@@ -48,7 +48,7 @@ if( $to == "guest" )
 
 
 
-$result = mysql_query( "SELECT ID, Flags+0 AS flags, Notify " . 
+$result = mysql_query( "SELECT ID, Flags+0 AS flags, Notify, ClockUsed " . 
                        "FROM Players WHERE Handle='$to'" );
 
 if( mysql_num_rows( $result ) != 1 )
@@ -136,8 +136,8 @@ if( $type == "INVITATION" )
                            "Byotime=$byohours, " .
                            "Byoperiods=$byoperiods, " .
                            "Black_Maintime=$hours, " .
-                           "White_Maintime=$hours," 
-                           "Rated=$rated" 
+                           "White_Maintime=$hours," .
+                           "Rated='$rated'" 
                            );
 
     if( mysql_affected_rows() != 1)
@@ -163,7 +163,7 @@ else if( $type == "Accept" )
         {
             $clock_used = $opponent_row["ClockUsed"];
         }
-    if( $my_ID == $game_row["Black_ID"] )
+    else if( $my_ID == $game_row["Black_ID"] )
         {
             $clock_used = $player_row["ClockUsed"];
         }
