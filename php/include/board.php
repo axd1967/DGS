@@ -51,7 +51,8 @@ function draw_board($Size, &$array, $may_play, $gid,
         echo "<table border=2 cellpadding=3 align=center><tr>" . 
         "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
-    echo '<table border=0 cellpadding=0 cellspacing=0 align=center valign=center background=images/wood1.png>
+    echo '<table border=0 background="images/wood_color2b.png" align=center><tr><td>
+<table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">
 <tr>
 <td>&nbsp;</td>';
 
@@ -183,6 +184,7 @@ function draw_board($Size, &$array, $may_play, $gid,
     echo '<td width=5>&nbsp;</td>
 </tr>
 </table>
+</tr></td></table>
 ';
 }
 
