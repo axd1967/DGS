@@ -208,8 +208,9 @@ require( "include/form_functions.php" );
 
          game_info_table($Size, $color, $ToMove_ID, $Komi, $Handicap, $Maintime,
                          $Byotype, $Byotime, $Byoperiods, $Rated, $Weekendclock);
-         echo '<a href="message.php?mode=Dispute&mid=' . $mid . '">Dispute settings</a>';
-         echo "<p>&nbsp;<p><B><h3><font color=$h3_color>Reply:</font></B>\n";
+         echo '<a href="message.php?mode=Dispute&mid=' . $mid . '">' .
+            T_('Dispute settings') . '</a>';
+         echo "<p>&nbsp;<p><B><h3><font color=$h3_color>" . T_('Reply:') . "</font></B>\n";
          echo form_start( 'messageform', 'send_message.php', 'POST' );
          echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
          echo form_insert_row( 'HIDDEN', 'reply', $mid );
