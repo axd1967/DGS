@@ -89,9 +89,13 @@ while( $row = mysql_fetch_array( $result ) )
     echo "<td><A href=\"show_message.php?mid=" . $row["mid"] . "\">" .
         $row["sender"] . "</A></td>\n" . 
         "<td>" . $row["Subject"] . "</td>\n" .
-        "<td>" . $row["date"] . "</td>\n" .
-        "<td align=center><a href=\"messages.php?del=" . $row["mid"] . "\">" .
-        "<img width=15 height=16 border=0 src=\"images/trashcan.gif\"></A></td>\n</tr>\n";
+        "<td>" . $row["date"] . "</td>\n";
+
+    if( $row["Info"] == 'NONE' or $row["Info"] == 'REPLIED' )
+        echo "<td align=center><a href=\"messages.php?del=" . $row["mid"] . "\">" .
+            "<img width=15 height=16 border=0 src=\"images/trashcan.gif\"></A></td>\n";
+
+    echo "</tr>\n";
         
 }
 
@@ -100,7 +104,7 @@ echo "</table>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
         <td><B><A href=\"new_message.php\">Send message</A></B></td>
-        <td><B><A href=\"messages.php?del=all\"> Delete all messages</A></B></td>
+        <td><B><A href=\"messages.php?del=all\"> Delete all read messages</A></B></td>
       </tr>
     </table>
 ";
