@@ -93,6 +93,13 @@ $vals = array( 0 => 'Off',
 echo form_insert_row( 'DESCRIPTION', 'Email notifications',
                       'SELECTBOX', 'emailnotify', 1, $vals, $s, false );
 
+$s = $the_translator->current_language;
+if( strcmp( $s, 'C' ) == 0 ) $s = 'en';
+
+echo form_insert_row( 'DESCRIPTION', 'Language',
+                      'SELECTBOX', 'language', 1,
+                      get_known_languages_with_full_names(), $s, false );
+
 echo form_insert_row( 'DESCRIPTION', 'Timezone',
                       'SELECTBOX', 'timezone', 1,
                       get_timezone_array(), $player_row['Timezone'], false );

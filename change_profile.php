@@ -64,6 +64,12 @@ require( "include/rating.php" );
        "Button=$button, " .
        "SendEmail='$sendemail', ";
 
+   if( $language != $player_row['Lang'] and
+       in_array($language, get_known_languages(), true) )
+     {
+       $query .= "Lang='$language', ";
+     }
+
    if( $nightstart != $player_row["Nightstart"] ||
    $timezone != $player_row["Timezone"] )
    {
