@@ -106,7 +106,7 @@ require( "include/rating.php" );
    }
 
 
-   $newrating = convert_to_rating($_GET['rating'], $POST_['ratingtype']);
+   $newrating = convert_to_rating($_GET['rating'], $_GET['ratingtype']);
 
    if( $player_row["RatingStatus"] != 'RATED' and is_numeric($newrating) and
        ( $ratingtype != 'dragonrating' or !is_numeric($player_row["Rating2"])
