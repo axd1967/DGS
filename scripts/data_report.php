@@ -104,16 +104,17 @@ require_once( "include/form_functions.php" );
       echo 'Query&gt; ' . $query . ';<p>';
       $result = mysql_query( $query );
       $mysqlerror = @mysql_error();
+      $numrows = 0+@mysql_num_rows($result);
+      $i= ( $numrows>1 ? 's' : '' );
+      $c= date($date_fmt, $NOW);
+      echo "Time: $c - Result: $numrows row$i<br>";
 
       if( $mysqlerror )
       {
-         echo "<p>Error: $mysqlerror<p>";
+         echo "Error: $mysqlerror<p>";
       }
       else 
       {
-         $numrows = 0+@mysql_num_rows($result);
-         $i= ( $numrows>1 ? 's' : '' );
-         echo "<p>Result: $numrows row$i<br>";
          if( $result && $numrows>0 )
          {
             $c=2;
