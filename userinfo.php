@@ -45,7 +45,10 @@ require( "include/rating.php" );
 
    $row = mysql_fetch_array( $result );
 
-   start_page(T_('User info'), true, $logged_in, $player_row );
+   $title = ( $my_info ? T_('My user info') :
+              sprintf(T_('User info for %s'), $row['Name']) . ' (' . $row['Handle'] . ')');
+
+   start_page($title, true, $logged_in, $player_row );
 
 
 
@@ -54,6 +57,8 @@ require( "include/rating.php" );
 
    if( $msg )
       echo "\n<p><b><font color=green>$msg</font></b><hr>";
+
+   echo "<h3><font color=$h3_color>" . $title . '</font></h3>';
 
    echo '
  <table border=3>
@@ -72,7 +77,7 @@ require( "include/rating.php" );
        if( mysql_num_rows($result) > 0 )
        {
           echo '    <p>
-    <H4><font color=' . $h3_color . '>' . T_('Biographical info') . '</font></H4>
+    <h3><font color=' . $h3_color . '>' . T_('Biographical info') . '</font></h3>
     <table border=3>
 ';
        }

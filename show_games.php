@@ -153,7 +153,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $gtable->Last_Page = false;
    }
 
-   echo "<center><h4><font color=$h3_color>$title2</font></H4></center>\n";
+   echo "<center><h3><font color=$h3_color>$title2</font></H3></center>\n";
 
 
    $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true );

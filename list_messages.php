@@ -94,8 +94,13 @@ require_once( "include/timezones.php" );
    $result = mysql_query( $query )
        or die ( error("mysql_query_failed") );
 
+   $title = ( $_GET['sent'] == 1 ? T_('Sent messages') :
+              ( $_GET['all'] == 1 ? T_('All messages') :
+                T_('Message list') ));
 
-   start_page(T_('Message list'), true, $logged_in, $player_row );
+   start_page($title, true, $logged_in, $player_row );
+
+   echo "<h3><font color=$h3_color>" . $title . '</font></h3>';
 
    $mtable = new Table( make_url( 'list_messages.php',
                                   true,

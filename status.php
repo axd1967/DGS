@@ -53,6 +53,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    if( $msg )
       echo "<p><b><font color=\"green\">$msg</font></b><hr>";
 
+   echo "<h3><font color=$h3_color>" . T_('Status') . '</font></h3>';
    $gtable = new Table( "status.php",
                         "GamesColumns" );
    $gtable->add_or_del_column();
@@ -84,7 +85,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    if( mysql_num_rows($result) > 0 )
    {
-      echo "<HR><font color=$h3_color><B>" . T_('New messages') . ":</B></font><p>\n";
+      echo "<HR><h3><font color=$h3_color>" . T_('New messages') . ":</font></h3><p>\n";
 
       $mtable = new Table( 'status.php', '', '', true );
 
@@ -138,8 +139,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    $result = mysql_query( $query ) or die(mysql_error());
 
-   echo "<hr><font color=$h3_color><b>" .
-      T_("Your turn to move in the following games:") . "</b></font><p>\n";
+   echo "<hr><h3><font color=$h3_color>" .
+      T_("Your turn to move in the following games:") . "</font></h3><p>\n";
 
    if( mysql_num_rows($result) == 0 )
    {
