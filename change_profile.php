@@ -55,12 +55,12 @@ require_once( "include/countries.php" );
       ( $_GET['coordsright'] ? RIGHT : 0 ) + ( $_GET['coordsdown'] ? DOWN : 0 ) +
       ( $_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
 
-   $menudirection = ( $menudir == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
+   $menudirection = ( $_GET['$menudir'] == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
-   $notessmallposition = ( $notessmallpos == 'RIGHT' ? 'RIGHT' : 'BELOW' );
-   $noteslargeposition = ( $noteslargepos == 'RIGHT' ? 'RIGHT' : 'BELOW' );
-   $notessmallenabled = ( $notessmallenab == 'ON' ? 'ON' : 'OFF' );
-   $noteslargeenabled = ( $noteslargeenab == 'ON' ? 'ON' : 'OFF' );
+   $notessmallposition = ( $_GET['$notessmallpos'] == 'RIGHT' ? 'RIGHT' : 'BELOW' );
+   $noteslargeposition = ( $_GET['$noteslargepos'] == 'RIGHT' ? 'RIGHT' : 'BELOW' );
+   $notessmallenabled = ( $_GET['$notessmallenab'] == 'ON' ? 'ON' : 'OFF' );
+   $noteslargeenabled = ( $_GET['$noteslargeenab'] == 'ON' ? 'ON' : 'OFF' );
 
 
    $query = "UPDATE Players SET " .
