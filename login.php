@@ -24,7 +24,7 @@ if( @$_REQUEST['quick_mode'] )
    $quick_errors = 1;
 
 {
-   disable_cache();
+//   disable_cache();
 
    connect2mysql();
 
@@ -49,14 +49,20 @@ if( @$_REQUEST['quick_mode'] )
       $result = mysql_query( "UPDATE Players SET " .
                              "Sessioncode='$code', " .
                              "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
-                             "WHERE Handle='$userid' LIMIT 1" );
-
+                             "WHERE Handle='$userid' LIMIT 1" )
+                or error("mysql_query_failed");
    }
 
    if( @$_COOKIE[COOKIE_PREFIX.'handle'] != $userid
       or @$_COOKIE[COOKIE_PREFIX.'sessioncode'] != $code )
    {
+      if( @$_REQUEST['cookie_check'] )
+         error('cookies_disabled');
+
       set_cookies( $userid, $code );
+      jump_to("login.php?cookie_check=1&userid=$userid&passwd=$passwd"
+             . ( $quick_errors ? "&quick_mode=1" : '' )
+             );
    }
 
    if( $quick_errors )

@@ -233,6 +233,12 @@ require_once( "include/std_functions.php" );
       }
       break;
 
+      case('cookies_disabled'):
+      {
+         echo T_("Sorry, you haven't enabled cookies in your browser.");         
+      }
+      break;
+
       case("not_your_turn"):
       {
          echo T_("Sorry, it's not your turn.");
