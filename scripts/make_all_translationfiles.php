@@ -19,9 +19,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-chdir('..');
-require_once( 'include/std_functions.php' );
-require_once( 'include/make_translationfiles.php' );
+chdir('../');
+require_once( "include/std_functions.php" );
+require_once( "include/make_translationfiles.php" );
 
 connect2mysql();
 

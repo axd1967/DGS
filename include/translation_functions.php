@@ -62,8 +62,7 @@ function include_all_translate_groups($player_row=null)
 
 function include_translate_group($group, $player_row)
 {
-   global $HTTP_ACCEPT_LANGUAGE, $HTTP_ACCEPT_CHARSET,
-      $language_used, $encoding_used, $base_path, $Tr;
+   global $language_used, $encoding_used, $base_path, $Tr;
 
    if( !isset( $language_used ) )
    {
@@ -101,9 +100,10 @@ function include_translate_group($group, $player_row)
 
 function get_preferred_browser_language()
 {
-   global $known_languages, $HTTP_ACCEPT_LANGUAGE, $HTTP_ACCEPT_CHARSET;
+   global $known_languages;
 
-   $accept_langcodes = explode( ',', $HTTP_ACCEPT_LANGUAGE );
+   $accept_langcodes = explode( ',', @$_SERVER['HTTP_ACCEPT_LANGUAGE'] );
+   $accept_charset = strtolower(trim(@$_SERVER['HTTP_ACCEPT_CHARSET']));
 
    $current_q_val = -1;
    $return_val = NULL;
@@ -124,11 +124,12 @@ function get_preferred_browser_language()
 
          $current_q_val = $q_val;
 
-         foreach( $known_languages[$lang] as $enc => $name )
+         if( $accept_charset )
+            foreach( $known_languages[$lang] as $charenc => $name )
             {
-               if( strpos(strtolower($HTTP_ACCEPT_CHARSET), $enc) !== false )
+               if( strpos( $accept_charset, strtolower($charenc) ) !== false )
                {
-                  $return_val = $lang . '.' . $enc;
+                  $return_val = $lang . '.' . $charenc;
                   break;
                }
             }
@@ -148,9 +149,9 @@ function get_language_descriptions_translated()
    $result = array();
    foreach( $known_languages as $entry => $array )
       {
-         foreach( $array as $enc => $lang_name )
+         foreach( $array as $charenc => $lang_name )
             {
-               $result[ $entry . "." . $enc ] = T_($lang_name);
+               $result[ $entry . "." . $charenc ] = T_($lang_name);
             }
       }
    return $result;

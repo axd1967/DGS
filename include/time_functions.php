@@ -23,8 +23,6 @@ $TranslateGroups[] = "Common";
 $date_fmt = 'Y-m-d H:i';
 $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
-$NOW = time() + (int)$timeadjust;
-
 function getmicrotime()
 {
    list($usec, $sec) = explode(" ",microtime());
@@ -118,6 +116,16 @@ function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
    }
 
    $main = 0;
+}
+
+function echo_day($days)
+{
+   return $days .'&nbsp;' . ( abs($days) <= 1 ? T_('day') : T_('days') );
+}
+
+function echo_hour($hours)
+{
+   return $hours .'&nbsp;' . ( abs($hours) <= 1 ? T_('hour') : T_('hours') );
 }
 
 function echo_time($hours)

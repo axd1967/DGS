@@ -38,10 +38,13 @@ $tick_frequency = 12; // ticks/hour
 
 
 //a $_REQUEST['handle'] will not overlap $_COOKIE['cookie_handle']
-define('COOKIE_PREFIX', 'cookie_');
+//define('COOKIE_PREFIX', 'cookie_');
+define('COOKIE_PREFIX', '');
 
+//used in quick_status.php
 define("FOLDER_NEW", 2);
 
+//used in daily_cron.php
 $new_end =  4*7*24*3600;  // four weeks
 
 ?>

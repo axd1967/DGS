@@ -34,13 +34,13 @@ function make_known_languages()
    $first = true;
    while( $row = mysql_fetch_array($result) )
    {
-      list($lang,$enc) = explode('.', $row['Language']);
+      list($lang,$charenc) = explode('.', $row['Language']);
 
       if( $lang === $prev_lang )
-         fwrite( $fd, ",\n                 \"$enc\" => \"" . $row["Name"] . '"');
+         fwrite( $fd, ",\n                 \"$charenc\" => \"" . $row["Name"] . '"');
       else
          fwrite( $fd, ( $first ? '' : " ),\n" ) .
-                 "  \"$lang\" => array( \"$enc\" => \"" . $row["Name"] . '"');
+                 "  \"$lang\" => array( \"$charenc\" => \"" . $row["Name"] . '"');
 
       $prev_lang = $lang;
       $first = false;
@@ -159,11 +159,11 @@ function translations_query( $translate_lang, $untranslated, $group )
 */
         "AND Translatable!='N' " .
         "AND (Translations.Text IS NULL OR Translatable='Changed') " .
-/*Rod: some item appear two times when in different groups
-     Can't use:
+/*>>Rod: Warning: Some items appear two times when in different groups
+     but we can't use:
         . ( $untranslated ? "DISTINCT " : "") . 
      unless:
-        "ORDER BY Original_ID LIMIT 50"; //Group_ID Original_ID
+        "ORDER BY Original_ID LIMIT 50";
 */
         "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
    else

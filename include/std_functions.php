@@ -23,13 +23,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Common";
 
 require_once( "include/config.php" );
-
-$timeadjust = 0;
-if( @is_readable("timeadjust.php" ) )
-   include_once( "timeadjust.php" );
-
-if( !is_numeric($timeadjust) )
-   $timeadjust = 0;
+require_once( "include/quick_common.php" );
 
 require_once( "include/time_functions.php" );
 
@@ -43,13 +37,6 @@ if (!isset($page_microtime))
 require_once( "include/connect2mysql.php" );
 require_once( "include/translation_functions.php" );
 
-
-$session_duration = 3600*12*61; // 1 month
-$tick_frequency = 12; // ticks/hour
-
-$is_down = false;
-$is_down_message = "Sorry, dragon is down for maintenance at the moment, " .
-                   "please return in an hour or so.";
 
 $hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
 
@@ -94,23 +81,22 @@ $table_row_color_del2='"#F0B8BD"';
 
 $h3_color='"#800000"';
 
+$button_max = 10;
 $buttonfiles = array('button0.gif','button1.gif','button2.gif','button3.gif',
                      'button4.gif','button5.gif','button6.gif','button7.gif',
                      'button8.png','button9.png','button10.png');
-
 $buttoncolors = array('white','white','white','white',
                       '#990000','white','white','white',
                       'white','white','white');
 
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
+
 $cookie_pref_rows = array(
        'Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button',
        'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
        'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff',
        );
-
-$button_max = 10;
 
 $vacation_min_days = 5;
 
@@ -169,7 +155,7 @@ define("ADMIN_TIME",0x10);
 define("FOLDER_NONE", -1);
 define("FOLDER_ALL_RECEIVED", 0);
 define("FOLDER_MAIN", 1);
-define("FOLDER_NEW", 2);
+//define("FOLDER_NEW", 2); //moved in quick_common.php
 define("FOLDER_REPLY", 3);
 define("FOLDER_DELETED", 4);
 define("FOLDER_SENT", 5);
@@ -193,7 +179,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $base_path, $is_down, $is_down_message, $bg_color, $menu_bg_color, $menu_fg_color,
-      $encoding_used, $max_links_in_main_menu, $vertical, $base_path;
+      $encoding_used, $vertical, $base_path;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -309,7 +295,7 @@ function end_page( $menu_array=NULL )
         sprintf (' %0.2f', (getmicrotime() - $page_microtime)*1000) .
          "</font><br>\n";
 
-   if( $admin_level > 0 )
+   if( ($admin_level & ~ADMIN_TIME) > 0 )
       echo '<b><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
          T_('Admin') . '</font></a></b>&nbsp;&nbsp;&nbsp;';
 
@@ -481,13 +467,13 @@ function make_menu_vertical($menu_array)
 
 function error($err, $debugmsg=NULL)
 {
-   global $handle, $PHP_SELF, $REMOTE_ADDR;
-
    disable_cache();
+
+   $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
 
    $uri = "error.php?err=" . urlencode($err);
    $errorlog_query = "INSERT INTO Errorlog SET Handle='$handle', " .
-      "Message='$err', IP='$REMOTE_ADDR'" ;
+      "Message='$err', IP='{$_SERVER['REMOTE_ADDR']}'" ;
 
    $mysql_error = mysql_error();
 
@@ -508,23 +494,27 @@ function error($err, $debugmsg=NULL)
    jump_to( $uri );
 }
 
+/* Not used
 function warn($debugmsg)
 {
    $errorlog_query = "INSERT INTO Errorlog SET Handle='$handle', " .
-      "Message='WARN:$debugmsg', IP='$REMOTE_ADDR'" ;
+      "Message='WARN:$debugmsg', IP='{$_SERVER['REMOTE_ADDR']}'" ;
 
    if( !empty($mysql_error) )
       $errorlog_query .= ", MysqlError='" . mysql_error() . "'";
 
    @mysql_query( $errorlog_query );
 }
+*/
 
+/* Not used
 function help($topic)
 {
    global $base_path;
 
    return '<a href="javascript:popup(\'' . $base_path . 'help.php?topic=' . $topic . '\')"><img border=0 align=top src="' . $base_path . 'images/help.png"></a>';
 }
+*/
 
 function sysmsg($msg)
 {
@@ -576,13 +566,13 @@ function set_cookies($handl, $code, $delete=false)
 
    if( $delete )
    {
-      setcookie ("handle", '', $NOW-3600, "$SUB_PATH" );
-      setcookie ("sessioncode", '', $NOW-3600, "$SUB_PATH" );
+      setcookie (COOKIE_PREFIX."handle", '', $NOW-3600, "$SUB_PATH" );
+      setcookie (COOKIE_PREFIX."sessioncode", '', $NOW-3600, "$SUB_PATH" );
    }
    else
    {
-      setcookie ("handle", $handl, $NOW+$session_duration*5, "$SUB_PATH" );
-      setcookie ("sessioncode", $code, $NOW+$session_duration, "$SUB_PATH" );
+      setcookie (COOKIE_PREFIX."handle", $handl, $NOW+$session_duration*5, "$SUB_PATH" );
+      setcookie (COOKIE_PREFIX."sessioncode", $code, $NOW+$session_duration, "$SUB_PATH" );
    }
 }
 
@@ -590,7 +580,8 @@ function get_cookie_prefs(&$player_row)
 {
    global $cookie_prefs, $cookie_pref_rows;
 
-   $cookie_prefs = unserialize(stripslashes(@$_COOKIE["prefs{$player_row['ID']}"]));
+   $cookie_prefs = unserialize(stripslashes(
+         @$_COOKIE[COOKIE_PREFIX."prefs{$player_row['ID']}"] ));
    if( !is_array( $cookie_prefs ) )
       $cookie_prefs = array();
 
@@ -606,9 +597,9 @@ function set_cookie_prefs($id, $delete=false)
    global $cookie_prefs, $NOW, $SUB_PATH, $session_duration;
 
    if( $delete )
-      setcookie("prefs$id", '', $NOW-3600, $SUB_PATH );
+      setcookie(COOKIE_PREFIX."prefs$id", '', $NOW-3600, $SUB_PATH );
    else
-      setcookie("prefs$id", serialize($cookie_prefs), $NOW+$session_duration*36, $SUB_PATH );
+      setcookie(COOKIE_PREFIX."prefs$id", serialize($cookie_prefs), $NOW+$session_duration*36, $SUB_PATH );
 }
 
 function add_line_breaks( $str)
@@ -794,12 +785,12 @@ function make_html_safe( $msg, $some_html=false)
    return $msg;
 }
 
-function textarea_safe( $msg, $encoding=false)
+function textarea_safe( $msg, $charenc=false)
 {
  global $encoding_used;
-   if( !$encoding) $encoding = $encoding_used; //else 'iso-8859-1'
-//   $msg = @htmlspecialchars($msg, ENT_QUOTES, $encoding);
-   $msg = @htmlentities($msg, ENT_QUOTES, $encoding);
+   if( !$charenc) $charenc = $encoding_used; //else 'iso-8859-1'
+//   $msg = @htmlspecialchars($msg, ENT_QUOTES, $charenc);
+   $msg = @htmlentities($msg, ENT_QUOTES, $charenc);
    return $msg;
 }
 
@@ -833,16 +824,16 @@ function score2text($score, $verbose, $keep_english=false)
 
 function is_base_dir()
 {
-   global $SUB_PATH, $PHP_SELF;
+   global $SUB_PATH;
 
-   //return dirname($PHP_SELF) == $SUB_PATH;
+   //return dirname($_SERVER['PHP_SELF']) == $SUB_PATH;
 /* In case of a local server under Windows,
          dirname('/foo/bar') return '/foo'
      but dirname('/foo')     return '\\'
      and dirname('/')        return '\\'
    replace the previous line by this one:
  */
-   return str_replace('\\','/',dirname($PHP_SELF)) == $SUB_PATH;
+   return str_replace('\\','/',dirname($_SERVER['PHP_SELF'])) == $SUB_PATH;
 }
 
 function mod($a,$b)
@@ -889,7 +880,7 @@ function get_request_url()
 {
  global $SUB_PATH;
 
-   $url = $_SERVER['REQUEST_URI'];
+   $url = @$_SERVER['REQUEST_URI'];
    $len = strlen($SUB_PATH);
    if ($len == 1)
       $url = substr($url,1);
@@ -900,38 +891,46 @@ function get_request_url()
 
 function get_request_user( &$uid, &$uhandle, $from_referer=false)
 {
-   $uid = @$_REQUEST['uid'];
+   $uid_nam = 'uid';
+   $uid = @$_REQUEST[$uid_nam];
    $uhandle = '';  
    if( !($uid > 0) )
    {
       $uid = 0;
-      $uhandle = @$_REQUEST['user'];
-      if( !$uhandle && $from_referer )
+      $uhandle_nam = 'user';
+      $uhandle = @$_REQUEST[$uhandle_nam];
+      if( !$uhandle && $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
       {
 //default user = last referenced user
 //(ex: message.php from userinfo.php by menu link)
-       global $HTTP_REFERER;
-         if( eregi("[?&]uid=([0-9]+)", $HTTP_REFERER, $result) )
+         if( eregi("[?&]$uid_nam=([0-9]+)", $refer, $result) )
            $uid = $result[1];
          if( !($uid > 0) )
          {
             $uid = 0;
-            if( eregi("[?&]user=([-_+a-zA-Z]+)", $HTTP_REFERER, $result) )
+            if( eregi("[?&]$uhandle_nam=([-_+a-zA-Z]+)", $refer, $result) )
               $uhandle = $result[1];
          }
       }
    }
 }
 
+function who_is_logged( &$row)
+{
+   $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
+   $sessioncode = @$_COOKIE[COOKIE_PREFIX.'sessioncode'];
+   return is_logged_in($handle, $sessioncode, $row);
+}
+
 function is_logged_in($hdl, $scode, &$row)
 {
-   global $page_microtime, $admin_level, $PHP_SELF, $HOSTNAME, $HTTP_HOST, $hostname_jump,
+   global $HOSTNAME, $hostname_jump, $page_microtime, $admin_level,
       $ActivityHalvingTime, $ActivityForHit, $NOW, $base_path;
 
 
-   if( $hostname_jump and eregi_replace(":.*$","", $HTTP_HOST) != $HOSTNAME )
+   if( $hostname_jump and eregi_replace(":.*$","", @$_SERVER['HTTP_HOST']) != $HOSTNAME )
    {
-      jump_to( "http://" . $HOSTNAME . $PHP_SELF, true );
+      jump_to( "http://" . $HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
 
    if( !$hdl )
@@ -977,7 +976,6 @@ function is_logged_in($hdl, $scode, &$row)
 
    if( @mysql_affected_rows() != 1 )
       return false;
-
 
 
    if( $row["admin_level"] >= 1 )

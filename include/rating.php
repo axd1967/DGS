@@ -567,7 +567,7 @@ function read_rating($string)
 
    $kyu = ( $matches[2] == 'dan' || $matches[2] == 'd' ) ? 2 : 1;
 
-   return rank_to_rating($matches[1], $kyu) + $matches[4];
+   return rank_to_rating($matches[1], $kyu) + @$matches[4];
 }
 
 function rank_to_rating($val, $kyu)

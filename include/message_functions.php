@@ -212,6 +212,7 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
                            'CHECKBOX', 'rated', 'Y', "", $Rated ) );
 }
 
+
 define('FLOW_ANSWER'  ,0x1);
 define('FLOW_ANSWERED',0x2);
    $msg_icones = array(
@@ -378,10 +379,11 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
 //Set global $hours,$byohours,$byoperiods
 function interpret_time_limit_forms()
 {
-   global $hours, $timevalue, $timeunit, $byoyomitype, $byohours, $byoperiods,
-      $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
-      $byotimevalue_can, $timeunit_can, $byoperiods_can,
-      $byotimevalue_fis, $timeunit_fis;
+   global $hours, $byohours, $byoperiods; //outputs
+   global $byoyomitype, $timevalue, $timeunit, //inputs
+          $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
+          $byotimevalue_can, $timeunit_can, $byoperiods_can,
+          $byotimevalue_fis, $timeunit_fis;
 
       $hours = $timevalue;
       if( $timeunit != 'hours' )
@@ -546,7 +548,7 @@ function echo_folders($folders, $current_folder)
    return $string;
 }
 
-function folder_is_removable($nr, $uid)
+function folder_is_empty($nr, $uid)
 {
    $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
                          "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1");

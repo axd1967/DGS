@@ -160,7 +160,7 @@ class GoDiagram
             {
                $str = $row[$x-$this->Left+1];
                if( $str{0} === 'e' )
-                  if( $str{1} === 'l' )
+                  if( strlen($str)>1 && $str{1} === 'l' )
                      $str = substr($str, 1);
                   else
                      $str = $this->get_empty_image($x, $y, $this->Size) . substr($str, 1);
