@@ -21,13 +21,13 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
 include( "std_functions.php" );
-include( "connect2mysql.php" );
+// include( "connect2mysql.php" );
 
-connect2mysql();
+// connect2mysql();
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
+//$logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-start_page("Messages", true, $logged_in, $player_row );
+start_page("Messages", true, false );
 
 switch( $err )
 {
