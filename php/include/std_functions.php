@@ -282,7 +282,7 @@ function time_remaining($ticks, &$main, &$byotime, &$byoper, $byotype, $startbyo
             if( !$has_moved )
               $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
 
-            if( $byoper <= 0 )
+            if( $byoper < 0 )
                 $byotime = $byoper = 0;  // time is up;
         }
     else // canadian byoyomi
