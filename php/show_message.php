@@ -32,14 +32,15 @@ if( !$logged_in )
     exit;
 }
 
+$my_id = $player_row["ID"];
 
-$result = mysql_query("SELECT Messages.*, " .
-                      "DATE_FORMAT(Messages.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
+$result = mysql_query("SELECT Messages$my_id.*, " .
+                      "DATE_FORMAT(Messages$my_id.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
                       "Players.Name AS sender, " .
                       "Players.Handle, Players.ID AS pid, " .
-                      "Messages.Info " .
-                      "FROM Messages,Players " .
-                      "WHERE Messages.ID=$mid AND To_ID=" . $player_row["ID"] . 
+                      "Messages$my_id.Info " .
+                      "FROM Messages$my_id,Players " .
+                      "WHERE Messages$my_id.ID=$mid" . 
                       " AND From_ID=Players.ID");
 
 if( mysql_num_rows($result) != 1 )
@@ -85,7 +86,7 @@ if( $info == 'NEW' )
     else
         $new_info = 'NONE';
 
-    mysql_query( "UPDATE Messages SET Info='$new_info' WHERE ID=$mid" );
+    mysql_query( "UPDATE Messages$my_id SET Info='$new_info' WHERE ID=$mid" );
 
     if( mysql_affected_rows() != 1)
         {

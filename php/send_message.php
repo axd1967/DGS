@@ -147,9 +147,8 @@ else if( $type == "Decline" )
 
 // Update database
 
-$query = "INSERT INTO Messages SET " .
+$query = "INSERT INTO Messages$opponent_ID SET " .
          "From_ID=$my_ID, " .
-         "To_ID=$opponent_ID, " .
          "Type='$type', ";
 if( $gid ) 
      $query .= "Game_ID=$gid, ";
@@ -169,7 +168,7 @@ if( mysql_affected_rows() != 1)
 
 if( $reply )
 {
-    mysql_query( "UPDATE Messages SET Info='REPLIED' WHERE ID=$reply AND To_ID=$my_ID" );
+    mysql_query( "UPDATE Messages$my_ID SET Info='REPLIED' WHERE ID=$reply" );
 
     if( mysql_affected_rows() != 1)
         {

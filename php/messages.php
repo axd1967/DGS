@@ -32,11 +32,13 @@ if( !$logged_in )
     exit;
 }
 
-$result = mysql_query("SELECT DATE_FORMAT(Messages.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
-                      "Messages.ID as mid, Messages.Subject, Messages.Info, " . 
+$my_id = $player_row["ID"];
+
+$result = mysql_query("SELECT DATE_FORMAT(Messages$my_id.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
+                      "Messages$my_id.ID as mid, Messages$my_id.Subject, Messages$my_id.Info, " . 
                       "Players.Name AS sender " .
-                      "FROM Messages,Players " .
-                      "WHERE To_ID=" . $player_row["ID"] . " AND From_ID=Players.ID");
+                      "FROM Messages$my_id,Players " .
+                      "WHERE From_ID=Players.ID");
 
 
 start_page("Messages", true, $logged_in, $player_row );
