@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Jim Heiney and Erik Ouchterlony
+Copyright (C) 2001 Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,12 +30,30 @@ start_page("Introduction", true, $logged_in, $player_row );
 
 ?>
 
-<p align="left">&nbsp;</p>
-<h3><font color="#800000">Introduction to dragon</font></h3>
+<table align=center width=85%><tr><td>
+<center><h3><font color="#800000">Introduction to dragon</font></h3></center>
 
-Sorry, nothing here yet.
+Welcome to Dragon Go Server, a <a href="licence.php">free</a> server for playing <a
+href="links.php">go</a>, where the games tends to 'drag on'. 
 
-<p align="left">&nbsp;</p>
+<p> You can look at it as kind of play-by-email, where a web-interface is used to make the
+board look prettier. To start playing you should first get yourself an <a
+href="register.php">account</a>, if you haven't got one already. Thereafter you could <a
+href="edit_profile.php">edit your profile</a> and <a href="edit_bio.php">enter some
+biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info'
+are useful for finding opponents. Next you can study the <a href="users.php">user list</a>
+and use the <a href="phorum/index.php">forums</a> to find suitable opponents to <a
+href="invite.php">invite</a> for a game.
+
+<p> More information can be found in the <a href="phorum/list.php?f=3">FAQ forum</a> where you
+are also encouraged to submit your own questions.
+
+<p> Once again welcome, and enjoy your visit here!
+
+
+
+
+</td></tr></table>
 
 <?php
 end_page();
