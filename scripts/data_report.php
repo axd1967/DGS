@@ -148,6 +148,7 @@ require_once( "include/form_functions.php" );
                switch( $key )
                {
                   case 'Password':
+                  case 'Sessioncode':                  
                   case 'Email':
                      if ($val) $val= '***';
                      break;
