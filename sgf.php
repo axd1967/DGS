@@ -219,7 +219,7 @@ $array=array();
 
    $result = mysql_query(
       'SELECT Games.*, ' .
-      'Games.Flags+0 AS flags, ' .
+//      'Games.Flags+0 AS flags, ' .
       'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' .
       'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
        $field_owned .
@@ -265,8 +265,8 @@ $array=array();
 
 
    header( 'Content-Type: application/x-go-sgf' );
-   $filename= "$Whitehandle-$Blackhandle-" . date('Ymd', $timestamp) . ".sgf" ;
-   header( "Content-Disposition: inline; filename=\"$filename\"" );
+   $filename= "$Whitehandle-$Blackhandle-$gid-" . date('Ymd', $timestamp) ;
+   header( "Content-Disposition: inline; filename=\"$filename.sgf\"" );
    header( "Content-Description: PHP Generated Data" );
 
 
