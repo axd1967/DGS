@@ -182,12 +182,12 @@ function update_rating($gid)
 
    change_rating($wRating, $bRating, $game_result, $Size, $Komi, $Handicap);
 
-   mysql_query( "UPDATE Games SET Lastchanged=Lastchanged, Rated='DONE' WHERE ID=$gid" );
+   mysql_query( "UPDATE Games SET Rated='DONE' WHERE ID=$gid" );
 
-   mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, Rating=$bRating, " .
+   mysql_query( "UPDATE Players SET Rating=$bRating, " .
                 "RatingStatus='RATED' WHERE ID=$Black_ID" );
 
-   mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, Rating=$wRating, " .
+   mysql_query( "UPDATE Players SET Rating=$wRating, " .
                 "RatingStatus='RATED' WHERE ID=$White_ID" );
 
    mysql_query("INSERT INTO RatingChange (uid,gid,diff) VALUES " . 

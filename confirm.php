@@ -181,6 +181,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Moves=$Moves, " .
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
+             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "Status='PLAY', " . $time_query . $consistent_query;
 
          if( $nr_prisoners > 0 )
@@ -227,6 +228,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Moves=$Moves, " .
              "Last_X=-1, " .
              "Status='$next_status', " .
+             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "ToMove_ID=$next_to_move_ID, " . $time_query . $consistent_query .
              "Flags=0 " .
              $where_clause;
@@ -265,6 +267,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Handicap, " .
+             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " . $time_query . $consistent_query .
              "ToMove_ID=$White_ID " .
@@ -290,6 +293,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
+             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "Last_X=-3, " .
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
@@ -347,6 +351,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
          $game_query = "UPDATE Games SET " .
+             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "Moves=$Moves, " .
              "Last_X=-2, " .
              "Status='$next_status', " . $time_query . $consistent_query;
@@ -438,16 +443,17 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       }
 
       mysql_query( "INSERT INTO Messages SET " .
-                   "From_ID=" . $player_row["ID"] . 
-                   ", To_ID=" . $opponent_row["ID"] . 
-                   ", Game_ID=$gid, Subject='$Subject', Text='$Text'");
+                   "From_ID=" . $player_row["ID"] . ", " .
+                   "To_ID=" . $opponent_row["ID"] . ", " .
+                   "Time=FROM_UNIXTIME($NOW), " .
+                   "Game_ID=$gid, Subject='$Subject', Text='$Text'");
 
    }
 
 
 // Notify opponent about move
 
-   mysql_query( "UPDATE Players SET Notify='NEXT', Lastaccess=Lastaccess " .
+   mysql_query( "UPDATE Players SET Notify='NEXT' " .
                 "WHERE ID='$next_to_move_ID' AND Flags LIKE '%WANT_EMAIL%' " .
                 "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "'") ;
 

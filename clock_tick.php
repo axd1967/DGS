@@ -25,12 +25,12 @@ if( !$is_down )
    connect2mysql();
     
     
-   $hour = gmdate('G');
-   $day_of_week = gmdate('w'); 
+   $hour = gmdate('G', $NOW);
+   $day_of_week = gmdate('w', $NOW); 
 
    // Check that ticks are not too frequent
 
-   $result = mysql_query( 'SELECT ID,UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(Lastchanged) AS timediff FROM Clock WHERE ID=0 OR ID=12' );
+   $result = mysql_query( "SELECT ID,$NOW-UNIX_TIMESTAMP(Lastchanged) AS timediff FROM Clock WHERE ID=0 OR ID=12" );
     
 
    while( $row = mysql_fetch_array( $result ) )
@@ -42,7 +42,7 @@ if( !$is_down )
     
    // Now increase clocks that are not sleeping
 
-   $query = 'UPDATE Clock SET Ticks=Ticks+1 ' .
+   $query = 'UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) ' .
        "WHERE ((ID>$hour OR ID<". ($hour-8) . ') AND ID< '. ($hour+16) . ')';
     
    if( $day_of_week > 0 and $day_of_week < 6 )
@@ -99,6 +99,7 @@ if( !$is_down )
 
          $query = "UPDATE Games SET " .
              "Status='FINISHED', " .
+             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "ToMove_ID=0, " .
              "Score=$score, " .
              "Flags=0" .
@@ -115,12 +116,16 @@ if( !$is_down )
              "was: <p><center>" . score2text($score,true) . "</center></BR>";
           
          mysql_query( "INSERT INTO Messages" . $Black_ID . " SET " .
-                      "From_ID=" . $White_ID . 
-                      ", Game_ID=$gid, Subject='Game result', Text='$Text'" );
+                      "From_ID=" . $White_ID . ", " .
+                      "To_ID=" . $Black_ID . ", " .
+                      "Time=FROM_UNIXTIME($NOW), " .
+                      "Game_ID=$gid, Subject='Game result', Text='$Text'" );
 
          mysql_query( "INSERT INTO Messages" . $White_ID . " SET " .
-                      "From_ID=" . $Black_ID . 
-                      ", Game_ID=$gid, Subject='Game result', Text='$Text'" );
+                      "From_ID=" . $Black_ID . ", " .
+                      "To_ID=" . $White_ID . ", " .
+                      "Time=FROM_UNIXTIME($NOW), " .
+                      "Game_ID=$gid, Subject='Game result', Text='$Text'" );
           
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .

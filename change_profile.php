@@ -61,7 +61,7 @@ require( "include/rating.php" );
    {            
       putenv("TZ=$timezone" );
 
-      $query .= "ClockChanged=NOW(), ";
+      $query .= "ClockChanged=FROM_UNIXTIME($NOW), ";
       // TODO: Should be changed after 15h
       $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
    }

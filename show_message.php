@@ -77,7 +77,7 @@ require( "include/std_functions.php" );
    {
       $Flags = substr_replace($Flags, '', $pos, 3);
 
-      mysql_query( "UPDATE Messages SET Flags='$Flags', Time=Time " .
+      mysql_query( "UPDATE Messages SET Flags='$Flags' " .
                    "WHERE ID=$mid AND To_ID=$my_id" );
 
       if( mysql_affected_rows() != 1)

@@ -126,6 +126,7 @@ disable_cache();
                              "Black_ID=$Black_ID, " .
                              "White_ID=$White_ID, " .
                              "ToMove_ID=$Black_ID, " .
+                             "Lastchanged=FROM_UNIXTIME($NOW), " .
                              "Size=$size, " .
                              "Handicap=$handicap, " .
                              "Komi=$komi, " .
@@ -175,7 +176,8 @@ disable_cache();
 
       $result = mysql_query( "UPDATE Games SET " .
                              "Status='PLAY', " .
-                             "Starttime=NOW(), " .
+                             "Starttime=FROM_UNIXTIME($NOW), " .
+                             "Lastchanged=FROM_UNIXTIME($NOW), " .
                              "ClockUsed=$clock_used, " .
                              "LastTicks=$ticks " .
                              "WHERE ID=$gid AND Status='INVITED'" .
@@ -219,6 +221,7 @@ disable_cache();
    $query = "INSERT INTO Messages SET " .
        "From_ID=$my_ID, " .
        "To_ID=$opponent_ID, " .
+       "Time=FROM_UNIXTIME($NOW), " .
        "Type='$type', ";
 
    if( $type == 'INVITATION' )
@@ -241,7 +244,7 @@ disable_cache();
 
    if( $reply )
    {
-      mysql_query( "UPDATE Messages SET Flags='REPLIED', Time=Time " .
+      mysql_query( "UPDATE Messages SET Flags='REPLIED' " .
                    "WHERE  ID=$reply AND To_ID=$my_ID" );
    }
 
@@ -250,7 +253,7 @@ disable_cache();
 
    if( $opponent_row["flags"] & WANT_EMAIL and $opponent_row["Notify"] == 'NONE' )
    {
-      $result = mysql_query( "UPDATE Players SET Notify='NEXT', Lastaccess=Lastaccess " .
+      $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
                              "WHERE Handle='$to'" );
    }
 
