@@ -32,19 +32,58 @@ if( !$logged_in )
    exit;
 }
 
+$my_id = $player_row["ID"];
 
 start_page("Status", true, $logged_in, $player_row );
 
-
-
-echo "
+    echo "
     <table border=3>
        <tr><td>Name:</td> <td>" . $player_row["Name"] . "</td></tr>
        <tr><td>Userid:</td> <td>" . $player_row["Handle"] . "</td></tr>
        <tr><td>Rank:</td> <td>" . $player_row["Rank"] . "</td></tr>
     </table>
-    <p>
-";
+    <p>";
+
+
+$result = mysql_query("SELECT DATE_FORMAT(Messages$my_id.Time, \"%H:%i  %Y-%m-%d\") AS date, " . 
+                      "Messages$my_id.*, Players.Name AS sender " . 
+                      "FROM Messages$my_id, Players " .
+                      "WHERE (Info='NEW' OR Info='REPLY REQUIRED') AND From_ID=Players.ID");
+
+
+if( mysql_num_rows($result) > 0 )
+{
+    echo "<HR><B>New messages:</B><p>\n";
+    echo "<table border=3>\n";
+    echo "<tr><th></th><th>From</th><th>Subject</th><th>Date</th></tr>\n";
+
+
+
+    while( $row = mysql_fetch_array( $result ) )
+        {
+            echo "<tr>";
+            
+            switch( $row["Info"] )
+                {
+                case 'NEW':
+                    echo "<td bgcolor=\"00F464\">New</td>\n";
+                    break;
+                case 'REPLY REQUIRED':
+                    echo "<td bgcolor=\"FFA27A\">Reply!</td>\n";
+                    break;
+                default:
+                    echo "<td bgcolor=\"FF0000\">Error?</td>\n";
+                    break;                    
+                }
+            
+            echo "<td><A href=\"show_message.php?mid=" . $row["ID"] . "\">" .
+                $row["sender"] . "</A></td>\n" . 
+                "<td>" . $row["Subject"] . "</td>\n" .
+                "<td>" . $row["date"] . "</td></tr>\n";
+        }
+
+    echo "</table><p>\n";
+}
 
 
 
