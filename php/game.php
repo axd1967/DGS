@@ -467,7 +467,7 @@ else if( $action == 'handicap' )
 
 // display moves
 
-if( $player_row["Handle"] == 'ejlo' and !$enable_message and $Moves > 0 )
+if( !$enable_message and $Moves > 0 )
 {
     mysql_data_seek($moves_result, 0);
 
