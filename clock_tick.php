@@ -62,6 +62,7 @@ if( !$is_down )
 
    $result = mysql_query('SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
                          'black.Name as blackname, white.Name as whitename ' .
+                         'black.Handle as blackhandle, white.Handle as whitehandle ' .
                          'FROM Games, Clock ,Players as white, Players as black ' .
                          'WHERE Status!="INVITED" AND Status!="FINISHED" ' .
                          'AND Games.ClockUsed >= 0 ' .
@@ -114,10 +115,18 @@ if( !$is_down )
             error("Couldn't update game.");
 
          // Send messages to the players
-         $Text = addslashes("The result in the game " .
-             game_reference( 1, 0, $gid, 0, $whitename, $blackname).
-             " was: <p><center>" . score2text($score,true,true) . "</center><br>" );
+         $Text = "The result in the game:<center>"
+               . game_reference( 1, 0, $gid, 0, $whitename, $blackname)
+               . "</center>was:<center>"
+               . score2text($score,true,true)
+               . "</center>";
+         $Text.= "Send a message to:<center>"
+               . send_reference( 1, 1, '', $White_ID, $whitename, $whitehandle)
+               . "<br>"
+               . send_reference( 1, 1, '', $Black_ID, $blackname, $blackhandle)
+               . "</center>" ;
 
+         $Text = addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'" );
 

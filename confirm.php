@@ -501,24 +501,28 @@ if( HOT_SECTION )
       {
          $blackname = $player_row["Name"];
          $whitename = $opponent_row["Name"];
+         $blackhandle = $player_row["Handle"];
+         $whitehandle = $opponent_row["Handle"];
       }
       else
       {
          $whitename = $player_row["Name"];
          $blackname = $opponent_row["Name"];
+         $whitehandle = $player_row["Handle"];
+         $blackhandle = $opponent_row["Handle"];
       }
 
 
       if( $action == 'delete' )
       {
-         //reference: game is deleted => no link
-         $Text = addslashes("The game " .
-             game_reference( 0, 0, $gid, 0, $whitename, $blackname) .
-             " has been deleted by your opponent");
-         $Subject = 'Game deleted';
-
          mysql_query("UPDATE Players SET Running=Running-1 " .
                      "WHERE ID=$Black_ID OR ID=$White_ID LIMIT 2");
+
+         $Subject = 'Game deleted';
+         //reference: game is deleted => no link
+         $Text = "The game:<center>"
+               . game_reference( 0, 0, $gid, 0, $whitename, $blackname)
+               . "</center>has been deleted by your opponent.<br>";
 
          delete_all_observers($gid, false);
       }
@@ -526,11 +530,6 @@ if( HOT_SECTION )
       {
 //         update_rating($gid);
          update_rating2($gid);
-
-         $Text = addslashes("The result in the game " .
-             game_reference( 1, 0, $gid, 0, $whitename, $blackname) .
-             " was: <p><center>" . score2text($score,true,true) . "</center><br>");
-         $Subject = 'Game result';
 
          mysql_query( "UPDATE Players SET Running=Running-1" .
                       ($garbage ? '' : ", Finished=Finished+1" .
@@ -542,12 +541,29 @@ if( HOT_SECTION )
                        ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$Black_ID LIMIT 1" );
 
-         delete_all_observers($gid, !$garbage, $Text);
+         $Subject = 'Game result';
+         $Text = "The result in the game:<center>"
+               . game_reference( 1, 0, $gid, 0, $whitename, $blackname)
+               . "</center>was:<center>"
+               . score2text($score,true,true)
+               . "</center>";
+
+         $tmp = $Text . "Send a message to:<center>"
+               . send_reference( 1, 1, '', $White_ID, $whitename, $whitehandle)
+               . "<br>"
+               . send_reference( 1, 1, '', $Black_ID, $blackname, $blackhandle)
+               . "</center>" ;
+         delete_all_observers($gid, !$garbage, addslashes( $tmp));
       }
 
+         $Text.= "Send a message to:<center>"
+               . send_reference( 1, 1, '', $player_row["ID"], $player_row["Name"], $player_row["Handle"])
+               . "</center>" ;
+
+         $Text = addslashes( $Text);
       if ( $message )
       {
-         $Text .= "<p>Your opponent wrote:<p>" . $message;
+         $Text .= "Your opponent wrote:<p>" . $message;
       }
 
       mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
