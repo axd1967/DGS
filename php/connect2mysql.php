@@ -22,6 +22,8 @@ include( "config.php" );
 
 function connect2mysql()
 {
+    global $USER, $HOST, $PASSWORD, $DB_NAME;
+
     $dbcnx = @mysql_connect( $HOST, $USER, $PASSWORD);
     if (!$dbcnx) 
       {
