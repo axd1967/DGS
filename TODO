@@ -1,8 +1,4 @@
 
-* Add two gamelists (running/finished) per player in the database
-
-* FAQ
-
 * Introduction page
 
 * Installation information and scripts
@@ -15,11 +11,13 @@
 
 * Save timestamp/clock with each move
 
+* Sgf: handle finished games properly.
+
 * Add time
 
 * Two-game-match
 
-* Sorting users/messages
+* Sorting users
 
 * Scoring: show more info
 
@@ -29,6 +27,9 @@
 
 * Show number of games for players in users.php
 
+* Activity measure
+
+* Make menues more consistent. Invite/send message add default reciever at, e.g., show_games.
 
 
 
