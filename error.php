@@ -83,6 +83,11 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("move_problem"):
+      {
+         echo "An error occurred for this. Usually it works if you try again, otherwise please contact the support.";
+      }
+      break;
 
       case("mysql_connect_failed"):
       {

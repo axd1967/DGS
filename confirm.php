@@ -163,12 +163,17 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
 
          reset($prisoners);
-
+         $new_prisoner_string = "";
+         
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
             $query .= "($Moves, \"NONE\", $x, $y, 0, NULL), ";
+            $new_prisoner_string .= board2sgf_coords($x, $y, $Size);
          }
        
+         if( strlen($new_prisoner_string) != $nr_prisoners*2 or 
+             (isset($prisoner_string) and $new_prisoner_string != $prisoner_string) )
+            error("move_problem");
 
          if( $message )
             $query .= "($Moves, $to_move, $colnr, $rownr, $hours, \"$message\") ";
@@ -250,8 +255,10 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          for( $i=1; $i <= $Handicap; $i++ )
          {
-            $colnr = ord($stonestring[$i*2-1])-ord('a');
-            $rownr = ord($stonestring[$i*2])-ord('a');
+            list($colnr,$rownr) = sgf2board_coords(substr($stonestring, $i*2-1, 2), $Size);
+            
+            if( !isset($rownr) or !isset($colnr) )
+               error("illegal_position");
 
             if( $i == $Handicap )
                if( $message )

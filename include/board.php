@@ -23,6 +23,29 @@ define("UP",2);
 define("RIGHT",4);
 define("DOWN",8);
 
+function board2sgf_coords($x, $y, $Size)
+{
+   if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
+      return NULL;
+
+   return chr(ord('a')+$x) . chr(ord('a')+$y);
+}
+
+function sgf2board_coords($coord, $Size)
+{
+   if( !is_string($coord) or strlen($coord)!=2 )
+      return array(NULL,NULL);
+      
+   $x = ord($coord[0])-ord('a');
+   $y = ord($coord[1])-ord('a');
+
+   if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
+      return array(NULL,NULL);
+   
+   return array(ord($coord[0])-ord('a'), ord($coord[1])-ord('a'));
+}
+
+
 function draw_board($Size, &$array, $may_play, $gid, 
 $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi, 
 $board_type, $coord_borders, $woodcolor  )
@@ -648,7 +671,7 @@ function check_consistency($gid)
       else
          $moves_White_Prisoners += $nr_prisoners;
 
-      $coord = chr(ord('a')+$PosX) . chr(ord('a')+$PosY);
+      $coord = board2sgf_coords($PosX,$PosY);
 
       if( !check_move(false) )
       {

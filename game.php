@@ -145,6 +145,18 @@ require( "include/rating.php" );
       case 'move':
       {
          check_move();
+
+         reset($prisoners);
+         $prisoner_string = "";
+
+         while( list($dummy, list($x,$y)) = each($prisoners) )
+         {
+            $prisoner_string .= board2sgf_coords($x, $y, $Size);
+         }
+       
+         if( strlen($prisoner_string) != $nr_prisoners*2 )
+            error("move_problem");
+
        
          $Moves++;
          $Last_X = $colnr;

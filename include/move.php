@@ -23,12 +23,9 @@ function check_move($print_error=true)
    global $coord, $colnr, $rownr, $Size, $array, $to_move, $Black_Prisoners, $White_Prisoners,
       $Last_X, $Last_Y, $prisoners, $nr_prisoners, $flags;
 
-   $colnr = ord($coord)-ord('a');
-   $rownr = ord($coord[1])-ord('a');
+   list($colnr,$rownr) = sgf2board_coords($coord, $Size);
 
-
-   if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size 
-       or $colnr < 0 or $array[$colnr][$rownr] >= 1 )
+   if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
    {
       if( $print_error )
          error("illegal_position");
@@ -107,31 +104,23 @@ function check_handicap()
 
    for( $i=1; $i < $l; $i += 2 )
    {
-      $colnr = ord($stonestring[$i])-ord('a');
-      $rownr = ord($stonestring[$i+1])-ord('a');
+      list($colnr,$rownr) = sgf2board_coords(substr($stonestring, $i, 2), $Size);
                  
-      if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 
-         or $array[$colnr][$rownr] )
-      {
+      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
          error("illegal_position");
-      }
 
       $array[$colnr][$rownr] = BLACK;
    }
 
    if( $coord )
    {
-      $colnr = ord($coord)-ord('a');
-      $rownr = ord($coord[1])-ord('a');
+      list($colnr,$rownr) = sgf2board_coords($coord, $Size);
 
-      if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0
-          or $array[$colnr][$rownr] )
-      {
+      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
          error("illegal_position");
-      }
 
       $array[$colnr][$rownr] = BLACK;
-      $stonestring .= chr(ord('a') + $colnr) . chr(ord('a') + $rownr);
+      $stonestring .= $coord;
    }
 
    if( (strlen( $stonestring ) / 2) < $Handicap )
@@ -158,13 +147,10 @@ function check_done()
 
    for( $i=1; $i < $l; $i += 2 )
    {
-      $colnr = ord($stonestring[$i])-ord('a');
-      $rownr = ord($stonestring[$i+1])-ord('a');
-                 
-      if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
-      {
+      list($colnr,$rownr) = sgf2board_coords(substr($stonestring, $i, 2), $Size);
+      
+      if( !isset($rownr) or !isset($colnr) )
          error("illegal_position");
-      }
 
       if( $index[$colnr][$rownr] )
          unset($index[$colnr][$rownr]);
@@ -204,13 +190,10 @@ function check_remove()
   
    for( $i=1; $i < $l; $i += 2 )
    {
-      $colnr = ord($stonestring[$i])-ord('a');
-      $rownr = ord($stonestring[$i+1])-ord('a');
-      
-      if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
-      {
+      list($colnr,$rownr) = sgf2board_coords(substr($stonestring, $i, 2), $Size);
+
+      if( !isset($rownr) or !isset($colnr) )
          error("illegal_position");
-      }
 
       $stone = $array[$colnr][$rownr];
       if( $stone == BLACK or $stone == WHITE )
@@ -221,23 +204,21 @@ function check_remove()
   
    if( $coord )
    {
-      $colnr = ord($coord)-ord('a');
-      $rownr = ord($coord[1])-ord('a');
+      list($colnr,$rownr) = sgf2board_coords($coord, $Size);
+
+      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
+         error("illegal_position");
 
       $stone = $array[$colnr][$rownr];
-      if(( $stone != BLACK and $stone != WHITE and 
-           $stone != BLACK_DEAD and $stone != WHITE_DEAD ) or
-         $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
-      {
+      if( $stone!=BLACK and $stone!=WHITE and $stone!=BLACK_DEAD and $stone!=WHITE_DEAD )
          error("illegal_position");
-      }
-                 
+
       $prisoners = array();
       remove_dead( $colnr, $rownr, $array, $prisoners );
 
       while( list($dummy, list($x,$y)) = each($prisoners) )
       {
-         $stonestring .= chr(ord('a') + $x) . chr(ord('a') + $y);
+         $stonestring .= board2sgf_coords($x,$y);
       }
    }
 
@@ -245,7 +226,7 @@ function check_remove()
 
 function draw_message_box()
 {
-   global $action, $gid, $stonestring, $coord;
+   global $action, $gid, $stonestring, $coord, $prisoner_string;
 ?>
   <FORM name="confirmform" action="confirm.php" method="POST">
     <center>
@@ -260,11 +241,12 @@ function draw_message_box()
 <?php 
     if( $action == 'move' ) 
     { 
-       echo "       <input type=\"hidden\" name=\"coord\" value=\"$coord\">\n";
+       echo "<input type=\"hidden\" name=\"coord\" value=\"$coord\">\n";
+       echo "<input type=\"hidden\" name=\"prisoner_string\" value=\"$prisoner_string\">\n";
     }
     else if( $action == 'done' or $action == 'handicap' )
     {
-       echo "<input type=\"hidden\" name=\"stonestring\" value=\"" . $stonestring . "\">\n";
+       echo "<input type=\"hidden\" name=\"stonestring\" value=\"$stonestring\">\n";
     } 
 
 ?>
