@@ -25,13 +25,16 @@ $TranslateGroups[] = "Common";
 require_once( "include/config.php" );
 require_once( "include/connect2mysql.php" );
 require_once( "include/translation_functions.php" );
-require_once( "include/time_functions.php" );
 
+$timeadjust = 0;
 if( @is_readable("timeadjust.php" ) )
    include( "timeadjust.php" );
 
 if( !is_numeric($timeadjust) )
    $timeadjust = 0;
+
+require_once( "include/time_functions.php" );
+
 
 $session_duration = 3600*12*61; // 1 month
 $tick_frequency = 12; // ticks/hour
@@ -272,6 +275,8 @@ function end_page( $menu_array=NULL )
 
    if( count($menu_array) >= 3 )
       $span = ' colspan=' . (count($menu_array)-1);
+   else
+      $span = "";
 
 
    global $NOW, $date_fmt;
@@ -314,8 +319,6 @@ function make_menu($menu_array)
 
    echo "<table width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>\n" . $new_row;
 
-   if( count($menu_array) == 1 )
-     $span = " colspan=2";
 
    $break_point_array = array();
    $nr_menu_links = count($menu_array);
@@ -331,6 +334,7 @@ function make_menu($menu_array)
        $i++;
      }
 
+   $cumwidth = $cumw = 0;
    $i = 0;
    foreach( $menu_array as $text => $link )
       {
@@ -339,6 +343,9 @@ function make_menu($menu_array)
          $width = round($cumw - $cumwidth);
          if( $i == count($menu_array) && !$even )
            $span = " colspan=2";
+         else
+           $span = "";
+
          echo "<td$span width=\"$width%\"><B><A href=\"$base_path$link\">$text</A></B></td>\n";
          $cumwidth += $width;
          if( in_array($i, $break_point_array) )
@@ -473,8 +480,8 @@ function error($err, $debugmsg=NULL)
 
    if( !empty($mysql_error) )
    {
-      $uri .= "&mysqlerror=" . urlencode(mysql_error());
-      $errorlog_query .= ", MysqlError='" . mysql_error() . "'";
+      $uri .= "&mysqlerror=" . urlencode($mysql_error);
+      $errorlog_query .= ", MysqlError='" . $mysql_error . "'";
    }
 
    if( !empty($debugmsg) )
@@ -563,7 +570,7 @@ function get_cookie_prefs(&$player_row)
 {
    global $cookie_prefs, $cookie_pref_rows;
 
-   $cookie_prefs = unserialize(stripslashes($_COOKIE["prefs{$player_row['ID']}"]));
+   $cookie_prefs = unserialize(stripslashes(@$_COOKIE["prefs{$player_row['ID']}"]));
    if( !is_array( $cookie_prefs ) )
       $cookie_prefs = array();
 
@@ -596,44 +603,163 @@ function add_line_breaks($msg)
    return $newmsg;
 }
 
+// Some regular allowed html tags. Keep them lower case.
+$html_code_closed = '|a|b|i|u|center|ul|ol|font|tt|pre|'; //keep a '|' at both end
+$html_code = 'br'.$html_code_closed.'p|goban|li|/br'; //|/li|/p|/br'; //|/ *br';
+//Warning: </br> was historically used in end game messages. It remain in database.
+
+define( 'ALLOWED_LT', '{anglstart}');
+define( 'ALLOWED_GT', '{anglend}');
+
+/* Simple syntax check of element's attributes up to the next '>'.
+   Check for quote mismatches.
+   If so, simply add the missing quote at the (supposed?) end of tag.
+*/
+//attribut not string - allowed characters (HTML4.01): [a-zA-Z0-9:.-_] 
+function parse_atbs_safe( &$trail, &$bad)
+{
+   $head = '';
+   $quote = '';
+   $seps = array(
+         ""    => "\"'<>",
+         "\""  => "\"",
+         "'"   => "'",
+      );
+
+   while ( !$bad )
+   {
+      $i = strcspn($trail, $seps[$quote]);
+      $c = substr($trail,$i,1);
+      if ( $c=='' || $c=='<' )
+      {
+         $head.= substr($trail,0,$i);
+         $trail = substr($trail,$i);
+         $bad = 1;
+         break;
+      }
+      else if ( $c=='>' )
+      {
+         $head.= substr($trail,0,$i);
+         $trail = substr($trail,$i+1);
+         break;
+      }
+      else if( $quote )
+      {
+         $head.= substr($trail,0,$i+1);
+         $trail = substr($trail,$i+1);
+         $quote = '';
+      }
+      else
+      {
+         $head.= substr($trail,0,$i+1);
+         $trail = substr($trail,$i+1);
+         $quote = $c;
+      }
+   }
+   if ( $quote )
+   {
+      $head.= $quote;
+      $bad = 1;
+   }
+//RodLog("args$bad=$head + $trail");
+   return $head;
+}
+
+/* Simple check of elements' attributes and inner text. Recursive.
+   If an element is allowed and correctly closed,
+    validate it by subtituing its '<' and '>' with ALLOWED_LT and ALLOWED_GT.
+   Check up to the <$stop > tag (supposed to be the closing tag).
+   If $stop=='', check up to the end of string $trail.
+*/
+function parse_tags_safe( &$trail, &$bad, $stop)
+{
+ global $html_code_closed, $html_code;
+
+   $before = '';
+   $reg = "%^(.*?)<(" . ( $stop ? "$stop|" : "" ) . "$html_code)([\x01-\x20>].*)$%is";
+
+   while ( preg_match($reg, $trail, $matches) )
+   {
+      $before.= $matches[1] ;
+      $tag = strtolower($matches[2]) ; //Warning: same case as $html_code
+         if( $tag == '/br' ) $tag = 'br' ; //historically used in end game messages.
+      $trail = $matches[3] ;
+      unset($matches);
+//RodLog("found:$stop=$tag");
+      $head = $tag . parse_atbs_safe( $trail, $bad) ;
+      if( $bad)
+         return $before .'<'. $head .'>' ;
+      $head = preg_replace('%[\x01-\x20]+%', ' ', $head);
+
+//RodLog("stop:$tag = $before + $trail");
+      if( $stop == $tag )
+         return $before .ALLOWED_LT. $head .ALLOWED_GT ;
+
+      $to_be_closed = is_numeric(strpos($html_code_closed,'|'.$tag.'|')) ;
+      if( $to_be_closed )
+      {
+         $inside = parse_tags_safe( $trail, $bad, '/'.$tag) ;
+//RodLog("inside$bad:$tag = $before + $inside + $trail");
+         if( $bad)
+            return $before .'<'. $head .'>'. $inside ;
+      }
+      else
+      {
+         $inside = '' ;
+      }
+
+      $before.= ALLOWED_LT. $head .ALLOWED_GT. $inside ;
+   }
+   if( $stop )
+      $bad = 1;
+//RodLog("close:$stop= $before + $trail");
+   return $before ;
+}
+
+function parse_html_safe( $msg)
+{
+
+//RodLog("safe<= $msg");
+   $bad = 0;
+   $str = parse_tags_safe( $msg, $bad, '') ;
+   $str.= $msg;
+//RodLog("safe".($bad?'#':'>')."= $str");
+   return $str;
+}
+
 function make_html_safe( $msg, $some_html=false)
 {
-   $magic_quote = "<!-- '\" -->";
 
 //   $msg = str_replace('&', '&amp;', $msg);
-//   $msg = str_replace('"', '&quot;', $msg); //see $magic_quote
+//   $msg = str_replace('"', '&quot;', $msg);
 
 
    if( $some_html )
    {
+      // make sure the <, > replacements: ALLOWED_LT, ALLOWED_GT are removed from the string
+      $msg = str_replace(ALLOWED_LT, "<", $msg);
+      $msg = str_replace(ALLOWED_GT, ">", $msg);
 
-      // make sure the <, > replacements: {anglstart}, {anglend} are removed from the string
-      $msg = str_replace("{anglstart}", "<", $msg);
-      $msg = str_replace("{anglend}", ">", $msg);
-
-      // remove the 'close pending quotes' magic string
-      $msg = str_replace ($magic_quote, "", $msg);
-
-      // replace <, > with {anglstart}, {anglend} for legal html code
+      // replace <, > with ALLOWED_LT, ALLOWED_GT for legal html code
       if( $some_html === 'game' )
       {
          // mark sgf comments
-         $msg = preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg);
-         $msg = eregi_replace("<c(omment)? *>", "{anglstart}font color=blue{anglend}\\0", $msg);
-         $msg = eregi_replace("</c(omment)? *>", "\\0{anglstart}/font{anglend}", $msg);
+         $msg = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg));
+         $msg = eregi_replace("<c(omment)? *>",
+                              ALLOWED_LT."font color=blue".ALLOWED_GT."\\0", $msg);
+         $msg = eregi_replace("</c(omment)? *>",
+                              "\\0".ALLOWED_LT."/font".ALLOWED_GT, $msg);
       }
 
       $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>",
-                         "{anglstart}a href=\"\\1\\2\"{anglend}\\2{anglstart}/a{anglend}", $msg);
-      $msg=eregi_replace("<((http|news|ftp)+://[^ >\n\t]+)>",
-                         "{anglstart}a href=\"\\1\"{anglend}\\1{anglstart}/a{anglend}", $msg);
+                         ALLOWED_LT."a href=\"\\1\\2\"".ALLOWED_GT.
+                         "\\2".ALLOWED_LT."/a".ALLOWED_GT, $msg);
+      $msg=eregi_replace("<((http:|news:|ftp:)//[^ >\n\t]+)>",
+                         ALLOWED_LT."a href=\"\\1\"".ALLOWED_GT.
+                         "\\1".ALLOWED_LT."/a".ALLOWED_GT, $msg);
 
-
-      // Some allowed html tags
-
-      $html_code = "a|b|i|u|center|li|ul|ol|font|p|br|goban";
-
-      $msg=eregi_replace("<(/?($html_code)( +[^>]*)?)>", "{anglstart}\\1{anglend}", $msg);
+      // Regular allowed html tags
+      $msg = parse_html_safe($msg) ;
    }
 
    // Filter out HTML code
@@ -641,17 +767,14 @@ function make_html_safe( $msg, $some_html=false)
    $msg = str_replace("<", "&lt;", $msg);
    $msg = str_replace(">", "&gt;", $msg);
 
-   $msg = add_line_breaks($msg);
-
    if( $some_html )
    {
-      // change back to <, > from {anglstart} , {anglend}
-      $msg = str_replace ("{anglstart}", "<", $msg);
-      $msg = str_replace ("{anglend}", ">", $msg);
-
-      // add the 'close pending quotes' magic string
-      if ($msg) $msg.= $magic_quote;
+      // change back to <, > from ALLOWED_LT, ALLOWED_GT
+      $msg = str_replace(ALLOWED_LT, "<", $msg);
+      $msg = str_replace(ALLOWED_GT, ">", $msg);
    }
+
+   $msg = add_line_breaks($msg);
 
    return $msg;
 }
@@ -885,6 +1008,7 @@ function toggle_observe_list( $gid, $uid )
       mysql_query("INSERT INTO Observers SET gid=$gid, uid=$uid");
 }
 
+//Text must be escaped by addslashes()
 function delete_all_observers( $gid, $notify, $Text='' )
 {
    global $NOW;
@@ -914,24 +1038,38 @@ function delete_all_observers( $gid, $notify, $Text='' )
    mysql_query("DELETE FROM Observers WHERE gid=$gid");
 }
 
-function blend_alpha($red, $green, $blue, $alpha, $bgred=247, $bggreen=245, $bgblue=227)
+function RGBA($r, $g, $b, $a=NULL)
+{
+   if ( $a === NULL )
+      return sprintf("%02x%02x%02x", $r, $g, $b);
+   else
+      return sprintf("%02x%02x%02x%02x", $r, $g, $b, $a);
+}
+
+function blend_alpha($red, $green, $blue, $alpha, $bgred=0xf7, $bggreen=0xf5, $bgblue=0xe3)
 {
    $a = $alpha/255;
    $r = $a*$red + (1-$a)*$bgred;
    $g = $a*$green + (1-$a)*$bggreen;
    $b = $a*$blue + (1-$a)*$bgblue;
-   return sprintf("%02x%02x%02x", $r, $g, $b);
+   return RGBA( $r, $g, $b);
+}
+
+function split_RGBA($color, $alpha=NULL)
+{
+   return array(base_convert(substr($color, 0, 2), 16, 10),
+                base_convert(substr($color, 2, 2), 16, 10),
+                base_convert(substr($color, 4, 2), 16, 10),
+                strlen($color)<7 ? $alpha :
+                base_convert(substr($color, 6, 2), 16, 10),
+         );
 }
 
 function blend_alpha_hex($color, $bgcolor="f7f5e3")
 {
-   return blend_alpha(base_convert(substr($color, 0, 2), 16, 10),
-                      base_convert(substr($color, 2, 2), 16, 10),
-                      base_convert(substr($color, 4, 2), 16, 10),
-                      base_convert(substr($color, 6, 2), 16, 10),
-                      base_convert(substr($bgcolor, 0, 2), 16, 10),
-                      base_convert(substr($bgcolor, 2, 2), 16, 10),
-                      base_convert(substr($bgcolor, 4, 2), 16, 10));
+   list($r,$g,$b,$a)= split_RGBA($color, 0);
+   list($br,$bg,$bb,$ba)= split_RGBA($bgcolor);
+   return blend_alpha($r,$g,$b,$a,$br,$bg,$bb);
 }
 
 function limit($val, $minimum, $maximum, $default)
