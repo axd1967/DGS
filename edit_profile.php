@@ -136,10 +136,10 @@ echo form_insert_row( 'DESCRIPTION', T_('Wood color'),
 
 $s = $player_row["Boardcoords"];
 echo form_insert_row( 'DESCRIPTION', T_('Coordinate sides'),
-                      'CHECKBOX', 'coordsleft', 1, 'Left', ($s & LEFT),
-                      'CHECKBOX', 'coordsup', 1, 'Up', ($s & UP),
-                      'CHECKBOX', 'coordsright', 1, 'Right', ($s & RIGHT),
-                      'CHECKBOX', 'coordsdown', 1, 'Down', ($s & DOWN) );
+                      'CHECKBOX', 'coordsleft', 1, T_('Left'), ($s & LEFT),
+                      'CHECKBOX', 'coordsup', 1, T_('Up'), ($s & UP),
+                      'CHECKBOX', 'coordsright', 1, T_('Right'), ($s & RIGHT),
+                      'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & DOWN) );
 
 echo form_insert_row( 'DESCRIPTION', T_('Smooth board edge'),
                       'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) );
