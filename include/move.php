@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-function check_move()
+function check_move($print_error=true)
 {
    global $coord, $colnr, $rownr, $Size, $array, $to_move, $Black_Prisoners, $White_Prisoners,
       $Last_X, $Last_Y, $prisoners, $nr_prisoners, $flags;
@@ -30,7 +30,13 @@ function check_move()
    if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size 
        or $colnr < 0 or $array[$colnr][$rownr] >= 1 )
    {
-      error("illegal_position");
+      if( $print_error )
+         error("illegal_position");
+      else 
+      {
+         echo "Illegal_position";
+         return false;
+      }
    }
 
    $array[$colnr][$rownr] = $to_move;
@@ -55,7 +61,13 @@ function check_move()
 
       if( $Last_X == $x and $Last_Y == $y )
       {
-         error("ko");
+         if( $print_error )
+            error("ko");
+         else 
+         {
+            echo "ko";
+            return false;
+         }
       }
    }
 
@@ -67,13 +79,19 @@ function check_move()
    {
       if(!$suicide_allowed)
       {
-         error("suicide");
+         if( $print_error )
+            error("suicide");
+         else 
+         {
+            echo "suicide";
+            return false;
+         }
+
       }
    }
-         
 
    // Ok, all tests passed.
-         
+   return true;
 }
 
 function check_handicap()

@@ -78,6 +78,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
 
+   $old_moves = $Moves;
 
    if( $player_row["ID"] != $ToMove_ID )
       error("not_your_turn");
@@ -150,6 +151,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    if( $message ) $message = trim($message);
 
+   $where_clause = " WHERE ID=$gid AND Moves=$old_moves Consistent='N'";
+
    switch( $action )
    {
       case 'move':
@@ -191,7 +194,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$flags " .
-             "WHERE ID=$gid";
+             $where_clause;
       }
       break;
 
@@ -224,7 +227,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Status='$next_status', " .
              "ToMove_ID=$next_to_move_ID, " . $time_query .
              "Flags=0 " .
-             "WHERE ID=$gid";
+             $where_clause;
       }
       break;
      
@@ -263,7 +266,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " . $time_query .
              "ToMove_ID=$White_ID " .
-             "WHERE ID=$gid";
+             $where_clause;
       }
       break;
 
@@ -290,7 +293,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "ToMove_ID=0, " .
              "Score=$score, " . $time_query .
              "Flags=0" .
-             " WHERE ID=$gid";
+             $where_clause;
 
          $game_finished = true;
       }
@@ -361,7 +364,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $game_query .=
              "Flags=0, " .
              "Score=$score" .
-             " WHERE ID=$gid";
+             $where_clause;
          
       }
       break;
@@ -373,25 +376,22 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    }
 
 
-   if( $query )
-   {
-      $result = mysql_query( $query );
-        
-      if( mysql_affected_rows() < 1 and $action != 'delete' )
-         error("mysql_insert_move", true);
-   }
-
-
-
    $result = mysql_query( $game_query );
-
 
    if( mysql_affected_rows() != 1 )
       error("mysql_update_game", true);
 
+   
+   $result = mysql_query( $query );
+        
+   if( mysql_affected_rows() < 1 and $action != 'delete' )
+      error("mysql_insert_move", true);
 
 
+   $result = mysql_query( "UPDATE Games set Consistent=$Consistent WHERE ID=$gid" );
 
+   if( mysql_affected_rows() != 1 )
+      error("mysql_update_game", true);
     
    if( $game_finished )
    {

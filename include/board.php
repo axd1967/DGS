@@ -605,4 +605,88 @@ function remove_dead( $x, $y, &$array, &$prisoners )
    }
 }
 
+function check_consistency($gid)
+{
+   global $coord, $Size, $array, $to_move, $flags, $Last_X, $Last_Y, 
+      $Black_Prisoners, $White_Prisoners, $nr_prisoners;
+
+   echo "Game $gid: ";
+   $result = mysql_query("SELECT * from Games where ID=$gid");
+   if( mysql_num_rows($result) != 1 )
+   {
+      echo "Doesn't exist?<br>\n";
+      return false;
+   }
+
+   extract( mysql_fetch_array( $result ) );
+
+   $result = mysql_query( "SELECT * FROM Moves$gid order by ID" );
+   
+   $move_nr=0;
+   $array = NULL;
+   $games_Black_Prisoners = $Black_Prisoners;
+   $games_White_Prisoners = $White_Prisoners;
+   $Black_Prisoners=$White_Prisoners=0;
+   $moves_Black_Prisoners=$moves_White_Prisoners=0;
+   while( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      if( !($Stone == WHITE or $Stone == BLACK ) or $PosX<0 )
+      {
+         if( $Stone == NONE )
+            $nr_prisoners++;
+         elseif( $PosX < 0 )
+            $move_nr++;
+
+         continue;
+      }
+      $move_nr++;
+      $to_move=$Stone;
+      if( $to_move == BLACK )
+         $moves_Black_Prisoners += $nr_prisoners;
+      else
+         $moves_White_Prisoners += $nr_prisoners;
+
+      $coord = chr(ord('a')+$PosX) . chr(ord('a')+$PosY);
+
+      if( !check_move(false) )
+      {
+         echo ", problem at move $move_nr<br>\n";
+         return false;
+      }
+      
+      $Last_X=$PosX;
+      $Last_Y=$PosY;
+      $nr_prisoners=0;
+   }
+
+   if( $Moves != $move_nr )
+   {
+      echo "Wrong number of moves!<br>\n";
+      return false;
+   }
+
+   if( $Black_Prisoners != $games_Black_Prisoners or 
+   $White_Prisoners != $games_White_Prisoners )
+   {
+      echo "Wrong number of prisoners in Games table!<br>\n";
+      echo "Black: $games_Black_Prisoners should be:$Black_Prisoners<br>\n";
+      echo "White: $games_White_Prisoners should be:$White_Prisoners<br>\n";
+      return false;
+      
+   }
+
+   if( $Black_Prisoners != $moves_Black_Prisoners or 
+   $White_Prisoners != $moves_White_Prisoners )
+   {
+      echo "Wrong number of prisoners removed!<br>\n";
+      return false;
+      
+   }
+
+
+   echo "Ok<br>\n";
+}
+
+
 ?>
