@@ -91,7 +91,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    $games_for = ( $finished ? T_('Finished games for %s') : T_('Running games for %s') );
 
-   start_page( sprintf( $games_for, $user_row["Name"] ),
+   start_page( sprintf( $games_for, make_html_safe($user_row["Name"]) ),
                true, $logged_in, $player_row, $style );
 
 
@@ -104,8 +104,9 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    echo "<center><h4>";
 
-   printf(  $games_for, "<A href=\"userinfo.php?uid=$uid\">" . $user_row["Name"] .
-            " (" . $user_row["Handle"] . ")</A>");
+   printf(  $games_for, "<A href=\"userinfo.php?uid=$uid\">" .
+            make_html_safe($user_row["Name"]) . " (" .
+            make_html_safe($user_row["Handle"]) . ")</A>");
 
    echo "</H4></center>\n";
 
@@ -149,9 +150,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       if( (1 << 1) & $column_set )
          echo "<td><A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" . T_('sgf') . "</font></A></td>\n";
       if( (1 << 2) & $column_set )
-         echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>$Name</font></a></td>\n";
+         echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+            make_html_safe($Name) . "</font></a></td>\n";
       if( (1 << 3) & $column_set )
-         echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>$Handle</font></a></td>\n";
+         echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+            make_html_safe($Handle) . "</font></a></td>\n";
       if( (1 << 4) & $column_set )
          echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
       if( (1 << 5) & $column_set )

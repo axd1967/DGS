@@ -283,17 +283,19 @@ function draw_game_info()
   echo "   </tr><tr>\n";
   echo "     <td>" . T_('Name') . ":</td>\n";
   echo '     <td><A href="userinfo.php?uid=' .
-    "$White_ID\">$Whitename ($Whitehandle)" . "</A></td>\n";
+    "$White_ID\">" . make_html_safe($Whitename) . ' (' . make_html_safe($Whitehandle) . ")" .
+     "</A></td>\n";
   echo '     <td><A href="userinfo.php?uid=' .
-    "$Black_ID\">$Blackname ($Blackhandle)" . "</A></td>\n";
+    "$Black_ID\">" . make_html_safe($Blackname) . ' (' . make_html_safe($Blackhandle) . ")" .
+     "</A></td>\n";
   echo "   </tr><tr>\n";
   echo '     <td>' . T_('Rating') . ":</td>\n";
   echo '     <td>' . echo_rating( $Whiterating ) . "</td>\n";
   echo '     <td>' . echo_rating( $Blackrating ) . "</td>\n";
   echo "   </tr><tr>\n";
   echo '     <td>' . T_('Rank info') . ":</td>\n";
-  echo '     <td>' . $Whiterank . "</td>\n";
-  echo '     <td>' . $Blackrank . "</td>\n";
+  echo '     <td>' . make_html_safe($Whiterank) . "</td>\n";
+  echo '     <td>' . make_html_safe($Blackrank) . "</td>\n";
   echo "   </tr><tr>\n";
   echo '     <td>' . T_('Prisoners') . ":</td>\n";
   echo '     <td>' . $White_Prisoners . "</td>\n";

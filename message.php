@@ -85,6 +85,9 @@ require( "include/form_functions.php" );
 
       extract($row);
 
+      $sender_name = make_html_safe($sender_name);
+      $sender_handle_safe = make_html_safe($sender_handle);
+
       $to_me = $can_reply = ( $To_ID == $my_id );
       $has_replied = !(strpos($Flags,'REPLIED') === false);
 
@@ -139,7 +142,7 @@ require( "include/form_functions.php" );
       case 'AlreadyDeclined':
       case 'AlreadyAccepted':
       {
-         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
+         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text);
          if( $mode == 'AlreadyAccepted' )
          {
@@ -183,22 +186,24 @@ require( "include/form_functions.php" );
 
       case 'ShowInvite':
       {
-         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
+         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text);
 
          if( $Color == BLACK )
          {
             $color = "<img src='17/w.gif' alt='" . T_('white') . "'> " .
-               "$sender_name ($sender_handle)" .
+               "$sender_name ($sender_handle_safe)" .
                " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('black') . "'> " .
-               $player_row["Name"] .' (' . $player_row["Handle"] . ')';
+               make_html_safe($player_row["Name"]) .
+               ' (' . make_html_safe($player_row["Handle"]) . ')';
          }
          else
          {
             $color = "<img src='17/w.gif' alt='" . T_('white') . "'> " .
-               $player_row["Name"] .' (' . $player_row["Handle"] . ')' .
+               make_html_safe($player_row["Name"]) .
+               ' (' . make_html_safe($player_row["Handle"]) . ')' .
                " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('black') . "'> " .
-               "$sender_name ($sender_handle) &nbsp;&nbsp;";
+               "$sender_name ($sender_handle_safe) &nbsp;&nbsp;";
          }
 
          game_info_table($Size, $color, $ToMove_ID, $Komi, $Handicap, $Maintime,
@@ -218,7 +223,7 @@ require( "include/form_functions.php" );
 
       case 'Dispute':
       {
-         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
+         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text);
 
          echo "<B><h3><font color=$h3_color>" . T_('Disputing settings') . ":</font></B><p>\n";

@@ -23,7 +23,7 @@ include("forum_functions.php");
 
 function draw_post($reply_link=true)
 {
-   global $Subject, $Text, $ID, $User_ID, $HOSTBASE, $forum, $Name, $thread, $Timestamp, 
+   global $Subject, $Text, $ID, $User_ID, $HOSTBASE, $forum, $Name, $thread, $Timestamp,
       $date_fmt, $Lastread;
 
    $txt = make_html_safe($Text, true);
@@ -34,7 +34,7 @@ function draw_post($reply_link=true)
 
    echo '<tr><td bgcolor=cccccc>
 <a name="' . $ID . '"><font size="+1"><b>' . make_html_safe($Subject) . '</b></font>' . $new . '</a><br>
-by <a href="' . $HOSTBASE . '/userinfo.php?uid=' . $User_ID . '">' . $Name . '</a>
+by <a href="' . $HOSTBASE . '/userinfo.php?uid=' . $User_ID . '">' . make_html_safe($Name) . '</a>
 on ' . date($date_fmt, $Timestamp) . '</td></tr>
 <tr><td bgcolor=white>' . $txt . '</td></tr>
 ';
@@ -102,7 +102,7 @@ on ' . date($date_fmt, $Timestamp) . '</td></tr>
       }
 
       draw_post($reply != $ID);
- 
+
       if( $reply == $ID )
       {
          echo "<tr><td>\n";
@@ -118,10 +118,10 @@ on ' . date($date_fmt, $Timestamp) . '</td></tr>
    }
 
    echo "</table></td></tr>\n";
-   
+
    end_table($links, $cols);
 
-   
+
 // Update Forumreads to remove the 'new' flag
 
    if( $Lastchangedthread + $new_end > $NOW )

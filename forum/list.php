@@ -27,7 +27,7 @@ require("forum_functions.php");
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
    $Forumname = forum_name($forum);
-   
+
    start_page("Forum $Forumname", true, $logged_in, $player_row );
 
    $result = mysql_query("SELECT Subject, Posts.Thread_ID, Lastchanged, Posts.User_ID, Replies, " .
@@ -44,8 +44,8 @@ require("forum_functions.php");
    $headline = array("Thread"=>"width=50%","Author"=>"width=20%",
                      "Replies"=>"width=10%  align=center","Date"=>"width=20%");
    $links = LINK_FORUMS | LINK_THREADS | LINK_NEW_TOPIC;
-   start_table($headline, $links, "width=98%", $cols); 
-               
+   start_table($headline, $links, "width=98%", $cols);
+
    $odd = true;
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -56,7 +56,7 @@ require("forum_functions.php");
       $new = get_new_string($Lastchangedstamp, $Lastread);
 
       $color = ( $odd ? "" : " bgcolor=white" );
-      echo "<tr$color><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a>$new</td><td>$Name</td><td align=center>" . ($Replies-1) . "</td><td nowrap>$Lastchanged</td></tr>\n";
+      echo "<tr$color><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a>$new</td><td>" . make_html_safe($Name) . "</td><td align=center>" . ($Replies-1) . "</td><td nowrap>$Lastchanged</td></tr>\n";
       $odd = !$odd;
    }
 

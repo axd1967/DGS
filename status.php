@@ -60,12 +60,16 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    echo '
     <table border=3>
-       <tr><td><b>' . T_("Name") . '</b></td> <td>' . $player_row["Name"] . '</td></tr>
-       <tr><td><b>' . T_("Userid") . '</b></td> <td>' . $player_row["Handle"] . '</td></tr>
-       <tr><td><b>' . T_("Open for matches?") . '</b></td> <td>' . $player_row["Open"] . '</td></tr>
-       <tr><td><b>' . T_("Rating") . '</b></td> <td>' . echo_rating($player_row["Rating"]);
-   echo '</td></tr>
-       <tr><td><b>' . T_('Rank info') . '</b></td> <td>' . $player_row["Rank"] . '</td></tr>
+       <tr><td><b>' . T_("Name") . '</b></td>
+           <td>' . make_html_safe($player_row["Name"]) . '</td></tr>
+       <tr><td><b>' . T_("Userid") . '</b></td>
+           <td>' . make_html_safe($player_row["Handle"]) . '</td></tr>
+       <tr><td><b>' . T_("Open for matches?") . '</b></td>
+           <td>' . make_html_safe($player_row["Open"]) . '</td></tr>
+       <tr><td><b>' . T_("Rating") . '</b></td>
+           <td>' . echo_rating($player_row["Rating"]) .  '</td></tr>
+       <tr><td><b>' . T_('Rank info') . '</b></td>
+           <td>' . make_html_safe($player_row["Rank"]) . '</td></tr>
     </table>
     <p>';
 
@@ -112,7 +116,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          }
 
          echo "<td><A href=\"message.php?mode=ShowMessage&amp;mid=" . $row["ID"] . "\">" .
-            $row["sender"] . "</A></td>\n" .
+            make_html_safe($row["sender"]) . "</A></td>\n" .
             "<td>" . make_html_safe($row["Subject"]) . "</td>\n" .
             "<td>" . date($date_fmt2, $row["date"]) . "</td></tr>\n";
       }
@@ -178,9 +182,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          if( (1 << 1) & $column_set )
             echo "<td><A href=\"sgf.php?gid=$ID\"><font color=$gid_color>sgf</font></A></td>\n";
          if( (1 << 2) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>$Name</font></a></td>\n";
+            echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+               make_html_safe($Name) . "</font></a></td>\n";
          if( (1 << 3) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>$Handle</font></a></td>\n";
+            echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+               make_html_safe($Handle) . "</font></a></td>\n";
          if( (1 << 4) & $column_set )
             echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
          if( (1 << 5) & $column_set )

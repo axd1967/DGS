@@ -102,15 +102,17 @@ include( "include/form_functions.php" );
       if( (1 << 0) & $column_set )
          echo "<td><A href=\"userinfo.php?uid=$ID\">$ID</A></td>\n";
       if( (1 << 1) & $column_set )
-         echo "<td><A href=\"userinfo.php?uid=$ID\">" . $row['Name'] . "</A></td>\n";
+         echo "<td><A href=\"userinfo.php?uid=$ID\">" . make_html_safe($row['Name']) .
+            "</A></td>\n";
       if( (1 << 2) & $column_set )
-         echo "<td><A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A></td>\n";
+         echo "<td><A href=\"userinfo.php?uid=$ID\">" . make_html_safe($row['Handle']) .
+            "</A></td>\n";
       if( (1 << 3) & $column_set )
-         echo '<td>' . $row['Rankinfo'] . '&nbsp;</td>';
+         echo '<td>' . make_html_safe($row['Rankinfo']) . '&nbsp;</td>';
       if( (1 << 4) & $column_set )
          echo '<td>' . echo_rating($row['Rating']) . '&nbsp;</td>';
       if( (1 << 5) & $column_set )
-         echo '<td>' . $row['Open'] . '&nbsp;</td>';
+         echo '<td>' . make_html_safe($row['Open']) . '&nbsp;</td>';
       if( (1 << 6) & $column_set )
          echo '<td>' . $row['Games'] . '&nbsp;</td>';
       if( (1 << 7) & $column_set )

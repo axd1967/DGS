@@ -162,7 +162,7 @@ require( "include/timezones.php" );
       }
 
       echo "<td><A href=\"message.php?mode=ShowMessage&mid=" . $row["mid"] . "\">" .
-         $row["sender"] . "</A></td>\n" .
+         make_html_safe($row["sender"]) . "</A></td>\n" .
          "<td>" . make_html_safe($row["Subject"]) . "&nbsp;</td>\n" .
          "<td>" . date($date_fmt, $row["date"]) . "</td>\n";
 
