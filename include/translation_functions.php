@@ -18,10 +18,6 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-if( file_exists("translations/known_languages.php") )
-   include_once( "translations/known_languages.php" );
-
-
 
 function T_($string)
 {
@@ -36,15 +32,16 @@ function T_($string)
 
 function include_all_translate_groups($player_row)
 {
-   global $TranslateGroups, $known_languages;
+   global $TranslateGroups, $known_languages, $base_path;
 
-   if( !file_exists("translations/known_languages.php") )
+   if( !file_exists($base_path . "translations/known_languages.php") )
    {
-      require_once( "include/make_translationfiles.php" );
+      require_once( $base_path . "include/make_translationfiles.php" );
       make_known_languages();
       make_include_files();
-      include_once( "translations/known_languages.php" );
    }
+
+   include_once( $base_path . "translations/known_languages.php" );
 
    $TranslateGroups = array_unique($TranslateGroups);
 
