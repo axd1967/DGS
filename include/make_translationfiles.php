@@ -50,6 +50,13 @@ function make_known_languages()
 
    chdir('../');
 }
+
+function slashed($string)
+{
+   return str_replace('"','\"',$string);
+}
+
+
    // Now make all translation include-files
 
 function make_include_files($language=null, $group=null)
@@ -102,8 +109,8 @@ function make_include_files($language=null, $group=null)
                  gmdate('Y-m-d H:i:s T', $NOW) . " */\n\n");
       }
 
-      fwrite( $fd, "\$Tr[\"" . addslashes($row['Original']) . "\"] = \"" .
-              addslashes($row['Text']) . "\";\n" );
+      fwrite( $fd, "\$Tr[\"" . slashed($row['Original']) . "\"] = \"" .
+              slashed($row['Text']) . "\";\n" );
    }
 
 
