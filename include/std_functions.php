@@ -560,8 +560,7 @@ function make_html_safe(&$msg, $some_html=false)
 
       $html_code = "a|b|i|u|center|li|ul|ol|font|p|br";
 
-      $msg=eregi_replace("<(/?($html_code) *[^>]*)>", "{anglstart}\\1{anglend}", $msg);
-
+      $msg=eregi_replace("<(/?($html_code)( +[^>]*)?)>", "{anglstart}\\1{anglend}", $msg);
    }
 
    // Filter out HTML code
