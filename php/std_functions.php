@@ -140,7 +140,7 @@ function random_letter()
     else if( $c < 36 )
         return chr( $c - 10 + ord('a'));
     else
-        return chr( $c - 30 + ord('A'));
+        return chr( $c - 36 + ord('A'));
 }
 
 function generate_random_password()
