@@ -531,7 +531,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
 
    if( !isset($rating) ) return '';
 
-   $spc = ( $show_percent ? '&nbsp;' : ' ' );
+   $spc = ( $show_percent === true ? '&nbsp;' : ' ' );
 
    $rank_val = round($rating/100.0);
 

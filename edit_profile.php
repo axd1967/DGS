@@ -132,14 +132,14 @@ require_once( "include/countries.php" );
    {
       $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
                                      'TEXTINPUT', 'rating', 16, 16,
-                                     echo_rating($player_row["Rating2"],true),
+                                     echo_rating($player_row["Rating2"],2,0,1),
                                      'SELECTBOX', 'ratingtype', 1, $ratings,
                                      'dragonrating', false ) );
    }
    else
    {
       $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
-                                     'TEXT', echo_rating( $player_row["Rating2"] ) ) );
+                                     'TEXT', echo_rating($player_row["Rating2"],2,0,0 ) ) );
    }
 
    $s = 0;
