@@ -98,7 +98,8 @@ require( "include/rating.php" );
        "Nightstart=$nightstart" .
        " WHERE ID=" . $player_row['ID'];
 
-   mysql_query( $query );
+   mysql_query( $query )
+      or error("mysql_query_failed");
 
    $msg = urlencode("Profile updated!");
 
