@@ -79,7 +79,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
        "Players.Name, Players.Handle, Players.ID as pid, " .
-       "(Black_ID=$uid)+1 AS Color ";
+       "(White_ID=$uid)+1 AS Color ";
 
    if( $finished )
       $query .= ", (Black_ID=$uid AND Score<0)*2 + (White_ID=$uid AND Score>0)*2-1 AS Win ";
