@@ -1744,7 +1744,7 @@ The reasons for this problem could be any of the following:
       array( 'Groups' => array( 'Site map' ) ),
 
       /* Found in these files: introduction.php */
-      'Welcome to Dragon Go Server, a <a href="licence.php">free</a>server for playing <a href="links.php">go</a>, where the games tends to \'drag on\'.' =>
+      'Welcome to Dragon Go Server, a <a href="licence.php">free</a> server for playing <a href="links.php">go</a>, where the games tends to \'drag on\'.' =>
       array( 'Groups' => array( 'Introduction' ) ),
 
       /* Found in these files: index.php */
