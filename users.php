@@ -66,7 +66,7 @@ require_once( "include/countries.php" );
 
    $utable->add_tablehead(1, T_('ID'), 'ID');
    $utable->add_tablehead(2, T_('Name'), 'Name');
-   $utable->add_tablehead(3, T_('Nick'), 'Handle');
+   $utable->add_tablehead(3, T_('Userid'), 'Handle');
    $utable->add_tablehead(16, T_('Country'), 'Country');
    $utable->add_tablehead(4, T_('Rank info'));
    $utable->add_tablehead(5, T_('Rating'), 'Rating2', true);

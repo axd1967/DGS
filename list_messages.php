@@ -124,7 +124,7 @@ require_once( "include/timezones.php" );
 
    if( $page )
       $page{0} = '?';
-   $mtable = new Table( 'list_messages.php' . $page, '', '', true );
+   $mtable = new Table( 'list_messages.php' . $page );
 
    $order = $mtable->current_order_string();
    $limit = $mtable->current_limit_string();

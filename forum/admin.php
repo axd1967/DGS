@@ -68,7 +68,7 @@ require_once( "forum_functions.php" );
      $SortOrder = 0;
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
 
-     if( mysql_num_rows($result) == 1 )
+     if( @mysql_num_rows($result) == 1 )
      {
         $row = mysql_fetch_array( $result );
         $SortOrder = $row['SortOrder'];
@@ -102,7 +102,7 @@ require_once( "forum_functions.php" );
 
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
 
-     if( mysql_num_rows($result) != 1 )
+     if( @mysql_num_rows($result) != 1 )
         error("admin_no_such_entry");
 
      $row = mysql_fetch_array( $result );
@@ -129,7 +129,7 @@ require_once( "forum_functions.php" );
   {
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
 
-     if( mysql_num_rows($result) != 1 )
+     if( @mysql_num_rows($result) != 1 )
         error("admin_no_such_entry");
 
      $row = mysql_fetch_array( $result );
@@ -143,7 +143,7 @@ require_once( "forum_functions.php" );
 
      // Delete ?
      if( empty($name) and empty($description) and
-         mysql_num_rows(mysql_query("SELECT ID FROM Posts " .
+         @mysql_num_rows(mysql_query("SELECT ID FROM Posts " .
                                     "WHERE Forum_ID=" . $row["ID"] . " LIMIT 1")) == 0 )
      {
         mysql_query("DELETE FROM Forums WHERE ID=$id LIMIT 1");
@@ -170,7 +170,7 @@ require_once( "forum_functions.php" );
   {
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
 
-     if( mysql_num_rows($result) != 1 )
+     if( @mysql_num_rows($result) != 1 )
         error("admin_no_such_entry");
 
      $row = mysql_fetch_array( $result );

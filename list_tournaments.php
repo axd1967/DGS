@@ -39,7 +39,7 @@ require_once( "include/tournament.php" );
 
    $result = mysql_query( "SELECT ID, State, Name FROM Tournament" );
 
-   $table = new Table( 'list_tournaments.php', '', 't_', true );
+   $table = new Table( 'list_tournaments.php', '', 't_' );
 
    $table->add_tablehead( 1, T_('ID'), 'ID', false, true );
    $table->add_tablehead( 2, T_('State'), 'State', false, true );

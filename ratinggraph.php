@@ -43,7 +43,7 @@ require_once( "include/form_functions.php" );
 
   $result = mysql_query("SELECT ID,Name,Handle FROM Players WHERE $where");
 
-  if( mysql_num_rows($result) != 1 )
+  if( @mysql_num_rows($result) != 1 )
      error("unknown user");
 
   $user_row = mysql_fetch_array($result);
@@ -99,7 +99,7 @@ require_once( "include/form_functions.php" );
 
   $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2");
 
-  if( mysql_num_rows($result) < 1 )
+  if( @mysql_num_rows($result) < 1 )
      echo T_("Sorry, too few rated games to draw a graph") . "\n";
   else
   {

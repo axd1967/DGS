@@ -45,7 +45,7 @@ require_once( "include/std_functions.php" );
 
    $result = mysql_query( "SELECT * FROM Players WHERE Handle='" . $userid . "'" );
 
-   if( mysql_num_rows($result) > 0 )
+   if( @mysql_num_rows($result) > 0 )
       error("userid_in_use");
 
 
