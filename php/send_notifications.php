@@ -39,9 +39,9 @@ while( $row = mysql_fetch_array( $result ) )
 }
 
 
-$result = mysql_query( "UPDATE Players SET Notify='DONE' " .
+$result = mysql_query( "UPDATE Players SET Notify='DONE', Lastaccess=Lastaccess " .
                        "WHERE Flags LIKE '%WANT_EMAIL%' AND Notify='NOW' " );
 
-$result = mysql_query( "UPDATE Players SET Notify='NOW' " .
+$result = mysql_query( "UPDATE Players SET Notify='NOW', Lastaccess=Lastaccess " .
                        "WHERE Flags LIKE '%WANT_EMAIL%' AND Notify='NEXT' " );
                        
