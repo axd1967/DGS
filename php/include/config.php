@@ -1,6 +1,6 @@
 <?php
 
-$HOSTNAME = "localhost";
+$HOSTBASE = "localhost";
 $BASEPATH = "/home/dragongoserver/public_html/";
 
 // From address for notification emails
