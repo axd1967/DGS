@@ -114,7 +114,7 @@ $table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches
       if( (1 << 5) & $column_set )
          echo '<td>' . $row['Open'] . '&nbsp;</td>';
       if( (1 << 6) & $column_set )
-         echo '<td>' . $row['games'] . '&nbsp;</td>';
+         echo '<td>' . $row['Games'] . '&nbsp;</td>';
       if( (1 << 7) & $column_set )
          echo '<td>' . $row['Running'] . '&nbsp;</td>';
       if( (1 << 8) & $column_set )
