@@ -128,6 +128,8 @@ $coord_borders, $woodcolor  )
    $border_start = 140 - ( $coord_borders & LEFT ? $coord_width : 0 );
    $border_imgs = ceil( ($Size * $stone_size - $border_start) / 150 ) - 1;
    $border_rem = $Size * $stone_size - $border_start - 150 * $border_imgs;
+   if( $border_imgs < 0 )
+      $border_rem = $Size * $stone_size;
 
    if( $may_play )
    {
@@ -196,8 +198,9 @@ $coord_borders, $woodcolor  )
          '_ul.gif" alt=" " height=10 width=10></td>' . "\n";
 
       echo "<td colspan=$Size width=" . $Size*$stone_size . '>';
-      echo '<img src="images/wood' . $woodcolor . '_u.gif" alt=" " height=10 width=' .
-         $border_start . '>';
+      if( $border_imgs >= 0 )
+         echo '<img src="images/wood' . $woodcolor . '_u.gif" alt=" " height=10 width=' .
+            $border_start . '>';
       for($i=0; $i<$border_imgs; $i++ )
          echo '<img src="images/wood' . $woodcolor . '_u.gif" alt=" " height=10 width=150>';
 
@@ -337,8 +340,9 @@ $coord_borders, $woodcolor  )
          '_dl.gif" alt=" " height=10 width=10></td>' . "\n";
 
       echo "<td colspan=$Size width=" . $Size*$stone_size . '>';
-      echo '<img src="images/wood' . $woodcolor . '_d.gif" alt=" " height=10 width=' .
-         $border_start . '>';
+      if( $border_imgs >= 0 )
+         echo '<img src="images/wood' . $woodcolor . '_d.gif" alt=" " height=10 width=' .
+            $border_start . '>';
       for($i=0; $i<$border_imgs; $i++ )
          echo '<img src="images/wood' . $woodcolor . '_d.gif" alt=" " height=10 width=150>';
 
