@@ -64,7 +64,7 @@ function replace_unnecessary_chars( $string )
         $translation_changes[ $row['CString'] ] = $row['Translation'];
 
       $new_translations = array();
-      $query = "INSERT INTO Translationlog (Handle,Language,CString,Translation) VALUES ";
+      $query = "INSERT INTO Translationlog (Handle,Language,CString,OldTranslation,Translation) VALUES ";
       $counter = 0;
       $found_anything = false;
       foreach( $translation_info as $string => $info )
@@ -85,7 +85,7 @@ function replace_unnecessary_chars( $string )
                   $found_anything = true;
                   $translation_changes[$string] = $translation;
                   $query .= "( '" . $player_row['Handle'] .
-                    "', '$translate_lang', '$string', '$translation' ),";
+                    "', '$translate_lang', '$string', '$current_translation', '$translation' ),";
                 }
             }
         }
