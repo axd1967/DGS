@@ -687,10 +687,10 @@ function message_list_table( &$mtable, $result, $show_rows
 
       if( $row['Sender'] === 'M' ) //Message to myself
       {
-         $row["other_name"] = T_('Myself');
+         $row["other_name"] = '('.T_('Myself').')';
       }
       else if( $row["other_ID"] <= 0 )
-         $row["other_name"] = T_('Server message');
+         $row["other_name"] = '['.T_('Server message').']';
       if( empty($row["other_name"]) )
          $row["other_name"] = '-';
 

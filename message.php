@@ -102,7 +102,7 @@ require_once( "include/form_functions.php" );
       }
       else if( $other_id <= 0 )
       {
-         $other_name = T_('Server message');
+         $other_name = '['.T_('Server message').']';
          $other_handle = '';
       }
       if( empty($other_name) )
