@@ -213,7 +213,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
           <td><B><A href="' . $HOSTBASE . '/forum/index.php">' . T_("Forums") . '</A></B></td>
 ';
 
-   if( !empty($player_row['Translator']) )
+   if( isset($player_row['Translate']) && !empty($player_row['Translator']) )
      echo '
           <td><B><A href="' . $HOSTBASE . '/translate.php">' . T_("Translate") . '</A></B></td>
 ';
@@ -667,6 +667,17 @@ function check_password( $password, $new_password, $given_password )
                    'Newpassword=NULL ' .
                    "WHERE Handle='$handle' LIMIT 1" );
     }
+}
+
+function write_to_file( $filename, $string_to_write )
+{
+  if( !($fp = fopen( $filename, 'w' )) )
+    error( "couldnt_open_file" );
+
+  fwrite( $fp, $string_to_write );
+  fclose( $fp );
+
+  chmod( $filename, 0666 );
 }
 
 function array_value_to_key_and_value( $array )
