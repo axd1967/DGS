@@ -63,6 +63,7 @@ if( !$is_down )
                          'black.Name as blackname, white.Name as whitename ' .
                          'FROM Games, Clock ,Players as white, Players as black ' .
                          'WHERE Status!="INVITED" AND Status!="FINISHED" ' .
+                         'AND Games.ClockUsed > 0 ' .
                          'AND ( Maintime>0 OR Byotime>0 ) ' .
                          'AND Games.ClockUsed=Clock.ID ' .
                          'AND white.ID=White_ID AND black.ID=Black_ID' );
