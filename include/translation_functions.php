@@ -83,11 +83,12 @@ function get_preferred_browser_language()
 {
    global $known_languages, $HTTP_ACCEPT_LANGUAGE, $HTTP_ACCEPT_CHARSET;
 
-   $accept_langcodes = explode( ", ", $HTTP_ACCEPT_LANGUAGE );
+   $accept_langcodes = explode( ',', $HTTP_ACCEPT_LANGUAGE );
 
    foreach( $accept_langcodes as $lang )
       {
-         list($lang) = explode(';', $lang);
+         list($lang) = explode(';', trim($lang));
+         $lang = trim($lang);
 
          if( !array_key_exists($lang, $known_languages))
             continue;
