@@ -32,73 +32,25 @@ require( "include/form_functions.php" );
   if( !$logged_in )
     error("not_logged_in");
 
-  if( $player_row['Adminlevel'] < 2 )
+  $adm = $player_row['admin_level'];
+
+  if( $adm < 1 )
     error("adminlevel_too_low");
 
   start_page(T_('Admin'), true, $logged_in, $player_row);
 
-  $extra_message = '';
-  switch( $_GET['what'] )
-    {
-    case 'addlanguage':
-      $extra_message =
-        sprintf( T_("Added language %s with code %s and characterencoding %s."),
-                 $_GET['langname'], $_GET['twoletter'], $_GET['charenc'] );
-      break;
+  echo "<table align=center><tr><td>\n";
+  echo "<center><h3><font color=$h3_color>" .
+    T_('Administration') . "</font></h3></center><p>\n";
 
-    case 'transladd':
-      $extra_message =
-        sprintf( T_("Added user %s as translator for language %s."),
-                 $_GET['user'], $_GET['lang'] );
-      break;
+  add_link_page_link('admin_translators.php', T_('Manage translators'),
+                     '', $adm & ADMIN_TRANSLATORS);
+  add_link_page_link('admin_faq.php', T_('Edit FAQ'), '', $adm & ADMIN_FAQ);
+  add_link_page_link('admin_forum.php', T_('Admin forums'), '', false);
+//  add_link_page_link('admin_requests.php', T_('Handle user requests'), '', false);
+  add_link_page_link('admin_admins.php', T_('Edit admin staff'), '', false);
 
-    case 'tadd_already':
-      $extra_message =
-        sprintf( T_("User %s is already translator for language %s."),
-                 $_GET['user'], $_GET['lang'] );
-      break;
-
-    case 'transllang':
-      $extra_message =
-        sprintf( T_("Changed translator privileges info for user %s."), $_GET['user'] );
-      break;
-
-    default:
-      $extra_message = '';
-      break;
-    }
-
-  echo "<center>\n";
-
-  if( !empty($extra_message) )
-    echo "<p><b><font color=\"green\">$extra_message</font></b><hr>";
-
-  $admin_form = new Form( 'adminform', 'do_admin.php', FORM_POST );
-
-  /* Add language for translation */
-  $admin_form->add_row( array( 'HEADER', T_('Add language for translation') ) );
-  $admin_form->add_row( array( 'DESCRIPTION', T_('Two-letter language code'),
-                               'TEXTINPUT', 'twoletter', 30, 10, '' ) );
-  $admin_form->add_row( array( 'DESCRIPTION', T_('Language name (i.e. English)'),
-                               'TEXTINPUT', 'langname', 30, 50, '' ) );
-  $admin_form->add_row( array( 'DESCRIPTION', T_("Character encoding (i.e. 'iso-8859-1')"),
-                               'TEXTINPUT', 'charenc', 30, 50, '' ) );
-  $admin_form->add_row( array( 'SUBMITBUTTON', 'addlanguage', T_('Add language') ) );
-
-  /* Set translator privileges for user */
-  $admin_form->add_row( array( 'HEADER', T_('Set translator privileges for user') ) );
-  $admin_form->add_row( array( 'DESCRIPTION', T_('User to set privileges for (use the userid)'),
-                               'TEXTINPUT', 'transluser', 30, 80, '' ) );
-  $admin_form->add_row( array( 'DESCRIPTION', T_('Select language to make user translator for that language.'),
-                               'SELECTBOX', 'transladdlang', 1,
-                               $known_languages->get_descriptions_translated(), array(), false,
-                               'SUBMITBUTTON', 'transladd', T_('Add language for translator') ) );
-  $admin_form->add_row( array( 'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
-                               'SELECTBOX', 'transllang[]', 7,
-                               $known_languages->get_descriptions_translated(), array(), true,
-                               'SUBMITBUTTON', 'translpriv', T_('Set user privileges') ) );
-
-  $admin_form->echo_string();
+  echo "<br>&nbsp;\n</td></tr></table>\n";
 
   end_page();
 }

@@ -41,12 +41,12 @@ require( "include/translation_info.php" );
   if( $addlanguage )
     {
       if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
-        error("admin_add_lang_missing_field");
+        error("translator_admin_add_lang_missing_field");
 
       $k_langs = $known_languages->get_descriptions();
       if( array_key_exists( $twoletter . "." .$charenc, $k_langs ) ||
           in_array( $langname, $k_langs ) )
-        error("admin_add_lang_exists");
+        error("translator_admin_add_lang_exists");
 
       $entry = new LangEntry( $twoletter, $langname, $charenc );
       $new_lang_php_code = sprintf( $translation_template_top,
@@ -130,5 +130,5 @@ require( "include/translation_info.php" );
       $extra_url_parts = "?what=transluser&user=$transluser";
     }
 
-  jump_to("admin.php$extra_url_parts");
+  jump_to("admin_translators.php$extra_url_parts");
 }
