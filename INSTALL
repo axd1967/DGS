@@ -14,7 +14,6 @@ Requirements:
 
 1) Download:
 
-
 Either from cvs:
 
 > cd /path/to/the/directory/where/you/want/dragon/to/be
@@ -24,6 +23,9 @@ Either from cvs:
 > rmdir DragonGoServer
 
 or download a cvs snapshot from <http://www.dragongoserver.net/snapshot>
+
+
+For both methods also download the images from <http://www.dragongoserver.net/snapshot>
 
 
 2) Make a mysql database and a mysql user to access the database:
@@ -64,5 +66,5 @@ Find which group your webserver is using (e.g. www-data).
 
 
 
-6) Complain to the support forum at dragon <http://www.dragongoserver.net> if it doesn't
+6) Complain in the support forum at dragon <http://www.dragongoserver.net> if it doesn't
    work.
