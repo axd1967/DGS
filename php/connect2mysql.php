@@ -20,14 +20,19 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 function connect2mysql()
 {
-    $dbcnx = @mysql_connect( "mysql.sourceforge.net", "dragongoserver", "password");
+    $HOST = "mysql";
+    $USER = "dragongoserver";
+    $PASSWORD = "";
+    $DB_NAME = "dragongoserver";
+
+    $dbcnx = @mysql_connect( $HOST, $USER, $PASSWORD);
     if (!$dbcnx) 
       {
           header("Location: error.php?err=mysql_connect_failed");
           exit;
       }
 
-    if (! @mysql_select_db("dragongoserver") ) 
+    if (! @mysql_select_db($DB_NAME) ) 
       {
           header("Location: error.php?err=mysql_select_db_failed");
         exit;

@@ -56,4 +56,4 @@ if( $handle != $userid or $sessioncode != $code )
 {
     set_cookies( $userid, $code );
 }
-header("Location: /~erik/go/status.php");
+header("Location: status.php");

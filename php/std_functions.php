@@ -103,9 +103,9 @@ function set_cookies($uid, $code)
 {
     global $session_duration;
 
-    setcookie ("handle", $uid, time()+$session_duration, "/~erik/go" );
+    setcookie ("handle", $uid, time()+$session_duration, "/" );
 
-    setcookie ("sessioncode", $code, time()+$session_duration, "/~erik/go" );
+    setcookie ("sessioncode", $code, time()+$session_duration, "/" );
 }
 
 
