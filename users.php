@@ -24,6 +24,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
+require_once( "include/countries.php" );
 
 {
    connect2mysql();
@@ -64,6 +65,7 @@ require_once( "include/form_functions.php" );
    $utable->add_tablehead(1, T_('ID'), 'ID');
    $utable->add_tablehead(2, T_('Name'), 'Name');
    $utable->add_tablehead(3, T_('Nick'), 'Handle');
+   $utable->add_tablehead(16, T_('Country'), 'Country');
    $utable->add_tablehead(4, T_('Rank info'));
    $utable->add_tablehead(5, T_('Rating'), 'Rating2', true);
    $utable->add_tablehead(6, T_('Open for matches?'));
@@ -99,6 +101,13 @@ require_once( "include/form_functions.php" );
       if( $utable->Is_Column_Displayed[3] )
          $urow_strings[3] = "<td><A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Handle']) . "</A></td>";
+      if( $utable->Is_Column_Displayed[16] )
+      {
+         $c = $row['Country'];
+         $urow_strings[16] = "<td>" .
+            (empty($c) ? '&nbsp;' :
+             "<img title=\"{$COUNTRIES[$c][0]}\" src=\"images/flags/$c.gif\">") . "</td>";
+      }
       if( $utable->Is_Column_Displayed[4] )
          $urow_strings[4] = '<td>' . make_html_safe($row['Rankinfo'],true) . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[5] )

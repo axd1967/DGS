@@ -50,6 +50,7 @@ CREATE TABLE Players (
   Translator varchar(160) NOT NULL default '',
   IP varchar(15) default NULL,
   Browser varchar(100) default NULL,
+  Country char(2) default NULL,
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
 ) TYPE=ISAM PACK_KEYS=1;

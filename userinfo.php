@@ -18,10 +18,11 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
- $TranslateGroups[] = "Users";
+$TranslateGroups[] = "Users";
 
 require( "include/std_functions.php" );
 require( "include/rating.php" );
+require( "include/countries.php" );
 
 {
    connect2mysql();
@@ -74,10 +75,13 @@ require( "include/rating.php" );
    $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
    $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
 
+   $cntr = $row['Country'];
    echo '
  <table border=3>
     <tr><td><b>' . T_('Name') . '</b></td><td>' . make_html_safe($row['Name']) . '</td></tr>
     <tr><td><b>' . T_('Userid') . '</b></td><td>' . make_html_safe($row['Handle']) . '</td></tr>
+    <tr><td><b>' . T_('Country') . '</b></td><td>' .  (empty($cntr) ? '&nbsp;' :
+             '<img title="' . $COUNTRIES[$cntr][0] . "\" src=\"images/flags/$cntr.gif\">") . '</td>
     <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . make_html_safe($row['Open'],true) . '</td></tr>
     <tr><td><b>' . T_('Acitvity') . '</b></td><td>' . $activity . '</td></tr>
     <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating($row['Rating2'],true,$row['ID']) . '</td></tr>
@@ -85,7 +89,7 @@ require( "include/rating.php" );
     <tr><td><b>' . T_('Registration date') . '</b></td><td>' . $row['Registerdate'] . '</td></tr>
     <tr><td><b>' . T_('Last access') . '</b></td><td>' . $lastaccess . '</td></tr>
     <tr><td><b>' . T_('Last moved') . '</b></td><td>' . $lastmove . '</td></tr>
-    <tr><td><b>' . T_('Vacation days left') . '</b></td><td>' . sprintf("%d",$player_row["VacationDays"]) . "</td></tr>\n";
+    <tr><td><b>' . T_('Vacation days left') . '</b></td><td>' . sprintf("%d", $row["VacationDays"]) . "</td></tr>\n";
 
    if( $row['OnVacation'] > 0 )
    {

@@ -58,6 +58,7 @@ require( "include/rating.php" );
 
    $query = "UPDATE Players SET " .
       "Name='" . trim($name) . "', " .
+      "Country='" . trim($country) . "', " .
       "Email='" . trim($email) . "', " .
       "Rank='" . trim($rank) . "', " .
       "Open='" . trim($open) . "', " .
