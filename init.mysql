@@ -420,7 +420,7 @@ CREATE TABLE TranslationTexts (
   ID int(11) NOT NULL auto_increment,
   Text blob,
   Ref_ID int(11) default NULL,
-  Translatable enum('Y','N','Done') NOT NULL default 'Y',
+  Translatable enum('Y','N','Done','Changed') NOT NULL default 'Y',
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 

@@ -91,6 +91,13 @@ require_once( "include/make_translationfiles.php" );
                                         'TEXTAREA', 'answer', 80, 20, $row["A"] ) );
      }
 
+     if( $row['Translatable'] === 'Done' )
+     {
+        $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
+                                        'CHECKBOX', 'changed', 'Y',
+                                        'Mark entry as changed for translators', false) );
+     }
+
      $faq_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
      $faq_edit_form->echo_string();
 
@@ -164,7 +171,10 @@ require_once( "include/make_translationfiles.php" );
      }
      else
      {
-        mysql_query("UPDATE TranslationTexts SET Text=\"$question\" " .
+        $changed = ( $row['Translatable'] === 'Done' and $_POST['changed'] === 'Y' ) ?
+           ', Translatable="Changed"' : '';
+
+        mysql_query("UPDATE TranslationTexts SET Text=\"$question\" $changed" .
                     "WHERE ID=" . $row['Question'] . " LIMIT 1");
 
         if( $row['Level'] == 2 )
@@ -312,7 +322,7 @@ require_once( "include/make_translationfiles.php" );
 
      $FAQ_group = get_faq_group();
 
-     if( $row['Translatable'] == 'Done' )
+     if( $row['Translatable'] == 'Done' or $row['Translatable'] == 'Changed' )
         error('admin_already_translated');
      else
      {
@@ -385,7 +395,7 @@ require_once( "include/make_translationfiles.php" );
            '" src="images/new.png"></a>';
 
         $transl = $row['Translatable'];
-        if( $transl !== 'Done' )
+        if( $transl !== 'Done' and $transl !== 'Changed' )
            echo "<td><a href=\"admin_faq.php?transl=t&id=" . $row['ID'] .
            '"><img border=0 title="' .
            ($transl == 'Y' ? T_('Make untranslatable') : T_('Make translatable')) .

@@ -137,7 +137,8 @@ When translating you should keep in mind the following things:
            "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
            "AND TranslationLanguages.Language='$translate_lang' " .
            "AND Translatable!='N' " .
-           "AND Translations.Text IS NULL ORDER BY Group_ID LIMIT 50";
+           "AND (Translations.Text IS NULL OR Translatable='Changed') " .
+           "ORDER BY Group_ID LIMIT 50";
      else
         $query .= "WHERE TranslationGroups.Groupname='$group' " .
            "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
