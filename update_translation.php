@@ -36,13 +36,15 @@ require( "include/translation_info.php" );
     {
       $translator_array = explode(',', $player_row['Translator']);
 
-      if( !in_array( $translate_lang, get_known_languages() ) )
+      if( !in_array( $translate_lang, $known_languages->get_lang_codes_with_charsets() ) )
         error('no_such_translation_language');
 
-      if( !in_array( $translate_lang, $translator_array ) )
-        error('not_correct_transl_lang');
+      list( $tlc, $tcs ) = explode( '.', $translate_lang, 2 );
+      if( !in_array( $translate_lang, $translator_array ) and
+          !in_array( $tlc, $translator_array ) )
+        error('not_correct_transl_language');
 
-      $k_langs = get_known_languages_with_full_names();
+      $k_langs = $known_languages->get_descriptions();
 
       $the_translator->change_language($translate_lang);
       $the_translator->set_return_empty();
@@ -93,7 +95,7 @@ require( "include/translation_info.php" );
       if( $apply_changes )
         {
           $lang_php_code = sprintf( $translation_template_top,
-                                    $translate_lang,
+                                    $the_translator->get_class_name(),
                                     $k_langs[$translate_lang],
                                     $NOW,
                                     gmdate( 'Y-m-d H:i:s T', $NOW ) );
@@ -114,7 +116,7 @@ require( "include/translation_info.php" );
           $lang_php_code = substr( $lang_php_code, 0, -3 );
           $lang_php_code .= $translation_template_bottom;
 
-          $filename = "translations/" . $translate_lang . ".php";
+          $filename = "translations/" . $the_translator->get_lang_name() . ".php";
 
           if( !copy( $filename, $filename . ".bak" ) )
             error( "couldnt_make_backup" );

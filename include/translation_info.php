@@ -48,9 +48,9 @@ $translation_template_top = $translation_template_copyright .
 '
 /* Automatically generated at %4$s */
 
-class %1$s_Language extends Language
+class %1$s extends Language
 {
-  function %1$s_Language()
+  function %1$s()
     {
       $this->full_name = \'%2$s\';
       $this->last_updated = %3$d;
@@ -1822,10 +1822,18 @@ The reasons for this problem could be any of the following:
 /* Define $update_script to be true if run from an update_script. */
 if( !$update_script )
   {
-    $_k_langs = get_known_languages_with_full_names();
-    foreach( $_k_langs as $_langname => $_lang )
+    $_k_langs = $known_languages->get_descriptions();
+    foreach( $_k_langs as $_langdesc )
       {
-        $translation_info[$_k_langs[$_langname]] = array( 'Groups' => array( 'Language' ) );
+        if( !array_key_exists( $_langdesc, $translation_info ) )
+          {
+            $translation_info[$_langdesc] = array( 'Groups' => array( 'Language' ) );
+          }
+        else
+          {
+            if( !array_key_exists( 'Language', $translation_info[$_langdesc]['Groups'] ) )
+              $translation_info[$_langdesc]['Groups'][] = 'Language';
+          }
       }
   }
 

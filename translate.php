@@ -94,14 +94,14 @@ When translating you should keep in mind the following things:
       echo "<CENTER>\n";
       $langchoice_form = new Form( 'selectlangform', 'translate.php', FORM_GET );
       $langchoice_form->add_row( array( 'HEADER', 'Select language to translate to' ) );
-      $languages = get_known_translated_languages();
+      $languages = $known_languages->get_descriptions_translated();
       $vals = array();
-      foreach( $translator_array as $lang )
+      foreach( $languages as $lang => $description )
         {
-          if( array_key_exists( $lang, $languages ) )
-            $vals[$lang] = $languages[$lang];
-          else
-            $vals[$lang] = $lang;
+          list( $lc, $cs ) = explode( '.', $lang, 2 );
+          if( in_array( $lang, $translator_array ) or
+              in_array( $lc, $translator_array ) )
+            $vals[$lang] = $description;
         }
 
       $langchoice_form->add_row( array( 'SELECTBOX', 'translate_lang', 1, $vals, '', false,
@@ -112,11 +112,13 @@ When translating you should keep in mind the following things:
     }
   else
     {
-      if( !in_array( $translate_lang, get_known_languages() ) )
+      if( !in_array( $translate_lang, $known_languages->get_lang_codes_with_charsets() ) )
         error('no_such_translation_language');
 
-      if( !in_array( $translate_lang, $translator_array ) )
-        error('not_correct_transl_lang');
+      list( $tlc, $tcs ) = explode( '.', $translate_lang, 2 );
+      if( !in_array( $translate_lang, $translator_array ) and
+          !in_array( $tlc, $translator_array ) )
+        error('not_correct_transl_language');
 
       if( !$group )
         $group = 'Common';

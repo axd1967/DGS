@@ -43,27 +43,33 @@ require( "include/translation_info.php" );
       if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
         error("admin_add_lang_missing_field");
 
-      $k_langs = get_known_languages_with_full_names();
-      if( array_key_exists( $twoletter, $k_langs ) || in_array( $langname, $k_langs ) )
+      $k_langs = $known_languages->get_descriptions();
+      if( array_key_exists( $twoletter . "." .$charenc, $k_langs ) ||
+          in_array( $langname, $k_langs ) )
         error("admin_add_lang_exists");
 
+      $entry = new LangEntry( $twoletter, $langname, $charenc );
       $new_lang_php_code = sprintf( $translation_template_top,
-                                    $twoletter, $langname,
+                                    Translator::create_class_name( $entry ),
+                                    $langname,
                                     $NOW, gmdate( 'Y-m-d H:i:s T', $NOW ) );
       $new_lang_php_code =
         substr( $new_lang_php_code, 0, -1 ) .
         $translation_template_bottom;
 
-      write_to_file( "translations/$twoletter.php", $new_lang_php_code );
+      $lang_code_name = Translator::create_lang_name( $entry );
+      write_to_file( "translations/$lang_code_name.php", $new_lang_php_code );
 
       $new_all_languages_php_code = $translation_template_copyright . "\n";
-      foreach( $k_langs as $lang => $desc )
-        $new_all_languages_php_code .=
-        "add_to_known_languages( \"$lang\", " .
-        "\"$desc\", \"".$CHARACTER_ENCODINGS[$lang]."\" );\n";
+      foreach( $known_languages->languages as $lang )
+        {
+          $new_all_languages_php_code .=
+            "\$known_languages->add( \"".$lang->lang_code."\", " .
+            "\"".$lang->description."\", \"".$lang->charset."\" );\n";
+        }
 
       $new_all_languages_php_code .=
-        "add_to_known_languages( \"$twoletter\", \"$langname\", \"$charenc\" );\n";
+        "\$known_languages->add( \"$twoletter\", \"$langname\", \"$charenc\" );\n";
       $new_all_languages_php_code .= "\n?>\n";
 
       write_to_file( "translations/all_languages.php", $new_all_languages_php_code );

@@ -21,9 +21,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 /* The code in this file is written by Ragnar Ouchterlony */
 
-$KNOWN_LANGUAGES = array();
-$CHARACTER_ENCODINGS = array();
-
 class Language
 {
   var $full_name;
@@ -49,37 +46,139 @@ class Language
     }
 }
 
-function add_to_known_languages( $lang, $lang_full_name, $charenc )
+class LangEntry
 {
-  global $KNOWN_LANGUAGES, $CHARACTER_ENCODINGS;
+  var $lang_code;
+  var $description;
+  var $charset;
 
-  $KNOWN_LANGUAGES[ $lang ] = $lang_full_name;
-  $CHARACTER_ENCODINGS[ $lang ] = $charenc;
+  function LangEntry( $lc, $desc, $cs )
+    {
+      $this->lang_code = $lc;
+      $this->description = $desc;
+      $this->charset = $cs;
+    }
 }
 
-function get_known_languages()
+class KnownLanguages
 {
-  global $KNOWN_LANGUAGES;
+  var $languages;
 
-  return array_keys($KNOWN_LANGUAGES);
+  function KnownLanguages()
+    {
+      $this->languages = array();
+    }
+
+  function add( $lang, $desc, $charset )
+    {
+      $this->languages[] = new LangEntry( $lang, $desc, $charset );
+    }
+
+  /* Find a language, return null if not found.
+   * Second argument interpreted as charset if given.
+   */
+  function get_lang( $lang )
+    {
+      if( func_num_args() >= 2 )
+        $charset = func_get_arg(1);
+      else
+        $charset = null;
+
+      $result = array();
+      foreach( $this->languages as $entry )
+        {
+          if( $entry->lang_code == $lang and
+              (is_null($charset) or $entry->charset == $charset ) )
+            {
+              if( is_null($charset) )
+                $result[] = $entry;
+              else
+                return $entry;
+            }
+        }
+
+      if( !is_null($charset) )
+        return null;
+      return $result;
+    }
+
+  function get_lang_code_charset_string( $lang, $charset )
+    {
+      $language = get_lang( $lang, $charset );
+      $result = '';
+      if( !is_null( $language ) )
+        $result = $language->lang_code . "." . $language->charset;
+      return $result;
+    }
+
+  function get_lang_codes()
+    {
+      $result = array();
+      foreach( $this->languages as $entry )
+        $result[] = $entry->lang_code;
+      return array_unique($result);
+    }
+
+  function get_lang_codes_with_charsets()
+    {
+      $result = array();
+      foreach( $this->languages as $entry )
+        $result[] = $entry->lang_code . "." . $entry->charset;
+      return $result;
+    }
+
+  function get_descriptions()
+    {
+      $result = array();
+      foreach( $this->languages as $entry )
+        $result[ $entry->lang_code . "." .  $entry->charset ] = $entry->description;
+      return $result;
+    }
+
+  function get_descriptions_translated()
+    {
+      $result = array();
+      foreach( $this->languages as $entry )
+        {
+          $result[ $entry->lang_code . "." . $entry->charset ] = T_($entry->description);
+        }
+      return $result;
+    }
 }
 
-function get_known_languages_with_full_names()
-{
-  global $KNOWN_LANGUAGES;
+$known_languages = new KnownLanguages;
 
-  return $KNOWN_LANGUAGES;
-}
+// function add_to_known_languages( $lang, $lang_full_name, $charenc )
+// {
+//   global $KNOWN_LANGUAGES, $CHARACTER_ENCODINGS;
 
-function get_known_translated_languages()
-{
-  global $KNOWN_LANGUAGES;
-  $t_langs = array();
-  foreach( $KNOWN_LANGUAGES as $lang => $fullname )
-    $t_langs[$lang] = T_($fullname);
+//   $KNOWN_LANGUAGES[ $lang ] = $lang_full_name;
+//   $CHARACTER_ENCODINGS[ $lang ] = $charenc;
+// }
 
-  return $t_langs;
-}
+// function get_known_languages()
+// {
+//   global $KNOWN_LANGUAGES;
+
+//   return array_keys($KNOWN_LANGUAGES);
+// }
+
+// function get_known_languages_with_full_names()
+// {
+//   global $KNOWN_LANGUAGES;
+
+//   return $KNOWN_LANGUAGES;
+// }
+
+// function get_known_translated_languages()
+// {
+//   global $KNOWN_LANGUAGES;
+//   $t_langs = array();
+//   foreach( $KNOWN_LANGUAGES as $lang => $fullname )
+//     $t_langs[$lang] = T_($fullname);
+
+//   return $t_langs;
+// }
 
 require( "translations/all_languages.php" );
 ?>

@@ -91,11 +91,11 @@ require( "include/form_functions.php" );
                                'TEXTINPUT', 'transluser', 30, 80, '' ) );
   $admin_form->add_row( array( 'DESCRIPTION', T_('Select language to make user translator for that language.'),
                                'SELECTBOX', 'transladdlang', 1,
-                               get_known_languages_with_full_names(), array(), false,
+                               $known_languages->get_descriptions_translated(), array(), false,
                                'SUBMITBUTTON', 'transladd', T_('Add language for translator') ) );
   $admin_form->add_row( array( 'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
                                'SELECTBOX', 'transllang[]', 7,
-                               get_known_languages_with_full_names(), array(), true,
+                               $known_languages->get_descriptions_translated(), array(), true,
                                'SUBMITBUTTON', 'translpriv', T_('Set user privileges') ) );
 
   $admin_form->echo_string();

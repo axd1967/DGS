@@ -172,10 +172,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    ob_start("ob_gzhandler");
 
-   $charenc = ( strcmp($the_translator->current_language,'C') == 0 ?
-                'ISO-8859-1' :
-                $CHARACTER_ENCODINGS[ $the_translator->current_language ] );
-   header ('Content-Type: text/html; charset=$charenc'); // Character-encoding
+   $charenc = $the_translator->current_language->charset;
+   header ('Content-Type: text/html; charset='.$charenc); // Character-encoding
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
@@ -813,7 +811,7 @@ function make_url($page, $sep)
 function is_logged_in($hdl, $scode, &$row)
 {
    global $time, $admin_level, $PHP_SELF, $HOSTNAME, $HTTP_HOST,
-      $ActivityHalvingTime, $ActivityForHit, $NOW, $the_translator;
+      $ActivityHalvingTime, $ActivityForHit, $NOW, $the_translator, $known_languages;
 
    $time = getmicrotime();
    $admin_level = 0;

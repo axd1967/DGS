@@ -29,18 +29,34 @@ class Translator
   var $loaded_languages;
   var $return_empty;
 
-  function Translator( $lang = '' )
+  function Translator( $lang = null )
     {
       $this->loaded_languages = array();
       $this->return_empty = false;
       $this->change_language( $lang );
     }
 
-  function change_language( $lang = '' )
+  function change_language( $lang = null )
     {
-      if( !empty( $lang ) )
+      global $known_languages;
+
+      if( !is_null( $lang ) )
         {
-          $this->current_language = $lang;
+          if( is_object( $lang ) )
+            $this->current_language = $lang;
+          else if( is_string( $lang ) )
+            {
+              list($lang_c,$charset) = explode( '.', $lang, 2 );
+              if( is_null( $charset ) )
+                {
+                  $langs = $known_languages->get_lang( $lang_c );
+                  $this->current_language = $langs[0];
+                }
+              else
+                {
+                  $this->current_language = $known_languages->get_lang( $lang_c, $charset );
+                }
+            }
         }
       else
         {
@@ -53,28 +69,50 @@ class Translator
       $this->return_empty = $val;
     }
 
+  function create_lang_name( $language )
+    {
+      return $language->lang_code . "_" . str_replace('-','_',$language->charset);
+    }
+
+  function create_class_name( $language )
+    {
+      return Translator::create_lang_name( $language ) . "_Language";
+    }
+
+  function get_lang_name()
+    {
+      return $this->create_lang_name( $this->current_language );
+    }
+
+  function get_class_name()
+    {
+      return $this->create_class_name( $this->current_language );
+    }
+
   function &get_language()
     {
       global $HOSTBASE;
-      if( strcmp( $this->current_language, 'C' ) == 0 )
+      if( strcmp( $this->current_language->lang_code, 'C' ) == 0 )
         {
           return false;
         }
 
-      if( !array_key_exists( $this->current_language, $this->loaded_languages  ) )
+      $lang_name = $this->create_lang_name($this->current_language);
+      if( !array_key_exists( $lang_name, $this->loaded_languages  ) )
         {
-          $file = "translations/" . $this->current_language . ".php";
+          $lang_class_name = $this->create_class_name($this->current_language);
+
+          $file = "translations/" . $lang_name . ".php";
 
           if( @is_readable( $file ) )
              include_once $file;
           else if( @is_readable( "../$file" ) )
              include_once "../$file";
 
-          $lang_class_name = $this->current_language . "_Language";
-          $this->loaded_languages[ $this->current_language ] = new $lang_class_name;
+          $this->loaded_languages[ $lang_name ] = new $lang_class_name;
         }
 
-      return $this->loaded_languages[ $this->current_language ];
+      return $this->loaded_languages[ $lang_name ];
     }
 
   function translate( $string )
@@ -109,12 +147,12 @@ class Translator
 
   function get_preferred_browser_language()
     {
-      global $HTTP_ACCEPT_LANGUAGE;
+      global $known_languages, $HTTP_ACCEPT_LANGUAGE, $HTTP_ACCEPT_CHARSET;
 
-      $known_languages = get_known_languages();
+      $known_list = $known_languages->get_lang_codes();
 
       $regexp_languages = "";
-      foreach( $known_languages as $lang )
+      foreach( $known_list as $lang )
         {
           if( empty( $regexp_languages ) )
             $regexp_languages = "($lang";
@@ -123,16 +161,53 @@ class Translator
         }
       $regexp_languages .= ")";
 
+      $found_lang = 'C';
       if( isset( $HTTP_ACCEPT_LANGUAGE ) )
         {
           $languages = explode( ", ", $HTTP_ACCEPT_LANGUAGE );
 
           foreach( $languages as $http_language )
-            if( ereg( $regexp_languages, $http_language, $found))
-              return $found[1];
+            {
+              if( ereg( $regexp_languages, $http_language, $found) )
+                {
+                  $found_lang = $found[1];
+                  break;
+                }
+            }
         }
 
-      return 'C';
+      if( strcmp( $found_lang, 'C' ) != 0 and isset( $HTTP_ACCEPT_CHARSET ) )
+        {
+          $cs_list = $known_languages->get_lang( $found_lang );
+
+          if( empty( $cs_list ) )
+            {
+              $found_lang = 'C';
+            }
+
+          $regexp_charsets = "";
+          foreach( $cs_list as $entry )
+            {
+              if( empty( $regexp_charsets ) )
+                $regexp_charsets = "(" . $entry->charset;
+              else
+                $regexp_charsets .= "|" . $entry->$charset;
+            }
+          $regexp_charsets .= ")";
+
+          $found_cs = $cs_list[0]->charset;
+          $charsets = explode( ", ", $HTTP_ACCEPT_CHARSET );
+          foreach( $charsets as $http_charset )
+            if( ereg( $regexp_charsets, $http_charset, $found ) )
+              {
+                $found_cs = $found[1];
+                break;
+              }
+        }
+
+      if( strcmp( $found_lang, 'C' ) == 0 )
+        return new LangEntry( 'C', 'No translation', 'iso-8859-1' );
+      return $known_languages->get_lang($found_lang, $found_cs);
     }
 
 }

@@ -68,9 +68,11 @@ require( "include/rating.php" );
        "SendEmail='$sendemail', ";
 
    if( strcmp($language, $player_row['Lang']) != 0 and
-       in_array($language, get_known_languages(), true) )
+       (in_array($language, $known_languages->get_lang_codes_with_charsets(), true) or
+        in_array($language, $known_languages->get_lang_codes(), true)) )
      {
        $query .= "Lang='$language', ";
+       $the_translator->change_language( $language );
      }
 
    if( $nightstart != $player_row["Nightstart"] ||
