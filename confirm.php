@@ -47,13 +47,14 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
 {
-   if( $nextback )
+   if( @$_GET['nextback'] )
       jump_to("game.php?gid=$gid");
 
    connect2mysql();
 
-   if( !$gid )
+   if( !@$_GET['gid'] )
       error("no_game_nr");
+   $gid = $_GET['gid'] ;
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
@@ -76,7 +77,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    extract(mysql_fetch_array($result));
 
-   if( $skip )
+   if( @$_GET['skip'] )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
@@ -109,6 +110,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    else
       error("database_corrupted");
 
+
+   $action = @$_GET['action'];
 
    $next_to_move = WHITE+BLACK-$to_move;
 
@@ -177,6 +180,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    {
       case 'move':
       {
+         $coord = @$_GET['coord'];
+         $prisoner_string = @$_GET['prisoner_string'];
+
          check_move();
   //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
   //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
@@ -193,7 +199,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          }
 
          if( strlen($new_prisoner_string) != $nr_prisoners*2 or
-             (isset($prisoner_string) and $new_prisoner_string != $prisoner_string) )
+             ( $prisoner_string and $new_prisoner_string != $prisoner_string) )
             error("move_problem");
 
          $query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
@@ -265,6 +271,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'PLAY' or $Moves != 1 )
             error("invalid_action");
 
+         $stonestring = @$_GET['stonestring'];
          check_handicap(); //adjust $handi, $stonestring and others
 
          if( strlen( $stonestring ) != 2 * $Handicap + 1 )
@@ -357,6 +364,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
             error("invalid_action");
 
+         $stonestring = @$_GET['stonestring'];
          check_remove();
   //ajusted globals by check_remove(): $array, $score, $stonestring;
 
@@ -377,7 +385,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             $query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
          }
 
-         $query .= "($gid, $Moves, $to_move, -2, -2, $hours) ";
+         $query .= "($gid, $Moves, $to_move, -2, 0, $hours) ";
 
 
          if( $message )
@@ -538,11 +546,11 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 // Jump somewhere
 
-   if( $nextstatus )
+   if( @$_GET['nextstatus'] )
    {
       jump_to("status.php");
    }
-   else if( $nextgame )
+   else if( @$_GET['nextgame'] )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
