@@ -219,6 +219,7 @@ function draw_message_box()
 {
    global $action, $gid, $stonestring, $coord, $prisoner_string, $move;
 
+   $tabindex=1;
    echo '
   <FORM name="confirmform" action="confirm.php" method="POST">
     <center>
@@ -226,7 +227,7 @@ function draw_message_box()
         <TR>
           <TD align=right>' . T_('Message') . ':</TD>
           <TD align=left>
-            <textarea name="message" tabindex="1" cols="50" rows="8" wrap="virtual"></textarea></TD>
+            <textarea name="message" tabindex="'.($tabindex++).'" cols="50" rows="8" wrap="virtual"></textarea></TD>
         </TR>
         <input type="hidden" name="gid" value="' . $gid . '">
         <input type="hidden" name="move" value="' . $move .'">
@@ -246,11 +247,11 @@ function draw_message_box()
    echo '
       </TABLE>
 <TABLE align=center cellpadding=5>
-<TR><TD><input type=submit name="nextgame" value="' .
+<TR><TD><input type=submit name="nextgame" tabindex="'.($tabindex++).'" value="' .
       T_('Submit and go to next game') . '"></TD>
-    <TD><input type=submit name="nextstatus" value="' .
+    <TD><input type=submit name="nextstatus" tabindex="'.($tabindex++).'" value="' .
       T_("Submit and go to status") . '"></TD></TR>
-<TR><TD align=right colspan=2><input type=submit name="nextback" value="' .
+<TR><TD align=right colspan=2><input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' .
       T_("Go back") . '"></TD></TR>
       </TABLE>
     </CENTER>
