@@ -64,10 +64,10 @@ require_once( "include/make_translationfiles.php" );
      echo "<center>\n";
 
      $result = mysql_query(
-        "SELECT FAQ.*, Answer.Text AS A, Question.Text AS Q, Question.Translatable ".
-        "FROM FAQ, TranslationTexts AS Answer " .
-        "LEFT JOIN TranslationTexts AS Question ON Question.ID=FAQ.Question " .
-        "WHERE FAQ.ID='$id' AND Answer.ID=FAQ.Answer" );
+        "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A, Question.Translatable ".
+        "FROM FAQ, TranslationTexts AS Question " .
+        "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
+        "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question" );
 
      if( mysql_num_rows($result) != 1 )
         error("admin_no_such_entry");
