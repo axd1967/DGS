@@ -47,9 +47,10 @@ disable_cache();
 
    if( isset($_GET['foldermove']) and isset($new_folder) and isset($folders[$new_folder]) )
    {
-      mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='$newfolder' " .
+      mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='$new_folder' " .
                    "WHERE uid='$my_id' AND mid='$message_id' " .
-                   "AND !( Type='INVITATION' and Replied='N' ) LIMIT 1" );
+                   ($type == 'INVITATION' ? "AND Replied='Y' ": '') . "LIMIT 1" )
+         or die(mysql_error());
 
       jump_to("message.php?mid=$message_id");
    }
