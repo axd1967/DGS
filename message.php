@@ -39,7 +39,7 @@ $mode = $_GET['mode'];
       error("not_logged_in");
 
    $my_id = $player_row["ID"];
-   $can_reply = true;
+
    if( !$mode )
    {
       $mode = ($mid > 0 ? 'ShowMessage' : 'NewMessage');
@@ -106,8 +106,7 @@ $mode = $_GET['mode'];
          {
             // Remove NEW flag
 
-            $Folder_nr = ( ($Type == 'INVITATION' or $Type == 'DISPUTED') ?
-                           FOLDER_REPLY : FOLDER_MAIN );
+            $Folder_nr = ( $Type == 'INVITATION' ? FOLDER_REPLY : FOLDER_MAIN );
 
             mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
                          "WHERE mid=$mid AND uid=$my_id LIMIT 1" )
@@ -122,21 +121,25 @@ $mode = $_GET['mode'];
          {
             if( $Status=='INVITED' and ($Replied === 'N') )
             {
-               $mode = 'ShowInvite';
+               if( $to_me )
+                  $mode = 'ShowInvite';
+               else
+                  $mode = 'ShowMyInvite';
             }
             else if( is_null($Status) )
             {
                $mode = 'AlreadyDeclined';
-            }
-            else if( $Status == 'DISPUTED' )
-            {
-               $mode = 'InviteDisputed';
             }
             else
             {
                $mode = 'AlreadyAccepted';
             }
          }
+         else if( $Type == 'DISPUTED' )
+         {
+            $mode = 'InviteDisputed';
+         }
+
       }
 
    }
@@ -167,7 +170,7 @@ $mode = $_GET['mode'];
          else if( $mode == 'AlreadyDeclined' )
             echo '<font color=green>' .
                T_('This invitation has been declined or the game deleted') . '</font>';
-         else if( $mode == 'InviteDisputed)' )
+         else if( $mode == 'InviteDisputed' )
             echo '<font color=green>' .
                sprintf(T_('The settings for this game invitation has been %sdisputed%s'),
                        "<a href=\"message.php?mid=$Game_mid\">", '</a>' ) . '</font>';

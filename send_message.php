@@ -52,7 +52,9 @@ disable_cache();
                    ($type == 'INVITATION' ? "AND Replied='Y' ": '') . "LIMIT 1" )
          or die(mysql_error());
 
-      jump_to("message.php?mid=$message_id");
+      $msg = urlencode(T_('Message moved!'));
+
+      jump_to("status.php?msg=$msg");
    }
 
 
@@ -361,7 +363,7 @@ disable_cache();
    {
       $query = "UPDATE MessageCorrespondents SET Replied='Y'";
 
-      if( $accepttype or $declinetype or
+      if( $accepttype or $declinetype or ($disputegid > 0) or
           (isset($new_folder) and isset($folders[$new_folder])) )
       {
          if( !isset($new_folder) or !isset($folders[$new_folder]) )

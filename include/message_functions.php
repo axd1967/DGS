@@ -246,7 +246,7 @@ function message_info_table($mid, $date, $to_me,
 
       $fld = array('' => '');
       foreach( $folders as $key => $val )
-         if( $key != $folder_nr and ($to_me xor $key == FOLDER_SENT) and $key != FOLDER_NEW )
+         if( $key != $folder_nr and (!$to_me or $key != FOLDER_SENT) and $key != FOLDER_NEW )
             $fld[$key] = $val[0];
 
       echo $form->print_insert_select_box('folder', '1', $fld, '', '');
