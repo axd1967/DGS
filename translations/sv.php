@@ -19,151 +19,796 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-04-14 13:54:22 GMT */
+/* Automatically generated at 2002-04-16 13:20:19 GMT */
 
-add_to_known_languages( "sv", "Svenska", 1018792462 );
+add_to_known_languages( "sv", "Svenska", 1018963219 );
 
 class sv_Language extends Language
 {
   function sv_Language()
     {
       $this->translated_strings = array(
-'Edit password' =>
-'Ändra lösenord',
-
-'Old password' =>
-'Gammalt lösenord',
-
-'New password' =>
-'Nytt lösenord',
-
-'Confirm password' =>
-'Bekräfta lösenordet',
-
-'Change password' =>
-'Byt lösenord',
-
-'Edit profile' =>
-'Ändra din profil',
-
-'Personal settings' =>
-'Personliga inställningar',
-
-'Userid' =>
-'Användaridentitet',
-
-'Full name' =>
-'Hela namnet',
-
-'Email' =>
-'Epost',
-
-'Open for matches' =>
+'%s per %s stones' =>
 '',
 
-'Rank info' =>
+'%s per move and %s extra periods' =>
 '',
 
-'Rating' =>
+'A Brief History' =>
 '',
 
-'Off' =>
+'Accept' =>
 '',
 
-'Notify only' =>
+'A collaboration web site. Read and contribute!' =>
 '',
 
-'Moves and messages' =>
+'Activity' =>
 '',
 
-'Full board and messages' =>
+'Add language' =>
+'Lägg till språk',
+
+'Add language for translation' =>
 '',
 
-'Email notifications' =>
+'Admin' =>
+'Admin',
+
+'A large server for realtime play' =>
 '',
 
-'Language' =>
-'Språk',
-
-'Timezone' =>
-'Tidszon',
-
-'Nighttime' =>
+'Also turn based. Has several other games.' =>
 '',
 
-'Board graphics' =>
-'Brädgrafik',
-
-'Stone size' =>
+'A manga about go. Recommended!' =>
 '',
 
-'Wood color' =>
+'A more complete list of servers' =>
 '',
 
-'Coordinate sides' =>
-'',
-
-'Game id button' =>
-'',
-
-'Change profile' =>
-'Ändra profilen',
-
-'Sorry, you may not pass before all handicap stones are placed.' =>
-'',
-
-'Sorry, the game has already finished.' =>
-'',
-
-'Sorry, the game hasn\'t started yet.' =>
-'',
-
-'Error, guest may not recieve messages' =>
-'',
-
-'Move outside board?' =>
-'',
-
-'This type action is either unknown or can\'t be use in this state of the game.' =>
-'',
-
-'Sorry, you can\'t invite yourself.' =>
-'',
-
-'Sorry, can\'t find the game you are invited to. Already declined?' =>
-'',
-
-'Sorry, you may not retake a stone which has just captured a stone, since it would repeat a previous board position. Look for \'ko\' in the rules.' =>
-'',
-
-'The komi is out of range, please choose a move reasonable value.' =>
+'and' =>
 '',
 
 'An error occurred for this. Usually it works if you try again, otherwise please contact the support.' =>
 '',
 
+'A new password has already been sent to this user, please use that password instead of sending another one.' =>
+'',
+
+'An excellent, but unfortunately no longer updated site.' =>
+'',
+
+'An Interactive Introduction' =>
+'',
+
+'An Introduction to Shape' =>
+'',
+
+'An open sourced go server' =>
+'',
+
+'Another go site with lots of useful info.' =>
+'',
+
+'Biographical info' =>
+'',
+
+'Bio updated!' =>
+'',
+
+'black' =>
+'',
+
+'Black' =>
+'',
+
+'Board graphics' =>
+'Brädgrafik',
+
+'Browse Dragon source code' =>
+'',
+
+'Byoyomi' =>
+'',
+
+'Canadian' =>
+'',
+
+'Canadian byo-yomi' =>
+'',
+
+'Canadian byoyomi' =>
+'',
+
+'Change bio' =>
+'',
+
+'Change password' =>
+'Byt lösenord',
+
+'Change profile' =>
+'Ändra profilen',
+
+'City' =>
+'',
+
+'Clock runs on weekends' =>
+'',
+
+'Club' =>
+'',
+
+'Color' =>
+'',
+
+'Colors' =>
+'',
+
+'Common Japanese Go Terms' =>
+'',
+
+'Confirm password' =>
+'Bekräfta lösenordet',
+
 'Connection to database failed. Please wait a few minutes and test again.' =>
 '',
 
-'Delete game failed. This is problably not a problem.' =>
+'Conventional handicap (komi 0.5 if not even)' =>
 '',
 
-'Sorry, the additon of the message to the database seems to have failed.' =>
+'Coordinate sides' =>
 '',
 
-'Sorry, the additon of the game to the database seems to have failed.' =>
+'Couldn\'t extrapolate value in function interpolate' =>
 '',
 
-'The insertion of the move into the database seems to have failed. This may or may not be a problem, please return to the game to see if the move has been registered.' =>
+'Couldn\'t select the database. Please wait a few minutes and try again. ' =>
 '',
 
-'The insertion of your data into the database seems to have failed. If you can\'t log in, please try once more and, if this fails, contact the support.' =>
+'Country' =>
+'',
+
+'daily snapshot of the cvs' =>
+'',
+
+'dan' =>
 '',
 
 'Database query failed. Please wait a few minutes and try again. ' =>
 '',
 
-'Couldn\'t select the database. Please wait a few minutes and try again. ' =>
+'Date' =>
+'',
+
+'day' =>
+'',
+
+'days' =>
+'',
+
+'Decline' =>
+'',
+
+'Del' =>
+'',
+
+'Delete all' =>
+'Ta bort alla',
+
+'Delete game' =>
+'',
+
+'Delete game failed. This is problably not a problem.' =>
+'',
+
+'Deleting game' =>
+'',
+
+'Disputing settings' =>
+'',
+
+'Docs' =>
+'Dokumentation',
+
+'Documentation' =>
+'',
+
+'Done' =>
+'',
+
+'Double game' =>
+'',
+
+'Download dragon sources' =>
+'',
+
+'Download sgf' =>
+'',
+
+'Dragon project page at sourceforge' =>
+'',
+
+'Edit bio' =>
+'',
+
+'Edit biopgraphical info' =>
+'',
+
+'Edit password' =>
+'Ändra lösenord',
+
+'Edit profile' =>
+'Ändra din profil',
+
+'Email' =>
+'Epost',
+
+'Email notifications' =>
+'',
+
+'End date' =>
+'',
+
+'Error, guest may not recieve messages' =>
+'',
+
+'European shop' =>
+'',
+
+'Even game with nigiri' =>
+'',
+
+'extra periods.' =>
+'',
+
+'extra per move' =>
+'',
+
+'extra per move.' =>
+'',
+
+'FAQ' =>
+'',
+
+'Finished' =>
+'',
+
+'Finished games for %s' =>
+'',
+
+'Fischer time' =>
+'',
+
+'Flags' =>
+'',
+
+'for' =>
+'',
+
+'Forgot password?' =>
+'Glömt lösenordet?',
+
+'Forum' =>
+'',
+
+'Forums' =>
+'Forum',
+
+'For you people with short attention spans.' =>
+'',
+
+'Frequently Asked Questions' =>
+'',
+
+'Frequently asked questions about go for the rec.games.go newsgroup' =>
+'',
+
+'From' =>
+'',
+
+'Full board and messages' =>
+'',
+
+'Full name' =>
+'Hela namnet',
+
+'Game' =>
+'',
+
+'Game ID' =>
+'',
+
+'Game id button' =>
+'',
+
+'Game preferences' =>
+'',
+
+'Games' =>
+'',
+
+'General Info' =>
+'',
+
+'General Public Licence' =>
+'',
+
+'Go back' =>
+'',
+
+'Go books, equipment and software' =>
+'',
+
+'Go FAQ' =>
+'',
+
+'Go News' =>
+'',
+
+'Go Problems' =>
+'',
+
+'Go Teaching Ladder' =>
+'',
+
+'Handicap' =>
+'',
+
+'Het Paard' =>
+'',
+
+'Hide deleted' =>
+'Göm borttagna',
+
+'Hikaru no Go' =>
+'',
+
+'History' =>
+'',
+
+'Hobbies' =>
+'',
+
+'Home' =>
+'Hemma',
+
+'Homepage' =>
+'',
+
+'hour' =>
+'',
+
+'hours' =>
+'',
+
+'How to Teach Go' =>
+'',
+
+'ICQ-number' =>
+'',
+
+'ID' =>
+'',
+
+'If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.' =>
+'',
+
+'if you want your own dragon' =>
+'',
+
+'IGS' =>
+'',
+
+'In case you\'re an aspiring know-it-all.' =>
+'',
+
+'Installation instructions' =>
+'',
+
+'Introduction' =>
+'',
+
+'Introduction to Dragon' =>
+'',
+
+'Invitation message' =>
+'',
+
+'Invite' =>
+'Bjud in',
+
+'Invite this user' =>
+'',
+
+'It\'s your turn' =>
+'',
+
+'Jan van der Steens Pages' =>
+'',
+
+'Japanese' =>
+'',
+
+'Japanese byo-yomi' =>
+'',
+
+'Japanese byoyomi' =>
+'',
+
+'jigo' =>
+'',
+
+'Kiseido' =>
+'',
+
+'Kiseido Go Server' =>
+'',
+
+'Komi' =>
+'',
+
+'kyu' =>
+'',
+
+'Language' =>
+'Språk',
+
+'Language name (i.e. English)' =>
+'Språknamn (e.g. Svenska)',
+
+'Last access' =>
+'',
+
+'Last Access' =>
+'',
+
+'Last Move' =>
+'',
+
+'Last Moved' =>
+'',
+
+'Licence' =>
+'',
+
+'Links' =>
+'',
+
+'Logged in as' =>
+'Inloggad som',
+
+'Log in' =>
+'Logga in',
+
+'Logout' =>
+'Logga ut',
+
+'Lost' =>
+'',
+
+'Lots of info on go' =>
+'',
+
+'Main time' =>
+'',
+
+'Main Time' =>
+'',
+
+'Make user translator' =>
+'',
+
+'Manual setting' =>
+'',
+
+'Meet other turn-based go players' =>
+'',
+
+'Message' =>
+'',
+
+'Message list' =>
+'',
+
+'Messages' =>
+'Meddelanden',
+
+'Message sent!' =>
+'',
+
+'Mind Sport Zine' =>
+'',
+
+'More Japanese Go Terms' =>
+'',
+
+'Move outside board?' =>
+'',
+
+'Moves' =>
+'',
+
+'Moves and messages' =>
+'',
+
+'My color' =>
+'',
+
+'My user info' =>
+'',
+
+'Name' =>
+'Namn',
+
+'New' =>
+'',
+
+'New message' =>
+'',
+
+'New password' =>
+'Nytt lösenord',
+
+'News and games from the professional scene' =>
+'',
+
+'New topic' =>
+'',
+
+'Nick' =>
+'',
+
+'Nighttime' =>
+'',
+
+'Nigiri' =>
+'',
+
+'NNGS' =>
+'',
+
+'no' =>
+'',
+
+'No' =>
+'',
+
+'No games found' =>
+'Inga spel finns',
+
+'Nothing to be done?' =>
+'',
+
+'Notify only' =>
+'',
+
+'Not logged in' =>
+'Ej inloggad',
+
+'Occupation' =>
+'',
+
+'Off' =>
+'',
+
+'Old password' =>
+'Gammalt lösenord',
+
+'Only active users' =>
+'',
+
+'Open for matches' =>
+'',
+
+'Open for matches?' =>
+'',
+
+'Opponent' =>
+'',
+
+'Other:' =>
+'',
+
+'Other go servers' =>
+'',
+
+'Page created in' =>
+'Sidan skapades på',
+
+'Pass' =>
+'',
+
+'Passing' =>
+'',
+
+'Password' =>
+'Lösenord',
+
+'Password changed!' =>
+'',
+
+'Percent' =>
+'',
+
+'periods' =>
+'',
+
+'Personal settings' =>
+'Personliga inställningar',
+
+'Place your handicap stones, please!' =>
+'',
+
+'plans for future improvements' =>
+'',
+
+'Please enter data' =>
+'Var god fyll i data',
+
+'Please login.' =>
+'Logga in, tack.',
+
+'Please mark dead stones and click \'done\' when finished.' =>
+'',
+
+'Prisoners' =>
+'',
+
+'Profile updated!' =>
+'Profilen är uppdaterad!',
+
+'Proper handicap' =>
+'',
+
+'Rafael\'s Go Page' =>
+'',
+
+'Rank info' =>
+'',
+
+'Rank Info' =>
+'',
+
+'Rated' =>
+'',
+
+'Rating' =>
+'',
+
+'Read forum' =>
+'',
+
+'Register' =>
+'Registrera',
+
+'Register new account' =>
+'Registrera ett nytt konto',
+
+'Registration date' =>
+'',
+
+'Replied' =>
+'',
+
+'Reply' =>
+'',
+
+'Reply!' =>
+'',
+
+'Resign' =>
+'',
+
+'Resigning' =>
+'',
+
+'Resume playing' =>
+'',
+
+'Rules' =>
+'',
+
+'Running' =>
+'',
+
+'Running games for %s' =>
+'',
+
+'Samarkand' =>
+'',
+
+'Score' =>
+'Poäng',
+
+'Scot\'s Go Page' =>
+'',
+
+'Select language to make user translator for that language.' =>
+'',
+
+'Select the languages the user should be allowed to translate' =>
+'',
+
+'Send a message' =>
+'Skicka ett meddelande',
+
+'Send Invitation' =>
+'',
+
+'Send Message' =>
+'',
+
+'Send message to user' =>
+'',
+
+'Send Reply' =>
+'',
+
+'Sensei\'s Library' =>
+'',
+
+'Server list' =>
+'',
+
+'Server with java interface' =>
+'',
+
+'Set translator privileges for user' =>
+'',
+
+'Set user privileges' =>
+'',
+
+'sgf' =>
+'',
+
+'SGF file of game' =>
+'',
+
+'Show/edit userinfo' =>
+'',
+
+'Show all' =>
+'Visa alla',
+
+'Show all messages' =>
+'',
+
+'Show all users' =>
+'',
+
+'Show finished games' =>
+'',
+
+'Show message' =>
+'',
+
+'Show recieved messages' =>
+'Visa mottagna meddelanden',
+
+'Show running games' =>
+'',
+
+'Show sent messages' =>
+'Visa skickade meddelanden',
+
+'Site map' =>
+'',
+
+'Size' =>
+'',
+
+'Skip to next game' =>
+'',
+
+'Smooth board edge' =>
+'Mjuk brädkant',
+
+'Sorry, can\'t find the game you are invited to. Already declined?' =>
+'',
+
+'Sorry, couldn\'t find the reciever of your message. Make sure to use the userid, not the full name.' =>
 '',
 
 'Sorry, couldn\'t start the game. Please wait a few minutes and try again.' =>
@@ -172,28 +817,100 @@ class sv_Language extends Language
 'Sorry, couldn\'t update player data. Please wait a few minutes and try again.' =>
 '',
 
-'Sorry, you have to supply a name.' =>
+'Sorry, I\'ve problem with the rating, did you forget to specify \'kyu\' or \'dan\'?' =>
 '',
 
-'A new password has already been sent to this user, please use that password instead of sending another one.' =>
+'Sorry, I\'ve problem with the rating, you shouldn\'t use \'kyu\' or \'dan\' for this ratingtype' =>
 '',
 
-'Nothing to be done?' =>
+'Sorry, I can\'t find that game.' =>
+'',
+
+'Sorry, I couldn\'t find that forum you wanted to show.' =>
+'',
+
+'Sorry, I couldn\'t find the language you want to translate. Please contact the support.' =>
+'',
+
+'Sorry, I couldn\'t find the message you wanted to show.' =>
+'',
+
+'Sorry, I couldn\'t find this user.' =>
+'',
+
+'Sorry, I don\'t know anyone with that userid.' =>
 '',
 
 'Sorry, I need a game number to know what game to show.' =>
 '',
 
-'Sorry, you and your opponent need to set an initial rating, otherwise I can\'t find a suitable handicap' =>
+'Sorry, I need to known for which user to show the data.' =>
 '',
 
-'Sorry, I need to known for which user to show the data.' =>
+'Sorry, it\'s not your turn.' =>
+'',
+
+'Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support.' =>
+'',
+
+'Sorry, I was unable to open a file for writing. Please contact the support.' =>
+'',
+
+'Sorry, only translators are allowed to translate.' =>
+'',
+
+'Sorry, something went wrong when trying to insert the new translations into the database.' =>
+'',
+
+'Sorry, the additon of the game to the database seems to have failed.' =>
+'',
+
+'Sorry, the additon of the message to the database seems to have failed.' =>
+'',
+
+'Sorry, the game has already finished.' =>
+'',
+
+'Sorry, the game hasn\'t started yet.' =>
+'',
+
+'Sorry, the initial rating must be between 30 kyu and 6 dan.' =>
+'',
+
+'Sorry, the language you tried to add already exists.' =>
+'',
+
+'Sorry, the password must be at least six letters.' =>
+'',
+
+'Sorry, there was a missing or incorrect field when adding a language.' =>
 '',
 
 'Sorry, this is not allowed for guests, please first register a personal account' =>
 '',
 
-'Sorry, you may only place stones on empty points.' =>
+'Sorry, this page is solely for users with administrative tasks.' =>
+'',
+
+'Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset.' =>
+'',
+
+'Sorry, this userid is already used, please try to find a unique userid.' =>
+'',
+
+'Sorry, userid must be at least 3 letters long.' =>
+'',
+
+'Sorry, you and your opponent need to set an initial rating, otherwise I can\'t find a suitable handicap' =>
+'',
+
+'Sorry, you are not allowed to translate the specified language.' =>
+'',
+
+'Sorry, you can\'t invite yourself.' =>
+'',
+
+'Sorry, you didn\'t write your current password correctly.' =>
 '',
 
 'Sorry, you have to be logged in to do that.
@@ -213,187 +930,43 @@ Anledningen till detta problem kan vara ett av följande:
 <li> Du har inte slagit på kakor i din webbläsare.
 </ul>',
 
-'Sorry, it\'s not your turn.' =>
+'Sorry, you have to supply a name.' =>
 '',
 
-'The confirmed password didn\'t match the password, please go back and retry.' =>
+'Sorry, you may not pass before all handicap stones are placed.' =>
 '',
 
-'Sorry, the password must be at least six letters.' =>
+'Sorry, you may not retake a stone which has just captured a stone, since it would repeat a previous board position. Look for \'ko\' in the rules.' =>
 '',
 
-'Sorry, couldn\'t find the reciever of your message. Make sure to use the userid, not the full name.' =>
+'Sorry, you may only place stones on empty points.' =>
 '',
 
-'Sorry, I\'ve problem with the rating, did you forget to specify \'kyu\' or \'dan\'?' =>
+'Sorry, you must specify a language.' =>
 '',
 
-'Sorry, I\'ve problem with the rating, you shouldn\'t use \'kyu\' or \'dan\' for this ratingtype' =>
-'',
-
-'Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset.' =>
-'',
-
-'Sorry, I can\'t find that game.' =>
-'',
-
-'Sorry, I couldn\'t find that forum you wanted to show.' =>
-'',
-
-'Sorry, I couldn\'t find the message you wanted to show.' =>
-'',
-
-'Sorry, I couldn\'t find this user.' =>
-'',
-
-'Sorry, this userid is already used, please try to find a unique userid.' =>
-'',
-
-'Sorry, userid must be at least 3 letters long.' =>
-'',
-
-'Couldn\'t extrapolate value in function interpolate()' =>
-'',
-
-'Wrong, number of handicap stones' =>
-'',
-
-'Sorry, you didn\'t write your current password correctly.' =>
-'',
-
-'Unknown rank type' =>
-'',
-
-'Sorry, I don\'t know anyone with that userid.' =>
-'',
-
-'Sorry, the initial rating must be between 30 kyu and 6 dan.' =>
+'Sorry, you must specify a user.' =>
 '',
 
 'Sorry, you wrote a non-numeric value on a numeric field.' =>
 '',
 
-'Sorry, only translators are allowed to translate.' =>
+'State' =>
 '',
 
-'Sorry, I couldn\'t find the language you want to translate. Please contact the support.' =>
+'Status' =>
+'Status',
+
+'stones' =>
 '',
 
-'Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support.' =>
+'Stone size' =>
 '',
 
-'Sorry, I was unable to open a file for writing. Please contact the support.' =>
+'Strategy and terms' =>
 '',
 
-'Unknown problem. This shouldn\'t happen. Please send the url of this page to the support, so that this doesn\'t happen again.' =>
-'',
-
-'Resigning' =>
-'',
-
-'Passing' =>
-'',
-
-'Deleting game' =>
-'',
-
-'Please mark dead stones and click \'done\' when finished.' =>
-'',
-
-'Score' =>
-'Poäng',
-
-'Game' =>
-'',
-
-'Pass' =>
-'',
-
-'Delete game' =>
-'',
-
-'Done' =>
-'',
-
-'Resume playing' =>
-'',
-
-'Download sgf' =>
-'',
-
-'Resign' =>
-'',
-
-'Skip to next game' =>
-'',
-
-'Home' =>
-'Hemma',
-
-'Please login.' =>
-'Logga in, tack.',
-
-'To look around, use %s.' =>
-'Använd %s för att se dig omkring.',
-
-'Password' =>
-'Lösenord',
-
-'Log in' =>
-'Logga in',
-
-'Forgot password?' =>
-'Glömt lösenordet?',
-
-'Register new account' =>
-'Registrera ett nytt konto',
-
-'Send a message' =>
-'Skicka ett meddelande',
-
-'Show recieved messages' =>
-'Visa mottagna meddelanden',
-
-'Hide deleted' =>
-'Göm borttagna',
-
-'Show all' =>
-'Visa alla',
-
-'Show sent messages' =>
-'Visa skickade meddelanden',
-
-'Delete all' =>
-'Ta bort alla',
-
-'Register' =>
-'Registrera',
-
-'Please enter data' =>
-'Var god fyll i data',
-
-'Name' =>
-'Namn',
-
-'Your turn to move in the following games:' =>
-'',
-
-'No games found' =>
-'Inga spel finns',
-
-'Show/edit userinfo' =>
-'',
-
-'Show running games' =>
-'',
-
-'Show finished games' =>
-'',
-
-'Only active users' =>
-'',
-
-'Show all users' =>
+'Subject' =>
 '',
 
 'Submit and go to next game' =>
@@ -402,319 +975,148 @@ Anledningen till detta problem kan vara ett av följande:
 'Submit and go to status' =>
 '',
 
-'Go back' =>
+'Submit your games for comments to see where you might have played better.' =>
 '',
 
-'Logged in as' =>
-'Inloggad som',
-
-'Not logged in' =>
-'Ej inloggad',
-
-'Status' =>
-'Status',
-
-'Messages' =>
-'Meddelanden',
-
-'Invite' =>
-'Bjud in',
-
-'Users' =>
-'Användare',
-
-'Forums' =>
-'Forum',
-
-'Translate' =>
-'Översätt',
-
-'Docs' =>
-'Dokumentation',
-
-'Page created in %0.5f' =>
-'Sidan skapades på %0.5f',
-
-'Logout' =>
-'Logga ut',
-
-'Admin' =>
+'The confirmed password didn\'t match the password, please go back and retry.' =>
 '',
 
-'Add language for translation' =>
+'The Extended History' =>
 '',
 
-'Set translator privileges for user' =>
+'The insertion of the move into the database seems to have failed. This may or may not be a problem, please return to the game to see if the move has been registered.' =>
 '',
 
-'Bio updated!' =>
+'The insertion of your data into the database seems to have failed. If you can\'t log in, please try once more and, if this fails, contact the support.' =>
 '',
 
-'Password changed!' =>
-'',
-
-'Profile updated!' =>
-'Profilen är uppdaterad!',
-
-'Documentation' =>
-'',
-
-'Introduction to Dragon' =>
-'',
-
-'Other:' =>
-'',
-
-'Edit biopgraphical info' =>
-'',
-
-'Change bio' =>
-'',
-
-'Smooth board edge' =>
-'Mjuk brädkant',
-
-'Couldn\'t extrapolate value in function interpolate' =>
-'',
-
-'Sorry, you are not allowed to translate the specified language.' =>
-'',
-
-'Sorry, something went wrong when trying to insert the new translations into the database.' =>
-'',
-
-'Sorry, this page is solely for users with administrative tasks.' =>
-'',
-
-'Sorry, there was a missing or incorrect field when adding a language.' =>
-'',
-
-'Sorry, the language you tried to add already exists.' =>
-'',
-
-'Sorry, you must specify a user.' =>
-'',
-
-'Sorry, you must specify a language.' =>
-'',
-
-'If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.' =>
-'',
-
-'Installation instructions' =>
-'',
-
-'Introduction' =>
-'',
-
-'General Public Licence' =>
-'',
-
-'Links' =>
-'',
-
-'General Info' =>
-'',
-
-'Jan van der Steens Pages' =>
-'',
-
-'Rules' =>
-'',
-
-'An Interactive Introduction' =>
-'',
-
-'Strategy and terms' =>
-'',
-
-'An Introduction to Shape' =>
-'',
-
-'History' =>
-'',
-
-'A Brief History' =>
-'',
-
-'Go books, equipment and software' =>
-'',
-
-'Kiseido' =>
-'',
-
-'Other go servers' =>
-'',
-
-'It\'s your turn' =>
-'',
-
-'Message list' =>
-'',
-
-'From' =>
-'',
-
-'Subject' =>
-'',
-
-'Del' =>
-'',
-
-'New' =>
-'',
-
-'Message sent!' =>
-'',
-
-'User info' =>
-'',
-
-'Invite this user' =>
-'',
-
-'Site map' =>
-'',
-
-'Forum' =>
-'',
-
-'Flags' =>
-'',
-
-'Place your handicap stones, please!' =>
-'',
-
-'Message' =>
-'',
-
-'White' =>
-'',
-
-'Main Time' =>
-'',
-
-'Byoyomi' =>
-'',
-
-'Time limit' =>
-'',
-
-'without byoyomi' =>
-'',
-
-'Rated' =>
-'',
-
-'Moves' =>
-'',
-
-'dan' =>
-'',
-
-'Page created in' =>
-'',
-
-'day' =>
-'',
-
-'and' =>
-'',
-
-'hour' =>
+'The komi is out of range, please choose a move reasonable value.' =>
 '',
 
 'This %sgame%s invitation has already been accepted.' =>
 '',
 
-'Reply:' =>
+'This invitation has been declined or the game deleted' =>
 '',
 
-'New message:' =>
+'This is all you need to get started. Very basic stuff' =>
 '',
 
-'white' =>
+'This is a very nice site to learn with.' =>
 '',
 
-'Disputing settings:' =>
+'This is more in-depth.' =>
 '',
 
-'Send Reply' =>
+'This type action is either unknown or can\'t be use in this state of the game.' =>
 '',
 
-'Invitation message:' =>
+'Thread list' =>
 '',
 
-'Send Invitation' =>
+'Time limit' =>
 '',
 
-'Finished games for %s' =>
+'Timezone' =>
+'Tidszon',
+
+'To' =>
 '',
 
-'ID' =>
+'To (userid)' =>
 '',
 
-'sgf' =>
+'To do list' =>
 '',
 
-'yes' =>
+'Todo list' =>
+'',
+
+'To look around, use %s.' =>
+'Använd %s för att se dig omkring.',
+
+'Translate' =>
+'Översätt',
+
+'Translated and explained.' =>
+'',
+
+'Turn-based go guild' =>
+'',
+
+'Two-letter language code' =>
+'',
+
+'Unknown problem. This shouldn\'t happen. Please send the url of this page to the support, so that this doesn\'t happen again.' =>
+'',
+
+'Unknown rank type' =>
+'',
+
+'Userid' =>
+'Användaridentitet',
+
+'User info' =>
 '',
 
 'User Info' =>
 '',
 
-'Biographical info' =>
+'Users' =>
+'Användare',
+
+'User to set privileges for (use the userid)' =>
 '',
 
-'Conventional handicap (komi 0.5 if not even)' =>
+'Very well written introduction by the British Go Association.' =>
 '',
 
-'Proper handicap' =>
+'Welcome page' =>
 '',
 
-'Manual setting' =>
+'white' =>
 '',
 
-'Handicap' =>
+'White' =>
 '',
 
-'Even game with nigiri' =>
+'Win?' =>
 '',
 
-'Double game' =>
+'with' =>
 '',
 
-'Main time' =>
+'with answers' =>
 '',
 
-'Japanese byo-yomi' =>
+'without byoyomi' =>
 '',
 
-'Canadian byo-yomi' =>
+'Won' =>
 '',
 
-'Fischer time' =>
+'Wood color' =>
 '',
 
-'Clock runs on weekends' =>
+'Working through these can help out your game.' =>
 '',
 
-'Date' =>
+'Wrong, number of handicap stones' =>
 '',
 
-'Game ID' =>
+'yes' =>
 '',
 
-'Size' =>
+'Yes' =>
 '',
 
-'Komi' =>
+'You have to know what other players are talking about.' =>
 '',
 
-'Colors' =>
+'Your turn to move in the following games:' =>
 '',
 
-'periods' =>
+'Yutopian' =>
 '' );
     }
 };
