@@ -30,6 +30,7 @@ require_once( "include/std_functions.php" );
 
    start_page("Error", true, $logged_in, $player_row );
 
+   $err = @$_GET['err'];
    switch( $err )
    {
       case("early pass"):
@@ -552,6 +553,7 @@ require_once( "include/std_functions.php" );
       break;
    }
 
+   $mysqlerror = @$_GET['mysqlerror'];
    if( $mysqlerror )
       echo("<p>Mysql error: " . $mysqlerror );
 

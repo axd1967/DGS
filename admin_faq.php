@@ -49,16 +49,16 @@ require_once( "include/make_translationfiles.php" );
   if( !($player_row['admin_level'] & ADMIN_FAQ) )
     error("adminlevel_too_low");
 
-  $id = is_numeric($_GET["id"]) ? $_GET["id"] : 0;
+  $id = is_numeric(@$_GET["id"]) ? $_GET["id"] : 0;
 
   $show_list = true;
 
 
   // ***********        Edit entry       ****************
 
-  if( $_GET["edit"] == 'c' or  $_GET["edit"] == 'e')
+  if( ($action=@$_GET["edit"]) == 'c' or  $action == 'e')
   {
-     if( $_GET["edit"] == 'c' )
+     if( $action == 'c' )
         start_page(T_("FAQ Admin").' - '.T_('Edit category'), true, $logged_in, $player_row );
      else
         start_page(T_("FAQ Admin").' - '.T_('Edit entry'), true, $logged_in, $player_row );
@@ -80,7 +80,7 @@ require_once( "include/make_translationfiles.php" );
         {
            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
                                            'CHECKBOX', 'Qchanged', 'Y',
-                                           'Mark entry as changed for translators', false) );
+                                           T_('Mark entry as changed for translators'), false) );
         }
      }
      else //i.e. Question/Answer
@@ -92,7 +92,7 @@ require_once( "include/make_translationfiles.php" );
         {
            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
                                            'CHECKBOX', 'Qchanged', 'Y',
-                                           'Mark question as changed for translators', false) );
+                                           T_('Mark question as changed for translators'), false) );
         }
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
                                         'TEXTAREA', 'answer', 80, 20, $row["A"] ) );
@@ -100,7 +100,7 @@ require_once( "include/make_translationfiles.php" );
         {
            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
                                            'CHECKBOX', 'Achanged', 'Y',
-                                           'Mark answer as changed for translators', false) );
+                                           T_('Mark answer as changed for translators'), false) );
         }
      }
 
@@ -112,7 +112,7 @@ require_once( "include/make_translationfiles.php" );
 
   // ***********        Move entry       ****************
 
-  else if( $_GET["move"] == 'u' or $_GET["move"] == 'd' )
+  else if( ($action=@$_GET["move"]) == 'u' or $action == 'd' )
   {
      $result = mysql_query( "SELECT * FROM FAQ WHERE ID=$id" );
 
@@ -126,10 +126,10 @@ require_once( "include/make_translationfiles.php" );
      $row2 = mysql_fetch_array( $result );
      $max = $row2["max"];
 
-     if( ( $_GET["move"] != 'u' or $row["SortOrder"] > 1 ) and
-         ( $_GET["move"] != 'd' or $row["SortOrder"] < $max ) )
+     if( ( $action != 'u' or $row["SortOrder"] > 1 ) and
+         ( $action != 'd' or $row["SortOrder"] < $max ) )
      {
-        $dir = ($_GET["move"] == 'd' ? 1 : -1 );
+        $dir = ($action == 'd' ? 1 : -1 );
 
         mysql_query( "UPDATE FAQ SET SortOrder=SortOrder-($dir) " .
                      'WHERE Parent=' . $row["Parent"] . ' ' .
@@ -144,7 +144,7 @@ require_once( "include/make_translationfiles.php" );
 
   // ***********        Move entry to new category      ****************
 
-  else if( $_GET["move"] == 'uu' or $_GET["move"] == 'dd' )
+  else if( ($action=@$_GET["move"]) == 'uu' or $action == 'dd' )
   {
      $result = mysql_query(
         "SELECT Entry.SortOrder, Entry.Parent, Parent.SortOrder AS ParentOrder " .
@@ -158,7 +158,7 @@ require_once( "include/make_translationfiles.php" );
 
      $query = 'SELECT ID as NewParent FROM FAQ ' .
         'WHERE Level=1 ' .
-        ( $_GET['move'] == 'dd' ?
+        ( $action == 'dd' ?
           'AND SortOrder > ' . $row['ParentOrder'] . ' ORDER BY SortOrder' :
           'AND SortOrder < ' . $row['ParentOrder'] . ' ORDER BY SortOrder DESC' ) .
         ' LIMIT 1';
@@ -191,7 +191,7 @@ require_once( "include/make_translationfiles.php" );
 
   // ***********        Save edited entry       ****************
 
-  else if( $_GET["do_edit"] == 't' )
+  else if( ($action=@$_GET["do_edit"]) == 't' )
   {
 
      $row = get_entry_row( $id );
@@ -200,14 +200,14 @@ require_once( "include/make_translationfiles.php" );
         error("No data");
 
      $question = trim( $_POST["question"] );
-     $answer = trim( $_POST["answer"] );
+     $answer = trim( @$_POST["answer"] );
 
      // Delete or update ?
      if( empty($question) and empty($answer)
        and $row["QTranslatable"] != 'Done'
        and $row["ATranslatable"] != 'Done'
        and
-         ($row["Level"] == 2 or
+         ($row["Level"] > 1 or
           mysql_num_rows(mysql_query("SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1")) == 0 ))
      {
         mysql_query("DELETE FROM FAQ WHERE ID=$id LIMIT 1");
@@ -224,14 +224,14 @@ require_once( "include/make_translationfiles.php" );
      }
      else //Update
      {
-        $Qchanged = ( $_POST['Qchanged'] === 'Y' && $row['QTranslatable'] === 'Done') ?
+        $Qchanged = ( @$_POST['Qchanged'] === 'Y' && $row['QTranslatable'] === 'Done') ?
            ', Translatable="Changed"' : '';
         mysql_query("UPDATE TranslationTexts SET Text=\"$question\" $Qchanged" .
                     "WHERE ID=" . $row['Question'] . " LIMIT 1");
 
         if( $row['Answer'] )
         {
-           $Achanged = ( $_POST['Achanged'] === 'Y' && $row['ATranslatable'] === 'Done') ?
+           $Achanged = ( @$_POST['Achanged'] === 'Y' && $row['ATranslatable'] === 'Done') ?
               ', Translatable="Changed"' : '';
            mysql_query("UPDATE TranslationTexts SET Text=\"$answer\" $Achanged" .
                        "WHERE ID=" . $row['Answer'] . " LIMIT 1");
@@ -252,9 +252,9 @@ require_once( "include/make_translationfiles.php" );
 
   // ***********        New entry       ****************
 
-  else if( $_GET["new"] == 'e' or $_GET["new"] == 'c')
+  else if( ($action=@$_GET["new"]) == 'e' or $action == 'c')
   {
-     if( $_GET["new"] == 'c' )
+     if( $action == 'c' )
         start_page(T_("FAQ Admin").' - '.T_('New category'), true, $logged_in, $player_row );
      else
         start_page(T_("FAQ Admin").' - '.T_('New entry'), true, $logged_in, $player_row );
@@ -264,9 +264,9 @@ require_once( "include/make_translationfiles.php" );
      echo "<center>\n";
 
      $faq_edit_form = new Form( 'faqnewform', "admin_faq.php?do_new=" .
-                                $_GET["new"] . "&id=$id", FORM_POST );
+                                $action . "&id=$id", FORM_POST );
 
-     if( $_GET["new"] == 'c' )
+     if( $action == 'c' )
      {
         $faq_edit_form->add_row( array( 'HEADER', T_('New category') ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Category'),
@@ -288,7 +288,7 @@ require_once( "include/make_translationfiles.php" );
 
   // ***********        Save new entry       ****************
 
-  else if( $_GET["do_new"] == 'c' or $_GET["do_new"] == 'e' )
+  else if( ($action=@$_GET["do_new"]) == 'c' or $action == 'e' )
   {
      $result = mysql_query( "SELECT * FROM FAQ WHERE ID=$id" );
 
@@ -298,7 +298,7 @@ require_once( "include/make_translationfiles.php" );
      $row = mysql_fetch_array( $result );
 
      // First entry
-     if( $row["Level"] == 1 and $_GET["do_new"] == 'e' )
+     if( $row["Level"] == 1 and $action == 'e' )
         $row = array("Parent" => $row["ID"], "SortOrder" => 0, "Level" => 2);
 
      // First category
@@ -309,7 +309,7 @@ require_once( "include/make_translationfiles.php" );
         error("No data");
 
      $question = trim( $_POST["question"] );
-     $answer = trim( $_POST["answer"] );
+     $answer = trim( @$_POST["answer"] );
 
      $FAQ_group = get_faq_group();
 
@@ -339,7 +339,7 @@ require_once( "include/make_translationfiles.php" );
                     "SET Text_ID=$q_id, Group_ID=$FAQ_group" )
            or die(mysql_error());
 
-        if( $row['Level'] != 1 )
+        if( $row['Level'] > 1 )
         {
            mysql_query( "INSERT INTO TranslationTexts SET Text=\"$answer\", " .
                         "Ref_ID=$faq_id, Translatable = 'N' " )
@@ -363,7 +363,7 @@ require_once( "include/make_translationfiles.php" );
 
   // ***********       Toggle translatable     ****************
 
-  if( $_GET["transl"] === 't' )
+  if( ($action=@$_GET["transl"]) === 't' )
   {
 
      $row = get_entry_row( $id );

@@ -36,9 +36,10 @@ require_once( "include/make_translationfiles.php" );
   if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
      error("adminlevel_too_low");
 
-  $charenc = trim($_REQUEST['charenc']);
-  $langname = trim($_REQUEST['langname']);
-  $twoletter = trim($_REQUEST['twoletter']);
+  $charenc = trim(@$_REQUEST['charenc']);
+  $langname = trim(@$_REQUEST['langname']);
+  $twoletter = trim(@$_REQUEST['twoletter']);
+  $addlanguage = @$_REQUEST['addlanguage'];
 
   $extra_url_parts = '';
   if( $addlanguage )
@@ -79,12 +80,15 @@ require_once( "include/make_translationfiles.php" );
                       $langname, $twoletter, $charenc );
     }
 
+  $transladd = @$_REQUEST['transladd'];
   if( $transladd )
     {
+      $transluser = trim(@$_REQUEST['transluser']);
       if( empty($transluser) )
         error("no_specified_user");
 
-      if( !isset($transladdlang) or empty($transladdlang) )
+      $transladdlang = trim(@$_REQUEST['transladdlang']);
+      if( empty($transladdlang) )
         error("no_lang_selected");
 
       $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='$transluser'" );
@@ -117,12 +121,15 @@ require_once( "include/make_translationfiles.php" );
         }
     }
 
+  $translpriv = @$_REQUEST['translpriv'];
   if( $translpriv )
     {
+      $transluser = trim(@$_REQUEST['transluser']);
       if( empty($transluser) )
         error("no_specified_user");
 
-      if( !isset( $transllang ) )
+      $transllang = @$_REQUEST['transllang'];
+      if( !is_array( $transllang ) )
         $transllang = array();
 
       $new_langs = implode(',', $transllang);

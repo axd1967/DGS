@@ -31,8 +31,10 @@ require_once( "include/form_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
+  $uid = @$_GET['uid'];
   if( !($uid > 0) )
   {
+//default user = last referenced user (ex: if from site map)
      if( eregi("[?&]uid=([0-9]+)", $HTTP_REFERER, $result) )
         $uid = $result[1];
   }
