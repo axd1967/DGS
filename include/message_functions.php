@@ -621,7 +621,8 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
       "UNIX_TIMESTAMP(Messages.Time) AS Time, me.mid as date, " .
       "IF(Messages.ReplyTo>0,".FLOW_ANSWER.",0)+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
       "me.mid, me.Replied, me.Sender, me.Folder_nr AS folder, " .
-      "Players.Name AS other_name, Players.ID AS other_ID " .
+      "IF(me.sender='M',' ',Players.Name) AS other_name, " . //the ' ' help to sort
+      "Players.ID AS other_ID " .
       "FROM Messages, MessageCorrespondents AS me " .
       "LEFT JOIN MessageCorrespondents AS other " .
         "ON other.mid=me.mid AND other.Sender!=me.Sender " .

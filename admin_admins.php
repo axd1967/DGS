@@ -159,7 +159,8 @@ require_once( "include/table_columns.php" );
             $tmp = "<input type=\"checkbox\" name=\"${aid}_$id\" value=\"Y\"" .
                   (($level & $amask) ? ' checked' : '') . ">";
          else
-            $tmp = "-";
+            //$tmp = (($level & $amask) ? '&times;' : '&#149;'); //&loz;&deg;
+            $tmp = (($level & $amask) ? 'x' : '-');
 
          $arow_strings[$col++] = "<td align=center>$tmp</td>";
       }
