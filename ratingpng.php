@@ -151,8 +151,8 @@ function scale_data()
    global $MAX, $MIN, $SIZE, $OFFSET, $SizeX, $SizeY,
       $ratings, $ratingmin, $ratingmax, $time, $endtime, $starttime;
 
-   $MIN = array_reduce($ratingmax, "max");
-   $MAX = array_reduce($ratingmin, "min");
+   $MIN = array_reduce($ratingmax, "max", -10000);
+   $MAX = array_reduce($ratingmin, "min", +10000);
    $SIZE = $SizeY-MARGE_BOTTOM-MARGE_TOP;
    $OFFSET = MARGE_TOP;
 
@@ -210,21 +210,15 @@ $kyu = T_('kyu');
 
 
 //First check font and find pagging constantes
-/* Rod: some TTF names that works in my computer
-   $x = '?' ; //Embedded font (i.e. use imagestring())
-   $x = 'ARIAL' ; //Arial
-   $x = 'LUCON' ; //Lucida console
-   $x = 'COUR' ; //Courier New
-   $x = 'KINGARTH' ; //tests
-   $x = 'msgothic' ; //tests
-   $x = 'IMPACT' ; //tests
-*/
-   $x = 'ARIAL' ; //Arial
-   
+
+
+// Font name, if it's not found a non-ttf font is used instead (with imagestring())
+   $x = 'FreeSans-Medium' ;
+
    if ( isset($_GET['font']) )
       $x = $_GET['font'] ;
 
-define('TTF_FONT',"C:/WINDOWS/FONTS/$x.TTF"); //Rod: system font path
+define('TTF_FONT',"/var/lib/defoma/fontconfig.d/F/$x.ttf"); // Font path
 
 
 //Just two string samples to evaluate MARGE_LEFT
@@ -239,7 +233,8 @@ if ( function_exists('imagettftext') //TTF need GD and Freetype.
    )
 {
    define('LABEL_FONT'  ,-1);
-   define('LABEL_HEIGHT',12);
+   define('LABEL_HEIGHT',9);
+   define('LABEL_SEPARATION',3);
    $m = $v = 0;
    foreach( $x as $y )
    {
@@ -284,7 +279,7 @@ else //True type font file problem, so use embedded fonts:
 
 define('MARGE_TOP'   ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
 define('MARGE_RIGHT' ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
-define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*LABEL_HEIGHT);
+define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
 
 
 
@@ -302,8 +297,8 @@ define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*LABEL_HEIGHT);
 
    get_rating_data(@$_GET["uid"]);
 
-   $max = array_reduce($ratingmax, "max");
-   $min = array_reduce($ratingmin, "min");
+   $max = array_reduce($ratingmax, "max", -10000);
+   $min = array_reduce($ratingmin, "min", +10000);
 
    scale_data();
 
@@ -360,7 +355,8 @@ define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*LABEL_HEIGHT);
       $x= 0;
       if (SHOW_NRGAMES)
       {
-         $x= max($x,imagelabel($im, 4, $SizeY-MARGE_BOTTOM+3+2*LABEL_HEIGHT, T_('nr games'), $black));
+         $x= max($x,imagelabel($im, 4,$SizeY-MARGE_BOTTOM+3+
+                               2*(LABEL_SEPARATION+LABEL_HEIGHT), T_('nr games'), $black));
       }
 
    $year = date('Y',$starttime);
@@ -392,12 +388,12 @@ define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*LABEL_HEIGHT);
          continue;
 
       $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3,  T_(date('M', $dt)), $black));
-      $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3+LABEL_HEIGHT,  date('Y', $dt), $black));
+      $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3+LABEL_HEIGHT+LABEL_SEPARATION,  date('Y', $dt), $black));
       if (SHOW_NRGAMES)
       {
          while ($ix_games < $nr_points && $time[$ix_games] <= $sc)
             $ix_games++;
-         $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3+2*LABEL_HEIGHT, $nr_games+$ix_games, $black));
+         $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3+2*LABEL_HEIGHT+2*LABEL_SEPARATION, $nr_games+$ix_games, $black));
       }
    }
 
