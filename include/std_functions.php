@@ -30,7 +30,7 @@ if( !is_numeric($timeadjust) )
 
 $NOW = time() + (int)$timeadjust;
 
-$session_duration = 3600*24*7; // 1 week
+$session_duration = 3600*12*61; // 1 month
 $tick_frequency = 12; // ticks/hour
 $date_fmt = 'Y-m-d H:i';
 $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
