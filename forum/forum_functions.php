@@ -94,7 +94,7 @@ function start_table(&$headline, &$links, $width, $cols)
    if( $links > 0 )
       echo_links($cols);
 
-   echo "<tr bgcolor=000080>";
+   echo "<tr>";
    while( list($name, $extra) = each($headline) )
    {
       echo "<td bgcolor=000080 $extra><font color=white>&nbsp;$name</font></td>";
@@ -123,7 +123,7 @@ function echo_links($cols)
       echo "<a href=\"$link\"><font color=000000>$name</font></a>";
       $first=false;
    }
-   echo "&nbsp;</td>\n<td bgcolor=d0d0d0 align=right colspan=" . ($cols-$cols/2) . ">&nbsp;\n";
+   echo "&nbsp;</td>\n<td bgcolor=d0d0d0 align=right colspan=" . ($cols-$cols/2) . ">&nbsp;";
 
    $first=true;
    reset($link_array_right);
@@ -177,7 +177,7 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
                           'HIDDEN', ($post_type == 'edit' ? 'edit' : 'parent'), $id,
                           'HIDDEN', 'thread', $thread,
                           'HIDDEN', 'forum', $forum ));
-   $form->add_row( array( 'SPACE', 'TEXTAREA', 'Text', 70, 25, $Text ) );
+   $form->add_row( array( 'TAB', 'TEXTAREA', 'Text', 70, 25, $Text ) );
 
    if( isset($GoDiagrams) )
       $str = draw_editors($GoDiagrams);
@@ -185,12 +185,13 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
    if( !empty($str) )
    {
       $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str . '</td>'));
-      $form->add_row( array( 'OWNHTML',
-                             '<td><input type="submit" name="post" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . ' "></td>' .
-                             '<td><input type="submit" name="preview" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \"></td>\n" ));
+      $form->add_row( array( 'OWNHTML', '<td colspan=2 align="center">' . 
+                             '<input type="submit" name="post" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . " \">\n" .
+                             '<input type="submit" name="preview" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \">\n" .
+                             "</td>\n" ));
    }
    else
-      $form->add_row( array( 'SPACE', 'SUBMITBUTTON', 'post', ' ' . T_('Post') . ' ',
+      $form->add_row( array( 'TAB', 'SUBMITBUTTON', 'post', ' ' . T_('Post') . ' ',
                           'SUBMITBUTTON', 'preview', ' ' . T_('Preview') . ' ') );
 
    $form->echo_string();
