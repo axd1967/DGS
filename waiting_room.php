@@ -51,7 +51,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       'background-repeat : no-repeat;  background-position : center; }';
 
 
-   start_page("Waiting room", true, $logged_in, $player_row, $style );
+   start_page(T_("Waiting room"), true, $logged_in, $player_row, $style );
 
    echo "<center>";
 
@@ -63,7 +63,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
                          "FROM Waitingroom,Players " .
                          "WHERE Players.ID=Waitingroom.uid");
 
-   echo "<font color=$h3_color><B>Players waiting:</B></font><p>\n";
+   echo "<font color=$h3_color><B>". T_("Players waiting") . ":</B></font><p>\n";
 
    if( mysql_num_rows($result) > 0 )
    {
@@ -86,10 +86,10 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
       echo "</tr>\n";
 
-      $handi_array = array( 'conv' => 'Conventional',
-                            'proper' => 'Proper',
-                            'nigiri' => 'Even game with nigiri',
-                            'double' => 'Double game' );
+      $handi_array = array( 'conv' => T_('Conventional'),
+                            'proper' => T_('Proper'),
+                            'nigiri' => T_('Even game with nigiri'),
+                            'double' => T_('Double game') );
       $row_color=2;
       while( $row = mysql_fetch_array( $result ) )
       {
