@@ -45,7 +45,7 @@ if( !$is_down )
        "WHERE ((ID>$hour OR ID<". ($hour-8) . ') AND ID< '. ($hour+16) . ')';
     
    if( $day_of_week > 0 and $day_of_week < 6 )
-      $query .= ' OR ((ID>' . ($hour+100) . ' OR ID<'. ($hour+92) . 
+      $query .= ' OR (ID>=100 AND (ID>' . ($hour+100) . ' OR ID<'. ($hour+92) . 
          ') AND ID< '. ($hour+116) . ')';
    
    
