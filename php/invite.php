@@ -36,12 +36,10 @@ if( $uid )
 {
     $result = mysql_query( "SELECT Handle FROM Players WHERE ID=$uid" );
 
-    if( mysql_num_rows( $result ) != 1 )
+    if( mysql_num_rows( $result ) == 1 )
         {
-            header("Location: error.php?err=reciever_not_found");
-            exit;
+            extract(mysql_fetch_array($result));
         }
-    extract(mysql_fetch_array($result));
 }
 
 

@@ -28,7 +28,7 @@ include( "std_functions.php" );
 
 $player_row = 0;
 
-start_page("Messages", true, false, $player_row );
+start_page("Error", true, false, $player_row );
 
 switch( $err )
 {
