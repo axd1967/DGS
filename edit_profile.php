@@ -113,19 +113,19 @@ require_once( "include/countries.php" );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Userid'),
                                   'TEXT', $player_row["Handle"] ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Full name'),
-                                  'TEXTINPUT', 'name', 16, 40,
+                                  'TEXTINPUT', 'name', 32, 40,
                                   str_replace( "\"", "&quot;", $player_row["Name"] ) ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Country'),
                                   'SELECTBOX', 'country', 1, $COUNTRIES,
                                   $player_row["Country"], false ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Email'),
-                                  'TEXTINPUT', 'email', 16, 80,
+                                  'TEXTINPUT', 'email', 32, 80,
                                   str_replace( "\"", "&quot;", $player_row["Email"] ) ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches'),
-                                  'TEXTINPUT', 'open', 16, 40,
+                                  'TEXTINPUT', 'open', 32, 40,
                                   str_replace( "\"", "&quot;", $player_row["Open"] ) ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Rank info'),
-                                  'TEXTINPUT', 'rank', 16, 40,
+                                  'TEXTINPUT', 'rank', 32, 40,
                                   str_replace( "\"", "&quot;", $player_row["Rank"] ) ) );
 
    if( $player_row["RatingStatus"] != 'RATED' )
