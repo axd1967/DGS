@@ -93,7 +93,7 @@ if( !$action )
         }
 }
 
-if( $Status != 'FINISHED' and $Maintime > 0)
+if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0) )
 {
   $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
 
