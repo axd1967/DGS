@@ -493,7 +493,7 @@ require( "include/std_functions.php" );
 
       case("strange_tournament_id"):
       {
-        echo T_("Sorry, I don't seem to understand the given tournament id.");
+        echo T_("Sorry, a correct tournament id is required.");
       }
       break;
 

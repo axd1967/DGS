@@ -80,32 +80,85 @@ function make_applicationperiod_string( $app_p, $soap )
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
+   if( !$logged_in )
+      error("not_logged_in");
+
    start_page(T_("Show tournament"), true, $logged_in, $player_row );
 
+   if( !isset( $_GET['tid'] ) )
+   {
+      error("strange_tournament_id");
+   }
    $t = new Tournament( $_GET['tid'] );
 
-   echo "<table align=\"center\" border=\"3\" cellspacing=\"0\" cellpadding=\"3\">\n";
-   display_row_of_information( T_('ID'), $t->ID );
-   display_row_of_information( T_('Name'), $t->Name );
-   display_row_of_information( T_('Description'), $t->Description );
-   display_row_of_information( T_('Organizers'), $t->get_organizers_html() );
-   display_row_of_information( T_('Max and min participants'),
-                               make_max_min_participants_string( $t->MinParticipants,
+   if( isset( $_GET['update'] ) and
+       $_GET['update'] == 't' and
+       in_array( $player_row['ID'], $t->ListOfOrganizers ) )
+   {
+   }
+   elseif( isset( $_GET['modify'] ) and
+           $_GET['modify'] == 't' and
+           in_array( $player_row['ID'], $t->ListOfOrganizers ) )
+   {
+      echo "<center>\n";
+      $modify_form = new Form( 'modifyform',
+                               "show_tournament.php?tid=" . $t->ID . "&update=t",
+                               FORM_POST );
+      $modify_form->add_row( array( 'HEADER', T_('Tournament') ) );
+      $modify_form->add_row( array( 'DESCRIPTION', T_('Tournament ID'),
+                                    'TEXT', $t->ID ) );
+      $modify_form->add_row( array( 'DESCRIPTION', T_('Tournament name'),
+                                    'TEXTINPUT', 'name', 50, 80, $t->Name ) );
+      $modify_form->add_row( array( 'DESCRIPTION', T_('Tournamnet description'),
+                                    'TEXTAREA', 'description', 50, 8, $t->Description ) );
+      $modify_form->add_row( array( 'DESCRIPTION', T_('Allowed participants'),
+                                    'TEXT', T_('Between'),
+                                    'TEXTINPUT', 'min', 6, 10, $t->MinParticipants,
+                                    'TEXT', "&nbsp;" . T_('and') . "&nbsp;",
+                                    'TEXTINPUT', 'max', 6, 10, $t->MaxParticipants,
+                                    'TEXT', "&nbsp;" . T_('particpants') ) );
+      //TODO: Add input field for applicationperiod.
+      $modify_form->add_row( array( 'DESCRIPTION', T_('Tournament state'),
+                                    'TEXT', $TourState_Strings[ $t->State ] ) );
+      $modify_form->add_row( array( 'DESCRIPTION', T_('Strict end of application period?'),
+                                    'CHECKBOX', 'strictend', 'Y', "",
+                                    $t->StrictEndOfApplicationPeriod ) );
+      $modify_form->add_row( array( 'DESCRIPTION',
+                                    T_('Will tournament receive apllications after start?'),
+                                    'CHECKBOX', 'rated', 'Y', "",
+                                    $t->ReceiveApplicationsAfterStart ) );
+      $modify_form->add_row( array( 'DESCRIPTION', T_('Rated tournament games?'),
+                                    'CHECKBOX', 'rated', 'Y', "", $t->Rated ) );
+      $modify_form->add_row( array( 'DESCRIPTION', T_('Weekend clock in tournament games?'),
+                                    'CHECKBOX', 'weekend', 'Y', "", $t->WeekendClock ) );
+      $modify_form->echo_string();
+      echo "</center>\n";
+   }
+   else
+   {
+      echo "<table align=\"center\" border=\"3\" cellspacing=\"0\" cellpadding=\"3\">\n";
+      display_row_of_information( T_('ID'), $t->ID );
+      display_row_of_information( T_('Name'), $t->Name );
+      display_row_of_information( T_('Description'), $t->Description );
+      display_row_of_information( T_('Organizers'), $t->get_organizers_html() );
+      display_row_of_information( T_('Max and min participants'),
+                                  make_max_min_participants_string( $t->MinParticipants,
                                                                  $t->MaxParticipants ) );
-   display_row_of_information( T_('Tournament state'), $TourState_Strings[ $t->State ] );
-   display_row_of_information( T_('Applicationperiod'),
-                               make_applicationperiod_string( $t->Applicationperiod,
+      display_row_of_information( T_('Tournament state'), $TourState_Strings[ $t->State ] );
+      display_row_of_information( T_('Applicationperiod'),
+                                  make_applicationperiod_string( $t->Applicationperiod,
                                                               $t->StartOfApplicationPeriod ) );
-   display_row_of_information( T_('Strict end of application period?'),
-                               ($t->StrictEndOfApplicationPeriod ? T_("Yes") : T_("No")) );
-   display_row_of_information( T_('Will tournament receive apllications after start?'),
-                               ($t->ReceiveApplicationsAfterStart ? T_("Yes") : T_("No")) );
-   display_row_of_information( T_('Rated tournament games?'),
-                               ($t->Rated ? T_("Yes") : T_("No")) );
-   display_row_of_information( T_('Weekend clock in tournament games?'),
-                               ($t->WeekendClock ? T_("Yes") : T_("No")) );
+      display_row_of_information( T_('Strict end of application period?'),
+                                  ($t->StrictEndOfApplicationPeriod ? T_("Yes") : T_("No")) );
+      display_row_of_information( T_('Will tournament receive apllications after start?'),
+                                  ($t->ReceiveApplicationsAfterStart ? T_("Yes") : T_("No")) );
+      display_row_of_information( T_('Rated tournament games?'),
+                                  ($t->Rated ? T_("Yes") : T_("No")) );
+      display_row_of_information( T_('Weekend clock in tournament games?'),
+                                  ($t->WeekendClock ? T_("Yes") : T_("No")) );
 
-   echo "</table>\n";
+      echo "</table>\n";
+   }
 
    end_page(false);
 }
