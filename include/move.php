@@ -61,7 +61,7 @@ function check_move($print_error=true)
    {
       list($dummy, list($x,$y)) = each($prisoners);
 
-      if( $Last_X == $x and $Last_Y == $y 
+      if( ($Last_X == $x and $Last_Y == $y )
         or $Last_Move == number2sgf_coords( $x,$y, $Size) )
       {
          if( $print_error )
