@@ -47,10 +47,10 @@ require( "include/std_functions.php" );
      {
         if( $row['Level'] == 1 )
         {
-           echo '<h4><A href="faq.php">' . $row['Question'] . "</A></h4><ul>\n";
+           echo '<p><b><A href="faq.php">' . $row['Question'] . "</A></b><ul>\n";
         }
         else
-           echo '<p><A name="Entry' . $row["ID"] . '"><li><h4>' . $row['Question'] . '</h4><P>' .$row['Answer'];
+           echo '<A name="Entry' . $row["ID"] . '"><li><b>' . $row['Question'] . '</b><P>' .$row['Answer'];
      }
 
 
@@ -65,7 +65,8 @@ require( "include/std_functions.php" );
                            "AND entry.Level<3 AND entry.Level>0 " .
                            "ORDER BY CatOrder,entry.Level,entry.SortOrder");
 
-     echo "<ul><ul><table>\n";
+     echo "<ul><table><tr><td>\n";
+     $first = true;
 
      while( $row = mysql_fetch_array( $result ) )
      {
@@ -73,17 +74,20 @@ require( "include/std_functions.php" );
 
         if( $row['Level'] == 1 )
         {
-           echo "</table></ul>\n";
-           echo '<A href="faq.php?read=t&cat=' . $row['ID'] . "\">$question</A>\n";
-           echo "<ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
+           if( $first )
+              $first = false;
+           else
+              echo "</ul></table>\n";
+
+           echo '<p><b><A href="faq.php?read=t&cat=' . $row['ID'] . "\">$question</A></b>\n";
+           echo "<table><tr><td><ul>\n";
         }
         else
            echo '<li><A href="faq.php?read=t&cat=' . $row['Parent'] .
               '#Entry' . $row['ID'] . "\">$question</A>\n";
      }
 
-
-     echo "</table></table></ul></ul>\n";
+     echo "</ul></table></table></ul></table>\n";
   }
 
   end_page();

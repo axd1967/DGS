@@ -22,6 +22,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 if( basename(getcwd()) == 'forum' )
    chdir("../");
 require_once( "include/std_functions.php" );
+require_once( "include/form_functions.php" );
 chdir("forum");
 
 
@@ -144,34 +145,23 @@ function get_new_string($Lastchangedstamp, $Lastread)
    return $new;
 }
 
-function message_box($forum, $parent=-1, $Subject=NULL)
+function message_box($forum, $parent=-1, $Subject='')
 {
-   if( $Subject and strcasecmp(substr($Subject,0,3), "re:") != 0 )
+   if( strcasecmp(substr($Subject,0,3), "re:") != 0 )
       $Subject = "RE: " . $Subject;
 
+   echo "<ul>\n";
+   $form = new Form( 'messageform', "post.php", FORM_POST );
 
-?>
-<table align=center cellpadding=0>
-<FORM name="messageform" action="post.php" method="POST">
-    <INPUT type=hidden name="parent" value="<?php echo $parent;?>">
-    <INPUT type=hidden name="forum" value="<?php echo $forum;?>">
-
-          <TR nowrap>
-            <TD align=left colspan=2>&nbsp;&nbsp;Subject:&nbsp;&nbsp;
-            <input type="text" name="Subject" size="50" maxlength="80" <?php if( $Subject ) echo "value=\"$Subject\"";?>></TD>
-          </TR>
-          <TR nowrap>
-            <TD align=center colspan=2>
-              &nbsp;<textarea name="Text" cols="60" rows="16" wrap="virtual"></textarea>&nbsp;</TD>
-          </TR>
-
-          <TR>
-            <TD align=right colspan=2><input type=submit name="send" value=" Post ">&nbsp;</TD>
-          </TR>
-
-</FORM>
-</table>
-<?php
+   $form->add_row( array( 'HIDDEN', 'parent', $parent ));
+   $form->add_row( array( 'HIDDEN', 'forum', $forum ));
+   $form->add_row( array( 'DESCRIPTION', T_('Subject'),
+                          'TEXTINPUT', 'name', 50, 80, $Subject ) );
+   $form->add_row( array( 'SPACE', 'TEXTAREA', 'description', 70, 25, '' ) );
+   $form->add_row( array( 'SPACE', 'SUBMITBUTTON', 'post', ' ' . T_('Post') . ' ',
+                          'SUBMITBUTTON', 'preview', ' ' . T_('Preview') . ' ') );
+   $form->echo_string();
+   echo "</ul>\n";
 }
 
 function forum_name($forum)

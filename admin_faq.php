@@ -129,7 +129,6 @@ require( "include/form_functions.php" );
      $question = trim( $_POST["question"] );
      $answer = trim( $_POST["answer"] );
 
-
      // Delete ?
      if( empty($question) and empty($answer) and $row["Translatable"] == 'N' and
          ($row["Level"] == 2 or
@@ -213,7 +212,7 @@ require( "include/form_functions.php" );
      $question = trim( $_POST["question"] );
      $answer = trim( $_POST["answer"] );
 
-     if( !empty($question) and !empty($answer))
+     if( !empty($question) or !empty($answer))
      {
         mysql_query("UPDATE FAQ SET SortOrder=SortOrder+1 " .
                     'WHERE Parent=' . $row["Parent"] . ' ' .
