@@ -53,7 +53,7 @@ echo "
 $uid = $player_row["ID"];
 
 $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
-                      "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINNISHED' " .
+                      "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
                       "AND Players.ID!=$uid " .
                       "AND (Black_ID=Players.ID OR White_ID=Players.ID)" );
 

@@ -9,7 +9,7 @@ CREATE TABLE Games (
   Size int(11) DEFAULT '19',
   Komi decimal(3,1) DEFAULT '5.5',
   Handicap int(11) DEFAULT '0' NOT NULL,
-  Status enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINNISHED') DEFAULT 'INVITED' NOT NULL,
+  Status enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') DEFAULT 'INVITED' NOT NULL,
   Moves int(11) DEFAULT '0' NOT NULL,
   Black_Prisoners int(11) DEFAULT '0' NOT NULL,
   White_Prisoners int(11) DEFAULT '0' NOT NULL,

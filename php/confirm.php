@@ -55,7 +55,7 @@ if( $player_row["ID"] != $ToMove_ID )
     exit;
 }
 
-if( $Status == 'INVITED' or $Status == 'FINNISHED')
+if( $Status == 'INVITED' or $Status == 'FINISHED')
 {
     header("Location: error.php?err=unknown_game");
     exit;
@@ -183,7 +183,7 @@ switch( $action )
          $game_query = "UPDATE Games SET " .
               "Moves=$Moves, " .
               "Last_X=-1, " .
-              "Status='FINNISHED', " .
+              "Status='FINISHED', " .
               "ToMove_ID=NULL, " .
               "Score=$score, " .
               "Flags=0" .
@@ -206,7 +206,7 @@ switch( $action )
 
          $next_status = 'SCORE2';
          if( $Status == 'SCORE2' and  $nr_prisoners == 0 )
-             $next_status = 'FINNISHED';
+             $next_status = 'FINISHED';
 
          $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Text ) VALUES ";
 
