@@ -88,6 +88,8 @@ CREATE TABLE Games (
   ClockUsed int(11) NOT NULL default '0',
   Rated enum('N','Y','Done') NOT NULL default 'N',
   WeekendClock enum('N','Y') NOT NULL default 'Y',
+  Black_Rating double default NULL,
+  White_Rating double default NULL,
   PRIMARY KEY  (ID),
   KEY ToMove_ID (ToMove_ID)
 ) TYPE=MyISAM;

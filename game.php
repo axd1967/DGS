@@ -67,7 +67,8 @@ require( "include/rating.php" );
       error("unknown_game");
 
 
-   extract(mysql_fetch_array($result));
+   $row = mysql_fetch_assoc($result);
+   extract($row);
 
    if( $Status == 'INVITED' )
       error("unknown_game");
@@ -266,7 +267,7 @@ require( "include/rating.php" );
    }
 
    echo "<HR>\n";
-   draw_game_info();
+   draw_game_info($row);
    echo "<HR>\n";
 
 // display moves

@@ -130,7 +130,7 @@ if( !$is_down )
                       "WHERE (ID='$Black_ID' OR ID='$White_ID') " .
                       "AND SendEmail LIKE '%ON%' AND Notify='NONE' LIMIT 2" ) ;
 
-         update_rating($gid);
+//         update_rating($gid);
          update_rating2($gid);
 
          delete_all_observers($gid, ($Moves >= 10+$Handicap), $Text);

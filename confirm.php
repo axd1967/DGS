@@ -454,7 +454,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       }
       else
       {
-         update_rating($gid);
+//         update_rating($gid);
          update_rating2($gid);
 
          mysql_query( "UPDATE Players " .

@@ -211,7 +211,7 @@ function update_rating($gid)
 
    change_rating($wRating, $bRating, $game_result, $Size, $Komi, $Handicap);
 
-   mysql_query( "UPDATE Games SET Rated='DONE' WHERE ID=$gid" );
+   mysql_query( "UPDATE Games SET Rated='Done' WHERE ID=$gid" );
 
    mysql_query( "UPDATE Players SET Rating=$bRating, " .
                 "RatingStatus='RATED' WHERE ID=$Black_ID" );
@@ -236,7 +236,7 @@ function update_rating2($gid)
        "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
        "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
        "FROM Games, Players as white, Players as black " .
-       "WHERE Status='FINISHED' AND Games.ID=$gid AND Rated!='N' " .
+       "WHERE Status='FINISHED' AND Games.ID=$gid AND Rated!='Done' " .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
        "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
        "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
@@ -250,9 +250,10 @@ function update_rating2($gid)
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   if( $Moves < 10+$Handicap ) // Don't rate games with too few moves
+   if( $Rated === 'N' or  $Moves < 10+$Handicap ) // Don't rate games with too few moves
    {
-      mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid");
+      mysql_query("UPDATE Games SET Rated='N', " .
+                  "Black_Rating=$bRating, White_Rating=$wRating WHERE ID=$gid LIMIT 1");
       return;
    }
 
@@ -318,9 +319,9 @@ function update_rating2($gid)
       $wRatingMin = ($wRating - $wRatingMax * $k) / (1-$k);
 
 
-   if( $Rated !== 'Done' )
-      mysql_query( "UPDATE Games SET Rated='Done', " .
-                   "WHERE ID=$gid LIMIT 1" );
+   mysql_query( "UPDATE Games SET Rated='Done', " .
+                "Black_Rating=$bRating, White_Rating=$wRating " .
+                "WHERE ID=$gid LIMIT 1" );
 
    mysql_query( "UPDATE Players SET Rating2=$bRating, " .
                 "RatingMin=$bRatingMin, RatingMax=$bRatingMax, " .
@@ -338,6 +339,43 @@ function update_rating2($gid)
                ($wRating - $wOld) . ", '$Lastchanged') ")
       or die(mysql_error());
 
+}
+
+function update_rating_glicko($gid)
+{
+   global $NOW;
+
+   $C = 60;
+
+   $query = "SELECT Games.*, ".
+       "white.RatingGlicko as wRating, white.RatingStatus as wRatingStatus, " .
+       "white.RatingGlickoRD as wRatingRD, " .
+       "black.RatingGlicko as bRating, black.RatingStatus as bRatingStatus, " .
+       "black.RatingGlickoRD as bRatingRD " .
+       "FROM Games, Players as white, Players as black " .
+       "WHERE Status='FINISHED' AND Games.ID=$gid AND Rated!='N' " .
+       "AND white.ID=White_ID AND black.ID=Black_ID ".
+       "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
+       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
+
+
+   $result = mysql_query( $query ) or die(mysql_error());
+
+   if(  mysql_num_rows($result) != 1 )
+      return;
+
+   $row = mysql_fetch_array( $result );
+   extract($row);
+
+   if( $Moves < 10+$Handicap ) // Don't rate games with too few moves
+   {
+      mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid");
+      return;
+   }
+
+   $game_result = 0.5;
+   if( $Score > 0 ) $game_result = 1.0;
+   if( $Score < 0 ) $game_result = 0.0;
 }
 
 // To avoid too many translations
@@ -369,7 +407,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0)
    if( $show_percent )
    {
       $percent = round($rating - $rank_val*100);
-      $string .= $spc . '('. ( $percent > 0 ? '+' : '') . $percent . '%)';
+      $string .= $spc . '('. ( ($rating - $rank_val*100 > 0) ? '+' : '') . $percent . '%)';
    }
 
    if( $graph_uid > 0 )
@@ -404,6 +442,23 @@ function rank_to_rating($val, $kyu)
 
    return $rating;
 }
+
+
+function get_rating_at($uid, $date)
+{
+   $result = mysql_query( "SELECT Rating FROM Ratinglog " .
+                          "WHERE uid='$uid' AND Time<='$date' " .
+                          "ORDER BY Time DESC LIMIT 1" )
+      or die(mysql_error());
+
+   if(  mysql_num_rows($result) != 1 )
+      $result = mysql_query( "SELECT InitialRating AS Rating FROM Players WHERE ID='$uid'" );
+
+   $row = mysql_fetch_array( $result );
+
+   return $row['Rating'];
+}
+
 
 function convert_to_rating($string, $type)
 {

@@ -97,13 +97,15 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    else if( $all )
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
-         "black.Name AS blackName, black.Handle AS blackHandle, " .
-         "black.Rating2 AS blackRating, black.ID AS blackID, " .
-         "white.Name AS whiteName, white.Handle AS whiteHandle, " .
-         "white.Rating2 AS whiteRating, white.ID AS whiteID " .
+         "black.Name AS blackName, black.Handle AS blackHandle, black.ID AS blackID, " .
+         "white.Name AS whiteName, white.Handle AS whiteHandle, white.ID AS whiteID, " .
+         ( $_GET['finished']
+           ? "black.Rating2 AS blackRating, white.Rating2 AS whiteRating "
+           : "Games.Black_Rating AS blackRating, Games.White_Rating AS whiteRating " ) .
          "FROM Games, Players AS white, Players AS black " .
-         "WHERE " .
-         ( $_GET['finished'] ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .
+         "WHERE " . ( $_GET['finished']
+                      ? "Status='FINISHED' "
+                      : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND white.ID=White_ID AND black.ID=Black_ID " .
          "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
    }
@@ -111,8 +113,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "Name, Handle, Players.ID as pid, " .
-         "Rating2 AS Rating, UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
-         "(White_ID=" . $_GET['uid'] . ")+1 AS Color ";
+         ( $_GET['finished']
+           ? 'IF(Black_ID=' . $_GET['uid'] . ', Games.White_Rating, Games.Black_Rating) '
+           : 'Rating2' ) . ' AS Rating, ' .
+         "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
+         "IF(White_ID=" . $_GET['uid'] . ", 2, 1) AS Color ";
 
       if( $_GET['finished'] )
       {
@@ -128,7 +133,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
    }
 
-   $result = mysql_query( $query );
+   $result = mysql_query( $query ) or die(mysql_error());
 
    if( $_GET['observe'] or $all)
    {
