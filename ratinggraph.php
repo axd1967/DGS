@@ -31,32 +31,28 @@ require_once( "include/form_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-  $uid = @$_GET['uid'];
-  if( !($uid > 0) )
-  {
-//default user = last referenced user (ex: if from site map)
-     if( eregi("[?&]uid=([0-9]+)", $HTTP_REFERER, $result) )
-        $uid = $result[1];
-  }
+   get_request_user( $uid, $uhandle, true);
+   if( $uhandle )
+      $where = "Handle='$uhandle'";
+   elseif( $uid > 0 )
+      $where = "ID=$uid";
+   else
+      error("no_uid");
 
-  if( !($uid > 0) )
-     error("no_uid");
-
-  $CURRENTYEAR = date('Y', $NOW);
-  $CURRENTMONTH = date('n', $NOW);
-
-
-
-  $result = mysql_query("SELECT Name FROM Players where ID=$uid");
+  $result = mysql_query("SELECT ID,Name FROM Players WHERE $where");
 
   if( mysql_num_rows($result) != 1 )
      error("unknown user");
 
   $row = mysql_fetch_array($result);
 
+  $uid = $row['ID'];
   $name_safe = make_html_safe($row['Name']);
 
   start_page(T_('Rating graph for') . " $name_safe", true, $logged_in, $player_row );
+
+  $CURRENTYEAR = date('Y', $NOW);
+  $CURRENTMONTH = date('n', $NOW);
 
   echo '<center>';
 
@@ -66,10 +62,10 @@ require_once( "include/form_functions.php" );
 
   $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2");
 
-  $startyear = ( $_GET['startyear'] > 0 ? $_GET['startyear'] : $BEGINYEAR );
-  $startmonth = ( $_GET['startmonth'] > 0 ? $_GET['startmonth'] : $BEGINMONTH );
-  $endyear = ( $_GET['endyear'] > 0 ? $_GET['endyear'] : $CURRENTYEAR );
-  $endmonth = ( $_GET['endmonth'] > 0 ? $_GET['endmonth'] : $CURRENTMONTH );
+  $startyear = ( @$_GET['startyear'] > 0 ? $_GET['startyear'] : $BEGINYEAR );
+  $startmonth = ( @$_GET['startmonth'] > 0 ? $_GET['startmonth'] : $BEGINMONTH );
+  $endyear = ( @$_GET['endyear'] > 0 ? $_GET['endyear'] : $CURRENTYEAR );
+  $endmonth = ( @$_GET['endmonth'] > 0 ? $_GET['endmonth'] : $CURRENTMONTH );
 
   if( $startyear < $BEGINYEAR or ( $startyear == $BEGINYEAR and $startmonth < $BEGINMONTH ))
   {
@@ -104,7 +100,7 @@ require_once( "include/form_functions.php" );
      echo T_("Sorry, too few rated games to draw a graph") . "\n";
   else
      echo '<img src="ratingpng.php?uid=' . $uid .
-        ($_GET['show_time'] == 'y' ? '&show_time=y' : '') . "&startyear=$startyear&startmonth=$startmonth&endmonth=$endmonth&endyear=$endyear\">\n";
+        (@$_GET['show_time'] == 'y' ? '&show_time=y' : '') . "&startyear=$startyear&startmonth=$startmonth&endmonth=$endmonth&endyear=$endyear\">\n";
 
   echo "<p>\n";
 

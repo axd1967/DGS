@@ -28,33 +28,39 @@ require_once( "include/rating.php" );
 {
    connect2mysql();
 
-   $all = (@$_GET['uid'] == 'all');
-   $observe = isset($_GET['observe']);
-   $finished = isset($_GET['finished']);
-
-   if( !(@$_GET['uid'] > 0) and !$observe and !$all )
-      error("no_uid");
-
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
 
-   //Not used: $column_set = $player_row["GamesColumns"];
-   if( $observe )
-      $page = 'show_games.php?observe=t&';
-   else
-      $page = "show_games.php?uid=" . $_GET['uid'] . '&' . ( $finished ? 'finished=1&' : '' );
+   $observe = isset($_GET['observe']);
+   $finished = isset($_GET['finished']);
+   $uid = @$_GET['uid'];
+   $all = ($uid == 'all');
 
    if( !$observe and !$all )
    {
-      $result = mysql_query( "SELECT ID, Name, Handle FROM Players WHERE ID=" . $_GET['uid'] );
+      get_request_user( $uid, $uhandle, true);
+      if( $uhandle )
+         $where = "Handle='$uhandle'";
+      elseif( $uid > 0 )
+         $where = "ID=$uid";
+      else
+         error("no_uid");
+
+      $result = mysql_query( "SELECT ID, Name, Handle FROM Players WHERE $where" );
 
       if( mysql_num_rows($result) != 1 )
          error("unknown_user");
 
       $user_row = mysql_fetch_array($result);
+      $uid = $user_row['ID'];
    }
+
+   if( $observe )
+      $page = 'show_games.php?observe=t&';
+   else
+      $page = "show_games.php?uid=$uid&" . ( $finished ? 'finished=1&' : '' );
 
    if(!@$_GET['sort1'])
    {
@@ -113,29 +119,29 @@ require_once( "include/rating.php" );
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "Name, Handle, Players.ID as pid, " .
          "Rating2 AS Rating, " .
-         'IF(Black_ID=' . $_GET['uid'] .
+         "IF(Black_ID=$uid" .
          ', Games.White_Start_Rating, Games.Black_Start_Rating) AS startRating, ' .
          ( $finished ?
-           'IF(Black_ID=' . $_GET['uid'] .
+           "IF(Black_ID=$uid" .
            ', Games.White_End_Rating, Games.Black_End_Rating) AS endRating, ' .
            'log.RatingDiff AS ratingDiff, ' : '' ) .
          "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
-         "IF(White_ID=" . $_GET['uid'] . "," . WHITE . "," . BLACK . ") AS Color ";
+         "IF(White_ID=$uid," . WHITE . "," . BLACK . ") AS Color ";
 
       if( $finished )
       {
-         $query .= ", (Black_ID=" . $_GET['uid'] . " AND Score<0)*2 + " .
-            "(White_ID=" . $_GET['uid'] . " AND Score>0)*2 + " .
+         $query .= ", (Black_ID=$uid AND Score<0)*2 + " .
+            "(White_ID=$uid AND Score>0)*2 + " .
             "(Score=0) - 1 AS Win ";
       }
 
       $query .= "FROM Games,Players " .
          ( $finished ?
-           "LEFT JOIN Ratinglog AS log ON gid=Games.ID AND uid={$_GET['uid']} " : '' ) .
+           "LEFT JOIN Ratinglog AS log ON gid=Games.ID AND uid=$uid " : '' ) .
          "WHERE " . ( $finished ? "Status='FINISHED' "
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
-         "AND (( Black_ID=" . $_GET['uid'] . " AND White_ID=Players.ID ) " .
-           "OR ( White_ID=" . $_GET['uid'] . " AND Black_ID=Players.ID )) " .
+         "AND (( Black_ID=$uid AND White_ID=Players.ID ) " .
+           "OR ( White_ID=$uid AND Black_ID=Players.ID )) " .
          "ORDER BY $order $limit";
    }
 
@@ -346,25 +352,24 @@ require_once( "include/rating.php" );
 
    if( $observe )
    {
-      $_GET['uid'] = $player_row["ID"];
+      $uid = $player_row["ID"];
    }
 
    if( !$all )
    {
-      $menu_array[T_('User info')] = "userinfo.php?uid=" . $_GET['uid'];
+      $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
 
-      if( $_GET['uid'] != $player_row["ID"] and !$observe )
-         $menu_array[T_('Invite this user')] = "message.php?mode=Invite&uid=" . $_GET['uid'];
+      if( $uid != $player_row["ID"] and !$observe )
+         $menu_array[T_('Invite this user')] = "message.php?mode=Invite&uid=$uid";
    }
 
    if( $finished or $observe )
    {
-      $menu_array[T_('Show running games')] = "show_games.php?uid=" . $_GET['uid'];
+      $menu_array[T_('Show running games')] = "show_games.php?uid=$uid";
    }
    if( !$finished )
    {
-      $menu_array[T_('Show finished games')] = "show_games.php?uid=" .
-         $_GET['uid'] . "&finished=1";
+      $menu_array[T_('Show finished games')] = "show_games.php?uid=$uid&finished=1";
    }
    if( !$observe )
    {
