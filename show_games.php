@@ -34,33 +34,52 @@ require_once( "include/rating.php" );
       error("not_logged_in");
 
    $observe = isset($_GET['observe']);
-   $finished = isset($_GET['finished']);
-   $uid = @$_GET['uid'];
-   $all = ($uid == 'all');
-
-   if( !$observe and !$all )
+   if( $observe )
    {
-      get_request_user( $uid, $uhandle, true);
-      if( $uhandle )
-         $where = "Handle='$uhandle'";
-      elseif( $uid > 0 )
-         $where = "ID=$uid";
-      else
-         error("no_uid");
+      $finished = false; //by definition
+      $uid = 0; //from $player_row["ID"] list
+      $all = false;
+   }
+   else
+   {
+      $finished = isset($_GET['finished']);
+      $uid = @$_GET['uid'];
+      $all = ($uid == 'all');
+      if( !$all )
+      {
+         get_request_user( $uid, $uhandle, true);
+         if( $uhandle )
+            $where = "Handle='$uhandle'";
+         elseif( $uid > 0 )
+            $where = "ID=$uid";
+         else
+            error("no_uid");
 
-      $result = mysql_query( "SELECT ID, Name, Handle FROM Players WHERE $where" );
+         $result = mysql_query( "SELECT ID, Name, Handle FROM Players WHERE $where" );
 
-      if( @mysql_num_rows($result) != 1 )
-         error("unknown_user");
+         if( @mysql_num_rows($result) != 1 )
+            error("unknown_user");
 
-      $user_row = mysql_fetch_array($result);
-      $uid = $user_row['ID'];
+         $user_row = mysql_fetch_assoc($result);
+         $uid = $user_row['ID'];
+      }
    }
 
    if( $observe )
-      $page = 'show_games.php?observe=t&';
+   {
+      $page = 'show_games.php?observe=1&';
+      $column_set_name = "ObservedGamesColumns";
+   }
+   else if( $finished )
+   {
+      $page = "show_games.php?uid=$uid&finished=1&";
+      $column_set_name = "FinishedGamesColumns";
+   }
    else
-      $page = "show_games.php?uid=$uid&" . ( $finished ? 'finished=1&' : '' );
+   {
+      $page = "show_games.php?uid=$uid&";
+      $column_set_name = "RunningGamesColumns";
+   }
 
    if(!@$_GET['sort1'])
    {
@@ -76,7 +95,7 @@ require_once( "include/rating.php" );
       $_GET['desc2'] = 1;
    }
 
-   $gtable = new Table( $page, "GamesColumns" );
+   $gtable = new Table( $page, $column_set_name );
    $gtable->add_or_del_column();
 
    $order = $gtable->current_order_string();
@@ -121,20 +140,19 @@ require_once( "include/rating.php" );
          "Rating2 AS Rating, " .
          "IF(Black_ID=$uid" .
          ', Games.White_Start_Rating, Games.Black_Start_Rating) AS startRating, ' .
-         ( $finished ?
-           "IF(Black_ID=$uid" .
-           ', Games.White_End_Rating, Games.Black_End_Rating) AS endRating, ' .
-           'log.RatingDiff AS ratingDiff, ' : '' ) .
          "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
          //extra bits of Color are for sorting purposes
          "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color ";
-
 
       if( $finished )
       {
          $query .= ", (Black_ID=$uid AND Score<0)*2 + " .
             "(White_ID=$uid AND Score>0)*2 + " .
-            "(Score=0) - 1 AS Win ";
+            "(Score=0) - 1 AS Win " .
+           ", IF(Black_ID=$uid" .
+             ', Games.White_End_Rating, Games.Black_End_Rating) AS endRating, ' .
+           'log.RatingDiff AS ratingDiff '
+            ;
       }
 
       $query .= "FROM Games,Players " .
@@ -144,7 +162,7 @@ require_once( "include/rating.php" );
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND (( Black_ID=$uid AND White_ID=Players.ID ) " .
            "OR ( White_ID=$uid AND Black_ID=Players.ID )) " .
-         "ORDER BY $order $limit";
+         "ORDER BY $order,Games.ID $limit";
    }
 
    $result = mysql_query( $query ) or die(mysql_error());
@@ -167,49 +185,84 @@ require_once( "include/rating.php" );
 
    echo "<center><h3><font color=$h3_color>$title2</font></H3></center>\n";
 
-   $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true );
-   $gtable->add_tablehead( 2, T_('sgf') );
+   $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true);
+   $gtable->add_tablehead( 2, T_('sgf'));
 
-   if( $observe or $all )
+   if( $observe )
    {
       $gtable->add_tablehead(17, T_('Black name'), 'blackName');
       $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
       $gtable->add_tablehead(26, T_('Black start rating'), 'blackStartRating', true);
-      if( $finished )
-         $gtable->add_tablehead(27, T_('Black end rating'), 'blackEndRating', true);
       $gtable->add_tablehead(19, T_('Black rating'), 'blackRating', true);
-      if( $finished )
-         $gtable->add_tablehead(28, T_('Black rating diff'), 'blackDiff', true);
       $gtable->add_tablehead(20, T_('White name'), 'whiteName');
       $gtable->add_tablehead(21, T_('White userid'), 'whiteHandle');
       $gtable->add_tablehead(29, T_('White start rating'), 'whiteStartRating', true);
-      if( $finished )
-         $gtable->add_tablehead(30, T_('White end rating'), 'whiteEndRating', true);
       $gtable->add_tablehead(22, T_('White rating'), 'whiteRating', true);
-      if( $finished )
+   }
+   else if( $finished )
+   {
+      if( $all)
+      {
+         $gtable->add_tablehead(17, T_('Black name'), 'blackName');
+         $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
+         $gtable->add_tablehead(26, T_('Black start rating'), 'blackStartRating', true);
+         $gtable->add_tablehead(27, T_('Black end rating'), 'blackEndRating', true);
+         $gtable->add_tablehead(19, T_('Black rating'), 'blackRating', true);
+         $gtable->add_tablehead(28, T_('Black rating diff'), 'blackDiff', true);
+         $gtable->add_tablehead(20, T_('White name'), 'whiteName');
+         $gtable->add_tablehead(21, T_('White userid'), 'whiteHandle');
+         $gtable->add_tablehead(29, T_('White start rating'), 'whiteStartRating', true);
+         $gtable->add_tablehead(30, T_('White end rating'), 'whiteEndRating', true);
+         $gtable->add_tablehead(22, T_('White rating'), 'whiteRating', true);
          $gtable->add_tablehead(31, T_('White rating diff'), 'whiteDiff', true);
-   }
-   else
-   {
-      $gtable->add_tablehead(3, T_('Opponent'), 'Name');
-      $gtable->add_tablehead(4, T_('Nick'), 'Handle');
-      $gtable->add_tablehead(23, T_('Start rating'), 'startRating', true);
-      if( $finished )
+      }
+      else
+      {
+         $gtable->add_tablehead( 3, T_('Opponent'), 'Name');
+         $gtable->add_tablehead( 4, T_('Userid'), 'Handle');
+         $gtable->add_tablehead(23, T_('Start rating'), 'startRating', true);
          $gtable->add_tablehead(24, T_('End rating'), 'endRating', true);
-      $gtable->add_tablehead(16, T_('Rating'), 'Rating', true);
-      if( $finished )
+         $gtable->add_tablehead(16, T_('Rating'), 'Rating', true);
          $gtable->add_tablehead(25, T_('Rating diff'), 'ratingDiff', true);
-      $gtable->add_tablehead(5, T_('Color'), 'Color');
+         $gtable->add_tablehead( 5, T_('Color'), 'Color');
+      }
+   }
+   else //if( $running )
+   {
+      if( $all)
+      {
+         $gtable->add_tablehead(17, T_('Black name'), 'blackName');
+         $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
+         $gtable->add_tablehead(26, T_('Black start rating'), 'blackStartRating', true);
+         $gtable->add_tablehead(19, T_('Black rating'), 'blackRating', true);
+         $gtable->add_tablehead(20, T_('White name'), 'whiteName');
+         $gtable->add_tablehead(21, T_('White userid'), 'whiteHandle');
+         $gtable->add_tablehead(29, T_('White start rating'), 'whiteStartRating', true);
+         $gtable->add_tablehead(22, T_('White rating'), 'whiteRating', true);
+      }
+      else
+      {
+         $gtable->add_tablehead( 3, T_('Opponent'), 'Name');
+         $gtable->add_tablehead( 4, T_('Userid'), 'Handle');
+         $gtable->add_tablehead(23, T_('Start rating'), 'startRating', true);
+         $gtable->add_tablehead(16, T_('Rating'), 'Rating', true);
+         $gtable->add_tablehead( 5, T_('Color'), 'Color');
+      }
    }
 
-   $gtable->add_tablehead(6, T_('Size'), 'Size', true);
-   $gtable->add_tablehead(7, T_('Handicap'), 'Handicap');
-   $gtable->add_tablehead(8, T_('Komi'), 'Komi');
-   $gtable->add_tablehead(9, T_('Moves'), 'Moves', true);
+   $gtable->add_tablehead( 6, T_('Size'), 'Size', true);
+   $gtable->add_tablehead( 7, T_('Handicap'), 'Handicap');
+   $gtable->add_tablehead( 8, T_('Komi'), 'Komi');
+   $gtable->add_tablehead( 9, T_('Moves'), 'Moves', true);
 
-   if( $finished )
+   if( $observe )
    {
-      $gtable->add_tablehead(10, T_('Score'));
+      $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
+      $gtable->add_tablehead(13, T_('Last Move'), 'Lastchanged', true);
+   }
+   else if( $finished )
+   {
+      $gtable->add_tablehead(10, T_('Score')); //, 'ABS(Score)', true);
       if( !$all )
       {
          $gtable->add_tablehead(11, T_('Win?'), 'Win', true);
@@ -217,15 +270,16 @@ require_once( "include/rating.php" );
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
       $gtable->add_tablehead(12, T_('End date'), 'Lastchanged', true);
    }
-   else
+   else //if( $running )
    {
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
       $gtable->add_tablehead(13, T_('Last Move'), 'Lastchanged', true);
-      if( !$observe and !$all)
+      if( !$all )
       {
          $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
       }
    }
+
 
    while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
    {
@@ -313,7 +367,6 @@ require_once( "include/rating.php" );
             }
             $grow_strings[5] = "<td align=center><img src=\"17/$colors.gif\" alt=\"$colors\"></td>";
          }
-
       }
 
       if( $gtable->Is_Column_Displayed[6] )
@@ -384,7 +437,7 @@ require_once( "include/rating.php" );
    }
    if( !$observe )
    {
-      $menu_array[T_('Show observed games')] = "show_games.php?observe=t";
+      $menu_array[T_('Show observed games')] = "show_games.php?observe=1";
    }
 
    end_page(@$menu_array);

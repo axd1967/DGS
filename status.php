@@ -106,8 +106,9 @@ require_once( "include/message_functions.php" );
 
    $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," .
        "UNIX_TIMESTAMP(Lastchanged) AS Time, " .
-       "IF(White_ID=$uid," . WHITE . "," . BLACK . ") AS Color, " .
-       "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid " .
+       "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid, " .
+         //extra bits of Color are for sorting purposes
+         "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
        "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$uid " .
@@ -124,23 +125,23 @@ require_once( "include/message_functions.php" );
    }
    else
    {
-      $gtable->add_tablehead(1, T_('ID'), NULL, NULL, true);
-      $gtable->add_tablehead(2, T_('sgf'));
-      $gtable->add_tablehead(3, T_('Opponent'));
-      $gtable->add_tablehead(4, T_('Nick'));
+      $gtable->add_tablehead( 1, T_('ID'), NULL, false, true);
+      $gtable->add_tablehead( 2, T_('sgf'));
+      $gtable->add_tablehead( 3, T_('Opponent'));
+      $gtable->add_tablehead( 4, T_('Nick'));
       $gtable->add_tablehead(16, T_('Rating'));
-      $gtable->add_tablehead(5, T_('Color'));
-      $gtable->add_tablehead(6, T_('Size'));
-      $gtable->add_tablehead(7, T_('Handicap'));
-      $gtable->add_tablehead(8, T_('Komi'));
-      $gtable->add_tablehead(9, T_('Moves'));
+      $gtable->add_tablehead( 5, T_('Color'));
+      $gtable->add_tablehead( 6, T_('Size'));
+      $gtable->add_tablehead( 7, T_('Handicap'));
+      $gtable->add_tablehead( 8, T_('Komi'));
+      $gtable->add_tablehead( 9, T_('Moves'));
+      $gtable->add_tablehead(14, T_('Rated')); //, 'Rated', true);
       $gtable->add_tablehead(13, T_('Last Move'));
 
       while( $row = mysql_fetch_array( $result ) )
       {
          $Rating=NULL;
          extract($row);
-         $color = ( $Color == BLACK ? 'b' : 'w' );
 
          $grow_strings = array();
          if( $gtable->Is_Column_Displayed[1] )
@@ -159,7 +160,22 @@ require_once( "include/message_functions.php" );
          if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
          if( $gtable->Is_Column_Displayed[5] )
-            $grow_strings[5] = "<td align=center><img src=\"17/$color.gif\" alt=$color></td>";
+         {
+            if( $Color & 2 ) //my color
+               $colors = 'w';
+            else
+               $colors = 'b';
+      /*
+            if( !($Color & 0x20) )
+            {
+               if( $Color & 1 ) //to move color
+                  $colors.= '_w';
+               else
+                  $colors.= '_b';
+            }
+      */
+            $grow_strings[5] = "<td align=center><img src=\"17/$colors.gif\" alt=\"$colors\"></td>";
+         }
          if( $gtable->Is_Column_Displayed[6] )
             $grow_strings[6] = "<td>$Size</td>";
          if( $gtable->Is_Column_Displayed[7] )
@@ -168,6 +184,8 @@ require_once( "include/message_functions.php" );
             $grow_strings[8] = "<td>$Komi</td>";
          if( $gtable->Is_Column_Displayed[9] )
             $grow_strings[9] = "<td>$Moves</td>";
+         if( $gtable->Is_Column_Displayed[14] )
+            $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
          if( $gtable->Is_Column_Displayed[13] )
             $grow_strings[13] = '<td>' . date($date_fmt, $Time) . "</td>";
 
@@ -181,7 +199,7 @@ require_once( "include/message_functions.php" );
    $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$my_id",
                         T_('Show running games') => "show_games.php?uid=$my_id",
                         T_('Show finished games') => "show_games.php?uid=$my_id&finished=1",
-                        T_('Show observed games') => "show_games.php?observe=t" );
+                        T_('Show observed games') => "show_games.php?observe=1" );
 
    end_page(@$menu_array);
 
