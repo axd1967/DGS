@@ -35,6 +35,7 @@ var hoshi_pos  = [0,0,0,0,0,1,0,1,4,5,4,5,4,7,7,7,7,7,7,7,7,7,7,7,7,7];
 var col_next = [];
 var size = [];
 var stonesize = [];
+var woodcolor = [];
 var hoshi = [];
 var lastx = [];
 var lasty = [];
@@ -53,6 +54,7 @@ var current_mode = [];
 var current_index = [];
 
 var img = 'gif';
+var path = '';
 
 var letters = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -109,7 +111,7 @@ function show_goban(nr)
   var x, y, fig;
   var stonesz = stonesize[nr];
 
-  document.write('<table border=0 cellpadding=0 cellspacing=0 background="images/wood2.gif" align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
+  document.write('<table border=0 cellpadding=0 cellspacing=0 background="'+path+'images/wood'+woodcolor[nr]+'.gif" align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
   for( y=starty[nr]; y<endy[nr]; y++)
   {
      document.write('<tr>');
@@ -118,9 +120,9 @@ function show_goban(nr)
         fig = get_empty_image(x, y, size[nr]);
 
         if( version == 1 )
-           document.write ('<td><img name="pos'+nr+'_'+x+'_'+y+'" src="'+stonesz+'/'+fig+'.'+img+'" onClick="click('+nr+','+x+','+y+')">');
+           document.write ('<td><img name="pos'+nr+'_'+x+'_'+y+'" src="'+path+stonesz+'/'+fig+'.'+img+'" onClick="click('+nr+','+x+','+y+')">');
         else
-           document.write ('<td><a href="javascript:click('+nr+','+x+','+y+');"><img name="pos'+nr+'_'+x+'_'+y+'" border=0 src="'+stonesz+'/'+fig+'.'+img+'" width='+stonesz+' height='+stonesz+'></a>');
+           document.write ('<td><a href="javascript:click('+nr+','+x+','+y+');"><img name="pos'+nr+'_'+x+'_'+y+'" border=0 src="'+path+stonesz+'/'+fig+'.'+img+'" width='+stonesz+' height='+stonesz+'></a>');
      }
      document.write('</tr>');
   }
@@ -130,31 +132,31 @@ function show_goban(nr)
 
 function change_mode(nr, new_mode)
 {
-   document.images[current_mode[nr]+'_'+nr+'_1'].src = 'images/gr.png';
-   document.images[current_mode[nr]+'_'+nr+'_2'].src = 'images/gr.png';
-   document.images[current_mode[nr]+'_'+nr+'_3'].src = 'images/gr.png';
-   document.images[current_mode[nr]+'_'+nr+'_4'].src = 'images/gr.png';
+   document.images[current_mode[nr]+'_'+nr+'_1'].src = path+'images/gr.png';
+   document.images[current_mode[nr]+'_'+nr+'_2'].src = path+'images/gr.png';
+   document.images[current_mode[nr]+'_'+nr+'_3'].src = path+'images/gr.png';
+   document.images[current_mode[nr]+'_'+nr+'_4'].src = path+'images/gr.png';
    current_mode[nr] = new_mode;
-   document.images[current_mode[nr]+'_'+nr+'_1'].src = 'images/bl.png';
-   document.images[current_mode[nr]+'_'+nr+'_2'].src = 'images/bl.png';
-   document.images[current_mode[nr]+'_'+nr+'_3'].src = 'images/bl.png';
-   document.images[current_mode[nr]+'_'+nr+'_4'].src = 'images/bl.png';
+   document.images[current_mode[nr]+'_'+nr+'_1'].src = path+'images/bl.png';
+   document.images[current_mode[nr]+'_'+nr+'_2'].src = path+'images/bl.png';
+   document.images[current_mode[nr]+'_'+nr+'_3'].src = path+'images/bl.png';
+   document.images[current_mode[nr]+'_'+nr+'_4'].src = path+'images/bl.png';
 }
 
 function show_button(nr, button_mode, button_function, image, alt, width, height, border, on)
 {
   var stonesz = stonesize[nr];
   document.write('<table border=0 cellpadding=0 cellspacing=0 align=center valign=center bgcolor=#fdd69b>');
-   document.write('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_1" src="images/'+(on ? 'bl.' : 'gr.')+img+'\"></td></tr>');
-   document.write('<tr><td><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_2" src="images/'+(on ? 'bl.' : 'gr.')+img+'"></td>');
+   document.write('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_1" src="'+path+'images/'+(on ? 'bl.' : 'gr.')+img+'\"></td></tr>');
+   document.write('<tr><td><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_2" src="'+path+'images/'+(on ? 'bl.' : 'gr.')+img+'"></td>');
 
    if( version == 1 )
-      document.write('<td width='+width+' height='+height+' align=center><img border=0 name="'+button_mode+'_'+nr+'" src="'+image+'" onClick="'+button_function+'('+nr+',\''+button_mode+'\')"></td>');
+      document.write('<td width='+width+' height='+height+' align=center><img border=0 name="'+button_mode+'_'+nr+'" src="'+path+image+'" onClick="'+button_function+'('+nr+',\''+button_mode+'\')"></td>');
    else
-      document.write('<td width='+width+' height='+height+' align=center><a href="javascript:'+button_function+'('+nr+',\''+button_mode+'\');"><img border=0 align=center name="'+button_mode+'_'+nr+'" src="'+image+'"></a></td>');
+      document.write('<td width='+width+' height='+height+' align=center><a href="javascript:'+button_function+'('+nr+',\''+button_mode+'\');"><img border=0 align=center name="'+button_mode+'_'+nr+'" src="'+path+image+'"></a></td>');
 
-   document.write('<td align=right><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_3" src="images/'+(on ? 'bl.' : 'gr.')+img+'"></td></tr>');
-   document.writeln('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_4" src="images/'+(on ? 'bl.' : 'gr.')+img+'"></td></tr></table>');
+   document.write('<td align=right><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_3" src="'+path+'images/'+(on ? 'bl.' : 'gr.')+img+'"></td></tr>');
+   document.writeln('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_4" src="'+path+'images/'+(on ? 'bl.' : 'gr.')+img+'"></td></tr></table>');
 }
 
 
@@ -184,7 +186,7 @@ function show_editor_buttons(nr)
    show_button(nr, 'letter', 'change_mode', stonesz+'/la.'+img, 'Letter', sz, sz, border, 0);
    document.writeln("</td><td>");
    show_button(nr, 'number', 'change_mode', stonesz+'/b1.'+img, 'Number', sz, sz, border, 0);
-   document.writeln('</td></tr><tr><td><img src="images/blank.gif" width=1 height='+(border*2)+'></td></tr><tr><td colspan=2>');
+   document.writeln('</td></tr><tr><td><img src="'+path+'images/blank.gif" width=1 height='+(border*2)+'></td></tr><tr><td colspan=2>');
    show_button(nr, 'undo', 'undo', stonesz+'/undo.'+img, 'Undo', Math.round(sz*1.8), Math.round(sz*0.8), border, 0);
    document.writeln("</td></tr><tr><td colspan=2>");
    show_button(nr, 'redo', 'redo', stonesz+'/redo.'+img, 'Redo', Math.round(sz*1.8), Math.round(sz*0.8), border, 0);
@@ -283,13 +285,14 @@ function click(nr,x,y)
    if( mark[nr][x][y].charAt(1) == letters[current_letter[nr]-1] && current_letter[nr] > 1)
    {
       document.images['letter_'+nr].src =
-         stonesize[nr]+'/l'+letters[--current_letter[nr]]+'.'+img;
+         path+stonesize[nr]+'/l'+letters[--current_letter[nr]]+'.'+img;
       remove = true;
    }
 
    if( Number(mark[nr][x][y]) == current_number[nr]-1 && current_number[nr] > 1)
    {
-      document.images['number_'+nr].src = stonesize[nr]+'/b'+(--current_number[nr])+'.'+img;
+      document.images['number_'+nr].src =
+         path+stonesize[nr]+'/b'+(--current_number[nr])+'.'+img;
       remove = true;
    }
 
@@ -320,7 +323,7 @@ function click(nr,x,y)
          has_liberty(nr, x, y, true);
 
          col_next[nr] = 3-col_next[nr];
-         document.images['play_'+nr].src = stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
+         document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
          lastx[nr] = x;
          lasty[nr] = y;
          break;
@@ -338,7 +341,7 @@ function click(nr,x,y)
             if( col_next[nr] = 1 )
             {
                col_next[nr] = 2;
-               document.images['play_'+nr].src = stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
+               document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
             }
          }
          break;
@@ -356,7 +359,8 @@ function click(nr,x,y)
             if( col_next[nr] = 2 )
             {
                col_next[nr] = 1;
-               document.images['play_'+nr].src = stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
+               document.images['play_'+nr].src =
+                  path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
             }
          }
          break;
@@ -380,13 +384,15 @@ function click(nr,x,y)
       case 'letter':
          mark[nr][x][y] = ( remove ? '' : 'l'+letters[current_letter[nr]++] );
 
-         document.images['letter_'+nr].src = stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
+         document.images['letter_'+nr].src =
+            path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
          break;
 
       case 'number':
          mark[nr][x][y] = ( remove ? '' : ''+(current_number[nr]++) );
 
-         document.images['number_'+nr].src = stonesize[nr]+'/b'+current_number[nr]+'.'+img;
+         document.images['number_'+nr].src =
+            path+stonesize[nr]+'/b'+current_number[nr]+'.'+img;
          break;
 
    }
@@ -416,26 +422,27 @@ function undo(nr, mode)
       if( Number(a[5]) >= 1 && !isNaN(Number(a[5])))
       {
          current_number[nr] = Number(a[5]);
-         document.images['number_'+nr].src = stonesize[nr]+'/b'+current_number[nr]+'.'+img;
+         document.images['number_'+nr].src =
+            path+stonesize[nr]+'/b'+current_number[nr]+'.'+img;
       }
       else if( Number(a[3]) == current_number[nr] )
          document.images['number_'+nr].src =
-            stonesize[nr]+'/b'+(++current_number[nr])+'.'+img;
+            path+stonesize[nr]+'/b'+(++current_number[nr])+'.'+img;
 
       if( a[5].charAt(0) == 'l' )
       {
          current_letter[nr] = (a[5].charCodeAt(1) - 'a'.charCodeAt(0) + 1);
          document.images['letter_'+nr].src =
-            stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
+            path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
       }
       else if( a[3].charAt(1) == letters[current_letter[nr]] )
          document.images['letter_'+nr].src =
-            stonesize[nr]+'/l'+letters[++current_letter[nr]]+'.'+img;
+            path+stonesize[nr]+'/l'+letters[++current_letter[nr]]+'.'+img;
 
       if( a[2] == 0 && a[4] > 0 )
       {
          col_next[nr] = 3-col_next[nr];
-         document.images['play_'+nr].src = stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
+         document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
       }
 
    }
@@ -464,36 +471,38 @@ function redo(nr, mode)
 
       if( Number(a[5]) == current_number[nr] )
          document.images['number_'+nr].src =
-            stonesize[nr]+'/b'+(++current_number[nr])+'.'+img;
+            path+stonesize[nr]+'/b'+(++current_number[nr])+'.'+img;
       else if( Number(a[3]) >= 1 && !isNaN(Number(a[5])))
       {
          current_number[nr] = Number(a[3]);
-         document.images['number_'+nr].src = stonesize[nr]+'/b'+current_number[nr]+'.'+img;
+         document.images['number_'+nr].src =
+            path+stonesize[nr]+'/b'+current_number[nr]+'.'+img;
       }
 
 
       if( a[5].charAt(1) == letters[current_letter[nr]] )
       {
          document.images['letter_'+nr].src =
-            stonesize[nr]+'/l'+letters[++current_letter[nr]]+'.'+img;
+            path+stonesize[nr]+'/l'+letters[++current_letter[nr]]+'.'+img;
       }
       else if( a[3].charAt(0) == 'l'  )
       {
          current_letter[nr] = (a[3].charCodeAt(1) - 'a'.charCodeAt(0) + 1);
          document.images['letter_'+nr].src =
-            stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
+            path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
       }
 
       if( a[4] == 0 && a[2] > 0 )
       {
          col_next[nr] = 3-col_next[nr];
-         document.images['play_'+nr].src = stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
+         document.images['play_'+nr].src =
+            path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
       }
 
    }
 }
 
-function dump_data(nr)
+function dump_data(nr, formname)
 {
    var x,y;
    var string = '';
@@ -508,17 +517,17 @@ function dump_data(nr)
       }
       separator = ';';
    }
-   document.forms['goeditor'+nr].dimensions.value = size[nr] +','+ startx[nr] +','+ endx[nr] +
-      ','+ starty[nr] +','+ endy[nr];
-   document.forms['goeditor'+nr].data.value = string;
+   document.forms[formname].elements['dimensions'+nr].value =
+      size[nr] +','+ startx[nr] +','+ endx[nr] + ','+ starty[nr] +','+ endy[nr];
+   document.forms[formname].elements['data'+nr].value = string;
 }
 
-function dump_all_data()
+function dump_all_data(formname)
 {
    var i;
 
    for(i=0; i<number_of_gobans; i++)
-      dump_data(goban_numbers[i]);
+      dump_data(goban_numbers[i], formname);
 }
 
 function get_empty_image(x, y, sz)
@@ -553,7 +562,7 @@ function set_image(nr, x, y)
 
    prefix += mark[nr][x][y];
 
-   document.images["pos"+nr+"_"+x+"_"+y].src=stonesize[nr]+'/'+prefix+'.'+img;
+   document.images["pos"+nr+"_"+x+"_"+y].src = path+stonesize[nr]+'/'+prefix+'.'+img;
 }
 
 function add_to_history(nr, x, y, before_goban, before_mark, after_goban, after_mark)
@@ -574,12 +583,16 @@ function add_to_history(nr, x, y, before_goban, before_mark, after_goban, after_
 
 /* Main function
 */
-function goeditor(nr, sz, stonesz, start_x, end_x, start_y, end_y)
+function goeditor(nr, sz, start_x, end_x, start_y, end_y, stonesz, wood_color, subdir)
 {
 /*image_preload();*/
 
+   path = ( subdir ? '../' : '' );
+
    size[nr] = sz;
    stonesize[nr] = stonesz;
+   woodcolor[nr] = wood_color;
+
    startx[nr] = start_x-1;
    endx[nr] = end_x;
    starty[nr] = start_y-1;

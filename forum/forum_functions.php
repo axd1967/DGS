@@ -23,6 +23,7 @@ if( basename(getcwd()) == 'forum' )
    chdir("../");
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
+require_once( "include/goeditor_functions.php" );
 chdir("forum");
 
 
@@ -177,9 +178,21 @@ function message_box( $post_type, $id, $Subject='', $Text='')
                           'HIDDEN', 'thread', $thread,
                           'HIDDEN', 'forum', $forum ));
    $form->add_row( array( 'SPACE', 'TEXTAREA', 'Text', 70, 25, $Text ) );
-   $form->add_row( array( 'SPACE', 'SUBMITBUTTON', 'post', ' ' . T_('Post') . ' ',
+
+   $str = draw_diagrams($id, $Text);
+   if( !empty($str) )
+   {
+      $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str ));
+      $form->add_row( array( 'OWNHTML',
+                             '<td><input type="submit" name="post" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . ' "></td>' .
+                             '<td><input type="submit" name="preview" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \"></td>\n" ));
+   }
+   else
+      $form->add_row( array( 'SPACE', 'SUBMITBUTTON', 'post', ' ' . T_('Post') . ' ',
                           'SUBMITBUTTON', 'preview', ' ' . T_('Preview') . ' ') );
+
    $form->echo_string();
+
    echo "</ul>\n";
 }
 
