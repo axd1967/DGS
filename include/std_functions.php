@@ -719,11 +719,19 @@ function is_logged_in($hdl, $scode, &$row)
       return false;
 
    $query = "UPDATE Players SET " .
-       "Hits=Hits+1, " .
-       "Activity=Activity + $ActivityForHit, " .
-       "Lastaccess=FROM_UNIXTIME($NOW), " .
-       "Notify='NONE' " .
-       "WHERE Handle='$hdl' LIMIT 1";
+      "Hits=Hits+1, " .
+      "Activity=Activity + $ActivityForHit, " .
+      "Lastaccess=FROM_UNIXTIME($NOW), " .
+      "Notify='NONE'";
+
+   $browser = substr($_SERVER['HTTP_USER_AGENT'], 0, 64);
+   if( $row['Browser'] !== $browser )
+      $query .= ", Browser='$browser'";
+
+   if( $row['IP'] !== $_SERVER['REMOTE_ADDR'] )
+      $query .= ", IP='{$_SERVER['REMOTE_ADDR']}'";
+
+   $query .= " WHERE Handle='$hdl' LIMIT 1";
 
    $result = @mysql_query( $query );
 
