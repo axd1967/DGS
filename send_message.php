@@ -265,9 +265,9 @@ disable_cache();
 
 
       if( $swap )
-         $query .= "Black_ID=White_ID, " .
-            "White_ID=Black_ID, " .
-            "ToMove_ID=White_ID, " .
+         $query .= "Black_ID=" . $game_row["White_ID"] . ", " .
+            "White_ID=" . $game_row["Black_ID"] . ", " .
+            "ToMove_ID=" . $game_row["White_ID"] . ", " .
             "ClockUsed=$clock_used_white, " .
             "LastTicks=$ticks_white, ";
       else
