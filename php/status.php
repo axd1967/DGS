@@ -45,7 +45,8 @@ if( $msg )
     echo "
     <table border=3>
        <tr><td>Name:</td> <td>" . $player_row["Name"] . "</td></tr>
-       <tr><td>Userid:</td> <td>" . $player_row["Handle"] . "</td></tr>";
+       <tr><td>Userid:</td> <td>" . $player_row["Handle"] . "</td></tr>
+       <tr><td>Open for matches:</td> <td>" . $player_row["Open"] . "</td></tr>";
 
     if( $player_row["RatingStatus"] ) echo "
        <tr><td>Rating:</td> <td>";  echo_rating($player_row["Rating"]); echo "</td></tr>";
@@ -59,7 +60,8 @@ if( $msg )
 $result = mysql_query("SELECT UNIX_TIMESTAMP(Messages$my_id.Time) AS date, " . 
                       "Messages$my_id.*, Players.Name AS sender " . 
                       "FROM Messages$my_id, Players " .
-                      "WHERE (Info='NEW' OR Info='REPLY REQUIRED') AND From_ID=Players.ID");
+                      "WHERE (Info='NEW' OR Info='REPLY REQUIRED') AND From_ID=Players.ID " .
+                      "ORDER BY Time DESC");
 
 
 if( mysql_num_rows($result) > 0 )
@@ -105,7 +107,8 @@ $uid = $player_row["ID"];
 $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
                       "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
                       "AND Players.ID!=$uid " .
-                      "AND (Black_ID=Players.ID OR White_ID=Players.ID)" );
+                      "AND (Black_ID=Players.ID OR White_ID=Players.ID) " .
+                      "ORDER BY Lastchanged");
 
 echo "<HR><B>Your turn to move in the following games:</B><p>\n";
 echo "<table border=3>\n";
