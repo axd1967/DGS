@@ -51,6 +51,8 @@ Find which group your webserver is using (e.g. www-data).
 > chmod 640 include/config.php
 > chmod 664 translations/
 
+Adjust include/config.php to your environment.
+
 
 
 
