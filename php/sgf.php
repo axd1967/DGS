@@ -49,10 +49,13 @@ $result = mysql_query( "SELECT * FROM Moves$gid" );
 disable_cache();
 
 header ('Content-Type: application/x-go-sgf');
+header( "Content-Disposition: inline; filename=\"$Whitehandle-$Blackhandle-" . 
+        date('Ymd', time()) . '.sgf\"' ); 
+header( "Content-Description: PHP3 Generated Data" );
 
 echo "(;GM[1]
 PC[Dragon Go Server: $HOSTNAME]
-DT[" . date( 'Y-m-d', time() ) . "
+DT[" . date( 'Y-m-d', time() ) . "]
 PB[$Blackname]
 PW[$Whitename]
 BR[$Blackrank]
