@@ -113,10 +113,10 @@ disable_cache();
       $handicap_type = @$_REQUEST['handicap_type'];
       $color = @$_REQUEST['color'];
       $rated = @$_REQUEST['rated'];
-      $handicap = @$_REQUEST['handicap'];
-      $komi_m = @$_REQUEST['komi_m'];
-      $komi_n = @$_REQUEST['komi_n'];
-      $komi_d = @$_REQUEST['komi_d'];
+      $handicap = (int)@$_REQUEST['handicap'];
+      $komi_m = (int)@$_REQUEST['komi_m'];
+      $komi_n = (int)@$_REQUEST['komi_n'];
+      $komi_d = (int)@$_REQUEST['komi_d'];
       $weekendclock = @$_REQUEST['weekendclock'];
 
       //for interpret_time_limit_forms{
