@@ -43,14 +43,14 @@ require_once( "include/std_functions.php" );
 
    while( $row = mysql_fetch_array( $result ) )
    {
-      echo '<tr><td>' . $row["Status"] . '</td><td>' . $row["moves"] . '</td><td>' . $row["count"] . '</td></tr>
+      echo '<tr><td>' . $row["Status"] . '</td><td align="right">' . $row["moves"] . '</td><td align="right">' . $row["count"] . '</td></tr>
 ';
    }
 
    $result = mysql_query( $q2 );
    $row = mysql_fetch_array( $result );
 
-   echo '<tr><td>Total</td><td>' . $row["moves"] . '</td><td>' . $row["count"] . '</td></tr>
+   echo '<tr><td>Total</td><td align="right">' . $row["moves"] . '</td><td align="right">' . $row["count"] . '</td></tr>
 </table>
 ';
 
@@ -60,6 +60,9 @@ require_once( "include/std_functions.php" );
 
    echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
    echo '<p>Activity: ' . round($row['activity']);
+
+   echo "\n<p><img src=\"statisticspng.php?date=$NOW\"" .
+        " alt=\"" . T_('Statistics graph') . "\">";
 
    end_page();
 }

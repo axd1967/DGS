@@ -20,14 +20,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
+require_once( "include/graph.php" );
 
-$defaultsize = 640;
+define('IMAGE_BORDER',6);
 
 //Display the number of games played below the date.
 define('SHOW_NRGAMES',true);
-
-//For IMG_COLOR_STYLED alignment = count of both imagesetstyle() arrays.
-define('DASH_MODULO' ,6);
 
 
 function get_rating_data($uid)
@@ -192,19 +190,8 @@ function interleave_data($arrayX, $arrayY)
    return $array;
 }
 
-function imagemultiline($im, $points, $nr_points, $color)
-{
-   for( $i=0; $i<$nr_points-1; $i++)
-      imageline($im, $points[2*$i],$points[2*$i+1],$points[2*$i+2],$points[2*$i+3],$color);
-}
-
-
-
-
-
 
 {
-   $microtime = getmicrotime();
 
    connect2mysql();
 
@@ -214,95 +201,50 @@ function imagemultiline($im, $points, $nr_points, $color)
 //      error("not_logged_in");
 
 
-//Disable translations in graph if not latin
-if( eregi( '^iso-8859-', $encoding_used) )
-{
-   $keep_english= false;
-   $T_= 'T_';
-}
-else
-{
-   $keep_english= true;
-   $T_= 'fnop';
-}
-
-
-//Check font and find pagging constantes
-
-
-// Font name, if it's not found a non-ttf font is used instead (with imagestring())
-   $x = 'FreeSans-Medium' ;
-
-   if ( isset($_GET['font']) )
-      $x = $_GET['font'] ;
-
-   define('TTF_FONT',"/var/lib/defoma/fontconfig.d/F/$x.ttf"); // Font path
-
-
-//Just two string samples to evaluate MARGE_LEFT
-   $x = array (echo_rating(100, 0,0,$keep_english), //20kyu
-               echo_rating(3000, 0,0,$keep_english)); //10dan
-
-   if ( function_exists('imagettftext') //TTF need GD and Freetype.
-        && is_file(TTF_FONT) //...and access rights check if needed
-   )
+   //Disable translations in graph if not latin
+   if( eregi( '^iso-8859-', $encoding_used) )
    {
-      define('LABEL_FONT'  ,-1);
-      define('LABEL_HEIGHT',9);
-      define('LABEL_SEPARATION',3);
-      $m = $v = 0;
-      foreach( $x as $y )
-         {
-            $b= imagettfbbox(LABEL_HEIGHT, 0, TTF_FONT, $y);
-            $a = $b[2]-$b[6] +1 ;
-            if( $a > $m )
-            {
-               $m = $a ;
-               $v = $a/strlen($y) ;
-            }
-         }
-      define('LABEL_MIDDLE', $b[3]-$b[7] +1);
-      define('LABEL_WIDTH' , $v +1);
-      define('MARGE_LEFT'  , $m +15);
-
-      function imagelabel($im, $x, $y, $str, $color)
-         {
-            $b= imagettftext($im, LABEL_HEIGHT, 0, $x, $y+LABEL_MIDDLE, $color, TTF_FONT, $str);
-            //global $red; imagerectangle($im, $b[6], $b[7], $b[2], $b[3], $red);
-            return $b[2]+LABEL_WIDTH ;
-         }
+      $keep_english= false;
+      $T_= 'T_';
    }
-   else //True type font file problem, so use embedded fonts:
+   else
    {
-      define('LABEL_FONT'  ,2);
-      define('LABEL_HEIGHT',ImageFontHeight(LABEL_FONT)-1);
-      define('LABEL_SEPARATION',1);
-      define('LABEL_WIDTH' ,ImageFontWidth(LABEL_FONT));
-      define('LABEL_MIDDLE',LABEL_HEIGHT*2/3);
-      $m = 0;
-      foreach( $x as $y )
-         $m = max( $m , strlen($y)*LABEL_WIDTH ) ;
-      define('MARGE_LEFT'  , $m +15);
-
-      function imagelabel($im, $x, $y, $str, $color)
-         {
-            $b = $x + strlen($str)*LABEL_WIDTH ;
-            //global $red; imagerectangle($im, $x, $y, $b, $y+LABEL_HEIGHT, $red);
-            imagestring($im, LABEL_FONT, $x, $y, $str, $color);
-            return $b+LABEL_WIDTH ;
-         }
+      $keep_english= true;
+      $T_= 'fnop';
    }
-
-   define('MARGE_TOP'   ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
-   define('MARGE_RIGHT' ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
-   define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
 
 
 //Then draw the graph
 
-
    $SizeX = ( @$_GET['size'] > 0 ? $_GET['size'] : $defaultsize );
    $SizeY = $SizeX * 3 / 4;
+
+   $im = imagecreate( $SizeX, $SizeY );
+   list($r,$g,$b,$a)= split_RGBA(substr($bg_color, 2, 6), 0);
+   $bg = imagecolorallocate ($im, $r,$g,$b); //first=background color
+
+   $black = imagecolorallocate ($im, 0, 0, 0);
+   $red = imagecolorallocate ($im, 205, 159, 156);
+   $light_blue = imagecolorallocate ($im, 220, 229, 255);
+   $nr_games_color = imagecolorallocate ($im, 250, 100, 98);
+
+
+   //Just two string samples to evaluate MARGE_LEFT
+   $x = array (echo_rating(100, 0,0,$keep_english), //20kyu
+               echo_rating(3000, 0,0,$keep_english)); //10dan
+
+   $m = 0;
+   foreach( $x as $y )
+   {
+      $b= imagelabelbox($im, $y);
+      $m= max($m,$b['x']);
+   }
+   define('MARGE_LEFT'  ,$m +IMAGE_BORDER+10);
+   define('MARGE_TOP'   ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
+   define('MARGE_RIGHT' ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
+   define('MARGE_BOTTOM',IMAGE_BORDER+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
+
+
 
    $starttime = mktime(0,0,0,$BEGINMONTH,1,$BEGINYEAR);
    $endtime = $NOW + $ratingpng_min_interval;
@@ -331,14 +273,6 @@ else
 
    $nr_points = count($ratings);
 
-   $im = imagecreate( $SizeX, $SizeY );
-
-   $bg = imagecolorallocate ($im, 247, 245, 227);
-   $black = imagecolorallocate ($im, 0, 0, 0);
-   $nr_games_color = imagecolorallocate ($im, 250, 100, 98);
-   $light_blue = imagecolorallocate ($im, 220, 229, 255);
-   $red = imagecolorallocate ($im, 205, 159, 156);
-
 
    if( $nr_points > 1 )
       imagefilledpolygon($im,
@@ -347,45 +281,50 @@ else
                          2*$nr_points, $light_blue);
 
 
+   //vertical scaling
+
    $SIZE = $SizeY-MARGE_BOTTOM-MARGE_TOP;
    $OFFSET = MARGE_TOP;
    $MIN = $max;
    $MAX = $min;
 
-   imagesetstyle ($im, array($black,$black,IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT,
-                             IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT));
+   imagesetdash($im, $black);
 
-   $v = ceil($min/100)*100;
+   $v = ceil($MAX/100)*100;
    $a = MARGE_LEFT-4 ;
-   $b = $SizeX- (($SizeX-$a) % DASH_MODULO)-1 ; //so all lines start in the same way
+   $b = $SizeX ;
+   $b = $b - ((($b-$a) % DASH_MODULO)+1) ; //so all lines start in the same way
    $y = $SizeY ;
-   while( $v < $max )
+   while( $v < $MIN )
    {
       $sc = scale($v);
       imageline($im, $a, $sc, $b, $sc, IMG_COLOR_STYLED);
       if ( $y > $sc )
       {
-         imagelabel ($im, 4, $sc-LABEL_MIDDLE, echo_rating($v, 0,0,$keep_english), $black);
+         imagelabel($im, IMAGE_BORDER, $sc-LABEL_ALIGN
+                  , echo_rating($v, 0,0,$keep_english), $black);
          $y = $sc - LABEL_HEIGHT ;
       }
       $v += 100;
    }
 
 
+   //horizontal scaling
+
    $SIZE = $SizeX-MARGE_LEFT-MARGE_RIGHT;
    $OFFSET = MARGE_LEFT;
    $MIN = $starttime;
    $MAX = $endtime;
 
-   imagesetstyle ($im, array($red,$red,IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT,
-                             IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT));
+   imagesetdash($im, $red);
 
-   $x = 0;
+   $x = MARGE_LEFT-1 ;
    if (SHOW_NRGAMES)
    {
-      $x = max($x,imagelabel($im, 4,
-                             $SizeY-MARGE_BOTTOM+3+ 2*(LABEL_SEPARATION+LABEL_HEIGHT),
-                             $T_('Games').':', $nr_games_color));
+      $x= max($x,LABEL_WIDTH+
+            imagelabel($im, IMAGE_BORDER
+                     , $SizeY-MARGE_BOTTOM+3+ 2*(LABEL_SEPARATION+LABEL_HEIGHT)
+                     , $T_('Games').':', $nr_games_color));
    }
 
    $year = date('Y',$starttime);
@@ -394,8 +333,10 @@ else
    $step = ceil(($endtime - $starttime)/(3600*24*30) * 20 / $SIZE);
    $no_text = true;
    $b = $SizeY-MARGE_BOTTOM+3 ;
-   $a = MARGE_TOP -DASH_MODULO+(($b-MARGE_TOP) % DASH_MODULO)+1 ;
+   $a = MARGE_TOP ;
+   $a = $a - (DASH_MODULO-((($b-$a) % DASH_MODULO)+1)) ;
    $ix_games = 0 ;
+   $y = $SizeY-MARGE_BOTTOM+3;
    for(;;$month+=$step)
    {
       $dt = mktime(0,0,0,$month,1,$year);
@@ -415,28 +356,32 @@ else
       if ($x >= $sc)
          continue;
 
-      $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3,  $T_(date('M', $dt)), $black));
-      $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3+LABEL_HEIGHT+LABEL_SEPARATION,
-                            date('Y', $dt), $black));
+      $x= max($x,LABEL_WIDTH+
+            imagelabel($im, $sc, $y,
+                        $T_(date('M', $dt)), $black));
+      $x= max($x,LABEL_WIDTH+
+            imagelabel($im, $sc, $y+LABEL_HEIGHT+LABEL_SEPARATION,
+                        date('Y', $dt), $black));
+
       if (SHOW_NRGAMES)
       {
          while ($ix_games < $nr_points && $time[$ix_games] <= $sc)
             $ix_games++;
          $v = max( 0, $nr_games+$ix_games);
-         $x= max($x,imagelabel($im, $sc,
-                               $SizeY-MARGE_BOTTOM+3+2*LABEL_HEIGHT+2*LABEL_SEPARATION,
-                               $v, $nr_games_color));
+         $x= max($x,LABEL_WIDTH+
+               imagelabel($im, $sc, $y+2*LABEL_HEIGHT+2*LABEL_SEPARATION,
+                           $v, $nr_games_color));
       }
    }
 
+   imagecurve($im, $time, $ratings, $nr_points, $black);
+
+
    if( @$_GET['show_time'] == 'y')
       imagelabel($im, MARGE_LEFT, 0,
-                 sprintf('%0.2f ms', (getmicrotime()-$microtime)*1000), $black);
+                 sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
-   imagemultiline($im, interleave_data($time, $ratings), $nr_points, $black);
 
-   header("Content-type: image/png");
-   imagePNG($im);
-   imagedestroy($im);
+   imagesend($im);
 }
 ?>
