@@ -22,6 +22,7 @@ $TranslateGroups[] = "Common";
 
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
+require_once( "include/form_functions.php" ); //for test
 require_once( "include/table_columns.php" );
 require_once( "include/message_functions.php" );
 
