@@ -688,6 +688,11 @@ class Form
                    ($multiple and array_key_exists($value,$selected)) )
                   $result .= " selected";
 
+               // Filter out HTML code
+               $info = eregi_replace("<BR>"," ",$info); //allow 2 lines long headers
+               $info = str_replace("<", "&lt;", $info);
+               $info = str_replace(">", "&gt;", $info);
+
                $result .= ">".$info."</OPTION>\n";
             }
          $result .= "        </SELECT>\n";
