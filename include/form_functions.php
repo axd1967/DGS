@@ -44,14 +44,15 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * * Selectbox
  * * Radiobuttons
  * * Checkbox
- * * Submitbutton 
+ * * Submitbutton
  * * Text
  * * Header  --- creates a header line.
  *
  *** Other things you could have in a row.
  *
- * * BR -- Forces a linebreak within the row.
- * * TD -- Forces a column change.
+ * * SPACE -- Makes some additional space, should be used on it's own row.
+ * * BR    -- Forces a linebreak within the row.
+ * * TD    -- Forces a column change.
  *
  *** Example:
  *
@@ -629,6 +630,14 @@ function form_insert_row()
           break;
 
           /* Special commands */
+        case 'SPACE':
+          {
+            $current_arg++;
+            $result .= "      <td height=\"20px\">&nbsp;</td>\n";
+            $column_started = false;
+          }
+          break;
+
         case 'BR':
           {
             $current_arg++;
