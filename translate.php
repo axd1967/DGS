@@ -172,15 +172,18 @@ When translating you should keep in mind the following things:
                                          strlen( $string ) / $hsize + 2,
                                          substr_count( $string, "\n" ) + 2 ),
                                     12 )));
-         //$transl = textarea_safe( $row['Text'], $translate_encoding);
-         //$transl = textarea_safe( $row['Text'], 'iso-8859-1');
-         $transl = $row['Text'];
-         if( $translate_lang == 'jp.shift-jis') //Japanese 2bytes char Pb
-             $transl = urldecode($transl);
+
+         $translation = $row['Text'];
+         if( $translate_lang == 'jp.shift-jis') //Japanese multibytes char Pb
+             $translation = urldecode($translation);
+         else
+           $translation = textarea_safe( $translation, $translate_encoding);
+         //$translation = textarea_safe( $translation, 'iso-8859-1');
+         //$translation = textarea_safe( $translation, 'EUC-JP');
          $form_row = array( 'TEXT', nl2br( textarea_safe($string, 'iso-8859-1' ) ),
                             'TD',
                             'TEXTAREA', "transl" . $row['Original_ID'],
-                              $hsize, $vsize, $transl,
+                              $hsize, $vsize, $translation,
                             'CELL', 1, 'nowrap',
                             'CHECKBOX', 'same' . $row['Original_ID'], 'Y',
                               'untranslated', $row['Text'] === '',
