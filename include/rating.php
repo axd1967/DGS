@@ -270,7 +270,7 @@ function update_rating2($gid)
    // Calculate factor used to alter how much the the ratings are to be changed
    $Factor = log(($bRatingMax - $bRatingMin)/($wRatingMax-$wRatingMin));
 
-   $MAX_FACTOR = 3;
+   $MAX_FACTOR = 2.5;
    $MAX_LN_FACTOR = log($MAX_FACTOR);
    $SLOPE_CONST = 1;
 
@@ -329,28 +329,36 @@ function update_rating2($gid)
       "bRatingMin: $bRatingMin<br>\n" .
       "bRatingMax: $bRatingMax<br>";
 
-
-    mysql_query( "UPDATE Games SET Rated='Done', " .
-                 "BlackRatingDiff= " . ($bRating - $bOld) .
-                 ", WhiteRatingDiff= " . ($wRating - $wOld) .
-                 " WHERE ID=$gid" );
+   if( $Rated !== 'Done' )
+      mysql_query( "UPDATE Games SET Rated='Done', " .
+                   "WHERE ID=$gid LIMIT 1" );
 
    mysql_query( "UPDATE Players SET Rating2=$bRating, " .
                 "RatingMin=$bRatingMin, RatingMax=$bRatingMax, " .
-                "RatingStatus='RATED' WHERE ID=$Black_ID" );
+                "RatingStatus='RATED' WHERE ID=$Black_ID LIMIT 1" );
 
-    mysql_query( "UPDATE Players SET Rating2=$wRating, " .
-                 "RatingMin=$wRatingMin, RatingMax=$wRatingMax, " .
-                 "RatingStatus='RATED' WHERE ID=$White_ID" );
+   mysql_query( "UPDATE Players SET Rating2=$wRating, " .
+                "RatingMin=$wRatingMin, RatingMax=$wRatingMax, " .
+                "RatingStatus='RATED' WHERE ID=$White_ID LIMIT 1" );
 
-    mysql_query("INSERT INTO Ratinglog (uid,gid,Rating,RatingMin,RatingMax, Time) VALUES " .
-                "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, '$Lastchanged'), " .
-                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, '$Lastchanged') ") or die(mysql_error());
+   mysql_query('INSERT INTO Ratinglog' .
+               '(uid,gid,Rating,RatingMin,RatingMax,RatingDiff,Time) VALUES ' .
+               "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, " .
+               ($bRating - $bOld) . ",'$Lastchanged'), " .
+               "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, " .
+               ($wRating - $wOld) . ", '$Lastchanged') ")
+      or die(mysql_error());
 
 }
 
+// To avoid too many translations
+$dan = T_('dan');
+$kyu = T_('kyu');
+
 function echo_rating($rating, $show_percent=true)
 {
+   global $dan, $kyu;
+
    if( !isset($rating) ) return '';
 
    $spc = ( $show_percent ? '&nbsp;' : ' ' );
@@ -360,11 +368,11 @@ function echo_rating($rating, $show_percent=true)
 
    if( $rank_val > 20.5 )
    {
-      $string .= ( $rank_val - 20 ) . $spc . T_('dan');
+      $string .= ( $rank_val - 20 ) . $spc . $dan;
    }
    else
    {
-      $string .= ( 21 - $rank_val ) . $spc . T_('kyu');
+      $string .= ( 21 - $rank_val ) . $spc . $kyu;
    }
 
    if( $show_percent )

@@ -27,6 +27,9 @@ CREATE TABLE Players (
   ClockUsed int(11) NOT NULL default '22',
   ClockChanged datetime default NULL,
   Rating double default NULL,
+  Rating2 double default NULL,
+  RatingMin double default NULL,
+  RatingMax double default NULL,
   InitialRating double default NULL,
   RatingStatus enum('INIT','READY','RATED') default NULL,
   Open varchar(40) default NULL,
@@ -128,6 +131,7 @@ CREATE TABLE Ratinglog (
   Rating double default NULL,
   RatingMin double default NULL,
   RatingMax double default NULL,
+  RatingDiff double default NULL,
   PRIMARY KEY  (ID),
   KEY uid (uid)
 ) TYPE=MyISAM;
