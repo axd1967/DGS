@@ -24,7 +24,6 @@ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 
-
 {
    connect2mysql();
 
@@ -54,10 +53,9 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    if( $msg )
       echo "<p><b><font color=\"green\">$msg</font></b><hr>";
 
-   $column_set = $player_row["GamesColumns"];
-   $page = "status.php?";
-
-   add_or_del($add, $del, "GamesColumns");
+   $gtable = new Table( "status.php",
+                        "GamesColumns" );
+   $gtable->add_or_del_column();
 
    echo '
     <table border=3>
@@ -88,41 +86,39 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
       echo "<HR><font color=$h3_color><B>" . T_('New messages') . ":</B></font><p>\n";
 
-      echo start_end_column_table(true);
-      echo tablehead(1, T_('Flags'), NULL, true, true);
-      echo tablehead(1, T_('From'), NULL, false, true);
-      echo tablehead(1, T_('Subject'), NULL, false, true);
-      echo tablehead(1, T_('Date'), NULL, true, true);
-      echo "</tr>\n";
+      $mtable = new Table( 'status.php', '', '', true );
 
-      $row_color=2;
+      $mtable->add_tablehead( 1, T_('Flags'), NULL, true, true );
+      $mtable->add_tablehead( 2, T_('From'), NULL, false, true );
+      $mtable->add_tablehead( 3, T_('Subject'), NULL, false, true );
+      $mtable->add_tablehead( 4, T_('Date'), NULL, true, true );
+
       while( $row = mysql_fetch_array( $result ) )
       {
-         $row_color=3-$row_color;
-         $bgcolor = ${"table_row_color$row_color"};
-
-         echo "<tr bgcolor=$bgcolor>";
-
+         $mrow_strings = array();
          if( !(strpos($row["Flags"],'NEW') === false) )
          {
-            echo '<td bgcolor="#00F464">' . T_('New') . "</td>\n";
+            $mrow_strings[1] = '<td bgcolor="#00F464">' . T_('New') . "</td>";
          }
          else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
          {
-            echo '<td bgcolor="#FFA27A">' . T_('Reply!') . "</td>\n";
+            $mrow_strings[1] = '<td bgcolor="#FFA27A">' . T_('Reply!') . "</td>";
          }
          else
          {
             error("message_status_corrupt");
          }
 
-         echo "<td><A href=\"message.php?mode=ShowMessage&amp;mid=" . $row["ID"] . "\">" .
-            make_html_safe($row["sender"]) . "</A></td>\n" .
-            "<td>" . make_html_safe($row["Subject"]) . "</td>\n" .
-            "<td>" . date($date_fmt2, $row["date"]) . "</td></tr>\n";
+         $mrow_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&amp;mid=" .
+            $row["ID"] . "\">" . make_html_safe($row["sender"]) . "</A></td>";
+         $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"]) . "</td>";
+         $mrow_strings[4] = "<td>" . date($date_fmt2, $row["date"]) . "</td></tr>";
+
+         $mtable->add_row( $mrow_strings );
       }
 
-      echo "</table><p>\n";
+      $mtable->echo_table();
+      echo "<p>\n";
    }
 
 
@@ -151,66 +147,48 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    }
    else
    {
-      echo start_end_column_table(true) .
-         tablehead(1, T_('ID'), NULL, NULL, true) .
-         tablehead(2, T_('sgf')) .
-         tablehead(3, T_('Opponent')) .
-         tablehead(4, T_('Nick')) .
-         tablehead(16, T_('Rating')) .
-         tablehead(5, T_('Color')) .
-         tablehead(6, T_('Size')) .
-         tablehead(7, T_('Handicap')) .
-         tablehead(8, T_('Komi')) .
-         tablehead(9, T_('Moves')) .
-         tablehead(13, T_('Last Move')) .
-         "</tr>\n";
+      $gtable->add_tablehead(1, T_('ID'), NULL, NULL, true);
+      $gtable->add_tablehead(2, T_('sgf'));
+      $gtable->add_tablehead(3, T_('Opponent'));
+      $gtable->add_tablehead(4, T_('Nick'));
+      $gtable->add_tablehead(16, T_('Rating'));
+      $gtable->add_tablehead(5, T_('Color'));
+      $gtable->add_tablehead(6, T_('Size'));
+      $gtable->add_tablehead(7, T_('Handicap'));
+      $gtable->add_tablehead(8, T_('Komi'));
+      $gtable->add_tablehead(9, T_('Moves'));
+      $gtable->add_tablehead(13, T_('Last Move'));
 
-      $row_color=2;
       while( $row = mysql_fetch_array( $result ) )
       {
          $Rating=NULL;
          extract($row);
          $color = ( $Color == BLACK ? 'b' : 'w' );
 
+         $grow_strings = array();
+         $grow_strings[1] = "<td class=button width=92 align=center>" .
+            "<A class=button href=\"game.php?gid=$ID\">" .
+            "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>";
+         $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
+            "<font color=$gid_color>sgf</font></A></td>";
+         $grow_strings[3] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+            make_html_safe($Name) . "</font></a></td>";
+         $grow_strings[4] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+            make_html_safe($Handle) . "</font></a></td>";
+         $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
+         $grow_strings[5] = "<td align=center><img src=\"17/$color.gif\" alt=$color></td>";
+         $grow_strings[6] = "<td>$Size</td>";
+         $grow_strings[7] = "<td>$Handicap</td>";
+         $grow_strings[8] = "<td>$Komi</td>";
+         $grow_strings[9] = "<td>$Moves</td>";
+         $grow_strings[13] = '<td>' . date($date_fmt, $Time) . "</td>";
 
-         $row_color=3-$row_color;
-
-
-
-
-         echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
-
-         echo "<td class=button width=92 align=center><A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>\n";
-         if( (1 << 1) & $column_set )
-            echo "<td><A href=\"sgf.php?gid=$ID\"><font color=$gid_color>sgf</font></A></td>\n";
-         if( (1 << 2) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Name) . "</font></a></td>\n";
-         if( (1 << 3) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Handle) . "</font></a></td>\n";
-         if( (1 << 15) & $column_set )
-            echo "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>\n";
-         if( (1 << 4) & $column_set )
-            echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
-         if( (1 << 5) & $column_set )
-            echo "<td>$Size</td>\n";
-         if( (1 << 6) & $column_set )
-            echo "<td>$Handicap</td>\n";
-         if( (1 << 7) & $column_set )
-            echo "<td>$Komi</td>\n";
-         if( (1 << 8) & $column_set )
-            echo "<td>$Moves</td>\n";
-         if( (1 << 12) & $column_set )
-            echo '<td>' . date($date_fmt, $Time) . "</td>\n";
-
-         echo "</tr>\n";
+         $gtable->add_row( $grow_strings );
       }
-      echo start_end_column_table(false);
+
+      $gtable->echo_table();
    }
    echo "</center>";
-
-
 
    $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$uid",
                         T_('Show running games') => "show_games.php?uid=$uid",

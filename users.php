@@ -33,21 +33,20 @@ require_once( "include/form_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   $column_set = $player_row["UsersColumns"];
    $page = "users.php?";
+   if( $_GET['showall'] ) $page .= "showall=1&";
 
-   if( $showall ) $page .= "showall=1&";
+   $utable = new Table( $page, "UsersColumns" );
+   $utable->add_or_del_column();
 
-   add_or_del($add, $del, "UsersColumns");
+   if(!$_GET['sort1'])
+      $_GET['sort1'] = 'ID';
 
-   if(!$sort1)
-      $sort1 = 'ID';
+   $order = $_GET['sort1'] . ( $_GET['desc1'] ? ' DESC' : '' );
+   if( $_GET['sort2'] )
+      $order .= "," . $_GET['sort2'] . ( $_GET['desc2'] ? ' DESC' : '' );
 
-   $order = $sort1 . ( $desc1 ? ' DESC' : '' );
-   if( $sort2 )
-      $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
-
-   if( !$showall )
+   if( !$_GET['showall'] )
        $where_clause = "WHERE Activity>$ActiveLevel1 ";
 
    $query = "SELECT *, Rank AS Rankinfo, " .
@@ -60,30 +59,24 @@ require_once( "include/form_functions.php" );
 
    $result = mysql_query( $query );
 
-
    start_page(T_('Users'), true, $logged_in, $player_row );
 
+   $utable->add_tablehead(1, T_('ID'), 'ID');
+   $utable->add_tablehead(2, T_('Name'), 'Name');
+   $utable->add_tablehead(3, T_('Nick'), 'Handle');
+   $utable->add_tablehead(4, T_('Rank info'));
+   $utable->add_tablehead(5, T_('Rating'), 'Rating2', true);
+   $utable->add_tablehead(6, T_('Open for matches?'));
+   $utable->add_tablehead(7, T_('Games'), 'Games', true);
+   $utable->add_tablehead(8, T_('Running'), 'Running', true);
+   $utable->add_tablehead(9, T_('Finished'), 'Finished', true);
+   $utable->add_tablehead(10, T_('Won'), 'Won', true);
+   $utable->add_tablehead(11, T_('Lost'), 'Lost', true);
+   $utable->add_tablehead(12, T_('Percent'), 'Percent', true);
+   $utable->add_tablehead(13, T_('Activity'), 'ActivityLevel', true);
+   $utable->add_tablehead(14, T_('Last access'), 'Lastaccess', true);
+   $utable->add_tablehead(15, T_('Last Moved'), 'Lastmove', true);
 
-
-   echo start_end_column_table(true) .
-      tablehead(1, T_('ID'), 'ID') .
-      tablehead(2, T_('Name'), 'Name') .
-      tablehead(3, T_('Nick'), 'Handle') .
-      tablehead(4, T_('Rank info')) .
-      tablehead(5, T_('Rating'), 'Rating2', true) .
-      tablehead(6, T_('Open for matches?')) .
-      tablehead(7, T_('Games'), 'Games', true) .
-      tablehead(8, T_('Running'), 'Running', true) .
-      tablehead(9, T_('Finished'), 'Finished', true) .
-      tablehead(10, T_('Won'), 'Won', true) .
-      tablehead(11, T_('Lost'), 'Lost', true) .
-      tablehead(12, T_('Percent'), 'Percent', true) .
-      tablehead(13, T_('Activity'), 'ActivityLevel', true) .
-      tablehead(14, T_('Last access'), 'Lastaccess', true) .
-                tablehead(15, T_('Last Moved'), 'Lastmove', true) .
-                "</tr>\n";
-
-   $row_color=2;
    while( $row = mysql_fetch_array( $result ) )
    {
       $ID = $row['ID'];
@@ -97,55 +90,41 @@ require_once( "include/form_functions.php" );
       $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
       $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
 
-      $row_color=3-$row_color;
-      echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
+      $urow_strings = array();
+      $urow_strings[1] = "<td><A href=\"userinfo.php?uid=$ID\">$ID</A></td>";
+      $urow_strings[2] = "<td><A href=\"userinfo.php?uid=$ID\">" .
+         make_html_safe($row['Name']) . "</A></td>";
+      $urow_strings[3] = "<td><A href=\"userinfo.php?uid=$ID\">" .
+         make_html_safe($row['Handle']) . "</A></td>";
+      $urow_strings[4] = '<td>' . make_html_safe($row['Rankinfo'],true) . '&nbsp;</td>';
+      $urow_strings[5] = '<td>' . echo_rating($row['Rating2'],true,$ID) . '&nbsp;</td>';
+      $urow_strings[6] = '<td>' . make_html_safe($row['Open'],true) . '&nbsp;</td>';
+      $urow_strings[7] = '<td>' . $row['Games'] . '&nbsp;</td>';
+      $urow_strings[8] = '<td>' . $row['Running'] . '&nbsp;</td>';
+      $urow_strings[9] = '<td>' . $row['Finished'] . '&nbsp;</td>';
+      $urow_strings[10] = '<td>' . $row['Won'] . '&nbsp;</td>';
+      $urow_strings[11] = '<td>' . $row['Lost'] . '&nbsp;</td>';
+      $urow_strings[12] = '<td>' . $percent . '&nbsp;</td>';
+      $urow_strings[13] = '<td>' . $activity . '&nbsp;</td>';
+      $urow_strings[14] = '<td>' . $lastaccess . '&nbsp;</td>';
+      $urow_strings[15] = '<td>' . $lastmove . '&nbsp;</td>';
 
-      if( (1 << 0) & $column_set )
-         echo "<td><A href=\"userinfo.php?uid=$ID\">$ID</A></td>\n";
-      if( (1 << 1) & $column_set )
-         echo "<td><A href=\"userinfo.php?uid=$ID\">" . make_html_safe($row['Name']) .
-            "</A></td>\n";
-      if( (1 << 2) & $column_set )
-         echo "<td><A href=\"userinfo.php?uid=$ID\">" . make_html_safe($row['Handle']) .
-            "</A></td>\n";
-      if( (1 << 3) & $column_set )
-         echo '<td>' . make_html_safe($row['Rankinfo'],true) . '&nbsp;</td>';
-      if( (1 << 4) & $column_set )
-         echo '<td>' . echo_rating($row['Rating2'],true,$ID) . '&nbsp;</td>';
-      if( (1 << 5) & $column_set )
-         echo '<td>' . make_html_safe($row['Open'],true) . '&nbsp;</td>';
-      if( (1 << 6) & $column_set )
-         echo '<td>' . $row['Games'] . '&nbsp;</td>';
-      if( (1 << 7) & $column_set )
-         echo '<td>' . $row['Running'] . '&nbsp;</td>';
-      if( (1 << 8) & $column_set )
-         echo '<td>' . $row['Finished'] . '&nbsp;</td>';
-      if( (1 << 9) & $column_set )
-         echo '<td>' . $row['Won'] . '&nbsp;</td>';
-      if( (1 << 10) & $column_set )
-         echo '<td>' . $row['Lost'] . '&nbsp;</td>';
-      if( (1 << 11) & $column_set )
-         echo '<td>' . $percent . '&nbsp;</td>';
-      if( (1 << 12) & $column_set )
-         echo '<td>' . $activity . '&nbsp;</td>';
-      if( (1 << 13) & $column_set )
-         echo '<td>' . $lastaccess . '&nbsp;</td>';
-      if( (1 << 14) & $column_set )
-         echo '<td>' . $lastmove . '&nbsp;</td>';
-      echo "</tr>\n";
+      $utable->add_row( $urow_strings );
    }
 
-   echo start_end_column_table(false);
+   $utable->echo_table();
 
-
-   $order = order_string($sort1, $desc1, $sort2, $desc2);
+   $order = $utable->make_sort_string( $_GET['sort1'],
+                                       $_GET['desc1'],
+                                       $_GET['sort2'],
+                                       $_GET['desc2'] );
 
    if( strlen( $order ) > 0 )
-      $vars = '?' . $order . ( $showall ? '' : '&showall=1');
+      $vars = '?' . $order . ( $_GET['showall'] ? '' : '&showall=1');
    else
       $vars = 'showall=1';
 
-   $menu_array = array( ( $showall ? T_("Only active users")  : T_("Show all users") ) =>
+   $menu_array = array( ( $_GET['showall'] ? T_("Only active users")  : T_("Show all users") ) =>
                         "users.php$vars" );
 
    end_page($menu_array);

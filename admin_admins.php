@@ -20,8 +20,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Admin";
 
-require( "include/std_functions.php" );
-require( "include/table_columns.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/table_columns.php" );
+require_once( "include/table_columns.php.old" );
 
 {
   connect2mysql();
@@ -94,19 +95,6 @@ require( "include/table_columns.php" );
      }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   start_page(T_("Admin").' - '.T_('Edit admin staff'), true, $logged_in, $player_row );
 
   $result = mysql_query("SELECT ID, Handle, Name, Adminlevel+0 AS admin_level FROM Players " .
@@ -119,60 +107,77 @@ require( "include/table_columns.php" );
 
       echo '<form name="admform" action="admin_admins.php?update=t" method="POST">'."\n";
 
-      echo start_end_column_table(true);
-      echo tablehead(1, T_('ID'), NULL, true, true);
-      echo tablehead(1, T_('Nick'), NULL, false, true);
-      echo tablehead(1, T_('Name'), NULL, false, true);
-      echo tablehead(1, T_('Translators'), NULL, true, true);
-      echo tablehead(1, T_('FAQ'), NULL, true, true);
-      echo tablehead(1, T_('Forum'), NULL, true, true);
-      echo tablehead(1, T_('Admins'), NULL, true, true);
-      echo tablehead(1, T_('Time'), NULL, true, true);
-      echo "</tr>\n";
+      $atable = new Table( '', '', '', true );
 
-      $row_color=2;
+      $atable->add_tablehead(1, T_('ID'), NULL, true, true);
+      $atable->add_tablehead(2, T_('Nick'), NULL, false, true);
+      $atable->add_tablehead(3, T_('Name'), NULL, false, true);
+      $atable->add_tablehead(4, T_('Translators'), NULL, true, true);
+      $atable->add_tablehead(5, T_('FAQ'), NULL, true, true);
+      $atable->add_tablehead(6, T_('Forum'), NULL, true, true);
+      $atable->add_tablehead(7, T_('Admins'), NULL, true, true);
+      $atable->add_tablehead(8, T_('Time'), NULL, true, true);
+
       while( $row = mysql_fetch_array( $result ) )
       {
-         $row_color=3-$row_color;
-         $bgcolor = ${"table_row_color$row_color"};
-
-         echo "<tr bgcolor=$bgcolor>";
-
          $id = $row["ID"];
 
-         echo "<td><A href=\"userinfo.php?uid=$id\">$id</A></td>\n";
-         echo "<td><A href=\"userinfo.php?uid=$id\">" . $row["Handle"] . "</td>\n";
-         echo "<td><A href=\"userinfo.php?uid=$id\">" .
-            make_html_safe($row["Name"]) . "</A></td>\n";
+         $arow_strings = array();
+         $arow_strings[1] = "<td><A href=\"userinfo.php?uid=$id\">$id</A></td>";
+         $arow_strings[2] = "<td><A href=\"userinfo.php?uid=$id\">" . $row["Handle"] . "</td>";
+         $arow_strings[3] = "<td><A href=\"userinfo.php?uid=$id\">" .
+            make_html_safe($row["Name"]) . "</A></td>";
+         $arow_strings[4] = "<td align=center>" .
+            "<input type=\"checkbox\" name=\"TRANS_$id\" value=\"Y\"" .
+            (($row["admin_level"] & ADMIN_TRANSLATORS) ? ' checked' : '') . "></td>";
+         $arow_strings[5] = "<td align=center>" .
+            "<input type=\"checkbox\" name=\"FAQ_$id\" value=\"Y\"" .
+            (($row["admin_level"] & ADMIN_FAQ) ? ' checked' : '') . "></td>";
+         $arow_strings[6] = "<td align=center>" .
+            "<input type=\"checkbox\" name=\"Forum_$id\" value=\"Y\"" .
+            (($row["admin_level"] & ADMIN_FORUM) ? ' checked' : '') . "></td>";
+         $arow_strings[7] = "<td align=center>" .
+            "<input type=\"checkbox\" name=\"ADMIN_$id\" value=\"Y\"" .
+            (($row["admin_level"] & ADMIN_ADMINS) ? ' checked' : '') . "></td>";
+         $arow_strings[8] = "<td align=center>" .
+            "<input type=\"checkbox\" name=\"TIME_$id\" value=\"Y\"" .
+            (($row["admin_level"] & ADMIN_TIME) ? ' checked' : '') . "></td>";
 
-         echo "<td align=center><input type=\"checkbox\" name=\"TRANS_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_TRANSLATORS) ? ' checked' : '') . "></td>\n";
-         echo "<td align=center><input type=\"checkbox\" name=\"FAQ_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_FAQ) ? ' checked' : '') . "></td>\n";
-         echo "<td align=center><input type=\"checkbox\" name=\"Forum_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_FORUM) ? ' checked' : '') . "></td>\n";
-         echo "<td align=center><input type=\"checkbox\" name=\"ADMIN_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_ADMINS) ? ' checked' : '') . "></td>\n";
-         echo "<td align=center><input type=\"checkbox\" name=\"TIME_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_TIME) ? ' checked' : '') . "></td>\n";
-
+         $atable->add_row( $arow_strings );
       }
 
-      $row_color=3-$row_color;
-      $bgcolor = ${"table_row_color$row_color"};
-      echo "<tr bgcolor=$bgcolor><td colspan=3>" . T_('New admin') .
-         ': <input type="text" name="newadmin" value="" size="16" maxlength="16">'."\n";
-      echo "<td align=center><input type=\"checkbox\" name=\"TRANS_new\" value=\"Y\"></td>\n";
-      echo "<td align=center><input type=\"checkbox\" name=\"FAQ_new\" value=\"Y\"></td>\n";
-      echo "<td align=center><input type=\"checkbox\" name=\"Forum_new\" value=\"Y\"></td>\n";
-      echo "<td align=center><input type=\"checkbox\" name=\"ADMIN_new\" value=\"Y\"></td>\n";
-      echo "<td align=center><input type=\"checkbox\" name=\"TIME_new\" value=\"Y\"></td>\n";
+      $atable->add_row(
+         array( 1 => "<td colspan=3>" . T_('New admin') .
+                ': <input type="text" name="newadmin" value="" ' .
+                'size="16" maxlength="16">',
 
+                '',
 
+                '',
 
-      echo '<tr><td align=right colspan=8>' .
-         '<input type="submit" name="action" value="' . T_('Update changes') . "\">\n";
-      echo "</table><p>\n";
+                "<td align=center>" .
+                "<input type=\"checkbox\" name=\"TRANS_new\" value=\"Y\"></td>",
+
+                "<td align=center>" .
+                "<input type=\"checkbox\" name=\"FAQ_new\" value=\"Y\"></td>",
+
+                "<td align=center>" .
+                "<input type=\"checkbox\" name=\"Forum_new\" value=\"Y\"></td>",
+
+                "<td align=center>" .
+                "<input type=\"checkbox\" name=\"ADMIN_new\" value=\"Y\"></td>",
+
+                "<td align=center>" .
+                "<input type=\"checkbox\" name=\"TIME_new\" value=\"Y\"></td>" ) );
+
+      $atable->add_row(
+         array( 1 => '<td align=right colspan=8>' .
+                '<input type="submit" name="action" value="' . T_('Update changes') . "\">",
+
+                '', '', '', '', '', '', '' ) );
+
+      $atable->echo_table();
+      echo "<p>\n";
    }
 
 

@@ -28,9 +28,9 @@ require_once( "include/rating.php" );
 {
    connect2mysql();
 
-   $all = ($uid == 'all');
+   $all = ($_GET['uid'] == 'all');
 
-   if( !($uid > 0) and !$observe and !$all )
+   if( !($_GET['uid'] > 0) and !$_GET['observe'] and !$all )
       error("no_uid");
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
@@ -48,19 +48,18 @@ require_once( "include/rating.php" );
 td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       'background-repeat : no-repeat;  background-position : center; }';
 
-
    $column_set = $player_row["GamesColumns"];
-
-   if( $observe )
+   if( $_GET['observe'] )
       $page = 'show_games.php?observe=t&';
    else
-      $page = "show_games.php?uid=$uid&" . ( $finished ? 'finished=1&' : '' );
+      $page = "show_games.php?uid=" . $_GET['uid'] . '&' . ( $_GET['finished'] ? 'finished=1&' : '' );
 
-   add_or_del($add, $del, "GamesColumns");
+   $gtable = new Table( $page, "GamesColumns" );
+   $gtable->add_or_del_column();
 
-   if( !$observe and !$all )
+   if( !$_GET['observe'] and !$all )
    {
-      $result = mysql_query( "SELECT Name, Handle FROM Players WHERE ID=$uid" );
+      $result = mysql_query( "SELECT Name, Handle FROM Players WHERE ID=" . $_GET['uid'] );
 
       if( mysql_num_rows($result) != 1 )
          error("unknown_user");
@@ -68,22 +67,22 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $user_row = mysql_fetch_array($result);
    }
 
-   if(!$sort1)
+   if(!$_GET['sort1'])
    {
-      $sort1 = 'Lastchanged';
-      $desc1 = 1;
-      $sort2 = 'ID';
-      $desc2 = 1;
+      $_GET['sort1'] = 'Lastchanged';
+      $_GET['desc1'] = 1;
+      $_GET['sort2'] = 'ID';
+      $_GET['desc2'] = 1;
    }
 
-   $order = $sort1 . ( $desc1 ? ' DESC' : '' );
-   if( $sort2 )
-      $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
+   $order = $_GET['sort1'] . ( $_GET['desc1'] ? ' DESC' : '' );
+   if( $_GET['sort2'] )
+      $order .= "," . $_GET['sort2'] . ( $_GET['desc2'] ? ' DESC' : '' );
 
-   if( !is_numeric($from_row) or $from_row < 0 )
-      $from_row = 0;
+   if( !is_numeric($_GET['from_row']) or $_GET['from_row'] < 0 )
+      $_GET['from_row'] = 0;
 
-   if( $observe )
+   if( $_GET['observe'] )
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "black.Name AS blackName, black.Handle AS blackHandle, " .
@@ -93,7 +92,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          "FROM Observers, Games, Players AS white, Players AS black " .
          "WHERE Observers.uid=" . $player_row["ID"] . " AND Games.ID=gid " .
          "AND white.ID=White_ID AND black.ID=Black_ID " .
-         "ORDER BY $order LIMIT $from_row,$MaxRowsPerPage";
+         "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
    }
    else if( $all )
    {
@@ -104,216 +103,208 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          "white.Rating2 AS whiteRating, white.ID AS whiteID " .
          "FROM Games, Players AS white, Players AS black " .
          "WHERE " .
-         ( $finished ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .
+         ( $_GET['finished'] ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND white.ID=White_ID AND black.ID=Black_ID " .
-         "ORDER BY $order LIMIT $from_row,$MaxRowsPerPage";
+         "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
    }
    else
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "Name, Handle, Players.ID as pid, " .
          "Rating2 AS Rating, UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
-         "(White_ID=$uid)+1 AS Color ";
+         "(White_ID=" . $_GET['uid'] . ")+1 AS Color ";
 
-      if( $finished )
-         $query .= ", (Black_ID=$uid AND Score<0)*2 + (White_ID=$uid AND Score>0)*2 + " .
+      if( $_GET['finished'] )
+      {
+         $query .= ", (Black_ID=" . $_GET['uid'] . " AND Score<0)*2 + " .
+            "(White_ID=" . $_GET['uid'] . " AND Score>0)*2 + " .
             "(Score=0) - 1 AS Win ";
+      }
 
       $query .= "FROM Games,Players WHERE " .
-         ( $finished ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .
-         "AND (( Black_ID=$uid AND White_ID=Players.ID ) " .
-         "OR ( White_ID=$uid AND Black_ID=Players.ID )) " .
-         "ORDER BY $order LIMIT $from_row,$MaxRowsPerPage";
+         ( $_GET['finished'] ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .
+         "AND (( Black_ID=" . $_GET['uid'] . " AND White_ID=Players.ID ) " .
+         "OR ( White_ID=" . $_GET['uid'] . " AND Black_ID=Players.ID )) " .
+         "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
    }
 
    $result = mysql_query( $query );
 
-
-   if( $observe or $all)
+   if( $_GET['observe'] or $all)
    {
-      $title1 = $title2 = ( $observe ? T_('Observed games') :
-                            ( $finished ? T_('Finished games') : T_('Running games') ) );
+      $title1 = $title2 = ( $_GET['observe'] ? T_('Observed games') :
+                            ( $_GET['finished'] ? T_('Finished games') : T_('Running games') ) );
    }
    else
    {
-      $games_for = ( $finished ? T_('Finished games for %s') : T_('Running games for %s') );
+      $games_for = ( $_GET['finished'] ? T_('Finished games for %s') : T_('Running games for %s') );
       $title = sprintf( $games_for, make_html_safe($user_row["Name"]) );
-      $title2 = sprintf(  $games_for, "<A href=\"userinfo.php?uid=$uid\">" .
+      $title2 = sprintf(  $games_for, "<A href=\"userinfo.php?uid=" . $_GET['uid'] . "\">" .
                           make_html_safe($user_row["Name"]) . " (" .
                           make_html_safe($user_row["Handle"]) . ")</A>");
    }
 
    start_page( $title1, true, $logged_in, $player_row, $style );
 
-   $show_rows = $nr_rows = mysql_num_rows($result);
-
-   if( $nr_rows == $MaxRowsPerPage )
+   $show_rows = mysql_num_rows($result);
+   if( $show_rows == $MaxRowsPerPage )
+   {
       $show_rows = $RowsPerPage;
+      $gtable->Last_Page = false;
+   }
 
    echo "<center><h4><font color=$h3_color>$title2</font></H4></center>\n";
 
 
-   echo start_end_column_table(true) .
-      tablehead(NULL, T_('ID'), 'ID', true, true) .
-      tablehead(2, T_('sgf'));
+   $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true );
+   $gtable->add_tablehead( 2, T_('sgf') );
 
-   if( $observe or $all )
+   if( $_GET['observe'] or $all )
    {
-       echo tablehead(17, T_('Black name'), 'blackName') .
-          tablehead(18, T_('Black userid'), 'blackHandle') .
-          tablehead(19, T_('Black rating'), 'blackRating', true) .
-          tablehead(20, T_('White name'), 'whiteName') .
-          tablehead(21, T_('White userid'), 'whiteHandle') .
-          tablehead(22, T_('White rating'), 'whiteRating', true);
+      $gtable->add_tablehead(17, T_('Black name'), 'blackName');
+      $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
+      $gtable->add_tablehead(19, T_('Black rating'), 'blackRating', true);
+      $gtable->add_tablehead(20, T_('White name'), 'whiteName');
+      $gtable->add_tablehead(21, T_('White userid'), 'whiteHandle');
+      $gtable->add_tablehead(22, T_('White rating'), 'whiteRating', true);
    }
    else
    {
-      echo tablehead(3, T_('Opponent'), 'Name') .
-         tablehead(4, T_('Nick'), 'Handle') .
-         tablehead(16, T_('Rating'), 'Rating', true) .
-         tablehead(5, T_('Color'), 'Color');
+      $gtable->add_tablehead(3, T_('Opponent'), 'Name');
+      $gtable->add_tablehead(4, T_('Nick'), 'Handle');
+      $gtable->add_tablehead(16, T_('Rating'), 'Rating', true);
+      $gtable->add_tablehead(5, T_('Color'), 'Color');
    }
 
-   echo tablehead(6, T_('Size'), 'Size', true) .
-      tablehead(7, T_('Handicap'), 'Handicap') .
-      tablehead(8, T_('Komi'), 'Komi') .
-      tablehead(9, T_('Moves'), 'Moves', true);
+   $gtable->add_tablehead(6, T_('Size'), 'Size', true);
+   $gtable->add_tablehead(7, T_('Handicap'), 'Handicap');
+   $gtable->add_tablehead(8, T_('Komi'), 'Komi');
+   $gtable->add_tablehead(9, T_('Moves'), 'Moves', true);
 
-   if( $finished )
+   if( $_GET['finished'] )
    {
-      echo tablehead(10, T_('Score'));
+      $gtable->add_tablehead(10, T_('Score'));
       if( !$all )
-         echo tablehead(11, T_('Win?'), 'Win', true);
-      echo tablehead(14, T_('Rated'), 'Rated', true) .
-         tablehead(12, T_('End date'), 'Lastchanged', true);
+      {
+         $gtable->add_tablehead(11, T_('Win?'), 'Win', true);
+      }
+      $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
+      $gtable->add_tablehead(12, T_('End date'), 'Lastchanged', true);
    }
    else
    {
-      echo tablehead(14, T_('Rated'), 'Rated', true) .
-         tablehead(13, T_('Last Move'), 'Lastchanged', true);
-      if( !$observe and !$all)
-        echo tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
+      $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
+      $gtable->add_tablehead(13, T_('Last Move'), 'Lastchanged', true);
+      if( !$_GET['observe'] and !$all)
+      {
+         $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
+      }
    }
-
-   echo "</tr>\n";
 
    $i=0;
-   $row_color=2;
    while( $row = mysql_fetch_array( $result ) )
    {
       $Rating = $blackRating = $whiteRating = NULL;
       extract($row);
       $color = ( $Color == BLACK ? 'b' : 'w' );
 
-      $row_color=3-$row_color;
-      echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
+      $grow_strings = array();
+      $grow_strings[1] = "<td class=button width=92 align=center>" .
+         "<A class=button href=\"game.php?gid=$ID\">" .
+         "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>";
+      $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
+         "<font color=$gid_color>" . T_('sgf') . "</font></A></td>";
 
-
-      echo "<td class=button width=92 align=center><A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>\n";
-      if( (1 << 1) & $column_set )
-         echo "<td><A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" . T_('sgf') . "</font></A></td>\n";
-
-
-      if( $observe or $all )
+      if( $_GET['observe'] or $all )
       {
-         if( (1 << 16) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
-               make_html_safe($blackName) . "</font></a></td>\n";
-         if( (1 << 17) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
-               make_html_safe($blackHandle) . "</font></a></td>\n";
-         if( (1 << 18) & $column_set )
-            echo "<td>" . echo_rating($blackRating,true,$blackID) . "&nbsp;</td>\n";
-         if( (1 << 19) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
-               make_html_safe($whiteName) . "</font></a></td>\n";
-         if( (1 << 20) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
-               make_html_safe($whiteHandle) . "</font></a></td>\n";
-         if( (1 << 21) & $column_set )
-            echo "<td>" . echo_rating($whiteRating,true,$whiteID) . "&nbsp;</td>\n";
+         $grow_strings[17] = "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
+            make_html_safe($blackName) . "</font></a></td>";
+         $grow_strings[18] = "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
+            make_html_safe($blackHandle) . "</font></a></td>";
+         $grow_strings[19] = "<td>" . echo_rating($blackRating,true,$blackID) . "&nbsp;</td>";
+         $grow_strings[20] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
+            make_html_safe($whiteName) . "</font></a></td>";
+         $grow_strings[21] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
+            make_html_safe($whiteHandle) . "</font></a></td>";
+         $grow_strings[22] = "<td>" . echo_rating($whiteRating,true,$whiteID) . "&nbsp;</td>";
       }
       else
       {
-         if( (1 << 2) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Name) . "</font></a></td>\n";
-         if( (1 << 3) & $column_set )
-            echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Handle) . "</font></a></td>\n";
-         if( (1 << 15) & $column_set )
-            echo "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>\n";
-         if( (1 << 4) & $column_set )
-            echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
+         $grow_strings[3] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+            make_html_safe($Name) . "</font></a></td>";
+         $grow_strings[4] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+            make_html_safe($Handle) . "</font></a></td>";
+         $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
+         $grow_strings[5] = "<td align=center><img src=\"17/$color.gif\" alt=$color></td>";
       }
 
-      if( (1 << 5) & $column_set )
-         echo "<td>$Size</td>\n";
-      if( (1 << 6) & $column_set )
-         echo "<td>$Handicap</td>\n";
-      if( (1 << 7) & $column_set )
-         echo "<td>$Komi</td>\n";
-      if( (1 << 8) & $column_set )
-         echo "<td>$Moves</td>\n";
+      $grow_strings[6] = "<td>$Size</td>";
+      $grow_strings[7] = "<td>$Handicap</td>";
+      $grow_strings[8] = "<td>$Komi</td>";
+      $grow_strings[9] = "<td>$Moves</td>";
 
-      if( $finished )
+      if( $_GET['finished'] )
       {
-         if( (1 << 9) & $column_set )
-            echo '<td>' . score2text($Score, false) . "</td>\n";
-         if( !$all and (1 << 10) & $column_set )
+         $grow_strings[10] = '<td>' . score2text($Score, false) . "</td>";
+         if( !$all )
          {
             $src = '"images/' .
                ( $Win == 1 ? 'yes.gif" alt=' . T_('Yes') :
                  ( $Win == -1 ? 'no.gif" alt=' . T_('No') :
                    'dash.gif" alt=' . T_('jigo') ));
 
-            echo "<td align=center><img src=$src></td>";
+            $grow_strings[11] = "<td align=center><img src=$src></td>";
          }
-         if( (1 << 13) & $column_set )
-            echo "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>\n";
-         if( (1 << 11) & $column_set )
-            echo '<td>' . date($date_fmt, $Time) . "</td>\n";
+         $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
+         $grow_strings[12] = '<td>' . date($date_fmt, $Time) . "</td>";
       }
       else
       {
-         if( (1 << 13) & $column_set )
-            echo "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>\n";
-         if( (1 << 12) & $column_set )
-            echo '<td>' . date($date_fmt2, $Time) . "</td>\n";
+         $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
+         $grow_strings[13] = '<td>' . date($date_fmt2, $Time) . "</td>";
 
-         if( !$observe and !$all and (1 << 14) & $column_set )
-            echo '<td align=center>' . date($date_fmt2, $Lastaccess) . "</td>\n";
+         if( !$_GET['observe'] and !$all )
+         {
+            $grow_strings[15] = '<td align=center>' . date($date_fmt2, $Lastaccess) . "</td>";
+         }
       }
 
-      echo "</tr>\n";
+      $gtable->add_row( $grow_strings );
 
       if(++$i >= $show_rows)
          break;
    }
 
-   echo start_end_column_table(false);
-
-
+   $gtable->echo_table();
 
    $menu_array = array();
 
-   if( $observe )
-      $uid = $player_row["ID"];
+   if( $_GET['observe'] )
+   {
+      $_GET['uid'] = $player_row["ID"];
+   }
 
    if( !$all )
    {
-      $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
+      $menu_array[T_('User info')] = "userinfo.php?uid=" . $_GET['uid'];
 
-      if( $uid != $player_row["ID"] and !$observe )
-         $menu_array[T_('Invite this user')] = "message.php?mode=Invite&uid=$uid";
+      if( $_GET['uid'] != $player_row["ID"] and !$_GET['observe'] )
+         $menu_array[T_('Invite this user')] = "message.php?mode=Invite&uid=" . $_GET['uid'];
    }
 
-   if( $finished or $observe )
-      $menu_array[T_('Show running games')] = "show_games.php?uid=$uid";
-   if( !$finished )
-      $menu_array[T_('Show finished games')] = "show_games.php?uid=$uid&finished=1";
-   if( !$observe )
+   if( $_GET['finished'] or $_GET['observe'] )
+   {
+      $menu_array[T_('Show running games')] = "show_games.php?uid=" . $_GET['uid'];
+   }
+   if( !$_GET['finished'] )
+   {
+      $menu_array[T_('Show finished games')] = "show_games.php?uid=" .
+         $_GET['uid'] . "&finished=1";
+   }
+   if( !$_GET['observe'] )
+   {
       $menu_array[T_('Show observed games')] = "show_games.php?observe=t";
+   }
 
    end_page($menu_array);
 }

@@ -22,160 +22,435 @@ $TranslateGroups[] = "Common";
 
 require_once("form_functions.php");
 
-function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeletable=false,
-                   $width=NULL)
+/*!
+ * \file table_columns.php
+ *
+ * \brief Functions for creating standard tables.
+ */
+
+/*!
+ * \class Table
+ *
+ * \brief Class to ease the creation of standard tables.
+ */
+
+class Table
 {
-   global $sort1, $desc1, $sort2, $desc2,$column_set,$page,$removed_columns;
+   /*! \privatesection */
 
-   $col_pos = 1 << ($nr-1);
+   /*! \brief The primary column to sort on. */
+   var $Sort1;
+   /*! \brief Whether to search descending or ascending for the primary sort. */
+   var $Desc1;
+   /*! \brief The secondary column to sort on. */
+   var $Dort2;
+   /*! \brief Whether to search descending or ascending for the secondary sort. */
+   var $Desc2;
 
-   if( !$undeletable and !($col_pos & $column_set) )
-   {
-      if( !is_array($removed_columns) )
-         $removed_columns = array('');
-      $removed_columns[$nr] = $Head;
-      return;
-   }
+   /*! \brief Which columns in the set that is visible. */
+   var $Column_set;
+   /*! \brief The page used in links within this table. */
+   var $Page;
+   /*! \brief The column of the Player table in the database to use as column_set.
+    * \see $Column_set */
+   var $Player_Column;
+   /*! \brief Prefix to be used in _GET to avoid clashes with other tables and variables. */
+   var $Prefix;
+   /*! \brief If true, the table will not be able to add or delete columns. */
+   var $Static_Columns;
+   /*! \brief The columns that has been removed. */
+   var $Removed_Columns;
 
-   if( !$undeletable )
-      $delete_string = "<a href=\"" . $page .
-         ($sort1 ? order_string($sort1,$desc1,$sort2,$desc2) . '&' : '') .
-         "del=$nr" .
-         "\"><sup><font size=\"-1\" color=red>x</font></sup></a>";
+   /*! \brief Array describing all tableheads. */
+   var $Tableheads;
 
-   if( $width )
-      $width = " width=$width";
+   /*! \brief Array of rows to be diplayed.
+    * Each row should consist of an array like this:
+    * array( $column_nr1 => "Rowstring1",
+    *        $column_nr2 => "Rowstring2" );
+    *
+    * If the string doesn't begin with "<td", then, "<td>" will be added to the output.
+    * If the string doesn't end with "</td>", then, "</td>" will be added to the output.
+    */
+   var $Tablerows;
 
-   if( !$sort_string )
-      return "<th nowrap valign=bottom$width><font color=black>" . $Head .
-         "</font>$delete_string</th>\n";
+   /*! \brief The colors to alternate between for the rows. */
+   var $Row_Colors;
 
-   if( $sort_string == $sort1 )
-   {
-      $s1 = $sort1;
-      $s2 = $sort2;
-      $d1 = !$desc1;
-      $d2 = !$desc2;
-   }
-   else
-   {
-      $s1 = $sort_string;
-      $d1 = $desc_default;
-      $s2 = $sort1;
-      $d2 = $desc1 xor $desc_default;
-   }
+   /*! \brief The row number to start from.
+    * \see make_next_prev_links() */
+   var $From_Row;
+   /*! \brief If we are on the last page.
+    * \see make_next_prev_links() */
+   var $Last_Page;
+   /*! \brief The number of rows to be displayed (normally) on one page.
+    * \see make_next_prev_links() */
+   var $Rows_Per_Page;
 
-   return "<th nowrap valign=bottom $width><A href=\"$page" . order_string($s1,$d1,$s2,$d2) .
-      "\"><font color=black>" .  $Head .
-      "</font></A>$delete_string</th>\n";
-}
+   /*! \publicsection */
 
-function order_string($sortA, $descA, $sortB, $descB)
-{
-   if( $sortA )
-   {
-      $order = "sort1=$sortA" . ($descA ? '&desc1=1' : '');
-      if( $sortB )
-         $order .= "&sort2=$sortB" . ($descB ? '&desc2=1' : '');
-   }
-
-   return $order;
-}
-
-function next_prev($new_from_row, $next)
-{
-   global $sort1, $desc1, $sort2, $desc2, $page;
-
-   return "<a href=\"" . $page . "from_row=$new_from_row&" .
-      order_string($sort1,$desc1,$sort2,$desc2) . "\">" .
-      ($next ? T_("next page") . " -->" : "<-- " . T_("prev page")) . "</a>";
-}
-
-function strip_last_et($string)
-{
-   $c = substr($string, -1);
-
-   if( $c == '&' or $c == '?' )
-      return substr($string, 0, -1);
-
-   return $string;
-}
-
-function add_column_form()
-{
-   global $removed_columns, $page;
-
-   if( count($removed_columns) <= 1 )
-      return '';
-
-   $ac_form = new Form( 'add_column_form', strip_last_et($page), FORM_POST );
-   $ac_form->add_row( array( 'SELECTBOX', 'add', 1, $removed_columns, '', false,
-                             'SUBMITBUTTON', 'action', T_('Add Column') ) );
-   return $ac_form->get_form_string();
-}
-
-// Needed for php < 4.0.5
-if( !function_exists("array_search") )
-{
-   function array_search($needle, $haystack)
+   /*! \brief Constructor. Create a new table and initialize it. */
+   function Table( $_page,
+                   $_player_column = '',
+                   $_prefix = '',
+                   $_sc = false )
       {
-         while( list($key,$val) = each($haystack) )
+         global $table_row_color1, $table_row_color2, $RowsPerPage, $player_row;
+
+         $this->Removed_Columns = array('');
+         $this->Tableheads = array();
+         $this->Tablerows = array();
+
+         $this->Page = $_page;
+
+         if( strstr( $this->Page, '?' ) )
          {
-            if( $val == $needle )
-               return $key;
+            if( !(substr( $this->Page, -1 ) == '?') and
+                !(substr( $this->Page, -1 ) == '&') )
+            {
+               $this->Page .= '&';
+            }
          }
-         return false;
+         else
+         {
+            $this->Page .= '?';
+         }
+
+         $this->Player_Column = $_player_column;
+         if( empty($this->Player_Column) )
+         {
+            $this->Column_set = 255;
+         }
+         else
+         {
+            $this->Column_set = $player_row[ $this->Player_Column ];
+         }
+
+         $this->Prefix = $_prefix;
+         $this->Static_Columns = $_sc;
+
+         $this->Sort1 = $_GET[ $this->Prefix . 'sort1' ];
+         $this->Desc1 = $_GET[ $this->Prefix . 'desc1' ];
+         $this->Sort2 = $_GET[ $this->Prefix . 'sort2' ];
+         $this->Desc2 = $_GET[ $this->Prefix . 'desc2' ];
+
+         $this->Row_Colors = array( $table_row_color1, $table_row_color2 );
+
+         $this->From_Row = $_GET[ $this->Prefix . 'from_row' ];
+         $this->Last_Page = true;
+         $this->Rows_Per_Page = $RowsPerPage;
       }
-}
 
-function add_or_del($add, $del, $mysql_column)
-{
-   global $column_set, $player_row;
+   /*! \brief Add a tablehead. */
+   function add_tablehead( $nr,
+                           $description,
+                           $sort_string = NULL,
+                           $desc_default = false,
+                           $undeletable = false,
+                           $width = NULL )
+      {
+         array_push( $this->Tableheads,
+                     array( 'Nr' => $nr,
+                            'Description' => $description,
+                            'Sort_String' => $sort_string,
+                            'Desc_Default' => $desc_default,
+                            'Undeletable' => $undeletable,
+                            'Width' => $width ) );
+      }
 
-   if( $del or $add )
-   {
-      if( $add )
-         $column_set |= 1 << ($add-1);
-      if( $del )
-         $column_set &= ~(1 << ($del-1));
+   /*! \brief Add a row to be displayed.
+    * \see $Tablerows
+    */
+   function add_row( $row_array )
+      {
+         array_push( $this->Tablerows, $row_array );
+      }
 
-      $query = "UPDATE Players " .
-          "SET $mysql_column=$column_set " .
-          "WHERE ID=" . $player_row["ID"];
+   /*! \brief Create a string of the table. */
+   function make_table()
+      {
+         global $table_head_color;
 
-      mysql_query($query);
-   }
-}
-function start_end_column_table($start)
-{
-   global $from_row, $nr_rows, $show_rows, $RowsPerPage, $table_head_color;
+         $string = '';
 
-   if( $start )
-      $string =
-         "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
-   else
-      $string = "";
+         /* Start of the table */
 
+         $string = "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
+         $string .= $this->make_next_prev_links();
 
-   $string .= "<tr><td align=left colspan=2>";
+         /* Make tableheads */
 
-   if( $from_row > 0 )
-      $string .= next_prev($from_row-$RowsPerPage, false);
+         $string .= " <tr bgcolor=$table_head_color>\n";
+         foreach( $this->Tableheads as $thead )
+            {
+               $string .= $this->make_tablehead( $thead );
+            }
+         $string .= " </tr>\n";
 
-   $string .= "</td>\n<td align=right colspan=20>";
+         /* Make table rows */
 
-   if( $show_rows < $nr_rows )
-      $string .= next_prev($from_row+$RowsPerPage, true);
+         foreach( $this->Tablerows as $trow )
+            {
+               $string .= $this->make_tablerow( $trow );
+            }
 
-   $string .= "</td>\n</tr>\n";
+         /* End of the table */
 
-   if( $start )
-      $string .= "<tr bgcolor=$table_head_color>";
-   else
-      $string .= '<tr><td colspan=20 align=right>' .
-         add_column_form() . "</td></tr></table>\n";
+         $string .= $this->make_next_prev_links();
+         $string .= ' <tr><td colspan=20 align=right>' .
+            $this->make_add_column_form() .
+            "</td></tr>\n</table>\n";
 
-   return $string;
+         return $string;
+      }
+
+   /*! \brief Echo the string of the table. */
+   function echo_table()
+      {
+         echo $this->make_table();
+      }
+
+   /*! \privatesection */
+
+   function make_tablehead( $tablehead )
+      {
+         if( $tablehead['Nr'] > 0 )
+         {
+            $col_pos = 1 << ($tablehead['Nr'] - 1);
+         }
+         else
+         {
+            $col_pos = 0;
+         }
+
+         if( !$this->Static_Columns and
+             !$tablehead['Undeletable'] and
+             $tablehead['Nr'] > 0 and
+             !($col_pos & $this->Column_set) )
+         {
+            $this->Removed_Columns[ $tablehead['Nr'] ] = $tablehead['Description'];
+            return "";
+         }
+
+         $string = "  <th nowrap valign=\"bottom\"";
+
+         if( !is_null( $tablehead['Width'] ) )
+         {
+            $string .= " width=\"" . $tablehead['Width'] . "\"";
+         }
+
+         $string .= ">";
+
+         if( $tablehead['Sort_String'] )
+         {
+            $string .= "<a href=\"" . $this->Page;
+
+            if( $tablehead['Sort_String'] == $this->Sort1 )
+            {
+               $string .= $this->make_sort_string( $this->Sort1,
+                                                   !$this->Desc1,
+                                                   $this->Sort2,
+                                                   !$this->Desc2 );
+            }
+            else
+            {
+               $string .= $this->make_sort_string( $tablehead['Sort_String'],
+                                                   $tablehead['Desc_Default'],
+                                                   $this->Sort1,
+                                                   $this->Desc1 xor $tablehead['Desc_Default'] );
+            }
+
+            $string .= "\"><font color=\"black\">" . $tablehead['Description'] .
+               "</font></a>";
+         }
+         else
+         {
+            $string .= "<font color=\"black\">" . $tablehead['Description'] . "</font>";
+         }
+
+         if( !$tablehead['Undeletable'] )
+         {
+            $string .=
+               "<a href=\"" . $this->Page .
+               ($this->Sort1 ? $this->make_sort_string( $this->Sort1,
+                                                        $this->Desc1,
+                                                        $this->Sort2,
+                                                        $this->Desc2 ) . '&' : '') .
+               $this->Prefix . "del=" . $tablehead['Nr'] . "\">" .
+               "<sup><font size=\"-1\" color=\"red\">x</font></sup></a>";
+         }
+
+         $string .= "</th>\n";
+
+         return $string;
+      }
+
+   function make_tablerow( $tablerow )
+      {
+         list(, $bgcolor) = each( $this->Row_Colors );
+         if( !$bgcolor )
+         {
+            reset( $this->Row_Colors );
+            list(, $bgcolor) = each( $this->Row_Colors );
+         }
+
+         if( isset($tablerow['BG_Color']) )
+         {
+            $string = " <tr bgcolor=" . $tablerow['BG_Color'] .">\n";
+         }
+         else
+         {
+            $string = " <tr bgcolor=$bgcolor>\n";
+         }
+
+         foreach( $this->Tableheads as $th )
+            {
+               if( !in_array( $th['Description'], $this->Removed_Columns ) )
+               {
+                  $string .= $this->make_tablecell( $tablerow[ $th['Nr'] ] );
+               }
+            }
+
+         $string .= " </tr>\n";
+
+         return $string;
+      }
+
+   /*! \brief Modify the cellstring to make sure it behaves well. */
+   function make_tablecell( $cellstring )
+      {
+         if( empty( $cellstring ) )
+         {
+            return '';
+         }
+
+         $string = '  ';
+         if( substr( $cellstring, 0, 3 ) != "<td" )
+         {
+            $string .= "<td>";
+         }
+
+         $string .= $cellstring;
+
+         if( substr( $cellstring, -5 ) != "</td>" )
+         {
+            $string .= "</td>";
+         }
+
+         return $string . "\n";
+      }
+
+   /*! \brief Add next and prev links. */
+   function make_next_prev_links()
+      {
+         $string = "";
+
+         if( $$this->From_Row > 0 )
+         {
+            $string .= "  <td><a href=\"" . $this->Page .
+               $this->Prefix . "from_row=" . ($from_row-$RowsPerPage) .
+               $this->make_sort_string( $this->Sort1,
+                                        $this->Desc1,
+                                        $this->Sort2,
+                                        $this->Desc2 ) . "\">" .
+               "<-- " . T_("prev page") . "</a></td>\n";
+
+         }
+
+         if( !$this->Last_Page )
+         {
+            $string .= "  <td align=\"right\" colspan=20><a href=\"" . $this->Page .
+               $this->Prefix . "from_row=" . ($from_row+$RowsPerPage) .
+               $this->make_sort_string( $this->Sort1,
+                                        $this->Desc1,
+                                        $this->Sort2,
+                                        $this->Desc2 ) . "\">" .
+               T_("next page") . " -->" . "</a></td>\n";
+
+         }
+
+         if( !empty( $string ) )
+         {
+            $string = " <tr>\n $string </tr>\n";
+         }
+
+         return $string;
+      }
+
+   /*! \brief Make sort part of url. */
+   function make_sort_string( $sortA, $descA, $sortB, $descB )
+      {
+         if( $sortA )
+         {
+            $sort_string = $this->Prefix . "sort1=$sortA" .
+               ( $descA ? '&' . $this->Prefix . 'desc1=1' : '' );
+            if( $sortB )
+            {
+               $sort_string .= '&' . $this->Prefix . "sort2=$sortB" .
+                  ( $descB ? '&' . $this->Prefix . 'desc2=1' : '' );
+            }
+         }
+
+         return $sort_string;
+      }
+
+   /*! \brief Add or delete a column from the column set and apply it to the database. */
+   function add_or_del_column()
+      {
+         global $player_row;
+
+         $del = $_GET[ $this->Prefix . 'del' ];
+         $add = $_GET[ $this->Prefix . 'add' ];
+
+         if( $del or $add )
+         {
+            if( $add )
+            {
+               $this->Column_set |= 1 << ($add-1);
+            }
+            if( $del )
+            {
+               $this->Column_set &= ~(1 << ($del-1));
+            }
+
+            $query = "UPDATE Players" .
+               " SET " . $this->Player_Column . "=" . $this->Column_set .
+               " WHERE ID=" . $player_row["ID"];
+
+            mysql_query($query);
+         }
+
+      }
+
+   /*! \brief Adds a form for adding columns. */
+   function make_add_column_form()
+      {
+         if( $this->Static_Columns or
+             count($this->Removed_Columns) <= 1 )
+         {
+            return "";
+         }
+
+         $page_split = split( '[?&]', $this->Page );
+         list( , $page ) = each( $page_split );
+         $form_array = array();
+         while( list( , $query ) = each( $page_split ) )
+         {
+            if( !empty( $query ) )
+            {
+               list( $key, $value ) = explode( "=", $query );
+               array_push( $form_array, 'HIDDEN', $key, $value );
+            }
+         }
+
+         array_push( $form_array,
+                     'SELECTBOX', $this->Prefix . 'add', 1,
+                     $this->Removed_Columns, '', false,
+                     'SUBMITBUTTON', 'action', T_('Add Column') );
+         $ac_form = new Form( 'add_column_form', $page, FORM_GET );
+         $ac_form->add_row( $form_array );
+         return $ac_form->get_form_string();
+      }
 }
 
 ?>

@@ -34,14 +34,16 @@ require_once( "include/tournament.php" );
 
    start_page(T_("Tournaments"), true, $logged_in, $player_row );
 
-   $column_set = 255;
-   $page = "tournaments.php?";
+   $table = new Table( 'list_tournaments.php', '', 't_', true );
 
-   echo start_end_column_table(true);
-   echo tablehead( 1, T_('ID'), 'ID', false, true ) .
-      tablehead( 1, T_('State'), 'State', false, true ) .
-      tablehead( 1, T_('Name'), 'Name', false, true );
-   echo start_end_column_table(false);
+   $table->add_tablehead( 1, T_('ID'), 'ID', false, true );
+   $table->add_tablehead( 2, T_('State'), 'State', false, true );
+   $table->add_tablehead( 3, T_('Name'), 'Name', false, true );
+
+   $table->add_row( array( 1 => "111", 2 => "Inactive", 3 => "A name" ) );
+   $table->add_row( array( 1 => "122", 2 => "Active", 3 => "Another name" ) );
+
+   $table->echo_table();
 
    end_page(false);
 }

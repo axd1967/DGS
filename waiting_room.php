@@ -56,23 +56,25 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    echo "<center>";
 
-   if( $msg )
-      echo "<p><b><font color=\"green\">$msg</font></b><hr>";
+   if( $_GET['msg'] )
+      echo "<p><b><font color=\"green\">" . $_GET['msg'] . "</font></b><hr>";
 
-   $page = "waiting_room.php" . ( $info > 0 ? "?info=$info&" : '?' );
+   $page = "waiting_room.php" . ( $_GET['info'] > 0 ? "?info=" . $_GET['info'] . "&" : '?' );
 
-   if(!$sort1)
-      $sort1 = 'ID';
+   $wrtable = new Table( $page, "WaitingroomColumns" );
+   $wrtable->add_or_del_column();
 
-   $order = $sort1 . ( $desc1 ? ' DESC' : '' );
-   if( $sort2 )
-      $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
+   if(!$_GET['sort1'])
+      $_GET['sort1'] = 'ID';
 
-   $orderstring = order_string($sort1, $desc1, $sort2, $desc2);
+   $order = $_GET['sort1'] . ( $_GET['desc1'] ? ' DESC' : '' );
+   if( $_GET['sort2'] )
+      $order .= "," . $_GET['sort2'] . ( $_GET['desc2'] ? ' DESC' : '' );
 
-   $column_set = $player_row["WaitingroomColumns"];
-
-   add_or_del($add, $del, "WaitingroomColumns");
+   $orderstring = $wrtable->make_sort_string( $_GET['sort1'],
+                                              $_GET['desc1'],
+                                              $_GET['sort2'],
+                                              $_GET['desc2'] );
 
    $result = mysql_query("SELECT Waitingroom.*,Name,Handle," .
                          "Rating2 AS Rating,Players.ID AS pid " .
@@ -83,81 +85,67 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    if( mysql_num_rows($result) > 0 )
    {
-      echo start_end_column_table(true) .
-         tablehead(NULL, T_('Info'), NULL, NULL, true, 92) .
-         tablehead(1, T_('Name'), 'Name', false) .
-         tablehead(2, T_('Nick'), 'Handle', false) .
-         tablehead(3, T_('Rating'), 'Rating', true) .
-         tablehead(4, T_('Comment'), NULL, true) .
-         tablehead(5, T_('Handicap'), 'Handicaptype', false) .
-         tablehead(6, T_('Komi'), 'Komi', true) .
-         tablehead(7, T_('Size'), 'Size', true) .
-         tablehead(8, T_('Rating range'), NULL, true) .
-         tablehead(9, T_('Time limit'), NULL, true) .
-         tablehead(10, T_('#Games'), 'nrGames', true) .
-         tablehead(11, T_('Rated'), 'Rated', true) .
-         tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
+      $wrtable->add_tablehead(0, T_('Info'), NULL, NULL, true, 92);
+      $wrtable->add_tablehead(1, T_('Name'), 'Name', false);
+      $wrtable->add_tablehead(2, T_('Nick'), 'Handle', false);
+      $wrtable->add_tablehead(3, T_('Rating'), 'Rating', true);
+      $wrtable->add_tablehead(4, T_('Comment'), NULL, true);
+      $wrtable->add_tablehead(5, T_('Handicap'), 'Handicaptype', false);
+      $wrtable->add_tablehead(6, T_('Komi'), 'Komi', true);
+      $wrtable->add_tablehead(7, T_('Size'), 'Size', true);
+      $wrtable->add_tablehead(8, T_('Rating range'), NULL, true);
+      $wrtable->add_tablehead(9, T_('Time limit'), NULL, true);
+      $wrtable->add_tablehead(10, T_('#Games'), 'nrGames', true);
+      $wrtable->add_tablehead(11, T_('Rated'), 'Rated', true);
+      $wrtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
 
-      echo "</tr>\n";
-
-      $row_color=2;
       while( $row = mysql_fetch_array( $result ) )
       {
          $Rating = NULL;
          extract($row);
 
-
-         if( $info === $ID )
+         if( $_GET['info'] === $ID )
             $info_row = $row;
-
-         $row_color=3-$row_color;
-         echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
 
          if( $Handicaptype == 'conv' or $Handicaptype == 'proper' )
             $Komi = '-';
 
-
-         echo "<td class=button width=92 align=center><A class=button href=\"waiting_room.php?info=$ID&$orderstring#info\">&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>\n";
-
-         if( (1 << 0) & $column_set )
-            echo "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Name) . "</font></a></td>\n";
-         if( (1 << 1) & $column_set )
-            echo "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Handle) . "</font></a></td>\n";
-         if( (1 << 2) & $column_set )
-            echo "<td nowrap>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>\n";
-         if( (1 << 3) & $column_set )
+         $wrow_strings = array();
+         $wrow_strings[0] = "<td class=button width=92 align=center>" .
+            "<A class=button href=\"waiting_room.php?info=$ID&$orderstring#info\">" .
+            "&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>";
+         $wrow_strings[1] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+            make_html_safe($Name) . "</font></a></td>";
+         $wrow_strings[2] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
+            make_html_safe($Handle) . "</font></a></td>";
+         $wrow_strings[3] = "<td nowrap>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
+         if( empty($Comment) )
          {
-            if( empty($Comment) ) $Comment = '&nbsp;';
-            echo "<td nowrap>" . make_html_safe($Comment, true) . "</td>\n";
+            $Comment = '&nbsp;';
          }
-         if( (1 << 4) & $column_set )
-            echo "<td nowrap>" . $handi_array[$Handicaptype] . "</td>\n";
-         if( (1 << 5) & $column_set )
-            echo "<td>$Komi</td>\n";
-         if( (1 << 6) & $column_set )
-            echo "<td>$Size</td>\n";
-         if( (1 << 7) & $column_set )
-            echo '<td nowrap>' . echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) .
-               "</td>\n";
-         if( (1 << 8) & $column_set )
-            echo '<td nowrap>' . echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) . "</td>\n";
-         if( (1 << 9) & $column_set )
-            echo "<td>$nrGames</td>\n";
-         if( (1 << 10) & $column_set )
-         echo "<td>$Rated</td>\n";
-         if( (1 << 11) & $column_set )
-            echo "<td>$WeekendClock</td>\n";
+         $wrow_strings[4] = "<td nowrap>" . make_html_safe($Comment, true) . "</td>";
+         $wrow_strings[5] = "<td nowrap>" . $handi_array[$Handicaptype] . "</td>";
+         $wrow_strings[6] = "<td>$Komi</td>";
+         $wrow_strings[7] = "<td>$Size</td>";
+         $wrow_strings[8] = '<td nowrap>' .
+            echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) .
+            "</td>";
+         $wrow_strings[9] = '<td nowrap>' .
+            echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) .
+            "</td>";
+         $wrow_strings[10] = "<td>$nrGames</td>";
+         $wrow_strings[11] = "<td>$Rated</td>";
+         $wrow_strings[12] = "<td>$WeekendClock</td>";
 
+         $wrtable->add_row( $wrow_strings );
       }
 
-      echo start_end_column_table(false);
+      $wrtable->echo_table();
    }
    else
       echo '<p>&nbsp;<p>' . T_('Seems to be empty at the moment.');
 
-   if( $info > 0 and is_array($info_row) )
+   if( $_GET['info'] > 0 and is_array($info_row) )
    {
       show_game_info($info_row, $info_row['pid'] == $player_row['ID']);
    }
@@ -166,7 +154,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    echo "</center>";
 
-   if( $info > 0 and is_array($info_row) )
+   if( $_GET['info'] > 0 and is_array($info_row) )
       $menu_array[T_('Add new game')] = "waiting_room.php" .
          ($orderstring ? "?$orderstring" : '' ) . "#add" ;
 
