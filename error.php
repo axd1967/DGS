@@ -374,7 +374,19 @@ require( "include/std_functions.php" );
 
       case("couldnt_open_transl_file"):
       {
-        echo T_("Sorry, I was unable to open the translation file for writing. Please contact the support.");
+        echo T_("Sorry, I was unable to open a file for writing. Please contact the support.");
+      }
+      break;
+
+      case("adminlevel_too_low"):
+      {
+        echo T_("Sorry, this page is solely for users with administrative tasks.");
+      }
+      break;
+
+      case("admin_error"):
+      {
+        echo T_("Sorry, there was an error when processing your administrative task.");
       }
       break;
 
