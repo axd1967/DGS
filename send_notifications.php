@@ -61,7 +61,7 @@ require( "include/board.php" );
                make_array( $ID, $array, $mess, $Moves, NULL, $moves_result, $marked_dead );
 
                $msg .= str_pad('', 47, '-') . "\n";
-               $msg .= "Game ID: $ID  ($HOSTBASE/game.php?gid=$ID\n";
+               $msg .= "Game ID: $ID  ($HOSTBASE/game.php?gid=$ID)\n";
                $msg .= "Black: $Blackname ($Blackhandle)\n";
                $msg .= "White: $Whitename ($Whitehandle)\n";
                $msg .= "Move $Moves: " . number2board_coords($Last_X, $Last_Y, $Size) . "\n";
