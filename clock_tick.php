@@ -111,6 +111,7 @@ if( !$is_down )
          $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
 
          $query = "UPDATE Games SET " .
+             "Last_X=-4, " .
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
              "Score=$score, " .
@@ -177,5 +178,8 @@ if( !$is_down )
       }
    }
 
+//the whole cron stuff in one cron job:
+include_once( "halfhourly_cron.php" );
+include_once( "daily_cron.php" );
 }
 ?>
