@@ -30,19 +30,18 @@ if( !$is_down )
 
    // Check that ticks are not too frequent
 
-   $result = mysql_query( "SELECT ID,$NOW-UNIX_TIMESTAMP(Lastchanged) AS timediff FROM Clock WHERE ID=0 OR ID=12" );
+   $result = mysql_query( "SELECT MIN($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff FROM Clock WHERE ID=0 OR ID=12" );
     
 
-   while( $row = mysql_fetch_array( $result ) )
-   {    
-      if( $row['timediff'] < 3600/$tick_frequency-10 )
-         exit;
-   }
-    
-    
+   $row = mysql_fetch_array( $result );
+
+   if( $row['timediff'] < 3600/$tick_frequency-10 )
+      exit;
+
+
    // Now increase clocks that are not sleeping
 
-   $query = 'UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) ' .
+   $query = "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) " .
        "WHERE ((ID>$hour OR ID<". ($hour-8) . ') AND ID< '. ($hour+16) . ')';
     
    if( $day_of_week > 0 and $day_of_week < 6 )
@@ -65,8 +64,6 @@ if( !$is_down )
                          'AND Games.ClockUsed=Clock.ID ' . 
                          'AND white.ID=White_ID AND black.ID=Black_ID' ); 
 
-   echo mysql_error();
-    
    while($row = mysql_fetch_array($result))
    {
       extract($row);
