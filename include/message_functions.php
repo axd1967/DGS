@@ -510,6 +510,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $need_replied
 
    mysql_query("UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
                "WHERE uid='$uid' $where_clause" .
+               "AND Folder_nr IS NOT NULL " .
                "AND mid IN (" . implode(',', $message_ids) . ") " .
                "LIMIT " . count($message_ids) )
       or error("mysql_query_failed"); //die(mysql_error());
