@@ -39,8 +39,8 @@ require( "include/rating.php" );
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 
-   if( !$logged_in )
-      error("not_logged_in");
+//    if( !$logged_in )
+//       error("not_logged_in");
 
    $result = mysql_query( "SELECT Games.*, " .
                           "Games.Flags+0 AS flags, " .
