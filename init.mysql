@@ -111,6 +111,24 @@ CREATE TABLE RatingChange (
   KEY uid (uid)
 ) TYPE=MyISAM;
 
+
+#
+# Table structure for table 'Ratinglog'
+#
+
+CREATE TABLE Ratinglog (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  gid int(11) NOT NULL default '0',
+  Time datetime NOT NULL,
+  Rating double default NULL,
+  RatingMin double default NULL,
+  RatingMax double default NULL,
+  PRIMARY KEY  (ID),
+  KEY uid (uid)
+) TYPE=MyISAM;
+
+
 #
 # Table structure for table 'Statistics'
 #
