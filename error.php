@@ -402,6 +402,12 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("no_lang_selected"):
+      {
+        echo T_("Sorry, you must specify a language.");
+      }
+      break;
+
       default:
       {
          echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
