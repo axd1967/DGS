@@ -40,6 +40,11 @@ require_once( "include/form_functions.php" );
 
    $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 utf-8
 
+   if( isset($_REQUEST['split']) )
+      $split= $_REQUEST['split'];
+   else
+      $split= 20;
+
    $apply= @$_REQUEST['apply'];
 
    $arg_array = array(
@@ -102,42 +107,53 @@ require_once( "include/form_functions.php" );
 
       if( $mysqlerror )
       {
-         echo "<p>Erreur: $mysqlerror<p>";
+         echo "<p>Error: $mysqlerror<p>";
       }
-      else if( $result && @mysql_num_rows($result)>0 )
+      else 
       {
-         $c=2;
-         $i=0;
-         echo "\n<table class=tbl cellpadding=4 cellspacing=1>\n";
-         while( $row = mysql_fetch_assoc( $result ) )
+         $numrows = 0+@mysql_num_rows($result);
+         $i= ( $numrows>1 ? 's' : '' );
+         echo "<p>Result: $numrows row$i<br>";
+         if( $result && $numrows>0 )
          {
-            $c=3-$c;
-            if( ($i=($i%20)+1) == 1 )
+            $c=2;
+            $i=0;
+            echo "\n<table class=tbl cellpadding=4 cellspacing=1>\n";
+            while( $row = mysql_fetch_assoc( $result ) )
             {
-               echo "<tr>\n";
+               $c=3-$c;
+               $i++;
+               if( $i==1 or ($split>1 && ($i%$split)==1) )
+               {
+                  echo "<tr>\n";
+                  foreach( $row as $key => $val )
+                  {
+                     echo "<th>$key</th>";
+                  }
+                  echo "\n</tr>";
+               }
+               //onClick onmousedown ondblclick
+               echo "<tr class=row$c title='#$i' ondblclick=\"row_click(this,'row$c')\">\n";
                foreach( $row as $key => $val )
                {
-                  echo "<th>$key</th>";
+                  switch( $key )
+                  {
+                     case 'Password':
+                     case 'Sessioncode':                  
+                     case 'Email':
+                        if ($val) $val= '***';
+                        break;
+                     case 'Debug':
+                        if ($val)
+                           $val= preg_replace( "%(passwd=)[^&]*%is", "\\1***", $val);
+                        break;
+                  }
+                  echo "<td nowrap>" . textarea_safe($val) . "</td>";
                }
                echo "\n</tr>";
             }
-            //onClick onmousedown ondblclick
-            echo "<tr class=row$c ondblclick=\"row_click(this,'row$c')\">\n";
-            foreach( $row as $key => $val )
-            {
-               switch( $key )
-               {
-                  case 'Password':
-                  case 'Sessioncode':                  
-                  case 'Email':
-                     if ($val) $val= '***';
-                     break;
-               }
-               echo "<td nowrap>" . textarea_safe($val) . "</td>";
-            }
-            echo "\n</tr>";
+            echo "\n</table>\n";
          }
-         echo "\n</table>\n";
       }
    }
 
