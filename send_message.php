@@ -92,7 +92,7 @@ disable_cache();
       if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
           ( !$player_row["RatingStatus"] or !$opponent_row["RatingStatus"] ) )
       {
-         error( "no_initail_rating" );
+         error( "no_initial_rating" );
       }
 
       $tomove = $Black_ID;
