@@ -24,6 +24,8 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
+define('ALLOW_PROFIL_CHARSET', 1);
+
 {
    $translation_groups =
       array( 'Common', 'Start', 'Game', 'Messages', 'Users',
@@ -65,6 +67,10 @@ require_once( "include/make_translationfiles.php" );
           $lang_choice = true;
         }
     }
+  if( ALLOW_PROFIL_CHARSET )
+    $profil_charset = @$_REQUEST['profil_charset'] ? 'Y' : '';
+  else
+    $profil_charset = false;
 
   $info_box = '<CENTER>
 <table border="2">
@@ -107,7 +113,7 @@ When translating you should keep in mind the following things:
      echo $info_box;
 
      echo "<CENTER>\n";
-     $langchoice_form = new Form( 'selectlangform', 'translate.php', FORM_GET );
+     $langchoice_form = new Form( 'selectlangform', 'translate.php', FORM_POST );
      $langchoice_form->add_row( array( 'HEADER', 'Select language to translate to' ) );
      $languages = get_language_descriptions_translated();
      $vals = array();
@@ -121,7 +127,13 @@ When translating you should keep in mind the following things:
 
      $langchoice_form->add_row( array( 'SELECTBOX', 'translate_lang', 1, $vals, '', false,
                                        'HIDDEN', 'group', $group,
-                                       'SUBMITBUTTON', 'cl', 'Select' ) );
+                                       'SUBMITBUTTON', 'cl', 'Select',
+                              ) );
+     if( ALLOW_PROFIL_CHARSET )
+       $langchoice_form->add_row( array(
+                            'CHECKBOX', 'profil_charset', 'Y', 'use profil encoding', $profil_charset,
+                              ) );
+
      $langchoice_form->echo_string();
      echo "</CENTER>\n";
   }
@@ -135,14 +147,6 @@ When translating you should keep in mind the following things:
       $numrows = mysql_num_rows($result);
       if( $numrows == 0 and !$untranslated )
          error('translation_bad_language_or_group');
-
-      start_page(T_("Translate"), true, $logged_in, $player_row);
-      echo $info_box;
-
-      echo "<CENTER>\n";
-
-      $translate_form = new Form( 'translateform', 'update_translation.php', FORM_POST );
-      $translate_form->add_row( array('HEADER', 'Translate the following strings' ) );
 
       $string = '';
       foreach( $known_languages as $entry => $array )
@@ -160,7 +164,20 @@ When translating you should keep in mind the following things:
 
       list(,$translate_encoding) = explode('.', $translate_lang);
 
-      $string.= ' / ' . $translate_encoding ;
+      if( !$profil_charset )
+         $encoding_used = $translate_encoding; // before start_page()
+
+      $string.= ' / ' . $translate_encoding;
+      if( ALLOW_PROFIL_CHARSET )
+        $string.=  ' / ' . $encoding_used;
+
+      start_page(T_("Translate"), true, $logged_in, $player_row);
+      echo $info_box;
+
+      echo "<CENTER>\n";
+
+      $translate_form = new Form( 'translateform', 'update_translation.php', FORM_POST );
+      $translate_form->add_row( array('HEADER', 'Translate the following strings' ) );
 
       $translate_form->add_row( array( 'CELL', 99, 'align="center"', 'TEXT', "- $string -" ) );
 
@@ -219,6 +236,7 @@ When translating you should keep in mind the following things:
       $translate_form->add_row( array( 'DESCRIPTION', 'Change to group',
                                        'HIDDEN', 'translate_lang', $translate_lang,
                                        'HIDDEN', 'group', $group,
+                                       'HIDDEN', 'profil_charset', $profil_charset,
                                        'SELECTBOX', 'newgroup', 1,
                                        array_value_to_key_and_value( $translation_groups ),
                                        $group, false ) );

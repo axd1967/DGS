@@ -32,9 +32,11 @@ require_once( "include/make_translationfiles.php" );
   $translate_lang = @$_POST['translate_lang'];
   $group = @$_POST['group'];
   $newgroup = @$_POST['newgroup'];
+  $profil_charset = @$_POST['profil_charset'] ? 'Y' : '';
 
   if( isset($_POST['just_group'] ) )
-      jump_to("translate.php?translate_lang=$translate_lang&group=" . urlencode($newgroup));
+      jump_to("translate.php?translate_lang=$translate_lang" .
+              "&profil_charset=$profil_charset&group=" . urlencode($newgroup));
 
   $translator_array = explode(',', $player_row['Translator']);
 
@@ -104,7 +106,8 @@ require_once( "include/make_translationfiles.php" );
 
   make_include_files($translate_lang);
 
-  jump_to("translate.php?translate_lang=$translate_lang&group=" . urlencode($newgroup));
+  jump_to("translate.php?translate_lang=$translate_lang" .
+              "&profil_charset=$profil_charset&group=" . urlencode($newgroup));
 
 }
 ?>
