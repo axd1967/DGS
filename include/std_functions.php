@@ -241,8 +241,9 @@ function end_page( $new_paragraph = true )
         <td align="right" width="50%">';
    if( $show_time )
       echo '
-        <font color=' . $menu_fg_color . '><B>' . T_("Page created in") . ' ' .
-         sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s' . $timeadjust. '</B></font></td>';
+        <font color=' . $menu_fg_color . '><B>' .
+        sprintf (T_("Page created in %0.5f"), getmicrotime() - $time) . '&nbsp;s' .
+        $timeadjust. '</B></font></td>';
    else
       echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
 
