@@ -199,7 +199,13 @@ function callback($matches)
 {
    global $callback_diagrams, $callback_diag_nr;
 
-   return $callback_diagrams[$matches[1]]->echo_board();
+   if( isset($callback_diagrams[$matches[1]]) 
+     && is_object($callback_diagrams[$matches[1]]) 
+     && method_exists($callback_diagrams[$matches[1]], 'echo_board')
+     )
+      return $callback_diagrams[$matches[1]]->echo_board();
+   else
+      return "[goban #".$matches[1]."]";
 }
 
 function replace_goban_tags_with_boards($text, $diagrams)
