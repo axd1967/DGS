@@ -26,7 +26,7 @@ $TranslateGroups[] = "Game";
 function check_move($print_error=true)
 {
    global $coord, $colnr, $rownr, $Size, $array, $to_move, $Black_Prisoners, $White_Prisoners,
-      $Last_X, $Last_Y, $prisoners, $nr_prisoners, $flags;
+      $Last_X, $Last_Y, $Last_Move, $prisoners, $nr_prisoners, $flags;
 
    list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
@@ -61,7 +61,8 @@ function check_move($print_error=true)
    {
       list($dummy, list($x,$y)) = each($prisoners);
 
-      if( $Last_X == $x and $Last_Y == $y )
+      if( $Last_X == $x and $Last_Y == $y 
+        or $Last_Move == number2sgf_coords( $x,$y, $Size) )
       {
          if( $print_error )
             error("ko");
@@ -308,12 +309,12 @@ function draw_game_info($row)
         echo " <tr>\n";
         echo '     <td>' . T_('Byoyomi') . ":</td>\n";
         echo '     <td>' .  echo_time( $row['White_Byotime'] );
-        if( $row['White_Byotime'] > 0 ) echo '(' . $row['White_Byoperiods'] . ')';
+        if( $row['White_Byotime'] > 0 ) echo ' (' . $row['White_Byoperiods'] . ')';
 
         echo "</td>\n";
         echo '     <td>' . echo_time( $row['Black_Byotime'] );
 
-        if( $row['Black_Byotime'] > 0 ) echo '(' . $row['Black_Byoperiods'] . ')';
+        if( $row['Black_Byotime'] > 0 ) echo ' (' . $row['Black_Byoperiods'] . ')';
         echo "</td>\n";
         echo "   </tr>\n";
       }
