@@ -56,7 +56,8 @@ require_once( "include/make_translationfiles.php" );
         "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
         "AND TranslationLanguages.Language='$translate_lang' " .
         "AND Translatable!='N' " .
-        "AND Translations.Text IS NULL ORDER BY Group_ID LIMIT 50";
+        "AND (Translations.Text IS NULL OR Translatable='Changed') " .
+        "ORDER BY Group_ID LIMIT 50";
   else
      $query .= "WHERE TranslationGroups.Groupname='$group' " .
         "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
@@ -88,7 +89,7 @@ require_once( "include/make_translationfiles.php" );
      $log_query .= ($has_changed ? ',(' : '(') . $player_row['ID'] . ',' .
         $row['Language_ID'] . ',' . $row['Original_ID'] . ',"' . $transl . '")';
 
-     if( $row['Translatable'] === 'Y' )
+     if( $row['Translatable'] === 'Y' or $row['Translatable'] === 'Changed' )
         $translatable_query .= ',' . $row['Original_ID'];
      $has_changed = true;
   }
