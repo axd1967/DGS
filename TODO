@@ -13,6 +13,7 @@ SMALLER TASKS
         handle finished games properly.
         passes missing.
         Save time usage.
+        Optionally show comments for own games.
 
 * Add time for opponent
 
@@ -26,7 +27,7 @@ SMALLER TASKS
 
 * Better 'Open' options.
 
-* User/game search.
+* Searching: users/games/messages/docs etc.
 
 * go ascii->graphics in messages
 
