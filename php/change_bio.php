@@ -51,7 +51,7 @@ require( "include/rating.php" );
       $EnteredCategory = trim(${"category$ID"});
 
       if( $EnteredCategory == 'Other:' )
-         $EnteredCategory = ${"other$ID"};
+         $EnteredCategory = trim(${"other$ID"});
 
       if( $EnteredText == $Text and $EnteredCategory == $Category )
          continue;
@@ -72,7 +72,7 @@ require( "include/rating.php" );
       $EnteredCategory = trim(${"newcategory$i"});
 
       if( $EnteredCategory == 'Other:' )
-         $EnteredCategory = ${"newother$i"};
+         $EnteredCategory = trim(${"newother$i"});
       
       if( $EnteredText == "" )
          continue;
