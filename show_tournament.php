@@ -83,12 +83,11 @@ function make_applicationperiod_string( $app_p, $soap )
    if( !$logged_in )
       error("not_logged_in");
 
-   start_page(T_("Show tournament"), true, $logged_in, $player_row );
-
    if( !isset( $_GET['tid'] ) )
    {
       error("strange_tournament_id");
    }
+
    $t = new Tournament( $_GET['tid'] );
 
    if( isset( $_GET['update'] ) and
@@ -175,6 +174,8 @@ function make_applicationperiod_string( $app_p, $soap )
          or error("couldnt_update_tournament");
    }
 
+   start_page(T_("Show tournament"), true, $logged_in, $player_row );
+
    if( isset( $_GET['modify'] ) and
        $_GET['modify'] == 't' and
        in_array( $player_row['ID'], $t->ListOfOrganizers ) )
@@ -251,6 +252,8 @@ function make_applicationperiod_string( $app_p, $soap )
                                     'CHECKBOX', 'weekend', 'Y', "", $t->WeekendClock ) );
       $modify_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Update') ) );
       $modify_form->echo_string();
+
+      echo "<a href=\"show_tournament.php?tid=" . $t->ID . "\">View tournament</a>";
       echo "</center>\n";
    }
    else
@@ -258,7 +261,8 @@ function make_applicationperiod_string( $app_p, $soap )
       echo "<table align=\"center\" border=\"3\" cellspacing=\"0\" cellpadding=\"3\">\n";
       display_row_of_information( T_('ID'), $t->ID );
       display_row_of_information( T_('Name'), $t->Name );
-      display_row_of_information( T_('Description'), $t->Description );
+      display_row_of_information( T_('Description'), str_replace( "\n", "\n<br>&nbsp;",
+                                                                  $t->Description ) );
       display_row_of_information( T_('Organizers'), $t->get_organizers_html() );
       display_row_of_information( T_('Max and min participants'),
                                   make_max_min_participants_string( $t->MinParticipants,
@@ -277,6 +281,11 @@ function make_applicationperiod_string( $app_p, $soap )
                                   ($t->WeekendClock ? T_("Yes") : T_("No")) );
 
       echo "</table>\n";
+
+      if( in_array( $player_row['ID'], $t->ListOfOrganizers ) )
+      {
+         echo "<br><br><center><a href=\"show_tournament.php?tid=" . $t->ID . "&modify=t\">Modify tournament</a></center>\n";
+      }
    }
 
    end_page(false);
