@@ -104,6 +104,10 @@ array(
       'Add language for translation' =>
       array( 'Groups' => array( 'Admin' ) ),
 
+      /* Found in these files: admin.php */
+      'Add user for translator' =>
+      array( 'Groups' => array( 'Admin' ) ),
+
       /* Found in these files: admin.php, include/std_functions.php */
       'Admin' =>
       array( 'Groups' => array( 'Admin', 'Common' ) ),
@@ -699,10 +703,6 @@ array(
       /* Found in these files: include/move.php */
       'Main Time' =>
       array( 'Groups' => array( 'Game' ) ),
-
-      /* Found in these files: admin.php */
-      'Make user translator' =>
-      array( 'Groups' => array( 'Admin' ) ),
 
       /* Found in these files: include/message_functions.php */
       'Manual setting' =>

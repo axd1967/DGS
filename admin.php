@@ -57,7 +57,7 @@ require( "include/form_functions.php" );
   echo form_insert_row( 'DESCRIPTION', T_('Select language to make user translator for that language.'),
                         'SELECTBOX', 'transladdlang', 1,
                         get_known_languages_with_full_names(), array(), false,
-                        'SUBMITBUTTON', 'transladd', T_('Make user translator') );
+                        'SUBMITBUTTON', 'transladd', T_('Add user for translator') );
   echo form_insert_row( 'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
                         'SELECTBOX', 'transllang[]', 7,
                         get_known_languages_with_full_names(), array(), true,
