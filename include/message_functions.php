@@ -62,7 +62,7 @@ function game_settings_form($my_ID=NULL, $gid=NULL, $waiting_room=false)
 
       extract($game_row);
 
-      $MyColor = ( $color == BLACK ? 'Black' : 'White' );
+      $MyColor = ( $Color == BLACK ? 'Black' : 'White' );
       $Rated = ( $Rated == 'Y' );
       $Weekendclock = ( $Weekendclock == 'Y' );
 
