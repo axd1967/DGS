@@ -26,7 +26,10 @@ require( "include/std_functions.php" );
 connect2mysql();
 
 
-$correct_handicap = false;
+$use_HA = false;
+$use_AB_for_handicap = true;
+//$rules = "New Zealand";
+$sgf_version = 3;
 
 $result = mysql_query( 'SELECT Games.*, ' .
                        'Games.Flags+0 AS flags, ' . 
@@ -51,9 +54,9 @@ disable_cache();
 header ('Content-Type: application/x-go-sgf');
 header( "Content-Disposition: inline; filename=\"$Whitehandle-$Blackhandle-" . 
         date('Ymd', time()) . '.sgf"' ); 
-header( "Content-Description: PHP3 Generated Data" );
+header( "Content-Description: PHP Generated Data" );
 
-echo "(;GM[1]
+echo "(;FF[$sgf_version]GM[1]
 PC[Dragon Go Server: $HOSTBASE]
 DT[" . date( 'Y-m-d', time() ) . "]
 PB[$Blackname]
@@ -69,11 +72,18 @@ if( isset($Score) )
 
 echo "SZ[$Size]\n";
 echo "KM[$Komi]\n";
-if( $correct_handicap and $Handicap > 0 )
+
+if( $rules )
+     echo "RU[$rules]\n";
+
+if( $use_HA and $Handicap > 0 )
      echo "HA[$Handicap]\n";
 
+if( $Handicap > 1 )
+     echo "PL[W]\n";
 
-if( $Handicap > 0 and $correct_handicap ) 
+
+if( $Handicap > 0 and $use_AB_for_handicap ) 
      echo "AB";
 
 while( $row = mysql_fetch_array($result) )
@@ -81,11 +91,11 @@ while( $row = mysql_fetch_array($result) )
     if( $row["PosX"] < 0 or ($row["Stone"] != WHITE and $row["Stone"] != BLACK ) )
         continue;
     
-    if( $row["MoveNr"] > $Handicap or !$correct_handicap )
+    if( $row["MoveNr"] > $Handicap or !$use_AB_for_handicap )
         echo( $row["Stone"] == WHITE ? ";W" : ";B" );
     
     echo "[" . chr($row["PosX"] + ord('a')) .
         chr($row["PosY"] + ord('a')) . "]";
 }
-echo "\n;)\n";
+echo "\n)\n";
 
