@@ -29,6 +29,26 @@ a.dead {
 }
 
 
+img.s5 {
+        width : 5px;
+        height : 5px;
+}
+
+img.s7 {
+        width : 7px;
+        height : 7px;
+}
+
+img.s9 {
+        width : 9px;
+        height : 9px;
+}
+
+img.s11 {
+        width : 11px;
+        height : 11px;
+}
+
 img.s13 {
         width : 13px;
         height : 13px;
@@ -67,6 +87,26 @@ img.s42 {
 img.s50 {
         width : 50px;
         height : 50px;
+}
+
+img.c5 {
+        width : 6px;
+        height : 5px;
+}
+
+img.c7 {
+        width : 8px;
+        height : 7px;
+}
+
+img.c9 {
+        width : 11px;
+        height : 9px;
+}
+
+img.c11 {
+        width : 13px;
+        height : 11px;
 }
 
 img.c13 {
