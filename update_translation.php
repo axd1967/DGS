@@ -52,7 +52,7 @@ require_once( "include/make_translationfiles.php" );
    //chdir( 'translations' );
    $fd = fopen( "translations/rodivaltmp.php", 'w' )
             or error("couldnt_open_rodival_file");
-   fwrite( $fd, var_export($_POST, true));
+   fwrite( $fd, serialize($_POST));
    fclose( $fd );
 
 
