@@ -35,6 +35,8 @@ $session_duration = 3600*12*61; // 1 month
 $tick_frequency = 12; // ticks/hour
 
 $is_down = false;
+$is_down_message = "Sorry, dragon is down for maintenance at the moment, " .
+                   "please return in an hour or so.";
 
 $hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
 
@@ -154,7 +156,7 @@ function disable_cache($stamp=NULL)
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $is_down, $bg_color, $menu_bg_color, $menu_fg_color,
+   global $base_path, $is_down, $is_down_message, $bg_color, $menu_bg_color, $menu_fg_color,
       $encoding_used, $max_links_in_main_menu, $vertical, $base_path;
 
    if( $no_cache )
@@ -226,8 +228,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( $is_down )
       {
-         echo "Sorry, dragon is down for maintenance at the moment, ".
-            "please return in an hour or so.";
+         echo $is_down_message . '<p>';
          end_page();
          exit;
       }
