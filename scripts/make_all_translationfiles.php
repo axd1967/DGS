@@ -27,3 +27,5 @@ connect2mysql();
 
 make_known_languages();
 make_include_files();
+
+?>
