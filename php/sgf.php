@@ -28,40 +28,45 @@ connect2mysql();
 
 $correct_handicap = false;
 
-    $result = mysql_query( "SELECT Games.*, " .
-                           "Games.Flags+0 AS flags, " . 
-                           "black.Name AS Blackname, " .
-                           "black.Handle AS Blackhandle, " .
-                           "black.Rank AS Blackrank, " .
-                           "white.Name AS Whitename, " .
-                           "white.Handle AS Whitehandle, " .
-                           "white.Rank AS Whiterank " .
-                           "FROM Games, Players AS black, Players AS white " .
-                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
+$result = mysql_query( 'SELECT Games.*, ' .
+                       'Games.Flags+0 AS flags, ' . 
+                       'black.Name AS Blackname, ' .
+                       'black.Handle AS Blackhandle, ' .
+                       'black.Rank AS Blackrank, ' .
+                       'white.Name AS Whitename, ' .
+                       'white.Handle AS Whitehandle, ' .
+                       'white.Rank AS Whiterank ' .
+                       'FROM Games, Players AS black, Players AS white ' .
+                       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
 
-    if(  mysql_num_rows($result) != 1 )
-         return false;
+if( mysql_num_rows($result) != 1 )
+     return false;
+     
+extract(mysql_fetch_array($result));
+     
+$result = mysql_query( "SELECT * FROM Moves$gid" );
 
-    extract(mysql_fetch_array($result));
+disable_cache();
 
-    $result = mysql_query( "SELECT * FROM Moves$gid" );
+header ('Content-Type: application/x-go-sgf');
 
+echo "(;GM[1]
+PC[Dragon Go Server: $HOSTNAME]
+DT[" . date( 'Y-m-d', time() ) . "
+PB[$Blackname]
+PW[$Whitename]
+BR[$Blackrank]
+WR[$Whiterank]
+";
 
-    echo "(;GM[1]\n" .
-        "PC[Dragon Go Server: http://dragongoserver.sourceforge.net]\n" .
-        "DT[" . date( "Y-m-d", time() ) . "]\n" .
-        "PW[$Blackname]\n" .
-        "PB[$Whitename]\n" .
-        "WR[$Blackrank]\n" .
-        "BR[$Whiterank]\n";
-    if( isset($Score) )
-        {
-            echo "RE[" . score2text($Score, false) . "]\n";
-        }
+if( isset($Score) )
+{
+    echo "RE[" . score2text($Score, false) . "]\n";
+}
 
 echo "SZ[$Size]\n";
 echo "KM[$Komi]\n";
-if( $correct_handicap )
+if( $correct_handicap and $Handicap > 0 )
      echo "HA[$Handicap]\n";
 
 
