@@ -180,12 +180,9 @@ sub gifify
     $fg = gimp_palette_get_foreground ();
     gimp_palette_set_foreground ([237, 183, 123]);
     gimp_selection_none ($theImage);
-    if ($have_alpha_background == 0)
-    {
-        $mask = gimp_layer_create_mask ($theLayer, ALPHA_MASK);
-        gimp_image_add_layer_mask ($theImage, $theLayer, $mask);
-        gimp_threshold ($mask, 50, 255);
-    }
+    $mask = gimp_layer_create_mask ($theLayer, ALPHA_MASK);
+    gimp_image_add_layer_mask ($theImage, $theLayer, $mask);
+    gimp_threshold ($mask, 50, 255);
     $newLayer = gimp_layer_copy ($theLayer, 1);
     gimp_image_add_layer ($theImage, $newLayer, 1);
     gimp_drawable_fill ($newLayer, FG_IMAGE_FILL);
@@ -312,7 +309,6 @@ foreach $final_size (@Sizes)
 
     if( $ARGV[0] ne 'board' )
     {
-        $have_alpha_background = 1;
         for $color ('b', 'w')
         {
             if( $color eq 'b' )
@@ -412,7 +408,6 @@ foreach $final_size (@Sizes)
     if( $ARGV[0] ne 'stones' )
     {
 
-        $have_alpha_background = 0;
 
 #--------------- Draw board lines -------------
 
