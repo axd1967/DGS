@@ -76,8 +76,8 @@ $BEGINMONTH = 8;
 $table_head_color='"#CCCCCC"';
 $table_row_color1='"#FFFFFF"';
 $table_row_color2='"#E0E8ED"';
-$table_row_color_del1='"#FFCFCF"';
-$table_row_color_del2='"#F0B8BD"';
+//$table_row_color_del1='"#FFCFCF"';
+//$table_row_color_del2='"#F0B8BD"';
 
 $h3_color='"#800000"';
 
@@ -292,8 +292,8 @@ function end_page( $menu_array=NULL )
    if( $admin_level & ADMIN_TIME )
       echo '
         <font size=-2 color=' . $menu_fg_color . '>' . T_('Page created in') .
-        sprintf (' %0.2f', (getmicrotime() - $page_microtime)*1000) .
-         "</font><br>\n";
+        sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000) .
+         "</font>&nbsp;<br>\n";
 
    if( ($admin_level & ~ADMIN_TIME) > 0 )
       echo '<b><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
