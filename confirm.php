@@ -74,7 +74,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
             or die(mysql_error());
 
-   if(  mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
 
    extract(mysql_fetch_assoc($result));
@@ -216,8 +216,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Moves=$Moves, " .
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
-             "Lastchanged=FROM_UNIXTIME($NOW), " .
-             "Status='PLAY', " . $time_query;
+             "Status='PLAY', ";
 
          if( $nr_prisoners > 0 )
             if( $to_move == BLACK )
@@ -231,7 +230,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             $flags &= ~KO;
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
-             "Flags=$flags " .
+             "Flags=$flags, " .
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
       }
       break;
@@ -264,9 +264,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Moves=$Moves, " .
              "Last_X=-1, " .
              "Status='$next_status', " .
-             "Lastchanged=FROM_UNIXTIME($NOW), " .
-             "ToMove_ID=$next_to_move_ID, " . $time_query .
-             //"Flags=0" . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
+             "ToMove_ID=$next_to_move_ID, " .
+             //"Flags=0, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
       }
       break;
@@ -303,10 +303,10 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Handicap, " .
-             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "Last_X=$colnr, " .
-             "Last_Y=$rownr, " . $time_query .
-             "ToMove_ID=$White_ID " .
+             "Last_Y=$rownr, " .
+             "ToMove_ID=$White_ID, " .
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
       }
       break;
@@ -330,12 +330,12 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
-             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "Last_X=-3, " .
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
-             "Score=$score, " . $time_query .
-             //"Flags=0" . //Not useful
+             "Score=$score, " .
+             //"Flags=0, " . //Not useful
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
 
          $game_finished = true;
@@ -397,10 +397,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
          $game_query = "UPDATE Games SET " .
-             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "Moves=$Moves, " .
              "Last_X=-2, " .
-             "Status='$next_status', " . $time_query;
+             "Status='$next_status', ";
 
          if( $next_status != 'FINISHED' )
          {
@@ -414,8 +413,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
          $game_query .=
+             "Score=$score, " .
              //"Flags=0, " . //Not useful
-             "Score=$score" .
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
 
       }
