@@ -45,7 +45,7 @@ disable_cache();
    $folders = get_folders($my_id);
    $new_folder = $_GET['folder'];
 
-   if( isset($_GET['foldermove'] and isset($new_folder) and isset($folders[$new_folder]) )
+   if( isset($_GET['foldermove']) and isset($new_folder) and isset($folders[$new_folder]) )
    {
       mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='$newfolder' " .
                    "WHERE uid='$my_id' AND mid='$message_id' " .
