@@ -39,8 +39,6 @@ SMALLER TASKS
 
 * Themes/Layout option
 
-* 'Show coordinates' flag.
-
 * Rework users.php:
   * Activity measure
   * Show number of games for players
