@@ -9,7 +9,7 @@ BIGSTONES_POV = BigBlack_pov.png BigWhite_pov.png YinYang_pov.png BigPlayBlack_p
 POVFILES = stone.inc stone.pov
 
 POVRAY = povray
-POVRAY_ARGS = +D +sp16 +ep4 -P -V +A +J +W1024 +H768 +FN
+POVRAY_ARGS = +D +sp16 +ep4 -P -V +A +J +W1024 +H768 +FN +UA
 
 target: board stones
 
