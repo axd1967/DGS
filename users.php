@@ -69,7 +69,7 @@ require_once( "include/form_functions.php" );
       tablehead(2, T_('Name'), 'Name') .
       tablehead(3, T_('Nick'), 'Handle') .
       tablehead(4, T_('Rank Info')) .
-      tablehead(5, T_('Rating'), 'Rating', true) .
+      tablehead(5, T_('Rating'), 'Rating2', true) .
       tablehead(6, T_('Open for matches?')) .
       tablehead(7, T_('Games'), 'Games', true) .
       tablehead(8, T_('Running'), 'Running', true) .
@@ -110,7 +110,7 @@ require_once( "include/form_functions.php" );
       if( (1 << 3) & $column_set )
          echo '<td>' . make_html_safe($row['Rankinfo'],true) . '&nbsp;</td>';
       if( (1 << 4) & $column_set )
-         echo '<td>' . echo_rating($row['Rating'],true,$ID) . '&nbsp;</td>';
+         echo '<td>' . echo_rating($row['Rating2'],true,$ID) . '&nbsp;</td>';
       if( (1 << 5) & $column_set )
          echo '<td>' . make_html_safe($row['Open'],true) . '&nbsp;</td>';
       if( (1 << 6) & $column_set )

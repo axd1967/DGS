@@ -85,9 +85,9 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "black.Name AS blackName, black.Handle AS blackHandle, " .
-         "black.Rating AS blackRating, black.ID AS blackID, " .
+         "black.Rating2 AS blackRating, black.ID AS blackID, " .
          "white.Name AS whiteName, white.Handle AS whiteHandle, " .
-         "white.Rating AS whiteRating, white.ID AS whiteID " .
+         "white.Rating2 AS whiteRating, white.ID AS whiteID " .
          "FROM Observers, Games, Players AS white, Players AS black " .
          "WHERE Observers.uid=" . $player_row["ID"] . " AND Games.ID=gid " .
          "AND white.ID=White_ID AND black.ID=Black_ID " .
@@ -97,9 +97,9 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "black.Name AS blackName, black.Handle AS blackHandle, " .
-         "black.Rating AS blackRating, black.ID AS blackID, " .
+         "black.Rating2 AS blackRating, black.ID AS blackID, " .
          "white.Name AS whiteName, white.Handle AS whiteHandle, " .
-         "white.Rating AS whiteRating, white.ID AS whiteID " .
+         "white.Rating2 AS whiteRating, white.ID AS whiteID " .
          "FROM Games, Players AS white, Players AS black " .
          "WHERE " .
          ( $finished ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .
@@ -110,7 +110,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "Name, Handle, Players.ID as pid, " .
-         "Rating, UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
+         "Rating2 AS Rating, UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
          "(White_ID=$uid)+1 AS Color ";
 
       if( $finished )

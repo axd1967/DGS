@@ -66,7 +66,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
        <tr><td><b>' . T_("Open for matches?") . '</b></td>
            <td>' . make_html_safe($player_row["Open"], true) . '</td></tr>
        <tr><td><b>' . T_("Rating") . '</b></td>
-           <td>' . echo_rating($player_row["Rating"],true,$player_row['ID']) .  '</td></tr>
+           <td>' . echo_rating($player_row["Rating2"],true,$player_row['ID']) .  '</td></tr>
        <tr><td><b>' . T_('Rank info') . '</b></td>
            <td>' . make_html_safe($player_row["Rank"], true) . '</td></tr>
     </table>

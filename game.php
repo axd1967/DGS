@@ -51,12 +51,12 @@ require( "include/rating.php" );
                           "black.Name AS Blackname, " .
                           "black.Handle AS Blackhandle, " .
                           "black.Rank AS Blackrank, " .
-                          "black.Rating AS Blackrating, " .
+                          "black.Rating2 AS Blackrating, " .
                           "black.RatingStatus AS Blackratingstatus, " .
                           "white.Name AS Whitename, " .
                           "white.Handle AS Whitehandle, " .
                           "white.Rank AS Whiterank, " .
-                          "white.Rating AS Whiterating, " .
+                          "white.Rating2 AS Whiterating, " .
                           "white.RatingStatus AS Whiteratingstatus " .
                           "FROM Games, Players AS black, Players AS white " .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );

@@ -96,15 +96,15 @@ $profile_form->add_row( array( 'DESCRIPTION', T_('Rank info'),
 if( $player_row["RatingStatus"] != 'RATED' )
 {
   $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
-                                 'TEXTINPUT', 'rating', 16, 16, 
-                                 echo_rating($player_row["Rating"],true),
+                                 'TEXTINPUT', 'rating', 16, 16,
+                                 echo_rating($player_row["Rating2"],true),
                                  'SELECTBOX', 'ratingtype', 1, $ratings,
                                  'dragonrating', false ) );
 }
 else
 {
   $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
-                                 'TEXT', echo_rating( $player_row["Rating"] ) ) );
+                                 'TEXT', echo_rating( $player_row["Rating2"] ) ) );
 }
 
 $s = 0;

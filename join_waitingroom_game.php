@@ -37,7 +37,8 @@ require( "include/rating.php" );
    if( !is_numeric($id) )
       $id=0;
 
-   $result = mysql_query("SELECT Waitingroom.*,Name,Handle,Rating,RatingStatus,ClockUsed " .
+   $result = mysql_query("SELECT Waitingroom.*,Name,Handle," .
+                         "Rating2 AS Rating,RatingStatus,ClockUsed " .
                          "FROM Waitingroom,Players " .
                          "WHERE Players.ID=Waitingroom.uid AND Waitingroom.ID=$id");
 

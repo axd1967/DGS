@@ -72,7 +72,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    add_or_del($add, $del, "WaitingroomColumns");
 
-   $result = mysql_query("SELECT Waitingroom.*,Name,Handle,Rating,Players.ID as pid " .
+   $result = mysql_query("SELECT Waitingroom.*,Name,Handle," .
+                         "Rating2 AS Rating,Players.ID AS pid " .
                          "FROM Waitingroom,Players " .
                          "WHERE Players.ID=Waitingroom.uid ORDER BY $order");
 

@@ -45,7 +45,7 @@ disable_cache();
 
 // find reciever of the message
 
-   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed, Rating, RatingStatus " .
+   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed, Rating2, RatingStatus " .
                           "FROM Players WHERE Handle='$to'" );
 
    if( mysql_num_rows( $result ) != 1 )
@@ -166,15 +166,15 @@ disable_cache();
       {
          $clock_used_black = $opponent_row["ClockUsed"];
          $clock_used_white = $player_row["ClockUsed"];
-         $rating_black = $opponent_row["Rating"];
-         $rating_white = $player_row["Rating"];
+         $rating_black = $opponent_row["Rating2"];
+         $rating_white = $player_row["Rating2"];
       }
       else if( $my_ID == $game_row["Black_ID"] )
       {
          $clock_used_white = $opponent_row["ClockUsed"];
          $clock_used_black = $player_row["ClockUsed"];
-         $rating_white = $opponent_row["Rating"];
-         $rating_black = $player_row["Rating"];
+         $rating_white = $opponent_row["Rating2"];
+         $rating_black = $player_row["Rating2"];
       }
       else
       {
