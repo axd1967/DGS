@@ -147,6 +147,8 @@ require_once( "include/rating.php" );
       make_array( $gid, $array, $msg, $Moves, $move, $moves_result, $marked_dead, $no_marked_dead );
 
    $enable_message = true;
+   $extra_message = false;
+   $handi = false;
 
    switch( $action )
    {
@@ -198,7 +200,7 @@ require_once( "include/rating.php" );
          if( $Status != 'PLAY' )
             error("invalid_action");
 
-         check_handicap();
+         check_handicap(); //adjust $handi, $stonestring and others
 
       }
       break;
@@ -274,62 +276,59 @@ require_once( "include/rating.php" );
       $msg = make_html_safe($msg, 'game');
 
 
-   $show_notes = false;
    if ($player_row["ID"] == $Black_ID)
-     {
+   {
      $show_notes = true;
      $notes = $Black_Notes;
-     }
-   if ($player_row["ID"] == $White_ID)
-     {
+   }
+   else if ($player_row["ID"] == $White_ID)
+   {
      $show_notes = true;
      $notes = $White_Notes;
-     }
+   }
+   else
+     $show_notes = false;
      
    if ($Size >= $player_row["NotesCutoff"])
-     {
+   {
      $notesheight = $player_row["NotesLargeHeight"];
      $noteswidth = $player_row["NotesLargeWidth"];
      $notesmode = $player_row["NotesLargeMode"];
-     }
+   }
    else
-     {
+   {
      $notesheight = $player_row["NotesSmallHeight"];
      $noteswidth = $player_row["NotesSmallWidth"];
      $notesmode = $player_row["NotesSmallMode"];
-     }
+   }
 
-   echo "<table><tr><td>";
+   echo "<table><tr><td>"; //notes table
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
               $player_row["Stonesize"], $msg, $stonestring, $handi,
               $player_row["Boardcoords"], $player_row["Woodcolor"]);
 
+     if( $extra_message ) //score messages
+       echo "<P><center>$extra_message</center>\n";
+   echo '<br>';
+
    if ($notesmode == 'BELOW')
-     {
-     echo "</td></tr><tr><td valign=top><center>";
-     if ($show_notes)
+   {
+     echo "</td></tr>\n<tr><td align='center'";
+     if ($notesmode != 'OFF' and $show_notes)
        draw_notes($notes, $notesheight, $noteswidth);
-     echo "</center></td></tr></table>";
+     echo "</td>\n</tr></table>";
      if( $enable_message )
-       {
        draw_message_box(); //use $stonestring, $prisoner_string, $move
-       }
-     }
-   else
-     {
+   }
+   else //default RIGHT, even if OFF
+   {
      if( $enable_message )
-       {
        draw_message_box(); //use $stonestring, $prisoner_string, $move
-       }
-     echo "</td><td valign=top><center>";
-     if ($notesmode == 'RIGHT' and $show_notes)
+     echo "</td>\n<td align='left'>";
+     if ($notesmode != 'OFF' and $show_notes)
        draw_notes($notes, $notesheight, $noteswidth);
-     echo "</center></td></tr></table>";
-     }
-
-
-   if( $extra_message )
-      echo "<P><center>$extra_message</center>\n";
+     echo "</td>\n</tr></table>";
+   }
 
 
    echo "<HR>\n";
@@ -386,6 +385,6 @@ require_once( "include/rating.php" );
       }
    }
 
-   end_page($menu_array);
+   end_page(@$menu_array);
 }
 ?>
