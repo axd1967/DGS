@@ -280,7 +280,6 @@ function show_game_info($game_row, $mygame=false)
       $join_form->add_row( array( 'DESCRIPTION', T_('Reply'),
                                   'HIDDEN', 'id', $ID,
                                   'TEXTAREA', 'reply', 40, 4, "",
-                                  'SPACE',
                                   'SUBMITBUTTON', 'join', T_('Join') ) );
       $join_form->echo_string();
    }
