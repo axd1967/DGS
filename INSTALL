@@ -92,8 +92,7 @@ By now, Dragon works with these PHP directives:
 25   5  *   *   *   wget -q -O - http://your.url/daily_cron.php
 
 
-(( Windows NT/200x/XP - the nncron LITE is a freeware clone
-   of cron at <http://www.nncron.ru/download.shtml> ))
+(( Windows NT/200x/XP - some freeware clones of cron may be found on the web ))
 
 
 
