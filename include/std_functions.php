@@ -926,7 +926,7 @@ function rel_base_dir()
    while( $i=strrpos($dir,'/') )
    {
       $dir= substr($dir,0,$i);
-      if( $dir.'/' == $SUB_PATH )
+      if( !strcasecmp( $dir.'/' , $SUB_PATH ) )
          break;
       $rel.= '../';
    }
