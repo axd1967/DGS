@@ -25,11 +25,15 @@ function jump_to($uri, $absolute=false)
 {
    global $HOSTBASE;
 
+   $uri= str_replace( URI_AMP, URI_AMP_IN, $uri);
+   session_write_close();
+   //header('HTTP/1.1 303 REDIRECT');
    if( $absolute )
       header( "Location: " . $uri );
    else
       header( "Location: " . $HOSTBASE . '/' . $uri );
-
+   header('Status: 303');
+   //header('Connection: close'); 
    exit;
 }
 
@@ -59,7 +63,7 @@ function error($err, $debugmsg=NULL)
 
    if( !empty($mysqlerror) )
    {
-      $uri .= "&mysqlerror=" . urlencode($mysqlerror);
+      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
       $errorlog_query .= ", MysqlError='" . addslashes( $mysqlerror) . "'";
       $err.= ' / '. $mysqlerror;
    }

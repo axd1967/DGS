@@ -252,7 +252,7 @@ function message_info_table($mid, $date, $to_me,
    if( $flow & FLOW_ANSWER && $reply_mid > 0 )
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWER];
-      $str.= "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" .
+      $str.= "<a href=\"message.php?mode=ShowMessage".URI_AMP."mid=$reply_mid\">" .
              "<img border=0 alt='$alt' src='images/$ico.gif'"
              . ' title="' . T_("Previous message") . '"'
              . "></a>&nbsp;" ;
@@ -694,7 +694,7 @@ function message_list_table( &$mtable, $result, $show_rows
 
       $str = make_html_safe($row["other_name"]) ;
       //if( !$deleted )
-         $str = "<A href=\"message.php?mode=ShowMessage&mid=$mid\">$str</A>";
+         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid\">$str</A>";
       if( $row['Sender'] === 'Y' )
          $str = T_('To') . ': ' . $str;
       $mrow_strings[2] = "<td>$str</td>";
@@ -705,7 +705,7 @@ function message_list_table( &$mtable, $result, $show_rows
       $tit = $tits[$row["flow"]];
       $str = "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>";
       //if( !$deleted )
-         $str = "<A href=\"message.php?mode=ShowMessage&mid=$mid\">$str</A>";
+         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid\">$str</A>";
       $mrow_strings[0] = "<td>$str</td>";
 
       $mrow_strings[4] = "<td>" . date($date_fmt, $row["Time"]) . "</td>";
@@ -722,7 +722,7 @@ function message_list_table( &$mtable, $result, $show_rows
             $can_move_messages = true;
             $checked = ((@$_REQUEST["mark$mid"]=='Y') xor $toggle_marks) ;
             if( $checked )
-               $page.= "mark$mid=Y&" ;
+               $page.= "mark$mid=Y".URI_AMP ;
             $mrow_strings[5] = "<td align=center>"  .
                "<input type='checkbox' name='mark$mid' value='Y'".
                ($checked ? ' checked' : '') .

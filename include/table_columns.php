@@ -109,9 +109,9 @@ class Table
          if( strstr( $this->Page, '?' ) )
          {
             if( !(substr( $this->Page, -1 ) == '?') and
-                !(substr( $this->Page, -1 ) == '&') )
+                !(substr( $this->Page, -strlen(URI_AMP) ) == URI_AMP) )
             {
-               $this->Page .= '&';
+               $this->Page .= URI_AMP;
             }
          }
          else
@@ -466,14 +466,14 @@ class Table
          if( $sortA )
          {
             $sort_string = $this->Prefix . "sort1=$sortA" .
-               ( $descA ? '&' . $this->Prefix . 'desc1=1' : '' );
+               ( $descA ? URI_AMP . $this->Prefix . 'desc1=1' : '' );
             if( $sortB )
             {
-               $sort_string .= '&' . $this->Prefix . "sort2=$sortB" .
-                  ( $descB ? '&' . $this->Prefix . 'desc2=1' : '' );
+               $sort_string .= URI_AMP . $this->Prefix . "sort2=$sortB" .
+                  ( $descB ? URI_AMP . $this->Prefix . 'desc2=1' : '' );
             }
             if ($add_sep)
-               $sort_string .= '&' ;
+               $sort_string .= URI_AMP ;
             return $sort_string;
          }
          return '';
@@ -527,7 +527,7 @@ class Table
             return "";
          }
 
-         $page_split = split( '[?&]', $this->Page );
+         $page_split = split( '([?#]|'.URI_AMP.')', $this->Page );
          list( , $page ) = each( $page_split );
          $form_array = array();
          while( list( , $query ) = each( $page_split ) )

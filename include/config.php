@@ -22,4 +22,8 @@ $DB_NAME = "dragongoserver";
 
 $SUB_PATH = "/";
 
+define('URI_AMP_IN','&'); //ini_get('arg_separator.input')
+//URI_AMP at '&amp;' work even if arg_separator.output is set to '&'
+//define('URI_AMP','&amp;'); //ini_get('arg_separator.output')
+define('URI_AMP','&'); //ini_get('arg_separator.output')
 ?>

@@ -73,17 +73,17 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
 
       if( $handi )
       {
-         $move_start = "<td><A href=\"game.php?g=$gid&a=handicap&c=";
-         $move_alt = "&s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
+         $move_start = "<td><A href=\"game.php?g=$gid".URI_AMP."a=handicap".URI_AMP."c=";
+         $move_alt = URI_AMP."s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
       }
       else if( $stonestring )
       {
-         $move_start = "<td><A href=\"game.php?g=$gid&a=remove&c=";
-         $move_alt = "&s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
+         $move_start = "<td><A href=\"game.php?g=$gid".URI_AMP."a=remove".URI_AMP."c=";
+         $move_alt = URI_AMP."s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
       }
       else
       {
-         $move_start = "<td><A href=\"game.php?g=$gid&a=move&c=";
+         $move_start = "<td><A href=\"game.php?g=$gid".URI_AMP."a=move".URI_AMP."c=";
          $move_alt = "\"><IMG class=s$stone_size border=0 alt=\"";
       }
    }

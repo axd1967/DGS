@@ -379,10 +379,10 @@ function draw_moves()
          printf('<td class=r bgcolor=F7F5E3><font color=red>%s</font></td>
 ', $c );
       else if( $s == BLACK )
-         printf( '<td><A class=b href="game.php?gid=%d&move=%d">%s</A></td>
+         printf( '<td><A class=b href="game.php?gid=%d'.URI_AMP.'move=%d">%s</A></td>
 ', $gid, $i, $c );
       else
-         printf( '<td><a class=w href="game.php?gid=%d&move=%d">%s</a></td>
+         printf( '<td><a class=w href="game.php?gid=%d'.URI_AMP.'move=%d">%s</a></td>
 ', $gid, $i, $c );
 
       $i++;

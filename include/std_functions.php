@@ -246,7 +246,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       T_('Invite') => array('message.php?mode=Invite" accesskey="i',2,3),
 
       T_('Users') => array('users.php" accesskey="u',3,1),
-      T_('Games') => array('show_games.php?uid=all&finished=1" accesskey="g',3,2),
+      T_('Games') => array('show_games.php?uid=all" accesskey="g',3,2),
       T_('Translate') => array('translate.php" accesskey="t',3,3),
 
       T_('Forums') => array('forum/index.php" accesskey="f',4,1),
@@ -923,7 +923,7 @@ function make_url($page, $sep, $array)
       if( !empty($value) )
       {
          $url .= $separator . $var . '=' . urlencode($value);
-         $separator = '&';
+         $separator = URI_AMP;
       }
    }
 
@@ -943,6 +943,7 @@ function get_request_url()
       $url = substr($url,1);
    else if (!strcasecmp( $SUB_PATH, substr($url,0,$len) ))
       $url = substr($url,$len+1);
+   $url = str_replace( URI_AMP_IN, URI_AMP, $url);
    return $url;
 }
 
@@ -962,12 +963,12 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
       {
 //default user = last referenced user
 //(ex: message.php from userinfo.php by menu link)
-         if( eregi("[?&]$uid_nam=([0-9]+)", $refer, $result) )
+         if( eregi("[?".URI_AMP_IN."]$uid_nam=([0-9]+)", $refer, $result) )
            $uid = $result[1];
          if( !($uid > 0) )
          {
             $uid = 0;
-            if( eregi("[?&]".UHANDLE_NAM."=([".HANDLE_LEGAL_REGS."]+)", $refer, $result) )
+            if( eregi("[?".URI_AMP_IN."]".UHANDLE_NAM."=([".HANDLE_LEGAL_REGS."]+)", $refer, $result) )
               $uhandle = $result[1];
          }
       }
@@ -1160,7 +1161,7 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
    if( $link && $legal )
    {
       $tmp = 'A href="'.$base_path."game.php?gid=$gid" .
-                   ($move>0 ? "&move=$move" : "") . '"';
+                   ($move>0 ? URI_AMP."move=$move" : "") . '"';
       if( $link & REF_LINK_BLANK )
         $tmp.= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
@@ -1241,7 +1242,7 @@ function user_reference( $link, $safe, $color, $player_id, $player_name=false, $
       if( $link<0 )
       {
          $link = -$link;
-         $tmp = 'A href="'.$base_path."message.php?mode=NewMessage&";
+         $tmp = 'A href="'.$base_path."message.php?mode=NewMessage".URI_AMP;
       }
       else
       {
