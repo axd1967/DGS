@@ -579,27 +579,30 @@ function add_line_breaks($msg)
 
 function make_html_safe(&$msg, $some_html=false)
 {
+   $magic_quote = "<!-- '\" -->";
 
 //   $msg = str_replace('&', '&amp;', $msg);
-//   $msg = str_replace('"', '&quot;', $msg);
+//   $msg = str_replace('"', '&quot;', $msg); //see $magic_quote
 
 
    if( $some_html )
    {
-      if( $some_html === 'game' )
-      {
-         // mark sgf comments
-         $msg = eregi_replace("<c(omment)?>", "<font color=blue>\\0", $msg);
-         $msg = eregi_replace("</c(omment)?>", "\\0</font>", $msg);
-         $msg = preg_replace("'<h(idden)?>(.*?)</h(idden)?>'mis", "", $msg);
-      }
 
       // make sure the <, > replacements: {anglstart}, {anglend} are removed from the string
       $msg = str_replace("{anglstart}", "<", $msg);
       $msg = str_replace("{anglend}", ">", $msg);
 
+      // remove the 'close pending quotes' magic string
+      $msg = str_replace ($magic_quote, "", $msg);
 
       // replace <, > with {anglstart}, {anglend} for legal html code
+      if( $some_html === 'game' )
+      {
+         // mark sgf comments
+         $msg = preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg);
+         $msg = eregi_replace("<c(omment)? *>", "{anglstart}font color=blue{anglend}\\0", $msg);
+         $msg = eregi_replace("</c(omment)? *>", "\\0{anglstart}/font{anglend}", $msg);
+      }
 
       $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>",
                          "{anglstart}a href=\"\\1\\2\"{anglend}\\2{anglstart}/a{anglend}", $msg);
@@ -626,6 +629,9 @@ function make_html_safe(&$msg, $some_html=false)
       // change back to <, > from {anglstart} , {anglend}
       $msg = str_replace ("{anglstart}", "<", $msg);
       $msg = str_replace ("{anglend}", ">", $msg);
+
+      // add the 'close pending quotes' magic string
+      if ($msg) $msg.= $magic_quote;
    }
 
    return $msg;
@@ -939,4 +945,5 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       'background-repeat : no-repeat;  background-position : center; }';
 
 }
+
 ?>
