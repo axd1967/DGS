@@ -19,36 +19,36 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-05-03 07:20:34 GMT */
+/* Automatically generated at 2002-05-03 16:54:05 GMT */
 
-class sv_Language extends Language
+class cs_iso_8859_2_Language extends Language
 {
-  function sv_Language()
+  function cs_iso_8859_2_Language()
     {
-      $this->full_name = 'Swedish';
-      $this->last_updated = 1020410434;
+      $this->full_name = 'Czech';
+      $this->last_updated = 1020444845;
 
       $this->translated_strings = array(
 "%s per %s stones" =>
-"",
+"%s na %s kamenù",
 
 "%s per move and %s extra periods" =>
-"",
+"%s na tah a %s extra period",
 
 "A Brief History" =>
 "",
 
 "Accept" =>
-"Acceptera",
+"Pøijmout",
 
 "A collaboration web site. Read and contribute!" =>
 "",
 
 "Activity" =>
-"",
+"Aktivita",
 
 "Add Column" =>
-"lägg till kolumn",
+"Pøidat sloupec",
 
 "Added language %s with code %s and characterencoding %s." =>
 "",
@@ -57,7 +57,7 @@ class sv_Language extends Language
 "",
 
 "Add language" =>
-"Lägg till språk",
+"",
 
 "Add language for translation" =>
 "",
@@ -66,7 +66,7 @@ class sv_Language extends Language
 "",
 
 "Admin" =>
-"Admin",
+"Správce",
 
 "A large collection of go book reviews" =>
 "",
@@ -84,7 +84,7 @@ class sv_Language extends Language
 "",
 
 "and" =>
-"och",
+"a",
 
 "An error occurred for this. Usually it works if you try again, otherwise please contact the support." =>
 "",
@@ -111,73 +111,73 @@ class sv_Language extends Language
 "",
 
 "Biographical info" =>
-"",
+"Biografické informace",
 
 "Bio updated!" =>
-"",
+"Biografie aktualizována!",
 
 "black" =>
-"svart",
+"èerný",
 
 "Black" =>
-"Svart",
+"Èerný",
 
 "Board graphics" =>
-"Brädgrafik",
+"Vzhled desky",
 
 "Board size" =>
-"",
+"Velikost desky",
 
 "Browse Dragon source code" =>
-"",
+"Procházet zdrojový kód Dragonu",
 
 "Byoyomi" =>
-"",
+"Bjojomi",
 
 "Canadian" =>
-"",
+"Kanadské",
 
 "Canadian byo-yomi" =>
-"",
+"Kanadské bjojomi",
 
 "Canadian byoyomi" =>
-"",
+"Kanadské bjojomi",
 
 "Change bio" =>
-"",
+"Zmìnit biografii",
 
 "Changed translator privileges info for user %s." =>
 "",
 
 "Change password" =>
-"Byt lösenord",
+"Zmìnit heslo",
 
 "Change profile" =>
-"Ändra profilen",
+"Zmìnit profil",
 
 "Character encoding (i.e. 'iso-8859-1')" =>
 "",
 
 "City" =>
-"",
+"Mìsto",
 
 "Clock runs on weekends" =>
-"",
+"Èas bì¾í o víkendu",
 
 "Club" =>
-"",
+"Klub",
 
 "Color" =>
-"Färg",
+"Barva",
 
 "Colors" =>
-"Färger",
+"Barvy",
 
 "Common Japanese Go Terms" =>
 "",
 
 "Confirm password" =>
-"Bekräfta lösenordet",
+"Potvrzení hesla",
 
 "Connection to database failed. Please wait a few minutes and test again." =>
 "",
@@ -186,10 +186,10 @@ class sv_Language extends Language
 "",
 
 "Conventional handicap (komi 0.5 if not even)" =>
-"",
+"Konvenèní handikap (komi 0,5 pøi nerovné høe) ",
 
 "Coordinate sides" =>
-"",
+"Souøadnice stran",
 
 "Couldn't extrapolate value in function interpolate" =>
 "",
@@ -198,16 +198,16 @@ class sv_Language extends Language
 "",
 
 "Country" =>
-"",
+"Zemì",
 
 "Current maintainer and founder of Dragon" =>
 "",
 
 "Current translators" =>
-"",
+"Souèasní pøekladatelé",
 
 "daily snapshot of the cvs" =>
-"",
+"denní snímek cvs",
 
 "dan" =>
 "",
@@ -219,79 +219,79 @@ class sv_Language extends Language
 "Datum",
 
 "day" =>
-"dag",
+"den",
 
 "days" =>
-"dagar",
+"dnù",
 
 "Decline" =>
-"",
+"Odmítnout",
 
 "Del" =>
 "",
 
 "Delete all" =>
-"Ta bort alla",
+"Odstranit v¹e",
 
 "Delete game" =>
-"",
+"Odstranit hru",
 
 "Delete game failed. This is problably not a problem." =>
 "",
 
 "Deleting game" =>
-"",
+"Odstranìní hry",
 
 "Developer" =>
-"",
+"Vývojáø",
 
 "Disputing settings" =>
-"",
+"Licitování nastavení",
 
 "Docs" =>
-"Dokumentation",
+"Dokumenty",
 
 "Documentation" =>
-"",
+"Dokumentace",
 
 "Done" =>
-"",
+"Hotovo",
 
 "Double game" =>
-"",
+"Dvojitá hra",
 
 "Down" =>
-"",
+"Dole",
 
 "Download dragon sources" =>
-"",
+"Stáhnout zdrojové kódy Dragonu",
 
 "Download sgf" =>
-"",
+"Stáhnout SGF",
 
 "Dragon project page at sourceforge" =>
-"",
+"Stránka projektu Dragon na sourceforge",
 
 "Edit bio" =>
-"Ändra biografi",
+"Upravit biografii",
 
 "Edit biopgraphical info" =>
-"",
+"Upravit biografické informace",
 
 "Edit password" =>
-"Ändra lösenord",
+"Upravit heslo",
 
 "Edit profile" =>
-"Ändra din profil",
+"Upravit profil",
 
 "Email" =>
-"Epost",
+"E-mail",
 
 "Email notifications" =>
-"",
+"Oznámení e-mailem",
 
 "End date" =>
-"",
+"Datum ukonèení",
 
 "Error, guest may not recieve messages" =>
 "",
@@ -300,76 +300,76 @@ class sv_Language extends Language
 "",
 
 "Even game with nigiri" =>
-"",
+"Vyrovnaná hra s nigiri",
 
 "extra periods." =>
-"",
+"extra period.",
 
 "extra per move" =>
-"",
+"extra na tah",
 
 "extra per move." =>
-"",
+"extra na tah.",
 
 "FAQ" =>
-"",
+"FAQ (Èasto kladené dotazy)",
 
 "Finished" =>
-"",
+"Ukonèeno",
 
 "Finished games for %s" =>
-"",
+"Ukonèené hry pro %s",
 
 "Fischer time" =>
-"",
+"Fischerovský èas",
 
 "Flags" =>
-"",
+"Pøíznaky",
 
 "for" =>
-"",
+"pro",
 
 "Forgot password?" =>
-"Glömt lösenordet?",
+"Zapomnìli jste heslo?",
 
 "Forum" =>
-"Forum",
+"Fórum",
 
 "Forums" =>
-"Forum",
+"Fóra",
 
 "For you people with short attention spans." =>
 "",
 
 "Frequently Asked Questions" =>
-"",
+"FAQ (Èasto kladené dotazy)",
 
 "Frequently asked questions about go for the rec.games.go newsgroup" =>
 "",
 
 "From" =>
-"",
+"Od",
 
 "Full board and messages" =>
-"",
+"Celé desky a zprávy",
 
 "Full name" =>
-"Hela namnet",
+"Celé jméno",
 
 "Game" =>
-"Spel",
+"Hra",
 
 "Game ID" =>
-"",
+"ID hry",
 
 "Game id button" =>
-"",
+"Tlaèítko ID hry",
 
 "Game preferences" =>
-"",
+"Preferované hry",
 
 "Games" =>
-"",
+"Hry",
 
 "General Info" =>
 "",
@@ -378,7 +378,7 @@ class sv_Language extends Language
 "",
 
 "Go back" =>
-"",
+"Zpìt",
 
 "Go books, equipment and software" =>
 "",
@@ -396,13 +396,13 @@ class sv_Language extends Language
 "",
 
 "Handicap" =>
-"",
+"Handikap",
 
 "Het Paard" =>
 "",
 
 "Hide deleted" =>
-"Göm borttagna",
+"Skrýt odstranìné",
 
 "Hikaru no Go" =>
 "",
@@ -411,34 +411,34 @@ class sv_Language extends Language
 "",
 
 "Hobbies" =>
-"",
+"Koníèky",
 
 "Home" =>
-"Hemma",
+"Domù",
 
 "Homepage" =>
-"",
+"Domovská stránka",
 
 "hour" =>
-"timme",
+"hodina",
 
 "hours" =>
-"timmar",
+"hodiny",
 
 "How to Teach Go" =>
 "",
 
 "ICQ-number" =>
-"",
+"Èíslo ICQ",
 
 "ID" =>
-"",
+"ID",
 
 "If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page." =>
-"",
+"Pokud jste zapomnìli heslo, mù¾eme vám poslat e-mailem nové. Nové heslo bude náhodnì vygenerované, ale mù¾ete si je zmìnit ve svém u¾ivatelském profilu,",
 
 "if you want your own dragon" =>
-"",
+"pokud chcete vlastní dragon",
 
 "IGS" =>
 "",
@@ -447,25 +447,25 @@ class sv_Language extends Language
 "",
 
 "Installation instructions" =>
-"",
+"Pokyny pro instalaci",
 
 "Introduction" =>
-"",
+"Úvod",
 
 "Introduction to Dragon" =>
-"",
+"Úvod do Dragonu",
 
 "Introduction to dragon" =>
-"",
+"Úvod do dragonu",
 
 "Invitation message" =>
-"",
+"Výzva",
 
 "Invite" =>
-"Bjud in",
+"Vyzvat",
 
 "Invite this user" =>
-"",
+"Vyzvat tohoto u¾ivatele",
 
 "It's your turn" =>
 "",
@@ -474,13 +474,13 @@ class sv_Language extends Language
 "",
 
 "Japanese" =>
-"",
+"Japonské",
 
 "Japanese byo-yomi" =>
-"",
+"Japonské bjojomi",
 
 "Japanese byoyomi" =>
-"",
+"Japonské bjojomi",
 
 "jigo" =>
 "",
@@ -498,79 +498,79 @@ class sv_Language extends Language
 "",
 
 "Language" =>
-"Språk",
+"Jazyk",
 
 "Language name (i.e. English)" =>
-"Språknamn (e.g. Svenska)",
+"",
 
 "Last access" =>
-"",
+"Poslední pøístup",
 
 "Last Access" =>
-"",
+"Poslední pøístup",
 
 "Last Move" =>
-"Senaste drag",
+"Poslední tah",
 
 "Last Moved" =>
-"",
+"Naposledy táhl",
 
 "Left" =>
-"",
+"Vlevo",
 
 "Licence" =>
 "",
 
 "Links" =>
-"",
+"Odkazy",
 
 "Logged in as" =>
-"Inloggad som",
+"Pøihlá¹en jako",
 
 "Log in" =>
-"Logga in",
+"Pøihlásit se",
 
 "Logout" =>
-"Logga ut",
+"Odhlásit",
 
 "Lost" =>
-"",
+"Prohrál",
 
 "Lots of info on go" =>
 "",
 
 "Main time" =>
-"",
+"Základní èas",
 
 "Main Time" =>
-"",
+"Základní èas",
 
 "Manual setting" =>
-"",
+"Ruèní nastavení",
 
 "Meet other turn-based go players" =>
 "",
 
 "Message" =>
-"",
+"Zpráva",
 
 "Message list" =>
-"",
+"Seznam zpráv",
 
 "Messages" =>
-"Meddelanden",
+"Zprávy",
 
 "Message sent!" =>
-"",
+"Zpráva odeslána!",
 
 "Mind Sport Zine" =>
 "",
 
 "months" =>
-"",
+"mìsíce",
 
 "More information can be found in the <a href=\"phorum/list.php?f=3\">FAQ forum</a> where you are also encouraged to submit your own questions." =>
-"",
+"Více informací najdete ve <a href=\"phorum/list.php?f=3\">fóru FAQ</a>. Tam se také nestyïte polo¾it vlastní dotazy.",
 
 "More Japanese Go Terms" =>
 "",
@@ -579,28 +579,28 @@ class sv_Language extends Language
 "",
 
 "Moves" =>
-"",
+"Tahy",
 
 "Moves and messages" =>
-"",
+"Tahy a zprávy",
 
 "My color" =>
-"",
+"Moje barva",
 
 "My user info" =>
-"Min användarinformation",
+"Moje u¾ivatelské informace",
 
 "Name" =>
-"Namn",
+"Jméno",
 
 "New" =>
-"Ny",
+"Nový",
 
 "New message" =>
-"",
+"Nová zpráva",
 
 "New password" =>
-"Nytt lösenord",
+"Nové heslo",
 
 "News and games from the professional scene" =>
 "",
@@ -609,13 +609,13 @@ class sv_Language extends Language
 "",
 
 "next page" =>
-"",
+"dal¹í stránka",
 
 "Nick" =>
-"",
+"Pøezdívka",
 
 "Nighttime" =>
-"",
+"Noc",
 
 "Nigiri" =>
 "",
@@ -624,55 +624,55 @@ class sv_Language extends Language
 "",
 
 "no" =>
-"nej",
+"ne",
 
 "No" =>
-"Nej",
+"Ne",
 
 "No games found" =>
-"Inga partier funna",
+"®ádné hry nenalezeny",
 
 "Nothing to be done?" =>
 "",
 
 "Notify only" =>
-"",
+"Jen oznámení",
 
 "Not logged in" =>
-"Ej inloggad",
+"Nepøihlá¹en",
 
 "Occupation" =>
-"",
+"Zamìstnání",
 
 "Off" =>
-"",
+"Vypnuto",
 
 "Old password" =>
-"Gammalt lösenord",
+"Staré heslo",
 
 "Once again welcome, and enjoy your visit here!" =>
-"",
+"Je¹tì jednou vítejte a u¾ijte si náv¹tìvu zde!",
 
 "Only active users" =>
-"",
+"Jen aktivní u¾ivatelé",
 
 "Open for matches" =>
-"Öppen för matcher",
+"Pøijímat výzvy",
 
 "Open for matches?" =>
-"Öppen för matcher?",
+"Pøijímá výzvy?",
 
 "Opponent" =>
-"Motståndare",
+"Soupeø",
 
 "Other:" =>
-"",
+"Jiné:",
 
 "Other go servers" =>
 "",
 
 "Page created in" =>
-"Sidan skapades på",
+"Stránka vytvoøena v",
 
 "Pass" =>
 "",
@@ -681,112 +681,112 @@ class sv_Language extends Language
 "",
 
 "Password" =>
-"Lösenord",
+"Heslo",
 
 "Password changed!" =>
-"Lösenordet ändrat!",
+"Heslo zmìnìno!",
 
 "People" =>
-"",
+"Lidé",
 
 "Percent" =>
-"",
+"Procent",
 
 "periods" =>
-"",
+"periody",
 
 "Personal settings" =>
-"Personliga inställningar",
+"Osobní nastavení",
 
 "Place your handicap stones, please!" =>
-"",
+"Umístìte prosím své handikapy.",
 
 "plans for future improvements" =>
-"",
+"plány na dal¹í vylep¹ení",
 
 "Please enter data" =>
-"Var god fyll i data",
+"Zadejte prosím údaje",
 
 "Please login." =>
-"Logga in, tack.",
+"Pøihla¹te se prosím.",
 
 "Please mark dead stones and click 'done' when finished." =>
-"",
+"Oznaète prosím mrtvé kameny a kliknìte na \"Hotovo\", a¾ skonèíte.",
 
 "prev page" =>
-"",
+"pøedchozí stránka",
 
 "Prisoners" =>
-"",
+"Zajatci",
 
 "Profile updated!" =>
-"Profilen är uppdaterad!",
+"Profil aktualizován!",
 
 "Proper handicap" =>
-"",
+"Pøesný handikap",
 
 "Rafael's Go Page" =>
 "",
 
 "Rank info" =>
-"",
+"Úroveò",
 
 "Rank Info" =>
-"",
+"Informace o úrovni",
 
 "Rated" =>
-"",
+"Hodnocená",
 
 "Rating" =>
 "",
 
 "Read forum" =>
-"",
+"Èíst fórum",
 
 "Register" =>
-"Registrera",
+"Zaregistrovat",
 
 "Register new account" =>
-"Registrera ett nytt konto",
+"Zaregistrovat nový úèet",
 
 "Registration date" =>
-"",
+"Datum registrace",
 
 "Replied" =>
-"",
+"Odeslána odpovìï",
 
 "Reply" =>
-"",
+"Odpovìdìt",
 
 "Reply!" =>
-"Svar!",
+"Odpovìdìt!",
 
 "Resign" =>
-"",
+"Vzdát",
 
 "Resigning" =>
 "",
 
 "Resume playing" =>
-"",
+"Pokraèovat ve høe",
 
 "Right" =>
-"",
+"Vpravo",
 
 "Rules" =>
 "",
 
 "Running" =>
-"",
+"Aktivní",
 
 "Running games for %s" =>
-"",
+"Aktivní hry pro %s",
 
 "Samarkand" =>
 "",
 
 "Score" =>
-"Poäng",
+"Skóre",
 
 "Scot's Go Page" =>
 "",
@@ -798,19 +798,19 @@ class sv_Language extends Language
 "",
 
 "Send a message" =>
-"Skicka ett meddelande",
+"Odeslat zprávu",
 
 "Send Invitation" =>
-"",
+"Odeslat výzvu",
 
 "Send Message" =>
-"",
+"Odeslat zprávu",
 
 "Send message to user" =>
-"",
+"Poslat u¾ivateli zprávu",
 
 "Send Reply" =>
-"",
+"Odeslat odpovìï",
 
 "Sensei's Library" =>
 "",
@@ -828,49 +828,49 @@ class sv_Language extends Language
 "",
 
 "sgf" =>
-"",
+"sgf",
 
 "SGF file of game" =>
-"",
+"SGF soubor hry",
 
 "Show/edit userinfo" =>
-"Visa/ändra användarinformation",
+"Zobrazit/upravit u¾ivatelské informace",
 
 "Show all" =>
-"Visa alla",
+"Zobrazit v¹e",
 
 "Show all messages" =>
-"",
+"Zobrazit v¹echny zprávy",
 
 "Show all users" =>
-"",
+"Zobrazit v¹echny u¾ivatele",
 
 "Show finished games" =>
-"Visa färdiga partier",
+"Zobrazit ukonèené hry",
 
 "Show message" =>
-"",
+"Zobrazit zprávu",
 
 "Show recieved messages" =>
-"Visa mottagna meddelanden",
+"Zobrazit zodpovìzené zprávy",
 
 "Show running games" =>
-"Visa pågående partier",
+"Zobrazit aktivní hry",
 
 "Show sent messages" =>
-"Visa skickade meddelanden",
+"Zobrazit odeslané zprávy",
 
 "Site map" =>
-"",
+"Mapa serveru",
 
 "Size" =>
-"",
+"Velikost",
 
 "Skip to next game" =>
-"",
+"Pøeskoèit na dal¹í hru",
 
 "Smooth board edge" =>
-"Mjuk brädkant",
+"Hladké hrany desky",
 
 "Sorry, can't find the game you are invited to. Already declined?" =>
 "",
@@ -1012,28 +1012,28 @@ The reasons for this problem could be any of the following:
 "",
 
 "State" =>
-"",
+"Stát",
 
 "Status" =>
-"Status",
+"Pøehled",
 
 "stones" =>
-"stenar",
+"kamenù",
 
 "Stone size" =>
-"",
+"Velikost kamenù",
 
 "Strategy and terms" =>
 "",
 
 "Subject" =>
-"",
+"Pøedmìt",
 
 "Submit and go to next game" =>
-"",
+"Odeslat a dal¹í hra",
 
 "Submit and go to status" =>
-"",
+"Odeslat a Pøehled",
 
 "Submit your games for comments to see where you might have played better." =>
 "",
@@ -1054,10 +1054,10 @@ The reasons for this problem could be any of the following:
 "",
 
 "This %sgame%s invitation has already been accepted." =>
-"",
+"Výzva na tuto %shru%s u¾ byla pøijata. ",
 
 "This invitation has been declined or the game deleted" =>
-"",
+"Tato výzva u¾ byla odmítnuta nebo hra smazána",
 
 "This is all you need to get started. Very basic stuff" =>
 "",
@@ -1072,31 +1072,31 @@ The reasons for this problem could be any of the following:
 "",
 
 "Thread list" =>
-"",
+"Seznam témat",
 
 "Time limit" =>
-"",
+"Èasový limit",
 
 "Timezone" =>
-"Tidszon",
+"Èasové pásmo",
 
 "To" =>
-"",
+"Komu",
 
 "To (userid)" =>
-"",
+"Komu (ID u¾ivatele)",
 
 "Todo list" =>
-"",
+"Plánované úkoly (todo list)",
 
 "To do list" =>
-"",
+"seznam plánù (to do list)",
 
 "To look around, use %s." =>
-"Använd %s för att se dig omkring.",
+"Pokud se chcete jen rozhlédnout, pou¾ijte %s.",
 
 "Translate" =>
-"Översätt",
+"Pøekládat",
 
 "Translated and explained." =>
 "",
@@ -1114,22 +1114,22 @@ The reasons for this problem could be any of the following:
 "",
 
 "Up" =>
-"",
+"Nahoøe",
 
 "User %s is already translator for language %s." =>
 "",
 
 "Userid" =>
-"Användaridentitet",
+"ID u¾ivatele",
 
 "User info" =>
-"",
+"Informace o u¾ivateli",
 
 "User Info" =>
-"",
+"Informace o u¾ivateli",
 
 "Users" =>
-"Användare",
+"U¾ivatelé",
 
 "User to set privileges for (use the userid)" =>
 "",
@@ -1138,37 +1138,37 @@ The reasons for this problem could be any of the following:
 "",
 
 "Welcome page" =>
-"",
+"Uvítací stránka",
 
 "Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
-"",
+"Vítejte na Dragon Go serveru, <a href=\"licence.php\">free</a> serveru na hraní <a href=\"links.php\">go</a>, kde se hry èasto dlouho táhnou (v angliètinì slovní høíèka - 'drag on'). ",
 
 "white" =>
-"",
+"bílý",
 
 "White" =>
-"Vit",
+"Bílý",
 
 "who contributes to Dragon" =>
-"",
+"kdo se podílí na Dragonu",
 
 "Win?" =>
-"",
+"Vyhrál?",
 
 "with" =>
-"",
+"s",
 
 "with answers" =>
-"",
+"s otázkami",
 
 "without byoyomi" =>
-"",
+"bez byoyomi",
 
 "Won" =>
-"",
+"Vyhrál",
 
 "Wood color" =>
-"",
+"Barva døeva",
 
 "Working through these can help out your game." =>
 "",
@@ -1177,10 +1177,10 @@ The reasons for this problem could be any of the following:
 "",
 
 "Yes" =>
-"Ja",
+"Ano",
 
 "yes" =>
-"ja",
+"ano",
 
 "You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"invite.php\">invite</a> for a game." =>
 "",
@@ -1189,31 +1189,31 @@ The reasons for this problem could be any of the following:
 "",
 
 "Your turn to move in the following games:" =>
-"Det är ditt drag i följande partier",
+"Jste na tahu v tìchto hrách:",
 
 "Yutopian" =>
 "",
 
 "English" =>
-"Engelska",
+"Anglicky",
 
 "Swedish" =>
-"Svenska",
+"©védsky",
 
 "Norwegian" =>
-"Norska",
+"Norsky",
 
 "German" =>
-"Tyska",
+"Nìmecky",
 
 "French" =>
-"Franska",
+"Francouzsky",
 
 "Spanish" =>
-"Spanska",
+"©panìlsky",
 
 "Czech" =>
-"Tjeckiska" );
+"Èesky" );
     }
 };
 

@@ -19,36 +19,36 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-05-03 16:54:05 GMT */
+/* Automatically generated at 2002-05-03 11:58:45 GMT */
 
-class cs_Language extends Language
+class de_iso_8859_1_Language extends Language
 {
-  function cs_Language()
+  function de_iso_8859_1_Language()
     {
-      $this->full_name = 'Czech';
-      $this->last_updated = 1020444845;
+      $this->full_name = 'German';
+      $this->last_updated = 1020427125;
 
       $this->translated_strings = array(
 "%s per %s stones" =>
-"%s na %s kamenù",
+"%1\$s für %2\$s Steine",
 
 "%s per move and %s extra periods" =>
-"%s na tah a %s extra period",
+"%s pro Zug und %s Zusatzperioden",
 
 "A Brief History" =>
-"",
+"Eine kurze Geschichte",
 
 "Accept" =>
-"Pøijmout",
+"Akzeptieren",
 
 "A collaboration web site. Read and contribute!" =>
-"",
+"Ein Wiki über Go. Lesen und selber beitragen!	",
 
 "Activity" =>
-"Aktivita",
+"Aktivität",
 
 "Add Column" =>
-"Pøidat sloupec",
+"Spalte hinzufügen",
 
 "Added language %s with code %s and characterencoding %s." =>
 "",
@@ -66,10 +66,10 @@ class cs_Language extends Language
 "",
 
 "Admin" =>
-"Správce",
+"Administrator",
 
 "A large collection of go book reviews" =>
-"",
+"Eine umfangreiche Sammlung von Rezensionen von Go-Büchern.",
 
 "A large server for realtime play" =>
 "",
@@ -78,25 +78,25 @@ class cs_Language extends Language
 "",
 
 "A manga about go. Recommended!" =>
-"",
+"Ein Manga über Go. Empfehlenswert!",
 
 "A more complete list of servers" =>
-"",
+"Eine vollständigere Liste von Servern",
 
 "and" =>
-"a",
+"und",
 
 "An error occurred for this. Usually it works if you try again, otherwise please contact the support." =>
-"",
+"Ein Fehler ist aufgetreten. Üblicherweise funktioniert es nach einem erneuten Versuch. Falls nicht, wenden sie sich bitte an den Support.",
 
 "A new password has already been sent to this user, please use that password instead of sending another one." =>
-"",
+"Ein neues Passwort wurde bereits diesem Benutzer zugeschickt. Bitte verwenden sie dieses, anstatt ein neues zu schicken.",
 
 "An excellent, but unfortunately no longer updated site." =>
-"",
+"Eine hervorragende, aber leider nicht mehr aktualisierte Site.",
 
 "An Interactive Introduction" =>
-"",
+"Eine interaktive Einführung",
 
 "An Introduction to Shape" =>
 "",
@@ -105,91 +105,91 @@ class cs_Language extends Language
 "",
 
 "An open sourced go server" =>
-"",
+"Ein Open-Source Go-Server",
 
 "Another go site with lots of useful info." =>
-"",
+"Eine weitere Go-Site mit vielen nützlichen Informationen ",
 
 "Biographical info" =>
-"Biografické informace",
+"Biographische Informationen",
 
 "Bio updated!" =>
-"Biografie aktualizována!",
+"Biographie aktualisiert!",
 
 "black" =>
-"èerný",
+"schwarz",
 
 "Black" =>
-"Èerný",
+"Schwarz",
 
 "Board graphics" =>
-"Vzhled desky",
+"Brettgraphiken",
 
 "Board size" =>
-"Velikost desky",
+"Brettgröße",
 
 "Browse Dragon source code" =>
-"Procházet zdrojový kód Dragonu",
+"im Quellcode stöbern",
 
 "Byoyomi" =>
-"Bjojomi",
+"Byoyomi",
 
 "Canadian" =>
-"Kanadské",
+"kanadisch",
 
 "Canadian byo-yomi" =>
-"Kanadské bjojomi",
+"kanadisches Byoyomi",
 
 "Canadian byoyomi" =>
-"Kanadské bjojomi",
+"kanadisches Byoyomi",
 
 "Change bio" =>
-"Zmìnit biografii",
+"Biographie ändern",
 
 "Changed translator privileges info for user %s." =>
 "",
 
 "Change password" =>
-"Zmìnit heslo",
+"Passwort ändern",
 
 "Change profile" =>
-"Zmìnit profil",
+"Einstellungen ändern",
 
 "Character encoding (i.e. 'iso-8859-1')" =>
 "",
 
 "City" =>
-"Mìsto",
+"Stadt",
 
 "Clock runs on weekends" =>
-"Èas bì¾í o víkendu",
+"Uhr läuft am Wochende",
 
 "Club" =>
 "Klub",
 
 "Color" =>
-"Barva",
+"Farbe",
 
 "Colors" =>
-"Barvy",
+"Farben",
 
 "Common Japanese Go Terms" =>
-"",
+"Häufige japanische Go-Ausdrücke",
 
 "Confirm password" =>
-"Potvrzení hesla",
+"Passwort bestätigen",
 
 "Connection to database failed. Please wait a few minutes and test again." =>
-"",
+"Verbindung zur Datenbank ist fehlgeschlagen. Bitte versuchen sie es in ein paar Minuten erneut.",
 
 "Contributors to Dragon" =>
-"",
+"Mitwirkende",
 
 "Conventional handicap (komi 0.5 if not even)" =>
-"Konvenèní handikap (komi 0,5 pøi nerovné høe) ",
+"Gewöhnliches Handicap (0,5 Punkte Komi falls nicht gleichauf)",
 
 "Coordinate sides" =>
-"Souøadnice stran",
+"Koordinatenseiten",
 
 "Couldn't extrapolate value in function interpolate" =>
 "",
@@ -198,190 +198,190 @@ class cs_Language extends Language
 "",
 
 "Country" =>
-"Zemì",
+"Land",
 
 "Current maintainer and founder of Dragon" =>
-"",
+"Aktueller Maintainer und Begründer von Dragon",
 
 "Current translators" =>
-"Souèasní pøekladatelé",
+"Aktuelle Übersetzer",
 
 "daily snapshot of the cvs" =>
-"denní snímek cvs",
+"täglicher Snapshot aus dem CVS",
 
 "dan" =>
 "",
 
 "Database query failed. Please wait a few minutes and try again. " =>
-"",
+"Eine Datenbankabfrage ist fehlgeschlagen. Bitte versuchen sie es in ein paar Minuten erneut.",
 
 "Date" =>
 "Datum",
 
 "day" =>
-"den",
+"Tag",
 
 "days" =>
-"dnù",
+"Tage",
 
 "Decline" =>
-"Odmítnout",
+"Ablehnen",
 
 "Del" =>
-"",
+"Löschen",
 
 "Delete all" =>
-"Odstranit v¹e",
+"Alle Löschen",
 
 "Delete game" =>
-"Odstranit hru",
+"Partie löschen",
 
 "Delete game failed. This is problably not a problem." =>
-"",
+"Löschen der Partie ist fehlgeschlagen. Dies ist wahrscheinlich kein Problem.",
 
 "Deleting game" =>
-"Odstranìní hry",
+"lösche Partie ",
 
 "Developer" =>
-"Vývojáø",
+"Entwickler",
 
 "Disputing settings" =>
-"Licitování nastavení",
+"Einstellungen verhandeln",
 
 "Docs" =>
-"Dokumenty",
+"Dokumente",
 
 "Documentation" =>
-"Dokumentace",
+"Dokumentation",
 
 "Done" =>
-"Hotovo",
+"Fertig",
 
 "Double game" =>
-"Dvojitá hra",
+"Doppelte Partie",
 
 "Down" =>
-"Dole",
+"Unten",
 
 "Download dragon sources" =>
-"Stáhnout zdrojové kódy Dragonu",
+"Quellcode herunterladen",
 
 "Download sgf" =>
-"Stáhnout SGF",
+"sgf-Datei herunterladen",
 
 "Dragon project page at sourceforge" =>
-"Stránka projektu Dragon na sourceforge",
+"Projekt-Seite bei Sourceforge",
 
 "Edit bio" =>
-"Upravit biografii",
+"Biographie bearbeiten",
 
 "Edit biopgraphical info" =>
-"Upravit biografické informace",
+"Biographische Information bearbeiten",
 
 "Edit password" =>
-"Upravit heslo",
+"Passwort bearbeiten",
 
 "Edit profile" =>
-"Upravit profil",
+"Einstellungen bearbeiten",
 
 "Email" =>
-"E-mail",
+"E-Mail",
 
 "Email notifications" =>
-"Oznámení e-mailem",
+"E-Mail-Benachrichtigungen",
 
 "End date" =>
-"Datum ukonèení",
+"",
 
 "Error, guest may not recieve messages" =>
-"",
+"Fehler, guest kann keine Nachrichten erhalten.",
 
 "European shop" =>
 "",
 
 "Even game with nigiri" =>
-"Vyrovnaná hra s nigiri",
+"Gleichaufpartie mit Nigiri",
 
 "extra periods." =>
-"extra period.",
+"Zusatzperioden.",
 
 "extra per move" =>
-"extra na tah",
+"zusätzlich pro Zug",
 
 "extra per move." =>
-"extra na tah.",
+"zusätzlich pro Zug.",
 
 "FAQ" =>
-"FAQ (Èasto kladené dotazy)",
+"",
 
 "Finished" =>
-"Ukonèeno",
+"beendet",
 
 "Finished games for %s" =>
-"Ukonèené hry pro %s",
+"beendete Partien von %s",
 
 "Fischer time" =>
-"Fischerovský èas",
+"",
 
 "Flags" =>
-"Pøíznaky",
+"Markierungen",
 
 "for" =>
-"pro",
+"für",
 
 "Forgot password?" =>
-"Zapomnìli jste heslo?",
+"Passwort vergessen",
 
 "Forum" =>
-"Fórum",
+"Forum",
 
 "Forums" =>
-"Fóra",
+"Foren",
 
 "For you people with short attention spans." =>
-"",
+"Für Leute mit kurzer Konzentrationsspanne.",
 
 "Frequently Asked Questions" =>
-"FAQ (Èasto kladené dotazy)",
+"Häufig gestellte Fragen",
 
 "Frequently asked questions about go for the rec.games.go newsgroup" =>
-"",
+"Häufig gestellte Fragen über Go aus der rec.games.go Newsgruppe",
 
 "From" =>
-"Od",
+"von",
 
 "Full board and messages" =>
-"Celé desky a zprávy",
+"Gesamtes Brett und Nachrichten",
 
 "Full name" =>
-"Celé jméno",
+"Name",
 
 "Game" =>
-"Hra",
+"Partie",
 
 "Game ID" =>
-"ID hry",
+"Partie-ID",
 
 "Game id button" =>
-"Tlaèítko ID hry",
+"Partie-Id Schaltfläche",
 
 "Game preferences" =>
-"Preferované hry",
+"Bevorzugte Spielarten",
 
 "Games" =>
-"Hry",
+"Partien",
 
 "General Info" =>
-"",
+"Allgemeine Informationen",
 
 "General Public Licence" =>
 "",
 
 "Go back" =>
-"Zpìt",
+"gehe zurück",
 
 "Go books, equipment and software" =>
-"",
+"Go Bücher, Ausstattung und Software",
 
 "Go FAQ" =>
 "",
@@ -390,55 +390,55 @@ class cs_Language extends Language
 "",
 
 "Go Problems" =>
-"",
+"Go Probleme",
 
 "Go Teaching Ladder" =>
 "",
 
 "Handicap" =>
-"Handikap",
+"Handicap",
 
 "Het Paard" =>
 "",
 
 "Hide deleted" =>
-"Skrýt odstranìné",
+"gelöschte verstecken",
 
 "Hikaru no Go" =>
 "",
 
 "History" =>
-"",
+"Geschichte",
 
 "Hobbies" =>
-"Koníèky",
+"",
 
 "Home" =>
-"Domù",
+"Hauptseite",
 
 "Homepage" =>
-"Domovská stránka",
+"",
 
 "hour" =>
-"hodina",
+"Stunde",
 
 "hours" =>
-"hodiny",
+"Stunden",
 
 "How to Teach Go" =>
 "",
 
 "ICQ-number" =>
-"Èíslo ICQ",
+"ICQ-Nummer",
 
 "ID" =>
 "ID",
 
 "If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page." =>
-"Pokud jste zapomnìli heslo, mù¾eme vám poslat e-mailem nové. Nové heslo bude náhodnì vygenerované, ale mù¾ete si je zmìnit ve svém u¾ivatelském profilu,",
+"Falls sie ihr Passwort vergessen haben, kann ihnen ein neues zugeschickt werden. Das neue Passwort wird zufällig erzeugt, aber sie können es selbstverständlich auf der Profil bearbeiten Seite ändern.",
 
 "if you want your own dragon" =>
-"pokud chcete vlastní dragon",
+"Falls sie ihren eigenen Dragon wollen",
 
 "IGS" =>
 "",
@@ -447,25 +447,25 @@ class cs_Language extends Language
 "",
 
 "Installation instructions" =>
-"Pokyny pro instalaci",
+"Installationsanleitung",
 
 "Introduction" =>
-"Úvod",
+"Einführung",
 
 "Introduction to Dragon" =>
-"Úvod do Dragonu",
+"Einführung zu Dragon",
 
 "Introduction to dragon" =>
-"Úvod do dragonu",
+"Einführung zu Dragon",
 
 "Invitation message" =>
-"Výzva",
+"Herausforderung",
 
 "Invite" =>
-"Vyzvat",
+"Herausfordern",
 
 "Invite this user" =>
-"Vyzvat tohoto u¾ivatele",
+"diesen Benutzer herausfordern",
 
 "It's your turn" =>
 "",
@@ -474,16 +474,16 @@ class cs_Language extends Language
 "",
 
 "Japanese" =>
-"Japonské",
+"japanisch",
 
 "Japanese byo-yomi" =>
-"Japonské bjojomi",
+"japanisches Byoyomi",
 
 "Japanese byoyomi" =>
-"Japonské bjojomi",
+"japanisches Byoyomi",
 
 "jigo" =>
-"",
+"jigo",
 
 "Kiseido" =>
 "",
@@ -492,301 +492,301 @@ class cs_Language extends Language
 "",
 
 "Komi" =>
-"",
+"Komi",
 
 "kyu" =>
 "",
 
 "Language" =>
-"Jazyk",
+"Sprache",
 
 "Language name (i.e. English)" =>
 "",
 
 "Last access" =>
-"Poslední pøístup",
+"letzter Zugriff",
 
 "Last Access" =>
-"Poslední pøístup",
+"letzter Zugriff",
 
 "Last Move" =>
-"Poslední tah",
+"letzter Zug",
 
 "Last Moved" =>
-"Naposledy táhl",
+"zuletzt gezogen",
 
 "Left" =>
-"Vlevo",
+"Links",
 
 "Licence" =>
-"",
+"Lizenz",
 
 "Links" =>
-"Odkazy",
-
-"Logged in as" =>
-"Pøihlá¹en jako",
-
-"Log in" =>
-"Pøihlásit se",
-
-"Logout" =>
-"Odhlásit",
-
-"Lost" =>
-"Prohrál",
-
-"Lots of info on go" =>
 "",
 
+"Logged in as" =>
+"angemeldet als",
+
+"Log in" =>
+"anmelden",
+
+"Logout" =>
+"abmelden",
+
+"Lost" =>
+"verloren",
+
+"Lots of info on go" =>
+"Viele Informationen über Go",
+
 "Main time" =>
-"Základní èas",
+"Bedenkzeit",
 
 "Main Time" =>
-"Základní èas",
+"Bedenkzeit",
 
 "Manual setting" =>
-"Ruèní nastavení",
+"Manuelle Einstellungen",
 
 "Meet other turn-based go players" =>
 "",
 
 "Message" =>
-"Zpráva",
+"Nachricht",
 
 "Message list" =>
-"Seznam zpráv",
+"Nachrichtenliste",
 
 "Messages" =>
-"Zprávy",
+"Nachrichten",
 
 "Message sent!" =>
-"Zpráva odeslána!",
+"Nachricht abgeschickt!",
 
 "Mind Sport Zine" =>
 "",
 
 "months" =>
-"mìsíce",
+"Monate",
 
 "More information can be found in the <a href=\"phorum/list.php?f=3\">FAQ forum</a> where you are also encouraged to submit your own questions." =>
-"Více informací najdete ve <a href=\"phorum/list.php?f=3\">fóru FAQ</a>. Tam se také nestyïte polo¾it vlastní dotazy.",
+"Weitere Informationen finden sie im <a href=\"phorum/list.php?f=3\">FAQ Forum</a>, wo sie auch gerne eigene Fragen stellen können.",
 
 "More Japanese Go Terms" =>
-"",
+"Weiter japanische Go-Ausdrücke",
 
 "Move outside board?" =>
-"",
+"Zug außerhalb des Bretts?",
 
 "Moves" =>
-"Tahy",
+"Züge",
 
 "Moves and messages" =>
-"Tahy a zprávy",
+"Züge und Nachrichten",
 
 "My color" =>
-"Moje barva",
+"Meine Farbe",
 
 "My user info" =>
-"Moje u¾ivatelské informace",
+"Meine Benutzerinformationen",
 
 "Name" =>
-"Jméno",
+"Name",
 
 "New" =>
-"Nový",
+"Neu",
 
 "New message" =>
-"Nová zpráva",
+"Neue Nachricht",
 
 "New password" =>
-"Nové heslo",
+"Neues Passwort",
 
 "News and games from the professional scene" =>
-"",
+"Nachrichten und Partien aus der Profi-Szene",
 
 "New topic" =>
 "",
 
 "next page" =>
-"dal¹í stránka",
+"nächste Seite",
 
 "Nick" =>
-"Pøezdívka",
+"Kurzname",
 
 "Nighttime" =>
-"Noc",
+"",
 
 "Nigiri" =>
-"",
+"Nigiri",
 
 "NNGS" =>
 "",
 
 "no" =>
-"ne",
+"nein",
 
 "No" =>
-"Ne",
+"Nein",
 
 "No games found" =>
-"®ádné hry nenalezeny",
+"keine Partien gefunden",
 
 "Nothing to be done?" =>
-"",
+"Nichts zu tun?",
 
 "Notify only" =>
-"Jen oznámení",
+"Nur benachrichtigen",
 
 "Not logged in" =>
-"Nepøihlá¹en",
+"nicht angemeldet",
 
 "Occupation" =>
-"Zamìstnání",
+"Beruf",
 
 "Off" =>
-"Vypnuto",
+"Aus",
 
 "Old password" =>
-"Staré heslo",
+"Altes Passwort",
 
 "Once again welcome, and enjoy your visit here!" =>
-"Je¹tì jednou vítejte a u¾ijte si náv¹tìvu zde!",
+"Noch einmal Willkommen und viel Vergnügen bei ihrem Besuch hier!",
 
 "Only active users" =>
-"Jen aktivní u¾ivatelé",
+"nur aktive Benutzer",
 
 "Open for matches" =>
-"Pøijímat výzvy",
+"bereit für Partien",
 
 "Open for matches?" =>
-"Pøijímá výzvy?",
+"bereit für Partien?",
 
 "Opponent" =>
-"Soupeø",
+"Gegner",
 
 "Other:" =>
-"Jiné:",
+"Anderes:",
 
 "Other go servers" =>
-"",
+"Andere Go-Server",
 
 "Page created in" =>
-"Stránka vytvoøena v",
+"",
 
 "Pass" =>
-"",
+"Passen",
 
 "Passing" =>
-"",
+"Passe",
 
 "Password" =>
-"Heslo",
+"Passwort",
 
 "Password changed!" =>
-"Heslo zmìnìno!",
+"Passwort geändert!",
 
 "People" =>
-"Lidé",
+"Leute",
 
 "Percent" =>
-"Procent",
+"Prozent",
 
 "periods" =>
-"periody",
+"Perioden",
 
 "Personal settings" =>
-"Osobní nastavení",
+"Persönliche Einstellungen",
 
 "Place your handicap stones, please!" =>
-"Umístìte prosím své handikapy.",
+"Bitte setzen sie ihr Handicap-Steine!",
 
 "plans for future improvements" =>
-"plány na dal¹í vylep¹ení",
+"Pläne für zukünftige Verbesserungen",
 
 "Please enter data" =>
-"Zadejte prosím údaje",
+"Bitte geben sie die Daten ein",
 
 "Please login." =>
-"Pøihla¹te se prosím.",
+"Bitte melden sie sich an.",
 
 "Please mark dead stones and click 'done' when finished." =>
-"Oznaète prosím mrtvé kameny a kliknìte na \"Hotovo\", a¾ skonèíte.",
+"Bitte markieren sie tote Steine und bestätigen sie mit \"Fertig\".",
 
 "prev page" =>
-"pøedchozí stránka",
+"vorherige Seite",
 
 "Prisoners" =>
-"Zajatci",
+"Gefangene",
 
 "Profile updated!" =>
-"Profil aktualizován!",
+"Einstellungen aktualisiert!",
 
 "Proper handicap" =>
-"Pøesný handikap",
+"genaues Handicap",
 
 "Rafael's Go Page" =>
 "",
 
 "Rank info" =>
-"Úroveò",
+"Selbsteinstufung",
 
 "Rank Info" =>
-"Informace o úrovni",
+"Selbsteinstufung",
 
 "Rated" =>
-"Hodnocená",
+"Bewertet",
 
 "Rating" =>
-"",
+"Spielstärke",
 
 "Read forum" =>
-"Èíst fórum",
+"Forum lesen",
 
 "Register" =>
-"Zaregistrovat",
+"Account anlegen ",
 
 "Register new account" =>
-"Zaregistrovat nový úèet",
+"neuen Account anlegen",
 
 "Registration date" =>
-"Datum registrace",
+"Datum der Registrierung",
 
 "Replied" =>
-"Odeslána odpovìï",
+"Beantwortet",
 
 "Reply" =>
-"Odpovìdìt",
+"Beantworten",
 
 "Reply!" =>
-"Odpovìdìt!",
+"Beantworten!",
 
 "Resign" =>
-"Vzdát",
+"Aufgeben",
 
 "Resigning" =>
-"",
+"Aufgeben",
 
 "Resume playing" =>
-"Pokraèovat ve høe",
+"Partie fortsetzen",
 
 "Right" =>
-"Vpravo",
+"Rechts",
 
 "Rules" =>
-"",
+"Regeln",
 
 "Running" =>
-"Aktivní",
+"Laufende",
 
 "Running games for %s" =>
-"Aktivní hry pro %s",
+"laufende Partien von %s",
 
 "Samarkand" =>
 "",
 
 "Score" =>
-"Skóre",
+"Ergebnis",
 
 "Scot's Go Page" =>
 "",
@@ -798,28 +798,28 @@ class cs_Language extends Language
 "",
 
 "Send a message" =>
-"Odeslat zprávu",
+"Nachricht abschicken",
 
 "Send Invitation" =>
-"Odeslat výzvu",
+"Herausforderung abschicken",
 
 "Send Message" =>
-"Odeslat zprávu",
+"Nachricht abschicken",
 
 "Send message to user" =>
-"Poslat u¾ivateli zprávu",
+"Nachricht an Benutzer schicken",
 
 "Send Reply" =>
-"Odeslat odpovìï",
+"Antwort abschicken",
 
 "Sensei's Library" =>
 "",
 
 "Server list" =>
-"",
+"Server-Liste",
 
 "Server with java interface" =>
-"",
+"Server mit Java-Oberfläche",
 
 "Set translator privileges for user" =>
 "",
@@ -831,154 +831,154 @@ class cs_Language extends Language
 "sgf",
 
 "SGF file of game" =>
-"SGF soubor hry",
+"SGF-Datei der Partie",
 
 "Show/edit userinfo" =>
-"Zobrazit/upravit u¾ivatelské informace",
+"Benutzerinformation anzeigen/bearbeiten",
 
 "Show all" =>
-"Zobrazit v¹e",
+"Alle anzeigen",
 
 "Show all messages" =>
-"Zobrazit v¹echny zprávy",
+"Alle Nachrichten anzeigen",
 
 "Show all users" =>
-"Zobrazit v¹echny u¾ivatele",
+"Alle Benutzer anzeigen",
 
 "Show finished games" =>
-"Zobrazit ukonèené hry",
+"beendete Partien anzeigen",
 
 "Show message" =>
-"Zobrazit zprávu",
+"Nachricht anzeigen",
 
 "Show recieved messages" =>
-"Zobrazit zodpovìzené zprávy",
+"erhaltene Nachrichten anzeigen",
 
 "Show running games" =>
-"Zobrazit aktivní hry",
+"laufende Partien anzeigen",
 
 "Show sent messages" =>
-"Zobrazit odeslané zprávy",
+"abgeschickte Nachrichten anzeigen",
 
 "Site map" =>
-"Mapa serveru",
+"Sitemap",
 
 "Size" =>
-"Velikost",
+"Größe",
 
 "Skip to next game" =>
-"Pøeskoèit na dal¹í hru",
+"Überspringen und zur nächsten Partie gehen",
 
 "Smooth board edge" =>
-"Hladké hrany desky",
+"Abgerundete Brettkanten",
 
 "Sorry, can't find the game you are invited to. Already declined?" =>
-"",
+"Die Partie u der sie herausgefordert wurden, konnte nicht gefunden werden. Wurde sie schon abgelehnt?",
 
 "Sorry, couldn't find the reciever of your message. Make sure to use the userid, not the full name." =>
-"",
+"Der Empfänger ihrer Nachricht konnte nicht gefunden werden. Stellen sie sicher, dass sie die Benutzer-ID verwenden, und nicht den Namen.",
 
 "Sorry, couldn't start the game. Please wait a few minutes and try again." =>
-"",
+"Die Partie konnte nicht begonnen werden. Bitte versuchen sie es in ein paar Minuten erneut.",
 
 "Sorry, couldn't update player data. Please wait a few minutes and try again." =>
-"",
+"Die Spieler-Daten konnten nicht aktualisiert werden. Bitte versuchen sie es in ein paar Minuten erneut.",
 
 "Sorry, I've problem with the rating, did you forget to specify 'kyu' or 'dan'?" =>
-"",
+"Es gibt ein Problem mit der Spielstärke. Haben sie vergessen \\\"kyu\\\" oder \\\"dan\\\" anzugeben?",
 
 "Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' for this ratingtype" =>
-"",
+"Es gibt ein Problem mit der Spielstärke. Sie sollten für diesen Spielstärkentyp \\\"kyu\\\" oder \\\"dan\\\" nicht verwenden.",
 
 "Sorry, I can't find that game." =>
-"",
+"Diese Partie konnte nicht gefunden werden.",
 
 "Sorry, I couldn't find that forum you wanted to show." =>
-"",
+"Das gewünschte Forum konnte nicht gefunden werden.",
 
 "Sorry, I couldn't find the language you want to translate. Please contact the support." =>
-"",
+"Die gewünschte Sprache wurde nicht gefunden. Bitte wenden sie sich an den Support.",
 
 "Sorry, I couldn't find the message you wanted to show." =>
-"",
+"Die gewünschte Nachricht wurde nicht gefunden. ",
 
 "Sorry, I couldn't find this user." =>
-"",
+"Dieser Benutzer wurde nicht gefunden.",
 
 "Sorry, I don't know anyone with that userid." =>
-"",
+"Ein Benutzer mit dieser Benutzer-ID ist nicht bekannt.",
 
 "Sorry, I need a game number to know what game to show." =>
-"",
+"Die Nummer der Partie wird benötigt, um sie anzuzeigen.",
 
 "Sorry, I need to known for which user to show the data." =>
-"",
+"Der Benutzer muss angegeben werden, um seine Daten anzuzeigen.",
 
 "Sorry, it's not your turn." =>
-"",
+"Sie sind nicht am Zug.",
 
 "Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support." =>
-"",
+"Es konnte kein Backup der alten Übersetzung angelegt werden. Bitte wenden sie sich an den Support.",
 
 "Sorry, I was unable to open a file for writing. Please contact the support." =>
-"",
+"Eine Datei konnte nicht zum Schreiben geöffnet werden. Bitte wenden sie sich an den Support.",
 
 "Sorry, only translators are allowed to translate." =>
-"",
+"Nur Übersetzer dürfen übersetzen.",
 
 "Sorry, something went wrong when trying to insert the new translations into the database." =>
-"",
+"Ein Fehler trat auf, als versucht wurde, die neuen Übersetzungen in die Datenbank einzufügen.",
 
 "Sorry, the additon of the game to the database seems to have failed." =>
-"",
+"Die Partie konnte anscheinend nicht in die Datenbank eingefügt werden.",
 
 "Sorry, the additon of the message to the database seems to have failed." =>
-"",
+"Die Nachricht konnte anscheinend nicht in die Datenbank eingefügt werden.",
 
 "Sorry, the game has already finished." =>
-"",
+"Die Partie ist leider schon beendet.",
 
 "Sorry, the game hasn't started yet." =>
-"",
+"Die Partie hat noch nicht begonnen.",
 
 "Sorry, the initial rating must be between 30 kyu and 6 dan." =>
-"",
+"Die initiale Spielstärke muss zwischen 30 kyu und 6 dan liegen",
 
 "Sorry, the language you tried to add already exists." =>
-"",
+"Die Sprache, die sie hinzufügen wollten, existiert bereits.",
 
 "Sorry, the password must be at least six letters." =>
-"",
+"Das Passwort muss mindestens sechs Buchstaben enthalten.",
 
 "Sorry, there was a missing or incorrect field when adding a language." =>
-"",
+"Beim Hinzufügen einer Sprache fehlte ein Feld oder war falsch.",
 
 "Sorry, this is not allowed for guests, please first register a personal account" =>
-"",
+"Dies ist leider nicht erlaubt für den guest-Account. Bitte legen sie einen persönlichen Account an.",
 
 "Sorry, this page is solely for users with administrative tasks." =>
-"",
+"Diese Seite ist ausschließlich für Benutzer mit administrativen Rechten.",
 
 "Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset." =>
-"",
+"Dieser Stein hätte sich selbst getötet, aber Selbstmord ist in diesen Regeln nicht erlaubt.",
 
 "Sorry, this userid is already used, please try to find a unique userid." =>
-"",
+"Diese Benutzer-ID wird leider schon verwendet. Bitte versuchen sie eine andere Benutzer-ID zu finden.",
 
 "Sorry, userid must be at least 3 letters long." =>
-"",
+"Die Benutzer-ID muss mindestens 3 Buchstaben enthalten.",
 
 "Sorry, you and your opponent need to set an initial rating, otherwise I can't find a suitable handicap" =>
-"",
+"Sie und ihr Gegner müssen eine initiale Spielstärke angeben. Andernfalls kann ich kein passendes Handicap errechnen.",
 
 "Sorry, you are not allowed to translate the specified language." =>
-"",
+"Es ist ihnen nicht erlaubt, diese Sprache zu übersetzen.",
 
 "Sorry, you can't invite yourself." =>
-"",
+"Sie können sich nicht selbst herausfordern.",
 
 "Sorry, you didn't write your current password correctly." =>
-"",
+"Sie haben ihr Passwort falsch eingegeben.",
 
 "Sorry, you have to be logged in to do that.
 <p>
@@ -991,115 +991,115 @@ The reasons for this problem could be any of the following:
 "",
 
 "Sorry, you have to supply a name." =>
-"",
+"Sie müssen einen Namen angeben.",
 
 "Sorry, you may not pass before all handicap stones are placed." =>
-"",
+"Sie können nicht passen bevor nicht alle Handicap-Steine gesetzt wurden.",
 
 "Sorry, you may not retake a stone which has just captured a stone, since it would repeat a previous board position. Look for 'ko' in the rules." =>
-"",
+"Sie dürfen keinen einzelnen Stein zurückschlagen, der gerade einen einzelnen Stein geschlagen hat, da sonst eine vorherige Position wiederholt würde. Schauen sie unter \\\"Ko\\\" in den Regeln nach.",
 
 "Sorry, you may only place stones on empty points." =>
-"",
+"Steine dürfen nur auf freie Schnittpunkte gesetzt werden.",
 
 "Sorry, you must specify a language." =>
-"",
+"Sie müssen eine Sprache angeben.",
 
 "Sorry, you must specify a user." =>
-"",
+"Sie müssen einen Benutzer angeben.",
 
 "Sorry, you wrote a non-numeric value on a numeric field." =>
-"",
+"Sie haben einen nicht-numerischen Wert in einem numerischen Feld angegeben.",
 
 "State" =>
-"Stát",
+"Land",
 
 "Status" =>
-"Pøehled",
+"Status",
 
 "stones" =>
-"kamenù",
+"Steine",
 
 "Stone size" =>
-"Velikost kamenù",
+"Größe der Spielsteine",
 
 "Strategy and terms" =>
-"",
+"Strategie und Terminologie",
 
 "Subject" =>
-"Pøedmìt",
+"Betreff",
 
 "Submit and go to next game" =>
-"Odeslat a dal¹í hra",
+"Bestätigen und zur nächsten Partie gehen",
 
 "Submit and go to status" =>
-"Odeslat a Pøehled",
+"Bestätigen und zur Statusseite gehen",
 
 "Submit your games for comments to see where you might have played better." =>
 "",
 
 "The confirmed password didn't match the password, please go back and retry." =>
-"",
+"Das bestätigte Passwort passt nicht zum Passwort. Bitte versuchen sie es erneut.",
 
 "The Extended History" =>
-"",
+"Die ausführlichere Geschichte",
 
 "The insertion of the move into the database seems to have failed. This may or may not be a problem, please return to the game to see if the move has been registered." =>
-"",
+"Das Einfügen des Zuges in die Datenbank ist anscheinend fehlgeschlagen. Dies könnte ein Problem sein, oder auch nicht. Bitte gehen sie zurück zur Partie und schauen nach ob der Zug registriert wurde.",
 
 "The insertion of your data into the database seems to have failed. If you can't log in, please try once more and, if this fails, contact the support." =>
-"",
+"Das Einfügen ihrer Daten in die Datenbank ist anscheinend fehlgeschlagen. Falls sie sich nicht anmelden können, versuchen sie es bitte erneut, und wenden sie sich an den Support, falls auch das nicht gelingt.",
 
 "The komi is out of range, please choose a move reasonable value." =>
-"",
+"Das Komi liegt nicht in einem sinnvollen Bereich. Bitte wählen sie einen vernünftigeren Wert.",
 
 "This %sgame%s invitation has already been accepted." =>
-"Výzva na tuto %shru%s u¾ byla pøijata. ",
+"",
 
 "This invitation has been declined or the game deleted" =>
-"Tato výzva u¾ byla odmítnuta nebo hra smazána",
+"Diese Herausforderung wurde abgelehnt oder die Partie wurde gelöscht",
 
 "This is all you need to get started. Very basic stuff" =>
-"",
+"Alles was man braucht um anzufangen. Sehr elementar.",
 
 "This is a very nice site to learn with." =>
-"",
+"Eine hübsche Seite um damit zu lernen.",
 
 "This is more in-depth." =>
-"",
+"Geht mehr in die Tiefe. ",
 
 "This type action is either unknown or can't be use in this state of the game." =>
 "",
 
 "Thread list" =>
-"Seznam témat",
+"Thread-Liste",
 
 "Time limit" =>
-"Èasový limit",
+"Zeitbeschränkung",
 
 "Timezone" =>
-"Èasové pásmo",
+"Zeitzone",
 
 "To" =>
-"Komu",
+"An",
 
 "To (userid)" =>
-"Komu (ID u¾ivatele)",
+"An (Benutzer-ID)",
 
 "Todo list" =>
-"Plánované úkoly (todo list)",
+"Todo-Liste",
 
 "To do list" =>
-"seznam plánù (to do list)",
+"Todo-Liste",
 
 "To look around, use %s." =>
-"Pokud se chcete jen rozhlédnout, pou¾ijte %s.",
+"verwenden sie %s um sich umzusehen.",
 
 "Translate" =>
-"Pøekládat",
+"Übersetzen",
 
 "Translated and explained." =>
-"",
+"Übersetzt und erläutert.",
 
 "Turn-based go guild" =>
 "",
@@ -1108,112 +1108,112 @@ The reasons for this problem could be any of the following:
 "",
 
 "Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again." =>
-"",
+"Unbekanntes Problem. Dies sollte nicht geschehen. Bitte senden sie den URL dieser Seite an den Support, damit dies nicht wieder geschieht.",
 
 "Unknown rank type" =>
-"",
+"Unbekannter Spielstärkentyp",
 
 "Up" =>
-"Nahoøe",
+"Oben",
 
 "User %s is already translator for language %s." =>
 "",
 
 "Userid" =>
-"ID u¾ivatele",
+"Benutzer-ID",
 
 "User info" =>
-"Informace o u¾ivateli",
+"Benutzerinformation",
 
 "User Info" =>
-"Informace o u¾ivateli",
+"Benutzerinformation",
 
 "Users" =>
-"U¾ivatelé",
+"Benutzer",
 
 "User to set privileges for (use the userid)" =>
 "",
 
 "Very well written introduction by the British Go Association." =>
-"",
+"Sehr gut geschriebene Einführung von der British Go Association.",
 
 "Welcome page" =>
-"Uvítací stránka",
+"Eingangs-Seite",
 
 "Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
-"Vítejte na Dragon Go serveru, <a href=\"licence.php\">free</a> serveru na hraní <a href=\"links.php\">go</a>, kde se hry èasto dlouho táhnou (v angliètinì slovní høíèka - 'drag on'). ",
+"Willkommen zum Dragon Go Server, einem <a href=\"licence.php\">freiem</a> Server um <a href=\"links.php\">Go</a> zu spielen, auf dem sich die Spiele \"hinziehen\" (engl.: \"drag on\").",
 
 "white" =>
-"bílý",
+"weiß",
 
 "White" =>
-"Bílý",
+"Weiß",
 
 "who contributes to Dragon" =>
-"kdo se podílí na Dragonu",
+"wer hilft bei Dragon mit",
 
 "Win?" =>
-"Vyhrál?",
+"Sieg?",
 
 "with" =>
-"s",
+"mit",
 
 "with answers" =>
-"s otázkami",
+"mit Antworten",
 
 "without byoyomi" =>
-"bez byoyomi",
+"ohne Byoyomi",
 
 "Won" =>
-"Vyhrál",
+"gewonnen",
 
 "Wood color" =>
-"Barva døeva",
+"Farbe des Holzes",
 
 "Working through these can help out your game." =>
-"",
+"Durch diese durchzuarbeiten kann ihr Spiel verbessern.",
 
 "Wrong, number of handicap stones" =>
-"",
+"Falsche Zahl von Handicap-Steinen",
 
 "Yes" =>
-"Ano",
+"Ja",
 
 "yes" =>
-"ano",
+"ja",
 
 "You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"invite.php\">invite</a> for a game." =>
-"",
+"Man kann es als eine Art von \"play-by-email\" betrachten, wobei eine Web-Oberfläche benutzt wird, um das Spielbrett attraktiver zu gestalten. Um zu spielen, sollten sie sich zunächst einen <a href=\"register.php\">Account</a> anlegen, falls sie das nicht schon getan haben. Danach können sie ihre <a href=\"edit_profile.php\">Einstellungen bearbeiten</a> und einige <a href=\"edit_bio.php\">biographische Informationen</a> angeben. Besonders die Felder \"Bereit für Partien?\", \"Spielstärke\" und \"Selbsteinstufung\" sind nützlich um Gegner zu finden. Um geeignete Gegner für eine <a href=\"invite.php\">Herausforderung</a> zu finden, können sie anschließend die <a href=\"users.php\">Benutzer-Liste</a> betrachten oder das <a href=\"phorum/index.php\">Forum</a> verwenden.",
 
 "You have to know what other players are talking about." =>
-"",
+"Sie sollten wissen, über was andere Leute reden.",
 
 "Your turn to move in the following games:" =>
-"Jste na tahu v tìchto hrách:",
+"Sie sind am Zug in folgenden Partien:",
 
 "Yutopian" =>
 "",
 
 "English" =>
-"Anglicky",
+"Englisch",
 
 "Swedish" =>
-"©védsky",
+"Schwedisch",
 
 "Norwegian" =>
-"Norsky",
+"Norwegisch",
 
 "German" =>
-"Nìmecky",
+"Deutsch",
 
 "French" =>
-"Francouzsky",
+"Französisch",
 
 "Spanish" =>
-"©panìlsky",
+"Spanisch",
 
 "Czech" =>
-"Èesky" );
+"Tschechisch" );
     }
 };
 

@@ -19,16 +19,14 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-06-11 06:39:37 GMT */
-
-class zh_Language extends Language
+class en_iso_8859_1_Language extends Language
 {
-  function zh_Language()
+  function en_iso_8859_1_Language()
     {
-      $this->full_name = 'Chinese';
-      $this->last_updated = 1023777577;
+      $this->full_name = "English";
+      $this->last_updated = -1;
 
-      $this->translated_strings = array( );
+      $this->translated_strings = array();
     }
 };
 
