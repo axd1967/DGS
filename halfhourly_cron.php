@@ -78,6 +78,7 @@ function mail_strip_html( $str)
    return $str;
 }
 
+if( !$is_down )
 {
    connect2mysql();
 

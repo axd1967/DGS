@@ -21,8 +21,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require_once( "include/std_functions.php" );
 //require_once( "include/rating.php" );
-require_once( "forum/forum_functions.php" ); //only required for $new_end
 
+if( !$is_down )
 {
    connect2mysql();
 
