@@ -445,17 +445,6 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $Subject = 'Game deleted';
       }
 
-      if ( $message )
-      {
-         $Text .= "<p>Your opponent wrote:<p>" . $message;
-      }
-
-      mysql_query( "INSERT INTO Messages SET " .
-                   "From_ID=" . $player_row["ID"] . ", " .
-                   "To_ID=" . $opponent_row["ID"] . ", " .
-                   "Time=FROM_UNIXTIME($NOW), " .
-                   "Game_ID=$gid, Subject='$Subject', Text='$Text'");
-
       if( $action == 'delete' )
       {
          mysql_query("UPDATE Players SET Running=Running-1 " .
@@ -480,6 +469,16 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          delete_all_observers($gid, ($old_moves >= 10+$Handicap), $Text);
       }
 
+      if ( $message )
+      {
+         $Text .= "<p>Your opponent wrote:<p>" . $message;
+      }
+
+      mysql_query( "INSERT INTO Messages SET " .
+                   "From_ID=" . $player_row["ID"] . ", " .
+                   "To_ID=" . $opponent_row["ID"] . ", " .
+                   "Time=FROM_UNIXTIME($NOW), " .
+                   "Game_ID=$gid, Subject='$Subject', Text='$Text'");
    }
 
 
