@@ -110,7 +110,7 @@ require( "include/std_functions.php" );
   add_link_page_link("http://www.kiseido.com/", T_('Kiseido'));
   add_link_page_link("http://www.yutopian.com/go/", T_('Yutopian'));
   add_link_page_link("http://www.samarkand.net/", T_('Samarkand'));
-  add_link_page_link("http://www.xs4all.nl/~paard//", T_('Het Paard'), T_('European shop'));
+  add_link_page_link("http://www.xs4all.nl/~paard/", T_('Het Paard'), T_('European shop'));
 
   echo "<p>&nbsp;\n";
   echo "<h3 align=left><a name=\"servers\"></a><font color=$h3_color>" .
