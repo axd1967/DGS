@@ -18,21 +18,60 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+define("LEFT",1);
+define("UP",2);
+define("RIGHT",4);
+define("DOWN",8);
+
 function draw_board($Size, &$array, $may_play, $gid, 
 $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi )
 {
    $woodcolor = 1;
+   
+   $use_second_table = true;
+   $use_gif_coords = false;
+
+   $coord_borders = 15;//LEFT | DOWN;
+
+   if( !$use_second_table ) $use_gif_coords = true;
 
    if( !$stone_size ) $stone_size = 25;
    if( !$font_size ) $font_size = "+0";
 
-   $font_start = "<font size=\"$font_size\">";
-   $font_end = "</font>";
+   if($use_second_table)
+   {
+      $board_begin = '<table border=0 cellpadding=0 cellspacing=0 ' .
+          'align=center valign=center background="">';
+      $board_end = "</table>\n";
+      $row_start = '<tr>';
+      $row_end = "</tr>\n";
+      $table_start = "<td>";
+      $table_start_c = "<td align=center>";
+      $table_end = "</td>";
+   }
+   else
+   {
+      $board_begin = $board_end = $row_start = "";
+      $row_end = "<br\n>";
+      $table_start = $table_start_c = $table_end = "";
+   }
 
-   if( $font_size == "+0" )
-      $font_start = $font_end = "";
+   
+   if( $use_gif_coords )
+   {
+      $coord_start = $table_start . "<img src=$stone_size/c";
+      $coord_end = ".gif>" . $table_end;
+      $coord_empty = $table_start . "<img src=$stone_size/.gif>" . $table_end;
+   }
+   else
+   {
+      $coord_start = $table_start_c . ( $font_size != "+0"  ? "<font size=\"$font_size\">" :"");
+      $coord_end = ( $font_size != "+0"  ? "</font>" : "") . $table_end;
+      $coord_empty = "<td>&nbsp;</td>";
+   }
 
-   $str1 = "<td><IMG border=0 alt=\"";
+   $str1 = "$table_start<IMG alt=\"";
+   $str4 = ".gif></A>$table_end";
    if( $may_play )
    {
       if( $handi or !$stonestring )
@@ -40,17 +79,17 @@ $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi )
 
       if( $handi )
       {
-         $str2 = "<td><A href=\"game.php?gid=$gid&action=handicap&coord=";
-         $str3 = "&stonestring=$stonestring\"><IMG border=0 alt=\"";
+         $str2 = "$table_start<A href=\"game.php?g=$gid&a=handicap&c=";
+         $str3 = "&s=$stonestring\"><IMG border=0 alt=\"";
       }
       else if( $stonestring )
       {
-         $str2 = "<td><A href=\"game.php?gid=$gid&action=remove&coord=";
-         $str3 = "&stonestring=$stonestring\"><IMG border=0 alt=\"";
+         $str2 = "$table_start<A href=\"game.php?g=$gid&a=remove&c=";
+         $str3 = "&s=$stonestring\"><IMG border=0 alt=\"";
       }
       else
       {
-         $str2 = "<td><A href=\"game.php?gid=$gid&action=move&coord=";
+         $str2 = "$table_start<A href=\"game.php?g=$gid&a=move&c=";
          $str3 = "\"><IMG border=0 alt=\"";
       }
    }
@@ -59,24 +98,26 @@ $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi )
       echo "<table border=2 cellpadding=3 align=center><tr>" . 
          "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
-   echo '<table border=0 background="images/wood' . $woodcolor . '.gif" align=center><tr><td>
-<table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">
-<tr>
-<td>&nbsp;</td>';
+   echo '<table border=0 cellpadding=0 cellspacing=0 background="images/wood' . $woodcolor . '.gif" align=center><tr><td valign=top>';
+   
+   echo $board_begin;
 
-   $colnr = 1;
-   $letter = 'a';
-   while( $colnr <= $Size )
+   if( $coord_borders & UP )
    {
-      echo "<td align=center>$font_start<B>$letter</B>$font_end</td>\n";
-      $colnr++;
-      $letter++;
-      if( $letter == 'i' ) $letter++;
-   }  
-   echo '<td width=5>&nbsp;</td>
-</tr>
-';
-
+      if( $coord_borders & LEFT )
+         echo $coord_empty;
+      $colnr = 1;
+      $letter = 'a';
+      while( $colnr <= $Size )
+      {
+         echo $coord_start . $letter . $coord_end;
+         $colnr++;
+         $letter++;
+         if( $letter == 'i' ) $letter++;
+      }  
+      if( $coord_borders & RIGHT )
+         echo $coord_empty . $row_end;
+   }
 
    if( $Size > 11 ) $hoshi_dist = 4; else $hoshi_dist = 3;
 
@@ -89,8 +130,9 @@ $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi )
 
    for($rownr = $Size; $rownr > 0; $rownr-- )
    {
-      echo "<tr><td align=center>$font_start<B>$rownr</B>$font_end</td>\n";
-            
+      echo $row_start;
+      if( $coord_borders & LEFT )
+         echo $coord_start . $rownr . $coord_end;
             
       $hoshi_r = 0;
       if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
@@ -163,36 +205,41 @@ $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi )
             $type .= 'm';
                     
          if( $may_play and ( $empty xor !$on_empty ) )
-            printf('%s%s%s%s%s" SRC=%d/%s.gif></A></td>
-', $str2, $letter_c, $letter_r, $str3, $alt, $stone_size, $type);
+            echo "$str2$letter_c$letter_r$str3$alt\" SRC=$stone_size/$type$str4";
          else
-            printf('%s%s" SRC=%d/%s.gif></td>
-', $str1, $alt, $stone_size, $type );
+            echo "$str1$alt\" SRC=$stone_size/$type$str4";
 
          $letter_c ++;
       }
 
-      echo "<td align=center>$font_start<B>$rownr</B>$font_end</td>\n";
+      if( $coord_borders & RIGHT )
+         echo $coord_start . $rownr . $coord_end;
 
       $letter_r++;
-      echo "</tr>\n";
+      echo $row_end;
    }
 
-   echo '<tr>
-<td width=5>&nbsp;</td>';
-   $colnr = 1;
-   $letter = 'a';
-   while( $colnr <= $Size )
+   if( $coord_borders & DOWN )
    {
-      echo "<td align=center>$font_start<B>$letter</B>$font_end</td>\n";
-      $colnr++;
-      $letter++;
-      if( $letter == 'i' ) $letter++;
-   }  
-   echo '<td width=5>&nbsp;</td>
-</tr>
-</table>
-</td></tr></table>
+      echo $row_start;
+      if( $coord_borders & LEFT )
+         echo $coord_empty;
+      $colnr = 1;
+      $letter = 'a';
+      while( $colnr <= $Size )
+      {
+         echo $coord_start . $letter . $coord_end;
+         $colnr++;
+         $letter++;
+         if( $letter == 'i' ) $letter++;
+      }  
+      if( $coord_borders & RIGHT )
+         echo $coord_empty . $row_end;
+   }
+
+   echo $board_end;
+
+   echo '</td></tr></table>
 ';
 }
 
