@@ -77,10 +77,10 @@ require( "include/rating.php" );
    $clock_used_white = $ClockUsed;
    $clock_used_black = $player_row["ClockUsed"];
    $rating_white = $Rating;
-   $rating_black = $player_row["Rating"];
+   $rating_black = $player_row["Rating2"];
 
    if( $MustBeRated == 'Y' and
-       !($player_row["Rating"]>=$Ratingmin and $player_row["Rating"]<=$Ratingmax) )
+       !($player_row["Rating2"]>=$Ratingmin and $player_row["Rating2"]<=$Ratingmax) )
       error("waitingroom_not_in_rating_range");
 
    if( $WeekendClock != 'Y' )
