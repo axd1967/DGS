@@ -309,7 +309,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $menu_array[T_('Show running games')] = "show_games.php?uid=$uid";
    if( !$finished )
       $menu_array[T_('Show finished games')] = "show_games.php?uid=$uid&finished=1";
-   if( !$observe and !$all )
+   if( !$observe )
       $menu_array[T_('Show observed games')] = "show_games.php?observe=t";
 
    end_page($menu_array);
