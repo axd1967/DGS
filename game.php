@@ -309,7 +309,7 @@ require_once( "include/rating.php" );
    if ($notesposition == 'BELOW')
      {
      echo "</td></tr><tr><td valign=top><center>";
-     if ($notesenabled == 'ON')
+     if ($notesenabled == 'ON' and $show_notes)
        draw_notes($notes, $notesheight, $noteswidth);
      echo "</center></td></tr></table>";
      if( $enable_message )
@@ -324,7 +324,7 @@ require_once( "include/rating.php" );
        draw_message_box(); //use $stonestring, $prisoner_string, $move
        }
      echo "</td><td valign=top><center>";
-     if ($notesenabled == 'ON')
+     if ($notesenabled == 'ON' and $show_notes)
        draw_notes($notes, $notesheight, $noteswidth);
      echo "</center></td></tr></table>";
      }
