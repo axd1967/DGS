@@ -43,7 +43,7 @@ require_once( "include/message_functions.php" );
 
    echo "<center>";
 
-   sysmsg(@$_GET['msg']);
+   sysmsg(get_request_arg('msg'));
 
    echo "<h3><font color=$h3_color>" . T_('Status') . '</font></h3>';
 

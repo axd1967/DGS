@@ -51,7 +51,7 @@ define('BAD_RATING_COLOR',"ff000033");
 
    echo "<center>";
 
-   sysmsg(@$_GET['msg']);
+   sysmsg(get_request_arg('msg'));
 
    if(!@$_GET['sort1'])
       $_GET['sort1'] = 'ID';

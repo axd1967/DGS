@@ -484,8 +484,8 @@ function help($topic)
 
 function sysmsg($msg)
 {
-   if( isset($msg) && $msg )
-      echo "\n<p><b><font color=\"green\">$msg</font></b><hr>\n";
+   if( isset($msg) && trim($msg) )
+      echo "\n<p><b><font color=\"green\">".make_html_safe($msg)."</font></b><hr>\n";
 }
 
 

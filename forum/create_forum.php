@@ -38,7 +38,7 @@ require_once( "forum_functions.php" );
 
    start_page(T_('Create new forum'), true, $logged_in, $player_row);
 
-   sysmsg(@$_GET['msg']);
+   sysmsg(get_request_arg('msg'));
 
    if( $_POST['do_create'] == 'Y' )
    {
