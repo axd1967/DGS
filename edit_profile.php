@@ -136,23 +136,6 @@ if( $player_row["flags"] & WANT_EMAIL ) echo "checked " ?> value="true">
       </TR>
 
       <TR>
-        <TD align=right>Boardfont size:</TD>
-        <TD align=left>  
-<?php $s = $player_row["Boardfontsize"]; ?>
-          <select name="boardfontsize">
-            <option<?php if($s == '+4') echo " selected"; ?>>+4</option>
-            <option<?php if($s == '+3') echo " selected"; ?>>+3</option>
-            <option<?php if($s == '+2') echo " selected"; ?>>+2</option>
-            <option<?php if($s == '+1') echo " selected"; ?>>+1</option>
-            <option<?php if($s == '+0') echo " selected"; ?>>+0</option>
-            <option<?php if($s == '-1') echo " selected"; ?>>-1</option>
-            <option<?php if($s == '-2') echo " selected"; ?>>-2</option>
-            <option<?php if($s == '-3') echo " selected"; ?>>-3</option>
-          </select>
-        </TD>
-      </TR>
-
-      <TR>
         <TD align=right>Wood color:</TD>
         <TD align=left>
           <?php $s = $player_row["Woodcolor"]; ?>

@@ -52,7 +52,6 @@ require( "include/rating.php" );
        "Rank='$rank', " .
        "Open='$open', " .
        "Stonesize=$stonesize, " .
-       "Boardfontsize='$boardfontsize', " .
        "Boardcoords=$boardcoords, " .
        "Woodcolor=$woodcolor, " .
        "Flags=$flags, ";
