@@ -26,7 +26,7 @@ include( "std_functions.php" );
 connect2mysql();
 
 
-$correct_handicap = true;
+$correct_handicap = false;
 
     $result = mysql_query( "SELECT Games.*, " .
                            "Games.Flags+0 AS flags, " . 
@@ -60,6 +60,7 @@ $correct_handicap = true;
         }
 
 echo "SZ[$Size]\n";
+echo "KM[$Komi]\n";
 if( $correct_handicap )
      echo "HA[$Handicap]\n";
 
