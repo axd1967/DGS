@@ -38,7 +38,7 @@ require_once( "include/rating.php" );
 
    $query = "SELECT Games.ID as gid ".
        "FROM Games, Players as white, Players as black " .
-       "WHERE Status='FINISHED' AND Rated='Done' " .
+       "WHERE Status='FINISHED' AND Rated!='N' " . //Rated='Done' " .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
        "AND ( NOT ISNULL(white.RatingStatus) ) " .
        "AND ( NOT ISNULL(black.RatingStatus) ) " .
