@@ -26,7 +26,8 @@ require_once( "include/form_functions.php" );
 {
   connect2mysql();
 
-  if( $logout )
+
+  if( @$_GET['logout'] )
     {
       set_cookies("","", true);
       jump_to("index.php");
@@ -66,6 +67,6 @@ require_once( "include/form_functions.php" );
 
   $menu_array = array( T_("Register new account") => 'register.php' );
 
-  end_page($menu_array);
+  end_page(@$menu_array);
 }
 ?>
