@@ -40,7 +40,7 @@ class Translator
     {
       global $known_languages;
 
-      if( !is_null( $lang ) and $lang != 'C' )
+      if( !empty( $lang ) and $lang != 'C' )
         {
           if( is_object( $lang ) )
             $this->current_language = $lang;
@@ -93,7 +93,8 @@ class Translator
     {
       global $HOSTBASE;
 
-      if( strcmp( $this->current_language->lang_code, 'C' ) == 0 )
+      if( empty($this->current_language->lang_code) or
+          strcmp( $this->current_language->lang_code, 'C' ) == 0 )
         {
           return false;
         }
@@ -177,6 +178,7 @@ class Translator
             }
         }
 
+
       if( strcmp( $found_lang, 'C' ) != 0 and isset( $HTTP_ACCEPT_CHARSET ) )
         {
           $cs_list = $known_languages->get_lang( $found_lang );
@@ -213,7 +215,7 @@ class Translator
 
 }
 
-$the_translator = new Translator;
+$the_translator = new Translator();
 
 /* Alias for $the_translator->translate($string) */
 function T_($string)
