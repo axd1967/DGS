@@ -46,7 +46,7 @@ require( "include/rating.php" );
 
    interpret_time_limit_forms();
 
-   if( $rated != 'Y' )
+   if( $rated != 'Y' or !$player_row["RatingStatus"] )
       $rated = 'N';
 
    if( $weekendclock != 'Y' )

@@ -47,7 +47,8 @@ require( "include/rating.php" );
 
    extract(mysql_fetch_array($result));
 
-   if( ($Handicaptype == 'proper' or $Handicaptype == 'conv') and !$RatingStatus )
+   if( ($Handicaptype == 'proper' or $Handicaptype == 'conv')
+       and !$player_row["RatingStatus"] )
       error("no_initial_rating");
 
    if( $delete == 't' and $player_row['ID'] == $uid )
