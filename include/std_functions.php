@@ -1277,6 +1277,9 @@ function blend_alpha_hex($color, $bgcolor="f7f5e3")
 
 function limit($val, $minimum, $maximum, $default)
 {
+   if( is_string( $val) && is_numeric(strpos('hHxX#$',$val{0})) && substr($val,1)!='' )
+      $val = base_convert( substr($val,1), 16, 10);
+
    if( !is_numeric($val) )
       return (isset($default) ? $default : $val );
    else if( is_numeric($minimum) and $val < $minimum )
