@@ -11,17 +11,13 @@ BIG TASKS
 SMALLER TASKS
 -------------
 
-* More docs:
-  * Acknowledgements
-  * More FAQ
-
-* Save timestamp/clock with each move
-
-* Sgf: handle finished games properly.
+* Sgf:
+        handle finished games properly.
+        Save time usage.
 
 * Add time for opponent
 
-* Adjourn game (for vacations)
+* Vacations
 
 * Scoring: show more info
 
@@ -39,23 +35,21 @@ SMALLER TASKS
 
 * game.php: Show more info for finished games
 
-* Store rating info for finisked games.
-
 * Improve caching
 
-* Area scoring
+* Area scoring (?)
 
 * Game notes
 
 * Rating graph
 
-* Send notification delay customizable.
+* Send notification delay customizable (?)
 
 * Save the previous invite settings as default.
 
 * Remove all dead groups within a territory with one click.
 
-* Komi bidding
+* Komi bidding (?)
 
 * Improve rating system
 
@@ -66,3 +60,5 @@ SMALLER TASKS
 * Messages:
         Delete many.
         Mark messages to stay at status.
+
+* Auto refresh (?)
