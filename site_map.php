@@ -66,7 +66,7 @@ function item($text,$link,$working, $level,$last=false)
       {
          item(T_('My user info'), "userinfo.php?uid=" . $player_row["ID"], true, 1);
          {
-            item(T_('Edit profil'), "edit_profile.php", true, 2);
+            item(T_('Edit profile'), "edit_profile.php", true, 2);
             item(T_('Edit bio'), "edit_bio.php", true, 2);
             item(T_('Change password'), "edit_password.php", true, 2, true);
          }

@@ -177,7 +177,7 @@ function game_settings_form($my_ID=NULL, $gid=NULL)
                          'SELECTBOX', 'timeunit_can', 1, $value_array, $ByotimeUnit_can, false,
                          'TEXT', T_('for') . '&nbsp;',
                          'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
-                         'TEXT', T_('stones.') );
+                         'TEXT', T_('stones') . '.' );
 
    echo form_insert_row( 'DESCRIPTION', T_('Fischer time'),
                          'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), $Byotype,
@@ -204,11 +204,11 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
       "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .
       "<td><A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" .
       "</td></tr>\n" .
-      "<tr><td><b>" . T_('Subject:') . "</b></td><td>$subject</td></tr>\n" .
+      "<tr><td><b>" . T_('Subject') . ":</b></td><td>$subject</td></tr>\n" .
       "<tr><td valign=\"top\">" .
       ( $reply_mid > 0 ?
-        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" . T_('Replied:') "</a>" :
-        "<b>" . T_('Message:') . "</b>" ) .
+        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" . T_('Replied') ":</a>" :
+        "<b>" . T_('Message') . ":</b>" ) .
       "</td>\n" .
       "<td align=\"center\">\n" .
       "<table border=2 align=center><tr>" .
@@ -264,13 +264,13 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
 
    if( $Byotype == 'JAP' )
    {
-      echo '<tr><td><b>' . T_('Byoyomi') . '</b></td><td> ' . T_('Japanese:') . ' ' .
+      echo '<tr><td><b>' . T_('Byoyomi') . '</b></td><td> ' . T_('Japanese') . ': ' .
          sprintf(T_('%s per move and %s extra periods'), echo_time($Byotime), $Byoperiods) .
          ' </td></tr>' . "\n";
    }
    else if ( $Byotype == 'CAN' )
    {
-      echo '<tr><td><b>' . T_('Byoyomi') . '</b></td><td> ' . T_('Canadian:') . ' ' .
+      echo '<tr><td><b>' . T_('Byoyomi') . '</b></td><td> ' . T_('Canadian') . ': ' .
          sprintf(T_('%s per %s stones'), echo_time($Byotime), $Byoperiods) .
          ' </td></tr>' . "\n";
    }

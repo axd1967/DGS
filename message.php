@@ -154,7 +154,7 @@ require( "include/form_functions.php" );
 
          if( $can_reply )
             {
-            echo "<B><h3><font color=$h3_color>" . T_('Reply:') . "</font></B><p>\n";
+            echo "<B><h3><font color=$h3_color>" . T_('Reply') . ":</font></B><p>\n";
             echo form_start( 'messageform', 'send_message.php', 'POST' );
             echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
             echo form_insert_row( 'HIDDEN', 'reply', $mid );
@@ -169,7 +169,7 @@ require( "include/form_functions.php" );
 
       case 'NewMessage':
       {
-         echo "<B><h3><font color=$h3_color>" . T_('New message:') . "</font></B><p>\n";
+         echo "<B><h3><font color=$h3_color>" . T_('New message') . ":</font></B><p>\n";
          echo form_start( 'messageform', 'send_message.php', 'POST' );
          echo form_insert_row( 'DESCRIPTION', T_('To (userid)'),
                                'TEXTINPUT', 'to', 50, 80, $default_handle );
@@ -221,7 +221,7 @@ require( "include/form_functions.php" );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
                             $Subject, $ReplyTo, $Text);
 
-         echo "<B><h3><font color=$h3_color>" . T_('Disputing settings:') . "</font></B><p>\n";
+         echo "<B><h3><font color=$h3_color>" . T_('Disputing settings') . ":</font></B><p>\n";
          echo form_start( 'messageform', 'send_message.php', 'POST' );
          echo form_insert_row( 'HIDDEN', 'mode', $mode );
          echo form_insert_row( 'HIDDEN', 'subject', 'Game invitation dispute' );
@@ -240,7 +240,7 @@ require( "include/form_functions.php" );
 
       case 'Invite':
       {
-         echo "<B><h3><font color=$h3_color>" . T_('Invitation message:') . "</font></B><p>\n";
+         echo "<B><h3><font color=$h3_color>" . T_('Invitation message') . ":</font></B><p>\n";
          echo form_start( 'messageform', 'send_message.php', 'POST' );
          echo form_insert_row( 'HIDDEN', 'type', 'INVITATION' );
          echo form_insert_row( 'DESCRIPTION', T_('To (userid)'),

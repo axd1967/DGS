@@ -63,7 +63,7 @@ require( "include/rating.php" );
     <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating($row['Rating']) . '</td></tr>
     <tr><td><b>' . T_('Rank info') . '</b></td><td>' . $row['Rank'] . '</td></tr>
     <tr><td><b>' . T_('Registration date') . '</b></td><td>' . $row['Registerdate'] . '</td></tr>
-    <tr><td><b>' . T_('Last access<') . '/b></td><td>' . date($date_fmt,$row['Time']) . '</td></tr>
+    <tr><td><b>' . T_('Last access') . '</b></td><td>' . date($date_fmt,$row['Time']) . '</td></tr>
  </table>
 ';
 
