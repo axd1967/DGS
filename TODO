@@ -14,7 +14,6 @@ SMALLER TASKS
 -------------
 
 * More docs:
-  * Introduction page
   * Acknowledgements
   * More FAQ
 
@@ -31,8 +30,6 @@ SMALLER TASKS
 * Invite: Two-game-match
 
 * Scoring: show more info
-
-* Automatic delete old messages
 
 * Themes/Layout option
 
@@ -58,8 +55,6 @@ SMALLER TASKS
 * game.php: Show more info for finished games
 
 * Show time for last move in show_games.php and status.php.
-
-* Make it possible to add comments to the sgf file.
 
 BUGS
 ----
