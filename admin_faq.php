@@ -36,6 +36,9 @@ require( "include/form_functions.php" );
 
   $show_list = true;
 
+
+  // ***********        Edit entry       ****************
+
   if( $_GET["edit"] == 'c' or  $_GET["edit"] == 'e')
   {
      if( $_GET["edit"] == 'c' )
@@ -50,7 +53,7 @@ require( "include/form_functions.php" );
      $result = mysql_query( "SELECT * FROM FAQ WHERE ID=$id" );
 
      if( mysql_num_rows($result) != 1 )
-        error("faq_admin_no_such_entry");
+        error("admin_no_such_entry");
 
      $row = mysql_fetch_array( $result );
 
@@ -75,12 +78,16 @@ require( "include/form_functions.php" );
      $faq_edit_form->echo_string();
 
   }
+
+
+  // ***********        Move entry       ****************
+
   else if( $_GET["move"] == 'u' or $_GET["move"] == 'd' )
   {
      $result = mysql_query( "SELECT * FROM FAQ WHERE ID=$id" );
 
      if( mysql_num_rows($result) != 1 )
-        error("faq_admin_no_such_entry");
+        error("admin_no_such_entry");
 
      $row = mysql_fetch_array( $result );
 
@@ -102,12 +109,17 @@ require( "include/form_functions.php" );
      }
      jump_to("admin_faq.php");
   }
+
+
+
+  // ***********        Save edited entry       ****************
+
   else if( $_GET["do_edit"] == 't' )
   {
      $result = mysql_query( "SELECT * FROM FAQ WHERE ID=$id" );
 
      if( mysql_num_rows($result) != 1 )
-        error("faq_admin_no_such_entry");
+        error("admin_no_such_entry");
 
      $row = mysql_fetch_array( $result );
 
@@ -117,6 +129,8 @@ require( "include/form_functions.php" );
      $question = trim( $_POST["question"] );
      $answer = trim( $_POST["answer"] );
 
+
+     // Delete ?
      if( empty($question) and empty($answer) and $row["Translatable"] == 'N' and
          ($row["Level"] == 2 or
           mysql_num_rows(mysql_query("SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1")) == 0 ))
@@ -125,15 +139,21 @@ require( "include/form_functions.php" );
         mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1 " .
                     "WHERE Parent=" . $row["Parent"] . " AND SortOrder>" . $row["SortOrder"]);
      }
+     else
+     {
+        mysql_query("UPDATE FAQ SET Question=\"$question\", Answer=\"$answer\" " .
+                    "WHERE ID=$id LIMIT 1");
 
-     mysql_query("UPDATE FAQ SET Question=\"$question\", Answer=\"$answer\" " .
-                 "WHERE ID=$id LIMIT 1");
-
-     mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ", FAQID=$id, " .
-                 "Question=\"$question\", Answer=\"$answer\"");
-
+        mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ", FAQID=$id, " .
+                    "Question=\"$question\", Answer=\"$answer\"");
+     }
      jump_to("admin_faq.php");
   }
+
+
+
+  // ***********        New entry       ****************
+
   else if( $_GET["new"] == 'e' or $_GET["new"] == 'c')
   {
      if( $_GET["new"] == 'c' )
@@ -145,7 +165,7 @@ require( "include/form_functions.php" );
 
      echo "<center>\n";
 
-     $faq_edit_form = new Form( 'faqeditform', "admin_faq.php?do_new=" .
+     $faq_edit_form = new Form( 'faqnewform', "admin_faq.php?do_new=" .
                                 $_GET["new"] . "&id=$id", FORM_POST );
 
      if( $_GET["new"] == 'c' )
@@ -166,12 +186,16 @@ require( "include/form_functions.php" );
      $faq_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
      $faq_edit_form->echo_string();
   }
+
+
+  // ***********        Save new entry       ****************
+
   else if( $_GET["do_new"] == 'c' or $_GET["do_new"] == 'e' )
   {
      $result = mysql_query( "SELECT * FROM FAQ WHERE ID=$id" );
 
      if( mysql_num_rows($result) != 1 )
-        error("faq_admin_no_such_entry");
+        error("admin_no_such_entry");
 
      $row = mysql_fetch_array( $result );
 
@@ -189,24 +213,29 @@ require( "include/form_functions.php" );
      $question = trim( $_POST["question"] );
      $answer = trim( $_POST["answer"] );
 
-     mysql_query("UPDATE FAQ SET SortOrder=SortOrder+1 " .
-                 'WHERE Parent=' . $row["Parent"] . ' ' .
-                 'AND SortOrder>' . $row["SortOrder"] ) or die(mysql_error());
+     if( !empty($question) and !empty($answer))
+     {
+        mysql_query("UPDATE FAQ SET SortOrder=SortOrder+1 " .
+                    'WHERE Parent=' . $row["Parent"] . ' ' .
+                    'AND SortOrder>' . $row["SortOrder"] ) or die(mysql_error());
 
-     mysql_query("INSERT INTO FAQ SET " .
-                 "SortOrder=" . ($row["SortOrder"]+1) . ', ' .
-                 "Parent=" . $row["Parent"] . ', ' .
-                 "Level=" . $row["Level"] . ', ' .
-                 "Question=\"$question\", " .
-                 "Answer=\"$answer\"") or die(mysql_error());
+        mysql_query("INSERT INTO FAQ SET " .
+                    "SortOrder=" . ($row["SortOrder"]+1) . ', ' .
+                    "Parent=" . $row["Parent"] . ', ' .
+                    "Level=" . $row["Level"] . ', ' .
+                    "Question=\"$question\", " .
+                    "Answer=\"$answer\"") or die(mysql_error());
 
-     mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ', ' .
-                 'FAQID=' . mysql_insert_id() . ', ' .
-                 "Question=\"$question\", Answer=\"$answer\"");
+        mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ', ' .
+                    'FAQID=' . mysql_insert_id() . ', ' .
+                    "Question=\"$question\", Answer=\"$answer\"");
+     }
 
      jump_to("admin_faq.php");
   }
 
+
+  // ***********       Show FAQ list       ****************
 
   if( $show_list )
   {
