@@ -93,7 +93,7 @@ class Table
    function Table( $_page,
                    $_player_column = '',
                    $_prefix = '',
-                   $_sc = false )
+                   $_static_columns = false )
       {
          global $table_row_color1, $table_row_color2, $RowsPerPage, $player_row;
 
@@ -127,7 +127,7 @@ class Table
          }
 
          $this->Prefix = $_prefix;
-         $this->Static_Columns = $_sc;
+         $this->Static_Columns = $_static_columns;
 
          $this->Sort1 = $_GET[ $this->Prefix . 'sort1' ];
          $this->Desc1 = $_GET[ $this->Prefix . 'desc1' ];
@@ -137,6 +137,8 @@ class Table
          $this->Row_Colors = array( $table_row_color1, $table_row_color2 );
 
          $this->From_Row = $_GET[ $this->Prefix . 'from_row' ];
+         if( !is_numeric($this->From_Row) or $this->From_Row < 0 )
+            $this->From_Row = 0;
          $this->Last_Page = true;
          $this->Rows_Per_Page = $RowsPerPage;
       }
@@ -297,10 +299,7 @@ class Table
          {
             $string .=
                "<a href=\"" . $this->Page .
-               ($this->Sort1 ? $this->make_sort_string( $this->Sort1,
-                                                        $this->Desc1,
-                                                        $this->Sort2,
-                                                        $this->Desc2 ) . '&' : '') .
+               $this->current_sort_string( true ) .
                $this->Prefix . "del=" . $tablehead['Nr'] . "\">" .
                "<sup><font size=\"-1\" color=\"red\">x</font></sup></a>";
          }
@@ -345,30 +344,25 @@ class Table
    /*! \brief Add next and prev links. */
    function make_next_prev_links()
       {
+         if ( $this->Rows_Per_Page <= 0 )
+            return '';
+
          $string = "";
 
          if( $this->From_Row > 0 )
          {
             $string .= "  <td><a href=\"" . $this->Page .
-               $this->Prefix . "from_row=" . ($this->From_Row-$this->Rows_Per_Page) . '&' .
-               $this->make_sort_string( $this->Sort1,
-                                        $this->Desc1,
-                                        $this->Sort2,
-                                        $this->Desc2 ) . "\">" .
-               "&lt;-- " . T_("prev page") . "</a></td>\n";
-
+               $this->current_sort_string( true ) .
+               $this->Prefix . "from_row=" . ($this->From_Row-$this->Rows_Per_Page) .
+               "\">" . "&lt;-- " . T_("prev page") . "</a></td>\n";
          }
 
          if( !$this->Last_Page )
          {
-            $string .= "  <td align=\"right\" colspan=20><a href=\"" . $this->Page .
-               $this->Prefix . "from_row=" . ($this->From_Row+$this->Rows_Per_Page) . '&' .
-               $this->make_sort_string( $this->Sort1,
-                                        $this->Desc1,
-                                        $this->Sort2,
-                                        $this->Desc2 ) . "\">" .
-               T_("next page") . " --&gt;" . "</a></td>\n";
-
+            $string .= "  <td align=\"right\" colspan=99><a href=\"" . $this->Page .
+               $this->current_sort_string( true ) .
+               $this->Prefix . "from_row=" . ($this->From_Row+$this->Rows_Per_Page) .
+               "\">" . T_("next page") . " --&gt;" . "</a></td>\n";
          }
 
          if( !empty( $string ) )
@@ -379,8 +373,58 @@ class Table
          return $string;
       }
 
+   /*! \brief Compute the number of rows from mySQL result. */
+   function compute_show_rows( $num_rows_result)
+      {
+         if( $this->Rows_Per_Page > 0 && $num_rows_result > $this->Rows_Per_Page )
+         {
+            $num_rows_result = $this->Rows_Per_Page;
+            $this->Last_Page = false;
+         }
+         else
+            $this->Last_Page = true;
+         return $num_rows_result;
+      }
+
+   /*! \brief Retrieve mySQL LIMIT part from table. */
+   function current_limit_string()
+      {
+         if ( $this->Rows_Per_Page <= 0 )
+            return '';
+         return "LIMIT " . $this->From_Row . "," . ($this->Rows_Per_Page+1) ;
+      }
+
+   /*! \brief Retrieve mySQL ORDER BY part from table. */
+   function current_order_string()
+      {
+         if(!$this->Sort1 )
+            return '';
+         $order = str_replace( URI_ORDER_CHAR
+            , ( $this->Desc1 ? ' DESC,' : ',' )
+            , $this->Sort1.URI_ORDER_CHAR);
+         if( $this->Sort2 )
+         {
+            $order.= str_replace( URI_ORDER_CHAR
+               , ( $this->Desc2 ? ' DESC,' : ',' )
+               , $this->Sort2.URI_ORDER_CHAR);
+         }
+         $order= substr($order,0,-1);
+         //could do also: $order= 'ORDER BY '.$order;
+         return $order;
+      }
+
+   /*! \brief Retrieve sort part of url from table. */
+   function current_sort_string( $add_sep=false )
+      {
+         return $this->make_sort_string( $this->Sort1,
+                                         $this->Desc1,
+                                         $this->Sort2,
+                                         $this->Desc2,
+                                         $add_sep );
+      }
+
    /*! \brief Make sort part of url. */
-   function make_sort_string( $sortA, $descA, $sortB, $descB )
+   function make_sort_string( $sortA, $descA, $sortB, $descB, $add_sep=false )
       {
          if( $sortA )
          {
@@ -391,9 +435,11 @@ class Table
                $sort_string .= '&' . $this->Prefix . "sort2=$sortB" .
                   ( $descB ? '&' . $this->Prefix . 'desc2=1' : '' );
             }
+            if ($add_sep)
+               $sort_string .= '&' ;
+            return $sort_string;
          }
-
-         return $sort_string;
+         return '';
       }
 
    /*! \brief Add or delete a column from the column set and apply it to the database. */
@@ -431,7 +477,6 @@ class Table
 
             mysql_query($query);
          }
-
       }
 
    /*! \brief Adds a form for adding columns. */
@@ -453,6 +498,21 @@ class Table
                list( $key, $value ) = explode( "=", $query );
                array_push( $form_array, 'HIDDEN', $key, $value );
             }
+         }
+         if($this->Sort1 )
+         {
+            array_push( $form_array, 'HIDDEN', $this->Prefix . "sort1", $this->Sort1 );
+            if ($this->Desc1)
+               array_push( $form_array, 'HIDDEN', $this->Prefix . "desc1", $this->Desc1 );
+            if ($this->Sort2) {
+               array_push( $form_array, 'HIDDEN', $this->Prefix . "sort2", $this->Sort2 );
+               if ($this->Desc2)
+                  array_push( $form_array, 'HIDDEN', $this->Prefix . "desc2", $this->Desc2 );
+            }
+         }
+         if ( $this->Rows_Per_Page > 0 )
+         {
+            array_push( $form_array, 'HIDDEN', $this->Prefix . "from_row", $this->From_Row );
          }
 
          $this->Removed_Columns[ -1 ] = T_('All columns');

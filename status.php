@@ -44,8 +44,8 @@ require_once( "include/message_functions.php" );
       echo "<p><b><font color=\"green\">$msg</font></b><hr>";
 
    echo "<h3><font color=$h3_color>" . T_('Status') . '</font></h3>';
-   $gtable = new Table( "status.php",
-                        "GamesColumns" );
+
+   $gtable = new Table( "status.php", "GamesColumns" );
    $gtable->add_or_del_column();
 
    echo '
@@ -125,7 +125,7 @@ require_once( "include/message_functions.php" );
          if( empty($row["sender"]) )
             $row["sender"] = '-';
 
-         $mrow_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&amp;mid=" .
+         $mrow_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&mid=" .
             $row["mid"] . "\">" . make_html_safe($row["sender"]) . "</A></td>";
          $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "</td>";
          $mrow_strings[4] = "<td>" . date($date_fmt2, $row["time"]) . "</td></tr>";
@@ -219,7 +219,7 @@ require_once( "include/message_functions.php" );
 
    $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$uid",
                         T_('Show running games') => "show_games.php?uid=$uid",
-                        T_('Show finished games') => "show_games.php?uid=$uid&amp;finished=1",
+                        T_('Show finished games') => "show_games.php?uid=$uid&finished=1",
                         T_('Show observed games') => "show_games.php?observe=t" );
 
    end_page( $menu_array );

@@ -38,14 +38,11 @@ require_once( "include/rating.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   $column_set = $player_row["GamesColumns"];
+   //Not used: $column_set = $player_row["GamesColumns"];
    if( $_GET['observe'] )
       $page = 'show_games.php?observe=t&';
    else
       $page = "show_games.php?uid=" . $_GET['uid'] . '&' . ( $_GET['finished'] ? 'finished=1&' : '' );
-
-   $gtable = new Table( $page, "GamesColumns" );
-   $gtable->add_or_del_column();
 
    if( !$_GET['observe'] and !$all )
    {
@@ -71,12 +68,11 @@ require_once( "include/rating.php" );
       $_GET['desc2'] = 1;
    }
 
-   $order = $_GET['sort1'] . ( $_GET['desc1'] ? ' DESC' : '' );
-   if( $_GET['sort2'] )
-      $order .= "," . $_GET['sort2'] . ( $_GET['desc2'] ? ' DESC' : '' );
+   $gtable = new Table( $page, "GamesColumns" );
+   $gtable->add_or_del_column();
 
-   if( !is_numeric($_GET['from_row']) or $_GET['from_row'] < 0 )
-      $_GET['from_row'] = 0;
+   $order = $gtable->current_order_string();
+   $limit = $gtable->current_limit_string();
 
    if( $_GET['observe'] )
    {
@@ -88,7 +84,7 @@ require_once( "include/rating.php" );
          "FROM Observers, Games, Players AS white, Players AS black " .
          "WHERE Observers.uid=" . $player_row["ID"] . " AND Games.ID=gid " .
          "AND white.ID=White_ID AND black.ID=Black_ID " .
-         "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+         "ORDER BY $order $limit";
    }
    else if( $all )
    {
@@ -108,7 +104,7 @@ require_once( "include/rating.php" );
                       ? "Status='FINISHED' "
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND white.ID=White_ID AND black.ID=Black_ID " .
-         "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+         "ORDER BY $order $limit";
    }
    else
    {
@@ -137,11 +133,13 @@ require_once( "include/rating.php" );
          "WHERE " . ( $_GET['finished'] ? "Status='FINISHED' "
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND (( Black_ID=" . $_GET['uid'] . " AND White_ID=Players.ID ) " .
-         "OR ( White_ID=" . $_GET['uid'] . " AND Black_ID=Players.ID )) " .
-         "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+           "OR ( White_ID=" . $_GET['uid'] . " AND Black_ID=Players.ID )) " .
+         "ORDER BY $order $limit";
    }
 
    $result = mysql_query( $query ) or die(mysql_error());
+
+   $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
 
    if( $_GET['observe'] or $all)
    {
@@ -158,13 +156,6 @@ require_once( "include/rating.php" );
    }
 
    start_page( $title1, true, $logged_in, $player_row, button_style() );
-
-   $show_rows = mysql_num_rows($result);
-   if( $show_rows == $MaxRowsPerPage )
-   {
-      $show_rows = $RowsPerPage;
-      $gtable->Last_Page = false;
-   }
 
    echo "<center><h3><font color=$h3_color>$title2</font></H3></center>\n";
 
@@ -229,8 +220,7 @@ require_once( "include/rating.php" );
       }
    }
 
-   $i=0;
-   while( $row = mysql_fetch_array( $result ) )
+   while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
    {
       $Rating = $blackRating = $whiteRating = NULL;
       $startRating = $blackStartRating = $whiteStartRating = NULL;
@@ -345,9 +335,6 @@ require_once( "include/rating.php" );
       }
 
       $gtable->add_row( $grow_strings );
-
-      if(++$i >= $show_rows)
-         break;
    }
 
    $gtable->echo_table();

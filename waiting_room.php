@@ -50,20 +50,14 @@ require_once( "include/message_functions.php" );
 
    $page = "waiting_room.php" . ( $_GET['info'] > 0 ? "?info=" . $_GET['info'] . "&" : '?' );
 
-   $wrtable = new Table( $page, "WaitingroomColumns" );
-   $wrtable->add_or_del_column();
-
    if(!$_GET['sort1'])
       $_GET['sort1'] = 'ID';
 
-   $order = $_GET['sort1'] . ( $_GET['desc1'] ? ' DESC' : '' );
-   if( $_GET['sort2'] )
-      $order .= "," . $_GET['sort2'] . ( $_GET['desc2'] ? ' DESC' : '' );
+   $wrtable = new Table( $page, "WaitingroomColumns" );
+   $wrtable->add_or_del_column();
 
-   $orderstring = $wrtable->make_sort_string( $_GET['sort1'],
-                                              $_GET['desc1'],
-                                              $_GET['sort2'],
-                                              $_GET['desc2'] );
+   $order = $wrtable->current_order_string();
+   $orderstring = $wrtable->current_sort_string();
 
    $result = mysql_query("SELECT Waitingroom.*,Name,Handle," .
                          "Rating2 AS Rating,Players.ID AS pid " .
@@ -82,7 +76,7 @@ require_once( "include/message_functions.php" );
       $wrtable->add_tablehead(5, T_('Handicap'), 'Handicaptype', false);
       $wrtable->add_tablehead(6, T_('Komi'), 'Komi', true);
       $wrtable->add_tablehead(7, T_('Size'), 'Size', true);
-      $wrtable->add_tablehead(8, T_('Rating range'), NULL, true);
+      $wrtable->add_tablehead(8, T_('Rating range'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true);
       $wrtable->add_tablehead(9, T_('Time limit'), NULL, true);
       $wrtable->add_tablehead(10, T_('#Games'), 'nrGames', true);
       $wrtable->add_tablehead(11, T_('Rated'), 'Rated', true);

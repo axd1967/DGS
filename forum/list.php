@@ -45,7 +45,7 @@ require("forum_functions.php");
    or die(mysql_error());
 
    $show_rows = $nr_rows = mysql_num_rows($result);
-   if( $nr_rows == $MaxRowsPerPage )
+   if( $show_rows > $RowsPerPage )
       $show_rows = $RowsPerPage;
 
    $cols = 4;

@@ -59,12 +59,12 @@ require_once( "include/timezones.php" );
       $_GET['desc1'] = 1;
    }
 
-   $order = $_GET['sort1'] . ( $_GET['desc1'] ? ' DESC' : '' );
-   if( $sort2 )
-      $order .= "," . $_GET['sort2'] . ( $_GET['desc2'] ? ' DESC' : '' );
+   $mtable = new Table( 'list_messages.php' . ( $current_folder == FOLDER_ALL_RECEIVED ? '' :
+                                                '?folder=' . $current_folder ),
+                        '', '', true );
 
-   if( !is_numeric($_GET['from_row']) or $_GET['from_row'] < 0 )
-      $_GET['from_row'] = 0;
+   $order = $mtable->current_order_string();
+   $limit = $mtable->current_limit_string();
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS time, " .
       "Messages.Type, Messages.Subject, " .
@@ -76,21 +76,21 @@ require_once( "include/timezones.php" );
       "ON other.mid=me.mid AND other.Sender != me.Sender " .
       "LEFT JOIN Players ON Players.ID=other.uid " .
       "WHERE me.uid=$my_id AND me.Folder_nr IN ($folderstring) " .
-      "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+      "ORDER BY $order $limit";
 
 //    $rec_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
 //       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
 //       "Players.Name AS other, To_Folder_nr AS folder " .
 //       "FROM Messages, Players " .
 //       "WHERE To_ID=$my_id AND To_Folder_nr IN ($folderstring) AND To_ID=Players.ID " .
-//       "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+//       "ORDER BY $order $limit";
 
 //    $sent_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
 //       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
 //       "Players.Name AS other, From_Folder_nr AS folder " .
 //       "FROM Messages, Players " .
 //       "WHERE From_ID=$my_id AND From_Folder_nr IN ($folderstring) AND To_ID=Players.ID " .
-//       "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+//       "ORDER BY $order $limit";
 
 
 // for mysql 4.0
@@ -107,10 +107,12 @@ require_once( "include/timezones.php" );
 //       "Players.Name AS other, To_Folder_nr AS folder " .
 //       "FROM Messages, Players WHERE To_ID=$my_id AND To_Folder_nr IN ($folderstring) " .
 //       "AND From_ID=Players.ID order by $order limit $l)" .
-//       "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+//       "ORDER BY $order $limit";
 
    $result = mysql_query( $query )
        or die ( error("mysql_query_failed") );
+
+   $show_rows = $mtable->compute_show_rows(mysql_num_rows($result));
 
    $title = T_('Message list');
 
@@ -123,16 +125,6 @@ require_once( "include/timezones.php" );
 
    echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
 
-   $mtable = new Table( 'list_messages.php' . ( $current_folder == FOLDER_ALL_RECEIVED ? '' :
-                                                '?folder=' . $current_folder ),
-                        '', '', true );
-   $show_rows = mysql_num_rows($result);
-   if( $show_rows == $MaxRowsPerPage )
-   {
-      $show_rows = $RowsPerPage;
-      $mtable->Last_Page = false;
-   }
-
    $mtable->add_tablehead( 1, T_('Folder'), '', true, true );
    $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
                            'other', false, true );
@@ -144,8 +136,7 @@ require_once( "include/timezones.php" );
 
    $can_move_messages = false;
    $any_sent_message = false;
-   $i=0;
-   while( $row = mysql_fetch_array( $result ) )
+   while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
    {
       $mid = $row["mid"];
 
@@ -186,8 +177,6 @@ require_once( "include/timezones.php" );
 
       $mtable->add_row( $row_strings );
 
-      if(++$i >= $show_rows)
-         break;
    }
 
    $mtable->echo_table();

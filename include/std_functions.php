@@ -48,7 +48,8 @@ $ActiveLevel1 = 10.0;
 $ActiveLevel2 = 150.0;
 
 $RowsPerPage = 50;
-$MaxRowsPerPage = 70;
+$MaxRowsPerPage = $RowsPerPage+1;
+
 
 $has_sgf_alias = false;
 // If using apache add this row to your virtual host to make this work:
@@ -61,6 +62,11 @@ $menu_bg_color='"#0C41C9"';
 $menu_fg_color='"#FFFC70"';
 
 $max_links_in_main_menu=8;
+
+
+//This car will be a part of a URI query. From RFC 2396 unreserved
+// marks are "-" | "_" | "." | "!" | "~" | "*" | "'" | "(" | ")"
+define('URI_ORDER_CHAR','-');
 
 $ratingpng_min_interval = 2*31*24*3600;
 $BEGINYEAR = 2001;
@@ -96,17 +102,17 @@ define("NONE", 0);
 define("BLACK", 1);
 define("WHITE", 2);
 
-define("OFFSET_TERRITORY", 0x04);
+define("OFFSET_TERRITORY", 0x04); //keep it a power of 2
 define("DAME", OFFSET_TERRITORY+NONE);
 define("BLACK_TERRITORY", OFFSET_TERRITORY+BLACK);
 define("WHITE_TERRITORY", OFFSET_TERRITORY+WHITE);
 
-define("OFFSET_MARKED", 0x08);
+define("OFFSET_MARKED", 0x08); //keep it a power of 2
 define("MARKED_DAME", OFFSET_MARKED+NONE);
 define("BLACK_DEAD", OFFSET_MARKED+BLACK);
 define("WHITE_DEAD", OFFSET_MARKED+WHITE);
 
-define("FLAG_NOCLICK", 0x10);
+define("FLAG_NOCLICK", 0x10); //keep it a power of 2
 
 
 /* Not yet used:
@@ -123,19 +129,20 @@ define('SCORE_TIME', 2000);
 define("MARKED_BY_WHITE", 7);
 define("MARKED_BY_BLACK", 8);
 
-define("KO", 1);
+//keep next constants powers of 2
+define("KO", 0x01);
 
-define("LEFT",1);
-define("UP",2);
-define("RIGHT",4);
-define("DOWN",8);
-define("SMOOTH_EDGE",16);
+define("LEFT",0x01);
+define("UP",0x02);
+define("RIGHT",0x04);
+define("DOWN",0x08);
+define("SMOOTH_EDGE",0x10);
 
-define("ADMIN_TRANSLATORS",1);
-define("ADMIN_FAQ",2);
-define("ADMIN_FORUM",4);
-define("ADMIN_ADMINS",8);
-define("ADMIN_TIME",16);
+define("ADMIN_TRANSLATORS",0x01);
+define("ADMIN_FAQ",0x02);
+define("ADMIN_FORUM",0x04);
+define("ADMIN_ADMINS",0x08);
+define("ADMIN_TIME",0x10);
 
 
 
