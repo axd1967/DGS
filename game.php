@@ -114,13 +114,15 @@ require( "include/rating.php" );
 
       if( $to_move == BLACK )
       {
-         time_remaining($hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
-         $Byotype, $Byotime, $Byoperiods, false);
+         time_remaining($hours, $row['Black_Maintime'], $row['Black_Byotime'],
+                        $row['Black_Byoperiods'], $Maintime,
+                        $Byotype, $Byotime, $Byoperiods, false);
       }
       else
       {
-         time_remaining($hours, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
-         $Byotype, $Byotime, $Byoperiods, false);
+         time_remaining($hours, $row['White_Maintime'], $row['White_Byotime'],
+                        $row['White_Byoperiods'], $Maintime,
+                        $Byotype, $Byotime, $Byoperiods, false);
       }
    }
 
