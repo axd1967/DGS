@@ -27,6 +27,7 @@ CREATE TABLE Players (
   ID int(11) DEFAULT '0' NOT NULL auto_increment,
   Handle varchar(16) DEFAULT '' NOT NULL,
   Password varchar(16),
+  Newpassword varchar(16),
   Sessioncode varchar(32),
   Sessionexpire datetime,
   Name varchar(80),
@@ -36,6 +37,8 @@ CREATE TABLE Players (
   Boardfontsize char(2) DEFAULT '+0',
   Flags set('WANT_EMAIL') DEFAULT '' NOT NULL,
   Notify enum('NONE','NEXT','NOW','DONE') DEFAULT 'NONE',
+  Adminlevel int(11) DEFAULT 0 NOT NULL,
+  Timezone varchar(40) DEFAULT 'GMT' NOT NULL,
   PRIMARY KEY (ID),
   UNIQUE Handle (Handle),
   KEY Handle_2 (Handle)

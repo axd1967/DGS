@@ -22,6 +22,8 @@ include( "config.php" );
 include( "connect2mysql.php" );
 
 $session_duration = 3600*24*7; // 1 week
+$date_fmt = 'Y-m-d H:i';
+
 
 define("NONE", 0);
 define("BLACK", 1);
@@ -130,6 +132,26 @@ function make_session_code()
     return sprintf("%06X%06X%04X\0",mt_rand(0,16777215), mt_rand(0,16777215), mt_rand(0,65535));
 }
 
+function random_letter()
+{
+    $c = mt_rand(0,61);
+    if( $c < 10 )
+        return chr( $c + ord('0'));
+    else if( $c < 36 )
+        return chr( $c - 10 + ord('a'));
+    else
+        return chr( $c - 30 + ord('A'));
+}
+
+function generate_random_password()
+{
+    mt_srand((double)microtime()*1000000); 
+    for( $i=0; $i<8; $i++ )
+        $return .= random_letter();
+
+    return $return;
+}
+
 function set_cookies($uid, $code, $delete=false)
 {
     global $session_duration;
@@ -221,6 +243,9 @@ function is_logged_in($hdl, $scode, &$row)
 
     if( $row["Adminlevel"] >= 3 )
         $show_time = true;
+
+    if( !empty( $row["Timezone"] ) )
+        putenv('TZ='.$row["Timezone"] );
 
     return true;
 }

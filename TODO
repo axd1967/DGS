@@ -1,6 +1,4 @@
 
-* Forgot password? -> send email
-
 * Add two gamelists (running/finished) per player in the database
 
 * FAQ
@@ -11,7 +9,7 @@
 
 * Time control
 
-* Customizable time zones and time format
+* Customizable time format
 
 * Installation information and scripts
 
