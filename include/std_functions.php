@@ -257,7 +257,7 @@ function end_page( $menu_array=NULL )
    echo "&nbsp;<p>\n";
 
    if( $vertical )
-      echo '</td></tr><tr><td>';
+      echo '</td></tr><tr><td valign=bottom>';
 
    if( $menu_array )
       make_menu($menu_array);
@@ -297,7 +297,7 @@ function end_page( $menu_array=NULL )
 
 function make_menu($menu_array)
 {
-   global $HOSTBASE, $bg_color,$max_links_in_main_menu;
+   global $HOSTBASE, $bg_color,$max_links_in_main_menu,$menu_bg_color;
 
    $new_row= '<tr bgcolor=' . $bg_color . ' align="center">' . "\n";
 
@@ -412,7 +412,7 @@ function make_menu_horizontal($menu_array)
    echo '</tr></table>' . "\n";
 
    echo '<table width="100%" cellpadding=0 cellspacing=0><tr><td height=1 bgcolor=' . $menu_bg_color .
-      "><img src=\"images/blank.png\" width=1 height=1 alt=\"\"></td></table>\n" . "
+      "><img src=\"images/dot.gif\" width=1 height=1 alt=\"\"></td></table>\n" . "
     <BR>\n";
 
 }
@@ -423,27 +423,28 @@ function make_menu_vertical($menu_array)
 
    echo '<table width="100%" border=0 cellspacing=0 cellpadding=5><tr><td valign=top rowspan=2>' . "\n";
    echo '<table border=0 cellspacing=0 cellpadding=1 bgcolor='.$menu_bg_color.'><tr><td>' . "\n";
-   echo '<table border=0 cellspacing=0 cellpadding=3 bgcolor="#F7F5FF">' . "\n";
+   echo '<table border=0 cellspacing=0 cellpadding=5 bgcolor="#F7F5FF">' . "\n";
    echo '<tr><td align=center> <img src="images/dragonlogo_bl.jpg" alt="Dragon">' . "\n";
 
    $i = 0;
 
    //  uasort($menu_array, "cmp1");
+   echo '<tr><td align=left nowrap>' . "\n";
 
    foreach( $menu_array as $text => $tmp )
       {
          list($link,$t1,$t2) = $tmp;
 
-         if( $i % 3 == 0 )
-            echo '<tr><td>&nbsp;' . "\n";
+         if( $i % 3 == 0 and $i > 0 )
+             echo '<tr><td height=1><img src="images/dot.gif" alt=""></td></tr><tr><td align=left nowrap>' . "\n";
 
          $i++;
 
-         echo "<tr><td nowrap><A href=\"$HOSTBASE/$link\"><font color=black>$text</font></A></td>\n";
+         echo "<A href=\"$HOSTBASE/$link\"><font color=black>$text</font></A><br>\n";
       }
 
-   echo '<tr><td>&nbsp;' . "\n";
-   echo '</table></table></td><td width="100%" align=center valign=top><BR>' . "\n";
+   echo '<tr><td height=5><img src="images/dot.gif" alt=""></td></tr></table>' . "\n";
+   echo '</table></td><td width="100%" align=center valign=top><BR>' . "\n";
 }
 
 function error($err, $debugmsg=NULL)
