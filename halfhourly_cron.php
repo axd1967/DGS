@@ -27,7 +27,8 @@ if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.
 $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
 $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
 
-function html_entity_decode($str, $quote_style, $charset);
+function html_entity_decode($str, $quote_style, $charset)
+{
  global $reverse_htmlentities_table;
    $str = strtr($str, $reverse_htmlentities_table);
 }
