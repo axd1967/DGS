@@ -41,7 +41,7 @@ echo form_insert_row( 'DESCRIPTION', T_('Password'),
                       'PASSWORD', 'passwd', 16, 16, '' );
 echo form_insert_row( 'DESCRIPTION', T_('Confirm password'),
                       'PASSWORD', 'passwd2', 16, 16, '' );
-echo form_insert_row( 'SUBMITBUTTON', 'register', T_('register') );
+echo form_insert_row( 'SUBMITBUTTON', 'register', T_('Register') );
 
 echo form_end();
 echo "</center>\n";
