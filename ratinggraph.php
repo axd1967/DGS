@@ -106,9 +106,9 @@ require_once( "include/form_functions.php" );
 
   $form = new Form( 'date_form', 'ratinggraph.php', FORM_GET );
 
-  $months = array( 1 => T_('Jan'), 2 => T_('Feb'), 3 => 'Mar', 4 => T_('Apr'),
-                   5 => T_('May'), 6 => T_('Jun'), 7 => 'Jul', 8 => T_('Aug'),
-                   9 => T_('Sep'), 10=> T_('Oct'), 11=> 'Nov', 12=> T_('Dec') );
+  $months = array( 1 => T_('Jan'), 2 => T_('Feb'), 3 => T_('Mar'), 4 => T_('Apr'),
+                   5 => T_('May'), 6 => T_('Jun'), 7 => T_('Jul'), 8 => T_('Aug'),
+                   9 => T_('Sep'), 10=> T_('Oct'), 11=> T_('Nov'), 12=> T_('Dec') );
 
   for( $y = $BEGINYEAR; $y <= $CURRENTYEAR; $y++ )
      $years[$y] = $y;
