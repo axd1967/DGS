@@ -279,16 +279,16 @@ function make_menu($menu_array)
 {
    global $HOSTBASE, $bg_color;
 
-   $width = 'width="' . floor(100/count($menu_array)) . '%"';
-
-   if( count($menu_array) == 1 )
-      $width .= ' colspan=2';
+   $w = 100/count($menu_array);
 
    echo '<tr bgcolor=' . $bg_color . ' align="center">';
 
    foreach( $menu_array as $text => $link )
       {
-         echo "<td $width><B><A href=\"$HOSTBASE/$link\">$text</A></B></td>\n";
+         $cumw += $w;
+         $width = round($cumw - $cumwidth);
+         echo "<td width=$width%><B><A href=\"$HOSTBASE/$link\">$text</A></B></td>\n";
+         $cumwidth += $width;
       }
 
    echo "</tr>\n";
@@ -673,11 +673,11 @@ function is_logged_in($hdl, $scode, &$row)
    if( !$hdl )
       return false;
 
-   $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire " .
+   $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire " .
                           "FROM Players WHERE Handle='$hdl'" );
 
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       return false;
 
    $row = mysql_fetch_array($result);
@@ -693,9 +693,9 @@ function is_logged_in($hdl, $scode, &$row)
        "Notify='NONE' " .
        "WHERE Handle='$hdl' LIMIT 1";
 
-   $result = mysql_query( $query );
+   $result = @mysql_query( $query );
 
-   if( mysql_affected_rows() != 1 )
+   if( @mysql_affected_rows() != 1 )
       return false;
 
 
@@ -711,15 +711,6 @@ function is_logged_in($hdl, $scode, &$row)
      {
        $the_translator->change_language( $row['Lang'] );
      }
-
-
-//     bindtextdomain ("dragon", "./locale");
-//     textdomain ("dragon");
-
-//     putenv("LANG=" . $row["Lang"]);
-
-//  //   setlocale(LC_ALL, $row["Lang"]);
-//     setlocale(LC_ALL, "");
 
    return true;
 }
