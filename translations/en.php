@@ -1,6 +1,6 @@
 <?php
 
-add_to_known_languages( "en" );
+add_to_known_languages( "en", "English" );
 
 class en_Language extends Language
 {

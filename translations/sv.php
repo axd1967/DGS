@@ -1,6 +1,6 @@
 <?php
 
-add_to_known_languages( "sv" );
+add_to_known_languages( "sv", "Svenska" );
 
 class sv_Language extends Language
 {

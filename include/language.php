@@ -25,18 +25,25 @@ class Language
     }
 }
 
-function add_to_known_languages( $lang )
+function add_to_known_languages( $lang, $lang_full_name )
 {
   global $KNOWN_LANGUAGES;
 
-  array_push( $KNOWN_LANGUAGES, $lang );
+  $KNOWN_LANGUAGES[ $lang ] = $lang_full_name;
 }
 
 function get_known_languages()
 {
   global $KNOWN_LANGUAGES;
-  $result = array( "en", "sv" );
-  return $result;
+
+  return array_keys($KNOWN_LANGUAGES);
+}
+
+function get_known_languages_with_full_names()
+{
+  global $KNOWN_LANGUAGES;
+
+  return $KNOWN_LANGUAGES;
 }
 
 include( "translations/en.php" );
