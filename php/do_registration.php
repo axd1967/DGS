@@ -79,11 +79,6 @@ if( mysql_affected_rows() != 1 )
 
 $result = mysql_query( "CREATE TABLE Messages$new_id (  ID int(11) DEFAULT '0' NOT NULL auto_increment, From_ID int(11), Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') DEFAULT 'NORMAL', Info enum('NONE','NEW','REPLIED','REPLY REQUIRED') DEFAULT 'NEW', Game_ID int(11), Time timestamp(14), Subject varchar(80), Text text, PRIMARY KEY (ID) )" );
 
-if( mysql_affected_rows() != 1 )
-{
-    header("Location: error.php?err=mysql_insert_player");
-    exit;
-}
 
 set_cookies( $userid, $code );
 
