@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Dragon Go Server
-# Copyright (C) 2002  Erik Ouchterlony
+# Copyright (C) 2002-2003  Erik Ouchterlony
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
