@@ -75,7 +75,7 @@ require( "include/std_functions.php" );
          $color = "w"; 
 
       echo "<tr><td><A href=\"userinfo.php?uid=" . $row["uid"] . "\">" . $row["Name"] . "</td>" .
-      "<td align=center><img src=\"17/$color.gif\"></td>" .
+      "<td align=center><img src=\"17/$color.gif\" alt=$color></td>" .
       "<td>" . $row["Size"] . "</td>" .
          "<td>" . $row["Handicap"] . "</td>" .
          "<td>" . $row["Komi"] . "</td>" .
@@ -85,14 +85,23 @@ require( "include/std_functions.php" );
       if( $finished )
       {
          if( $color == "w" xor $row["Score"] > 0.0 )
+         {
             $image = 'no.gif';
+            $alt = 'no';
+         }
          else
+         {
             $image = 'yes.gif';
+            $alt = 'yes';
+         }
 
          if( abs($row["Score"]) < 0.1 )
+         {
             $image = 'dash.gif';
+            $alt = 'jigo';
+         }
 
-      echo"<td align=center><img src=\"images/$image\"></td>\n";
+      echo"<td align=center><img src=\"images/$image\" alt=$alt></td>\n";
       }
       echo "</tr>\n";
    }
