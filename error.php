@@ -218,7 +218,7 @@ require( "include/std_functions.php" );
                    "<ul>\n" .
                    "<li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, " .
                    "or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.\n" .
-                   "<li> Your cookies have expired. This happens once a week.\n" .
+                   "<li> Your cookies have expired. This happens once a month.\n" .
                    "<li> You haven't enabled cookies in your browser.\n" .
                    "</ul>"),
                 $HOSTBASE );
