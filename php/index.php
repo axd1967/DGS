@@ -24,6 +24,14 @@ include( "std_functions.php" );
 
 connect2mysql();
 
+if( $logout )
+{
+    set_cookies("","", true);
+    header("Location: index.php");
+    exit;
+}
+
+
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 start_page("Home", true, $logged_in, $player_row );
@@ -48,7 +56,8 @@ start_page("Home", true, $logged_in, $player_row );
             <TD align=right>Password:</TD>
             <TD align=left><input type="password" name="passwd" size="16" maxlength="16"></TD>
             <TD><input type=submit name="login" value="Log in"></TD>
-          </TR>
+            <TD><A href="forgot.php"><font size="-2">Forgot password?</font></A></td>
+</TR>
 
       </TABLE>
 

@@ -70,8 +70,10 @@ echo "
 
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
         <tr bgcolor=\"0C41C9\">
-          <td colspan=\"3\" width=\"50%\"><font color=\"FFFC70\"><B>Dragon Go Server</B></font></td>
+          <td colspan=\"3\" width=\"50%\">
+          <A style=\"color: FFFC70 \" href=\"index.php\"><B>Dragon Go Server</B></A></td>
 ";
+
 
 if( $logged_in ) 
     echo "          <td colspan=\"3\" align=\"right\" width=\"50%\"><font color=\"FFFC70\"><B>Logged in as: " . 
@@ -82,7 +84,6 @@ else
 echo "
         </tr>
         <tr bgcolor=\"F7F5E3\" align=\"center\">
-          <td><font color=\"FFFC70\"><B><A href=\"index.php\">Main</A></B></font></td>
           <td><font color=\"FFFC70\"><B><A href=\"status.php\">Status</A></B></font></td>
           <td><font color=\"FFFC70\"><B><A href=\"messages.php\">Messages</A></B></font></td>
           <td><font color=\"FFFC70\"><B><A href=\"invite.php\">Invite</A></B></font></td>
@@ -100,15 +101,24 @@ echo "
 function end_page( $new_paragraph = true )
 {
     global $time;
-    
+    global $show_time;
+
     if( $new_paragraph )
         echo "<p>";
 echo "
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr bgcolor=\"0C41C9\">
-        <td align=\"left\" width=\"50%\"><font color=\"FFFC70\"><B>Dragon Go Server</B></font></td>
-        <td align=\"right\" width=\"50%\"><font color=\"FFFC70\"><B>Page created in " . 
-              sprintf ("%0.5f", getmicrotime() - $time) . "&nbsp;s</B></font></td>
+        <td align=\"left\" width=\"50%\">
+          <A style=\"color: FFFC70 \" href=\"index.php\"><B>Dragon Go Server</B></A></td>
+        <td align=\"right\" width=\"50%\">";
+ if( $show_time )
+     echo "
+        <font color=\"FFFC70\"><B>Page created in " . 
+         sprintf ("%0.5f", getmicrotime() - $time) . "&nbsp;s</B></font></td>";
+ else
+     echo "<A style=\"color: FFFC70 \" href=\"index.php?logout=t\"><B>Logout</B></A></td>";
+
+ echo "
       </tr>
     </table>
   </BODY>
@@ -123,14 +133,23 @@ function make_session_code()
     return sprintf("%06X%06X%04X\0",mt_rand(0,16777215), mt_rand(0,16777215), mt_rand(0,65535));
 }
 
-function set_cookies($uid, $code)
+function set_cookies($uid, $code, $delete=false)
 {
     global $session_duration;
     global $SUB_PATH;
 
-    setcookie ("handle", $uid, time()+$session_duration, "$SUB_PATH" );
+    if( $delete )
+        {
+            $time_diff=-3600;
+            $uid = "";
+            $code = "";
+        }
+    else
+        $time_diff = $session_duration;
 
-    setcookie ("sessioncode", $code, time()+$session_duration, "$SUB_PATH" );
+    setcookie ("handle", $uid, time()+$time_diff, "$SUB_PATH" );
+
+    setcookie ("sessioncode", $code, time()+$time_diff, "$SUB_PATH" );
 }
 
 
@@ -148,12 +167,37 @@ $msg = ereg_replace("\n\n","<P>",$msg);
 $msg = ereg_replace("\n","<BR>",$msg);
 }
 
+function score2text($score, $verbose)
+{
+    if( !isset($score) )
+        $text = "?";        
+    else if( $score == 0 )
+        $text = "Jigo";
+    else
+        {
+            if( $verbose )
+                $text = ( $score > 0 ? "White wins by " : "Black wins by " );
+            else 
+                $text = ( $score > 0 ? "W+" : "B+" );
+            
+            if( abs($score) == 1000 )
+                $text .= "Resign";
+            else if( abs($score) == 2000 )
+                $text .= "Time";
+            else 
+                $text .= abs($score);
+        }
+
+    return $text;
+}
 
 function is_logged_in($hdl, $scode, &$row)
 {
-    global $time;
+    global $time, $show_time;
     $time = getmicrotime();
-    
+    $show_time = false;
+
+
     if( !$hdl )
         return false;
 
@@ -177,6 +221,9 @@ function is_logged_in($hdl, $scode, &$row)
             if( mysql_affected_rows() != 1 )
                 return false;
         }
+
+    if( $hdl=='ejlo' )
+        $show_time = true;
 
     return true;
 }
