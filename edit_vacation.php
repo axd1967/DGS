@@ -78,7 +78,7 @@ require_once( "include/form_functions.php" );
 
          $vacation_form->add_row( array( 'SPACE' ) );
          $vacation_form->add_row( array(
-                  'DESCRIPTION', echo_day($on_vacation) . ' ' .T_('left'),
+                  'DESCRIPTION', echo_day($on_vacation),
                   'SELECTBOX', 'vacationdiff', 1, $days, 0, false,
                   'SUBMITBUTTON', 'change_vacation', T_('Change vacation length') ) );
 

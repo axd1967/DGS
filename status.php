@@ -62,14 +62,13 @@ require_once( "include/message_functions.php" );
            <td>' . make_html_safe($player_row["Rank"], true) . '</td></tr>
        <tr><td><b><a href="edit_vacation.php"><font color=black>' .
       T_('Vacation days left') . '</font></a></b></td>
-           <td>' . sprintf("%d",$player_row["VacationDays"]) . '</td></tr>';
+           <td>' . echo_day(floor($player_row["VacationDays"]))
 
    if( $player_row['OnVacation'] > 0 )
    {
-      $days = floor($player_row['OnVacation']);
       echo '<tr><td><b><a href="edit_vacation.php"><font color=red>' . T_('On vacation') .
-         '</font></a></b></td>
-           <td>' . echo_day($days) . ' ' .T_('left') . '</td></tr>';
+         '</font></a></b></td><td>' . 
+         echo_day(floor($player_row['OnVacation'])) . ' ' .T_('left') . '</td></tr>';
    }
    echo '
     </table>

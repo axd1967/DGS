@@ -92,13 +92,13 @@ require_once( "include/countries.php" );
     <tr><td><b>' . T_('Registration date') . '</b></td><td>' . $row['Registerdate'] . '</td></tr>
     <tr><td><b>' . T_('Last access') . '</b></td><td>' . $lastaccess . '</td></tr>
     <tr><td><b>' . T_('Last move') . '</b></td><td>' . $lastmove . '</td></tr>
-    <tr><td><b>' . T_('Vacation days left') . '</b></td><td>' . sprintf("%d", $row["VacationDays"]) . "</td></tr>\n";
+    <tr><td><b>' . T_('Vacation days left') . '</b></td>' . 
+                      '<td>' . echo_day(floor($row["VacationDays"])) . "</td></tr>\n";
 
    if( $row['OnVacation'] > 0 )
    {
-      $days = floor($row['OnVacation']);
       echo '<tr><td><b><font color=red>' . T_('On vacation') .
-         '</font></b></td><td>' . echo_day($days) . ' ' .T_('left') . "</td></tr>\n";
+         '</font></b></td><td>' . echo_day(floor($row['OnVacation'])) . ' ' .T_('left') . "</td></tr>\n";
    }
 
    echo '
