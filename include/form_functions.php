@@ -43,6 +43,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * * Radiobuttons
  * * Checkbox
  * * Submitbutton 
+ * * Text
  *
  *** Other things you could have in a row.
  *
@@ -364,6 +365,24 @@ function form_insert_row()
           }
           break;
 
+        case 'TEXT':
+          {
+            $current_arg++;
+            if( func_num_args() - $current_arg >= 1 )
+              {
+                $description = func_get_arg( $current_arg );
+                $current_arg++;
+
+                if( $column_started )
+                  $result .= form_td_end();
+
+                $result .= form_td_start().$description.form_td_end( true );
+                $nr_columns++;
+                $column_started = false;
+              }
+          }
+          break;
+
         case 'TEXTINPUT':
           {
             $current_arg++;
@@ -421,8 +440,8 @@ function form_insert_row()
                 $value_array = func_get_arg( $current_arg + 2 );
                 $selected = func_get_arg( $current_arg + 3 );
                 $multiple = func_get_arg( $current_arg + 4 );
-                $selectbox = form_insert_textarea( $name, $size, $value_array,
-                                                   $selected, $multiple );
+                $selectbox = form_insert_select_box( $name, $size, $value_array,
+                                                     $selected, $multiple );
                 $current_arg += 5;
 
                 if( !$column_started )
@@ -431,7 +450,7 @@ function form_insert_row()
                     $column_started = true;
                     $nr_columns++;
                   }
-                $result .= "        ".$selectbox."\n";
+                $result .= $selectbox;
               }
           }
           break;
