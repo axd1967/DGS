@@ -26,7 +26,7 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 
-define('BAD_RATING_COLOR',"f0000010");
+define('BAD_RATING_COLOR',"f0000018");
 
 {
    connect2mysql();
