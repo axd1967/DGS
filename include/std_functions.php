@@ -92,7 +92,7 @@ $buttoncolors = array('white','white','white','white',
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
 
-define('INFO_HTML', false);
+define('INFO_HTML', 'cell');
 $cookie_pref_rows = array(
        'Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button',
        'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
@@ -193,7 +193,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    if( empty($encoding_used) )
       $encoding_used = 'iso-8859-1';
 
-   header ('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
+   header('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
@@ -594,9 +594,15 @@ function add_line_breaks( $str)
 }
 
 // Some regular allowed html tags. Keep them lower case.
-$html_code_closed = '|a|b|i|u|center|ul|ol|font|tt|pre|'; //keep a '|' at both end
-$html_code = 'br'.$html_code_closed.'p|goban|li|/br'; //more? '|/li|/p|/br|/ *br';
+// 'cell': tags that does not disturb a table cell.
+// 'msg': tags allowed in messages
 //Warning: </br> was historically used in end game messages. It remains in database.
+ //keep a '|' at both end:
+$html_code_closed['cell'] = '|b|i|u|';
+$html_code_closed['msg'] = '|a|b|i|u|center|ul|ol|font|tt|pre|';
+ //more? '|/li|/p|/br|/ *br';
+$html_code['cell'] = 'b|i|u';
+$html_code['msg'] = 'br'.$html_code_closed['msg'].'p|goban|li|/br';
 
 define( 'ALLOWED_LT', '{anglstart}');
 define( 'ALLOWED_GT', '{anglend}');
@@ -660,9 +666,8 @@ function parse_atbs_safe( &$trail, &$bad)
    Check up to the <$stop > tag (supposed to be the closing tag).
    If $stop=='', check up to the end of string $trail.
 */
-function parse_tags_safe( &$trail, &$bad, $stop)
+function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop)
 {
- global $html_code_closed, $html_code;
 
    $before = '';
    $reg = "%^(.*?)<(" . ( $stop ? "$stop|" : "" ) . "$html_code)([\x01-\x20>].*)$%is";
@@ -685,7 +690,7 @@ function parse_tags_safe( &$trail, &$bad, $stop)
       $to_be_closed = is_numeric(strpos($html_code_closed,'|'.$tag.'|')) ;
       if( $to_be_closed )
       {
-         $inside = parse_tags_safe( $trail, $bad, '/'.$tag) ;
+         $inside = parse_tags_safe( $trail, $bad, $html_code, $html_code_closed, '/'.$tag) ;
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
       }
@@ -701,11 +706,14 @@ function parse_tags_safe( &$trail, &$bad, $stop)
    return $before ;
 }
 
-function parse_html_safe( $msg)
+function parse_html_safe( $msg, $some_html)
 {
-
+ global $html_code, $html_code_closed;
    $bad = 0;
-   $str = parse_tags_safe( $msg, $bad, '') ;
+   $str = parse_tags_safe( $msg, $bad, 
+               $html_code[$some_html], 
+               $html_code_closed[$some_html], 
+               '') ;
    $str.= $msg;
    return $str;
 }
@@ -713,6 +721,7 @@ function parse_html_safe( $msg)
 define('REF_LINK', 0x1);
 define('REF_LINK_ALLOWED', 0x2);
 define('REF_LINK_BLANK', 0x4);
+//$some_html could be false, 'cell', 'game' or 'msg'==default
 function make_html_safe( $msg, $some_html=false)
 {
 
@@ -736,7 +745,10 @@ function make_html_safe( $msg, $some_html=false)
                               ALLOWED_LT."font color=blue".ALLOWED_GT."\\0", $msg);
          $msg = eregi_replace("</c(omment)? *>",
                               "\\0".ALLOWED_LT."/font".ALLOWED_GT, $msg);
+         $some_html = 'msg';
       }
+      else if( $some_html !== 'cell' )
+         $some_html = 'msg';
 
       $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>",
                          ALLOWED_LT."a href=\"\\1\\2\"".ALLOWED_GT.
@@ -746,17 +758,23 @@ function make_html_safe( $msg, $some_html=false)
                          "\\1".ALLOWED_LT."/a".ALLOWED_GT, $msg);
 
       //link: <game gid[,move]> =>show game
-      $msg=preg_replace("%<game(_)? *([0-9]+)( *,? *([0-9]+))? *>%ise",
+      $msg=preg_replace("%<game(_)? +([0-9]+)( *, *([0-9]+))? *>%ise",
                         "game_reference(('\\1'=='_'?".REF_LINK_BLANK.":0)+".
                            REF_LINK_ALLOWED.",1,\\2,\\4+0)", $msg);
       //link: <user uid> or <user =uhandle> =>show user info
       //link: <send uid> or <send =uhandle> =>send a message to user
-      $msg=preg_replace("%<(user|send)(_)? *(".HANDLE_TAG_CHAR."?[".HANDLE_LEGAL_REGS."]+) *>%ise",
+      $msg=preg_replace("%<(user|send)(_)? +(".HANDLE_TAG_CHAR."?[".HANDLE_LEGAL_REGS."]+) *>%ise",
                         "\\1_reference(('\\2'=='_'?".REF_LINK_BLANK.":0)+".
                            REF_LINK_ALLOWED.",1,0,'\\3')", $msg);
 
+      //tag: <color col>...</color> =>translated to <font color="col">...</font>
+      $msg=eregi_replace("<color +([#0-9a-zA-Z]+) *>",
+                           ALLOWED_LT."font color=\"\\1\"".ALLOWED_GT, $msg);
+      $msg=eregi_replace("</color *>",
+                           ALLOWED_LT."/font".ALLOWED_GT, $msg);
+
       // Regular allowed html tags
-      $msg = parse_html_safe($msg) ;
+      $msg = parse_html_safe( $msg, $some_html) ;
    }
 
    // Filter out HTML code
