@@ -34,7 +34,8 @@ while( $row = mysql_fetch_array( $result ) )
     mail( $row["Email"], 
          "Dragon Go Server notification", 
          "A message or game move is waiting for you at " . 
-         "http://dragongoserver.sourceforge.net/status.php");
+           "http://dragongoserver.sourceforge.net/status.php",
+         "From: noreply@dragongoserver.sourceforge.net");
 }
 
 
