@@ -102,6 +102,9 @@ define("DONE_WHITE", 6);
 define("BLACK_DEAD", 7);
 define("WHITE_DEAD", 8);
 
+define('SCORE_RESIGN', 1000);
+define('SCORE_TIME', 2000);
+define('SCORE_NORESULT', 10000);
 
 define("KO", 1);
 
@@ -593,8 +596,8 @@ function make_html_safe(&$msg, $some_html=false)
 
    // Filter out HTML code
 
-   $msg = ereg_replace("<", "&lt;", $msg);
-   $msg = ereg_replace(">", "&gt;", $msg);
+   $msg = str_replace("<", "&lt;", $msg);
+   $msg = str_replace(">", "&gt;", $msg);
 
    $msg = add_line_breaks($msg);
 
@@ -627,11 +630,11 @@ function score2text($score, $verbose, $sgf=false)
    $color = ($verbose ? ( $score > 0 ? T_('White') : T_('Black') )
              : ( $score > 0 ? 'W' : 'B' ));
 
-   if( abs($score) > 1999 )
+   if( abs($score) == SCORE_TIME )
    {
       return ( $verbose ? sprintf(T_("%s wins on time"), $color) : $color . "+Time" );
    }
-   else if( abs($score) > 999 )
+   else if( abs($score) == SCORE_RESIGN )
    {
       return ( $verbose ? sprintf(T_("%s wins by resign"), $color) : $color . "+Resign" );
    }

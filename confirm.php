@@ -101,7 +101,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       error("database_corrupted");
 
 
-   $next_to_move = 3-$to_move;
+   $next_to_move = WHITE+BLACK-$to_move;
 
    if( $Moves+1 < $Handicap ) $next_to_move = BLACK;
 
@@ -293,9 +293,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
          if( $to_move == BLACK )
-            $score = 1000;
+            $score = SCORE_RESIGN;
          else
-            $score = -1000;
+            $score = -SCORE_RESIGN;
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
@@ -529,4 +529,3 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    jump_to("game.php?gid=$gid");
 }
 ?>
-

@@ -95,7 +95,7 @@ if( !$is_down )
       if( $time_is_up )
       {
 
-         $score = ( $ToMove_ID == $Black_ID ? 2000 : -2000 );
+         $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
 
          $query = "UPDATE Games SET " .
              "Status='FINISHED', " .

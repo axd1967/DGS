@@ -323,7 +323,7 @@ $coord_borders, $woodcolor  )
 // fills $array with positions where the stones are.
 // returns the coords of the last move
 function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked_dead,
-$no_marked_dead = false )
+   $no_marked_dead = false )
 {
    $array=NULL;
 
@@ -715,7 +715,7 @@ function check_consistency($gid)
    }
 
    if( $Black_Prisoners != $games_Black_Prisoners or
-   $White_Prisoners != $games_White_Prisoners )
+      $White_Prisoners != $games_White_Prisoners )
    {
       echo "Wrong number of prisoners in Games table!<br>\n";
       echo "Black: $games_Black_Prisoners should be:$Black_Prisoners<br>\n";
@@ -725,7 +725,7 @@ function check_consistency($gid)
    }
 
    if( $Black_Prisoners != $moves_Black_Prisoners or
-   $White_Prisoners != $moves_White_Prisoners )
+      $White_Prisoners != $moves_White_Prisoners )
    {
       echo "Wrong number of prisoners removed!<br>\n";
       return false;
@@ -743,6 +743,78 @@ function check_consistency($gid)
    }
 
    echo "Ok<br>\n";
+}
+
+// check for a cyclical position
+// compare the $actual position with history of the game $gid up to $move.
+// if (no cycle) return false 
+//   else return the move number of the cycle
+// build on the make_array() model.
+function check_cyclical( $gid, &$actual, $size, $max_moves, $move )
+{
+   $array=NULL; //to be compared to $actual
+
+   if( !$move ) $move = $max_moves;
+
+   if( $move < 2 )
+      return false; //no cycle found
+
+   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
+
+   $MoveNr=0;
+
+   $diff_found = false;
+
+   while (!$diff_found) {
+
+      for($rownr = 0; $rownr < $size; $rownr++ )
+      {
+
+         for($colnr = 0; $colnr < $size; $colnr++ )
+         {
+            $diff= (int)$actual[$colnr][$rownr];
+            if ($diff != (int)$array[$colnr][$rownr] )
+            {
+               $diff_found = true;
+               break;
+            }
+
+         }
+         if ($diff_found)
+            break;
+
+      }
+      if (!$diff_found)
+         return (int)$MoveNr; //there is a cyclical position
+
+      while( $row = mysql_fetch_array($result) )
+      {
+
+         extract($row);
+
+         if( $MoveNr > $move )
+         {
+            break;
+         }
+
+         if( $Stone <= WHITE )
+         {
+            if( $PosX < 0 ) continue;
+
+            $array[$PosX][$PosY] = $Stone;
+            if ($colnr == $PosX && $rownr == $PosY && $diff == (int)$Stone )
+            {
+               $diff_found = false;
+               break;
+            }
+
+         }
+
+      }
+
+   }
+
+   return false; //no cycle found
 }
 
 function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_borders, $msg )
