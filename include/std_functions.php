@@ -26,7 +26,7 @@ require_once( "include/config.php" );
 
 $timeadjust = 0;
 if( @is_readable("timeadjust.php" ) )
-   include( "timeadjust.php" );
+   include_once( "timeadjust.php" );
 
 if( !is_numeric($timeadjust) )
    $timeadjust = 0;
@@ -104,9 +104,11 @@ $buttoncolors = array('white','white','white','white',
 
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
-$cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button',
-           'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
-           'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff');
+$cookie_pref_rows = array(
+       'Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button',
+       'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
+       'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff',
+       );
 
 $button_max = 10;
 
@@ -304,8 +306,8 @@ function end_page( $menu_array=NULL )
    if( $admin_level & ADMIN_TIME )
       echo '
         <font size=-2 color=' . $menu_fg_color . '>' . T_('Page created in') .
-        sprintf (' %0.2f', (getmicrotime() - $page_microtime)*1000) . '&nbsp;ms&nbsp;&nbsp;&nbsp;' .
-         "</font>\n";
+        sprintf (' %0.2f', (getmicrotime() - $page_microtime)*1000) .
+         "</font><br>\n";
 
    if( $admin_level > 0 )
       echo '<b><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
@@ -524,6 +526,12 @@ function help($topic)
    return '<a href="javascript:popup(\'' . $base_path . 'help.php?topic=' . $topic . '\')"><img border=0 align=top src="' . $base_path . 'images/help.png"></a>';
 }
 
+function sysmsg($msg)
+{
+   if( isset($msg) && $msg )
+      echo "\n<p><b><font color=\"green\">$msg</font></b><hr>\n";
+}
+
 function jump_to($uri, $absolute=false)
 {
    global $HOSTBASE;
@@ -619,8 +627,8 @@ function add_line_breaks( $str)
 
 // Some regular allowed html tags. Keep them lower case.
 $html_code_closed = '|a|b|i|u|center|ul|ol|font|tt|pre|'; //keep a '|' at both end
-$html_code = 'br'.$html_code_closed.'p|goban|li|/br'; //|/li|/p|/br'; //|/ *br';
-//Warning: </br> was historically used in end game messages. It remain in database.
+$html_code = 'br'.$html_code_closed.'p|goban|li|/br'; //more? '|/li|/p|/br|/ *br';
+//Warning: </br> was historically used in end game messages. It remains in database.
 
 define( 'ALLOWED_LT', '{anglstart}');
 define( 'ALLOWED_GT', '{anglend}');
@@ -789,7 +797,7 @@ function make_html_safe( $msg, $some_html=false)
 function textarea_safe( $msg, $encoding=false)
 {
  global $encoding_used;
-   if( !$encoding) $encoding = $encoding_used;
+   if( !$encoding) $encoding = $encoding_used; //else 'iso-8859-1'
 //   $msg = @htmlspecialchars($msg, ENT_QUOTES, $encoding);
    $msg = @htmlentities($msg, ENT_QUOTES, $encoding);
    return $msg;
@@ -888,6 +896,31 @@ function get_request_url()
    else if (!strcasecmp( $SUB_PATH, substr($url,0,$len) ))
       $url = substr($url,$len+1);
    return $url;
+}
+
+function get_request_user( &$uid, &$uhandle, $from_referer=false)
+{
+   $uid = @$_REQUEST['uid'];
+   $uhandle = '';  
+   if( !($uid > 0) )
+   {
+      $uid = 0;
+      $uhandle = @$_REQUEST['user'];
+      if( !$uhandle && $from_referer )
+      {
+//default user = last referenced user
+//(ex: message.php from userinfo.php by menu link)
+       global $HTTP_REFERER;
+         if( eregi("[?&]uid=([0-9]+)", $HTTP_REFERER, $result) )
+           $uid = $result[1];
+         if( !($uid > 0) )
+         {
+            $uid = 0;
+            if( eregi("[?&]user=([-_+a-zA-Z]+)", $HTTP_REFERER, $result) )
+              $uhandle = $result[1];
+         }
+      }
+   }
 }
 
 function is_logged_in($hdl, $scode, &$row)
