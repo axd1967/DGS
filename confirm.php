@@ -316,7 +316,15 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'PLAY' or ( $Moves >= 11+$Handicap ) )
             error("invalid_action");
 
+/* Rod:
+  Here, the previous line was:
          $query = "DELETE FROM Moves WHERE gid=$gid LIMIT $Moves";
+  But, the number of records of Moves could be greater than the number of moves if:
+  - there are prisoners
+  - a sequence like PASS/PASS/SCORE.../RESUME had already occured.
+  So some garbage records could remains alone because of the LIMIT.
+*/
+         $query = "DELETE FROM Moves WHERE gid=$gid";
          $query2 = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
          $game_query = "DELETE FROM Games WHERE ID=$gid LIMIT 1";
 
@@ -345,6 +353,12 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
+/*
+  WARNING: the formula insert the BLACK_DEAD or WHITE_DEAD constants but:
+  - BLACK_DEAD flag all the stones (black or white) toggled (dead/alive) by !!WHITE!!
+  - WHITE_DEAD flag all the stones (black or white) toggled (dead/alive) by !!BLACK!!
+  so the constants meaning is a little spurious.
+*/
             $query .= "($gid, $Moves, " . (9 - $to_move ) . ", $x, $y, 0), ";
          }
 
@@ -515,3 +529,4 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    jump_to("game.php?gid=$gid");
 }
 ?>
+
