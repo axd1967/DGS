@@ -27,14 +27,12 @@ class Translator
 {
   var $current_language;
   var $loaded_languages;
-  var $collect_translateable;
-  var $translated_messages;
+  var $return_empty;
 
   function Translator( $lang = '' )
     {
       $this->loaded_languages = array();
-      $this->collect_translateable = false;
-      $this->translated_messages = array();
+      $this->return_empty = false;
       $this->change_language( $lang );
     }
 
@@ -50,17 +48,14 @@ class Translator
         }
     }
 
-  function set_collect_translateable_mode()
+  function set_return_empty( $val = true )
     {
-      $this->collect_translateable = true;
+      $this->return_empty = $val;
     }
 
   function translate( $string )
     {
       $language = $this->current_language;
-
-      if( $this->collect_translateable )
-        array_push( $this->translated_messages, $string );
 
       if( strcmp( $this->current_language, 'C' ) == 0 )
         {
@@ -73,7 +68,7 @@ class Translator
           $this->loaded_languages[ $language ] = new $lang_class_name;
         }
 
-      return $this->loaded_languages[ $language ]->find_translation( $string );
+      return $this->loaded_languages[ $language ]->find_translation( $string, $this->return_empty );
     }
 
   function get_preferred_browser_language()
