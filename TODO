@@ -37,6 +37,8 @@ SMALLER TASKS
   * Default sorting?
   * Configurable?
 
+* Store rating info for finisked games.
+
 * More info in show_games.php
 
 * Consistency checks for games.
