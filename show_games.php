@@ -213,7 +213,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    $menu_array = array( T_('User info') => "userinfo.php?uid=$uid" );
 
    if( $uid != $player_row["ID"] )
-      $menu_array[T_('Invite this user')] = "invite.php?uid=$uid";
+      $menu_array[T_('Invite this user')] = "message.php?mode=Iinvite&uid=$uid";
 
    if( $finished )
       $menu_array[T_('Show running games')] = "show_games.php?uid=$uid";
