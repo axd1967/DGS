@@ -273,18 +273,26 @@ class Table
             $string .= "<a href=\"" . $this->Page;
 
             if( $tablehead['Sort_String'] == $this->Sort1 )
-            {
+            { //Click on main column: just toggle its order
                $string .= $this->make_sort_string( $this->Sort1,
                                                    !$this->Desc1,
                                                    $this->Sort2,
-                                                   !$this->Desc2 );
+                                                   $this->Desc2 );
             }
             else
-            {
+            if( $tablehead['Sort_String'] == $this->Sort2 )
+            { //Click on second column: just swap the columns
+               $string .= $this->make_sort_string( $this->Sort2,
+                                                   $this->Desc2,
+                                                   $this->Sort1,
+                                                   $this->Desc1 );
+            }
+            else
+            { //Click on a new column: just push it
                $string .= $this->make_sort_string( $tablehead['Sort_String'],
                                                    $tablehead['Desc_Default'],
                                                    $this->Sort1,
-                                                   $this->Desc1 xor $tablehead['Desc_Default'] );
+                                                   $this->Desc1);
             }
 
             $string .= "\"><font color=\"black\">" . $tablehead['Description'] .
