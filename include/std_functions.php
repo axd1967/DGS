@@ -21,6 +21,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require( "include/config.php" );
 require( "include/connect2mysql.php" );
 
+if( @is_readable("timeadjust.php" ) )
+   include( "timeadjust.php" );
+else
+   $timeadjust = 0;
+
 $session_duration = 3600*24*7; // 1 week
 $tick_frequency = 12; // ticks/hour
 $date_fmt = 'Y-m-d H:i';
@@ -166,7 +171,7 @@ function end_page( $new_paragraph = true )
    if( $show_time )
       echo '
         <font color="#FFFC70"><B>' . _("Page created in") . ' ' . 
-         sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s</B></font></td>';
+         sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s' . $timeadjust. '</B></font></td>';
    else
       echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color="#FFFC70"><B>' . _("Logout") . '</B></font></A></td>';
 
@@ -258,10 +263,14 @@ function make_html_safe(&$msg, $some_html=false)
 
    if( $some_html )
    {
-      // sgf comment
-      $msg = eregi_replace("<c(omment)?>", "<font color=blue>\\0", $msg);
-      $msg = eregi_replace("</c(omment)?>", "\\0</font>", $msg);
-      $msg = preg_replace("'<h(idden)?>(.*?)</h(idden)?>'i", "", $msg);
+      if( $some_html == 'game' )
+      {
+         // mark sgf comments
+         $msg = eregi_replace("<c(omment)?>", "<font color=blue>\\0", $msg);
+         $msg = eregi_replace("</c(omment)?>", "\\0</font>", $msg);
+         $msg = preg_replace("'<h(idden)?>(.*?)</h(idden)?>'i", "", $msg);
+      }
+
       // make sure the <, > replacements: {anglstart}, {anglend} are removed from the string
       $msg = str_replace("{anglstart}", "<", $msg);
       $msg = str_replace("{anglend}", ">", $msg);
@@ -443,6 +452,7 @@ function is_logged_in($hdl, $scode, &$row)
 {
    global $time, $show_time, $HOSTBASE, $PHP_SELF, $HOSTNAME, $HTTP_HOST;
    global $ActivityHalvingTime, $ActivityForHit;
+
    $time = getmicrotime();
    $show_time = false;
 
@@ -487,8 +497,6 @@ function is_logged_in($hdl, $scode, &$row)
 
    if( !empty( $row["Timezone"] ) )
       putenv('TZ='.$row["Timezone"] );
-
-
 
 //     bindtextdomain ("dragon", "./locale");
 //     textdomain ("dragon");
