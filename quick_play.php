@@ -1,4 +1,22 @@
 <?php
+/*
+Dragon Go Server
+Copyright (C) 2001-2003  Erik Ouchterlony
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 $quick_errors = 1;
 require_once( "include/std_functions.php" );
@@ -45,11 +63,12 @@ else
 
    $gid = @$_REQUEST['gid'] ;
    if( $gid <= 0 )
-      error("unknown_game");
+      error("no_game_nr");
 
-
+/*
    if( !empty( $player_row["Timezone"] ) )
       putenv('TZ='.$player_row["Timezone"] );
+*/
 
    $my_id = $player_row['ID'];
 
@@ -70,11 +89,21 @@ else
    $Last_X = NULL; $Last_Y = NULL;
    extract(mysql_fetch_assoc($result));
 
-   if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
+   if( $Status == 'INVITED' )
+   {
+      error("game_not_started");
+   }
+   else if( $Status == 'FINISHED' )
+   {
+      error("game_finished");
+   }
+   else if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
       or !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
       or ($Handicap>1 && $Moves<=$Handicap) //exclude first white move after handicap stones
      )
+   {
       error("invalid_action");
+   }
 
    $old_moves = $Moves;
 
@@ -94,7 +123,7 @@ else
    elseif( isset($_REQUEST['board_move']) )
       list( $query_X, $query_Y) = board2number_coords($_REQUEST['board_move'], $Size);
    else
-      list( $query_X, $query_Y) = array( -1, -1);
+      list( $query_X, $query_Y) = array( NULL, NULL);
 
    if( is_null($query_X) or is_null($query_Y) )
       error("illegal_position");
@@ -104,7 +133,7 @@ else
    elseif( isset($_REQUEST['board_prev']) )
       list( $prev_X, $prev_Y) = board2number_coords($_REQUEST['board_prev'], $Size);
    else
-      list( $prev_X, $prev_Y) = array( -1, -1);
+      list( $prev_X, $prev_Y) = array( NULL, NULL);
 
    if( is_null($prev_X) or is_null($prev_Y) )
       error("illegal_position");
@@ -168,7 +197,6 @@ else
           "ClockUsed=$next_clockused, ";
    }
 
-   //$no_marked_dead = true; //( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
 
    list($lastx,$lasty) =
       make_array( $gid, $array, $msg, $old_moves, NULL, $moves_result, $marked_dead, true );
@@ -205,8 +233,7 @@ else
              "Moves=$Moves, " .
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
-             "Lastchanged=FROM_UNIXTIME($NOW), " .
-             "Status='PLAY', " . $time_query;
+             "Status='PLAY', ";
 
          if( $nr_prisoners > 0 )
             if( $to_move == BLACK )
@@ -220,7 +247,8 @@ else
             $flags &= ~KO;
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
-             "Flags=$flags " .
+             "Flags=$flags, " .
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
       }
 
@@ -258,7 +286,7 @@ if( HOT_SECTION )
 
    $result = mysql_query( $move_query );
 
-   if( mysql_affected_rows() < 1 ) //and $action != 'delete' )
+   if( mysql_affected_rows() < 1 )
       error("mysql_insert_move");
 
    $result = mysql_query( $game_query );
@@ -298,6 +326,8 @@ if( HOT_SECTION )
       echo "\nOk";
       exit;
    }
+
+// Jump somewhere
 
    jump_to("game.php?gid=$gid");
 }

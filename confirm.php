@@ -71,7 +71,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                           "black.OnVacation AS Blackonvacation, " .
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
-                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" ) ;
+                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
+                        )
+            or error('mysql_query_failed');
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
@@ -427,7 +429,7 @@ if( HOT_SECTION )
    //*********************** HOT SECTION START ***************************
    //could append in case of multi-players account with simultaneous logins
    //or if one player hit twice the validation button during a net lag
-   //and if opponent has already played between the two confirm.php calls.
+   //and if opponent has already played between the two quick_play.php/confirm.php calls.
 
    $result = mysql_query( "LOCK TABLES Games WRITE, Moves WRITE"
       //. ", MoveMessages WRITE"
