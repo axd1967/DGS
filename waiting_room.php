@@ -58,10 +58,18 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    if( $msg )
       echo "<p><b><font color=\"green\">$msg</font></b><hr>";
 
+   $page = "waiting_room.php?";
+
+   if(!$sort1)
+      $sort1 = 'ID';
+
+   $order = $sort1 . ( $desc1 ? ' DESC' : '' );
+   if( $sort2 )
+      $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
 
    $result = mysql_query("SELECT Waitingroom.*,Name,Handle,Rating,Players.ID as pid " .
                          "FROM Waitingroom,Players " .
-                         "WHERE Players.ID=Waitingroom.uid");
+                         "WHERE Players.ID=Waitingroom.uid ORDER BY $order");
 
    echo "<h3><font color=$h3_color><B>". T_("Players waiting") . ":</B></font></h3><p>\n";
 
