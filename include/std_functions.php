@@ -518,16 +518,14 @@ function set_cookies($uid, $code, $delete=false)
 
    if( $delete )
    {
-      $time_diff=-3600;
-      $uid = "";
-      $code = "";
+      setcookie ("handle", '', $NOW-3600, "$SUB_PATH" );
+      setcookie ("sessioncode", '', $NOW-3600, "$SUB_PATH" );
    }
    else
-      $time_diff = $session_duration;
-
-   setcookie ("handle", $uid, $NOW+$time_diff, "$SUB_PATH" );
-
-   setcookie ("sessioncode", $code, $NOW+$time_diff, "$SUB_PATH" );
+   {
+      setcookie ("handle", $uid, $NOW+$session_duration*5, "$SUB_PATH" );
+      setcookie ("sessioncode", $code, $NOW+$session_duration, "$SUB_PATH" );
+   }
 }
 
 
