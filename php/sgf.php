@@ -50,7 +50,7 @@ disable_cache();
 
 header ('Content-Type: application/x-go-sgf');
 header( "Content-Disposition: inline; filename=\"$Whitehandle-$Blackhandle-" . 
-        date('Ymd', time()) . '.sgf\"' ); 
+        date('Ymd', time()) . '.sgf"' ); 
 header( "Content-Description: PHP3 Generated Data" );
 
 echo "(;GM[1]
