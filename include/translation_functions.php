@@ -85,10 +85,19 @@ function get_preferred_browser_language()
 
    $accept_langcodes = explode( ',', $HTTP_ACCEPT_LANGUAGE );
 
+   $current_q_val = -1;
+   $return_val = NULL;
+
    foreach( $accept_langcodes as $lang )
       {
-         list($lang) = explode(';', trim($lang));
-         $lang = trim($lang);
+         list($lang, $q_val) = explode(';', trim($lang));
+         $lang = substr(trim($lang), 0, 2);
+         $q_val = preg_replace('/q=/i','', trim($q_val));
+         if( !is_numeric($q_val) )
+            $q_val = 1.0;
+
+         if( $current_q_val >= $q_val )
+            continue;
 
          if( !array_key_exists($lang, $known_languages))
             continue;
@@ -97,15 +106,18 @@ function get_preferred_browser_language()
          foreach( $known_languages[$lang] as $enc => $name )
             {
                if( strpos(strtolower($HTTP_ACCEPT_CHARSET), $enc) !== false )
-                  return $lang . '.' . $enc;
-
-               // No supporting encoding found. Take the first one anyway.
-               reset($known_languages[$lang]);
-               return $lang . '.' . key($known_languages[$lang]);
+               {
+                  $return_val = $lang . '.' . $enc;
+                  break;
+               }
             }
+
+         // No supporting encoding found. Take the first one anyway.
+         reset($known_languages[$lang]);
+         $return_val = $lang . '.' . key($known_languages[$lang]);
       }
 
-   return NULL;
+   return $return_val;
 }
 
 function get_language_descriptions_translated()
