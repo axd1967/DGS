@@ -38,8 +38,8 @@ echo '
 </TD></TR>
 <FORM name="forgot" action="send_new_password.php" method="POST">
 
-<TR><TD align=center>' . T_('Userid:') .
-  ' <input type="text" name="userid" size="16" maxlength="16">
+<TR><TD align=center>' . T_('Userid') .
+  ': <input type="text" name="userid" size="16" maxlength="16">
 <input type=submit name="action" value="Send password"></TR>
 <TR><TD align="right"><input type=submit name="action" value="Go back"></TD></TR>
 </FORM>

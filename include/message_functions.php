@@ -199,7 +199,7 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
    global $date_fmt;
 
    echo "<table>\n" .
-      "<tr><td><b>" . T_('Date:') . "</b></td>" .
+      "<tr><td><b>" . T_('Date') . ":</b></td>" .
       "<td>" . date($date_fmt, $date) . "</td></tr>\n" .
       "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .
       "<td><A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" .
