@@ -156,20 +156,16 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    if( $info > 0 and is_array($info_row) )
    {
-      show_game_info($info_row);
+      show_game_info($info_row, $info_row['pid'] == $player_row['ID']);
    }
    else
-      add_new_game_form();
+      add_new_game_form($info_row['pid'] == $player_row['ID']);
 
    echo "</center>";
 
    if( $info > 0 and is_array($info_row) )
       $menu_array[T_('Add new game')] = "waiting_room.php" .
          ($orderstring ? "?$orderstring" : '' ) . "#add" ;
-
-   if( $info_row['pid'] == $player_row['ID'] )
-      $menu_array[T_('Delete game')] = "join_waitingroom_game.php?id=" .
-         $info_row['ID'] . "&delete=t";
 
    end_page($menu_array);
 }
@@ -233,7 +229,7 @@ function add_new_game_form()
    $addgame_form->echo_string();
 }
 
-function show_game_info($game_row)
+function show_game_info($game_row, $mygame=false)
 {
    global $handi_array;
 
@@ -266,12 +262,25 @@ function show_game_info($game_row)
 
    echo "</tr></td></table>\n";
 
-   $join_form = new Form( 'join', 'join_waitingroom_game.php', FORM_POST );
-   $join_form->add_row( array( 'DESCRIPTION', T_('Reply'),
-                               'HIDDEN', 'id', $ID,
-                               'TEXTAREA', 'reply', 40, 4, "",
-                               'SPACE',
-                               'SUBMITBUTTON', 'join', T_('Join') ) );
-   $join_form->echo_string();
+   if( $mygame )
+   {
+      $delete_form = new Form( 'delete', 'join_waitingroom_game.php', FORM_POST );
+      $delete_form->add_row( array( 'SUBMITBUTTON', 'delete', T_('Delete'),
+                                    'HIDDEN', 'id', $ID,
+                                    'HIDDEN', 'delete', 't') );
+      $delete_form->echo_string();
+   }
+   else
+   {
+      $join_form = new Form( 'join', 'join_waitingroom_game.php', FORM_POST );
+      $join_form->add_row( array( 'DESCRIPTION', T_('Reply'),
+                                  'HIDDEN', 'id', $ID,
+                                  'TEXTAREA', 'reply', 40, 4, "",
+                                  'SPACE',
+                                  'SUBMITBUTTON', 'join', T_('Join') ) );
+      $join_form->echo_string();
+   }
+
+
 }
 ?>
