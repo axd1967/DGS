@@ -127,7 +127,7 @@ require_once( "include/message_functions.php" );
 
          $mrow_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&amp;mid=" .
             $row["mid"] . "\">" . make_html_safe($row["sender"]) . "</A></td>";
-         $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"]) . "</td>";
+         $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "</td>";
          $mrow_strings[4] = "<td>" . date($date_fmt2, $row["time"]) . "</td></tr>";
 
          $mtable->add_row( $mrow_strings );
