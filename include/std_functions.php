@@ -77,8 +77,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
    if( $no_cache )
       disable_cache();
     
-
    ob_start("ob_gzhandler");
+
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
   <HEAD>';
@@ -173,7 +173,9 @@ function error($err, $mysql=true)
 
 function jump_to($uri)
 {
-   header( "Location: " . $uri );
+   global $HOSTBASE;
+
+   header( "Location: " . $HOSTBASE . '/' . $uri );
    exit;
 }
 
@@ -243,18 +245,13 @@ function make_html_safe(&$msg, $some_html=false)
                          "{anglstart}a href=\"\\1\\2\"{anglend}\\2{anglstart}/a{anglend}", $msg);
       $msg=eregi_replace("<([http|news|ftp]+://[^ >\n\t]+)>", 
                          "{anglstart}a href=\"\\1\"{anglend}\\1{anglstart}/a{anglend}", $msg);
-/*
-      $msg=eregi_replace("<a[[:space:]]+href=\"?([^ >\n\t\"\']+)\"?>([^<]+)</a>", 
-                         "{anglstart}a href=\"\\1\"{anglend}\\2{anglstart}/a{anglend}", $msg);
-*/
 
+
+      // Some allowed html tags
 
       $html_code = "a|b|i|u|center|li|ul|ol|font|p|br";
 
-      $msg=eregi_replace("<(/*($html_code) *[^>]*)>[[:space:]]*", "{anglstart}\\1{anglend}", $msg);
-//      $msg=eregi_replace ("<(/?$html_code)>[[:space:]]*", "{anglstart}\\1{anglend}", $msg);
-
-  
+      $msg=eregi_replace("<(/?($html_code) *[^>]*)>", "{anglstart}\\1{anglend}", $msg);
    }
 
    // Filter out HTML code
