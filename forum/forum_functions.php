@@ -53,7 +53,7 @@ function make_link_array( $links)
    if( $links & LINK_THREADS )
       $link_array_left["Threads"] = "list.php?forum=$forum";
    if( $links & LINK_NEW_TOPIC )
-      $link_array_left["New Topic"] = "new_topic.php?forum=$forum";
+      $link_array_left["New Topic"] = "read.php?forum=$forum";
    if( $links & LINK_SEARCH )
       $link_array_left["Search"] = "search.php";
    if( $links & LINK_EXPAND_VIEW )
@@ -92,7 +92,7 @@ function end_table($links,$cols)
 {
    if( $links > 0 )
       echo_links($cols);
-   echo "</table>\n";
+   echo "</table></center>\n";
 }
 
 function echo_links($cols)
@@ -145,19 +145,20 @@ function get_new_string($Lastchangedstamp, $Lastread)
    return $new;
 }
 
-function message_box($forum, $parent=-1, $Subject='')
+function message_box($forum, $parent=-1, $thread='', $Subject='', $Text='')
 {
-   if( strcasecmp(substr($Subject,0,3), "re:") != 0 )
+   if( strlen($Subject) > 0 and strcasecmp(substr($Subject,0,3), "re:") != 0 )
       $Subject = "RE: " . $Subject;
 
    echo "<ul>\n";
-   $form = new Form( 'messageform', "post.php", FORM_POST );
+   $form = new Form( 'messageform', "read.php#preview", FORM_POST );
 
-   $form->add_row( array( 'HIDDEN', 'parent', $parent ));
-   $form->add_row( array( 'HIDDEN', 'forum', $forum ));
    $form->add_row( array( 'DESCRIPTION', T_('Subject'),
-                          'TEXTINPUT', 'name', 50, 80, $Subject ) );
-   $form->add_row( array( 'SPACE', 'TEXTAREA', 'description', 70, 25, '' ) );
+                          'TEXTINPUT', 'Subject', 50, 80, $Subject,
+                          'HIDDEN', 'parent', $parent,
+                          'HIDDEN', 'thread', $thread,
+                          'HIDDEN', 'forum', $forum ));
+   $form->add_row( array( 'SPACE', 'TEXTAREA', 'Text', 70, 25, $Text ) );
    $form->add_row( array( 'SPACE', 'SUBMITBUTTON', 'post', ' ' . T_('Post') . ' ',
                           'SUBMITBUTTON', 'preview', ' ' . T_('Preview') . ' ') );
    $form->echo_string();
@@ -167,12 +168,12 @@ function message_box($forum, $parent=-1, $Subject='')
 function forum_name($forum)
 {
    if( !($forum > 0) )
-      error("Unknown forum");
+      error("unknown_forum");
 
    $result = mysql_query("SELECT Name AS Forumname FROM Forums WHERE ID=$forum");
 
    if( mysql_num_rows($result) != 1 )
-      error("Unknown forum");
+      error("unknown_forum");
 
    $row = mysql_fetch_array($result);
 

@@ -293,9 +293,16 @@ require( "include/std_functions.php" );
       break;
 
 
-      case("Unknown forum"):
+      case("unknown_forum"):
       {
          echo T_("Sorry, I couldn't find that forum you wanted to show.");
+      }
+      break;
+
+
+      case("unknown_parent_post"):
+      {
+         echo T_("Hmm, this message seems to be a reply to a non-existing post.");
       }
       break;
 

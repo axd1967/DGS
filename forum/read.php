@@ -20,11 +20,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
 include("forum_functions.php");
+include("post.php");
 
 function draw_post($reply_link=true)
 {
-   global $Subject, $Text, $ID, $User_ID, $HOSTBASE, $forum, $Name, $thread, $Timestamp,
-      $date_fmt, $Lastread;
+   global $Subject, $Text, $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle,
+      $thread, $Timestamp, $date_fmt, $Lastread;
 
    $txt = make_html_safe($Text, true);
    if( strlen($txt) == 0 ) $txt = '&nbsp';
@@ -32,35 +33,77 @@ function draw_post($reply_link=true)
    $color = "ff0000";
    $new = get_new_string($Timestamp, $Lastread);
 
-   echo '<tr><td bgcolor=cccccc>
-<a name="' . $ID . '"><font size="+1"><b>' . make_html_safe($Subject) . '</b></font>' . $new . '</a><br>
-by <a href="' . $HOSTBASE . '/userinfo.php?uid=' . $User_ID . '">' . make_html_safe($Name) . '</a>
-on ' . date($date_fmt, $Timestamp) . '</td></tr>
+   echo "<tr><td bgcolor=cccccc><a name=\"$ID\"><font size=\"+1\"><b>" .
+      make_html_safe($Subject) . "</b></font>$new</a><br> " . T_('by') .
+      " <a href=\"$HOSTBASE/userinfo.php?uid=$User_ID\">" . make_html_safe($Name) .
+      " ($Handle)</a>" .
+      ' &nbsp;&nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp) . '</td></tr>
 <tr><td bgcolor=white>' . $txt . '</td></tr>
 ';
    if( $reply_link )
-      echo "<tr><td bgcolor=white align=left><a href =\"read.php?forum=$forum&thread=$thread&reply=$ID#$ID\">[ reply ]</a></td></tr>\n";
+      echo "<tr><td bgcolor=white align=left><a href =\"read.php?forum=$forum&thread=$thread&reply=$ID#$ID\">[ " . T_('reply') . " ]</a></td></tr>\n";
+}
+
+function draw_preview_post($reply_link=true)
+{
+   global $player_row, $NOW, $date_fmt, $HOSTBASE;
+
+   $txt = make_html_safe(trim($_POST['Text']), true);
+   if( strlen($txt) == 0 ) $txt = '&nbsp';
+
+   echo "<tr><td bgcolor=cceecc><a name=\"preview\"><font size=\"+1\"><b>" .
+      make_html_safe(trim($_POST['Subject'])) . "</b></font></a><br> " . T_('by') .
+      " <a href=\"$HOSTBASE/userinfo.php?uid=" . $player_row['ID'] . '">' .
+      make_html_safe($player_row['Name']) . ' (' . $player_row['Handle'] . ')</a>' .
+      ' &nbsp;&nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . '</td></tr>
+<tr><td bgcolor=white>' . $txt . '</td></tr>
+';
+}
+
+function change_depth(&$cur_depth, $new_depth)
+{
+   while( $cur_depth < $new_depth )
+   {
+      echo "<tr><td><ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+      $cur_depth++;
+   }
+
+   while( $cur_depth > $new_depth )
+   {
+      echo "</table></ul></td></tr>\n";
+      $cur_depth--;
+   }
 }
 
 
-
-
-//  input: $forum, $thread, $reply
 {
-   connect2mysql();
+   $forum = $_REQUEST['forum']+0;
+   $thread = $_REQUEST['thread']+0;
+   $reply = $_GET['reply']+0;
 
+   connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-   if( ($reply > 0) and !$logged_in )
+   if( !$logged_in and ( ($reply > 0) or isset($_POST['post']) ) )
       error("not_logged_in");
+
+   if( isset($_POST['post']) )
+   {
+      post_message($player_row);
+      jump_to("forum/list.php?forum=$forum");
+   }
+
+   $preview = isset($_POST['preview']);
 
    $Forumname = forum_name($forum);
 
    start_page("Reading forum $Forumname", true, $logged_in, $player_row );
 
+   echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
+
    $cols=2;
-   $headline   = array("Reading thread" => "colspan=$cols");
+   $headline = array("Reading thread" => "colspan=$cols");
    $links = LINK_FORUMS | LINK_THREADS;
 
    start_table($headline, $links, 'width="99%"', $cols);
@@ -74,47 +117,54 @@ on ' . date($date_fmt, $Timestamp) . '</td></tr>
    $result = mysql_query("SELECT Posts.*, " .
                          "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
                          "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
-                         "Players.Name " .
+                         "Players.Name, Players.Handle " .
                          "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
                          "ORDER BY PosIndex");
 
    echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+
    $cur_depth=1;
    while( $row = mysql_fetch_array( $result ) )
    {
       $Name = '?';
       extract($row);
 
+      if( $thread_ID == $ID )
+         $thread_Subject = $Subject;
+
+      change_depth( $cur_depth, $Depth );
+
       if( !$Lastchangedthread )
          $Lastchangedthread = $Lastchangedstamp;
-
-      while( $cur_depth < $Depth )
-      {
-         echo "<tr><td><ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
-         $cur_depth++;
-      }
-
-      while( $cur_depth > $Depth )
-      {
-         echo "</table></ul></td></tr>\n";
-         $cur_depth--;
-      }
 
       draw_post($reply != $ID);
 
       if( $reply == $ID )
       {
          echo "<tr><td>\n";
-         message_box($forum, $ID, $Subject);
+         message_box($forum, $ID, $thread, $Subject);
+         echo "</td></tr>\n";
+      }
+      else if( $preview and $parent==$ID )
+      {
+         change_depth( $cur_depth, $cur_depth + 1 );
+         draw_preview_post();
+         echo "<tr><td>\n";
+         message_box($forum, $ID, $thread, $_POST['Subject'], $_POST['Text']);
          echo "</td></tr>\n";
       }
    }
 
-   while( $cur_depth > 1 )
+   change_depth($cur_depth, 1);
+
+   if( !($reply > 0) and !$preview)
    {
-      echo "</td></tr></table></ul>\n";
-      $cur_depth--;
+      echo "<tr><td>\n";
+      if( $thread > 0 )
+         echo '<hr>';
+      message_box($forum, $thread, $thread, $thread_Subject);
+      echo "</td></tr>\n";
    }
 
    echo "</table></td></tr>\n";

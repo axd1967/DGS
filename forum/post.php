@@ -19,27 +19,21 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-include("forum_functions.php");
-
+function post_message($player_row)
 {
-   disable_cache();
-   connect2mysql();
+   global $NOW, $order_str;
 
-
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-   if( !$logged_in )
-      error("not_logged_in");
-
-//  input: $Text, $Subject, $parent, $forum
+   $forum = $_POST['forum']+0;
+   $parent = $_POST['parent']+0;
 
    if( $parent > 0 )
    {
       $result = mysql_query("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
-                            "WHERE ID=$parent AND Forum_ID=$forum");
+                            "WHERE ID=$parent AND Forum_ID=$forum")
+         or error('unknown_parent_post');
 
       if( mysql_num_rows($result) != 1 )
-         error("Unknown parent post");
+         error("unknown_parent_post");
 
       extract(mysql_fetch_array($result));
 
@@ -61,8 +55,8 @@ include("forum_functions.php");
 
    $PosIndex .= $order_str[$answer_nr];
    $Depth++;
-   $Text = trim($Text);
-   $Subject = trim($Subject);
+   $Text = trim($_POST['Text']);
+   $Subject = trim($_POST['Subject']);
 
    $query = "INSERT INTO Posts SET " .
        "Forum_ID=$forum, " .
@@ -96,7 +90,6 @@ include("forum_functions.php");
                 "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
                 "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
 
-
-   jump_to("forum/list.php?forum=$forum");
 }
+
 ?>
