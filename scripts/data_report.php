@@ -81,12 +81,12 @@ require_once( "include/form_functions.php" );
   }
  </STYLE>\n";
 
-   echo " <!-- <SCRIPT language=\"JavaScript\">\n";
+   echo " <SCRIPT language=\"JavaScript\"><!-- \n";
    echo "   function row_click(row,rcl) {
      row.className=((row.className=='hil')?rcl:'hil');
    }\n";
 //     row.bgColor=((row.bgColor.toLowerCase()==hcol)?rcol:hcol);
-   echo " </SCRIPT> -->\n";
+   echo " --></SCRIPT>\n";
 
    echo "</HEAD>\n";
    echo "<BODY>\n";
@@ -117,7 +117,7 @@ require_once( "include/form_functions.php" );
             $query.= $word . ' ' . $$arg . ' ';
       }
 
-      echo 'Query> ' . $query . ';<p>';
+      echo 'Query&gt; ' . $query . ';<p>';
       $result = mysql_query( $query );
       $mysqlerror = @mysql_error();
 
