@@ -95,6 +95,7 @@ function a($rating)
 
 // Using rating the EGF system:
 // http://www.european-go.org/rating/gor.html
+// http://www.ujf.cas.cz/~cieply/GO/gor.html
 //
 // result: 0 - black win, 1 - white win
 
@@ -186,23 +187,28 @@ function update_rating($gid)
        "black.Rating as bRating, black.RatingStatus as bRatingStatus " .
        "FROM Games, Players as white, Players as black " .
        "WHERE Status='FINISHED' AND Rated='Y' AND Games.ID=$gid " .
-       "AND white.ID=White_ID AND black.ID=Black_ID ".
-       "AND white.RatingStatus='RATED' " .
-       "AND black.RatingStatus='RATED' ";
+       //"AND white.RatingStatus='RATED' " .
+       //"AND black.RatingStatus='RATED' " .
+       "AND white.ID=White_ID AND black.ID=Black_ID ";
 
 
    $result = mysql_query( $query );
 
    if( @mysql_num_rows($result) != 1 )
-      return false;
+      return -1; //error or game not found (?or rate already done)
 
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   if( $Rated === 'N' or $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
+   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
+   // here $Rated=='N' is always false. See rating2 to update
+   if( $too_few_moves or $Rated == 'N' or $wRatingStatus!='RATED' or $bRatingStatus!='RATED' )
    {
       mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid");
-      return false;
+      if( $too_few_moves )
+         return 1; //not rated game
+      else
+         return 2; //not rated game
    }
 
    $game_result = 0.5;
@@ -224,9 +230,12 @@ function update_rating($gid)
                "($Black_ID, $gid, " . ($bRating - $bOld) . "), " .
                "($White_ID, $gid, " . ($wRating - $wOld) . ")");
 
-   return true;
+   return 0; //rated game
 }
 
+//
+// EGF rating, see above URIs for documentation
+//
 function update_rating2($gid, $check_done=true)
 {
    global $NOW, $MIN_RATING;
@@ -247,18 +256,22 @@ function update_rating2($gid, $check_done=true)
    $result = mysql_query( $query ) or die(mysql_error());
 
    if( @mysql_num_rows($result) != 1 )
-      return false;
+      return -1; //error or game not found or rate already done
 
    $row = mysql_fetch_assoc( $result );
    extract($row);
 
-   if( $Rated === 'N' or $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
+   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
+   if( $too_few_moves or $Rated == 'N' or $wRatingStatus!='RATED' or $bRatingStatus!='RATED' )
    {
       mysql_query("UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
                   " WHERE ID=$gid LIMIT 1");
-      return false;
+      if( $too_few_moves )
+         return 1; //not rated game
+      else
+         return 2; //not rated game
    }
 
    $game_result = 0.5;
@@ -347,7 +360,7 @@ function update_rating2($gid, $check_done=true)
                ($wRating - $wOld) . ", '$Lastchanged') ")
       or die(mysql_error());
 
-   return true;
+   return 0; //rated game
 }
 
 
@@ -381,18 +394,22 @@ function update_rating_glicko($gid, $check_done=true)
    $result = mysql_query( $query ) or die(mysql_error());
 
    if( @mysql_num_rows($result) != 1 )
-      return false;
+      return -1; //error or game not found or rate already done
 
    $row = mysql_fetch_assoc( $result );
    extract($row);
 
-   if( $Rated === 'N' or $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
+   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
+   if( $too_few_moves or $Rated == 'N' or $wRatingStatus!='RATED' or $bRatingStatus!='RATED' )
    {
       mysql_query("UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
                   " WHERE ID=$gid LIMIT 1");
-      return false;
+      if( $too_few_moves )
+         return 1; //not rated game
+      else
+         return 2; //not rated game
    }
 
    $game_result = 0.5;
@@ -514,7 +531,7 @@ function update_rating_glicko($gid, $check_done=true)
 
    echo "<br>$gid: $White_ID - $Black_ID    $w_mu, $w_phi, $w_sigma - $b_mu, $b_phi, $b_sigma\n";
 
-   return true;
+   return 0; //rated game
 }
 
 // To avoid too many translations

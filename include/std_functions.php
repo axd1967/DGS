@@ -155,6 +155,7 @@ define("ADMIN_ADMINS",0x08);
 define("ADMIN_TIME",0x10);
 define("ADMIN_ADD_ADMIN",0x20);
 define("ADMIN_PASSWORD",0x40);
+define('ADMIN_DATABASE',0x80);
 
 
 define("FOLDER_NONE", -1);
@@ -819,8 +820,9 @@ function is_base_dir()
      but dirname('/foo')     return '\\'
      and dirname('/')        return '\\'
    replace the previous line by this one:
- */
    return str_replace('\\','/',dirname($_SERVER['PHP_SELF'])) == $SUB_PATH;
+ */
+   return file_exists("include/std_functions.php");
 }
 
 function mod($a,$b)

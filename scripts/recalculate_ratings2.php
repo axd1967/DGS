@@ -25,16 +25,46 @@ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
 {
+   disable_cache();
+
    connect2mysql();
 
+  $logged_in = who_is_logged( $player_row);
 
-   mysql_query( "UPDATE Players SET " .
+  if( !$logged_in )
+    error("not_logged_in");
+
+  $player_level = (int)$player_row['admin_level'];
+  if( !($player_level & ADMIN_DATABASE) )
+    error("adminlevel_too_low");
+
+
+   if( $do_it=@$_REQUEST['do_it'] )
+   {
+      function dbg_query($s) { 
+        if( !mysql_query( $s) )
+           die("<BR>$s;<BR>" . mysql_error() );
+        echo " --- fixed. ";
+      }
+      echo "<p>*** Fixes errors:<br>";
+   }
+   else
+   {
+      function dbg_query($s) { echo " --- query:<BR>$s; ";}
+      echo "<p>(just show queries needed):<br>";
+   }
+
+
+
+   echo "<br>Reset Players' ratings";
+   dbg_query( "UPDATE Players SET " .
                 "Rating2=InitialRating, " .
                 "RatingMax=InitialRating+200+GREATEST(1600-InitialRating,0)*2/15, " .
-                "RatingMin=InitialRating-200-GREATEST(1600-InitialRating,0)*2/15" )
-      or die(mysql_error());
+                "RatingMin=InitialRating-200-GREATEST(1600-InitialRating,0)*2/15" );
 
-   mysql_query( "DELETE FROM Ratinglog" );
+   echo "<br>Reset Ratinglog";
+   dbg_query( "DELETE FROM Ratinglog" );
+
 
    $query = "SELECT Games.ID as gid ".
        "FROM Games, Players as white, Players as black " .
@@ -44,18 +74,23 @@ require_once( "include/rating.php" );
        "AND ( NOT ISNULL(black.RatingStatus) ) " .
        "ORDER BY Lastchanged, gid";
 
-
    $result = mysql_query( $query );
 
-   echo "<p>Game: ";
-   $count=0;
+   echo "<p>Game:";
+   $count=0; $tot=0;
    while( $row = mysql_fetch_array( $result ) )
    {
-      echo $row["gid"] . " ";
-      update_rating2($row["gid"], false);
-      $count++;
+      echo ' ' . $row["gid"];
+      if( $do_it )
+      {
+         $rated_status = update_rating2($row["gid"], false/*=check_done*/);
+         if( $rated_status == 0 )
+            $count++;
+         else
+            echo '--';
+      }
+      $tot++;
    }
-   echo "<p>Finished!\n" .
-      "<p>$count rated games.\n";
+   echo "\n<p>Finished!<br>$count/$tot rated games.\n";
 }
 ?>
