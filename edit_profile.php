@@ -67,7 +67,8 @@ require_once( "include/countries.php" );
       $nightstart[$i] = sprintf('%02d-%02d',$i,($i+9)%24);
    }
 
-   $stonesizes = array( 13 => 13, 17 => 17, 21 => 21, 25 => 25,
+   $stonesizes = array( 5 => 5, 7 => 7, 9 => 9, 11 => 11,
+                        13 => 13, 17 => 17, 21 => 21, 25 => 25,
                         29 => 29, 35 => 35, 42 => 42, 50 => 50 );
 
    $woodcolors = array();
