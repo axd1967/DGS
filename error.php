@@ -179,6 +179,11 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case('no_email'):
+      {
+         echo T_("Sorry, no email has been given, so I can't send you the password. Please log in as guest and use the support forum to get help.");
+      }
+      break;
 
       case("no_game_nr"):
       {
