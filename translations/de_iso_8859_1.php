@@ -19,16 +19,22 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-05-03 11:58:45 GMT */
+/* Automatically generated at 2002-06-12 16:32:48 GMT */
 
 class de_iso_8859_1_Language extends Language
 {
   function de_iso_8859_1_Language()
     {
       $this->full_name = 'German';
-      $this->last_updated = 1020427125;
+      $this->last_updated = 1023899568;
 
       $this->translated_strings = array(
+"#Games" =>
+"Anzahl der Partien",
+
+"%s only" =>
+"nur %s",
+
 "%s per %s stones" =>
 "%1\$s für %2\$s Steine",
 
@@ -56,6 +62,9 @@ class de_iso_8859_1_Language extends Language
 "Added user %s as translator for language %s." =>
 "",
 
+"Add Game" =>
+"Partie hinzufügen",
+
 "Add language" =>
 "",
 
@@ -65,6 +74,12 @@ class de_iso_8859_1_Language extends Language
 "Add language for translator" =>
 "",
 
+"Add new game" =>
+"Eine neue Partie hinzufügen",
+
+"Add to observe list" =>
+"",
+
 "Admin" =>
 "Administrator",
 
@@ -72,10 +87,10 @@ class de_iso_8859_1_Language extends Language
 "Eine umfangreiche Sammlung von Rezensionen von Go-Büchern.",
 
 "A large server for realtime play" =>
-"",
+"Ein großer SErver um in Echtzeit zu spielen.",
 
 "Also turn based. Has several other games." =>
-"",
+"Auch \"turn-based\". Hat auch andere Spiele.",
 
 "A manga about go. Recommended!" =>
 "Ein Manga über Go. Empfehlenswert!",
@@ -121,6 +136,15 @@ class de_iso_8859_1_Language extends Language
 
 "Black" =>
 "Schwarz",
+
+"Black name" =>
+"",
+
+"Black rating" =>
+"",
+
+"Black userid" =>
+"",
 
 "Board graphics" =>
 "Brettgraphiken",
@@ -173,6 +197,9 @@ class de_iso_8859_1_Language extends Language
 "Colors" =>
 "Farben",
 
+"Comment" =>
+"Kommentar",
+
 "Common Japanese Go Terms" =>
 "Häufige japanische Go-Ausdrücke",
 
@@ -185,6 +212,9 @@ class de_iso_8859_1_Language extends Language
 "Contributors to Dragon" =>
 "Mitwirkende",
 
+"Conventional" =>
+"Gewöhnlich",
+
 "Conventional handicap (komi 0.5 if not even)" =>
 "Gewöhnliches Handicap (0,5 Punkte Komi falls nicht gleichauf)",
 
@@ -192,10 +222,10 @@ class de_iso_8859_1_Language extends Language
 "Koordinatenseiten",
 
 "Couldn't extrapolate value in function interpolate" =>
-"",
+"Ein Wert in der Funktion \"interpolate\" konnte nicht extrapoliert werden.",
 
 "Couldn't select the database. Please wait a few minutes and try again. " =>
-"",
+"Eine \"select\"-Anfrage an die Datenbank ist fehlgeschlagen. Bitte versuchen sie es in ein paar Minuten erneut.",
 
 "Country" =>
 "Land",
@@ -230,6 +260,9 @@ class de_iso_8859_1_Language extends Language
 "Del" =>
 "Löschen",
 
+"Delete" =>
+"Löschen",
+
 "Delete all" =>
 "Alle Löschen",
 
@@ -244,6 +277,9 @@ class de_iso_8859_1_Language extends Language
 
 "Developer" =>
 "Entwickler",
+
+"Dispute settings" =>
+"Einstellungen verhandeln",
 
 "Disputing settings" =>
 "Einstellungen verhandeln",
@@ -291,7 +327,7 @@ class de_iso_8859_1_Language extends Language
 "E-Mail-Benachrichtigungen",
 
 "End date" =>
-"",
+"Spielendedatum",
 
 "Error, guest may not recieve messages" =>
 "Fehler, guest kann keine Nachrichten erhalten.",
@@ -317,11 +353,14 @@ class de_iso_8859_1_Language extends Language
 "Finished" =>
 "beendet",
 
+"Finished games" =>
+"",
+
 "Finished games for %s" =>
 "beendete Partien von %s",
 
 "Fischer time" =>
-"",
+"Fischer-Zeit",
 
 "Flags" =>
 "Markierungen",
@@ -359,11 +398,20 @@ class de_iso_8859_1_Language extends Language
 "Game" =>
 "Partie",
 
+"Game added!" =>
+"Partie hinzugefügt!",
+
+"Game deleted!" =>
+"Partie gelöscht",
+
 "Game ID" =>
 "Partie-ID",
 
 "Game id button" =>
 "Partie-Id Schaltfläche",
+
+"Game joined!" =>
+"Partie aufgenommen!",
 
 "Game preferences" =>
 "Bevorzugte Spielarten",
@@ -419,6 +467,9 @@ class de_iso_8859_1_Language extends Language
 "Homepage" =>
 "",
 
+"Horizontal" =>
+"",
+
 "hour" =>
 "Stunde",
 
@@ -434,8 +485,14 @@ class de_iso_8859_1_Language extends Language
 "ID" =>
 "ID",
 
+"If yes, rating between" =>
+"Falls ja, Spielstärke zwischen",
+
 "If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page." =>
 "Falls sie ihr Passwort vergessen haben, kann ihnen ein neues zugeschickt werden. Das neue Passwort wird zufällig erzeugt, aber sie können es selbstverständlich auf der Profil bearbeiten Seite ändern.",
+
+"If you want to help translating dragon, please post a message to the 'translation' forum." =>
+"",
 
 "if you want your own dragon" =>
 "Falls sie ihren eigenen Dragon wollen",
@@ -443,8 +500,11 @@ class de_iso_8859_1_Language extends Language
 "IGS" =>
 "",
 
-"In case you're an aspiring know-it-all." =>
+"Info" =>
 "",
+
+"In case you're an aspiring know-it-all." =>
+"Falls sie anstreben, alles zu wissen.",
 
 "Installation instructions" =>
 "Installationsanleitung",
@@ -474,7 +534,7 @@ class de_iso_8859_1_Language extends Language
 "",
 
 "Japanese" =>
-"japanisch",
+"Japanisch",
 
 "Japanese byo-yomi" =>
 "japanisches Byoyomi",
@@ -484,6 +544,9 @@ class de_iso_8859_1_Language extends Language
 
 "jigo" =>
 "jigo",
+
+"Join" =>
+"Teilnehmen",
 
 "Kiseido" =>
 "",
@@ -503,10 +566,10 @@ class de_iso_8859_1_Language extends Language
 "Language name (i.e. English)" =>
 "",
 
-"Last access" =>
+"Last Access" =>
 "letzter Zugriff",
 
-"Last Access" =>
+"Last access" =>
 "letzter Zugriff",
 
 "Last Move" =>
@@ -539,17 +602,20 @@ class de_iso_8859_1_Language extends Language
 "Lots of info on go" =>
 "Viele Informationen über Go",
 
-"Main time" =>
+"Main Time" =>
 "Bedenkzeit",
 
-"Main Time" =>
+"Main time" =>
 "Bedenkzeit",
 
 "Manual setting" =>
 "Manuelle Einstellungen",
 
 "Meet other turn-based go players" =>
-"",
+"Treffen sie andere \"turn-based\" Go Spieler",
+
+"Menu direction" =>
+"Plazierung des Menüs",
 
 "Message" =>
 "Nachricht",
@@ -606,7 +672,7 @@ class de_iso_8859_1_Language extends Language
 "Nachrichten und Partien aus der Profi-Szene",
 
 "New topic" =>
-"",
+"Neues Thema",
 
 "next page" =>
 "nächste Seite",
@@ -615,7 +681,7 @@ class de_iso_8859_1_Language extends Language
 "Kurzname",
 
 "Nighttime" =>
-"",
+"Nachtruhe",
 
 "Nigiri" =>
 "Nigiri",
@@ -641,6 +707,15 @@ class de_iso_8859_1_Language extends Language
 "Not logged in" =>
 "nicht angemeldet",
 
+"Number of games" =>
+"",
+
+"Number of games to add" =>
+"Anzahl der hinzuzufügenden Partien ",
+
+"Observed games" =>
+"",
+
 "Occupation" =>
 "Beruf",
 
@@ -665,6 +740,9 @@ class de_iso_8859_1_Language extends Language
 "Opponent" =>
 "Gegner",
 
+"Opponents Last Access" =>
+"Letzter Zugriff des Gegners",
+
 "Other:" =>
 "Anderes:",
 
@@ -672,7 +750,7 @@ class de_iso_8859_1_Language extends Language
 "Andere Go-Server",
 
 "Page created in" =>
-"",
+"Seite erstellt am",
 
 "Pass" =>
 "Passen",
@@ -704,6 +782,15 @@ class de_iso_8859_1_Language extends Language
 "plans for future improvements" =>
 "Pläne für zukünftige Verbesserungen",
 
+"Player" =>
+"",
+
+"Players waiting" =>
+"wartende Spieler",
+
+"Please, feel free to register and play some games." =>
+"",
+
 "Please enter data" =>
 "Bitte geben sie die Daten ein",
 
@@ -722,11 +809,14 @@ class de_iso_8859_1_Language extends Language
 "Profile updated!" =>
 "Einstellungen aktualisiert!",
 
+"Proper" =>
+"Passend",
+
 "Proper handicap" =>
 "genaues Handicap",
 
 "Rafael's Go Page" =>
-"",
+"Rafael's Go Seite",
 
 "Rank info" =>
 "Selbsteinstufung",
@@ -740,6 +830,9 @@ class de_iso_8859_1_Language extends Language
 "Rating" =>
 "Spielstärke",
 
+"Rating range" =>
+"Spielstärkenbereich",
+
 "Read forum" =>
 "Forum lesen",
 
@@ -752,6 +845,9 @@ class de_iso_8859_1_Language extends Language
 "Registration date" =>
 "Datum der Registrierung",
 
+"Remove from observe list" =>
+"",
+
 "Replied" =>
 "Beantwortet",
 
@@ -760,6 +856,9 @@ class de_iso_8859_1_Language extends Language
 
 "Reply!" =>
 "Beantworten!",
+
+"Require rated opponent" =>
+"Verlange eingestuften Gegner",
 
 "Resign" =>
 "Aufgeben",
@@ -779,6 +878,9 @@ class de_iso_8859_1_Language extends Language
 "Running" =>
 "Laufende",
 
+"Running games" =>
+"",
+
 "Running games for %s" =>
 "laufende Partien von %s",
 
@@ -789,7 +891,10 @@ class de_iso_8859_1_Language extends Language
 "Ergebnis",
 
 "Scot's Go Page" =>
-"",
+"Scot's Go Seite",
+
+"Seems to be empty at the moment." =>
+"Scheint im Moment leer zu sein.",
 
 "Select language to make user translator for that language." =>
 "",
@@ -851,6 +956,9 @@ class de_iso_8859_1_Language extends Language
 "Show message" =>
 "Nachricht anzeigen",
 
+"Show observed games" =>
+"",
+
 "Show recieved messages" =>
 "erhaltene Nachrichten anzeigen",
 
@@ -873,10 +981,13 @@ class de_iso_8859_1_Language extends Language
 "Abgerundete Brettkanten",
 
 "Sorry, can't find the game you are invited to. Already declined?" =>
-"Die Partie u der sie herausgefordert wurden, konnte nicht gefunden werden. Wurde sie schon abgelehnt?",
+"Die Partie, zu der sie herausgefordert wurden, konnte nicht gefunden werden. Wurde sie schon abgelehnt?",
 
 "Sorry, couldn't find the reciever of your message. Make sure to use the userid, not the full name." =>
 "Der Empfänger ihrer Nachricht konnte nicht gefunden werden. Stellen sie sicher, dass sie die Benutzer-ID verwenden, und nicht den Namen.",
+
+"Sorry, couldn't find this waiting room game. Probably someone has already joined it." =>
+"Diese Wartezimmerpartie konnte nicht gefunden werden. Wahrscheinlich wurde sie schon aufgenommen.",
 
 "Sorry, couldn't start the game. Please wait a few minutes and try again." =>
 "Die Partie konnte nicht begonnen werden. Bitte versuchen sie es in ein paar Minuten erneut.",
@@ -885,10 +996,10 @@ class de_iso_8859_1_Language extends Language
 "Die Spieler-Daten konnten nicht aktualisiert werden. Bitte versuchen sie es in ein paar Minuten erneut.",
 
 "Sorry, I've problem with the rating, did you forget to specify 'kyu' or 'dan'?" =>
-"Es gibt ein Problem mit der Spielstärke. Haben sie vergessen \\\"kyu\\\" oder \\\"dan\\\" anzugeben?",
+"Es gibt ein Problem mit der Spielstärke. Haben sie vergessen \"kyu\" oder \"dan\" anzugeben?",
 
 "Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' for this ratingtype" =>
-"Es gibt ein Problem mit der Spielstärke. Sie sollten für diesen Spielstärkentyp \\\"kyu\\\" oder \\\"dan\\\" nicht verwenden.",
+"Es gibt ein Problem mit der Spielstärke. Sie sollten für diesen Spielstärkentyp \"kyu\" oder \"dan\" nicht verwenden.",
 
 "Sorry, I can't find that game." =>
 "Diese Partie konnte nicht gefunden werden.",
@@ -974,8 +1085,14 @@ class de_iso_8859_1_Language extends Language
 "Sorry, you are not allowed to translate the specified language." =>
 "Es ist ihnen nicht erlaubt, diese Sprache zu übersetzen.",
 
+"Sorry, you are not in the specified rating range." =>
+"Sie sind nicht im angegebenen Spielstärkenbereich",
+
 "Sorry, you can't invite yourself." =>
 "Sie können sich nicht selbst herausfordern.",
+
+"Sorry, you can't join your own game." =>
+"Sie können nicht an ihrer eigenen Partie teilnehmen.",
 
 "Sorry, you didn't write your current password correctly." =>
 "Sie haben ihr Passwort falsch eingegeben.",
@@ -985,10 +1102,17 @@ class de_iso_8859_1_Language extends Language
 The reasons for this problem could be any of the following:
 <ul>
 <li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.
-<li> Your cookies have expired. This happens once a week.
+<li> Your cookies have expired. This happens once a month.
 <li> You haven't enabled cookies in your browser.
 </ul>" =>
-"",
+"Sie mússen angemeldet sein, um diese Funktion auszuführen.<p>
+Der Grund für dieses Problem kann sein:
+<ul>
+<li>Sie haben keinen <a href=\"%1\$s/register.php\">Account</a>, oder sie haben sich noch nicht <a href=\"%1\$s/index.php\">angemeldet</a>.</li>
+<li>Ihre \"cookies\" sind abgelaufen. Dies geschieht einmal pro Woche.</li>
+<li>Sie haben \"cookies\" in ihrem Browser deaktiviert.</li>
+</ul>
+",
 
 "Sorry, you have to supply a name." =>
 "Sie müssen einen Namen angeben.",
@@ -1036,6 +1160,9 @@ The reasons for this problem could be any of the following:
 "Bestätigen und zur Statusseite gehen",
 
 "Submit your games for comments to see where you might have played better." =>
+"Lassen sie ihre Partien kommentieren, um zu erfahren, wo sie hätten besser spielen können.",
+
+"The black links require an argument to work, so they are not usable." =>
 "",
 
 "The confirmed password didn't match the password, please go back and retry." =>
@@ -1054,7 +1181,7 @@ The reasons for this problem could be any of the following:
 "Das Komi liegt nicht in einem sinnvollen Bereich. Bitte wählen sie einen vernünftigeren Wert.",
 
 "This %sgame%s invitation has already been accepted." =>
-"",
+"Die Herausforderung zu dieser %sPartie%s wurde bereits angenommen.",
 
 "This invitation has been declined or the game deleted" =>
 "Diese Herausforderung wurde abgelehnt oder die Partie wurde gelöscht",
@@ -1069,7 +1196,7 @@ The reasons for this problem could be any of the following:
 "Geht mehr in die Tiefe. ",
 
 "This type action is either unknown or can't be use in this state of the game." =>
-"",
+"Diese Aktion ist entweder unbekannt, oder kann in diesem Stadium der Partie nicht angewandt werden.",
 
 "Thread list" =>
 "Thread-Liste",
@@ -1086,10 +1213,10 @@ The reasons for this problem could be any of the following:
 "To (userid)" =>
 "An (Benutzer-ID)",
 
-"Todo list" =>
+"To do list" =>
 "Todo-Liste",
 
-"To do list" =>
+"Todo list" =>
 "Todo-Liste",
 
 "To look around, use %s." =>
@@ -1122,10 +1249,10 @@ The reasons for this problem could be any of the following:
 "Userid" =>
 "Benutzer-ID",
 
-"User info" =>
+"User Info" =>
 "Benutzerinformation",
 
-"User Info" =>
+"User info" =>
 "Benutzerinformation",
 
 "Users" =>
@@ -1134,8 +1261,17 @@ The reasons for this problem could be any of the following:
 "User to set privileges for (use the userid)" =>
 "",
 
+"Vertical" =>
+"Vertikal",
+
 "Very well written introduction by the British Go Association." =>
 "Sehr gut geschriebene Einführung von der British Go Association.",
+
+"Waiting room" =>
+"Wartezimmer",
+
+"Weekend Clock" =>
+"Wochenendsuhr",
 
 "Welcome page" =>
 "Eingangs-Seite",
@@ -1143,11 +1279,23 @@ The reasons for this problem could be any of the following:
 "Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
 "Willkommen zum Dragon Go Server, einem <a href=\"licence.php\">freiem</a> Server um <a href=\"links.php\">Go</a> zu spielen, auf dem sich die Spiele \"hinziehen\" (engl.: \"drag on\").",
 
+"Welcome to the dragon go server!" =>
+"",
+
 "white" =>
 "weiß",
 
 "White" =>
 "Weiß",
+
+"White name" =>
+"",
+
+"White rating" =>
+"",
+
+"White userid" =>
+"",
 
 "who contributes to Dragon" =>
 "wer hilft bei Dragon mit",
@@ -1157,6 +1305,9 @@ The reasons for this problem could be any of the following:
 
 "with" =>
 "mit",
+
+"with %s extra per move" =>
+"mit %s zusätzlich pro Zug",
 
 "with answers" =>
 "mit Antworten",
@@ -1182,14 +1333,14 @@ The reasons for this problem could be any of the following:
 "yes" =>
 "ja",
 
-"You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"invite.php\">invite</a> for a game." =>
-"Man kann es als eine Art von \"play-by-email\" betrachten, wobei eine Web-Oberfläche benutzt wird, um das Spielbrett attraktiver zu gestalten. Um zu spielen, sollten sie sich zunächst einen <a href=\"register.php\">Account</a> anlegen, falls sie das nicht schon getan haben. Danach können sie ihre <a href=\"edit_profile.php\">Einstellungen bearbeiten</a> und einige <a href=\"edit_bio.php\">biographische Informationen</a> angeben. Besonders die Felder \"Bereit für Partien?\", \"Spielstärke\" und \"Selbsteinstufung\" sind nützlich um Gegner zu finden. Um geeignete Gegner für eine <a href=\"invite.php\">Herausforderung</a> zu finden, können sie anschließend die <a href=\"users.php\">Benutzer-Liste</a> betrachten oder das <a href=\"phorum/index.php\">Forum</a> verwenden.",
+"You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"message.php?mode=Invite\">invite</a> for a game." =>
+"Man kann es als eine Art von \"play-by-email\" betrachten, wobei eine Web-Oberfläche benutzt wird, um das Spielbrett attraktiver zu gestalten. Um zu spielen, sollten sie sich zunächst einen <a href=\"register.php\">Account</a> anlegen, falls sie das nicht schon getan haben. Danach können sie ihre <a href=\"edit_profile.php\">Einstellungen bearbeiten</a> und einige <a href=\"edit_bio.php\">biographische Informationen</a> angeben. Besonders die Felder \"Bereit für Partien?\", \"Spielstärke\" und \"Selbsteinstufung\" sind nützlich um Gegner zu finden. Um geeignete Gegner für eine <a href=\"message.php?mode=Invite\">Herausforderung</a> zu finden, können sie anschließend die <a href=\"users.php\">Benutzer-Liste</a> betrachten oder das <a href=\"phorum/index.php\">Forum</a> verwenden.",
 
 "You have to know what other players are talking about." =>
 "Sie sollten wissen, über was andere Leute reden.",
 
 "Your turn to move in the following games:" =>
-"Sie sind am Zug in folgenden Partien:",
+"Sie sind in folgenden Partien am Zug:",
 
 "Yutopian" =>
 "",
@@ -1213,8 +1364,6 @@ The reasons for this problem could be any of the following:
 "Spanisch",
 
 "Czech" =>
-"Tschechisch" );
-    }
-};
+"Tschechisch",
 
-?>
+"Chin

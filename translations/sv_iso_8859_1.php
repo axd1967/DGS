@@ -19,18 +19,18 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-06-14 17:36:27 GMT */
+/* Automatically generated at 2002-06-18 11:04:19 GMT */
 
 class sv_iso_8859_1_Language extends Language
 {
   function sv_iso_8859_1_Language()
     {
       $this->full_name = 'Swedish';
-      $this->last_updated = 1024076187;
+      $this->last_updated = 1024398259;
 
       $this->translated_strings = array(
 "#Games" =>
-"",
+"#Spel",
 
 "%s only" =>
 "",
@@ -165,7 +165,7 @@ class sv_iso_8859_1_Language extends Language
 "",
 
 "Canadian byoyomi" =>
-"",
+"Kanadensisk byoyomi",
 
 "Change bio" =>
 "",
@@ -261,7 +261,7 @@ class sv_iso_8859_1_Language extends Language
 "",
 
 "Delete" =>
-"",
+"Ta bort",
 
 "Delete all" =>
 "Ta bort alla",
@@ -276,7 +276,7 @@ class sv_iso_8859_1_Language extends Language
 "",
 
 "Developer" =>
-"",
+"Utvecklare",
 
 "Dispute settings" =>
 "",
@@ -288,7 +288,7 @@ class sv_iso_8859_1_Language extends Language
 "Dokumentation",
 
 "Documentation" =>
-"",
+"Dokumentation",
 
 "Done" =>
 "",
@@ -534,7 +534,7 @@ class sv_iso_8859_1_Language extends Language
 "",
 
 "Japanese" =>
-"",
+"Japansk",
 
 "Japanese byo-yomi" =>
 "",
@@ -546,7 +546,7 @@ class sv_iso_8859_1_Language extends Language
 "",
 
 "Join" =>
-"",
+"Gå med",
 
 "Kiseido" =>
 "",
@@ -618,7 +618,7 @@ class sv_iso_8859_1_Language extends Language
 "",
 
 "Message" =>
-"",
+"Meddelande",
 
 "Message list" =>
 "",
@@ -633,7 +633,7 @@ class sv_iso_8859_1_Language extends Language
 "",
 
 "months" =>
-"",
+"månader",
 
 "More information can be found in the <a href=\"phorum/list.php?f=3\">FAQ forum</a> where you are also encouraged to submit your own questions." =>
 "",
@@ -849,10 +849,10 @@ class sv_iso_8859_1_Language extends Language
 "",
 
 "Replied" =>
-"",
+"Svarat",
 
 "Reply" =>
-"",
+"Svar",
 
 "Reply!" =>
 "Svar!",
@@ -906,16 +906,16 @@ class sv_iso_8859_1_Language extends Language
 "Skicka ett meddelande",
 
 "Send Invitation" =>
-"",
+"Skicka inbjudan",
 
 "Send Message" =>
-"",
+"Skicka meddelande",
 
 "Send message to user" =>
 "",
 
 "Send Reply" =>
-"",
+"Skicka svar",
 
 "Sensei's Library" =>
 "",
@@ -1102,7 +1102,7 @@ class sv_iso_8859_1_Language extends Language
 The reasons for this problem could be any of the following:
 <ul>
 <li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.
-<li> Your cookies have expired. This happens once a week.
+<li> Your cookies have expired. This happens once a month.
 <li> You haven't enabled cookies in your browser.
 </ul>" =>
 "",
@@ -1174,7 +1174,7 @@ The reasons for this problem could be any of the following:
 "",
 
 "This %sgame%s invitation has already been accepted." =>
-"",
+"Denna %sinbjudan%s har redan accepterats. ",
 
 "This invitation has been declined or the game deleted" =>
 "",
@@ -1201,10 +1201,10 @@ The reasons for this problem could be any of the following:
 "Tidszon",
 
 "To" =>
-"",
+"Till",
 
 "To (userid)" =>
-"",
+"Till (användarnamn)",
 
 "To do list" =>
 "",
@@ -1276,7 +1276,7 @@ The reasons for this problem could be any of the following:
 "",
 
 "white" =>
-"",
+"Vit",
 
 "White" =>
 "Vit",
@@ -1326,7 +1326,7 @@ The reasons for this problem could be any of the following:
 "yes" =>
 "ja",
 
-"You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"invite.php\">invite</a> for a game." =>
+"You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"message.php?mode=Invite\">invite</a> for a game." =>
 "",
 
 "You have to know what other players are talking about." =>
@@ -1359,9 +1359,11 @@ The reasons for this problem could be any of the following:
 "Czech" =>
 "Tjeckiska",
 
-"Traditional Chinese" =>
-"" );
-    }
-};
+"Chinese (Traditional)" =>
+"",
 
-?>
+"Portuguese" =>
+"",
+
+"Chinese (Simplified)" =>
+"" );

@@ -19,16 +19,22 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-05-03 16:54:05 GMT */
+/* Automatically generated at 2002-06-13 09:04:22 GMT */
 
 class cs_iso_8859_2_Language extends Language
 {
   function cs_iso_8859_2_Language()
     {
       $this->full_name = 'Czech';
-      $this->last_updated = 1020444845;
+      $this->last_updated = 1023959062;
 
       $this->translated_strings = array(
+"#Games" =>
+"Poèet her",
+
+"%s only" =>
+"pouze %s",
+
 "%s per %s stones" =>
 "%s na %s kamenù",
 
@@ -56,6 +62,9 @@ class cs_iso_8859_2_Language extends Language
 "Added user %s as translator for language %s." =>
 "",
 
+"Add Game" =>
+"Pøidat hru",
+
 "Add language" =>
 "",
 
@@ -64,6 +73,12 @@ class cs_iso_8859_2_Language extends Language
 
 "Add language for translator" =>
 "",
+
+"Add new game" =>
+"Pøidat novou hru",
+
+"Add to observe list" =>
+"Pøidat do seznamu sledovaných",
 
 "Admin" =>
 "Správce",
@@ -87,10 +102,10 @@ class cs_iso_8859_2_Language extends Language
 "a",
 
 "An error occurred for this. Usually it works if you try again, otherwise please contact the support." =>
-"",
+"Pøi provádìní nastala chyba. Obvykle by mìlo fungovat, kdy¾ to zkusíte znovu. Pokud ne, kontaktujte podporu.",
 
 "A new password has already been sent to this user, please use that password instead of sending another one." =>
-"",
+"Nové heslo u¾ bylo posláno u¾ivateli, pou¾ijte prosím toto heslo místo posílání dal¹ího.",
 
 "An excellent, but unfortunately no longer updated site." =>
 "",
@@ -122,6 +137,15 @@ class cs_iso_8859_2_Language extends Language
 "Black" =>
 "Èerný",
 
+"Black name" =>
+"Jméno èerného",
+
+"Black rating" =>
+"Rating èerného",
+
+"Black userid" =>
+"ID èerného",
+
 "Board graphics" =>
 "Vzhled desky",
 
@@ -141,7 +165,7 @@ class cs_iso_8859_2_Language extends Language
 "Kanadské bjojomi",
 
 "Canadian byoyomi" =>
-"Kanadské bjojomi",
+"kanadské bjojomi",
 
 "Change bio" =>
 "Zmìnit biografii",
@@ -173,6 +197,9 @@ class cs_iso_8859_2_Language extends Language
 "Colors" =>
 "Barvy",
 
+"Comment" =>
+"Poznámka",
+
 "Common Japanese Go Terms" =>
 "",
 
@@ -180,10 +207,13 @@ class cs_iso_8859_2_Language extends Language
 "Potvrzení hesla",
 
 "Connection to database failed. Please wait a few minutes and test again." =>
-"",
+"Selhalo spojení s databází. Poèkejte prosím nìkolik minut a zkuste to znovu.",
 
 "Contributors to Dragon" =>
-"",
+"Pøispìvatelé Dragonu",
+
+"Conventional" =>
+"Konvenèní",
 
 "Conventional handicap (komi 0.5 if not even)" =>
 "Konvenèní handikap (komi 0,5 pøi nerovné høe) ",
@@ -192,16 +222,16 @@ class cs_iso_8859_2_Language extends Language
 "Souøadnice stran",
 
 "Couldn't extrapolate value in function interpolate" =>
-"",
+"Nelze extrapolovat hodnoty interpolaèní funkcí.",
 
 "Couldn't select the database. Please wait a few minutes and try again. " =>
-"",
+"Nelze provést select databáze. Poèkejte prosím nìkolik minut a zkuste to znovu.",
 
 "Country" =>
 "Zemì",
 
 "Current maintainer and founder of Dragon" =>
-"",
+"Souèasný správce a zakladatel Dragonu",
 
 "Current translators" =>
 "Souèasní pøekladatelé",
@@ -213,7 +243,7 @@ class cs_iso_8859_2_Language extends Language
 "",
 
 "Database query failed. Please wait a few minutes and try again. " =>
-"",
+"Selhal dotaz na databázi. Poèkejte prosím nìkolik minut a zkuste to znovu.",
 
 "Date" =>
 "Datum",
@@ -230,6 +260,9 @@ class cs_iso_8859_2_Language extends Language
 "Del" =>
 "",
 
+"Delete" =>
+"Odstranit",
+
 "Delete all" =>
 "Odstranit v¹e",
 
@@ -237,13 +270,16 @@ class cs_iso_8859_2_Language extends Language
 "Odstranit hru",
 
 "Delete game failed. This is problably not a problem." =>
-"",
+"Selhalo smazání hry. To pravdìpodobnì není problém.",
 
 "Deleting game" =>
 "Odstranìní hry",
 
 "Developer" =>
 "Vývojáø",
+
+"Dispute settings" =>
+"Licitovat nastavení",
 
 "Disputing settings" =>
 "Licitování nastavení",
@@ -294,7 +330,7 @@ class cs_iso_8859_2_Language extends Language
 "Datum ukonèení",
 
 "Error, guest may not recieve messages" =>
-"",
+"Chyba, host nemù¾e pøijímat zprávy",
 
 "European shop" =>
 "",
@@ -316,6 +352,9 @@ class cs_iso_8859_2_Language extends Language
 
 "Finished" =>
 "Ukonèeno",
+
+"Finished games" =>
+"Ukonèené hry",
 
 "Finished games for %s" =>
 "Ukonèené hry pro %s",
@@ -359,11 +398,20 @@ class cs_iso_8859_2_Language extends Language
 "Game" =>
 "Hra",
 
+"Game added!" =>
+"Hra pøidána!",
+
+"Game deleted!" =>
+"Hra odstranìna!",
+
 "Game ID" =>
 "ID hry",
 
 "Game id button" =>
 "Tlaèítko ID hry",
+
+"Game joined!" =>
+"Hra pøijata!",
 
 "Game preferences" =>
 "Preferované hry",
@@ -419,6 +467,9 @@ class cs_iso_8859_2_Language extends Language
 "Homepage" =>
 "Domovská stránka",
 
+"Horizontal" =>
+"Vodorovnì",
+
 "hour" =>
 "hodina",
 
@@ -434,13 +485,22 @@ class cs_iso_8859_2_Language extends Language
 "ID" =>
 "ID",
 
+"If yes, rating between" =>
+"Pokud ano rating mezi",
+
 "If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page." =>
 "Pokud jste zapomnìli heslo, mù¾eme vám poslat e-mailem nové. Nové heslo bude náhodnì vygenerované, ale mù¾ete si je zmìnit ve svém u¾ivatelském profilu,",
+
+"If you want to help translating dragon, please post a message to the 'translation' forum." =>
+"Pokud chcete pomoci s lokalizací Dragonu, po¹lete prosím zprávu do fóra Translation.",
 
 "if you want your own dragon" =>
 "pokud chcete vlastní dragon",
 
 "IGS" =>
+"",
+
+"Info" =>
 "",
 
 "In case you're an aspiring know-it-all." =>
@@ -480,10 +540,13 @@ class cs_iso_8859_2_Language extends Language
 "Japonské bjojomi",
 
 "Japanese byoyomi" =>
-"Japonské bjojomi",
+"japonské bjojomi",
 
 "jigo" =>
 "",
+
+"Join" =>
+"Pøijmout",
 
 "Kiseido" =>
 "",
@@ -503,10 +566,10 @@ class cs_iso_8859_2_Language extends Language
 "Language name (i.e. English)" =>
 "",
 
-"Last access" =>
+"Last Access" =>
 "Poslední pøístup",
 
-"Last Access" =>
+"Last access" =>
 "Poslední pøístup",
 
 "Last Move" =>
@@ -539,10 +602,10 @@ class cs_iso_8859_2_Language extends Language
 "Lots of info on go" =>
 "",
 
-"Main time" =>
+"Main Time" =>
 "Základní èas",
 
-"Main Time" =>
+"Main time" =>
 "Základní èas",
 
 "Manual setting" =>
@@ -550,6 +613,9 @@ class cs_iso_8859_2_Language extends Language
 
 "Meet other turn-based go players" =>
 "",
+
+"Menu direction" =>
+"Umístìní menu",
 
 "Message" =>
 "Zpráva",
@@ -576,7 +642,7 @@ class cs_iso_8859_2_Language extends Language
 "",
 
 "Move outside board?" =>
-"",
+"Táhnout mimo desku?",
 
 "Moves" =>
 "Tahy",
@@ -633,13 +699,22 @@ class cs_iso_8859_2_Language extends Language
 "®ádné hry nenalezeny",
 
 "Nothing to be done?" =>
-"",
+"Nemám nic udìlat?",
 
 "Notify only" =>
 "Jen oznámení",
 
 "Not logged in" =>
 "Nepøihlá¹en",
+
+"Number of games" =>
+"Poèet her",
+
+"Number of games to add" =>
+"Poèet her k pøidání",
+
+"Observed games" =>
+"Sledované hry",
 
 "Occupation" =>
 "Zamìstnání",
@@ -664,6 +739,9 @@ class cs_iso_8859_2_Language extends Language
 
 "Opponent" =>
 "Soupeø",
+
+"Opponents Last Access" =>
+"Poslední pøístup soupeøe",
 
 "Other:" =>
 "Jiné:",
@@ -693,7 +771,7 @@ class cs_iso_8859_2_Language extends Language
 "Procent",
 
 "periods" =>
-"periody",
+"period",
 
 "Personal settings" =>
 "Osobní nastavení",
@@ -703,6 +781,15 @@ class cs_iso_8859_2_Language extends Language
 
 "plans for future improvements" =>
 "plány na dal¹í vylep¹ení",
+
+"Player" =>
+"Hráè",
+
+"Players waiting" =>
+"Èekající hráèi",
+
+"Please, feel free to register and play some games." =>
+"Mù¾ete se libovolnì zaregistrovat a zahrát si pár her.",
 
 "Please enter data" =>
 "Zadejte prosím údaje",
@@ -722,6 +809,9 @@ class cs_iso_8859_2_Language extends Language
 "Profile updated!" =>
 "Profil aktualizován!",
 
+"Proper" =>
+"Pøesný",
+
 "Proper handicap" =>
 "Pøesný handikap",
 
@@ -740,6 +830,9 @@ class cs_iso_8859_2_Language extends Language
 "Rating" =>
 "",
 
+"Rating range" =>
+"Rozsah ratingu",
+
 "Read forum" =>
 "Èíst fórum",
 
@@ -752,6 +845,9 @@ class cs_iso_8859_2_Language extends Language
 "Registration date" =>
 "Datum registrace",
 
+"Remove from observe list" =>
+"Odstranit ze seznamu sledovaných",
+
 "Replied" =>
 "Odeslána odpovìï",
 
@@ -760,6 +856,9 @@ class cs_iso_8859_2_Language extends Language
 
 "Reply!" =>
 "Odpovìdìt!",
+
+"Require rated opponent" =>
+"Po¾aduji ohodnoceného soupeøe",
 
 "Resign" =>
 "Vzdát",
@@ -779,6 +878,9 @@ class cs_iso_8859_2_Language extends Language
 "Running" =>
 "Aktivní",
 
+"Running games" =>
+"Aktivní hry",
+
 "Running games for %s" =>
 "Aktivní hry pro %s",
 
@@ -790,6 +892,9 @@ class cs_iso_8859_2_Language extends Language
 
 "Scot's Go Page" =>
 "",
+
+"Seems to be empty at the moment." =>
+"Zdá se, ¾e je teï prázdná.",
 
 "Select language to make user translator for that language." =>
 "",
@@ -851,6 +956,9 @@ class cs_iso_8859_2_Language extends Language
 "Show message" =>
 "Zobrazit zprávu",
 
+"Show observed games" =>
+"Zobrazit sledované hry",
+
 "Show recieved messages" =>
 "Zobrazit zodpovìzené zprávy",
 
@@ -873,134 +981,150 @@ class cs_iso_8859_2_Language extends Language
 "Hladké hrany desky",
 
 "Sorry, can't find the game you are invited to. Already declined?" =>
-"",
+"Promiòte, nelze najít hru, ke které jste byli vyzváni. Nebyla u¾ odmítnuta?",
 
 "Sorry, couldn't find the reciever of your message. Make sure to use the userid, not the full name." =>
-"",
+"Promiòte, nelze najít pøíjemce va¹í zprávy. Pøesvìdète se, ¾e jste pou¾ili ID u¾ivatele a nikoli celé jméno.",
+
+"Sorry, couldn't find this waiting room game. Probably someone has already joined it." =>
+"Promiòte, nelze najít tuto hru v èekárnì. Pravdìpodobnì ji ji¾ nìkdo pøijal.",
 
 "Sorry, couldn't start the game. Please wait a few minutes and try again." =>
-"",
+"Promiòte, nelze spustit hru. Poèkejte prosím nìkolik minut a zkuste to znovu.",
 
 "Sorry, couldn't update player data. Please wait a few minutes and try again." =>
-"",
+"Promiòte, nelze aktualizovat údaje hráèe. Poèkejte prosím nìkolik minut a zkuste to znovu.",
 
 "Sorry, I've problem with the rating, did you forget to specify 'kyu' or 'dan'?" =>
-"",
+"Promiòte mám problém s ratingem. Uvedli jste, zda jde o kyu nebo dan?",
 
 "Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' for this ratingtype" =>
-"",
+"Promiòte mám problém s ratingem. U tohoto typu ratingu byste mìli uvést \"kyu\" nebo \"dan\".",
 
 "Sorry, I can't find that game." =>
-"",
+"Promiòte, nelze najít tuto hru.",
 
 "Sorry, I couldn't find that forum you wanted to show." =>
-"",
+"Promiòte, nelze najít fórum, které chcete zobrazit.",
 
 "Sorry, I couldn't find the language you want to translate. Please contact the support." =>
-"",
+"Promiòte, nelze najít jazyk, který chcete pøekládat. Kontaktujte prosím podporu.",
 
 "Sorry, I couldn't find the message you wanted to show." =>
-"",
+"Promiòte, nelze najít zprávu, kterou chcete zobrazit.",
 
 "Sorry, I couldn't find this user." =>
-"",
+"Promiòte, nelze najít tohoto u¾ivatele.",
 
 "Sorry, I don't know anyone with that userid." =>
-"",
+"Promiòte, není zde u¾ivatel s takovým ID.",
 
 "Sorry, I need a game number to know what game to show." =>
-"",
+"Promiòte, potøebuji znát èíslo hry, abych vìdìl, kterou mám zobrazit.",
 
 "Sorry, I need to known for which user to show the data." =>
-"",
+"Promiòte, potøebuji vìdìt, pro kterého u¾ivatele mám zobrazit údaje.",
 
 "Sorry, it's not your turn." =>
-"",
+"Promiòte, nejste na tahu.",
 
 "Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support." =>
-"",
+"Promiòte, nelze zazálohovat starý pøeklad, pøeru¹eno. Kontaktujte prosím podporu.",
 
 "Sorry, I was unable to open a file for writing. Please contact the support." =>
-"",
+"Promiòte, nelze otevøít soubor pro zápis. Kontaktujte prosím podporu.",
 
 "Sorry, only translators are allowed to translate." =>
-"",
+"Promiòte, pouze pøekladatelé mohou pøekládat.",
 
 "Sorry, something went wrong when trying to insert the new translations into the database." =>
-"",
+"Promiòte, nìco se nepovedlo pøi pokusu o ulo¾ení nového pøekladu do databáze. ",
 
 "Sorry, the additon of the game to the database seems to have failed." =>
-"",
+"Promiòte, patrnì selhalo ulo¾ení hry do databáze.",
 
 "Sorry, the additon of the message to the database seems to have failed." =>
-"",
+"Promiòte, patrnì selhalo ulo¾ení zprávy do databáze.",
 
 "Sorry, the game has already finished." =>
-"",
+"Promiòte, hra je ji¾ ukonèena.",
 
 "Sorry, the game hasn't started yet." =>
-"",
+"Promiòte, hra je¹tì nezaèala.",
 
 "Sorry, the initial rating must be between 30 kyu and 6 dan." =>
-"",
+"Promiòte, poèáteèní rating musí být mezi 30 kyu a 6 dan.",
 
 "Sorry, the language you tried to add already exists." =>
-"",
+"Promiòte, jazyk, který chcete pøidat, u¾ existuje.",
 
 "Sorry, the password must be at least six letters." =>
-"",
+"Promiòte, heslo musí být dlouhé alespoò ¹est znakù.",
 
 "Sorry, there was a missing or incorrect field when adding a language." =>
-"",
+"Promiòte, ale nìkteré pole pøi pøidávání jazyka chybí nebo je chybné.",
 
 "Sorry, this is not allowed for guests, please first register a personal account" =>
-"",
+"Promiòte, toto není hostùm povoleno. Zaregistrujte si prosím osobní úèet.",
 
 "Sorry, this page is solely for users with administrative tasks." =>
-"",
+"Promiòte, tato stránka je pouze pro administrátory.",
 
 "Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset." =>
-"",
+"Promiòte, tento kámen by se sám zabil, ale sebevra¾du pravidla nepovolují.",
 
 "Sorry, this userid is already used, please try to find a unique userid." =>
-"",
+"Promiòte, toto u¾ivatelské ID u¾ je pou¾íváno, zkuste prosím najít jedineèné ID.",
 
 "Sorry, userid must be at least 3 letters long." =>
-"",
+"Promiòte, ID u¾ivatele musí být dlouhé alespoò tøi znaky.",
 
 "Sorry, you and your opponent need to set an initial rating, otherwise I can't find a suitable handicap" =>
-"",
+"Promiòte, vy i vá¹ soupeø musíte mít nastaven poèáteèní rating, jinak nelze najít vhodný handicap.",
 
 "Sorry, you are not allowed to translate the specified language." =>
-"",
+"Promiòte, není povoleno pøekládat vybraný jazyk.",
+
+"Sorry, you are not in the specified rating range." =>
+"Promiòte, vá¹ rating není v nastaveném rozsahu.",
 
 "Sorry, you can't invite yourself." =>
-"",
+"Promiòte, nemù¾ete vyzvat sám sebe.",
+
+"Sorry, you can't join your own game." =>
+"Promiòte, nemù¾ete pøijmout vlastní hru.",
 
 "Sorry, you didn't write your current password correctly." =>
-"",
+"Promiòte, nenapsal jste správnì va¹e souèasné heslo.",
 
 "Sorry, you have to be logged in to do that.
 <p>
 The reasons for this problem could be any of the following:
 <ul>
 <li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.
-<li> Your cookies have expired. This happens once a week.
+<li> Your cookies have expired. This happens once a month.
 <li> You haven't enabled cookies in your browser.
 </ul>" =>
-"",
+"Promiòte, toto nelze provést bez pøihlá¹ení.
+<p>
+Pøíèiny tohoto problému mohou být následující:
+<ul>
+<li> Nemáte vytvoøen <a href=\"%1\$s/register.php\">úèet</a> nebo nejste <a href=\"%1\$s/index.php\">pøihlá¹en</a>.
+<li> Va¹e cookie vypr¹ela. To nastává jednou týdnì.
+<li> Nemáte povoleny cookies ve va¹em prohlí¾eèi.
+</ul> ",
 
 "Sorry, you have to supply a name." =>
-"",
+"Promiòte, musíte zadat jméno.",
 
 "Sorry, you may not pass before all handicap stones are placed." =>
-"",
+"Promiòte, nesmíte dát pass pøed polo¾ením v¹ech handikapù.",
 
 "Sorry, you may not retake a stone which has just captured a stone, since it would repeat a previous board position. Look for 'ko' in the rules." =>
-"",
+"Promiòte, nesmíte vzít znovu kámen, který právì zajal tento kámen, proto¾e by se opakovala pøedchozí pozice na desce. Nejdìte si v pravidlech pojem \"ko\".",
 
 "Sorry, you may only place stones on empty points." =>
-"",
+"Promiòte, mù¾ete umís»ovat kameny pouze na volná místa.",
 
 "Sorry, you must specify a language." =>
 "",
@@ -1036,6 +1160,9 @@ The reasons for this problem could be any of the following:
 "Odeslat a Pøehled",
 
 "Submit your games for comments to see where you might have played better." =>
+"",
+
+"The black links require an argument to work, so they are not usable." =>
 "",
 
 "The confirmed password didn't match the password, please go back and retry." =>
@@ -1086,11 +1213,11 @@ The reasons for this problem could be any of the following:
 "To (userid)" =>
 "Komu (ID u¾ivatele)",
 
-"Todo list" =>
-"Plánované úkoly (todo list)",
-
 "To do list" =>
 "seznam plánù (to do list)",
+
+"Todo list" =>
+"Plánované úkoly (todo list)",
 
 "To look around, use %s." =>
 "Pokud se chcete jen rozhlédnout, pou¾ijte %s.",
@@ -1122,10 +1249,10 @@ The reasons for this problem could be any of the following:
 "Userid" =>
 "ID u¾ivatele",
 
-"User info" =>
+"User Info" =>
 "Informace o u¾ivateli",
 
-"User Info" =>
+"User info" =>
 "Informace o u¾ivateli",
 
 "Users" =>
@@ -1134,8 +1261,17 @@ The reasons for this problem could be any of the following:
 "User to set privileges for (use the userid)" =>
 "",
 
+"Vertical" =>
+"Svisle",
+
 "Very well written introduction by the British Go Association." =>
 "",
+
+"Waiting room" =>
+"Èekárna",
+
+"Weekend Clock" =>
+"Èas be¾í o víkendu",
 
 "Welcome page" =>
 "Uvítací stránka",
@@ -1143,11 +1279,23 @@ The reasons for this problem could be any of the following:
 "Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
 "Vítejte na Dragon Go serveru, <a href=\"licence.php\">free</a> serveru na hraní <a href=\"links.php\">go</a>, kde se hry èasto dlouho táhnou (v angliètinì slovní høíèka - 'drag on'). ",
 
+"Welcome to the dragon go server!" =>
+"Vítejte na Dragon go serveru!",
+
 "white" =>
 "bílý",
 
 "White" =>
 "Bílý",
+
+"White name" =>
+"Jméno bílého",
+
+"White rating" =>
+"Rating bílého",
+
+"White userid" =>
+"ID bílého",
 
 "who contributes to Dragon" =>
 "kdo se podílí na Dragonu",
@@ -1158,11 +1306,14 @@ The reasons for this problem could be any of the following:
 "with" =>
 "s",
 
+"with %s extra per move" =>
+"a dal¹í %s na ka¾dý tah",
+
 "with answers" =>
 "s otázkami",
 
 "without byoyomi" =>
-"bez byoyomi",
+"bez bjojomi",
 
 "Won" =>
 "Vyhrál",
@@ -1182,7 +1333,7 @@ The reasons for this problem could be any of the following:
 "yes" =>
 "ano",
 
-"You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"invite.php\">invite</a> for a game." =>
+"You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"message.php?mode=Invite\">invite</a> for a game." =>
 "",
 
 "You have to know what other players are talking about." =>
@@ -1213,8 +1364,7 @@ The reasons for this problem could be any of the following:
 "©panìlsky",
 
 "Czech" =>
-"Èesky" );
-    }
-};
+"Èesky",
 
-?>
+"Chinese" =>
+"Èínsky" );

@@ -19,16 +19,22 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-05-02 12:03:31 GMT */
+/* Automatically generated at 2002-06-23 19:53:10 GMT */
 
 class no_iso_8859_1_Language extends Language
 {
   function no_iso_8859_1_Language()
     {
       $this->full_name = 'Norwegian';
-      $this->last_updated = 1020341011;
+      $this->last_updated = 1024861990;
 
       $this->translated_strings = array(
+"#Games" =>
+"Antall partier",
+
+"%s only" =>
+"%s bare",
+
 "%s per %s stones" =>
 "%s per %s stener",
 
@@ -56,6 +62,9 @@ class no_iso_8859_1_Language extends Language
 "Added user %s as translator for language %s." =>
 "Lagt til %s som oversetter for %s.",
 
+"Add Game" =>
+"Opprett parti",
+
 "Add language" =>
 "Legg til språk",
 
@@ -64,6 +73,12 @@ class no_iso_8859_1_Language extends Language
 
 "Add language for translator" =>
 "Legg til språk for oversetter",
+
+"Add new game" =>
+"Opprett nytt parti",
+
+"Add to observe list" =>
+"Legg til i observasjonslista",
 
 "Admin" =>
 "Admin",
@@ -122,6 +137,15 @@ class no_iso_8859_1_Language extends Language
 "Black" =>
 "Svart",
 
+"Black name" =>
+"Svart navn",
+
+"Black rating" =>
+"Svart grad",
+
+"Black userid" =>
+"Svart bruker ID",
+
 "Board graphics" =>
 "Sideoppsett",
 
@@ -173,6 +197,9 @@ class no_iso_8859_1_Language extends Language
 "Colors" =>
 "Farger",
 
+"Comment" =>
+"Kommentar",
+
 "Common Japanese Go Terms" =>
 "Vanlige japanske Go-uttrykk",
 
@@ -184,6 +211,9 @@ class no_iso_8859_1_Language extends Language
 
 "Contributors to Dragon" =>
 "Bidragsytere til Dragon",
+
+"Conventional" =>
+"Vanlig",
 
 "Conventional handicap (komi 0.5 if not even)" =>
 "Vanlig forgave",
@@ -230,6 +260,9 @@ class no_iso_8859_1_Language extends Language
 "Del" =>
 "Slett",
 
+"Delete" =>
+"Slett",
+
 "Delete all" =>
 "Slett alle",
 
@@ -245,8 +278,11 @@ class no_iso_8859_1_Language extends Language
 "Developer" =>
 "Utvikler",
 
-"Disputing settings" =>
+"Dispute settings" =>
 "Foreslå andre innstillinger",
+
+"Disputing settings" =>
+"Foreslår andre innstillinger",
 
 "Docs" =>
 "Dokumenter",
@@ -300,7 +336,7 @@ class no_iso_8859_1_Language extends Language
 "En europeisk forretning med Go-bøker og utstyr",
 
 "Even game with nigiri" =>
-"Likt parti med nigir",
+"Likt parti med nigiri",
 
 "extra periods." =>
 "ekstra perioder.",
@@ -316,6 +352,9 @@ class no_iso_8859_1_Language extends Language
 
 "Finished" =>
 "Avsluttet",
+
+"Finished games" =>
+"Avsluttede partier",
 
 "Finished games for %s" =>
 "Avsluttede partier for %s",
@@ -359,11 +398,20 @@ class no_iso_8859_1_Language extends Language
 "Game" =>
 "Parti",
 
+"Game added!" =>
+"Partiet er opprettet!",
+
+"Game deleted!" =>
+"Partiet er slettet!",
+
 "Game ID" =>
 "Parti ID",
 
 "Game id button" =>
 "Knapp for partinummer",
+
+"Game joined!" =>
+"Partiet har startet!",
 
 "Game preferences" =>
 "Foretrukne partityper",
@@ -375,7 +423,7 @@ class no_iso_8859_1_Language extends Language
 "Generell informasjon",
 
 "General Public Licence" =>
-"",
+"General Public Licence",
 
 "Go back" =>
 "Tilbake",
@@ -390,22 +438,22 @@ class no_iso_8859_1_Language extends Language
 "Go Nyheter",
 
 "Go Problems" =>
-"",
+"Go Problems ",
 
 "Go Teaching Ladder" =>
-"",
+"Go Teaching Ladder",
 
 "Handicap" =>
 "Forgave",
 
 "Het Paard" =>
-"",
+"Het Paard",
 
 "Hide deleted" =>
 "Ikke vis slettede",
 
 "Hikaru no Go" =>
-"",
+"Hikaru no Go ",
 
 "History" =>
 "Historie",
@@ -418,6 +466,9 @@ class no_iso_8859_1_Language extends Language
 
 "Homepage" =>
 "Hjemmeside",
+
+"Horizontal" =>
+"Horisontal",
 
 "hour" =>
 "time",
@@ -434,14 +485,23 @@ class no_iso_8859_1_Language extends Language
 "ID" =>
 "ID",
 
+"If yes, rating between" =>
+"Hvis ja, rating mellom",
+
 "If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page." =>
 "Hvis du har glemt ditt passord kan du få et nytt tilsendt på e-post. Det nye passordet vil være tilfeldig valgt, men du kan selvfølgelig endre det senere.",
+
+"If you want to help translating dragon, please post a message to the 'translation' forum." =>
+"Hvis du ønsker å hjelpe til med å oversette Dragon, legg igjen en melding i 'Translation' forumet.",
 
 "if you want your own dragon" =>
 "hvis du ønsker din egen Dragon",
 
 "IGS" =>
-"",
+"IGS ",
+
+"Info" =>
+"Info",
 
 "In case you're an aspiring know-it-all." =>
 "For deg som vil vite alt",
@@ -468,7 +528,7 @@ class no_iso_8859_1_Language extends Language
 "Invitér denne brukeren",
 
 "It's your turn" =>
-"",
+"It's your turn ",
 
 "Jan van der Steens Pages" =>
 "Jan van der Steens sider",
@@ -483,13 +543,16 @@ class no_iso_8859_1_Language extends Language
 "Japansk overtid",
 
 "jigo" =>
-"",
+"jigo",
+
+"Join" =>
+"Start",
 
 "Kiseido" =>
-"",
+"Kiseido ",
 
 "Kiseido Go Server" =>
-"",
+"Kiseido Go Server",
 
 "Komi" =>
 "Komi",
@@ -503,10 +566,10 @@ class no_iso_8859_1_Language extends Language
 "Language name (i.e. English)" =>
 "Språknavn (f.eks. Engelsk)",
 
-"Last access" =>
+"Last Access" =>
 "Siste aksess",
 
-"Last Access" =>
+"Last access" =>
 "Siste aksess",
 
 "Last Move" =>
@@ -539,10 +602,10 @@ class no_iso_8859_1_Language extends Language
 "Lots of info on go" =>
 "Masse informasjon om Go",
 
-"Main time" =>
+"Main Time" =>
 "Hovedtid",
 
-"Main Time" =>
+"Main time" =>
 "Hovedtid",
 
 "Manual setting" =>
@@ -550,6 +613,9 @@ class no_iso_8859_1_Language extends Language
 
 "Meet other turn-based go players" =>
 "Møt andre som spiller turn-based Go.",
+
+"Menu direction" =>
+"Menyretning",
 
 "Message" =>
 "Melding",
@@ -564,7 +630,7 @@ class no_iso_8859_1_Language extends Language
 "Melding sendt!",
 
 "Mind Sport Zine" =>
-"",
+"Mind Sport Zine",
 
 "months" =>
 "måneder",
@@ -612,7 +678,7 @@ class no_iso_8859_1_Language extends Language
 "neste side",
 
 "Nick" =>
-"",
+"Nick",
 
 "Nighttime" =>
 "Nattid",
@@ -621,7 +687,7 @@ class no_iso_8859_1_Language extends Language
 "Nigiri",
 
 "NNGS" =>
-"",
+"NNGS ",
 
 "no" =>
 "nei",
@@ -640,6 +706,15 @@ class no_iso_8859_1_Language extends Language
 
 "Not logged in" =>
 "Ikke innlogget",
+
+"Number of games" =>
+"Antall partier",
+
+"Number of games to add" =>
+"Antall partier du vil starte",
+
+"Observed games" =>
+"Observerte partier",
 
 "Occupation" =>
 "Yrke",
@@ -664,6 +739,9 @@ class no_iso_8859_1_Language extends Language
 
 "Opponent" =>
 "Motstander",
+
+"Opponents Last Access" =>
+"Motstander sist innlogget",
 
 "Other:" =>
 "Annet:",
@@ -704,6 +782,15 @@ class no_iso_8859_1_Language extends Language
 "plans for future improvements" =>
 "planer for framtidige oppdateringer",
 
+"Player" =>
+"Spiller",
+
+"Players waiting" =>
+"Spillere som venter",
+
+"Please, feel free to register and play some games." =>
+"Registrér deg gjerne og spill noen partier.",
+
 "Please enter data" =>
 "Legg inn informasjon",
 
@@ -722,11 +809,14 @@ class no_iso_8859_1_Language extends Language
 "Profile updated!" =>
 "Profilen er oppdatert!",
 
+"Proper" =>
+"Korrekt",
+
 "Proper handicap" =>
 "Korrekt forgave",
 
 "Rafael's Go Page" =>
-"",
+"Rafael's Go Page ",
 
 "Rank info" =>
 "Spillestyrke (grad)",
@@ -740,6 +830,9 @@ class no_iso_8859_1_Language extends Language
 "Rating" =>
 "Rating",
 
+"Rating range" =>
+"Ratingområde",
+
 "Read forum" =>
 "Les fora",
 
@@ -752,6 +845,9 @@ class no_iso_8859_1_Language extends Language
 "Registration date" =>
 "Registrert dato",
 
+"Remove from observe list" =>
+"Fjern fra observasjonslista",
+
 "Replied" =>
 "Besvart",
 
@@ -760,6 +856,9 @@ class no_iso_8859_1_Language extends Language
 
 "Reply!" =>
 "Svar!",
+
+"Require rated opponent" =>
+"Bare ratede motstandere",
 
 "Resign" =>
 "Gi opp",
@@ -779,17 +878,23 @@ class no_iso_8859_1_Language extends Language
 "Running" =>
 "Pågående",
 
+"Running games" =>
+"Pågående partier",
+
 "Running games for %s" =>
 "Pågående partier for %s",
 
 "Samarkand" =>
-"",
+"Samarkand ",
 
 "Score" =>
 "Score",
 
 "Scot's Go Page" =>
-"",
+"Scot's Go Page ",
+
+"Seems to be empty at the moment." =>
+"Ingen partier for øyeblikket",
 
 "Select language to make user translator for that language." =>
 "Velg språk for å gjøre bruker oversetter for det språket.",
@@ -813,7 +918,7 @@ class no_iso_8859_1_Language extends Language
 "Send svar",
 
 "Sensei's Library" =>
-"",
+"Sensei's Library ",
 
 "Server list" =>
 "Serverliste",
@@ -851,6 +956,9 @@ class no_iso_8859_1_Language extends Language
 "Show message" =>
 "Vis melding",
 
+"Show observed games" =>
+"Vis observerte partier",
+
 "Show recieved messages" =>
 "Vis mottatte meldinger",
 
@@ -877,6 +985,9 @@ class no_iso_8859_1_Language extends Language
 
 "Sorry, couldn't find the reciever of your message. Make sure to use the userid, not the full name." =>
 "Beklager, kan ikke finne mottaker for denne meldingen. Pass på at du benytter Bruker ID og ikke fullt navn.",
+
+"Sorry, couldn't find this waiting room game. Probably someone has already joined it." =>
+"Beklager, finner ikke dette partiet. Sannsynligvis har noen andre allerede startet det.",
 
 "Sorry, couldn't start the game. Please wait a few minutes and try again." =>
 "Beklager, kan ikke starte dette partiet. Vent et par minutter og prøv igjen.",
@@ -974,8 +1085,14 @@ class no_iso_8859_1_Language extends Language
 "Sorry, you are not allowed to translate the specified language." =>
 "Beklager. Du har ikke tillatelse til å oversette det språket.",
 
+"Sorry, you are not in the specified rating range." =>
+"Beklager, du er utenfor ønsket ratingområde.",
+
 "Sorry, you can't invite yourself." =>
 "Beklager. Du kan ikke invitere deg selv.",
+
+"Sorry, you can't join your own game." =>
+"Beklager, du kan ikke starte et parti med deg selv.",
 
 "Sorry, you didn't write your current password correctly." =>
 "Beklager. Du skrev feil passord.",
@@ -985,7 +1102,7 @@ class no_iso_8859_1_Language extends Language
 The reasons for this problem could be any of the following:
 <ul>
 <li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.
-<li> Your cookies have expired. This happens once a week.
+<li> Your cookies have expired. This happens once a month.
 <li> You haven't enabled cookies in your browser.
 </ul>" =>
 "Beklager. Du må være innlogget for å gjøre dette.
@@ -1005,6 +1122,9 @@ The reasons for this problem could be any of the following:
 
 "Sorry, you may not retake a stone which has just captured a stone, since it would repeat a previous board position. Look for 'ko' in the rules." =>
 "Beklager. Du kan ikke ta en stein som nettopp har tatt en annen stein da dette vil gi samme situasjon på brettet en gang til. Se etter ko i reglene.",
+
+"Sorry, you may only delete your own game." =>
+"Beklager, du kan bare slette egne partier.",
 
 "Sorry, you may only place stones on empty points." =>
 "Beklager. Du kan bare sette steiner på ledige felter.",
@@ -1045,6 +1165,9 @@ The reasons for this problem could be any of the following:
 "Submit your games for comments to see where you might have played better." =>
 "Her kan du sende inn dine partier og få dem kommentert",
 
+"The black links require an argument to work, so they are not usable." =>
+"Lenker i svart trenger et argument for å virke så de kan ikke brukes herfra.",
+
 "The confirmed password didn't match the password, please go back and retry." =>
 "Beklager. Passord og Bekreft passord var ulike. Gå tilbake og prøv en gang til.",
 
@@ -1059,6 +1182,12 @@ The reasons for this problem could be any of the following:
 
 "The komi is out of range, please choose a move reasonable value." =>
 "Komi er utenfor verdiområde. Bruk en mer fornuftig verdi.",
+
+"The password contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+.,:;?!%* are allowed." =>
+"Passordet inneholder ulovlige tegn. Bare tegnene a-z, A-Z, 0-9 og -_+.,:;?!%* er tillatt.",
+
+"The userid contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+ are allowed." =>
+"Brukerid inneholder ulovlige tegn. Bare tegnene a-z, A-Z, 0-9 og -_+.,:;?!%* er tillatt.",
 
 "This %sgame%s invitation has already been accepted." =>
 "Denne %s parti %s invitasjonen har allerede blitt akseptert.",
@@ -1093,11 +1222,11 @@ The reasons for this problem could be any of the following:
 "To (userid)" =>
 "Til (bruker ID)",
 
-"Todo list" =>
-"utestående oppgaver liste",
-
 "To do list" =>
 "Gjøremål",
+
+"Todo list" =>
+"utestående oppgaver liste",
 
 "To look around, use %s." =>
 "For å se deg rundt kan du bruke %s. ",
@@ -1109,7 +1238,7 @@ The reasons for this problem could be any of the following:
 "Oversatt og forklart.",
 
 "Turn-based go guild" =>
-"",
+"Turn-based go guild ",
 
 "Two-letter language code" =>
 "To-tegns språk kode (ISO 639-1)",
@@ -1123,16 +1252,19 @@ The reasons for this problem could be any of the following:
 "Up" =>
 "Opp",
 
+"Use browser settings" =>
+"Bruk nettleserinnstillingene",
+
 "User %s is already translator for language %s." =>
 "Bruker %s er allerede oversetter for %s.",
 
 "Userid" =>
 "Bruker ID",
 
-"User info" =>
+"User Info" =>
 "Bruker info",
 
-"User Info" =>
+"User info" =>
 "Bruker info",
 
 "Users" =>
@@ -1141,8 +1273,17 @@ The reasons for this problem could be any of the following:
 "User to set privileges for (use the userid)" =>
 "Bruker ID å sette privilegier for.",
 
+"Vertical" =>
+"Vertikal",
+
 "Very well written introduction by the British Go Association." =>
 "Meget velskrevet introduksjon til Go fra det Britiske Go-forbundet.",
+
+"Waiting room" =>
+"Venterom",
+
+"Weekend Clock" =>
+"Klokka går i helga",
 
 "Welcome page" =>
 "Velkomstside",
@@ -1150,11 +1291,23 @@ The reasons for this problem could be any of the following:
 "Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
 "Velkommen til Dragon Go Server, en <a href=\"licence.php\">fri</a> server der du kan spille <a href=\"links.php\">go</a>.",
 
+"Welcome to the dragon go server!" =>
+"Velkommen til Dragon Go Server!",
+
 "white" =>
 "hvit",
 
 "White" =>
 "Hvit",
+
+"White name" =>
+"Hvit navn",
+
+"White rating" =>
+"Hvit grad",
+
+"White userid" =>
+"Hvit bruker ID",
 
 "who contributes to Dragon" =>
 "Hvem bidrar til Dragon",
@@ -1164,6 +1317,9 @@ The reasons for this problem could be any of the following:
 
 "with" =>
 "med",
+
+"with %s extra per move" =>
+"med %s ekstra hvert trekk",
 
 "with answers" =>
 "med svar",
@@ -1189,8 +1345,8 @@ The reasons for this problem could be any of the following:
 "yes" =>
 "ja",
 
-"You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"invite.php\">invite</a> for a game." =>
-"Å spille her tilsvarer å spille via e-mail, men her hjelper serveren deg med et grensesnitt som gjør det lettere å holde rede på partiforløpet. For å kunne starte å spille må du først skaffe deg en <a href=\"register.php\">konto</a>, om du ikke allerede har en. Deretter kan du <a href=\"edit_profile.php\">endre profilen din</a> og eventuelt<a href=\"edit_bio.php\"> legge inn litt informasjon om deg selv</a>, spesielt er feltene 'Åpen for Partier?', 'Rating' og 'Spillestyrke(Grad)' nyttige for å finne motstandere. Du kan så lete i <a href=\"users.php\">brukerlista</a> eller bruke <a href=\"phorum/index.php\"> et forum</a> for å finne passende motstandere som du kan <a href=\"invite.php\">invitere</a> til et parti. ",
+"You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href=\"register.php\">account</a>, if you haven't got one already. Thereafter you could <a href=\"edit_profile.php\">edit your profile</a> and <a href=\"edit_bio.php\">enter some biographical info</a>, especially the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for finding opponents. Next you can study the <a href=\"users.php\">user list</a> and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents to <a href=\"message.php?mode=Invite\">invite</a> for a game." =>
+"Å spille her tilsvarer å spille via e-mail, men her hjelper serveren deg med et grensesnitt som gjør det lettere å holde rede på partiforløpet. For å kunne starte å spille må du først skaffe deg en <a href=\"register.php\">konto</a>, om du ikke allerede har en. Deretter kan du <a href=\"edit_profile.php\">endre profilen din</a> og eventuelt<a href=\"edit_bio.php\"> legge inn litt informasjon om deg selv</a>, spesielt er feltene 'Åpen for Partier?', 'Rating' og 'Spillestyrke(Grad)' nyttige for å finne motstandere. Du kan så lete i <a href=\"users.php\">brukerlista</a> eller bruke <a href=\"phorum/index.php\"> et forum</a> for å finne passende motstandere som du kan <a href=\"message.php?mode=Invite\">invitere</a> til et parti. ",
 
 "You have to know what other players are talking about." =>
 "Du bør kjenne til de uttrykkene andre bruker.",
@@ -1199,29 +1355,34 @@ The reasons for this problem could be any of the following:
 "Ditt trekk i følgende partier:",
 
 "Yutopian" =>
-"",
+"Yutopian ",
 
 "English" =>
-"",
+"Engelsk",
 
 "Swedish" =>
-"",
+"Svensk",
 
 "Norwegian" =>
 "Norsk",
 
 "German" =>
-"",
+"Tysk",
 
 "French" =>
-"",
+"Fransk",
 
 "Spanish" =>
-"",
+"Spansk",
 
 "Czech" =>
-"" );
-    }
-};
+"Tsjekkisk",
 
-?>
+"Chinese (Traditional)" =>
+"Kinsesisk (tradisjonell)",
+
+"Portuguese" =>
+"Portugisisk",
+
+"Chinese (Simplified)" =>
+"Kinesisk (f
