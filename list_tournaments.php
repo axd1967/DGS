@@ -102,3 +102,4 @@ require_once( "include/tournament.php" );
 
    end_page(false);
 }
+?>

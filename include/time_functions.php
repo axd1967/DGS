@@ -191,3 +191,4 @@ function time_convert_to_longer_unit(&$time, &$unit)
       $time /= 30;
    }
 }
+?>

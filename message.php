@@ -76,7 +76,7 @@ $mode = $_GET['mode'];
                             "Games.Status, Games.mid AS Game_mid, " .
                             "Size, Komi, Handicap, Maintime, Byotype, " .
                             "Byotime, Byoperiods, Rated, Weekendclock, " .
-                            "ToMove_ID, (White_ID=$my_id)+1 AS Color " .
+                            "ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS Color " .
                             "FROM Messages, MessageCorrespondents AS me " .
                             "LEFT JOIN MessageCorrespondents AS other " .
                             "ON other.mid=$mid AND other.Sender!=me.Sender " .

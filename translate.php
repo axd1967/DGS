@@ -121,7 +121,7 @@ When translating you should keep in mind the following things:
         error('not_correct_transl_language');
 
      if( !$group or !in_array( $group, $translation_groups ) )
-        $group = 'Common';
+        $group = 'Untranslated phrases';
 
      $untranslated = ($group === 'Untranslated phrases');
 

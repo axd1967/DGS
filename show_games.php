@@ -122,7 +122,7 @@ require_once( "include/rating.php" );
            ', Games.White_End_Rating, Games.Black_End_Rating) AS endRating, ' .
            'log.RatingDiff AS ratingDiff, ' : '' ) .
          "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
-         "IF(White_ID=" . $_GET['uid'] . ", 2, 1) AS Color ";
+         "IF(White_ID=" . $_GET['uid'] . "," . WHITE . "," . BLACK . ") AS Color ";
 
       if( $_GET['finished'] )
       {
@@ -151,7 +151,7 @@ require_once( "include/rating.php" );
    else
    {
       $games_for = ( $_GET['finished'] ? T_('Finished games for %s') : T_('Running games for %s') );
-      $title = sprintf( $games_for, make_html_safe($user_row["Name"]) );
+      $title1 = sprintf(  $games_for, make_html_safe($user_row["Name"]) );
       $title2 = sprintf(  $games_for, "<A href=\"userinfo.php?uid=" . $_GET['uid'] . "\">" .
                           make_html_safe($user_row["Name"]) . " (" .
                           make_html_safe($user_row["Handle"]) . ")</A>");
@@ -246,7 +246,7 @@ require_once( "include/rating.php" );
             "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>";
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
-            "<font color=$gid_color>" . T_('sgf') . "</font></A></td>";
+            "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";
 
       if( $_GET['observe'] or $all )
       {
@@ -265,7 +265,7 @@ require_once( "include/rating.php" );
          if( $_GET['finished'] and $gtable->Is_Column_Displayed[28] )
             $grow_strings[28] = "<td>" .
                (isset($blackDiff) ? ($blackDiff > 0 ? '+' : '') .
-                sprintf("%0.2f",$blackDiff*0.01) : '&nbsp' ) . "</td>";
+                sprintf("%0.2f",$blackDiff*0.01) : '&nbsp;' ) . "</td>";
          if( $gtable->Is_Column_Displayed[20] )
             $grow_strings[20] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
                make_html_safe($whiteName) . "</font></a></td>";
@@ -281,7 +281,7 @@ require_once( "include/rating.php" );
          if( $_GET['finished'] and $gtable->Is_Column_Displayed[31] )
             $grow_strings[31] = "<td>" .
                (isset($whiteDiff) ? ($whiteDiff > 0 ? '+' : '') .
-                sprintf("%0.2f",$whiteDiff*0.01) : '&nbsp' ) . "</td>";
+                sprintf("%0.2f",$whiteDiff*0.01) : '&nbsp;' ) . "</td>";
       }
       else
       {
@@ -300,7 +300,7 @@ require_once( "include/rating.php" );
          if( $_GET['finished'] and $gtable->Is_Column_Displayed[25] )
             $grow_strings[25] = "<td>" .
                (isset($ratingDiff) ? ($ratingDiff > 0 ? '+' : '') .
-                sprintf("%0.2f",$ratingDiff*0.01) : '&nbsp' ) . "</td>";
+                sprintf("%0.2f",$ratingDiff*0.01) : '&nbsp;' ) . "</td>";
          if( $gtable->Is_Column_Displayed[5] )
             $grow_strings[5] = "<td align=center><img src=\"17/$color.gif\" alt=$color></td>";
       }

@@ -239,3 +239,4 @@ require( "forum_functions.php" );
 
   end_page();
 }
+?>

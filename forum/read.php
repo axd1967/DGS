@@ -38,7 +38,7 @@ function draw_post($post_type, $my_post, $Subject, $Text, $GoDiagrams)
    $txt = make_html_safe(trim($Text), true);
    $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
-   if( strlen($txt) == 0 ) $txt = '&nbsp';
+   if( strlen($txt) == 0 ) $txt = '&nbsp;';
 
    $color = "ff0000";
    $new = get_new_string($Timestamp, $Lastread);

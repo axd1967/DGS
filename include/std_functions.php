@@ -54,7 +54,7 @@ $has_sgf_alias = false;
 // If using apache add this row to your virtual host to make this work:
 // AliasMatch game([0-9]+)\.sgf /path/to/sgf.php
 
-$gid_color='"#d50047"';
+$sgf_color='"#d50047"';
 $bg_color='"#F7F5E3"';  // change in dragon.css too!
 
 $menu_bg_color='"#0C41C9"';

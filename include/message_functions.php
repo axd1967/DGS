@@ -218,7 +218,7 @@ function message_info_table($mid, $date, $to_me,
                             $subject, $reply_mid, $text,
                             $folders=null, $folder_nr=null, $form=null, $no_move=false)
 {
-   global $date_fmt;
+   global $date_fmt, $bg_color;
 
    echo "<table border=0 witdh=\"50%\">\n" .
       "<tr><td><b>" . T_('Date') . ":</b></td>" .
@@ -242,8 +242,8 @@ function message_info_table($mid, $date, $to_me,
    if( isset($folders) )
    {
       echo "<tr><td><b>" . T_('Folder') . ":</b></td>\n<td><table cellpadding=3><tr>" .
-         echo_folder_box($folders, $folder_nr, 'f7f5e3') . "</table></td>\n" .
-         '<td>';
+         echo_folder_box($folders, $folder_nr, substr($bg_color, 2, 6))
+          . "</table></td>\n<td>";
 
       $fld = array('' => '');
       foreach( $folders as $key => $val )

@@ -535,7 +535,7 @@ require( "include/std_functions.php" );
 
       default:
       {
-         echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
+         echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.")." ($err)";
       }
       break;
    }

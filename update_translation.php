@@ -107,3 +107,4 @@ require_once( "include/make_translationfiles.php" );
   jump_to("translate.php?translate_lang=$translate_lang&group=" . urlencode($newgroup));
 
 }
+?>

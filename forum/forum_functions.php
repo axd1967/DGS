@@ -114,7 +114,7 @@ function echo_links($cols)
 {
    global $link_array_left, $link_array_right;
 
-   echo "<tr><td bgcolor=d0d0d0 colspan=" . ($cols/2) . " align=left>&nbsp";
+   echo "<tr><td bgcolor=d0d0d0 colspan=" . ($cols/2) . " align=left>&nbsp;";
    $first=true;
    reset($link_array_left);
    while( list($name, $link) = each($link_array_left) )
@@ -123,7 +123,7 @@ function echo_links($cols)
       echo "<a href=\"$link\"><font color=000000>$name</font></a>";
       $first=false;
    }
-   echo "&nbsp;</td>\n<td bgcolor=d0d0d0 align=right colspan=" . ($cols-$cols/2) . ">&nbsp\n";
+   echo "&nbsp;</td>\n<td bgcolor=d0d0d0 align=right colspan=" . ($cols-$cols/2) . ">&nbsp;\n";
 
    $first=true;
    reset($link_array_right);

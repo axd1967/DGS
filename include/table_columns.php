@@ -43,7 +43,7 @@ class Table
    /*! \brief Whether to search descending or ascending for the primary sort. */
    var $Desc1;
    /*! \brief The secondary column to sort on. */
-   var $Dort2;
+   var $Sort2;
    /*! \brief Whether to search descending or ascending for the secondary sort. */
    var $Desc2;
 
@@ -355,7 +355,7 @@ class Table
                                         $this->Desc1,
                                         $this->Sort2,
                                         $this->Desc2 ) . "\">" .
-               "<-- " . T_("prev page") . "</a></td>\n";
+               "&lt;-- " . T_("prev page") . "</a></td>\n";
 
          }
 
@@ -367,7 +367,7 @@ class Table
                                         $this->Desc1,
                                         $this->Sort2,
                                         $this->Desc2 ) . "\">" .
-               T_("next page") . " -->" . "</a></td>\n";
+               T_("next page") . " --&gt;" . "</a></td>\n";
 
          }
 

@@ -95,7 +95,7 @@ require( "include/countries.php" );
    {
       $days = round($row['OnVacation']);
       echo '<tr><td><b><font color=red>' . T_('On vacation') .
-         '</font></b></td><td>' . "$days " . ($days == 1 ? T_('day') : T_('days')) .
+         '</font></b></td><td>' . "$days " . ($days <= 1 ? T_('day') : T_('days')) .
          ' ' .T_('left') . "</td></tr>\n";
    }
 

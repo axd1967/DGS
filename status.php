@@ -69,7 +69,7 @@ require_once( "include/message_functions.php" );
       $days = round($player_row['OnVacation']);
       echo '<tr><td><b><a href="edit_vacation.php"><font color=red>' . T_('On vacation') .
          '</font></a></b></td>
-           <td>' . "$days " . ($days == 1 ? T_('day') : T_('days')) .
+           <td>' . "$days " . ($days <= 1 ? T_('day') : T_('days')) .
          ' ' .T_('left') . '</td></tr>';
    }
    echo '
@@ -145,7 +145,7 @@ require_once( "include/message_functions.php" );
 
    $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," .
        "UNIX_TIMESTAMP(Lastchanged) AS Time, " .
-       "(White_ID=$uid)+1 AS Color, " .
+       "IF(White_ID=$uid," . WHITE . "," . BLACK . ") AS Color, " .
        "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
@@ -188,7 +188,7 @@ require_once( "include/message_functions.php" );
                "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>";
          if( $gtable->Is_Column_Displayed[2] )
             $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
-               "<font color=$gid_color>sgf</font></A></td>";
+               "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";
          if( $gtable->Is_Column_Displayed[3] )
             $grow_strings[3] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Name) . "</font></a></td>";

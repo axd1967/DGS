@@ -133,3 +133,4 @@ require_once( "include/make_translationfiles.php" );
 
   jump_to("admin_translators.php?msg=" . urlencode($msg));
 }
+?>
