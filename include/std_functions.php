@@ -537,6 +537,21 @@ function jump_to($uri, $absolute=false)
    exit;
 }
 
+
+//must never allow quotes, ampersand, < and >
+define('HANDLE_LEGAL_REGS', '-_+a-zA-Z0-9');
+define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'.,:;?!%*');
+
+function illegal_chars( $string, $punctuation=false )
+{
+   if( $punctuation )
+      $regs = PASSWORD_LEGAL_REGS;
+   else
+      $regs = HANDLE_LEGAL_REGS;
+
+   return !ereg( "^[$regs]+\$", $string);
+}
+
 function make_session_code()
 {
    mt_srand((double)microtime()*1000000);
@@ -631,7 +646,7 @@ define( 'ALLOWED_GT', '{anglend}');
    Check for quote mismatches.
    If so, simply add the missing quote at the (supposed?) end of tag.
 */
-//attribut not string - allowed characters (HTML4.01): [a-zA-Z0-9:.-_] 
+//attribut not string - allowed characters (HTML4.01): [-_:.a-zA-Z0-9] 
 function parse_atbs_safe( &$trail, &$bad)
 {
    $head = '';
@@ -913,7 +928,7 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
          if( !($uid > 0) )
          {
             $uid = 0;
-            if( eregi("[?&]$uhandle_nam=([-_+a-zA-Z]+)", $refer, $result) )
+            if( eregi("[?&]$uhandle_nam=([".HANDLE_LEGAL_REGS."]+)", $refer, $result) )
               $uhandle = $result[1];
          }
       }

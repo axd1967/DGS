@@ -42,6 +42,9 @@ require_once( "include/std_functions.php" );
    $passwd = @$_POST['passwd'];
    if( strlen($passwd) < 6 )
       error("password_too_short");
+   if( illegal_chars( $passwd, true ) )
+      error("password_illegal_chars");
+
    if( $passwd != @$_POST['passwd2'] )
       error("password_mismatch");
 

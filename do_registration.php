@@ -20,27 +20,17 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require_once( "include/std_functions.php" );
 
-function illegal_chars( $string, $punctuation=false )
-{
-   //must never allow quotes, ampersand, < and >
-   $legal_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_+';
-   if( $punctuation )
-      $legal_chars .= '.,:;?!%*';
-
-   return strspn( $string , $legal_chars ) != strlen( $string );
-}
-
 
 {
    connect2mysql();
 
-   $userid = @_POST['userid'];
+   $userid = @$_POST['userid'];
    if( strlen( $userid ) < 3 )
       error("userid_too_short");
    if( illegal_chars( $userid ) )
       error("userid_illegal_chars");
 
-   $passwd = @_POST['passwd'];
+   $passwd = @$_POST['passwd'];
    if( strlen($passwd) < 6 )
       error("password_too_short");
    if( illegal_chars( $passwd, true ) )
@@ -49,7 +39,7 @@ function illegal_chars( $string, $punctuation=false )
    if( $passwd != @$_POST['passwd2'] )
       error("password_mismatch");
 
-   $name = @_POST['name'];
+   $name = @$_POST['name'];
    if( strlen( $name ) < 1 )
       error("name_not_given");
 
@@ -60,7 +50,7 @@ function illegal_chars( $string, $punctuation=false )
 
 
 
-# Userid and password are fine, now do the registration to the database
+// Userid and password are fine, now do the registration to the database
 
    $code = make_session_code();
 
