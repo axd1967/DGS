@@ -100,7 +100,7 @@ require( "include/timezones.php" );
    start_page(T_('Message list'), true, $logged_in, $player_row );
 
    $column_set=255;
-   $page = make_url('list_messages.php', true, 'all', $all, 'sent', $sent);
+   $page = make_url('list_messages.php', true, array('all' => $all, 'sent' => $sent));
    $show_rows = $nr_rows = mysql_num_rows($result);
    if( $nr_rows == $MaxRowsPerPage )
       $show_rows = $RowsPerPage;
@@ -171,8 +171,9 @@ require( "include/timezones.php" );
             !(strpos($row["Flags"],'REPLIED') === false) ) )
       {
          echo '<td align=center><a href="' .
-            make_url('list_messages.php',false,'del',$mid,'all',$all,
-                     'sort1',$sort1,'desc1',$desc1,'sort2',$sort2,'desc2',$desc2 ) .
+            make_url('list_messages.php',false,
+                     array('del'=>$mid, 'all'=>$all, 'sort1'=>$sort1,
+                           'desc1'=>$desc1,'sort2'=>$sort2,'desc2'=>$desc2 )) .
             "\"> <img width=15 height=16 border=0 alt='X' src=\"images/trashcan.gif\"></A></td>\n";
       }
       else if( !($sent==1) )
