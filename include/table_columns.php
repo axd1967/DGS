@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-function tablehead($Head, $sort_string=NULL, $desc_default=false)
+function tablehead($Head, $sort_string=NULL, $desc_default=false, $undeletable=false)
 {
    global $sort1, $desc1, $sort2, $desc2,$column_set,$page,$removed_columns;
 
@@ -30,10 +30,14 @@ function tablehead($Head, $sort_string=NULL, $desc_default=false)
       return;
    }
 
+   if( !$undeletable )
+      $delete_string = "<a href=\"" . $page . 
+         ($sort1 ? order_string($sort1,$desc1,$sort2,$desc2) . '&' : '') .
+         "del=" . urlencode($Head) . 
+         "\"><sup><font size=\"-1\" color=red>x</font></sup></a>";
+
    if( !$sort_string )
-      return "<th nowrap>" . _($Head) .
-         "</font></A><a href=\"" . $page . "del=" . urlencode($Head) .
-         "\"><sup><font size=\"-1\" color=red>x</font></sup></a></th>\n";
+      return "<th nowrap>" . _($Head) . "</font></a>$delete_string</th>\n";
 
    if( $sort_string == $sort1 )
    {
@@ -50,10 +54,9 @@ function tablehead($Head, $sort_string=NULL, $desc_default=false)
       $d2 = $desc1 xor $desc_default;
    }
 
-   return "<th><A href=\"$page" . order_string($s1,$d1,$s2,$d2) . 
+   return "<th nowrap><A href=\"$page" . order_string($s1,$d1,$s2,$d2) . 
       "\"><font color=black>" .  _($Head) . 
-      "</font></A><a href=\"" . $page . "del=" . urlencode($Head) . 
-      "\"><sup><font size=\"-1\" color=red>x</font></sup></a></th>\n";
+      "</font></A>$delete_string</th>\n";
 }
 
 function tableelement($Head, $string)

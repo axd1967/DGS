@@ -60,7 +60,9 @@ include( "include/timezones.php" );
    $query = "SELECT *, Rank AS Rankinfo, " .
        "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
        "Running+Finished AS Games, " .
-       "100*Won/Finished AS Percent " .
+       "100*Won/Finished AS Percent, " .
+       "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
+       "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
        "FROM Players ORDER BY $order";
 
    $result = mysql_query( $query );
@@ -84,6 +86,8 @@ include( "include/timezones.php" );
       tablehead('Lost', 'Lost', true) .
       tablehead('Percent', 'Percent', true) .
       tablehead('Activity', 'ActivityLevel', true) .
+      tablehead('Last Access', 'Lastaccess', true) .
+      tablehead('Last Moved', 'Lastmove', true) .
       "</tr>\n";
 
    while( $row = mysql_fetch_array( $result ) )
@@ -95,6 +99,9 @@ include( "include/timezones.php" );
                     ( $a == 1 ? '<img align=middle src=images/star2.gif>' : 
                       '<img align=middle src=images/star.gif>' .
                       '<img align=middle src=images/star.gif>' ) );
+
+      $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
+      $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
 
       echo "<tr>\n" .
          tableelement('ID', "<A href=\"userinfo.php?uid=$ID\">$ID</A>") .
@@ -110,6 +117,8 @@ include( "include/timezones.php" );
          tableelement('Lost', $row["Lost"]) .
          tableelement('Percent', $percent) .
          tableelement('Activity', $activity) .
+         tableelement('Last Access', $lastaccess) .
+         tableelement('Last Moved', $lastmove) .
          "</tr>\n";
    }
 

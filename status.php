@@ -19,7 +19,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require( "include/std_functions.php" );
-require( "include/rating.php" );
+include( "include/rating.php" );
+include( "include/table_columns.php" );
+include( "include/timezones.php" );
 
 {
    connect2mysql();
@@ -38,6 +40,24 @@ require( "include/rating.php" );
 
    if( $msg )
       echo "<p><b><font color=green>$msg</font></b><hr>";
+
+   $column_set = explode(',', $player_row["GamesColumns"]);
+   $page = "status.php?";
+
+   if( $del or $add )
+   {
+      if( $add )
+         array_push($column_set,$add);
+      if( $del and is_integer($s=array_search($del, $column_set, true)) )
+         array_splice($column_set, $s, 1);
+
+      $query = "UPDATE Players " . 
+          "SET GamesColumns='" . implode(',', $column_set) . "' " .
+          "WHERE ID=" . $player_row["ID"];
+      
+      mysql_query($query);
+
+   }
 
    echo '
     <table border=3>
@@ -88,7 +108,7 @@ require( "include/rating.php" );
          echo "<td><A href=\"show_message.php?mid=" . $row["ID"] . "\">" .
             $row["sender"] . "</A></td>\n" . 
             "<td>" . make_html_safe($row["Subject"]) . "</td>\n" .
-            "<td>" . date($date_fmt, $row["date"]) . "</td></tr>\n";
+            "<td>" . date($date_fmt2, $row["date"]) . "</td></tr>\n";
       }
 
       echo "</table><p>\n";
@@ -102,41 +122,60 @@ require( "include/rating.php" );
 
    $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," . 
        "UNIX_TIMESTAMP(Lastchanged) AS Time, " .
-       "black.Name AS bName, white.Name AS wName " .
-       "FROM Games " .
-       "LEFT JOIN Players AS black ON black.ID=Black_ID " . 
-       "LEFT JOIN Players AS white ON white.ID=White_ID " . 
+       "(Black_ID=$uid)+1 AS Color, " .
+       "opponent.Name, opponent.Handle, opponent.ID AS pid " .
+       "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
+       "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$uid " .
        "ORDER BY LastChanged, Games.ID";
 
    $result = mysql_query( $query ) or die(mysql_error());
 
-   echo "<HR><B>" . _("Your turn to move in the following games:") . "</B><p>\n";
-   echo "<table border=3>\n";
-   echo "<tr><th>gid</th><th>" . _("Opponent") . "</th><th>" . _("Color") . "</th><th>" . _("Size") . "</th><th>" . _("Handicap") . "</th><th>" . _("Komi") . "</th><th>" ._("Moves") . "</th><th>" . _("Last moved") . "</th></tr>\n";
+   echo "<hr><b>" . _("Your turn to move in the following games:") . "</b><p>\n";
 
-
-   while( $row = mysql_fetch_array( $result ) )
+   if( mysql_num_rows($result) == 0 )
    {
-      extract($row);
-
-      $color = ( $uid == $Black_ID ? 'b' : 'w' );
-      $opp_ID = ( $uid == $Black_ID ? $White_ID : $Black_ID );
-
-      echo "<tr><td><a href=\"game.php?gid=$ID\"><font color=$gid_color><b>$ID</b></font></a></td>" .
-         "<td><a href=\"userinfo.php?uid=$opp_ID\">" . 
-         ( $uid == $Black_ID ? $wName : $bName ) . "</a></td>\n" . 
-
-         "<td align=center><img src=\"17/$color.gif\" alt=$color></td>" .
-         "<td>" . $Size . "</td>\n" .
-         "<td>" . $Handicap . "</td>\n" .
-         "<td>" . $Komi . "</td>\n" .
-         "<td>" . $Moves . "</td>\n" .
-         "<td>" . date($date_fmt, $Time) . "</td>\n" .
-         "</tr>\n";
+      echo _("No games");
    }
+   else
+   {
+      echo start_end_column_table(true) .
+         tablehead('ID', NULL, NULL, true) .
+         tablehead('sgf') .
+         tablehead('Opponent') .
+         tablehead('Nick') .
+         tablehead('Color') .
+         tablehead('Size') .
+         tablehead('Handicap') .
+         tablehead('Komi') .
+         tablehead('Moves') .
+         tablehead('Last Move') .
+         "</tr>\n";
 
-   echo "</table>\n";
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         extract($row);
+         $color = ( $Color == BLACK ? 'b' : 'w' ); 
+
+         echo "<tr>\n" .
+            tableelement('ID', "<A href=\"game.php?gid=$ID\"><font color=$gid_color><b>" .
+                         "$ID</b></font></A>") .
+            tableelement('sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
+                         "sgf</font></A>") .
+            tableelement('Opponent', "<A href=\"userinfo.php?uid=$pid\">" .
+                         "<font color=black>$Name</font></a>") .
+            tableelement('Nick', "<A href=\"userinfo.php?uid=$pid\">" .
+                         "<font color=black>$Handle</font></a>") .
+            tableelement('Color', "<img align=middle src=\"17/$color.gif\" alt=$color>") .
+            tableelement('Size', $Size) .
+            tableelement('Handicap', $Handicap) .
+            tableelement('Komi', $Komi) .
+            tableelement('Moves', $Moves ) .
+            tableelement('Last Move', date($date_fmt2, $Time)) .
+            "</tr>\n";
+      }
+      echo start_end_column_table(false);
+   }
    echo "</center>";
 
 

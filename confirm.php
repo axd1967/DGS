@@ -468,7 +468,10 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 // Increase moves and activity
 
-   mysql_query( "UPDATE Players SET Activity=Activity + $ActivityForMove, Moves=Moves+1 " . 
+   mysql_query( "UPDATE Players " . 
+                "SET Activity=Activity + $ActivityForMove, " .
+                "Moves=Moves+1, " .
+                "LastMove=FROM_UNIXTIME($NOW) " . 
                 "WHERE ID=" . $player_row["ID"] );
 
 

@@ -107,9 +107,10 @@ include( "include/timezones.php" );
 
 
    echo start_end_column_table(true) .
-      tablehead('ID', 'ID', true) .
+      tablehead('ID', 'ID', true, true) .
       tablehead('sgf') .
       tablehead('Opponent', 'Name') .
+      tablehead('Nick', 'Handle') .
       tablehead('Color', 'Color') .
       tablehead('Size', 'Size', true) .
       tablehead('Handicap', 'Handicap') .
@@ -140,7 +141,10 @@ include( "include/timezones.php" );
                       "$ID</b></font></A>") .
          tableelement('sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
                       "sgf</font></A>") .
-         tableelement('Opponent', "<A href=\"userinfo.php?uid=$pid\">$Name</a>") .
+         tableelement('Opponent', "<A href=\"userinfo.php?uid=$pid\">" .
+                      "<font color=black>$Name</font></a>") .
+         tableelement('Nick', "<A href=\"userinfo.php?uid=$pid\">" .
+                      "<font color=black>$Handle</font></a>") .
          tableelement('Color', "<img align=middle src=\"17/$color.gif\" alt=$color>") .
          tableelement('Size', $Size) .
          tableelement('Handicap', $Handicap) .

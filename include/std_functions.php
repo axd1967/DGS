@@ -32,6 +32,7 @@ $NOW = time() + (int)$timeadjust;
 $session_duration = 3600*24*7; // 1 week
 $tick_frequency = 12; // ticks/hour
 $date_fmt = 'Y-m-d H:i';
+$date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
 $is_down = false;
 
@@ -42,8 +43,8 @@ $ActivityForMove = 10.0;
 $ActiveLevel1 = 10.0;
 $ActiveLevel2 = 150.0;
 
-$RowsPerPage = 50;
-$MaxRowsPerPage = 70;
+$RowsPerPage = 100;
+$MaxRowsPerPage = 130;
 
 $has_sgf_alias = false;
 
