@@ -287,7 +287,7 @@ function make_menu($menu_array)
 }
 
 
-function error($err)
+function error($err, $debugmsg=NULL)
 {
    global $handle, $PHP_SELF, $REMOTE_ADDR;
 
@@ -304,6 +304,11 @@ function error($err)
    {
       $uri .= "&mysqlerror=" . urlencode(mysql_error());
       $errorlog_query .= ", MysqlError='" . mysql_error() . "'";
+   }
+
+   if( !empty($debugmsg) )
+   {
+      $errorlog_query .= ", Debug='$debugmsg'";
    }
 
    @mysql_query( $errorlog_query );

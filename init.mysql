@@ -197,6 +197,7 @@ CREATE TABLE Errorlog (
   Handle varchar(16) default NULL,
   Message text,
   MysqlError text,
+  Debug text,
   IP varchar(16) default NULL,
   Date timestamp(14) NOT NULL,
   PRIMARY KEY  (ID)
