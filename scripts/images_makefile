@@ -8,6 +8,8 @@
 # gimp-perl 1.2
 
 SIZES = 13 17 21 25 29 35 42 50
+BOARD_SIZES = 13/board 17/board 21/board 25/board 29/board 35/board 42/board 50/board
+STONES_SIZES = 13/stones 17/stones 21/stones 25/stones 29/stones 35/stones 42/stones 50/stones
 
 BIGSTONES = BigBlack.png BigBlackMark.png BigWhite.png BigWhiteMark.png YinYang.png BigPlayBlack.png BigPlayWhite.png
 BIGSTONES_POV = BigBlack_pov.png BigWhite_pov.png YinYang_pov.png BigPlayBlack_pov.png BigPlayWhite_pov.png
@@ -40,22 +42,17 @@ YinYang_pov.png: $(POVFILES)
 %Mark.png: %_pov.png generate_big_images.pl
 	./generate_big_images.pl $@ $<
 
+%/board: generate_board_images.pl
+	./generate_board_images.pl board $*
+	touch $@
 
+%/stones: $(BIGSTONES) generate_board_images.pl
+	./generate_board_images.pl stones $*
+	touch $@
 
-board: generate_board_images.pl
-	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Draw some board images with gimp";
-	@echo -e "\n------------------------------------------------------------------------------------\n";
-	./generate_board_images.pl board
-	touch board
+board: $(BOARD_SIZES)
 
-stones: $(BIGSTONES) generate_board_images.pl
-	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Draw stone images with gimp";
-	@echo -e "\n------------------------------------------------------------------------------------\n";
-	./generate_board_images.pl stones
-	touch stones
-
+stones: $(STONES_SIZES)
 
 clean:
 	 rm -rf $(SIZES)
