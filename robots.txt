@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /users.php
+Disallow: /status.php
+Disallow: /invite.php
+Disallow: /messages.php
+Disallow: /register.php
+Disallow: /userinfo.php
+Disallow: /game.php
