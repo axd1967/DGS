@@ -140,19 +140,13 @@ switch( $action )
          $prisoners = unserialize(urldecode($prisoners));
          reset($prisoners);
 
-         $nr_prisoners = count($prisoners);
-
-         if( $nr_prisoners == 1 )
-             $flags |= KO;
-         else
-             $flags &= ~KO;
-
          $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Text ) VALUES ";
 
-
+         $nr_prisoners = 0;
          while( list($dummy, list($x,$y)) = each($prisoners) )
              {
                  $query .= "($Moves, \"NONE\", $x, $y, NULL), ";
+                 $nr_prisoners++;
              }
 
 
@@ -173,6 +167,11 @@ switch( $action )
                  $game_query .= "Black_Prisoners=" . ( $Black_Prisoners + $nr_prisoners ) . ", ";
              else
                  $game_query .= "White_Prisoners=" . ( $White_Prisoners + $nr_prisoners ) . ", ";
+
+         if( $nr_prisoners == 1 )
+             $flags |= KO;
+         else
+             $flags &= ~KO;
          
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
               "Flags=$flags " .
