@@ -43,7 +43,7 @@ function sgf_echo_comment( $com )
 {
    if ( !$com )
       return false;
-   echo "\nC[" . str_replace("]","\]", str_replace("\\","\\\\",
+   echo "\nC[" . str_replace("]","\\]", str_replace("\\","\\\\",
          reverse_htmlentities( ltrim($com,"\r\n")
       ) ) ) . "]";
    return true;
