@@ -355,35 +355,52 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
 
 // fills $array with positions where the stones are.
 // returns the coords of the last move
-function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked_dead,
+function make_array( $gid, &$array, &$msg, &$msgtbl, $max_moves, $move, &$result, &$marked_dead,
                      $no_marked_dead = false )
 {
-   $array=NULL;
+   $array = NULL;
+   $msgtbl = NULL;
+   $lastx = $lasty = -1; // don't use as lastx/lasty
 
    if( !$move ) $move = $max_moves;
 
-   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
+   $result = mysql_query( "SELECT Moves.*,MoveMessages.Text AS mobj FROM Moves " .
+                          "LEFT JOIN MoveMessages " .
+                          "ON $gid=MoveMessages.gid AND Moves.MoveNr=MoveMessages.MoveNr " .
+                          "WHERE Moves.gid=$gid ORDER BY Moves.ID" )
+               or die(mysql_error())
+               ;
 
    $removed_dead = FALSE;
    $marked_dead = array();
 
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
 
-      if( $row["MoveNr"] > $move )
-      {
-         if( $row["MoveNr"] > $max_moves )
+         if( $row["MoveNr"] > $max_moves ) {
             fix_corrupted_move_table($gid);
-         break;
-      }
+            break;
+         }
 
+      $mobj="";
       extract($row);
 
+      if ($mobj)
+      {
+         $msgtbl[$MoveNr]= $mobj;
+      }
+      if( $MoveNr > $move )
+      {
+         continue;
+      }
+
+      $lastx = $lasty = -1; // don't use as lastx/lasty
       if( $Stone <= WHITE )
       {
          if( $PosX < 0 ) continue;
 
          $array[$PosX][$PosY] = $Stone;
+         $lastx = $PosX; $lasty = $PosY;
 
          $removed_dead = FALSE;
       }
@@ -395,7 +412,6 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
             $removed_dead = TRUE;
          }
          array_push($marked_dead, array($PosX,$PosY));
-         $PosX = $PosY = NULL; // don't use as lastx/lasty
       }
    }
 
@@ -411,15 +427,9 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
       }
    }
 
-   $result2 = mysql_query( "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" );
+      $msg = $msgtbl[$move];
 
-   if( mysql_num_rows($result2) == 1 )
-   {
-      $row = mysql_fetch_array($result2);
-      $msg = $row["Text"];
-   }
-
-   return array($PosX,$PosY);
+   return array($lastx,$lasty);
 }
 
 $dirx = array( -1,0,1,0 );

@@ -19,8 +19,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-require( "include/std_functions.php" );
-require( "include/board.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/board.php" );
 
 {
    connect2mysql();
@@ -76,7 +76,7 @@ require( "include/board.php" );
                extract($game_row);
 
                $mess = NULL;
-               make_array( $ID, $array, $mess, $Moves, NULL, $moves_result, $marked_dead );
+               make_array( $ID, $array, $mess, $msgtbl, $Moves, NULL, $moves_result, $marked_dead ,false);
 
                $msg .= str_pad('', 47, '-') . "\n";
                $msg .= "Game ID: $ID  ($HOSTBASE/game.php?gid=$ID)\n";

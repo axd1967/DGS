@@ -335,7 +335,7 @@ function draw_game_info($row)
 
 
 
-function draw_moves()
+function draw_moves($msgtbl)
 {
    global $moves_result, $gid, $move, $Size;
 
@@ -367,11 +367,17 @@ function draw_moves()
          $c = 'S';
       else if( $row["PosX"] == -3 )
          $c = 'R';
-
       else
       {
          $c=number2board_coords($row["PosX"], $row["PosY"], $Size);
       }
+
+      if (isset($msgtbl[$i]))
+      {
+        if(make_html_safe( $msgtbl[$i], 'game'))
+          $c="<u>$c</u>";
+      }
+
       if( $i == $move )
          printf('<td class=r bgcolor=F7F5E3><font color=red>%s</font></td>
 ', $c );
