@@ -282,26 +282,14 @@ function click(nr,x,y)
 
    move_nr[nr]++;
 
+   if( max_move_nr[nr] == move_nr[nr] )
+       max_move_nr[nr]++;  // make sure history is cleaned.
+
    if( lastx[nr] >= 0 && lasty[nr] >=0 && mark[nr][lastx[nr]][lasty[nr]] == 'm' &&
        !( current_mode[nr] == 'play' && goban[nr][x][y] > 0 ) )
    {
       change_last(nr, -1, -1);
    }
-
-//    var remove = false;
-//    if( mark[nr][x][y].charAt(1) == letters[current_letter[nr]-1] && current_letter[nr] > 1)
-//    {
-//       document.images['letter_'+nr].src =
-//          path+stonesize[nr]+'/l'+letters[--current_letter[nr]]+'.'+img;
-//       remove = true;
-//    }
-
-//    if( Number(mark[nr][x][y]) == current_number[nr]-1 && current_number[nr] > 1)
-//    {
-//       document.images['number_'+nr].src =
-//          path+stonesize[nr]+'/b'+(--current_number[nr])+'.'+img;
-//       remove = true;
-//    }
 
    old_goban = goban[nr][x][y];
    old_mark = mark[nr][x][y];
@@ -441,7 +429,12 @@ function redo(nr, mode)
 {
    var a;
 
-   if( move_nr[nr] == max_move_nr[nr] ) return;
+   if( move_nr[nr] == max_move_nr[nr] )
+   {
+      refresh(nr);
+      return;
+   }
+
    move_nr[nr]++;
 
    for(var i=0; i<move_history[nr][move_nr[nr]].length; i++)
@@ -565,7 +558,8 @@ function push_history(nr, push_array)
       max_move_nr[nr] = move_nr[nr];
    }
 
-    move_history[nr][move_nr[nr]].push(push_array);
+   move_history[nr][move_nr[nr]][move_history[nr][move_nr[nr]].length] = push_array;
+   //   move_history[nr][move_nr[nr]].push(push_array);
 }
 
 function change_last(nr, x, y)
@@ -648,6 +642,18 @@ function change_mark(nr, x, y, val)
    set_image(nr, x, y);
 }
 
+function refresh(nr)
+{
+   for(y=starty[nr]; y<endy[nr]; y++)
+   {
+      for(x=startx[nr]; x<endx[nr]; x++)
+      {
+         set_image(nr, x, y);
+      }
+   }
+
+}
+
 function enter_data(nr, data)
 {
    var row;
@@ -664,6 +670,11 @@ function enter_data(nr, data)
          v = ( c == 'b' ? 1 : ( c == 'w' ? 2 : 0 ) );
          goban[nr][x][y] = v;
          mark[nr][x][y] = row[x-startx[nr]].substr(1);
+         if( mark[nr][x][y] == 'm' )
+             {
+                 lastx[nr] = x;
+                 lasty[nr] = y;
+             }
          set_image(nr, x, y);
       }
    }
