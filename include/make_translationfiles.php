@@ -44,7 +44,7 @@ function make_known_languages()
       $prev_lang = $lang;
       $first = false;
    }
-   fwrite( $fd, " )\n);\n\n?>" );
+   fwrite( $fd, ( $first ? '' : ' )' ) . "\n);\n\n?>" );
    fclose($fd);
    unset($fd);
 
