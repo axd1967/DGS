@@ -283,7 +283,7 @@ function make_html_safe(&$msg, $some_html=false)
          // mark sgf comments
          $msg = eregi_replace("<c(omment)?>", "<font color=blue>\\0", $msg);
          $msg = eregi_replace("</c(omment)?>", "\\0</font>", $msg);
-         $msg = preg_replace("'<h(idden)?>(.*?)</h(idden)?>'i", "", $msg);
+         $msg = preg_replace("'<h(idden)?>(.*?)</h(idden)?>'mis", "", $msg);
       }
 
       // make sure the <, > replacements: {anglstart}, {anglend} are removed from the string

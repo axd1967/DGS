@@ -113,7 +113,7 @@ WR[$Whiterank]
 
 
 
-      if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'i", $row["Text"],
+      if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'mis", $row["Text"],
                                        $matches, PREG__SET_ORDER) )
       {
          echo "C[";
