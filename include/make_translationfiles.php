@@ -53,7 +53,7 @@ function make_known_languages()
 
 function slashed($string)
 {
-   return str_replace('"','\"',$string);
+   return str_replace( array( "\\", "\"" ), array( "\\\\", "\\\"" ), $string );
 }
 
 
