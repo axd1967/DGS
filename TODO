@@ -62,3 +62,7 @@ SMALLER TASKS
 * Improve rating system
 
 * Delete game when it's the opponents turn.
+
+* Running game list: Add column 'Opponents last access'
+
+* List of recently finished games.
