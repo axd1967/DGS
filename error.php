@@ -458,7 +458,13 @@ require_once( "include/std_functions.php" );
 
       case("admin_no_longer_admin_admin"):
       {
-         echo _("Hmm, you seem to try to revoke your abillity to edit the admin staff.");
+         echo T_("Hmm, you seem to try to revoke your abillity to edit the admin staff.");
+      }
+      break;
+
+      case("new_admin_already_admin"):
+      {
+         echo T_("This user is already an admin.");
       }
       break;
 
