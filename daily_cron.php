@@ -61,6 +61,7 @@ if( !$is_down )
 
 // Delete old invitations
 
+/* to be reviewed: the field *Type* 'DELETED' no more used (replaced by Folder_nr = NULL).
    if( $delete_invitations )
    {
       $timelimit = $invite_timelimit*24*3600;
@@ -84,6 +85,7 @@ if( !$is_down )
          }
       }
    }
+*/
 
 
 // Delete old waiting list entries

@@ -266,7 +266,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Status='$next_status', " .
              "Lastchanged=FROM_UNIXTIME($NOW), " .
              "ToMove_ID=$next_to_move_ID, " . $time_query .
-             "Flags=0 " .
+             //"Flags=0" . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
              " WHERE $where_clause LIMIT 1";
       }
       break;
@@ -277,7 +277,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             error("invalid_action");
 
          $stonestring = @$_REQUEST['stonestring'];
-         check_handicap(); //adjust $handi, $stonestring and others
+         check_handicap(); //adjust $handi, $stonestring, $enable_message and others
 
          if( strlen( $stonestring ) != 2 * $Handicap + 1 )
             error("wrong_number_of_handicap_stone");
@@ -335,7 +335,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
              "Score=$score, " . $time_query .
-             "Flags=0" .
+             //"Flags=0" . //Not useful
              " WHERE $where_clause LIMIT 1";
 
          $game_finished = true;
@@ -414,7 +414,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
          $game_query .=
-             "Flags=0, " .
+             //"Flags=0, " . //Not useful
              "Score=$score" .
              " WHERE $where_clause LIMIT 1";
 
@@ -552,8 +552,7 @@ if( HOT_SECTION )
          $Text .= "<p>Your opponent wrote:<p>" . $message;
       }
 
-      mysql_query( "INSERT INTO Messages SET " .
-                   "Time=FROM_UNIXTIME($NOW), " .
+      mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                    "Game_ID=$gid, Subject='$Subject', Text='$Text'");
 
       if( mysql_affected_rows() != 1)

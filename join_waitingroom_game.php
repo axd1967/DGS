@@ -218,8 +218,7 @@ require_once( "include/rating.php" );
       $reply = addslashes(user_reference( true, 1, '', $player_row). " has joined your waiting room game.") ;
    }
 
-   $query = "INSERT INTO Messages SET " .
-      "Time=FROM_UNIXTIME($NOW), " .
+   $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
       "Game_ID=$gid, " .
       "Subject='$subject', " .
       "Text='$reply'";

@@ -514,7 +514,8 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
       else
          $where_clause = '';
 
-      if( $current_folder > FOLDER_ALL_RECEIVED && $current_folder != 'NULL' )
+      if( $current_folder > FOLDER_ALL_RECEIVED && isset($folders[$current_folder])
+            && $current_folder != 'NULL' )
          $where_clause.= "AND Folder_nr='" .$current_folder. "' ";      
    }
 

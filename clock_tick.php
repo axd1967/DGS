@@ -104,7 +104,7 @@ if( !$is_down )
              "Lastchanged=FROM_UNIXTIME($NOW), " .
              "ToMove_ID=0, " .
              "Score=$score, " .
-             "Flags=0" .
+             //"Flags=0" . //Not useful
              " WHERE ID=$gid LIMIT 1";
 
          mysql_query( $query );
@@ -116,8 +116,7 @@ if( !$is_down )
          $Text = addslashes("The result in the game " .game_reference( true, false, $gid, $whitename, $blackname).
              " was: <p><center>" . score2text($score,true,true) . "</center><br>" );
 
-         mysql_query( "INSERT INTO Messages SET " .
-                      "Time=FROM_UNIXTIME($NOW), " .
+         mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'" );
 
       if( mysql_affected_rows() == 1)

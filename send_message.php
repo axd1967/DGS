@@ -382,8 +382,7 @@ disable_cache();
 
 // Update database
 
-   $query = "INSERT INTO Messages SET " .
-       "Time=FROM_UNIXTIME($NOW), " .
+   $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
        "Type='$type', ";
 
    if( $type == 'INVITATION' )
