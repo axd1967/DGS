@@ -317,9 +317,8 @@ disable_cache();
 
       }
 
-
-      mysql_query( "UPDATE Players SET Running=Running+1 " .
-                   "WHERE ID=$my_ID OR ID=$opponent_ID" );
+      mysql_query( "UPDATE Players SET Running=Running+" . ( $handitype == -4 ? 2 : 1 ) .
+                   " WHERE ID=$my_ID OR ID=$opponent_ID LIMIT 2" );
 
       $subject = "Game invitation accepted";
    }
