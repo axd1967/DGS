@@ -24,6 +24,8 @@ function draw_board($Size, &$array, $may_play, $gid,
     if( !$stone_size ) $stone_size = 25;
     if( !$font_size ) $font_size = "+0";
 
+    $HTML="";
+
     $str1 = "<td><IMG class=s$stone_size border=0 alt=\"";
     if( $may_play )
         {
@@ -48,21 +50,25 @@ function draw_board($Size, &$array, $may_play, $gid,
         }
     
     if( $msg )
-        echo "<table border=2 align=center><tr>" . 
+        $HTML .= "<table border=2 align=center><tr>" . 
         "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
-    echo "<table border=0 cellpadding=0 cellspacing=0 align=center valign=center background=images/wood1.png>";
-    echo "<tr>\n<td>&nbsp;</td>";
+    $HTML .= '<table border=0 cellpadding=0 cellspacing=0 align=center valign=center background=images/wood1.png>
+<tr>
+<td>&nbsp;</td>';
+
     $colnr = 1;
     $letter = 'a';
     while( $colnr <= $Size )
         {
-            echo "<td align=center><font size=$font_size><B>$letter</B></font></td>\n";
+            $HTML .= '<td align=center><font size=' . $font_size . '><B>' . $letter . '</B></font></td>' . "\n";
             $colnr++;
             $letter++;
             if( $letter == 'i' ) $letter++;
         }  
-    echo "<td width=5>&nbsp;</td>\n</tr>\n";
+    $HTML .= '<td width=5>&nbsp;</td>
+</tr>
+';
 
 
     if( $Size > 11 ) $hoshi_dist = 4; else $hoshi_dist = 3;
@@ -76,7 +82,7 @@ function draw_board($Size, &$array, $may_play, $gid,
 
     for($rownr = $Size; $rownr > 0; $rownr-- )
         {
-            echo "<tr><td align=center><font size=$font_size><B>$rownr</B></font></td>\n";
+            $HTML .= '<tr><td align=center><font size=' . $font_size . '><B>' . $rownr . '</B></font></td>' . "\n";
             
             
             $hoshi_r = 0;
@@ -90,34 +96,34 @@ function draw_board($Size, &$array, $may_play, $gid,
                     $empty = false;
                     if( $stone == BLACK )
                         {
-                            $type = "b";
+                            $type = 'b';
                             $alt = '#';
                         }
                     else if( $stone == WHITE )
                         {
-                            $type = "w";
+                            $type = 'w';
                             $alt = 'O';
                         }
                     else if( $stone == BLACK_DEAD )
                         {
-                            $type = "bw";
+                            $type = 'bw';
                             $alt = '/';
                         }
                     else if( $stone == WHITE_DEAD )
                         {
-                            $type = "wb";
+                            $type = 'wb';
                             $alt = '-';
                         }
                     else
                         {
-                            $type = "e";
+                            $type = 'e';
                             $alt = '.';
-                            if( $rownr == 1 ) $type = "d";
-                            if( $rownr == $Size ) $type = "u";
-                            if( $colnr == 0 ) $type .= "l";
-                            if( $colnr == $Size-1 ) $type .= "r";
+                            if( $rownr == 1 ) $type = 'd';
+                            if( $rownr == $Size ) $type = 'u';
+                            if( $colnr == 0 ) $type .= 'l';
+                            if( $colnr == $Size-1 ) $type .= 'r';
                     
-                            if( $hoshi_r > 0 and $type=="e" )
+                            if( $hoshi_r > 0 and $type=='e' )
                                 {
                                     $hoshi_c = 0;
                                     if( $colnr == $hoshi_dist -  1 or $colnr == $Size - $hoshi_dist ) 
@@ -129,17 +135,17 @@ function draw_board($Size, &$array, $may_play, $gid,
                                     $hoshi_c + $hoshi_r == $hoshi_2 or
                                     $hoshi_c + $hoshi_r == $hoshi_3 )
                                         {
-                                            $type = "h";
+                                            $type = 'h';
                                             $alt = ',';
                                         }
                                 }
 
                             if( $stone == BLACK_TERRITORY )
-                                    $type .= "b";
+                                    $type .= 'b';
                             else if( $stone == WHITE_TERRITORY )
-                                $type .= "w";
+                                $type .= 'w';
                             else if( $stone == DAME )
-                                $type .= "d";
+                                $type .= 'd';
 
                             $empty = true;
 
@@ -147,37 +153,42 @@ function draw_board($Size, &$array, $may_play, $gid,
                         }
 
                     if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y )
-                        $type .= "m";
+                        $type .= 'm';
                     
                     if( $may_play and ( $empty xor !$on_empty ) )
-                        echo $str2 . $letter_c . $letter_r . $str3 . $alt . 
+                        $HTML .= $str2 . $letter_c . $letter_r . $str3 . $alt . 
                             '" SRC=' . $stone_size . '/' . $type . '.gif></A></td>
 ';
                     else
-                        echo $str1 . $alt . '" SRC=' . $stone_size . '/' . 
+                        $HTML .= $str1 . $alt . '" SRC=' . $stone_size . '/' . 
                             $type . '.gif></td>
 ';
 
                     $letter_c ++;
                 }
 
-            echo "<td align=center><font size=$font_size><B>$rownr</B></font></td>\n";
+            $HTML .= '<td align=center><font size=' . $font_size . '><B>' . $rownr . '</B></font></td>' . "\n";
 
             $letter_r++;
-            echo "</tr>\n";
+            $HTML .= '</tr>' . "\n";
         }
 
-    echo "<tr>\n<td width=5>&nbsp;</td>";
+    $HTML .= '<tr>
+<td width=5>&nbsp;</td>';
     $colnr = 1;
     $letter = 'a';
     while( $colnr <= $Size )
         {
-            echo "<td align=center><font size=$font_size><B>$letter</B></font></td>\n";
+            $HTML .= '<td align=center><font size=' . $font_size . '><B>' . $letter . '</B></font></td>' . "\n";
             $colnr++;
             $letter++;
             if( $letter == 'i' ) $letter++;
         }  
-    echo "<td width=5>&nbsp;</td>\n</tr>\n</table>\n";
+    $HTML .= '<td width=5>&nbsp;</td>
+</tr>
+</table>
+';
+    echo $HTML;
 }
 
 
