@@ -20,9 +20,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 
-if( $HTTP_HOST != $HOSTNAME )
-   jump_to( "http://" . $HOSTNAME . $REQUEST_URI );
-
 
 disable_cache();
 
