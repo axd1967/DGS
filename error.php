@@ -565,7 +565,7 @@ require_once( "include/std_functions.php" );
       break;
    }
 
-   $mysqlerror = @$_GET['mysqlerror'];
+   $mysqlerror = get_request_arg('mysqlerror'); //@$_GET['mysqlerror'];
    if( $mysqlerror )
       echo("<p>Mysql error: " . $mysqlerror );
 
