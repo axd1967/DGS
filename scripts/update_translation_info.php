@@ -1,5 +1,6 @@
 <?php
 {
+  $update_script = true;
 
   if( $argc >= 1 )
     include $argv[1];
@@ -62,6 +63,10 @@
                 fwrite( $stderr, "Warning: No such group '$cgroup' for string '$string'.\n", 120 );
             }
           $group_str = substr( $group_str, 0, -1 ) . ' ';
+        }
+      else
+        {
+          fwrite( $stderr, "Warning: No group for string '$string'.\n", 120 );
         }
 
       $beginning = ",\n\n";
