@@ -19,6 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require( "include/std_functions.php" );
+require( "include/form_functions.php" );
 
 connect2mysql();
 
@@ -26,41 +27,24 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 start_page("Register", true, $logged_in, $player_row );
 
-?>
+echo "<center>\n";
 
-<CENTER>
-  <FORM name="loginform" action="do_registration.php" method="POST">
+echo "<B><font size=+1>Please enter data:</font></B>\n";
 
-    <B><font size=+1>Please enter data:</font></B>
-    
-    <TABLE>
+echo form_start('loginform', 'do_registration.php', 'POST');
 
-      
-      <TR>
-        <TD align=right>Userid:</TD>
-        <TD align=left> <input type="text" name="userid" size="16" maxlength="16"></TD>
-      </TR>
+echo form_insert_row( 'DESCRIPTION', 'Userid',
+                      'TEXTINPUT', 'userid', 16, 16, '' );
+echo form_insert_row( 'DESCRIPTION', 'Full name',
+                      'TEXTINPUT', 'name', 16,80, '' );
+echo form_insert_row( 'DESCRIPTION', 'password',
+                      'PASSWORD', 'passwd', 16, 16, '' );
+echo form_insert_row( 'DESCRIPTION', 'Confirm password',
+                      'PASSWORD', 'passwd2', 16, 16, '' );
+echo form_insert_row( 'SUBMITBUTTON', 'register', 'register' );
 
-      <TR>
-        <TD align=right>Full name:</TD>
-        <TD align=left> <input type="text" name="name" size="16" maxlength="80"></TD>
-      </TR>
-      
-      <TR>
-        <TD align=right>Password:</TD>
-        <TD align=left><input type="password" name="passwd" size="16" maxlength="16"></TD>
-      </TR>
-      
-      <TR>
-        <TD align=right>Confirm Password:</TD>
-        <TD align=left><input type="password" name="passwd2" size="16" maxlength="16"></TD>
-        <TD><input type=submit name="register" value="Register"></TD>
-      </TR>
-      
-    </TABLE>
-  </FORM>
-</CENTER>  
+echo form_end();
+echo "</center>\n";
 
-<?php
 end_page();
 ?>
