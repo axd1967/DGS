@@ -52,11 +52,12 @@ require( "include/std_functions.php" );
            echo '<p><b><A href="faq.php">' . $row['Question'] . "</A></b><ul>\n";
         }
         else
-           echo '<A name="Entry' . $row["ID"] . '"><li><b>' . $row['Question'] . '</b><P>' .$row['Answer'];
+           echo '<li><A name="Entry' . $row["ID"] . '"></a><b>' . $row['Question'] .
+              "</b>\n<p>\n" . add_line_breaks($row['Answer']);
      }
 
 
-     echo "</table></table></ul></ul>\n";
+     echo "</ul></table></ul></table>\n";
   }
   else
   {
