@@ -75,9 +75,6 @@ disable_cache();
 
    if( $type == "INVITATION" )
    {
-      if( $komi > 200 or $komi < -200 )
-         error("komi_range");
-
       if( $color == "White" )
       {
          $Black_ID = $opponent_ID;
@@ -95,11 +92,15 @@ disable_cache();
          error( "no_initial_rating" );
       }
 
+      $komi = $komi_m;
       $tomove = $Black_ID;
-      if($handicap_type == 'conv' ) $tomove = -1;
-      else if($handicap_type == 'proper' ) $tomove = -2;
-      else if($handicap_type == 'nigiri' ) $tomove = -3;
-      else if($handicap_type == 'double' ) $tomove = -4;
+      if($handicap_type == 'conv' ) { $tomove = -1; $komi = 0; }
+      else if($handicap_type == 'proper' ) { $tomove = -2; $komi = 0; }
+      else if($handicap_type == 'nigiri' ) { $tomove = -3; $komi = $komi_n; }
+      else if($handicap_type == 'double' ) { $tomove = -4; $komi = $komi_d; }
+
+      if( $komi > 200 or $komi < -200 )
+         error("komi_range");
 
       $hours = $timevalue;
       if( $timeunit != 'hours' )

@@ -140,17 +140,17 @@ function game_settings_form($my_ID=NULL, $gid=NULL)
                          'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
                          'SELECTBOX', 'handicap', 1, $handi_array, $Handicap, false,
                          'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                         'TEXTINPUT', 'komi', 5, 5, $Komi );
+                         'TEXTINPUT', 'komi_m', 5, 5, $Komi );
 
    echo form_insert_row( 'DESCRIPTION', T_('Even game with nigiri'),
                          'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
                          'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                         'TEXTINPUT', 'komi', 5, 5, $Komi );
+                         'TEXTINPUT', 'komi_n', 5, 5, $Komi );
 
    echo form_insert_row( 'DESCRIPTION', T_('Double game'),
                          'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
                          'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                         'TEXTINPUT', 'komi', 5, 5, $Komi );
+                         'TEXTINPUT', 'komi_d', 5, 5, $Komi );
 
 
 
