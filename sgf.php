@@ -25,7 +25,7 @@ require_once( "include/rating.php" );
 
 $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
 $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
-$reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0'
+$reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_entity_decode()
 function reverse_htmlentities( $str )
 {
  global $reverse_htmlentities_table;
@@ -34,7 +34,7 @@ function reverse_htmlentities( $str )
 
 function sgf_simpletext( $str )
 {
-   return str_replace("]","\]", str_replace("\\","\\\\",
+   return str_replace("]","\\]", str_replace("\\","\\\\",
          ereg_replace("[\x01-\x20]+", " ", reverse_htmlentities( $str )
       ) ) );
 }
@@ -222,11 +222,12 @@ $array=array();
       'Games.Flags+0 AS flags, ' .
       'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' .
       'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
+       $field_owned .
       'black.Name AS Blackname, ' .
       'black.Handle AS Blackhandle, ' .
       "IF(Games.Status='FINISHED', Games.Black_End_Rating, black.Rating2 ) AS Blackrating, " .
       'white.Name AS Whitename, ' .
-      'white.Handle AS Whitehandle, ' . $field_owned .
+      'white.Handle AS Whitehandle, ' .
       "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
       'FROM Games, Players AS black, Players AS white ' .
       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
@@ -240,21 +241,20 @@ $array=array();
 
    if ( $owned_comments )
    {
+      $owned_comments = DAME;
       if ($Blackhandle == @$_COOKIE['handle'])
       {
-         if( $Blackscode != @$_COOKIE['sessioncode'] or $Blackexpire < $NOW )
-            $owned_comments = false;
+         if( $Blackscode == @$_COOKIE['sessioncode'] && $Blackexpire >= $NOW )
+            $owned_comments = BLACK ;
       }
       elseif ($Whitehandle == @$_COOKIE['handle'])
       {
-         if( $Whitescode != @$_COOKIE['sessioncode'] or $Whiteexpire < $NOW )
-            $owned_comments = false;
-      }
-      else
-      {
-            $owned_comments = false;
+         if( $Whitescode == @$_COOKIE['sessioncode'] && $Whiteexpire >= $NOW )
+            $owned_comments = WHITE ;
       }
    }
+   else
+      $owned_comments = DAME;
 
    $node_com = "";
 
@@ -382,7 +382,16 @@ $array=array();
             $array[$PosX][$PosY] = $Stone;
 
             //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
-            if( !$owned_comments )
+            if( $owned_comments == BLACK or $owned_comments == WHITE )
+            {
+               if( $Status != 'FINISHED' && $owned_comments != $Stone )
+                  $Text = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text));
+
+                  if(  $Text )
+                     $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
+                           . ": " . $Text ;
+            }
+            else //SGF query from an observer
             {
                if( $Status != 'FINISHED' )
                   $Text = preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text);
@@ -400,15 +409,6 @@ $array=array();
                      $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
                            . ": " . $Text ;
                }
-            }
-            else
-            {
-               if( $Status != 'FINISHED' )
-                  $Text = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text));
-
-                  if(  $Text )
-                     $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
-                           . ": " . $Text ;
             }
             $Text="";
 
@@ -552,9 +552,21 @@ $array=array();
          $node_com.= "\nBlack_End_Rating: $Black_End_Rating" ;
          */
       }
-      sgf_echo_comment( $node_com );
-      $node_com= "";
    }
+
+   if( $owned_comments == BLACK )
+     $notes = trim($Black_Notes);
+   elseif( $owned_comments == WHITE )
+     $notes = trim($White_Notes);
+   else
+     $notes = '';
+
+   if( !empty($notes) )
+     $node_com.= "\n\nNotes - " . ( $owned_comments == WHITE ? $Whitename : $Blackname )
+                           . ":\n" . $notes ;
+
+   sgf_echo_comment( $node_com );
+   $node_com= "";
 
    echo "\n)\n";
 }
