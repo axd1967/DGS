@@ -22,6 +22,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 /* The code in this file is written by Ragnar Ouchterlony */
 
 $KNOWN_LANGUAGES = array();
+$CHARACTER_ENCODINGS = array();
 
 class Language
 {
@@ -48,11 +49,12 @@ class Language
     }
 }
 
-function add_to_known_languages( $lang, $lang_full_name )
+function add_to_known_languages( $lang, $lang_full_name, $charenc )
 {
-  global $KNOWN_LANGUAGES, $LANG_UPDATE_TIMESTAMPS;
+  global $KNOWN_LANGUAGES, $CHARACTER_ENCODINGS;
 
   $KNOWN_LANGUAGES[ $lang ] = $lang_full_name;
+  $CHARACTER_ENCODINGS[ $lang ] = $charenc;
 }
 
 function get_known_languages()

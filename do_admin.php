@@ -40,7 +40,7 @@ require( "include/translation_info.php" );
 
   if( $addlanguage )
     {
-      if( strlen( $twoletter ) < 2 || empty( $langname ) )
+      if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
         error("admin_add_lang_missing_field");
 
       $k_langs = get_known_languages_with_full_names();
@@ -59,10 +59,11 @@ require( "include/translation_info.php" );
       $new_all_languages_php_code = $translation_template_copyright . "\n";
       foreach( $k_langs as $lang => $desc )
         $new_all_languages_php_code .=
-        "add_to_known_languages( \"$lang\", \"$desc\" );\n";
+        "add_to_known_languages( \"$lang\", " .
+        "\"$desc\", \"".$CHARACTER_ENCODINGS[$lang]."\" );\n";
 
       $new_all_languages_php_code .=
-        "add_to_known_languages( \"$twoletter\", \"$langname\" );\n";
+        "add_to_known_languages( \"$twoletter\", \"$langname\", \"$charenc\" );\n";
       $new_all_languages_php_code .= "\n?>\n";
 
       write_to_file( "translations/all_languages.php", $new_all_languages_php_code );

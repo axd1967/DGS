@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-add_to_known_languages( "en", "English" );
-add_to_known_languages( "sv", "Svenska" );
+add_to_known_languages( "en", "English", 'iso-8859-1' );
+add_to_known_languages( "sv", "Svenska", 'iso-8859-1' );
 
 ?>

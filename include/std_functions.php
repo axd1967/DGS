@@ -134,7 +134,6 @@ function disable_cache($stamp=NULL)
    header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
    header ('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
    header ('Pragma: no-cache');                                              // HTTP/1.0
-
    if( !$stamp )
       header ('Last-Modified: ' . gmdate('D, d M Y H:i:s', $NOW) . ' GMT');    // Always modified
    else
@@ -169,6 +168,12 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
      {
        $the_translator->change_language( $player_row['Lang'] );
      }
+
+   if( strcmp($the_translator->current_language,'C') == 0  )
+     header ('Content-Type: text/html; charset=ISO-8859-1'); // Character-encoding
+   else
+     header ('Content-Type: text/html; '.
+             $CHARACTER_ENCODINGS[ $the_translator->current_language ]); // Character-encoding
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>

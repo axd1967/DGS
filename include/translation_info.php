@@ -208,6 +208,10 @@ array(
       'Change profile' =>
       array( 'Groups' => array( 'Edit profile' ) ),
 
+      /* Found in these files: admin.php */
+      'Character encoding (i.e. \'iso-8859-1\')' =>
+      array( 'Groups' => array( 'Admin' ) ),
+
       /* Found in these files: edit_bio.php */
       'City' =>
       array( 'Groups' => array( 'Edit bio' ) ),

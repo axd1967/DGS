@@ -46,6 +46,8 @@ require( "include/form_functions.php" );
                         'TEXTINPUT', 'twoletter', 30, 10, '' );
   echo form_insert_row( 'DESCRIPTION', T_('Language name (i.e. English)'),
                         'TEXTINPUT', 'langname', 30, 50, '' );
+  echo form_insert_row( 'DESCRIPTION', T_("Character encoding (i.e. 'iso-8859-1')"),
+                        'TEXTINPUT', 'charenc', 30, 50, '' );
   echo form_insert_row( 'SUBMITBUTTON', 'addlanguage', T_('Add language') );
 
   /* Set translator privileges for user */
