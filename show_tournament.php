@@ -95,10 +95,89 @@ function make_applicationperiod_string( $app_p, $soap )
        $_GET['update'] == 't' and
        in_array( $player_row['ID'], $t->ListOfOrganizers ) )
    {
+      $t->Name = trim( $_POST['name'] );
+      $t->Description = trim( $_POST['description'] );
+
+      $query = "UPDATE Tournament SET " .
+         "Name='" . $t->Name . "', " .
+         "Description='" . $t->Description . "', ";
+
+
+      if( isset( $_POST['minpart'] ) and is_numeric( $_POST['minpart'] ) )
+      {
+         $t->MinParticipants = $_POST['minpart'];
+         $query .= "MinParticipants=" . $t->MinParticipants . ", ";
+      }
+
+      if( isset( $_POST['maxpart'] ) and is_numeric( $_POST['maxpart'] ) )
+      {
+         $t->MaxParticipants = $_POST['maxpart'];
+         $query .= "MaxParticipants=" . $t->MaxParticipants . ", ";
+      }
+      else
+      {
+         $t->MaxParticipants = null;
+         $query .= "MaxParticipants=NULL, ";
+      }
+
+      $current_time = getdate( $NOW );
+      if( isset( $_POST['ap_start_day'] ) and
+          is_numeric( $_POST['ap_start_day'] ) and
+          $_POST['ap_start_day'] >= 1 and
+          $_POST['ap_start_day'] <= 31 and
+
+          isset( $_POST['ap_start_month'] ) and
+          is_numeric( $_POST['ap_start_month'] ) and
+          $_POST['ap_start_month'] >= 1 and
+          $_POST['ap_start_month'] <= 12 and
+
+          isset( $_POST['ap_start_year'] ) and
+          is_numeric( $_POST['ap_start_year'] ) and
+          $_POST['ap_start_year'] >= $current_time['year'] and
+          $_POST['ap_start_year'] <= $current_time['year']+2 )
+      {
+         $t->StartOfApplicationPeriod = 
+            mktime( 0, 0, 0,
+                    $_POST['ap_start_month'],
+                    $_POST['ap_start_day'],
+                    $_POST['ap_start_year'] );
+         $query .= "StartOfApplicationPeriod=FROM_UNIXTIME(" .
+            $t->StartOfApplicationPeriod . "), ";
+      }
+
+      if( isset( $_POST['ap_length'] ) and is_numeric( $_POST['ap_length'] ) )
+      {
+         $t->ApplicationPeriod = $_POST['ap_length'];
+         $query .= "ApplicationPeriod=" . $t->ApplicationPeriod . ", ";
+      }
+      else
+      {
+         $t->ApplicationPeriod = null;
+         $query .= "ApplicationPeriod=NULL, ";
+      }
+
+      $t->StrictEndOfApplicationPeriod =
+         ( $_POST['strictend'] == 'Y' ? true : false );
+      $t->ReceiveApplicationsAfterStart =
+         ( $_POST['receive_after_start'] == 'Y' ? true : false );
+      $t->Rated = ( $_POST['rated'] == 'Y' ? true : false );
+      $t->WeekendClock =( $_POST['weekend'] == 'Y' ? true : false );
+
+      $query .=
+         "StrictEndOfApplicationPeriod='" .
+         ($t->StrictEndOfApplicationPeriod ? 'Y' : 'N' ) . "', " .
+         "ReceiveApplicationsAfterStart='" .
+         ($t->ReceiveApplicationsAfterStart ? 'Y' : 'N' ) . "', " .
+         "Rated='" . ($t->Rated ? 'Y' : 'N' ) . "', " .
+         "WeekendClock='" . ($t->WeekendClock ? 'Y' : 'N' ) . "'";
+
+      mysql_query( $query )
+         or error("couldnt_update_tournament");
    }
-   elseif( isset( $_GET['modify'] ) and
-           $_GET['modify'] == 't' and
-           in_array( $player_row['ID'], $t->ListOfOrganizers ) )
+
+   if( isset( $_GET['modify'] ) and
+       $_GET['modify'] == 't' and
+       in_array( $player_row['ID'], $t->ListOfOrganizers ) )
    {
       echo "<center>\n";
       $modify_form = new Form( 'modifyform',
@@ -113,11 +192,50 @@ function make_applicationperiod_string( $app_p, $soap )
                                     'TEXTAREA', 'description', 50, 8, $t->Description ) );
       $modify_form->add_row( array( 'DESCRIPTION', T_('Allowed participants'),
                                     'TEXT', T_('Between'),
-                                    'TEXTINPUT', 'min', 6, 10, $t->MinParticipants,
+                                    'TEXTINPUT', 'minpart', 6, 10, $t->MinParticipants,
                                     'TEXT', "&nbsp;" . T_('and') . "&nbsp;",
-                                    'TEXTINPUT', 'max', 6, 10, $t->MaxParticipants,
+                                    'TEXTINPUT', 'maxpart', 6, 10, $t->MaxParticipants,
                                     'TEXT', "&nbsp;" . T_('particpants') ) );
-      //TODO: Add input field for applicationperiod.
+
+      $current_month = getdate( $NOW );
+      if( is_null( $t->StartOfApplicationPeriod ) )
+      {
+         $default_day = array( 'mday' => 0, 'mon' => 0, 'year' => 0 );
+      }
+      else
+      {
+         $default_day = getdate( $t->StartOfApplicationPeriod );
+      }
+
+      $day_array = array( 0 => '' );
+      for( $bs = 1; $bs <= 31; $bs++ )
+      {
+         $day_array[$bs]=$bs;
+      }
+
+      $month_array = array( 0 => '',
+                            1 => T_('January'), T_('February'), T_('March'),
+                            T_('April'),        T_('May'),      T_('June'),
+                            T_('July'),         T_('August'),   T_('September'),
+                            T_('October'),  T_('November'), T_('December') );
+      $year_array = array( 0 => '' );
+      for( $bs = $current_month['year']; $bs <= $current_month['year']+2; $bs++ )
+      {
+         $year_array[$bs]=$bs;
+      }
+
+      $modify_form->add_row( array( 'DESCRIPTION', T_('Applicationperiod'),
+                                    'TEXT', T_('Starting'),
+                                    'SELECTBOX', 'ap_start_day', 1,
+                                    $day_array, $default_day['mday'], false,
+                                    'SELECTBOX', 'ap_start_month', 1,
+                                    $month_array, $default_day['mon'], false,
+                                    'SELECTBOX', 'ap_start_year', 1,
+                                    $year_array, $default_day['year'], false,
+                                    'TEXT', "&nbsp;" . T_('and continuing for') . "&nbsp;",
+                                    'TEXTINPUT', 'ap_length', 6, 10, $t->Applicationperiod,
+                                    'TEXT', "&nbsp;" . T_('days') ) );
+
       $modify_form->add_row( array( 'DESCRIPTION', T_('Tournament state'),
                                     'TEXT', $TourState_Strings[ $t->State ] ) );
       $modify_form->add_row( array( 'DESCRIPTION', T_('Strict end of application period?'),
@@ -125,12 +243,13 @@ function make_applicationperiod_string( $app_p, $soap )
                                     $t->StrictEndOfApplicationPeriod ) );
       $modify_form->add_row( array( 'DESCRIPTION',
                                     T_('Will tournament receive apllications after start?'),
-                                    'CHECKBOX', 'rated', 'Y', "",
+                                    'CHECKBOX', 'receive_after_start', 'Y', "",
                                     $t->ReceiveApplicationsAfterStart ) );
       $modify_form->add_row( array( 'DESCRIPTION', T_('Rated tournament games?'),
                                     'CHECKBOX', 'rated', 'Y', "", $t->Rated ) );
       $modify_form->add_row( array( 'DESCRIPTION', T_('Weekend clock in tournament games?'),
                                     'CHECKBOX', 'weekend', 'Y', "", $t->WeekendClock ) );
+      $modify_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Update') ) );
       $modify_form->echo_string();
       echo "</center>\n";
    }
@@ -146,7 +265,7 @@ function make_applicationperiod_string( $app_p, $soap )
                                                                  $t->MaxParticipants ) );
       display_row_of_information( T_('Tournament state'), $TourState_Strings[ $t->State ] );
       display_row_of_information( T_('Applicationperiod'),
-                                  make_applicationperiod_string( $t->Applicationperiod,
+                                  make_applicationperiod_string( $t->ApplicationPeriod,
                                                               $t->StartOfApplicationPeriod ) );
       display_row_of_information( T_('Strict end of application period?'),
                                   ($t->StrictEndOfApplicationPeriod ? T_("Yes") : T_("No")) );
