@@ -212,11 +212,11 @@ require_once( "include/rating.php" );
    $reply = trim(get_request_arg('reply'));
    if ($reply)
    {
-      $reply = addslashes(user_reference( true, 1, '', $player_row). " wrote:\n" . $reply) ;
+      $reply = addslashes(user_reference( 1, 1, '', $player_row). " wrote:\n" . $reply) ;
    }
    else
    {
-      $reply = addslashes(user_reference( true, 1, '', $player_row). " has joined your waiting room game.") ;
+      $reply = addslashes(user_reference( 1, 1, '', $player_row). " has joined your waiting room game.") ;
    }
 
    $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .

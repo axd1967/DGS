@@ -231,7 +231,7 @@ function message_info_table($mid, $date, $to_me,
 
    if( $other_id > 0 )
    {
-     $name = user_reference( true, false, '', $other_id, $other_name, $other_handle) ;
+     $name = user_reference( 1, 0, '', $other_id, $other_name, $other_handle) ;
    }
    else
      $name = $other_name; //i.e. T_("Server message");

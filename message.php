@@ -41,7 +41,7 @@ require_once( "include/form_functions.php" );
       else
       {
          $result = mysql_query( "SELECT Handle AS uhandle FROM Players WHERE ID=$uid" );
-         if( mysql_num_rows( $result ) == 1 )
+         if( @mysql_num_rows( $result ) == 1 )
             extract(mysql_fetch_assoc($result));
       }
    }
@@ -86,7 +86,7 @@ require_once( "include/form_functions.php" );
 
       $result = mysql_query( $query ) or error("mysql_query_failed"); //die(mysql_error());
 
-      if( mysql_num_rows($result) != 1  and mysql_num_rows($result) != 2 )
+      if( @mysql_num_rows($result) != 1 and @mysql_num_rows($result) != 2 )
          error("unknown_message");
 
 
@@ -242,17 +242,17 @@ require_once( "include/form_functions.php" );
          if( $Color == BLACK )
          {
             $colortxt = "<img src='17/w.gif' alt='" . T_('White') . "'> " .
-               user_reference( 0, true, '', 0, $other_name, $other_handle) .
+               user_reference( 0, 1, '', 0, $other_name, $other_handle) .
                "&nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
-               user_reference( 0, true, '', $player_row) .
+               user_reference( 0, 1, '', $player_row) .
                '&nbsp;&nbsp;';
          }
          else
          {
             $colortxt = "<img src='17/w.gif' alt='" . T_('White') . "'> " .
-               user_reference( 0, true, '', $player_row) .
+               user_reference( 0, 1, '', $player_row) .
                "&nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
-               user_reference( 0, true, '', 0, $other_name, $other_handle) .
+               user_reference( 0, 1, '', 0, $other_name, $other_handle) .
                '&nbsp;&nbsp;';
          }
 

@@ -704,6 +704,9 @@ function parse_html_safe( $msg)
    return $str;
 }
 
+define('REF_LINK', 0x1);
+define('REF_LINK_ALLOWED', 0x2);
+define('REF_LINK_BLANK', 0x4);
 function make_html_safe( $msg, $some_html=false)
 {
 
@@ -737,14 +740,14 @@ function make_html_safe( $msg, $some_html=false)
                          "\\1".ALLOWED_LT."/a".ALLOWED_GT, $msg);
 
       //link: <game gid[,move]> =>show game
-      $msg=preg_replace("%<game *([0-9]+)( *,? *([0-9]+))? *>%ise",
-                        "game_reference(2,1,\\1,\\3+0)",
-                        $msg);
+      $msg=preg_replace("%<game(_)? *([0-9]+)( *,? *([0-9]+))? *>%ise",
+                        "game_reference(('\\1'=='_'?".REF_LINK_BLANK.":0)+".
+                           REF_LINK_ALLOWED.",1,\\2,\\4+0)", $msg);
       //link: <user uid> or <user =uhandle> =>show user info
       //link: <send uid> or <send =uhandle> =>send a message to user
-      $msg=preg_replace("%<(user|send) *(".HANDLE_TAG_CHAR."?[".HANDLE_LEGAL_REGS."]+) *>%ise",
-                        "\\1_reference(2,1,0,'\\2')",
-                        $msg);
+      $msg=preg_replace("%<(user|send)(_)? *(".HANDLE_TAG_CHAR."?[".HANDLE_LEGAL_REGS."]+) *>%ise",
+                        "\\1_reference(('\\2'=='_'?".REF_LINK_BLANK.":0)+".
+                           REF_LINK_ALLOWED.",1,0,'\\3')", $msg);
 
       // Regular allowed html tags
       $msg = parse_html_safe($msg) ;
@@ -1082,7 +1085,9 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
    {
       $tmp = 'A href="'.$base_path."game.php?gid=$gid" .
                    ($move>0 ? "&move=$move" : "") . '"';
-      if( $link+0==2 )
+      if( $link & REF_LINK_BLANK )
+        $tmp.= ' target="_blank"';
+      if( $link & REF_LINK_ALLOWED )
         $whitename = ALLOWED_LT.$tmp.ALLOWED_GT.$whitename.ALLOWED_LT."/A".ALLOWED_GT ;
       else
         $whitename = "<$tmp>$whitename</A>" ;
@@ -1093,7 +1098,7 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
 function send_reference( $link, $safe, $color, $player_id, $player_name=false, $player_handle=false)
 {
  global $base_path;
-   return user_reference( ($link ? $link+10 : 0)
+   return user_reference( -$link
       , $safe, $color, $player_id, $player_name, $player_handle);
 }
 
@@ -1154,10 +1159,9 @@ function user_reference( $link, $safe, $color, $player_id, $player_name=false, $
       $player_name = "<FONT color=\"$color\">$player_name</FONT>" ;
    if( $link && $legal )
    {
-      $link+= 0;
-      if( $link>10 )
+      if( $link<0 )
       {
-         $link-=10;
+         $link = -$link;
          $tmp = 'A href="'.$base_path."message.php?mode=NewMessage&";
       }
       else
@@ -1166,7 +1170,9 @@ function user_reference( $link, $safe, $color, $player_id, $player_name=false, $
       }
       $tmp.= ( $byid ? "uid=$player_id" 
                  : UHANDLE_NAM."=".str_replace('+','%2B',$player_id) ) . '"';
-      if( $link==2 )
+      if( $link & REF_LINK_BLANK )
+        $tmp.= ' target="_blank"';
+      if( $link & REF_LINK_ALLOWED )
         $player_name = ALLOWED_LT.$tmp.ALLOWED_GT.$player_name.ALLOWED_LT."/A".ALLOWED_GT ;
       else
         $player_name = "<$tmp>$player_name</A>" ;

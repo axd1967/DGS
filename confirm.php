@@ -513,7 +513,7 @@ if( HOT_SECTION )
       {
          //reference: game is deleted => no link
          $Text = addslashes("The game " .
-             game_reference( false, false, $gid, 0, $whitename, $blackname) .
+             game_reference( 0, 0, $gid, 0, $whitename, $blackname) .
              " has been deleted by your opponent");
          $Subject = 'Game deleted';
 
@@ -528,7 +528,7 @@ if( HOT_SECTION )
          update_rating2($gid);
 
          $Text = addslashes("The result in the game " .
-             game_reference( true, false, $gid, 0, $whitename, $blackname) .
+             game_reference( 1, 0, $gid, 0, $whitename, $blackname) .
              " was: <p><center>" . score2text($score,true,true) . "</center><br>");
          $Subject = 'Game result';
 

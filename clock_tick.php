@@ -31,7 +31,8 @@ if( !$is_down )
 
    // Check that ticks are not too frequent
 
-   $result = mysql_query( "SELECT $NOW-UNIX_TIMESTAMP(Lastchanged) AS timediff FROM Clock WHERE ID=201" );
+   $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
+                          "FROM Clock WHERE ID=201 LIMIT 1");
 
    $row = mysql_fetch_array( $result );
 
@@ -114,7 +115,7 @@ if( !$is_down )
 
          // Send messages to the players
          $Text = addslashes("The result in the game " .
-             game_reference( true, false, $gid, 0, $whitename, $blackname).
+             game_reference( 1, 0, $gid, 0, $whitename, $blackname).
              " was: <p><center>" . score2text($score,true,true) . "</center><br>" );
 
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .

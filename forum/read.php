@@ -48,14 +48,14 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
    if( $post_type == 'preview' )
       echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
          "\"><a name=\"preview\"><font size=\"+1\"><b>$sbj</b></font></a><br> " . 
-         T_('by')." " . user_reference( true, true, "black", $player_row) .
+         T_('by')." " . user_reference( 1, 1, "black", $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n" .
          '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
    else
    {
       echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
          "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a><br> " .
-         T_('by')." " . user_reference( true, true, "black", $User_ID, $Name, $Handle) .
+         T_('by')." " . user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
       if( $Lastedited > 0 )
          echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum&thread=$thread&revision_history=$ID\">" . T_('edited') .

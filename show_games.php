@@ -50,7 +50,7 @@ require_once( "include/rating.php" );
 
       $result = mysql_query( "SELECT ID, Name, Handle FROM Players WHERE $where" );
 
-      if( mysql_num_rows($result) != 1 )
+      if( @mysql_num_rows($result) != 1 )
          error("unknown_user");
 
       $user_row = mysql_fetch_array($result);
@@ -137,7 +137,7 @@ require_once( "include/rating.php" );
 
       $query .= "FROM Games,Players " .
          ( $finished ?
-           "LEFT JOIN Ratinglog AS log ON gid=Games.ID AND uid=$uid " : '' ) .
+           "LEFT JOIN Ratinglog AS log ON log.gid=Games.ID AND log.uid=$uid " : '' ) .
          "WHERE " . ( $finished ? "Status='FINISHED' "
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND (( Black_ID=$uid AND White_ID=Players.ID ) " .
@@ -158,13 +158,12 @@ require_once( "include/rating.php" );
    {
       $games_for = ( $finished ? T_('Finished games for %s') : T_('Running games for %s') );
       $title1 = sprintf(  $games_for, make_html_safe($user_row["Name"]) );
-      $title2 = sprintf(  $games_for, user_reference( 1, true, '', $user_row) );
+      $title2 = sprintf(  $games_for, user_reference( 1, 1, '', $user_row) );
    }
 
    start_page( $title1, true, $logged_in, $player_row, button_style() );
 
    echo "<center><h3><font color=$h3_color>$title2</font></H3></center>\n";
-
 
    $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true );
    $gtable->add_tablehead( 2, T_('sgf') );

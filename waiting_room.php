@@ -72,7 +72,7 @@ define('BAD_RATING_COLOR',"ff000033");
 
    echo "<h3><font color=$h3_color><B>". T_("Players waiting") . ":</B></font></h3><p>\n";
 
-   if( mysql_num_rows($result) > 0 )
+   if( @mysql_num_rows($result) > 0 )
    {
       $wrtable->add_tablehead(0, T_('Info'), NULL, NULL, true, 92);
       $wrtable->add_tablehead(1, T_('Name'), 'Name', false);
@@ -236,7 +236,7 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
    echo '<tr><td><b>' . T_('Player') . '<b></td><td>' . 
-      user_reference( true, true, "black", $pid, $Name, $Handle) . "</td></tr>\n";
+      user_reference( 1, 1, "black", $pid, $Name, $Handle) . "</td></tr>\n";
 
    echo '<tr><td><b>' . T_('Rating') . '<b></td><td>' .
       echo_rating($Rating,true,$pid) . "</td></tr>\n";
