@@ -66,7 +66,7 @@ require_once( "include/form_functions.php" );
             'SUBMITBUTTON', 'transladd', T_('Add language for translator') ) );
   $translator_form->add_row(
      array( 'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
-            'SELECTBOX', 'transllang[]', 7,
+            'SELECTBOX', 'transllang[]', 7, //transllang[] is a MULTIPLE select box
             get_language_descriptions_translated(), array(), true,
             'SUBMITBUTTON', 'translpriv', T_('Set user privileges') ) );
 
