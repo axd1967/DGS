@@ -134,7 +134,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," .
        "UNIX_TIMESTAMP(Lastchanged) AS Time, " .
        "(White_ID=$uid)+1 AS Color, " .
-       "opponent.Name, opponent.Handle, opponent.Rating, opponent.ID AS pid " .
+       "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
        "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$uid " .
