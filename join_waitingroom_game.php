@@ -200,7 +200,7 @@ require( "include/rating.php" );
 
    // Send message to notify opponent
 
-   $subject = "I have joined your waiting room game";
+   $subject = '<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game";
 
    $query = "INSERT INTO Messages SET " .
       "From_ID=" . $player_row["ID"] . ", " .
@@ -212,6 +212,10 @@ require( "include/rating.php" );
 
    mysql_query( $query );
 
+   $mid = mysql_insert_id();
+
+   mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+               "($uid, $mid, 'N', 2)");
 
 
    $msg = urlencode(T_('Game joined!'));

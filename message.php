@@ -183,7 +183,7 @@ $mode = $_GET['mode'];
               $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
               $message_form->add_row( array( 'DESCRIPTION', T_('Subject'),
                                              'TEXTINPUT', 'subject', 50, 80,
-                                             $default_subject ) );
+                                             str_replace('"','&quot;',$default_subject )) );
               $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
                                              'TEXTAREA', 'message', 50, 8, "" ) );
               $message_form->add_row( array( 'SUBMITBUTTON', 'send', T_('Send Reply') ) );

@@ -164,7 +164,7 @@ require_once( "include/timezones.php" );
       $row_strings[2] = "<td>" . ( $row['Sender'] == 'Y' ? T_('To') . ': ' : '') .
          "<A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
          make_html_safe($row["other"]) . "</A></td>";
-      $row_strings[3] = "<td>" . make_html_safe($row["Subject"]) . "&nbsp;</td>";
+      $row_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "&nbsp;</td>";
       $row_strings[0] = "<td>" .
          ($row['Replied'] == 'Y' ? '<font color="#009900">A</font>' : '&nbsp;' ) . '</td>';
       $row_strings[4] = "<td>" . date($date_fmt, $row["time"]) . "</td>";

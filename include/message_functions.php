@@ -227,7 +227,8 @@ function message_info_table($mid, $date, $to_me,
       "<td colspan=2>" . ( $sender_id > 0 ? "<A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" : T_("Server message") ) .
       "</td></tr>\n";
 
-   echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>$subject</td></tr>\n" .
+   echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>" .
+      make_html_safe($subject, true) . "</td></tr>\n" .
       "<tr><td valign=\"top\">" .
       ( $reply_mid > 0 ?
         "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" . T_('Replied') . ":</a>" :
