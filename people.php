@@ -50,7 +50,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
   add_contributor( T_("FAQ editor"), "Bjørn Ingmar Berg" );
   add_contributor( T_("FAQ co-editor"), "Frank Schlüter" );
 
-  echo "<tr><td colspan=2>\n";
+  echo "<tr><td colspan=2>&nbsp;<p>\n";
   echo "<center><h3><font color=$h3_color>" .
      T_('Current translators') . "</font></h3></center>\n";
   echo "</td></tr>\n";
