@@ -32,13 +32,13 @@ require_once( "include/countries.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   $msg = @$_GET['msg'];
-   if( @$_GET['uid'] )
-      $uid = @$_GET['uid'];
+   get_request_user( $uid, $uhandle, true);
+   if( $uhandle )
+      $where = "Handle='$uhandle'";
+   elseif( $uid > 0 )
+      $where = "ID=$uid";
    else
-      $uid = $player_row["ID"];
-
-   $my_info = ( $player_row["ID"] == $uid );
+      $where = "ID=" . $player_row["ID"];
 
    $result = mysql_query(
       "SELECT *," .
@@ -47,14 +47,15 @@ require_once( "include/countries.php" );
       "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
       "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
       "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
-      "FROM Players WHERE ID=$uid" );
+      "FROM Players WHERE $where" );
 
    if( mysql_affected_rows() != 1 )
       error("unknown_user");
 
-
    $row = mysql_fetch_array( $result );
+   $uid = $row['ID'];
 
+   $my_info = ( $player_row["ID"] == $uid );
    $name_safe = make_html_safe($row['Name']);
    $handle_safe = $row['Handle'];
 
@@ -63,11 +64,9 @@ require_once( "include/countries.php" );
 
    start_page($title, true, $logged_in, $player_row );
 
-
    echo "<center>";
 
-   if( isset($msg) && $msg )
-      echo "\n<p><b><font color=green>$msg</font></b><hr>";
+   sysmsg(@$_GET['msg']);
 
    echo "<h3><font color=$h3_color>" . $title . '</font></h3>';
 
@@ -88,8 +87,8 @@ require_once( "include/countries.php" );
              '<img title="' . T_($COUNTRIES[$cntr]) . "\" src=\"images/flags/$cntr.gif\">") . '</td>
     <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . make_html_safe($row['Open'],true) . '</td></tr>
     <tr><td><b>' . T_('Activity') . '</b></td><td>' . $activity . '</td></tr>
-    <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating($row['Rating2'],true,$row['ID']) . '</td></tr>
-    <tr><td><b>' . T_('Rank info') . '</b></td><td>' . make_html_safe($row['Rank'],true) . '</td></tr>
+    <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating(@$row['Rating2'],true,$row['ID']) . '</td></tr>
+    <tr><td><b>' . T_('Rank info') . '</b></td><td>' . make_html_safe(@$row['Rank'],true) . '</td></tr>
     <tr><td><b>' . T_('Registration date') . '</b></td><td>' . $row['Registerdate'] . '</td></tr>
     <tr><td><b>' . T_('Last access') . '</b></td><td>' . $lastaccess . '</td></tr>
     <tr><td><b>' . T_('Last move') . '</b></td><td>' . $lastmove . '</td></tr>
