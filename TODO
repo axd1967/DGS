@@ -7,8 +7,6 @@ BIG TASKS
 
 * Rewrite forums
 
-* Translations
-
 
 SMALLER TASKS
 -------------
@@ -25,17 +23,11 @@ SMALLER TASKS
 
 * Adjourn game (for vacations)
 
-* Invite: Two-game-match, nigiri
-
 * Scoring: show more info
 
 * Themes/Layout option
 
-* Consistency checks for games.
-
 * Move speedup (if/then)
-
-* Suggest (handicap/komi)
 
 * Better 'Open' options.
 
@@ -52,8 +44,6 @@ SMALLER TASKS
 * Improve caching
 
 * Area scoring
-
-* Dispute game settings for invitations.
 
 * Waiting room
 
