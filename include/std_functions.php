@@ -893,6 +893,8 @@ function get_request_url()
 
 function get_request_user( &$uid, &$uhandle, $from_referer=false)
 {
+//Priorities: URL(id) > URL(handle) > REFERER(id) > REFERER(handle)
+//Warning: + (a URL reserved char) must be substitued with %2B in 'handle'.
    $uid_nam = 'uid';
    $uid = @$_REQUEST[$uid_nam];
    $uhandle = '';  
