@@ -313,7 +313,7 @@ function get_clock_ticks($clock_used)
 {
    $result = mysql_query( "SELECT Ticks FROM Clock WHERE ID=$clock_used" );
    if( mysql_num_rows( $result ) != 1 )
-      error("Location: error.php?err=mysql_clock_ticks", true);
+      error("mysql_clock_ticks", true);
 
    $row = mysql_fetch_row($result);
    return $row[0]; 
