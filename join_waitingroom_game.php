@@ -102,7 +102,7 @@ require( "include/rating.php" );
 
    $Handicap = 0;
 
-   $Rated = (( $game_row['Rated'] === 'Y' and
+   $Rated = (( $Rated === 'Y' and
                !empty($RatingStatus) and
                !empty($player_row['RatingStatus']) ) ? 'Y' : 'N' );
 
