@@ -140,7 +140,7 @@ require( "include/std_functions.php" );
             !(strpos($row["Flags"],'REPLIED') === false) ) )
       {
          echo "<td align=center><a href=\"messages.php?del=" . $mid . $all_str .
-            "\"> <img width=15 height=16 border=0 src=\"images/trashcan.gif\"></A></td>\n";
+            "\"> <img width=15 height=16 border=0 alt='X' src=\"images/trashcan.gif\"></A></td>\n";
       }
       echo "</tr>\n";
         
@@ -150,21 +150,21 @@ require( "include/std_functions.php" );
     <p>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
-        <td><B><A href=\"new_message.php\">Send message</A></B></td>\n";
+        <td><B><A href=\"new_message.php\">" . _("Send message") . "</A></B></td>\n";
 
    if( $sent==1 )
-      echo "        <td><B><A href=\"messages.php\">Show recieved messages</A></B></td>\n";
+      echo "<td><B><A href=\"messages.php\">" . _("Show recieved messages") . "</A></B></td>\n";
    else
    {
       if( $all==1 )
-         echo "        <td><B><A href=\"messages.php\">Don't show deleted</A></B></td>\n";
+         echo "<td><B><A href=\"messages.php\">" . _("Hide deleted") . "</A></B></td>\n";
       else
-         echo "        <td><B><A href=\"messages.php?all=1\">Show all</A></B></td>\n";
+         echo "<td><B><A href=\"messages.php?all=1\">" . _("Show all") . "</A></B></td>\n";
 
-      echo "        <td><B><A href=\"messages.php?sent=1\">Show sent messages</A></B></td>\n";
+      echo "        <td><B><A href=\"messages.php?sent=1\">" . _("Show sent messages") . "</A></B></td>\n";
    }
 
-   echo "        <td><B><A href=\"messages.php?del=all$all_str\">Delete all</A></B></td>
+   echo "        <td><B><A href=\"messages.php?del=all$all_str\">" . _("Delete all") . "</A></B></td>
       </tr>
     </table>
 ";

@@ -39,16 +39,16 @@ require( "include/rating.php" );
    if( $msg )
       echo "<p><b><font color=green>$msg</font></b><hr>";
 
-   echo "
+   echo '
     <table border=3>
-       <tr><td>Name:</td> <td>" . $player_row["Name"] . "</td></tr>
-       <tr><td>Userid:</td> <td>" . $player_row["Handle"] . "</td></tr>
-       <tr><td>Open for matches:</td> <td>" . $player_row["Open"] . "</td></tr>
-       <tr><td>Rating:</td> <td>";  echo_rating($player_row["Rating"]); 
-   echo "</td></tr>
-       <tr><td>Rank info:</td> <td>" . $player_row["Rank"] . "</td></tr>
+       <tr><td>' . _("Name") . ':</td> <td>' . $player_row["Name"] . '</td></tr>
+       <tr><td>' . _("Userid") . ':</td> <td>' . $player_row["Handle"] . '</td></tr>
+       <tr><td>' . _("Open for matches?") . ':</td> <td>' . $player_row["Open"] . '</td></tr>
+       <tr><td>' . _("Rating") . ':</td> <td>';  echo_rating($player_row["Rating"]); 
+   echo '</td></tr>
+       <tr><td>Rank info:</td> <td>' . $player_row["Rank"] . '</td></tr>
     </table>
-    <p>";
+    <p>';
 
 
    $result = mysql_query("SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " . 
@@ -106,9 +106,9 @@ require( "include/rating.php" );
                          "AND (Black_ID=Players.ID OR White_ID=Players.ID) " .
                          "ORDER BY Lastchanged,Games.ID");
 
-   echo "<HR><B>Your turn to move in the following games:</B><p>\n";
+   echo "<HR><B>" . _("Your turn to move in the following games:") . "</B><p>\n";
    echo "<table border=3>\n";
-   echo "<tr><th>Opponent</th><th>Color</th><th>Size</th><th>Handicap</th><th>moves</th></tr>\n";
+   echo "<tr><th>" . _("Opponent") . "</th><th>" . _("Color") . "</th><th>" . _("Size") . "</th><th>" . _("Handicap") . "</th><th>" . _("Moves") . "</th></tr>\n";
 
 
    while( $row = mysql_fetch_array( $result ) )
@@ -134,9 +134,9 @@ require( "include/rating.php" );
     <p>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
-        <td><B><A href=\"userinfo.php?uid=$uid\">Show/edit userinfo</A></B></td>
-        <td><B><A href=\"show_games.php?uid=$uid\">Show running games</A></B></td>
-        <td><B><A href=\"show_games.php?uid=$uid&finished=1\">Show finished games</A></B></td>
+        <td><B><A href=\"userinfo.php?uid=$uid\">" . _("Show/edit userinfo") . "</A></B></td>
+        <td><B><A href=\"show_games.php?uid=$uid\">" . _("Show running games") . "</A></B></td>
+        <td><B><A href=\"show_games.php?uid=$uid&finished=1\">" . _("Show finished games") . "</A></B></td>
       </tr>
     </table>
 ";

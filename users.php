@@ -48,13 +48,13 @@ require( "include/rating.php" );
 
    echo "<table border=3 align=center>\n";
    echo "<tr>" .
-      "<th><A href=\"users.php?order=Name" . ($order=='Name'? '+DESC' : '') . "\">Player</A></th>" .
+      "<th><A href=\"users.php?order=Name" . ($order=='Name'? '+DESC' : '') . "\">" . _("Name") . "</A></th>" .
       "<th><A href=\"users.php?order=Handle" . ($order=='Handle'? '+DESC' : '') . 
-      "\">userid</A></th>" .
+      "\">" . _("Userid") . "</A></th>" .
       "<th>Rank info</th>" .
       "<th width=14>&nbsp;&nbsp;&nbsp;&nbsp;<A href=\"users.php?order=Rating" . 
-      ($order=='Rating DESC'? '' : '+DESC') . "\">Rating</A>&nbsp;&nbsp;&nbsp;&nbsp;</th>" .
-      "<th>Open for matches?</th></tr>\n";
+      ($order=='Rating DESC'? '' : '+DESC') . "\">" . _("Rating") . "</A>&nbsp;&nbsp;&nbsp;&nbsp;</th>" .
+      "<th>" . _("Open for matches?") . "</th></tr>\n";
 
 
 

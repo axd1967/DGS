@@ -79,6 +79,19 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
    if( $no_cache )
       disable_cache();
 
+
+//     $use_gz = true; 
+//     if (eregi("NetCache|Hasd_proxy", $HTTP_SERVER_VARS['HTTP_VIA'])
+//         || eregi("^Mozilla/4\.0[^ ]", $USER_AGENT))
+//     {
+//        $use_gz = false;
+//     }
+//     if ($use_gz)
+//        ob_start("ob_gzhandler");
+//     else
+//        ob_start();
+//     header("Vary: Accept-Encoding");
+
    ob_start("ob_gzhandler");
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -106,19 +119,19 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
 
 
    if( $logged_in and !$is_down ) 
-      echo '          <td colspan=3 align=right width="50%"><font color=FFFC70><B>Logged in as: ' . $player_row["Handle"] . ' </B></font></td>';
+      echo '          <td colspan=3 align=right width="50%"><font color=FFFC70><B>' . _("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
    else
-      echo '          <td colspan=3 align=right width="50%"><font color=FFFC70><B>Not logged in</B></font></td>';
+      echo '          <td colspan=3 align=right width="50%"><font color=FFFC70><B>' . _("Not logged in") . '</B></font></td>';
 
    echo '
         </tr>
         <tr bgcolor="F7F5E3" align="center">
-          <td><B><A href="' . $HOSTBASE . '/status.php">Status</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/messages.php">Messages</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/invite.php">Invite</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/users.php">Users</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/phorum/index.php">Forums</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/docs.php">Docs</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/status.php">' . _("Status") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/messages.php">' . _("Messages") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/invite.php">' . _("Invite") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/users.php">' . _("Users") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/phorum/index.php">' . _("Forums") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/docs.php">' . _("Docs") . '</A></B></td>
         </tr>
     </table>
     <BR>
@@ -147,10 +160,10 @@ function end_page( $new_paragraph = true )
         <td align="right" width="50%">';
    if( $show_time )
       echo '
-        <font color=FFFC70><B>Page created in ' . 
+        <font color=FFFC70><B>' . _("Page created in") . ' ' . 
          sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s</B></font></td>';
    else
-      echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=FFFC70><B>Logout</B></font></A></td>';
+      echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=FFFC70><B>' . _("Logout") . '</B></font></A></td>';
 
    echo '
       </tr>
@@ -173,11 +186,15 @@ function error($err, $mysql=true)
    jump_to( $uri );
 }
 
-function jump_to($uri)
+function jump_to($uri, $absolute=false)
 {
    global $HOSTBASE;
 
-   header( "Location: " . $HOSTBASE . '/' . $uri );
+   if( $absolute )
+      header( "Location: " . $uri );
+   else
+      header( "Location: " . $HOSTBASE . '/' . $uri );
+
    exit;
 }
 
@@ -414,14 +431,15 @@ function echo_time($hours)
 
 function is_logged_in($hdl, $scode, &$row)
 {
-   global $time, $show_time, $HOSTBASE, $REQUEST_URI, $HOSTNAME, $HTTP_HOST;
+   global $time, $show_time, $HOSTBASE, $PHP_SELF, $HOSTNAME, $HTTP_HOST;
    global $ActivityHalvingTime, $ActivityForHit;
    $time = getmicrotime();
    $show_time = false;
 
    if( $HTTP_HOST != $HOSTNAME )
-      jump_to( "http://" . $HOSTNAME . $REQUEST_URI );
-
+   {
+      jump_to( "http://" . $HOSTNAME . $PHP_SELF, true );
+   }
 
    if( !$hdl )
       return false;
@@ -430,10 +448,12 @@ function is_logged_in($hdl, $scode, &$row)
                           "Flags+0 AS flags " .
                           "FROM Players WHERE Handle='$hdl'" );
     
+
    if( mysql_num_rows($result) != 1 )
       return false;
 
    $row = mysql_fetch_array($result);
+
 
    if( $row["Sessioncode"] != $scode or $row["Expire"] < time() )
       return false;
@@ -446,7 +466,7 @@ function is_logged_in($hdl, $scode, &$row)
    $query .= " WHERE Handle='$hdl'";
 
    $result = mysql_query( $query );
-    
+
    if( mysql_affected_rows() != 1 )
       return false;
     
@@ -459,6 +479,14 @@ function is_logged_in($hdl, $scode, &$row)
       putenv('TZ='.$row["Timezone"] );
 
 
+
+//     bindtextdomain ("dragon", "./locale");
+//     textdomain ("dragon");
+
+//     putenv("LANG=" . $row["Lang"]);
+
+//  //   setlocale(LC_ALL, $row["Lang"]);
+//     setlocale(LC_ALL, "");
 
    return true;
 }
