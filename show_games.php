@@ -44,7 +44,7 @@ require( "include/std_functions.php" );
                             " WHERE Status='FINISHED' AND " . 
                             "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
                             "( White_ID=$uid AND Black_ID=Players.ID )) " .
-                            "ORDER BY Lastchanged DESC");
+                            "ORDER BY Lastchanged DESC,ID DESC");
       start_page("Finished games for " . $user_row["Name"], true, $logged_in, $player_row );
    }
    else
@@ -61,25 +61,40 @@ require( "include/std_functions.php" );
    echo "<center><h4>" . ( $finished ? "Finished" : "Running" ) . " Games for <A href=\"userinfo.php?uid=$uid\">" . $user_row["Name"] . " (" . $user_row["Handle"] . ")</A></H4></center>\n";
    echo "<table border=3 align=center>\n";
    echo "<tr><th>Opponent</th><th>Color</th><th>Size</th><th>Handicap</th><th>Komi</th>" .
-      "<th>" .( $finished ? "Score" : "Moves" ) . "</th><th>sgf</th><th>html</th>\n";
+      "<th>" .( $finished ? "Score" : "Moves" ) . "</th><th>sgf</th><th>html</th>";
+   if( $finished ) echo "<th>win?</th>";
+   
+   echo "\n";
 
 
    while( $row = mysql_fetch_array( $result ) )
    {
       if( $uid == $row["Black_ID"] )
-         $col = "Black";
+         $color = "Black"; 
       else
-         $col = "White";
+         $color = "White"; 
 
       echo "<tr><td><A href=\"userinfo.php?uid=" . $row["uid"] . "\">" . $row["Name"] . "</td>" .
-         "<td>$col</td>" .
-         "<td>" . $row["Size"] . "</td>" .
+      "<td bgcolor=$color><font color=$color>$color</font></td>" .
+      "<td>" . $row["Size"] . "</td>" .
          "<td>" . $row["Handicap"] . "</td>" .
          "<td>" . $row["Komi"] . "</td>" .
          "<td>" . ($finished ? score2text($row["Score"], false) : $row["Moves"] ) . "</td>" .
-         "<td><A href=\"sgf.php?gid=" . $row["ID"] . "\">sgf</td>" .
-         "<td><A href=\"game.php?gid=" . $row["ID"] . "\">html</td>" .
-         "</tr>\n";
+      "<td><A href=\"sgf.php?gid=" . $row["ID"] . "\">sgf</td>" .
+      "<td><A href=\"game.php?gid=" . $row["ID"] . "\">html</td>";
+      if( $finished )
+      {
+         if( $color == "White" xor $row["Score"] > 0.0 )
+            $image = 'no.gif';
+         else
+            $image = 'ok.gif';
+
+         if( abs($row["Score"]) < 0.1 )
+            $image = 'dash.gif';
+
+      echo"<td align=center><img src=\"images/$image\"></td>\n";
+      }
+      echo "</tr>\n";
    }
 
    echo "</table>\n";
