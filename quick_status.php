@@ -56,6 +56,7 @@ else
         "ON other.mid=me.mid AND other.Sender!=me.Sender " .
       "LEFT JOIN Players ON Players.ID=other.uid " .
       "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
+              "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date DESC";
 
    $result = mysql_query( $query ) or die(mysql_error());
