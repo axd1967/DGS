@@ -49,12 +49,6 @@ require_once( "include/make_translationfiles.php" );
       if( $numrows == 0 and !$untranslated )
          error('translation_bad_language_or_group');
 
-   //chdir( 'translations' );
-   $fd = fopen( "translations/rodivaltmp.php", 'w' )
-            or error("couldnt_open_rodival_file");
-   fwrite( $fd, serialize($_POST));
-   fclose( $fd );
-
 
   $replace_set = '';
   $log_set = '';

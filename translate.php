@@ -158,9 +158,11 @@ When translating you should keep in mind the following things:
       else
          $string = $translate_lang;
 
-      $translate_form->add_row( array( 'CELL', 99, 'align="center"', 'TEXT', "- $string -" ) );
-
       list(,$translate_encoding) = explode('.', $translate_lang);
+
+      $string.= ' / ' . $translate_encoding ;
+
+      $translate_form->add_row( array( 'CELL', 99, 'align="center"', 'TEXT', "- $string -" ) );
 
       while( $row = mysql_fetch_array($result) )
       {
@@ -170,11 +172,13 @@ When translating you should keep in mind the following things:
                                          strlen( $string ) / $hsize + 2,
                                          substr_count( $string, "\n" ) + 2 ),
                                     12 )));
+         //$transl = textarea_safe( $row['Text'], $translate_encoding);
+         //$transl = textarea_safe( $row['Text'], 'iso-8859-1');
+         $transl = $row['Text'];
          $form_row = array( 'TEXT', nl2br( textarea_safe($string, 'iso-8859-1' ) ),
                             'TD',
                             'TEXTAREA', "transl" . $row['Original_ID'],
-                              $hsize, $vsize,
-                              textarea_safe( $row['Text'], $translate_encoding),
+                              $hsize, $vsize, $transl,
                             'CELL', 1, 'nowrap',
                             'CHECKBOX', 'same' . $row['Original_ID'], 'Y',
                               'untranslated', $row['Text'] === '',

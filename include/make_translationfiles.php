@@ -111,8 +111,13 @@ function make_include_files($language=null, $group=null)
                  gmdate('Y-m-d H:i:s T', $NOW) . " */\n\n");
       }
 
+if($lang == 'jp.shift-jis'){//Japanese 2bytes char Pb
+      fwrite( $fd, "\$Tr[\"" . slashed($row['Original']) . "\"] = urldecode(\"" .
+              slashed(urlencode($row['Text'])) . "\");\n" );
+}else{
       fwrite( $fd, "\$Tr[\"" . slashed($row['Original']) . "\"] = \"" .
               slashed($row['Text']) . "\";\n" );
+}
    }
 
 
