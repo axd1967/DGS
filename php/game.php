@@ -102,15 +102,16 @@ if( !$action )
 if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0) )
 {
   $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
+  $hours = ( $ticks > 0 ? (int)(($ticks-1) / $tick_frequency) : 0 );
 
   if( $to_move == BLACK )
     {
-      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
+      time_remaining($hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, false);
     }
   else
     {
-      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
+      time_remaining($hours, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, false);
     }
 }

@@ -108,11 +108,11 @@ if( $Maintime > 0 or $Byotime > 0)
 {
 
   $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
-  $hours = (int)($ticks / $tick_frequency);
+  $hours = ( $ticks > 0 ? (int)(($ticks-1) / $tick_frequency) : 0 );
 
   if( $to_move == BLACK )
     {
-      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
+      time_remaining($hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, true);
       $time_query = "Black_Maintime=$Black_Maintime, " .
          "Black_Byotime=$Black_Byotime, " .
@@ -120,7 +120,7 @@ if( $Maintime > 0 or $Byotime > 0)
     }
   else
     {
-      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
+      time_remaining($hours, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, true);
       $time_query = "White_Maintime=$White_Maintime, " .
          "White_Byotime=$White_Byotime, " .
@@ -148,6 +148,8 @@ switch( $action )
        check_move();
 
        $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
+
+       reset($prisoners);
 
        while( list($dummy, list($x,$y)) = each($prisoners) )
              {
@@ -285,7 +287,7 @@ switch( $action )
               "Moves=$Moves, " .
               "Last_X=-3, " .
               "Status='FINISHED', " .
-              "ToMove_ID=NULL, " .
+              "ToMove_ID=0, " .
               "Score=$score, " . $time_query .
               "Flags=0" .
               " WHERE ID=$gid";
@@ -350,10 +352,17 @@ switch( $action )
               "Last_X=-2, " .
               "Status='$next_status', " . $time_query;
 
+         if( $next_status != 'FINISHED' )
+           {
               if( $next_to_move == BLACK )
                   $game_query .= "ToMove_ID=$Black_ID, ";
               else
                   $game_query .= "ToMove_ID=$White_ID, ";
+           }
+         else
+           $game_query .= "ToMove_ID=0, ";
+
+                
 
               $game_query .=
                    "Flags=0, " .

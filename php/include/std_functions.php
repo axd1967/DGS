@@ -67,7 +67,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
     if( $no_cache )
         disable_cache();
     
-    //    ob_start();
+    ob_start();
 echo '
 <HTML>
   <HEAD>
@@ -143,7 +143,7 @@ echo '
 </HTML>
 ';
 
- // ob_end_flush();
+ ob_end_flush();
 }
 
 function make_session_code()
@@ -257,13 +257,10 @@ function mod($a,$b)
         return (int) $a % $b; 
 } 
 
-function time_remaining($ticks, &$main, &$byotime, &$byoper, $startmaintime, 
+function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime, 
                         $byotype, $startbyotime, $startbyoper, $has_moved)
 {
-    global $tick_frequency;
-
-    if( $ticks > 0 ) $ticks--;
-    $elapsed = (int)($ticks / $tick_frequency);
+    $elapsed = $hours;
 
     if( $main > $elapsed ) // still have main time left
         {
