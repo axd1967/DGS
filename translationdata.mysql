@@ -1,12 +1,6 @@
--- MySQL dump 9.07
---
--- Host: samurajdata.se    Database: gowww
----------------------------------------------------------
--- Server version	3.23.54
-
---
--- Dumping data for table 'TranslationTexts'
---
+#
+# Dumping data for table 'TranslationTexts'
+#
 
 INSERT INTO TranslationTexts VALUES (1,'Sorry, you may not pass before all handicap stones are placed.',NULL,'Done');
 INSERT INTO TranslationTexts VALUES (2,'Sorry, the game has already finished.',NULL,'Y');
@@ -670,9 +664,9 @@ INSERT INTO TranslationTexts VALUES (668,'Opening play.  (Established pattern fo
 INSERT INTO TranslationTexts VALUES (669,'Seki',101,'Done');
 INSERT INTO TranslationTexts VALUES (670,'Seki means \"dual life\".  Seki is a local impasse in wich two groups share liberties, and neither side can capture the other.',101,'Done');
 
---
--- Dumping data for table 'Translations'
---
+#
+# Dumping data for table 'Translations'
+#
 
 INSERT INTO Translations VALUES (96,1,'Admin');
 INSERT INTO Translations VALUES (100,1,'och');
@@ -6115,9 +6109,9 @@ INSERT INTO Translations VALUES (610,9,'Marcar como intranduz&iacute;vel');
 INSERT INTO Translations VALUES (611,9,'Marcar como tranduz&iacute;vel');
 INSERT INTO Translations VALUES (513,9,'FAQ');
 
---
--- Dumping data for table 'TranslationLanguages'
---
+#
+# Dumping data for table 'TranslationLanguages'
+#
 
 INSERT INTO TranslationLanguages VALUES (1,'sv.iso-8859-1','Swedish');
 INSERT INTO TranslationLanguages VALUES (2,'no.iso-8859-1','Norwegian');
@@ -6133,9 +6127,9 @@ INSERT INTO TranslationLanguages VALUES (11,'nl.iso-8859-1','Dutch');
 INSERT INTO TranslationLanguages VALUES (12,'th.tis-620','Thai');
 INSERT INTO TranslationLanguages VALUES (14,'fi.iso-8859-1','Finnish');
 
---
--- Dumping data for table 'TranslationGroups'
---
+#
+# Dumping data for table 'TranslationGroups'
+#
 
 INSERT INTO TranslationGroups VALUES (1,'Common');
 INSERT INTO TranslationGroups VALUES (2,'Start');
@@ -6147,9 +6141,9 @@ INSERT INTO TranslationGroups VALUES (7,'Admin');
 INSERT INTO TranslationGroups VALUES (8,'Error');
 INSERT INTO TranslationGroups VALUES (9,'FAQ');
 
---
--- Dumping data for table 'TranslationFoundInGroup'
---
+#
+# Dumping data for table 'TranslationFoundInGroup'
+#
 
 INSERT INTO TranslationFoundInGroup VALUES (1,8);
 INSERT INTO TranslationFoundInGroup VALUES (2,8);
@@ -6907,9 +6901,9 @@ INSERT INTO TranslationFoundInGroup VALUES (668,9);
 INSERT INTO TranslationFoundInGroup VALUES (669,9);
 INSERT INTO TranslationFoundInGroup VALUES (670,9);
 
---
--- Dumping data for table 'TranslationPages'
---
+#
+# Dumping data for table 'TranslationPages'
+#
 
 INSERT INTO TranslationPages VALUES (3,'error.php',8);
 INSERT INTO TranslationPages VALUES (2,'include/std_functions.php',1);
