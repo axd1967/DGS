@@ -38,6 +38,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  * * Description
  * * Textinput
+ * * Password
+ * * Hidden
  * * Textarea
  * * Selectbox
  * * Radiobuttons
@@ -48,6 +50,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *** Other things you could have in a row.
  *
  * * BR -- Forces a linebreak within the row.
+ * * TD -- Forces a column change.
  *
  *** Example:
  *
@@ -85,7 +88,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * * To be able to use the type functions separately
  *   (probably possible already but not tested).
  * * Breaks within radiobuttons.
- * * New columns.
  *
  */
 
@@ -129,7 +131,7 @@ function form_end()
   $form_started = false;
   $result =
     "  </TABLE>\n".
-    "</FORM>";
+    "</FORM>\n";
   return $result;
 }
 
@@ -185,8 +187,47 @@ function form_add_description( $description )
 function form_insert_text_input( $name, $size, $maxlength, $initial_value )
 {
   $result =
-    "<INPUT type=\"text\" name=\"".$name."\" value=\"".$initial_value."\" ".
-    "size=\"".$size."\" maxlength=\"".$maxlength."\">";
+    "<INPUT type=\"text\" name=\"".$name."\" value=\"".$initial_value."\"".
+    " size=\"".$size."\" maxlength=\"".$maxlength."\">";
+  return $result;
+}
+
+/*
+ * --------------------------------------------------------------------------
+ *                        form_insert_password_input
+ * --------------------------------------------------------------------------
+ *
+ * This will insert a text input box for entering passwords in a standard form.
+ * Note that there is no initial value on purpose since that would be
+ * a security risk to send clear passwords to the user.
+ *
+ * $name          --- the field name that will be used as the variable name
+ *                    in the GET or POST.
+ * $size          --- the size of the text input box.
+ * $maxlength     --- How many characters it is allowed to enter.
+ */
+function form_insert_password_input( $name, $size, $maxlength )
+{
+  $result =
+    "<INPUT type=\"password\" name=\"".$name."\"".
+    " size=\"".$size."\" maxlength=\"".$maxlength."\">";
+  return $result;
+}
+
+/*
+ * --------------------------------------------------------------------------
+ *                        form_insert_hidden_input
+ * --------------------------------------------------------------------------
+ *
+ * This will just insert a value to the form, invisible to the user.
+ *
+ * $name    --- the field name that will be used as the variable name
+ *                    in the GET or POST.
+ * $value   --- The value of the hidden variable.
+ */
+function form_insert_hidden_input( $name, $value )
+{
+  $result = "<INPUT type=\"hidden\" name=\"".$name."\" value=\"".$value."\">";
   return $result;
 }
 
@@ -207,7 +248,7 @@ function form_insert_textarea( $name, $columns, $rows, $initial_text )
 {
   $result =
     "<TEXTAREA name=\"".$name."\" cols=\"".$columns."\" ".
-    "rows=\"".$rows."\">".$initial_text."</TEXTAREA>";
+    "rows=\"".$rows."\" wrap=\"virtual\">".$initial_text."</TEXTAREA>";
   return $result;
 }
 
@@ -276,11 +317,11 @@ function form_insert_radio_buttons( $name, $size, $value_array, $selected )
 {
   foreach( $value_array as $value => $info )
     {
-      $result .= "        <INPUT type=\"radio\" name=\"".$name."\" value=\"".$value."\" ";
+      $result .= "        <INPUT type=\"radio\" name=\"".$name."\" value=\"".$value."\"";
       if($value == $selected)
         $result .= " checked";
 
-      $result .= ">".$info."\n";
+      $result .= ">"." ".$info."\n";
     }
 
   return $result;
@@ -301,11 +342,11 @@ function form_insert_radio_buttons( $name, $size, $value_array, $selected )
  */
 function form_insert_checkbox( $name, $value, $description, $selected )
 {
-  $result = "<INPUT type=\"checkbox\" name=\"".$name."\" value=\"".$value."\" ";
+  $result = "<INPUT type=\"checkbox\" name=\"".$name."\" value=\"".$value."\"";
   if($selected)
     $result .= " checked";
 
-  $result .= ">".$info;
+  $result .= ">"." ".$description;
 
   return $result;
 }
@@ -319,9 +360,9 @@ function form_insert_checkbox( $name, $value, $description, $selected )
  *
  * $text          --- the text on the submit button.
  */
-function form_insert_submit_button( $text )
+function form_insert_submit_button( $name, $text )
 {
-  $result = "<INPUT type=\"submit\" value=\"".$text."\">";
+  $result = "<INPUT type=\"submit\" name=\"".$name."\" value=\"".$text."\">";
   return $result;
 }
 
@@ -403,6 +444,45 @@ function form_insert_row()
                     $nr_columns++;
                   }
                 $result .= "        ".$textinput."\n";
+              }
+          }
+          break;
+
+        case 'PASSWORD':
+          {
+            $current_arg++;
+            if( func_num_args() - $current_arg >= 3 )
+              {
+                $name = func_get_arg( $current_arg );
+                $size = func_get_arg( $current_arg + 1 );
+                $maxlength = func_get_arg( $current_arg + 2 );
+                $password_input =
+                  form_insert_password_input( $name, $size, $maxlength );
+                $current_arg += 3;
+
+                if( !$column_started )
+                  {
+                    $result .= form_td_start()."\n";
+                    $column_started = true;
+                    $nr_columns++;
+                  }
+                $result .= "        ".$password_input."\n";
+              }
+          }
+          break;
+
+        case 'HIDDEN':
+          {
+            $current_arg++;
+            if( func_num_args() - $current_arg >= 2 )
+              {
+                $name = func_get_arg( $current_arg );
+                $value = func_get_arg( $current_arg + 1 );
+                $hidden_input =
+                  form_insert_hidden_input( $name, $value );
+                $current_arg += 2;
+
+                $result .= "        ".$hidden_input."\n";
               }
           }
           break;
@@ -506,10 +586,12 @@ function form_insert_row()
         case 'SUBMITBUTTON':
           {
             $current_arg++;
-            if( func_num_args() - $current_arg >= 1 )
+            if( func_num_args() - $current_arg >= 2 )
               {
-                $submit = form_insert_submit_button( func_get_arg( $current_arg ) );
-                $current_arg++;
+                $name = func_get_arg( $current_arg );
+                $text = func_get_arg( $current_arg + 1 );
+                $submit = form_insert_submit_button( $name, $text );
+                $current_arg += 2;
 
                 if( $column_started )
                   $result .= form_td_end();
@@ -518,6 +600,7 @@ function form_insert_row()
                   form_td_start( 'center', $max_nr_columns - $nr_columns ).
                   $submit.
                   form_td_end( true );
+                $column_started = false;
               }
           }
           break;
@@ -527,6 +610,15 @@ function form_insert_row()
           {
             $current_arg++;
             $result .= "        <BR>\n";
+          }
+          break;
+
+        case 'TD':
+          {
+            $current_arg++;
+            if( $column_started )
+              $result .= form_td_end();
+            $column_started = false;
           }
           break;
 
