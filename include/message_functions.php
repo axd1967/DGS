@@ -212,27 +212,62 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
                            'CHECKBOX', 'rated', 'Y', "", $Rated ) );
 }
 
+define('FLOW_ANSWER'  ,0x1);
+define('FLOW_ANSWERED',0x2);
+   $msg_icones = array(
+      array('msg'   ,'&nbsp;-&nbsp;'),
+      array('msg_lr','&gt;-&nbsp;'), //is an answer
+      array('msg_rr','&nbsp;-&gt;'), //is answered
+      array('msg_2r','&gt;-&gt;'),
+      );
+
 function message_info_table($mid, $date, $to_me,
-                            $sender_id, $sender_name, $sender_handle,
-                            $subject, $reply_mid, $text,
-                            $folders=null, $folder_nr=null, $form=null, $no_move=false)
+                            $other_id, $other_name, $other_handle, //must be html_safe
+                            $subject, $reply_mid, $flow, $text, //must NOT be html_safe
+                            $folders=null, $folder_nr=null, $form=null, $delayed_move=false)
 {
    global $date_fmt, $bg_color;
+
+   if( $other_id > 0 )
+   {
+     $name = user_reference( true, false, '', $other_id, $other_name, $other_handle) ;
+   }
+   else
+     $name = $other_name; //i.e. T_("Server message");
 
    echo "<table border=0 witdh=\"50%\">\n" .
       "<tr><td><b>" . T_('Date') . ":</b></td>" .
       "<td colspan=2>" . date($date_fmt, $date) . "</td></tr>\n" .
       "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .
-      "<td colspan=2>" . ( $sender_id > 0 ? "<A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" : T_("Server message") ) .
-      "</td></tr>\n";
+      "<td colspan=2>$name</td>" .
+      "</tr>\n";
 
    echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>" .
       make_html_safe($subject, true) . "</td></tr>\n" .
-      "<tr><td valign=\"top\">" .
-      ( $reply_mid > 0 ?
-        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid&sent=t\">" . T_('Replied') . ":</a>" :
-        "<b>" . T_('Message') . ":</b>" ) .
-      "</td>\n" .
+      "<tr><td valign=\"top\">" ;
+
+ global $msg_icones;
+   echo "<b>" . T_('Message') . ":</b>" ;
+   $str = '';
+   if( $flow & FLOW_ANSWER && $reply_mid > 0 )
+   {
+      list($ico,$alt) = $msg_icones[FLOW_ANSWER];
+      $str.= "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" .
+             "<img border=0 alt='$alt' src='images/$ico.gif'>"
+             . "</a>&nbsp;" ;
+   }
+   if( $flow & FLOW_ANSWERED )
+   {
+      list($ico,$alt) = $msg_icones[FLOW_ANSWERED];
+      $str.= "<a href=\"list_messages.php?find_answers=$mid\">" .
+             "<img border=0 alt='$alt' src='images/$ico.gif'>"
+             . "</a>&nbsp;" ;
+   }
+   if( $str )
+     echo "<center>$str</center>";
+
+   echo "</td>\n" .
+
       "<td align=\"center\" colspan=2>\n" .
       "<table border=2 align=center><tr>" .
       "<td width=475 align=left>" . make_html_safe($text, true) .
@@ -250,15 +285,17 @@ function message_info_table($mid, $date, $to_me,
             $fld[$key] = $val[0];
 
       echo $form->print_insert_select_box('folder', '1', $fld, '', '');
-         if( $no_move )
-            echo T_('Move to folder when replying');
-         else
-            echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
+      if( $delayed_move )
+         echo T_('Move to folder when replying');
+      else
+      {
+         echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
+         echo $form->print_insert_hidden_input("mark$mid", 'Y') ;
+      }
+      echo $form->print_insert_hidden_input('messageid', $mid) ;
 
-         echo $form->print_insert_hidden_input('messageid', $mid) .
-            "</td></tr>\n";
+      echo "\n</td></tr>\n";
    }
-
 
    echo "</table>\n";
 }
@@ -424,56 +461,83 @@ function change_folders_for_marked_messages($uid, $folders)
    if( isset($_GET['move_marked']) )
    {
       $new_folder = $_GET['folder'];
-      if( !isset($folders[$new_folder]) or
-          $new_folder == FOLDER_NEW or $new_folder == FOLDER_ALL_RECEIVED )
-         error('folder_not_found');
    }
-   else if( isset($_GET['destory_marked'] ) )
+   else if( isset($_GET['destroy_marked'] ) )
+   {
       $new_folder = "NULL";
+   }
    else
       return;
 
-   if( $new_folder == FOLDER_SENT )
-      $sender_where_clause = 'AND Sender="Y"';
-   if( $new_folder == FOLDER_REPLY )
-      $sender_where_clause = 'AND Sender="N"';
-
-
    $message_ids = array();
    foreach( $_GET as $key => $val )
-      {
-         if( preg_match("/^mark(\d+)$/", $key, $matches) )
-            array_push($message_ids, $matches[1]);
-      }
-
-   if( count($message_ids) )
    {
-      mysql_query("UPDATE MessageCorrespondents SET Folder_nr='$new_folder' " .
-                  "WHERE uid='$uid' $sender_where_clause " .
-                  "AND mid IN (" . implode(',', $message_ids) . ") " .
-                  "LIMIT " . count($message_ids) )
-         or die(mysql_error());
+      if( preg_match("/^mark(\d+)$/", $key, $matches) )
+         array_push($message_ids, $matches[1]);
    }
+
+   return change_folders($uid, $folders, $message_ids, $new_folder);
+}
+
+function change_folders($uid, $folders, $message_ids, $new_folder, $need_replied=false)
+{
+
+   if( $new_folder == "NULL" )
+   {
+      $where_clause = "AND Folder_nr='" .FOLDER_DELETED. "' ";      
+   }
+   else
+   {
+      if( !isset($new_folder) or !isset($folders[$new_folder])
+        or $new_folder == FOLDER_NEW or $new_folder == FOLDER_ALL_RECEIVED )
+         error('folder_not_found');
+
+      if( $new_folder == FOLDER_SENT )
+         $where_clause = "AND (Sender='Y' or Sender='M') ";
+      else if( $new_folder == FOLDER_REPLY )
+         $where_clause = "AND (Sender='N' or Sender='M') ";
+      else
+         $where_clause = '';
+   }
+
+   if( count($message_ids) <= 0 )
+      return 0;
+
+   if( $need_replied )
+      $where_clause.= "AND Replied='Y' ";
+   else
+      $where_clause.= "AND Replied!='M' ";
+
+   mysql_query("UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
+               "WHERE uid='$uid' $where_clause" .
+               "AND mid IN (" . implode(',', $message_ids) . ") " .
+               "LIMIT " . count($message_ids) )
+      or error("mysql_query_failed"); //die(mysql_error());
+   return mysql_affected_rows() ;
 }
 
 function echo_folders($folders, $current_folder)
 {
    global $STANDARD_FOLDERS;
 
-   $string = '<table align=center border=0 cellpadding=0 cellspacing=17><tr>' . "\n" .
+   $string = '<table align=center border=0 cellpadding=0 cellspacing=7><tr>' . "\n" .
       '<td><b>' . T_('Folder') . ":&nbsp;&nbsp;&nbsp;</b></td>\n";
 
    $folders[FOLDER_ALL_RECEIVED] = $STANDARD_FOLDERS[FOLDER_ALL_RECEIVED];
    ksort($folders);
 
    foreach( $folders as $nr => $val )
-      {
-         list($name, $color) = $val;
-         if( $nr == $current_folder )
-            $string .= "<td><div style=\"align:right; color: black; border:'solid #6666ff'; padding: 7px;\">$name</div></td>\n";
-         else
-            $string .= "<td><a href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
-      }
+   {
+      list($name, $color, $fcol) = $val;
+      $name = make_html_safe($name);
+      $string .= '<td bgcolor="#' .blend_alpha_hex($color). '"' ;
+      if( $nr == $current_folder)
+         $string .= " style=\"border:'3px solid #6666ff'; padding:4px; color:'#" .
+                    $fcol. "'\">$name</td>\n";
+      else
+         $string .= " style=\"padding:7px;\"><a style=\"color:'#" .
+                    $fcol. "'\" href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
+   }
 
    $string .= '</tr></table>' . "\n";
 
@@ -490,16 +554,157 @@ function folder_is_removable($nr, $uid)
 
 function echo_folder_box($folders, $folder_nr, $bgcolor)
 {
-   global $STANDARD_FOLDERS;
+ global $STANDARD_FOLDERS;
 
-      list($foldername, $folderbgcolor, $folderfgcolor) = $folders[$folder_nr];
-      $folderbgcolor = blend_alpha_hex($folderbgcolor, $bgcolor);
+   list($foldername, $folderbgcolor, $folderfgcolor) = $folders[$folder_nr];
 
-      if( empty($foldername) )
-         $foldername = ( $folder_nr < USER_FOLDERS ? $STANDARD_FOLDERS[$folder_nr][0]
-                         : T_('Folder name') );
+   if( empty($foldername) )
+     if ( $folder_nr < USER_FOLDERS )
+       list($foldername, $folderbgcolor, $folderfgcolor) = $STANDARD_FOLDERS[$folder_nr];
+     else
+       $foldername = T_('Folder name');
 
-      return "<td bgcolor=\"#$folderbgcolor\" nowrap><font color=\"#$folderfgcolor\">$foldername</font></td>";
+   $folderbgcolor = blend_alpha_hex($folderbgcolor, $bgcolor);
+   if( empty($folderfgcolor) )
+      $folderfgcolor = "000000" ;
 
+   return "<td bgcolor=\"#$folderbgcolor\"><font color=\"#$folderfgcolor\">".
+          make_html_safe($foldername) . "</font></td>";
+}
+
+function message_list_query($my_id, $folderstring='all', $order='date', $limit='', $extra_where='')
+{
+//    $rec_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+//       "Players.Name AS other_name, To_Folder_nr AS folder " .
+//       "FROM Messages, Players " .
+//       "WHERE obsolet(To_ID)=$my_id AND To_Folder_nr IN ($folderstring) AND To_ID=Players.ID " .
+//       "ORDER BY $order $limit";
+
+//    $sent_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+//       "Players.Name AS other_name, From_Folder_nr AS folder " .
+//       "FROM Messages, Players " .
+//       "WHERE obsolet(From_ID)=$my_id AND From_Folder_nr IN ($folderstring) AND obsolet(To_ID)=Players.ID " .
+//       "ORDER BY $order $limit";
+
+
+// for mysql 4.0
+
+//    $l = $_GET['from_row']+$MaxRowsPerPage;
+//    $query = "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " ,
+//       "Players.Name AS other_name, From_Folder_nr AS folder " .
+//       "FROM Messages, Players WHERE obsolet(From_ID)=$my_id AND From_Folder_nr IN ($folderstring) " .
+//       "AND obsolet(To_ID)=Players.ID order by $order limit $l)" .
+//       "UNION " .
+//       "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+//       "Players.Name AS other_name, To_Folder_nr AS folder " .
+//       "FROM Messages, Players WHERE obsolet(To_ID)=$my_id AND To_Folder_nr IN ($folderstring) " .
+//       "AND obsolet(From_ID)=Players.ID order by $order limit $l)" .
+//       "ORDER BY $order $limit";
+
+   $query = "SELECT Messages.Type, Messages.Subject, " .
+      "UNIX_TIMESTAMP(Messages.Time) AS Time, me.mid as date, " .
+      "IF(Messages.ReplyTo>0,".FLOW_ANSWER.",0)+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
+      "me.mid, me.Replied, me.Sender, me.Folder_nr AS folder, " .
+      "Players.Name AS other_name, Players.ID AS other_ID " .
+      "FROM Messages, MessageCorrespondents AS me " .
+      "LEFT JOIN MessageCorrespondents AS other " .
+        "ON other.mid=me.mid AND other.Sender!=me.Sender " .
+      "LEFT JOIN Players ON Players.ID=other.uid " .
+      "WHERE me.uid=$my_id AND Messages.ID=me.mid $extra_where " .
+        ( $folderstring=="all" ? "" : "AND me.Folder_nr IN ($folderstring) " ) .
+      "ORDER BY $order $limit";
+
+   $result = mysql_query( $query ) or error("mysql_query_failed"); //die(mysql_error());
+   return $result;
+}
+
+function message_list_table( &$mtable, $result, $show_rows
+             , $current_folder, $my_folders
+             , $no_sort=true, $no_mark=true, $toggle_marks=false
+             )
+{
+ global $date_fmt, $msg_icones;
+
+   $can_move_messages = false;
+
+   $mtable->add_tablehead( 1, T_('Folder'), ( $no_sort or $current_folder>FOLDER_ALL_RECEIVED ) ? NULL : 
+                           'folder', true, true );
+   $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
+                           $no_sort ? NULL : 'other_name', false, true );
+   $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'subject', false, true );
+   list($ico,$alt) = $msg_icones[0];
+   $mtable->add_tablehead( 0, 
+      "<img border=0 alt='$alt' src='images/$ico.gif'>"
+      , $no_sort ? NULL : 'flow', false, true );
+   $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, true );
+   if( !$no_mark )
+      $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
+
+   $page = '';
+
+   while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
+   {
+      $mid = $row["mid"];
+      $mrow_strings = array();
+
+      $bgcolor = $mtable->blend_next_row_color_hex();
+      $mrow_strings[1] = echo_folder_box($my_folders, $row['folder'], $bgcolor);
+
+      if( $row['Sender'] === 'M' ) //Message to myself
+      {
+         $row["other_name"] = T_('Myself');
+      }
+      else if( $row["other_ID"] <= 0 )
+         $row["other_name"] = T_('Server message');
+      if( empty($row["other_name"]) )
+         $row["other_name"] = '-';
+
+      if( $row['Sender'] === 'Y' )
+         $mrow_strings[2] = "<td>" . T_('To') . ': ' .
+            "<A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
+            make_html_safe($row["other_name"]) . "</A></td>";
+      else
+         $mrow_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
+            make_html_safe($row["other_name"]) . "</A></td>";
+
+      $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "&nbsp;</td>";
+      list($ico,$alt) = $msg_icones[$row["flow"]];
+      $mrow_strings[0] = "<td>" .
+         "<A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
+         "<img border=0 alt='$alt' src='images/$ico.gif'>" .
+         '</A>' .
+         '</td>';
+      $mrow_strings[4] = "<td>" . date($date_fmt, $row["Time"]) . "</td>";
+
+      if( !$no_mark )
+      {
+         if( $row['folder'] == FOLDER_NEW or $row['Replied'] == 'M' or
+             ( $row['folder'] == FOLDER_REPLY and $row['Type'] == 'INVITATION'
+               and $row['Replied'] != 'Y' ) )
+            $mrow_strings[5] = '<td>&nbsp;</td>';
+         else
+         {
+            $can_move_messages = true;
+            $checked = ((@$_REQUEST["mark$mid"]=='Y') xor $toggle_marks) ;
+            if( $checked )
+               $page.= "mark$mid=Y&" ;
+            $mrow_strings[5] = "<td align=center>"  .
+               "<input type='checkbox' name='mark$mid' value='Y'".
+               ($checked ? ' checked' : '') .
+               '></td>';
+         }
+      }
+      $mtable->add_row( $mrow_strings );
+
+   }
+
+
+   $mtable->Page.= $page ;
+
+   return $can_move_messages ;
 }
 ?>

@@ -30,7 +30,7 @@ function make_folder_form_row(&$form, $name, $nr,
                               $onstatuspage)
 {
    $name_row = '<td bgcolor="#' . blend_alpha($bgred, $bggreen, $bgblue, $bgalpha) . '">' .
-      '<font color="#' . blend_alpha($fgred, $fggreen, $fgblue, 255) . '">' .
+      '<font color="#' . RGBA($fgred, $fggreen, $fgblue) . '">' .
       ( empty($name) ? T_('Folder name') : make_html_safe($name) ) . '</font></td>';
 
    $array = array( 'OWNHTML', $name_row,
@@ -98,8 +98,8 @@ function make_folder_form_row(&$form, $name, $nr,
       $fggreen = limit($_POST["fggreen$nr"], 0, 255, 0);
       $fgblue = limit($_POST["fgblue$nr"], 0, 255, 0);
 
-      $bgcolor = sprintf("%02x%02x%02x%02x", $bgred, $bggreen, $bgblue, $bgalpha);
-      $fgcolor = sprintf("%02x%02x%02x", $fgred, $fggreen, $fgblue);
+      $bgcolor = RGBA( $bgred, $bggreen, $bgblue, $bgalpha);
+      $fgcolor = RGBA( $fgred, $fggreen, $fgblue);
       $name = $_POST["folder$nr"];
 
       $onstatuspage = ( $_POST["onstatuspage$nr"] == 't' );
@@ -140,7 +140,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
       if( $delete )
       {
-         $query = "DELETE FROM Folders WHERE uid='$my_id' AND Folder_nr='$nr' LIMIT 1";
+         $query = "DELETE FROM Folders WHERE uid='$my_id' AND Folder_nr=$nr LIMIT 1";
       }
       else if( $is_old )
       {
@@ -154,13 +154,13 @@ function make_folder_form_row(&$form, $name, $nr,
             continue;
 
          $query .= implode(",", $updates);
-         $query .= " WHERE uid='$my_id' AND Folder_nr='$nr' LIMIT 1";
+         $query .= " WHERE uid='$my_id' AND Folder_nr=$nr LIMIT 1";
       }
       else
       {
          $query = "INSERT INTO Folders SET " .
             "uid='$my_id', " .
-            "Folder_nr='$nr', " .
+            "Folder_nr=$nr, " .
             "Name='$name', " .
             "BGColor='$bgcolor', " .
             "FGColor='$fgcolor' ";
@@ -191,13 +191,8 @@ function make_folder_form_row(&$form, $name, $nr,
    foreach( $folders as $nr => $fld )
    {
       list($name, $bgcolor, $fgcolor) = $fld;
-      $bgred = base_convert(substr($bgcolor, 0, 2), 16, 10);
-      $bggreen = base_convert(substr($bgcolor, 2, 2), 16, 10);
-      $bgblue = base_convert(substr($bgcolor, 4, 2), 16, 10);
-      $bgalpha = base_convert(substr($bgcolor, 6, 2), 16, 10);
-      $fgred = base_convert(substr($fgcolor, 0, 2), 16, 10);
-      $fggreen = base_convert(substr($fgcolor, 2, 2), 16, 10);
-      $fgblue = base_convert(substr($fgcolor, 4, 2), 16, 10);
+      list($bgred,$bggreen,$bgblue,$bgalpha)= split_RGBA($bgcolor, 0);
+      list($fgred,$fggreen,$fgblue,$dummy)= split_RGBA($fgcolor);
 
       make_folder_form_row($form, $name, $nr,
                            $bgred, $bggreen, $bgblue, $bgalpha, $fgred, $fggreen, $fgblue,

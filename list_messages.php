@@ -40,170 +40,125 @@ require_once( "include/timezones.php" );
    $my_folders = get_folders($my_id);
    change_folders_for_marked_messages($my_id, $my_folders);
 
-
-   $current_folder = $_GET['folder'];
-   if( empty($my_folders[$current_folder]) )
-      $current_folder = FOLDER_ALL_RECEIVED;
-
-   $folderstring = $current_folder;
-   if( $current_folder == FOLDER_ALL_RECEIVED )
-   {
-      $fldrs = $my_folders;
-      unset($fldrs[FOLDER_SENT]);
-      unset($fldrs[FOLDER_DELETED]);
-      $folderstring =implode(',', array_keys($fldrs));
-   }
-
-   if(!$_GET['sort1'])
+   if(!@$_GET['sort1'])
    {
       $_GET['sort1'] = 'date';
       $_GET['desc1'] = 1;
    }
 
-   $mtable = new Table( 'list_messages.php' . ( $current_folder == FOLDER_ALL_RECEIVED ? '' :
-                                                '?folder=' . $current_folder ),
-                        '', '', true );
+   $find_answers = @$_GET['find_answers'] ;
+
+   if( isset($_GET['toggle_marks']) )
+   {
+      $toggle_marks= true;
+      $current_folder = @$_GET['current_folder'];
+   }
+   else
+   {
+      $toggle_marks= false;
+      $current_folder = @$_GET['folder'];
+      if( !isset($current_folder) or !isset($my_folders[$current_folder]) )
+         $current_folder = @$_GET['current_folder'];
+   }
+
+   $page = '';
+   if( $find_answers > 0 )
+   {
+      $title = T_('Answers list');
+      $back = "<BR><A href=\"message.php?mode=ShowMessage&mid=$find_answers\">" . 
+                T_('Back to message') . "</A>";
+      $page.= '&find_answers=' . $find_answers ;
+      $where = "AND Messages.ReplyTo=$find_answers";
+      $current_folder = FOLDER_NONE;
+      $folderstring = 'all';
+   }
+   else
+   {
+      $title = T_('Message list');
+      $back = '';
+      $where = "";
+      if( !isset($current_folder) or !isset($my_folders[$current_folder]) )
+         $current_folder = FOLDER_ALL_RECEIVED;
+
+      if( $current_folder == FOLDER_ALL_RECEIVED )
+      {
+         $fldrs = $my_folders;
+         unset($fldrs[FOLDER_SENT]);
+         unset($fldrs[FOLDER_DELETED]);
+         $folderstring =implode(',', array_keys($fldrs));
+         unset($fldrs);
+      }
+      else
+      {
+         $page.= '&folder=' . $current_folder ;
+         $folderstring = (string)$current_folder;
+      }
+   }
+
+
+   start_page($title, true, $logged_in, $player_row );
+
+
+   if( $page )
+      $page{0} = '?';
+   $mtable = new Table( 'list_messages.php' . $page, '', '', true );
 
    $order = $mtable->current_order_string();
    $limit = $mtable->current_limit_string();
 
-   $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS time, " .
-      "Messages.Type, Messages.Subject, " .
-      "me.mid, me.mid as date, me.Replied, me.Sender, " .
-      "Players.Name AS other, Players.ID AS other_ID, me.Folder_nr AS folder " .
-      "FROM MessageCorrespondents AS me " .
-      "LEFT JOIN Messages ON Messages.ID=me.mid " .
-      "LEFT JOIN MessageCorrespondents AS other " .
-      "ON other.mid=me.mid AND other.Sender != me.Sender " .
-      "LEFT JOIN Players ON Players.ID=other.uid " .
-      "WHERE me.uid=$my_id AND me.Folder_nr IN ($folderstring) " .
-      "ORDER BY $order $limit";
-
-//    $rec_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
-//       "Players.Name AS other, To_Folder_nr AS folder " .
-//       "FROM Messages, Players " .
-//       "WHERE To_ID=$my_id AND To_Folder_nr IN ($folderstring) AND To_ID=Players.ID " .
-//       "ORDER BY $order $limit";
-
-//    $sent_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
-//       "Players.Name AS other, From_Folder_nr AS folder " .
-//       "FROM Messages, Players " .
-//       "WHERE From_ID=$my_id AND From_Folder_nr IN ($folderstring) AND To_ID=Players.ID " .
-//       "ORDER BY $order $limit";
-
-
-// for mysql 4.0
-
-//    $l = $_GET['from_row']+$MaxRowsPerPage;
-//    $query = "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " ,
-//       "Players.Name AS other, From_Folder_nr AS folder " .
-//       "FROM Messages, Players WHERE From_ID=$my_id AND From_Folder_nr IN ($folderstring) " .
-//       "AND To_ID=Players.ID order by $order limit $l)" .
-//       "UNION " .
-//       "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
-//       "Players.Name AS other, To_Folder_nr AS folder " .
-//       "FROM Messages, Players WHERE To_ID=$my_id AND To_Folder_nr IN ($folderstring) " .
-//       "AND From_ID=Players.ID order by $order limit $l)" .
-//       "ORDER BY $order $limit";
-
-   $result = mysql_query( $query )
-       or die ( error("mysql_query_failed") );
+   $result = message_list_query($my_id, $folderstring, $order, $limit, $where);
 
    $show_rows = $mtable->compute_show_rows(mysql_num_rows($result));
-
-   $title = T_('Message list');
-
-   start_page($title, true, $logged_in, $player_row );
 
    $marked_form = new Form('','', FORM_GET);
    echo "<form name=\"marked\" action=\"list_messages.php\" method=\"GET\">\n";
 
    echo echo_folders($my_folders, $current_folder);
 
-   echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
+   echo "<center>$back<h3><font color=$h3_color>" . $title . '</font></h3></center>';
 
-   $mtable->add_tablehead( 1, T_('Folder'), '', true, true );
-   $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
-                           'other', false, true );
-   $mtable->add_tablehead( 3, T_('Subject'), 'Subject', false, true );
-   $mtable->add_tablehead( 0, '&nbsp;', NULL, false, true );
-   $mtable->add_tablehead( 4, T_('Date'), 'date', true, true );
-   if( $current_folder != FOLDER_NEW )
-      $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
-
-   $can_move_messages = false;
-   $any_sent_message = false;
-   while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
-   {
-      $mid = $row["mid"];
-
-      if( $row['Sender'] == 'Y' )
-         $any_sent_message = true;
-
-      $bgcolor = substr($mtable->Row_Colors[count($mtable->Tablerows) % 2], 2, 6);
-
-      $row_strings[1] = echo_folder_box($my_folders, $row['folder'], $bgcolor);
-
-      if( empty($row["other_ID"]) )
-         $row["other"] = T_('Server message');
-      if( empty($row["other"]) )
-         $row["other"] = '-';
-
-      if( $row['Sender'] === 'Y' )
-         $row_strings[2] = "<td>" . T_('To') . ': ' .
-            "<A href=\"message.php?mode=ShowMessage&mid=$mid&sent=t\">" .
-            make_html_safe($row["other"]) . "</A></td>";
-      else
-         $row_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
-            make_html_safe($row["other"]) . "</A></td>";
-
-      $row_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "&nbsp;</td>";
-      $row_strings[0] = "<td>" .
-         ($row['Replied'] == 'Y' ? '<font color="#009900">A</font>' : '&nbsp;' ) . '</td>';
-      $row_strings[4] = "<td>" . date($date_fmt, $row["time"]) . "</td>";
-      if( $row['folder'] == FOLDER_NEW or
-          ( $row['folder'] == FOLDER_REPLY and $row['Type'] == 'INVITATION'
-            and $row['Replied'] == 'N' ) )
-         $row_strings[5] = '<td>&nbsp;</td>';
-      else
-      {
-         $row_strings[5] = '<td align=center>'  .
-            '<input type="checkbox" name="mark' . $mid . '" value="Y"></td>';
-         $can_move_messages = true;
-      }
-
-      $mtable->add_row( $row_strings );
-
-   }
+   $can_move_messages =
+     message_list_table( $mtable, $result, $show_rows
+             , $current_folder, $my_folders
+             , false, $current_folder == FOLDER_NEW, $toggle_marks) ;
 
    $mtable->echo_table();
+   echo "<p>\n";
 
-   if( $can_move_messages )
+   if( $can_move_messages && $current_folder != FOLDER_NEW )
    {
+/* Actually, toggle marks does not destroy sort
+        but sort destroy marks
+*/
+      echo '<center>';
+      echo $mtable->echo_hiddens();
+
+      if( $find_answers > 0 )
+        echo '<input type="hidden" name="find_answers" value="' . $find_answers . "\">\n";
+      else if( $current_folder != FOLDER_ALL_RECEIVED )
+        echo '<input type="hidden" name="current_folder" value="' . $current_folder . "\">\n";
+      echo '<input type="submit" name="toggle_marks" value="' . T_('Marks toggle') . "\">\n";
+
       if( $current_folder == FOLDER_DELETED )
       {
-         echo '<center><input type="submit" name="destory_marked" value="' .
-            T_('Destroy marked messages') . "\"></center>\n";
+         echo '<input type="submit" name="destroy_marked" value="' .
+            T_('Destroy marked messages') . "\">\n";
       }
-      else if( $current_folder != FOLDER_NEW )
+      else
       {
-         $fld = array();
+         $fld = array('' => '');
          foreach( $my_folders as $key => $val )
             if( $key != $current_folder and $key != FOLDER_NEW and
                 !($current_folder == FOLDER_SENT and $key == FOLDER_REPLY ) )
                $fld[$key] = $val[0];
 
-         echo '<center>' .
-            '<input type="submit" name="move_marked" value="' .
-            T_('Move marked messages to folder') . '">' .
-            $marked_form->print_insert_select_box( 'folder', '1', $fld, '', '') .
-            "</center></form>\n";
+         echo '<input type="submit" name="move_marked" value="' .
+            T_('Move marked messages to folder') . "\">\n" .
+            $marked_form->print_insert_select_box( 'folder', '1', $fld, '', '') ;
       }
+      echo "</center>\n";
    }
+   echo "</form>\n";
 
    $menu_array = array( T_('Edit folders') => "edit_folders.php" );
 

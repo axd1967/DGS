@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Error";
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
 
 
 {
@@ -50,7 +50,7 @@ require( "include/std_functions.php" );
       }
       break;
 
-      case("guest_may_not_recieve_messages"):
+      case("guest_may_not_receive_messages"):
       {
          echo T_("Error, guest may not recieve messages");
       }
@@ -262,7 +262,7 @@ require( "include/std_functions.php" );
       }
       break;
 
-      case("reciever_not_found"):
+      case("receiver_not_found"):
       {
          echo T_("Sorry, couldn't find the reciever of your message. Make sure to use " .
                  "the userid, not the full name.");

@@ -20,9 +20,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Messages";
 
-require( "include/std_functions.php" );
-require( "include/rating.php" );
-require( "include/message_functions.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/rating.php" );
+require_once( "include/message_functions.php" );
 
 disable_cache();
 
@@ -41,55 +41,59 @@ disable_cache();
 
 
    $my_id = $player_row['ID'];
-   $message_id = $_GET['messageid'];
+   $message_id = $_REQUEST['messageid'];
+   $disputegid = $_REQUEST['disputegid'];
+   $to = $_REQUEST['to'];
+   $reply = $_REQUEST['reply']; //ID of message replied. if set then (often?always?) == $message_id
+   $subject = $_REQUEST['subject'];
+   $message = $_REQUEST['message'];
+   $type = $_REQUEST['type'];
+   $gid = $_REQUEST['gid'];
+   $accepttype = $_REQUEST['accepttype'];
+   $declinetype = $_REQUEST['declinetype'];
 
    $folders = get_folders($my_id);
-   $new_folder = $_GET['folder'];
+   $new_folder = $_REQUEST['folder'];
 
-   if( isset($_GET['foldermove']) and isset($new_folder) and isset($folders[$new_folder]) )
+   if( isset($_REQUEST['foldermove']) )
    {
-      mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='$new_folder' " .
-                   "WHERE uid='$my_id' AND mid='$message_id' " .
-                   ($type == 'INVITATION' ? "AND Replied='Y' ": '') . "LIMIT 1" )
-         or die(mysql_error());
+      change_folders($my_id, $folders, array($message_id), $new_folder, $type == 'INVITATION');
 
+      $page = "";
+      foreach( $_REQUEST as $key => $val )
+      {
+         if( $val == 'Y' && preg_match("/^mark\d+$/i", $key) )
+           $page.= "&$key=Y" ;
+      }
+
+      jump_to("list_messages.php?folder=$new_folder$page");
+/*
       $msg = urlencode(T_('Message moved!'));
 
       jump_to("status.php?msg=$msg");
+*/
    }
 
 
    if( $to == "guest" )
-      error("guest_may_not_recieve_messages");
+      error("guest_may_not_receive_messages");
 
    if( $to == $player_row["Handle"] and $type == 'INVITATION' )
       error("invite_self");
 
 
-// find reciever of the message
+// find receiver of the message
 
    $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed, OnVacation, " .
                           "Rating2, RatingStatus " .
                           "FROM Players WHERE Handle='$to'" );
 
    if( mysql_num_rows( $result ) != 1 )
-      error("reciever_not_found");
+      error("receiver_not_found");
 
 
    $opponent_row = mysql_fetch_array($result);
    $opponent_ID = $opponent_row["ID"];
-
-// Check if dispute game exists
-   if( $disputegid > 0 )
-   {
-      $result = mysql_query("SELECT ID FROM Games WHERE ID=$disputegid " .
-                            "AND Status='INVITED' AND " .
-                            "((Black_ID=$my_id AND White_ID=$opponent_ID) OR " .
-                            "(Black_ID=$opponent_ID AND White_ID=$my_id))");
-
-      if( mysql_num_rows($result) != 1 )
-         error('unknown_game');
-   }
 
 
 // Update database
@@ -99,6 +103,34 @@ disable_cache();
 
    if( $type == "INVITATION" )
    {
+      $size = $_REQUEST['size'];
+      $handicap_type = $_REQUEST['handicap_type'];
+      $color = $_REQUEST['color'];
+      $rated = $_REQUEST['rated'];
+      $handicap = $_REQUEST['handicap'];
+      $komi_m = $_REQUEST['komi_m'];
+      $komi_n = $_REQUEST['komi_n'];
+      $komi_d = $_REQUEST['komi_d'];
+      $weekendclock = $_REQUEST['weekendclock'];
+      $byoyomitype = $_REQUEST['byoyomitype'];
+
+      //for interpret_time_limit_forms:
+      $timevalue = $_REQUEST['timevalue'];
+      $timeunit = $_REQUEST['timeunit'];
+
+      $byotimevalue_jap = $_REQUEST['byotimevalue_jap'];
+      $timeunit_jap = $_REQUEST['timeunit_jap'];
+      $byoperiods_jap = $_REQUEST['byoperiods_jap'];
+
+      $byotimevalue_can = $_REQUEST['byotimevalue_can'];
+      $timeunit_can = $_REQUEST['timeunit_can'];
+      $byoperiods_can = $_REQUEST['byoperiods_can'];
+
+      $byotimevalue_fis = $_REQUEST['byotimevalue_fis'];
+      $timeunit_fis = $_REQUEST['timeunit_fis'];
+
+
+
       if( $color == "White" )
       {
          $Black_ID = $opponent_ID;
@@ -152,7 +184,18 @@ disable_cache();
          "Rated='$rated'";
 
       if( $disputegid > 0 )
+      {
+      // Check if dispute game exists
+         $result = mysql_query("SELECT ID FROM Games WHERE ID=$disputegid " .
+                               "AND Status='INVITED' AND " .
+                               "((Black_ID=$my_id AND White_ID=$opponent_ID) OR " .
+                               "(Black_ID=$opponent_ID AND White_ID=$my_id))");
+
+         if( mysql_num_rows($result) != 1 )
+            error('unknown_game');
+
          $query = "UPDATE Games SET $query  WHERE ID=$disputegid LIMIT 1";
+      }
       else
          $query = "INSERT INTO Games SET $query";
 
@@ -185,15 +228,15 @@ disable_cache();
          error("mysql_start_game");
 
 
-      $game_row = mysql_fetch_array($result);
-      if( $opponent_ID == $game_row["Black_ID"] )
+      $game_row = mysql_fetch_assoc($result);
+      if( $opponent_ID == $game_row["Black_ID"] && $my_id == $game_row["White_ID"])
       {
          $clock_used_black = ( $opponent_row['OnVacation'] > 0 ? -1 : $opponent_row["ClockUsed"]);
          $clock_used_white = ( $player_row['OnVacation'] > 0 ? -1 : $player_row["ClockUsed"]);
          $rating_black = $opponent_row["Rating2"];
          $rating_white = $player_row["Rating2"];
       }
-      else if( $my_id == $game_row["Black_ID"] )
+      else if( $my_id == $game_row["Black_ID"] && $opponent_ID == $game_row["White_ID"])
       {
          $clock_used_white = ( $opponent_row['OnVacation'] > 0 ? -1 : $opponent_row["ClockUsed"]);
          $clock_used_black = ( $player_row['OnVacation'] > 0 ? -1 : $player_row["ClockUsed"]);
@@ -204,6 +247,7 @@ disable_cache();
       {
          error("mysql_start_game");
       }
+      $swap = 0;
 
       if( $game_row['WeekendClock'] != 'Y' )
       {
@@ -233,8 +277,7 @@ disable_cache();
 
          $query .= "Handicap=$handicap, Komi=$komi, ";
       }
-
-      if( $handitype == -1 ) // Conventional handi
+      else if( $handitype == -1 ) // Conventional handi
       {
          list($handicap,$komi,$swap) =
             suggest_conventional($rating_white, $rating_black, $game_row["Size"]);
@@ -333,8 +376,6 @@ disable_cache();
 // Update database
 
    $query = "INSERT INTO Messages SET " .
-       "From_ID=$my_id, " .
-       "To_ID=$opponent_ID, " .
        "Time=FROM_UNIXTIME($NOW), " .
        "Type='$type', ";
 
@@ -352,12 +393,21 @@ disable_cache();
       error("mysql_insert_message",true);
 
    $mid = mysql_insert_id();
-   $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-      "($my_id, $mid, 'Y', '".FOLDER_SENT."'), " .
-      "($opponent_ID, $mid, 'N', '".FOLDER_NEW."')";
-
+   if( $my_id == $opponent_ID ) //Message to myself
+   {
+      $to_me = 1;
+      $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+         "($my_id, $mid, 'M', ".FOLDER_NEW.")";
+   }
+   else
+   {
+      $to_me = 0;
+      $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr,Replied) VALUES " .
+         "($my_id, $mid, 'Y', ".FOLDER_SENT.",'N'), " .
+         "($opponent_ID, $mid, 'N', ".FOLDER_NEW.",".($type == 'INVITATION' ? "'M'" : "'N'").")";
+   }
    $result = mysql_query( $query );
-   if( mysql_affected_rows() != 2)
+   if( mysql_affected_rows() != 2-$to_me)
       error("mysql_insert_message",true);
 
    if( $type == "INVITATION" )
@@ -372,23 +422,23 @@ disable_cache();
       {
          if( !isset($new_folder) or !isset($folders[$new_folder]) )
             $new_folder = FOLDER_MAIN;
-         $query .= ", Folder_nr='$new_folder'";
+         $query .= ", Folder_nr=$new_folder";
       }
 
-      $query .= " WHERE mid=$reply AND Sender='N' AND Replied='N' AND uid=$my_id LIMIT 1";
+      $query .= " WHERE mid=$reply AND Sender!='Y' AND Replied!='Y' AND uid=$my_id LIMIT 1";
 
       mysql_query( $query ) or die(mysql_error());
 
       if( $disputegid > 0 )
          mysql_query( "UPDATE Messages SET Type='DISPUTED' " .
-                      "WHERE ID=$reply AND To_ID=$my_id LIMIT 1");
+                      "WHERE ID=$reply LIMIT 1");
    }
 
 
-// Notify reciever about message
+// Notify receiver about message
 
-   if( !(strpos($opponent_row["SendEmail"], 'ON') === false)
-       and $opponent_row["Notify"] == 'NONE' )
+   if( !$to_me and !(strpos($opponent_row["SendEmail"], 'ON') === false)
+       and $opponent_row["Notify"] == 'NONE')
    {
       $result = mysql_query( "UPDATE Players SET Notify='NEXT' WHERE Handle='$to' LIMIT 1" );
    }

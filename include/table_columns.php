@@ -129,14 +129,14 @@ class Table
          $this->Prefix = $_prefix;
          $this->Static_Columns = $_static_columns;
 
-         $this->Sort1 = $_GET[ $this->Prefix . 'sort1' ];
-         $this->Desc1 = $_GET[ $this->Prefix . 'desc1' ];
-         $this->Sort2 = $_GET[ $this->Prefix . 'sort2' ];
-         $this->Desc2 = $_GET[ $this->Prefix . 'desc2' ];
+         $this->Sort1 = @$_GET[ $this->Prefix . 'sort1' ];
+         $this->Desc1 = @$_GET[ $this->Prefix . 'desc1' ];
+         $this->Sort2 = @$_GET[ $this->Prefix . 'sort2' ];
+         $this->Desc2 = @$_GET[ $this->Prefix . 'desc2' ];
 
          $this->Row_Colors = array( $table_row_color1, $table_row_color2 );
 
-         $this->From_Row = $_GET[ $this->Prefix . 'from_row' ];
+         $this->From_Row = @$_GET[ $this->Prefix . 'from_row' ];
          if( !is_numeric($this->From_Row) or $this->From_Row < 0 )
             $this->From_Row = 0;
          $this->Last_Page = true;
@@ -317,6 +317,15 @@ class Table
          return $string;
       }
 
+   function blend_next_row_color_hex( $col=false )
+      {
+         $rowcol = substr($this->Row_Colors[count($this->Tablerows) % 2], 2, 6);
+         if( $col )
+            return blend_alpha_hex( $col, $rowcol);
+         else
+            return $rowcol;
+      }
+
    function make_tablerow( $tablerow )
       {
          list(, $bgcolor) = each( $this->Row_Colors );
@@ -421,6 +430,38 @@ class Table
          return $order;
       }
 
+   /*! \brief Retrieve hidden part from table. */
+   function echo_hiddens()
+      {
+         $hiddens= array();
+         $this->get_hiddens( $hiddens);
+         $str = '';
+         foreach( $hiddens as $key => $val )
+         {
+            $str.= '<input type="hidden" name="' . $key . '" value="' . $val . '"><BR>';
+         }
+         return $str;
+      }
+
+   function get_hiddens( &$hiddens)
+      {
+         if ($this->Sort1)
+         {
+            $hiddens[$this->Prefix . 'sort1'] = $this->Sort1;
+            if ($this->Desc1)
+               $hiddens[$this->Prefix . 'desc1'] = $this->Desc1;
+            if ($this->Sort2) {
+               $hiddens[$this->Prefix . 'sort2'] = $this->Sort2;
+               if ($this->Desc1)
+                  $hiddens[$this->Prefix . 'desc2'] = $this->Desc2;
+            }
+         }
+         if ( $this->Rows_Per_Page > 0 )
+         {
+            $hiddens[$this->Prefix . 'from_row'] = $this->From_Row;
+         }
+      }
+
    /*! \brief Retrieve sort part of url from table. */
    function current_sort_string( $add_sep=false )
       {
@@ -455,8 +496,8 @@ class Table
       {
          global $player_row;
 
-         $del = $_GET[ $this->Prefix . 'del' ];
-         $add = $_GET[ $this->Prefix . 'add' ];
+         $del = @$_GET[ $this->Prefix . 'del' ];
+         $add = @$_GET[ $this->Prefix . 'add' ];
 
          if( $del or $add )
          {

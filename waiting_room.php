@@ -49,12 +49,12 @@ define('BAD_RATING_COLOR',"ff000033");
 
    echo "<center>";
 
-   if( $_GET['msg'] )
+   if( @$_GET['msg'] )
       echo "<p><b><font color=\"green\">" . $_GET['msg'] . "</font></b><hr>";
 
-   $page = "waiting_room.php" . ( $_GET['info'] > 0 ? "?info=" . $_GET['info'] . "&" : '?' );
+   $page = "waiting_room.php" . ( @$_GET['info'] > 0 ? "?info=" . $_GET['info'] . "&" : '?' );
 
-   if(!$_GET['sort1'])
+   if(!@$_GET['sort1'])
       $_GET['sort1'] = 'ID';
 
    $wrtable = new Table( $page, "WaitingroomColumns" );
@@ -91,7 +91,7 @@ define('BAD_RATING_COLOR',"ff000033");
          $Rating = NULL;
          extract($row);
 
-         if( $_GET['info'] === $ID )
+         if( @$_GET['info'] === $ID )
             $info_row = $row;
 
          if( $Handicaptype == 'conv' or $Handicaptype == 'proper' )
@@ -127,8 +127,8 @@ define('BAD_RATING_COLOR',"ff000033");
             list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
             $wrow_strings[8] = '<td nowrap' .
                ( $good_rating ? '>' 
-                 : ' bgcolor='.blend_alpha_hex(BAD_RATING_COLOR, substr($wrtable->Row_Colors[count($wrtable->Tablerows) % 2], 2, 6))
-                   .'>') . $Ratinglimit . "</td>";
+                 : ' bgcolor="#'.$wrtable->blend_next_row_color_hex(BAD_RATING_COLOR)
+                   .'">') . $Ratinglimit . "</td>";
          }
          if( $wrtable->Is_Column_Displayed[9] )
             $wrow_strings[9] = '<td nowrap>' .
@@ -149,7 +149,7 @@ define('BAD_RATING_COLOR',"ff000033");
    else
       echo '<p>&nbsp;<p>' . T_('Seems to be empty at the moment.');
 
-   if( $_GET['info'] > 0 and is_array($info_row) )
+   if( @$_GET['info'] > 0 and is_array($info_row) )
    {
       show_game_info($info_row, $info_row['pid'] == $player_row['ID'], $my_rating);
    }
@@ -158,7 +158,7 @@ define('BAD_RATING_COLOR',"ff000033");
 
    echo "</center>";
 
-   if( $_GET['info'] > 0 and is_array($info_row) )
+   if( @$_GET['info'] > 0 and is_array($info_row) )
       $menu_array[T_('Add new game')] = "waiting_room.php" .
          ($orderstring ? "?$orderstring" : '' ) . "#add" ;
 
@@ -233,8 +233,8 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
    echo '<p><a name="info">' . "\n";
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
-   echo '<tr><td><b>' . T_('Player') . '<b></td><td>' .
-      "<A href=\"userinfo.php?uid=$pid\"><font color=black>$Name ($Handle)</a></td></tr>\n";
+   echo '<tr><td><b>' . T_('Player') . '<b></td><td>' . 
+      user_reference( true, true, "black", $pid, $Name, $Handle) . "</td></tr>\n";
 
    echo '<tr><td><b>' . T_('Rating') . '<b></td><td>' .
       echo_rating($Rating,true,$pid) . "</td></tr>\n";
@@ -247,8 +247,8 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
    list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
    echo '<tr><td><b>' . T_('Rating range') . '<b></td><td' .
                ( $good_rating ? '>' 
-                 : ' bgcolor='.blend_alpha_hex(BAD_RATING_COLOR, substr($bg_color, 2, 6))
-                   .'>') . $Ratinglimit . "</td></tr>\n";
+                 : ' bgcolor="#'.blend_alpha_hex(BAD_RATING_COLOR, substr($bg_color, 2, 6))
+                   .'">') . $Ratinglimit . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Time limit') . '<b></td><td>' .
       echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Number of games') . '<b></td><td>' . $nrGames . "</td></tr>\n";

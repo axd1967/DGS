@@ -146,6 +146,7 @@ define("RIGHT",0x04);
 define("DOWN",0x08);
 define("SMOOTH_EDGE",0x10);
 
+
 define("ADMIN_TRANSLATORS",0x01);
 define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
@@ -153,6 +154,7 @@ define("ADMIN_ADMINS",0x08);
 define("ADMIN_TIME",0x10);
 
 
+define("FOLDER_NONE", -1);
 define("FOLDER_ALL_RECEIVED", 0);
 define("FOLDER_MAIN", 1);
 define("FOLDER_NEW", 2);
@@ -994,6 +996,39 @@ function nsq_addslashes( $str )
   return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $str );
 }
 
+function game_reference( $link, $safe, $gid, $whitename='', $blackname='')
+{
+   $whitename = "$whitename (W)  vs. $blackname (B)" ;
+   if( $safe )
+      $whitename = make_html_safe($whitename) ;
+   if( $link )
+      $whitename = "<A href=\"game.php?gid=$gid\">$whitename</A>" ;
+   return $whitename ;
+}
+
+function user_reference( $link, $safe, $color, $player_id, $player_name='', $player_handle='')
+{
+   if( is_array($player_id) ) //i.e. $player_row
+   {
+      if( !$player_name )
+         $player_name = $player_id['Name'];
+      if( !$player_handle )
+         $player_handle = $player_id['Handle'];
+      $player_id = $player_id['ID'];
+   }
+   if( !$player_name )
+      $player_name = "#$player_id";
+   if( $player_handle )
+      $player_name.= " ($player_handle)" ;
+   if( $safe )
+      $player_name = make_html_safe($player_name) ;
+   if( $color )
+      $player_name = "<FONT color=\"$color\">$player_name</FONT>" ;
+   if( $link )
+      $player_name = "<A href=\"userinfo.php?uid=$player_id\">$player_name</A>" ;
+   return $player_name ;
+}
+
 function is_on_observe_list( $gid, $uid )
 {
    $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid");
@@ -1015,23 +1050,29 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
    if( $notify )
    {
-      $result = mysql_query("SELECT Players.ID AS pid " .
-                            "FROM Observers,Players WHERE gid=$gid AND uid=Players.ID");
+      $result = mysql_query("SELECT Observers.uid AS pid " .
+                            "FROM Observers WHERE gid=$gid");
 
-      $Subject = 'An observed game has finished';
-
-      while( $row = mysql_fetch_array( $result ) )
+      if(  mysql_num_rows($result) > 0 )
       {
+
+         $Subject = 'An observed game has finished';
+
          mysql_query( 'INSERT INTO Messages SET ' .
-                      'From_ID=' . $row['pid'] . ', ' .
-                      'To_ID=' . $row['pid'] . ', ' .
                       "Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='$Subject', Text='$Text'" );
 
-         $mid = mysql_insert_id();
+         if( mysql_affected_rows() == 1)
+         {
+            $mid = mysql_insert_id();
 
-         mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                     "(" . $row['pid'] . ", $mid, 'N', '".FOLDER_NEW."')");
+            while( $row = mysql_fetch_array( $result ) )
+            {
+               mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+                           "(" . $row['pid'] . ", $mid, 'N', ".FOLDER_NEW.")");
+            }
+         }
+
       }
    }
 

@@ -113,19 +113,21 @@ if( !$is_down )
             error("Couldn't update game.");
 
          // Send messages to the players
-         $Text = addslashes("The result in the game <A href=\"game.php?gid=$gid\">" .
-             "$whitename (W)  vs. $blackname (B) </A>" .
-             "was: <p><center>" . score2text($score,true,true) . "</center><br>");
+         $Text = addslashes("The result in the game " .game_reference( true, false, $gid, $whitename, $blackname).
+             " was: <p><center>" . score2text($score,true,true) . "</center><br>" );
 
          mysql_query( "INSERT INTO Messages SET " .
                       "Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'" );
 
+      if( mysql_affected_rows() == 1)
+      {
          $mid = mysql_insert_id();
 
          mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                     "($Black_ID, $mid, 'N', '".FOLDER_NEW."'), " .
-                     "($White_ID, $mid, 'N', '".FOLDER_NEW."')");
+                     "($Black_ID, $mid, 'N', ".FOLDER_NEW."), " .
+                     "($White_ID, $mid, 'N', ".FOLDER_NEW.")");
+      }
 
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .

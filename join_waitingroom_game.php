@@ -37,6 +37,7 @@ require_once( "include/rating.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
+   $id = $_REQUEST['id'];
    if( !is_numeric($id) )
       $id=0;
 
@@ -67,6 +68,7 @@ require_once( "include/rating.php" );
       jump_to("waiting_room.php?msg=$msg");
    }
 
+//else... joining game
 
    if( $player_row['ID'] == $uid )
       error("waitingroom_own_game");
@@ -76,7 +78,7 @@ require_once( "include/rating.php" );
 // set me to black and swap later if necessary
 
    $clock_used_white = ( $OnVacation > 0 ? -1 : $ClockUsed );
-   $clock_used_black =  ( $player_row['OnVacation'] > 0 ? -1 : $player_row["ClockUsed"] );
+   $clock_used_black = ( $player_row['OnVacation'] > 0 ? -1 : $player_row["ClockUsed"] );
 
    $opponent_rating = $Rating;
    $my_rating = $player_row["Rating2"];
@@ -202,22 +204,34 @@ require_once( "include/rating.php" );
 
    // Send message to notify opponent
 
-   $subject = addslashes('<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game");
+// This was often truncated by the database field:
+//   $subject = addslashes('<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game");
+   $subject = 'Your waiting room game has been joined.';
+   $reply = @$_REQUEST['reply'];
+   if ($reply)
+   {
+      $reply = addslashes(user_reference( true, false, '', $player_row). " wrote:\n") . $reply ;
+   }
+   else
+   {
+      $reply = addslashes(user_reference( true, false, '', $player_row). " has joined your waiting room game.") ;
+   }
 
    $query = "INSERT INTO Messages SET " .
-      "From_ID=" . $player_row["ID"] . ", " .
-      "To_ID=$uid, " .
       "Time=FROM_UNIXTIME($NOW), " .
       "Game_ID=$gid, " .
-      "Subject=\"$subject\", " .
-      "Text=\"$reply\"";
+      "Subject='$subject', " .
+      "Text='$reply'";
 
    mysql_query( $query );
+
+      if( mysql_affected_rows() != 1)
+         error("mysql_insert_message",true);
 
    $mid = mysql_insert_id();
 
    mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-               "($uid, $mid, 'N', '".FOLDER_NEW."')");
+               "($uid, $mid, 'N', ".FOLDER_NEW.")");
 
 
    $msg = urlencode(T_('Game joined!'));

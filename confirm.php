@@ -454,8 +454,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       if( $action == 'delete' )
       {
-         $Text = addslashes("The game $whitename (W)  vs. $blackname (B) " .
-             "has been deleted by your opponent");
+         //reference: game is deleted => no link
+         $Text = addslashes("The game " .game_reference( false, false, $gid, $whitename, $blackname) .
+             " has been deleted by your opponent");
          $Subject = 'Game deleted';
 
          mysql_query("UPDATE Players SET Running=Running-1 " .
@@ -468,9 +469,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 //         update_rating($gid);
          update_rating2($gid);
 
-         $Text = addslashes("The result in the game <a href=\"game.php?gid=$gid\">" .
-             "$whitename (W)  vs. $blackname (B) </a>" .
-             "was: <p><center>" . score2text($score,true,true) . "</center><br>");
+         $Text = addslashes("The result in the game " .game_reference( true, false, $gid, $whitename, $blackname) .
+             " was: <p><center>" . score2text($score,true,true) . "</center><br>");
          $Subject = 'Game result';
 
          mysql_query( "UPDATE Players " .
@@ -492,15 +492,16 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       }
 
       mysql_query( "INSERT INTO Messages SET " .
-                   "From_ID=" . $player_row["ID"] . ", " .
-                   "To_ID=" . $opponent_row["ID"] . ", " .
                    "Time=FROM_UNIXTIME($NOW), " .
                    "Game_ID=$gid, Subject='$Subject', Text='$Text'");
+
+      if( mysql_affected_rows() != 1)
+         error("mysql_insert_message",true);
 
       $mid = mysql_insert_id();
 
       mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                  "(" . $opponent_row['ID'] . ", $mid, 'N', '".FOLDER_NEW."')");
+                  "(" . $opponent_row['ID'] . ", $mid, 'N', ".FOLDER_NEW.")");
 
 
    }

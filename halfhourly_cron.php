@@ -96,14 +96,20 @@ require_once( "include/board.php" );
 
       if( !(strpos($SendEmail, 'MESSAGE') === false) )
       {
-         $query = "SELECT UNIX_TIMESTAMP(Time) AS date, " .
-             "Messages.*, Players.Name AS FromName, Players.Handle AS FromHandle " .
-             "FROM Messages, Players " .
-             "WHERE To_ID=$uid " .
-             "AND Messages.Flags LIKE '%NEW%' " .
-             "AND From_ID=Players.ID " .
-             "AND UNIX_TIMESTAMP(Time) > UNIX_TIMESTAMP('$Lastaccess') " .
-             "ORDER BY Time DESC";
+  $folderstring=FOLDER_NEW;
+         $query = "SELECT Messages.*, " .
+            "UNIX_TIMESTAMP(Messages.Time) AS date, " .
+            "Players.Name AS FromName, Players.Handle AS FromHandle " .
+            "FROM Messages, MessageCorrespondents AS me " .
+            "LEFT JOIN MessageCorrespondents AS other " .
+              "ON other.mid=me.mid AND other.Sender!=me.Sender " .
+            "LEFT JOIN Players ON Players.ID=other.uid " .
+            "WHERE me.uid=$uid AND Messages.ID=me.mid " .
+              "AND me.Folder_nr IN ($folderstring) " .
+              "AND me.Sender='N' " . //exclude message to myself
+              "AND UNIX_TIMESTAMP(Messages.Time) > UNIX_TIMESTAMP('$Lastaccess') " .
+            "ORDER BY Time DESC";
+
 
          $res3 = mysql_query( $query ) or die(mysql_error() . $query);
          if( mysql_num_rows($res3) > 0 )
@@ -112,10 +118,14 @@ require_once( "include/board.php" );
             while( $msg_row = mysql_fetch_array( $res3 ) )
             {
                extract($msg_row);
+               if($FromName && $FromHandle)
+                  $From= make_html_safe("$FromName ($FromHandle)");
+               else
+                  $From= 'Server message';
 
                $msg .= str_pad('', 47, '-') . "\n" .
                    "Date: " . date($date_fmt, $date) . "\n" .
-                   "From: ".make_html_safe("$FromName ($FromHandle)")."\n" .
+                   "From: $From\n" .
                    "Subject: " . make_html_safe($Subject) .
                    "  ($HOSTBASE/show_message.php?mid=$ID)\n\n" .
                    wordwrap(make_html_safe($Text),47) . "\n";
@@ -129,6 +139,7 @@ require_once( "include/board.php" );
    }
 
 
+   //Setting Notify to 'DONE' stop notifications until the player's visite
    mysql_query( "UPDATE Players SET Notify='DONE' " .
                 "WHERE SendEmail LIKE '%ON%' AND Notify='NOW' " );
 
