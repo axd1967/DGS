@@ -238,7 +238,7 @@ function read_rating($string)
 function rank_to_rating($val, $kyu)
 {
    if( empty($kyu) )
-      error("rank_not_rating");
+      error("rank_not_rating", "val: $val  kyu: $kyu");
 
    $rating = $val*100;
 
@@ -259,6 +259,8 @@ function convert_to_rating($string, $type)
       return null;
 
    $string = strtolower($string);
+   $string = str_replace(Chr(160), ' ', $string); // change to normal space char.
+
    $val = doubleval($string);
 
    if( strpos($string, 'k') > 0 or strpos($string, 'gup') > 0 )
@@ -289,15 +291,14 @@ function convert_to_rating($string, $type)
          $rating = read_rating($string);
 
          if( !is_numeric($rating) )
-            error("rank_not_rating");
-
+            error("rank_not_rating", "type: $type  Rating: $rating  string: $string");
       }
       break;
 
       case 'eurorating':
       {
          if( $kyu > 0 )
-            error("rating_not_rank");
+            error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
 
          $rating = $val;
       }
@@ -321,7 +322,7 @@ function convert_to_rating($string, $type)
       case 'agarating':
       {
          if( $kyu > 0 )
-            error("rating_not_rank");
+            error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
 
          if( $val > 0 )
             $rating = $val*100 + 1950;
@@ -343,7 +344,7 @@ function convert_to_rating($string, $type)
       case 'igsrating':
       {
          if( $kyu > 0 )
-            error("rating_not_rank");
+            error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
 
          $rating = $val*100 - 1130 ;
          $rating = interpolate($rating, $igs_table, true);
@@ -362,7 +363,7 @@ function convert_to_rating($string, $type)
       case 'nngsrating':
       {
          if( $kyu > 0 )
-            error("rating_not_rank");
+            error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
 
          $rating = $val - 900;
 
