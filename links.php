@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Jim Heiney and Erik Ouchterlony
+Copyright (C) 2001 Jim Heiney and Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
-
 require( "include/std_functions.php" );
 
 connect2mysql();
@@ -30,113 +28,100 @@ start_page("Links", true, $logged_in, $player_row );
 
 ?>
 
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<h3>
-  <CENTER><a href="#general">General info</a> | <a href="#rules">Rules</a> |
-    <a href="#strategy"> Strategy &amp; Terms</a> | <a href="#history"> History</a> | <a href="#stuff"> Books &amp; Equipment</a> | <a href="#servers"> Servers</a>
-  </CENTER>
-</h3>
-<p>&nbsp;</p>
 
-<h3 align="left"><a name="general"></a><font color="#800000">General Info</font> </h3>
+<table align=center width="85%"><tr><td>
+
+<h3 align=left><a name="general"></a><font color="#800000">General Info</font> </h3>
 
 
 
-<p align="left"><a href="http://gobase.org">Jan van der Steens Pages</a> --- Lots of info on go </p>
+<p><a href="http://gobase.org">Jan van der Steens Pages</a> --- Lots of info on go 
 
-<p align="left"><a href="http://www.igoweb.org/~pahle/go-faq/index.html">Go FAQ</a> --- Frequently asked questions about go for the rec.games.go newsgroup</p>
+<p><a href="http://www.igoweb.org/~pahle/go-faq/index.html">Go FAQ</a> --- Frequently asked questions about go for the rec.games.go newsgroup
 
-<p align="left"><a href="http://www.msoworld.com/mindzine/news/orient/go/go.html">Mind Sport Zine</a> --- An excellent, but unfortunately no longer updated site. </p>
+<p><a href="http://www.msoworld.com/mindzine/news/orient/go/go.html">Mind Sport Zine</a> --- An excellent, but unfortunately no longer updated site. 
 
-<p align="left"><a href="http://senseis.xmp.net">Sensei's Library</a> --- A collaboration web site. Read and contribute!  </p>
+<p><a href="http://senseis.xmp.net">Sensei's Library</a> --- A collaboration web site. Read and contribute!  
 
-<p align="left"><a href="http://www.kyoto.zaq.ne.jp/momoyama/news/news.html">Go News</a> --- News and games from the professional scene </p>
+<p><a href="http://www.kyoto.zaq.ne.jp/momoyama/news/news.html">Go News</a> --- News and games from the professional scene 
 
-<p align="left"><a href="http://finance.baylor.edu/rich/go/iyt_go.html">IYT go guild</a> --- Meet other turn based go players </p>
+<p><a href="http://finance.baylor.edu/rich/go/iyt_go.html">IYT go guild</a> --- Meet other turn based go players 
 
-<p align="left"><a href="http://www.toriyamaworld.com/hikaru.html">Hikaru no Go</a> --- A manga about go. Recommended! </p>
-
-
-
-<p align="left">&nbsp;</p>
-
-<h3 align="left"><a name="rules"></a><font color="#800000">Rules</font></h3>
-
-<p align="left"><a href="http://playgo.to/interactive/index.html">An Interactive
-    Introduction</a> --- This is a very nice site to learn with.</p>
-
-<p align="left"><a href="http://www.britgo.org/intro/intro1.html">Introduction</a> --- Very well written introduction by the British Go Association.</p>
+<p><a href="http://www.toriyamaworld.com/hikaru.html">Hikaru no Go</a> --- A manga about go. Recommended! 
 
 
 
-<p align="left"><a href="http://sentex.net/~mmcadams/teachgo/index.html">How to
-    Teach Go</a> --- This is all you need to get started.&nbsp; Very basic stuff</p>
+<p>&nbsp;
 
-<p align="left"><a href="http://home.earthlink.net/~scotmc/">Scot's Go Page</a>
-  --- This is more in-depth.</p>
+<h3 align=left><a name="rules"></a><font color="#800000">Rules</font></h3>
 
-<p align="left">&nbsp;</p>
+<p><a href="http://playgo.to/interactive/index.html">An Interactive
+    Introduction</a> --- This is a very nice site to learn with.
 
-
-
-<h3 align="left"><font color="#800000"><a name="strategy"></a>Strategy &amp; Terms</font>&nbsp;</h3>
-
-<p align="left"><a href="http://www.igoweb.org/~pahle/go-stuff/shape.html">An
-    Introduction to Shape</a></p>
-
-
-<p align="left"><a href="http://www.goproblems.com/">Go Problems</a> --- Working
-  through these can help out your game.</p>
-
-<p align="left"><a href="http://gtl.jeudego.org/">Go Teaching Ladder</a> --
-  Submit your games for comments to see where you might have played better.</p>
-
-<p align="left"><a href="http://nngs.cosmic.org/hmkw/stuff/definitions.html">Common Japanese Go Terms</a>
-  --- You have to know what other players are talking about.</p>
-
-<p align="left"><a href="http://www.algonet.se/~palund/glossary/term_000.htm">More Japanese Go Terms</a> --- Translated and explained.</p>
-
-<p align="left">&nbsp;</p>
+<p><a href="http://www.britgo.org/intro/intro1.html">Introduction</a> --- Very well written introduction by the British Go Association.
 
 
 
-<h3 align="left"><font color="#800000"><a name="history"></a>History</font></h3>
+<p><a href="http://sentex.net/~mmcadams/teachgo/index.html">How to
+    Teach Go</a> --- This is all you need to get started.&nbsp; Very basic stuff
 
-<p align="left"><a href="http://www.britgo.org/intro/intro1.html#bh">A Brief
-    History</a> --- For you people with short attention spans.</p>
-<p align="left"><a href="http://www.cwi.nl/~jansteen/go/history/">The Extended
-    History</a> --- In case you're an aspiring know-it-all.</p>
+<p><a href="http://home.earthlink.net/~scotmc/">Scot's Go Page</a>
+  --- This is more in-depth.
 
-<p align="left">&nbsp;</p>
-
-
-
-<h3 align="left"><font color="#800000"><a name="stuff"></a>Go Books, Equipment &amp; Software</font></h3>
-<p align="left"><a href="http://www.kiseido.com/">Kiseido</a></p>
-<p align="left"><a href="http://www.yutopian.com/go/">Yutopian</a></p>
-<p align="left"><a href="http://www.samarkand.net/">Samarkand</a></p>
-<p align="left"><a href="http://www.xs4all.nl/~paard//">Het Paard</a> --- European shop</p>
-
-<p align="left">&nbsp;</p>
+<p>&nbsp;
 
 
 
-<h3 align="left"><font color="#800000"><a name="servers"></a>Other go servers</font></h3>
-<p align="left"><a href="http://www.itsyourturn.com/">It's your turn</a> --- Also turn based. Has several other games.</p>
-<p align="left"><a href="http://kgs.kiseido.com">Kiseido Go Server</a> --- Server with java interface</p>
-<p align="left"><a href="http://panda-igs.joyjoy.net/English/contents.html">IGS</a> --- A large server for realtime play</p>
-<p align="left"><a href="http://nngs.cosmic.org">NNGS</a> --- An open sourced go server</p>
-<p align="left"><a href="http://www.britgo.org/gopcres/play.html">Server list</a> --- A more complete list of servers</p>
+<h3 align=left><font color="#800000"><a name="strategy"></a>Strategy &amp; Terms</font>&nbsp;</h3>
+
+<p><a href="http://www.igoweb.org/~pahle/go-stuff/shape.html">An
+    Introduction to Shape</a>
+
+
+<p><a href="http://www.goproblems.com/">Go Problems</a> --- Working
+  through these can help out your game.
+
+<p><a href="http://gtl.jeudego.org/">Go Teaching Ladder</a> --
+  Submit your games for comments to see where you might have played better.
+
+<p><a href="http://nngs.cosmic.org/hmkw/stuff/definitions.html">Common Japanese Go Terms</a>
+  --- You have to know what other players are talking about.
+
+<p><a href="http://www.algonet.se/~palund/glossary/term_000.htm">More Japanese Go Terms</a> --- Translated and explained.
+
+<p>&nbsp;
 
 
 
-<p align="left">&nbsp;</p>
+<h3 align=left><font color="#800000"><a name="history"></a>History</font></h3>
+
+<p><a href="http://www.britgo.org/intro/intro1.html#bh">A Brief
+    History</a> --- For you people with short attention spans.
+<p><a href="http://www.cwi.nl/~jansteen/go/history/">The Extended
+    History</a> --- In case you're an aspiring know-it-all.
+
+<p>&nbsp;
 
 
 
+<h3 align=left><font color="#800000"><a name="stuff"></a>Go Books, Equipment &amp; Software</font></h3>
+<p><a href="http://www.kiseido.com/">Kiseido</a>
+<p><a href="http://www.yutopian.com/go/">Yutopian</a>
+<p><a href="http://www.samarkand.net/">Samarkand</a>
+<p><a href="http://www.xs4all.nl/~paard//">Het Paard</a> --- European shop
 
-<p align="left">&nbsp;</p>
+<p>&nbsp;
+
+
+
+<h3 align=left><font color="#800000"><a name="servers"></a>Other go servers</font></h3>
+<p><a href="http://www.itsyourturn.com/">It's your turn</a> --- Also turn based. Has several other games.
+<p><a href="http://kgs.kiseido.com">Kiseido Go Server</a> --- Server with java interface
+<p><a href="http://panda-igs.joyjoy.net/English/contents.html">IGS</a> --- A large server for realtime play
+<p><a href="http://nngs.cosmic.org">NNGS</a> --- An open sourced go server
+<p><a href="http://www.britgo.org/gopcres/play.html">Server list</a> --- A more complete list of servers
+
+</td></tr></table>
 
 <?php
 end_page();

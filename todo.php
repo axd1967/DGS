@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Jim Heiney and Erik Ouchterlony
+Copyright (C) 2001 Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,10 +26,13 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 start_page("To do", true, $logged_in, $player_row );
 
+echo "<table align=center><tr><td>\n";
 echo "<pre>\n";
 
 readfile("TODO");
 
 echo "</pre>\n";
+echo "</td></tr></table>\n";
+
 end_page();
 ?>
