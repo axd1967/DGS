@@ -114,23 +114,23 @@ function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified
     <TITLE> Dragon Go Server - ' . $title . '</TITLE>
     <LINK rel="stylesheet" type="text/css" media="screen" href="dragon.css">
   </HEAD>
-  <BODY bgcolor="F7F5E3">
+  <BODY bgcolor="#F7F5E3">
 
-    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=0C41C9>
+    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor="#0C41C9">
         <tr>
           <td colspan=3 width="50%">
-          <A href="' . $HOSTBASE . '/index.php"><B><font color=FFFC70>Dragon Go Server</font></B></A></td>
+          <A href="' . $HOSTBASE . '/index.php"><B><font color="#FFFC70">Dragon Go Server</font></B></A></td>
 ';
 
 
    if( $logged_in and !$is_down ) 
-      echo '          <td colspan=3 align=right width="50%"><font color=FFFC70><B>' . _("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
+      echo '          <td colspan=3 align=right width="50%"><font color="#FFFC70"><B>' . _("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
    else
-      echo '          <td colspan=3 align=right width="50%"><font color=FFFC70><B>' . _("Not logged in") . '</B></font></td>';
+      echo '          <td colspan=3 align=right width="50%"><font color="#FFFC70"><B>' . _("Not logged in") . '</B></font></td>';
 
    echo '
         </tr>
-        <tr bgcolor="F7F5E3" align="center">
+        <tr bgcolor="#F7F5E3" align="center">
           <td><B><A href="' . $HOSTBASE . '/status.php">' . _("Status") . '</A></B></td>
           <td><B><A href="' . $HOSTBASE . '/messages.php">' . _("Messages") . '</A></B></td>
           <td><B><A href="' . $HOSTBASE . '/invite.php">' . _("Invite") . '</A></B></td>
@@ -158,17 +158,17 @@ function end_page( $new_paragraph = true )
    if( $new_paragraph )
       echo "<p>";
    echo '
-    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=0C41C9>
+    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor="#0C41C9">
       <tr>
         <td align="left" width="50%">
-          <A href="' . $HOSTBASE . '/index.php"><font color=FFFC70><B>Dragon Go Server</B></font></A></td>
+          <A href="' . $HOSTBASE . '/index.php"><font color="#FFFC70"><B>Dragon Go Server</B></font></A></td>
         <td align="right" width="50%">';
    if( $show_time )
       echo '
-        <font color=FFFC70><B>' . _("Page created in") . ' ' . 
+        <font color="#FFFC70"><B>' . _("Page created in") . ' ' . 
          sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s</B></font></td>';
    else
-      echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=FFFC70><B>' . _("Logout") . '</B></font></A></td>';
+      echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color="#FFFC70"><B>' . _("Logout") . '</B></font></A></td>';
 
    echo '
       </tr>
@@ -258,6 +258,10 @@ function make_html_safe(&$msg, $some_html=false)
 
    if( $some_html )
    {
+      // sgf comment
+      $msg = eregi_replace("<c(omment)?>", "<font color=blue>\\0", $msg);
+      $msg = eregi_replace("</c(omment)?>", "\\0</font>", $msg);
+      $msg = preg_replace("'<h(idden)?>(.*?)</h(idden)?>'i", "", $msg);
       // make sure the <, > replacements: {anglstart}, {anglend} are removed from the string
       $msg = str_replace("{anglstart}", "<", $msg);
       $msg = str_replace("{anglend}", ">", $msg);
@@ -267,8 +271,8 @@ function make_html_safe(&$msg, $some_html=false)
 
       $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>", 
                          "{anglstart}a href=\"\\1\\2\"{anglend}\\2{anglstart}/a{anglend}", $msg);
-      $msg=eregi_replace("<([http|news|ftp]://[^ >\n\t]+)>", 
-                         "{anglstart}a href=\"\\1\"{anglend}\\1{anglstart}/a{anglend}", $msg);
+      $msg=eregi_replace("<((http|news|ftp)+://[^ >\n\t]+)>", 
+                         "{anglstart}a href=\"\\2\"{anglend}\\2{anglstart}/a{anglend}", $msg);
 
 
       // Some allowed html tags
@@ -276,6 +280,7 @@ function make_html_safe(&$msg, $some_html=false)
       $html_code = "a|b|i|u|center|li|ul|ol|font|p|br";
 
       $msg=eregi_replace("<(/?($html_code) *[^>]*)>", "{anglstart}\\1{anglend}", $msg);
+
    }
 
    // Filter out HTML code
@@ -441,7 +446,7 @@ function is_logged_in($hdl, $scode, &$row)
    $time = getmicrotime();
    $show_time = false;
 
-   if( $HTTP_HOST != $HOSTNAME )
+   if( eregi_replace(":.*$","", $HTTP_HOST) != $HOSTNAME )
    {
       jump_to( "http://" . $HOSTNAME . $PHP_SELF, true );
    }

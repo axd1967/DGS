@@ -33,6 +33,15 @@ require( "include/std_functions.php" );
 //$rules = "New Zealand";
    $sgf_version = 3;
 
+   if( !$gid )
+   {
+      if( eregi("game([0-9]+)", $REQUEST_URI, $result) )
+         $gid = $result[1];
+   }
+
+   if( !$gid )
+      error("unknown_game");
+
    $result = mysql_query( 'SELECT Games.*, ' .
                           'Games.Flags+0 AS flags, ' . 
                           'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' . 
@@ -47,7 +56,7 @@ require( "include/std_functions.php" );
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
 
    if( mysql_num_rows($result) != 1 )
-      return false;
+      error("unknown_game");
      
    extract(mysql_fetch_array($result));
      
@@ -84,6 +93,8 @@ WR[$Whiterank]
    if( $Handicap > 1 )
       echo "PL[W]\n";
 
+   $regexp = ( $Status == 'FINISHED' ? "c|comment|h|hidden" : "c|comment" );
+      
 
    if( $Handicap > 0 and $use_AB_for_handicap ) 
       echo "AB";
@@ -98,6 +109,24 @@ WR[$Whiterank]
     
       echo "[" . chr($row["PosX"] + ord('a')) .
          chr($row["PosY"] + ord('a')) . "]";
+
+
+
+
+      if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'i", $row["Text"],
+                                       $matches, PREG__SET_ORDER) )
+      {
+         echo "C[";
+         for($i=0; $i<$nr_matches; $i++)
+         {
+            echo ( $row["Stone"] == WHITE ? $Whitename : $Blackname ) . ": ";
+            echo  str_replace("]","\]", trim($matches[2][$i])) .
+               ( $i == $nr_matches-1 ? "" : "\n" );
+         }
+         echo "]";
+      }
+
+
    }
    echo "\n)\n";
 
