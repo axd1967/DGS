@@ -24,6 +24,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/GoDiagram.php" );
 chdir("forum");
+$base_path = '../';
 
 
 //$new_end =  4*7*24*3600;  // four weeks //moved in quick_common.php
@@ -204,7 +205,7 @@ function forum_name($forum, &$moderated)
 
    $result = mysql_query("SELECT Name AS Forumname, Moderated FROM Forums WHERE ID=$forum");
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("unknown_forum");
 
    $row = mysql_fetch_array($result);
@@ -246,7 +247,7 @@ function recalculate_lastchanged($Post_ID, $replies_diff=0)
 {
    $result = mysql_query("SELECT Depth,Parent_ID FROM Posts WHERE ID='$Post_ID'");
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       return;
 
    extract(mysql_fetch_array($result));
@@ -257,7 +258,7 @@ function recalculate_lastchanged($Post_ID, $replies_diff=0)
    while( $d > 0 )
    {
       $result = mysql_query("SELECT Depth,Parent_ID FROM Posts WHERE ID='$id'");
-      if( mysql_num_rows($result) != 1 )
+      if( @mysql_num_rows($result) != 1 )
          error("internal_error", "recalculate_lastchanged: parent_missing $id $Post_ID" );
 
       extract(mysql_fetch_array($result));
@@ -269,7 +270,7 @@ function recalculate_lastchanged($Post_ID, $replies_diff=0)
                             "WHERE Parent_ID='$id' AND Approved='Y' " .
                             "ORDER BY Lastchanged DESC LIMIT 1");
 
-      if( mysql_num_rows($result) != 1 )
+      if( @mysql_num_rows($result) != 1 )
          mysql_query("UPDATE Posts SET Lastchanged=GREATEST(Time,Lastedited), " .
                      "Replies=Replies+($replies_diff) " .
                      "WHERE ID='$id' LIMIT 1");

@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 chdir( '../' );
 require_once( "include/std_functions.php" );
 chdir( 'scripts' );
+$base_path = '../';
 
 {
    connect2mysql();
@@ -56,7 +57,7 @@ chdir( 'scripts' );
            $string = preg_replace( '/\\n/', '\n', $string );
 
            $res = mysql_query("SELECT ID FROM TranslationTexts WHERE Text=$string");
-           if( mysql_num_rows( $res ) == 0 )
+           if( @mysql_num_rows( $res ) == 0 )
            {
               mysql_query("INSERT INTO TranslationTexts SET Text=$string")
                  or die(mysql_error());
