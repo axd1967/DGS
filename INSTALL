@@ -37,13 +37,18 @@ mysql> GRANT select, insert, update, delete ON dragon.* TO dragon@localhost IDEN
 
 > mysql < init.mysql
 
+and add some translations:
+
+> mysql < translationdata.mysql
 
 
-4) Edit include/config.php and make readable only for the web server:
+4) Edit permissions for include/config.php and translations/:
 
 Find which group your webserver is using (e.g. www-data).
-> su -c 'chgrp www-data include/config.php'
+> su -c 'chgrp www-data include/config.php translations'
 > chmod 640 include/config.php
+> chmod 664 translations/
+
 
 
 
