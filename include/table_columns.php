@@ -455,7 +455,7 @@ class Table
             }
          }
 
-         $this->Removed_Columns[ -1 ] = T_('*All columns*');
+         $this->Removed_Columns[ -1 ] = T_('All columns');
          asort($this->Removed_Columns);
          array_push( $form_array,
                      'SELECTBOX', $this->Prefix . 'add', 1,
