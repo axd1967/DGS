@@ -74,7 +74,7 @@ require_once( "include/countries.php" );
    $woodcolors = array();
    for($i=1; $i<16; $i++ )
    {
-      $woodcolors[$i] = "<img width=30 height=30 src=\"images/smallwood$i.gif\" alt=\"wood$i\">";
+      $woodcolors[$i] = "<img width=30 height=30 src=\"images/smallwood$i.gif\" alt=\"wood$i\">&nbsp;&nbsp;";
       if( $i==5 ) 
       {
          $woodcolors[$i].= '<BR>';
@@ -201,9 +201,7 @@ require_once( "include/countries.php" );
                                   'RADIOBUTTONS', 'menudir', $menu_directions,
                                   $player_row["MenuDirection"] ) );
 
-   $button_code  = "      <TD align=right>" . T_('Game id button') . ":</TD>\n";
-   $button_code .= "      <TD align=left>\n";
-   $button_code .= "        <TABLE border=0 cellspacing=0 cellpadding=3>\n";
+   $button_code  = "        <TABLE border=0 cellspacing=0 cellpadding=0>\n";
    $button_code .= "          <TR>\n";
 
    for($i=0; $i<=$button_max; $i++)
@@ -214,9 +212,9 @@ require_once( "include/countries.php" );
          'background-repeat : no-repeat;  background-position : center;';
 
       $button_code .= '<TD valign=middle><INPUT type="radio" name="button" value=' . $i .
-         ( $i == $button_nr ? ' checked' : '') . '></TD>' . "\n" .
-         '<td><table><tr><TD width=92 height=21 align=center STYLE="' . $button_style . $font_style .
-         '">1348</TD><td width=10></td></tr></table></td>';
+         ( $i == $button_nr ? ' checked' : '') . '></TD><td width=10></td>' . "\n" .
+         '<TD width=92 height=21 align=center STYLE="' . $button_style . $font_style .
+         '">1348</TD><td width=20></td>';
 
       if( $i % 4 == 3 )
          $button_code .= "</TR>\n<TR>\n";
@@ -224,9 +222,11 @@ require_once( "include/countries.php" );
 
    $button_code .= "          </TR>\n";
    $button_code .= "        </table>\n";
-   $button_code .= "      </TD>\n";
 
-   $profile_form->add_row( array( 'OWNHTML', $button_code ) );
+      $profile_form->add_row( array(
+               'DESCRIPTION', T_('Game id button'),
+               'TEXT', $button_code,
+            ) );
 
 
 
@@ -238,6 +238,7 @@ require_once( "include/countries.php" );
       if( $ltyp == 'small' )
          $profile_form->add_row( array(
                'TEXT', '<b>' . T_('Small boards') . ':</b>',
+               'TAB',
             ) );
       else
          $profile_form->add_row( array(

@@ -251,6 +251,13 @@ require_once( "include/std_functions.php" );
       }
       break;
 
+      case("page_not_found"):
+      {
+         echo T_('Page not found. Please contact the server administrators and inform them of the time the error occurred, and anything you might have done that may have caused the error.');
+         //echo '<br>('.@$_SERVER['REDIRECT_STATUS'].': '.@$_SERVER['REDIRECT_URL'].')';
+      }
+      break;
+
       case("password_illegal_chars"):
       {
          echo T_("The password contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+.,:;?!%* are allowed.");

@@ -103,7 +103,7 @@ require_once( "include/form_functions.php" );
   {
      echo '<img src="ratingpng.php?uid=' . $uid .
         (@$_GET['show_time'] == 'y' ? '&show_time=y' : '') . 
-        "&startyear=$startyear&startmonth=$startmonth&endmonth=$endmonth&endyear=$endyear\"" .
+        "&startyear=$startyear&startmonth=$startmonth&endmonth=$endmonth&endyear=$endyear&date=$NOW\"" .
         " alt=\"" . T_('Rating graph') . "\">\n";
 
      echo "<p>\n";

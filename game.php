@@ -85,9 +85,9 @@ require_once( "include/rating.php" );
    if( $Status == 'INVITED' )
       error("unknown_game",'game2');
 
-
-   if( $action and $player_row["ID"] != $ToMove_ID )
+   if( $action and $logged_in and $player_row["ID"] != $ToMove_ID )
       error("not_your_turn");
+
 
    if( !$move ) $move = $Moves;
 
@@ -101,10 +101,8 @@ require_once( "include/rating.php" );
       $to_move = BLACK;
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
-   else if( @$ToMove_ID )
-   {
+   else if( $ToMove_ID )
       error("database_corrupted");
-   }
 
    if( !$action )
    {
@@ -312,7 +310,7 @@ require_once( "include/rating.php" );
 
    start_page(T_("Game"), true, $logged_in, $player_row);
 
-   echo "<table>\n<tr><td>"; //notes table {--------
+   echo "<table align=center>\n<tr><td>"; //notes table {--------
 
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
               $player_row["Stonesize"], $msg, $stonestring, $handi,
