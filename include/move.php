@@ -30,7 +30,7 @@ function check_move($print_error=true)
 
    list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
-   if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
+   if( !isset($rownr) or !isset($colnr) or @$array[$colnr][$rownr] >= 1 )
    {
       if( $print_error )
          error("illegal_position");
@@ -96,7 +96,7 @@ function check_move($print_error=true)
    return true;
 }
 
-function check_handicap()
+function check_handicap() //adjust $handi, $stonestring and others
 {
    global $stonestring, $colnr, $rownr, $Size, $array, $coord, $Handicap,
       $enable_message, $extra_message, $handi;
@@ -392,19 +392,19 @@ function draw_notes($notes, $height, $width)
 {
    global $gid;
 
-   echo "<form name=\"savenotes\" action=\"savenotes.php\" method=\"post\">";
-   echo "<input type=\"hidden\" name=\"refer_url\" value=\"". get_request_url() . "\"><br>";
-   echo "<input type=\"hidden\" name=\"gid\" value=\"". $gid . "\"><br>";
+   echo "<form name=\"savenotes\" action=\"savenotes.php\" method=\"post\">\n";
+   echo "<input type=\"hidden\" name=\"refer_url\" value=\"". get_request_url() . "\">\n";
+   echo "<input type=\"hidden\" name=\"gid\" value=\"". $gid . "\">\n";
    echo "<table>";
-   echo "<tr><td bgcolor=#7aa07a><font color=white><b><span id=\"notes_caption\">" . T_("Private game notes") .
+   echo "<tr><td bgcolor='#7aa07a'><font color=white><b><span id=\"notes_caption\">" . T_('Private game notes') .
       "</span></b></font></td></tr>\n";
-   echo "<tr><td bgcolor=#ddf0dd>\n";
+   echo "<tr><td bgcolor='#ddf0dd'>\n";
    $notes = @htmlspecialchars($notes, ENT_QUOTES);
    echo "<textarea name=\"notes\" id=\"notes\" cols=\"" . $width . "\" rows=\"" . $height . "\" wrap=\"virtual\">$notes</textarea>";
    echo "</td></tr>\n";
-   echo "<tr><td><input type=\"submit\" value=\"Save notes\"></td></tr>";
-   echo "</table>";
-   echo "</form>";
+   echo "<tr><td><input type=\"submit\" value=\"Save notes\"></td></tr>\n";
+   echo "</table>\n";
+   echo "</form>\n";
 }
 
 ?>
