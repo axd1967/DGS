@@ -1,0 +1,42 @@
+
+* Email notification
+
+* Forgot password? -> send email
+
+* sgf-files
+
+* show moves of games
+
+* Add two gamelists (running/finished) per player in the database
+
+* FAQ
+
+* Introduction page
+
+* Make messages HTML-safe
+
+* Allow for fixed handicap
+
+* Smother handicap placement
+
+* Nicer territory/dead stones grafics
+
+* Time control
+
+* Customizable time zones and time format
+
+* submit->next game
+
+* show finished games
+
+* Installation information and scripts
+
+* Delete messages (all/individual)
+
+* Logout link
+
+* Message boards
+
+* Tournaments
+
+* Rengo (team go)
