@@ -57,6 +57,8 @@ $bg_color='"#F7F5E3"';  // change in dragon.css too!
 $menu_bg_color='"#0C41C9"';
 $menu_fg_color='"#FFFC70"';
 
+$max_links_in_main_menu=15;
+
 $table_head_color='"#CCCCCC"';
 $table_row_color1='"#FFFFFF"';
 $table_row_color2='"#E0E8ED"';
@@ -146,7 +148,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $HOSTBASE, $is_down, $bg_color, $menu_bg_color, $menu_fg_color,
-      $the_translator, $CHARACTER_ENCODINGS;
+      $the_translator, $CHARACTER_ENCODINGS, $max_links_in_main_menu;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -216,8 +218,9 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    $menu_array[T_('Docs')] = 'docs.php';
 
-
-   echo '         <td colspan=' . (count($menu_array)-3) . ' width="50%">
+   $menu_levels = ceil(count($menu_array)/$max_links_in_main_menu);
+   $menu_width = round(count($menu_array)/$menu_levels+0.1);
+   echo '         <td colspan=' . ($menu_width-3) . ' width="50%">
           <A href="' . $HOSTBASE . '/index.php"><B><font color=' . $menu_fg_color .
       '>Dragon Go Server</font></B></A></td>
           <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color .'><B>' .
@@ -279,21 +282,44 @@ function end_page( $menu_array=NULL )
 
 function make_menu($menu_array)
 {
-   global $HOSTBASE, $bg_color;
+   global $HOSTBASE, $bg_color,$max_links_in_main_menu;
 
-   $w = 100/count($menu_array);
-
-   echo '<tr bgcolor=' . $bg_color . ' align="center">';
+   $new_row= '<tr bgcolor=' . $bg_color . ' align="center">' . "\n";
+   echo $new_row;
 
    if( count($menu_array) == 1 )
      $span = " colspan=2";
 
+   $break_point_array = array();
+   $nr_menu_links = count($menu_array);
+   $menu_levels = ceil($nr_menu_links/$max_links_in_main_menu);
+   $menu_width = round($nr_menu_links/$menu_levels+0.01);
+   $even = ((count($menu_array) % $menu_width) == 0);
+   $w = 100/$menu_width;
+
+   $i = 1;
+   while( $i < $menu_levels )
+     {
+       $break_point_array[] = $menu_width*$i;
+       $i++;
+     }
+
+   $i = 0;
    foreach( $menu_array as $text => $link )
       {
+        $i++;
          $cumw += $w;
          $width = round($cumw - $cumwidth);
+         if( $i == count($menu_array) && !$even )
+           $span = " colspan=2";
          echo "<td$span width=$width%><B><A href=\"$HOSTBASE/$link\">$text</A></B></td>\n";
          $cumwidth += $width;
+         if( in_array($i, $break_point_array) )
+           {
+             echo "</tr>".$new_row;
+             $cumw = 0;
+             $cumwidth = 0;
+           }
       }
 
    echo "</tr>\n";
