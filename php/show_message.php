@@ -159,6 +159,8 @@ if( $game_row["Byotype"] == 'JAP' )
 
      }
 
+    echo '<tr><td>Rated: </td><td>' . ( $game_row["Rated"] == 'Y' ? 'Yes' : 'No' );
+
  echo "    </table>\n";
 }
 
