@@ -53,7 +53,8 @@ function make_known_languages()
 
 function slashed($string)
 {
-   return str_replace( array( "\\", "\"" ), array( "\\\\", "\\\"" ), $string );
+   //all that can disturb a PHP string quoted with ""
+   return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $string );
 }
 
 
