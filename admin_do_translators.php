@@ -40,7 +40,7 @@ require_once( "include/make_translationfiles.php" );
   $charenc = strtolower(trim(@$_REQUEST['charenc']));
   $langname = trim(@$_REQUEST['langname']);
 
-  $extra_url_parts = '';
+
   if( $addlanguage )
     {
       if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
@@ -77,6 +77,16 @@ require_once( "include/make_translationfiles.php" );
 
       $msg = sprintf( T_("Added language %s with code %s and characterencoding %s."),
                       $langname, $twoletter, $charenc );
+    }
+
+  $showpriv = @$_REQUEST['showpriv'];
+  if( $showpriv )
+    {
+      $transluser = trim(@$_REQUEST['transluser']);
+      if( empty($transluser) )
+        error("no_specified_user");
+
+      jump_to("admin_translators.php?transluser=" . urlencode($transluser));
     }
 
   $transladd = @$_REQUEST['transladd'];
@@ -127,7 +137,7 @@ require_once( "include/make_translationfiles.php" );
       if( empty($transluser) )
         error("no_specified_user");
 
-      $transllang = @$_REQUEST['transllang'];
+      $transllang = @$_REQUEST['transllang']; //transllang is a MULTIPLE select box
       if( !is_array( $transllang ) )
         $transllang = array();
 

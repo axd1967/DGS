@@ -52,24 +52,77 @@ require_once( "include/form_functions.php" );
                                     'TEXTINPUT', 'langname', 30, 50, '' ) );
   $translator_form->add_row( array( 'DESCRIPTION', T_("Character encoding (i.e. 'iso-8859-1')"),
                                     'TEXTINPUT', 'charenc', 30, 50, '' ) );
-  $translator_form->add_row( array( 'SUBMITBUTTON', 'addlanguage', T_('Add language') ) );
+  $translator_form->add_row( array(
+      'SUBMITBUTTON', 'addlanguage', T_('Add language'),
+      ) );
+
 
   /* Set translator privileges for user */
   $translator_form->add_row( array( 'HEADER', T_('Set translator privileges for user') ) );
-  $translator_form->add_row( array( 'DESCRIPTION', T_('User to set privileges for (use the userid)'),
-                                    'TEXTINPUT', 'transluser', 30, 80, '' ) );
+
   $langs = get_language_descriptions_translated();
   asort($langs);
-  $translator_form->add_row(
-     array( 'DESCRIPTION', T_('Select language to make user translator for that language.'),
-            'SELECTBOX', 'transladdlang', 1,
-            $langs, array(), false,
-            'SUBMITBUTTON', 'transladd', T_('Add language for translator') ) );
-  $translator_form->add_row(
-     array( 'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
-            'SELECTBOX', 'transllang[]', 7, //transllang[] is a MULTIPLE select box
-            $langs, array(), true,
-            'SUBMITBUTTON', 'translpriv', T_('Set user privileges') ) );
+
+   $transluser = trim(@$_REQUEST['transluser']);
+
+  $translator_form->add_row( array(
+      'DESCRIPTION', T_('User to set privileges for (use the userid)'),
+      'TEXTINPUT', 'transluser', 30, 80, $transluser,
+      ) );
+
+   $translator = array();
+   $transluser_langs= array();
+   if( !empty($transluser) )
+   {
+      $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='$transluser'" );
+
+      if( mysql_affected_rows() != 1 )
+        error('unknown_user','admin_tr1');
+
+      $row = mysql_fetch_array( $result );
+      if( !empty($row['Translator']) )
+        $translator = explode( ',', $row['Translator'] );
+
+      foreach( $translator as $value )
+      {
+         $transluser_langs[$value] = $langs[$value];
+      }
+      asort($transluser_langs);
+      $str= '';
+      foreach( $transluser_langs as $value => $info )
+      {
+         $str.= $info . ' (' . $value . ')<BR>';
+      }
+      $translator_form->add_row( array(
+         'DESCRIPTION', T_('Allowed to translate'),
+         'TEXT', $str,
+         ) );
+   }
+   //else
+   {
+      $translator_form->add_row( array(
+         'SUBMITBUTTON', 'showpriv', T_('Show actual user privileges'),
+         ) );
+   }
+
+
+  $translator_form->add_row( array(
+      'DESCRIPTION', T_('Select language to make user translator for that language.'),
+      'SELECTBOX', 'transladdlang', 1, $langs, array(), false,
+      ) );
+  $translator_form->add_row( array(
+      'SUBMITBUTTON', 'transladd', T_('Add language for translator'),
+      ) );
+
+
+  $translator_form->add_row( array(
+      'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
+      'SELECTBOX', 'transllang[]', 7, //transllang[] is a MULTIPLE select box
+                  $langs, $transluser_langs, true,
+      ) );
+  $translator_form->add_row( array(
+      'SUBMITBUTTON', 'translpriv', T_('Set user privileges'),
+      ) );
 
   $translator_form->echo_string();
 
