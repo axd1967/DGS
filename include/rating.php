@@ -90,42 +90,67 @@ function a($rating)
 
 // Using rating the EGF system: 
 // http://www.european-go.org/rating/gor.html
+//
+// result: 0 - black win, 1 - white win
 
-
-function change_rating(&$rating_A, &$rating_B, $result, $size, $komi, $handicap)
+function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap)
 {
 
    $e = 0.014;
 
-   $D = $rating_A - $rating_B;
+   $D = $rating_W - $rating_B;
 
-   if( $handicap > 0 )
-      $D -= 100 * $handicap - 50;
+   if( $handicap <= 0 )
+      $handicap = 1;
 
-   $D += 100.0 * ($komi - 6.5) / 13.0;
+   $H = ( $handicap - 0.5 - $komi / 13.0 );
+
+   // Handicap value is about proportional to number of moves
+   $H *= ( 256.0 / (($size-3.0)*($size-3.0)));
+
+   $D -= 100.0 * $H;
 
    if( $D > 0 )
    {
       $SEB = 1.0/(1.0+exp($D/a($rating_B)));
-      $SEA = 1.0-$SEB;
+      $SEW = 1.0-$SEB;
    }
    else
    {
-      $SEA = 1.0/(1.0+exp(-$D/a($rating_A)));
-      $SEB = 1.0-$SEA;
+      $SEW = 1.0/(1.0+exp(-$D/a($rating_W)));
+      $SEB = 1.0-$SEW;
    }
 
-   $SEA *= 1-$e;
+   $SEW *= 1-$e;
    $SEB *= 1-$e;
 
    $sizefactor = (19 - abs($size-19))*(19 - abs($size-19)) / (19*19);
 
-   $conA = con($rating_A) * $sizefactor;
+   $conW = con($rating_W) * $sizefactor;
    $conB = con($rating_B) * $sizefactor;
 
-   $rating_A += $conA * ($result - $SEA);
+   $rating_W += $conW * ($result - $SEW);
    $rating_B += $conB * (1-$result - $SEB);
 
+}
+
+function suggest($rating_W, $rating_B, $size, $pos_komi=false)
+{
+   $H = ($rating_W - $rating_B) / 100.0;
+
+   $H *= (($size-3.0)*($size-3.0)) / 256.0;  // adjust handicap to board size
+   
+   $H += 0.5; // advantage for playing first;
+
+   $handicap = ( $pos_komi ? $handicap = ceil($H) : round($H) ); 
+
+   if( $handicap <=1 ) $handicap = 1;
+
+   $komi = round( 26.0 * ( $handicap - $H ) ) / 2;
+
+   if( $handicap == 1 ) $handicap = 0;
+
+   return array($handicap, $komi);
 }
 
 function update_rating(&$wRating, &$bRating, $score, $size, $komi, $handicap, 
