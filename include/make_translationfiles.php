@@ -113,7 +113,7 @@ function make_include_files($language=null, $group=null)
 
 if($lang == 'jp.shift-jis'){//Japanese 2bytes char Pb
       fwrite( $fd, "\$Tr[\"" . slashed($row['Original']) . "\"] = urldecode(\"" .
-              slashed(urlencode($row['Text'])) . "\");\n" );
+              slashed($row['Text']) . "\");\n" );
 }else{
       fwrite( $fd, "\$Tr[\"" . slashed($row['Original']) . "\"] = \"" .
               slashed($row['Text']) . "\";\n" );

@@ -57,6 +57,8 @@ require_once( "include/make_translationfiles.php" );
   {
 
      $translation = trim(get_request_arg("transl" . $row['Original_ID']));
+     if( $translate_lang == 'jp.shift-jis') //Japanese 2bytes char Pb
+         $translation = urlencode($translation);
      $same = ( @$_POST["same" . $row['Original_ID']] === 'Y' );
      $unchanged = $untranslated && ( @$_POST["unch" . $row['Original_ID']] === 'Y' );
 
@@ -68,7 +70,7 @@ require_once( "include/make_translationfiles.php" );
 
      }
      else if( (  $same && $row['Text'] !== '' )
-           or ( !empty($translation) && $row['Text'] !== stripslashes($translation) ) )
+           or ( !empty($translation) && $row['Text'] !== $translation ) )
      {
 //        echo '<p>' . $row['Original_ID'] . ': ' . @$_POST["transl" . $row['Original_ID']];
 
