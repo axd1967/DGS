@@ -244,7 +244,7 @@ require( "include/form_functions.php" );
          echo form_start( 'messageform', 'send_message.php', 'POST' );
          echo form_insert_row( 'HIDDEN', 'type', 'INVITATION' );
          echo form_insert_row( 'DESCRIPTION', T_('To (userid)'),
-                               'TEXTINPUT', 'to', 50, 80, $Handle );
+                               'TEXTINPUT', 'to', 50, 80, $default_handle );
          echo form_insert_row( 'DESCRIPTION', T_('Message'),
                                'TEXTAREA', 'message', 50, 8, "" );
 
