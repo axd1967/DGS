@@ -35,54 +35,76 @@ $button_nr = $player_row["Button"];
 if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
    $button_nr = 0;
 
+$ratings = array( 'dragonrating' => 'dragonrating',
+                  'eurorank' => 'eurorank',
+                  'eurorating' => 'eurorating',
+                  'aga' => 'aga',
+                  'agarating' => 'agarating',
+                  'igs' => 'igs',
+                  'igsrating' => 'igsrating',
+                  'iytgg' => 'iytgg',
+                  'nngs' => 'nngs',
+                  'nngsrating' => 'nngsrating',
+                  'japan' => 'japan',
+                  'china' => 'china',
+                  'korea' => 'korea' );
+
+$notify_mess = array( 0 => T_('Off'),
+                      1 => T_('Notify only'),
+                      2 => T_('Moves and messages'),
+                      3 => T_('Full board and messages') );
+
+$menu_directions = array('VERTICAL' => T_('Vertical'), 'HORIZONTAL' => T_('Horizontal'));
+
+
+$nightstart = array();
+for($i=0; $i<24; $i++)
+{
+  $nightstart[$i] = sprintf('%02d-%02d',$i,($i+9)%24);
+}
+
+$stonesizes = array( 13 => 13, 17 => 17, 21 => 21, 25 => 25,
+                     29 => 29, 35 => 35, 42 => 42, 50 => 50 );
+
+$woodcolors = array();
+for($i=1; $i<6; $i++ )
+{
+  $woodcolors[$i] = '<img width=30 height=30 src="images/smallwood'.$i.'.gif">';
+}
+
 start_page(T_("Edit profile"), true, $logged_in, $player_row );
 
 echo "<CENTER>\n";
 
-echo form_start( 'profileform', 'change_profile.php', 'POST' );
-
-echo "    <tr><td><h3><font color=$h3_color>" .
-  T_('Personal settings') . ":</font></h3></td></tr>";
-
-echo form_insert_row( 'DESCRIPTION', T_('Userid'),
-                      'TEXT', $player_row["Handle"] );
-echo form_insert_row( 'DESCRIPTION', T_('Full name'),
-                      'TEXTINPUT', 'name', 16, 40,
-                      str_replace( "\"", "&quot;", $player_row["Name"] ) );
-echo form_insert_row( 'DESCRIPTION', T_('Email'),
-                      'TEXTINPUT', 'email', 16, 80,
-                      str_replace( "\"", "&quot;", $player_row["Email"] ) );
-echo form_insert_row( 'DESCRIPTION', T_('Open for matches'),
-                      'TEXTINPUT', 'open', 16, 40,
-                      str_replace( "\"", "&quot;", $player_row["Open"] ) );
-echo form_insert_row( 'DESCRIPTION', T_('Rank info'),
-                      'TEXTINPUT', 'rank', 16, 40,
-                      str_replace( "\"", "&quot;", $player_row["Rank"] ) );
-
-$vals = array( 'dragonrating' => 'dragonrating',
-               'eurorank' => 'eurorank',
-               'eurorating' => 'eurorating',
-               'aga' => 'aga',
-               'agarating' => 'agarating',
-               'igs' => 'igs',
-//               'igsrating' => 'igsrating',
-               'iytgg' => 'iytgg',
-               'nngs' => 'nngs',
-               'nngsrating' => 'nngsrating',
-               'japan' => 'japan',
-               'china' => 'china',
-               'korea' => 'korea' );
+$profile_form = new Form( 'profileform', 'change_profile.php', 'POST' );
+$profile_form->add_row( array( 'HEADER', T_('Personal settings') ) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Userid'),
+                               'TEXT', $player_row["Handle"] ) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Full name'),
+                               'TEXTINPUT', 'name', 16, 40,
+                               str_replace( "\"", "&quot;", $player_row["Name"] ) ) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Email'),
+                               'TEXTINPUT', 'email', 16, 80,
+                               str_replace( "\"", "&quot;", $player_row["Email"] ) ) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches'),
+                               'TEXTINPUT', 'open', 16, 40,
+                               str_replace( "\"", "&quot;", $player_row["Open"] ) ) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Rank info'),
+                               'TEXTINPUT', 'rank', 16, 40,
+                               str_replace( "\"", "&quot;", $player_row["Rank"] ) ) );
 
 if( $player_row["RatingStatus"] != 'RATED' )
 {
-  echo form_insert_row( 'DESCRIPTION', T_('Rating'),
-                        'TEXTINPUT', 'rating', 16,16,echo_rating($player_row["Rating"],true),
-                        'SELECTBOX', 'ratingtype', 1, $vals, 'dragonrating', false );
+  $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
+                                 'TEXTINPUT', 'rating', 16, 16, 
+                                 echo_rating($player_row["Rating"],true),
+                                 'SELECTBOX', 'ratingtype', 1, $ratings,
+                                 'dragonrating', false ) );
 }
 else
 {
-  echo form_insert_row( 'DESCRIPTION', T_('Rating'),
-                        'TEXT', echo_rating( $player_row["Rating"] ) );
+  $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
+                                 'TEXT', echo_rating( $player_row["Rating"] ) ) );
 }
 
 $s = 0;
@@ -90,74 +112,49 @@ if(!(strpos($player_row["SendEmail"], 'ON') === false) ) $s++;
 if(!(strpos($player_row["SendEmail"], 'MOVE') === false) ) $s++;
 if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
 
-$vals = array( 0 => T_('Off'),
-               1 => T_('Notify only'),
-               2 => T_('Moves and messages'),
-               3 => T_('Full board and messages') );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Email notifications'),
+                               'SELECTBOX', 'emailnotify', 1, $notify_mess, $s, false ) );
 
-echo form_insert_row( 'DESCRIPTION', T_('Email notifications'),
-                      'SELECTBOX', 'emailnotify', 1, $vals, $s, false );
-
-$s = $player_row['Lang'];//$the_translator->current_language;
+$s = $player_row['Lang']; //$the_translator->current_language;
 if( strcmp( $s, 'C' ) == 0 ) $s = 'en';
 
-echo form_insert_row( 'DESCRIPTION', T_('Language'),
-                      'SELECTBOX', 'language', 1,
-                      get_known_translated_languages(), $s, false );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Language'),
+                               'SELECTBOX', 'language', 1,
+                               get_known_translated_languages(), $s, false ) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Timezone'),
+                               'SELECTBOX', 'timezone', 1,
+                               get_timezone_array(), $player_row['Timezone'], false ) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Nighttime'),
+                               'SELECTBOX', 'nightstart', 1,
+                               $nightstart, $player_row["Nightstart"], false ) );
 
-echo form_insert_row( 'DESCRIPTION', T_('Timezone'),
-                      'SELECTBOX', 'timezone', 1,
-                      get_timezone_array(), $player_row['Timezone'], false );
+$profile_form->add_row( array( 'HEADER', T_('Board graphics') ) );
 
-$vals = array();
-for($i=0; $i<24; $i++)
-{
-  $vals[$i] = sprintf('%02d-%02d',$i,($i+9)%24);
-}
+$profile_form->add_row( array( 'DESCRIPTION', T_('Stone size'),
+                               'SELECTBOX', 'stonesize', 1, $stonesizes,
+                               $player_row["Stonesize"], false ) );
 
-echo form_insert_row( 'DESCRIPTION', T_('Nighttime'),
-                      'SELECTBOX', 'nightstart', 1, $vals, $player_row["Nightstart"], false );
-
-echo "    <tr><td height=20px>&nbsp;</td></tr>\n";
-echo "    <tr><td><h3><font color=$h3_color>" .
-  T_('Board graphics') . ":</font></h3></td></tr>\n";
-
-$vals = array( 13 => 13, 17 => 17, 21 => 21, 25 => 25,
-               29 => 29, 35 => 35, 42 => 42, 50 => 50 );
-
-echo form_insert_row( 'DESCRIPTION', T_('Stone size'),
-                      'SELECTBOX', 'stonesize', 1, $vals, $player_row["Stonesize"], false );
-
-$vals = array();
-for($i=1; $i<6; $i++ )
-{
-  $vals[$i] = '<img width=30 height=30 src="images/smallwood'.$i.'.gif">';
-}
-
-echo form_insert_row( 'DESCRIPTION', T_('Wood color'),
-                      'RADIOBUTTONS', 'woodcolor', $vals,
-                      $player_row["Woodcolor"], false );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Wood color'),
+                               'RADIOBUTTONS', 'woodcolor', $woodcolors,
+                               $player_row["Woodcolor"], false ) );
 
 $s = $player_row["Boardcoords"];
-echo form_insert_row( 'DESCRIPTION', T_('Coordinate sides'),
-                      'CHECKBOX', 'coordsleft', 1, T_('Left'), ($s & LEFT),
-                      'CHECKBOX', 'coordsup', 1, T_('Up'), ($s & UP),
-                      'CHECKBOX', 'coordsright', 1, T_('Right'), ($s & RIGHT),
-                      'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & DOWN) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Coordinate sides'),
+                               'CHECKBOX', 'coordsleft', 1, T_('Left'), ($s & LEFT),
+                               'CHECKBOX', 'coordsup', 1, T_('Up'), ($s & UP),
+                               'CHECKBOX', 'coordsright', 1, T_('Right'), ($s & RIGHT),
+                               'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & DOWN) ) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
+                               'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
 
-echo form_insert_row( 'DESCRIPTION', T_('Smooth board edge'),
-                      'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) );
+$profile_form->add_row( array( 'DESCRIPTION', T_('Menu direction'),
+                               'RADIOBUTTONS', 'menudir', $menu_directions,
+                               $player_row["MenuDirection"], false ) );
 
-$vals = array('VERTICAL' => T_('Vertical'), 'HORIZONTAL' => T_('Horizontal'));
-
-echo form_insert_row( 'DESCRIPTION', T_('Menu direction'),
-                      'RADIOBUTTONS', 'menudir', $vals, $player_row["MenuDirection"], false );
-
-echo "    <TR>\n";
-echo "      <TD align=right>" . T_('Game id button') . ":</TD>\n";
-echo "      <TD align=left>\n";
-echo "        <TABLE border=0 cellspacing=0 cellpadding=3>\n";
-echo "          <TR>\n";
+$button_code  = "      <TD align=right>" . T_('Game id button') . ":</TD>\n";
+$button_code .= "      <TD align=left>\n";
+$button_code .= "        <TABLE border=0 cellspacing=0 cellpadding=3>\n";
+$button_code .= "          <TR>\n";
 
 for($i=0; $i<=$button_max; $i++)
 {
@@ -166,23 +163,25 @@ for($i=0; $i<=$button_max; $i++)
    $button_style = 'background-image : url(images/' . $buttonfiles[$i] . ');' .
    'background-repeat : no-repeat;  background-position : center;';
 
-   echo '<TD valign=middle><INPUT type="radio" name="button" value=' . $i .
+   $button_code .= '<TD valign=middle><INPUT type="radio" name="button" value=' . $i .
    ( $i == $button_nr ? ' checked' : '') . '></TD>' . "\n" .
    '<td><table><tr><TD width=92 height=21 align=center STYLE="' . $button_style . $font_style .
    '">1348</TD><td width=10></td></tr></table></td>';
 
    if( $i % 4 == 3 )
-      echo "</TR>\n<TR>\n";
+      $button_code .= "</TR>\n<TR>\n";
 }
 
-echo "          </TR>\n";
-echo "        </table>\n";
-echo "      </TD>\n";
-echo "    </TR>\n";
+$button_code .= "          </TR>\n";
+$button_code .= "        </table>\n";
+$button_code .= "      </TD>\n";
+$button_code .= "     </TR>\n";
 
-echo "    <TR><TD><BR></TD></TR>\n";
-echo form_insert_row( 'SUBMITBUTTON', 'action', T_('Change profile') );
-echo form_end();
+$button_code .= "    <TR><TD><BR></TD>\n";
+$profile_form->add_row( array( 'OWNHTML', $button_code ) );
+$profile_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change profile') ) );
+
+$profile_form->echo_string();
 echo "</CENTER>\n";
 
 end_page();

@@ -186,13 +186,14 @@ function display_row_of_information( $description, $information )
         }
 
       echo "<center>\n";
-      echo form_start( 'participate_add_del_form', "show_tournament.php?tid=$tid", 'POST' );
-      echo form_insert_row( 'HIDDEN', ($is_participating ? 'remove' : 'add'), 1,
-                            'SUBMITBUTTON', 'adddel',
-                            ($is_participating ?
-                             _("Remove yourself from tournament") :
-                             _("Add youself to tournament")) );
-      echo form_end();
+      $tour_form = new Form( 'participate_add_del_form',
+                             "show_tournament.php?tid=$tid", FORM_POST );
+      $tour_form->add_row( array( 'HIDDEN', ($is_participating ? 'remove' : 'add'), 1,
+                                  'SUBMITBUTTON', 'adddel',
+                                  ($is_participating ?
+                                   _("Remove yourself from tournament") :
+                                   _("Add youself to tournament")) ) );
+      $tour_form->echo_string();
       echo "</center>\n";
       echo "<p>\n";
     }

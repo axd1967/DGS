@@ -44,30 +44,30 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
   echo "<CENTER>\n";
 
-  echo form_start( 'tournamentform', 'new_tournament_phase2.php', 'POST');
+  $tour_form = new Form( 'tournamentform', 'new_tournament_phase2.php', FORM_POST);
 
-  echo form_insert_row( 'HEADER', 'Tournament information' );
-  echo form_insert_row( 'DESCRIPTION', 'Tournament name',
-                        'TEXTINPUT', 'name', 50, 80, "" );
+  $tour_form->add_row( array( 'HEADER', 'Tournament information' ) );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Tournament name',
+                              'TEXTINPUT', 'name', 50, 80, "" ) );
 
-  echo form_insert_row( 'DESCRIPTION', 'Tournament description',
-                        'TEXTAREA', 'description', 50, 8, "" );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Tournament description',
+                              'TEXTAREA', 'description', 50, 8, "" ) );
 
-  echo form_insert_row( 'SPACE' );
-  echo form_insert_row( 'DESCRIPTION', 'Creating organizer',
-                        'TEXT', $player_row['Handle'] );
-  echo form_insert_row( 'DESCRIPTION', 'Comma separated list of other organizers',
-                        'TEXTINPUT', 'organizers', 50, 150, '' );
+  $tour_form->add_row( array( 'SPACE' ) );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Creating organizer',
+                              'TEXT', $player_row['Handle'] ) );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Comma separated list of other organizers',
+                              'TEXTINPUT', 'organizers', 50, 150, '' ) );
 
-  echo form_insert_row( 'SPACE' );
-  echo form_insert_row( 'DESCRIPTION', 'Number of participants allowed',
-                        'TEXT', 'Minimum:',
-                        'TEXTINPUT', 'min', 10, 10, "",
-                        'TEXT', 'Maximum:',
-                        'TEXTINPUT', 'max', 10, 10, "" );
+  $tour_form->add_row( array( 'SPACE' ) );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Number of participants allowed',
+                              'TEXT', 'Minimum:',
+                              'TEXTINPUT', 'min', 10, 10, "",
+                              'TEXT', 'Maximum:',
+                              'TEXTINPUT', 'max', 10, 10, "" ) );
 
-  echo form_insert_row( 'DESCRIPTION', 'Type of tournament',
-                        'RADIOBUTTONS', 'type', $type_array, 'MACMAHON' );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Type of tournament',
+                              'RADIOBUTTONS', 'type', $type_array, 'MACMAHON' ) );
 
   $current_month = getdate( $NOW );
   $next_month = getdate( strtotime( "+1 month", $NOW ) );
@@ -87,46 +87,46 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   for( $bs = $next_month['year']; $bs <= $next_month['year']+10; $bs++ )
     $year_array[$bs]=$bs;
 
-  echo form_insert_row( 'DESCRIPTION', 'Starttime of tournament',
-                        'SELECTBOX', 'start_day', 1,
-                        $day_array, $next_month['mday'], false,
-                        'SELECTBOX', 'start_month', 1,
-                        $month_array, $next_month['mon'], false,
-                        'SELECTBOX', 'start_year', 1,
-                        $year_array, $next_month['year'], false,
-                        'TEXT', 'at',
-                        'SELECTBOX', 'start_hour', 1,
-                        $hour_array, $next_month['hours'], false,
-                        'TEXT', $player_row['Timezone']);
+  $tour_form->add_row( array( 'DESCRIPTION', 'Starttime of tournament',
+                              'SELECTBOX', 'start_day', 1,
+                              $day_array, $next_month['mday'], false,
+                              'SELECTBOX', 'start_month', 1,
+                              $month_array, $next_month['mon'], false,
+                              'SELECTBOX', 'start_year', 1,
+                              $year_array, $next_month['year'], false,
+                              'TEXT', 'at',
+                              'SELECTBOX', 'start_hour', 1,
+                              $hour_array, $next_month['hours'], false,
+                              'TEXT', $player_row['Timezone']) );
 
-  echo form_insert_row( 'DESCRIPTION', 'First allowed starttime',
-                        'SELECTBOX', 'firststart_day', 1,
-                        $day_array, $current_month['mday'], false,
-                        'SELECTBOX', 'firststart_month', 1,
-                        $month_array, $current_month['mon'], false,
-                        'SELECTBOX', 'firststart_year', 1,
-                        $year_array, $current_month['year'], false,
-                        'TEXT', 'at',
-                        'SELECTBOX', 'firststart_hour', 1,
-                        $hour_array, $current_month['hours'], false,
-                        'TEXT', $player_row['Timezone']);
+  $tour_form->add_row( array( 'DESCRIPTION', 'First allowed starttime',
+                              'SELECTBOX', 'firststart_day', 1,
+                              $day_array, $current_month['mday'], false,
+                              'SELECTBOX', 'firststart_month', 1,
+                              $month_array, $current_month['mon'], false,
+                              'SELECTBOX', 'firststart_year', 1,
+                              $year_array, $current_month['year'], false,
+                              'TEXT', 'at',
+                              'SELECTBOX', 'firststart_hour', 1,
+                              $hour_array, $current_month['hours'], false,
+                              'TEXT', $player_row['Timezone']) );
 
-  echo form_insert_row( 'DESCRIPTION', 'Deadline for tournament entry',
-                        'CHECKBOX', 'use_deadline', 1, '', false,
-                        'SELECTBOX', 'deadline_day', 1,
-                        $day_array, $next_month['mday'], false,
-                        'SELECTBOX', 'deadline_month', 1,
-                        $month_array, $next_month['mon'], false,
-                        'SELECTBOX', 'deadline_year', 1,
-                        $year_array, $next_month['year'], false,
-                        'TEXT', 'at',
-                        'SELECTBOX', 'deadline_hour', 1,
-                        $hour_array, $next_month['hours'], false,
-                        'TEXT', $player_row['Timezone']);
+  $tour_form->add_row( array( 'DESCRIPTION', 'Deadline for tournament entry',
+                              'CHECKBOX', 'use_deadline', 1, '', false,
+                              'SELECTBOX', 'deadline_day', 1,
+                              $day_array, $next_month['mday'], false,
+                              'SELECTBOX', 'deadline_month', 1,
+                              $month_array, $next_month['mon'], false,
+                              'SELECTBOX', 'deadline_year', 1,
+                              $year_array, $next_month['year'], false,
+                              'TEXT', 'at',
+                              'SELECTBOX', 'deadline_hour', 1,
+                              $hour_array, $next_month['hours'], false,
+                              'TEXT', $player_row['Timezone']) );
 
-  echo form_insert_row( 'SUBMITBUTTON', 'action', 'Next >' );
+  $tour_form->add_row( array( 'SUBMITBUTTON', 'action', 'Next >' ) );
 
-  echo form_end();
+  $tour_form->echo_string();
 
   echo "</CENTER>\n";
 

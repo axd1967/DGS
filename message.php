@@ -136,6 +136,7 @@ require( "include/form_functions.php" );
 
    echo "<center>\n";
 
+   $message_form = null;
    switch( $mode )
    {
       case 'ShowMessage':
@@ -157,30 +158,35 @@ require( "include/form_functions.php" );
 
          if( $can_reply )
             {
-            echo "<B><h3><font color=$h3_color>" . T_('Reply') . ":</font></B><p>\n";
-            echo form_start( 'messageform', 'send_message.php', 'POST' );
-            echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
-            echo form_insert_row( 'HIDDEN', 'reply', $mid );
-            echo form_insert_row( 'DESCRIPTION', T_('Subject'),
-                                  'TEXTINPUT', 'subject', 50, 80, $default_subject );
-            echo form_insert_row( 'DESCRIPTION', T_('Message'),
-                                  'TEXTAREA', 'message', 50, 8, "" );
-            echo form_insert_row( 'SUBMITBUTTON', 'send', T_('Send Reply') );
+              // echo "<B><h3><font color=$h3_color>" . T_('Reply') . ":</font></B><p>\n";
+              // echo form_start( 'messageform', 'send_message.php', 'POST' );
+              $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+              $message_form->add_row( array( 'HEADER', T_('Reply') ) );
+              $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
+              $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
+              $message_form->add_row( array( 'DESCRIPTION', T_('Subject'),
+                                             'TEXTINPUT', 'subject', 50, 80,
+                                             $default_subject ) );
+              $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
+                                             'TEXTAREA', 'message', 50, 8, "" ) );
+              $message_form->add_row( array( 'SUBMITBUTTON', 'send', T_('Send Reply') ) );
             }
          }
       break;
 
       case 'NewMessage':
       {
-         echo "<B><h3><font color=$h3_color>" . T_('New message') . ":</font></B><p>\n";
-         echo form_start( 'messageform', 'send_message.php', 'POST' );
-         echo form_insert_row( 'DESCRIPTION', T_('To (userid)'),
-                               'TEXTINPUT', 'to', 50, 80, $default_handle );
-         echo form_insert_row( 'DESCRIPTION', T_('Subject'),
-                               'TEXTINPUT', 'subject', 50, 80, "" );
-         echo form_insert_row( 'DESCRIPTION', T_('Message'),
-                               'TEXTAREA', 'message', 50, 8, "" );
-         echo form_insert_row( 'SUBMITBUTTON', 'send', T_('Send Message') );
+        // echo "<B><h3><font color=$h3_color>" . T_('New message') . ":</font></B><p>\n";
+        // echo form_start( 'messageform', 'send_message.php', 'POST' );
+        $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+        $message_form->add_row( array( 'HEADER', T_('New message') ) );
+        $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)') ,
+                                       'TEXTINPUT', 'to', 50, 80, $default_handle ) );
+        $message_form->add_row( array( 'DESCRIPTION', T_('Subject'),
+                                       'TEXTINPUT', 'subject', 50, 80, "" ) );
+        $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
+                                       'TEXTAREA', 'message', 50, 8, "" ) );
+        $message_form->add_row( array( 'SUBMITBUTTON', 'send', T_('Send Message') ) );
       }
       break;
 
@@ -214,15 +220,20 @@ require( "include/form_functions.php" );
          {
             echo '<a href="message.php?mode=Dispute&mid=' . $mid . '">' .
                T_('Dispute settings') . '</a>';
-            echo "<p>&nbsp;<p><B><h3><font color=$h3_color>" . T_('Reply') . ":</font></B>\n";
-            echo form_start( 'messageform', 'send_message.php', 'POST' );
-            echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
-            echo form_insert_row( 'HIDDEN', 'reply', $mid );
-            echo form_insert_row( 'HIDDEN', 'gid', $Game_ID );
-            echo form_insert_row( 'DESCRIPTION', T_('Message'),
-                                  'TEXTAREA', 'message', 50, 8, "" );
-            echo '<td><td><INPUT type="submit" name="accepttype" value="' .T_('Accept') . '">' .
-               '<INPUT type="submit" name="declinetype" value="' . T_('Decline') . '"></td>';
+            echo "<p>&nbsp;<p>\n";
+            // echo "<B><h3><font color=$h3_color>" . T_('Reply') . ":</font></B>\n";
+            // echo form_start( 'messageform', 'send_message.php', 'POST' );
+            $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+            $message_form->add_row( array( 'HEADER', T_('Reply') ) );
+            $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
+            $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
+            $message_form->add_row( array( 'HIDDEN', 'gid', $Game_ID ) );
+            $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
+                                           'TEXTAREA', 'message', 50, 8, "" ) );
+            $message_form->add_row( array( 'TEXT', '',
+                                           'TD',
+                                           'SUBMITBUTTON', 'accepttype', T_('Accept'),
+                                           'SUBMITBUTTON', 'declinetype', T_('Decline') ) );
          }
       }
       break;
@@ -232,42 +243,46 @@ require( "include/form_functions.php" );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text);
 
-         echo "<B><h3><font color=$h3_color>" . T_('Disputing settings') . ":</font></B><p>\n";
-         echo form_start( 'messageform', 'send_message.php', 'POST' );
-         echo form_insert_row( 'HIDDEN', 'mode', $mode );
-         echo form_insert_row( 'HIDDEN', 'subject', 'Game invitation dispute' );
-         echo form_insert_row( 'HIDDEN', 'disputegid', $disputegid );
-         echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
-         echo form_insert_row( 'HIDDEN', 'reply', $mid );
-         echo form_insert_row( 'HIDDEN', 'type', 'INVITATION' );
-         echo form_insert_row( 'DESCRIPTION', T_('Message'),
-                               'TEXTAREA', 'message', 50, 8, "" );
+         //echo "<B><h3><font color=$h3_color>" . T_('Disputing settings') . ":</font></B><p>\n";
+         //echo form_start( 'messageform', 'send_message.php', 'POST' );
+         $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+         $message_form->add_row( array( 'HEADER', T_('Dispute settings') ) );
+         $message_form->add_row( array( 'HIDDEN', 'mode', $mode ) );
+         $message_form->add_row( array( 'HIDDEN', 'subject', 'Game invitation dispute' ) );
+         $message_form->add_row( array( 'HIDDEN', 'disputegid', $disputegid ) );
+         $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
+         $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
+         $message_form->add_row( array( 'HIDDEN', 'type', 'INVITATION' ) );
+         $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
+                                        'TEXTAREA', 'message', 50, 8, "" ) );
 
-         game_settings_form($my_id, $Game_ID);
+         game_settings_form($message_form, $my_id, $Game_ID);
 
-         echo form_insert_row( 'SUBMITBUTTON', 'send', T_('Send Reply') );
+         $message_form->add_row( array( 'SUBMITBUTTON', 'send', T_('Send Reply') ) );
       }
       break;
 
       case 'Invite':
       {
-         echo "<B><h3><font color=$h3_color>" . T_('Invitation message') . ":</font></B><p>\n";
-         echo form_start( 'messageform', 'send_message.php', 'POST' );
-         echo form_insert_row( 'HIDDEN', 'type', 'INVITATION' );
-         echo form_insert_row( 'DESCRIPTION', T_('To (userid)'),
-                               'TEXTINPUT', 'to', 50, 80, $default_handle );
-         echo form_insert_row( 'DESCRIPTION', T_('Message'),
-                               'TEXTAREA', 'message', 50, 8, "" );
+         //echo "<B><h3><font color=$h3_color>" . T_('Invitation message') . ":</font></B><p>\n";
+         //echo form_start( 'messageform', 'send_message.php', 'POST' );
+         $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+         $message_form->add_row( array( 'HEADER', T_('Invitation message') ) );
+         $message_form->add_row( array( 'HIDDEN', 'type', 'INVITATION' ) );
+         $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)'),
+                                        'TEXTINPUT', 'to', 50, 80, $default_handle ) );
+         $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
+                                        'TEXTAREA', 'message', 50, 8, "" ) );
 
-         game_settings_form();
+         game_settings_form($message_form);
 
-         echo form_insert_row( 'SUBMITBUTTON', 'send', T_('Send Invitation') );
+         $message_form->add_row( array( 'SUBMITBUTTON', 'send', T_('Send Invitation') ) );
       }
       break;
    }
 
-   if( $can_reply )
-      echo form_end();
+   if( !is_null($message_form) )
+     $message_form->echo_string();
 
    echo "</center>\n";
 

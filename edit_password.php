@@ -34,16 +34,19 @@ if( !$logged_in )
 start_page(T_("Edit password"), true, $logged_in, $player_row );
 
 echo "<CENTER>\n";
-echo form_start( 'passwordform', 'change_password.php', 'POST' );
 
-echo form_insert_row( 'DESCRIPTION', T_('Old password'),
-                      'PASSWORD', 'oldpasswd',16,16 );
-echo form_insert_row( 'DESCRIPTION', T_('New password'),
-                      'PASSWORD', 'passwd',16,16 );
-echo form_insert_row( 'DESCRIPTION', T_('Confirm password'),
-                      'PASSWORD', 'passwd2',16,16 );
-echo form_insert_row( 'SUBMITBUTTON', 'action', T_('Change password') );
-echo form_end();
+$pass_form = new Form( 'passwordform', 'change_password.php', FORM_POST );
+
+$pass_form->add_row( array( 'DESCRIPTION', T_('Old password'),
+                            'PASSWORD', 'oldpasswd',16,16 ) );
+$pass_form->add_row( array( 'DESCRIPTION', T_('New password'),
+                            'PASSWORD', 'passwd',16,16 ) );
+$pass_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
+                            'PASSWORD', 'passwd2',16,16 ) );
+$pass_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change password') ) );
+
+$pass_form->echo_string();
+
 echo "</CENTER>\n";
 
 end_page();

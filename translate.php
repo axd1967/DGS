@@ -92,8 +92,8 @@ When translating you should keep in mind the following things:
   if( $lang_choice )
     {
       echo "<CENTER>\n";
-      echo "<B><h3><font color=$h3_color>Select language to translate to:</font></h3></B><p>\n";
-      echo form_start( 'selectlangform', 'translate.php', 'GET' );
+      $langchoice_form = new Form( 'selectlangform', 'translate.php', FORM_GET );
+      $langchoice_form->add_row( array( 'HEADER', 'Select language to translate to' ) );
       $languages = get_known_translated_languages();
       $vals = array();
       foreach( $translator_array as $lang )
@@ -104,10 +104,10 @@ When translating you should keep in mind the following things:
             $vals[$lang] = $lang;
         }
 
-      echo form_insert_row( 'SELECTBOX', 'translate_lang', 1, $vals, '', false,
-                            'HIDDEN', 'group', 'Common',
-                            'SUBMITBUTTON', 'cl', 'Select' );
-      echo form_end();
+      $langchoice_form->add_row( array( 'SELECTBOX', 'translate_lang', 1, $vals, '', false,
+                                        'HIDDEN', 'group', 'Common',
+                                        'SUBMITBUTTON', 'cl', 'Select' ) );
+      $langchoice_form->echo_string();
       echo "</CENTER>\n";
     }
   else
@@ -137,8 +137,9 @@ When translating you should keep in mind the following things:
         $new_translations[ $row['CString'] ] = $row['Translation'];
 
       echo "<CENTER>\n";
-      echo "<B><h3><font color=$h3_color>Translate the following strings:</font></B></h3><p>\n";
-      echo form_start( 'translateform', 'update_translation.php', 'POST' );
+
+      $translate_form = new Form( 'translateform', 'update_translation.php', FORM_POST );
+      $translate_form->add_row( array( 'HEADER', 'Translate the following strings' ) );
 
       $counter = 0;
       foreach( $translation_info as $string => $info )
@@ -157,42 +158,43 @@ When translating you should keep in mind the following things:
                                               strlen( $string ) / $hsize + 2,
                                               substr_count( $string, "\n" ) + 2 ),
                                          12 )));
-              echo form_insert_row( 'TEXT', nl2br( htmlspecialchars($string,
+              $translate_form->add_row( array( 'TEXT', nl2br( htmlspecialchars($string,
                                                                     ENT_QUOTES,
                                                                     'iso-8859-1' ) ),
-                                    'TD',
-                                    'TEXTAREA', "transl$counter",
-                                    $hsize, $vsize,
-                                    htmlspecialchars($translation,
-                                                     ENT_QUOTES,
-                                                     $CHARACTER_ENCODINGS[$translate_lang]) );
+                                               'TD',
+                                               'TEXTAREA', "transl$counter",
+                                               $hsize, $vsize,
+                                               htmlspecialchars($translation,
+                                                                ENT_QUOTES,
+                                                                $CHARACTER_ENCODINGS[$translate_lang]) ) );
             }
         }
 
       $the_translator->change_language( $old_lang );
       $the_translator->set_return_empty( false );
 
-      echo form_insert_row( 'SPACE' );
-      echo form_insert_row( 'HEADER', 'Groups' );
-      echo form_insert_row( 'HIDDEN', 'translate_lang', $translate_lang );
-      echo form_insert_row( 'DESCRIPTION', 'Change to group',
-                            'SELECTBOX', 'group', 1,
-                            array_value_to_key_and_value( $translation_groups ),
-                            $group, false );
+      $translate_form->add_row( array( 'SPACE' ) );
+      $translate_form->add_row( array( 'HEADER', 'Groups' ) );
+      $translate_form->add_row( array( 'HIDDEN', 'translate_lang', $translate_lang ) );
+      $translate_form->add_row( array( 'DESCRIPTION', 'Change to group',
+                                       'SELECTBOX', 'group', 1,
+                                       array_value_to_key_and_value( $translation_groups ),
+                                       $group, false ) );
 
-      echo form_insert_row( 'SPACE' );
+      $translate_form->add_row( array( 'SPACE' ) );
 
-      echo "</table>\n";
-      echo "<table width=\"100%\">\n";
-      echo "  <tr>\n" .
-        "    <td align=\"center\">" .
-        form_insert_submit_button( 'just_group', 'Just change group' ) . "</td>\n" .
-        "    <td align=\"center\">" .
-        form_insert_submit_button( 'change', 'Change translation' ) . "</td>\n" .
-        "    <td align=\"center\">" .
-        form_insert_submit_button( 'apply_changes', 'Apply translation changes to Dragon' ) . "</td>\n" .
-        "  </tr>\n";
-      echo form_end();
+      $translate_form->add_row( array( 'OWNHTML',
+                                       "</table>\n" .
+                                       "<table width=\"100%\">\n" .
+                                       "  <tr>\n" .
+                                       "    <td align=\"center\">" .
+                                       form_insert_submit_button( 'just_group', 'Just change group' ) . "</td>\n" .
+                                       "    <td align=\"center\">" .
+                                       form_insert_submit_button( 'change', 'Change translation' ) . "</td>\n" .
+                                       "    <td align=\"center\">" .
+                                       form_insert_submit_button( 'apply_changes', 'Apply translation changes to Dragon' ) . "</td>\n" .
+                                       "  </tr>\n" ) );
+      $translate_form->echo_string();
 
     }
 

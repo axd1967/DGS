@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // Prints game setting form used by invite.php
 
-function game_settings_form($my_ID=NULL, $gid=NULL, $waiting_room=false)
+function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false)
 {
 
    // Default values:
@@ -113,9 +113,9 @@ function game_settings_form($my_ID=NULL, $gid=NULL, $waiting_room=false)
    for( $bs = 5; $bs <= 25; $bs++ )
      $value_array[$bs]=$bs;
 
-   echo form_insert_row( 'SPACE' );
-   echo form_insert_row( 'DESCRIPTION', T_('Board size'),
-                         'SELECTBOX', 'size', 1, $value_array, $Size, false );
+   $mform->add_row( array( 'SPACE' ) );
+   $mform->add_row( array( 'DESCRIPTION', T_('Board size'),
+                           'SELECTBOX', 'size', 1, $value_array, $Size, false ) );
 
    $color_array = array( 'White' => T_('White'), 'Black' => T_('Black') );
 
@@ -124,36 +124,35 @@ function game_settings_form($my_ID=NULL, $gid=NULL, $waiting_room=false)
      $handi_array[$bs]=$bs;
 
 
-   echo form_insert_row( 'SPACE' );
+   $mform->add_row( array( 'SPACE' ) );
 
-   echo form_insert_row( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
-                         'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype );
+   $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
+                           'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype ) );
 
-   echo form_insert_row( 'DESCRIPTION', T_('Proper handicap'),
-                         'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype );
+   $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
+                           'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype ) );
 
    if( !$waiting_room )
    {
-      echo form_insert_row( 'DESCRIPTION', T_('Manual setting'),
-                            'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
-                            'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('My color'),
-                            'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
-
-                            'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
-                            'SELECTBOX', 'handicap', 1, $handi_array, $Handicap, false,
-                            'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                            'TEXTINPUT', 'komi_m', 5, 5, $Komi );
+      $mform->add_row( array( 'DESCRIPTION', T_('Manual setting'),
+                              'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
+                              'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('My color'),
+                              'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
+                              'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
+                              'SELECTBOX', 'handicap', 1, $handi_array, $Handicap, false,
+                              'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                              'TEXTINPUT', 'komi_m', 5, 5, $Komi ) );
    }
 
-   echo form_insert_row( 'DESCRIPTION', T_('Even game with nigiri'),
-                         'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
-                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                         'TEXTINPUT', 'komi_n', 5, 5, $Komi );
+   $mform->add_row( array( 'DESCRIPTION', T_('Even game with nigiri'),
+                           'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
+                           'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                           'TEXTINPUT', 'komi_n', 5, 5, $Komi ) );
 
-   echo form_insert_row( 'DESCRIPTION', T_('Double game'),
-                         'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
-                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                         'TEXTINPUT', 'komi_d', 5, 5, $Komi );
+   $mform->add_row( array( 'DESCRIPTION', T_('Double game'),
+                           'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
+                           'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                           'TEXTINPUT', 'komi_d', 5, 5, $Komi ) );
 
 
 
@@ -162,40 +161,40 @@ function game_settings_form($my_ID=NULL, $gid=NULL, $waiting_room=false)
                        'days' => T_('days'),
                        'months' => T_('months') );
 
-   echo form_insert_row( 'SPACE' );
+   $mform->add_row( array( 'SPACE' ) );
 
-   echo form_insert_row( 'DESCRIPTION', T_('Main time'),
-                         'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
-                         'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false );
+   $mform->add_row( array( 'DESCRIPTION', T_('Main time'),
+                           'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
+                           'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
 
-   echo form_insert_row( 'DESCRIPTION', T_('Japanese byo-yomi'),
-                         'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), $Byotype,
-                         'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
-                         'SELECTBOX', 'timeunit_jap', 1, $value_array, $ByotimeUnit_jap, false,
-                         'TEXT', T_('with') . '&nbsp;',
-                         'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
-                         'TEXT', T_('extra periods.') );
+   $mform->add_row( array( 'DESCRIPTION', T_('Japanese byo-yomi'),
+                           'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), $Byotype,
+                           'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
+                           'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
+                           'TEXT', T_('with') . '&nbsp;',
+                           'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
+                           'TEXT', T_('extra periods.') ) );
 
-   echo form_insert_row( 'DESCRIPTION', T_('Canadian byo-yomi'),
-                         'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), $Byotype,
-                         'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
-                         'SELECTBOX', 'timeunit_can', 1, $value_array, $ByotimeUnit_can, false,
-                         'TEXT', T_('for') . '&nbsp;',
-                         'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
-                         'TEXT', T_('stones') . '.' );
+   $mform->add_row( array( 'DESCRIPTION', T_('Canadian byo-yomi'),
+                           'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), $Byotype,
+                           'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
+                           'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
+                           'TEXT', T_('for') . '&nbsp;',
+                           'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
+                           'TEXT', T_('stones') . '.' ) );
 
-   echo form_insert_row( 'DESCRIPTION', T_('Fischer time'),
-                         'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), $Byotype,
-                         'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
-                         'SELECTBOX', 'timeunit_fis', 1, $value_array, $ByotimeUnit_fis, false,
-                         'TEXT', T_('extra per move.') );
+   $mform->add_row( array( 'DESCRIPTION', T_('Fischer time'),
+                           'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), $Byotype,
+                           'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
+                           'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
+                           'TEXT', T_('extra per move.') ) );
 
-   echo form_insert_row( 'SPACE' );
+   $mform->add_row( array( 'SPACE' ) );
 
-   echo form_insert_row( 'DESCRIPTION', T_('Clock runs on weekends'),
-                         'CHECKBOX', 'weekendclock', 'Y', "", $Weekendclock );
-   echo form_insert_row( 'DESCRIPTION', T_('Rated'),
-                         'CHECKBOX', 'rated', 'Y', "", $Rated );
+   $mform->add_row( array( 'DESCRIPTION', T_('Clock runs on weekends'),
+                           'CHECKBOX', 'weekendclock', 'Y', "", $Weekendclock ) );
+   $mform->add_row( array( 'DESCRIPTION', T_('Rated'),
+                           'CHECKBOX', 'rated', 'Y', "", $Rated ) );
 }
 
 function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_handle,

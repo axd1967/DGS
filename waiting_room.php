@@ -150,23 +150,25 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       echo '<p>&nbsp;<p>' . T_('Seems to be empty at the moment.');
 
 
-
    // Add new game form
 
-   echo "<p>&nbsp;<p><hr><B><h3><font color=$h3_color>" . T_('Add new game') . ":</font></h3></B><p>\n";
-   echo form_start( 'addgame', 'add_to_waitingroom.php', 'POST' );
-   echo form_insert_row( 'DESCRIPTION', T_('Comment'),
-                         'TEXTINPUT', 'comment', 40, 40, "" );
+   echo "<p>&nbsp;<p><hr>";
+
+   $addgame_form = new Form( 'addgame', 'add_to_waitingroom.php', FORM_POST );
+   $addgame_form->add_row( array( 'HEADER', T_('Add new game') ) );
+
+   $addgame_form->add_row( array( 'DESCRIPTION', T_('Comment'),
+                                  'TEXTINPUT', 'comment', 40, 40, "" ) );
 
    $vals = array();
 
    for($i=1; $i<=10; $i++)
       $vals["$i"] = "$i";
 
-   echo form_insert_row( 'DESCRIPTION', T_('Number of games to add'),
-                         'SELECTBOX', 'nrGames', 1, $vals, '1', false );
+   $addgame_form->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
+                                  'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
 
-   game_settings_form(NULL,NULL,true);
+   game_settings_form($addgame_form,NULL,NULL,true);
 
    $rating_array = array();
 
@@ -176,16 +178,17 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    for($i=1; $i<=40; $i++)
       $rating_array["$i kyu"] = $i . ' ' . T_('kyu');
 
-   echo form_insert_row( 'DESCRIPTION', T_('Require rated opponent'),
-                         'CHECKBOX', 'must_be_rated', 'Y', "", false,
-                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('If yes, rating between'),
-                         'SELECTBOX', 'rating1', 1, $rating_array, '40 kyu', false,
-                         'TEXT', T_('and'),
-                         'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false );
+   $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
+                                  'CHECKBOX', 'must_be_rated', 'Y', "", false,
+                                  'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('If yes, rating between'),
+                                  'SELECTBOX', 'rating1', 1, $rating_array, '40 kyu', false,
+                                  'TEXT', T_('and'),
+                                  'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
 
 
-   echo form_insert_row( 'SUBMITBUTTON', 'add_game', T_('Add Game') );
-   echo form_end();
+   $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
+
+   $addgame_form->echo_string();
 
    echo "</center>";
 

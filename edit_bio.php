@@ -64,33 +64,44 @@ function find_category_box_text($cat)
 
 
    echo "<CENTER>\n";
-   echo form_start( 'bioform', 'change_bio.php', 'POST' );
+   $bio_form = new Form( 'bioform', 'change_bio.php', FORM_POST );
 
    while( $row = mysql_fetch_array( $result ) )
    {
       $cat = find_category_box_text($row["Category"]);
 
-      echo form_insert_row( 'SELECTBOX', "category".$row["ID"],1,$categories, $cat, false,
-                            'BR','BR',
-                            'TEXTINPUT', "other".$row["ID"],15,40,
-                            ($cat == "Other:" ? $row["Category"] : "" ),
-                            'TD',
-                            'TEXTAREA', "text".$row["ID"],40,4,$row["Text"] );
+      $bio_form->add_row( array( 'SELECTBOX', "category".$row["ID"], 1,
+                                 $categories, $cat, false,
+
+                                 'BR','BR',
+
+                                 'TEXTINPUT', "other".$row["ID"], 15, 40,
+                                 ($cat == "Other:" ? $row["Category"] : "" ),
+
+                                 'TD',
+
+                                 'TEXTAREA', "text".$row["ID"],40,4,$row["Text"] ) );
     }
 
 // And now three empty ones:
 
    for($i=1; $i<=3; $i++)
    {
-      echo form_insert_row( 'SELECTBOX', "newcategory".$i,1,$categories, 'Other:', false,
+      $bio_form->add_row( array( 'SELECTBOX', "newcategory" . $i, 1,
+                            $categories, 'Other:', false,
+
                             'BR','BR',
-                            'TEXTINPUT', "newother".$i,15,40, "",
+
+                            'TEXTINPUT', "newother" . $i, 15, 40, "",
+
                             'TD',
-                            'TEXTAREA', "newtext".$i,40,4,"" );
+
+                            'TEXTAREA', "newtext" . $i, 40, 4, "" ) );
    }
 
-   echo form_insert_row( 'SUBMITBUTTON', 'action', T_('Change bio') );
-   echo form_end();
+   $bio_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change bio') ) );
+   $bio_form->echo_string();
+
    echo "</CENTER><BR>\n";
 
    end_page();

@@ -42,18 +42,20 @@ require( "include/form_functions.php" );
     '</font></B><font color="red"> ' .
     sprintf( T_("To look around, use %s."), "'guest' / 'guest'" ) . " </font>\n";
 
-  echo form_start( 'loginform', 'login.php', 'POST' );
-  echo form_insert_row( 'DESCRIPTION', T_('Userid'),
-                        'TEXTINPUT', 'userid',16,16,'' );
-  echo form_insert_row( 'DESCRIPTION', T_('Password'),
-                        'PASSWORD', 'passwd',16,16,
-                        'TD',
-                        'SUBMITBUTTON', 'login', T_('Log in'),
-                        'TEXT',
-                        '<A href="forgot.php"><font size="-2">' .
-                        T_('Forgot password?') . '</font></A>',
-                        'HIDDEN', 'url', 'status.php' );
-  echo form_end();
+  $login_form = new Form( 'loginform', 'login.php', FORM_POST );
+
+  $login_form->add_row( array( 'DESCRIPTION', T_('Userid'),
+                               'TEXTINPUT', 'userid',16,16,'' ) );
+  $login_form->add_row( array( 'DESCRIPTION', T_('Password'),
+                               'PASSWORD', 'passwd',16,16,
+                               'TD',
+                               'SUBMITBUTTON', 'login', T_('Log in'),
+                               'TEXT',
+                               '<A href="forgot.php"><font size="-2">' .
+                               T_('Forgot password?') . '</font></A>',
+                               'HIDDEN', 'url', 'status.php' ) );
+
+  $login_form->echo_string();
   echo "</center>\n";
 
   $menu_array = array( T_("Register new account") => 'register.php' );

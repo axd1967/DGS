@@ -77,28 +77,28 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
   echo "<CENTER>\n";
 
-  echo form_start( 'tournament_p2_form', 'create_tournament.php', 'POST' );
+  $tour_form = new Form( 'tournament_p2_form', 'create_tournament.php', FORM_POST );
 
-  echo form_insert_row( 'HIDDEN', 'name', $name );
-  echo form_insert_row( 'HIDDEN', 'description', $description );
-  echo form_insert_row( 'HIDDEN', 'min', $min );
-  echo form_insert_row( 'HIDDEN', 'max', $max );
-  echo form_insert_row( 'HIDDEN', 'type', $type );
-  echo form_insert_row( 'HIDDEN', 'organizers', $player_row['Handle'].",".$organizers );
-  echo form_insert_row( 'HIDDEN', 'starttime', $starttime );
-  echo form_insert_row( 'HIDDEN', 'firststarttime', $firststarttime );
-  echo form_insert_row( 'HIDDEN', 'deadlihetime', $deadlinetime );
+  $tour_form->add_row( array( 'HIDDEN', 'name', $name ) );
+  $tour_form->add_row( array( 'HIDDEN', 'description', $description ) );
+  $tour_form->add_row( array( 'HIDDEN', 'min', $min ) );
+  $tour_form->add_row( array( 'HIDDEN', 'max', $max ) );
+  $tour_form->add_row( array( 'HIDDEN', 'type', $type ) );
+  $tour_form->add_row( array( 'HIDDEN', 'organizers', $player_row['Handle'].",".$organizers ) );
+  $tour_form->add_row( array( 'HIDDEN', 'starttime', $starttime ) );
+  $tour_form->add_row( array( 'HIDDEN', 'firststarttime', $firststarttime ) );
+  $tour_form->add_row( array( 'HIDDEN', 'deadlihetime', $deadlinetime ) );
 
-  echo form_insert_row( 'HEADER', 'General options' );
+  $tour_form->add_row( array( 'HEADER', 'General options' ) );
 
   switch( $type )
     {
     case( "KNOCKOUT" ):
       {
-        echo form_insert_row( 'DESCRIPTION', 'How many seeded participants',
-                              'TEXTINPUT', 'seeded', 10, 10, 0 );
-        echo form_insert_row( 'DESCRIPTION', 'Use handicap',
-                              'CHECKBOX', 'handicap', 1, '', true );
+        $tour_form->add_row( array( 'DESCRIPTION', 'How many seeded participants',
+                                    'TEXTINPUT', 'seeded', 10, 10, 0 ) );
+        $tour_form->add_row( array( 'DESCRIPTION', 'Use handicap',
+                                    'CHECKBOX', 'handicap', 1, '', true ) );
       }
       break;
 
@@ -146,54 +146,54 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
    * WeekendClock
    */
 
-  echo form_insert_row( 'SPACE' );
-  echo form_insert_row( 'HEADER', 'Game options' );
+  $tour_form->add_row( array( 'SPACE' ) );
+  $tour_form->add_row( array( 'HEADER', 'Game options' ) );
 
   $value_array=array();
   for( $bs = 5; $bs <= 25; $bs++ )
     $value_array[$bs]=$bs;
 
-  echo form_insert_row( 'DESCRIPTION', 'Board size',
-                        'SELECTBOX', 'size', 1, $value_array, 19, false );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Board size',
+                              'SELECTBOX', 'size', 1, $value_array, 19, false ) );
 
-  echo form_insert_row( 'DESCRIPTION', 'Komi',
-                        'TEXTINPUT', 'komi', 5, 5, '6.5' );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Komi',
+                              'TEXTINPUT', 'komi', 5, 5, '6.5' ) );
 
   $value_array=array( 'hours' => 'hours', 'days' => 'days', 'months' => 'months' );
-  echo form_insert_row( 'DESCRIPTION', 'Main time',
-                        'TEXTINPUT', 'timevalue', 5, 5, 3,
-                        'SELECTBOX', 'timeunit', 1, $value_array, 'months', false );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Main time',
+                              'TEXTINPUT', 'timevalue', 5, 5, 3,
+                              'SELECTBOX', 'timeunit', 1, $value_array, 'months', false ) );
 
-  echo form_insert_row( 'DESCRIPTION', 'Japanese byo-yomi',
-                        'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), 'JAP',
-                        'TEXTINPUT', 'byotimevalue_jap', 5, 5, 1,
-                        'SELECTBOX', 'timeunit_jap', 1, $value_array, 'days', false,
-                        'TEXT', 'with&nbsp;',
-                        'TEXTINPUT', 'byoperiods_jap', 5, 5, 10,
-                        'TEXT', 'extra periods.' );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Japanese byo-yomi',
+                              'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), 'JAP',
+                              'TEXTINPUT', 'byotimevalue_jap', 5, 5, 1,
+                              'SELECTBOX', 'timeunit_jap', 1, $value_array, 'days', false,
+                              'TEXT', 'with&nbsp;',
+                              'TEXTINPUT', 'byoperiods_jap', 5, 5, 10,
+                              'TEXT', 'extra periods.' ) );
 
-  echo form_insert_row( 'DESCRIPTION', 'Canadian byo-yomi',
-                        'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), 'CAN',
-                        'TEXTINPUT', 'byotimevalue_can', 5, 5, 15,
-                        'SELECTBOX', 'timeunit_can', 1, $value_array, 'days', false,
-                        'TEXT', 'for&nbsp;',
-                        'TEXTINPUT', 'byoperiods_can', 5, 5, 15,
-                        'TEXT', 'stones.' );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Canadian byo-yomi',
+                              'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), 'CAN',
+                              'TEXTINPUT', 'byotimevalue_can', 5, 5, 15,
+                              'SELECTBOX', 'timeunit_can', 1, $value_array, 'days', false,
+                              'TEXT', 'for&nbsp;',
+                              'TEXTINPUT', 'byoperiods_can', 5, 5, 15,
+                              'TEXT', 'stones.' ) );
 
-  echo form_insert_row( 'DESCRIPTION', 'Fischer time',
-                        'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), 'FIS',
-                        'TEXTINPUT', 'byotimevalue_fis', 5, 5, 1,
-                        'SELECTBOX', 'timeunit_fis', 1, $value_array, 'days', false,
-                        'TEXT', 'extra&nbsp;per move.' );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Fischer time',
+                              'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), 'FIS',
+                              'TEXTINPUT', 'byotimevalue_fis', 5, 5, 1,
+                              'SELECTBOX', 'timeunit_fis', 1, $value_array, 'days', false,
+                              'TEXT', 'extra&nbsp;per move.' ) );
 
-  echo form_insert_row( 'DESCRIPTION', 'Clock runs on weekends',
-                        'CHECKBOX', 'weekendclock', 'Y', "", true );
-  echo form_insert_row( 'DESCRIPTION', 'Rated',
-                        'CHECKBOX', 'rated', 'Y', "", true );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Clock runs on weekends',
+                              'CHECKBOX', 'weekendclock', 'Y', "", true ) );
+  $tour_form->add_row( array( 'DESCRIPTION', 'Rated',
+                              'CHECKBOX', 'rated', 'Y', "", true ) );
 
-  echo form_insert_row( 'SUBMITBUTTON', 'action', 'Create' );
+  $tour_form->add_row( array( 'SUBMITBUTTON', 'action', 'Create' ) );
 
-  echo form_end();
+  $tour_form->echo_string();
 
   echo "</CENTER>\n";
 
