@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Jim Heiney and Erik Ouchterlony
+Copyright (C) 2001 Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,38 +18,23 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
+
 require( "include/std_functions.php" );
 
 connect2mysql();
 
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-start_page("Links", true, $logged_in, $player_row );
+start_page("General Public Licence", true, $logged_in, $player_row );
 
-?>
+echo "<table align=center><tr><td>\n";
+echo "<pre>\n";
 
-<table align=center><tr><td>
+readfile("COPYING");
 
-<center><h3><font color="#800000">Documentaion</font></h3></center>
+echo "</pre>\n";
+echo "</td></tr></table>\n";
 
-
-<p><a href="introduction.php">Introduction to Dragon</a>
-
-<p><a href="site_map.php">Site map</a>
-
-<p><a href="phorum/list.php?f=3">Frequently Asked Questions</a> -- with answers
-
-<p><a href="links.php">Links</a>
-
-<p><a href="todo.php">To do list</a> --- plans for future improvements 
-
-<p><a href="http://sourceforge.net/projects/dragongoserver">Dragon project page at sourceforge</a>
-
-<p><a href="licence.php">Licence</a> --- GPL
-
-<br>&nbsp;
-</td></tr></table>
-
-<?php
 end_page();
 ?>

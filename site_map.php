@@ -32,11 +32,11 @@ function item($text,$link,$working, $level,$last=false)
    for($i=0; $i<$level; $i++)
    {
       echo "<td width=50 align=right>" . 
-         ( ${"f$i"} ? "<img src=\"$size/du.gif\">" : "" ) . "</td>";
+         ( ${"f$i"} ? "<img alt=\"&nbsp;|&nbsp;\" src=\"$size/du.gif\">" : "" ) . "</td>";
    }
 
-   echo "<td width=50 align=right><img src=\"$size/" .
-      ( $last ? "dl" : "el" ) . ".gif\"></td>" .
+   echo "<td width=50 align=right><img alt=\"" . ( $last ? "&nbsp;`-" : "&nbsp;|-" ) . 
+      "\" src=\"$size/" . ( $last ? "dl" : "el" ) . ".gif\"></td>" .
       "<td colspan=" . (4-$level) . ">&nbsp;<a " . ( $working ? "" : "class=dead " ) .
       " href=\"$link\">" .
       "<font color=" . ($working ? "0C41C9" : "black"  ) . ">$text</font></a></td></tr>\n";
@@ -50,11 +50,14 @@ function item($text,$link,$working, $level,$last=false)
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
    
-   start_page("Links", true, $logged_in, $player_row );
+   start_page("Site map", true, $logged_in, $player_row );
 
    $f0=$f1=$f2=$f3=true;
    
-   echo "<ul><table cellspacing=0 cellpadding=0 border=0><tr><td colspan=3>" .
+   
+   echo "<table width=80% align=center><tr><td>\n";
+   echo "<center><h3><font color=\"#800000\">Site map</font></h3></center>";
+   echo "<table cellspacing=0 cellpadding=0 border=0><tr><td colspan=3>" .
       "<a href=\"index.php\"><font color=0C41C9>Welcome page</font></a></td></tr>\n";
 
    {
@@ -109,13 +112,16 @@ function item($text,$link,$working, $level,$last=false)
          item("Site map", "site_map.php", true, 1);
          item("FAQ", "phorum/list.php?f=3", true, 1);
          item("Links", "links.php", true, 1);
-         item("Todo list", "todo.php", true, 1, true);
+         item("Todo list", "todo.php", true, 1);
+         item("Licence", "licence.php", true, 1, true);
       }
    }
 
 }
 
-echo "</table></ul>\n";
+echo "</table>\n";
+echo "<p>The black links require an argument to work, so they are not usable\n";
+echo "</td></tr></table>\n";
 
 end_page();
 ?>
