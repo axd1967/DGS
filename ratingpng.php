@@ -304,10 +304,14 @@ else
    $SizeX = ( @$_GET['size'] > 0 ? $_GET['size'] : $defaultsize );
    $SizeY = $SizeX * 3 / 4;
 
-   if( $endtime < $starttime )
-     swap($starttime, $endtime);
-
    $starttime = mktime(0,0,0,$BEGINMONTH,1,$BEGINYEAR);
+   $endtime = $NOW + $ratingpng_min_interval;
+   if( $endtime < $starttime )
+   {
+      $endtime = $starttime + $ratingpng_min_interval;
+      if( $endtime < $starttime )
+        swap($starttime, $endtime);
+   }
 
    if( isset($_GET['startyear']) and isset($_GET['startmonth']) )
       $starttime = max($starttime, mktime(0,0,0,$_GET['startmonth'],1,$_GET['startyear']));
@@ -317,6 +321,7 @@ else
       $endtime = min($endtime, mktime(0,0,0,$_GET['endmonth']+1,0,$_GET['endyear']));
 
    get_rating_data(@$_GET["uid"]);
+   //$nr_games is the number of games before the graph start
 
    $max = array_reduce($ratingmax, "max",-10000);
    $min = array_reduce($ratingmin, "min", 10000);
