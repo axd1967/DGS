@@ -3,8 +3,7 @@
 # Perl script to find all translatable sentences.
 #
 
-
-while( <*.php> )
+while( <*.php include/*.php> )
 {
     $filename = $_;
 
