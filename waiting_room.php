@@ -101,8 +101,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $row_color=2;
       while( $row = mysql_fetch_array( $result ) )
       {
-         $Rating = '&nbsp;';
+         $Rating = NULL;
          extract($row);
+
+         if( !is_numeric($Rating) )
+            $Rating = NULL;
 
          $row_color=3-$row_color;
          echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
