@@ -27,10 +27,10 @@ if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.
    $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
    $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
 
-   function html_entity_decode($str, $quote_style, $charset)
+   function html_entity_decode($str, $quote_style=ENT_COMPAT, $charset='iso-8859-1')
    {
     global $reverse_htmlentities_table;
-      $str = strtr($str, $reverse_htmlentities_table);
+      return strtr($str, $reverse_htmlentities_table);
    }
 }
 
@@ -74,7 +74,7 @@ function mail_strip_html( $str)
    $str = strip_tags($str, '<a><br><p><ul><ol><li><goban>');
    $str = preg_replace(array_keys($reps), array_values($reps), $str);
    $str = strip_tags($str, '<goban>');
-   //$str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
+   $str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
    return $str;
 }
 
@@ -89,7 +89,7 @@ function mail_strip_html( $str)
 
    $row = mysql_fetch_array( $result );
 
-   if( $row['timediff'] < 15+00 )
+   if( $row['timediff'] < 1500 )
       exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202");
