@@ -20,6 +20,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
+$MAX_START_RATING = 2600;
+$MIN_RATING = -900;
+
 function interpolate($value, $table, $extrapolate)
 {
    foreach ( $table as $x )
@@ -224,7 +227,7 @@ function update_rating($gid)
 
 function update_rating2($gid, $check_done=true)
 {
-   global $NOW;
+   global $NOW, $MIN_RATING;
 
    $WithinPercent = 1/4;
 
@@ -280,6 +283,8 @@ function update_rating2($gid, $check_done=true)
 
    $bTmp = $bOld;
    change_rating($wRating, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
+   if( $wRating < $MIN_RATING )
+      $wRating = $MIN_RATING;
 
    $wFactor *= $maxminFactor;
    $bTmp = $bOld;
@@ -290,6 +295,8 @@ function update_rating2($gid, $check_done=true)
 
    $wTmp = $wOld;
    change_rating($wTmp, $bRating, $game_result, $Size, $Komi, $Handicap, $bFactor);
+   if( $bRating < $MIN_RATING )
+      $bRating = $MIN_RATING;
 
    $bFactor *= $maxminFactor;
    $wTmp = $wOld;
@@ -589,8 +596,7 @@ function get_rating_at($uid, $date)
 
 function convert_to_rating($string, $type)
 {
-   $max_start_rating = 2600;
-   $min_start_rating = -900;
+   global $MAX_START_RATING, $MIN_RATING;
 
    if( empty($string) )
       return null;
@@ -736,7 +742,13 @@ function convert_to_rating($string, $type)
       }
    }
 
-   if( $rating > $max_start_rating or $rating < $min_start_rating )
+   if( $rating > $MAX_START_RATING and $rating-50 <= $MAX_START_RATING )
+      $rating = $MAX_START_RATING;
+
+   if( $rating < $MIN_RATING and $rating+50 >= $MIN_RATING )
+      $rating = $MIN_RATING;
+
+   if( $rating > $MAX_START_RATING or $rating < $MIN_RATING )
       error("rating_out_of_range");
 
    return $rating;
