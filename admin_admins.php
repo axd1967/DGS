@@ -32,7 +32,7 @@ require_once( "include/table_columns.php" );
   if( !$logged_in )
     error("not_logged_in");
 
-  $player_level = $player_row['admin_level'];
+  $player_level = (int)$player_row['admin_level'];
   if( !($player_level & ADMIN_ADMINS) )
     error("adminlevel_too_low");
 
@@ -52,8 +52,8 @@ require_once( "include/table_columns.php" );
 
   while( $row = mysql_fetch_array($result) )
   {
-     $Admin[$row['ID']] = 0;
-     $AdminOldLevel[$row['ID']] = $row['admin_level'];
+     $Admin[$row['ID']] = ~$player_level & (int)$row['admin_level'] ;
+     $AdminOldLevel[$row['ID']] = (int)$row['admin_level'];
   }
 
 
@@ -67,7 +67,7 @@ require_once( "include/table_columns.php" );
 
         list($type, $id) = explode('_', $item, 2);
 
-        $val = $admin_tasks[$type][0];
+        $val = $player_level & (int)$admin_tasks[$type][0];
 
         if( !($id > 0 or $id=='new') or !$val)
            error("bad_data");
@@ -97,13 +97,12 @@ require_once( "include/table_columns.php" );
 
      foreach( $Admin as $id => $adm_level )
      {
-        $adm_level = ((int)$adm_level ^ (int)$AdminOldLevel[$id]) & (int)$player_level;
-        if( $adm_level )
-        {
-           $adm_level = ((int)$adm_level ^ (int)$AdminOldLevel[$id]);
+        $Admin[$id] = $adm_level = (int)$adm_level;
+        if( $adm_level != $AdminOldLevel[$id] )
            mysql_query("UPDATE Players SET Adminlevel=$adm_level WHERE ID=$id LIMIT 1");
-        }
      }
+
+     $player_level = (int)$Admin[$player_row["ID"]];
   }
 
   start_page(T_("Admin").' - '.T_('Edit admin staff'), true, $logged_in, $player_row );
