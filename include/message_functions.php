@@ -275,11 +275,11 @@ function message_info_table($mid, $date, $to_me,
       "<td width=475 align=left>" . make_html_safe($text, true) .
       "</td></tr></table><BR></td></tr>\n";
 
-   if( isset($folders) )
+   if( isset($folders) && $mid > 0 )
    {
-      echo "<tr><td><b>" . T_('Folder') . ":</b></td>\n<td><table cellpadding=3><tr>" .
+      echo "<tr>\n<td><b>" . T_('Folder') . ":</b></td>\n<td><table cellpadding=3><tr>" .
          echo_folder_box($folders, $folder_nr, substr($bg_color, 2, 6))
-          . "</table></td>\n<td>";
+          . "</tr></table></td>\n<td>";
 
       $deleted = ( is_null($folder_nr) );
       if( !$deleted )
