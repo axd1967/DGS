@@ -61,7 +61,7 @@ require( "include/form_functions.php" );
                                T_('Forgot password?') . '</font></A>',
                                'HIDDEN', 'url', 'status.php' ) );
 
-  $login_form->echo_string();
+  $login_form->echo_string(1);
   echo "</center>\n";
 
   $menu_array = array( T_("Register new account") => 'register.php' );

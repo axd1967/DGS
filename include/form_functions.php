@@ -52,6 +52,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * <li> Submitbutton
   * <li> Text
   * <li> Header  --- Creates a header line.
+  * <li> Chapter --- Creates a chapter line.
   * <li> Ownhtml --- Does not produce td:s and such things, it will only add the code
   *                  specified by the user.
   * </ul>
@@ -89,7 +90,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * </pre>
   */
 
-   define( "FORM_GET", 0 );
+define( "FORM_GET", 0 );
 define( "FORM_POST", 1 );
 
 class Form
@@ -119,9 +120,13 @@ class Form
    /*! \brief Echo the <from ...> element immediately. */
    var $echo_form_start_now;
 
+   var $tabindex;
+
    /*! \brief Constructor. Initializes various variables. */
    function Form( $name, $action_page, $method, $echo_form_start_now=false )
       {
+         $this->tabindex = 0;
+
          $this->name = $name;
          $this->action = $action_page;
          $this->method = $method;
@@ -149,6 +154,12 @@ class Form
                                      'SpanAllColumns' => false,
                                      'Align'   => '' ),
             'HEADER'       => array( 'NumArgs' => 1,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => true,
+                                     'SpanAllColumns' => true,
+                                     'Align'   => 'center' ),
+            'CHAPTER'      => array( 'NumArgs' => 1,
                                      'NewTD'   => false,
                                      'StartTD' => true,
                                      'EndTD'   => true,
@@ -207,7 +218,7 @@ class Form
                                      'StartTD' => true,
                                      'EndTD'   => false,
                                      'SpanAllColumns' => true,
-                                     'Align'   => 'left' ),
+                                     'Align'   => 'center' ),
             'SPACE'        => array( 'NumArgs' => 0,
                                      'NewTD'   => false,
                                      'StartTD' => false,
@@ -233,16 +244,17 @@ class Form
       }
 
    /*! \brief Get $form_string and update it if necessary. */
-   function get_form_string()
+   function get_form_string( $tabindex=0 )
       {
+         $this->tabindex= $tabindex;
          $this->update_form_string();
          return $this->form_string;
       }
 
    /*! \brief Echo $form_string */
-   function echo_string()
+   function echo_string( $tabindex=0 )
       {
-         echo $this->get_form_string();
+         echo $this->get_form_string($tabindex);
       }
 
    /*!
@@ -304,9 +316,9 @@ class Form
    function create_form_string()
       {
          $result = "";
-         $max_nr_columns = 2;
+         $max_nr_columns = 99; //actually build on the fly, it is often inadequate for the top rows of the form
 
-         if( !$echo_form_start_now )
+         if( !$this->echo_form_start_now )
             $result .= $this->print_start( $this->name, $this->action, $this->method );
 
          $result .= "  <TABLE>\n";
@@ -322,25 +334,24 @@ class Form
                $column_started = false;
                $result .= "    <TR>\n";
 
-               $tmp_counter = 0;
+               $element_counter = 0;
 
                while( $current_arg < count($args) )
                {
-                  $tmp_counter++;
-                  if( $tmp_counter >= 40 )
+                  //40 allow 10*(TEXT,TD,TEXTAREA,TD) in the row
+                  if( $element_counter >= 40 )
                      exit;
 
                   $element_name = $args[ $current_arg ];
+                  $current_arg++;
 
                   if( !array_key_exists( $element_name, $this->form_elements ) )
-                  {
-                     $current_arg++;
                      continue;
-                  }
+
+                  $element_counter++;
 
                   $element_type = $this->form_elements[ $element_name ];
 
-                  $current_arg++;
                   if( count($args) - $current_arg >= $element_type[ 'NumArgs' ] )
                   {
                      $element_args = array();
@@ -359,7 +370,7 @@ class Form
                         if( $column_started )
                            $result .= $this->print_td_end();
 
-                        $result .= $this->print_td_start( 'center',
+                        $result .= $this->print_td_start( $element_type['Align'],
                                                           max( $max_nr_columns -
                                                                $nr_columns,
                                                                1 ) );
@@ -439,6 +450,15 @@ class Form
          global $h3_color;
          $result .= "<b><h3><font color=$h3_color>" . $args[0] . ":" .
             "</font></h3></b>";
+      }
+
+   /*!
+    * \brief Function for making chapter string in the standard form
+    * \internal
+    */
+   function create_string_func_chapter( &$result, $args )
+      {
+         $result .= "<b>" . $args[0] . ":</b>";
       }
 
    /*!
@@ -620,6 +640,7 @@ class Form
    function print_insert_text_input( $name, $size, $maxlength, $initial_value )
       {
          return "<INPUT type=\"text\" name=\"$name\" value=\"$initial_value\"" .
+            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
             " size=\"$size\" maxlength=\"$maxlength\">";
       }
 
@@ -637,6 +658,7 @@ class Form
    function print_insert_password_input( $name, $size, $maxlength )
       {
          return "<INPUT type=\"password\" name=\"$name\"" .
+            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
             " size=\"$size\" maxlength=\"$maxlength\">";
       }
 
@@ -664,6 +686,7 @@ class Form
    function print_insert_textarea( $name, $columns, $rows, $initial_text )
       {
          return "<TEXTAREA name=\"$name\" cols=\"$columns\" " .
+            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
             "rows=\"$rows\" wrap=\"virtual\">$initial_text</TEXTAREA>";
       }
 
@@ -688,7 +711,9 @@ class Form
          $result = "        <SELECT name=\"$name\" size=\"$size\" ";
          if( $multiple )
             $result .= "multiple";
-         $result .= ">\n";
+         $result .= 
+            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
+            ">\n";
 
          foreach( $value_array as $value => $info )
             {
@@ -724,13 +749,16 @@ class Form
     */
    function print_insert_radio_buttons( $name, $value_array, $selected )
       {
+         $result = '';
          foreach( $value_array as $value => $info )
             {
                $result .= "        <INPUT type=\"radio\" name=\"$name\" value=\"$value\"";
                if($value == $selected)
                   $result .= " checked";
 
-               $result .= "> $info\n";
+               $result .= 
+            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
+                  "> $info\n";
             }
 
          return $result;
@@ -751,7 +779,9 @@ class Form
          if($selected)
             $result .= " checked";
 
-         $result .= "> $description";
+         $result .= 
+            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
+            "> $description";
 
          return $result;
       }
@@ -765,8 +795,11 @@ class Form
     */
    function print_insert_submit_button( $name, $text )
       {
-         return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\">";
+         return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
+            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
+         ">";
       }
+
 
 }
 
