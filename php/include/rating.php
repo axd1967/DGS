@@ -167,17 +167,16 @@ function rank_to_rating($val, $kyu)
 function convert_to_rating($string, $type)
 {
   $string = strtolower($string);
-  
   $val = doubleval($string);
 
-  if( strpos($string, 'kyu') > 0 or strpos($string, 'gup') > 0 )
+  if( strpos($string, 'k') > 0 or strpos($string, 'gup') > 0 )
       $kyu = 1;
-
-  if( strpos($string, 'dan') > 0 )
+  if( strpos($string, 'd') > 0 )
       $kyu = 2;
 
   switch( $type )
     {
+    case 'dragonrating':
     case 'eurorating':
       {
         if( $kyu > 0 )
@@ -230,14 +229,14 @@ function convert_to_rating($string, $type)
         $igs_table[0]['KEY'] = -300;
         $igs_table[0]['VAL'] = 500;
         
-        $igs_table[1]['KEY'] = 500;
-        $igs_table[1]['VAL'] = 1200;
+        $igs_table[1]['KEY'] = 400;
+        $igs_table[1]['VAL'] = 1000;
 
         $igs_table[2]['KEY'] = 1100;
-        $igs_table[2]['VAL'] = 1600;
+        $igs_table[2]['VAL'] = 1500;
 
-        $igs_table[3]['KEY'] = 1700;
-        $igs_table[3]['VAL'] = 2000;
+        $igs_table[3]['KEY'] = 1900;
+        $igs_table[3]['VAL'] = 2100;
 
         $igs_table[4]['KEY'] = 2200;
         $igs_table[4]['VAL'] = 2400;
