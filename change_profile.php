@@ -69,7 +69,8 @@ require( "include/rating.php" );
 
    if( strcmp($language, $player_row['Lang']) != 0 and
        (in_array($language, $known_languages->get_lang_codes_with_charsets(), true) or
-        in_array($language, $known_languages->get_lang_codes(), true)) )
+        in_array($language, $known_languages->get_lang_codes(), true) or
+        strcmp($language, 'C') == 0 ))
      {
        $query .= "Lang='$language', ";
        $the_translator->change_language( $language );
