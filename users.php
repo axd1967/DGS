@@ -25,7 +25,8 @@ include( "include/table_columns.php" );
 include( "include/timezones.php" );
 
 $table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches?','Games',
-                       'Running','Finished','Won','Lost','Percent','Activity');
+                       'Running','Finished','Won','Lost','Percent','Activity',
+                       'Last Access','Last Moved');
 
 {
    connect2mysql();

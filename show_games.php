@@ -155,7 +155,7 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
       }
       else
       {
-         echo tableelement(14, 'Last Move', date($date_fmt, $Time));
+         echo tableelement(13, 'Last Move', date($date_fmt, $Time));
       }
 
       echo "</tr>\n";

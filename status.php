@@ -139,7 +139,7 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
          tablehead(7, 'Handicap') .
          tablehead(8, 'Komi') .
          tablehead(9, 'Moves') .
-         tablehead(14, 'Last Move') .
+         tablehead(13, 'Last Move') .
          "</tr>\n";
 
       $row_color=2;
@@ -164,7 +164,7 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
             tableelement(7, 'Handicap', $Handicap) .
             tableelement(8, 'Komi', $Komi) .
             tableelement(9, 'Moves', $Moves ) .
-            tableelement(14, 'Last Move', date($date_fmt2, $Time)) .
+            tableelement(13, 'Last Move', date($date_fmt2, $Time)) .
             "</tr>\n";
       }
       echo start_end_column_table(false);
