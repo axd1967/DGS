@@ -37,11 +37,6 @@ function replace_unnecessary_chars( $string )
   if( !$logged_in )
     error("not_logged_in");
 
-  if( $just_change )
-    {
-      jump_to("translate.php?translate_lang=$translate_lang&group=$group");
-    }
-
   if( $update )
     {
       $translator_array = explode(',', $player_row['Translator']);
@@ -77,20 +72,16 @@ function replace_unnecessary_chars( $string )
 
       $lang_php_code = substr( $lang_php_code, 0, -3 );
       $lang_php_code .= $translation_template_bottom;
+
+      $filename = "translations/" . $translate_lang . ".php";
+
+      if( !copy( $filename, $filename . ".bak" ) )
+        error( "couldnt_make_backup" );
+
+      chmod( $filename . ".bak", 0666 );
+
+      write_to_file( $filename, $lang_php_code );
     }
-
-  $filename = "translations/" . $translate_lang . ".php";
-
-  if( !copy( $filename, $filename . ".bak" ) )
-    error( "couldnt_make_backup" );
-
-  chmod( $filename . ".bak", 0666 );
-
-  if( !($fp = fopen( $filename, 'w' )) )
-    error( "couldnt_open_transl_file" );
-
-  fwrite( $fp, $lang_php_code );
-  fclose( $fp );
 
   jump_to("translate.php?translate_lang=$translate_lang&group=$group");
 }
