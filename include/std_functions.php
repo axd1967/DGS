@@ -274,8 +274,8 @@ function end_page( $menu_array=NULL )
          "</font>\n";
 
    if( $admin_level > 0 )
-      echo '<B><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
-         T_('Admin') . '</a></B></font></td>';
+      echo '<b><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
+         T_('Admin') . '</font></a></b></td>';
    else
       echo '<A href="' . $base_path . 'index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
 
@@ -531,6 +531,17 @@ function set_cookies($uid, $code, $delete=false)
    }
 }
 
+function add_line_breaks($msg)
+{
+   // Strip out carriage returns
+   $newmsg = ereg_replace("\r","",$msg);
+   // Handle paragraphs
+   $newmsg = ereg_replace("\n\n","<P>",$newmsg);
+   // Handle line breaks
+   $newmsg = ereg_replace("\n","<BR>",$newmsg);
+
+   return $newmsg;
+}
 
 function make_html_safe(&$msg, $some_html=false)
 {
@@ -574,13 +585,7 @@ function make_html_safe(&$msg, $some_html=false)
    $msg = ereg_replace("<", "&lt;", $msg);
    $msg = ereg_replace(">", "&gt;", $msg);
 
-
-   // Strip out carriage returns
-   $msg = ereg_replace("\r","",$msg);
-   // Handle paragraphs
-   $msg = ereg_replace("\n\n","<P>",$msg);
-   // Handle line breaks
-   $msg = ereg_replace("\n","<BR>",$msg);
+   $msg = add_line_breaks($msg);
 
    if( $some_html )
    {
