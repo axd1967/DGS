@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Docs";
+
 require( "include/std_functions.php" );
 
 function add_contributor( $text, $contributor, $uid = -1 )
@@ -43,6 +45,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
 
   add_contributor( T_("Current maintainer and founder of Dragon"), "Erik Ouchterlony" );
   add_contributor( T_("Developer"), "Ragnar Ouchterlony" );
+  add_contributor( T_("FAQ editor"), "Bjørn Ingmar Berg" );
 
   echo "<tr><td colspan=2>\n";
   echo "<center><h3><font color=$h3_color>" .
@@ -77,7 +80,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
         }
     }
 
-  $k_langs = $known_languages->get_descriptions_translated();
+  $k_langs = get_language_descriptions_translated();
   foreach( $per_language as $lang => $translators )
     {
       $first = true;
