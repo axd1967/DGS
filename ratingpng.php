@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require_once( "include/std_functions.php" );
+ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
 $defaultsize = 640;
@@ -96,20 +96,20 @@ function get_rating_data($uid)
    while( $row = mysql_fetch_array($result) )
    {
       if( $row['seconds'] < $starttime )
-         {
-            $tmp = $row;
-            $nr_games++ ;
-            continue;
-         }
+      {
+         $tmp = $row;
+         $nr_games++ ;
+         continue;
+      }
 
       if( $first )
       {
          array_push($ratings, scale2($tmp['Rating'], $row['Rating'],
                                      $tmp['seconds'], $starttime, $row['seconds']));
          array_push($ratingmin, scale2($tmp['RatingMin'], $row['RatingMin'],
-                                     $tmp['seconds'], $starttime, $row['seconds']));
+                                       $tmp['seconds'], $starttime, $row['seconds']));
          array_push($ratingmax, scale2($tmp['RatingMax'], $row['RatingMax'],
-                                     $tmp['seconds'], $starttime, $row['seconds']));
+                                       $tmp['seconds'], $starttime, $row['seconds']));
          array_push($time, $starttime);
          $first = false;
       }
@@ -206,8 +206,8 @@ function imagemultiline($im, $points, $nr_points, $color)
 //      error("not_logged_in");
 
 // globals used by echo_rating()
-$dan = T_('dan');
-$kyu = T_('kyu');
+   $dan = T_('dan');
+   $kyu = T_('kyu');
 
 
 //First check font and find pagging constantes
@@ -219,69 +219,65 @@ $kyu = T_('kyu');
    if ( isset($_GET['font']) )
       $x = $_GET['font'] ;
 
-define('TTF_FONT',"/var/lib/defoma/fontconfig.d/F/$x.ttf"); // Font path
+   define('TTF_FONT',"/var/lib/defoma/fontconfig.d/F/$x.ttf"); // Font path
 
 
 //Just two string samples to evaluate MARGE_LEFT
-   $x= array (
-      echo_rating(100, false), //20kyu
-      echo_rating(3000, false), //10dan
-     ) ;
+   $x = array (echo_rating(100, false), //20kyu
+               echo_rating(3000, false)); //10dan
 
-
-if ( function_exists('imagettftext') //TTF need GD and Freetype.
-     && is_file(TTF_FONT) //Rod: ...and access rights check if needed
-   )
-{
-   define('LABEL_FONT'  ,-1);
-   define('LABEL_HEIGHT',9);
-   define('LABEL_SEPARATION',3);
-   $m = $v = 0;
-   foreach( $x as $y )
+   if ( function_exists('imagettftext') //TTF need GD and Freetype.
+        && is_file(TTF_FONT) ) //Rod: ...and access rights check if needed
    {
-      $b= imagettfbbox(LABEL_HEIGHT, 0, TTF_FONT, $y);
-      $a = $b[2]-$b[6] +1 ;
-      if( $a > $m )
-      {
-         $m = $a ;
-         $v = $a/strlen($y) ;
-      }
-   }
-   define('LABEL_MIDDLE', $b[3]-$b[7] +1);
-   define('LABEL_WIDTH' , $v +1);
-   define('MARGE_LEFT'  , $m +15);
+      define('LABEL_FONT'  ,-1);
+      define('LABEL_HEIGHT',9);
+      define('LABEL_SEPARATION',3);
+      $m = $v = 0;
+      foreach( $x as $y )
+         {
+            $b= imagettfbbox(LABEL_HEIGHT, 0, TTF_FONT, $y);
+            $a = $b[2]-$b[6] +1 ;
+            if( $a > $m )
+            {
+               $m = $a ;
+               $v = $a/strlen($y) ;
+            }
+         }
+      define('LABEL_MIDDLE', $b[3]-$b[7] +1);
+      define('LABEL_WIDTH' , $v +1);
+      define('MARGE_LEFT'  , $m +15);
 
-   function imagelabel($im, $x, $y, $str, $color)
+      function imagelabel($im, $x, $y, $str, $color)
+         {
+            $b= imagettftext($im, LABEL_HEIGHT, 0, $x, $y+LABEL_MIDDLE, $color, TTF_FONT, $str);
+            //global $red; imagerectangle($im, $b[6], $b[7], $b[2], $b[3], $red);
+            return $b[2]+LABEL_WIDTH ;
+         }
+   }
+   else //True type font file problem, so use embedded fonts:
    {
-      $b= imagettftext($im, LABEL_HEIGHT, 0, $x, $y+LABEL_MIDDLE, $color, TTF_FONT, $str);
-      //global $red; imagerectangle($im, $b[6], $b[7], $b[2], $b[3], $red);
-      return $b[2]+LABEL_WIDTH ;
-   }
-}
-else //True type font file problem, so use embedded fonts:
-{
-   define('LABEL_FONT'  ,2);
-   define('LABEL_HEIGHT',ImageFontHeight(LABEL_FONT)-1);
-   define('LABEL_SEPARATION',1);
-   define('LABEL_WIDTH' ,ImageFontWidth(LABEL_FONT));
-   define('LABEL_MIDDLE',LABEL_HEIGHT*2/3);
-   $m = 0;
-   foreach( $x as $y )
-      $m = max( $m , strlen($y)*LABEL_WIDTH ) ;
-   define('MARGE_LEFT'  , $m +15);
+      define('LABEL_FONT'  ,2);
+      define('LABEL_HEIGHT',ImageFontHeight(LABEL_FONT)-1);
+      define('LABEL_SEPARATION',1);
+      define('LABEL_WIDTH' ,ImageFontWidth(LABEL_FONT));
+      define('LABEL_MIDDLE',LABEL_HEIGHT*2/3);
+      $m = 0;
+      foreach( $x as $y )
+         $m = max( $m , strlen($y)*LABEL_WIDTH ) ;
+      define('MARGE_LEFT'  , $m +15);
 
-   function imagelabel($im, $x, $y, $str, $color)
-   {
-      $b = $x + strlen($str)*LABEL_WIDTH ;
-      //global $red; imagerectangle($im, $x, $y, $b, $y+LABEL_HEIGHT, $red);
-      imagestring($im, LABEL_FONT, $x, $y, $str, $color);
-      return $b+LABEL_WIDTH ;
+      function imagelabel($im, $x, $y, $str, $color)
+         {
+            $b = $x + strlen($str)*LABEL_WIDTH ;
+            //global $red; imagerectangle($im, $x, $y, $b, $y+LABEL_HEIGHT, $red);
+            imagestring($im, LABEL_FONT, $x, $y, $str, $color);
+            return $b+LABEL_WIDTH ;
+         }
    }
-}
 
-define('MARGE_TOP'   ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
-define('MARGE_RIGHT' ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
-define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
+   define('MARGE_TOP'   ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
+   define('MARGE_RIGHT' ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
+   define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
 
 
 
@@ -310,6 +306,7 @@ define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
 
    $bg = imagecolorallocate ($im, 247, 245, 227);
    $black = imagecolorallocate ($im, 0, 0, 0);
+   $nr_games_color = imagecolorallocate ($im, 250, 100, 98);
    $light_blue = imagecolorallocate ($im, 220, 229, 255);
    $red = imagecolorallocate ($im, 205, 159, 156);
 
@@ -354,12 +351,13 @@ define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
    imagesetstyle ($im, array($red,$red,IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT,
                              IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT));
 
-      $x= 0;
-      if (SHOW_NRGAMES)
-      {
-         $x= max($x,imagelabel($im, 4,$SizeY-MARGE_BOTTOM+3+
-                               2*(LABEL_SEPARATION+LABEL_HEIGHT), T_('nr games'), $black));
-      }
+   $x = 0;
+   if (SHOW_NRGAMES)
+   {
+      $x = max($x,imagelabel($im, 4,
+                             $SizeY-MARGE_BOTTOM+3+ 2*(LABEL_SEPARATION+LABEL_HEIGHT),
+                             T_('Games').':', $nr_games_color));
+   }
 
    $year = date('Y',$starttime);
    $month = date('n',$starttime)+1;
@@ -390,17 +388,21 @@ define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
          continue;
 
       $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3,  T_(date('M', $dt)), $black));
-      $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3+LABEL_HEIGHT+LABEL_SEPARATION,  date('Y', $dt), $black));
+      $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3+LABEL_HEIGHT+LABEL_SEPARATION,
+                            date('Y', $dt), $black));
       if (SHOW_NRGAMES)
       {
          while ($ix_games < $nr_points && $time[$ix_games] <= $sc)
             $ix_games++;
-         $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3+2*LABEL_HEIGHT+2*LABEL_SEPARATION, $nr_games+$ix_games, $black));
+         $x= max($x,imagelabel($im, $sc,
+                               $SizeY-MARGE_BOTTOM+3+2*LABEL_HEIGHT+2*LABEL_SEPARATION,
+                               $nr_games+$ix_games, $nr_games_color));
       }
    }
 
    if( @$_GET['show_time'] == 'y')
-      imagelabel($im, MARGE_LEFT, 0, sprintf('%0.2f ms', (getmicrotime()-$microtime)*1000), $black);
+      imagelabel($im, MARGE_LEFT, 0,
+                 sprintf('%0.2f ms', (getmicrotime()-$microtime)*1000), $black);
 
    imagemultiline($im, interleave_data($time, $ratings), $nr_points, $black);
 
