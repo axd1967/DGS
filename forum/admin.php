@@ -33,13 +33,13 @@ require_once( "forum_functions.php" );
   if( !( $adm & ADMIN_FORUM ) )
      error("adminlevel_too_low");
 
-  $id = $_GET["id"];
+  $id = @$_GET["id"];
 
   $show_list = true;
 
   // ***********        New forum       ****************
 
-  if( $_GET["new"] == 't' )
+  if( @$_GET["new"] == 't' )
   {
      start_page(T_("Forum Admin").' - '.T_('New forum'), true, $logged_in, $player_row );
 
@@ -63,7 +63,7 @@ require_once( "forum_functions.php" );
 
   // ***********        Save new forum       ****************
 
-  else if( $_GET["do_new"] == 't' )
+  else if( @$_GET["do_new"] == 't' )
   {
      $SortOrder = 0;
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
@@ -74,8 +74,8 @@ require_once( "forum_functions.php" );
         $SortOrder = $row['SortOrder'];
      }
 
-     $name = trim( $_POST["name"] );
-     $description = trim( $_POST["description"] );
+     $name = trim( @$_POST["name"] );
+     $description = trim( @$_POST["description"] );
 
      if( !empty($name) and !empty($description))
      {
@@ -94,7 +94,7 @@ require_once( "forum_functions.php" );
 
   // ***********        Edit forum       ****************
 
-  else if( $_GET["edit"] == 't' )
+  else if( @$_GET["edit"] == 't' )
   {
      start_page(T_("Forum Admin").' - '.T_('Edit forum'), true, $logged_in, $player_row );
 
@@ -125,7 +125,7 @@ require_once( "forum_functions.php" );
 
   // ***********        Save edited forum       ****************
 
-  else if( $_GET["do_edit"] == 't' )
+  else if( @$_GET["do_edit"] == 't' )
   {
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
 
@@ -138,7 +138,7 @@ require_once( "forum_functions.php" );
         error("No data");
 
      $name = trim( $_POST["name"] );
-     $description = trim( $_POST["description"] );
+     $description = trim( @$_POST["description"] );
 
 
      // Delete ?
@@ -166,7 +166,7 @@ require_once( "forum_functions.php" );
 
   // ***********        Move forum       ****************
 
-  else if( $_GET["move"] == 'u' or $_GET["move"] == 'd' )
+  else if( @$_GET["move"] == 'u' or @$_GET["move"] == 'd' )
   {
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
 
@@ -179,10 +179,10 @@ require_once( "forum_functions.php" );
      $row2 = mysql_fetch_array( $result );
      $max = $row2["max"];
 
-     if( ( $_GET["move"] != 'u' or $row["SortOrder"] > 1 ) and
-         ( $_GET["move"] != 'd' or $row["SortOrder"] < $max ) )
+     if( ( @$_GET["move"] != 'u' or $row["SortOrder"] > 1 ) and
+         ( @$_GET["move"] != 'd' or $row["SortOrder"] < $max ) )
      {
-        $dir = ($_GET["move"] == 'd' ? 1 : -1 );
+        $dir = (@$_GET["move"] == 'd' ? 1 : -1 );
 
         mysql_query( "UPDATE Forums SET SortOrder=SortOrder-($dir) " .
                      'WHERE SortOrder=' . ($row["SortOrder"]+$dir) );
