@@ -199,22 +199,24 @@ function echo_rating($rating, $show_percent=true)
 {
    if( !isset($rating) ) return '';
 
+   $spc = ( $show_percent ? '&nbsp' : ' ' );
+
    $rank_val = round($rating/100);
    $string = '';
 
    if( $rank_val > 20.5 )
    {
-      $string .= ( $rank_val - 20 ) . " dan";
+      $string .= ( $rank_val - 20 ) . $spc . 'dan';
    }
    else
    {
-      $string .= ( 21 - $rank_val ) . " kyu";
+      $string .= ( 21 - $rank_val ) . $spc . 'kyu';
    }
 
    if( $show_percent ) 
    {
       $percent = round($rating - $rank_val*100);
-      $string .= ' ('. ( $percent > 0 ? '+' : '') . $percent . '%)';
+      $string .= $spc . '('. ( $percent > 0 ? '+' : '') . $percent . '%)';
    }
 
    return $string;

@@ -20,6 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 include( "include/table_columns.php" );
+include( "include/timezones.php" );
 
 {
    if( !$uid )
@@ -29,6 +30,28 @@ include( "include/table_columns.php" );
    connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+
+   if( !$logged_in )
+      error("not_logged_in");
+
+   $column_set = explode(',', $player_row["GamesColumns"]);
+   $finished_string = ( $finished ? 'finished=1&' : '' );
+   $page = "show_games.php?uid=$uid&$finished_string";
+
+   if( $del or $add )
+   {
+      if( $add )
+         array_push($column_set,$add);
+      if( $del and is_integer($s=array_search($del, $column_set, true)) )
+         array_splice($column_set, $s, 1);
+
+      $query = "UPDATE Players " . 
+          "SET GamesColumns='" . implode(',', $column_set) . "' " .
+          "WHERE ID=" . $player_row["ID"];
+      
+      mysql_query($query);
+
+   }
 
    $result = mysql_query( "SELECT Name, Handle FROM Players WHERE ID=$uid" );
 
@@ -77,70 +100,68 @@ include( "include/table_columns.php" );
    if( $nr_rows == $MaxRowsPerPage )
       $show_rows = $RowsPerPage;
 
-   $finished_string = ( $finished ? 'finished=1&' : '' );
+
 
    echo "<center><h4>" . ( $finished ? "Finished" : "Running" ) . " Games for <A href=\"userinfo.php?uid=$uid\">" . $user_row["Name"] . " (" . $user_row["Handle"] . ")</A></H4></center>\n";
-   echo "<table border=0 cellspacing=0 cellpadding=0 align=center>\n";
-   echo "<tr><td align=left>";
-   if( $from_row > 0 )
-      next_prev("show_games.php?uid=$uid&$finished_string&", $from_row-$RowsPerPage, false);
 
-   echo "</td>\n<td align=right>";
 
-   if( $show_rows < $nr_rows )
-      next_prev("show_games.php?uid=$uid&$finished_string&", $from_row+$RowsPerPage, true);
 
-   echo "</td>\n</tr>\n<tr><td colspan=2><table border=3>\n<tr>\n" .
-      tablehead('gid', "show_games.php?uid=$uid&$finished_string", 'ID', true) .
+   echo start_end_column_table(true) .
+      tablehead('ID', 'ID', true) .
       tablehead('sgf', "show_games.php?uid=$uid&$finished_string") .
-      tablehead('Opponent', "show_games.php?uid=$uid&$finished_string", 'Name') .
-      tablehead('Color', "show_games.php?uid=$uid&$finished_string", 'Color') .
-      tablehead('Size', "show_games.php?uid=$uid&$finished_string", 'Size', true) .
-      tablehead('Handicap', "show_games.php?uid=$uid&$finished_string", 'Handicap') .
-      tablehead('Komi', "show_games.php?uid=$uid&$finished_string", 'Komi');
+      tablehead('Opponent', 'Name') .
+      tablehead('Color', 'Color') .
+      tablehead('Size', 'Size', true) .
+      tablehead('Handicap', 'Handicap') .
+      tablehead('Komi', 'Komi') .
+      tablehead('Moves', 'Moves', true);
 
    if( $finished )
    {
-      echo "<th>Score</th>\n" .
-         tablehead('win?', "show_games.php?uid=$uid&$finished_string", 'Win', true) .
-         tablehead('End date', "show_games.php?uid=$uid&$finished_string", 'Lastchanged', true);
+      echo tablehead('Score') .
+         tablehead('Win?', 'Win', true) .
+         tablehead('End date', 'Lastchanged', true);
    }
    else
    {
-      echo tablehead('Moves', "show_games.php?uid=$uid&$finished_string", 'Moves', true) .
-         tablehead('Last move', "show_games.php?uid=$uid&$finished_string", 'Lastchanged', true);
+      echo tablehead('Last Move', 'Lastchanged', true);
    }
+
+   echo "</tr>\n";
 
    $i=0;
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
+      $color = ( $Color == BLACK ? 'b' : 'w' ); 
 
-      if( $Color == BLACK )
-         $color = "b"; 
-      else
-         $color = "w"; 
-
-      echo "<tr><td><A href=\"game.php?gid=$ID\"><font color=$gid_color><b>$ID</b></font></td>
-<td><A href=\"sgf.php?gid=$ID\"><font color=$gid_color>sgf</font></td>
-<td><A href=\"userinfo.php?uid=$pid\">$Name</a></td>
-<td align=center><img src=\"17/$color.gif\" alt=$color></td>
-<td>$Size</td>
-<td>$Handicap</td>
-<td>$Komi</td>
-<td>" . ($finished ? score2text($Score, false) : $Moves ) . "</td>
-";
+      echo "<tr>\n" .
+         tableelement('ID', "<A href=\"game.php?gid=$ID\"><font color=$gid_color><b>" .
+                      "$ID</b></font></A>") .
+         tableelement('sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
+                      "sgf</font></A>") .
+         tableelement('Opponent', "<A href=\"userinfo.php?uid=$pid\">$Name</a>") .
+         tableelement('Color', "<img align=middle src=\"17/$color.gif\" alt=$color>") .
+         tableelement('Size', $Size) .
+         tableelement('Handicap', $Handicap) .
+         tableelement('Komi', $Komi) .
+         tableelement('Moves', $Moves );
 
       if( $finished )
       {
          $src = '"images/' . 
              ( $Win == 1 ? 'yes.gif" alt=yes' : 
-             ( $Win == -1 ? 'no.gif" alt=no' : 
-             'dash.gif" alt=jigo' ) ); 
-         echo "<td align=center><img src=$src></td>\n";
-      }
+               ( $Win == -1 ? 'no.gif" alt=no' : 
+                 'dash.gif" alt=jigo' ) );
 
-      echo "<td>" . date($date_fmt, $Time) . "</td>\n";
+         echo tableelement('Score', score2text($Score, false)) .
+            tableelement('Win?', "<img align=middle src=$src>") .
+            tableelement('End date', date($date_fmt, $Time));
+      }
+      else
+      {
+         echo tableelement('Last Move', date($date_fmt, $Time));
+      }
 
       echo "</tr>\n";
 
@@ -148,9 +169,7 @@ include( "include/table_columns.php" );
          break;
    }
 
-   echo "</table>\n";
-
-   echo "</table>\n";
+   echo start_end_column_table(false);
 
 
 

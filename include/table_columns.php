@@ -20,13 +20,18 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 function tablehead($Head, $sort_string=NULL, $desc_default=false)
 {
-   global $sort1, $desc1, $sort2, $desc2,$column_set,$page;
+   global $sort1, $desc1, $sort2, $desc2,$column_set,$page,$removed_columns;
 
    if( !in_array($Head,$column_set) )
+   {
+      if( !is_array($removed_columns) )
+         $removed_columns = array('');
+      array_push($removed_columns, $Head);
       return;
+   }
 
    if( !$sort_string )
-      return "<th>" . _($Head) .
+      return "<th nowrap>" . _($Head) .
          "</font></A><a href=\"" . $page . "del=" . urlencode($Head) .
          "\"><sup><font size=\"-1\" color=red>x</font></sup></a></th>\n";
 
@@ -58,6 +63,9 @@ function tableelement($Head, $string)
    if( !in_array($Head,$column_set) )
       return;
 
+   if( strlen($string) < 1 )
+      $string = '&nbsp;';
+
    return "<td>$string</td>\n";
 }
 
@@ -73,13 +81,70 @@ function order_string($sortA, $descA, $sortB, $descB)
    return $order;
 }
 
-function next_prev($page, $new_from_row, $next)
+function next_prev($new_from_row, $next)
 {
-   global $sort1, $desc1, $sort2, $desc2;
+   global $sort1, $desc1, $sort2, $desc2, $page;
 
-   echo "<a href=\"" . $page . "from_row=$new_from_row&" . 
+   return "<a href=\"" . $page . "from_row=$new_from_row&" . 
       order_string($sort1,$desc1,$sort2,$desc2) . "\">" .
       ($next ? "next page -->" : "<-- previous page") . "</a>";  
+}
+
+function strip_last_et($string)
+{
+   $c = substr($string, -1);
+
+   if( $c == '&' or $c == '?' )
+      return substr($string, 0, -1);
+
+   return $string;
+}
+
+function add_column_form()
+{
+   global $removed_columns, $page;
+
+   if( count($removed_columns) <= 1 )
+      return '';
+
+   $string = "<form name=\"add_column_form\" action=\"" . strip_last_et($page) . 
+       "\" method=\"POST\">\n" .
+       html_build_select_box_from_array($removed_columns, 'add', '', true) .
+       "<input type=submit name=\"action\" value=\"Add Column\">\n" .
+       "</form>\n";
+
+   return $string;
+}
+
+function start_end_column_table($start)
+{
+   global $from_row, $nr_rows, $show_rows, $RowsPerPage;
+ 
+   if( $start )
+      $string = "<table border=0 cellspacing=0 cellpadding=0 align=center>\n";
+   else
+      $string = "</table></td></tr>\n";
+
+   
+   $string .= "<tr><td align=left>";
+
+   if( $from_row > 0 )
+      $string .= next_prev($from_row-$RowsPerPage, false);
+
+   $string .= "</td>\n<td align=right>";
+
+   if( $show_rows < $nr_rows )
+      $string .= next_prev($from_row+$RowsPerPage, true);
+
+   $string .= "</td>\n</tr>\n";
+
+   if( $start )
+      $string .= "<tr><td colspan=2><table border=3 width=100% rules=rows>\n<tr>\n";
+   else
+      $string .= '<tr><td height=10></tr><tr><td colspan=2 align=right>' . 
+         add_column_form() . "</td></tr></table>\n</table>\n";
+
+   return $string;
 }
 
 ?>

@@ -22,6 +22,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require( "include/std_functions.php" );
 include( "include/rating.php" );
 include( "include/table_columns.php" );
+include( "include/timezones.php" );
 
 {
    connect2mysql();
@@ -56,43 +57,61 @@ include( "include/table_columns.php" );
    if( $sort2 )
       $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
 
-   $result = mysql_query("SELECT *, Rank as Rankinfo FROM Players order by $order");
+   $result = mysql_query("SELECT *, Rank AS Rankinfo, " .
+                         "(Activity>10)+(Activity>250) AS ActivityLevel, " .
+                         "Running+Finished AS Games, " .
+                         "100*Won/Finished AS Percent " .
+                         "FROM Players ORDER BY $order");
 
 
    start_page("Users", true, $logged_in, $player_row );
 
 
-   echo "<table border=3 align=center>\n";
-   echo "<tr>\n" .
-      tablehead('#', 'ID') .
+
+   echo start_end_column_table(true) .
+      tablehead('ID', 'ID') .
       tablehead('Name', 'Name') .
-      tablehead('UserID', 'Handle') .
+      tablehead('Nick', 'Handle') .
       tablehead('Rank Info') .
       tablehead('Rating', 'Rating', true) .
       tablehead('Open for matches?') . 
-      tablehead('Games #/w/l/r') .
-      tablehead('Rated #/w/l') .
-      tablehead('Activity', 'Activity', true) .
+      tablehead('Games', 'Games', true) .
+      tablehead('Running', 'Running', true) .
+      tablehead('Finished', 'Finished', true) .
+      tablehead('Won', 'Won', true) .
+      tablehead('Lost', 'Lost', true) .
+      tablehead('Percent', 'Percent', true) .
+      tablehead('Activity', 'ActivityLevel', true) .
       "</tr>\n";
 
    while( $row = mysql_fetch_array( $result ) )
    {
       $ID = $row['ID'];
+      $percent = ( $row["Finished"] == 0 ? '' : round($row["Percent"]). '%' );
+      $a = $row['ActivityLevel'];
+      $activity = ( $a == 0 ? '' : 
+                    ( $a == 1 ? '<img align=middle src=images/star2.gif>' : 
+                      '<img align=middle src=images/star.gif>' .
+                      '<img align=middle src=images/star.gif>' ) );
 
       echo "<tr>\n" .
-         tableelement('#', "<A href=\"userinfo.php?uid=$ID\">$ID</A>") .
+         tableelement('ID', "<A href=\"userinfo.php?uid=$ID\">$ID</A>") .
          tableelement('Name', "<A href=\"userinfo.php?uid=$ID\">" . $row['Name'] . "</A>") .
-         tableelement('UserID', "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>") .
+         tableelement('Nick', "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>") .
          tableelement('Rank Info', $row['Rankinfo']) .
          tableelement('Rating', echo_rating($row['Rating'])) .
          tableelement('Open for matches?', $row['Open']) .
-         tableelement('Games #/w/l/r', '??') .
-         tableelement('Rated #/w/l/r', '??') .
-         tableelement('Activity', $row['Activity']) .
+         tableelement('Games', $row["Games"]) .
+         tableelement('Running', $row["Running"]) .
+         tableelement('Finished', $row["Finished"]) .
+         tableelement('Won', $row["Won"]) .
+         tableelement('Lost', $row["Lost"]) .
+         tableelement('Percent', $percent) .
+         tableelement('Activity', $activity) .
          "</tr>\n";
    }
 
-   echo "</table>\n";
+   echo start_end_column_table(false);
 
    end_page();
 }
