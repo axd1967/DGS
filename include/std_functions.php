@@ -156,6 +156,7 @@ define("ADMIN_PASSWORD",0x40);
 
 define("FOLDER_NONE", -1);
 define("FOLDER_ALL_RECEIVED", 0);
+//Valid folders must be > FOLDER_ALL_RECEIVED
 define("FOLDER_MAIN", 1);
 //define("FOLDER_NEW", 2); //moved in quick_common.php
 define("FOLDER_REPLY", 3);
