@@ -10,6 +10,8 @@
 
   include "php://stdin";
 
+  $stderr = fopen( "php://stderr", 'w' );
+
   $new_translation_info = array();
   foreach( $all_translations as $string => $sinfo )
     {
@@ -54,7 +56,11 @@
           $sorted_array = array_unique( $info['Groups'] );
           sort( $sorted_array );
           foreach( $sorted_array as $cgroup )
-            $group_str .= " '$cgroup',";
+            {
+              $group_str .= " '$cgroup',";
+              if( !in_array($cgroup, $translation_groups) )
+                fwrite( $stderr, "Warning: No such group '$cgroup' for string '$string'.\n", 120 );
+            }
           $group_str = substr( $group_str, 0, -1 ) . ' ';
         }
 
