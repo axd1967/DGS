@@ -106,7 +106,7 @@ require( "include/std_functions.php" );
   echo "<h3 align=left><a name=\"stuff\"></a><font color=$h3_color>" .
     T_('Go books, equipment and software') . "</font></h3>\n";
 
-  add_link_page_link("http://math.stanford.edu/~carlton/go/",
+  add_link_page_link("http://www.gobooks.info/",
                      T_('Annotated Go Bibliographies'),
                      T_('A large collection of go book reviews'));
   add_link_page_link("http://www.slateandshell.com/", 'Slate & Shell');
