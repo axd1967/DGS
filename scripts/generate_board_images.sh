@@ -122,7 +122,8 @@ gimp -i -d -b "(begin
 (define (round x) (floor (+ x 0.5)))
 
 (define (draw-filled-square sz)
-  (set! a (round (/ (- size (* size sz)) 2)))
+  (set! a (* (/ size final_size) (round (/ (- final_size (* final_size sz)) 2))))
+;  (set! a (round (/ (- size (* size sz)) 2)))
   (gimp-rect-select theImage a a (- size (* 2 a)) (- size (* 2 a)) REPLACE 0 0)
   (gimp-edit-fill theLayer FG-IMAGE-FILL))
 
@@ -523,6 +524,7 @@ gimp -i -d -b "(begin
 
       (gimp-palette-set-background '(247 245 227))
       (set! letter_font_size (/ (* final_size 3) 5))
+      (resize final_size final_size)
 
       (set! k 1)
       (set! letters \"abcdefghjklmnopqrstuvwxyz\")
