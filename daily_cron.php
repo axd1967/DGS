@@ -90,7 +90,7 @@ require( "include/rating.php" );
 
 
    $result = mysql_query( $query );
-   echo mysql_num_rows($result);
+
    while( $row = mysql_fetch_array( $result ) )
    {
       update_rating($row["gid"]);    
@@ -99,5 +99,31 @@ require( "include/rating.php" );
    $result = mysql_query( "UPDATE Players SET RatingStatus='READY', Lastaccess=Lastaccess " .
                           "WHERE RatingStatus='INIT' " );
   
+
+
+
+// Update statistics
+
+   $q_finished = "SELECT SUM(Moves) as MovesFinished, COUNT(*) as GamesFinished FROM Games " .
+       "WHERE Status='FINISHED'";
+   $q_running = "SELECT SUM(Moves) as MovesRunning, COUNT(*) as GamesRunning FROM Games " .
+       "WHERE Status!='FINISHED' AND Status!='INVITED'";
+   $q_users = "SELECT SUM(Hits) as Hits, Count(*) as Users, SUM(Activity) as Activity FROM Players";
+
+   extract( mysql_fetch_array(mysql_query( $q_finished )));
+   extract( mysql_fetch_array(mysql_query( $q_running )));
+   extract( mysql_fetch_array(mysql_query( $q_users )));
+
+   mysql_query( "INSERT INTO Statistics SET " .
+                "Time=NOW(), " .
+                "Hits=$Hits, " .
+                "Users=$Users, " .
+                "Moves=" . ($MovesFinished+$MovesRunning) . ", " .
+                "MovesFinished=$MovesFinished, " .
+                "MovesRunning=$MovesRunning, " .
+                "Games=" . ($GamesRunning+$GamesFinished) . ", " .
+                "GamesFinished=$GamesFinished, " .
+                "GamesRunning=$GamesRunning, " .
+                "Activity=$Activity" );
 } 
 ?>

@@ -6,7 +6,7 @@ CREATE TABLE Players (
   Handle varchar(16) NOT NULL default '',
   Password varchar(16) default NULL,
   Newpassword varchar(16) default NULL,
-  Sessioncode varchar(32) default NULL,
+  Sessioncode varchar(16) default NULL,
   Sessionexpire datetime default NULL,
   Lastaccess timestamp(14) NOT NULL,
   Registerdate date default NULL,
@@ -100,6 +100,24 @@ CREATE TABLE RatingChange (
   KEY uid (uid)
 ) TYPE=MyISAM;
 
+#
+# Table structure for table 'Statistics'
+#
+
+CREATE TABLE Statistics (
+  ID int(11) NOT NULL auto_increment,
+  Time datetime default NULL,
+  Hits int(11) default NULL,
+  Users int(11) default NULL,
+  Moves int(11) default NULL,
+  MovesFinished int(11) default NULL,
+  MovesRunning int(11) default NULL,
+  Games int(11) default NULL,
+  GamesFinished int(11) default NULL,
+  GamesRunning int(11) default NULL,
+  Activity int(11) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
 
 #
 # Insert Guest account
