@@ -96,6 +96,10 @@ array(
       'Activity' =>
       array( 'Groups' => array( 'Users' ) ),
 
+      /* Found in these files: include/table_columns.php */
+      'Add Column' =>
+      array( 'Groups' => array() ),
+
       /* Found in these files: admin.php */
       'Added language %s with code %s and characterencoding %s.' =>
       array( 'Groups' => array() ),
@@ -184,7 +188,7 @@ array(
       'Bio updated!' =>
       array( 'Groups' => array( 'Edit bio' ) ),
 
-      /* Found in these files: include/move.php */
+      /* Found in these files: include/message_functions.php, include/move.php */
       'Black' =>
       array( 'Groups' => array( 'Common' ) ),
 
@@ -195,6 +199,10 @@ array(
       /* Found in these files: edit_profile.php */
       'Board graphics' =>
       array( 'Groups' => array( 'Edit profile' ) ),
+
+      /* Found in these files: include/message_functions.php */
+      'Board size' =>
+      array( 'Groups' => array() ),
 
       /* Found in these files: docs.php */
       'Browse Dragon source code' =>
@@ -308,7 +316,7 @@ array(
       'day' =>
       array( 'Groups' => array( 'Common' ) ),
 
-      /* Found in these files: include/std_functions.php */
+      /* Found in these files: include/message_functions.php, include/std_functions.php */
       'days' =>
       array( 'Groups' => array( 'Common' ) ),
 
@@ -572,7 +580,7 @@ array(
       'hour' =>
       array( 'Groups' => array( 'Common' ) ),
 
-      /* Found in these files: include/std_functions.php */
+      /* Found in these files: include/message_functions.php, include/std_functions.php */
       'hours' =>
       array( 'Groups' => array( 'Common' ) ),
 
@@ -760,6 +768,10 @@ array(
       'Mind Sport Zine' =>
       array( 'Groups' => array( 'Links' ) ),
 
+      /* Found in these files: include/message_functions.php */
+      'months' =>
+      array( 'Groups' => array() ),
+
       /* Found in these files: links.php */
       'More Japanese Go Terms' =>
       array( 'Groups' => array( 'Links' ) ),
@@ -828,12 +840,12 @@ array(
       'NNGS' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/message_functions.php, include/move.php */
-      'No' =>
-      array( 'Groups' => array( 'Common' ) ),
-
       /* Found in these files: show_games.php */
       'no' =>
+      array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: include/message_functions.php, include/move.php */
+      'No' =>
       array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: status.php */
@@ -960,13 +972,13 @@ array(
       'Rafael\'s Go Page' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: edit_profile.php, include/move.php, status.php, userinfo.php */
-      'Rank info' =>
-      array( 'Groups' => array( 'Edit profile', 'Status' ) ),
-
       /* Found in these files: users.php */
       'Rank Info' =>
       array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: edit_profile.php, include/move.php, status.php, userinfo.php */
+      'Rank info' =>
+      array( 'Groups' => array( 'Edit profile', 'Status' ) ),
 
       /* Found in these files: include/message_functions.php, include/move.php */
       'Rated' =>
@@ -1483,13 +1495,13 @@ The reasons for this problem could be any of the following:
       'Userid' =>
       array( 'Groups' => array( 'Common', 'Edit profile', 'Register', 'Status' ) ),
 
-      /* Found in these files: userinfo.php */
-      'User Info' =>
-      array( 'Groups' => array( 'Users' ) ),
-
       /* Found in these files: show_games.php, site_map.php */
       'User info' =>
       array( 'Groups' => array( 'Game' ) ),
+
+      /* Found in these files: userinfo.php */
+      'User Info' =>
+      array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: include/std_functions.php, site_map.php, users.php */
       'Users' =>
@@ -1507,13 +1519,13 @@ The reasons for this problem could be any of the following:
       'Welcome page' =>
       array( 'Groups' => array( 'Site map' ) ),
 
+      /* Found in these files: include/message_functions.php, include/move.php */
+      'White' =>
+      array( 'Groups' => array( 'Common', 'Game' ) ),
+
       /* Found in these files: message.php */
       'white' =>
       array( 'Groups' => array( 'Messages' ) ),
-
-      /* Found in these files: include/move.php */
-      'White' =>
-      array( 'Groups' => array( 'Common', 'Game' ) ),
 
       /* Found in these files: show_games.php */
       'Win?' =>
@@ -1547,12 +1559,12 @@ The reasons for this problem could be any of the following:
       'Wrong, number of handicap stones' =>
       array( 'Groups' => array( 'Error' ) ),
 
-      /* Found in these files: show_games.php */
-      'yes' =>
-      array( 'Groups' => array( 'Common' ) ),
-
       /* Found in these files: include/message_functions.php, include/move.php */
       'Yes' =>
+      array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: show_games.php */
+      'yes' =>
       array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: links.php */
