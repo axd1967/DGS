@@ -22,13 +22,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 /* The code in this file is written by Ragnar Ouchterlony */
 
 $KNOWN_LANGUAGES = array();
-$LANG_UPDATE_TIMESTAMPS = array();
 
-/*
- * TODO: Add possibility to use %s, %d and other 'printf'-stuff in translations.
- */
 class Language
 {
+  var $full_name;
+  var $last_updated;
+
   var $translated_strings;
 
   function find_translation( $string, $return_empty = false )
@@ -49,12 +48,11 @@ class Language
     }
 }
 
-function add_to_known_languages( $lang, $lang_full_name, $timestamp = -1 )
+function add_to_known_languages( $lang, $lang_full_name )
 {
   global $KNOWN_LANGUAGES, $LANG_UPDATE_TIMESTAMPS;
 
   $KNOWN_LANGUAGES[ $lang ] = $lang_full_name;
-  $LANG_UPDATE_TIMESTAMPS[ $lang ] = $timestamp;
 }
 
 function get_known_languages()

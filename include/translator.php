@@ -53,22 +53,52 @@ class Translator
       $this->return_empty = $val;
     }
 
-  function translate( $string )
+  function &get_language()
     {
-      $language = $this->current_language;
-
       if( strcmp( $this->current_language, 'C' ) == 0 )
         {
-          return $string;
+          return false;
         }
 
-      if( !array_key_exists( $language, $this->loaded_languages  ) )
+      if( !array_key_exists( $this->current_language, $this->loaded_languages  ) )
         {
-          $lang_class_name = $language . "_Language";
-          $this->loaded_languages[ $language ] = new $lang_class_name;
+          include "translations/" . $this->current_language . ".php";
+
+          $lang_class_name = $this->current_language . "_Language";
+          $this->loaded_languages[ $this->current_language ] = new $lang_class_name;
         }
 
-      return $this->loaded_languages[ $language ]->find_translation( $string, $this->return_empty );
+      return $this->loaded_languages[ $this->current_language ];
+    }
+
+  function translate( $string )
+    {
+      $language =& $this->get_language();
+
+      if( $language === false )
+        return $string;
+
+      return $language->find_translation( $string, $this->return_empty );
+    }
+
+  function get_lang_full_name()
+    {
+      $language =& $this->get_language();
+
+      if( $language === false )
+        return '';
+
+      return $language->full_name;
+    }
+
+  function get_last_updated()
+    {
+      $language =& $this->get_language();
+
+      if( $language === false )
+        return -1;
+
+      return $language->last_updated;
     }
 
   function get_preferred_browser_language()

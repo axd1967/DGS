@@ -46,12 +46,13 @@ $translation_template_top = $translation_template_copyright .
 '
 /* Automatically generated at %4$s */
 
-add_to_known_languages( "%1$s", "%2$s", %3$s );
-
 class %1$s_Language extends Language
 {
   function %1$s_Language()
     {
+      $this->full_name = \'%2$s\';
+      $this->last_updated = %3$d;
+
       $this->translated_strings = array(
 ';
 

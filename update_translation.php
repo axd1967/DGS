@@ -52,7 +52,7 @@ function replace_unnecessary_chars( $string )
       $the_translator->change_language($translate_lang);
       $the_translator->set_return_empty();
 
-      $last_updated = $LANG_UPDATE_TIMESTAMPS[ $translate_lang ];
+      $last_updated = $the_translator->get_last_updated();
       $query = "SELECT * FROM Translationlog WHERE Language='$translate_lang' ";
       if( $last_updated > 0 )
         $query .= "AND Date > FROM_UNIXTIME($last_updated)";
