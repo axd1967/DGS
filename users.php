@@ -24,6 +24,9 @@ include( "include/rating.php" );
 include( "include/table_columns.php" );
 include( "include/timezones.php" );
 
+$table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches?','Games',
+                       'Running','Finished','Won','Lost','Percent','Activity');
+
 {
    connect2mysql();
 
@@ -32,23 +35,10 @@ include( "include/timezones.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   $column_set = explode(',', $player_row["UsersColumns"]);
+   $column_set = $player_row["UsersColumns"];
    $page = "users.php?";
 
-   if( $del or $add )
-   {
-      if( $add )
-         array_push($column_set,$add);
-      if( $del and is_integer($s=array_search($del, $column_set, true)) )
-         array_splice($column_set, $s, 1);
-
-      $query = "UPDATE Players " . 
-          "SET UsersColumns='" . implode(',', $column_set) . "' " .
-          "WHERE ID=" . $player_row["ID"];
-      
-      mysql_query($query);
-
-   }
+   add_or_del($add, $del, "UsersColumns");
 
    if(!$sort1)
       $sort1 = 'ID';
@@ -73,52 +63,54 @@ include( "include/timezones.php" );
 
 
    echo start_end_column_table(true) .
-      tablehead('ID', 'ID') .
-      tablehead('Name', 'Name') .
-      tablehead('Nick', 'Handle') .
-      tablehead('Rank Info') .
-      tablehead('Rating', 'Rating', true) .
-      tablehead('Open for matches?') . 
-      tablehead('Games', 'Games', true) .
-      tablehead('Running', 'Running', true) .
-      tablehead('Finished', 'Finished', true) .
-      tablehead('Won', 'Won', true) .
-      tablehead('Lost', 'Lost', true) .
-      tablehead('Percent', 'Percent', true) .
-      tablehead('Activity', 'ActivityLevel', true) .
-      tablehead('Last Access', 'Lastaccess', true) .
-      tablehead('Last Moved', 'Lastmove', true) .
+      tablehead(1, 'ID', 'ID') .
+      tablehead(2, 'Name', 'Name') .
+      tablehead(3, 'Nick', 'Handle') .
+      tablehead(4, 'Rank Info') .
+      tablehead(5, 'Rating', 'Rating', true) .
+      tablehead(6, 'Open for matches?') . 
+      tablehead(7, 'Games', 'Games', true) .
+      tablehead(8, 'Running', 'Running', true) .
+      tablehead(9, 'Finished', 'Finished', true) .
+      tablehead(10, 'Won', 'Won', true) .
+      tablehead(11, 'Lost', 'Lost', true) .
+      tablehead(12, 'Percent', 'Percent', true) .
+      tablehead(13, 'Activity', 'ActivityLevel', true) .
+      tablehead(14, 'Last Access', 'Lastaccess', true) .
+      tablehead(15, 'Last Moved', 'Lastmove', true) .
       "</tr>\n";
 
+   $row_color=2;
    while( $row = mysql_fetch_array( $result ) )
    {
       $ID = $row['ID'];
       $percent = ( $row["Finished"] == 0 ? '' : round($row["Percent"]). '%' );
       $a = $row['ActivityLevel'];
       $activity = ( $a == 0 ? '' : 
-                    ( $a == 1 ? '<img align=middle src=images/star2.gif>' : 
-                      '<img align=middle src=images/star.gif>' .
-                      '<img align=middle src=images/star.gif>' ) );
+                    ( $a == 1 ? '<img align=middle alt="*" src=images/star2.gif>' : 
+                      '<img align=middle alt="*" src=images/star.gif>' .
+                      '<img align=middle alt="*" src=images/star.gif>' ) );
 
       $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
       $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
 
-      echo "<tr>\n" .
-         tableelement('ID', "<A href=\"userinfo.php?uid=$ID\">$ID</A>") .
-         tableelement('Name', "<A href=\"userinfo.php?uid=$ID\">" . $row['Name'] . "</A>") .
-         tableelement('Nick', "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>") .
-         tableelement('Rank Info', $row['Rankinfo']) .
-         tableelement('Rating', echo_rating($row['Rating'])) .
-         tableelement('Open for matches?', $row['Open']) .
-         tableelement('Games', $row["Games"]) .
-         tableelement('Running', $row["Running"]) .
-         tableelement('Finished', $row["Finished"]) .
-         tableelement('Won', $row["Won"]) .
-         tableelement('Lost', $row["Lost"]) .
-         tableelement('Percent', $percent) .
-         tableelement('Activity', $activity) .
-         tableelement('Last Access', $lastaccess) .
-         tableelement('Last Moved', $lastmove) .
+      $row_color=3-$row_color;
+      echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n" .
+         tableelement(1, 'ID', "<A href=\"userinfo.php?uid=$ID\">$ID</A>") .
+         tableelement(2, 'Name', "<A href=\"userinfo.php?uid=$ID\">" . $row['Name'] . "</A>") .
+         tableelement(3, 'Nick', "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>") .
+         tableelement(4, 'Rank Info', $row['Rankinfo']) .
+         tableelement(5, 'Rating', echo_rating($row['Rating'])) .
+         tableelement(6, 'Open for matches?', $row['Open']) .
+         tableelement(7, 'Games', $row["Games"]) .
+         tableelement(8, 'Running', $row["Running"]) .
+         tableelement(9, 'Finished', $row["Finished"]) .
+         tableelement(10, 'Won', $row["Won"]) .
+         tableelement(11, 'Lost', $row["Lost"]) .
+         tableelement(12, 'Percent', $percent) .
+         tableelement(13, 'Activity', $activity) .
+         tableelement(14, 'Last Access', $lastaccess) .
+         tableelement(15, 'Last Moved', $lastmove) .
          "</tr>\n";
    }
 

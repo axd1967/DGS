@@ -9,6 +9,7 @@ CREATE TABLE Players (
   Sessioncode varchar(16) default NULL,
   Sessionexpire datetime default NULL,
   Lastaccess datetime default NULL,
+  LastMove datetime default NULL,
   Registerdate date default NULL,
   Hits int(11) default '0',
   Moves int(11) default '0',
@@ -33,12 +34,12 @@ CREATE TABLE Players (
   Woodcolor int(11) NOT NULL default '1',
   Boardtype int(11) NOT NULL default '1',
   Boardcoords int(11) NOT NULL default '15',
-  UsersColumns set('ID','Name','Nick','Rank Info','Rating','Open for matches?','Games','Running','Finished','Won','Lost','Percent','Activity') NOT NULL default 'Name,Nick,Rank Info,Rating,Open for matches?',
+  UsersColumns int(10) unsigned NOT NULL default '62',
   Running int(11) NOT NULL default '0',
   Finished int(11) NOT NULL default '0',
   Won int(11) NOT NULL default '0',
   Lost int(11) NOT NULL default '0',
-  GamesColumns set('ID','sgf','Opponent','Color','Size','Handicap','Komi','Moves','Last Move','End date','Score','Win?') NOT NULL default 'ID,sgf,Opponent,Color,Size,Handicap,Komi,Moves,Last Move,End date,Score,Win?',
+  GamesColumns int(10) unsigned NOT NULL default '2039',
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
 ) TYPE=ISAM PACK_KEYS=1;

@@ -18,11 +18,13 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-function tablehead($Head, $sort_string=NULL, $desc_default=false, $undeletable=false)
+function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeletable=false)
 {
    global $sort1, $desc1, $sort2, $desc2,$column_set,$page,$removed_columns;
 
-   if( !in_array($Head,$column_set) )
+   $col_pos = 1 << ($nr-1);
+   
+   if( !($col_pos & $column_set) )
    {
       if( !is_array($removed_columns) )
          $removed_columns = array('');
@@ -33,11 +35,12 @@ function tablehead($Head, $sort_string=NULL, $desc_default=false, $undeletable=f
    if( !$undeletable )
       $delete_string = "<a href=\"" . $page . 
          ($sort1 ? order_string($sort1,$desc1,$sort2,$desc2) . '&' : '') .
-         "del=" . urlencode($Head) . 
+         "del=$nr" . 
          "\"><sup><font size=\"-1\" color=red>x</font></sup></a>";
 
    if( !$sort_string )
-      return "<th nowrap>" . _($Head) . "</font></a>$delete_string</th>\n";
+      return "<th nowrap valign=bottom><font color=black>" . _($Head) . 
+         "</font>$delete_string</th>\n";
 
    if( $sort_string == $sort1 )
    {
@@ -54,22 +57,22 @@ function tablehead($Head, $sort_string=NULL, $desc_default=false, $undeletable=f
       $d2 = $desc1 xor $desc_default;
    }
 
-   return "<th nowrap><A href=\"$page" . order_string($s1,$d1,$s2,$d2) . 
+   return "<th nowrap valign=bottom><A href=\"$page" . order_string($s1,$d1,$s2,$d2) . 
       "\"><font color=black>" .  _($Head) . 
       "</font></A>$delete_string</th>\n";
 }
 
-function tableelement($Head, $string)
+function tableelement($nr, $Head, $string, $align_center=false)
 {
    global $column_set,$page;
 
-   if( !in_array($Head,$column_set) )
+   if( !( (1 << ($nr-1)) & $column_set ) )
       return;
 
    if( strlen($string) < 1 )
       $string = '&nbsp;';
 
-   return "<td>$string</td>\n";
+   return "<td" . ( $align_center ? ' align=center' : '' ) . ">$string</td>\n";
 }
 
 function order_string($sortA, $descA, $sortB, $descB)
@@ -111,7 +114,7 @@ function add_column_form()
       return '';
 
    $string = "<form name=\"add_column_form\" action=\"" . strip_last_et($page) . 
-       "\" method=\"POST\">\n" .
+       "\" method=\"POST\">" .
        html_build_select_box_from_array($removed_columns, 'add', '', true) .
        "<input type=submit name=\"action\" value=\"Add Column\">\n" .
        "</form>\n";
@@ -119,22 +122,41 @@ function add_column_form()
    return $string;
 }
 
+function add_or_del($add, $del, $mysql_column)
+{
+   global $column_set, $player_row, $table_columns;
+
+   if( $del or $add )
+   {
+      if( $add )
+         $column_set |= 1 << array_search($add, $table_columns);
+      if( $del )
+         $column_set &= ~(1 << ($del-1));
+
+      $query = "UPDATE Players " . 
+          "SET $mysql_column=$column_set " .
+          "WHERE ID=" . $player_row["ID"];
+      
+      mysql_query($query);
+   }
+}
 function start_end_column_table($start)
 {
-   global $from_row, $nr_rows, $show_rows, $RowsPerPage;
+   global $from_row, $nr_rows, $show_rows, $RowsPerPage, $table_head_color;
  
    if( $start )
-      $string = "<table border=0 cellspacing=0 cellpadding=0 align=center>\n";
+      $string = 
+         "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
    else
-      $string = "</table></td></tr>\n";
+      $string = "";
 
    
-   $string .= "<tr><td align=left>";
+   $string .= "<tr><td align=left colspan=3>";
 
    if( $from_row > 0 )
       $string .= next_prev($from_row-$RowsPerPage, false);
 
-   $string .= "</td>\n<td align=right>";
+   $string .= "</td>\n<td align=right colspan=20>";
 
    if( $show_rows < $nr_rows )
       $string .= next_prev($from_row+$RowsPerPage, true);
@@ -142,10 +164,10 @@ function start_end_column_table($start)
    $string .= "</td>\n</tr>\n";
 
    if( $start )
-      $string .= "<tr><td colspan=2><table border=3 width=100% rules=rows>\n<tr>\n";
+      $string .= "<tr bgcolor=$table_head_color>";
    else
-      $string .= '<tr><td height=10></tr><tr><td colspan=2 align=right>' . 
-         add_column_form() . "</td></tr></table>\n</table>\n";
+      $string .= '<tr><td colspan=20 align=right>' .
+         add_column_form() . "</td></tr></table></div>\n";
 
    return $string;
 }

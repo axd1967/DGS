@@ -22,6 +22,9 @@ require( "include/std_functions.php" );
 include( "include/table_columns.php" );
 include( "include/timezones.php" );
 
+$table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','Komi',
+                       'Moves','Score','Win?','End date','Last Move');
+
 {
    if( !$uid )
       error("no_uid");
@@ -34,24 +37,11 @@ include( "include/timezones.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   $column_set = explode(',', $player_row["GamesColumns"]);
+   $column_set = $player_row["GamesColumns"];
    $finished_string = ( $finished ? 'finished=1&' : '' );
    $page = "show_games.php?uid=$uid&$finished_string";
 
-   if( $del or $add )
-   {
-      if( $add )
-         array_push($column_set,$add);
-      if( $del and is_integer($s=array_search($del, $column_set, true)) )
-         array_splice($column_set, $s, 1);
-
-      $query = "UPDATE Players " . 
-          "SET GamesColumns='" . implode(',', $column_set) . "' " .
-          "WHERE ID=" . $player_row["ID"];
-      
-      mysql_query($query);
-
-   }
+   add_or_del($add, $del, "GamesColumns");
 
    $result = mysql_query( "SELECT Name, Handle FROM Players WHERE ID=$uid" );
 
@@ -105,51 +95,52 @@ include( "include/timezones.php" );
    echo "<center><h4>" . ( $finished ? "Finished" : "Running" ) . " Games for <A href=\"userinfo.php?uid=$uid\">" . $user_row["Name"] . " (" . $user_row["Handle"] . ")</A></H4></center>\n";
 
 
-
    echo start_end_column_table(true) .
-      tablehead('ID', 'ID', true, true) .
-      tablehead('sgf') .
-      tablehead('Opponent', 'Name') .
-      tablehead('Nick', 'Handle') .
-      tablehead('Color', 'Color') .
-      tablehead('Size', 'Size', true) .
-      tablehead('Handicap', 'Handicap') .
-      tablehead('Komi', 'Komi') .
-      tablehead('Moves', 'Moves', true);
+      tablehead(1, 'ID', 'ID', true, true) .
+      tablehead(2, 'sgf') .
+      tablehead(3, 'Opponent', 'Name') .
+      tablehead(4, 'Nick', 'Handle') .
+      tablehead(5, 'Color', 'Color') .
+      tablehead(6, 'Size', 'Size', true) .
+      tablehead(7, 'Handicap', 'Handicap') .
+      tablehead(8, 'Komi', 'Komi') .
+      tablehead(9, 'Moves', 'Moves', true);
 
    if( $finished )
    {
-      echo tablehead('Score') .
-         tablehead('Win?', 'Win', true) .
-         tablehead('End date', 'Lastchanged', true);
+      echo tablehead(10, 'Score') .
+         tablehead(11, 'Win?', 'Win', true) .
+         tablehead(12, 'End date', 'Lastchanged', true);
    }
    else
    {
-      echo tablehead('Last Move', 'Lastchanged', true);
+      echo tablehead(13, 'Last Move', 'Lastchanged', true);
    }
 
    echo "</tr>\n";
 
    $i=0;
+   $row_color=2;
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
       $color = ( $Color == BLACK ? 'b' : 'w' ); 
 
-      echo "<tr>\n" .
-         tableelement('ID', "<A href=\"game.php?gid=$ID\"><font color=$gid_color><b>" .
+      $row_color=3-$row_color;
+      echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
+      echo tableelement(1, 'ID', "<A href=\"game.php?gid=$ID\"><font color=$gid_color><b>" .
                       "$ID</b></font></A>") .
-         tableelement('sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
+         tableelement(2, 'sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
                       "sgf</font></A>") .
-         tableelement('Opponent', "<A href=\"userinfo.php?uid=$pid\">" .
+         tableelement(3, 'Opponent', "<A href=\"userinfo.php?uid=$pid\">" .
                       "<font color=black>$Name</font></a>") .
-         tableelement('Nick', "<A href=\"userinfo.php?uid=$pid\">" .
+         tableelement(4, 'Nick', "<A href=\"userinfo.php?uid=$pid\">" .
                       "<font color=black>$Handle</font></a>") .
-         tableelement('Color', "<img align=middle src=\"17/$color.gif\" alt=$color>") .
-         tableelement('Size', $Size) .
-         tableelement('Handicap', $Handicap) .
-         tableelement('Komi', $Komi) .
-         tableelement('Moves', $Moves );
+         tableelement(5, 'Color', "<img src=\"17/$color.gif\" alt=$color>", true) .
+         tableelement(6, 'Size', $Size) .
+         tableelement(7, 'Handicap', $Handicap) .
+         tableelement(8, 'Komi', $Komi) .
+         tableelement(9, 'Moves', $Moves );
 
       if( $finished )
       {
@@ -158,13 +149,13 @@ include( "include/timezones.php" );
                ( $Win == -1 ? 'no.gif" alt=no' : 
                  'dash.gif" alt=jigo' ) );
 
-         echo tableelement('Score', score2text($Score, false)) .
-            tableelement('Win?', "<img align=middle src=$src>") .
-            tableelement('End date', date($date_fmt, $Time));
+         echo tableelement(10, 'Score', score2text($Score, false)) .
+            tableelement(11, 'Win?', "<img src=$src>", true) .
+            tableelement(12, 'End date', date($date_fmt, $Time));
       }
       else
       {
-         echo tableelement('Last Move', date($date_fmt, $Time));
+         echo tableelement(14, 'Last Move', date($date_fmt, $Time));
       }
 
       echo "</tr>\n";

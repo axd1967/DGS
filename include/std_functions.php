@@ -50,8 +50,14 @@ $has_sgf_alias = false;
 
 $gid_color='"#d50047"';
 $bg_color='"#F7F5E3"';  // change in dragon.css too!
+
 $menu_bg_color='"#0C41C9"';
 $menu_fg_color='"#FFFC70"';
+
+$table_head_color='"#CCCCCC"';
+$table_row_color1='"#FFFFFF"';
+$table_row_color2='"#E0E8ED"';
+
 
 define("NONE", 0);
 define("BLACK", 1);
