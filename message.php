@@ -158,8 +158,6 @@ require( "include/form_functions.php" );
 
          if( $can_reply )
             {
-              // echo "<B><h3><font color=$h3_color>" . T_('Reply') . ":</font></B><p>\n";
-              // echo form_start( 'messageform', 'send_message.php', 'POST' );
               $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
               $message_form->add_row( array( 'HEADER', T_('Reply') ) );
               $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
@@ -176,8 +174,6 @@ require( "include/form_functions.php" );
 
       case 'NewMessage':
       {
-        // echo "<B><h3><font color=$h3_color>" . T_('New message') . ":</font></B><p>\n";
-        // echo form_start( 'messageform', 'send_message.php', 'POST' );
         $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
         $message_form->add_row( array( 'HEADER', T_('New message') ) );
         $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)') ,
@@ -221,8 +217,7 @@ require( "include/form_functions.php" );
             echo '<a href="message.php?mode=Dispute&mid=' . $mid . '">' .
                T_('Dispute settings') . '</a>';
             echo "<p>&nbsp;<p>\n";
-            // echo "<B><h3><font color=$h3_color>" . T_('Reply') . ":</font></B>\n";
-            // echo form_start( 'messageform', 'send_message.php', 'POST' );
+
             $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
             $message_form->add_row( array( 'HEADER', T_('Reply') ) );
             $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
@@ -243,8 +238,6 @@ require( "include/form_functions.php" );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text);
 
-         //echo "<B><h3><font color=$h3_color>" . T_('Disputing settings') . ":</font></B><p>\n";
-         //echo form_start( 'messageform', 'send_message.php', 'POST' );
          $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
          $message_form->add_row( array( 'HEADER', T_('Dispute settings') ) );
          $message_form->add_row( array( 'HIDDEN', 'mode', $mode ) );
@@ -264,8 +257,6 @@ require( "include/form_functions.php" );
 
       case 'Invite':
       {
-         //echo "<B><h3><font color=$h3_color>" . T_('Invitation message') . ":</font></B><p>\n";
-         //echo form_start( 'messageform', 'send_message.php', 'POST' );
          $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
          $message_form->add_row( array( 'HEADER', T_('Invitation message') ) );
          $message_form->add_row( array( 'HIDDEN', 'type', 'INVITATION' ) );
