@@ -123,6 +123,20 @@ function add_column_form()
    return $string;
 }
 
+// Needed for php < 4.0.5
+if( !function_exists("array_search") )
+{
+   function array_search($needle, $haystack)
+      {
+         while( list($key,$val) = each($haystack) )
+         {
+            if( $val == $needle )
+               return $key;
+         }
+         return false;
+      }
+}
+
 function add_or_del($add, $del, $mysql_column)
 {
    global $column_set, $player_row, $table_columns;
