@@ -62,7 +62,7 @@ disable_cache();
       $code = make_session_code();
       $result = mysql_query( "UPDATE Players SET " . 
                              "Sessioncode='$code', " .
-                             "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration second) " .
+                             "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
                              "WHERE Handle='$userid'" );
 
    }
