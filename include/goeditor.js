@@ -151,7 +151,7 @@ function show_button(nr, button_mode, image, alt, width, height, on)
    if( version == 1 )
       document.write('<td width='+width+' height='+height+' align=center><img border=0 hspace=5 vspace=5 name="'+button_mode+'_'+nr+'" src="'+image+'" onClick="change_mode('+nr+',\''+button_mode+'\')"></td>');
    else
-      document.write('<td width='+width+' height='+height+' align=center><a href="javascript:change_mode('+nr+',\''+button_mode+'\');"><img width='+(width-10)+' height='+(height-10)+' border=0 hspace=5 vspace=5 name="'+button_mode+'_'+nr+'" src="'+image+'"></a></td>');
+      document.write('<td width='+width+' height='+height+' align=center><a href="javascript:change_mode('+nr+',\''+button_mode+'\');"><img border=0 hspace=5 vspace=5 name="'+button_mode+'_'+nr+'" src="'+image+'"></a></td>');
 
    document.write('<td><img width=5 height='+height+' name="'+button_mode+'_'+nr+'_3" src="images/'+(on ? 'bl.png':'gr.png')+'"></td></tr>');
    document.writeln('<tr><td colspan=3><img width='+(width+10)+' height=5 name="'+button_mode+'_'+nr+'_4" src="images/'+(on ? 'bl.png':'gr.png')+'"></td></tr></table>');
