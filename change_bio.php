@@ -63,7 +63,7 @@ require( "include/rating.php" );
             ", Text=\"$EnteredText\", Category=\"$EnteredCategory\" " .
             "WHERE ID=$ID";
 
-      mysql_query( $query ) or error("",true);
+      mysql_query( $query ) or error("mysql_query_failed",true);
    }
 
    for($i=1; $i<=3; $i++)
@@ -80,7 +80,7 @@ require( "include/rating.php" );
       $query = "INSERT INTO Bio set uid=" . $player_row["ID"] . 
           ", Text=\"$EnteredText\", Category=\"$EnteredCategory\"";
 
-      mysql_query( $query ) or error("",true);
+      mysql_query( $query ) or error("mysql_query_failed",true);
       
    }
 
