@@ -178,6 +178,12 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("no_initial_rating"):
+      {
+         echo "Sorry, you and your opponent need to set an initial rating, otherwise I can't find a suitable handicap";
+      }
+      break;
+
       case("no_uid"):
       {
          echo "Sorry, I need to known for which user to show the data.";
@@ -339,30 +345,6 @@ The reasons for this problem could be any of the following:
       case("value_not_numeric"):
       {
         echo "Sorry, you wrote a non-numeric value on a numeric field.";
-      }
-      break;
-
-      case("tournament_no_name_given"):
-      {
-        echo "Sorry, you have to give a name to your tournament.";
-      }
-      break;
-
-      case("tournament_no_description_given"):
-      {
-        echo "Sorry, you have to give a description to your tournament.";
-      }
-      break;
-
-      case("min_larger_than_max"):
-      {
-        echo "Sorry, the minimum valur you wrote is larger than the maximum value.";
-      }
-      break;
-
-      case("unknown_tournament_type"):
-      {
-        echo "Sorry, I don't know about that tournament type.";
       }
       break;
 
