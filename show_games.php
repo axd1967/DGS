@@ -189,7 +189,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       echo tablehead(14, T_('Rated'), 'Rated', true) .
          tablehead(13, T_('Last Move'), 'Lastchanged', true);
       if( !$observe and !$all)
-         tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
+        echo tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
    }
 
    echo "</tr>\n";
