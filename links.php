@@ -107,25 +107,26 @@ require( "include/std_functions.php" );
   add_link_page_link("http://math.stanford.edu/~carlton/go/",
                      T_('Annotated Go Bibliographies'),
                      T_('A large collection of go book reviews'));
-  add_link_page_link("http://www.kiseido.com/", T_('Kiseido'));
-  add_link_page_link("http://www.yutopian.com/go/", T_('Yutopian'));
-  add_link_page_link("http://www.samarkand.net/", T_('Samarkand'));
-  add_link_page_link("http://www.xs4all.nl/~paard/", T_('Het Paard'), T_('European shop'));
+  add_link_page_link("http://www.slateandshell.com/", 'Slate & Shell');
+  add_link_page_link("http://www.kiseido.com/", 'Kiseido');
+  add_link_page_link("http://www.yutopian.com/go/", 'Yutopian');
+  add_link_page_link("http://www.samarkand.net/", 'Samarkand');
+  add_link_page_link("http://www.xs4all.nl/~paard/", 'Het Paard', T_('European shop'));
 
   echo "<p>&nbsp;\n";
   echo "<h3 align=left><a name=\"servers\"></a><font color=$h3_color>" .
     T_('Other go servers') . "</font></h3>\n";
 
   add_link_page_link("http://www.itsyourturn.com/",
-                     T_('It\'s your turn'),
+                     'It\'s your turn',
                      T_('Also turn based. Has several other games.'));
   add_link_page_link("http://kgs.kiseido.com",
-                     T_('Kiseido Go Server'),
+                     'Kiseido Go Server',
                      T_('Server with java interface'));
   add_link_page_link("http://panda-igs.joyjoy.net/English/contents.html",
-                     T_('IGS'), T_('A large server for realtime play'));
+                     'IGS', T_('A large server for realtime play'));
   add_link_page_link("http://nngs.cosmic.org",
-                     T_('NNGS'), T_('An open sourced go server'));
+                     'NNGS', T_('An open sourced go server'));
   add_link_page_link("http://www.britgo.org/gopcres/play.html",
                      T_('Server list'), T_('A more complete list of servers'));
 
