@@ -145,6 +145,13 @@ require_once( "include/form_functions.php" );
             echo "<tr class=row$c onmousedown=\"row_click(this,'row$c')\">\n";
             foreach( $row as $key => $val )
             {
+               switch( $key )
+               {
+                  case 'Password':
+                  case 'Email':
+                     if ($val) $val= '***';
+                     break;
+               }
                echo "<td nowrap>" . textarea_safe($val) . "</td>";
             }
             echo "\n</tr>";
