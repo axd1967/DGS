@@ -19,6 +19,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+/* NOTE: This file must be included after std_functions.php */
+
 $translation_template_copyright =
 '<?php
 
@@ -67,8 +69,9 @@ $translation_template_bottom =
 $translation_groups =
 array( 'Admin', 'Common', 'Documentation', 'Edit bio',
        'Edit password', 'Edit profile', 'Error',
-       'Game', 'Index', 'Introduction', 'Links', 'Messages',
-       'Misc', 'Register', 'Site map', 'Status', 'Users' );
+       'Game', 'Index', 'Introduction', 'Language',
+       'Links', 'Messages', 'Misc', 'Register',
+       'Site map', 'Status', 'Users' );
 
 $translation_info =
 array(
@@ -276,6 +279,10 @@ array(
       'Connection to database failed. Please wait a few minutes and test again.' =>
       array( 'Groups' => array( 'Error' ) ),
 
+      /* Found in these files: people.php */
+      'Contributors to Dragon' =>
+      array( 'Groups' => array( 'Documentation' ) ),
+
       /* Found in these files: include/message_functions.php */
       'Conventional handicap (komi 0.5 if not even)' =>
       array( 'Groups' => array( 'Messages' ) ),
@@ -295,6 +302,14 @@ array(
       /* Found in these files: edit_bio.php */
       'Country' =>
       array( 'Groups' => array( 'Edit bio' ) ),
+
+      /* Found in these files: people.php */
+      'Current maintainer and founder of Dragon' =>
+      array( 'Groups' => array( 'Documentation' ) ),
+
+      /* Found in these files: people.php */
+      'Current translators' =>
+      array( 'Groups' => array( 'Documentation' ) ),
 
       /* Found in these files: docs.php */
       'daily snapshot of the cvs' =>
@@ -343,6 +358,10 @@ array(
       /* Found in these files: game.php */
       'Deleting game' =>
       array( 'Groups' => array( 'Game' ) ),
+
+      /* Found in these files: people.php */
+      'Developer' =>
+      array( 'Groups' => array( 'Documentation' ) ),
 
       /* Found in these files: message.php */
       'Disputing settings' =>
@@ -620,13 +639,13 @@ array(
       'Introduction' =>
       array( 'Groups' => array( 'Misc' ) ),
 
-      /* Found in these files: introduction.php */
-      'Introduction to dragon' =>
-      array( 'Groups' => array( 'Introduction' ) ),
-
       /* Found in these files: docs.php */
       'Introduction to Dragon' =>
       array( 'Groups' => array( 'Documentation' ) ),
+
+      /* Found in these files: introduction.php */
+      'Introduction to dragon' =>
+      array( 'Groups' => array( 'Introduction' ) ),
 
       /* Found in these files: message.php */
       'Invitation message' =>
@@ -688,12 +707,12 @@ array(
       'Language name (i.e. English)' =>
       array( 'Groups' => array( 'Admin' ) ),
 
-      /* Found in these files: users.php */
-      'Last Access' =>
-      array( 'Groups' => array( 'Users' ) ),
-
       /* Found in these files: userinfo.php */
       'Last access' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: users.php */
+      'Last Access' =>
       array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: show_games.php, status.php */
@@ -848,12 +867,12 @@ array(
       'NNGS' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/message_functions.php, include/move.php */
-      'No' =>
-      array( 'Groups' => array( 'Common' ) ),
-
       /* Found in these files: show_games.php */
       'no' =>
+      array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: include/message_functions.php, include/move.php */
+      'No' =>
       array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: status.php */
@@ -932,6 +951,10 @@ array(
       'Password changed!' =>
       array( 'Groups' => array( 'Edit password' ) ),
 
+      /* Found in these files: docs.php, people.php */
+      'People' =>
+      array( 'Groups' => array( 'Documentation' ) ),
+
       /* Found in these files: users.php */
       'Percent' =>
       array( 'Groups' => array( 'Users' ) ),
@@ -984,13 +1007,13 @@ array(
       'Rafael\'s Go Page' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: users.php */
-      'Rank Info' =>
-      array( 'Groups' => array( 'Users' ) ),
-
       /* Found in these files: edit_profile.php, include/move.php, status.php, userinfo.php */
       'Rank info' =>
       array( 'Groups' => array( 'Edit profile', 'Status' ) ),
+
+      /* Found in these files: users.php */
+      'Rank Info' =>
+      array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: include/message_functions.php, include/move.php */
       'Rated' =>
@@ -1459,13 +1482,13 @@ The reasons for this problem could be any of the following:
       'To (userid)' =>
       array( 'Groups' => array( 'Messages' ) ),
 
-      /* Found in these files: docs.php */
-      'To do list' =>
-      array( 'Groups' => array( 'Documentation' ) ),
-
       /* Found in these files: site_map.php */
       'Todo list' =>
       array( 'Groups' => array( 'Site map' ) ),
+
+      /* Found in these files: docs.php */
+      'To do list' =>
+      array( 'Groups' => array( 'Documentation' ) ),
 
       /* Found in these files: index.php */
       'To look around, use %s.' =>
@@ -1543,6 +1566,10 @@ The reasons for this problem could be any of the following:
       'White' =>
       array( 'Groups' => array( 'Common', 'Game' ) ),
 
+      /* Found in these files: docs.php */
+      'who contributes to Dragon' =>
+      array( 'Groups' => array( 'Documentation' ) ),
+
       /* Found in these files: show_games.php */
       'Win?' =>
       array( 'Groups' => array( 'Users' ) ),
@@ -1598,8 +1625,16 @@ The reasons for this problem could be any of the following:
       /* Found in these files: links.php */
       'Yutopian' =>
       array( 'Groups' => array( 'Links' ) )
-
       );
 
+/* Define $update_script to be true if run from an update_script. */
+if( !$update_script )
+  {
+    $k_langs = get_known_languages_with_full_names();
+    foreach( $k_langs as $langname => $lang )
+      {
+        $translation_info[$k_langs[$langname]] = array( 'Groups' => array( 'Language' ) );
+      }
+  }
 
 ?>
