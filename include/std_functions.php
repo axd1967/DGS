@@ -689,4 +689,12 @@ function array_value_to_key_and_value( $array )
   return $new_array;
 }
 
+function add_link_page_link($link, $linkdesc, $extra = '')
+{
+  echo "<p><a href=\"$link\">$linkdesc</a>";
+  if( !empty($extra) )
+    echo " --- $extra";
+  echo "\n";
+}
+
 ?>
