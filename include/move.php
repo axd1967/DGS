@@ -276,92 +276,68 @@ function draw_game_info()
     $Black_Maintime, $White_Byotime, $Black_Byotime, $White_Byoperiods, $Black_Byoperiods,
      $Byotype, $Rated, $Byoperiods;
 
-  echo "    <table align=center border=2 cellpadding=3 cellspacing=3>\n";
-  echo "        <tr>\n";
-  echo "          <td></td><td width=" . ($Size*9) . ">" .
+  echo "<table align=center border=2 cellpadding=3 cellspacing=3>\n";
+  echo "   <tr>\n";
+  echo "     <td></td><td width=" . ($Size*9) . ">" .
     T_('White') . "</td><td width=" . ($Size*9) . ">" . T_('Black') . "</td>\n";
-  echo "        </tr><tr>\n";
-  echo "          <td>" . T_('Name') . ":</td>\n";
-  echo '          <td><A href="userinfo.php?uid=' .
+  echo "   </tr><tr>\n";
+  echo "     <td>" . T_('Name') . ":</td>\n";
+  echo '     <td><A href="userinfo.php?uid=' .
     "$White_ID\">$Whitename ($Whitehandle)" . "</A></td>\n";
-  echo '          <td><A href="userinfo.php?uid=' .
+  echo '     <td><A href="userinfo.php?uid=' .
     "$Black_ID\">$Blackname ($Blackhandle)" . "</A></td>\n";
-  echo "        </tr><tr>\n";
-  echo '          <td>' . T_('Rating') . ":</td>\n";
-  echo '          <td>' . echo_rating( $Whiterating ) . "</td>\n";
-  echo '          <td>' . echo_rating( $Blackrating ) . "</td>\n";
-  echo "        </tr><tr>\n";
-  echo '          <td>' . T_('Rank info') . ":</td>\n";
-  echo '          <td>' . $Whiterank . "</td>\n";
-  echo '          <td>' . $Blackrank . "</td>\n";
-  echo "        </tr><tr>\n";
-  echo '          <td>' . T_('Prisoners') . ":</td>\n";
-  echo '          <td>' . $White_Prisoners . "</td>\n";
-  echo '          <td>' . $Black_Prisoners . "</td>\n";
-  echo "        </tr><tr>\n";
-  echo '          <td></td><td>' . T_('Komi') . ': ' . $Komi . "</td>\n";
-  echo '          <td>' . T_('Handicap') . ': ' . $Handicap . "</td>\n";
-  echo "        </tr>\n";
+  echo "   </tr><tr>\n";
+  echo '     <td>' . T_('Rating') . ":</td>\n";
+  echo '     <td>' . echo_rating( $Whiterating ) . "</td>\n";
+  echo '     <td>' . echo_rating( $Blackrating ) . "</td>\n";
+  echo "   </tr><tr>\n";
+  echo '     <td>' . T_('Rank info') . ":</td>\n";
+  echo '     <td>' . $Whiterank . "</td>\n";
+  echo '     <td>' . $Blackrank . "</td>\n";
+  echo "   </tr><tr>\n";
+  echo '     <td>' . T_('Prisoners') . ":</td>\n";
+  echo '     <td>' . $White_Prisoners . "</td>\n";
+  echo '     <td>' . $Black_Prisoners . "</td>\n";
+  echo "   </tr><tr>\n";
+  echo '     <td></td><td>' . T_('Komi') . ': ' . $Komi . "</td>\n";
+  echo '     <td>' . T_('Handicap') . ': ' . $Handicap . "</td>\n";
+  echo "   </tr>\n";
 
   if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0))
     {
-      echo "      <tr>\n";
-      echo '          <td>' . T_('Main Time') . ":</td>\n";
-      echo '          <td>';
-      echo_time( $White_Maintime );
-      echo "</td>\n";
-      echo '          <td>';
-      echo_time( $Black_Maintime );
-      echo "</td>\n";
-      echo "        </tr>\n";
+      echo " <tr>\n";
+      echo '     <td>' . T_('Main Time') . ":</td>\n";
+      echo '     <td>' .  echo_time( $White_Maintime ) . "</td>\n";
+      echo '     <td>' .  echo_time( $Black_Maintime ) . "</td>\n";
+      echo "   </tr>\n";
 
       if( $Black_Byotime > 0 or $White_Byotime > 0 )
       {
-        echo "      <tr>\n";
-        echo '          <td>' . T_('Byoyomi') . ":</td>\n";
-        echo '          <td>';
-        echo_time( $White_Byotime );
-
+        echo " <tr>\n";
+        echo '     <td>' . T_('Byoyomi') . ":</td>\n";
+        echo '     <td>' .  echo_time( $White_Byotime );
         if( $White_Byotime > 0 ) echo '(' . $White_Byoperiods . ')';
 
         echo "</td>\n";
-        echo '          <td>';
-        echo_time( $Black_Byotime );
+        echo '     <td>' . echo_time( $Black_Byotime );
 
         if( $Black_Byotime > 0 ) echo '(' . $Black_Byoperiods . ')';
         echo "</td>\n";
-        echo "        </tr>\n";
+        echo "   </tr>\n";
       }
 
-      echo "      <tr>\n";
-      echo '            <td>' . T_('Time limit') . ":</td>\n";
-      echo '            <td colspan=2>';
+      echo " <tr>\n";
+      echo '       <td>' . T_('Time limit') . ":</td>\n";
+      echo '       <td colspan=2>';
 
-      /* TODO: Change times below to be translateable! */
-      if ( $Maintime > 0 )
-         echo_time( $Maintime );
-      if( $Byotime <= 0 )
-         echo ' without byoyomi';
-      else if( $Byotype == 'FIS' )
-      {
-         echo ' with ';
-         echo_time($Byotime);
-         echo ' extra per move';
-      }
-      else
-      {
-         if ( $Maintime > 0 )
-            echo ' + ';
-         echo_time($Byotime);
-         echo '/' . $Byoperiods .  ($Byotype == 'JAP' ? '&nbsp;periods&nbsp;Japanese' : '&nbsp;stones&nbsp;Canadian') . '&nbsp;byoyomi';
-      }
+      echo echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods);
 
       echo "</td>\n";
-      echo "        </tr>\n";
+      echo "   </tr>\n";
 
     }
 
-    echo '        <tr><td>' . T_('Rated') . ': </td><td colspan=2>' .
+    echo '   <tr><td>' . T_('Rated') . ': </td><td colspan=2>' .
       ( $Rated == 'N' ? T_('No') : T_('Yes') ) . "</td></tr>\n";
     echo "    </table>\n";
 }

@@ -22,9 +22,6 @@ require( "include/std_functions.php" );
 include( "include/table_columns.php" );
 include( "include/form_functions.php" );
 
-$table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','Komi',
-                       'Moves','Score','Win?','End date','Last Move');
-
 {
    connect2mysql();
 
@@ -91,7 +88,10 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    $result = mysql_query( $query );
 
-   start_page( ($finished ? "Finished" : "Running" ) . " games for " . $user_row["Name"],
+
+   $games_for = ( $finished ? T_('Finished games for %s') : T_('Running games for %s') );
+
+   start_page( sprintf( $games_for, $user_row["Name"] ),
                true, $logged_in, $player_row, $style );
 
 
@@ -102,29 +102,34 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
 
 
-   echo "<center><h4>" . ( $finished ? "Finished" : "Running" ) . " Games for <A href=\"userinfo.php?uid=$uid\">" . $user_row["Name"] . " (" . $user_row["Handle"] . ")</A></H4></center>\n";
+   echo "<center><h4>";
+
+   printf(  $games_for, "<A href=\"userinfo.php?uid=$uid\">" . $user_row["Name"] .
+            " (" . $user_row["Handle"] . ")</A>");
+
+   echo "</H4></center>\n";
 
 
    echo start_end_column_table(true) .
-      tablehead(1, 'ID', 'ID', true, true) .
-      tablehead(2, 'sgf') .
-      tablehead(3, 'Opponent', 'Name') .
-      tablehead(4, 'Nick', 'Handle') .
-      tablehead(5, 'Color', 'Color') .
-      tablehead(6, 'Size', 'Size', true) .
-      tablehead(7, 'Handicap', 'Handicap') .
-      tablehead(8, 'Komi', 'Komi') .
-      tablehead(9, 'Moves', 'Moves', true);
+      tablehead(1, T_('ID'), 'ID', true, true) .
+      tablehead(2, T_('sgf')) .
+      tablehead(3, T_('Opponent'), 'Name') .
+      tablehead(4, T_('Nick'), 'Handle') .
+      tablehead(5, T_('Color'), 'Color') .
+      tablehead(6, T_('Size'), 'Size', true) .
+      tablehead(7, T_('Handicap'), 'Handicap') .
+      tablehead(8, T_('Komi'), 'Komi') .
+      tablehead(9, T_('Moves'), 'Moves', true);
 
    if( $finished )
    {
-      echo tablehead(10, 'Score') .
-         tablehead(11, 'Win?', 'Win', true) .
-         tablehead(12, 'End date', 'Lastchanged', true);
+      echo tablehead(10, T_('Score')) .
+         tablehead(11, T_('Win?'), 'Win', true) .
+         tablehead(12, T_('End date'), 'Lastchanged', true);
    }
    else
    {
-      echo tablehead(13, 'Last Move', 'Lastchanged', true);
+      echo tablehead(13, T_('Last Move'), 'Lastchanged', true);
    }
 
    echo "</tr>\n";
@@ -142,7 +147,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       if( (1 << 0) & $column_set )
          echo "<td class=button width=92 align=center><A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>\n";
       if( (1 << 1) & $column_set )
-         echo "<td><A href=\"sgf.php?gid=$ID\"><font color=$gid_color>sgf</font></A></td>\n";
+         echo "<td><A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" . T_('sgf') . "</font></A></td>\n";
       if( (1 << 2) & $column_set )
          echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>$Name</font></a></td>\n";
       if( (1 << 3) & $column_set )
@@ -161,9 +166,9 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       if( $finished )
       {
          $src = '"images/' .
-             ( $Win == 1 ? 'yes.gif" alt=yes' :
-               ( $Win == -1 ? 'no.gif" alt=no' :
-                 'dash.gif" alt=jigo' ) );
+             ( $Win == 1 ? 'yes.gif" alt=' . T_('yes') :
+               ( $Win == -1 ? 'no.gif" alt=' . T_('no') :
+                 'dash.gif" alt=' . T_('jigo' ) );
 
       if( (1 << 9) & $column_set )
          echo '<td>' . score2text($Score, false) . "</td>\n";

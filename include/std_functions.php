@@ -550,30 +550,58 @@ $byotype, $startbyotime, $startbyoper, $has_moved)
 function echo_time($hours)
 {
    if( $hours <= 0 )
-   {
-      echo '-';
-      return;
-   }
+      return '-';
+
    $days = (int)($hours/15);
    if( $days > 0 )
    {
       if( $days == 1 )
-         echo '1&nbsp;' . T_('day');
+         $str = '1&nbsp;' . T_('day');
       else
-         echo $days .'&nbsp;' . T_('days');
+         $str = $days .'&nbsp;' . T_('days');
    }
 
    $h = $hours % 15;
    if( $h > 0 )
    {
       if( $days > 0 )
-         echo '&nbsp;' . T_('and') . '&nbsp;';
+         $str .='&nbsp;' . T_('and') . '&nbsp;';
 
       if( $h == 1 )
-         echo '1&nbsp;' . T_('hour');
+         $str .= '1&nbsp;' . T_('hour');
       else
-         echo $h . '&nbsp;' . T_('hours');
+         $str .= $h . '&nbsp;' . T_('hours');
    }
+
+   return $str;
+}
+
+function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)
+{
+   $str = '';
+   if ( $Maintime > 0 )
+      $str = echo_time( $Maintime );
+
+   if( $Byotime <= 0 )
+         $str .= ' ' . T_('without byoyomi');
+      else if( $Byotype == 'FIS' )
+      {
+         $str .= ' ' . sprintf( 'with %s extra per move', echo_time($Byotime) );
+      }
+      else
+      {
+         if ( $Maintime > 0 )
+            $str .= ' + ';
+         $str .= echo_time($Byotime);
+         $str .= '/' . $Byoperiods . ' ';
+
+         if( $Byotype == 'JAP' )
+            $str .= T_('periods') . ' ' . T_('Japanese byoyomi');
+         else
+            $str .= T_('stones') . ' ' . T_('Canadian byoyomi');
+      }
+
+      return $str;
 }
 
 function time_convert_to_longer_unit(&$time, &$unit)

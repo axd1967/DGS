@@ -24,10 +24,6 @@ include( "include/rating.php" );
 include( "include/table_columns.php" );
 include( "include/form_functions.php" );
 
-$table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches?','Games',
-                       'Running','Finished','Won','Lost','Percent','Activity',
-                       'Last Access','Last Moved');
-
 {
    connect2mysql();
 
@@ -64,26 +60,26 @@ $table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches
    $result = mysql_query( $query );
 
 
-   start_page("Users", true, $logged_in, $player_row );
+   start_page(T_('Users'), true, $logged_in, $player_row );
 
 
 
    echo start_end_column_table(true) .
-      tablehead(1, 'ID', 'ID') .
-      tablehead(2, 'Name', 'Name') .
-      tablehead(3, 'Nick', 'Handle') .
-      tablehead(4, 'Rank Info') .
-      tablehead(5, 'Rating', 'Rating', true) .
-      tablehead(6, 'Open for matches?') .
-      tablehead(7, 'Games', 'Games', true) .
-      tablehead(8, 'Running', 'Running', true) .
-      tablehead(9, 'Finished', 'Finished', true) .
-      tablehead(10, 'Won', 'Won', true) .
-      tablehead(11, 'Lost', 'Lost', true) .
-      tablehead(12, 'Percent', 'Percent', true) .
-      tablehead(13, 'Activity', 'ActivityLevel', true) .
-      tablehead(14, 'Last Access', 'Lastaccess', true) .
-      tablehead(15, 'Last Moved', 'Lastmove', true) .
+      tablehead(1, T_('ID'), 'ID') .
+      tablehead(2, T_('Name'), 'Name') .
+      tablehead(3, T_('Nick'), 'Handle') .
+      tablehead(4, T_('Rank Info')) .
+      tablehead(5, T_('Rating'), 'Rating', true) .
+      tablehead(6, T_('Open for matches?') .
+      tablehead(7, T_('Games'), 'Games', true) .
+      tablehead(8, T_('Running'), 'Running', true) .
+      tablehead(9, T_('Finished'), 'Finished', true) .
+      tablehead(10, T_('Won'), 'Won', true) .
+      tablehead(11, T_('Lost'), 'Lost', true) .
+      tablehead(12, T_('Percent'), 'Percent', true) .
+      tablehead(13, T_('Activity'), 'ActivityLevel', true) .
+      tablehead(14, T_('Last Access'), 'Lastaccess', true) .
+      tablehead(15, T_('Last Moved'), 'Lastmove', true) .
       "</tr>\n";
 
    $row_color=2;

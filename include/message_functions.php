@@ -126,30 +126,30 @@ function game_settings_form($my_ID=NULL, $gid=NULL)
 
    echo form_insert_row( 'SPACE' );
 
-   echo form_insert_row( 'DESCRIPTION', 'Conventional handicap (komi 0.5)',
+   echo form_insert_row( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
                          'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype );
 
-   echo form_insert_row( 'DESCRIPTION', 'Proper handicap',
+   echo form_insert_row( 'DESCRIPTION', T_('Proper handicap'),
                          'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype );
 
-   echo form_insert_row( 'DESCRIPTION', 'Manual setting',
+   echo form_insert_row( 'DESCRIPTION', T_('Manual setting'),
                          'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
-                         'TEXT', '&nbsp;&nbsp;&nbsp;My color',
+                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('My color'),
                          'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
 
-                         'TEXT', '&nbsp;&nbsp;&nbsp;Handicap',
+                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
                          'SELECTBOX', 'handicap', 1, $handi_array, $Handicap, false,
-                         'TEXT', '&nbsp;&nbsp;&nbsp;Komi',
+                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
                          'TEXTINPUT', 'komi', 5, 5, $Komi );
 
-   echo form_insert_row( 'DESCRIPTION', 'Even game with nigiri',
+   echo form_insert_row( 'DESCRIPTION', T_('Even game with nigiri'),
                          'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
-                         'TEXT', '&nbsp;&nbsp;&nbsp;Komi',
+                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
                          'TEXTINPUT', 'komi', 5, 5, $Komi );
 
-   echo form_insert_row( 'DESCRIPTION', 'Double game',
+   echo form_insert_row( 'DESCRIPTION', T_('Double game'),
                          'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
-                         'TEXT', '&nbsp;&nbsp;&nbsp;Komi',
+                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
                          'TEXTINPUT', 'komi', 5, 5, $Komi );
 
 
@@ -159,37 +159,37 @@ function game_settings_form($my_ID=NULL, $gid=NULL)
 
    echo form_insert_row( 'SPACE' );
 
-   echo form_insert_row( 'DESCRIPTION', 'Main time',
+   echo form_insert_row( 'DESCRIPTION', T_('Main time'),
                          'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
                          'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false );
 
-   echo form_insert_row( 'DESCRIPTION', 'Japanese byo-yomi',
+   echo form_insert_row( 'DESCRIPTION', T_('Japanese byo-yomi'),
                          'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), $Byotype,
                          'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
                          'SELECTBOX', 'timeunit_jap', 1, $value_array, $ByotimeUnit_jap, false,
-                         'TEXT', 'with&nbsp;',
+                         'TEXT', T_('with') . '&nbsp;',
                          'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
-                         'TEXT', 'extra periods.' );
+                         'TEXT', T_('extra periods.') );
 
-   echo form_insert_row( 'DESCRIPTION', 'Canadian byo-yomi',
+   echo form_insert_row( 'DESCRIPTION', T_('Canadian byo-yomi'),
                          'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), $Byotype,
                          'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
                          'SELECTBOX', 'timeunit_can', 1, $value_array, $ByotimeUnit_can, false,
-                         'TEXT', 'for&nbsp;',
+                         'TEXT', T_('for') . '&nbsp;',
                          'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
-                         'TEXT', 'stones.' );
+                         'TEXT', T_('stones.') );
 
-   echo form_insert_row( 'DESCRIPTION', 'Fischer time',
+   echo form_insert_row( 'DESCRIPTION', T_('Fischer time'),
                          'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), $Byotype,
                          'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
                          'SELECTBOX', 'timeunit_fis', 1, $value_array, $ByotimeUnit_fis, false,
-                         'TEXT', 'extra&nbsp;per move.' );
+                         'TEXT', T_('extra per move.') );
 
    echo form_insert_row( 'SPACE' );
 
-   echo form_insert_row( 'DESCRIPTION', 'Clock runs on weekends',
+   echo form_insert_row( 'DESCRIPTION', T_('Clock runs on weekends'),
                          'CHECKBOX', 'weekendclock', 'Y', "", $Weekendclock );
-   echo form_insert_row( 'DESCRIPTION', 'Rated',
+   echo form_insert_row( 'DESCRIPTION', T_('Rated'),
                          'CHECKBOX', 'rated', 'Y', "", $Rated );
 }
 
@@ -199,15 +199,17 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
    global $date_fmt;
 
    echo "<table>\n" .
-      "<tr><td><b>Date:</b></td><td>" . date($date_fmt, $date) . "</td></tr>\n" .
-      "<tr><td><b>" . ($to_me ? "From" : "To" ) . ":</b></td>\n" .
+      "<tr><td><b>" . T_('Date:') . "</b></td>" .
+      "<td>" . date($date_fmt, $date) . "</td></tr>\n" .
+      "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .
       "<td><A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" .
       "</td></tr>\n" .
-      "<tr><td><b>Subject:</b></td><td>$subject</td></tr>\n" .
+      "<tr><td><b>" . T_('Subject:') . "</b></td><td>$subject</td></tr>\n" .
       "<tr><td valign=\"top\">" .
       ( $reply_mid > 0 ?
-        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">Replied:</a>" :
-        "<b>Message:</b>" ) . "</td>\n" .
+        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" . T_('Replied:') "</a>" :
+        "<b>" . T_('Message:') . "</b>" ) .
+      "</td>\n" .
       "<td align=\"center\">\n" .
       "<table border=2 align=center><tr>" .
       "<td width=475 align=left>" . make_html_safe($text, true) . "</td></tr></table><BR>\n" .
@@ -222,61 +224,66 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
    if( $gid > 0 )
-      echo "<tr><td><b>Game ID</b></td><td><a href=\"game.php?gid=$gid\">$gid</a></td></tr>\n";
+      echo "<tr><td><b>" . T_('Game ID') . "</b></td><td><a href=\"game.php?gid=$gid\">$gid</a></td></tr>\n";
 
-   echo '<tr><td><b>Size<b></td><td>' . $Size . "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Size') . '<b></td><td>' . $Size . "</td></tr>\n";
 
    switch( $handicap_type )
    {
       case -1: // conventional handicap
-         echo "<tr><td><b>Handicap</b></td><td>Conventional handicap (komi 0.5 if not even)</td></tr>\n";
+         echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' .
+            T_('Conventional handicap (komi 0.5 if not even)') . "</td></tr>\n";
          break;
 
       case -2: // Proper handicap
-         echo "<tr><td><b>Handicap</b></td><td>Proper handicap</td></tr>\n";
+         echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' .
+            T_('Proper handicap') . "</td></tr>\n";
          break;
 
       case -3: // Nigiri
-         echo '<tr><td><b>Komi</b></td><td>' . $Komi . "</td></tr>\n";
-         echo "<tr><td><b>Colors</b></td><td>Nigiri</td></tr>\n";
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Colors') . '</b></td><td>' . T_('Nigiri') . "</td></tr>\n";
          break;
 
       case -4: // Double game
-         echo '<tr><td><b>Komi</b></td><td>' . $Komi . "</td></tr>\n";
-         echo "<tr><td><b>Colors</b></td><td>Double game</td></tr>\n";
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Colors') . '</b></td><td>' .
+            T_('Double game') . "</td></tr>\n";
          break;
 
       default:
-         echo "<tr><td><b>Colors<b></td><td>$col</td></tr>\n" .
-            '<tr><td><b>Komi</b></td><td>' . $Komi . "</td></tr>\n" .
-            '<tr><td><b>Handicap</b></td><td>' . $Handicap . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Colors') . "<b></td><td>$col</td></tr>\n" .
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+            '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $Handicap . "</td></tr>\n";
          break;
    }
 
 
-   echo '<tr><td><b>Main time</b></td><td>'; echo_time($Maintime); echo "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Main time') . '</b></td><td>' .
+      echo_time($Maintime) . "</td></tr>\n";
 
    if( $Byotype == 'JAP' )
    {
-      echo '        <tr><td><b>Byo-yomi</b></td><td> Japanese: ';
-      echo_time($Byotime);
-      echo ' per move and ' . $Byoperiods . ' extra periods </td></tr>' . "\n";
+      echo '<tr><td><b>' . T_('Byoyomi') . '</b></td><td> ' . T_('Japanese:') . ' ' .
+         sprintf(T_('%s per move and %s extra periods'), echo_time($Byotime), $Byoperiods) .
+         ' </td></tr>' . "\n";
    }
    else if ( $Byotype == 'CAN' )
    {
-      echo '        <tr><td><b>Byo-yomi</b></td><td> Canadian: ';
-      echo_time($Byotime);
-      echo ' per ' .$Byoperiods . ' stones </td></tr>' . "\n";
+      echo '<tr><td><b>' . T_('Byoyomi') . '</b></td><td> ' . T_('Canadian:') . ' ' .
+         sprintf(T_('%s per %s stones'), echo_time($Byotime), $Byoperiods) .
+         ' </td></tr>' . "\n";
    }
    else if ( $Byotype == 'FIS' )
    {
-      echo '        <tr><td><b>Fischer time</b></td><td> ';
-      echo_time($Byotime);
-      echo ' extra per move </td></tr>' . "\n";
+      echo '<tr><td><b>' . T_('Fischer time') . '</b></td><td> ' .
+         echo_time($Byotime) . ' ' . T_('extra per move') . ' </td></tr>' . "\n";
    }
 
-    echo '<tr><td><b>Rated</b></td><td>' . ( $Rated == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
-<tr><td><b>Clock runs on weekends</b></td><td>' . ( $WeekendClock == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
+    echo '<tr><td><b>' . T_('Rated') . '</b></td><td>' .
+       ( $Rated == 'Y' ? T_('Yes') : T_('No') ) .
+       '</td></tr><tr><td><b>' . T_('Clock runs on weekends') . '</b></td><td>' .
+       ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . '</td></tr>
 </table>
 ';
 

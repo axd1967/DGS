@@ -181,7 +181,7 @@ disable_cache();
          $subject = "Game invitation";
       }
    }
-   else if( $type == "Accept" )
+   else if( $accepttype )
    {
       $result = mysql_query( "SELECT Black_ID, White_ID, ToMove_ID, " .
                              "Size, Handicap, Komi, " .
@@ -323,7 +323,7 @@ disable_cache();
 
       $subject = "Game invitation accepted";
    }
-   else if( $type == "Decline" )
+   else if( $declinetype )
    {
       $result = mysql_query( "DELETE FROM Games WHERE ID=$gid AND Status='INVITED'" .
                              " AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .

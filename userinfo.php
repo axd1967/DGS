@@ -45,7 +45,7 @@ require( "include/rating.php" );
 
    $row = mysql_fetch_array( $result );
 
-   start_page("User Info", true, $logged_in, $player_row );
+   start_page(T_('User Info'), true, $logged_in, $player_row );
 
 
 
@@ -55,26 +55,26 @@ require( "include/rating.php" );
    if( $msg )
       echo "\n<p><b><font color=green>$msg</font></b><hr>";
 
-   echo"
-    <table border=3>
-       <tr><td><b>Name</b></td> <td>" . $row["Name"] . "</td></tr>
-       <tr><td><b>Userid</b></td> <td>" . $row["Handle"] . "</td></tr>
-       <tr><td><b>Open for matches</b></td> <td>" . $row["Open"] . "</td></tr>
-       <tr><td><b>Rating</b></td> <td>" . echo_rating($row["Rating"]) . "</td></tr>
-       <tr><td><b>Rank info</b></td> <td>" . $row["Rank"] . "</td></tr>
-       <tr><td><b>Registration date</b></td> <td>" . $row["Registerdate"] . "</td></tr>
-       <tr><td><b>Last access</b></td> <td>" . date($date_fmt,$row["Time"]) . "</td></tr>
-    </table>
-";
+   echo '
+ <table border=3>
+    <tr><td><b>' . T_('Name') . '</b></td><td>' . $row['Name'] . '</td></tr>
+    <tr><td><b>' . T_('Userid') . '</b></td><td>' . $row['Handle'] . '</td></tr>
+    <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . $row['Open'] . '</td></tr>
+    <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating($row['Rating']) . '</td></tr>
+    <tr><td><b>' . T_('Rank info') . '</b></td><td>' . $row['Rank'] . '</td></tr>
+    <tr><td><b>' . T_('Registration date') . '</b></td><td>' . $row['Registerdate'] . '</td></tr>
+    <tr><td><b>' . T_('Last access<') . '/b></td><td>' . date($date_fmt,$row['Time']) . '</td></tr>
+ </table>
+';
 
        $result = mysql_query("SELECT * FROM Bio where uid=$uid");
 
        if( mysql_num_rows($result) > 0 )
        {
-          echo "    <p>
-    <H4>Biographical info</H4>
+          echo '    <p>
+    <H4>' . T_('Biographical info') . '</H4>
     <table border=3>
-";
+';
        }
 
        while( $row = mysql_fetch_array( $result ) )

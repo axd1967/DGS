@@ -142,40 +142,42 @@ require( "include/form_functions.php" );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
                             $Subject, $ReplyTo, $Text);
          if( $mode == 'AlreadyAccepted' )
-            echo '<font color=green>This <a href="game.php?gid=' . $Game_ID .
-               '">game</a> invitation has already been accepted</font>';
-
+         {
+            echo '<font color=green>';
+            printf( T_('This %sgame%s invitation has already been accepted.'),
+                    "<a href=\"game.php?gid=$Game_ID\">", '</a>' );
+            echo '</font>';
+         }
          if( $mode == 'AlreadyDeclined' )
-            echo '<font color=green>This invitation has been declined or the game deleted</font>';
+            echo '<font color=green>' .
+               T_('This invitation has been declined or the game deleted') . '</font>';
 
          if( $can_reply )
-         {
-            echo "<B><h3><font color=$h3_color>Reply:</font></B><p>\n";
+            {
+            echo "<B><h3><font color=$h3_color>" . T_('Reply:') . "</font></B><p>\n";
             echo form_start( 'messageform', 'send_message.php', 'POST' );
             echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
             echo form_insert_row( 'HIDDEN', 'reply', $mid );
-            echo form_insert_row( 'DESCRIPTION', 'Subject',
+            echo form_insert_row( 'DESCRIPTION', T_('Subject'),
                                   'TEXTINPUT', 'subject', 50, 80, $default_subject );
-            echo form_insert_row( 'DESCRIPTION', 'Message',
+            echo form_insert_row( 'DESCRIPTION', T_('Message'),
                                   'TEXTAREA', 'message', 50, 8, "" );
-            echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Reply' );
-
-
+            echo form_insert_row( 'SUBMITBUTTON', 'send', T_('Send Reply') );
+            }
          }
-      }
       break;
 
       case 'NewMessage':
       {
-         echo "<B><h3><font color=$h3_color>New message:</font></B><p>\n";
+         echo "<B><h3><font color=$h3_color>" . T_('New message:') . "</font></B><p>\n";
          echo form_start( 'messageform', 'send_message.php', 'POST' );
-         echo form_insert_row( 'DESCRIPTION', 'To (userid)',
+         echo form_insert_row( 'DESCRIPTION', T_('To (userid)'),
                                'TEXTINPUT', 'to', 50, 80, $default_handle );
-         echo form_insert_row( 'DESCRIPTION', 'Subject',
+         echo form_insert_row( 'DESCRIPTION', T_('Subject'),
                                'TEXTINPUT', 'subject', 50, 80, "" );
-         echo form_insert_row( 'DESCRIPTION', 'Message',
+         echo form_insert_row( 'DESCRIPTION', T_('Message'),
                                'TEXTAREA', 'message', 50, 8, "" );
-         echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Message' );
+         echo form_insert_row( 'SUBMITBUTTON', 'send', T_('Send Message') );
       }
       break;
 
@@ -186,16 +188,16 @@ require( "include/form_functions.php" );
 
          if( $Color == BLACK )
          {
-            $color = "<img src='17/w.gif' alt='white'> " .
+            $color = "<img src='17/w.gif' alt='" . T_('white') . "'> " .
                "$sender_name ($sender_handle)" .
-               " &nbsp;&nbsp;<img src='17/b.gif' alt='black'> " .
+               " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('black') . "'> " .
                $player_row["Name"] .' (' . $player_row["Handle"] . ')';
          }
          else
          {
-            $color = "<img src='17/w.gif' alt='white'> " .
+            $color = "<img src='17/w.gif' alt='" . T_('white') . "'> " .
                $player_row["Name"] .' (' . $player_row["Handle"] . ')' .
-               " &nbsp;&nbsp;<img src='17/b.gif' alt='black'> " .
+               " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('black') . "'> " .
                "$sender_name ($sender_handle) &nbsp;&nbsp;";
          }
 
@@ -207,10 +209,10 @@ require( "include/form_functions.php" );
          echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
          echo form_insert_row( 'HIDDEN', 'reply', $mid );
          echo form_insert_row( 'HIDDEN', 'gid', $Game_ID );
-         echo form_insert_row( 'DESCRIPTION', 'Message',
+         echo form_insert_row( 'DESCRIPTION', T_('Message'),
                                'TEXTAREA', 'message', 50, 8, "" );
-         echo "<td><td><INPUT type=\"submit\" name=\"type\" value=\"Accept\">" .
-            "<INPUT type=\"submit\" name=\"type\" value=\"Decline\"></td>";
+         echo '<td><td><INPUT type="submit" name="accepttype" value="' .T_('Accept') . '">' .
+            '<INPUT type="submit" name="declinetype" value="' . T_('Decline') . '"></td>';
       }
       break;
 
@@ -219,7 +221,7 @@ require( "include/form_functions.php" );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
                             $Subject, $ReplyTo, $Text);
 
-         echo "<B><h3><font color=$h3_color>Disputing settings:</font></B><p>\n";
+         echo "<B><h3><font color=$h3_color>" . T_('Disputing settings:') . "</font></B><p>\n";
          echo form_start( 'messageform', 'send_message.php', 'POST' );
          echo form_insert_row( 'HIDDEN', 'mode', $mode );
          echo form_insert_row( 'HIDDEN', 'subject', 'Game invitation dispute' );
@@ -227,28 +229,28 @@ require( "include/form_functions.php" );
          echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
          echo form_insert_row( 'HIDDEN', 'reply', $mid );
          echo form_insert_row( 'HIDDEN', 'type', 'INVITATION' );
-         echo form_insert_row( 'DESCRIPTION', 'Message',
+         echo form_insert_row( 'DESCRIPTION', T_('Message'),
                                'TEXTAREA', 'message', 50, 8, "" );
 
          game_settings_form($my_id, $Game_ID);
 
-         echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Reply' );
+         echo form_insert_row( 'SUBMITBUTTON', 'send', T_('Send Reply') );
       }
       break;
 
       case 'Invite':
       {
-         echo "<B><h3><font color=$h3_color>Invitation message:</font></B><p>\n";
+         echo "<B><h3><font color=$h3_color>" . T_('Invitation message:') . "</font></B><p>\n";
          echo form_start( 'messageform', 'send_message.php', 'POST' );
          echo form_insert_row( 'HIDDEN', 'type', 'INVITATION' );
-         echo form_insert_row( 'DESCRIPTION', 'To (userid)',
+         echo form_insert_row( 'DESCRIPTION', T_('To (userid)'),
                                'TEXTINPUT', 'to', 50, 80, $Handle );
-         echo form_insert_row( 'DESCRIPTION', 'Message',
+         echo form_insert_row( 'DESCRIPTION', T_('Message'),
                                'TEXTAREA', 'message', 50, 8, "" );
 
          game_settings_form();
 
-         echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Invitation' );
+         echo form_insert_row( 'SUBMITBUTTON', 'send', T_('Send Invitation') );
       }
       break;
    }
