@@ -55,4 +55,34 @@ function quick_error($string) //Short one line message
    exit;
 }
 
+if ( get_magic_quotes_gpc() )
+{
+   function arg_stripslashes( $arg)
+   {
+      if( is_string( $arg) )
+         return stripslashes($arg);
+      if( is_array( $arg) )
+         return map_array('arg_stripslashes',$arg);
+      return $arg;
+   }
+} else {
+   function arg_stripslashes( $arg)
+   {
+      return $arg;
+   }
+}
+
+function get_request_arg( $name, $def='', $list=NULL)
+{
+   $val = (string) (isset($_REQUEST[$name]) ? arg_stripslashes($_REQUEST[$name]) :
+         //$HTTP_REQUEST_VARS does not exist
+         $def) ;
+   if (is_array($list))
+   {
+      if (!array_key_exists($val,$list) )
+         $val = (string) $def;
+   }
+   return $val;
+}
+
 ?>

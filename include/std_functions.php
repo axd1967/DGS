@@ -169,7 +169,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $base_path, $is_down, $is_down_message, $bg_color, $menu_bg_color, $menu_fg_color,
-      $encoding_used, $vertical, $base_path;
+      $encoding_used, $vertical;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -545,7 +545,7 @@ function get_cookie_prefs(&$player_row)
 {
    global $cookie_prefs, $cookie_pref_rows;
 
-   $cookie_prefs = unserialize(stripslashes(
+   $cookie_prefs = unserialize(arg_stripslashes(
          @$_COOKIE[COOKIE_PREFIX."prefs{$player_row['ID']}"] ));
    if( !is_array( $cookie_prefs ) )
       $cookie_prefs = array();

@@ -48,11 +48,11 @@ require_once( "include/rating.php" );
    {
       extract($row);
 
-      $EnteredText = trim(@$_POST["text$ID"]);
-      $EnteredCategory = trim(@$_POST["category$ID"]);
+      $EnteredText = trim(get_request_arg("text$ID"));
+      $EnteredCategory = trim(get_request_arg("category$ID"));
 
       if( $EnteredCategory == 'Other:' )
-         $EnteredCategory = trim(@$_POST["other$ID"]);
+         $EnteredCategory = trim(get_request_arg("other$ID"));
 
       if( $EnteredText == $Text and $EnteredCategory == $Category )
          continue;
@@ -70,11 +70,11 @@ require_once( "include/rating.php" );
 
    for($i=1; $i<=3; $i++)
    {
-      $EnteredText = trim(@$_POST["newtext$i"]);
-      $EnteredCategory = trim(@$_POST["newcategory$i"]);
+      $EnteredText = trim(get_request_arg("newtext$i"));
+      $EnteredCategory = trim(get_request_arg("newcategory$i"));
 
       if( $EnteredCategory == 'Other:' )
-         $EnteredCategory = trim(@$_POST["newother$i"]);
+         $EnteredCategory = trim(get_request_arg("newother$i"));
 
       if( $EnteredText == "" )
          continue;
@@ -84,7 +84,6 @@ require_once( "include/rating.php" );
             ', Category="'.addslashes($EnteredCategory).'"' ;
 
       mysql_query( $query ) or error("mysql_query_failed","change_bio 2");
-
    }
 
    $msg = urlencode(T_('Bio updated!'));
