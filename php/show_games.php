@@ -32,24 +32,34 @@ connect2mysql();
 
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
+$result = mysql_query( "SELECT Name, Handle FROM Players WHERE ID=$uid" );
+
+if( mysql_num_rows($result) != 1 )
+{
+    header("Location: error.php?err=unknown_user");
+    exit;
+}
+
+$user_row = mysql_fetch_array($result);
+
 if( $finished )
 {
-     $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
+     $result = mysql_query("SELECT Games.*, Players.Name, Players.Handle FROM Games,Players " .
                            " WHERE Status='FINISHED' AND " . 
                            "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
                            "( White_ID=$uid AND Black_ID=Players.ID ))");
-     start_page("Finished games", true, $logged_in, $player_row );
+     start_page("Finished games for " . $user_row["Name"], true, $logged_in, $player_row );
 }
 else
 {
-     $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
+     $result = mysql_query("SELECT Games.*, Players.Name, Players.Handle  FROM Games,Players " .
                            " WHERE  Status!='INVITED' AND Status!='FINISHED' AND " . 
                            "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
                            "( White_ID=$uid AND Black_ID=Players.ID ))");
-     start_page("Running games", true, $logged_in, $player_row );
+     start_page("Running games for " . $user_row["Name"], true, $logged_in, $player_row );
 }
 
-
+echo "<center><h4>" . ( $finished ? "Finished" : "Running" ) . " Games for <A href=\"userinfo.php?uid=$uid\">" . $user_row["Name"] . " (" . $user_row["Handle"] . ")</A></H4></center>\n";
 echo "<table border=3 align=center>\n";
 echo "<tr><th>Opponent</th><th>Color</th><th>Size</th><th>Handicap</th><th>Komi</th>" .
      "<th>" .( $finished ? "Score" : "Moves" ) . "</th>\n";
