@@ -187,16 +187,6 @@ disable_cache();
       if( mysql_affected_rows() != 1)
          error("mysql_start_game");
 
-
-      $result = mysql_query( "CREATE TABLE Moves$gid (" .
-                             "ID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, " .
-                             "MoveNr SMALLINT UNSIGNED, " .
-                             "Stone SMALLINT UNSIGNED NOT NULL, " .
-                             "PosX SMALLINT, " .
-                             "PosY SMALLINT, " .
-                             "Hours SMALLINT UNSIGNED NOT NULL, " .
-                             "Text TEXT )" );
-
       $subject = "Game invitation accepted";
    }
    else if( $type == "Decline" )

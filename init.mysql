@@ -152,31 +152,30 @@ CREATE TABLE Messages (
 
 
 #
-# Table structure for table 'Moves??' (one per game)
-#
-#CREATE TABLE Moves1 (
-#  ID smallint(5) unsigned NOT NULL auto_increment,
-#  MoveNr smallint(5) unsigned default NULL,
-#  Stone smallint(5) unsigned NOT NULL default '0',
-#  PosX smallint(6) default NULL,
-#  PosY smallint(6) default NULL,
-#  Hours smallint(5) unsigned default NULL,
-#  Text text,
-#  PRIMARY KEY  (ID)
-#);
-
-
-#
-# Table structure for table 'Bio'
+# Table structure for table 'Moves'
 #
 
-CREATE TABLE Bio (
+CREATE TABLE Moves (
   ID int(11) NOT NULL auto_increment,
-  uid int(11) NOT NULL default '0',
-  Category varchar(40) default NULL,
+  gid int(11) NOT NULL default '0',
+  MoveNr smallint(5) unsigned default NULL,
+  Stone smallint(5) unsigned NOT NULL default '0',
+  PosX smallint(6) default NULL,
+  PosY smallint(6) default NULL,
+  Hours smallint(5) unsigned default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'MoveMessages'
+#
+
+CREATE TABLE MoveMessages (
+  gid int(11) NOT NULL auto_increment,
+  MoveNr smallint(5) unsigned NOT NULL,
   Text text,
-  PRIMARY KEY  (ID),
-  KEY uid (uid)
+  PRIMARY KEY  (gid,MoveNr)
 ) TYPE=MyISAM;
 
 

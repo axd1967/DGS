@@ -56,8 +56,7 @@ require( "include/board.php" );
             {
                extract($game_row);
             
-               make_array( $ID, $array, $mess, $Moves, 
-               NULL, $moves_result, $marked_dead );
+               make_array( $ID, $array, $mess, $Moves, NULL, $moves_result, $marked_dead );
 
                $msg .= str_pad('', 47, '-') . "\n";
                $msg .= "Game ID: $ID\n";

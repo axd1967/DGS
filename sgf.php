@@ -60,7 +60,10 @@ require( "include/std_functions.php" );
      
    extract(mysql_fetch_array($result));
      
-   $result = mysql_query( "SELECT * FROM Moves$gid order by ID" );
+   $result = mysql_query( "SELECT Moves.*,Text FROM Moves " . 
+                          "LEFT JOIN MoveMessages " .
+                          "ON Moves.gid=MoveMessages.gid AND Moves.MoveNr=MoveMessages.MoveNr " .
+                          "WHERE Moves.gid=$gid order by Moves.ID" );
 
    header ('Content-Type: application/x-go-sgf');
    header( "Content-Disposition: inline; filename=\"$Whitehandle-$Blackhandle-" . 

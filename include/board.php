@@ -57,6 +57,40 @@ function number2board_coords($x, $y, $Size)
  
 }
 
+
+// If move update was interupted between thw mysql queries, there may 
+// be extra entries in the Moves and MoveMessages tables.
+function fix_corrupted_move_table($gid)
+{
+   $result = mysql_query("SELECT Moves FROM Games WHERE ID=$gid");
+
+   if( mysql_num_rows($result) != 1 )
+      error("mysql_query_failed");
+
+   extract(mysql_fetch_array($result));
+
+
+   $result = mysql_query("SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid");
+
+   if( mysql_num_rows($result) != 1 )
+      error("mysql_query_failed");
+
+   extract(mysql_fetch_array($result));
+
+   
+
+   if($Moves == $max_movenr)
+      return;
+
+   if($max_movenr != $Moves+1)
+      error("mysql_data_corruption");    // Can't handle this type of problem
+
+   mysql_query("DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr");
+   mysql_query("DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr");
+}
+
+
+
 function draw_board($Size, &$array, $may_play, $gid, 
 $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi, 
 $board_type, $coord_borders, $woodcolor  )
@@ -332,38 +366,38 @@ $no_marked_dead = false )
   
    if( !$move ) $move = $max_moves;
 
-   $result = mysql_query( "SELECT * FROM Moves$gid order by ID" );
+   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
 
    $removed_dead = FALSE;
    $marked_dead = array();
 
    while( $row = mysql_fetch_array($result) )
    {
-      if( $row["MoveNr"] > $move ) 
-         break;
+      extract($row);
 
-      $x = $row["PosX"];
-      $y = $row["PosY"];
-
-      if( $row["Stone"] <= WHITE )
+      if( $MoveNr > $move ) 
       {
-         if( $row["MoveNr"] == $move and $row["Stone"] > 0 )
-            $msg = $row["Text"];
+         if( $Movenr > $max_moves )
+            fix_corrupted_move_table($gid, $max_moves);
+         break;
+      }
 
+      if( $Stone <= WHITE )
+      {
          if( $row["PosX" ] < 0 ) continue;
 
-         $array[$x][$y] = $row["Stone"];
+         $array[$PosX][$PosY] = $Stone;
             
          $removed_dead = FALSE;
       }
-      else if( $row["Stone"] >= BLACK_DEAD )
+      else if( $Stone >= BLACK_DEAD )
       {
          if( $removed_dead == FALSE )
          {
             $marked_dead = array(); // restart removal
             $removed_dead = TRUE;
          }
-         array_push($marked_dead, array($x,$y));
+         array_push($marked_dead, array($PosX,$PosY));
       } 
    }
 
@@ -378,8 +412,16 @@ $no_marked_dead = false )
             $array[$X][$Y] += 6;
       }
    }
-    
-   return array($x,$y);
+
+   $result2 = mysql_query( "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" );
+   
+   if( mysql_num_rows($result2) == 1 )
+   {
+      $row = mysql_fetch_array($result2);
+      $msg = $row["Text"];
+   }
+
+   return array($PosX,$PosY);
 }
 
 $dirx = array( -1,0,1,0 );
@@ -655,7 +697,7 @@ function check_consistency($gid)
 
    extract( mysql_fetch_array( $result ) );
 
-   $result = mysql_query( "SELECT * FROM Moves$gid order by ID" );
+   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
    
    $move_nr=0;
    $array = NULL;
@@ -682,7 +724,7 @@ function check_consistency($gid)
       else
          $moves_White_Prisoners += $nr_prisoners;
 
-      $coord = number2sgf_coords($PosX,$PosY);
+      $coord = number2sgf_coords($PosX,$PosY,$Size);
 
       if( !check_move(false) )
       {

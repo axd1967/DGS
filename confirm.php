@@ -152,7 +152,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    if( $message ) $message = trim($message);
 
-   $where_clause = " WHERE ID=$gid AND Moves=$old_moves";
+   $where_clause = " ID=$gid AND Moves=$old_moves";
    $consistent_query = "Consistent='N', ";
    switch( $action )
    {
@@ -160,14 +160,14 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       {
          check_move();
 
-         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
+         $query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
          reset($prisoners);
          $new_prisoner_string = "";
          
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
-            $query .= "($Moves, \"NONE\", $x, $y, 0, NULL), ";
+            $query .= "($gid, $Moves, \"NONE\", $x, $y, 0), ";
             $new_prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
        
@@ -175,11 +175,10 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              (isset($prisoner_string) and $new_prisoner_string != $prisoner_string) )
             error("move_problem");
 
-         if( $message )
-            $query .= "($Moves, $to_move, $colnr, $rownr, $hours, \"$message\") ";
-         else
-            $query .= "($Moves, $to_move, $colnr, $rownr, $hours, NULL) ";
+         $query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
+         if( $message )
+            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
@@ -201,7 +200,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$flags " .
-             $where_clause;
+             " WHERE" . $where_clause;
       }
       break;
 
@@ -219,14 +218,15 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             error("invalid_action");
 
 
-         $query = "INSERT INTO Moves$gid SET " . 
+         $query = "INSERT INTO Moves SET " . 
+             "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
              "PosX=-1, " .
              "Hours=$hours";
 
          if( $message )
-            $query .= ", Text=\"$message\"";
+            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
@@ -235,7 +235,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Lastchanged=FROM_UNIXTIME($NOW), " .
              "ToMove_ID=$next_to_move_ID, " . $time_query . $consistent_query .
              "Flags=0 " .
-             $where_clause;
+             " WHERE" . $where_clause;
       }
       break;
      
@@ -250,7 +250,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             error("wrong_number_of_handicap_stone");
 
 
-         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
+         $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
 
          for( $i=1; $i <= $Handicap; $i++ )
@@ -260,14 +260,11 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             if( !isset($rownr) or !isset($colnr) )
                error("illegal_position");
 
-            if( $i == $Handicap )
-               if( $message )
-                  $query .= "($i, " . BLACK . ", $colnr, $rownr, $hours, \"$message\")";
-               else
-                  $query .= "($i, " . BLACK . ", $colnr, $rownr, $hours, NULL)";
-                 
-            else
-               $query .= "($i, " . BLACK . ", $colnr, $rownr, 0, NULL), ";
+            $query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .  
+                ($i == $Handicap ? $hours : 0 ) . ")";
+
+            if( $message )
+               $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
          }
 
 
@@ -277,20 +274,21 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " . $time_query . $consistent_query .
              "ToMove_ID=$White_ID " .
-             $where_clause;
+             " WHERE" . $where_clause;
       }
       break;
 
       case 'resign':
       {
-         $query = "INSERT INTO Moves$gid SET " . 
+         $query = "INSERT INTO Moves SET " . 
+             "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
              "PosX=-3, " .
              "Hours=$hours";
 
          if( $message )
-            $query .= ", Text=\"$message\"";
+            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
          if( $to_move == BLACK )
             $score = 1000;
@@ -305,7 +303,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "ToMove_ID=0, " .
              "Score=$score, " . $time_query . $consistent_query .
              "Flags=0" .
-             $where_clause;
+             " WHERE" . $where_clause;
 
          $game_finished = true;
       }
@@ -316,8 +314,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'PLAY' or ( $Moves >= 4+$Handicap ) )
             error("invalid_action");
        
-         $query = "DROP TABLE Moves$gid";
-
+         $query = "DELETE FROM Moves WHERE gid=$gid";
+         $query2 = "DELETE FROM MoveMessages WHERE gid=$gid";
          $game_query = "DELETE FROM Games WHERE ID=$gid";
 
          $game_finished = true;
@@ -340,20 +338,18 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             $game_finished = true;
          }
 
-         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
+         $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
 
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
-            $query .= "($Moves, " . (9 - $to_move ) . ", $x, $y, 0, NULL), ";
+            $query .= "($gid, $Moves, " . (9 - $to_move ) . ", $x, $y, 0), ";
          }
 
+         $query .= "($gid, $Moves, $to_move, -2, NULL, $hours) ";
 
          if( $message )
-            $query .= "($Moves, $to_move, -2, NULL, $hours, \"$message\") ";
-         else
-            $query .= "($Moves, $to_move, -2, NULL, $hours, NULL) ";
-
+            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
 
          $game_query = "UPDATE Games SET " .
@@ -377,7 +373,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $game_query .=
              "Flags=0, " .
              "Score=$score" .
-             $where_clause;
+             " WHERE" . $where_clause;
          
       }
       break;
@@ -389,22 +385,26 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    }
 
 
-   $result = mysql_query( $game_query );
-
-   if( mysql_affected_rows() != 1 )
-      error("mysql_update_game", true);
-
-   
    $result = mysql_query( $query );
         
    if( mysql_affected_rows() < 1 and $action != 'delete' )
       error("mysql_insert_move", true);
 
-
-   if( $action != 'delete' )
+   if( strlen($query2) > 0 )
    {
-      $result = mysql_query( "UPDATE Games set Consistent='$Consistent' WHERE ID=$gid" );
+      $result = mysql_query( $query );
+        
+      if( mysql_affected_rows() < 1 and $action != 'delete' )
+         error("mysql_insert_move", true);
    }
+
+
+
+   $result = mysql_query( $game_query );
+
+   if( mysql_affected_rows() != 1 )
+      error("mysql_update_game", true);
+
     
    if( $game_finished )
    {
@@ -454,6 +454,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                    "Time=FROM_UNIXTIME($NOW), " .
                    "Game_ID=$gid, Subject='$Subject', Text='$Text'");
 
+      update_rating($gid);
    }
 
 
