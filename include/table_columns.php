@@ -71,9 +71,6 @@ class Table
     * Each row should consist of an array like this:
     * array( $column_nr1 => "Rowstring1",
     *        $column_nr2 => "Rowstring2" );
-    *
-    * If the string doesn't begin with "<td", then, "<td>" will be added to the output.
-    * If the string doesn't end with "</td>", then, "</td>" will be added to the output.
     */
    var $Tablerows;
 
