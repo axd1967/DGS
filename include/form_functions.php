@@ -422,8 +422,8 @@ function form_insert_row()
 
                 $result .=
                   form_td_start( 'left' ).
-                  "<h3><font color=$h3_color>".$description.":".
-                  "</font></h3>".
+                  "<B><h3><font color=$h3_color>".$description.":".
+                  "</font></h3></B>".
                   form_td_end( true );
 
                 $nr_columns++;
