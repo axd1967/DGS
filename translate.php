@@ -30,7 +30,7 @@ $info_box = '<CENTER>
 <table border="2">
 <tr><td>
 <CENTER>
-<B><h3><font color=' . $h3_color . '>Read this before translating:</font></h3></B><p>
+ <h3><font color=' . $h3_color . '>Read this before translating:</font></h3><p>
 </CENTER>
 &nbsp;When translating you should keep in mind the following things:
 <ul>

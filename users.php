@@ -106,7 +106,7 @@ require_once( "include/countries.php" );
       if( $utable->Is_Column_Displayed[16] )
       {
          $cntr = @$row['Country'];
-         $cntrn = T_($COUNTRIES[$cntr]);
+         $cntrn = T_(@$COUNTRIES[$cntr]);
          $urow_strings[16] = "<td>" .
             (empty($cntr) ? '&nbsp;' :
              "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">") . "</td>";

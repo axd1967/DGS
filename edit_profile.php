@@ -74,8 +74,12 @@ require_once( "include/countries.php" );
    $woodcolors = array();
    for($i=1; $i<16; $i++ )
    {
-      if( $i==6 ) $i = 11;
-      $woodcolors[$i] = '<img width=30 height=30 src="images/smallwood'.$i.'.gif">';
+      $woodcolors[$i] = "<img width=30 height=30 src=\"images/smallwood$i.gif\" alt=\"wood$i\">";
+      if( $i==5 ) 
+      {
+         $woodcolors[$i].= '<BR>';
+         $i = 10;
+      }
    }
 
    foreach( $COUNTRIES as $code => $country )

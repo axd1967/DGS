@@ -64,7 +64,7 @@ function item($text,$link,$working, $level,$last=false)
    $f0=$f1=$f2=$f3=true;
    $id = $player_row["ID"];
 
-   echo "<table width=80% align=center><tr><td>\n";
+   echo "<table width=\"80%\" align=\"center\"><tr><td>\n";
    echo "<center><h3><font color=$h3_color>" . T_('Site map') . "</font></h3></center>";
    echo "<table cellspacing=0 cellpadding=0 border=0><tr><td colspan=3>" .
       "<a href=\"index.php\"><font color=0C41C9>" . T_('Welcome page') .

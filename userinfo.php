@@ -79,7 +79,7 @@ require_once( "include/countries.php" );
    $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
 
    $cntr = @$row['Country'];
-   $cntrn = T_($COUNTRIES[$cntr]);
+   $cntrn = T_(@$COUNTRIES[$cntr]);
    echo '
  <table border=3>
     <tr><td><b>' . T_('Name') . '</b></td><td>' . $name_safe . '</td></tr>
