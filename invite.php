@@ -93,7 +93,7 @@ include( "include/form_functions.php" );
                          'TEXT', 'extra periods.' );
 
    echo form_insert_row( 'DESCRIPTION', 'Canadian byo-yomi',
-                         'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), 'CAN',
+                         'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), '',
                          'TEXTINPUT', 'byotimevalue_can', 5, 5, 15,
                          'SELECTBOX', 'timeunit_can', 1, $value_array, 'days', false,
                          'TEXT', 'for&nbsp;',
@@ -101,7 +101,7 @@ include( "include/form_functions.php" );
                          'TEXT', 'stones.' );
 
    echo form_insert_row( 'DESCRIPTION', 'Fischer time',
-                         'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), 'FIS',
+                         'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), '',
                          'TEXTINPUT', 'byotimevalue_fis', 5, 5, 1,
                          'SELECTBOX', 'timeunit_fis', 1, $value_array, 'days', false,
                          'TEXT', 'extra&nbsp;per move.' );
@@ -112,6 +112,8 @@ include( "include/form_functions.php" );
                          'CHECKBOX', 'rated', 'Y', "", true );
    echo form_insert_row( 'HIDDEN', 'type', 'INVITATION' );
    echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Invitation' );
+
+   echo form_end();
 
    echo "</center>\n";
 
