@@ -213,6 +213,7 @@ CREATE TABLE Translationlog (
   Handle varchar(16) default NULL,
   Language varchar(16) default NULL,
   CString text,
+  OldTranslation text default '',
   Translation text,
   Date timestamp(14) NOT NULL,
   PRIMARY KEY  (ID)
