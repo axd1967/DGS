@@ -33,7 +33,7 @@ require_once( "forum_functions.php" );
    if( ($reply > 0) and !$logged_in )
       error("not_logged_in");
 
-   if( $player_row['Adminlevel'] < 2 )
+   if( !($player_row['admin_level'] & ADMIN_FORUM) )
       error("adminlevel_too_low");
 
    start_page(T_('Create new forum'), true, $logged_in, $player_row);
