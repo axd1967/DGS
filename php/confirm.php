@@ -20,8 +20,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
-include( "board.php" );
+require( "include/std_functions.php" );
+require( "include/board.php" );
 
 if( !$gid )
 {
@@ -45,7 +45,12 @@ if( !$logged_in )
     exit;
 }
 
-$result = mysql_query( "SELECT *,Flags+0 AS flags FROM Games WHERE ID=$gid" );
+$result = mysql_query( "SELECT Games.*, " .
+                       "Games.Flags+0 AS flags, " .
+                       "black.ClockUsed AS Blackclock, " . 
+                       "white.ClockUsed AS Whiteclock " . 
+                       "FROM Games, Players AS black, Players AS white " .
+                       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
 
 if(  mysql_num_rows($result) != 1 )
 {
@@ -61,16 +66,27 @@ if( $player_row["ID"] != $ToMove_ID )
     exit;
 }
 
-if( $Status == 'INVITED' or $Status == 'FINISHED')
+if( $Status == 'INVITED' )
 {
-    header("Location: error.php?err=unknown_game");
+    header("Location: error.php?err=game_not_started");
+    exit;
+}
+else if( $Status == 'FINISHED' )
+{
+    header("Location: error.php?err=game_finished");
     exit;
 }
 
+
 if( $Black_ID == $ToMove_ID )
      $to_move = BLACK;
+else if( $White_ID == $ToMove_ID )
+    $to_move = WHITE;
 else
-     $to_move = WHITE;
+{       
+    header("Location: error.php?err=database_corrupted");
+    exit;
+}
 
 $next_to_move = 3-$to_move;
 
@@ -84,6 +100,37 @@ if( $message )
      make_html_safe( $message );
 
 
+
+// Update clock
+
+if( $Maintime > 0 )
+{
+
+  $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
+ 
+  if( $to_move == BLACK )
+    {
+      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+      $Byotype, $Byotime, $Byoperiods, true);
+      $time_query = "Black_Maintime=$Black_Maintime, " .
+         "Black_Byotime=$Black_Byotime, " .
+         "Black_Byoperiods=$Black_Byoperiods, ";
+    }
+  else
+    {
+      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods,
+      $Byotype, $Byotime, $Byoperiods, true);
+      $time_query = "White_Maintime=$White_Maintime, " .
+         "White_Byotime=$White_Byotime, " .
+         "White_Byoperiods=$White_Byoperiods, ";
+    }
+
+  $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
+  $next_ticks = get_clock_ticks($next_clockused);
+
+  $time_query .= "LastTicks=$next_ticks, " .
+     "ClockUsed=$next_clockused, ";
+}
 
 switch( $action )
 {
@@ -116,10 +163,10 @@ switch( $action )
 
 
          $game_query = "UPDATE Games SET " .
-              "Moves=$Moves, " .
-              "Last_X=$colnr, " .
-              "Last_Y=$rownr, " .
-              "Status='PLAY', ";
+            "Moves=$Moves, " .
+            "Last_X=$colnr, " .
+            "Last_Y=$rownr, " .
+            "Status='PLAY', " . $time_query;
 
          if( $nr_prisoners > 0 )
              if( $to_move == BLACK )
@@ -163,7 +210,7 @@ switch( $action )
               "Moves=$Moves, " .
               "Last_X=-1, " .
               "Status='$next_status', " .
-              "ToMove_ID=$next_to_move_ID, " .
+              "ToMove_ID=$next_to_move_ID, " . $time_query .
               "Flags=0 " .
               "WHERE ID=$gid";
      }
@@ -205,7 +252,7 @@ switch( $action )
          $game_query = "UPDATE Games SET " .
               "Moves=$Handicap, " .
               "Last_X=$colnr, " .
-              "Last_Y=$rownr, " .
+              "Last_Y=$rownr, " . $time_query .
               "ToMove_ID=$White_ID " .
               "WHERE ID=$gid";
      }
@@ -231,7 +278,7 @@ switch( $action )
               "Last_X=-3, " .
               "Status='FINISHED', " .
               "ToMove_ID=NULL, " .
-              "Score=$score, " .
+              "Score=$score, " . $time_query .
               "Flags=0" .
               " WHERE ID=$gid";
 
@@ -278,7 +325,7 @@ switch( $action )
          $game_query = "UPDATE Games SET " .
               "Moves=$Moves, " .
               "Last_X=-2, " .
-              "Status='$next_status', ";
+              "Status='$next_status', " . $time_query;
 
               if( $next_to_move == BLACK )
                   $game_query .= "ToMove_ID=$Black_ID, ";
@@ -301,13 +348,15 @@ switch( $action )
 }
 
 
-
-$result = mysql_query( $query );
-
-if( mysql_affected_rows() < 1)
+if( $query )
 {
-    header("Location: error.php?err=mysql_insert_move");
-    exit;
+  $result = mysql_query( $query );
+  
+  if( mysql_affected_rows() < 1)
+    {
+      header("Location: error.php?err=mysql_insert_move");
+      exit;
+    }
 }
 
 
@@ -324,18 +373,23 @@ if( mysql_affected_rows() != 1)
 
 // Notify opponent about move
 
-if( $next_to_move_ID != $player_row["ID"] )
-{
-  $result = mysql_query( "SELECT Flags+0 AS flags, Notify " .
-                           "FROM Players WHERE ID='$next_to_move_ID'" );
+//if( $next_to_move_ID != $player_row["ID"] )
+//{
+  mysql_query( "UPDATE Players SET Notify='NEXT' " .
+               "WHERE ID='$next_to_move_ID' AND Flags LIKE '%WANT_EMAIL%' " .
+               "AND Notify='NONE' AND ID!='$next_to_move_ID'") ;
 
-  if( $row = mysql_fetch_array($result) and 
-      $row["flags"] & WANT_EMAIL and $row["Notify"] == 'NONE' )
-      {
-          $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
-                                 "WHERE ID='$next_to_move_ID'" );
-      }
-}
+
+//    $result = mysql_query( "SELECT Flags+0 AS flags, Notify " .
+//                             "FROM Players WHERE ID='$next_to_move_ID'" );
+
+//    if( $row = mysql_fetch_array($result) and 
+//        $row["flags"] & WANT_EMAIL and $row["Notify"] == 'NONE' )
+//        {
+//            $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
+//                                   "WHERE ID='$next_to_move_ID'" );
+//        }
+//  }
 
 if( $game_finished )
 {
