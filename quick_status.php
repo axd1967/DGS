@@ -1,6 +1,6 @@
 <?php
 
-require_once( "include/config.php" );
+$quick_errors = 1;
 require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
 
