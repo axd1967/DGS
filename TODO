@@ -33,7 +33,9 @@ SMALLER TASKS
 
 * Rengo (team go)
 
-* game.php: Show more info for finished games
+* Games:
+        Show more info for finished games.
+        Start game from a setup position.
 
 * Improve caching
 
