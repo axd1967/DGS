@@ -36,7 +36,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
    $array = array( 'OWNHTML', $name_row,
                    'TEXTINPUT', "folder$nr", 32, 32, "$name",
-                   'DESCRIPTION', T_('Backgrund'),
+                   'DESCRIPTION', T_('Background'),
                    'DESCRIPTION', T_('Red'),
                    'TEXTINPUT', "bgred$nr", 3, 3, "$bgred",
                    'DESCRIPTION', T_('Green'),
