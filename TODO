@@ -49,9 +49,11 @@ SMALLER TASKS
 
 * Komi bidding (?)
 
-* Improve rating system
+* Improve rating system (Glicko?)
 
 * Delete game when it's the opponents turn.
+
+* Bio: sort order.
 
 * Help system.
 
