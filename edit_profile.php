@@ -24,7 +24,6 @@ require_once( "include/std_functions.php" );
 require_once( "include/timezones.php" );
 require_once( "include/rating.php" );
 require_once( "include/form_functions.php" );
-require_once( "include/countries.php" );
 
 
 {
@@ -34,6 +33,7 @@ require_once( "include/countries.php" );
 
    if( !$logged_in )
       error("not_logged_in");
+require_once( "include/countries.php" );
 
    $button_nr = $player_row["Button"];
 

@@ -35,6 +35,7 @@ define('BAD_RATING_COLOR',"#ffaaaa");
 
    if( !$logged_in )
       error("not_logged_in");
+   //not used: init_standard_folders();
 
    $handi_array = array( 'conv' => T_('Conventional'),
                          'proper' => T_('Proper'),
@@ -197,11 +198,13 @@ function add_new_game_form()
 
    $rating_array = array();
 
+   $s = ' ' . T_('dan');
    for($i=9; $i>0; $i--)
-      $rating_array["$i dan"] = $i . ' ' . T_('dan');
+      $rating_array["$i dan"] = $i . $s;
 
+   $s = ' ' . T_('kyu');
    for($i=1; $i<=30; $i++)
-      $rating_array["$i kyu"] = $i . ' ' . T_('kyu');
+      $rating_array["$i kyu"] = $i . $s;
 
 
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),

@@ -24,7 +24,6 @@ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
-require_once( "include/countries.php" );
 
 {
    connect2mysql();
@@ -33,6 +32,7 @@ require_once( "include/countries.php" );
 
    if( !$logged_in )
       error("not_logged_in");
+require_once( "include/countries.php" );
 
    $page = "users.php?";
    if( $_GET['showall'] ) $page .= "showall=1&";

@@ -170,7 +170,8 @@ $array=array();
 /*
    WARNING: Some fields could cause problems because of charset:
    - those coming from user (like $Blackname)
-   - those translated (like score2text() or echo_time_limit())
+   - those translated (like score2text(), echo_rating() or echo_time_limit())
+     (but, actually, the translation database is not available here)
    We could use the CA[] (FF[4]) property if we know what it is.
 */
 

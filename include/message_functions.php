@@ -27,13 +27,18 @@ define("FOLDER_REPLY", 3);
 define("FOLDER_DELETED", 4);
 define("FOLDER_SENT", 5);
 
-$STANDARD_FOLDERS = array(
-   FOLDER_ALL_RECEIVED => array(T_('All Received'),'f7f5e300','000000'),
-   FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
-   FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
-   FOLDER_REPLY => array(T_('Reply!'), 'ffaaaa80', '000000'),
-   FOLDER_DELETED => array(T_('Trashcan'), 'ff88ee00', '000000'),
-   FOLDER_SENT => array(T_('Sent'), '00000000', '0000ff'));
+function init_standard_folders()
+{
+   global $STANDARD_FOLDERS;
+   $STANDARD_FOLDERS = array(
+      FOLDER_ALL_RECEIVED => array(T_('All Received'),'f7f5e300','000000'),
+      FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
+      FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
+      FOLDER_REPLY => array(T_('Reply!'), 'ffaaaa80', '000000'),
+      FOLDER_DELETED => array(T_('Trashcan'), 'ff88ee00', '000000'),
+      FOLDER_SENT => array(T_('Sent'), '00000000', '0000ff'),
+      );
+}
 
 // Prints game setting form used by invite.php
 
@@ -489,6 +494,8 @@ function folder_is_removable($nr, $uid)
 
 function echo_folder_box($folders, $folder_nr, $bgcolor)
 {
+   global $STANDARD_FOLDERS;
+
       list($foldername, $folderbgcolor, $folderfgcolor) = $folders[$folder_nr];
       $folderbgcolor = blend_alpha_hex($folderbgcolor, $bgcolor);
 

@@ -72,6 +72,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
    if( !$logged_in )
       error("not_logged_in");
+   init_standard_folders();
 
    $my_id = $player_row['ID'];
 

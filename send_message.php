@@ -33,6 +33,7 @@ disable_cache();
 
    if( !$logged_in )
       error("not_logged_in");
+   init_standard_folders();
 
 
    if( $player_row["Handle"] == "guest" )

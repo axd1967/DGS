@@ -32,7 +32,7 @@ require_once( "include/message_functions.php" );
 
    if( !$logged_in )
       error("not_logged_in");
-
+   init_standard_folders();
 
    $my_id = $player_row["ID"];
 

@@ -38,6 +38,7 @@ $mode = $_GET['mode'];
 
    if( !$logged_in )
       error("not_logged_in");
+   init_standard_folders();
 
    $my_id = $player_row["ID"];
 

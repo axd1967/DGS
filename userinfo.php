@@ -22,7 +22,6 @@ $TranslateGroups[] = "Users";
 
 require( "include/std_functions.php" );
 require( "include/rating.php" );
-require( "include/countries.php" );
 
 {
    connect2mysql();
@@ -31,6 +30,7 @@ require( "include/countries.php" );
 
    if( !$logged_in )
       error("not_logged_in");
+require_once( "include/countries.php" );
 
    if( !$uid )
       $uid = $player_row["ID"];

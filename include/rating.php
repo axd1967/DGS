@@ -513,12 +513,15 @@ function update_rating_glicko($gid, $check_done=true)
 }
 
 // To avoid too many translations
-$dan = T_('dan');
-$kyu = T_('kyu');
+//WARNING: the translation database must be available when this file is included.
+//$dan = T_('dan');
+//$kyu = T_('kyu');
+$dan = 'dan';
+$kyu = 'kyu';
 
 function echo_rating($rating, $show_percent=true, $graph_uid=0)
 {
-   global $dan, $kyu;
+//   global $dan, $kyu;
 
    if( !isset($rating) ) return '';
 
@@ -531,11 +534,11 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0)
 
    if( $rank_val > 20.5 )
    {
-      $string .= ( $rank_val - 20 ) . $spc . $dan;
+      $string .= ( $rank_val - 20 ) . $spc . T_('dan'); //$dan;
    }
    else
    {
-      $string .= ( 21 - $rank_val ) . $spc . $kyu;
+      $string .= ( 21 - $rank_val ) . $spc . T_('kyu'); //$kyu;
    }
 
    if( $show_percent )
