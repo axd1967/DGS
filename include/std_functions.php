@@ -23,6 +23,7 @@ $TranslateGroups[] = "Common";
 require_once( "include/config.php" );
 require_once( "include/connect2mysql.php" );
 require_once( "include/translation_functions.php" );
+require_once( "include/time_functions.php" );
 
 if( @is_readable("timeadjust.php" ) )
    include( "timeadjust.php" );
@@ -30,12 +31,8 @@ if( @is_readable("timeadjust.php" ) )
 if( !is_numeric($timeadjust) )
    $timeadjust = 0;
 
-$NOW = time() + (int)$timeadjust;
-
 $session_duration = 3600*12*61; // 1 month
 $tick_frequency = 12; // ticks/hour
-$date_fmt = 'Y-m-d H:i';
-$date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
 $is_down = false;
 
@@ -119,32 +116,7 @@ define("ADMIN_ADMINS",8);
 define("ADMIN_TIME",16);
 
 
-// If no gettext
-//if( !function_exists("_") )
-//{
-//   function _($string) { return $string; }
-//}
 
-
-function getmicrotime()
-{
-   list($usec, $sec) = explode(" ",microtime());
-   return ((float)$usec + (float)$sec);
-}
-
-function unix_timestamp($date)
-{
-   $pattern = "/(19|20)(\d{2})-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2})/";
-   $m = preg_match ($pattern, $date, $matches);
-
-   if(empty($date) or $date == "0000-00-00" or !$m)
-   {
-      return NULL;
-   }
-
-   list($whole, $y1, $y2, $month, $day, $hour, $minute, $second) = $matches;
-   return mktime($hour,$minute,$second,$month,$day,$y1.$y2);
-}
 
 function disable_cache($stamp=NULL)
 {
@@ -201,6 +173,9 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    echo '
   </HEAD>
   <BODY bgcolor=' . $bg_color . '>
+
+    <script language="JavaScript" src="' . $base_path . 'include/goeditor.js"></script>
+    <script language="JavaScript1.4"> version=1; </script>
 
     <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
         <tr>
@@ -665,21 +640,6 @@ function is_base_dir()
    return dirname($PHP_SELF) == $SUB_PATH;
 }
 
-function get_clock_used($nightstart)
-{
-   return gmdate('G', mktime ($nightstart,0,0,date("m"),date("d"),date("Y")));
-}
-
-function get_clock_ticks($clock_used)
-{
-   $result = mysql_query( "SELECT Ticks FROM Clock WHERE ID=$clock_used" );
-   if( mysql_num_rows( $result ) != 1 )
-      error("mysql_clock_ticks", true);
-
-   $row = mysql_fetch_row($result);
-   return $row[0];
-}
-
 function mod($a,$b)
 {
    if ($a <= 0)
@@ -693,134 +653,6 @@ function swap(&$a, &$b)
    $tmp = $a;
    $a = $b;
    $b = $tmp;
-}
-
-function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
-$byotype, $startbyotime, $startbyoper, $has_moved)
-{
-   $elapsed = $hours;
-
-   if( $main > $elapsed ) // still have main time left
-   {
-      $main -= $elapsed;
-
-      if( $has_moved and $byotype == 'FIS' )
-         $main = min($startmaintime, $main + $startbyotime);
-
-      return;
-   }
-
-   $elapsed -= $main;
-
-   if( $main > 0 or $byoper < 0 ) // entering byoyomi
-   {
-      $byotime = $startbyotime;
-      $byoper = $startbyoper;
-   }
-
-   if( $byotype == 'JAP' )
-   {
-      $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
-      if( !$has_moved )
-         $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
-
-      if( $byoper < 0 )
-         $byotime = $byoper = 0;  // time is up;
-   }
-   else if( $byotype == 'CAN' ) // canadian byoyomi
-   {
-      if( $has_moved )
-         $byoper--; // byo stones;
-
-      $byotime -= $elapsed;
-
-      if( $byotime <= 0 )
-         $byotime = 0;
-      else if( $byoper <= 0 ) // get new stones;
-      {
-         $byotime = $startbyotime;
-         $byoper = $startbyoper;
-      }
-
-   }
-   else if( $byotype == 'FIS' )
-   {
-      $byotime = $byoper = 0;  // time is up;
-   }
-
-   $main = 0;
-}
-
-function echo_time($hours)
-{
-   if( $hours <= 0 )
-      return '-';
-
-   $days = (int)($hours/15);
-   if( $days > 0 )
-   {
-      if( $days == 1 )
-         $str = '1&nbsp;' . T_('day');
-      else
-         $str = $days .'&nbsp;' . T_('days');
-   }
-
-   $h = $hours % 15;
-   if( $h > 0 )
-   {
-      if( $days > 0 )
-         $str .='&nbsp;' . T_('and') . '&nbsp;';
-
-      if( $h == 1 )
-         $str .= '1&nbsp;' . T_('hour');
-      else
-         $str .= $h . '&nbsp;' . T_('hours');
-   }
-
-   return $str;
-}
-
-function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)
-{
-   $str = '';
-   if ( $Maintime > 0 )
-      $str = echo_time( $Maintime );
-
-   if( $Byotime <= 0 )
-         $str .= ' ' . T_('without byoyomi');
-      else if( $Byotype == 'FIS' )
-      {
-         $str .= ' ' . sprintf( T_('with %s extra per move'), echo_time($Byotime) );
-      }
-      else
-      {
-         if ( $Maintime > 0 )
-            $str .= ' + ';
-         $str .= echo_time($Byotime);
-         $str .= '/' . $Byoperiods . ' ';
-
-         if( $Byotype == 'JAP' )
-            $str .= T_('periods') . ' ' . T_('Japanese byoyomi');
-         else
-            $str .= T_('stones') . ' ' . T_('Canadian byoyomi');
-      }
-
-      return $str;
-}
-
-function time_convert_to_longer_unit(&$time, &$unit)
-{
-   if( $unit == 'hours' and $time % 15 == 0 )
-   {
-      $unit = 'days';
-      $time /= 15;
-   }
-
-   if( $unit == 'days' and $time % 30 == 0 )
-   {
-      $unit = 'months';
-      $time /= 30;
-   }
 }
 
 // Makes url from a base page and an array of variable/value pairs
