@@ -266,12 +266,12 @@ function draw_game_info($row)
     T_('White') . "</td><td width=" . ($row['Size']*9) . ">" . T_('Black') . "</td>\n";
   echo "   </tr><tr>\n";
   echo "     <td>" . T_('Name') . ":</td>\n";
-  echo '     <td><A href="userinfo.php?uid=' . $row['White_ID'] . '">' .
-     make_html_safe($row['Whitename']) . ' (' .
-     make_html_safe($row['Whitehandle']) . ")</A></td>\n";
-  echo '     <td><A href="userinfo.php?uid=' . $row['Black_ID'] . '">' .
-     make_html_safe($row['Blackname']) . ' (' .
-     make_html_safe($row['Blackhandle']) . ")</A></td>\n";
+  echo '     <td>'
+       . user_reference( 1, 1, '', $row['White_ID'], $row['Whitename'], $row['Whitehandle'])
+       . "</td>\n";
+  echo '     <td>'
+       . user_reference( 1, 1, '', $row['Black_ID'], $row['Blackname'], $row['Blackhandle'])
+       . "</td>\n";
   echo "   </tr><tr>\n";
 
   echo '     <td>' . T_('Rating') . ":</td>\n";
