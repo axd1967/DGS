@@ -105,7 +105,7 @@ array(
       array( 'Groups' => array( 'Admin' ) ),
 
       /* Found in these files: admin.php */
-      'Add user for translator' =>
+      'Add language for translator' =>
       array( 'Groups' => array( 'Admin' ) ),
 
       /* Found in these files: admin.php, include/std_functions.php */
