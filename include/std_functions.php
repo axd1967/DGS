@@ -780,6 +780,16 @@ function make_mysql_safe(&$msg)
    $msg = str_replace("\"", "\\\"", $msg);
 }
 
+function make_textarea_safe(&$msg)
+{
+   // Filter out HTML code
+
+   $msg = str_replace("<", "&lt;", $msg);
+   $msg = str_replace(">", "&gt;", $msg);
+
+   return $msg;
+}
+
 function score2text($score, $verbose, $keep_english=false)
 {
    if( !isset($score) )
