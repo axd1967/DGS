@@ -10,10 +10,7 @@ SMALLER TASKS
 -------------
 
 * Sgf:
-        handle finished games properly.
-        passes missing.
-        Save time usage.
-        Optionally show comments for own games.
+        Save time usage (how?)
 
 * Add time for opponent
 
@@ -39,8 +36,6 @@ SMALLER TASKS
 
 * Area scoring (?)
 
-* Game notes
-
 * Send notification delay customizable (?)
 
 * Save the previous invite settings as default.
@@ -64,8 +59,6 @@ SMALLER TASKS
 * Invite/waitingroom:
         Make it possible to limit the number of handicap stones.
         Rated only if less than x handicap option.
-
-* Notification: Remove ugly html in messages.
 
 * Add fun variations (torusgo etc.)
 
