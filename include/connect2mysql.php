@@ -88,6 +88,15 @@ function error($err, $debugmsg=NULL)
 }
 
 
+function admin_log( $uid, $handle, $text)
+{
+   $text= addslashes( $text);
+   $query = "INSERT INTO Adminlog SET uid='$uid', Handle='$handle', Message='$text'" ;
+
+   return mysql_query( $query );
+}
+
+
 function connect2mysql($no_errors=false)
 {
    global $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;

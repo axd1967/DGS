@@ -67,7 +67,9 @@ require_once( "include/std_functions.php" );
 
    $newpasswd = generate_random_password();
 
-   //admin_log( @$player_row['Handle']." (".@$player_row['ID'].") send a new password to $userid at {$row['Email']}.");
+
+   admin_log( @$player_row['ID'], @$player_row['Handle'],
+         "send a new password to $userid at {$row['Email']}.");
 
 // Save password in database
 

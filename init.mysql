@@ -407,6 +407,20 @@ CREATE TABLE Errorlog (
 
 
 #
+# Table structure for table 'Adminlog'
+#
+
+CREATE TABLE Adminlog (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  Handle varchar(16) default NULL,
+  Message text,
+  Date timestamp(14) NOT NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
 # Table structure for table 'Translationlog'
 #
 

@@ -43,7 +43,7 @@ require_once( "include/table_columns.php" );
                         'TRANS'  => array( ADMIN_TRANSLATORS, T_('Translators')),
                         'Forum'  => array( ADMIN_FORUM, T_('Forum')),
                         'FAQ'    => array( ADMIN_FAQ, T_('FAQ')),
-                        'Database'    => array( ADMIN_DATABASE, T_('Database')),
+                        'Dbase'  => array( ADMIN_DATABASE, T_('Database')),
                         'TIME'   => array( ADMIN_TIME, T_('Time')),
                       );
 
@@ -100,7 +100,12 @@ require_once( "include/table_columns.php" );
      {
         $Admin[$id] = $adm_level = (int)$adm_level;
         if( $adm_level != $AdminOldLevel[$id] )
+        {
+           admin_log( @$player_row['ID'], @$player_row['Handle'], 
+                sprintf("grants %s from 0x%x to 0x%x.", (string)$id, $AdminOldLevel[$id], $adm_level) );
+
            mysql_query("UPDATE Players SET Adminlevel=$adm_level WHERE ID=$id LIMIT 1");
+        }
      }
 
      $player_level = (int)$Admin[$player_row["ID"]];
