@@ -77,16 +77,16 @@ if( !$is_down )
       if( $ToMove_ID == $Black_ID )
       {
          time_remaining( $hours, $Black_Maintime, $Black_Byotime,
-         $Black_Byoperiods, $Maintime,
-         $Byotype, $Byotime, $Byoperiods, false);
+            $Black_Byoperiods, $Maintime,
+            $Byotype, $Byotime, $Byoperiods, false);
 
          $time_is_up = ( $Black_Maintime == 0 and $Black_Byotime == 0 );
       }
       else if( $ToMove_ID == $White_ID )
       {
          time_remaining( $hours, $White_Maintime, $White_Byotime,
-         $White_Byoperiods, $Maintime,
-         $Byotype, $Byotime, $Byoperiods, false);
+            $White_Byoperiods, $Maintime,
+            $Byotype, $Byotime, $Byoperiods, false);
 
          $time_is_up = ( $White_Maintime == 0 and $White_Byotime == 0 );
       }
@@ -137,18 +137,20 @@ if( !$is_down )
 //         update_rating($gid);
          update_rating2($gid);
 
-         delete_all_observers($gid, ($Moves >= DELETE_LIMIT+$Handicap), $Text);
-
          // Change some stats
-         mysql_query( "UPDATE Players " .
-                      "SET Running=Running-1, Finished=Finished+1" .
-                      ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : "")) .
-                      " WHERE ID=$White_ID LIMIT 1" );
+         $garbage = ($Moves < DELETE_LIMIT+$Handicap) ;
 
-         mysql_query( "UPDATE Players " .
-                      "SET Running=Running-1, Finished=Finished+1" .
-                      ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
-                      " WHERE ID=$Black_ID LIMIT 1" );
+         mysql_query( "UPDATE Players SET Running=Running-1" .
+                      ($garbage ? '' : ", Finished=Finished+1" .
+                       ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
+                      ) . " WHERE ID=$White_ID LIMIT 1" );
+
+         mysql_query( "UPDATE Players SET Running=Running-1" .
+                      ($garbage ? '' : ", Finished=Finished+1" .
+                       ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
+                      ) . " WHERE ID=$Black_ID LIMIT 1" );
+
+         delete_all_observers($gid, !$garbage, $Text);
 
       }
    }

@@ -194,15 +194,15 @@ function update_rating($gid)
    $result = mysql_query( $query );
 
    if(  mysql_num_rows($result) != 1 )
-      return;
+      return false;
 
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   if( $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
+   if( $Rated === 'N' or $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
    {
       mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid");
-      return;
+      return false;
    }
 
    $game_result = 0.5;
@@ -223,6 +223,8 @@ function update_rating($gid)
    mysql_query("INSERT INTO RatingChange (uid,gid,diff) VALUES " .
                "($Black_ID, $gid, " . ($bRating - $bOld) . "), " .
                "($White_ID, $gid, " . ($wRating - $wOld) . ")");
+
+   return true;
 }
 
 function update_rating2($gid, $check_done=true)
@@ -245,7 +247,7 @@ function update_rating2($gid, $check_done=true)
    $result = mysql_query( $query ) or die(mysql_error());
 
    if(  mysql_num_rows($result) != 1 )
-      return;
+      return false;
 
    $row = mysql_fetch_array( $result );
    extract($row);
@@ -256,7 +258,7 @@ function update_rating2($gid, $check_done=true)
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
                   " WHERE ID=$gid LIMIT 1");
-      return;
+      return false;
    }
 
    $game_result = 0.5;
@@ -345,6 +347,7 @@ function update_rating2($gid, $check_done=true)
                ($wRating - $wOld) . ", '$Lastchanged') ")
       or die(mysql_error());
 
+   return true;
 }
 
 
@@ -378,7 +381,7 @@ function update_rating_glicko($gid, $check_done=true)
    $result = mysql_query( $query ) or die(mysql_error());
 
    if(  mysql_num_rows($result) != 1 )
-      return;
+      return false;
 
    $row = mysql_fetch_array( $result );
    extract($row);
@@ -389,7 +392,7 @@ function update_rating_glicko($gid, $check_done=true)
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
                   " WHERE ID=$gid LIMIT 1");
-      return;
+      return false;
    }
 
    $game_result = 0.5;
@@ -510,6 +513,8 @@ function update_rating_glicko($gid, $check_done=true)
       or die(mysql_error());
 
    echo "<br>$gid: $White_ID - $Black_ID    $w_mu, $w_phi, $w_sigma - $b_mu, $b_phi, $b_sigma\n";
+
+   return true;
 }
 
 // To avoid too many translations

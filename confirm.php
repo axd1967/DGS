@@ -482,17 +482,19 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              " was: <p><center>" . score2text($score,true,true) . "</center><br>");
          $Subject = 'Game result';
 
-         mysql_query( "UPDATE Players " .
-                      "SET Running=Running-1, Finished=Finished+1" .
-                      ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : "")) .
-                      " WHERE ID=$White_ID LIMIT 1" );
+         $garbage = ($Moves < DELETE_LIMIT+$Handicap) ;
 
-         mysql_query( "UPDATE Players " .
-                      "SET Running=Running-1, Finished=Finished+1" .
-                      ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
-                      " WHERE ID=$Black_ID LIMIT 1" );
+         mysql_query( "UPDATE Players SET Running=Running-1" .
+                      ($garbage ? '' : ", Finished=Finished+1" .
+                       ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
+                      ) . " WHERE ID=$White_ID LIMIT 1" );
 
-         delete_all_observers($gid, ($old_moves >= DELETE_LIMIT+$Handicap), $Text);
+         mysql_query( "UPDATE Players SET Running=Running-1" .
+                      ($garbage ? '' : ", Finished=Finished+1" .
+                       ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
+                      ) . " WHERE ID=$Black_ID LIMIT 1" );
+
+         delete_all_observers($gid, !$garbage, $Text);
       }
 
       if ( $message )
