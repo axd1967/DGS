@@ -213,7 +213,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
           <td><B><A href="' . $HOSTBASE . '/forum/index.php">' . T_("Forums") . '</A></B></td>
 ';
 
-   if( isset($player_row['Translate']) && !empty($player_row['Translator']) )
+   if( $logged_in && !empty($player_row['Translator']) )
      echo '
           <td><B><A href="' . $HOSTBASE . '/translate.php">' . T_("Translate") . '</A></B></td>
 ';
