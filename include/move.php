@@ -185,7 +185,7 @@ function check_remove()
    if( !$stonestring ) $stonestring = "1";
   
    // add killed stones to array
-  
+
    $l = strlen( $stonestring );
   
    for( $i=1; $i < $l; $i += 2 )
@@ -206,7 +206,7 @@ function check_remove()
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
-      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
+      if( !isset($rownr) or !isset($colnr) )
          error("illegal_position");
 
       $stone = $array[$colnr][$rownr];
@@ -218,7 +218,7 @@ function check_remove()
 
       while( list($dummy, list($x,$y)) = each($prisoners) )
       {
-         $stonestring .= number2sgf_coords($x,$y);
+         $stonestring .= number2sgf_coords($x, $y, $Size);
       }
    }
 
