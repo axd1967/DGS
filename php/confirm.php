@@ -102,7 +102,7 @@ if( $message )
 
 // Update clock
 
-$hours = 'NULL';
+$hours = 0;
 
 if( $Maintime > 0 or $Byotime > 0)
 {
@@ -153,7 +153,7 @@ switch( $action )
 
        while( list($dummy, list($x,$y)) = each($prisoners) )
              {
-               $query .= "($Moves, \"NONE\", $x, $y, NULL, NULL), ";
+               $query .= "($Moves, \"NONE\", $x, $y, 0, NULL), ";
              }
        
 
@@ -254,7 +254,7 @@ switch( $action )
                          $query .= "($i, " . BLACK . ", $colnr, $rownr, $hours, NULL)";
                  
                  else
-                     $query .= "($i, " . BLACK . ", $colnr, $rownr, NULL, NULL), ";
+                     $query .= "($i, " . BLACK . ", $colnr, $rownr, 0, NULL), ";
              }
 
 
@@ -336,7 +336,7 @@ switch( $action )
 
          while( list($dummy, list($x,$y)) = each($prisoners) )
              {
-                 $query .= "($Moves, " . (9 - $to_move ) . ", $x, $y, NULL, NULL), ";
+                 $query .= "($Moves, " . (9 - $to_move ) . ", $x, $y, 0, NULL), ";
              }
 
 
@@ -483,6 +483,7 @@ else if( $next == "Submit and go to next game" )
                           "WHERE ToMove_ID=" . $player_row["ID"]  . 
                           " AND Status!='INVITED' AND Status!='FINISHED' " .
                           "AND Lastchanged >= $Lastchanged " .
+                          "ORDER BY Lastchanged " .
                           "LIMIT 1");
 
     if( mysql_num_rows($result) != 1 )
