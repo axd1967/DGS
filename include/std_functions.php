@@ -786,6 +786,15 @@ function make_html_safe( $msg, $some_html=false)
    return $msg;
 }
 
+function textarea_safe( $msg, $encoding=false)
+{
+ global $encoding_used;
+   if( !$encoding) $encoding = $encoding_used;
+//   $msg = @htmlspecialchars($msg, ENT_QUOTES, $encoding);
+   $msg = @htmlentities($msg, ENT_QUOTES, $encoding);
+   return $msg;
+}
+
 function score2text($score, $verbose, $keep_english=false)
 {
    if( !isset($score) )
