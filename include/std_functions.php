@@ -540,7 +540,7 @@ function get_cookie_prefs(&$player_row)
 {
    global $cookie_prefs, $cookie_pref_rows;
 
-   $cookie_prefs = unserialize(stripslashes($_COOKIE['prefs']));
+   $cookie_prefs = unserialize(stripslashes($_COOKIE["prefs{$player_row['ID']}"]));
    if( !is_array( $cookie_prefs ) )
       $cookie_prefs = array();
 
@@ -551,14 +551,14 @@ function get_cookie_prefs(&$player_row)
       }
 }
 
-function set_cookie_prefs($delete=false)
+function set_cookie_prefs($id, $delete=false)
 {
    global $cookie_prefs, $NOW, $session_duration;
 
    if( $delete )
-      setcookie ('prefs', '', $NOW-3600, "$SUB_PATH" );
+      setcookie("prefs$id", '', $NOW-3600, $SUB_PATH );
    else
-      setcookie ('prefs', serialize($cookie_prefs), $NOW+$session_duration*36, "$SUB_PATH" );
+      setcookie("prefs$id", serialize($cookie_prefs), $NOW+$session_duration*36, $SUB_PATH );
 }
 
 function add_line_breaks($msg)

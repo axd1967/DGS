@@ -71,7 +71,7 @@ require( "include/rating.php" );
       $cookie_prefs['Woodcolor'] = $_GET['woodcolor'];
       $cookie_prefs['Button'] = $_GET['button'];
 
-      set_cookie_prefs();
+      set_cookie_prefs($player_row['ID']);
    }
    else
    {
@@ -82,7 +82,7 @@ require( "include/rating.php" );
          "Woodcolor=" . $_GET['woodcolor'] . ", " .
          "Button=" . $_GET['button'] . ", ";
 
-      set_cookie_prefs(true);
+      set_cookie_prefs($player_row['ID'], true);
    }
 
    list($lang,$enc) = explode('.', $_GET['language']);
