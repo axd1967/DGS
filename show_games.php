@@ -263,8 +263,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          if( !$all and (1 << 10) & $column_set )
          {
             $src = '"images/' .
-               ( $Win == 1 ? 'yes.gif" alt=' . T_('yes') :
-                 ( $Win == -1 ? 'no.gif" alt=' . T_('no') :
+               ( $Win == 1 ? 'yes.gif" alt=' . T_('Yes') :
+                 ( $Win == -1 ? 'no.gif" alt=' . T_('No') :
                    'dash.gif" alt=' . T_('jigo') ));
 
             echo "<td align=center><img src=$src></td>";

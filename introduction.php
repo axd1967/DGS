@@ -31,7 +31,7 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
   echo "<table align=center width=\"85%\"><tr><td>\n";
   echo "<center><h3><font color=\"$h3_color\">" .
-    T_("Introduction to dragon") . "</font></h3></center>\n";
+    T_("Introduction to Dragon") . "</font></h3></center>\n";
 
   echo T_("Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a> " .
           "server for playing <a href=\"links.php\">go</a>, " .

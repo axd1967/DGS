@@ -196,18 +196,18 @@ require( "include/form_functions.php" );
 
          if( $Color == BLACK )
          {
-            $color = "<img src='17/w.gif' alt='" . T_('white') . "'> " .
+            $color = "<img src='17/w.gif' alt='" . T_('White') . "'> " .
                "$sender_name ($sender_handle_safe)" .
-               " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('black') . "'> " .
+               " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
                make_html_safe($player_row["Name"]) .
                ' (' . make_html_safe($player_row["Handle"]) . ')';
          }
          else
          {
-            $color = "<img src='17/w.gif' alt='" . T_('white') . "'> " .
+            $color = "<img src='17/w.gif' alt='" . T_('White') . "'> " .
                make_html_safe($player_row["Name"]) .
                ' (' . make_html_safe($player_row["Handle"]) . ')' .
-               " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('black') . "'> " .
+               " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
                "$sender_name ($sender_handle_safe) &nbsp;&nbsp;";
          }
 

@@ -310,7 +310,7 @@ function draw_game_info()
   if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0))
     {
       echo " <tr>\n";
-      echo '     <td>' . T_('Main Time') . ":</td>\n";
+      echo '     <td>' . T_('Main time') . ":</td>\n";
       echo '     <td>' .  echo_time( $White_Maintime ) . "</td>\n";
       echo '     <td>' .  echo_time( $Black_Maintime ) . "</td>\n";
       echo "   </tr>\n";

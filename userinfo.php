@@ -45,7 +45,7 @@ require( "include/rating.php" );
 
    $row = mysql_fetch_array( $result );
 
-   start_page(T_('User Info'), true, $logged_in, $player_row );
+   start_page(T_('User info'), true, $logged_in, $player_row );
 
 
 

@@ -69,7 +69,7 @@ require_once( "include/form_functions.php" );
       tablehead(1, T_('ID'), 'ID') .
       tablehead(2, T_('Name'), 'Name') .
       tablehead(3, T_('Nick'), 'Handle') .
-      tablehead(4, T_('Rank Info')) .
+      tablehead(4, T_('Rank info')) .
       tablehead(5, T_('Rating'), 'Rating2', true) .
       tablehead(6, T_('Open for matches?')) .
       tablehead(7, T_('Games'), 'Games', true) .
@@ -79,7 +79,7 @@ require_once( "include/form_functions.php" );
       tablehead(11, T_('Lost'), 'Lost', true) .
       tablehead(12, T_('Percent'), 'Percent', true) .
       tablehead(13, T_('Activity'), 'ActivityLevel', true) .
-      tablehead(14, T_('Last Access'), 'Lastaccess', true) .
+      tablehead(14, T_('Last access'), 'Lastaccess', true) .
                 tablehead(15, T_('Last Moved'), 'Lastmove', true) .
                 "</tr>\n";
 
