@@ -18,31 +18,35 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
-
 require( "include/std_functions.php" );
 
-connect2mysql();
-
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-if( !$logged_in )
-   error("not_logged_in");
-
-
-if( $uid )
 {
-    $result = mysql_query( "SELECT Handle FROM Players WHERE ID=$uid" );
+   connect2mysql();
 
-    if( mysql_num_rows( $result ) == 1 )
-        {
-            extract(mysql_fetch_array($result));
-        }
+   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+
+   if( !$logged_in )
+      error("not_logged_in");
+
+   if( !$uid )
+   {
+      if( eregi("uid=([0-9]+)", $HTTP_REFERER, $result) )
+         $uid = $result[1];
+   }
+
+   if( $uid and $uid != $player_row["ID"] )
+   {
+      $result = mysql_query( "SELECT Handle FROM Players WHERE ID=$uid" );
+      
+      if( mysql_num_rows( $result ) == 1 )
+      {
+         extract(mysql_fetch_array($result));
+      }
+   }
+
+
+   start_page("Send Invitation", true, $logged_in, $player_row );
 }
-
-
-start_page("Send Invitation", true, $logged_in, $player_row );
-
 ?>
 
 <FORM name="loginform" action="send_message.php" method="POST">

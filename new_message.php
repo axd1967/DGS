@@ -20,28 +20,35 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 
-
-connect2mysql();
-
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-if( !$logged_in )
-   error("not_logged_in");
-
-
-if( $uid )
 {
-    $result = mysql_query( "SELECT Handle FROM Players WHERE ID=$uid" );
+   connect2mysql();
 
-    if( mysql_num_rows( $result ) == 1 )
-        {
-            extract(mysql_fetch_array($result));
-        }
+   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
+   if( !$logged_in )
+      error("not_logged_in");
+
+   if( !$uid )
+   {
+      if( eregi("uid=([0-9]+)", $HTTP_REFERER, $result) )
+         $uid = $result[1];
+   }
+
+
+   if( $uid and $uid != $player_row["ID"] )
+   {
+      $result = mysql_query( "SELECT Handle FROM Players WHERE ID=$uid" );
+
+      if( mysql_num_rows( $result ) == 1 )
+      {
+         extract(mysql_fetch_array($result));
+      }
+
+   }
+
+
+   start_page("Send Message", true, $logged_in, $player_row );
 }
-
-
-start_page("Send Message", true, $logged_in, $player_row );
 
 ?>
 
