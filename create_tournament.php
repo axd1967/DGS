@@ -28,7 +28,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-   if( is_null($_POST['name']) || is_null($_POST['description']) )
+   if( !isset($_POST['name'],$_POST['description']) )
      error("tournament_error_message_to_be_decided_later");
 
    $new_tour = Tournament::Create( $_POST['name'], $_POST['description'], $player_row['ID'] );

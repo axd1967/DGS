@@ -113,6 +113,8 @@ class Tournament
 
    /*! \brief An array consisting of player ids of users organizing this tournament. */
    var $ListOfOrganizers;
+   /*! \brief Cached value of organizers in html. */
+   var $ListOfOrganizersInHTML;
 
    /***
     * User functions.
@@ -128,6 +130,7 @@ class Tournament
    function Tournament( $ID = -1 )
       {
          $this->ID = $ID;
+         $this->ListOfOrganizersInHTML = null;
 
          if( $this->ID > 0 )
             $this->get_from_database();
@@ -194,7 +197,7 @@ class Tournament
             }
 
          $Rounds = array();
-         if( !is_null($row['FirstRound']) )
+         if( isset($row['FirstRound']) )
          {
             array_push($Rounds, $row['FirstRound']);
          }
@@ -215,6 +218,39 @@ class Tournament
     */
    function get_round( $round )
       {
+      }
+
+   /*!
+    * \brief Returns a string of organizers in html with links to the users.
+    *
+    * Caches the information in the $ListOfOrganizersInHTML variable.
+    * \return A string in html of organizers.
+    */
+   function get_organizers_html()
+      {
+         if( is_null( $this->ListOfOrganizersInHTML ) )
+         {
+            if( empty( $this->ListOfOrganizers ) )
+            {
+               $this->ListOfOrganizersInHTML = "";
+            }
+            else
+            {
+               $result = mysql_query( "SELECT ID, Name FROM Players " .
+                                      "WHERE ID IN (" .
+                                      implode( ",", $this->ListOfOrganizers ) .
+                                      ") ORDER BY Name" );
+               $res_html_array = array();
+               while( $row = mysql_fetch_array($result) )
+               {
+                  array_push($res_html_array,
+                             "<a href=\"userinfo.php?uid=" . $row['ID'] .
+                             "\">" . $row['Name'] . "</a>");
+               }
+               $this->ListOfOrganizersInHTML = implode(",", $res_html_array);
+            }
+         }
+         return $this->ListOfOrganizersInHTML;
       }
 
    /*! \privatesection */
