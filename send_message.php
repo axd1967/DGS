@@ -51,9 +51,17 @@ disable_cache();
    $opponent_ID = $opponent_row["ID"];
    $my_ID = $player_row["ID"];
 
-   if( $my_ID == $opponent_ID )
-      error("reciver_self");
+// Check if dispute game exists
+   if( $disputegid > 0 )
+   {
+      $result = mysql_query("SELECT ID FROM Games WHERE ID=$disputegid " .
+                            "AND Status='INVITED' AND " .
+                            "((Black_ID=$my_ID AND White_ID=$opponent_ID) OR " .
+                            "(Black_ID=$opponent_ID AND White_ID=$my_ID))");
 
+      if( mysql_num_rows($result) != 1 )
+         error('unknown_game');
+   }
 
 
 // Update database
@@ -102,7 +110,7 @@ disable_cache();
          if( $timeunit_can == 'months' )
             $byohours *= 30;
 
-         $byoperiods = $byostones_can;
+         $byoperiods = $byoperiods_can;
       }
       else if( $byoyomitype == 'FIS' )
       {
@@ -115,37 +123,48 @@ disable_cache();
          $byoperiods = 0;
       }
 
-      if( $rated != 'Y' )
+      if( $rated != 'Y' or $my_ID == $opponent_ID )
          $rated = 'N';
 
       if( $weekendclock != 'Y' )
          $weekendclock = 'N';
 
+      $query = "Black_ID=$Black_ID, " .
+         "White_ID=$White_ID, " .
+         "ToMove_ID=$Black_ID, " .
+         "Lastchanged=FROM_UNIXTIME($NOW), " .
+         "Size=$size, " .
+         "Handicap=$handicap, " .
+         "Komi=ROUND(2*($komi))/2, " .
+         "Maintime=$hours, " .
+         "Byotype='$byoyomitype', " .
+         "Byotime=$byohours, " .
+         "Byoperiods=$byoperiods, " .
+         "Black_Maintime=$hours, " .
+         "White_Maintime=$hours," .
+         "WeekendClock='$weekendclock', " .
+         "Rated='$rated'";
 
-      $result = mysql_query( "INSERT INTO Games SET " .
-                             "Black_ID=$Black_ID, " .
-                             "White_ID=$White_ID, " .
-                             "ToMove_ID=$Black_ID, " .
-                             "Lastchanged=FROM_UNIXTIME($NOW), " .
-                             "Size=$size, " .
-                             "Handicap=$handicap, " .
-                             "Komi=ROUND(2*$komi)/2, " .
-                             "Maintime=$hours, " .
-                             "Byotype='$byoyomitype', " .
-                             "Byotime=$byohours, " .
-                             "Byoperiods=$byoperiods, " .
-                             "Black_Maintime=$hours, " .
-                             "White_Maintime=$hours," .
-                             "WeekendClock='$weekendclock', " .
-                             "Rated='$rated'"
-         );
+      if( $disputegid > 0 )
+         $query = "UPDATE Games SET $query  WHERE ID=$disputegid LIMIT 1";
+      else
+         $query = "INSERT INTO Games SET $query";
+
+      $result = mysql_query( $query );
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_game");
 
-
-      $gid = mysql_insert_id();
-      $subject = "Game invitation";
+      if( $disputegid > 0 )
+      {
+         $gid = $disputegid;
+         $subject = "Game invitation dispute";
+      }
+      else
+      {
+         $gid = mysql_insert_id();
+         $subject = "Game invitation";
+      }
    }
    else if( $type == "Accept" )
    {

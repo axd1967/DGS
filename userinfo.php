@@ -107,8 +107,8 @@ require( "include/rating.php" );
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
         <td><B><A href=\"show_games.php?uid=$uid\">Show running games</A></B></td>
-        <td><B><A href=\"invite.php?uid=$uid\">Invite this user</A></B></td>
-        <td><B><A href=\"new_message.php?uid=$uid\">Send message to user</A></B></td>
+        <td><B><A href=\"message.php?mode=Invite&uid=$uid\">Invite this user</A></B></td>
+        <td><B><A href=\"message.php?mode=NewMessage&uid=$uid\">Send message to user</A></B></td>
         <td><B><A href=\"show_games.php?uid=$uid&finished=1\">Show finished games</A></B></td>
       </tr>
     </table>

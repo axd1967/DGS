@@ -107,7 +107,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             error("message_status_corrupt");
          }
 
-         echo "<td><A href=\"show_message.php?mid=" . $row["ID"] . "\">" .
+         echo "<td><A href=\"message.php?mode=ShowMessage&mid=" . $row["ID"] . "\">" .
             $row["sender"] . "</A></td>\n" .
             "<td>" . make_html_safe($row["Subject"]) . "</td>\n" .
             "<td>" . date($date_fmt2, $row["date"]) . "</td></tr>\n";

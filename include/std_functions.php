@@ -46,8 +46,8 @@ $ActivityForMove = 10.0;
 $ActiveLevel1 = 10.0;
 $ActiveLevel2 = 150.0;
 
-$RowsPerPage = 100;
-$MaxRowsPerPage = 130;
+$RowsPerPage = 50;
+$MaxRowsPerPage = 70;
 
 $has_sgf_alias = false;
 
@@ -60,6 +60,10 @@ $menu_fg_color='"#FFFC70"';
 $table_head_color='"#CCCCCC"';
 $table_row_color1='"#FFFFFF"';
 $table_row_color2='"#E0E8ED"';
+$table_row_color_del1='"#FFCFCF"';
+$table_row_color_del2='"#F0B8BD"';
+
+$h3_color='"#800000"';
 
 $buttonfiles = array('button0.gif','button1.gif','button2.gif','button3.gif',
                      'button4.gif','button5.gif','button6.gif','button7.gif',
@@ -189,7 +193,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 
    if( $logged_in and !$is_down )
-      echo '          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . _("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
+      echo '          <td colspan=4 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . _("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
    else
       echo '          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . _("Not logged in") . '</B></font></td>';
 
@@ -197,10 +201,10 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
         </tr>
         <tr bgcolor=' . $bg_color . ' align="center">
           <td><B><A href="' . $HOSTBASE . '/status.php">' . _("Status") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/messages.php">' . _("Messages") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/invite.php">' . _("Invite") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/list_messages.php">' . _("Messages") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/message.php?mode=Invite">' . _("Invite") . '</A></B></td>
           <td><B><A href="' . $HOSTBASE . '/users.php">' . _("Users") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/phorum/index.php">' . _("Forums") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/forum/index.php">' . _("Forums") . '</A></B></td>
           <td><B><A href="' . $HOSTBASE . '/docs.php">' . _("Docs") . '</A></B></td>
         </tr>
     </table>
@@ -218,7 +222,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 function end_page( $new_paragraph = true )
 {
-   global $time, $show_time, $HOSTBASE, $menu_bg_color, $menu_fg_color;
+   global $time, $show_time, $HOSTBASE, $menu_bg_color, $menu_fg_color, $bg_color;
 
    if( $new_paragraph )
       echo "<p>";
@@ -510,6 +514,54 @@ function echo_time($hours)
       echo $hours % 15 . '&nbsp;hour';
       if( $hours % 15 != 1 ) echo 's';
    }
+}
+
+function time_convert_to_longer_unit(&$time, &$unit)
+{
+   if( $unit == 'hours' and $time % 15 == 0 )
+   {
+      $unit = 'days';
+      $time /= 15;
+   }
+
+   if( $unit == 'days' and $time % 30 == 0 )
+   {
+      $unit = 'months';
+      $time /= 30;
+   }
+}
+
+// Makes url from a base page and some variable/value pairs
+// if $sep is true a '?' or '&' is added
+// Example:
+// make_url('test.php', false, 'a', 1, 'b, 'foo')  gives
+// 'test.php?a=1&b=foo'
+function make_url($page, $sep)
+{
+   $url = $page;
+
+   $args = func_num_args();
+
+   if( $args % 2 == 1 )
+      error("internal problem");
+
+   $separator = '?';
+   for( $i=2; $i<$args; $i+=2 )
+   {
+      $var = func_get_arg($i);
+      $value = func_get_arg($i+1);
+
+      if( $value )
+      {
+         $url .= $separator . $var . '=' . urlencode($value);
+         $separator = '&';
+      }
+   }
+
+   if( $sep )
+      $url .= $separator;
+
+   return $url;
 }
 
 function is_logged_in($hdl, $scode, &$row)

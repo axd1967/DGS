@@ -56,7 +56,7 @@ function item($text,$link,$working, $level,$last=false)
 
 
    echo "<table width=80% align=center><tr><td>\n";
-   echo "<center><h3><font color=\"#800000\">Site map</font></h3></center>";
+   echo "<center><h3><font color=$h3_color>Site map</font></h3></center>";
    echo "<table cellspacing=0 cellpadding=0 border=0><tr><td colspan=3>" .
       "<a href=\"index.php\"><font color=0C41C9>Welcome page</font></a></td></tr>\n";
 
@@ -69,19 +69,19 @@ function item($text,$link,$working, $level,$last=false)
             item("Edit bio", "edit_bio.php", true, 2);
             item("Change password", "edit_password.php", true, 2, true);
          }
-         item("Show message", "show_message.php", false, 1);
+         item("Show message", "message.php?mode=ShowMessage", false, 1);
          item("Game", "game.php", false, 1, true);
       }
 
       item("Messages", "messages.php", true, 0);
       {
-         item("Send a message", "new_message.php", true, 1);
-         item("Show message", "show_message.php", false, 1);
-         item("Show all messages", "messages.php?all=1", true, 1);
-         item("Show sent messages", "messages.php?sent=1", true, 1, true);
+         item("Send a message", "message.php", true, 1);
+         item("Show message", "message.php?mode=ShowMessage", false, 1);
+         item("Show all messages", "list_messages.php?all=1", true, 1);
+         item("Show sent messages", "list_messages.php?sent=1", true, 1, true);
       }
 
-      item("Invite", "invite.php", true, 0);
+      item("Invite", "message.php?mode=Invite", true, 0);
 
       item("Users", "users.php", true, 0);
       {
@@ -93,7 +93,7 @@ function item($text,$link,$working, $level,$last=false)
                item("Game", "game.php", false, 3);
                item("SGF file of game", "sgf.php", false, 3, true);
             }
-            item("Send a message", "new_message.php", true, 2, true);
+            item("Send a message", "message.php", true, 2, true);
          }
       }
 
