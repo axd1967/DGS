@@ -24,7 +24,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
-define('ALLOW_PROFIL_CHARSET', 1);
+define('ALLOW_PROFIL_CHARSET', 0);
 
 {
    $translation_groups =
