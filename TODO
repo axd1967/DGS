@@ -5,10 +5,6 @@
 
 * Introduction page
 
-* Allow for fixed handicap
-
-* Customizable time format
-
 * Installation information and scripts
 
 * Show message: link if it's a reply
@@ -33,13 +29,10 @@
 
 * Show number of games for players in users.php
 
-* Add title to show_games.php
 
 
 
 * Tournaments
-
-* Ratings
 
 * Rengo (team go)
 

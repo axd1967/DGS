@@ -277,7 +277,7 @@ function time_remaining($ticks, &$main, &$byotime, &$byoper, $startmaintime,
 
     $elapsed -= $main;
 
-    if( $main > 0 or $byoperiods < 0 ) // entering byoyomi
+    if( $main > 0 or $byoper < 0 ) // entering byoyomi
         {
             $byotime = $startbyotime;
             $byoper = $startbyoper;

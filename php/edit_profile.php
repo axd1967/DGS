@@ -73,12 +73,12 @@ start_page("Edit profile", true, $logged_in, $player_row );
         <input type="text" name="rating" value="<?php echo_rating( $player_row["Rating"], true); ?>" size="16" maxlength="16">
 <?php
 
- $vals = array('dragonrating', 'eurorating','eurorank', 'aga', 'agarating', 'igs', 'iytgg', 
-               'nngs', 'japan', 'china', 'korea');
+ $vals = array('dragonrating', 'eurorank', 'eurorating','aga', 'agarating', 'igs', 'igsrating',
+               'iytgg', 'nngs', 'nngsrating', 'japan', 'china', 'korea');
  
  echo html_build_select_box_from_array($vals, 'ratingtype', 'dragonrating', true);
 } 
-else echo $player_row["Rating"];
+else echo_rating( $player_row["Rating"] );
 ?>
          </TD>
       </TR>

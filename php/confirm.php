@@ -22,6 +22,7 @@ header ("Cache-Control: no-cache, must-revalidate, max_age=0");
 
 require( "include/std_functions.php" );
 require( "include/board.php" );
+require( "include/move.php" );
 
 if( !$gid )
 {
@@ -90,9 +91,7 @@ else
 
 $next_to_move = 3-$to_move;
 
-$Moves++;
-
-if( $Moves < $Handicap ) $next_to_move = BLACK;
+if( $Moves+1 < $Handicap ) $next_to_move = BLACK;
 
 $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
@@ -103,11 +102,14 @@ if( $message )
 
 // Update clock
 
+$hours = 'NULL';
+
 if( $Maintime > 0 or $Byotime > 0)
 {
 
   $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
- 
+  $hours = (int)($ticks / $tick_frequency);
+
   if( $to_move == BLACK )
     {
       time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
@@ -132,28 +134,31 @@ if( $Maintime > 0 or $Byotime > 0)
      "ClockUsed=$next_clockused, ";
 }
 
+$no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
+
+list($lastx,$lasty) = 
+make_array( $gid, $array, $msg, $Moves, NULL, $moves_result, $marked_dead, $no_marked_dead );
+
+$Moves++;
+
 switch( $action )
 {
  case 'move':
      {
+       check_move();
 
-         $prisoners = unserialize(urldecode($prisoners));
-         reset($prisoners);
+       $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
 
-         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Text ) VALUES ";
-
-         $nr_prisoners = 0;
-         while( list($dummy, list($x,$y)) = each($prisoners) )
+       while( list($dummy, list($x,$y)) = each($prisoners) )
              {
-                 $query .= "($Moves, \"NONE\", $x, $y, NULL), ";
-                 $nr_prisoners++;
+               $query .= "($Moves, \"NONE\", $x, $y, NULL, NULL), ";
              }
-
+       
 
          if( $message )
-             $query .= "($Moves, $to_move, $colnr, $rownr, \"$message\") ";
+             $query .= "($Moves, $to_move, $colnr, $rownr, $hours, \"$message\") ";
          else
-             $query .= "($Moves, $to_move, $colnr, $rownr, NULL) ";
+             $query .= "($Moves, $to_move, $colnr, $rownr, $hours, NULL) ";
 
 
          $game_query = "UPDATE Games SET " .
@@ -164,9 +169,9 @@ switch( $action )
 
          if( $nr_prisoners > 0 )
              if( $to_move == BLACK )
-                 $game_query .= "Black_Prisoners=" . ( $Black_Prisoners + $nr_prisoners ) . ", ";
+                 $game_query .= "Black_Prisoners=$Black_Prisoners, ";
              else
-                 $game_query .= "White_Prisoners=" . ( $White_Prisoners + $nr_prisoners ) . ", ";
+                 $game_query .= "White_Prisoners=$White_Prisoners, ";
 
          if( $nr_prisoners == 1 )
              $flags |= KO;
@@ -200,7 +205,8 @@ switch( $action )
          $query = "INSERT INTO Moves$gid SET " . 
               "MoveNr=$Moves, " .
               "Stone=$to_move, " .
-              "PosX=-1";
+              "PosX=-1, " .
+              "Hours=$hours";
 
          if( $message )
              $query .= ", Text=\"$message\"";
@@ -223,13 +229,15 @@ switch( $action )
                  exit;
              }
 
+         check_handicap();
+
          if( strlen( $stonestring ) != 2 * $Handicap + 1 )
              {
                  header("Location: error.php?err=wrong_number_of_handicap_stone");
                  exit;
              }
 
-         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Text ) VALUES ";
+         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
 
 
          for( $i=1; $i <= $Handicap; $i++ )
@@ -239,12 +247,12 @@ switch( $action )
 
                  if( $i == $Handicap )
                      if( $message )
-                         $query .= "($i, " . BLACK . ", $colnr, $rownr, \"$message\")";
+                         $query .= "($i, " . BLACK . ", $colnr, $rownr, $hours, \"$message\")";
                      else
-                         $query .= "($i, " . BLACK . ", $colnr, $rownr, NULL)";
+                         $query .= "($i, " . BLACK . ", $colnr, $rownr, $hours, NULL)";
                  
                  else
-                     $query .= "($i, " . BLACK . ", $colnr, $rownr, NULL), ";
+                     $query .= "($i, " . BLACK . ", $colnr, $rownr, NULL, NULL), ";
              }
 
 
@@ -260,9 +268,10 @@ switch( $action )
  case 'resign':
      {
          $query = "INSERT INTO Moves$gid SET " . 
-              "MoveNr=$Moves, " .
-              "Stone=$to_move, " .
-              "PosX=-3";
+            "MoveNr=$Moves, " .
+            "Stone=$to_move, " .
+            "PosX=-3, " .
+            "Hours=$hours";
 
          if( $message )
              $query .= ", Text=\"$message\"";
@@ -309,8 +318,7 @@ switch( $action )
                  exit;
              }
 
-         $prisoners = unserialize(urldecode($prisoners));
-         reset($prisoners);
+         check_done();
 
          $nr_prisoners = count($prisoners);
 
@@ -321,19 +329,19 @@ switch( $action )
                  $game_finished = true;
              }
 
-         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Text ) VALUES ";
+         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
 
 
          while( list($dummy, list($x,$y)) = each($prisoners) )
              {
-                 $query .= "($Moves, " . (9 - $to_move ) . ", $x, $y, NULL), ";
+                 $query .= "($Moves, " . (9 - $to_move ) . ", $x, $y, NULL, NULL), ";
              }
 
 
          if( $message )
-             $query .= "($Moves, $to_move, -2, NULL, \"$message\") ";
+             $query .= "($Moves, $to_move, -2, NULL, $hours, \"$message\") ";
          else
-             $query .= "($Moves, $to_move, -2, NULL, NULL) ";
+             $query .= "($Moves, $to_move, -2, NULL, $hours, NULL) ";
 
 
 

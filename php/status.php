@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
 require( "include/std_functions.php" );
+require( "include/rating.php" );
 
 connect2mysql();
 
@@ -36,11 +37,21 @@ $my_id = $player_row["ID"];
 
 start_page("Status", true, $logged_in, $player_row );
 
+echo "<center>";
+
+if( $msg )
+     echo "<p><b><font color=green>$msg</font></b><hr>";
+
     echo "
     <table border=3>
        <tr><td>Name:</td> <td>" . $player_row["Name"] . "</td></tr>
-       <tr><td>Userid:</td> <td>" . $player_row["Handle"] . "</td></tr>
-       <tr><td>Rank:</td> <td>" . $player_row["Rank"] . "</td></tr>
+       <tr><td>Userid:</td> <td>" . $player_row["Handle"] . "</td></tr>";
+
+    if( $player_row["RatingStatus"] ) echo "
+       <tr><td>Rating:</td> <td>";  echo_rating($player_row["Rating"]); echo "</td></tr>";
+
+    echo "
+       <tr><td>Rank info:</td> <td>" . $player_row["Rank"] . "</td></tr>
     </table>
     <p>";
 
@@ -131,7 +142,7 @@ echo "
     </table>
 ";
 
-
+echo "</center>";
 end_page(false);
 
 ?>

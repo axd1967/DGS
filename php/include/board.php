@@ -196,6 +196,8 @@ function draw_board($Size, &$array, $may_play, $gid,
 function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked_dead, 
                      $no_marked_dead = false )
 {
+    $array=NULL;
+  
     if( !$move ) $move = $max_moves;
 
     $result = mysql_query( "SELECT * FROM Moves$gid" );

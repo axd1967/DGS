@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
 require( "include/std_functions.php" );
+require( "include/rating.php" );
 
 if( !$uid )
 {
@@ -56,11 +57,16 @@ start_page("User Info", true, $logged_in, $player_row );
 
 
 
-echo "
+echo "<center>
     <table border=3>
        <tr><td>Name:</td> <td>" . $row["Name"] . "</td></tr>
-       <tr><td>Userid:</td> <td>" . $row["Handle"] . "</td></tr>
-       <tr><td>Rank:</td> <td>" . $row["Rank"] . "</td></tr>
+       <tr><td>Userid:</td> <td>" . $row["Handle"] . "</td></tr>";
+
+if( $row["RatingStatus"] ) echo "
+       <tr><td>Rating:</td> <td>";  echo_rating($row["Rating"]); echo "</td></tr>";
+
+    echo "
+       <tr><td>Rank info:</td> <td>" . $row["Rank"] . "</td></tr>
     </table>
     <p>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
@@ -71,6 +77,7 @@ echo "
         <td><B><A href=\"show_games.php?uid=$uid&finished=1\">Show finished games</A></B></td>
       </tr>
     </table>
+</center>
 ";
 
 

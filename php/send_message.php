@@ -201,11 +201,12 @@ else if( $type == "Accept" )
         }
 
     $result = mysql_query( "CREATE TABLE Moves$gid (" .
-                           "ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " .
-                           "MoveNr INT, " .
-                           "Stone INT NOT NULL, " .
-                           "PosX INT, " .
-                           "PosY INT, " .
+                           "ID SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, " .
+                           "MoveNr SMALLINT UNSIGNED, " .
+                           "Stone SMALLINT UNSIGNED NOT NULL, " .
+                           "PosX SMALLINT, " .
+                           "PosY SMALLINT, " .
+                           "Hours SMALLINT UNSIGNED NOT NULL, " .
                            "Text TEXT )" );
 
     $subject = "Game invitation accepted";
@@ -265,11 +266,8 @@ if( $opponent_row["flags"] & WANT_EMAIL and $opponent_row["Notify"] == 'NONE' )
                           "WHERE Handle='$to'" );
 }
 
+$msg = urlencode("Message sent!");
 
-start_page("Message Sent", true, $logged_in, $player_row );
-
-echo "Message sent!";
-
-end_page();
-
+header("Location: status.php?msg=$msg");
+exit;
 ?>

@@ -22,6 +22,8 @@ header ("Cache-Control: no-cache, must-revalidate, max_age=0");
 
 require( "include/std_functions.php" );
 require( "include/board.php" );
+require( "include/move.php" );
+require( "include/rating.php" );
 
 if( !$gid )
 {
@@ -38,9 +40,13 @@ $result = mysql_query( "SELECT Games.*, " .
                        "black.Name AS Blackname, " .
                        "black.Handle AS Blackhandle, " .
                        "black.Rank AS Blackrank, " .
+                       "black.Rating AS Blackrating, " .
+                       "black.RatingStatus AS Blackratingstatus, " .
                        "white.Name AS Whitename, " .
                        "white.Handle AS Whitehandle, " .
-                       "white.Rank AS Whiterank " .
+                       "white.Rank AS Whiterank, " .
+                       "white.Rating AS Whiterating, " .
+                       "white.RatingStatus AS Whiteratingstatus " .
                        "FROM Games, Players AS black, Players AS white " .
                        "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
 
@@ -142,62 +148,11 @@ switch( $action )
 
  case 'move':
      {
-         $colnr = ord($coord)-ord('a');
-         $rownr = ord($coord[1])-ord('a');
-
-         if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 
-         or $array[$colnr][$rownr] >= 1 )
-             {
-                 header("Location: error.php?err=illegal_position");
-                 exit;
-             }
-
-         $array[$colnr][$rownr] = $to_move;
-
-
-         $prisoners = array();
-         check_prisoners($colnr,$rownr, 3-$to_move, $Size, $array, $prisoners);
-         
-         
-         $nr_prisoners = count($prisoners);
-         
-         if( $to_move == BLACK )
-             $Black_Prisoners += $nr_prisoners;
-         else
-             $White_Prisoners += $nr_prisoners;
-
-         // Check for ko
-                  
-         if( $nr_prisoners == 1 and $flags & KO )
-             {
-                 list($dummy, list($x,$y)) = each($prisoners);
-
-                 if( $Last_X == $x and $Last_Y == $y )
-                     {
-                         header("Location: error.php?err=ko");
-                         exit;
-                     }
-             }
-
-         // Check for suicide
-         
-         $suicide_allowed = false;
-         
-         if( !has_liberty_check($colnr, $rownr, $Size, $array, $prisoners, $suicide_allowed) )
-             {
-                 if(!$suicide_allowed)
-                     {
-                         header("Location: error.php?err=suicide");
-                         exit;
-                     }
-             }
-         
-
-         // Ok, all tests passed.
-         
-         $Moves++;
-         $Last_X = $colnr;
-         $Last_Y = $rownr;
+       check_move();
+       
+       $Moves++;
+       $Last_X = $colnr;
+       $Last_Y = $rownr;
      }
      break;
 
@@ -209,50 +164,8 @@ switch( $action )
                  exit;
              }
 
-         if( !$stonestring ) $stonestring = "1";
+         check_handicap();
 
-         // add killed stones to array
-         
-         $l = strlen( $stonestring );
-
-         for( $i=1; $i < $l; $i += 2 )
-             {
-                 $colnr = ord($stonestring[$i])-ord('a');
-                 $rownr = ord($stonestring[$i+1])-ord('a');
-                 
-                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 or 
-                     $array[$colnr][$rownr] )
-                     {
-                         header("Location: error.php?err=illegal_position");
-                         exit;
-                     }
-
-                 $array[$colnr][$rownr] = BLACK;
-             }
-
-         if( $coord )
-             {
-                 $colnr = ord($coord)-ord('a');
-                 $rownr = ord($coord[1])-ord('a');
-
-                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 or 
-                     $array[$colnr][$rownr] )
-                     {
-                         header("Location: error.php?err=illegal_position");
-                         exit;
-                     }
-
-                 $array[$colnr][$rownr] = BLACK;
-                 $stonestring .= chr(ord('a') + $colnr) . chr(ord('a') + $rownr);
-             }
-
-         if( (strlen( $stonestring ) / 2) < $Handicap )
-             {
-                 $enable_message = false;
-                 $extra_message = "<font color=\"green\">Place your handicap stones, please!</font>";
-             }
-
-         $handi = true;
      }
      break;
 
@@ -292,56 +205,12 @@ switch( $action )
                   header("Location: error.php?err=invalid_action");
                   exit;
              }
+         
+         check_remove();
 
          $enable_message = false;
 
-         if( !$stonestring ) $stonestring = "1";
-
-         // add killed stones to array
-         
-         $l = strlen( $stonestring );
-
-         for( $i=1; $i < $l; $i += 2 )
-             {
-                 $colnr = ord($stonestring[$i])-ord('a');
-                 $rownr = ord($stonestring[$i+1])-ord('a');
-                 
-                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
-                     {
-                         header("Location: error.php?err=illegal_position");
-                         exit;
-                     }
-                 $stone = $array[$colnr][$rownr];
-                 if( $stone == BLACK or $stone == WHITE )
-                     $array[$colnr][$rownr] = $stone + 6;
-                 else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD )
-                     $array[$colnr][$rownr] = $stone - 6;
-             }
-
-         if( $coord )
-             {
-                 $colnr = ord($coord)-ord('a');
-                 $rownr = ord($coord[1])-ord('a');
-
-                 $stone = $array[$colnr][$rownr];
-                 if(( $stone != BLACK and $stone != WHITE and 
-                      $stone != BLACK_DEAD and $stone != WHITE_DEAD ) or
-                    $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
-                     {
-                         header("Location: error.php?err=illegal_position");
-                         exit;
-                     }
-                 
-                 $prisoners = array();
-                 remove_dead( $colnr, $rownr, $array, $prisoners );
-
-                 while( list($dummy, list($x,$y)) = each($prisoners) )
-                     {
-                         $stonestring .= chr(ord('a') + $x) . chr(ord('a') + $y);
-                     }
-             }
-
-         $extra_message = "<font color=\"green\">Please remove dead stones and click 'done' when finished.</font>";
+         $extra_message = "<font color=\"green\">Please mark dead stones and click 'done' when finished.</font>";
      }
      break;
 
@@ -353,47 +222,7 @@ switch( $action )
                   exit;
              }
 
-
-         if( !$stonestring ) $stonestring = "1";
-
-         // add killed stones to array
-         
-         $l = strlen( $stonestring );
-         $index = array();
-
-         for( $i=1; $i < $l; $i += 2 )
-             {
-                 $colnr = ord($stonestring[$i])-ord('a');
-                 $rownr = ord($stonestring[$i+1])-ord('a');
-                 
-                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
-                     {
-                         header("Location: error.php?err=illegal_position");
-                         exit;
-                     }
-                 if( $index[$colnr][$rownr] )
-                     unset($index[$colnr][$rownr]);
-                 else
-                     $index[$colnr][$rownr] = TRUE;
-
-                 $stone = $array[$colnr][$rownr];
-                 if( $stone == BLACK or $stone == WHITE )
-                     $array[$colnr][$rownr] = $stone + 6;
-                 else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD )
-                     $array[$colnr][$rownr] = $stone - 6;
-             }
-         
-         $prisoners = array();
-         while( list($x, $sub) = each($index) )
-             {
-                 while( list($y, $val) = each($sub) )
-                     {
-                         array_push($prisoners, array($x,$y));
-                     }
-             }
-
-         $score = create_territories_and_score( $Size, $array );
-         $score += $White_Prisoners - $Black_Prisoners + $Komi;
+         check_done();
 
          $extra_message = "<font color=\"blue\">Score: " . 
               score2text($score, true) . "</font>";
@@ -438,19 +267,9 @@ if( $enable_message )
 <?php 
 if( $action == 'move' ) 
     { 
-        echo "
-      <input type=\"hidden\" name=\"prisoners\" value=\"" . urlencode(serialize($prisoners)) . "\">
-      <input type=\"hidden\" name=\"colnr\" value=\"$colnr\">
-      <input type=\"hidden\" name=\"rownr\" value=\"$rownr\">\n";
+        echo "       <input type=\"hidden\" name=\"coord\" value=\"$coord\">\n";
     }
-else if( $action == 'done' )
-    {
-        echo "
-      <input type=\"hidden\" name=\"prisoners\" value=\"" . urlencode(serialize($prisoners)) . "\">
-      <input type=\"hidden\" name=\"score\" value=\"$score\">\n";
-
-    }
-else if( $action == 'handicap' )
+else if( $action == 'done' or $action == 'handicap' )
     {
         echo "<input type=\"hidden\" name=\"stonestring\" value=\"" . $stonestring . "\">\n";
     } 
@@ -482,8 +301,14 @@ else if( $action == 'handicap' )
           <td>Name:</td>
           <td><A href="userinfo.php?uid=<?php echo "$White_ID\">$Whitename ($Whitehandle)"; ?></A></td>
           <td><A href="userinfo.php?uid=<?php echo "$Black_ID\">$Blackname ($Blackhandle)"; ?></A></td>
+
         </tr><tr>
-          <td>Rank:</td>
+          <td>Rating:</td>
+          <td><?php echo_rating( $Whiterating ); ?></td>
+          <td><?php echo_rating( $Blackrating ); ?></td>
+
+        </tr><tr>
+          <td>Rank info:</td>
           <td><?php echo( $Whiterank ); ?></td>
           <td><?php echo( $Blackrank ); ?></td>
           

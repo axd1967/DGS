@@ -98,35 +98,64 @@ function a($rating)
 // http://www.european-go.org/rating/gor.html
 
 
-function update_rating(&$rating_A, &$rating_B, $result)
+function change_rating(&$rating_A, &$rating_B, $result, $size, $komi, $handicap)
 {
+  echo "$rating_A\n$rating_B\n";
+
   $e = 0.014;
 
-  $D = abs($rating_B - $rating_A);
+  $D = $rating_A - $rating_B;
 
-  if( $rating_A > $rating_B )
+  if( $handicap > 0 )
+    $D -= 100 * $handicap - 50;
+
+  $D += 100.0 * ($komi - 6.5) / 13.0;
+
+  if( $D > 0 )
     {
       $SEB = 1.0/(1.0+exp($D/a($rating_B)));
       $SEA = 1.0-$SEB;
     }
   else
     {
-      $SEA = 1.0/(1.0+exp($D/a($rating_A)));
+      $SEA = 1.0/(1.0+exp(-$D/a($rating_A)));
       $SEB = 1.0-$SEA;
     }
 
   $SEA *= 1-$e;
   $SEB *= 1-$e;
 
-  $conA = con($rating_A); 
-  $conB = con($rating_B); 
+  $sizefactor = (19 - abs($size-19))*(19 - abs($size-19)) / (19*19);
+
+  $conA = con($rating_A) * $sizefactor;
+  $conB = con($rating_B) * $sizefactor;
 
   $rating_A += $conA * ($result - $SEA);
   $rating_B += $conB * (1-$result - $SEB);
 }
 
-function echo_rating($rating, $show_percent)
+function update_rating(&$wRating, &$bRating, $score, $size, $komi, $handicap, 
+                       $gid, $Black_ID, $White_ID)
 {
+  change_rating($wRating, $bRating, $result, $size, $komi, $handicap);
+  $result = 0.5;
+  if( $Score > 0 ) $result = 1.0;
+  if( $Score < 0 ) $result = 0.0;
+
+  echo "White rating = $wRating, black rating = $bRating\n";
+
+  mysql_query( "UPDATE Games SET Lastchanged=Lastchanged, Rated='DONE' WHERE ID=$gid" );
+  mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, Rating=$bRating, " .
+               "RatingStatus='RATED' WHERE ID=$Black_ID" );
+  mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, Rating=$wRating, " .
+               "RatingStatus='RATED' WHERE ID=$White_ID" );
+
+}
+
+function echo_rating($rating, $show_percent=true)
+{
+  if( !isset($rating) ) return '';
+
   $rank_val = round($rating/100);
 
   if( $rank_val > 20.5 )
@@ -140,11 +169,22 @@ function echo_rating($rating, $show_percent)
 
   if( $show_percent ) 
     {
-      $percent = round($rating*2 - $rank_val*200);
+      $percent = round($rating - $rank_val*100);
       echo ' ('. ( $percent > 0 ? '+' : '') . $percent . '%)';
     }
 }
 
+function read_rating($string)
+{
+  $string = strtolower($string);
+  $pattern = "/^\s*([1-9][0-9]*)\s*(k|d|kyu|dan|gup)\s*(\(?\s*([+-]?[0-9]+\s*)%\s*\)?\s*)?$/";
+
+  if( !preg_match($pattern, $string, $matches) )
+    return null;
+
+  $kyu = ( $matches[2] == 'dan' || $matches[2] == 'd' ) ? 2 : 1;
+   return rank_to_rating($matches[1], $kyu) + $matches[4];
+}
 
 function rank_to_rating($val, $kyu)
 {
@@ -166,6 +206,12 @@ function rank_to_rating($val, $kyu)
 
 function convert_to_rating($string, $type)
 {
+  $max_start_rating = 2600;
+  $min_start_rating = -900;
+
+  if( empty($string) )
+    return null;
+
   $string = strtolower($string);
   $val = doubleval($string);
 
@@ -174,9 +220,37 @@ function convert_to_rating($string, $type)
   if( strpos($string, 'd') > 0 )
       $kyu = 2;
 
+  $igs_table[0]['KEY'] = -100;
+  $igs_table[0]['VAL'] = 500;
+  
+  $igs_table[1]['KEY'] = 600;
+  $igs_table[1]['VAL'] = 1000;
+  
+  $igs_table[2]['KEY'] = 1200;
+  $igs_table[2]['VAL'] = 1500;
+  
+  $igs_table[3]['KEY'] = 1900;
+  $igs_table[3]['VAL'] = 2100;
+  
+  $igs_table[4]['KEY'] = 2200;
+  $igs_table[4]['VAL'] = 2400;
+
+
   switch( $type )
     {
     case 'dragonrating':
+      {
+        $rating = read_rating($string);
+
+        if( !$rating )
+          {
+            header("Location: error.php?err=rating_not_rank");
+            exit;
+          } 
+        
+      }
+      break;
+
     case 'eurorating':
       {
         if( $kyu > 0 )
@@ -225,23 +299,19 @@ function convert_to_rating($string, $type)
     case 'igs':
       {
         $rating = rank_to_rating($val, $kyu);
+        $rating = interpolate($rating, $igs_table, true);
+      }
+      break;
+
+    case 'igsrating':
+      {
+        if( $kyu > 0 )
+          {
+            header("Location: error.php?err=rating_not_rank");
+            exit;
+          } 
         
-        $igs_table[0]['KEY'] = -300;
-        $igs_table[0]['VAL'] = 500;
-        
-        $igs_table[1]['KEY'] = 400;
-        $igs_table[1]['VAL'] = 1000;
-
-        $igs_table[2]['KEY'] = 1100;
-        $igs_table[2]['VAL'] = 1500;
-
-        $igs_table[3]['KEY'] = 1900;
-        $igs_table[3]['VAL'] = 2100;
-
-        $igs_table[4]['KEY'] = 2200;
-        $igs_table[4]['VAL'] = 2400;
-        
-
+        $rating = $val*100 - 1130 ;
         $rating = interpolate($rating, $igs_table, true);
       }
       break;
@@ -255,6 +325,18 @@ function convert_to_rating($string, $type)
       }
       break;
       
+    case 'nngsrating':
+      {
+        if( $kyu > 0 )
+          {
+            header("Location: error.php?err=rating_not_rank");
+            exit;
+          } 
+        
+        $rating = $val - 900;
+        
+      }
+      break;
 
     case 'japan':
       {
@@ -287,6 +369,9 @@ function convert_to_rating($string, $type)
       header("Location: error.php?err=wrong_rank_type");
       exit;
     }
+
+  if( $rating > $max_start_rating ) $rating = $max_start_rating;
+  if( $rating < $min_start_rating ) $rating = $min_start_rating;
 
   return $rating;
 }

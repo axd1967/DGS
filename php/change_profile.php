@@ -70,12 +70,12 @@ if( $action == "Change profile" )
             $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
         }
 
-    if( $player_row["RatingStatus"] != 'RATED' and
-    ( $ratingtype != 'dragonrating' or abs($rating - $player_row["Rating"]) > 0.005 ) )
+    
+    $newrating = convert_to_rating($rating, $ratingtype);
+
+    if( $player_row["RatingStatus"] != 'RATED' and $newrating and
+    ( $ratingtype != 'dragonrating' or abs($newrating - $player_row["Rating"]) > 0.005 ) )
       {
-
-        $newrating = convert_to_rating($rating, $ratingtype);
-
         // TODO: check if reasonable
         $query .= "Rating=$newrating, " .
            "RatingStatus='INIT', ";
@@ -88,12 +88,10 @@ if( $action == "Change profile" )
     
     mysql_query( $query );
 
-    start_page("Profile updated", true, $logged_in, $player_row );
+    $msg = urlencode("Profile updated!");
 
-    echo "Profile updated!\n";
-
-    end_page();
-    exit();
+    header("Location: status.php?msg=$msg");
+    exit;
 }
 else if( $action == "Change password" )
 {
