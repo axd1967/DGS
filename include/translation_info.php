@@ -71,10 +71,14 @@ array( 'Admin', 'Common', 'Documentation', 'Edit bio',
        'Edit password', 'Edit profile', 'Error',
        'Game', 'Index', 'Introduction', 'Language',
        'Links', 'Messages', 'Misc', 'Register',
-       'Site map', 'Status', 'Users' );
+       'Site map', 'Status', 'Users', 'Waiting room' );
 
 $translation_info =
 array(
+      /* Found in these files: waiting_room.php */
+      '#Games' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
       /* Found in these files: include/message_functions.php */
       '%s per %s stones' =>
       array( 'Groups' => array( 'Messages' ) ),
@@ -111,6 +115,10 @@ array(
       'Added user %s as translator for language %s.' =>
       array( 'Groups' => array( 'Admin' ) ),
 
+      /* Found in these files: waiting_room.php */
+      'Add Game' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
       /* Found in these files: admin.php */
       'Add language' =>
       array( 'Groups' => array( 'Admin' ) ),
@@ -122,6 +130,10 @@ array(
       /* Found in these files: admin.php */
       'Add language for translator' =>
       array( 'Groups' => array( 'Admin' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'Add new game' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: admin.php, include/std_functions.php */
       'Admin' =>
@@ -147,7 +159,7 @@ array(
       'A more complete list of servers' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/std_functions.php */
+      /* Found in these files: include/std_functions.php, waiting_room.php */
       'and' =>
       array( 'Groups' => array( 'Common' ) ),
 
@@ -267,6 +279,10 @@ array(
       'Colors' =>
       array( 'Groups' => array( 'Common', 'Game', 'Messages' ) ),
 
+      /* Found in these files: waiting_room.php */
+      'Comment' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
       /* Found in these files: links.php */
       'Common Japanese Go Terms' =>
       array( 'Groups' => array( 'Links' ) ),
@@ -282,6 +298,10 @@ array(
       /* Found in these files: people.php */
       'Contributors to Dragon' =>
       array( 'Groups' => array( 'Documentation' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'Conventional' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: include/message_functions.php */
       'Conventional handicap (komi 0.5 if not even)' =>
@@ -315,7 +335,7 @@ array(
       'daily snapshot of the cvs' =>
       array( 'Groups' => array( 'Documentation' ) ),
 
-      /* Found in these files: include/rating.php */
+      /* Found in these files: include/rating.php, waiting_room.php */
       'dan' =>
       array( 'Groups' => array( 'Common' ) ),
 
@@ -342,6 +362,10 @@ array(
       /* Found in these files: list_messages.php */
       'Del' =>
       array( 'Groups' => array( 'Messages' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'Delete' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: list_messages.php */
       'Delete all' =>
@@ -383,7 +407,7 @@ array(
       'Done' =>
       array( 'Groups' => array( 'Game' ) ),
 
-      /* Found in these files: include/message_functions.php */
+      /* Found in these files: include/message_functions.php, waiting_room.php */
       'Double game' =>
       array( 'Groups' => array( 'Messages' ) ),
 
@@ -439,7 +463,7 @@ array(
       'European shop' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/message_functions.php */
+      /* Found in these files: include/message_functions.php, waiting_room.php */
       'Even game with nigiri' =>
       array( 'Groups' => array( 'Messages' ) ),
 
@@ -519,6 +543,14 @@ array(
       'Game' =>
       array( 'Groups' => array( 'Common', 'Game' ) ),
 
+      /* Found in these files: add_to_waitingroom.php */
+      'Game added!' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
+      /* Found in these files: join_waitingroom_game.php */
+      'Game deleted!' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
       /* Found in these files: include/message_functions.php */
       'Game ID' =>
       array( 'Groups' => array( 'Game', 'Messages' ) ),
@@ -526,6 +558,10 @@ array(
       /* Found in these files: edit_profile.php */
       'Game id button' =>
       array( 'Groups' => array( 'Edit profile' ) ),
+
+      /* Found in these files: join_waitingroom_game.php */
+      'Game joined!' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: edit_bio.php */
       'Game preferences' =>
@@ -567,7 +603,7 @@ array(
       'Go Teaching Ladder' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/message_functions.php, include/move.php, show_games.php, status.php */
+      /* Found in these files: include/message_functions.php, include/move.php, show_games.php, status.php, waiting_room.php */
       'Handicap' =>
       array( 'Groups' => array( 'Messages' ) ),
 
@@ -618,6 +654,10 @@ array(
       /* Found in these files: show_games.php, status.php, users.php */
       'ID' =>
       array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'If yes, rating between' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: forgot.php */
       'If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.' =>
@@ -687,6 +727,10 @@ array(
       'jigo' =>
       array( 'Groups' => array( 'Users' ) ),
 
+      /* Found in these files: waiting_room.php */
+      'Join' =>
+      array( 'Groups' => array( 'Common', 'Waiting room' ) ),
+
       /* Found in these files: links.php */
       'Kiseido' =>
       array( 'Groups' => array( 'Links' ) ),
@@ -695,11 +739,11 @@ array(
       'Kiseido Go Server' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/message_functions.php, include/move.php, show_games.php, status.php */
+      /* Found in these files: include/message_functions.php, include/move.php, show_games.php, status.php, waiting_room.php */
       'Komi' =>
       array( 'Groups' => array( 'Game', 'Messages' ) ),
 
-      /* Found in these files: include/rating.php */
+      /* Found in these files: include/rating.php, waiting_room.php */
       'kyu' =>
       array( 'Groups' => array( 'Common' ) ),
 
@@ -711,12 +755,12 @@ array(
       'Language name (i.e. English)' =>
       array( 'Groups' => array( 'Admin' ) ),
 
-      /* Found in these files: userinfo.php */
-      'Last access' =>
-      array( 'Groups' => array( 'Users' ) ),
-
       /* Found in these files: users.php */
       'Last Access' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: userinfo.php */
+      'Last access' =>
       array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: show_games.php, status.php */
@@ -759,13 +803,13 @@ array(
       'Lots of info on go' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/message_functions.php */
-      'Main time' =>
-      array( 'Groups' => array( 'Game', 'Messages' ) ),
-
       /* Found in these files: include/move.php */
       'Main Time' =>
       array( 'Groups' => array( 'Game' ) ),
+
+      /* Found in these files: include/message_functions.php */
+      'Main time' =>
+      array( 'Groups' => array( 'Game', 'Messages' ) ),
 
       /* Found in these files: include/message_functions.php */
       'Manual setting' =>
@@ -827,7 +871,7 @@ array(
       'My user info' =>
       array( 'Groups' => array( 'Site map' ) ),
 
-      /* Found in these files: include/move.php, status.php, userinfo.php, users.php */
+      /* Found in these files: include/move.php, status.php, userinfo.php, users.php, waiting_room.php */
       'Name' =>
       array( 'Groups' => array( 'Status' ) ),
 
@@ -855,7 +899,7 @@ array(
       'next page' =>
       array( 'Groups' => array( 'Game', 'Messages' ) ),
 
-      /* Found in these files: show_games.php, status.php, users.php */
+      /* Found in these files: show_games.php, status.php, users.php, waiting_room.php */
       'Nick' =>
       array( 'Groups' => array( 'Status', 'Users' ) ),
 
@@ -894,6 +938,10 @@ array(
       /* Found in these files: include/std_functions.php */
       'Not logged in' =>
       array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'Number of games to add' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: edit_bio.php */
       'Occupation' =>
@@ -979,6 +1027,10 @@ array(
       'plans for future improvements' =>
       array( 'Groups' => array( 'Documentation' ) ),
 
+      /* Found in these files: waiting_room.php */
+      'Players waiting' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
       /* Found in these files: register.php */
       'Please enter data' =>
       array( 'Groups' => array( 'Register' ) ),
@@ -1003,6 +1055,10 @@ array(
       'Profile updated!' =>
       array( 'Groups' => array( 'Edit profile' ) ),
 
+      /* Found in these files: waiting_room.php */
+      'Proper' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
       /* Found in these files: include/message_functions.php */
       'Proper handicap' =>
       array( 'Groups' => array( 'Messages' ) ),
@@ -1019,13 +1075,17 @@ array(
       'Rank Info' =>
       array( 'Groups' => array( 'Users' ) ),
 
-      /* Found in these files: include/message_functions.php, include/move.php */
+      /* Found in these files: include/message_functions.php, include/move.php, waiting_room.php */
       'Rated' =>
       array( 'Groups' => array( 'Game' ) ),
 
-      /* Found in these files: edit_profile.php, include/move.php, status.php, userinfo.php, users.php */
+      /* Found in these files: edit_profile.php, include/move.php, status.php, userinfo.php, users.php, waiting_room.php */
       'Rating' =>
       array( 'Groups' => array( 'Common', 'Edit profile', 'Status' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'Rating range' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: site_map.php */
       'Read forum' =>
@@ -1054,6 +1114,10 @@ array(
       /* Found in these files: list_messages.php, status.php */
       'Reply!' =>
       array( 'Groups' => array( 'Messages', 'Status' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'Require rated opponent' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: game.php */
       'Resign' =>
@@ -1094,6 +1158,10 @@ array(
       /* Found in these files: links.php */
       'Scot\'s Go Page' =>
       array( 'Groups' => array( 'Links' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'Seems to be empty at the moment.' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: admin.php */
       'Select language to make user translator for that language.' =>
@@ -1191,7 +1259,7 @@ array(
       'Site map' =>
       array( 'Groups' => array( 'Misc' ) ),
 
-      /* Found in these files: include/message_functions.php, show_games.php, status.php */
+      /* Found in these files: include/message_functions.php, show_games.php, status.php, waiting_room.php */
       'Size' =>
       array( 'Groups' => array( 'Game', 'Messages' ) ),
 
@@ -1209,6 +1277,10 @@ array(
 
       /* Found in these files: error.php */
       'Sorry, couldn\'t find the reciever of your message. Make sure to use the userid, not the full name.' =>
+      array( 'Groups' => array( 'Error' ) ),
+
+      /* Found in these files: error.php */
+      'Sorry, couldn\'t find this waiting room game. Probably someone has already joined it.' =>
       array( 'Groups' => array( 'Error' ) ),
 
       /* Found in these files: error.php */
@@ -1340,7 +1412,15 @@ array(
       array( 'Groups' => array( 'Error' ) ),
 
       /* Found in these files: error.php */
+      'Sorry, you are not in the specified rating range.' =>
+      array( 'Groups' => array( 'Error' ) ),
+
+      /* Found in these files: error.php */
       'Sorry, you can\'t invite yourself.' =>
+      array( 'Groups' => array( 'Error' ) ),
+
+      /* Found in these files: error.php */
+      'Sorry, you can\'t join your own game.' =>
       array( 'Groups' => array( 'Error' ) ),
 
       /* Found in these files: error.php */
@@ -1470,7 +1550,7 @@ The reasons for this problem could be any of the following:
       'Thread list' =>
       array( 'Groups' => array( 'Site map' ) ),
 
-      /* Found in these files: include/move.php */
+      /* Found in these files: include/move.php, waiting_room.php */
       'Time limit' =>
       array( 'Groups' => array( 'Game' ) ),
 
@@ -1486,13 +1566,13 @@ The reasons for this problem could be any of the following:
       'To (userid)' =>
       array( 'Groups' => array( 'Messages' ) ),
 
-      /* Found in these files: site_map.php */
-      'Todo list' =>
-      array( 'Groups' => array( 'Site map' ) ),
-
       /* Found in these files: docs.php */
       'To do list' =>
       array( 'Groups' => array( 'Documentation' ) ),
+
+      /* Found in these files: site_map.php */
+      'Todo list' =>
+      array( 'Groups' => array( 'Site map' ) ),
 
       /* Found in these files: index.php */
       'To look around, use %s.' =>
@@ -1534,13 +1614,13 @@ The reasons for this problem could be any of the following:
       'Userid' =>
       array( 'Groups' => array( 'Common', 'Edit profile', 'Register', 'Status' ) ),
 
-      /* Found in these files: show_games.php, site_map.php */
-      'User info' =>
-      array( 'Groups' => array( 'Game' ) ),
-
       /* Found in these files: userinfo.php */
       'User Info' =>
       array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: show_games.php, site_map.php */
+      'User info' =>
+      array( 'Groups' => array( 'Game' ) ),
 
       /* Found in these files: include/std_functions.php, site_map.php, users.php */
       'Users' =>
@@ -1553,6 +1633,14 @@ The reasons for this problem could be any of the following:
       /* Found in these files: links.php */
       'Very well written introduction by the British Go Association.' =>
       array( 'Groups' => array( 'Links' ) ),
+
+      /* Found in these files: include/std_functions.php, waiting_room.php */
+      'Waiting room' =>
+      array( 'Groups' => array( 'Common', 'Waiting room' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'Weekend Clock' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
 
       /* Found in these files: site_map.php */
       'Welcome page' =>
@@ -1581,6 +1669,10 @@ The reasons for this problem could be any of the following:
       /* Found in these files: include/message_functions.php */
       'with' =>
       array( 'Groups' => array( 'Messages' ) ),
+
+      /* Found in these files: include/std_functions.php */
+      'with %s extra per move' =>
+      array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: docs.php */
       'with answers' =>
