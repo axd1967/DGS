@@ -74,7 +74,7 @@ require( "include/rating.php" );
 
 // set me to black and swap later if necessary
 
-   $clock_used_white = ( $OnVacation > 0 ? -1 : $ClockUsed);
+   $clock_used_white = ( $OnVacation > 0 ? -1 : $ClockUsed );
    $clock_used_black =  ( $player_row['OnVacation'] > 0 ? -1 : $player_row["ClockUsed"] );
 
    $opponent_rating = $Rating;

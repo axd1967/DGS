@@ -205,14 +205,14 @@ function add_new_game_form()
    for($i=9; $i>0; $i--)
       $rating_array["$i dan"] = $i . ' ' . T_('dan');
 
-   for($i=1; $i<=40; $i++)
+   for($i=1; $i<=30; $i++)
       $rating_array["$i kyu"] = $i . ' ' . T_('kyu');
 
 
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
                                   'CHECKBOX', 'must_be_rated', 'Y', "", false,
                                   'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('If yes, rating between'),
-                                  'SELECTBOX', 'rating1', 1, $rating_array, '40 kyu', false,
+                                  'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
                                   'TEXT', T_('and'),
                                   'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
 
