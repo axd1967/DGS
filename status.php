@@ -133,7 +133,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," .
        "UNIX_TIMESTAMP(Lastchanged) AS Time, " .
        "(White_ID=$uid)+1 AS Color, " .
-       "opponent.Name, opponent.Handle, opponent.ID AS pid " .
+       "opponent.Name, opponent.Handle, opponent.Rating, opponent.ID AS pid " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
        "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$uid " .
@@ -155,6 +155,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          tablehead(2, T_('sgf')) .
          tablehead(3, T_('Opponent')) .
          tablehead(4, T_('Nick')) .
+         tablehead(16, T_('Rating')) .
          tablehead(5, T_('Color')) .
          tablehead(6, T_('Size')) .
          tablehead(7, T_('Handicap')) .
@@ -187,6 +188,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          if( (1 << 3) & $column_set )
             echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Handle) . "</font></a></td>\n";
+         if( (1 << 15) & $column_set )
+            echo "<td>" . echo_rating($Rating) . "&nbsp;</td>\n";
          if( (1 << 4) & $column_set )
             echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
          if( (1 << 5) & $column_set )
