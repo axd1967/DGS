@@ -133,10 +133,9 @@ function set_cookies($uid, $code)
     setcookie ("sessioncode", $code, time()+$session_duration, "$SUB_PATH" );
 }
 
+
 function make_html_safe(&$msg)
 {
-
-
 // Filter out HTML code
 $msg = htmlspecialchars($msg);
 
@@ -147,10 +146,8 @@ $msg = ereg_replace("\r","",$msg);
 $msg = ereg_replace("\n\n","<P>",$msg);
 // Handle line breaks
 $msg = ereg_replace("\n","<BR>",$msg);
-
-
-
 }
+
 
 function is_logged_in($hdl, $scode, &$row)
 {
