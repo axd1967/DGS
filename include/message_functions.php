@@ -134,9 +134,9 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 
    $color_array = array( 'White' => T_('White'), 'Black' => T_('Black') );
 
-   $handi_array=array( 0 => 0 );
-   for( $bs = 2; $bs <= 20; $bs++ )
-     $handi_array[$bs]=$bs;
+   $handi_stones=array( 0 => 0 );
+   for( $bs = 2; $bs <= MAX_HANDICAP; $bs++ )
+     $handi_stones[$bs]=$bs;
 
 
    $mform->add_row( array( 'SPACE' ) );
@@ -154,7 +154,7 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
                               'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('My color'),
                               'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
                               'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
-                              'SELECTBOX', 'handicap', 1, $handi_array, $Handicap, false,
+                              'SELECTBOX', 'handicap', 1, $handi_stones, $Handicap, false,
                               'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
                               'TEXTINPUT', 'komi_m', 5, 5, $Komi ) );
    }

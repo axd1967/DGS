@@ -143,6 +143,8 @@ define("SMOOTH_EDGE",0x10);
 
 define('MIN_BOARD_SIZE',5);
 define('MAX_BOARD_SIZE',25);
+define('MAX_KOMI_RANGE',200);
+define('MAX_HANDICAP',20);
 
 
 define("ADMIN_TRANSLATORS",0x01);
