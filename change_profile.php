@@ -53,6 +53,7 @@ require( "include/rating.php" );
       ( $coordsright ? RIGHT : 0 ) + ( $coordsdown ? DOWN : 0 ) +
       ( $smoothedge ? SMOOTH_EDGE : 0 );
 
+   $menudirection = ( $menudir == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
    $query = "UPDATE Players SET " .
        "Name='$name', " .
@@ -61,6 +62,7 @@ require( "include/rating.php" );
        "Open='$open', " .
        "Stonesize=$stonesize, " .
        "Boardcoords=$boardcoords, " .
+       "MenuDirection='$menudirection', " .
        "Woodcolor=$woodcolor, " .
        "Button=$button, " .
        "SendEmail='$sendemail', ";

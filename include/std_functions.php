@@ -150,7 +150,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $HOSTBASE, $is_down, $bg_color, $menu_bg_color, $menu_fg_color,
-      $the_translator, $CHARACTER_ENCODINGS, $max_links_in_main_menu;
+      $the_translator, $CHARACTER_ENCODINGS, $max_links_in_main_menu, $vertical;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -231,8 +231,13 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu_array[T_('Site map')] = array('site_map.php',4,3);
 
 
-   //make_menu_horizontal($menu_array);
-   make_menu_vertical($menu_array);
+   if( $player_row['MenuDirection'] == 'HORIZONTAL' )
+      make_menu_horizontal($menu_array);
+   else
+   {
+      make_menu_vertical($menu_array);
+      $vertical = true;
+   }
 
 
    if( $is_down )
@@ -246,23 +251,29 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 function end_page( $menu_array=NULL )
 {
-   global $time, $admin_level, $HOSTBASE, $menu_bg_color, $menu_fg_color, $bg_color;
+   global $time, $admin_level, $HOSTBASE, $vertical,
+      $menu_bg_color, $menu_fg_color, $bg_color;
 
-   echo "</table>\n";
    echo "&nbsp;<p>\n";
-   echo '<table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . ">\n";
+
+   if( $vertical )
+      echo '</td></tr><tr><td>';
 
    if( $menu_array )
       make_menu($menu_array);
+
+   if( $vertical )
+      echo "</td></tr></table>\n";
 
 
    if( count($menu_array) >= 3 )
       $span = ' colspan=' . (count($menu_array)-1);
 
-   echo '
-      <tr>
-        <td' . $span . ' align="left" width="50%">
-          <A href="' . $HOSTBASE . '/index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
+
+   echo '<table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
+   <tr>
+     <td' . $span . ' align="left" width="50%">
+       <A href="' . $HOSTBASE . '/index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
         <td align="right" width="50%">';
 
    if( $admin_level > 2 )
@@ -289,7 +300,8 @@ function make_menu($menu_array)
    global $HOSTBASE, $bg_color,$max_links_in_main_menu;
 
    $new_row= '<tr bgcolor=' . $bg_color . ' align="center">' . "\n";
-   echo $new_row;
+
+   echo "<table width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>\n" . $new_row;
 
    if( count($menu_array) == 1 )
      $span = " colspan=2";
@@ -320,13 +332,13 @@ function make_menu($menu_array)
          $cumwidth += $width;
          if( in_array($i, $break_point_array) )
            {
-             echo "</tr>".$new_row;
+             echo "</tr>" . $new_row;
              $cumw = 0;
              $cumwidth = 0;
            }
       }
 
-   echo "</tr>\n";
+   echo "</tr></table>\n";
 }
 
 function cmp1($a, $b)
@@ -399,7 +411,8 @@ function make_menu_horizontal($menu_array)
 
    echo '</tr></table>' . "\n";
 
-   echo '<table width="100%" cellpadding=0 cellspacing=0><tr><td height=1 bgcolor=' . $menu_bg_color . "><img src=\"images/blank.png\" width=1 height=1></td></table>\n" . "
+   echo '<table width="100%" cellpadding=0 cellspacing=0><tr><td height=1 bgcolor=' . $menu_bg_color .
+      "><img src=\"images/blank.png\" width=1 height=1 alt=\"\"></td></table>\n" . "
     <BR>\n";
 
 }
@@ -408,7 +421,7 @@ function make_menu_vertical($menu_array)
 {
    global $HOSTBASE, $menu_bg_color, $bg_color;
 
-   echo '<table width="100%" border=0 cellspacing=0 cellpadding=0><tr><td valign=top>' . "\n";
+   echo '<table width="100%" border=0 cellspacing=0 cellpadding=5><tr><td valign=top rowspan=2>' . "\n";
    echo '<table border=0 cellspacing=0 cellpadding=1 bgcolor='.$menu_bg_color.'><tr><td>' . "\n";
    echo '<table border=0 cellspacing=0 cellpadding=3 bgcolor="#F7F5FF">' . "\n";
    echo '<tr><td align=center> <img src="images/dragonlogo_bl.jpg" alt="Dragon">' . "\n";

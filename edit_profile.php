@@ -148,6 +148,11 @@ echo form_insert_row( 'DESCRIPTION', T_('Coordinate sides'),
 echo form_insert_row( 'DESCRIPTION', T_('Smooth board edge'),
                       'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) );
 
+$vals = array('VERTICAL' => T_('Vertical'), 'HORIZONTAL' => T_('Horizontal'));
+
+echo form_insert_row( 'DESCRIPTION', T_('Menu direction'),
+                      'RADIOBUTTONS', 'menudir', $vals, $player_row["MenuDirection"], false );
+
 echo "    <TR>\n";
 echo "      <TD align=right>" . T_('Game id button') . ":</TD>\n";
 echo "      <TD align=left>\n";
