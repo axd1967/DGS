@@ -37,7 +37,7 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
   echo "<p>\n";
 
-  echo T_("You can look at it as kind of play-by-email, " . 
+  echo T_("You can look at it as kind of play-by-email, " .
           "where a web-interface is used to make the board look prettier." .
           " To start playing you should first get yourself an " .
           "<a href=\"register.php\">account</a>, if you haven't got one already. " .
@@ -52,7 +52,7 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 
   echo T_("More information can be found in the " .
-          "<a href=\"phorum/list.php?f=3\">FAQ forum</a> where you are " .
+          "<a href=\"faq.php\">FAQ forum</a> where you are " .
           "also encouraged to submit your own questions.") . "\n";
 
   echo "<p>\n";
