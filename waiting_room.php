@@ -45,17 +45,19 @@ define('BAD_RATING_COLOR',"ff000033");
    $my_id = $player_row["ID"];
    $my_rating = $player_row["Rating2"];
 
+   $page = "waiting_room.php" . ( @$_GET['info'] > 0 ? "?info=" . $_GET['info'] . "&" : '?' );
+
    start_page(T_("Waiting room"), true, $logged_in, $player_row, button_style() );
 
    echo "<center>";
 
-   if( @$_GET['msg'] )
-      echo "<p><b><font color=\"green\">" . $_GET['msg'] . "</font></b><hr>";
-
-   $page = "waiting_room.php" . ( @$_GET['info'] > 0 ? "?info=" . $_GET['info'] . "&" : '?' );
+   sysmsg(@$_GET['msg']);
 
    if(!@$_GET['sort1'])
       $_GET['sort1'] = 'ID';
+
+   if(!@$_GET['sort2'] && $_GET['sort1'] != 'ID')
+      $_GET['sort2'] = 'ID';
 
    $wrtable = new Table( $page, "WaitingroomColumns" );
    $wrtable->add_or_del_column();
@@ -154,7 +156,7 @@ define('BAD_RATING_COLOR',"ff000033");
       show_game_info($info_row, $info_row['pid'] == $player_row['ID'], $my_rating);
    }
    else
-      add_new_game_form($info_row['pid'] == $player_row['ID']);
+      add_new_game_form();
 
    echo "</center>";
 

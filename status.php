@@ -41,8 +41,7 @@ require_once( "include/message_functions.php" );
 
    echo "<center>";
 
-   if( isset($msg) && $msg )
-      echo "<p><b><font color=\"green\">$msg</font></b><hr>";
+   sysmsg(@$_GET['msg']);
 
    echo "<h3><font color=$h3_color>" . T_('Status') . '</font></h3>';
 
