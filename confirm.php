@@ -50,7 +50,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    if( !$gid )
       error("no_game_nr");
 
-   if( $next == 'Go back' )
+   if( $nextback )
       jump_to("game.php?gid=$gid");
 
    connect2mysql();
@@ -73,7 +73,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    extract(mysql_fetch_array($result));
 
-   if( $next == 'Skip to next game' )
+   if( $skip )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
@@ -499,11 +499,11 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 // Jump somewhere
 
-   if( $next == "Submit and go to status" )
+   if( $nextstatus )
    {
       jump_to("status.php");
    }
-   else if( $next == "Submit and go to next game" )
+   else if( $nextgame )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }

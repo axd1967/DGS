@@ -29,7 +29,7 @@ function check_move($print_error=true)
    {
       if( $print_error )
          error("illegal_position");
-      else 
+      else
       {
          echo "Illegal_position";
          return false;
@@ -41,17 +41,17 @@ function check_move($print_error=true)
 
    $prisoners = array();
    check_prisoners($colnr,$rownr, 3-$to_move, $Size, $array, $prisoners);
-         
-         
+
+
    $nr_prisoners = count($prisoners);
-         
+
    if( $to_move == BLACK )
       $Black_Prisoners += $nr_prisoners;
    else
       $White_Prisoners += $nr_prisoners;
 
    // Check for ko
-                  
+
    if( $nr_prisoners == 1 and $flags & KO )
    {
       list($dummy, list($x,$y)) = each($prisoners);
@@ -60,7 +60,7 @@ function check_move($print_error=true)
       {
          if( $print_error )
             error("ko");
-         else 
+         else
          {
             echo "ko";
             return false;
@@ -69,16 +69,16 @@ function check_move($print_error=true)
    }
 
    // Check for suicide
-         
+
    $suicide_allowed = false;
-         
+
    if( !has_liberty_check($colnr, $rownr, $Size, $array, $prisoners, $suicide_allowed) )
    {
       if(!$suicide_allowed)
       {
          if( $print_error )
             error("suicide");
-         else 
+         else
          {
             echo "suicide";
             return false;
@@ -93,19 +93,19 @@ function check_move($print_error=true)
 
 function check_handicap()
 {
-   global $stonestring, $colnr, $rownr, $Size, $array, $coord, $Handicap, 
+   global $stonestring, $colnr, $rownr, $Size, $array, $coord, $Handicap,
       $enable_message, $extra_message, $handi;
 
    if( !$stonestring ) $stonestring = "1";
 
    // add killed stones to array
-         
+
    $l = strlen( $stonestring );
 
    for( $i=1; $i < $l; $i += 2 )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-                 
+
       if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
          error("illegal_position");
 
@@ -135,20 +135,20 @@ function check_handicap()
 
 function check_done()
 {
-   global $stonestring, $Size, $array, $prisoners, $Komi, $score, 
+   global $stonestring, $Size, $array, $prisoners, $Komi, $score,
       $White_Prisoners, $Black_Prisoners;
 
    if( !$stonestring ) $stonestring = "1";
 
    // add killed stones to array
-         
+
    $l = strlen( $stonestring );
    $index = array();
 
    for( $i=1; $i < $l; $i += 2 )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-      
+
       if( !isset($rownr) or !isset($colnr) )
          error("illegal_position");
 
@@ -163,7 +163,7 @@ function check_done()
       else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD )
          $array[$colnr][$rownr] = $stone - 6;
    }
-         
+
    $prisoners = array();
    while( list($x, $sub) = each($index) )
    {
@@ -181,13 +181,13 @@ function check_done()
 function check_remove()
 {
    global $stonestring, $Size, $array, $prisoners, $coord;
-  
+
    if( !$stonestring ) $stonestring = "1";
-  
+
    // add killed stones to array
 
    $l = strlen( $stonestring );
-  
+
    for( $i=1; $i < $l; $i += 2 )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
@@ -201,7 +201,7 @@ function check_remove()
       else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD )
          $array[$colnr][$rownr] = $stone - 6;
    }
-  
+
    if( $coord )
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
@@ -227,51 +227,51 @@ function check_remove()
 function draw_message_box()
 {
    global $action, $gid, $stonestring, $coord, $prisoner_string;
-?>
+
+   echo '
   <FORM name="confirmform" action="confirm.php" method="POST">
     <center>
       <TABLE align="center">
         <TR>
           <TD align=right>Message:</TD>
-          <TD align=left>  
+          <TD align=left>
             <textarea name="message" cols="50" rows="8" wrap="virtual"></textarea></TD>
         </TR>
-        <input type="hidden" name="gid" value="<?php echo $gid; ?>">
-          <input type="hidden" name="action" value="<?php echo $action; ?>">
-<?php 
-    if( $action == 'move' ) 
-    { 
+        <input type="hidden" name="gid" value="' . $gid . '">
+          <input type="hidden" name="action" value="' . $action .'">
+';
+
+    if( $action == 'move' )
+    {
        echo "<input type=\"hidden\" name=\"coord\" value=\"$coord\">\n";
        echo "<input type=\"hidden\" name=\"prisoner_string\" value=\"$prisoner_string\">\n";
     }
     else if( $action == 'done' or $action == 'handicap' )
     {
        echo "<input type=\"hidden\" name=\"stonestring\" value=\"$stonestring\">\n";
-    } 
+    }
 
-?>
-         <TR><TD></TD>
-                <TD><input type=submit name="next" value="Submit and go to next game">
-                    <input type=submit name="next" value="Submit and go to status"></TD></TR>
-
-              
-              <TR><TD></TD>
-                <TD align=right><input type=submit name="next" value="Go back"></TD></TR>
-  
+   echo '
+      </TABLE>
+<TABLE align=center cellpadding=5>
+<TR><TD><input type=submit name="nextgame" value="' .
+      T_('Submit and go to next game') . '"></TD>
+    <TD><input type=submit name="nextstatus" value="' .
+      T_("Submit and go to status") . '"></TD></TR>
+<TR><TD align=right colspan=2><input type=submit name="nextback" value="' .
+      T_("Go back") . '"></TD></TR>
       </TABLE>
     </CENTER>
   </FORM>
-
-
-<?php
+';
 
 }
 
 function draw_game_info()
 {
-  global $Size, $Whiterating, $Blackrating, $Whiterank, $Blackrank, 
+  global $Size, $Whiterating, $Blackrating, $Whiterank, $Blackrank,
     $Whitename, $Blackname, $Whitehandle, $Blackhandle, $White_Prisoners, $Black_Prisoners,
-    $White_ID, $Black_ID, $Komi, $Handicap, $Status, $Maintime, $Byotime, $White_Maintime, 
+    $White_ID, $Black_ID, $Komi, $Handicap, $Status, $Maintime, $Byotime, $White_Maintime,
     $Black_Maintime, $White_Byotime, $Black_Byotime, $White_Byoperiods, $Black_Byoperiods,
      $Byotype, $Rated, $Byoperiods;
 ?>
@@ -292,12 +292,12 @@ function draw_game_info()
           <td>Rank info:</td>
           <td><?php echo( $Whiterank ); ?></td>
           <td><?php echo( $Blackrank ); ?></td>
-          
+
         </tr><tr>
           <td>Prisoners:</td>
           <td><?php echo( $White_Prisoners );?></td>
           <td><?php echo( $Black_Prisoners );?></td>
-          
+
         </tr><tr>
           <td></td><td>Komi: <?php echo( $Komi );?></td>
           <td>Handicap: <?php echo( $Handicap );?></td>
@@ -318,13 +318,13 @@ function draw_game_info()
 
       <tr>
           <td>Byoyomi:</td>
-          <td> 
+          <td>
 <?php echo_time( $White_Byotime );
-      if( $White_Byotime > 0 ) echo '(' . $White_Byoperiods . ')'; 
+      if( $White_Byotime > 0 ) echo '(' . $White_Byoperiods . ')';
 ?></td>
-          <td> 
+          <td>
 <?php echo_time( $Black_Byotime );
-      if( $Black_Byotime > 0 ) echo '(' . $Black_Byoperiods . ')'; 
+      if( $Black_Byotime > 0 ) echo '(' . $Black_Byoperiods . ')';
 ?></td>
         </tr>
 
@@ -333,8 +333,8 @@ function draw_game_info()
        }
 ?>
       <tr>
-            <td>Time limit:</td><td colspan=2> 
-<?php 
+            <td>Time limit:</td><td colspan=2>
+<?php
       if ( $Maintime > 0 )
          echo_time( $Maintime );
       if( $Byotime <= 0 )
@@ -349,7 +349,7 @@ function draw_game_info()
       {
          if ( $Maintime > 0 )
             echo ' + ';
-         echo_time($Byotime); 
+         echo_time($Byotime);
          echo '/' . $Byoperiods .  ($Byotype == 'JAP' ? '&nbsp;periods&nbsp;Japanese' : '&nbsp;stones&nbsp;Canadian') . '&nbsp;byoyomi';
       }
 ?></td>
@@ -367,15 +367,15 @@ function draw_game_info()
 function draw_moves()
 {
    global $moves_result, $gid, $move, $Size;
-   
+
    mysql_data_seek($moves_result, 0);
-   
-   
+
+
    echo '<table border=4 cellspacing=0 cellpadding=1 align=center bgcolor=66C17B><tr align=center><th>Moves</th>
 ';
-   
+
    $moves_per_row = 20;
-   
+
    for($i=0; $i<$moves_per_row; $i++)
      echo "<td>$i</td>";
 
@@ -396,22 +396,22 @@ function draw_moves()
          $c = 'S';
       else if( $row["PosX"] == -3 )
          $c = 'R';
-        
+
       else
       {
-         $c=number2board_coords($row["PosX"], $row["PosY"], $Size); 
+         $c=number2board_coords($row["PosX"], $row["PosY"], $Size);
       }
       if( $i == $move )
          printf('<td class=r bgcolor=F7F5E3><font color=red>%s</font></td>
 ', $c );
-      else if( $s == BLACK )        
+      else if( $s == BLACK )
          printf( '<td><A class=b href="game.php?gid=%d&move=%d">%s</A></td>
 ', $gid, $i, $c );
       else
          printf( '<td><a class=w href="game.php?gid=%d&move=%d">%s</a></td>
 ', $gid, $i, $c );
 
-      $i++;    
+      $i++;
    }
    echo "</tr></table>";
 

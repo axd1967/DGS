@@ -212,7 +212,7 @@ require( "include/rating.php" );
 
          $enable_message = false;
 
-         $extra_message = "<font color=\"green\">" . T_('Please mark dead stones and click 'done' when finished.') . "</font>";
+         $extra_message = "<font color=\"green\">" . T_("Please mark dead stones and click 'done' when finished.") . "</font>";
       }
       break;
 
@@ -242,6 +242,8 @@ require( "include/rating.php" );
       unset( $msg );
    else
       make_html_safe($msg, 'game');
+
+
 
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
    $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $stonestring, $handi,
@@ -307,7 +309,7 @@ require( "include/rating.php" );
          echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=resign\">" . T_('Resign') . "</A></B></td>\n";
 
       if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
-         echo "<td width=\"$width\"><B><A href=\"confirm.php?gid=$gid&next=Skip+to+next+game\">" . T_('Skip to next game') . "</A></B></td>\n";
+         echo "<td width=\"$width\"><B><A href=\"confirm.php?gid=$gid&skip=t\">" . T_('Skip to next game') . "</A></B></td>\n";
 
 
       echo"
