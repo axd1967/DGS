@@ -163,7 +163,7 @@ function echo_time($hours, $keep_english=false)
    return $str;
 }
 
-function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_english=false)
+function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_english=false, $short=false)
 {
    $T_= ( $keep_english ? 'fnop' : 'T_' );
    $str = '';
@@ -175,6 +175,8 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
    else if( $Byotype == 'FIS' )
       {
          $str .= ' ' . sprintf( $T_('with %s extra per move'), echo_time($Byotime, $keep_english) );
+         if( !$short )
+            $str .= ' - ' . $T_('Fischer time');
       }
    else
       {
@@ -183,9 +185,17 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
          $str .= echo_time($Byotime, $keep_english);
 
          if( $Byotype == 'JAP' )
-            $str .= '*' . $Byoperiods . ' ' . $T_('periods') . ' ' . $T_('Japanese byoyomi');
+         {
+            $str .= ' * ' . $Byoperiods . ' ' . $T_('periods');
+            if( !$short )
+               $str .= ' - ' . $T_('Japanese byoyomi');
+         }
          else
-            $str .= '/' . $Byoperiods . ' ' . $T_('stones') . ' ' . $T_('Canadian byoyomi');
+         {
+            $str .= ' / ' . $Byoperiods . ' ' . $T_('stones');
+            if( !$short )
+               $str .= ' - ' . $T_('Canadian byoyomi');
+         }
       }
 
    return $str;

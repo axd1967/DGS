@@ -37,9 +37,10 @@ define('BAD_RATING_COLOR',"ff000033");
       error("not_logged_in");
    //not used: init_standard_folders();
 
+   //short descriptions for table
    $handi_array = array( 'conv' => T_('Conventional'),
                          'proper' => T_('Proper'),
-                         'nigiri' => T_('Even game with nigiri'),
+                         'nigiri' => T_('Even game'),
                          'double' => T_('Double game') );
 
    $my_id = $player_row["ID"];
@@ -66,7 +67,7 @@ define('BAD_RATING_COLOR',"ff000033");
    $orderstring = $wrtable->current_sort_string();
 
    $result = mysql_query("SELECT Waitingroom.*,Name,Handle," .
-                         "Rating2 AS Rating,Players.ID AS pid " .
+                         "Rating2 AS Rating,RatingStatus,Players.ID AS pid " .
                          "FROM Waitingroom,Players " .
                          "WHERE Players.ID=Waitingroom.uid ORDER BY $order");
 
@@ -74,16 +75,16 @@ define('BAD_RATING_COLOR',"ff000033");
 
    if( @mysql_num_rows($result) > 0 )
    {
-      $wrtable->add_tablehead(0, T_('Info'), NULL, NULL, true, 92);
+      $wrtable->add_tablehead(0, T_('Info'), NULL, false, true, 92);
       $wrtable->add_tablehead(1, T_('Name'), 'Name', false);
-      $wrtable->add_tablehead(2, T_('Nick'), 'Handle', false);
+      $wrtable->add_tablehead(2, T_('Userid'), 'Handle', false);
       $wrtable->add_tablehead(3, T_('Rating'), 'Rating', true);
-      $wrtable->add_tablehead(4, T_('Comment'), NULL, true);
+      $wrtable->add_tablehead(4, T_('Comment'));
       $wrtable->add_tablehead(5, T_('Handicap'), 'Handicaptype', false);
       $wrtable->add_tablehead(6, T_('Komi'), 'Komi', true);
       $wrtable->add_tablehead(7, T_('Size'), 'Size', true);
       $wrtable->add_tablehead(8, T_('Rating range'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true);
-      $wrtable->add_tablehead(9, T_('Time limit'), NULL, true);
+      $wrtable->add_tablehead(9, T_('Time limit'));
       $wrtable->add_tablehead(10, T_('#Games'), 'nrGames', true);
       $wrtable->add_tablehead(11, T_('Rated'), 'Rated', true);
       $wrtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
@@ -134,7 +135,7 @@ define('BAD_RATING_COLOR',"ff000033");
          }
          if( $wrtable->Is_Column_Displayed[9] )
             $wrow_strings[9] = '<td nowrap>' .
-               echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) .
+               echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, 0, 1) .
                "</td>";
          if( $wrtable->Is_Column_Displayed[10] )
             $wrow_strings[10] = "<td>$nrGames</td>";
@@ -173,6 +174,7 @@ function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating=fals
    if( $MustBeRated == 'N' )
       return array('-', true);
 
+   // +/-50 reverse the inflation from add_to_waitingroom.php
    $r1 = echo_rating($Ratingmin+50,false);
    $r2 = echo_rating($Ratingmax-50,false);
    if( $r1 == $r2 )
@@ -228,7 +230,12 @@ function add_new_game_form()
 
 function show_game_info($game_row, $mygame=false, $my_rating=false)
 {
-   global $handi_array, $bg_color;
+   global $bg_color;
+   //long descriptions for box
+   $handi_array = array( 'conv' => T_('Conventional handicap (komi 0.5 if not even)'),
+                         'proper' => T_('Proper handicap'),
+                         'nigiri' => T_('Even game with nigiri'),
+                         'double' => T_('Double game') );
 
    extract($game_row);
 
@@ -261,7 +268,8 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
 
    echo '<tr><td><b>' . T_('Comment') . '<b></td><td>' . $Comment . "</td></tr>\n";
 
-   echo "</tr></td></table>\n";
+   echo "</table>\n";
+
 
    if( $mygame )
    {
