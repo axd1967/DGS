@@ -94,7 +94,11 @@ if( !$is_down )
 
    $row = mysql_fetch_array( $result );
 
-   if( $row['timediff'] < 1500 )
+   if( @$tick_diff ) //when chained after clock_tick.php
+      $half_diff = 3600/2 - $tick_diff/2;
+   else
+      $half_diff = 1500;
+   if( $row['timediff'] < $half_diff )
       exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202")
@@ -129,7 +133,7 @@ if( !$is_down )
              "white.Handle AS Whitehandle " .
              "FROM Games, Players AS black, Players AS white " .
              "WHERE ToMove_ID=$uid AND Black_ID=black.ID AND White_ID=white.ID" .
-             " AND UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastaccess')";
+             " AND UNIX_TIMESTAMP(Lastchanged) >= UNIX_TIMESTAMP('$Lastaccess')";
 
          $res2 = mysql_query( $query )
                or error('mysql_query_failed','halfhourly_cron4' . $query);

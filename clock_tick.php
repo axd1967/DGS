@@ -36,7 +36,8 @@ if( !$is_down )
 
    $row = mysql_fetch_array( $result );
 
-   if( $row['timediff'] < 3600/$tick_frequency-10 )
+   $tick_diff = 3600/$tick_frequency - 10;
+   if( $row['timediff'] < $tick_diff )
       exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201")
@@ -178,7 +179,7 @@ if( !$is_down )
       }
    }
 
-//the whole cron stuff in one cron job:
+//the whole cron stuff in one cron job (else comments those 2 lines):
 include_once( "halfhourly_cron.php" );
 include_once( "daily_cron.php" );
 }

@@ -36,7 +36,11 @@ if( !$is_down )
 
    $row = mysql_fetch_array( $result );
 
-   if( $row['timediff'] < 3600*23 )
+   if( @$half_diff ) //when chained after halfhourly_cron.php
+      $daily_diff = 3600*24 - $half_diff/2;
+   else
+      $daily_diff = 3600*23;
+   if( $row['timediff'] < $daily_diff )
       exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203")
