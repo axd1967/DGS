@@ -46,23 +46,23 @@ function make_link_array( $links)
 
    $link_array_left = $link_array_right = array();
 
-   if( $links & LINK_FORUMS ) 
+   if( $links & LINK_FORUMS )
       $link_array_left["Forums"] = "index.php";
 
-   if( $links & LINK_THREADS ) 
+   if( $links & LINK_THREADS )
       $link_array_left["Threads"] = "list.php?forum=$forum";
-   if( $links & LINK_NEW_TOPIC ) 
+   if( $links & LINK_NEW_TOPIC )
       $link_array_left["New Topic"] = "new_topic.php?forum=$forum";
-   if( $links & LINK_SEARCH ) 
+   if( $links & LINK_SEARCH )
       $link_array_left["Search"] = "search.php";
-   if( $links & LINK_EXPAND_VIEW ) 
+   if( $links & LINK_EXPAND_VIEW )
       $link_array_left["Expand View"] = "";
-   if( $links & LINK_MARK_READ ) 
+   if( $links & LINK_MARK_READ )
       $link_array_left["Mark All Read"] = "";
 
-   if( $links & LINK_PREV_PAGE ) 
+   if( $links & LINK_PREV_PAGE )
       $link_array_right["Prev Page"] = "test$prev_page";
-   if( $links & LINK_NEXT_PAGE ) 
+   if( $links & LINK_NEXT_PAGE )
       $link_array_right["Next Page"] = "$next_page";
 
 
@@ -127,19 +127,19 @@ function get_new_string($Lastchangedstamp, $Lastread)
 {
    global $NOW, $new_level1, $new_end;
 
-   $color = "ff0000";
+   $color = '#ff0000';
 
-   if( (empty($Lastread) or $Lastchangedstamp > $Lastread) 
+   if( (empty($Lastread) or $Lastchangedstamp > $Lastread)
        and $Lastchangedstamp + $new_end > $NOW )
    {
       if( $Lastchangedstamp + $new_level1 < $NOW )
       {
          $color = "ff7777";
       }
-      $new = "<font color=\"#$color\" size=\"-1\">&nbsp;&nbsp;new</font>";
+      $new = '<font color="' . $color . '" size="-1">&nbsp;&nbsp;' . T_('new') .'</font>';
    }
    else
-      $new = "";
+      $new = '';
 
    return $new;
 }
@@ -151,17 +151,17 @@ function message_box($forum, $parent=-1, $Subject=NULL)
 
 
 ?>
-<table align=center cellpadding=0> 
+<table align=center cellpadding=0>
 <FORM name="messageform" action="post.php" method="POST">
     <INPUT type=hidden name="parent" value="<?php echo $parent;?>">
     <INPUT type=hidden name="forum" value="<?php echo $forum;?>">
-      
+
           <TR nowrap>
             <TD align=left colspan=2>&nbsp;&nbsp;Subject:&nbsp;&nbsp;
             <input type="text" name="Subject" size="50" maxlength="80" <?php if( $Subject ) echo "value=\"$Subject\"";?>></TD>
           </TR>
           <TR nowrap>
-            <TD align=center colspan=2>  
+            <TD align=center colspan=2>
               &nbsp;<textarea name="Text" cols="60" rows="16" wrap="virtual"></textarea>&nbsp;</TD>
           </TR>
 
@@ -178,9 +178,9 @@ function forum_name($forum)
 {
    if( !($forum > 0) )
       error("Unknown forum");
-   
+
    $result = mysql_query("SELECT Name AS Forumname FROM Forums WHERE ID=$forum");
-   
+
    if( mysql_num_rows($result) != 1 )
       error("Unknown forum");
 
