@@ -43,8 +43,6 @@ require_once( "include/form_functions.php" );
   echo "\n<BR>&nbsp;";
 
 
-   sysmsg(get_request_arg('msg'));
-
 if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
   echo "<p><font color=green>\n" .
      T_("Welcome to the development version of the dragon go server!") . 
@@ -58,6 +56,9 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
      '<p>' . T_("Please, feel free to register and play some games.") .
      "</font><HR>\n";
 } //for devel server
+
+
+   sysmsg(get_request_arg('msg'));
 
 
   echo '<p><font size="+0">' . T_('Please login.') .
