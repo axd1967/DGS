@@ -23,6 +23,7 @@ $TranslateGroups[] = "Common";
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
+require_once( "include/message_functions.php" );
 
 {
    connect2mysql();
@@ -87,46 +88,52 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
     <p>';
 
 
-   $result = mysql_query("SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-                         "Messages.*, Players.Name AS sender " .
-                         "FROM Messages, Players " .
-                         "WHERE To_ID=$my_id " .
-                         "AND (Messages.Flags LIKE '%NEW%' OR Messages.Flags LIKE '%REPLY REQUIRED%') " .
-                         "AND From_ID=Players.ID " .
-                         "ORDER BY Time DESC") or error( "mysql_query_failed", true );
+//    $result = mysql_query("SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//                          "Messages.*, Players.Name AS sender " .
+//                          "FROM Messages, Players, MessageCorrespondents AS me " .
+//                          "WHERE To_ID=$my_id " .
+//                          "AND (Messages.Flags LIKE '%NEW%' OR Messages.Flags LIKE '%REPLY REQUIRED%') " .
+//                          "AND From_ID=Players.ID " .
+//                          "ORDER BY Time DESC") or error( "mysql_query_failed", true );
 
+   $folderstring = $player_row['StatusFolders'] .
+      (empty($player_row['StatusFolders']) ? '' : ',') . FOLDER_NEW . ',' . FOLDER_IMPORTANT;
+
+   $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS time, " .
+      "me.mid, me.mid as date, Messages.Subject, me.Replied, " .
+      "Players.Name AS sender, me.Folder_nr AS folder " .
+      "FROM MessageCorrespondents AS me " .
+      "LEFT JOIN Messages ON Messages.ID=me.mid " .
+      "LEFT JOIN MessageCorrespondents AS other " .
+      "ON other.mid=me.mid AND other.Sender != me.Sender " .
+      "LEFT JOIN Players ON Players.ID=other.uid " .
+      "WHERE me.uid=$my_id AND me.Folder_nr IN ($folderstring) " .
+      "ORDER BY Time DESC";
+
+   $result = mysql_query( $query ) or die(mysql_error());
 
    if( mysql_num_rows($result) > 0 )
    {
+      $my_folders = get_folders($my_id);
+
       echo "<HR><h3><font color=$h3_color>" . T_('New messages') . ":</font></h3><p>\n";
 
       $mtable = new Table( 'status.php', '', '', true );
 
-      $mtable->add_tablehead( 1, T_('Flags'), NULL, true, true );
+      $mtable->add_tablehead( 1, T_('Folder'), NULL, true, true );
       $mtable->add_tablehead( 2, T_('From'), NULL, false, true );
       $mtable->add_tablehead( 3, T_('Subject'), NULL, false, true );
       $mtable->add_tablehead( 4, T_('Date'), NULL, true, true );
 
       while( $row = mysql_fetch_array( $result ) )
       {
+         $bgcolor = substr($mtable->Row_Colors[count($mtable->Tablerows) % 2], 2, 6);
          $mrow_strings = array();
-         if( !(strpos($row["Flags"],'NEW') === false) )
-         {
-            $mrow_strings[1] = '<td bgcolor="#00F464">' . T_('New') . "</td>";
-         }
-         else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
-         {
-            $mrow_strings[1] = '<td bgcolor="#FFA27A">' . T_('Reply!') . "</td>";
-         }
-         else
-         {
-            error("message_status_corrupt");
-         }
-
+         $mrow_strings[1] = echo_folder_box($my_folders, $row['folder'], $bgcolor);
          $mrow_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&amp;mid=" .
-            $row["ID"] . "\">" . make_html_safe($row["sender"]) . "</A></td>";
+            $row["mid"] . "\">" . make_html_safe($row["sender"]) . "</A></td>";
          $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"]) . "</td>";
-         $mrow_strings[4] = "<td>" . date($date_fmt2, $row["date"]) . "</td></tr>";
+         $mrow_strings[4] = "<td>" . date($date_fmt2, $row["time"]) . "</td></tr>";
 
          $mtable->add_row( $mrow_strings );
       }
