@@ -26,9 +26,6 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
 {
    global $woodbgcolors;
 
-   $mark_letter = 'm';
-   $sizestringtype = 1;
-
    if( !($woodcolor >= 1 and $woodcolor <= 5 or $woodcolor >= 11 and $woodcolor <= 15) )
       $woodcolor = 1;
 
@@ -61,7 +58,10 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
    if( $may_play )
    {
       if( $handi or !$stonestring )
+      {
+         $on_not_empty = false;
          $on_empty = true;
+      }
       else
       {
          $on_not_empty = true;
@@ -184,7 +184,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       $letter_c = 'a';
       for($colnr = 0; $colnr < $Size; $colnr++ )
       {
-         $stone = (int)$array[$colnr][$Size-$rownr];
+         $stone = (int)@$array[$colnr][$Size-$rownr];
          $empty = false;
          if( $stone & FLAG_NOCLICK ) {
             $stone &= ~FLAG_NOCLICK;
@@ -268,7 +268,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
          if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y
              and ( $stone == BLACK or $stone == WHITE ) )
          {
-            $type .= $mark_letter;
+            $type .= 'm';
             $alt = ( $stone == BLACK ? '#' : '@' );
          }
 
@@ -479,9 +479,9 @@ function has_liberty_check( $x, $y, $Size, &$array, &$prisoners, $remove )
              ( $nx >= 0 ) and ($nx < $Size) and ($ny >= 0) and ($ny < $Size) )
             return true; // found liberty
 
-         if( $new_color == $c and !$index[$nx][$ny])
+         if( $new_color == $c and !@$index[$nx][$ny])
          {
-            $x = $nx;  // Go to the neigbour
+            $x = $nx;  // Go to the neighbour
             $y = $ny;
             $index[$x][$y] = $dir;
          }
