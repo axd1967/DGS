@@ -25,12 +25,6 @@ require_once( "include/message_functions.php" );
 require_once( "include/form_functions.php" );
 
 
-// Input variables:
-
-$mid = @$_GET['mid'];
-$mode = @$_GET['mode'];
-$uid = @$_GET['uid'];
-
 {
    connect2mysql();
 
@@ -38,37 +32,31 @@ $uid = @$_GET['uid'];
 
    if( !$logged_in )
       error("not_logged_in");
+
+   get_request_user( $uid, $uhandle, true);
+   if( !$uhandle and $uid > 0 )
+   {
+      if( $uid == $player_row["ID"] )
+         $uhandle = $player_row["Handle"];
+      else
+      {
+         $result = mysql_query( "SELECT Handle AS uhandle FROM Players WHERE ID=$uid" );
+         if( mysql_num_rows( $result ) == 1 )
+            extract(mysql_fetch_assoc($result));
+      }
+   }
+   //unset($uid);
+
    init_standard_folders();
-
    $my_id = $player_row["ID"];
+   $folders = get_folders($my_id);
 
+   $mid = @$_GET['mid'];
+   $mode = @$_GET['mode'];
    if( !$mode )
    {
       $mode = ($mid > 0 ? 'ShowMessage' : 'NewMessage');
    }
-
-   if( !$uid )
-   {
-//default recipient = last referenced user (ex: if from userinfo by menu link)
-      if( eregi("[?&]uid=([0-9]+)", $HTTP_REFERER, $result) )
-         $uid = $result[1];
-   }
-   if( $uid > 0 and $uid != $player_row["ID"] )
-   {
-      $result = mysql_query( "SELECT Handle AS default_handle FROM Players WHERE ID=$uid" );
-
-      if( mysql_num_rows( $result ) == 1 )
-      {
-         extract(mysql_fetch_array($result));
-      }
-   }
-   if( !isset($default_handle) )
-   {
-      $uid = 0;
-      $default_handle = '';
-   }
-
-   $folders = get_folders($my_id);
 
    if( $mode == 'ShowMessage' or $mode == 'Dispute' )
    {
@@ -231,7 +219,7 @@ $uid = @$_GET['uid'];
       {
         $message_form->add_row( array( 'HEADER', T_('New message') ) );
         $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)') ,
-                                       'TEXTINPUT', 'to', 50, 80, $default_handle ) );
+                                       'TEXTINPUT', 'to', 50, 80, $uhandle ) );
         $message_form->add_row( array( 'DESCRIPTION', T_('Subject'),
                                        'TEXTINPUT', 'subject', 50, 80, "" ) );
         $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
@@ -321,7 +309,7 @@ $uid = @$_GET['uid'];
          $message_form->add_row( array( 'HEADER', T_('Invitation message') ) );
          $message_form->add_row( array( 'HIDDEN', 'type', 'INVITATION' ) );
          $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)'),
-                                        'TEXTINPUT', 'to', 50, 80, $default_handle ) );
+                                        'TEXTINPUT', 'to', 50, 80, $uhandle ) );
          $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
                                         'TEXTAREA', 'message', 50, 8, "" ) );
 
