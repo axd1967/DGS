@@ -302,7 +302,7 @@ require( "include/rating.php" );
       if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
          $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid&skip=t";
 
-      if( !$my_game and $logged_in )
+      if( ($Status != 'FINISHED') and !$my_game and $logged_in )
       {
          if( is_on_observe_list( $gid, $player_row["ID"] ) )
             $menu_array[T_('Remove from observe list')] = "game.php?gid=$gid&toggleobserve=t";
