@@ -57,8 +57,8 @@ require_once( "include/countries.php" );
 
    $menudirection = ( $_GET['$menudir'] == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
-   $notessmallmode = ( @$_GET['notessmallmod'] == 'RIGHT' ? 'RIGHT' : ('BELOW' ? 'BELOW' : 'OFF') );
-   $noteslargemode = ( @$_GET['noteslargemod'] == 'RIGHT' ? 'RIGHT' : ('BELOW' ? 'BELOW' : 'OFF') );
+   $notessmallmode = ( @$_GET['notessmallmod'] == 'RIGHT' ? 'RIGHT' : ( @$_GET['notessmallmod'] == 'BELOW' ? 'BELOW' : 'OFF') );
+   $noteslargemode = ( @$_GET['noteslargemod'] == 'RIGHT' ? 'RIGHT' : ( @$_GET['noteslargemod'] == 'BELOW' ? 'BELOW' : 'OFF') );
 
    $query = "UPDATE Players SET " .
       "Name='" . trim($name) . "', " .
