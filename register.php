@@ -29,21 +29,18 @@ start_page(T_("Register"), true, $logged_in, $player_row );
 
 echo "<center>\n";
 
-echo "<B><font size=+1>" . T_('Please enter data') . ":</font></B>\n";
-
-echo form_start('loginform', 'do_registration.php', 'POST');
-
-echo form_insert_row( 'DESCRIPTION', T_('Userid'),
-                      'TEXTINPUT', 'userid', 16, 16, '' );
-echo form_insert_row( 'DESCRIPTION', T_('Full name'),
-                      'TEXTINPUT', 'name', 16,80, '' );
-echo form_insert_row( 'DESCRIPTION', T_('Password'),
-                      'PASSWORD', 'passwd', 16, 16, '' );
-echo form_insert_row( 'DESCRIPTION', T_('Confirm password'),
-                      'PASSWORD', 'passwd2', 16, 16, '' );
-echo form_insert_row( 'SUBMITBUTTON', 'register', T_('Register') );
-
-echo form_end();
+$reg_form = new Form( 'loginform', 'do_registration.php', FORM_POST );
+$reg_form->add_row( array( 'HEADER', T_('Please enter data') ) );
+$reg_form->add_row( array( 'DESCRIPTION', T_('Userid'),
+                           'TEXTINPUT', 'userid', 16, 16, '' ) );
+$reg_form->add_row( array( 'DESCRIPTION', T_('Full name'),
+                           'TEXTINPUT', 'name', 16,80, '' ) );
+$reg_form->add_row( array( 'DESCRIPTION', T_('Password'),
+                           'PASSWORD', 'passwd', 16, 16, '' ) );
+$reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
+                           'PASSWORD', 'passwd2', 16, 16, '' ) );
+$reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Register') ) );
+$reg_form->echo_string();
 echo "</center>\n";
 
 end_page();

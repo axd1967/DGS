@@ -104,12 +104,10 @@ function add_column_form()
    if( count($removed_columns) <= 1 )
       return '';
 
-   $string = form_start( 'add_column_form', strip_last_et($page), 'POST' ) .
-      form_insert_row('SELECTBOX', 'add', 1, $removed_columns, '', false,
-                      'SUBMITBUTTON', 'action', T_('Add Column')) .
-      form_end();
-
-   return $string;
+   $ac_form = new Form( 'add_column_form', strip_last_et($page), FORM_POST );
+   $ac_form->add_row( array( 'SELECTBOX', 'add', 1, $removed_columns, '', false,
+                             'SUBMITBUTTON', 'action', T_('Add Column') ) );
+   return $ac_form->get_form_string();
 }
 
 // Needed for php < 4.0.5
