@@ -420,4 +420,3 @@ function draw_notes()
 }
 
 ?>
-
