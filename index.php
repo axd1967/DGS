@@ -45,9 +45,18 @@ require_once( "include/form_functions.php" );
 
    sysmsg(get_request_arg('msg'));
 
+if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
   echo "<p><font color=green>\n" .
-     T_("Welcome to the dragon go server!") . '<p>' . T_("Please, feel free to register and play some games.") .
+     T_("Welcome to the development version of the dragon go server!") . 
+     '<p>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") . 
+     '<p><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
      "</font><HR>\n";
+}else{ //for devel server
+  echo "<p><font color=green>\n" .
+     T_("Welcome to the dragon go server!") .
+     '<p>' . T_("Please, feel free to register and play some games.") .
+     "</font><HR>\n";
+} //for devel server
 
 
   echo '<p><font size="+0">' . T_('Please login.') .
