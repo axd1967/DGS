@@ -45,6 +45,8 @@ start_page("Links", true, $logged_in, $player_row );
 
 <p><a href="install.php">Installation instructions</a> --- if you want your own dragon
 
+<p><a href="snapshot">Download dragon sources</a> --- daily shapshot of the cvs
+
 <p><a href="http://sourceforge.net/projects/dragongoserver">Dragon project page at sourceforge</a>
 
 <p><a href="licence.php">Licence</a> --- GPL
