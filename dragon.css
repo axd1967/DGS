@@ -24,7 +24,7 @@ td.r {
 }
 
 
-img.s13 {
+img.13 {
         width : 13px;
         height : 13px;
 }
@@ -61,5 +61,45 @@ img.s42 {
 
 img.s50 {
         width : 50px;
+        height : 50px;
+}
+
+img.c13 {
+        width : 16px;
+        height : 13px;
+}
+
+img.c17 {
+        width : 21px;
+        height : 17px;
+}
+
+img.c21 {
+        width : 26px;
+        height : 21px;
+}
+
+img.c25 {
+        width : 31px;
+        height : 25px;
+}
+
+img.c29 {
+        width : 35px;
+        height : 29px;
+}
+
+img.c35 {
+        width : 43px;
+        height : 35px;
+}
+
+img.c42 {
+        width : 52px;
+        height : 42px;
+}
+
+img.c50 {
+        width : 62px;
         height : 50px;
 }
