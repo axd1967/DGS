@@ -123,7 +123,9 @@ require_once( "include/timezones.php" );
 
    echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
 
-   $mtable = new Table( 'list_messages.php', '', '', true );
+   $mtable = new Table( 'list_messages.php' . ( $current_folder == FOLDER_ALL_RECEIVED ? '' :
+                                                '?folder=' . $current_folder ),
+                        '', '', true );
    $show_rows = mysql_num_rows($result);
    if( $show_rows == $MaxRowsPerPage )
    {
