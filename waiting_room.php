@@ -117,9 +117,6 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             $Komi = '-';
 
 
-//          if( $pid == $player_row['ID'] )
-//             echo "<td class=button width=92 align=center><A class=button href=\"join_waitingroom_game.php?id=$ID&delete=t\">&nbsp;&nbsp;&nbsp;" . T_('Delete') . "&nbsp;&nbsp;&nbsp;</A></td>\n";
-//          else
          echo "<td class=button width=92 align=center><A class=button href=\"waiting_room.php?info=$ID\">&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>\n";
 
          if( (1 << 0) & $column_set )
@@ -170,7 +167,10 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    echo "</center>";
 
    if( $info > 0 and is_array($info_row) )
-      $menu_array = array( T_('Add new game') => "waiting_room.php" );
+      $menu_array[T_('Add new game')] = "waiting_room.php" ;
+
+   if( $pid == $player_row['ID'] )
+      $menu_array[T_('Delete game')] = "join_waitingroom_game.php?id=$ID&delete=t";
 
    end_page($menu_array);
 }
