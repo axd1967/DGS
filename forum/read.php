@@ -23,6 +23,7 @@ require_once("forum_functions.php");
 require_once("post.php");
 
 
+
 function draw_post($post_type, $my_post, $Subject, $Text)
 {
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
@@ -63,7 +64,7 @@ function draw_post($post_type, $my_post, $Subject, $Text)
          " <a href=\"$HOSTBASE/userinfo.php?uid=$User_ID\">" . make_html_safe($Name) .
          " ($Handle)</a>" . ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
       if( $Lastedited > 0 )
-         echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?revision_history=$ID\">" . T_('edited') .
+         echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum&thread=$thread&revision_history=$ID\">" . T_('edited') .
             "</a> " . date($date_fmt, $Lasteditedstamp) . ")";
       echo "</td></tr>\n" .
          '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
@@ -86,6 +87,47 @@ function draw_post($post_type, $my_post, $Subject, $Text)
 
       echo "</td></tr>\n";
    }
+}
+
+
+function revision_history($post_id)
+{
+   global $links, $cols, $Name, $Handle, $Lasteditedstamp, $Timestamp, $Lastread, $NOW;
+
+   $result = mysql_query(
+      "SELECT Posts.*, " .
+      "Players.ID AS uid, Players.Name, Players.Handle, " .
+      "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
+      "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
+      "UNIX_TIMESTAMP(GREATEST(Posts.Time,Posts.Lastedited)) AS Timestamp " .
+      "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
+      "WHERE Posts.ID='$post_id' OR (Depth=0 AND Parent_ID='$post_id') " .
+      "ORDER BY Timestamp DESC") or die(mysql_error());
+
+
+   $headline = array(T_("Revision history") => "colspan=$cols");
+   $links |= LINK_BACK_TO_THREAD;
+   $Lastread = $NOW;
+
+   start_table($headline, $links, 'width="99%"', $cols);
+
+   echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+
+   $cur_depth = 1;
+   change_depth($cur_depth,1);
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      extract($row);
+      draw_post(($cur_depth==1 ? 'reply' : 'edit' ), true, $row['Subject'], $row['Text']);
+      change_depth($cur_depth,2);
+   }
+
+   change_depth($cur_depth,1);
+
+   echo "</table></td></tr>\n";
+   end_table($links, $cols);
+   end_page();
+   exit;
 }
 
 
@@ -150,6 +192,9 @@ function change_depth(&$cur_depth, $new_depth)
    start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
 
    echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
+
+   if( $_GET['revision_history'] > 0 )
+      revision_history($_GET['revision_history']);
 
    start_table($headline, $links, 'width="99%"', $cols);
 

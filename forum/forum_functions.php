@@ -31,35 +31,39 @@ $order_str = "+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"
 $new_level1 = 2*7*24*3600;  // two week
 $new_end =  4*7*24*3600;  // four weeks
 
-define("LINK_FORUMS",1);
-define("LINK_THREADS",2);
-define("LINK_NEW_TOPIC",4);
-define("LINK_EXPAND_VIEW",8);
-define("LINK_SEARCH",16);
-define("LINK_MARK_READ",32);
-define("LINK_PREV_PAGE",1024);
-define("LINK_NEXT_PAGE",2048);
-define("LINK_TOGGLE_EDITOR",4096);
-define("LINK_TOGGLE_EDITOR_LIST",8192);
+define("LINK_FORUMS", 1 << 0);
+define("LINK_THREADS", 1 << 1);
+define("LINK_BACK_TO_THREAD", 1 << 2);
+define("LINK_NEW_TOPIC", 1 << 3);
+define("LINK_SEARCH", 1 << 4);
+define("LINK_MARK_READ", 1 << 5);
+define("LINK_PREV_PAGE", 1 << 6);
+define("LINK_NEXT_PAGE", 1 << 7);
+define("LINK_TOGGLE_EDITOR", 1 << 8);
+define("LINK_TOGGLE_EDITOR_LIST", 1 << 9);
 
 
 function make_link_array($links)
 {
-   global $link_array_left, $link_array_right, $forum, $offset, $RowsPerPage;
+   global $link_array_left, $link_array_right, $forum, $thread, $offset, $RowsPerPage;
 
    $link_array_left = $link_array_right = array();
 
    if( $links & LINK_FORUMS )
-      $link_array_left["Forums"] = "index.php";
+      $link_array_left[T_("Forums")] = "index.php";
 
    if( $links & LINK_THREADS )
-      $link_array_left["Threads"] = "list.php?forum=$forum";
+      $link_array_left[T_("Threads")] = "list.php?forum=$forum";
+
+   if( $links & LINK_BACK_TO_THREAD )
+      $link_array_left[T_("Back to thread")] = "read.php?forum=$forum&thread=$thread";
+
+
    if( $links & LINK_NEW_TOPIC )
-      $link_array_left["New Topic"] = "read.php?forum=$forum";
+      $link_array_left[T_("New Topic")] = "read.php?forum=$forum";
    if( $links & LINK_SEARCH )
-      $link_array_left["Search"] = "search.php";
-   if( $links & LINK_EXPAND_VIEW )
-      $link_array_left["Expand View"] = "";
+      $link_array_left[T_("Search")] = "search.php";
+
    if( $links & LINK_MARK_READ )
       $link_array_left["Mark All Read"] = "";
 
@@ -67,16 +71,16 @@ function make_link_array($links)
    {
       $get = $_GET;
       $get['editor'] = ( $_COOKIE['forumeditor'] == 'y'? 'n' : 'y' );
-      $link_array_right["Toggle forum editor"] =
+      $link_array_right[T_("Toggle forum editor")] =
          ($links & LINK_TOGGLE_EDITOR ?
           make_url( "read.php", false, $get ) :
           make_url( "list.php", false, $get ) );
    }
 
    if( $links & LINK_PREV_PAGE )
-      $link_array_right["Prev Page"] = "list.php?forum=$forum&offset=".($offset-$RowsPerPage);
+      $link_array_right[T_("Prev Page")] = "list.php?forum=$forum&offset=".($offset-$RowsPerPage);
    if( $links & LINK_NEXT_PAGE )
-      $link_array_right["Next Page"] = "list.php?forum=$forum&offset=".($offset+$RowsPerPage);
+      $link_array_right[T_("Next Page")] = "list.php?forum=$forum&offset=".($offset+$RowsPerPage);
 }
 
 function start_table(&$headline, &$links, $width, $cols)

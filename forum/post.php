@@ -34,7 +34,8 @@ function post_message($player_row, $moderated)
 
    if( $edit > 0 )
    {
-      $result = mysql_query("SELECT Subject,Text,Time,Forum_ID FROM Posts WHERE ID=$edit")
+      $result = mysql_query("SELECT Subject,Text,Forum_ID,GREATEST(Time,Lastedited) AS Time ".
+                            "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'])
          or error("unknown_parent_post");
 
        if( mysql_num_rows($result) != 1 )
