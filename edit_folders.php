@@ -31,11 +31,10 @@ function make_folder_form_row(&$form, $name, $nr,
 {
    $name_row = '<td bgcolor="#' . blend_alpha($bgred, $bggreen, $bgblue, $bgalpha) . '">' .
       '<font color="#' . blend_alpha($fgred, $fggreen, $fgblue, 255) . '">' .
-      ( empty($name) ? T_('Folder name') : $name ) . '</font></td>';
-
+      ( empty($name) ? T_('Folder name') : make_html_safe($name) ) . '</font></td>';
 
    $array = array( 'OWNHTML', $name_row,
-                   'TEXTINPUT', "folder$nr", 32, 32, "$name",
+                   'TEXTINPUT', "folder$nr", 32, 32, str_replace( "\"", "&quot;", $name ),
                    'DESCRIPTION', T_('Background'),
                    'DESCRIPTION', T_('Red'),
                    'TEXTINPUT', "bgred$nr", 3, 3, "$bgred",

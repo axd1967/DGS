@@ -80,8 +80,8 @@ require_once( "include/board.php" );
 
                $msg .= str_pad('', 47, '-') . "\n";
                $msg .= "Game ID: $ID  ($HOSTBASE/game.php?gid=$ID)\n";
-               $msg .= "Black: $Blackname ($Blackhandle)\n";
-               $msg .= "White: $Whitename ($Whitehandle)\n";
+               $msg .= "Black: ".make_html_safe("$Blackname ($Blackhandle)")."\n";
+               $msg .= "White: ".make_html_safe("$Whitename ($Whitehandle)")."\n";
                $msg .= "Move $Moves: " . number2board_coords($Last_X, $Last_Y, $Size) . "\n";
 
                if( !(strpos($SendEmail, 'BOARD') === false) )
@@ -115,7 +115,7 @@ require_once( "include/board.php" );
 
                $msg .= str_pad('', 47, '-') . "\n" .
                    "Date: " . date($date_fmt, $date) . "\n" .
-                   "From: $FromName($FromHandle)\n" .
+                   "From: ".make_html_safe("$FromName ($FromHandle)")."\n" .
                    "Subject: " . make_html_safe($Subject) .
                    "  ($HOSTBASE/show_message.php?mid=$ID)\n\n" .
                    wordwrap(make_html_safe($Text),47) . "\n";

@@ -264,7 +264,7 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
    if( $mygame )
    {
       $delete_form = new Form( 'delete', 'join_waitingroom_game.php', FORM_POST );
-      $delete_form->add_row( array( 'SUBMITBUTTON', 'delete', T_('Delete'),
+      $delete_form->add_row( array( 'SUBMITBUTTON', 'deletebut', T_('Delete'),
                                     'HIDDEN', 'id', $ID,
                                     'HIDDEN', 'delete', 't') );
       $delete_form->echo_string();

@@ -20,9 +20,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
-require( "include/std_functions.php" );
-require( "include/message_functions.php" );
-require( "include/rating.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/message_functions.php" );
+require_once( "include/rating.php" );
 
 {
    disable_cache();
@@ -202,7 +202,7 @@ require( "include/rating.php" );
 
    // Send message to notify opponent
 
-   $subject = '<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game";
+   $subject = addslashes('<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game");
 
    $query = "INSERT INTO Messages SET " .
       "From_ID=" . $player_row["ID"] . ", " .

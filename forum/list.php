@@ -19,7 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-require("forum_functions.php");
+require_once("forum_functions.php");
 
 {
    connect2mysql();
@@ -80,6 +80,7 @@ require("forum_functions.php");
 
       if( $Replies >= 0 or $is_editor )
       {
+         $Subject = make_html_safe( $Subject, true);
          echo "<tr$color><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a>$new</td><td>" . make_html_safe($Name) . "</td><td align=center>" . $Replies . "</td><td nowrap>$Lastchanged</td></tr>\n";
          $odd = !$odd;
          $show_rows--;

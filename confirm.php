@@ -454,8 +454,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       if( $action == 'delete' )
       {
-         $Text = "The game $whitename (W)  vs. $blackname (B) " .
-             "has been deleted by your opponent";
+         $Text = addslashes("The game $whitename (W)  vs. $blackname (B) " .
+             "has been deleted by your opponent");
          $Subject = 'Game deleted';
 
          mysql_query("UPDATE Players SET Running=Running-1 " .
@@ -468,9 +468,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 //         update_rating($gid);
          update_rating2($gid);
 
-         $Text = "The result in the game <a href=\"game.php?gid=$gid\">" .
+         $Text = addslashes("The result in the game <a href=\"game.php?gid=$gid\">" .
              "$whitename (W)  vs. $blackname (B) </a>" .
-             "was: <p><center>" . score2text($score,true,true) . "</center><br>";
+             "was: <p><center>" . score2text($score,true,true) . "</center><br>");
          $Subject = 'Game result';
 
          mysql_query( "UPDATE Players " .

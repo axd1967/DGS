@@ -52,12 +52,13 @@ require_once( "include/countries.php" );
 
    $row = mysql_fetch_array( $result );
 
+   $name_safe = make_html_safe($row['Name']);
+   $handle_safe = make_html_safe($row['Handle']);
+
    $title = ( $my_info ? T_('My user info') :
-              sprintf(T_('User info for %s'), $row['Name']) . ' (' . $row['Handle'] . ')');
+              sprintf(T_('User info for %s'), $name_safe) . " ($handle_safe)");
 
    start_page($title, true, $logged_in, $player_row );
-
-
 
 
    echo "<center>";
@@ -78,8 +79,8 @@ require_once( "include/countries.php" );
    $cntr = $row['Country'];
    echo '
  <table border=3>
-    <tr><td><b>' . T_('Name') . '</b></td><td>' . make_html_safe($row['Name']) . '</td></tr>
-    <tr><td><b>' . T_('Userid') . '</b></td><td>' . make_html_safe($row['Handle']) . '</td></tr>
+    <tr><td><b>' . T_('Name') . '</b></td><td>' . $name_safe . '</td></tr>
+    <tr><td><b>' . T_('Userid') . '</b></td><td>' . $handle_safe . '</td></tr>
     <tr><td><b>' . T_('Country') . '</b></td><td>' .  (empty($cntr) ? '&nbsp;' :
              '<img title="' . T_($COUNTRIES[$cntr]) . "\" src=\"images/flags/$cntr.gif\">") . '</td>
     <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . make_html_safe($row['Open'],true) . '</td></tr>
