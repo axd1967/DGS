@@ -196,7 +196,7 @@ require( "include/rating.php" );
 
       case 'delete':
       {
-         if( $Status != 'PLAY' or ( $Moves >= 4+$Handicap ) )
+         if( $Status != 'PLAY' or ( $Moves >= 10+$Handicap ) )
             error("invalid_action");
 
          $extra_message = "<font color=\"red\">" . T_('Deleting game') . "</font>";
@@ -275,7 +275,7 @@ require( "include/rating.php" );
       {
          $menu_array[T_('Pass')] = "game.php?gid=$gid&action=pass";
 
-         if( $Moves < 4+$Handicap )
+         if( $Moves < 10+$Handicap )
             $menu_array[T_('Delete game')] = "game.php?gid=$gid&action=delete";
       }
       else if( $action == 'remove' )

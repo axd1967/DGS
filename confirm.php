@@ -313,7 +313,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       case 'delete':
       {
-         if( $Status != 'PLAY' or ( $Moves >= 4+$Handicap ) )
+         if( $Status != 'PLAY' or ( $Moves >= 11+$Handicap ) )
             error("invalid_action");
 
          $query = "DELETE FROM Moves WHERE gid=$gid LIMIT $Moves";

@@ -194,7 +194,7 @@ function update_rating($gid)
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   if( $Moves < 4+$Handicap ) // Don't rate games with too few moves
+   if( $Moves < 10+$Handicap ) // Don't rate games with too few moves
    {
       mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid");
       return;
