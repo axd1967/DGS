@@ -347,6 +347,37 @@ require( "include/std_functions.php" );
       }
       break;
 
+      /* Should show information about how to become a translator */
+      case("not_translator"):
+      {
+        echo T_("Sorry, only translators are allowed to translate.");
+      }
+      break;
+
+      case("not_correct_transl_language"):
+      {
+        echo T_("Sorry, you are not allowed to translate the specified language.");
+      }
+      break;
+
+      case("no_such_translation_language"):
+      {
+        echo T_("Sorry, I couldn't find the language you want to translate. Please contact the support.");
+      }
+      break;
+
+      case("couldnt_make_backup"):
+      {
+        echo T_("Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support.");
+      }
+      break;
+
+      case("couldnt_open_transl_file"):
+      {
+        echo T_("Sorry, I was unable to open the translation file for writing. Please contact the support.");
+      }
+      break;
+
       default:
       {
          echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
