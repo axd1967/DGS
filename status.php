@@ -63,6 +63,7 @@ require_once( "include/message_functions.php" );
        <tr><td><b><a href="edit_vacation.php"><font color=black>' .
       T_('Vacation days left') . '</font></a></b></td>
            <td>' . echo_day(floor($player_row["VacationDays"]))
+           . '</td></tr>';
 
    if( $player_row['OnVacation'] > 0 )
    {
