@@ -18,15 +18,28 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+include( "config.php" );
+include( "connect2mysql.php" );
+
 $session_duration = 3600*24*7; // 1 week
 
 define("NONE", 0);
 define("BLACK", 1);
 define("WHITE", 2);
+define("DAME", 3);
+define("BLACK_TERRITORY", 4);
+define("WHITE_TERRITORY", 5);
+
+define("PASS_BLACK", 3);
+define("PASS_WHITE", 4);
+define("DONE_BLACK", 5);
+define("DONE_WHITE", 6);
+
+define("BLACK_DEAD", 7);
+define("WHITE_DEAD", 8);
+
 
 define("KO", 1);
-define("TOBECONFIRMED", 2);
-define("NEXT_KO", 4);
 
 
 function start_page( $title, $no_cache, $logged_in, &$player_row )
@@ -102,10 +115,11 @@ function make_session_code()
 function set_cookies($uid, $code)
 {
     global $session_duration;
+    global $SUB_PATH;
 
-    setcookie ("handle", $uid, time()+$session_duration, "/" );
+    setcookie ("handle", $uid, time()+$session_duration, "$SUB_PATH" );
 
-    setcookie ("sessioncode", $code, time()+$session_duration, "/" );
+    setcookie ("sessioncode", $code, time()+$session_duration, "$SUB_PATH" );
 }
 
 
