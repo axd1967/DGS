@@ -3,8 +3,6 @@
 $HOSTBASE = "http://localhost";
 $HOSTNAME = "localhost";
 
-$SERVER_TIMEZONE = "CET";
-
 // From address for notification emails
 $EMAIL_FROM = "noreply@localhost";
 

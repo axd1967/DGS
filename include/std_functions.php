@@ -129,7 +129,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
 
 function end_page( $new_paragraph = true )
 {
-   global $time, $show_time, $HOSTBASE, $SERVER_TIMEZONE;
+   global $time, $show_time, $HOSTBASE;
 
    if( $new_paragraph )
       echo "<p>";
@@ -153,7 +153,6 @@ function end_page( $new_paragraph = true )
 </HTML>
 ';
 
-   putenv('TZ=' . $SERVER_TIMEZONE );
    ob_end_flush();
 }
 
@@ -170,9 +169,6 @@ function error($err, $mysql=true)
 
 function jump_to($uri)
 {
-   global $SERVER_TIMEZONE;
-
-   putenv('TZ=' . $SERVER_TIMEZONE );
    header( "Location: " . $uri );
    exit;
 }
