@@ -41,6 +41,8 @@ start_page("Links", true, $logged_in, $player_row );
 
 <p><a href="http://www.msoworld.com/mindzine/news/orient/go/go.html">Mind Sport Zine</a> --- An excellent, but unfortunately no longer updated site.
 
+<p><a href="http://home.san.rr.com/rafgo/go.html">Rafael's Go Page</a> --- Another go site with lots of useful info.
+
 <p><a href="http://senseis.xmp.net">Sensei's Library</a> --- A collaboration web site. Read and contribute!
 
 <p><a href="http://www.kyoto.zaq.ne.jp/momoyama/news/news.html">Go News</a> --- News and games from the professional scene
