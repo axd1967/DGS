@@ -274,7 +274,7 @@ disable_cache();
             "LastTicks=$ticks_black, ";
 
       $query .= "Starttime=FROM_UNIXTIME($NOW), " .
-         "Lastchanged=FROM_UNIXTIME($NOW), " .
+         "Lastchanged=FROM_UNIXTIME($NOW) " .
          "WHERE ID=$gid AND Status='INVITED' " .
          "AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
          "AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
