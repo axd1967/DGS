@@ -87,7 +87,7 @@ require( "include/std_functions.php" );
          if( $color == "White" xor $row["Score"] > 0.0 )
             $image = 'no.gif';
          else
-            $image = 'ok.gif';
+            $image = 'yes.gif';
 
          if( abs($row["Score"]) < 0.1 )
             $image = 'dash.gif';
