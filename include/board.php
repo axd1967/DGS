@@ -794,11 +794,10 @@ function check_consistency($gid)
 
    $handi = ($Handicap < 2 ? 1 : $Handicap );
    $black_to_move = (($Moves < $handi) or ($Moves-$handi)%2 == 1 );
-   if( $Status!='FINISHED' and
-       (($black_to_move and $ToMove_ID!=$Black_ID) or
-        (!$black_to_move and $ToMove_ID!=$White_ID )) )
+   $to_move = ( $black_to_move ? $Black_ID : $White_ID );
+   if( $Status!='FINISHED' and $ToMove_ID!=$to_move )
    {
-      echo "Wrong Player to move!<br>\n";
+      echo "Wrong Player to move! Should be $to_move.<br>\n";
       return false;
    }
 

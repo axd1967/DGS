@@ -197,7 +197,7 @@ require_once( "include/rating.php" );
          if( $Status != 'PLAY' )
             error("invalid_action");
 
-         check_handicap(); //adjust $handi, $stonestring and others
+         check_handicap(); //adjust $handi, $stonestring, $enable_message and others
 
       }
       break;
@@ -263,8 +263,6 @@ require_once( "include/rating.php" );
       }
    }
 
-   start_page(T_("Game"), true, $logged_in, $player_row);
-
    if( $enable_message ) $may_play = false;
 
    if( !$my_game )
@@ -299,6 +297,10 @@ require_once( "include/rating.php" );
      $notesmode = $player_row["NotesSmallMode"];
    }
 
+
+
+   start_page(T_("Game"), true, $logged_in, $player_row);
+
    echo "<table>\n<tr><td>"; //notes table {--------
 
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
@@ -332,14 +334,10 @@ require_once( "include/rating.php" );
 
 // display moves
 
-   if( !$enable_message and $Moves > 0 )
+   if( !$enable_message )
    {
-      draw_moves();
-   }
-
-   if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' or
-       $action == 'handicap' )
-   {
+      if( $Moves > 0 )
+         draw_moves();
       if( $action == 'choose_move' )
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
@@ -347,6 +345,8 @@ require_once( "include/rating.php" );
 
          if( $Moves < DELETE_LIMIT+$Handicap )
             $menu_array[T_('Delete game')] = "game.php?gid=$gid&action=delete";
+
+         $menu_array[T_('Resign')] = "game.php?gid=$gid&action=resign";
       }
       else if( $action == 'remove' )
       {
@@ -357,9 +357,6 @@ require_once( "include/rating.php" );
       {
          $menu_array[T_('Delete game')] = "game.php?gid=$gid&action=delete";
       }
-
-      if( $action == 'choose_move' )
-         $menu_array[T_('Resign')] = "game.php?gid=$gid&action=resign";
 
       $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid");
 

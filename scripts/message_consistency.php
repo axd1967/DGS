@@ -21,10 +21,25 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 chdir( '../' );
 require_once( "include/std_functions.php" );
 
+define('DEBUG',true);
+
 {
    connect2mysql();
 
+   disable_cache();
+
    //init_standard_folders();
+
+if(DEBUG){
+   function dbg_query($s) { echo $s."<BR>";}
+   echo "<p>(just show queries needed): <br>";
+}else{
+   function dbg_query($s) { 
+     if( !mysql_query( $s) )
+        die("$s;<br>" . mysql_error());
+   }
+   echo "<p>*** Fixes errors: <br>";
+}
 
    if( !($uid=@$_REQUEST['uid']) )
       check_myself_message();
@@ -37,15 +52,7 @@ require_once( "include/std_functions.php" );
 function check_myself_message( $user_id=false)
 {
 
-if(1){
-   function showqry($s) { echo $s."<BR>"; }
-   $action = "showqry";
-   echo "<p>Messages to myself (just show queries needed): <br>";
-}else{
-   $action = "mysql_query";
    echo "<p>Messages to myself: ";
-}
-
 
 //Find old way *messages to myself*, i.e. where sender and receiver are the same user.
    $query = "SELECT me.mid as mid, " .
@@ -68,10 +75,10 @@ if(1){
       if (!isset($folder)) $folder = FOLDER_MAIN; /* or simply "NULL" */
 
       $mcID = $row['me_mcID'];
-      $action("UPDATE MessageCorrespondents SET Sender='M', Folder_nr=$folder " .
+      dbg_query("UPDATE MessageCorrespondents SET Sender='M', Folder_nr=$folder " .
                    "WHERE ID=$mcID LIMIT 1" );
       $mcID = $row['other_mcID'];
-      $action("DELETE FROM MessageCorrespondents WHERE ID=$mcID LIMIT 1" );
+      dbg_query("DELETE FROM MessageCorrespondents WHERE ID=$mcID LIMIT 1" );
    }
 
    echo "<p>\n";

@@ -34,7 +34,6 @@ function get_rating_data($uid)
 {
    global $ratings, $ratingmin, $ratingmax, $nr_games,
       $time, $starttime, $endtime, $ratingpng_min_interval;
-   global $NOW;
 
    $nr_games = -1 ; //first point is Registerdate
 
@@ -47,6 +46,8 @@ function get_rating_data($uid)
    $ratingmin = array();
    $time = array();
 
+   $bound_interval = $ratingpng_min_interval/4;
+
    $result = mysql_query(
       "SELECT InitialRating AS Rating, " .
       "InitialRating+200+GREATEST(1600-InitialRating,0)*2/15 AS RatingMax, " .
@@ -57,33 +58,29 @@ function get_rating_data($uid)
    if( mysql_num_rows($result) != 1 )
       exit;
 
+   $min_row = mysql_fetch_assoc($result);
+   if( $starttime < $min_row['seconds'] - $bound_interval )
+      $starttime = $min_row['seconds'] - $bound_interval;
+   if( $endtime < $min_row['seconds'] + $bound_interval)
+      $endtime = $min_row['seconds'] + $bound_interval;
 
-   $row = mysql_fetch_assoc($result);
-
-   $min_interval = min( $ratingpng_min_interval, $NOW - $row['seconds'] );
-
-   if( $starttime < $row['seconds'] - $ratingpng_min_interval/2 )
-      $starttime = $row['seconds'] - $ratingpng_min_interval/2;
-
-   if( $endtime < $row['seconds'] + $min_interval/2 )
-      $endtime = $row['seconds'] + $min_interval/2;
 
    $result = mysql_query("SELECT MAX(UNIX_TIMESTAMP(Time)) AS seconds " .
                          "FROM Ratinglog WHERE uid=$uid") or die(mysql_error());
 
    $max_row = mysql_fetch_assoc($result);
-   if( $endtime > $max_row['seconds'] + $ratingpng_min_interval/2)
-      $endtime = $max_row['seconds'] + $ratingpng_min_interval/2;
+   if( $starttime > $max_row['seconds'] - $bound_interval )
+      $starttime = $max_row['seconds'] - $bound_interval;
+   if( $endtime > $max_row['seconds'] + $bound_interval)
+      $endtime = $max_row['seconds'] + $bound_interval;
 
-   if( $starttime > $max_row['seconds'] - $min_interval/2 )
-      $starttime = $max_row['seconds'] - $min_interval/2;
-
-   if( ($endtime - $starttime) < $min_interval )
+   if( ($endtime - $starttime) < $ratingpng_min_interval )
    {
       $mean = ( $starttime + $endtime )/2 + 12*3600;
-      $starttime = $mean - $min_interval/2;
-      $endtime = $starttime + $min_interval;
+      $starttime = $mean - $ratingpng_min_interval/2;
+      $endtime = $starttime + $ratingpng_min_interval;
    }
+
 
    $result = mysql_query("SELECT Rating, RatingMax, RatingMin, " .
                          "UNIX_TIMESTAMP(Time) AS seconds " .
@@ -94,6 +91,7 @@ function get_rating_data($uid)
 
    $first = true;
    $tmp = NULL;
+   $row = $min_row;
    do
    {
       if( $row['seconds'] < $starttime )
@@ -297,6 +295,8 @@ function imagemultiline($im, $points, $nr_points, $color)
    $SizeX = ( @$_GET['size'] > 0 ? $_GET['size'] : $defaultsize );
    $SizeY = $SizeX * 3 / 4;
 
+   if( $endtime < $starttime )
+     swap($starttime, $endtime);
 
    $starttime = mktime(0,0,0,$BEGINMONTH,1,$BEGINYEAR);
 
@@ -307,10 +307,10 @@ function imagemultiline($im, $points, $nr_points, $color)
    if( isset($_GET['endyear']) and isset($_GET['endmonth']) )
       $endtime = min($endtime, mktime(0,0,0,$_GET['endmonth']+1,0,$_GET['endyear']));
 
-   get_rating_data(@$_GET["uid"]); //will not return if no data
+   get_rating_data(@$_GET["uid"]);
 
-   $max = array_reduce($ratingmax, "max", $ratingmax[0]);
-   $min = array_reduce($ratingmin, "min", $ratingmin[0]);
+   $max = array_reduce($ratingmax, "max",-10000);
+   $min = array_reduce($ratingmin, "min", 10000);
 
 
    scale_data();

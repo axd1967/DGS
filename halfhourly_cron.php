@@ -108,7 +108,9 @@ if( !$is_down )
       extract($row);
 
       $msg = "A message or game move is waiting for you at:\n "
-                . mail_link('',"status.php")."\n";
+                . mail_link('',"status.php")."\n"
+           . "(No more notifications will be send until your reconnection)\n"
+           ;
 
       // Find games
 

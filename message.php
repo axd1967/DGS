@@ -258,9 +258,8 @@ require_once( "include/form_functions.php" );
 
          if( $can_reply )
          {
-            echo '<a href="message.php?mode=Dispute&mid=' . $mid . '">' .
+            echo '&nbsp;<br><a href="message.php?mode=Dispute&mid=' . $mid . '">' .
                T_('Dispute settings') . '</a>';
-            echo "<p>&nbsp;<p>\n";
 
             $message_form->add_row( array(
                   'HEADER', T_('Reply'),

@@ -171,6 +171,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    list($lastx,$lasty) =
       make_array( $gid, $array, $msg, $Moves, NULL, $moves_result, $marked_dead, $no_marked_dead );
 
+   $garbage = ($Moves < DELETE_LIMIT+$Handicap) ;
    $Moves++;
 
    $message = trim(@$_REQUEST['message']);
@@ -343,7 +344,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       case 'delete':
       {
-         if( $Status != 'PLAY' or ( $Moves >= 1+DELETE_LIMIT+$Handicap ) )
+         if( $Status != 'PLAY' or !$garbage )
             error("invalid_action");
 
 /*
@@ -532,8 +533,6 @@ if( HOT_SECTION )
          $Text = addslashes("The result in the game " .game_reference( true, false, $gid, $whitename, $blackname) .
              " was: <p><center>" . score2text($score,true,true) . "</center><br>");
          $Subject = 'Game result';
-
-         $garbage = ($Moves < DELETE_LIMIT+$Handicap) ;
 
          mysql_query( "UPDATE Players SET Running=Running-1" .
                       ($garbage ? '' : ", Finished=Finished+1" .
