@@ -316,10 +316,12 @@ require_once( "include/make_translationfiles.php" );
         error('admin_already_translated');
      else
      {
-        mysql_query("UPDATE TranslationTexts " .
+        $query = "UPDATE TranslationTexts " .
                     "SET Translatable='" . ($row['Translatable'] == 'Y' ? 'N' : 'Y' ) . "' " .
-                    "WHERE ID=" . $row['Question'] . ' ' .
-                    "OR ID=" . $row['Answer'] . " LIMIT 2" );
+                    "WHERE ID=" . $row['Question'] .
+           ( $row['Level'] == 1 ? ' LIMIT 1' : " OR ID=" . $row['Answer'] . " LIMIT 2" );
+
+        mysql_query( $query ) or die(mysql_error());
      }
 
      make_include_files(null, 'FAQ');
