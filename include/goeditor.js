@@ -163,7 +163,12 @@ function show_text_button(nr, button_function)
   document.write('<table border=0 cellpadding=0 cellspacing=0 align=center valign=center bgcolor=#fdd69b>');
   document.write('<tr><td colspan=3><img width='+(stonesz*2+40)+' height=5 src="images/gr.png"></td></tr>');
   document.write('<td><img width=5 height='+(stonesz+5)+' src="images/gr.png"></td>');
-  document.write('<td width='+(stonesz*2+30)+' height='+(stonesz+5)+' align=center><a href="javascript:'+button_function+'('+nr+');"><font color=black>'+button_function+'</font></a></td>');
+
+  if( version == 1 )
+     document.write('<td width='+(stonesz*2+30)+' height='+(stonesz+5)+' align=center><a onClick="'+button_function+'('+nr+')"><font color=black>'+button_function+'</font></a></td>');
+  else
+     document.write('<td width='+(stonesz*2+30)+' height='+(stonesz+5)+' align=center><a href="javascript:'+button_function+'('+nr+');"><font color=black>'+button_function+'</font></a></td>');
+
   document.write('<td><img width=5 height='+(stonesz+5)+' src="images/gr.png"></td></tr>');
   document.writeln('<tr><td colspan=3><img width='+(stonesz*2+40)+' height=5 src="images/gr.png"></td></tr></table>');
 }
@@ -421,7 +426,7 @@ function undo(nr)
          lasty[nr] = a[1];
       }
 
-      if( Number(a[5]) >= 1 )
+      if( Number(a[5]) >= 1 && !isNaN(Number(a[5])))
       {
          current_number[nr] = Number(a[5]);
          document.images['number_'+nr].src = stonesize[nr]+'/b'+current_number[nr]+'.'+img;
@@ -473,7 +478,7 @@ function redo(nr)
       if( Number(a[5]) == current_number[nr] )
          document.images['number_'+nr].src =
             stonesize[nr]+'/b'+(++current_number[nr])+'.'+img;
-      else if( Number(a[3]) >= 1 )
+      else if( Number(a[3]) >= 1 && !isNaN(Number(a[5])))
       {
          current_number[nr] = Number(a[3]);
          document.images['number_'+nr].src = stonesize[nr]+'/b'+current_number[nr]+'.'+img;
