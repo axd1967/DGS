@@ -226,10 +226,12 @@ function update_rating2($gid)
 {
    global $NOW;
 
+   $WithinPercent = 1/4;
+
    $query = "SELECT Games.*, ".
-       "white.Rating as wRating, white.RatingStatus as wRatingStatus, " .
+       "white.Rating2 as wRating, white.RatingStatus as wRatingStatus, " .
        "white.RatingMax as wRatingMax, white.RatingMin as wRatingMin, " .
-       "black.Rating as bRating, black.RatingStatus as bRatingStatus, " .
+       "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
        "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
        "FROM Games, Players as white, Players as black " .
        "WHERE Status='FINISHED'  AND Games.ID=$gid " .
@@ -245,6 +247,12 @@ function update_rating2($gid)
 
    $row = mysql_fetch_array( $result );
    extract($row);
+
+   if( $Moves < 10+$Handicap ) // Don't rate games with too few moves
+   {
+      mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid");
+      return;
+   }
 
    $game_result = 0.5;
    if( $Score > 0 ) $game_result = 1.0;
@@ -294,17 +302,24 @@ function update_rating2($gid)
    $wTmp = $wOld;
    change_rating($wTmp, $bRatingMin, $game_result, $Size, $Komi, $Handicap, $bFactor);
 
-   if( ($bRatingMax - $bRating) < ($bRating - $bRatingMin)/2 )
-      $bRatingMax = $bRating + ($bRating - $bRatingMin)/2;
+   // Check that $Rating is within the central $WithinPercent of [$RatingMin,$RatingMax]
 
-   if( ($bRating - $bRatingMin) < ($bRatingMax - $bRating)/2 )
-      $bRatingMin = $bRating - ($bRatingMax - $bRating)/2;
+   $k = (1-$WithinPercent)/2;
+   $Dist = ($bRatingMax - $bRatingMin) * $k;
 
-   if( ($wRatingMax - $wRating) < ($wRating - $wRatingMin)/2 )
-      $wRatingMax = $wRating + ($wRating - $wRatingMin)/2;
+   if( $bRating > $bRatingMax - $Dist )
+      $bRatingMax = ($bRating - $bRatingMin * $k) / (1-$k);
 
-   if( ($wRating - $wRatingMin) < ($wRatingMax - $wRating)/2 )
-      $wRatingMin = $wRating - ($wRatingMax - $wRating)/2;
+   if( $bRating < $bRatingMin + $Dist )
+      $bRatingMin = ($bRating - $bRatingMax * $k) / (1-$k);
+
+   $Dist = ($wRatingMax - $wRatingMin) * $k;
+
+   if( $wRating > $wRatingMax - $Dist )
+      $wRatingMax = ($wRating - $wRatingMin * $k) / (1-$k);
+
+   if( $wRating < $wRatingMin + $Dist )
+      $wRatingMin = ($wRating - $wRatingMax * $k) / (1-$k);
 
 
    echo "wRating: $wRating<br>\n" .
@@ -315,22 +330,22 @@ function update_rating2($gid)
       "bRatingMax: $bRatingMax<br>";
 
 
-   mysql_query( "UPDATE Games SET Rated='Done', " .
-                "BlackRatingDiff= " . ($bRating - $bOld) .
-                ", WhiteRatingDiff= " . ($wRating - $wOld) .
-                " WHERE ID=$gid" );
+    mysql_query( "UPDATE Games SET Rated='Done', " .
+                 "BlackRatingDiff= " . ($bRating - $bOld) .
+                 ", WhiteRatingDiff= " . ($wRating - $wOld) .
+                 " WHERE ID=$gid" );
 
-   mysql_query( "UPDATE Players SET Rating=$bRating, " .
+   mysql_query( "UPDATE Players SET Rating2=$bRating, " .
                 "RatingMin=$bRatingMin, RatingMax=$bRatingMax, " .
                 "RatingStatus='RATED' WHERE ID=$Black_ID" );
 
-    mysql_query( "UPDATE Players SET Rating=$wRating, " .
+    mysql_query( "UPDATE Players SET Rating2=$wRating, " .
                  "RatingMin=$wRatingMin, RatingMax=$wRatingMax, " .
                  "RatingStatus='RATED' WHERE ID=$White_ID" );
 
     mysql_query("INSERT INTO Ratinglog (uid,gid,Rating,RatingMin,RatingMax, Time) VALUES " .
-                "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, FROM_UNIXTIME($NOW)), " .
-                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, FROM_UNIXTIME($NOW)) ") or die(mysql_error());
+                "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, '$Lastchanged'), " .
+                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, '$Lastchanged') ") or die(mysql_error());
 
 }
 
