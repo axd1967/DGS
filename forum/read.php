@@ -45,10 +45,9 @@ function draw_post($post_type, $my_post, $Subject, $Text, $GoDiagrams)
 
 
    if( $post_type == 'preview' )
-      echo "<tr><td bgcolor=cceecc><a name=\"preview\"><font size=\"+1\"><b>" .
+      echo "<tr><td bgcolor='#cceecc'><a name=\"preview\"><font size=\"+1\"><b>" .
          make_html_safe(trim($_POST['Subject'])) . "</b></font></a><br> " . T_('by') .
-         " <a href=\"$HOSTBASE/userinfo.php?uid=" . $player_row['ID'] . '">' .
-         make_html_safe($player_row['Name']) . ' (' . $player_row['Handle'] . ')</a>' .
+         " ".user_reference( true, true, "black", $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n" .
          '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
    else
@@ -56,8 +55,8 @@ function draw_post($post_type, $my_post, $Subject, $Text, $GoDiagrams)
       echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
          "\"><a name=\"$ID\"><font size=\"+1\"><b>" .
          make_html_safe($Subject) . "</b></font>$new</a><br> " . T_('by') .
-         " <a href=\"$HOSTBASE/userinfo.php?uid=$User_ID\">" . make_html_safe($Name) .
-         " ($Handle)</a>" . ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
+         " ".user_reference( true, true, "black", $User_ID, $Name, $Handle) .
+         ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
       if( $Lastedited > 0 )
          echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum&thread=$thread&revision_history=$ID\">" . T_('edited') .
             "</a> " . date($date_fmt, $Lasteditedstamp) . ")";
