@@ -188,11 +188,11 @@ When translating you should keep in mind the following things:
                                        "<table width=\"100%\">\n" .
                                        "  <tr>\n" .
                                        "    <td align=\"center\">" .
-                                       form_insert_submit_button( 'just_group', 'Just change group' ) . "</td>\n" .
+                                       $translate_form->print_insert_submit_button( 'just_group', 'Just change group' ) . "</td>\n" .
                                        "    <td align=\"center\">" .
-                                       form_insert_submit_button( 'change', 'Change translation' ) . "</td>\n" .
+                                       $translate_form->print_insert_submit_button( 'change', 'Change translation' ) . "</td>\n" .
                                        "    <td align=\"center\">" .
-                                       form_insert_submit_button( 'apply_changes', 'Apply translation changes to Dragon' ) . "</td>\n" .
+                                       $translate_form->print_insert_submit_button( 'apply_changes', 'Apply translation changes to Dragon' ) . "</td>\n" .
                                        "  </tr>\n" ) );
       $translate_form->echo_string();
 
