@@ -22,6 +22,7 @@ $TranslateGroups[] = "Users";
 
 require( "include/std_functions.php" );
 require( "include/rating.php" );
+require( "include/countries.php" );
 
 {
    disable_cache();
@@ -58,11 +59,13 @@ require( "include/rating.php" );
 
    $query = "UPDATE Players SET " .
       "Name='" . trim($name) . "', " .
-      "Country='" . trim($country) . "', " .
       "Email='" . trim($email) . "', " .
       "Rank='" . trim($rank) . "', " .
       "Open='" . trim($open) . "', " .
       "SendEmail='$sendemail', ";
+
+   if( isset($COUNTRIES[trim($country)]) )
+      $query .= "Country='" . trim($country) . "', ";
 
    if( $_GET['locally'] == 1 )
    {

@@ -81,7 +81,7 @@ require( "include/countries.php" );
     <tr><td><b>' . T_('Name') . '</b></td><td>' . make_html_safe($row['Name']) . '</td></tr>
     <tr><td><b>' . T_('Userid') . '</b></td><td>' . make_html_safe($row['Handle']) . '</td></tr>
     <tr><td><b>' . T_('Country') . '</b></td><td>' .  (empty($cntr) ? '&nbsp;' :
-             '<img title="' . $COUNTRIES[$cntr][0] . "\" src=\"images/flags/$cntr.gif\">") . '</td>
+             '<img title="' . $COUNTRIES[$cntr] . "\" src=\"images/flags/$cntr.gif\">") . '</td>
     <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . make_html_safe($row['Open'],true) . '</td></tr>
     <tr><td><b>' . T_('Activity') . '</b></td><td>' . $activity . '</td></tr>
     <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating($row['Rating2'],true,$row['ID']) . '</td></tr>

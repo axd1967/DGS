@@ -78,14 +78,7 @@ require_once( "include/countries.php" );
       $woodcolors[$i] = '<img width=30 height=30 src="images/smallwood'.$i.'.gif">';
    }
 
-   $countries[''] = '';
-   foreach( $COUNTRIES as $code => $name_array )
-      {
-         if( $name_array[5] )
-            $countries[$code] = $name_array[0];
-      }
-
-   asort($countries);
+   asort($COUNTRIES);
 
    start_page(T_("Edit profile"), true, $logged_in, $player_row );
 
@@ -99,7 +92,7 @@ require_once( "include/countries.php" );
                                   'TEXTINPUT', 'name', 16, 40,
                                   str_replace( "\"", "&quot;", $player_row["Name"] ) ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Country'),
-                                  'SELECTBOX', 'country', 1, $countries,
+                                  'SELECTBOX', 'country', 1, $COUNTRIES,
                                   $player_row["Country"], false ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Email'),
                                   'TEXTINPUT', 'email', 16, 80,
