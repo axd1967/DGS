@@ -88,7 +88,7 @@ echo '
           <td><B><A href="messages.php">Messages</A></B></td>
           <td><B><A href="invite.php">Invite</A></B></td>
           <td><B><A href="users.php">Users</A></B></td>
-          <td><B><A href="faq.php">FAQ</A></B></td>
+          <td><B><A href="docs.php">Docs</A></B></td>
         </tr>
     </table>
     <BR>
@@ -219,7 +219,7 @@ function is_logged_in($hdl, $scode, &$row)
                 return false;
         }
 
-    if( $hdl=='ejlo' )
+    if( $row["Adminlevel"] >= 3 )
         $show_time = true;
 
     return true;
