@@ -191,16 +191,6 @@ CREATE TABLE Forums (
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
-#
-# Table structure for table 'Threads'
-#
-
-CREATE TABLE Threads (
-  ID int(11) NOT NULL auto_increment,
-  Forum_ID int(11) NOT NULL default '0',
-  Lastchanged datetime default NULL,
-  PRIMARY KEY  (ID)
-) TYPE=MyISAM;
 
 #
 # Table structure for table 'Posts'
@@ -208,14 +198,18 @@ CREATE TABLE Threads (
 
 CREATE TABLE Posts (
   ID int(11) NOT NULL auto_increment,
-  Thread_ID int(11) NOT NULL default '0',
+  Forum_ID int(11) NOT NULL default '0',
   Time datetime default NULL,
+  Lastchanged datetime default NULL,
   Subject varchar(80) default NULL,
   Text text,
   User_ID int(11) default NULL,
   Parent_ID int(11) default NULL,
+  Thread_ID int(11) NOT NULL default '0',
   AnswerNr int(11) NOT NULL default '0',
+  Depth int(11) NOT NULL default '0',
   crc32 int(11) default NULL,
   PosIndex varchar(80) binary default NULL,
-  PRIMARY KEY  (ID)
+  PRIMARY KEY  (ID),
+  KEY Pos (Thread_ID,PosIndex)
 ) TYPE=MyISAM;

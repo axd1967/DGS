@@ -48,8 +48,10 @@ include("forum_functions.php");
 
    start_table($headline, $links, "", $cols);
 
+   echo "<tr><td colspan=$cols>\n";
    message_box($forum);
-   
+   echo "</td></tr>\n";   
+
    end_table($links, $cols);
    end_page();
 }

@@ -119,16 +119,21 @@ function echo_links($cols)
 
 }
 
-function message_box($forum, $parent=-1)
+function message_box($forum, $parent=-1, $Subject=NULL)
 {
+   if( $Subject and strcasecmp(substr($Subject,0,3), "re:") != 0 )
+      $Subject = "RE: " . $Subject;
+
+
 ?>
+<table align=center cellpadding=0> 
 <FORM name="messageform" action="post.php" method="POST">
     <INPUT type=hidden name="parent" value="<?php echo $parent;?>">
     <INPUT type=hidden name="forum" value="<?php echo $forum;?>">
       
           <TR nowrap>
             <TD align=left colspan=2>&nbsp;&nbsp;Subject:&nbsp;&nbsp;
-            <input type="text" name="Subject" size="50" maxlength="80"></TD>
+            <input type="text" name="Subject" size="50" maxlength="80" <?php if( $Subject ) echo "value=\"$Subject\"";?>></TD>
           </TR>
           <TR nowrap>
             <TD align=center colspan=2>  
@@ -140,7 +145,23 @@ function message_box($forum, $parent=-1)
           </TR>
 
 </FORM>
+</table>
 <?php
+}
+
+function forum_name($forum)
+{
+   if( !($forum > 0) )
+      error("Unknown forum");
+   
+   $result = mysql_query("SELECT Name AS Forumname FROM Forums WHERE ID=$forum");
+   
+   if( mysql_num_rows($result) != 1 )
+      error("Unknown forum");
+
+   $row = mysql_fetch_array($result);
+
+   return $row["Forumname"];
 }
 
 ?>

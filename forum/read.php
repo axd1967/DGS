@@ -21,39 +21,81 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 include("forum_functions.php");
 
+function draw_post($reply_link=true)
+{
+   global $Subject, $Text, $ID, $User_ID, $HOSTBASE, $forum, $Name, $thread, $Timestamp, 
+      $date_fmt;
+
+   echo '<tr><td bgcolor=cccccc>
+<a name="' . $ID . '"><font size=\"+1\"><b>' . make_html_safe($Subject) . '</b></font></a><br>
+by <a href="' . $HOSTBASE . '/userinfo.php?uid=' . $User_ID . '">' . $Name . '</a>
+on ' . date($date_fmt, $Timestamp) . '</td></tr>
+<tr><td bgcolor=white>' . make_html_safe($Text, true) . '</td></tr>
+';
+   if( $reply_link )
+      echo "<tr><td bgcolor=white align=left><a href =\"read.php?forum=$forum&thread=$thread&reply=$ID#$ID\">[ reply ]</a></td></tr>\n";
+}
+
+
+//  input: $forum, $thread, $reply
 {
    connect2mysql();
 
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-   $result = mysql_query("SELECT Name as Forumname from Forums where ID=$forum");
-   
-   if( mysql_num_rows($result) != 1 )
-      error("Unknown forum");
-   
-   extract(mysql_fetch_array($result));
+   $Forumname = forum_name($forum);
 
    start_page("Reading forum $Forumname", true, $logged_in, $player_row );
 
-
-
-   $result = mysql_query("SELECT Posts.*, Lastchanged from Posts, Threads, count(*) AS Count " .
-                         "WHERE Posts.Thread_ID=Threads.ID " .
-                         "ORDER BY Lastchanged, PosIndex");
-
    $cols=2;
-   $headline   = array("New topic" => "colspan=$cols");
+   $headline   = array("Reading thread" => "colspan=$cols");
    $links = LINK_FORUMS | LINK_THREADS | LINK_EXPAND_VIEW;
 
-   start_table($headline, $links, "", $cols);
+   start_table($headline, $links, 'width="99%"', $cols);
 
+   $result = mysql_query("SELECT Posts.*, UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
+                         "Players.Name " .
+                         "FROM Posts, Players " .
+                         "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
+                         "AND Posts.User_ID=Players.ID " .
+                         "ORDER BY PosIndex");
 
+   echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+   $cur_depth=1;
    while( $row = mysql_fetch_array( $result ) )
    {
-      
+      extract($row);
+
+      while( $cur_depth < $Depth )
+      {
+         echo "<tr><td><ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+         $cur_depth++;
+      }
+
+      while( $cur_depth > $Depth )
+      {
+         echo "</table></ul></td></tr>\n";
+         $cur_depth--;
+      }
+
+      draw_post($reply != $ID);
+ 
+      if( $reply == $ID )
+      {
+         echo "<tr><td>\n";
+         message_box($forum, $ID, $Subject);
+         echo "</td></tr>\n";
+      }
    }
 
+   while( $cur_depth > 1 )
+   {
+      echo "</td></tr></table></ul>\n";
+      $cur_depth--;
+   }
+
+   echo "</table></td></tr>\n";
    
    end_table($links, $cols);
 

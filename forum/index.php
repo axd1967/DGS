@@ -27,7 +27,10 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 start_page("Forum list", true, $logged_in, $player_row );
 
-$result = mysql_query("SELECT * from Forums");
+$result = mysql_query("SELECT Forums.ID,Description,Name, " .
+                      "UNIX_TIMESTAMP(MAX(Lastchanged)) AS Timestamp,Count(*) AS Count " .
+                      "FROM Posts,Forums " .
+                      "GROUP BY Posts.Forum_ID");
 
 $cols = 3;
 $headline   = array("Forums" => "colspan=$cols");
@@ -40,10 +43,12 @@ while( $row = mysql_fetch_array( $result ) )
 {
    extract($row);
 
-   echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID. '">' . $Name .
-      '</a></b></td><td width="20%">Posts: <b>?</b></td><td width="20%">Last Post: <b>?</b></td></tr>
+   echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID . '">' . $Name .
+      '</a></b></td>' .
+      '<td nowrap>Posts: <b>' . $Count .  '&nbsp;&nbsp;&nbsp;</b></td>' .
+      '<td nowrap>Last Post: <b>' . date($date_fmt, $Timestamp) . '</b></td></tr>
 
-<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;New news</dl></td></tr>';   
+<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description . '</dl></td></tr>';   
 }
 
 end_table($links, $cols);

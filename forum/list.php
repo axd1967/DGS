@@ -25,25 +25,18 @@ include("forum_functions.php");
    connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
-   
-   if( !($forum > 0 ) )
-      error("Unknown forum");
-       
-   $result = mysql_query("SELECT Name as Forumname from Forums where ID=$forum");
-   
-   if( mysql_num_rows($result) != 1 )
-      error("Unknown forum");
-   
-   extract(mysql_fetch_array($result));
 
+   $Forumname = forum_name($forum);
+   
    start_page("Forum $Forumname", true, $logged_in, $player_row );
 
-   $result = mysql_query("SELECT Posts.*, Lastchanged from Posts, Threads " .
-                         "WHERE Posts.Thread_ID=Threads.ID " .
-                         "ORDER BY Lastchanged, PosIndex");
+   $result = mysql_query("SELECT Subject,Thread_ID,Lastchanged,User_ID,Name " .
+                         "FROM Posts,Players " .
+                         "WHERE Forum_ID=$forum AND Depth=1 AND Players.ID=User_ID " .
+                         "ORDER BY Lastchanged");
 
-   $cols=3;
-   $headline   = array("Thread"=>"width=50%","Author"=>"width=25%","Date"=>"width=25%");
+   $cols = 3;
+   $headline = array("Thread"=>"width=50%","Author"=>"width=25%","Date"=>"width=25%");
    $links = LINK_FORUMS | LINK_THREADS | LINK_NEW_TOPIC;
    start_table($headline, $links, "width=98%", $cols); 
                
@@ -52,7 +45,7 @@ include("forum_functions.php");
    {
       extract($row);
 
-      echo "<tr><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a></td><td>$User_ID</td><td>$Time</td></tr>\n";
+      echo "<tr><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a></td><td>$Name</td><td>$Lastchanged</td></tr>\n";
    }
 
    end_table($links, $cols);

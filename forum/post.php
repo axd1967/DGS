@@ -30,47 +30,48 @@ include("forum_functions.php");
 
 //  input: $Text, $Subject, $parent, $forum
 
-   if( $parent != -1 )
+   if( $parent > 0 )
    {
-      $result = mysql_query("SELECT Threads,PosIndex from Posts WHERE ID=$parent");
+      $result = mysql_query("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
+                            "WHERE ID=$parent AND Forum_ID=$forum");
       
       if( mysql_num_rows($result) != 1 )
          error("Unknown parent post");
 
       extract(mysql_fetch_array($result));
 
-      $result = mysql_query("SELECT MAX(AnswerNr) AS next_answernr " .
+      $result = mysql_query("SELECT MAX(AnswerNr) AS answer_nr " .
                             "FROM Posts WHERE Parent_ID=$parent");
 
       extract(mysql_fetch_array($result));
 
-      if( !($next_answernr > 0) ) $next_answernr=0;
-
-      $next_answernr++;
+      if( !($answer_nr > 0) ) $answer_nr=0;
    }
    else
    {
       // New thread
-      $result = mysql_query("INSERT INTO Threads SET Forum_ID=$forum, Lastchanged=NOW()");
-
-      if( mysql_affected_rows() != 1 )
-         error("New thread failed");
-
-      $Thread_ID = mysql_insert_id();
-      $next_answernr = 1;
+      $answer_nr = 0;
       $PosIndex = '';
+      $Depth = 0;
+      $Thread_ID = -1;
    }
 
-   $PosIndex .= $order_str[$AnswerNr];
+   $PosIndex .= $order_str[$answer_nr];
+   $Depth++;
+   $Text = trim($Text);
+   $Subject = trim($Subject);
 
    $query = "INSERT INTO Posts SET " .
+       "Forum_ID=$forum, " .
        "Thread_ID=$Thread_ID, " .
        "Time=NOW(), " .
+       "Lastchanged=NOW(), " .
        "Subject=\"$Subject\", " .
        "Text=\"$Text\", " .
        "User_ID=" . $player_row["ID"] . ", " .
        "Parent_ID=$parent, " .
-       "AnswerNr=$next_answernr, " .
+       "AnswerNr=" . ($answernr+1) . ", " .
+       "Depth=$Depth, " .
        "crc32=" . crc32($Text) . ", " .
        "PosIndex=\"$PosIndex\"";
 
@@ -78,6 +79,19 @@ include("forum_functions.php");
    
    if( mysql_affected_rows() != 1)
       error("mysql_insert_post");
+
+   if( !($parent > 0) )
+   {
+      $Thread_ID = mysql_insert_id();
+      mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$Thread_ID" );
+
+      if( mysql_affected_rows() != 1)
+         error("mysql_insert_post");
+   }
+
+   mysql_query( "UPDATE Posts SET Lastchanged=NOW() " .
+                "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
+                "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
 
 
    jump_to("forum/list.php?forum=$forum");
