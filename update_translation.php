@@ -85,16 +85,16 @@ require_once( "include/make_translationfiles.php" );
   }
 
   if( $replace_set )
-     Rod_mysql_query( "REPLACE INTO Translations (Original_ID,Language_ID,Text) VALUES " .
+     mysql_query( "REPLACE INTO Translations (Original_ID,Language_ID,Text) VALUES " .
                   substr($replace_set,1) ) or die(mysql_error());
 
   if( $log_set )
-     Rod_mysql_query( "INSERT INTO Translationlog " .
+     mysql_query( "INSERT INTO Translationlog " .
                   "(Player_ID,Language_ID,Original_ID,Translation) VALUES " .
                   substr($log_set,1) ) or die(mysql_error());
 
   if( $done_set )
-     Rod_mysql_query( "UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN (" .
+     mysql_query( "UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN (" .
                   substr($done_set,1) . ')' ) or die(mysql_error());
 
   make_include_files($translate_lang);
