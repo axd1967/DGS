@@ -65,7 +65,7 @@ function get_clock_ticks($clock_used)
 
 
 function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
-$byotype, $startbyotime, $startbyoper, $has_moved)
+   $byotype, $startbyotime, $startbyoper, $has_moved)
 {
    $elapsed = $hours;
 
@@ -87,7 +87,7 @@ $byotype, $startbyotime, $startbyoper, $has_moved)
       $byoper = $startbyoper;
    }
 
-   if( $byotype == 'JAP' )
+   if( $byotype == 'JAP' ) // japanese byoyomi
    {
       $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
       if( !$has_moved )
@@ -104,7 +104,7 @@ $byotype, $startbyotime, $startbyoper, $has_moved)
       $byotime -= $elapsed;
 
       if( $byotime <= 0 )
-         $byotime = 0;
+         $byotime = $byoper = 0;  // time is up;
       else if( $byoper <= 0 ) // get new stones;
       {
          $byotime = $startbyotime;
@@ -112,7 +112,7 @@ $byotype, $startbyotime, $startbyoper, $has_moved)
       }
 
    }
-   else if( $byotype == 'FIS' )
+   else if( $byotype == 'FIS' ) // Fischer time
    {
       $byotime = $byoper = 0;  // time is up;
    }
@@ -133,6 +133,8 @@ function echo_time($hours)
       else
          $str = $days .'&nbsp;' . T_('days');
    }
+   else
+         $str = '';
 
    $h = $hours % 15;
    if( $h > 0 )
@@ -166,12 +168,11 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)
          if ( $Maintime > 0 )
             $str .= ' + ';
          $str .= echo_time($Byotime);
-         $str .= '/' . $Byoperiods . ' ';
 
          if( $Byotype == 'JAP' )
-            $str .= T_('periods') . ' ' . T_('Japanese byoyomi');
+            $str .= '*' . $Byoperiods . ' ' . T_('periods') . ' ' . T_('Japanese byoyomi');
          else
-            $str .= T_('stones') . ' ' . T_('Canadian byoyomi');
+            $str .= '/' . $Byoperiods . ' ' . T_('stones') . ' ' . T_('Canadian byoyomi');
       }
 
       return $str;
