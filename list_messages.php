@@ -108,12 +108,12 @@ require( "include/timezones.php" );
    echo start_end_column_table(true);
    if( $sent == 1 )
    {
-      echo tablehead(1, T_('From'), 'sender', false, true);
+      echo tablehead(1, T_('To'), 'sender', false, true);
    }
    else
    {
       echo tablehead(1, T_('Flags'), '', true, true);
-      echo tablehead(1, T_('To'), 'sender', false, true);
+      echo tablehead(1, T_('From'), 'sender', false, true);
    }
 
    echo tablehead(1, T_('Subject'), 'Subject', false, true) .
