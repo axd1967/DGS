@@ -207,7 +207,7 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
       "<tr><td><b>" . T_('Subject') . ":</b></td><td>$subject</td></tr>\n" .
       "<tr><td valign=\"top\">" .
       ( $reply_mid > 0 ?
-        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" . T_('Replied') ":</a>" :
+        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" . T_('Replied') . ":</a>" :
         "<b>" . T_('Message') . ":</b>" ) .
       "</td>\n" .
       "<td align=\"center\">\n" .
@@ -252,8 +252,8 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
          break;
 
       default:
-         echo '<tr><td><b>' . T_('Colors') . "<b></td><td>$col</td></tr>\n" .
-         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Colors') . "<b></td><td>$col</td></tr>\n";
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n" .
             '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $Handicap . "</td></tr>\n";
          break;
    }
