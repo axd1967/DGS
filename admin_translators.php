@@ -38,10 +38,9 @@ require_once( "include/form_functions.php" );
 
   start_page(T_('Translator admin'), true, $logged_in, $player_row);
 
-  echo "<center>\n";
+  echo "<center>";
 
-  if( !empty($_GET['msg']) )
-    echo "<p><b><font color=\"green\">" . $_GET['msg'] . "</font></b><hr>\n";
+   sysmsg(@$_GET['msg']);
 
   $translator_form = new Form( 'translatorform', 'admin_do_translators.php', FORM_POST );
 
