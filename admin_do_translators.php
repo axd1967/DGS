@@ -36,6 +36,10 @@ require_once( "include/make_translationfiles.php" );
   if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
      error("adminlevel_too_low");
 
+  $charenc = trim($_GET['charenc']);
+  $langname = trim($_GET['langname']);
+  $twoletter = trim($_GET['twoletter']);
+
   $extra_url_parts = '';
   if( $addlanguage )
     {
