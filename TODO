@@ -13,7 +13,7 @@
 
 * Show message: link if it's a reply
 
-* More user info: Location, languages, web pages, register date, etc.
+* More user info: Game preferences, Location, languages, web pages, ICQ-number, email, register date, Other info etc.
 
 * Send moves/board with email notification
 
@@ -30,6 +30,10 @@
 * Delete old messages
 
 * Themes
+
+* Show number of games for players in users.php
+
+* Add title to show_games.php
 
 
 

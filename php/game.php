@@ -529,7 +529,8 @@ if( $Black_Byotime > 0 or $White_Byotime > 0 )
       </tr><tr>
             <td>Time limit:</td><td colspan=2> 
 <?php 
-    echo_time( $Maintime );
+      if ( $Maintime > 0 )
+        echo_time( $Maintime );
       if( $Byotime <= 0 )
           echo ' without byoyomi';
       else if( $Byotype == 'FIS' )
@@ -540,6 +541,7 @@ if( $Black_Byotime > 0 or $White_Byotime > 0 )
         }
       else
           {
+            if ( $Maintime > 0 )
               echo ' + ';
               echo_time($Byotime); 
               echo '/' . $Byoperiods .  ($Byotype == 'JAP' ? '&nbsp;periods&nbsp;Japanese' : '&nbsp;stones&nbsp;Canadian') . '&nbsp;byoyomi';
