@@ -57,7 +57,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    if( $msg )
       echo "<p><b><font color=\"green\">$msg</font></b><hr>";
 
-   $page = "waiting_room.php" . ( $info > 0 ? "info=$info&" : '?' );
+   $page = "waiting_room.php" . ( $info > 0 ? "?info=$info&" : '?' );
 
    if(!$sort1)
       $sort1 = 'ID';
@@ -65,6 +65,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    $order = $sort1 . ( $desc1 ? ' DESC' : '' );
    if( $sort2 )
       $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
+
+   $orderstring = order_string($sort1, $desc1, $sort2, $desc2);
 
    $column_set = $player_row["WaitingroomColumns"];
 
@@ -82,7 +84,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          tablehead(NULL, T_('Info'), NULL, NULL, true, 92) .
          tablehead(1, T_('Name'), 'Name', false) .
          tablehead(2, T_('Nick'), 'Handle', false) .
-         tablehead(3, T_('Rating'), 'Rating', false) .
+         tablehead(3, T_('Rating'), 'Rating', true) .
          tablehead(4, T_('Comment'), NULL, true) .
          tablehead(5, T_('Handicap'), 'Handicaptype', false) .
          tablehead(6, T_('Komi'), 'Komi', true) .
@@ -112,7 +114,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             $Komi = '-';
 
 
-         echo "<td class=button width=92 align=center><A class=button href=\"waiting_room.php?info=$ID#info\">&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>\n";
+         echo "<td class=button width=92 align=center><A class=button href=\"waiting_room.php?info=$ID&$orderstring#info\">&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>\n";
 
          if( (1 << 0) & $column_set )
             echo "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
@@ -162,7 +164,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    echo "</center>";
 
    if( $info > 0 and is_array($info_row) )
-      $menu_array[T_('Add new game')] = "waiting_room.php" ;
+      $menu_array[T_('Add new game')] = "waiting_room.php" .
+         ($orderstring ? "?$orderstring" : '' ) . "#add" ;
 
    if( $pid == $player_row['ID'] )
       $menu_array[T_('Delete game')] = "join_waitingroom_game.php?id=$ID&delete=t";
@@ -190,6 +193,7 @@ function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax)
 
 function add_new_game_form()
 {
+   echo '<a name="add">' . "\n";
    $addgame_form = new Form( 'addgame', 'add_to_waitingroom.php', FORM_POST );
    $addgame_form->add_row( array( 'HEADER', T_('Add new game') ) );
 
