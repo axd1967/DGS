@@ -214,6 +214,7 @@ function add_new_game_form()
    for($i=1; $i<=40; $i++)
       $rating_array["$i kyu"] = $i . ' ' . T_('kyu');
 
+
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
                                   'CHECKBOX', 'must_be_rated', 'Y', "", false,
                                   'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('If yes, rating between'),
@@ -248,12 +249,12 @@ function show_game_info($game_row)
       "</td></tr>\n";
    echo '<tr><td><b>' . T_('Rating range') . '<b></td><td>' .
       echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Time limits') . '<b></td><td>' .
+   echo '<tr><td><b>' . T_('Time limit') . '<b></td><td>' .
       echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Number of games') . '<b></td><td>' . $nrGames . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Rated?') . '<b></td><td>' .
+   echo '<tr><td><b>' . T_('Rated') . '<b></td><td>' .
       ( $Rated == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Clock runs on weekends?') . '<b></td><td>' .
+   echo '<tr><td><b>' . T_('Clock runs on weekends') . '<b></td><td>' .
       ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
 
    echo '<tr><td><b>' . T_('Comment') . '<b></td><td>' . $Comment . "</td></tr>\n";
