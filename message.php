@@ -60,11 +60,13 @@ $mode = $_GET['mode'];
    }
 
    $folders = get_folders($my_id);
+   $new_folder = $_POST['folder'];
 
-   if( isset($_POST['foldermove']) and isset($folders[$_POST['folder']]) )
+   if( isset($new_folder) and isset($folders[$new_folder]) )
    {
       mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='{$_POST['folder']}' " .
-                   "WHERE uid='$my_id' AND mid='$mid' LIMIT 1" );
+                   "WHERE uid='$my_id' AND mid='$mid' " .
+                   "AND !( Type='INVITATION' and Replied='N' ) LIMIT 1" );
    }
 
    if( $mode == 'ShowMessage' or $mode == 'Dispute' )
@@ -76,7 +78,8 @@ $mode = $_GET['mode'];
                             "UNIX_TIMESTAMP(Messages.Time) AS date, " .
                             "Players.Name AS sender_name, " .
                             "Players.Handle AS sender_handle, Players.ID AS sender_id, " .
-                            "Games.Status, Size, Komi, Handicap, Maintime, Byotype, " .
+                            "Games.Status, Games.mid AS Game_mid, " .
+                            "Size, Komi, Handicap, Maintime, Byotype, " .
                             "Byotime, Byoperiods, Rated, Weekendclock, " .
                             "ToMove_ID, (White_ID=$my_id)+1 AS Color " .
                             "FROM Messages, MessageCorrespondents AS me, " .
@@ -109,15 +112,16 @@ $mode = $_GET['mode'];
          {
             // Remove NEW flag
 
-            $new_folder_nr =
-               ( $Type == 'INVITATION' or $Type == 'DISPUTED' ? FOLDER_REPLY : FOLDER_MAIN );
+            $Folder_nr = ( ($Type == 'INVITATION' or $Type == 'DISPUTED') ?
+                           FOLDER_REPLY : FOLDER_MAIN );
 
-            mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=$new_folder_nr " .
+            mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
                          "WHERE mid=$mid AND uid=$my_id LIMIT 1" )
                or die( mysql_error());
 
             if( mysql_affected_rows() != 1)
                error("mysql_message_info", 'remove new-flag failed');
+
          }
 
          if( $Type == 'INVITATION' )
@@ -129,6 +133,10 @@ $mode = $_GET['mode'];
             else if( is_null($Status) )
             {
                $mode = 'AlreadyDeclined';
+            }
+            else if( $Status == 'DISPUTED' )
+            {
+               $mode = 'InviteDisputed';
             }
             else
             {
@@ -143,26 +151,30 @@ $mode = $_GET['mode'];
 
    echo "<center>\n";
 
-   $message_form = null;
+   $message_form = new Form('messageform', 'send_message.php', FORM_GET, true );
+
    switch( $mode )
    {
       case 'ShowMessage':
       case 'AlreadyDeclined':
       case 'AlreadyAccepted':
+      case 'InviteDisputed':
       {
-         $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text, $folders, $Folder_nr, $message_form);
          if( $mode == 'AlreadyAccepted' )
          {
-            echo '<font color=green>';
-            printf( T_('This %sgame%s invitation has already been accepted.'),
-                    "<a href=\"game.php?gid=$Game_ID\">", '</a>' );
-            echo '</font>';
+            echo '<font color=green>' .
+               sprintf( T_('This %sgame%s invitation has already been accepted.'),
+                        "<a href=\"game.php?gid=$Game_ID\">", '</a>' ) . '</font>';
          }
-         if( $mode == 'AlreadyDeclined' )
+         else if( $mode == 'AlreadyDeclined' )
             echo '<font color=green>' .
                T_('This invitation has been declined or the game deleted') . '</font>';
+         else if( $mode == 'InviteDisputed)' )
+            echo '<font color=green>' .
+               sprintf(T_('The settings for this game invitation has been %sdisputed%s'),
+                       "<a href=\"message.php?mid=$Game_mid\">", '</a>' ) . '</font>';
 
          if( $can_reply )
             {
@@ -181,7 +193,6 @@ $mode = $_GET['mode'];
 
       case 'NewMessage':
       {
-        $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
         $message_form->add_row( array( 'HEADER', T_('New message') ) );
         $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)') ,
                                        'TEXTINPUT', 'to', 50, 80, $default_handle ) );
@@ -196,7 +207,6 @@ $mode = $_GET['mode'];
       case 'ShowInvite':
       case 'ShowMyInvite':
       {
-         $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text, $folders, $Folder_nr, $message_form);
 
@@ -245,7 +255,6 @@ $mode = $_GET['mode'];
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text);
 
-         $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
          $message_form->add_row( array( 'HEADER', T_('Dispute settings') ) );
          $message_form->add_row( array( 'HIDDEN', 'mode', $mode ) );
          $message_form->add_row( array( 'HIDDEN', 'subject', 'Game invitation dispute' ) );
@@ -264,7 +273,6 @@ $mode = $_GET['mode'];
 
       case 'Invite':
       {
-         $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
          $message_form->add_row( array( 'HEADER', T_('Invitation message') ) );
          $message_form->add_row( array( 'HIDDEN', 'type', 'INVITATION' ) );
          $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)'),
@@ -279,8 +287,7 @@ $mode = $_GET['mode'];
       break;
    }
 
-   if( !is_null($message_form) )
-     $message_form->echo_string();
+   $message_form->echo_string();
 
    echo "</center>\n";
 

@@ -337,6 +337,9 @@ disable_cache();
    if( mysql_affected_rows() != 2)
       error("mysql_insert_message",true);
 
+   if( $type == "INVITATION" )
+      mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" );
+
    if( $reply )
    {
       mysql_query( "UPDATE MessageCorrespondents SET Replied='Y' " .

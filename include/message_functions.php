@@ -214,7 +214,8 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 }
 
 function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_handle,
-                            $subject, $reply_mid, $text, $folders=null, $folder_nr=null)
+                            $subject, $reply_mid, $text,
+                            $folders=null, $folder_nr=null, $form=null)
 {
    global $date_fmt;
 
@@ -243,7 +244,7 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
 
       echo "<td><form name=\"movefolders\" action=\"" . basename($_SERVER['REQUEST_URI']) .
          "\" method=\"POST\">\n";
-      $form = new Form('','','');
+
       $fld = array('' => '');
       foreach( $folders as $key => $val )
          if( $key != $folder_nr and ($to_me xor $key == FOLDER_SENT) and $key != FOLDER_NEW )
@@ -426,7 +427,6 @@ function change_folders_for_marked_messages($uid, $folders)
    else
       return;
 
-   $sender_where_clause = "";
    if( $new_folder == FOLDER_SENT )
       $sender_where_clause = 'AND Sender="Y"';
    if( $new_folder == FOLDER_REPLY )
@@ -442,13 +442,11 @@ function change_folders_for_marked_messages($uid, $folders)
 
    if( count($message_ids) )
    {
-
-      $query = "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
-         "WHERE uid='$uid' $sender_where_clause " .
-         "AND mid IN (" . implode(',', $message_ids) . ") " .
-         "LIMIT " . count($message_ids);
-
-      mysql_query( $query ) or die(mysql_error());
+      mysql_query("UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
+                  "WHERE uid='$uid' $sender_where_clause " .
+                  "AND mid IN (" . implode(',', $message_ids) . ") " .
+                  "LIMIT " . count($message_ids) )
+         or die(mysql_error());
    }
 }
 

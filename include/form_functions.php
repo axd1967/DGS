@@ -116,12 +116,16 @@ class Form
    /*! \brief A variable responsible for holding all different form elements. */
    var $form_elements;
 
+   /*! \brief Echo the <from ...> element immediately. */
+   var $echo_form_start_now;
+
    /*! \brief Constructor. Initializes various variables. */
-   function Form( $name, $action_page, $method )
+   function Form( $name, $action_page, $method, $echo_form_start_now=false )
       {
          $this->name = $name;
          $this->action = $action_page;
          $this->method = $method;
+         $this->echo_form_start_now = $echo_form_start_now;
 
          $this->rows = array();
 
@@ -223,6 +227,9 @@ class Form
                                      'SpanAllColumns' => false,
                                      'Align'   => 'left' ) );
 
+         if( $echo_form_start_now )
+            echo $this->print_start( $this->name, $this->action, $this->method );
+
       }
 
    /*! \brief Get $form_string and update it if necessary. */
@@ -299,7 +306,10 @@ class Form
          $result = "";
          $max_nr_columns = 2;
 
-         $result .= $this->print_start( $this->name, $this->action, $this->method );
+         if( !$echo_form_start_now )
+            $result .= $this->print_start( $this->name, $this->action, $this->method );
+
+         $result .= "  <TABLE>\n";
 
          ksort($this->rows);
 
@@ -552,8 +562,7 @@ class Form
          $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
          return "<FORM name=\"$name\" action=\"$action_page\" method=\"" .
-            $pg_arr[$method] . "\">\n" .
-            "  <TABLE>\n";
+            $pg_arr[$method] . "\">\n";
       }
 
    /*!
