@@ -1,0 +1,50 @@
+<?php
+/*
+Dragon Go Server
+Copyright (C) 2001-2003  Erik Ouchterlony
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+$TranslateGroups[] = "Error";
+
+require_once( "include/std_functions.php" );
+
+{
+   connect2mysql();
+
+   $logged_in = who_is_logged( $player_row);
+
+   start_page(T_('Not Found'), true, $logged_in, $player_row );
+
+   echo "<center>\n";
+
+   $uri= @$_SERVER['REQUEST_URI'];
+   $refer= @$_SERVER['HTTP_REFERER'];
+   $err= @$_REQUEST['err'];
+
+   $tmp = urlencode("$uri - $refer - $err");
+   echo "<!-- $tmp -->\n";
+
+   echo '<TABLE border=0 cellpadding=0 width="80%"><TR><TD align="left">&nbsp;<BR>
+' . T_('Page not found.')
+. '
+</TD></TR>
+</TABLE>';
+
+   echo "</center>\n";
+   end_page();
+}
+?>
