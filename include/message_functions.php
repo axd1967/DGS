@@ -231,7 +231,7 @@ function message_info_table($mid, $date, $to_me,
       make_html_safe($subject, true) . "</td></tr>\n" .
       "<tr><td valign=\"top\">" .
       ( $reply_mid > 0 ?
-        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" . T_('Replied') . ":</a>" :
+        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid&sent=t\">" . T_('Replied') . ":</a>" :
         "<b>" . T_('Message') . ":</b>" ) .
       "</td>\n" .
       "<td align=\"center\" colspan=2>\n" .

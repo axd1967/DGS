@@ -161,9 +161,14 @@ require_once( "include/timezones.php" );
       if( empty($row["other"]) )
          $row["other"] = '-';
 
-      $row_strings[2] = "<td>" . ( $row['Sender'] == 'Y' ? T_('To') . ': ' : '') .
-         "<A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
-         make_html_safe($row["other"]) . "</A></td>";
+      if( $row['Sender'] === 'Y' )
+         $row_strings[2] = "<td>" . T_('To') . ': ' .
+            "<A href=\"message.php?mode=ShowMessage&mid=$mid&sent=t\">" .
+            make_html_safe($row["other"]) . "</A></td>";
+      else
+         $row_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
+            make_html_safe($row["other"]) . "</A></td>";
+
       $row_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "&nbsp;</td>";
       $row_strings[0] = "<td>" .
          ($row['Replied'] == 'Y' ? '<font color="#009900">A</font>' : '&nbsp;' ) . '</td>';

@@ -28,6 +28,7 @@ require( "include/form_functions.php" );
 // Input variables:
 
 $mid = $_GET['mid'];
+$is_sent = ($_GET['sent'] === 't' );
 $mode = $_GET['mode'];
 
 {
@@ -81,10 +82,14 @@ $mode = $_GET['mode'];
                             "ON other.mid=$mid AND other.Sender!=me.Sender " .
                             "LEFT JOIN Players ON Players.ID=other.uid " .
                             "LEFT JOIN Games ON Games.ID=Game_ID " .
-                            "WHERE Messages.ID=$mid AND me.mid=$mid AND me.uid=$my_id ");
+                            "WHERE Messages.ID=$mid AND me.mid=$mid AND me.uid=$my_id " .
+                            "ORDER BY Sender" );
 
-      if( @mysql_num_rows($result) != 1 )
+      if( mysql_num_rows($result) != 1  and mysql_num_rows($result) != 2 )
          error("unknown_message");
+
+      if( mysql_num_rows($result) == 2 and $is_sent )
+         $row = mysql_fetch_array($result); // skip first
 
       $row = mysql_fetch_array($result);
 
@@ -110,7 +115,7 @@ $mode = $_GET['mode'];
             $Folder_nr = ( $Type == 'INVITATION' ? FOLDER_REPLY : FOLDER_MAIN );
 
             mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
-                         "WHERE mid=$mid AND uid=$my_id LIMIT 1" )
+                         "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" )
                or die( mysql_error());
 
             if( mysql_affected_rows() != 1)
