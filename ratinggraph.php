@@ -20,7 +20,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/form_functions.php" );
 
 {
   connect2mysql();
@@ -39,6 +40,14 @@ require( "include/std_functions.php" );
   if( !($uid > 0) )
      error("no_uid");
 
+  $BEGINYEAR = 2001;
+  $BEGINMONTH = 8;
+
+  $CURRENTYEAR = date('Y', $NOW);
+  $CURRENTMONTH = date('n', $NOW);
+
+
+
   $result = mysql_query("SELECT Name FROM Players where ID=$uid");
 
   if( mysql_num_rows($result) != 1 )
@@ -56,11 +65,67 @@ require( "include/std_functions.php" );
 
   $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2");
 
+  $startyear = ( $_GET['startyear'] > 0 ? $_GET['startyear'] : $BEGINYEAR );
+  $startmonth = ( $_GET['startmonth'] > 0 ? $_GET['startmonth'] : $BEGINMONTH );
+  $endyear = ( $_GET['endyear'] > 0 ? $_GET['endyear'] : $CURRENTYEAR );
+  $endmonth = ( $_GET['endmonth'] > 0 ? $_GET['endmonth'] : $CURRENTMONTH );
+
+  if( $startyear < $BEGINYEAR or ( $startyear == $BEGINYEAR and $startmonth < $BEGINMONTH ))
+  {
+     $startmonth = $BEGINMONTH;
+     $startyear = $BEGINYEAR;
+  }
+  else if( $startyear > $CURRENTYEAR or
+           ( $startyear == $CURRENTYEAR and $startmonth > $CURRENTMONTH ))
+  {
+     $startmonth = $CURRENTMONTH;
+     $startyear = $CURRENTYEAR;
+  }
+
+  if( $endyear < $startyear or ( $endyear == $startyear and $endmonth < $startmonth ))
+  {
+     $endmonth = $startmonth;
+     $endyear = $startyear;
+  }
+  else if( $endyear > $CURRENTYEAR or
+           ( $endyear == $CURRENTYEAR and $endmonth > $CURRENTMONTH ))
+  {
+     $endmonth = $CURRENTMONTH;
+     $endyear = $CURRENTYEAR;
+  }
+
   if( mysql_num_rows($result) < 2 )
      echo T_("Sorry, too few rated games to draw a graph") . "\n";
   else
      echo '<img src="ratingpng.php?uid=' . $uid .
-        ($_GET['show_time'] == 'y' ? '&show_time=y' : '') . "\">\n";
+        ($_GET['show_time'] == 'y' ? '&show_time=y' : '') . "&startyear=$startyear&startmonth=$startmonth&endmonth=$endmonth&endyear=$endyear\">\n";
+
+  echo "<p>\n";
+
+  $form = new Form( 'date_form', 'ratinggraph.php', FORM_GET );
+
+  $months = array( 1 => T_('Jan'), 2 => T_('Feb'), 3 => 'Mar', 4 => T_('Apr'),
+                   5 => T_('May'), 6 => T_('Jun'), 7 => 'Jul', 8 => T_('Aug'),
+                   9 => T_('Sep'), 10=> T_('Oct'), 11=> 'Nov', 12=> T_('Dec') );
+
+  for( $y = $BEGINYEAR; $y <= $CURRENTYEAR; $y++ )
+     $years[$y] = $y;
+
+  $form->add_row( array( 'HIDDEN', 'uid', $uid,
+                         'DESCRIPTION', T_('From month'),
+                         'SELECTBOX', 'startmonth', 1, $months, $startmonth, false,
+                         'DESCRIPTION', T_('year'),
+                         'SELECTBOX', 'startyear', 1, $years, $startyear, false) );
+
+  $form->add_row( array( 'DESCRIPTION', T_('To month'),
+                         'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
+                         'DESCRIPTION', T_('year'),
+                         'SELECTBOX', 'endyear', 1, $years, $endyear, false ) );
+
+  $form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Change interval') ) );
+
+  $form->echo_string();
+
 
   echo '</center>';
 
