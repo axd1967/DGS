@@ -36,6 +36,8 @@ function get_rating_data($uid)
       $time, $starttime, $endtime, $ratingpng_min_interval;
    global $NOW;
 
+   $nr_games = 0 ;
+
    if( !($uid > 0 ) )
       exit;
 
@@ -90,7 +92,6 @@ function get_rating_data($uid)
    if( mysql_num_rows( $result ) < 2 )
       exit;
 
-   $nr_games = 0 ;
    $first = true;
    while( $row = mysql_fetch_array($result) )
    {
@@ -149,22 +150,22 @@ function scale2($val1, $val3, $time1, $time2, $time3)
 function scale_data()
 {
    global $MAX, $MIN, $SIZE, $OFFSET, $SizeX, $SizeY,
-      $ratings, $ratingmin, $ratingmax, $time, $endtime, $starttime;
+      $max, $min, $ratings, $ratingmin, $ratingmax, $time, $endtime, $starttime;
 
-   $MIN = array_reduce($ratingmax, "max", -10000);
-   $MAX = array_reduce($ratingmin, "min", +10000);
    $SIZE = $SizeY-MARGE_BOTTOM-MARGE_TOP;
    $OFFSET = MARGE_TOP;
+   $MIN = $max;
+   $MAX = $min;
 
    $ratingmax = array_map("scale", $ratingmax);
    $ratingmin = array_map("scale", $ratingmin);
    $ratings = array_map("scale", $ratings);
 
 
-   $MAX = $endtime;
-   $MIN = $starttime;
    $SIZE = $SizeX-MARGE_LEFT-MARGE_RIGHT;
    $OFFSET = MARGE_LEFT;
+   $MIN = $starttime;
+   $MAX = $endtime;
 
    $time = array_map("scale", $time);
 }
@@ -261,6 +262,7 @@ else //True type font file problem, so use embedded fonts:
 {
    define('LABEL_FONT'  ,2);
    define('LABEL_HEIGHT',ImageFontHeight(LABEL_FONT)-1);
+   define('LABEL_SEPARATION',1);
    define('LABEL_WIDTH' ,ImageFontWidth(LABEL_FONT));
    define('LABEL_MIDDLE',LABEL_HEIGHT*2/3);
    $m = 0;
@@ -319,10 +321,10 @@ define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
                          2*$nr_points, $light_blue);
 
 
-   $MAX = $min;
-   $MIN = $max;
    $SIZE = $SizeY-MARGE_BOTTOM-MARGE_TOP;
    $OFFSET = MARGE_TOP;
+   $MIN = $max;
+   $MAX = $min;
 
    imagesetstyle ($im, array($black,$black,IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT,
                              IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT));
@@ -344,10 +346,10 @@ define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
    }
 
 
-   $MIN = $starttime;
-   $MAX = $endtime;
    $SIZE = $SizeX-MARGE_LEFT-MARGE_RIGHT;
    $OFFSET = MARGE_LEFT;
+   $MIN = $starttime;
+   $MAX = $endtime;
 
    imagesetstyle ($im, array($red,$red,IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT,
                              IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT));

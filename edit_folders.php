@@ -76,7 +76,7 @@ function make_folder_form_row(&$form, $name, $nr,
    $my_id = $player_row['ID'];
 
    $folders = get_folders($my_id);
-   $max_folder = array_reduce(array_keys($folders), "max");
+   $max_folder = array_reduce(array_keys($folders), "max", USER_FOLDERS-1);
    $status_page_folders = empty($player_row['StatusFolders']) ? array() :
       explode( ',', $player_row['StatusFolders'] );
    $old_statusfolders = $status_page_folders;
@@ -178,7 +178,7 @@ function make_folder_form_row(&$form, $name, $nr,
    }
 
    $folders = get_folders($my_id);
-   $max_folder = array_reduce(array_keys($folders), "max");
+   $max_folder = array_reduce(array_keys($folders), "max", USER_FOLDERS-1);
 
    start_page(T_("Edit message folders"), true, $logged_in, $player_row );
 
