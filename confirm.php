@@ -39,7 +39,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    if( mysql_num_rows($result) != 1 )
       jump_to("status.php");
 
-   $row = mysql_fetch_array($result);
+   $row = mysql_fetch_assoc($result);
 
    jump_to("game.php?gid=" . $row["ID"]);
 }
@@ -75,7 +75,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    if(  mysql_num_rows($result) != 1 )
       error("unknown_game");
 
-   extract(mysql_fetch_array($result));
+   extract(mysql_fetch_assoc($result));
 
    if( @$_REQUEST['skip'] )
    {
@@ -171,12 +171,12 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    $Moves++;
 
-   $message = trim(@$_REQUEST['messageid']);
+   $message = trim(@$_REQUEST['message']);
 
    $where_clause = " ID=$gid AND Moves=$old_moves";
    $handi = false;
    $game_finished = false;
-   $query2 = '';
+   $message_query = '';
 
    switch( $action )
    {
@@ -189,14 +189,14 @@ function jump_to_next_game($id, $Lastchanged, $gid)
   //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
   //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
-         $query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
+         $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
          reset($prisoners);
          $new_prisoner_string = "";
 
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
-            $query .= "($gid, $Moves, \"NONE\", $x, $y, 0), ";
+            $move_query .= "($gid, $Moves, \"NONE\", $x, $y, 0), ";
             $new_prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
 
@@ -204,10 +204,10 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              ( $prisoner_string and $new_prisoner_string != $prisoner_string) )
             error("move_problem");
 
-         $query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
+         $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
          if( $message )
-            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
@@ -247,7 +247,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             error("invalid_action");
 
 
-         $query = "INSERT INTO Moves SET " .
+         $move_query = "INSERT INTO Moves SET " .
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
@@ -255,7 +255,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Hours=$hours";
 
          if( $message )
-            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
@@ -280,7 +280,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             error("wrong_number_of_handicap_stone");
 
 
-         $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
+         $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
 
          for( $i=1; $i <= $Handicap; $i++ )
@@ -290,12 +290,12 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             if( !isset($rownr) or !isset($colnr) )
                error("illegal_position");
 
-            $query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
+            $move_query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
                ($i == $Handicap ? "$hours)" : "0), " );
          }
 
          if( $message )
-            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
 
 
          $game_query = "UPDATE Games SET " .
@@ -310,7 +310,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       case 'resign':
       {
-         $query = "INSERT INTO Moves SET " .
+         $move_query = "INSERT INTO Moves SET " .
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
@@ -318,7 +318,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Hours=$hours";
 
          if( $message )
-            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
          if( $to_move == BLACK )
             $score = SCORE_RESIGN;
@@ -346,14 +346,14 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 /*
   Here, the previous line was:
-         $query = "DELETE FROM Moves WHERE gid=$gid LIMIT $Moves";
+         $move_query = "DELETE FROM Moves WHERE gid=$gid LIMIT $Moves";
   But, the number of records of Moves could be greater than the number of moves if:
   - there are prisoners
   - a sequence like PASS/PASS/SCORE.../RESUME had already occured.
   So some garbage records could remains alone because of the LIMIT.
 */
-         $query = "DELETE FROM Moves WHERE gid=$gid";
-         $query2 = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
+         $move_query = "DELETE FROM Moves WHERE gid=$gid";
+         $message_query = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
          $game_query = "DELETE FROM Games WHERE ID=$gid LIMIT 1";
 
          $game_finished = true;
@@ -378,19 +378,19 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             $game_finished = true;
          }
 
-         $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
+         $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
          for( $i=1; $i < $l; $i += 2 )
          {
             list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-            $query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
+            $move_query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
          }
 
-         $query .= "($gid, $Moves, $to_move, -2, 0, $hours) ";
+         $move_query .= "($gid, $Moves, $to_move, -2, 0, $hours) ";
 
 
          if( $message )
-            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
 
          $game_query = "UPDATE Games SET " .
@@ -425,25 +425,25 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    }
 
 
-   $result = mysql_query( $query );
+   $result = mysql_query( $move_query );
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
       error("mysql_insert_move", true);
-
-   if( $query2 )
-   {
-      $result = mysql_query( $query2 );
-
-      if( mysql_affected_rows() < 1 and $action != 'delete' )
-         error("mysql_insert_move", true);
-   }
-
 
 
    $result = mysql_query( $game_query );
 
    if( mysql_affected_rows() != 1 )
       error("mysql_update_game", true);
+
+
+   if( $message_query )
+   {
+      $result = mysql_query( $message_query );
+
+      if( mysql_affected_rows() < 1 and $action != 'delete' )
+         error("mysql_insert_move", true);
+   }
 
 
    if( $game_finished )
