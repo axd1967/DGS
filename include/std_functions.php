@@ -31,6 +31,8 @@ $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
 $ActivityForHit = 1.0;
 $ActivityForMove = 10.0;
 
+$MessagesPerPage = 50;
+
 define("NONE", 0);
 define("BLACK", 1);
 define("WHITE", 2);
@@ -76,7 +78,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
 
    if( $no_cache )
       disable_cache();
-    
+
    ob_start("ob_gzhandler");
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">

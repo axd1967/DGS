@@ -37,16 +37,18 @@ require( "include/std_functions.php" );
                          "Players.Name AS sender, " .
                          "Players.Handle, Players.ID AS pid " .
                          "FROM Messages,Players " .
-                         "WHERE Messages.ID=$mid AND " .
-                         "Messages.To_ID=$my_id AND From_ID=Players.ID");
+                         "WHERE Messages.ID=$mid " .
+                         "AND ((Messages.To_ID=$my_id AND From_ID=Players.ID)" .
+                         "OR (Messages.From_ID=$my_id AND To_ID=Players.ID))");
 
    if( mysql_num_rows($result) != 1 )
       error("unknown_message");
 
-
    $row = mysql_fetch_array($result);
 
    extract($row);
+
+   $to_me = ( $To_ID == $my_id );
 
    $RepliedQ = !(strpos($Flags,'REPLIED') === false);
 
@@ -71,7 +73,7 @@ require( "include/std_functions.php" );
    }
 
    $pos = strpos($Flags,'NEW');
-   if( !($pos === false) )
+   if( $to_me and !($pos === false) )
    {
       $Flags = substr_replace($Flags, '', $pos, 3);
 
@@ -88,7 +90,8 @@ require( "include/std_functions.php" );
    echo "<center>
     <table>
         <tr><td>Date:</td><td>" . date($date_fmt, $row["date"]) . "</td></tr>
-        <tr><td>From:</td><td><A href=\"userinfo.php?uid=" . $row["pid"] ."\">" . 
+        <tr><td>" . ($to_me ? "From" : "To" ) . 
+      ":</td><td><A href=\"userinfo.php?uid=" . $row["pid"] ."\">" . 
       $row["sender"] . "</A></td></tr>\n";
 
    switch( $Type )
@@ -159,7 +162,7 @@ require( "include/std_functions.php" );
 ';
    }
 
-   if( $Type != 'INVITATION' or !$RepliedQ )
+   if( $to_me and ( $Type != 'INVITATION' or !$RepliedQ ))
    {
 ?>
 
