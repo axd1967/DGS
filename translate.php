@@ -128,6 +128,7 @@ When translating you should keep in mind the following things:
 // See admin_faq.php to know the Translatable flag meaning.
 
      $query = "SELECT Translations.Text,TranslationTexts.ID AS Original_ID," .
+        "TranslationFoundInGroup.Group_ID ," . //ORDER BY columns not in the result is not allowed in ANSI SQL.
         "TranslationTexts.Text AS Original " .
         "FROM TranslationTexts, TranslationGroups, " .
         "TranslationFoundInGroup, TranslationLanguages " .
@@ -139,13 +140,13 @@ When translating you should keep in mind the following things:
            "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
            "AND TranslationLanguages.Language='$translate_lang' " .
 /* 
-  Translations.Text IS NOT NULL (but maybe '' i.e. same) and Translatable='Y'
+  Translations.Text IS NOT NULL (but maybe "" if 'same' box) and Translatable='Y'
     (instead of Done) is the default status for all the system messages.
   So Translations.Text IS NULL and Translatable!='N' mean never translated.
 */
            "AND Translatable!='N' " .
            "AND (Translations.Text IS NULL OR Translatable='Changed') " .
-           "ORDER BY Group_ID LIMIT 50";
+           "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
      else
         $query .= "WHERE TranslationGroups.Groupname='$group' " .
            "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .

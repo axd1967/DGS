@@ -25,16 +25,17 @@ require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
 /* Translatable flag meaning - See also translate.php
-  Value    Meaning              admin_toggle  admin_changed_box  translator_box
-  N        not translatable     change to Y   -                  -
-  Y        to be translated     change to N   -                  change to Done
-  Done     already translated   -             change to Changed  -
-  Changed  to be re-translated  -             -                  change to Done
+  Value   : Meaning             : admin_toggle : admin_mark_box    : translator_box
+ ---------:---------------------:--------------:-------------------:----------------
+  N       : not translatable    : change to Y  : -                 : -
+  Y       : to be translated    : change to N  : -                 : change to Done
+  Done    : already translated  : -            : change to Changed : -
+  Changed : to be re-translated : -            : -                 : change to Done
 
   Question and Answer are independently translated.
   If Answer exist, admin_toggle appears only if both Q & A have not already
-    been translated (not Done nor Changed) and Answer.Translatable is always
-    equal to Question.Translatable.
+    been translated (not Done nor Changed) and, if so, Answer.Translatable
+    is always equal to Question.Translatable.
 */
 
 {
@@ -91,7 +92,7 @@ require_once( "include/make_translationfiles.php" );
         {
            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
                                            'CHECKBOX', 'Qchanged', 'Y',
-                                           'Mark entry as changed for translators', false) );
+                                           'Mark question as changed for translators', false) );
         }
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
                                         'TEXTAREA', 'answer', 80, 20, $row["A"] ) );
@@ -99,7 +100,7 @@ require_once( "include/make_translationfiles.php" );
         {
            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
                                            'CHECKBOX', 'Achanged', 'Y',
-                                           'Mark entry as changed for translators', false) );
+                                           'Mark answer as changed for translators', false) );
         }
      }
 
@@ -490,45 +491,20 @@ function get_faq_group()
   return $row['ID'];
 }
 
-function get_entry_row( $id, $Qonly = false )
+function get_entry_row( $id )
 {
-/*
-   if ($Qonly)
-      $result = mysql_query(
-           "SELECT FAQ.*, Question.Text AS Q".
-           ", Question.Translatable AS QTranslatable ".
-           "FROM FAQ, TranslationTexts AS Question " .
-           "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question"
-      ) or die(mysql_error());
-   else
-*/
-      $result = mysql_query(
-           "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
-           ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
-           "FROM FAQ, TranslationTexts AS Question " .
-           "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
-           "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question"
-      ) or die(mysql_error());
-
-/*
-           "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
-           ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
-           "FROM FAQ, TranslationTexts AS Answer " .
-           "LEFT JOIN TranslationTexts AS Question ON Question.ID=FAQ.Question " .
-           "WHERE FAQ.ID='$id' AND Answer.ID=FAQ.Answer"
-*/
-/*
-           "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
-           ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
-           "FROM FAQ, TranslationTexts AS Question, TranslationTexts AS Answer " .
-           "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question AND Answer.ID=FAQ.Answer"
-*/
+   $result = mysql_query(
+        "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
+        ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
+        "FROM FAQ, TranslationTexts AS Question " .
+        "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
+        "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question"
+   ) or die(mysql_error());
 
    if( mysql_num_rows($result) != 1 )
       error("admin_no_such_entry");
 
    return mysql_fetch_assoc( $result );
 }
-
 
 ?>
