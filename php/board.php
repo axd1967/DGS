@@ -21,6 +21,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 function draw_board($Size, &$array, $may_play, $gid, 
                     $Last_X, $Last_Y, $stone_size, $font_size, $msg, $killedstring)
 {
+    if( !$stone_size ) $stone_size = 25;
+    if( !$font_size ) $font_size = "+0";
+    
     if( $msg )
         echo "<table border=2 align=center><tr>" . 
         "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
@@ -123,12 +126,20 @@ function draw_board($Size, &$array, $may_play, $gid,
                         $type .= "m";
 
                     if( $may_play && $empty && !$killedstring)
-                        echo "<td><A href=game.php?gid=$gid&action=move&coord=$letter_c$letter_r><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
+                        echo "<td><A href=game.php?gid=$gid&action=move&coord=$letter_c$letter_r>" . 
+                            "<IMG  height=$stone_size width=$stone_size border=0 " . 
+                            "alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
+
                     else if( $may_play && !$empty && $killedstring)
-                        echo "<td><A href=game.php?gid=$gid&action=remove&coord=$letter_c$letter_r&killedstring=$killedstring><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
-                        
+                        echo "<td><A href=game.php?gid=$gid&action=remove&coord=" .
+                            "$letter_c$letter_r&killedstring=$killedstring>" . 
+                            "<IMG  height=$stone_size width=$stone_size border=0 " . 
+                            "alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
+
                     else
-                        echo "<td><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></td>\n";
+                        echo "<td><IMG  height=$stone_size width=$stone_size border=0 " . 
+                            "alt='$alt' align=center SRC=$stone_size/$type.gif></td>\n";
+
                     $letter_c ++;
                 }
 
