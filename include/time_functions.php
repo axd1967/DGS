@@ -53,11 +53,11 @@ function get_clock_used($nightstart)
 
 function get_clock_ticks($clock_used)
 {
-   if( $clock_used == -1 ) return 0; // On vacation
+   if( $clock_used == -1 or $clock_used == 99 ) return 0; // On vacation
 
    $result = mysql_query( "SELECT Ticks FROM Clock WHERE ID=$clock_used" );
    if( mysql_num_rows( $result ) != 1 )
-      error("mysql_clock_ticks", true);
+      error("mysql_clock_ticks", $clock_used);
 
    $row = mysql_fetch_row($result);
    return $row[0];
