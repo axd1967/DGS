@@ -28,50 +28,39 @@ require( "forum/forum_functions.php" );
 
 
    $delete_msgs = false;
-   $messege_timelimit = 92;
-   $invite_timelimit = 92;
+   $message_timelimit = 90;
+   $invite_timelimit = 60;
 
 // Delete old messages
 
    if( $delete_msgs )
    {
-
-      $result = mysql_query( "SELECT ID FROM Players" );
-
-      while( $row = mysql_fetch_array( $result ) )
-      {
-         $id = $row["ID"];
-
-         // delete read messages
-
-         mysql_query("DELETE FROM Messages$id WHERE " .
-                     "( Info='None' OR Info='REPLIED' ) AND " .
-                     "TO_DAYS(FROM_UNIXTIME($NOW))-TO_DAYS(Time) > $messege_timelimit" );
+      // delete read messages
+      
+      mysql_query("UPDATE Messages " .
+                  "SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
+                  "WHERE $NOW-UNIX_TIMESTAMP(Time) > " . ($message_timelimit*24*3600) .
+                  " AND NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )");
 
          //delete old invitations
 
-         $result2 = mysql_query( "SELECT Game_ID FROM Messages$id WHERE " .
-                                 "Type='INVITATION' AND " .
-                                 "TO_DAYS(FROM_UNIXTIME($NOW))-TO_DAYS(Time) > $invite_timelimit" );
+      $result = mysql_query( "SELECT Game_ID FROM Messages " .
+                             "WHERE Type='INVITATION' " .
+                             "AND $NOW-UNIX_TIMESTAMP(Time) > " . ($invite_timelimit*24*3600) );
 
-         if( mysql_num_rows($result2) > 0 )
+      if( mysql_num_rows($result) > 0 )
+      {
+         while( $row = mysql_fetch_array( $result ) )
          {
-            while( $row2 = mysql_fetch_array( $result2 ) )
-            {
-
-               mysql_query( "DELETE FROM Games WHERE ID=" . $row["Game_ID"] . 
-                            " AND Status='INVITED'" .
-                            " AND ( Black_ID=$id OR White_ID=$id ) " );
-            }
-
-            mysql_query( "DELETE FROM Messages$id WHERE " .
-                         "Type='INVITATION' AND " .
-                         "TO_DAYS(FROM_UNIXTIME($NOW))-TO_DAYS(Time) > $invite_timelimit" );
-      
+            mysql_query( "DELETE FROM Games WHERE ID=" . $row["Game_ID"] . 
+                         " AND Status='INVITED'" );
          }
 
-      }  
-
+         mysql_query( "UPDATE Messages " .
+                      "SET Flags=REPLACE(Flags,'REPLY REQUIRED','') " .
+                      "WHERE Type='INVITATION' " .
+                      "AND $NOW-UNIX_TIMESTAMP(Time) > " . ($invite_timelimit*24*3600) );
+         }
    }
 
 
