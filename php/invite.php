@@ -95,7 +95,7 @@ start_page("Send Invitation", true, $logged_in, $player_row );
       </TR>
       
       <TR>
-        <TD align=right>Color:</TD>
+        <TD align=right>My color:</TD>
         <TD align=left>  
           <select name="color">
             <option selected>White</option>
@@ -206,7 +206,7 @@ start_page("Send Invitation", true, $logged_in, $player_row );
 
       <TR>
         <TD align=right>Rated:</TD>
-        <TD align=left>  <input type="radio" name="rated" value="Y" checked></TD>
+        <TD align=left>  <input type="checkbox" name="rated" value="Y" checked></TD>
 
       </TR>
 
