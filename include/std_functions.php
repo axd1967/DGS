@@ -87,24 +87,6 @@ $cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoord
 
 $button_max = 10;
 
-function str_TD_class_button( &$browser)
-{
-   return "<td class=button" .
-/* Rod:
- * This fixe a bad LEFT align of ID when there is so too few column that the 
- * browser need to enlarge the first column over 92px.
- * Curiously, the background picture is always well centered.
- * Then, most of the time, we have a white ID over a white background.
- * It's better to keep only the class A.button 'width : 90px;' for this browser.
- */
-         ( ($browser=="Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; DigExt)")
-           ? ""
-           : " width=92"
-         )
-      . " align=center>" ;
-}
-
-
 define("NONE", 0);
 define("BLACK", 1);
 define("WHITE", 2);
@@ -907,6 +889,11 @@ function limit($val, $minimum, $maximum, $default)
       return $maximum;
 
    return $val;
+}
+
+function str_TD_class_button( &$browser)
+{
+   return "<td class=button width=92 align=center>";
 }
 
 ?>
