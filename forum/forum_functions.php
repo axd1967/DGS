@@ -223,10 +223,10 @@ function toggle_editor_cookie()
    {
       if( $editor === 'n' )
          $editor = '';
-      if( $editor !== $cookie )
+      if( $editor != $cookie )
       {
          $cookie = $editor;
-         setcookie (COOKIE_PREFIX."forumeditor", $cookie, $NOW+ ( $editor ? 3600 : -3600 ), "$SUB_PATH" );
+         setcookie(COOKIE_PREFIX."forumeditor", $cookie, $NOW+ ( $editor ? 3600 : -3600 ), $SUB_PATH );
       }
    }
    $_COOKIE[COOKIE_PREFIX.'forumeditor'] = $cookie;

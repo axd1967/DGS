@@ -68,7 +68,7 @@ require_once( "include/std_functions.php" );
       error("mysql_insert_player");
 
 
-   set_cookies( $userid, $code );
+   set_login_cookie( $userid, $code );
 
    jump_to("status.php");
 }

@@ -29,7 +29,7 @@ require_once( "include/form_functions.php" );
 
   if( @$_GET['logout'] )
     {
-      set_cookies("","", true);
+      set_login_cookie("","", true);
       jump_to("index.php");
     }
 

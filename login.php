@@ -25,7 +25,7 @@ require_once( "include/std_functions.php" );
 {
    if( @$_GET['logout'] )
    {
-      set_cookies("","", true);
+      set_login_cookie("","", true);
       if( $quick_errors )
          exit;
       jump_to("index.php");
@@ -64,7 +64,7 @@ require_once( "include/std_functions.php" );
       if( @$_REQUEST['cookie_check'] )
          error('cookies_disabled');
 
-      set_cookies( $userid, $code );
+      set_login_cookie( $userid, $code );
       jump_to("login.php?cookie_check=1"
              . URI_AMP."userid=".urlencode($userid)
              . URI_AMP."passwd=".urlencode($passwd)
