@@ -32,6 +32,7 @@ if (!isset($page_microtime))
    $admin_level = 0;
    //$base_path is relative to the URL, not to the current dir
    $base_path = ( is_base_dir() ? '' : '../' );
+   //force to call std_functions.php from main dir
    $main_path = getcwd().'/';
 }
 
