@@ -40,7 +40,7 @@ require( "include/form_functions.php" );
 
    $days_left = floor($player_row['VacationDays']);
    $on_vacation = floor($player_row['OnVacation']);
-   $minimum_days = 7 - $on_vacation;
+   $minimum_days = $vacation_min_days - $on_vacation;
    $vacationdiff = round($_POST['vacationdiff']);
    $vacationlength = round($_POST['vacationlength']);
 
@@ -86,12 +86,12 @@ require( "include/form_functions.php" );
    }
    else
    {
-      if( $days_left < 7 )
+      if( $days_left < $vacation_min_days )
       {
-         echo T_("Sorry, you need at least 7 vacation days to be able to start a vacation period.");
+         echo sprintf(T_("Sorry, you need at least %d vacation days to be able to start a vacation period."), $vacation_min_days);
       }
       else if( isset($_POST['start_vacation']) and
-         !(!is_numeric($vacationlength) or $vacationlength < 7
+         !(!is_numeric($vacationlength) or $vacationlength < $vacation_min_days
            or $vacationlength > $days_left ) )
       {
          $result = mysql_query("SELECT Games.ID as gid, LastTicks-Clock.Ticks AS ticks " .
@@ -120,7 +120,7 @@ require( "include/form_functions.php" );
          $vacation_form = new Form( 'vacationform', 'edit_vacation.php', FORM_POST );
 
          $days = array();
-         for($i=7; $i<=$days_left; $i++ )
+         for($i=$vacation_min_days; $i<=$days_left; $i++ )
             $days[$i] = "$i " . T_('days');
 
          $vacation_form->add_row( array( 'HEADER', T_('Start vacation') ) );
@@ -128,9 +128,10 @@ require( "include/form_functions.php" );
 //    $vacation_form->add_row( array( 'DESCRIPTION', '<font color=green>' .
 //                                    T_('Choose vacation length') . '</font>' ) );
          $vacation_form->add_row( array( 'SPACE' ) );
-         $vacation_form->add_row( array( 'DESCRIPTION', T_('Choose vacation length'),
-                                         'SELECTBOX', 'vacationlength', 1, $days, 7, false,
-                                         'SUBMITBUTTON', 'start_vacation', T_('Start vacation') ) );
+         $vacation_form->add_row(
+            array('DESCRIPTION', T_('Choose vacation length'),
+                  'SELECTBOX', 'vacationlength', 1, $days, $vacation_min_days, false,
+                  'SUBMITBUTTON', 'start_vacation', T_('Start vacation') ) );
 
          $vacation_form->echo_string();
       }
