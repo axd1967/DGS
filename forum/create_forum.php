@@ -18,9 +18,12 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+/*****************
+* >>Warning: This file is no more used (moved in forum/admin.php)
+******************/
 
-require_once("forum_functions.php");
-require_once("../include/form_functions.php");
+require_once( "forum_functions.php" );
+//require_once( "../include/form_functions.php" );
 
 {
    connect2mysql();
@@ -36,8 +39,7 @@ require_once("../include/form_functions.php");
 
    start_page(T_('Create new forum'), true, $logged_in, $player_row);
 
-   if( $msg )
-      echo "<p><b><font color=\"green\">$msg</font></b><hr>";
+   sysmsg(@$_GET['msg']);
 
    if( $_POST['do_create'] == 'Y' )
    {
