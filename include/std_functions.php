@@ -212,6 +212,14 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
           <td><B><A href="' . $HOSTBASE . '/message.php?mode=Invite">' . T_("Invite") . '</A></B></td>
           <td><B><A href="' . $HOSTBASE . '/users.php">' . T_("Users") . '</A></B></td>
           <td><B><A href="' . $HOSTBASE . '/forum/index.php">' . T_("Forums") . '</A></B></td>
+';
+
+   if( !empty($player_row['Translator']) )
+     echo '
+          <td><B><A href="' . $HOSTBASE . '/translate.php">' . T_("Translate") . '</A></B></td>
+';
+
+   echo '
           <td><B><A href="' . $HOSTBASE . '/docs.php">' . T_("Docs") . '</A></B></td>
         </tr>
     </table>
@@ -652,6 +660,15 @@ function check_password( $password, $new_password, $given_password )
                    'Newpassword=NULL ' .
                    "WHERE Handle='$handle' LIMIT 1" );
     }
+}
+
+function array_value_to_key_and_value( $array )
+{
+  $new_array = array();
+  foreach( $array as $value )
+    $new_array[$value] = $value;
+
+  return $new_array;
 }
 
 ?>
