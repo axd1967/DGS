@@ -67,13 +67,10 @@ if( $action and $player_row["ID"] != $ToMove_ID )
 $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and !$move );
 
 if( $Black_ID == $ToMove_ID )
-    $next_move = BLACK;
+    $to_move = BLACK;
 else
-    $next_move = WHITE;
+    $to_move = WHITE;
 
-
-
-make_array( $gid, $array, $msg, $Moves, $move, $marked_dead );
 
 if( !$action )
 {
@@ -86,6 +83,11 @@ if( !$action )
                 $action = 'remove';
         }
 }
+
+$no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or 
+                    $action == 'choose_move' or $action == 'move' );
+
+make_array( $gid, $array, $msg, $Moves, $move, $marked_dead, $no_marked_dead );
 
 $enable_message = true;
 
@@ -110,15 +112,20 @@ switch( $action )
                  exit;
              }
 
-         $array[$colnr][$rownr] = $next_move;
+         $array[$colnr][$rownr] = $to_move;
 
 
          $prisoners = array();
-         check_prisoners($colnr,$rownr, 3-$next_move, $Size, $array, $prisoners);
+         check_prisoners($colnr,$rownr, 3-$to_move, $Size, $array, $prisoners);
          
          
          $nr_prisoners = count($prisoners);
          
+         if( $to_move == BLACK )
+             $Black_Prisoners += $nr_prisoners;
+         else
+             $White_Prisoners += $nr_prisoners;
+
          // Check for ko
                   
          if( $nr_prisoners == 1 and $flags & KO )
@@ -154,27 +161,10 @@ switch( $action )
      }
      break;
 
- case 'resume':
-     {
-         if( $Status != 'SCORE' and $Status != 'SCORE2' )
-             {
-                  header("Location: error.php?err=invalid_action");
-                  exit;
-             }
-
-         $enable_message = false;
-     }
-     break;
-
  case 'resign':
      {
-         if( $Status != 'PLAY' and $Status != 'PASS' )
-             {
-                  header("Location: error.php?err=invalid_action");
-                  exit;
-             }
+         $extra_message = "<font color=\"red\">Resigning</font>";
      }
-     $extra_message = "<font color=\"red\">Resigning</font>";
      break;
 
 
@@ -294,7 +284,12 @@ switch( $action )
                      {
                          array_push($prisoners, array($x,$y));
                      }
-             }         
+             }
+
+         $score = create_territories_and_score( $Size, $array );
+         $score += $White_Prisoners - $Black_Prisoners + $Komi;
+
+         $extra_message = "<font color=\"blue\">Score: $score</font>";
      }
      break;
 
@@ -345,6 +340,8 @@ else if( $action == 'done' )
     {
         echo "
       <input type=\"hidden\" name=\"prisoners\" value=\"" . urlencode(serialize($prisoners)) . "\">\n";
+        echo "
+      <input type=\"hidden\" name=\"score\" value=\"$score\">\n";
 
     }
 

@@ -108,7 +108,7 @@ switch( $action )
               "Last_Y=$rownr, " .
               "Status='PLAY', ";
 
-         if( nr_prisoners > 0 )
+         if( $nr_prisoners > 0 )
              if( $to_move == BLACK )
                  $game_query .= "Black_Prisoners=" . ( $Black_Prisoners + $nr_prisoners ) . ", ";
              else
@@ -235,7 +235,8 @@ switch( $action )
                   $game_query .= "ToMove_ID=$White_ID, ";
 
               $game_query .=
-                   "Flags=0" .
+                   "Flags=0, " .
+                   "Score=$score" .
                    " WHERE ID=$gid";
          
      }

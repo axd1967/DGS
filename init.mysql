@@ -16,7 +16,7 @@ CREATE TABLE Games (
   Last_X int(11),
   Last_Y int(11),
   Flags set('Ko'),
-  Score int(11),
+  Score decimal(5,1),
   PRIMARY KEY (ID)
 );
 

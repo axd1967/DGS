@@ -106,6 +106,14 @@ function draw_board($Size, &$array, $may_play, $gid,
                                             $alt = ',';
                                         }
                                 }
+
+                            if( $stone == BLACK_TERRITORY )
+                                    $type .= "b";
+                            else if( $stone == WHITE_TERRITORY )
+                                $type .= "w";
+                            else if( $stone == DAME )
+                                $type .= "d";
+
                             $empty = true;
 
                             
@@ -146,7 +154,8 @@ function draw_board($Size, &$array, $may_play, $gid,
 
 // fills $array with positions where the stones are.
 // returns who is next to move
-function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead )
+function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead, 
+                     $no_marked_dead = false )
 {
     if( !$move ) $move = $max_moves;
 
@@ -180,13 +189,16 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead )
                 } 
         }
 
-    while( $sub = each($marked_dead) )
+    if( !$no_marked_dead and $removed_dead == TRUE )
         {
-            list($dummy, list($x, $y, $s)) = $sub;
-            if( $array[$x][$y] >= BLACK_DEAD )
-                $array[$x][$y] = $s - 6;
-            else
-                $array[$x][$y] = $s;
+            while( $sub = each($marked_dead) )
+                {
+                    list($dummy, list($x, $y, $s)) = $sub;
+                    if( $array[$x][$y] >= BLACK_DEAD )
+                        $array[$x][$y] = $s - 6;
+                    else
+                        $array[$x][$y] = $s;
+                }
         }
 
 }
@@ -276,7 +288,7 @@ function check_prisoners($colnr,$rownr, $col, $Size, &$array, &$prisoners )
 
 
 
-function mark_territory( $x, $y, &$array )
+function mark_territory( $x, $y, $size, &$array )
 {
     global $dirx,$diry;
 
@@ -297,7 +309,8 @@ function mark_territory( $x, $y, &$array )
                                 {
                                     while( list($y, $val) = each($sub) )
                                         {
-                                            $array[$x][$y] = $c + 3;
+                                            if( $array[$x][$y] < BLACK_DEAD )
+                                                $array[$x][$y] = $c + 3;
                                         }
                                 }
 
@@ -315,11 +328,14 @@ function mark_territory( $x, $y, &$array )
                     $nx = $x+$dirx[$dir];
                     $ny = $y+$diry[$dir];
 
+                    if( ( $nx < 0 ) or ($nx >= $size) or ($ny < 0) or ($ny >= $size) or 
+                        isset($index[$nx][$ny]) )
+                        continue;
+
+
                     $new_color = $array[$nx][$ny];
 
-                    if( ( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD ) 
-                        and !$index[$nx][$ny] and 
-                        ( $nx >= 0 ) and ($nx < $Size) and ($ny >= 0) and ($ny < $Size) )
+                    if( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD )
                         {
                             $x = $nx;  // Go to the neigbour
                             $y = $ny; 
@@ -340,6 +356,52 @@ function mark_territory( $x, $y, &$array )
         }
 }
 
+function create_territories_and_score( $size, &$array )
+{
+    // mark territories
+
+    for( $x=0; $x<$size; $x++)
+        {
+            for( $y=0; $y<$size; $y++)
+                {
+                    if( !$array[$x][$y] or $array[$x][$y] == NONE )
+                        {
+                            mark_territory( $x, $y, $size, $array );
+                        }
+                }
+        }
+
+    // count
+
+    $score = 0;
+
+    for( $x=0; $x<$size; $x++)
+        {
+            for( $y=0; $y<$size; $y++)
+                {
+                    switch( $array[$x][$y] )
+                        {
+                        case BLACK_TERRITORY:
+                            $score --;
+                        break;
+
+                        case WHITE_TERRITORY:
+                            $score ++;
+                        break;
+
+                        case BLACK_DEAD:
+                            $score += 2;
+                        break;
+
+                        case WHITE_DEAD:
+                            $score -= 2;
+                        break;
+                        }
+                }
+        }
+    
+    return $score;
+}
 
 
 
