@@ -193,7 +193,7 @@ function update_rating($gid)
 
    $result = mysql_query( $query );
 
-   if(  mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       return false;
 
    $row = mysql_fetch_array( $result );
@@ -246,10 +246,10 @@ function update_rating2($gid, $check_done=true)
 
    $result = mysql_query( $query ) or die(mysql_error());
 
-   if(  mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       return false;
 
-   $row = mysql_fetch_array( $result );
+   $row = mysql_fetch_assoc( $result );
    extract($row);
 
    if( $Rated === 'N' or $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
@@ -380,10 +380,10 @@ function update_rating_glicko($gid, $check_done=true)
 
    $result = mysql_query( $query ) or die(mysql_error());
 
-   if(  mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       return false;
 
-   $row = mysql_fetch_array( $result );
+   $row = mysql_fetch_assoc( $result );
    extract($row);
 
    if( $Rated === 'N' or $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
@@ -524,9 +524,10 @@ function update_rating_glicko($gid, $check_done=true)
 $dan = 'dan';
 $kyu = 'kyu';
 
-function echo_rating($rating, $show_percent=true, $graph_uid=0)
+function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false)
 {
-//   global $dan, $kyu;
+   $T_= ( $keep_english ? 'trim' : 'T_' );
+   //global $dan, $kyu;
 
    if( !isset($rating) ) return '';
 
@@ -539,11 +540,11 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0)
 
    if( $rank_val > 20.5 )
    {
-      $string .= ( $rank_val - 20 ) . $spc . T_('dan'); //$dan;
+      $string .= ( $rank_val - 20 ) . $spc . $T_('dan');
    }
    else
    {
-      $string .= ( 21 - $rank_val ) . $spc . T_('kyu'); //$kyu;
+      $string .= ( 21 - $rank_val ) . $spc . $T_('kyu');
    }
 
    if( $show_percent )
@@ -593,7 +594,7 @@ function get_rating_at($uid, $date)
                           "ORDER BY Time DESC LIMIT 1" )
       or die(mysql_error());
 
-   if(  mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       $result = mysql_query( "SELECT InitialRating AS Rating FROM Players WHERE ID='$uid'" );
 
    $row = mysql_fetch_array( $result );

@@ -54,7 +54,7 @@ function get_clock_ticks($clock_used)
    if( $clock_used == -1 or $clock_used == 99 ) return 0; // On vacation
 
    $result = mysql_query( "SELECT Ticks FROM Clock WHERE ID=$clock_used" );
-   if( mysql_num_rows( $result ) != 1 )
+   if( @mysql_num_rows( $result ) != 1 )
       error("mysql_clock_ticks", $clock_used);
 
    $row = mysql_fetch_row($result);
@@ -128,18 +128,20 @@ function echo_hour($hours)
    return $hours .'&nbsp;' . ( abs($hours) <= 1 ? T_('hour') : T_('hours') );
 }
 
-function echo_time($hours)
+function echo_time($hours, $keep_english=false)
 {
    if( $hours <= 0 )
       return '-';
+
+   $T_= ( $keep_english ? 'trim' : 'T_' );
 
    $days = (int)($hours/15);
    if( $days > 0 )
    {
       if( $days == 1 )
-         $str = '1&nbsp;' . T_('day');
+         $str = '1&nbsp;' . $T_('day');
       else
-         $str = $days .'&nbsp;' . T_('days');
+         $str = $days .'&nbsp;' . $T_('days');
    }
    else
          $str = '';
@@ -148,39 +150,40 @@ function echo_time($hours)
    if( $h > 0 )
    {
       if( $days > 0 )
-         $str .='&nbsp;' . T_('and') . '&nbsp;';
+         $str .='&nbsp;' . $T_('and') . '&nbsp;';
 
       if( $h == 1 )
-         $str .= '1&nbsp;' . T_('hour');
+         $str .= '1&nbsp;' . $T_('hour');
       else
-         $str .= $h . '&nbsp;' . T_('hours');
+         $str .= $h . '&nbsp;' . $T_('hours');
    }
 
    return $str;
 }
 
-function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)
+function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_english=false)
 {
+   $T_= ( $keep_english ? 'trim' : 'T_' );
    $str = '';
    if ( $Maintime > 0 )
-      $str = echo_time( $Maintime );
+      $str = echo_time( $Maintime, $keep_english);
 
    if( $Byotime <= 0 )
-         $str .= ' ' . T_('without byoyomi');
+         $str .= ' ' . $T_('without byoyomi');
       else if( $Byotype == 'FIS' )
       {
-         $str .= ' ' . sprintf( T_('with %s extra per move'), echo_time($Byotime) );
+         $str .= ' ' . sprintf( $T_('with %s extra per move'), echo_time($Byotime, $keep_english) );
       }
       else
       {
          if ( $Maintime > 0 )
             $str .= ' + ';
-         $str .= echo_time($Byotime);
+         $str .= echo_time($Byotime, $keep_english);
 
          if( $Byotype == 'JAP' )
-            $str .= '*' . $Byoperiods . ' ' . T_('periods') . ' ' . T_('Japanese byoyomi');
+            $str .= '*' . $Byoperiods . ' ' . $T_('periods') . ' ' . $T_('Japanese byoyomi');
          else
-            $str .= '/' . $Byoperiods . ' ' . T_('stones') . ' ' . T_('Canadian byoyomi');
+            $str .= '/' . $Byoperiods . ' ' . $T_('stones') . ' ' . $T_('Canadian byoyomi');
       }
 
       return $str;
