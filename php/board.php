@@ -24,7 +24,7 @@ function draw_board($Size, &$array, $may_play, $gid,
     if( !$stone_size ) $stone_size = 25;
     if( !$font_size ) $font_size = "+0";
 
-    $str1 = "<td><IMG  height=$stone_size width=$stone_size border=0 ";
+    $str1 = "<td><IMG class=s$stone_size border=0 alt=\"";
     if( $may_play )
         {
             if( $handi or !$stonestring )
@@ -33,17 +33,17 @@ function draw_board($Size, &$array, $may_play, $gid,
             if( $handi )
                 {
                     $str2 = "<td><A href=game.php?gid=$gid&action=handicap&coord=";
-                    $str3 = "&stonestring=$stonestring><IMG  height=$stone_size width=$stone_size border=0 ";
+                    $str3 = "&stonestring=$stonestring><IMG class=s$stone_size border=0 alt=\"";
                 }
             else if( $stonestring )
                 {
                     $str2 = "<td><A href=game.php?gid=$gid&action=remove&coord=";
-                    $str3 = "&stonestring=$stonestring><IMG  height=$stone_size width=$stone_size border=0 ";
+                    $str3 = "&stonestring=$stonestring><IMG class=s$stone_size border=0 alt=\"";
                 }
             else
                 {
                     $str2 = "<td><A href=game.php?gid=$gid&action=move&coord=";
-                    $str3 = "><IMG  height=$stone_size width=$stone_size border=0 ";
+                    $str3 = "><IMG class=s$stone_size border=0 alt=\"";
                 }
         }
     
@@ -150,10 +150,13 @@ function draw_board($Size, &$array, $may_play, $gid,
                         $type .= "m";
                     
                     if( $may_play and ( $empty xor !$on_empty ) )
-                        echo $str2 . $letter_c . $letter_r . $str3 .
-                            " alt='$alt' SRC=$stone_size/$type.gif></A></td>\n";
+                        echo $str2 . $letter_c . $letter_r . $str3 . $alt . 
+                            '" SRC=' . $stone_size . '/' . $type . '.gif></A></td>
+';
                     else
-                        echo $str1 . "alt='$alt' SRC=$stone_size/$type.gif></td>\n";
+                        echo $str1 . $alt . '" SRC=' . $stone_size . '/' . 
+                            $type . '.gif></td>
+';
 
                     $letter_c ++;
                 }

@@ -445,8 +445,8 @@ else if( $action == 'handicap' )
           <td></td><td>White</td><td>Black</td>
         </tr><tr>
           <td>Name:</td>
-          <td><A href="userinfo.php?uid=<?php echo "$White_ID\">$Whitename ($Whitehandle)"; ?></A</td>
-          <td><A href="userinfo.php?uid=<?php echo "$Black_ID\">$Blackname ($Blackhandle)"; ?></A</td>
+          <td><A href="userinfo.php?uid=<?php echo "$White_ID\">$Whitename ($Whitehandle)"; ?></A></td>
+          <td><A href="userinfo.php?uid=<?php echo "$Black_ID\">$Blackname ($Blackhandle)"; ?></A></td>
         </tr><tr>
           <td>Rank:</td>
           <td><?php echo( $Whiterank ); ?></td>
@@ -467,23 +467,24 @@ else if( $action == 'handicap' )
 
 // display moves
 
-if( false and !$enable_message and $Moves > 0 )
+if( $player_row["ID"] == 'ejlo' and !$enable_message and $Moves > 0 )
 {
     mysql_data_seek($moves_result, 0);
 
 
-echo "<table border=1 align=center bgcolor=49BCFF><tr><font color=\"FFFC70\"><th>Moves</th>\n";
+echo '<table border=4 cellspacing=0 cellpadding=1 align=center class="moves"><tr align=center><th>Moves</th>
+';
 for($i=0;$i<20;$i++)
-     echo "<th>$i</th>";
+     echo "<td>$i</td>";
 
-echo "</tr></font>\n<tr><td>1-19</td><td>&nbsp;</td>";
+echo "</tr>\n<tr align=center><td>1-19</td><td>&nbsp;</td>";
 $i=1;
 while( $row = mysql_fetch_array($moves_result) )
 {
     $s = $row["Stone"];
     if( $s != BLACK and $s != WHITE ) continue;
     if( $i % 20 == 0 )
-        echo "</tr>\n<tr><td>$i-" . ($i + 19) . "</td>\n";
+        echo "</tr>\n<tr align=center><td>$i-" . ($i + 19) . "</td>\n";
 
     if( $row["PosX"] == -1 )
         $c = 'P';
@@ -498,32 +499,49 @@ while( $row = mysql_fetch_array($moves_result) )
             if( $col >= 'i' ) $col++;
             $c = $col . ($Size - $row["PosY"]);
         }
-
-    if( $s == BLACK )        
-        echo "<td><a style=\"color: 000000\" href=game.php?gid=$gid&move=$i>$c</A></td>\n";
+    if( $i == $move )
+        echo '<td  class="r">' . $c . '</td>
+';        
+    else if( $s == BLACK )        
+        echo '<td><a class="b" href=game.php?gid=' . $gid . '&move=' .
+            $i . '>' . $c . '</A></td>
+';
     else
-        echo "<td><a style=\"color: FFFFFF\" href=game.php?gid=$gid&move=$i>$c</A></td>\n";
+        echo '<td><a class="w" href=game.php?gid=' . $gid . '&move=' .
+            $i . '>' . $c . '</A></td>
+';
 
     $i++;    
 }
 echo "</tr></table>";
 }
 
-if( ( $action == 'remove' or $action == 'choose_move' ) and $Moves >= $Handicap )
+if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' )
 {
-echo "
+echo '
     <p>
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-      <tr align=\"center\">\n";
+    <table width="100%" border=0 cellspacing=0 cellpadding=4>
+      <tr align="center">
+';
 if( $action == 'choose_move' )
-   echo "<td><B><A href=\"game.php?gid=$gid&action=pass\">Pass</A></B></td>\n";
-else
-   echo "<td><B><A href=\"game.php?gid=$gid&action=done&stonestring=$stonestring\">Done</A></B></td>
-<td><B><A href=\"game.php?gid=$gid&action=choose_move\">Resume playing</A></B></td>\n";
-       
+    {
+        echo "<td width=33%><B><A href=\"game.php?gid=$gid&action=pass\">Pass</A></B></td>\n";
+        $width="33%";
+    }
+else if( $action == 'remove' )
+    {
+   echo "<td width=25%><B><A href=\"game.php?gid=$gid&action=done&stonestring=$stonestring\">Done</A></B></td>
+<td width=25%><B><A href=\"game.php?gid=$gid&action=choose_move\">Resume playing</A></B></td>\n";
+   $width="25%";
+    }
 
+
+echo "<td><B><A href=\"sgf.php?gid=$gid\">Download sgf</A></B></td>\n";
+
+ if( $action != 'just_looking' )
+     echo "<td width=$width><B><A href=\"game.php?gid=$gid&action=resign\">Resign</A></B></td>\n";
 echo "
-        <td><B><A href=\"game.php?gid=$gid&action=resign\">Resign</A></B></td>
+
       </tr>
     </table>
 ";

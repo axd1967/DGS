@@ -58,44 +58,41 @@ echo "
 
  if( $no_cache )
      {
-echo "
-    <META HTTP-EQUIV=\"Pragma\" CONTENT=\"no-cache\">
-    <META HTTP-EQUIV=\"Expires\" CONTENT=\"0\">
-";
+echo '
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="0">
+';
      }
-echo "
-    <TITLE> Dragon Go Server - $title </TITLE>
+echo '
+    <TITLE> Dragon Go Server - ' . $title . '</TITLE>
+    <LINK rel="stylesheet" type="text/css" media="screen" href="dragon.css">
   </HEAD>
-  <BODY bgcolor=\"F7F5E3\">
+  <BODY bgcolor="F7F5E3">
 
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-        <tr bgcolor=\"0C41C9\">
-          <td colspan=\"3\" width=\"50%\">
-          <A style=\"color: FFFC70 \" href=\"index.php\"><B>Dragon Go Server</B></A></td>
-";
+    <table width="100%" border=0 cellspacing=0 cellpadding=4 class="title" bgcolor="9FED7B">
+        <tr>
+          <td colspan="3" width="50%">
+          <A class="title" href="index.php"><B>Dragon Go Server</B></A></td>
+';
 
 
 if( $logged_in ) 
-    echo "          <td colspan=\"3\" align=\"right\" width=\"50%\"><font color=\"FFFC70\"><B>Logged in as: " . 
-        $player_row["Handle"] . " </B></font></td>\n";
+    echo '          <td colspan="3" align="right" width="50%" class="title"><font color="0C41C9"><B class="title">Logged in as: ' . $player_row["Handle"] . ' </B></font></td>';
 else
-    echo "          <td colspan=\"3\" align=\"right\" width=\"50%\"><font color=\"FFFC70\"><B>Not logged in</B></font></td>\n";
+    echo '          <td colspan="3" align="right" width="50%"><font color="0C41C9"><B class="title">Not logged in</B></font></td>';
 
-echo "
+echo '
         </tr>
-        <tr bgcolor=\"F7F5E3\" align=\"center\">
-          <td><font color=\"FFFC70\"><B><A href=\"status.php\">Status</A></B></font></td>
-          <td><font color=\"FFFC70\"><B><A href=\"messages.php\">Messages</A></B></font></td>
-          <td><font color=\"FFFC70\"><B><A href=\"invite.php\">Invite</A></B></font></td>
-          <td><font color=\"FFFC70\"><B><A href=\"users.php\">Users</A></B></font></td>
-          <td><font color=\"FFFC70\"><B><A href=\"faq.php\">FAQ</A></B></font></td>
+        <tr bgcolor="F7F5E3" align="center">
+          <td><B><A href="status.php">Status</A></B></td>
+          <td><B><A href="messages.php">Messages</A></B></td>
+          <td><B><A href="invite.php">Invite</A></B></td>
+          <td><B><A href="users.php">Users</A></B></td>
+          <td><B><A href="faq.php">FAQ</A></B></td>
         </tr>
-
-
     </table>
-    
     <BR>
-";
+';
 }
 
 function end_page( $new_paragraph = true )
@@ -105,25 +102,25 @@ function end_page( $new_paragraph = true )
 
     if( $new_paragraph )
         echo "<p>";
-echo "
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-      <tr bgcolor=\"0C41C9\">
-        <td align=\"left\" width=\"50%\">
-          <A style=\"color: FFFC70 \" href=\"index.php\"><B>Dragon Go Server</B></A></td>
-        <td align=\"right\" width=\"50%\">";
+echo '
+    <table width="100%" border=0 cellspacing=0 cellpadding=4 class="title" bgcolor="9FED7B">
+      <tr>
+        <td align="left" width="50%">
+          <A class="title" href="index.php"><B>Dragon Go Server</B></A></td>
+        <td align="right" width="50%">';
  if( $show_time )
-     echo "
-        <font color=\"FFFC70\"><B>Page created in " . 
-         sprintf ("%0.5f", getmicrotime() - $time) . "&nbsp;s</B></font></td>";
+     echo '
+        <font color="0C41C9"><B class="title">Page created in ' . 
+         sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s</B></font></td>';
  else
-     echo "<A style=\"color: FFFC70 \" href=\"index.php?logout=t\"><B>Logout</B></A></td>";
+     echo '<A class="title" href="index.php?logout=t"><B>Logout</B></A></td>';
 
- echo "
+ echo '
       </tr>
     </table>
   </BODY>
 </HTML>
-";
+';
 
 }
 
