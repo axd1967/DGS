@@ -77,7 +77,7 @@ require( "include/rating.php" );
 
    $newrating = convert_to_rating($rating, $ratingtype);
 
-   if( $player_row["RatingStatus"] != 'RATED' and $newrating and
+   if( $player_row["RatingStatus"] != 'RATED' and is_numeric($newrating) and
    ( $ratingtype != 'dragonrating' or abs($newrating - $player_row["Rating"]) > 0.005 ) )
    {
       // TODO: check if reasonable
