@@ -27,5 +27,7 @@ $known_languages->add( "fr", "French", "iso-8859-1" );
 $known_languages->add( "es", "Spanish", "iso-8859-1" );
 $known_languages->add( "cs", "Czech", "iso-8859-2" );
 $known_languages->add( "zh", "Chinese (Traditional)", "big5" );
+$known_languages->add( "pt", "Portuguese", "iso-8859-1" );
+$known_languages->add( "zh", "Chinese (Simplified)", "gb2312" );
 
 ?>
