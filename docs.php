@@ -35,6 +35,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   add_link_page_link('site_map.php', T_('Site map'));
   add_link_page_link("phorum/list.php?f=3",
                      T_('Frequently Asked Questions'), T_('with answers'));
+  add_link_page_link("people.php", T_("People"), T_("who contributes to Dragon"));
   add_link_page_link("links.php", T_('Links'));
   add_link_page_link("todo.php", T_('To do list'), T_('plans for future improvements'));
   add_link_page_link("install.php", T_('Installation instructions'),
