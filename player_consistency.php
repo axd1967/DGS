@@ -60,17 +60,18 @@ require_once( "include/std_functions.php" );
    else
       $where = "" ;
 
-   //$alt_where = " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
-   $alt_where = " AND Games.Rated!='N'" ;
+   $is_rated = " AND Games.Rated!='N'" ;
+   //$is_rated.= " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
 
 
 
-   $result = mysql_query("SELECT Players.ID,count(*) AS Run,Running FROM Games,Players " .
-                         "WHERE Status!='INVITED' AND Status!='FINISHED'$where " .
-                         "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
-                         "GROUP BY Players.ID HAVING Run!=Running")
+   //count(Games.ID) and LEFT JOIN Games ON are used to find when Run=0 and Running!=0
+   $query = "SELECT Players.ID, count(Games.ID) AS Run, Running FROM Players " .
+            "LEFT JOIN Games ON Status!='INVITED' AND Status!='FINISHED'$where " .
+            "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
+            "GROUP BY Players.ID HAVING Run!=Running";
+   $result = mysql_query( $query)
       or die("Run.A: " . mysql_error());
-
 
    while( $row = mysql_fetch_array($result) )
    {
@@ -83,11 +84,12 @@ require_once( "include/std_functions.php" );
    echo "<br>Running Done.";
 
 
-
-   $result = mysql_query("SELECT Players.ID,count(*) AS Fin,Finished FROM Games,Players " .
-                         "WHERE Status='FINISHED'$where$alt_where " .
-                         "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
-                         "GROUP BY Players.ID HAVING Fin!=Finished")
+   //count(Games.ID) and LEFT JOIN Games ON are used to find when Fin=0 and Finished!=0
+   $query = "SELECT Players.ID, count(Games.ID) AS Fin, Finished FROM Players " .
+            "LEFT JOIN Games ON Status='FINISHED'$where$is_rated " .
+            "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
+            "GROUP BY Players.ID HAVING Fin!=Finished";
+   $result = mysql_query( $query)
       or die("Fin.A: " . mysql_error());
 
    while( $row = mysql_fetch_array($result) )
@@ -101,12 +103,13 @@ require_once( "include/std_functions.php" );
    echo "<br>Finished Done.";
 
 
-
-   $result = mysql_query("SELECT Players.ID,count(*) AS W, Won FROM Games,Players " .
-                         "WHERE Status='FINISHED'$where$alt_where " .
-                         "AND ((Black_ID=Players.ID AND Score<0) " .
-                         "OR (White_ID=Players.ID AND Score>0)) " .
-                         "GROUP BY Players.ID HAVING W!=Won")
+   //count(Games.ID) and LEFT JOIN Games ON are used to find when W=0 and Won!=0
+   $query = "SELECT Players.ID, count(Games.ID) AS W, Won FROM Players " .
+            "LEFT JOIN Games ON Status='FINISHED'$where$is_rated " .
+            "AND ((Black_ID=Players.ID AND Score<0) " .
+              "OR (White_ID=Players.ID AND Score>0)) " .
+            "GROUP BY Players.ID HAVING W!=Won";
+   $result = mysql_query( $query)
       or die("Won.A: " . mysql_error());
 
    while( $row = mysql_fetch_array($result) )
@@ -120,12 +123,13 @@ require_once( "include/std_functions.php" );
    echo "<br>Won Done.";
 
 
-
-   $result = mysql_query("SELECT Players.ID,count(*) AS L, Lost FROM Games,Players " .
-                         "WHERE Status='FINISHED'$where$alt_where " .
-                         "AND ((Black_ID=Players.ID AND Score>0) " .
-                         "OR (White_ID=Players.ID AND Score<0)) " .
-                         "GROUP BY Players.ID HAVING L!=Lost")
+   //count(Games.ID) and LEFT JOIN Games ON are used to find when L=0 and Lost!=0
+   $query = "SELECT Players.ID, count(Games.ID) AS L, Lost FROM Players " .
+            "LEFT JOIN Games ON Status='FINISHED'$where$is_rated " .
+            "AND ((Black_ID=Players.ID AND Score>0) " .
+              "OR (White_ID=Players.ID AND Score<0)) " .
+            "GROUP BY Players.ID HAVING L!=Lost";
+   $result = mysql_query( $query)
       or die("Los.A: " . mysql_error());
 
    while( $row = mysql_fetch_array($result) )
@@ -137,6 +141,24 @@ require_once( "include/std_functions.php" );
    }
 
    echo "<br>Lost Done.";
+
+
+   //Finished = Won + Lost consistency
+   $result = mysql_query("SELECT Players.ID, Finished, Won, Lost FROM Players " .
+                         "WHERE Finished!=(Won+Lost)$where")
+      or die("Cnt.A: " . mysql_error());
+
+   $err = 0;
+   while( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      echo "<br>ID: $ID  Counts: (F=$Finished) != ((W=$Won) + (L=$Lost))";
+      $err++;
+   }
+   if( $err )
+      echo "<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
+
+   echo "<br>Counts Done.";
 
 }
 ?>
