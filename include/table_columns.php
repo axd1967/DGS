@@ -61,6 +61,9 @@ class Table
    /*! \brief The columns that has been removed. */
    var $Removed_Columns;
 
+   /*! \brief Boolean array used to check if the column should be display. */
+   var $Is_Column_Displayed;
+
    /*! \brief Array describing all tableheads. */
    var $Tableheads;
 
@@ -156,6 +159,12 @@ class Table
                    'Desc_Default' => $desc_default,
                    'Undeletable' => $undeletable,
                    'Width' => $width );
+
+         $col_pos = ( $nr > 0 ? $col_pos = 1 << ($nr - 1) : 0 );
+
+         $this->Is_Column_Displayed[$nr] = ( $this->Static_Columns or
+                                             $undeletable or
+                                             $col_pos & $this->Column_set ? 1 : 0);
       }
 
    /*! \brief Check if column is displayed. */
@@ -324,9 +333,9 @@ class Table
 
          foreach( $this->Tableheads as $th )
             {
-               if( !in_array( $th['Description'], $this->Removed_Columns ) )
+               if( $this->Is_Column_Displayed[ $th['Nr'] ] )
                {
-                  $string .= $this->make_tablecell( $tablerow[ $th['Nr'] ] );
+                  $string .= $tablerow[ $th['Nr'] ];
                }
             }
 
@@ -335,29 +344,6 @@ class Table
          return $string;
       }
 
-   /*! \brief Modify the cellstring to make sure it behaves well. */
-   function make_tablecell( $cellstring )
-      {
-         if( empty( $cellstring ) )
-         {
-            return '';
-         }
-
-         $string = '  ';
-         if( substr( $cellstring, 0, 3 ) != "<td" )
-         {
-            $string .= "<td>";
-         }
-
-         $string .= $cellstring;
-
-         if( substr( $cellstring, -5 ) != "</td>" )
-         {
-            $string .= "</td>";
-         }
-
-         return $string . "\n";
-      }
 
    /*! \brief Add next and prev links. */
    function make_next_prev_links()

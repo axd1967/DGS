@@ -209,59 +209,59 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $color = ( $Color == BLACK ? 'b' : 'w' );
 
       $grow_strings = array();
-      if( $gtable->is_column_displayed(1) )
+      if( $gtable->Is_Column_Displayed[1] )
          $grow_strings[1] = "<td class=button width=92 align=center>" .
             "<A class=button href=\"game.php?gid=$ID\">" .
             "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>";
-      if( $gtable->is_column_displayed(2) )
+      if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
             "<font color=$gid_color>" . T_('sgf') . "</font></A></td>";
 
       if( $_GET['observe'] or $all )
       {
-         if( $gtable->is_column_displayed(17) )
+         if( $gtable->Is_Column_Displayed[17] )
             $grow_strings[17] = "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
                make_html_safe($blackName) . "</font></a></td>";
-         if( $gtable->is_column_displayed(18) )
+         if( $gtable->Is_Column_Displayed[18] )
             $grow_strings[18] = "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
                make_html_safe($blackHandle) . "</font></a></td>";
-         if( $gtable->is_column_displayed(19) )
+         if( $gtable->Is_Column_Displayed[19] )
             $grow_strings[19] = "<td>" . echo_rating($blackRating,true,$blackID) . "&nbsp;</td>";
-         if( $gtable->is_column_displayed(20) )
+         if( $gtable->Is_Column_Displayed[20] )
             $grow_strings[20] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
                make_html_safe($whiteName) . "</font></a></td>";
-         if( $gtable->is_column_displayed(21) )
+         if( $gtable->Is_Column_Displayed[21] )
             $grow_strings[21] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
                make_html_safe($whiteHandle) . "</font></a></td>";
-         if( $gtable->is_column_displayed(22) )
+         if( $gtable->Is_Column_Displayed[22] )
             $grow_strings[22] = "<td>" . echo_rating($whiteRating,true,$whiteID) . "&nbsp;</td>";
       }
       else
       {
-         if( $gtable->is_column_displayed(3) )
+         if( $gtable->Is_Column_Displayed[3] )
             $grow_strings[3] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Name) . "</font></a></td>";
-         if( $gtable->is_column_displayed(4) )
+         if( $gtable->Is_Column_Displayed[4] )
             $grow_strings[4] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Handle) . "</font></a></td>";
-         if( $gtable->is_column_displayed(16) )
+         if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
-         if( $gtable->is_column_displayed(5) )
+         if( $gtable->Is_Column_Displayed[5] )
             $grow_strings[5] = "<td align=center><img src=\"17/$color.gif\" alt=$color></td>";
       }
 
-      if( $gtable->is_column_displayed(6) )
+      if( $gtable->Is_Column_Displayed[6] )
          $grow_strings[6] = "<td>$Size</td>";
-      if( $gtable->is_column_displayed(7) )
+      if( $gtable->Is_Column_Displayed[7] )
          $grow_strings[7] = "<td>$Handicap</td>";
-      if( $gtable->is_column_displayed(8) )
+      if( $gtable->Is_Column_Displayed[8] )
          $grow_strings[8] = "<td>$Komi</td>";
-      if( $gtable->is_column_displayed(9) )
+      if( $gtable->Is_Column_Displayed[9] )
          $grow_strings[9] = "<td>$Moves</td>";
 
       if( $_GET['finished'] )
       {
-         if( $gtable->is_column_displayed(10) )
+         if( $gtable->Is_Column_Displayed[10] )
             $grow_strings[10] = '<td>' . score2text($Score, false) . "</td>";
          if( !$all )
          {
@@ -270,24 +270,24 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
                  ( $Win == -1 ? 'no.gif" alt=' . T_('No') :
                    'dash.gif" alt=' . T_('jigo') ));
 
-         if( $gtable->is_column_displayed(11) )
+         if( $gtable->Is_Column_Displayed[11] )
             $grow_strings[11] = "<td align=center><img src=$src></td>";
          }
-         if( $gtable->is_column_displayed(14) )
+         if( $gtable->Is_Column_Displayed[14] )
             $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
-         if( $gtable->is_column_displayed(12) )
+         if( $gtable->Is_Column_Displayed[12] )
             $grow_strings[12] = '<td>' . date($date_fmt, $Time) . "</td>";
       }
       else
       {
-         if( $gtable->is_column_displayed(14) )
+         if( $gtable->Is_Column_Displayed[14] )
             $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
-         if( $gtable->is_column_displayed(13) )
+         if( $gtable->Is_Column_Displayed[13] )
             $grow_strings[13] = '<td>' . date($date_fmt2, $Time) . "</td>";
 
          if( !$_GET['observe'] and !$all )
          {
-            if( $gtable->is_column_displayed(15) )
+            if( $gtable->Is_Column_Displayed[15] )
                $grow_strings[15] = '<td align=center>' . date($date_fmt2, $Lastaccess) . "</td>";
          }
       }

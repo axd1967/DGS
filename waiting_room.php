@@ -111,43 +111,43 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             $Komi = '-';
 
          $wrow_strings = array();
-         if( $wrtable->is_column_displayed(0) )
+         if( $wrtable->Is_Column_Displayed[0] )
             $wrow_strings[0] = "<td class=button width=92 align=center>" .
                "<A class=button href=\"waiting_room.php?info=$ID&$orderstring#info\">" .
                "&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>";
-         if( $wrtable->is_column_displayed(1) )
+         if( $wrtable->Is_Column_Displayed[1] )
             $wrow_strings[1] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Name) . "</font></a></td>";
-         if( $wrtable->is_column_displayed(2) )
+         if( $wrtable->Is_Column_Displayed[2] )
             $wrow_strings[2] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Handle) . "</font></a></td>";
-         if( $wrtable->is_column_displayed(3) )
+         if( $wrtable->Is_Column_Displayed[3] )
             $wrow_strings[3] = "<td nowrap>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
          if( empty($Comment) )
          {
             $Comment = '&nbsp;';
          }
-         if( $wrtable->is_column_displayed(4) )
+         if( $wrtable->Is_Column_Displayed[4] )
             $wrow_strings[4] = "<td nowrap>" . make_html_safe($Comment, true) . "</td>";
-         if( $wrtable->is_column_displayed(5) )
+         if( $wrtable->Is_Column_Displayed[5] )
             $wrow_strings[5] = "<td nowrap>" . $handi_array[$Handicaptype] . "</td>";
-         if( $wrtable->is_column_displayed(6) )
+         if( $wrtable->Is_Column_Displayed[6] )
             $wrow_strings[6] = "<td>$Komi</td>";
-         if( $wrtable->is_column_displayed(7) )
+         if( $wrtable->Is_Column_Displayed[7] )
             $wrow_strings[7] = "<td>$Size</td>";
-         if( $wrtable->is_column_displayed(8) )
+         if( $wrtable->Is_Column_Displayed[8] )
             $wrow_strings[8] = '<td nowrap>' .
                echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) .
                "</td>";
-         if( $wrtable->is_column_displayed(9) )
+         if( $wrtable->Is_Column_Displayed[9] )
             $wrow_strings[9] = '<td nowrap>' .
                echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) .
                "</td>";
-         if( $wrtable->is_column_displayed(10) )
+         if( $wrtable->Is_Column_Displayed[10] )
             $wrow_strings[10] = "<td>$nrGames</td>";
-         if( $wrtable->is_column_displayed(11) )
+         if( $wrtable->Is_Column_Displayed[11] )
             $wrow_strings[11] = "<td>$Rated</td>";
-         if( $wrtable->is_column_displayed(12) )
+         if( $wrtable->Is_Column_Displayed[12] )
             $wrow_strings[12] = "<td>$WeekendClock</td>";
 
          $wrtable->add_row( $wrow_strings );

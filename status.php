@@ -167,32 +167,32 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          $color = ( $Color == BLACK ? 'b' : 'w' );
 
          $grow_strings = array();
-         if( $gtable->is_column_displayed(1) )
+         if( $gtable->Is_Column_Displayed[1] )
             $grow_strings[1] = "<td class=button width=92 align=center>" .
                "<A class=button href=\"game.php?gid=$ID\">" .
                "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>";
-         if( $gtable->is_column_displayed(2) )
+         if( $gtable->Is_Column_Displayed[2] )
             $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
                "<font color=$gid_color>sgf</font></A></td>";
-         if( $gtable->is_column_displayed(3) )
+         if( $gtable->Is_Column_Displayed[3] )
             $grow_strings[3] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Name) . "</font></a></td>";
-         if( $gtable->is_column_displayed(4) )
+         if( $gtable->Is_Column_Displayed[4] )
             $grow_strings[4] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Handle) . "</font></a></td>";
-         if( $gtable->is_column_displayed(16) )
+         if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
-         if( $gtable->is_column_displayed(5) )
+         if( $gtable->Is_Column_Displayed[5] )
             $grow_strings[5] = "<td align=center><img src=\"17/$color.gif\" alt=$color></td>";
-         if( $gtable->is_column_displayed(6) )
+         if( $gtable->Is_Column_Displayed[6] )
             $grow_strings[6] = "<td>$Size</td>";
-         if( $gtable->is_column_displayed(7) )
+         if( $gtable->Is_Column_Displayed[7] )
             $grow_strings[7] = "<td>$Handicap</td>";
-         if( $gtable->is_column_displayed(8) )
+         if( $gtable->Is_Column_Displayed[8] )
             $grow_strings[8] = "<td>$Komi</td>";
-         if( $gtable->is_column_displayed(9) )
+         if( $gtable->Is_Column_Displayed[9] )
             $grow_strings[9] = "<td>$Moves</td>";
-         if( $gtable->is_column_displayed(13) )
+         if( $gtable->Is_Column_Displayed[13] )
             $grow_strings[13] = '<td>' . date($date_fmt, $Time) . "</td>";
 
          $gtable->add_row( $grow_strings );
