@@ -52,6 +52,9 @@ function item($text,$link,$working, $level,$last=false)
 
    start_page("Site map", true, $logged_in, $player_row );
 
+   if( !$logged_in )
+      error("not_logged_in");
+
    $f0=$f1=$f2=$f3=true;
    $id = $player_row["ID"];
 
