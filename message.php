@@ -99,7 +99,7 @@ $mode = $_GET['mode'];
       $sender_name = make_html_safe($sender_name);
       $sender_handle_safe = make_html_safe($sender_handle);
 
-      $can_reply = ( $To_ID == $my_id );
+      $can_reply = ( $To_ID == $my_id && $sender_id && $sender_handle);
       $to_me = ( $Sender === 'N' );
 
 
