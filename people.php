@@ -19,6 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 $TranslateGroups[] = "Docs";
+$TranslateGroups[] = "Users";
 
 require( "include/std_functions.php" );
 
@@ -49,55 +50,42 @@ function add_contributor( $text, $contributor, $uid = -1 )
 
   echo "<tr><td colspan=2>\n";
   echo "<center><h3><font color=$h3_color>" .
-    T_('Current translators') . "</font></h3></center>\n";
+     T_('Current translators') . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
   $query_result = mysql_query( "SELECT ID,Handle,Name,Translator FROM Players " .
                                "WHERE LENGTH(Translator)>0" );
 
-  $per_language = array();
+  $translator_list = array();
   while( $row = mysql_fetch_array( $query_result ) )
-    {
-      $langs = explode(',', $row['Translator']);
-      foreach( $langs as $lang )
+  {
+     $languages = explode(',', $row['Translator']);
+     foreach( $languages as $language )
         {
-          list($lang_c, $charset) = explode( '.', $lang, 2 );
-          if( is_null( $charset ) )
-            {
-              $lang = null;
-              $entries = $known_languages->get_lang( $lang_c );
-              if( !empty( $entries ) )
-                $lang = $entries[0]->lang_code . "." . $entries[0]->charset;
-            }
+           list($lang, $enc) = explode('.', $language, 2);
 
-          if( !is_null( $lang ) )
-            {
-              if( array_key_exists( $lang, $per_language ) )
-                array_push( $per_language[$lang], $row );
-              else
-                $per_language[$lang] = array( $row );
-            }
+           $lang_name = T_($known_languages[$lang][$enc]);
+
+           if( !isset($translator_list[$lang_name]) )
+              $translator_list[$lang_name] = array();
+
+           array_push($translator_list[$lang_name], $row);
         }
-    }
+  }
 
-  $k_langs = get_language_descriptions_translated();
-  foreach( $per_language as $lang => $translators )
-    {
-      $first = true;
-      foreach( $translators as $translator )
-        {
-          $text = '';
-          if( $first )
-            {
-              $text = $k_langs[$lang];
+  ksort($translator_list);
+
+  foreach( $translator_list as $language => $translators )
+     {
+        $first = true;
+        foreach( $translators as $translator )
+           {
+              add_contributor( $first ? $language : '',
+                               $translator['Name'],
+                               $translator['ID'] );
               $first = false;
-            }
-
-          add_contributor( $text,
-                           $translator['Name'],
-                           $translator['ID'] );
-        }
-    }
+           }
+     }
 
   echo "</table>\n";
   echo "<br>&nbsp;\n";
