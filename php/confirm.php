@@ -163,6 +163,48 @@ switch( $action )
      }
      break;
      
+ case 'handicap':
+     {
+         if( $Status != 'PLAY' )
+             {
+                 header("Location: error.php?err=invalid_action");
+                 exit;
+             }
+
+         if( strlen( $stonestring ) != 2 * $Handicap + 1 )
+             {
+                 header("Location: error.php?err=wrong_number_of_handicap_stone");
+                 exit;
+             }
+
+         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Text ) VALUES ";
+
+
+         for( $i=1; $i <= $Handicap; $i++ )
+             {
+                 $colnr = ord($stonestring[$i*2-1])-ord('a');
+                 $rownr = ord($stonestring[$i*2])-ord('a');
+
+                 if( $i == $Handicap )
+                     if( $message )
+                         $query .= "($i, " . BLACK . ", $colnr, $rownr, '$message')";
+                     else
+                         $query .= "($i, " . BLACK . ", $colnr, $rownr, NULL)";
+                 
+                 else
+                     $query .= "($i, " . BLACK . ", $colnr, $rownr, NULL), ";
+             }
+
+
+         $game_query = "UPDATE Games SET " .
+              "Moves=$Handicap, " .
+              "Last_X=$colnr, " .
+              "Last_Y=$rownr, " .
+              "ToMove_ID=$White_ID " .
+              "WHERE ID=$gid";
+     }
+     break;
+
  case 'resign':
      {
          $query = "INSERT INTO Moves$gid SET " . 

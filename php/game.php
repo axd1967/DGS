@@ -78,7 +78,11 @@ if( !$action )
     if( $may_play )
         {
             if( $Status == 'PLAY' or $Status == 'PASS' )
-                $action = 'choose_move';
+                {
+                    $action = 'choose_move';
+                    if( $Moves == 0 and $Handicap > 0 )
+                        $action = 'handicap';
+                }
             else if( $Status == 'SCORE' or $Status == 'SCORE2' )
                 $action = 'remove';
         }
@@ -161,6 +165,60 @@ switch( $action )
      }
      break;
 
+ case 'handicap':
+     {
+         if( $Status != 'PLAY' )
+             {
+                 header("Location: error.php?err=invalid_action");
+                 exit;
+             }
+
+         if( !$stonestring ) $stonestring = "1";
+
+         // add killed stones to array
+         
+         $l = strlen( $stonestring );
+
+         for( $i=1; $i < $l; $i += 2 )
+             {
+                 $colnr = ord($stonestring[$i])-ord('a');
+                 $rownr = ord($stonestring[$i+1])-ord('a');
+                 
+                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 or 
+                     $array[$colnr][$rownr] )
+                     {
+                         header("Location: error.php?err=illegal_position");
+                         exit;
+                     }
+
+                 $array[$colnr][$rownr] = BLACK;
+             }
+
+         if( $coord )
+             {
+                 $colnr = ord($coord)-ord('a');
+                 $rownr = ord($coord[1])-ord('a');
+
+                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 or 
+                     $array[$colnr][$rownr] )
+                     {
+                         header("Location: error.php?err=illegal_position");
+                         exit;
+                     }
+
+                 $array[$colnr][$rownr] = BLACK;
+                 $stonestring .= chr(ord('a') + $colnr) . chr(ord('a') + $rownr);
+             }
+
+         if( (strlen( $stonestring ) / 2) < $Handicap )
+             {
+                 $enable_message = false;
+             }
+
+         $handi = true;
+     }
+     break;
+
  case 'resign':
      {
          $extra_message = "<font color=\"red\">Resigning</font>";
@@ -189,16 +247,16 @@ switch( $action )
 
          $enable_message = false;
 
-         if( !$killedstring ) $killedstring = "1";
+         if( !$stonestring ) $stonestring = "1";
 
          // add killed stones to array
          
-         $l = strlen( $killedstring );
+         $l = strlen( $stonestring );
 
          for( $i=1; $i < $l; $i += 2 )
              {
-                 $colnr = ord($killedstring[$i])-ord('a');
-                 $rownr = ord($killedstring[$i+1])-ord('a');
+                 $colnr = ord($stonestring[$i])-ord('a');
+                 $rownr = ord($stonestring[$i+1])-ord('a');
                  
                  if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
                      {
@@ -231,7 +289,7 @@ switch( $action )
 
                  while( list($dummy, list($x,$y)) = each($prisoners) )
                      {
-                         $killedstring .= chr(ord('a') + $x) . chr(ord('a') + $y);
+                         $stonestring .= chr(ord('a') + $x) . chr(ord('a') + $y);
                      }
              }
 
@@ -248,17 +306,17 @@ switch( $action )
              }
 
 
-         if( !$killedstring ) $killedstring = "1";
+         if( !$stonestring ) $stonestring = "1";
 
          // add killed stones to array
          
-         $l = strlen( $killedstring );
+         $l = strlen( $stonestring );
          $index = array();
 
          for( $i=1; $i < $l; $i += 2 )
              {
-                 $colnr = ord($killedstring[$i])-ord('a');
-                 $rownr = ord($killedstring[$i+1])-ord('a');
+                 $colnr = ord($stonestring[$i])-ord('a');
+                 $rownr = ord($stonestring[$i+1])-ord('a');
                  
                  if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
                      {
@@ -310,7 +368,7 @@ if( !$logged_in or ( $player_row["ID"] != $Black_ID and $player_row["ID"] != $Wh
      unset( $msg );
 
 draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y, 
-           $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $killedstring );
+           $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $stonestring, $handi );
 
 
 if( $extra_message )
@@ -340,11 +398,14 @@ if( $action == 'move' )
 else if( $action == 'done' )
     {
         echo "
-      <input type=\"hidden\" name=\"prisoners\" value=\"" . urlencode(serialize($prisoners)) . "\">\n";
-        echo "
+      <input type=\"hidden\" name=\"prisoners\" value=\"" . urlencode(serialize($prisoners)) . "\">
       <input type=\"hidden\" name=\"score\" value=\"$score\">\n";
 
     }
+else if( $action == 'handicap' )
+    {
+        echo "<input type=\"hidden\" name=\"stonestring\" value=\"" . $stonestring . "\">\n";
+    } 
 
 ?>
       <TR><TD></TD>
@@ -398,7 +459,7 @@ echo "
 if( $action == 'choose_move' )
    echo "<td><B><A href=\"game.php?gid=$gid&action=pass\">Pass</A></B></td>\n";
 else
-   echo "<td><B><A href=\"game.php?gid=$gid&action=done&killedstring=$killedstring\">Done</A></B></td>
+   echo "<td><B><A href=\"game.php?gid=$gid&action=done&stonestring=$stonestring\">Done</A></B></td>
 <td><B><A href=\"game.php?gid=$gid&action=choose_move\">Resume</A></B></td>\n";
        
 

@@ -38,6 +38,12 @@ switch( $err )
      }
      break;
 
+ case("guest_may_not_recieve_messages"):
+     {
+         echo "Error, guest may not recieve messages";
+     }
+     break;
+
  case("illegal_position"):
      {
          echo "Move outside board??";
@@ -240,6 +246,11 @@ switch( $err )
      }
      break;
 
+     case("wrong_number_of_handicap_stone");
+     {
+         echo "Wrong, number of handicap stones";
+     }
+     break;
 
  case("wrong_password"):
      {
