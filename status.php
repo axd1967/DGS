@@ -167,6 +167,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $row_color=2;
       while( $row = mysql_fetch_array( $result ) )
       {
+         $Rating=NULL;
          extract($row);
          $color = ( $Color == BLACK ? 'b' : 'w' );
 
