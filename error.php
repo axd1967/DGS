@@ -33,7 +33,7 @@ require_once( "include/std_functions.php" );
    $err = @$_GET['err'];
    switch( $err )
    {
-      case("early pass"):
+      case("early_pass"):
       {
          echo T_("Sorry, you may not pass before all handicap stones are placed.");
       }
