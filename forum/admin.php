@@ -42,7 +42,6 @@ require_once( "forum_functions.php" );
   if( @$_GET["new"] == 't' )
   {
      start_page(T_("Forum Admin").' - '.T_('New forum'), true, $logged_in, $player_row );
-
      echo "<center>\n";
 
 
@@ -199,6 +198,7 @@ require_once( "forum_functions.php" );
   if( $show_list )
   {
      start_page(T_("Forum Admin"), true, $logged_in, $player_row );
+     echo "<center>\n";
 
      echo "<table align=center width=\"85%\" border=0><tr><td>\n";
 
@@ -216,7 +216,7 @@ require_once( "forum_functions.php" );
 
 
      echo "<tr><td colspan=4 align=right><a href=\"admin.php?new=t&id=0\">" .
-        '<img border=0 title="' . T_('Add new forum') . '" src="../images/new.png"></a>';
+        '<img border=0 title="' . T_('Add new forum') . '" src="../images/new.png" alt="N"></a>';
 
      while( $row = mysql_fetch_array( $result ) )
      {
@@ -227,18 +227,18 @@ require_once( "forum_functions.php" );
            '" title="' . T_("Edit") . "\">$name</A>\n";
 
         echo '<td width=40 align=right><a href="admin.php?move=u&id=' . $row['ID'] .
-           '"><img border=0 title="' . T_("Move up") . '" src="../images/up.png"></a>';
+           '"><img border=0 title="' . T_("Move up") . '" src="../images/up.png" alt="u"></a>';
         echo '<td><a href="admin.php?move=d&id=' . $row['ID'] .
-           '"><img border=0 title="' . T_("Move down") . '" src="../images/down.png"></a>';
+           '"><img border=0 title="' . T_("Move down") . '" src="../images/down.png" alt="d"></a>';
         echo "<td><a href=\"admin.php?new=t&id=" . $row['ID'] .
-           '"><img border=0 title="' . T_('Add new forum') . '" src="../images/new.png"></a>';
+           '"><img border=0 title="' . T_('Add new forum') . '" src="../images/new.png" alt="N"></a>';
      }
 
 
      echo "</table></table>\n";
   }
 
-
+  echo "</center>";
   end_page();
 }
 ?>

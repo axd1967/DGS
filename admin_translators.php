@@ -126,6 +126,7 @@ require_once( "include/form_functions.php" );
 
   $translator_form->echo_string();
 
+  echo "</center>";
   end_page();
 }
 ?>

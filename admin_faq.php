@@ -399,6 +399,7 @@ require_once( "include/make_translationfiles.php" );
   if( $show_list )
   {
      start_page(T_("FAQ Admin"), true, $logged_in, $player_row );
+     echo "<center>\n";
 
      echo "<table align=center width=\"85%\" border=0><tr><td>\n";
 
@@ -421,7 +422,7 @@ require_once( "include/make_translationfiles.php" );
      echo "<table>\n";
 
      echo "<tr><td><a href=\"admin_faq.php?new=c&id=1" . '"><img border=0 title="' .
-        T_('Add new category') . '" src="images/new.png"></a></td></tr>';
+        T_('Add new category') . '" src="images/new.png" alt="N"></a></td></tr>';
 
      while( $row = mysql_fetch_array( $result ) )
      {
@@ -443,22 +444,22 @@ require_once( "include/make_translationfiles.php" );
         echo "</td>";
 
         echo '<td width=40 align=right><a href="admin_faq.php?move=u&id=' .
-           $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png"></a></td>';
+           $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png" alt="u"></a></td>';
         echo '<td><a href="admin_faq.php?move=d&id=' .
-           $row['ID'] . '"><img border=0 title="' . T_("Move down") . '" src="images/down.png"></a></td>';
+           $row['ID'] . '"><img border=0 title="' . T_("Move down") . '" src="images/down.png" alt="d"></a></td>';
 
         if( $row['Level'] > 1 )
         {
            echo '<td align=right><a href="admin_faq.php?move=uu&id=' .
-              $row['ID'] . '"><img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png"></a></td>';
+              $row['ID'] . '"><img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png" alt="U"></a></td>';
            echo '<td><a href="admin_faq.php?move=dd&id=' .
-              $row['ID'] . '"><img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png"></a></td>';
+              $row['ID'] . '"><img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png" alt="D"></a></td>';
         }
 
         echo "<td><a href=\"admin_faq.php?new=$typechar&id=" . $row['ID'] .
            '"><img border=0 title="' .
            ($typechar == 'e' ? T_('Add new entry') : T_('Add new category')) .
-           '" src="images/new.png"></a></td>';
+           '" src="images/new.png" alt="N"></a></td>';
 
         $transl = $row['ATranslatable'];
         if( !$row['Answer'] or ( $transl !== 'Done' and $transl !== 'Changed') )
@@ -467,20 +468,21 @@ require_once( "include/make_translationfiles.php" );
            echo "<td><a href=\"admin_faq.php?transl=t&id=" . $row['ID'] .
            '"><img border=0 title="' .
            ($transl == 'Y' ? T_('Make untranslatable') : T_('Make translatable')) .
-           '" src="images/transl' . ( $transl == 'Y' ? '' : '_no' ) . '.png"></a></td>';
+           '" src="images/transl' . ( $transl == 'Y' ? '.png" alt="T' : '_no.png" alt="t' ) . '"></a></td>';
 
         echo '</tr>';
 
         if( $row["Level"] == 1 )
            echo "<tr><td witdh=20></td><td><a href=\"admin_faq.php?new=e&id=" .
               $row['ID'] . '"><img border=0 title="' . T_('Add new entry') .
-              '" src="images/new.png"></a></td></tr>';
+              '" src="images/new.png" alt="N"></a></td></tr>';
      }
 
 
      echo "</table></td></tr></table>\n";
   }
 
+  echo "</center>\n";
   end_page();
 }
 

@@ -92,10 +92,17 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       echo "<table border=2 cellpadding=3 align=center><tr>" .
          "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
-   $woodstring = ( $woodcolor > 10
-                   ? 'bgcolor="' . $woodbgcolors[$woodcolor - 10] . '"'
-                   : 'background="images/wood' . $woodcolor . '.gif"');
 
+   if( $woodcolor > 10 )
+   {
+      $woodstring = 'bgcolor="' . $woodbgcolors[$woodcolor - 10] . '"';
+   }
+   else
+   {
+      //$woodstring = 'background="images/wood' . $woodcolor . '.gif"';
+      $woodstring = 'style="background-image:url(images/wood' . $woodcolor . '.gif);"';
+                  // background-repeat:repeat; background-position:center;
+   }
 
    echo '<table border=0 cellpadding=0 cellspacing=0 ' .
        $woodstring . ' align=center>';
