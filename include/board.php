@@ -307,7 +307,8 @@ $coord_borders, $woodcolor  )
 
          }
 
-         if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y )
+         if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y
+             and ( $stone == BLACK or $stone == WHITE ) )
          {
             $type .= $mark_letter;
             $alt = ( $alt == '#' ? 'X' : '@' );
@@ -397,7 +398,7 @@ $coord_borders, $woodcolor  )
 
 
 // fills $array with positions where the stones are.
-// returns who is next to move
+// returns the coords of the last move
 function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked_dead,
 $no_marked_dead = false )
 {
@@ -437,6 +438,7 @@ $no_marked_dead = false )
             $removed_dead = TRUE;
          }
          array_push($marked_dead, array($PosX,$PosY));
+         $PosX = $PosY = 0; // don't use as lastx/lasty
       }
    }
 
