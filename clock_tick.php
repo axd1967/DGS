@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+
+$quick_errors = 1; //just store errors in log database
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
@@ -29,14 +31,16 @@ if( !$is_down )
    // Check that ticks are not too frequent
 
    $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
-                          "FROM Clock WHERE ID=201 LIMIT 1");
+                          "FROM Clock WHERE ID=201 LIMIT 1")
+               or error('mysql_query_failed','clock_tick1');
 
    $row = mysql_fetch_array( $result );
 
    if( $row['timediff'] < 3600/$tick_frequency-10 )
       exit;
 
-   mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201");
+   mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201")
+               or error('mysql_query_failed','clock_tick2');
 
 
 
@@ -55,7 +59,8 @@ if( !$is_down )
        //WHERE ID>=100 AND ID<139 AND ((ID-100-$hour+23)%24)<15 //ID from 124 to 138 does not exist
 
 
-   mysql_query( $query );
+   mysql_query( $query)
+               or error('mysql_query_failed','clock_tick3');
 
 
 
@@ -71,7 +76,8 @@ if( !$is_down )
                          "AND Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
                          'AND ( Maintime>0 OR Byotime>0 ) ' .
                          'AND Games.ClockUsed=Clock.ID ' .
-                         'AND white.ID=White_ID AND black.ID=Black_ID' );
+                         'AND white.ID=White_ID AND black.ID=Black_ID' )
+               or error('mysql_query_failed','clock_tick4');
 
    while($row = mysql_fetch_array($result))
    {
@@ -112,7 +118,8 @@ if( !$is_down )
              "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE ID=$gid LIMIT 1";
 
-         mysql_query( $query );
+         mysql_query( $query)
+               or error('mysql_query_failed','clock_tick5');
 
          if( mysql_affected_rows() != 1)
             error('mysql_update_game',"Couldn't update game.");
@@ -131,7 +138,8 @@ if( !$is_down )
 
          $Text = addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
-                      "Game_ID=$gid, Subject='Game result', Text='$Text'" );
+                      "Game_ID=$gid, Subject='Game result', Text='$Text'")
+               or error('mysql_query_failed','clock_tick6');
 
          if( mysql_affected_rows() == 1)
          {
@@ -145,7 +153,8 @@ if( !$is_down )
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .
                       "WHERE (ID='$Black_ID' OR ID='$White_ID') " .
-                      "AND SendEmail LIKE '%ON%' AND Notify='NONE' LIMIT 2" ) ;
+                      "AND SendEmail LIKE '%ON%' AND Notify='NONE' LIMIT 2")
+               or error('mysql_query_failed','clock_tick7');
 
 //         update_rating($gid);
          $rated_status = update_rating2($gid);
@@ -154,12 +163,14 @@ if( !$is_down )
          mysql_query( "UPDATE Players SET Running=Running-1" .
                       (!$rated_status ? '' : ", Finished=Finished+1" .
                        ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
-                      ) . " WHERE ID=$White_ID LIMIT 1" );
+                      ) . " WHERE ID=$White_ID LIMIT 1" )
+               or error('mysql_query_failed','clock_tick8');
 
          mysql_query( "UPDATE Players SET Running=Running-1" .
                       (!$rated_status ? '' : ", Finished=Finished+1" .
                        ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
-                      ) . " WHERE ID=$Black_ID LIMIT 1" );
+                      ) . " WHERE ID=$Black_ID LIMIT 1" )
+               or error('mysql_query_failed','clock_tick9');
 
          delete_all_observers($gid, $rated_status!=1, $Text);
 
@@ -167,6 +178,4 @@ if( !$is_down )
    }
 
 }
-
-
 ?>
