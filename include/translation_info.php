@@ -44,7 +44,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $translation_template_top = $translation_template_copyright .
 '
-add_to_known_languages( "%1$s", "%2$s" );
+add_to_known_languages( "%1$s", "%2$s", %3$s );
 
 class %1$s_Language extends Language
 {
