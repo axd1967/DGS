@@ -490,6 +490,13 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                    "To_ID=" . $opponent_row["ID"] . ", " .
                    "Time=FROM_UNIXTIME($NOW), " .
                    "Game_ID=$gid, Subject='$Subject', Text='$Text'");
+
+      $mid = mysql_insert_id();
+
+      mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+                  "(" . $opponent_row['ID'] . ", $mid, 'N', 2)");
+
+
    }
 
 
