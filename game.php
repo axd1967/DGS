@@ -273,19 +273,33 @@ require_once( "include/rating.php" );
       $msg = make_html_safe($msg, 'game');
 
 
-
+   echo "<table><tr><td>";
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
               $player_row["Stonesize"], $msg, $stonestring, $handi,
               $player_row["Boardcoords"], $player_row["Woodcolor"]);
-
-
-   if( $extra_message )
-      echo "<P><center>$extra_message</center>\n";
 
    if( $enable_message )
    {
       draw_message_box(); //use $stonestring, $prisoner_string, $move
    }
+
+   echo "</td><td valign=top>";
+   $show_notes = false;
+   if ($player_row["ID"] == $Black_ID)
+      {
+      draw_notes($Black_Notes);
+      }
+   if ($player_row["ID"] == $White_ID)
+      {
+      draw_notes($White_Notes);
+      }
+
+   echo "</td></tr></table>";
+
+
+   if( $extra_message )
+      echo "<P><center>$extra_message</center>\n";
+
 
    echo "<HR>\n";
    draw_game_info($row);
