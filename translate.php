@@ -65,6 +65,8 @@ When translating you should keep in mind the following things:
   <li> Since the actual translation is actually changed when you press on
        \'Update translation\' it is good that you check that the new translations
        look good before you go on to translating the next group.
+  <li> If you for some reason want to have a phrase untranslated, just
+       leave that translation blank and the English phrase will be used.
   <li> In some places there is a percent-character followed by some characters. 
        This is a special place where the program might put some data in.
        <br>
@@ -123,7 +125,7 @@ When translating you should keep in mind the following things:
       $the_translator->set_return_empty();
 
       echo "<CENTER>\n";
-      echo "<B><h3><font color=$h3_color>Translate the following strings:</font></B><p>\n";
+      echo "<B><h3><font color=$h3_color>Translate the following strings:</font></B></h3><p>\n";
       echo form_start( 'translateform', 'update_translation.php', 'POST' );
 
       $counter = 0;
@@ -138,6 +140,9 @@ When translating you should keep in mind the following things:
                                     'TEXTAREA', "transl$counter", 50, 5, T_($string) );
             }
         }
+
+      $the_translator->change_language( $old_lang );
+      $the_translator->set_return_empty( false );
 
       echo form_insert_row( 'SPACE' );
       echo form_insert_row( 'HEADER', 'Groups' );
@@ -159,8 +164,6 @@ When translating you should keep in mind the following things:
         "  </tr>\n";
       echo form_end();
 
-      $the_translator->change_language( $old_lang );
-      $the_translator->set_return_empty( false );
     }
 
   end_page(false);
