@@ -32,13 +32,6 @@ require( "include/std_functions.php" );
 
    switch( $err )
    {
-      case("cyclical"):
-      {
-         echo T_("Sorry, you may not reproduce a position which has already appeared in a game. " .
-                 "Look for 'cyclical positions' in the rules.");
-      }
-      break;
-
       case("early pass"):
       {
          echo T_("Sorry, you may not pass before all handicap stones are placed.");

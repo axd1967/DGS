@@ -161,56 +161,6 @@ require( "include/rating.php" );
       {
          check_move();
 
-   // Check for cyclical play
-
-/* >>> Warning:
- *     The simple Ko test from check_move() could be actually bypassed
- *     if one insert two passes and a resume between the take and the re-take.
- * Almost with check_cyclical(), this delayed Ko become a 'cyclical position'.
- */
-
-/* Rod to Erik:
- * I don't really know where to place this test.
- *
- * 1) into check_move()
- *   - $gid, $Size and $Moves are not available and I dislike to globalize them.
- *   - the optionnal $print_error make uneasy to use the argument way 
- *   - this test may be too heavy if run every time check_move() is called.
- *         (For instance: from check_consistency())
- *
- * 2) here
- *   - we have not the $print_error ability
- *   - the test is made only at the 'player move' moment.
- *
- * Could replace previous Ko check from check_move() and its KO flag.
- * I show you the way here. Do what you want.
- */
-
-         $cycnr= check_cyclical( $gid, $array, $Size, $Moves, NULL ) ;
-         if( is_numeric($cycnr) )
-         {
-            if ($Moves-$cycnr <= 2)
-            {
-               if( true ) // $print_error )
-                  error("ko");
-               else
-               {
-                  echo "ko";
-                  return false;
-               }
-            }
-            else
-            {
-               if( true ) // $print_error )
-                  error("cyclical");
-               else
-               {
-                  echo "cyclical";
-                  //return false;
-               }
-            }
-         }
-
          reset($prisoners);
          $prisoner_string = "";
 
@@ -307,8 +257,8 @@ require( "include/rating.php" );
 
 
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
-      $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $stonestring, $handi,
-      $player_row["Boardcoords"], $player_row["Woodcolor"]);
+              $player_row["Stonesize"], $msg, $stonestring, $handi,
+              $player_row["Boardcoords"], $player_row["Woodcolor"]);
 
    if( $extra_message )
       echo "<P><center>$extra_message</center>\n";
@@ -334,7 +284,7 @@ require( "include/rating.php" );
    {
       if( $action == 'choose_move' )
       {
-         if( $Status != 'SCORE' )
+         if( $Status != 'SCORE' and $Status != 'SCORE2' )
             $menu_array[T_('Pass')] = "game.php?gid=$gid&action=pass";
 
          if( $Moves < 10+$Handicap )
