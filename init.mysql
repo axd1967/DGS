@@ -13,7 +13,7 @@ CREATE TABLE Players (
   Registerdate date default NULL,
   Hits int(11) default '0',
   Moves int(11) default '0',
-  Activity double NOT NULL default '0',
+  Activity double NOT NULL default '15',
   Name varchar(40) default NULL,
   Email varchar(80) default NULL,
   Rank varchar(40) default NULL,
