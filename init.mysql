@@ -31,7 +31,7 @@ CREATE TABLE Players (
   RatingMin double default NULL,
   RatingMax double default NULL,
   InitialRating double default NULL,
-  RatingStatus enum('INIT','READY','RATED') default NULL,
+  RatingStatus enum('INIT','RATED') default NULL,
   Open varchar(40) default NULL,
   Lang varchar(20) NOT NULL default 'C',
   Woodcolor int(11) NOT NULL default '1',

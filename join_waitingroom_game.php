@@ -177,6 +177,7 @@ require( "include/rating.php" );
 
    mysql_query( "UPDATE Players SET Running=Running+" .
                 ( $Handicaptype == 'double' ? 2 : 1 ) .
+                ( $Rated == 'Y' ? ", RatingStatus='RATED'" : '' ) .
                 " WHERE ID=$uid OR ID=" . $player_row['ID'] . " LIMIT 2" );
 
 // Reduce number of games left in the waiting room

@@ -184,8 +184,8 @@ function update_rating($gid)
        "FROM Games, Players as white, Players as black " .
        "WHERE Status='FINISHED' AND Rated='Y' AND Games.ID=$gid " .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
-       "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
-       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
+       "AND white.RatingStatus='RATED' " .
+       "AND black.RatingStatus='RATED' ";
 
 
    $result = mysql_query( $query );
@@ -213,11 +213,9 @@ function update_rating($gid)
 
    mysql_query( "UPDATE Games SET Rated='Done' WHERE ID=$gid" );
 
-   mysql_query( "UPDATE Players SET Rating=$bRating, " .
-                "RatingStatus='RATED' WHERE ID=$Black_ID" );
+   mysql_query( "UPDATE Players SET Rating=$bRating WHERE ID=$Black_ID" );
 
-   mysql_query( "UPDATE Players SET Rating=$wRating, " .
-                "RatingStatus='RATED' WHERE ID=$White_ID" );
+   mysql_query( "UPDATE Players SET Rating=$wRating WHERE ID=$White_ID" );
 
    mysql_query("INSERT INTO RatingChange (uid,gid,diff) VALUES " .
                "($Black_ID, $gid, " . ($bRating - $bOld) . "), " .
@@ -238,8 +236,8 @@ function update_rating2($gid)
        "FROM Games, Players as white, Players as black " .
        "WHERE Status='FINISHED' AND Games.ID=$gid AND Rated!='Done' " .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
-       "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
-       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
+       "AND white.RatingStatus='RATED' " .
+       "AND black.RatingStatus='RATED' ";
 
 
    $result = mysql_query( $query ) or die(mysql_error());
@@ -324,12 +322,12 @@ function update_rating2($gid)
                 "WHERE ID=$gid LIMIT 1" );
 
    mysql_query( "UPDATE Players SET Rating2=$bRating, " .
-                "RatingMin=$bRatingMin, RatingMax=$bRatingMax, " .
-                "RatingStatus='RATED' WHERE ID=$Black_ID LIMIT 1" );
+                "RatingMin=$bRatingMin, RatingMax=$bRatingMax " .
+                "WHERE ID=$Black_ID LIMIT 1" );
 
    mysql_query( "UPDATE Players SET Rating2=$wRating, " .
-                "RatingMin=$wRatingMin, RatingMax=$wRatingMax, " .
-                "RatingStatus='RATED' WHERE ID=$White_ID LIMIT 1" );
+                "RatingMin=$wRatingMin, RatingMax=$wRatingMax " .
+                "WHERE ID=$White_ID LIMIT 1" );
 
    mysql_query('INSERT INTO Ratinglog' .
                '(uid,gid,Rating,RatingMin,RatingMax,RatingDiff,Time) VALUES ' .
@@ -355,8 +353,8 @@ function update_rating_glicko($gid)
        "FROM Games, Players as white, Players as black " .
        "WHERE Status='FINISHED' AND Games.ID=$gid AND Rated!='N' " .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
-       "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
-       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
+       "AND white.RatingStatus='RATED' " .
+       "AND black.RatingStatus='RATED' ";
 
 
    $result = mysql_query( $query ) or die(mysql_error());
