@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // Prints game setting form used by invite.php
 
-function game_settings_form($my_ID, $gid=NULL)
+function game_settings_form($my_ID=NULL, $gid=NULL)
 {
 
    // Default values:
@@ -42,13 +42,12 @@ function game_settings_form($my_ID, $gid=NULL)
    $ByotimeUnit_fis = 'days';
    $Weekendclock = true;
    $Rated = true;
-
+   $Handitype = 'conv';
 
    // If dispute, use values from game $gid
    if( $gid > 0 )
    {
-      $my_ID = $player_row['ID'];
-      $result = mysql_query( "SELECT Handle,Size,Komi,Handicap," .
+      $result = mysql_query( "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
                              "Maintime,Byotype,Byotime,Byoperiods,Rated,Weekendclock, " .
                              "(White_ID=$my_ID)+1 AS Color " .
                              "FROM Games,Players WHERE Games.ID=$gid " .
@@ -72,6 +71,14 @@ function game_settings_form($my_ID, $gid=NULL)
 
       $MaintimeUnit = 'hours';
       time_convert_to_longer_unit($Maintime, $MaintimeUnit);
+
+      $Handitype = 'manual';
+
+      if( $ToMove_ID == -1 ) $Handitype = 'conv';
+      else if( $ToMove_ID == -2 ) $Handitype = 'proper';
+      else if( $ToMove_ID == -3 ) $Handitype = 'nigiri';
+      else if( $ToMove_ID == -4 ) $Handitype = 'double';
+
 
       switch( $Byotype )
       {
@@ -106,24 +113,52 @@ function game_settings_form($my_ID, $gid=NULL)
    for( $bs = 5; $bs <= 25; $bs++ )
      $value_array[$bs]=$bs;
 
+   echo form_insert_row( 'SPACE' );
    echo form_insert_row( 'DESCRIPTION', 'Board size',
                          'SELECTBOX', 'size', 1, $value_array, $Size, false );
 
-   $value_array=array( 'White' => 'White', 'Black' => 'Black' );
-   echo form_insert_row( 'DESCRIPTION', 'My color',
-                         'SELECTBOX', 'color', 1, $value_array, $MyColor, false );
+   $color_array = array( 'White' => 'White', 'Black' => 'Black' );
 
-   $value_array=array( 0 => 0 );
+   $handi_array=array( 0 => 0 );
    for( $bs = 2; $bs <= 20; $bs++ )
-     $value_array[$bs]=$bs;
+     $handi_array[$bs]=$bs;
 
-   echo form_insert_row( 'DESCRIPTION', 'Handicap',
-                         'SELECTBOX', 'handicap', 1, $value_array, $Handicap, false );
 
-   echo form_insert_row( 'DESCRIPTION', 'Komi',
+   echo form_insert_row( 'SPACE' );
+
+   echo form_insert_row( 'DESCRIPTION', 'Conventional handicap (komi 0.5)',
+                         'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype );
+
+   echo form_insert_row( 'DESCRIPTION', 'Proper handicap',
+                         'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype );
+
+   echo form_insert_row( 'DESCRIPTION', 'Manual setting',
+                         'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
+                         'TEXT', '&nbsp;&nbsp;&nbsp;My color',
+                         'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
+
+                         'TEXT', '&nbsp;&nbsp;&nbsp;Handicap',
+                         'SELECTBOX', 'handicap', 1, $handi_array, $Handicap, false,
+                         'TEXT', '&nbsp;&nbsp;&nbsp;Komi',
                          'TEXTINPUT', 'komi', 5, 5, $Komi );
 
+   echo form_insert_row( 'DESCRIPTION', 'Even game with nigiri',
+                         'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
+                         'TEXT', '&nbsp;&nbsp;&nbsp;Komi',
+                         'TEXTINPUT', 'komi', 5, 5, $Komi );
+
+   echo form_insert_row( 'DESCRIPTION', 'Double game',
+                         'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
+                         'TEXT', '&nbsp;&nbsp;&nbsp;Komi',
+                         'TEXTINPUT', 'komi', 5, 5, $Komi );
+
+
+
+
    $value_array=array( 'hours' => 'hours', 'days' => 'days', 'months' => 'months' );
+
+   echo form_insert_row( 'SPACE' );
+
    echo form_insert_row( 'DESCRIPTION', 'Main time',
                          'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
                          'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false );
@@ -150,6 +185,8 @@ function game_settings_form($my_ID, $gid=NULL)
                          'SELECTBOX', 'timeunit_fis', 1, $value_array, $ByotimeUnit_fis, false,
                          'TEXT', 'extra&nbsp;per move.' );
 
+   echo form_insert_row( 'SPACE' );
+
    echo form_insert_row( 'DESCRIPTION', 'Clock runs on weekends',
                          'CHECKBOX', 'weekendclock', 'Y', "", $Weekendclock );
    echo form_insert_row( 'DESCRIPTION', 'Rated',
@@ -162,15 +199,15 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
    global $date_fmt;
 
    echo "<table>\n" .
-      "<tr><td>Date:</td><td>" . date($date_fmt, $date) . "</td></tr>\n" .
-      "<tr><td>" . ($to_me ? "From" : "To" ) . ":</td>\n" .
+      "<tr><td><b>Date:</b></td><td>" . date($date_fmt, $date) . "</td></tr>\n" .
+      "<tr><td><b>" . ($to_me ? "From" : "To" ) . ":</b></td>\n" .
       "<td><A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" .
       "</td></tr>\n" .
-      "<tr><td>Subject:</td><td>$subject</td></tr>\n" .
+      "<tr><td><b>Subject:</b></td><td>$subject</td></tr>\n" .
       "<tr><td valign=\"top\">" .
       ( $reply_mid > 0 ?
         "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">Replied:</a>" :
-        "Message:" ) . "</td>\n" .
+        "<b>Message:</b>" ) . "</td>\n" .
       "<td align=\"center\">\n" .
       "<table border=2 align=center><tr>" .
       "<td width=475 align=left>" . make_html_safe($text, true) . "</td></tr></table><BR>\n" .
@@ -178,43 +215,68 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
 }
 
 
-function game_info_table($Size, $col, $Komi, $Handicap,
+function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
                          $Maintime, $Byotype, $Byotime, $Byoperiods,
                          $Rated, $WeekendClock, $gid=NULL)
 {
-   echo '    <table align=center border=2 cellpadding=3 cellspacing=3>';
+   echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
    if( $gid > 0 )
-      echo "\n<tr><td>Game ID: </td><td><a href=\"game.php?gid=$gid\">$gid</a></td></tr>";
+      echo "<tr><td><b>Game ID</b></td><td><a href=\"game.php?gid=$gid\">$gid</a></td></tr>\n";
 
-   echo '
-      <tr><td>Size: </td><td>' . $Size .'</td></tr>
-      <tr><td>Color: </td><td>' . $col . '</td></tr>
-      <tr><td>Komi: </td><td>' . $Komi . '</td></tr>
-      <tr><td>Handicap: </td><td>' . $Handicap . '</td></tr>
-      <tr><td>Main time: </td><td>'; echo_time($Maintime); echo "</td></tr>\n";
+   echo '<tr><td><b>Size<b></td><td>' . $Size . "</td></tr>\n";
+
+   switch( $handicap_type )
+   {
+      case -1: // conventional handicap
+         echo "<tr><td><b>Handicap</b></td><td>Conventional handicap (komi 0.5 if not even)</td></tr>\n";
+         break;
+
+      case -2: // Proper handicap
+         echo "<tr><td><b>Handicap</b></td><td>Proper handicap</td></tr>\n";
+         break;
+
+      case -3: // Nigiri
+         echo '<tr><td><b>Komi</b></td><td>' . $Komi . "</td></tr>\n";
+         echo "<tr><td><b>Colors</b></td><td>Nigiri</td></tr>\n";
+         break;
+
+      case -4: // Double game
+         echo '<tr><td><b>Komi</b></td><td>' . $Komi . "</td></tr>\n";
+         echo "<tr><td><b>Colors</b></td><td>Double game</td></tr>\n";
+         break;
+
+      default:
+         echo "<tr><td><b>Colors<b></td><td>$col</td></tr>\n" .
+            '<tr><td><b>Komi</b></td><td>' . $Komi . "</td></tr>\n" .
+            '<tr><td><b>Handicap</b></td><td>' . $Handicap . "</td></tr>\n";
+         break;
+   }
+
+
+   echo '<tr><td><b>Main time</b></td><td>'; echo_time($Maintime); echo "</td></tr>\n";
 
    if( $Byotype == 'JAP' )
    {
-      echo '        <tr><td>Byo-yomi: </td><td> Japanese: ';
+      echo '        <tr><td><b>Byo-yomi</b></td><td> Japanese: ';
       echo_time($Byotime);
       echo ' per move and ' . $Byoperiods . ' extra periods </td></tr>' . "\n";
    }
    else if ( $Byotype == 'CAN' )
    {
-      echo '        <tr><td>Byo-yomi: </td><td> Canadian: ';
+      echo '        <tr><td><b>Byo-yomi</b></td><td> Canadian: ';
       echo_time($Byotime);
       echo ' per ' .$Byoperiods . ' stones </td></tr>' . "\n";
    }
    else if ( $Byotype == 'FIS' )
    {
-      echo '        <tr><td>Fischer time: </td><td> ';
+      echo '        <tr><td><b>Fischer time</b></td><td> ';
       echo_time($Byotime);
       echo ' extra per move </td></tr>' . "\n";
    }
 
-    echo '<tr><td>Rated: </td><td>' . ( $Rated == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
-<tr><td>Clock runs on weekends: </td><td>' . ( $WeekendClock == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
+    echo '<tr><td><b>Rated</b></td><td>' . ( $Rated == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
+<tr><td><b>Clock runs on weekends</b></td><td>' . ( $WeekendClock == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
 </table>
 ';
 

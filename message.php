@@ -60,7 +60,7 @@ require( "include/form_functions.php" );
    }
 
 
-   if( $mode == 'ShowMessage' )
+   if( $mode == 'ShowMessage' or $mode == 'Dispute' )
    {
       if( !($mid > 0) )
          error("unknown_message");
@@ -71,7 +71,7 @@ require( "include/form_functions.php" );
                             "Players.Handle AS sender_handle, Players.ID AS sender_id, " .
                             "Games.Status, Size, Komi, Handicap, Maintime, Byotype, " .
                             "Byotime, Byoperiods, Rated, Weekendclock, " .
-                            "(White_ID=$my_id)+1 AS Color " .
+                            "ToMove_ID, (White_ID=$my_id)+1 AS Color " .
                             "FROM Messages,Players " .
                             "LEFT JOIN Games ON Games.ID=Game_ID " .
                             "WHERE Messages.ID=$mid " .
@@ -88,44 +88,45 @@ require( "include/form_functions.php" );
       $to_me = $can_reply = ( $To_ID == $my_id );
       $has_replied = !(strpos($Flags,'REPLIED') === false);
 
-      $default_subject = $Subject;
-      if( strcasecmp(substr($Subject,0,3), "re:") != 0 )
-         $default_subject = "RE: " . $Subject;
 
-      $color = ( $Color == BLACK ? 'Black' : 'White' );
-
-      // Remove NEW flag
-      $pos = strpos($Flags,'NEW');
-
-      if( $to_me and !($pos === false) )
+      if( $mode == 'ShowMessage' or !$can_reply )
       {
-         $Flags = substr_replace($Flags, '', $pos, 3);
+         $default_subject = $Subject;
+         if( strcasecmp(substr($Subject,0,3), "re:") != 0 )
+            $default_subject = "RE: " . $Subject;
 
-         mysql_query( "UPDATE Messages SET Flags='$Flags' " .
-                      "WHERE ID=$mid AND To_ID=$my_id LIMIT 1" ) or die( mysql_error());
+         // Remove NEW flag
+         $pos = strpos($Flags,'NEW');
 
-         if( mysql_affected_rows() != 1)
-            error("mysql_message_info", true);
-      }
-
-      if( $Type=='INVITATION' )
-      {
-         if( $can_reply and $Status=='INVITED' and !$has_replied)
+         if( $to_me and !($pos === false) )
          {
-            $mode = 'ShowInvite';
+            $Flags = substr_replace($Flags, '', $pos, 3);
+
+            mysql_query( "UPDATE Messages SET Flags='$Flags' " .
+                         "WHERE ID=$mid AND To_ID=$my_id LIMIT 1" ) or die( mysql_error());
+
+            if( mysql_affected_rows() != 1)
+               error("mysql_message_info", true);
          }
-         else if( is_null($Status) )
+
+         if( $Type=='INVITATION' )
          {
-            $mode = 'AlreadyDeclined';
-         }
-         else
-         {
-            $mode = 'AlreadyAccepted';
+            if( $can_reply and $Status=='INVITED' and !$has_replied)
+            {
+               $mode = 'ShowInvite';
+            }
+            else if( is_null($Status) )
+            {
+               $mode = 'AlreadyDeclined';
+            }
+            else
+            {
+               $mode = 'AlreadyAccepted';
+            }
          }
       }
 
    }
-
 
 
    start_page("Message - $mode", true, $logged_in, $player_row );
@@ -183,8 +184,23 @@ require( "include/form_functions.php" );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
                             $Subject, $ReplyTo, $Text);
 
-         game_info_table($Size, $color, $Komi, $Handicap, $Maintime, $Byotype, $Byotime,
-                         $Byoperiods, $Rated, $Weekendclock);
+         if( $Color == BLACK )
+         {
+            $color = "<img src='17/w.gif' alt='white'> " .
+               "$sender_name ($sender_handle)" .
+               " &nbsp;&nbsp;<img src='17/b.gif' alt='black'> " .
+               $player_row["Name"] .' (' . $player_row["Handle"] . ')';
+         }
+         else
+         {
+            $color = "<img src='17/w.gif' alt='white'> " .
+               $player_row["Name"] .' (' . $player_row["Handle"] . ')' .
+               " &nbsp;&nbsp;<img src='17/b.gif' alt='black'> " .
+               "$sender_name ($sender_handle) &nbsp;&nbsp;";
+         }
+
+         game_info_table($Size, $color, $ToMove_ID, $Komi, $Handicap, $Maintime,
+                         $Byotype, $Byotime, $Byoperiods, $Rated, $Weekendclock);
          echo '<a href="message.php?mode=Dispute&mid=' . $mid . '">Dispute settings</a>';
          echo "<p>&nbsp;<p><B><h3><font color=$h3_color>Reply:</font></B>\n";
          echo form_start( 'messageform', 'send_message.php', 'POST' );
@@ -214,7 +230,7 @@ require( "include/form_functions.php" );
          echo form_insert_row( 'DESCRIPTION', 'Message',
                                'TEXTAREA', 'message', 50, 8, "" );
 
-         game_settings_form($my_ID, $disputegid);
+         game_settings_form($my_id, $Game_ID);
 
          echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Reply' );
       }
@@ -230,7 +246,7 @@ require( "include/form_functions.php" );
          echo form_insert_row( 'DESCRIPTION', 'Message',
                                'TEXTAREA', 'message', 50, 8, "" );
 
-         game_settings_form($my_ID, $disputegid);
+         game_settings_form();
 
          echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Invitation' );
       }

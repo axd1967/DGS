@@ -19,6 +19,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require( "include/std_functions.php" );
+require( "include/rating.php" );
+
 disable_cache();
 
 {
@@ -40,7 +42,7 @@ disable_cache();
 
 // find reciever of the message
 
-   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed " .
+   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed, RatingStatus " .
                           "FROM Players WHERE Handle='$to'" );
 
    if( mysql_num_rows( $result ) != 1 )
@@ -74,7 +76,6 @@ disable_cache();
       if( $komi > 200 or $komi < -200 )
          error("komi_range");
 
-      $type = "INVITATION";
       if( $color == "White" )
       {
          $Black_ID = $opponent_ID;
@@ -85,6 +86,18 @@ disable_cache();
          $White_ID = $opponent_ID;
          $Black_ID = $my_ID;
       }
+
+      if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
+          ( !$player_row["RatingStatus"] or !$opponent_row["RatingStatus"] ) )
+      {
+         error( "no_initail_rating" );
+      }
+
+      $tomove = $Black_ID;
+      if($handicap_type == 'conv' ) $tomove = -1;
+      else if($handicap_type == 'proper' ) $tomove = -2;
+      else if($handicap_type == 'nigiri' ) $tomove = -3;
+      else if($handicap_type == 'double' ) $tomove = -4;
 
       $hours = $timevalue;
       if( $timeunit != 'hours' )
@@ -131,7 +144,7 @@ disable_cache();
 
       $query = "Black_ID=$Black_ID, " .
          "White_ID=$White_ID, " .
-         "ToMove_ID=$Black_ID, " .
+         "ToMove_ID=$tomove, " .
          "Lastchanged=FROM_UNIXTIME($NOW), " .
          "Size=$size, " .
          "Handicap=$handicap, " .
@@ -168,7 +181,8 @@ disable_cache();
    }
    else if( $type == "Accept" )
    {
-      $result = mysql_query( "SELECT Black_ID, White_ID FROM Games WHERE ID=$gid" );
+      $result = mysql_query( "SELECT Black_ID, White_ID, ToMove_ID, Size " .
+                             "FROM Games WHERE ID=$gid" );
 
       if( mysql_num_rows($result) != 1)
          error("mysql_start_game");
@@ -177,11 +191,17 @@ disable_cache();
       $game_row = mysql_fetch_array($result);
       if( $opponent_ID == $game_row["Black_ID"] )
       {
-         $clock_used = $opponent_row["ClockUsed"];
+         $clock_used_black = $opponent_row["ClockUsed"];
+         $clock_used_white = $player_row["ClockUsed"];
+         $rating_black = $opponent_row["Rating"];
+         $rating_white = $player_row["Rating"];
       }
       else if( $my_ID == $game_row["Black_ID"] )
       {
-         $clock_used = $player_row["ClockUsed"];
+         $clock_used_white = $opponent_row["ClockUsed"];
+         $clock_used_black = $player_row["ClockUsed"];
+         $rating_black = $opponent_row["Rating"];
+         $rating_white = $player_row["Rating"];
       }
       else
       {
@@ -191,21 +211,104 @@ disable_cache();
       if( $weekendclock != 'Y' )
          $clock_used += 100;
 
-      $ticks = get_clock_ticks($clock_used);
+      $ticks_black = get_clock_ticks($clock_used_black);
+      $ticks_white = get_clock_ticks($clock_used_white);
 
-      $result = mysql_query( "UPDATE Games SET " .
-                             "Status='PLAY', " .
-                             "Starttime=FROM_UNIXTIME($NOW), " .
-                             "Lastchanged=FROM_UNIXTIME($NOW), " .
-                             "ClockUsed=$clock_used, " .
-                             "LastTicks=$ticks " .
-                             "WHERE ID=$gid AND Status='INVITED'" .
-                             " AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
-                             " AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
-                             "LIMIT 1" );
+      $handitype = $game_row["ToMove_ID"];
+
+      mt_srand ((double) microtime() * 1000000);
+      if( $handitype == -3 ) // nigiri
+         $swap = mt_rand(0,1);
+
+
+      $query =  "UPDATE Games SET " .
+         "Status='PLAY', ";
+
+
+      if( $handitype == -2 ) // Proper handi
+      {
+         if( $rating_black > $rating_black )
+         {
+            $swap = true;
+            list($handicap,$komi) = suggest($rating_black, $rating_white, $game_row["Size"]);
+         }
+         else
+            list($handicap,$komi) = suggest($rating_white, $rating_black, $game_row["Size"]);
+
+         $query .= "Handicap=$handicap, Komi=$komi, ";
+      }
+
+      if( $handitype == -1 ) // Conventional handi
+      {
+         $handicap = floor(abs($rating_black-$rating_white)/100);
+         $komi = 0.5;
+
+         if( $handicap == 0 )
+         {
+            $komi = 6.5;
+            $swap = mt_rand(0,1);
+         }
+
+         if( $handicap < 0 )
+         {
+            $swap = true;
+            $handicap = -$handicap;
+         }
+
+         if( $handicap == 1 )
+            $handicap = 0;
+
+         $query .= "Handicap=$handicap, Komi=$komi, ";
+      }
+
+
+      if( $swap )
+         $query .= "Black_ID=White_ID, " .
+            "White_ID=Black_ID, " .
+            "ToMove_ID=White_ID, " .
+            "ClockUsed=$clock_used_white, " .
+            "LastTicks=$ticks_white, ";
+      else
+         $query .= "ToMove_ID=Black_ID, " .
+            "ClockUsed=$clock_used_black, " .
+            "LastTicks=$ticks_black, ";
+
+      $query .= "Starttime=FROM_UNIXTIME($NOW), " .
+         "Lastchanged=FROM_UNIXTIME($NOW), " .
+         "WHERE ID=$gid AND Status='INVITED' " .
+         "AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
+         "AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
+         "LIMIT 1";
+
+      $result = mysql_query( $query );
 
       if( mysql_affected_rows() != 1)
          error("mysql_start_game");
+
+      if( $handitype == -4 ) // double
+      {
+         // duplicate
+         mysql_query( "INSERT INTO Games SELECT * FROM Games WHERE ID=$gid LIMIT 1" );
+         if( mysql_affected_rows() != 1)
+            error("mysql_start_game");
+
+         $new_gid = mysql_insert_id();
+
+         mysql_query( "UPDATE Games SET " .
+                      "Black_ID=White_ID, " .
+                      "White_ID=Black_ID, " .
+                      "ToMove_ID=White_ID, " .
+                      "ClockUsed=$clock_used_white, " .
+                      "LastTicks=$ticks_white " .
+                      "WHERE ID=$new_id " .
+                      "AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
+                      "AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
+                      "LIMIT 1" );
+
+         if( mysql_affected_rows() != 1)
+            error("mysql_start_game");
+      }
+
 
       mysql_query( "UPDATE Players SET Running=Running+1 " .
                    "WHERE ID=$my_ID OR ID=$opponent_ID" );
