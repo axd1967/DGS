@@ -94,7 +94,7 @@ $vals = array( 0 => T_('Off'),
 echo form_insert_row( 'DESCRIPTION', T_('Email notifications'),
                       'SELECTBOX', 'emailnotify', 1, $vals, $s, false );
 
-$s = $the_translator->current_language;
+$s = $player_row['Lang'];//$the_translator->current_language;
 if( strcmp( $s, 'C' ) == 0 ) $s = 'en';
 
 echo form_insert_row( 'DESCRIPTION', T_('Language'),
