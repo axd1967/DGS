@@ -34,6 +34,9 @@ require_once( "include/form_functions.php" );
  * \brief Class to ease the creation of standard tables.
  */
 
+//~(0) is negative (PHP) and database field is unsigned: INT(10) unsigned NOT NULL
+define('ALL_COLUMNS', 0x7fffffff); //=2147483647
+
 class Table
 {
    /*! \privatesection */
@@ -92,12 +95,12 @@ class Table
    /*! \brief Constructor. Create a new table and initialize it. */
    function Table( $_page,
                    $_player_column = '',
-                   $_prefix = '',
-                   $_static_columns = false )
+                   $_prefix = ''
+                 )
       {
          global $table_row_color1, $table_row_color2, $RowsPerPage, $player_row;
 
-         $this->Removed_Columns = array('');
+         $this->Removed_Columns = NULL;
          $this->Tableheads = array();
          $this->Tablerows = array();
 
@@ -119,15 +122,16 @@ class Table
          $this->Player_Column = $_player_column;
          if( empty($this->Player_Column) )
          {
-            $this->Column_set = 255;
+            $this->Static_Columns = true;
+            $this->Column_set = ALL_COLUMNS;
          }
          else
          {
+            $this->Static_Columns = false;
             $this->Column_set = $player_row[ $this->Player_Column ];
          }
 
          $this->Prefix = $_prefix;
-         $this->Static_Columns = $_static_columns;
 
          $this->Sort1 = @$_GET[ $this->Prefix . 'sort1' ];
          $this->Desc1 = @$_GET[ $this->Prefix . 'desc1' ];
@@ -159,30 +163,15 @@ class Table
                    'Undeletable' => $undeletable,
                    'Width' => $width );
 
-         $col_pos = ( $nr > 0 )? ( 1 << ($nr - 1) ): 0 ;
-
-         $this->Is_Column_Displayed[$nr] = ( $this->Static_Columns or
-                                             $undeletable or
-                                             $col_pos & $this->Column_set ? 1 : 0);
+         $this->Is_Column_Displayed[$nr] = $this->is_column_displayed( $nr);
       }
 
    /*! \brief Check if column is displayed. */
-   function is_column_displayed( $colnr )
+   function is_column_displayed( $nr )
       {
-         if( $colnr > 0 )
-         {
-            $col_pos = 1 << ($colnr - 1);
-         }
-         else
-         {
-            $col_pos = 0;
-         }
-
-         $res = !( !$this->Static_Columns and
-                   !$this->Tableheads[$colnr]['Undeletable'] and
-                   $colnr > 0 and
-                   !($col_pos & $this->Column_set) );
-         return $res;
+         return $this->Static_Columns or
+                $this->Tableheads[$nr]['Undeletable'] or
+                ( $nr < 1 ? 1 : (1 << ($nr-1)) & $this->Column_set );
       }
 
    /*! \brief Add a row to be displayed.
@@ -202,8 +191,9 @@ class Table
 
          /* Start of the table */
 
-         $string = "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
-         $string .= $this->make_next_prev_links();
+         $string = '<a name="' . $this->Prefix . 'tbl">'
+                 . "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
+         $string.= $this->make_next_prev_links();
 
          /* Make tableheads */
 
@@ -224,10 +214,14 @@ class Table
          /* End of the table */
 
          $string .= $this->make_next_prev_links();
-         $string .= ' <tr><td colspan=20 align=right>' .
-            $this->make_add_column_form() .
-            "</td></tr>\n</table>\n";
+         $tmp = $this->make_add_column_form();
+         if( !$tmp )
+           $tmp = '&nbsp;';
+         $string .= ' <tr><td colspan=99 align=right>'
+              . '<a name="' . $this->Prefix . 'tblac">'. $tmp . '</a>'
+              . "</td></tr>\n";
 
+         $string .= "</table></a>\n";
          return $string;
       }
 
@@ -241,21 +235,11 @@ class Table
 
    function make_tablehead( $tablehead )
       {
-         if( $tablehead['Nr'] > 0 )
-         {
-            $col_pos = 1 << ($tablehead['Nr'] - 1);
-         }
-         else
-         {
-            $col_pos = 0;
-         }
+         $nr = $tablehead['Nr'];
 
-         if( !$this->Static_Columns and
-             !$tablehead['Undeletable'] and
-             $tablehead['Nr'] > 0 and
-             !($col_pos & $this->Column_set) )
+         if( !$this->Is_Column_Displayed[$nr] )
          {
-            $this->Removed_Columns[ $tablehead['Nr'] ] = $tablehead['Description'];
+            $this->Removed_Columns[ $nr ] = $tablehead['Description'];
             return "";
          }
 
@@ -295,7 +279,8 @@ class Table
                                                    $this->Desc1);
             }
 
-            $string .= "\"><font color=\"black\">" . $tablehead['Description'] .
+            $string .= '#' . $this->Prefix . 'tbl">' .
+               "<font color=\"black\">" . $tablehead['Description'] .
                "</font></a>";
          }
          else
@@ -303,12 +288,13 @@ class Table
             $string .= "<font color=\"black\">" . $tablehead['Description'] . "</font>";
          }
 
-         if( !$tablehead['Undeletable'] )
+         if( !$tablehead['Undeletable'] && !$this->Static_Columns)
          {
             $string .=
                "<a href=\"" . $this->Page .
                $this->current_sort_string( true ) .
-               $this->Prefix . "del=" . $tablehead['Nr'] . "\">" .
+               $this->Prefix . "del=" . $nr . 
+               '#' . $this->Prefix . 'tbl">' .
                "<sup><font size=\"-1\" color=\"red\">x</font></sup></a>";
          }
 
@@ -319,7 +305,9 @@ class Table
 
    function blend_next_row_color_hex( $col=false )
       {
-         $rowcol = substr($this->Row_Colors[count($this->Tablerows) % 2], 2, 6);
+         $rowcol = substr($this->Row_Colors[
+                     count($this->Tablerows) % count($this->Row_Colors)
+                   ], 2, 6);
          if( $col )
             return blend_alpha_hex( $col, $rowcol);
          else
@@ -348,7 +336,7 @@ class Table
             {
                if( $this->Is_Column_Displayed[ $th['Nr'] ] )
                {
-                  $string .= $tablerow[ $th['Nr'] ];
+                  $string .= @$tablerow[ $th['Nr'] ];
                }
             }
 
@@ -456,7 +444,7 @@ class Table
                   $hiddens[$this->Prefix . 'desc2'] = $this->Desc2;
             }
          }
-         if ( $this->Rows_Per_Page > 0 )
+         if ( $this->Rows_Per_Page > 0 && $this->From_Row > 0 )
          {
             $hiddens[$this->Prefix . 'from_row'] = $this->From_Row;
          }
@@ -503,12 +491,11 @@ class Table
          {
             if( $add > 0 )
             {
-               $this->Column_set |= 1 << ($add-1);
+               $this->Column_set |= (1 << ($add-1));
             }
             else if( $add < 0 )
             {
-               //~(0) is negative and database is unsigned
-               $this->Column_set = 0x7fffffff;
+               $this->Column_set = ALL_COLUMNS;
             }
 
             if( $del > 0 )
@@ -520,11 +507,14 @@ class Table
                $this->Column_set = 0;
             }
 
-            $query = "UPDATE Players" .
-               " SET " . $this->Player_Column . "=" . $this->Column_set .
-               " WHERE ID=" . $player_row["ID"];
+            if( !empty($this->Player_Column) )
+            {
+               $query = "UPDATE Players" .
+                  " SET " . $this->Player_Column . "=" . $this->Column_set .
+                  " WHERE ID=" . $player_row["ID"];
 
-            mysql_query($query);
+               mysql_query($query);
+            }
          }
       }
 
@@ -532,7 +522,7 @@ class Table
    function make_add_column_form()
       {
          if( $this->Static_Columns or
-             count($this->Removed_Columns) <= 1 )
+             count($this->Removed_Columns) < 1 )
          {
             return "";
          }
@@ -564,6 +554,7 @@ class Table
             array_push( $form_array, 'HIDDEN', $this->Prefix . "from_row", $this->From_Row );
          }
 
+         $this->Removed_Columns[ 0 ] = '';
          $this->Removed_Columns[ -1 ] = T_('All columns');
          asort($this->Removed_Columns);
          array_push( $form_array,
