@@ -45,6 +45,7 @@ start_page("Edit profile", true, $logged_in, $player_row );
 
     <TABLE>
 
+    <tr><td><h3><font color="#800000">Personal settings:</font></h3></td></tr>
 
       <TR>
         <TD align=right>Userid:</TD>
@@ -84,7 +85,7 @@ start_page("Edit profile", true, $logged_in, $player_row );
 
  echo html_build_select_box_from_array($vals, 'ratingtype', 'dragonrating', true);
 }
-else echo_rating( $player_row["Rating"] );
+else echo echo_rating( $player_row["Rating"] );
 ?>
          </TD>
       </TR>
@@ -131,7 +132,7 @@ for($i=0; $i<24; $i++)
           </select>
 
         </TD>
-      </tr>
+      </tr><tr><td height=20px>&nbsp;</td></tr>
          <tr><td><h3><font color="#800000">Board graphics:</font></h3></td></tr>
       <TR>
         <TD align=right>Stone size:</TD>
