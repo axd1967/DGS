@@ -35,19 +35,19 @@ start_page("Links", true, $logged_in, $player_row );
 
 
 
-<p><a href="http://gobase.org">Jan van der Steens Pages</a> --- Lots of info on go 
+<p><a href="http://gobase.org">Jan van der Steens Pages</a> --- Lots of info on go
 
 <p><a href="http://www.igoweb.org/~pahle/go-faq/index.html">Go FAQ</a> --- Frequently asked questions about go for the rec.games.go newsgroup
 
-<p><a href="http://www.msoworld.com/mindzine/news/orient/go/go.html">Mind Sport Zine</a> --- An excellent, but unfortunately no longer updated site. 
+<p><a href="http://www.msoworld.com/mindzine/news/orient/go/go.html">Mind Sport Zine</a> --- An excellent, but unfortunately no longer updated site.
 
-<p><a href="http://senseis.xmp.net">Sensei's Library</a> --- A collaboration web site. Read and contribute!  
+<p><a href="http://senseis.xmp.net">Sensei's Library</a> --- A collaboration web site. Read and contribute!
 
-<p><a href="http://www.kyoto.zaq.ne.jp/momoyama/news/news.html">Go News</a> --- News and games from the professional scene 
+<p><a href="http://www.kyoto.zaq.ne.jp/momoyama/news/news.html">Go News</a> --- News and games from the professional scene
 
-<p><a href="http://finance.baylor.edu/rich/go/iyt_go.html">IYT go guild</a> --- Meet other turn based go players 
+<p><a href="http://finance.baylor.edu/rich/go/goguild.html">IYT go guild</a> --- Meet other turn based go players
 
-<p><a href="http://www.toriyamaworld.com/hikaru.html">Hikaru no Go</a> --- A manga about go. Recommended! 
+<p><a href="http://www.toriyamaworld.com/hikaru.html">Hikaru no Go</a> --- A manga about go. Recommended!
 
 
 
