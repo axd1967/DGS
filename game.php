@@ -283,7 +283,7 @@ require_once( "include/rating.php" );
    if ($player_row["ID"] == $White_ID)
      {
      $show_notes = true;
-     $notes = $Black_Notes;
+     $notes = $White_Notes;
      }
      
    if ($Size > $player_row["NotesCutoff"])
