@@ -110,10 +110,6 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
-   if( $message )
-      make_html_safe( $message );
-
-
 
 // Update clock
 
@@ -155,6 +151,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       make_array( $gid, $array, $msg, $Moves, NULL, $moves_result, $marked_dead, $no_marked_dead );
 
    $Moves++;
+
+   if( $message ) $message = trim($message);
 
    switch( $action )
    {
@@ -429,9 +427,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       }
 
 
-      $Text = "The result in the game <A href=\"game.php?gid=$gid\">" . 
-          "$whitename (W)  vs. $blackname (B) </A>" . 
-          "was: <p><center>" . score2text($score,true) . "</center></BR>";
+      $Text = "The result in the game <a href=\"game.php?gid=$gid\">" . 
+          "$whitename (W)  vs. $blackname (B) </a>" . 
+          "was: <p><center>" . score2text($score,true) . "</center></br>";
 
       $Subject = 'Game result';
 

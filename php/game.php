@@ -219,6 +219,8 @@ require( "include/rating.php" );
 
    if( !$logged_in or ( $player_row["ID"] != $Black_ID and $player_row["ID"] != $White_ID ) )
       unset( $msg );
+   else
+      make_html_safe($msg, true);
 
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y, 
    $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $stonestring, $handi );
