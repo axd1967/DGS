@@ -363,7 +363,7 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
 
    if( !$move ) $move = $max_moves;
 
-   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
+   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
 
    $removed_dead = FALSE;
    $marked_dead = array();
@@ -406,7 +406,7 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
       while( $sub = each($marked_dead) )
       {
          list($dummy, list($X, $Y)) = $sub;
-         if( $array[$X][$Y] >= MARKED_DAME )
+         if( @$array[$X][$Y] >= MARKED_DAME )
             $array[$X][$Y] -= OFFSET_MARKED;
          else
             $array[$X][$Y] += OFFSET_MARKED;
@@ -434,7 +434,7 @@ function has_liberty_check( $x, $y, $Size, &$array, &$prisoners, $remove )
 {
    global $dirx,$diry;
 
-   $c = $array[$x][$y]; // Color of this stone
+   $c = @$array[$x][$y]; // Color of this stone
 
    $index=NULL;
    $index[$x][$y] = 7;
@@ -612,7 +612,7 @@ function create_territories_and_score( $size, &$array )
    {
       for( $y=0; $y<$size; $y++)
       {
-         switch( $array[$x][$y] & ~FLAG_NOCLICK)
+         switch( @$array[$x][$y] & ~FLAG_NOCLICK)
          {
             case BLACK_TERRITORY:
                $score --;
@@ -852,7 +852,7 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
       $letter_c = 'a';
       for($colnr = 0; $colnr < $Size; $colnr++ )
       {
-         $stone = $array[$colnr][$Size-$rownr];
+         $stone = (int)@$array[$colnr][$Size-$rownr];
          $empty = false;
          if( $stone == BLACK )
          {
