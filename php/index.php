@@ -62,7 +62,7 @@ start_page("Home", true, $logged_in, $player_row );
     <HR>
     <a href="register.php"><B>Register new account</B></a>
     <HR>
-<center>
+</center>
 
 <?php
 end_page();
