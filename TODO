@@ -57,6 +57,8 @@ SMALLER TASKS
 
 * Show time for last move in show_games.php and status.php.
 
+* Improve caching
+
 BUGS
 ----
 
