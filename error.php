@@ -203,7 +203,7 @@ Sorry, you have to be logged in to do that.
 <p>
 The reasons for this problem could be any of the following:
 <ul>
-<li> You haven't got an <a href="http://<?php echo $HOSTBASE; ?>/register.php">account</a>, or haven't <a href="http://<?php echo $HOSTBASE; ?>/index.php">logged in</a> yet.
+<li> You haven't got an <a href="<?php echo $HOSTBASE; ?>/register.php">account</a>, or haven't <a href="<?php echo $HOSTBASE; ?>/index.php">logged in</a> yet.
 <li> Your cookies have expired. This happens once a week.
 <li> You haven't enabled cookies in your browser.
 </ul>
