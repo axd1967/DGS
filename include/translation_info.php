@@ -609,7 +609,7 @@ array(
 
       /* Found in these files: include/message_functions.php, include/move.php, show_games.php, status.php, waiting_room.php */
       'Handicap' =>
-      array( 'Groups' => array( 'Messages' ) ),
+      array( 'Groups' => array( 'Game', 'Messages', 'Waiting room' ) ),
 
       /* Found in these files: links.php */
       'Het Paard' =>
@@ -978,6 +978,10 @@ array(
       /* Found in these files: show_games.php, status.php */
       'Opponent' =>
       array( 'Groups' => array( 'Status', 'Users' ) ),
+
+      /* Found in these files: show_games.php */
+      'Opponents Last Access' =>
+      array( 'Groups' => array( 'Game' ) ),
 
       /* Found in these files: edit_bio.php */
       'Other:' =>
