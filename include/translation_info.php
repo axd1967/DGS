@@ -602,7 +602,7 @@ array(
 
       /* Found in these files: docs.php */
       'Introduction to Dragon' =>
-      array( 'Groups' => array( 'Documentaion' ) ),
+      array( 'Groups' => array( 'Documentation' ) ),
 
       /* Found in these files: message.php */
       'Invitation message' =>
@@ -686,11 +686,11 @@ array(
 
       /* Found in these files: docs.php, site_map.php */
       'Licence' =>
-      array( 'Groups' => array( 'Documentaion', 'Site map' ) ),
+      array( 'Groups' => array( 'Documentation', 'Site map' ) ),
 
       /* Found in these files: docs.php, links.php, site_map.php */
       'Links' =>
-      array( 'Groups' => array( 'Documentaion', 'Links', 'Site map' ) ),
+      array( 'Groups' => array( 'Documentation', 'Links', 'Site map' ) ),
 
       /* Found in these files: include/std_functions.php */
       'Logged in as' =>
@@ -914,7 +914,7 @@ array(
 
       /* Found in these files: docs.php */
       'plans for future improvements' =>
-      array( 'Groups' => array( 'Documentaion' ) ),
+      array( 'Groups' => array( 'Documentation' ) ),
 
       /* Found in these files: register.php */
       'Please enter data' =>
@@ -1429,7 +1429,7 @@ The reasons for this problem could be any of the following:
 
       /* Found in these files: docs.php */
       'To do list' =>
-      array( 'Groups' => array( 'Documentaion' ) ),
+      array( 'Groups' => array( 'Documentation' ) ),
 
       /* Found in these files: index.php */
       'To look around, use %s.' =>
@@ -1509,7 +1509,7 @@ The reasons for this problem could be any of the following:
 
       /* Found in these files: docs.php */
       'with answers' =>
-      array( 'Groups' => array( 'Documentaion' ) ),
+      array( 'Groups' => array( 'Documentation' ) ),
 
       /* Found in these files: include/std_functions.php */
       'without byoyomi' =>
