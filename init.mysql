@@ -132,19 +132,6 @@ CREATE TABLE Messages (
 
 
 #
-# Table structure for table 'Bio'
-#
-
-CREATE TABLE Bio (
-  ID int(11) NOT NULL auto_increment,
-  uid int(11) NOT NULL default '0',
-  Category varchar(40) default NULL,
-  Text text,
-  PRIMARY KEY  (ID),
-  KEY uid (uid)
-) TYPE=MyISAM;
-
-#
 # Table structure for table 'Moves??' (one per game)
 #
 #CREATE TABLE Moves1 (
@@ -159,5 +146,57 @@ CREATE TABLE Bio (
 #);
 
 
- 
-      
+#
+# Table structure for table 'Bio'
+#
+
+CREATE TABLE Bio (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  Category varchar(40) default NULL,
+  Text text,
+  PRIMARY KEY  (ID),
+  KEY uid (uid)
+) TYPE=MyISAM;
+
+
+
+#
+# Table structure for table 'Forums'
+#
+
+CREATE TABLE Forums (
+  ID int(11) NOT NULL auto_increment,
+  Name varchar(40) default NULL,
+  Description varchar(255) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'Threads'
+#
+
+CREATE TABLE Threads (
+  ID int(11) NOT NULL auto_increment,
+  Forum_ID int(11) NOT NULL default '0',
+  Lastchanged datetime default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'Posts'
+#
+
+CREATE TABLE Posts (
+  ID int(11) NOT NULL auto_increment,
+  Thread_ID int(11) NOT NULL default '0',
+  Time datetime default NULL,
+  Subject varchar(80) default NULL,
+  Text text,
+  User_ID int(11) default NULL,
+  Parent_ID int(11) default NULL,
+  AnswerNr int(11) NOT NULL default '0',
+  crc32 int(11) default NULL,
+  PosIndex varchar(80) binary default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
