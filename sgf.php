@@ -32,7 +32,7 @@ require_once( "include/rating.php" );
    $use_HA = false;
    $use_AB_for_handicap = true;
 
-   $sgf_version = 3;
+   $sgf_version = 4;
 
    if( !$gid )
    {
