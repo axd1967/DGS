@@ -105,19 +105,38 @@ INSERT INTO Players SET
        Password=PASSWORD('guest');
 
 #
-# Table structure for table 'Messages??' (one per player)
+# Table structure for table 'Messages'
 #
-#CREATE TABLE Messages1 (
-#  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-#  From_ID int(11),
-#  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') DEFAULT 'NORMAL',
-#  Info enum('NONE','NEW','REPLIED','REPLY REQUIRED') DEFAULT 'NEW',
-#  Game_ID int(11),
-#  Time timestamp(14),
-#  Subject varchar(80),
-#  Text text,
-#  PRIMARY KEY (ID)
-#);
+
+CREATE TABLE Messages (
+  ID int(11) NOT NULL auto_increment,
+  To_ID int(11) default NULL,
+  From_ID int(11) default NULL,
+  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') default 'NORMAL',
+  Flags set('DELETED','NEW','REPLIED','REPLY REQUIRED') NOT NULL default 'NEW',
+  ReplyTo int(11) default NULL,
+  Game_ID int(11) default NULL,
+  Time timestamp(14) NOT NULL,
+  Subject varchar(80) default NULL,
+  Text text,
+  PRIMARY KEY  (ID),
+  KEY To_ID (To_ID),
+  KEY From_ID (From_ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Bio'
+#
+
+CREATE TABLE Bio (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  Category varchar(40) default NULL,
+  Text text,
+  PRIMARY KEY  (ID),
+  KEY uid (uid)
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'Moves??' (one per game)
