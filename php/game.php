@@ -306,7 +306,7 @@ switch( $action )
                      }
              }
 
-
+         $extra_message = "<font color=\"green\">Please remove dead stones and click 'done' when finished.</font>";
      }
      break;
 
@@ -361,7 +361,7 @@ switch( $action )
          $score += $White_Prisoners - $Black_Prisoners + $Komi;
 
          $extra_message = "<font color=\"blue\">Score: " . 
-              score2text($Score, true) . "</font>";
+              score2text($score, true) . "</font>";
      }
      break;
 
@@ -519,7 +519,7 @@ if( $action == 'choose_move' )
    echo "<td><B><A href=\"game.php?gid=$gid&action=pass\">Pass</A></B></td>\n";
 else
    echo "<td><B><A href=\"game.php?gid=$gid&action=done&stonestring=$stonestring\">Done</A></B></td>
-<td><B><A href=\"game.php?gid=$gid&action=choose_move\">Resume</A></B></td>\n";
+<td><B><A href=\"game.php?gid=$gid&action=choose_move\">Resume playing</A></B></td>\n";
        
 
 echo "
