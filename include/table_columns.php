@@ -62,23 +62,6 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
       "</font></A>$delete_string</th>\n";
 }
 
-function tableelement($nr, $Head, $string, $align_center=false, $extra_options=NULL)
-{
-   global $column_set,$page;
-
-   if( !( (1 << ($nr-1)) & $column_set ) )
-      return;
-
-   if( strlen($string) < 1 )
-      $string = '&nbsp;';
-
-   if( !$align_center and !$extra_options )
-      echo "<td>$string</td>\n";
-   else
-      echo '<td' . ( $align_center ? ' align=center' : '' ) .
-         ( $extra_options ? ' ' . $extra_options : '' ) . ">$string</td>\n";
-}
-
 function order_string($sortA, $descA, $sortB, $descB)
 {
    if( $sortA )

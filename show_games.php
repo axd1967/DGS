@@ -139,19 +139,25 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
       $row_color=3-$row_color;
       echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
-      tableelement(1, 'ID', "<A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;" .
-                        "&nbsp;$ID&nbsp;&nbsp;&nbsp;</A>", true, "class=button width=92" );
-      tableelement(2, 'sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
-                      "sgf</font></A>");
-      tableelement(3, 'Opponent', "<A href=\"userinfo.php?uid=$pid\">" .
-                      "<font color=black>$Name</font></a>");
-      tableelement(4, 'Nick', "<A href=\"userinfo.php?uid=$pid\">" .
-                      "<font color=black>$Handle</font></a>");
-      tableelement(5, 'Color', "<img src=\"17/$color.gif\" alt=$color>", true);
-      tableelement(6, 'Size', $Size);
-      tableelement(7, 'Handicap', $Handicap);
-      tableelement(8, 'Komi', $Komi);
-      tableelement(9, 'Moves', $Moves );
+
+      if( (1 << 0) & $column_set )
+         echo "<td class=button width=92 align=center><A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>\n";
+      if( (1 << 1) & $column_set )
+         echo "<td><A href=\"sgf.php?gid=$ID\"><font color=$gid_color>sgf</font></A></td>\n";
+      if( (1 << 2) & $column_set )
+         echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>$Name</font></a></td>\n";
+      if( (1 << 3) & $column_set )
+         echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>$Handle</font></a></td>\n";
+      if( (1 << 4) & $column_set )
+         echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
+      if( (1 << 5) & $column_set )
+         echo "<td>$Size</td>\n";
+      if( (1 << 6) & $column_set )
+         echo "<td>$Handicap</td>\n";
+      if( (1 << 7) & $column_set )
+         echo "<td>$Komi</td>\n";
+      if( (1 << 8) & $column_set )
+         echo "<td>$Moves</td>\n";
 
       if( $finished )
       {
@@ -160,13 +166,17 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
                ( $Win == -1 ? 'no.gif" alt=no' :
                  'dash.gif" alt=jigo' ) );
 
-         tableelement(10, 'Score', score2text($Score, false));
-         tableelement(11, 'Win?', "<img src=$src>", true);
-         tableelement(12, 'End date', date($date_fmt, $Time));
+      if( (1 << 9) & $column_set )
+         echo '<td>' . score2text($Score, false) . "</td>\n";
+      if( (1 << 10) & $column_set )
+         echo "<td align=center><img src=$src></td>";
+      if( (1 << 11) & $column_set )
+         echo '<td>' . date($date_fmt, $Time) . "</td>\n";
       }
       else
       {
-         tableelement(13, 'Last Move', date($date_fmt, $Time));
+         if( (1 << 12) & $column_set )
+            echo '<td>' . date($date_fmt, $Time) . "</td>\n";
       }
 
       echo "</tr>\n";
