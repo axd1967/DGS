@@ -26,13 +26,24 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
    connect2mysql();
 
+   start_page(T_('Create New Tournament'), true, $logged_in, $player_row);
+
+   echo "<CENTER>\n";
+
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-   if( is_null($_POST['name']) || is_null($_POST['description']) )
-     error("tournament_error_message_to_be_decided_later");
+   $tour_form = new Form( 'tournamentform', 'create_tournament.php', FORM_POST );
 
-   $new_tour = Tournament::Create( $_POST['name'], $_POST['description'], $player_row['ID'] );
+   $tour_form->add_row( array( 'HEADER', 'Tournament Information' ) );
+   $tour_form->add_row( array( 'DESCRIPTION', 'Tournament name',
+                               'TEXTINPUT', 'name', 50, 80, "" ) );
+   $tour_form->add_row( array( 'DESCRIPTION', 'Tournament description',
+                               'TEXTAREA', 'description', 50, 8, "" ) );
+   $tour_form->add_row( array( 'SUBMITBUTTON', 'action', 'Submit' ) );
 
-   jump_to("show_tournament.php?tid=$new_tour->ID");
+   echo "</CENTER>\n";
+
+   end_page(false);
+
 }
 ?>
