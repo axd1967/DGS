@@ -52,6 +52,13 @@ CREATE TABLE Players (
   IP varchar(15) default NULL,
   Browser varchar(100) default NULL,
   Country char(2) default NULL,
+  NotesSmallHeight tinyint(3) unsigned NOT NULL default '25',
+  NotesSmallWidth tinyint(3) unsigned NOT NULL default '30',
+  NotesSmallMode enum('OFF','RIGHT','BELOW') NOT NULL default 'RIGHT',
+  NotesLargeHeight tinyint(3) unsigned NOT NULL default '25',
+  NotesLargeWidth tinyint(3) unsigned NOT NULL default '30',
+  NotesLargeMode enum('OFF','RIGHT','BELOW') NOT NULL default 'RIGHT',
+  NotesCutoff tinyint(3) unsigned NOT NULL default '13',
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
 ) TYPE=ISAM PACK_KEYS=1;
@@ -64,7 +71,7 @@ CREATE TABLE Players (
 CREATE TABLE Games (
   ID int(11) NOT NULL auto_increment,
   Starttime datetime default NULL,
-  Lastchanged datetime NOT NULL,
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
   mid int(11) default NULL,
   Tournament_ID int(11) default NULL,
   Black_ID int(11) default NULL,
@@ -99,8 +106,8 @@ CREATE TABLE Games (
   White_Start_Rating double default NULL,
   Black_End_Rating double default NULL,
   White_End_Rating double default NULL,
-  Black_Notes text default NULL,
-  White_Notes text default NULL,
+  Black_Notes text NOT NULL default '',
+  White_Notes text NOT NULL default '',
   PRIMARY KEY  (ID),
   KEY ToMove_ID (ToMove_ID)
 ) TYPE=MyISAM;
@@ -140,7 +147,7 @@ CREATE TABLE Ratinglog (
   ID int(11) NOT NULL auto_increment,
   uid int(11) NOT NULL default '0',
   gid int(11) NOT NULL default '0',
-  Time datetime NOT NULL,
+  Time datetime NOT NULL default '0000-00-00 00:00:00',
   Rating double default NULL,
   RatingMin double default NULL,
   RatingMax double default NULL,
@@ -185,18 +192,13 @@ INSERT INTO Players SET
 
 CREATE TABLE Messages (
   ID int(11) NOT NULL auto_increment,
-#  To_ID int(11) default NULL,
-#  From_ID int(11) default NULL,
   Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED') default 'NORMAL',
   ReplyTo int(11) default NULL,
-#  Replied char(1) NOT NULL default 'N',
   Game_ID int(11) default NULL,
   Time datetime default NULL,
   Subject varchar(80) default NULL,
   Text text,
-  PRIMARY KEY  (ID),
-#  KEY To_ID (To_ID),
-#  KEY From_ID (From_ID)
+  PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
 
@@ -209,7 +211,7 @@ CREATE TABLE MessageCorrespondents (
   uid int(11) default NULL,
   mid int(11) default NULL,
   Folder_nr int(11) default NULL,
-  Sender enum('M','N','Y') default NULL,
+  Sender enum('M','N','Y') NOT NULL default 'Y',
   Replied enum('M','N','Y') NOT NULL default 'N',
   PRIMARY KEY  (ID),
   KEY mid (mid),
@@ -240,7 +242,7 @@ CREATE TABLE Folders (
 CREATE TABLE Moves (
   ID int(11) NOT NULL auto_increment,
   gid int(11) NOT NULL default '0',
-  MoveNr smallint(5) unsigned default NULL,
+  MoveNr smallint(5) unsigned NOT NULL default '0',
   Stone smallint(5) unsigned NOT NULL default '0',
   PosX smallint(6) default NULL,
   PosY smallint(6) default NULL,
@@ -255,10 +257,12 @@ CREATE TABLE Moves (
 #
 
 CREATE TABLE MoveMessages (
-  gid int(11) NOT NULL auto_increment,
-  MoveNr smallint(5) unsigned NOT NULL,
+  ID int(11) unsigned NOT NULL auto_increment,
+  gid int(11) NOT NULL default '0',
+  MoveNr smallint(5) unsigned NOT NULL default '0',
   Text text,
-  PRIMARY KEY  (gid,MoveNr)
+  PRIMARY KEY  (gid,MoveNr),
+  KEY ID (ID)
 ) TYPE=MyISAM;
 
 
@@ -269,7 +273,7 @@ CREATE TABLE MoveMessages (
 CREATE TABLE Waitingroom (
   ID int(11) NOT NULL auto_increment,
   uid int(11) default NULL,
-  nrGames int(11) default 1,
+  nrGames int(11) default '1',
   Time datetime default NULL,
   Size int(11) default '19',
   Komi decimal(6,1) default '6.5',
@@ -310,7 +314,7 @@ CREATE TABLE Tournament (
   ID int(11) NOT NULL auto_increment,
   Name varchar(80) default NULL,
   Description text,
-  State int(11) NOT NULL default 0,
+  State int(11) NOT NULL default '0',
   FirstRound int(11) default NULL,
   ApplicationPeriod int(11) default NULL,
   StartOfApplicationPeriod datetime default NULL,
@@ -499,10 +503,10 @@ CREATE TABLE Forums (
   ID int(11) NOT NULL auto_increment,
   Name varchar(40) default NULL,
   Description varchar(255) default NULL,
-  SortOrder int NOT NULL default '0',
+  SortOrder int(11) NOT NULL default '0',
   Moderated char(1) NOT NULL default 'N',
   PRIMARY KEY  (ID),
-  UNIQUE KEY (SortOrder)
+  KEY SortOrder (SortOrder)
 ) TYPE=MyISAM;
 
 
@@ -556,8 +560,8 @@ CREATE TABLE GoDiagrams (
   View_Right int(11) default NULL,
   View_Up int(11) default NULL,
   View_Down int(11) default NULL,
-  Date datetime NOT NULL,
-  Saved enum('Y','N') default 'N',
+  Date datetime NOT NULL default '0000-00-00 00:00:00',
+  Saved enum('Y','N') NOT NULL default 'N',
   Data text,
   SGF text,
   PRIMARY KEY  (ID)
@@ -602,7 +606,7 @@ CREATE TABLE FAQlog (
 CREATE TABLE Clock (
   ID int(11) NOT NULL default '0',
   Ticks int(11) default '0',
-  Lastchanged datetime NOT NULL,
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM PACK_KEYS=1;
 
