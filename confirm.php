@@ -445,9 +445,10 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $Text .= "<p>Your opponent wrote:<p>" . $message;
       }
 
-      mysql_query( "INSERT INTO Messages" . $opponent_row["ID"] . " SET " .
+      mysql_query( "INSERT INTO Messages SET " .
                    "From_ID=" . $player_row["ID"] . 
-                   ", Game_ID=$gid, Subject='$Subject', Text='$Text'" );
+                   ", To_ID=" . $opponent_row["ID"] . 
+                   ", Game_ID=$gid, Subject=\"$Subject\", Text=\"$Text\"");
 
    }
 
