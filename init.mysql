@@ -409,6 +409,24 @@ CREATE TABLE Forumreads (
 
 
 #
+# Table structure for table 'FAQ'
+#
+
+CREATE TABLE FAQ (
+  ID int(11) NOT NULL auto_increment,
+  EntryID int(11) default NULL,
+  Lang varchar(16) default NULL,
+  SortOrder int(11) NOT NULL default '0',
+  Parent int(11) NOT NULL default '0',
+  Level int(11) default NULL,
+  Question text,
+  Answer text,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+INSERT INTO FAQ VALUES (1,1,NULL,0,0,0,NULL,NULL);
+
+#
 # Table structure for table 'Clock'
 #
 
