@@ -20,6 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // Update rating
 
+chdir( '../' );
 require( "include/std_functions.php" );
 require( "include/rating.php" );
 
@@ -46,10 +47,15 @@ require( "include/rating.php" );
 
    $result = mysql_query( $query );
 
+   echo "<p>Game: ";
+   $count=0;
    while( $row = mysql_fetch_array( $result ) )
    {
-      echo "<p>Game " . $row["gid"] . ":<br>";
+      echo $row["gid"] . " ";
       update_rating2($row["gid"]);
+      $count++;
    }
+   echo "<p>Finished!\n" .
+      "<p>$count rated games.\n";
 }
 ?>
