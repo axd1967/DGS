@@ -46,7 +46,7 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
           "the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for " .
           "finding opponents. Next you can study the <a href=\"users.php\">user list</a> " .
           "and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents " .
-          "to <a href=\"invite.php\">invite</a> for a game.") . "\n";
+          "to <a href=\"message.php?mode=Invite\">invite</a> for a game.") . "\n";
 
   echo "<p>\n";
 
