@@ -93,7 +93,7 @@ function a($rating)
 //
 // result: 0 - black win, 1 - white win
 
-function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap)
+function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap, $factor=1)
 {
 
    $e = 0.014;
@@ -126,8 +126,8 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap)
 
    $sizefactor = (19 - abs($size-19))*(19 - abs($size-19)) / (19*19);
 
-   $conW = con($rating_W) * $sizefactor;
-   $conB = con($rating_B) * $sizefactor;
+   $conW = con($rating_W) * $sizefactor * $factor;
+   $conB = con($rating_B) * $sizefactor * $factor;
 
    $rating_W += $conW * ($result - $SEW);
    $rating_B += $conB * (1-$result - $SEB);
@@ -203,6 +203,8 @@ function update_rating($gid)
 
 function update_rating2($gid)
 {
+   global $NOW;
+
    $query = "SELECT Games.*, ".
        "white.Rating as wRating, white.RatingStatus as wRatingStatus, " .
        "white.RatingMax as wRatingMax, white.RatingMin as wRatingMin, " .
@@ -236,19 +238,53 @@ function update_rating2($gid)
       "bRatingMin: $bRatingMin<br>\n" .
       "bRatingMax: $bRatingMax<p>";
 
-   change_rating($wRating, $bRating, $game_result, $Size, $Komi, $Handicap);
+   // Calculate factor used to alter how much the the ratings are to be changed
+   $Factor = log(($bRatingMax - $bRatingMin)/($wRatingMax-$wRatingMin));
+
+   $MAX_FACTOR = 3;
+   $MAX_LN_FACTOR = log($MAX_FACTOR);
+   $SLOPE_CONST = 1;
+
+   $tmp = exp(2*$SLOPE_CONST*$Factor/$MAX_LN_FACTOR);
+
+   $bFactor = exp($MAX_LN_FACTOR * ($tmp - 1) / ($tmp + 1));
+   $wFactor = 1/$bFactor;
+   $maxminFactor = 0.5;
+
+   // Update ratings
 
    $bTmp = $bOld;
-   change_rating($wRatingMax, $bTmp, $game_result, $Size, $Komi, $Handicap);
+   change_rating($wRating, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
+
+   $wFactor *= $maxminFactor;
+   $bTmp = $bOld;
+   change_rating($wRatingMax, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
 
    $bTmp = $bOld;
-   change_rating($wRatingMin, $bTmp, $game_result, $Size, $Komi, $Handicap);
+   change_rating($wRatingMin, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
 
-   $wTmp = $bOld;
-   change_rating($wTmp, $bRatingMax, $game_result, $Size, $Komi, $Handicap);
+   $wTmp = $wOld;
+   change_rating($wTmp, $bRating, $game_result, $Size, $Komi, $Handicap, $bFactor);
 
-   $wTmp = $bOld;
-   change_rating($wTmp, $bRatingMin, $game_result, $Size, $Komi, $Handicap);
+   $bFactor *= $maxminFactor;
+   $wTmp = $wOld;
+   change_rating($wTmp, $bRatingMax, $game_result, $Size, $Komi, $Handicap, $bFactor);
+
+   $wTmp = $wOld;
+   change_rating($wTmp, $bRatingMin, $game_result, $Size, $Komi, $Handicap, $bFactor);
+
+   if( ($bRatingMax - $bRating) < ($bRating - $bRatingMin)/2 )
+      $bRatingMax = $bRating + ($bRating - $bRatingMin)/2;
+
+   if( ($bRating - $bRatingMin) < ($bRatingMax - $bRating)/2 )
+      $bRatingMin = $bRating - ($bRatingMax - $bRating)/2;
+
+   if( ($wRatingMax - $wRating) < ($wRating - $wRatingMin)/2 )
+      $wRatingMax = $wRating + ($wRating - $wRatingMin)/2;
+
+   if( ($wRating - $wRatingMin) < ($wRatingMax - $wRating)/2 )
+      $wRatingMin = $wRating - ($wRatingMax - $wRating)/2;
+
 
    echo "wRating: $wRating<br>\n" .
       "wRatingMin: $wRatingMin<br>\n" .
@@ -256,11 +292,11 @@ function update_rating2($gid)
       "bRating: $bRating<br>\n" .
       "bRatingMin: $bRatingMin<br>\n" .
       "bRatingMax: $bRatingMax<br>";
-   exit;
 
-   mysql_query( "UPDATE Games SET Rated='DONE', " .
+
+   mysql_query( "UPDATE Games SET Rated='Done', " .
                 "BlackRatingDiff= " . ($bRating - $bOld) .
-                " WhiteRatingDiff= " . ($wRating - $wOld) .
+                ", WhiteRatingDiff= " . ($wRating - $wOld) .
                 " WHERE ID=$gid" );
 
    mysql_query( "UPDATE Players SET Rating=$bRating, " .
@@ -272,8 +308,8 @@ function update_rating2($gid)
                  "RatingStatus='RATED' WHERE ID=$White_ID" );
 
     mysql_query("INSERT INTO Ratinglog (uid,gid,Rating,RatingMin,RatingMax, Time) VALUES " .
-                "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, $NOW), " .
-                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, $NOW) ");
+                "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, FROM_UNIXTIME($NOW)), " .
+                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, FROM_UNIXTIME($NOW)) ") or die(mysql_error());
 
 }
 
