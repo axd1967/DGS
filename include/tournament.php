@@ -33,6 +33,10 @@ define( "TOUR_STATE_APPLICATIONPERIOD", 1 );
 define( "TOUR_STATE_RUNNING", 2 );
 define( "TOUR_STATE_FINISHED", 3 );
 
+$TourState_Strings = array( TOUR_STATE_INACTIVE          => T_("Inactive tournament"),
+                            TOUR_STATE_APPLICATIONPERIOD => T_("Waiting for participation applications"),
+                            TOUR_STATE_RUNNING           => T_("Tournament is running"),
+                            TOUR_STATE_FINISHED          => T_("Tournament is finished") );
 
 /*!
  * \brief Class for a tournament.
@@ -181,7 +185,11 @@ class Tournament
     */
    function get_from_database()
       {
-         $result = mysql_query( "SELECT * FROM Tournament WHERE ID='$this->ID'" )
+         $result = mysql_query(
+            "SELECT Tournament.*, " .
+            "IFNULL(UNIX_TIMESTAMP(StartOfApplicationPeriod),NULL) AS SOAP_Unix " .
+            "FROM Tournament WHERE ID='$this->ID'"
+            )
            or error("tournament_error_message_to_be_decided_later");
 
          if( mysql_num_rows($result) != 1 )
@@ -190,7 +198,10 @@ class Tournament
          $row = mysql_fetch_array( $result );
          foreach( $row as $key => $value )
             {
-               if( is_string( $key ) and $key != "FirstRound" )
+               if( is_string( $key ) and
+                   $key != "FirstRound" and
+                   $key != "StartOfApplicationPeriod" and
+                   $key != "SOAP_Unix" )
                {
                   $this->$key = $value;
                }
@@ -201,6 +212,8 @@ class Tournament
          {
             array_push($Rounds, $row['FirstRound']);
          }
+
+         $StartOfApplicationPeriod = $row['SOAP_Unix'];
 
          $this->ListOfOrganizers = array();
          $orgresult = mysql_query( "SELECT * FROM TournamentOrganizers " .
