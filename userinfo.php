@@ -79,7 +79,7 @@ require( "include/rating.php" );
 
        while( $row = mysql_fetch_array( $result ) )
        {
-          echo '     <tr><td><b>' . make_html_safe($row["Category"]) . '</b></td>' .
+          echo '     <tr><td><b>' . make_html_safe(T_($row["Category"])) . '</b></td>' .
              '<td>' . make_html_safe($row["Text"],true) . "</td></tr>\n";
        }
 
