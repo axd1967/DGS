@@ -6140,6 +6140,7 @@ INSERT INTO TranslationGroups VALUES (6,'Docs');
 INSERT INTO TranslationGroups VALUES (7,'Admin');
 INSERT INTO TranslationGroups VALUES (8,'Error');
 INSERT INTO TranslationGroups VALUES (9,'FAQ');
+INSERT INTO TranslationGroups VALUES (10,'Countries');
 
 #
 # Dumping data for table 'TranslationFoundInGroup'
@@ -6946,4 +6947,5 @@ INSERT INTO TranslationPages VALUES (39,'include/move.php',3);
 INSERT INTO TranslationPages VALUES (40,'include/rating.php',3);
 INSERT INTO TranslationPages VALUES (41,'include/table_columns.php',1);
 INSERT INTO TranslationPages VALUES (42,'admin_password.php',2);
+INSERT INTO TranslationPages VALUES (43,'include/countries.php',10);
 
