@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+// apd_set_pprof_trace();  for profiling
+
 $TranslateGroups[] = "Common";
 
 require_once( "include/config.php" );
@@ -94,6 +96,8 @@ $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 $cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button');
 
 $button_max = 10;
+
+$vacation_min_days = 5;
 
 define('DELETE_LIMIT', 10);
 
