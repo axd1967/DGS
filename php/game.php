@@ -226,6 +226,7 @@ switch( $action )
          if( (strlen( $stonestring ) / 2) < $Handicap )
              {
                  $enable_message = false;
+                 $extra_message = "<font color=\"green\">Place your handicap stones, please!</font>";
              }
 
          $handi = true;
