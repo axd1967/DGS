@@ -44,25 +44,29 @@ $user_row = mysql_fetch_array($result);
 
 if( $finished )
 {
-     $result = mysql_query("SELECT Games.*, Players.Name, Players.Handle FROM Games,Players " .
+     $result = mysql_query("SELECT Games.*, Players.Name, Players.Handle, Players.ID as uid " .
+                           "FROM Games,Players " .
                            " WHERE Status='FINISHED' AND " . 
                            "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
-                           "( White_ID=$uid AND Black_ID=Players.ID ))");
+                           "( White_ID=$uid AND Black_ID=Players.ID )) " .
+                           "ORDER BY Lastchanged DESC");
      start_page("Finished games for " . $user_row["Name"], true, $logged_in, $player_row );
 }
 else
 {
-     $result = mysql_query("SELECT Games.*, Players.Name, Players.Handle  FROM Games,Players " .
+     $result = mysql_query("SELECT Games.*, Players.Name, Players.Handle, Players.ID as uid " .
+                           "FROM Games,Players " .
                            " WHERE  Status!='INVITED' AND Status!='FINISHED' AND " . 
                            "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
-                           "( White_ID=$uid AND Black_ID=Players.ID ))");
+                           "( White_ID=$uid AND Black_ID=Players.ID )) " . 
+                           "ORDER BY Lastchanged DESC");
      start_page("Running games for " . $user_row["Name"], true, $logged_in, $player_row );
 }
 
 echo "<center><h4>" . ( $finished ? "Finished" : "Running" ) . " Games for <A href=\"userinfo.php?uid=$uid\">" . $user_row["Name"] . " (" . $user_row["Handle"] . ")</A></H4></center>\n";
 echo "<table border=3 align=center>\n";
 echo "<tr><th>Opponent</th><th>Color</th><th>Size</th><th>Handicap</th><th>Komi</th>" .
-     "<th>" .( $finished ? "Score" : "Moves" ) . "</th>\n";
+     "<th>" .( $finished ? "Score" : "Moves" ) . "</th><th>sgf</th><th>html</th>\n";
 
 
 while( $row = mysql_fetch_array( $result ) )
@@ -72,13 +76,15 @@ while( $row = mysql_fetch_array( $result ) )
     else
         $col = "White";
 
-    echo "<tr><td><A href=\"game.php?gid=" . $row["ID"] . "\">" . $row["Name"] . "</td>\n" .
-        "<td>$col</td>" .
-        "<td>" . $row["Size"] . "</td>\n" .
-        "<td>" . $row["Handicap"] . "</td>\n" .
-        "<td>" . $row["Komi"] . "</td>\n" .
-        "<td>" . ($finished ? score2text($row["Score"], false) : $row["Moves"] ) . "</td>\n" .
-        "</tr>\n";
+    echo "<tr><td><A href=\"userinfo.php?uid=" . $row["uid"] . "\">" . $row["Name"] . "</td>" .
+      "<td>$col</td>" .
+      "<td>" . $row["Size"] . "</td>" .
+      "<td>" . $row["Handicap"] . "</td>" .
+      "<td>" . $row["Komi"] . "</td>" .
+      "<td>" . ($finished ? score2text($row["Score"], false) : $row["Moves"] ) . "</td>" .
+      "<td><A href=\"sgf.php?gid=" . $row["ID"] . "\">sgf</td>" .
+      "<td><A href=\"game.php?gid=" . $row["ID"] . "\">html</td>" .
+      "</tr>\n";
 }
 
 echo "</table>\n";
