@@ -32,7 +32,8 @@ require_once( "include/table_columns.php" );
   if( !$logged_in )
     error("not_logged_in");
 
-  if( !($player_row['admin_level'] & ADMIN_ADMINS) )
+  $player_level = $player_row['admin_level'];
+  if( !($player_level & ADMIN_ADMINS) )
     error("adminlevel_too_low");
 
   $admin_tasks = array(
@@ -66,9 +67,9 @@ require_once( "include/table_columns.php" );
 
         list($type, $id) = explode('_', $item, 2);
 
-        $val = $admin_tasks[$type][0] & $player_row['admin_level'];
+        $val = $admin_tasks[$type][0];
 
-        if( !($id > 0 or $id=='new') or !($val > 0))
+        if( !($id > 0 or $id=='new') or !$val)
            error("bad_data");
 
         $Admin[$id] |= $val;
@@ -77,7 +78,7 @@ require_once( "include/table_columns.php" );
      if( !($Admin[$player_row["ID"]] & ADMIN_ADMINS) )
         error("admin_no_longer_admin_admin");
 
-     if( $Admin['new'] > 0 and !empty($_POST["newadmin"]))
+     if( $Admin['new'] != 0 and !empty($_POST["newadmin"]))
      {
         $result = mysql_query("SELECT ID,Adminlevel+0 AS admin_level FROM Players " .
                               "WHERE Handle=\"" . $_POST["newadmin"] . "\"");
@@ -86,7 +87,7 @@ require_once( "include/table_columns.php" );
            error("unknown_user");
 
         $row = mysql_fetch_array($result);
-        if( $row["admin_level"] > 0 )
+        if( $row["admin_level"] != 0 )
            error("new_admin_already_admin");
 
         $Admin[$row['ID']] = $Admin['new'];
@@ -96,8 +97,12 @@ require_once( "include/table_columns.php" );
 
      foreach( $Admin as $id => $adm_level )
      {
-        if( $adm_level != $AdminOldLevel[$id] )
+        $adm_level = ((int)$adm_level ^ (int)$AdminOldLevel[$id]) & (int)$player_level;
+        if( $adm_level )
+        {
+           $adm_level = ((int)$adm_level ^ (int)$AdminOldLevel[$id]);
            mysql_query("UPDATE Players SET Adminlevel=$adm_level WHERE ID=$id LIMIT 1");
+        }
      }
   }
 
@@ -107,7 +112,7 @@ require_once( "include/table_columns.php" );
                         "WHERE Adminlevel != 0");
 
 
-   echo "<center><p><h3><font color=$h3_color><B>" . T_('Admins') . ":</B></font></h3><p>\n";
+   echo "<center>&nbsp;<p><h3><font color=$h3_color><B>" . T_('Admins') . ":</B></font></h3><p>\n";
 
    echo '<form name="admform" action="admin_admins.php?update=t" method="POST">'."\n";
 
@@ -124,8 +129,8 @@ require_once( "include/table_columns.php" );
       $atable->add_tablehead($col++, $aname, NULL, true, true, '10pc');
    }
 
-   $new_admin = ( $player_row['admin_level'] & ADMIN_ADD_ADMIN );
-   while( $row = mysql_fetch_array( $result ) or $new_admin )
+   $new_admin = ($player_level & ADMIN_ADD_ADMIN);
+   while( $row = mysql_fetch_assoc( $result ) or $new_admin )
    {
       $arow_strings = array();
 
@@ -155,15 +160,15 @@ require_once( "include/table_columns.php" );
       {
          list( $amask, $aname) = $tmp;
 
-         if( $amask & $player_row['admin_level'] )
-            $tmp = '';
+         if( $amask & $player_level )
+            $tmp = ' value="Y"';
          else
-            $tmp = ' disabled';
+            $tmp = ' value="" disabled';
 
          if( $amask & $level )
             $tmp.= ' checked';
 
-         $tmp = "<input type=\"checkbox\" name=\"${aid}_$id\" value=\"Y\"$tmp>";
+         $tmp = "\n  <input type=\"checkbox\" name=\"${aid}_$id\"$tmp>";
 
          $arow_strings[$col++] = "<td align=center>$tmp</td>";
       }
@@ -177,7 +182,10 @@ require_once( "include/table_columns.php" );
            , 'BG_Color' => $bg_color ) );
 
    $atable->echo_table();
-   echo "<p>\n";
+
+   echo "\n</form>";
+
+   echo "</center>\n";
 
   end_page();
 }
