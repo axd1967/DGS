@@ -1281,7 +1281,7 @@ La razón por la que ha pasado esto puede ser una de las siguientes:
 "Welcome page" =>
 "Página de bienvenida",
 
-"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
+"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a> server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
 "Bienvenido a Dragon Go Server, un <a href=\"licence.php\">free</a>servidor para jugar a go.<a href=\"links.php\">go</a>",
 
 "Welcome to the dragon go server!" =>

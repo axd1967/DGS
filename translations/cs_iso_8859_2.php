@@ -1276,7 +1276,7 @@ Pøíèiny tohoto problému mohou být následující:
 "Welcome page" =>
 "Uvítací stránka",
 
-"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
+"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a> server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
 "Vítejte na Dragon Go serveru, <a href=\"licence.php\">free</a> serveru na hraní <a href=\"links.php\">go</a>, kde se hry èasto dlouho táhnou (v angliètinì slovní høíèka - 'drag on'). ",
 
 "Welcome to the dragon go server!" =>

@@ -1288,7 +1288,7 @@ The reasons for this problem could be any of the following:
 "Welcome page" =>
 "Velkomstside",
 
-"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
+"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a> server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
 "Velkommen til Dragon Go Server, en <a href=\"licence.php\">fri</a> server der du kan spille <a href=\"links.php\">go</a>.",
 
 "Welcome to the dragon go server!" =>

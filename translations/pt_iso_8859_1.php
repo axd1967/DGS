@@ -1287,7 +1287,7 @@ As raz&otilde;&es deste problema podem ser qualquer das seguintes:
 "Welcome page" =>
 "P&aacute;gina de boas vindas",
 
-"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
+"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a> server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
 "Benvindo ao Drag&atilde;o <i>('Dragon')</i>, servidor <a href=\"licence.php\">gr&aacute;tis</a> de <a href=\"links.php\">go</a>, onde os jogos se arrastam (<i>'drag on'</i> em ingl&ecirc;s).",
 
 "Welcome to the dragon go server!" =>

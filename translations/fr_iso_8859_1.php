@@ -1265,7 +1265,7 @@ Contactez le support du site en indiquant clairement la page incriminée et ce qu
 "Welcome page" =>
 "Page d'accueil",
 
-"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
+"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a> server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
 "Bienvenue sur Dragon Go Server, un serveur pour jouer au <a href=\"links.php\">go</a>, <a href=\"licence.php\">libre</a> de surcroît, où les parties ont tendance à « s'éterniser » (to drag on, en anglais cqfd). ",
 
 "Welcome to the dragon go server!" =>

@@ -1269,7 +1269,7 @@ The reasons for this problem could be any of the following:
 "Welcome page" =>
 "",
 
-"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a>server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
+"Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a> server for playing <a href=\"links.php\">go</a>, where the games tends to 'drag on'." =>
 "",
 
 "Welcome to the dragon go server!" =>
