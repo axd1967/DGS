@@ -70,7 +70,7 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
    {
       $result = mysql_query( "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
                              "Maintime,Byotype,Byotime,Byoperiods,Rated,Weekendclock, " .
-                             "(White_ID=$my_ID)+1 AS Color " .
+                             "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
                              "FROM Games,Players WHERE Games.ID=$gid " .
                              "AND ((Players.ID=Black_ID AND White_ID=$my_ID) " .
                              "OR (Players.ID=White_ID AND Black_ID=$my_ID)) " .

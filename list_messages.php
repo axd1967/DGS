@@ -119,7 +119,7 @@ require_once( "include/timezones.php" );
 
    start_page($title, true, $logged_in, $player_row );
 
-   $marked_form = new Form('','', 0);
+   $marked_form = new Form('','', FORM_GET);
    echo "<form name=\"marked\" action=\"list_messages.php\" method=\"GET\">\n";
 
    echo echo_folders($my_folders, $current_folder);
