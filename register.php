@@ -25,23 +25,23 @@ connect2mysql();
 
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-start_page("Register", true, $logged_in, $player_row );
+start_page(T_("Register"), true, $logged_in, $player_row );
 
 echo "<center>\n";
 
-echo "<B><font size=+1>Please enter data:</font></B>\n";
+echo "<B><font size=+1>" . T_('Please enter data') . ":</font></B>\n";
 
 echo form_start('loginform', 'do_registration.php', 'POST');
 
-echo form_insert_row( 'DESCRIPTION', 'Userid',
+echo form_insert_row( 'DESCRIPTION', T_('Userid'),
                       'TEXTINPUT', 'userid', 16, 16, '' );
-echo form_insert_row( 'DESCRIPTION', 'Full name',
+echo form_insert_row( 'DESCRIPTION', T_('Full name'),
                       'TEXTINPUT', 'name', 16,80, '' );
-echo form_insert_row( 'DESCRIPTION', 'password',
+echo form_insert_row( 'DESCRIPTION', T_('Password'),
                       'PASSWORD', 'passwd', 16, 16, '' );
-echo form_insert_row( 'DESCRIPTION', 'Confirm password',
+echo form_insert_row( 'DESCRIPTION', T_('Confirm password'),
                       'PASSWORD', 'passwd2', 16, 16, '' );
-echo form_insert_row( 'SUBMITBUTTON', 'register', 'register' );
+echo form_insert_row( 'SUBMITBUTTON', 'register', T_('register') );
 
 echo form_end();
 echo "</center>\n";

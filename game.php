@@ -180,7 +180,7 @@ require( "include/rating.php" );
 
       case 'resign':
       {
-         $extra_message = "<font color=\"red\">Resigning</font>";
+         $extra_message = "<font color=\"red\">" . T_('Resigning') . "</font>";
       }
       break;
 
@@ -190,7 +190,7 @@ require( "include/rating.php" );
          if( $Status != 'PLAY' and $Status != 'PASS' )
             error("invalid_action");
 
-         $extra_message = "<font color=\"green\">Passing</font>";
+         $extra_message = "<font color=\"green\">" . T_('Passing') . "</font>";
       }
       break;
 
@@ -199,7 +199,7 @@ require( "include/rating.php" );
          if( $Status != 'PLAY' or ( $Moves >= 4+$Handicap ) )
             error("invalid_action");
 
-         $extra_message = "<font color=\"red\">Deleting game</font>";
+         $extra_message = "<font color=\"red\">" . T_('Deleting game') . "</font>";
       }
       break;
 
@@ -212,7 +212,7 @@ require( "include/rating.php" );
 
          $enable_message = false;
 
-         $extra_message = "<font color=\"green\">Please mark dead stones and click 'done' when finished.</font>";
+         $extra_message = "<font color=\"green\">" . T_('Please mark dead stones and click 'done' when finished.') . "</font>";
       }
       break;
 
@@ -223,7 +223,7 @@ require( "include/rating.php" );
 
          check_done();
 
-         $extra_message = "<font color=\"blue\">Score: " .
+         $extra_message = "<font color=\"blue\">" . T_('Score') . ": " .
              score2text($score, true) . "</font>";
       }
       break;
@@ -234,7 +234,7 @@ require( "include/rating.php" );
       }
    }
 
-   start_page("Game", true, $logged_in, $player_row);
+   start_page(T_("Game"), true, $logged_in, $player_row);
 
    if( $enable_message ) $may_play = false;
 
@@ -279,35 +279,35 @@ require( "include/rating.php" );
       {
          $width= ( $Moves < 4+$Handicap ? '20%' : '25%' );
 
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=pass\">Pass</A></B></td>\n";
+         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=pass\">" . T_('Pass') . "</A></B></td>\n";
 
          if( $Moves < 4+$Handicap )
-            echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=delete\">Delete game</A></B></td>\n";
+            echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=delete\">" . T_('Delete game') . "</A></B></td>\n";
       }
       else if( $action == 'remove' )
       {
          $width="25%";
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=done&stonestring=$stonestring\">Done</A></B></td>\n";
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=choose_move\">Resume playing</A></B></td>\n";
+         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=done&stonestring=$stonestring\">" . T_('Done') . "</A></B></td>\n";
+         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=choose_move\">" . T_('Resume playing') . "</A></B></td>\n";
 
       }
       else if( $action == 'handicap' )
       {
          $width="33%";
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=delete\">Delete game</A></B></td>\n";
+         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=delete\">" . T_('Delete game') . "</A></B></td>\n";
 
       }
 
       echo "<td width=\"$width\"><B><A href=\"" .
          ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid") .
-         "\">Download sgf</A></B></td>\n";
+         "\">" . T_('Download sgf') . "</A></B></td>\n";
 
 
       if( $action == 'choose_move' )
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=resign\">Resign</A></B></td>\n";
+         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=resign\">" . T_('Resign') . "</A></B></td>\n";
 
       if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
-         echo "<td width=\"$width\"><B><A href=\"confirm.php?gid=$gid&next=Skip+to+next+game\">Skip to next game</A></B></td>\n";
+         echo "<td width=\"$width\"><B><A href=\"confirm.php?gid=$gid&next=Skip+to+next+game\">" . T_('Skip to next game') . "</A></B></td>\n";
 
 
       echo"

@@ -31,18 +31,18 @@ if( !$logged_in )
    error("not_logged_in");
 
 
-start_page("Edit password", true, $logged_in, $player_row );
+start_page(T_("Edit password"), true, $logged_in, $player_row );
 
 echo "<CENTER>\n";
 echo form_start( 'passwordform', 'change_password.php', 'POST' );
 
-echo form_insert_row( 'DESCRIPTION', 'Old password',
+echo form_insert_row( 'DESCRIPTION', T_('Old password'),
                       'PASSWORD', 'oldpasswd',16,16 );
-echo form_insert_row( 'DESCRIPTION', 'New password',
+echo form_insert_row( 'DESCRIPTION', T_('New password'),
                       'PASSWORD', 'passwd',16,16 );
-echo form_insert_row( 'DESCRIPTION', 'Confirm password',
+echo form_insert_row( 'DESCRIPTION', T_('Confirm password'),
                       'PASSWORD', 'passwd2',16,16 );
-echo form_insert_row( 'SUBMITBUTTON', 'action', 'Change password' );
+echo form_insert_row( 'SUBMITBUTTON', 'action', T_('Change password') );
 echo form_end();
 echo "</CENTER>\n";
 
