@@ -56,10 +56,10 @@ require( "include/rating.php" );
    $menudirection = ( $menudir == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
    $query = "UPDATE Players SET " .
-       "Name='$name', " .
-       "Email='$email', " .
-       "Rank='$rank', " .
-       "Open='$open', " .
+       "Name='" . trim($name) . "', " .
+       "Email='" . trim($email) . "', " .
+       "Rank='" . trim($rank) . "', " .
+       "Open='" . trim($open) . "', " .
        "Stonesize=$stonesize, " .
        "Boardcoords=$boardcoords, " .
        "MenuDirection='$menudirection', " .
