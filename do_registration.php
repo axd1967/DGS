@@ -63,7 +63,7 @@ require( "include/std_functions.php" );
                           "Password=PASSWORD('$passwd'), " .
                           "Registerdate=FROM_UNIXTIME($NOW), " .
                           "Sessioncode='$code', " .
-                          "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration second)" );
+                          "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration)" );
 
    $new_id = mysql_insert_id();
 
