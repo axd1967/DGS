@@ -22,55 +22,56 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require( "include/std_functions.php" );
 require( "include/rating.php" );
 
-connect2mysql();
+{
+   connect2mysql();
 
 
-$delete_msgs = false;
-$messege_timelimit = 92;
-$invite_timelimit = 92;
+   $delete_msgs = false;
+   $messege_timelimit = 92;
+   $invite_timelimit = 92;
 
 // Delete old messages
 
-if( $delete_msgs )
-{
+   if( $delete_msgs )
+   {
 
-  $result = mysql_query( "SELECT ID FROM Players" );
+      $result = mysql_query( "SELECT ID FROM Players" );
 
-  while( $row = mysql_fetch_array( $result ) )
-    {
-      $id = $row["ID"];
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $id = $row["ID"];
 
-      // delete read messages
+         // delete read messages
 
-      mysql_query("DELETE FROM Messages$id WHERE " .
-                  "( Info='None' OR Info='REPLIED' ) AND " .
-                  "TO_DAYS(Now())-TO_DAYS(Time) > $messege_timelimit" );
+         mysql_query("DELETE FROM Messages$id WHERE " .
+                     "( Info='None' OR Info='REPLIED' ) AND " .
+                     "TO_DAYS(Now())-TO_DAYS(Time) > $messege_timelimit" );
 
-      //delete old invitations
+         //delete old invitations
 
-      $result2 = mysql_query( "SELECT Game_ID FROM Messages$id WHERE " .
-                              "Type='INVITATION' AND " .
-                              "TO_DAYS(Now())-TO_DAYS(Time) > $invite_timelimit" );
+         $result2 = mysql_query( "SELECT Game_ID FROM Messages$id WHERE " .
+                                 "Type='INVITATION' AND " .
+                                 "TO_DAYS(Now())-TO_DAYS(Time) > $invite_timelimit" );
 
-      if( mysql_num_rows($result2) > 0 )
-        {
-          while( $row2 = mysql_fetch_array( $result2 ) )
+         if( mysql_num_rows($result2) > 0 )
+         {
+            while( $row2 = mysql_fetch_array( $result2 ) )
             {
 
-              mysql_query( "DELETE FROM Games WHERE ID=" . $row["Game_ID"] . 
-                           " AND Status='INVITED'" .
-                           " AND ( Black_ID=$id OR White_ID=$id ) " );
+               mysql_query( "DELETE FROM Games WHERE ID=" . $row["Game_ID"] . 
+                            " AND Status='INVITED'" .
+                            " AND ( Black_ID=$id OR White_ID=$id ) " );
             }
 
-          mysql_query( "DELETE FROM Messages$id WHERE " .
-                       "Type='INVITATION' AND " .
-                       "TO_DAYS(Now())-TO_DAYS(Time) > $invite_timelimit" );
+            mysql_query( "DELETE FROM Messages$id WHERE " .
+                         "Type='INVITATION' AND " .
+                         "TO_DAYS(Now())-TO_DAYS(Time) > $invite_timelimit" );
       
-        }
+         }
 
-    }  
+      }  
 
-}
+   }
 
 
 
@@ -79,23 +80,26 @@ if( $delete_msgs )
 // Update rating
 
 
-$query = "SELECT Games.*, white.Rating as wRating, white.RatingStatus as wRatingStatus, " . 
-   "black.Rating as bRating, black.RatingStatus as bRatingStatus " .
-   "FROM Games, Players as white, Players as black " .
-   "WHERE Status='FINISHED' AND Rated='Y' AND white.ID=White_ID AND black.ID=Black_ID ".
-   "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
-   "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
+   $query = "SELECT Games.*, ". 
+       "white.Rating as wRating, white.RatingStatus as wRatingStatus, " . 
+       "black.Rating as bRating, black.RatingStatus as bRatingStatus " .
+       "FROM Games, Players as white, Players as black " .
+       "WHERE Status='FINISHED' AND Rated='Y' " .
+       "AND white.ID=White_ID AND black.ID=Black_ID ".
+       "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
+       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
 
 
-$result = mysql_query( $query );
+   $result = mysql_query( $query );
 
-while( $row = mysql_fetch_array( $result ) )
-{
-  extract( $row );
-  update_rating($wRating, $bRating, $Score, $Size, $Komi, $Handicap, $ID, $Black_ID, $White_ID);    
-}
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      extract( $row );
+      update_rating($wRating, $bRating, $Score, $Size, $Komi, $Handicap, $ID, $Black_ID, $White_ID);    
+   }
 
-$result = mysql_query( "UPDATE Players SET RatingStatus='READY', Lastaccess=Lastaccess " .
-                       "WHERE RatingStatus='INIT' " );
-   
+   $result = mysql_query( "UPDATE Players SET RatingStatus='READY', Lastaccess=Lastaccess " .
+                          "WHERE RatingStatus='INIT' " );
+  
+} 
 ?>

@@ -18,54 +18,49 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
-
 require( "include/std_functions.php" );
 
-connect2mysql();
-
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-if( !$logged_in )
 {
-   header("Location: error.php?err=not_logged_in");
-   exit;
-}
+   connect2mysql();
 
-start_page("Statistics", true, $logged_in, $player_row );
+   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-$q1 = "SELECT Status,SUM(Moves) as moves, COUNT(*) as count FROM Games GROUP BY Status";
-$q2 = "SELECT SUM(Moves) as moves, COUNT(*) as count FROM Games";
-$q3 = "SELECT SUM(Hits) as hits, Count(*) as count FROM Players";
+   if( !$logged_in )
+      error("not_logged_in");
 
-$result = mysql_query( $q1 );
 
-echo '<table border=1>
+   start_page("Statistics", true, $logged_in, $player_row );
+
+   $q1 = "SELECT Status,SUM(Moves) as moves, COUNT(*) as count FROM Games GROUP BY Status";
+   $q2 = "SELECT SUM(Moves) as moves, COUNT(*) as count FROM Games";
+   $q3 = "SELECT SUM(Hits) as hits, Count(*) as count FROM Players";
+
+   $result = mysql_query( $q1 );
+
+   echo '<table border=1>
 <tr><th>Status</th><th>Moves</th><th>Games</th><tr>
 ';
 
-while( $row = mysql_fetch_array( $result ) )
-{
-  echo '<tr><td>' . $row["Status"] . '</td><td>' . $row["moves"] . '</td><td>' . $row["count"] . '</td></tr>
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      echo '<tr><td>' . $row["Status"] . '</td><td>' . $row["moves"] . '</td><td>' . $row["count"] . '</td></tr>
 ';
-}
+   }
 
-$result = mysql_query( $q2 );
-$row = mysql_fetch_array( $result );
+   $result = mysql_query( $q2 );
+   $row = mysql_fetch_array( $result );
 
-echo '<tr><td>Total</td><td>' . $row["moves"] . '</td><td>' . $row["count"] . '</td></tr>
+   echo '<tr><td>Total</td><td>' . $row["moves"] . '</td><td>' . $row["count"] . '</td></tr>
 </table>
 ';
 
 
-$result = mysql_query( $q3 );
-$row = mysql_fetch_array( $result );
+   $result = mysql_query( $q3 );
+   $row = mysql_fetch_array( $result );
 
-echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
-
-
-end_page();
+   echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
 
 
-
+   end_page();
+}
 ?>

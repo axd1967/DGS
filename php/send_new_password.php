@@ -21,48 +21,46 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 
-connect2mysql();
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-
-
-if( $action == 'Go back' )
 {
-    header("Location: index.php");
-    exit;
-}
+   connect2mysql();
 
-$result = mysql_query( "SELECT Newpassword, Email " .
-                       "FROM Players WHERE Handle='$handle'" );
+   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+
+
+
+   if( $action == 'Go back' )
+   {
+      header("Location: index.php");
+      exit;
+   }
+
+   $result = mysql_query( "SELECT Newpassword, Email " .
+                          "FROM Players WHERE Handle='$handle'" );
   
-if( mysql_num_rows($result) != 1 )
-{
-    header("Location: error.php?err=unknown_user");
-    exit;
-}
+   if( mysql_num_rows($result) != 1 )
+      error("unknown_user");
 
-$row = mysql_fetch_array($result);
 
-if( !empty($row['Newpassword']) )
-{
-    header("Location: error.php?err=newpassword_already_sent");
-    exit;
-}
+   $row = mysql_fetch_array($result);
+
+   if( !empty($row['Newpassword']) )
+      error("newpassword_already_sent");
+
 
 // Now generate new password:
 
-$newpasswd = generate_random_password();
+   $newpasswd = generate_random_password();
 
 // Save password in database
 
-$result = mysql_query( "UPDATE Players " .
-                       "SET Newpassword=PASSWORD('$newpasswd') Where Handle='$handle'" );
+   $result = mysql_query( "UPDATE Players " .
+                          "SET Newpassword=PASSWORD('$newpasswd') Where Handle='$handle'" );
          
 
-mail( $row["Email"], 
-'Dragon Go Server: New password', 
-'You (or possibly someone else) has requested a new password, and it has 
+   mail( $row["Email"], 
+   'Dragon Go Server: New password', 
+   'You (or possibly someone else) has requested a new password, and it has 
 been randomly chosen as: ' . $newpasswd . '
 
 Both the old and the new password will also be valid until your next 
@@ -71,12 +69,13 @@ rememberable.
  
 ' . $HOSTBASE,
 
-'From: ' . $EMAIL_FROM);
+   'From: ' . $EMAIL_FROM);
 
 
-start_page("New password sent", true, $logged_in, $player_row );
+   start_page("New password sent", true, $logged_in, $player_row );
 
-echo "New password sent!";
+   echo "New password sent!";
 
-end_page();
+   end_page();
+}
 ?>

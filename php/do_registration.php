@@ -20,67 +20,59 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 
-
-if( $passwd != $passwd2 )
 {
-    header("Location: error.php?err=password_missmatch");
-    exit;
-}
-else if( strlen($passwd) < 6 )
-{
-    header("Location: error.php?err=password_too_short");
-    exit;
-}
+   if( $passwd != $passwd2 )
+   {
+      error("password_missmatch");
+   }
+   else if( strlen($passwd) < 6 )
+   {
+      error("password_too_short");
+   }
 
-if( strlen( $userid ) < 3 )
-{
-    header("Location: error.php?err=userid_too_short");
-    exit;
-}
+   if( strlen( $userid ) < 3 )
+   {
+      error("userid_too_short");
+   }
 
-if( strlen( $name ) < 1 )
-{
-    header("Location: error.php?err=name_not_given");
-    exit;
-}
+   if( strlen( $name ) < 1 )
+   {
+      error("name_not_given");
+   }
 
 
-connect2mysql();
+   connect2mysql();
 
-$result = mysql_query( "SELECT * FROM Players WHERE Handle='" . $userid . "'" );
+   $result = mysql_query( "SELECT * FROM Players WHERE Handle='" . $userid . "'" );
 
-if( mysql_num_rows($result) > 0 )
-{
-    header("Location: error.php?err=userid_in_use");
-    exit;
-}
+   if( mysql_num_rows($result) > 0 )
+   {
+      error("userid_in_use");
+   }
 
 
 
 
 # Userid and password are fine, now do the registration to the database
 
-$code = make_session_code();
+   $code = make_session_code();
 
-$result = mysql_query( "INSERT INTO Players SET " .
-                       "Handle='$userid', " .
-                       "Name='$name', " .
-                       "Password=PASSWORD('$passwd'), " .
-                       "Registerdate=NOW(), " .
-                       "Sessioncode='$code', " .
-                       "Sessionexpire=DATE_ADD(NOW(),INTERVAL $session_duration second)" );
+   $result = mysql_query( "INSERT INTO Players SET " .
+                          "Handle='$userid', " .
+                          "Name='$name', " .
+                          "Password=PASSWORD('$passwd'), " .
+                          "Registerdate=NOW(), " .
+                          "Sessioncode='$code', " .
+                          "Sessionexpire=DATE_ADD(NOW(),INTERVAL $session_duration second)" );
 
-$new_id = mysql_insert_id();
+   $new_id = mysql_insert_id();
 
-if( mysql_affected_rows() != 1 )
-{
-    header("Location: error.php?err=mysql_insert_player");
-    exit;
+   if( mysql_affected_rows() != 1 )
+      error("mysql_insert_player", true);
+
+
+   set_cookies( $userid, $code );
+
+   header("Location: status.php");
 }
-
-$result = mysql_query( "CREATE TABLE Messages$new_id (  ID int(11) DEFAULT '0' NOT NULL auto_increment, From_ID int(11), Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') DEFAULT 'NORMAL', Info enum('NONE','NEW','REPLIED','REPLY REQUIRED') DEFAULT 'NEW', Game_ID int(11), Time timestamp(14), Subject varchar(80), Text text, PRIMARY KEY (ID) )" );
-
-
-set_cookies( $userid, $code );
-
-header("Location: status.php");
+?>

@@ -17,24 +17,26 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
-
+    
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
-
+    
 require( "include/std_functions.php" );
 
-connect2mysql();
+{    
+    connect2mysql();
+ 
+    if( $logout )
+        {
+            set_cookies("","", true);
+            header("Location: " . $HOSTBASE ."/index.php");
+            exit;
+        }
 
-if( $logout )
-{
-    set_cookies("","", true);
-    header("Location: " . $HOSTBASE ."/index.php");
-    exit;
+
+    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+
+    start_page("Home", true, $logged_in, $player_row );
 }
-
-
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-start_page("Home", true, $logged_in, $player_row );
 
 ?>
     

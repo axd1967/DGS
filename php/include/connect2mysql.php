@@ -22,20 +22,19 @@ require( "include/config.php" );
 
 function connect2mysql()
 {
-    global $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
+   global $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
 
-    $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
-    if (!$dbcnx) 
-      {
-          header("Location: error.php?err=mysql_connect_failed");
-          exit;
-      }
+   $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
 
-    if (! @mysql_select_db($DB_NAME) ) 
-      {
-          header("Location: error.php?err=mysql_select_db_failed");
-        exit;
-      }    
+   if (!$dbcnx) 
+   {
+      error("mysql_connect_failed");
+   }
+
+   if (! @mysql_select_db($DB_NAME) ) 
+   {
+      error("mysql_select_db_failed");
+   }    
 }
 
 ?>

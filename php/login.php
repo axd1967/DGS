@@ -20,54 +20,56 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 
-connect2mysql();
+disable_cache();
 
-$result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire FROM Players WHERE Handle='" . $userid . "'" );
-
-if( mysql_num_rows($result) != 1 )
 {
-    header("Location: error.php?err=wrong_userid");
-    exit;
-}
+   connect2mysql();
 
-$row = mysql_fetch_array($result);
-$passwd_encrypt = mysql_fetch_row( mysql_query( "SELECT PASSWORD('$passwd')" ) );
+   $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+                          "FROM Players WHERE Handle='" . $userid . "'" );
 
-if( $row["Password"] != $passwd_encrypt[0] )
-{
-    // Check if there is a new password
+   if( mysql_num_rows($result) != 1 )
+      error("wrong_userid");
 
-    if( empty($row["Newpassword"]) or $row["Newpassword"] != $passwd_encrypt[0] )
-        {
-            header("Location: error.php?err=wrong_password");
-            exit;
-        }
 
-}
+   $row = mysql_fetch_array($result);
+   $passwd_encrypt = mysql_fetch_row( mysql_query( "SELECT PASSWORD('$passwd')" ) );
+
+   if( $row["Password"] != $passwd_encrypt[0] )
+   {
+      // Check if there is a new password
+
+      if( empty($row["Newpassword"]) or $row["Newpassword"] != $passwd_encrypt[0] )
+         error("wrong_password");
+
+
+   }
 
 // Remove the new password.
-if( !empty($row["Newpassword"]) )
-{
-    mysql_query( 'UPDATE Players ' .
-                 "SET Password='$passwd_encrypt[0]', " .
-                 'Newpassword=NULL ' .
-                 "Where Handle='$handle'" );
+   if( !empty($row["Newpassword"]) )
+   {
+      mysql_query( 'UPDATE Players ' .
+                   "SET Password='$passwd_encrypt[0]', " .
+                   'Newpassword=NULL ' .
+                   "Where Handle='$handle'" );
+   }
+
+   $code = $row["Sessioncode"];
+
+   if( !$code or $row["Expire"] < time() )
+   {
+      $code = make_session_code();
+      $result = mysql_query( "UPDATE Players SET " . 
+                             "Sessioncode='$code', " .
+                             "Sessionexpire=DATE_ADD(NOW(),INTERVAL $session_duration second) " .
+                             "WHERE Handle='$userid'" );
+
+   }
+
+   if( $handle != $userid or $sessioncode != $code )
+   {
+      set_cookies( $userid, $code );
+   }
+   header("Location: status.php");
 }
-
-$code = $row["Sessioncode"];
-
-if( !$code or $row["Expire"] < time() )
-{
-    $code = make_session_code();
-    $result = mysql_query( "UPDATE Players SET " . 
-                           "Sessioncode='$code', " .
-                           "Sessionexpire=DATE_ADD(NOW(),INTERVAL $session_duration second) " .
-                           "WHERE Handle='$userid'" );
-
-}
-
-if( $handle != $userid or $sessioncode != $code )
-{
-    set_cookies( $userid, $code );
-}
-header("Location: status.php");
+?>
