@@ -25,7 +25,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * \brief For class TournamentRound.
  */
 
- require( "include/form_functions.php" );
+require_once( "include/form_functions.php" );
 
 /*!
  * \brief Base class for a tournament round.

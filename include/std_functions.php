@@ -20,9 +20,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Common";
 
-require( "include/config.php" );
-require( "include/connect2mysql.php" );
-require( "include/translation_functions.php" );
+require_once( "include/config.php" );
+require_once( "include/connect2mysql.php" );
+require_once( "include/translation_functions.php" );
 
 if( @is_readable("timeadjust.php" ) )
    include( "timeadjust.php" );
