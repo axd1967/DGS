@@ -389,22 +389,22 @@ function draw_moves()
 }
 
 function draw_notes($notes)
-   {
-
+{
    global $gid;
 
    echo "<form name=\"savenotes\" action=\"savenotes.php\" method=\"post\">";
-   echo "<input type=\"hidden\" name=\"refer_url\" value=\"". $_SERVER['REQUEST_URI'] . "\"><br>";
+   echo "<input type=\"hidden\" name=\"refer_url\" value=\"". get_request_url() . "\"><br>";
    echo "<input type=\"hidden\" name=\"gid\" value=\"". $gid . "\"><br>";
    echo "<table>";
    echo "<tr><td bgcolor=#7aa07a><font color=white><b><span id=\"notes_caption\">" . T_("Private game notes") .
       "</span></b></font></td></tr>\n";
    echo "<tr><td bgcolor=#ddf0dd>\n";
+   $notes = @htmlspecialchars($notes, ENT_QUOTES);
    echo "<textarea name=\"notes\" id=\"notes\" cols=\"20\" rows=\"25\" wrap=\"virtual\">$notes</textarea>";
    echo "</td></tr>\n";
    echo "<tr><td><input type=\"submit\" value=\"Save notes\"></td></tr>";
    echo "</table>";
    echo "</form>";
-   }
+}
 
 ?>

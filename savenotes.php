@@ -45,7 +45,6 @@ disable_cache();
    if ($player_row["ID"] != $Black_ID and $player_row["ID"] != $White_ID)
       error("not_a_player");
 
-   make_mysql_safe(make_textarea_safe($notes));
 
    if ($player_row["ID"] == $Black_ID)
       {
@@ -57,6 +56,6 @@ disable_cache();
       }
 
    //go back to where we came from
-   jump_to(substr($refer_url, 1));
+   jump_to($refer_url);
 
 }

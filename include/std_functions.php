@@ -774,22 +774,6 @@ function make_html_safe( $msg, $some_html=false)
    return $msg;
 }
 
-function make_mysql_safe(&$msg)
-{
-   $msg = str_replace("\\", "\\\\", $msg);
-   $msg = str_replace("\"", "\\\"", $msg);
-}
-
-function make_textarea_safe(&$msg)
-{
-   // Filter out HTML code
-
-   $msg = str_replace("<", "&lt;", $msg);
-   $msg = str_replace(">", "&gt;", $msg);
-
-   return $msg;
-}
-
 function score2text($score, $verbose, $keep_english=false)
 {
    if( !isset($score) )
@@ -862,6 +846,19 @@ function make_url($page, $sep, $array)
    if( $sep )
       $url .= $separator;
 
+   return $url;
+}
+
+function get_request_url()
+{
+ global $SUB_PATH;
+
+   $url = $_SERVER['REQUEST_URI'];
+   $len = strlen($SUB_PATH);
+   if ($len == 1)
+      $url = substr($url,1);
+   else if (!strcasecmp( $SUB_PATH, substr($url,0,$len) ))
+      $url = substr($url,$len+1);
    return $url;
 }
 
