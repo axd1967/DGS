@@ -180,9 +180,12 @@ sub gifify
     $fg = gimp_palette_get_foreground ();
     gimp_palette_set_foreground ([237, 183, 123]);
     gimp_selection_none ($theImage);
+    gimp_edit_copy ($theLayer);
     $mask = gimp_layer_create_mask ($theLayer, ALPHA_MASK);
-    gimp_image_add_layer_mask ($theImage, $theLayer, $mask);
+    $float = gimp_edit_paste ($mask, 1);
+    gimp_floating_sel_anchor ($float);
     gimp_threshold ($mask, 50, 255);
+    gimp_image_add_layer_mask ($theImage, $theLayer, $mask);
     $newLayer = gimp_layer_copy ($theLayer, 1);
     gimp_image_add_layer ($theImage, $newLayer, 1);
     gimp_drawable_fill ($newLayer, FG_IMAGE_FILL);
@@ -198,7 +201,7 @@ sub save_image
     {
         gimp_image_scale( $theImage, $final_size, $final_size );
     }
-#    file_png_save( $theImage, $theLayer, $final_size."/".$name.".orig.png", $name."orig.png", 0, 9, 0, 0, 0, 0, 0 );
+    #file_png_save( $theImage, $theLayer, $final_size."/".$name.".orig.png", $name."orig.png", 0, 9, 0, 0, 0, 0, 0 );
     gifify ();
     gimp_convert_indexed ($theImage, 1, 0, 50, 0, 1, "");
     file_gif_save( $theImage, $theLayer, $final_size."/".$name.".gif", $name.".gif", 0, 0, 0, 0);
@@ -236,8 +239,8 @@ sub resize
 sub load_image
 {
     my ($filename, $scaled, $fg_color) = @_;
-    $theImage = Gimp->gimp_file_load ($filename, $filename);
-    Gimp->gimp_image_undo_disable ($theImage);
+    $theImage = gimp_file_load ($filename, $filename);
+    gimp_image_undo_disable ($theImage);
     if ($scaled == 1)
     {
         gimp_image_scale ($theImage, $final_size, $final_size);
@@ -248,6 +251,7 @@ sub load_image
         $size = gimp_image_height ($theImage);
     }
     $theLayer = gimp_image_active_drawable ($theImage);
+    gimp_layer_add_alpha ($theLayer);
     gimp_palette_set_foreground ($fg_color);
     gimp_selection_none ($theImage);
 }
@@ -275,7 +279,6 @@ sub new_image
 
 
 Gimp::init;
-
 
 $number_font='helvetica';
 $number_font_weight='bold';
