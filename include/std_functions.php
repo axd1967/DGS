@@ -214,7 +214,7 @@ function jump_to($uri, $absolute=false)
 function make_session_code()
 {
    mt_srand((double)microtime()*1000000); 
-   return sprintf("%06X%06X%04X\0",mt_rand(0,16777215), mt_rand(0,16777215), mt_rand(0,65535));
+   return sprintf("%06X%06X%04X",mt_rand(0,16777215), mt_rand(0,16777215), mt_rand(0,65535));
 }
 
 function random_letter()
