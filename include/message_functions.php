@@ -353,4 +353,47 @@ function interpret_time_limit_forms()
 
 }
 
+function get_folders($uid)
+{
+   $result = mysql_query("SELECT * FROM Folders WHERE uid=0 OR uid=$uid ORDER BY Folder_nr")
+      or die(mysql_error());
+
+   $array = array();
+   while( $row = mysql_fetch_array($result) )
+   {
+      $array[$row['Folder_nr']] = $row['Name'];
+   }
+
+   return $array;
+}
+
+function change_folders_for_marked_messages($uid)
+{
+   $message_ids = array();
+   foreach( $_GET as $key => $val )
+      {
+         if( preg_match("/^mark(\d+)$/", $key, $matches) )
+            array_push($message_ids, $matches[1]);
+      }
+
+   if( count($message_ids) )
+   {
+      $folders = get_folders($uid);
+      $new_folder = $_GET['folder'];
+      if( !isset($folders[$new_folder]) )
+         return;
+
+      $query = "UPDATE Messages SET From_Folder_nr=$new_folder " .
+         "WHERE From_ID=$uid AND ID IN (" . implode(',', $message_ids) . ") " .
+         "LIMIT " . count($message_ids);
+
+      mysql_query( $query ) or die(mysql_error());
+
+      $query = "UPDATE Messages SET To_Folder_nr=$new_folder " .
+         "WHERE To_ID=$uid AND ID IN (" . implode(',', $message_ids) . ") " .
+         "LIMIT " . count($message_ids);
+
+      mysql_query( $query ) or die(mysql_error());
+   }
+}
 ?>

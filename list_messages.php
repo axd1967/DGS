@@ -22,6 +22,8 @@ $TranslateGroups[] = "Messages";
 
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
+require_once( "include/form_functions.php" );
+require_once( "include/message_functions.php" );
 require_once( "include/timezones.php" );
 
 {
@@ -34,29 +36,16 @@ require_once( "include/timezones.php" );
 
    $my_id = $player_row["ID"];
 
-   if( $_GET['del'] )
-   {
-      // delete messages
+   change_folders_for_marked_messages($my_id);
 
-      if( $_GET['del'] == 'all' )
-      {
-         $result = mysql_query("UPDATE Messages " .
-                               "SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
-                               "WHERE To_ID=$my_id AND " .
-                               "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )");
-      }
-      else
-      {
-         $query = "UPDATE Messages " .
-             "SET Flags=" .
-             ( $_GET['del'] > 0 ? "CONCAT_WS(',',Flags,'DELETED')" : "REPLACE(Flags,'DELETED','')" ) .
-             " WHERE To_ID=$my_id AND ID=" . abs($_GET['del']) . " AND " .
-             "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' ) LIMIT 1";
+   $query = "UPDATE Messages " .
+      "SET Flags=" .
+      ( $_GET['del'] > 0 ? "CONCAT_WS(',',Flags,'DELETED')" : "REPLACE(Flags,'DELETED','')" ) .
+      " WHERE To_ID=$my_id AND ID=" . abs($_GET['del']) . " AND " .
+      "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' ) LIMIT 1";
 
-         mysql_query($query);
+   mysql_query($query);
 
-      }
-   }
 
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
@@ -102,6 +91,8 @@ require_once( "include/timezones.php" );
 
    echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
 
+   echo "<form name=\"marked\" action=\"list_messages.php\" method=\"GET\">\n";
+
    $mtable = new Table( make_url( 'list_messages.php',
                                   true,
                                   array('all' => $_GET['all'], 'sent' => $_GET['sent']) ),
@@ -125,11 +116,8 @@ require_once( "include/timezones.php" );
 
    $mtable->add_tablehead( 3, T_('Subject'), 'Subject', false, true );
    $mtable->add_tablehead( 4, T_('Date'), 'date', true, true );
+   $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
 
-   if( !($_GET['sent']==1) )
-   {
-      $mtable->add_tablehead( 5, T_('Del'), NULL, true, true );
-   }
 
    $i=0;
    $row_color=2;
@@ -171,29 +159,8 @@ require_once( "include/timezones.php" );
          make_html_safe($row["sender"]) . "</A></td>";
       $row_strings[3] = "<td>" . make_html_safe($row["Subject"]) . "&nbsp;</td>";
       $row_strings[4] = "<td>" . date($date_fmt, $row["date"]) . "</td>";
-
-      if( !($_GET['sent']==1) and
-          strpos($row["Flags"],'NEW') === false and
-          ( strpos($row["Flags"],'REPLY REQUIRED') === false or
-            !(strpos($row["Flags"],'REPLIED') === false) ) )
-      {
-         $row_strings[5] =
-            '<td align=center><a href="' .
-            make_url('list_messages.php',
-                     false,
-                     array( 'del' => $mid,
-                            'all' => $_GET['all'],
-                            'sort1' => $_GET['sort1'],
-                            'desc1' => $_GET['desc1'],
-                            'sort2' => $_GET['sort2'],
-                            'desc2' => $_GET['desc2'] )) . "\"> " .
-            "<img width=15 height=16 border=0 alt='X' " .
-            "src=\"images/trashcan.gif\"></A></td>";
-      }
-      else if( !($_GET['sent']==1) )
-      {
-        $row_strings[5] = "<td>&nbsp;</td>";
-      }
+      $row_strings[5] = '<td align=center>'  .
+         '<input type="checkbox" name="mark' . $row['mid'] .  '" value="Y"></td>';
 
       $mtable->add_row( $row_strings );
 
@@ -202,6 +169,14 @@ require_once( "include/timezones.php" );
    }
 
    $mtable->echo_table();
+
+   $form = new Form('','','');
+   echo '<center>' .
+      '<input type="submit" name="move_marked" value="' .
+      T_('Move marked messages to folder') . '">' .
+      $form->print_insert_select_box( 'folder', '1', get_folders($my_id), '', '') .
+      "</form>\n";
+
 
    $menu_array = array( T_('Send a message') => 'message.php?mode=NewMessage' );
 

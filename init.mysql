@@ -183,6 +183,8 @@ CREATE TABLE Messages (
   Flags set('DELETED','NEW','REPLIED','REPLY REQUIRED') NOT NULL default 'NEW',
   ReplyTo int(11) default NULL,
   Game_ID int(11) default NULL,
+  From_Folder_nr int(11) NOT NULL default 5,
+  To_Folder_nr int(11) NOT NULL default 2,
   Time datetime NOT NULL,
   Subject varchar(80) default NULL,
   Text text,
@@ -191,6 +193,31 @@ CREATE TABLE Messages (
   KEY From_ID (From_ID)
 ) TYPE=MyISAM;
 
+CREATE TABLE MessagesNew (
+  ID int(11) NOT NULL auto_increment,
+  To_ID int(11) default NULL,
+  From_ID int(11) default NULL,
+  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') default 'NORMAL',
+  Replied set('N','Y') NOT NULL default 'N',
+  ReplyTo int(11) default NULL,
+  Game_ID int(11) default NULL,
+  From_Folder_ID int(11) NOT NULL default 4,
+  To_Folder_ID int(11) NOT NULL default 1,
+  Time datetime NOT NULL,
+  Subject varchar(80) default NULL,
+  Text text,
+  PRIMARY KEY  (ID),
+  KEY To_ID (To_ID),
+  KEY From_ID (From_ID)
+) TYPE=MyISAM;
+
+CREATE TABLE Folders (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) default NULL,
+  Folder_nr int(11) default NULL,
+  PRIMARY KEY  (ID),
+  KEY (uid, Folder_nr)
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'Moves'
