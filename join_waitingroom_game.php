@@ -116,16 +116,16 @@ require( "include/rating.php" );
    if( $swap )
       $query .= "Black_ID=$uid, " .
          "White_ID=" . $player_row["ID"] . ", " .
-         (is_numeric($my_rating) ? "White_Rating=$my_rating, " : '' ) .
-         (is_numeric($opponent_rating) ? "Black_Rating=$opponent_rating, " : '' ) .
+         (is_numeric($my_rating) ? "White_Start_Rating=$my_rating, " : '' ) .
+         (is_numeric($opponent_rating) ? "Black_Start_Rating=$opponent_rating, " : '' ) .
          "ToMove_ID=$uid, " .
          "ClockUsed=$clock_used_white, " .
          "LastTicks=$ticks_white, ";
    else
       $query .= "White_ID=$uid, " .
          "Black_ID=" . $player_row["ID"] . ", " .
-         (is_numeric($my_rating) ? "Black_Rating=$my_rating, " : '' ) .
-         (is_numeric($opponent_rating) ? "White_Rating=$opponent_rating, " : '' ) .
+         (is_numeric($my_rating) ? "Black_Start_Rating=$my_rating, " : '' ) .
+         (is_numeric($opponent_rating) ? "White_Start_Rating=$opponent_rating, " : '' ) .
          "ToMove_ID=" . $player_row["ID"] . ", " .
          "ClockUsed=$clock_used_black, " .
          "LastTicks=$ticks_black, ";
@@ -156,8 +156,8 @@ require( "include/rating.php" );
       $query = "INSERT INTO Games SET " .
          "Black_ID=$uid, " .
          "White_ID=" . $player_row["ID"] . ", " .
-         (is_numeric($my_rating) ? "White_Rating=$my_rating, " : '' ) .
-         (is_numeric($opponent_rating) ? "Black_Rating=$opponent_rating, " : '' ) .
+         (is_numeric($my_rating) ? "White_Start_Rating=$my_rating, " : '' ) .
+         (is_numeric($opponent_rating) ? "Black_Start_Rating=$opponent_rating, " : '' ) .
          "ToMove_ID=$uid, " .
          "Status='PLAY', " .
          "ClockUsed=$clock_used_white, " .

@@ -249,7 +249,10 @@ function update_rating2($gid, $check_done=true)
 
    if( $Rated === 'N' or $Moves < 10+$Handicap ) // Don't rate games with too few moves
    {
-      mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid LIMIT 1");
+      mysql_query("UPDATE Games SET Rated='N'" .
+                  ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
+                  ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
+                  " WHERE ID=$gid LIMIT 1");
       return;
    }
 
@@ -316,7 +319,7 @@ function update_rating2($gid, $check_done=true)
 
 
    mysql_query( "UPDATE Games SET Rated='Done', " .
-                "Black_Rating=$bRating, White_Rating=$wRating " .
+                "Black_End_Rating=$bRating, White_End_Rating=$wRating " .
                 "WHERE ID=$gid LIMIT 1" );
 
    mysql_query( "UPDATE Players SET Rating2=$bRating, " .

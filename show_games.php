@@ -106,9 +106,9 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          "black.Name AS blackName, black.Handle AS blackHandle, black.ID AS blackID, " .
          "white.Name AS whiteName, white.Handle AS whiteHandle, white.ID AS whiteID, " .
          "black.Rating2 AS blackRating, white.Rating2 AS whiteRating, " .
-         "Games.Black_Rating AS blackStartRating, Games.White_Rating AS whiteStartRating " .
+         "Games.Black_Start_Rating AS blackStartRating, Games.White_Start_Rating AS whiteStartRating " .
          ( $_GET['finished']
-           ? ", blog.Rating AS blackEndRating, wlog.Rating AS whiteEndRating, " .
+           ? ", Black_End_Rating AS blackEndRating, White_End_Rating AS whiteEndRating, " .
            "blog.RatingDiff AS blackDiff, wlog.RatingDiff AS whiteDiff " : '' ) .
          "FROM Games, Players AS white, Players AS black " .
          ( $_GET['finished'] ?
@@ -126,9 +126,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          "Name, Handle, Players.ID as pid, " .
          "Rating2 AS Rating, " .
          'IF(Black_ID=' . $_GET['uid'] .
-         ', Games.White_Rating, Games.Black_Rating) AS startRating, ' .
+         ', Games.White_Start_Rating, Games.Black_Start_Rating) AS startRating, ' .
          ( $_GET['finished'] ?
-           "opplog.Rating AS endRating, mylog.RatingDiff AS ratingDiff, " : '' ) .
+           'IF(Black_ID=' . $_GET['uid'] .
+           ', Games.White_End_Rating, Games.Black_End_Rating) AS endRating, ' .
+           'log.RatingDiff AS ratingDiff, ' : '' ) .
          "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
          "IF(White_ID=" . $_GET['uid'] . ", 2, 1) AS Color ";
 
@@ -141,8 +143,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
       $query .= "FROM Games,Players " .
          ( $_GET['finished'] ?
-           "LEFT JOIN Ratinglog AS mylog ON mylog.gid=Games.ID AND mylog.uid=" . $_GET['uid'] . ' ' .
-           "LEFT JOIN Ratinglog AS opplog ON opplog.gid=Games.ID AND opplog.uid!=" . $_GET['uid'] . ' ' : '' ) .
+           "LEFT JOIN Ratinglog AS log ON gid=Games.ID AND uid={$_GET['uid']} " : '' ) .
          "WHERE " . ( $_GET['finished'] ? "Status='FINISHED' "
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND (( Black_ID=" . $_GET['uid'] . " AND White_ID=Players.ID ) " .
