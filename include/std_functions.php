@@ -267,7 +267,7 @@ function make_html_safe(&$msg, $some_html=false)
 
       $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>", 
                          "{anglstart}a href=\"\\1\\2\"{anglend}\\2{anglstart}/a{anglend}", $msg);
-      $msg=eregi_replace("<([http|news|ftp]+://[^ >\n\t]+)>", 
+      $msg=eregi_replace("<([http|news|ftp]://[^ >\n\t]+)>", 
                          "{anglstart}a href=\"\\1\"{anglend}\\1{anglstart}/a{anglend}", $msg);
 
 
