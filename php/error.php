@@ -26,7 +26,9 @@ include( "std_functions.php" );
 
 //$logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-start_page("Messages", true, false );
+$player_row = 0;
+
+start_page("Messages", true, false, $player_row );
 
 switch( $err )
 {
