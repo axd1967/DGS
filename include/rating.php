@@ -340,22 +340,32 @@ function update_rating2($gid, $check_done=true)
 
 }
 
-function update_rating_glicko($gid)
+
+//
+// Glicko-2, see http://www.glicko.com/glicko2.doc/example.html
+//
+function update_rating_glicko($gid, $check_done=true)
 {
    global $NOW;
 
-   $C = 60;
+   // Step 1
+
+   $tau = 1.2;
+   $tau2 = 1/($tau*$tau);
 
    $query = "SELECT Games.*, ".
-       "white.RatingGlicko as wRating, white.RatingStatus as wRatingStatus, " .
-       "white.RatingGlickoRD as wRatingRD, " .
-       "black.RatingGlicko as bRating, black.RatingStatus as bRatingStatus, " .
-       "black.RatingGlickoRD as bRatingRD " .
-       "FROM Games, Players as white, Players as black " .
-       "WHERE Status='FINISHED' AND Games.ID=$gid AND Rated!='N' " .
-       "AND white.ID=White_ID AND black.ID=Black_ID ".
-       "AND white.RatingStatus='RATED' " .
-       "AND black.RatingStatus='RATED' ";
+      "white.RatingGlicko as wRating, " .
+      "white.RatingStatus as wRatingStatus, " .
+      "white.RatingGlicko_Deviation as wRatingDeviation, " .
+      "white.RatingGlicko_Volatility as wRatingVolatility, " .
+      "black.RatingGlicko as bRating, " .
+      "black.RatingStatus as bRatingStatus, " .
+      "black.RatingGlicko_Deviation as bRatingDeviation, " .
+      "black.RatingGlicko_Volatility as bRatingVolatility " .
+      "FROM Games, Players as white, Players as black " .
+      "WHERE Status='FINISHED' AND Games.ID=$gid " .
+      ( $check_done ? "AND Rated!='Done' " : '' ) .
+      "AND white.ID=White_ID AND black.ID=Black_ID ";
 
 
    $result = mysql_query( $query ) or die(mysql_error());
@@ -366,15 +376,133 @@ function update_rating_glicko($gid)
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   if( $Moves < 10+$Handicap ) // Don't rate games with too few moves
+   if( $Rated === 'N' or $Moves < 10+$Handicap ) // Don't rate games with too few moves
    {
-      mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid");
+      mysql_query("UPDATE Games SET Rated='N'" .
+                  ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
+                  ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
+                  " WHERE ID=$gid LIMIT 1");
       return;
    }
 
    $game_result = 0.5;
-   if( $Score > 0 ) $game_result = 1.0;
-   if( $Score < 0 ) $game_result = 0.0;
+   if( $Score > 0 ) $game_result = 1.0; // White won
+   if( $Score < 0 ) $game_result = 0.0; // Black won
+
+   $D = $wRating - $bRating;
+
+   if( $Handicap <= 0 )
+      $Handicap = 1;
+
+   $H = ( $Handicap - 0.5 - $Komi / 13.0 );
+
+   // Handicap value is about proportional to number of moves
+   $H *= ( 256.0 / (($Size-3.0)*($Size-3.0)));
+
+   $p = 400/M_LN10;
+
+   $D -= 100.0 * $H;
+   $D /= $p;
+
+   // Step 2
+
+   $w_mu = $wRating/$p;
+   $b_mu = $bRating/$p;
+   $w_phi = $wRatingDeviation/$p;
+   $b_phi = $bRatingDeviation/$p;
+
+   // Step 3
+   $w_g = 1/sqrt(1+3*($w_phi/M_PI)*($w_phi/M_PI));
+   $b_g = 1/sqrt(1+3*($b_phi/M_PI)*($b_phi/M_PI));
+
+   $w_e = 1/(1+exp(-$b_g*($D)));
+   $b_e = 1/(1+exp(-$w_g*(-$D)));
+   $w_v = 1/($b_g*$b_g * $w_e * (1-$w_e));
+   $b_v = 1/($w_g*$w_g * $b_e * (1-$b_e));
+
+   // Step 4
+   $w_delta = $w_v * $b_g * ($game_result - $w_e);
+   $b_delta = $b_v * $w_g * (1 - $game_result - $b_e);
+
+   // Step 5
+//    $a = 2*log($wRatingVolatility);
+
+//    $x = $a;
+//    $x_last = $x+10;
+//    while( abs($x_last - $x) > 1e-14 )
+//    {
+//       $exp_x = exp($x);
+//       $d = $w_phi*$w_phi + $w_v + $exp_x;
+
+//       $h1 = -($x - $a)*$tau2 + 0.5*$exp_x*(($w_delta*$w_delta-$d)/($d*$d));
+//       $h2 = -$tau2 - 0.5*$exp_x*( ($w_phi*$w_phi + $w_v)/($d*$d) +
+//                                   $delta*$delta*($w_phi*$w_phi + $w_v - $exp_x)/($d*$d*$d));
+//       $x_last = $x;
+//       $x = $x - $h1/$h2;
+//    }
+//    $w_sigma = exp($x/2);
+//    echo "<br>w_sigma: $wRatingVolatility";
+//    echo "<br>w_sigma: $w_sigma";
+
+   $sigma = $wRatingVolatility;
+   $d = $w_phi*$w_phi + $w_v + $sigma;
+   $k = $tau*$sigma/(2*$d);
+
+   $w_sigma = $sigma*exp($k*$k * ($w_delta*$w_delta - $d));
+
+//    $a = 2*log($bRatingVolatility);
+
+//    $x = $a;
+//    $x_last = $x+10;
+//    while( abs($x_last - $x) > 1e-14 )
+//    {
+//       $exp_x = exp($x);
+//       $d = $b_phi*$b_phi + $b_v + $exp_x;
+//       $h1 = -($x - $a)*$tau2 + 0.5*$exp_x*(($b_delta*$b_delta-$d)/($d*$d));
+//       $h2 = -$tau2 - 0.5*$exp_x*( ($b_phi*$b_phi + $b_v)/($d*$d) +
+//                                   $delta*$delta*($b_phi*$b_phi + $b_v - $exp_x)/($d*$d*$d));
+
+//       $x_last = $x;
+//       $x = $x - $h1/$h2;
+//    }
+
+//   $b_sigma = exp($x/2);
+   $sigma = $bRatingVolatility;
+   $d = $b_phi*$b_phi + $b_v + $sigma*$sigma;
+   $k = $tau*$sigma/(2*$d);
+   $b_sigma = $sigma*exp($k*$k * ($b_delta*$b_delta - $d));
+
+   // Step 6
+   $w_phi = sqrt($w_phi*$w_phi + $w_sigma*$w_sigma);
+   $b_phi = sqrt($b_phi*$b_phi + $b_sigma*$b_sigma);
+
+   // Step 7,8
+   $w_phi = 1/sqrt(1/($w_phi*$w_phi) + 1/$w_v);
+   $b_phi = 1/sqrt(1/($b_phi*$b_phi) + 1/$b_v);
+
+   $w_mu = $p * ( $w_mu + $w_phi * $w_phi * $b_g * ($game_result - $w_e) );
+   $b_mu = $p * ( $b_mu + $b_phi * $b_phi * $w_g * (1 - $game_result - $b_e) );
+
+   $w_phi *= $p;
+   $b_phi *= $p;
+
+   mysql_query( "UPDATE Players SET RatingGlicko=$w_mu, " .
+                "RatingGlicko_Deviation=$w_phi, RatingGlicko_Volatility=$w_sigma " .
+                "WHERE ID=$White_ID LIMIT 1" ) or die(mysql_error());
+
+   mysql_query( "UPDATE Players SET RatingGlicko=$b_mu, " .
+                "RatingGlicko_Deviation=$b_phi, RatingGlicko_Volatility=$b_sigma " .
+                "WHERE ID=$Black_ID LIMIT 1" ) or die(mysql_error());
+
+   mysql_query('INSERT INTO RatinglogGlicko' .
+               '(uid,gid,RatingGlicko,RatingGlicko_Deviation,RatingGlicko_Volatility,RatingDiff,Time) VALUES ' .
+               "($Black_ID, $gid, $b_mu, $b_phi, $b_sigma, " .
+               ($b_mu - $bRating) . ",'$Lastchanged'), " .
+               "($White_ID, $gid, $w_mu, $w_phi, $w_sigma, " .
+               ($w_mu - $wRating) . ", '$Lastchanged') ")
+      or die(mysql_error());
+
+   echo "<br>$gid: $White_ID - $Black_ID    $w_mu, $w_phi, $w_sigma - $b_mu, $b_phi, $b_sigma\n";
 }
 
 // To avoid too many translations
