@@ -80,22 +80,20 @@ require( "include/rating.php" );
 // Update rating
 
 
-   $query = "SELECT Games.*, ". 
-       "white.Rating as wRating, white.RatingStatus as wRatingStatus, " . 
-       "black.Rating as bRating, black.RatingStatus as bRatingStatus " .
+   $query = "SELECT Games.ID as gid ". 
        "FROM Games, Players as white, Players as black " .
        "WHERE Status='FINISHED' AND Rated='Y' " .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
        "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
-       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
+       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) " .
+       "ORDER BY Lastchanged, gid";
 
 
    $result = mysql_query( $query );
-
+   echo mysql_num_rows($result);
    while( $row = mysql_fetch_array( $result ) )
    {
-      extract( $row );
-      update_rating($wRating, $bRating, $Score, $Size, $Komi, $Handicap, $ID, $Black_ID, $White_ID);    
+      update_rating($row["gid"]);    
    }
 
    $result = mysql_query( "UPDATE Players SET RatingStatus='READY', Lastaccess=Lastaccess " .

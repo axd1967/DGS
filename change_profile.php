@@ -75,6 +75,7 @@ require( "include/rating.php" );
    {
       // TODO: check if reasonable
       $query .= "Rating=$newrating, " .
+          "InitialRating=$newrating, " .
           "RatingStatus='INIT', ";
         
    }

@@ -153,18 +153,36 @@ function suggest($rating_W, $rating_B, $size, $pos_komi=false)
    return array($handicap, $komi);
 }
 
-function update_rating(&$wRating, &$bRating, $score, $size, $komi, $handicap, 
-$gid, $Black_ID, $White_ID)
+function update_rating($gid)
 {
+   $query = "SELECT Games.*, ". 
+       "white.Rating as wRating, white.RatingStatus as wRatingStatus, " . 
+       "black.Rating as bRating, black.RatingStatus as bRatingStatus " .
+       "FROM Games, Players as white, Players as black " .
+       "WHERE Status='FINISHED' AND Rated='Y' AND Games.ID=$gid " .
+       "AND white.ID=White_ID AND black.ID=Black_ID ".
+       "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
+       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
 
-   $result = 0.5;
-   if( $score > 0 ) $result = 1.0;
-   if( $score < 0 ) $result = 0.0;
+
+   $result = mysql_query( $query );
+
+   if(  mysql_num_rows($result) != 1 )
+      return;
+
+   $row = mysql_fetch_array( $result );
+   extract($row);
+
+   echo $gid . "<p>\n";
+
+   $game_result = 0.5;
+   if( $Score > 0 ) $game_result = 1.0;
+   if( $Score < 0 ) $game_result = 0.0;
 
    $bOld = $bRating;
    $wOld = $wRating;
 
-   change_rating($wRating, $bRating, $result, $size, $komi, $handicap);
+   change_rating($wRating, $bRating, $game_result, $Size, $Komi, $Handicap);
 
    mysql_query( "UPDATE Games SET Lastchanged=Lastchanged, Rated='DONE' WHERE ID=$gid" );
 

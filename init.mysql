@@ -24,6 +24,7 @@ CREATE TABLE Players (
   ClockUsed int(11) NOT NULL default '22',
   ClockChanged datetime default NULL,
   Rating double default NULL,
+  InitialRating double default NULL,
   RatingStatus enum('INIT','READY','RATED') default NULL,
   Open varchar(40) default NULL,
   Woodcolor int(11) NOT NULL default '1',
