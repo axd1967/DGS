@@ -39,18 +39,22 @@ function item($text,$link,$working, $level,$last=false)
 
    echo "<td width=50 align=right><img alt=\"" . ( $last ? "&nbsp;`-" : "&nbsp;|-" ) .
       "\" src=\"$size/" . ( $last ? "dl" : "el" ) . ".gif\"></td>" .
-      "<td colspan=" . (4-$level) . ">&nbsp;<a " . ( $working ? "" : "class=dead " ) .
-      " href=\"$link\">" .
-      "<font color=" . ($working ? "0C41C9" : "black"  ) . ">$text</font></a></td></tr>\n";
+      "<td colspan=" . (4-$level) . ">&nbsp;";
+
+   if( $working )
+      echo "<a href=\"$link\"><font color=\"#0C41C9\">$text</font></a>";
+   else
+      echo "<font color=\"black\">$text</font>";
+
+   echo "</td></tr>\n";
 
    ${"f$level"} = !$last;
-
 }
 
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    start_page("Site map", true, $logged_in, $player_row );
 
@@ -90,7 +94,7 @@ function item($text,$link,$working, $level,$last=false)
          item(T_('Send a message'), "message.php?mode=NewMessage", true, 1);
          item(T_('Invite'), "message.php?mode=Invite", true, 1);
          item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
-         item(T_('Message list'), "list_messages.php?all=1", true, 1, true);
+         item(T_('Message list'), "list_messages.php", true, 1, true);
          {
             item(T_('Edit message folders'), "edit_folders.php", true, 2, true);
          }
@@ -103,12 +107,12 @@ function item($text,$link,$working, $level,$last=false)
          item(T_('User info'), "userinfo.php", false, 1, true);
       }
 
-      item(T_('Forum'), "phorum/index.php", true, 0);
+      item(T_('Forum'), "forum/index.php", true, 0);
       {
-         item(T_('Thread list'), "phorum/list.php", false, 1, true);
+         item(T_('Thread list'), "forum/list.php", false, 1, true);
          {
-            item(T_('Read forum'), "phorum/read.php", false, 2);
-            item(T_('New topic'), "phorum/post.php", false, 2, true);
+            item(T_('Read forum'), "forum/read.php", false, 2);
+            item(T_('New topic'), "forum/post.php", false, 2, true);
          }
       }
 

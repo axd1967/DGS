@@ -35,7 +35,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
 {
   connect2mysql();
 
-  $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+  $logged_in = who_is_logged( $player_row);
 
   start_page(T_("People"), true, $logged_in, $player_row );
 
@@ -45,10 +45,42 @@ function add_contributor( $text, $contributor, $uid = -1 )
   echo "</td></tr>\n";
 
   add_contributor( T_("Current maintainer and founder of Dragon"), "Erik Ouchterlony" );
-  add_contributor( T_("Developer"), "Ragnar Ouchterlony" );
-  add_contributor( T_("Developer"), "Rod Ival" );
+
+
+  $first = T_("Developer");
+  foreach( array( "Ragnar Ouchterlony",
+                  "Rod Ival",
+                  "Kris Van Hulle",
+                  ) as $name )
+  {
+      add_contributor( $first, $name );
+      $first = '';
+  }
+
+
+  echo "<tr><td colspan=2>&nbsp;<p>\n";
+  echo "<center><h3><font color=$h3_color>" .
+     T_("FAQ") . "</font></h3></center>\n";
+  echo "</td></tr>\n";
+
   add_contributor( T_("FAQ editor"), "Bjørn Ingmar Berg" );
-  add_contributor( T_("FAQ co-editor"), "Frank Schlüter" );
+
+  $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level FROM Players " .
+                               "WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" );
+
+  $first = T_("FAQ co-editor");
+  while( $row = mysql_fetch_array( $query_result ) )
+  {
+      //add_contributor( , "Frank Schlüter" );
+      if( $row['ID'] != 0 ) //?? skip "Bjørn Ingmar Berg"
+      {
+         add_contributor( $first,
+                          make_html_safe($row['Name']),
+                          $row['ID'] );
+         $first = '';
+      }
+  }
+
 
   echo "<tr><td colspan=2>&nbsp;<p>\n";
   echo "<center><h3><font color=$h3_color>" .
@@ -64,9 +96,9 @@ function add_contributor( $text, $contributor, $uid = -1 )
      $languages = explode(',', $row['Translator']);
      foreach( $languages as $language )
         {
-           list($lang, $enc) = explode('.', $language, 2);
+           list($lang, $charenc) = explode('.', $language, 2);
 
-           $lang_name = T_($known_languages[$lang][$enc]);
+           $lang_name = T_($known_languages[$lang][$charenc]);
 
            if( !isset($translator_list[$lang_name]) )
               $translator_list[$lang_name] = array();
@@ -83,7 +115,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
         foreach( $translators as $translator )
            {
               add_contributor( $first ? $language : '',
-                               $translator['Name'],
+                               make_html_safe($translator['Name']),
                                $translator['ID'] );
               $first = false;
            }
