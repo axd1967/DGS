@@ -100,7 +100,6 @@ function a($rating)
 
 function change_rating(&$rating_A, &$rating_B, $result, $size, $komi, $handicap)
 {
-  echo "$rating_A\n$rating_B\n";
 
   $e = 0.014;
 
@@ -132,6 +131,7 @@ function change_rating(&$rating_A, &$rating_B, $result, $size, $komi, $handicap)
 
   $rating_A += $conA * ($result - $SEA);
   $rating_B += $conB * (1-$result - $SEB);
+
 }
 
 function update_rating(&$wRating, &$bRating, $score, $size, $komi, $handicap, 
@@ -139,17 +139,25 @@ function update_rating(&$wRating, &$bRating, $score, $size, $komi, $handicap,
 {
 
   $result = 0.5;
-  if( $Score > 0 ) $result = 1.0;
-  if( $Score < 0 ) $result = 0.0;
+  if( $score > 0 ) $result = 1.0;
+  if( $score < 0 ) $result = 0.0;
+
+  $bOld = $bRating;
+  $wOld = $wRating;
 
   change_rating($wRating, $bRating, $result, $size, $komi, $handicap);
 
-  mysql_query( "UPDATE Games SET Lastchanged=Lastchanged, Rated='DONE' WHERE ID=$gid" );
-  mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, Rating=$bRating, " .
-               "RatingStatus='RATED' WHERE ID=$Black_ID" );
-  mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, Rating=$wRating, " .
-               "RatingStatus='RATED' WHERE ID=$White_ID" );
+    mysql_query( "UPDATE Games SET Lastchanged=Lastchanged, Rated='DONE' WHERE ID=$gid" );
 
+    mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, Rating=$bRating, " .
+                 "RatingStatus='RATED' WHERE ID=$Black_ID" );
+
+    mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, Rating=$wRating, " .
+                 "RatingStatus='RATED' WHERE ID=$White_ID" );
+
+    mysql_query("INSERT INTO RatingChange (uid,gid,diff) VALUES " . 
+                "($Black_ID, $gid, " . ($bRating - $bOld) . "), " .
+                "($White_ID, $gid, " . ($wRating - $wOld) . ")");
 }
 
 function echo_rating($rating, $show_percent=true)
