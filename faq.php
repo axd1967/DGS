@@ -29,7 +29,7 @@ require( "include/std_functions.php" );
 
   start_page(T_("FAQ"), true, $logged_in, $player_row );
 
-  echo "<table align=center width=\"85%\" border=0><tr><td>\n";
+  echo "<table align=center width=\"87%\" border=0><tr><td>\n";
   echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
     T_('Frequently Asked Questions') . "</font></h3>\n";
 
@@ -43,7 +43,7 @@ require( "include/std_functions.php" );
                             "AND ( entry.Parent = $cat OR entry.ID = $cat ) " .
                             "ORDER BY ParentOrder,entry.SortOrder" );
 
-     echo "<ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
+     echo "<ul><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
 
      while( $row = mysql_fetch_array( $result ) )
      {
