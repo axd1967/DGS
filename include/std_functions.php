@@ -36,6 +36,8 @@ $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
 $is_down = false;
 
+$hostname_jump = false;
+
 $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
 $ActivityForHit = 1.0;
 $ActivityForMove = 10.0;
@@ -81,6 +83,14 @@ define("LEFT",1);
 define("UP",2);
 define("RIGHT",4);
 define("DOWN",8);
+
+
+// If no gettext
+if( !function_exists("_") )
+{
+   function _($string) { return $string; }
+}
+
 
 function getmicrotime()
 {
@@ -493,7 +503,7 @@ function is_logged_in($hdl, $scode, &$row)
    $time = getmicrotime();
    $show_time = false;
 
-   if( eregi_replace(":.*$","", $HTTP_HOST) != $HOSTNAME )
+   if( $hostname_jump and eregi_replace(":.*$","", $HTTP_HOST) != $HOSTNAME )
    {
       jump_to( "http://" . $HOSTNAME . $PHP_SELF, true );
    }
