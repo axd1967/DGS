@@ -283,8 +283,8 @@ function draw_game_info($row)
   echo "   </tr><tr>\n";
 
   echo '     <td>' . T_('Rank info') . ":</td>\n";
-  echo '     <td>' . make_html_safe($row['Whiterank']) . "</td>\n";
-  echo '     <td>' . make_html_safe($row['Blackrank']) . "</td>\n";
+  echo '     <td>' . make_html_safe($row['Whiterank'], true) . "</td>\n";
+  echo '     <td>' . make_html_safe($row['Blackrank'], true) . "</td>\n";
   echo "   </tr><tr>\n";
   echo '     <td>' . T_('Prisoners') . ":</td>\n";
   echo '     <td>' . $row['White_Prisoners'] . "</td>\n";
