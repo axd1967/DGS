@@ -179,11 +179,9 @@ function fnop( $a)
    return $a;
 }
 
-function start_page( $title, $no_cache, $logged_in, &$player_row,
-                     $style_string=NULL, $last_modified_stamp=NULL )
+function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $is_down, $is_down_message, $bg_color, $menu_bg_color, $menu_fg_color,
-      $encoding_used, $vertical;
+   global $base_path, $bg_color, $encoding_used;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -214,7 +212,18 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    echo '
   </HEAD>
   <BODY bgcolor=' . $bg_color . '>
+';
+}
 
+function start_page( $title, $no_cache, $logged_in, &$player_row,
+                     $style_string=NULL, $last_modified_stamp=NULL )
+{
+   global $base_path, $is_down, $is_down_message, $vertical,
+      $bg_color, $menu_bg_color, $menu_fg_color;
+
+   start_html( $title, $no_cache, $style_string, $last_modified_stamp);
+
+   echo '
     <script language="JavaScript" src="' . $base_path . 'js/goeditor.js" type="text/javascript"></script>
     <script language="JavaScript1.4" type="text/javascript"> version=1; </script>
 
@@ -310,6 +319,14 @@ function end_page( $menu_array=NULL )
    echo '
       </tr>
     </table>
+';
+
+   end_html();
+}
+
+function end_html()
+{
+   echo '
   </BODY>
 </HTML>
 ';
@@ -1010,7 +1027,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       "Lastaccess=FROM_UNIXTIME($NOW), " .
       "Notify='NONE'";
 
-   $browser = substr($_SERVER['HTTP_USER_AGENT'], 0, 100);
+   $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 100);
    if( $row['Browser'] !== $browser )
       $query .= ", Browser='$browser'";
 
