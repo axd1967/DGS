@@ -39,6 +39,7 @@ chdir( 'scripts' );
   while( $row = mysql_fetch_array($result) )
   {
      $Filename = $row['Page'];
+     $Group_ID = $row['Group_ID'];
 
      echo "<hr><p>$Filename<hr><p>\n";
 
@@ -52,18 +53,28 @@ chdir( 'scripts' );
 
      foreach( $matches[1] as $string )
         {
+  //Actually, the 'T_' argument may contains concatenations but with the same quoting 
            $string = preg_replace( '/[\'"]\s+\.\s+[\'"]/s', "", $string );
            $string = preg_replace( '/\\n/', '\n', $string );
+  /* As this argument will be interpreted while the page is build,
+     maybe it's better to interprets it here too,
+     replacing the two previous lines with something like:
+           eval( "\$string = $string;" );
+           $string = addslashes($string);
+     then:
+           $string = "'" . $string . "'";
+     or use the more conventionals:
+           $res = mysql_query("SELECT ID FROM TranslationTexts WHERE Text='$string'");
+       and:
+           mysql_query("INSERT INTO TranslationTexts SET Text='$string'")
+  */
 
            $res = mysql_query("SELECT ID FROM TranslationTexts WHERE Text=$string");
            if( @mysql_num_rows( $res ) == 0 )
            {
               mysql_query("INSERT INTO TranslationTexts SET Text=$string")
                  or die(mysql_error());
-
-              mysql_query("INSERT INTO TranslationFoundInGroup " .
-                          "SET Text_ID=" . mysql_insert_id() . ", " .
-                          "Group_ID=" . $row['Group_ID'] );
+              $Text_ID = mysql_insert_id();
 
               echo "<br>$string";
 
@@ -71,10 +82,12 @@ chdir( 'scripts' );
            else
            {
               $text_row = mysql_fetch_array($res);
-              mysql_query("INSERT INTO TranslationFoundInGroup " .
-                          "SET Text_ID=" . $text_row['ID'] . ", " .
-                          "Group_ID=" . $row['Group_ID'] );
+              $Text_ID = $text_row['ID'];
            }
+
+//           mysql_query("INSERT INTO TranslationFoundInGroup " .
+           mysql_query("REPLACE INTO TranslationFoundInGroup " .
+                       "SET Text_ID=$Text_ID, Group_ID=$Group_ID" );
         }
   }
 }
