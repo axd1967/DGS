@@ -36,101 +36,99 @@ require_once( "include/countries.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-   if( strlen( $_GET['name'] ) < 1 )
+   $name = trim(@$_GET['name']) ;
+   if( strlen( $name ) < 1 )
       error("name_not_given");
 
-   if( $_GET['emailnotify'] == 0 or empty($email) )
-      $sendemail = '';
-
-   if( $_GET['emailnotify'] >= 1 )
+   $email = trim(@$_GET['email']) ;
+   $sendemail = '';
+   if( !empty($email) && @$_GET['emailnotify'] >= 1 )
+   {
       $sendemail = 'ON';
+      if( @$_GET['emailnotify'] >= 2 )
+      {
+         $sendemail .= ',MOVE,MESSAGE';
+         if( @$_GET['emailnotify'] >= 3 )
+            $sendemail .= ',BOARD';
+      }
+   }
 
-   if( $_GET['emailnotify'] >= 2 )
-      $sendemail .= ',MOVE,MESSAGE';
+   $boardcoords = ( @$_GET['coordsleft'] ? LEFT : 0 ) + ( @$_GET['coordsup'] ? UP : 0 ) +
+      ( @$_GET['coordsright'] ? RIGHT : 0 ) + ( @$_GET['coordsdown'] ? DOWN : 0 ) +
+      ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
 
-   if( $_GET['emailnotify'] == 3 )
-      $sendemail .= ',BOARD';
+   $menudirection = ( @$_GET['menudir'] == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
-   $boardcoords = ( $_GET['coordsleft'] ? LEFT : 0 ) + ( $_GET['coordsup'] ? UP : 0 ) +
-      ( $_GET['coordsright'] ? RIGHT : 0 ) + ( $_GET['coordsdown'] ? DOWN : 0 ) +
-      ( $_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
+   $notessmallmode = @$_GET['notessmallmod'];
+   if( !$notessmallmode )
+      $notessmallmode = 'RIGHT';
+   $noteslargemode = @$_GET['noteslargemod'];
+   if( !$noteslargemode )
+      $noteslargemode = 'RIGHT';
 
-   $menudirection = ( $_GET['$menudir'] == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
-
-   $notessmallmode = ( @$_GET['notessmallmod'] == 'RIGHT' ? 'RIGHT' : ( @$_GET['notessmallmod'] == 'BELOW' ? 'BELOW' : 'OFF') );
-   $noteslargemode = ( @$_GET['noteslargemod'] == 'RIGHT' ? 'RIGHT' : ( @$_GET['noteslargemod'] == 'BELOW' ? 'BELOW' : 'OFF') );
 
    $query = "UPDATE Players SET " .
-      "Name='" . trim($name) . "', " .
-      "Email='" . trim($email) . "', " .
-      "Rank='" . trim($rank) . "', " .
-      "Open='" . trim($open) . "', " .
+      "Name='" . $name . "', " .
+      "Email='" . $email . "', " .
+      "Rank='" . trim(@$_GET['rank']) . "', " .
+      "Open='" . trim(@$_GET['open']) . "', " .
       "SendEmail='$sendemail', ";
 
-   if( isset($COUNTRIES[trim($country)]) )
-      $query .= "Country='" . trim($country) . "', ";
+   $country = trim(@$_GET['country']) ;
+   if( isset($COUNTRIES[$country]) )
+      $query .= "Country='$country', ";
    else if( empty($country) )
       $query .= "Country=NULL, ";
 
-   if( $_GET['locally'] == 1 )
+   if( @$_GET['locally'] == 1 )
    {
-      $cookie_prefs['Stonesize'] = $_GET['stonesize'];
+      $cookie_prefs['Stonesize'] = @$_GET['stonesize'];
       $cookie_prefs['Boardcoords'] = $boardcoords;
       $cookie_prefs['MenuDirection'] = $menudirection;
-      $cookie_prefs['Woodcolor'] = $_GET['woodcolor'];
-      $cookie_prefs['Button'] = $_GET['button'];
-      $cookie_prefs['NotesSmallHeight'] = $_GET['notessmallheight'];
-      $cookie_prefs['NotesSmallWidth'] = $_GET['notessmallwidth'];
+      $cookie_prefs['Woodcolor'] = @$_GET['woodcolor'];
+      $cookie_prefs['Button'] = @$_GET['button'];
+      $cookie_prefs['NotesSmallHeight'] = @$_GET['notessmallheight'];
+      $cookie_prefs['NotesSmallWidth'] = @$_GET['notessmallwidth'];
       $cookie_prefs['NotesSmallMode'] = $notessmallmode;
-      $cookie_prefs['NotesLargeHeight'] = $_GET['noteslargeheight'];
-      $cookie_prefs['NotesLargeWidth'] = $_GET['noteslargewidth'];
+      $cookie_prefs['NotesLargeHeight'] = @$_GET['noteslargeheight'];
+      $cookie_prefs['NotesLargeWidth'] = @$_GET['noteslargewidth'];
       $cookie_prefs['NotesLargeMode'] = $noteslargemode;
-      $cookie_prefs['NotesCutoff'] = $_GET['notescutoff'];
+      $cookie_prefs['NotesCutoff'] = @$_GET['notescutoff'];
 
       set_cookie_prefs($player_row['ID']);
    }
    else
    {
       $query .=
-         "Stonesize=" . $_GET['stonesize'] . ", " .
+         "Stonesize=" . @$_GET['stonesize'] . ", " .
          "Boardcoords=$boardcoords, " .
          "MenuDirection='$menudirection', " .
-         "Woodcolor=" . $_GET['woodcolor'] . ", " .
-         "Button=" . $_GET['button'] . ", " .
-         "NotesSmallHeight=" . $_GET['notessmallheight'] . ", " .
-         "NotesSmallWidth=" . $_GET['notessmallwidth'] . ", " .
+         "Woodcolor=" . @$_GET['woodcolor'] . ", " .
+         "Button=" . @$_GET['button'] . ", " .
+         "NotesSmallHeight=" . @$_GET['notessmallheight'] . ", " .
+         "NotesSmallWidth=" . @$_GET['notessmallwidth'] . ", " .
          "NotesSmallMode='$notessmallmode', " .
-         "NotesLargeHeight=" . $_GET['noteslargeheight'] . ", " .
-         "NotesLargeWidth=" . $_GET['noteslargewidth'] . ", " .
+         "NotesLargeHeight=" . @$_GET['noteslargeheight'] . ", " .
+         "NotesLargeWidth=" . @$_GET['noteslargewidth'] . ", " .
          "NotesLargeMode='$noteslargemode', " .
-         "NotesCutoff=" . $_GET['notescutoff'] . ", ";
-        
+         "NotesCutoff=" . @$_GET['notescutoff'] . ", ";         
 
       set_cookie_prefs($player_row['ID'], true);
    }
 
-   list($lang,$enc) = explode('.', $_GET['language']);
+   $language = trim(@$_GET['language']) ;
+   list($lang,$enc) = explode('.', $language);
 
-   if( $_GET['language'] === 'C' or ( $_GET['language'] !== $player_row['Lang'] and
+   if( $language === 'C' or ( $language !== $player_row['Lang'] and
                               array_key_exists($lang, $known_languages) and
                               array_key_exists($enc, $known_languages[$lang])) )
-     {
-       $query .= "Lang='" . $_GET['language'] . "', ";
-     }
-
-   if( $_GET['nightstart'] != $player_row["Nightstart"] ||
-       $_GET['timezone'] != $player_row["Timezone"] )
    {
-      putenv("TZ=" . $_GET['timezone'] );
-
-      $query .= "ClockChanged='Y', ";
-
-      // ClockUsed is uppdated only once a day to prevent eternal night...
-      // $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
+       $query .= "Lang='" . $language . "', ";
    }
 
 
-   $newrating = convert_to_rating($_GET['rating'], $_GET['ratingtype']);
+   $ratingtype = @$_GET['ratingtype'] ;
+   $newrating = convert_to_rating(@$_GET['rating'], $ratingtype);
 
    if( $player_row["RatingStatus"] != 'RATED' and is_numeric($newrating) and
        ( $ratingtype != 'dragonrating' or !is_numeric($player_row["Rating2"])
@@ -142,11 +140,23 @@ require_once( "include/countries.php" );
          "RatingMax=$newrating+200+GREATEST(1600-($newrating),0)*2/15, " .
          "RatingMin=$newrating-200-GREATEST(1600-($newrating),0)*2/15, " .
          "RatingStatus='INIT', ";
-
    }
 
-   $query .= "Timezone='" . $_GET['timezone'] . "', " .
-       "Nightstart=" . $_GET['nightstart'] .
+   $timezone = @$_GET['timezone'] ;
+   $nightstart = @$_GET['nightstart'] ;
+   if( $nightstart != $player_row["Nightstart"] ||
+       $timezone != $player_row["Timezone"] )
+   {
+      putenv("TZ=" . $timezone );
+
+      $query .= "ClockChanged='Y', ";
+
+      // ClockUsed is uppdated only once a day to prevent eternal night...
+      // $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
+   }
+
+   $query .= "Timezone='" . $timezone . "', " .
+       "Nightstart=" . $nightstart .
        " WHERE ID=" . $player_row['ID'];
 
    mysql_query( $query )
