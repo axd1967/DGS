@@ -343,8 +343,8 @@ function interpret_time_limit_forms()
          if( $timeunit_fis == 'months' )
             $byohours *= 30;
 
-         if( $byohours < 0 ) $byohour = 0;
-         if( $byohours > $hour ) $byohours = $hours;
+         if( $byohours < 0 ) $byohours = 0;
+         if( $byohours > $hours ) $byohours = $hours;
 
          $byoperiods = 0;
       }
