@@ -260,7 +260,7 @@ require( "include/rating.php" );
    if( !$logged_in or ( $player_row["ID"] != $Black_ID and $player_row["ID"] != $White_ID ) )
       unset( $msg );
    else
-      make_html_safe($msg, 'game');
+      $msg = make_html_safe($msg, 'game');
 
 
 
