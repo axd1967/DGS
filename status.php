@@ -129,7 +129,7 @@ require_once( "include/message_functions.php" );
       $gtable->add_tablehead( 1, T_('ID'), NULL, false, true);
       $gtable->add_tablehead( 2, T_('sgf'));
       $gtable->add_tablehead( 3, T_('Opponent'));
-      $gtable->add_tablehead( 4, T_('Nick'));
+      $gtable->add_tablehead( 4, T_('Userid')); //, 'Handle');
       $gtable->add_tablehead(16, T_('Rating'));
       $gtable->add_tablehead( 5, T_('Color'));
       $gtable->add_tablehead( 6, T_('Size'));
