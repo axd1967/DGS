@@ -146,9 +146,9 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          if( $wrtable->Is_Column_Displayed[10] )
             $wrow_strings[10] = "<td>$nrGames</td>";
          if( $wrtable->Is_Column_Displayed[11] )
-            $wrow_strings[11] = "<td>$Rated</td>";
+            $wrow_strings[11] = "<td>".( $Rated == 'Y' ? T_('Yes') : T_('No') )."</td>";
          if( $wrtable->Is_Column_Displayed[12] )
-            $wrow_strings[12] = "<td>$WeekendClock</td>";
+            $wrow_strings[12] = "<td>".( $WeekendClock == 'Y' ? T_('Yes') : T_('No') )."</td>";
 
          $wrtable->add_row( $wrow_strings );
       }
