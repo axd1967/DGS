@@ -102,7 +102,7 @@ function add_column_form()
 
    $string = form_start( 'add_column_form', strip_last_et($page), 'POST' ) .
       form_insert_row('SELECTBOX', 'add', 1, $removed_columns, '', false,
-                      'SUBMITBUTTON', 'action', 'Add Column') .
+                      'SUBMITBUTTON', 'action', T_('Add Column')) .
       form_end();
 
    return $string;

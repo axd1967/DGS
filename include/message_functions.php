@@ -117,7 +117,7 @@ function game_settings_form($my_ID=NULL, $gid=NULL)
    echo form_insert_row( 'DESCRIPTION', 'Board size',
                          'SELECTBOX', 'size', 1, $value_array, $Size, false );
 
-   $color_array = array( 'White' => 'White', 'Black' => 'Black' );
+   $color_array = array( 'White' => T_('White'), 'Black' => T_('Black') );
 
    $handi_array=array( 0 => 0 );
    for( $bs = 2; $bs <= 20; $bs++ )
@@ -155,7 +155,9 @@ function game_settings_form($my_ID=NULL, $gid=NULL)
 
 
 
-   $value_array=array( 'hours' => 'hours', 'days' => 'days', 'months' => 'months' );
+   $value_array=array( 'hours' => T_('hours'),
+                       'days' => T_('days'),
+                       'months' => T_('months') );
 
    echo form_insert_row( 'SPACE' );
 
