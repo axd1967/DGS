@@ -367,6 +367,12 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("couldnt_update_translation"):
+      {
+        echo T_("Sorry, something went wrong when trying to insert the new translations into the database.");
+      }
+      break;
+
       case("couldnt_make_backup"):
       {
         echo T_("Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support.");
