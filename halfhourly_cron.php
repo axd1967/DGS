@@ -18,11 +18,29 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+
 require( "include/std_functions.php" );
 require( "include/board.php" );
 
 {
    connect2mysql();
+
+
+   // Check that updates are not too frequent
+
+   $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
+                          "FROM Clock WHERE ID=202 LIMIT 1");
+
+   $row = mysql_fetch_array( $result );
+
+   if( $row['timediff'] < 1500 )
+      exit;
+
+   mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202");
+
+
+// Send notifications
+
 
    $result = mysql_query( "SELECT ID as uid, Email, SendEmail, Lastaccess FROM Players " .
                           "WHERE SendEmail LIKE '%ON%' AND Notify='NOW'" );
@@ -121,7 +139,42 @@ require( "include/board.php" );
 
 // Update activities
 
-   $factor =  exp( - M_LN2 * 30 / $ActivityHalvingTime );
-   mysql_query( "UPDATE Players SET Activity=Activity * $factor" );
+   $factor = exp( -M_LN2 * 30 / $ActivityHalvingTime );
+
+   mysql_query("UPDATE Players SET Activity=Activity * $factor");
+
+
+// Check end of vacations
+
+   $result = mysql_query("SELECT ID, ClockUsed from Players " .
+                         "WHERE OnVacation>0 AND OnVacation <= 1/(12*24)");
+
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      $uid = $row['ID'];
+      $ClockUsed = $row['ClockUsed'];
+
+      $res2 = mysql_query("SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
+                         "FROM Games, Clock " .
+                         "WHERE Clock.ID=$ClockUsed AND ToMove_ID='$uid' " .
+                         "AND Status!='INVITED' AND Status!='FINISHED'")
+      or die(mysql_error());
+
+      while( $row2 = mysql_fetch_array( $res2 ) );
+      {
+         mysql_query("UPDATE Games SET ClockUsed=$ClockUsed, " .
+                     "LastTicks='" . $row2['ticks'] . "' " .
+                     "WHERE ID='" . $row2['gid'] . "' LIMIT 1");
+      }
+   }
+
+
+
+// Change vacation days
+
+   mysql_query("UPDATE Players SET " .
+               "VacationDays=LEAST(365.24/12, VacationDays + 1/(12*24)), " .
+               "OnVacation=GREATEST(0, OnVacation - 1/(12*24))");
+
 }
 ?>

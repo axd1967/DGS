@@ -27,7 +27,20 @@ require( "forum/forum_functions.php" );
    connect2mysql();
 
 
+   // Check that updates are not too frequent
+
+   $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
+                          "FROM Clock WHERE ID=203 LIMIT 1");
+
+   $row = mysql_fetch_array( $result );
+
+   if( $row['timediff'] < 3600*23 )
+      exit;
+
+   mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203");
+
    $delete_msgs = false;
+   $delete_invitations = false;
    $message_timelimit = 90;
    $invite_timelimit = 60;
 
@@ -35,32 +48,37 @@ require( "forum/forum_functions.php" );
 
    if( $delete_msgs )
    {
-      // delete read messages
-
       mysql_query("UPDATE Messages " .
                   "SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
                   "WHERE $NOW-UNIX_TIMESTAMP(Time) > " . ($message_timelimit*24*3600) .
                   " AND NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )");
+   }
 
-         //delete old invitations
 
-      $result = mysql_query( "SELECT Game_ID FROM Messages " .
-                             "WHERE Type='INVITATION' " .
-                             "AND $NOW-UNIX_TIMESTAMP(Time) > " . ($invite_timelimit*24*3600) );
+// Delete old invitations
+
+   if( $delete_invitations )
+   {
+      $timelimit = $invite_timelimit*24*3600;
+      $query = "SELECT Messages.ID as mid, Game_ID " .
+         "FROM Messages, Games " .
+         "WHERE Game.ID=Messages.Game_ID AND Games.Status='INVITED' " .
+         "AND Messages.Type='INVITATION' AND $NOW-UNIX_TIMESTAMP(Time) > $timelimit " .
+         "AND $NOW-UNIX_TIMESTAMP(Lastchanged) > $timelimit";
+
+      mysql_query( $query );
 
       if( mysql_num_rows($result) > 0 )
       {
          while( $row = mysql_fetch_array( $result ) )
          {
             mysql_query( "DELETE FROM Games WHERE ID=" . $row["Game_ID"] .
-                         " AND Status='INVITED'" );
-         }
+                         " AND Status='INVITED' LIMIT 1" );
 
-         mysql_query( "UPDATE Messages " .
-                      "SET Flags=REPLACE(Flags,'REPLY REQUIRED','') " .
-                      "WHERE Type='INVITATION' " .
-                      "AND $NOW-UNIX_TIMESTAMP(Time) > " . ($invite_timelimit*24*3600) );
+            mysql_query( "UPDATE Messages SET Type='DELETED' " .
+                         "WHERE ID=" . $row['mid'] . " LIMIT 1");
          }
+      }
    }
 
 
@@ -116,7 +134,6 @@ require( "forum/forum_functions.php" );
                 "GamesFinished=$GamesFinished, " .
                 "GamesRunning=$GamesRunning, " .
                 "Activity=$Activity" );
-
 
 
 

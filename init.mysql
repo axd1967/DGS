@@ -34,6 +34,7 @@ CREATE TABLE Players (
   RatingStatus enum('INIT','RATED') default NULL,
   Open varchar(40) default NULL,
   Lang varchar(20) NOT NULL default 'C',
+  VacationDays double default '14',
   Woodcolor int(11) NOT NULL default '1',
   Boardcoords int(11) NOT NULL default '31',
   Button int(11) NOT NULL default '0',
@@ -171,6 +172,7 @@ INSERT INTO Players SET
        Name='Guest',
        Password=PASSWORD('guest');
 
+
 #
 # Table structure for table 'Messages'
 #
@@ -179,14 +181,10 @@ CREATE TABLE Messages (
   ID int(11) NOT NULL auto_increment,
   To_ID int(11) default NULL,
   From_ID int(11) default NULL,
-  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') default 'NORMAL',
-  Flags set('DELETED','NEW','REPLIED','REPLY REQUIRED') NOT NULL default 'NEW',
+  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED') default 'NORMAL',
   ReplyTo int(11) default NULL,
   Game_ID int(11) default NULL,
-  From_Folder_nr int(11) NOT NULL default 5,
-  To_Folder_nr int(11) NOT NULL default 2,
-  Replied char(1) NOT null default 'N',
-  Time datetime NOT NULL,
+  Time datetime default NULL,
   Subject varchar(80) default NULL,
   Text text,
   PRIMARY KEY  (ID),
@@ -195,12 +193,35 @@ CREATE TABLE Messages (
 ) TYPE=MyISAM;
 
 
+#
+# Table structure for table 'MessageCorrespondents'
+#
+
+CREATE TABLE MessageCorrespondents (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) default NULL,
+  mid int(11) default NULL,
+  Folder_nr int(11) default NULL,
+  Sender enum('N','Y') NOT NULL default 'Y',
+  Replied enum('N','Y') NOT NULL default 'N',
+  PRIMARY KEY  (ID),
+  KEY mid (mid),
+  KEY uid (uid),
+  KEY Folder_nr (Folder_nr,uid)
+) TYPE=My
+
+
+#
+# Table structure for table 'Folders'
+#
+
 CREATE TABLE Folders (
   ID int(11) NOT NULL auto_increment,
   uid int(11) default NULL,
   Folder_nr int(11) default NULL,
   Name text default NULL,
-  Color char(6) default 'f7f5e3',
+  BGColor char(8) default 'f7f5e3FF',
+  FGColor char(6) default '000000',
   PRIMARY KEY  (ID),
   KEY (uid, Folder_nr)
 ) TYPE=MyISAM;
@@ -629,3 +650,7 @@ INSERT INTO Clock set ID=120;
 INSERT INTO Clock set ID=121;
 INSERT INTO Clock set ID=122;
 INSERT INTO Clock set ID=123;
+INSERT INTO Clock set ID=-1;
+INSERT INTO Clock set ID=200;
+INSERT INTO Clock set ID=201;
+INSERT INTO Clock set ID=202;

@@ -31,13 +31,15 @@ if( !$is_down )
 
    // Check that ticks are not too frequent
 
-   $result = mysql_query( "SELECT MIN($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff FROM Clock WHERE ID=0 OR ID=12" );
-
+   $result = mysql_query( "SELECT $NOW-UNIX_TIMESTAMP(Lastchanged) AS timediff FROM Clock WHERE ID=201" );
 
    $row = mysql_fetch_array( $result );
 
    if( $row['timediff'] < 3600/$tick_frequency-10 )
       exit;
+
+   mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201");
+
 
 
    // Now increase clocks that are not sleeping

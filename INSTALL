@@ -60,7 +60,7 @@ Find which group your webserver is using (e.g. www-data).
 > crontab -e
 
 # m  h dom mon dow command
-0,30 *  *   *   *   wget -q -O - http://your.url/send_notifications.php
+0,30 *  *   *   *   wget -q -O - http://your.url/halfhourly_cron.php
 */5  *  *   *   *   wget -q -O - http://your.url/clock_tick.php
 25   5  *   *   *   wget -q -O - http://your.url/daily_cron.php
 
