@@ -157,7 +157,7 @@ class Table
                    'Undeletable' => $undeletable,
                    'Width' => $width );
 
-         $col_pos = ( $nr > 0 ? $col_pos = 1 << ($nr - 1) : 0 );
+         $col_pos = ( $nr > 0 )? ( 1 << ($nr - 1) ): 0 ;
 
          $this->Is_Column_Displayed[$nr] = ( $this->Static_Columns or
                                              $undeletable or
