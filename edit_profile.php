@@ -79,6 +79,7 @@ require_once( "include/countries.php" );
    }
 
    asort($COUNTRIES);
+   array_unshift($COUNTRIES, '');
 
    start_page(T_("Edit profile"), true, $logged_in, $player_row );
 

@@ -66,6 +66,8 @@ require( "include/countries.php" );
 
    if( isset($COUNTRIES[trim($country)]) )
       $query .= "Country='" . trim($country) . "', ";
+   else if( empty($country) )
+      $query .= "Country=NULL, ";
 
    if( $_GET['locally'] == 1 )
    {
