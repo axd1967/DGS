@@ -19,13 +19,17 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-add_to_known_languages( "en", "English", "iso-8859-1" );
-add_to_known_languages( "sv", "Swedish", "iso-8859-1" );
-add_to_known_languages( "no", "Norwegian", "iso-8859-1" );
-add_to_known_languages( "de", "German", "iso-8859-1" );
-add_to_known_languages( "fr", "French", "iso-8859-1" );
-add_to_known_languages( "es", "Spanish", "iso-8859-1" );
-add_to_known_languages( "cs", "Czech", "iso-8859-2" );
-add_to_known_languages( "zh", "Chinese", "big5" );
+/* Automatically generated at 2002-06-11 06:39:37 GMT */
+
+class zh_Language extends Language
+{
+  function zh_Language()
+    {
+      $this->full_name = 'Chinese';
+      $this->last_updated = 1023777577;
+
+      $this->translated_strings = array( );
+    }
+};
 
 ?>
