@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-add_to_known_languages( "sv", "Svenska" );
+add_to_known_languages( "sv", "Svenska", 1018728671 );
 
 class sv_Language extends Language
 {
@@ -81,10 +81,10 @@ class sv_Language extends Language
 '',
 
 'Language' =>
-'',
+'Språk',
 
 'Timezone' =>
-'',
+'Tidszon',
 
 'Nighttime' =>
 '',
@@ -282,7 +282,7 @@ Anledningen till detta problem kan vara ett av följande:
 'Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support.' =>
 '',
 
-'Sorry, I was unable to open the translation file for writing. Please contact the support.' =>
+'Sorry, I was unable to open a file for writing. Please contact the support.' =>
 '',
 
 'Unknown problem. This shouldn\'t happen. Please send the url of this page to the support, so that this doesn\'t happen again.' =>
@@ -301,7 +301,7 @@ Anledningen till detta problem kan vara ett av följande:
 '',
 
 'Score' =>
-'',
+'Poäng',
 
 'Game' =>
 '',
@@ -349,22 +349,22 @@ Anledningen till detta problem kan vara ett av följande:
 'Registrera ett nytt konto',
 
 'Send a message' =>
-'',
+'Skicka ett meddelande',
 
 'Show recieved messages' =>
-'',
+'Visa mottagna meddelanden',
 
 'Hide deleted' =>
-'',
+'Göm borttagna',
 
 'Show all' =>
-'',
+'Visa alla',
 
 'Show sent messages' =>
-'',
+'Visa skickade meddelanden',
 
 'Delete all' =>
-'',
+'Ta bort alla',
 
 'Register' =>
 'Registrera',
@@ -373,13 +373,13 @@ Anledningen till detta problem kan vara ett av följande:
 'Var god fyll i data',
 
 'Name' =>
-'',
+'Namn',
 
 'Your turn to move in the following games:' =>
 '',
 
 'No games found' =>
-'',
+'Inga spel finns',
 
 'Show/edit userinfo' =>
 '',
@@ -425,6 +425,9 @@ Anledningen till detta problem kan vara ett av följande:
 
 'Forums' =>
 'Forum',
+
+'Translate' =>
+'Översätt',
 
 'Docs' =>
 'Dokumentation',
