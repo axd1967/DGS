@@ -42,9 +42,10 @@ include("forum_functions.php");
                          "WHERE Posts.Thread_ID=Threads.ID " .
                          "ORDER BY Lastchanged, PosIndex");
 
+   $cols=3;
    $headline   = array("Thread"=>"width=50%","Author"=>"width=25%","Date"=>"width=25%");
-   $link_array = array("New Topic"=>"new_topic.php?forum=$forum"); 
-   start_table($headline, $link_array, "width=98%"); 
+   $links = LINK_FORUMS | LINK_THREADS | LINK_NEW_TOPIC;
+   start_table($headline, $links, "width=98%", $cols); 
                
 
    while( $row = mysql_fetch_array( $result ) )
@@ -54,7 +55,7 @@ include("forum_functions.php");
       echo "<tr><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a></td><td>$User_ID</td><td>$Time</td></tr>\n";
    }
 
-   end_table($headline, $link_array);
+   end_table($links, $cols);
 
    end_page();
 }

@@ -29,17 +29,24 @@ start_page("Forum list", true, $logged_in, $player_row );
 
 $result = mysql_query("SELECT * from Forums");
 
+$cols = 3;
+$headline   = array("Forums" => "colspan=$cols");
 
-echo "<table width=100%>\n";
-echo "<tr><th>Forum</th><th>Description</th><th>Last changed</th></tr>\n";
+
+start_table($headline, $links, "width=98%", $cols);
+
 
 while( $row = mysql_fetch_array( $result ) )
 {
    extract($row);
-   
+
+   echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID. '">' . $Name .
+      '</a></b></td><td width="20%">Posts: <b>?</b></td><td width="20%">Last Post: <b>?</b></td></tr>
+
+<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;New news</dl></td></tr>';   
 }
 
-echo "</table>\n";
+end_table($links, $cols);
 
 end_page();
 ?>

@@ -42,12 +42,20 @@ include("forum_functions.php");
                          "WHERE Posts.Thread_ID=Threads.ID " .
                          "ORDER BY Lastchanged, PosIndex");
 
-   start_table("", array());
+   $cols=2;
+   $headline   = array("New topic" => "colspan=$cols");
+   $links = LINK_FORUMS | LINK_THREADS | LINK_EXPAND_VIEW;
+
+   start_table($headline, $links, "", $cols);
+
 
    while( $row = mysql_fetch_array( $result ) )
    {
       
    }
+
+   
+   end_table($links, $cols);
 
    end_page();
 }

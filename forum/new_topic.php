@@ -42,14 +42,15 @@ include("forum_functions.php");
 
    start_page("Forum $Forumname - New Topic", true, $logged_in, $player_row );
 
-   $headline   = array("New topic" => "colspan=2");
-   $link_array = array("Home" => "index.php");
-   
-   start_table($headline, $link_array, "");
+   $cols=2;
+   $headline   = array("New topic" => "colspan=$cols");
+   $links = LINK_FORUMS | LINK_THREADS;
+
+   start_table($headline, $links, "", $cols);
 
    message_box($forum);
    
-   end_table($headline, $link_array);
+   end_table($links, $cols);
    end_page();
 }
 ?>
