@@ -137,7 +137,7 @@ $profile_form->add_row( array( 'DESCRIPTION', T_('Stone size'),
 
 $profile_form->add_row( array( 'DESCRIPTION', T_('Wood color'),
                                'RADIOBUTTONS', 'woodcolor', $woodcolors,
-                               $player_row["Woodcolor"], false ) );
+                               $player_row["Woodcolor"] ) );
 
 $s = $player_row["Boardcoords"];
 $profile_form->add_row( array( 'DESCRIPTION', T_('Coordinate sides'),
@@ -150,7 +150,7 @@ $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
 
 $profile_form->add_row( array( 'DESCRIPTION', T_('Menu direction'),
                                'RADIOBUTTONS', 'menudir', $menu_directions,
-                               $player_row["MenuDirection"], false ) );
+                               $player_row["MenuDirection"] ) );
 
 $button_code  = "      <TD align=right>" . T_('Game id button') . ":</TD>\n";
 $button_code .= "      <TD align=left>\n";
