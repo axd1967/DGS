@@ -160,6 +160,8 @@ require( "include/rating.php" );
       case 'move':
       {
          check_move();
+  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
+  //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
          reset($prisoners);
          $prisoner_string = "";
@@ -220,6 +222,7 @@ require( "include/rating.php" );
             error("invalid_action");
 
          check_remove();
+  //ajusted globals by check_remove(): $array, $stonestring;
 
          $enable_message = false;
 
@@ -233,6 +236,8 @@ require( "include/rating.php" );
             error("invalid_action");
 
          check_done();
+  //ajusted globals by check_done(): $array, $score, $prisoners;
+  //here, $prisoners list the marked points (from $stonestring)
 
          $extra_message = "<font color=\"blue\">" . T_('Score') . ": " .
              score2text($score, true) . "</font>";
@@ -265,7 +270,7 @@ require( "include/rating.php" );
 
    if( $enable_message )
    {
-      draw_message_box();
+      draw_message_box(); //use $stonestring, $prisoner_string
    }
 
    echo "<HR>\n";

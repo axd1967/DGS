@@ -62,6 +62,12 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
    {
       if( $handi or !$stonestring )
          $on_empty = true;
+      else
+      {
+         $on_not_empty = true;
+         if( ALLOW_SEKI_MARK and $stonestring )
+            $on_empty = true;
+      }
 
       if( $handi )
       {
@@ -228,7 +234,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
                $type .= 'b';
             else if( $stone == WHITE_TERRITORY )
                $type .= 'w';
-            else if( $stone == DAME )
+            else if( $stone == DAME or $stone == MARKED_DAME )
                $type .= 'd';
 
             $empty = true;
@@ -243,7 +249,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
             $alt = ( $alt == '#' ? 'X' : '@' );
          }
 
-         if( $may_play and ( $empty xor !$on_empty ) )
+         if( $may_play and ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
             echo "$str2$letter_c$letter_r$str3$alt\" SRC=$stone_size/$type$str4";
          else
             echo "$str1$alt\" SRC=$stone_size/$type$str5";
@@ -352,7 +358,7 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
 
          $removed_dead = FALSE;
       }
-      else if( $Stone >= BLACK_DEAD )
+      else if( $Stone == MARKED_BY_WHITE or $Stone == MARKED_BY_BLACK)
       {
          if( $removed_dead == FALSE )
          {
@@ -369,10 +375,10 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
       while( $sub = each($marked_dead) )
       {
          list($dummy, list($X, $Y)) = $sub;
-         if( $array[$X][$Y] >= BLACK_DEAD )
-            $array[$X][$Y] -= 6;
+         if( $array[$X][$Y] >= MARKED_DAME )
+            $array[$X][$Y] -= OFFSET_MARKED;
          else
-            $array[$X][$Y] += 6;
+            $array[$X][$Y] += OFFSET_MARKED;
       }
    }
 
@@ -490,12 +496,15 @@ function mark_territory( $x, $y, $size, &$array )
 
          if( $m == 7 )   // At starting point, all checked
          {
+            if( $c == -1 ) $c = DAME ;
+            else $c+= OFFSET_TERRITORY ;
+
             while( list($x, $sub) = each($index) )
             {
                while( list($y, $val) = each($sub) )
                {
                   if( $array[$x][$y] < BLACK_DEAD )
-                     $array[$x][$y] = $c + 3;
+                     $array[$x][$y] = $c;
                }
             }
 
@@ -526,13 +535,17 @@ function mark_territory( $x, $y, $size, &$array )
             $y = $ny;
             $index[$x][$y] = $dir;
          }
-         else
+         else //remains BLACK/WHITE/DAME/BLACK_TERRITORY/WHITE_TERRITORY and MARKED_DAME
          {
-            if( $c == -1 )
+            if( $new_color == MARKED_DAME )
+            {
+               $c = NONE; // This area will become dame
+            } 
+            else if( $c == -1 )
             {
                $c = $new_color;
             }
-            else if( $c == (3-$new_color) )
+            else if( $c == (WHITE+BLACK-$new_color) )
             {
                $c = NONE; // This area has both colors as boundary
             }
@@ -590,14 +603,17 @@ function create_territories_and_score( $size, &$array )
 
 
 
-function remove_dead( $x, $y, $size, &$array, &$prisoners, $cons_group=TRUE )
+function toggle_marked_area( $x, $y, $size, &$array, &$marked, $companion_groups=true )
 {
    global $dirx,$diry;
 
    $c = $array[$x][$y]; // Color of this stone
+   if( $c == BLACK_DEAD or $c == WHITE_DEAD or $c == MARKED_DAME )
+      $toggle_value =-OFFSET_MARKED;
+   else
+      $toggle_value = OFFSET_MARKED;
 
    $index[$x][$y] = 7;
-
 
    while( true )
    {
@@ -612,11 +628,8 @@ function remove_dead( $x, $y, $size, &$array, &$prisoners, $cons_group=TRUE )
                while( list($y, $val) = each($sub) )
                {
                   if ($c == $array[$x][$y]) {
-                     array_push($prisoners, array($x,$y));
-                     if( $array[$x][$y] < 7 )
-                        $array[$x][$y] += 6;
-                     else
-                        $array[$x][$y] -= 6;
+                     array_push($marked, array($x,$y));
+                     $array[$x][$y] += $toggle_value ;
                   }
                }
             }
@@ -641,7 +654,7 @@ function remove_dead( $x, $y, $size, &$array, &$prisoners, $cons_group=TRUE )
 
          $new_color = $array[$nx][$ny];
 
-         if( $new_color == $c or ( $cons_group and $new_color == NONE ) )
+         if( $new_color == $c or ( $companion_groups and $new_color == NONE ) )
          {
             $x = $nx;  // Go to the neigbour
             $y = $ny;
@@ -695,6 +708,8 @@ function check_consistency($gid)
 
       $coord = number2sgf_coords($PosX,$PosY,$Size);
 
+  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
+  //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
       if( !check_move(false) )
       {
          echo ", problem at move $move_nr<br>\n";
@@ -832,7 +847,7 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
                $type .= '+';
             else if( $stone == WHITE_TERRITORY )
                $type .= '-';
-            else if( $stone == DAME )
+            else if( $stone == DAME or $stone == MARKED_DAME )
                $type .= '.';
 
             $empty = true;
