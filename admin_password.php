@@ -50,7 +50,7 @@ require_once( "include/form_functions.php" );
    $passwd_form->add_row( array( 'DESCRIPTION', T_('Email'),
                                  'TEXTINPUT', 'email', 32, 80, '',
                                  'TD',
-                                 'TEXT', T_("to overwrite user's one"),
+                                 'TEXT', T_("to replace user's one"),
                                ) );
    $passwd_form->echo_string();
 

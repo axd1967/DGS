@@ -34,7 +34,7 @@ function interpolate($value, $table, $extrapolate)
             if( empty($prev) )
             {
                if( !$extrapolate )
-                  error("value_out_of_range");
+                  error("value_out_of_range",'rat1');
             }
             else
                return $prev['VAL'] + ($value-$prev['KEY'])/($x['KEY']-$prev['KEY']) *
@@ -45,7 +45,7 @@ function interpolate($value, $table, $extrapolate)
       }
 
    if( !$extrapolate )
-      error("value_out_of_range");
+      error("value_out_of_range",'rat2');
 
    // extrapolate
 

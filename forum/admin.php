@@ -103,7 +103,7 @@ require_once( "forum_functions.php" );
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
 
      if( @mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry");
+        error("admin_no_such_entry",'admin1');
 
      $row = mysql_fetch_array( $result );
 
@@ -130,7 +130,7 @@ require_once( "forum_functions.php" );
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
 
      if( @mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry");
+        error("admin_no_such_entry",'admin2');
 
      $row = mysql_fetch_array( $result );
 
@@ -171,7 +171,7 @@ require_once( "forum_functions.php" );
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
 
      if( @mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry");
+        error("admin_no_such_entry",'admin3');
 
      $row = mysql_fetch_array( $result );
 

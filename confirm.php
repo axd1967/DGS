@@ -248,7 +248,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          else if( $Status == 'PASS' )
             $next_status = 'SCORE';
          else
-            error("invalid_action");
+            error("invalid_action",'conf1');
 
 
          $move_query = "INSERT INTO Moves SET " .
@@ -275,7 +275,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       case 'handicap':
       {
          if( $Status != 'PLAY' or $Moves != 1 )
-            error("invalid_action");
+            error("invalid_action",'conf2');
 
          $stonestring = @$_REQUEST['stonestring'];
          check_handicap(); //adjust $handi, $stonestring, $enable_message and others
@@ -346,7 +346,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       case 'delete':
       {
          if( $Status != 'PLAY' or !$too_few_moves )
-            error("invalid_action");
+            error("invalid_action",'conf3');
 
 /*
   Here, the previous line was:
@@ -367,7 +367,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       case 'done':
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error("invalid_action");
+            error("invalid_action",'conf4');
 
          $stonestring = @$_REQUEST['stonestring'];
          check_remove();
@@ -419,7 +419,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       default:
       {
-         error("invalid_action");
+         error("invalid_action",'conf5');
       }
    }
 
@@ -460,7 +460,7 @@ if( HOT_SECTION )
    $result = mysql_query( $move_query );
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
-      error("mysql_insert_move");
+      error("mysql_insert_move",'conf7');
 
    $result = mysql_query( $game_query );
 
@@ -481,7 +481,7 @@ if( HOT_SECTION )
       $result = mysql_query( $message_query );
 
       if( mysql_affected_rows() < 1 and $action != 'delete' )
-         error("mysql_insert_move");
+         error("mysql_insert_move",'conf8');
    }
 
 
@@ -493,7 +493,7 @@ if( HOT_SECTION )
                              ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) );
 
       if( @mysql_num_rows($result) != 1 )
-         error("opponent_not_found", true);
+         error("opponent_not_found");
 
       $opponent_row = mysql_fetch_array($result);
 
@@ -570,7 +570,7 @@ if( HOT_SECTION )
                    "Game_ID=$gid, Subject='$Subject', Text='$Text'");
 
       if( mysql_affected_rows() != 1)
-         error("mysql_insert_message",true);
+         error("mysql_insert_message");
 
       $mid = mysql_insert_id();
 

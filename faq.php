@@ -47,7 +47,7 @@ require_once( "include/std_functions.php" );
         "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
         ( $cat === 'all' ? '' : "AND ( entry.Parent = $cat OR entry.ID = $cat ) " ) .
         "ORDER BY CatOrder,ParentOrder,entry.SortOrder")
-        or error("internal_error");
+        or error('mysql_query_failed');
 
      echo "<ul><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
 

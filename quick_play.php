@@ -50,7 +50,7 @@ else
 
    if( @mysql_num_rows($result) != 1 )
    {
-      error("not_logged_in");
+      error("not_logged_in",'qp1');
    }
 
    $player_row = mysql_fetch_assoc($result);
@@ -58,7 +58,7 @@ else
    if( $player_row['Sessioncode'] !== @$_COOKIE[COOKIE_PREFIX.'sessioncode']
        or $player_row["Expire"] < $NOW )
    {
-      error("not_logged_in");
+      error("not_logged_in",'qp2');
    }
 
    $gid = @$_REQUEST['gid'] ;
@@ -115,7 +115,7 @@ else
       error("database_corrupted");
 
    if( $my_id != $ToMove_ID )
-      error("not_your_turn");
+      error("not_your_turn",'qp7');
 
 
    if( isset($_REQUEST['sgf_move']) )
@@ -126,7 +126,7 @@ else
       list( $query_X, $query_Y) = array( NULL, NULL);
 
    if( is_null($query_X) or is_null($query_Y) )
-      error("illegal_position");
+      error("illegal_position",'qp3');
 
    if( isset($_REQUEST['sgf_prev']) )
       list( $prev_X, $prev_Y) = sgf2number_coords($_REQUEST['sgf_prev'], $Size);
@@ -136,14 +136,14 @@ else
       list( $prev_X, $prev_Y) = array( NULL, NULL);
 
    if( is_null($prev_X) or is_null($prev_Y) )
-      error("illegal_position");
+      error("illegal_position",'qp4');
 
    if( $prev_X != $Last_X or $prev_Y != $Last_Y )
-      error("already_played");
+      error("already_played",'qp5');
 
    $move_color = @$_REQUEST['color'];
    if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
-      error("not_your_turn");
+      error("not_your_turn",'qp8');
 
 
    $next_to_move = WHITE+BLACK-$to_move;
@@ -281,7 +281,7 @@ if( HOT_SECTION )
    $tmp = mysql_fetch_assoc($result);
 
    if( $tmp["Moves"] != $old_moves )
-      error("already_played");
+      error("already_played",'qp6');
 }//HOT_SECTION
 
    $result = mysql_query( $move_query );

@@ -32,7 +32,7 @@ else
 
    if( @mysql_num_rows($result) != 1 )
    {
-      error("not_logged_in");
+      error("not_logged_in",'qs1');
    }
 
    $player_row = mysql_fetch_assoc($result);
@@ -40,7 +40,7 @@ else
    if( $player_row['Sessioncode'] !== @$_COOKIE[COOKIE_PREFIX.'sessioncode']
        or $player_row["Expire"] < $NOW )
    {
-      error("not_logged_in");
+      error("not_logged_in",'qs2');
    }
 
    if( !empty( $player_row["Timezone"] ) )
@@ -64,7 +64,7 @@ else
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date DESC";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed');
+   $result = mysql_query( $query ) or error('mysql_query_failed','qs3');
 
    while( $row = mysql_fetch_assoc($result) )
    {
@@ -85,7 +85,7 @@ else
          "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$my_id " .
        "ORDER BY date DESC, Games.ID";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed');
+   $result = mysql_query( $query ) or error('mysql_query_failed','qs4');
 
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )

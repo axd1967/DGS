@@ -61,18 +61,18 @@ function error($err, $debugmsg=NULL)
    if( !empty($mysqlerror) )
    {
       $uri .= "&mysqlerror=" . urlencode($mysqlerror);
-      $errorlog_query .= ", MysqlError='" . $mysqlerror . "'";
+      $errorlog_query .= ", MysqlError='" . addslashes( $mysqlerror) . "'";
       $err.= ' / '. $mysqlerror;
    }
 
    
    if( empty($debugmsg) )
    {
-      $debugmsg = @$_SERVER['PHP_SELF'];
+      $debugmsg = str_replace( $SUB_PATH, '', @$_SERVER['PHP_SELF']);
    }
    //if( !empty($debugmsg) )
    {
-      $errorlog_query .= ", Debug='$debugmsg'";
+      $errorlog_query .= ", Debug='" . addslashes( $debugmsg) . "'";
       //$err.= ' / '. $debugmsg;
    }
 

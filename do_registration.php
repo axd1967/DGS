@@ -65,7 +65,7 @@ require_once( "include/std_functions.php" );
    $new_id = mysql_insert_id();
 
    if( mysql_affected_rows() != 1 )
-      error("mysql_insert_player", true);
+      error("mysql_insert_player");
 
 
    set_cookies( $userid, $code );

@@ -115,7 +115,7 @@ if( !$is_down )
          mysql_query( $query );
 
          if( mysql_affected_rows() != 1)
-            error("Couldn't update game.");
+            error('mysql_update_game',"Couldn't update game.");
 
          // Send messages to the players
          $Text = "The result in the game:<center>"

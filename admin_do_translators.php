@@ -58,17 +58,17 @@ require_once( "include/make_translationfiles.php" );
       make_known_languages();
 
       $res = mysql_query("SELECT ID FROM TranslationGroups WHERE Groupname='Users'");
-      if( mysql_num_rows($res) != 1 )
-         error("internal_error");
+      if( @mysql_num_rows($res) != 1 )
+         error("internal_error",'admin_t1');
 
       $row = mysql_fetch_array($res);
       $Group_ID = $row['ID'];
 
       $res = mysql_query("SELECT ID FROM TranslationTexts WHERE Text=\"$langname\"");
-      if( mysql_num_rows( $res ) === 0 )
+      if( @mysql_num_rows( $res ) === 0 )
       {
          mysql_query("INSERT INTO TranslationTexts SET Text=\"$langname\"")
-            or die(mysql_error());
+            or error("internal_error",'admin_t2');
 
          mysql_query("REPLACE INTO TranslationFoundInGroup " .
                      "SET Text_ID=" . mysql_insert_id() . ", " .
@@ -93,7 +93,7 @@ require_once( "include/make_translationfiles.php" );
       $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='$transluser'" );
 
       if( mysql_affected_rows() != 1 )
-        error("unknown_user");
+        error("unknown_user",'admin_t3');
 
       $row = mysql_fetch_array( $result );
       if( empty($row['Translator']) )
@@ -104,11 +104,11 @@ require_once( "include/make_translationfiles.php" );
       if( !in_array( $transladdlang, $translator ) )
         {
           array_push( $translator, $transladdlang );
-          $new_langs = implode(',', $translator);
+          $new_langs = implode(',', array_unique($translator));
           $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
 
           if( mysql_affected_rows() != 1 )
-            error("unknown_user");
+            error("unknown_user",'admin_t4');
 
           $msg = sprintf( T_("Added user %s as translator for language %s."),
                           $transluser, $transladdlang );
@@ -135,7 +135,7 @@ require_once( "include/make_translationfiles.php" );
 
       $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
       if( mysql_affected_rows() != 1 )
-        error("unknown_user");
+        error("unknown_user",'admin_t5');
 
       $msg = sprintf( T_("Changed translator privileges info for user %s."), $transluser );
 

@@ -61,7 +61,7 @@ require_once( "include/form_functions.php" );
                      "OnVacation=OnVacation+($vacationdiff) " .
                      "WHERE ID=" . $player_row['ID'] . " " .
                      "AND VacationDays >= ($vacationdiff) LIMIT 1" )
-             or error("internal_error");
+             or error("internal_error",'edit_v1');
 
          $msg = urlencode(T_('Vacation length changed!'));
 
@@ -100,20 +100,20 @@ require_once( "include/form_functions.php" );
                                "WHERE Clock.ID=ClockUsed " .
                                "AND ToMove_ID='" . $player_row['ID'] . "' " .
                                "AND Status!='INVITED' AND Status!='FINISHED'")
-            or error("internal_error");
+            or error("internal_error",'edit_v2');
 
          while( $row = mysql_fetch_array( $result ) )
          {
             mysql_query("UPDATE Games SET LastTicks='" . $row['ticks'] . "', ClockUsed=-1 " .
                         "WHERE ID=" . $row['gid'] . " LIMIT 1" )
-               or error("internal_error");
+               or error("internal_error",'edit_v3');
          }
 
          mysql_query("UPDATE Players SET VacationDays=VacationDays-$vacationlength, " .
                      "OnVacation=$vacationlength " .
                      "WHERE ID=" . $player_row['ID'] . " " .
                      "AND VacationDays >= ($vacationlength) LIMIT 1" )
-            or error("internal_error");
+            or error("internal_error",'edit_v4');
 
          $msg = urlencode(T_('Have a nice vacation!'));
 

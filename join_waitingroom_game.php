@@ -227,7 +227,7 @@ require_once( "include/rating.php" );
    mysql_query( $query );
 
       if( mysql_affected_rows() != 1)
-         error("mysql_insert_message",true);
+         error("mysql_insert_message");
 
    $mid = mysql_insert_id();
 

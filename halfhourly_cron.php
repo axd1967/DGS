@@ -127,7 +127,7 @@ if( !$is_down )
 
          $res2 = mysql_query( $query ) or die(mysql_error() . $query);
 
-         if( mysql_num_rows($res2) > 0 )
+         if( @mysql_num_rows($res2) > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  Games:\n";
 
@@ -174,7 +174,7 @@ if( !$is_down )
 
 
          $res3 = mysql_query( $query ) or die(mysql_error() . $query);
-         if( mysql_num_rows($res3) > 0 )
+         if( @mysql_num_rows($res3) > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  New messages:\n";
             while( $msg_row = mysql_fetch_array( $res3 ) )

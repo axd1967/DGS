@@ -31,13 +31,20 @@ require_once( "include/std_functions.php" );
       jump_to("index.php");
 
    $userid = @$_POST['userid'];
-   $result = mysql_query( "SELECT Newpassword, Email " .
+
+   if( $userid == "guest" )
+      error("not_allowed_for_guest");
+
+   $result = mysql_query( "SELECT ID, Newpassword, Email " .
                           "FROM Players WHERE Handle='$userid'" );
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("unknown_user");
 
    $row = mysql_fetch_assoc($result);
+
+   if( $row['ID'] == 1 )
+      error("not_allowed_for_guest");
 
    if( !empty($row['Newpassword']) )
       error("newpassword_already_sent");

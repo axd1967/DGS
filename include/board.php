@@ -962,7 +962,7 @@ function fix_corrupted_move_table($gid)
    $result = mysql_query("SELECT Moves FROM Games WHERE ID=$gid");
 
    if( @mysql_num_rows($result) != 1 )
-      error("mysql_query_failed");
+      error("mysql_query_failed",'board1');
 
    extract(mysql_fetch_array($result));
 
@@ -970,7 +970,7 @@ function fix_corrupted_move_table($gid)
    $result = mysql_query("SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid");
 
    if( @mysql_num_rows($result) != 1 )
-      error("mysql_query_failed");
+      error("mysql_query_failed",'board2');
 
    extract(mysql_fetch_array($result));
 

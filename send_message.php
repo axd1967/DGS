@@ -235,7 +235,7 @@ disable_cache();
                              "FROM Games WHERE ID=$gid" );
 
       if( @mysql_num_rows($result) != 1)
-         error("mysql_start_game");
+         error("mysql_start_game",'send3');
 
 
       $game_row = mysql_fetch_assoc($result);
@@ -255,7 +255,7 @@ disable_cache();
       }
       else
       {
-         error("mysql_start_game");
+         error("mysql_start_game",'send4');
       }
       $swap = 0;
       $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_row["Size"]));
@@ -328,7 +328,7 @@ disable_cache();
       $result = mysql_query( $query );
 
       if( mysql_affected_rows() != 1)
-         error("mysql_start_game");
+         error("mysql_start_game",'send5');
 
       if( $handitype == -4 ) // double
       {
@@ -401,7 +401,7 @@ disable_cache();
 
    $result = mysql_query( $query );
    if( mysql_affected_rows() != 1)
-      error("mysql_insert_message",true);
+      error("mysql_insert_message",'send1');
 
    $mid = mysql_insert_id();
    if( $my_id == $opponent_ID ) //Message to myself
@@ -419,7 +419,7 @@ disable_cache();
    }
    $result = mysql_query( $query );
    if( mysql_affected_rows() != 2-$to_me)
-      error("mysql_insert_message",true);
+      error("mysql_insert_message",'send2');
 
    if( $type == "INVITATION" )
       mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" );

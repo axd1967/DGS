@@ -116,8 +116,8 @@ require_once( "include/make_translationfiles.php" );
   {
      $result = mysql_query( "SELECT * FROM FAQ WHERE ID=$id" );
 
-     if( mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry");
+     if( @mysql_num_rows($result) != 1 )
+        error("admin_no_such_entry",'admin_e1');
 
      $row = mysql_fetch_array( $result );
 
@@ -151,8 +151,8 @@ require_once( "include/make_translationfiles.php" );
         " FROM FAQ AS Entry, FAQ AS Parent " .
         "WHERE Entry.ID='$id' AND Parent.ID=Entry.Parent" );
 
-     if( mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry");
+     if( @mysql_num_rows($result) != 1 )
+        error("admin_no_such_entry",'admin_e2');
 
      $row = mysql_fetch_array( $result );
 
@@ -165,7 +165,7 @@ require_once( "include/make_translationfiles.php" );
 
      $result = mysql_query( $query );
 
-     if( mysql_num_rows($result) == 1 )
+     if( @mysql_num_rows($result) == 1 )
      {
         $newparent_row = mysql_fetch_array( $result );
         $newparent = $newparent_row["NewParent"];
@@ -197,7 +197,7 @@ require_once( "include/make_translationfiles.php" );
      $row = get_entry_row( $id );
 
      if( !isset( $_POST["question"] ) )
-        error("No data");
+        error("no_data",'admin_e3');
 
      $question = trim( $_POST["question"] );
      $answer = trim( @$_POST["answer"] );
@@ -208,7 +208,7 @@ require_once( "include/make_translationfiles.php" );
        and $row["ATranslatable"] != 'Done'
        and
          ($row["Level"] > 1 or
-          mysql_num_rows(mysql_query("SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1")) == 0 ))
+          @mysql_num_rows(mysql_query("SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1")) == 0 ))
      {
         mysql_query("DELETE FROM FAQ WHERE ID=$id LIMIT 1");
         mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1 " .
@@ -294,8 +294,8 @@ require_once( "include/make_translationfiles.php" );
   {
      $result = mysql_query( "SELECT * FROM FAQ WHERE ID=$id" );
 
-     if( mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry");
+     if( @mysql_num_rows($result) != 1 )
+        error("admin_no_such_entry",'admin_e4');
 
      $row = mysql_fetch_array( $result );
 
@@ -308,55 +308,55 @@ require_once( "include/make_translationfiles.php" );
         $row = array("Parent" => $row["ID"], "SortOrder" => 0, "Level" => 1);
 
      if( !isset( $_POST["question"] ) )
-        error("No data");
+        error("no_data",'admin_e5');
 
      $question = trim( $_POST["question"] );
      $answer = trim( @$_POST["answer"] );
 
-     $FAQ_group = get_faq_group();
+     $FAQ_group = get_faq_group_id();
 
      if( !empty($question) or !empty($answer))
      {
         mysql_query("UPDATE FAQ SET SortOrder=SortOrder+1 " .
                     'WHERE Parent=' . $row["Parent"] . ' ' .
-                    'AND SortOrder>' . $row["SortOrder"] ) or die(mysql_error());
+                    'AND SortOrder>' . $row["SortOrder"] )
+           or error("internal_error",'admin_f1');
 
         mysql_query("INSERT INTO FAQ SET " .
                     "SortOrder=" . ($row["SortOrder"]+1) . ', ' .
                     "Parent=" . $row["Parent"] . ', ' .
-                    "Level=" . $row["Level"] ) or die(mysql_error());
+                    "Level=" . $row["Level"] )
+           or error("internal_error",'admin_f2');
 
         $faq_id = mysql_insert_id();
         mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ', ' .
                     "FAQID=$faq_id," .
                     "Question=\"$question\", Answer=\"$answer\"");
 
-        mysql_query( "INSERT INTO TranslationTexts SET Text=\"$question\", " .
-                     "Ref_ID=$faq_id, Translatable = 'N' " )
-           or die(mysql_error());
+        mysql_query("INSERT INTO TranslationTexts SET Text=\"$question\", " .
+                    "Ref_ID=$faq_id, Translatable = 'N' " )
+           or error("internal_error",'admin_f3');
 
         $q_id =  mysql_insert_id();
         $a_id = 'NULL';
         mysql_query("INSERT INTO TranslationFoundInGroup " .
                     "SET Text_ID=$q_id, Group_ID=$FAQ_group" )
-           or die(mysql_error());
+           or error("internal_error",'admin_f4');
 
         if( $row['Level'] > 1 )
         {
-           mysql_query( "INSERT INTO TranslationTexts SET Text=\"$answer\", " .
+            mysql_query("INSERT INTO TranslationTexts SET Text=\"$answer\", " .
                         "Ref_ID=$faq_id, Translatable = 'N' " )
-              or die(mysql_error());
+               or error("internal_error",'admin_f5');
 
-         $a_id =  mysql_insert_id();
-         mysql_query("INSERT INTO TranslationFoundInGroup " .
-                     "SET Text_ID=$a_id, Group_ID=$FAQ_group" )
-            or die(mysql_error());
+            $a_id =  mysql_insert_id();
+            mysql_query("INSERT INTO TranslationFoundInGroup " .
+                        "SET Text_ID=$a_id, Group_ID=$FAQ_group" )
+               or error("internal_error",'admin_f6');
         }
 
-
         mysql_query( "UPDATE FAQ SET Answer=$a_id, Question=$q_id WHERE ID=$faq_id LIMIT 1" )
-           or die(mysql_error());
-
+           or error("internal_error",'admin_f7');
      }
 
      jump_to("admin_faq.php");
@@ -370,7 +370,7 @@ require_once( "include/make_translationfiles.php" );
 
      $row = get_entry_row( $id );
 
-     //$FAQ_group = get_faq_group();
+     //$FAQ_group = get_faq_group_id();
 
 //Warning: for toggle, Answer follow Question
 //         but they could be translated independently
@@ -378,7 +378,7 @@ require_once( "include/make_translationfiles.php" );
          || ( $row['Answer'] && (
            $row['ATranslatable'] == 'Done' or $row['ATranslatable'] == 'Changed' ) )
        )
-        error('admin_already_translated');
+        error('admin_already_translated','admin_e6');
      else
      {
         $query = "UPDATE TranslationTexts " .
@@ -386,7 +386,7 @@ require_once( "include/make_translationfiles.php" );
                     "WHERE ID=" . $row['Question'] .
            ( $row['Level'] == 1 ? ' LIMIT 1' : " OR ID=" . $row['Answer'] . " LIMIT 2" );
 
-        mysql_query( $query ) or die(mysql_error());
+        mysql_query( $query ) or error("internal_error",'admin_f10');
      }
 
      make_include_files(null, 'FAQ');
@@ -415,7 +415,7 @@ require_once( "include/make_translationfiles.php" );
         "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
         "AND entry.Level<3 AND entry.Level>0 " .
         "ORDER BY CatOrder,entry.Level,entry.SortOrder")
-        or die(mysql_error());
+        or error("internal_error",'admin_f11');
 
 
      echo "<table>\n";
@@ -484,11 +484,11 @@ require_once( "include/make_translationfiles.php" );
   end_page();
 }
 
-function get_faq_group()
+function get_faq_group_id()
 {
   $result = mysql_query("SELECT ID FROM TranslationGroups WHERE Groupname='FAQ'");
 
-  if( mysql_num_rows($result) != 1 )
+  if( @mysql_num_rows($result) != 1 )
      error("mysql_query_failed", "Group 'FAQ' Missing in TranslationGroups");
 
   $row = mysql_fetch_assoc( $result );
@@ -503,10 +503,10 @@ function get_entry_row( $id )
         "FROM FAQ, TranslationTexts AS Question " .
         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
         "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question"
-   ) or die(mysql_error());
+   ) or error("internal_error",'admin_f12');
 
-   if( mysql_num_rows($result) != 1 )
-      error("admin_no_such_entry");
+   if( @mysql_num_rows($result) != 1 )
+      error("admin_no_such_entry",'admin_e7');
 
    return mysql_fetch_assoc( $result );
 }

@@ -76,14 +76,14 @@ require_once( "include/rating.php" );
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
 
    if( @mysql_num_rows($result) != 1 )
-      error("unknown_game");
+      error("unknown_game",'game1');
 
 
    $row = mysql_fetch_assoc($result);
    extract($row);
 
    if( $Status == 'INVITED' )
-      error("unknown_game");
+      error("unknown_game",'game2');
 
 
    if( $action and $player_row["ID"] != $ToMove_ID )
@@ -201,7 +201,7 @@ require_once( "include/rating.php" );
       case 'handicap':
       {
          if( $Status != 'PLAY' )
-            error("invalid_action");
+            error("invalid_action",'game3');
 
          check_handicap(); //adjust $handi, $stonestring, $enable_message and others
 
@@ -218,7 +218,7 @@ require_once( "include/rating.php" );
       case 'pass':
       {
          if( $Status != 'PLAY' and $Status != 'PASS' )
-            error("invalid_action");
+            error("invalid_action",'game4');
 
          $extra_message = "<font color=\"green\">" . T_('Passing') . "</font>";
       }
@@ -227,7 +227,7 @@ require_once( "include/rating.php" );
       case 'delete':
       {
          if( $Status != 'PLAY' or !$too_few_moves )
-            error("invalid_action");
+            error("invalid_action",'game5');
 
          $extra_message = "<font color=\"red\">" . T_('Deleting game') . "</font>";
       }
@@ -236,7 +236,7 @@ require_once( "include/rating.php" );
       case 'remove':
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error("invalid_action");
+            error("invalid_action",'game6');
 
          check_remove( $coord );
   //ajusted globals by check_remove(): $array, $score, $stonestring;
@@ -253,7 +253,7 @@ require_once( "include/rating.php" );
       case 'done':
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error("invalid_action");
+            error("invalid_action",'game7');
 
          check_remove();
   //ajusted globals by check_remove(): $array, $score, $stonestring;
@@ -265,7 +265,7 @@ require_once( "include/rating.php" );
 
       default:
       {
-         error("illegal_action");
+         error("invalid_action",'game8');
       }
    }
 

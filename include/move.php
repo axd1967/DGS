@@ -33,7 +33,7 @@ function check_move($print_error=true)
    if( !isset($rownr) or !isset($colnr) or @$array[$colnr][$rownr] >= 1 )
    {
       if( $print_error )
-         error("illegal_position");
+         error("illegal_position",'move1');
       else
       {
          echo "Illegal_position";
@@ -112,7 +112,7 @@ function check_handicap() //adjust $handi, $stonestring, $enable_message and oth
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
 
       if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] != NONE )
-         error("illegal_position");
+         error("illegal_position",'move2');
 
       $array[$colnr][$rownr] = BLACK;
    }
@@ -122,7 +122,7 @@ function check_handicap() //adjust $handi, $stonestring, $enable_message and oth
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
       if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] != NONE )
-         error("illegal_position");
+         error("illegal_position",'move3');
 
       $array[$colnr][$rownr] = BLACK;
       $stonestring .= $coord;
@@ -160,7 +160,7 @@ function check_remove( $coord=false )
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
 
       if( !isset($rownr) or !isset($colnr) )
-         error("illegal_position");
+         error("illegal_position",'move4');
 
       $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
       if( $stone == BLACK or $stone == WHITE or $stone == NONE ) //NONE for MARKED_DAME
@@ -179,13 +179,13 @@ function check_remove( $coord=false )
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
       if( !isset($rownr) or !isset($colnr) )
-         error("illegal_position");
+         error("illegal_position",'move5');
 
       $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
       if ( MAX_SEKI_MARK<=0 or ($stone!=NONE and $stone!=MARKED_DAME) )
       {
          if( $stone!=BLACK and $stone!=WHITE and $stone!=BLACK_DEAD and $stone!=WHITE_DEAD )
-            error("illegal_position");
+            error("illegal_position",'move6');
       }
 
       $marked = array();
