@@ -52,13 +52,14 @@ require_once( "include/form_functions.php" );
 
   $row = mysql_fetch_array($result);
 
-  $title =  T_('Rating graph for') . ' ' . "<A href=\"userinfo.php?uid=$uid\">" .
-     $row['Name'] . "</A>";
-
-  start_page($title, true, $logged_in, $player_row );
+  start_page(T_('Rating graph for') . ' ' . $row['Name'], true, $logged_in, $player_row );
 
   echo '<center>';
-  echo "<h3><font color=$h3_color>$title</font></h3><p>\n";
+
+
+  echo "<h3><font color=$h3_color>" .
+     T_('Rating graph for') . " <A href=\"userinfo.php?uid=$uid\">" . $row['Name'] .
+     "</A></font></h3><p>\n";
 
   $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2");
 
