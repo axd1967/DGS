@@ -22,6 +22,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
+function sgf_echo_com( $com ) {
+   if ( $com )
+      echo "\nC[".str_replace("]","\]", ltrim($com,"\r\n"))."]\n";
+}
 
 {
    disable_cache();
@@ -31,7 +35,11 @@ require_once( "include/rating.php" );
 
    $use_HA = false;
    $use_AB_for_handicap = true;
+   $sgf_trim_level = -1; //-1= skip ending pass, -2= keep them
+   $sgf_pass_hili = 1; //0=no highlight, 1=with Name property, 2=in comments
 
+//As board size may be > 'tt' coord, we can't use [tt] for pass moves
+// so we use [] and, then, we need at least sgf_version = 4 (FF[4])
    $sgf_version = 4;
 
    if( !$gid )
@@ -73,6 +81,9 @@ require_once( "include/rating.php" );
            date('Ymd', $timestamp) . '.sgf"' );
    header( "Content-Description: PHP Generated Data" );
 
+
+   $node_com = "";
+
    echo "(;FF[$sgf_version]GM[1]
 PC[Dragon Go Server: $HOSTBASE]
 DT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]
@@ -96,48 +107,79 @@ PW[$Whitename ($Whitehandle)]\n";
    if( $rules )
       echo "RU[$rules]\n";
 
-   if( $use_HA and $Handicap > 0 )
-      echo "HA[$Handicap]\n";
-
-   if( $Handicap > 1 )
-      echo "PL[W]\n";
+   if( $Handicap > 0 ) {
+      if( $use_HA ) 
+         echo "HA[$Handicap]\n";
+      if( $use_AB_for_handicap )
+         echo "PL[W]\nAB";
+   }
 
    $regexp = ( $Status == 'FINISHED' ? "c|comment|h|hidden" : "c|comment" );
+   
+   for ($sgf_trim_nr = mysql_num_rows ($result) - 1; $sgf_trim_nr >=0; $sgf_trim_nr--) {
+      if (!mysql_data_seek ($result, $sgf_trim_nr))
+         break;
+      if (!$row = mysql_fetch_array($result))
+         break;
+      if( $row["PosX"] > $sgf_trim_level )
+         break; 
+   }
 
 
-   if( $Handicap > 0 and $use_AB_for_handicap )
-      echo "AB";
-
+   mysql_data_seek ($result, 0) ;
    while( $row = mysql_fetch_array($result) )
    {
-      if( $row["PosX"] < 0 or ($row["Stone"] != WHITE and $row["Stone"] != BLACK ) )
-         continue;
+      if ( $sgf_trim_nr >= 0
+         && $row["PosX"] >= -1
+         && ($row["Stone"] == WHITE or $row["Stone"] == BLACK )
+         ) {
 
-      if( $row["MoveNr"] > $Handicap or !$use_AB_for_handicap )
-         echo( $row["Stone"] == WHITE ? ";W" : ";B" );
+         if( $row["MoveNr"] > $Handicap or !$use_AB_for_handicap ) {
+            sgf_echo_com( $node_com );
+            $node_com = "";
+            echo( $row["Stone"] == WHITE ? ";W" : ";B" );
+         }
 
-      echo "[" . chr($row["PosX"] + ord('a')) .
-         chr($row["PosY"] + ord('a')) . "]";
+         $sgf_trim_nr--;
+         if( $row["PosX"] == -1 ) { //pass move
+            echo "[]"; //do not use [tt]
+            switch ($sgf_pass_hili) {
+            case 1: echo "N[PASS]"; break;
+            case 2: $node_com.= "\nPASS"; break;
+            }
+         }
+         else   //if bigger board: + ($row["PosX"]<26)?ord('a'):(ord('A')-26)
+            echo "[" . chr($row["PosX"] + ord('a')) .
+               chr($row["PosY"] + ord('a')) . "]";
 
+      }
 
-
-
+      //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
       if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'mis", $row["Text"],
                                        $matches, PREG__SET_ORDER) )
       {
-         echo "C[";
          for($i=0; $i<$nr_matches; $i++)
          {
-            echo ( $row["Stone"] == WHITE ? $Whitename : $Blackname ) . ": ";
-            echo  str_replace("]","\]", trim($matches[2][$i])) .
-               ( $i == $nr_matches-1 ? "" : "\n" );
+            $node_com.= "\n" . ( $row["Stone"] == WHITE ? $Whitename : $Blackname ) . ": ";
+            $node_com.= trim($matches[2][$i]) ;
          }
-         echo "]";
       }
 
-
    }
+
+/* highlighting result in last comments:
+   could show territories, prisonniers, komi ...
+   if ( $Status == 'FINISHED') //???
+   if( isset($Score) )
+   {
+      $node_com.= "\nResult: " . score2text($Score, false, true) ;
+   }
+*/
+
+   sgf_echo_com( $node_com );
+
    echo "\n)\n";
 
 }
+
 ?>
