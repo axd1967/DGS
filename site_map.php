@@ -73,7 +73,8 @@ function item($text,$link,$working, $level,$last=false)
          {
             item(T_('Edit profile'), "edit_profile.php", true, 2);
             item(T_('Edit bio'), "edit_bio.php", true, 2);
-            item(T_('Change password'), "edit_password.php", true, 2, true);
+            item(T_('Change password'), "edit_password.php", true, 2);
+            item(T_('Edit vacation'), "edit_vacation.php", true, 2, true);
          }
          item(T_('Show running games'), "show_games.php?uid=$id", true, 1);
          item(T_('Show finished games'), "show_games.php?uid=$id&finished=1", true, 1);
@@ -89,8 +90,10 @@ function item($text,$link,$working, $level,$last=false)
          item(T_('Send a message'), "message.php", true, 1);
          item(T_('Invite'), "message.php?mode=Invite", true, 1);
          item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
-         item(T_('Show all messages'), "list_messages.php?all=1", true, 1);
-         item(T_('Show sent messages'), "list_messages.php?sent=1", true, 1, true);
+         item(T_('Message list'), "list_messages.php?all=1", true, 1, true);
+         {
+            item(T_('Edit message folders'), "edit_folders.php", true, 2, true);
+         }
       }
 
       item(T_('Waiting room'), "waiting_room.php", true, 0);
@@ -98,15 +101,6 @@ function item($text,$link,$working, $level,$last=false)
       item(T_('Users'), "users.php", true, 0);
       {
          item(T_('User info'), "userinfo.php", false, 1, true);
-         {
-            item(T_('Show running games'), "show_games.php?uid=0", false, 2);
-            item(T_('Show finished games'), "show_games.php?uid=0&finished=1", false, 2);
-            {
-               item(T_('Game'), "game.php", false, 3);
-               item(T_('SGF file of game'), "sgf.php", false, 3, true);
-            }
-            item(T_('Send a message'), "message.php", true, 2, true);
-         }
       }
 
       item(T_('Forum'), "phorum/index.php", true, 0);

@@ -23,7 +23,7 @@ $TranslateGroups[] = "Messages";
 define("FOLDER_ALL_RECEIVED", 0);
 define("FOLDER_MAIN", 1);
 define("FOLDER_NEW", 2);
-define("FOLDER_IMPORTANT", 3);
+define("FOLDER_REPLY", 3);
 define("FOLDER_DELETED", 4);
 define("FOLDER_SENT", 5);
 
@@ -31,7 +31,7 @@ $STANDARD_FOLDERS = array(
    FOLDER_ALL_RECEIVED => array(T_('All Received'),'f7f5e300','000000'),
    FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
    FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
-   FOLDER_IMPORTANT => array(T_('Important'), 'ffaaaa80', '000000'),
+   FOLDER_REPLY => array(T_('Reply!'), 'ffaaaa80', '000000'),
    FOLDER_DELETED => array(T_('Trashcan'), 'ff88ee00', '000000'),
    FOLDER_SENT => array(T_('Sent'), '00000000', '0000ff'));
 
@@ -413,6 +413,26 @@ function get_folders($uid, $remove_all_received=true)
 
 function change_folders_for_marked_messages($uid, $folders)
 {
+
+   if( isset($_GET['move_marked']) )
+   {
+      $new_folder = $_GET['folder'];
+      if( !isset($folders[$new_folder]) or
+          $new_folder == FOLDER_NEW or $new_folder == FOLDER_ALL_RECEIVED )
+         error('folder_not_found');
+   }
+   else if( isset($_GET['destory_marked'] ) )
+      $new_folder = "NULL";
+   else
+      return;
+
+   $sender_where_clause = "";
+   if( $new_folder == FOLDER_SENT )
+      $sender_where_clause = 'AND Sender="Y"';
+   if( $new_folder == FOLDER_REPLY )
+      $sender_where_clause = 'AND Sender="N"';
+
+
    $message_ids = array();
    foreach( $_GET as $key => $val )
       {
@@ -422,12 +442,10 @@ function change_folders_for_marked_messages($uid, $folders)
 
    if( count($message_ids) )
    {
-      $new_folder = $_GET['folder'];
-      if( !isset($folders[$new_folder]) )
-         return;
 
       $query = "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
-         "WHERE uid='$uid' AND mid IN (" . implode(',', $message_ids) . ") " .
+         "WHERE uid='$uid' $sender_where_clause " .
+         "AND mid IN (" . implode(',', $message_ids) . ") " .
          "LIMIT " . count($message_ids);
 
       mysql_query( $query ) or die(mysql_error());

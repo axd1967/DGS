@@ -97,7 +97,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 //                          "ORDER BY Time DESC") or error( "mysql_query_failed", true );
 
    $folderstring = $player_row['StatusFolders'] .
-      (empty($player_row['StatusFolders']) ? '' : ',') . FOLDER_NEW . ',' . FOLDER_IMPORTANT;
+      (empty($player_row['StatusFolders']) ? '' : ',') . FOLDER_NEW . ',' . FOLDER_REPLY;
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS time, " .
       "me.mid, me.mid as date, Messages.Subject, me.Replied, " .

@@ -108,7 +108,11 @@ $mode = $_GET['mode'];
          if( $Folder_nr == FOLDER_NEW )
          {
             // Remove NEW flag
-            mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=" . FOLDER_MAIN . " " .
+
+            $new_folder_nr =
+               ( $Type == 'INVITATION' or $Type == 'DISPUTED' ? FOLDER_REPLY : FOLDER_MAIN );
+
+            mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=$new_folder_nr " .
                          "WHERE mid=$mid AND uid=$my_id LIMIT 1" )
                or die( mysql_error());
 

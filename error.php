@@ -527,6 +527,12 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("folder_not_found"):
+      {
+         echo T_("Sorry, couldn't find the specified message folder.");
+      }
+      break;
+
       default:
       {
          echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");

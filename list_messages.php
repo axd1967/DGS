@@ -169,17 +169,27 @@ require_once( "include/timezones.php" );
 
    $mtable->echo_table();
 
-   $form = new Form('','','');
-   $fld = array();
-   foreach( $my_folders as $key => $val )
-      $fld[$key] = $val[0];
+   if( $current_folder == FOLDER_DELETED )
+   {
+      echo '<center><input type="submit" name="destory_marked" value="' .
+         T_('Destroy marked messages') . "\"></center>\n";
+   }
+   else
+   {
+      $form = new Form('','','');
+      $fld = array();
+      foreach( $my_folders as $key => $val )
+         $fld[$key] = $val[0];
 
-   echo '<center>' .
-      '<input type="submit" name="move_marked" value="' .
-      T_('Move marked messages to folder') . '">' .
-      $form->print_insert_select_box( 'folder', '1', $fld, '', '') .
-      "</form>\n";
+      echo '<center>' .
+         '<input type="submit" name="move_marked" value="' .
+         T_('Move marked messages to folder') . '">' .
+         $form->print_insert_select_box( 'folder', '1', $fld, '', '') .
+         "</center></form>\n";
+   }
 
-   end_page();
+   $menu_array = array( T_('Edit folders') => "edit_folders.php" );
+
+   end_page( $menu_array );
 }
 ?>

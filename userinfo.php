@@ -133,7 +133,8 @@ require( "include/countries.php" );
    {
       $menu_array = array( T_('Edit profile') => 'edit_profile.php',
                            T_('Change password') => 'edit_password.php',
-                           T_('Edit bio') => 'edit_bio.php' );
+                           T_('Edit bio') => 'edit_bio.php',
+                           T_('Edit message folders') => 'edit_folders.php' );
 
       $days_left = floor($player_row['VacationDays']);
       $minimum_days = 7 - floor($player_row['OnVacation']);
