@@ -219,6 +219,12 @@ disable_cache();
          $query .= "Handicap=$handicap, Komi=$komi, ";
       }
 
+      $Rated = ( $game_row['Rated'] === 'Y' and
+                 !empty($opponent_row['RatingStatus']) and
+                 !empty($player_row['RatingStatus']) );
+
+      if( !$Rated and $game_row['Rated'] === 'Y' )
+         $query .= "Rated='N', ";
 
       if( $swap )
          $query .= "Black_ID=" . $game_row["White_ID"] . ", " .
@@ -264,7 +270,7 @@ disable_cache();
             "Black_Maintime=" . $game_row["Maintime"] . ", " .
             "White_Maintime=" . $game_row["Maintime"] . "," .
             "WeekendClock='" . $game_row["WeekendClock"] . "', " .
-            "Rated='" . $game_row["Rated"] . "'";
+            "Rated='" . ($Rated ? 'Y' : 'N' ) . "'";
 
          mysql_query( $query )
             or error("mysql_query_failed");
