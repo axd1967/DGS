@@ -353,6 +353,7 @@ else if( $action == 'done' )
       </TR>
   
     </TABLE>
+  </CENTER>
 </FORM>
 
 

@@ -53,7 +53,6 @@ if( $action == "Change profile" )
          "Rank='$rank', " .
          "Stonesize=$stonesize, " .
          "Boardfontsize='$boardfontsize', " .
-         "Sessionexpire=" . $player_row["Sessionexpire"] .
          " WHERE ID=" . $player_row["ID"]; 
     
     mysql_query( $query );
@@ -86,7 +85,6 @@ else if( $action == "Change password" )
    
    $query = "UPDATE Players SET " .
         "Password=PASSWORD('$passwd'), " .
-         "Sessionexpire=" .$player_row["Sessionexpire"] .
         "WHERE ID=" . $player_row["ID"];    
 
    mysql_query( $query );
