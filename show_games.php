@@ -126,7 +126,9 @@ require_once( "include/rating.php" );
            ', Games.White_End_Rating, Games.Black_End_Rating) AS endRating, ' .
            'log.RatingDiff AS ratingDiff, ' : '' ) .
          "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
-         "IF(White_ID=$uid," . WHITE . "," . BLACK . ") AS Color ";
+         //extra bits of Color are for sorting purposes
+         "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color ";
+
 
       if( $finished )
       {
@@ -232,10 +234,6 @@ require_once( "include/rating.php" );
       $endRating = $blackEndRating = $whiteEndRating = NULL;
       $blackDiff = $whiteDiff = $ratingDiff = NULL;
       extract($row);
-      if( !isset($Color) )
-         $color = 'y';
-      else
-         $color = ( $Color == BLACK ? 'b' : 'w' );
 
       $grow_strings = array();
       if( $gtable->Is_Column_Displayed[1] )
@@ -299,8 +297,23 @@ require_once( "include/rating.php" );
             $grow_strings[25] = "<td>" .
                (isset($ratingDiff) ? ($ratingDiff > 0 ? '+' : '') .
                 sprintf("%0.2f",$ratingDiff*0.01) : '&nbsp;' ) . "</td>";
+
          if( $gtable->Is_Column_Displayed[5] )
-            $grow_strings[5] = "<td align=center><img src=\"17/$color.gif\" alt=$color></td>";
+         {
+            if( $Color & 2 ) //my color
+               $colors = 'w';
+            else
+               $colors = 'b';
+            if( !($Color & 0x20) )
+            {
+               if( $Color & 1 ) //to move color
+                  $colors.= '_w';
+               else
+                  $colors.= '_b';
+            }
+            $grow_strings[5] = "<td align=center><img src=\"17/$colors.gif\" alt=\"$colors\"></td>";
+         }
+
       }
 
       if( $gtable->Is_Column_Displayed[6] )
@@ -329,17 +342,16 @@ require_once( "include/rating.php" );
          if( $gtable->Is_Column_Displayed[14] )
             $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
          if( $gtable->Is_Column_Displayed[12] )
-            $grow_strings[12] = '<td>' . date($date_fmt2, $Time) . "</td>";
+            $grow_strings[12] = '<td>' . date($date_fmt, $Time) . "</td>";
       }
       else
       {
          if( $gtable->Is_Column_Displayed[14] )
             $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
          if( $gtable->Is_Column_Displayed[13] )
-            $grow_strings[13] = '<td>' . date($date_fmt2, $Time) . "</td>";
-
+            $grow_strings[13] = '<td>' . date($date_fmt, $Time) . "</td>";
          if( !$observe and !$all and $gtable->Is_Column_Displayed[15] )
-            $grow_strings[15] = '<td align=center>' . date($date_fmt2, $Lastaccess) . "</td>";
+            $grow_strings[15] = '<td align=center>' . date($date_fmt, $Lastaccess) . "</td>";
       }
 
       $gtable->add_row( $grow_strings );
