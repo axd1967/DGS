@@ -68,7 +68,9 @@ function error($err, $debugmsg=NULL)
    
    if( empty($debugmsg) )
    {
-      $debugmsg = str_replace( $SUB_PATH, '', @$_SERVER['PHP_SELF']);
+      $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
+      //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
+      $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
    }
    //if( !empty($debugmsg) )
    {

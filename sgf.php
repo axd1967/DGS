@@ -19,6 +19,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
+if( @$_GET['quick_mode'] )
+   $quick_errors = 1;
 require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/rating.php" );
@@ -157,8 +159,6 @@ function sgf_count_string( $color, $territory, $prisoner, $komi=false )
 
 $array=array();
 
-if( @$_GET['quick_mode'] )
-   $quick_errors = 1;
 
 {
    disable_cache();
