@@ -80,12 +80,6 @@ require_once( "include/rating.php" );
       $page = "show_games.php?uid=$uid&";
       $column_set_name = "RunningGamesColumns";
    }
-   $column_set_name = "GamesColumns";
-/* Remove the previous line when this is done:
-ALTER TABLE `dragon`.`players` ADD `ObservedGamesColumns` INT(10) UNSIGNED DEFAULT '593910' NOT NULL AFTER `GamesColumns`;
-ALTER TABLE `dragon`.`players` ADD `FinishedGamesColumns` INT(10) UNSIGNED DEFAULT '593910' NOT NULL AFTER `GamesColumns`;
-ALTER TABLE `dragon`.`players` ADD `RunningGamesColumns` INT(10) UNSIGNED DEFAULT '593910' NOT NULL AFTER `GamesColumns`;
-*/
 
    if(!@$_GET['sort1'])
    {
