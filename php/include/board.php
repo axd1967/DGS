@@ -158,7 +158,7 @@ function draw_board($Size, &$array, $may_play, $gid,
                       printf('%s%s%s%s%s" SRC=%d/%s.gif></A></td>
 ', $str2, $letter_c, $letter_r, $str3, $alt, $stone_size, $type);
                     else
-                      printf('%s%s "SRC=%d/%s.gif></td>
+                      printf('%s%s" SRC=%d/%s.gif></td>
 ', $str1, $alt, $stone_size, $type );
 
                     $letter_c ++;
