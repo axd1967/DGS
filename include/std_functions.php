@@ -37,7 +37,7 @@ $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
 $is_down = false;
 
-$hostname_jump = false;  // ensure $HTTP_HOST is same as $HOSTNAME
+$hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
 
 $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
 $ActivityForHit = 1.0;
@@ -105,6 +105,12 @@ define("RIGHT",4);
 define("DOWN",8);
 define("SMOOTH_EDGE",16);
 
+define("ADMIN_TRANSLATORS",1);
+define("ADMIN_FAQ",2);
+define("ADMIN_FORUM",4);
+define("ADMIN_ADMINS",8);
+define("ADMIN_TIME",16);
+
 
 // If no gettext
 //if( !function_exists("_") )
@@ -158,18 +164,6 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    $base_path = ( is_base_dir() ? '' : '../' );
 
-//     $use_gz = true;
-//     if (eregi("NetCache|Hasd_proxy", $HTTP_SERVER_VARS['HTTP_VIA'])
-//         || eregi("^Mozilla/4\.0[^ ]", $USER_AGENT))
-//     {
-//        $use_gz = false;
-//     }
-//     if ($use_gz)
-//        ob_start("ob_gzhandler");
-//     else
-//        ob_start();
-//     header("Vary: Accept-Encoding");
-
    ob_start("ob_gzhandler");
 
    $charenc = $the_translator->current_language->charset;
@@ -182,13 +176,14 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
   echo "
   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$charenc\">\n";
 
-//   if( $no_cache )
-//       {
-//  echo '
-//      <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
-//      <META HTTP-EQUIV="Expires" CONTENT="0">
-//  ';
-//       }
+//   echo '<script language="JavaScript">
+// function popup(page)
+// {
+// w2=window.open(page, "w2", "");
+// }
+// </script>';
+
+
    echo '
     <TITLE> Dragon Go Server - ' . $title . '</TITLE>
     <LINK REL="shortcut icon" HREF="' . $base_path . 'images/favicon.ico" TYPE="image/x-icon">
@@ -269,11 +264,14 @@ function end_page( $menu_array=NULL )
        <A href="' . $base_path . 'index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
         <td align="right" width="50%">';
 
-   if( $admin_level > 2 )
+   if( $admin_level & ADMIN_TIME )
       echo '
         <font size=-2 color=' . $menu_fg_color . '>' . T_('Page created in') .
         sprintf (' %0.2f', (getmicrotime() - $time)*1000) . '&nbsp;ms&nbsp;&nbsp;&nbsp;' .
-         '</font><B><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
+         "</font>\n";
+
+   if( $admin_level > 0 )
+      echo '<B><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
          T_('Admin') . '</a></B></font></td>';
    else
       echo '<A href="' . $base_path . 'index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
@@ -467,6 +465,13 @@ function error($err, $debugmsg=NULL)
    @mysql_query( $errorlog_query );
 
    jump_to( $uri );
+}
+
+function help($topic)
+{
+   global $base_path;
+
+   return '<a href="javascript:popup(\'' . $base_path . 'help.php?topic=' . $topic . '\')"><img border=0 align=top src="' . $base_path . 'images/help.png"></a>';
 }
 
 function jump_to($uri, $absolute=false)
@@ -810,7 +815,7 @@ function make_url($page, $sep)
 
 function is_logged_in($hdl, $scode, &$row)
 {
-   global $time, $admin_level, $PHP_SELF, $HOSTNAME, $HTTP_HOST,
+   global $time, $admin_level, $PHP_SELF, $HOSTNAME, $HTTP_HOST, $hostname_jump,
       $ActivityHalvingTime, $ActivityForHit, $NOW, $the_translator, $known_languages;
 
    $time = getmicrotime();
@@ -824,8 +829,9 @@ function is_logged_in($hdl, $scode, &$row)
    if( !$hdl )
       return false;
 
-   $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire " .
-                          "FROM Players WHERE Handle='$hdl'" );
+   $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
+                           "Adminlevel+0 as admin_level " .
+                           "FROM Players WHERE Handle='$hdl'" );
 
 
    if( @mysql_num_rows($result) != 1 )
@@ -851,8 +857,8 @@ function is_logged_in($hdl, $scode, &$row)
 
 
 
-   if( $row["Adminlevel"] >= 1 )
-      $admin_level = $row["Adminlevel"];
+   if( $row["admin_level"] >= 1 )
+      $admin_level = $row["admin_level"];
 
    if( !empty( $row["Timezone"] ) )
       putenv('TZ='.$row["Timezone"] );
@@ -908,12 +914,20 @@ function array_value_to_key_and_value( $array )
   return $new_array;
 }
 
-function add_link_page_link($link, $linkdesc, $extra = '')
+function add_link_page_link($link, $linkdesc, $extra = '', $active = true)
 {
-  echo "<p><a href=\"$link\">$linkdesc</a>";
-  if( !empty($extra) )
-    echo " --- $extra";
-  echo "\n";
+   if( $active )
+      echo "<p><a href=\"$link\">$linkdesc</a>";
+   else
+      echo "<p><font color=gray>$linkdesc";
+
+   if( !empty($extra) )
+      echo " --- $extra";
+
+   if( !$active )
+      echo "</font>";
+
+   echo "\n";
 }
 
 function nsq_addslashes( $str )

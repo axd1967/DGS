@@ -435,15 +435,21 @@ require( "include/std_functions.php" );
       }
       break;
 
-      case("admin_add_lang_missing_field"):
+      case("translator_admin_add_lang_missing_field"):
       {
         echo T_("Sorry, there was a missing or incorrect field when adding a language.");
       }
       break;
 
-      case("admin_add_lang_exists"):
+      case("translator_admin_add_lang_exists"):
       {
         echo T_("Sorry, the language you tried to add already exists.");
+      }
+      break;
+
+      case("faq_admin_no_such_entry"):
+      {
+        echo T_("Sorry, couldn't find that faq entry.");
       }
       break;
 
