@@ -31,15 +31,9 @@ start_page("Links", true, $logged_in, $player_row );
 ?>
 
 <p align="left">&nbsp;</p>
-<h3><font color="#800000">Documentaion</font></h3>
+<h3><font color="#800000">Introduction to dragon</font></h3>
 
-
-<p align="left"><a href="introduction.php">Introduction to Dragon</a></p>
-
-<p align="left"><a href="faq.php">Frequently Asked Questions</a> -- with answers</p>
-
-<p align="left"><a href="links.php">Links</a>
-  -- to rules and more</p>
+Sorry, nothing here yet.
 
 <p align="left">&nbsp;</p>
 
