@@ -274,28 +274,60 @@ require_once( "include/rating.php" );
       $msg = make_html_safe($msg, 'game');
 
 
+   $show_notes = false;
+   if ($player_row["ID"] == $Black_ID)
+     {
+     $show_notes = true;
+     $notes = $Black_Notes;
+     }
+   if ($player_row["ID"] == $White_ID)
+     {
+     $show_notes = true;
+     $notes = $Black_Notes;
+     }
+     
+   if ($Size > $player_row["NotesCutoff"])
+     {
+     $notesheight = $player_row["NotesLargeHeight"];
+     $noteswidth = $player_row["NotesLargeWidth"];
+     $notesposition = $player_row["NotesLargePosition"];
+     $notesenabled = $player_row["NotesLargeEnabled"];
+     }
+   else
+     {
+     $notesheight = $player_row["NotesSmallHeight"];
+     $noteswidth = $player_row["NotesSmallWidth"];
+     $notesposition = $player_row["NotesSmallPosition"];
+     $notesenabled = $player_row["NotesSmallEnabled"];
+     }
+
    echo "<table><tr><td>";
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
               $player_row["Stonesize"], $msg, $stonestring, $handi,
               $player_row["Boardcoords"], $player_row["Woodcolor"]);
 
-   if( $enable_message )
-   {
-      draw_message_box(); //use $stonestring, $prisoner_string, $move
-   }
-
-   echo "</td><td valign=top>";
-   $show_notes = false;
-   if ($player_row["ID"] == $Black_ID)
-      {
-      draw_notes($Black_Notes);
-      }
-   if ($player_row["ID"] == $White_ID)
-      {
-      draw_notes($White_Notes);
-      }
-
-   echo "</td></tr></table>";
+   if ($notesposition == 'BELOW')
+     {
+     echo "</td></tr><tr><td valign=top><center>";
+     if ($notesenabled == 'ON')
+       draw_notes($notes, $notesheight, $noteswidth);
+     echo "</center></td></tr></table>";
+     if( $enable_message )
+       {
+       draw_message_box(); //use $stonestring, $prisoner_string, $move
+       }
+     }
+   else
+     {
+     if( $enable_message )
+       {
+       draw_message_box(); //use $stonestring, $prisoner_string, $move
+       }
+     echo "</td><td valign=top><center>";
+     if ($notesenabled == 'ON')
+       draw_notes($notes, $notesheight, $noteswidth);
+     echo "</center></td></tr></table>";
+     }
 
 
    if( $extra_message )

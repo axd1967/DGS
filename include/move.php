@@ -388,7 +388,7 @@ function draw_moves()
 
 }
 
-function draw_notes($notes)
+function draw_notes($notes, $height, $width)
 {
    global $gid;
 
@@ -400,7 +400,7 @@ function draw_notes($notes)
       "</span></b></font></td></tr>\n";
    echo "<tr><td bgcolor=#ddf0dd>\n";
    $notes = @htmlspecialchars($notes, ENT_QUOTES);
-   echo "<textarea name=\"notes\" id=\"notes\" cols=\"20\" rows=\"25\" wrap=\"virtual\">$notes</textarea>";
+   echo "<textarea name=\"notes\" id=\"notes\" cols=\"" . $width . "\" rows=\"" . $height . "\" wrap=\"virtual\">$notes</textarea>";
    echo "</td></tr>\n";
    echo "<tr><td><input type=\"submit\" value=\"Save notes\"></td></tr>";
    echo "</table>";

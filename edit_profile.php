@@ -83,6 +83,28 @@ require_once( "include/countries.php" );
 
    asort($COUNTRIES);
    array_unshift($COUNTRIES, '');
+   
+   $notesheights = array();
+   for($i=5; $i<26; $i++ )
+     {
+     $notesheights[$i] = $i;
+     }
+   
+   $noteswidths = array();
+   for($i=3; $i<16; $i++ )
+     {
+     $noteswidths[$i*5] = $i * 5;
+     }
+   
+   $notespositions = array('RIGHT' => T_('Right of the board'), 'BELOW' => T_('Below the board'));
+
+   $notesenableds = array('ON' => T_('On'), 'OFF' => T_('Off'));
+   
+   $notescutoffs = array();
+   for($i=5; $i<26; $i++ )
+     {
+     $notescutoffs[$i] = $i;
+     }
 
    start_page(T_("Edit profile"), true, $logged_in, $player_row );
 
@@ -193,6 +215,46 @@ require_once( "include/countries.php" );
    $button_code .= "      </TD>\n";
 
    $profile_form->add_row( array( 'OWNHTML', $button_code ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Large boards from'),
+                                  'SELECTBOX', 'notescutoff', 1, $notescutoffs,
+                                  $player_row["NotesCutoff"], false ) );
+
+   $profile_form->add_row( array( 'HEADER', T_('Notes box for small boards') ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Enabled'),
+                                  'RADIOBUTTONS', 'notessmallenab', $notesenableds,
+                                  $player_row["NotesSmallEnabled"] ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Height'),
+                                  'SELECTBOX', 'notessmallheight', 1, $notesheights,
+                                  $player_row["NotesSmallHeight"], false ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Width'),
+                                  'SELECTBOX', 'notessmallwidth', 1, $noteswidths,
+                                  $player_row["NotesSmallWidth"], false ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Position'),
+                                  'RADIOBUTTONS', 'notessmallpos', $notespositions,
+                                  $player_row["NotesSmallPosition"] ) );
+
+   $profile_form->add_row( array( 'HEADER', T_('Notes box for large boards') ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Enabled'),
+                                  'RADIOBUTTONS', 'noteslargeenab', $notesenableds,
+                                  $player_row["NotesLargeEnabled"] ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Height'),
+                                  'SELECTBOX', 'noteslargeheight', 1, $notesheights,
+                                  $player_row["NotesLargeHeight"], false ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Width'),
+                                  'SELECTBOX', 'noteslargewidth', 1, $noteswidths,
+                                  $player_row["NotesLargeWidth"], false ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Position'),
+                                  'RADIOBUTTONS', 'noteslargepos', $notespositions,
+                                  $player_row["NotesLargePosition"] ) );
 
    $profile_form->add_row( array( 'TD',
                                   'OWNHTML', '<TD>',

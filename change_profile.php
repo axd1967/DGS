@@ -57,6 +57,12 @@ require_once( "include/countries.php" );
 
    $menudirection = ( $menudir == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
+   $notessmallposition = ( $notessmallpos == 'RIGHT' ? 'RIGHT' : 'BELOW' );
+   $noteslargeposition = ( $noteslargepos == 'RIGHT' ? 'RIGHT' : 'BELOW' );
+   $notessmallenabled = ( $notessmallenab == 'ON' ? 'ON' : 'OFF' );
+   $noteslargeenabled = ( $noteslargeenab == 'ON' ? 'ON' : 'OFF' );
+
+
    $query = "UPDATE Players SET " .
       "Name='" . trim($name) . "', " .
       "Email='" . trim($email) . "', " .
@@ -76,6 +82,15 @@ require_once( "include/countries.php" );
       $cookie_prefs['MenuDirection'] = $menudirection;
       $cookie_prefs['Woodcolor'] = $_GET['woodcolor'];
       $cookie_prefs['Button'] = $_GET['button'];
+      $cookie_prefs['NotesSmallHeight'] = $_GET['notessmallheight'];
+      $cookie_prefs['NotesSmallWidth'] = $_GET['notessmallwidth'];
+      $cookie_prefs['NotesSmallPosition'] = $notessmallposition;
+      $cookie_prefs['NotesSmallEnabled'] = $notessmallenabled;
+      $cookie_prefs['NotesLargeHeight'] = $_GET['noteslargeheight'];
+      $cookie_prefs['NotesLargeWidth'] = $_GET['noteslargewidth'];
+      $cookie_prefs['NotesLargePosition'] = $noteslargeposition;
+      $cookie_prefs['NotesLargeEnabled'] = $noteslargeenabled;
+      $cookie_prefs['NotesCutoff'] = $_GET['notescutoff'];
 
       set_cookie_prefs($player_row['ID']);
    }
@@ -86,7 +101,17 @@ require_once( "include/countries.php" );
          "Boardcoords=$boardcoords, " .
          "MenuDirection='$menudirection', " .
          "Woodcolor=" . $_GET['woodcolor'] . ", " .
-         "Button=" . $_GET['button'] . ", ";
+         "Button=" . $_GET['button'] . ", " .
+         "NotesSmallHeight=" . $_GET['notessmallheight'] . ", " .
+         "NotesSmallWidth=" . $_GET['notessmallwidth'] . ", " .
+         "NotesSmallPosition='$notessmallposition', " .
+         "NotesSmallEnabled='$notessmallenabled', " .
+         "NotesLargeHeight=" . $_GET['noteslargeheight'] . ", " .
+         "NotesLargeWidth=" . $_GET['noteslargewidth'] . ", " .
+         "NotesLargePosition='$noteslargeposition', " .
+         "NotesLargeEnabled='$noteslargeenabled', " .
+         "NotesCutoff=" . $_GET['notescutoff'] . ", ";
+         
 
       set_cookie_prefs($player_row['ID'], true);
    }
