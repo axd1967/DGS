@@ -422,6 +422,23 @@ foreach $final_size (@Sizes)
         load_image ("BigPlayWhite.png", 0, $foreground_color);
         resize (round ($final_size * 644 / 502), $final_size);
         save_image ("pw", 1);
+
+//Rodival: not well implanted:
+        load_image ("BigBlackBlack.png", 0, $foreground_color);
+        resize (round ($final_size * 644 / 502), $final_size);
+        save_image ("b_b", 1);
+
+        load_image ("BigWhiteWhite.png", 0, $foreground_color);
+        resize (round ($final_size * 644 / 502), $final_size);
+        save_image ("w_w", 1);
+
+        load_image ("BigWhiteBlack.png", 0, $foreground_color);
+        resize (round ($final_size * 644 / 502), $final_size);
+        save_image ("w_b", 1);
+
+        load_image ("BigBlackWhite.png", 0, $foreground_color);
+        resize (round ($final_size * 644 / 502), $final_size);
+        save_image ("b_w", 1);
     }
 
 

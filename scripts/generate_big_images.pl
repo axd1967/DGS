@@ -50,6 +50,8 @@ if( $outfile eq 'BigBlackMark.png' || $outfile eq 'BigWhiteMark.png' )
 }
 elsif( $outfile eq 'BigBlack.png' || $outfile eq 'BigWhite.png' ||
        $outfile eq 'BigPlayBlack.png' || $outfile eq 'BigPlayWhite.png' ||
+       $outfile eq 'BigBlackBlack.png' || $outfile eq 'BigWhiteWhite.png' ||
+       $outfile eq 'BigWhiteBlack.png' || $outfile eq 'BigBlackWhite.png' ||
        $outfile eq 'YinYang.png' )
 {
     $theImage = gimp_file_load($infile, $infile);
