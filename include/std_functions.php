@@ -94,16 +94,16 @@ if( !function_exists("_") )
 
 function getmicrotime()
 {
-   list($usec, $sec) = explode(" ",microtime()); 
-   return ((float)$usec + (float)$sec); 
-} 
+   list($usec, $sec) = explode(" ",microtime());
+   return ((float)$usec + (float)$sec);
+}
 
 function unix_timestamp($date)
 {
    $pattern = "/(19|20)(\d{2})-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2})/";
    $m = preg_match ($pattern, $date, $matches);
-       
-   if(empty($date) or $date == "0000-00-00" or !$m) 
+
+   if(empty($date) or $date == "0000-00-00" or !$m)
    {
       return NULL;
    }
@@ -134,7 +134,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified
       disable_cache($last_modified_stamp);
 
 
-//     $use_gz = true; 
+//     $use_gz = true;
 //     if (eregi("NetCache|Hasd_proxy", $HTTP_SERVER_VARS['HTTP_VIA'])
 //         || eregi("^Mozilla/4\.0[^ ]", $USER_AGENT))
 //     {
@@ -172,7 +172,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified
 ';
 
 
-   if( $logged_in and !$is_down ) 
+   if( $logged_in and !$is_down )
       echo '          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . _("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
    else
       echo '          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . _("Not logged in") . '</B></font></td>';
@@ -193,7 +193,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified
 
    if( $is_down )
       {
-         echo "Sorry, dragon is down for maintenance at the moment, ". 
+         echo "Sorry, dragon is down for maintenance at the moment, ".
             "please return in an hour or so.";
          end_page();
          exit;
@@ -214,7 +214,7 @@ function end_page( $new_paragraph = true )
         <td align="right" width="50%">';
    if( $show_time )
       echo '
-        <font color=' . $menu_fg_color . '><B>' . _("Page created in") . ' ' . 
+        <font color=' . $menu_fg_color . '><B>' . _("Page created in") . ' ' .
          sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s' . $timeadjust. '</B></font></td>';
    else
       echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . _("Logout") . '</B></font></A></td>';
@@ -239,7 +239,7 @@ function error($err)
    if( mysql_error() )
       $uri .= "&mysqlerror=" . urlencode(mysql_error());
 
-   error_log($handle . ": " . $err . "\n" . mysql_error(), 0);
+   error_log($handle . ": " . $err . ( mysql_error() ? "\n" . mysql_error() : ''), 0);
 
    jump_to( $uri );
 }
@@ -258,7 +258,7 @@ function jump_to($uri, $absolute=false)
 
 function make_session_code()
 {
-   mt_srand((double)microtime()*1000000); 
+   mt_srand((double)microtime()*1000000);
    return sprintf("%06X%06X%04X",mt_rand(0,16777215), mt_rand(0,16777215), mt_rand(0,65535));
 }
 
@@ -275,7 +275,7 @@ function random_letter()
 
 function generate_random_password()
 {
-   mt_srand((double)microtime()*1000000); 
+   mt_srand((double)microtime()*1000000);
    for( $i=0; $i<8; $i++ )
       $return .= random_letter();
 
@@ -285,7 +285,7 @@ function generate_random_password()
 function set_cookies($uid, $code, $delete=false)
 {
    global $session_duration, $SUB_PATH, $NOW;
-   
+
    if( $delete )
    {
       $time_diff=-3600;
@@ -325,9 +325,9 @@ function make_html_safe(&$msg, $some_html=false)
 
       // replace <, > with {anglstart}, {anglend} for legal html code
 
-      $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>", 
+      $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>",
                          "{anglstart}a href=\"\\1\\2\"{anglend}\\2{anglstart}/a{anglend}", $msg);
-      $msg=eregi_replace("<((http|news|ftp)+://[^ >\n\t]+)>", 
+      $msg=eregi_replace("<((http|news|ftp)+://[^ >\n\t]+)>",
                          "{anglstart}a href=\"\\1\"{anglend}\\1{anglstart}/a{anglend}", $msg);
 
 
@@ -354,7 +354,7 @@ function make_html_safe(&$msg, $some_html=false)
 
    if( $some_html )
    {
-      // change back to <, > from {anglstart} , {anglend} 
+      // change back to <, > from {anglstart} , {anglend}
       $msg = str_replace ("{anglstart}", "<", $msg);
       $msg = str_replace ("{anglend}", ">", $msg);
    }
@@ -371,7 +371,7 @@ function make_mysql_safe(&$msg)
 function score2text($score, $verbose)
 {
    if( !isset($score) )
-      $text = "?";        
+      $text = "?";
    else if( $score == 0 )
       $text = "Jigo";
    else
@@ -379,14 +379,14 @@ function score2text($score, $verbose)
       $prep = ( abs($score) > 1999 ? 'on' : 'by' );
       if( $verbose )
          $text = ( $score > 0 ? "White wins $prep " : "Black wins $prep " );
-      else 
+      else
          $text = ( $score > 0 ? "W+" : "B+" );
-            
+
       if( abs($score) > 1999 )
          $text .= "Time";
       else if( abs($score) > 999 )
          $text .= "Resign";
-      else 
+      else
          $text .= abs($score);
    }
 
@@ -405,18 +405,18 @@ function get_clock_ticks($clock_used)
       error("mysql_clock_ticks", true);
 
    $row = mysql_fetch_row($result);
-   return $row[0]; 
+   return $row[0];
 }
 
-function mod($a,$b) 
-{ 
-   if ($a <= 0) 
+function mod($a,$b)
+{
+   if ($a <= 0)
       return (int) ($b*(int)(-$a/$b+1)+$a) % $b;
-   else 
-      return (int) $a % $b; 
-} 
+   else
+      return (int) $a % $b;
+}
 
-function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime, 
+function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
 $byotype, $startbyotime, $startbyoper, $has_moved)
 {
    $elapsed = $hours;
@@ -438,7 +438,7 @@ $byotype, $startbyotime, $startbyoper, $has_moved)
       $byotime = $startbyotime;
       $byoper = $startbyoper;
    }
-  
+
    if( $byotype == 'JAP' )
    {
       $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
@@ -462,14 +462,14 @@ $byotype, $startbyotime, $startbyoper, $has_moved)
          $byotime = $startbyotime;
          $byoper = $startbyoper;
       }
-            
+
    }
    else if( $byotype == 'FIS' )
    {
       $byotime = $byoper = 0;  // time is up;
    }
 
-   $main = 0;    
+   $main = 0;
 }
 
 function echo_time($hours)
@@ -513,7 +513,7 @@ function is_logged_in($hdl, $scode, &$row)
 
    $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire " .
                           "FROM Players WHERE Handle='$hdl'" );
-    
+
 
    if( mysql_num_rows($result) != 1 )
       return false;
@@ -535,7 +535,7 @@ function is_logged_in($hdl, $scode, &$row)
 
    if( mysql_affected_rows() != 1 )
       return false;
-    
+
 
 
    if( $row["Adminlevel"] >= 3 )
