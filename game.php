@@ -24,6 +24,12 @@ require( "include/move.php" );
 require( "include/rating.php" );
 
 {
+   // abbreviations used to reduce file size
+   if( $g ) $gid=$g;
+   if( $a ) $action=$a;
+   if( $m ) $move==$m;
+   if( $c ) $coord=$c;
+   if( $s ) $stonestring=$s;
 
    if( !$gid )
       error("no_game_nr");
