@@ -69,15 +69,15 @@ require_once( "include/countries.php" );
 
 
    $query = "UPDATE Players SET " .
-      "Name='" . $name . "', " .
-      "Email='" . $email . "', " .
-      "Rank='" . trim(@$_GET['rank']) . "', " .
-      "Open='" . trim(@$_GET['open']) . "', " .
+      "Name='" . addslashes($name) . "', " .
+      "Email='" . addslashes($email) . "', " .
+      "Rank='" . addslashes(trim(@$_GET['rank'])) . "', " .
+      "Open='" . addslashes(trim(@$_GET['open'])) . "', " .
       "SendEmail='$sendemail', ";
 
    $country = trim(@$_GET['country']) ;
    if( isset($COUNTRIES[$country]) )
-      $query .= "Country='$country', ";
+      $query .= "Country='" . addslashes($country) . "', ";
    else if( empty($country) )
       $query .= "Country=NULL, ";
 

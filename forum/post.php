@@ -28,8 +28,9 @@ function post_message($player_row, $moderated)
    $edit = @$_POST['edit']+0;
 
    $Subject = trim(@$_POST['Subject']);
-   $Text = stripslashes(trim(@$_POST['Text']));
+   $Text = trim(@$_POST['Text']);
    $GoDiagrams = create_godiagrams($Text);
+   $Subject = addslashes($Subject);
    $Text = addslashes($Text);
 
    // -------   Edit old post  ----------

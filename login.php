@@ -60,7 +60,9 @@ if( @$_REQUEST['quick_mode'] )
          error('cookies_disabled');
 
       set_cookies( $userid, $code );
-      jump_to("login.php?cookie_check=1&userid=$userid&passwd=$passwd"
+      jump_to("login.php?cookie_check=1"
+             . "&userid=".urlencode($userid)
+             . "&passwd=".urlencode($passwd)
              . ( $quick_errors ? "&quick_mode=1" : '' )
              );
    }

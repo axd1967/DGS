@@ -392,7 +392,8 @@ disable_cache();
    if( $reply > 0 )
       $query .= "ReplyTo=$reply, ";
 
-   $message = trim($message);
+   $message = addslashes(trim($message));
+   $subject = addslashes(trim($subject));
    $query .= "Subject=\"$subject\", Text=\"$message\"";
 
    $result = mysql_query( $query );

@@ -175,7 +175,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    $garbage = ($Moves < DELETE_LIMIT+$Handicap) ;
    $Moves++;
 
-   $message = trim(@$_REQUEST['message']);
+   $message = addslashes(trim(@$_REQUEST['message']));
 
    $where_clause = " ID=$gid AND Moves=$old_moves";
    $handi = false;

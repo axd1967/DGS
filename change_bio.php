@@ -61,10 +61,11 @@ require_once( "include/rating.php" );
          $query = "DELETE FROM Bio WHERE ID=$ID";
       else
          $query = "UPDATE Bio set uid=" . $player_row["ID"] .
-            ", Text=\"$EnteredText\", Category=\"$EnteredCategory\" " .
-            "WHERE ID=$ID";
+            ', Text="'.addslashes($EnteredText).'"' .
+            ', Category="'.addslashes($EnteredCategory).'"' .
+            " WHERE ID=$ID";
 
-      mysql_query( $query ) or error("mysql_query_failed",true);
+      mysql_query( $query ) or error("mysql_query_failed","change_bio 1");
    }
 
    for($i=1; $i<=3; $i++)
@@ -79,9 +80,10 @@ require_once( "include/rating.php" );
          continue;
 
       $query = "INSERT INTO Bio set uid=" . $player_row["ID"] .
-          ", Text=\"$EnteredText\", Category=\"$EnteredCategory\"";
+            ', Text="'.addslashes($EnteredText).'"' .
+            ', Category="'.addslashes($EnteredCategory).'"' ;
 
-      mysql_query( $query ) or error("mysql_query_failed",true);
+      mysql_query( $query ) or error("mysql_query_failed","change_bio 2");
 
    }
 

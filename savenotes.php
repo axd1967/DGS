@@ -38,7 +38,7 @@ disable_cache();
                           "FROM Games " .
                           "WHERE Games.ID=$gid" );
 
-   if (mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
 
    extract(mysql_fetch_array($result));
@@ -47,7 +47,7 @@ disable_cache();
       error("not_a_player");
 
 
-   $notes = trim(@$_POST['notes']);
+   $notes = addslashes(trim(@$_POST['notes']));
 
    if ($player_row["ID"] == $Black_ID)
       mysql_query( "UPDATE Games SET Black_notes=\"$notes\" WHERE Games.ID=$gid LIMIT 1");
