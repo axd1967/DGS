@@ -160,6 +160,7 @@ define("ADMIN_TIME",0x10);
 define("ADMIN_ADD_ADMIN",0x20);
 define("ADMIN_PASSWORD",0x40);
 define('ADMIN_DATABASE',0x80);
+define('ADMIN_VALIDATE',0x100);
 
 
 define("FOLDER_NONE", -1);
@@ -193,48 +194,43 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
 
    header('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
 
-   echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<HTML>
-  <HEAD>';
+   echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
+      . "<HTML>\n<HEAD>";
 
-  echo "
-  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">\n";
+  echo "\n <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">";
 
+   echo "\n <TITLE> Dragon Go Server - $title </TITLE>"
+      . "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">"
+      . "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}dragon.css\">";
 
-   echo '
-    <TITLE> Dragon Go Server - ' . $title . '</TITLE>
-    <LINK REL="shortcut icon" HREF="' . $base_path . 'images/favicon.ico" TYPE="image/x-icon">
-    <LINK rel="stylesheet" type="text/css" media="screen" href="' . $base_path . 'dragon.css">';
 
    if( $style_string )
-      echo "<STYLE TYPE=\"text/css\">\n" .$style_string . "\n</STYLE>";
+      echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
 
-   echo '
-  </HEAD>
-  <BODY bgcolor=' . $bg_color . '>
-';
+   echo "\n</HEAD>\n<BODY bgcolor=$bg_color>\n";
 }
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $is_down, $is_down_message, $vertical,
+   global $base_path, $is_down, $is_down_message,
       $bg_color, $menu_bg_color, $menu_fg_color;
 
    start_html( $title, $no_cache, $style_string, $last_modified_stamp);
 
-   echo '
-    <script language="JavaScript" src="' . $base_path . 'js/goeditor.js" type="text/javascript"></script>
-    <script language="JavaScript1.4" type="text/javascript"> version=1; </script>
+   echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
+   echo "\n<script language=\"JavaScript1.4\" type=\"text/javascript\"> version=1; </script>";
 
-    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
-        <tr>
-        <td width="50%"><A href="' . $base_path . "index.php\">" .
-      "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>\n" .
-      '<td align=right width="50%"><font color=' . $menu_fg_color .'><B>' .
-      ( ($logged_in and !$is_down) ? T_("Logged in as") . ': ' . $player_row["Handle"]
-        : T_("Not logged in") ) .
-      " </B></font></td></tr>\n</table>\n";
+   echo "\n\n<table id=\"page_head\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>"
+      . "\n <tr>"
+      . "\n  <td align=left><A href=\"{$base_path}index.php\">"
+        . "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>"
+      . "\n  <td align=right><font color=$menu_fg_color><B>"
+        . ( ($logged_in and !$is_down) ? T_("Logged in as") . ': ' . $player_row["Handle"]
+                                       : T_("Not logged in") )
+        . " </B></font></td>"
+      . "\n </tr>\n</table>\n";
+
 
    $menu_array = array(
       '<b><font size="+1">' . T_('Status') . '</font></b>' => array('status.php" accesskey="s',1,1),
@@ -255,82 +251,107 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       T_('Docs') => array('docs.php" accesskey="d',4,3)
       );
 
+
    if( $player_row['MenuDirection'] == 'HORIZONTAL' )
+   {
       make_menu_horizontal($menu_array);
+      echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
+         . "\n <tr>";
+   }
    else
    {
+      echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
+         . "\n <tr>"
+         . "\n  <td valign=top rowspan=2>\n";
       make_menu_vertical($menu_array);
-      $vertical = true;
+      echo "\n  </td>";
    }
+   //this <table><tr><td> is left open until page end
+   echo "\n  <td id=\"page_body\" width=\"100%\" align=center valign=top><BR>";
 
    if( $is_down )
-      {
-         echo $is_down_message . '<p>';
-         end_page();
-         exit;
-      }
+   {
+      echo $is_down_message . '<p>';
+      end_page();
+      exit;
+   }
 }
 
 function end_page( $menu_array=NULL )
 {
-   global $page_microtime, $admin_level, $base_path, $vertical,
+   global $page_microtime, $admin_level, $base_path,
       $menu_bg_color, $menu_fg_color, $bg_color;
 
-   echo "&nbsp;<p>\n";
+   echo "&nbsp;<br>\n";
 
-   if( $vertical )
-      echo '</td></tr><tr><td valign=bottom>';
+   echo "\n  </td>";
 
    if( $menu_array )
+   {
+      echo "\n </tr><tr>"
+         . "\n  <td valign=bottom>";
       make_menu($menu_array);
+      echo "\n  </td>";
+   }
 
-   if( $vertical )
-      echo "</td></tr></table>\n";
-
-
-   if( count($menu_array) >= 3 )
-      $span = ' colspan=' . (count($menu_array)-1);
-   else
-      $span = "";
-
+   //close the <table><tr><td> left open since page start
+   echo "\n </tr>\n</table>\n";
 
    global $NOW, $date_fmt;
-   echo '<table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
-   <tr>
-     <td' . $span . ' align="left" width="30%">
-       <A href="' . $base_path . 'index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
-        <td align="center" width="40%"><font size=-1 color=' . $menu_fg_color . '>'
+   echo "\n<table id=\"page_foot\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color >"
+      . "\n <tr>"
+      . "\n  <td align=left><A href=\"{$base_path}index.php\">"
+        . "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>"
+      . "\n  <td align=center><font size=-1 color=$menu_fg_color>"
         . T_("Page time") . ' ' . date($date_fmt, $NOW)
-        . '</font></td>
-        <td align="right" width="30%">';
+        . "</font></td>"
+      . "\n  <td align=right>";
 
    if( $admin_level & ADMIN_TIME )
-      echo '
-        <font size=-2 color=' . $menu_fg_color . '>' . T_('Page created in') .
-        sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000) .
-         "</font>&nbsp;<br>\n";
+      echo "<font size=-2 color=$menu_fg_color>"
+        . T_('Page created in')
+        . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
+        . "</font>&nbsp;<br>";
 
-   if( $admin_level & ~ADMIN_TIME )
-      echo '<b><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
-         T_('Admin') . '</font></a></b>&nbsp;&nbsp;&nbsp;';
+   if( $admin_level & ~(ADMIN_TIME|ADMIN_VALIDATE) )
+      echo "<a href=\"{$base_path}admin.php\"><b><font color=$menu_fg_color>"
+        . T_('Admin') . "</font></b></a>&nbsp;&nbsp;&nbsp;";
 
-   echo '<A href="' . $base_path . 'index.php?logout=t" accesskey="x"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
+   echo "<A href=\"{$base_path}index.php?logout=t\" accesskey=\"x\">"
+        . "<B><font color=$menu_fg_color>"
+        . T_("Logout") . "</font></B></A>";
 
-   echo '
-      </tr>
-    </table>
-';
+   echo "</td>"
+      . "\n </tr>"
+      . "\n</table>";
+
+   echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$bg_color>"
+      . "\n </tr>";
+
+global $HOSTNAME;
+
+   if( $admin_level & ADMIN_VALIDATE )
+      echo "\n  "
+         . '<td align=left valign=top><a href="http://validator.w3.org/check?uri=referer">'
+         . '<img border=0 src="http://www.w3.org/Icons/valid-html401"'
+         . 'alt="Valid HTML 4.01!" height="31" width="88"></a></td>';
+
+   if( $HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
+      $hostlink= '<A href="http://sourceforge.net" target="_blank"><IMG src="http://sourceforge.net/sflogo.php?group_id=29933&amp;type=1" alt="SourceForge.net Logo" width=88 height=31 border=0 align=middle></A>';
+   else //for devel server
+      $hostlink= '<a href="http://www.samurajdata.se" target="_blank"><img src="'.$base_path.'images/samurajlogo.gif" alt="Samuraj Logo" width=160 height=20 border=0 align=middle></a>';
+
+   echo "\n  <td valign=top align=right colspan=99><font size=-1>Hosted by&nbsp;&nbsp;</font>$hostlink</td>";
+
+   echo "\n </tr>"
+      . "\n</table>";
 
    end_html();
 }
 
 function end_html()
 {
-   echo '
-  </BODY>
-</HTML>
-';
-
+   echo "\n</BODY>\n</HTML>";
    ob_end_flush();
 }
 
@@ -338,10 +359,9 @@ function make_menu($menu_array)
 {
    global $base_path, $bg_color, $max_links_in_main_menu;
 
-   $new_row= '<tr bgcolor=' . $bg_color . ' align="center">' . "\n";
+   $new_row= "\n <tr align=center bgcolor=$bg_color>";
 
-   echo "<table width=\"100%\" border=0 cellspacing=0 cellpadding=4>\n" . $new_row;
-
+   echo "\n\n<table id=\"page_link\" width=\"100%\" border=0 cellspacing=0 cellpadding=4>" . $new_row;
 
    $nr_menu_links = count($menu_array);
    $menu_levels = ceil($nr_menu_links/$max_links_in_main_menu);
@@ -352,29 +372,29 @@ function make_menu($menu_array)
    $cumwidth = $cumw = 0;
    $i = 0;
    foreach( $menu_array as $text => $link )
-      {
-         if( ($i % $menu_width)==0 && $i>0 )
-           {
-             echo "</tr>" . $new_row;
-             $cumw = 0;
-             $cumwidth = 0;
-           }
-         $i++;
-         $cumw += $w;
-         $width = round($cumw - $cumwidth);
+   {
+      if( ($i % $menu_width)==0 && $i>0 )
+        {
+          echo "\n </tr>" . $new_row;
+          $cumw = 0;
+          $cumwidth = 0;
+        }
+      $i++;
+      $cumw += $w;
+      $width = round($cumw - $cumwidth);
 /*
-         if( $i == $nr_menu_links && $remain>1 )
-           $span = " colspan=$remain";
-         else
+      if( $i == $nr_menu_links && $remain>1 )
+        $span = " colspan=$remain";
+      else
 */
-           $span = "";
+        $span = "";
 
-         $j = $i % 10;
-         echo "<td$span width=\"$width%\"><B><A href=\"$base_path$link\" accesskey=\"$j\">$text</A></B></td>\n";
-         $cumwidth += $width;
-      }
+      $j = $i % 10;
+      echo "\n  <td$span width=\"$width%\"><B><A href=\"$base_path$link\" accesskey=\"$j\">$text</A></B></td>";
+      $cumwidth += $width;
+   }
 
-   echo "</tr></table>\n";
+   echo "\n </tr>\n</table>\n";
 }
 
 function cmp1($a, $b)
@@ -410,82 +430,109 @@ function make_menu_horizontal($menu_array)
 {
    global $base_path, $menu_bg_color, $bg_color;
 
-   echo '<table width="100%" border=0 cellspacing=0 cellpadding=0 bgcolor="#F7F5FF"><tr>' . "\n";
+   echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=0 bgcolor=$menu_bg_color>"
+      . "\n <tr>"
+      . "\n  <td>";
+
+   echo "\n<table id=\"page_menu\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=\"#F7F5FF\">"
+      . "\n <tr>";
+
    $cols = 4;
-   $w = 100/($cols+1);
+   $b = $w = 100/($cols+2); //two icons
+   $w = floor($w); $b = 100-$w*($cols+1);
 
-   echo '<td width="' .round($w). '%" rowspan=3>' .
-      '<img src="' . $base_path . 'images/dragonlogo_bl.jpg" alt="Dragon"></td>' . "\n";
-
-   $cumwidth = round($w);
-   $cumw=$w;
    $i = 0;
-
    uasort($menu_array, "cmp2");
-
    foreach( $menu_array as $text => $tmp )
+   {
+      if( $i % $cols == 0 )
       {
-         list($link,$t1,$t2) = $tmp;
+         if( $i<=$cols )
+         {
+            if( $i==0 )
+            {
+               $t1 = round($b);
+               $t1 = " width=\"$t1%\"";
+               $t2 = 'dragonlogo_bl.jpg';
+               $width = "*";
+            }
+            else 
+            {
+               $t1 = 100-$cumwidth;
+               $t1 = " width=\"$t1%\" align=right";
+               $t2 = 'dragonlogo_br.jpg';
+               $width = "";
+            }
+            echo "\n  <td$t1 rowspan=3>"
+               . "<img src=\"{$base_path}images/$t2\" alt=\"Dragon\"></td>";
+         }
+         if( $i>0 )
+            echo "\n </tr><tr>";
+         $cumw = $b;
+         $cumwidth = round($cumw);
+      }
+      $i++;
+
+      list($link,$t1,$t2) = $tmp;
+      if( $width )
+      {
          $cumw += $w;
          $width = round($cumw - $cumwidth);
          $cumwidth += $width;
-         if( $i % $cols == 0 and $i > 0 )
-         {
-            if( $i==$cols )
-               echo '<td width=100 align=right rowspan=3> ' .
-                  '<img src="' . $base_path . 'images/dragonlogo_br.jpg" alt="Dragon"></td>' . "\n";
-            echo '</tr><tr>' . "\n";
-            $cumwidth = round($w);
-            $cumw=$w;
-
-         }
-         $i++;
-
-
-         echo "<td width=\"$width%\"><A href=\"$base_path$link\"><font color=black>$text</font></A></td>\n";
+         $width = " width=\"$width%\"";
       }
 
-   echo "</tr>\n</table>\n";
+      echo "\n  <td$width><A href=\"$base_path$link\"><font color=black>$text</font></A></td>";
+   }
 
-   echo '<table width="100%" cellpadding=0 cellspacing=0><tr><td height=1 bgcolor=' . $menu_bg_color .
-      "><img src=\"{$base_path}images/dot.gif\" width=1 height=1 alt=\"\"></td></tr></table>\n" . "
-    <BR>\n";
+   echo "\n </tr>\n</table>\n";
 
+   echo "\n  </td>"
+      . "\n </tr><tr>"
+      . "\n  <td height=1><img src=\"{$base_path}images/dot.gif\" width=1 height=1 alt=\"\"></td>"
+      . "\n </tr>\n</table>\n";
 }
 
 function make_menu_vertical($menu_array)
 {
    global $base_path, $menu_bg_color, $bg_color;
 
-   //this <table><tr> is left open until page end
-   echo '<table width="100%" border=0 cellspacing=0 cellpadding=5><tr><td valign=top rowspan=2>' . "\n";
+   echo "\n<table border=0 cellspacing=0 cellpadding=1 bgcolor=$menu_bg_color>"
+      . "\n <tr>"
+      . "\n  <td>";
 
-   echo '<table border=0 cellspacing=0 cellpadding=1 bgcolor='.$menu_bg_color.'><tr><td>' . "\n";
-   echo '<table border=0 cellspacing=0 cellpadding=5 bgcolor="#F7F5FF">' . "\n";
-   echo '<tr><td align=center> <img src="' . $base_path . 'images/dragonlogo_bl.jpg" alt="Dragon">' . "\n";
+   echo "\n<table id=\"page_menu\" border=0 cellspacing=0 cellpadding=4 bgcolor=\"#F7F5FF\">"
+      . "\n <tr>";
+
+   echo "\n  <td align=center><img src=\"{$base_path}images/dragonlogo_bl.jpg\" alt=\"Dragon\"></td>"
+      . "\n </tr><tr>"
+      . "\n  <td align=left nowrap>";
 
    $i = 0;
 
    //  uasort($menu_array, "cmp1");
-   echo '</td></tr><tr><td align=left nowrap>' . "\n";
-
    foreach( $menu_array as $text => $tmp )
-      {
-         list($link,$t1,$t2) = $tmp;
+   {
+      if( $i % 3 == 0 and $i > 0 )
+          echo "</td>"
+             . "\n </tr><tr>"
+             . "\n  <td height=1><img height=1 src=\"{$base_path}images/dot.gif\" alt=\"\"></td>"
+             . "\n </tr><tr>"
+             . "\n  <td align=left nowrap>";
+      $i++;
 
-         if( $i % 3 == 0 and $i > 0 )
-             echo '</td></tr><tr><td height=1><img src="' . $base_path . 'images/dot.gif" alt=""></td></tr><tr><td align=left nowrap>' . "\n";
+      list($link,$t1,$t2) = $tmp;
+      echo "<A href=\"$base_path$link\"><font color=black>$text</font></A><br>";
+   }
 
-         $i++;
+   echo "</td>"
+      . "\n </tr><tr>"
+      . "\n  <td height=1><img height=1 src=\"{$base_path}images/dot.gif\" alt=\"\"></td>"
+      . "\n </tr>"
+      . "\n</table>";
 
-         echo "<A href=\"$base_path$link\"><font color=black>$text</font></A><br>\n";
-      }
-
-   echo '</td></tr><tr><td height=5><img height=1 src="' . $base_path . 'images/dot.gif" alt=""></td></tr>'
-         . "\n</table>\n</td></tr></table>\n";
-
-   //this <td> is left open until page end
-   echo '</td><td width="100%" align=center valign=top><BR>' . "\n";
+   echo "\n  </td>"
+      . "\n </tr>\n</table>\n";
 }
 
 /* Not used

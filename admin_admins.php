@@ -45,6 +45,7 @@ require_once( "include/table_columns.php" );
                         'FAQ'    => array( ADMIN_FAQ, T_('FAQ')),
                         'Dbase'  => array( ADMIN_DATABASE, T_('Database')),
                         'TIME'   => array( ADMIN_TIME, T_('Time')),
+                        'VALID'  => array( ADMIN_VALIDATE, T_('Validate')),
                       );
 
 // Make sure all previous admins gets into the Admin array
