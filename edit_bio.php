@@ -24,18 +24,6 @@ require( "include/rating.php" );
 require( "include/form_functions.php" );
 
 
-$categories = array( 'Other:' => T_('Other:'),
-                     'Country' => T_('Country'),
-                     'City' => T_('City'),
-                     'State' => T_('State'),
-                     'Club' => T_('Club'),
-                     'Homepage' => T_('Homepage'),
-                     'Email' => T_('Email'),
-                     'ICQ-number' => T_('ICQ-number'),
-                     'Game preferences' => T_('Game preferences'),
-                     'Hobbies' => T_('Hobbies'),
-                     'Occupation' => T_('Occupation') );
-
 function find_category_box_text($cat)
 {
    global $categories;
@@ -54,10 +42,26 @@ function find_category_box_text($cat)
    if( !$logged_in )
       error("not_logged_in");
 
-
    $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"]);
 
+
+   $categories = array( 'Other:' => T_('Other:'),
+                        'Country' => T_('Country'),
+                        'City' => T_('City'),
+                        'State' => T_('State'),
+                        'Club' => T_('Club'),
+                        'Homepage' => T_('Homepage'),
+                        'Email' => T_('Email'),
+                        'ICQ-number' => T_('ICQ-number'),
+                        'Game preferences' => T_('Game preferences'),
+                        'Hobbies' => T_('Hobbies'),
+                        'Occupation' => T_('Occupation') );
+
+
+
    start_page(T_("Edit biopgraphical info"), true, $logged_in, $player_row );
+
+
 
    echo "<CENTER>\n";
    echo form_start( 'bioform', 'change_bio.php', 'POST' );
