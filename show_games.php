@@ -110,6 +110,7 @@ ALTER TABLE `dragon`.`players` ADD `RunningGamesColumns` INT(10) UNSIGNED DEFAUL
    if( $observe )
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
+         "IF(Rated='N','N','Y') as Rated, " .
          "black.Name AS blackName, black.Handle AS blackHandle, " .
          "black.Rating2 AS blackRating, black.ID AS blackID, " .
          "white.Name AS whiteName, white.Handle AS whiteHandle, " .
@@ -122,6 +123,7 @@ ALTER TABLE `dragon`.`players` ADD `RunningGamesColumns` INT(10) UNSIGNED DEFAUL
    else if( $all )
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
+         "IF(Rated='N','N','Y') as Rated, " .
          "black.Name AS blackName, black.Handle AS blackHandle, black.ID AS blackID, " .
          "white.Name AS whiteName, white.Handle AS whiteHandle, white.ID AS whiteID, " .
          "black.Rating2 AS blackRating, white.Rating2 AS whiteRating, " .
@@ -142,6 +144,7 @@ ALTER TABLE `dragon`.`players` ADD `RunningGamesColumns` INT(10) UNSIGNED DEFAUL
    else
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
+         "IF(Rated='N','N','Y') as Rated, " .
          "Name, Handle, Players.ID as pid, " .
          "Rating2 AS Rating, " .
          "IF(Black_ID=$uid" .
@@ -287,7 +290,7 @@ ALTER TABLE `dragon`.`players` ADD `RunningGamesColumns` INT(10) UNSIGNED DEFAUL
    }
 
 
-   while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
+   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $Rating = $blackRating = $whiteRating = NULL;
       $startRating = $blackStartRating = $whiteStartRating = NULL;

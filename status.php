@@ -104,8 +104,9 @@ require_once( "include/message_functions.php" );
 
    $uid = $my_id;
 
-   $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," .
-       "UNIX_TIMESTAMP(Lastchanged) AS Time, " .
+
+   $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
+         "IF(Rated='N','N','Y') as Rated, " .
        "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid, " .
          //extra bits of Color are for sorting purposes
          "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color " .
@@ -138,7 +139,7 @@ require_once( "include/message_functions.php" );
       $gtable->add_tablehead(14, T_('Rated')); //, 'Rated', true);
       $gtable->add_tablehead(13, T_('Last Move'));
 
-      while( $row = mysql_fetch_array( $result ) )
+      while( $row = mysql_fetch_assoc( $result ) )
       {
          $Rating=NULL;
          extract($row);
