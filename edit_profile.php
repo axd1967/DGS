@@ -164,6 +164,14 @@ require_once( "include/countries.php" );
                                   'SELECTBOX', 'nightstart', 1,
                                   $nightstart, $player_row["Nightstart"], false ) );
 
+
+
+   //--- Followings may be browser settings ---
+
+   $profile_form->add_row( array( 'SPACE' ) );
+
+   $profile_form->add_row( array( 'HR' ) );
+
    $profile_form->add_row( array( 'HEADER', T_('Board graphics') ) );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Stone size'),
@@ -214,12 +222,13 @@ require_once( "include/countries.php" );
 
    $profile_form->add_row( array( 'OWNHTML', $button_code ) );
 
+
+
    $profile_form->add_row( array( 'HEADER', T_('Private game notes') ) );
 
    foreach( array( 'Small', 'Large') as $typ )
    {
       $ltyp = strtolower($typ) ;
-//   $profile_form->add_row( array( 'CELL', 9, 'align="left"', 'TEXT', '<b>' . T_('Small boards') . ':</b>' ) );
       if( $ltyp == 'small' )
          $profile_form->add_row( array(
                'TEXT', '<b>' . T_('Small boards') . ':</b>',
@@ -244,15 +253,22 @@ require_once( "include/countries.php" );
             ) );
    }
 
+   //--- End of browser settings ---
+
+
 
    $profile_form->add_row( array( 'SPACE' ) );
 
-   $profile_form->add_row( array( 'HR' ) );
+   $profile_form->add_row( array( 'SPACE' ) );
 
    $profile_form->add_row( array( 'TAB',
                                   'CHECKBOX', 'locally', 1,
                                   T_('Change board graphics for this browser only'),
                                   !empty($_COOKIE["prefs{$player_row['ID']}"]) ) );
+
+   $profile_form->add_row( array( 'HR' ) );
+
+   $profile_form->add_row( array( 'SPACE' ) );
 
    $profile_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change profile') ) );
 
