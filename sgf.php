@@ -558,9 +558,9 @@ $array=array();
    }
 
    if( $owned_comments == BLACK )
-     $notes = trim($Black_Notes);
+     $notes = rtrim($Black_Notes);
    elseif( $owned_comments == WHITE )
-     $notes = trim($White_Notes);
+     $notes = rtrim($White_Notes);
    else
      $notes = '';
 
