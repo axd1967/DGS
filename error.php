@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Error";
+
 require( "include/std_functions.php" );
 
 
@@ -62,7 +64,7 @@ require( "include/std_functions.php" );
 
       case("invalid_action"):
       {
-         echo T_("This type action is either unknown or can't be use in this state of the game.");
+         echo T_("This type of action is either unknown or can't be used in this state of the game.");
       }
       break;
 
@@ -87,13 +89,13 @@ require( "include/std_functions.php" );
 
       case("komi_range"):
       {
-         echo T_("The komi is out of range, please choose a move reasonable value.");
+         echo T_("The komi is out of range, please choose a more reasonable value.");
       }
       break;
 
       case("move_problem"):
       {
-         echo T_("An error occurred for this. Usually it works if you try again, otherwise please contact the support.");
+         echo T_("An error occurred for this move. Usually it works if you try again, otherwise please contact the support.");
       }
       break;
 
@@ -398,7 +400,6 @@ require( "include/std_functions.php" );
       }
       break;
 
-      /* Should show information about how to become a translator */
       case("not_translator"):
       {
          echo T_("Sorry, only translators are allowed to translate.") . '<p>' .
