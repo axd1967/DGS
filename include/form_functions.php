@@ -345,13 +345,13 @@ class Form
    /*! \brief Create a string from the rows */
    function create_form_string()
       {
-         $result = "";
+         $formstr = "";
          $max_nr_columns = 99; //actually build on the fly, it is often inadequate for the top rows of the form
 
          if( !$this->echo_form_start_now )
-            $result .= $this->print_start( $this->name, $this->action, $this->method );
+            $formstr .= $this->print_start( $this->name, $this->action, $this->method );
 
-         $result .= "  <TABLE border=0>\n"; //form table
+         $formstr .= "  <TABLE border=0>\n"; //form table
 
          ksort($this->rows);
 
@@ -363,8 +363,8 @@ class Form
                $current_arg = 0;
                $this->nr_columns = 0;
                $this->column_started = false;
-               $result .= "    <TR>\n";
 
+               $result = '';
                $element_counter = 0;
 
                while( $current_arg < count($args) )
@@ -447,17 +447,18 @@ class Form
                if( $this->column_started )
                   $result .= $this->print_td_end();
 
-               $result .= "    </TR>\n";
+               if( $result )
+                  $formstr .= "    <TR>\n$result\n    </TR>\n";
             }
 
-         $result .= "  </TABLE>\n";
+         $formstr .= "  </TABLE>\n";
 
          if (!$this->hiddens_echoed)
-            $result .= $this->echo_hiddens();
+            $formstr .= $this->echo_hiddens();
 
-         $result .= $this->print_end();
+         $formstr .= $this->print_end();
 
-         return $result;
+         return $formstr;
        }
 
    /*!
@@ -764,7 +765,8 @@ class Form
             $initial_text = textarea_safe($initial_text);
          return "<TEXTAREA name=\"$name\" cols=\"$columns\"" .
             ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-            " rows=\"$rows\" wrap=\"virtual\">$initial_text</TEXTAREA>";
+            " rows=\"$rows\">$initial_text</TEXTAREA>";
+
       }
 
    /*!

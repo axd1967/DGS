@@ -503,7 +503,7 @@ function sysmsg($msg)
 
 //must never allow quotes, ampersand, < and >
 define('HANDLE_LEGAL_REGS', '-_+a-zA-Z0-9');
-define('HANDLE_TAG_CHAR', '='); //not in HANDLE_LEGAL_REGS
+define('HANDLE_TAG_CHAR', '='); //not in HANDLE_LEGAL_REGS or in "<>"
 define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'.,:;?!%*');
 
 function illegal_chars( $string, $punctuation=false )
@@ -666,6 +666,11 @@ function parse_atbs_safe( &$trail, &$bad)
    {
       $head.= $quote;
       $bad = 1;
+   }
+   if ( $bad )
+   {
+      $head = str_replace(ALLOWED_QUOT, '"', $head);
+      $head = str_replace(ALLOWED_APOS, "'", $head);
    }
    return $head;
 }
