@@ -67,7 +67,7 @@ while( $row = mysql_fetch_array( $result ) )
         "<td>" . $row["Size"] . "</td>\n" .
         "<td>" . $row["Handicap"] . "</td>\n" .
         "<td>" . $row["Komi"] . "</td>\n" .
-        "<td>" . ($finished ? score2text($row["Score"]) : $row["Moves"] ) . "</td>\n" .
+        "<td>" . ($finished ? score2text($row["Score"], false) : $row["Moves"] ) . "</td>\n" .
         "</tr>\n";
 }
 
