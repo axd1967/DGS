@@ -22,8 +22,8 @@ require( "include/std_functions.php" );
 
 connect2mysql();
 
-$result = mysql_query( "SELECT Email FROM Players WHERE Flags & " . WANT_EMAIL .
-                       " AND Notify='NOW'" );
+$result = mysql_query( "SELECT Email FROM Players " .
+                       "WHERE Flags LIKE '%WANT_EMAIL%' AND Notify='NOW'" );
 
 
 
@@ -40,8 +40,8 @@ while( $row = mysql_fetch_array( $result ) )
 
 
 $result = mysql_query( "UPDATE Players SET Notify='DONE' " .
-                       "WHERE Flags & " . WANT_EMAIL . " AND Notify='NOW' " );
+                       "WHERE Flags LIKE '%WANT_EMAIL%' AND Notify='NOW' " );
 
 $result = mysql_query( "UPDATE Players SET Notify='NOW' " .
-                       "WHERE Flags & " . WANT_EMAIL . " AND Notify='NEXT' " );
+                       "WHERE Flags LIKE '%WANT_EMAIL%' AND Notify='NEXT' " );
                        
