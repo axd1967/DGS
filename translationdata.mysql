@@ -6945,4 +6945,5 @@ INSERT INTO TranslationPages VALUES (38,'include/message_functions.php',4);
 INSERT INTO TranslationPages VALUES (39,'include/move.php',3);
 INSERT INTO TranslationPages VALUES (40,'include/rating.php',3);
 INSERT INTO TranslationPages VALUES (41,'include/table_columns.php',1);
+INSERT INTO TranslationPages VALUES (42,'admin_password.php',2);
 

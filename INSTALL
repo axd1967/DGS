@@ -56,10 +56,12 @@ Find which group your webserver is using (e.g. www-data).
 > chmod 640 include/config.php
 > chmod 664 translations/
 
+
 Adjust include/config.php to your environment.
 
 
-Some required PHP directives:
+By now, Dragon works with these PHP directives:
+ error_reporting = E_ALL
  asp_tags = Off ;Unused
  arg_separator.input = &
  arg_separator.output = & 
@@ -88,6 +90,10 @@ Some required PHP directives:
 0,30 *  *   *   *   wget -q -O - http://your.url/halfhourly_cron.php
 */5  *  *   *   *   wget -q -O - http://your.url/clock_tick.php
 25   5  *   *   *   wget -q -O - http://your.url/daily_cron.php
+
+
+(( Windows NT/200x/XP - the nncron LITE is a freeware clone
+   of cron at http://www.nncron.ru/download.shtml ))
 
 
 
