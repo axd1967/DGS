@@ -47,13 +47,13 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
 {
-   if( !$gid )
-      error("no_game_nr");
-
    if( $nextback )
       jump_to("game.php?gid=$gid");
 
    connect2mysql();
+
+   if( !$gid )
+      error("no_game_nr");
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 

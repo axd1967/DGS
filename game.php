@@ -31,10 +31,10 @@ require( "include/rating.php" );
    if( $c ) $coord=$c;
    if( $s ) $stonestring=$s;
 
+   connect2mysql();
+
    if( !$gid )
       error("no_game_nr");
-
-   connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 

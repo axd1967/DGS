@@ -21,6 +21,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require( "include/std_functions.php" );
 
 {
+   connect2mysql();
+
    if( $passwd != $passwd2 )
    {
       error("password_mismatch");
@@ -39,9 +41,6 @@ require( "include/std_functions.php" );
    {
       error("name_not_given");
    }
-
-
-   connect2mysql();
 
    $result = mysql_query( "SELECT * FROM Players WHERE Handle='" . $userid . "'" );
 

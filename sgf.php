@@ -24,7 +24,7 @@ require( "include/std_functions.php" );
 
 {
    disable_cache();
-   
+
    connect2mysql();
 
 
@@ -43,9 +43,9 @@ require( "include/std_functions.php" );
       error("unknown_game");
 
    $result = mysql_query( 'SELECT Games.*, ' .
-                          'Games.Flags+0 AS flags, ' . 
-                          'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' . 
-                          'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' . 
+                          'Games.Flags+0 AS flags, ' .
+                          'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' .
+                          'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
                           'black.Name AS Blackname, ' .
                           'black.Handle AS Blackhandle, ' .
                           'black.Rank AS Blackrank, ' .
@@ -57,17 +57,17 @@ require( "include/std_functions.php" );
 
    if( mysql_num_rows($result) != 1 )
       error("unknown_game");
-     
+
    extract(mysql_fetch_array($result));
-     
-   $result = mysql_query( "SELECT Moves.*,Text FROM Moves " . 
+
+   $result = mysql_query( "SELECT Moves.*,Text FROM Moves " .
                           "LEFT JOIN MoveMessages " .
                           "ON Moves.gid=MoveMessages.gid AND Moves.MoveNr=MoveMessages.MoveNr " .
                           "WHERE Moves.gid=$gid order by Moves.ID" );
 
    header ('Content-Type: application/x-go-sgf');
-   header( "Content-Disposition: inline; filename=\"$Whitehandle-$Blackhandle-" . 
-           date('Ymd', $timestamp) . '.sgf"' ); 
+   header( "Content-Disposition: inline; filename=\"$Whitehandle-$Blackhandle-" .
+           date('Ymd', $timestamp) . '.sgf"' );
    header( "Content-Description: PHP Generated Data" );
 
    echo "(;FF[$sgf_version]GM[1]
@@ -97,19 +97,19 @@ WR[$Whiterank]
       echo "PL[W]\n";
 
    $regexp = ( $Status == 'FINISHED' ? "c|comment|h|hidden" : "c|comment" );
-      
 
-   if( $Handicap > 0 and $use_AB_for_handicap ) 
+
+   if( $Handicap > 0 and $use_AB_for_handicap )
       echo "AB";
 
    while( $row = mysql_fetch_array($result) )
    {
       if( $row["PosX"] < 0 or ($row["Stone"] != WHITE and $row["Stone"] != BLACK ) )
          continue;
-    
+
       if( $row["MoveNr"] > $Handicap or !$use_AB_for_handicap )
          echo( $row["Stone"] == WHITE ? ";W" : ";B" );
-    
+
       echo "[" . chr($row["PosX"] + ord('a')) .
          chr($row["PosY"] + ord('a')) . "]";
 
@@ -134,4 +134,4 @@ WR[$Whiterank]
    echo "\n)\n";
 
 }
-?>   
+?>

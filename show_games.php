@@ -26,11 +26,10 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
                        'Moves','Score','Win?','End date','Last Move');
 
 {
+   connect2mysql();
+
    if( !$uid )
       error("no_uid");
-
-
-   connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 

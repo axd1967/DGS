@@ -23,11 +23,10 @@ require( "include/std_functions.php" );
 require( "include/rating.php" );
 
 {
+   connect2mysql();
+
    if( !$uid )
       error("no_uid");
-
-
-   connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
