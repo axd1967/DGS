@@ -224,15 +224,17 @@ require_once( "include/make_translationfiles.php" );
      }
      else //Update
      {
-        $Qchanged = ( @$_POST['Qchanged'] === 'Y' && $row['QTranslatable'] === 'Done') ?
-           ', Translatable="Changed"' : '';
+        $Qchanged = ( @$_POST['Qchanged'] === 'Y' && $row['QTranslatable'] === 'Done'
+                     && $question
+                     ) ? ', Translatable="Changed"' : '';
         mysql_query("UPDATE TranslationTexts SET Text=\"$question\" $Qchanged" .
                     "WHERE ID=" . $row['Question'] . " LIMIT 1");
 
         if( $row['Answer'] )
         {
-           $Achanged = ( @$_POST['Achanged'] === 'Y' && $row['ATranslatable'] === 'Done') ?
-              ', Translatable="Changed"' : '';
+           $Achanged = ( @$_POST['Achanged'] === 'Y' && $row['ATranslatable'] === 'Done'
+                        && $answer
+                        ) ? ', Translatable="Changed"' : '';
            mysql_query("UPDATE TranslationTexts SET Text=\"$answer\" $Achanged" .
                        "WHERE ID=" . $row['Answer'] . " LIMIT 1");
         }
@@ -363,12 +365,12 @@ require_once( "include/make_translationfiles.php" );
 
   // ***********       Toggle translatable     ****************
 
-  if( ($action=@$_GET["transl"]) === 't' )
+  else if( ($action=@$_GET["transl"]) === 't' )
   {
 
      $row = get_entry_row( $id );
 
-     $FAQ_group = get_faq_group();
+     //$FAQ_group = get_faq_group();
 
 //Warning: for toggle, Answer follow Question
 //         but they could be translated independently
@@ -419,7 +421,7 @@ require_once( "include/make_translationfiles.php" );
      echo "<table>\n";
 
      echo "<tr><td><a href=\"admin_faq.php?new=c&id=1" . '"><img border=0 title="' .
-        T_('Add new category') . '" src="images/new.png"></a>';
+        T_('Add new category') . '" src="images/new.png"></a></td></tr>';
 
      while( $row = mysql_fetch_array( $result ) )
      {
@@ -428,34 +430,35 @@ require_once( "include/make_translationfiles.php" );
         if( $row['Level'] == 1 )
         {
            echo '<tr><td colspan=2>';
-           $typechar = 'c';
+           $typechar = 'c'; //category
         }
         else
         {
-           echo '<tr><td width=20><td>';
-           $typechar = 'e';
+           echo '<tr><td width=20></td><td>';
+           $typechar = 'e'; //entry
         }
 
         echo "<A href=\"admin_faq.php?edit=$typechar&id=" . $row['ID'] .
            '" title="' . T_("Edit") . "\">$question</A>\n";
+        echo "</td>";
 
         echo '<td width=40 align=right><a href="admin_faq.php?move=u&id=' .
-           $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png"></a>';
+           $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png"></a></td>';
         echo '<td><a href="admin_faq.php?move=d&id=' .
-           $row['ID'] . '"><img border=0 title="' . T_("Move down") . '" src="images/down.png"></a>';
+           $row['ID'] . '"><img border=0 title="' . T_("Move down") . '" src="images/down.png"></a></td>';
 
         if( $row['Level'] > 1 )
         {
            echo '<td align=right><a href="admin_faq.php?move=uu&id=' .
-              $row['ID'] . '"><img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png"></a>';
+              $row['ID'] . '"><img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png"></a></td>';
            echo '<td><a href="admin_faq.php?move=dd&id=' .
-              $row['ID'] . '"><img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png"></a>';
+              $row['ID'] . '"><img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png"></a></td>';
         }
 
         echo "<td><a href=\"admin_faq.php?new=$typechar&id=" . $row['ID'] .
            '"><img border=0 title="' .
            ($typechar == 'e' ? T_('Add new entry') : T_('Add new category')) .
-           '" src="images/new.png"></a>';
+           '" src="images/new.png"></a></td>';
 
         $transl = $row['ATranslatable'];
         if( !$row['Answer'] or ( $transl !== 'Done' and $transl !== 'Changed') )
@@ -464,17 +467,18 @@ require_once( "include/make_translationfiles.php" );
            echo "<td><a href=\"admin_faq.php?transl=t&id=" . $row['ID'] .
            '"><img border=0 title="' .
            ($transl == 'Y' ? T_('Make untranslatable') : T_('Make translatable')) .
-           '" src="images/transl' . ( $transl == 'Y' ? '' : '_no' ) . '.png"></a>';
+           '" src="images/transl' . ( $transl == 'Y' ? '' : '_no' ) . '.png"></a></td>';
 
+        echo '</tr>';
 
         if( $row["Level"] == 1 )
-           echo "<tr><td witdh=20><td><a href=\"admin_faq.php?new=e&id=" .
+           echo "<tr><td witdh=20></td><td><a href=\"admin_faq.php?new=e&id=" .
               $row['ID'] . '"><img border=0 title="' . T_('Add new entry') .
-              '" src="images/new.png"></a>';
+              '" src="images/new.png"></a></td></tr>';
      }
 
 
-     echo "</table></table>\n";
+     echo "</table></td></tr></table>\n";
   }
 
   end_page();
@@ -487,7 +491,7 @@ function get_faq_group()
   if( mysql_num_rows($result) != 1 )
      error("mysql_query_failed", "Group 'FAQ' Missing in TranslationGroups");
 
-  $row = mysql_fetch_array( $result );
+  $row = mysql_fetch_assoc( $result );
   return $row['ID'];
 }
 
