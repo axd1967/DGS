@@ -54,7 +54,7 @@ require( "include/std_functions.php" );
 
 
   echo "<p>&nbsp;\n";
-  echo "<h3 align=left><a name=\"rules\"></a><font color=$h3_color>" . 
+  echo "<h3 align=left><a name=\"rules\"></a><font color=$h3_color>" .
     T_('Rules') . "</font></h3>\n";
 
   add_link_page_link("http://playgo.to/interactive/index.html",
@@ -71,7 +71,7 @@ require( "include/std_functions.php" );
                      T_('This is more in-depth.'));
 
   echo "<p>&nbsp;\n";
-  echo "<h3 align=left><a name=\"strategy\"></a><font color=$h3_color>" . 
+  echo "<h3 align=left><a name=\"strategy\"></a><font color=$h3_color>" .
     T_('Strategy and terms') . "</font></h3>\n";
 
   add_link_page_link("http://www.igoweb.org/~pahle/go-stuff/shape.html",
@@ -90,7 +90,7 @@ require( "include/std_functions.php" );
 
 
   echo "<p>&nbsp;\n";
-  echo "<h3 align=left><a name=\"history\"></a><font color=$h3_color>" . 
+  echo "<h3 align=left><a name=\"history\"></a><font color=$h3_color>" .
     T_('History') . "</font></h3>\n";
 
   add_link_page_link("http://www.britgo.org/intro/intro1.html#bh",
@@ -101,16 +101,19 @@ require( "include/std_functions.php" );
                      T_('In case you\'re an aspiring know-it-all.'));
 
   echo "<p>&nbsp;\n";
-  echo "<h3 align=left><a name=\"stuff\"></a><font color=$h3_color>" . 
+  echo "<h3 align=left><a name=\"stuff\"></a><font color=$h3_color>" .
     T_('Go books, equipment and software') . "</font></h3>\n";
 
+  add_link_page_link("http://math.stanford.edu/~carlton/go/",
+                     T_('Annotated Go Bibliographies'),
+                     T_('A large collection of go book reviews'));
   add_link_page_link("http://www.kiseido.com/", T_('Kiseido'));
   add_link_page_link("http://www.yutopian.com/go/", T_('Yutopian'));
   add_link_page_link("http://www.samarkand.net/", T_('Samarkand'));
   add_link_page_link("http://www.xs4all.nl/~paard//", T_('Het Paard'), T_('European shop'));
 
   echo "<p>&nbsp;\n";
-  echo "<h3 align=left><a name=\"servers\"></a><font color=$h3_color>" . 
+  echo "<h3 align=left><a name=\"servers\"></a><font color=$h3_color>" .
     T_('Other go servers') . "</font></h3>\n";
 
   add_link_page_link("http://www.itsyourturn.com/",
