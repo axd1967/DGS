@@ -220,14 +220,10 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
       T_('Users') => array('users.php',3,1),
       T_('Games') => array('show_games.php?uid=all&finished=1',3,2),
-      T_('Tournaments') => array('tournaments.php',3,3),
+      T_('Translate') => array('translate.php',3,3),
       T_('Forums') => array('forum/index.php',4,1),
-      T_('Docs') => array('docs.php',4,2) );
-
-   if( $logged_in && !empty($player_row['Translator']) )
-      $menu_array[T_('Translate')] = array('translate.php',4,3);
-   else
-      $menu_array[T_('Site map')] = array('site_map.php',4,3);
+      T_('Docs') => array('docs.php',4,2),
+      T_('Site map') => array('site_map.php',4,3) );
 
    if( $player_row['MenuDirection'] == 'HORIZONTAL' )
       make_menu_horizontal($menu_array);
