@@ -530,7 +530,7 @@ if( $Black_Byotime > 0 or $White_Byotime > 0 )
 <?php
 }
 
-    echo '<tr><td>Rated: </td><td colspan=2>' . ( $game_row["Rated"] == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
+    echo '<tr><td>Rated: </td><td colspan=2>' . ( $Rated == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
 ';
 
 ?>
