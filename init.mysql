@@ -414,17 +414,32 @@ CREATE TABLE Forumreads (
 
 CREATE TABLE FAQ (
   ID int(11) NOT NULL auto_increment,
-  EntryID int(11) default NULL,
-  Lang varchar(16) default NULL,
-  SortOrder int(11) NOT NULL default '0',
   Parent int(11) NOT NULL default '0',
   Level int(11) default NULL,
+  SortOrder int(11) NOT NULL default '0',
+  Lang varchar(16) default NULL,
+  Translatable enum('Y','N') NOT NULL default 'N',
   Question text,
   Answer text,
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
 INSERT INTO FAQ VALUES (1,1,NULL,0,0,0,NULL,NULL);
+
+
+#
+# Table structure for table 'FAQlog'
+#
+
+CREATE TABLE FAQlog (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  FAQID int(11) NOT NULL default '0',
+  Question text,
+  Answer text,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
 
 #
 # Table structure for table 'Clock'

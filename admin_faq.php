@@ -47,7 +47,7 @@ require( "include/form_functions.php" );
 
      echo "<center>\n";
 
-     $result = mysql_query( "SELECT * FROM FAQ WHERE EntryID=$id" );
+     $result = mysql_query( "SELECT * FROM FAQ WHERE ID=$id" );
 
      if( mysql_num_rows($result) != 1 )
         error("faq_admin_no_such_entry");
@@ -98,8 +98,9 @@ require( "include/form_functions.php" );
                      'WHERE Parent=' . $row["Parent"] . ' ' .
                      'AND SortOrder=' . ($row["SortOrder"]+$dir) );
         mysql_query( "UPDATE FAQ SET SortOrder=SortOrder+($dir) " .
-                     "WHERE EntryID=" . $row["EntryID"] );
+                     "WHERE ID=" . $row["ID"] );
      }
+     jump_to("admin_faq.php");
   }
   else if( $_GET["do_edit"] == 't' )
   {
@@ -116,8 +117,17 @@ require( "include/form_functions.php" );
      $question = trim( $_POST["question"] );
      $answer = trim( $_POST["answer"] );
 
+     if( empty($question) and empty($answer) and $row["Translatable"] == 'Y' )
+     {
+        mysql_query("DELETE FROM FAQ WHERE ID=$id LIMIT 1");
+     }
      mysql_query("UPDATE FAQ SET Question=\"$question\", Answer=\"$answer\" " .
-                 "WHERE ID=$id");
+                 "WHERE ID=$id LIMIT 1");
+
+     mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ", FAQID=$id, " .
+                 "Question=\"$question\", Answer=\"$answer\"");
+
+     jump_to("admin_faq.php");
   }
   else if( $_GET["new"] == 'e' or $_GET["new"] == 'c')
   {
@@ -162,21 +172,17 @@ require( "include/form_functions.php" );
 
      // First entry
      if( $row["Level"] == 1 and $_GET["do_new"] == 'e' )
-        $row = array("Parent" => $row["EntryID"], "SortOrder" => 0, "Level" => 2);
+        $row = array("Parent" => $row["ID"], "SortOrder" => 0, "Level" => 2);
 
      // First category
      if( $row["Level"] == 0 )
-        $row = array("Parent" => $row["EntryID"], "SortOrder" => 0, "Level" => 1);
+        $row = array("Parent" => $row["ID"], "SortOrder" => 0, "Level" => 1);
 
      if( !isset( $_POST["question"] ) )
         error("No data");
 
      $question = trim( $_POST["question"] );
      $answer = trim( $_POST["answer"] );
-
-     $result = mysql_query( "SELECT MAX(EntryID) as max FROM FAQ " );
-     $row2 = mysql_fetch_array( $result );
-     $max = $row2["max"];
 
      mysql_query("UPDATE FAQ SET SortOrder=SortOrder+1 " .
                  'WHERE Parent=' . $row["Parent"] . ' ' .
@@ -185,10 +191,15 @@ require( "include/form_functions.php" );
      mysql_query("INSERT INTO FAQ SET " .
                  "SortOrder=" . ($row["SortOrder"]+1) . ', ' .
                  "Parent=" . $row["Parent"] . ', ' .
-                 "EntryID=" . ($max+1) . ', ' .
                  "Level=" . $row["Level"] . ', ' .
                  "Question=\"$question\", " .
                  "Answer=\"$answer\"") or die(mysql_error());
+
+     mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ', ' .
+                 'FAQID=' . mysql_insert_id() . ', ' .
+                 "Question=\"$question\", Answer=\"$answer\"");
+
+     jump_to("admin_faq.php");
   }
 
 
@@ -204,8 +215,9 @@ require( "include/form_functions.php" );
      $result = mysql_query("SELECT entry.*, " .
                            "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
                            "FROM FAQ AS entry, FAQ AS parent " .
-                           "WHERE entry.Parent = parent.EntryID " .
-                           "ORDER BY CatOrder,Level,SortOrder" );
+                           "WHERE entry.Parent = parent.ID " .
+                           "AND entry.Level<3 AND entry.Level>0 " .
+                           "ORDER BY CatOrder,entry.Level,entry.SortOrder");
 
      echo "<table>\n";
 

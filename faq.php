@@ -37,8 +37,8 @@ require( "include/std_functions.php" );
      $cat = is_numeric($_GET["cat"]) ? $_GET["cat"] : 0;
      $result = mysql_query( "SELECT entry.*, parent.SortOrder AS ParentOrder " .
                             "FROM FAQ AS entry, FAQ AS parent " .
-                            "WHERE entry.Parent = parent.EntryID " .
-                            "AND ( entry.Parent = $cat OR entry.EntryID = $cat ) " .
+                            "WHERE entry.Parent = parent.ID " .
+                            "AND ( entry.Parent = $cat OR entry.ID = $cat ) " .
                             "ORDER BY ParentOrder,entry.SortOrder" );
 
      echo "<ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
@@ -50,7 +50,7 @@ require( "include/std_functions.php" );
            echo '<h4><A href="faq.php">' . $row['Question'] . "</A></h4><ul>\n";
         }
         else
-           echo '<p><A name="Entry' . $row["EntryID"] . '"><li><h4>' . $row['Question'] . '</h4><P>' .$row['Answer'];
+           echo '<p><A name="Entry' . $row["ID"] . '"><li><h4>' . $row['Question'] . '</h4><P>' .$row['Answer'];
      }
 
 
@@ -58,10 +58,12 @@ require( "include/std_functions.php" );
   }
   else
   {
-     $result =  mysql_query( "SELECT entry.*, parent.SortOrder AS ParentOrder " .
-                             "FROM FAQ AS entry, FAQ AS parent " .
-                             "WHERE entry.Parent = parent.EntryID " .
-                             "ORDER BY ParentOrder,SortOrder" );
+     $result = mysql_query("SELECT entry.*, " .
+                           "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
+                           "FROM FAQ AS entry, FAQ AS parent " .
+                           "WHERE entry.Parent = parent.ID " .
+                           "AND entry.Level<3 AND entry.Level>0 " .
+                           "ORDER BY CatOrder,entry.Level,entry.SortOrder");
 
      echo "<ul><ul><table>\n";
 
@@ -70,12 +72,12 @@ require( "include/std_functions.php" );
         if( $row['Level'] == 1 )
         {
            echo "</table></ul>\n";
-           echo '<A href="faq.php?read=t&cat=' . $row['EntryID'] . '">' . $row['Question'] . "</A>\n";
+           echo '<A href="faq.php?read=t&cat=' . $row['ID'] . '">' . $row['Question'] . "</A>\n";
            echo "<ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
         }
         else
            echo '<li><A href="faq.php?read=t&cat=' . $row['Parent'] .
-              '#Entry' . $row['EntryID'] . '">' . $row['Question'] . "</A>\n";
+              '#Entry' . $row['ID'] . '">' . $row['Question'] . "</A>\n";
      }
 
 
