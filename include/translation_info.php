@@ -1506,7 +1506,7 @@ array(
 The reasons for this problem could be any of the following:
 <ul>
 <li> You haven\'t got an <a href="%1$s/register.php">account</a>, or haven\'t <a href="%1$s/index.php">logged in</a> yet.
-<li> Your cookies have expired. This happens once a week.
+<li> Your cookies have expired. This happens once a month.
 <li> You haven\'t enabled cookies in your browser.
 </ul>' =>
       array( 'Groups' => array( 'Error' ) ),
@@ -1820,7 +1820,7 @@ The reasons for this problem could be any of the following:
       array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: introduction.php */
-      'You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href="register.php">account</a>, if you haven\'t got one already. Thereafter you could <a href="edit_profile.php">edit your profile</a> and <a href="edit_bio.php">enter some biographical info</a>, especially the fields \'Open for matches?\', \'Rating\' and \'Rank info\' are useful for finding opponents. Next you can study the <a href="users.php">user list</a> and use the <a href="phorum/index.php">forums</a> to find suitable opponents to <a href="invite.php">invite</a> for a game.' =>
+      'You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href="register.php">account</a>, if you haven\'t got one already. Thereafter you could <a href="edit_profile.php">edit your profile</a> and <a href="edit_bio.php">enter some biographical info</a>, especially the fields \'Open for matches?\', \'Rating\' and \'Rank info\' are useful for finding opponents. Next you can study the <a href="users.php">user list</a> and use the <a href="phorum/index.php">forums</a> to find suitable opponents to <a href="message.php?mode=Invite">invite</a> for a game.' =>
       array( 'Groups' => array( 'Introduction' ) ),
 
       /* Found in these files: links.php */
