@@ -303,10 +303,11 @@ function create_godiagrams(&$text)
 
 function find_godiagrams($text)
 {
-   $diagram_IDs = array();
+   $diagrams = array();
    if( !preg_match_all('/<goban id=(\d+)>/i', $text, $matches) )
       return $diagrams;
 
+   $diagram_IDs = array();
    foreach( $matches[1] as $ID )
       {
          if( $ID > 0 )
@@ -317,7 +318,6 @@ function find_godiagrams($text)
                          "WHERE ID IN(" . implode(',',$diagram_IDs) .")")
       or die(mysql_error());
 
-   $diagrams = array();
    while( $row = mysql_fetch_array( $result ) )
    {
       $diagrams[$row['ID']] = new GoDiagram();
