@@ -89,37 +89,6 @@ else echo_rating( $player_row["Rating"] );
          </TD>
       </TR>
 
-      <TR>
-        <TD align=right>Stone size:</TD>
-        <TD align=left>  
-<?php $s = $player_row["Stonesize"]; ?>
-          <select name="stonesize">
-            <option<?php if($s == 13) echo " selected"; ?>>13</option>
-            <option<?php if($s == 17) echo " selected"; ?>>17</option>
-            <option<?php if($s == 21) echo " selected"; ?>>21</option>
-            <option<?php if($s == 25) echo " selected"; ?>>25</option>
-            <option<?php if($s == 29) echo " selected"; ?>>29</option>
-            <option<?php if($s == 35) echo " selected"; ?>>35</option>
-            <option<?php if($s == 42) echo " selected"; ?>>42</option>
-            <option<?php if($s == 50) echo " selected"; ?>>50</option>
-          </select>
-      </TR>
-
-      <TR>
-        <TD align=right>Boardfont size:</TD>
-        <TD align=left>  
-<?php $s = $player_row["Boardfontsize"]; ?>
-          <select name="boardfontsize">
-            <option<?php if($s == '+4') echo " selected"; ?>>+4</option>
-            <option<?php if($s == '+3') echo " selected"; ?>>+3</option>
-            <option<?php if($s == '+2') echo " selected"; ?>>+2</option>
-            <option<?php if($s == '+1') echo " selected"; ?>>+1</option>
-            <option<?php if($s == '+0') echo " selected"; ?>>+0</option>
-            <option<?php if($s == '-1') echo " selected"; ?>>-1</option>
-            <option<?php if($s == '-2') echo " selected"; ?>>-2</option>
-            <option<?php if($s == '-3') echo " selected"; ?>>-3</option>
-          </select>
-      </TR>
 
       <TR>
         <TD align=right>Send email notifications:</TD>
@@ -152,9 +121,79 @@ if( $player_row["flags"] & WANT_EMAIL ) echo "checked " ?> value="true">
           </select>
 
         </TD>        
-          <TD><input type=submit name="action" value="Change profile"></TD>
+      </tr>
+         <tr><td><h3><font color="#800000">Board graphics:</font></h3></td></tr>
+      <TR>
+        <TD align=right>Stone size:</TD>
+        <TD align=left>  
+<?php $s = $player_row["Stonesize"]; ?>
+          <select name="stonesize">
+            <option<?php if($s == 13) echo " selected"; ?>>13</option>
+            <option<?php if($s == 17) echo " selected"; ?>>17</option>
+            <option<?php if($s == 21) echo " selected"; ?>>21</option>
+            <option<?php if($s == 25) echo " selected"; ?>>25</option>
+            <option<?php if($s == 29) echo " selected"; ?>>29</option>
+            <option<?php if($s == 35) echo " selected"; ?>>35</option>
+            <option<?php if($s == 42) echo " selected"; ?>>42</option>
+            <option<?php if($s == 50) echo " selected"; ?>>50</option>
+          </select>
       </TR>
+
+      <TR>
+        <TD align=right>Boardfont size:</TD>
+        <TD align=left>  
+<?php $s = $player_row["Boardfontsize"]; ?>
+          <select name="boardfontsize">
+            <option<?php if($s == '+4') echo " selected"; ?>>+4</option>
+            <option<?php if($s == '+3') echo " selected"; ?>>+3</option>
+            <option<?php if($s == '+2') echo " selected"; ?>>+2</option>
+            <option<?php if($s == '+1') echo " selected"; ?>>+1</option>
+            <option<?php if($s == '+0') echo " selected"; ?>>+0</option>
+            <option<?php if($s == '-1') echo " selected"; ?>>-1</option>
+            <option<?php if($s == '-2') echo " selected"; ?>>-2</option>
+            <option<?php if($s == '-3') echo " selected"; ?>>-3</option>
+          </select>
+        </TD>
+      </TR>
+
+      <TR>
+        <TD align=right>Wood color:</TD>
+        <TD align=left>
+          <?php $s = $player_row["Woodcolor"]; ?>
+          <INPUT type="radio" name="woodcolor" value=1 <?php if($s == 1) echo " checked"; ?>> 
+            <img width=30 height=30 src="images/wood1.gif">
+          <INPUT type="radio" name="woodcolor" value=2 <?php if($s == 2) echo " checked"; ?>> 
+            <img width=30 height=30 src="images/wood2.gif">
+          <INPUT type="radio" name="woodcolor" value=3 <?php if($s == 3) echo " checked"; ?>> 
+            <img width=30 height=30 src="images/wood3.gif">
+          <INPUT type="radio" name="woodcolor" value=4 <?php if($s == 4) echo " checked"; ?>> 
+            <img width=30 height=30 src="images/wood4.gif">
+          <INPUT type="radio" name="woodcolor" value=5 <?php if($s == 5) echo " checked"; ?>> 
+            <img width=30 height=30 src="images/wood5.gif">
+        </TD>
+      </TR>
+
+      <TR>
+        <TD align=right>Coordinate sides:</TD>
+        <TD align=left>
+          <?php $s = $player_row["Boardcoords"]; ?>
+          <INPUT type="checkbox" name="coordsleft" value=1 
+            <?php if($s & 1) echo " checked"; ?> > Left
+          <INPUT type="checkbox" name="coordsup" value=1 
+            <?php if($s & 2) echo " checked"; ?>>  Up
+          <INPUT type="checkbox" name="coordsright" value=1 
+            <?php if($s & 4) echo " checked"; ?>> Right
+
+          <INPUT type="checkbox" name="coordsdown" value=1 
+            <?php if($s & 8) echo " checked"; ?>> Down
+        </TD>
+      </TR>
+
     </table>  
+
+
+          <input type=submit name="action" value="Change profile">
+
   </FORM>
 </CENTER>  
 

@@ -42,6 +42,10 @@ require( "include/rating.php" );
    else
       $flags = 0;
 
+   $boardcoords = ( $coordsleft ? LEFT : 0 ) + ( $coordsup ? UP : 0 ) +
+       ( $coordsright ? RIGHT : 0 ) + ( $coordsdown ? DOWN : 0 );
+
+
    $query = "UPDATE Players SET " .
        "Name='$name', " .
        "Email='$email', " .
@@ -49,6 +53,8 @@ require( "include/rating.php" );
        "Open='$open', " .
        "Stonesize=$stonesize, " .
        "Boardfontsize='$boardfontsize', " .
+       "Boardcoords=$boardcoords, " .
+       "Woodcolor=$woodcolor, " .
        "Flags=$flags, ";
 
    if( $nightstart != $player_row["Nightstart"] || 

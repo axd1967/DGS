@@ -47,6 +47,11 @@ define("KO", 1);
 
 define("WANT_EMAIL", 1);
 
+define("LEFT",1);
+define("UP",2);
+define("RIGHT",4);
+define("DOWN",8);
+
 function getmicrotime()
 {
    list($usec, $sec) = explode(" ",microtime()); 
