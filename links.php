@@ -84,7 +84,7 @@ require( "include/std_functions.php" );
   add_link_page_link("http://nngs.cosmic.org/hmkw/stuff/definitions.html",
                      T_('Common Japanese Go Terms'),
                      T_('You have to know what other players are talking about.'));
-  add_link_page_link("http://www.algonet.se/~palund/glossary/term_000.htm",
+  add_link_page_link("http://www.gbgo.nu/GobanKen/palund/glossary/term_000.htm",
                      T_('More Japanese Go Terms'),
                      T_('Translated and explained.'));
 
