@@ -37,7 +37,42 @@ require( "include/form_functions.php" );
 
   start_page(T_('Admin'), true, $logged_in, $player_row);
 
+  $extra_message = '';
+  switch( $_GET['what'] )
+    {
+    case 'addlanguage':
+      $extra_message =
+        sprintf( T_("Added language %s with code %s and characterencoding %s."),
+                 $_GET['langname'], $_GET['twoletter'], $_GET['charenc'] );
+      break;
+
+    case 'transladd':
+      $extra_message =
+        sprintf( T_("Added user %s as translator for language %s."),
+                 $_GET['user'], $_GET['lang'] );
+      break;
+
+    case 'tadd_already':
+      $extra_message =
+        sprintf( T_("User %s is already translator for language %s."),
+                 $_GET['user'], $_GET['lang'] );
+      break;
+
+    case 'transllang':
+      $extra_message =
+        sprintf( T_("Changed translator privileges info for user %s."), $_GET['user'] );
+      break;
+
+    default:
+      $extra_message = '';
+      break;
+    }
+
   echo "<center>\n";
+
+  if( !empty($extra_message) )
+    echo "<p><b><font color=\"green\">$extra_message</font></b><hr>";
+
   echo form_start( 'adminform', 'do_admin.php', 'POST' );
 
   /* Add language for translation */

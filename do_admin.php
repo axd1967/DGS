@@ -37,7 +37,7 @@ require( "include/translation_info.php" );
   if( $player_row['Adminlevel'] < 2 )
     error("adminlevel_too_low");
 
-
+  $extra_url_parts = '';
   if( $addlanguage )
     {
       if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
@@ -67,6 +67,8 @@ require( "include/translation_info.php" );
       $new_all_languages_php_code .= "\n?>\n";
 
       write_to_file( "translations/all_languages.php", $new_all_languages_php_code );
+
+      $extra_url_parts = "?what=addlanguage&twoletter=$twoletter&langname=$langname&charenc=$charenc";
     }
 
   if( $transladd )
@@ -93,8 +95,15 @@ require( "include/translation_info.php" );
           array_push( $translator, $transladdlang );
           $new_langs = implode(',', $translator);
           $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
+
           if( mysql_affected_rows() != 1 )
             error("unknown_user");
+
+          $extra_url_parts = "?what=transladd&user=$transluser&lang=$transladdlang";
+        }
+      else
+        {
+          $extra_url_parts = "?what=tadd_already&user=$transluser&lang=$transladdlang";
         }
     }
 
@@ -111,7 +120,9 @@ require( "include/translation_info.php" );
       $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
       if( mysql_affected_rows() != 1 )
         error("unknown_user");
+
+      $extra_url_parts = "?what=transluser&user=$transluser";
     }
 
-  jump_to("admin.php");
+  jump_to("admin.php$extra_url_parts");
 }
