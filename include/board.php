@@ -462,15 +462,11 @@ function check_prisoners($colnr,$rownr, $col, $Size, &$array, &$prisoners )
 {
    global $dirx,$diry;
 
-   //    echo $col . "<p>";
-
    for($i=0; $i<4; $i++)
    {
       $x = $colnr+$dirx[$i];
       $y = $rownr+$diry[$i];
-      //            echo "x: $x<p>";
-      //            echo "y: $y<p>";
-      //            echo "color: " . $array[$x][$y] . "<p>";
+
       if( $array[$x][$y] == $col )
          has_liberty_check($x,$y, $Size, $array, $prisoners, true);
    }
