@@ -33,14 +33,31 @@ if( !$logged_in )
     exit;
 }
 
-$result = mysql_query("SELECT *, Rank as Rankinfo FROM Players");
+
+$order_list = array('ID', 'ID DESC', 
+                    'Rating', 'Rating DESC', 
+                    'Name', 'Name DESC', 
+                    'Handle', 'Handle DESC');
+
+if( !in_array($order, $order_list) )
+    $order = 'ID';
+
+
+$result = mysql_query("SELECT *, Rank as Rankinfo FROM Players order by $order");
 
 
 start_page("Users", true, $logged_in, $player_row );
 
 
 echo "<table border=3 align=center>\n";
-echo "<tr><th>Player</th><th>userid</th><th>Rank info</th><th>Rating</th><th>Open for matches?</th></tr>\n";
+echo "<tr>" .
+"<th><A href=\"users.php?order=Name" . ($order=='Name'? '+DESC' : '') . "\">Player</A></th>" .
+"<th><A href=\"users.php?order=Handle" . ($order=='Handle'? '+DESC' : '') . 
+"\">userid</A></th>" .
+"<th>Rank info</th>" .
+"<th width=14>&nbsp;&nbsp;&nbsp;&nbsp;<A href=\"users.php?order=Rating" . 
+($order=='Rating DESC'? '' : '+DESC') . "\">Rating</A>&nbsp;&nbsp;&nbsp;&nbsp;</th>" .
+"<th>Open for matches?</th></tr>\n";
 
 
 
