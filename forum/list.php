@@ -40,12 +40,20 @@ include("forum_functions.php");
    $links = LINK_FORUMS | LINK_THREADS | LINK_NEW_TOPIC;
    start_table($headline, $links, "width=98%", $cols); 
                
-
+   $odd = true;
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
 
-      echo "<tr><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a></td><td>$Name</td><td>$Lastchanged</td></tr>\n";
+      $color = ( $odd ? "" : " bgcolor=white" );
+      
+      if(  $Lastchanged > $player_row["Forumreaddate$forum"] )
+         $new = "<font color=red size=\"-1\">&nbsp;&nbsp;new</i></font>";
+      else
+         $new = "";
+
+      echo "<tr$color><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a>$new</td><td>$Name</td><td>$Lastchanged</td></tr>\n";
+      $odd = !$odd;
    }
 
    end_table($links, $cols);

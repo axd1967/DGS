@@ -30,6 +30,7 @@ start_page("Forum list", true, $logged_in, $player_row );
 $result = mysql_query("SELECT Forums.ID,Description,Name, " .
                       "UNIX_TIMESTAMP(MAX(Lastchanged)) AS Timestamp,Count(*) AS Count " .
                       "FROM Posts,Forums " .
+                      "WHERE Forums.ID=Forum_ID " .
                       "GROUP BY Posts.Forum_ID");
 
 $cols = 3;
