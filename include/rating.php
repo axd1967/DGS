@@ -236,9 +236,7 @@ function update_rating2($gid, $check_done=true)
       "FROM Games, Players as white, Players as black " .
       "WHERE Status='FINISHED' AND Games.ID=$gid " .
       ( $check_done ? "AND Rated!='Done' " : '' ) .
-      "AND white.ID=White_ID AND black.ID=Black_ID ".
-      "AND white.RatingStatus='RATED' " .
-      "AND black.RatingStatus='RATED' ";
+      "AND white.ID=White_ID AND black.ID=Black_ID";
 
 
    $result = mysql_query( $query ) or die(mysql_error());
@@ -249,11 +247,11 @@ function update_rating2($gid, $check_done=true)
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   if( $Rated === 'N' or  $Moves < 10+$Handicap ) // Don't rate games with too few moves
+   if( $Rated === 'N' or $Moves < 10+$Handicap ) // Don't rate games with too few moves
    {
       mysql_query("UPDATE Games SET Rated='N'" .
-                  ( !empty($bRating) ? ", Black_Rating=$bRating" : '' ) .
-                  ( !empty($wRating) ? ", White_Rating=$wRating" : '' ) .
+                  ( is_numeric($bRating) ? ", Black_Rating=$bRating" : '' ) .
+                  ( is_numeric($wRating) ? ", White_Rating=$wRating" : '' ) .
                   " WHERE ID=$gid LIMIT 1");
       return;
    }
