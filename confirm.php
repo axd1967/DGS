@@ -528,9 +528,9 @@ if( HOT_SECTION )
 
          $Subject = 'Game deleted';
          //reference: game is deleted => no link
-         $Text = "The game:<center>"
+         $Text = "The game:\n<center>"
                . game_reference( 0, 0, $gid, 0, $whitename, $blackname)
-               . "</center>has been deleted by your opponent.<br>";
+               . "</center>\nhas been deleted by your opponent.<br>";
 
          delete_all_observers($gid, false);
       }
@@ -550,17 +550,17 @@ if( HOT_SECTION )
                       ) . " WHERE ID=$Black_ID LIMIT 1" );
 
          $Subject = 'Game result';
-         $Text = "The result in the game:<center>"
+         $Text = "The result in the game:\n<center>"
                . game_reference( 1, 0, $gid, 0, $whitename, $blackname)
-               . "</center>was:<center>"
+               . "</center>\nwas:\n<center>"
                . score2text($score,true,true)
-               . "</center>";
+               . "</center>\n";
 
-         $tmp = $Text . "Send a message to:<center>"
+         $tmp = $Text . "Send a message to:\n<center>"
                . send_reference( 1, 1, '', $White_ID, $whitename, $whitehandle)
-               . "<br>"
+               . "\n<br>"
                . send_reference( 1, 1, '', $Black_ID, $blackname, $blackhandle)
-               . "</center>" ;
+               . "</center>\n" ;
          delete_all_observers($gid, $rated_status!=1, addslashes( $tmp));
       }
 
@@ -570,9 +570,9 @@ if( HOT_SECTION )
       {
          //The server messages does not allow a reply,
          // so add a *in message* reference to this player.
-         $Text.= "Send a message to:<center>"
+         $Text.= "Send a message to:\n<center>"
                . send_reference( 1, 1, '', $player_row["ID"], $player_row["Name"], $player_row["Handle"])
-               . "</center>" ;
+               . "</center>\n" ;
       }
 
          $Text = addslashes( $Text);

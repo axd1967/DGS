@@ -38,7 +38,7 @@ if( !$is_down )
 
    $tick_diff = 3600/$tick_frequency - 10;
    if( $row['timediff'] < $tick_diff )
-      exit;
+      if( !@$_REQUEST['forced'] ) exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201")
                or error('mysql_query_failed','clock_tick2');
@@ -127,16 +127,16 @@ if( !$is_down )
             error('mysql_update_game',"Couldn't update game.");
 
          // Send messages to the players
-         $Text = "The result in the game:<center>"
+         $Text = "The result in the game:\n<center>"
                . game_reference( 1, 0, $gid, 0, $whitename, $blackname)
-               . "</center>was:<center>"
+               . "</center>\nwas:\n<center>"
                . score2text($score,true,true)
-               . "</center>";
-         $Text.= "Send a message to:<center>"
+               . "</center>\n";
+         $Text.= "Send a message to:\n<center>"
                . send_reference( 1, 1, '', $White_ID, $whitename, $whitehandle)
-               . "<br>"
+               . "\n<br>"
                . send_reference( 1, 1, '', $Black_ID, $blackname, $blackhandle)
-               . "</center>" ;
+               . "</center>\n" ;
 
          $Text = addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
@@ -179,6 +179,7 @@ if( !$is_down )
       }
    }
 
+if( !@$_REQUEST['chained'] ) exit;
 //the whole cron stuff in one cron job (else comments those 2 lines):
 include_once( "halfhourly_cron.php" );
 include_once( "daily_cron.php" );

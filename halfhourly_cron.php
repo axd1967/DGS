@@ -99,7 +99,7 @@ if( !$is_down )
    else
       $half_diff = 1500;
    if( $row['timediff'] < $half_diff )
-      exit;
+      if( !@$_REQUEST['forced'] ) exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202")
                or error('mysql_query_failed','halfhourly_cron2');
@@ -210,7 +210,9 @@ if( !$is_down )
 
       $msg .= str_pad('', 47, '-');
 
-      mail( $Email, 'Dragon Go Server notification', $msg, "From: $EMAIL_FROM" );
+      if( !function_exists('mail')
+       or !mail( $Email, 'Dragon Go Server notification', $msg, "From: $EMAIL_FROM" ) )
+         error('mail_failure',"Uid:$uid Addr:$Email Text:$msg");
    }
 
 

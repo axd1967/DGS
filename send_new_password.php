@@ -80,18 +80,19 @@ require_once( "include/std_functions.php" );
                           "WHERE Handle='$userid' LIMIT 1" );
 
 
-   mail( $row["Email"],
-   'Dragon Go Server: New password',
-   'You (or possibly someone else) has requested a new password, and it has
+   $Email= $row["Email"];
+   $msg= 'You (or possibly someone else) has requested a new password, and it has
 been randomly chosen as: ' . $newpasswd . '
 
 Both the old and the new password will also be valid until your next
 login. Now please login and then change your password to something more
 rememberable.
 
-' . $HOSTBASE,
+' . $HOSTBASE;
 
-   'From: ' . $EMAIL_FROM);
+   if( !function_exists('mail')
+    or !mail( $Email, 'Dragon Go Server: New password', $msg, "From: $EMAIL_FROM" ) )
+      error('mail_failure',"Uid:$userid Addr:$Email Text:$msg");
 
 
    $msg = urlencode(T_("New password sent!"));

@@ -41,7 +41,7 @@ if( !$is_down )
    else
       $daily_diff = 3600*23;
    if( $row['timediff'] < $daily_diff )
-      exit;
+      if( !@$_REQUEST['forced'] ) exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203")
                or error('mysql_query_failed','daily_cron2');
