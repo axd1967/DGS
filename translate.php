@@ -118,7 +118,7 @@ $translation_groups =
                 or error('mysql_query_failed','translat1'); //die(mysql_error());
       $numrows = @mysql_num_rows($result);
       if( $numrows == 0 and !$untranslated )
-         error('translation_bad_language_or_group');
+         error('translation_bad_language_or_group','translat1');
 
       $lang_string = '';
       foreach( $known_languages as $twoletter => $array )
@@ -146,6 +146,8 @@ $translation_groups =
 
 
 
+  $tabindex= 1;
+
   start_page(T_("Translate"), true, $logged_in, $player_row);
   echo $info_box;
 
@@ -159,8 +161,12 @@ $translation_groups =
 
       $translate_form->add_row( array( 'CELL', 99, 'align="center"', 'TEXT', "- $lang_string -" ) );
 
+      $oid= -1;
       while( $row = mysql_fetch_assoc($result) )
       {
+         if( $oid == $row['Original_ID'] ) continue;
+         $oid = $row['Original_ID'];
+
          $string = $row['Original'];
          $hsize = 60;
          $vsize = intval(floor(min( max( 2,
@@ -169,12 +175,7 @@ $translation_groups =
                                     12 )));
 
          $translation = $row['Text'];
-         if( $translate_lang == 'jp.shift-jis') //Japanese multibytes char Pb
-             $translation = urldecode($translation);
-         else
            $translation = textarea_safe( $translation, $translate_encoding);
-         //$translation = textarea_safe( $translation, 'iso-8859-1');
-         //$translation = textarea_safe( $translation, 'EUC-JP');
          $form_row = array( 'TEXT', nl2br( textarea_safe($string, 'iso-8859-1' ) ),
                             'TD',
                             'TEXTAREA', "transl" . $row['Original_ID'],
@@ -188,7 +189,7 @@ $translation_groups =
             a minor correction that does not involve a translation modification.
             Else one can't remove the entry from the untranslated group.
          */
-         if( $untranslated )
+         if( $untranslated && !empty($translation))
             array_push( $form_row,
                             'BR',
                             'CHECKBOX', 'unch' . $row['Original_ID'], 'Y',
@@ -223,23 +224,27 @@ $translation_groups =
          ) );
 
 
-      $translate_form->add_row( array(
+      $translate_form->echo_string($tabindex);
+      $tabindex= $translate_form->tabindex;
+
+      $groupchoice_form = new Form( 'selectgroupform', 'translate.php', FORM_POST );
+      $groupchoice_form->add_row( array(
          'HEADER', 'Groups',
          ) );
 
-      $translate_form->add_row( array(
+      $groupchoice_form->add_row( array(
 //         'DESCRIPTION', 'Change to group',
          'CELL', 99, 'align="center"',
-         'SELECTBOX', 'newgroup', 1,
+         'SELECTBOX', 'group', 1,
             array_value_to_key_and_value( $translation_groups ), $group, false,
+         'HIDDEN', 'translate_lang', $translate_lang,
+         'HIDDEN', 'profil_charset', $profil_charset,
          'SUBMITBUTTON', 'just_group', 'Just change group',
          ) );
 
-      $translate_form->echo_string(1);
-      $tabindex= $translate_form->tabindex;
+      $groupchoice_form->echo_string($tabindex);
+      $tabindex= $groupchoice_form->tabindex;
    }
-   else
-      $tabindex= 1;
 
    if( $lang_choice )
    {

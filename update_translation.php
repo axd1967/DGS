@@ -31,12 +31,7 @@ require_once( "include/make_translationfiles.php" );
 
   $translate_lang = @$_POST['translate_lang'];
   $group = @$_POST['group'];
-  $newgroup = @$_POST['newgroup'];
   $profil_charset = @$_POST['profil_charset'] ? 'Y' : '';
-
-  if( isset($_POST['just_group'] ) )
-      jump_to("translate.php?translate_lang=$translate_lang" .
-              "&profil_charset=$profil_charset&group=" . urlencode($newgroup));
 
   $translator_array = explode(',', $player_row['Translator']);
 
@@ -49,22 +44,23 @@ require_once( "include/make_translationfiles.php" );
                 or error('mysql_query_failed','uptranslat1'); //die(mysql_error());
       $numrows = @mysql_num_rows($result);
       if( $numrows == 0 and !$untranslated )
-         error('translation_bad_language_or_group');
+         error('translation_bad_language_or_group','uptranslat1');
 
 
   $replace_set = '';
   $log_set = '';
   $done_set = '';
-  while( $row = mysql_fetch_array($result) )
+  $oid= -1;
+  while( $row = mysql_fetch_assoc($result) )
   {
+     if( $oid == $row['Original_ID'] ) continue;
+     $oid = $row['Original_ID'];
 
      $translation = trim(get_request_arg("transl" . $row['Original_ID']));
-     if( $translate_lang == 'jp.shift-jis') //Japanese 2bytes char Pb
-         $translation = urlencode($translation);
      $same = ( @$_POST["same" . $row['Original_ID']] === 'Y' );
-     $unchanged = $untranslated && ( @$_POST["unch" . $row['Original_ID']] === 'Y' );
+     $unchanged = ( @$_POST["unch" . $row['Original_ID']] === 'Y' );
 
-     if( $unchanged )
+     if( $unchanged && $untranslated && $row['Text'] !== '' )
      {
 
         if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
@@ -107,7 +103,7 @@ require_once( "include/make_translationfiles.php" );
   make_include_files($translate_lang); //must be called from main dir
 
   jump_to("translate.php?translate_lang=$translate_lang" .
-              "&profil_charset=$profil_charset&group=" . urlencode($newgroup));
+              "&profil_charset=$profil_charset&group=" . urlencode($group));
 
 }
 ?>
