@@ -91,11 +91,13 @@ require_once( "include/rating.php" );
 
    $my_game = ( $logged_in and ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID ) ) ;
 
+   $garbage = ($Moves < DELETE_LIMIT+$Handicap) ;
+
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
-   else if( isset($to_move) )
+   else if( @$ToMove_ID )
    {
       error("database_corrupted");
    }
@@ -186,7 +188,7 @@ require_once( "include/rating.php" );
             error("move_problem");
 
 
-         $Moves++;
+         //$Moves++;
          $Last_X = $colnr;
          $Last_Y = $rownr;
       }
@@ -220,7 +222,7 @@ require_once( "include/rating.php" );
 
       case 'delete':
       {
-         if( $Status != 'PLAY' or ( $Moves >= DELETE_LIMIT+$Handicap ) )
+         if( $Status != 'PLAY' or !$garbage )
             error("invalid_action");
 
          $extra_message = "<font color=\"red\">" . T_('Deleting game') . "</font>";
@@ -343,7 +345,7 @@ require_once( "include/rating.php" );
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
             $menu_array[T_('Pass')] = "game.php?gid=$gid&action=pass";
 
-         if( $Moves < DELETE_LIMIT+$Handicap )
+         if( $garbage )
             $menu_array[T_('Delete game')] = "game.php?gid=$gid&action=delete";
 
          $menu_array[T_('Resign')] = "game.php?gid=$gid&action=resign";
