@@ -19,9 +19,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 include( "std_functions.php" );
-include( "connect2mysql.php" );
-
-
 
 
 if( $passwd != $passwd2 )

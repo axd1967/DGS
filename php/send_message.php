@@ -21,7 +21,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
 include( "std_functions.php" );
-include( "connect2mysql.php" );
 
 connect2mysql();
 
@@ -120,7 +119,7 @@ else if( $type == "Accept" )
     $result = mysql_query( "CREATE TABLE Moves$gid (" .
                            "ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " .
                            "MoveNr INT, " .
-                           "Stone ENUM('BLACK', 'WHITE'), " .
+                           "Stone INT NOT NULL, " .
                            "PosX INT, " .
                            "PosY INT, " .
                            "Text TEXT )" );

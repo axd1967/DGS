@@ -21,8 +21,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
 include( "std_functions.php" );
-include( "connect2mysql.php" );
-
 
 connect2mysql();
 
@@ -55,7 +53,7 @@ echo "
 $uid = $player_row["ID"];
 
 $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
-                      "WHERE ToMove_ID=$uid AND Status='Running' " .
+                      "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINNISHED' " .
                       "AND Players.ID!=$uid " .
                       "AND (Black_ID=Players.ID OR White_ID=Players.ID)" );
 
