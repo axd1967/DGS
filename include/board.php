@@ -24,16 +24,12 @@ define("RIGHT",4);
 define("DOWN",8);
 
 function draw_board($Size, &$array, $may_play, $gid, 
-$Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi )
+$Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi, 
+$board_type, $coord_borders, $woodcolor  )
 {
-   $woodcolor = 1;
-   
-   $use_second_table = true;
-   $use_gif_coords = false;
+   $use_second_table = ( $board_type != 2 );
 
-   $coord_borders = 15;//LEFT | DOWN;
-
-   if( !$use_second_table ) $use_gif_coords = true;
+   $use_gif_coords = ( $board_type != 1 );
 
    if( !$stone_size ) $stone_size = 25;
    if( !$font_size ) $font_size = "+0";

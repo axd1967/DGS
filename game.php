@@ -229,7 +229,8 @@ require( "include/rating.php" );
       make_html_safe($msg, true);
 
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y, 
-   $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $stonestring, $handi );
+   $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $stonestring, $handi,
+   $player_row["Boardtype"], $player_row["Boardcoords"], $player_row["Woodcolor"]);
 
    if( $extra_message )
       echo "<P><center>$extra_message</center>\n";
