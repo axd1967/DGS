@@ -48,13 +48,16 @@ $table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches
    if( $sort2 )
       $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
 
+   if( !$showall )
+       $where_clause = "WHERE Activity>$ActiveLevel1 ";
+
    $query = "SELECT *, Rank AS Rankinfo, " .
        "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
        "Running+Finished AS Games, " .
-       "100*Won/Finished AS Percent, " .
+       "IFNULL(100*Won/Finished,-0.01) AS Percent, " .
        "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
        "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
-       "FROM Players ORDER BY $order";
+       "FROM Players $where_clause ORDER BY $order";
 
    $result = mysql_query( $query );
 
@@ -97,26 +100,63 @@ $table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches
 
       $row_color=3-$row_color;
       echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
-      tableelement(1, 'ID', "<A href=\"userinfo.php?uid=$ID\">$ID</A>");
-      tableelement(2, 'Name', "<A href=\"userinfo.php?uid=$ID\">" . $row['Name'] . "</A>");
-      tableelement(3, 'Nick', "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>");
-      tableelement(4, 'Rank Info', $row['Rankinfo']);
-      tableelement(5, 'Rating', echo_rating($row['Rating']));
-      tableelement(6, 'Open for matches?', $row['Open']);
-      tableelement(7, 'Games', $row["Games"]);
-      tableelement(8, 'Running', $row["Running"]);
-      tableelement(9, 'Finished', $row["Finished"]);
-      tableelement(10, 'Won', $row["Won"]);
-      tableelement(11, 'Lost', $row["Lost"]);
-      tableelement(12, 'Percent', $percent);
-      tableelement(13, 'Activity', $activity);
-      tableelement(14, 'Last Access', $lastaccess);
-      tableelement(15, 'Last Moved', $lastmove);
+
+      if( (1 << 0) & $column_set )
+         echo "<td><A href=\"userinfo.php?uid=$ID\">$ID</A></td>\n";
+      if( (1 << 1) & $column_set )
+         echo "<td><A href=\"userinfo.php?uid=$ID\">" . $row['Name'] . "</A></td>\n";
+      if( (1 << 2) & $column_set )
+         echo "<td><A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A></td>\n";
+      if( (1 << 3) & $column_set )
+         echo '<td>' . $row['Rankinfo'] . '&nbsp;</td>';
+      if( (1 << 4) & $column_set )
+         echo '<td>' . echo_rating($row['Rating']) . '&nbsp;</td>';
+      if( (1 << 5) & $column_set )
+         echo '<td>' . $row['Open'] . '&nbsp;</td>';
+      if( (1 << 6) & $column_set )
+         echo '<td>' . $row['games'] . '&nbsp;</td>';
+      if( (1 << 7) & $column_set )
+         echo '<td>' . $row['Running'] . '&nbsp;</td>';
+      if( (1 << 8) & $column_set )
+         echo '<td>' . $row['Finished'] . '&nbsp;</td>';
+      if( (1 << 9) & $column_set )
+         echo '<td>' . $row['Won'] . '&nbsp;</td>';
+      if( (1 << 10) & $column_set )
+         echo '<td>' . $row['Lost'] . '&nbsp;</td>';
+      if( (1 << 11) & $column_set )
+         echo '<td>' . $percent . '&nbsp;</td>';
+      if( (1 << 12) & $column_set )
+         echo '<td>' . $activity . '&nbsp;</td>';
+      if( (1 << 13) & $column_set )
+         echo '<td>' . $lastaccess . '&nbsp;</td>';
+      if( (1 << 14) & $column_set )
+         echo '<td>' . $lastmove . '&nbsp;</td>';
       echo "</tr>\n";
    }
 
    echo start_end_column_table(false);
 
-   end_page();
+   echo "
+    <p>
+    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
+      <tr align=\"center\">";
+
+   $order = order_string($sort1, $desc1, $sort2, $desc2);
+
+   if( strlen( $order ) > 0 )
+      $vars = '?' . $order . ( $showall ? '' : '&showall=1');
+   else
+      $vars = 'showall=1';
+
+   echo "
+        <td><B><A href=\"users.php$vars\">" .
+      ( $showall ? _("Only active users")  : _("Show all users") ) . "</A></B></td>";
+
+   echo "
+      </tr>
+    </table>
+";
+
+   end_page(false);
 }
 ?>
