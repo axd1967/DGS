@@ -66,7 +66,7 @@ require_once( "include/countries.php" );
 
    echo "<center>";
 
-   if( !isset($msg) )
+   if( isset($msg) && $msg )
       echo "\n<p><b><font color=green>$msg</font></b><hr>";
 
    echo "<h3><font color=$h3_color>" . $title . '</font></h3>';
