@@ -95,8 +95,11 @@ require( "include/rating.php" );
    {
       // TODO: check if reasonable
       $query .= "Rating=$newrating, " .
-          "InitialRating=$newrating, " .
-          "RatingStatus='INIT', ";
+         "InitialRating=$newrating, " .
+         "Rating2=$newrating, " .
+         "RatingMax=$newrating+200+GREATEST(1600-$newrating,0)*2/15, " .
+         "RatingMin=$newrating-200-GREATEST(1600-$newrating,0)*2/15, " .
+         "RatingStatus='INIT', ";
 
    }
 
