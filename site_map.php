@@ -81,8 +81,8 @@ function item($text,$link,$working, $level,$last=false)
             item(T_('Edit vacation'), "edit_vacation.php", true, 2, true);
          }
          item(T_('Show running games'), "show_games.php?uid=$id", true, 1);
-         item(T_('Show finished games'), "show_games.php?uid=$id&finished=1", true, 1);
-         item(T_('Show observed games'), "show_games.php?uid=$id&observe=1", true, 1);
+         item(T_('Show finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true, 1);
+         item(T_('Show observed games'), "show_games.php?uid=$id".URI_AMP."observe=1", true, 1);
 
          item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
          item(T_('Game'), "game.php", false, 1, false);
@@ -116,7 +116,7 @@ function item($text,$link,$working, $level,$last=false)
          }
       }
 
-      item(T_('Games'), "show_games.php?uid=all&finished=1", true, 0);
+      item(T_('Games'), "show_games.php?uid=all".URI_AMP."finished=1", true, 0);
 
       item(T_('Translate'), "translate.php", true, 0);
 

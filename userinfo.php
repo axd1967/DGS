@@ -160,9 +160,9 @@ require_once( "include/countries.php" );
    {
       $menu_array =
          array( T_('Show running games') => "show_games.php?uid=$uid",
-                T_('Invite this user') => "message.php?mode=Invite&uid=$uid",
-                T_('Send message to user') => "message.php?mode=NewMessage&uid=$uid",
-                T_('Show finished games') => "show_games.php?uid=$uid&finished=1" );
+                T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
+                T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid",
+                T_('Show finished games') => "show_games.php?uid=$uid".URI_AMP."finished=1" );
    }
 
 

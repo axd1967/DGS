@@ -46,7 +46,7 @@ define('BAD_RATING_COLOR',"ff000033");
    $my_id = $player_row["ID"];
    $my_rating = $player_row["Rating2"];
 
-   $page = "waiting_room.php" . ( @$_GET['info'] > 0 ? "?info=" . $_GET['info'] . "&" : '?' );
+   $page = "waiting_room.php" . ( @$_GET['info'] > 0 ? '?info=' . $_GET['info'] . URI_AMP : '?' );
 
    start_page(T_("Waiting room"), true, $logged_in, $player_row, button_style() );
 
@@ -103,7 +103,7 @@ define('BAD_RATING_COLOR',"ff000033");
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[0] )
             $wrow_strings[0] = str_TD_class_button($player_row["Browser"]) .
-               "<A class=button href=\"waiting_room.php?info=$ID&$orderstring#info\">" .
+               "<A class=button href=\"waiting_room.php?info=$ID".URI_AMP."$orderstring#info\">" .
                "&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>";
          if( $wrtable->Is_Column_Displayed[1] )
             $wrow_strings[1] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .

@@ -350,44 +350,44 @@ require_once( "include/rating.php" );
       if( $action == 'choose_move' )
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            $menu_array[T_('Pass')] = "game.php?gid=$gid&action=pass";
+            $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."action=pass";
 
          if( $too_few_moves )
-            $menu_array[T_('Delete game')] = "game.php?gid=$gid&action=delete";
+            $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."action=delete";
 
-         $menu_array[T_('Resign')] = "game.php?gid=$gid&action=resign";
+         $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."action=resign";
       }
       else if( $action == 'remove' )
       {
-         $menu_array[T_('Done')] = "game.php?gid=$gid&action=done&stonestring=$stonestring";
-         $menu_array[T_('Resume playing')] = "game.php?gid=$gid&action=choose_move";
+         $menu_array[T_('Done')] = "game.php?gid=$gid".URI_AMP."action=done".URI_AMP."stonestring=$stonestring";
+         $menu_array[T_('Resume playing')] = "game.php?gid=$gid".URI_AMP."action=choose_move";
       }
       else if( $action == 'handicap' )
       {
-         $menu_array[T_('Delete game')] = "game.php?gid=$gid&action=delete";
+         $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."action=delete";
       }
       else if( $my_game && $Status == 'FINISHED' && $opponent_ID > 0) //&& $action == 'just_looking'
       {
-         $menu_array[T_('Send message to user')] = "message.php?mode=NewMessage&uid=$opponent_ID" ;
-         $menu_array[T_('Invite this user')] = "message.php?mode=Invite&uid=$opponent_ID" ;
+         $menu_array[T_('Send message to user')] = "message.php?mode=NewMessage".URI_AMP."uid=$opponent_ID" ;
+         $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$opponent_ID" ;
       }
 
       $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid");
 
       if( $my_game && !$has_sgf_alias )
       {
-         $menu_array[T_('Download sgf with all comments')] = "sgf.php?gid=$gid&owned_comments=1" ;
+         $menu_array[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
       }
 
       if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
-         $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid&skip=t";
+         $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."skip=t";
 
       if( ($Status != 'FINISHED') and !$my_game and $logged_in )
       {
          if( is_on_observe_list( $gid, $player_row["ID"] ) )
-            $menu_array[T_('Remove from observe list')] = "game.php?gid=$gid&toggleobserve=t";
+            $menu_array[T_('Remove from observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=t";
          else
-            $menu_array[T_('Add to observe list')] = "game.php?gid=$gid&toggleobserve=t";
+            $menu_array[T_('Add to observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=t";
       }
    }
 

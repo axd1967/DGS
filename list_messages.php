@@ -88,7 +88,7 @@ require_once( "include/timezones.php" );
    if( $find_answers > 0 )
    {
       $title = T_('Answers list');
-      $page.= '&find_answers=' . $find_answers ;
+      $page.= URI_AMP.'find_answers=' . $find_answers ;
       $where = "AND Messages.ReplyTo=$find_answers";
       $current_folder = FOLDER_NONE;
       $folderstring = 'all';
@@ -115,15 +115,15 @@ require_once( "include/timezones.php" );
    }
 
    if( isset($current_folder) )
-      $page.= '&current_folder=' . $current_folder ;
+      $page.= URI_AMP.'current_folder=' . $current_folder ;
    if( isset($folder) )
-      $page.= '&folder=' . $folder ;
+      $page.= URI_AMP.'folder=' . $folder ;
 
    start_page($title, true, $logged_in, $player_row );
 
 
    if( $page )
-      $page{0} = '?';
+      $page= '?'.substr( $page, strlen(URI_AMP));
    $mtable = new Table( 'list_messages.php' . $page );
 
    $order = $mtable->current_order_string();
@@ -186,7 +186,7 @@ require_once( "include/timezones.php" );
    echo "</form>\n";
 
    if( $find_answers > 0 )
-      $menu_array = array( T_('Back to message') => "message.php?mode=ShowMessage&mid=$find_answers" );
+      $menu_array = array( T_('Back to message') => "message.php?mode=ShowMessage".URI_AMP."mid=$find_answers" );
    else
       $menu_array = array( T_('Edit folders') => "edit_folders.php" );
 

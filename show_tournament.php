@@ -182,7 +182,7 @@ function make_applicationperiod_string( $app_p, $soap )
    {
       echo "<center>\n";
       $modify_form = new Form( 'modifyform',
-                               "show_tournament.php?tid=" . $t->ID . "&update=t",
+                               "show_tournament.php?tid=" . $t->ID . URI_AMP."update=t",
                                FORM_POST );
       $modify_form->add_row( array( 'HEADER', T_('Tournament') ) );
       $modify_form->add_row( array( 'DESCRIPTION', T_('Tournament ID'),
@@ -284,7 +284,7 @@ function make_applicationperiod_string( $app_p, $soap )
 
       if( in_array( $player_row['ID'], $t->ListOfOrganizers ) )
       {
-         echo "<br><br><center><a href=\"show_tournament.php?tid=" . $t->ID . "&modify=t\">Modify tournament</a></center>\n";
+         echo "<br><br><center><a href=\"show_tournament.php?tid=" . $t->ID . URI_AMP."modify=t\">Modify tournament</a></center>\n";
       }
    }
 

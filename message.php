@@ -261,7 +261,7 @@ require_once( "include/form_functions.php" );
 
          if( $can_reply )
          {
-            echo '&nbsp;<br><a href="message.php?mode=Dispute&mid=' . $mid . '">' .
+            echo '&nbsp;<br><a href="message.php?mode=Dispute'.URI_AMP.'mid=' . $mid . '">' .
                T_('Dispute settings') . '</a>';
 
             $message_form->add_row( array(

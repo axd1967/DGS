@@ -102,8 +102,10 @@ require_once( "include/form_functions.php" );
   else
   {
      echo '<img src="ratingpng.php?uid=' . $uid .
-        (@$_GET['show_time'] == 'y' ? '&show_time=y' : '') . 
-        "&startyear=$startyear&startmonth=$startmonth&endmonth=$endmonth&endyear=$endyear&date=$NOW\"" .
+        (@$_GET['show_time'] == 'y' ? URI_AMP.'show_time=y' : '') . 
+        URI_AMP."date=$NOW" . //force cache refresh
+        URI_AMP."startyear=$startyear".URI_AMP."startmonth=$startmonth" .
+        URI_AMP."endmonth=$endmonth".URI_AMP."endyear=$endyear\"" .
         " alt=\"" . T_('Rating graph') . "\">\n";
 
      echo "<p>\n";
@@ -134,7 +136,7 @@ require_once( "include/form_functions.php" );
   echo '</center>';
 
   $menu_array =
-     array( T_('Show finished games') => "show_games.php?uid=$uid&finished=1" );
+     array( T_('Show finished games') => "show_games.php?uid=$uid".URI_AMP."finished=1" );
 
   end_page(@$menu_array);
 

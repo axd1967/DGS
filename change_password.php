@@ -56,6 +56,6 @@ require_once( "include/std_functions.php" );
 
    $msg = urlencode(T_('Password changed!'));
 
-   jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
+   jump_to("userinfo.php?uid=" . $player_row["ID"] . URI_AMP."msg=$msg");
 }
 ?>

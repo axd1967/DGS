@@ -23,7 +23,13 @@ if( @$_REQUEST['quick_mode'] )
 require_once( "include/std_functions.php" );
 
 {
-//   disable_cache();
+   if( @$_GET['logout'] )
+   {
+      set_cookies("","", true);
+      if( $quick_errors )
+         exit;
+      jump_to("index.php");
+   }
 
    connect2mysql();
 
@@ -60,9 +66,9 @@ require_once( "include/std_functions.php" );
 
       set_cookies( $userid, $code );
       jump_to("login.php?cookie_check=1"
-             . "&userid=".urlencode($userid)
-             . "&passwd=".urlencode($passwd)
-             . ( $quick_errors ? "&quick_mode=1" : '' )
+             . URI_AMP."userid=".urlencode($userid)
+             . URI_AMP."passwd=".urlencode($passwd)
+             . ( $quick_errors ? URI_AMP."quick_mode=1" : '' )
              );
    }
 

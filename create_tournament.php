@@ -37,6 +37,6 @@ require_once( "include/tournament.php" );
 
    $new_tour = Tournament::Create( $_POST['name'], $_POST['description'], $player_row['ID'] );
 
-   jump_to("show_tournament.php?tid=" . $new_tour->ID . "&modify=t");
+   jump_to("show_tournament.php?tid=" . $new_tour->ID . URI_AMP."modify=t");
 }
 ?>

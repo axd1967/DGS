@@ -69,7 +69,7 @@ require_once( "include/make_translationfiles.php" );
 
      $row = get_entry_row( $id );
 
-     $faq_edit_form = new Form( 'faqeditform', "admin_faq.php?do_edit=t&id=$id", FORM_POST );
+     $faq_edit_form = new Form( 'faqeditform', "admin_faq.php?do_edit=t".URI_AMP."id=$id", FORM_POST );
 
      if( $row["Level"] == 1 ) //i.e. Category
      {
@@ -266,7 +266,7 @@ require_once( "include/make_translationfiles.php" );
      echo "<center>\n";
 
      $faq_edit_form = new Form( 'faqnewform', "admin_faq.php?do_new=" .
-                                $action . "&id=$id", FORM_POST );
+                                $action . URI_AMP."id=$id", FORM_POST );
 
      if( $action == 'c' )
      {
@@ -421,7 +421,7 @@ require_once( "include/make_translationfiles.php" );
 
      echo "<table>\n";
 
-     echo "<tr><td><a href=\"admin_faq.php?new=c&id=1" . '"><img border=0 title="' .
+     echo "<tr><td><a href=\"admin_faq.php".URI_AMP."new=c".URI_AMP."id=1" . '"><img border=0 title="' .
         T_('Add new category') . '" src="images/new.png" alt="N"></a></td></tr>';
 
      while( $row = mysql_fetch_array( $result ) )
@@ -439,24 +439,24 @@ require_once( "include/make_translationfiles.php" );
            $typechar = 'e'; //entry
         }
 
-        echo "<A href=\"admin_faq.php?edit=$typechar&id=" . $row['ID'] .
+        echo "<A href=\"admin_faq.php?edit=$typechar".URI_AMP."id=" . $row['ID'] .
            '" title="' . T_("Edit") . "\">$question</A>\n";
         echo "</td>";
 
-        echo '<td width=40 align=right><a href="admin_faq.php?move=u&id=' .
+        echo '<td width=40 align=right><a href="admin_faq.php?move=u'.URI_AMP.'id=' .
            $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png" alt="u"></a></td>';
-        echo '<td><a href="admin_faq.php?move=d&id=' .
+        echo '<td><a href="admin_faq.php?move=d'.URI_AMP.'id=' .
            $row['ID'] . '"><img border=0 title="' . T_("Move down") . '" src="images/down.png" alt="d"></a></td>';
 
         if( $row['Level'] > 1 )
         {
-           echo '<td align=right><a href="admin_faq.php?move=uu&id=' .
+           echo '<td align=right><a href="admin_faq.php?move=uu'.URI_AMP.'id=' .
               $row['ID'] . '"><img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png" alt="U"></a></td>';
-           echo '<td><a href="admin_faq.php?move=dd&id=' .
+           echo '<td><a href="admin_faq.php?move=dd'.URI_AMP.'id=' .
               $row['ID'] . '"><img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png" alt="D"></a></td>';
         }
 
-        echo "<td><a href=\"admin_faq.php?new=$typechar&id=" . $row['ID'] .
+        echo "<td><a href=\"admin_faq.php?new=$typechar".URI_AMP."id=" . $row['ID'] .
            '"><img border=0 title="' .
            ($typechar == 'e' ? T_('Add new entry') : T_('Add new category')) .
            '" src="images/new.png" alt="N"></a></td>';
@@ -465,7 +465,7 @@ require_once( "include/make_translationfiles.php" );
         if( !$row['Answer'] or ( $transl !== 'Done' and $transl !== 'Changed') )
             $transl = $row['QTranslatable'];
         if( $transl !== 'Done' and $transl !== 'Changed' )
-           echo "<td><a href=\"admin_faq.php?transl=t&id=" . $row['ID'] .
+           echo "<td><a href=\"admin_faq.php?transl=t".URI_AMP."id=" . $row['ID'] .
            '"><img border=0 title="' .
            ($transl == 'Y' ? T_('Make untranslatable') : T_('Make translatable')) .
            '" src="images/transl' . ( $transl == 'Y' ? '.png" alt="T' : '_no.png" alt="t' ) . '"></a></td>';
@@ -473,7 +473,7 @@ require_once( "include/make_translationfiles.php" );
         echo '</tr>';
 
         if( $row["Level"] == 1 )
-           echo "<tr><td witdh=20></td><td><a href=\"admin_faq.php?new=e&id=" .
+           echo "<tr><td width=20></td><td><a href=\"admin_faq.php?new=e".URI_AMP."id=" .
               $row['ID'] . '"><img border=0 title="' . T_('Add new entry') .
               '" src="images/new.png" alt="N"></a></td></tr>';
      }

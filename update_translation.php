@@ -103,7 +103,7 @@ require_once( "include/make_translationfiles.php" );
   make_include_files($translate_lang); //must be called from main dir
 
   jump_to("translate.php?translate_lang=$translate_lang" .
-              "&profil_charset=$profil_charset&group=" . urlencode($group));
+              URI_AMP."profil_charset=$profil_charset".URI_AMP."group=" . urlencode($group));
 
 }
 ?>

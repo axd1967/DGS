@@ -69,7 +69,7 @@ disable_cache();
       foreach( $_REQUEST as $key => $val )
       {
          if( $val == 'Y' && preg_match("/^mark\d+$/i", $key) )
-           $page.= "&$key=Y" ;
+           $page.= URI_AMP."$key=Y" ;
       }
 
       jump_to("list_messages.php?folder=$new_folder$page");

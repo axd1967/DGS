@@ -37,7 +37,7 @@ require_once( "include/countries.php" );
    $page = "users.php?";
    $where_clause = '';
    if( @$_GET['showall'] ) 
-      $page .= "showall=1&";
+      $page .= "showall=1".URI_AMP;
    else
       $where_clause = "WHERE Activity>$ActiveLevel1 ";
 
@@ -151,7 +151,7 @@ require_once( "include/countries.php" );
    else
    {
       $str = T_("Show all users");
-      $vars = '?showall=1' . ( $orderstring ? '&'.$orderstring : '');
+      $vars = '?showall=1' . ( $orderstring ? URI_AMP.$orderstring : '');
    }
 
    $menu_array = array( $str => "users.php$vars" );

@@ -67,17 +67,17 @@ require_once( "include/rating.php" );
 
    if( $observe )
    {
-      $page = 'show_games.php?observe=1&';
+      $page = 'show_games.php?observe=1'.URI_AMP;
       $column_set_name = "ObservedGamesColumns";
    }
    else if( $finished )
    {
-      $page = "show_games.php?uid=$uid&finished=1&";
+      $page = "show_games.php?uid=$uid".URI_AMP."finished=1".URI_AMP;
       $column_set_name = "FinishedGamesColumns";
    }
    else
    {
-      $page = "show_games.php?uid=$uid&";
+      $page = "show_games.php?uid=$uid".URI_AMP;
       $column_set_name = "RunningGamesColumns";
    }
 
@@ -437,7 +437,7 @@ require_once( "include/rating.php" );
       $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
 
       if( $uid != $player_row["ID"] and !$observe )
-         $menu_array[T_('Invite this user')] = "message.php?mode=Invite&uid=$uid";
+         $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$uid";
    }
 
    if( $finished or $observe )
@@ -446,7 +446,7 @@ require_once( "include/rating.php" );
    }
    if( !$finished )
    {
-      $menu_array[T_('Show finished games')] = "show_games.php?uid=$uid&finished=1";
+      $menu_array[T_('Show finished games')] = "show_games.php?uid=$uid".URI_AMP."finished=1";
    }
    if( !$observe )
    {

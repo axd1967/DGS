@@ -88,6 +88,6 @@ require_once( "include/rating.php" );
 
    $msg = urlencode(T_('Bio updated!'));
 
-   jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
+   jump_to("userinfo.php?uid=" . $player_row["ID"] . URI_AMP."msg=$msg");
 }
 ?>
