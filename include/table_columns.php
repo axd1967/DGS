@@ -25,7 +25,7 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
 
    $col_pos = 1 << ($nr-1);
 
-   if( !($col_pos & $column_set) )
+   if( !$undeletable and !($col_pos & $column_set) )
    {
       if( !is_array($removed_columns) )
          $removed_columns = array('');
