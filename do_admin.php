@@ -41,11 +41,11 @@ require( "include/translation_info.php" );
   if( $addlanguage )
     {
       if( strlen( $twoletter ) < 2 || empty( $langname ) )
-        error("admin_error");
+        error("admin_add_lang_missing_field");
 
       $k_langs = get_known_languages_with_full_names();
       if( array_key_exists( $twoletter, $k_langs ) || in_array( $langname, $k_langs ) )
-        error("admin_error");
+        error("admin_add_lang_exists");
 
       $new_lang_php_code = sprintf( $translation_template_top,
                                     $twoletter, $langname );
@@ -68,7 +68,7 @@ require( "include/translation_info.php" );
   if( $translpriv )
     {
       if( empty($transluser) )
-        error("admin_error");
+        error("no_specified_user");
 
       if( !isset( $transllang ) )
         $transllang = array();
@@ -77,7 +77,7 @@ require( "include/translation_info.php" );
 
       $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
       if( mysql_affected_rows() != 1 )
-        error("reciever_not_found");
+        error("unknown_user");
     }
 
   jump_to("admin.php");

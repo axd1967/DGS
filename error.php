@@ -384,9 +384,21 @@ require( "include/std_functions.php" );
       }
       break;
 
-      case("admin_error"):
+      case("admin_add_lang_missing_field"):
       {
-        echo T_("Sorry, there was an error when processing your administrative task.");
+        echo T_("Sorry, there was a missing or incorrect field when adding a language.");
+      }
+      break;
+
+      case("admin_add_lang_exists"):
+      {
+        echo T_("Sorry, the language you tried to add already exists.");
+      }
+      break;
+
+      case("no_specified_user"):
+      {
+        echo T_("Sorry, you must specify a user.");
       }
       break;
 
