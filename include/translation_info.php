@@ -67,7 +67,7 @@ $translation_template_bottom =
 $translation_groups =
 array( 'Admin', 'Common', 'Documentation', 'Edit bio',
        'Edit password', 'Edit profile', 'Error',
-       'Game', 'Index', 'Links', 'Messages',
+       'Game', 'Index', 'Introduction', 'Links', 'Messages',
        'Misc', 'Register', 'Site map', 'Status', 'Users' );
 
 $translation_info =
@@ -98,15 +98,15 @@ array(
 
       /* Found in these files: include/table_columns.php */
       'Add Column' =>
-      array( 'Groups' => array() ),
+      array( 'Groups' => array( 'Game', 'Messages', 'Status' ) ),
 
       /* Found in these files: admin.php */
       'Added language %s with code %s and characterencoding %s.' =>
-      array( 'Groups' => array() ),
+      array( 'Groups' => array( 'Admin' ) ),
 
       /* Found in these files: admin.php */
       'Added user %s as translator for language %s.' =>
-      array( 'Groups' => array() ),
+      array( 'Groups' => array( 'Admin' ) ),
 
       /* Found in these files: admin.php */
       'Add language' =>
@@ -188,12 +188,12 @@ array(
       'Bio updated!' =>
       array( 'Groups' => array( 'Edit bio' ) ),
 
-      /* Found in these files: include/message_functions.php, include/move.php */
-      'Black' =>
-      array( 'Groups' => array( 'Common' ) ),
-
       /* Found in these files: message.php */
       'black' =>
+      array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: include/message_functions.php, include/move.php */
+      'Black' =>
       array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: edit_profile.php */
@@ -202,7 +202,7 @@ array(
 
       /* Found in these files: include/message_functions.php */
       'Board size' =>
-      array( 'Groups' => array() ),
+      array( 'Groups' => array( 'Messages' ) ),
 
       /* Found in these files: docs.php */
       'Browse Dragon source code' =>
@@ -230,7 +230,7 @@ array(
 
       /* Found in these files: admin.php */
       'Changed translator privileges info for user %s.' =>
-      array( 'Groups' => array() ),
+      array( 'Groups' => array( 'Admin' ) ),
 
       /* Found in these files: edit_password.php, site_map.php, userinfo.php */
       'Change password' =>
@@ -620,6 +620,10 @@ array(
       'Introduction' =>
       array( 'Groups' => array( 'Misc' ) ),
 
+      /* Found in these files: introduction.php */
+      'Introduction to dragon' =>
+      array( 'Groups' => array( 'Introduction' ) ),
+
       /* Found in these files: docs.php */
       'Introduction to Dragon' =>
       array( 'Groups' => array( 'Documentation' ) ),
@@ -684,12 +688,12 @@ array(
       'Language name (i.e. English)' =>
       array( 'Groups' => array( 'Admin' ) ),
 
-      /* Found in these files: userinfo.php */
-      'Last access' =>
-      array( 'Groups' => array( 'Users' ) ),
-
       /* Found in these files: users.php */
       'Last Access' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: userinfo.php */
+      'Last access' =>
       array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: show_games.php, status.php */
@@ -732,13 +736,13 @@ array(
       'Lots of info on go' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/move.php */
-      'Main Time' =>
-      array( 'Groups' => array( 'Game' ) ),
-
       /* Found in these files: include/message_functions.php */
       'Main time' =>
       array( 'Groups' => array( 'Game', 'Messages' ) ),
+
+      /* Found in these files: include/move.php */
+      'Main Time' =>
+      array( 'Groups' => array( 'Game' ) ),
 
       /* Found in these files: include/message_functions.php */
       'Manual setting' =>
@@ -770,7 +774,11 @@ array(
 
       /* Found in these files: include/message_functions.php */
       'months' =>
-      array( 'Groups' => array() ),
+      array( 'Groups' => array( 'Common', 'Messages' ) ),
+
+      /* Found in these files: introduction.php */
+      'More information can be found in the <a href="phorum/list.php?f=3">FAQ forum</a> where you are also encouraged to submit your own questions.' =>
+      array( 'Groups' => array( 'Introduction' ) ),
 
       /* Found in these files: links.php */
       'More Japanese Go Terms' =>
@@ -840,12 +848,12 @@ array(
       'NNGS' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: show_games.php */
-      'no' =>
-      array( 'Groups' => array( 'Common' ) ),
-
       /* Found in these files: include/message_functions.php, include/move.php */
       'No' =>
+      array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: show_games.php */
+      'no' =>
       array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: status.php */
@@ -875,6 +883,10 @@ array(
       /* Found in these files: edit_password.php */
       'Old password' =>
       array( 'Groups' => array( 'Edit password' ) ),
+
+      /* Found in these files: introduction.php */
+      'Once again welcome, and enjoy your visit here!' =>
+      array( 'Groups' => array( 'Introduction' ) ),
 
       /* Found in these files: users.php */
       'Only active users' =>
@@ -1489,7 +1501,7 @@ The reasons for this problem could be any of the following:
 
       /* Found in these files: admin.php */
       'User %s is already translator for language %s.' =>
-      array( 'Groups' => array() ),
+      array( 'Groups' => array( 'Admin' ) ),
 
       /* Found in these files: edit_profile.php, forgot.php, index.php, register.php, status.php, userinfo.php */
       'Userid' =>
@@ -1519,13 +1531,17 @@ The reasons for this problem could be any of the following:
       'Welcome page' =>
       array( 'Groups' => array( 'Site map' ) ),
 
-      /* Found in these files: include/message_functions.php, include/move.php */
-      'White' =>
-      array( 'Groups' => array( 'Common', 'Game' ) ),
+      /* Found in these files: introduction.php */
+      'Welcome to Dragon Go Server, a <a href="licence.php">free</a>server for playing <a href="links.php">go</a>, where the games tends to \'drag on\'.' =>
+      array( 'Groups' => array( 'Introduction' ) ),
 
       /* Found in these files: message.php */
       'white' =>
       array( 'Groups' => array( 'Messages' ) ),
+
+      /* Found in these files: include/message_functions.php, include/move.php */
+      'White' =>
+      array( 'Groups' => array( 'Common', 'Game' ) ),
 
       /* Found in these files: show_games.php */
       'Win?' =>
@@ -1566,6 +1582,10 @@ The reasons for this problem could be any of the following:
       /* Found in these files: show_games.php */
       'yes' =>
       array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: introduction.php */
+      'You can look at it as kind of play-by-email, where a web-interface is used to make the board look prettier. To start playing you should first get yourself an <a href="register.php">account</a>, if you haven\'t got one already. Thereafter you could <a href="edit_profile.php">edit your profile</a> and <a href="edit_bio.php">enter some biographical info</a>, especially the fields \'Open for matches?\', \'Rating\' and \'Rank info\' are useful for finding opponents. Next you can study the <a href="users.php">user list</a> and use the <a href="phorum/index.php">forums</a> to find suitable opponents to <a href="invite.php">invite</a> for a game.' =>
+      array( 'Groups' => array( 'Introduction' ) ),
 
       /* Found in these files: links.php */
       'You have to know what other players are talking about.' =>
