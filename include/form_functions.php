@@ -317,7 +317,7 @@ class Form
                while( $current_arg < count($args) )
                {
                   $tmp_counter++;
-                  if( $tmp_counter >= 20 )
+                  if( $tmp_counter >= 40 )
                      exit;
 
                   $element_name = $args[ $current_arg ];
