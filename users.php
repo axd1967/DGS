@@ -39,6 +39,8 @@ $table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches
    $column_set = $player_row["UsersColumns"];
    $page = "users.php?";
 
+   if( $showall ) $page .= "showall=1&";
+
    add_or_del($add, $del, "UsersColumns");
 
    if(!$sort1)
