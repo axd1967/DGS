@@ -101,6 +101,10 @@ require( "include/rating.php" );
       "Status='PLAY', ";
 
    $Handicap = 0;
+   $Rated = ( $Rated === 'Y' and
+              ($RatingStatus == 'READY' or $RatingStatus == 'RATED') and
+              ($player_row['RatingStatus'] == 'READY' or
+               $player_row['RatingStatus'] == 'RATED') ? 'Y' : 'N' );
 
    if( $Handicaptype == 'proper' )
       list($Handicap,$Komi,$swap) = suggest_proper($rating_white, $rating_black, $Size);

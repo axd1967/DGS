@@ -70,25 +70,25 @@ require( "forum/forum_functions.php" );
 // Update rating
 
 
-   $query = "SELECT Games.ID as gid ".
-       "FROM Games, Players as white, Players as black " .
-       "WHERE Status='FINISHED' AND Rated='Y' " .
-       "AND white.ID=White_ID AND black.ID=Black_ID ".
-       "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
-       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) " .
-       "ORDER BY Lastchanged, gid";
+//    $query = "SELECT Games.ID as gid ".
+//        "FROM Games, Players as white, Players as black " .
+//        "WHERE Status='FINISHED' AND Rated='Y' " .
+//        "AND white.ID=White_ID AND black.ID=Black_ID ".
+//        "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
+//        "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) " .
+//        "ORDER BY Lastchanged, gid";
 
 
-   $result = mysql_query( $query );
+//    $result = mysql_query( $query );
 
-   while( $row = mysql_fetch_array( $result ) )
-   {
-      update_rating($row["gid"]);
-      update_rating2($row["gid"]);
-   }
+//    while( $row = mysql_fetch_array( $result ) )
+//    {
+//       update_rating($row["gid"]);
+//       update_rating2($row["gid"]);
+//    }
 
-   $result = mysql_query( "UPDATE Players SET RatingStatus='READY' " .
-                          "WHERE RatingStatus='INIT' " );
+//    $result = mysql_query( "UPDATE Players SET RatingStatus='READY' " .
+//                           "WHERE RatingStatus='INIT' " );
 
 
 
