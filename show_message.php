@@ -114,7 +114,9 @@ require( "include/std_functions.php" );
    }
 
    echo "<tr><td>Subject:</td><td>$Subject</td></tr>\n" .
-      "<tr><td valign=\"top\">Message:</td><td align=\"center\">\n" . 
+      "<tr><td valign=\"top\">" . 
+      ( $ReplyTo > 0 ? "<a href=\"show_message.php?mid=$ReplyTo\">Replied:</a>" : "Message:") . 
+      "</td><td align=\"center\">\n" . 
       "<table border=2 align=center><tr>" . 
       "<td width=\"" . ($player_row["Stonesize"]*19) . "\" align=left>" . 
       make_html_safe($row["Text"],true) .
