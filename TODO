@@ -49,7 +49,9 @@ SMALLER TASKS
 
 * Komi bidding (?)
 
-* Improve rating system (Glicko?)
+* Ratings:
+        Implement Glicko (?)
+        Add admin code to change a players rating.
 
 * Delete game when it's the opponents turn.
 
@@ -73,3 +75,5 @@ SMALLER TASKS
 * Notification: Remove ugly html in messages.
 
 * Add fun variations (torusgo etc.)
+
+* Show observers of a game.
