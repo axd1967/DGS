@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-$translation_template_top =
+$translation_template_copyright =
 '<?php
 
 /*
@@ -40,7 +40,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
+';
 
+$translation_template_top = $translation_template_copyright .
+'
 add_to_known_languages( "%1$s", "%2$s" );
 
 class %1$s_Language extends Language
@@ -318,7 +321,7 @@ array( /* From std_functions.php */
       "Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support." =>
       array( 'Groups' => array( 'Error' ) ),
 
-      "Sorry, I was unable to open the translation file for writing. Please contact the support." =>
+      "Sorry, I was unable to open a file for writing. Please contact the support." =>
       array( 'Groups' => array( 'Error' ) ),
 
       "Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again." =>
