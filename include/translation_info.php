@@ -64,9 +64,10 @@ $translation_template_bottom =
 ';
 
 $translation_groups =
-array( 'Common', 'Edit password', 'Edit profile',
-       'Error', 'Game', 'Index', 'List messages',
-       'Register', 'Status' );
+array( 'Admin', 'Common', 'Documentation', 'Edit bio',
+       'Edit password', 'Edit profile', 'Error',
+       'Game', 'Index', 'Links', 'Messages',
+       'Misc', 'Register', 'Status', 'Users' );
 
 $translation_info =
 array( /* From std_functions.php */
@@ -393,22 +394,22 @@ array( /* From std_functions.php */
       array( 'Groups' => array( 'Index' ) ),
 
       "Send a message" =>
-      array( 'Groups' => array( 'List messages' ) ),
+      array( 'Groups' => array( 'Messages' ) ),
 
       "Show recieved messages" =>
-      array( 'Groups' => array( 'List messages' ) ),
+      array( 'Groups' => array( 'Messages' ) ),
 
       "Hide deleted" =>
-      array( 'Groups' => array( 'List messages' ) ),
+      array( 'Groups' => array( 'Messages' ) ),
 
       "Show all" =>
-      array( 'Groups' => array( 'List messages' ) ),
+      array( 'Groups' => array( 'Messages' ) ),
 
       "Show sent messages" =>
-      array( 'Groups' => array( 'List messages' ) ),
+      array( 'Groups' => array( 'Messages' ) ),
 
       "Delete all" =>
-      array( 'Groups' => array( 'List messages' ) ),
+      array( 'Groups' => array( 'Messages' ) ),
 
       "Register" =>
       array( 'Groups' => array( 'Register' ) ),
@@ -480,7 +481,287 @@ array( /* From std_functions.php */
       array( 'Groups' => array( 'Common' ) ),
 
       "Logout" =>
-      array( 'Groups' => array( 'Common' ) )
+      array( 'Groups' => array( 'Common' ) ),
+
+      'Admin' =>
+      array( 'Groups' => array( 'Common', 'Admin' ) ), /* include/std_functions.php */
+
+      'Add language for translation' =>
+      array( 'Groups' => array( 'Admin' ) ), /* admin.php */
+
+      'Set translator privileges for user' =>
+      array( 'Groups' => array( 'Admin' ) ), /* admin.php */
+
+      'Bio updated!' =>
+      array( 'Groups' => array( 'Edit bio' ) ), /* change_bio.php */
+
+      'Password changed!' =>
+      array( 'Groups' => array( 'Edit password' ) ), /* change_password.php */
+
+      'Profile updated!' =>
+      array( 'Groups' => array( 'Edit profile' ) ), /* change_profile.php */
+
+      'Documentation' =>
+      array( 'Groups' => array( 'Documentation' ) ), /* docs.php */
+
+      'Introduction to Dragon' =>
+      array( 'Groups' => array( 'Documentaion' ) ), /* docs.php */
+
+      'Other:' =>
+      array( 'Groups' => array( 'Edit bio' ) ), /* edit_bio.php */
+
+      'Edit biopgraphical info' =>
+      array( 'Groups' => array( 'Edit bio' ) ), /* edit_bio.php */
+
+      'Change bio' =>
+      array( 'Groups' => array( 'Edit bio' ) ), /* edit_bio.php */
+
+      'Smooth board edge' =>
+      array( 'Groups' => array( 'Edit profile' ) ), /* edit_profile.php */
+
+      'Couldn\'t extrapolate value in function interpolate' =>
+      array( 'Groups' => array( 'Error' ) ), /* error.php */
+
+      'Sorry, you are not allowed to translate the specified language.' =>
+      array( 'Groups' => array( 'Error' ) ), /* error.php */
+
+      'Sorry, something went wrong when trying to insert the new translations into the database.' =>
+      array( 'Groups' => array( 'Error' ) ), /* error.php */
+
+      'Sorry, this page is solely for users with administrative tasks.' =>
+      array( 'Groups' => array( 'Error' ) ), /* error.php */
+
+      'Sorry, there was a missing or incorrect field when adding a language.' =>
+      array( 'Groups' => array( 'Error' ) ), /* error.php */
+
+      'Sorry, the language you tried to add already exists.' =>
+      array( 'Groups' => array( 'Error' ) ), /* error.php */
+
+      'Sorry, you must specify a user.' =>
+      array( 'Groups' => array( 'Error' ) ), /* error.php */
+
+      'Sorry, you must specify a language.' =>
+      array( 'Groups' => array( 'Error' ) ), /* error.php */
+
+      'If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.' =>
+      array( 'Groups' => array( 'Misc' ) ), /* forgot.php */
+
+      'Installation instructions' =>
+      array( 'Groups' => array( 'Misc' ) ), /* install.php */
+
+      'Introduction' =>
+      array( 'Groups' => array( 'Misc' ) ), /* introduction.php */
+
+      'General Public Licence' =>
+      array( 'Groups' => array( 'Misc' ) ), /* licence.php */
+
+      'Links' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'General Info' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'Jan van der Steens Pages' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'Rules' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'An Interactive Introduction' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'Strategy and terms' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'An Introduction to Shape' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'History' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'A Brief History' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'Go books, equipment and software' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'Kiseido' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'Other go servers' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'It\'s your turn' =>
+      array( 'Groups' => array( 'Links' ) ), /* links.php */
+
+      'Message list' =>
+      array( 'Groups' => array( 'Messages' ) ), /* list_messages.php */
+
+      'From' =>
+      array( 'Groups' => array( 'Messages' ) ), /* list_messages.php */
+
+      'Subject' =>
+      array( 'Groups' => array( 'Messages' ) ), /* list_messages.php */
+
+      'Del' =>
+      array( 'Groups' => array( 'Messages' ) ), /* list_messages.php */
+
+      'New' =>
+      array( 'Groups' => array( 'Status' ) ), /* status.php */
+
+      'Message sent!' =>
+      array( 'Groups' => array( 'Messages' ) ), /* send_message.php */
+
+      'User info' =>
+      array( 'Groups' => array( 'Game' ) ), /* show_games.php */
+
+      'Invite this user' =>
+      array( 'Groups' => array( 'Game' ) ), /* show_games.php */
+
+      'Site map' =>
+      array( 'Groups' => array( 'Misc' ) ), /* site_map.php */
+
+      'Forum' =>
+      array( 'Groups' => array( 'Common' ) ), /* site_map.php */
+
+      'Flags' =>
+      array( 'Groups' => array( 'Status' ) ), /* status.php */
+
+      'Place your handicap stones, please!' =>
+      array( 'Groups' => array( 'Game' ) ), /* include/move.php */
+
+      'Message' =>
+      array( 'Groups' => array( 'Game', 'Messages' ) ), /* include/move.php */
+
+      'White' =>
+      array( 'Groups' => array( 'Common', 'Game' ) ), /* include/move.php */
+
+      'Main Time' =>
+      array( 'Groups' => array( 'Game' ) ), /* include/move.php */
+
+      'Byoyomi' =>
+      array( 'Groups' => array( 'Game' ) ), /* include/move.php */
+
+      'Time limit' =>
+      array( 'Groups' => array( 'Game' ) ), /* include/move.php */
+
+      'without byoyomi' =>
+      array( 'Groups' => array( 'Game' ) ), /* include/move.php */
+
+      'Rated' =>
+      array( 'Groups' => array( 'Game' ) ), /* include/move.php */
+
+      'Moves' =>
+      array( 'Groups' => array( 'Game' ) ), /* include/move.php */
+
+      'dan' =>
+      array( 'Groups' => array( 'Common' ) ), /* include/rating.php */
+
+      'Page created in' =>
+      array( 'Groups' => array( 'Common' ) ), /* include/std_functions.php */
+
+      'day' =>
+      array( 'Groups' => array( 'Common' ) ), /* include/std_functions.php */
+
+      'and' =>
+      array( 'Groups' => array( 'Common' ) ), /* include/std_functions.php */
+
+      'hour' =>
+      array( 'Groups' => array( 'Common' ) ), /* include/std_functions.php */
+
+      'This %sgame%s invitation has already been accepted.' =>
+      array( 'Groups' => array( 'Messages' ) ), /* message.php */
+
+      'Reply:' =>
+      array( 'Groups' => array( 'Messages' ) ), /* message.php */
+
+      'New message:' =>
+      array( 'Groups' => array( 'Messages' ) ), /* message.php */
+
+      'white' =>
+      array( 'Groups' => array( 'Messages' ) ), /* message.php */
+
+      'Disputing settings:' =>
+      array( 'Groups' => array( 'Messages' ) ), /* message.php */
+
+      'Send Reply' =>
+      array( 'Groups' => array( 'Messages' ) ), /* message.php */
+
+      'Invitation message:' =>
+      array( 'Groups' => array( 'Messages' ) ), /* message.php */
+
+      'Send Invitation' =>
+      array( 'Groups' => array( 'Messages' ) ), /* message.php */
+
+      'Finished games for %s' =>
+      array( 'Groups' => array( 'Game' ) ), /* show_games.php */
+
+      'ID' =>
+      array( 'Groups' => array( 'Common' ) ), /* users.php */
+
+      'sgf' =>
+      array( 'Groups' => array( 'Common', 'Game' ) ), /* show_games.php */
+
+      'yes' =>
+      array( 'Groups' => array( 'Common' ) ), /* show_games.php */
+
+      'User Info' =>
+      array( 'Groups' => array( 'Users' ) ), /* userinfo.php */
+
+      'Biographical info' =>
+      array( 'Groups' => array( 'Users' ) ), /* userinfo.php */
+
+      'Conventional handicap (komi 0.5 if not even)' =>
+      array( 'Groups' => array( 'Messages' ) ), /* include/message_functions.php */
+
+      'Proper handicap' =>
+      array( 'Groups' => array( 'Messages' ) ), /* include/message_functions.php */
+
+      'Manual setting' =>
+      array( 'Groups' => array( 'Messages' ) ), /* include/message_functions.php */
+
+      'Handicap' =>
+      array( 'Groups' => array( 'Messages' ) ), /* include/message_functions.php */
+
+      'Even game with nigiri' =>
+      array( 'Groups' => array( 'Messages' ) ), /* include/message_functions.php */
+
+      'Double game' =>
+      array( 'Groups' => array( 'Messages' ) ), /* include/message_functions.php */
+
+      'Main time' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ), /* include/message_functions.php */
+
+      'Japanese byo-yomi' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ), /* include/message_functions.php */
+
+      'Canadian byo-yomi' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ), /* include/message_functions.php */
+
+      'Fischer time' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ), /* include/message_functions.php */
+
+      'Clock runs on weekends' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ), /* include/message_functions.php */
+
+      'Date' =>
+      array( 'Groups' => array( 'Common', 'Messages' ) ), /* include/message_functions.php */
+
+      'Game ID' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ), /* include/message_functions.php */
+
+      'Size' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ), /* include/message_functions.php */
+
+      'Komi' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ), /* include/message_functions.php */
+
+      'Colors' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ), /* include/message_functions.php */
+
+      'periods' =>
+      array( 'Groups' => array( 'Game' ) )  /* include/std_functions.php */
+
       );
 
 
