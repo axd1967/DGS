@@ -128,7 +128,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
       echo tablehead(10, T_('Score')) .
          tablehead(11, T_('Win?'), 'Win', true) .
-         tablehead(14, T_('Rated?'), 'Rated', true) .
+         tablehead(14, T_('Rated'), 'Rated', true) .
          tablehead(12, T_('End date'), 'Lastchanged', true);
    }
    else
