@@ -91,23 +91,38 @@ require_once( "include/form_functions.php" );
       $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
 
       $urow_strings = array();
-      $urow_strings[1] = "<td><A href=\"userinfo.php?uid=$ID\">$ID</A></td>";
-      $urow_strings[2] = "<td><A href=\"userinfo.php?uid=$ID\">" .
-         make_html_safe($row['Name']) . "</A></td>";
-      $urow_strings[3] = "<td><A href=\"userinfo.php?uid=$ID\">" .
-         make_html_safe($row['Handle']) . "</A></td>";
-      $urow_strings[4] = '<td>' . make_html_safe($row['Rankinfo'],true) . '&nbsp;</td>';
-      $urow_strings[5] = '<td>' . echo_rating($row['Rating2'],true,$ID) . '&nbsp;</td>';
-      $urow_strings[6] = '<td>' . make_html_safe($row['Open'],true) . '&nbsp;</td>';
-      $urow_strings[7] = '<td>' . $row['Games'] . '&nbsp;</td>';
-      $urow_strings[8] = '<td>' . $row['Running'] . '&nbsp;</td>';
-      $urow_strings[9] = '<td>' . $row['Finished'] . '&nbsp;</td>';
-      $urow_strings[10] = '<td>' . $row['Won'] . '&nbsp;</td>';
-      $urow_strings[11] = '<td>' . $row['Lost'] . '&nbsp;</td>';
-      $urow_strings[12] = '<td>' . $percent . '&nbsp;</td>';
-      $urow_strings[13] = '<td>' . $activity . '&nbsp;</td>';
-      $urow_strings[14] = '<td>' . $lastaccess . '&nbsp;</td>';
-      $urow_strings[15] = '<td>' . $lastmove . '&nbsp;</td>';
+      if( $utable->is_column_displayed(1) )
+         $urow_strings[1] = "<td><A href=\"userinfo.php?uid=$ID\">$ID</A></td>";
+      if( $utable->is_column_displayed(2) )
+         $urow_strings[2] = "<td><A href=\"userinfo.php?uid=$ID\">" .
+            make_html_safe($row['Name']) . "</A></td>";
+      if( $utable->is_column_displayed(3) )
+         $urow_strings[3] = "<td><A href=\"userinfo.php?uid=$ID\">" .
+            make_html_safe($row['Handle']) . "</A></td>";
+      if( $utable->is_column_displayed(4) )
+         $urow_strings[4] = '<td>' . make_html_safe($row['Rankinfo'],true) . '&nbsp;</td>';
+      if( $utable->is_column_displayed(5) )
+         $urow_strings[5] = '<td>' . echo_rating($row['Rating2'],true,$ID) . '&nbsp;</td>';
+      if( $utable->is_column_displayed(6) )
+         $urow_strings[6] = '<td>' . make_html_safe($row['Open'],true) . '&nbsp;</td>';
+      if( $utable->is_column_displayed(7) )
+         $urow_strings[7] = '<td>' . $row['Games'] . '&nbsp;</td>';
+      if( $utable->is_column_displayed(8) )
+         $urow_strings[8] = '<td>' . $row['Running'] . '&nbsp;</td>';
+      if( $utable->is_column_displayed(9) )
+         $urow_strings[9] = '<td>' . $row['Finished'] . '&nbsp;</td>';
+      if( $utable->is_column_displayed(10) )
+         $urow_strings[10] = '<td>' . $row['Won'] . '&nbsp;</td>';
+      if( $utable->is_column_displayed(11) )
+         $urow_strings[11] = '<td>' . $row['Lost'] . '&nbsp;</td>';
+      if( $utable->is_column_displayed(12) )
+         $urow_strings[12] = '<td>' . $percent . '&nbsp;</td>';
+      if( $utable->is_column_displayed(13) )
+         $urow_strings[13] = '<td>' . $activity . '&nbsp;</td>';
+      if( $utable->is_column_displayed(14) )
+         $urow_strings[14] = '<td>' . $lastaccess . '&nbsp;</td>';
+      if( $utable->is_column_displayed(15) )
+         $urow_strings[15] = '<td>' . $lastmove . '&nbsp;</td>';
 
       $utable->add_row( $urow_strings );
    }

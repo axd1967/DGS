@@ -149,13 +149,32 @@ class Table
                            $undeletable = false,
                            $width = NULL )
       {
-         array_push( $this->Tableheads,
-                     array( 'Nr' => $nr,
-                            'Description' => $description,
-                            'Sort_String' => $sort_string,
-                            'Desc_Default' => $desc_default,
-                            'Undeletable' => $undeletable,
-                            'Width' => $width ) );
+         $this->Tableheads[$nr] =
+            array( 'Nr' => $nr,
+                   'Description' => $description,
+                   'Sort_String' => $sort_string,
+                   'Desc_Default' => $desc_default,
+                   'Undeletable' => $undeletable,
+                   'Width' => $width );
+      }
+
+   /*! \brief Check if column is displayed. */
+   function is_column_displayed( $colnr )
+      {
+         if( $colnr > 0 )
+         {
+            $col_pos = 1 << ($colnr - 1);
+         }
+         else
+         {
+            $col_pos = 0;
+         }
+
+         $res = !( !$this->Static_Columns and
+                   !$this->Tableheads[$colnr]['Undeletable'] and
+                   $colnr > 0 and
+                   !($col_pos & $this->Column_set) );
+         return $res;
       }
 
    /*! \brief Add a row to be displayed.
