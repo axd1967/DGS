@@ -246,7 +246,7 @@ $array=array();
       . "\nPC[Dragon Go Server: $HOSTBASE]"
       . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
       . "\nGN[" . sgf_simpletext($filename) . "]"
-      . "\nGC[Game ID: $gid]"          //($HOSTBASE/game.php?gid=$gid)
+      . "\nGC[Game ID: $gid".($Rated=='N'?'':', rated')."]"   //($HOSTBASE/game.php?gid=$gid)
       . "\nPB[" . sgf_simpletext("$Blackname ($Blackhandle)") . "]"
       . "\nPW[" . sgf_simpletext("$Whitename ($Whitehandle)") . "]";
 
@@ -262,21 +262,21 @@ $array=array();
       //may specify CA (charset)
    }
 
-   if( isset($Score) )
-   {
-      echo "\nRE[" . sgf_simpletext(score2text($Score, false, true)) . "]";
-   }
+   if( $rules )
+      echo "\nRU[$rules]";
 
    echo "\nSZ[$Size]";
    echo "\nKM[$Komi]";
 
-   if( $rules )
-      echo "\nRU[$rules]";
+   if( $Handicap > 0 && $use_HA )
+      echo "\nHA[$Handicap]";
 
 
    $sgf_trim_nr = mysql_num_rows ($result) - 1 ;
-   if ( $Status == 'FINISHED' )
+   if ( $Status == 'FINISHED' && isset($Score) )
    {
+      echo "\nRE[" . sgf_simpletext(score2text($Score, false, true)) . "]";
+
       //-1= skip ending pass, -2= keep them, -999= keep everything
       if ( abs($Score) < SCORE_RESIGN )
          $sgf_trim_level = -1;
@@ -299,9 +299,6 @@ $array=array();
       mysql_data_seek ($result, 0) ;
    }
 
-
-   if( $Handicap > 0 && $use_HA )
-      echo "\nHA[$Handicap]";
 
    $movenum= 0; $movesync= 0;
    $points= array();
