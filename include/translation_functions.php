@@ -93,7 +93,7 @@ function get_preferred_browser_language()
          list($lang, $q_val) = explode(';', trim($lang));
          $lang = substr(trim($lang), 0, 2);
          $q_val = preg_replace('/q=/i','', trim($q_val));
-         if( !is_numeric($q_val) )
+         if( empty($q_val) or !is_numeric($q_val) )
             $q_val = 1.0;
 
          if( $current_q_val >= $q_val )
