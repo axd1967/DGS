@@ -110,7 +110,7 @@ if( $Maintime > 0 or $Byotime > 0)
  
   if( $to_move == BLACK )
     {
-      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, true);
       $time_query = "Black_Maintime=$Black_Maintime, " .
          "Black_Byotime=$Black_Byotime, " .
@@ -118,7 +118,7 @@ if( $Maintime > 0 or $Byotime > 0)
     }
   else
     {
-      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods,
+      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, true);
       $time_query = "White_Maintime=$White_Maintime, " .
          "White_Byotime=$White_Byotime, " .
@@ -217,7 +217,7 @@ switch( $action )
      
  case 'handicap':
      {
-         if( $Status != 'PLAY' )
+         if( $Status != 'PLAY' or $Moves != 1 )
              {
                  header("Location: error.php?err=invalid_action");
                  exit;
@@ -282,6 +282,22 @@ switch( $action )
               " WHERE ID=$gid";
 
          $game_finished = true;
+     }
+     break;
+
+ case 'delete':
+     {
+       if( $Status != 'PLAY' or ( $Moves >= 4+$Handicap ) )
+         {
+           header("Location: error.php?err=invalid_action");
+           exit;
+         }
+       
+       $query = "DROP TABLE Moves$gid";
+
+       $game_query = "DELETE FROM Games WHERE ID=$gid";
+
+       $game_finished = true;
      }
      break;
 
@@ -351,7 +367,7 @@ if( $query )
 {
   $result = mysql_query( $query );
   
-  if( mysql_affected_rows() < 1)
+  if( mysql_affected_rows() < 1 and $action != 'delete' )
     {
       header("Location: error.php?err=mysql_insert_move");
       exit;
@@ -363,7 +379,7 @@ if( $query )
 $result = mysql_query( $game_query );
 
 
-if( mysql_affected_rows() != 1)
+if( mysql_affected_rows() != 1 )
 {
     header("Location: error.php?err=mysql_update_game");
     exit;
@@ -374,7 +390,7 @@ if( mysql_affected_rows() != 1)
 
 //if( $next_to_move_ID != $player_row["ID"] )
 //{
-  mysql_query( "UPDATE Players SET Notify='NEXT' " .
+  mysql_query( "UPDATE Players SET Notify='NEXT', Lastaccess=Lastaccess " .
                "WHERE ID='$next_to_move_ID' AND Flags LIKE '%WANT_EMAIL%' " .
                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "'") ;
 
@@ -392,7 +408,7 @@ if( mysql_affected_rows() != 1)
 
 if( $game_finished )
 {
-    // send message to me and my opponent about the result
+    // send message to my opponent about the result
 
     $result = mysql_query( "SELECT * FROM Players WHERE ID=" . 
                            ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) ); 
@@ -421,13 +437,21 @@ if( $game_finished )
          "$whitename (W)  vs. $blackname (B) </A>" . 
          "was: <p><center>" . score2text($score,true) . "</center></BR>";
 
+    $Subject = 'Game result';
+
+    if( $action == 'delete' )
+      {
+        $Text = "The game $whitename (W)  vs. $blackname (B) has been deleted by your opponent";
+        $Subject = 'Game deleted';
+      }
+
     if ( $message )
         {
             $Text .= "<p>Your opponent wrote:<p>" . $message;
         }
 
     mysql_query( "INSERT INTO Messages" . $opponent_row["ID"] . " SET " .
-         "From_ID=" . $player_row["ID"] . ", Game_ID=$gid, Subject='Game result', Text='$Text'" );
+         "From_ID=" . $player_row["ID"] . ", Game_ID=$gid, Subject='$Subject', Text='$Text'" );
 
 }
 

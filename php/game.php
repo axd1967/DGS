@@ -99,12 +99,12 @@ if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0) )
 
   if( $to_move == BLACK )
     {
-      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, false);
     }
   else
     {
-      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods,
+      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, false);
     }
 }
@@ -271,6 +271,17 @@ switch( $action )
                   exit;
              }
          $extra_message = "<font color=\"green\">Passing</font>";
+     }
+     break;
+
+ case 'delete':
+     {
+         if( $Status != 'PLAY' or ( $Moves >= 4+$Handicap ) )
+             {
+                  header("Location: error.php?err=invalid_action");
+                  exit;
+             }
+         $extra_message = "<font color=\"red\">Deleting game</font>";
      }
      break;
 
@@ -466,7 +477,7 @@ else if( $action == 'handicap' )
 <HR>
     <table align=center border=2 cellpadding=3 cellspacing=3>
         <tr>
-          <td></td><td>White</td><td>Black</td>
+<td></td><td width=<?php echo ($Size*9) . ">White</td><td width=" . ($Size*9) . ">Black</td>"; ?>
         </tr><tr>
           <td>Name:</td>
           <td><A href="userinfo.php?uid=<?php echo "$White_ID\">$Whitename ($Whitehandle)"; ?></A></td>
@@ -520,10 +531,18 @@ if( $Black_Byotime > 0 or $White_Byotime > 0 )
 <?php 
     echo_time( $Maintime );
       if( $Byotime <= 0 )
-          echo " without byoyomi";
+          echo ' without byoyomi';
+      else if( $Byotype == 'FIS' )
+        {
+          echo ' with ';
+          echo_time($Byotime);
+          echo ' extra per move';
+        }
       else
           {
-              echo " with " . $Byotime . '/' . $Byoperiods . ($Byotype == 'JAP' ? ' Japanese' : ' Canadian') . ' byoyomi';
+              echo ' + ';
+              echo_time($Byotime); 
+              echo '/' . $Byoperiods .  ($Byotype == 'JAP' ? '&nbsp;periods&nbsp;Japanese' : '&nbsp;stones&nbsp;Canadian') . '&nbsp;byoyomi';
           }
 ?></td>
         </tr>
@@ -592,7 +611,8 @@ while( $row = mysql_fetch_array($moves_result) )
 echo "</tr></table>";
 }
 
-if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' )
+if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' or 
+    $action == 'handicap' )
 {
 echo '
     <p>
@@ -601,8 +621,12 @@ echo '
 ';
 if( $action == 'choose_move' )
     {
-        echo "<td width=33%><B><A href=\"game.php?gid=$gid&action=pass\">Pass</A></B></td>\n";
-        $width="33%";
+      $width= ( $Moves < 4+$Handicap ? '25%' : '33%' );
+
+      echo "<td width=$width><B><A href=\"game.php?gid=$gid&action=pass\">Pass</A></B></td>\n";
+
+      if( $Moves < 4+$Handicap )
+        echo "<td width=25%><B><A href=\"game.php?gid=$gid&action=delete\">Delete game</A></B></td>\n";
     }
 else if( $action == 'remove' )
     {
@@ -610,11 +634,15 @@ else if( $action == 'remove' )
 <td width=25%><B><A href=\"game.php?gid=$gid&action=choose_move\">Resume playing</A></B></td>\n";
    $width="25%";
     }
-
+else if( $action == 'handicap' )
+  {
+    echo "<td width=50%><B><A href=\"game.php?gid=$gid&action=delete\">Delete game</A></B></td>\n";
+    $width="50%";
+  }
 
 echo "<td><B><A href=\"sgf.php?gid=$gid\">Download sgf</A></B></td>\n";
 
- if( $action != 'just_looking' )
+ if( $action != 'just_looking' and $action != 'handicap' )
      echo "<td width=$width><B><A href=\"game.php?gid=$gid&action=resign\">Resign</A></B></td>\n";
 echo "
 
