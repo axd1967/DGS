@@ -101,15 +101,15 @@ require_once( "include/countries.php" );
             $row['Handle'] . "</A></td>";
       if( $utable->Is_Column_Displayed[16] )
       {
-         $c = $row['Country'];
+         $c = @$row['Country'];
          $urow_strings[16] = "<td>" .
             (empty($c) ? '&nbsp;' :
              "<img title=\"" . T_($COUNTRIES[$c]) ."\" src=\"images/flags/$c.gif\">") . "</td>";
       }
       if( $utable->Is_Column_Displayed[4] )
-         $urow_strings[4] = '<td>' . make_html_safe($row['Rankinfo'],true) . '&nbsp;</td>';
+         $urow_strings[4] = '<td>' . make_html_safe(@$row['Rankinfo'],true) . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[5] )
-         $urow_strings[5] = '<td>' . echo_rating($row['Rating2'],true,$ID) . '&nbsp;</td>';
+         $urow_strings[5] = '<td>' . echo_rating(@$row['Rating2'],true,$ID) . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[6] )
          $urow_strings[6] = '<td>' . make_html_safe($row['Open'],true) . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[7] )
