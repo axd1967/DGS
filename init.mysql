@@ -8,7 +8,7 @@ CREATE TABLE Players (
   Newpassword varchar(16) default NULL,
   Sessioncode varchar(16) default NULL,
   Sessionexpire datetime default NULL,
-  Lastaccess timestamp(14) NOT NULL,
+  Lastaccess datetime NOT NULL,
   Registerdate date default NULL,
   Hits int(11) default '0',
   Moves int(11) default '0',
@@ -42,7 +42,7 @@ CREATE TABLE Players (
 CREATE TABLE Games (
   ID int(11) NOT NULL auto_increment,
   Starttime datetime default NULL,
-  Lastchanged timestamp(14) NOT NULL,
+  Lastchanged datetime NOT NULL,
   Black_ID int(11) default NULL,
   White_ID int(11) default NULL,
   ToMove_ID int(11) NOT NULL default '0',
@@ -142,7 +142,7 @@ CREATE TABLE Messages (
   Flags set('DELETED','NEW','REPLIED','REPLY REQUIRED') NOT NULL default 'NEW',
   ReplyTo int(11) default NULL,
   Game_ID int(11) default NULL,
-  Time timestamp(14) NOT NULL,
+  Time datetime NOT NULL,
   Subject varchar(80) default NULL,
   Text text,
   PRIMARY KEY  (ID),
@@ -222,7 +222,7 @@ CREATE TABLE Posts (
 CREATE TABLE Clock (
   ID int(11) NOT NULL default '0',
   Ticks int(11) default '0',
-  Lastchanged timestamp(14) NOT NULL,
+  Lastchanged datetime NOT NULL,
   PRIMARY KEY  (ID)
 ) TYPE=ISAM PACK_KEYS=1;
 
