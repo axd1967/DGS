@@ -157,15 +157,15 @@ When translating you should keep in mind the following things:
                                               strlen( $string ) / $hsize + 2,
                                               substr_count( $string, "\n" ) + 2 ),
                                          12 )));
-              echo form_insert_row( 'TEXT', nl2br( htmlentities($string,
-                                                                ENT_QUOTES,
-                                                                'iso-8859-1' ) ),
+              echo form_insert_row( 'TEXT', nl2br( htmlspecialchars($string,
+                                                                    ENT_QUOTES,
+                                                                    'iso-8859-1' ) ),
                                     'TD',
                                     'TEXTAREA', "transl$counter",
                                     $hsize, $vsize,
-                                    htmlentities($translation,
-                                                 ENT_QUOTES,
-                                                 $CHARACTER_ENCODINGS[$translate_lang]) );
+                                    htmlspecialchars($translation,
+                                                     ENT_QUOTES,
+                                                     $CHARACTER_ENCODINGS[$translate_lang]) );
             }
         }
 
