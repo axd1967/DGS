@@ -19,6 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require( "include/std_functions.php" );
+include( "include/form_functions.php" );
 
 {
    connect2mysql();
@@ -46,45 +47,25 @@ require( "include/std_functions.php" );
 
    }
 
-
    start_page("Send Message", true, $logged_in, $player_row );
+
+   echo "<center>\n";
+   echo "<B><font size=+1>New message:</font></B>\n<HR>\n";
+   echo form_start( 'messageform', 'send_message.php', 'POST' );
+
+   echo form_insert_row( 'DESCRIPTION', 'To (userid)',
+                         'TEXTINPUT', 'to', 50, 80, $Handle );
+   echo form_insert_row( 'DESCRIPTION', 'Subject',
+                         'TEXTINPUT', 'subject', 50, 80, "" );
+   echo form_insert_row( 'DESCRIPTION', 'Message',
+                         'TEXTAREA', 'message', 50, 8, "" );
+   echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send message' );
+
+   echo form_end();
+   echo "</center>\n";
+
+   end_page();
+
 }
 
-?>
-
-<FORM name="loginform" action="send_message.php" method="POST">
-      
-      
-      <center><B><font size=+1>New Message:</font></B></center>
-      <HR>
-      <TABLE align="center">
-        
-          <TR>
-            <TD align=right>To (userid):</TD>
-            <TD align=left> <input type="text" name="to" size="50" value="<?php echo $Handle ?>" maxlength="80"></TD>
-          </TR>
-
-
-          <TR>
-            <TD align=right>Subject:</TD>
-            <TD align=left> <input type="text" name="subject" size="50" maxlength="80"></TD>
-          </TR>
-
-
-          <TR>
-            <TD align=right>Message:</TD>
-            <TD align=left>  
-              <textarea name="message" cols="50" rows="8" wrap="virtual"></textarea></TD>
-          </TR>
-
-          <TR>
-            <TD></TD>
-            <TD><input type=submit name="send" value="Send message"></TD>
-          </TR>
-
-      </TABLE>
-</FORM>
-
-<?php
-end_page();
 ?>
