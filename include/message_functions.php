@@ -20,6 +20,13 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Messages";
 
+define("FOLDER_ALL_RECEIVED", 0);
+define("FOLDER_MAIN", 1);
+define("FOLDER_NEW", 2);
+define("FOLDER_IMPORTANT", 3);
+define("FOLDER_DELETED", 4);
+define("FOLDER_SENT", 5);
+
 
 // Prints game setting form used by invite.php
 
@@ -361,13 +368,13 @@ function get_folders($uid)
    $array = array();
    while( $row = mysql_fetch_array($result) )
    {
-      $array[$row['Folder_nr']] = $row['Name'];
+      $array[$row['Folder_nr']] = array($row['Name'], $row['Color']);
    }
 
    return $array;
 }
 
-function change_folders_for_marked_messages($uid)
+function change_folders_for_marked_messages($uid, $folders)
 {
    $message_ids = array();
    foreach( $_GET as $key => $val )
@@ -378,7 +385,6 @@ function change_folders_for_marked_messages($uid)
 
    if( count($message_ids) )
    {
-      $folders = get_folders($uid);
       $new_folder = $_GET['folder'];
       if( !isset($folders[$new_folder]) )
          return;
@@ -396,4 +402,24 @@ function change_folders_for_marked_messages($uid)
       mysql_query( $query ) or die(mysql_error());
    }
 }
+
+function echo_folders($folders, $current_folder)
+{
+   $string = '<table align=center border=0 cellpadding=0 cellspacing=17><tr>' . "\n" .
+      '<td><b>' . T_('Folder') . ":&nbsp;&nbsp;&nbsp;</b></td>\n";
+
+   foreach( $folders as $nr => $val )
+      {
+         list($name, $color) = $val;
+         if( $nr == $current_folder )
+            $string .= "<td><div style=\"align:right; color: black; border: solid #6666ff; padding: 7px;\">$name</div></td>\n";
+            else
+         $string .= "<td><a href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
+      }
+
+   $string .= '</tr></table>' . "\n";
+
+   return $string;
+}
+
 ?>

@@ -36,7 +36,8 @@ require_once( "include/timezones.php" );
 
    $my_id = $player_row["ID"];
 
-   change_folders_for_marked_messages($my_id);
+   $my_folders = get_folders($my_id);
+   change_folders_for_marked_messages($my_id, $my_folders);
 
    $query = "UPDATE Messages " .
       "SET Flags=" .
@@ -46,24 +47,27 @@ require_once( "include/timezones.php" );
 
    mysql_query($query);
 
+   $current_folder = $_GET['folder'];
+   if( empty($my_folders[$current_folder]) )
+      $current_folder = FOLDER_ALL_RECEIVED;
 
+   $folderstring = $current_folder;
+   if( $current_folder == FOLDER_ALL_RECEIVED )
+   {
+      $fldrs = $my_folders;
+      unset($fldrs[FOLDER_SENT]);
+      unset($fldrs[FOLDER_DELETED]);
+      $folderstring =implode(',', array_keys($fldrs));
+   }
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-       "Messages.ID AS mid, Messages.Subject, Messages.Flags, " .
-       "Players.Name AS sender " .
-       "FROM Messages, Players ";
-
-   if( $_GET['sent']==1 )
-      $query .= "WHERE From_ID=$my_id AND To_ID=Players.ID ";
-   else
-   {
-      $query .= "WHERE To_ID=$my_id AND From_ID=Players.ID ";
-
-      if( !($_GET['all']==1) )
-         $query .= "AND NOT (Messages.Flags LIKE '%DELETED%') ";
-      else
-         $all_str = "&all=1 ";
-   }
+      "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+      "Players.Name AS sender, " .
+      "IF( From_ID=$my_id, From_Folder_nr, To_Folder_nr) AS folder " .
+      "FROM Messages, Players " .
+      "WHERE (From_ID=$my_id AND From_Folder_nr IN ($folderstring) " .
+      "OR (To_ID=$my_id AND To_Folder_nr IN ($folderstring) ) ) " .
+      "AND To_ID=Players.ID ";
 
    if(!$_GET['sort1'])
    {
@@ -89,8 +93,9 @@ require_once( "include/timezones.php" );
 
    start_page($title, true, $logged_in, $player_row );
 
-   echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
+   echo echo_folders($my_folders, $current_folder);
 
+   echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
    echo "<form name=\"marked\" action=\"list_messages.php\" method=\"GET\">\n";
 
    $mtable = new Table( make_url( 'list_messages.php',
@@ -110,11 +115,12 @@ require_once( "include/timezones.php" );
    }
    else
    {
-      $mtable->add_tablehead( 1, T_('Flags'), '', true, true );
+      $mtable->add_tablehead( 1, T_('Folder'), '', true, true );
       $mtable->add_tablehead( 2, T_('From'), 'sender', false, true );
    }
 
    $mtable->add_tablehead( 3, T_('Subject'), 'Subject', false, true );
+   $mtable->add_tablehead( 0, '&nbsp;', NULL, false, true );
    $mtable->add_tablehead( 4, T_('Date'), 'date', true, true );
    $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
 
@@ -134,30 +140,14 @@ require_once( "include/timezones.php" );
       }
 
       $row_strings['BG_Color'] = $bgcolor;
-
-      if( !($_GET['sent']==1) )
-      {
-         if( !(strpos($row["Flags"],'NEW') === false) )
-         {
-            $row_strings[1] = "<td bgcolor=\"00F464\">" . T_('New') . "</td>";
-         }
-         else if( !(strpos($row["Flags"],'REPLIED') === false) )
-         {
-            $row_strings[1] = '<td bgcolor="FFEE00">'. T_('Replied') . "</td>";
-         }
-         else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
-         {
-            $row_strings[1] = '<td bgcolor="FFA27A">' . T_('Reply!') . "</td>";
-         }
-         else
-         {
-            $row_strings[1] = "<td>&nbsp;</td>";
-         }
-      }
+      list($foldername, $foldercolor) = $my_folders[$row['folder']];
+      $row_strings[1] = "<td bgcolor=\"#$foldercolor\">" . T_("$foldername") . "</td>";
 
       $row_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&mid=" . $row["mid"] . "\">" .
          make_html_safe($row["sender"]) . "</A></td>";
       $row_strings[3] = "<td>" . make_html_safe($row["Subject"]) . "&nbsp;</td>";
+      $row_strings[0] = "<td>" .
+         ($row['Replied'] == 'Y' ? '<font color="#009900">A</font>' : '&nbsp;' ) . '</td>';
       $row_strings[4] = "<td>" . date($date_fmt, $row["date"]) . "</td>";
       $row_strings[5] = '<td align=center>'  .
          '<input type="checkbox" name="mark' . $row['mid'] .  '" value="Y"></td>';
@@ -174,7 +164,7 @@ require_once( "include/timezones.php" );
    echo '<center>' .
       '<input type="submit" name="move_marked" value="' .
       T_('Move marked messages to folder') . '">' .
-      $form->print_insert_select_box( 'folder', '1', get_folders($my_id), '', '') .
+      $form->print_insert_select_box( 'folder', '1', $my_folders, '', '') .
       "</form>\n";
 
 
