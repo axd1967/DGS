@@ -26,6 +26,8 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 
+define('BAD_RATING_COLOR',"#ffaaaa");
+
 {
    connect2mysql();
 
@@ -40,6 +42,7 @@ require_once( "include/message_functions.php" );
                          'double' => T_('Double game') );
 
    $my_id = $player_row["ID"];
+   $my_rating = $player_row["Rating2"];
 
    start_page(T_("Waiting room"), true, $logged_in, $player_row, button_style() );
 
@@ -118,10 +121,10 @@ require_once( "include/message_functions.php" );
             $wrow_strings[6] = "<td>$Komi</td>";
          if( $wrtable->Is_Column_Displayed[7] )
             $wrow_strings[7] = "<td>$Size</td>";
+         list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
          if( $wrtable->Is_Column_Displayed[8] )
-            $wrow_strings[8] = '<td nowrap>' .
-               echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) .
-               "</td>";
+            $wrow_strings[8] = '<td nowrap' .
+               ( $good_rating ? '>' : ' bgcolor='.BAD_RATING_COLOR.'>') . $Ratinglimit . "</td>";
          if( $wrtable->Is_Column_Displayed[9] )
             $wrow_strings[9] = '<td nowrap>' .
                echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) .
@@ -143,7 +146,7 @@ require_once( "include/message_functions.php" );
 
    if( $_GET['info'] > 0 and is_array($info_row) )
    {
-      show_game_info($info_row, $info_row['pid'] == $player_row['ID']);
+      show_game_info($info_row, $info_row['pid'] == $player_row['ID'], $my_rating);
    }
    else
       add_new_game_form($info_row['pid'] == $player_row['ID']);
@@ -158,21 +161,19 @@ require_once( "include/message_functions.php" );
 }
 
 
-function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax)
+function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating=false)
 {
    if( $MustBeRated == 'N' )
-      $Ratinglimit = '-';
-   else
-   {
-      $r1 = echo_rating($Ratingmin+50,false);
-      $r2 = echo_rating($Ratingmax-50,false);
-      if( $r1 == $r2 )
-         $Ratinglimit = sprintf( T_('%s only'), $r1);
-      else
-         $Ratinglimit = $r1 . ' - ' . $r2;
-   }
+      return array('-', true);
 
-   return $Ratinglimit;
+   $r1 = echo_rating($Ratingmin+50,false);
+   $r2 = echo_rating($Ratingmax-50,false);
+   if( $r1 == $r2 )
+      $Ratinglimit = sprintf( T_('%s only'), $r1);
+   else
+      $Ratinglimit = $r1 . ' - ' . $r2;
+   return array($Ratinglimit,
+      !is_numeric($my_rating) or ( $my_rating>=$Ratingmin and $my_rating<=$Ratingmax));
 }
 
 function add_new_game_form()
@@ -216,7 +217,7 @@ function add_new_game_form()
    $addgame_form->echo_string();
 }
 
-function show_game_info($game_row, $mygame=false)
+function show_game_info($game_row, $mygame=false, $my_rating=false)
 {
    global $handi_array;
 
@@ -236,8 +237,9 @@ function show_game_info($game_row, $mygame=false)
       "</td></tr>\n";
    echo '<tr><td><b>' . T_('Handicap') . '<b></td><td>' . $handi_array[$Handicaptype] .
       "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Rating range') . '<b></td><td>' .
-      echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) . "</td></tr>\n";
+   list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
+   echo '<tr><td><b>' . T_('Rating range') . '<b></td><td' .
+               ( $good_rating ? '>' : ' bgcolor='.BAD_RATING_COLOR.'>') . $Ratinglimit . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Time limit') . '<b></td><td>' .
       echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Number of games') . '<b></td><td>' . $nrGames . "</td></tr>\n";
@@ -258,7 +260,7 @@ function show_game_info($game_row, $mygame=false)
                                     'HIDDEN', 'delete', 't') );
       $delete_form->echo_string();
    }
-   else
+   else if( $good_rating )
    {
       $join_form = new Form( 'join', 'join_waitingroom_game.php', FORM_POST );
       $join_form->add_row( array( 'DESCRIPTION', T_('Reply'),
@@ -267,7 +269,6 @@ function show_game_info($game_row, $mygame=false)
                                   'SUBMITBUTTON', 'join', T_('Join') ) );
       $join_form->echo_string();
    }
-
 
 }
 ?>
