@@ -34,33 +34,15 @@ disable_cache();
 
 
    $row = mysql_fetch_array($result);
-   $passwd_encrypt = mysql_fetch_row( mysql_query( "SELECT PASSWORD('$passwd')" ) );
 
-   if( $row["Password"] != $passwd_encrypt[0] )
-   {
-      // Check if there is a new password
-
-      if( empty($row["Newpassword"]) or $row["Newpassword"] != $passwd_encrypt[0] )
-         error("wrong_password");
-
-
-   }
-
-// Remove the new password.
-   if( !empty($row["Newpassword"]) )
-   {
-      mysql_query( 'UPDATE Players ' .
-                   "SET Password='$passwd_encrypt[0]', " .
-                   'Newpassword=NULL ' .
-                   "Where Handle='$handle'" );
-   }
+   check_password( $row["Password"], $row["Newpassword"], $passwd );
 
    $code = $row["Sessioncode"];
 
    if( !$code or $row["Expire"] < $NOW )
    {
       $code = make_session_code();
-      $result = mysql_query( "UPDATE Players SET " . 
+      $result = mysql_query( "UPDATE Players SET " .
                              "Sessioncode='$code', " .
                              "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
                              "WHERE Handle='$userid'" );
