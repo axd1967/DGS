@@ -26,6 +26,8 @@ disable_cache();
 
 function jump_to_next_game($id, $Lastchanged, $gid)
 {
+   global $ActivityHalvingTime, $ActivityForMove;
+
    $result = mysql_query("SELECT ID FROM Games " .
                          "WHERE ToMove_ID=$id "  . 
                          "AND Status!='INVITED' AND Status!='FINISHED' " .
@@ -389,11 +391,6 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
 
-// Notify opponent about move
-
-   mysql_query( "UPDATE Players SET Notify='NEXT', Lastaccess=Lastaccess " .
-                "WHERE ID='$next_to_move_ID' AND Flags LIKE '%WANT_EMAIL%' " .
-                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "'") ;
 
     
    if( $game_finished )
@@ -444,6 +441,24 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                    ", Game_ID=$gid, Subject='$Subject', Text='$Text'");
 
    }
+
+
+// Notify opponent about move
+
+   mysql_query( "UPDATE Players SET Notify='NEXT', Lastaccess=Lastaccess " .
+                "WHERE ID='$next_to_move_ID' AND Flags LIKE '%WANT_EMAIL%' " .
+                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "'") ;
+
+
+
+// Increase activity
+
+   mysql_query( "UPDATE Players SET Activity=Activity + $ActivityForMove " . 
+                "WHERE ID=" . $player_row["ID"] );
+
+
+
+// Jump somewhere
 
    if( $next == "Submit and go to status" )
    {

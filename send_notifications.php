@@ -39,9 +39,15 @@ while( $row = mysql_fetch_array( $result ) )
 }
 
 
-$result = mysql_query( "UPDATE Players SET Notify='DONE', Lastaccess=Lastaccess " .
-                       "WHERE Flags LIKE '%WANT_EMAIL%' AND Notify='NOW' " );
+mysql_query( "UPDATE Players SET Notify='DONE', Lastaccess=Lastaccess " .
+             "WHERE Flags LIKE '%WANT_EMAIL%' AND Notify='NOW' " );
 
-$result = mysql_query( "UPDATE Players SET Notify='NOW', Lastaccess=Lastaccess " .
-                       "WHERE Flags LIKE '%WANT_EMAIL%' AND Notify='NEXT' " );
-                       
+mysql_query( "UPDATE Players SET Notify='NOW', Lastaccess=Lastaccess " .
+             "WHERE Flags LIKE '%WANT_EMAIL%' AND Notify='NEXT' " );
+             
+
+
+// Update activities
+
+mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, "
+             "Activity=Activity * EXP( -LOG(2) * 30 / $ActivityHalvingTime )" );

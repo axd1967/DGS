@@ -11,6 +11,7 @@ CREATE TABLE Players (
   Lastaccess timestamp(14) NOT NULL,
   Registerdate date default NULL,
   Hits int(11) default '0',
+  Activity double NOT NULL default '0',
   Name varchar(40) default NULL,
   Email varchar(80) default NULL,
   Rank varchar(40) default NULL,

@@ -27,6 +27,10 @@ $date_fmt = 'Y-m-d H:i';
 
 $is_down = false;
 
+$ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
+$ActivityForHit = 1.0;
+$ActivityForMove = 10.0;
+
 define("NONE", 0);
 define("BLACK", 1);
 define("WHITE", 2);
@@ -412,6 +416,7 @@ function echo_time($hours)
 function is_logged_in($hdl, $scode, &$row)
 {
    global $time, $show_time, $HOSTBASE, $REQUEST_URI, $HOSTNAME, $HTTP_HOST;
+   global $ActivityHalvingTime, $ActivityForHit;
    $time = getmicrotime();
    $show_time = false;
 
@@ -434,7 +439,7 @@ function is_logged_in($hdl, $scode, &$row)
    if( $row["Sessioncode"] != $scode or $row["Expire"] < time() )
       return false;
 
-   $query = "UPDATE Players SET Hits=Hits+1";
+   $query = "UPDATE Players SET Hits=Hits+1, Activity=Activity + $ActivityForHit";
 
    if( $row["flags"] & WANT_EMAIL AND $row["Notify"] != 'NONE' )
       $query .= ", Notify='NONE'";
