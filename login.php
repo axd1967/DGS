@@ -57,12 +57,12 @@ disable_cache();
 
    $code = $row["Sessioncode"];
 
-   if( !$code or $row["Expire"] < time() )
+   if( !$code or $row["Expire"] < $NOW )
    {
       $code = make_session_code();
       $result = mysql_query( "UPDATE Players SET " . 
                              "Sessioncode='$code', " .
-                             "Sessionexpire=DATE_ADD(NOW(),INTERVAL $session_duration second) " .
+                             "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration second) " .
                              "WHERE Handle='$userid'" );
 
    }

@@ -26,6 +26,8 @@ if( @is_readable("timeadjust.php" ) )
 else
    $timeadjust = 0;
 
+$NOW = time() + (int)$timeadjust;
+
 $session_duration = 3600*24*7; // 1 week
 $tick_frequency = 12; // ticks/hour
 $date_fmt = 'Y-m-d H:i';
@@ -71,13 +73,14 @@ function getmicrotime()
 
 function disable_cache($stamp=NULL)
 {
+   global $NOW;
   // Force revalidation
    header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
    header ('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
    header ('Pragma: no-cache');                                              // HTTP/1.0
 
    if( !$stamp )
-      header ('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');    // Always modified
+      header ('Last-Modified: ' . gmdate('D, d M Y H:i:s', $NOW) . ' GMT');    // Always modified
    else
       header ('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
 }
@@ -236,9 +239,8 @@ function generate_random_password()
 
 function set_cookies($uid, $code, $delete=false)
 {
-   global $session_duration;
-   global $SUB_PATH;
-
+   global $session_duration, $SUB_PATH, $NOW;
+   
    if( $delete )
    {
       $time_diff=-3600;
@@ -248,9 +250,9 @@ function set_cookies($uid, $code, $delete=false)
    else
       $time_diff = $session_duration;
 
-   setcookie ("handle", $uid, time()+$time_diff, "$SUB_PATH" );
+   setcookie ("handle", $uid, $NOW+$time_diff, "$SUB_PATH" );
 
-   setcookie ("sessioncode", $code, time()+$time_diff, "$SUB_PATH" );
+   setcookie ("sessioncode", $code, $NOW+$time_diff, "$SUB_PATH" );
 }
 
 
@@ -450,8 +452,8 @@ function echo_time($hours)
 
 function is_logged_in($hdl, $scode, &$row)
 {
-   global $time, $show_time, $HOSTBASE, $PHP_SELF, $HOSTNAME, $HTTP_HOST;
-   global $ActivityHalvingTime, $ActivityForHit;
+   global $time, $show_time, $HOSTBASE, $PHP_SELF, $HOSTNAME, $HTTP_HOST,
+      $ActivityHalvingTime, $ActivityForHit, $NOW;
 
    $time = getmicrotime();
    $show_time = false;
@@ -475,10 +477,13 @@ function is_logged_in($hdl, $scode, &$row)
    $row = mysql_fetch_array($result);
 
 
-   if( $row["Sessioncode"] != $scode or $row["Expire"] < time() )
+   if( $row["Sessioncode"] != $scode or $row["Expire"] < $NOW )
       return false;
 
-   $query = "UPDATE Players SET Hits=Hits+1, Activity=Activity + $ActivityForHit";
+   $query = "UPDATE Players SET " .
+       "Hits=Hits+1, " .
+       "Activity=Activity + $ActivityForHit, " .
+       "Lastaccess=FROM_UNIXTIME($NOW)";
 
    if( $row["flags"] & WANT_EMAIL AND $row["Notify"] != 'NONE' )
       $query .= ", Notify='NONE'";
