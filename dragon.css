@@ -5,24 +5,21 @@ table.moves {
 
 a.w {
         color : white;
-        font-size : small;
-        font-weight: bold;
+        font : bold 85% sans-serif;
         text-decoration : none;
 }
 
 
 a.b {
         color : black;
-        font-size : small;
-        font-weight: bold;
+        font : bold 85% sans-serif;
         text-decoration : none;
 }
 
 td.r {
         color : red;
         background : #F7F5E3;
-        font-size : small;
-        font-weight: bold;
+        font : bold 70% sans-serif;
         text-decoration : none;
 }
 
