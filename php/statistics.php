@@ -64,7 +64,7 @@ $row = mysql_fetch_array( $result );
 echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
 
 
-
+end_page();
 
 
 
