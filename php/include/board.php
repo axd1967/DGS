@@ -21,6 +21,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 function draw_board($Size, &$array, $may_play, $gid, 
                     $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi )
 {
+  $woodcolor = 1;
+
     if( !$stone_size ) $stone_size = 25;
     if( !$font_size ) $font_size = "+0";
 
@@ -51,7 +53,7 @@ function draw_board($Size, &$array, $may_play, $gid,
         echo "<table border=2 cellpadding=3 align=center><tr>" . 
         "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
-    echo '<table border=0 background="images/wood_color2b.png" align=center><tr><td>
+    echo '<table border=0 background="images/wood' . $woodcolor . '.gif" align=center><tr><td>
 <table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">
 <tr>
 <td>&nbsp;</td>';
