@@ -46,6 +46,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * * Checkbox
  * * Submitbutton 
  * * Text
+ * * Header  --- creates a header line.
  *
  *** Other things you could have in a row.
  *
@@ -304,7 +305,6 @@ function form_insert_select_box( $name, $size, $value_array, $selected, $multipl
  *
  * $name        --- the field name that will be used as the variable name
  *                  in the GET or POST.
- * $size        --- the size of the box.
  * $value_array --- The array defining all values and their descriptions.
  *                  the key will be used as value and the entry will
  *                  be used as description, i.e.:
@@ -313,7 +313,7 @@ function form_insert_select_box( $name, $size, $value_array, $selected, $multipl
  *                  that should be selected from start else the value
  *                  of the selected value.
  */
-function form_insert_radio_buttons( $name, $size, $value_array, $selected )
+function form_insert_radio_buttons( $name, $value_array, $selected )
 {
   foreach( $value_array as $value => $info )
     {
@@ -406,7 +406,7 @@ function form_insert_row()
           }
           break;
 
-        case 'TEXT':
+        case 'HEADER':
           {
             $current_arg++;
             if( func_num_args() - $current_arg >= 1 )
@@ -417,9 +417,34 @@ function form_insert_row()
                 if( $column_started )
                   $result .= form_td_end();
 
-                $result .= form_td_start().$description.form_td_end( true );
+                $result .=
+                  form_td_start( 'left' ).
+                  "<h3><font color=\"#800000\">".$description.":".
+                  "</font></h3>".
+                  form_td_end( true );
+
                 $nr_columns++;
                 $column_started = false;
+              }
+
+          }
+          break;
+
+        case 'TEXT':
+          {
+            $current_arg++;
+            if( func_num_args() - $current_arg >= 1 )
+              {
+                $description = func_get_arg( $current_arg );
+                $current_arg++;
+
+                if( !$column_started )
+                  {
+                    $result .= form_td_start()."\n";
+                    $column_started = true;
+                    $nr_columns++;
+                  }
+                $result .= "        ".$description."\n";
               }
           }
           break;
@@ -538,24 +563,22 @@ function form_insert_row()
         case 'RADIOBUTTONS':
           {
             $current_arg++;
-            if( func_num_args() - $current_arg >= 4 )
+            if( func_num_args() - $current_arg >= 3 )
               {
                 $name = func_get_arg( $current_arg );
-                $size = func_get_arg( $current_arg + 1 );
-                $value_array = func_get_arg( $current_arg + 2 );
-                $selected = func_get_arg( $current_arg + 3 );
-                $radiobuttons = form_insert_radio_buttons( $name, $size,
-                                                           $value_array, $selected );
-                $current_arg += 4;
-              }
+                $value_array = func_get_arg( $current_arg + 1 );
+                $selected = func_get_arg( $current_arg + 2 );
+                $radiobuttons = form_insert_radio_buttons( $name, $value_array, $selected );
+                $current_arg += 3;
 
-            if( !$column_started )
-              {
-                $result .= form_td_start()."\n";
-                $column_started = true;
-                $nr_columns++;
+                if( !$column_started )
+                  {
+                    $result .= form_td_start()."\n";
+                    $column_started = true;
+                    $nr_columns++;
+                  }
+                $result .= $radiobuttons;
               }
-            $result .= $radiobuttons;
           }
           break;
 
