@@ -134,9 +134,10 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
 }
 
-function suggest($rating_W, $rating_B, $size, $pos_komi=false)
+function suggest_proper($rating_W, $rating_B, $size, $pos_komi=false)
 {
-   $H = ($rating_W - $rating_B) / 100.0;
+   $H = abs($rating_W - $rating_B) / 100.0;
+   $swap = ( $rating_B > $rating_W );
 
    $H *= (($size-3.0)*($size-3.0)) / 256.0;  // adjust handicap to board size
 
@@ -150,7 +151,27 @@ function suggest($rating_W, $rating_B, $size, $pos_komi=false)
 
    if( $handicap == 1 ) $handicap = 0;
 
-   return array($handicap, $komi);
+   return array($handicap, $komi, $swap);
+}
+
+function suggest_conventional($rating_W, $rating_B, $size, $pos_komi=false)
+{
+   $handicap = abs($rating_W - $rating_B) / 100.0;
+   $swap = ( $rating_B > $rating_W );
+
+   $handicap = round($handicap * (($size-3.0)*($size-3.0)) / 256.0 );
+   $komi = 0.5;
+
+   if( $handicap == 0 )
+   {
+      $komi = 6.5;
+      $swap = mt_rand(0,1);
+   }
+
+   if( $handicap == 1 )
+      $handicap = 0;
+
+   return array($handicap, $komi, $swap);
 }
 
 function update_rating($gid)

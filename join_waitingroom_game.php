@@ -93,35 +93,14 @@ require( "include/rating.php" );
 
    if( $Handicaptype == 'proper' )
    {
-      if( $rating_black > $rating_white )
-      {
-         $swap = true;
-         list($handicap,$komi) = suggest($rating_black, $rating_white, $Size);
-      }
-      else
-         list($handicap,$komi) = suggest($rating_white, $rating_black, $Size);
+      list($handicap,$komi,$swap) = suggest_proper($rating_black, $rating_white, $Size);
 
       $query .= "Handicap=$handicap, Komi=$komi, ";
    }
 
-   if( $Handicaptype == 'conv' ) // Conventional handi
+   if( $Handicaptype == 'conv' )
    {
-      $handicap = abs($rating_black-$rating_white)/100;
-      $size = $Size;
-      $handicap = round($handicap * (($size-3.0)*($size-3.0)) / 256.0 );
-      $komi = 0.5;
-
-      if( $handicap == 0 )
-      {
-         $komi = 6.5;
-         $swap = mt_rand(0,1);
-      }
-
-      if( $rating_black > $rating_white )
-         $swap = true;
-
-      if( $handicap == 1 )
-         $handicap = 0;
+      list($handicap,$komi,$swap) = suggest_conventional($rating_black, $rating_white, $Size);
 
       $query .= "Handicap=$handicap, Komi=$komi, ";
    }
