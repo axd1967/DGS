@@ -155,9 +155,10 @@ require_once( "include/board.php" );
       $ClockUsed = $row['ClockUsed'];
 
       $res2 = mysql_query("SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
-                         "FROM Games, Clock " .
-                         "WHERE Clock.ID=$ClockUsed AND ToMove_ID='$uid' " .
-                         "AND Status!='INVITED' AND Status!='FINISHED'")
+                          "FROM Games, Clock " .
+                          "WHERE Clock.ID=$ClockUsed AND ToMove_ID='$uid' " .
+                          "AND ClockUsed=-1 " .
+                          "AND Status!='INVITED' AND Status!='FINISHED'")
       or die(mysql_error());
 
       while( $row2 = mysql_fetch_array( $res2 ) )
