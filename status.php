@@ -29,7 +29,7 @@ require_once( "include/message_functions.php" );
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -66,11 +66,10 @@ require_once( "include/message_functions.php" );
 
    if( $player_row['OnVacation'] > 0 )
    {
-      $days = round($player_row['OnVacation']);
+      $days = floor($player_row['OnVacation']);
       echo '<tr><td><b><a href="edit_vacation.php"><font color=red>' . T_('On vacation') .
          '</font></a></b></td>
-           <td>' . "$days " . ($days <= 1 ? T_('day') : T_('days')) .
-         ' ' .T_('left') . '</td></tr>';
+           <td>' . echo_day($days) . ' ' .T_('left') . '</td></tr>';
    }
    echo '
     </table>

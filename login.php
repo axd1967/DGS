@@ -26,6 +26,7 @@ disable_cache();
 {
    connect2mysql();
 
+   $userid = @$_REQUEST['userid'];
    $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                           "FROM Players WHERE Handle='" . $userid . "'" );
 
@@ -35,6 +36,7 @@ disable_cache();
 
    $row = mysql_fetch_array($result);
 
+   $passwd = @$_REQUEST['passwd'];
    check_password( $userid, $row["Password"], $row["Newpassword"], $passwd );
 
    $code = $row["Sessioncode"];
@@ -49,7 +51,8 @@ disable_cache();
 
    }
 
-   if( $handle != $userid or $sessioncode != $code )
+   if( @$_COOKIE[COOKIE_PREFIX.'handle'] != $userid
+      or @$_COOKIE[COOKIE_PREFIX.'sessioncode'] != $code )
    {
       set_cookies( $userid, $code );
    }

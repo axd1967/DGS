@@ -33,7 +33,7 @@ require_once( "include/form_functions.php" );
       jump_to("index.php");
     }
 
-  $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+  $logged_in = who_is_logged( $player_row);
 
   start_page(T_("Home"), true, $logged_in, $player_row );
 
@@ -60,7 +60,8 @@ require_once( "include/form_functions.php" );
                                'TEXT',
                                '<A href="forgot.php"><font size="-2">' .
                                T_('Forgot password?') . '</font></A>',
-                               'HIDDEN', 'url', 'status.php' ) );
+                               //'HIDDEN', 'url', 'status.php',
+                               ) );
 
   $login_form->echo_string(1);
   echo "</center>\n";

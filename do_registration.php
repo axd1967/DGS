@@ -34,38 +34,29 @@ function illegal_chars( $string, $punctuation=false )
 {
    connect2mysql();
 
+   $userid = @_POST['userid'];
+   if( strlen( $userid ) < 3 )
+      error("userid_too_short");
    if( illegal_chars( $userid ) )
       error("userid_illegal_chars");
 
+   $passwd = @_POST['passwd'];
+   if( strlen($passwd) < 6 )
+      error("password_too_short");
    if( illegal_chars( $passwd, true ) )
       error("password_illegal_chars");
 
-   if( $passwd != $passwd2 )
-   {
+   if( $passwd != @$_POST['passwd2'] )
       error("password_mismatch");
-   }
-   else if( strlen($passwd) < 6 )
-   {
-      error("password_too_short");
-   }
 
-   if( strlen( $userid ) < 3 )
-   {
-      error("userid_too_short");
-   }
-
+   $name = @_POST['name'];
    if( strlen( $name ) < 1 )
-   {
       error("name_not_given");
-   }
 
    $result = mysql_query( "SELECT * FROM Players WHERE Handle='" . $userid . "'" );
 
    if( mysql_num_rows($result) > 0 )
-   {
       error("userid_in_use");
-   }
-
 
 
 
