@@ -213,9 +213,10 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
                            'CHECKBOX', 'rated', 'Y', "", $Rated ) );
 }
 
-function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_handle,
+function message_info_table($mid, $date, $to_me,
+                            $sender_id, $sender_name, $sender_handle,
                             $subject, $reply_mid, $text,
-                            $folders=null, $folder_nr=null, $form=null)
+                            $folders=null, $folder_nr=null, $form=null, $no_move=false)
 {
    global $date_fmt;
 
@@ -248,9 +249,14 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
          if( $key != $folder_nr and ($to_me xor $key == FOLDER_SENT) and $key != FOLDER_NEW )
             $fld[$key] = $val[0];
 
-      echo $form->print_insert_select_box('folder', '1', $fld, '', '') .
-         $form->print_insert_submit_button('foldermove', T_('Move to folder')) .
-         "</td></tr>\n";
+      echo $form->print_insert_select_box('folder', '1', $fld, '', '');
+         if( $no_move )
+            echo T_('Move to folder when replying');
+         else
+            echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
+
+         echo $form->print_insert_hidden_input('messageid', $mid) .
+            "</td></tr>\n";
    }
 
 

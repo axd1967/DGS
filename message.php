@@ -154,8 +154,10 @@ $mode = $_GET['mode'];
       case 'AlreadyAccepted':
       case 'InviteDisputed':
       {
-         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
+         message_info_table($mid, $date, $can_reply,
+                            $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text, $folders, $Folder_nr, $message_form);
+
          if( $mode == 'AlreadyAccepted' )
          {
             echo '<font color=green>' .
@@ -201,8 +203,10 @@ $mode = $_GET['mode'];
       case 'ShowInvite':
       case 'ShowMyInvite':
       {
-         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
-                            $Subject, $ReplyTo, $Text, $folders, $Folder_nr, $message_form);
+         message_info_table($mid, $date, $can_reply,
+                            $sender_id, $sender_name, $sender_handle_safe,
+                            $Subject, $ReplyTo, $Text,
+                            $folders, $Folder_nr, $message_form, ($mode == 'ShowInvite'));
 
          if( $Color == BLACK )
          {
@@ -246,7 +250,8 @@ $mode = $_GET['mode'];
 
       case 'Dispute':
       {
-         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
+         message_info_table($mid, $date, $can_reply,
+                            $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text);
 
          $message_form->add_row( array( 'HEADER', T_('Dispute settings') ) );

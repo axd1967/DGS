@@ -39,17 +39,19 @@ disable_cache();
       error("not_allowed_for_guest");
 
 
-   $folders = get_folders($my_id);
-   $new_folder = $_POST['folder'];
+   $my_id = $player_row['ID'];
+   $message_id = $_GET['messageid'];
 
-   if( isset($new_folder) and isset($folders[$new_folder]) )
+   $folders = get_folders($my_id);
+   $new_folder = $_GET['folder'];
+
+   if( isset($_GET['foldermove'] and isset($new_folder) and isset($folders[$new_folder]) )
    {
       mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='$newfolder' " .
-                   "WHERE uid='$my_id' AND mid='$mid' " .
+                   "WHERE uid='$my_id' AND mid='$message_id' " .
                    "AND !( Type='INVITATION' and Replied='N' ) LIMIT 1" );
 
-      if( isset($_POST['foldermove'] ) )
-          jump_to("message.php?mid=$mid");
+      jump_to("message.php?mid=$message_id");
    }
 
 
@@ -71,7 +73,6 @@ disable_cache();
 
    $opponent_row = mysql_fetch_array($result);
    $opponent_ID = $opponent_row["ID"];
-   $my_id = $player_row["ID"];
 
 // Check if dispute game exists
    if( $disputegid > 0 )
@@ -333,7 +334,7 @@ disable_cache();
    if( $type == 'INVITATION' )
       $query .= "Game_ID=$gid, ";
 
-   if( $reply )
+   if( $reply > 0 )
       $query .= "ReplyTo=$reply, ";
 
    $message = trim($message);
@@ -355,11 +356,12 @@ disable_cache();
    if( $type == "INVITATION" )
       mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" );
 
-   if( $reply )
+   if( $reply > 0 )
    {
       $query = "UPDATE MessageCorrespondents SET Replied='Y'";
 
-      if( $Type == "INVITATION" )
+      if( $accepttype or $declinetype or
+          (isset($new_folder) and isset($folders[$new_folder])) )
       {
          if( !isset($new_folder) or !isset($folders[$new_folder]) )
             $new_folder = FOLDER_MAIN;

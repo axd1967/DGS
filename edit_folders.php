@@ -177,10 +177,11 @@ function make_folder_form_row(&$form, $name, $nr,
 
    start_page(T_("Edit message folders"), true, $logged_in, $player_row );
 
-   echo "<CENTER>\n";
+   echo "<center>\n";
+
+   echo "<h3><font color=$h3_color>" . T_('Edit message folders') . '</font></h3><br><p>';
 
    $form = new Form( 'folderform', 'edit_folders.php', FORM_POST );
-   $form->add_row( array( 'HEADER', T_('Edit message folders') ) );
 
    foreach( $folders as $nr => $fld )
    {
@@ -215,7 +216,11 @@ function make_folder_form_row(&$form, $name, $nr,
 
    $form->echo_string();
 
-   echo "</CENTER><BR>\n";
+   echo "</center>\n";
+
+   $menu_array = array( T_('Show/edit userinfo') => 'userinfo.php' );
+
+   end_page( $menu_array );
 
    end_page();
 }
