@@ -23,9 +23,9 @@ function post_message($player_row, $moderated)
 {
    global $NOW, $order_str;
 
-   $forum = $_POST['forum']+0;
-   $parent = $_POST['parent']+0;
-   $edit = $_POST['edit']+0;
+   $forum = @$_POST['forum']+0;
+   $parent = @$_POST['parent']+0;
+   $edit = @$_POST['edit']+0;
 
    $Subject = trim(@$_POST['Subject']);
    $Text = stripslashes(trim(@$_POST['Text']));

@@ -19,12 +19,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-require_once("forum_functions.php");
-require_once("post.php");
+require_once( "forum_functions.php" );
+require_once( "post.php" );
 
 
 
-function draw_post($post_type, $my_post, $Subject, $Text, $GoDiagrams)
+function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null )
 {
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
       $thread, $Timestamp, $date_fmt, $Lastread, $is_editor, $NOW, $player_row;
@@ -148,17 +148,17 @@ function change_depth(&$cur_depth, $new_depth)
 
 
 {
+   connect2mysql();
+
+   $logged_in = who_is_logged( $player_row);
+
+   if( !$logged_in and ( ($reply > 0) or isset($_POST['post']) ) )
+      error("not_logged_in");
+
    $forum = @$_REQUEST['forum']+0;
    $thread = @$_REQUEST['thread']+0;
    $reply = @$_REQUEST['reply']+0;
    $edit = @$_REQUEST['edit']+0;
-
-   connect2mysql();
-
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-   if( !$logged_in and ( ($reply > 0) or isset($_POST['post']) ) )
-      error("not_logged_in");
 
    $Forumname = forum_name($forum, $moderated);
 
@@ -191,7 +191,7 @@ function change_depth(&$cur_depth, $new_depth)
          approve_message( @$_GET['hide'], $thread, false );
 
       toggle_editor_cookie();
-      $is_editor = ($_COOKIE['forumeditor'] === 'y');
+      $is_editor = ($_COOKIE[COOKIE_PREFIX.'forumeditor'] === 'y');
    }
 
    start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );

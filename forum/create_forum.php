@@ -19,7 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 /*****************
-* >>Warning: This file is no more used (moved in forum/admin.php)
+* >>Warning: This file is no more used (feature moved in forum/admin.php)
 ******************/
 
 require_once( "forum_functions.php" );
@@ -28,8 +28,7 @@ require_once( "forum_functions.php" );
 {
    connect2mysql();
 
-
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( ($reply > 0) and !$logged_in )
       error("not_logged_in");

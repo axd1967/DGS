@@ -19,18 +19,18 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-if( basename(getcwd()) == 'forum' )
-   chdir("../");
+chdir("../");
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/GoDiagram.php" );
 chdir("forum");
 
 
-$order_str = "+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
+//$new_end =  4*7*24*3600;  // four weeks //moved in quick_common.php
 
 $new_level1 = 2*7*24*3600;  // two week
-$new_end =  4*7*24*3600;  // four weeks
+
+$order_str = "+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
 
 define("LINK_FORUMS", 1 << 0);
 define("LINK_THREADS", 1 << 1);
@@ -71,7 +71,7 @@ function make_link_array($links)
    if( ($links & LINK_TOGGLE_EDITOR) or ($links & LINK_TOGGLE_EDITOR_LIST) )
    {
       $get = $_GET;
-      $get['editor'] = ( $_COOKIE['forumeditor'] == 'y'? 'n' : 'y' );
+      $get['editor'] = ( @$_COOKIE[COOKIE_PREFIX.'forumeditor'] == 'y'? 'n' : 'y' );
       $link_array_right[T_("Toggle forum editor")] =
          ($links & LINK_TOGGLE_EDITOR ?
           make_url( "read.php", false, $get ) :
@@ -143,15 +143,13 @@ function get_new_string($Lastchangedstamp, $Lastread)
 {
    global $NOW, $new_level1, $new_end;
 
-   $color = '#ff0000';
-
    if( (empty($Lastread) or $Lastchangedstamp > $Lastread)
        and $Lastchangedstamp + $new_end > $NOW )
    {
-      if( $Lastchangedstamp + $new_level1 < $NOW )
-      {
-         $color = "ff7777";
-      }
+      if( $Lastchangedstamp + $new_level1 > $NOW )
+         $color = '#ff0000'; //recent 'new'
+      else
+         $color = '#ff7777'; //older 'new'
       $new = '<font color="' . $color . '" size="-1">&nbsp;&nbsp;' . T_('new') .'</font>';
    }
    else
@@ -220,7 +218,7 @@ function toggle_editor_cookie()
    global $NOW, $SUB_PATH;
 
    $editor = @$_GET['editor'];
-   $cookie = @$_COOKIE['forumeditor'];
+   $cookie = @$_COOKIE[COOKIE_PREFIX.'forumeditor'];
    if( $editor === 'y' or $editor === 'n' )
    {
       if( $editor === 'n' )
@@ -228,10 +226,10 @@ function toggle_editor_cookie()
       if( $editor !== $cookie )
       {
          $cookie = $editor;
-         setcookie ("forumeditor", $cookie, $NOW+ ( $editor ? 3600 : -3600 ), "$SUB_PATH" );
+         setcookie (COOKIE_PREFIX."forumeditor", $cookie, $NOW+ ( $editor ? 3600 : -3600 ), "$SUB_PATH" );
       }
    }
-   $_COOKIE['forumeditor'] = $cookie;
+   $_COOKIE[COOKIE_PREFIX.'forumeditor'] = $cookie;
 }
 
 function approve_message($id, $thread, $approve=true)

@@ -19,19 +19,20 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-require_once("forum_functions.php");
+require_once( "forum_functions.php" );
 
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
+
+   $forum = @$_GET['forum']+0;
+   $offset = @$_GET['offset']+0;
 
    $Forumname = forum_name($forum, $moderated);
 
+
    start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
-
-   $offset = (isset($_GET['offset']) ? $_GET['offset'] : 0);
-
 
    $result = mysql_query("SELECT Subject, Posts.Thread_ID, Lastchanged, " .
                          "Posts.User_ID, Replies, Name, " .
@@ -62,7 +63,7 @@ require_once("forum_functions.php");
    {
       $links |= LINK_TOGGLE_EDITOR_LIST;
       toggle_editor_cookie();
-      $is_editor = ($_COOKIE['forumeditor'] === 'y');
+      $is_editor = ($_COOKIE[COOKIE_PREFIX.'forumeditor'] === 'y');
    }
 
    start_table($headline, $links, "width=98%", $cols);
