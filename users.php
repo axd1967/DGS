@@ -20,7 +20,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
 require( "include/std_functions.php" );
-require( "include/rating.php" );
+include( "include/rating.php" );
+include( "include/table_columns.php" );
 
 {
    connect2mysql();
@@ -45,10 +46,10 @@ require( "include/rating.php" );
 
    echo "<table border=3 align=center>\n";
    echo "<tr>\n" .
-      tablehead('Name','Name','users.php') .
-      tablehead('UserId','Handle','users.php') .
+      tablehead('Name','Name','users.php?') .
+      tablehead('UserId','Handle','users.php?') .
       "<th>Rank info</th>" .
-      tablehead('Rating','Rating','users.php', true) .
+      tablehead('Rating','Rating','users.php?', true) .
       "<th>" . _("Open for matches?") . "</th>\n</tr>\n";
 
    while( $row = mysql_fetch_array( $result ) )

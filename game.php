@@ -295,7 +295,9 @@ require( "include/rating.php" );
 
       }
 
-      echo "<td width=\"$width\"><B><A href=\"sgf.php?gid=$gid\">Download sgf</A></B></td>\n";
+      echo "<td width=\"$width\"><B><A href=\"" . 
+         ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid") . 
+         "\">Download sgf</A></B></td>\n";
 
 
       if( $action == 'choose_move' )

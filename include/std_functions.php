@@ -39,7 +39,10 @@ $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
 $ActivityForHit = 1.0;
 $ActivityForMove = 10.0;
 
-$MessagesPerPage = 50;
+$RowsPerPage = 5;
+$MaxRowsPerPage = 6;
+
+$has_sgf_alias = false;
 
 $gid_color='"#d50047"';
 $bg_color='"#F7F5E3"';  // change in dragon.css too!
@@ -343,32 +346,6 @@ function make_mysql_safe(&$msg)
 {
    $msg = str_replace("\\", "\\\\", $msg);
    $msg = str_replace("\"", "\\\"", $msg);
-}
-
-function tablehead($Head, $sort_string, $page, $desc_default=false)
-{
-   global $sort1, $desc1, $sort2, $desc2;
-
-   if( $sort_string == $sort1 )
-   {
-      $s1 = $sort1;
-      $s2 = $sort2;
-      $d1 = !$desc1;
-      $d2 = !$desc2;
-   }
-   else
-   {
-      $s1 = $sort_string;
-      $d1 = $desc_default;
-      $s2 = $sort1;
-      $d2 = $desc1 xor $desc_default;
-   }
-
-   $order = "?sort1=$s1" . ($d1 ? '&desc1=1' : '');
-   if( $s2 )
-      $order .= "&sort2=$s2" . ($d2 ? '&desc2=1' : '');
-
-   return "<th><A href=\"$page$order\">" . _($Head) . "</A></th>\n";
 }
 
 function score2text($score, $verbose)
