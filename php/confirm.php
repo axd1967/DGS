@@ -482,6 +482,7 @@ else if( $next == "Submit and go to next game" )
     $result = mysql_query("SELECT ID FROM Games " .
                           "WHERE ToMove_ID=" . $player_row["ID"]  . 
                           " AND Status!='INVITED' AND Status!='FINISHED' " .
+                          "AND Lastchanged >= $Lastchanged " .
                           "LIMIT 1");
 
     if( mysql_num_rows($result) != 1 )
