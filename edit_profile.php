@@ -115,12 +115,13 @@ if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
 $profile_form->add_row( array( 'DESCRIPTION', T_('Email notifications'),
                                'SELECTBOX', 'emailnotify', 1, $notify_mess, $s, false ) );
 
-$s = $player_row['Lang']; //$the_translator->current_language;
-if( strcmp( $s, 'C' ) == 0 ) $s = 'en.iso-8859-1';
+$langs = $known_languages->get_descriptions_translated();
+arsort($langs);
+$langs['C'] = T_('Use browser settings');
 
 $profile_form->add_row( array( 'DESCRIPTION', T_('Language'),
                                'SELECTBOX', 'language', 1,
-                               $known_languages->get_descriptions_translated(), $s, false ) );
+                               array_reverse($langs), $player_row['Lang'], false ) );
 $profile_form->add_row( array( 'DESCRIPTION', T_('Timezone'),
                                'SELECTBOX', 'timezone', 1,
                                get_timezone_array(), $player_row['Timezone'], false ) );
