@@ -62,6 +62,7 @@ require( "include/std_functions.php" );
                           "Name='$name', " .
                           "Password=PASSWORD('$passwd'), " .
                           "Registerdate=FROM_UNIXTIME($NOW), " .
+                          "Lang='$the_translator->current_language', " .
                           "Sessioncode='$code', " .
                           "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration)" );
 
