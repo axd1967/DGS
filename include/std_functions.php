@@ -205,6 +205,9 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    if( $logged_in && !empty($player_row['Translator']) )
       $menu_array['Translate'] = 'translate.php';
 
+   if( $logged_in && $player_row['Adminlevel'] >= 2 )
+      $menu_array['Admin'] = 'admin.php';
+
    $menu_array['Docs'] = 'docs.php';
 
 
