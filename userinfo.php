@@ -25,14 +25,13 @@ require( "include/rating.php" );
 {
    connect2mysql();
 
-   if( !$uid )
-      error("no_uid");
-
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
 
+   if( !$uid )
+      $uid = $player_row["ID"];
 
    $my_info = ( $player_row["ID"] == $uid );
 
