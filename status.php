@@ -51,7 +51,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    echo "<center>";
 
    if( $msg )
-      echo "<p><b><font color=green>$msg</font></b><hr>";
+      echo "<p><b><font color=\"green\">$msg</font></b><hr>";
 
    $column_set = $player_row["GamesColumns"];
    $page = "status.php?";
@@ -100,18 +100,18 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
          if( !(strpos($row["Flags"],'NEW') === false) )
          {
-            echo '<td bgcolor="00F464">' . T_('New') . "</td>\n";
+            echo '<td bgcolor="#00F464">' . T_('New') . "</td>\n";
          }
          else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
          {
-            echo '<td bgcolor="FFA27A">' . T_('Reply!') . "</td>\n";
+            echo '<td bgcolor="#FFA27A">' . T_('Reply!') . "</td>\n";
          }
          else
          {
             error("message_status_corrupt");
          }
 
-         echo "<td><A href=\"message.php?mode=ShowMessage&mid=" . $row["ID"] . "\">" .
+         echo "<td><A href=\"message.php?mode=ShowMessage&amp;mid=" . $row["ID"] . "\">" .
             $row["sender"] . "</A></td>\n" .
             "<td>" . make_html_safe($row["Subject"]) . "</td>\n" .
             "<td>" . date($date_fmt2, $row["date"]) . "</td></tr>\n";
@@ -204,7 +204,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$uid",
                         T_('Show running games') => "show_games.php?uid=$uid",
-                        T_('Show finished games') => "show_games.php?uid=$uid&finished=1" );
+                        T_('Show finished games') => "show_games.php?uid=$uid&amp;finished=1" );
 
    end_page( $menu_array );
 }

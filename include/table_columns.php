@@ -167,7 +167,7 @@ function start_end_column_table($start)
       $string .= "<tr bgcolor=$table_head_color>";
    else
       $string .= '<tr><td colspan=20 align=right>' .
-         add_column_form() . "</td></tr></table></div>\n";
+         add_column_form() . "</td></tr></table>\n";
 
    return $string;
 }
