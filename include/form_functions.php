@@ -376,7 +376,7 @@ function form_insert_submit_button( $name, $text )
  */
 function form_insert_row()
 {
-  global $form_started, $max_nr_columns;
+  global $form_started, $max_nr_columns, $h3_color;
   if( !$form_started )
     return;
 
@@ -423,7 +423,7 @@ function form_insert_row()
                 $result .=
                   form_td_start( 'left' ).
                   "<B><h3><font color=$h3_color>".$description.":".
-                  "</font></h3></B>".
+                  "</font></h3></B>6".
                   form_td_end( true );
 
                 $nr_columns++;
