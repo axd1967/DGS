@@ -357,7 +357,7 @@ function draw_game_info()
 <?php
     }
 
-    echo '<tr><td>Rated: </td><td colspan=2>' . ( $Rated == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
+    echo '<tr><td>Rated: </td><td colspan=2>' . ( $Rated == 'N' ? 'No' : 'Yes' ) . '</td></tr>
     </table>
 ';
 }
