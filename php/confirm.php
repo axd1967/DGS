@@ -110,7 +110,7 @@ switch( $action )
 
 
          if( $message )
-             $query .= "($Moves, $to_move, $colnr, $rownr, '$message') ";
+             $query .= "($Moves, $to_move, $colnr, $rownr, \"$message\") ";
          else
              $query .= "($Moves, $to_move, $colnr, $rownr, NULL) ";
 
@@ -157,7 +157,7 @@ switch( $action )
               "PosX=-1";
 
          if( $message )
-             $query .= ", Text='$message'";
+             $query .= ", Text=\"$message\"";
 
          $game_query = "UPDATE Games SET " .
               "Moves=$Moves, " .
@@ -193,7 +193,7 @@ switch( $action )
 
                  if( $i == $Handicap )
                      if( $message )
-                         $query .= "($i, " . BLACK . ", $colnr, $rownr, '$message')";
+                         $query .= "($i, " . BLACK . ", $colnr, $rownr, \"$message\")";
                      else
                          $query .= "($i, " . BLACK . ", $colnr, $rownr, NULL)";
                  
@@ -219,7 +219,7 @@ switch( $action )
               "PosX=-3";
 
          if( $message )
-             $query .= ", Text='$message'";
+             $query .= ", Text=\"$message\"";
 
          if( $to_move == BLACK )
              $score = 1000;
@@ -269,7 +269,7 @@ switch( $action )
 
 
          if( $message )
-             $query .= "($Moves, $to_move, -2, NULL, '$message') ";
+             $query .= "($Moves, $to_move, -2, NULL, \"$message\") ";
          else
              $query .= "($Moves, $to_move, -2, NULL, NULL) ";
 
