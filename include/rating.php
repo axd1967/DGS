@@ -229,16 +229,16 @@ function update_rating2($gid, $check_done=true)
    $WithinPercent = 1/4;
 
    $query = "SELECT Games.*, ".
-       "white.Rating2 as wRating, white.RatingStatus as wRatingStatus, " .
-       "white.RatingMax as wRatingMax, white.RatingMin as wRatingMin, " .
-       "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
-       "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
-       "FROM Games, Players as white, Players as black " .
-       "WHERE Status='FINISHED' AND Games.ID=$gid " .
-      ( $check_done + "AND Rated!='Done' " . '' ) .
-       "AND white.ID=White_ID AND black.ID=Black_ID ".
-       "AND white.RatingStatus='RATED' " .
-       "AND black.RatingStatus='RATED' ";
+      "white.Rating2 as wRating, white.RatingStatus as wRatingStatus, " .
+      "white.RatingMax as wRatingMax, white.RatingMin as wRatingMin, " .
+      "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
+      "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
+      "FROM Games, Players as white, Players as black " .
+      "WHERE Status='FINISHED' AND Games.ID=$gid " .
+      ( $check_done ? "AND Rated!='Done' " : '' ) .
+      "AND white.ID=White_ID AND black.ID=Black_ID ".
+      "AND white.RatingStatus='RATED' " .
+      "AND black.RatingStatus='RATED' ";
 
 
    $result = mysql_query( $query ) or die(mysql_error());
