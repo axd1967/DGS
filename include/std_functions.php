@@ -95,6 +95,7 @@ $cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoord
 
 $button_max = 10;
 
+define('DELETE_LIMIT', 10);
 
 define('MAX_SEKI_MARK', 2);
 

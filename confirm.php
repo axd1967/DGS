@@ -325,7 +325,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       case 'delete':
       {
-         if( $Status != 'PLAY' or ( $Moves >= 11+$Handicap ) )
+         if( $Status != 'PLAY' or ( $Moves >= 1+DELETE_LIMIT+$Handicap ) )
             error("invalid_action");
 
 /* Rod:
@@ -487,7 +487,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                       ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
                       " WHERE ID=$Black_ID LIMIT 1" );
 
-         delete_all_observers($gid, ($old_moves >= 10+$Handicap), $Text);
+         delete_all_observers($gid, ($old_moves >= DELETE_LIMIT+$Handicap), $Text);
       }
 
       if ( $message )

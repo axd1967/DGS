@@ -199,7 +199,7 @@ function update_rating($gid)
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   if( $Moves < 10+$Handicap ) // Don't rate games with too few moves
+   if( $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
    {
       mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid");
       return;
@@ -250,7 +250,7 @@ function update_rating2($gid, $check_done=true)
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   if( $Rated === 'N' or $Moves < 10+$Handicap ) // Don't rate games with too few moves
+   if( $Rated === 'N' or $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
    {
       mysql_query("UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
@@ -383,7 +383,7 @@ function update_rating_glicko($gid, $check_done=true)
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   if( $Rated === 'N' or $Moves < 10+$Handicap ) // Don't rate games with too few moves
+   if( $Rated === 'N' or $Moves < DELETE_LIMIT+$Handicap ) // Don't rate games with too few moves
    {
       mysql_query("UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
