@@ -219,7 +219,7 @@ function draw_message_box()
    global $action, $gid, $stonestring, $coord, $prisoner_string, $move;
 
    echo '
-  <FORM name="confirmform" action="confirm.php" method="GET">
+  <FORM name="confirmform" action="confirm.php" method="POST">
     <center>
       <TABLE align="center">
         <TR>
