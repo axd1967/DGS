@@ -42,6 +42,21 @@ class MacMahon extends TournamentRound
   function add_type_specific_options_to_form( &$options_form )
     {
     }
+
+  /*! \brief Generate games in a MacMahon round. */
+  function generate_games()
+    {
+    }
+
+  /*! \brief Checks and ends the round if applicable. */
+  function end_of_round()
+    {
+    }
+
+  /*! \brief Prints a view of the results of this round. */
+  function print_result_view()
+    {
+    }
 }
 
 ?>

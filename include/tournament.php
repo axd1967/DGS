@@ -138,7 +138,9 @@ class Tournament
     */
    function get_from_database()
       {
-         $result = mysql_query( "SELECT * FROM Tournament WHERE ID='$this->ID'" );
+         $result = mysql_query( "SELECT * FROM Tournament WHERE ID='$this->ID'" )
+           or error("tournament_error_message_to_be_decided_later");
+
          if( mysql_num_rows($result) != 1 )
            error("tournament_error_message_to_be_decided_later");
 
@@ -147,7 +149,7 @@ class Tournament
            $this->$key = $value;
 
          $ListOfOrganizers = array();
-         $orgresult = mysql_query( "SELECT * FROM TournamentOrganizers "
+         $orgresult = mysql_query( "SELECT * FROM TournamentOrganizers " .
                                    "WHERE tid='$this->ID'" );
          while( $row = mysql_fetch_array( $orgresult ) )
            array_push( $ListOfOrganizers, $row['pid'] );
