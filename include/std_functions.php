@@ -191,50 +191,49 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 //       }
    echo '
     <TITLE> Dragon Go Server - ' . $title . '</TITLE>
+    <LINK REL="shortcut icon" HREF="images/favicon.ico" TYPE="image/x-icon">
     <LINK rel="stylesheet" type="text/css" media="screen" href="dragon.css">';
 
    if( $style_string )
       echo "<STYLE TYPE=\"text/css\">\n" .$style_string . "\n</STYLE>";
 
-      echo '
+   echo '
   </HEAD>
   <BODY bgcolor=' . $bg_color . '>
 
     <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
         <tr>
-';
-
-   $menu_array = array( T_('Status') => 'status.php',
-                        T_('Messages') => 'list_messages.php',
-                        T_('Tournaments') => 'tournaments.php',
-                        T_('Invite') => 'message.php?mode=Invite',
-                        T_('Waiting room') => 'waiting_room.php',
-                        T_('Users') => 'users.php',
-                        T_('Forums') => 'forum/index.php');
-
-   if( $logged_in && !empty($player_row['Translator']) )
-      $menu_array[T_('Translate')] = 'translate.php';
-
-   if( $logged_in && $player_row['Adminlevel'] >= 2 )
-      $menu_array[T_('Admin')] = 'admin.php';
-
-   $menu_array[T_('Docs')] = 'docs.php';
-
-   $menu_levels = ceil(count($menu_array)/$max_links_in_main_menu);
-   $menu_width = round(count($menu_array)/$menu_levels+0.1);
-   echo '         <td colspan=' . ($menu_width-3) . ' width="50%">
-          <A href="' . $HOSTBASE . '/index.php"><B><font color=' . $menu_fg_color .
-      '>Dragon Go Server</font></B></A></td>
-          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color .'><B>' .
+        <td width="50%"><A href="' . $HOSTBASE . "/index.php\">" .
+      "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>\n" .
+      '<td align=right width="50%"><font color=' . $menu_fg_color .'><B>' .
       ( ($logged_in and !$is_down) ? T_("Logged in as") . ': ' . $player_row["Handle"]
         : T_("Not logged in") ) .
-      " </B></font></td>\n";
-   echo "     </tr>\n";
+      " </B></font></td></tr></table>\n";
 
-   make_menu($menu_array);
+   $menu_array = array(
+      '<b><font size="+1">' . T_('Status') . '</font></b>' => array('status.php',1,1),
+      T_('Waiting room') => array('waiting_room.php',1,2),
+      T_('User info') => array('userinfo.php',1,3),
+      T_('Messages') => array('list_messages.php',2,1),
+      T_('Send a message') => array('message.php?mode=NewMessage',2,2),
+      T_('Invite') => array('message.php?mode=Invite',2,3),
 
-   echo "    </table>
-    <BR>\n";
+      T_('Users') => array('users.php',3,1),
+      T_('Games') => array('show_games.php?uid=all&finished=1',3,2),
+      T_('Tournaments') => array('tournaments.php',3,3),
+
+      T_('Forums') => array('forum/index.php',4,1),
+      T_('Docs') => array('docs.php',4,2) );
+
+   if( $logged_in && !empty($player_row['Translator']) )
+      $menu_array[T_('Translate')] = array('translate.php',4,3);
+   else
+      $menu_array[T_('Site map')] = array('site_map.php',4,3);
+
+
+   //make_menu_horizontal($menu_array);
+   make_menu_vertical($menu_array);
+
 
    if( $is_down )
       {
@@ -247,8 +246,9 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 function end_page( $menu_array=NULL )
 {
-   global $time, $show_time, $HOSTBASE, $menu_bg_color, $menu_fg_color, $bg_color;
+   global $time, $admin_level, $HOSTBASE, $menu_bg_color, $menu_fg_color, $bg_color;
 
+   echo "</table>\n";
    echo "&nbsp;<p>\n";
    echo '<table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . ">\n";
 
@@ -264,11 +264,13 @@ function end_page( $menu_array=NULL )
         <td' . $span . ' align="left" width="50%">
           <A href="' . $HOSTBASE . '/index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
         <td align="right" width="50%">';
-   if( $show_time )
+
+   if( $admin_level > 2 )
       echo '
-        <font color=' . $menu_fg_color . '><B>' . T_('Page created in') .
-        sprintf (' %0.2f', (getmicrotime() - $time)*1000) . '&nbsp;ms' .
-        '</B></font></td>';
+        <font size=-2 color=' . $menu_fg_color . '>' . T_('Page created in') .
+        sprintf (' %0.2f', (getmicrotime() - $time)*1000) . '&nbsp;ms&nbsp;&nbsp;&nbsp;' .
+         '</font><B><a href="' . $HOSTBASE . '/admin.php"><font color=' . $menu_fg_color . '>' .
+         T_('Admin') . '</a></B></font></td>';
    else
       echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
 
@@ -314,7 +316,7 @@ function make_menu($menu_array)
          $width = round($cumw - $cumwidth);
          if( $i == count($menu_array) && !$even )
            $span = " colspan=2";
-         echo "<td$span width=$width%><B><A href=\"$HOSTBASE/$link\">$text</A></B></td>\n";
+         echo "<td$span width=\"$width%\"><B><A href=\"$HOSTBASE/$link\">$text</A></B></td>\n";
          $cumwidth += $width;
          if( in_array($i, $break_point_array) )
            {
@@ -327,6 +329,109 @@ function make_menu($menu_array)
    echo "</tr>\n";
 }
 
+function cmp1($a, $b)
+{
+   list($d,$a1,$a2) = $a;
+   list($d,$b1,$b2) = $b;
+
+   if ($a1 != $b1)
+      return ( $a1 > $b1 ? 1 : -1 );
+
+   if( $a2 == $b2 )
+      return 0;
+   else
+      return ( $a2 > $b2 ? 1 : -1 );
+}
+
+function cmp2($a, $b)
+{
+   list($d,$a1,$a2) = $a;
+   list($d,$b1,$b2) = $b;
+
+   if ($a2 != $b2)
+      return ( $a2 > $b2 ? 1 : -1 );
+
+   if( $a1 == $b1 )
+      return 0;
+   else
+      return ( $a1 > $b1 ? 1 : -1 );
+}
+
+
+function make_menu_horizontal($menu_array)
+{
+   global $HOSTBASE, $menu_bg_color, $bg_color;
+
+   echo '<table width="100%" border=0 cellspacing=0 cellpadding=0 bgcolor="#F7F5FF"><tr>' . "\n";
+   $cols = 4;
+   $w = 100/($cols+1);
+
+   echo '<td width="' .round($w). '%" rowspan=3>' .
+      '<img src="images/dragonlogo_bl.jpg" alt="Dragon"></td>' . "\n";
+
+   $cumwidth = round($w);
+   $cumw=$w;
+   $i = 0;
+
+   uasort($menu_array, "cmp2");
+
+   foreach( $menu_array as $text => $tmp )
+      {
+         list($link,$t1,$t2) = $tmp;
+         $cumw += $w;
+         $width = round($cumw - $cumwidth);
+         $cumwidth += $width;
+         if( $i % $cols == 0 and $i > 0 )
+         {
+            if( $i==$cols )
+               echo '<td width=100 align=right rowspan=3> ' .
+                  '<img src="images/dragonlogo_br.jpg" alt="Dragon"></td>' . "\n";
+            echo '</tr><tr>' . "\n";
+            $cumwidth = round($w);
+            $cumw=$w;
+
+         }
+         $i++;
+
+
+         echo "<td width=\"$width%\"><A href=\"$HOSTBASE/$link\"><font color=black>$text</font></A></td>\n";
+      }
+
+   echo '</tr></table>' . "\n";
+
+   echo '<table width="100%" cellpadding=0 cellspacing=0><tr><td height=1 bgcolor=' . $menu_bg_color . "><img src=\"images/blank.png\" width=1 height=1></td></table>\n" . "
+    <BR>\n";
+
+}
+
+function make_menu_vertical($menu_array)
+{
+   global $HOSTBASE, $menu_bg_color, $bg_color;
+
+   echo '<table width="100%" border=0 cellspacing=0 cellpadding=0><tr><td valign=top>' . "\n";
+   echo '<table border=0 cellspacing=0 cellpadding=1 bgcolor='.$menu_bg_color.'><tr><td>' . "\n";
+   echo '<table border=0 cellspacing=0 cellpadding=3 bgcolor="#F7F5FF">' . "\n";
+   echo '<tr><td align=center> <img src="images/dragonlogo_bl.jpg" alt="Dragon">' . "\n";
+
+   $i = 0;
+
+   //  uasort($menu_array, "cmp1");
+
+   foreach( $menu_array as $text => $tmp )
+      {
+         list($link,$t1,$t2) = $tmp;
+
+         if( $i % 3 == 0 )
+            echo '<tr><td>&nbsp;' . "\n";
+
+         $i++;
+
+         echo "<tr><td nowrap><A href=\"$HOSTBASE/$link\"><font color=black>$text</font></A></td>\n";
+      }
+
+   echo '<tr><td>&nbsp;' . "\n";
+   echo '</table></table></td><td width="100%" align=center valign=top><BR>' . "\n";
+}
 
 function error($err, $debugmsg=NULL)
 {
@@ -504,6 +609,13 @@ function score2text($score, $verbose)
    }
 
    return $text;
+}
+
+function is_base_dir()
+{
+   global $SUB_PATH, $PHP_SELF;
+
+   return dirname($PHP_SELF) == $SUB_PATH;
 }
 
 function get_clock_used($nightstart)
@@ -692,11 +804,11 @@ function make_url($page, $sep)
 
 function is_logged_in($hdl, $scode, &$row)
 {
-   global $time, $show_time, $HOSTBASE, $PHP_SELF, $HOSTNAME, $HTTP_HOST,
+   global $time, $admin_level, $HOSTBASE, $PHP_SELF, $HOSTNAME, $HTTP_HOST,
       $ActivityHalvingTime, $ActivityForHit, $NOW, $the_translator;
 
    $time = getmicrotime();
-   $show_time = false;
+   $admin_level = 0;
 
    if( $hostname_jump and eregi_replace(":.*$","", $HTTP_HOST) != $HOSTNAME )
    {
@@ -733,8 +845,8 @@ function is_logged_in($hdl, $scode, &$row)
 
 
 
-   if( $row["Adminlevel"] >= 3 )
-      $show_time = true;
+   if( $row["Adminlevel"] >= 1 )
+      $admin_level = $row["Adminlevel"];
 
    if( !empty( $row["Timezone"] ) )
       putenv('TZ='.$row["Timezone"] );
@@ -801,6 +913,44 @@ function add_link_page_link($link, $linkdesc, $extra = '')
 function nsq_addslashes( $str )
 {
   return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $str );
+}
+
+function is_on_observe_list( $gid, $uid )
+{
+   $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid");
+   return( mysql_num_rows($result) > 0 );
+}
+
+function toggle_observe_list( $gid, $uid )
+{
+   if( is_on_observe_list( $gid, $uid ) )
+      mysql_query("DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
+   else
+      mysql_query("INSERT INTO Observers SET gid=$gid, uid=$uid");
+}
+
+function delete_all_observers( $gid, $notify, $Text='' )
+{
+   global $NOW;
+
+   if( $notify )
+   {
+      $result = mysql_query("SELECT Players.ID AS pid " .
+                            "FROM Observers,Players WHERE gid=$gid AND uid=Players.ID");
+
+      $Subject = 'An observed game has finished';
+
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         mysql_query( 'INSERT INTO Messages SET ' .
+                      'From_ID=' . $row['pid'] . ', ' .
+                      'To_ID=' . $row['pid'] . ', ' .
+                      "Time=FROM_UNIXTIME($NOW), " .
+                      "Game_ID=$gid, Subject='$Subject', Text='$Text'" );
+      }
+   }
+
+   mysql_query("DELETE FROM Observers WHERE gid=$gid");
 }
 
 ?>
