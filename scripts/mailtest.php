@@ -41,6 +41,7 @@ require_once( "include/form_functions.php" );
    $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 UTF-8
 
    $Email= get_request_arg( 'email', '');
+   $From= get_request_arg( 'from', $EMAIL_FROM);
    $Subject= get_request_arg( 'subject', 'Mail test');
    $Text= "This is a test\nLine 2\nLine 3\n";
    $sendit= @$_REQUEST['sendit'];
@@ -52,12 +53,16 @@ require_once( "include/form_functions.php" );
    $dform = new Form('dform', 'mailtest.php', FORM_POST, true );
 
    $dform->add_row( array(
-      'DESCRIPTION', 'Email',
-      'TEXTAREA', 'email', 80, 1, $Email,
+      'DESCRIPTION', 'To',
+      'TEXTINPUT', 'email', 80, 100, $Email,
+      ) );
+   $dform->add_row( array(
+      'DESCRIPTION', 'From',
+      'TEXTINPUT', 'from', 80, 100, $From,
       ) );
    $dform->add_row( array(
       'DESCRIPTION', 'Subject',
-      'TEXTAREA', 'subject', 80, 1, $Subject,
+      'TEXTINPUT', 'subject', 80, 100, $Subject,
       ) );
    $dform->add_row( array(
       'DESCRIPTION', 'Text',
@@ -79,11 +84,11 @@ require_once( "include/form_functions.php" );
    }
    else if( $sendit && $Email )
    {
-      $headers = "From: $EMAIL_FROM\n";
+      $headers = "From: $From\n";
 
       $msg = str_pad('', 47, '-') . "\n" .
           "Date: ".date($date_fmt, $NOW) . "\n" .
-          "From: Admin staff\n" .
+          "From: DragonGo admin staff\n" .
           "Subject: ".strip_tags( $Subject, '') . "\n\n" .
           strip_tags( $Text, '') . "\n";
 
