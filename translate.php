@@ -2,7 +2,7 @@
 
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2002  Erik Ouchterlony, Ragnar Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,13 +19,17 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* The code in this file is written by Ragnar Ouchterlony */
+$TranslateGroups[] = "Admin";
 
-require( "include/std_functions.php" );
-require( "include/form_functions.php" );
-require( "include/translation_info.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/form_functions.php" );
 
 {
+   $translation_groups =
+      array( 'Common', 'Start', 'Game', 'Messages', 'Users',
+             'Docs', 'Admin', 'Error', 'Untranslated phrases' );
+
+
   connect2mysql();
 
   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
@@ -34,6 +38,7 @@ require( "include/translation_info.php" );
     error("not_logged_in");
 
   $translator_array = explode(',', $player_row['Translator']);
+  $group = $_REQUEST['group'];
 
   if( !$translate_lang )
     {
@@ -52,9 +57,7 @@ require( "include/translation_info.php" );
         }
     }
 
-  start_page(T_("Translate"), true, $logged_in, $player_row);
-
-   echo '<CENTER>
+  $info_box = '<CENTER>
 <table border="2">
 <tr><td>
 <CENTER>
@@ -62,16 +65,12 @@ require( "include/translation_info.php" );
 </CENTER>
 When translating you should keep in mind the following things:
 <ul>
-  <li> You can make a lot of changes without actually submitting them to be used
-       on the website. Just click on \'Change translation\' to do this. When
-       you want the translation to be used on Dragon, click on
-       \Apply translation changes to Dragon\'.
-  <li> If you for some reason want to have a phrase untranslated, just
-       leave that translation blank and the English phrase will be used.
-  <li> In some places there is a percent-character followed by some characters. 
+  <li> If a translated word is the same as in english, leave it blank and click
+       the \'same\' box to the right.
+  <li> In some places there is a percent-character followed by some characters.
        This is a special place where the program might put some data in.
        <br>
-       Example: \'I am %s\' might be displayed as \'I am Erik\' or whatever the name is.
+       Example: \'with %s extra per move\' might be displayed as \'with 2 hours extra per move\'.
        <br>
        If you want to change order of these you can use \'%1$s\' to place to make
        sure that you get the first argument and \'%2$s\' for the second etc.
@@ -79,7 +78,7 @@ When translating you should keep in mind the following things:
        <a href="http://www.php.net/manual/en/function.sprintf.php">You can read more here</a>
   <li> In some strings there are html code. If you don\'t know how to use html code,
        just copy the original code and change the real language. If you are unsure
-       contact the support.
+       you can use the translator forum to get help.
   <li> If you want to change the html code in some way in the translation, keep in mind
        that the code shall conform to the standard layout of Dragon.
 </ul>
@@ -90,145 +89,130 @@ When translating you should keep in mind the following things:
 ';
 
   if( $lang_choice )
-    {
-      echo "<CENTER>\n";
-      $langchoice_form = new Form( 'selectlangform', 'translate.php', FORM_GET );
-      $langchoice_form->add_row( array( 'HEADER', 'Select language to translate to' ) );
-      $languages = $known_languages->get_descriptions_translated();
-      $vals = array();
-      foreach( $languages as $lang => $description )
+  {
+     start_page(T_("Translate"), true, $logged_in, $player_row);
+     echo $info_box;
+
+     echo "<CENTER>\n";
+     $langchoice_form = new Form( 'selectlangform', 'translate.php', FORM_GET );
+     $langchoice_form->add_row( array( 'HEADER', 'Select language to translate to' ) );
+     $languages = get_language_descriptions_translated();
+     $vals = array();
+     foreach( $languages as $lang => $description )
         {
-          list( $lc, $cs ) = explode( '.', $lang, 2 );
-          if( in_array( $lang, $translator_array ) or
-              in_array( $lc, $translator_array ) )
-            $vals[$lang] = $description;
+           list( $lc, $cs ) = explode( '.', $lang, 2 );
+           if( in_array( $lang, $translator_array ) or
+               in_array( $lc, $translator_array ) )
+              $vals[$lang] = $description;
         }
 
-      $langchoice_form->add_row( array( 'SELECTBOX', 'translate_lang', 1, $vals, '', false,
-                                        'HIDDEN', 'group', 'Common',
-                                        'SUBMITBUTTON', 'cl', 'Select' ) );
-      $langchoice_form->echo_string();
-      echo "</CENTER>\n";
-    }
+     $langchoice_form->add_row( array( 'SELECTBOX', 'translate_lang', 1, $vals, '', false,
+                                       'HIDDEN', 'group', 'Common',
+                                       'SUBMITBUTTON', 'cl', 'Select' ) );
+     $langchoice_form->echo_string();
+     echo "</CENTER>\n";
+  }
   else
-    {
-      if( !in_array( $translate_lang, $known_languages->get_lang_codes_with_charsets() ) )
-        error('no_such_translation_language');
-
-      list( $tlc, $tcs ) = explode( '.', $translate_lang, 2 );
-      if( !in_array( $translate_lang, $translator_array ) and
-          !in_array( $tlc, $translator_array ) )
+  {
+     if( !in_array( $translate_lang, $translator_array ) )
         error('not_correct_transl_language');
 
-      if( !$group or !in_array( $group, $translation_groups ) )
+     if( !$group or !in_array( $group, $translation_groups ) )
         $group = 'Common';
 
-      $untranslated = false;
-      if( strcmp( $group, 'Untranslated phrases' ) == 0 )
-        $untranslated = true;
+     $untranslated = ($group === 'Untranslated phrases');
 
-      $old_lang = $the_translator->current_language;
-      $the_translator->change_language( $translate_lang );
-      $the_translator->set_return_empty();
+     $query = "SELECT Translations.Text,TranslationTexts.ID AS Original_ID," .
+        "TranslationTexts.Text AS Original " .
+        "FROM TranslationTexts, TranslationGroups, " .
+        "TranslationFoundInGroup, TranslationLanguages " .
+        "LEFT JOIN Translations ON Translations.Original_ID=TranslationTexts.ID " .
+        "AND Translations.Language_ID=TranslationLanguages.ID ";
 
-      $last_updated = $the_translator->get_last_updated();
-      $query = "SELECT * FROM Translationlog WHERE Language='$translate_lang' ";
-      if( $last_updated > 0 )
-        $query .= "AND Date > FROM_UNIXTIME($last_updated) ";
-      $query .= "ORDER BY Date,ID";
+     if( $untranslated )
+        $query .= "WHERE TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
+           "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
+           "AND TranslationLanguages.Language='$translate_lang' " .
+           "AND Translations.Text IS NULL ORDER BY Group_ID LIMIT 50";
+     else
+        $query .= "WHERE TranslationGroups.Groupname='$group' " .
+           "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
+           "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
+           "AND TranslationLanguages.Language='$translate_lang' ";
 
-      $result = mysql_query($query);
-      $new_translations = array();
-      while( $row = mysql_fetch_array( $result ) )
-        $new_translations[ $row['CString'] ] = $row['Translation'];
+      $result = mysql_query($query) or die(mysql_error());
+      $numrows = mysql_num_rows($result);
+
+      if( $numrows == 0 and !$untranslated )
+         error('translation_bad_language_or_group');
+
+      start_page(T_("Translate"), true, $logged_in, $player_row);
+      echo $info_box;
 
       echo "<CENTER>\n";
 
       $translate_form = new Form( 'translateform', 'update_translation.php', FORM_POST );
       $translate_form->add_row( array( 'HEADER', 'Translate the following strings' ) );
 
-      $counter = 0;
-      $nr_messages = 0;
-      foreach( $translation_info as $string => $info )
-        {
-          $counter++;
-          if( in_array( $group, $info['Groups'] ) || $untranslated )
-            {
-              $translation = '';
-              if( array_key_exists( $string, $new_translations ) )
-                $translation = $new_translations[$string];
-              else
-                $translation = T_($string);
+      while( $row = mysql_fetch_array($result) )
+      {
+         $string = $row['Original'];
+         $hsize = 60;
+         $vsize = intval(floor(min( max( 2,
+                                         strlen( $string ) / $hsize + 2,
+                                         substr_count( $string, "\n" ) + 2 ),
+                                    12 )));
+         $translate_form->
+            add_row( array( 'TEXT', nl2br( htmlspecialchars($string, ENT_QUOTES,
+                                                            'iso-8859-1' ) ),
+                            'TD',
+                            'TEXTAREA', "transl" . $row['Original_ID'],
+                            $hsize, $vsize,
+                            htmlspecialchars($row['Text'], ENT_QUOTES,
+                                             $CHARACTER_ENCODINGS[$translate_lang]),
+                            'TD',
+                            'CHECKBOX', 'same' . $row['Original_ID'], 'Y',
+                            'same', $row['Text'] === '' ) );
+      }
 
-              if( $untranslated &&
-                  ($nr_messages > 50 || !empty($translation)) )
-                {
-                  continue;
-                }
-              else
-                {
-                  $nr_messages++;
-                }
 
-              $hsize = 60;
-              $vsize = intval(floor(min( max( 2,
-                                              strlen( $string ) / $hsize + 2,
-                                              substr_count( $string, "\n" ) + 2 ),
-                                         12 )));
-              $translate_form->add_row( array( 'TEXT', nl2br( htmlspecialchars($string,
-                                                                    ENT_QUOTES,
-                                                                    'iso-8859-1' ) ),
-                                               'TD',
-                                               'TEXTAREA', "transl$counter",
-                                               $hsize, $vsize,
-                                               htmlspecialchars($translation,
-                                                                ENT_QUOTES,
-                                                                $CHARACTER_ENCODINGS[$translate_lang]) ) );
-            }
-        }
-
-      $the_translator->change_language( $old_lang );
-      $the_translator->set_return_empty( false );
-
-      if( $untranslated && $nr_messages >= 50 )
-        {
-          $translate_form->add_row( array( 'SPACE' ) );
-          $translate_form->add_row( array( 'OWNHTML',
-                                           "<tr>\n" .
-                                           "  <td align=\"center\" colspan=\"2\" " .
-                                           "style=\"  border: solid; border-color: " .
-                                           "#ff6666; border-width: 2pt;\">\n" .
-                                           "    Note that only the first fifty untranslated " .
-                                           "messages are displayed, so that there won't be " .
-                                           "too many messages at the same time.\n" .
-                                           "  </td>\n" .
-                                           "</tr>\n" ) );
-
-        }
+      if( $untranslated and $numrows == 50 )
+      {
+         $translate_form->add_row( array( 'SPACE' ) );
+         $translate_form->add_row( array( 'OWNHTML',
+                                          "<tr>\n" .
+                                          "  <td align=\"center\" colspan=\"2\" " .
+                                          "style=\"  border: solid; border-color: " .
+                                          "#ff6666; border-width: 2pt;\">\n" .
+                                          "    Note that only the first fifty untranslated " .
+                                          "messages are displayed, so that there won't be " .
+                                          "too many messages at the same time.\n" .
+                                          "  </td>\n" .
+                                          "</tr>\n" ) );
+      }
 
       $translate_form->add_row( array( 'SPACE' ) );
-      $translate_form->add_row( array( 'HEADER', 'Groups' ) );
-      $translate_form->add_row( array( 'HIDDEN', 'translate_lang', $translate_lang ) );
+      $translate_form->add_row( array( 'OWNHTML',
+                                       "</table>\n" .
+                                       "<table width=\"100%\"><tr>\n"));
+      $translate_form->add_row( array( 'HEADER', 'Groups') );
+      $translate_form->add_row( array( 'HIDDEN', 'translate_lang', $translate_lang,
+                                       'HIDDEN', 'group', $group ) );
       $translate_form->add_row( array( 'DESCRIPTION', 'Change to group',
-                                       'SELECTBOX', 'group', 1,
+                                       'SELECTBOX', 'newgroup', 1,
                                        array_value_to_key_and_value( $translation_groups ),
                                        $group, false ) );
       $translate_form->add_row( array( 'SPACE' ) );
 
       $translate_form->add_row( array( 'OWNHTML',
-                                       "</table>\n" .
-                                       "<table width=\"100%\">\n" .
-                                       "  <tr>\n" .
-                                       "    <td align=\"center\">" .
+                                       "    <td align=\"right\" width=\"50%\">" .
                                        $translate_form->print_insert_submit_button( 'just_group', 'Just change group' ) . "</td>\n" .
-                                       "    <td align=\"center\">" .
-                                       $translate_form->print_insert_submit_button( 'change', 'Change translation' ) . "</td>\n" .
-                                       "    <td align=\"center\">" .
+                                       "    <td align=\"left\">" .
                                        $translate_form->print_insert_submit_button( 'apply_changes', 'Apply translation changes to Dragon' ) . "</td>\n" .
                                        "  </tr>\n" ) );
-      $translate_form->echo_string();
 
-    }
+      $translate_form->echo_string();
+  }
 
   end_page();
 }

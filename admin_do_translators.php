@@ -2,7 +2,7 @@
 
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2002  Erik Ouchterlony, Ragnar Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,11 +19,11 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* The code in this file is written by Ragnar Ouchterlony */
+$TranslateGroups[] = "Admin";
 
-require( "include/std_functions.php" );
-require( "include/form_functions.php" );
-require( "include/translation_info.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/form_functions.php" );
+require_once( "include/make_translationfiles.php" );
 
 {
 
@@ -34,8 +34,8 @@ require( "include/translation_info.php" );
   if( !$logged_in )
     error("not_logged_in");
 
-  if( $player_row['Adminlevel'] < 2 )
-    error("adminlevel_too_low");
+  if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
+     error("adminlevel_too_low");
 
   $extra_url_parts = '';
   if( $addlanguage )
@@ -43,38 +43,19 @@ require( "include/translation_info.php" );
       if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
         error("translator_admin_add_lang_missing_field");
 
-      $k_langs = $known_languages->get_descriptions();
-      if( array_key_exists( $twoletter . "." .$charenc, $k_langs ) ||
-          in_array( $langname, $k_langs ) )
+      if( array_key_exists( $twoletter , $known_languages ) and
+          array_key_exists( $charenc, $known_languages[$twoletter] ) )
         error("translator_admin_add_lang_exists");
 
-      $entry = new LangEntry( $twoletter, $langname, $charenc );
-      $new_lang_php_code = sprintf( $translation_template_top,
-                                    Translator::create_class_name( $entry ),
-                                    $langname,
-                                    $NOW, gmdate( 'Y-m-d H:i:s T', $NOW ) );
-      $new_lang_php_code =
-        substr( $new_lang_php_code, 0, -1 ) .
-        $translation_template_bottom;
 
-      $lang_code_name = Translator::create_lang_name( $entry );
-      write_to_file( "translations/$lang_code_name.php", $new_lang_php_code );
+      mysql_query("INSERT INTO TranslationLanguages SET " .
+                  "Language='" . $twoletter . '.' . $charenc . "', " .
+                  "Name='$langname'");
 
-      $new_all_languages_php_code = $translation_template_copyright . "\n";
-      foreach( $known_languages->languages as $lang )
-        {
-          $new_all_languages_php_code .=
-            "\$known_languages->add( \"".$lang->lang_code."\", " .
-            "\"".$lang->description."\", \"".$lang->charset."\" );\n";
-        }
+      make_all_languages();
 
-      $new_all_languages_php_code .=
-        "\$known_languages->add( \"$twoletter\", \"$langname\", \"$charenc\" );\n";
-      $new_all_languages_php_code .= "\n?>\n";
-
-      write_to_file( "translations/all_languages.php", $new_all_languages_php_code );
-
-      $extra_url_parts = "?what=addlanguage&twoletter=$twoletter&langname=$langname&charenc=$charenc";
+      $msg = sprintf( T_("Added language %s with code %s and characterencoding %s."),
+                      $langname, $twoletter, $charenc );
     }
 
   if( $transladd )
@@ -105,11 +86,13 @@ require( "include/translation_info.php" );
           if( mysql_affected_rows() != 1 )
             error("unknown_user");
 
-          $extra_url_parts = "?what=transladd&user=$transluser&lang=$transladdlang";
+          $msg = sprintf( T_("Added user %s as translator for language %s."),
+                          $transluser, $transladdlang );
         }
       else
         {
-          $extra_url_parts = "?what=tadd_already&user=$transluser&lang=$transladdlang";
+           $msg = sprintf( T_("User %s is already translator for language %s."),
+                           $transluser, $transladdlang );
         }
     }
 
@@ -127,8 +110,9 @@ require( "include/translation_info.php" );
       if( mysql_affected_rows() != 1 )
         error("unknown_user");
 
-      $extra_url_parts = "?what=transluser&user=$transluser";
+      $msg = sprintf( T_("Changed translator privileges info for user %s."), $transluser );
+
     }
 
-  jump_to("admin_translators.php$extra_url_parts");
+  jump_to("admin_translators.php?msg=" . urlencode($msg));
 }

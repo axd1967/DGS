@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Users";
+
 require( "include/std_functions.php" );
 require( "include/rating.php" );
 
@@ -67,13 +69,13 @@ require( "include/rating.php" );
        "Button=$button, " .
        "SendEmail='$sendemail', ";
 
-   if( strcmp($language, $player_row['Lang']) != 0 and
-       (in_array($language, $known_languages->get_lang_codes_with_charsets(), true) or
-        in_array($language, $known_languages->get_lang_codes(), true) or
-        strcmp($language, 'C') == 0 ))
+   list($lang,$enc) = explode('.', $language);
+
+   if( $language === 'C' or ( $language !== $player_row['Lang'] and
+                              array_key_exists($lang, $known_languages) and
+                              array_key_exists($enc, $known_languages[$lang])) )
      {
        $query .= "Lang='$language', ";
-       $the_translator->change_language( $language );
      }
 
    if( $nightstart != $player_row["Nightstart"] ||
@@ -110,6 +112,7 @@ require( "include/rating.php" );
    mysql_query( $query )
       or error("mysql_query_failed");
 
+   include_all_translate_groups($player_row);
    $msg = urlencode(T_('Profile updated!'));
 
    jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");

@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Users";
+
 require( "include/std_functions.php" );
 require( "include/timezones.php" );
 require( "include/rating.php" );
@@ -115,7 +117,7 @@ if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
 $profile_form->add_row( array( 'DESCRIPTION', T_('Email notifications'),
                                'SELECTBOX', 'emailnotify', 1, $notify_mess, $s, false ) );
 
-$langs = $known_languages->get_descriptions_translated();
+$langs = get_language_descriptions_translated();
 arsort($langs);
 $langs['C'] = T_('Use browser settings');
 

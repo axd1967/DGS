@@ -64,7 +64,7 @@ CREATE TABLE Games (
   White_ID int(11) default NULL,
   ToMove_ID int(11) NOT NULL default '0',
   Size int(11) default '19',
-  Komi decimal(6,1) default '5.5',
+  Komi decimal(6,1) default '6.5',
   Handicap int(11) NOT NULL default '0',
   Status enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED',
   Moves int(11) NOT NULL default '0',
@@ -224,7 +224,7 @@ CREATE TABLE Waitingroom (
   nrGames int(11) default 1,
   Time datetime default NULL,
   Size int(11) default '19',
-  Komi decimal(6,1) default '5.5',
+  Komi decimal(6,1) default '6.5',
   Handicaptype enum('conv','proper','nigiri','double') NOT NULL default 'conv',
   Maintime int(11) default NULL,
   Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
@@ -285,7 +285,7 @@ CREATE TABLE TournamentRound (
   NextRound int(11) default NULL,
   PreviousRound int(11) default NULL,
   BoardSize int(11) default '19',
-  Komi decimal(6,1) default '5.5',
+  Komi decimal(6,1) default '6.5',
   HandicapType int(11) NOT NULL default '0',
   Maintime int(11) default NULL,
   Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
@@ -358,6 +358,9 @@ CREATE TABLE Errorlog (
 
 CREATE TABLE Translationlog (
   ID int(11) NOT NULL auto_increment,
+  Player_ID int(11) default NULL,
+  Language_ID int(11) default NULL,
+  Original_ID int(11) default NULL,
   Handle varchar(16) default NULL,
   Language varchar(16) default NULL,
   CString text,
@@ -366,6 +369,78 @@ CREATE TABLE Translationlog (
   Date timestamp(14) NOT NULL,
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationTexts'
+#
+
+CREATE TABLE TranslationTexts (
+  ID int(11) NOT NULL auto_increment,
+  Text text,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Translations'
+#
+
+CREATE TABLE Translations (
+  Original_ID int(11) NOT NULL default '0',
+  Language_ID int(11) NOT NULL default '0',
+  Text text,
+  PRIMARY KEY  (Language_ID,Original_ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationLanguages'
+#
+
+CREATE TABLE TranslationLanguages (
+  ID int(11) NOT NULL auto_increment,
+  Language varchar(32) default NULL,
+  Name varchar(32) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationGroups'
+#
+
+CREATE TABLE TranslationGroups (
+  ID int(11) NOT NULL auto_increment,
+  Groupname varchar(32) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationFoundInGroup'
+#
+
+CREATE TABLE TranslationFoundInGroup (
+  Text_ID int(11) NOT NULL default '0',
+  Group_ID int(11) NOT NULL default '0',
+  PRIMARY KEY  (Text_ID,Group_ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationPages'
+#
+
+CREATE TABLE TranslationPages (
+  ID int(11) NOT NULL auto_increment,
+  Page varchar(64) default NULL,
+  Group_ID int(11) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+
 
 #
 # Table structure for table 'Forums'

@@ -21,6 +21,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 /* The code in this file is written by Ragnar Ouchterlony */
 
+$TranslateGroups[] = "Admin";
+
 require( "include/std_functions.php" );
 require( "include/form_functions.php" );
 
@@ -37,41 +39,10 @@ require( "include/form_functions.php" );
 
   start_page(T_('Translator admin'), true, $logged_in, $player_row);
 
-  $extra_message = '';
-  switch( $_GET['what'] )
-    {
-    case 'addlanguage':
-      $extra_message =
-        sprintf( T_("Added language %s with code %s and characterencoding %s."),
-                 $_GET['langname'], $_GET['twoletter'], $_GET['charenc'] );
-      break;
-
-    case 'transladd':
-      $extra_message =
-        sprintf( T_("Added user %s as translator for language %s."),
-                 $_GET['user'], $_GET['lang'] );
-      break;
-
-    case 'tadd_already':
-      $extra_message =
-        sprintf( T_("User %s is already translator for language %s."),
-                 $_GET['user'], $_GET['lang'] );
-      break;
-
-    case 'transllang':
-      $extra_message =
-        sprintf( T_("Changed translator privileges info for user %s."), $_GET['user'] );
-      break;
-
-    default:
-      $extra_message = '';
-      break;
-    }
-
   echo "<center>\n";
 
-  if( !empty($extra_message) )
-    echo "<p><b><font color=\"green\">$extra_message</font></b><hr>";
+  if( !empty($_GET['msg']) )
+    echo "<p><b><font color=\"green\">" . $_GET['msg'] . "</font></b><hr>\n";
 
   $translator_form = new Form( 'translatorform', 'admin_do_translators.php', FORM_POST );
 
@@ -92,12 +63,12 @@ require( "include/form_functions.php" );
   $translator_form->add_row(
      array( 'DESCRIPTION', T_('Select language to make user translator for that language.'),
             'SELECTBOX', 'transladdlang', 1,
-            $known_languages->get_descriptions_translated(), array(), false,
+            get_language_descriptions_translated(), array(), false,
             'SUBMITBUTTON', 'transladd', T_('Add language for translator') ) );
   $translator_form->add_row(
      array( 'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
             'SELECTBOX', 'transllang[]', 7,
-            $known_languages->get_descriptions_translated(), array(), true,
+            get_language_descriptions_translated(), array(), true,
             'SUBMITBUTTON', 'translpriv', T_('Set user privileges') ) );
 
   $translator_form->echo_string();

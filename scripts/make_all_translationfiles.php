@@ -1,5 +1,4 @@
 <?php
-
 /*
 Dragon Go Server
 Copyright (C) 2001-2002  Erik Ouchterlony
@@ -19,15 +18,12 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-class en_iso_8859_1_Language extends Language
-{
-  function en_iso_8859_1_Language()
-    {
-      $this->full_name = "English";
-      $this->last_updated = -1;
 
-      $this->translated_strings = array();
-    }
-};
+chdir('..');
+require( 'include/std_functions.php' );
+require( 'include/make_translationfiles.php' );
 
-?>
+connect2mysql();
+
+make_known_languages();
+make_include_files();

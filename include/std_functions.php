@@ -18,9 +18,11 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Common";
+
 require( "include/config.php" );
 require( "include/connect2mysql.php" );
-require( "include/translator.php" );
+require( "include/translation_functions.php" );
 
 if( @is_readable("timeadjust.php" ) )
    include( "timeadjust.php" );
@@ -156,25 +158,28 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $base_path, $is_down, $bg_color, $menu_bg_color, $menu_fg_color,
-      $the_translator, $CHARACTER_ENCODINGS, $max_links_in_main_menu, $vertical, $base_path;
+      $encoding_used, $max_links_in_main_menu, $vertical, $base_path;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
 
+   ob_start("ob_gzhandler");
 
    $base_path = ( is_base_dir() ? '' : '../' );
 
-   ob_start("ob_gzhandler");
+   include_all_translate_groups($row);
 
-   $charenc = $the_translator->current_language->charset;
-   header ('Content-Type: text/html; charset='.$charenc); // Character-encoding
+   if( empty($encoding_used) )
+      $encoding_used = 'iso-8859-1';
+
+   header ('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
   <HEAD>';
 
   echo "
-  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$charenc\">\n";
+  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">\n";
 
 //   echo '<script language="JavaScript">
 // function popup(page)
@@ -808,7 +813,7 @@ function make_url($page, $sep, $array)
 function is_logged_in($hdl, $scode, &$row)
 {
    global $time, $admin_level, $PHP_SELF, $HOSTNAME, $HTTP_HOST, $hostname_jump,
-      $ActivityHalvingTime, $ActivityForHit, $NOW, $the_translator, $known_languages;
+      $ActivityHalvingTime, $ActivityForHit, $NOW;
 
    $time = getmicrotime();
    $admin_level = 0;
@@ -854,12 +859,6 @@ function is_logged_in($hdl, $scode, &$row)
 
    if( !empty( $row["Timezone"] ) )
       putenv('TZ='.$row["Timezone"] );
-
-   if( !is_null($row['Lang']) and
-       strcmp($row['Handle'],'guest') != 0 )
-     {
-       $the_translator->change_language( $row['Lang'] );
-     }
 
    return true;
 }
