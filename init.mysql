@@ -58,7 +58,6 @@ CREATE TABLE Games (
   Komi decimal(6,1) default '5.5',
   Handicap int(11) NOT NULL default '0',
   Status enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED',
-  Consistet enum('N','Y','?') NOT NULL default 'Y',
   Moves int(11) NOT NULL default '0',
   Black_Prisoners int(11) NOT NULL default '0',
   White_Prisoners int(11) NOT NULL default '0',
