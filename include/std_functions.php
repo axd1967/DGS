@@ -572,4 +572,26 @@ function is_logged_in($hdl, $scode, &$row)
    return true;
 }
 
+function check_password( $password, $new_password, $given_password )
+{
+  global $handle;
+
+  $given_password_encrypted = mysql_fetch_row( mysql_query( "SELECT PASSWORD ('$given_password')" ) );
+  if( $password != $given_password_encrypted[0] )
+    {
+      // Check if there is a new password
+
+      if( empty($new_password) or $new_password != $given_password_encrypted[0] )
+        error("wrong_password");
+    }
+
+  if( !empty( $new_password ) )
+    {
+      mysql_query( 'UPDATE Players ' .
+                   "SET Password='".$given_password_encrypted[0]."', " .
+                   'Newpassword=NULL ' .
+                   "Where Handle='$handle'" );
+    }
+}
+
 ?>
