@@ -56,7 +56,7 @@ function find_category_box_text($cat)
 
    $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"]);
 
-   start_page("Edit biopgraphical info", true, $logged_in, $player_row );
+   start_page(T_("Edit biopgraphical info"), true, $logged_in, $player_row );
 
    echo "<CENTER>\n";
    echo form_start( 'bioform', 'change_bio.php', 'POST' );
@@ -84,7 +84,7 @@ function find_category_box_text($cat)
                             'TEXTAREA', "newtext".$i,40,4,"" );
    }
 
-   echo form_insert_row( 'SUBMITBUTTON', 'action', 'Change bio' );
+   echo form_insert_row( 'SUBMITBUTTON', 'action', T_('Change bio') );
    echo form_end();
    echo "</CENTER><BR>\n";
 
