@@ -40,11 +40,13 @@ require_once( "include/form_functions.php" );
 
    $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 UTF-8
 
+   $sendit= @$_REQUEST['sendit'];
    $Email= get_request_arg( 'email', '');
-   $From= get_request_arg( 'from', $EMAIL_FROM);
+   $From= get_request_arg( 'from', '');
+   if( !$sendit && !$From )
+      $From= $EMAIL_FROM;
    $Subject= get_request_arg( 'subject', 'Mail test');
    $Text= "This is a test\nLine 2\nLine 3\n";
-   $sendit= @$_REQUEST['sendit'];
 
 
    start_html( 'mailtest', 0,
@@ -84,7 +86,10 @@ require_once( "include/form_functions.php" );
    }
    else if( $sendit && $Email )
    {
-      $headers = "From: $From\n";
+      if( $From )
+         $headers = "From: $From\n";
+      else
+         $headers = "";
 
       $msg = str_pad('', 47, '-') . "\n" .
           "Date: ".date($date_fmt, $NOW) . "\n" .
@@ -99,7 +104,7 @@ require_once( "include/form_functions.php" );
       }
       else
       {
-         echo "<br>Message sent to $Email:<br>";
+         echo "<br>Message sent to $Email / $From:<br>";
          echo "<pre>$msg</pre>";
       }
    }
