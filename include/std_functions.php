@@ -671,8 +671,8 @@ function check_password( $password, $new_password, $given_password )
 
 function write_to_file( $filename, $string_to_write )
 {
-  if( !($fp = fopen( $filename, 'w' )) )
-    error( "couldnt_open_file" );
+  $fp = fopen( $filename, 'w' )
+    or error( "couldnt_open_file" );
 
   fwrite( $fp, $string_to_write );
   fclose( $fp );
