@@ -44,7 +44,7 @@ disable_cache();
 
 // find reciever of the message
 
-   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed, RatingStatus " .
+   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed, Rating, RatingStatus " .
                           "FROM Players WHERE Handle='$to'" );
 
    if( mysql_num_rows( $result ) != 1 )
@@ -255,9 +255,7 @@ disable_cache();
          }
 
          if( $rating_black > $rating_white )
-         {
             $swap = true;
-         }
 
          if( $handicap == 1 )
             $handicap = 0;
