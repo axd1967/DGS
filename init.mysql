@@ -28,7 +28,7 @@ CREATE TABLE Players (
   Handle varchar(16) DEFAULT '' NOT NULL,
   Password varchar(16),
   Sessioncode varchar(32),
-  Sessionexpire timestamp(14),
+  Sessionexpire datetime,
   Name varchar(80),
   Email varchar(80),
   Rank varchar(40),
