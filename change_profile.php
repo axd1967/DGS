@@ -50,7 +50,8 @@ require( "include/rating.php" );
       $sendemail .= ',BOARD';
 
    $boardcoords = ( $coordsleft ? LEFT : 0 ) + ( $coordsup ? UP : 0 ) +
-       ( $coordsright ? RIGHT : 0 ) + ( $coordsdown ? DOWN : 0 );
+      ( $coordsright ? RIGHT : 0 ) + ( $coordsdown ? DOWN : 0 ) +
+      ( $smoothedge ? SMOOTH_EDGE : 0 );
 
 
    $query = "UPDATE Players SET " .

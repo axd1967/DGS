@@ -33,7 +33,7 @@ CREATE TABLE Players (
   Lang varchar(20) NOT NULL default 'C',
   Woodcolor int(11) NOT NULL default '1',
   Boardtype int(11) NOT NULL default '1',
-  Boardcoords int(11) NOT NULL default '15',
+  Boardcoords int(11) NOT NULL default '31',
   Button int(11) NOT NULL default '0',
   UsersColumns int(10) unsigned NOT NULL default '62',
   Running int(11) NOT NULL default '0',

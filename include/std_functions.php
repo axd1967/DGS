@@ -97,6 +97,7 @@ define("LEFT",1);
 define("UP",2);
 define("RIGHT",4);
 define("DOWN",8);
+define("SMOOTH_EDGE",16);
 
 
 // If no gettext
@@ -250,9 +251,9 @@ function end_page( $menu_array=NULL )
         <td align="right" width="50%">';
    if( $show_time )
       echo '
-        <font color=' . $menu_fg_color . '><B>' .
-        sprintf (T_("Page created in %0.5f"), getmicrotime() - $time) . '&nbsp;s' .
-        $timeadjust. '</B></font></td>';
+        <font color=' . $menu_fg_color . '><B>' . T_('Page created in') .
+        sprintf (' %0.2f', (getmicrotime() - $time)*1000) . '&nbsp;ms' .
+        '</B></font></td>';
    else
       echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
 
