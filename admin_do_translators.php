@@ -52,7 +52,25 @@ require_once( "include/make_translationfiles.php" );
                   "Language='" . $twoletter . '.' . $charenc . "', " .
                   "Name='$langname'");
 
-      make_all_languages();
+      make_known_languages();
+
+      $res = mysql_query("SELECT ID FROM TranslationGroups WHERE Groupname='Users'");
+      if( mysql_num_rows($res) != 1 )
+         error("internal_error");
+
+      $row = mysql_fetch_array($res);
+      $Group_ID = $row['ID'];
+
+      $res = mysql_query("SELECT ID FROM TranslationTexts WHERE Text=\"$langname\"");
+      if( mysql_num_rows( $res ) === 0 )
+      {
+         mysql_query("INSERT INTO TranslationTexts SET Text=\"$langname\"")
+            or die(mysql_error());
+
+         mysql_query("REPLACE INTO TranslationFoundInGroup " .
+                     "SET Text_ID=" . mysql_insert_id() . ", " .
+                     "Group_ID=" . $Group_ID );
+      }
 
       $msg = sprintf( T_("Added language %s with code %s and characterencoding %s."),
                       $langname, $twoletter, $charenc );
