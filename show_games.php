@@ -106,8 +106,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          "black.Name AS blackName, black.Handle AS blackHandle, black.ID AS blackID, " .
          "white.Name AS whiteName, white.Handle AS whiteHandle, white.ID AS whiteID, " .
          ( $_GET['finished']
-           ? "black.Rating2 AS blackRating, white.Rating2 AS whiteRating "
-           : "Games.Black_Rating AS blackRating, Games.White_Rating AS whiteRating " ) .
+           ? "Games.Black_Rating AS blackRating, Games.White_Rating AS whiteRating "
+           : "black.Rating2 AS blackRating, white.Rating2 AS whiteRating " ) .
          "FROM Games, Players AS white, Players AS black " .
          "WHERE " . ( $_GET['finished']
                       ? "Status='FINISHED' "
