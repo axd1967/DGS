@@ -69,6 +69,5 @@ function get_known_languages_with_full_names()
   return $KNOWN_LANGUAGES;
 }
 
-include( "translations/en.php" );
-include( "translations/sv.php" );
+require( "translations/all_languages.php" );
 ?>
