@@ -139,57 +139,12 @@ function check_handicap()
 
 }
 
-//ajusted globals by check_done(): $array, $score, $prisoners;
-//return: $prisoners list the marked points (from $stonestring)
-function check_done()
+
+//ajusted globals by check_remove(): $array, $score, $stonestring;
+function check_remove( $coord=false )
 {
-   global $stonestring, $Size, $array, $prisoners, $Komi, $score,
-      $White_Prisoners, $Black_Prisoners;
-
-   if( !$stonestring ) $stonestring = "1";
-
-   // toggle marked stones and marked dame to array
-
-   $l = strlen( $stonestring );
-   $index = array();
-
-   for( $i=1; $i < $l; $i += 2 )
-   {
-      list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-
-      if( !isset($rownr) or !isset($colnr) )
-         error("illegal_position");
-
-      if( $index[$colnr][$rownr] )
-         unset($index[$colnr][$rownr]);
-      else
-         $index[$colnr][$rownr] = TRUE;
-
-      $stone = $array[$colnr][$rownr];
-      if( $stone == BLACK or $stone == WHITE or $stone == NONE ) //NONE for MARKED_DAME
-         $array[$colnr][$rownr] = $stone + OFFSET_MARKED;
-      else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD or $stone == MARKED_DAME )
-         $array[$colnr][$rownr] = $stone - OFFSET_MARKED;
-   }
-
-   $prisoners = array();
-   while( list($x, $sub) = each($index) )
-   {
-      while( list($y, $val) = each($sub) )
-      {
-         array_push($prisoners, array($x,$y));
-      }
-   }
-
-   $score = create_territories_and_score( $Size, $array );
-   $score += $White_Prisoners - $Black_Prisoners + $Komi;
-
-}
-
-//ajusted globals by check_remove(): $array, $stonestring;
-function check_remove( )
-{
-   global $stonestring, $Size, $array, $coord;
+   global $stonestring, $Size, $array,
+      $Komi, $score, $White_Prisoners, $Black_Prisoners;
 
    if( !$stonestring ) $stonestring = "1";
 
@@ -227,7 +182,7 @@ function check_remove( )
          error("illegal_position");
 
       $stone = $array[$colnr][$rownr];
-      if ( !ALLOW_SEKI_MARK or ($stone!=NONE and $stone!=MARKED_DAME) )
+      if ( MAX_SEKI_MARK<=0 or ($stone!=NONE and $stone!=MARKED_DAME) )
       {
          if( $stone!=BLACK and $stone!=WHITE and $stone!=BLACK_DEAD and $stone!=WHITE_DEAD )
             error("illegal_position");
@@ -253,6 +208,9 @@ function check_remove( )
          $stonestring .= number2sgf_coords($colnr, $rownr, $Size);
       }
    }
+
+   $score = create_territories_and_score( $Size, $array );
+   $score += $White_Prisoners - $Black_Prisoners + $Komi;
 
 }
 

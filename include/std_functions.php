@@ -88,21 +88,24 @@ $cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoord
 $button_max = 10;
 
 
-define('ALLOW_SEKI_MARK', true);
+define('MAX_SEKI_MARK', 2);
 
 define("NONE", 0);
 define("BLACK", 1);
 define("WHITE", 2);
 
-define("OFFSET_TERRITORY", 3);
+define("OFFSET_TERRITORY", 0x04);
 define("DAME", OFFSET_TERRITORY+NONE);
 define("BLACK_TERRITORY", OFFSET_TERRITORY+BLACK);
 define("WHITE_TERRITORY", OFFSET_TERRITORY+WHITE);
 
-define("OFFSET_MARKED", 6);
+define("OFFSET_MARKED", 0x08);
 define("MARKED_DAME", OFFSET_MARKED+NONE);
 define("BLACK_DEAD", OFFSET_MARKED+BLACK);
 define("WHITE_DEAD", OFFSET_MARKED+WHITE);
+
+define("FLAG_NOCLICK", 0x10);
+
 
 /* Not yet used:
 define("PASS_BLACK", 3);
