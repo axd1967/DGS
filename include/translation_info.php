@@ -364,6 +364,10 @@ array(
       array( 'Groups' => array( 'Documentation' ) ),
 
       /* Found in these files: message.php */
+      'Dispute settings' =>
+      array( 'Groups' => array( 'Messages' ) ),
+
+      /* Found in these files: message.php */
       'Disputing settings' =>
       array( 'Groups' => array( 'Messages' ) ),
 
