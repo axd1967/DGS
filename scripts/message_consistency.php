@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 chdir( '../' );
 require_once( "include/std_functions.php" );
 
-define('DEBUG',true);
+define('DEBUG',1);
 
 {
    connect2mysql();
@@ -31,7 +31,7 @@ define('DEBUG',true);
    //init_standard_folders();
 
 if(DEBUG){
-   function dbg_query($s) { echo $s."<BR>";}
+   function dbg_query($s) { echo "<BR>$s";}
    echo "<p>(just show queries needed): <br>";
 }else{
    function dbg_query($s) { 
@@ -57,6 +57,7 @@ function check_myself_message( $user_id=false)
 //Find old way *messages to myself*, i.e. where sender and receiver are the same user.
    $query = "SELECT me.mid as mid, " .
       "me.ID as me_mcID, other.ID as other_mcID, " .
+      "me.Replied AS replied, other.Replied AS other_replied, " .
       "me.Folder_nr AS folder, other.Folder_nr AS other_folder " .
       "FROM MessageCorrespondents AS me, MessageCorrespondents AS other " .
       "WHERE other.mid=me.mid AND other.uid=me.uid " .
@@ -71,11 +72,15 @@ function check_myself_message( $user_id=false)
       echo $row['mid']." ";
 
       $folder = @$row['folder'];
-      if (!isset($folder)) $folder = @$row['other_folder'];
-      if (!isset($folder)) $folder = FOLDER_MAIN; /* or simply "NULL" */
+      if( !isset($folder) ) $folder = @$row['other_folder'];
+      if( !isset($folder) ) $folder = FOLDER_MAIN; /* or simply "NULL" */
+
+      $replied = @$row['replied'];
+      if( !isset($replied) or $replied=='N' ) $replied = @$row['other_replied'];
+      if( !isset($replied) ) $replied = 'N';
 
       $mcID = $row['me_mcID'];
-      dbg_query("UPDATE MessageCorrespondents SET Sender='M', Folder_nr=$folder " .
+      dbg_query("UPDATE MessageCorrespondents SET Sender='M', Folder_nr=$folder, Replied='$replied' " .
                    "WHERE ID=$mcID LIMIT 1" );
       $mcID = $row['other_mcID'];
       dbg_query("DELETE FROM MessageCorrespondents WHERE ID=$mcID LIMIT 1" );
