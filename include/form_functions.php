@@ -64,7 +64,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * <li> HR        -- Vertical separator, should be used on it's own row.
   * <li> TAB       -- Horizontal space. Add an empty cell.
   * <li> BR        -- Forces a linebreak within the row.
-  * <li> TD        -- Forces a column change.
+  * <li> TD        -- Forces a column change (TD end).
+  * <li> CELL      -- Forces a new cell start with colspan and attributs specified.
   * </ul>
   *
   * \todo Add more types (if necessary).
@@ -122,7 +123,11 @@ class Form
    /*! \brief Echo the <from ...> element immediately. */
    var $echo_form_start_now;
 
+   /*! \brief Construction variables. */
+   var $column_started;
+   var $nr_columns;
    var $tabindex;
+   var $safe_text;
 
    /*! \brief Constructor. Initializes various variables. */
    function Form( $name, $action_page, $method, $echo_form_start_now=false )
@@ -252,6 +257,12 @@ class Form
                                      'EndTD'   => true,
                                      'SpanAllColumns' => false,
                                      'Align'   => '' ),
+            'CELL'         => array( 'NumArgs' => 2,
+                                     'NewTD'   => true,
+                                     'StartTD' => false,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => '' ),
          );
 
          if( $echo_form_start_now )
@@ -278,7 +289,7 @@ class Form
     *
     * \return The line_number of the new row or -1 if failed.
     */
-   function add_row( $row_array, $line_no = -1 )
+   function add_row( $row_array, $line_no = -1, $safe = true )
       {
          if( $line_no != -1 )
          {
@@ -297,7 +308,7 @@ class Form
             }
          }
 
-         $this->rows[ $line_no ] = $row_array;
+         $this->rows[ $line_no ] = array($safe,$row_array);
          $this->updated = false;
 
          return $line_no;
@@ -343,11 +354,12 @@ class Form
 
          foreach( $this->rows as $row_args )
             {
+               list( $this->safe_text, $row_args ) = $row_args;
                $args = array_values( $row_args );
 
                $current_arg = 0;
-               $nr_columns = 0;
-               $column_started = false;
+               $this->nr_columns = 0;
+               $this->column_started = false;
                $result .= "    <TR>\n";
 
                $element_counter = 0;
@@ -380,55 +392,55 @@ class Form
                      $current_arg += $element_type[ 'NumArgs' ];
 
                      if( $element_type['SpanAllColumns'] and
-                         $nr_columns == 0 and
+                         $this->nr_columns == 0 and
                          $current_arg >= count($args) )
                      {
-                        if( $column_started )
+                        if( $this->column_started )
                            $result .= $this->print_td_end();
 
                         $result .= $this->print_td_start( $element_type['Align'],
                                                           max( $max_nr_columns -
-                                                               $nr_columns,
+                                                               $this->nr_columns,
                                                                1 ) );
 
                         $this->$func_name( $result, $element_args );
 
                         $result .= $this->print_td_end( true );
 
-                        $nr_columns = $max_nr_columns;
-                        $column_started = false;
+                        $this->nr_columns = $max_nr_columns;
+                        $this->column_started = false;
                      }
                      else
                      {
-                        if( $element_type['NewTD'] and $column_started )
+                        if( $element_type['NewTD'] and $this->column_started )
                         {
                            $result .= $this->print_td_end();
-                           $column_started = false;
+                           $this->column_started = false;
                         }
 
-                        if( $element_type['StartTD'] and !$column_started )
+                        if( $element_type['StartTD'] and !$this->column_started )
                         {
                            $result .= $this->print_td_start( $element_type['Align'] )."\n";
-                           $column_started = true;
-                           $nr_columns++;
+                           $this->column_started = true;
+                           $this->nr_columns++;
                         }
 
                         $result .= "        ";
                         $this->$func_name( $result, $element_args );
                         $result .= "\n";
 
-                        if( $element_type['EndTD'] and $column_started )
+                        if( $element_type['EndTD'] and $this->column_started )
                         {
                            $result .= $this->print_td_end();
-                           $column_started = false;
+                           $this->column_started = false;
                         }
                      }
                   }
 
-                  if( $nr_columns > $max_nr_columns )
-                     $max_nr_columns = $nr_columns;
+                  if( $this->nr_columns > $max_nr_columns )
+                     $max_nr_columns = $this->nr_columns;
                }
-               if( $column_started )
+               if( $this->column_started )
                   $result .= $this->print_td_end();
 
                $result .= "    </TR>\n";
@@ -596,11 +608,27 @@ class Form
       }
 
    /*!
-    * \brief Function for making new td string in the standard form
+    * \brief Function for ending td string in the standard form
     * \internal
     */
    function create_string_func_td( &$result, $args )
       {
+      }
+
+   /*!
+    * \brief Function for making new td string in the standard form
+    * \internal
+    */
+   function create_string_func_cell( &$result, $args )
+      {
+         $colspan = $args[0]>1 ? $args[0] : 1 ;
+         $attribs = trim($args[1]) ;
+         $result .= "<TD" .
+            ($attribs ? " $attribs" : '') .
+            ($colspan>1 ? " colspan=\"$colspan\"" : '') .
+            ">";
+         $this->column_started = true;
+         $this->nr_columns+= $colspan;
       }
 
    /*!
@@ -674,6 +702,8 @@ class Form
     */
    function print_insert_text_input( $name, $size, $maxlength, $initial_value )
       {
+         if( $this->safe_text )
+            $initial_value = textarea_safe($initial_value);
          return "<INPUT type=\"text\" name=\"$name\" value=\"$initial_value\"" .
             ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
             " size=\"$size\" maxlength=\"$maxlength\">";
@@ -720,6 +750,8 @@ class Form
     */
    function print_insert_textarea( $name, $columns, $rows, $initial_text )
       {
+         if( $this->safe_text )
+            $initial_text = textarea_safe($initial_text);
          return "<TEXTAREA name=\"$name\" cols=\"$columns\" " .
             ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
             "rows=\"$rows\" wrap=\"virtual\">$initial_text</TEXTAREA>";
