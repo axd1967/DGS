@@ -186,9 +186,6 @@ $array=array();
    $use_HA = true;
    $use_AB_for_handicap = true;
 
-   //-1= skip ending pass, -2= keep them, -999= keep everything
-   $sgf_trim_level = -1;
-
    //0=no highlight, 1=with Name property, 2=in comments, 3=both
    $sgf_pass_highlight = 1;
    $sgf_score_highlight = 1;
@@ -280,6 +277,14 @@ $array=array();
    $sgf_trim_nr = mysql_num_rows ($result) - 1 ;
    if ( $Status == 'FINISHED' )
    {
+      //-1= skip ending pass, -2= keep them, -999= keep everything
+      if ( abs($Score) < SCORE_RESIGN )
+         $sgf_trim_level = -1;
+      else if ( abs($Score) == SCORE_TIME )
+         $sgf_trim_level = -3;
+      else
+         $sgf_trim_level = -2;
+
       while ( $sgf_trim_nr >=0 )
       {
          if (!mysql_data_seek ($result, $sgf_trim_nr))
@@ -404,7 +409,7 @@ $array=array();
                   $movenum++;
                   if( $MoveNr != $movenum+$movesync)
                   {
-                     //usefull when "non AB handicap" or "resume after SCORE"
+                     //useful when "non AB handicap" or "resume after SCORE"
                      echo "MN[$movenum]";
                      $movesync= $MoveNr-$movenum;
                   }
