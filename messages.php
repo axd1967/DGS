@@ -150,7 +150,7 @@ require( "include/std_functions.php" );
     <p>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
-        <td><B><A href=\"new_message.php\">" . _("Send message") . "</A></B></td>\n";
+        <td><B><A href=\"new_message.php\">" . _("Send a message") . "</A></B></td>\n";
 
    if( $sent==1 )
       echo "<td><B><A href=\"messages.php\">" . _("Show recieved messages") . "</A></B></td>\n";
@@ -162,10 +162,10 @@ require( "include/std_functions.php" );
          echo "<td><B><A href=\"messages.php?all=1\">" . _("Show all") . "</A></B></td>\n";
 
       echo "        <td><B><A href=\"messages.php?sent=1\">" . _("Show sent messages") . "</A></B></td>\n";
+      echo "        <td><B><A href=\"messages.php?del=all$all_str\">" . _("Delete all") . "</A></B></td>\n";
    }
 
-   echo "        <td><B><A href=\"messages.php?del=all$all_str\">" . _("Delete all") . "</A></B></td>
-      </tr>
+   echo "      </tr>
     </table>
 ";
 
