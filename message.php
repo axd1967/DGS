@@ -30,6 +30,7 @@ require( "include/form_functions.php" );
 $mid = $_GET['mid'];
 $is_sent = ($_GET['sent'] === 't' );
 $mode = $_GET['mode'];
+$uid = $_GET['uid'];
 
 {
    connect2mysql();
@@ -49,10 +50,10 @@ $mode = $_GET['mode'];
 
    if( !$uid )
    {
-      if( eregi("uid=([0-9]+)", $HTTP_REFERER, $result) )
+//default recipient = last referenced user (ex: if from userinfo by menu link)
+      if( eregi("[?&]uid=([0-9]+)", $HTTP_REFERER, $result) )
          $uid = $result[1];
    }
-
    if( $uid > 0 and $uid != $player_row["ID"] )
    {
       $result = mysql_query( "SELECT Handle AS default_handle FROM Players WHERE ID=$uid" );
@@ -62,6 +63,8 @@ $mode = $_GET['mode'];
          extract(mysql_fetch_array($result));
       }
    }
+   if( !$default_handle )
+      $uid = 0;
 
    $folders = get_folders($my_id);
 
@@ -115,7 +118,7 @@ $mode = $_GET['mode'];
 
             $Folder_nr = ( $Type == 'INVITATION' ? FOLDER_REPLY : FOLDER_MAIN );
 
-            mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
+            mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='$Folder_nr' " .
                          "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" )
                or die( mysql_error());
 

@@ -33,7 +33,7 @@ require_once( "include/form_functions.php" );
 
   if( !($uid > 0) )
   {
-     if( eregi("uid=([0-9]+)", $HTTP_REFERER, $result) )
+     if( eregi("[?&]uid=([0-9]+)", $HTTP_REFERER, $result) )
         $uid = $result[1];
   }
 
