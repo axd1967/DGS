@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 function number2sgf_coords($x, $y, $Size)
 {
-   if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
+   if( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$Size && $y<$Size) )
       return NULL;
 
    return chr(ord('a')+$x) . chr(ord('a')+$y);
@@ -43,27 +43,31 @@ function sgf2number_coords($coord, $Size)
 
 function number2board_coords($x, $y, $Size)
 {
-  if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
+   if( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$Size && $y<$Size) )
      return NULL;
 
   $col = chr( $x + ord('a') );
   if( $col >= 'i' ) $col++;
 
   return  $col . ($Size - $y);
-
 }
 
-function board_coords2number($string, $Size)
+function board2number_coords($coord, $Size)
 {
-   $x = ord($string{0}) - ord('a');
-   if( $x > 8 ) $x--;
+   if( is_string($coord) && strlen($coord)>=2 )
+   {
+      $x = ord($coord{0}) - ord('a');
+      if( $x != 8 )
+      {
+         if( $x > 8 ) $x--;
 
-   $y = $Size - substr($string, 1);
+         $y = $Size - substr($coord, 1);
 
-   if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
-      return NULL;
-
-   return  array($x, $y);
+         if( $x<$Size and $y<$Size and $x>=0 and $y>=0 )
+            return  array($x, $y);
+      }
+   }
+   return array(NULL,NULL);
 }
 
 ?>

@@ -89,8 +89,8 @@ class GoDiagram
          if(isset($view))
          {
             list($dl,$ur) = split('-', $view);
-            list($l,$d) = board_coords2number($dl, $this->Size);
-            list($r,$u) = board_coords2number($ur, $this->Size);
+            list($l,$d) = board2number_coords($dl, $this->Size);
+            list($r,$u) = board2number_coords($ur, $this->Size);
          }
          else
          {
@@ -235,7 +235,7 @@ function create_godiagrams(&$text)
          {
             $result = mysql_query("SELECT * FROM GoDiagrams WHERE ID=$ID");
 
-            if( mysql_num_rows($result) == 1 )
+            if( @mysql_num_rows($result) == 1 )
             {
                $row = mysql_fetch_array( $result );
                $diagrams[$ID] = new GoDiagram();
