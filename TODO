@@ -41,8 +41,6 @@ SMALLER TASKS
 
 * Game notes
 
-* Rating graph
-
 * Send notification delay customizable (?)
 
 * Save the previous invite settings as default.
@@ -53,6 +51,8 @@ SMALLER TASKS
 
 * Improve rating system
 
+* Rating graph
+
 * Delete game when it's the opponents turn.
 
 * Help system.
@@ -60,7 +60,12 @@ SMALLER TASKS
 * Messages:
         Delete many.
         Mark messages to stay at status.
+        Folders.
 
 * Auto refresh (?)
 
-* Message folders.
+* Teaching mode, with undo (?)
+
+
+
+
