@@ -69,8 +69,9 @@ $stonesizes = array( 13 => 13, 17 => 17, 21 => 21, 25 => 25,
                      29 => 29, 35 => 35, 42 => 42, 50 => 50 );
 
 $woodcolors = array();
-for($i=1; $i<6; $i++ )
+for($i=1; $i<16; $i++ )
 {
+  if( $i==6 ) $i = 11;
   $woodcolors[$i] = '<img width=30 height=30 src="images/smallwood'.$i.'.gif">';
 }
 

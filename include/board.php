@@ -95,19 +95,21 @@ function draw_board($Size, &$array, $may_play, $gid,
 $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi,
 $coord_borders, $woodcolor  )
 {
+   global $woodbgcolors;
+
    $coord_width_array = array( 13 => 16, 17 => 21, 21 => 26, 25 => 31,
                                29 => 35, 35 => 43, 42 => 52, 50 => 62 );
 
    $mark_letter = 'm';
    $sizestringtype = 1;
 
-   if( !( $woodcolor >= 1 and $woodcolor <= 5) )
+   if( !($woodcolor >= 1 and $woodcolor <= 5 or $woodcolor >= 11 and $woodcolor <= 15) )
       $woodcolor = 1;
 
    if( !( $coord_borders >= 0 and $coord_borders <= 31) )
       $coord_borders = 31;
 
-   $smooth_edge = $coord_borders & SMOOTH_EDGE;
+   $smooth_edge = ( ($coord_borders & SMOOTH_EDGE) and ($woodcolor < 10) );
 
    if( !$stone_size ) $stone_size = 25;
    if( !$font_size ) $font_size = "+0";
@@ -157,7 +159,12 @@ $coord_borders, $woodcolor  )
       echo "<table border=2 cellpadding=3 align=center><tr>" .
          "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
-   echo '<table border=0 cellpadding=0 cellspacing=0 background="images/wood' . $woodcolor . '.gif" align=center><tr><td valign=top>';
+   $woodstring = ( $woodcolor > 10
+                   ? 'bgcolor=' . $woodbgcolors[$woodcolor - 10]
+                   : 'background="images/wood' . $woodcolor . '.gif"');
+
+   echo '<table border=0 cellpadding=0 cellspacing=0 ' . $woodstring .
+      ' align=center><tr><td valign=top>';
 
    echo '<table border=0 cellpadding=0 cellspacing=0 ' .
       'align=center valign=center background="">';

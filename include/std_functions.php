@@ -81,6 +81,8 @@ $buttoncolors = array('white','white','white','white',
                       '#990000','white','white','white',
                       'white','white','white');
 
+$woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
+
 $cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button');
 
 $button_max = 10;
@@ -174,7 +176,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
   </HEAD>
   <BODY bgcolor=' . $bg_color . '>
 
-    <script language="JavaScript" src="' . $base_path . 'include/goeditor.js"></script>
+    <script language="JavaScript" src="' . $base_path . 'js/goeditor.js"></script>
     <script language="JavaScript1.4"> version=1; </script>
 
     <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
