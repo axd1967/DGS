@@ -69,9 +69,9 @@ Both the old and the new password will also be valid until your next
 login. Now please login and then change your password to something more 
 rememberable.
  
-http://dragongoserver.sourceforge.net',
+' . $HOSTNAME,
 
-"From: noreply@dragongoserver.sourceforge.net");
+'From: ' . $EMAIL_FROM);
 
 
 start_page("New password sent", true, $logged_in, $player_row );

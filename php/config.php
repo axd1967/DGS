@@ -1,11 +1,17 @@
 <?php
 
-// These four are used to connect to mysql, with a command corresponding to
-// mysql -u$USER -p$PASSWORD -h$HOST -D$DB_NAME
+$HOSTNAME = "localhost";
 
-$HOST = "mysql";
-$USER = "dragongoserver";
-$PASSWORD = "";
+// From address for notification emails
+$EMAIL_FROM = "noreply@localhost";
+
+
+// These four are used to connect to mysql, with a command corresponding to
+// mysql -u$MYSQLUSER -p$MYSQLPASSWORD -h$MYSQLHOST -D$DB_NAME
+
+$MYSQLHOST = "mysql";
+$MYSQLUSER = "dragongoserver";
+$MYSQLPASSWORD = "";
 $DB_NAME = "dragongoserver";
 
 

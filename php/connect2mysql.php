@@ -22,9 +22,9 @@ include( "config.php" );
 
 function connect2mysql()
 {
-    global $USER, $HOST, $PASSWORD, $DB_NAME;
+    global $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
 
-    $dbcnx = @mysql_connect( $HOST, $USER, $PASSWORD);
+    $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
     if (!$dbcnx) 
       {
           header("Location: error.php?err=mysql_connect_failed");
