@@ -24,24 +24,12 @@ connect2mysql();
 
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-start_page("Links", true, $logged_in, $player_row );
+start_page("To do", true, $logged_in, $player_row );
 
-?>
+echo "<pre>\n";
 
-<p align="left">&nbsp;</p>
-<h3><font color="#800000">Documentaion</font></h3>
+readfile("TODO");
 
-
-<p align="left"><a href="introduction.php">Introduction to Dragon</a></p>
-
-<p align="left"><a href="phorum/list.php?f=3">Frequently Asked Questions</a> -- with answers</p>
-
-<p align="left"><a href="links.php">Links</a>
-
-<p align="left"><a href="todo.php">To do list</a> --- plans for future improvements </p>
-
-<p align="left">&nbsp;</p>
-
-<?php
+echo "</pre>\n";
 end_page();
 ?>

@@ -1,3 +1,17 @@
+BIG TASKS
+---------
+
+* Tournaments
+
+* Admin system
+
+* Rewrite forums
+
+
+
+
+SMALLER TASKS
+-------------
 
 * Introduction page
 
@@ -43,17 +57,15 @@
 
 * ascii->graphics in messages
 
-
---------------------------------
-* Tournaments
-
 * Rengo (team go)
-
-* Admin system
-
-* Rewrite forums
 
 
 BUGS
 ----
+
+* Server sends empty page sometimes.
+
+* Report of strange looking board on some browser.
+
+
 
