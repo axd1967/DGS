@@ -113,22 +113,21 @@ require_once( "include/countries.php" );
 
    $result = mysql_query("SELECT * FROM Bio where uid=$uid");
 
-   if( mysql_num_rows($result) > 0 )
+   if( @mysql_num_rows($result) > 0 )
    {
       echo '    <p>
     <h3><font color=' . $h3_color . '>' . T_('Biographical info') . '</font></h3>
     <table border=3>
 ';
-   }
 
-   while( $row = mysql_fetch_array( $result ) )
-   {
-      echo '     <tr><td><b>' . make_html_safe(T_($row["Category"])) . '</b></td>' .
-         '<td>' . make_html_safe($row["Text"],true) . "</td></tr>\n";
-   }
+      while( $row = mysql_fetch_assoc( $result ) )
+      {
+         echo '     <tr><td><b>' . make_html_safe(T_($row["Category"])) . '</b></td>' .
+            '<td>' . make_html_safe($row["Text"],true) . "</td></tr>\n";
+      }
 
-   if(  mysql_num_rows($result) > 0 )
       echo "    </table>\n";
+   }
 
 
    if( $my_info )
