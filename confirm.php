@@ -35,14 +35,11 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                          "LIMIT 1");
 
    if( mysql_num_rows($result) != 1 )
-   {
-      header("Location: status.php");
-      exit;
-   }
+      jump_to("status.php");
+
    $row = mysql_fetch_array($result);
 
-   header("Location: game.php?gid=" . $row["ID"]);
-   exit;
+   jump_to("game.php?gid=" . $row["ID"]);
 }
 
 
@@ -52,10 +49,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       error("no_game_nr");
 
    if( $next == 'Go back' )
-   {
-      header("Location: game.php?gid=$gid");
-      exit;
-   }
+      jump_to("game.php?gid=$gid");
 
    connect2mysql();
 
@@ -373,7 +367,6 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       default:
       {
          error("invalid_action");
-         exit;
       }
    }
 
@@ -454,15 +447,13 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    if( $next == "Submit and go to status" )
    {
-      header("Location: status.php");
-      exit;
+      jump_to("status.php");
    }
    else if( $next == "Submit and go to next game" )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
 
-   header("Location: game.php?gid=$gid");
-   exit;
+   jump_to("game.php?gid=$gid");
 }
 ?>

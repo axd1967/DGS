@@ -129,9 +129,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
 
 function end_page( $new_paragraph = true )
 {
-   global $time;
-   global $show_time;
-   global $HOSTBASE;
+   global $time, $show_time, $HOSTBASE, $SERVER_TIMEZONE;
 
    if( $new_paragraph )
       echo "<p>";
@@ -155,6 +153,7 @@ function end_page( $new_paragraph = true )
 </HTML>
 ';
 
+   putenv('TZ=' . $SERVER_TIMEZONE );
    ob_end_flush();
 }
 
@@ -162,11 +161,19 @@ function error($err, $mysql=true)
 {
    disable_cache();
 
-   $header = "Location: error.php?err=" . urlencode($err);
+   $uri = "error.php?err=" . urlencode($err);
    if( $mysql )
-      $header .= "&mysql=" . urlencode($mysql);
+      $uri .= "&mysql=" . urlencode($mysql);
 
-   header( $header );
+   jump_to( $uri );
+}
+
+function jump_to($uri)
+{
+   global $SERVER_TIMEZONE;
+
+   putenv('TZ=' . $SERVER_TIMEZONE );
+   header( "Location: " . $uri );
    exit;
 }
 
@@ -408,9 +415,12 @@ function echo_time($hours)
 
 function is_logged_in($hdl, $scode, &$row)
 {
-   global $time, $show_time;
+   global $time, $show_time, $HOSTBASE, $REQUEST_URI, $HOSTNAME, $HTTP_HOST;
    $time = getmicrotime();
    $show_time = false;
+
+   if( $HTTP_HOST != $HOSTNAME )
+      jump_to( "http://" . $HOSTNAME . $REQUEST_URI );
 
 
    if( !$hdl )

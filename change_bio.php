@@ -87,7 +87,6 @@ require( "include/rating.php" );
 
    $msg = urlencode("Bio updated!");
 
-   header("Location: userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
-   exit;
+   jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
 }
 ?>

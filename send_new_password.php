@@ -30,10 +30,8 @@ require( "include/std_functions.php" );
 
 
    if( $action == 'Go back' )
-   {
-      header("Location: index.php");
-      exit;
-   }
+      jump_to("index.php");
+
 
    $result = mysql_query( "SELECT Newpassword, Email " .
                           "FROM Players WHERE Handle='$handle'" );
@@ -72,10 +70,7 @@ rememberable.
    'From: ' . $EMAIL_FROM);
 
 
-   start_page("New password sent", true, $logged_in, $player_row );
-
-   echo "New password sent!";
-
-   end_page();
+   $msg = urlencode("New password sent!");
+   jump_to("status.php?msg=$msg");
 }
 ?>

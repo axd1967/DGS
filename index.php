@@ -28,8 +28,7 @@ require( "include/std_functions.php" );
     if( $logout )
         {
             set_cookies("","", true);
-            header("Location: " . $HOSTBASE ."/index.php");
-            exit;
+            jump_to("index.php");
         }
 
 

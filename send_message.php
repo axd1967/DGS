@@ -249,7 +249,6 @@ disable_cache();
 
    $msg = urlencode("Message sent!");
 
-   header("Location: status.php?msg=$msg");
-   exit;
+   jump_to("status.php?msg=$msg");
 }
 ?>

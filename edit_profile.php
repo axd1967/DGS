@@ -18,8 +18,6 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
-
 require( "include/std_functions.php" );
 require( "include/timezones.php" );
 require( "include/rating.php" );
@@ -29,10 +27,8 @@ connect2mysql();
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 if( !$logged_in )
-{
-   header("Location: error.php?err=not_logged_in");
-   exit;
-}
+   error("not_logged_in");
+
 
 start_page("Edit profile", true, $logged_in, $player_row );
 

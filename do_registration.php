@@ -73,6 +73,6 @@ require( "include/std_functions.php" );
 
    set_cookies( $userid, $code );
 
-   header("Location: status.php");
+   jump_to("status.php");
 }
 ?>

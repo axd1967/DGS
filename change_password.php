@@ -51,7 +51,6 @@ require( "include/rating.php" );
 
    $msg = urlencode("Password changed!");
 
-   header("Location: userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
-   exit;
+   jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
 }
 ?>
