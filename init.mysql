@@ -281,6 +281,7 @@ CREATE TABLE Tournament (
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
+
 #
 # Table structure for table 'TournamentRound'
 #
@@ -306,7 +307,6 @@ CREATE TABLE TournamentRound (
 # Table structure for table 'Knockout'
 #
 
-
 CREATE TABLE Knockout (
   Tournament_ID int(11) NOT NULL default '0',
   Seedings int(11) NOT NULL default '0',
@@ -318,7 +318,6 @@ CREATE TABLE Knockout (
 #
 # Table structure for table 'TournamentOrganizers'
 #
-
 
 CREATE TABLE TournamentOrganizers (
   ID int(11) NOT NULL auto_increment,
@@ -332,7 +331,6 @@ CREATE TABLE TournamentOrganizers (
 # Table structure for table 'TournamentParticipants'
 #
 
-
 CREATE TABLE TournamentParticipants (
   ID int(11) NOT NULL auto_increment,
   tid int(11) NOT NULL default '0',
@@ -341,6 +339,7 @@ CREATE TABLE TournamentParticipants (
   PlayerNumber int(11) default NULL,
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
+
 
 #
 # Table structure for table 'Errorlog'
@@ -501,6 +500,24 @@ CREATE TABLE Forumreads (
   Thread_ID int(11) NOT NULL default '0',
   Time datetime default NULL,
   PRIMARY KEY  (User_ID,Thread_ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'GoDiagrams'
+#
+
+CREATE TABLE GoDiagrams (
+  ID int(11) NOT NULL auto_increment,
+  diagid int(11) default NULL,
+  mid int(11) default NULL,
+  Size int(11) default NULL,
+  View_Left int(11) default NULL,
+  View_Right int(11) default NULL,
+  View_Up int(11) default NULL,
+  View_Down int(11) default NULL,
+  Data text,
+  PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
 

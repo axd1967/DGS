@@ -23,7 +23,7 @@ if( basename(getcwd()) == 'forum' )
    chdir("../");
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
-require_once( "include/goeditor_functions.php" );
+require_once( "include/GoDiagram.php" );
 chdir("forum");
 
 
@@ -162,7 +162,7 @@ function get_new_string($Lastchangedstamp, $Lastread)
 
 function message_box( $post_type, $id, $Subject='', $Text='')
 {
-   global $forum, $thread;
+   global $forum, $thread, $GoDiagrams;
 
    if( $post_type != 'edit' and $post_type != 'preview' and strlen($Subject) > 0 and
        strcasecmp(substr($Subject,0,3), "re:") != 0 )
@@ -177,9 +177,10 @@ function message_box( $post_type, $id, $Subject='', $Text='')
                           'HIDDEN', ($post_type == 'edit' ? 'edit' : 'parent'), $id,
                           'HIDDEN', 'thread', $thread,
                           'HIDDEN', 'forum', $forum ));
-   $form->add_row( array( 'SPACE', 'TEXTAREA', 'Text', 70, 25, $Text ) );
+   $form->add_row( array( 'SPACE', 'TEXTAREA', 'Text', 70, 25,
+                          preg_replace('/<goban([^>]*)>/i', '<goban>', $Text) ) );
 
-   $str = draw_diagrams($id, $Text);
+   $str = draw_editors($GoDiagrams);
    if( !empty($str) )
    {
       $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str ));

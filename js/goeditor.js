@@ -58,6 +58,9 @@ var path = '';
 
 var letters = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
+var woodbgcolors = ['', '#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848'];
+
 function init(nr)
 {
    var x, y;
@@ -112,8 +115,11 @@ function show_goban(nr)
 {
   var x, y, fig;
   var stonesz = stonesize[nr];
+  var woodstring = ( woodcolor[nr] > 10
+                    ? 'bgcolor=' + woodbgcolors[woodcolor[nr] - 10]
+                    : 'background="' + path + 'images/wood' + woodcolor[nr] + '.gif"');
 
-  document.write('<table border=0 cellpadding=0 cellspacing=0 background="'+path+'images/wood'+woodcolor[nr]+'.gif" align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
+  document.write('<table border=0 cellpadding=0 cellspacing=0 '+woodstring+' align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
   for( y=starty[nr]; y<endy[nr]; y++)
   {
      document.write('<tr>');
@@ -498,7 +504,7 @@ function dump_data(nr, formname)
       separator = ';';
    }
    document.forms[formname].elements['dimensions'+nr].value =
-      size[nr] +','+ startx[nr] +','+ endx[nr] + ','+ starty[nr] +','+ endy[nr];
+      size[nr] +','+ (startx[nr]+1) +','+ endx[nr] + ','+ (starty[nr]+1) +','+ endy[nr];
    document.forms[formname].elements['data'+nr].value = string;
 }
 
@@ -624,7 +630,7 @@ function change_goban(nr, x, y, val)
       mark[nr][x][y] = '';
    }
 
-   set_image(nr, x ,y);
+   set_image(nr, x, y);
 }
 
 function change_mark(nr, x, y, val)
@@ -637,9 +643,29 @@ function change_mark(nr, x, y, val)
    push_history(nr, ['m', x, y, mark[nr][x][y], val]);
    mark[nr][x][y] = val;
 
-   set_image(nr, x ,y);
+   set_image(nr, x, y);
 }
 
+function enter_data(nr, data)
+{
+   var row;
+   var data_rows = data.split(';');
+   var c, v;
+
+   for(y=starty[nr]; y<endy[nr]; y++)
+   {
+      row = data_rows[y-starty[nr]].split(',');
+
+      for(x=startx[nr]; x<endx[nr]; x++)
+      {
+         c = row[x-startx[nr]].charAt(0);
+         v = ( c == 'b' ? 1 : ( c == 'w' ? 2 : 0 ) );
+         goban[nr][x][y] = v;
+         mark[nr][x][y] = row[x-startx[nr]].substr(1);
+         set_image(nr, x, y);
+      }
+   }
+}
 
 /* Main function
 */

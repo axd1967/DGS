@@ -27,7 +27,7 @@ require_once("post.php");
 function draw_post($post_type, $my_post, $Subject, $Text)
 {
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
-      $thread, $Timestamp, $date_fmt, $Lastread, $is_editor, $NOW, $player_row, $cur_depth;
+      $thread, $Timestamp, $date_fmt, $Lastread, $is_editor, $NOW, $player_row, $GoDiagrams;
 
    $post_colors = array( 'normal' => 'cccccc',
                          'hidden' => 'eecccc',
@@ -36,12 +36,7 @@ function draw_post($post_type, $my_post, $Subject, $Text)
                          'edit' => 'eeeecc' );
 
    $txt = make_html_safe(trim($Text), true);
-
-   if( $post_type == 'preview' )
-   {
-      $txt = make_html_safe(trim($_POST['Text']), true);
-      change_depth( $cur_depth, $cur_depth + 1 );
-   }
+   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
    if( strlen($txt) == 0 ) $txt = '&nbsp';
 
@@ -247,6 +242,7 @@ function change_depth(&$cur_depth, $new_depth)
       if( $edit == $ID )
          $post_type = 'edit';
 
+      $GoDiagrams = create_godiagrams($ID, $Text);
       draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text);
 
       if( $preview and $preview_ID == $ID )
@@ -254,6 +250,7 @@ function change_depth(&$cur_depth, $new_depth)
          change_depth( $cur_depth, $cur_depth + 1 );
          $Subject = $_POST['Subject'];
          $Text = $_POST['Text'];
+         $GoDiagrams = create_godiagrams(null, $Text);
          draw_post('preview', false, $Subject, $Text);
       }
 
@@ -268,8 +265,10 @@ function change_depth(&$cur_depth, $new_depth)
 
    if( $preview and $preview_ID == 0 )
    {
+      change_depth( $cur_depth, $cur_depth + 1 );
       $Subject = $_POST['Subject'];
       $Text = $_POST['Text'];
+      $GoDiagrams = create_godiagrams(null, $Text);
       draw_post('preview', false, $Subject, $Text);
       echo "<tr><td>\n";
       message_box('preview', $thread, $Subject, $Text);

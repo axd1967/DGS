@@ -381,7 +381,7 @@ function make_menu_horizontal($menu_array)
    echo '</tr></table>' . "\n";
 
    echo '<table width="100%" cellpadding=0 cellspacing=0><tr><td height=1 bgcolor=' . $menu_bg_color .
-      "><img src=\"images/dot.gif\" width=1 height=1 alt=\"\"></td></table>\n" . "
+      "><img src=\"{$base_path}images/dot.gif\" width=1 height=1 alt=\"\"></td></table>\n" . "
     <BR>\n";
 
 }
@@ -443,6 +443,17 @@ function error($err, $debugmsg=NULL)
    @mysql_query( $errorlog_query );
 
    jump_to( $uri );
+}
+
+function warn($debugmsg)
+{
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='$handle', " .
+      "Message='WARN:$debugmsg', IP='$REMOTE_ADDR'" ;
+
+   if( !empty($mysql_error) )
+      $errorlog_query .= ", MysqlError='" . mysql_error() . "'";
+
+   @mysql_query( $errorlog_query );
 }
 
 function help($topic)
@@ -575,7 +586,7 @@ function make_html_safe(&$msg, $some_html=false)
 
       // Some allowed html tags
 
-      $html_code = "a|b|i|u|center|li|ul|ol|font|p|br";
+      $html_code = "a|b|i|u|center|li|ul|ol|font|p|br|goban";
 
       $msg=eregi_replace("<(/?($html_code)( +[^>]*)?)>", "{anglstart}\\1{anglend}", $msg);
    }
