@@ -57,7 +57,8 @@ require( "include/form_functions.php" );
       {
          mysql_query("UPDATE Players SET VacationDays=VacationDays-($vacationdiff), " .
                      "OnVacation=OnVacation+($vacationdiff) " .
-                     "WHERE ID=" . $player_row['ID'] . " LIMIT 1") or die(mysql_error());
+                     "WHERE ID=" . $player_row['ID'] . " " .
+                     "AND VacationDays >= ($vacationdiff) LIMIT 1") or die(mysql_error());
 
          $msg = urlencode(T_('Vacation length changed!'));
 
@@ -109,7 +110,8 @@ require( "include/form_functions.php" );
 
          mysql_query("UPDATE Players SET VacationDays=VacationDays-$vacationlength, " .
                      "OnVacation=$vacationlength " .
-                     "WHERE ID=" . $player_row['ID'] . " LIMIT 1") or die(mysql_error());
+                     "WHERE ID=" . $player_row['ID'] . " " .
+                     "AND VacationDays >= ($vacationlength) LIMIT 1") or die(mysql_error());
 
          $msg = urlencode(T_('Have a nice vacation!'));
 
