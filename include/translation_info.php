@@ -97,6 +97,14 @@ array(
       array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: admin.php */
+      'Added language %s with code %s and characterencoding %s.' =>
+      array( 'Groups' => array() ),
+
+      /* Found in these files: admin.php */
+      'Added user %s as translator for language %s.' =>
+      array( 'Groups' => array() ),
+
+      /* Found in these files: admin.php */
       'Add language' =>
       array( 'Groups' => array( 'Admin' ) ),
 
@@ -176,12 +184,12 @@ array(
       'Bio updated!' =>
       array( 'Groups' => array( 'Edit bio' ) ),
 
-      /* Found in these files: message.php */
-      'black' =>
-      array( 'Groups' => array( 'Common' ) ),
-
       /* Found in these files: include/move.php */
       'Black' =>
+      array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: message.php */
+      'black' =>
       array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: edit_profile.php */
@@ -211,6 +219,10 @@ array(
       /* Found in these files: edit_bio.php */
       'Change bio' =>
       array( 'Groups' => array( 'Edit bio' ) ),
+
+      /* Found in these files: admin.php */
+      'Changed translator privileges info for user %s.' =>
+      array( 'Groups' => array() ),
 
       /* Found in these files: edit_password.php, site_map.php, userinfo.php */
       'Change password' =>
@@ -460,7 +472,7 @@ array(
       'Frequently asked questions about go for the rec.games.go newsgroup' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/message_functions.php, list_messages.php */
+      /* Found in these files: include/message_functions.php, list_messages.php, status.php */
       'From' =>
       array( 'Groups' => array( 'Messages' ) ),
 
@@ -664,12 +676,12 @@ array(
       'Language name (i.e. English)' =>
       array( 'Groups' => array( 'Admin' ) ),
 
-      /* Found in these files: users.php */
-      'Last Access' =>
-      array( 'Groups' => array( 'Users' ) ),
-
       /* Found in these files: userinfo.php */
       'Last access' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: users.php */
+      'Last Access' =>
       array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: show_games.php, status.php */
@@ -712,13 +724,13 @@ array(
       'Lots of info on go' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: include/message_functions.php */
-      'Main time' =>
-      array( 'Groups' => array( 'Game', 'Messages' ) ),
-
       /* Found in these files: include/move.php */
       'Main Time' =>
       array( 'Groups' => array( 'Game' ) ),
+
+      /* Found in these files: include/message_functions.php */
+      'Main time' =>
+      array( 'Groups' => array( 'Game', 'Messages' ) ),
 
       /* Found in these files: include/message_functions.php */
       'Manual setting' =>
@@ -798,7 +810,7 @@ array(
 
       /* Found in these files: include/table_columns.php */
       'next page' =>
-      array( 'Groups' => array( 'Messages', 'Game' ) ),
+      array( 'Groups' => array( 'Game', 'Messages' ) ),
 
       /* Found in these files: show_games.php, status.php, users.php */
       'Nick' =>
@@ -816,12 +828,12 @@ array(
       'NNGS' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: show_games.php */
-      'no' =>
-      array( 'Groups' => array( 'Common' ) ),
-
       /* Found in these files: include/message_functions.php, include/move.php */
       'No' =>
+      array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: show_games.php */
+      'no' =>
       array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: status.php */
@@ -948,13 +960,13 @@ array(
       'Rafael\'s Go Page' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: users.php */
-      'Rank Info' =>
-      array( 'Groups' => array( 'Users' ) ),
-
       /* Found in these files: edit_profile.php, include/move.php, status.php, userinfo.php */
       'Rank info' =>
       array( 'Groups' => array( 'Edit profile', 'Status' ) ),
+
+      /* Found in these files: users.php */
+      'Rank Info' =>
+      array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: include/message_functions.php, include/move.php */
       'Rated' =>
@@ -1415,7 +1427,7 @@ The reasons for this problem could be any of the following:
       'Timezone' =>
       array( 'Groups' => array( 'Common', 'Edit profile' ) ),
 
-      /* Found in these files: include/message_functions.php, list_messages.php, status.php */
+      /* Found in these files: include/message_functions.php, list_messages.php */
       'To' =>
       array( 'Groups' => array( 'Messages', 'Status' ) ),
 
@@ -1423,13 +1435,13 @@ The reasons for this problem could be any of the following:
       'To (userid)' =>
       array( 'Groups' => array( 'Messages' ) ),
 
-      /* Found in these files: site_map.php */
-      'Todo list' =>
-      array( 'Groups' => array( 'Site map' ) ),
-
       /* Found in these files: docs.php */
       'To do list' =>
       array( 'Groups' => array( 'Documentation' ) ),
+
+      /* Found in these files: site_map.php */
+      'Todo list' =>
+      array( 'Groups' => array( 'Site map' ) ),
 
       /* Found in these files: index.php */
       'To look around, use %s.' =>
@@ -1463,6 +1475,10 @@ The reasons for this problem could be any of the following:
       'Up' =>
       array( 'Groups' => array( 'Edit profile' ) ),
 
+      /* Found in these files: admin.php */
+      'User %s is already translator for language %s.' =>
+      array( 'Groups' => array() ),
+
       /* Found in these files: edit_profile.php, forgot.php, index.php, register.php, status.php, userinfo.php */
       'Userid' =>
       array( 'Groups' => array( 'Common', 'Edit profile', 'Register', 'Status' ) ),
@@ -1491,13 +1507,13 @@ The reasons for this problem could be any of the following:
       'Welcome page' =>
       array( 'Groups' => array( 'Site map' ) ),
 
-      /* Found in these files: include/move.php */
-      'White' =>
-      array( 'Groups' => array( 'Common', 'Game' ) ),
-
       /* Found in these files: message.php */
       'white' =>
       array( 'Groups' => array( 'Messages' ) ),
+
+      /* Found in these files: include/move.php */
+      'White' =>
+      array( 'Groups' => array( 'Common', 'Game' ) ),
 
       /* Found in these files: show_games.php */
       'Win?' =>
