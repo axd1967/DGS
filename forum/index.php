@@ -31,7 +31,7 @@ $result = mysql_query("SELECT Forums.ID,Description,Name, " .
                       "UNIX_TIMESTAMP(MAX(Lastchanged)) AS Timestamp,Count(*) AS Count " .
                       "FROM Forums LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
                       "GROUP BY Forums.ID " .
-                      "ORDER BY SortVal");
+                      "ORDER BY SortOrder");
 
 $cols = 3;
 $headline   = array("Forums" => "colspan=$cols");
