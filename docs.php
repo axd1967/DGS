@@ -29,7 +29,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
   echo "<table align=center><tr><td>\n";
   echo "<center><h3><font color=$h3_color>" .
-    T_('Documentaion') . "</font></h3></center>\n";
+    T_('Documentation') . "</font></h3></center>\n";
 
   add_link_page_link('introduction.php', T_('Introduction to Dragon'));
   add_link_page_link('site_map.php', T_('Site map'));
