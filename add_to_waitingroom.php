@@ -32,7 +32,7 @@ require( "include/rating.php" );
 
    if( !$logged_in )
       error("not_logged_in");
-   //init_standard_folders();
+   //not used: init_standard_folders();
 
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
@@ -56,18 +56,24 @@ require( "include/rating.php" );
       $weekendclock = 'N';
 
    if( $must_be_rated != 'Y' )
-      $must_be_rated = 'N';
-
-   $rating1 = read_rating($rating1, 'dragonrating');
-   $rating2 = read_rating($rating2, 'dragonrating');
-
-   if( $rating2 < $rating1 )
    {
-      $tmp = $rating1; $rating1 = $rating2; $rating2 = $tmp;
+      $must_be_rated = 'N';
+      //to keep a good column sorting
+      $rating1 = $rating2 = read_rating('99 kyu', 'dragonrating');
    }
+   else
+   {
+      $rating1 = read_rating($rating1, 'dragonrating');
+      $rating2 = read_rating($rating2, 'dragonrating');
 
-   $rating2 += 50;
-   $rating1 -= 50;
+      if( $rating2 < $rating1 )
+      {
+         $tmp = $rating1; $rating1 = $rating2; $rating2 = $tmp;
+      }
+
+      $rating2 += 50;
+      $rating1 -= 50;
+   }
 
    $query = "INSERT INTO Waitingroom SET " .
       "uid=" . $player_row['ID'] . ', ' .
