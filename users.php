@@ -57,11 +57,13 @@ include( "include/timezones.php" );
    if( $sort2 )
       $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
 
-   $result = mysql_query("SELECT *, Rank AS Rankinfo, " .
-                         "(Activity>10)+(Activity>250) AS ActivityLevel, " .
-                         "Running+Finished AS Games, " .
-                         "100*Won/Finished AS Percent " .
-                         "FROM Players ORDER BY $order");
+   $query = "SELECT *, Rank AS Rankinfo, " .
+       "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
+       "Running+Finished AS Games, " .
+       "100*Won/Finished AS Percent " .
+       "FROM Players ORDER BY $order";
+
+   $result = mysql_query( $query );
 
 
    start_page("Users", true, $logged_in, $player_row );

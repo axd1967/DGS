@@ -39,8 +39,11 @@ $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
 $ActivityForHit = 1.0;
 $ActivityForMove = 10.0;
 
-$RowsPerPage = 5;
-$MaxRowsPerPage = 6;
+$ActiveLevel1 = 10.0;
+$ActiveLevel2 = 150.0;
+
+$RowsPerPage = 50;
+$MaxRowsPerPage = 70;
 
 $has_sgf_alias = false;
 
