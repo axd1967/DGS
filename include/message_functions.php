@@ -470,6 +470,8 @@ function change_folders_for_marked_messages($uid, $folders)
 
    if( isset($_GET['move_marked']) )
    {
+      if( !isset($_GET['folder']) )
+         return -1; //i.e. no move query
       $new_folder = $_GET['folder'];
    }
    else if( isset($_GET['destroy_marked'] ) )

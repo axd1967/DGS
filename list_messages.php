@@ -47,18 +47,41 @@ require_once( "include/timezones.php" );
 
    $my_folders = get_folders($my_id);
 
+/* 
+   *folder* args rules:
+   - no &folder= neither &current_folder= set:
+       assume enter FOLDER_ALL_RECEIVED
+   - &folder= set but not &current_folder=:
+       assume enter &folder=
+   - no &folder= but &current_folder= set (may be 0=FOLDER_ALL_RECEIVED):
+       reenter &current_folder=
+   - both &folder= and &current_folder= set:
+       reenter &current_folder=
+       &folder= is the move query field, effective on a *move_marked* click
+
+   *folder* vars meaning:
+   - $current_folder: folder shown
+   - $folder: destination folder for move queries,
+       effective on a *move_marked* click
+       kept if != $current_folder
+*/
+   $folder = @$_GET['folder'];
+   $current_folder = @$_GET['current_folder'];
+   if( !isset($current_folder) )
+      if( !isset($folder) )
+         $current_folder = FOLDER_ALL_RECEIVED;
+      else
+         $current_folder = $folder;
+
    if( isset($_GET['toggle_marks']) )
-   {
       $toggle_marks= true;
-      $current_folder = @$_GET['current_folder'];
-   }
    else
    {
       $toggle_marks= false;
-      if( change_folders_for_marked_messages($my_id, $my_folders) != 0 )
-         $current_folder = @$_GET['folder'];
-      if( !isset($current_folder) or !isset($my_folders[$current_folder]) )
-         $current_folder = @$_GET['current_folder'];
+      if( change_folders_for_marked_messages($my_id, $my_folders) > 0 )
+         if( isset($folder) && isset($my_folders[$folder]) 
+           && $current_folder != FOLDER_DELETED )
+            swap( $current_folder, $folder); //follow the move if one
    }
 
    $page = '';
@@ -74,7 +97,7 @@ require_once( "include/timezones.php" );
    {
       $title = T_('Message list');
       $where = "";
-      if( !isset($current_folder) or !isset($my_folders[$current_folder]) )
+      if( !isset($my_folders[$current_folder]) )
          $current_folder = FOLDER_ALL_RECEIVED;
 
       if( $current_folder == FOLDER_ALL_RECEIVED )
@@ -87,11 +110,14 @@ require_once( "include/timezones.php" );
       }
       else
       {
-         $page.= '&folder=' . $current_folder ;
          $folderstring = (string)$current_folder;
       }
    }
 
+   if( isset($current_folder) )
+      $page.= '&current_folder=' . $current_folder ;
+   if( isset($folder) )
+      $page.= '&folder=' . $folder ;
 
    start_page($title, true, $logged_in, $player_row );
 
@@ -126,14 +152,16 @@ require_once( "include/timezones.php" );
    {
 /* Actually, toggle marks does not destroy sort
         but sort destroy marks
+   (unless a double *toggle marks* that transfert marks in URL)
 */
       echo '<center>';
       echo $mtable->echo_hiddens();
 
       if( $find_answers > 0 )
         echo '<input type="hidden" name="find_answers" value="' . $find_answers . "\">\n";
-      else if( $current_folder > FOLDER_ALL_RECEIVED )
+      else if( $current_folder >= FOLDER_ALL_RECEIVED )
         echo '<input type="hidden" name="current_folder" value="' . $current_folder . "\">\n";
+
       echo '<input type="submit" name="toggle_marks" value="' . T_('Marks toggle') . "\">\n";
 
       if( $current_folder == FOLDER_DELETED )
@@ -151,7 +179,7 @@ require_once( "include/timezones.php" );
 
          echo '<input type="submit" name="move_marked" value="' .
             T_('Move marked messages to folder') . "\">\n" .
-            $marked_form->print_insert_select_box( 'folder', '1', $fld, '', '') ;
+            $marked_form->print_insert_select_box( 'folder', '1', $fld, $folder, '') ;
       }
       echo "</center>\n";
    }
