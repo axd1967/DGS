@@ -57,7 +57,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    if( $msg )
       echo "<p><b><font color=\"green\">$msg</font></b><hr>";
 
-   $page = "waiting_room.php?" . ( $info > 0 ? "info=$info&" : '' );
+   $page = "waiting_room.php" . ( $info > 0 ? "info=$info&" : '?' );
 
    if(!$sort1)
       $sort1 = 'ID';
@@ -112,7 +112,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             $Komi = '-';
 
 
-         echo "<td class=button width=92 align=center><A class=button href=\"waiting_room.php?info=$ID\">&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>\n";
+         echo "<td class=button width=92 align=center><A class=button href=\"waiting_room.php?info=$ID#info\">&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>\n";
 
          if( (1 << 0) & $column_set )
             echo "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
@@ -234,7 +234,7 @@ function show_game_info($game_row)
 
    extract($game_row);
 
-   echo '<p>';
+   echo '<p><a name="info">' . "\n";
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
    echo '<tr><td><b>' . T_('Player') . '<b></td><td>' .
