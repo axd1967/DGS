@@ -339,14 +339,13 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
             error("invalid_action");
 
-         check_done();
-  //ajusted globals by check_done(): $array, $score, $prisoners;
-  //here, $prisoners list the marked points (from $stonestring)
+         check_remove();
+  //ajusted globals by check_remove(): $array, $score, $stonestring;
 
-         $nr_prisoners = count($prisoners);
+         $l = strlen( $stonestring );
 
          $next_status = 'SCORE2';
-         if( $Status == 'SCORE2' and  $nr_prisoners == 0 )
+         if( $Status == 'SCORE2' and  $l < 2 )
          {
             $next_status = 'FINISHED';
             $game_finished = true;
@@ -354,9 +353,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
-
-         while( list($dummy, list($x,$y)) = each($prisoners) )
+         for( $i=1; $i < $l; $i += 2 )
          {
+            list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
             $query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
          }
 
@@ -381,7 +380,6 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          }
          else
             $game_query .= "ToMove_ID=0, ";
-
 
 
          $game_query .=

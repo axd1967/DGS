@@ -221,12 +221,15 @@ require( "include/rating.php" );
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
             error("invalid_action");
 
-         check_remove();
-  //ajusted globals by check_remove(): $array, $stonestring;
+         check_remove( $coord );
+  //ajusted globals by check_remove(): $array, $score, $stonestring;
 
          $enable_message = false;
 
-         $extra_message = "<font color=\"green\">" . T_("Please mark dead stones and click 'done' when finished.") . "</font>";
+         $extra_message = "<font color=\"blue\">" . T_('Score') . ": " .
+             score2text($score, true) . "</font>";
+         $extra_message.= "<P>";
+         $extra_message.= "<font color=\"green\">" . T_("Please mark dead stones and click 'done' when finished.") . "</font>";
       }
       break;
 
@@ -235,9 +238,8 @@ require( "include/rating.php" );
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
             error("invalid_action");
 
-         check_done();
-  //ajusted globals by check_done(): $array, $score, $prisoners;
-  //here, $prisoners list the marked points (from $stonestring)
+         check_remove();
+  //ajusted globals by check_remove(): $array, $score, $stonestring;
 
          $extra_message = "<font color=\"blue\">" . T_('Score') . ": " .
              score2text($score, true) . "</font>";
