@@ -30,7 +30,9 @@ if (!isset($page_microtime))
 {
    $page_microtime = getmicrotime();
    $admin_level = 0;
+   //$base_path is relative to the URL, not to the current dir
    $base_path = ( is_base_dir() ? '' : '../' );
+   $main_path = getcwd().'/';
 }
 
 require_once( "include/translation_functions.php" );
@@ -810,6 +812,7 @@ function score2text($score, $verbose, $keep_english=false)
                : $color . '+' . abs($score) );
 }
 
+// relative to the calling URL, not to the current dir
 function is_base_dir()
 {
    global $SUB_PATH;
@@ -820,9 +823,10 @@ function is_base_dir()
      but dirname('/foo')     return '\\'
      and dirname('/')        return '\\'
    replace the previous line by this one:
-   return str_replace('\\','/',dirname($_SERVER['PHP_SELF'])) == $SUB_PATH;
  */
-   return file_exists("include/std_functions.php");
+   return str_replace('\\','/',dirname($_SERVER['PHP_SELF'])) == $SUB_PATH;
+   //relative to current directory (allow chdir())
+   //return file_exists("include/std_functions.php");
 }
 
 function mod($a,$b)
@@ -910,13 +914,18 @@ function who_is_logged( &$row)
 {
    $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
    $sessioncode = @$_COOKIE[COOKIE_PREFIX.'sessioncode'];
-   return is_logged_in($handle, $sessioncode, $row);
+   $curdir = getcwd();
+   global $main_path;
+   chdir( $main_path);
+   $res = is_logged_in($handle, $sessioncode, $row);
+   chdir( $curdir);
+   return $res;
 }
 
-function is_logged_in($hdl, $scode, &$row)
+function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 {
    global $HOSTNAME, $hostname_jump, $page_microtime, $admin_level,
-      $ActivityHalvingTime, $ActivityForHit, $NOW, $base_path;
+      $ActivityHalvingTime, $ActivityForHit, $NOW;
 
 
    if( $hostname_jump and eregi_replace(":.*$","", @$_SERVER['HTTP_HOST']) != $HOSTNAME )
@@ -926,7 +935,7 @@ function is_logged_in($hdl, $scode, &$row)
 
    if( !$hdl )
    {
-      include_all_translate_groups();
+      include_all_translate_groups(); //must be called from main dir
       return false;
    }
 
@@ -937,13 +946,13 @@ function is_logged_in($hdl, $scode, &$row)
 
    if( @mysql_num_rows($result) != 1 )
    {
-      include_all_translate_groups();
+      include_all_translate_groups(); //must be called from main dir
       return false;
    }
 
    $row = mysql_fetch_assoc($result);
 
-   include_all_translate_groups($row);
+   include_all_translate_groups($row); //must be called from main dir
 
    if( $row["Sessioncode"] != $scode or $row["Expire"] < $NOW )
       return false;
@@ -1100,7 +1109,7 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
 
 function send_reference( $link, $safe, $color, $player_id, $player_name=false, $player_handle=false)
 {
- global $base_path;
+// global $base_path;
    return user_reference( -$link
       , $safe, $color, $player_id, $player_name, $player_handle);
 }

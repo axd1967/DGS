@@ -25,7 +25,7 @@ require_once( "include/make_translationfiles.php" );
 
 connect2mysql();
 
-make_known_languages();
-make_include_files();
+make_known_languages(); //must be called from main dir
+make_include_files(); //must be called from main dir
 
 ?>

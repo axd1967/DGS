@@ -245,7 +245,7 @@ require_once( "include/make_translationfiles.php" );
 
      if( $row['QTranslatable'] !== 'N' 
          || ( $row['Answer'] && $row['ATranslatable'] !== 'N' ) )
-        make_include_files(null, 'FAQ');
+        make_include_files(null, 'FAQ'); //must be called from main dir
 
      jump_to("admin_faq.php");
   }
@@ -389,7 +389,7 @@ require_once( "include/make_translationfiles.php" );
         mysql_query( $query ) or error("internal_error",'admin_f10');
      }
 
-     make_include_files(null, 'FAQ');
+     make_include_files(null, 'FAQ'); //must be called from main dir
   }
 
 

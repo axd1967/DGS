@@ -21,7 +21,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 chdir( '../' );
 require_once( "include/std_functions.php" );
 chdir( 'scripts' );
-$base_path = '../';
 
 {
    connect2mysql();
@@ -43,10 +42,10 @@ $base_path = '../';
 
      echo "<hr><p>$Filename<hr><p>\n";
 
-     $fd = fopen( $base_path . $Filename, 'r' )
+     $fd = fopen( $main_path . $Filename, 'r' )
         or error( 'couldnt_open_file' );
 
-     $contents = fread($fd, filesize ($base_path . $Filename));
+     $contents = fread($fd, filesize ($main_path . $Filename));
 
      $pattern = "/T_\((['\"].*?['\"])\)[^'\"]/s";
      preg_match_all( $pattern, $contents, $matches );

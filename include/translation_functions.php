@@ -24,7 +24,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
     If known_languages.php is missing, it will be automatically
     built in make_known_languages() ...
     called by include_all_translate_groups() ...
-    called by is_logged_in() ...
+    only called by is_logged_in() ...
     so very soon.
 */
 if( file_exists( "translations/known_languages.php") )
@@ -42,27 +42,27 @@ function T_($string)
       return $s;
 }
 
-function include_all_translate_groups($player_row=null)
+function include_all_translate_groups($player_row=null) //must be called from main dir
 {
-   global $TranslateGroups, $known_languages, $base_path;
+   global $TranslateGroups, $known_languages;
 
-   if( !file_exists($base_path . "translations/known_languages.php") )
+   if( !file_exists( "translations/known_languages.php") )
    {
-      require_once( $base_path . "include/make_translationfiles.php" );
-      make_known_languages();
-      make_include_files();
+      require_once( "include/make_translationfiles.php" );
+      make_known_languages(); //must be called from main dir
+      make_include_files(); //must be called from main dir
    }
-   include_once( $base_path . "translations/known_languages.php" );
+   include_once( "translations/known_languages.php" );
 
    $TranslateGroups = array_unique($TranslateGroups);
 
    foreach( $TranslateGroups as $i => $group )
-      include_translate_group($group, $player_row);
+      include_translate_group($group, $player_row); //must be called from main dir
 }
 
-function include_translate_group($group, $player_row)
+function include_translate_group($group, $player_row) //must be called from main dir
 {
-   global $language_used, $encoding_used, $base_path, $Tr;
+   global $language_used, $encoding_used, $Tr;
 
    if( !isset( $language_used ) )
    {
@@ -75,7 +75,7 @@ function include_translate_group($group, $player_row)
       $language = $language_used;
 
 
-   $filename = $base_path . "translations/en.iso-8859-1" . '_' . $group . '.php';
+   $filename = "translations/en.iso-8859-1" . '_' . $group . '.php';
 
    if( file_exists( $filename ) )
    {
@@ -85,7 +85,7 @@ function include_translate_group($group, $player_row)
 
    if( !empty($language) )
    {
-      $filename = $base_path . "translations/$language" . '_' . $group . '.php';
+      $filename = "translations/$language" . '_' . $group . '.php';
 
       if( file_exists( $filename ) )
       {

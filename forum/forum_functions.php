@@ -24,7 +24,6 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/GoDiagram.php" );
 chdir("forum");
-$base_path = '../';
 
 
 //$new_end =  4*7*24*3600;  // four weeks //moved in quick_common.php

@@ -55,7 +55,7 @@ require_once( "include/make_translationfiles.php" );
                   "Language='" . $twoletter . '.' . $charenc . "', " .
                   "Name='$langname'");
 
-      make_known_languages();
+      make_known_languages(); //must be called from main dir
 
       $res = mysql_query("SELECT ID FROM TranslationGroups WHERE Groupname='Users'");
       if( @mysql_num_rows($res) != 1 )

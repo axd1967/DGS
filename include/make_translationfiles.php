@@ -19,9 +19,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-function make_known_languages()
+function make_known_languages() //must be called from main dir
 {
-   chdir( 'translations' );
+   chdir( 'translations'); //must be called from main dir
 
    $result = mysql_query("SELECT * FROM TranslationLanguages ORDER BY Language");
 
@@ -61,11 +61,11 @@ function slashed($string)
 
    // Now make all translation include-files
 
-function make_include_files($language=null, $group=null)
+function make_include_files($language=null, $group=null) //must be called from main dir
 {
    global $NOW;
 
-   chdir( 'translations' );
+   chdir( 'translations'); //must be called from main dir
 
    $query = "SELECT Translations.Text, TranslationGroups.Groupname, " .
       "TranslationLanguages.Language, TranslationTexts.Text AS Original " .

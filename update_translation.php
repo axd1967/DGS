@@ -104,7 +104,7 @@ require_once( "include/make_translationfiles.php" );
      mysql_query( "UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN (" .
                   substr($done_set,1) . ')' ) or die(mysql_error());
 
-  make_include_files($translate_lang);
+  make_include_files($translate_lang); //must be called from main dir
 
   jump_to("translate.php?translate_lang=$translate_lang" .
               "&profil_charset=$profil_charset&group=" . urlencode($newgroup));
