@@ -403,6 +403,9 @@ $array=array();
             }
             else
             {
+               if( $Status != 'FINISHED' )
+                  $Text = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text));
+
                   if(  $Text )
                      $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
                            . ": " . $Text ;
