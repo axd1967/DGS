@@ -180,13 +180,15 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead,
 
     while( $row = mysql_fetch_array($result) )
         {
-            if( $row["PosX" ] < 0 ) continue;
             if( $row["Stone"] <= WHITE )
                 {
-                    $array[$row["PosX"]][$row["PosY"]] = $row["Stone"];
                     if( $row["MoveNr"] == $move and $row["Stone"] > 0 )
                         $msg = $row["Text"];
 
+                    if( $row["PosX" ] < 0 ) continue;
+
+                    $array[$row["PosX"]][$row["PosY"]] = $row["Stone"];
+            
                     $removed_dead = FALSE;
                 }
             else if( $row["Stone"] >= BLACK_DEAD )
@@ -196,7 +198,7 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead,
                             $marked_dead = array(); // restart removal
                             $removed_dead = TRUE;
                         }
-                    array_push($marked_dead, array($row["PosX"],$row["PosY"],$row["Stone"]));
+                    array_push($marked_dead, array($row["PosX"],$row["PosY"]));
                 } 
         }
 
@@ -204,11 +206,11 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead,
         {
             while( $sub = each($marked_dead) )
                 {
-                    list($dummy, list($x, $y, $s)) = $sub;
+                    list($dummy, list($x, $y)) = $sub;
                     if( $array[$x][$y] >= BLACK_DEAD )
-                        $array[$x][$y] = $s - 6;
+                        $array[$x][$y] -= 6;
                     else
-                        $array[$x][$y] = $s;
+                        $array[$x][$y] += 6;
                 }
         }
 
