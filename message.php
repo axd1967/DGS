@@ -158,7 +158,7 @@ require( "include/form_functions.php" );
 
          if( $can_reply )
             {
-              $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+              $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
               $message_form->add_row( array( 'HEADER', T_('Reply') ) );
               $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
               $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
@@ -174,7 +174,7 @@ require( "include/form_functions.php" );
 
       case 'NewMessage':
       {
-        $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+        $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
         $message_form->add_row( array( 'HEADER', T_('New message') ) );
         $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)') ,
                                        'TEXTINPUT', 'to', 50, 80, $default_handle ) );
@@ -218,7 +218,7 @@ require( "include/form_functions.php" );
                T_('Dispute settings') . '</a>';
             echo "<p>&nbsp;<p>\n";
 
-            $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+            $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
             $message_form->add_row( array( 'HEADER', T_('Reply') ) );
             $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
             $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
@@ -238,7 +238,7 @@ require( "include/form_functions.php" );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text);
 
-         $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+         $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
          $message_form->add_row( array( 'HEADER', T_('Dispute settings') ) );
          $message_form->add_row( array( 'HIDDEN', 'mode', $mode ) );
          $message_form->add_row( array( 'HIDDEN', 'subject', 'Game invitation dispute' ) );
@@ -257,7 +257,7 @@ require( "include/form_functions.php" );
 
       case 'Invite':
       {
-         $message_form = new Form( 'messageform', 'send_message.php', FORM_POST );
+         $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
          $message_form->add_row( array( 'HEADER', T_('Invitation message') ) );
          $message_form->add_row( array( 'HIDDEN', 'type', 'INVITATION' ) );
          $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)'),
