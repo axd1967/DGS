@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 include( "include/table_columns.php" );
-include( "include/timezones.php" );
+include( "include/form_functions.php" );
 
 $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','Komi',
                        'Moves','Score','Win?','End date','Last Move');
