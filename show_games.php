@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require( "include/std_functions.php" );
 include( "include/table_columns.php" );
 include( "include/form_functions.php" );
+include( "include/rating.php" );
 
 {
    connect2mysql();
@@ -74,7 +75,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $from_row = 0;
 
    $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
-       "Players.Name, Players.Handle, Players.ID as pid, " .
+       "Name, Handle, Players.ID as pid, Rating, UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
        "(White_ID=$uid)+1 AS Color ";
 
    if( $finished )
@@ -116,6 +117,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       tablehead(2, T_('sgf')) .
       tablehead(3, T_('Opponent'), 'Name') .
       tablehead(4, T_('Nick'), 'Handle') .
+      tablehead(16, T_('Rating'), 'Rating', true) .
       tablehead(5, T_('Color'), 'Color') .
       tablehead(6, T_('Size'), 'Size', true) .
       tablehead(7, T_('Handicap'), 'Handicap') .
@@ -126,11 +128,14 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
       echo tablehead(10, T_('Score')) .
          tablehead(11, T_('Win?'), 'Win', true) .
+         tablehead(14, T_('Rated?'), 'Rated', true) .
          tablehead(12, T_('End date'), 'Lastchanged', true);
    }
    else
    {
-      echo tablehead(13, T_('Last Move'), 'Lastchanged', true);
+      echo tablehead(14, T_('Rated?'), 'Rated', true) .
+         tablehead(13, T_('Last Move'), 'Lastchanged', true) .
+         tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
    }
 
    echo "</tr>\n";
@@ -139,6 +144,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    $row_color=2;
    while( $row = mysql_fetch_array( $result ) )
    {
+      $Rating = NULL;
       extract($row);
       $color = ( $Color == BLACK ? 'b' : 'w' );
 
@@ -155,6 +161,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       if( (1 << 3) & $column_set )
          echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
             make_html_safe($Handle) . "</font></a></td>\n";
+      if( (1 << 15) & $column_set )
+         echo "<td>" . echo_rating($Rating) . "</td>\n";
       if( (1 << 4) & $column_set )
          echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
       if( (1 << 5) & $column_set )
@@ -173,17 +181,23 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
                ( $Win == -1 ? 'no.gif" alt=' . T_('no') :
                  'dash.gif" alt=' . T_('jigo') ));
 
-      if( (1 << 9) & $column_set )
-         echo '<td>' . score2text($Score, false) . "</td>\n";
-      if( (1 << 10) & $column_set )
-         echo "<td align=center><img src=$src></td>";
-      if( (1 << 11) & $column_set )
-         echo '<td>' . date($date_fmt, $Time) . "</td>\n";
+         if( (1 << 9) & $column_set )
+            echo '<td>' . score2text($Score, false) . "</td>\n";
+         if( (1 << 10) & $column_set )
+            echo "<td align=center><img src=$src></td>";
+         if( (1 << 13) & $column_set )
+            echo "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>\n";
+         if( (1 << 11) & $column_set )
+            echo '<td>' . date($date_fmt, $Time) . "</td>\n";
       }
       else
       {
+         if( (1 << 13) & $column_set )
+            echo "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>\n";
          if( (1 << 12) & $column_set )
-            echo '<td>' . date($date_fmt, $Time) . "</td>\n";
+            echo '<td>' . date($date_fmt2, $Time) . "</td>\n";
+         if( (1 << 14) & $column_set )
+            echo '<td align=center>' . date($date_fmt2, $Lastaccess) . "</td>\n";
       }
 
       echo "</tr>\n";
