@@ -23,9 +23,9 @@ require( "include/std_functions.php" );
 
 {
    $player_row = 0;
-  
+
    start_page("Error", true, false, $player_row );
- 
+
    switch( $err )
    {
       case("early pass"):
@@ -72,7 +72,7 @@ require( "include/std_functions.php" );
 
       case("ko"):
       {
-         echo "Sorry, you may not retake a stone which has just captured a stone, " . 
+         echo "Sorry, you may not retake a stone which has just captured a stone, " .
             "since it would repeat a previous board position. Look for 'ko' in the rules.";
       }
       break;
@@ -274,13 +274,13 @@ The reasons for this problem could be any of the following:
       }
       break;
 
-     
+
       case("unknown_message"):
       {
          echo "Sorry, I couldn't find the message you wanted to show.";
       }
       break;
-     
+
 
       case("unknown_user"):
       {
@@ -317,7 +317,7 @@ The reasons for this problem could be any of the following:
          echo "Sorry, invalid password.";
       }
       break;
-      
+
       case("wrong_rank_type");
       {
          echo "Unknown rank type";
@@ -334,6 +334,7 @@ The reasons for this problem could be any of the following:
       {
          echo "Sorry, the initial rating must be between 30 kyu and 6 dan";
       }
+      break;
 
       default:
       {
