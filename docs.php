@@ -30,7 +30,7 @@ start_page("Links", true, $logged_in, $player_row );
 
 <table align=center><tr><td>
 
-<center><h3><font color=<?php echo $h4_color; ?>>Documentaion</font></h3></center>
+<center><h3><font color=<?php echo $h3_color; ?>>Documentaion</font></h3></center>
 
 
 <p><a href="introduction.php">Introduction to Dragon</a>

@@ -41,7 +41,7 @@ echo "<CENTER>\n";
 
 echo form_start( 'profileform', 'change_profile.php', 'POST' );
 
-echo "    <tr><td><h3><font color=\"#800000\">Personal settings:</font></h3></td></tr>";
+echo "    <tr><td><h3><font color=$h3_color>Personal settings:</font></h3></td></tr>";
 
 echo form_insert_row( 'DESCRIPTION', 'Userid',
                       'TEXT', $player_row["Handle"] );
@@ -107,7 +107,7 @@ echo form_insert_row( 'DESCRIPTION', 'Nighttime',
                       'SELECTBOX', 'nightstart', 1, $vals, $player_row["Nightstart"], false );
 
 echo "    <tr><td height=20px>&nbsp;</td></tr>\n";
-echo "    <tr><td><h3><font color=\"#800000\">Board graphics:</font></h3></td></tr>\n";
+echo "    <tr><td><h3><font color=$h3_color>Board graphics:</font></h3></td></tr>\n";
 
 $vals = array( 13 => 13, 17 => 17, 21 => 21, 25 => 25,
                29 => 29, 35 => 35, 42 => 42, 50 => 50 );

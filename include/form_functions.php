@@ -420,7 +420,7 @@ function form_insert_row()
 
                 $result .=
                   form_td_start( 'left' ).
-                  "<h3><font color=\"#800000\">".$description.":".
+                  "<h3><font color=$h3_color>".$description.":".
                   "</font></h3>".
                   form_td_end( true );
 
