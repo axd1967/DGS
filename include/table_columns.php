@@ -406,13 +406,23 @@ class Table
 
          if( $del or $add )
          {
-            if( $add )
+            if( $add > 0 )
             {
                $this->Column_set |= 1 << ($add-1);
             }
-            if( $del )
+            else if( $add < 0 )
+            {
+               //~(0) is negative and database is unsigned
+               $this->Column_set = 0x7fffffff;
+            }
+
+            if( $del > 0 )
             {
                $this->Column_set &= ~(1 << ($del-1));
+            }
+            else if( $del < 0 )
+            {
+               $this->Column_set = 0;
             }
 
             $query = "UPDATE Players" .
@@ -445,6 +455,8 @@ class Table
             }
          }
 
+         $this->Removed_Columns[ -1 ] = T_('*All columns*');
+         asort($this->Removed_Columns);
          array_push( $form_array,
                      'SELECTBOX', $this->Prefix . 'add', 1,
                      $this->Removed_Columns, '', false,

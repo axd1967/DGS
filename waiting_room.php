@@ -112,7 +112,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[0] )
-            $wrow_strings[0] = "<td class=button width=92 align=center>" .
+            $wrow_strings[0] = str_TD_class_button($player_row["Browser"]) .
                "<A class=button href=\"waiting_room.php?info=$ID&$orderstring#info\">" .
                "&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>";
          if( $wrtable->Is_Column_Displayed[1] )

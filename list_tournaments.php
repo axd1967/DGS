@@ -80,7 +80,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             TOUR_STATE_RUNNING           => " bgcolor=\"00F464\"",
             TOUR_STATE_FINISHED          => " bgcolor=\"FFA27A\"" );
 
-         $row_strings[1] = "<td class=button width=92 align=center>" .
+         $row_strings[1] = str_TD_class_button($player_row["Browser"]) .
             "<a class=button href=\"show_tournament.php?tid=$ID\">" .
             "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</a></td>";
          $row_strings[2] = "<td" . $state_colors[ $State ] . ">" .

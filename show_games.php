@@ -251,7 +251,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
       $grow_strings = array();
       if( $gtable->Is_Column_Displayed[1] )
-         $grow_strings[1] = "<td class=button width=92 align=center>" .
+         $grow_strings[1] = str_TD_class_button($player_row["Browser"]) .
             "<A class=button href=\"game.php?gid=$ID\">" .
             "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>";
       if( $gtable->Is_Column_Displayed[2] )
