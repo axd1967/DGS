@@ -49,13 +49,20 @@ require_once( "include/make_translationfiles.php" );
       if( $numrows == 0 and !$untranslated )
          error('translation_bad_language_or_group');
 
+         $fd = fopen( "rodivaltmp.txt", 'w' )
+            or error("couldnt_open_rodival_file");
+
+         fwrite( $fd, var_export($_POST, true));
+            fclose( $fd );
+
+
   $replace_set = '';
   $log_set = '';
   $done_set = '';
   while( $row = mysql_fetch_array($result) )
   {
 
-     $translation = trim('' . @$_POST["transl" . $row['Original_ID']]);
+     $translation = trim(get_request_arg("transl" . $row['Original_ID']));
      $same = ( @$_POST["same" . $row['Original_ID']] === 'Y' );
      $unchanged = $untranslated && ( @$_POST["unch" . $row['Original_ID']] === 'Y' );
 
