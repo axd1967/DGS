@@ -59,7 +59,7 @@ require( "include/std_functions.php" );
    $row = mysql_fetch_array( $result );
 
    echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
-   echo '<p>Activity: ' . $row['activity'];
+   echo '<p>Activity: ' . round($row['activity']);
 
    end_page();
 }
