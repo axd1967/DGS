@@ -73,32 +73,32 @@ require( "include/form_functions.php" );
   if( !empty($extra_message) )
     echo "<p><b><font color=\"green\">$extra_message</font></b><hr>";
 
-  echo form_start( 'adminform', 'do_admin.php', 'POST' );
+  $admin_form = new Form( 'adminform', 'do_admin.php', FORM_POST );
 
   /* Add language for translation */
-  echo form_insert_row( 'HEADER', T_('Add language for translation') );
-  echo form_insert_row( 'DESCRIPTION', T_('Two-letter language code'),
-                        'TEXTINPUT', 'twoletter', 30, 10, '' );
-  echo form_insert_row( 'DESCRIPTION', T_('Language name (i.e. English)'),
-                        'TEXTINPUT', 'langname', 30, 50, '' );
-  echo form_insert_row( 'DESCRIPTION', T_("Character encoding (i.e. 'iso-8859-1')"),
-                        'TEXTINPUT', 'charenc', 30, 50, '' );
-  echo form_insert_row( 'SUBMITBUTTON', 'addlanguage', T_('Add language') );
+  $admin_form->add_row( array( 'HEADER', T_('Add language for translation') ) );
+  $admin_form->add_row( array( 'DESCRIPTION', T_('Two-letter language code'),
+                               'TEXTINPUT', 'twoletter', 30, 10, '' ) );
+  $admin_form->add_row( array( 'DESCRIPTION', T_('Language name (i.e. English)'),
+                               'TEXTINPUT', 'langname', 30, 50, '' ) );
+  $admin_form->add_row( array( 'DESCRIPTION', T_("Character encoding (i.e. 'iso-8859-1')"),
+                               'TEXTINPUT', 'charenc', 30, 50, '' ) );
+  $admin_form->add_row( array( 'SUBMITBUTTON', 'addlanguage', T_('Add language') ) );
 
   /* Set translator privileges for user */
-  echo form_insert_row( 'HEADER', T_('Set translator privileges for user') );
-  echo form_insert_row( 'DESCRIPTION', T_('User to set privileges for (use the userid)'),
-                        'TEXTINPUT', 'transluser', 30, 80, '' );
-  echo form_insert_row( 'DESCRIPTION', T_('Select language to make user translator for that language.'),
-                        'SELECTBOX', 'transladdlang', 1,
-                        get_known_languages_with_full_names(), array(), false,
-                        'SUBMITBUTTON', 'transladd', T_('Add language for translator') );
-  echo form_insert_row( 'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
-                        'SELECTBOX', 'transllang[]', 7,
-                        get_known_languages_with_full_names(), array(), true,
-                        'SUBMITBUTTON', 'translpriv', T_('Set user privileges') );
+  $admin_form->add_row( array( 'HEADER', T_('Set translator privileges for user') ) );
+  $admin_form->add_row( array( 'DESCRIPTION', T_('User to set privileges for (use the userid)'),
+                               'TEXTINPUT', 'transluser', 30, 80, '' ) );
+  $admin_form->add_row( array( 'DESCRIPTION', T_('Select language to make user translator for that language.'),
+                               'SELECTBOX', 'transladdlang', 1,
+                               get_known_languages_with_full_names(), array(), false,
+                               'SUBMITBUTTON', 'transladd', T_('Add language for translator') ) );
+  $admin_form->add_row( array( 'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
+                               'SELECTBOX', 'transllang[]', 7,
+                               get_known_languages_with_full_names(), array(), true,
+                               'SUBMITBUTTON', 'translpriv', T_('Set user privileges') ) );
 
-  echo form_end();
+  $admin_form->echo_string();
 
   end_page();
 }
