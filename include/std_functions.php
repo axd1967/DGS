@@ -246,7 +246,7 @@ function end_page( $new_paragraph = true )
 
 function error($err)
 {
-   global $handle;
+   global $handle, $PHP_SELF;
 
    disable_cache();
 
@@ -254,7 +254,7 @@ function error($err)
    if( mysql_error() )
       $uri .= "&mysqlerror=" . urlencode(mysql_error());
 
-   error_log($handle . ": " . $err . ( mysql_error() ? "\n" . mysql_error() : ''), 0);
+   error_log( "$handle ($PHP_SELF): $err" . ( mysql_error() ? "\n" . mysql_error() : ''), 0);
 
    jump_to( $uri );
 }
