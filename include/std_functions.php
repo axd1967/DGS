@@ -429,7 +429,7 @@ function make_menu_vertical($menu_array)
          list($link,$t1,$t2) = $tmp;
 
          if( $i % 3 == 0 and $i > 0 )
-             echo '<tr><td height=1><img src="images/dot.gif" alt=""></td></tr><tr><td align=left nowrap>' . "\n";
+             echo '<tr><td height=1><img src="' . $HOSTBASE . '/images/dot.gif" alt=""></td></tr><tr><td align=left nowrap>' . "\n";
 
          $i++;
 
