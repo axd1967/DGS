@@ -55,7 +55,8 @@ $result = mysql_query("SELECT UNIX_TIMESTAMP(Messages$my_id.Time) AS date, " .
                       "Messages$my_id.ID AS mid, Messages$my_id.Subject, Messages$my_id.Info, " . 
                       "Players.Name AS sender " .
                       "FROM Messages$my_id, Players " .
-                      "WHERE From_ID=Players.ID");
+                      "WHERE From_ID=Players.ID " .
+                      "ORDER BY Time DESC");
 
 
 start_page("Messages", true, $logged_in, $player_row );
