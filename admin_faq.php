@@ -69,6 +69,7 @@ require_once( "include/make_translationfiles.php" );
 
      $row = get_entry_row( $id );
 
+     $faqhide = ( @$row['Hidden'] == 'Y' );
      $faq_edit_form = new Form( 'faqeditform', "admin_faq.php?do_edit=t".URI_AMP."id=$id", FORM_POST );
 
      if( $row["Level"] == 1 ) //i.e. Category
@@ -88,7 +89,7 @@ require_once( "include/make_translationfiles.php" );
         $faq_edit_form->add_row( array( 'HEADER', T_('Edit FAQ entry') ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Question'),
                                         'TEXTINPUT', 'question', 80, 80, $row["Q"] ) );
-        if( $row['QTranslatable'] === 'Done' )
+        if( !$faqhide && $row['QTranslatable'] === 'Done' )
         {
            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
                                            'CHECKBOX', 'Qchanged', 'Y',
@@ -96,7 +97,7 @@ require_once( "include/make_translationfiles.php" );
         }
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
                                         'TEXTAREA', 'answer', 80, 20, $row["A"] ) );
-        if( $row['ATranslatable'] === 'Done' )
+        if( !$faqhide && $row['ATranslatable'] === 'Done' )
         {
            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
                                            'CHECKBOX', 'Achanged', 'Y',
@@ -363,6 +364,33 @@ require_once( "include/make_translationfiles.php" );
   }
 
 
+  // ***********       Toggle hidden           ****************
+
+  else if( ($action=@$_GET["hidden"]) === 't' )
+  {
+     $row = get_entry_row( $id );
+
+     $faqhide = ( @$row['Hidden'] == 'Y' );
+
+        $query = "UPDATE FAQ " .
+                    "SET Hidden='" . ($faqhide == 'Y' ? 'N' : 'Y' ) . "' " .
+                    "WHERE ID=" . $row["ID"] . ' LIMIT 1';
+
+        mysql_query( $query ) or error("internal_error",'admin_f8');
+
+     if( $faqhide && $row['QTranslatable'] == 'Y' )
+     {
+        $query = "UPDATE TranslationTexts " .
+                    "SET Translatable='N' " .
+                    "WHERE ID=" . $row['Question'] .
+           ( $row['Level'] == 1 ? ' LIMIT 1' : " OR ID=" . $row['Answer'] . " LIMIT 2" );
+
+        mysql_query( $query ) or error("internal_error",'admin_f9');
+     }
+
+  }
+
+
   // ***********       Toggle translatable     ****************
 
   else if( ($action=@$_GET["transl"]) === 't' )
@@ -427,6 +455,7 @@ require_once( "include/make_translationfiles.php" );
      while( $row = mysql_fetch_array( $result ) )
      {
         $question = (empty($row['Q']) ? '-' : $row['Q']);
+        $faqhide = ( @$row['Hidden'] == 'Y' );
 
         if( $row['Level'] == 1 )
         {
@@ -439,8 +468,11 @@ require_once( "include/make_translationfiles.php" );
            $typechar = 'e'; //entry
         }
 
-        echo "<A href=\"admin_faq.php?edit=$typechar".URI_AMP."id=" . $row['ID'] .
-           '" title="' . T_("Edit") . "\">$question</A>\n";
+        if( $faqhide )
+           echo "$question\n";
+        else
+           echo "<A href=\"admin_faq.php?edit=$typechar".URI_AMP."id=" . $row['ID'] .
+              '" title="' . T_("Edit") . "\">$question</A>\n";
         echo "</td>";
 
         echo '<td width=40 align=right><a href="admin_faq.php?move=u'.URI_AMP.'id=' .
@@ -461,10 +493,15 @@ require_once( "include/make_translationfiles.php" );
            ($typechar == 'e' ? T_('Add new entry') : T_('Add new category')) .
            '" src="images/new.png" alt="N"></a></td>';
 
+        echo "<td><a href=\"admin_faq.php?hidden=t".URI_AMP."id=" . $row['ID'] .
+           '"><img border=0 title="' .
+           ( $faqhide ? T_('Show') : T_('Hide') ) .
+           '" src="images/hide' . ( $faqhide ? '.png" alt="H' : '_no.png" alt="h' ) . '"></a></td>';
+
         $transl = $row['ATranslatable'];
         if( !$row['Answer'] or ( $transl !== 'Done' and $transl !== 'Changed') )
             $transl = $row['QTranslatable'];
-        if( $transl !== 'Done' and $transl !== 'Changed' )
+        if( !$faqhide and $transl !== 'Done' and $transl !== 'Changed' )
            echo "<td><a href=\"admin_faq.php?transl=t".URI_AMP."id=" . $row['ID'] .
            '"><img border=0 title="' .
            ($transl == 'Y' ? T_('Make untranslatable') : T_('Make translatable')) .

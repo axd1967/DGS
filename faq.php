@@ -29,8 +29,10 @@ require_once( "include/std_functions.php" );
 
   start_page(T_("FAQ"), true, $logged_in, $player_row );
 
-//$blk='ul';
-$blk='blockquote';
+  //$blk='ul';
+  $blk='blockquote';
+  //$faqhide = "AND entry.Hidden='N' AND (entry.Level=1 OR parent.Hidden='N') ";
+  $faqhide = "AND entry.Hidden='N' AND parent.Hidden='N' "; //need a viewable root
 
   echo "<table align=center width=\"87%\" border=0><tr><td>\n";
   echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
@@ -40,14 +42,14 @@ $blk='blockquote';
   $cat = @$_GET['cat'];
   if( $cat !== 'all' && !is_numeric($cat) ) $cat = 0;
   if( @$_GET["read"] == 't' )
-  {
+  { //expand answers
      $result = mysql_query(
         "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
-        "Question.Text AS Q, Question.Translatable, Answer.Text AS A, " .
+        "Question.Text AS Q, Answer.Text AS A, " .
         "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
         "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
-        "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
+        "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question $faqhide" .
         ( $cat === 'all' ? '' : "AND ( entry.Parent = $cat OR entry.ID = $cat ) " ) .
         "ORDER BY CatOrder,ParentOrder,entry.SortOrder")
         or error('mysql_query_failed');
@@ -71,21 +73,21 @@ $blk='blockquote';
               "</b>\n<p>\n" . add_line_breaks( T_( $row['A'] ) ) . "<br>&nbsp;<p>\n";
         }
      }
-
+     if( !$first )
        echo "</ul>\n";
      echo "</td></tr></table></$blk>\n";
   }
   else
-  {
+  { //titles only
      $result = mysql_query(
-        "SELECT entry.*, Question.Text AS Q, Question.Translatable, " .
+        "SELECT entry.*, Question.Text AS Q, " .
         "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
         "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
-        "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
-        "AND entry.Level<3 AND entry.Level>0 " .
+        "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question $faqhide" .
+         "AND entry.Level<3 AND entry.Level>0 " .
         "ORDER BY CatOrder,entry.Level,entry.SortOrder");
 
-     echo "<$blk><table><tr><td>\n";
+     echo "<$blk><table width=\"93%\" border=0><tr><td>\n";
 
      $first = true;
      while( $row = mysql_fetch_array( $result ) )
@@ -98,7 +100,7 @@ $blk='blockquote';
               echo "</ul></td></tr></table>\n";
            echo '<p><b><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['ID'] . "\">$question</A></b>\n";
            echo "<table><tr><td><ul>\n";
-              $first = false;
+           $first = false;
         }
         else
         {
@@ -106,7 +108,7 @@ $blk='blockquote';
               '#Entry' . $row['ID'] . "\">$question</A>\n";
         }
      }
-
+     if( !$first )
        echo "</ul></td></tr></table>\n";
      echo "</td></tr></table></$blk>\n";
   }
