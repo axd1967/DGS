@@ -245,7 +245,9 @@ disable_cache();
 
       if( $handitype == -1 ) // Conventional handi
       {
-         $handicap = floor(abs($rating_black-$rating_white)/100);
+         $handicap = abs($rating_black-$rating_white)/100;
+         $size = $game_row["Size"];
+         $handicap = round($handicap * (($size-3.0)*($size-3.0)) / 256.0 );
          $komi = 0.5;
 
          if( $handicap == 0 )
