@@ -460,12 +460,12 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       mysql_query( "UPDATE Players " .
                    "SET Running=Running-1, Finished=Finished+1" .
-                   ($score > 0 ? ", Win=Win+1" : ($score < 0 ? ", Lost=Lost+1 " : "")) .
+                   ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : "")) .
                     " WHERE ID=$White_ID LIMIT 1" );
 
       mysql_query( "UPDATE Players " .
                    "SET Running=Running-1, Finished=Finished+1" .
-                   ($score < 0 ? ", Win=Win+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
+                   ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
                     " WHERE ID=$Black_ID LIMIT 1" );
 
 
