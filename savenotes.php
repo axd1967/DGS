@@ -25,7 +25,7 @@ disable_cache();
 {
    connect2mysql();
 
-   $gid = @$_POST('gid');
+   $gid = @$_POST['gid'];
    if( !$gid )
       error("no_game_nr");
 
@@ -47,19 +47,19 @@ disable_cache();
       error("not_a_player");
 
 
-   $notes = @$_POST('notes');
+   $notes = @$_POST['notes'];
 
    if ($player_row["ID"] == $Black_ID)
       {
-      mysql_query( "UPDATE Games SET Black_notes='$notes' WHERE Games.ID=$gid");
+      mysql_query( "UPDATE Games SET Black_notes='$notes' WHERE Games.ID=$gid LIMIT 1");
       }
    else 
       {
-      mysql_query( "UPDATE Games SET White_notes='$notes' WHERE Games.ID=$gid");
+      mysql_query( "UPDATE Games SET White_notes='$notes' WHERE Games.ID=$gid LIMIT 1");
       }
 
    //go back to where we came from
-   $refer_url = @$_POST('refer_url');
+   $refer_url = @$_POST['refer_url'];
    if( !$refer_url )
       $refer_url = "status.php";
    jump_to($refer_url);
