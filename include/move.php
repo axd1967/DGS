@@ -226,7 +226,7 @@ function draw_message_box()
         <TR>
           <TD align=right>' . T_('Message') . ':</TD>
           <TD align=left>
-            <textarea name="message" cols="50" rows="8" wrap="virtual"></textarea></TD>
+            <textarea name="message" tabindex="1" cols="50" rows="8" wrap="virtual"></textarea></TD>
         </TR>
         <input type="hidden" name="gid" value="' . $gid . '">
         <input type="hidden" name="move" value="' . $move .'">
@@ -373,6 +373,7 @@ function draw_moves()
       {
          $c=number2board_coords($row["PosX"], $row["PosY"], $Size);
       }
+
       if( $i == $move )
          printf('<td class=r bgcolor=F7F5E3><font color=red>%s</font></td>
 ', $c );
