@@ -18,89 +18,93 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
-
 require( "include/std_functions.php" );
 
-connect2mysql();
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-if( !$logged_in )
 {
-    header("Location: error.php?err=not_logged_in");
-    exit;
-}
+   connect2mysql();
 
-$my_id = $player_row["ID"];
+   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-if( $del ) 
-{
-    // delete messages
+   if( !$logged_in )
+      error("not_logged_in");
 
-    if( $del == 'all' )
-        {
-            $result = mysql_query("DELETE FROM Messages$my_id " .
-                                  "WHERE Info='NONE' OR Info='REPLIED'" );
-        }
-    else
-        {
-            $result = mysql_query("DELETE FROM Messages$my_id " .
-                                  "WHERE ID=$del AND (Info='NONE' OR Info='REPLIED')");
-        }
-}
+   $my_id = $player_row["ID"];
 
+   if( $del ) 
+   {
+      // delete messages
 
-$result = mysql_query("SELECT UNIX_TIMESTAMP(Messages$my_id.Time) AS date, " .
-                      "Messages$my_id.ID AS mid, Messages$my_id.Subject, Messages$my_id.Info, " . 
-                      "Players.Name AS sender " .
-                      "FROM Messages$my_id, Players " .
-                      "WHERE From_ID=Players.ID " .
-                      "ORDER BY Time DESC");
+      if( $del == 'all' )
+      {
+         $result = mysql_query("UPDATE Messages SET Flags=CONCAT_WS(",",Flags,'DELETED') " .
+                               "WHERE Flags NOT ( Flags LIKE '%NEW%' OR " .
+                               "Flags LIKE '%REPLY REQUIRED%' )");
+      }
+      else
+      {
+         $result = mysql_query("UPDATE Messages SET Flags=CONCAT_WS(",",Flags,'DELETED') " .
+                               "WHERE ID=$del AND NOT ( Flags LIKE '%NEW%' OR " .
+                               "Flags LIKE '%REPLY REQUIRED%' )");
+      }
+   }
 
 
-start_page("Messages", true, $logged_in, $player_row );
+   $result = mysql_query("SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+                         "Messages.ID AS mid, Messages.Subject, Messages.Flags, " . 
+                         "Players.Name AS sender " .
+                         "FROM Messages, Players " .
+                         "WHERE To_ID=$my_id AND From_ID=Players.ID " .
+                         "AND NOT (Messages.Flags LIKE '%DELETED%') " .
+                         "ORDER BY Time DESC") or die ( mysql_error());
 
 
-echo "<table border=3 align=center>\n";
-echo "<tr><th></th><th>From</th><th>Subject</th><th>Date</th><th>Del</th></tr>\n";
+   start_page("Messages", true, $logged_in, $player_row );
+
+
+   echo "<table border=3 align=center>\n";
+   echo "<tr><th></th><th>From</th><th>Subject</th><th>Date</th><th>Del</th></tr>\n";
 
 
 
-while( $row = mysql_fetch_array( $result ) )
-{
-    echo "<tr>";
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      echo "<tr>";
 
-    switch( $row["Info"] )
-        {
-        case 'NONE':
-            echo "<td></td>\n";
-            break;
-        case 'NEW':
-            echo "<td bgcolor=\"00F464\">New</td>\n";
-            break;
-        case 'REPLIED':
-            echo "<td bgcolor=\"FFEE00\">Replied</td>\n";
-            break;
-        case 'REPLY REQUIRED':
-            echo "<td bgcolor=\"FFA27A\">Reply!</td>\n";
-            break;
-        }
 
-    echo "<td><A href=\"show_message.php?mid=" . $row["mid"] . "\">" .
-        $row["sender"] . "</A></td>\n" . 
-        "<td>" . $row["Subject"] . "</td>\n" .
-        "<td>" . date($date_fmt, $row["date"]) . "</td>\n";
+      if( !(strpos($row["Flags"],'NEW') === false) )
+      {
+         echo "<td bgcolor=\"00F464\">New</td>\n";        
+      }
+      else if( !(strpos($row["Flags"],'REPLIED') === false) )
+      {
+         echo "<td bgcolor=\"FFEE00\">Replied</td>\n";        
+      }
+      else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
+      {
+         echo "<td bgcolor=\"FFA27A\">Reply!</td>\n";
+      }
+      else
+      {
+         echo "<td></td>\n";
+      }
 
-    if( $row["Info"] == 'NONE' or $row["Info"] == 'REPLIED' )
-        echo "<td align=center><a href=\"messages.php?del=" . $row["mid"] . "\">" .
+      echo "<td><A href=\"show_message.php?mid=" . $row["mid"] . "\">" .
+         $row["sender"] . "</A></td>\n" . 
+         "<td>" . make_html_safe($row["Subject"]) . "</td>\n" .
+         "<td>" . date($date_fmt, $row["date"]) . "</td>\n";
+
+      if( strpos($row["Flags"],'NEW') === false and 
+          ( strpos($row["Flags"],'REPLY REQUIRED') === false or
+            !(strpos($row["Flags"],'REPLIED') === false) ) )
+         echo "<td align=center><a href=\"messages.php?del=" . $row["mid"] . "\">" .
             "<img width=15 height=16 border=0 src=\"images/trashcan.gif\"></A></td>\n";
 
-    echo "</tr>\n";
+      echo "</tr>\n";
         
-}
+   }
 
-echo "</table>
+   echo "</table>
     <p>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
@@ -110,6 +114,6 @@ echo "</table>
     </table>
 ";
 
-end_page(false);
-
+   end_page(false);
+}
 ?>

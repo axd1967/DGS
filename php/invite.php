@@ -27,10 +27,8 @@ connect2mysql();
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 if( !$logged_in )
-{
-    header("Location: error.php?err=not_logged_in");
-    exit;
-}
+   error("not_logged_in");
+
 
 if( $uid )
 {
