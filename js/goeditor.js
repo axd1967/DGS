@@ -600,6 +600,8 @@ function increase_number(nr)
 {
    push_history(nr, ['1', current_number[nr], current_number[nr] + 1]);
    current_number[nr] ++;
+   if( current_number[nr] > 100 )
+      current_number[nr] = 1;
    document.images[number_mode+'_'+nr].src =
       path+stonesize[nr]+'/b'+(current_number[nr])+'.'+img;
 }
@@ -608,6 +610,8 @@ function increase_letter(nr)
 {
    push_history(nr, ['a', current_letter[nr], current_letter[nr] + 1]);
    current_letter[nr] ++;
+   if( current_letter[nr] > 26 )
+      current_letter[nr] = 1;
    document.images['letter_'+nr].src =
       path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
 }
