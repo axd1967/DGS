@@ -26,7 +26,7 @@ function draw_board($Size, &$array, $may_play, $gid,
     if( !$stone_size ) $stone_size = 25;
     if( !$font_size ) $font_size = "+0";
 
-    $font_start = "<font size=\"$font_size\"";
+    $font_start = "<font size=\"$font_size\">";
     $font_end = "</font>";
 
     if( $font_size == "+0" )
