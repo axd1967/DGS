@@ -34,6 +34,7 @@ if( !$logged_in )
 
 $my_id = $player_row["ID"];
 
+
 $result = mysql_query("SELECT Messages$my_id.*, " .
                       "DATE_FORMAT(Messages$my_id.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
                       "Players.Name AS sender, " .
@@ -107,23 +108,24 @@ echo "<center>
 switch( $type )
 {
  case 'NORMAL':
-     echo "<tr><td>Subject:</td><td>" . $row["Subject"] . "</td></tr>\n";
+     $Subject = $row["Subject"];
      break;
      
  case 'INVITATION':
-     echo "<tr><td>Subject:</td><td>Game invitation</td></tr>\n";
+     $Subject="Game invitation";
      break;
      
  case 'ACCEPT':
-     echo "<tr><td>Subject:</td><td>Invitation declined</td></tr>\n";
+     $Subject="Invitation declined";
      break;
 
  case 'DECLINE':
-     echo "<tr><td>Subject:</td><td>Invitation accepted</td></tr>\n";
+     $Subject="Invitation accepted";
      break;
 }
 
-echo "<tr><td valign=\"top\">Message:</td><td align=\"center\">\n" . 
+echo "<tr><td>Subject:</td><td>$Subject</td></tr>\n" .
+     "<tr><td valign=\"top\">Message:</td><td align=\"center\">\n" . 
      "<table border=2 align=center><tr>" . 
      "<td width=\"" . ($player_row["Stonesize"]*19) . "\" align=left>" .$row["Text"] .
      "</td></tr></table><BR>\n";
@@ -131,7 +133,8 @@ echo "<tr><td valign=\"top\">Message:</td><td align=\"center\">\n" .
 
 echo "</td></tr>\n</table></center>\n";
 
-
+if( strcasecmp(substr($Subject,0,3), "re:") != 0 )
+     $Subject = "RE: " . $Subject;
 
 if( $type == 'INVITATION' and $info != 'REPLIED' )
 {
@@ -164,7 +167,7 @@ if( $type != 'INVITATION' or $info != 'REPLIED' )
       
       <TR>
         <TD align=right>Subject:</TD>
-        <TD align=left> <input type="text" name="subject" size="50" maxlength="80"></TD>
+        <TD align=left> <input type="text" name="subject" size="50" maxlength="80" value="<?php echo $Subject ?>"></TD>
       </TR>      
 
 <?php } ?>
