@@ -150,27 +150,11 @@ if( $player_row["flags"] & WANT_EMAIL ) echo "checked " ?> value="true">
 }
 ?>
           </select>
+
         </TD>        
-
           <TD><input type=submit name="action" value="Change profile"></TD>
-
       </TR>
-
     </table>  
-    <HR>
-      <table>
-      <TR>
-        <TD align=right>Password:</TD>
-        <TD align=left><input type="password" name="passwd" size="16" maxlength="16"></TD>
-      </TR>
-      
-      <TR>
-        <TD align=right>Confirm Password:</TD>
-        <TD align=left><input type="password" name="passwd2" size="16" maxlength="16"></TD>
-        <TD><input type=submit name="action" value="Change password"></TD>
-      </TR>
-      
-    </TABLE>
   </FORM>
 </CENTER>  
 

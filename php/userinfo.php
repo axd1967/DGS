@@ -18,48 +18,44 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
 require( "include/std_functions.php" );
 require( "include/rating.php" );
 
-if( !$uid )
 {
-    header("Location: error.php?err=no_uid");
-    exit;
-}
+   if( !$uid )
+      error("no_uid");
 
 
-connect2mysql();
+   connect2mysql();
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-if( !$logged_in )
-{
-    header("Location: error.php?err=not_logged_in");
-    exit;
-}
+   if( !$logged_in )
+      error("not_logged_in");
 
 
+   $my_info = ( $player_row["ID"] == $uid );
 
-$my_info = ( $player_row["ID"] == $uid );
+   $result = mysql_query("SELECT * FROM Players WHERE ID=$uid");
 
-$result = mysql_query("SELECT * FROM Players WHERE ID=$uid");
+   if( mysql_affected_rows() != 1 )
+      error("unknown_user");
 
-if( mysql_affected_rows() != 1 )
-{
-    header("Location: error.php?err=unknown_user");
-    exit;
-}
 
-$row = mysql_fetch_array( $result );
+   $row = mysql_fetch_array( $result );
 
-start_page("User Info", true, $logged_in, $player_row );
+   start_page("User Info", true, $logged_in, $player_row );
 
 
 
 
-echo "<center>
+   echo "<center>";
+
+   if( $msg )
+      echo "\n<p><b><font color=green>$msg</font></b><hr>";
+
+   echo"
     <table border=3>
        <tr><td>Name:</td> <td>" . $row["Name"] . "</td></tr>
        <tr><td>Userid:</td> <td>" . $row["Handle"] . "</td></tr>
@@ -69,25 +65,42 @@ echo "<center>
     </table>
 ";
 
-$result = mysql_query("SELECT * FROM Bio where uid=$uid");
+       $result = mysql_query("SELECT * FROM Bio where uid=$uid");
 
-if( mysql_num_rows($result) > 0 )
-{
-  echo "    <p>
+       if( mysql_num_rows($result) > 0 )
+       {
+          echo "    <p>
     <H4>Biographical info</H4>
     <table border=3>
 ";
-}
+       }
 
-while( $row = mysql_fetch_array( $result ) )
-{
-  echo '     <tr><td>' . $row["Category"] . '</td><td>' . $row["Text"] . "</td></tr>\n";
-}
+       while( $row = mysql_fetch_array( $result ) )
+       {
+          echo '     <tr><td><b>' . make_html_safe($row["Category"]) . '</b></td>' .
+             '<td>' . make_html_safe($row["Text"],true) . "</td></tr>\n";
+       }
 
-if(  mysql_num_rows($result) > 0 )
-   echo "    </table>\n";
+       if(  mysql_num_rows($result) > 0 )
+          echo "    </table>\n";
 
-echo "    <p>
+       echo "    <p>";
+
+       if( $my_info )
+       {
+          echo "
+    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
+      <tr align=\"center\">
+        <td><B><A href=\"edit_profile.php\">Edit profile</A></B></td>
+        <td><B><A href=\"edit_password.php\">Change password</A></B></td>
+        <td><B><A href=\"edit_bio.php\">Edit bio</A></B></td>
+      </tr>
+    </table>
+";
+       }
+       else
+       {
+          echo "
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
         <td><B><A href=\"show_games.php?uid=$uid\">Show running games</A></B></td>
@@ -98,8 +111,9 @@ echo "    <p>
     </table>
 </center>
 ";
+       }
 
 
-end_page(false);
-
+       end_page(false);
+}
 ?>

@@ -18,48 +18,43 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
-
 require( "include/std_functions.php" );
 require( "include/timezones.php" );
 require( "include/rating.php" );
 
 $categories = array('Other:', 'Country', 'City','State', 'Club', 'Homepage', 'Email',
-               'ICQ-number', 'Game preferences', 'Hobbies', 'Occupation');
+                    'ICQ-number', 'Game preferences', 'Hobbies', 'Occupation');
 
-function find_cat($cat)
+function find_category_box_text($cat)
 {
-  global $categories;
-
-  if( in_array($cat, $categories) )
-    return $cat;
-  else
-    return 'Other:';
+   global $categories;
+   
+   if( in_array($cat, $categories) )
+      return $cat;
+   else
+      return 'Other:';
 }
 
-connect2mysql();
-
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-if( !$logged_in )
 {
-   header("Location: error.php?err=not_logged_in");
-   exit;
-}
+   connect2mysql();
+
+   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+
+   if( !$logged_in )
+      error("not_logged_in");
 
 
+   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"]);
 
-$result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"]);
+   start_page("Edit biopgraphical info", true, $logged_in, $player_row );
 
-start_page("Edit biopgraphical info", true, $logged_in, $player_row );
-
-echo '<CENTER>
-<FORM name="bioform" action="change_profile.php" method=post>
+   echo '<CENTER>
+<FORM name="bioform" action="change_bio.php" method=post>
 ';
 
-while( $row = mysql_fetch_array( $result ) )
-{
-  $cat = find_cat($row["Category"]);
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      $cat = find_category_box_text($row["Category"]);
 ?>
 
 
@@ -77,12 +72,12 @@ if( $cat == "Other:" ) echo ' value="' . $row["Category"] . '"' ?>></TD>
       </TR>
  </table>
 <?php
-}
+    }
 
 // And now three empty ones:
 
-for($i=1;$i<=3;$i++)
-{
+   for($i=1; $i<=3; $i++)
+   {
   ?>
  <table>
     <tr>
@@ -96,18 +91,18 @@ for($i=1;$i<=3;$i++)
       </TR>
  </table>
 <?php 
-}
+   }
 
 ?>
 
 
-  <input type=submit name="action" value="Change profile">
+  <input type=submit name="action" value="Change bio">
 </FORM>
 </CENTER>  
 <BR>
 
 <?php
 
-end_page(false);
-
+   end_page(false);
+}
 ?>

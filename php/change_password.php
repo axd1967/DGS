@@ -23,6 +23,7 @@ require( "include/rating.php" );
 
 {
    disable_cache();
+
    connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
@@ -33,53 +34,22 @@ require( "include/rating.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-
-   if( strlen( $name ) < 1 )
-      error("name_not_given");
-
-   if( $wantemail and $email )
-      $flags = 1;
-   else
-      $flags = 0;
+   if( $passwd != $passwd2 )
+   {
+      error("password_missmatch");
+   }
+   else if( strlen($passwd) < 6 )
+   {
+      error("password_too_short");
+   } 
 
    $query = "UPDATE Players SET " .
-       "Name='$name', " .
-       "Email='$email', " .
-       "Rank='$rank', " .
-       "Open='$open', " .
-       "Stonesize=$stonesize, " .
-       "Boardfontsize='$boardfontsize', " .
-       "Flags=$flags, ";
+       "Password=PASSWORD('$passwd') " .
+       "WHERE ID=" . $player_row['ID'];    
 
-   if( $nightstart != $player_row["Nightstart"] || 
-   $timezone != $player_row["Timezone"] )
-   {            
-      putenv("TZ=$timezone" );
-
-      $query .= "ClockChanged=NOW(), ";
-      // TODO: Should be changed after 15h
-      $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
-   }
-
-    
-   $newrating = convert_to_rating($rating, $ratingtype);
-
-   if( $player_row["RatingStatus"] != 'RATED' and $newrating and
-   ( $ratingtype != 'dragonrating' or abs($newrating - $player_row["Rating"]) > 0.005 ) )
-   {
-      // TODO: check if reasonable
-      $query .= "Rating=$newrating, " .
-          "RatingStatus='INIT', ";
-        
-   }
-
-   $query .= "Timezone='$timezone', " .
-       "Nightstart=$nightstart" .
-       " WHERE ID=" . $player_row['ID']; 
-    
    mysql_query( $query );
 
-   $msg = urlencode("Profile updated!");
+   $msg = urlencode("Password changed!");
 
    header("Location: userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
    exit;
