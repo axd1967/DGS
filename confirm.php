@@ -28,7 +28,7 @@ disable_cache();
 function jump_to_next_game($id, $Lastchanged, $gid)
 {
    $result = mysql_query("SELECT ID FROM Games " .
-                         "WHERE ToMove_ID=$id "  . 
+                         "WHERE ToMove_ID=$id "  .
                          "AND Status!='INVITED' AND Status!='FINISHED' " .
                          "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
                          "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
@@ -63,8 +63,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    $result = mysql_query( "SELECT Games.*, " .
                           "Games.Flags+0 AS flags, " .
-                          "black.ClockUsed AS Blackclock, " . 
-                          "white.ClockUsed AS Whiteclock " . 
+                          "black.ClockUsed AS Blackclock, " .
+                          "white.ClockUsed AS Whiteclock " .
                           "FROM Games, Players AS black, Players AS white " .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
 
@@ -146,7 +146,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
 
-   list($lastx,$lasty) = 
+   list($lastx,$lasty) =
       make_array( $gid, $array, $msg, $Moves, NULL, $moves_result, $marked_dead, $no_marked_dead );
 
    $Moves++;
@@ -165,14 +165,14 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          reset($prisoners);
          $new_prisoner_string = "";
-         
+
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
             $query .= "($gid, $Moves, \"NONE\", $x, $y, 0), ";
             $new_prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
-       
-         if( strlen($new_prisoner_string) != $nr_prisoners*2 or 
+
+         if( strlen($new_prisoner_string) != $nr_prisoners*2 or
              (isset($prisoner_string) and $new_prisoner_string != $prisoner_string) )
             error("move_problem");
 
@@ -198,10 +198,10 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             $flags |= KO;
          else
             $flags &= ~KO;
-         
+
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$flags " .
-             " WHERE" . $where_clause;
+             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
       }
       break;
 
@@ -219,7 +219,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             error("invalid_action");
 
 
-         $query = "INSERT INTO Moves SET " . 
+         $query = "INSERT INTO Moves SET " .
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
@@ -236,10 +236,10 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Lastchanged=FROM_UNIXTIME($NOW), " .
              "ToMove_ID=$next_to_move_ID, " . $time_query .
              "Flags=0 " .
-             " WHERE" . $where_clause;
+             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
       }
       break;
-     
+
       case 'handicap':
       {
          if( $Status != 'PLAY' or $Moves != 1 )
@@ -257,16 +257,17 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          for( $i=1; $i <= $Handicap; $i++ )
          {
             list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i*2-1, 2), $Size);
-            
+
             if( !isset($rownr) or !isset($colnr) )
                error("illegal_position");
 
-            $query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .  
-                ($i == $Handicap ? $hours : 0 ) . ")";
-
-            if( $message )
-               $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
+            $query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
+               ($i == $Handicap ? "$hours)" : "0), " );
          }
+
+         if( $message )
+            $query2 = "INSERT INTO MoveMessages " .
+               "SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
 
 
          $game_query = "UPDATE Games SET " .
@@ -275,13 +276,13 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " . $time_query .
              "ToMove_ID=$White_ID " .
-             " WHERE" . $where_clause;
+             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
       }
       break;
 
       case 'resign':
       {
-         $query = "INSERT INTO Moves SET " . 
+         $query = "INSERT INTO Moves SET " .
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
@@ -304,7 +305,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "ToMove_ID=0, " .
              "Score=$score, " . $time_query .
              "Flags=0" .
-             " WHERE" . $where_clause;
+             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
 
          $game_finished = true;
       }
@@ -314,7 +315,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       {
          if( $Status != 'PLAY' or ( $Moves >= 4+$Handicap ) )
             error("invalid_action");
-       
+
          $query = "DELETE FROM Moves WHERE gid=$gid";
          $query2 = "DELETE FROM MoveMessages WHERE gid=$gid";
          $game_query = "DELETE FROM Games WHERE ID=$gid";
@@ -369,13 +370,13 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          else
             $game_query .= "ToMove_ID=0, ";
 
-                
+
 
          $game_query .=
              "Flags=0, " .
              "Score=$score" .
-             " WHERE" . $where_clause;
-         
+             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
+
       }
       break;
 
@@ -387,14 +388,14 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
    $result = mysql_query( $query );
-        
+
    if( mysql_affected_rows() < 1 and $action != 'delete' )
       error("mysql_insert_move", true);
 
    if( strlen($query2) > 0 )
    {
-      $result = mysql_query( $query );
-        
+      $result = mysql_query( $query2 );
+
       if( mysql_affected_rows() < 1 and $action != 'delete' )
          error("mysql_insert_move", true);
    }
@@ -406,13 +407,13 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    if( mysql_affected_rows() != 1 )
       error("mysql_update_game", true);
 
-    
+
    if( $game_finished )
    {
       // send message to my opponent about the result
 
-      $result = mysql_query( "SELECT * FROM Players WHERE ID=" . 
-                             ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) ); 
+      $result = mysql_query( "SELECT * FROM Players WHERE ID=" .
+                             ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) );
 
       if( mysql_num_rows($result) != 1 )
          error("opponent_not_found", true);
@@ -431,8 +432,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       }
 
 
-      $Text = "The result in the game <a href=\"game.php?gid=$gid\">" . 
-          "$whitename (W)  vs. $blackname (B) </a>" . 
+      $Text = "The result in the game <a href=\"game.php?gid=$gid\">" .
+          "$whitename (W)  vs. $blackname (B) </a>" .
           "was: <p><center>" . score2text($score,true) . "</center></br>";
 
       $Subject = 'Game result';
@@ -460,14 +461,14 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       mysql_query( "UPDATE Players " .
                    "SET Running=Running-1, Finished=Finished+1" .
                    ($score > 0 ? ", Win=Win+1" : ($score < 0 ? ", Lost=Lost+1 " : "")) .
-                    " WHERE ID=$White_ID" );
-                    
+                    " WHERE ID=$White_ID LIMIT 1" );
+
       mysql_query( "UPDATE Players " .
                    "SET Running=Running-1, Finished=Finished+1" .
                    ($score < 0 ? ", Win=Win+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
-                    " WHERE ID=$Black_ID" );
-                    
-                    
+                    " WHERE ID=$Black_ID LIMIT 1" );
+
+
    }
 
 
@@ -475,17 +476,17 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    mysql_query( "UPDATE Players SET Notify='NEXT' " .
                 "WHERE ID='$next_to_move_ID' AND SendEmail LIKE '%ON%' " .
-                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "'") ;
+                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "' LIMIT 1") ;
 
 
 
 // Increase moves and activity
 
-   mysql_query( "UPDATE Players " . 
+   mysql_query( "UPDATE Players " .
                 "SET Activity=Activity + $ActivityForMove, " .
                 "Moves=Moves+1, " .
-                "LastMove=FROM_UNIXTIME($NOW) " . 
-                "WHERE ID=" . $player_row["ID"] );
+                "LastMove=FROM_UNIXTIME($NOW) " .
+                "WHERE ID=" . $player_row["ID"] . " LIMIT 1" );
 
 
 
