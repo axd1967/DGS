@@ -26,10 +26,11 @@ require_once( "include/message_functions.php" );
 
 disable_cache();
 
+
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -41,19 +42,19 @@ disable_cache();
 
 
    $my_id = $player_row['ID'];
-   $message_id = $_REQUEST['messageid'];
-   $disputegid = $_REQUEST['disputegid'];
-   $to = $_REQUEST['to'];
-   $reply = $_REQUEST['reply']; //ID of message replied. if set then (often?always?) == $message_id
-   $subject = $_REQUEST['subject'];
-   $message = $_REQUEST['message'];
-   $type = $_REQUEST['type'];
-   $gid = $_REQUEST['gid'];
-   $accepttype = $_REQUEST['accepttype'];
-   $declinetype = $_REQUEST['declinetype'];
+   $message_id = @$_REQUEST['messageid'];
+   $disputegid = @$_REQUEST['disputegid'];
+   $to = @$_REQUEST['to'];
+   $reply = @$_REQUEST['reply']; //ID of message replied. if set then (often?always?) == $message_id
+   $subject = @$_REQUEST['subject'];
+   $message = @$_REQUEST['message'];
+   $type = @$_REQUEST['type'];
+   $gid = @$_REQUEST['gid'];
+   $accepttype = @$_REQUEST['accepttype'];
+   $declinetype = @$_REQUEST['declinetype'];
 
    $folders = get_folders($my_id);
-   $new_folder = $_REQUEST['folder'];
+   $new_folder = @$_REQUEST['folder'];
 
    if( isset($_REQUEST['foldermove']) )
    {
@@ -103,31 +104,32 @@ disable_cache();
 
    if( $type == "INVITATION" )
    {
-      $size = $_REQUEST['size'];
-      $handicap_type = $_REQUEST['handicap_type'];
-      $color = $_REQUEST['color'];
-      $rated = $_REQUEST['rated'];
-      $handicap = $_REQUEST['handicap'];
-      $komi_m = $_REQUEST['komi_m'];
-      $komi_n = $_REQUEST['komi_n'];
-      $komi_d = $_REQUEST['komi_d'];
-      $weekendclock = $_REQUEST['weekendclock'];
-      $byoyomitype = $_REQUEST['byoyomitype'];
+      $size = @$_REQUEST['size'];
+      $handicap_type = @$_REQUEST['handicap_type'];
+      $color = @$_REQUEST['color'];
+      $rated = @$_REQUEST['rated'];
+      $handicap = @$_REQUEST['handicap'];
+      $komi_m = @$_REQUEST['komi_m'];
+      $komi_n = @$_REQUEST['komi_n'];
+      $komi_d = @$_REQUEST['komi_d'];
+      $weekendclock = @$_REQUEST['weekendclock'];
 
-      //for interpret_time_limit_forms:
-      $timevalue = $_REQUEST['timevalue'];
-      $timeunit = $_REQUEST['timeunit'];
+      //for interpret_time_limit_forms{
+      $byoyomitype = @$_REQUEST['byoyomitype'];
+      $timevalue = @$_REQUEST['timevalue'];
+      $timeunit = @$_REQUEST['timeunit'];
 
-      $byotimevalue_jap = $_REQUEST['byotimevalue_jap'];
-      $timeunit_jap = $_REQUEST['timeunit_jap'];
-      $byoperiods_jap = $_REQUEST['byoperiods_jap'];
+      $byotimevalue_jap = @$_REQUEST['byotimevalue_jap'];
+      $timeunit_jap = @$_REQUEST['timeunit_jap'];
+      $byoperiods_jap = @$_REQUEST['byoperiods_jap'];
 
-      $byotimevalue_can = $_REQUEST['byotimevalue_can'];
-      $timeunit_can = $_REQUEST['timeunit_can'];
-      $byoperiods_can = $_REQUEST['byoperiods_can'];
+      $byotimevalue_can = @$_REQUEST['byotimevalue_can'];
+      $timeunit_can = @$_REQUEST['timeunit_can'];
+      $byoperiods_can = @$_REQUEST['byoperiods_can'];
 
-      $byotimevalue_fis = $_REQUEST['byotimevalue_fis'];
-      $timeunit_fis = $_REQUEST['timeunit_fis'];
+      $byotimevalue_fis = @$_REQUEST['byotimevalue_fis'];
+      $timeunit_fis = @$_REQUEST['timeunit_fis'];
+      //for interpret_time_limit_forms}
 
 
 
@@ -270,14 +272,14 @@ disable_cache();
          "Status='PLAY', ";
 
 
-      if( $handitype == -2 ) // Proper handi
+      if( $handitype == -2 ) // Proper handicap
       {
             list($handicap,$komi,$swap) =
                suggest_proper($rating_white, $rating_black, $game_row["Size"]);
 
          $query .= "Handicap=$handicap, Komi=$komi, ";
       }
-      else if( $handitype == -1 ) // Conventional handi
+      else if( $handitype == -1 ) // Conventional handicap
       {
          list($handicap,$komi,$swap) =
             suggest_conventional($rating_white, $rating_black, $game_row["Size"]);

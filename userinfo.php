@@ -27,7 +27,7 @@ require_once( "include/countries.php" );
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -96,10 +96,9 @@ require_once( "include/countries.php" );
 
    if( $row['OnVacation'] > 0 )
    {
-      $days = round($row['OnVacation']);
+      $days = floor($row['OnVacation']);
       echo '<tr><td><b><font color=red>' . T_('On vacation') .
-         '</font></b></td><td>' . "$days " . ($days <= 1 ? T_('day') : T_('days')) .
-         ' ' .T_('left') . "</td></tr>\n";
+         '</font></b></td><td>' . echo_day($days) . ' ' .T_('left') . "</td></tr>\n";
    }
 
    echo '

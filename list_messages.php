@@ -29,7 +29,7 @@ require_once( "include/timezones.php" );
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -65,8 +65,6 @@ require_once( "include/timezones.php" );
    if( $find_answers > 0 )
    {
       $title = T_('Answers list');
-      $back = "<BR><A href=\"message.php?mode=ShowMessage&mid=$find_answers\">" . 
-                T_('Back to message') . "</A>";
       $page.= '&find_answers=' . $find_answers ;
       $where = "AND Messages.ReplyTo=$find_answers";
       $current_folder = FOLDER_NONE;
@@ -75,7 +73,6 @@ require_once( "include/timezones.php" );
    else
    {
       $title = T_('Message list');
-      $back = '';
       $where = "";
       if( !isset($current_folder) or !isset($my_folders[$current_folder]) )
          $current_folder = FOLDER_ALL_RECEIVED;
@@ -115,7 +112,7 @@ require_once( "include/timezones.php" );
 
    echo echo_folders($my_folders, $current_folder);
 
-   echo "<center>$back<h3><font color=$h3_color>" . $title . '</font></h3></center>';
+   echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
 
    $can_move_messages =
      message_list_table( $mtable, $result, $show_rows
@@ -160,8 +157,11 @@ require_once( "include/timezones.php" );
    }
    echo "</form>\n";
 
-   $menu_array = array( T_('Edit folders') => "edit_folders.php" );
+   if( $find_answers > 0 )
+      $menu_array = array( T_('Back to message') => "message.php?mode=ShowMessage&mid=$find_answers" );
+   else
+      $menu_array = array( T_('Edit folders') => "edit_folders.php" );
 
-   end_page( $menu_array );
+   end_page(@$menu_array);
 }
 ?>

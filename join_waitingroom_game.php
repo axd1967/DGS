@@ -28,7 +28,7 @@ require_once( "include/rating.php" );
    disable_cache();
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -37,8 +37,8 @@ require_once( "include/rating.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-   $id = $_REQUEST['id'];
-   if( !is_numeric($id) )
+   $id = @$_REQUEST['id'];
+   if( !is_numeric($id) or $id<0 )
       $id=0;
 
    $result = mysql_query("SELECT Waitingroom.*,Name,Handle," .
@@ -56,7 +56,7 @@ require_once( "include/rating.php" );
        and !$player_row["RatingStatus"] )
       error("no_initial_rating");
 
-   if( $delete == 't' )
+   if( @$_REQUEST['delete'] == 't' )
    {
       if( $player_row['ID'] !== $uid )
          error('waitingroom_delete_not_own');

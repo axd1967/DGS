@@ -29,7 +29,7 @@ require_once( "include/countries.php" );
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -264,7 +264,7 @@ require_once( "include/countries.php" );
    $profile_form->add_row( array( 'TAB',
                                   'CHECKBOX', 'locally', 1,
                                   T_('Change board graphics for this browser only'),
-                                  !empty($_COOKIE["prefs{$player_row['ID']}"]) ) );
+                                  !empty($_COOKIE[COOKIE_PREFIX."prefs{$player_row['ID']}"]) ) );
 
    $profile_form->add_row( array( 'HR' ) );
 

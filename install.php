@@ -24,7 +24,7 @@ require_once( "include/std_functions.php" );
 
 connect2mysql();
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
+$logged_in = who_is_logged( $player_row);
 
 start_page(T_('Installation instructions'), true, $logged_in, $player_row );
 

@@ -32,7 +32,7 @@ require_once( "include/make_translationfiles.php" );
 
   connect2mysql();
 
-  $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+  $logged_in = who_is_logged( $player_row);
 
   if( !$logged_in )
     error("not_logged_in");
@@ -147,9 +147,9 @@ When translating you should keep in mind the following things:
       $string = '';
       foreach( $known_languages as $entry => $array )
       {
-         foreach( $array as $enc => $lang_name )
+         foreach( $array as $charenc => $lang_name )
          {
-            if( $entry . "." . $enc == $translate_lang)
+            if( $entry . "." . $charenc == $translate_lang)
                $string .= ",$lang_name";
          }
       }

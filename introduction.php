@@ -22,11 +22,11 @@ $TranslateGroups[] = "Start";
 
 require_once( "include/std_functions.php" );
 
-connect2mysql();
-
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
 {
+  connect2mysql();
+
+  $logged_in = who_is_logged( $player_row);
+
   start_page(T_('Introduction'), true, $logged_in, $player_row );
 
   echo "<table align=center width=\"85%\"><tr><td>\n";

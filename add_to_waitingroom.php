@@ -26,9 +26,10 @@ require_once( "include/rating.php" );
 
 {
    disable_cache();
+
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -37,9 +38,13 @@ require_once( "include/rating.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-   $komi = 0;
-   if($handicap_type == 'nigiri' ) { $komi = $komi_n; }
-   else if($handicap_type == 'double' ) { $komi = $komi_d; }
+   $handicap_type = @$_POST['handicap_type'];
+   if( $handicap_type == 'nigiri' )
+      $komi = @$_POST['komi_n'];
+   elseif( $handicap_type == 'double' )
+      $komi = @$_POST['komi_d'];
+   else
+      $komi = 0;
 
    if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
        !$player_row["RatingStatus"] )
@@ -47,24 +52,41 @@ require_once( "include/rating.php" );
       error( "no_initial_rating" );
    }
 
-   interpret_time_limit_forms();
+      //for interpret_time_limit_forms{
+      $byoyomitype = @$_POST['byoyomitype'];
+      $timevalue = @$_POST['timevalue'];
+      $timeunit = @$_POST['timeunit'];
 
-   if( $rated != 'Y' or !$player_row["RatingStatus"] )
+      $byotimevalue_jap = @$_POST['byotimevalue_jap'];
+      $timeunit_jap = @$_POST['timeunit_jap'];
+      $byoperiods_jap = @$_POST['byoperiods_jap'];
+
+      $byotimevalue_can = @$_POST['byotimevalue_can'];
+      $timeunit_can = @$_POST['timeunit_can'];
+      $byoperiods_can = @$_POST['byoperiods_can'];
+
+      $byotimevalue_fis = @$_POST['byotimevalue_fis'];
+      $timeunit_fis = @$_POST['timeunit_fis'];
+      //for interpret_time_limit_forms}
+
+   interpret_time_limit_forms(); //Set global $hours,$byohours,$byoperiods
+
+   if( ($rated=@$_POST['rated']) != 'Y' or !$player_row["RatingStatus"] )
       $rated = 'N';
 
-   if( $weekendclock != 'Y' )
+   if( ($weekendclock=@$_POST['weekendclock']) != 'Y' )
       $weekendclock = 'N';
 
-   if( $must_be_rated != 'Y' )
+   if( ($must_be_rated=@$_POST['must_be_rated']) != 'Y' )
    {
       $must_be_rated = 'N';
-      //to keep a good column sorting
+      //to keep a good column sorting:
       $rating1 = $rating2 = read_rating('99 kyu', 'dragonrating');
    }
    else
    {
-      $rating1 = read_rating($rating1, 'dragonrating');
-      $rating2 = read_rating($rating2, 'dragonrating');
+      $rating1 = read_rating(@$_POST['rating1'], 'dragonrating');
+      $rating2 = read_rating(@$_POST['rating2'], 'dragonrating');
 
       if( $rating2 < $rating1 )
       {
@@ -77,9 +99,9 @@ require_once( "include/rating.php" );
 
    $query = "INSERT INTO Waitingroom SET " .
       "uid=" . $player_row['ID'] . ', ' .
-      "nrGames=$nrGames, " .
+      "nrGames=" . (0+@$_POST['nrGames']) . ", " .
       "Time=FROM_UNIXTIME($NOW), " .
-      "Size=$size, " .
+      "Size=" . (0+@$_POST['size']) . ", " .
       "Komi=ROUND(2*($komi))/2, " .
       "Maintime=$hours, " .
       "Byotype='$byoyomitype', " .
@@ -91,7 +113,7 @@ require_once( "include/rating.php" );
       "MustBeRated='$must_be_rated', " .
       "Ratingmin=$rating1, " .
       "Ratingmax=$rating2, " .
-      "Comment=\"$comment\"";
+      "Comment=\"" . @$_POST['comment'] . "\"";
 
    mysql_query( $query )
       or error("mysql_query_failed");

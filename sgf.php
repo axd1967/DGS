@@ -242,14 +242,14 @@ $array=array();
    if ( $owned_comments )
    {
       $owned_comments = DAME;
-      if ($Blackhandle == @$_COOKIE['handle'])
+      if ($Blackhandle == @$_COOKIE[COOKIE_PREFIX.'handle'])
       {
-         if( $Blackscode == @$_COOKIE['sessioncode'] && $Blackexpire >= $NOW )
+         if( $Blackscode == @$_COOKIE[COOKIE_PREFIX.'sessioncode'] && $Blackexpire >= $NOW )
             $owned_comments = BLACK ;
       }
-      elseif ($Whitehandle == @$_COOKIE['handle'])
+      elseif ($Whitehandle == @$_COOKIE[COOKIE_PREFIX.'handle'])
       {
-         if( $Whitescode == @$_COOKIE['sessioncode'] && $Whiteexpire >= $NOW )
+         if( $Whitescode == @$_COOKIE[COOKIE_PREFIX.'sessioncode'] && $Whiteexpire >= $NOW )
             $owned_comments = WHITE ;
       }
    }

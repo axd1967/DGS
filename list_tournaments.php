@@ -28,7 +28,7 @@ require_once( "include/tournament.php" );
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -101,6 +101,6 @@ require_once( "include/tournament.php" );
       $table->echo_table();
    }
 
-   end_page(false);
+   end_page();
 }
 ?>

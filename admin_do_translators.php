@@ -25,10 +25,9 @@ require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
 {
-
   connect2mysql();
 
-  $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+  $logged_in = who_is_logged( $player_row);
 
   if( !$logged_in )
     error("not_logged_in");
@@ -36,10 +35,10 @@ require_once( "include/make_translationfiles.php" );
   if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
      error("adminlevel_too_low");
 
-  $charenc = trim(@$_REQUEST['charenc']);
-  $langname = trim(@$_REQUEST['langname']);
-  $twoletter = trim(@$_REQUEST['twoletter']);
   $addlanguage = @$_REQUEST['addlanguage'];
+  $twoletter = strtolower(trim(@$_REQUEST['twoletter']));
+  $charenc = strtolower(trim(@$_REQUEST['charenc']));
+  $langname = trim(@$_REQUEST['langname']);
 
   $extra_url_parts = '';
   if( $addlanguage )

@@ -21,14 +21,14 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
-require_once( "include/rating.php" );
+//require_once( "include/rating.php" );
 
 {
    disable_cache();
 
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -36,16 +36,14 @@ require_once( "include/rating.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-   check_password( $handle, $player_row["Password"], $player_row["Newpassword"], $oldpasswd );
+   $oldpasswd = @$_POST['oldpasswd'];
+   check_password( $player_row["Handle"], $player_row["Password"], $player_row["Newpassword"], $oldpasswd );
 
-   if( $passwd != $passwd2 )
-   {
-      error("password_mismatch");
-   }
-   else if( strlen($passwd) < 6 )
-   {
+   $passwd = @$_POST['passwd'];
+   if( strlen($passwd) < 6 )
       error("password_too_short");
-   }
+   if( $passwd != @$_POST['passwd2'] )
+      error("password_mismatch");
 
    $query = "UPDATE Players SET " .
        "Password=PASSWORD('$passwd') " .

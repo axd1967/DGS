@@ -20,20 +20,18 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
  /* The code in this file is written by Ragnar Ouchterlony */
 
-{
-   require_once( "include/std_functions.php" );
-   require_once( "include/tournament.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/tournament.php" );
 
+{
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
 
    start_page(T_('Create New Tournament'), true, $logged_in, $player_row);
-
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
    $tour_form = new Form( 'tournamentform', 'create_tournament.php', FORM_POST );
 
@@ -48,7 +46,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
    $tour_form->echo_string();
    echo "</CENTER>\n";
 
-   end_page(false);
+   end_page();
 
 }
 ?>

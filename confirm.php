@@ -56,7 +56,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       error("no_game_nr");
    $gid = $_REQUEST['gid'] ;
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");

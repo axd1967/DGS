@@ -28,7 +28,7 @@ require_once( "include/rating.php" );
 
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -48,11 +48,11 @@ require_once( "include/rating.php" );
    {
       extract($row);
 
-      $EnteredText = trim(${"text$ID"});
-      $EnteredCategory = trim(${"category$ID"});
+      $EnteredText = trim(@$_POST["text$ID"]);
+      $EnteredCategory = trim(@$_POST["category$ID"]);
 
       if( $EnteredCategory == 'Other:' )
-         $EnteredCategory = trim(${"other$ID"});
+         $EnteredCategory = trim(@$_POST["other$ID"]);
 
       if( $EnteredText == $Text and $EnteredCategory == $Category )
          continue;
@@ -69,11 +69,11 @@ require_once( "include/rating.php" );
 
    for($i=1; $i<=3; $i++)
    {
-      $EnteredText = trim(${"newtext$i"});
-      $EnteredCategory = trim(${"newcategory$i"});
+      $EnteredText = trim(@$_POST["newtext$i"]);
+      $EnteredCategory = trim(@$_POST["newcategory$i"]);
 
       if( $EnteredCategory == 'Other:' )
-         $EnteredCategory = trim(${"newother$i"});
+         $EnteredCategory = trim(@$_POST["newother$i"]);
 
       if( $EnteredText == "" )
          continue;

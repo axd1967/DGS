@@ -26,9 +26,10 @@ require_once( "include/countries.php" );
 
 {
    disable_cache();
+
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -117,11 +118,11 @@ require_once( "include/countries.php" );
    }
 
    $language = trim(@$_GET['language']) ;
-   list($lang,$enc) = explode('.', $language);
+   list($lang,$charenc) = explode('.', $language);
 
    if( $language === 'C' or ( $language !== $player_row['Lang'] and
                               array_key_exists($lang, $known_languages) and
-                              array_key_exists($enc, $known_languages[$lang])) )
+                              array_key_exists($charenc, $known_languages[$lang])) )
    {
        $query .= "Lang='" . $language . "', ";
    }

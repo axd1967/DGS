@@ -27,7 +27,7 @@ require_once( "include/form_functions.php" );
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -41,8 +41,8 @@ require_once( "include/form_functions.php" );
    $days_left = floor($player_row['VacationDays']);
    $on_vacation = floor($player_row['OnVacation']);
    $minimum_days = $vacation_min_days - $on_vacation;
-   $vacationdiff = round($_POST['vacationdiff']);
-   $vacationlength = round($_POST['vacationlength']);
+   $vacationdiff = round(@$_POST['vacationdiff']);
+   $vacationlength = round(@$_POST['vacationlength']);
 
    if( $on_vacation > 0 )
    {
@@ -52,9 +52,11 @@ require_once( "include/form_functions.php" );
          echo T_("Sorry, you can't change the vacation length at the moment.");
       }
       else if( isset($_POST['change_vacation']) and
-          !(!is_numeric($vacationdiff) or $vacationdiff == 0 or
-            $vacationdiff < $minimum_days or $vacationdiff > $days_left))
+            $vacationdiff >= $minimum_days and $vacationdiff <= $days_left )
       {
+         if( $vacationdiff == 0 )
+            jump_to("status.php");
+
          mysql_query("UPDATE Players SET VacationDays=VacationDays-($vacationdiff), " .
                      "OnVacation=OnVacation+($vacationdiff) " .
                      "WHERE ID=" . $player_row['ID'] . " " .
@@ -69,18 +71,16 @@ require_once( "include/form_functions.php" );
          $vacation_form = new Form( 'vacationform', 'edit_vacation.php', FORM_POST );
 
          $days = array();
-
          for( $i=$minimum_days; $i<=$days_left; $i++ )
-            $days[$i] = ( $i >= 0 ? T_('Add') : T_('Remove') ) . ' ' . abs($i) . ' ' .
-               (abs($i) <= 1 ? T_('day') : T_('days'));
+            $days[$i] = ( $i >= 0 ? T_('Add') : T_('Remove') ) . ' ' . echo_day(abs($i));
 
          $vacation_form->add_row( array( 'HEADER', T_('Change vacation length') ) );
 
-//    $vacation_form->add_row( array( 'DESCRIPTION', '<font color=green>' .
-//                                    T_('Choose vacation length') . '</font>' ) );
          $vacation_form->add_row( array( 'SPACE' ) );
-         $vacation_form->add_row( array( 'SELECTBOX', 'vacationdiff', 1, $days, 0, false,
-                                         'SUBMITBUTTON', 'change_vacation', T_('Change vacation length') ) );
+         $vacation_form->add_row( array(
+                  'DESCRIPTION', echo_day($on_vacation) . ' ' .T_('left'),
+                  'SELECTBOX', 'vacationdiff', 1, $days, 0, false,
+                  'SUBMITBUTTON', 'change_vacation', T_('Change vacation length') ) );
 
          $vacation_form->echo_string();
       }
@@ -92,8 +92,7 @@ require_once( "include/form_functions.php" );
          echo sprintf(T_("Sorry, you need at least %d vacation days to be able to start a vacation period."), $vacation_min_days);
       }
       else if( isset($_POST['start_vacation']) and
-         !(!is_numeric($vacationlength) or $vacationlength < $vacation_min_days
-           or $vacationlength > $days_left ) )
+         $vacationlength >= $vacation_min_days and $vacationlength <= $days_left )
       {
          $result = mysql_query("SELECT Games.ID as gid, LastTicks-Clock.Ticks AS ticks " .
                                "FROM Games, Clock " .
@@ -127,11 +126,9 @@ require_once( "include/form_functions.php" );
 
          $vacation_form->add_row( array( 'HEADER', T_('Start vacation') ) );
 
-//    $vacation_form->add_row( array( 'DESCRIPTION', '<font color=green>' .
-//                                    T_('Choose vacation length') . '</font>' ) );
          $vacation_form->add_row( array( 'SPACE' ) );
-         $vacation_form->add_row(
-            array('DESCRIPTION', T_('Choose vacation length'),
+         $vacation_form->add_row( array(
+                  'DESCRIPTION', T_('Choose vacation length'),
                   'SELECTBOX', 'vacationlength', 1, $days, $vacation_min_days, false,
                   'SUBMITBUTTON', 'start_vacation', T_('Start vacation') ) );
 

@@ -46,7 +46,7 @@ require_once( "include/rating.php" );
    if( !$gid )
       error("no_game_nr");
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( $toggleobserve and $logged_in )
       toggle_observe_list($gid, $player_row["ID"]);

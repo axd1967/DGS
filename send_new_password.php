@@ -25,14 +25,15 @@ require_once( "include/std_functions.php" );
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
 
 
+   $action = @$_POST['action'];
    if( $action == 'Go back' )
       jump_to("index.php");
 
-
+   $userid = @$_POST['userid'];
    $result = mysql_query( "SELECT Newpassword, Email " .
                           "FROM Players WHERE Handle='$userid'" );
 
