@@ -26,7 +26,7 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 
-define('BAD_RATING_COLOR',"#ffaaaa");
+define('BAD_RATING_COLOR',"f0000010");
 
 {
    connect2mysql();
@@ -124,8 +124,12 @@ define('BAD_RATING_COLOR',"#ffaaaa");
             $wrow_strings[7] = "<td>$Size</td>";
          list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
          if( $wrtable->Is_Column_Displayed[8] )
+         {
+            $bgcolor = substr($wrtable->Row_Colors[count($wrtable->Tablerows) % 2], 2, 6);
+            $bgcolor = blend_alpha_hex(BAD_RATING_COLOR, $bgcolor);
             $wrow_strings[8] = '<td nowrap' .
-               ( $good_rating ? '>' : ' bgcolor='.BAD_RATING_COLOR.'>') . $Ratinglimit . "</td>";
+               ( $good_rating ? '>' : ' bgcolor='.$bgcolor.'>') . $Ratinglimit . "</td>";
+         }
          if( $wrtable->Is_Column_Displayed[9] )
             $wrow_strings[9] = '<td nowrap>' .
                echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) .
