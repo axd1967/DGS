@@ -42,7 +42,7 @@ if( $player_row["Handle"] == "guest" )
 
 
 
-$result = mysql_query( "SELECT ID FROM Players WHERE Handle='" . $to . "'" );
+$result = mysql_query( "SELECT ID FROM Players WHERE Handle='$to'" );
 
 if( mysql_num_rows( $result ) != 1 )
 {
