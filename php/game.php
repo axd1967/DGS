@@ -487,7 +487,7 @@ else if( $action == 'handicap' )
         </tr>
 
 <?php
-if( $Status != 'FINISHED' and $Maintime > 0)
+if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0))
 {
 ?>
       </tr><tr>
@@ -529,6 +529,10 @@ if( $Black_Byotime > 0 or $White_Byotime > 0 )
         </tr>
 <?php
 }
+
+    echo '<tr><td>Rated: </td><td colspan=2>' . ( $game_row["Rated"] == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
+';
+
 ?>
     </table>
 <HR>

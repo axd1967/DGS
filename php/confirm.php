@@ -103,7 +103,7 @@ if( $message )
 
 // Update clock
 
-if( $Maintime > 0 )
+if( $Maintime > 0 or $Byotime > 0)
 {
 
   $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
