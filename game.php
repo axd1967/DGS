@@ -299,33 +299,31 @@ require_once( "include/rating.php" );
      $notesmode = $player_row["NotesSmallMode"];
    }
 
-   echo "<table><tr><td>"; //notes table
+   echo "<table>\n<tr><td>"; //notes table {--------
+
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
               $player_row["Stonesize"], $msg, $stonestring, $handi,
               $player_row["Boardcoords"], $player_row["Woodcolor"]);
 
-     if( $extra_message ) //score messages
-       echo "<P><center>$extra_message</center>\n";
+   if( $extra_message ) //score messages
+      echo "<P><center>$extra_message</center>\n";
    echo '<br>';
 
-   if ($notesmode == 'BELOW')
+   if ($notesmode != 'OFF' and $show_notes)
    {
-     echo "</td></tr>\n<tr><td align='center'>";
-     if ($notesmode != 'OFF' and $show_notes)
-       draw_notes($notes, $notesheight, $noteswidth);
-     echo "</td>\n</tr></table>";
-     if( $enable_message )
-       draw_message_box(); //use $stonestring, $prisoner_string, $move
+      if ($notesmode == 'BELOW')
+         echo "</td></tr>\n<tr><td align='center'>";
+      else //default RIGHT
+         echo "</td>\n<td align='left' valign='bottom'>";
+      draw_notes($notes, $notesheight, $noteswidth);
    }
-   else //default RIGHT, even if OFF
+
+   if( $enable_message )
    {
-     if( $enable_message )
-       draw_message_box(); //use $stonestring, $prisoner_string, $move
-     echo "</td>\n<td align='left'>";
-     if ($notesmode != 'OFF' and $show_notes)
-       draw_notes($notes, $notesheight, $noteswidth);
-     echo "</td>\n</tr></table>";
+      echo "</td></tr>\n<tr><td align='center'>";
+      draw_message_box(); //use $stonestring, $prisoner_string, $move
    }
+   echo "</td></tr>\n</table>"; //notes table }--------
 
 
    echo "<HR>\n";
