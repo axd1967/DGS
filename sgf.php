@@ -22,11 +22,43 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
+function reverse_htmlentities( $str )
+{
+  $reg= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
+  $reg= array_flip($reg);
+  $reg['&nbsp;'] = ' '; //else maybe '\xa0'
+  return strtr($str, $reg);
+}
+
+function sgf_simpletext( $str )
+{
+   return str_replace("]","\]", str_replace("\\","\\\\", 
+         ereg_replace("[\x01-\x20]+", " ", reverse_htmlentities( $str )
+      ) ) );
+}
+
 function sgf_echo_comment( $com )
 {
-   if ( $com )
-      echo "\nC[".str_replace("]","\]", ltrim($com,"\r\n"))."]\n";
+   if ( !$com )
+      return false;
+   echo "\nC[" . str_replace("]","\]", str_replace("\\","\\\\", 
+         reverse_htmlentities( ltrim($com,"\r\n")
+      ) ) ) . "]";
+   return true;
 }
+
+function sgf_echo_point( $marks, $prop="MA" )
+{
+   if (count($marks) <= 0)
+      return false;
+   echo $prop;
+   foreach($marks as $coord)
+   {
+      echo "[$coord]";
+   }
+   return true;
+}
+
 
 {
    disable_cache();
@@ -37,11 +69,18 @@ function sgf_echo_comment( $com )
    $use_HA = false;
    $use_AB_for_handicap = true;
    $sgf_trim_level = -1; //-1= skip ending pass, -2= keep them
-   $sgf_pass_highlight = 1; //0=no highlight, 1=with Name property, 2=in comments
+   $sgf_pass_highlight = 1; //0=no highlight, 1=with Name property, 2=in comments, 3=both
 
 //As board size may be > 'tt' coord, we can't use [tt] for pass moves
 // so we use [] and, then, we need at least sgf_version = 4 (FF[4])
    $sgf_version = 4;
+
+/*
+   WARNING: Some fields could cause problems because of charset:
+   - those coming from user (like $Blackname)
+   - those translated (like score2text() or echo_time_limit())
+   We could use the CA[] (FF[4]) property if we know what it is.
+*/
 
    if( !$gid )
    {
@@ -85,105 +124,169 @@ function sgf_echo_comment( $com )
 
    $node_com = "";
 
-   echo "(;FF[$sgf_version]GM[1]
-PC[Dragon Go Server: $HOSTBASE]
-DT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]
-PB[$Blackname ($Blackhandle)]
-PW[$Whitename ($Whitehandle)]\n";
+   echo "(\n;FF[$sgf_version]GM[1]"
+      . "\nPC[Dragon Go Server: $HOSTBASE]"
+      . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
+      . "\nPB[" . sgf_simpletext("$Blackname ($Blackhandle)") . "]"
+      . "\nPW[" . sgf_simpletext("$Whitename ($Whitehandle)") . "]";
 
    if( isset($Blackrating) or isset($Whiterating) )
    {
-      echo "BR[" . ( isset($Blackrating) ? echo_rating($Blackrating, false) : '?' ) . "]\n" .
-         "WR[" . ( isset($Whiterating) ? echo_rating($Whiterating, false) : '?' ) . "]\n";
+      echo "\nBR[" . ( isset($Blackrating) ? echo_rating($Blackrating, false) : '?' ) . "]" .
+           "\nWR[" . ( isset($Whiterating) ? echo_rating($Whiterating, false) : '?' ) . "]";
+   }
+
+   if ($sgf_version >= 4)
+   {
+      echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)) . "]";
    }
 
    if( isset($Score) )
    {
-      echo "RE[" . score2text($Score, false, true) . "]\n";
+      echo "\nRE[" . sgf_simpletext(score2text($Score, false, true)) . "]";
    }
 
-   echo "SZ[$Size]\n";
-   echo "KM[$Komi]\n";
+   echo "\nSZ[$Size]";
+   echo "\nKM[$Komi]";
 
    if( $rules )
-      echo "RU[$rules]\n";
+      echo "\nRU[$rules]";
 
-   if( $Handicap > 0 )
-   {
-      if( $use_HA )
-         echo "HA[$Handicap]\n";
-      if( $use_AB_for_handicap )
-         echo "PL[W]\nAB";
-   }
 
    $regexp = ( $Status == 'FINISHED' ? "c|comment|h|hidden" : "c|comment" );
 
-   for ($sgf_trim_nr = mysql_num_rows ($result) - 1; $sgf_trim_nr >=0; $sgf_trim_nr--)
+   $sgf_trim_nr = mysql_num_rows ($result) - 1 ;
+   if ( $Status == 'FINISHED' )
    {
-      if (!mysql_data_seek ($result, $sgf_trim_nr))
-         break;
-      if (!$row = mysql_fetch_array($result))
-         break;
-      if( $row["PosX"] > $sgf_trim_level )
-         break;
+      while ( $sgf_trim_nr >=0 )
+      {
+         if (!mysql_data_seek ($result, $sgf_trim_nr))
+            break;
+         if (!$row = mysql_fetch_array($result))
+            break;
+         if( $row["PosX"] > $sgf_trim_level 
+            && ($row["Stone"] == WHITE or $row["Stone"] == BLACK) )
+            break;
+         $sgf_trim_nr-- ;
+      }
+      mysql_data_seek ($result, 0) ;
    }
 
 
-   mysql_data_seek ($result, 0) ;
+   if( $Handicap > 0 && $use_HA )
+      echo "\nHA[$Handicap]";
+
+   $movenum= 0; $movesync= 0;
+   $points=array();
    while( $row = mysql_fetch_array($result) )
    {
-      if( $sgf_trim_nr >= 0
-          && $row["PosX"] >= -1
-          && ($row["Stone"] == WHITE or $row["Stone"] == BLACK ) )
+      $coord = chr($row["PosX"] + ord('a')) . chr($row["PosY"] + ord('a'));
+
+      if( $row["Stone"] == WHITE or $row["Stone"] == BLACK )
       {
 
-         if( $row["MoveNr"] > $Handicap or !$use_AB_for_handicap )
+         if( $row["MoveNr"] <= $Handicap && $use_AB_for_handicap )
+         {
+            $points[$coord]=$coord;
+            if( $row["MoveNr"] == $Handicap)
+            {
+               sgf_echo_point( $points, "\nPL[W]AB");
+               unset($points);
+            }
+         }
+         else if ($sgf_trim_nr >= 0)
          {
             sgf_echo_comment( $node_com );
             $node_com = "";
-            echo( $row["Stone"] == WHITE ? ";W" : ";B" );
+
+            echo( "\n;" ); //Node start
+
+            if ($row["PosX"] < -1 )
+            { //score steps
+               sgf_echo_point( $points);
+            }
+            else
+            { //pass, normal move or non AB handicap
+               unset($points);
+
+               if( $row["MoveNr"] > $Handicap)
+               {
+                  $movenum++;
+                  if( $row["MoveNr"] != $movenum+$movesync)
+                  {
+                     //usefull when non AB handicap or resume after SCORE
+                     echo "MN[$movenum]";
+                     $movesync= $row["MoveNr"]-$movenum;
+                  }
+               }
+
+               echo( $row["Stone"] == WHITE ? "W" : "B" );
+            
+               if( $row["PosX"] == -1 )  //pass move
+               {
+                  echo "[]"; //do not use [tt]
+
+                  if( $sgf_pass_highlight & 1 )
+                     echo "N[PASS]";
+
+                  else if ( $sgf_pass_highlight & 2 )
+                     $node_com .= "\nPASS";
+               }
+               else //move or non AB handicap
+               {
+                  echo "[" . $coord . "]";
+               }
+            }
+
          }
 
-         $sgf_trim_nr--;
-         if( $row["PosX"] == -1 )  //pass move
+         //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
+         if ($sgf_trim_nr == -1)
          {
-            echo "[]"; //do not use [tt]
-
-            if( $sgf_pass_highlight == 1 )
-               echo "N[PASS]";
-
-            else if ( $sgf_pass_highlight == 2 )
-               $node_com .= "\nPASS";
+            sgf_echo_comment( $node_com );
+            $node_com = "";
          }
-         else   //if bigger board: + ($row["PosX"]<26)?ord('a'):(ord('A')-26)
-            echo "[" . chr($row["PosX"] + ord('a')) .
-               chr($row["PosY"] + ord('a')) . "]";
+         if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'mis", $row["Text"],
+                                          $matches, PREG__SET_ORDER) )
+         {
+            for($i=0; $i<$nr_matches; $i++)
+            {
+               $node_com .= "\n" . ( $row["Stone"] == WHITE ? $Whitename : $Blackname )
+                        . ": " . trim($matches[2][$i]) ;
+            }
+         }
 
       }
-
-      //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
-      if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'mis", $row["Text"],
-                                       $matches, PREG__SET_ORDER) )
-      {
-         for($i=0; $i<$nr_matches; $i++)
-         {
-            $node_com .= "\n" . ( $row["Stone"] == WHITE ? $Whitename : $Blackname ) . ": ";
-            $node_com .= trim($matches[2][$i]) ;
-         }
+      else if ($row["Stone"] == WHITE_DEAD or $row["Stone"] == BLACK_DEAD)
+      { // toggle dead marks
+         if (isset($points[$coord]))
+            unset($points[$coord]);
+         else
+            $points[$coord]=$coord;
       }
 
+      $sgf_trim_nr--;
    }
 
-/* highlighting result in last comments:
-   could show territories, prisonniers, komi ...
-   if ( $Status == 'FINISHED') //???
-   if( isset($Score) )
+   $i= false;
+   if ( $Status == 'FINISHED')
    {
-      $node_com.= "\nResult: " . score2text($Score, false, true) ;
-   }
-*/
+      //from last skipped SCORE/SCORE2 dead stones
+      $i= sgf_echo_point( $points, "\n;AE"); //and territories with TB+TW ?
 
-   sgf_echo_comment( $node_com );
+      // highlighting result in last comments:
+      // could show counts for territories, prisonniers, komi
+      if( isset($Score) )
+      {
+         $node_com.= "\nResult: " . score2text($Score, false, true) ;
+      }
+   }
+   if ( $node_com )
+   {
+      if ( !$i )
+         echo "\n;" ;
+      sgf_echo_comment( $node_com );
+   }
 
    echo "\n)\n";
 
