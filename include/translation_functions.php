@@ -58,7 +58,7 @@ function include_translate_group($group, $player_row)
 
    if( !empty($language) )
    {
-      $filename = $base_path . "include/translatefiles/$language" .
+      $filename = $base_path . "translations/$language" .
          "_" . $group . '.php';
 
       if( file_exists( $filename ) )
