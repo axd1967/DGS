@@ -1523,6 +1523,10 @@ The reasons for this problem could be any of the following:
       array( 'Groups' => array( 'Error' ) ),
 
       /* Found in these files: error.php */
+      'Sorry, you may only delete your own game.' =>
+      array( 'Groups' => array( 'Error' ) ),
+
+      /* Found in these files: error.php */
       'Sorry, you may only place stones on empty points.' =>
       array( 'Groups' => array( 'Error' ) ),
 
@@ -1596,6 +1600,14 @@ The reasons for this problem could be any of the following:
 
       /* Found in these files: error.php */
       'The komi is out of range, please choose a move reasonable value.' =>
+      array( 'Groups' => array( 'Error' ) ),
+
+      /* Found in these files: error.php */
+      'The password contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+.,:;?!%* are allowed.' =>
+      array( 'Groups' => array( 'Error' ) ),
+
+      /* Found in these files: error.php */
+      'The userid contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+ are allowed.' =>
       array( 'Groups' => array( 'Error' ) ),
 
       /* Found in these files: message.php */
@@ -1680,6 +1692,10 @@ The reasons for this problem could be any of the following:
 
       /* Found in these files: edit_profile.php */
       'Up' =>
+      array( 'Groups' => array( 'Edit profile' ) ),
+
+      /* Found in these files: edit_profile.php */
+      'Use browser settings' =>
       array( 'Groups' => array( 'Edit profile' ) ),
 
       /* Found in these files: admin.php */
