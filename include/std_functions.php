@@ -101,10 +101,10 @@ define("DOWN",8);
 
 
 // If no gettext
-if( !function_exists("_") )
-{
-   function _($string) { return $string; }
-}
+//if( !function_exists("_") )
+//{
+//   function _($string) { return $string; }
+//}
 
 
 function getmicrotime()
@@ -144,7 +144,7 @@ function disable_cache($stamp=NULL)
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $HOSTBASE, $is_down, $bg_color, $menu_bg_color, $menu_fg_color;
+   global $HOSTBASE, $is_down, $bg_color, $menu_bg_color, $menu_fg_color, $the_translator;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -163,6 +163,12 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 //     header("Vary: Accept-Encoding");
 
    ob_start("ob_gzhandler");
+
+   if( $logged_in and !is_null($player_row['Lang']) and
+       strcmp($player_row['Handle'],'guest') != 0 )
+     {
+       $the_translator->change_language( $player_row['Lang'] );
+     }
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
