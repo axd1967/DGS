@@ -102,6 +102,7 @@ function get_preferred_browser_language()
          if( !array_key_exists($lang, $known_languages))
             continue;
 
+         $current_q_val = $q_val;
 
          foreach( $known_languages[$lang] as $enc => $name )
             {
