@@ -69,6 +69,33 @@ CREATE TABLE Games (
 ) TYPE=MyISAM;
 
 #
+# Table structure for table 'Bio'
+#
+
+CREATE TABLE Bio (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  Category varchar(40) default NULL,
+  Text text,
+  PRIMARY KEY  (ID),
+  KEY uid (uid)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'RatingChange'
+#
+
+CREATE TABLE RatingChange (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  gid int(11) NOT NULL default '0',
+  diff double default NULL,
+  PRIMARY KEY  (ID),
+  KEY uid (uid)
+) TYPE=MyISAM;
+
+
+#
 # Insert Guest account
 #
 
