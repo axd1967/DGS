@@ -64,22 +64,29 @@ function include_translate_group($group, $player_row) //must be called from main
 {
    global $language_used, $encoding_used, $Tr;
 
-   if( !isset( $language_used ) )
+   if( isset( $language_used ) ) //from a previous call
+      $language = $language_used;
+   else
    {
       if( isset($player_row['Lang']) and $player_row['Lang'] !== 'C' )
          $language = $player_row['Lang'];
       else
          $language = get_preferred_browser_language();
+
+      if( empty($language) )
+         $language = 'en.iso-8859-1';
+      //else call to get_preferred_browser_language() for each $group
    }
-   else
-      $language = $language_used;
 
 
+   if( empty($language) || strtolower($language)!='en.iso-8859-1' )
+   { //replace 'To#2' and 'From#2'
    $filename = "translations/en.iso-8859-1" . '_' . $group . '.php';
 
    if( file_exists( $filename ) )
    {
       include_once( $filename );
+   }
    }
 
 
@@ -147,11 +154,11 @@ function get_language_descriptions_translated()
    global $known_languages;
 
    $result = array();
-   foreach( $known_languages as $entry => $array )
+   foreach( $known_languages as $twoletter => $array )
       {
          foreach( $array as $charenc => $lang_name )
             {
-               $result[ $entry . "." . $charenc ] = T_($lang_name);
+               $result[ $twoletter . "." . $charenc ] = T_($lang_name);
             }
       }
    return $result;

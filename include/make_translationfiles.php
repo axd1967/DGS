@@ -54,8 +54,12 @@ function make_known_languages() //must be called from main dir
 
 function slashed($string)
 {
+   //all that can disturb a PHP string quoted with ''
+   return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
+/*
    //all that can disturb a PHP string quoted with ""
    return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $string );
+*/
 }
 
 
@@ -72,6 +76,7 @@ function make_include_files($language=null, $group=null) //must be called from m
       "FROM Translations, TranslationTexts, TranslationLanguages, " .
       "TranslationFoundInGroup, TranslationGroups " .
       "WHERE Translations.Language_ID = TranslationLanguages.ID ".
+      "AND Translations.Text!='' " .
       "AND TranslationTexts.ID=Translations.Original_ID " .
       "AND TranslationFoundInGroup.Text_ID=Translations.Original_ID " .
       "AND TranslationGroups.ID=TranslationFoundInGroup.Group_ID ";
@@ -111,13 +116,8 @@ function make_include_files($language=null, $group=null) //must be called from m
                  gmdate('Y-m-d H:i:s T', $NOW) . " */\n\n");
       }
 
-if($lang == 'jp.shift-jis'){//Japanese 2bytes char Pb
-      fwrite( $fd, "\$Tr[\"" . slashed($row['Original']) . "\"] = urldecode(\"" .
-              slashed($row['Text']) . "\");\n" );
-}else{
-      fwrite( $fd, "\$Tr[\"" . slashed($row['Original']) . "\"] = \"" .
-              slashed($row['Text']) . "\";\n" );
-}
+      fwrite( $fd, "\$Tr['" . slashed($row['Original']) . "'] = '" .
+              slashed($row['Text']) . "';\n" );
    }
 
 
@@ -142,41 +142,47 @@ if($lang == 'jp.shift-jis'){//Japanese 2bytes char Pb
 function translations_query( $translate_lang, $untranslated, $group )
 {
 // See admin_faq.php to know the Translatable flag meaning.
-
-   $query = "SELECT Translations.Text,TranslationTexts.ID AS Original_ID," .
-     "TranslationFoundInGroup.Group_ID ," . //ORDER BY columns not in the result is not allowed in ANSI SQL.
-     "TranslationTexts.Text AS Original, TranslationLanguages.ID AS Language_ID, " .
+   $query = 
+     "SELECT Translations.Text," .
+            "TranslationTexts.ID AS Original_ID," .
+            "TranslationLanguages.ID AS Language_ID," .
+            "TranslationFoundInGroup.Group_ID," .
+            "TranslationTexts.Text AS Original," .
      "TranslationTexts.Translatable " .
-     "FROM TranslationTexts, TranslationGroups, " .
-     "TranslationFoundInGroup, TranslationLanguages " .
-     "LEFT JOIN Translations ON Translations.Original_ID=TranslationTexts.ID " .
-     "AND Translations.Language_ID=TranslationLanguages.ID ";
+     "FROM TranslationTexts," .
+          "TranslationLanguages," .
+          "TranslationFoundInGroup," .
+          "TranslationGroups " .
+     "LEFT JOIN Translations " .
+        "ON Translations.Original_ID=TranslationTexts.ID " .
+       "AND Translations.Language_ID=TranslationLanguages.ID " .
+     "WHERE TranslationLanguages.Language='$translate_lang' " .
+       "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
+       "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
+       "AND TranslationTexts.Translatable!='N' " ;
 
-   if( $untranslated )
-     $query .= "WHERE TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
-        "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
-        "AND TranslationLanguages.Language='$translate_lang' " .
-/* 
-  Translations.Text IS NOT NULL (but maybe "" if the 'same' box is checked)
-    and Translatable='Y' (instead of Done)
-    is the default status for all the system messages.
-  So Translations.Text IS NULL and Translatable!='N' mean "never translated".
-*/
-        "AND Translatable!='N' " .
-        "AND (Translations.Text IS NULL OR Translatable='Changed') " .
-/*>>Rod: Warning: Some items appear two times when in different groups
-     but we can't use:
-        . ( $untranslated ? "DISTINCT " : "") . 
-     unless:
-        "ORDER BY Original_ID LIMIT 50";
-*/
-        "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
+   if( !$untranslated )
+     $query .= 
+       "AND TranslationGroups.Groupname='$group' " .
+       "ORDER BY Original_ID"; // LIMIT 50";
    else
-     $query .= "WHERE TranslationGroups.Groupname='$group' " .
-        "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
-        "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
-        "AND TranslationLanguages.Language='$translate_lang' " .
-        "AND Translatable!='N' ";
+     $query .= 
+       "AND (Translations.Text IS NULL OR TranslationTexts.Translatable='Changed') " .
+       "ORDER BY Original_ID LIMIT 50";
+/* Translations.Text IS NOT NULL (but maybe empty if the 'same' box is checked)
+    and Translatable='Y' (instead of Done as for a FAQ message)
+    is the default status for a translated system message.
+   So, Translations.Text IS NULL mean "never translated".
+*/
+/* Note: Some items appear two or more times within the untranslated set
+    when from different groups. But we can't use:
+       ( $untranslated ? "DISTINCT " : "")
+    because the Group_ID column makes the rows distinct.
+   Workaround: using "ORDER BY Original_ID LIMIT 50";
+    and filter the rows on Original_ID while computing.
+   The previous sort was:
+        "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
+*/
 
    return mysql_query($query);
 }
