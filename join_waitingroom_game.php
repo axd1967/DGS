@@ -100,23 +100,14 @@ require( "include/rating.php" );
    $query =  "INSERT INTO Games SET " .
       "Status='PLAY', ";
 
+   $Handicap = 0;
 
    if( $Handicaptype == 'proper' )
-   {
-      list($handicap,$komi,$swap) = suggest_proper($rating_white, $rating_black, $Size);
+      list($Handicap,$Komi,$swap) = suggest_proper($rating_white, $rating_black, $Size);
 
-      $query .= "Handicap=$handicap, Komi=$komi, ";
-   }
 
    if( $Handicaptype == 'conv' )
-   {
-      list($handicap,$komi,$swap) = suggest_conventional($rating_white, $rating_black, $Size);
-
-      $query .= "Handicap=$handicap, Komi=$komi, ";
-   }
-
-   if( $Handicaptype == 'double' )
-      $query .= "Handicap=0, Komi=$Komi, ";
+      list($handicap,$Komi,$swap) = suggest_conventional($rating_white, $rating_black, $Size);
 
    if( $swap )
       $query .= "Black_ID=$uid, " .
@@ -132,6 +123,8 @@ require( "include/rating.php" );
          "LastTicks=$ticks_black, ";
 
    $query .= "Size=$Size, " .
+      "Handicap=$Handicap, " .
+      "Komi=$Komi, " .
       "Maintime=$Maintime, " .
       "Byotype='$Byotype', " .
       "Byotime=$Byotime, " .
@@ -160,7 +153,7 @@ require( "include/rating.php" );
          "ClockUsed=$clock_used_white, " .
          "LastTicks=$ticks_white, " .
          "Size=$Size, " .
-         "Handicap=0, " .
+         "Handicap=$Handicap, " .
          "Komi=$Komi, " .
          "Maintime=$Maintime, " .
          "Byotype='$Byotype', " .
