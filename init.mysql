@@ -25,7 +25,7 @@ CREATE TABLE Players (
   Timezone varchar(40) NOT NULL default 'GMT',
   Nightstart int(11) NOT NULL default '22',
   ClockUsed int(11) NOT NULL default '22',
-  ClockChanged datetime default NULL,
+  ClockChanged char(1) default NULL,
   Rating double default NULL,
   Rating2 double default NULL,
   RatingMin double default NULL,

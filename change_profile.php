@@ -79,7 +79,7 @@ require( "include/rating.php" );
      }
 
    if( $nightstart != $player_row["Nightstart"] ||
-   $timezone != $player_row["Timezone"] )
+       $timezone != $player_row["Timezone"] )
    {
       putenv("TZ=$timezone" );
 
@@ -96,7 +96,6 @@ require( "include/rating.php" );
        ( $ratingtype != 'dragonrating' or !is_numeric($player_row["Rating2"])
          or  abs($newrating - $player_row["Rating2"]) > 0.005 ) )
    {
-      // TODO: check if reasonable
       $query .= "Rating=$newrating, " .
          "InitialRating=$newrating, " .
          "Rating2=$newrating, " .

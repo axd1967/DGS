@@ -118,6 +118,8 @@ require( "forum/forum_functions.php" );
                 "Activity=$Activity" );
 
 
+
+
 // Delete old forumreads
 
    $result = mysql_query("SELECT ID FROM Posts " .
@@ -157,7 +159,5 @@ require( "forum/forum_functions.php" );
                   "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
                   "WHERE ID='" . $row['ID'] . "' LIMIT 1");
    }
-
-
 }
 ?>
