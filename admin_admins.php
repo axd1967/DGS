@@ -59,7 +59,7 @@ require_once( "include/table_columns.php.old" );
         if( $value != 'Y' )
            continue;
 
-        list($type, $id) = split('_', $item, 2);
+        list($type, $id) = explode('_', $item, 2);
 
         $val = $admin_tasks[$type];
 
