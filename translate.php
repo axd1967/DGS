@@ -177,7 +177,9 @@ When translating you should keep in mind the following things:
                                              $CHARACTER_ENCODINGS[$translate_lang]),
                             'TD',
                             'CHECKBOX', 'same' . $row['Original_ID'], 'Y',
-                            'same', $row['Text'] === '' ) );
+                            'same', $row['Text'] === '') );
+         $translate_form->add_row( array( 'OWNHTML',
+                                          "<td align=\"center\" colspan=\"3\"><hr></td>") );
       }
 
 
