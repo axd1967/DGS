@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
 require( "include/std_functions.php" );
+require( "include/rating.php" );
 
 connect2mysql();
 
@@ -65,9 +66,22 @@ if( $action == "Change profile" )
             putenv("TZ=$timezone" );
 
             $query .= "ClockChanged=NOW(), ";
-            // Should be changed after 15h
+            // TODO: Should be changed after 15h
             $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
         }
+
+    if( $player_row["RatingStatus"] != 'RATED' and
+    ( $ratingtype != 'dragonrating' or abs($rating - $player_row["Rating"]) > 0.005 ) )
+      {
+
+        $newrating = convert_to_rating($rating, $ratingtype);
+
+        // TODO: check if reasonable
+        $query .= "Rating=$newrating, " .
+           "RatingStatus='INIT', ";
+        
+      }
+
     $query .= "Timezone='$timezone', " .
          "Nightstart=$nightstart" .
          " WHERE ID=" . $player_row['ID']; 
@@ -112,3 +126,4 @@ else
     header("Location: error.php?err=no_action");
     exit;
 }
+?>

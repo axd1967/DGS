@@ -63,14 +63,14 @@ while($row = mysql_fetch_array($result))
 
   if( $ToMove_ID == $Black_ID )
     {
-      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, false);
 
       $time_is_up = ( $Black_Maintime == 0 and $Black_Byotime == 0 );
     }
   else if( $ToMove_ID == $White_ID )
     {
-      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods,
+      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
       $Byotype, $Byotime, $Byoperiods, false);
 
       $time_is_up = ( $White_Maintime == 0 and $White_Byotime == 0 );

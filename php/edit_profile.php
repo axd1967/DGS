@@ -22,6 +22,7 @@ header ("Cache-Control: no-cache, must-revalidate, max_age=0");
 
 require( "include/std_functions.php" );
 require( "include/timezones.php" );
+require( "include/rating.php" );
 
 connect2mysql();
 
@@ -61,10 +62,26 @@ start_page("Edit profile", true, $logged_in, $player_row );
       </TR>
 
       <TR>
-        <TD align=right>Rank:</TD>
+        <TD align=right>Rank info:</TD>
         <TD align=left> <input type="text" name="rank" value="<?php echo $player_row["Rank"]; ?>" size="16" maxlength="80"></TD>
       </TR>
 
+      <TR>
+        <TD align=right>Rating:</TD><TD align=left>
+        <?php if( $player_row["RatingStatus"] != 'RATED' ) 
+{?>
+        <input type="text" name="rating" value="<?php echo_rating( $player_row["Rating"], true); ?>" size="16" maxlength="16">
+<?php
+
+ $vals = array('dragonrating', 'eurorating','eurorank', 'aga', 'agarating', 'igs', 'iytgg', 
+               'nngs', 'japan', 'china', 'korea');
+ 
+ echo html_build_select_box_from_array($vals, 'ratingtype', 'dragonrating', true);
+} 
+else echo $player_row["Rating"];
+?>
+         </TD>
+      </TR>
 
       <TR>
         <TD align=right>Stone size:</TD>
