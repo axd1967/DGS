@@ -51,7 +51,7 @@ require_once( "include/countries.php" );
    $query = "SELECT *, Rank AS Rankinfo, " .
        "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
        "Running+Finished AS Games, " .
-       "IFNULL(100*Won/Finished,-0.01) AS Percent, " .
+       "IFNULL(ROUND(100*Won/Finished),-0.01) AS Percent, " .
        "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
        "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
        "FROM Players $where_clause ORDER BY $order";
@@ -80,7 +80,7 @@ require_once( "include/countries.php" );
    while( $row = mysql_fetch_array( $result ) )
    {
       $ID = $row['ID'];
-      $percent = ( $row["Finished"] == 0 ? '' : round($row["Percent"]). '%' );
+      $percent = ( $row["Finished"] == 0 ? '' : $row["Percent"]. '%' );
       $a = $row['ActivityLevel'];
       $activity = ( $a == 0 ? '' :
                     ( $a == 1 ? '<img align=middle alt="*" src=images/star2.gif>' :

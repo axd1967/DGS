@@ -527,7 +527,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0)
 
    $spc = ( $show_percent ? '&nbsp;' : ' ' );
 
-   $rank_val = round($rating/100);
+   $rank_val = round($rating/100.0);
 
    $string = ($graph_uid > 0 ?
               "<a href=\"ratinggraph.php?uid=$graph_uid\"><font color=black>" : '');
@@ -543,8 +543,8 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0)
 
    if( $show_percent )
    {
-      $percent = round($rating - $rank_val*100);
-      $string .= $spc . '('. ( ($rating - $rank_val*100 > 0) ? '+' : '') . $percent . '%)';
+      $percent = round($rating - $rank_val*100.0);
+      $string .= $spc . '('. ( ($rating - $rank_val*100.0 > 0) ? '+' : '') . $percent . '%)';
    }
 
    if( $graph_uid > 0 )
