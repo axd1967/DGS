@@ -221,7 +221,7 @@ class Table
               . '<a name="' . $this->Prefix . 'tblac">'. $tmp . '</a>'
               . "</td></tr>\n";
 
-         $string .= "</table></a>\n";
+         $string .= "</table></a>\n"; //</a> close the name="tbl" one
          return $string;
       }
 
@@ -322,7 +322,6 @@ class Table
             reset( $this->Row_Colors );
             list(, $bgcolor) = each( $this->Row_Colors );
          }
-         $hicolor = "fF800040";
 
          if( isset($tablerow['BG_Color']) )
          {
@@ -539,21 +538,6 @@ class Table
                array_push( $form_array, 'HIDDEN', $key, $value );
             }
          }
-         if($this->Sort1 )
-         {
-            array_push( $form_array, 'HIDDEN', $this->Prefix . "sort1", $this->Sort1 );
-            if ($this->Desc1)
-               array_push( $form_array, 'HIDDEN', $this->Prefix . "desc1", $this->Desc1 );
-            if ($this->Sort2) {
-               array_push( $form_array, 'HIDDEN', $this->Prefix . "sort2", $this->Sort2 );
-               if ($this->Desc2)
-                  array_push( $form_array, 'HIDDEN', $this->Prefix . "desc2", $this->Desc2 );
-            }
-         }
-         if ( $this->Rows_Per_Page > 0 )
-         {
-            array_push( $form_array, 'HIDDEN', $this->Prefix . "from_row", $this->From_Row );
-         }
 
          $this->Removed_Columns[ 0 ] = '';
          $this->Removed_Columns[ -1 ] = T_('All columns');
@@ -563,6 +547,7 @@ class Table
                      $this->Removed_Columns, '', false,
                      'SUBMITBUTTON', 'action', T_('Add Column') );
          $ac_form = new Form( 'add_column_form', $page . '#' . $this->Prefix . 'tblac', FORM_GET );
+         $ac_form->attach_table($this);
          $ac_form->add_row( $form_array );
          return $ac_form->get_form_string();
       }

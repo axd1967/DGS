@@ -132,6 +132,9 @@ class Form
    /*! \brief Constructor. Initializes various variables. */
    function Form( $name, $action_page, $method, $echo_form_start_now=false )
       {
+         $this->attached = array();
+         $this->hiddens_echoed = false;
+         $this->hiddens = array();
          $this->tabindex = 0;
 
          $this->name = $name;
@@ -348,7 +351,7 @@ class Form
          if( !$this->echo_form_start_now )
             $result .= $this->print_start( $this->name, $this->action, $this->method );
 
-         $result .= "  <TABLE>\n";
+         $result .= "  <TABLE border=0>\n"; //form table
 
          ksort($this->rows);
 
@@ -391,24 +394,25 @@ class Form
 
                      $current_arg += $element_type[ 'NumArgs' ];
 
-                     if( $element_type['SpanAllColumns'] and
-                         $this->nr_columns == 0 and
-                         $current_arg >= count($args) )
+                     if( $element_name == 'HIDDEN' )
                      {
-                        if( $this->column_started )
-                           $result .= $this->print_td_end();
+                        $this->$func_name( $result, $element_args );
+                     }
+                     else if( $element_type['SpanAllColumns'] )
+                     {
 
+                        if( !$this->column_started )
                         $result .= $this->print_td_start( $element_type['Align'],
                                                           max( $max_nr_columns -
                                                                $this->nr_columns,
-                                                               1 ) );
+                                                               1 ) )."\n";
 
+                        $result .= "        ";
                         $this->$func_name( $result, $element_args );
-
-                        $result .= $this->print_td_end( true );
+                        $result .= "\n";
 
                         $this->nr_columns = $max_nr_columns;
-                        $this->column_started = false;
+                        $this->column_started = true;
                      }
                      else
                      {
@@ -446,7 +450,12 @@ class Form
                $result .= "    </TR>\n";
             }
 
-        $result .= $this->print_end();
+         $result .= "  </TABLE>\n";
+
+         if (!$this->hiddens_echoed)
+            $result .= $this->echo_hiddens();
+
+         $result .= $this->print_end();
 
          return $result;
        }
@@ -522,7 +531,8 @@ class Form
     */
    function create_string_func_hidden( &$result, $args )
       {
-         $result .= $this->print_insert_hidden_input( $args[0], $args[1] );
+         //$result .= $this->print_insert_hidden_input( $args[0], $args[1] );
+         $this->add_hidden( $args[0], $args[1] );
       }
 
    /*!
@@ -643,7 +653,7 @@ class Form
          assert( $method == FORM_GET or $method == FORM_POST );
          $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
-         return "<FORM name=\"$name\" action=\"$action_page\" method=\"" .
+         return "\n<FORM name=\"$name\" action=\"$action_page\" method=\"" .
             $pg_arr[$method] . "\">\n";
       }
 
@@ -652,7 +662,7 @@ class Form
     */
    function print_end()
       {
-         return "  </TABLE>\n</FORM>\n";
+         return "</FORM>\n";
       }
 
    /*!
@@ -867,6 +877,44 @@ class Form
          ">";
       }
 
+   /* ******************************************************************** */
+
+   var $attached;
+   var $hiddens;
+   var $hiddens_echoed;
+
+   /*!
+    * \brief This will attach an object to the form. Then, the hiddens
+    *        from the object are inserted when the form is closed
+    *        via the object get_hiddens() function.
+    *
+    * \param &$table The object.
+    */
+   function attach_table( &$table)
+   {
+      //if (isset($table))
+      array_push($this->attached, $table);
+   }
+
+   function add_hidden( $key, $val)
+   {
+      $this->hiddens[$key] = $val;
+   }
+
+   function echo_hiddens()
+   {
+      foreach ($this->attached as $attach)
+      {
+         $attach->get_hiddens( $this->hiddens);
+      }
+      $str = '';
+      foreach ($this->hiddens as $key => $val)
+      {
+         $str.= "<input type=\"hidden\" name=\"$key\" value=\"$val\">\n";
+      }
+      $this->hiddens_echoed = true;
+      return $str;
+   }
 
 }
 
