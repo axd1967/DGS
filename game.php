@@ -158,7 +158,7 @@ require_once( "include/rating.php" );
          if( $Status == 'FINISHED' )
             $extra_message = "<font color=\"blue\">" . score2text($Score, true) . "</font>";
          $enable_message = false;
-         if( $lastx > 0 && $lasty > 0 )
+         if( $lastx >= 0 && $lasty >= 0 )
          {
             $Last_X = $lastx;
             $Last_Y = $lasty;
