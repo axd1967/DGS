@@ -26,7 +26,7 @@ require_once( "include/form_functions.php" );
 {
    $translation_groups =
       array( 'Common', 'Start', 'Game', 'Messages', 'Users',
-             'Docs', 'FAQ', 'Admin', 'Error', 'Untranslated phrases' );
+             'Docs', 'FAQ', 'Admin', 'Error', 'Countries', 'Untranslated phrases' );
 
 
   connect2mysql();
@@ -160,6 +160,8 @@ When translating you should keep in mind the following things:
       $translate_form = new Form( 'translateform', 'update_translation.php', FORM_POST );
       $translate_form->add_row( array( 'HEADER', 'Translate the following strings' ) );
 
+      list(,$translate_encoding) = explode('.', $translate_lang);
+
       while( $row = mysql_fetch_array($result) )
       {
          $string = $row['Original'];
@@ -174,8 +176,7 @@ When translating you should keep in mind the following things:
                             'TD',
                             'TEXTAREA', "transl" . $row['Original_ID'],
                             $hsize, $vsize,
-                            htmlspecialchars($row['Text'], ENT_QUOTES,
-                                             $CHARACTER_ENCODINGS[$translate_lang]),
+                            @htmlspecialchars($row['Text'], ENT_QUOTES, $translate_encoding),
                             'TD',
                             'CHECKBOX', 'same' . $row['Original_ID'], 'Y',
                             'same', $row['Text'] === '') );
