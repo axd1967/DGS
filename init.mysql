@@ -1,0 +1,64 @@
+#
+# Table structure for table 'Games'
+#
+CREATE TABLE Games (
+  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  Black_ID int(11),
+  White_ID int(11),
+  ToMove_ID int(11),
+  Size int(11) DEFAULT '19',
+  Komi decimal(3,1) DEFAULT '5.5',
+  Handicap int(11) DEFAULT '0' NOT NULL,
+  Status enum('INVITED','RUNNING','FINNISHED') DEFAULT 'INVITED',
+  Moves int(11) DEFAULT '0' NOT NULL,
+  Black_Prisoners int(11) DEFAULT '0' NOT NULL,
+  White_Prisoners int(11) DEFAULT '0' NOT NULL,
+  Last_X int(11),
+  Last_Y int(11),
+  Flags set('Ko'),
+  PRIMARY KEY (ID)
+);
+
+#
+# Table structure for table 'Players'
+#
+CREATE TABLE Players (
+  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  Handle varchar(16) DEFAULT '' NOT NULL,
+  Password varchar(16),
+  Sessioncode varchar(32),
+  Sessionexpire timestamp(14),
+  Name varchar(80),
+  Email varchar(80),
+  Rank varchar(40),
+  Stonesize int(11) DEFAULT '25',
+  Boardfontsize char(2) DEFAULT '+0',
+  PRIMARY KEY (ID),
+  UNIQUE Handle (Handle),
+  KEY Handle_2 (Handle)
+);
+
+#
+# Table structure for table 'Messages'
+#
+CREATE TABLE Messages (
+  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  From_ID int(11),
+  To_ID int(11),
+  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') DEFAULT 'NORMAL',
+  Game_ID int(11),
+  Time timestamp(14),
+  Subject varchar(80),
+  Text text,
+  PRIMARY KEY (ID)
+);
+
+#
+# Insert Guest account
+#
+
+INSERT INTO Players SET
+       Handle='guest',
+       Name='Guest',
+       Password=PASSWORD('guest');
+       
