@@ -214,8 +214,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
   </HEAD>
   <BODY bgcolor=' . $bg_color . '>
 
-    <script language="JavaScript" src="' . $base_path . 'js/goeditor.js"></script>
-    <script language="JavaScript1.4"> version=1; </script>
+    <script language="JavaScript" src="' . $base_path . 'js/goeditor.js" type="text/javascript"></script>
+    <script language="JavaScript1.4" type="text/javascript"> version=1; </script>
 
     <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
         <tr>
@@ -1136,8 +1136,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
          $Subject = 'An observed game has finished';
 
-         mysql_query( 'INSERT INTO Messages SET ' .
-                      "Time=FROM_UNIXTIME($NOW), " .
+         mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='$Subject', Text='$Text'" );
 
          if( mysql_affected_rows() == 1)
