@@ -89,7 +89,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * </pre>
   */
 
-define( "FORM_GET", 0 );
+   define( "FORM_GET", 0 );
 define( "FORM_POST", 1 );
 
 class Form
@@ -113,6 +113,9 @@ class Form
    /*! \brief The number that the lin number will be increased with with each new row. */
    var $line_no_step;
 
+   /*! \brief A variable responsible for holding all different form elements. */
+   var $form_elements;
+
    /*! \brief Constructor. Initializes various variables. */
    function Form( $name, $action_page, $method )
       {
@@ -127,6 +130,99 @@ class Form
          $this->updated = false;
 
          $this->line_no_step = 10;
+
+         $this->form_elements = array(
+            'DESCRIPTION'  => array( 'NumArgs' => 1,
+                                     'NewTD'   => true,
+                                     'StartTD' => true,
+                                     'EndTD'   => true,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'right' ),
+            'OWNHTML'      => array( 'NumArgs' => 1,
+                                     'NewTD'   => false,
+                                     'StartTD' => false,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => '' ),
+            'HEADER'       => array( 'NumArgs' => 1,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => true,
+                                     'SpanAllColumns' => true,
+                                     'Align'   => 'left' ),
+            'TEXT'         => array( 'NumArgs' => 1,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'TEXTINPUT'    => array( 'NumArgs' => 4,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'PASSWORD'     => array( 'NumArgs' => 3,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'HIDDEN'       => array( 'NumArgs' => 2,
+                                     'NewTD'   => false,
+                                     'StartTD' => false,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'TEXTAREA'     => array( 'NumArgs' => 4,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'SELECTBOX'    => array( 'NumArgs' => 5,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'RADIOBUTTONS' => array( 'NumArgs' => 3,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'CHECKBOX'     => array( 'NumArgs' => 4,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'SUBMITBUTTON' => array( 'NumArgs' => 2,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => true,
+                                     'Align'   => 'left' ),
+            'SPACE'        => array( 'NumArgs' => 0,
+                                     'NewTD'   => false,
+                                     'StartTD' => false,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'BR'           => array( 'NumArgs' => 0,
+                                     'NewTD'   => false,
+                                     'StartTD' => false,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'TD'           => array( 'NumArgs' => 0,
+                                     'NewTD'   => false,
+                                     'StartTD' => false,
+                                     'EndTD'   => true,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ) );
+
       }
 
    /*! \brief Get $form_string and update it if necessary. */
@@ -200,14 +296,13 @@ class Form
    /*! \brief Create a string from the rows */
    function create_form_string()
       {
-         global $h3_color;
-
          $result = "";
          $max_nr_columns = 2;
 
          $result .= $this->print_start( $this->name, $this->action, $this->method );
 
          ksort($this->rows);
+
          foreach( $this->rows as $row_args )
             {
                $args = array_values( $row_args );
@@ -217,348 +312,231 @@ class Form
                $column_started = false;
                $result .= "    <TR>\n";
 
+               $tmp_counter = 0;
+
                while( $current_arg < count($args) )
                {
-                  switch( $args[ $current_arg ] )
+                  $tmp_counter++;
+                  if( $tmp_counter >= 20 )
+                     exit;
+
+                  $element_name = $args[ $current_arg ];
+
+                  if( !array_key_exists( $element_name, $this->form_elements ) )
                   {
-                     case 'DESCRIPTION':
+                     $current_arg++;
+                     continue;
+                  }
+
+                  $element_type = $this->form_elements[ $element_name ];
+
+                  $current_arg++;
+                  if( count($args) - $current_arg >= $element_type[ 'NumArgs' ] )
+                  {
+                     $element_args = array();
+
+                     for( $i = 0; $i < $element_type[ 'NumArgs' ]; $i++ )
+                        $element_args[] = $args[ $current_arg + $i ];
+
+                     $func_name = "create_string_func_" . strtolower( $element_name );
+
+                     $current_arg += $element_type[ 'NumArgs' ];
+
+                     if( $element_type['SpanAllColumns'] and
+                         $nr_columns == 0 and
+                         $current_arg >= count($args) )
                      {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 1 )
+                        if( $column_started )
+                           $result .= $this->print_td_end();
+
+                        $result .= $this->print_td_start( 'center',
+                                                          max( $max_nr_columns -
+                                                               $nr_columns,
+                                                               1 ) );
+                        $this->$func_name( $result, $element_args );
+
+                        $result .= $this->print_td_end( true );
+
+                        $nr_columns++;
+                        $column_started = false;
+                     }
+                     else
+                     {
+
+                        if( $element_type['NewTD'] and $column_started )
                         {
-                           $description = $args[ $current_arg ];
-                           $current_arg++;
-
-                           if( $column_started )
-                              $result .= $this->print_td_end();
-
-                           $result .= $this->print_td_start( 'right' ) . $description .
-                              ":" . $this->print_td_end( true );
-                           $nr_columns++;
+                           $result .= $this->print_td_end();
                            $column_started = false;
                         }
 
-                     }
-                     break;
-
-                     case 'OWNHTML':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 1 )
+                        if( $element_type['StartTD'] and !$column_started )
                         {
-                           $ownhtml = $args[ $current_arg ];
-                           $current_arg++;
-
-                           $result .= $ownhtml . "\n";
-                        }
-                     }
-                     break;
-
-                     case 'HEADER':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 1 )
-                        {
-                           $description = $args[ $current_arg ];
-                           $current_arg++;
-
-                           if( $nr_columns == 0  and
-                               $current_arg >= count($args) )
-                           {
-                              if( $column_started )
-                                 $result .= $this->print_td_end();
-
-                              $result .=
-                                 $this->print_td_start( 'center', 
-                                                        max( $max_nr_columns - $nr_columns, 1 ) ) .
-                                 "<B><h3><font color=$h3_color>".$description.":" .
-                                 "</font></h3></B>" .
-                                 $this->print_td_end( true );
-
-                              $nr_columns++;
-                              $column_started = false;
-                           }
-                           elseif( $nr_columns > 0 or $current_arg < count($args) )
-                              {
-                                 if( !$column_started )
-                                 {
-                                    $result .= $this->print_td_start()."\n";
-                                    $column_started = true;
-                                    $nr_columns++;
-                                 }
-                                 $result .= "        " .
-                                    "<B><h3><font color=$h3_color>".$description.":" .
-                                    "</font></h3></B>\n";
-                              }
+                           $result .= $this->print_td_start( $element_type['Align'] )."\n";
+                           $column_started = true;
+                           $nr_columns++;
                         }
 
-                     }
-                     break;
+                        $result .= "        ";
+                        $this->$func_name( $result, $element_args );
+                        $result .= "\n";
 
-                     case 'TEXT':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 1 )
+                        if( $element_type['EndTD'] and $column_started )
                         {
-                           $description = $args[ $current_arg ];
-                           $current_arg++;
-
-                           if( !$column_started )
-                           {
-                              $result .= $this->print_td_start()."\n";
-                              $column_started = true;
-                              $nr_columns++;
-                           }
-                           $result .= "        ".$description."\n";
-                        }
-                     }
-                     break;
-
-                     case 'TEXTINPUT':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 4 )
-                        {
-                           $name = $args[ $current_arg ];
-                           $size = $args[ $current_arg + 1 ];
-                           $maxlength = $args[ $current_arg + 2 ];
-                           $initial_value = $args[ $current_arg + 3];
-                           $textinput =
-                              $this->print_insert_text_input( $name, $size, $maxlength, $initial_value );
-                           $current_arg += 4;
-
-                           if( !$column_started )
-                           {
-                              $result .= $this->print_td_start()."\n";
-                              $column_started = true;
-                              $nr_columns++;
-                           }
-                           $result .= "        ".$textinput."\n";
-                        }
-                     }
-                     break;
-
-                     case 'PASSWORD':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 3 )
-                        {
-                           $name = $args[ $current_arg ];
-                           $size = $args[ $current_arg + 1 ];
-                           $maxlength = $args[ $current_arg + 2 ];
-                           $password_input =
-                              $this->print_insert_password_input( $name, $size, $maxlength );
-                           $current_arg += 3;
-
-                           if( !$column_started )
-                           {
-                              $result .= $this->print_td_start()."\n";
-                              $column_started = true;
-                              $nr_columns++;
-                           }
-                           $result .= "        ".$password_input."\n";
-                        }
-                     }
-                     break;
-
-                     case 'HIDDEN':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 2 )
-                        {
-                           $name = $args[ $current_arg ];
-                           $value = $args[ $current_arg + 1 ];
-                           $hidden_input =
-                              $this->print_insert_hidden_input( $name, $value );
-                           $current_arg += 2;
-
-                           $result .= "        ".$hidden_input."\n";
-                        }
-                     }
-                     break;
-
-                     case 'TEXTAREA':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 4 )
-                        {
-                           $name = $args[ $current_arg ];
-                           $columns = $args[ $current_arg + 1 ];
-                           $rows = $args[ $current_arg + 2 ];
-                           $initial_text = $args[ $current_arg + 3 ];
-                           $textarea = $this->print_insert_textarea( $name, $columns,
-                                                                     $rows, $initial_text );
-                           $current_arg += 4;
-
-                           if( !$column_started )
-                           {
-                              $result .= $this->print_td_start()."\n";
-                              $column_started = true;
-                              $nr_columns++;
-                           }
-                           $result .= "        ".$textarea."\n";
-                        }
-                     }
-                     break;
-
-                     case 'SELECTBOX':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 5 )
-                        {
-                           $name = $args[ $current_arg ];
-                           $size = $args[ $current_arg + 1 ];
-                           $value_array = $args[ $current_arg + 2 ];
-                           $selected = $args[ $current_arg + 3 ];
-                           $multiple = $args[ $current_arg + 4 ];
-                           $selectbox = $this->print_insert_select_box( $name, $size, $value_array,
-                                                                        $selected, $multiple );
-                           $current_arg += 5;
-
-                           if( !$column_started )
-                           {
-                              $result .= $this->print_td_start()."\n";
-                              $column_started = true;
-                              $nr_columns++;
-                           }
-                           $result .= $selectbox;
-                        }
-                     }
-                     break;
-
-                     case 'RADIOBUTTONS':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 3 )
-                        {
-                           $name = $args[ $current_arg ];
-                           $value_array = $args[ $current_arg + 1 ];
-                           $selected = $args[ $current_arg + 2 ];
-                           $radiobuttons = $this->print_insert_radio_buttons( $name,
-                                                                              $value_array,
-                                                                              $selected );
-                           $current_arg += 3;
-
-                           if( !$column_started )
-                           {
-                              $result .= $this->print_td_start()."\n";
-                              $column_started = true;
-                              $nr_columns++;
-                           }
-                           $result .= $radiobuttons;
-                        }
-                     }
-                     break;
-
-                     case 'CHECKBOX':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 4 )
-                        {
-                           $name = $args[ $current_arg ];
-                           $value = $args[ $current_arg + 1 ];
-                           $description = $args[ $current_arg + 2 ];
-                           $selected = $args[ $current_arg + 3 ];
-                           $checkbox = $this->print_insert_checkbox( $name, $value,
-                                                                     $description, $selected );
-                           $current_arg += 4;
-
-                           if( !$column_started )
-                           {
-                              $result .= $this->print_td_start()."\n";
-                              $column_started = true;
-                              $nr_columns++;
-                           }
-                           $result .= "        ".$checkbox."\n";
-                        }
-                     }
-                     break;
-
-                     case 'SUBMITBUTTON':
-                     {
-                        $current_arg++;
-                        if( count($args) - $current_arg >= 2 )
-                        {
-                           $name = $args[ $current_arg ];
-                           $text = $args[ $current_arg + 1 ];
-                           $submit = $this->print_insert_submit_button( $name, $text );
-                           $current_arg += 2;
-
-                           if( $nr_columns == 0  and
-                               $current_arg >= count($args) )
-                           {
-                              if( $column_started )
-                                 $result .= $this->print_td_end();
-
-                              $result .=
-                                 $this->print_td_start( 'center', max( $max_nr_columns -
-                                                                       $nr_columns,
-                                                                       1 ) ) .
-                                 $submit .
-                                 $this->print_td_end( true );
-                              $nr_columns++;
-                              $column_started = false;
-                           }
-                           elseif( $nr_columns > 0 or $current_arg < count($args) )
-                              {
-                                 if( !$column_started )
-                                 {
-                                    $result .= $this->print_td_start()."\n";
-                                    $column_started = true;
-                                    $nr_columns++;
-                                 }
-                                 $result .= "        ".$submit."\n";
-                              }
-                        }
-                     }
-                     break;
-
-                     /* Special commands */
-                     case 'SPACE':
-                     {
-                        $current_arg++;
-                        $result .= "      <td height=\"20px\">&nbsp;</td>\n";
-                        $column_started = false;
-                     }
-                     break;
-
-                     case 'BR':
-                     {
-                        $current_arg++;
-                        $result .= "        <BR>\n";
-                     }
-                     break;
-
-                     case 'TD':
-                     {
-                        $current_arg++;
-                        if( $column_started )
                            $result .= $this->print_td_end();
-                        $column_started = false;
+                           $column_started = false;
+                        }
                      }
-                     break;
-
-                     default:
-                     {
-                        $current_arg++;
-                     }
-                     break;
                   }
 
                   if( $nr_columns > $max_nr_columns )
                      $max_nr_columns = $nr_columns;
                }
-
                if( $column_started )
                   $result .= $this->print_td_end();
 
                $result .= "    </TR>\n";
-
             }
 
-         $result .= $this->print_end();
+        $result .= $this->print_end();
 
          return $result;
+       }
+
+   /*!
+    * \brief Function for making a description string in the standard form.
+    * \internal
+    */
+   function create_string_func_description( &$result, $args )
+      {
+         $result .= $args[ 0 ] . ':';
+      }
+
+   /*!
+    * \brief Function for making own html string in the standard form
+    * \internal
+    */
+   function create_string_func_ownhtml( &$result, $args )
+      {
+         $result .= $args[0];
+      }
+
+   /*!
+    * \brief Function for making header string in the standard form
+    * \internal
+    */
+   function create_string_func_header( &$result, $args )
+      {
+         global $h3_color;
+         $result .= "<b><h3><font color=$h3_color>" . $args[0] . ":" .
+            "</font></h3></b>";
+      }
+
+   /*!
+    * \brief Function for making text string in the standard form
+    * \internal
+    */
+   function create_string_func_text( &$result, $args )
+      {
+         $result .= $args[0];
+      }
+
+   /*!
+    * \brief Function for making textinput string in the standard form
+    * \internal
+    */
+   function create_string_func_textinput( &$result, $args )
+      {
+         $result .= $this->print_insert_text_input( $args[0], $args[1], $args[2], $args[3] );
+      }
+
+   /*!
+    * \brief Function for making password string in the standard form
+    * \internal
+    */
+   function create_string_func_password( &$result, $args )
+      {
+         $result .= $this->print_insert_password_input( $args[0], $args[1], $args[2] );
+      }
+
+   /*!
+    * \brief Function for making hidden string in the standard form
+    * \internal
+    */
+   function create_string_func_hidden( &$result, $args )
+      {
+         $result .= $this->print_insert_hidden_input( $args[0], $args[1] );
+      }
+
+   /*!
+    * \brief Function for making textarea string in the standard form
+    * \internal
+    */
+   function create_string_func_textarea( &$result, $args )
+      {
+         $result .= $this->print_insert_textarea( $args[0], $args[1], $args[2], $args[3] );
+      }
+
+   /*!
+    * \brief Function for making selectbox string in the standard form
+    * \internal
+    */
+   function create_string_func_selectbox( &$result, $args )
+      {
+         $result .= $this->print_insert_select_box( $args[0], $args[1], $args[2],
+                                                    $args[3], $args[4] );
+      }
+
+   /*!
+    * \brief Function for making radiobuttons string in the standard form
+    * \internal
+    */
+   function create_string_func_radiobuttons( &$result, $args )
+      {
+         $result .= $this->print_insert_radio_buttons( $args[0], $args[1], $args[2] );
+      }
+
+   /*!
+    * \brief Function for making checkbox string in the standard form
+    * \internal
+    */
+   function create_string_func_checkbox( &$result, $args )
+      {
+         $result .= $this->print_insert_checkbox( $args[0], $args[1], $args[2], $args[3] );
+      }
+
+   /*!
+    * \brief Function for making submitbutton string in the standard form
+    * \internal
+    */
+   function create_string_func_submitbutton( &$result, $args )
+      {
+         $result .= $this->print_insert_submit_button( $args[0], $args[1] );
+      }
+
+   /*!
+    * \brief Function for making space string in the standard form
+    * \internal
+    */
+   function create_string_func_space( &$result, $args )
+      {
+         $result .= "<td height=\"20px\">&nbsp;</td>";
+      }
+
+   /*!
+    * \brief Function for making break line string in the standard form
+    * \internal
+    */
+   function create_string_func_br( &$result, $args )
+      {
+         $result .= "<br>";
+      }
+
+   /*!
+    * \brief Function for making new td string in the standard form
+    * \internal
+    */
+   function create_string_func_td( &$result, $args )
+      {
       }
 
    /*!
