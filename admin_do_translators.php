@@ -107,14 +107,14 @@ require_once( "include/make_translationfiles.php" );
 
       $row = mysql_fetch_array( $result );
       if( empty($row['Translator']) )
-        $translator = array();
+        $translator_array = array();
       else
-        $translator = explode( ',', $row['Translator'] );
+        $translator_array = explode(',', $row['Translator'] );
 
-      if( !in_array( $transladdlang, $translator ) )
+      if( !in_array( $transladdlang, $translator_array ) )
         {
-          array_push( $translator, $transladdlang );
-          $new_langs = implode(',', array_unique($translator));
+          array_push( $translator_array, $transladdlang );
+          $new_langs = implode(',', array_unique($translator_array));
           $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
 
           if( mysql_affected_rows() != 1 )

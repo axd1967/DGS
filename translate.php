@@ -26,59 +26,13 @@ require_once( "include/make_translationfiles.php" );
 
 define('ALLOW_PROFIL_CHARSET', 0);
 
-{
-   $translation_groups =
-      array( 'Common', 'Start', 'Game', 'Messages', 'Users',
-             'Docs', 'FAQ', 'Admin', 'Error', 'Countries', 'Untranslated phrases' );
-
-
-  connect2mysql();
-
-  $logged_in = who_is_logged( $player_row);
-
-  if( !$logged_in )
-    error("not_logged_in");
-
-
-  $translator_set = @$player_row['Translator'];
-  if( !$translator_set )
-    error("not_translator");
-
-  $translator_array = explode(',', $translator_set);
-
-  $group = @$_REQUEST['group'];
-
-  if( !$group or !in_array( $group, $translation_groups ) )
-     $group = 'Untranslated phrases';
-
-  $untranslated = ($group === 'Untranslated phrases');
-
-  $translate_lang = @$_REQUEST['translate_lang'];
-
-  $lang_choice = false;
-  if( !$translate_lang )
-    {
-      if( count( $translator_array ) == 1 )
-        {
-          $translate_lang = $translator_array[0];
-        }
-      elseif( count( $translator_array ) > 1 )
-        {
-          $lang_choice = true;
-        }
-    }
-  if( ALLOW_PROFIL_CHARSET )
-    $profil_charset = @$_REQUEST['profil_charset'] ? 'Y' : '';
-  else
-    $profil_charset = false;
-
-  $info_box = '<CENTER>
+$info_box = '<CENTER>
 <table border="2">
 <tr><td>
 <CENTER>
 <B><h3><font color=' . $h3_color . '>Read this before translating:</font></h3></B><p>
 </CENTER>
-When translating you should keep in mind the following things:
+&nbsp;When translating you should keep in mind the following things:
 <ul>
   <li> If a translated word is the same as in english, leave it blank and click
        the \'untranslated\' box to the right.
@@ -107,81 +61,105 @@ When translating you should keep in mind the following things:
 <p>
 ';
 
-  if( $lang_choice )
-  {
-     start_page(T_("Translate"), true, $logged_in, $player_row);
-     echo $info_box;
+$translation_groups =
+   array( 'Common', 'Start', 'Game', 'Messages', 'Users',
+          'Docs', 'FAQ', 'Admin', 'Error', 'Countries', 'Untranslated phrases' );
 
-     echo "<CENTER>\n";
-     $langchoice_form = new Form( 'selectlangform', 'translate.php', FORM_POST );
-     $langchoice_form->add_row( array( 'HEADER', 'Select language to translate to' ) );
-     $languages = get_language_descriptions_translated();
-     $vals = array();
-     foreach( $languages as $lang => $description )
-        {
-           list( $lc, $cs ) = explode( '.', $lang, 2 );
-           if( in_array( $lang, $translator_array ) or
-               in_array( $lc, $translator_array ) )
-              $vals[$lang] = $description;
-        }
+{
 
-     $langchoice_form->add_row( array( 'SELECTBOX', 'translate_lang', 1, $vals, '', false,
-                                       'HIDDEN', 'group', $group,
-                                       'SUBMITBUTTON', 'cl', 'Select',
-                              ) );
-     if( ALLOW_PROFIL_CHARSET )
-       $langchoice_form->add_row( array(
-                            'CHECKBOX', 'profil_charset', 'Y', 'use profil encoding', $profil_charset,
-                              ) );
+  connect2mysql();
 
-     $langchoice_form->echo_string(1);
-     echo "</CENTER>\n";
-  }
+  $logged_in = who_is_logged( $player_row);
+
+  if( !$logged_in )
+    error("not_logged_in");
+
+
+  $translator_set = @$player_row['Translator'];
+  if( !$translator_set )
+    error("not_translator");
+
+  $translator_array = explode(',', $translator_set);
+
+  $group = @$_REQUEST['group'];
+
+  if( !$group or !in_array( $group, $translation_groups ) )
+     $group = 'Untranslated phrases';
+
+  $untranslated = ($group === 'Untranslated phrases');
+
+  $translate_lang = @$_REQUEST['translate_lang'];
+
+   if( count( $translator_array ) > 1 )
+   {
+      $lang_choice = true;
+   }
+   else
+   {
+      $lang_choice = false;
+      if( !$translate_lang && count( $translator_array ) == 1 )
+      {
+         $translate_lang = $translator_array[0];
+      }
+   }
+
+  if( ALLOW_PROFIL_CHARSET )
+    $profil_charset = @$_REQUEST['profil_charset'] ? 'Y' : '';
   else
+    $profil_charset = false;
+
+
+  if( $translate_lang )
   {
-     if( !in_array( $translate_lang, $translator_array ) )
-        error('not_correct_transl_language');
+      if( !in_array( $translate_lang, $translator_array ) )
+         error('not_correct_transl_language');
 
       $result = translations_query( $translate_lang, $untranslated, $group )
-                or die(mysql_error());
-      $numrows = mysql_num_rows($result);
+                or error('mysql_query_failed','translat1'); //die(mysql_error());
+      $numrows = @mysql_num_rows($result);
       if( $numrows == 0 and !$untranslated )
          error('translation_bad_language_or_group');
 
-      $string = '';
-      foreach( $known_languages as $entry => $array )
+      $lang_string = '';
+      foreach( $known_languages as $twoletter => $array )
       {
          foreach( $array as $charenc => $lang_name )
          {
-            if( $entry . "." . $charenc == $translate_lang)
-               $string .= ",$lang_name";
+            if( $twoletter . "." . $charenc == $translate_lang)
+               $lang_string .= ",$lang_name";
          }
       }
-      if( $string )
-         $string = substr( $string, 1);
+      if( $lang_string )
+         $lang_string = substr( $lang_string, 1);
       else
-         $string = $translate_lang;
+         $lang_string = $translate_lang;
 
       list(,$translate_encoding) = explode('.', $translate_lang);
 
       if( !$profil_charset )
          $encoding_used = $translate_encoding; // before start_page()
 
-      $string.= ' / ' . $translate_encoding;
+      $lang_string.= ' / ' . $translate_encoding;
       if( ALLOW_PROFIL_CHARSET )
-        $string.=  ' / ' . $encoding_used;
+        $lang_string.=  ' / ' . $encoding_used;
+  }
 
-      start_page(T_("Translate"), true, $logged_in, $player_row);
-      echo $info_box;
 
-      echo "<CENTER>\n";
 
+  start_page(T_("Translate"), true, $logged_in, $player_row);
+  echo $info_box;
+
+  echo "<CENTER>\n";
+
+
+  if( $translate_lang )
+  {
       $translate_form = new Form( 'translateform', 'update_translation.php', FORM_POST );
       $translate_form->add_row( array('HEADER', 'Translate the following strings' ) );
 
-      $translate_form->add_row( array( 'CELL', 99, 'align="center"', 'TEXT', "- $string -" ) );
+      $translate_form->add_row( array( 'CELL', 99, 'align="center"', 'TEXT', "- $lang_string -" ) );
 
-      while( $row = mysql_fetch_array($result) )
+      while( $row = mysql_fetch_assoc($result) )
       {
          $string = $row['Original'];
          $hsize = 60;
@@ -205,6 +183,11 @@ When translating you should keep in mind the following things:
                             'CHECKBOX', 'same' . $row['Original_ID'], 'Y',
                               'untranslated', $row['Text'] === '',
                            ) ;
+         /*
+            Unchanged box is useful when, for instance, a FAQ entry receive
+            a minor correction that does not involve a translation modification.
+            Else one can't remove the entry from the untranslated group.
+         */
          if( $untranslated )
             array_push( $form_row,
                             'BR',
@@ -221,7 +204,7 @@ When translating you should keep in mind the following things:
       {
          $translate_form->add_row( array( 'SPACE' ) );
          $translate_form->add_row( array( 'OWNHTML',
-                                          "  <td align=\"center\" colspan=\"3\" " .
+                                          "  <td align=\"center\" colspan=\"99\" " .
                                           "style=\"  border: solid; border-color: " .
                                           "#ff6666; border-width: 2pt;\">\n" .
                                           "    Note that only the first fifty untranslated " .
@@ -230,28 +213,68 @@ When translating you should keep in mind the following things:
                                           "  </td>\n" ) );
       }
 
-      $translate_form->add_row( array( 'OWNHTML',
-                                       "  <table width=\"100%\"><tr>\n"));
-      $translate_form->add_row( array( 'HEADER', 'Groups') );
-      $translate_form->add_row( array( 'DESCRIPTION', 'Change to group',
-                                       'HIDDEN', 'translate_lang', $translate_lang,
-                                       'HIDDEN', 'group', $group,
-                                       'HIDDEN', 'profil_charset', $profil_charset,
-                                       'SELECTBOX', 'newgroup', 1,
-                                       array_value_to_key_and_value( $translation_groups ),
-                                       $group, false ) );
       $translate_form->add_row( array( 'SPACE' ) );
+      $translate_form->add_row( array(
+         'CELL', 99, 'align="center"',
+         'HIDDEN', 'translate_lang', $translate_lang,
+         'HIDDEN', 'profil_charset', $profil_charset,
+         'HIDDEN', 'group', $group,
+         'SUBMITBUTTON', 'apply_changes', 'Apply translation changes to Dragon',
+         ) );
 
-      $translate_form->add_row( array( 'OWNHTML',
-                                       "    <td align=\"right\" width=\"50%\">" .
-                                       $translate_form->print_insert_submit_button( 'just_group', 'Just change group' ) . "</td>\n" .
-                                       "    <td align=\"left\">" .
-                                       $translate_form->print_insert_submit_button( 'apply_changes', 'Apply translation changes to Dragon' ) . "</td>\n" .
-                                       "  </tr></table>\n" ) );
+
+      $translate_form->add_row( array(
+         'HEADER', 'Groups',
+         ) );
+
+      $translate_form->add_row( array(
+//         'DESCRIPTION', 'Change to group',
+         'CELL', 99, 'align="center"',
+         'SELECTBOX', 'newgroup', 1,
+            array_value_to_key_and_value( $translation_groups ), $group, false,
+         'SUBMITBUTTON', 'just_group', 'Just change group',
+         ) );
 
       $translate_form->echo_string(1);
-  }
+      $tabindex= $translate_form->tabindex;
+   }
+   else
+      $tabindex= 1;
 
+   if( $lang_choice )
+   {
+      $langchoice_form = new Form( 'selectlangform', 'translate.php', FORM_POST );
+      $langchoice_form->add_row( array(
+         'HEADER', 'Select language to translate to',
+         ) );
+
+      $langs = get_language_descriptions_translated();
+      $vals = array();
+      foreach( $langs as $lang => $lang_name )
+        {
+           list( $lc, $cs ) = explode( '.', $lang, 2 );
+           if( in_array( $lang, $translator_array ) or
+               in_array( $lc, $translator_array ) )
+              $vals[$lang] = $lang_name;
+        }
+
+      $langchoice_form->add_row( array(
+         'CELL', 99, 'align="center"',
+         'SELECTBOX', 'translate_lang', 1, $vals, $translate_lang, false,
+         'HIDDEN', 'group', $group,
+         'SUBMITBUTTON', 'cl', 'Select',
+         ) );
+
+      if( ALLOW_PROFIL_CHARSET )
+       $langchoice_form->add_row( array(
+         'CELL', 99, 'align="center"',
+         'CHECKBOX', 'profil_charset', 'Y', 'use profile encoding', $profil_charset,
+         ) );
+
+      $langchoice_form->echo_string($tabindex);
+   }
+
+  echo "</CENTER>\n";
   end_page();
 }
 

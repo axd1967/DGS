@@ -65,12 +65,12 @@ require_once( "include/form_functions.php" );
 
    $transluser = trim(@$_REQUEST['transluser']);
 
-  $translator_form->add_row( array(
+   $translator_form->add_row( array(
       'DESCRIPTION', T_('User to set privileges for (use the userid)'),
       'TEXTINPUT', 'transluser', 30, 80, $transluser,
       ) );
 
-   $translator = array();
+   $translator_array = array();
    $transluser_langs= array();
    if( !empty($transluser) )
    {
@@ -81,17 +81,17 @@ require_once( "include/form_functions.php" );
 
       $row = mysql_fetch_array( $result );
       if( !empty($row['Translator']) )
-        $translator = explode( ',', $row['Translator'] );
+        $translator_array = explode(',', $row['Translator'] );
 
-      foreach( $translator as $value )
+      foreach( $translator_array as $value )
       {
          $transluser_langs[$value] = $langs[$value];
       }
       asort($transluser_langs);
       $str= '';
-      foreach( $transluser_langs as $value => $info )
+      foreach( $transluser_langs as $value => $lang_name )
       {
-         $str.= $info . ' (' . $value . ')<BR>';
+         $str.= $lang_name . ' (' . $value . ')<BR>';
       }
       $translator_form->add_row( array(
          'DESCRIPTION', T_('Allowed to translate'),

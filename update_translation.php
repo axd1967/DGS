@@ -46,8 +46,8 @@ require_once( "include/make_translationfiles.php" );
   $untranslated = ($group === 'Untranslated phrases');
 
       $result = translations_query( $translate_lang, $untranslated, $group )
-                or die(mysql_error());
-      $numrows = mysql_num_rows($result);
+                or error('mysql_query_failed','uptranslat1'); //die(mysql_error());
+      $numrows = @mysql_num_rows($result);
       if( $numrows == 0 and !$untranslated )
          error('translation_bad_language_or_group');
 
