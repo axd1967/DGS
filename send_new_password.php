@@ -34,8 +34,8 @@ require( "include/std_functions.php" );
 
 
    $result = mysql_query( "SELECT Newpassword, Email " .
-                          "FROM Players WHERE Handle='$handle'" );
-  
+                          "FROM Players WHERE Handle='$userid'" );
+
    if( mysql_num_rows($result) != 1 )
       error("unknown_user");
 
@@ -53,18 +53,18 @@ require( "include/std_functions.php" );
 // Save password in database
 
    $result = mysql_query( "UPDATE Players " .
-                          "SET Newpassword=PASSWORD('$newpasswd') Where Handle='$handle'" );
-         
+                          "SET Newpassword=PASSWORD('$newpasswd') Where Handle='$userid'" );
 
-   mail( $row["Email"], 
-   'Dragon Go Server: New password', 
-   'You (or possibly someone else) has requested a new password, and it has 
+
+   mail( $row["Email"],
+   'Dragon Go Server: New password',
+   'You (or possibly someone else) has requested a new password, and it has
 been randomly chosen as: ' . $newpasswd . '
 
-Both the old and the new password will also be valid until your next 
-login. Now please login and then change your password to something more 
+Both the old and the new password will also be valid until your next
+login. Now please login and then change your password to something more
 rememberable.
- 
+
 ' . $HOSTBASE,
 
    'From: ' . $EMAIL_FROM);
