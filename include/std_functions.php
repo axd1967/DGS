@@ -36,7 +36,8 @@ $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
 $is_down = false;
 
-$hostname_jump = false;
+$hostname_jump = false;  // ensure $HTTP_HOST is same as $HOSTNAME
+$use_error_log = false;  // print error messages to the webservers error log.
 
 $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
 $ActivityForHit = 1.0;
@@ -254,7 +255,8 @@ function error($err)
    if( mysql_error() )
       $uri .= "&mysqlerror=" . urlencode(mysql_error());
 
-   error_log( "$handle ($PHP_SELF): $err" . ( mysql_error() ? "\n" . mysql_error() : ''), 0);
+   if( $use_error_log )
+      error_log( "$handle ($PHP_SELF): $err" . ( mysql_error() ? "\n" . mysql_error() : ''), 0);
 
    jump_to( $uri );
 }
