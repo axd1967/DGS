@@ -38,6 +38,12 @@ require( "include/rating.php" );
    if($handicap_type == 'nigiri' ) { $komi = $komi_n; }
    else if($handicap_type == 'double' ) { $komi = $komi_d; }
 
+   if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
+       !$player_row["RatingStatus"] )
+   {
+      error( "no_initial_rating" );
+   }
+
    interpret_time_limit_forms();
 
    if( $rated != 'Y' )

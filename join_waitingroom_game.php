@@ -37,7 +37,7 @@ require( "include/rating.php" );
    if( !is_numeric($id) )
       $id=0;
 
-   $result = mysql_query("SELECT Waitingroom.*,Name,Handle,Rating,ClockUsed " .
+   $result = mysql_query("SELECT Waitingroom.*,Name,Handle,Rating,RatingStatus,ClockUsed " .
                          "FROM Waitingroom,Players " .
                          "WHERE Players.ID=Waitingroom.uid AND Waitingroom.ID=$id");
 
@@ -46,6 +46,9 @@ require( "include/rating.php" );
 
 
    extract(mysql_fetch_array($result));
+
+   if( ($Handicaptype == 'proper' or $Handicaptype == 'conv') and !$RatingStatus )
+      error("no_initial_rating");
 
    if( $delete == 't' and $player_row['ID'] == $uid )
    {
