@@ -180,12 +180,12 @@ sub gifify
     $fg = gimp_palette_get_foreground ();
     gimp_palette_set_foreground ([237, 183, 123]);
     gimp_selection_none ($theImage);
-    gimp_edit_copy ($theLayer);
-    $mask = gimp_layer_create_mask ($theLayer, ALPHA_MASK);
-    $float = gimp_edit_paste ($mask, 1);
-    gimp_floating_sel_anchor ($float);
-    gimp_threshold ($mask, 50, 255);
-    gimp_image_add_layer_mask ($theImage, $theLayer, $mask);
+    if ($have_alpha_background == 0)
+    {
+        $mask = gimp_layer_create_mask ($theLayer, ALPHA_MASK);
+        gimp_image_add_layer_mask ($theImage, $theLayer, $mask);
+        gimp_threshold ($mask, 50, 255);
+    }
     $newLayer = gimp_layer_copy ($theLayer, 1);
     gimp_image_add_layer ($theImage, $newLayer, 1);
     gimp_drawable_fill ($newLayer, FG_IMAGE_FILL);
@@ -251,7 +251,6 @@ sub load_image
         $size = gimp_image_height ($theImage);
     }
     $theLayer = gimp_image_active_drawable ($theImage);
-    gimp_layer_add_alpha ($theLayer);
     gimp_palette_set_foreground ($fg_color);
     gimp_selection_none ($theImage);
 }
@@ -313,6 +312,7 @@ foreach $final_size (@Sizes)
 
     if( $ARGV[0] ne 'board' )
     {
+        $have_alpha_background = 1;
         for $color ('b', 'w')
         {
             if( $color eq 'b' )
@@ -411,6 +411,8 @@ foreach $final_size (@Sizes)
 
     if( $ARGV[0] ne 'stones' )
     {
+
+        $have_alpha_background = 0;
 
 #--------------- Draw board lines -------------
 
