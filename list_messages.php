@@ -37,9 +37,6 @@ require_once( "include/timezones.php" );
 
    $my_id = $player_row["ID"];
 
-   $my_folders = get_folders($my_id);
-   change_folders_for_marked_messages($my_id, $my_folders);
-
    if(!@$_GET['sort1'])
    {
       $_GET['sort1'] = 'date';
@@ -47,6 +44,8 @@ require_once( "include/timezones.php" );
    }
 
    $find_answers = @$_GET['find_answers'] ;
+
+   $my_folders = get_folders($my_id);
 
    if( isset($_GET['toggle_marks']) )
    {
@@ -56,7 +55,8 @@ require_once( "include/timezones.php" );
    else
    {
       $toggle_marks= false;
-      $current_folder = @$_GET['folder'];
+      if( change_folders_for_marked_messages($my_id, $my_folders) != 0 )
+         $current_folder = @$_GET['folder'];
       if( !isset($current_folder) or !isset($my_folders[$current_folder]) )
          $current_folder = @$_GET['current_folder'];
    }

@@ -55,10 +55,15 @@ disable_cache();
 
    $folders = get_folders($my_id);
    $new_folder = @$_REQUEST['folder'];
+   $current_folder = @$_REQUEST['current_folder'];
 
    if( isset($_REQUEST['foldermove']) )
    {
-      change_folders($my_id, $folders, array($message_id), $new_folder, $type == 'INVITATION');
+      if( change_folders($my_id, $folders, array($message_id), $new_folder
+            , $current_folder, $type == 'INVITATION') <= 0 )
+      {
+         $new_folder = ( $current_folder ? $current_folder : FOLDER_ALL_RECEIVED ) ;
+      }
 
       $page = "";
       foreach( $_REQUEST as $key => $val )

@@ -45,13 +45,16 @@ require_once( "include/form_functions.php" );
             extract(mysql_fetch_assoc($result));
       }
    }
-   //unset($uid);
+   //unset($uid); //no more used
 
    init_standard_folders();
    $my_id = $player_row["ID"];
    $folders = get_folders($my_id);
 
    $mid = @$_GET['mid'];
+
+   $default_subject = '';
+
    $mode = @$_GET['mode'];
    if( !$mode )
    {
