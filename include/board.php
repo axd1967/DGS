@@ -27,9 +27,6 @@ $coord_borders, $woodcolor  )
 {
    global $woodbgcolors;
 
-   $coord_width_array = array( 13 => 16, 17 => 21, 21 => 26, 25 => 31,
-                               29 => 35, 35 => 43, 42 => 52, 50 => 62 );
-
    $mark_letter = 'm';
    $sizestringtype = 1;
 
@@ -44,7 +41,7 @@ $coord_borders, $woodcolor  )
    if( !$stone_size ) $stone_size = 25;
    if( !$font_size ) $font_size = "+0";
 
-   $coord_width=$coord_width_array[$stone_size];
+   $coord_width=floor($stone_size*31/25);
 
    $coord_start_number = "<td><img class=c$stone_size src=$stone_size/c";
    $coord_start_letter = "<td><img class=s$stone_size src=$stone_size/c";
