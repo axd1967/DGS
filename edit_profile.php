@@ -99,7 +99,7 @@ if( strcmp( $s, 'C' ) == 0 ) $s = 'en';
 
 echo form_insert_row( 'DESCRIPTION', T_('Language'),
                       'SELECTBOX', 'language', 1,
-                      get_known_languages_with_full_names(), $s, false );
+                      get_known_translated_languages(), $s, false );
 
 echo form_insert_row( 'DESCRIPTION', T_('Timezone'),
                       'SELECTBOX', 'timezone', 1,

@@ -71,5 +71,15 @@ function get_known_languages_with_full_names()
   return $KNOWN_LANGUAGES;
 }
 
+function get_known_translated_languages()
+{
+  global $KNOWN_LANGUAGES;
+  $t_langs = array();
+  foreach( $KNOWN_LANGUAGES as $lang => $fullname )
+    $t_langs[$lang] = T_($fullname);
+
+  return $t_langs;
+}
+
 require( "translations/all_languages.php" );
 ?>

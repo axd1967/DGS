@@ -75,6 +75,8 @@ $buttoncolors = array('white','white','white','white',
 
 $button_max = 10;
 
+$update_script = false; /* Should always be false false for include/std_functions.php */
+
 define("NONE", 0);
 define("BLACK", 1);
 define("WHITE", 2);

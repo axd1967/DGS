@@ -94,7 +94,7 @@ When translating you should keep in mind the following things:
       echo "<CENTER>\n";
       echo "<B><h3><font color=$h3_color>Select language to translate to:</font></h3></B><p>\n";
       echo form_start( 'selectlangform', 'translate.php', 'GET' );
-      $languages = get_known_languages_with_full_names();
+      $languages = get_known_translated_languages();
       $vals = array();
       foreach( $translator_array as $lang )
         {
