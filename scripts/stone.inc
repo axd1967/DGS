@@ -72,7 +72,7 @@
       pigment { colour 0.14*<1,1,1> }
       finish
       {
-        ambient 1.4
+        ambient 1.3
 //         diffuse 0.1
 //         brilliance 0.2
 //         reflection 0.2
