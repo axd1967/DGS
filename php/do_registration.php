@@ -26,13 +26,13 @@ if( $passwd != $passwd2 )
     header("Location: error.php?err=password_missmatch");
     exit;
 }
-else if( strlen($passwd) < 5 )
+else if( strlen($passwd) < 6 )
 {
     header("Location: error.php?err=password_too_short");
     exit;
 }
 
-if( strlen( $userid ) < 4 )
+if( strlen( $userid ) < 3 )
 {
     header("Location: error.php?err=userid_too_short");
     exit;

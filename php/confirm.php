@@ -244,7 +244,7 @@ switch( $action )
 
  default:
      {
-         header("Location: error.php?err=unknown_action");
+         header("Location: error.php?err=invalid_action");
          exit;
      }
 }

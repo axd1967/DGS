@@ -295,7 +295,7 @@ switch( $action )
 
  default:
      {
-         header("Location: error.php?err=unknown_action");
+         header("Location: error.php?err=illegal_action");
          exit;
      }
 }
