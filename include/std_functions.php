@@ -149,12 +149,14 @@ function disable_cache($stamp=NULL)
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $HOSTBASE, $is_down, $bg_color, $menu_bg_color, $menu_fg_color,
-      $the_translator, $CHARACTER_ENCODINGS, $max_links_in_main_menu, $vertical;
+   global $base_path, $is_down, $bg_color, $menu_bg_color, $menu_fg_color,
+      $the_translator, $CHARACTER_ENCODINGS, $max_links_in_main_menu, $vertical, $base_path;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
 
+
+   $base_path = ( is_base_dir() ? '' : '../' );
 
 //     $use_gz = true;
 //     if (eregi("NetCache|Hasd_proxy", $HTTP_SERVER_VARS['HTTP_VIA'])
@@ -191,8 +193,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 //       }
    echo '
     <TITLE> Dragon Go Server - ' . $title . '</TITLE>
-    <LINK REL="shortcut icon" HREF="' . $HOSTBASE . '/images/favicon.ico" TYPE="image/x-icon">
-    <LINK rel="stylesheet" type="text/css" media="screen" href="dragon.css">';
+    <LINK REL="shortcut icon" HREF="' . $base_path . 'images/favicon.ico" TYPE="image/x-icon">
+    <LINK rel="stylesheet" type="text/css" media="screen" href="' . $base_path . 'dragon.css">';
 
    if( $style_string )
       echo "<STYLE TYPE=\"text/css\">\n" .$style_string . "\n</STYLE>";
@@ -203,7 +205,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
     <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
         <tr>
-        <td width="50%"><A href="' . $HOSTBASE . "/index.php\">" .
+        <td width="50%"><A href="' . $base_path . "index.php\">" .
       "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>\n" .
       '<td align=right width="50%"><font color=' . $menu_fg_color .'><B>' .
       ( ($logged_in and !$is_down) ? T_("Logged in as") . ': ' . $player_row["Handle"]
@@ -244,7 +246,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 function end_page( $menu_array=NULL )
 {
-   global $time, $admin_level, $HOSTBASE, $vertical,
+   global $time, $admin_level, $base_path, $vertical,
       $menu_bg_color, $menu_fg_color, $bg_color;
 
    echo "&nbsp;<p>\n";
@@ -266,17 +268,17 @@ function end_page( $menu_array=NULL )
    echo '<table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
    <tr>
      <td' . $span . ' align="left" width="50%">
-       <A href="' . $HOSTBASE . '/index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
+       <A href="' . $base_path . 'index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
         <td align="right" width="50%">';
 
    if( $admin_level > 2 )
       echo '
         <font size=-2 color=' . $menu_fg_color . '>' . T_('Page created in') .
         sprintf (' %0.2f', (getmicrotime() - $time)*1000) . '&nbsp;ms&nbsp;&nbsp;&nbsp;' .
-         '</font><B><a href="' . $HOSTBASE . '/admin.php"><font color=' . $menu_fg_color . '>' .
+         '</font><B><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
          T_('Admin') . '</a></B></font></td>';
    else
-      echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
+      echo '<A href="' . $base_path . 'index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
 
    echo '
       </tr>
@@ -290,7 +292,7 @@ function end_page( $menu_array=NULL )
 
 function make_menu($menu_array)
 {
-   global $HOSTBASE, $bg_color,$max_links_in_main_menu,$menu_bg_color;
+   global $base_path, $bg_color,$max_links_in_main_menu,$menu_bg_color;
 
    $new_row= '<tr bgcolor=' . $bg_color . ' align="center">' . "\n";
 
@@ -321,7 +323,7 @@ function make_menu($menu_array)
          $width = round($cumw - $cumwidth);
          if( $i == count($menu_array) && !$even )
            $span = " colspan=2";
-         echo "<td$span width=\"$width%\"><B><A href=\"$HOSTBASE/$link\">$text</A></B></td>\n";
+         echo "<td$span width=\"$width%\"><B><A href=\"$base_path$link\">$text</A></B></td>\n";
          $cumwidth += $width;
          if( in_array($i, $break_point_array) )
            {
@@ -365,14 +367,14 @@ function cmp2($a, $b)
 
 function make_menu_horizontal($menu_array)
 {
-   global $HOSTBASE, $menu_bg_color, $bg_color;
+   global $base_path, $menu_bg_color, $bg_color;
 
    echo '<table width="100%" border=0 cellspacing=0 cellpadding=0 bgcolor="#F7F5FF"><tr>' . "\n";
    $cols = 4;
    $w = 100/($cols+1);
 
    echo '<td width="' .round($w). '%" rowspan=3>' .
-      '<img src="' . $HOSTBASE . '/images/dragonlogo_bl.jpg" alt="Dragon"></td>' . "\n";
+      '<img src="' . $base_path . 'images/dragonlogo_bl.jpg" alt="Dragon"></td>' . "\n";
 
    $cumwidth = round($w);
    $cumw=$w;
@@ -390,7 +392,7 @@ function make_menu_horizontal($menu_array)
          {
             if( $i==$cols )
                echo '<td width=100 align=right rowspan=3> ' .
-                  '<img src="' . $HOSTBASE . '/images/dragonlogo_br.jpg" alt="Dragon"></td>' . "\n";
+                  '<img src="' . $base_path . 'images/dragonlogo_br.jpg" alt="Dragon"></td>' . "\n";
             echo '</tr><tr>' . "\n";
             $cumwidth = round($w);
             $cumw=$w;
@@ -399,7 +401,7 @@ function make_menu_horizontal($menu_array)
          $i++;
 
 
-         echo "<td width=\"$width%\"><A href=\"$HOSTBASE/$link\"><font color=black>$text</font></A></td>\n";
+         echo "<td width=\"$width%\"><A href=\"$base_path$link\"><font color=black>$text</font></A></td>\n";
       }
 
    echo '</tr></table>' . "\n";
@@ -412,12 +414,12 @@ function make_menu_horizontal($menu_array)
 
 function make_menu_vertical($menu_array)
 {
-   global $HOSTBASE, $menu_bg_color, $bg_color;
+   global $base_path, $menu_bg_color, $bg_color;
 
    echo '<table width="100%" border=0 cellspacing=0 cellpadding=5><tr><td valign=top rowspan=2>' . "\n";
    echo '<table border=0 cellspacing=0 cellpadding=1 bgcolor='.$menu_bg_color.'><tr><td>' . "\n";
    echo '<table border=0 cellspacing=0 cellpadding=5 bgcolor="#F7F5FF">' . "\n";
-   echo '<tr><td align=center> <img src="' . $HOSTBASE . '/images/dragonlogo_bl.jpg" alt="Dragon">' . "\n";
+   echo '<tr><td align=center> <img src="' . $base_path . 'images/dragonlogo_bl.jpg" alt="Dragon">' . "\n";
 
    $i = 0;
 
@@ -429,14 +431,14 @@ function make_menu_vertical($menu_array)
          list($link,$t1,$t2) = $tmp;
 
          if( $i % 3 == 0 and $i > 0 )
-             echo '<tr><td height=1><img src="' . $HOSTBASE . '/images/dot.gif" alt=""></td></tr><tr><td align=left nowrap>' . "\n";
+             echo '<tr><td height=1><img src="' . $base_path . 'images/dot.gif" alt=""></td></tr><tr><td align=left nowrap>' . "\n";
 
          $i++;
 
-         echo "<A href=\"$HOSTBASE/$link\"><font color=black>$text</font></A><br>\n";
+         echo "<A href=\"$base_path$link\"><font color=black>$text</font></A><br>\n";
       }
 
-   echo '<tr><td height=5><img height=1 src="' . $HOSTBASE . '/images/dot.gif" alt=""></td></tr></table>' . "\n";
+   echo '<tr><td height=5><img height=1 src="' . $base_path . 'images/dot.gif" alt=""></td></tr></table>' . "\n";
    echo '</table></td><td width="100%" align=center valign=top><BR>' . "\n";
 }
 
@@ -810,7 +812,7 @@ function make_url($page, $sep)
 
 function is_logged_in($hdl, $scode, &$row)
 {
-   global $time, $admin_level, $HOSTBASE, $PHP_SELF, $HOSTNAME, $HTTP_HOST,
+   global $time, $admin_level, $PHP_SELF, $HOSTNAME, $HTTP_HOST,
       $ActivityHalvingTime, $ActivityForHit, $NOW, $the_translator;
 
    $time = getmicrotime();
