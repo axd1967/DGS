@@ -435,6 +435,12 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("admin_no_longer_admin_admin"):
+      {
+         echo _("Hmm, you seem to try to revoke your abillity to edit the admin staff.");
+      }
+      break;
+
       case("translator_admin_add_lang_missing_field"):
       {
         echo T_("Sorry, there was a missing or incorrect field when adding a language.");

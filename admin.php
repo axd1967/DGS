@@ -46,9 +46,9 @@ require( "include/form_functions.php" );
   add_link_page_link('admin_translators.php', T_('Manage translators'),
                      '', $adm & ADMIN_TRANSLATORS);
   add_link_page_link('admin_faq.php', T_('Edit FAQ'), '', $adm & ADMIN_FAQ);
-  add_link_page_link('admin_forum.php', T_('Admin forums'), '', false);
+//  add_link_page_link('admin_forum.php', T_('Admin forums'), '', $adm & ADMIN_FORUM);
 //  add_link_page_link('admin_requests.php', T_('Handle user requests'), '', false);
-  add_link_page_link('admin_admins.php', T_('Edit admin staff'), '', false);
+  add_link_page_link('admin_admins.php', T_('Edit admin staff'), '', $adm & ADMIN_ADMINS);
 
   echo "<br>&nbsp;\n</td></tr></table>\n";
 
