@@ -42,6 +42,12 @@ define("WHITE_DEAD", 8);
 define("KO", 1);
 
 
+function getmicrotime()
+{
+    list($usec, $sec) = explode(" ",microtime()); 
+    return ((float)$usec + (float)$sec); 
+} 
+
 function start_page( $title, $no_cache, $logged_in, &$player_row )
 {
 echo "
@@ -92,12 +98,16 @@ echo "
 
 function end_page( $new_paragraph = true )
 {
+    global $time;
+    
     if( $new_paragraph )
         echo "<p>";
 echo "
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr bgcolor=\"0C41C9\">
-        <td><font color=\"FFFC70\"><B>Dragon Go Server</B></font></td>
+        <td align=\"left\" width=\"50%\"><font color=\"FFFC70\"><B>Dragon Go Server</B></font></td>
+        <td align=\"right\" width=\"50%\"><font color=\"FFFC70\"><B>Page created in " . 
+              sprintf ("%0.5f", getmicrotime() - $time) . "&nbsp;s</B></font></td>
       </tr>
     </table>
   </BODY>
@@ -126,6 +136,9 @@ function set_cookies($uid, $code)
 
 function is_logged_in($hdl, $scode, &$row)
 {
+    global $time;
+    $time = getmicrotime();
+    
     if( !$hdl )
         return false;
 
