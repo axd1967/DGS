@@ -1,0 +1,229 @@
+<?php
+/*
+Dragon Go Server
+Copyright (C) 2001  Erik Ouchterlony
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+function draw_board($Size, &$array, $may_play, $gid, 
+                    $Last_X, $Last_Y, $stone_size, $font_size, $msg)
+{
+    if( $msg )
+        echo "<table border=2 align=center><tr>" . 
+        "<td width=\"" . $stone_size*($Size) . "\" align=left>$msg</td></tr></table><BR>\n";
+
+    echo "<table border=0 cellpadding=0 cellspacing=0 align=center valign=center background=images/wood1.png>";
+    echo "<tr>\n<td>&nbsp;</td>";
+    $colnr = 1;
+    $letter = 'a';
+    while( $colnr <= $Size )
+        {
+            echo "<td align=center><font size=$font_size><B>$letter</B></font></td>\n";
+            $colnr++;
+            $letter++;
+            if( $letter == 'i' ) $letter++;
+        }  
+    echo "<td width=5>&nbsp;</td>\n</tr>\n";
+
+
+    if( $Size > 11 ) $hoshi_dist = 4; else $hoshi_dist = 3;
+
+    // 4 == center, 5 == side, 6 == corner
+    if( $Size >=5 ) $hoshi_1 = 4; else $hoshi_1 = 7;
+    if( $Size >=8 ) $hoshi_2 = 6; else $hoshi_2 = 7;
+    if( $Size >=13) $hoshi_3 = 5; else $hoshi_3 = 7;
+
+    $letter_r = 'a';
+    for($rownr = $Size; $rownr > 0; $rownr-- )
+        {
+            echo "<tr><td align=center><font size=$font_size><B>$rownr</B></font></td>\n";
+            
+            
+            $hoshi_r = 0;
+            if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
+            if( $rownr == $Size - $rownr + 1 ) $hoshi_r = 2;
+            
+            $letter_c = 'a';
+            for($colnr = 0; $colnr < $Size; $colnr++ )
+                {
+                    $empty = false;
+                    if( $array[$colnr][$Size-$rownr] == BLACK )
+                        $type = "b";
+                    else if( $array[$colnr][$Size-$rownr] == WHITE )
+                        $type = "w";
+                    else
+                        {
+                            $type = "e";
+                            $alt = '.';
+                            if( $rownr == 1 ) $type = "d";
+                            if( $rownr == $Size ) $type = "u";
+                            if( $colnr == 0 ) $type .= "l";
+                            if( $colnr == $Size-1 ) $type .= "r";
+                    
+                            if( $hoshi_r > 0 and $type=="e" )
+                                {
+                                    $hoshi_c = 0;
+                                    if( $colnr == $hoshi_dist -  1 or $colnr == $Size - $hoshi_dist ) 
+                                        $hoshi_c = 3;
+
+                                    if( $colnr == $Size - $colnr - 1 ) $hoshi_c = 2;
+                            
+                                    if( $hoshi_c + $hoshi_r == $hoshi_1 or 
+                                    $hoshi_c + $hoshi_r == $hoshi_2 or
+                                    $hoshi_c + $hoshi_r == $hoshi_3 )
+                                        {
+                                            $type = "h";
+                                            $alt = ',';
+                                        }
+                                }
+                            $empty = true;
+                        }
+
+                    if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y )
+                        $type .= "m";
+
+                    if( $may_play && $empty )
+                        echo "<td><A href=confirm.php?gid=$gid&coord=$letter_c$letter_r><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
+                    else
+                        echo "<td><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></td>\n";
+                    $letter_c ++;
+                }
+
+            echo "<td align=center><font size=$font_size><B>$rownr</B></font></td>\n";
+
+            $letter_r++;
+            echo "</tr>\n";
+        }
+
+    echo "<tr>\n<td width=5>&nbsp;</td>";
+    $colnr = 1;
+    $letter = 'a';
+    while( $colnr <= $Size )
+        {
+            echo "<td align=center><font size=$font_size><B>$letter</B></font></td>\n";
+            $colnr++;
+            $letter++;
+            if( $letter == 'i' ) $letter++;
+        }  
+    echo "<td width=5>&nbsp;</td>\n</tr>\n</table>\n";
+}
+
+
+// fills $array with positions where the stones are.
+// returns who is next to move
+function make_array( $gid, &$array, &$msg, $max_moves, $move )
+{
+    if( !$move ) $move = $max_moves;
+
+    if( $move >= $max_moves )        
+        $result = mysql_query( "SELECT *, Stone+0 AS color FROM Moves$gid" );
+    else
+        $result = mysql_query( "SELECT *, Stone+0 AS color FROM Moves$gid WHERE MoveNr<=$move" );
+    while( $row = mysql_fetch_array($result) )
+        {
+            $array[$row["PosX"]][$row["PosY"]] = $row["color"];
+            if( $row["MoveNr"] == $move and $row["color"] > 0 )
+                $msg = $row["Text"];
+        }
+}
+
+$dirx = array( -1,0,1,0 );
+$diry = array( 0,-1,0,1 );
+
+
+function has_liberty_check( $x, $y, $Size, &$array, &$prisoners, $remove )
+{
+    global $dirx,$diry;
+    
+    $c = $array[$x][$y]; // Color of this stone
+
+    $index[$x][$y] = 7;
+
+
+    while( true )
+        {
+            if( $index[$x][$y] >= 32 )  // Have looked in all directions
+                {
+                    $m = $index[$x][$y] % 8;
+
+                    if( $m == 7 )   // At starting point, no liberties found
+                        {
+                            if( $remove )
+                                {
+                                    while( list($x, $sub) = each($index) )
+                                        {
+                                            while( list($y, $val) = each($sub) )
+                                                {
+                                                    array_push($prisoners, array($x,$y));
+                                                    unset($array[$x][$y]);
+                                                }
+                                        }
+                                }
+                            return false;
+                        }
+
+                    $x -= $dirx[$m];  // Go back
+                    $y -= $diry[$m];
+                }
+            else
+                {
+                    $dir = (int)($index[$x][$y] / 8);
+                    $index[$x][$y] += 8;
+
+                    $nx = $x+$dirx[$dir];
+                    $ny = $y+$diry[$dir];
+
+                    $new_color = $array[$nx][$ny];
+
+                    if( (!$new_color or $new_color == NONE ) and 
+                        ( $nx >= 0 ) and ($nx < $Size) and ($ny >= 0) and ($ny < $Size) )
+                        return true; // found liberty
+                    
+                    if( $new_color == $c and !$index[$nx][$ny])
+                        {
+                            $x = $nx;  // Go to the neigbour
+                            $y = $ny; 
+                            $index[$x][$y] = $dir;
+                        }
+                }
+        }
+
+
+    
+
+}
+
+function check_prisoners($colnr,$rownr, $col, $Size, &$array, &$prisoners )
+{
+    global $dirx,$diry;
+
+    //    echo $col . "<p>";
+
+    for($i=0; $i<4; $i++)
+        {
+            $x = $colnr+$dirx[$i];
+            $y = $rownr+$diry[$i];
+            //            echo "x: $x<p>";
+            //            echo "y: $y<p>";
+            //            echo "color: " . $array[$x][$y] . "<p>"; 
+            if( $array[$x][$y] == $col )
+                has_liberty_check($x,$y, $Size, $array, $prisoners, true);
+        }
+
+}
+
+
+?>
