@@ -118,8 +118,6 @@ require( "forum/forum_functions.php" );
                 "Activity=$Activity" );
 
 
-
-
 // Delete old forumreads
 
    $result = mysql_query("SELECT ID FROM Posts " .
@@ -135,6 +133,31 @@ require( "forum/forum_functions.php" );
    }
 
    mysql_query( $query );
+
+
+
+
+// Apply recently changed night hours
+
+   $result = mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone " .
+                         "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID");
+
+   $row = mysql_fetch_array($result);
+   putenv('TZ='.$row["Timezone"] );
+
+   // Changed to/from summertime?
+   if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )
+      $result =  mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone FROM Players");
+
+   while( $row = mysql_fetch_array($result) )
+   {
+      putenv('TZ='.$row["Timezone"] );
+      mysql_query("UPDATE Players " .
+                  "SET ClockChanged=NULL, " .
+                  "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
+                  "WHERE ID='" . $row['ID'] . "' LIMIT 1");
+   }
+
 
 }
 ?>
