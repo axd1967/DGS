@@ -229,6 +229,7 @@ function scale($x)
    imagesetdash($im, $black);
 
    $v = ceil($MAX/10)*10;
+   if( abs($v)<1 ) $v=0;
    $a = MARGE_LEFT-4 ;
    $b = $SizeX ;
    $b = $b - ((($b-$a) % DASH_MODULO)+1) ; //so all lines start in the same way

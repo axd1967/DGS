@@ -64,7 +64,7 @@ By now, Dragon works with these PHP directives:
  error_reporting = E_ALL
  asp_tags = Off ;Unused
  arg_separator.input = &
- arg_separator.output = & 
+ arg_separator.output = &amp; //or = &
  file_uploads = On
  track_vars = On ;always enabled as of PHP 4.0.3
  register_argc_argv = Off ;Unused
