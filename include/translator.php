@@ -41,6 +41,11 @@ class Translator
       if( $this->collect_translateable )
         array_push( $this->translated_messages, $string );
 
+      if( strcmp( $this->current_language, 'C' ) == 0 )
+        {
+          return $string;
+        }
+
       if( !array_key_exists( $language, $this->loaded_languages  ) )
         {
           $lang_class_name = $language . "_Language";
@@ -52,10 +57,12 @@ class Translator
 
   function get_preferred_browser_language()
     {
-      global $HTTP_ACCEPT_LANGUAGE, $KNOWN_LANGUAGES;
+      global $HTTP_ACCEPT_LANGUAGE;
+
+      $known_languages = get_known_languages();
 
       $regexp_languages = "";
-      foreach( $KNOWN_LANGUAGES as $lang )
+      foreach( $known_languages as $lang )
         {
           if( empty( $regexp_languages ) )
             $regexp_languages = "($lang";
@@ -72,6 +79,8 @@ class Translator
             if( ereg( $regexp_languages, $http_language, $found))
               return $found[1];
         }
+
+      return 'C';
     }
 
 }
