@@ -104,8 +104,14 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          if( $MustBeRated == 'N' )
             $Ratinglimit = '-';
          else
-            $Ratinglimit = echo_rating($Ratingmin,false) . ' - ' .
-               echo_rating($Ratingmax,false);
+         {
+            $r1 = echo_rating($Ratingmin+50,false);
+            $r2 = echo_rating($Ratingmax-50,false);
+            if( $r1 == $r2 )
+               $Ratinglimit = $r1 . ' ' . T_('only');
+            else
+               $Ratinglimit = $r1 . ' - ' . $r2;
+         }
 
          if( $pid == $player_row['ID'] )
             echo "<td class=button width=92 align=center><A class=button href=\"join_waitingroom_game.php?id=$ID&delete=t\">&nbsp;&nbsp;&nbsp;" . T_('Delete') . "&nbsp;&nbsp;&nbsp;</A></td>\n";
