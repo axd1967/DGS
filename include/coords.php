@@ -32,13 +32,13 @@ function sgf2number_coords($coord, $Size)
    if( !is_string($coord) or strlen($coord)!=2 )
       return array(NULL,NULL);
 
-   $x = ord($coord[0])-ord('a');
-   $y = ord($coord[1])-ord('a');
+   $x = ord($coord{0})-ord('a');
+   $y = ord($coord{1})-ord('a');
 
    if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
       return array(NULL,NULL);
 
-   return array(ord($coord[0])-ord('a'), ord($coord[1])-ord('a'));
+   return array($x, $y);
 }
 
 function number2board_coords($x, $y, $Size)
