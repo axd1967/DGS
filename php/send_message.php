@@ -38,6 +38,12 @@ if( $player_row["Handle"] == "guest" )
     exit;    
 }
 
+if( $to == "guest" )
+{
+    header("Location: error.php?err=guest_may_not_recieve_messages");
+    exit;
+}
+
 // find reciever of the message
 
 
@@ -61,6 +67,7 @@ if( $my_ID == $opponent_ID )
     exit;
 
 }
+
 
 // Update database
 
