@@ -23,6 +23,8 @@ require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( "include/rating.php" );
 
+define('HOT_SECTION', true);
+
 disable_cache();
 
 function jump_to_next_game($id, $Lastchanged, $gid)
@@ -425,6 +427,40 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    }
 
 
+if( HOT_SECTION )
+{
+   //*********************** HOT SECTION START ***************************
+   //could append in case of multi-players account with simultaneous logins
+   //or if one player hit twice the validation button during a net lag
+   //and if opponent has already played between the two confirm.php calls.
+
+   $result = mysql_query( "LOCK TABLES Games WRITE, Moves WRITE"
+      //. ", MoveMessages WRITE"
+      );
+
+   if ( !$result )
+      die(mysql_error());
+
+   // Maybe not useful:
+   function unlock_games_tables()
+   {
+      $result = mysql_query( "UNLOCK TABLES");
+   }
+   register_shutdown_function('unlock_games_tables');
+
+   // Locked ... an ultimate verification:
+   $result = mysql_query( "SELECT Moves FROM Games WHERE Games.ID=$gid" )
+            or die(mysql_error());
+
+   if(  mysql_num_rows($result) != 1 )
+      error("unknown_game");
+
+   $tmp = mysql_fetch_assoc($result);
+
+   if( $tmp["Moves"] != $old_moves )
+      error("already_played");
+}//HOT_SECTION
+
    $result = mysql_query( $move_query );
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
@@ -435,6 +471,12 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    if( mysql_affected_rows() != 1 )
       error("mysql_update_game", true);
+
+if( HOT_SECTION )
+{
+   $result = mysql_query( "UNLOCK TABLES");
+   //*********************** HOT SECTION END *****************************
+}//HOT_SECTION
 
 
    if( $message_query )
