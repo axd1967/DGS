@@ -22,11 +22,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Common";
 
-require_once( "include/config.php" );
 require_once( "include/quick_common.php" );
+require_once( "include/connect2mysql.php" );
 
 require_once( "include/time_functions.php" );
-
 if (!isset($page_microtime))
 {
    $page_microtime = getmicrotime();
@@ -34,9 +33,7 @@ if (!isset($page_microtime))
    $base_path = ( is_base_dir() ? '' : '../' );
 }
 
-require_once( "include/connect2mysql.php" );
 require_once( "include/translation_functions.php" );
-
 
 $hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
 
@@ -164,19 +161,6 @@ define("FOLDER_DELETED", 4);
 define("FOLDER_SENT", 5);
 define("USER_FOLDERS", 6);
 
-
-function disable_cache($stamp=NULL)
-{
-   global $NOW;
-  // Force revalidation
-   header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-   header ('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
-   header ('Pragma: no-cache');                                              // HTTP/1.0
-   if( !$stamp )
-      header ('Last-Modified: ' . gmdate('D, d M Y H:i:s', $NOW) . ' GMT');    // Always modified
-   else
-      header ('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
-}
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
@@ -468,35 +452,6 @@ function make_menu_vertical($menu_array)
    echo '</table></td><td width="100%" align=center valign=top><BR>' . "\n";
 }
 
-function error($err, $debugmsg=NULL)
-{
-   disable_cache();
-
-   $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
-
-   $uri = "error.php?err=" . urlencode($err);
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='$handle', " .
-      "Message='$err', IP='{$_SERVER['REMOTE_ADDR']}'" ;
-
-   $mysql_error = mysql_error();
-
-
-   if( !empty($mysql_error) )
-   {
-      $uri .= "&mysqlerror=" . urlencode($mysql_error);
-      $errorlog_query .= ", MysqlError='" . $mysql_error . "'";
-   }
-
-   if( !empty($debugmsg) )
-   {
-      $errorlog_query .= ", Debug='$debugmsg'";
-   }
-
-   @mysql_query( $errorlog_query );
-
-   jump_to( $uri );
-}
-
 /* Not used
 function warn($debugmsg)
 {
@@ -525,17 +480,6 @@ function sysmsg($msg)
       echo "\n<p><b><font color=\"green\">$msg</font></b><hr>\n";
 }
 
-function jump_to($uri, $absolute=false)
-{
-   global $HOSTBASE;
-
-   if( $absolute )
-      header( "Location: " . $uri );
-   else
-      header( "Location: " . $HOSTBASE . '/' . $uri );
-
-   exit;
-}
 
 
 //must never allow quotes, ampersand, < and >
@@ -909,8 +853,8 @@ function get_request_url()
 
 function get_request_user( &$uid, &$uhandle, $from_referer=false)
 {
-//Priorities: URL(id) > URL(handle) > REFERER(id) > REFERER(handle)
-//Warning: + (a URL reserved char) must be substitued with %2B in 'handle'.
+//Priorities: URI(id) > URI(handle) > REFERER(id) > REFERER(handle)
+//Warning: + (a URI reserved char) must be substitued with %2B in 'handle'.
    $uid_nam = 'uid';
    $uid = @$_REQUEST[$uid_nam];
    $uhandle = '';  

@@ -22,11 +22,12 @@ $is_down = false;
 $is_down_message = "Sorry, dragon is down for maintenance at the moment, " .
                    "please return in an hour or so.";
 
+if( !isset($quick_errors) )
+   $quick_errors = false;
 
 $timeadjust = 0;
 if( @is_readable( "timeadjust.php" ) )
    include_once( "timeadjust.php" );
-
 if( !is_numeric($timeadjust) )
    $timeadjust = 0;
 
