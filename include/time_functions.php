@@ -82,7 +82,10 @@ function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
    if( $main > 0 or $byoper < 0 ) // entering byoyomi
    {
       $byotime = $startbyotime;
-      $byoper = $startbyoper;
+      if( $byotype == 'JAP' ) // japanese byoyomi
+         $byoper = $startbyoper-1;
+      else
+         $byoper = $startbyoper;
    }
 
    if( $byotype == 'JAP' ) // japanese byoyomi
@@ -108,7 +111,6 @@ function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
          $byotime = $startbyotime;
          $byoper = $startbyoper;
       }
-
    }
    else if( $byotype == 'FIS' ) // Fischer time
    {
@@ -170,11 +172,11 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
 
    if( $Byotime <= 0 )
          $str .= ' ' . $T_('without byoyomi');
-      else if( $Byotype == 'FIS' )
+   else if( $Byotype == 'FIS' )
       {
          $str .= ' ' . sprintf( $T_('with %s extra per move'), echo_time($Byotime, $keep_english) );
       }
-      else
+   else
       {
          if ( $Maintime > 0 )
             $str .= ' + ';
@@ -186,7 +188,7 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
             $str .= '/' . $Byoperiods . ' ' . $T_('stones') . ' ' . $T_('Canadian byoyomi');
       }
 
-      return $str;
+   return $str;
 }
 
 function time_convert_to_longer_unit(&$time, &$unit)

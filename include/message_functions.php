@@ -398,8 +398,8 @@ function interpret_time_limit_forms()
       if( $timeunit == 'months' )
          $hours *= 30;
 
-      if( $hours > 5475 ) $hours = 5475;
-      if( $hours < 0 ) $hour = 0;
+      if( $hours > 5475 ) $hours = 5475; //365*15
+      else if( $hours < 0 ) $hours = 0;
 
       if( $byoyomitype == 'JAP' )
       {
@@ -408,7 +408,7 @@ function interpret_time_limit_forms()
          if( $timeunit_jap == 'months' ) $byohours *= 30;
 
          if( $byohours > 5475 ) $byohours = 5475;
-         if( $byohours < 0 ) $byohour = 0;
+         else if( $byohours < 0 ) $byohours = 0;
 
          $byoperiods = $byoperiods_jap;
          if( $byohours * ($byoperiods+1) > 5475 )
@@ -419,8 +419,9 @@ function interpret_time_limit_forms()
          $byohours = $byotimevalue_can;
          if( $timeunit_can != 'hours' ) $byohours *= 15;
          if( $timeunit_can == 'months' ) $byohours *= 30;
-         if( $byohours < 0 ) $byohour = 0;
+
          if( $byohours > 5475 ) $byohours = 5475;
+         else if( $byohours < 0 ) $byohours = 0;
 
          $byoperiods = $byoperiods_can;
          if( $byoperiods < 1 ) $byoperiods = 1;
@@ -428,14 +429,11 @@ function interpret_time_limit_forms()
       else if( $byoyomitype == 'FIS' )
       {
          $byohours = $byotimevalue_fis;
+         if( $timeunit_fis != 'hours' ) $byohours *= 15;
+         if( $timeunit_fis == 'months' ) $byohours *= 30;
 
-         if( $timeunit_fis != 'hours' )
-            $byohours *= 15;
-         if( $timeunit_fis == 'months' )
-            $byohours *= 30;
-
-         if( $byohours < 0 ) $byohours = 0;
          if( $byohours > $hours ) $byohours = $hours;
+         else if( $byohours < 0 ) $byohours = 0;
 
          $byoperiods = 0;
       }
