@@ -335,8 +335,6 @@ disable_cache();
       $result = mysql_query( "UPDATE Players SET Notify='NEXT' WHERE Handle='$to' LIMIT 1" );
    }
 
-   include_all_translate_groups($player_row);
-
    $msg = urlencode(T_('Message sent!'));
 
    jump_to("status.php?msg=$msg");

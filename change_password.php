@@ -53,8 +53,6 @@ require( "include/rating.php" );
 
    mysql_query( $query );
 
-   include_all_translate_groups($player_row);
-
    $msg = urlencode(T_('Password changed!'));
 
    jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");

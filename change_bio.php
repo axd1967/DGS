@@ -85,8 +85,6 @@ require( "include/rating.php" );
 
    }
 
-   include_all_translate_groups($player_row);
-
    $msg = urlencode(T_('Bio updated!'));
 
    jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");

@@ -165,10 +165,6 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    ob_start("ob_gzhandler");
 
-   $base_path = ( is_base_dir() ? '' : '../' );
-
-   include_all_translate_groups($row);
-
    if( empty($encoding_used) )
       $encoding_used = 'iso-8859-1';
 
@@ -813,10 +809,11 @@ function make_url($page, $sep, $array)
 function is_logged_in($hdl, $scode, &$row)
 {
    global $time, $admin_level, $PHP_SELF, $HOSTNAME, $HTTP_HOST, $hostname_jump,
-      $ActivityHalvingTime, $ActivityForHit, $NOW;
+      $ActivityHalvingTime, $ActivityForHit, $NOW, $base_path;
 
    $time = getmicrotime();
    $admin_level = 0;
+   $base_path = ( is_base_dir() ? '' : '../' );
 
    if( $hostname_jump and eregi_replace(":.*$","", $HTTP_HOST) != $HOSTNAME )
    {
@@ -824,7 +821,10 @@ function is_logged_in($hdl, $scode, &$row)
    }
 
    if( !$hdl )
+   {
+      include_all_translate_groups();
       return false;
+   }
 
    $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
                            "Adminlevel+0 as admin_level " .
@@ -832,10 +832,14 @@ function is_logged_in($hdl, $scode, &$row)
 
 
    if( @mysql_num_rows($result) != 1 )
+   {
+      include_all_translate_groups();
       return false;
+   }
 
    $row = mysql_fetch_array($result);
 
+   include_all_translate_groups($row);
 
    if( $row["Sessioncode"] != $scode or $row["Expire"] < $NOW )
       return false;

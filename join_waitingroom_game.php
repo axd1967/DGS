@@ -36,8 +36,6 @@ require( "include/rating.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-   include_all_translate_groups($player_row);
-
    if( !is_numeric($id) )
       $id=0;
 
