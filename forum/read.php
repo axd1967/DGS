@@ -26,11 +26,13 @@ function draw_post($reply_link=true)
    global $Subject, $Text, $ID, $User_ID, $HOSTBASE, $forum, $Name, $thread, $Timestamp, 
       $date_fmt;
 
+   $txt = make_html_safe($Text, true);
+   if( strlen($txt) == 0 ) $txt = '&nbsp';
    echo '<tr><td bgcolor=cccccc>
-<a name="' . $ID . '"><font size=\"+1\"><b>' . make_html_safe($Subject) . '</b></font></a><br>
+<a name="' . $ID . '"><font size="+1"><b>' . make_html_safe($Subject) . '</b></font></a><br>
 by <a href="' . $HOSTBASE . '/userinfo.php?uid=' . $User_ID . '">' . $Name . '</a>
 on ' . date($date_fmt, $Timestamp) . '</td></tr>
-<tr><td bgcolor=white>' . make_html_safe($Text, true) . '</td></tr>
+<tr><td bgcolor=white>' . $txt . '</td></tr>
 ';
    if( $reply_link )
       echo "<tr><td bgcolor=white align=left><a href =\"read.php?forum=$forum&thread=$thread&reply=$ID#$ID\">[ reply ]</a></td></tr>\n";
@@ -43,6 +45,9 @@ on ' . date($date_fmt, $Timestamp) . '</td></tr>
 
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+
+   if( ($reply > 0) and !$logged_in )
+      error("not_logged_in");
 
    $Forumname = forum_name($forum);
 

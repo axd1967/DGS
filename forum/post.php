@@ -28,6 +28,9 @@ include("forum_functions.php");
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
+   if( !$logged_in )
+      error("not_logged_in");
+
 //  input: $Text, $Subject, $parent, $forum
 
    if( $parent > 0 )
