@@ -506,6 +506,19 @@ gimp -i -d -b "(begin
              (set! k (+ k 1)))
 
 
+      (gimp-palette-set-background '(253 214 155))
+      (set! letter_font_size (/ (* final_size 7) 10))
+      (resize (* final_size 2) final_size)
+
+      (bg-fill-image)
+      (draw-letter (string-append \"b  undo  q\") (* size 2) size)
+      (save-image \"undo\" 0)
+
+      (bg-fill-image)
+      (draw-letter (string-append \"b  redo  q\") (* size 2) size)
+      (save-image \"redo\" 0)
+
+
 ;--------------- Draw coord images ---------------
 
       (gimp-palette-set-background '(247 245 227))
@@ -555,7 +568,7 @@ rm -f *or8* ?.png ??.png ???.png ????.png
 pngquant -force -ordered 50 [bwyp]*.orig.png
 pngquant -force -ordered 16 [cl]*.orig.png
 pngquant -force -ordered 2 [eduh]*.orig.png
-pngquant -force -ordered 16 [eduh]*[tcsxwbd].orig.png
+pngquant -force -ordered 16 [eduh]*[tcsxwbdo].orig.png
 
 rename 's/.orig-or8.png/.png/' *or8*
 

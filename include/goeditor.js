@@ -141,66 +141,53 @@ function change_mode(nr, new_mode)
    document.images[current_mode[nr]+'_'+nr+'_4'].src = 'images/bl.png';
 }
 
-function show_button(nr, button_mode, image, alt, width, height, on)
+function show_button(nr, button_mode, button_function, image, alt, width, height, border, on)
 {
   var stonesz = stonesize[nr];
   document.write('<table border=0 cellpadding=0 cellspacing=0 align=center valign=center bgcolor=#fdd69b>');
-   document.write('<tr><td colspan=3><img width='+(width+10)+' height=5 name="'+button_mode+'_'+nr+'_1" src="images/'+(on ? 'bl.png':'gr.png')+'\"></td></tr>');
-   document.write('<td><img width=5 height='+height+' name="'+button_mode+'_'+nr+'_2" src="images/'+(on ? 'bl.png':'gr.png')+'"></td>');
+   document.write('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_1" src="images/'+(on ? 'bl.png':'gr.png')+'\"></td></tr>');
+   document.write('<tr><td><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_2" src="images/'+(on ? 'bl.png':'gr.png')+'"></td>');
 
    if( version == 1 )
-      document.write('<td width='+width+' height='+height+' align=center><img border=0 hspace=5 vspace=5 name="'+button_mode+'_'+nr+'" src="'+image+'" onClick="change_mode('+nr+',\''+button_mode+'\')"></td>');
+      document.write('<td width='+width+' height='+height+' align=center><img border=0 name="'+button_mode+'_'+nr+'" src="'+image+'" onClick="'+button_function+'('+nr+',\''+button_mode+'\')"></td>');
    else
-      document.write('<td width='+width+' height='+height+' align=center><a href="javascript:change_mode('+nr+',\''+button_mode+'\');"><img border=0 hspace=5 vspace=5 name="'+button_mode+'_'+nr+'" src="'+image+'"></a></td>');
+      document.write('<td width='+width+' height='+height+' align=center><a href="javascript:change_mode('+nr+',\''+button_mode+'\');"><img border=0 align=center name="'+button_mode+'_'+nr+'" src="'+image+'"></a></td>');
 
-   document.write('<td><img width=5 height='+height+' name="'+button_mode+'_'+nr+'_3" src="images/'+(on ? 'bl.png':'gr.png')+'"></td></tr>');
-   document.writeln('<tr><td colspan=3><img width='+(width+10)+' height=5 name="'+button_mode+'_'+nr+'_4" src="images/'+(on ? 'bl.png':'gr.png')+'"></td></tr></table>');
+   document.write('<td align=right><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_3" src="images/'+(on ? 'bl.png':'gr.png')+'"></td></tr>');
+   document.writeln('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_4" src="images/'+(on ? 'bl.png':'gr.png')+'"></td></tr></table>');
 }
 
-function show_text_button(nr, button_function)
-{
-  var stonesz = stonesize[nr];
-  document.write('<table border=0 cellpadding=0 cellspacing=0 align=center valign=center bgcolor=#fdd69b>');
-  document.write('<tr><td colspan=3><img width='+(stonesz*2+40)+' height=5 src="images/gr.png"></td></tr>');
-  document.write('<td><img width=5 height='+(stonesz+5)+' src="images/gr.png"></td>');
-
-  if( version == 1 )
-     document.write('<td width='+(stonesz*2+30)+' height='+(stonesz+5)+' align=center><a onClick="'+button_function+'('+nr+')"><font color=black>'+button_function+'</font></a></td>');
-  else
-     document.write('<td width='+(stonesz*2+30)+' height='+(stonesz+5)+' align=center><a href="javascript:'+button_function+'('+nr+');"><font color=black>'+button_function+'</font></a></td>');
-
-  document.write('<td><img width=5 height='+(stonesz+5)+' src="images/gr.png"></td></tr>');
-  document.writeln('<tr><td colspan=3><img width='+(stonesz*2+40)+' height=5 src="images/gr.png"></td></tr></table>');
-}
 
 function show_editor_buttons(nr)
 {
    var stonesz = stonesize[nr];
-   var sz = stonesize[nr] + 10;
+   var border = Math.round(stonesz / 7);
+   var sz = stonesize[nr] + 2*border;
+
    document.writeln("<table border=0 cellspadding=0 cellspacing=2 bgcolor=#F7F5E3>");
    document.writeln("<tr><td colspan=2>");
-   show_button(nr, 'play', stonesz+'/pb.'+img, 'Play', sz*1.5, sz, 1);
-   //   show_button(nr, 'score', stonesz+'/y.'+img, 'Score');
+   show_button(nr, 'play', 'change_mode', stonesz+'/pb.'+img, 'Play', Math.round(sz*1.5), sz, border, 1);
+   //   show_button(nr, 'score', 'change_mode', stonesz+'/y.'+img, 'Score', sz, sz, border, 0);
    document.writeln("</td></tr><tr><td>");
-   show_button(nr, 'black', stonesz+'/b.'+img, 'Black', sz, sz, 0);
+   show_button(nr, 'black', 'change_mode', stonesz+'/b.'+img, 'Black', sz, sz, border, 0);
    document.writeln("</td><td>");
-   show_button(nr, 'white', stonesz+'/w.'+img, 'White', sz, sz, 0);
+   show_button(nr, 'white', 'change_mode', stonesz+'/w.'+img, 'White', sz, sz, border, 0);
    document.writeln("</td></tr><tr><td>");
-   show_button(nr, 'triangle', stonesz+'/bt.'+img, 'Triangle', sz, sz, 0);
+   show_button(nr, 'triangle', 'change_mode', stonesz+'/bt.'+img, 'Triangle', sz, sz, border, 0);
    document.writeln("</td><td>");
-   show_button(nr, 'square', stonesz+'/bs.'+img, 'Square', sz, sz, 0);
+   show_button(nr, 'square', 'change_mode', stonesz+'/bs.'+img, 'Square', sz, sz, border, 0);
    document.writeln("</td></tr><tr><td>");
-   show_button(nr, 'circle', stonesz+'/bc.'+img, 'Circle', sz, sz, 0);
+   show_button(nr, 'circle', 'change_mode', stonesz+'/bc.'+img, 'Circle', sz, sz, border, 0);
    document.writeln("</td><td>");
-   show_button(nr, 'cross', stonesz+'/bx.'+img, 'Cross', sz, sz, 0);
+   show_button(nr, 'cross', 'change_mode', stonesz+'/bx.'+img, 'Cross', sz, sz, border, 0);
    document.writeln("</td></tr><tr><td>");
-   show_button(nr, 'letter', stonesz+'/la.'+img, 'Letter', sz, sz, 0);
+   show_button(nr, 'letter', 'change_mode', stonesz+'/la.'+img, 'Letter', sz, sz, border, 0);
    document.writeln("</td><td>");
-   show_button(nr, 'number', stonesz+'/b1.'+img, 'Number', sz, sz, 0);
-   document.writeln("</td></tr><tr><td>&nbsp;</td></tr><tr><td colspan=2>");
-   show_text_button(nr, 'undo');
+   show_button(nr, 'number', 'change_mode', stonesz+'/b1.'+img, 'Number', sz, sz, border, 0);
+   document.writeln('</td></tr><tr><td><img src="images/blank.gif" width=1 height='+(border*2)+'></td></tr><tr><td colspan=2>');
+   show_button(nr, 'undo', 'undo', stonesz+'/undo.'+img, 'Undo', Math.round(sz*1.8), Math.round(sz*0.8), border, 0);
    document.writeln("</td></tr><tr><td colspan=2>");
-   show_text_button(nr, 'redo');
+   show_button(nr, 'redo', 'redo', stonesz+'/redo.'+img, 'Redo', Math.round(sz*1.8), Math.round(sz*0.8), border, 0);
    document.writeln("</td></tr></table>");
 }
 
@@ -408,7 +395,7 @@ function click(nr,x,y)
    set_image(nr, x, y);
 }
 
-function undo(nr)
+function undo(nr, mode)
 {
    var a;
    if( move_nr[nr] == 0 ) return;
@@ -456,7 +443,7 @@ function undo(nr)
    move_nr[nr]--;
 }
 
-function redo(nr)
+function redo(nr, mode)
 {
    var a;
    if( move_nr[nr] == max_move_nr[nr] ) return;
