@@ -98,10 +98,10 @@ require( "include/std_functions.php" );
   add_link_page_link("http://www.britgo.org/intro/intro1.html#bh",
                      T_('A Brief History'),
                      T_('For you people with short attention spans.'));
-  add_link_page_link("http://www.cwi.nl/~jansteen/go/history/",
+  add_link_page_link("http://gobase.org/information/history/",
                      T_('The Extended History'),
                      T_('In case you\'re an aspiring know-it-all.'));
-
+  
   echo "<p>&nbsp;\n";
   echo "<h3 align=left><a name=\"stuff\"></a><font color=$h3_color>" .
     T_('Go books, equipment and software') . "</font></h3>\n";
