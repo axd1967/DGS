@@ -108,7 +108,7 @@ include( "include/timezones.php" );
 
    echo start_end_column_table(true) .
       tablehead('ID', 'ID', true) .
-      tablehead('sgf', "show_games.php?uid=$uid&$finished_string") .
+      tablehead('sgf') .
       tablehead('Opponent', 'Name') .
       tablehead('Color', 'Color') .
       tablehead('Size', 'Size', true) .

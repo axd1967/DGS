@@ -199,7 +199,7 @@ function echo_rating($rating, $show_percent=true)
 {
    if( !isset($rating) ) return '';
 
-   $spc = ( $show_percent ? '&nbsp' : ' ' );
+   $spc = ( $show_percent ? '&nbsp;' : ' ' );
 
    $rank_val = round($rating/100);
    $string = '';
