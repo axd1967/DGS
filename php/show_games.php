@@ -33,9 +33,9 @@ connect2mysql();
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
-                      " WHERE Status='Running' AND " . 
-                      "( Black_ID=$uid AND White_ID=Players.ID ) OR " .
-                      "( White_ID=$uid AND Black_ID=Players.ID )");
+                      " WHERE  Status!='INVITED' AND Status!='FINISHED' AND " . 
+                      "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
+                      "( White_ID=$uid AND Black_ID=Players.ID ))");
 
 
 
