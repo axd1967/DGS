@@ -151,8 +151,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    if( $message ) $message = trim($message);
 
-   $where_clause = " WHERE ID=$gid AND Moves=$old_moves Consistent='N'";
-
+   $where_clause = " WHERE ID=$gid AND Moves=$old_moves";
+   $consistent_query = "Consistent='N', ";
    switch( $action )
    {
       case 'move':
@@ -179,7 +179,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Moves=$Moves, " .
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
-             "Status='PLAY', " . $time_query;
+             "Status='PLAY', " . $time_query . $consistent_query;
 
          if( $nr_prisoners > 0 )
             if( $to_move == BLACK )
@@ -225,7 +225,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Moves=$Moves, " .
              "Last_X=-1, " .
              "Status='$next_status', " .
-             "ToMove_ID=$next_to_move_ID, " . $time_query .
+             "ToMove_ID=$next_to_move_ID, " . $time_query . $consistent_query .
              "Flags=0 " .
              $where_clause;
       }
@@ -264,7 +264,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $game_query = "UPDATE Games SET " .
              "Moves=$Handicap, " .
              "Last_X=$colnr, " .
-             "Last_Y=$rownr, " . $time_query .
+             "Last_Y=$rownr, " . $time_query . $consistent_query .
              "ToMove_ID=$White_ID " .
              $where_clause;
       }
@@ -291,7 +291,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Last_X=-3, " .
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
-             "Score=$score, " . $time_query .
+             "Score=$score, " . $time_query . $consistent_query .
              "Flags=0" .
              $where_clause;
 
@@ -347,7 +347,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
              "Last_X=-2, " .
-             "Status='$next_status', " . $time_query;
+             "Status='$next_status', " . $time_query . $consistent_query;
 
          if( $next_status != 'FINISHED' )
          {
@@ -388,7 +388,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       error("mysql_insert_move", true);
 
 
-   $result = mysql_query( "UPDATE Games set Consistent=$Consistent WHERE ID=$gid" );
+   $result = mysql_query( "UPDATE Games set Consistent='$Consistent' WHERE ID=$gid" );
 
    if( mysql_affected_rows() != 1 )
       error("mysql_update_game", true);
