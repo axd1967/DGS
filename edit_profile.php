@@ -96,7 +96,7 @@ require_once( "include/countries.php" );
      $noteswidths[$i*5] = $i * 5;
      }
    
-   $notesmodes = array('RIGHT' => T_('Right of the board'), 'BELOW' => T_('Below the board'), 'OFF' => T_('Off'));
+   $notesmodes = array('OFF' => T_('Off'), 'RIGHT' => T_('Right'), 'BELOW' => T_('Below'));
 
    $notescutoffs = array();
    for($i=5; $i<26; $i++ )
@@ -214,37 +214,35 @@ require_once( "include/countries.php" );
 
    $profile_form->add_row( array( 'OWNHTML', $button_code ) );
 
-   $profile_form->add_row( array( 'HEADER', T_('Notes box for small boards') ) );
+   $profile_form->add_row( array( 'HEADER', T_('Private game notes') ) );
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Position'),
-                                  'SELECTBOX', 'notessmallmod', 1, $notesmodes,
-                                  $player_row["NotesSmallMode"], false ) );
+   foreach( array( 'Small', 'Large') as $typ )
+   {
+      $ltyp = strtolower($typ) ;
+//   $profile_form->add_row( array( 'CELL', 9, 'align="left"', 'TEXT', '<b>' . T_('Small boards') . ':</b>' ) );
+      if( $ltyp == 'small' )
+         $profile_form->add_row( array(
+               'TEXT', '<b>' . T_('Small boards') . ':</b>',
+            ) );
+      else
+         $profile_form->add_row( array(
+               'TEXT', '<b>' . T_("$typ boards from") . ':</b>',
+               'TD', 'SELECTBOX', 'notescutoff', 1, $notescutoffs, $player_row["NotesCutoff"], false,
+            ) );
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Height'),
-                                  'SELECTBOX', 'notessmallheight', 1, $notesheights,
-                                  $player_row["NotesSmallHeight"], false ) );
+      $profile_form->add_row( array(
+               'DESCRIPTION', T_('Position'),
+               'RADIOBUTTONS', "notes{$ltyp}mod", $notesmodes, $player_row["Notes{$typ}Mode"],
+            ) );
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Width'),
-                                  'SELECTBOX', 'notessmallwidth', 1, $noteswidths,
-                                  $player_row["NotesSmallWidth"], false ) );
-
-   $profile_form->add_row( array( 'HEADER', T_('Notes box for large boards') ) );
-
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Large boards from'),
-                                  'SELECTBOX', 'notescutoff', 1, $notescutoffs,
-                                  $player_row["NotesCutoff"], false ) );
-
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Position'),
-                                  'SELECTBOX', 'noteslargemod', 1, $notesmodes,
-                                  $player_row["NotesLargeMode"], false ) );
-
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Height'),
-                                  'SELECTBOX', 'noteslargeheight', 1, $notesheights,
-                                  $player_row["NotesLargeHeight"], false ) );
-
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Width'),
-                                  'SELECTBOX', 'noteslargewidth', 1, $noteswidths,
-                                  $player_row["NotesLargeWidth"], false ) );
+      $profile_form->add_row( array(
+               'DESCRIPTION', T_('Size'),
+               'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Height') . '&nbsp;',
+               'SELECTBOX', "notes{$ltyp}height", 1, $notesheights, $player_row["Notes{$typ}Height"], false,
+               'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Width') . '&nbsp;',
+               'SELECTBOX', "notes{$ltyp}width", 1, $noteswidths, $player_row["Notes{$typ}Width"], false,
+            ) );
+   }
 
 
    $profile_form->add_row( array( 'SPACE' ) );
