@@ -65,15 +65,15 @@ require( "include/form_functions.php" );
      {
         $faq_edit_form->add_row( array( 'HEADER', T_('Edit category') ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Category'),
-                                        'TEXTINPUT', 'question', 50, 80, $row["Question"] ) );
+                                        'TEXTINPUT', 'question', 80, 80, $row["Question"] ) );
      }
      else
      {
         $faq_edit_form->add_row( array( 'HEADER', T_('Edit FAQ entry') ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Question'),
-                                        'TEXTINPUT', 'question', 50, 80, $row["Question"] ) );
+                                        'TEXTINPUT', 'question', 80, 80, $row["Question"] ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
-                                        'TEXTAREA', 'answer', 50, 8, $row["Answer"] ) );
+                                        'TEXTAREA', 'answer', 80, 20, $row["Answer"] ) );
      }
 
      $faq_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
@@ -173,15 +173,15 @@ require( "include/form_functions.php" );
      {
         $faq_edit_form->add_row( array( 'HEADER', T_('New category') ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Category'),
-                                        'TEXTINPUT', 'question', 50, 80, '' ) );
+                                        'TEXTINPUT', 'question', 80, 80, '' ) );
      }
      else
      {
         $faq_edit_form->add_row( array( 'HEADER', T_('New entry') ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Question'),
-                                        'TEXTINPUT', 'question', 50, 80, '' ) );
+                                        'TEXTINPUT', 'question', 80, 80, '' ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
-                                        'TEXTAREA', 'answer', 50, 8, '' ) );
+                                        'TEXTAREA', 'answer', 80, 20, '' ) );
      }
 
      $faq_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
