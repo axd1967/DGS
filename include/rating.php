@@ -173,8 +173,6 @@ function update_rating($gid)
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   echo $gid . "<p>\n";
-
    $game_result = 0.5;
    if( $Score > 0 ) $game_result = 1.0;
    if( $Score < 0 ) $game_result = 0.0;
