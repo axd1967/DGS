@@ -64,7 +64,7 @@ if( $action and $player_row["ID"] != $ToMove_ID )
     exit;
 }
 
-$may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and !$move );
+$may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and (!$move or $move == $Moves) );
 
 if( $Black_ID == $ToMove_ID )
     $to_move = BLACK;
@@ -91,7 +91,8 @@ if( !$action )
 $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or 
                     $action == 'choose_move' or $action == 'move' );
 
-make_array( $gid, $array, $msg, $Moves, $move, $marked_dead, $no_marked_dead );
+list($lastx,$lasty) = 
+make_array( $gid, $array, $msg, $Moves, $move, $moves_result, $marked_dead, $no_marked_dead );
 
 $enable_message = true;
 
@@ -102,6 +103,11 @@ switch( $action )
          if( $Status == 'FINISHED' )
              $extra_message = "<font color=\"blue\">" . score2text($Score, true) . "</font>";
          $enable_message = false;
+         if( $move )
+             {
+                 $Last_X = $lastx;
+                 $Last_Y = $lasty;
+             }
      }
      break;
 
@@ -458,6 +464,50 @@ else if( $action == 'handicap' )
     </table>
 <HR>
 <?php
+
+// display moves
+
+if( false and !$enable_message and $Moves > 0 )
+{
+    mysql_data_seek($moves_result, 0);
+
+
+echo "<table border=1 align=center bgcolor=49BCFF><tr><font color=\"FFFC70\"><th>Moves</th>\n";
+for($i=0;$i<20;$i++)
+     echo "<th>$i</th>";
+
+echo "</tr></font>\n<tr><td>1-19</td><td>&nbsp;</td>";
+$i=1;
+while( $row = mysql_fetch_array($moves_result) )
+{
+    $s = $row["Stone"];
+    if( $s != BLACK and $s != WHITE ) continue;
+    if( $i % 20 == 0 )
+        echo "</tr>\n<tr><td>$i-" . ($i + 19) . "</td>\n";
+
+    if( $row["PosX"] == -1 )
+        $c = 'P';
+    else if( $row["PosX"] == -2 )
+        $c = 'S';
+    else if( $row["PosX"] == -3 )
+        $c = 'R';
+        
+    else
+        {
+            $col = chr($row["PosX"]+ord('a'));
+            if( $col >= 'i' ) $col++;
+            $c = $col . ($Size - $row["PosY"]);
+        }
+
+    if( $s == BLACK )        
+        echo "<td><a style=\"color: 000000\" href=game.php?gid=$gid&move=$i>$c</A></td>\n";
+    else
+        echo "<td><a style=\"color: FFFFFF\" href=game.php?gid=$gid&move=$i>$c</A></td>\n";
+
+    $i++;    
+}
+echo "</tr></table>";
+}
 
 if( ( $action == 'remove' or $action == 'choose_move' ) and $Moves >= $Handicap )
 {

@@ -180,21 +180,24 @@ function draw_board($Size, &$array, $may_play, $gid,
 
 // fills $array with positions where the stones are.
 // returns who is next to move
-function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead, 
+function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked_dead, 
                      $no_marked_dead = false )
 {
     if( !$move ) $move = $max_moves;
 
-    if( $move >= $max_moves )        
-        $result = mysql_query( "SELECT * FROM Moves$gid" );
-    else
-        $result = mysql_query( "SELECT * FROM Moves$gid WHERE MoveNr<=$move" );
+    $result = mysql_query( "SELECT * FROM Moves$gid" );
 
     $removed_dead = FALSE;
     $marked_dead = array();
 
     while( $row = mysql_fetch_array($result) )
         {
+            if( $row["MoveNr"] > $move ) 
+                break;
+
+            $x = $row["PosX"];
+            $y = $row["PosY"];
+
             if( $row["Stone"] <= WHITE )
                 {
                     if( $row["MoveNr"] == $move and $row["Stone"] > 0 )
@@ -202,7 +205,7 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead,
 
                     if( $row["PosX" ] < 0 ) continue;
 
-                    $array[$row["PosX"]][$row["PosY"]] = $row["Stone"];
+                    $array[$x][$y] = $row["Stone"];
             
                     $removed_dead = FALSE;
                 }
@@ -213,7 +216,7 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead,
                             $marked_dead = array(); // restart removal
                             $removed_dead = TRUE;
                         }
-                    array_push($marked_dead, array($row["PosX"],$row["PosY"]));
+                    array_push($marked_dead, array($x,$y));
                 } 
         }
 
@@ -221,14 +224,15 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead,
         {
             while( $sub = each($marked_dead) )
                 {
-                    list($dummy, list($x, $y)) = $sub;
-                    if( $array[$x][$y] >= BLACK_DEAD )
-                        $array[$x][$y] -= 6;
+                    list($dummy, list($X, $Y)) = $sub;
+                    if( $array[$X][$Y] >= BLACK_DEAD )
+                        $array[$X][$Y] -= 6;
                     else
-                        $array[$x][$y] += 6;
+                        $array[$X][$Y] += 6;
                 }
         }
-
+    
+    return array($x,$y);
 }
 
 $dirx = array( -1,0,1,0 );

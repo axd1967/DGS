@@ -216,7 +216,7 @@ switch( $action )
          $query = "INSERT INTO Moves$gid SET " . 
               "MoveNr=$Moves, " .
               "Stone=$to_move, " .
-              "PosX=-2";
+              "PosX=-3";
 
          if( $message )
              $query .= ", Text='$message'";
@@ -228,7 +228,7 @@ switch( $action )
 
          $game_query = "UPDATE Games SET " .
               "Moves=$Moves, " .
-              "Last_X=-1, " .
+              "Last_X=-3, " .
               "Status='FINISHED', " .
               "ToMove_ID=NULL, " .
               "Score=$score, " .
@@ -277,7 +277,7 @@ switch( $action )
 
          $game_query = "UPDATE Games SET " .
               "Moves=$Moves, " .
-              "Last_X=-1, " .
+              "Last_X=-2, " .
               "Status='$next_status', ";
 
               if( $next_to_move == BLACK )
@@ -366,7 +366,7 @@ if( $game_finished )
 
     $Text = "The result in the game <A href=\"game.php?gid=$gid\">" . 
          "$whitename (W)  vs. $blackname (B) </A>" . 
-         "was: <p><center>" . score2text($Score,true) . "</center></BR>";
+         "was: <p><center>" . score2text($score,true) . "</center></BR>";
 
     if ( $message )
         {
