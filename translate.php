@@ -175,6 +175,8 @@ When translating you should keep in mind the following things:
          //$transl = textarea_safe( $row['Text'], $translate_encoding);
          //$transl = textarea_safe( $row['Text'], 'iso-8859-1');
          $transl = $row['Text'];
+         if( $translate_lang == 'jp.shift-jis') //Japanese 2bytes char Pb
+             $transl = urldecode($transl);
          $form_row = array( 'TEXT', nl2br( textarea_safe($string, 'iso-8859-1' ) ),
                             'TD',
                             'TEXTAREA', "transl" . $row['Original_ID'],
