@@ -114,7 +114,7 @@ require( "include/form_functions.php" );
 
          if( $Type=='INVITATION' )
          {
-            if( $can_reply and $Status=='INVITED' and !$has_replied)
+            if( $Status=='INVITED' and !$has_replied)
             {
                $mode = 'ShowInvite';
             }
@@ -185,6 +185,7 @@ require( "include/form_functions.php" );
       break;
 
       case 'ShowInvite':
+      case 'ShowMyInvite':
       {
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text);
@@ -208,17 +209,21 @@ require( "include/form_functions.php" );
 
          game_info_table($Size, $color, $ToMove_ID, $Komi, $Handicap, $Maintime,
                          $Byotype, $Byotime, $Byoperiods, $Rated, $Weekendclock);
-         echo '<a href="message.php?mode=Dispute&mid=' . $mid . '">' .
-            T_('Dispute settings') . '</a>';
-         echo "<p>&nbsp;<p><B><h3><font color=$h3_color>" . T_('Reply') . ":</font></B>\n";
-         echo form_start( 'messageform', 'send_message.php', 'POST' );
-         echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
-         echo form_insert_row( 'HIDDEN', 'reply', $mid );
-         echo form_insert_row( 'HIDDEN', 'gid', $Game_ID );
-         echo form_insert_row( 'DESCRIPTION', T_('Message'),
-                               'TEXTAREA', 'message', 50, 8, "" );
-         echo '<td><td><INPUT type="submit" name="accepttype" value="' .T_('Accept') . '">' .
-            '<INPUT type="submit" name="declinetype" value="' . T_('Decline') . '"></td>';
+
+         if( $can_reply )
+         {
+            echo '<a href="message.php?mode=Dispute&mid=' . $mid . '">' .
+               T_('Dispute settings') . '</a>';
+            echo "<p>&nbsp;<p><B><h3><font color=$h3_color>" . T_('Reply') . ":</font></B>\n";
+            echo form_start( 'messageform', 'send_message.php', 'POST' );
+            echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
+            echo form_insert_row( 'HIDDEN', 'reply', $mid );
+            echo form_insert_row( 'HIDDEN', 'gid', $Game_ID );
+            echo form_insert_row( 'DESCRIPTION', T_('Message'),
+                                  'TEXTAREA', 'message', 50, 8, "" );
+            echo '<td><td><INPUT type="submit" name="accepttype" value="' .T_('Accept') . '">' .
+               '<INPUT type="submit" name="declinetype" value="' . T_('Decline') . '"></td>';
+         }
       }
       break;
 
