@@ -98,6 +98,13 @@ $enable_message = true;
 switch( $action )
 {
  case 'just_looking':
+     {
+         if( $Status == 'FINISHED' )
+             $extra_message = "<font color=\"blue\">" . score2text($Score, true) . "</font>";
+         $enable_message = false;
+     }
+     break;
+
  case 'choose_move':
      {
          $enable_message = false;
@@ -409,10 +416,12 @@ else if( $action == 'handicap' )
 
 ?>
       <TR><TD></TD>
-        <TD><input type=submit name="next" value="Submit and go to next game"></TD></TR>
+        <TD><input type=submit name="next" value="Submit and go to next game">
+           <input type=submit name="next" value="Submit and go to status"></TD></TR>
+
+
       <TR><TD></TD>
-        <TD><input type=submit name="next" value="Submit and go to status"></TD></TR>
-      </TR>
+        <TD align=right><input type=submit name="next" value="Go back"></TD></TR>
   
     </TABLE>
   </CENTER>
