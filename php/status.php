@@ -46,12 +46,8 @@ if( $msg )
     <table border=3>
        <tr><td>Name:</td> <td>" . $player_row["Name"] . "</td></tr>
        <tr><td>Userid:</td> <td>" . $player_row["Handle"] . "</td></tr>
-       <tr><td>Open for matches:</td> <td>" . $player_row["Open"] . "</td></tr>";
-
-    if( $player_row["RatingStatus"] ) echo "
-       <tr><td>Rating:</td> <td>";  echo_rating($player_row["Rating"]); echo "</td></tr>";
-
-    echo "
+       <tr><td>Open for matches:</td> <td>" . $player_row["Open"] . "</td></tr>
+       <tr><td>Rating:</td> <td>";  echo_rating($player_row["Rating"]); echo "</td></tr>
        <tr><td>Rank info:</td> <td>" . $player_row["Rank"] . "</td></tr>
     </table>
     <p>";
@@ -108,7 +104,7 @@ $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
                       "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
                       "AND Players.ID!=$uid " .
                       "AND (Black_ID=Players.ID OR White_ID=Players.ID) " .
-                      "ORDER BY Lastchanged");
+                      "ORDER BY Lastchanged,Games.ID");
 
 echo "<HR><B>Your turn to move in the following games:</B><p>\n";
 echo "<table border=3>\n";

@@ -63,12 +63,8 @@ echo "<center>
     <table border=3>
        <tr><td>Name:</td> <td>" . $row["Name"] . "</td></tr>
        <tr><td>Userid:</td> <td>" . $row["Handle"] . "</td></tr>
-       <tr><td>Open for matches:</td> <td>" . $row["Open"] . "</td></tr>";
-
-if( $row["RatingStatus"] ) echo "
-       <tr><td>Rating:</td> <td>";  echo_rating($row["Rating"]); echo "</td></tr>";
-
-    echo "
+       <tr><td>Open for matches:</td> <td>" . $row["Open"] . "</td></tr>
+       <tr><td>Rating:</td> <td>";  echo_rating($row["Rating"]); echo "</td></tr>
        <tr><td>Rank info:</td> <td>" . $row["Rank"] . "</td></tr>
     </table>
 ";
