@@ -129,7 +129,7 @@ disable_cache();
                              "Lastchanged=FROM_UNIXTIME($NOW), " .
                              "Size=$size, " .
                              "Handicap=$handicap, " .
-                             "Komi=$komi, " .
+                             "Komi=ROUND(2*$komi)/2, " .
                              "Maintime=$hours, " .
                              "Byotype='$byoyomitype', " .
                              "Byotime=$byohours, " .
