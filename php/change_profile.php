@@ -47,7 +47,7 @@ if( $action == "Change profile" )
             exit;
         }
 
-    if( $wantemail )
+    if( $wantemail and $email )
         $flags = 1;
     else
         $flags = 0;
