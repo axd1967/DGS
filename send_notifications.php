@@ -43,8 +43,8 @@ require( "include/board.php" );
              "black.Handle AS Blackhandle, " .
              "white.Name AS Whitename, " .
              "white.Handle AS Whitehandle " .
-             "FROM Games, Players AS black, Players AS white " . 
-             "WHERE ToMove_ID=$uid AND Black_ID=black.ID AND White_ID=white.ID" . 
+             "FROM Games, Players AS black, Players AS white " .
+             "WHERE ToMove_ID=$uid AND Black_ID=black.ID AND White_ID=white.ID" .
              " AND UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastaccess')";
 
          $res2 = mysql_query( $query ) or die(mysql_error() . $query);
@@ -52,11 +52,12 @@ require( "include/board.php" );
          if( mysql_num_rows($res2) > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  Games:\n";
-         
+
             while( $game_row = mysql_fetch_array( $res2 ) )
             {
                extract($game_row);
-            
+
+               $mess = NULL;
                make_array( $ID, $array, $mess, $Moves, NULL, $moves_result, $marked_dead );
 
                $msg .= str_pad('', 47, '-') . "\n";
@@ -66,7 +67,7 @@ require( "include/board.php" );
                $msg .= "Move $Moves: " . number2board_coords($Last_X, $Last_Y, $Size) . "\n";
 
                if( !(strpos($SendEmail, 'BOARD') === false) )
-                  $msg .= draw_ascii_board($Size, $array, $ID, $Last_X, $Last_Y, 15, 
+                  $msg .= draw_ascii_board($Size, $array, $ID, $Last_X, $Last_Y, 15,
                                            make_html_safe($mess, 'game'));
             }
          }
@@ -77,7 +78,7 @@ require( "include/board.php" );
 
       if( !(strpos($SendEmail, 'MESSAGE') === false) )
       {
-         $query = "SELECT UNIX_TIMESTAMP(Time) AS date, " . 
+         $query = "SELECT UNIX_TIMESTAMP(Time) AS date, " .
              "Messages.*, Players.Name AS FromName, Players.Handle AS FromHandle " .
              "FROM Messages, Players " .
              "WHERE To_ID=$uid " .
@@ -93,11 +94,11 @@ require( "include/board.php" );
             while( $msg_row = mysql_fetch_array( $res3 ) )
             {
                extract($msg_row);
-               
+
                $msg .= str_pad('', 47, '-') . "\n" .
                    "Date: " . date($date_fmt, $date) . "\n" .
                    "From: $FromName($FromHandle)\n" .
-                   "Subject: " . make_html_safe($Subject) . 
+                   "Subject: " . make_html_safe($Subject) .
                    "  ($HOSTBASE/show_message.php?mid=$ID)\n\n" .
                    wordwrap(make_html_safe($Text),47) . "\n";
             }
@@ -115,7 +116,7 @@ require( "include/board.php" );
 
    mysql_query( "UPDATE Players SET Notify='NOW' " .
                 "WHERE SendEmail LIKE '%ON%' AND Notify='NEXT' " );
-             
+
 
 
 // Update activities
