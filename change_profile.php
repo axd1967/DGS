@@ -57,12 +57,8 @@ require_once( "include/countries.php" );
 
    $menudirection = ( $_GET['$menudir'] == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
-   $notessmallposition = ( @$_GET['notessmallpos'] == 'RIGHT' ? 'RIGHT' : 'BELOW' );
-   $noteslargeposition = ( @$_GET['noteslargepos'] == 'RIGHT' ? 'RIGHT' : 'BELOW' );
-   $notessmallenabled = ( @$_GET['notessmallenab'] == 'ON' ? 'ON' : 'OFF' );
-   $noteslargeenabled = ( @$_GET['noteslargeenab'] == 'ON' ? 'ON' : 'OFF' );
-
-
+   $notessmallmode = ( @$_GET['notessmallmod'] == 'RIGHT' ? 'RIGHT' : ('BELOW' ? 'BELOW' : 'OFF') );
+   $noteslargemode = ( @$_GET['noteslargemod'] == 'RIGHT' ? 'RIGHT' : ('BELOW' ? 'BELOW' : 'OFF') );
 
    $query = "UPDATE Players SET " .
       "Name='" . trim($name) . "', " .
@@ -85,12 +81,10 @@ require_once( "include/countries.php" );
       $cookie_prefs['Button'] = $_GET['button'];
       $cookie_prefs['NotesSmallHeight'] = $_GET['notessmallheight'];
       $cookie_prefs['NotesSmallWidth'] = $_GET['notessmallwidth'];
-      $cookie_prefs['NotesSmallPosition'] = $notessmallposition;
-      $cookie_prefs['NotesSmallEnabled'] = $notessmallenabled;
+      $cookie_prefs['NotesSmallMode'] = $notessmallmode;
       $cookie_prefs['NotesLargeHeight'] = $_GET['noteslargeheight'];
       $cookie_prefs['NotesLargeWidth'] = $_GET['noteslargewidth'];
-      $cookie_prefs['NotesLargePosition'] = $noteslargeposition;
-      $cookie_prefs['NotesLargeEnabled'] = $noteslargeenabled;
+      $cookie_prefs['NotesLargeMode'] = $noteslargemode;
       $cookie_prefs['NotesCutoff'] = $_GET['notescutoff'];
 
       set_cookie_prefs($player_row['ID']);
@@ -105,14 +99,12 @@ require_once( "include/countries.php" );
          "Button=" . $_GET['button'] . ", " .
          "NotesSmallHeight=" . $_GET['notessmallheight'] . ", " .
          "NotesSmallWidth=" . $_GET['notessmallwidth'] . ", " .
-         "NotesSmallPosition='$notessmallposition', " .
-         "NotesSmallEnabled='$notessmallenabled', " .
+         "NotesSmallMode='$notessmallmode', " .
          "NotesLargeHeight=" . $_GET['noteslargeheight'] . ", " .
          "NotesLargeWidth=" . $_GET['noteslargewidth'] . ", " .
-         "NotesLargePosition='$noteslargeposition', " .
-         "NotesLargeEnabled='$noteslargeenabled', " .
+         "NotesLargeMode='$noteslargemode', " .
          "NotesCutoff=" . $_GET['notescutoff'] . ", ";
-         
+        
 
       set_cookie_prefs($player_row['ID'], true);
    }

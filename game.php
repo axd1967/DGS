@@ -290,15 +290,13 @@ require_once( "include/rating.php" );
      {
      $notesheight = $player_row["NotesLargeHeight"];
      $noteswidth = $player_row["NotesLargeWidth"];
-     $notesposition = $player_row["NotesLargePosition"];
-     $notesenabled = $player_row["NotesLargeEnabled"];
+     $notesmode = $player_row["NotesLargeMode"];
      }
    else
      {
      $notesheight = $player_row["NotesSmallHeight"];
      $noteswidth = $player_row["NotesSmallWidth"];
-     $notesposition = $player_row["NotesSmallPosition"];
-     $notesenabled = $player_row["NotesSmallEnabled"];
+     $notesmode = $player_row["NotesSmallMode"];
      }
 
    echo "<table><tr><td>";
@@ -306,10 +304,10 @@ require_once( "include/rating.php" );
               $player_row["Stonesize"], $msg, $stonestring, $handi,
               $player_row["Boardcoords"], $player_row["Woodcolor"]);
 
-   if ($notesposition == 'BELOW')
+   if ($notesmode == 'BELOW')
      {
      echo "</td></tr><tr><td valign=top><center>";
-     if ($notesenabled == 'ON' and $show_notes)
+     if ($show_notes)
        draw_notes($notes, $notesheight, $noteswidth);
      echo "</center></td></tr></table>";
      if( $enable_message )
@@ -324,7 +322,7 @@ require_once( "include/rating.php" );
        draw_message_box(); //use $stonestring, $prisoner_string, $move
        }
      echo "</td><td valign=top><center>";
-     if ($notesenabled == 'ON' and $show_notes)
+     if ($notesmode == 'RIGHT' and $show_notes)
        draw_notes($notes, $notesheight, $noteswidth);
      echo "</center></td></tr></table>";
      }

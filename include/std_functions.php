@@ -104,7 +104,7 @@ $buttoncolors = array('white','white','white','white',
 
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
-$cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button', 'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallPosition', 'NotesSmallEnabled', 'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargePosition', 'NotesLargeEnabled', 'NotesCutoff');
+$cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button', 'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode', 'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff');
 
 $button_max = 10;
 
