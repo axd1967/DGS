@@ -98,7 +98,11 @@ require_once( "include/table_columns.php" );
 
      foreach( $Admin as $id => $adm_level )
      {
-        $Admin[$id] = $adm_level = (int)$adm_level;
+        $adm_level = (int)$adm_level;
+        if( !($adm_level & ADMIN_ADMINS) )
+           $adm_level &= ~ADMIN_ADD_ADMIN;
+        $Admin[$id] = $adm_level;
+
         if( $adm_level != $AdminOldLevel[$id] )
         {
            admin_log( @$player_row['ID'], @$player_row['Handle'], 
