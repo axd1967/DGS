@@ -42,6 +42,8 @@ if( !$logged_in )
 
 
 
+$my_info = ( $player_row["ID"] == $uid );
+
 $result = mysql_query("SELECT * FROM Players WHERE ID=$uid");
 
 if( mysql_affected_rows() != 1 )
@@ -69,7 +71,27 @@ if( $row["RatingStatus"] ) echo "
     echo "
        <tr><td>Rank info:</td> <td>" . $row["Rank"] . "</td></tr>
     </table>
-    <p>
+";
+
+$result = mysql_query("SELECT * FROM Bio where uid=$uid");
+
+if( mysql_num_rows($result) > 0 )
+{
+  echo "    <p>
+    <H4>Biographical info</H4>
+    <table border=3>
+";
+}
+
+while( $row = mysql_fetch_array( $result ) )
+{
+  echo '     <tr><td>' . $row["Category"] . '</td><td>' . $row["Text"] . "</td></tr>\n";
+}
+
+if(  mysql_num_rows($result) > 0 )
+   echo "    </table>\n";
+
+echo "    <p>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
         <td><B><A href=\"show_games.php?uid=$uid\">Show running games</A></B></td>
