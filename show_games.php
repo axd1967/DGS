@@ -294,16 +294,16 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    $menu_array = array();
 
+   if( $observe )
+      $uid = $player_row["ID"];
+
    if( !$all )
    {
       $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
 
-      if( $uid != $player_row["ID"] )
+      if( $uid != $player_row["ID"] and !$observe )
          $menu_array[T_('Invite this user')] = "message.php?mode=Iinvite&uid=$uid";
    }
-
-   if( $observe )
-      $uid = $player_row["ID"];
 
    if( $finished or $observe )
       $menu_array[T_('Show running games')] = "show_games.php?uid=$uid";
