@@ -45,7 +45,7 @@ start_page("Status", true, $logged_in, $player_row );
     <p>";
 
 
-$result = mysql_query("SELECT DATE_FORMAT(Messages$my_id.Time, \"%H:%i  %Y-%m-%d\") AS date, " . 
+$result = mysql_query("SELECT UNIX_TIMESTAMP(Messages$my_id.Time) AS date, " . 
                       "Messages$my_id.*, Players.Name AS sender " . 
                       "FROM Messages$my_id, Players " .
                       "WHERE (Info='NEW' OR Info='REPLY REQUIRED') AND From_ID=Players.ID");
@@ -79,7 +79,7 @@ if( mysql_num_rows($result) > 0 )
             echo "<td><A href=\"show_message.php?mid=" . $row["ID"] . "\">" .
                 $row["sender"] . "</A></td>\n" . 
                 "<td>" . $row["Subject"] . "</td>\n" .
-                "<td>" . $row["date"] . "</td></tr>\n";
+                "<td>" . date($date_fmt, $row["date"]) . "</td></tr>\n";
         }
 
     echo "</table><p>\n";

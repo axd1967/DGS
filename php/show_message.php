@@ -36,7 +36,7 @@ $my_id = $player_row["ID"];
 
 
 $result = mysql_query("SELECT Messages$my_id.*, " .
-                      "DATE_FORMAT(Messages$my_id.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
+                      "UNIX_TIMESTAMP(Messages$my_id.Time) AS date, " .
                       "Players.Name AS sender, " .
                       "Players.Handle, Players.ID AS pid, " .
                       "Messages$my_id.Info " .
@@ -101,7 +101,7 @@ start_page("Show Message", true, $logged_in, $player_row );
 
 echo "<center>
     <table>
-        <tr><td>Date:</td><td>" . $row["date"] . "</td></tr>
+        <tr><td>Date:</td><td>" . date($date_fmt, $row["date"]) . "</td></tr>
         <tr><td>From:</td><td><A href=\"userinfo.php?uid=" . $row["pid"] ."\">" . 
                               $row["sender"] . "</A></td></tr>\n";
 

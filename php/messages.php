@@ -51,10 +51,10 @@ if( $del )
 }
 
 
-$result = mysql_query("SELECT DATE_FORMAT(Messages$my_id.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
-                      "Messages$my_id.ID as mid, Messages$my_id.Subject, Messages$my_id.Info, " . 
+$result = mysql_query("SELECT UNIX_TIMESTAMP(Messages$my_id.Time) AS date, " .
+                      "Messages$my_id.ID AS mid, Messages$my_id.Subject, Messages$my_id.Info, " . 
                       "Players.Name AS sender " .
-                      "FROM Messages$my_id,Players " .
+                      "FROM Messages$my_id, Players " .
                       "WHERE From_ID=Players.ID");
 
 
@@ -89,7 +89,7 @@ while( $row = mysql_fetch_array( $result ) )
     echo "<td><A href=\"show_message.php?mid=" . $row["mid"] . "\">" .
         $row["sender"] . "</A></td>\n" . 
         "<td>" . $row["Subject"] . "</td>\n" .
-        "<td>" . $row["date"] . "</td>\n";
+        "<td>" . date($date_fmt, $row["date"]) . "</td>\n";
 
     if( $row["Info"] == 'NONE' or $row["Info"] == 'REPLIED' )
         echo "<td align=center><a href=\"messages.php?del=" . $row["mid"] . "\">" .
