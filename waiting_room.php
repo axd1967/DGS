@@ -24,15 +24,6 @@ include( "include/table_columns.php" );
 include( "include/form_functions.php" );
 include( "include/message_functions.php" );
 
-$table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','Komi',
-                       'Moves','Score','Win?','End date','Last Move');
-
-$handi_array = array( 'conv' => T_('Conventional'),
-                      'proper' => T_('Proper'),
-                      'nigiri' => T_('Even game with nigiri'),
-                      'double' => T_('Double game') );
-
-
 {
    connect2mysql();
 
@@ -41,6 +32,10 @@ $handi_array = array( 'conv' => T_('Conventional'),
    if( !$logged_in )
       error("not_logged_in");
 
+   $handi_array = array( 'conv' => T_('Conventional'),
+                         'proper' => T_('Proper'),
+                         'nigiri' => T_('Even game with nigiri'),
+                         'double' => T_('Double game') );
 
    $my_id = $player_row["ID"];
 
