@@ -68,9 +68,11 @@ else
 
 $next_to_move = 3-$to_move;
 
+$Moves++;
+
 if( $Moves < $Handicap ) $next_to_move = BLACK;
 
-$Moves++;
+
 
 switch( $action )
 {
