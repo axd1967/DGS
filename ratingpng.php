@@ -187,8 +187,8 @@ function imagemultiline($im, $points, $nr_points,$color)
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-   if( !$logged_in )
-      error("not_logged_in");
+//   if( !$logged_in )
+//      error("not_logged_in");
 
    $SizeX = ( $_GET['size'] > 0 ? $_GET['size'] : $defaltsize );
    $SizeY = $SizeX * 3 / 4;
