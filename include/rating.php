@@ -222,7 +222,7 @@ function update_rating($gid)
                "($White_ID, $gid, " . ($wRating - $wOld) . ")");
 }
 
-function update_rating2($gid)
+function update_rating2($gid, $check_done=true)
 {
    global $NOW;
 
@@ -234,7 +234,8 @@ function update_rating2($gid)
        "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
        "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
        "FROM Games, Players as white, Players as black " .
-       "WHERE Status='FINISHED' AND Games.ID=$gid AND Rated!='Done' " .
+       "WHERE Status='FINISHED' AND Games.ID=$gid " .
+      ( $check_done + "AND Rated!='Done' " . '' ) .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
        "AND white.RatingStatus='RATED' " .
        "AND black.RatingStatus='RATED' ";
