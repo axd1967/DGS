@@ -42,12 +42,13 @@ require_once( "forum/forum_functions.php" );
    $delete_msgs = false;
    $delete_invitations = false;
    $delete_waitingroom_entries = true;
-   $message_timelimit = 90;
-   $invite_timelimit = 60;
-   $waitingroom_timelimit = 30;
+   $message_timelimit = 90; //days
+   $invite_timelimit = 60; //days
+   $waitingroom_timelimit = 30; //days
 
 // Delete old messages
 
+/* to be reviewed: the field *Flags* doesn't exist.
    if( $delete_msgs )
    {
       mysql_query("UPDATE Messages " .
@@ -55,6 +56,7 @@ require_once( "forum/forum_functions.php" );
                   "WHERE $NOW-UNIX_TIMESTAMP(Time) > " . ($message_timelimit*24*3600) .
                   " AND NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )");
    }
+*/
 
 
 // Delete old invitations
