@@ -22,9 +22,11 @@ require( "include/std_functions.php" );
 
 
 {
-   $player_row = 0;
+   connect2mysql(true);
 
-   start_page("Error", true, false, $player_row );
+   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+
+   start_page("Error", true, $logged_in, $player_row );
 
    switch( $err )
    {

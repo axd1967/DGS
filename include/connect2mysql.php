@@ -20,21 +20,23 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/config.php" );
 
-function connect2mysql()
+function connect2mysql($no_errors=false)
 {
    global $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
 
    $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
 
-   if (!$dbcnx) 
+   if (!$dbcnx)
    {
+      if( $no_errors ) return;
       error("mysql_connect_failed");
    }
 
-   if (! @mysql_select_db($DB_NAME) ) 
+   if (! @mysql_select_db($DB_NAME) )
    {
+      if( $no_errors ) return;
       error("mysql_select_db_failed");
-   }    
+   }
 }
 
 ?>
