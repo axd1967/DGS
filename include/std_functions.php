@@ -774,8 +774,8 @@ function textarea_safe( $msg, $charenc=false)
 {
  global $encoding_used;
    if( !$charenc) $charenc = $encoding_used; //else 'iso-8859-1'
-//   $msg = @htmlspecialchars($msg, ENT_QUOTES, $charenc);
-   $msg = @htmlentities($msg, ENT_QUOTES, $charenc);
+   $msg = @htmlspecialchars($msg, ENT_QUOTES, $charenc);
+//No:   $msg = @htmlentities($msg, ENT_QUOTES, $charenc); //Too much entities for not iso-8859-1 languages
    return $msg;
 }
 
