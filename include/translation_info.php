@@ -1806,10 +1806,10 @@ The reasons for this problem could be any of the following:
 /* Define $update_script to be true if run from an update_script. */
 if( !$update_script )
   {
-    $k_langs = get_known_languages_with_full_names();
-    foreach( $k_langs as $langname => $lang )
+    $_k_langs = get_known_languages_with_full_names();
+    foreach( $_k_langs as $_langname => $_lang )
       {
-        $translation_info[$k_langs[$langname]] = array( 'Groups' => array( 'Language' ) );
+        $translation_info[$_k_langs[$_langname]] = array( 'Groups' => array( 'Language' ) );
       }
   }
 
