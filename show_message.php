@@ -160,6 +160,7 @@ require( "include/std_functions.php" );
        }
 
     echo '<tr><td>Rated: </td><td>' . ( $game_row["Rated"] == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
+<tr><td>Clock runs on weekends: </td><td>' . ( $game_row["WeekendClock"] == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
 </table>
 ';
    }

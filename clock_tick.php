@@ -26,7 +26,7 @@ if( !$is_down )
     
     
    $hour = gmdate('G');
-    
+   $day_of_week = gmdate('w'); 
 
    // Check that ticks are not too frequent
 
@@ -41,10 +41,16 @@ if( !$is_down )
     
     
    // Now increase clocks that are not sleeping
+
+   $query = 'UPDATE Clock SET Ticks=Ticks+1 ' .
+       "WHERE ((ID>$hour OR ID<". ($hour-8) . ') AND ID< '. ($hour+16) . ')';
     
-   mysql_query( "UPDATE Clock SET Ticks=Ticks+1 " .
-                "WHERE (ID>$hour OR ID<". ($hour-8) . ") " .
-                "AND ID< ". ($hour+16) );
+   if( $day_of_week > 0 and $day_of_week < 6 )
+      $query .= ' OR ((ID>' . ($hour+100) . ' OR ID<'. ($hour+92) . 
+         ') AND ID< '. ($hour+116) . ')';
+   
+   
+   mysql_query( $query );
 
 
 

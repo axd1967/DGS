@@ -207,6 +207,12 @@ require( "include/std_functions.php" );
       </TR>
 
       <TR>
+        <TD align=right>Clock runs on weekends:</TD>
+        <TD align=left>  <input type="checkbox" name="weekendclock" value="Y" checked></TD>
+
+      </TR>
+
+      <TR>
         <TD align=right>Rated:</TD>
         <TD align=left>  <input type="checkbox" name="rated" value="Y" checked></TD>
 

@@ -118,6 +118,10 @@ disable_cache();
       if( $rated != 'Y' )
          $rated = 'N';
 
+      if( $weekendclock != 'Y' )
+         $weekendclock = 'N';
+
+
       $result = mysql_query( "INSERT INTO Games SET " .
                              "Black_ID=$Black_ID, " .
                              "White_ID=$White_ID, " .
@@ -131,6 +135,7 @@ disable_cache();
                              "Byoperiods=$byoperiods, " .
                              "Black_Maintime=$hours, " .
                              "White_Maintime=$hours," .
+                             "WeekendClock='$weekendclock', " . 
                              "Rated='$rated'" 
          );
 
@@ -163,7 +168,9 @@ disable_cache();
          error("mysql_start_game");
       }
         
-    
+      if( $weekendclock != 'Y' )
+         $clock_used += 100;
+
       $ticks = get_clock_ticks($clock_used);
 
       $result = mysql_query( "UPDATE Games SET " .

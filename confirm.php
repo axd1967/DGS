@@ -136,6 +136,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       }
 
       $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
+      if( $WeekendClock != 'Y' )
+         $next_clockused += 100;
       $next_ticks = get_clock_ticks($next_clockused);
 
       $time_query .= "LastTicks=$next_ticks, " .
@@ -391,9 +393,6 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    if( $action != 'delete' )
    {
       $result = mysql_query( "UPDATE Games set Consistent='$Consistent' WHERE ID=$gid" );
-      
-      if( mysql_affected_rows() != 1 )
-         error("mysql_update_game", true);
    }
     
    if( $game_finished )

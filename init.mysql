@@ -71,6 +71,7 @@ CREATE TABLE Games (
   LastTicks int(11) default NULL,
   ClockUsed int(11) NOT NULL default '0',
   Rated enum('N','Y','Done') NOT NULL default 'N',
+  WeekendClock enum('N','Y') NOT NULL default 'Y',
   PRIMARY KEY  (ID),
   KEY ToMove_ID (ToMove_ID)
 ) TYPE=MyISAM;
@@ -213,3 +214,67 @@ CREATE TABLE Posts (
   PRIMARY KEY  (ID),
   KEY Pos (Thread_ID,PosIndex)
 ) TYPE=MyISAM;
+
+#
+# Table structure for table 'Clock'
+#
+
+CREATE TABLE Clock (
+  ID int(11) NOT NULL default '0',
+  Ticks int(11) default '0',
+  Lastchanged timestamp(14) NOT NULL,
+  PRIMARY KEY  (ID)
+) TYPE=ISAM PACK_KEYS=1;
+
+#
+# Dumping data for table 'Clock'
+#
+
+INSERT INTO Clock set ID=0;
+INSERT INTO Clock set ID=1;
+INSERT INTO Clock set ID=2;
+INSERT INTO Clock set ID=3;
+INSERT INTO Clock set ID=4;
+INSERT INTO Clock set ID=5;
+INSERT INTO Clock set ID=6;
+INSERT INTO Clock set ID=7;
+INSERT INTO Clock set ID=8;
+INSERT INTO Clock set ID=9;
+INSERT INTO Clock set ID=10;
+INSERT INTO Clock set ID=11;
+INSERT INTO Clock set ID=12;
+INSERT INTO Clock set ID=13;
+INSERT INTO Clock set ID=14;
+INSERT INTO Clock set ID=15;
+INSERT INTO Clock set ID=16;
+INSERT INTO Clock set ID=17;
+INSERT INTO Clock set ID=18;
+INSERT INTO Clock set ID=19;
+INSERT INTO Clock set ID=20;
+INSERT INTO Clock set ID=21;
+INSERT INTO Clock set ID=22;
+INSERT INTO Clock set ID=23;
+INSERT INTO Clock set ID=100;
+INSERT INTO Clock set ID=101;
+INSERT INTO Clock set ID=102;
+INSERT INTO Clock set ID=103;
+INSERT INTO Clock set ID=104;
+INSERT INTO Clock set ID=105;
+INSERT INTO Clock set ID=106;
+INSERT INTO Clock set ID=107;
+INSERT INTO Clock set ID=108;
+INSERT INTO Clock set ID=109;
+INSERT INTO Clock set ID=110;
+INSERT INTO Clock set ID=111;
+INSERT INTO Clock set ID=112;
+INSERT INTO Clock set ID=113;
+INSERT INTO Clock set ID=114;
+INSERT INTO Clock set ID=115;
+INSERT INTO Clock set ID=116;
+INSERT INTO Clock set ID=117;
+INSERT INTO Clock set ID=118;
+INSERT INTO Clock set ID=119;
+INSERT INTO Clock set ID=120;
+INSERT INTO Clock set ID=121;
+INSERT INTO Clock set ID=122;
+INSERT INTO Clock set ID=123;
