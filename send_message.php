@@ -20,6 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 require( "include/rating.php" );
+require( "include/message_functions.php" );
 
 disable_cache();
 
