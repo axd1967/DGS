@@ -38,6 +38,8 @@ require_once( "include/form_functions.php" );
     error("adminlevel_too_low");
 
 
+   $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 utf-8
+
    $apply= @$_REQUEST['apply'];
 
    $arg_array = array(
@@ -56,10 +58,11 @@ require_once( "include/form_functions.php" );
    }
 
 
+   header ('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
 
    echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n";
    echo "<HTML><HEAD>\n";
-   echo " <META http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n";
+   echo " <META http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">\n";
    echo " <TITLE>data_report</TITLE>\n";
 
    echo " <STYLE TYPE=\"text/css\">
@@ -78,12 +81,12 @@ require_once( "include/form_functions.php" );
   }
  </STYLE>\n";
 
-   echo " <SCRIPT language=\"JavaScript\">
-  function row_click(row,rcl){
+   echo " <!-- <SCRIPT language=\"JavaScript\">\n";
+   echo "   function row_click(row,rcl) {
      row.className=((row.className=='hil')?rcl:'hil');
+   }\n";
 //     row.bgColor=((row.bgColor.toLowerCase()==hcol)?rcol:hcol);
-  }
- </SCRIPT>\n";
+   echo " </SCRIPT> -->\n";
 
    echo "</HEAD>\n";
    echo "<BODY>\n";
@@ -97,7 +100,10 @@ require_once( "include/form_functions.php" );
       $dform->add_row( array( 'DESCRIPTION', $word,
                                  'TEXTAREA', $arg, 80, 2, $$arg ) );
    }
-   $dform->add_row( array( 'SUBMITBUTTON', 'apply" accesskey="a', '<A>pply' ) );
+   $dform->add_row( array( 'CELL', 9, 'align="center"',
+      'HIDDEN', 'charset', $encoding_used,
+      'OWNHTML', '<INPUT type="submit" name="apply" accesskey="a" value="A-pply">',
+      ) );
 
    $dform->echo_string();
 
