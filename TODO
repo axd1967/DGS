@@ -11,6 +11,7 @@ SMALLER TASKS
 
 * Sgf:
         handle finished games properly.
+        passes missing.
         Save time usage.
 
 * Add time for opponent
