@@ -203,7 +203,7 @@ disable_cache();
       if( $handitype == -2 ) // Proper handi
       {
             list($handicap,$komi,$swap) =
-               suggest_proper($rating_black, $rating_white, $game_row["Size"]);
+               suggest_proper($rating_white, $rating_black, $game_row["Size"]);
 
          $query .= "Handicap=$handicap, Komi=$komi, ";
       }
@@ -211,7 +211,7 @@ disable_cache();
       if( $handitype == -1 ) // Conventional handi
       {
          list($handicap,$komi,$swap) =
-            suggest_conventional($rating_black, $rating_white, $game_row["Size"]);
+            suggest_conventional($rating_white, $rating_black, $game_row["Size"]);
 
          $query .= "Handicap=$handicap, Komi=$komi, ";
       }

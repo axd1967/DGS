@@ -93,14 +93,14 @@ require( "include/rating.php" );
 
    if( $Handicaptype == 'proper' )
    {
-      list($handicap,$komi,$swap) = suggest_proper($rating_black, $rating_white, $Size);
+      list($handicap,$komi,$swap) = suggest_proper($rating_white, $rating_black, $Size);
 
       $query .= "Handicap=$handicap, Komi=$komi, ";
    }
 
    if( $Handicaptype == 'conv' )
    {
-      list($handicap,$komi,$swap) = suggest_conventional($rating_black, $rating_white, $Size);
+      list($handicap,$komi,$swap) = suggest_conventional($rating_white, $rating_black, $Size);
 
       $query .= "Handicap=$handicap, Komi=$komi, ";
    }
