@@ -796,6 +796,10 @@ array(
       'New topic' =>
       array( 'Groups' => array( 'Links' ) ),
 
+      /* Found in these files: include/table_columns.php */
+      'next page' =>
+      array( 'Groups' => array( 'Messages', 'Game' ) ),
+
       /* Found in these files: show_games.php, status.php, users.php */
       'Nick' =>
       array( 'Groups' => array( 'Status', 'Users' ) ),
@@ -923,6 +927,10 @@ array(
       /* Found in these files: game.php */
       'Please mark dead stones and click \'done\' when finished.' =>
       array( 'Groups' => array( 'Game' ) ),
+
+      /* Found in these files: include/table_columns.php */
+      'prev page' =>
+      array( 'Groups' => array( 'Game', 'Messages' ) ),
 
       /* Found in these files: include/move.php */
       'Prisoners' =>

@@ -80,7 +80,7 @@ function next_prev($new_from_row, $next)
 
    return "<a href=\"" . $page . "from_row=$new_from_row&" .
       order_string($sort1,$desc1,$sort2,$desc2) . "\">" .
-      ($next ? "next page -->" : "<-- prev page") . "</a>";
+      ($next ? T_("next page") . " -->" : "<-- " . T_("prev page")) . "</a>";
 }
 
 function strip_last_et($string)
