@@ -287,7 +287,7 @@ $letter_font_weight='medium';
 
 @Sizes = grep { $_ > 0 } @ARGV;
 
-if( $#Sizes < 1 )
+if( $#Sizes < 0 )
 {
     @Sizes = (13, 17, 21, 25, 29, 35, 42, 50);
 }
