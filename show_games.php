@@ -168,7 +168,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          $src = '"images/' .
              ( $Win == 1 ? 'yes.gif" alt=' . T_('yes') :
                ( $Win == -1 ? 'no.gif" alt=' . T_('no') :
-                 'dash.gif" alt=' . T_('jigo' ) );
+                 'dash.gif" alt=' . T_('jigo' ) ));
 
       if( (1 << 9) & $column_set )
          echo '<td>' . score2text($Score, false) . "</td>\n";

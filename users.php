@@ -70,7 +70,7 @@ include( "include/form_functions.php" );
       tablehead(3, T_('Nick'), 'Handle') .
       tablehead(4, T_('Rank Info')) .
       tablehead(5, T_('Rating'), 'Rating', true) .
-      tablehead(6, T_('Open for matches?') .
+      tablehead(6, T_('Open for matches?')) .
       tablehead(7, T_('Games'), 'Games', true) .
       tablehead(8, T_('Running'), 'Running', true) .
       tablehead(9, T_('Finished'), 'Finished', true) .
@@ -79,8 +79,8 @@ include( "include/form_functions.php" );
       tablehead(12, T_('Percent'), 'Percent', true) .
       tablehead(13, T_('Activity'), 'ActivityLevel', true) .
       tablehead(14, T_('Last Access'), 'Lastaccess', true) .
-      tablehead(15, T_('Last Moved'), 'Lastmove', true) .
-      "</tr>\n";
+                tablehead(15, T_('Last Moved'), 'Lastmove', true) .
+                "</tr>\n";
 
    $row_color=2;
    while( $row = mysql_fetch_array( $result ) )

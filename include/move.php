@@ -31,7 +31,7 @@ function check_move($print_error=true)
          error("illegal_position");
       else
       {
-         echo T_("Illegal_position");
+         echo "Illegal_position";
          return false;
       }
    }
@@ -62,7 +62,7 @@ function check_move($print_error=true)
             error("ko");
          else
          {
-            echo T_("ko");
+            echo "ko";
             return false;
          }
       }
@@ -80,7 +80,7 @@ function check_move($print_error=true)
             error("suicide");
          else
          {
-            echo T_("suicide");
+            echo "suicide";
             return false;
          }
 
