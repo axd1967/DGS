@@ -58,7 +58,7 @@ require_once( "include/form_functions.php" );
    }
 
 
-   header ('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
+   header('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
 
    echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n";
    echo "<HTML><HEAD>\n";

@@ -144,15 +144,21 @@ if( !$is_down )
        "WHERE Status!='FINISHED' AND Status!='INVITED'";
    $q_users = "SELECT SUM(Hits) as Hits, Count(*) as Users, SUM(Activity) as Activity FROM Players";
 
-   extract( mysql_fetch_array(mysql_query( $q_finished )
-               or error('mysql_query_failed','daily_cron4')
-            ));
-   extract( mysql_fetch_array(mysql_query( $q_running )
-               or error('mysql_query_failed','daily_cron5')
-            ));
-   extract( mysql_fetch_array(mysql_query( $q_users )
-               or error('mysql_query_failed','daily_cron6')
-            ));
+   $result = mysql_query( $q_finished )
+               or error('mysql_query_failed','daily_cron4');
+   if( @mysql_num_rows($result) > 0 )
+      extract( mysql_fetch_array($result));
+
+   $result = mysql_query( $q_running )
+               or error('mysql_query_failed','daily_cron5');
+   if( @mysql_num_rows($result) > 0 )
+      extract( mysql_fetch_array($result));
+
+   $result = mysql_query( $q_users )
+               or error('mysql_query_failed','daily_cron6');
+   if( @mysql_num_rows($result) > 0 )
+      extract( mysql_fetch_array($result));
+
 
    mysql_query( "INSERT INTO Statistics SET " .
                 "Time=FROM_UNIXTIME($NOW), " .

@@ -37,19 +37,17 @@ function disable_cache($stamp=NULL)
 {
    global $NOW;
   // Force revalidation
-   header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-   header ('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
-   header ('Pragma: no-cache');                                              // HTTP/1.0
+   header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+   header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
+   header('Pragma: no-cache');                                              // HTTP/1.0
    if( !$stamp )
-      header ('Last-Modified: ' . gmdate('D, d M Y H:i:s', $NOW) . ' GMT');  // Always modified
+      header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $NOW) . ' GMT');  // Always modified
    else
-      header ('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
+      header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
 }
 
 function error($err, $debugmsg=NULL)
 {
-   disable_cache();
-
    $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
 
    $uri = "error.php?err=" . urlencode($err);
@@ -78,11 +76,17 @@ function error($err, $debugmsg=NULL)
       //$err.= ' / '. $debugmsg;
    }
 
+ global $dbcnx;
+   if( !isset($dbcnx) )
+      connect2mysql( true);
+
    @mysql_query( $errorlog_query );
 
  global $quick_errors;
    if( @$quick_errors )
       quick_error( $err ); //Short one line message
+
+   disable_cache();
 
    jump_to( $uri );
 }
@@ -99,7 +103,7 @@ function admin_log( $uid, $handle, $text)
 
 function connect2mysql($no_errors=false)
 {
-   global $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
+   global $dbcnx, $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
 
    $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
 
