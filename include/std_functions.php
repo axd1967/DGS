@@ -23,6 +23,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Common";
 
 require_once( "include/config.php" );
+require_once( "include/connect2mysql.php" );
+require_once( "include/translation_functions.php" );
 
 $timeadjust = 0;
 if( @is_readable("timeadjust.php" ) )
@@ -32,16 +34,6 @@ if( !is_numeric($timeadjust) )
    $timeadjust = 0;
 
 require_once( "include/time_functions.php" );
-
-if (!isset($page_microtime))
-{
-   $page_microtime = getmicrotime();
-   $admin_level = 0;
-   $base_path = ( is_base_dir() ? '' : '../' );
-}
-
-require_once( "include/connect2mysql.php" );
-require_once( "include/translation_functions.php" );
 
 
 $session_duration = 3600*12*61; // 1 month
@@ -104,7 +96,7 @@ $buttoncolors = array('white','white','white','white',
 
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
-$cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button');
+$cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button', 'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallPosition', 'NotesSmallEnabled', 'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargePosition', 'NotesLargeEnabled', 'NotesCutoff');
 
 $button_max = 10;
 
@@ -268,7 +260,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 function end_page( $menu_array=NULL )
 {
-   global $page_microtime, $admin_level, $base_path, $vertical,
+   global $time, $admin_level, $base_path, $vertical,
       $menu_bg_color, $menu_fg_color, $bg_color;
 
    echo "&nbsp;<p>\n";
@@ -302,7 +294,7 @@ function end_page( $menu_array=NULL )
    if( $admin_level & ADMIN_TIME )
       echo '
         <font size=-2 color=' . $menu_fg_color . '>' . T_('Page created in') .
-        sprintf (' %0.2f', (getmicrotime() - $page_microtime)*1000) . '&nbsp;ms&nbsp;&nbsp;&nbsp;' .
+        sprintf (' %0.2f', (getmicrotime() - $time)*1000) . '&nbsp;ms&nbsp;&nbsp;&nbsp;' .
          "</font>\n";
 
    if( $admin_level > 0 )
@@ -814,14 +806,7 @@ function is_base_dir()
 {
    global $SUB_PATH, $PHP_SELF;
 
-   //return dirname($PHP_SELF) == $SUB_PATH;
-/* In case of a local server under Windows,
-         dirname('/foo/bar') return '/foo'
-     but dirname('/foo')     return '\\'
-     and dirname('/')        return '\\'
-   replace the previous line by this one:
- */
-   return str_replace('\\','/',dirname($PHP_SELF)) == $SUB_PATH;
+   return dirname($PHP_SELF) == $SUB_PATH;
 }
 
 function mod($a,$b)
@@ -879,9 +864,12 @@ function get_request_url()
 
 function is_logged_in($hdl, $scode, &$row)
 {
-   global $page_microtime, $admin_level, $PHP_SELF, $HOSTNAME, $HTTP_HOST, $hostname_jump,
+   global $time, $admin_level, $PHP_SELF, $HOSTNAME, $HTTP_HOST, $hostname_jump,
       $ActivityHalvingTime, $ActivityForHit, $NOW, $base_path;
 
+   $time = getmicrotime();
+   $admin_level = 0;
+   $base_path = ( is_base_dir() ? '' : '../' );
 
    if( $hostname_jump and eregi_replace(":.*$","", $HTTP_HOST) != $HOSTNAME )
    {
@@ -1010,18 +998,16 @@ function nsq_addslashes( $str )
 
 function game_reference( $link, $safe, $gid, $whitename='', $blackname='')
 {
- global $base_path;
    $whitename = "$whitename (W)  vs. $blackname (B)" ;
    if( $safe )
       $whitename = make_html_safe($whitename) ;
    if( $link )
-      $whitename = "<A href=\"".$base_path."game.php?gid=$gid\">$whitename</A>" ;
+      $whitename = "<A href=\"game.php?gid=$gid\">$whitename</A>" ;
    return $whitename ;
 }
 
 function user_reference( $link, $safe, $color, $player_id, $player_name='', $player_handle='')
 {
- global $base_path;
    if( is_array($player_id) ) //i.e. $player_row
    {
       if( !$player_name )
@@ -1039,7 +1025,7 @@ function user_reference( $link, $safe, $color, $player_id, $player_name='', $pla
    if( $color )
       $player_name = "<FONT color=\"$color\">$player_name</FONT>" ;
    if( $link )
-      $player_name = "<A href=\"".$base_path."userinfo.php?uid=$player_id\">$player_name</A>" ;
+      $player_name = "<A href=\"userinfo.php?uid=$player_id\">$player_name</A>" ;
    return $player_name ;
 }
 
