@@ -703,6 +703,10 @@ array(
       'IGS' =>
       array( 'Groups' => array( 'Links' ) ),
 
+      /* Found in these files: waiting_room.php */
+      'Info' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
       /* Found in these files: links.php */
       'In case you\'re an aspiring know-it-all.' =>
       array( 'Groups' => array( 'Links' ) ),
@@ -976,6 +980,10 @@ array(
       array( 'Groups' => array( 'Common' ) ),
 
       /* Found in these files: waiting_room.php */
+      'Number of games' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
+      /* Found in these files: waiting_room.php */
       'Number of games to add' =>
       array( 'Groups' => array( 'Waiting room' ) ),
 
@@ -1070,6 +1078,10 @@ array(
       /* Found in these files: docs.php */
       'plans for future improvements' =>
       array( 'Groups' => array( 'Documentation' ) ),
+
+      /* Found in these files: waiting_room.php */
+      'Player' =>
+      array( 'Groups' => array( 'Common', 'Waiting room' ) ),
 
       /* Found in these files: waiting_room.php */
       'Players waiting' =>
@@ -1561,6 +1573,10 @@ The reasons for this problem could be any of the following:
       /* Found in these files: links.php */
       'Submit your games for comments to see where you might have played better.' =>
       array( 'Groups' => array( 'Links' ) ),
+
+      /* Found in these files: site_map.php */
+      'The black links require an argument to work, so they are not usable.' =>
+      array( 'Groups' => array( 'Site map' ) ),
 
       /* Found in these files: error.php */
       'The confirmed password didn\'t match the password, please go back and retry.' =>
