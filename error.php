@@ -236,13 +236,13 @@ The reasons for this problem could be any of the following:
       }
       break;
 
-      case("rank_not_rating");
+      case("rank_not_rating"):
       {
          echo "Sorry, I've problem with the rating, did you forget to specify 'kyu' or 'dan'?";
       }
       break;
 
-      case("rating_not_rank");
+      case("rating_not_rank"):
       {
          echo "Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' " .
             "for this ratingtype";
@@ -300,13 +300,13 @@ The reasons for this problem could be any of the following:
       }
       break;
 
-      case("value_out_of_range");
+      case("value_out_of_range"):
       {
          echo "Couldn't extrapolate value in function interpolate()";
       }
       break;
 
-      case("wrong_number_of_handicap_stone");
+      case("wrong_number_of_handicap_stone"):
       {
          echo "Wrong, number of handicap stones";
       }
@@ -318,7 +318,7 @@ The reasons for this problem could be any of the following:
       }
       break;
 
-      case("wrong_rank_type");
+      case("wrong_rank_type"):
       {
          echo "Unknown rank type";
       }
@@ -330,9 +330,39 @@ The reasons for this problem could be any of the following:
       }
       break;
 
-      case("rating_out_of_range");
+      case("rating_out_of_range"):
       {
-         echo "Sorry, the initial rating must be between 30 kyu and 6 dan";
+         echo "Sorry, the initial rating must be between 30 kyu and 6 dan.";
+      }
+      break;
+
+      case("value_not_numeric"):
+      {
+        echo "Sorry, you wrote a non-numeric value on a numeric field.";
+      }
+      break;
+
+      case("tournament_no_name_given"):
+      {
+        echo "Sorry, you have to give a name to your tournament.";
+      }
+      break;
+
+      case("tournament_no_description_given"):
+      {
+        echo "Sorry, you have to give a description to your tournament.";
+      }
+      break;
+
+      case("min_larger_than_max"):
+      {
+        echo "Sorry, the minimum valur you wrote is larger than the maximum value.";
+      }
+      break;
+
+      case("unknown_tournament_type"):
+      {
+        echo "Sorry, I don't know about that tournament type.";
       }
       break;
 
