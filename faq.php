@@ -96,13 +96,13 @@ $blk='blockquote';
         {
            if( !$first )
               echo "</ul></td></tr></table>\n";
-           echo '<p><b><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['ID'] . "\">$question</A></b>\n";
+           echo '<p><b><A href="faq.php?read=t&cat=' . $row['ID'] . "\">$question</A></b>\n";
            echo "<table><tr><td><ul>\n";
               $first = false;
         }
         else
         {
-           echo '<li><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['Parent'] .
+           echo '<li><A href="faq.php?read=t&cat=' . $row['Parent'] .
               '#Entry' . $row['ID'] . "\">$question</A>\n";
         }
      }
