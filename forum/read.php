@@ -152,12 +152,12 @@ function change_depth(&$cur_depth, $new_depth)
 
    $logged_in = who_is_logged( $player_row);
 
+   $reply = @$_REQUEST['reply']+0;
    if( !$logged_in and ( ($reply > 0) or isset($_POST['post']) ) )
       error("not_logged_in");
 
    $forum = @$_REQUEST['forum']+0;
    $thread = @$_REQUEST['thread']+0;
-   $reply = @$_REQUEST['reply']+0;
    $edit = @$_REQUEST['edit']+0;
 
    $Forumname = forum_name($forum, $moderated);
