@@ -23,36 +23,24 @@ require( "include/timezones.php" );
 require( "include/rating.php" );
 require( "include/form_functions.php" );
 
-// Just for find_translation.pl to find these words:
-//    T_('Other:')
-//    T_('Country')
-//    T_('City')
-//    T_('State')
-//    T_('Club')
-//    T_('Homepage')
-//    T_('Email')
-//    T_('ICQ-number')
-//    T_('Game preferences')
-//    T_('Hobbies')
-//    T_('Occupation')
 
-$categories = array( 'Other:' => 'Other:',
-                     'Country' => 'Country',
-                     'City' => 'City',
-                     'State' => 'State',
-                     'Club' => 'Club',
-                     'Homepage' => 'Homepage',
-                     'Email' => 'Email',
-                     'ICQ-number' => 'ICQ-number',
-                     'Game preferences' => 'Game preferences',
-                     'Hobbies' => 'Hobbies',
-                     'Occupation' => 'Occupation' );
+$categories = array( 'Other:' => T_('Other:'),
+                     'Country' => T_('Country'),
+                     'City' => T_('City'),
+                     'State' => T_('State'),
+                     'Club' => T_('Club'),
+                     'Homepage' => T_('Homepage'),
+                     'Email' => T_('Email'),
+                     'ICQ-number' => T_('ICQ-number'),
+                     'Game preferences' => T_('Game preferences'),
+                     'Hobbies' => T_('Hobbies'),
+                     'Occupation' => T_('Occupation') );
 
 function find_category_box_text($cat)
 {
    global $categories;
 
-   if( in_array($cat, $categories) )
+   if( in_array($cat, array_keys($categories)) )
       return $cat;
    else
       return 'Other:';
