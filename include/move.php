@@ -23,7 +23,7 @@ function check_move($print_error=true)
    global $coord, $colnr, $rownr, $Size, $array, $to_move, $Black_Prisoners, $White_Prisoners,
       $Last_X, $Last_Y, $prisoners, $nr_prisoners, $flags;
 
-   list($colnr,$rownr) = sgf2board_coords($coord, $Size);
+   list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
    if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
    {
@@ -104,7 +104,7 @@ function check_handicap()
 
    for( $i=1; $i < $l; $i += 2 )
    {
-      list($colnr,$rownr) = sgf2board_coords(substr($stonestring, $i, 2), $Size);
+      list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
                  
       if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
          error("illegal_position");
@@ -114,7 +114,7 @@ function check_handicap()
 
    if( $coord )
    {
-      list($colnr,$rownr) = sgf2board_coords($coord, $Size);
+      list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
       if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
          error("illegal_position");
@@ -147,7 +147,7 @@ function check_done()
 
    for( $i=1; $i < $l; $i += 2 )
    {
-      list($colnr,$rownr) = sgf2board_coords(substr($stonestring, $i, 2), $Size);
+      list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
       
       if( !isset($rownr) or !isset($colnr) )
          error("illegal_position");
@@ -190,7 +190,7 @@ function check_remove()
   
    for( $i=1; $i < $l; $i += 2 )
    {
-      list($colnr,$rownr) = sgf2board_coords(substr($stonestring, $i, 2), $Size);
+      list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
 
       if( !isset($rownr) or !isset($colnr) )
          error("illegal_position");
@@ -204,7 +204,7 @@ function check_remove()
   
    if( $coord )
    {
-      list($colnr,$rownr) = sgf2board_coords($coord, $Size);
+      list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
       if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
          error("illegal_position");
@@ -218,7 +218,7 @@ function check_remove()
 
       while( list($dummy, list($x,$y)) = each($prisoners) )
       {
-         $stonestring .= board2sgf_coords($x,$y);
+         $stonestring .= number2sgf_coords($x,$y);
       }
    }
 
@@ -399,9 +399,7 @@ function draw_moves()
         
       else
       {
-         $col = chr($row["PosX"]+ord('a'));
-         if( $col >= 'i' ) $col++;
-         $c = $col . ($Size - $row["PosY"]);
+         $c=number2board_coords($row["PosX"], $row["PosY"], $Size); 
       }
       if( $i == $move )
          printf('<td class=r bgcolor=F7F5E3><font color=red>%s</font></td>

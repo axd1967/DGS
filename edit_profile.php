@@ -87,9 +87,19 @@ else echo_rating( $player_row["Rating"] );
 
 
       <TR>
-        <TD align=right>Send email notifications:</TD>
-        <TD align=left>  <INPUT type="checkbox" name="wantemail" <?php 
-if( $player_row["flags"] & WANT_EMAIL ) echo "checked " ?> value="true"> 
+        <TD align=right>Email notifications:</TD>
+        <TD align=left>  <select name="emailnotify">
+<?php
+$s = 0;
+if(!(strpos($player_row["SendEmail"], 'ON') === false) ) $s++;
+if(!(strpos($player_row["SendEmail"], 'MOVE') === false) ) $s++;
+if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
+?>
+            <option<?php if($s == 0) echo " selected"; ?> value=0>Off</option>
+            <option<?php if($s == 1) echo " selected"; ?> value=1>Notify only</option>
+            <option<?php if($s == 2) echo " selected"; ?> value=2>Moves and messages</option>
+            <option<?php if($s == 3) echo " selected"; ?> value=3>Full board and messages</option>
+          </select>
         </TD>
       </TR> 
 

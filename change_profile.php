@@ -37,10 +37,17 @@ require( "include/rating.php" );
    if( strlen( $name ) < 1 )
       error("name_not_given");
 
-   if( $wantemail and $email )
-      $flags = 1;
-   else
-      $flags = 0;
+   if( $emailnotify == 0 or empty($email) )
+      $sendemail = '';
+   
+   if( $emailnotify >= 1 )
+      $sendemail = 'ON';
+
+   if( $emailnotify >= 2 )
+      $sendemail .= ',MOVE,MESSAGE';
+
+   if( $emailnotify == 3 )
+      $sendemail .= ',BOARD';
 
    $boardcoords = ( $coordsleft ? LEFT : 0 ) + ( $coordsup ? UP : 0 ) +
        ( $coordsright ? RIGHT : 0 ) + ( $coordsdown ? DOWN : 0 );
@@ -54,7 +61,7 @@ require( "include/rating.php" );
        "Stonesize=$stonesize, " .
        "Boardcoords=$boardcoords, " .
        "Woodcolor=$woodcolor, " .
-       "Flags=$flags, ";
+       "SendEmail='$sendemail', ";
 
    if( $nightstart != $player_row["Nightstart"] || 
    $timezone != $player_row["Timezone"] )

@@ -23,7 +23,7 @@ define("UP",2);
 define("RIGHT",4);
 define("DOWN",8);
 
-function board2sgf_coords($x, $y, $Size)
+function number2sgf_coords($x, $y, $Size)
 {
    if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
       return NULL;
@@ -31,7 +31,7 @@ function board2sgf_coords($x, $y, $Size)
    return chr(ord('a')+$x) . chr(ord('a')+$y);
 }
 
-function sgf2board_coords($coord, $Size)
+function sgf2number_coords($coord, $Size)
 {
    if( !is_string($coord) or strlen($coord)!=2 )
       return array(NULL,NULL);
@@ -45,6 +45,17 @@ function sgf2board_coords($coord, $Size)
    return array(ord($coord[0])-ord('a'), ord($coord[1])-ord('a'));
 }
 
+function number2board_coords($x, $y, $Size)
+{
+  if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
+     return NULL;
+  
+  $col = chr( $x + ord('a') );
+  if( $col >= 'i' ) $col++;
+
+  return  $col . ($Size - $y);
+ 
+}
 
 function draw_board($Size, &$array, $may_play, $gid, 
 $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi, 
@@ -671,7 +682,7 @@ function check_consistency($gid)
       else
          $moves_White_Prisoners += $nr_prisoners;
 
-      $coord = board2sgf_coords($PosX,$PosY);
+      $coord = number2sgf_coords($PosX,$PosY);
 
       if( !check_move(false) )
       {
@@ -712,5 +723,146 @@ function check_consistency($gid)
    echo "Ok<br>\n";
 }
 
+function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_borders, $msg )
+{
+   $out = "\n";
 
+   if( $msg )
+      $out .= wordwrap("Message: $msg", 47) . "\n\n";
+
+   if( $coord_borders & UP )
+   {
+      $out .= '  ';
+      if( $coord_borders & LEFT )
+         $out .= '  ';
+
+      $colnr = 1;
+      $letter = 'a';
+      while( $colnr <= $Size )
+      {
+         $out .= " $letter";
+         $colnr++;
+         $letter++;
+         if( $letter == 'i' ) $letter++;
+      }
+      $out .= "\n";
+   }
+
+   if( $Size > 11 ) $hoshi_dist = 4; else $hoshi_dist = 3;
+
+   // 4 == center, 5 == side, 6 == corner
+   if( $Size >=5 ) $hoshi_1 = 4; else $hoshi_1 = 7;
+   if( $Size >=8 ) $hoshi_2 = 6; else $hoshi_2 = 7;
+   if( $Size >=13) $hoshi_3 = 5; else $hoshi_3 = 7;
+
+   $letter_r = 'a';
+
+   for($rownr = $Size; $rownr > 0; $rownr-- )
+   {
+      $out .= '  ';
+      if( $coord_borders & LEFT )
+         $out .= str_pad($rownr, 2, ' ', STR_PAD_LEFT);
+            
+      $hoshi_r = 0;
+      if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
+      if( $rownr == $Size - $rownr + 1 ) $hoshi_r = 2;
+            
+      $letter_c = 'a';
+      for($colnr = 0; $colnr < $Size; $colnr++ )
+      {
+         $stone = $array[$colnr][$Size-$rownr];
+         $empty = false;
+         if( $stone == BLACK )
+         {
+            $type = 'X';
+         }
+         else if( $stone == WHITE )
+         {
+            $type = 'O';
+         }
+         else if( $stone == BLACK_DEAD )
+         {
+            $type = 'x';
+         }
+         else if( $stone == WHITE_DEAD )
+         {
+            $type = 'o';
+         }
+         else
+         {
+            $type = '.';
+                    
+            if( $hoshi_r > 0 )
+            {
+               $hoshi_c = 0;
+               if( $colnr == $hoshi_dist -  1 or $colnr == $Size - $hoshi_dist ) 
+                  $hoshi_c = 3;
+
+               if( $colnr == $Size - $colnr - 1 ) $hoshi_c = 2;
+                            
+               if( $hoshi_c + $hoshi_r == $hoshi_1 or 
+               $hoshi_c + $hoshi_r == $hoshi_2 or
+               $hoshi_c + $hoshi_r == $hoshi_3 )
+               {
+                  $type = ',';
+               }
+            }
+
+            if( $stone == BLACK_TERRITORY )
+               $type .= '+';
+            else if( $stone == WHITE_TERRITORY )
+               $type .= '-';
+            else if( $stone == DAME )
+               $type .= '.';
+
+            $empty = true;                            
+         }
+
+         if( $pre_mark ) 
+         {
+            $out .= ")$type";
+            $pre_mark = false;
+         }
+         else if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y )
+         {
+            $out .= "($type";
+            $pre_mark = true;
+         }
+         else
+         {
+            $out .= " $type";
+         }
+
+         $letter_c ++;
+      }
+
+      $out .= ( $pre_mark ? ')' : ' ' );
+
+      if( $coord_borders & RIGHT )
+         $out .= str_pad($rownr, 2, ' ', STR_PAD_RIGHT);
+
+      $letter_r++;
+      $out .= "\n";
+   }
+
+   if( $coord_borders & DOWN )
+   {
+      $out .= '  ';
+      if( $coord_borders & LEFT )
+         $out .= '  ';
+
+      $colnr = 1;
+      $letter = 'a';
+      while( $colnr <= $Size )
+      {
+         $out .= " $letter";
+         $colnr++;
+         $letter++;
+         if( $letter == 'i' ) $letter++;
+      }
+      $out .= "\n";
+   }
+
+   return $out;
+}
 ?>

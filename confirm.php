@@ -168,7 +168,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
             $query .= "($Moves, \"NONE\", $x, $y, 0, NULL), ";
-            $new_prisoner_string .= board2sgf_coords($x, $y, $Size);
+            $new_prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
        
          if( strlen($new_prisoner_string) != $nr_prisoners*2 or 
@@ -255,7 +255,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          for( $i=1; $i <= $Handicap; $i++ )
          {
-            list($colnr,$rownr) = sgf2board_coords(substr($stonestring, $i*2-1, 2), $Size);
+            list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i*2-1, 2), $Size);
             
             if( !isset($rownr) or !isset($colnr) )
                error("illegal_position");
@@ -460,7 +460,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 // Notify opponent about move
 
    mysql_query( "UPDATE Players SET Notify='NEXT' " .
-                "WHERE ID='$next_to_move_ID' AND Flags LIKE '%WANT_EMAIL%' " .
+                "WHERE ID='$next_to_move_ID' AND SendEmail LIKE '%ON%' " .
                 "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "'") ;
 
 

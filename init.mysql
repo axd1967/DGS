@@ -18,7 +18,7 @@ CREATE TABLE Players (
   Rank varchar(40) default NULL,
   Stonesize int(11) default '25',
   Boardfontsize char(2) default '+0',
-  Flags set('WANT_EMAIL') NOT NULL default '',
+  SendEmail set('ON','MOVE','BOARD','MESSAGE') NOT NULL default '',
   Notify enum('NONE','NEXT','NOW','DONE') default 'NONE',
   Adminlevel int(11) NOT NULL default '0',
   Timezone varchar(40) NOT NULL default 'GMT',

@@ -40,7 +40,7 @@ disable_cache();
 
 // find reciever of the message
 
-   $result = mysql_query( "SELECT ID, Flags+0 AS flags, Notify, ClockUsed " . 
+   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed " . 
                           "FROM Players WHERE Handle='$to'" );
 
    if( mysql_num_rows( $result ) != 1 )
@@ -245,16 +245,16 @@ disable_cache();
    if( $reply )
    {
       mysql_query( "UPDATE Messages SET Flags='REPLIED' " .
-                   "WHERE  ID=$reply AND To_ID=$my_ID" );
+                   "WHERE ID=$reply AND To_ID=$my_ID" );
    }
 
 
 // Notify reciever about message
 
-   if( $opponent_row["flags"] & WANT_EMAIL and $opponent_row["Notify"] == 'NONE' )
+   if( !(strpos($opponent_row["SendEmail"], 'ON') === false) 
+       and $opponent_row["Notify"] == 'NONE' )
    {
-      $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
-                             "WHERE Handle='$to'" );
+      $result = mysql_query( "UPDATE Players SET Notify='NEXT' WHERE Handle='$to'" );
    }
 
    $msg = urlencode("Message sent!");

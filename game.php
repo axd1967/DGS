@@ -151,7 +151,7 @@ require( "include/rating.php" );
 
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
-            $prisoner_string .= board2sgf_coords($x, $y, $Size);
+            $prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
        
          if( strlen($prisoner_string) != $nr_prisoners*2 )

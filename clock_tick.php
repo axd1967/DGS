@@ -112,13 +112,13 @@ if( !$is_down )
              "$whitename (W)  vs. $blackname (B) </A>" . 
              "was: <p><center>" . score2text($score,true) . "</center></BR>";
           
-         mysql_query( "INSERT INTO Messages" . $Black_ID . " SET " .
+         mysql_query( "INSERT INTO Messages SET " .
                       "From_ID=" . $White_ID . ", " .
                       "To_ID=" . $Black_ID . ", " .
                       "Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'" );
 
-         mysql_query( "INSERT INTO Messages" . $White_ID . " SET " .
+         mysql_query( "INSERT INTO Messages SET " .
                       "From_ID=" . $Black_ID . ", " .
                       "To_ID=" . $White_ID . ", " .
                       "Time=FROM_UNIXTIME($NOW), " .
@@ -127,7 +127,7 @@ if( !$is_down )
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .
                       "WHERE (ID='$Black_ID' OR ID='$White_ID') " .
-                      "AND Flags LIKE '%WANT_EMAIL%' AND Notify='NONE'" ) ;
+                      "AND SendEmail LIKE '%ON%' AND Notify='NONE'" ) ;
 
       }
    }

@@ -59,8 +59,6 @@ define("WHITE_DEAD", 8);
 
 define("KO", 1);
 
-define("WANT_EMAIL", 1);
-
 define("LEFT",1);
 define("UP",2);
 define("RIGHT",4);
@@ -467,8 +465,7 @@ function is_logged_in($hdl, $scode, &$row)
    if( !$hdl )
       return false;
 
-   $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
-                          "Flags+0 AS flags " .
+   $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire " .
                           "FROM Players WHERE Handle='$hdl'" );
     
 
@@ -486,7 +483,7 @@ function is_logged_in($hdl, $scode, &$row)
        "Activity=Activity + $ActivityForHit, " .
        "Lastaccess=FROM_UNIXTIME($NOW)";
 
-   if( $row["flags"] & WANT_EMAIL AND $row["Notify"] != 'NONE' )
+   if( !(strpos($row["SendEmail"], 'ON') === false) and $row["Notify"] != 'NONE' )
       $query .= ", Notify='NONE'";
     
    $query .= " WHERE Handle='$hdl'";
