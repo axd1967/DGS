@@ -653,7 +653,7 @@ function message_list_table( &$mtable, $result, $show_rows
    $tits[0                        ] = T_('Message') ;
    $tits[FLOW_ANSWER              ] = $p ;
    $tits[            FLOW_ANSWERED] = $n ;
-   $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p\n$n" ;
+   $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p&#10;$n" ;
 
    while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
    {
