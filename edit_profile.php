@@ -157,15 +157,15 @@ if( $player_row["flags"] & WANT_EMAIL ) echo "checked " ?> value="true">
         <TD align=left>
           <?php $s = $player_row["Woodcolor"]; ?>
           <INPUT type="radio" name="woodcolor" value=1 <?php if($s == 1) echo " checked"; ?>> 
-            <img width=30 height=30 src="images/wood1.gif">
+            <img width=30 height=30 src="images/smallwood1.gif">
           <INPUT type="radio" name="woodcolor" value=2 <?php if($s == 2) echo " checked"; ?>> 
-            <img width=30 height=30 src="images/wood2.gif">
+            <img width=30 height=30 src="images/smallwood2.gif">
           <INPUT type="radio" name="woodcolor" value=3 <?php if($s == 3) echo " checked"; ?>> 
-            <img width=30 height=30 src="images/wood3.gif">
+            <img width=30 height=30 src="images/smallwood3.gif">
           <INPUT type="radio" name="woodcolor" value=4 <?php if($s == 4) echo " checked"; ?>> 
-            <img width=30 height=30 src="images/wood4.gif">
+            <img width=30 height=30 src="images/smallwood4.gif">
           <INPUT type="radio" name="woodcolor" value=5 <?php if($s == 5) echo " checked"; ?>> 
-            <img width=30 height=30 src="images/wood5.gif">
+            <img width=30 height=30 src="images/smallwood5.gif">
         </TD>
       </TR>
 
