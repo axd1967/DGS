@@ -74,12 +74,16 @@ require( "include/rating.php" );
       set_cookie_prefs();
    }
    else
+   {
       $query .=
          "Stonesize=" . $_GET['stonesize'] . ", " .
          "Boardcoords=$boardcoords, " .
          "MenuDirection='$menudirection', " .
          "Woodcolor=" . $_GET['woodcolor'] . ", " .
          "Button=" . $_GET['button'] . ", ";
+
+      set_cookie_prefs(true);
+   }
 
    list($lang,$enc) = explode('.', $_GET['language']);
 

@@ -184,7 +184,8 @@ $profile_form->add_row( array( 'OWNHTML', $button_code ) );
 $profile_form->add_row( array( 'TD',
                                'OWNHTML', '<TD>',
                                'CHECKBOX', 'locally', 1,
-                               T_('Change board graphics for this browser only'), false) );
+                               T_('Change board graphics for this browser only'),
+                               !empty($_COOKIE['prefs']) ) );
 
 $profile_form->add_row( array( 'OWNHTML', '<TD>&nbsp;</TD>' ) );
 

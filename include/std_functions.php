@@ -551,11 +551,14 @@ function get_cookie_prefs(&$player_row)
       }
 }
 
-function set_cookie_prefs()
+function set_cookie_prefs($delete=false)
 {
    global $cookie_prefs, $NOW, $session_duration;
 
-   setcookie ('prefs', serialize($cookie_prefs), $NOW+$session_duration*36, "$SUB_PATH" );
+   if( $delete )
+      setcookie ('prefs', '', $NOW-3600, "$SUB_PATH" );
+   else
+      setcookie ('prefs', serialize($cookie_prefs), $NOW+$session_duration*36, "$SUB_PATH" );
 }
 
 function add_line_breaks($msg)
