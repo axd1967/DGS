@@ -79,6 +79,10 @@ array(
       '#Games' =>
       array( 'Groups' => array( 'Waiting room' ) ),
 
+      /* Found in these files: waiting_room.php */
+      '%s only' =>
+      array( 'Groups' => array( 'Waiting room' ) ),
+
       /* Found in these files: include/message_functions.php */
       '%s per %s stones' =>
       array( 'Groups' => array( 'Messages' ) ),
