@@ -204,12 +204,12 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
          else if( $stone == BLACK_DEAD )
          {
             $type = 'bw';
-            $alt = '/';
+            $alt = 'x';
          }
          else if( $stone == WHITE_DEAD )
          {
             $type = 'wb';
-            $alt = '-';
+            $alt = 'o';
          }
          else
          {
@@ -238,13 +238,24 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
             }
 
             if( $stone == BLACK_TERRITORY )
+            {
                $type .= 'b';
+               $alt = '+';
+            }
             else if( $stone == WHITE_TERRITORY )
+            {
                $type .= 'w';
+               $alt = '-';
+            }
             else if( $stone == DAME )
+            {
                $type .= 'd';
+            }
             else if( $stone == MARKED_DAME )
-               $type .= 'c'; //waiting better
+            {
+               $type .= 's';
+               $alt = 's';
+            }
 
             $empty = true;
 
@@ -822,7 +833,7 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
          $empty = false;
          if( $stone == BLACK )
          {
-            $type = 'X';
+            $type = '#';
          }
          else if( $stone == WHITE )
          {
@@ -863,7 +874,7 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
             else if( $stone == DAME )
                $type .= '.';
             else if( $stone == MARKED_DAME )
-               $type .= ':'; //waiting better
+               $type .= 's';
 
             $empty = true;
          }

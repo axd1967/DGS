@@ -493,6 +493,11 @@ foreach $final_size (@Sizes)
                 draw_filled_square (0.41);
                 save_image ($upchar.$rightchar."d", 0);
 
+                draw_board_lines ($right, $up, $hoshi, 1);
+                gimp_palette_set_foreground ([65, 242, 91]);
+                draw_filled_square (0.41);
+                save_image ($upchar.$rightchar."s", 0);
+
                 if( $right == 0 and $up == 0 )
                 {
                     if( $upchar eq "e" )
