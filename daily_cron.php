@@ -41,8 +41,10 @@ require( "forum/forum_functions.php" );
 
    $delete_msgs = false;
    $delete_invitations = false;
+   $delete_waitingroom_entries = true;
    $message_timelimit = 90;
    $invite_timelimit = 60;
+   $waitingroom_timelimit = 30;
 
 // Delete old messages
 
@@ -81,6 +83,17 @@ require( "forum/forum_functions.php" );
       }
    }
 
+
+// Delete old waiting list entries
+
+   if( $delete_waitingroom_entries )
+   {
+      $timelimit = $waitingroom_timelimit*24*3600;
+      $query = "DELETE FROM Waitingroom " .
+         "WHERE $NOW-UNIX_TIMESTAMP(Time) > $timelimit";
+
+      mysql_query( $query );
+   }
 
 
 
