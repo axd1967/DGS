@@ -150,6 +150,8 @@ define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
 define("ADMIN_ADMINS",0x08);
 define("ADMIN_TIME",0x10);
+define("ADMIN_ADD_ADMIN",0x20);
+define("ADMIN_PASSWORD",0x40);
 
 
 define("FOLDER_NONE", -1);
@@ -295,7 +297,7 @@ function end_page( $menu_array=NULL )
         sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000) .
          "</font>&nbsp;<br>\n";
 
-   if( ($admin_level & ~ADMIN_TIME) > 0 )
+   if( $admin_level & ~ADMIN_TIME )
       echo '<b><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
          T_('Admin') . '</font></a></b>&nbsp;&nbsp;&nbsp;';
 
@@ -978,7 +980,7 @@ function is_logged_in($hdl, $scode, &$row)
       return false;
 
 
-   if( $row["admin_level"] >= 1 )
+   if( $row["admin_level"] != 0 )
       $admin_level = $row["admin_level"];
 
    get_cookie_prefs($row);

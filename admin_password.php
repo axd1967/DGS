@@ -28,17 +28,17 @@ require_once( "include/form_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
 
-   start_page(T_('Forgot password?'), true, $logged_in, $player_row );
+   if( !$logged_in )
+      error("not_logged_in");
+
+   if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
+      error("adminlevel_too_low");
+
+   start_page(T_("Admin").' - '.T_('Send password'), true, $logged_in, $player_row );
 
    echo "<center>\n";
 
-   echo '<TABLE border=0 cellpadding=0 width="80%"><TR><TD align="left">&nbsp;<P>
-' . T_('If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.')
-. '
-</TD></TR>
-</TABLE>';
-
-   $passwd_form = new Form( 'newpasswdform', "send_new_password.php", FORM_POST );
+   $passwd_form = new Form( 'adminnewpasswdform', "send_new_password.php", FORM_POST );
 
    $passwd_form->add_row( array( 'HEADER', T_('New password') ) );
 
@@ -46,8 +46,9 @@ require_once( "include/form_functions.php" );
                                  'TEXTINPUT', 'userid', 16, 16, '',
                                  'SUBMITBUTTON', 'action', T_("Send password"),
                                ) );
-   $passwd_form->add_row( array( 'CELL', 2, 'align="right"',
-                                 'SUBMITBUTTON', 'goback', T_("Go back"),
+   $passwd_form->add_row( array( 'DESCRIPTION', T_('Email'),
+                                 'TEXTINPUT', 'email', 16, 80, '',
+                                 'TEXT', T_("to overwrite user's one"),
                                ) );
    $passwd_form->echo_string();
 

@@ -27,10 +27,7 @@ require_once( "include/std_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
 
-
-
-   $action = @$_POST['action'];
-   if( $action == 'Go back' )
+   if( isset($_POST['goback']) )
       jump_to("index.php");
 
    $userid = @$_POST['userid'];
@@ -40,20 +37,30 @@ require_once( "include/std_functions.php" );
    if( mysql_num_rows($result) != 1 )
       error("unknown_user");
 
-
-   $row = mysql_fetch_array($result);
-
-
-   if( empty($row['Email']) )
-      error('no_email');
+   $row = mysql_fetch_assoc($result);
 
    if( !empty($row['Newpassword']) )
       error("newpassword_already_sent");
 
+   if( !empty($_POST['email']) )
+   {
+     // Could force email only if admin
+     if( !$logged_in )
+       error("not_logged_in");
+     if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
+       error("adminlevel_too_low");
+
+     $row['Email'] = trim($_POST['email']);
+   }
+
+   if( empty($row['Email']) )
+      error('no_email');
 
 // Now generate new password:
 
    $newpasswd = generate_random_password();
+
+   //admin_log( @$player_row['Handle']." (".@$player_row['ID'].") send a new password to $userid at {$row['Email']}.");
 
 // Save password in database
 

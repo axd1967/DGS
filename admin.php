@@ -31,9 +31,7 @@ require_once( "include/form_functions.php" );
   if( !$logged_in )
     error("not_logged_in");
 
-  $adm = $player_row['admin_level'];
-
-  if( $adm < 1 )
+  if( !$admin_level )
     error("adminlevel_too_low");
 
   start_page(T_('Admin'), true, $logged_in, $player_row);
@@ -42,12 +40,17 @@ require_once( "include/form_functions.php" );
   echo "<center><h3><font color=$h3_color>" .
     T_('Administration') . "</font></h3></center><p>\n";
 
+  add_link_page_link('admin_password.php', T_('New password'),
+                     '', $admin_level & ADMIN_PASSWORD);
   add_link_page_link('admin_translators.php', T_('Manage translators'),
-                     '', $adm & ADMIN_TRANSLATORS);
-  add_link_page_link('admin_faq.php', T_('Edit FAQ'), '', $adm & ADMIN_FAQ);
-  add_link_page_link('forum/admin.php', T_('Admin forums'), '', $adm & ADMIN_FORUM);
+                     '', $admin_level & ADMIN_TRANSLATORS);
+  add_link_page_link('admin_faq.php', T_('Edit FAQ'), 
+                     '', $admin_level & ADMIN_FAQ);
+  add_link_page_link('forum/admin.php', T_('Admin forums'), 
+                     '', $admin_level & ADMIN_FORUM);
+  add_link_page_link('admin_admins.php', T_('Edit admin staff'),
+                     '', $admin_level & ADMIN_ADMINS);
 //  add_link_page_link('admin_requests.php', T_('Handle user requests'), '', false);
-  add_link_page_link('admin_admins.php', T_('Edit admin staff'), '', $adm & ADMIN_ADMINS);
 
   echo "<br>&nbsp;\n</td></tr></table>\n";
 

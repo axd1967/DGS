@@ -35,15 +35,19 @@ require_once( "include/table_columns.php" );
   if( !($player_row['admin_level'] & ADMIN_ADMINS) )
     error("adminlevel_too_low");
 
-  $admin_tasks = array( 'TRANS' => ADMIN_TRANSLATORS,
-                        'FAQ' => ADMIN_FAQ,
-                        'Forum' => ADMIN_FORUM,
-                        'ADMIN' => ADMIN_ADMINS,
-                        'TIME' => ADMIN_TIME );
+  $admin_tasks = array(
+                        'ADMIN'  => array( ADMIN_ADMINS, T_('Admins')),
+                        'AddAdm' => array( ADMIN_ADD_ADMIN, T_('New admin')),
+                        'Passwd' => array( ADMIN_PASSWORD, T_('New password')),
+                        'TRANS'  => array( ADMIN_TRANSLATORS, T_('Translators')),
+                        'Forum'  => array( ADMIN_FORUM, T_('Forum')),
+                        'FAQ'    => array( ADMIN_FAQ, T_('FAQ')),
+                        'TIME'   => array( ADMIN_TIME, T_('Time')),
+                      );
 
 // Make sure all previous admins gets into the Admin array
   $result = mysql_query("SELECT ID, Adminlevel+0 AS admin_level FROM Players " .
-                        "WHERE Adminlevel > 0");
+                        "WHERE Adminlevel != 0");
 
   while( $row = mysql_fetch_array($result) )
   {
@@ -62,7 +66,7 @@ require_once( "include/table_columns.php" );
 
         list($type, $id) = explode('_', $item, 2);
 
-        $val = $admin_tasks[$type];
+        $val = $admin_tasks[$type][0] & $player_row['admin_level'];
 
         if( !($id > 0 or $id=='new') or !($val > 0))
            error("bad_data");
@@ -100,89 +104,76 @@ require_once( "include/table_columns.php" );
   start_page(T_("Admin").' - '.T_('Edit admin staff'), true, $logged_in, $player_row );
 
   $result = mysql_query("SELECT ID, Handle, Name, Adminlevel+0 AS admin_level FROM Players " .
-                        "WHERE Adminlevel > 0");
+                        "WHERE Adminlevel != 0");
 
 
-   if( mysql_num_rows($result) > 0 )
+   echo "<center><p><h3><font color=$h3_color><B>" . T_('Admins') . ":</B></font></h3><p>\n";
+
+   echo '<form name="admform" action="admin_admins.php?update=t" method="POST">'."\n";
+
+   $atable = new Table( '', '', '', true );
+
+   $atable->add_tablehead(1, T_('ID'), NULL, true, true);
+   $atable->add_tablehead(2, T_('Nick'), NULL, true, true);
+   $atable->add_tablehead(3, T_('Name'), NULL, true, true);
+
+   $col = 4;
+   foreach( $admin_tasks as $aid => $tmp )
    {
-      echo "<center><p><h3><font color=$h3_color><B>" . T_('Admins') . ":</B></font></h3><p>\n";
+      list( $amask, $aname) = $tmp;
+      $atable->add_tablehead($col++, $aname, NULL, true, true, '10pc');
+   }
 
-      echo '<form name="admform" action="admin_admins.php?update=t" method="POST">'."\n";
+   $new_admin = ( $player_row['admin_level'] & ADMIN_ADD_ADMIN );
+   while( $row = mysql_fetch_array( $result ) or $new_admin )
+   {
+      $arow_strings = array();
 
-      $atable = new Table( '', '', '', true );
-
-      $atable->add_tablehead(1, T_('ID'), NULL, true, true);
-      $atable->add_tablehead(2, T_('Nick'), NULL, false, true);
-      $atable->add_tablehead(3, T_('Name'), NULL, false, true);
-      $atable->add_tablehead(4, T_('Translators'), NULL, true, true);
-      $atable->add_tablehead(5, T_('FAQ'), NULL, true, true);
-      $atable->add_tablehead(6, T_('Forum'), NULL, true, true);
-      $atable->add_tablehead(7, T_('Admins'), NULL, true, true);
-      $atable->add_tablehead(8, T_('Time'), NULL, true, true);
-
-      while( $row = mysql_fetch_array( $result ) )
+      if( is_array($row) )
       {
          $id = $row["ID"];
-
-         $arow_strings = array();
+         $level = $row["admin_level"];
          $arow_strings[1] = "<td><A href=\"userinfo.php?uid=$id\">$id</A></td>";
          $arow_strings[2] = "<td><A href=\"userinfo.php?uid=$id\">" . $row["Handle"] . "</A></td>";
          $arow_strings[3] = "<td><A href=\"userinfo.php?uid=$id\">" .
             make_html_safe($row["Name"]) . "</A></td>";
-         $arow_strings[4] = "<td align=center>" .
-            "<input type=\"checkbox\" name=\"TRANS_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_TRANSLATORS) ? ' checked' : '') . "></td>";
-         $arow_strings[5] = "<td align=center>" .
-            "<input type=\"checkbox\" name=\"FAQ_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_FAQ) ? ' checked' : '') . "></td>";
-         $arow_strings[6] = "<td align=center>" .
-            "<input type=\"checkbox\" name=\"Forum_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_FORUM) ? ' checked' : '') . "></td>";
-         $arow_strings[7] = "<td align=center>" .
-            "<input type=\"checkbox\" name=\"ADMIN_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_ADMINS) ? ' checked' : '') . "></td>";
-         $arow_strings[8] = "<td align=center>" .
-            "<input type=\"checkbox\" name=\"TIME_$id\" value=\"Y\"" .
-            (($row["admin_level"] & ADMIN_TIME) ? ' checked' : '') . "></td>";
-
-         $atable->add_row( $arow_strings );
+      }
+      else
+      {
+         $new_admin = false;
+         $id = 'new';
+         $level = 0;
+         $arow_strings[1] = "<td colspan=3 nowrap>" . T_('New admin') . ": " .
+             '<input type="text" name="newadmin"' .
+             ' value="" size="16" maxlength="16"></td>';
+         $arow_strings[2] = "";
+         $arow_strings[3] = "";
       }
 
-      $atable->add_row(
-         array( 1 => "<td colspan=3>" . T_('New admin') .
-                ': <input type="text" name="newadmin" value="" ' .
-                'size="16" maxlength="16">',
+      $col = 4;
+      foreach( $admin_tasks as $aid => $tmp )
+      {
+         list( $amask, $aname) = $tmp;
 
-                '',
+         if( $amask & $player_row['admin_level'] )
+            $tmp = "<input type=\"checkbox\" name=\"${aid}_$id\" value=\"Y\"" .
+                  (($level & $amask) ? ' checked' : '') . ">";
+         else
+            $tmp = "-";
 
-                '',
+         $arow_strings[$col++] = "<td align=center>$tmp</td>";
+      }
 
-                "<td align=center>" .
-                "<input type=\"checkbox\" name=\"TRANS_new\" value=\"Y\"></td>",
-
-                "<td align=center>" .
-                "<input type=\"checkbox\" name=\"FAQ_new\" value=\"Y\"></td>",
-
-                "<td align=center>" .
-                "<input type=\"checkbox\" name=\"Forum_new\" value=\"Y\"></td>",
-
-                "<td align=center>" .
-                "<input type=\"checkbox\" name=\"ADMIN_new\" value=\"Y\"></td>",
-
-                "<td align=center>" .
-                "<input type=\"checkbox\" name=\"TIME_new\" value=\"Y\"></td>" ) );
-
-      $atable->add_row(
-         array( 1 => '<td align=right colspan=8>' .
-                '<input type="submit" name="action" value="' . T_('Update changes') . "\">",
-
-                '', '', '', '', '', '', '' ) );
-
-      $atable->echo_table();
-      echo "<p>\n";
+      $atable->add_row( $arow_strings );
    }
 
+   $atable->add_row(
+      array( 1 => '<td align=right colspan=99>' .
+             '<input type="submit" name="action" value="' . T_('Update changes') . "\">"
+           , 'BG_Color' => $bg_color ) );
 
+   $atable->echo_table();
+   echo "<p>\n";
 
   end_page();
 }
