@@ -30,7 +30,7 @@ function T_($string)
       return $s;
 }
 
-function include_all_translate_groups($player_row)
+function include_all_translate_groups($player_row=null)
 {
    global $TranslateGroups, $known_languages, $base_path;
 
