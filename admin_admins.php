@@ -22,7 +22,6 @@ $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
-require_once( "include/table_columns.php.old" );
 
 {
   connect2mysql();
