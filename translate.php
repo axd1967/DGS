@@ -81,6 +81,10 @@ When translating you should keep in mind the following things:
        you can use the translator forum to get help.
   <li> If you want to change the html code in some way in the translation, keep in mind
        that the code shall conform to the standard layout of Dragon.
+  <li> If a word ends with #2, for example \'To#2\', this means a second word with the same
+       spelling, so just ignore the #2 part when translating. This is necessary since in some
+       languages \'to\' is translated differently depending on the context (e.g., \'bis\' or
+       \'an\' in german).
 </ul>
 </td></tr>
 </table>

@@ -64,10 +64,18 @@ function include_translate_group($group, $player_row)
    else
       $language = $language_used;
 
+
+   $filename = $base_path . "translations/en.iso-8859-1" . '_' . $group . '.php';
+
+   if( file_exists( $filename ) )
+   {
+      include_once( $filename );
+   }
+
+
    if( !empty($language) )
    {
-      $filename = $base_path . "translations/$language" .
-         "_" . $group . '.php';
+      $filename = $base_path . "translations/$language" . '_' . $group . '.php';
 
       if( file_exists( $filename ) )
       {
@@ -76,6 +84,7 @@ function include_translate_group($group, $player_row)
       $language_used = $language;
       list(,$encoding_used) = explode('.', $language);
    }
+
 }
 
 

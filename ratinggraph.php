@@ -114,11 +114,11 @@ require_once( "include/form_functions.php" );
      $years[$y] = $y;
 
   $form->add_row( array( 'HIDDEN', 'uid', $uid,
-                         'DESCRIPTION', T_('From'),
+                         'DESCRIPTION', T_('From#2'),
                          'SELECTBOX', 'startmonth', 1, $months, $startmonth, false,
                          'SELECTBOX', 'startyear', 1, $years, $startyear, false,
                          'OWNHTML', '&nbsp;&nbsp;',
-                         'DESCRIPTION', T_('To'),
+                         'DESCRIPTION', T_('To#2'),
                          'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
                          'SELECTBOX', 'endyear', 1, $years, $endyear, false,
                          'OWNHTML', '&nbsp;&nbsp;',
