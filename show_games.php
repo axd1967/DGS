@@ -231,7 +231,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             echo "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
                make_html_safe($whiteHandle) . "</font></a></td>\n";
          if( (1 << 21) & $column_set )
-            echo "<td>" . echo_rating($whiteRatingtrue,$whiteID) . "&nbsp;</td>\n";
+            echo "<td>" . echo_rating($whiteRating,true,$whiteID) . "&nbsp;</td>\n";
       }
       else
       {
