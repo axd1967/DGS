@@ -33,7 +33,7 @@ require( "include/std_functions.php" );
 
    $q1 = "SELECT Status,SUM(Moves) as moves, COUNT(*) as count FROM Games GROUP BY Status";
    $q2 = "SELECT SUM(Moves) as moves, COUNT(*) as count FROM Games";
-   $q3 = "SELECT SUM(Hits) as hits, Count(*) as count FROM Players";
+   $q3 = "SELECT SUM(Hits) as hits, Count(*) as count, sum(Activity) as activity FROM Players";
 
    $result = mysql_query( $q1 );
 
@@ -59,7 +59,7 @@ require( "include/std_functions.php" );
    $row = mysql_fetch_array( $result );
 
    echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
-
+   echo '<p>Activity: ' . $row['activity'];
 
    end_page();
 }
