@@ -129,6 +129,7 @@ if( !$is_down )
                       "WHERE (ID='$Black_ID' OR ID='$White_ID') " .
                       "AND SendEmail LIKE '%ON%' AND Notify='NONE'" ) ;
 
+         update_rating($gid);
       }
    }
 
