@@ -32,7 +32,7 @@ require( "include/form_functions.php" );
 
   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-  start_page(_("Home"), true, $logged_in, $player_row );
+  start_page(T_("Home"), true, $logged_in, $player_row );
 
 
   echo "<center>\n";

@@ -152,7 +152,7 @@ $table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches
 
    echo "
         <td><B><A href=\"users.php$vars\">" .
-      ( $showall ? _("Only active users")  : _("Show all users") ) . "</A></B></td>";
+      ( $showall ? T_("Only active users")  : T_("Show all users") ) . "</A></B></td>";
 
    echo "
       </tr>

@@ -63,12 +63,12 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    echo '
     <table border=3>
-       <tr><td><b>' . _("Name") . '</b></td> <td>' . $player_row["Name"] . '</td></tr>
-       <tr><td><b>' . _("Userid") . '</b></td> <td>' . $player_row["Handle"] . '</td></tr>
-       <tr><td><b>' . _("Open for matches?") . '</b></td> <td>' . $player_row["Open"] . '</td></tr>
-       <tr><td><b>' . _("Rating") . '</b></td> <td>' . echo_rating($player_row["Rating"]);
+       <tr><td><b>' . T_("Name") . '</b></td> <td>' . $player_row["Name"] . '</td></tr>
+       <tr><td><b>' . T_("Userid") . '</b></td> <td>' . $player_row["Handle"] . '</td></tr>
+       <tr><td><b>' . T_("Open for matches?") . '</b></td> <td>' . $player_row["Open"] . '</td></tr>
+       <tr><td><b>' . T_("Rating") . '</b></td> <td>' . echo_rating($player_row["Rating"]);
    echo '</td></tr>
-       <tr><td><b>Rank info</b></td> <td>' . $player_row["Rank"] . '</td></tr>
+       <tr><td><b>' . T_('Rank info') . '</b></td> <td>' . $player_row["Rank"] . '</td></tr>
     </table>
     <p>';
 
@@ -133,11 +133,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    $result = mysql_query( $query ) or die(mysql_error());
 
-   echo "<hr><b>" . _("Your turn to move in the following games:") . "</b><p>\n";
+   echo "<hr><b>" . T_("Your turn to move in the following games:") . "</b><p>\n";
 
    if( mysql_num_rows($result) == 0 )
    {
-      echo _("No games found");
+      echo T_("No games found");
    }
    else
    {
@@ -200,9 +200,9 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
     <p>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
-        <td><B><A href=\"userinfo.php?uid=$uid\">" . _("Show/edit userinfo") . "</A></B></td>
-        <td><B><A href=\"show_games.php?uid=$uid\">" . _("Show running games") . "</A></B></td>
-        <td><B><A href=\"show_games.php?uid=$uid&finished=1\">" . _("Show finished games") . "</A></B></td>
+        <td><B><A href=\"userinfo.php?uid=$uid\">" . T_("Show/edit userinfo") . "</A></B></td>
+        <td><B><A href=\"show_games.php?uid=$uid\">" . T_("Show running games") . "</A></B></td>
+        <td><B><A href=\"show_games.php?uid=$uid&finished=1\">" . T_("Show finished games") . "</A></B></td>
       </tr>
     </table>
 ";

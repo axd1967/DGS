@@ -189,19 +189,19 @@ require( "include/timezones.php" );
     <p>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
-        <td><B><A href=\"message.php?mode=NewMessage\">" . _("Send a message") . "</A></B></td>\n";
+        <td><B><A href=\"message.php?mode=NewMessage\">" . T_("Send a message") . "</A></B></td>\n";
 
    if( $sent==1 )
-      echo "<td><B><A href=\"list_messages.php\">" . _("Show recieved messages") . "</A></B></td>\n";
+      echo "<td><B><A href=\"list_messages.php\">" . T_("Show recieved messages") . "</A></B></td>\n";
    else
    {
       if( $all==1 )
-         echo "<td><B><A href=\"list_messages.php\">" . _("Hide deleted") . "</A></B></td>\n";
+         echo "<td><B><A href=\"list_messages.php\">" . T_("Hide deleted") . "</A></B></td>\n";
       else
-         echo "<td><B><A href=\"list_messages.php?all=1\">" . _("Show all") . "</A></B></td>\n";
+         echo "<td><B><A href=\"list_messages.php?all=1\">" . T_("Show all") . "</A></B></td>\n";
 
-      echo "        <td><B><A href=\"list_messages.php?sent=1\">" . _("Show sent messages") . "</A></B></td>\n";
-      echo "        <td><B><A href=\"list_messages.php?del=all$all_str\">" . _("Delete all") . "</A></B></td>\n";
+      echo "        <td><B><A href=\"list_messages.php?sent=1\">" . T_("Show sent messages") . "</A></B></td>\n";
+      echo "        <td><B><A href=\"list_messages.php?del=all$all_str\">" . T_("Delete all") . "</A></B></td>\n";
    }
 
    echo "      </tr>
