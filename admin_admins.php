@@ -160,14 +160,14 @@ require_once( "include/table_columns.php" );
          list( $amask, $aname) = $tmp;
 
          if( $amask & $player_level )
-            $tmp = ' value="Y"';
+            $tmp = '';
          else
-            $tmp = ' value="" disabled';
+            $tmp = ' disabled';
 
          if( $amask & $level )
             $tmp.= ' checked';
 
-         $tmp = "\n  <input type=\"checkbox\" name=\"${aid}_$id\"$tmp>";
+         $tmp = "\n  <input type=\"checkbox\" name=\"${aid}_$id\" value=\"Y\"$tmp>";
 
          $arow_strings[$col++] = "<td align=center>$tmp</td>";
       }
