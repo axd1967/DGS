@@ -98,7 +98,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       ' align=center><tr><td valign=top>';
 
    echo '<table border=0 cellpadding=0 cellspacing=0 ' .
-      'align=center valign=center background="">';
+      'align=center background="">'; //no valign for TABLE, if needed use TBODY
 
    if( $coord_borders & UP )
    {
@@ -122,7 +122,9 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       $span = ($coord_borders & RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
       $w = ($coord_borders & RIGHT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
       if( $span > 0 )
-         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td></tr>";
+         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
+
+      echo "</tr>\n";
    }
 
    if( $smooth_edge )
@@ -194,7 +196,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
          if( $stone == BLACK )
          {
             $type = 'b';
-            $alt = '#';
+            $alt = 'X';
          }
          else if( $stone == WHITE )
          {
@@ -250,6 +252,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
             else if( $stone == DAME )
             {
                $type .= 'd';
+               $alt = '.';
             }
             else if( $stone == MARKED_DAME )
             {
@@ -266,7 +269,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
              and ( $stone == BLACK or $stone == WHITE ) )
          {
             $type .= $mark_letter;
-            $alt = ( $alt == '#' ? 'X' : '@' );
+            $alt = ( $stone == BLACK ? '#' : '@' );
          }
 
          if( $may_play and !$no_click and
@@ -285,6 +288,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       if( $coord_borders & RIGHT )
          echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
 
+      echo "</tr>\n";
       $letter_r++;
    }
 
@@ -313,6 +317,8 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
 
       if( $coord_borders & RIGHT )
          echo "<td><img src=\"images/blank.gif\" alt=\"  \" width=$coord_width height=10></td>";
+
+      echo "</tr>\n";
    }
 
    if( $coord_borders & DOWN )
@@ -339,6 +345,8 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       $w = ($coord_borders & RIGHT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
       if( $span > 0 )
          echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
+
+      echo "</tr>\n";
    }
 
    echo '</table></td></tr></table>' . "\n";
@@ -564,7 +572,7 @@ function mark_territory( $x, $y, $size, &$array )
             if( $new_color == MARKED_DAME )
             {
                $c = NONE; // This area will become dame
-            } 
+            }
             else if( $c == -1 )
             {
                $c = $new_color;
@@ -833,7 +841,7 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
          $empty = false;
          if( $stone == BLACK )
          {
-            $type = '#';
+            $type = 'X';
          }
          else if( $stone == WHITE )
          {
@@ -884,7 +892,8 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
             $out .= ")$type";
             $pre_mark = false;
          }
-         else if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y )
+         else if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y
+             and ( $stone == BLACK or $stone == WHITE ) )
          {
             $out .= "($type";
             $pre_mark = true;
