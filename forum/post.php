@@ -73,7 +73,7 @@ include("forum_functions.php");
        "Text=\"$Text\", " .
        "User_ID=" . $player_row["ID"] . ", " .
        "Parent_ID=$parent, " .
-       "AnswerNr=" . ($answernr+1) . ", " .
+       "AnswerNr=" . ($answer_nr+1) . ", " .
        "Depth=$Depth, " .
        "crc32=" . crc32($Text) . ", " .
        "PosIndex=\"$PosIndex\"";
