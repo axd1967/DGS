@@ -51,20 +51,31 @@ function getmicrotime()
     return ((float)$usec + (float)$sec); 
 } 
 
+function disable_cache()
+{
+    header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT');              // Date in the past
+    header ('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+    header ('Cache-Control: no-cache, must-revalidate');            // HTTP/1.1
+    header ('Pragma: no-cache');                                    // HTTP/1.0
+}
+
 function start_page( $title, $no_cache, $logged_in, &$player_row )
 {
-echo "
+    if( $no_cache )
+        disable_cache();
+    
+echo '
 <HTML>
   <HEAD>
-";
-
- if( $no_cache )
-     {
-echo '
-    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
-    <META HTTP-EQUIV="Expires" CONTENT="0">
 ';
-     }
+
+//   if( $no_cache )
+//       {
+//  echo '
+//      <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+//      <META HTTP-EQUIV="Expires" CONTENT="0">
+//  ';
+//       }
 echo '
     <TITLE> Dragon Go Server - ' . $title . '</TITLE>
     <LINK rel="stylesheet" type="text/css" media="screen" href="dragon.css">
