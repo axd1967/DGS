@@ -57,7 +57,16 @@ function mail_strip_html( $str)
    $str = strip_tags($str, '<a><br><p><ul><ol><li><goban>');
    $str = preg_replace(array_keys($reps), array_values($reps), $str);
    $str = strip_tags($str, '<goban>');
-   $str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
+   if( function_exists('html_entity_decode') ) //Does not exist on dragongoserver.sourceforge.net
+   {
+      $str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
+   }
+   else
+   {
+      $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
+      $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
+      $str = strtr($str, $reverse_htmlentities_table);
+   }
    return $str;
 }
 
