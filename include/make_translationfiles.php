@@ -131,4 +131,47 @@ function make_include_files($language=null, $group=null)
 //    mysql_query("DELETE FROM TranslationFoundInGroup WHERE Text_ID='$Text_ID'");
 //    mysql_query("DELETE FROM Translations WHERE Original_ID='$Text_ID'");
 // }
+
+
+function translations_query( $translate_lang, $untranslated, $group )
+{
+// See admin_faq.php to know the Translatable flag meaning.
+
+   $query = "SELECT Translations.Text,TranslationTexts.ID AS Original_ID," .
+     "TranslationFoundInGroup.Group_ID ," . //ORDER BY columns not in the result is not allowed in ANSI SQL.
+     "TranslationTexts.Text AS Original, TranslationLanguages.ID AS Language_ID, " .
+     "TranslationTexts.Translatable " .
+     "FROM TranslationTexts, TranslationGroups, " .
+     "TranslationFoundInGroup, TranslationLanguages " .
+     "LEFT JOIN Translations ON Translations.Original_ID=TranslationTexts.ID " .
+     "AND Translations.Language_ID=TranslationLanguages.ID ";
+
+   if( $untranslated )
+     $query .= "WHERE TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
+        "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
+        "AND TranslationLanguages.Language='$translate_lang' " .
+/* 
+  Translations.Text IS NOT NULL (but maybe "" if the 'same' box is checked)
+    and Translatable='Y' (instead of Done)
+    is the default status for all the system messages.
+  So Translations.Text IS NULL and Translatable!='N' mean "never translated".
+*/
+        "AND Translatable!='N' " .
+        "AND (Translations.Text IS NULL OR Translatable='Changed') " .
+/*Rod: some item appear two times when in different groups
+     Can't use:
+        . ( $untranslated ? "DISTINCT " : "") . 
+     unless:
+        "ORDER BY Original_ID LIMIT 50"; //Group_ID Original_ID
+*/
+        "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
+   else
+     $query .= "WHERE TranslationGroups.Groupname='$group' " .
+        "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
+        "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
+        "AND TranslationLanguages.Language='$translate_lang' " .
+        "AND Translatable!='N' ";
+
+   return mysql_query($query);
+}
 ?>

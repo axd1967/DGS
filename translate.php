@@ -22,6 +22,7 @@ $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
+require_once( "include/make_translationfiles.php" );
 
 {
    $translation_groups =
@@ -36,19 +37,28 @@ require_once( "include/form_functions.php" );
   if( !$logged_in )
     error("not_logged_in");
 
-  $translator_array = explode(',', $player_row['Translator']);
-  $group = $_REQUEST['group'];
 
+  $translator_set = @$player_row['Translator'];
+  if( !$translator_set )
+    error("not_translator");
+
+  $translator_array = explode(',', $translator_set);
+
+  $group = @$_REQUEST['group'];
+
+  if( !$group or !in_array( $group, $translation_groups ) )
+     $group = 'Untranslated phrases';
+
+  $untranslated = ($group === 'Untranslated phrases');
+
+  $translate_lang = @$_REQUEST['translate_lang'];
+
+  $lang_choice = false;
   if( !$translate_lang )
     {
-      if( empty( $player_row['Translator'] ) )
-        {
-          error("not_translator");
-        }
-      elseif( count( $translator_array ) == 1 )
+      if( count( $translator_array ) == 1 )
         {
           $translate_lang = $translator_array[0];
-          $lang_choice = false;
         }
       elseif( count( $translator_array ) > 1 )
         {
@@ -110,7 +120,7 @@ When translating you should keep in mind the following things:
         }
 
      $langchoice_form->add_row( array( 'SELECTBOX', 'translate_lang', 1, $vals, '', false,
-                                       'HIDDEN', 'group', 'Common',
+                                       'HIDDEN', 'group', $group,
                                        'SUBMITBUTTON', 'cl', 'Select' ) );
      $langchoice_form->echo_string();
      echo "</CENTER>\n";
@@ -120,43 +130,9 @@ When translating you should keep in mind the following things:
      if( !in_array( $translate_lang, $translator_array ) )
         error('not_correct_transl_language');
 
-     if( !$group or !in_array( $group, $translation_groups ) )
-        $group = 'Untranslated phrases';
-
-     $untranslated = ($group === 'Untranslated phrases');
-
-// See admin_faq.php to know the Translatable flag meaning.
-
-     $query = "SELECT Translations.Text,TranslationTexts.ID AS Original_ID," .
-        "TranslationFoundInGroup.Group_ID ," . //ORDER BY columns not in the result is not allowed in ANSI SQL.
-        "TranslationTexts.Text AS Original " .
-        "FROM TranslationTexts, TranslationGroups, " .
-        "TranslationFoundInGroup, TranslationLanguages " .
-        "LEFT JOIN Translations ON Translations.Original_ID=TranslationTexts.ID " .
-        "AND Translations.Language_ID=TranslationLanguages.ID ";
-
-     if( $untranslated )
-        $query .= "WHERE TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
-           "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
-           "AND TranslationLanguages.Language='$translate_lang' " .
-/* 
-  Translations.Text IS NOT NULL (but maybe "" if 'same' box) and Translatable='Y'
-    (instead of Done) is the default status for all the system messages.
-  So Translations.Text IS NULL and Translatable!='N' mean never translated.
-*/
-           "AND Translatable!='N' " .
-           "AND (Translations.Text IS NULL OR Translatable='Changed') " .
-           "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
-     else
-        $query .= "WHERE TranslationGroups.Groupname='$group' " .
-           "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
-           "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
-           "AND TranslationLanguages.Language='$translate_lang' " .
-           "AND Translatable!='N' ";
-
-      $result = mysql_query($query) or die(mysql_error());
+      $result = translations_query( $translate_lang, $untranslated, $group )
+                or die(mysql_error());
       $numrows = mysql_num_rows($result);
-
       if( $numrows == 0 and !$untranslated )
          error('translation_bad_language_or_group');
 
@@ -166,7 +142,23 @@ When translating you should keep in mind the following things:
       echo "<CENTER>\n";
 
       $translate_form = new Form( 'translateform', 'update_translation.php', FORM_POST );
-      $translate_form->add_row( array( 'HEADER', 'Translate the following strings' ) );
+      $translate_form->add_row( array('HEADER', 'Translate the following strings' ) );
+
+      $string = '';
+      foreach( $known_languages as $entry => $array )
+      {
+         foreach( $array as $enc => $lang_name )
+         {
+            if( $entry . "." . $enc == $translate_lang)
+               $string .= ",$lang_name";
+         }
+      }
+      if( $string )
+         $string = substr( $string, 1);
+      else
+         $string = $translate_lang;
+
+      $translate_form->add_row( array( 'CELL', 99, 'align="center"', 'TEXT', "- $string -" ) );
 
       list(,$translate_encoding) = explode('.', $translate_lang);
 
@@ -178,16 +170,23 @@ When translating you should keep in mind the following things:
                                          strlen( $string ) / $hsize + 2,
                                          substr_count( $string, "\n" ) + 2 ),
                                     12 )));
-         $translate_form->
-            add_row( array( 'TEXT', nl2br( htmlspecialchars($string, ENT_QUOTES,
-                                                            'iso-8859-1' ) ),
+         $form_row = array( 'TEXT', nl2br( textarea_safe($string, 'iso-8859-1' ) ),
                             'TD',
                             'TEXTAREA', "transl" . $row['Original_ID'],
-                            $hsize, $vsize,
-                            @htmlspecialchars($row['Text'], ENT_QUOTES, $translate_encoding),
-                            'TD',
+                              $hsize, $vsize,
+                              textarea_safe( $row['Text'], $translate_encoding),
+                            'CELL', 1, 'nowrap',
                             'CHECKBOX', 'same' . $row['Original_ID'], 'Y',
-                            'same', $row['Text'] === '') );
+                              'untranslated', $row['Text'] === '',
+                           ) ;
+         if( $untranslated )
+            array_push( $form_row,
+                            'BR',
+                            'CHECKBOX', 'unch' . $row['Original_ID'], 'Y',
+                              'unchanged', false ) ;
+
+         $translate_form->add_row( $form_row, -1, false ) ;
+
          $translate_form->add_row( array( 'HR' ) );
       }
 
