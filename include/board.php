@@ -355,21 +355,15 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
 
 // fills $array with positions where the stones are.
 // returns the coords of the last move
-function make_array( $gid, &$array, &$msg, &$msgtbl, $max_moves, $move, &$result, &$marked_dead,
+function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked_dead,
                      $no_marked_dead = false )
 {
    $array = NULL;
-   $msgtbl = NULL;
    $lastx = $lasty = -1; // don't use as lastx/lasty
 
    if( !$move ) $move = $max_moves;
 
-   $result = mysql_query( "SELECT Moves.*,MoveMessages.Text AS mobj FROM Moves " .
-                          "LEFT JOIN MoveMessages " .
-                          "ON $gid=MoveMessages.gid AND Moves.MoveNr=MoveMessages.MoveNr " .
-                          "WHERE Moves.gid=$gid ORDER BY Moves.ID" )
-               or die(mysql_error())
-               ;
+   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
 
    $removed_dead = FALSE;
    $marked_dead = array();
@@ -377,22 +371,14 @@ function make_array( $gid, &$array, &$msg, &$msgtbl, $max_moves, $move, &$result
    while( $row = mysql_fetch_assoc($result) )
    {
 
-         if( $row["MoveNr"] > $max_moves ) {
+      if( $row["MoveNr"] > $move )
+      {
+         if( $row["MoveNr"] > $max_moves )
             fix_corrupted_move_table($gid);
-            break;
-         }
+         break;
+      }
 
-      $mobj="";
       extract($row);
-
-      if ($mobj)
-      {
-         $msgtbl[$MoveNr]= $mobj;
-      }
-      if( $MoveNr > $move )
-      {
-         continue;
-      }
 
       $lastx = $lasty = -1; // don't use as lastx/lasty
       if( $Stone <= WHITE )
@@ -427,7 +413,15 @@ function make_array( $gid, &$array, &$msg, &$msgtbl, $max_moves, $move, &$result
       }
    }
 
-      $msg = $msgtbl[$move];
+   $result2 = mysql_query( "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" );
+
+   if( mysql_num_rows($result2) == 1 )
+   {
+      $row = mysql_fetch_array($result2);
+      $msg = $row["Text"];
+   }
+   else
+      $msg = '';
 
    return array($lastx,$lasty);
 }

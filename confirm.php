@@ -157,7 +157,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
 
    list($lastx,$lasty) =
-      make_array( $gid, $array, $msg ,$msgid, $Moves, NULL, $moves_result, $marked_dead, $no_marked_dead);
+      make_array( $gid, $array, $msg, $Moves, NULL, $moves_result, $marked_dead, $no_marked_dead );
 
    $Moves++;
 

@@ -133,7 +133,7 @@ require( "include/rating.php" );
                        $action == 'choose_move' or $action == 'move' );
 
    list($lastx,$lasty) =
-      make_array( $gid, $array, $msg ,$msgtbl, $Moves, $move, $moves_result, $marked_dead, $no_marked_dead);
+      make_array( $gid, $array, $msg, $Moves, $move, $moves_result, $marked_dead, $no_marked_dead );
 
    $enable_message = true;
 
@@ -285,7 +285,7 @@ require( "include/rating.php" );
 
    if( !$enable_message and $Moves > 0 )
    {
-      draw_moves($msgtbl);
+      draw_moves();
    }
 
    if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' or

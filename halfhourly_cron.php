@@ -76,7 +76,7 @@ require_once( "include/board.php" );
                extract($game_row);
 
                $mess = NULL;
-               make_array( $ID, $array, $mess, $msgtbl, $Moves, NULL, $moves_result, $marked_dead ,false);
+               make_array( $ID, $array, $mess, $Moves, NULL, $moves_result, $marked_dead );
 
                $msg .= str_pad('', 47, '-') . "\n";
                $msg .= "Game ID: $ID  ($HOSTBASE/game.php?gid=$ID)\n";
