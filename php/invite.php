@@ -133,7 +133,7 @@ start_page("Send Invitation", true, $logged_in, $player_row );
       <TR>
         <TD align=right>Komi:</TD>
         <TD align=left>  
-          <input type="text" value="5.5" name="komi" size="5" maxlength="5">
+          <input type="text" value="6.5" name="komi" size="5" maxlength="5">
       </TR>
 
       <TR>
