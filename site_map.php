@@ -127,8 +127,8 @@ function item($text,$link,$working, $level,$last=false)
 
 }
 
-echo "</table>\n";
-echo "<p>The black links require an argument to work, so they are not usable\n";
+echo "</table>\n<p>";
+echo T_('The black links require an argument to work, so they are not usable.') . "\n";
 echo "</td></tr></table>\n";
 
 end_page();
