@@ -303,7 +303,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
 
       if( $uid != $player_row["ID"] and !$observe )
-         $menu_array[T_('Invite this user')] = "message.php?mode=Iinvite&uid=$uid";
+         $menu_array[T_('Invite this user')] = "message.php?mode=Invite&uid=$uid";
    }
 
    if( $finished or $observe )
