@@ -156,13 +156,6 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
   echo "
   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">\n";
 
-//   echo '<script language="JavaScript">
-// function popup(page)
-// {
-// w2=window.open(page, "w2", "");
-// }
-// </script>';
-
 
    echo '
     <TITLE> Dragon Go Server - ' . $title . '</TITLE>
