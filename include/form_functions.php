@@ -248,6 +248,7 @@ class Form
                         $result .= $ownhtml . "\n";
                       }
                   }
+                  break;
 
                 case 'HEADER':
                   {
