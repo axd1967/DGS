@@ -50,6 +50,10 @@ function draw_board($Size, &$array, $may_play, $gid,
     if( $Size >=13) $hoshi_3 = 5; else $hoshi_3 = 7;
 
     $letter_r = 'a';
+    $str1 = "><IMG  height=$stone_size width=$stone_size border=0 ";
+    $str2r = "<td><A href=game.php?gid=$gid&action=remove&coord=";
+    $str2m = "<td><A href=game.php?gid=$gid&action=move&coord=";
+
     for($rownr = $Size; $rownr > 0; $rownr-- )
         {
             echo "<tr><td align=center><font size=$font_size><B>$rownr</B></font></td>\n";
@@ -126,19 +130,27 @@ function draw_board($Size, &$array, $may_play, $gid,
                         $type .= "m";
 
                     if( $may_play && $empty && !$killedstring)
+                        echo $str2m . $letter_c . $letter_r . $str1 . 
+                            " alt='$alt' SRC=$stone_size/$type.gif></A></td>\n";
+                            /*
                         echo "<td><A href=game.php?gid=$gid&action=move&coord=$letter_c$letter_r>" . 
                             "<IMG  height=$stone_size width=$stone_size border=0 " . 
-                            "alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
-
+                            "alt='$alt' SRC=$stone_size/$type.gif></A></td>\n";
+                            */
                     else if( $may_play && !$empty && $killedstring)
+                        echo $str2r . $letter_c . $letter_r . $str1 . 
+                            "&killedstring=$killedstring> alt='$alt' SRC=$stone_size/$type.gif></A></td>\n";
+                        
+                        /*
                         echo "<td><A href=game.php?gid=$gid&action=remove&coord=" .
                             "$letter_c$letter_r&killedstring=$killedstring>" . 
                             "<IMG  height=$stone_size width=$stone_size border=0 " . 
-                            "alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
-
+                            "alt='$alt' SRC=$stone_size/$type.gif></A></td>\n";
+                        */
                     else
-                        echo "<td><IMG  height=$stone_size width=$stone_size border=0 " . 
-                            "alt='$alt' align=center SRC=$stone_size/$type.gif></td>\n";
+                        echo "<td" . $str1 . "alt='$alt' SRC=$stone_size/$type.gif></td>\n";
+                        //                        echo "<td><IMG  height=$stone_size width=$stone_size border=0 " . 
+                        //                            "alt='$alt' SRC=$stone_size/$type.gif></td>\n";
 
                     $letter_c ++;
                 }
