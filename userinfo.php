@@ -56,10 +56,10 @@ require_once( "include/countries.php" );
    $row = mysql_fetch_array( $result );
 
    $name_safe = make_html_safe($row['Name']);
-   $handle_safe = make_html_safe($row['Handle']);
+   $handle_safe = $row['Handle'];
 
    $title = ( $my_info ? T_('My user info') :
-              sprintf(T_('User info for %s'), $name_safe) . " ($handle_safe)");
+              sprintf(T_('User info for %s'), user_reference( 0, 0, '', 0, $name_safe, $handle_safe)) );
 
    start_page($title, true, $logged_in, $player_row );
 
@@ -163,6 +163,6 @@ require_once( "include/countries.php" );
    }
 
 
-   end_page( $menu_array );
+   end_page(@$menu_array);
 }
 ?>

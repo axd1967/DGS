@@ -53,7 +53,7 @@ require_once( "include/message_functions.php" );
        <tr><td><b>' . T_("Name") . '</b></td>
            <td>' . make_html_safe($player_row["Name"]) . '</td></tr>
        <tr><td><b>' . T_("Userid") . '</b></td>
-           <td>' . make_html_safe($player_row["Handle"]) . '</td></tr>
+           <td>' . $player_row["Handle"] . '</td></tr>
        <tr><td><b>' . T_("Open for matches?") . '</b></td>
            <td>' . make_html_safe($player_row["Open"], true) . '</td></tr>
        <tr><td><b>' . T_("Rating") . '</b></td>
@@ -154,7 +154,7 @@ require_once( "include/message_functions.php" );
                make_html_safe($Name) . "</font></a></td>";
          if( $gtable->Is_Column_Displayed[4] )
             $grow_strings[4] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Handle) . "</font></a></td>";
+               $Handle . "</font></a></td>";
          if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
          if( $gtable->Is_Column_Displayed[5] )
@@ -182,6 +182,7 @@ require_once( "include/message_functions.php" );
                         T_('Show finished games') => "show_games.php?uid=$uid&finished=1",
                         T_('Show observed games') => "show_games.php?observe=t" );
 
-   end_page( $menu_array );
+   end_page(@$menu_array);
+
 }
 ?>

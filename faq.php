@@ -34,11 +34,10 @@ require_once( "include/std_functions.php" );
     T_('Frequently Asked Questions') . "</font></h3>\n";
 
 
-  if( $_GET["read"] == 't' )
+  $cat = @$_GET['cat'];
+  if( $cat !== 'all' && !is_numeric($cat) ) $cat = 0;
+  if( @$_GET["read"] == 't' )
   {
-     $cat = ($_GET['cat'] === 'all' or is_numeric($_GET['cat'])) ? $_GET['cat'] : 0;
-
-
      $result = mysql_query(
         "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
         "Question.Text AS Q, Question.Translatable, Answer.Text AS A, " .
@@ -110,6 +109,6 @@ require_once( "include/std_functions.php" );
   if( $cat !== 'all' )
      $menu_array = array( T_('Show the whole FAQ in one page') => "faq.php?read=t&cat=all" );
 
-   end_page( $menu_array );
+   end_page(@$menu_array);
 }
 ?>

@@ -28,9 +28,11 @@ require_once( "include/rating.php" );
 {
    connect2mysql();
 
-   $all = ($_GET['uid'] == 'all');
+   $all = (@$_GET['uid'] == 'all');
+   $observe = isset($_GET['observe']);
+   $finished = isset($_GET['finished']);
 
-   if( !($_GET['uid'] > 0) and !$_GET['observe'] and !$all )
+   if( !(@$_GET['uid'] > 0) and !$observe and !$all )
       error("no_uid");
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
@@ -39,14 +41,14 @@ require_once( "include/rating.php" );
       error("not_logged_in");
 
    //Not used: $column_set = $player_row["GamesColumns"];
-   if( $_GET['observe'] )
+   if( $observe )
       $page = 'show_games.php?observe=t&';
    else
-      $page = "show_games.php?uid=" . $_GET['uid'] . '&' . ( $_GET['finished'] ? 'finished=1&' : '' );
+      $page = "show_games.php?uid=" . $_GET['uid'] . '&' . ( $finished ? 'finished=1&' : '' );
 
-   if( !$_GET['observe'] and !$all )
+   if( !$observe and !$all )
    {
-      $result = mysql_query( "SELECT Name, Handle FROM Players WHERE ID=" . $_GET['uid'] );
+      $result = mysql_query( "SELECT ID, Name, Handle FROM Players WHERE ID=" . $_GET['uid'] );
 
       if( mysql_num_rows($result) != 1 )
          error("unknown_user");
@@ -54,7 +56,7 @@ require_once( "include/rating.php" );
       $user_row = mysql_fetch_array($result);
    }
 
-   if(!$_GET['sort1'])
+   if(!@$_GET['sort1'])
    {
       $_GET['sort1'] = 'Lastchanged';
       $_GET['desc1'] = 1;
@@ -62,7 +64,7 @@ require_once( "include/rating.php" );
       $_GET['desc2'] = 1;
    }
 
-   if(!$_GET['sort2'])
+   if(!@$_GET['sort2'])
    {
       $_GET['sort2'] = 'Lastchanged';
       $_GET['desc2'] = 1;
@@ -74,7 +76,7 @@ require_once( "include/rating.php" );
    $order = $gtable->current_order_string();
    $limit = $gtable->current_limit_string();
 
-   if( $_GET['observe'] )
+   if( $observe )
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "black.Name AS blackName, black.Handle AS blackHandle, " .
@@ -93,14 +95,14 @@ require_once( "include/rating.php" );
          "white.Name AS whiteName, white.Handle AS whiteHandle, white.ID AS whiteID, " .
          "black.Rating2 AS blackRating, white.Rating2 AS whiteRating, " .
          "Games.Black_Start_Rating AS blackStartRating, Games.White_Start_Rating AS whiteStartRating " .
-         ( $_GET['finished']
+         ( $finished
            ? ", Black_End_Rating AS blackEndRating, White_End_Rating AS whiteEndRating, " .
            "blog.RatingDiff AS blackDiff, wlog.RatingDiff AS whiteDiff " : '' ) .
          "FROM Games, Players AS white, Players AS black " .
-         ( $_GET['finished'] ?
+         ( $finished ?
            "LEFT JOIN Ratinglog AS blog ON blog.gid=Games.ID AND blog.uid=Black_ID ".
            "LEFT JOIN Ratinglog AS wlog ON wlog.gid=Games.ID AND wlog.uid=White_ID " : '' ) .
-         "WHERE " . ( $_GET['finished']
+         "WHERE " . ( $finished
                       ? "Status='FINISHED' "
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND white.ID=White_ID AND black.ID=Black_ID " .
@@ -113,14 +115,14 @@ require_once( "include/rating.php" );
          "Rating2 AS Rating, " .
          'IF(Black_ID=' . $_GET['uid'] .
          ', Games.White_Start_Rating, Games.Black_Start_Rating) AS startRating, ' .
-         ( $_GET['finished'] ?
+         ( $finished ?
            'IF(Black_ID=' . $_GET['uid'] .
            ', Games.White_End_Rating, Games.Black_End_Rating) AS endRating, ' .
            'log.RatingDiff AS ratingDiff, ' : '' ) .
          "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
          "IF(White_ID=" . $_GET['uid'] . "," . WHITE . "," . BLACK . ") AS Color ";
 
-      if( $_GET['finished'] )
+      if( $finished )
       {
          $query .= ", (Black_ID=" . $_GET['uid'] . " AND Score<0)*2 + " .
             "(White_ID=" . $_GET['uid'] . " AND Score>0)*2 + " .
@@ -128,9 +130,9 @@ require_once( "include/rating.php" );
       }
 
       $query .= "FROM Games,Players " .
-         ( $_GET['finished'] ?
+         ( $finished ?
            "LEFT JOIN Ratinglog AS log ON gid=Games.ID AND uid={$_GET['uid']} " : '' ) .
-         "WHERE " . ( $_GET['finished'] ? "Status='FINISHED' "
+         "WHERE " . ( $finished ? "Status='FINISHED' "
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND (( Black_ID=" . $_GET['uid'] . " AND White_ID=Players.ID ) " .
            "OR ( White_ID=" . $_GET['uid'] . " AND Black_ID=Players.ID )) " .
@@ -141,18 +143,16 @@ require_once( "include/rating.php" );
 
    $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
 
-   if( $_GET['observe'] or $all)
+   if( $observe or $all)
    {
-      $title1 = $title2 = ( $_GET['observe'] ? T_('Observed games') :
-                            ( $_GET['finished'] ? T_('Finished games') : T_('Running games') ) );
+      $title1 = $title2 = ( $observe ? T_('Observed games') :
+                            ( $finished ? T_('Finished games') : T_('Running games') ) );
    }
    else
    {
-      $games_for = ( $_GET['finished'] ? T_('Finished games for %s') : T_('Running games for %s') );
+      $games_for = ( $finished ? T_('Finished games for %s') : T_('Running games for %s') );
       $title1 = sprintf(  $games_for, make_html_safe($user_row["Name"]) );
-      $title2 = sprintf(  $games_for, "<A href=\"userinfo.php?uid=" . $_GET['uid'] . "\">" .
-                          make_html_safe($user_row["Name"]) . " (" .
-                          make_html_safe($user_row["Handle"]) . ")</A>");
+      $title2 = sprintf(  $games_for, user_reference( 1, true, '', $user_row) );
    }
 
    start_page( $title1, true, $logged_in, $player_row, button_style() );
@@ -163,23 +163,23 @@ require_once( "include/rating.php" );
    $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true );
    $gtable->add_tablehead( 2, T_('sgf') );
 
-   if( $_GET['observe'] or $all )
+   if( $observe or $all )
    {
       $gtable->add_tablehead(17, T_('Black name'), 'blackName');
       $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
       $gtable->add_tablehead(26, T_('Black start rating'), 'blackStartRating', true);
-      if( $_GET['finished'] )
+      if( $finished )
          $gtable->add_tablehead(27, T_('Black end rating'), 'blackEndRating', true);
       $gtable->add_tablehead(19, T_('Black rating'), 'blackRating', true);
-      if( $_GET['finished'] )
+      if( $finished )
          $gtable->add_tablehead(28, T_('Black rating diff'), 'blackDiff', true);
       $gtable->add_tablehead(20, T_('White name'), 'whiteName');
       $gtable->add_tablehead(21, T_('White userid'), 'whiteHandle');
       $gtable->add_tablehead(29, T_('White start rating'), 'whiteStartRating', true);
-      if( $_GET['finished'] )
+      if( $finished )
          $gtable->add_tablehead(30, T_('White end rating'), 'whiteEndRating', true);
       $gtable->add_tablehead(22, T_('White rating'), 'whiteRating', true);
-      if( $_GET['finished'] )
+      if( $finished )
          $gtable->add_tablehead(31, T_('White rating diff'), 'whiteDiff', true);
    }
    else
@@ -187,10 +187,10 @@ require_once( "include/rating.php" );
       $gtable->add_tablehead(3, T_('Opponent'), 'Name');
       $gtable->add_tablehead(4, T_('Nick'), 'Handle');
       $gtable->add_tablehead(23, T_('Start rating'), 'startRating', true);
-      if( $_GET['finished'] )
+      if( $finished )
          $gtable->add_tablehead(24, T_('End rating'), 'endRating', true);
       $gtable->add_tablehead(16, T_('Rating'), 'Rating', true);
-      if( $_GET['finished'] )
+      if( $finished )
          $gtable->add_tablehead(25, T_('Rating diff'), 'ratingDiff', true);
       $gtable->add_tablehead(5, T_('Color'), 'Color');
    }
@@ -200,7 +200,7 @@ require_once( "include/rating.php" );
    $gtable->add_tablehead(8, T_('Komi'), 'Komi');
    $gtable->add_tablehead(9, T_('Moves'), 'Moves', true);
 
-   if( $_GET['finished'] )
+   if( $finished )
    {
       $gtable->add_tablehead(10, T_('Score'));
       if( !$all )
@@ -214,7 +214,7 @@ require_once( "include/rating.php" );
    {
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
       $gtable->add_tablehead(13, T_('Last Move'), 'Lastchanged', true);
-      if( !$_GET['observe'] and !$all)
+      if( !$observe and !$all)
       {
          $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
       }
@@ -227,7 +227,10 @@ require_once( "include/rating.php" );
       $endRating = $blackEndRating = $whiteEndRating = NULL;
       $blackDiff = $whiteDiff = $ratingDiff = NULL;
       extract($row);
-      $color = ( $Color == BLACK ? 'b' : 'w' );
+      if( !isset($Color) )
+         $color = 'y';
+      else
+         $color = ( $Color == BLACK ? 'b' : 'w' );
 
       $grow_strings = array();
       if( $gtable->Is_Column_Displayed[1] )
@@ -238,21 +241,21 @@ require_once( "include/rating.php" );
          $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
             "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";
 
-      if( $_GET['observe'] or $all )
+      if( $observe or $all )
       {
          if( $gtable->Is_Column_Displayed[17] )
             $grow_strings[17] = "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
                make_html_safe($blackName) . "</font></a></td>";
          if( $gtable->Is_Column_Displayed[18] )
             $grow_strings[18] = "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
-               make_html_safe($blackHandle) . "</font></a></td>";
+               $blackHandle . "</font></a></td>";
          if( $gtable->Is_Column_Displayed[26] )
             $grow_strings[26] = "<td>" . echo_rating($blackStartRating,true,$blackID) . "&nbsp;</td>";
-         if( $_GET['finished'] and $gtable->Is_Column_Displayed[27] )
+         if( $finished and $gtable->Is_Column_Displayed[27] )
             $grow_strings[27] = "<td>" . echo_rating($blackEndRating,true,$blackID) . "&nbsp;</td>";
          if( $gtable->Is_Column_Displayed[19] )
             $grow_strings[19] = "<td>" . echo_rating($blackRating,true,$blackID) . "&nbsp;</td>";
-         if( $_GET['finished'] and $gtable->Is_Column_Displayed[28] )
+         if( $finished and $gtable->Is_Column_Displayed[28] )
             $grow_strings[28] = "<td>" .
                (isset($blackDiff) ? ($blackDiff > 0 ? '+' : '') .
                 sprintf("%0.2f",$blackDiff*0.01) : '&nbsp;' ) . "</td>";
@@ -261,14 +264,14 @@ require_once( "include/rating.php" );
                make_html_safe($whiteName) . "</font></a></td>";
          if( $gtable->Is_Column_Displayed[21] )
             $grow_strings[21] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
-               make_html_safe($whiteHandle) . "</font></a></td>";
+               $whiteHandle . "</font></a></td>";
          if( $gtable->Is_Column_Displayed[29] )
             $grow_strings[29] = "<td>" . echo_rating($whiteStartRating,true,$whiteID) . "&nbsp;</td>";
-         if( $_GET['finished'] and $gtable->Is_Column_Displayed[30] )
+         if( $finished and $gtable->Is_Column_Displayed[30] )
             $grow_strings[30] = "<td>" . echo_rating($whiteEndRating,true,$whiteID) . "&nbsp;</td>";
          if( $gtable->Is_Column_Displayed[22] )
             $grow_strings[22] = "<td>" . echo_rating($whiteRating,true,$whiteID) . "&nbsp;</td>";
-         if( $_GET['finished'] and $gtable->Is_Column_Displayed[31] )
+         if( $finished and $gtable->Is_Column_Displayed[31] )
             $grow_strings[31] = "<td>" .
                (isset($whiteDiff) ? ($whiteDiff > 0 ? '+' : '') .
                 sprintf("%0.2f",$whiteDiff*0.01) : '&nbsp;' ) . "</td>";
@@ -280,14 +283,14 @@ require_once( "include/rating.php" );
                make_html_safe($Name) . "</font></a></td>";
          if( $gtable->Is_Column_Displayed[4] )
             $grow_strings[4] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Handle) . "</font></a></td>";
+               $Handle . "</font></a></td>";
          if( $gtable->Is_Column_Displayed[23] )
             $grow_strings[23] = "<td>" . echo_rating($startRating,true,$pid) . "&nbsp;</td>";
-         if( $_GET['finished'] and $gtable->Is_Column_Displayed[24] )
+         if( $finished and $gtable->Is_Column_Displayed[24] )
             $grow_strings[24] = "<td>" . echo_rating($endRating,true,$pid) . "&nbsp;</td>";
          if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
-         if( $_GET['finished'] and $gtable->Is_Column_Displayed[25] )
+         if( $finished and $gtable->Is_Column_Displayed[25] )
             $grow_strings[25] = "<td>" .
                (isset($ratingDiff) ? ($ratingDiff > 0 ? '+' : '') .
                 sprintf("%0.2f",$ratingDiff*0.01) : '&nbsp;' ) . "</td>";
@@ -304,7 +307,7 @@ require_once( "include/rating.php" );
       if( $gtable->Is_Column_Displayed[9] )
          $grow_strings[9] = "<td>$Moves</td>";
 
-      if( $_GET['finished'] )
+      if( $finished )
       {
          if( $gtable->Is_Column_Displayed[10] )
             $grow_strings[10] = '<td>' . score2text($Score, false) . "</td>";
@@ -330,7 +333,7 @@ require_once( "include/rating.php" );
          if( $gtable->Is_Column_Displayed[13] )
             $grow_strings[13] = '<td>' . date($date_fmt2, $Time) . "</td>";
 
-         if( !$_GET['observe'] and !$all and $gtable->Is_Column_Displayed[15] )
+         if( !$observe and !$all and $gtable->Is_Column_Displayed[15] )
             $grow_strings[15] = '<td align=center>' . date($date_fmt2, $Lastaccess) . "</td>";
       }
 
@@ -341,7 +344,7 @@ require_once( "include/rating.php" );
 
    $menu_array = array();
 
-   if( $_GET['observe'] )
+   if( $observe )
    {
       $_GET['uid'] = $player_row["ID"];
    }
@@ -350,24 +353,24 @@ require_once( "include/rating.php" );
    {
       $menu_array[T_('User info')] = "userinfo.php?uid=" . $_GET['uid'];
 
-      if( $_GET['uid'] != $player_row["ID"] and !$_GET['observe'] )
+      if( $_GET['uid'] != $player_row["ID"] and !$observe )
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite&uid=" . $_GET['uid'];
    }
 
-   if( $_GET['finished'] or $_GET['observe'] )
+   if( $finished or $observe )
    {
       $menu_array[T_('Show running games')] = "show_games.php?uid=" . $_GET['uid'];
    }
-   if( !$_GET['finished'] )
+   if( !$finished )
    {
       $menu_array[T_('Show finished games')] = "show_games.php?uid=" .
          $_GET['uid'] . "&finished=1";
    }
-   if( !$_GET['observe'] )
+   if( !$observe )
    {
       $menu_array[T_('Show observed games')] = "show_games.php?observe=t";
    }
 
-   end_page($menu_array);
+   end_page(@$menu_array);
 }
 ?>

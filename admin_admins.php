@@ -123,7 +123,7 @@ require_once( "include/table_columns.php" );
 
          $arow_strings = array();
          $arow_strings[1] = "<td><A href=\"userinfo.php?uid=$id\">$id</A></td>";
-         $arow_strings[2] = "<td><A href=\"userinfo.php?uid=$id\">" . $row["Handle"] . "</td>";
+         $arow_strings[2] = "<td><A href=\"userinfo.php?uid=$id\">" . $row["Handle"] . "</A></td>";
          $arow_strings[3] = "<td><A href=\"userinfo.php?uid=$id\">" .
             make_html_safe($row["Name"]) . "</A></td>";
          $arow_strings[4] = "<td align=center>" .

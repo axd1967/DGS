@@ -107,7 +107,7 @@ define('BAD_RATING_COLOR',"ff000033");
                make_html_safe($Name) . "</font></a></td>";
          if( $wrtable->Is_Column_Displayed[2] )
             $wrow_strings[2] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Handle) . "</font></a></td>";
+               $Handle . "</font></a></td>";
          if( $wrtable->Is_Column_Displayed[3] )
             $wrow_strings[3] = "<td nowrap>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
          if( empty($Comment) )
@@ -162,7 +162,7 @@ define('BAD_RATING_COLOR',"ff000033");
       $menu_array[T_('Add new game')] = "waiting_room.php" .
          ($orderstring ? "?$orderstring" : '' ) . "#add" ;
 
-   end_page($menu_array);
+   end_page(@$menu_array);
 }
 
 

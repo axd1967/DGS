@@ -22,6 +22,7 @@ require_once( "include/std_functions.php" );
 
 function illegal_chars( $string, $punctuation=false )
 {
+   //must never allow quotes, ampersand, < and >
    $legal_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_+';
    if( $punctuation )
       $legal_chars .= '.,:;?!%*';

@@ -98,7 +98,7 @@ require_once( "include/countries.php" );
             make_html_safe($row['Name']) . "</A></td>";
       if( $utable->Is_Column_Displayed[3] )
          $urow_strings[3] = "<td><A href=\"userinfo.php?uid=$ID\">" .
-            make_html_safe($row['Handle']) . "</A></td>";
+            $row['Handle'] . "</A></td>";
       if( $utable->Is_Column_Displayed[16] )
       {
          $c = $row['Country'];
@@ -146,6 +146,6 @@ require_once( "include/countries.php" );
    $menu_array = array( ( $_GET['showall'] ? T_("Only active users")  : T_("Show all users") ) =>
                         "users.php$vars" );
 
-   end_page($menu_array);
+   end_page(@$menu_array);
 }
 ?>

@@ -121,7 +121,6 @@ $uid = @$_GET['uid'];
       }
 
       $other_name = make_html_safe($other_name);
-      $other_handle_safe = make_html_safe($other_handle);
 
 /* Here, the line was:
       $can_reply = ( $To_ID == $my_id && $other_id && $other_handle);
@@ -196,7 +195,7 @@ $uid = @$_GET['uid'];
       case 'InviteDisputed':
       {
          message_info_table($mid, $date, $to_me,
-                            $other_id, $other_name, $other_handle_safe,
+                            $other_id, $other_name, $other_handle,
                             $Subject, $ReplyTo, $flow, $Text,
                             $folders, $Folder_nr, $message_form, $Replied=='M');
 
@@ -245,25 +244,25 @@ $uid = @$_GET['uid'];
       case 'ShowMyInvite':
       {
          message_info_table($mid, $date, $to_me,
-                            $other_id, $other_name, $other_handle_safe,
+                            $other_id, $other_name, $other_handle,
                             $Subject, $ReplyTo, $flow, $Text,
                             $folders, $Folder_nr, $message_form, ($mode=='ShowInvite' or $Replied=='M'));
 
          if( $Color == BLACK )
          {
             $colortxt = "<img src='17/w.gif' alt='" . T_('White') . "'> " .
-               "$other_name ($other_handle_safe)" .
-               " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
-               make_html_safe($player_row["Name"]) .
-               ' (' . make_html_safe($player_row["Handle"]) . ')&nbsp;&nbsp;';
+               user_reference( 0, true, '', 0, $other_name, $other_handle) .
+               "&nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
+               user_reference( 0, true, '', $player_row) .
+               '&nbsp;&nbsp;';
          }
          else
          {
             $colortxt = "<img src='17/w.gif' alt='" . T_('White') . "'> " .
-               make_html_safe($player_row["Name"]) .
-               ' (' . make_html_safe($player_row["Handle"]) . ')' .
-               " &nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
-               "$other_name ($other_handle_safe)&nbsp;&nbsp;";
+               user_reference( 0, true, '', $player_row) .
+               "&nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
+               user_reference( 0, true, '', 0, $other_name, $other_handle) .
+               '&nbsp;&nbsp;';
          }
 
          game_info_table($Size, $colortxt, $ToMove_ID, $Komi, $Handicap, $Maintime,
@@ -299,7 +298,7 @@ $uid = @$_GET['uid'];
       case 'Dispute':
       {
          message_info_table($mid, $date, $to_me,
-                            $other_id, $other_name, $other_handle_safe,
+                            $other_id, $other_name, $other_handle,
                             $Subject, $ReplyTo, $flow, $Text); //no folders, so no move
 
          $message_form->add_row( array( 'HEADER', T_('Dispute settings') ) );
