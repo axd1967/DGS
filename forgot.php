@@ -34,9 +34,7 @@ echo '
 <TABLE cellpadding=10 width=80% >
 <TR><TD align="left">
 <p>
-' . T_('If you have forgot your password we can email a new one. The new password
-  will be randomly generated, but you can of course change it later from the
-  edit profile page.') . '
+' . T_('If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.') . '
 </TD></TR>
 <FORM name="forgot" action="send_new_password.php" method="POST">
 
