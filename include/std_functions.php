@@ -84,7 +84,7 @@ $buttoncolors = array('white','white','white','white',
                       '#990000','white','white','white',
                       'white','white','white');
 
-$cookie_pref_rows = array('Stonsize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button');
+$cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button');
 
 $button_max = 10;
 
