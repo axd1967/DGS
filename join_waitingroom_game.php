@@ -51,8 +51,11 @@ require( "include/rating.php" );
        and !$player_row["RatingStatus"] )
       error("no_initial_rating");
 
-   if( $delete == 't' and $player_row['ID'] == $uid )
+   if( $delete == 't' )
    {
+      if( $player_row['ID'] !== $uid )
+         error('waitingroom_delete_not_own');
+
       mysql_query("DELETE FROM Waitingroom WHERE ID=$id LIMIT 1");
 
       $msg = urlencode(T_('Game deleted!'));

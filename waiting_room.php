@@ -168,7 +168,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          ($orderstring ? "?$orderstring" : '' ) . "#add" ;
 
    if( $info_row['pid'] == $player_row['ID'] )
-      $menu_array[T_('Delete game')] = "join_waitingroom_game.php?id=$ID&delete=t";
+      $menu_array[T_('Delete game')] = "join_waitingroom_game.php?id=" .
+         $info_row['ID'] . "&delete=t";
 
    end_page($menu_array);
 }

@@ -314,6 +314,12 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("waitingroom_delete_not_own"):
+      {
+         echo T_("Sorry, you may only delete your own game.");
+      }
+      break;
+
       case("waitingroom_game_not_found"):
       {
          echo T_("Sorry, couldn't find this waiting room game. Probably someone has already joined it.");
