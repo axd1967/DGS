@@ -41,7 +41,9 @@ $mode = $_GET['mode'];
    $my_id = $player_row["ID"];
    $can_reply = true;
    if( !$mode )
-      $mode = "NewMessage";
+   {
+      $mode = ($mid > 0 ? 'ShowMessage' : 'NewMessage');
+   }
 
    if( !$uid )
    {
@@ -60,14 +62,6 @@ $mode = $_GET['mode'];
    }
 
    $folders = get_folders($my_id);
-   $new_folder = $_POST['folder'];
-
-   if( isset($new_folder) and isset($folders[$new_folder]) )
-   {
-      mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='{$_POST['folder']}' " .
-                   "WHERE uid='$my_id' AND mid='$mid' " .
-                   "AND !( Type='INVITATION' and Replied='N' ) LIMIT 1" );
-   }
 
    if( $mode == 'ShowMessage' or $mode == 'Dispute' )
    {
@@ -126,7 +120,7 @@ $mode = $_GET['mode'];
 
          if( $Type == 'INVITATION' )
          {
-            if( $Status=='INVITED' and !($Replied == 'N'))
+            if( $Status=='INVITED' and ($Replied === 'N') )
             {
                $mode = 'ShowInvite';
             }

@@ -240,10 +240,8 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
    if( isset($folders) )
    {
       echo "<tr><td><b>" . T_('Folder') . ":</b></td>\n<td><table cellpadding=3><tr>" .
-         echo_folder_box($folders, $folder_nr, 'f7f5e3') . "</table></td>\n";
-
-      echo "<td><form name=\"movefolders\" action=\"" . basename($_SERVER['REQUEST_URI']) .
-         "\" method=\"POST\">\n";
+         echo_folder_box($folders, $folder_nr, 'f7f5e3') . "</table></td>\n" .
+         '<td>';
 
       $fld = array('' => '');
       foreach( $folders as $key => $val )
@@ -252,7 +250,7 @@ function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_han
 
       echo $form->print_insert_select_box('folder', '1', $fld, '', '') .
          $form->print_insert_submit_button('foldermove', T_('Move to folder')) .
-         "</form></td></tr>\n";
+         "</td></tr>\n";
    }
 
 

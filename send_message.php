@@ -38,6 +38,21 @@ disable_cache();
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
+
+   $folders = get_folders($my_id);
+   $new_folder = $_POST['folder'];
+
+   if( isset($new_folder) and isset($folders[$new_folder]) )
+   {
+      mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='$newfolder' " .
+                   "WHERE uid='$my_id' AND mid='$mid' " .
+                   "AND !( Type='INVITATION' and Replied='N' ) LIMIT 1" );
+
+      if( isset($_POST['foldermove'] ) )
+          jump_to("message.php?mid=$mid");
+   }
+
+
    if( $to == "guest" )
       error("guest_may_not_recieve_messages");
 
@@ -342,8 +357,18 @@ disable_cache();
 
    if( $reply )
    {
-      mysql_query( "UPDATE MessageCorrespondents SET Replied='Y' " .
-                   "WHERE mid=$reply AND Sender='Y' AND uid=$my_id LIMIT 1" );
+      $query = "UPDATE MessageCorrespondents SET Replied='Y'";
+
+      if( $Type == "INVITATION" )
+      {
+         if( !isset($new_folder) or !isset($folders[$new_folder]) )
+            $new_folder = FOLDER_MAIN;
+         $query .= ", Folder_nr='$new_folder'";
+      }
+
+      $query .= " WHERE mid=$reply AND Sender='N' AND Replied='N' AND uid=$my_id LIMIT 1";
+
+      mysql_query( $query ) or die(mysql_error());
 
       if( $disputegid > 0 )
          mysql_query( "UPDATE Messages SET Type='DISPUTED' " .
