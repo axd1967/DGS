@@ -195,7 +195,7 @@ if( !$is_down )
                   $From= 'Server message';
 
                $msg .= str_pad('', 47, '-') . "\n" .
-                   "Message: ".mail_link('',"show_message.php?mid=$ID") . "\n" .
+                   "Message: ".mail_link('',"message.php?mid=$ID") . "\n" .
                    "Date: ".date($date_fmt, $date) . "\n" .
                    "From: $From\n" .
                    "Subject: ".mail_strip_html($Subject) . "\n\n" .
