@@ -376,7 +376,7 @@ if( mysql_affected_rows() != 1)
 //{
   mysql_query( "UPDATE Players SET Notify='NEXT' " .
                "WHERE ID='$next_to_move_ID' AND Flags LIKE '%WANT_EMAIL%' " .
-               "AND Notify='NONE' AND ID!='$next_to_move_ID'") ;
+               "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "'") ;
 
 
 //    $result = mysql_query( "SELECT Flags+0 AS flags, Notify " .
