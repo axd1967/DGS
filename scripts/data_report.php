@@ -74,7 +74,7 @@ require_once( "include/form_functions.php" );
      row.className=((row.className=='hil')?rcl:'hil');
    }\n";
 //     row.bgColor=((row.bgColor.toLowerCase()==hcol)?rcol:hcol);
-   echo " --></SCRIPT>\n";
+   echo "\n//-->\n</SCRIPT>\n";
 
 
    $dform = new Form('dform', 'data_report.php', FORM_POST, true );
