@@ -34,6 +34,23 @@ if( !$logged_in )
 
 $my_id = $player_row["ID"];
 
+if( $del ) 
+{
+    // delete messages
+
+    if( $del == 'all' )
+        {
+            $result = mysql_query("DELETE FROM Messages$my_id " .
+                                  "WHERE Info='NONE' OR Info='REPLIED'" );
+        }
+    else
+        {
+            $result = mysql_query("DELETE FROM Messages$my_id " .
+                                  "WHERE ID=$del AND (Info='NONE' OR Info='REPLIED')");
+        }
+}
+
+
 $result = mysql_query("SELECT DATE_FORMAT(Messages$my_id.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
                       "Messages$my_id.ID as mid, Messages$my_id.Subject, Messages$my_id.Info, " . 
                       "Players.Name AS sender " .
@@ -44,8 +61,8 @@ $result = mysql_query("SELECT DATE_FORMAT(Messages$my_id.Time, \"%H:%i  %Y-%m-%d
 start_page("Messages", true, $logged_in, $player_row );
 
 
-echo "<table border=3>\n";
-echo "<tr><th></th><th>From</th><th>Subject</th><th>Date</th></tr>\n";
+echo "<table border=3 align=center>\n";
+echo "<tr><th></th><th>From</th><th>Subject</th><th>Date</th><th>Del</th></tr>\n";
 
 
 
@@ -72,7 +89,10 @@ while( $row = mysql_fetch_array( $result ) )
     echo "<td><A href=\"show_message.php?mid=" . $row["mid"] . "\">" .
         $row["sender"] . "</A></td>\n" . 
         "<td>" . $row["Subject"] . "</td>\n" .
-        "<td>" . $row["date"] . "</td></tr>\n";
+        "<td>" . $row["date"] . "</td>\n" .
+        "<td align=center><a href=\"messages.php?del=" . $row["mid"] . "\">" .
+        "<img width=15 height=16 border=0 src=\"images/trashcan.gif\"></A></td>\n</tr>\n";
+        
 }
 
 echo "</table>
@@ -80,7 +100,7 @@ echo "</table>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
         <td><B><A href=\"new_message.php\">Send message</A></B></td>
-        <td><B><A href=\"delete_messages.php\"> Delete all messages</A></B></td>
+        <td><B><A href=\"messages.php?del=all\"> Delete all messages</A></B></td>
       </tr>
     </table>
 ";
