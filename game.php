@@ -25,51 +25,6 @@ require( "include/board.php" );
 require( "include/move.php" );
 require( "include/rating.php" );
 
-//From Jeremy Brenner (theedge){
-function fwd_back($cur,$tot,$gid)
-{
-   if(!$tot or $tot<0)
-      return;
-   if(!$cur or $cur<0 or $cur>$tot)
-      $cur = $tot;
-
-   $next = $cur + 1;
-   $prev = $cur - 1;
-   $pgnext = min( $cur + 10, $tot);
-   $pgprev = max( $cur - 10, 1);
-
-   $str = "<a href=\"game.php?gid=$gid&move=";
-
-   $startbutton = "&lt&lt&lt";
-   $endbutton = "&gt&gt&gt";
-   $pgprevbutton = "&lt&lt";
-   $pgnextbutton = "&gt&gt";
-   $prevbutton = "&lt";
-   $nextbutton = "&gt";
-
-   if( $prev>0 )
-   {
-      $prevbutton = $str . $prev . '">' . $prevbutton . '</a>';
-      $pgprevbutton = $str . $pgprev . '">' . $pgprevbutton . '</a>';
-      $startbutton = $str . 1 . '">' . $startbutton . '</a>';
-   }
-   if( $next<=$tot )
-   {
-      $nextbutton = $str . $next . '">' . $nextbutton . '</a>';
-      $pgnextbutton = $str . $pgnext . '">' . $pgnextbutton . '</a>';
-      $endbutton = $str . $tot . '">' . $endbutton . '</a>';
-   }
-
-   echo "<table border=0 cellpadding=5 cellspacing=0><tr>" .
-        "<td>$startbutton</td>" .
-        "<td>$pgprevbutton</td>" .
-        "<td>$prevbutton</td>" .
-        "<td>$nextbutton</td>" .
-        "<td>$pgnextbutton</td>" .
-        "<td>$endbutton</td>" .
-        "</tr></table>\n";
-}
-//From Jeremy Brenner (theedge)}
 
 {
    // abbreviations used to reduce file size
@@ -313,10 +268,6 @@ function fwd_back($cur,$tot,$gid)
               $player_row["Stonesize"], $msg, $stonestring, $handi,
               $player_row["Boardcoords"], $player_row["Woodcolor"]);
 
-//From Jeremy Brenner (theedge){
-   if (!$enable_message)
-      fwd_back($move,$Moves,$gid);
-//From Jeremy Brenner (theedge)}
 
    if( $extra_message )
       echo "<P><center>$extra_message</center>\n";
