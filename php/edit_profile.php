@@ -97,6 +97,14 @@ start_page("Edit profile", true, $logged_in, $player_row );
           </select>
           <TD><input type=submit name="action" value="Change profile"></TD>
       </TR>
+
+     <TR>
+        <TD align=right>Send email notifications:</TD>
+        <TD align=left>  <INPUT type="checkbox" name="wantemail" <?php 
+if( $player_row["flags"] & WANT_EMAIL ) echo "checked " ?> value="true"> 
+        </TD>
+     </TR> 
+
     </table>  
     <HR>
       <table>

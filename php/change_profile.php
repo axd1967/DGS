@@ -47,12 +47,18 @@ if( $action == "Change profile" )
             exit;
         }
 
+    if( $wantemail )
+        $flags = 1;
+    else
+        $flags = 0;
+
     $query = "UPDATE Players SET " .
          "Name='$name', " .
          "Email='$email', " .
          "Rank='$rank', " .
          "Stonesize=$stonesize, " .
          "Boardfontsize='$boardfontsize', " .
+         "Flags=$flags" .
          " WHERE ID=" . $player_row["ID"]; 
     
     mysql_query( $query );
