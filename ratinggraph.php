@@ -40,9 +40,6 @@ require_once( "include/form_functions.php" );
   if( !($uid > 0) )
      error("no_uid");
 
-  $BEGINYEAR = 2001;
-  $BEGINMONTH = 8;
-
   $CURRENTYEAR = date('Y', $NOW);
   $CURRENTMONTH = date('n', $NOW);
 
@@ -82,16 +79,21 @@ require_once( "include/form_functions.php" );
      $startyear = $CURRENTYEAR;
   }
 
-  if( $endyear < $startyear or ( $endyear == $startyear and $endmonth < $startmonth ))
-  {
-     $endmonth = $startmonth;
-     $endyear = $startyear;
-  }
-  else if( $endyear > $CURRENTYEAR or
-           ( $endyear == $CURRENTYEAR and $endmonth > $CURRENTMONTH ))
+  if( $endyear > $CURRENTYEAR or ( $endyear == $CURRENTYEAR and $endmonth > $CURRENTMONTH ))
   {
      $endmonth = $CURRENTMONTH;
      $endyear = $CURRENTYEAR;
+  }
+  else if( $endyear < $BEGINYEAR or ( $endyear == $BEGINYEAR and $endmonth < $BEGINMONTH ))
+  {
+     $endmonth = $BEGINMONTH;
+     $endyear = $BEGINYEAR;
+  }
+
+  if( $endyear < $startyear or ( $endyear == $startyear and $endmonth < $startmonth ))
+  {
+     swap($startmonth, $endmonth);
+     swap($startyear, $endyear);
   }
 
   if( mysql_num_rows($result) < 2 )
@@ -112,17 +114,15 @@ require_once( "include/form_functions.php" );
      $years[$y] = $y;
 
   $form->add_row( array( 'HIDDEN', 'uid', $uid,
-                         'DESCRIPTION', T_('From month'),
+                         'DESCRIPTION', T_('From'),
                          'SELECTBOX', 'startmonth', 1, $months, $startmonth, false,
-                         'DESCRIPTION', T_('year'),
-                         'SELECTBOX', 'startyear', 1, $years, $startyear, false) );
-
-  $form->add_row( array( 'DESCRIPTION', T_('To month'),
+                         'SELECTBOX', 'startyear', 1, $years, $startyear, false,
+                         'OWNHTML', '&nbsp;&nbsp;',
+                         'DESCRIPTION', T_('To'),
                          'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
-                         'DESCRIPTION', T_('year'),
-                         'SELECTBOX', 'endyear', 1, $years, $endyear, false ) );
-
-  $form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Change interval') ) );
+                         'SELECTBOX', 'endyear', 1, $years, $endyear, false,
+                         'OWNHTML', '&nbsp;&nbsp;',
+                         'SUBMITBUTTON', 'submit', T_('Change interval') ) );
 
   $form->echo_string();
 

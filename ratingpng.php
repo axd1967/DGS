@@ -25,7 +25,8 @@ $defaltsize = 640;
 
 function get_rating_data($uid)
 {
-   global $ratings, $ratingmin, $ratingmax, $time, $starttime, $endtime;
+   global $ratings, $ratingmin, $ratingmax,
+      $time, $starttime, $endtime, $ratingpng_min_interval;
 
    if( !($uid > 0 ) )
       exit;
@@ -47,16 +48,31 @@ function get_rating_data($uid)
       exit;
 
    $tmp = mysql_fetch_array($result);
-   if( $starttime < $tmp['seconds'] )
+   if( $starttime < $tmp['seconds'] - 2*24*3600 )
+      $starttime = $tmp['seconds'] - 2*24*3600;
+
+   if( $endtime < $tmp['seconds'] + $ratingpng_min_interval/2 )
+      $endtime = $tmp['seconds'] + $ratingpng_min_interval/2;
+
+   $result = mysql_query("SELECT MAX(UNIX_TIMESTAMP(Time)) AS seconds " .
+                         "FROM Ratinglog WHERE uid=$uid") or die(mysql_error());
+
+   $max_row = mysql_fetch_array($result);
+   if( $endtime > $max_row['seconds'] + 2*24*3600)
+      $endtime = $max_row['seconds'] + 2*24*3600;
+
+   if( $starttime > $max_row['seconds'] - $ratingpng_min_interval )
+      $starttime = $max_row['seconds'] - $ratingpng_min_interval;
+
+   if( $endtime - $starttime < $ratingpng_min_interval )
    {
-      $starttime = $tmp['seconds'];
-      if( $endtime - $starttime < 2*30*24*3600 )
-         $endtime = $starttime + 2*30*24*3600;
+      $mean = ( $starttime + $endtime )/2;
+      $starttime = $mean - $ratingpng_min_interval/2;
+      $endtime = $mean + $ratingpng_min_interval/2;
    }
 
-
    $result = mysql_query("SELECT Rating, RatingMax, RatingMin, " .
-                         "UNIX_TIMESTAMP(Time) as seconds " .
+                         "UNIX_TIMESTAMP(Time) AS seconds " .
                          "FROM Ratinglog WHERE uid=$uid") or die(mysql_error());
 
    if( mysql_num_rows( $result ) < 2 )
@@ -185,13 +201,6 @@ function imagemultiline($im, $points, $nr_points,$color)
    $endtime = $NOW;
    if( isset($_GET['endyear']) and isset($_GET['endmonth']) )
       $endtime = min($NOW, mktime(0,0,0,$_GET['endmonth'],2,($_GET['endyear'])));
-
-   if( $endtime - $starttime < 2*30*24*3600 )
-   {
-      $mean = min(0.5*( $starttime + $endtime ), $NOW - 31*24*3600);
-      $starttime = $mean - 31*24*3600;
-      $endtime = $mean + 31*24*3600;
-   }
 
    get_rating_data($_GET["uid"]);
 

@@ -63,6 +63,11 @@ $menu_fg_color='"#FFFC70"';
 
 $max_links_in_main_menu=8;
 
+$ratingpng_min_interval = 2*31*24*3600;
+$BEGINYEAR = 2001;
+$BEGINMONTH = 8;
+
+
 $table_head_color='"#CCCCCC"';
 $table_row_color1='"#FFFFFF"';
 $table_row_color2='"#E0E8ED"';
@@ -678,6 +683,13 @@ function mod($a,$b)
       return (int) ($b*(int)(-$a/$b+1)+$a) % $b;
    else
       return (int) $a % $b;
+}
+
+function swap(&$a, &$b)
+{
+   $tmp = $a;
+   $a = $b;
+   $b = $tmp;
 }
 
 function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
