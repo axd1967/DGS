@@ -72,7 +72,7 @@ require( "include/rating.php" );
        if( mysql_num_rows($result) > 0 )
        {
           echo '    <p>
-    <H4>' . T_('Biographical info') . '</H4>
+    <H4><font color=' . $h3_color . '>' . T_('Biographical info') . '</font></H4>
     <table border=3>
 ';
        }
