@@ -153,7 +153,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    if( $message ) $message = trim($message);
 
    $where_clause = " ID=$gid AND Moves=$old_moves";
-   $consistent_query = "Consistent='N', ";
+
    switch( $action )
    {
       case 'move':
@@ -185,7 +185,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
              "Lastchanged=FROM_UNIXTIME($NOW), " .
-             "Status='PLAY', " . $time_query . $consistent_query;
+             "Status='PLAY', " . $time_query;
 
          if( $nr_prisoners > 0 )
             if( $to_move == BLACK )
@@ -233,7 +233,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Last_X=-1, " .
              "Status='$next_status', " .
              "Lastchanged=FROM_UNIXTIME($NOW), " .
-             "ToMove_ID=$next_to_move_ID, " . $time_query . $consistent_query .
+             "ToMove_ID=$next_to_move_ID, " . $time_query .
              "Flags=0 " .
              " WHERE" . $where_clause;
       }
@@ -272,7 +272,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Moves=$Handicap, " .
              "Lastchanged=FROM_UNIXTIME($NOW), " .
              "Last_X=$colnr, " .
-             "Last_Y=$rownr, " . $time_query . $consistent_query .
+             "Last_Y=$rownr, " . $time_query .
              "ToMove_ID=$White_ID " .
              " WHERE" . $where_clause;
       }
@@ -301,7 +301,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Last_X=-3, " .
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
-             "Score=$score, " . $time_query . $consistent_query .
+             "Score=$score, " . $time_query .
              "Flags=0" .
              " WHERE" . $where_clause;
 
@@ -356,7 +356,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Lastchanged=FROM_UNIXTIME($NOW), " .
              "Moves=$Moves, " .
              "Last_X=-2, " .
-             "Status='$next_status', " . $time_query . $consistent_query;
+             "Status='$next_status', " . $time_query;
 
          if( $next_status != 'FINISHED' )
          {
