@@ -104,7 +104,7 @@ require_once( "include/countries.php" );
          $c = $row['Country'];
          $urow_strings[16] = "<td>" .
             (empty($c) ? '&nbsp;' :
-             "<img title=\"{$COUNTRIES[$c]}\" src=\"images/flags/$c.gif\">") . "</td>";
+             "<img title=\"" . T_($COUNTRIES[$c]) ."\" src=\"images/flags/$c.gif\">") . "</td>";
       }
       if( $utable->Is_Column_Displayed[4] )
          $urow_strings[4] = '<td>' . make_html_safe($row['Rankinfo'],true) . '&nbsp;</td>';

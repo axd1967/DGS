@@ -20,8 +20,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Users";
 
-require( "include/std_functions.php" );
-require( "include/rating.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/rating.php" );
+require_once( "include/countries.php" );
 
 {
    connect2mysql();
@@ -30,7 +31,6 @@ require( "include/rating.php" );
 
    if( !$logged_in )
       error("not_logged_in");
-require_once( "include/countries.php" );
 
    if( !$uid )
       $uid = $player_row["ID"];
@@ -81,7 +81,7 @@ require_once( "include/countries.php" );
     <tr><td><b>' . T_('Name') . '</b></td><td>' . make_html_safe($row['Name']) . '</td></tr>
     <tr><td><b>' . T_('Userid') . '</b></td><td>' . make_html_safe($row['Handle']) . '</td></tr>
     <tr><td><b>' . T_('Country') . '</b></td><td>' .  (empty($cntr) ? '&nbsp;' :
-             '<img title="' . $COUNTRIES[$cntr] . "\" src=\"images/flags/$cntr.gif\">") . '</td>
+             '<img title="' . T_($COUNTRIES[$cntr]) . "\" src=\"images/flags/$cntr.gif\">") . '</td>
     <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . make_html_safe($row['Open'],true) . '</td></tr>
     <tr><td><b>' . T_('Activity') . '</b></td><td>' . $activity . '</td></tr>
     <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating($row['Rating2'],true,$row['ID']) . '</td></tr>

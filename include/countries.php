@@ -4,7 +4,8 @@ $TranslateGroups[] = "Countries";
 
 // ISO 3166 code => Name
 
-//WARNING: the translation database must be available when this file is included.
+// The comments are required for 'scripts/generate_translation_texts.php'.
+
 $COUNTRIES = array(
    'af' => 'Afghanistan', // T_('Afghanistan')
    'al' => 'Albania', // T_('Albania')
