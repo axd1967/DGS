@@ -37,7 +37,8 @@ require( "include/rating.php" );
 
    $my_info = ( $player_row["ID"] == $uid );
 
-   $result = mysql_query("SELECT * FROM Players WHERE ID=$uid");
+   $result = mysql_query("SELECT *,UNIX_TIMESTAMP(Lastaccess) as Time " .
+                         "FROM Players WHERE ID=$uid");
 
    if( mysql_affected_rows() != 1 )
       error("unknown_user");
@@ -57,11 +58,13 @@ require( "include/rating.php" );
 
    echo"
     <table border=3>
-       <tr><td>Name:</td> <td>" . $row["Name"] . "</td></tr>
-       <tr><td>Userid:</td> <td>" . $row["Handle"] . "</td></tr>
-       <tr><td>Open for matches:</td> <td>" . $row["Open"] . "</td></tr>
-       <tr><td>Rating:</td> <td>";  echo_rating($row["Rating"]); echo "</td></tr>
-       <tr><td>Rank info:</td> <td>" . $row["Rank"] . "</td></tr>
+       <tr><td><b>Name</b></td> <td>" . $row["Name"] . "</td></tr>
+       <tr><td><b>Userid</b></td> <td>" . $row["Handle"] . "</td></tr>
+       <tr><td><b>Open for matches</b></td> <td>" . $row["Open"] . "</td></tr>
+       <tr><td><b>Rating</b></td> <td>";  echo_rating($row["Rating"]); echo "</td></tr>
+       <tr><td><b>Rank info</b></td> <td>" . $row["Rank"] . "</td></tr>
+       <tr><td><b>Registration date</b></td> <td>" . $row["Registerdate"] . "</td></tr>
+       <tr><td><b>Last access</b></td> <td>" . date($date_fmt,$row["Time"]) . "</td></tr>
     </table>
 ";
 

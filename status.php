@@ -41,12 +41,12 @@ require( "include/rating.php" );
 
    echo '
     <table border=3>
-       <tr><td>' . _("Name") . ':</td> <td>' . $player_row["Name"] . '</td></tr>
-       <tr><td>' . _("Userid") . ':</td> <td>' . $player_row["Handle"] . '</td></tr>
-       <tr><td>' . _("Open for matches?") . ':</td> <td>' . $player_row["Open"] . '</td></tr>
-       <tr><td>' . _("Rating") . ':</td> <td>';  echo_rating($player_row["Rating"]); 
+       <tr><td><b>' . _("Name") . '</b></td> <td>' . $player_row["Name"] . '</td></tr>
+       <tr><td><b>' . _("Userid") . '</b></td> <td>' . $player_row["Handle"] . '</td></tr>
+       <tr><td><b>' . _("Open for matches?") . '</b></td> <td>' . $player_row["Open"] . '</td></tr>
+       <tr><td><b>' . _("Rating") . '</b></td> <td>';  echo_rating($player_row["Rating"]); 
    echo '</td></tr>
-       <tr><td>Rank info:</td> <td>' . $player_row["Rank"] . '</td></tr>
+       <tr><td><b>Rank info</b></td> <td>' . $player_row["Rank"] . '</td></tr>
     </table>
     <p>';
 
@@ -100,30 +100,39 @@ require( "include/rating.php" );
 
    $uid = $player_row["ID"];
 
-   $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
-                         "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
-                         "AND Players.ID!=$uid " .
-                         "AND (Black_ID=Players.ID OR White_ID=Players.ID) " .
-                         "ORDER BY Lastchanged,Games.ID");
+   $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," . 
+       "UNIX_TIMESTAMP(Lastchanged) AS Time, " .
+       "black.Name AS bName, white.Name AS wName " .
+       "FROM Games " .
+       "LEFT JOIN Players AS black ON black.ID=Black_ID " . 
+       "LEFT JOIN Players AS white ON white.ID=White_ID " . 
+       "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
+       "ORDER BY LastChanged, Games.ID";
+
+   $result = mysql_query( $query ) or die(mysql_error());
 
    echo "<HR><B>" . _("Your turn to move in the following games:") . "</B><p>\n";
    echo "<table border=3>\n";
-   echo "<tr><th>" . _("Opponent") . "</th><th>" . _("Color") . "</th><th>" . _("Size") . "</th><th>" . _("Handicap") . "</th><th>" . _("Moves") . "</th></tr>\n";
+   echo "<tr><th>gid</th><th>" . _("Opponent") . "</th><th>" . _("Color") . "</th><th>" . _("Size") . "</th><th>" . _("Handicap") . "</th><th>" . _("Komi") . "</th><th>" ._("Moves") . "</th><th>" . _("Last moved") . "</th></tr>\n";
 
 
    while( $row = mysql_fetch_array( $result ) )
    {
-      if( $uid == $row["Black_ID"] )
-         $col = "Black";
-      else
-         $col = "White";
+      extract($row);
 
-      echo "<tr><td><A href=\"game.php?gid=" . $row["ID"] . "\">" . 
-         $row["Name"] . "</td>\n" .
-         "<td>$col</td>" .
-         "<td>" . $row["Size"] . "</td>\n" .
-         "<td>" . $row["Handicap"] . "</td>\n" .
-         "<td>" . $row["Moves"] . "</td>\n" .
+      $color = ( $uid == $Black_ID ? 'b' : 'w' );
+      $opp_ID = ( $uid == $Black_ID ? $White_ID : $Black_ID );
+
+      echo "<tr><td><a href=\"game.php?gid=$ID\"><font color=$gid_color><b>$ID</b></font></a></td>" .
+         "<td><a href=\"userinfo.php?uid=$opp_ID\">" . 
+         ( $uid == $Black_ID ? $wName : $bName ) . "</a></td>\n" . 
+
+         "<td align=center><img src=\"17/$color.gif\" alt=$color></td>" .
+         "<td>" . $Size . "</td>\n" .
+         "<td>" . $Handicap . "</td>\n" .
+         "<td>" . $Komi . "</td>\n" .
+         "<td>" . $Moves . "</td>\n" .
+         "<td>" . date($date_fmt, $Time) . "</td>\n" .
          "</tr>\n";
    }
 

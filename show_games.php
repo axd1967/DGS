@@ -39,7 +39,7 @@ require( "include/std_functions.php" );
 
    if( $finished )
    {
-      $result = mysql_query("SELECT Games.*, Players.Name, Players.Handle, Players.ID as uid " .
+      $result = mysql_query("SELECT Games.*, Players.Name, Players.Handle, Players.ID as pid " .
                             "FROM Games,Players " .
                             " WHERE Status='FINISHED' AND " . 
                             "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
@@ -60,8 +60,8 @@ require( "include/std_functions.php" );
 
    echo "<center><h4>" . ( $finished ? "Finished" : "Running" ) . " Games for <A href=\"userinfo.php?uid=$uid\">" . $user_row["Name"] . " (" . $user_row["Handle"] . ")</A></H4></center>\n";
    echo "<table border=3 align=center>\n";
-   echo "<tr><th>Opponent</th><th>Color</th><th>Size</th><th>Handicap</th><th>Komi</th>" .
-      "<th>" .( $finished ? "Score" : "Moves" ) . "</th><th>sgf</th><th>html</th>";
+   echo "<tr><th>gid</th><th>Opponent</th><th>Color</th><th>Size</th><th>Handicap</th><th>Komi</th>" .
+      "<th>" .( $finished ? "Score" : "Moves" ) . "</th><th>sgf</th>";
    if( $finished ) echo "<th>win?</th>";
    
    echo "\n";
@@ -69,22 +69,25 @@ require( "include/std_functions.php" );
 
    while( $row = mysql_fetch_array( $result ) )
    {
-      if( $uid == $row["Black_ID"] )
+      extract($row);
+
+      if( $uid == $Black_ID )
          $color = "b"; 
       else
          $color = "w"; 
 
-      echo "<tr><td><A href=\"userinfo.php?uid=" . $row["uid"] . "\">" . $row["Name"] . "</td>" .
-      "<td align=center><img src=\"17/$color.gif\" alt=$color></td>" .
-      "<td>" . $row["Size"] . "</td>" .
-         "<td>" . $row["Handicap"] . "</td>" .
-         "<td>" . $row["Komi"] . "</td>" .
-         "<td>" . ($finished ? score2text($row["Score"], false) : $row["Moves"] ) . "</td>" .
-      "<td><A href=\"sgf.php?gid=" . $row["ID"] . "\">sgf</td>" .
-      "<td><A href=\"game.php?gid=" . $row["ID"] . "\">html</td>";
+      echo "<tr><td><A href=\"game.php?gid=$ID\"><font color=$gid_color><b>$ID</b></font></td>
+   <td><A href=\"userinfo.php?uid=$pid\">$Name</a></td>
+   <td align=center><img src=\"17/$color.gif\" alt=$color></td>
+   <td>$Size</td>
+   <td>$Handicap</td>
+   <td>$Komi</td>
+   <td>" . ($finished ? score2text($Score, false) : $Moves ) . "</td>
+   <td><A href=\"sgf.php?gid=$ID\">sgf</td>\n";
+
       if( $finished )
       {
-         if( $color == "w" xor $row["Score"] > 0.0 )
+         if( $color == "w" xor $Score > 0.0 )
          {
             $image = 'no.gif';
             $alt = 'no';
@@ -95,13 +98,13 @@ require( "include/std_functions.php" );
             $alt = 'yes';
          }
 
-         if( abs($row["Score"]) < 0.1 )
+         if( abs($Score) < 0.1 )
          {
             $image = 'dash.gif';
             $alt = 'jigo';
          }
 
-      echo"<td align=center><img src=\"images/$image\" alt=$alt></td>\n";
+      echo "   <td align=center><img src=\"images/$image\" alt=$alt></td>\n";
       }
       echo "</tr>\n";
    }

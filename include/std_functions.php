@@ -41,6 +41,11 @@ $ActivityForMove = 10.0;
 
 $MessagesPerPage = 50;
 
+$gid_color='"#d50047"';
+$bg_color='"#F7F5E3"';  // change in dragon.css too!
+$menu_bg_color='"#0C41C9"';
+$menu_fg_color='"#FFFC70"';
+
 define("NONE", 0);
 define("BLACK", 1);
 define("WHITE", 2);
@@ -100,7 +105,7 @@ function disable_cache($stamp=NULL)
 
 function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified_stamp=NULL )
 {
-   global $HOSTBASE, $is_down;
+   global $HOSTBASE, $is_down, $bg_color, $menu_bg_color, $menu_fg_color;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -135,23 +140,23 @@ function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified
     <TITLE> Dragon Go Server - ' . $title . '</TITLE>
     <LINK rel="stylesheet" type="text/css" media="screen" href="dragon.css">
   </HEAD>
-  <BODY bgcolor="#F7F5E3">
+  <BODY bgcolor=' . $bg_color . '>
 
-    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor="#0C41C9">
+    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
         <tr>
           <td colspan=3 width="50%">
-          <A href="' . $HOSTBASE . '/index.php"><B><font color="#FFFC70">Dragon Go Server</font></B></A></td>
+          <A href="' . $HOSTBASE . '/index.php"><B><font color=' . $menu_fg_color . '>Dragon Go Server</font></B></A></td>
 ';
 
 
    if( $logged_in and !$is_down ) 
-      echo '          <td colspan=3 align=right width="50%"><font color="#FFFC70"><B>' . _("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
+      echo '          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . _("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
    else
-      echo '          <td colspan=3 align=right width="50%"><font color="#FFFC70"><B>' . _("Not logged in") . '</B></font></td>';
+      echo '          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . _("Not logged in") . '</B></font></td>';
 
    echo '
         </tr>
-        <tr bgcolor="#F7F5E3" align="center">
+        <tr bgcolor=' . $bg_color . ' align="center">
           <td><B><A href="' . $HOSTBASE . '/status.php">' . _("Status") . '</A></B></td>
           <td><B><A href="' . $HOSTBASE . '/messages.php">' . _("Messages") . '</A></B></td>
           <td><B><A href="' . $HOSTBASE . '/invite.php">' . _("Invite") . '</A></B></td>
@@ -174,22 +179,22 @@ function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified
 
 function end_page( $new_paragraph = true )
 {
-   global $time, $show_time, $HOSTBASE;
+   global $time, $show_time, $HOSTBASE, $menu_bg_color, $menu_fg_color;
 
    if( $new_paragraph )
       echo "<p>";
    echo '
-    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor="#0C41C9">
+    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
       <tr>
         <td align="left" width="50%">
-          <A href="' . $HOSTBASE . '/index.php"><font color="#FFFC70"><B>Dragon Go Server</B></font></A></td>
+          <A href="' . $HOSTBASE . '/index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
         <td align="right" width="50%">';
    if( $show_time )
       echo '
-        <font color="#FFFC70"><B>' . _("Page created in") . ' ' . 
+        <font color=' . $menu_fg_color . '><B>' . _("Page created in") . ' ' . 
          sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s' . $timeadjust. '</B></font></td>';
    else
-      echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color="#FFFC70"><B>' . _("Logout") . '</B></font></A></td>';
+      echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . _("Logout") . '</B></font></A></td>';
 
    echo '
       </tr>
@@ -201,13 +206,17 @@ function end_page( $new_paragraph = true )
    ob_end_flush();
 }
 
-function error($err, $mysql=true)
+function error($err)
 {
+   global $handle;
+
    disable_cache();
 
    $uri = "error.php?err=" . urlencode($err);
-   if( $mysql )
-      $uri .= "&mysql=" . urlencode($mysql);
+   if( mysql_error() )
+      $uri .= "&mysqlerror=" . urlencode(mysql_error());
+
+   error_log($handle . ": " . $err . "\n" . mysql_error(), 0);
 
    jump_to( $uri );
 }
@@ -334,6 +343,32 @@ function make_mysql_safe(&$msg)
 {
    $msg = str_replace("\\", "\\\\", $msg);
    $msg = str_replace("\"", "\\\"", $msg);
+}
+
+function tablehead($Head, $sort_string, $page, $desc_default=false)
+{
+   global $sort1, $desc1, $sort2, $desc2;
+
+   if( $sort_string == $sort1 )
+   {
+      $s1 = $sort1;
+      $s2 = $sort2;
+      $d1 = !$desc1;
+      $d2 = !$desc2;
+   }
+   else
+   {
+      $s1 = $sort_string;
+      $d1 = $desc_default;
+      $s2 = $sort1;
+      $d2 = $desc1 xor $desc_default;
+   }
+
+   $order = "?sort1=$s1" . ($d1 ? '&desc1=1' : '');
+   if( $s2 )
+      $order .= "&sort2=$s2" . ($d2 ? '&desc2=1' : '');
+
+   return "<th><A href=\"$page$order\">" . _($Head) . "</A></th>\n";
 }
 
 function score2text($score, $verbose)
@@ -495,12 +530,9 @@ function is_logged_in($hdl, $scode, &$row)
    $query = "UPDATE Players SET " .
        "Hits=Hits+1, " .
        "Activity=Activity + $ActivityForHit, " .
-       "Lastaccess=FROM_UNIXTIME($NOW)";
-
-   if( !(strpos($row["SendEmail"], 'ON') === false) and $row["Notify"] != 'NONE' )
-      $query .= ", Notify='NONE'";
-    
-   $query .= " WHERE Handle='$hdl'";
+       "Lastaccess=FROM_UNIXTIME($NOW), " .
+       "Notify='NONE' " .
+       "WHERE Handle='$hdl'";
 
    $result = mysql_query( $query );
 

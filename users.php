@@ -30,15 +30,12 @@ require( "include/rating.php" );
    if( !$logged_in )
       error("not_logged_in");
 
+   if(!$sort1)
+      $sort1 = 'ID';
 
-   $order_list = array('ID', 'ID DESC', 
-                       'Rating', 'Rating DESC', 
-                       'Name', 'Name DESC', 
-                       'Handle', 'Handle DESC');
-
-   if( !in_array($order, $order_list) )
-      $order = 'ID';
-
+   $order = $sort1 . ( $desc1 ? ' DESC' : '' );
+   if( $sort2 )
+      $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
 
    $result = mysql_query("SELECT *, Rank as Rankinfo FROM Players order by $order");
 
@@ -47,16 +44,12 @@ require( "include/rating.php" );
 
 
    echo "<table border=3 align=center>\n";
-   echo "<tr>" .
-      "<th><A href=\"users.php?order=Name" . ($order=='Name'? '+DESC' : '') . "\">" . _("Name") . "</A></th>" .
-      "<th><A href=\"users.php?order=Handle" . ($order=='Handle'? '+DESC' : '') . 
-      "\">" . _("Userid") . "</A></th>" .
+   echo "<tr>\n" .
+      tablehead('Name','Name','users.php') .
+      tablehead('UserId','Handle','users.php') .
       "<th>Rank info</th>" .
-      "<th width=14>&nbsp;&nbsp;&nbsp;&nbsp;<A href=\"users.php?order=Rating" . 
-      ($order=='Rating DESC'? '' : '+DESC') . "\">" . _("Rating") . "</A>&nbsp;&nbsp;&nbsp;&nbsp;</th>" .
-      "<th>" . _("Open for matches?") . "</th></tr>\n";
-
-
+      tablehead('Rating','Rating','users.php', true) .
+      "<th>" . _("Open for matches?") . "</th>\n</tr>\n";
 
    while( $row = mysql_fetch_array( $result ) )
    {
