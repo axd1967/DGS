@@ -32,6 +32,17 @@ if( !$logged_in )
     exit;
 }
 
+if( $uid )
+{
+    $result = mysql_query( "SELECT Handle FROM Players WHERE ID=$uid" );
+
+    if( mysql_num_rows( $result ) == 1 )
+        {
+            extract(mysql_fetch_array($result));
+        }
+
+}
+
 
 start_page("Send Message", true, $logged_in, $player_row );
 
@@ -46,7 +57,7 @@ start_page("Send Message", true, $logged_in, $player_row );
         
           <TR>
             <TD align=right>To (userid):</TD>
-            <TD align=left> <input type="text" name="to" size="50" maxlength="80"></TD>
+            <TD align=left> <input type="text" name="to" size="50" value="<?php echo $Handle ?>" maxlength="80"></TD>
           </TR>
 
 
