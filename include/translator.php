@@ -55,6 +55,7 @@ class Translator
 
   function &get_language()
     {
+      global $HOSTBASE;
       if( strcmp( $this->current_language, 'C' ) == 0 )
         {
           return false;
@@ -62,7 +63,10 @@ class Translator
 
       if( !array_key_exists( $this->current_language, $this->loaded_languages  ) )
         {
-          include "translations/" . $this->current_language . ".php";
+          $add_to_path = '';
+          if( strcmp( basename($HOSTBASE), basename(getcwd()) ) != 0 )
+            $add_to_path = "../";
+          include $add_to_path . "translations/" . $this->current_language . ".php";
 
           $lang_class_name = $this->current_language . "_Language";
           $this->loaded_languages[ $this->current_language ] = new $lang_class_name;
