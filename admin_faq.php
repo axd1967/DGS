@@ -127,9 +127,56 @@ require_once( "include/make_translationfiles.php" );
 
         mysql_query( "UPDATE FAQ SET SortOrder=SortOrder-($dir) " .
                      'WHERE Parent=' . $row["Parent"] . ' ' .
-                     'AND SortOrder=' . ($row["SortOrder"]+$dir) );
+                     'AND SortOrder=' . ($row["SortOrder"]+$dir) . ' LIMIT 1' );
         mysql_query( "UPDATE FAQ SET SortOrder=SortOrder+($dir) " .
-                     "WHERE ID=" . $row["ID"] );
+                     "WHERE ID=" . $row["ID"] . ' LIMIT 1');
+     }
+     jump_to("admin_faq.php");
+  }
+
+
+
+  // ***********        Move entry to new category      ****************
+
+  else if( $_GET["move"] == 'uu' or $_GET["move"] == 'dd' )
+  {
+     $result = mysql_query(
+        "SELECT Entry.SortOrder, Entry.Parent, Parent.SortOrder AS ParentOrder " .
+        " FROM FAQ AS Entry, FAQ AS Parent " .
+        "WHERE Entry.ID='$id' AND Parent.ID=Entry.Parent" );
+
+     if( mysql_num_rows($result) != 1 )
+        error("admin_no_such_entry");
+
+     $row = mysql_fetch_array( $result );
+
+     $query = 'SELECT ID as NewParent FROM FAQ ' .
+        'WHERE Level=1 ' .
+        ( $_GET['move'] == 'dd' ?
+          'AND SortOrder > ' . $row['ParentOrder'] . ' ORDER BY SortOrder' :
+          'AND SortOrder < ' . $row['ParentOrder'] . ' ORDER BY SortOrder DESC' ) .
+        ' LIMIT 1';
+
+     $result = mysql_query( $query );
+
+     if( mysql_num_rows($result) == 1 )
+     {
+        $newparent_row = mysql_fetch_array( $result );
+        $newparent = $newparent_row["NewParent"];
+
+        $result = mysql_query( "SELECT MAX(SortOrder) as max FROM FAQ " .
+                               "WHERE Parent=$newparent" );
+
+        $max_row = mysql_fetch_array( $result );
+        $max = $max_row["max"];
+        if( !is_numeric($max) ) $max = 0;
+
+
+        mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1 " .
+                    "WHERE Parent=" . $row["Parent"] . " AND SortOrder>" . $row["SortOrder"]);
+
+        mysql_query( "UPDATE FAQ SET Parent=$newparent, SortOrder=" . ($max+1) . ' ' .
+                     "WHERE ID='$id' LIMIT 1");
      }
      jump_to("admin_faq.php");
   }
@@ -295,7 +342,7 @@ require_once( "include/make_translationfiles.php" );
         }
 
 
-        mysql_query( "UPDATE FAQ SET Answer=$a_id, Question=$q_id WHERE ID=$faq_id" )
+        mysql_query( "UPDATE FAQ SET Answer=$a_id, Question=$q_id WHERE ID=$faq_id LIMIT 1" )
            or die(mysql_error());
 
      }
@@ -388,6 +435,14 @@ require_once( "include/make_translationfiles.php" );
            $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png"></a>';
         echo '<td><a href="admin_faq.php?move=d&id=' .
            $row['ID'] . '"><img border=0 title="' . T_("Move down") . '" src="images/down.png"></a>';
+
+        if( $row['Level'] > 1 )
+        {
+           echo '<td align=right><a href="admin_faq.php?move=uu&id=' .
+              $row['ID'] . '"><img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png"></a>';
+           echo '<td><a href="admin_faq.php?move=dd&id=' .
+              $row['ID'] . '"><img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png"></a>';
+        }
 
         echo "<td><a href=\"admin_faq.php?new=$typechar&id=" . $row['ID'] .
            '"><img border=0 title="' .
