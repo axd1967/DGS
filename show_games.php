@@ -106,9 +106,11 @@ require_once( "include/rating.php" );
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "IF(Rated='N','N','Y') as Rated, " .
          "black.Name AS blackName, black.Handle AS blackHandle, " .
-         "black.Rating2 AS blackRating, black.ID AS blackID, " .
          "white.Name AS whiteName, white.Handle AS whiteHandle, " .
-         "white.Rating2 AS whiteRating, white.ID AS whiteID " .
+         "black.Rating2 AS blackRating, black.ID AS blackID, " .
+         "white.Rating2 AS whiteRating, white.ID AS whiteID, " .
+         "Games.Black_Start_Rating AS blackStartRating, " .
+         "Games.White_Start_Rating AS whiteStartRating " .
          "FROM Observers, Games, Players AS white, Players AS black " .
          "WHERE Observers.uid=" . $player_row["ID"] . " AND Games.ID=gid " .
          "AND white.ID=White_ID AND black.ID=Black_ID " .
@@ -118,10 +120,12 @@ require_once( "include/rating.php" );
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "IF(Rated='N','N','Y') as Rated, " .
-         "black.Name AS blackName, black.Handle AS blackHandle, black.ID AS blackID, " .
-         "white.Name AS whiteName, white.Handle AS whiteHandle, white.ID AS whiteID, " .
-         "black.Rating2 AS blackRating, white.Rating2 AS whiteRating, " .
-         "Games.Black_Start_Rating AS blackStartRating, Games.White_Start_Rating AS whiteStartRating " .
+         "black.Name AS blackName, black.Handle AS blackHandle, " .
+         "white.Name AS whiteName, white.Handle AS whiteHandle, " .
+         "black.Rating2 AS blackRating, black.ID AS blackID, " .
+         "white.Rating2 AS whiteRating, white.ID AS whiteID, " .
+         "Games.Black_Start_Rating AS blackStartRating, " .
+         "Games.White_Start_Rating AS whiteStartRating " .
          ( $finished
            ? ", Black_End_Rating AS blackEndRating, White_End_Rating AS whiteEndRating, " .
            "blog.RatingDiff AS blackDiff, wlog.RatingDiff AS whiteDiff " : '' ) .
@@ -249,7 +253,7 @@ require_once( "include/rating.php" );
          $gtable->add_tablehead( 4, T_('Userid'), 'Handle');
          $gtable->add_tablehead(23, T_('Start rating'), 'startRating', true);
          $gtable->add_tablehead(16, T_('Rating'), 'Rating', true);
-         $gtable->add_tablehead( 5, T_('Color'), 'Color');
+         $gtable->add_tablehead( 5, T_('Colors'), 'Color');
       }
    }
 
@@ -280,6 +284,10 @@ require_once( "include/rating.php" );
       if( !$all )
       {
          $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
+      }
+      if( !$all ) //!$observe && !$finished
+      {
+         $gtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
       }
    }
 
@@ -388,9 +396,9 @@ require_once( "include/rating.php" );
          if( !$all )
          {
             $src = '"images/' .
-               ( $Win == 1 ? 'yes.gif" alt=' . T_('Yes') :
-                 ( $Win == -1 ? 'no.gif" alt=' . T_('No') :
-                   'dash.gif" alt=' . T_('jigo') ));
+               ( $Win == 1 ? 'yes.gif" alt="' . T_('Yes') :
+                 ( $Win == -1 ? 'no.gif" alt="' . T_('No') :
+                   'dash.gif" alt="' . T_('jigo') )) . '"';
 
             if( $gtable->Is_Column_Displayed[11] )
                $grow_strings[11] = "<td align=center><img src=$src></td>";
@@ -400,8 +408,10 @@ require_once( "include/rating.php" );
          if( $gtable->Is_Column_Displayed[12] )
             $grow_strings[12] = '<td>' . date($date_fmt, $Time) . "</td>";
       }
-      else
+      else //if( !$finished or $observe )
       {
+         if( !$observe and !$all and $gtable->Is_Column_Displayed[12] )
+            $grow_strings[12] = "<td>" . ($WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td>";
          if( $gtable->Is_Column_Displayed[14] )
             $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
          if( $gtable->Is_Column_Displayed[13] )
