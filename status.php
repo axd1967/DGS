@@ -19,8 +19,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require( "include/std_functions.php" );
-include( "include/rating.php" );
-include( "include/table_columns.php" );
+require( "include/rating.php" );
+require( "include/table_columns.php" );
+require( "include/form_functions.php" );
 
 
 {
