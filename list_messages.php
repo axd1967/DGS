@@ -132,7 +132,7 @@ require_once( "include/timezones.php" );
 
       if( $find_answers > 0 )
         echo '<input type="hidden" name="find_answers" value="' . $find_answers . "\">\n";
-      else if( $current_folder != FOLDER_ALL_RECEIVED )
+      else if( $current_folder > FOLDER_ALL_RECEIVED )
         echo '<input type="hidden" name="current_folder" value="' . $current_folder . "\">\n";
       echo '<input type="submit" name="toggle_marks" value="' . T_('Marks toggle') . "\">\n";
 

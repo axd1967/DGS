@@ -297,7 +297,7 @@ function message_info_table($mid, $date, $to_me,
          {
             echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
             echo $form->print_insert_hidden_input("mark$mid", 'Y') ;
-            if( $folder_nr != FOLDER_ALL_RECEIVED )
+            if( $folder_nr > FOLDER_ALL_RECEIVED )
                echo $form->print_insert_hidden_input("current_folder", $folder_nr) ;
          }
          echo $form->print_insert_hidden_input('messageid', $mid) ;
@@ -512,7 +512,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
       else
          $where_clause = '';
 
-      if( $current_folder && $current_folder!=FOLDER_ALL_RECEIVED  && $current_folder!='NULL' )
+      if( $current_folder > FOLDER_ALL_RECEIVED && $current_folder != 'NULL' )
          $where_clause.= "AND Folder_nr='" .$current_folder. "' ";      
    }
 
