@@ -762,9 +762,9 @@ class Form
       {
          if( $this->safe_text )
             $initial_text = textarea_safe($initial_text);
-         return "<TEXTAREA name=\"$name\" cols=\"$columns\" " .
+         return "<TEXTAREA name=\"$name\" cols=\"$columns\"" .
             ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-            "rows=\"$rows\" wrap=\"virtual\">$initial_text</TEXTAREA>";
+            " rows=\"$rows\" wrap=\"virtual\">$initial_text</TEXTAREA>";
       }
 
    /*!
