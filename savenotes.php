@@ -47,7 +47,7 @@ disable_cache();
       error("not_a_player");
 
 
-   $notes = @$_POST['notes'];
+   $notes = trim(@$_POST['notes']);
 
    if ($player_row["ID"] == $Black_ID)
       {
