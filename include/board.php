@@ -65,7 +65,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       else
       {
          $on_not_empty = true;
-         if( ALLOW_SEKI_MARK and $stonestring )
+         if( MAX_SEKI_MARK>0 and $stonestring )
             $on_empty = true;
       }
 
@@ -182,8 +182,15 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       $letter_c = 'a';
       for($colnr = 0; $colnr < $Size; $colnr++ )
       {
-         $stone = $array[$colnr][$Size-$rownr];
+         $stone = (int)$array[$colnr][$Size-$rownr];
          $empty = false;
+         if( $stone & FLAG_NOCLICK ) {
+            $stone &= ~FLAG_NOCLICK;
+            $no_click = true;
+         }
+         else
+            $no_click=false;
+
          if( $stone == BLACK )
          {
             $type = 'b';
@@ -234,8 +241,10 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
                $type .= 'b';
             else if( $stone == WHITE_TERRITORY )
                $type .= 'w';
-            else if( $stone == DAME or $stone == MARKED_DAME )
+            else if( $stone == DAME )
                $type .= 'd';
+            else if( $stone == MARKED_DAME )
+               $type .= 'c'; //waiting better
 
             $empty = true;
 
@@ -249,7 +258,8 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
             $alt = ( $alt == '#' ? 'X' : '@' );
          }
 
-         if( $may_play and ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
+         if( $may_play and !$no_click and
+             ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
             echo "$str2$letter_c$letter_r$str3$alt\" SRC=$stone_size/$type$str4";
          else
             echo "$str1$alt\" SRC=$stone_size/$type$str5";
@@ -482,7 +492,7 @@ function mark_territory( $x, $y, $size, &$array )
    $c = -1;  // color of territory
 
    $index[$x][$y] = 7;
-
+   $point_count= 1; //for the current point (theoricaly NONE)
 
    while( true )
    {
@@ -492,19 +502,25 @@ function mark_territory( $x, $y, $size, &$array )
 
          if( $m == 7 )   // At starting point, all checked
          {
-            if( $c == -1 ) $c = DAME ;
-            else $c+= OFFSET_TERRITORY ;
+            if( $c == -1 )
+               $c = DAME ;
+            else
+               $c|= OFFSET_TERRITORY ;
+
+            if( $c==DAME || $point_count>MAX_SEKI_MARK)
+               $c|= FLAG_NOCLICK ;
 
             while( list($x, $sub) = each($index) )
             {
                while( list($y, $val) = each($sub) )
                {
-                  if( $array[$x][$y] < BLACK_DEAD )
+                  //keep all marks unchanged and reversible
+                  if( $array[$x][$y] < MARKED_DAME )
                      $array[$x][$y] = $c;
                }
             }
 
-            return true;
+            return $point_count;
          }
 
          $x -= $dirx[$m];  // Go back
@@ -530,6 +546,7 @@ function mark_territory( $x, $y, $size, &$array )
             $x = $nx;  // Go to the neigbour
             $y = $ny;
             $index[$x][$y] = $dir;
+            $point_count++;
          }
          else //remains BLACK/WHITE/DAME/BLACK_TERRITORY/WHITE_TERRITORY and MARKED_DAME
          {
@@ -573,7 +590,7 @@ function create_territories_and_score( $size, &$array )
    {
       for( $y=0; $y<$size; $y++)
       {
-         switch( $array[$x][$y] )
+         switch( $array[$x][$y] & ~FLAG_NOCLICK)
          {
             case BLACK_TERRITORY:
                $score --;
@@ -843,8 +860,10 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
                $type .= '+';
             else if( $stone == WHITE_TERRITORY )
                $type .= '-';
-            else if( $stone == DAME or $stone == MARKED_DAME )
+            else if( $stone == DAME )
                $type .= '.';
+            else if( $stone == MARKED_DAME )
+               $type .= ':'; //waiting better
 
             $empty = true;
          }
