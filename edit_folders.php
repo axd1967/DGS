@@ -187,7 +187,7 @@ function make_folder_form_row(&$form, $name, $nr,
             "FGColor='$fgcolor' ";
       }
 
-      mysql_query($query) or die(mysql_error());
+      mysql_query($query) or error("internal_error");
    }
 
 
@@ -195,7 +195,7 @@ function make_folder_form_row(&$form, $name, $nr,
    {
       mysql_query("UPDATE Players SET StatusFolders='" .
                   implode(',',$status_page_folders) . "' WHERE ID=$my_id LIMIT 1")
-         or die(mysql_error());
+         or error("internal_error");
    }
 
    $folders = get_folders($my_id);

@@ -71,8 +71,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                           "black.OnVacation AS Blackonvacation, " .
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
-                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
-            or die(mysql_error());
+                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" ) ;
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
@@ -440,7 +439,7 @@ if( HOT_SECTION )
       );
 
    if ( !$result )
-      die(mysql_error());
+      error("internal_error","confirm LOCK");
 
    // Maybe not useful:
    function unlock_games_tables()
@@ -450,11 +449,10 @@ if( HOT_SECTION )
    register_shutdown_function('unlock_games_tables');
 
    // Locked ... an ultimate verification:
-   $result = mysql_query( "SELECT Moves FROM Games WHERE Games.ID=$gid" )
-            or die(mysql_error());
+   $result = mysql_query( "SELECT Moves FROM Games WHERE Games.ID=$gid" );
 
-   if(  mysql_num_rows($result) != 1 )
-      error("unknown_game");
+   if( @mysql_num_rows($result) != 1 )
+      error("internal_error", "confirm verif $gid");
 
    $tmp = mysql_fetch_assoc($result);
 
@@ -465,17 +463,18 @@ if( HOT_SECTION )
    $result = mysql_query( $move_query );
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
-      error("mysql_insert_move", true);
-
+      error("mysql_insert_move");
 
    $result = mysql_query( $game_query );
 
    if( mysql_affected_rows() != 1 )
-      error("mysql_update_game", true);
+      error("mysql_update_game");
 
 if( HOT_SECTION )
 {
    $result = mysql_query( "UNLOCK TABLES");
+   if ( !$result )
+      error("internal_error","confirm UNLOCK");
    //*********************** HOT SECTION END *****************************
 }//HOT_SECTION
 
@@ -485,7 +484,7 @@ if( HOT_SECTION )
       $result = mysql_query( $message_query );
 
       if( mysql_affected_rows() < 1 and $action != 'delete' )
-         error("mysql_insert_move", true);
+         error("mysql_insert_move");
    }
 
 
