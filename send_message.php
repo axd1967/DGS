@@ -100,7 +100,7 @@ disable_cache();
       else if($handicap_type == 'nigiri' ) { $tomove = -3; $komi = $komi_n; }
       else if($handicap_type == 'double' ) { $tomove = -4; $komi = $komi_d; }
 
-      if( $komi > 200 or $komi < -200 )
+      if( !($komi <= 200 and $komi >= -200) )
          error("komi_range");
 
       interpret_time_limit_forms();
@@ -132,7 +132,8 @@ disable_cache();
       else
          $query = "INSERT INTO Games SET $query";
 
-      $result = mysql_query( $query );
+      $result = mysql_query( $query )
+         or error("mysql_insert_game");
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_game");

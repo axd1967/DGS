@@ -37,7 +37,7 @@ require("forum_functions.php");
                          "FROM Posts LEFT JOIN Players ON Players.ID=Posts.User_ID " .
                          "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
                          " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
-                         "WHERE Forum_ID=$forum AND Depth=1 " .
+                         "WHERE Forum_ID=$forum AND Depth=1 AND Approved='Y'" .
                          "ORDER BY Lastchanged desc")
    or die(mysql_error());
 
