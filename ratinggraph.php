@@ -41,28 +41,18 @@ require_once( "include/form_functions.php" );
    else
       error("no_uid");
 
-  $result = mysql_query("SELECT ID,Name FROM Players WHERE $where");
+  $result = mysql_query("SELECT ID,Name,Handle FROM Players WHERE $where");
 
   if( mysql_num_rows($result) != 1 )
      error("unknown user");
 
-  $row = mysql_fetch_array($result);
+  $user_row = mysql_fetch_array($result);
 
-  $uid = $row['ID'];
-  $name_safe = make_html_safe($row['Name']);
+  $uid = $user_row['ID'];
 
-  start_page(T_('Rating graph for') . " $name_safe", true, $logged_in, $player_row );
-
-  $CURRENTYEAR = date('Y', $NOW + $ratingpng_min_interval);
-  $CURRENTMONTH = date('n', $NOW + $ratingpng_min_interval);
-
-  echo '<center>';
-
-
-  echo "<h3><font color=$h3_color>" . T_('Rating graph for') .
-     " <A href=\"userinfo.php?uid=$uid\">$name_safe</A></font></h3><p>\n";
-
-  $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2");
+  $CURRENTMONTH = $NOW + $ratingpng_min_interval;
+  $CURRENTYEAR = date('Y', $CURRENTMONTH);
+  $CURRENTMONTH = date('n', $CURRENTMONTH);
 
   $startyear = ( @$_GET['startyear'] > 0 ? $_GET['startyear'] : $BEGINYEAR );
   $startmonth = ( @$_GET['startmonth'] > 0 ? $_GET['startmonth'] : $BEGINMONTH );
@@ -98,42 +88,58 @@ require_once( "include/form_functions.php" );
      swap($startyear, $endyear);
   }
 
+
+  start_page(T_('Rating graph for') . ' ' . make_html_safe($user_row['Name'])
+            , true, $logged_in, $player_row );
+
+  echo '<center>';
+
+  echo "<h3><font color=$h3_color>" . T_('Rating graph for') . ' ' .
+           user_reference( 1, 1, '', $user_row) . "</font></h3><p>\n" ;
+
+  $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2");
+
   if( mysql_num_rows($result) < 1 )
      echo T_("Sorry, too few rated games to draw a graph") . "\n";
   else
+  {
      echo '<img src="ratingpng.php?uid=' . $uid .
         (@$_GET['show_time'] == 'y' ? '&show_time=y' : '') . 
         "&startyear=$startyear&startmonth=$startmonth&endmonth=$endmonth&endyear=$endyear\"" .
         " alt=\"" . T_('Rating graph') . "\">\n";
 
-  echo "<p>\n";
+     echo "<p>\n";
 
-  $form = new Form( 'date_form', 'ratinggraph.php', FORM_GET );
+     $form = new Form( 'date_form', 'ratinggraph.php', FORM_GET );
 
-  $months = array( 1 => T_('Jan'), 2 => T_('Feb'), 3 => T_('Mar'), 4 => T_('Apr'),
-                   5 => T_('May'), 6 => T_('Jun'), 7 => T_('Jul'), 8 => T_('Aug'),
-                   9 => T_('Sep'), 10=> T_('Oct'), 11=> T_('Nov'), 12=> T_('Dec') );
+     $months = array( 1 => T_('Jan'), 2 => T_('Feb'), 3 => T_('Mar'), 4 => T_('Apr'),
+                      5 => T_('May'), 6 => T_('Jun'), 7 => T_('Jul'), 8 => T_('Aug'),
+                      9 => T_('Sep'), 10=> T_('Oct'), 11=> T_('Nov'), 12=> T_('Dec') );
 
-  for( $y = $BEGINYEAR; $y <= $CURRENTYEAR; $y++ )
-     $years[$y] = $y;
+     for( $y = $BEGINYEAR; $y <= $CURRENTYEAR; $y++ )
+        $years[$y] = $y;
 
-  $form->add_row( array( 'HIDDEN', 'uid', $uid,
-                         'DESCRIPTION', T_('From#2'),
-                         'SELECTBOX', 'startmonth', 1, $months, $startmonth, false,
-                         'SELECTBOX', 'startyear', 1, $years, $startyear, false,
-                         'OWNHTML', '&nbsp;&nbsp;',
-                         'DESCRIPTION', T_('To#2'),
-                         'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
-                         'SELECTBOX', 'endyear', 1, $years, $endyear, false,
-                         'OWNHTML', '&nbsp;&nbsp;',
-                         'SUBMITBUTTON', 'submit', T_('Change interval') ) );
+     $form->add_row( array( 'HIDDEN', 'uid', $uid,
+                            'DESCRIPTION', T_('From#2'),
+                            'SELECTBOX', 'startmonth', 1, $months, $startmonth, false,
+                            'SELECTBOX', 'startyear', 1, $years, $startyear, false,
+                            'OWNHTML', '&nbsp;&nbsp;',
+                            'DESCRIPTION', T_('To#2'),
+                            'SELECTBOX', 'endmonth', 1, $months, $endmonth, false,
+                            'SELECTBOX', 'endyear', 1, $years, $endyear, false,
+                            'OWNHTML', '&nbsp;&nbsp;',
+                            'SUBMITBUTTON', 'submit', T_('Change interval') ) );
 
-  $form->echo_string();
-
+     $form->echo_string();
+  }
 
   echo '</center>';
 
-  end_page();
+  $menu_array =
+     array( T_('Show finished games') => "show_games.php?uid=$uid&finished=1" );
+
+  end_page(@$menu_array);
+
 }
 
 ?>

@@ -80,9 +80,9 @@ function get_rating_data($uid)
 
    if( ($endtime - $starttime) < $min_interval )
    {
-      $mean = ( $starttime + $endtime )/2;
+      $mean = ( $starttime + $endtime )/2 + 12*3600;
       $starttime = $mean - $min_interval/2;
-      $endtime = $mean + $min_interval/2;
+      $endtime = $starttime + $min_interval;
    }
 
    $result = mysql_query("SELECT Rating, RatingMax, RatingMin, " .
@@ -298,13 +298,14 @@ function imagemultiline($im, $points, $nr_points, $color)
    $SizeY = $SizeX * 3 / 4;
 
 
-   $starttime = mktime(0,0,0,$BEGINMONTH,0,$BEGINYEAR);
+   $starttime = mktime(0,0,0,$BEGINMONTH,1,$BEGINYEAR);
+
    if( isset($_GET['startyear']) and isset($_GET['startmonth']) )
-      $starttime = max($starttime, mktime(0,0,0,$_GET['startmonth'],0,$_GET['startyear']));
+      $starttime = max($starttime, mktime(0,0,0,$_GET['startmonth'],1,$_GET['startyear']));
 
    $endtime = $NOW + $ratingpng_min_interval;
    if( isset($_GET['endyear']) and isset($_GET['endmonth']) )
-      $endtime = min($endtime, mktime(0,0,0,$_GET['endmonth'],0,$_GET['endyear']));
+      $endtime = min($endtime, mktime(0,0,0,$_GET['endmonth']+1,0,$_GET['endyear']));
 
    get_rating_data(@$_GET["uid"]);
 
