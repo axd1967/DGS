@@ -19,11 +19,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 function draw_board($Size, &$array, $may_play, $gid, 
-                    $Last_X, $Last_Y, $stone_size, $font_size, $msg, $killed_string)
+                    $Last_X, $Last_Y, $stone_size, $font_size, $msg, $killedstring)
 {
     if( $msg )
         echo "<table border=2 align=center><tr>" . 
-        "<td width=\"" . $stone_size*($Size) . "\" align=left>$msg</td></tr></table><BR>\n";
+        "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
     echo "<table border=0 cellpadding=0 cellspacing=0 align=center valign=center background=images/wood1.png>";
     echo "<tr>\n<td>&nbsp;</td>";
@@ -59,16 +59,27 @@ function draw_board($Size, &$array, $may_play, $gid,
             $letter_c = 'a';
             for($colnr = 0; $colnr < $Size; $colnr++ )
                 {
+                    $stone = $array[$colnr][$Size-$rownr];
                     $empty = false;
-                    if( $array[$colnr][$Size-$rownr] == BLACK )
+                    if( $stone == BLACK )
                         {
                             $type = "b";
                             $alt = '#';
                         }
-                    else if( $array[$colnr][$Size-$rownr] == WHITE )
+                    else if( $stone == WHITE )
                         {
                             $type = "w";
                             $alt = 'O';
+                        }
+                    else if( $stone == BLACK_DEAD )
+                        {
+                            $type = "bw";
+                            $alt = '/';
+                        }
+                    else if( $stone == WHITE_DEAD )
+                        {
+                            $type = "wb";
+                            $alt = '-';
                         }
                     else
                         {
@@ -96,15 +107,17 @@ function draw_board($Size, &$array, $may_play, $gid,
                                         }
                                 }
                             $empty = true;
+
+                            
                         }
 
                     if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y )
                         $type .= "m";
 
-                    if( $may_play && $empty && !$killed_string)
+                    if( $may_play && $empty && !$killedstring)
                         echo "<td><A href=game.php?gid=$gid&action=move&coord=$letter_c$letter_r><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
-                    else if( $may_play && !$empty && $killed_string)
-                        echo "<td><A href=game.php?gid=$gid&action=remove&coord=$letter_c$letter_r&killed=$killed_string><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
+                    else if( $may_play && !$empty && $killedstring)
+                        echo "<td><A href=game.php?gid=$gid&action=remove&coord=$letter_c$letter_r&killedstring=$killedstring><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
                         
                     else
                         echo "<td><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></td>\n";
@@ -147,6 +160,7 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead )
 
     while( $row = mysql_fetch_array($result) )
         {
+            if( $row["PosX" ] < 0 ) continue;
             if( $row["Stone"] <= WHITE )
                 {
                     $array[$row["PosX"]][$row["PosY"]] = $row["Stone"];
@@ -159,17 +173,20 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead )
                 {
                     if( $removed_dead == FALSE )
                         {
-                            $marked_dead = array();
+                            $marked_dead = array(); // restart removal
                             $removed_dead = TRUE;
                         }
-                    array_push($marked_dead, array($row["PosX"],$row["PosX"],$row["Stone"]));
+                    array_push($marked_dead, array($row["PosX"],$row["PosY"],$row["Stone"]));
                 } 
         }
 
     while( $sub = each($marked_dead) )
         {
-            list($x, $y, $s) = $sub;
-            $array[$x][$y] = $s;
+            list($dummy, list($x, $y, $s)) = $sub;
+            if( $array[$x][$y] >= BLACK_DEAD )
+                $array[$x][$y] = $s - 6;
+            else
+                $array[$x][$y] = $s;
         }
 
 }
@@ -348,7 +365,10 @@ function remove_dead( $x, $y, &$array, &$prisoners )
                                     while( list($y, $val) = each($sub) )
                                         {
                                             array_push($prisoners, array($x,$y));
-                                            $array[$x][$y] += 6;
+                                            if( $array[$x][$y] < 7 )
+                                                $array[$x][$y] += 6;
+                                            else
+                                                $array[$x][$y] -= 6;
                                         }
                                 }
 

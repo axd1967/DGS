@@ -153,7 +153,7 @@ switch( $action )
          $game_query = "UPDATE Games SET " .
               "Moves=$Moves, " .
               "Last_X=-1, " .
-              "Status=$next_status, ";
+              "Status='$next_status', ";
 
          if( $next_to_move == BLACK )
              $game_query .= "ToMove_ID=$Black_ID, ";
@@ -193,6 +193,51 @@ switch( $action )
 
  case 'done':
      {
+         if( $Status != 'SCORE' and $Status != 'SCORE2' )
+             {
+                 header("Location: error.php?err=invalid_action");
+                 exit;
+             }
+
+         $prisoners = unserialize(urldecode($prisoners));
+         reset($prisoners);
+
+         $nr_prisoners = count($prisoners);
+
+         $next_status = 'SCORE2';
+         if( $Status == 'SCORE2' and  $nr_prisoners == 0 )
+             $next_status = 'FINNISHED';
+
+         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Text ) VALUES ";
+
+
+         while( list($dummy, list($x,$y)) = each($prisoners) )
+             {
+                 $query .= "($Moves, " . (9 - $to_move ) . ", $x, $y, NULL), ";
+             }
+
+
+         if( $message )
+             $query .= "($Moves, $to_move, -2, NULL, '$message') ";
+         else
+             $query .= "($Moves, $to_move, -2, NULL, NULL) ";
+
+
+
+         $game_query = "UPDATE Games SET " .
+              "Moves=$Moves, " .
+              "Last_X=-1, " .
+              "Status='$next_status', ";
+
+              if( $next_to_move == BLACK )
+                  $game_query .= "ToMove_ID=$Black_ID, ";
+              else
+                  $game_query .= "ToMove_ID=$White_ID, ";
+
+              $game_query .=
+                   "Flags=0" .
+                   " WHERE ID=$gid";
+         
      }
      break;
 
