@@ -1,44 +1,58 @@
-
+#!/usr/bin/make -f
 # Use 'make -f images_makefile' to generate the images
 
 SIZES = 13 17 21 25 29 35 42 50
 
 BIGSTONES = BigBlack.png BigBlackMark.png BigWhite.png BigWhiteMark.png YinYang.png BigPlayBlack.png BigPlayWhite.png
+BIGSTONES_POV = BigBlack_pov.png BigWhite_pov.png YinYang_pov.png BigPlayBlack_pov.png BigPlayWhite_pov.png
 
 POVFILES = stone.inc stone.pov
 
-POVRAY = povray +D +sp16 +ep4 -P +A +J +W1024 +H768 +FN
+POVRAY = povray
+POVRAY_ARGS = +D +sp16 +ep4 -P -V +A +J +W1024 +H768 +FN
 
 target: board stones
 
-.PHONY: bigstones
+BigPlayBlack_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=PLAY_B=1 +O$@ stone.pov
 
-bigstones: $(BIGSTONES) $(POVFILES) generate_big_images.pl
-	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Running povray (v3.5 or higher) to generate some nice stone images.";
-	@echo -e "\n------------------------------------------------------------------------------------\n";
-	$(POVRAY) +FN Declare=PLAY_B=1 +OBigPlayBlack.png stone.pov
-	$(POVRAY) Declare=PLAY_W=1 +OBigPlayWhite.png stone.pov
-	$(POVRAY) Declare=BLACK=1 +OBigBlack.png stone.pov
-	$(POVRAY) Declare=WHITE=1 +OBigWhite.png stone.pov
-	$(POVRAY) Declare=YINYANG=1 +OYinYang.png stone.pov
-	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Now crop the images with gimp (v1.2 other versions might work too).";
-	@echo -e "\n------------------------------------------------------------------------------------\n";
-	generate_big_stones.pl
+BigPlayWhite_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=PLAY_W=1 +O$@ stone.pov
+
+BigBlack_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=BLACK=1 +O$@ stone.pov
+
+BigWhite_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=WHITE=1 +O$@ stone.pov
+
+YinYang_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=YINYANG=1 +O$@ stone.pov
+
+%.png: %_pov.png generate_big_images.pl
+	./generate_big_images.pl $@ $<
+
+%Mark.png: %_pov.png generate_big_images.pl
+	./generate_big_images.pl $@ $<
+
+#	@echo -e "\n\n------------------------------------------------------------------------------------\n";
+#	@echo -e "   Running povray (v3.5 or higher) to generate some nice stone images.";
+#	@echo -e "\n------------------------------------------------------------------------------------\n";
+#	@echo -e "\n\n------------------------------------------------------------------------------------\n";
+#	@echo -e "   Now crop the images with gimp (v1.2 other versions might work too).";
+#	@echo -e "\n------------------------------------------------------------------------------------\n";
 
 board: generate_board_images.pl
 	@echo -e "\n\n------------------------------------------------------------------------------------\n";
 	@echo -e "   Draw some board images with gimp (v1.2 other versions might work too).";
 	@echo -e "\n------------------------------------------------------------------------------------\n";
-	generate_board_images.pl board
+	./generate_board_images.pl board
 	touch board
 
-stones: bigstones generate_board_images.pl
+stones: $(BIGSTONES) generate_board_images.pl
 	@echo -e "\n\n------------------------------------------------------------------------------------\n";
 	@echo -e "   Draw stone images with gimp (v1.2 other versions might work too).";
 	@echo -e "\n------------------------------------------------------------------------------------\n";
-	generate_board_images.pl stones
+	./generate_board_images.pl stones
 	touch stones
 
 
