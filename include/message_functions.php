@@ -215,10 +215,10 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 define('FLOW_ANSWER'  ,0x1);
 define('FLOW_ANSWERED',0x2);
    $msg_icones = array(
-      array('msg'   ,'&nbsp;-&nbsp;'),
-      array('msg_lr','&gt;-&nbsp;'), //is an answer
-      array('msg_rr','&nbsp;-&gt;'), //is answered
-      array('msg_2r','&gt;-&gt;'),
+  0                         => array('msg'   ,'&nbsp;-&nbsp;'),
+  FLOW_ANSWER               => array('msg_lr','&gt;-&nbsp;'), //is an answer
+              FLOW_ANSWERED => array('msg_rr','&nbsp;-&gt;'), //is answered
+  FLOW_ANSWER|FLOW_ANSWERED => array('msg_2r','&gt;-&gt;'),
       );
 
 function message_info_table($mid, $date, $to_me,
@@ -226,7 +226,7 @@ function message_info_table($mid, $date, $to_me,
                             $subject, $reply_mid, $flow, $text, //must NOT be html_safe
                             $folders=null, $folder_nr=null, $form=null, $delayed_move=false)
 {
-   global $date_fmt, $bg_color;
+   global $date_fmt, $msg_icones, $bg_color;
 
    if( $other_id > 0 )
    {
@@ -246,22 +246,23 @@ function message_info_table($mid, $date, $to_me,
       make_html_safe($subject, true) . "</td></tr>\n" .
       "<tr><td valign=\"top\">" ;
 
- global $msg_icones;
    echo "<b>" . T_('Message') . ":</b>" ;
    $str = '';
    if( $flow & FLOW_ANSWER && $reply_mid > 0 )
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWER];
       $str.= "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" .
-             "<img border=0 alt='$alt' src='images/$ico.gif'>"
-             . "</a>&nbsp;" ;
+             "<img border=0 alt='$alt' src='images/$ico.gif'"
+             . ' title="' . T_("Previous message") . '"'
+             . "></a>&nbsp;" ;
    }
    if( $flow & FLOW_ANSWERED )
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWERED];
       $str.= "<a href=\"list_messages.php?find_answers=$mid\">" .
-             "<img border=0 alt='$alt' src='images/$ico.gif'>"
-             . "</a>&nbsp;" ;
+             "<img border=0 alt='$alt' src='images/$ico.gif'"
+             . ' title="' . T_("Next messages") . '"'
+             . "></a>&nbsp;" ;
    }
    if( $str )
      echo "<center>$str</center>";
@@ -557,7 +558,7 @@ function echo_folder_box($folders, $folder_nr, $bgcolor)
 {
  global $STANDARD_FOLDERS;
 
-   list($foldername, $folderbgcolor, $folderfgcolor) = $folders[$folder_nr];
+   list($foldername, $folderbgcolor, $folderfgcolor) = @$folders[$folder_nr];
 
    if( empty($foldername) )
      if ( $folder_nr < USER_FOLDERS )
@@ -638,14 +639,21 @@ function message_list_table( &$mtable, $result, $show_rows
                            $no_sort ? NULL : 'other_name', false, true );
    $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'subject', false, true );
    list($ico,$alt) = $msg_icones[0];
+   $tit = T_('Messages');
    $mtable->add_tablehead( 0, 
-      "<img border=0 alt='$alt' src='images/$ico.gif'>"
+      "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>"
       , $no_sort ? NULL : 'flow', false, true );
    $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, true );
    if( !$no_mark )
       $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
 
    $page = '';
+
+   $p = T_('Answer'); $n = T_('Answered');
+   $tits[0                        ] = T_('Message') ;
+   $tits[FLOW_ANSWER              ] = $p ;
+   $tits[            FLOW_ANSWERED] = $n ;
+   $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p\n$n" ;
 
    while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
    {
@@ -674,10 +682,11 @@ function message_list_table( &$mtable, $result, $show_rows
 
       $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "&nbsp;</td>";
       list($ico,$alt) = $msg_icones[$row["flow"]];
+      $tit = $tits[$row["flow"]];
       $mrow_strings[0] = "<td>" .
          "<A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
-         "<img border=0 alt='$alt' src='images/$ico.gif'>" .
-         '</A>' .
+         "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>"
+         . '</A>' .
          '</td>';
       $mrow_strings[4] = "<td>" . date($date_fmt, $row["Time"]) . "</td>";
 
