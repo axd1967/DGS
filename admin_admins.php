@@ -156,11 +156,14 @@ require_once( "include/table_columns.php" );
          list( $amask, $aname) = $tmp;
 
          if( $amask & $player_row['admin_level'] )
-            $tmp = "<input type=\"checkbox\" name=\"${aid}_$id\" value=\"Y\"" .
-                  (($level & $amask) ? ' checked' : '') . ">";
+            $tmp = '';
          else
-            //$tmp = (($level & $amask) ? '&times;' : '&#149;'); //&loz;&deg;
-            $tmp = (($level & $amask) ? 'x' : '-');
+            $tmp = ' disabled';
+
+         if( $amask & $level )
+            $tmp.= ' checked';
+
+         $tmp = "<input type=\"checkbox\" name=\"${aid}_$id\" value=\"Y\"$tmp>";
 
          $arow_strings[$col++] = "<td align=center>$tmp</td>";
       }
