@@ -70,12 +70,12 @@ require( "include/std_functions.php" );
    while( $row = mysql_fetch_array( $result ) )
    {
       if( $uid == $row["Black_ID"] )
-         $color = "Black"; 
+         $color = "b"; 
       else
-         $color = "White"; 
+         $color = "w"; 
 
       echo "<tr><td><A href=\"userinfo.php?uid=" . $row["uid"] . "\">" . $row["Name"] . "</td>" .
-      "<td bgcolor=$color><font color=$color>$color</font></td>" .
+      "<td align=center><img src=\"17/$color.gif\"></td>" .
       "<td>" . $row["Size"] . "</td>" .
          "<td>" . $row["Handicap"] . "</td>" .
          "<td>" . $row["Komi"] . "</td>" .
@@ -84,7 +84,7 @@ require( "include/std_functions.php" );
       "<td><A href=\"game.php?gid=" . $row["ID"] . "\">html</td>";
       if( $finished )
       {
-         if( $color == "White" xor $row["Score"] > 0.0 )
+         if( $color == "w" xor $row["Score"] > 0.0 )
             $image = 'no.gif';
          else
             $image = 'yes.gif';
