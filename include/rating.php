@@ -416,8 +416,8 @@ function convert_to_rating($string, $type)
    $igs_table[2]['KEY'] = 1500;
    $igs_table[2]['VAL'] = 1500;
 
-   $igs_table[4]['KEY'] = 2400;
-   $igs_table[4]['VAL'] = 2400;
+   $igs_table[3]['KEY'] = 2400;
+   $igs_table[3]['VAL'] = 2400;
 
 
    switch( $type )
