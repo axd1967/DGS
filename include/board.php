@@ -18,77 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-define("LEFT",1);
-define("UP",2);
-define("RIGHT",4);
-define("DOWN",8);
-
-function number2sgf_coords($x, $y, $Size)
-{
-   if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
-      return NULL;
-
-   return chr(ord('a')+$x) . chr(ord('a')+$y);
-}
-
-function sgf2number_coords($coord, $Size)
-{
-   if( !is_string($coord) or strlen($coord)!=2 )
-      return array(NULL,NULL);
-
-   $x = ord($coord[0])-ord('a');
-   $y = ord($coord[1])-ord('a');
-
-   if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
-      return array(NULL,NULL);
-
-   return array(ord($coord[0])-ord('a'), ord($coord[1])-ord('a'));
-}
-
-function number2board_coords($x, $y, $Size)
-{
-  if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
-     return NULL;
-
-  $col = chr( $x + ord('a') );
-  if( $col >= 'i' ) $col++;
-
-  return  $col . ($Size - $y);
-
-}
-
-
-// If move update was interupted between thw mysql queries, there may
-// be extra entries in the Moves and MoveMessages tables.
-function fix_corrupted_move_table($gid)
-{
-   $result = mysql_query("SELECT Moves FROM Games WHERE ID=$gid");
-
-   if( mysql_num_rows($result) != 1 )
-      error("mysql_query_failed");
-
-   extract(mysql_fetch_array($result));
-
-
-   $result = mysql_query("SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid");
-
-   if( mysql_num_rows($result) != 1 )
-      error("mysql_query_failed");
-
-   extract(mysql_fetch_array($result));
-
-
-
-   if($Moves == $max_movenr)
-      return;
-
-   if($max_movenr != $Moves+1)
-      error("mysql_data_corruption");    // Can't handle this type of problem
-
-   mysql_query("DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr");
-   mysql_query("DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr");
-}
-
+require_once( "include/coords.php" );
 
 
 function draw_board($Size, &$array, $may_play, $gid,
@@ -954,4 +884,39 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
 
    return $out;
 }
+
+
+
+// If move update was interupted between thw mysql queries, there may
+// be extra entries in the Moves and MoveMessages tables.
+function fix_corrupted_move_table($gid)
+{
+   $result = mysql_query("SELECT Moves FROM Games WHERE ID=$gid");
+
+   if( mysql_num_rows($result) != 1 )
+      error("mysql_query_failed");
+
+   extract(mysql_fetch_array($result));
+
+
+   $result = mysql_query("SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid");
+
+   if( mysql_num_rows($result) != 1 )
+      error("mysql_query_failed");
+
+   extract(mysql_fetch_array($result));
+
+
+
+   if($Moves == $max_movenr)
+      return;
+
+   if($max_movenr != $Moves+1)
+      error("mysql_data_corruption");    // Can't handle this type of problem
+
+   mysql_query("DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr");
+   mysql_query("DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr");
+}
+
+
 ?>
