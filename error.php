@@ -198,16 +198,16 @@ require( "include/std_functions.php" );
 
       case("not_logged_in"):
       {
-?>
+echo "
 Sorry, you have to be logged in to do that.
 <p>
 The reasons for this problem could be any of the following:
 <ul>
-<li> You haven't got an <a href="<?php echo $HOSTBASE; ?>/register.php">account</a>, or haven't <a href="<?php echo $HOSTBASE; ?>/index.php">logged in</a> yet.
+<li> You haven't got an <a href=\"$HOSTBASE/register.php\">account</a>, or haven't <a href=\"$HOSTBASE/index.php\">logged in</a> yet.
 <li> Your cookies have expired. This happens once a week.
 <li> You haven't enabled cookies in your browser.
 </ul>
-<?php            
+";
       }
       break;
 
@@ -342,8 +342,8 @@ The reasons for this problem could be any of the following:
       break;
    }
 
-   if( $mysql and mysql_error())
-      echo("<p>Mysql error: " . mysql_error() );
+   if( $mysql_error )
+      echo("<p>Mysql error: " . $mysql_error );
 
    end_page();
 }
