@@ -18,12 +18,14 @@ $DB_NAME = "dragongoserver";
 
 // This is used for cookies. If the main url is, e.g., 
 // http://www.some_domain.com/~my_dir/index.php
-// set $SUB_PATH = "/~my_dir";
+// http://localhost/~my_dir/index.php
+// http://127.0.0.1/~my_dir/index.php
+// set $SUB_PATH = "/~my_dir/";
 
 $SUB_PATH = "/";
 
 define('URI_AMP_IN','&'); //ini_get('arg_separator.input')
 //URI_AMP at '&amp;' work even if arg_separator.output is set to '&'
-//define('URI_AMP','&amp;'); //ini_get('arg_separator.output')
-define('URI_AMP','&'); //ini_get('arg_separator.output')
+define('URI_AMP','&amp;'); //ini_get('arg_separator.output')
+//define('URI_AMP','&'); //ini_get('arg_separator.output')
 ?>

@@ -30,10 +30,10 @@ if (!isset($page_microtime))
 {
    $page_microtime = getmicrotime();
    $admin_level = 0;
+   //std_functions.php must be called from the main dir
+   $main_path = str_replace('\\', '/', getcwd()).'/';
    //$base_path is relative to the URL, not to the current dir
-   $base_path = ( is_base_dir() ? '' : '../' );
-   //force to call std_functions.php from main dir
-   $main_path = getcwd().'/';
+   $base_path = rel_base_dir();
 }
 
 require_once( "include/translation_functions.php" );
@@ -160,7 +160,6 @@ define("ADMIN_TIME",0x10);
 define("ADMIN_ADD_ADMIN",0x20);
 define("ADMIN_PASSWORD",0x40);
 define('ADMIN_DATABASE',0x80);
-define('ADMIN_VALIDATE',0x100);
 
 
 define("FOLDER_NONE", -1);
@@ -195,7 +194,7 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
    header('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
-      . "<HTML>\n<HEAD>";
+      . "\n<HTML>\n<HEAD>";
 
   echo "\n <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">";
 
@@ -600,20 +599,30 @@ function generate_random_password()
    return $return;
 }
 
-function set_cookies($handl, $code, $delete=false)
+function set_login_cookie($handl, $code, $delete=false)
 {
    global $session_duration, $SUB_PATH, $NOW;
 
-   if( $delete )
+   if( $delete or !$handl or !$code)
    {
-      setcookie (COOKIE_PREFIX."handle", '', $NOW-3600, "$SUB_PATH" );
-      setcookie (COOKIE_PREFIX."sessioncode", '', $NOW-3600, "$SUB_PATH" );
+      setcookie(COOKIE_PREFIX."handle", '', $NOW-3600, $SUB_PATH );
+      setcookie(COOKIE_PREFIX."sessioncode", '', $NOW-3600, $SUB_PATH );
    }
    else
    {
-      setcookie (COOKIE_PREFIX."handle", $handl, $NOW+$session_duration*5, "$SUB_PATH" );
-      setcookie (COOKIE_PREFIX."sessioncode", $code, $NOW+$session_duration, "$SUB_PATH" );
+      setcookie(COOKIE_PREFIX."handle", $handl, $NOW+$session_duration*5, $SUB_PATH );
+      setcookie(COOKIE_PREFIX."sessioncode", $code, $NOW+$session_duration, $SUB_PATH );
    }
+}
+
+function set_cookie_prefs($id, $delete=false)
+{
+   global $cookie_prefs, $NOW, $SUB_PATH, $session_duration;
+
+   if( $delete )
+      setcookie(COOKIE_PREFIX."prefs$id", '', $NOW-3600, $SUB_PATH );
+   else
+      setcookie(COOKIE_PREFIX."prefs$id", serialize($cookie_prefs), $NOW+$session_duration*36, $SUB_PATH );
 }
 
 function get_cookie_prefs(&$player_row)
@@ -630,16 +639,6 @@ function get_cookie_prefs(&$player_row)
          if( in_array($key, $cookie_pref_rows) )
             $player_row[$key] = $value;
       }
-}
-
-function set_cookie_prefs($id, $delete=false)
-{
-   global $cookie_prefs, $NOW, $SUB_PATH, $session_duration;
-
-   if( $delete )
-      setcookie(COOKIE_PREFIX."prefs$id", '', $NOW-3600, $SUB_PATH );
-   else
-      setcookie(COOKIE_PREFIX."prefs$id", serialize($cookie_prefs), $NOW+$session_duration*36, $SUB_PATH );
 }
 
 function add_line_breaks( $str)
@@ -918,20 +917,20 @@ function score2text($score, $verbose, $keep_english=false)
 }
 
 // relative to the calling URL, not to the current dir
-function is_base_dir()
+function rel_base_dir()
 {
    global $SUB_PATH;
 
-   //return dirname($_SERVER['PHP_SELF']) == $SUB_PATH;
-/* In case of a local server under Windows,
-         dirname('/foo/bar') return '/foo'
-     but dirname('/foo')     return '\\'
-     and dirname('/')        return '\\'
-   replace the previous line by this one:
- */
-   return str_replace('\\','/',dirname($_SERVER['PHP_SELF'])) == $SUB_PATH;
-   //relative to current directory (allow chdir())
-   //return file_exists("include/std_functions.php");
+   $dir = str_replace('\\','/',$_SERVER['PHP_SELF']);
+   $rel = '';
+   while( $i=strrpos($dir,'/') )
+   {
+      $dir= substr($dir,0,$i);
+      if( $dir.'/' == $SUB_PATH )
+         break;
+      $rel.= '../';
+   }
+   return $rel;
 }
 
 function mod($a,$b)
@@ -980,10 +979,8 @@ function get_request_url()
 
    $url = @$_SERVER['REQUEST_URI'];
    $len = strlen($SUB_PATH);
-   if ($len == 1)
-      $url = substr($url,1);
-   else if (!strcasecmp( $SUB_PATH, substr($url,0,$len) ))
-      $url = substr($url,$len+1);
+   if (!strcasecmp( $SUB_PATH, substr($url,0,$len) ))
+      $url = substr($url,$len);
    $url = str_replace( URI_AMP_IN, URI_AMP, $url);
    return $url;
 }
