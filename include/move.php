@@ -399,7 +399,7 @@ function draw_notes($notes, $height, $width)
    echo "<tr><td bgcolor='#7aa07a'><font color=white><b><span id=\"notes_caption\">" . T_('Private game notes') .
       "</span></b></font></td></tr>\n";
    echo "<tr><td bgcolor='#ddf0dd'>\n";
-   $notes = @htmlspecialchars($notes, ENT_QUOTES);
+   $notes = textarea_safe($notes);
    echo "<textarea name=\"notes\" id=\"notes\" cols=\"" . $width . "\" rows=\"" . $height . "\" wrap=\"virtual\">$notes</textarea>";
    echo "</td></tr>\n";
    echo "<tr><td><input type=\"submit\" value=\"Save notes\"></td></tr>\n";
