@@ -31,9 +31,14 @@ require( "include/form_functions.php" );
  * \brief Base class for a tournament round.
  *
  * This class should define the behaviour of a tournament round.
+ *
+ * \todo The board specification could perhaps be a class of its own that
+ *       could be used by many classes in dragon.
  */
 class TournamentRound
 {
+  /*! \privatesection */
+
   /*! \brief The identification of this round. */
   var $ID;
   /*!
@@ -59,11 +64,27 @@ class TournamentRound
 
   /*! \brief The size of the board for this round. */
   var $board_size;
-
-  /*! \todo More board- and time-variables. */
+  /*! \brief The komi to use in all games in this round. */
+  var $komi;
+  /*! \brief Type of handicap to use in the games. */
+  var $handicap_type;
+  /*! \brief Maintime in all games for this round. */
+  var $maintime;
+  /*! \brief The byoyomi type for the games. */
+  var $byoyomi_type;
+  /*! \brief The byoyomi time for all games. */
+  var $byoyomi_time;
+  /*! \brief The number of byoyomi periods. */
+  var $byoperiods;
+  /*! \brief Whether the games in the tournament should change the general dragon rating. */ 
+  var $games_rated;
+  /*! \brief Should the clock run on weekends? */
+  var $weekend_clock;
+  /*! \brief The number of times each pair of players should play against each other. */
+  var $games_per_pair;
 
   /***
-   * Local (private) variables.
+   * Internal variables.
    ***/
 
 
@@ -71,6 +92,8 @@ class TournamentRound
   /***
    * User functions.
    ***/
+
+  /*! \publicsection */
 
   /*! \brief Constructor without real initialization.  */
   function TournamentRound()
@@ -96,7 +119,7 @@ class TournamentRound
    *       classes to add things before and after.
    *
    * \todo Add more common options.
-   * \see Form::Form, Form:add_form()
+   * \sa Form::Form, Form:add_form
    */
   function create_options_form( $form_name = 'option_form',
                                 $action = 'nopage.php',
@@ -109,6 +132,17 @@ class TournamentRound
       return $options_form;
     }
 
+  /*!
+   * \brief Generate a list of games for this round.
+   *
+   * \param what_games What type of games should be included.
+   *                   Should be a string with one of the following values:
+   *                   'Running', 'Finished', 'All'.
+   */
+  function get_game_list( $what_games )
+    {
+    }
+
   /***
    * Functions that should be implemented by all derived classes.
    ***/
@@ -117,4 +151,33 @@ class TournamentRound
   function add_type_specific_options_to_form( &$options_form )
     {
     }
+
+  /*!
+   * \brief Generate new games for this round.
+   *
+   * Checks if there are active games in this round and that it should not
+   * be ended. If these criterias are fulfilled, generates a new sets of
+   * games. If the game should be ended, call end_of_round.
+   *
+   * \note Only applicable when the round is active.
+   *
+   * \sa end_of_round
+   */
+  function generate_games()
+    {
+    }
+
+  /*!
+   * \brief Ends the rounds if it should be ended.
+   *
+   * Should take care of generating a new round or announce a
+   * winner.
+   *
+   * \note Only applicable when the round is active.
+   */
+  function end_of_round()
+    {
+    }
 }
+
+?>

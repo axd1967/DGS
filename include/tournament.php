@@ -18,19 +18,19 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* The code in this file is written by Ragnar Ouchterlony */
+ /* The code in this file is written by Ragnar Ouchterlony */
 
-/*!
- * \file tournament.php
- * \brief For class Tournament.
- */
+ /*!
+  * \file tournament.php
+  * \brief For class Tournament.
+  */
 
-require( "include/tournament_round.php" );
+ require( "include/tournament_round.php" );
 
 /* Tournament states */
 define( "TOUR_STATE_INACTIVE", 0 );
 define( "TOUR_STATE_APPLICATIONPERIOD", 1 );
-define( "TOUR_STATE_RUNNING", 2 )
+define( "TOUR_STATE_RUNNING", 2 );
 define( "TOUR_STATE_FINISHED", 3 );
 
 
@@ -41,98 +41,114 @@ define( "TOUR_STATE_FINISHED", 3 );
  */
 class Tournament
 {
-  /*! \privatesection */
+   /*! \privatesection */
 
-  /*! \brief The identification of this tournament */
-  var $ID;
-  /*! \brief The name of this tournament. */
-  var $name;
-  /*! \brief A longer description. */
-  var $description;
+   /*! \brief The identification of this tournament */
+   var $ID;
+   /*! \brief The name of this tournament. */
+   var $name;
+   /*! \brief A longer description. */
+   var $description;
 
-  /*! \brief The state of the tournament. */
-  var $state;
+   /*! \brief The state of the tournament. */
+   var $state;
 
-  /*!
-   * \brief An array of all the rounds in this tournament.
-   *
-   * Each element in the
-   * array should be either an ID or a TournamentRound object.
-   *
-   * If it is an ID it means that the object hasn't been loaded into memory
-   * yet.  See also the function get_round().
-   */
-  var $rounds;
+   /*!
+    * \brief An array of all the rounds in this tournament.
+    *
+    * Each element in the
+    * array should be either an ID or a TournamentRound object.
+    *
+    * If it is an ID it means that the object hasn't been loaded into memory
+    * yet.
+    * \sa get_round.
+    */
+   var $rounds;
 
-  /*!
-   * \brief The application period of this tournamnet.
-   *
-   * Should be an integer that says the number of days the application
-   * period should last.
-   */
-  var $applicationperiod;
-  /*! A timestamp that tells when the applicationperiod should start. */
-  var $start_of_applicationperiod;
-  /*!
-   * \brief A boolean that tells whether the tournamnet should be cancelled
-   * if too few participants or if the tournament should start when the
-   * minimum number of participants has been reached.
-   *
-   * It also tells if the applicationperiod should end when the maximum
-   * number of participants has been reached or if it should alwas start at
-   * the end of the given applicationperiod.
-   */
-  var $strict_end_of_applicationperiod;
-  /*!
-   * \brief This variable is a boolean that tells whether the tournament might
-   * accept new participants after the tournament started.
-   *
-   * The normal behaviour is that if this is set new participants will be
-   * accepted between rounds. Other behaviour should be possible to define
-   * though.
-   */
-  var $recieve_applications_after_start;
-  /*!
-   * \brief The maximum number of participants.
-   *
-   * If this is null or negative, there will be no limit.
-   */
-  var $max_participants;
-  /*!
-   * \brief The minumum number of participants.
-   *
-   * Should be two or more, since you can't have tournaments with just one
-   * player.
-   */
-  var $min_participants;
+   /*!
+    * \brief The application period of this tournamnet.
+    *
+    * Should be an integer that says the number of days the application
+    * period should last.
+    */
+   var $applicationperiod;
+   /*! A timestamp that tells when the applicationperiod should start. */
+   var $start_of_applicationperiod;
+   /*!
+    * \brief A boolean that tells whether the tournamnet should be cancelled
+    * if too few participants or if the tournament should start when the
+    * minimum number of participants has been reached.
+    *
+    * It also tells if the applicationperiod should end when the maximum
+    * number of participants has been reached or if it should alwas start at
+    * the end of the given applicationperiod.
+    */
+   var $strict_end_of_applicationperiod;
+   /*!
+    * \brief This variable is a boolean that tells whether the tournament might
+    * accept new participants after the tournament started.
+    *
+    * The normal behaviour is that if this is set new participants will be
+    * accepted between rounds. Other behaviour should be possible to define
+    * though.
+    */
+   var $recieve_applications_after_start;
+   /*!
+    * \brief The maximum number of participants.
+    *
+    * If this is null or negative, there will be no limit.
+    */
+   var $max_participants;
+   /*!
+    * \brief The minumum number of participants.
+    *
+    * Should be two or more, since you can't have tournaments with just one
+    * player.
+    */
+   var $min_participants;
 
-  /***
-   * User functions.
-   ***/
+   /***
+    * User functions.
+    ***/
 
-  /*! \publicsection */
+   /*! \publicsection */
 
-  /*! Constructor.
-   *
-   * \brief If called without $ID it is an illegible tournament.
-   */
-  function Tournament( $ID = -1 )
-    {
-      $this->ID = $ID;
-    }
+   /*!
+    * Constructor.
+    *
+    * \brief If called without $ID it is an illegible tournament.
+    */
+   function Tournament( $ID = -1 )
+      {
+         $this->ID = $ID;
+      }
 
-  /*! \privatesection */
+   /*!
+    * Returns a round from the round-list.
+    *
+    * Loads the round into memory if it is not in memory already.
+    *
+    * \param $round Not decided yet what this should be.
+    * \todo Decide how to reference a round.
+    */
+   function get_round( $round )
+      {
+      }
 
-  /***
-   * Internal functions.
-   ***/
+   /*! \privatesection */
 
-  /*!
-   * \brief Function that takes care of determining the type of the
-   * tournament round and loads that tournament round into memory from the
-   * database.
-   */
-  function load_tournamentround( $ID )
-    {
-    }
+   /***
+    * Internal functions.
+    ***/
+
+   /*!
+    * \brief Function that takes care of determining the type of the
+    * tournament round and loads that tournament round into memory from the
+    * database.
+    */
+   function load_tournamentround( $ID )
+      {
+      }
 }
+
+?>
