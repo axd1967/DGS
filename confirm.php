@@ -26,13 +26,12 @@ disable_cache();
 
 function jump_to_next_game($id, $Lastchanged, $gid)
 {
-   global $ActivityHalvingTime, $ActivityForMove;
-
    $result = mysql_query("SELECT ID FROM Games " .
                          "WHERE ToMove_ID=$id "  . 
                          "AND Status!='INVITED' AND Status!='FINISHED' " .
-                         "AND ( Lastchanged > $Lastchanged " .
-                         "OR ( Lastchanged = $Lastchanged AND ID>$gid )) " .
+                         "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
+                         "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
+                         "AND ID>$gid )) " .
                          "ORDER BY Lastchanged,ID " .
                          "LIMIT 1");
 
