@@ -473,7 +473,7 @@ function has_liberty_check( $x, $y, $Size, &$array, &$prisoners, $remove )
          $nx = $x+$dirx[$dir];
          $ny = $y+$diry[$dir];
 
-         $new_color = $array[$nx][$ny];
+         $new_color = @$array[$nx][$ny];
 
          if( (!$new_color or $new_color == NONE ) and
              ( $nx >= 0 ) and ($nx < $Size) and ($ny >= 0) and ($ny < $Size) )
@@ -500,7 +500,7 @@ function check_prisoners($colnr,$rownr, $col, $Size, &$array, &$prisoners )
       $x = $colnr+$dirx[$i];
       $y = $rownr+$diry[$i];
 
-      if( $array[$x][$y] == $col )
+      if( @$array[$x][$y] == $col )
          has_liberty_check($x,$y, $Size, $array, $prisoners, true);
    }
 
@@ -538,7 +538,7 @@ function mark_territory( $x, $y, $size, &$array )
                while( list($y, $val) = each($sub) )
                {
                   //keep all marks unchanged and reversible
-                  if( $array[$x][$y] < MARKED_DAME )
+                  if( @$array[$x][$y] < MARKED_DAME )
                      $array[$x][$y] = $c;
                }
             }
@@ -561,12 +561,11 @@ function mark_territory( $x, $y, $size, &$array )
              isset($index[$nx][$ny]) )
             continue;
 
-
-         $new_color = $array[$nx][$ny];
+         $new_color = @$array[$nx][$ny];
 
          if( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD )
          {
-            $x = $nx;  // Go to the neigbour
+            $x = $nx;  // Go to the neighbour
             $y = $ny;
             $index[$x][$y] = $dir;
             $point_count++;
@@ -598,7 +597,7 @@ function create_territories_and_score( $size, &$array )
    {
       for( $y=0; $y<$size; $y++)
       {
-         if( !$array[$x][$y] or $array[$x][$y] == NONE )
+         if( !@$array[$x][$y] or $array[$x][$y] == NONE )
          {
             mark_territory( $x, $y, $size, $array );
          }
@@ -643,11 +642,16 @@ function toggle_marked_area( $x, $y, $size, &$array, &$marked, $companion_groups
 {
    global $dirx,$diry;
 
-   $c = $array[$x][$y]; // Color of this stone
-   if( $c == BLACK_DEAD or $c == WHITE_DEAD or $c == MARKED_DAME )
-      $toggle_value =-OFFSET_MARKED;
+   $c = @$array[$x][$y]; // Color of this stone
+
+/* Actually, $opposite_dead force an already marked dead neighbour group from the
+   opposite color to reverse to not dead, but this does not work properly if
+   $companion_groups is not true, as both groups may be not touching themself.
+*/
+   if( $companion_groups and ($c == BLACK or $c == WHITE) )
+      $opposite_dead = WHITE+BLACK_DEAD-$c ;
    else
-      $toggle_value = OFFSET_MARKED;
+      $opposite_dead = -1 ;
 
    $index[$x][$y] = 7;
 
@@ -663,9 +667,12 @@ function toggle_marked_area( $x, $y, $size, &$array, &$marked, $companion_groups
             {
                while( list($y, $val) = each($sub) )
                {
-                  if ($c == $array[$x][$y]) {
+                  if ($c == @$array[$x][$y]) {
                      array_push($marked, array($x,$y));
-                     $array[$x][$y] += $toggle_value ;
+                     if ( isset($array[$x][$y]) )
+                        $array[$x][$y] ^= OFFSET_MARKED ;
+                     else
+                        $array[$x][$y]  = MARKED_DAME ;
                   }
                }
             }
@@ -685,16 +692,20 @@ function toggle_marked_area( $x, $y, $size, &$array, &$marked, $companion_groups
          $ny = $y+$diry[$dir];
 
          if( ( $nx < 0 ) or ($nx >= $size) or ($ny < 0) or ($ny >= $size) or
-            $index[$nx][$ny] )
+            @$index[$nx][$ny] )
             continue;
 
-         $new_color = $array[$nx][$ny];
+         $new_color = @$array[$nx][$ny];
 
          if( $new_color == $c or ( $companion_groups and $new_color == NONE ) )
          {
-            $x = $nx;  // Go to the neigbour
+            $x = $nx;  // Go to the neighbour
             $y = $ny;
             $index[$x][$y] = $dir;
+         }
+         else if( $new_color == $opposite_dead )
+         {
+            toggle_marked_area( $nx, $ny, $size, $array, $marked, $companion_groups);
          }
       }
    }
