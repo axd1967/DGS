@@ -87,7 +87,7 @@ if( $info == 'NEW' )
     else
         $new_info = 'NONE';
 
-    mysql_query( "UPDATE Messages$my_id SET Info='$new_info' WHERE ID=$mid" );
+    mysql_query( "UPDATE Messages$my_id SET Info='$new_info', Time=Time WHERE ID=$mid" );
 
     if( mysql_affected_rows() != 1)
         {

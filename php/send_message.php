@@ -253,7 +253,7 @@ if( mysql_affected_rows() != 1)
 
 if( $reply )
 {
-    mysql_query( "UPDATE Messages$my_ID SET Info='REPLIED' WHERE ID=$reply" );
+    mysql_query( "UPDATE Messages$my_ID SET Info='REPLIED', Time=Time WHERE ID=$reply" );
 }
 
 
