@@ -27,6 +27,8 @@ require_once( "include/table_columns.php" );
 require_once( "include/message_functions.php" );
 
 {
+   disable_cache();
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -80,7 +82,7 @@ require_once( "include/message_functions.php" );
       (empty($player_row['StatusFolders']) ? '' : ',') . FOLDER_NEW . ',' . FOLDER_REPLY;
 
    $result = message_list_query($my_id, $folderstring, 'date', 'LIMIT 20');
-   if( mysql_num_rows($result) > 0 )
+   if( @mysql_num_rows($result) > 0 )
    {
       $mtable = new Table( 'status.php', '', '', true );
       $my_folders = get_folders($my_id);
@@ -100,7 +102,7 @@ require_once( "include/message_functions.php" );
 
    // show games;
 
-   $uid = $player_row["ID"];
+   $uid = $my_id;
 
    $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," .
        "UNIX_TIMESTAMP(Lastchanged) AS Time, " .
@@ -116,7 +118,7 @@ require_once( "include/message_functions.php" );
    echo "<hr><h3><font color=$h3_color>" .
       T_("Your turn to move in the following games:") . "</font></h3><p>\n";
 
-   if( mysql_num_rows($result) == 0 )
+   if( @mysql_num_rows($result) == 0 )
    {
       echo T_("No games found");
    }
@@ -176,9 +178,9 @@ require_once( "include/message_functions.php" );
    }
    echo "</center>";
 
-   $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$uid",
-                        T_('Show running games') => "show_games.php?uid=$uid",
-                        T_('Show finished games') => "show_games.php?uid=$uid&finished=1",
+   $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$my_id",
+                        T_('Show running games') => "show_games.php?uid=$my_id",
+                        T_('Show finished games') => "show_games.php?uid=$my_id&finished=1",
                         T_('Show observed games') => "show_games.php?observe=t" );
 
    end_page(@$menu_array);
