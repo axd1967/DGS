@@ -107,6 +107,8 @@ function item($text,$link,$working, $level,$last=false)
          }
       }
 
+      item(T_('Translate'), "translate.php", true, 0);
+
       item(T_('Documentation'), "docs.php", true, 0, true);
       {
          item(T_('Introduction'), "introduction.php", true, 1);
