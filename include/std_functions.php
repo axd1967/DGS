@@ -876,6 +876,11 @@ function delete_all_observers( $gid, $notify, $Text='' )
                       'To_ID=' . $row['pid'] . ', ' .
                       "Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='$Subject', Text='$Text'" );
+
+         $mid = mysql_insert_id();
+
+         mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+                     "(" . $row['pid'] . ", $mid, 'N', 2), ");
       }
    }
 

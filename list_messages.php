@@ -69,7 +69,7 @@ require_once( "include/timezones.php" );
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS time, " .
       "Messages.Type, Messages.Subject, " .
       "me.mid, me.mid as date, me.Replied, me.Sender, " .
-      "Players.Name AS other, me.Folder_nr AS folder " .
+      "Players.Name AS other, Players.ID AS other_ID, me.Folder_nr AS folder " .
       "FROM MessageCorrespondents AS me " .
       "LEFT JOIN Messages ON Messages.ID=me.mid " .
       "LEFT JOIN MessageCorrespondents AS other " .
@@ -155,6 +155,12 @@ require_once( "include/timezones.php" );
       $bgcolor = substr($mtable->Row_Colors[count($mtable->Tablerows) % 2], 2, 6);
 
       $row_strings[1] = echo_folder_box($my_folders, $row['folder'], $bgcolor);
+
+      if( empty($row["other_ID"]) )
+         $row["other"] = T_('Server message');
+      if( empty($row["other"]) )
+         $row["other"] = '-';
+
       $row_strings[2] = "<td>" . ( $row['Sender'] == 'Y' ? T_('To') . ': ' : '') .
          "<A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
          make_html_safe($row["other"]) . "</A></td>";

@@ -90,7 +90,7 @@ require_once( "include/message_functions.php" );
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS time, " .
       "me.mid, me.mid as date, Messages.Subject, me.Replied, " .
-      "Players.Name AS sender, me.Folder_nr AS folder " .
+      "Players.Name AS sender, Players.ID AS sender_ID, me.Folder_nr AS folder " .
       "FROM MessageCorrespondents AS me " .
       "LEFT JOIN Messages ON Messages.ID=me.mid " .
       "LEFT JOIN MessageCorrespondents AS other " .
@@ -119,6 +119,12 @@ require_once( "include/message_functions.php" );
          $bgcolor = substr($mtable->Row_Colors[count($mtable->Tablerows) % 2], 2, 6);
          $mrow_strings = array();
          $mrow_strings[1] = echo_folder_box($my_folders, $row['folder'], $bgcolor);
+
+         if( empty($row["sender_ID"]) )
+            $row["sender"] = T_('Server message');
+         if( empty($row["sender"]) )
+            $row["sender"] = '-';
+
          $mrow_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&amp;mid=" .
             $row["mid"] . "\">" . make_html_safe($row["sender"]) . "</A></td>";
          $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"]) . "</td>";

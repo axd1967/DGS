@@ -117,16 +117,14 @@ if( !$is_down )
              "was: <p><center>" . score2text($score,true) . "</center></BR>";
 
          mysql_query( "INSERT INTO Messages SET " .
-                      "From_ID=" . $White_ID . ", " .
-                      "To_ID=" . $Black_ID . ", " .
                       "Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'" );
 
-         mysql_query( "INSERT INTO Messages SET " .
-                      "From_ID=" . $Black_ID . ", " .
-                      "To_ID=" . $White_ID . ", " .
-                      "Time=FROM_UNIXTIME($NOW), " .
-                      "Game_ID=$gid, Subject='Game result', Text='$Text'" );
+         $mid = mysql_insert_id();
+
+         mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+                     "($Black_ID, $mid, 'N', 2), " .
+                     "($White_ID, $mid, 'N', 2), ");
 
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .

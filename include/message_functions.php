@@ -224,7 +224,7 @@ function message_info_table($mid, $date, $to_me,
       "<tr><td><b>" . T_('Date') . ":</b></td>" .
       "<td colspan=2>" . date($date_fmt, $date) . "</td></tr>\n" .
       "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .
-      "<td colspan=2><A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" .
+      "<td colspan=2>" . ( $sender_id > 0 ? "<A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" : T_("Server message") ) .
       "</td></tr>\n";
 
    echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>$subject</td></tr>\n" .

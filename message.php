@@ -76,12 +76,12 @@ $mode = $_GET['mode'];
                             "Size, Komi, Handicap, Maintime, Byotype, " .
                             "Byotime, Byoperiods, Rated, Weekendclock, " .
                             "ToMove_ID, (White_ID=$my_id)+1 AS Color " .
-                            "FROM Messages, MessageCorrespondents AS me, " .
-                            "MessageCorrespondents AS other, Players " .
+                            "FROM Messages, MessageCorrespondents AS me " .
+                            "LEFT JOIN MessageCorrespondents AS other " .
+                            "ON other.mid=$mid AND other.Sender!=me.Sender " .
+                            "LEFT JOIN Players ON Players.ID=other.uid " .
                             "LEFT JOIN Games ON Games.ID=Game_ID " .
-                            "WHERE Messages.ID=$mid AND me.mid=$mid AND me.uid=$my_id " .
-                            "AND other.mid=$mid AND other.uid!=$my_id " .
-                            "AND Players.ID=other.uid");
+                            "WHERE Messages.ID=$mid AND me.mid=$mid AND me.uid=$my_id ");
 
       if( @mysql_num_rows($result) != 1 )
          error("unknown_message");
@@ -93,7 +93,8 @@ $mode = $_GET['mode'];
       $sender_name = make_html_safe($sender_name);
       $sender_handle_safe = make_html_safe($sender_handle);
 
-      $to_me = $can_reply = ( $To_ID == $my_id );
+      $can_reply = ( $To_ID == $my_id );
+      $to_me = ( $Sender === 'N' );
 
 
       if( $mode == 'ShowMessage' or !$can_reply )
@@ -157,7 +158,7 @@ $mode = $_GET['mode'];
       case 'AlreadyAccepted':
       case 'InviteDisputed':
       {
-         message_info_table($mid, $date, $can_reply,
+         message_info_table($mid, $date, $to_me,
                             $sender_id, $sender_name, $sender_handle_safe,
                             $Subject, $ReplyTo, $Text, $folders, $Folder_nr, $message_form);
 
