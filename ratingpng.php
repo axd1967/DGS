@@ -58,7 +58,7 @@ function get_rating_data($uid)
       exit;
 
 
-   $tmp = mysql_fetch_array($result);
+   $tmp = mysql_fetch_assoc($result);
 
    $min_interval = min( $ratingpng_min_interval, $NOW - $tmp['seconds'] );
 
@@ -71,7 +71,7 @@ function get_rating_data($uid)
    $result = mysql_query("SELECT MAX(UNIX_TIMESTAMP(Time)) AS seconds " .
                          "FROM Ratinglog WHERE uid=$uid") or die(mysql_error());
 
-   $max_row = mysql_fetch_array($result);
+   $max_row = mysql_fetch_assoc($result);
    if( $endtime > $max_row['seconds'] + 2*24*3600)
       $endtime = $max_row['seconds'] + 2*24*3600;
 
@@ -89,7 +89,7 @@ function get_rating_data($uid)
                          "UNIX_TIMESTAMP(Time) AS seconds " .
                          "FROM Ratinglog WHERE uid=$uid ORDER BY Time") or die(mysql_error());
 
-   if( mysql_num_rows( $result ) < 2 )
+   if( mysql_num_rows( $result ) < 1 )
       exit;
 
    $first = true;
@@ -280,6 +280,8 @@ function imagemultiline($im, $points, $nr_points, $color)
    define('MARGE_RIGHT' ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
    define('MARGE_BOTTOM',6+(SHOW_NRGAMES?3:2)*(LABEL_HEIGHT+LABEL_SEPARATION));
 
+
+//Then draw the graph
 
 
    $SizeX = ( @$_GET['size'] > 0 ? $_GET['size'] : $defaultsize );

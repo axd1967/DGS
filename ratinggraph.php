@@ -96,11 +96,13 @@ require_once( "include/form_functions.php" );
      swap($startyear, $endyear);
   }
 
-  if( mysql_num_rows($result) < 2 )
+  if( mysql_num_rows($result) < 1 )
      echo T_("Sorry, too few rated games to draw a graph") . "\n";
   else
      echo '<img src="ratingpng.php?uid=' . $uid .
-        (@$_GET['show_time'] == 'y' ? '&show_time=y' : '') . "&startyear=$startyear&startmonth=$startmonth&endmonth=$endmonth&endyear=$endyear\">\n";
+        (@$_GET['show_time'] == 'y' ? '&show_time=y' : '') . 
+        "&startyear=$startyear&startmonth=$startmonth&endmonth=$endmonth&endyear=$endyear\"" .
+        " alt=\"" . T_('Rating graph') . "\">\n";
 
   echo "<p>\n";
 
