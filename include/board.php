@@ -358,6 +358,7 @@ function has_liberty_check( $x, $y, $Size, &$array, &$prisoners, $remove )
     
    $c = $array[$x][$y]; // Color of this stone
 
+   $index=NULL;
    $index[$x][$y] = 7;
 
 
