@@ -188,6 +188,7 @@ else if( $type == "Accept" )
 
     $result = mysql_query( "UPDATE Games SET " .
                            "Status='PLAY', " .
+                           "Starttime=NOW(), " .
                            "ClockUsed=$clock_used, " .
                            "LastTicks=$ticks " .
                            "WHERE ID=$gid AND Status='INVITED'" .

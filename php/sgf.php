@@ -33,6 +33,8 @@ $sgf_version = 3;
 
 $result = mysql_query( 'SELECT Games.*, ' .
                        'Games.Flags+0 AS flags, ' . 
+                       'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' . 
+                       'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' . 
                        'black.Name AS Blackname, ' .
                        'black.Handle AS Blackhandle, ' .
                        'black.Rank AS Blackrank, ' .
@@ -47,18 +49,18 @@ if( mysql_num_rows($result) != 1 )
      
 extract(mysql_fetch_array($result));
      
-$result = mysql_query( "SELECT * FROM Moves$gid" );
+$result = mysql_query( "SELECT * FROM Moves$gid order by ID" );
 
 disable_cache();
 
 header ('Content-Type: application/x-go-sgf');
 header( "Content-Disposition: inline; filename=\"$Whitehandle-$Blackhandle-" . 
-        date('Ymd', time()) . '.sgf"' ); 
+        date('Ymd', $timestamp) . '.sgf"' ); 
 header( "Content-Description: PHP Generated Data" );
 
 echo "(;FF[$sgf_version]GM[1]
 PC[Dragon Go Server: $HOSTBASE]
-DT[" . date( 'Y-m-d', time() ) . "]
+DT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]
 PB[$Blackname]
 PW[$Whitename]
 BR[$Blackrank]
