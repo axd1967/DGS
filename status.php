@@ -179,8 +179,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
          echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
 
-         if( (1 << 0) & $column_set )
-            echo "<td class=button width=92 align=center><A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>\n";
+         echo "<td class=button width=92 align=center><A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>\n";
          if( (1 << 1) & $column_set )
             echo "<td><A href=\"sgf.php?gid=$ID\"><font color=$gid_color>sgf</font></A></td>\n";
          if( (1 << 2) & $column_set )
