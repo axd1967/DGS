@@ -22,6 +22,16 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 
+if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.sourceforge.net
+{
+$reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
+$reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
+
+function html_entity_decode($str, $quote_style, $charset);
+ global $reverse_htmlentities_table;
+   $str = strtr($str, $reverse_htmlentities_table);
+}
+
 function mail_link( $nam, $lnk)
 {
   global $HOSTBASE;
@@ -35,10 +45,12 @@ function mail_link( $nam, $lnk)
           && strtolower(substr($lnk,0,4)) != "www."
         )
          $lnk = $HOSTBASE."/".$lnk;
-      $nam = ( $nam ? "$nam " : "" ) . "($lnk)";
+      $nam = ( $nam ? "$nam ($lnk)" : "$lnk" );
    }
+   if( !$nam )
+      return '';
    $nam = str_replace("\\\"","\"",$nam);
-   return "[$nam]";
+   return "[ $nam ]";
 }
 
 //see also make_html_safe()
@@ -49,24 +61,18 @@ function mail_strip_html( $str)
     "%&nbsp;%si" => " ",
     "%<A([\x1-\x20]+((href$tmp\\4)|(\w+$tmp\\7)|(\w+)))*[\x1-\x20]*>(.*?)</A>%sie"
        => "mail_link('\\10','\\5')",
-    "%</?(UL|BR)[\x1-\x20]*/?>%si" => "\n",
-    "%</?P[\x1-\x20]*/?>%si" => "\n\n",
-    "%<LI[\x1-\x20]*/?>%si" => "\n - ",
+    "%</?(UL|BR)[\x1-\x20]*/?>%si"
+       => "\n",
+    "%</?P[\x1-\x20]*/?>%si"
+       => "\n\n",
+    "%[\x1-\x20]*<LI[\x1-\x20]*/?>[\x1-\x20]*%si"
+       => "\n - ",
    );
 
    $str = strip_tags($str, '<a><br><p><ul><ol><li><goban>');
    $str = preg_replace(array_keys($reps), array_values($reps), $str);
    $str = strip_tags($str, '<goban>');
-   if( function_exists('html_entity_decode') ) //Does not exist on dragongoserver.sourceforge.net
-   {
-      $str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
-   }
-   else
-   {
-      $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
-      $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
-      $str = strtr($str, $reverse_htmlentities_table);
-   }
+   $str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
    return $str;
 }
 
@@ -98,7 +104,7 @@ function mail_strip_html( $str)
    {
       extract($row);
 
-      $msg = "A message or game move is waiting for you at $HOSTBASE/status.php\n";
+      $msg = "A message or game move is waiting for you at ".mail_link('',"status.php")."\n";
 
       // Find games
 
@@ -127,10 +133,10 @@ function mail_strip_html( $str)
                make_array( $ID, $array, $mess, $Moves, NULL, $moves_result, $marked_dead );
 
                $msg .= str_pad('', 47, '-') . "\n";
-               $msg .= "Game ID: $ID  ($HOSTBASE/game.php?gid=$ID)\n";
+               $msg .= "Game ID: ".mail_link($ID,"game.php?gid=$ID")."\n";
                $msg .= "Black: ".mail_strip_html("$Blackname ($Blackhandle)")."\n";
                $msg .= "White: ".mail_strip_html("$Whitename ($Whitehandle)")."\n";
-               $msg .= "Move $Moves: " . number2board_coords($Last_X, $Last_Y, $Size) . "\n";
+               $msg .= "Move $Moves: " . number2board_coords($Last_X, $Last_Y, $Size)."\n";
 
                if( !(strpos($SendEmail, 'BOARD') === false) )
                   $msg .= draw_ascii_board($Size, $array, $ID, $Last_X, $Last_Y, 15,
@@ -166,16 +172,17 @@ function mail_strip_html( $str)
             while( $msg_row = mysql_fetch_array( $res3 ) )
             {
                extract($msg_row);
+
                if($FromName && $FromHandle)
                   $From= mail_strip_html("$FromName ($FromHandle)");
                else
                   $From= 'Server message';
 
                $msg .= str_pad('', 47, '-') . "\n" .
-                   "Date: " . date($date_fmt, $date) . "\n" .
+                   "Message: ".mail_link('',"show_message.php?mid=$ID") . "\n" .
+                   "Date: ".date($date_fmt, $date) . "\n" .
                    "From: $From\n" .
-                   "Subject: " . mail_strip_html($Subject) .
-                   "  ($HOSTBASE/show_message.php?mid=$ID)\n\n" .
+                   "Subject: ".mail_strip_html($Subject) . "\n\n" .
                    wordwrap(mail_strip_html($Text),47) . "\n";
             }
          }
