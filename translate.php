@@ -62,9 +62,10 @@ require( "include/translation_info.php" );
 </CENTER>
 When translating you should keep in mind the following things:
 <ul>
-  <li> Since the actual translation is actually changed when you press on
-       \'Update translation\' it is good that you check that the new translations
-       look good before you go on to translating the next group.
+  <li> You can make a lot of changes without actually submitting them to be used
+       on the website. Just click on \'Change translation\' to do this. When
+       you want the translation to be used on Dragon, click on
+       \Apply translation changes to Dragon\'.
   <li> If you for some reason want to have a phrase untranslated, just
        leave that translation blank and the English phrase will be used.
   <li> In some places there is a percent-character followed by some characters. 
@@ -124,6 +125,17 @@ When translating you should keep in mind the following things:
       $the_translator->change_language( $translate_lang );
       $the_translator->set_return_empty();
 
+      $last_updated = $LANG_UPDATE_TIMESTAMPS[ $translate_lang ];
+      $query = "SELECT * FROM Translationlog WHERE Language='$translate_lang' ";
+      if( $last_updated > 0 )
+        $query .= "AND Date > FROM_UNIXTIME($last_updated) ";
+      $query .= "ORDER BY Date,ID";
+
+      $result = mysql_query($query);
+      $new_translations = array();
+      while( $row = mysql_fetch_array( $result ) )
+        $new_translations[ $row['CString'] ] = $row['Translation'];
+
       echo "<CENTER>\n";
       echo "<B><h3><font color=$h3_color>Translate the following strings:</font></B></h3><p>\n";
       echo form_start( 'translateform', 'update_translation.php', 'POST' );
@@ -134,10 +146,21 @@ When translating you should keep in mind the following things:
           $counter++;
           if( in_array( $group, $info['Groups'] ) )
             {
-              /* TODO: change the character encoding of htmlentities() when necessary*/
+              $translation = '';
+              if( array_key_exists( $string, $new_translations ) )
+                $translation = $new_translations[$string];
+              else
+                $translation = T_($string);
+
+              $hsize = 60;
+              $vsize = intval(floor(min( max( 2,
+                                              strlen( $string ) / $hsize + 2,
+                                              substr_count( $string, "\n" ) + 2 ),
+                                         12 )));
               echo form_insert_row( 'TEXT', nl2br( htmlentities($string,ENT_COMPAT) ),
                                     'TD',
-                                    'TEXTAREA', "transl$counter", 50, 5, T_($string) );
+                                    'TEXTAREA', "transl$counter",
+                                    $hsize, $vsize, htmlentities($translation,ENT_COMPAT) );
             }
         }
 
@@ -155,12 +178,14 @@ When translating you should keep in mind the following things:
       echo form_insert_row( 'SPACE' );
 
       echo "</table>\n";
-      echo "<table width=\"50%\">\n";
+      echo "<table width=\"100%\">\n";
       echo "  <tr>\n" .
         "    <td align=\"center\">" .
-        form_insert_submit_button( 'update', 'Update translation' ) . "</td>\n" .
+        form_insert_submit_button( 'just_group', 'Just change group' ) . "</td>\n" .
         "    <td align=\"center\">" .
-        form_insert_submit_button( 'just_change', 'Just change group' ) . "</td>\n" .
+        form_insert_submit_button( 'change', 'Change translation' ) . "</td>\n" .
+        "    <td align=\"center\">" .
+        form_insert_submit_button( 'apply_changes', 'Apply translation changes to Dragon' ) . "</td>\n" .
         "  </tr>\n";
       echo form_end();
 
