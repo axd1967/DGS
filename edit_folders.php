@@ -53,7 +53,7 @@ function make_folder_form_row(&$form, $name, $nr,
                   'CHECKBOX', "onstatuspage$nr", 't',
                   T_('Show on status page'), $onstatuspage );
 
-   array_push( $array, 'DESCRIPTION', T_('Foregrund'),
+   array_push( $array, 'DESCRIPTION', T_('Foreground'),
                'DESCRIPTION', T_('Red'),
                'TEXTINPUT', "fgred$nr", 3, 3, "$fgred",
                'DESCRIPTION', T_('Green'),
