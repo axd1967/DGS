@@ -24,8 +24,6 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
 {
-  disable_cache($NOW + 2*24*3600);
-
   connect2mysql();
 
   $logged_in = who_is_logged( $player_row);

@@ -27,8 +27,6 @@ require_once( "include/table_columns.php" );
 require_once( "include/message_functions.php" );
 
 {
-   disable_cache();
-
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
