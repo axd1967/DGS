@@ -180,10 +180,10 @@ function score2text($score, $verbose)
             else 
                 $text = ( $score > 0 ? "W+" : "B+" );
             
-            if( abs($score) == 1000 )
-                $text .= "Resign";
-            else if( abs($score) == 2000 )
+            if( abs($score) > 1999 )
                 $text .= "Time";
+            else if( abs($score) > 999 )
+                $text .= "Resign";
             else 
                 $text .= abs($score);
         }
