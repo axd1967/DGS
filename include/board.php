@@ -378,7 +378,7 @@ $no_marked_dead = false )
       if( $MoveNr > $move )
       {
          if( $MoveNr > $max_moves )
-            fix_corrupted_move_table($gid, $max_moves);
+            fix_corrupted_move_table($gid);
          break;
       }
 
