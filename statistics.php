@@ -61,7 +61,8 @@ require_once( "include/std_functions.php" );
    echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
    echo '<p>Activity: ' . round($row['activity']);
 
-   echo "\n<p><img src=\"statisticspng.php?date=$NOW\"" .
+   $x = floor($NOW/86400);
+   echo "\n<p><img src=\"statisticspng.php?date=$x\"" .
         " alt=\"" . T_('Statistics graph') . "\">";
 
    end_page();
