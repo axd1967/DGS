@@ -203,6 +203,34 @@ CREATE TABLE Errorlog (
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
+#
+# Table structure for table 'Errorlog'
+#
+
+CREATE TABLE Errorlog (
+  ID int(11) NOT NULL auto_increment,
+  Handle varchar(16) default NULL,
+  Message text,
+  MysqlError text,
+  Debug text,
+  IP varchar(16) default NULL,
+  Date timestamp(14) NOT NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'Errorlog'
+#
+
+CREATE TABLE Translationlog (
+  ID int(11) NOT NULL auto_increment,
+  Handle varchar(16) default NULL,
+  Language varchar(16) default NULL,
+  CString text,
+  Translation text,
+  Date timestamp(14) NOT NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'Forums'
