@@ -238,17 +238,25 @@ function create_godiagrams(&$text)
             if( mysql_num_rows($result) == 1 )
             {
                $row = mysql_fetch_array( $result );
-               $diagrams[$row['ID']] = new GoDiagram();
-               $diagrams[$row['ID']]->set_values_from_database_row($row);
+               $diagrams[$ID] = new GoDiagram();
+               $diagrams[$ID]->set_values_from_database_row($row);
             }
          }
 
 
          if( !($ID > 0) or empty($row['Saved']) or
-             ($row['Saved']=='Y' and (!preg_match('/^\w*id=\d+\w*$/i', $m) or $altered=='Y')))
+             ($row['Saved']=='Y' and (!preg_match('/^\s*id=\d+\s*$/i', $m) or $altered=='Y')))
          {
-            $diag = new GoDiagram();
-            $diag->set_values_from_goban_tag($m);
+            if( $ID > 0 )
+            {
+               $diag = $diagrams[$ID];
+               $diag->set_values_from_post($ID);
+            }
+            else
+            {
+               $diag = new GoDiagram();
+               $diag->set_values_from_goban_tag($m);
+            }
 
             mysql_query("INSERT INTO GoDiagrams SET " .
                         "Size={$diag->Size}, " .
@@ -258,24 +266,30 @@ function create_godiagrams(&$text)
                         "View_Up={$diag->Up}, " .
                         "Date=FROM_UNIXTIME($NOW)") or die(mysql_error());
 
-            $ID = mysql_insert_id();
-            $diagrams[$ID] = $diag;
+            $New_ID = mysql_insert_id();
+            $diagrams[$New_ID] = $diag;
+            if( $ID > 0 )
+               unset($diagrams[$ID]);
+            $ID = $New_ID;
+
             $save_data = true;
+         }
+         else
+         {
+            if( !preg_match('/^\s*id=\d+\s*$/i', $m) )
+            {
+               $diagrams[$ID]->set_values_from_goban_tag($m);
+               $save_data = true;
+            }
+
+            if( $altered == 'Y' )
+            {
+               $diagrams[$ID]->set_values_from_post($ID);
+               $save_data = true;
+            }
          }
 
          $text = preg_replace('/<goban id=#>/i',"<goban id=$ID>", $text, 1);
-
-         if( !preg_match('/^\s*id=\d+\s*$/i', $m) )
-         {
-            $diagrams[$ID]->set_values_from_goban_tag($m);
-            $save_data = true;
-         }
-
-         if( $altered == 'Y' )
-         {
-            $diagrams[$ID]->set_values_from_post($ID);
-            $save_data = true;
-         }
 
          if( $save_data )
          {

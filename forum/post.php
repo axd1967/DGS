@@ -133,6 +133,8 @@ function post_message($player_row, $moderated)
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_post");
+
+      $Thread_ID = $New_ID;
    }
 
    save_diagrams($GoDiagrams);
@@ -143,7 +145,7 @@ function post_message($player_row, $moderated)
    }
 
    mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1 " .
-                "WHERE Forum_ID=$forum AND Thread_ID=$New_ID " .
+                "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
                 "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
 
 }
