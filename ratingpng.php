@@ -200,7 +200,7 @@ function imagemultiline($im, $points, $nr_points,$color)
 
    $endtime = $NOW;
    if( isset($_GET['endyear']) and isset($_GET['endmonth']) )
-      $endtime = min($NOW, mktime(0,0,0,$_GET['endmonth'],2,($_GET['endyear'])));
+      $endtime = min($NOW, mktime(0,0,0,$_GET['endmonth']+1,0,($_GET['endyear'])));
 
    get_rating_data($_GET["uid"]);
 
