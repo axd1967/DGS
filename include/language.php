@@ -30,18 +30,20 @@ class Language
 {
   var $translated_strings;
 
-  function find_translation( $string )
+  function find_translation( $string, $return_empty = false )
     {
       $result = $string;
       if( array_key_exists( $string, $this->translated_strings ) )
         {
           $tmp_result = $this->translated_strings[ $string ];
-          if( !empty( $tmp_result ) )
+          if( !empty( $tmp_result ) || $return_empty )
             $result = $tmp_result;
 
           return $result;
         }
 
+      if( $return_empty )
+        return '';
       return $result;
     }
 }
