@@ -19,9 +19,9 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-04-13 21:10:06 GMT */
+/* Automatically generated at 2002-04-14 13:54:22 GMT */
 
-add_to_known_languages( "sv", "Svenska", 1018732206 );
+add_to_known_languages( "sv", "Svenska", 1018792462 );
 
 class sv_Language extends Language
 {
@@ -107,7 +107,7 @@ class sv_Language extends Language
 '',
 
 'Change profile' =>
-'',
+'Ändra profilen',
 
 'Sorry, you may not pass before all handicap stones are placed.' =>
 '',
@@ -436,7 +436,286 @@ Anledningen till detta problem kan vara ett av följande:
 'Sidan skapades på %0.5f',
 
 'Logout' =>
-'Logga ut' );
+'Logga ut',
+
+'Admin' =>
+'',
+
+'Add language for translation' =>
+'',
+
+'Set translator privileges for user' =>
+'',
+
+'Bio updated!' =>
+'',
+
+'Password changed!' =>
+'',
+
+'Profile updated!' =>
+'Profilen är uppdaterad!',
+
+'Documentation' =>
+'',
+
+'Introduction to Dragon' =>
+'',
+
+'Other:' =>
+'',
+
+'Edit biopgraphical info' =>
+'',
+
+'Change bio' =>
+'',
+
+'Smooth board edge' =>
+'Mjuk brädkant',
+
+'Couldn\'t extrapolate value in function interpolate' =>
+'',
+
+'Sorry, you are not allowed to translate the specified language.' =>
+'',
+
+'Sorry, something went wrong when trying to insert the new translations into the database.' =>
+'',
+
+'Sorry, this page is solely for users with administrative tasks.' =>
+'',
+
+'Sorry, there was a missing or incorrect field when adding a language.' =>
+'',
+
+'Sorry, the language you tried to add already exists.' =>
+'',
+
+'Sorry, you must specify a user.' =>
+'',
+
+'Sorry, you must specify a language.' =>
+'',
+
+'If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.' =>
+'',
+
+'Installation instructions' =>
+'',
+
+'Introduction' =>
+'',
+
+'General Public Licence' =>
+'',
+
+'Links' =>
+'',
+
+'General Info' =>
+'',
+
+'Jan van der Steens Pages' =>
+'',
+
+'Rules' =>
+'',
+
+'An Interactive Introduction' =>
+'',
+
+'Strategy and terms' =>
+'',
+
+'An Introduction to Shape' =>
+'',
+
+'History' =>
+'',
+
+'A Brief History' =>
+'',
+
+'Go books, equipment and software' =>
+'',
+
+'Kiseido' =>
+'',
+
+'Other go servers' =>
+'',
+
+'It\'s your turn' =>
+'',
+
+'Message list' =>
+'',
+
+'From' =>
+'',
+
+'Subject' =>
+'',
+
+'Del' =>
+'',
+
+'New' =>
+'',
+
+'Message sent!' =>
+'',
+
+'User info' =>
+'',
+
+'Invite this user' =>
+'',
+
+'Site map' =>
+'',
+
+'Forum' =>
+'',
+
+'Flags' =>
+'',
+
+'Place your handicap stones, please!' =>
+'',
+
+'Message' =>
+'',
+
+'White' =>
+'',
+
+'Main Time' =>
+'',
+
+'Byoyomi' =>
+'',
+
+'Time limit' =>
+'',
+
+'without byoyomi' =>
+'',
+
+'Rated' =>
+'',
+
+'Moves' =>
+'',
+
+'dan' =>
+'',
+
+'Page created in' =>
+'',
+
+'day' =>
+'',
+
+'and' =>
+'',
+
+'hour' =>
+'',
+
+'This %sgame%s invitation has already been accepted.' =>
+'',
+
+'Reply:' =>
+'',
+
+'New message:' =>
+'',
+
+'white' =>
+'',
+
+'Disputing settings:' =>
+'',
+
+'Send Reply' =>
+'',
+
+'Invitation message:' =>
+'',
+
+'Send Invitation' =>
+'',
+
+'Finished games for %s' =>
+'',
+
+'ID' =>
+'',
+
+'sgf' =>
+'',
+
+'yes' =>
+'',
+
+'User Info' =>
+'',
+
+'Biographical info' =>
+'',
+
+'Conventional handicap (komi 0.5 if not even)' =>
+'',
+
+'Proper handicap' =>
+'',
+
+'Manual setting' =>
+'',
+
+'Handicap' =>
+'',
+
+'Even game with nigiri' =>
+'',
+
+'Double game' =>
+'',
+
+'Main time' =>
+'',
+
+'Japanese byo-yomi' =>
+'',
+
+'Canadian byo-yomi' =>
+'',
+
+'Fischer time' =>
+'',
+
+'Clock runs on weekends' =>
+'',
+
+'Date' =>
+'',
+
+'Game ID' =>
+'',
+
+'Size' =>
+'',
+
+'Komi' =>
+'',
+
+'Colors' =>
+'',
+
+'periods' =>
+'' );
     }
 };
 
