@@ -36,26 +36,31 @@ require( "include/std_functions.php" );
 
   if( $_GET["read"] == 't' )
   {
-     $cat = is_numeric($_GET["cat"]) ? $_GET["cat"] : 0;
+     $cat = ($_GET['cat'] === 'all' or is_numeric($_GET['cat'])) ? $_GET['cat'] : 0;
 
 
      $result = mysql_query(
         "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
-        "Question.Text AS Q, Question.Translatable, Answer.Text AS A " .
+        "Question.Text AS Q, Question.Translatable, Answer.Text AS A, " .
+        "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
         "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
         "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
-        "AND ( entry.Parent = $cat OR entry.ID = $cat ) " .
-        "ORDER BY ParentOrder,entry.SortOrder")
+        ( $cat === 'all' ? '' : "AND ( entry.Parent = $cat OR entry.ID = $cat ) " ) .
+        "ORDER BY CatOrder,ParentOrder,entry.SortOrder")
         or die(mysql_error());
 
      echo "<ul><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
 
+     $first = true;
      while( $row = mysql_fetch_array( $result ) )
      {
         if( $row['Level'] == 1 )
         {
+           if( !$first )
+              echo "</ul><hr>\n";
            echo '<p><b><A href="faq.php">' . T_( $row['Q'] ) . "</A></b><ul>\n";
+           $first = false;
         }
         else
         {
@@ -102,6 +107,9 @@ require( "include/std_functions.php" );
      echo "</ul></table></table></ul></table>\n";
   }
 
-  end_page();
+  if( $cat !== 'all' )
+     $menu_array = array( T_('Show the whole FAQ in one page') => "faq.php?read=t&cat=all" );
+
+   end_page( $menu_array );
 }
 ?>
