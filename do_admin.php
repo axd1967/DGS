@@ -65,6 +65,35 @@ require( "include/translation_info.php" );
       write_to_file( "translations/all_languages.php", $new_all_languages_php_code );
     }
 
+  if( $transladd )
+    {
+      if( empty($transluser) )
+        error("no_specified_user");
+
+      if( !isset($transladdlang) or empty($transladdlang) )
+        error("no_lang_selected");
+
+      $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='$transluser'" );
+
+      if( mysql_affected_rows() != 1 )
+        error("unknown_user");
+
+      $row = mysql_fetch_array( $result );
+      if( empty($row['Translator']) )
+        $translator = array();
+      else
+        $translator = explode( ',', $row['Translator'] );
+
+      if( !in_array( $transladdlang, $translator ) )
+        {
+          array_push( $translator, $transladdlang );
+          $new_langs = implode(',', $translator);
+          $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
+          if( mysql_affected_rows() != 1 )
+            error("unknown_user");
+        }
+    }
+
   if( $translpriv )
     {
       if( empty($transluser) )

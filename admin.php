@@ -35,27 +35,31 @@ require( "include/form_functions.php" );
   if( $player_row['Adminlevel'] < 2 )
     error("adminlevel_too_low");
 
-  start_page('Admin', true, $logged_in, $player_row);
+  start_page(T_('Admin'), true, $logged_in, $player_row);
 
   echo "<center>\n";
   echo form_start( 'adminform', 'do_admin.php', 'POST' );
 
   /* Add language for translation */
-  echo form_insert_row( 'HEADER', 'Add language for translation' );
-  echo form_insert_row( 'DESCRIPTION', 'Two-letter language code',
+  echo form_insert_row( 'HEADER', T_('Add language for translation') );
+  echo form_insert_row( 'DESCRIPTION', T_('Two-letter language code'),
                         'TEXTINPUT', 'twoletter', 30, 10, '' );
-  echo form_insert_row( 'DESCRIPTION', 'Language name (i.e. English)',
+  echo form_insert_row( 'DESCRIPTION', T_('Language name (i.e. English)'),
                         'TEXTINPUT', 'langname', 30, 50, '' );
-  echo form_insert_row( 'SUBMITBUTTON', 'addlanguage', 'Add language' );
+  echo form_insert_row( 'SUBMITBUTTON', 'addlanguage', T_('Add language') );
 
   /* Set translator privileges for user */
-  echo form_insert_row( 'HEADER', 'Set translator privileges for user' );
-  echo form_insert_row( 'DESCRIPTION', 'User to set privileges for (use the userid)',
+  echo form_insert_row( 'HEADER', T_('Set translator privileges for user') );
+  echo form_insert_row( 'DESCRIPTION', T_('User to set privileges for (use the userid)'),
                         'TEXTINPUT', 'transluser', 30, 80, '' );
-  echo form_insert_row( 'DESCRIPTION', 'Select the languages the user should be allowed to translate',
+  echo form_insert_row( 'DESCRIPTION', T_('Select language to make user translator for that language.'),
+                        'SELECTBOX', 'transladdlang', 1,
+                        get_known_languages_with_full_names(), array(), false,
+                        'SUBMITBUTTON', 'transladd', T_('Make user translator') );
+  echo form_insert_row( 'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
                         'SELECTBOX', 'transllang[]', 7,
-                        get_known_languages_with_full_names(), array(), true );
-  echo form_insert_row( 'SUBMITBUTTON', 'translpriv', 'Set user privileges' );
+                        get_known_languages_with_full_names(), array(), true,
+                        'SUBMITBUTTON', 'translpriv', T_('Set user privileges') );
 
   echo form_end();
 
