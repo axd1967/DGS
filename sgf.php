@@ -25,7 +25,7 @@ require_once( "include/rating.php" );
 
 $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
 $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
-$reverse_htmlentities_table['&nbsp;'] = ' '; //else maybe '\xa0'
+$reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0'
 function reverse_htmlentities( $str )
 {
  global $reverse_htmlentities_table;
@@ -34,7 +34,7 @@ function reverse_htmlentities( $str )
 
 function sgf_simpletext( $str )
 {
-   return str_replace("]","\]", str_replace("\\","\\\\", 
+   return str_replace("]","\]", str_replace("\\","\\\\",
          ereg_replace("[\x01-\x20]+", " ", reverse_htmlentities( $str )
       ) ) );
 }
@@ -43,7 +43,7 @@ function sgf_echo_comment( $com )
 {
    if ( !$com )
       return false;
-   echo "\nC[" . str_replace("]","\]", str_replace("\\","\\\\", 
+   echo "\nC[" . str_replace("]","\]", str_replace("\\","\\\\",
          reverse_htmlentities( ltrim($com,"\r\n")
       ) ) ) . "]";
    return true;
@@ -174,6 +174,14 @@ $array=array();
    We could use the CA[] (FF[4]) property if we know what it is.
 */
 
+   $rules = "Japanese"; //Mandatory for Go (GM[1])
+/*
+ "AGA" (rules of the American Go Association)
+ "GOE" (the Ing rules of Goe)
+ "Japanese" (the Nihon-Kiin rule set)
+ "NZ" (New Zealand rules)
+*/
+
    $use_HA = true;
    $use_AB_for_handicap = true;
 
@@ -192,13 +200,12 @@ $array=array();
    // ''= no mark, 'MA'/'CR'/'TR'/'SQ'= mark them
    $marked_dame_prop = '';
 
-
+   $gid = $_GET['gid'];
    if( !$gid )
    {
       if( eregi("game([0-9]+)", $REQUEST_URI, $result) )
          $gid = $result[1];
    }
-
    if( !$gid )
       error("unknown_game");
 
@@ -212,7 +219,7 @@ $array=array();
       "IF(Games.Status='FINISHED', Games.Black_End_Rating, black.Rating2 ) AS Blackrating, " .
       'white.Name AS Whitename, ' .
       'white.Handle AS Whitehandle, ' .
-      "IF(Games.Status='FINISHED',Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
+      "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
       'FROM Games, Players AS black, Players AS white ' .
       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
       or die(mysql_error());
@@ -225,10 +232,11 @@ $array=array();
 
    $node_com = "";
 
-   $result = mysql_query( "SELECT Moves.*,Text FROM Moves " .
-                          "LEFT JOIN MoveMessages " .
-                          "ON Moves.gid=MoveMessages.gid AND Moves.MoveNr=MoveMessages.MoveNr " .
-                          "WHERE Moves.gid=$gid order by Moves.ID" );
+   $result = mysql_query( "SELECT Moves.*,MoveMessages.Text " .
+                          "FROM Moves LEFT JOIN MoveMessages " .
+                          "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
+                          "WHERE Moves.gid=$gid ORDER BY Moves.ID" );
+
 
    header( 'Content-Type: application/x-go-sgf' );
    $filename= "$Whitehandle-$Blackhandle-" . date('Ymd', $timestamp) . ".sgf" ;
@@ -240,7 +248,7 @@ $array=array();
       . "\nPC[Dragon Go Server: $HOSTBASE]"
       . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
       . "\nGN[" . sgf_simpletext($filename) . "]"
-      . "\nGC[GameID: $gid]"
+      . "\nGC[Game ID: $gid]"          //($HOSTBASE/game.php?gid=$gid)
       . "\nPB[" . sgf_simpletext("$Blackname ($Blackhandle)") . "]"
       . "\nPW[" . sgf_simpletext("$Whitename ($Whitehandle)") . "]";
 
@@ -253,7 +261,7 @@ $array=array();
    if ($sgf_version >= 4)
    {
       echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)) . "]";
-      //may specify CA (charset) 
+      //may specify CA (charset)
    }
 
    if( isset($Score) )
@@ -268,8 +276,6 @@ $array=array();
       echo "\nRU[$rules]";
 
 
-   $regexp = ( $Status == 'FINISHED' ? "c|comment|h|hidden" : "c|comment" );
-
    $sgf_trim_nr = mysql_num_rows ($result) - 1 ;
    if ( $Status == 'FINISHED' )
    {
@@ -279,7 +285,7 @@ $array=array();
             break;
          if (!$row = mysql_fetch_array($result))
             break;
-         if( $row["PosX"] > $sgf_trim_level 
+         if( $row["PosX"] > $sgf_trim_level
             && ($row["Stone"] == WHITE or $row["Stone"] == BLACK) )
             break;
          $sgf_trim_nr-- ;
@@ -294,8 +300,9 @@ $array=array();
    $movenum= 0; $movesync= 0;
    $points= array();
    $next_color= "B";
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
+      $Text="";
       extract($row);
       $coord = chr($PosX + ord('a')) . chr($PosY + ord('a'));
 
@@ -344,15 +351,23 @@ $array=array();
             $array[$PosX][$PosY] = $Stone;
 
             //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
-            if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'mis", $Text,
-                                             $matches) )
+            if( $Status != 'FINISHED' )
+               $Text = preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text);
+
+            $nr_matches = preg_match_all(
+                  "'(<c(omment)? *>(.*?)</c(omment)? *>)".
+                  "|(<h(idden)? *>(.*?)</h(idden)? *>)'is"
+                  , $Text, $matches );
+            for($i=0; $i<$nr_matches; $i++)
             {
-               for($i=0; $i<$nr_matches; $i++)
-               {
+               $Text = trim($matches[3][$i]);
+               if( !$Text )
+                  $Text = trim($matches[7][$i]);
+               if(  $Text )
                   $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
-                           . ": " . trim($matches[2][$i]) ;
-               }
+                        . ": " . $Text ;
             }
+            $Text="";
 
             if( $MoveNr <= $Handicap && $use_AB_for_handicap )
             {
@@ -442,25 +457,6 @@ $array=array();
    {
       echo( "\n;N[RESULT]" ); //Node start
 
-      $black_territory = array();
-      $white_territory = array();
-      $black_prisoner = array();
-      $white_prisoner = array();
-      sgf_create_territories( $Size, $array, 
-         $black_territory, $white_territory, 
-         $black_prisoner, $white_prisoner);
-
-      //Last dead stones mark
-      if ($dead_stone_prop)
-         sgf_echo_point(
-            array_merge( $black_prisoner, $white_prisoner)
-            , $dead_stone_prop);
-
-      //$points from last skipped SCORE/SCORE2 marked points      
-      sgf_echo_point(
-         array_merge( $points, $black_territory, $white_territory)
-         );
-
       // highlighting result in last comments:
       if( isset($Score) )
       {
@@ -469,14 +465,33 @@ $array=array();
          if ( abs($Score) < SCORE_RESIGN )
          {
 
-            $node_com.= "\n" . 
+            $black_territory = array();
+            $white_territory = array();
+            $black_prisoner = array();
+            $white_prisoner = array();
+            sgf_create_territories( $Size, $array,
+               $black_territory, $white_territory,
+               $black_prisoner, $white_prisoner);
+
+            //Last dead stones mark
+            if ($dead_stone_prop)
+               sgf_echo_point(
+                  array_merge( $black_prisoner, $white_prisoner)
+                  , $dead_stone_prop);
+
+            //$points from last skipped SCORE/SCORE2 marked points
+            sgf_echo_point(
+               array_merge( $points, $black_territory, $white_territory)
+               );
+
+            $node_com.= "\n" .
                sgf_count_string( "White"
                   ,count($white_territory)
                   ,$White_Prisoners + count($white_prisoner)
                   ,$Komi
                );
 
-            $node_com.= "\n" . 
+            $node_com.= "\n" .
                sgf_count_string( "Black"
                   ,count($black_territory)
                   ,$Black_Prisoners + count($black_prisoner)
