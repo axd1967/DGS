@@ -31,7 +31,8 @@ require_once( "include/rating.php" );
    $action = @$_GET['action'];
    $move = @$_GET['move'];
    $coord = @$_GET['coord'];
-   $stonestring = @$_GET['stonestring'];   
+   $stonestring = @$_GET['stonestring'];
+   $toggleobserve = @$_GET['toggleobserve'];
    if( @$_GET['msg'] )
       $msg = $_GET['msg'];
    else
@@ -337,6 +338,11 @@ require_once( "include/rating.php" );
          $menu_array[T_('Resign')] = "game.php?gid=$gid&action=resign";
 
       $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid");
+
+      if( $my_game && !$has_sgf_alias )
+      {
+         $menu_array[T_('Download sgf with all comments')] = "sgf.php?gid=$gid&owned_comments=1" ;
+      }
 
       if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
          $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid&skip=t";

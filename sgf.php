@@ -198,7 +198,7 @@ $array=array();
    // ''= no mark, 'MA'/'CR'/'TR'/'SQ'= mark them
    $marked_dame_prop = '';
 
-   $gid = $_GET['gid'];
+   $gid = @$_GET['gid'];
    if( !$gid )
    {
       if( eregi("game([0-9]+)", $REQUEST_URI, $result) )
@@ -206,6 +206,16 @@ $array=array();
    }
    if( !$gid )
       error("unknown_game");
+
+   $owned_comments = @$_GET['owned_comments'];
+   if ( $owned_comments )
+      $field_owned = 
+         'black.Sessioncode AS Blackscode, ' .
+         'white.Sessioncode AS Whitescode, ' .
+         'UNIX_TIMESTAMP(black.Sessionexpire) AS Blackexpire, ' .
+         'UNIX_TIMESTAMP(white.Sessionexpire) AS Whiteexpire, ' ;
+   else
+      $field_owned = '';
 
    $result = mysql_query(
       'SELECT Games.*, ' .
@@ -216,7 +226,7 @@ $array=array();
       'black.Handle AS Blackhandle, ' .
       "IF(Games.Status='FINISHED', Games.Black_End_Rating, black.Rating2 ) AS Blackrating, " .
       'white.Name AS Whitename, ' .
-      'white.Handle AS Whitehandle, ' .
+      'white.Handle AS Whitehandle, ' . $field_owned .
       "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
       'FROM Games, Players AS black, Players AS white ' .
       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
@@ -227,6 +237,24 @@ $array=array();
 
    $row = mysql_fetch_array($result);
    extract($row);
+
+   if ( $owned_comments )
+   {
+      if ($Blackhandle == @$_COOKIE['handle'])
+      {
+         if( $Blackscode != @$_COOKIE['sessioncode'] or $Blackexpire < $NOW )
+            $owned_comments = false;
+      }
+      elseif ($Whitehandle == @$_COOKIE['handle'])
+      {
+         if( $Whitescode != @$_COOKIE['sessioncode'] or $Whiteexpire < $NOW )
+            $owned_comments = false;
+      }
+      else
+      {
+            $owned_comments = false;
+      }
+   }
 
    $node_com = "";
 
@@ -354,21 +382,30 @@ $array=array();
             $array[$PosX][$PosY] = $Stone;
 
             //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
-            if( $Status != 'FINISHED' )
-               $Text = preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text);
-
-            $nr_matches = preg_match_all(
-                  "'(<c(omment)? *>(.*?)</c(omment)? *>)".
-                  "|(<h(idden)? *>(.*?)</h(idden)? *>)'is"
-                  , $Text, $matches );
-            for($i=0; $i<$nr_matches; $i++)
+            if( !$owned_comments )
             {
-               $Text = trim($matches[3][$i]);
-               if( !$Text )
-                  $Text = trim($matches[7][$i]);
-               if(  $Text )
-                  $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
-                        . ": " . $Text ;
+               if( $Status != 'FINISHED' )
+                  $Text = preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text);
+
+               $nr_matches = preg_match_all(
+                     "'(<c(omment)? *>(.*?)</c(omment)? *>)".
+                     "|(<h(idden)? *>(.*?)</h(idden)? *>)'is"
+                     , $Text, $matches );
+               for($i=0; $i<$nr_matches; $i++)
+               {
+                  $Text = trim($matches[3][$i]);
+                  if( !$Text )
+                     $Text = trim($matches[7][$i]);
+                  if(  $Text )
+                     $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
+                           . ": " . $Text ;
+               }
+            }
+            else
+            {
+                  if(  $Text )
+                     $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
+                           . ": " . $Text ;
             }
             $Text="";
 
