@@ -191,7 +191,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 //       }
    echo '
     <TITLE> Dragon Go Server - ' . $title . '</TITLE>
-    <LINK REL="shortcut icon" HREF="images/favicon.ico" TYPE="image/x-icon">
+    <LINK REL="shortcut icon" HREF="' . $HOSTBASE . '/images/favicon.ico" TYPE="image/x-icon">
     <LINK rel="stylesheet" type="text/css" media="screen" href="dragon.css">';
 
    if( $style_string )
@@ -372,7 +372,7 @@ function make_menu_horizontal($menu_array)
    $w = 100/($cols+1);
 
    echo '<td width="' .round($w). '%" rowspan=3>' .
-      '<img src="images/dragonlogo_bl.jpg" alt="Dragon"></td>' . "\n";
+      '<img src="' . $HOSTBASE . '/images/dragonlogo_bl.jpg" alt="Dragon"></td>' . "\n";
 
    $cumwidth = round($w);
    $cumw=$w;
@@ -390,7 +390,7 @@ function make_menu_horizontal($menu_array)
          {
             if( $i==$cols )
                echo '<td width=100 align=right rowspan=3> ' .
-                  '<img src="images/dragonlogo_br.jpg" alt="Dragon"></td>' . "\n";
+                  '<img src="' . $HOSTBASE . '/images/dragonlogo_br.jpg" alt="Dragon"></td>' . "\n";
             echo '</tr><tr>' . "\n";
             $cumwidth = round($w);
             $cumw=$w;
@@ -417,7 +417,7 @@ function make_menu_vertical($menu_array)
    echo '<table width="100%" border=0 cellspacing=0 cellpadding=5><tr><td valign=top rowspan=2>' . "\n";
    echo '<table border=0 cellspacing=0 cellpadding=1 bgcolor='.$menu_bg_color.'><tr><td>' . "\n";
    echo '<table border=0 cellspacing=0 cellpadding=5 bgcolor="#F7F5FF">' . "\n";
-   echo '<tr><td align=center> <img src="images/dragonlogo_bl.jpg" alt="Dragon">' . "\n";
+   echo '<tr><td align=center> <img src="' . $HOSTBASE . '/images/dragonlogo_bl.jpg" alt="Dragon">' . "\n";
 
    $i = 0;
 
