@@ -85,7 +85,10 @@ function replace_unnecessary_chars( $string )
                   $found_anything = true;
                   $translation_changes[$string] = $translation;
                   $query .= "( '" . $player_row['Handle'] .
-                    "', '$translate_lang', '$string', '$current_translation', '$translation' ),";
+                    "', '$translate_lang', '" .
+                    str_replace("'", "\\'", $string) . "', '" .
+                    str_replace("'", "\\'", $current_translation) . "', '" .
+                    str_replace("'", "\\'", $translation) . "' ),";
                 }
             }
         }

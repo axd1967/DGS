@@ -113,6 +113,10 @@ array(
       array( 'Groups' => array( 'Admin', 'Common' ) ),
 
       /* Found in these files: links.php */
+      'A large collection of go book reviews' =>
+      array( 'Groups' => array( 'Links' ) ),
+
+      /* Found in these files: links.php */
       'A large server for realtime play' =>
       array( 'Groups' => array( 'Links' ) ),
 
@@ -150,6 +154,10 @@ array(
 
       /* Found in these files: links.php */
       'An Introduction to Shape' =>
+      array( 'Groups' => array( 'Links' ) ),
+
+      /* Found in these files: links.php */
+      'Annotated Go Bibliographies' =>
       array( 'Groups' => array( 'Links' ) ),
 
       /* Found in these files: links.php */
@@ -335,6 +343,10 @@ array(
       /* Found in these files: include/message_functions.php */
       'Double game' =>
       array( 'Groups' => array( 'Messages' ) ),
+
+      /* Found in these files: edit_profile.php */
+      'Down' =>
+      array( 'Groups' => array( 'Edit profile' ) ),
 
       /* Found in these files: docs.php */
       'Download dragon sources' =>
@@ -652,12 +664,12 @@ array(
       'Language name (i.e. English)' =>
       array( 'Groups' => array( 'Admin' ) ),
 
-      /* Found in these files: userinfo.php */
-      'Last access' =>
-      array( 'Groups' => array( 'Users' ) ),
-
       /* Found in these files: users.php */
       'Last Access' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: userinfo.php */
+      'Last access' =>
       array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: show_games.php, status.php */
@@ -667,6 +679,10 @@ array(
       /* Found in these files: users.php */
       'Last Moved' =>
       array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: edit_profile.php */
+      'Left' =>
+      array( 'Groups' => array( 'Edit profile' ) ),
 
       /* Found in these files: docs.php, site_map.php */
       'Licence' =>
@@ -924,13 +940,13 @@ array(
       'Rafael\'s Go Page' =>
       array( 'Groups' => array( 'Links' ) ),
 
-      /* Found in these files: edit_profile.php, include/move.php, status.php, userinfo.php */
-      'Rank info' =>
-      array( 'Groups' => array( 'Edit profile', 'Status' ) ),
-
       /* Found in these files: users.php */
       'Rank Info' =>
       array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: edit_profile.php, include/move.php, status.php, userinfo.php */
+      'Rank info' =>
+      array( 'Groups' => array( 'Edit profile', 'Status' ) ),
 
       /* Found in these files: include/message_functions.php, include/move.php */
       'Rated' =>
@@ -979,6 +995,10 @@ array(
       /* Found in these files: game.php */
       'Resume playing' =>
       array( 'Groups' => array( 'Game' ) ),
+
+      /* Found in these files: edit_profile.php */
+      'Right' =>
+      array( 'Groups' => array( 'Edit profile' ) ),
 
       /* Found in these files: links.php */
       'Rules' =>
@@ -1329,7 +1349,7 @@ The reasons for this problem could be any of the following:
 
       /* Found in these files: links.php */
       'Submit your games for comments to see where you might have played better.' =>
-      array( 'Groups' => array() ),
+      array( 'Groups' => array( 'Links' ) ),
 
       /* Found in these files: error.php */
       'The confirmed password didn\'t match the password, please go back and retry.' =>
@@ -1395,19 +1415,19 @@ The reasons for this problem could be any of the following:
       'To (userid)' =>
       array( 'Groups' => array( 'Messages' ) ),
 
-      /* Found in these files: docs.php */
-      'To do list' =>
-      array( 'Groups' => array( 'Documentaion' ) ),
-
       /* Found in these files: site_map.php */
       'Todo list' =>
       array( 'Groups' => array( 'Site map' ) ),
+
+      /* Found in these files: docs.php */
+      'To do list' =>
+      array( 'Groups' => array( 'Documentaion' ) ),
 
       /* Found in these files: index.php */
       'To look around, use %s.' =>
       array( 'Groups' => array( 'Index' ) ),
 
-      /* Found in these files: include/std_functions.php, translate.php */
+      /* Found in these files: include/std_functions.php, site_map.php, translate.php */
       'Translate' =>
       array( 'Groups' => array( 'Common' ) ),
 
@@ -1431,17 +1451,21 @@ The reasons for this problem could be any of the following:
       'Unknown rank type' =>
       array( 'Groups' => array( 'Error' ) ),
 
+      /* Found in these files: edit_profile.php */
+      'Up' =>
+      array( 'Groups' => array( 'Edit profile' ) ),
+
       /* Found in these files: edit_profile.php, forgot.php, index.php, register.php, status.php, userinfo.php */
       'Userid' =>
       array( 'Groups' => array( 'Common', 'Edit profile', 'Register', 'Status' ) ),
 
-      /* Found in these files: show_games.php, site_map.php */
-      'User info' =>
-      array( 'Groups' => array( 'Game' ) ),
-
       /* Found in these files: userinfo.php */
       'User Info' =>
       array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: show_games.php, site_map.php */
+      'User info' =>
+      array( 'Groups' => array( 'Game' ) ),
 
       /* Found in these files: include/std_functions.php, site_map.php, users.php */
       'Users' =>
@@ -1459,13 +1483,13 @@ The reasons for this problem could be any of the following:
       'Welcome page' =>
       array( 'Groups' => array( 'Site map' ) ),
 
-      /* Found in these files: message.php */
-      'white' =>
-      array( 'Groups' => array( 'Messages' ) ),
-
       /* Found in these files: include/move.php */
       'White' =>
       array( 'Groups' => array( 'Common', 'Game' ) ),
+
+      /* Found in these files: message.php */
+      'white' =>
+      array( 'Groups' => array( 'Messages' ) ),
 
       /* Found in these files: show_games.php */
       'Win?' =>
