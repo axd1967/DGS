@@ -38,6 +38,10 @@ require( "include/rating.php" );
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
+
+   if( !$logged_in )
+      error("not_logged_in");
+
    $result = mysql_query( "SELECT Games.*, " .
                           "Games.Flags+0 AS flags, " .
                           "black.Name AS Blackname, " .
@@ -241,7 +245,7 @@ require( "include/rating.php" );
 
    draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
    $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $stonestring, $handi,
-   $player_row["Boardtype"], $player_row["Boardcoords"], $player_row["Woodcolor"]);
+   $player_row["Boardcoords"], $player_row["Woodcolor"]);
 
    if( $extra_message )
       echo "<P><center>$extra_message</center>\n";

@@ -93,77 +93,48 @@ function fix_corrupted_move_table($gid)
 
 function draw_board($Size, &$array, $may_play, $gid,
 $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi,
-$board_type, $coord_borders, $woodcolor  )
+$coord_borders, $woodcolor  )
 {
+   $coord_width_array = array( 13 => 16, 17 => 21, 21 => 26, 25 => 31,
+                               29 => 35, 35 => 43, 42 => 52, 50 => 62 );
+
    $mark_letter = 'm';
-   $board_type = 3;
    $sizestringtype = 1;
+   $use_border = true;
 
    if( !( $woodcolor >= 1 and $woodcolor <= 5) )
    {
       $woodcolor = 1;
       $coord_borders = 15;
-      $board_type = 3;
    }
-
-
-   $use_second_table = ( $board_type != 2 );
-
-   $use_gif_coords = ( $board_type != 1 );
-
 
    if( !$stone_size ) $stone_size = 25;
    if( !$font_size ) $font_size = "+0";
 
-   if($use_second_table)
-   {
-      $board_begin = '<table border=0 cellpadding=0 cellspacing=0 ' .
-          'align=center valign=center background="">';
-      $board_end = "</table>\n";
-      $row_start = '<tr>';
-      $row_end = "</tr>\n";
-      $table_start = "<td>";
-      $table_start_c = "<td align=center>";
-      $table_end = "</td>\n";
-   }
-   else
-   {
-      $board_begin = $board_end = $row_start = "";
-      $row_end = "<br\n>";
-      $table_start = $table_start_c = $table_end = "";
-   }
+   $coord_width=$coord_width_array[$stone_size];
 
-   if( $sizestringtype == 2 )
-   {
-      $size_str = "width=$stone_size heigth=$stone_size";
-      $size_str2 = "width=" . floor($stone_size * 31/25) . " heigth=$stone_size";
-   }
-   else if( $sizestringtype == 1 )
-   {
-      $size_str = "class=s$stone_size";
-      $size_str2 = "class=c$stone_size";
-   }
-   if( $use_gif_coords )
-   {
-      $coord_start_number = $table_start . "<img $size_str2 src=$stone_size/c";
-      $coord_start_letter = $table_start . "<img $size_str src=$stone_size/c";
-      $coord_alt = '.gif alt=';
-      $coord_end = ">" . $table_end;
-      $coord_empty = $table_start . "<img $size_str2 alt=\" \" src=$stone_size/.gif>" . $table_end;
-   }
-   else
-   {
-      $coord_start_letter = $coord_start_number = $table_start_c .
-          ( $font_size != "+0"  ? "<font size=\"$font_size\">" :"");
-      $coord_start = $table_start_c . ( $font_size != "+0"  ? "<font size=\"$font_size\">" :"");
-      $coord_end = ( $font_size != "+0"  ? "</font>" : "") . $table_end;
-      $coord_empty = "<td>&nbsp;</td>";
-   }
+   $board_begin = '<table border=0 cellpadding=0 cellspacing=0 ' .
+      'align=center valign=center background="">';
+   $board_end = "</table>\n";
+   $row_start = '<tr>';
+   $row_end = "</tr>\n";
+
+   $coord_start_number = "<td><img class=c$stone_size src=$stone_size/c";
+   $coord_start_letter = "<td><img class=s$stone_size src=$stone_size/c";
+   $coord_alt = '.gif alt=';
+   $coord_end = '></td>';
+   $coord_empty = "<td><img class=c$stone_size alt=\" \" src=$stone_size/.gif></td>";
 
 
-   $str1 = "$table_start<IMG $size_str alt=\"";
-   $str4 = ".gif></A>". $table_end;
-   $str5 = ".gif>" . $table_end;
+   $str1 = "<td><IMG class=s$stone_size alt=\"";
+   $str4 = '.gif></A></td>';
+   $str5 = '.gif></td>';
+
+// Variables for the 3d-looking border
+   $border_start = 140 - ( $coord_borders & LEFT ? $coord_width : 0 );
+   $border_imgs = ceil( ($Size * $stone_size - $border_start) / 150 ) - 1;
+   $border_rem = $Size * $stone_size - $border_start - 150 * $border_imgs;
+
    if( $may_play )
    {
       if( $handi or !$stonestring )
@@ -171,18 +142,18 @@ $board_type, $coord_borders, $woodcolor  )
 
       if( $handi )
       {
-         $str2 = "$table_start<A href=\"game.php?g=$gid&a=handicap&c=";
-         $str3 = "&s=$stonestring\"><IMG $size_str border=0 alt=\"";
+         $str2 = "<td><A href=\"game.php?g=$gid&a=handicap&c=";
+         $str3 = "&s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
       }
       else if( $stonestring )
       {
-         $str2 = "$table_start<A href=\"game.php?g=$gid&a=remove&c=";
-         $str3 = "&s=$stonestring\"><IMG $size_str border=0 alt=\"";
+         $str2 = "<td><A href=\"game.php?g=$gid&a=remove&c=";
+         $str3 = "&s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
       }
       else
       {
-         $str2 = "$table_start<A href=\"game.php?g=$gid&a=move&c=";
-         $str3 = "\"><IMG $size_str border=0 alt=\"";
+         $str2 = "<td><A href=\"game.php?g=$gid&a=move&c=";
+         $str3 = "\"><IMG class=s$stone_size border=0 alt=\"";
       }
    }
 
@@ -196,8 +167,11 @@ $board_type, $coord_borders, $woodcolor  )
 
    if( $coord_borders & UP )
    {
-      if( $coord_borders & LEFT )
-         echo $coord_empty;
+      $span = ($coord_borders & LEFT ? 1 : 0 ) + ( $use_border ? 1 : 0 );
+      $w = ($coord_borders & LEFT ? $coord_width : 0 ) + ( $use_border ? 10 : 0 );
+      if( $span > 0 )
+         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" width=$w height=$stone_size></td>";
+
       $colnr = 1;
       $letter = 'a';
       while( $colnr <= $Size )
@@ -210,8 +184,39 @@ $board_type, $coord_borders, $woodcolor  )
          $letter++;
          if( $letter == 'i' ) $letter++;
       }
+
+      $span = ($coord_borders & RIGHT ? 1 : 0 ) + ( $use_border ? 1 : 0 );
+      $w = ($coord_borders & RIGHT ? $coord_width : 0 ) + ( $use_border ? 10 : 0 );
+      if( $span > 0 )
+         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" width=$w height=$stone_size></td></tr>";
+   }
+
+   if( $use_border )
+   {
+      echo '<tr>';
+
+      if( $coord_borders & LEFT )
+         echo "<td><img src=\"images/blank.gif\" width=$coord_width height=10></td>";
+
+      echo '<td><img src="images/wood' . $woodcolor .
+         '_ul.gif" height=10 width=10></td>' . "\n";
+
+      echo "<td colspan=$Size width=" . $Size*$stone_size . '>';
+      echo '<img src="images/wood' . $woodcolor . '_u.gif" height=10 width=' .
+         $border_start . '>';
+      for($i=0; $i<$border_imgs; $i++ )
+         echo '<img src="images/wood' . $woodcolor . '_u.gif" height=10 width=150>';
+
+      echo '<img src="images/wood' . $woodcolor . '_u.gif" height=10 width=' .
+         $border_rem . '>';
+
+      echo "</td>\n" . '<td><img src="images/wood' . $woodcolor .
+         '_ur.gif" height=10 width=10></td>' . "\n";
+
       if( $coord_borders & RIGHT )
-         echo $coord_empty . $row_end;
+         echo "<td><img src=\"images/blank.gif\" width=$coord_width height=10></td>";
+
+      echo "</tr>\n";
    }
 
    if( $Size > 11 ) $hoshi_dist = 4; else $hoshi_dist = 3;
@@ -226,14 +231,14 @@ $board_type, $coord_borders, $woodcolor  )
    for($rownr = $Size; $rownr > 0; $rownr-- )
    {
       echo $row_start;
-      if( $coord_borders & LEFT )
-      {
-         echo $coord_start_number . $rownr . $coord_alt;
-         if( $use_gif_coords )
-            echo  $rownr;
 
-         echo $coord_end;
-      }
+      if( $coord_borders & LEFT )
+         echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
+
+      if( $use_border )
+         echo '<td><img src="images/wood' . $woodcolor . '_l.gif" height=' .
+            $stone_size . ' width=10></td>';
+
 
       $hoshi_r = 0;
       if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
@@ -316,23 +321,54 @@ $board_type, $coord_borders, $woodcolor  )
          $letter_c ++;
       }
 
-      if( $coord_borders & RIGHT )
-      {
-         echo $coord_start_number . $rownr . $coord_alt;
-         if( $use_gif_coords )
-            echo  $rownr;
+      if( $use_border )
+         echo '<td><img src="images/wood' . $woodcolor . '_r.gif" height=' .
+            $stone_size . ' width=10></td>';
 
-         echo $coord_end;
-      }
+      if( $coord_borders & RIGHT )
+         echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
+
       $letter_r++;
       echo $row_end;
+   }
+
+   if( $use_border )
+   {
+      echo '<tr>';
+
+      if( $coord_borders & LEFT )
+         echo "<td><img src=\"images/blank.gif\" width=$coord_width height=10></td>";
+
+      echo '<td><img src="images/wood' . $woodcolor .
+         '_dl.gif" height=10 width=10></td>' . "\n";
+
+      echo "<td colspan=$Size width=" . $Size*$stone_size . '>';
+      echo '<img src="images/wood' . $woodcolor . '_d.gif" height=10 width=' .
+         $border_start . '>';
+      for($i=0; $i<$border_imgs; $i++ )
+         echo '<img src="images/wood' . $woodcolor . '_d.gif" height=10 width=150>';
+
+      echo '<img src="images/wood' . $woodcolor . '_d.gif" height=10 width=' .
+         $border_rem . '>';
+
+      echo "</td>\n" . '<td><img src="images/wood' . $woodcolor .
+         '_dr.gif" height=10 width=10></td>' . "\n";
+
+      if( $coord_borders & RIGHT )
+         echo "<td><img src=\"images/blank.gif\" width=$coord_width height=10></td>";
+
+      echo "</tr>\n";
    }
 
    if( $coord_borders & DOWN )
    {
       echo $row_start;
-      if( $coord_borders & LEFT )
-         echo $coord_empty;
+
+      $span = ($coord_borders & LEFT ? 1 : 0 ) + ( $use_border ? 1 : 0 );
+      $w = ($coord_borders & LEFT ? $coord_width : 0 ) + ( $use_border ? 10 : 0 );
+      if( $span > 0 )
+         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" width=$w height=$stone_size></td>";
+
       $colnr = 1;
       $letter = 'a';
       while( $colnr <= $Size )
@@ -346,8 +382,11 @@ $board_type, $coord_borders, $woodcolor  )
          $letter++;
          if( $letter == 'i' ) $letter++;
       }
-      if( $coord_borders & RIGHT )
-         echo $coord_empty . $row_end;
+
+      $span = ($coord_borders & RIGHT ? 1 : 0 ) + ( $use_border ? 1 : 0 );
+      $w = ($coord_borders & RIGHT ? $coord_width : 0 ) + ( $use_border ? 10 : 0 );
+      if( $span > 0 )
+         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" width=$w height=$stone_size align=center></td>";
    }
 
    echo $board_end;
