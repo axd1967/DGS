@@ -313,7 +313,7 @@ require_once( "include/rating.php" );
 
    if ($notesmode == 'BELOW')
    {
-     echo "</td></tr>\n<tr><td align='center'";
+     echo "</td></tr>\n<tr><td align='center'>";
      if ($notesmode != 'OFF' and $show_notes)
        draw_notes($notes, $notesheight, $noteswidth);
      echo "</td>\n</tr></table>";
