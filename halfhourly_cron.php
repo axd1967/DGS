@@ -74,7 +74,7 @@ function mail_strip_html( $str)
    $str = strip_tags($str, '<a><br><p><ul><ol><li><goban>');
    $str = preg_replace(array_keys($reps), array_values($reps), $str);
    $str = strip_tags($str, '<goban>');
-   $str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
+   //$str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
    return $str;
 }
 
@@ -89,7 +89,7 @@ function mail_strip_html( $str)
 
    $row = mysql_fetch_array( $result );
 
-   if( $row['timediff'] < 1500 )
+   if( $row['timediff'] < 15+00 )
       exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202");
@@ -106,7 +106,8 @@ function mail_strip_html( $str)
    {
       extract($row);
 
-      $msg = "A message or game move is waiting for you at ".mail_link('',"status.php")."\n";
+      $msg = "A message or game move is waiting for you at:\n "
+                . mail_link('',"status.php")."\n";
 
       // Find games
 
@@ -138,7 +139,7 @@ function mail_strip_html( $str)
                $msg .= "Game ID: ".mail_link($ID,"game.php?gid=$ID")."\n";
                $msg .= "Black: ".mail_strip_html("$Blackname ($Blackhandle)")."\n";
                $msg .= "White: ".mail_strip_html("$Whitename ($Whitehandle)")."\n";
-               $msg .= "Move $Moves: " . number2board_coords($Last_X, $Last_Y, $Size)."\n";
+               $msg .= "Move $Moves: ".number2board_coords($Last_X, $Last_Y, $Size)."\n";
 
                if( !(strpos($SendEmail, 'BOARD') === false) )
                   $msg .= draw_ascii_board($Size, $array, $ID, $Last_X, $Last_Y, 15,
