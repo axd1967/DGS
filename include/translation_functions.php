@@ -18,7 +18,10 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-include_once( "translations/known_languages.php" );
+if( file_exists("translations/known_languages.php") )
+   include_once( "translations/known_languages.php" );
+
+
 
 function T_($string)
 {
@@ -33,7 +36,15 @@ function T_($string)
 
 function include_all_translate_groups($player_row)
 {
-   global $TranslateGroups;
+   global $TranslateGroups, $known_languages;
+
+   if( !file_exists("translations/known_languages.php") )
+   {
+      require_once( "include/make_translationfiles.php" );
+      make_known_languages();
+      make_include_files();
+      include_once( "translations/known_languages.php" );
+   }
 
    $TranslateGroups = array_unique($TranslateGroups);
 
@@ -63,7 +74,7 @@ function include_translate_group($group, $player_row)
 
       if( file_exists( $filename ) )
       {
-         include ( $filename );
+         include_once( $filename );
       }
       $language_used = $language;
       list(,$encoding_used) = explode('.', $language);
