@@ -23,12 +23,13 @@ require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/rating.php" );
 
+$reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
+$reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
+$reverse_htmlentities_table['&nbsp;'] = ' '; //else maybe '\xa0'
 function reverse_htmlentities( $str )
 {
-  $reg= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
-  $reg= array_flip($reg);
-  $reg['&nbsp;'] = ' '; //else maybe '\xa0'
-  return strtr($str, $reg);
+ global $reverse_htmlentities_table;
+  return strtr($str, $reverse_htmlentities_table);
 }
 
 function sgf_simpletext( $str )
@@ -48,9 +49,9 @@ function sgf_echo_comment( $com )
    return true;
 }
 
-/* Possible properties are:
+/* Possible properties are: (uppercase only)
  * - AB/AW/AE: add black stone/white stone/empty point
- * - MA/CR/TR/SQ: mark with a cross/circle/triangle/square
+ * - MA/CR/TR/SQ: mark with a cross/circle/triangle/square (SQ is FF[4])
  * - TB/TW: mark territory black/white
  */
 function sgf_echo_point( $points, $overwrite_prop=false )
@@ -71,12 +72,14 @@ function sgf_echo_point( $points, $overwrite_prop=false )
 
    foreach($points as $coord => $point_prop)
    {
-      if( !$overwrite_prop && $prop!=$point_prop )
+      if( !$overwrite_prop && $prop !== $point_prop )
       {
          $prop= $point_prop;
-         echo "\n" . $prop;
+         if($prop)
+            echo "\n" . $prop;
       }
-      echo "[$coord]";
+      if($prop)
+         echo "[$coord]";
    }
 
    return true;
@@ -126,6 +129,32 @@ function sgf_create_territories( $size, &$array,
 }
 
 
+/*
+> White: 66 territory + 6 prisoners + 0.5 komi = 72.5
+> Black: 64 territory + 1 prisoner = 65
+*/
+function sgf_count_string( $color, $territory, $prisoner, $komi=false )
+{
+   $score = 0;
+   $str = "$color:";
+
+   $str.= " $territory territor" . ($territory > 1 ? "ies" : "y") ;
+   $score+= $territory;
+
+   $str.= " + $prisoner prisoner" . ($prisoner > 1 ? "s" : "") ;
+   $score+= $prisoner;
+
+   if( is_numeric($komi) )
+   {
+      $str.= " + $komi komi" ;
+      $score+= $komi;
+   }
+
+   $str.= " = $score";
+   return $str;
+}
+
+
 $array=array();
 
 {
@@ -154,6 +183,14 @@ $array=array();
    //0=no highlight, 1=with Name property, 2=in comments, 3=both
    $sgf_pass_highlight = 1;
    $sgf_score_highlight = 1;
+
+   //Last dead stones property: (uppercase only)
+   // ''= keep them, 'AE'= remove, 'MA'/'CR'/'TR'/'SQ'= mark them
+   $dead_stone_prop = '';
+
+   //Last marked dame property: (uppercase only)
+   // ''= no mark, 'MA'/'CR'/'TR'/'SQ'= mark them
+   $marked_dame_prop = 'CR';
 
 
    if( !$gid )
@@ -194,14 +231,16 @@ $array=array();
                           "WHERE Moves.gid=$gid order by Moves.ID" );
 
    header( 'Content-Type: application/x-go-sgf' );
-   header( "Content-Disposition: inline; filename=\"$Whitehandle-$Blackhandle-" .
-           date('Ymd', $timestamp) . '.sgf"' );
+   $filename= "$Whitehandle-$Blackhandle-" . date('Ymd', $timestamp) . ".sgf" ;
+   header( "Content-Disposition: inline; filename=\"$filename\"" );
    header( "Content-Description: PHP Generated Data" );
 
 
    echo "(\n;FF[$sgf_version]GM[1]"
       . "\nPC[Dragon Go Server: $HOSTBASE]"
       . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
+      . "\nGN[" . sgf_simpletext($filename) . "]"
+      . "\nGC[GameID: $gid]"
       . "\nPB[" . sgf_simpletext("$Blackname ($Blackhandle)") . "]"
       . "\nPW[" . sgf_simpletext("$Whitename ($Whitehandle)") . "]";
 
@@ -214,6 +253,7 @@ $array=array();
    if ($sgf_version >= 4)
    {
       echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)) . "]";
+      //may specify CA (charset) 
    }
 
    if( isset($Score) )
@@ -275,9 +315,9 @@ $array=array();
             else if ($sgf_trim_nr < 0)
             {
                if( $array[$PosX][$PosY] == MARKED_DAME )
-                  $points[$coord]='CR';
+                  $points[$coord]=$marked_dame_prop;
                else
-                  $points[$coord]='AE';
+                  $points[$coord]=$dead_stone_prop;
             }
             else
             {
@@ -374,8 +414,6 @@ $array=array();
                   {
                      echo $color."[]"; //do not use [tt]
 
-                     $next_color= "";
-
                      if( $sgf_pass_highlight & 1 )
                         echo "N[$color PASS]";
 
@@ -402,10 +440,7 @@ $array=array();
 
    if ( $Status == 'FINISHED')
    {
-      echo( "\n;" ); //Node start
-
-      //from last skipped SCORE/SCORE2 marked points
-      sgf_echo_point( $points);
+      echo( "\n;N[RESULT]" ); //Node start
 
       $black_territory = array();
       $white_territory = array();
@@ -415,34 +450,40 @@ $array=array();
          $black_territory, $white_territory, 
          $black_prisoner, $white_prisoner);
 
-      sgf_echo_point( $black_territory, 'TB'); //'TB''TR'
+      //Last dead stones mark
+      if ($dead_stone_prop)
+         sgf_echo_point(
+            array_merge( $black_prisoner, $white_prisoner)
+            , $dead_stone_prop);
 
-      sgf_echo_point( $white_territory, 'TW'); //'TW''SQ'
+      //$points from last skipped SCORE/SCORE2 marked points      
+      sgf_echo_point(
+         array_merge( $points, $black_territory, $white_territory)
+         );
 
       // highlighting result in last comments:
       if( isset($Score) )
       {
+         $node_com.= "\n";
+
          if ( abs($Score) < SCORE_RESIGN )
          {
-            $node_com.= "\n";
-            $scoreW = count($white_territory);
-            $node_com.= "\nWhite Territory: $scoreW" ;
-            $White_Prisoners+= count($white_prisoner) ;
-            $scoreW+= $White_Prisoners;
-            $node_com.= "\nWhite Prisoners: $White_Prisoners" ;
-            $scoreW+= $Komi;
-            $node_com.= "\nKomi: $Komi" ;
-            $node_com.= "\n==== $scoreW" ;
 
-            $node_com.= "\n";
-            $scoreB = count($black_territory);
-            $node_com.= "\nBlack Territory: $scoreB" ;
-            $Black_Prisoners+= count($black_prisoner) ;
-            $scoreB+= $Black_Prisoners;
-            $node_com.= "\nBlack Prisoners: $Black_Prisoners" ;
-            $node_com.= "\n==== $scoreB" ;
+            $node_com.= "\n" . 
+               sgf_count_string( "White"
+                  ,count($white_territory)
+                  ,$White_Prisoners + count($white_prisoner)
+                  ,$Komi
+               );
+
+            $node_com.= "\n" . 
+               sgf_count_string( "Black"
+                  ,count($black_territory)
+                  ,$Black_Prisoners + count($black_prisoner)
+               );
+
+            //$node_com.= "\n";
          }
-         $node_com.= "\n";
          $node_com.= "\nResult: " . score2text($Score, false, true) ;
 
          /*

@@ -254,11 +254,15 @@ function end_page( $menu_array=NULL )
       $span = ' colspan=' . (count($menu_array)-1);
 
 
+   global $NOW, $date_fmt;
    echo '<table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
    <tr>
-     <td' . $span . ' align="left" width="50%">
+     <td' . $span . ' align="left" width="30%">
        <A href="' . $base_path . 'index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
-        <td align="right" width="50%">';
+        <td align="center" width="40%"><font size=-1 color=' . $menu_fg_color . '>'
+        . T_("Page time") . ' ' . date($date_fmt, $NOW)
+        . '</font></td>
+        <td align="right" width="30%">';
 
    if( $admin_level & ADMIN_TIME )
       echo '
