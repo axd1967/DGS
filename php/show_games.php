@@ -32,18 +32,27 @@ connect2mysql();
 
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-$result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
-                      " WHERE  Status!='INVITED' AND Status!='FINISHED' AND " . 
-                      "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
-                      "( White_ID=$uid AND Black_ID=Players.ID ))");
+if( $finished )
+{
+     $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
+                           " WHERE Status='FINISHED' AND " . 
+                           "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
+                           "( White_ID=$uid AND Black_ID=Players.ID ))");
+     start_page("Finished games", true, $logged_in, $player_row );
+}
+else
+{
+     $result = mysql_query("SELECT Games.*, Players.Name FROM Games,Players " .
+                           " WHERE  Status!='INVITED' AND Status!='FINISHED' AND " . 
+                           "(( Black_ID=$uid AND White_ID=Players.ID ) OR " .
+                           "( White_ID=$uid AND Black_ID=Players.ID ))");
+     start_page("Running games", true, $logged_in, $player_row );
+}
 
 
-
-start_page("Running games", true, $logged_in, $player_row );
-
-
-echo "<table border=3>\n";
-echo "<tr><th>Opponent</th><th>Color</th><th>Size</th><th>Handicap</th><th>moves</th></tr>\n";
+echo "<table border=3 align=center>\n";
+echo "<tr><th>Opponent</th><th>Color</th><th>Size</th><th>Handicap</th><th>Komi</th>" .
+     "<th>" .( $finished ? "Score" : "Moves" ) . "</th>\n";
 
 
 while( $row = mysql_fetch_array( $result ) )
@@ -57,20 +66,29 @@ while( $row = mysql_fetch_array( $result ) )
         "<td>$col</td>" .
         "<td>" . $row["Size"] . "</td>\n" .
         "<td>" . $row["Handicap"] . "</td>\n" .
-        "<td>" . $row["Moves"] . "</td>\n" .
+        "<td>" . $row["Komi"] . "</td>\n" .
+        "<td>" . ($finished ? score2text($row["Score"]) : $row["Moves"] ) . "</td>\n" .
         "</tr>\n";
 }
 
 echo "</table>\n";
 
 
+
 echo "
     <p>
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
-        <td><B><A href=\"userinfo.php?uid=$uid\">User info</A></B></td>
-        <td><B><A href=\"invite.php?uid=$uid\">Invite this user</A></B></td>
-        <td><B><A href=\"show_games.php?uid=$uid&finished=1\">Show finished games</A></B></td>
+        <td><B><A href=\"userinfo.php?uid=$uid\">User info</A></B></td>\n";
+if( $uid != $player_row["ID"] ) 
+     echo "        <td><B><A href=\"invite.php?uid=$uid\">Invite this user</A></B></td>\n";
+
+if( $finished )
+     echo "        <td><B><A href=\"show_games.php?uid=$uid\">Show running games</A></B></td>";
+else
+     echo "        <td><B><A href=\"show_games.php?uid=$uid&finished=1\">Show finished games</A></B></td>";
+
+echo "
       </tr>
     </table>
 ";
