@@ -59,6 +59,7 @@ echo mysql_error();
 while($row = mysql_fetch_array($result))
 {
   extract($row);
+  $ticks = $ticks - $LastTicks;
 
   if( $ToMove_ID == $Black_ID )
     {
