@@ -196,19 +196,19 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
         <tr>
 ';
 
-   $menu_array = array( 'Status' => 'status.php',
-                        'Messages' => 'list_messages.php',
-                        'Invite' => 'message.php?mode=Invite',
-                        'Users' => 'users.php',
-                        'Forums' => 'forum/index.php');
+   $menu_array = array( T_('Status') => 'status.php',
+                        T_('Messages') => 'list_messages.php',
+                        T_('Invite') => 'message.php?mode=Invite',
+                        T_('Users') => 'users.php',
+                        T_('Forums') => 'forum/index.php');
 
    if( $logged_in && !empty($player_row['Translator']) )
-      $menu_array['Translate'] = 'translate.php';
+      $menu_array[T_('Translate')] = 'translate.php';
 
    if( $logged_in && $player_row['Adminlevel'] >= 2 )
-      $menu_array['Admin'] = 'admin.php';
+      $menu_array[T_('Admin')] = 'admin.php';
 
-   $menu_array['Docs'] = 'docs.php';
+   $menu_array[T_('Docs')] = 'docs.php';
 
 
    echo '         <td colspan=' . (count($menu_array)-3) . ' width="50%">
@@ -283,7 +283,7 @@ function make_menu($menu_array)
 
    foreach( $menu_array as $text => $link )
       {
-         echo "<td $width><B><A href=\"$HOSTBASE/$link\">" . T_($text) . "</A></B></td>\n";
+         echo "<td $width><B><A href=\"$HOSTBASE/$link\">$text</A></B></td>\n";
       }
 
    echo "</tr>\n";
