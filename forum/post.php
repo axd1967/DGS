@@ -34,7 +34,7 @@ function post_message($player_row, $moderated)
 
    if( $edit > 0 )
    {
-      $result = mysql_query("SELECT Subject,Text,Time FROM Posts WHERE ID=$edit")
+      $result = mysql_query("SELECT Subject,Text,Time,Forum_ID FROM Posts WHERE ID=$edit")
          or error("unknown_parent_post");
 
        if( mysql_num_rows($result) != 1 )
