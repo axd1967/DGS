@@ -220,10 +220,8 @@ disable_cache();
       }
 
       $Rated = ( $game_row['Rated'] === 'Y' and
-                 ($opponent_row['RatingStatus'] == 'READY' or
-                  $opponent_row['RatingStatus'] == 'RATED') and
-                 ($player_row['RatingStatus'] == 'READY' or
-                  $player_row['RatingStatus'] == 'RATED') );
+                 !empty($opponent_row['RatingStatus']) and
+                 !empty($player_row['RatingStatus']) );
 
       if( !$Rated and $game_row['Rated'] === 'Y' )
          $query .= "Rated='N', ";
