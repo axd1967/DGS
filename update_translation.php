@@ -24,11 +24,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require( "include/std_functions.php" );
 require( "include/translation_info.php" );
 
-function replace_unnecessary_chars( $string )
-{
-  return str_replace( "'", "\\'", $string );
-}
-
 {
   connect2mysql();
 
@@ -80,19 +75,18 @@ function replace_unnecessary_chars( $string )
                 $current_translation = T_($string);
 
               $translation = ${"transl$counter"};
+              $current_translation = addslashes($current_translation);
+              $string = addslashes($string);
               if( strcmp($translation, $current_translation) != 0 )
                 {
                   $found_anything = true;
-                  $translation_changes[$string] = $translation;
+                  $translation_changes[$string] = stripslashes($translation);
                   $query .= "( '" . $player_row['Handle'] .
-                    "', '$translate_lang', '" .
-                    str_replace("'", "\\'", $string) . "', '" .
-                    str_replace("'", "\\'", $current_translation) . "', '" .
-                    str_replace("'", "\\'", $translation) . "' ),";
+                    "', '$translate_lang', \"$string\", " .
+                    "\"$current_translation\", \"$translation\" ),";
                 }
             }
         }
-
       if( $found_anything )
         mysql_query(substr($query,0,-1)) or error('couldnt_update_translation');
 
@@ -112,10 +106,8 @@ function replace_unnecessary_chars( $string )
               else
                 $translation = T_($string);
 
-              $r_string = replace_unnecessary_chars( $string );
-              $r_translation = replace_unnecessary_chars( $translation );
-
-              $lang_php_code .= "'$r_string' =>\n'$r_translation',\n\n";
+              $lang_php_code .= "\"" . addslashes($string) . "\" =>\n\"" .
+                addslashes($translation) . "\",\n\n";
             }
 
           $lang_php_code = substr( $lang_php_code, 0, -3 );
