@@ -8,7 +8,7 @@ CREATE TABLE Players (
   Newpassword varchar(16) default NULL,
   Sessioncode varchar(16) default NULL,
   Sessionexpire datetime default NULL,
-  Lastaccess datetime NOT NULL,
+  Lastaccess datetime default NULL,
   Registerdate date default NULL,
   Hits int(11) default '0',
   Moves int(11) default '0',
@@ -29,12 +29,19 @@ CREATE TABLE Players (
   InitialRating double default NULL,
   RatingStatus enum('INIT','READY','RATED') default NULL,
   Open varchar(40) default NULL,
+  Lang varchar(20) NOT NULL default 'C',
   Woodcolor int(11) NOT NULL default '1',
-  Boardtype int(11) NOT NULL default '2',
+  Boardtype int(11) NOT NULL default '1',
   Boardcoords int(11) NOT NULL default '15',
+  UsersColumns set('ID','Name','Nick','Rank Info','Rating','Open for matches?','Games','Running','Finished','Won','Lost','Percent','Activity') NOT NULL default 'Name,Nick,Rank Info,Rating,Open for matches?',
+  Running int(11) NOT NULL default '0',
+  Finished int(11) NOT NULL default '0',
+  Won int(11) NOT NULL default '0',
+  Lost int(11) NOT NULL default '0',
+  GamesColumns set('ID','sgf','Opponent','Color','Size','Handicap','Komi','Moves','Last Move','End date','Score','Win?') NOT NULL default 'ID,sgf,Opponent,Color,Size,Handicap,Komi,Moves,Last Move,End date,Score,Win?',
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
-) TYPE=MyISAM PACK_KEYS=1;
+) TYPE=ISAM PACK_KEYS=1;
 
 #
 # Table structure for table 'Games'
