@@ -122,7 +122,7 @@ function change_depth(&$cur_depth, $new_depth)
 
    if( isset($_POST['post']) )
    {
-      post_message($player_row);
+      post_message($player_row, $moderated);
       jump_to("forum/list.php?forum=$forum");
    }
 
@@ -176,7 +176,7 @@ function change_depth(&$cur_depth, $new_depth)
       $Name = '?';
       extract($row);
 
-      $hidden = ($Approved == 'N' or ($Approved == 'Y' and $moderated));
+      $hidden = ($Approved == 'N');
 
       if( $hidden and !$is_editor )
          continue;
@@ -227,7 +227,7 @@ function change_depth(&$cur_depth, $new_depth)
       $Text = $_POST['Text'];
       draw_post('preview', false, $Subject, $Text);
       echo "<tr><td>\n";
-      message_box($post_type, $thread, $Subject, $Text);
+      message_box('preview', $thread, $Subject, $Text);
       echo "</td></tr>\n";
    }
 

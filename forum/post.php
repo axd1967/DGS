@@ -19,7 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-function post_message($player_row)
+function post_message($player_row, $moderated)
 {
    global $NOW, $order_str;
 
@@ -94,6 +94,11 @@ function post_message($player_row)
       $Thread_ID = -1;
    }
 
+
+
+
+   // -------   Update database   -------
+
    $PosIndex .= $order_str[$answer_nr];
    $Depth++;
 
@@ -108,6 +113,7 @@ function post_message($player_row)
        "Parent_ID=$parent, " .
        "AnswerNr=" . ($answer_nr+1) . ", " .
        "Depth=$Depth, " .
+       "Approved=" . ($moderated ? "'N'" : "'Y'")  . ", " .
        "crc32=" . crc32($Text) . ", " .
        "PosIndex=\"$PosIndex\"";
 
@@ -116,18 +122,24 @@ function post_message($player_row)
    if( mysql_affected_rows() != 1)
       error("mysql_insert_post");
 
+   $New_ID = mysql_insert_id();
+
    if( !($parent > 0) )
    {
-      $Thread_ID = mysql_insert_id();
-      mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$Thread_ID" );
+      mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID" );
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_post");
    }
 
-   mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1 " .
-                "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
-                "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
+   if( $moderated )
+   {
+      // TODO: Notify moderators;
+   }
+   else
+      mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1 " .
+                   "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
+                   "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
 
 }
 

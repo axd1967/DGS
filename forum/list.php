@@ -32,6 +32,8 @@ require("forum_functions.php");
 
    $offset = (isset($_GET['offset']) ? $_GET['offset'] : 0);
 
+   
+
    $result = mysql_query("SELECT Subject, Posts.Thread_ID, Lastchanged, " .
                          "Posts.User_ID, Replies, Name, " .
                          "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
@@ -76,7 +78,9 @@ require("forum_functions.php");
       $new = get_new_string($Lastchangedstamp, $Lastread);
 
       $color = ( $odd ? "" : " bgcolor=white" );
-      echo "<tr$color><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a>$new</td><td>" . make_html_safe($Name) . "</td><td align=center>" . ($Replies-1) . "</td><td nowrap>$Lastchanged</td></tr>\n";
+
+      if( $Replies >= 0 or $is_editor )
+         echo "<tr$color><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a>$new</td><td>" . make_html_safe($Name) . "</td><td align=center>" . $Replies . "</td><td nowrap>$Lastchanged</td></tr>\n";
       $odd = !$odd;
       $show_rows--;
    }

@@ -63,11 +63,6 @@ function make_link_array($links)
    if( $links & LINK_MARK_READ )
       $link_array_left["Mark All Read"] = "";
 
-   if( $links & LINK_PREV_PAGE )
-      $link_array_right["Prev Page"] = "list.php?forum=$forum&offset=".($offset-$RowsPerPage);
-   if( $links & LINK_NEXT_PAGE )
-      $link_array_right["Next Page"] = "list.php?forum=$forum&offset=".($offset+$RowsPerPage);
-
    if( ($links & LINK_TOGGLE_EDITOR) or ($links & LINK_TOGGLE_EDITOR_LIST) )
    {
       $get = $_GET;
@@ -77,6 +72,11 @@ function make_link_array($links)
           make_url( "read.php", false, $get ) :
           make_url( "list.php", false, $get ) );
    }
+
+   if( $links & LINK_PREV_PAGE )
+      $link_array_right["Prev Page"] = "list.php?forum=$forum&offset=".($offset-$RowsPerPage);
+   if( $links & LINK_NEXT_PAGE )
+      $link_array_right["Next Page"] = "list.php?forum=$forum&offset=".($offset+$RowsPerPage);
 }
 
 function start_table(&$headline, &$links, $width, $cols)
@@ -109,7 +109,7 @@ function echo_links($cols)
 {
    global $link_array_left, $link_array_right;
 
-   echo "<tr><td bgcolor=d0d0d0 colspan=" . ($cols-1) . " align=left>&nbsp";
+   echo "<tr><td bgcolor=d0d0d0 colspan=" . ($cols/2) . " align=left>&nbsp";
    $first=true;
    reset($link_array_left);
    while( list($name, $link) = each($link_array_left) )
@@ -118,7 +118,7 @@ function echo_links($cols)
       echo "<a href=\"$link\"><font color=000000>$name</font></a>";
       $first=false;
    }
-   echo "&nbsp;</td>\n<td bgcolor=d0d0d0 align=right>&nbsp\n";
+   echo "&nbsp;</td>\n<td bgcolor=d0d0d0 align=right colspan=" . ($cols-$cols/2) . ">&nbsp\n";
 
    $first=true;
    reset($link_array_right);
@@ -159,7 +159,7 @@ function message_box( $post_type, $id, $Subject='', $Text='')
 {
    global $forum, $thread;
 
-   if( $post_type != 'edit' and strlen($Subject) > 0 and
+   if( $post_type != 'edit' and $post_type != 'preview' and strlen($Subject) > 0 and
        strcasecmp(substr($Subject,0,3), "re:") != 0 )
       $Subject = "RE: " . $Subject;
 
@@ -184,14 +184,14 @@ function forum_name($forum, &$moderated)
    if( !($forum > 0) )
       error("unknown_forum");
 
-   $result = mysql_query("SELECT Name AS Forumname, Unmoderated FROM Forums WHERE ID=$forum");
+   $result = mysql_query("SELECT Name AS Forumname, Moderated FROM Forums WHERE ID=$forum");
 
    if( mysql_num_rows($result) != 1 )
       error("unknown_forum");
 
    $row = mysql_fetch_array($result);
 
-   $moderated = ($row['Unmoderated'] == 'N');
+   $moderated = ($row['Moderated'] == 'Y');
    return $row["Forumname"];
 }
 
@@ -212,8 +212,56 @@ function toggle_editor_cookie()
 
 function approve_message($id, $thread, $approve=true)
 {
-   mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "' " .
-               "WHERE ID=$id AND Thread_ID=$thread LIMIT 1");
+   $result = mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "' " .
+                         "WHERE ID=$id AND Thread_ID=$thread LIMIT 1");
+
+   if( mysql_affected_rows() == 1 )
+      recalculate_lastchanged($id, ($approve ? 1 : -1));
+}
+
+
+function recalculate_lastchanged($Post_ID, $replies_diff=0)
+{
+   $result = mysql_query("SELECT Depth,Parent_ID FROM Posts WHERE ID='$Post_ID'");
+
+   if( mysql_num_rows($result) != 1 )
+      return;
+
+   extract(mysql_fetch_array($result));
+
+   $d = $Depth;
+   $id = $Post_ID;
+
+   while( $d > 0 )
+   {
+      $result = mysql_query("SELECT Depth,Parent_ID FROM Posts WHERE ID='$id'");
+      if( mysql_num_rows($result) != 1 )
+         error("internal_error", "recalculate_lastchanged: parent_missing $id $Post_ID" );
+
+      extract(mysql_fetch_array($result));
+
+      if( $Depth != $d )
+         error("internal_error", "recalculate_lastchanged: depth_error $id $Post_ID" );
+
+      $result = mysql_query("SELECT Lastchanged FROM Posts " .
+                            "WHERE Parent_ID='$id' AND Approved='Y' " .
+                            "ORDER BY Lastchanged DESC LIMIT 1");
+
+      if( mysql_num_rows($result) != 1 )
+         mysql_query("UPDATE Posts SET Lastchanged=GREATEST(Time,Lastedited), " .
+                     "Replies=Replies+($replies_diff) " .
+                     "WHERE ID='$id' LIMIT 1");
+      else
+      {
+         extract(mysql_fetch_array($result));
+         mysql_query("UPDATE Posts " .
+                     "SET Lastchanged='$Lastchanged', Replies=Replies+($replies_diff) " .
+                     "WHERE ID='$id' LIMIT 1");
+      }
+
+      $d--;
+      $id = $Parent_ID;
+   }
 }
 
 ?>

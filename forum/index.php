@@ -27,7 +27,7 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 start_page("Forum list", true, $logged_in, $player_row );
 
-$result = mysql_query("SELECT Forums.ID,Description,Name, " .
+$result = mysql_query("SELECT Forums.ID,Description,Name,Moderated, " .
                       "UNIX_TIMESTAMP(MAX(Lastchanged)) AS Timestamp,Count(*) AS Count " .
                       "FROM Forums LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
                       "GROUP BY Forums.ID " .
@@ -55,7 +55,9 @@ while( $row = mysql_fetch_array( $result ) )
       '</a></b></td>' .
       '<td nowrap>Posts: <b>' . $Count .  '&nbsp;&nbsp;&nbsp;</b></td>' .
       '<td nowrap>Last Post: <b>' . $date . '</b></td></tr>
-<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description . '</dl></td></tr>';
+<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description .
+      ( $Moderated == 'Y' ? ' &nbsp; <font color="#22aacc">[' . T_('Moderated') . ']</font>' : '') .
+      '</dl></td></tr>';
 }
 
 end_table($links, $cols);

@@ -376,6 +376,7 @@ CREATE TABLE Forums (
   Name varchar(40) default NULL,
   Description varchar(255) default NULL,
   SortOrder int NOT NULL default '0',
+  Moderated char(1) NOT NULL default 'N',
   PRIMARY KEY  (ID),
   UNIQUE KEY (SortOrder)
 ) TYPE=MyISAM;
@@ -397,12 +398,12 @@ CREATE TABLE Posts (
   Parent_ID int(11) default NULL,
   Thread_ID int(11) NOT NULL default '0',
   AnswerNr int(11) NOT NULL default '0',
-  Replies int(11) NOT NULL default '0',
+  Replies int(11) NOT NULL default '-1',
   Depth int(11) NOT NULL default '0',
   crc32 int(11) default NULL,
   PosIndex varchar(80) binary default NULL,
   old_ID int(11) default '0',
-  Approved char(1) NOT NULL default 'Y',
+  Approved char(1) default NULL,
   PRIMARY KEY  (ID),
   KEY Pos (Thread_ID,PosIndex)
 ) TYPE=MyISAM;

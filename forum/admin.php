@@ -84,7 +84,7 @@ require( "forum_functions.php" );
         mysql_query("INSERT INTO Forums SET " .
                     "Name=\"$name\", " .
                     "Description=\"$description\", " .
-                    "Unmoderated=" . ($moderated ? '"N"' : '"Y"') . ", " .
+                    "Moderated=" . ($moderated ? '"Y"' : '"N"') . ", " .
                     "SortOrder=" . ($SortOrder+1));
      }
 
@@ -114,7 +114,7 @@ require( "forum_functions.php" );
      $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
                                        'TEXTAREA', 'description', 50, 4, $row['Description'] ) );
      $forum_edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
-                                       'CHECKBOX', 'moderated', 1, '', $row['Unmoderated'] == 'N'));
+                                       'CHECKBOX', 'moderated', 1, '', $row['Moderated'] == 'Y'));
      $forum_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
      $forum_edit_form->echo_string();
 
@@ -154,7 +154,7 @@ require( "forum_functions.php" );
         mysql_query("UPDATE Forums SET ".
                     "Name=\"$name\", " .
                     "Description=\"$description\", " .
-                    "Unmoderated=" . ($moderated ? '"N"' : '"Y"') . " " .
+                    "Moderated=" . ($moderated ? '"Y"' : '"N"') . " " .
                     "WHERE ID=" . $row['ID'] . " LIMIT 1");
      }
 
