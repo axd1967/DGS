@@ -46,6 +46,7 @@ if( $outfile eq 'BigBlackMark.png' || $outfile eq 'BigWhiteMark.png' )
     gimp_bucket_fill( $theLayer, FG_BUCKET_FILL, NORMAL_MODE, 80, 15, 1, 125, 125);
     gimp_selection_none( $theImage);
     file_png_save( $theImage, $theLayer, $outfile, $outfile, 0, 9, 0, 0, 0, 0, 0);
+    print $outfile . "\n";
 }
 elsif( $outfile eq 'BigBlack.png' || $outfile eq 'BigWhite.png' ||
        $outfile eq 'BigPlayBlack.png' || $outfile eq 'BigPlayWhite.png' ||
@@ -54,11 +55,13 @@ elsif( $outfile eq 'BigBlack.png' || $outfile eq 'BigWhite.png' ||
     $theImage = gimp_file_load($infile, $infile);
     $theLayer = gimp_image_active_drawable( $theImage );
     plug_in_autocrop( $theImage, $theLayer );
-    print $file . "\n";
     file_png_save( $theImage, $theLayer, $outfile, $outfile, 0, 9, 0, 0, 0, 0, 0);
+    print $outfile . "\n";
 }
-
-print $outfile . "\n";
+else
+{
+    print "Error: Unknown file\n";
+}
 
 Gimp::end;
 
