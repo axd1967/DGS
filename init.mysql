@@ -40,7 +40,7 @@ CREATE TABLE Players (
   Finished int(11) NOT NULL default '0',
   Won int(11) NOT NULL default '0',
   Lost int(11) NOT NULL default '0',
-  GamesColumns int(10) unsigned NOT NULL default '2039',
+  GamesColumns int(10) unsigned NOT NULL default '4087',
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
 ) TYPE=ISAM PACK_KEYS=1;
