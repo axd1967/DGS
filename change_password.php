@@ -34,7 +34,7 @@ require( "include/rating.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-   check_password( $player_row["Password"], $player_row["Newpassword"], $oldpasswd );
+   check_password( $handle, $player_row["Password"], $player_row["Newpassword"], $oldpasswd );
 
    if( $passwd != $passwd2 )
    {
@@ -47,7 +47,7 @@ require( "include/rating.php" );
 
    $query = "UPDATE Players SET " .
        "Password=PASSWORD('$passwd') " .
-       "WHERE ID=" . $player_row['ID'];
+       "WHERE ID=" . $player_row['ID'] . " LIMIT 1";
 
    mysql_query( $query );
 

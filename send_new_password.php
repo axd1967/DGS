@@ -57,7 +57,8 @@ require( "include/std_functions.php" );
 // Save password in database
 
    $result = mysql_query( "UPDATE Players " .
-                          "SET Newpassword=PASSWORD('$newpasswd') Where Handle='$userid'" );
+                          "SET Newpassword=PASSWORD('$newpasswd') " .
+                          "WHERE Handle='$userid' LIMIT 1" );
 
 
    mail( $row["Email"],

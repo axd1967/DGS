@@ -217,8 +217,10 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       T_('Games') => array('show_games.php?uid=all&finished=1',3,2),
       T_('Translate') => array('translate.php',3,3),
       T_('Forums') => array('forum/index.php',4,1),
-      T_('Docs') => array('docs.php',4,2),
-      T_('Site map') => array('site_map.php',4,3) );
+      T_('FAQ') => array('faq.php',4,2),
+//      T_('Site map') => array('site_map.php',4,3),
+      T_('Docs') => array('docs.php',4,3)
+      );
 
    if( $player_row['MenuDirection'] == 'HORIZONTAL' )
       make_menu_horizontal($menu_array);
@@ -538,7 +540,7 @@ function make_html_safe(&$msg, $some_html=false)
 
    if( $some_html )
    {
-      if( $some_html == 'game' )
+      if( $some_html === 'game' )
       {
          // mark sgf comments
          $msg = eregi_replace("<c(omment)?>", "<font color=blue>\\0", $msg);
@@ -778,27 +780,19 @@ function time_convert_to_longer_unit(&$time, &$unit)
    }
 }
 
-// Makes url from a base page and some variable/value pairs
+// Makes url from a base page and an array of variable/value pairs
 // if $sep is true a '?' or '&' is added
 // Example:
-// make_url('test.php', false, 'a', 1, 'b, 'foo')  gives
+// make_url('test.php', false, array('a'=> 1, 'b => 'foo')  gives
 // 'test.php?a=1&b=foo'
-function make_url($page, $sep)
+function make_url($page, $sep, $array)
 {
    $url = $page;
 
-   $args = func_num_args();
-
-   if( $args % 2 == 1 )
-      error("internal problem");
-
    $separator = '?';
-   for( $i=2; $i<$args; $i+=2 )
+   foreach( $array as $var=>$value )
    {
-      $var = func_get_arg($i);
-      $value = func_get_arg($i+1);
-
-      if( $value )
+      if( !empty($value) )
       {
          $url .= $separator . $var . '=' . urlencode($value);
          $separator = '&';
@@ -870,11 +864,11 @@ function is_logged_in($hdl, $scode, &$row)
    return true;
 }
 
-function check_password( $password, $new_password, $given_password )
+function check_password( $userid, $password, $new_password, $given_password )
 {
-  global $handle;
+  $given_password_encrypted =
+     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('$given_password')" ) );
 
-  $given_password_encrypted = mysql_fetch_row( mysql_query( "SELECT PASSWORD ('$given_password')" ) );
   if( $password != $given_password_encrypted[0] )
     {
       // Check if there is a new password
@@ -888,7 +882,7 @@ function check_password( $password, $new_password, $given_password )
       mysql_query( 'UPDATE Players ' .
                    "SET Password='" . $given_password_encrypted[0] . "', " .
                    'Newpassword=NULL ' .
-                   "WHERE Handle='$handle' LIMIT 1" );
+                   "WHERE Handle='$userid' LIMIT 1" );
     }
 }
 

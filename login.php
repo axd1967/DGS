@@ -35,7 +35,7 @@ disable_cache();
 
    $row = mysql_fetch_array($result);
 
-   check_password( $row["Password"], $row["Newpassword"], $passwd );
+   check_password( $userid, $row["Password"], $row["Newpassword"], $passwd );
 
    $code = $row["Sessioncode"];
 
@@ -45,7 +45,7 @@ disable_cache();
       $result = mysql_query( "UPDATE Players SET " .
                              "Sessioncode='$code', " .
                              "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
-                             "WHERE Handle='$userid'" );
+                             "WHERE Handle='$userid' LIMIT 1" );
 
    }
 
