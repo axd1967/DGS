@@ -46,8 +46,8 @@ disable_cache();
    $disputegid = @$_REQUEST['disputegid'];
    $to = @$_REQUEST['to'];
    $reply = @$_REQUEST['reply']; //ID of message replied. if set then (often?always?) == $message_id
-   $subject = @$_REQUEST['subject'];
-   $message = @$_REQUEST['message'];
+   $subject = get_request_arg('subject');
+   $message = get_request_arg('message');
    $type = @$_REQUEST['type'];
    $gid = @$_REQUEST['gid'];
    $accepttype = @$_REQUEST['accepttype'];
@@ -163,8 +163,11 @@ disable_cache();
       else if($handicap_type == 'nigiri' ) { $tomove = -3; $komi = $komi_n; }
       else if($handicap_type == 'double' ) { $tomove = -4; $komi = $komi_d; }
 
-      if( !($komi <= 200 and $komi >= -200) )
+      if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )
          error("komi_range");
+
+      if( !($handicap <= MAX_HANDICAP and $handicap >= 0) )
+         error("handicap_range");
 
       interpret_time_limit_forms(); //Set global $hours,$byohours,$byoperiods
 

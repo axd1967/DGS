@@ -52,6 +52,9 @@ require_once( "include/rating.php" );
       error( "no_initial_rating" );
    }
 
+   if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )
+      error("komi_range");
+
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_POST['size']));
 
       //for interpret_time_limit_forms{

@@ -26,6 +26,7 @@ require_once( "include/rating.php" );
 
 {
    disable_cache();
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -46,7 +47,7 @@ require_once( "include/rating.php" );
                          "FROM Waitingroom,Players " .
                          "WHERE Players.ID=Waitingroom.uid AND Waitingroom.ID=$id");
 
-   if( mysql_num_rows($result) != 1)
+   if( @mysql_num_rows($result) != 1)
       error("waitingroom_game_not_found");
 
 
@@ -208,10 +209,10 @@ require_once( "include/rating.php" );
 // This was often truncated by the database field:
 //   $subject = addslashes('<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game");
    $subject = 'Your waiting room game has been joined.';
-   $reply = @$_REQUEST['reply'];
+   $reply = trim(get_request_arg('reply'));
    if ($reply)
    {
-      $reply = addslashes(user_reference( true, 1, '', $player_row). " wrote:\n") . $reply ;
+      $reply = addslashes(user_reference( true, 1, '', $player_row). " wrote:\n" . $reply) ;
    }
    else
    {

@@ -28,10 +28,13 @@ or download a cvs snapshot from <http://www.dragongoserver.net/snapshot>
 For both methods also download the images from <http://www.dragongoserver.net/snapshot>
 
 
+
+
 2) Make a mysql database and a mysql user to access the database:
 
 mysql> CREATE DATABASE dragon;
 mysql> GRANT select, insert, update, delete ON dragon.* TO dragon@localhost IDENTIFIED BY 'secret';
+
 
 
 
@@ -44,6 +47,8 @@ and add some translations:
 > mysql < translationdata.mysql
 
 
+
+
 4) Edit permissions for include/config.php and translations/:
 
 Find which group your webserver is using (e.g. www-data).
@@ -52,6 +57,24 @@ Find which group your webserver is using (e.g. www-data).
 > chmod 664 translations/
 
 Adjust include/config.php to your environment.
+
+
+Some required PHP directives:
+ asp_tags = Off ;Unused
+ arg_separator.input = &
+ arg_separator.output = & 
+ file_uploads = On
+ track_vars = On ;always enabled as of PHP 4.0.3
+ register_argc_argv = Off ;Unused
+ register_globals = Off ;Don't care 
+ safe_mode = Off
+ variables_order = EGPCS
+ gpc_order = GPC
+ magic_quotes_gpc = Off ;Don't care
+ magic_quotes_runtime = Off
+ magic_quotes_sybase = Off
+ post_max_size = 8M 
+ precision = 14
 
 
 
@@ -65,6 +88,7 @@ Adjust include/config.php to your environment.
 0,30 *  *   *   *   wget -q -O - http://your.url/halfhourly_cron.php
 */5  *  *   *   *   wget -q -O - http://your.url/clock_tick.php
 25   5  *   *   *   wget -q -O - http://your.url/daily_cron.php
+
 
 
 

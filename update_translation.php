@@ -78,9 +78,11 @@ require_once( "include/make_translationfiles.php" );
            $done_set .= ',' . $row['Original_ID'];
 
         if( $same ) $translation = '';
+        else $translation = addslashes($translation);
 
         $replace_set .= ',(' . $row['Original_ID'] . ',' .
-           $row['Language_ID'] . ',"' . addslashes($translation) . '")';
+           $row['Language_ID'] . ',"' . $translation . '")';
+
         $log_set .= ',(' . $player_row['ID'] . ',' .
            $row['Language_ID'] . ',' . $row['Original_ID'] . ',"' . $translation . '")';
 

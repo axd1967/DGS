@@ -172,8 +172,9 @@ function change_depth(&$cur_depth, $new_depth)
    $preview_ID = ($edit > 0 ? $edit : @$_POST['parent']);
    if( $preview )
    {
-      $preview_Subject = stripslashes(trim(@$_POST['Subject']));
-      $preview_Text = stripslashes(trim(@$_POST['Text']));
+      $preview_Subject = trim(get_request_arg('Subject'));
+      $preview_Text = trim(get_request_arg('Text'));
+
       $preview_GoDiagrams = create_godiagrams($preview_Text);
    }
 
@@ -206,7 +207,7 @@ function change_depth(&$cur_depth, $new_depth)
    $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) AS Lastread FROM Forumreads " .
                          "WHERE User_ID=" . $player_row["ID"] . " AND Thread_ID=$thread");
 
-   if( mysql_num_rows($result) == 1 )
+   if( @mysql_num_rows($result) == 1 )
       extract( mysql_fetch_array( $result ) );
 
    $result = mysql_query("SELECT Posts.*, " .

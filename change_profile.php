@@ -37,11 +37,11 @@ require_once( "include/countries.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-   $name = trim(@$_GET['name']) ;
+   $name = trim(get_request_arg('name')) ;
    if( strlen( $name ) < 1 )
       error("name_not_given");
 
-   $email = trim(@$_GET['email']) ;
+   $email = trim(get_request_arg('email')) ;
    $sendemail = '';
    if( !empty($email) && @$_GET['emailnotify'] >= 1 )
    {
@@ -71,11 +71,11 @@ require_once( "include/countries.php" );
    $query = "UPDATE Players SET " .
       "Name='" . addslashes($name) . "', " .
       "Email='" . addslashes($email) . "', " .
-      "Rank='" . addslashes(trim(@$_GET['rank'])) . "', " .
-      "Open='" . addslashes(trim(@$_GET['open'])) . "', " .
+      "Rank='" . addslashes(trim(get_request_arg('rank'))) . "', " .
+      "Open='" . addslashes(trim(get_request_arg('open'))) . "', " .
       "SendEmail='$sendemail', ";
 
-   $country = trim(@$_GET['country']) ;
+   $country = trim(get_request_arg('country')) ;
    if( isset($COUNTRIES[$country]) )
       $query .= "Country='" . addslashes($country) . "', ";
    else if( empty($country) )
