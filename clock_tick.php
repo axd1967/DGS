@@ -26,9 +26,6 @@ if( !$is_down )
    connect2mysql();
 
 
-   $hour = gmdate('G', $NOW);
-   $day_of_week = gmdate('w', $NOW);
-
    // Check that ticks are not too frequent
 
    $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
@@ -43,14 +40,19 @@ if( !$is_down )
 
 
 
+   $hour = gmdate('G', $NOW);
+   $day_of_week = gmdate('w', $NOW);
+
    // Now increase clocks that are not sleeping
 
    $query = "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) " .
        "WHERE (ID>=0 AND (ID>$hour OR ID<". ($hour-8) . ') AND ID< '. ($hour+16) . ')';
+       //WHERE ID>=0 AND ID<39 AND ((ID-$hour+23)%24)<15 //ID from 24 to 38 does not exist
 
    if( $day_of_week > 0 and $day_of_week < 6 )
       $query .= ' OR (ID>=100 AND (ID>' . ($hour+100) . ' OR ID<'. ($hour+92) .
          ') AND ID< '. ($hour+116) . ')';
+       //WHERE ID>=100 AND ID<139 AND ((ID-100-$hour+23)%24)<15 //ID from 124 to 138 does not exist
 
 
    mysql_query( $query );
@@ -66,6 +68,7 @@ if( !$is_down )
                          'FROM Games, Clock ,Players as white, Players as black ' .
                          'WHERE Status!="INVITED" AND Status!="FINISHED" ' .
                          'AND Games.ClockUsed >= 0 ' .
+                         "AND Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
                          'AND ( Maintime>0 OR Byotime>0 ) ' .
                          'AND Games.ClockUsed=Clock.ID ' .
                          'AND white.ID=White_ID AND black.ID=Black_ID' );
@@ -145,22 +148,20 @@ if( !$is_down )
                       "AND SendEmail LIKE '%ON%' AND Notify='NONE' LIMIT 2" ) ;
 
 //         update_rating($gid);
-         update_rating2($gid);
+         $rated_status = update_rating2($gid);
 
          // Change some stats
-         $garbage = ($Moves < DELETE_LIMIT+$Handicap) ;
-
          mysql_query( "UPDATE Players SET Running=Running-1" .
-                      ($garbage ? '' : ", Finished=Finished+1" .
+                      (!$rated_status ? '' : ", Finished=Finished+1" .
                        ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$White_ID LIMIT 1" );
 
          mysql_query( "UPDATE Players SET Running=Running-1" .
-                      ($garbage ? '' : ", Finished=Finished+1" .
+                      (!$rated_status ? '' : ", Finished=Finished+1" .
                        ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$Black_ID LIMIT 1" );
 
-         delete_all_observers($gid, !$garbage, $Text);
+         delete_all_observers($gid, $rated_status!=1, $Text);
 
       }
    }

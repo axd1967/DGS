@@ -95,7 +95,7 @@ require_once( "include/rating.php" );
 
    $my_game = ( $logged_in and ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID ) ) ;
 
-   $garbage = ($Moves < DELETE_LIMIT+$Handicap) ;
+   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -226,7 +226,7 @@ require_once( "include/rating.php" );
 
       case 'delete':
       {
-         if( $Status != 'PLAY' or !$garbage )
+         if( $Status != 'PLAY' or !$too_few_moves )
             error("invalid_action");
 
          $extra_message = "<font color=\"red\">" . T_('Deleting game') . "</font>";
@@ -349,7 +349,7 @@ require_once( "include/rating.php" );
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
             $menu_array[T_('Pass')] = "game.php?gid=$gid&action=pass";
 
-         if( $garbage )
+         if( $too_few_moves )
             $menu_array[T_('Delete game')] = "game.php?gid=$gid&action=delete";
 
          $menu_array[T_('Resign')] = "game.php?gid=$gid&action=resign";

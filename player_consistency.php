@@ -21,91 +21,122 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // Checks and fixes errors in Running, Finished, Won and Lost fields in the database.
 
+//chdir( '../' ); //if moved in /scripts
 require_once( "include/std_functions.php" );
 
 {
-   connect2mysql();
-
    disable_cache();
 
+   connect2mysql();
+
+  $logged_in = who_is_logged( $player_row);
+
+  if( !$logged_in )
+    error("not_logged_in");
+
+  $player_level = (int)$player_row['admin_level'];
+  if( !($player_level & ADMIN_DATABASE) )
+    error("adminlevel_too_low");
+
+
+   if( $do_it=@$_REQUEST['do_it'] )
+   {
+      function dbg_query($s) { 
+        if( !mysql_query( $s) )
+           die("<BR>$s;<BR>" . mysql_error() );
+        echo " --- fixed. ";
+      }
+      echo "<p>*** Fixes errors:<br>";
+   }
+   else
+   {
+      function dbg_query($s) { echo " --- query:<BR>$s; ";}
+      echo "<p>(just show queries needed):<br>";
+   }
+
+
+   if( ($uid=@$_REQUEST['uid']) > 0 )
+      $where = " AND Players.ID=$uid";
+   else
+      $where = "" ;
+
+   //$alt_where = " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
+   $alt_where = " AND Games.Rated!='N'" ;
+
+
+
    $result = mysql_query("SELECT Players.ID,count(*) AS Run,Running FROM Games,Players " .
-                         "WHERE Status!='INVITED' AND Status!='FINISHED' " .
+                         "WHERE Status!='INVITED' AND Status!='FINISHED'$where " .
                          "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
                          "GROUP BY Players.ID HAVING Run!=Running")
-      or die("A: " . mysql_error());
+      or die("Run.A: " . mysql_error());
 
 
    while( $row = mysql_fetch_array($result) )
    {
       extract($row);
-      echo "<p>ID: $ID  Running: $Running  Should be: $Run   ---   fixed.";
+      echo "<br>ID: $ID  Running: $Running  Should be: $Run";
 
-      mysql_query("UPDATE Players SET Running=$Run WHERE ID=$ID LIMIT 1")
-         or die("B: " . mysql_error());
+      dbg_query("UPDATE Players SET Running=$Run WHERE ID=$ID LIMIT 1");
    }
 
-   echo "Running Done.<br>";
+   echo "<br>Running Done.";
 
 
 
    $result = mysql_query("SELECT Players.ID,count(*) AS Fin,Finished FROM Games,Players " .
-                         "WHERE Status='FINISHED' " .
+                         "WHERE Status='FINISHED'$where$alt_where " .
                          "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
                          "GROUP BY Players.ID HAVING Fin!=Finished")
-      or die("C: " . mysql_error());
+      or die("Fin.A: " . mysql_error());
 
    while( $row = mysql_fetch_array($result) )
    {
       extract($row);
-      echo "<p>ID: $ID  Finished: $Finished  Should be: $Fin   ---   fixed.";
+      echo "<br>ID: $ID  Finished: $Finished  Should be: $Fin";
 
-      mysql_query("UPDATE Players SET Finished=$Fin WHERE ID=$ID LIMIT 1")
-         or die("D: " . mysql_error());
+      dbg_query("UPDATE Players SET Finished=$Fin WHERE ID=$ID LIMIT 1");
    }
 
-   echo "Finished Done.<br>";
+   echo "<br>Finished Done.";
 
 
 
    $result = mysql_query("SELECT Players.ID,count(*) AS W, Won FROM Games,Players " .
-                         "WHERE Status='FINISHED' " .
+                         "WHERE Status='FINISHED'$where$alt_where " .
                          "AND ((Black_ID=Players.ID AND Score<0) " .
                          "OR (White_ID=Players.ID AND Score>0)) " .
                          "GROUP BY Players.ID HAVING W!=Won")
-      or die("E: " . mysql_error());
+      or die("Won.A: " . mysql_error());
 
    while( $row = mysql_fetch_array($result) )
    {
       extract($row);
-      echo "<p>ID: $ID  Won: $Won  Should be: $W   ---   fixed.";
+      echo "<br>ID: $ID  Won: $Won  Should be: $W";
 
-      mysql_query("UPDATE Players SET Won=$W WHERE ID=$ID LIMIT 1")
-         or die("F: " . mysql_error());
+      dbg_query("UPDATE Players SET Won=$W WHERE ID=$ID LIMIT 1");
    }
 
-   echo "Won Done.<br>";
-
+   echo "<br>Won Done.";
 
 
 
    $result = mysql_query("SELECT Players.ID,count(*) AS L, Lost FROM Games,Players " .
-                         "WHERE Status='FINISHED' " .
+                         "WHERE Status='FINISHED'$where$alt_where " .
                          "AND ((Black_ID=Players.ID AND Score>0) " .
                          "OR (White_ID=Players.ID AND Score<0)) " .
                          "GROUP BY Players.ID HAVING L!=Lost")
-      or die("G: " . mysql_error());
+      or die("Los.A: " . mysql_error());
 
    while( $row = mysql_fetch_array($result) )
    {
       extract($row);
-      echo "<p>ID: $ID  lost: $Lost  Should be: $L   ---   fixed.";
+      echo "<br>ID: $ID  Lost: $Lost  Should be: $L";
 
-      mysql_query("UPDATE Players SET Lost=$L WHERE ID=$ID LIMIT 1")
-         or die("H: " . mysql_error());
+      dbg_query("UPDATE Players SET Lost=$L WHERE ID=$ID LIMIT 1");
    }
 
-   echo "Lost Done.<br>";
-
+   echo "<br>Lost Done.";
 
 }
 ?>

@@ -71,9 +71,9 @@ if( !$is_down )
          "AND Messages.Type='INVITATION' AND $NOW-UNIX_TIMESTAMP(Time) > $timelimit " .
          "AND $NOW-UNIX_TIMESTAMP(Lastchanged) > $timelimit";
 
-      mysql_query( $query );
+      $result = mysql_query( $query );
 
-      if( mysql_num_rows($result) > 0 )
+      if( @mysql_num_rows($result) > 0 )
       {
          while( $row = mysql_fetch_array( $result ) )
          {
@@ -119,7 +119,7 @@ if( !$is_down )
 //    while( $row = mysql_fetch_array( $result ) )
 //    {
 //       update_rating($row["gid"]);
-//       update_rating2($row["gid"]);
+//       $rated_status = update_rating2($row["gid"]);
 //    }
 
 //    $result = mysql_query( "UPDATE Players SET RatingStatus='READY' " .
@@ -178,8 +178,8 @@ if( !$is_down )
    $result = mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone " .
                          "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID");
 
-   $row = mysql_fetch_array($result);
-   putenv('TZ='.$row["Timezone"] );
+   $row = mysql_fetch_assoc($result); //is "guest" and skipped else summertime changes
+   putenv('TZ='.$row["Timezone"] ); //always GMT (guest default)
 
    // Changed to/from summertime?
    if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )

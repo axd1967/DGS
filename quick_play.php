@@ -202,7 +202,7 @@ else
       make_array( $gid, $array, $msg, $old_moves, NULL, $moves_result, $marked_dead, true );
 
    $where_clause = " ID=$gid AND Moves=$old_moves";
-   $garbage = ($old_moves < DELETE_LIMIT+$Handicap) ;
+   //$too_few_moves = ($old_moves < DELETE_LIMIT+$Handicap) ;
    $Moves++;
 
       //case 'move':

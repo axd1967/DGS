@@ -43,6 +43,7 @@ require_once( "include/table_columns.php" );
                         'TRANS'  => array( ADMIN_TRANSLATORS, T_('Translators')),
                         'Forum'  => array( ADMIN_FORUM, T_('Forum')),
                         'FAQ'    => array( ADMIN_FAQ, T_('FAQ')),
+                        'Database'    => array( ADMIN_DATABASE, T_('Database')),
                         'TIME'   => array( ADMIN_TIME, T_('Time')),
                       );
 
@@ -83,7 +84,7 @@ require_once( "include/table_columns.php" );
         $result = mysql_query("SELECT ID,Adminlevel+0 AS admin_level FROM Players " .
                               "WHERE Handle=\"" . $_POST["newadmin"] . "\"");
 
-        if( mysql_num_rows($result) != 1 )
+        if( @mysql_num_rows($result) != 1 )
            error("unknown_user");
 
         $row = mysql_fetch_array($result);
@@ -115,10 +116,10 @@ require_once( "include/table_columns.php" );
 
    echo '<form name="admform" action="admin_admins.php?update=t" method="POST">'."\n";
 
-   $atable = new Table( '', '', '', true );
+   $atable = new Table( '');
 
    $atable->add_tablehead(1, T_('ID'), NULL, true, true);
-   $atable->add_tablehead(2, T_('Nick'), NULL, true, true);
+   $atable->add_tablehead(2, T_('Userid'), NULL, true, true);
    $atable->add_tablehead(3, T_('Name'), NULL, true, true);
 
    $col = 4;
