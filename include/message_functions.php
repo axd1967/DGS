@@ -281,20 +281,25 @@ function message_info_table($mid, $date, $to_me,
          echo_folder_box($folders, $folder_nr, substr($bg_color, 2, 6))
           . "</table></td>\n<td>";
 
-      $fld = array('' => '');
-      foreach( $folders as $key => $val )
-         if( $key != $folder_nr and (!$to_me or $key != FOLDER_SENT) and $key != FOLDER_NEW )
-            $fld[$key] = $val[0];
-
-      echo $form->print_insert_select_box('folder', '1', $fld, '', '');
-      if( $delayed_move )
-         echo T_('Move to folder when replying');
-      else
+      $deleted = ( is_null($folder_nr) );
+      if( !$deleted )
       {
-         echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
-         echo $form->print_insert_hidden_input("mark$mid", 'Y') ;
+
+         $fld = array('' => '');
+         foreach( $folders as $key => $val )
+            if( $key != $folder_nr and (!$to_me or $key != FOLDER_SENT) and $key != FOLDER_NEW )
+               $fld[$key] = $val[0];
+
+         echo $form->print_insert_select_box('folder', '1', $fld, '', '');
+         if( $delayed_move )
+            echo T_('Move to folder when replying');
+         else
+         {
+            echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
+            echo $form->print_insert_hidden_input("mark$mid", 'Y') ;
+         }
+         echo $form->print_insert_hidden_input('messageid', $mid) ;
       }
-      echo $form->print_insert_hidden_input('messageid', $mid) ;
 
       echo "\n</td></tr>\n";
    }
@@ -560,7 +565,10 @@ function echo_folder_box($folders, $folder_nr, $bgcolor)
 {
  global $STANDARD_FOLDERS;
 
-   list($foldername, $folderbgcolor, $folderfgcolor) = @$folders[$folder_nr];
+   if ( is_null($folder_nr) ) //case of $deleted messages
+     list($foldername, $folderbgcolor, $folderfgcolor) = array('---',0,0);
+   else
+     list($foldername, $folderbgcolor, $folderfgcolor) = @$folders[$folder_nr];
 
    if( empty($foldername) )
      if ( $folder_nr < USER_FOLDERS )
@@ -662,8 +670,11 @@ function message_list_table( &$mtable, $result, $show_rows
       $mid = $row["mid"];
       $mrow_strings = array();
 
+      $folder_nr = $row['folder'];
+      $deleted = ( is_null($folder_nr) );
       $bgcolor = $mtable->blend_next_row_color_hex();
-      $mrow_strings[1] = echo_folder_box($my_folders, $row['folder'], $bgcolor);
+
+      $mrow_strings[1] = echo_folder_box($my_folders, $folder_nr, $bgcolor);
 
       if( $row['Sender'] === 'M' ) //Message to myself
       {
@@ -674,29 +685,30 @@ function message_list_table( &$mtable, $result, $show_rows
       if( empty($row["other_name"]) )
          $row["other_name"] = '-';
 
+      $str = make_html_safe($row["other_name"]) ;
+      //if( !$deleted )
+         $str = "<A href=\"message.php?mode=ShowMessage&mid=$mid\">$str</A>";
       if( $row['Sender'] === 'Y' )
-         $mrow_strings[2] = "<td>" . T_('To') . ': ' .
-            "<A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
-            make_html_safe($row["other_name"]) . "</A></td>";
-      else
-         $mrow_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
-            make_html_safe($row["other_name"]) . "</A></td>";
+         $str = T_('To') . ': ' . $str;
+      $mrow_strings[2] = "<td>$str</td>";
 
       $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "&nbsp;</td>";
+
       list($ico,$alt) = $msg_icones[$row["flow"]];
       $tit = $tits[$row["flow"]];
-      $mrow_strings[0] = "<td>" .
-         "<A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
-         "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>"
-         . '</A>' .
-         '</td>';
+      $str = "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>";
+      //if( !$deleted )
+         $str = "<A href=\"message.php?mode=ShowMessage&mid=$mid\">$str</A>";
+      $mrow_strings[0] = "<td>$str</td>";
+
       $mrow_strings[4] = "<td>" . date($date_fmt, $row["Time"]) . "</td>";
 
       if( !$no_mark )
       {
-         if( $row['folder'] == FOLDER_NEW or $row['Replied'] == 'M' or
-             ( $row['folder'] == FOLDER_REPLY and $row['Type'] == 'INVITATION'
-               and $row['Replied'] != 'Y' ) )
+         if( $folder_nr == FOLDER_NEW or $row['Replied'] == 'M'
+           or ( $folder_nr == FOLDER_REPLY and $row['Type'] == 'INVITATION'
+              and $row['Replied'] != 'Y' )
+           or $deleted )
             $mrow_strings[5] = '<td>&nbsp;</td>';
          else
          {
