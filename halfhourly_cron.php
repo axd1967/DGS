@@ -141,7 +141,7 @@ if( !$is_down )
                $msg .= "Black: ".mail_strip_html("$Blackname ($Blackhandle)")."\n";
                $msg .= "White: ".mail_strip_html("$Whitename ($Whitehandle)")."\n";
                $tmp = number2board_coords($Last_X, $Last_Y, $Size);
-               if( empty($tmp) ) $tmp = $Status;
+               if( empty($tmp) ) $tmp = "lead to $Status step";
                $msg .= "Move $Moves: $tmp\n";
 
                if( !(strpos($SendEmail, 'BOARD') === false) )

@@ -307,10 +307,11 @@ function imagemultiline($im, $points, $nr_points, $color)
    if( isset($_GET['endyear']) and isset($_GET['endmonth']) )
       $endtime = min($endtime, mktime(0,0,0,$_GET['endmonth']+1,0,$_GET['endyear']));
 
-   get_rating_data(@$_GET["uid"]);
+   get_rating_data(@$_GET["uid"]); //will not return if no data
 
-   $max = array_reduce($ratingmax, "max", -10000);
-   $min = array_reduce($ratingmin, "min", +10000);
+   $max = array_reduce($ratingmax, "max", $ratingmax[0]);
+   $min = array_reduce($ratingmin, "min", $ratingmin[0]);
+
 
    scale_data();
 
