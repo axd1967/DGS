@@ -233,6 +233,7 @@ else
              "Moves=$Moves, " .
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
+             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
              "Status='PLAY', ";
 
          if( $nr_prisoners > 0 )

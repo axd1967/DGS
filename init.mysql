@@ -89,6 +89,7 @@ CREATE TABLE Games (
   White_Prisoners int(11) NOT NULL default '0',
   Last_X int(11) default NULL,
   Last_Y int(11) default NULL,
+  Last_Move VARCHAR(2) NOT NULL default '',
   Flags set('Ko') default NULL,
   Score decimal(7,1) default NULL,
   Maintime int(11) default NULL,
@@ -232,10 +233,10 @@ CREATE TABLE Folders (
   uid int(11) default NULL,
   Folder_nr int(11) default NULL,
   Name text default NULL,
-  BGColor char(8) default 'f7f5e3FF',
-  FGColor char(6) default '000000',
-  PRIMARY KEY  (ID),
-  KEY (uid, Folder_nr)
+  BGColor varchar(8) NOT NULL default 'f7f5e3FF',
+  FGColor varchar(6) NOT NULL default '000000',
+  PRIMARY KEY  (uid,Folder_nr),
+  KEY ID (ID)
 ) TYPE=MyISAM;
 
 #

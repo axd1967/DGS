@@ -49,14 +49,14 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
 {
+   if( !@$_REQUEST['gid'] )
+      error("no_game_nr");
+   $gid = $_REQUEST['gid'] ;
+
    if( @$_REQUEST['nextback'] )
       jump_to("game.php?gid=$gid");
 
    connect2mysql();
-
-   if( !@$_REQUEST['gid'] )
-      error("no_game_nr");
-   $gid = $_REQUEST['gid'] ;
 
    $logged_in = who_is_logged( $player_row);
 
@@ -217,6 +217,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Moves=$Moves, " .
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
+             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
              "Status='PLAY', ";
 
          if( $nr_prisoners > 0 )
@@ -266,7 +267,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Last_X=-1, " .
              "Status='$next_status', " .
              "ToMove_ID=$next_to_move_ID, " .
-             //"Flags=0, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
+             "Last_Move='$Last_Move', " . //Not a move, re-use last one
+             "Flags=$flags, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
       }
@@ -306,6 +308,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Moves=$Handicap, " .
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
+             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
              "ToMove_ID=$White_ID, " .
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
@@ -410,7 +413,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          $game_query .=
              "Score=$score, " .
-             //"Flags=0, " . //Not useful
+             "Last_Move='$Last_Move', " . //Not a move, re-use last one
+             "Flags=$flags, " . //Don't reset Flags else SCORE,RESUME could break a Ko
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
 
