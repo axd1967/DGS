@@ -31,7 +31,7 @@ start_page("Links", true, $logged_in, $player_row );
 
 <table align=center width="85%"><tr><td>
 
-<h3 align=left><a name="general"></a><font color="#800000">General Info</font> </h3>
+<h3 align=left><a name="general"></a><font color=<?php echo $h3_color; ?>>General Info</font> </h3>
 
 
 
@@ -47,7 +47,7 @@ start_page("Links", true, $logged_in, $player_row );
 
 <p><a href="http://www.kyoto.zaq.ne.jp/momoyama/news/news.html">Go News</a> --- News and games from the professional scene
 
-<p><a href="http://finance.baylor.edu/rich/go/goguild.html">IYT go guild</a> --- Meet other turn based go players
+<p><a href="http://finance.baylor.edu/rich/go/goguild.html">Turn-based go guild</a> --- Meet other turn-based go players
 
 <p><a href="http://www.toriyamaworld.com/hikago">Hikaru no Go</a> --- A manga about go. Recommended!
 
@@ -55,7 +55,7 @@ start_page("Links", true, $logged_in, $player_row );
 
 <p>&nbsp;
 
-<h3 align=left><a name="rules"></a><font color="#800000">Rules</font></h3>
+<h3 align=left><a name="rules"></a><font color=<?php echo $h3_color; ?>>Rules</font></h3>
 
 <p><a href="http://playgo.to/interactive/index.html">An Interactive
     Introduction</a> --- This is a very nice site to learn with.
@@ -74,7 +74,7 @@ start_page("Links", true, $logged_in, $player_row );
 
 
 
-<h3 align=left><font color="#800000"><a name="strategy"></a>Strategy &amp; Terms</font>&nbsp;</h3>
+<h3 align=left><font color=<?php echo $h3_color; ?>><a name="strategy"></a>Strategy &amp; Terms</font>&nbsp;</h3>
 
 <p><a href="http://www.igoweb.org/~pahle/go-stuff/shape.html">An
     Introduction to Shape</a>
@@ -95,7 +95,7 @@ start_page("Links", true, $logged_in, $player_row );
 
 
 
-<h3 align=left><font color="#800000"><a name="history"></a>History</font></h3>
+<h3 align=left><font color=<?php echo $h3_color; ?>><a name="history"></a>History</font></h3>
 
 <p><a href="http://www.britgo.org/intro/intro1.html#bh">A Brief
     History</a> --- For you people with short attention spans.
@@ -106,7 +106,7 @@ start_page("Links", true, $logged_in, $player_row );
 
 
 
-<h3 align=left><font color="#800000"><a name="stuff"></a>Go Books, Equipment &amp; Software</font></h3>
+<h3 align=left><font color=<?php echo $h3_color; ?>><a name="stuff"></a>Go Books, Equipment &amp; Software</font></h3>
 <p><a href="http://www.kiseido.com/">Kiseido</a>
 <p><a href="http://www.yutopian.com/go/">Yutopian</a>
 <p><a href="http://www.samarkand.net/">Samarkand</a>
@@ -116,7 +116,7 @@ start_page("Links", true, $logged_in, $player_row );
 
 
 
-<h3 align=left><font color="#800000"><a name="servers"></a>Other go servers</font></h3>
+<h3 align=left><font color=<?php echo $h3_color; ?>><a name="servers"></a>Other go servers</font></h3>
 <p><a href="http://www.itsyourturn.com/">It's your turn</a> --- Also turn based. Has several other games.
 <p><a href="http://kgs.kiseido.com">Kiseido Go Server</a> --- Server with java interface
 <p><a href="http://panda-igs.joyjoy.net/English/contents.html">IGS</a> --- A large server for realtime play

@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
+header ("Cache-Control: no-cache, must-revalidate, max_age=0");
 
 require( "include/std_functions.php" );
 
@@ -31,10 +31,10 @@ start_page("Introduction", true, $logged_in, $player_row );
 ?>
 
 <table align=center width=85%><tr><td>
-<center><h3><font color="#800000">Introduction to dragon</font></h3></center>
+<center><h3><font color=<?php echo $h3_color; ?>>Introduction to dragon</font></h3></center>
 
 Welcome to Dragon Go Server, a <a href="licence.php">free</a> server for playing <a
-href="links.php">go</a>, where the games tends to 'drag on'. 
+href="links.php">go</a>, where the games tends to 'drag on'.
 
 <p> You can look at it as kind of play-by-email, where a web-interface is used to make the
 board look prettier. To start playing you should first get yourself an <a
