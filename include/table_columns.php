@@ -322,6 +322,7 @@ class Table
             reset( $this->Row_Colors );
             list(, $bgcolor) = each( $this->Row_Colors );
          }
+         $hicolor = "fF800040";
 
          if( isset($tablerow['BG_Color']) )
          {
@@ -561,7 +562,7 @@ class Table
                      'SELECTBOX', $this->Prefix . 'add', 1,
                      $this->Removed_Columns, '', false,
                      'SUBMITBUTTON', 'action', T_('Add Column') );
-         $ac_form = new Form( 'add_column_form', $page, FORM_GET );
+         $ac_form = new Form( 'add_column_form', $page . '#' . $this->Prefix . 'tblac', FORM_GET );
          $ac_form->add_row( $form_array );
          return $ac_form->get_form_string();
       }
