@@ -80,7 +80,7 @@ function next_prev($new_from_row, $next)
 
    return "<a href=\"" . $page . "from_row=$new_from_row&" .
       order_string($sort1,$desc1,$sort2,$desc2) . "\">" .
-      ($next ? "next page -->" : "<-- previous page") . "</a>";
+      ($next ? "next page -->" : "<-- prev page") . "</a>";
 }
 
 function strip_last_et($string)
@@ -152,7 +152,7 @@ function start_end_column_table($start)
       $string = "";
 
 
-   $string .= "<tr><td align=left colspan=3>";
+   $string .= "<tr><td align=left colspan=2>";
 
    if( $from_row > 0 )
       $string .= next_prev($from_row-$RowsPerPage, false);
