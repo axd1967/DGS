@@ -44,10 +44,13 @@ start_page("Edit password", true, $logged_in, $player_row );
       <TR>
         <TD align=right>Confirm Password:</TD>
         <TD align=left><input type="password" name="passwd2" size="16" maxlength="16"></TD>
-        <TD><input type=submit name="action" value="Change password"></TD>
       </TR>
-      
     </TABLE>
+
+<input type=submit name="action" value="Change password">
+
+      
+
   </FORM>
 </CENTER>  
 
