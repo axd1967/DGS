@@ -29,6 +29,12 @@ if( !$gid )
     exit;
 }
 
+if( $next == 'Go back' )
+{
+    header("Location: game.php?gid=$gid");
+    exit;
+}
+
 connect2mysql();
 
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
@@ -216,9 +222,9 @@ switch( $action )
              $query .= ", Text='$message'";
 
          if( $to_move == BLACK )
-             $score = -1000;
-         else
              $score = 1000;
+         else
+             $score = -1000;
 
          $game_query = "UPDATE Games SET " .
               "Moves=$Moves, " .
@@ -228,6 +234,8 @@ switch( $action )
               "Score=$score, " .
               "Flags=0" .
               " WHERE ID=$gid";
+
+         $game_finished = true;
      }
      break;
 
@@ -246,7 +254,10 @@ switch( $action )
 
          $next_status = 'SCORE2';
          if( $Status == 'SCORE2' and  $nr_prisoners == 0 )
-             $next_status = 'FINISHED';
+             {
+                 $next_status = 'FINISHED';
+                 $game_finished = true;
+             }
 
          $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Text ) VALUES ";
 
@@ -326,6 +337,46 @@ if( $next_to_move_ID != $player_row["ID"] )
       }
 }
 
+if( $game_finished )
+{
+    // send message to me and my opponent about the result
+
+    $result = mysql_query( "SELECT * FROM Players WHERE ID=" . 
+                           ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) ); 
+
+    if( mysql_num_rows($result) != 1 )
+        {
+            header("Location: error.php?err=opponent_not_found");
+            exit;
+        }
+
+    $opponent_row = mysql_fetch_array($result);
+
+    if( $player_row["ID"] == $Black_ID )
+        {
+            $blackname = $player_row["Name"];
+            $whitename = $opponent_row["Name"];
+        }
+    else
+        {
+            $whitename = $player_row["Name"];
+            $blackname = $opponent_row["Name"];
+        }
+
+
+    $Text = "The result in the game <A href=\"game.php?gid=$gid\">" . 
+         "$whitename (W)  vs. $blackname (B) </A>" . 
+         "was: <p><center>" . score2text($Score,true) . "</center></BR>";
+
+    if ( $message )
+        {
+            $Text .= "<p>Your opponent wrote:<p>" . $message;
+        }
+
+    mysql_query( "INSERT INTO Messages" . $opponent_row["ID"] . " SET " .
+         "From_ID=" . $player_row["ID"] . ", Game_ID=$gid, Subject='Game result', Text='$Text'" );
+
+}
 
 if( $next == "Submit and go to status" )
 {
@@ -334,8 +385,19 @@ if( $next == "Submit and go to status" )
 }
 else if( $next == "Submit and go to next game" )
 {
-    // Should go to next game
-    header("Location: status.php");
+    $result = mysql_query("SELECT ID FROM Games " .
+                          "WHERE ToMove_ID=" . $player_row["ID"]  . 
+                          " AND Status!='INVITED' AND Status!='FINISHED' " .
+                          "LIMIT 1");
+
+    if( mysql_num_rows($result) != 1 )
+        {
+            header("Location: status.php");
+            exit;
+        }
+    $row = mysql_fetch_array($result);
+
+    header("Location: game.php?gid=" . $row["ID"]);
     exit;
 }
 
