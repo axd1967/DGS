@@ -20,17 +20,19 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require_once( "include/std_functions.php" );
 
-
-disable_cache();
+if( @$_REQUEST['quick_mode'] )
+   $quick_errors = 1;
 
 {
+   disable_cache();
+
    connect2mysql();
 
    $userid = @$_REQUEST['userid'];
    $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                           "FROM Players WHERE Handle='" . $userid . "'" );
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("wrong_userid");
 
 
@@ -55,6 +57,12 @@ disable_cache();
       or @$_COOKIE[COOKIE_PREFIX.'sessioncode'] != $code )
    {
       set_cookies( $userid, $code );
+   }
+
+   if( $quick_errors )
+   {
+      echo "\nOk";
+      exit;
    }
    jump_to("status.php");
 }

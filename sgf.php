@@ -96,7 +96,7 @@ function sgf_create_territories( $size, &$array,
    {
       for( $y=0; $y<$size; $y++)
       {
-         if( !$array[$x][$y] or $array[$x][$y] == NONE )
+         if( !@$array[$x][$y] or $array[$x][$y] == NONE )
          {
             mark_territory( $x, $y, $size, $array );
          }
@@ -110,7 +110,7 @@ function sgf_create_territories( $size, &$array,
       for( $y=0; $y<$size; $y++)
       {
          $coord = chr($x + ord('a')) . chr($y + ord('a'));
-         switch( $array[$x][$y] & ~FLAG_NOCLICK)
+         switch( @$array[$x][$y] & ~FLAG_NOCLICK)
          {
             case WHITE_DEAD:
                $black_prisoner[$coord]='AE';
@@ -156,6 +156,9 @@ function sgf_count_string( $color, $territory, $prisoner, $komi=false )
 
 
 $array=array();
+
+if( @$_GET['quick_mode'] )
+   $quick_errors = 1;
 
 {
    disable_cache();
@@ -231,9 +234,9 @@ $array=array();
       "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
       'FROM Games, Players AS black, Players AS white ' .
       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
-      or die(mysql_error());
+     or error("mysql_query_failed");
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
 
    $row = mysql_fetch_array($result);
@@ -261,8 +264,8 @@ $array=array();
    $result = mysql_query( "SELECT Moves.*,MoveMessages.Text " .
                           "FROM Moves LEFT JOIN MoveMessages " .
                           "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
-                          "WHERE Moves.gid=$gid ORDER BY Moves.ID" );
-
+                          "WHERE Moves.gid=$gid ORDER BY Moves.ID" )
+               or error("mysql_query_failed");
 
    header( 'Content-Type: application/x-go-sgf' );
    $filename= "$Whitehandle-$Blackhandle-$gid-" . date('Ymd', $timestamp) ;
@@ -300,7 +303,7 @@ $array=array();
       echo "\nHA[$Handicap]";
 
 
-   $sgf_trim_nr = mysql_num_rows ($result) - 1 ;
+   $sgf_trim_nr = @mysql_num_rows($result) - 1 ;
    if ( $Status == 'FINISHED' && isset($Score) )
    {
       echo "\nRE[" . sgf_simpletext(score2text($Score, false, true)) . "]";
@@ -344,7 +347,7 @@ $array=array();
          { // toggle marks
             //record last skipped SCORE/SCORE2 marked points
             if ($sgf_trim_nr < 0)
-               $array[$PosX][$PosY] ^= OFFSET_MARKED;
+               @$array[$PosX][$PosY] ^= OFFSET_MARKED;
 
             if (isset($points[$coord]))
             {
@@ -352,14 +355,14 @@ $array=array();
             }
             else if ($sgf_trim_nr < 0)
             {
-               if( $array[$PosX][$PosY] == MARKED_DAME )
+               if( @$array[$PosX][$PosY] == MARKED_DAME )
                   $points[$coord]=$marked_dame_prop;
                else
                   $points[$coord]=$dead_stone_prop;
             }
             else
             {
-               if( $array[$PosX][$PosY] == NONE )
+               if( @$array[$PosX][$PosY] == NONE )
                   $points[$coord]='MA';
                else
                   $points[$coord]='MA';

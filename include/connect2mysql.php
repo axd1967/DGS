@@ -80,11 +80,7 @@ function error($err, $debugmsg=NULL)
 
  global $quick_errors;
    if( @$quick_errors )
-   {
-      //Short one line message:
-      echo "\nError: ".ereg_replace( "[\x01-\x20]+", " ", $err);
-      exit;
-   }
+      quick_error( $err ); //Short one line message
 
    jump_to( $uri );
 }

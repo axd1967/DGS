@@ -9,9 +9,14 @@ function slashed($string)
    return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
 }
 
+function quick_warning($string) //Short one line message
+{
+   echo "\nWarning: " . ereg_replace( "[\x01-\x20]+", " ", $string);
+}
+
 if( $is_down )
 {
-   echo "Warning: ".$is_down_message;
+   quick_warning($is_down_message);
 }
 else
 {
@@ -23,20 +28,17 @@ else
                            "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
                            "FROM Players WHERE Handle='{$_COOKIE[COOKIE_PREFIX.'handle']}'" );
 
-
    if( @mysql_num_rows($result) != 1 )
    {
-      echo "Error: not logged in";
-      exit;
+      error("not_logged_in");
    }
 
-   $player_row = mysql_fetch_array($result);
+   $player_row = mysql_fetch_assoc($result);
 
    if( $player_row['Sessioncode'] !== @$_COOKIE[COOKIE_PREFIX.'sessioncode']
        or $player_row["Expire"] < $NOW )
    {
-      echo "Error: not logged in";
-      exit;
+      error("not_logged_in");
    }
 
    if( !empty( $player_row["Timezone"] ) )
@@ -45,6 +47,7 @@ else
    $my_id = $player_row['ID'];
 
    $nothing_found = true;
+
 
    // New messages?
 
@@ -59,9 +62,9 @@ else
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date DESC";
 
-   $result = mysql_query( $query ) or die(mysql_error());
+   $result = mysql_query( $query ) or error('mysql_query_failed');
 
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
       echo "'M', {$row['mid']}, '".slashed($row['sender'])."', '" .
@@ -72,7 +75,7 @@ else
 
    // Games to play?
 
-   $query = "SELECT Black_ID,White_ID,Games.ID, (White_ID=$my_id)+1 AS Color, " .
+   $query = "SELECT Black_ID,White_ID,Games.ID, (White_ID=$my_id)+0 AS Color, " .
        "UNIX_TIMESTAMP(LastChanged) as date, " .
        "opponent.Name, opponent.Handle, opponent.ID AS pid " .
        "FROM Games,Players AS opponent " .
@@ -80,18 +83,19 @@ else
          "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$my_id " .
        "ORDER BY date DESC, Games.ID";
 
-   $result = mysql_query( $query ) or die(mysql_error());
+   $result = mysql_query( $query ) or error('mysql_query_failed');
 
-
-   while( $row = mysql_fetch_array($result) )
+   $clrs="BW"; //player's color... so color to play.
+   while( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
-      echo "'G', {$row['ID']}, '".slashed($row['Name'])."', '{$row['Color']}', '" .
+      echo "'G', {$row['ID']}, '" . slashed($row['Name']) .
+         "', '" . $clrs{$row['Color']} . "', '" .
          date('Y-m-d H:i', $row['date']) . "'\n";
    }
 
     
-    if( $nothing_found )
-      echo "Warning: nothing found";
+   if( $nothing_found )
+      quick_warning("nothing found");
 }
 ?>
