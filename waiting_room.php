@@ -26,7 +26,7 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 
-define('BAD_RATING_COLOR',"f0000018");
+define('BAD_RATING_COLOR',"ff000033");
 
 {
    connect2mysql();
@@ -122,13 +122,13 @@ define('BAD_RATING_COLOR',"f0000018");
             $wrow_strings[6] = "<td>$Komi</td>";
          if( $wrtable->Is_Column_Displayed[7] )
             $wrow_strings[7] = "<td>$Size</td>";
-         list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
          if( $wrtable->Is_Column_Displayed[8] )
          {
-            $bgcolor = substr($wrtable->Row_Colors[count($wrtable->Tablerows) % 2], 2, 6);
-            $bgcolor = blend_alpha_hex(BAD_RATING_COLOR, $bgcolor);
+            list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
             $wrow_strings[8] = '<td nowrap' .
-               ( $good_rating ? '>' : ' bgcolor='.$bgcolor.'>') . $Ratinglimit . "</td>";
+               ( $good_rating ? '>' 
+                 : ' bgcolor='.blend_alpha_hex(BAD_RATING_COLOR, substr($wrtable->Row_Colors[count($wrtable->Tablerows) % 2], 2, 6))
+                   .'>') . $Ratinglimit . "</td>";
          }
          if( $wrtable->Is_Column_Displayed[9] )
             $wrow_strings[9] = '<td nowrap>' .
@@ -226,7 +226,7 @@ function add_new_game_form()
 
 function show_game_info($game_row, $mygame=false, $my_rating=false)
 {
-   global $handi_array;
+   global $handi_array, $bg_color;
 
    extract($game_row);
 
@@ -246,7 +246,9 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
       "</td></tr>\n";
    list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
    echo '<tr><td><b>' . T_('Rating range') . '<b></td><td' .
-               ( $good_rating ? '>' : ' bgcolor='.BAD_RATING_COLOR.'>') . $Ratinglimit . "</td></tr>\n";
+               ( $good_rating ? '>' 
+                 : ' bgcolor='.blend_alpha_hex(BAD_RATING_COLOR, substr($bg_color, 2, 6))
+                   .'>') . $Ratinglimit . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Time limit') . '<b></td><td>' .
       echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Number of games') . '<b></td><td>' . $nrGames . "</td></tr>\n";
