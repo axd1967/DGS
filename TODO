@@ -25,7 +25,7 @@ SMALLER TASKS
 
 * Sgf: handle finished games properly.
 
-* Add time
+* Add time for opponent
 
 * Two-game-match
 
@@ -33,7 +33,9 @@ SMALLER TASKS
 
 * Delete old messages
 
-* Themes
+* Themes/Layout option
+
+* 'Show coordinates' flag.
 
 * Show number of games for players in users.php
 
@@ -43,11 +45,7 @@ SMALLER TASKS
 
 * Consistency checks for games.
 
-* 'Show coordinates' flag.
-
-* TODO-page in docs.php
-
-* Move prediction (if/then)
+* Move speedup (if/then)
 
 * Suggest (handicap/komi)
 
@@ -55,7 +53,7 @@ SMALLER TASKS
 
 * User search.
 
-* ascii->graphics in messages
+* go ascii->graphics in messages
 
 * Rengo (team go)
 
