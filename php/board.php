@@ -19,7 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 function draw_board($Size, &$array, $may_play, $gid, 
-                    $Last_X, $Last_Y, $stone_size, $font_size, $msg)
+                    $Last_X, $Last_Y, $stone_size, $font_size, $msg, $killed_string)
 {
     if( $msg )
         echo "<table border=2 align=center><tr>" . 
@@ -61,9 +61,15 @@ function draw_board($Size, &$array, $may_play, $gid,
                 {
                     $empty = false;
                     if( $array[$colnr][$Size-$rownr] == BLACK )
-                        $type = "b";
+                        {
+                            $type = "b";
+                            $alt = '#';
+                        }
                     else if( $array[$colnr][$Size-$rownr] == WHITE )
-                        $type = "w";
+                        {
+                            $type = "w";
+                            $alt = 'O';
+                        }
                     else
                         {
                             $type = "e";
@@ -95,8 +101,11 @@ function draw_board($Size, &$array, $may_play, $gid,
                     if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y )
                         $type .= "m";
 
-                    if( $may_play && $empty )
-                        echo "<td><A href=confirm.php?gid=$gid&coord=$letter_c$letter_r><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
+                    if( $may_play && $empty && !$killed_string)
+                        echo "<td><A href=game.php?gid=$gid&action=move&coord=$letter_c$letter_r><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
+                    else if( $may_play && !$empty && $killed_string)
+                        echo "<td><A href=game.php?gid=$gid&action=remove&coord=$letter_c$letter_r&killed=$killed_string><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></A></td>\n";
+                        
                     else
                         echo "<td><IMG  height=$stone_size width=$stone_size  border=0 alt='$alt' align=center SRC=$stone_size/$type.gif></td>\n";
                     $letter_c ++;
@@ -124,20 +133,45 @@ function draw_board($Size, &$array, $may_play, $gid,
 
 // fills $array with positions where the stones are.
 // returns who is next to move
-function make_array( $gid, &$array, &$msg, $max_moves, $move )
+function make_array( $gid, &$array, &$msg, $max_moves, $move, &$marked_dead )
 {
     if( !$move ) $move = $max_moves;
 
     if( $move >= $max_moves )        
-        $result = mysql_query( "SELECT *, Stone+0 AS color FROM Moves$gid" );
+        $result = mysql_query( "SELECT * FROM Moves$gid" );
     else
-        $result = mysql_query( "SELECT *, Stone+0 AS color FROM Moves$gid WHERE MoveNr<=$move" );
+        $result = mysql_query( "SELECT * FROM Moves$gid WHERE MoveNr<=$move" );
+
+    $removed_dead = FALSE;
+    $marked_dead = array();
+
     while( $row = mysql_fetch_array($result) )
         {
-            $array[$row["PosX"]][$row["PosY"]] = $row["color"];
-            if( $row["MoveNr"] == $move and $row["color"] > 0 )
-                $msg = $row["Text"];
+            if( $row["Stone"] <= WHITE )
+                {
+                    $array[$row["PosX"]][$row["PosY"]] = $row["Stone"];
+                    if( $row["MoveNr"] == $move and $row["Stone"] > 0 )
+                        $msg = $row["Text"];
+
+                    $removed_dead = FALSE;
+                }
+            else if( $row["Stone"] >= BLACK_DEAD )
+                {
+                    if( $removed_dead == FALSE )
+                        {
+                            $marked_dead = array();
+                            $removed_dead = TRUE;
+                        }
+                    array_push($marked_dead, array($row["PosX"],$row["PosX"],$row["Stone"]));
+                } 
         }
+
+    while( $sub = each($marked_dead) )
+        {
+            list($x, $y, $s) = $sub;
+            $array[$x][$y] = $s;
+        }
+
 }
 
 $dirx = array( -1,0,1,0 );
@@ -200,11 +234,9 @@ function has_liberty_check( $x, $y, $Size, &$array, &$prisoners, $remove )
                         }
                 }
         }
-
-
-    
-
 }
+
+
 
 function check_prisoners($colnr,$rownr, $col, $Size, &$array, &$prisoners )
 {
@@ -225,5 +257,125 @@ function check_prisoners($colnr,$rownr, $col, $Size, &$array, &$prisoners )
 
 }
 
+
+
+function mark_territory( $x, $y, &$array )
+{
+    global $dirx,$diry;
+
+    $c = -1;  // color of territory
+    
+    $index[$x][$y] = 7;
+
+
+    while( true )
+        {
+            if( $index[$x][$y] >= 32 )  // Have looked in all directions
+                {
+                    $m = $index[$x][$y] % 8;
+
+                    if( $m == 7 )   // At starting point, all checked
+                        {
+                            while( list($x, $sub) = each($index) )
+                                {
+                                    while( list($y, $val) = each($sub) )
+                                        {
+                                            $array[$x][$y] = $c + 3;
+                                        }
+                                }
+
+                            return true;
+                        }
+
+                    $x -= $dirx[$m];  // Go back
+                    $y -= $diry[$m];
+                }
+            else
+                {
+                    $dir = (int)($index[$x][$y] / 8);
+                    $index[$x][$y] += 8;
+
+                    $nx = $x+$dirx[$dir];
+                    $ny = $y+$diry[$dir];
+
+                    $new_color = $array[$nx][$ny];
+
+                    if( ( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD ) 
+                        and !$index[$nx][$ny] and 
+                        ( $nx >= 0 ) and ($nx < $Size) and ($ny >= 0) and ($ny < $Size) )
+                        {
+                            $x = $nx;  // Go to the neigbour
+                            $y = $ny; 
+                            $index[$x][$y] = $dir;
+                        }
+                    else
+                        {
+                            if( $c == -1 )
+                                {
+                                    $c = $new_color;
+                                }
+                            else if( $c == (3-$new_color) )
+                                {
+                                    $c = NONE; // This area has both colors as boundary
+                                }
+                        }
+                }
+        }
+}
+
+
+
+
+function remove_dead( $x, $y, &$array, &$prisoners )
+{
+    global $dirx,$diry;
+    
+    $c = $array[$x][$y]; // Color of this stone
+    
+    $index[$x][$y] = 7;
+
+
+    while( true )
+        {
+            if( $index[$x][$y] >= 32 )  // Have looked in all directions
+                {
+                    $m = $index[$x][$y] % 8;
+
+                    if( $m == 7 )   // At starting point, all checked
+                        {
+                            while( list($x, $sub) = each($index) )
+                                {
+                                    while( list($y, $val) = each($sub) )
+                                        {
+                                            array_push($prisoners, array($x,$y));
+                                            $array[$x][$y] += 6;
+                                        }
+                                }
+
+                            return;
+                        }
+
+                    $x -= $dirx[$m];  // Go back
+                    $y -= $diry[$m];
+                }
+            else
+                {
+                    $dir = (int)($index[$x][$y] / 8);
+                    $index[$x][$y] += 8;
+
+                    $nx = $x+$dirx[$dir];
+                    $ny = $y+$diry[$dir];
+
+                    $new_color = $array[$nx][$ny];
+
+                    if( $new_color == $c and !$index[$nx][$ny])
+                        {
+                            $x = $nx;  // Go to the neigbour
+                            $y = $ny; 
+                            $index[$x][$y] = $dir;
+                        }
+                }
+        }
+}
 
 ?>

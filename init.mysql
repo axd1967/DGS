@@ -9,13 +9,14 @@ CREATE TABLE Games (
   Size int(11) DEFAULT '19',
   Komi decimal(3,1) DEFAULT '5.5',
   Handicap int(11) DEFAULT '0' NOT NULL,
-  Status enum('INVITED','RUNNING','FINNISHED') DEFAULT 'INVITED',
+  Status enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINNISHED') DEFAULT 'INVITED' NOT NULL,
   Moves int(11) DEFAULT '0' NOT NULL,
   Black_Prisoners int(11) DEFAULT '0' NOT NULL,
   White_Prisoners int(11) DEFAULT '0' NOT NULL,
   Last_X int(11),
   Last_Y int(11),
   Flags set('Ko'),
+  Score int(11),
   PRIMARY KEY (ID)
 );
 
@@ -46,6 +47,7 @@ CREATE TABLE Messages (
   From_ID int(11),
   To_ID int(11),
   Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') DEFAULT 'NORMAL',
+  Info enum('NONE','NEW','REPLIED','REPLY REQUIRED') DEFAULT 'NEW',
   Game_ID int(11),
   Time timestamp(14),
   Subject varchar(80),
