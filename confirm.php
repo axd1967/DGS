@@ -171,7 +171,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    $Moves++;
 
-   if( $message ) $message = trim($message);
+   $message = trim(@$_REQUEST['messageid']);
 
    $where_clause = " ID=$gid AND Moves=$old_moves";
    $handi = false;
@@ -295,8 +295,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          }
 
          if( $message )
-            $query2 = "INSERT INTO MoveMessages " .
-               "SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
+            $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
 
 
          $game_query = "UPDATE Games SET " .
