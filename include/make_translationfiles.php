@@ -116,7 +116,7 @@ function make_include_files($language=null, $group=null)
 
    if( isset($fd) )
    {
-      fwrite( $fd , "}\n?>");
+      fwrite( $fd , "\n?>");
       fclose( $fd );
    }
 
