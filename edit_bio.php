@@ -88,6 +88,6 @@ function find_category_box_text($cat)
    echo form_end();
    echo "</CENTER><BR>\n";
 
-   end_page(false);
+   end_page();
 }
 ?>

@@ -193,37 +193,33 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
     <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
         <tr>
-          <td colspan=3 width="50%">
-          <A href="' . $HOSTBASE . '/index.php"><B><font color=' . $menu_fg_color . '>Dragon Go Server</font></B></A></td>
 ';
 
-
-   if( $logged_in and !$is_down )
-      echo '          <td colspan=4 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . T_("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
-   else
-      echo '          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . T_("Not logged in") . '</B></font></td>';
-
-   echo '
-        </tr>
-        <tr bgcolor=' . $bg_color . ' align="center">
-          <td><B><A href="' . $HOSTBASE . '/status.php">' . T_("Status") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/list_messages.php">' . T_("Messages") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/message.php?mode=Invite">' . T_("Invite") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/users.php">' . T_("Users") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/forum/index.php">' . T_("Forums") . '</A></B></td>
-';
+   $menu_array = array( 'Status' => 'status.php',
+                        'Messages' => 'list_messages.php',
+                        'Invite' => 'message.php?mode=Invite',
+                        'Users' => 'users.php',
+                        'Forums' => 'forum/index.php');
 
    if( $logged_in && !empty($player_row['Translator']) )
-     echo '
-          <td><B><A href="' . $HOSTBASE . '/translate.php">' . T_("Translate") . '</A></B></td>
-';
+      $menu_array['Translate'] = 'translate.php';
 
-   echo '
-          <td><B><A href="' . $HOSTBASE . '/docs.php">' . T_("Docs") . '</A></B></td>
-        </tr>
+   $menu_array['Docs'] = 'docs.php';
+
+
+   echo '         <td colspan=' . (count($menu_array)-3) . ' width="50%">
+          <A href="' . $HOSTBASE . '/index.php"><B><font color=' . $menu_fg_color .
+      '>Dragon Go Server</font></B></A></td>
+          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color .'><B>' .
+      ( ($logged_in and !$is_down) ? T_("Logged in as") . ': ' . $player_row["Handle"]
+        : T_("Not logged in") ) .
+      " </B></font></td>\n";
+
+   make_menu($menu_array);
+
+   echo "     </tr>
     </table>
-    <BR>
-';
+    <BR>\n";
 
    if( $is_down )
       {
@@ -234,16 +230,22 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       }
 }
 
-function end_page( $new_paragraph = true )
+function end_page( $menu_array=NULL )
 {
    global $time, $show_time, $HOSTBASE, $menu_bg_color, $menu_fg_color, $bg_color;
 
-   if( $new_paragraph )
-      echo "<p>";
+   echo '<p>
+    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . ">\n";
+
+   if( $menu_array )
+      make_menu($menu_array);
+
+   if( count($menu_array) >= 3 )
+      $span = ' colspan=' . (count($menu_array)-1);
+
    echo '
-    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . '>
       <tr>
-        <td align="left" width="50%">
+        <td' . $span . ' align="left" width="50%">
           <A href="' . $HOSTBASE . '/index.php"><font color=' . $menu_fg_color . '><B>Dragon Go Server</B></font></A></td>
         <td align="right" width="50%">';
    if( $show_time )
@@ -263,6 +265,26 @@ function end_page( $new_paragraph = true )
 
    ob_end_flush();
 }
+
+function make_menu($menu_array)
+{
+   global $HOSTBASE, $bg_color;
+
+   $width = 'width=' . floor(100/count($menu_array)) . '%';
+
+   if( count($menu_array) == 1 )
+      $width .= ' colspan=2';
+
+   echo '<tr bgcolor=' . $bg_color . ' align="center">';
+
+   foreach( $menu_array as $text => $link )
+      {
+         echo "<td $width><B><A href=\"$HOSTBASE/$link\">" . T_($text) . "</A></B></td>\n";
+      }
+
+   echo "</tr>\n";
+}
+
 
 function error($err)
 {
@@ -677,7 +699,7 @@ function write_to_file( $filename, $string_to_write )
   fwrite( $fp, $string_to_write );
   fclose( $fp );
 
-  chmod( $filename, 0666 );
+  @chmod( $filename, 0666 );
 }
 
 function array_value_to_key_and_value( $array )

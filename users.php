@@ -138,10 +138,6 @@ $table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches
 
    echo start_end_column_table(false);
 
-   echo "
-    <p>
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-      <tr align=\"center\">";
 
    $order = order_string($sort1, $desc1, $sort2, $desc2);
 
@@ -150,15 +146,9 @@ $table_columns = array('ID','Name','Nick','Rank Info','Rating','Open for matches
    else
       $vars = 'showall=1';
 
-   echo "
-        <td><B><A href=\"users.php$vars\">" .
-      ( $showall ? T_("Only active users")  : T_("Show all users") ) . "</A></B></td>";
+   $menu_array = array( ( $showall ? T_("Only active users")  : T_("Show all users") ) =>
+                        "users.php$vars" );
 
-   echo "
-      </tr>
-    </table>
-";
-
-   end_page(false);
+   end_page($menu_array);
 }
 ?>

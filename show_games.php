@@ -188,24 +188,16 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
 
 
-   echo "
-    <p>
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-      <tr align=\"center\">
-        <td><B><A href=\"userinfo.php?uid=$uid\">User info</A></B></td>\n";
+   $menu_array = array( T_('User info') => "userinfo.php?uid=$uid" );
+
    if( $uid != $player_row["ID"] )
-      echo "        <td><B><A href=\"invite.php?uid=$uid\">Invite this user</A></B></td>\n";
+      $menu_array[T_('Invite this user')] = "invite.php?uid=$uid";
 
    if( $finished )
-      echo "        <td><B><A href=\"show_games.php?uid=$uid\">Show running games</A></B></td>";
+      $menu_array[T_('Show running games')] = "show_games.php?uid=$uid";
    else
-      echo "        <td><B><A href=\"show_games.php?uid=$uid&finished=1\">Show finished games</A></B></td>";
+      $menu_array[T_('Show finished games')] = "show_games.php?uid=$uid&finished=1";
 
-   echo "
-      </tr>
-    </table>
-";
-
-   end_page(false);
+   end_page($menu_array);
 }
 ?>

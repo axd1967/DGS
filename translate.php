@@ -166,7 +166,7 @@ When translating you should keep in mind the following things:
 
     }
 
-  end_page(false);
+  end_page();
 }
 
 ?>

@@ -59,5 +59,5 @@ require( "include/form_functions.php" );
 
   echo form_end();
 
-  end_page(false);
+  end_page();
 }

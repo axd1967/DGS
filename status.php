@@ -204,17 +204,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    echo "</center>";
 
 
-   echo "
-    <p>
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-      <tr align=\"center\">
-        <td><B><A href=\"userinfo.php?uid=$uid\">" . T_("Show/edit userinfo") . "</A></B></td>
-        <td><B><A href=\"show_games.php?uid=$uid\">" . T_("Show running games") . "</A></B></td>
-        <td><B><A href=\"show_games.php?uid=$uid&finished=1\">" . T_("Show finished games") . "</A></B></td>
-      </tr>
-    </table>
-";
 
-   end_page(false);
+   $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$uid",
+                        T_('Show running games') => "show_games.php?uid=$uid",
+                        T_('Show finished games') => "show_games.php?uid=$uid&finished=1" );
+
+   end_page( $menu_array );
 }
 ?>

@@ -86,36 +86,23 @@ require( "include/rating.php" );
        if(  mysql_num_rows($result) > 0 )
           echo "    </table>\n";
 
-       echo "    <p>";
 
        if( $my_info )
        {
-          echo "
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-      <tr align=\"center\">
-        <td><B><A href=\"edit_profile.php\">Edit profile</A></B></td>
-        <td><B><A href=\"edit_password.php\">Change password</A></B></td>
-        <td><B><A href=\"edit_bio.php\">Edit bio</A></B></td>
-      </tr>
-    </table>
-";
+          $menu_array = array( T_('Edit profile') => 'edit_profile.php',
+                               T_('Change password') => 'edit_password.php',
+                               T_('Edit bio') => 'edit_bio.php' );
        }
        else
        {
-          echo "
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-      <tr align=\"center\">
-        <td><B><A href=\"show_games.php?uid=$uid\">Show running games</A></B></td>
-        <td><B><A href=\"message.php?mode=Invite&uid=$uid\">Invite this user</A></B></td>
-        <td><B><A href=\"message.php?mode=NewMessage&uid=$uid\">Send message to user</A></B></td>
-        <td><B><A href=\"show_games.php?uid=$uid&finished=1\">Show finished games</A></B></td>
-      </tr>
-    </table>
-</center>
-";
+          $menu_array =
+             array( T_('Show running games') => "show_games.php?uid=$uid",
+                    T_('Invite this user') => "message.php?mode=Invite&uid=$uid",
+                    T_('Send message to user') => "message.php?mode=NewMessage&uid=$uid",
+                    T_('Show finished games') => "show_games.php?uid=$uid&finished=1" );
        }
 
 
-       end_page(false);
+       end_page( $menu_array );
 }
 ?>

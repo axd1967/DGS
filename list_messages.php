@@ -185,29 +185,23 @@ require( "include/timezones.php" );
 
    echo start_end_column_table(false);
 
-   echo "
-    <p>
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-      <tr align=\"center\">
-        <td><B><A href=\"message.php?mode=NewMessage\">" . T_("Send a message") . "</A></B></td>\n";
+
+   $menu_array = array( T_('Send a message') => 'message.php?mode=NewMessage' );
+
 
    if( $sent==1 )
-      echo "<td><B><A href=\"list_messages.php\">" . T_("Show recieved messages") . "</A></B></td>\n";
+      $menu_array[T_('Show recieved messages')] = 'list_messages.php';
    else
    {
       if( $all==1 )
-         echo "<td><B><A href=\"list_messages.php\">" . T_("Hide deleted") . "</A></B></td>\n";
+         $menu_array[T_('Hide deleted')] = 'list_messages.php';
       else
-         echo "<td><B><A href=\"list_messages.php?all=1\">" . T_("Show all") . "</A></B></td>\n";
+         $menu_array[T_('Show all')] = 'list_messages.php?all=1';
 
-      echo "        <td><B><A href=\"list_messages.php?sent=1\">" . T_("Show sent messages") . "</A></B></td>\n";
-      echo "        <td><B><A href=\"list_messages.php?del=all$all_str\">" . T_("Delete all") . "</A></B></td>\n";
+      $menu_array[T_('Show sent messages')] = 'list_messages.php?sent=1';
+      $menu_array[T_('Delete all')] = "list_messages.php?del=all$all_str";
    }
 
-   echo "      </tr>
-    </table>
-";
-
-   end_page(false);
+   end_page($menu_array);
 }
 ?>

@@ -269,56 +269,34 @@ require( "include/rating.php" );
    }
 
    if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' or
-   $action == 'handicap' )
+       $action == 'handicap' )
    {
-      $width="100%";
-      echo '
-    <p>
-    <table width="100%" border=0 cellspacing=0 cellpadding=4>
-      <tr align="center">
-';
       if( $action == 'choose_move' )
       {
-         $width= ( $Moves < 4+$Handicap ? '20%' : '25%' );
-
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=pass\">" . T_('Pass') . "</A></B></td>\n";
+         $menu_array[T_('Pass')] = "game.php?gid=$gid&action=pass";
 
          if( $Moves < 4+$Handicap )
-            echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=delete\">" . T_('Delete game') . "</A></B></td>\n";
+            $menu_array[T_('Delete game')] = "game.php?gid=$gid&action=delete";
       }
       else if( $action == 'remove' )
       {
-         $width="25%";
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=done&stonestring=$stonestring\">" . T_('Done') . "</A></B></td>\n";
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=choose_move\">" . T_('Resume playing') . "</A></B></td>\n";
-
+         $menu_array[T_('Done')] = "game.php?gid=$gid&action=done&stonestring=$stonestring";
+         $menu_array[T_('Resume playing')] = "game.php?gid=$gid&action=choose_move";
       }
       else if( $action == 'handicap' )
       {
-         $width="33%";
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=delete\">" . T_('Delete game') . "</A></B></td>\n";
-
+         $menu_array[T_('Delete game')] = "game.php?gid=$gid&action=delete";
       }
 
-      echo "<td width=\"$width\"><B><A href=\"" .
-         ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid") .
-         "\">" . T_('Download sgf') . "</A></B></td>\n";
-
-
       if( $action == 'choose_move' )
-         echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=resign\">" . T_('Resign') . "</A></B></td>\n";
+         $menu_array[T_('Resign')] = "game.php?gid=$gid&action=resign";
+
+      $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid");
 
       if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
-         echo "<td width=\"$width\"><B><A href=\"confirm.php?gid=$gid&skip=t\">" . T_('Skip to next game') . "</A></B></td>\n";
-
-
-      echo"
-      </tr>
-    </table>
-";
-      end_page(false);
+         $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid&skip=t";
    }
-   else
-      end_page();
+
+   end_page($menu_array);
 }
 ?>

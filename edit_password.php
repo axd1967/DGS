@@ -46,7 +46,7 @@ echo form_insert_row( 'SUBMITBUTTON', 'action', T_('Change password') );
 echo form_end();
 echo "</CENTER>\n";
 
-end_page(false);
+end_page();
 
 ?>
 
