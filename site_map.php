@@ -82,6 +82,8 @@ function item($text,$link,$working, $level,$last=false)
          item(T_('Show sent messages'), "list_messages.php?sent=1", true, 1, true);
       }
 
+      item(T_('Waiting room'), "waiting_room.php", true, 0);
+
       item(T_('Invite'), "message.php?mode=Invite", true, 0);
 
       item(T_('Users'), "users.php", true, 0);
@@ -90,6 +92,7 @@ function item($text,$link,$working, $level,$last=false)
          {
             item(T_('Show running games'), "show_games.php", false, 2);
             item(T_('Show finished games'), "show_games.php?finished=1", false, 2);
+            item(T_('Show observed games'), "show_games.php?finished=1", false, 2);
             {
                item(T_('Game'), "game.php", false, 3);
                item(T_('SGF file of game'), "sgf.php", false, 3, true);
@@ -106,6 +109,8 @@ function item($text,$link,$working, $level,$last=false)
             item(T_('New topic'), "phorum/post.php", false, 2, true);
          }
       }
+
+      item(T_('Games'), "show_games.php?uid=all&finished=1", true, 0);
 
       item(T_('Translate'), "translate.php", true, 0);
 
