@@ -99,7 +99,7 @@ function get_preferred_browser_language()
          if( $current_q_val >= $q_val )
             continue;
 
-         if( !array_key_exists($lang, $known_languages))
+         if( !$lang or !array_key_exists($lang, $known_languages))
             continue;
 
          $current_q_val = $q_val;
