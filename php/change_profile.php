@@ -58,16 +58,11 @@ if( $action == "Change profile" )
          "Rank='$rank', " .
          "Stonesize=$stonesize, " .
          "Boardfontsize='$boardfontsize', " .
-         "Flags=$flags" .
-         " WHERE ID=" . $player_row["ID"]; 
+         "Flags=$flags, " .
+         "Timezone='$timezone'" .
+         " WHERE ID=" . $player_row['ID']; 
     
     mysql_query( $query );
-
-    if( mysql_affected_rows() != 1 )
-    {
-        header("Location: error.php?err=mysql_update_player");
-        exit;
-    }
 
     start_page("Profile updated", true, $logged_in, $player_row );
 
@@ -90,16 +85,10 @@ else if( $action == "Change password" )
        } 
    
    $query = "UPDATE Players SET " .
-        "Password=PASSWORD('$passwd'), " .
-        "WHERE ID=" . $player_row["ID"];    
+        "Password=PASSWORD('$passwd') " .
+        "WHERE ID=" . $player_row['ID'];    
 
    mysql_query( $query );
-   
-   if( mysql_affected_rows() != 1 )
-       {
-           header("Location: error.php?err=mysql_update_player");
-           exit;
-       }
    
    start_page("Password changed", true, $logged_in, $player_row );
    

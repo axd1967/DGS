@@ -35,8 +35,23 @@ $passwd_encrypt = mysql_fetch_row( mysql_query( "SELECT PASSWORD('$passwd')" ) )
 
 if( $row["Password"] != $passwd_encrypt[0] )
 {
-    header("Location: error.php?err=wrong_password");
-    exit;
+    // Check if there is a new password
+
+    if( empty($row["Newpassword"]) or $row["Newpassword"] != $passwd_encrypt[0] )
+        {
+            header("Location: error.php?err=wrong_password");
+            exit;
+        }
+
+}
+
+// Remove the new password.
+if( !empty($row["Newpassword"]) )
+{
+    mysql_query( 'UPDATE Players ' .
+                 "SET Password='$passwd_encrypt[0]', " .
+                 'Newpassword=NULL ' .
+                 "Where Handle='$handle'" );
 }
 
 $code = $row["Sessioncode"];

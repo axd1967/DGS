@@ -110,12 +110,6 @@ switch( $err )
      }
      break;
 
- case("mysql_message_info"):
-     {
-         echo "Couldn't update message status. Please retry in a few minutes. ";
-     }
-     break;
-
  case("mysql_select_db_failed"):
      {
          echo "Couldn't select the database. Please wait a few minutes and try again. ";
@@ -137,6 +131,12 @@ switch( $err )
  case("name_not_given"):
      {
          echo "Sorry, you have to supply a name.";
+     }
+     break;
+
+ case("newpassword_already_sent"):
+     {
+         echo "A new password has already been sent to this user, please use that password instead of sending another one.";
      }
      break;
 
@@ -228,7 +228,7 @@ switch( $err )
      break;
      
 
- case("unknown_message"):
+ case("unknown_user"):
      {
          echo "Sorry, I couldn't find this user.";
      }
