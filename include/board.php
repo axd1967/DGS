@@ -35,13 +35,13 @@ function sgf2number_coords($coord, $Size)
 {
    if( !is_string($coord) or strlen($coord)!=2 )
       return array(NULL,NULL);
-      
+
    $x = ord($coord[0])-ord('a');
    $y = ord($coord[1])-ord('a');
 
    if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
       return array(NULL,NULL);
-   
+
    return array(ord($coord[0])-ord('a'), ord($coord[1])-ord('a'));
 }
 
@@ -49,16 +49,16 @@ function number2board_coords($x, $y, $Size)
 {
   if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
      return NULL;
-  
+
   $col = chr( $x + ord('a') );
   if( $col >= 'i' ) $col++;
 
   return  $col . ($Size - $y);
- 
+
 }
 
 
-// If move update was interupted between thw mysql queries, there may 
+// If move update was interupted between thw mysql queries, there may
 // be extra entries in the Moves and MoveMessages tables.
 function fix_corrupted_move_table($gid)
 {
@@ -77,7 +77,7 @@ function fix_corrupted_move_table($gid)
 
    extract(mysql_fetch_array($result));
 
-   
+
 
    if($Moves == $max_movenr)
       return;
@@ -91,15 +91,15 @@ function fix_corrupted_move_table($gid)
 
 
 
-function draw_board($Size, &$array, $may_play, $gid, 
-$Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi, 
+function draw_board($Size, &$array, $may_play, $gid,
+$Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi,
 $board_type, $coord_borders, $woodcolor  )
 {
    $mark_letter = 'm';
    $board_type = 3;
    $sizestringtype = 1;
-   
-   if( !( $woodcolor >= 1 and $woodcolor <= 5) ) 
+
+   if( !( $woodcolor >= 1 and $woodcolor <= 5) )
    {
       $woodcolor = 1;
       $coord_borders = 15;
@@ -141,7 +141,7 @@ $board_type, $coord_borders, $woodcolor  )
    else if( $sizestringtype == 1 )
    {
       $size_str = "class=s$stone_size";
-      $size_str2 = "class=c$stone_size";      
+      $size_str2 = "class=c$stone_size";
    }
    if( $use_gif_coords )
    {
@@ -153,7 +153,7 @@ $board_type, $coord_borders, $woodcolor  )
    }
    else
    {
-      $coord_start_letter = $coord_start_number = $table_start_c . 
+      $coord_start_letter = $coord_start_number = $table_start_c .
           ( $font_size != "+0"  ? "<font size=\"$font_size\">" :"");
       $coord_start = $table_start_c . ( $font_size != "+0"  ? "<font size=\"$font_size\">" :"");
       $coord_end = ( $font_size != "+0"  ? "</font>" : "") . $table_end;
@@ -185,13 +185,13 @@ $board_type, $coord_borders, $woodcolor  )
          $str3 = "\"><IMG $size_str border=0 alt=\"";
       }
    }
-    
+
    if( $msg )
-      echo "<table border=2 cellpadding=3 align=center><tr>" . 
+      echo "<table border=2 cellpadding=3 align=center><tr>" .
          "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
    echo '<table border=0 cellpadding=0 cellspacing=0 background="images/wood' . $woodcolor . '.gif" align=center><tr><td valign=top>';
-   
+
    echo $board_begin;
 
    if( $coord_borders & UP )
@@ -209,7 +209,7 @@ $board_type, $coord_borders, $woodcolor  )
          $colnr++;
          $letter++;
          if( $letter == 'i' ) $letter++;
-      }  
+      }
       if( $coord_borders & RIGHT )
          echo $coord_empty . $row_end;
    }
@@ -231,14 +231,14 @@ $board_type, $coord_borders, $woodcolor  )
          echo $coord_start_number . $rownr . $coord_alt;
          if( $use_gif_coords )
             echo  $rownr;
-         
+
          echo $coord_end;
       }
-            
+
       $hoshi_r = 0;
       if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
       if( $rownr == $Size - $rownr + 1 ) $hoshi_r = 2;
-            
+
       $letter_c = 'a';
       for($colnr = 0; $colnr < $Size; $colnr++ )
       {
@@ -272,16 +272,16 @@ $board_type, $coord_borders, $woodcolor  )
             if( $rownr == $Size ) $type = 'u';
             if( $colnr == 0 ) $type .= 'l';
             if( $colnr == $Size-1 ) $type .= 'r';
-                    
+
             if( $hoshi_r > 0 and $type=='e' )
             {
                $hoshi_c = 0;
-               if( $colnr == $hoshi_dist -  1 or $colnr == $Size - $hoshi_dist ) 
+               if( $colnr == $hoshi_dist -  1 or $colnr == $Size - $hoshi_dist )
                   $hoshi_c = 3;
 
                if( $colnr == $Size - $colnr - 1 ) $hoshi_c = 2;
-                            
-               if( $hoshi_c + $hoshi_r == $hoshi_1 or 
+
+               if( $hoshi_c + $hoshi_r == $hoshi_1 or
                $hoshi_c + $hoshi_r == $hoshi_2 or
                $hoshi_c + $hoshi_r == $hoshi_3 )
                {
@@ -299,7 +299,7 @@ $board_type, $coord_borders, $woodcolor  )
 
             $empty = true;
 
-                            
+
          }
 
          if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y )
@@ -307,7 +307,7 @@ $board_type, $coord_borders, $woodcolor  )
             $type .= $mark_letter;
             $alt = ( $alt == '#' ? 'X' : '@' );
          }
-                    
+
          if( $may_play and ( $empty xor !$on_empty ) )
             echo "$str2$letter_c$letter_r$str3$alt\" SRC=$stone_size/$type$str4";
          else
@@ -321,7 +321,7 @@ $board_type, $coord_borders, $woodcolor  )
          echo $coord_start_number . $rownr . $coord_alt;
          if( $use_gif_coords )
             echo  $rownr;
-         
+
          echo $coord_end;
       }
       $letter_r++;
@@ -345,7 +345,7 @@ $board_type, $coord_borders, $woodcolor  )
          $colnr++;
          $letter++;
          if( $letter == 'i' ) $letter++;
-      }  
+      }
       if( $coord_borders & RIGHT )
          echo $coord_empty . $row_end;
    }
@@ -359,11 +359,11 @@ $board_type, $coord_borders, $woodcolor  )
 
 // fills $array with positions where the stones are.
 // returns who is next to move
-function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked_dead, 
+function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked_dead,
 $no_marked_dead = false )
 {
    $array=NULL;
-  
+
    if( !$move ) $move = $max_moves;
 
    $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
@@ -375,7 +375,7 @@ $no_marked_dead = false )
    {
       extract($row);
 
-      if( $MoveNr > $move ) 
+      if( $MoveNr > $move )
       {
          if( $Movenr > $max_moves )
             fix_corrupted_move_table($gid, $max_moves);
@@ -387,7 +387,7 @@ $no_marked_dead = false )
          if( $row["PosX" ] < 0 ) continue;
 
          $array[$PosX][$PosY] = $Stone;
-            
+
          $removed_dead = FALSE;
       }
       else if( $Stone >= BLACK_DEAD )
@@ -398,7 +398,7 @@ $no_marked_dead = false )
             $removed_dead = TRUE;
          }
          array_push($marked_dead, array($PosX,$PosY));
-      } 
+      }
    }
 
    if( !$no_marked_dead and $removed_dead == TRUE )
@@ -414,7 +414,7 @@ $no_marked_dead = false )
    }
 
    $result2 = mysql_query( "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" );
-   
+
    if( mysql_num_rows($result2) == 1 )
    {
       $row = mysql_fetch_array($result2);
@@ -431,7 +431,7 @@ $diry = array( 0,-1,0,1 );
 function has_liberty_check( $x, $y, $Size, &$array, &$prisoners, $remove )
 {
    global $dirx,$diry;
-    
+
    $c = $array[$x][$y]; // Color of this stone
 
    $index=NULL;
@@ -473,14 +473,14 @@ function has_liberty_check( $x, $y, $Size, &$array, &$prisoners, $remove )
 
          $new_color = $array[$nx][$ny];
 
-         if( (!$new_color or $new_color == NONE ) and 
+         if( (!$new_color or $new_color == NONE ) and
              ( $nx >= 0 ) and ($nx < $Size) and ($ny >= 0) and ($ny < $Size) )
             return true; // found liberty
-                    
+
          if( $new_color == $c and !$index[$nx][$ny])
          {
             $x = $nx;  // Go to the neigbour
-            $y = $ny; 
+            $y = $ny;
             $index[$x][$y] = $dir;
          }
       }
@@ -501,7 +501,7 @@ function check_prisoners($colnr,$rownr, $col, $Size, &$array, &$prisoners )
       $y = $rownr+$diry[$i];
       //            echo "x: $x<p>";
       //            echo "y: $y<p>";
-      //            echo "color: " . $array[$x][$y] . "<p>"; 
+      //            echo "color: " . $array[$x][$y] . "<p>";
       if( $array[$x][$y] == $col )
          has_liberty_check($x,$y, $Size, $array, $prisoners, true);
    }
@@ -515,7 +515,7 @@ function mark_territory( $x, $y, $size, &$array )
    global $dirx,$diry;
 
    $c = -1;  // color of territory
-    
+
    $index[$x][$y] = 7;
 
 
@@ -550,7 +550,7 @@ function mark_territory( $x, $y, $size, &$array )
          $nx = $x+$dirx[$dir];
          $ny = $y+$diry[$dir];
 
-         if( ( $nx < 0 ) or ($nx >= $size) or ($ny < 0) or ($ny >= $size) or 
+         if( ( $nx < 0 ) or ($nx >= $size) or ($ny < 0) or ($ny >= $size) or
              isset($index[$nx][$ny]) )
             continue;
 
@@ -560,7 +560,7 @@ function mark_territory( $x, $y, $size, &$array )
          if( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD )
          {
             $x = $nx;  // Go to the neigbour
-            $y = $ny; 
+            $y = $ny;
             $index[$x][$y] = $dir;
          }
          else
@@ -621,7 +621,7 @@ function create_territories_and_score( $size, &$array )
          }
       }
    }
-    
+
    return $score;
 }
 
@@ -630,9 +630,9 @@ function create_territories_and_score( $size, &$array )
 function remove_dead( $x, $y, &$array, &$prisoners )
 {
    global $dirx,$diry;
-    
+
    $c = $array[$x][$y]; // Color of this stone
-    
+
    $index[$x][$y] = 7;
 
 
@@ -675,7 +675,7 @@ function remove_dead( $x, $y, &$array, &$prisoners )
          if( $new_color == $c and !$index[$nx][$ny])
          {
             $x = $nx;  // Go to the neigbour
-            $y = $ny; 
+            $y = $ny;
             $index[$x][$y] = $dir;
          }
       }
@@ -684,7 +684,7 @@ function remove_dead( $x, $y, &$array, &$prisoners )
 
 function check_consistency($gid)
 {
-   global $coord, $Size, $array, $to_move, $flags, $Last_X, $Last_Y, 
+   global $coord, $Size, $array, $to_move, $flags, $Last_X, $Last_Y,
       $Black_Prisoners, $White_Prisoners, $nr_prisoners;
 
    echo "Game $gid: ";
@@ -698,7 +698,7 @@ function check_consistency($gid)
    extract( mysql_fetch_array( $result ) );
 
    $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
-   
+
    $move_nr=0;
    $array = NULL;
    $games_Black_Prisoners = $Black_Prisoners;
@@ -731,7 +731,7 @@ function check_consistency($gid)
          echo ", problem at move $move_nr<br>\n";
          return false;
       }
-      
+
       $Last_X=$PosX;
       $Last_Y=$PosY;
       $nr_prisoners=0;
@@ -743,22 +743,22 @@ function check_consistency($gid)
       return false;
    }
 
-   if( $Black_Prisoners != $games_Black_Prisoners or 
+   if( $Black_Prisoners != $games_Black_Prisoners or
    $White_Prisoners != $games_White_Prisoners )
    {
       echo "Wrong number of prisoners in Games table!<br>\n";
       echo "Black: $games_Black_Prisoners should be:$Black_Prisoners<br>\n";
       echo "White: $games_White_Prisoners should be:$White_Prisoners<br>\n";
       return false;
-      
+
    }
 
-   if( $Black_Prisoners != $moves_Black_Prisoners or 
+   if( $Black_Prisoners != $moves_Black_Prisoners or
    $White_Prisoners != $moves_White_Prisoners )
    {
       echo "Wrong number of prisoners removed!<br>\n";
       return false;
-      
+
    }
 
 
@@ -804,11 +804,11 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
       $out .= '  ';
       if( $coord_borders & LEFT )
          $out .= str_pad($rownr, 2, ' ', STR_PAD_LEFT);
-            
+
       $hoshi_r = 0;
       if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
       if( $rownr == $Size - $rownr + 1 ) $hoshi_r = 2;
-            
+
       $letter_c = 'a';
       for($colnr = 0; $colnr < $Size; $colnr++ )
       {
@@ -833,16 +833,16 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
          else
          {
             $type = '.';
-                    
+
             if( $hoshi_r > 0 )
             {
                $hoshi_c = 0;
-               if( $colnr == $hoshi_dist -  1 or $colnr == $Size - $hoshi_dist ) 
+               if( $colnr == $hoshi_dist -  1 or $colnr == $Size - $hoshi_dist )
                   $hoshi_c = 3;
 
                if( $colnr == $Size - $colnr - 1 ) $hoshi_c = 2;
-                            
-               if( $hoshi_c + $hoshi_r == $hoshi_1 or 
+
+               if( $hoshi_c + $hoshi_r == $hoshi_1 or
                $hoshi_c + $hoshi_r == $hoshi_2 or
                $hoshi_c + $hoshi_r == $hoshi_3 )
                {
@@ -857,10 +857,10 @@ function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_border
             else if( $stone == DAME )
                $type .= '.';
 
-            $empty = true;                            
+            $empty = true;
          }
 
-         if( $pre_mark ) 
+         if( $pre_mark )
          {
             $out .= ")$type";
             $pre_mark = false;

@@ -39,7 +39,7 @@ require( "include/rating.php" );
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
    $result = mysql_query( "SELECT Games.*, " .
-                          "Games.Flags+0 AS flags, " . 
+                          "Games.Flags+0 AS flags, " .
                           "black.Name AS Blackname, " .
                           "black.Handle AS Blackhandle, " .
                           "black.Rank AS Blackrank, " .
@@ -74,7 +74,7 @@ require( "include/rating.php" );
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
    else if( isset($to_move) )
-   {       
+   {
       error("database_corrupted");
    }
 
@@ -113,10 +113,10 @@ require( "include/rating.php" );
 
 
 
-   $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or 
+   $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or
    $action == 'choose_move' or $action == 'move' );
 
-   list($lastx,$lasty) = 
+   list($lastx,$lasty) =
       make_array( $gid, $array, $msg, $Moves, $move, $moves_result, $marked_dead, $no_marked_dead );
 
    $enable_message = true;
@@ -153,11 +153,11 @@ require( "include/rating.php" );
          {
             $prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
-       
+
          if( strlen($prisoner_string) != $nr_prisoners*2 )
             error("move_problem");
 
-       
+
          $Moves++;
          $Last_X = $colnr;
          $Last_Y = $rownr;
@@ -203,7 +203,7 @@ require( "include/rating.php" );
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
             error("invalid_action");
-         
+
          check_remove();
 
          $enable_message = false;
@@ -219,7 +219,7 @@ require( "include/rating.php" );
 
          check_done();
 
-         $extra_message = "<font color=\"blue\">Score: " . 
+         $extra_message = "<font color=\"blue\">Score: " .
              score2text($score, true) . "</font>";
       }
       break;
@@ -230,8 +230,7 @@ require( "include/rating.php" );
       }
    }
 
-
-   start_page("Game", true, $logged_in, $player_row );
+   start_page("Game", true, $logged_in, $player_row);
 
    if( $enable_message ) $may_play = false;
 
@@ -240,7 +239,7 @@ require( "include/rating.php" );
    else
       make_html_safe($msg, 'game');
 
-   draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y, 
+   draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
    $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $stonestring, $handi,
    $player_row["Boardtype"], $player_row["Boardcoords"], $player_row["Woodcolor"]);
 
@@ -263,7 +262,7 @@ require( "include/rating.php" );
       draw_moves();
    }
 
-   if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' or 
+   if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' or
    $action == 'handicap' )
    {
       $width="100%";
@@ -295,15 +294,15 @@ require( "include/rating.php" );
 
       }
 
-      echo "<td width=\"$width\"><B><A href=\"" . 
-         ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid") . 
+      echo "<td width=\"$width\"><B><A href=\"" .
+         ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid") .
          "\">Download sgf</A></B></td>\n";
 
 
       if( $action == 'choose_move' )
          echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=resign\">Resign</A></B></td>\n";
 
-      if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' ) 
+      if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
          echo "<td width=\"$width\"><B><A href=\"confirm.php?gid=$gid&next=Skip+to+next+game\">Skip to next game</A></B></td>\n";
 
 
@@ -311,9 +310,9 @@ require( "include/rating.php" );
       </tr>
     </table>
 ";
-      end_page(false); 
+      end_page(false);
    }
    else
-      end_page(); 
+      end_page();
 }
 ?>

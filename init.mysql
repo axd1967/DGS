@@ -34,6 +34,7 @@ CREATE TABLE Players (
   Woodcolor int(11) NOT NULL default '1',
   Boardtype int(11) NOT NULL default '1',
   Boardcoords int(11) NOT NULL default '15',
+  Button int(11) NOT NULL default '0',
   UsersColumns int(10) unsigned NOT NULL default '62',
   Running int(11) NOT NULL default '0',
   Finished int(11) NOT NULL default '0',

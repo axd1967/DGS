@@ -26,18 +26,30 @@ include( "include/timezones.php" );
 $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','Komi',
                        'Moves','Score','Win?','End date','Last Move');
 
+
 {
    connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
-    
+
    if( !$logged_in )
       error("not_logged_in");
 
 
    $my_id = $player_row["ID"];
 
-   start_page("Status", true, $logged_in, $player_row );
+   $button_nr = $player_row["Button"];
+
+   if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
+      $button_nr = 0;
+
+   $style = 'a.button { color : ' . $buttoncolors[$button_nr] .
+      ';  font : bold 100% sans-serif;  text-decoration : none;  width : 90px; }
+td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
+      'background-repeat : no-repeat;  background-position : center; }';
+
+
+   start_page("Status", true, $logged_in, $player_row, $style );
 
    echo "<center>";
 
@@ -54,15 +66,15 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
        <tr><td><b>' . _("Name") . '</b></td> <td>' . $player_row["Name"] . '</td></tr>
        <tr><td><b>' . _("Userid") . '</b></td> <td>' . $player_row["Handle"] . '</td></tr>
        <tr><td><b>' . _("Open for matches?") . '</b></td> <td>' . $player_row["Open"] . '</td></tr>
-       <tr><td><b>' . _("Rating") . '</b></td> <td>' . echo_rating($player_row["Rating"]); 
+       <tr><td><b>' . _("Rating") . '</b></td> <td>' . echo_rating($player_row["Rating"]);
    echo '</td></tr>
        <tr><td><b>Rank info</b></td> <td>' . $player_row["Rank"] . '</td></tr>
     </table>
     <p>';
 
 
-   $result = mysql_query("SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " . 
-                         "Messages.*, Players.Name AS sender " . 
+   $result = mysql_query("SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+                         "Messages.*, Players.Name AS sender " .
                          "FROM Messages, Players " .
                          "WHERE To_ID=$my_id " .
                          "AND (Messages.Flags LIKE '%NEW%' OR Messages.Flags LIKE '%REPLY REQUIRED%') " .
@@ -81,10 +93,10 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
       while( $row = mysql_fetch_array( $result ) )
       {
          echo "<tr>";
-         
+
          if( !(strpos($row["Flags"],'NEW') === false) )
          {
-            echo "<td bgcolor=\"00F464\">New</td>\n";        
+            echo "<td bgcolor=\"00F464\">New</td>\n";
          }
          else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
          {
@@ -94,9 +106,9 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
          {
             error("message_status_corrupt");
          }
-            
+
          echo "<td><A href=\"show_message.php?mid=" . $row["ID"] . "\">" .
-            $row["sender"] . "</A></td>\n" . 
+            $row["sender"] . "</A></td>\n" .
             "<td>" . make_html_safe($row["Subject"]) . "</td>\n" .
             "<td>" . date($date_fmt2, $row["date"]) . "</td></tr>\n";
       }
@@ -110,7 +122,7 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
 
    $uid = $player_row["ID"];
 
-   $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," . 
+   $query = "SELECT Black_ID,White_ID,Games.ID,Size,Handicap,Komi,Games.Moves," .
        "UNIX_TIMESTAMP(Lastchanged) AS Time, " .
        "(Black_ID=$uid)+1 AS Color, " .
        "opponent.Name, opponent.Handle, opponent.ID AS pid " .
@@ -146,20 +158,20 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
       while( $row = mysql_fetch_array( $result ) )
       {
          extract($row);
-         $color = ( $Color == BLACK ? 'b' : 'w' ); 
+         $color = ( $Color == BLACK ? 'b' : 'w' );
 
 
          $row_color=3-$row_color;
          echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n" .
-            tableelement(1, 'ID', "<A href=\"game.php?gid=$ID\"><font color=$gid_color><b>" .
-                         "$ID</b></font></A>") .
+            tableelement(1, 'ID', "<A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;" .
+                         "&nbsp;$ID&nbsp;&nbsp;&nbsp;</A>", true, "class=button width=92" ) .
             tableelement(2, 'sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
                          "sgf</font></A>") .
             tableelement(3, 'Opponent', "<A href=\"userinfo.php?uid=$pid\">" .
                          "<font color=black>$Name</font></a>") .
             tableelement(4, 'Nick', "<A href=\"userinfo.php?uid=$pid\">" .
                          "<font color=black>$Handle</font></a>") .
-            tableelement(5, 'Color', "<img align=middle src=\"17/$color.gif\" alt=$color>") .
+            tableelement(5, 'Color', "<img src=\"17/$color.gif\" alt=$color>", true) .
             tableelement(6, 'Size', $Size) .
             tableelement(7, 'Handicap', $Handicap) .
             tableelement(8, 'Komi', $Komi) .

@@ -28,14 +28,14 @@ function item($text,$link,$working, $level,$last=false)
    $size=25;
 
    echo "<tr>";
-   
+
    for($i=0; $i<$level; $i++)
    {
-      echo "<td width=50 align=right>" . 
+      echo "<td width=50 align=right>" .
          ( ${"f$i"} ? "<img alt=\"&nbsp;|&nbsp;\" src=\"$size/du.gif\">" : "" ) . "</td>";
    }
 
-   echo "<td width=50 align=right><img alt=\"" . ( $last ? "&nbsp;`-" : "&nbsp;|-" ) . 
+   echo "<td width=50 align=right><img alt=\"" . ( $last ? "&nbsp;`-" : "&nbsp;|-" ) .
       "\" src=\"$size/" . ( $last ? "dl" : "el" ) . ".gif\"></td>" .
       "<td colspan=" . (4-$level) . ">&nbsp;<a " . ( $working ? "" : "class=dead " ) .
       " href=\"$link\">" .
@@ -49,12 +49,12 @@ function item($text,$link,$working, $level,$last=false)
    connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
-   
+
    start_page("Site map", true, $logged_in, $player_row );
 
    $f0=$f1=$f2=$f3=true;
-   
-   
+
+
    echo "<table width=80% align=center><tr><td>\n";
    echo "<center><h3><font color=\"#800000\">Site map</font></h3></center>";
    echo "<table cellspacing=0 cellpadding=0 border=0><tr><td colspan=3>" .
@@ -96,7 +96,7 @@ function item($text,$link,$working, $level,$last=false)
             item("Send a message", "new_message.php", true, 2, true);
          }
       }
-      
+
       item("Forum", "phorum/index.php", true, 0);
       {
          item("Thread list", "phorum/list.php", false, 1, true);

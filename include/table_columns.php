@@ -23,7 +23,7 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
    global $sort1, $desc1, $sort2, $desc2,$column_set,$page,$removed_columns;
 
    $col_pos = 1 << ($nr-1);
-   
+
    if( !($col_pos & $column_set) )
    {
       if( !is_array($removed_columns) )
@@ -33,13 +33,13 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
    }
 
    if( !$undeletable )
-      $delete_string = "<a href=\"" . $page . 
+      $delete_string = "<a href=\"" . $page .
          ($sort1 ? order_string($sort1,$desc1,$sort2,$desc2) . '&' : '') .
-         "del=$nr" . 
+         "del=$nr" .
          "\"><sup><font size=\"-1\" color=red>x</font></sup></a>";
 
    if( !$sort_string )
-      return "<th nowrap valign=bottom><font color=black>" . _($Head) . 
+      return "<th nowrap valign=bottom><font color=black>" . _($Head) .
          "</font>$delete_string</th>\n";
 
    if( $sort_string == $sort1 )
@@ -57,12 +57,12 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
       $d2 = $desc1 xor $desc_default;
    }
 
-   return "<th nowrap valign=bottom><A href=\"$page" . order_string($s1,$d1,$s2,$d2) . 
-      "\"><font color=black>" .  _($Head) . 
+   return "<th nowrap valign=bottom><A href=\"$page" . order_string($s1,$d1,$s2,$d2) .
+      "\"><font color=black>" .  _($Head) .
       "</font></A>$delete_string</th>\n";
 }
 
-function tableelement($nr, $Head, $string, $align_center=false)
+function tableelement($nr, $Head, $string, $align_center=false, $extra_options=NULL)
 {
    global $column_set,$page;
 
@@ -72,7 +72,8 @@ function tableelement($nr, $Head, $string, $align_center=false)
    if( strlen($string) < 1 )
       $string = '&nbsp;';
 
-   return "<td" . ( $align_center ? ' align=center' : '' ) . ">$string</td>\n";
+   return "<td" . ( $align_center ? ' align=center' : '' ) .
+      ( $extra_options ? ' ' . $extra_options : '' ) . ">$string</td>\n";
 }
 
 function order_string($sortA, $descA, $sortB, $descB)
@@ -91,9 +92,9 @@ function next_prev($new_from_row, $next)
 {
    global $sort1, $desc1, $sort2, $desc2, $page;
 
-   return "<a href=\"" . $page . "from_row=$new_from_row&" . 
+   return "<a href=\"" . $page . "from_row=$new_from_row&" .
       order_string($sort1,$desc1,$sort2,$desc2) . "\">" .
-      ($next ? "next page -->" : "<-- previous page") . "</a>";  
+      ($next ? "next page -->" : "<-- previous page") . "</a>";
 }
 
 function strip_last_et($string)
@@ -113,7 +114,7 @@ function add_column_form()
    if( count($removed_columns) <= 1 )
       return '';
 
-   $string = "<form name=\"add_column_form\" action=\"" . strip_last_et($page) . 
+   $string = "<form name=\"add_column_form\" action=\"" . strip_last_et($page) .
        "\" method=\"POST\">" .
        html_build_select_box_from_array($removed_columns, 'add', '', true) .
        "<input type=submit name=\"action\" value=\"Add Column\">\n" .
@@ -133,24 +134,24 @@ function add_or_del($add, $del, $mysql_column)
       if( $del )
          $column_set &= ~(1 << ($del-1));
 
-      $query = "UPDATE Players " . 
+      $query = "UPDATE Players " .
           "SET $mysql_column=$column_set " .
           "WHERE ID=" . $player_row["ID"];
-      
+
       mysql_query($query);
    }
 }
 function start_end_column_table($start)
 {
    global $from_row, $nr_rows, $show_rows, $RowsPerPage, $table_head_color;
- 
+
    if( $start )
-      $string = 
+      $string =
          "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
    else
       $string = "";
 
-   
+
    $string .= "<tr><td align=left colspan=3>";
 
    if( $from_row > 0 )

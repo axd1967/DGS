@@ -60,6 +60,15 @@ $table_head_color='"#CCCCCC"';
 $table_row_color1='"#FFFFFF"';
 $table_row_color2='"#E0E8ED"';
 
+$buttonfiles = array('button0.gif','button1.gif','button2.gif','button3.gif',
+                     'button4.gif','button5.gif','button6.gif','button7.gif',
+                     'button8.png','button9.png','button10.png');
+
+$buttoncolors = array('white','white','white','white',
+                      '#990000','white','white','white',
+                      'white','white','white');
+
+$button_max = 10;
 
 define("NONE", 0);
 define("BLACK", 1);
@@ -126,7 +135,8 @@ function disable_cache($stamp=NULL)
       header ('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
 }
 
-function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified_stamp=NULL )
+function start_page( $title, $no_cache, $logged_in, &$player_row,
+                     $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $HOSTBASE, $is_down, $bg_color, $menu_bg_color, $menu_fg_color;
 
@@ -161,7 +171,12 @@ function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified
 //       }
    echo '
     <TITLE> Dragon Go Server - ' . $title . '</TITLE>
-    <LINK rel="stylesheet" type="text/css" media="screen" href="dragon.css">
+    <LINK rel="stylesheet" type="text/css" media="screen" href="dragon.css">';
+
+   if( $style_string )
+      echo "<STYLE TYPE=\"text/css\">\n" .$style_string . "\n</STYLE>";
+
+      echo '
   </HEAD>
   <BODY bgcolor=' . $bg_color . '>
 

@@ -39,7 +39,7 @@ require( "include/rating.php" );
 
    if( $emailnotify == 0 or empty($email) )
       $sendemail = '';
-   
+
    if( $emailnotify >= 1 )
       $sendemail = 'ON';
 
@@ -61,11 +61,12 @@ require( "include/rating.php" );
        "Stonesize=$stonesize, " .
        "Boardcoords=$boardcoords, " .
        "Woodcolor=$woodcolor, " .
+       "Button=$button, " .
        "SendEmail='$sendemail', ";
 
-   if( $nightstart != $player_row["Nightstart"] || 
+   if( $nightstart != $player_row["Nightstart"] ||
    $timezone != $player_row["Timezone"] )
-   {            
+   {
       putenv("TZ=$timezone" );
 
       $query .= "ClockChanged=FROM_UNIXTIME($NOW), ";
@@ -73,7 +74,7 @@ require( "include/rating.php" );
       $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
    }
 
-    
+
    $newrating = convert_to_rating($rating, $ratingtype);
 
    if( $player_row["RatingStatus"] != 'RATED' and $newrating and
@@ -83,13 +84,13 @@ require( "include/rating.php" );
       $query .= "Rating=$newrating, " .
           "InitialRating=$newrating, " .
           "RatingStatus='INIT', ";
-        
+
    }
 
    $query .= "Timezone='$timezone', " .
        "Nightstart=$nightstart" .
-       " WHERE ID=" . $player_row['ID']; 
-    
+       " WHERE ID=" . $player_row['ID'];
+
    mysql_query( $query );
 
    $msg = urlencode("Profile updated!");

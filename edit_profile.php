@@ -29,6 +29,10 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 if( !$logged_in )
    error("not_logged_in");
 
+$button_nr = $player_row["Button"];
+
+if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
+   $button_nr = 0;
 
 start_page("Edit profile", true, $logged_in, $player_row );
 
@@ -41,7 +45,7 @@ start_page("Edit profile", true, $logged_in, $player_row );
 
     <TABLE>
 
-      
+
       <TR>
         <TD align=right>Userid:</TD>
         <TD align=left> <?php echo $player_row["Handle"]; ?></TD>
@@ -70,16 +74,16 @@ start_page("Edit profile", true, $logged_in, $player_row );
 
       <TR>
         <TD align=right>Rating:</TD><TD align=left>
-        <?php if( $player_row["RatingStatus"] != 'RATED' ) 
+        <?php if( $player_row["RatingStatus"] != 'RATED' )
 {?>
         <input type="text" name="rating" value="<?php echo echo_rating( $player_row["Rating"], true); ?>" size="16" maxlength="16">
 <?php
 
  $vals = array('dragonrating', 'eurorank', 'eurorating','aga', 'agarating', 'igs', 'igsrating',
                'iytgg', 'nngs', 'nngsrating', 'japan', 'china', 'korea');
- 
+
  echo html_build_select_box_from_array($vals, 'ratingtype', 'dragonrating', true);
-} 
+}
 else echo_rating( $player_row["Rating"] );
 ?>
          </TD>
@@ -101,13 +105,13 @@ if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
             <option<?php if($s == 3) echo " selected"; ?> value=3>Full board and messages</option>
           </select>
         </TD>
-      </TR> 
+      </TR>
 
       <TR>
         <TD align=right>Timezone:</TD>
         <TD align=left>
           <?php echo html_get_timezone_popup('timezone', $player_row['Timezone']); ?>
-        </TD>        
+        </TD>
       </TR>
 
       <TR>
@@ -116,22 +120,22 @@ if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
 <?php $s = $player_row["Nightstart"]; ?>
           <select name="nightstart">
 <?php
-          for($i=0; $i<24; $i++)
+for($i=0; $i<24; $i++)
 {
-    echo "<option"; 
-    if($s == $i) echo " selected";
-    echo " value=$i>";
-    printf('%02d-%02d',$i,($i+9)%24) . "</option>\n";
+   echo "<option";
+   if($s == $i) echo " selected";
+   echo " value=$i>";
+   printf('%02d-%02d',$i,($i+9)%24) . "</option>\n";
 }
 ?>
           </select>
 
-        </TD>        
+        </TD>
       </tr>
          <tr><td><h3><font color="#800000">Board graphics:</font></h3></td></tr>
       <TR>
         <TD align=right>Stone size:</TD>
-        <TD align=left>  
+        <TD align=left>
 <?php $s = $player_row["Stonesize"]; ?>
           <select name="stonesize">
             <option<?php if($s == 13) echo " selected"; ?>>13</option>
@@ -149,15 +153,15 @@ if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
         <TD align=right>Wood color:</TD>
         <TD align=left>
           <?php $s = $player_row["Woodcolor"]; ?>
-          <INPUT type="radio" name="woodcolor" value=1 <?php if($s == 1) echo " checked"; ?>> 
+          <INPUT type="radio" name="woodcolor" value=1 <?php if($s == 1) echo " checked"; ?>>
             <img width=30 height=30 src="images/smallwood1.gif">
-          <INPUT type="radio" name="woodcolor" value=2 <?php if($s == 2) echo " checked"; ?>> 
+          <INPUT type="radio" name="woodcolor" value=2 <?php if($s == 2) echo " checked"; ?>>
             <img width=30 height=30 src="images/smallwood2.gif">
-          <INPUT type="radio" name="woodcolor" value=3 <?php if($s == 3) echo " checked"; ?>> 
+          <INPUT type="radio" name="woodcolor" value=3 <?php if($s == 3) echo " checked"; ?>>
             <img width=30 height=30 src="images/smallwood3.gif">
-          <INPUT type="radio" name="woodcolor" value=4 <?php if($s == 4) echo " checked"; ?>> 
+          <INPUT type="radio" name="woodcolor" value=4 <?php if($s == 4) echo " checked"; ?>>
             <img width=30 height=30 src="images/smallwood4.gif">
-          <INPUT type="radio" name="woodcolor" value=5 <?php if($s == 5) echo " checked"; ?>> 
+          <INPUT type="radio" name="woodcolor" value=5 <?php if($s == 5) echo " checked"; ?>>
             <img width=30 height=30 src="images/smallwood5.gif">
         </TD>
       </TR>
@@ -166,25 +170,50 @@ if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
         <TD align=right>Coordinate sides:</TD>
         <TD align=left>
           <?php $s = $player_row["Boardcoords"]; ?>
-          <INPUT type="checkbox" name="coordsleft" value=1 
+          <INPUT type="checkbox" name="coordsleft" value=1
             <?php if($s & 1) echo " checked"; ?> > Left
-          <INPUT type="checkbox" name="coordsup" value=1 
+          <INPUT type="checkbox" name="coordsup" value=1
             <?php if($s & 2) echo " checked"; ?>>  Up
-          <INPUT type="checkbox" name="coordsright" value=1 
+          <INPUT type="checkbox" name="coordsright" value=1
             <?php if($s & 4) echo " checked"; ?>> Right
 
-          <INPUT type="checkbox" name="coordsdown" value=1 
+          <INPUT type="checkbox" name="coordsdown" value=1
             <?php if($s & 8) echo " checked"; ?>> Down
         </TD>
       </TR>
 
-    </table>  
 
+      <TR>
+        <TD align=right>Game id button:</TD>
+        <TD align=left>
+          <TABLE border=0 cellspacing=0 cellpadding=3>
+            <TR>
+<?php
+for($i=0; $i<=$button_max; $i++)
+{
+   $font_style = 'color : ' . $buttoncolors[$i] .
+   ';  font : bold 100% sans-serif;  text-decoration : none;  width : 90px;';
+   $button_style = 'background-image : url(images/' . $buttonfiles[$i] . ');' .
+   'background-repeat : no-repeat;  background-position : center;';
+
+   echo '<TD valign=middle><INPUT type="radio" name="button" value=' . $i .
+   ( $i == $button_nr ? ' checked' : '') . '></TD>' . "\n" .
+   '<td><table><tr><TD width=92 height=21 align=center STYLE="' . $button_style . $font_style .
+   '">1348</TD><td width=10></td></tr></table></td>';
+
+   if( $i % 4 == 3 )
+      echo "</TR>\n<TR>\n";
+}
+              ?>
+          </TR>
+       </table>
+    </table>
+    <BR>
 
           <input type=submit name="action" value="Change profile">
 
   </FORM>
-</CENTER>  
+</CENTER>
 
 <?php
 

@@ -37,6 +37,17 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
    if( !$logged_in )
       error("not_logged_in");
 
+   $button_nr = $player_row["Button"];
+
+   if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
+      $button_nr = 0;
+
+   $style = 'a.button { color : ' . $buttoncolors[$button_nr] .
+      ';  font : bold 100% sans-serif;  text-decoration : none;  width : 90px; }
+td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
+      'background-repeat : no-repeat;  background-position : center; }';
+
+
    $column_set = $player_row["GamesColumns"];
    $finished_string = ( $finished ? 'finished=1&' : '' );
    $page = "show_games.php?uid=$uid&$finished_string";
@@ -66,7 +77,7 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
    if( !is_numeric($from_row) or $from_row < 0 )
       $from_row = 0;
 
-   $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " . 
+   $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
        "Players.Name, Players.Handle, Players.ID as pid, " .
        "(Black_ID=$uid)+1 AS Color ";
 
@@ -74,15 +85,15 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
       $query .= ", (Black_ID=$uid AND Score<0)*2 + (White_ID=$uid AND Score>0)*2-1 AS Win ";
 
    $query .= "FROM Games,Players WHERE " .
-       ( $finished ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .  
+       ( $finished ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .
        "AND (( Black_ID=$uid AND White_ID=Players.ID ) " .
        "OR ( White_ID=$uid AND Black_ID=Players.ID )) " .
        "ORDER BY $order LIMIT $from_row,$MaxRowsPerPage";
 
    $result = mysql_query( $query );
-   
-   start_page( ($finished ? "Finished" : "Running" ) . " games for " . $user_row["Name"], 
-               true, $logged_in, $player_row );
+
+   start_page( ($finished ? "Finished" : "Running" ) . " games for " . $user_row["Name"],
+               true, $logged_in, $player_row, $style );
 
 
    $show_rows = $nr_rows = mysql_num_rows($result);
@@ -124,12 +135,12 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
-      $color = ( $Color == BLACK ? 'b' : 'w' ); 
+      $color = ( $Color == BLACK ? 'b' : 'w' );
 
       $row_color=3-$row_color;
       echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
-      echo tableelement(1, 'ID', "<A href=\"game.php?gid=$ID\"><font color=$gid_color><b>" .
-                      "$ID</b></font></A>") .
+      echo tableelement(1, 'ID', "<A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;" .
+                        "&nbsp;$ID&nbsp;&nbsp;&nbsp;</A>", true, "class=button width=92" ) .
          tableelement(2, 'sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
                       "sgf</font></A>") .
          tableelement(3, 'Opponent', "<A href=\"userinfo.php?uid=$pid\">" .
@@ -144,9 +155,9 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
 
       if( $finished )
       {
-         $src = '"images/' . 
-             ( $Win == 1 ? 'yes.gif" alt=yes' : 
-               ( $Win == -1 ? 'no.gif" alt=no' : 
+         $src = '"images/' .
+             ( $Win == 1 ? 'yes.gif" alt=yes' :
+               ( $Win == -1 ? 'no.gif" alt=no' :
                  'dash.gif" alt=jigo' ) );
 
          echo tableelement(10, 'Score', score2text($Score, false)) .
@@ -160,7 +171,7 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
 
       echo "</tr>\n";
 
-      if(++$i >= $show_rows) 
+      if(++$i >= $show_rows)
          break;
    }
 
@@ -173,7 +184,7 @@ $table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','K
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
       <tr align=\"center\">
         <td><B><A href=\"userinfo.php?uid=$uid\">User info</A></B></td>\n";
-   if( $uid != $player_row["ID"] ) 
+   if( $uid != $player_row["ID"] )
       echo "        <td><B><A href=\"invite.php?uid=$uid\">Invite this user</A></B></td>\n";
 
    if( $finished )
