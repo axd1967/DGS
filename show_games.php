@@ -75,6 +75,12 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $_GET['desc2'] = 1;
    }
 
+   if(!$_GET['sort2'])
+   {
+      $_GET['sort2'] = 'Lastchanged';
+      $_GET['desc2'] = 1;
+   }
+
    $order = $_GET['sort1'] . ( $_GET['desc1'] ? ' DESC' : '' );
    if( $_GET['sort2'] )
       $order .= "," . $_GET['sort2'] . ( $_GET['desc2'] ? ' DESC' : '' );
