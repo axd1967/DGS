@@ -177,8 +177,7 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
                           'HIDDEN', ($post_type == 'edit' ? 'edit' : 'parent'), $id,
                           'HIDDEN', 'thread', $thread,
                           'HIDDEN', 'forum', $forum ));
-   $form->add_row( array( 'SPACE', 'TEXTAREA', 'Text', 70, 25,
-                          preg_replace('/<goban([^>]*)>/i', '<goban>', $Text) ) );
+   $form->add_row( array( 'SPACE', 'TEXTAREA', 'Text', 70, 25, $Text ) );
 
    if( isset($GoDiagrams) )
       $str = draw_editors($GoDiagrams);

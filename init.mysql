@@ -549,14 +549,15 @@ CREATE TABLE Forumreads (
 
 CREATE TABLE GoDiagrams (
   ID int(11) NOT NULL auto_increment,
-  diagid int(11) default NULL,
-  mid int(11) default NULL,
   Size int(11) default NULL,
   View_Left int(11) default NULL,
   View_Right int(11) default NULL,
   View_Up int(11) default NULL,
   View_Down int(11) default NULL,
+  Date datetime NOT NULL,
+  Saved enum('Y','N') default 'N',
   Data text,
+  SGF text,
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 

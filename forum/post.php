@@ -30,7 +30,7 @@ function post_message($player_row, $moderated)
    $Text = trim($_POST['Text']);
    $Subject = trim($_POST['Subject']);
 
-   $GoDiagrams = create_godiagrams(null, $Text);
+   $GoDiagrams = create_godiagrams($Text);
 
    // -------   Edit old post  ----------
 
@@ -135,7 +135,7 @@ function post_message($player_row, $moderated)
          error("mysql_insert_post");
    }
 
-   save_diagrams($GoDiagrams, $New_ID);
+   save_diagrams($GoDiagrams);
 
    if( $moderated )
    {
@@ -143,7 +143,7 @@ function post_message($player_row, $moderated)
    }
 
    mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1 " .
-                "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
+                "WHERE Forum_ID=$forum AND Thread_ID=$New_ID " .
                 "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
 
 }

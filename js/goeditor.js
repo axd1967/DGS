@@ -503,8 +503,10 @@ function dump_data(nr, formname)
       }
       separator = ';';
    }
-   document.forms[formname].elements['dimensions'+nr].value =
-      size[nr] +','+ (startx[nr]+1) +','+ endx[nr] + ','+ (starty[nr]+1) +','+ endy[nr];
+   //   document.forms[formname].elements['dimensions'+nr].value =
+   //      size[nr] +','+ (startx[nr]+1) +','+ endx[nr] + ','+ (starty[nr]+1) +','+ endy[nr];
+   document.forms[formname].elements['altered'+nr].value =
+       ( move_history[nr].length > 0 ? 'Y' : 'N' );
    document.forms[formname].elements['data'+nr].value = string;
 }
 

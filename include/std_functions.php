@@ -938,9 +938,9 @@ function limit($val, $minimum, $maximum, $default)
 {
    if( !is_numeric($val) )
       return (isset($default) ? $default : $val );
-   else if( $val < $minimum )
+   else if( is_numeric($minimum) and $val < $minimum )
       return $minimum;
-   else if( $val > $maximum )
+   else if( is_numeric($maximum) and $val > $maximum )
       return $maximum;
 
    return $val;

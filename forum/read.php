@@ -248,7 +248,7 @@ function change_depth(&$cur_depth, $new_depth)
       if( $edit == $ID )
          $post_type = 'edit';
 
-      $GoDiagrams = create_godiagrams($ID, $Text);
+      $GoDiagrams = find_godiagrams($Text);
 
       draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text, $GoDiagrams);
 
@@ -257,7 +257,7 @@ function change_depth(&$cur_depth, $new_depth)
          change_depth( $cur_depth, $cur_depth + 1 );
          $Subject = $_POST['Subject'];
          $Text = $_POST['Text'];
-         $GoDiagrams = create_godiagrams(null, $Text);
+         $GoDiagrams = create_godiagrams($Text);
          $post_type = 'preview';
          draw_post($post_type, false, $Subject, $Text, $GoDiagrams);
       }
@@ -280,7 +280,7 @@ function change_depth(&$cur_depth, $new_depth)
       change_depth( $cur_depth, $cur_depth + 1 );
       $Subject = $_POST['Subject'];
       $Text = $_POST['Text'];
-      $GoDiagrams = create_godiagrams(null, $Text);
+      $GoDiagrams = create_godiagrams($Text);
       draw_post('preview', false, $Subject, $Text, $GoDiagrams);
       echo "<tr><td>\n";
       message_box('preview', $thread, $GoDiagrams, $Subject, $Text);

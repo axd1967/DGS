@@ -29,36 +29,29 @@ class GoDiagram
 
    var $Left;
    var $Right;
-   var $Up;
    var $Down;
+   var $Up;
 
    var $Data;
 
 
 
-   function GoDiagram( $_Size=19, $_Left=1, $_Right=19, $_Up=1, $_Down=19, $_Data = null)
+   function GoDiagram( $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19, $_Data = null)
       {
-         $this->Size = $_Size;
-         $this->Left = $_Left;
-         $this->Right = $_Right;
-         $this->Up = $_Up;
-         $this->Down = $_Down;
-         $this->Data = $_Data;
+         $this->set_geometry($_Size, $_Left, $_Right, $_Down, $_Up);
+         if( !empty($_Data ) )
+            $this->set_data($_Data);
+         else
+            $this->clear_data();
       }
 
-   function extract_value($string, $name, $minimum=null, $maximum=null, $default=null)
+   function set_geometry( $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19 )
       {
-         preg_match("/$name=([-\w]+)/i", $string, $matches);
-         return $this->limit( $matches[1], $minimum, $maximum, $default );
-      }
-
-   function set_geometry( $_Size=19, $_Left=1, $_Right=19, $_Up=1, $_Down=19 )
-      {
-         $this->Size = $this->limit($_Size, 2, 25, 19);
-         $this->Left = $this->limit($_Left, 1, $this->Size - 1, 1);
-         $this->Right = $this->limit($_Right, $this->Left + 1, $this->Size, $this->Size);
-         $this->Up = $this->limit($_Up, 1, $this->Size - 1, 1);
-         $this->Down = $this->limit($_Down, $this->Up + 1, $this->Size, $this->Size);
+         $this->Size = limit($_Size, 2, 25, 19);
+         $this->Left = limit($_Left, 1, $this->Size - 1, 1);
+         $this->Right = limit($_Right, $this->Left + 1, $this->Size, $this->Size);
+         $this->Down = limit($_Down, 1, $this->Size - 1, 1);
+         $this->Up = limit($_Up, $this->Down + 1, $this->Size, $this->Size);
       }
 
    function set_data( $_Data )
@@ -71,51 +64,54 @@ class GoDiagram
    function clear_data()
       {
          $s = 'e' . str_repeat(',e', $this->Right - $this->Left);
-         $this->Data = $s . str_repeat(";$s", $this->Down - $this->Up);
+         $this->Data = $s . str_repeat(";$s", $this->Up - $this->Down);
       }
 
-   function set_values_from_post( $nr )
+   function set_values_from_post( $ID )
       {
-         list($_Size, $_Left, $_Right, $_Up, $_Down) =
-            explode( ',', $_POST['dimensions' . $nr], 5 );
-
-         $this->set_geometry($_Size, $_Left, $_Right, $_Up, $_Down);
-
-         $this->set_data( $_POST['data' . $nr] );
+         $this->set_data( $_REQUEST["data$ID"] );
       }
 
    function set_values_from_database_row( $row )
       {
          $this->set_geometry($row['Size'],
                              $row['View_Left'], $row['View_Right'],
-                             $row['View_Up'], $row['View_Down']);
+                             $row['View_Down'], $row['View_Up']);
          $this->set_data( $row['Data'] );
       }
 
    function set_values_from_goban_tag( $s )
       {
-         $this->Size = $this->extract_value($s, 'size', 2, 25, 19);
-         $rect = $this->extract_value($s, 'rect');
-         if(isset($rect))
+         $this->Size = extract_value($s, 'size', 2, 25, $this->Size);
+         $this->set_geometry($this->Size);
+
+         $view = strtolower(extract_value($s, 'view'));
+         if(isset($view))
          {
-            list($dl,$ur) = split('-', $rect);
+            list($dl,$ur) = split('-', $view);
             list($l,$d) = board_coords2number($dl, $this->Size);
             list($r,$u) = board_coords2number($ur, $this->Size);
-
-            $this->Left = $this->limit($l+1, 1, $this->Size - 1, 1);
-            $this->Right = $this->limit($r+1, $this->Left + 1, $this->Size, $this->Size);
-            $this->Up = $this->limit($u+1, 1, $this->Size - 1, 1);
-            $this->Down = $this->limit($d+1, $this->Up + 1, $this->Size, $this->Size);
          }
          else
          {
-            $this->Left = $this->extract_value($s, 'left', 1, $this->Size - 1, 1);
-            $this->Right = $this->extract_value($s, 'right', $this->Left + 1, $this->Size, $this->Size);
-            $this->Up = $this->extract_value($s, 'up', 1, $this->Size - 1, 1);
-            $this->Down = $this->extract_value($s, 'down', $this->Up + 1, $this->Size, $this->Size);
+            $l = extract_value($s, 'left', 1, $this->Size);
+            $r = extract_value($s, 'right', 1, $this->Size);
+            $u = extract_value($s, 'down', 1, $this->Size);
+            $d = extract_value($s, 'up', 1, $this->Size);
          }
 
-         $this->clear_data();
+         if( $l > $r ) swap($l, $r);
+         if( $u < $d ) swap($u, $d);
+
+         $this->Left = 1 + limit($l, 0, $this->Size-2, $this->Left-1);
+         $this->Right = 1 + limit($r, $l, $this->Size-1, $this->Right-1);
+         $this->Down = 1 + limit($d, 0, $this->Size-2, $this->Down-1);
+         $this->Up = 1 + limit($u, $d, $this->Size-1, $this->Up-1);
+
+         if( empty($this->Data) )
+            $this->clear_data();
+         else
+            $this->clear_data(); // TODO: Modify data
       }
 
    function get_empty_image($x, $y, $sz)
@@ -155,9 +151,9 @@ class GoDiagram
 
          $string .= "<table border=0 cellpadding=0 cellspacing=0 $woodstring><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background=\"\">";
 
-         for( $y = $this->Up-1; $y < $this->Down; $y++)
+         for( $y = $this->Down-1; $y < $this->Up; $y++)
          {
-            $row = explode(',', $data_rows[$y-$this->Up+1]);
+            $row = explode(',', $data_rows[$y-$this->Down+1]);
 
             $string .= "<tr>\n";
             for( $x = $this->Left-1; $x < $this->Right; $x++)
@@ -183,21 +179,27 @@ class GoDiagram
    function echo_editor($nr, $woodcolor, $stonesize)
       {
          return '<script language="JavaScript">' . "\n" .
-            "goeditor($nr, {$this->Size}, {$this->Left}, {$this->Right}, {$this->Up}, $this->Down, $stonesize, $woodcolor, 1);\n" .
+            "goeditor($nr, {$this->Size}, {$this->Left}, {$this->Right}, {$this->Down}, $this->Up, $stonesize, $woodcolor, 1);\n" .
             "enter_data($nr, '{$this->Data}');\n" .
             "</script>\n" .
-            '<input type="hidden" name="dimensions'.$nr.'" value="">' .
+            '<input type="hidden" name="altered'.$nr.'" value="">' .
             '<input type="hidden" name="data'.$nr.'" value="">' . "\n";
       }
 
 }
 
 
+function extract_value($string, $name, $minimum=null, $maximum=null, $default=null)
+{
+   preg_match("/$name=([-\w]+)/i", $string, $matches);
+   return limit( $matches[1], $minimum, $maximum, $default );
+}
+
 function callback($matches)
 {
    global $callback_diagrams, $callback_diag_nr;
 
-   return $callback_diagrams[++$callback_diag_nr]->echo_board();
+   return $callback_diagrams[$matches[1]]->echo_board();
 }
 
 function replace_goban_tags_with_boards($text, $diagrams)
@@ -206,70 +208,111 @@ function replace_goban_tags_with_boards($text, $diagrams)
 
    $callback_diag_nr = 0;
    $callback_diagrams = $diagrams;
-   return preg_replace_callback('/<goban([^>]*)>/i', 'callback', $text);
+   return preg_replace_callback('/<goban id=(\d+)>/i', 'callback', $text);
 }
 
-function create_godiagrams($mid, $text)
+function create_godiagrams(&$text)
 {
+   global $NOW;
+
    $diagrams = array();
 
-   if( empty($mid) )
-   {
-      // New message, get info from $_POST or <goban> tag
+   if( !preg_match_all('/<goban([^>]*)>/i', $text, $matches) )
+      return $diagrams;
 
-      if( !preg_match_all('/<goban([^>]*)>/i', $text, $matches) )
-         return $diagrams;
+   $text = preg_replace('/<goban([^>]*)>/i','<goban id=#>', $text);
 
-//      $text = preg_replace('/<goban([^>]*)>/i','<goban>', $text);
 
-      $nr = 0;
-      $post_nr = 0;
-      foreach( $matches[1] as $m )
+   $old_diagrams = array();
+
+   foreach( $matches[1] as $m )
       {
-         $nr++;
-         if( empty($m) )
-         {
-            // Use POST data
-            $post_nr++;
+         $ID = extract_value($m, 'id' );
+         $altered = $_REQUEST["altered$ID"];
+         $save_data = false;
 
-            if( empty($_POST["dimensions$post_nr"]) )
+         if( $ID > 0 )
+         {
+            $result = mysql_query("SELECT * FROM GoDiagrams WHERE ID=$ID");
+
+            if( mysql_num_rows($result) == 1 )
             {
-               error("forum_no_diagram_found");
+               $row = mysql_fetch_array( $result );
+               $diagrams[$row['ID']] = new GoDiagram();
+               $diagrams[$row['ID']]->set_values_from_database_row($row);
             }
-
-            $diagrams[$nr] = new GoDiagram();
-            $diagrams[$nr]->set_values_from_post($post_nr);
          }
-         else
+
+
+         if( !($ID > 0) or empty($row['Saved']) or
+             ($row['Saved']=='Y' and (!preg_match('/^\w*id=\d+\w*$/i', $m) or $altered=='Y')))
          {
-            // New diagram with dimensions from the regexp match
+            $diag = new GoDiagram();
+            $diag->set_values_from_goban_tag($m);
 
-            $diagrams[$nr] = new GoDiagram();
-            $diagrams[$nr]->set_values_from_goban_tag($m);
+            mysql_query("INSERT INTO GoDiagrams SET " .
+                        "Size={$diag->Size}, " .
+                        "View_Left={$diag->Left}, " .
+                        "View_Right={$diag->Right}, " .
+                        "View_Down={$diag->Down}, " .
+                        "View_Up={$diag->Up}, " .
+                        "Date=FROM_UNIXTIME($NOW)") or die(mysql_error());
+
+            $ID = mysql_insert_id();
+            $diagrams[$ID] = $diag;
+            $save_data = true;
+         }
+
+         $text = preg_replace('/<goban id=#>/i',"<goban id=$ID>", $text, 1);
+
+         if( !preg_match('/^\s*id=\d+\s*$/i', $m) )
+         {
+            $diagrams[$ID]->set_values_from_goban_tag($m);
+            $save_data = true;
+         }
+
+         if( $altered == 'Y' )
+         {
+            $diagrams[$ID]->set_values_from_post($ID);
+            $save_data = true;
+         }
+
+         if( $save_data )
+         {
+            mysql_query('UPDATE GoDiagrams SET Data="' . $diagrams[$ID]->Data . '" ' .
+                         "WHERE ID=$ID AND Saved='N' LIMIT 1");
          }
       }
-   }
-   else
-   {
-      $N = preg_match_all('/<goban( id=(\d+))?>/i', $text, $matches);
 
-      if( !($N) )
-         return $diagrams;
+   return $diagrams;
+}
 
-      $result = mysql_query("SELECT * FROM GoDiagrams WHERE mid='$mid'");
+function find_godiagrams($text)
+{
+   $diagram_IDs = array();
+   if( !preg_match_all('/<goban id=(\d+)>/i', $text, $matches) )
+      return $diagrams;
 
-      if( mysql_num_rows($result) !== $N )
-         warn('GoDiagram: Missmatch in number of diagrams');
-
-      while( $row = mysql_fetch_array( $result ) )
+   foreach( $matches[1] as $ID )
       {
-         $diagrams[$row['diagid']] = new GoDiagram();
-         $diagrams[$row['diagid']]->set_values_from_database_row($row);
+         if( $ID > 0 )
+            array_push($diagram_IDs, $ID);
       }
+
+   $result = mysql_query("SELECT * FROM GoDiagrams " .
+                         "WHERE ID IN(" . implode(',',$diagram_IDs) .")")
+      or die(mysql_error());
+
+   $diagrams = array();
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      $diagrams[$row['ID']] = new GoDiagram();
+      $diagrams[$row['ID']]->set_values_from_database_row($row);
    }
 
    return $diagrams;
 }
+
 
 function draw_editors($GoDiagrams)
 {
@@ -291,22 +334,16 @@ function draw_editors($GoDiagrams)
    return $string;
 }
 
-function save_diagrams($GoDiagrams, $mid)
+function save_diagrams($GoDiagrams)
 {
-   if( empty($GoDiagrams[1]) )
-      return;
+   $IDs = array();
+   foreach( $GoDiagrams as $ID => $diagram )
+      if( $ID > 0 )
+         array_push($IDs, $ID);
 
-   $query = 'INSERT INTO GoDiagrams ' .
-      '(diagid, mid, Size, View_Left, View_Right, View_Up, View_Down, Data) VALUES ';
-
-   $c = '';
-   foreach( $GoDiagrams as $nr => $diagram )
-      {
-         $query .= "$c($nr, $mid, {$diagram->Size}, {$diagram->Left}, {$diagram->Right}, {$diagram->Up}, $diagram->Down, '{$diagram->Data}')";
-         $c = ',';
-      }
-
-   mysql_query( $query ) or die(mysql_error());
+   if( count($IDs) > 0 )
+      mysql_query("UPDATE GoDiagrams SET Saved='Y' WHERE ID IN (" . implode(',', $IDs) . ")")
+         or die(mysql_error());
 }
 
 ?>
