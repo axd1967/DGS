@@ -62,6 +62,7 @@ SMALLER TASKS
 
 * Rengo (team go)
 
+* game.php: Show more info for finished games
 
 BUGS
 ----
@@ -69,6 +70,5 @@ BUGS
 * Server sends empty page sometimes.
 
 * Report of strange looking board on some browser.
-
 
 
