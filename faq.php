@@ -53,7 +53,7 @@ require( "include/std_functions.php" );
         }
         else
            echo '<li><A name="Entry' . $row["ID"] . '"></a><b>' . $row['Question'] .
-              "</b>\n<p>\n" . add_line_breaks($row['Answer']) . "<p>\n";
+              "</b>\n<p>\n" . add_line_breaks($row['Answer']) . "<br>&nbsp;<p>\n";
      }
 
 
