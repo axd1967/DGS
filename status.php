@@ -61,7 +61,7 @@ require_once( "include/message_functions.php" );
        <tr><td><b>' . T_('Rank info') . '</b></td>
            <td>' . make_html_safe($player_row["Rank"], true) . '</td></tr>
        <tr><td><b><a href="edit_vacation.php"><font color=black>' .
-      T_('Vacation days left') . '</font></b></td>
+      T_('Vacation days left') . '</font></a></b></td>
            <td>' . sprintf("%d",$player_row["VacationDays"]) . '</td></tr>';
 
    if( $player_row['OnVacation'] > 0 )
