@@ -99,6 +99,8 @@ CREATE TABLE Games (
   White_Start_Rating double default NULL,
   Black_End_Rating double default NULL,
   White_End_Rating double default NULL,
+  Black_Notes text default NULL,
+  White_Notes text default NULL,
   PRIMARY KEY  (ID),
   KEY ToMove_ID (ToMove_ID)
 ) TYPE=MyISAM;
