@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 // connect2mysql();
 
@@ -37,6 +37,18 @@ switch( $err )
          echo "Sorry, you may not pass before all handicap stones are placed.";
      }
      break;
+
+ case("game_finished"):
+   {
+     echo "Sorry, the game has already finished.";
+   }
+   break;
+
+ case("game_not_started"):
+   {
+     echo "Sorry, the game hasn't started yet.";
+   }
+   break;
 
  case("guest_may_not_recieve_messages"):
      {
@@ -91,6 +103,12 @@ switch( $err )
  case("mysql_insert_message"):
      {
          echo "Sorry, the additon of the message to the database seems to have failed.";
+     }
+     break;
+
+ case("mysql_insert_game"):
+     {
+         echo "Sorry, the additon of the game to the database seems to have failed.";
      }
      break;
 

@@ -19,7 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 connect2mysql();
 
@@ -69,7 +69,7 @@ Both the old and the new password will also be valid until your next
 login. Now please login and then change your password to something more 
 rememberable.
  
-' . $HOSTNAME,
+' . $HOSTBASE,
 
 'From: ' . $EMAIL_FROM);
 

@@ -20,14 +20,14 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 connect2mysql();
 
 if( $logout )
 {
     set_cookies("","", true);
-    header("Location: index.php");
+    header("Location: " . $HOSTBASE ."/index.php");
     exit;
 }
 

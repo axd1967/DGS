@@ -20,8 +20,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
-include( "board.php" );
+require( "include/std_functions.php" );
+require( "include/board.php" );
 
 if( !$gid )
 {
@@ -68,9 +68,14 @@ $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and (!$move or $mov
 
 if( $Black_ID == $ToMove_ID )
     $to_move = BLACK;
-else
+else if( $White_ID == $ToMove_ID )
     $to_move = WHITE;
-
+else if( isset($to_move) )
+{       
+  echo $to_move;
+    header("Location: error.php?err=database_corrupted");
+    exit;
+}
 
 if( !$action )
 {
@@ -87,6 +92,24 @@ if( !$action )
                 $action = 'remove';
         }
 }
+
+if( $Status != 'FINISHED' and $Maintime > 0)
+{
+  $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
+
+  if( $to_move == BLACK )
+    {
+      time_remaining($ticks, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+      $Byotype, $Byotime, $Byoperiods, false);
+    }
+  else
+    {
+      time_remaining($ticks, $White_Maintime, $White_Byotime, $White_Byoperiods,
+      $Byotype, $Byotime, $Byoperiods, false);
+    }
+}
+
+
 
 $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or 
                     $action == 'choose_move' or $action == 'move' );
@@ -462,6 +485,51 @@ else if( $action == 'handicap' )
           <td></td><td>Komi: <?php echo( $Komi );?></td>
           <td>Handicap: <?php echo( $Handicap );?></td>
         </tr>
+
+<?php
+if( $Status != 'FINISHED' and $Maintime > 0)
+{
+?>
+      </tr><tr>
+          <td>Main Time:</td><td> <?php echo_time( $White_Maintime );?></td>
+          <td><?php echo_time( $Black_Maintime );?> </td>
+        </tr>
+<?php
+if( $Black_Byotime > 0 or $White_Byotime > 0 )
+    {
+?>
+
+      </tr><tr>
+          <td>Byoyomi:</td>
+          <td> 
+<?php echo_time( $White_Byotime );
+      if( $White_Byotime > 0 ) echo '(' . $White_Byoperiods . ')'; 
+?></td>
+          <td> 
+<?php echo_time( $Black_Byotime );
+      if( $Black_Byotime > 0 ) echo '(' . $Black_Byoperiods . ')'; 
+?></td>
+        </tr>
+
+
+<?php                                                        
+    }
+?>
+      </tr><tr>
+            <td>Time limit:</td><td colspan=2> 
+<?php 
+    echo_time( $Maintime );
+      if( $Byotime <= 0 )
+          echo " without byoyomi";
+      else
+          {
+              echo " with " . $Byotime . '/' . $Byoperiods . ($Byotype == 'JAP' ? ' Japanese' : ' Canadian') . ' byoyomi';
+          }
+?></td>
+        </tr>
+<?php
+}
+?>
     </table>
 <HR>
 <?php
@@ -506,16 +574,14 @@ while( $row = mysql_fetch_array($moves_result) )
             $c = $col . ($Size - $row["PosY"]);
         }
     if( $i == $move )
-        echo '<td  class="r">' . $c . '</td>
-';        
+        printf('<td  class="r">%s</td>
+', $c );
     else if( $s == BLACK )        
-        echo '<td><a class="b" href=game.php?gid=' . $gid . '&move=' .
-            $i . '>' . $c . '</A></td>
-';
+      printf( '<td><a class="b" href=game.php?gid=%d&move=%d>%s</A></td>
+', $gid, $i, $c );
     else
-        echo '<td><a class="w" href=game.php?gid=' . $gid . '&move=' .
-            $i . '>' . $c . '</A></td>
-';
+      printf( '<td><a class="w" href=game.php?gid=%d&move=%d>%s</A></td>
+', $gid, $i, $c );
 
     $i++;    
 }

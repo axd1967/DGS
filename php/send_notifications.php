@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 connect2mysql();
 
@@ -34,7 +34,7 @@ while( $row = mysql_fetch_array( $result ) )
     mail( $row['Email'], 
          'Dragon Go Server notification', 
          'A message or game move is waiting for you at ' . 
-          $HOSTNAME . '/status.php',
+          $HOSTBASE . '/status.php',
           'From: ' . $EMAIL_FROM );
 }
 

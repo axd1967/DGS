@@ -20,8 +20,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
-include( "timezones.php" );
+require( "include/std_functions.php" );
+require( "include/timezones.php" );
 
 connect2mysql();
 
@@ -109,6 +109,24 @@ if( $player_row["flags"] & WANT_EMAIL ) echo "checked " ?> value="true">
         <TD align=right>Timezone:</TD>
         <TD align=left>
           <?php echo html_get_timezone_popup('timezone', $player_row['Timezone']); ?>
+        </TD>        
+      </TR>
+
+      <TR>
+        <TD align=right>Nighttime:</TD>
+        <TD align=left>
+<?php $s = $player_row["Nightstart"]; ?>
+          <select name="nightstart">
+<?php
+          for($i=0; $i<24; $i++)
+{
+    echo "<option"; 
+    if($s == $i) echo " selected";
+    echo " value=$i>";
+    printf('%02d-%02d',$i,($i+9)%24) . "</option>\n";
+}
+?>
+          </select>
         </TD>        
 
           <TD><input type=submit name="action" value="Change profile"></TD>

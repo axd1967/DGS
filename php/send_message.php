@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 connect2mysql();
 
@@ -57,8 +57,8 @@ if( mysql_num_rows( $result ) != 1 )
     exit;
 }
 
-$row = mysql_fetch_row($result);
-$opponent_ID = $row[0];
+$opponent_row = mysql_fetch_array($result);
+$opponent_ID = $opponent_row["ID"];
 $my_ID = $player_row["ID"];
 
 if( $my_ID == $opponent_ID )
@@ -94,14 +94,51 @@ if( $type == "INVITATION" )
             $Black_ID = $my_ID;
         }
 
+    $hours = $timevalue;
+    if( $timeunit != 'hours' )
+        $hours *= 15;
+    if( $timeunit == 'months' )
+        $hours *= 30;
+
+    if( $byoyomitype == 'JAP' )
+        {
+            $byohours = $byotimevalue_jap;
+            if( $timeunit_jap != 'hours' )
+                $byohours *= 15;
+            if( $timeunit_jap == 'months' )
+                $byohours *= 30;
+
+            $byoperiods = $byoperiods_jap;
+        }
+    else
+        {
+            $byohours = $byotimevalue_can;
+            if( $timeunit_can != 'hours' )
+                $byohours *= 15;
+            if( $timeunit_can == 'months' )
+                $byohours *= 30;
+            
+            $byoperiods = $byostones_can;
+        }
+
+    if( $rated != 'Y' )
+      $rated = 'N';
 
     $result = mysql_query( "INSERT INTO Games SET " .
                            "Black_ID=$Black_ID, " .
                            "White_ID=$White_ID, " .
-                           "ToMove_ID = $Black_ID, " .
+                           "ToMove_ID=$Black_ID, " .
                            "Size=$size, " .
                            "Handicap=$handicap, " .
-                           "Komi=$komi" );
+                           "Komi=$komi, " .
+                           "Maintime=$hours, " .
+                           "Byotype='$byoyomitype', " .
+                           "Byotime=$byohours, " .
+                           "Byoperiods=$byoperiods, " .
+                           "Black_Maintime=$hours, " .
+                           "White_Maintime=$hours," 
+                           "Rated=$rated" 
+                           );
 
     if( mysql_affected_rows() != 1)
         {
@@ -114,10 +151,39 @@ if( $type == "INVITATION" )
 }
 else if( $type == "Accept" )
 {
+    $result = mysql_query( "SELECT Black_ID, White_ID FROM Games WHERE ID=$gid" );
+    if( mysql_num_rows($result) != 1)
+        {
+            header("Location: error.php?err=mysql_start_game");
+            exit;
+        }
+    
+    $game_row = mysql_fetch_array($result);
+    if( $opponent_ID == $game_row["Black_ID"] )
+        {
+            $clock_used = $opponent_row["ClockUsed"];
+        }
+    if( $my_ID == $game_row["Black_ID"] )
+        {
+            $clock_used = $player_row["ClockUsed"];
+        }
+    else
+        {
+            header("Location: error.php?err=mysql_start_game");
+            exit;
+        }
+        
+    
+    $ticks = get_clock_ticks($clock_used);
+
     $result = mysql_query( "UPDATE Games SET " .
-                           "Status='PLAY' WHERE ID=$gid AND Status='INVITED'" .
+                           "Status='PLAY', " .
+                           "ClockUsed=$clock_used, " .
+                           "LastTicks=$ticks " .
+                           "WHERE ID=$gid AND Status='INVITED'" .
                            " AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
                            " AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " );
+
     if( mysql_affected_rows() != 1)
         {
             header("Location: error.php?err=mysql_start_game");
@@ -183,7 +249,7 @@ if( $reply )
 
 // Notify reciever about message
 
-if( $row["flags"] & WANT_EMAIL and $row["Notify"] == 'NONE' )
+if( $opponent_row["flags"] & WANT_EMAIL and $opponent_row["Notify"] == 'NONE' )
 {
    $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
                           "WHERE Handle='$to'" );

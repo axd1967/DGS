@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 connect2mysql();
 
@@ -58,8 +58,18 @@ if( $action == "Change profile" )
          "Rank='$rank', " .
          "Stonesize=$stonesize, " .
          "Boardfontsize='$boardfontsize', " .
-         "Flags=$flags, " .
-         "Timezone='$timezone'" .
+         "Flags=$flags, ";
+    if( $nightstart != $player_row["Nightstart"] || 
+        $timezone != $player_row["Timezone"] )
+        {            
+            putenv("TZ=$timezone" );
+
+            $query .= "ClockChanged=NOW(), ";
+            // Should be changed after 15h
+            $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
+        }
+    $query .= "Timezone='$timezone', " .
+         "Nightstart=$nightstart" .
          " WHERE ID=" . $player_row['ID']; 
     
     mysql_query( $query );

@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 connect2mysql();
 
@@ -29,7 +29,22 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 start_page("FAQ", true, $logged_in, $player_row );
 
 
-echo "Sorry, nothing here yet.\n";
+$result = mysql_query("SELECT * FROM FAQ");
+
+echo "<H4>Questions:</H4>\n";
+while( $row = mysql_fetch_array( $result ) )
+{
+    echo '<P><A href="#q' . $row["ID"] . '">' . $row["Question"] . "</A>\n";
+}
+
+mysql_data_seek($result, 0);
+
+echo "<HR><H4>Answers:</H4>\n";
+while( $row = mysql_fetch_array( $result ) )
+{
+    echo '<HR><A name="q' . $row["ID"] . '">' . $row["Question"] .
+        "</A><UL><LI>\n<p>" . $row["Answer"] . "</UL>\n";
+}
 
 end_page();
 ?>

@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 connect2mysql();
 
@@ -144,8 +144,22 @@ if( $type == 'INVITATION' and $info != 'REPLIED' )
       <tr><td>Color: </td><td><?php echo( $col );?></td></tr>
       <tr><td>Komi: </td><td><?php echo( $game_row["Komi"] );?></td></tr>
       <tr><td>Handicap: </td><td><?php echo( $game_row["Handicap"] );?></td></tr>
-    </table>
-<?php
+      <tr><td>Main time: </td><td><?php echo( $game_row["Maintime"] . " hours" );?></td></tr>
+<?php 
+                                                                              
+if( $game_row["Byotype"] == 'JAP' )
+    {
+        echo '        <tr><td>Byo-yomi: </td><td> Japanese: ' . $game_row["Byotime"]  .
+            ' hours per move and ' .$game_row["Byoperiods"] . ' extra periods </td></tr>' . "\n";
+    }
+ else
+     {
+        echo '        <tr><td>Byo-yomi: </td><td> Canadian: ' . $game_row["Byotime"]  .
+            ' hours per ' .$game_row["Byoperiods"] . ' stones </td></tr>' . "\n";
+
+     }
+
+ echo "    </table>\n";
 }
 
 if( $type != 'INVITATION' or $info != 'REPLIED' )

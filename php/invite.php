@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 connect2mysql();
 
@@ -137,6 +137,63 @@ start_page("Send Invitation", true, $logged_in, $player_row );
       </TR>
 
       <TR>
+        <TD align=right>Main time:</TD>
+        <TD align=left>  
+          <input type="text" value="3" name="timevalue" size="5" maxlength="5">
+              <select name="timeunit">
+              <option>hours</option>
+              <option>days</option>
+              <option selected>months</option>
+          </select>
+        </TD>
+      </TR>
+
+
+      <TR>
+        <TD align=right>
+          <input type="radio" name="byoyomitype" value="JAP" checked>
+            Japanese byo-yomi:</TD>
+        <TD align=left>  
+
+            <input type="text" value="1" name="byotimevalue_jap" size="5" maxlength="5">
+              <select name="timeunit_jap">
+                <option>hours</option>
+                <option selected>days</option>
+                <option>months</option>
+              </select>
+
+            with &nbsp;
+            <input type="text" value="10" name="byoperiods_jap" size="5" maxlength="5">
+              extra periods.
+        </TD>
+      </TR>
+
+      <TR>
+        <TD align=right>
+          <input type="radio" name="byoyomitype" value="CAN">
+            Canadian byo-yomi:</TD>
+        <TD align=left>  
+
+            <input type="text" value="15" name="byotimevalue_can" size="5" maxlength="5">
+              <select name="timeunit_can">
+                <option>hours</option>
+                <option selected>days</option>
+                <option>months</option>
+              </select>
+
+            for&nbsp;
+            <input type="text" value="15" name="byostones_can" size="5" maxlength="5">
+              stones.
+        </TD>
+      </TR>
+
+      <TR>
+        <TD align=right>Rated:</TD>
+        <TD align=left>  <input type="radio" name="rated" value="Y" checked></TD>
+
+      </TR>
+
+      <TR>
         <TD></TD>
         <TD>
             <input type=hidden name="type" value="INVITATION">
@@ -144,7 +201,7 @@ start_page("Send Invitation", true, $logged_in, $player_row );
       </TR>
 
     </TABLE>
-
+</FORM>
 
 <?php
 end_page();

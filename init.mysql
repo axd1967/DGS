@@ -1,4 +1,33 @@
 #
+# Table structure for table 'Players'
+#
+CREATE TABLE Players (
+  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  Handle varchar(16) DEFAULT '' NOT NULL,
+  Password varchar(16),
+  Newpassword varchar(16),
+  Sessioncode varchar(32),
+  Sessionexpire datetime,
+  Lastaccess timestamp(14),
+  Name varchar(80),
+  Email varchar(80),
+  Rank varchar(40),
+  Stonesize int(11) DEFAULT '25',
+  Boardfontsize char(2) DEFAULT '+0',
+  Flags set('WANT_EMAIL') DEFAULT '' NOT NULL,
+  Notify enum('NONE','NEXT','NOW','DONE') DEFAULT 'NONE',
+  Adminlevel int(11) DEFAULT '0' NOT NULL,
+  Timezone varchar(40) DEFAULT 'GMT' NOT NULL,
+  Nightstart int(11) DEFAULT '22' NOT NULL,
+  ClockUsed int(11) DEFAULT '22' NOT NULL,
+  ClockChanged datetime,
+  PRIMARY KEY (ID),
+  UNIQUE Handle (Handle),
+  KEY Handle_2 (Handle)
+);
+
+
+#
 # Table structure for table 'Games'
 #
 CREATE TABLE Games (
@@ -16,32 +45,21 @@ CREATE TABLE Games (
   Last_X int(11),
   Last_Y int(11),
   Flags set('Ko'),
-  Score decimal(5,1),
+  Score decimal(7,1),
+  Maintime int(11),
+  Byotype enum('JAP','CAN') DEFAULT 'JAP' NOT NULL,
+  Byotime int(11) DEFAULT '0' NOT NULL,
+  Byoperiods int(11) DEFAULT '1' NOT NULL,
+  Black_Maintime int(11),
+  White_Maintime int(11),
+  Black_Byotime int(11) DEFAULT '0' NOT NULL,
+  White_Byotime int(11) DEFAULT '0' NOT NULL,
+  Black_Byoperiods int(11) DEFAULT '1' NOT NULL,
+  White_Byoperiods int(11) DEFAULT '1' NOT NULL,
+  LastTicks int(11),
+  ClockUsed int(11) DEFAULT '0' NOT NULL,
+  Rated enum('N','Y','Done') DEFAULT 'N' NOT NULL,
   PRIMARY KEY (ID)
-);
-
-#
-# Table structure for table 'Players'
-#
-CREATE TABLE Players (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  Handle varchar(16) DEFAULT '' NOT NULL,
-  Password varchar(16),
-  Newpassword varchar(16),
-  Sessioncode varchar(32),
-  Sessionexpire datetime,
-  Name varchar(80),
-  Email varchar(80),
-  Rank varchar(40),
-  Stonesize int(11) DEFAULT '25',
-  Boardfontsize char(2) DEFAULT '+0',
-  Flags set('WANT_EMAIL') DEFAULT '' NOT NULL,
-  Notify enum('NONE','NEXT','NOW','DONE') DEFAULT 'NONE',
-  Adminlevel int(11) DEFAULT 0 NOT NULL,
-  Timezone varchar(40) DEFAULT 'GMT' NOT NULL,
-  PRIMARY KEY (ID),
-  UNIQUE Handle (Handle),
-  KEY Handle_2 (Handle)
 );
 
 

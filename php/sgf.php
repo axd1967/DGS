@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //function make_sgf($gid)
 //{
 
-include( "std_functions.php" );
+require( "include/std_functions.php" );
 
 connect2mysql();
 
@@ -54,7 +54,7 @@ header( "Content-Disposition: inline; filename=\"$Whitehandle-$Blackhandle-" .
 header( "Content-Description: PHP3 Generated Data" );
 
 echo "(;GM[1]
-PC[Dragon Go Server: $HOSTNAME]
+PC[Dragon Go Server: $HOSTBASE]
 DT[" . date( 'Y-m-d', time() ) . "]
 PB[$Blackname]
 PW[$Whitename]

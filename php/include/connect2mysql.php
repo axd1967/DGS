@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Jim Heiney and Erik Ouchterlony
+Copyright (C) 2001  Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,25 +18,24 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
+require( "include/config.php" );
 
-require( "include/std_functions.php" );
+function connect2mysql()
+{
+    global $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
 
-connect2mysql();
+    $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
+    if (!$dbcnx) 
+      {
+          header("Location: error.php?err=mysql_connect_failed");
+          exit;
+      }
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
+    if (! @mysql_select_db($DB_NAME) ) 
+      {
+          header("Location: error.php?err=mysql_select_db_failed");
+        exit;
+      }    
+}
 
-start_page("Links", true, $logged_in, $player_row );
-
-?>
-
-<p align="left">&nbsp;</p>
-<h3><font color="#800000">Introduction to dragon</font></h3>
-
-Sorry, nothing here yet.
-
-<p align="left">&nbsp;</p>
-
-<?php
-end_page();
 ?>
