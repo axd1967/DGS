@@ -48,6 +48,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
   add_contributor( T_("Developer"), "Ragnar Ouchterlony" );
   add_contributor( T_("Developer"), "Rod Ival" );
   add_contributor( T_("FAQ editor"), "Bjørn Ingmar Berg" );
+  add_contributor( T_("FAQ co-editor"), "Frank Schlüter" );
 
   echo "<tr><td colspan=2>\n";
   echo "<center><h3><font color=$h3_color>" .
