@@ -47,7 +47,7 @@ start_page("Links", true, $logged_in, $player_row );
 
 <p><a href="http://finance.baylor.edu/rich/go/goguild.html">IYT go guild</a> --- Meet other turn based go players
 
-<p><a href="http://www.toriyamaworld.com/hikaru.html">Hikaru no Go</a> --- A manga about go. Recommended!
+<p><a href="http://www.toriyamaworld.com/hikago">Hikaru no Go</a> --- A manga about go. Recommended!
 
 
 
