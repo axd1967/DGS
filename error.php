@@ -342,8 +342,8 @@ The reasons for this problem could be any of the following:
       break;
    }
 
-   if( $mysql_error )
-      echo("<p>Mysql error: " . $mysql_error );
+   if( $mysqlerror )
+      echo("<p>Mysql error: " . $mysqlerror );
 
    end_page();
 }
