@@ -286,7 +286,7 @@ require_once( "include/rating.php" );
      $notes = $White_Notes;
      }
      
-   if ($Size > $player_row["NotesCutoff"])
+   if ($Size >= $player_row["NotesCutoff"])
      {
      $notesheight = $player_row["NotesLargeHeight"];
      $noteswidth = $player_row["NotesLargeWidth"];
