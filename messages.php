@@ -38,7 +38,7 @@ require( "include/std_functions.php" );
       if( $del == 'all' )
       {
          $result = mysql_query("UPDATE Messages SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
-                               "WHERE Flags NOT ( Flags LIKE '%NEW%' OR " .
+                               "WHERE NOT ( Flags LIKE '%NEW%' OR " .
                                "Flags LIKE '%REPLY REQUIRED%' )");
       }
       else
