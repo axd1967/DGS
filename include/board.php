@@ -406,16 +406,13 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
       while( $sub = each($marked_dead) )
       {
          list($dummy, list($X, $Y)) = $sub;
-         if( @$array[$X][$Y] >= MARKED_DAME )
-            $array[$X][$Y] -= OFFSET_MARKED;
-         else
-            $array[$X][$Y] += OFFSET_MARKED;
+         @$array[$X][$Y] ^= OFFSET_MARKED;
       }
    }
 
    $result2 = mysql_query( "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" );
 
-   if( mysql_num_rows($result2) == 1 )
+   if( @mysql_num_rows($result2) == 1 )
    {
       $row = mysql_fetch_array($result2);
       $msg = $row["Text"];
@@ -718,7 +715,7 @@ function check_consistency($gid)
 
    echo "Game $gid: ";
    $result = mysql_query("SELECT * from Games where ID=$gid");
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
    {
       echo "Doesn't exist?<br>\n";
       return false;
@@ -958,7 +955,7 @@ function fix_corrupted_move_table($gid)
 {
    $result = mysql_query("SELECT Moves FROM Games WHERE ID=$gid");
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("mysql_query_failed");
 
    extract(mysql_fetch_array($result));
@@ -966,7 +963,7 @@ function fix_corrupted_move_table($gid)
 
    $result = mysql_query("SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid");
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("mysql_query_failed");
 
    extract(mysql_fetch_array($result));
