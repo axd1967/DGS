@@ -56,10 +56,8 @@ function mail_link( $nam, $lnk)
 }
 
 //see also make_html_safe()
-function mail_strip_html( $str)
-{
-   $tmp = '[\x1-\x20]*=[\x1-\x20]*(\"|\'|)([^>\x1-\x20]*?)';
-   $reps = array(
+$tmp = '[\x1-\x20]*=[\x1-\x20]*(\"|\'|)([^>\x1-\x20]*?)';
+$strip_html_table = array(
     "%&nbsp;%si" => " ",
     "%<A([\x1-\x20]+((href$tmp\\4)|(\w+$tmp\\7)|(\w+)))*[\x1-\x20]*>(.*?)</A>%sie"
        => "mail_link('\\10','\\5')",
@@ -70,11 +68,13 @@ function mail_strip_html( $str)
     "%[\x1-\x20]*<LI[\x1-\x20]*/?>[\x1-\x20]*%si"
        => "\n - ",
    );
-
-   $str = strip_tags($str, '<a><br><p><ul><ol><li><goban>');
-   $str = preg_replace(array_keys($reps), array_values($reps), $str);
-   $str = strip_tags($str, '<goban>');
-   $str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
+function mail_strip_html( $str)
+{
+ global $strip_html_table;
+   $str = strip_tags( $str, '<a><br><p><ul><ol><li><goban>');
+   $str = preg_replace( array_keys($strip_html_table), array_values($strip_html_table), $str);
+   $str = strip_tags( $str, '<goban>');
+   $str = html_entity_decode( $str, ENT_QUOTES, 'iso-8859-1');
    return $str;
 }
 
@@ -140,7 +140,9 @@ if( !$is_down )
                $msg .= "Game ID: ".mail_link($ID,"game.php?gid=$ID")."\n";
                $msg .= "Black: ".mail_strip_html("$Blackname ($Blackhandle)")."\n";
                $msg .= "White: ".mail_strip_html("$Whitename ($Whitehandle)")."\n";
-               $msg .= "Move $Moves: ".number2board_coords($Last_X, $Last_Y, $Size)."\n";
+               $tmp = number2board_coords($Last_X, $Last_Y, $Size);
+               if( empty($tmp) ) $tmp = $Status;
+               $msg .= "Move $Moves: $tmp\n";
 
                if( !(strpos($SendEmail, 'BOARD') === false) )
                   $msg .= draw_ascii_board($Size, $array, $ID, $Last_X, $Last_Y, 15,
