@@ -200,21 +200,24 @@ function echo_rating($rating, $show_percent=true)
    if( !isset($rating) ) return '';
 
    $rank_val = round($rating/100);
+   $string = '';
 
    if( $rank_val > 20.5 )
    {
-      echo ( $rank_val - 20 ) . " dan";
+      $string .= ( $rank_val - 20 ) . " dan";
    }
    else
    {
-      echo ( 21 - $rank_val ) . " kyu";
+      $string .= ( 21 - $rank_val ) . " kyu";
    }
 
    if( $show_percent ) 
    {
       $percent = round($rating - $rank_val*100);
-      echo ' ('. ( $percent > 0 ? '+' : '') . $percent . '%)';
+      $string .= ' ('. ( $percent > 0 ? '+' : '') . $percent . '%)';
    }
+
+   return $string;
 }
 
 function read_rating($string)

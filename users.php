@@ -31,6 +31,24 @@ include( "include/table_columns.php" );
    if( !$logged_in )
       error("not_logged_in");
 
+   $column_set = explode(',', $player_row["UsersColumns"]);
+   $page = "users.php?";
+
+   if( $del or $add )
+   {
+      if( $add )
+         array_push($column_set,$add);
+      if( $del and is_integer($s=array_search($del, $column_set, true)) )
+         array_splice($column_set, $s, 1);
+
+      $query = "UPDATE Players " . 
+          "SET UsersColumns='" . implode(',', $column_set) . "' " .
+          "WHERE ID=" . $player_row["ID"];
+      
+      mysql_query($query);
+
+   }
+
    if(!$sort1)
       $sort1 = 'ID';
 
@@ -46,20 +64,32 @@ include( "include/table_columns.php" );
 
    echo "<table border=3 align=center>\n";
    echo "<tr>\n" .
-      tablehead('Name','Name','users.php?') .
-      tablehead('UserId','Handle','users.php?') .
-      "<th>Rank info</th>" .
-      tablehead('Rating','Rating','users.php?', true) .
-      "<th>" . _("Open for matches?") . "</th>\n</tr>\n";
+      tablehead('#', 'ID') .
+      tablehead('Name', 'Name') .
+      tablehead('UserID', 'Handle') .
+      tablehead('Rank Info') .
+      tablehead('Rating', 'Rating', true) .
+      tablehead('Open for matches?') . 
+      tablehead('Games #/w/l/r') .
+      tablehead('Rated #/w/l') .
+      tablehead('Activity', 'Activity', true) .
+      "</tr>\n";
 
    while( $row = mysql_fetch_array( $result ) )
    {
-      echo '<tr><td><A href="userinfo.php?uid=' . $row["ID"] . '">' . $row["Name"] . '</A></td>' .
-         '<td><A href="userinfo.php?uid=' . $row["ID"] . '">' . $row["Handle"] . '</A></td>' .
-         '<td>' . $row["Rankinfo"] . '</td><td>';     
-      echo_rating( $row["Rating"] ); 
-      echo '</td><td>' . $row["Open"] . '</td></tr>
-';
+      $ID = $row['ID'];
+
+      echo "<tr>\n" .
+         tableelement('#', "<A href=\"userinfo.php?uid=$ID\">$ID</A>") .
+         tableelement('Name', "<A href=\"userinfo.php?uid=$ID\">" . $row['Name'] . "</A>") .
+         tableelement('UserID', "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>") .
+         tableelement('Rank Info', $row['Rankinfo']) .
+         tableelement('Rating', echo_rating($row['Rating'])) .
+         tableelement('Open for matches?', $row['Open']) .
+         tableelement('Games #/w/l/r', '??') .
+         tableelement('Rated #/w/l/r', '??') .
+         tableelement('Activity', $row['Activity']) .
+         "</tr>\n";
    }
 
    echo "</table>\n";

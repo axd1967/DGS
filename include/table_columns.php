@@ -18,9 +18,17 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-function tablehead($Head, $sort_string, $page, $desc_default=false)
+function tablehead($Head, $sort_string=NULL, $desc_default=false)
 {
-   global $sort1, $desc1, $sort2, $desc2;
+   global $sort1, $desc1, $sort2, $desc2,$column_set,$page;
+
+   if( !in_array($Head,$column_set) )
+      return;
+
+   if( !$sort_string )
+      return "<th>" . _($Head) .
+         "</font></A><a href=\"" . $page . "del=" . urlencode($Head) .
+         "\"><sup><font size=\"-1\" color=red>x</font></sup></a></th>\n";
 
    if( $sort_string == $sort1 )
    {
@@ -37,10 +45,20 @@ function tablehead($Head, $sort_string, $page, $desc_default=false)
       $d2 = $desc1 xor $desc_default;
    }
 
-   $string = "<th><A href=\"$page" . order_string($s1,$d1,$s2,$d2) . 
-       "\"><font color=black>" .  _($Head) . "</font></A><sub><img src=\"images/cross.gif\" alt=\"delete column\"></sup></th>\n";
+   return "<th><A href=\"$page" . order_string($s1,$d1,$s2,$d2) . 
+      "\"><font color=black>" .  _($Head) . 
+      "</font></A><a href=\"" . $page . "del=" . urlencode($Head) . 
+      "\"><sup><font size=\"-1\" color=red>x</font></sup></a></th>\n";
+}
 
-   return $string;
+function tableelement($Head, $string)
+{
+   global $column_set,$page;
+
+   if( !in_array($Head,$column_set) )
+      return;
+
+   return "<td>$string</td>\n";
 }
 
 function order_string($sortA, $descA, $sortB, $descB)

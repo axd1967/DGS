@@ -72,7 +72,7 @@ start_page("Edit profile", true, $logged_in, $player_row );
         <TD align=right>Rating:</TD><TD align=left>
         <?php if( $player_row["RatingStatus"] != 'RATED' ) 
 {?>
-        <input type="text" name="rating" value="<?php echo_rating( $player_row["Rating"], true); ?>" size="16" maxlength="16">
+        <input type="text" name="rating" value="<?php echo echo_rating( $player_row["Rating"], true); ?>" size="16" maxlength="16">
 <?php
 
  $vals = array('dragonrating', 'eurorank', 'eurorating','aga', 'agarating', 'igs', 'igsrating',

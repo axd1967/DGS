@@ -91,24 +91,24 @@ include( "include/table_columns.php" );
       next_prev("show_games.php?uid=$uid&$finished_string&", $from_row+$RowsPerPage, true);
 
    echo "</td>\n</tr>\n<tr><td colspan=2><table border=3>\n<tr>\n" .
-      tablehead('gid', 'ID', "show_games.php?uid=$uid&$finished_string", true) .
-      "<th>sgf</th>\n" .
-      tablehead('Opponent', 'Name', "show_games.php?uid=$uid&$finished_string") .
-      tablehead('Color', 'Color', "show_games.php?uid=$uid&$finished_string") .
-      tablehead('Size', 'Size', "show_games.php?uid=$uid&$finished_string", true) .
-      tablehead('Handicap', 'Handicap', "show_games.php?uid=$uid&$finished_string") .
-      tablehead('Komi', 'Komi', "show_games.php?uid=$uid&$finished_string");
+      tablehead('gid', "show_games.php?uid=$uid&$finished_string", 'ID', true) .
+      tablehead('sgf', "show_games.php?uid=$uid&$finished_string") .
+      tablehead('Opponent', "show_games.php?uid=$uid&$finished_string", 'Name') .
+      tablehead('Color', "show_games.php?uid=$uid&$finished_string", 'Color') .
+      tablehead('Size', "show_games.php?uid=$uid&$finished_string", 'Size', true) .
+      tablehead('Handicap', "show_games.php?uid=$uid&$finished_string", 'Handicap') .
+      tablehead('Komi', "show_games.php?uid=$uid&$finished_string", 'Komi');
 
    if( $finished )
    {
       echo "<th>Score</th>\n" .
-         tablehead('win?', 'Win', "show_games.php?uid=$uid&$finished_string", true) .
-         tablehead('End date', 'Lastchanged', "show_games.php?uid=$uid&$finished_string", true);
+         tablehead('win?', "show_games.php?uid=$uid&$finished_string", 'Win', true) .
+         tablehead('End date', "show_games.php?uid=$uid&$finished_string", 'Lastchanged', true);
    }
    else
    {
-      echo tablehead('Moves', 'Moves', "show_games.php?uid=$uid&$finished_string", true) .
-         tablehead('Last move', 'Lastchanged', "show_games.php?uid=$uid&$finished_string", true);
+      echo tablehead('Moves', "show_games.php?uid=$uid&$finished_string", 'Moves', true) .
+         tablehead('Last move', "show_games.php?uid=$uid&$finished_string", 'Lastchanged', true);
    }
 
    $i=0;

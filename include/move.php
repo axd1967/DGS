@@ -285,8 +285,8 @@ function draw_game_info()
 
         </tr><tr>
           <td>Rating:</td>
-          <td><?php echo_rating( $Whiterating ); ?></td>
-          <td><?php echo_rating( $Blackrating ); ?></td>
+          <td><?php echo echo_rating( $Whiterating ); ?></td>
+          <td><?php echo echo_rating( $Blackrating ); ?></td>
 
         </tr><tr>
           <td>Rank info:</td>

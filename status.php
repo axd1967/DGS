@@ -44,7 +44,7 @@ require( "include/rating.php" );
        <tr><td><b>' . _("Name") . '</b></td> <td>' . $player_row["Name"] . '</td></tr>
        <tr><td><b>' . _("Userid") . '</b></td> <td>' . $player_row["Handle"] . '</td></tr>
        <tr><td><b>' . _("Open for matches?") . '</b></td> <td>' . $player_row["Open"] . '</td></tr>
-       <tr><td><b>' . _("Rating") . '</b></td> <td>';  echo_rating($player_row["Rating"]); 
+       <tr><td><b>' . _("Rating") . '</b></td> <td>' . echo_rating($player_row["Rating"]); 
    echo '</td></tr>
        <tr><td><b>Rank info</b></td> <td>' . $player_row["Rank"] . '</td></tr>
     </table>
@@ -137,6 +137,7 @@ require( "include/rating.php" );
    }
 
    echo "</table>\n";
+   echo "</center>";
 
 
    echo "
@@ -150,7 +151,6 @@ require( "include/rating.php" );
     </table>
 ";
 
-   echo "</center>";
    end_page(false);
 }
 ?>

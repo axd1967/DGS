@@ -61,7 +61,7 @@ require( "include/rating.php" );
        <tr><td><b>Name</b></td> <td>" . $row["Name"] . "</td></tr>
        <tr><td><b>Userid</b></td> <td>" . $row["Handle"] . "</td></tr>
        <tr><td><b>Open for matches</b></td> <td>" . $row["Open"] . "</td></tr>
-       <tr><td><b>Rating</b></td> <td>";  echo_rating($row["Rating"]); echo "</td></tr>
+       <tr><td><b>Rating</b></td> <td>" . echo_rating($row["Rating"]) . "</td></tr>
        <tr><td><b>Rank info</b></td> <td>" . $row["Rank"] . "</td></tr>
        <tr><td><b>Registration date</b></td> <td>" . $row["Registerdate"] . "</td></tr>
        <tr><td><b>Last access</b></td> <td>" . date($date_fmt,$row["Time"]) . "</td></tr>
