@@ -29,8 +29,8 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
    if( !($woodcolor >= 1 and $woodcolor <= 5 or $woodcolor >= 11 and $woodcolor <= 15) )
       $woodcolor = 1;
 
-   if( !( $coord_borders >= 0 and $coord_borders <= 31) )
-      $coord_borders = 31;
+   if( !( $coord_borders >= 0 and $coord_borders <= 63) )
+      $coord_borders = 63;
 
    $smooth_edge = ( ($coord_borders & SMOOTH_EDGE) and ($woodcolor < 10) );
 
@@ -181,6 +181,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
       if( $rownr == $Size - $rownr + 1 ) $hoshi_r = 2;
 
+      $letter = 'a';
       $letter_c = 'a';
       for($colnr = 0; $colnr < $Size; $colnr++ )
       {
@@ -272,6 +273,9 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
             $alt = ( $stone == BLACK ? '#' : '@' );
          }
 
+         if( $coord_borders & OVER )
+            $alt.= "\" title=\"$letter$rownr";
+
          if( $may_play and !$no_click and
              ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
             echo "$str2$letter_c$letter_r$str3$alt\" SRC=$stone_size/$type$str4";
@@ -279,6 +283,8 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
             echo "$str1$alt\" SRC=$stone_size/$type$str5";
 
          $letter_c ++;
+         $letter++;
+         if( $letter == 'i' ) $letter++;
       }
 
       if( $smooth_edge )

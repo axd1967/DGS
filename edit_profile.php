@@ -187,7 +187,9 @@ require_once( "include/countries.php" );
                                   'CHECKBOX', 'coordsleft', 1, T_('Left'), ($s & LEFT),
                                   'CHECKBOX', 'coordsup', 1, T_('Up'), ($s & UP),
                                   'CHECKBOX', 'coordsright', 1, T_('Right'), ($s & RIGHT),
-                                  'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & DOWN) ) );
+                                  'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & DOWN),
+                                  'CHECKBOX', 'coordsover', 1, T_('Over'), ($s & OVER),
+                                ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
                                   'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
 

@@ -56,7 +56,7 @@ require_once( "include/countries.php" );
 
    $boardcoords = ( @$_GET['coordsleft'] ? LEFT : 0 ) + ( @$_GET['coordsup'] ? UP : 0 ) +
       ( @$_GET['coordsright'] ? RIGHT : 0 ) + ( @$_GET['coordsdown'] ? DOWN : 0 ) +
-      ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
+      ( @$_GET['coordsover'] ? OVER : 0 ) + ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
 
    $menudirection = ( @$_GET['menudir'] == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 

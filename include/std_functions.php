@@ -140,6 +140,7 @@ define("UP",0x02);
 define("RIGHT",0x04);
 define("DOWN",0x08);
 define("SMOOTH_EDGE",0x10);
+define("OVER",0x20);
 
 define('MIN_BOARD_SIZE',5);
 define('MAX_BOARD_SIZE',25);
