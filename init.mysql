@@ -210,7 +210,7 @@ CREATE TABLE MessageCorrespondents (
   KEY mid (mid),
   KEY uid (uid),
   KEY Folder_nr (Folder_nr,uid)
-) TYPE=My
+) TYPE=MyISAM;
 
 
 #
@@ -571,7 +571,7 @@ CREATE TABLE FAQ (
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
-INSERT INTO FAQ VALUES (1,1,NULL,0,0,0,NULL,NULL);
+INSERT INTO FAQ VALUES (1,1,NULL,0,NULL,NULL);
 
 
 #
