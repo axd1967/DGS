@@ -1,7 +1,7 @@
-To use the translation scripts her just cd to the base directory of
+To use the translation scripts here just cd to the base directory of
 DragonGoServer and do
 
 $ scripts/get_update.sh
 
-The result should be place in include/translation_info.php instead of
+The result should be placed in include/translation_info.php instead of
 the contents of the old $translation_info array.

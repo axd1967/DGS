@@ -364,7 +364,7 @@ require( "include/std_functions.php" );
 
       case("wrong_number_of_handicap_stone"):
       {
-         echo T_("Wrong, number of handicap stones");
+         echo T_("Wrong number of handicap stones");
       }
       break;
 
