@@ -31,7 +31,7 @@ SMALLER TASKS
 
 * Better 'Open' options.
 
-* User search.
+* User/game search.
 
 * go ascii->graphics in messages
 
@@ -61,10 +61,8 @@ SMALLER TASKS
 
 * Delete game when it's the opponents turn.
 
-* List of recently finished games.
-
 * Help system.
 
-* Observed games list.
-
-* Messages: Delete many. Mark messages to stay at status.
+* Messages:
+        Delete many.
+        Mark messages to stay at status.
