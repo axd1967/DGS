@@ -207,13 +207,19 @@ class Tournament
                }
             }
 
-         $Rounds = array();
+         $this->Rounds = array();
          if( isset($row['FirstRound']) )
          {
-            array_push($Rounds, $row['FirstRound']);
+            array_push($this->Rounds, $row['FirstRound']);
          }
 
-         $StartOfApplicationPeriod = $row['SOAP_Unix'];
+         $this->StartOfApplicationPeriod = $row['SOAP_Unix'];
+         $this->StrictEndOfApplicationPeriod =
+            ($this->StrictEndOfApplicationPeriod == 'Y' ? true : false);
+         $this->ReceiveApplicationsAfterStart =
+            ($this->ReceiveApplicationsAfterStart == 'Y' ? true : false);
+         $this->Rated = ($this->Rated == 'Y' ? true : false);
+         $this->WeekendClock = ($this->WeekendClock == 'Y' ? true : false);
 
          $this->ListOfOrganizers = array();
          $orgresult = mysql_query( "SELECT * FROM TournamentOrganizers " .

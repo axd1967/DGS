@@ -96,10 +96,16 @@ function make_applicationperiod_string( $app_p, $soap )
    display_row_of_information( T_('Applicationperiod'),
                                make_applicationperiod_string( $t->Applicationperiod,
                                                               $t->StartOfApplicationPeriod ) );
+   display_row_of_information( T_('Strict end of application period?'),
+                               ($t->StrictEndOfApplicationPeriod ? T_("Yes") : T_("No")) );
+   display_row_of_information( T_('Will tournament receive apllications after start?'),
+                               ($t->ReceiveApplicationsAfterStart ? T_("Yes") : T_("No")) );
+   display_row_of_information( T_('Rated tournament games?'),
+                               ($t->Rated ? T_("Yes") : T_("No")) );
+   display_row_of_information( T_('Weekend clock in tournament games?'),
+                               ($t->WeekendClock ? T_("Yes") : T_("No")) );
 
    echo "</table>\n";
-
-   print_r( $t );
 
    end_page(false);
 }

@@ -270,7 +270,7 @@ CREATE TABLE Tournament (
   ReceiveApplicationsAfterStart enum('N','Y') NOT NULL default 'N',
   MinParticipants int(11) NOT NULL default '2',
   MaxParticipants int(11) default NULL,
-  Rated enum('N','Y','Done') NOT NULL default 'N',
+  Rated enum('N','Y') NOT NULL default 'N',
   WeekendClock enum('N','Y') NOT NULL default 'Y',
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
