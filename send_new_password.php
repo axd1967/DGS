@@ -93,6 +93,8 @@ rememberable.
 
 
    $msg = urlencode("New password sent!");
-   jump_to("status.php?msg=$msg");
+   if( $logged_in )
+      jump_to("status.php?msg=$msg");
+   jump_to("index.php?msg=$msg");
 }
 ?>
