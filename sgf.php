@@ -68,8 +68,12 @@ function sgf_echo_point( $marks, $prop="MA" )
 
    $use_HA = false;
    $use_AB_for_handicap = true;
-   $sgf_trim_level = -1; //-1= skip ending pass, -2= keep them
-   $sgf_pass_highlight = 1; //0=no highlight, 1=with Name property, 2=in comments, 3=both
+
+   //-1= skip ending pass, -2= keep them, -999= keep everything
+   $sgf_trim_level = -1;
+
+   //0=no highlight, 1=with Name property, 2=in comments, 3=both
+   $sgf_pass_highlight = 1;
 
 //As board size may be > 'tt' coord, we can't use [tt] for pass moves
 // so we use [] and, then, we need at least sgf_version = 4 (FF[4])
@@ -180,15 +184,16 @@ function sgf_echo_point( $marks, $prop="MA" )
    $points=array();
    while( $row = mysql_fetch_array($result) )
    {
-      $coord = chr($row["PosX"] + ord('a')) . chr($row["PosY"] + ord('a'));
+      extract($row);
+      $coord = chr($PosX + ord('a')) . chr($PosY + ord('a'));
 
-      if( $row["Stone"] == WHITE or $row["Stone"] == BLACK )
+      if( $Stone == WHITE or $Stone == BLACK )
       {
 
-         if( $row["MoveNr"] <= $Handicap && $use_AB_for_handicap )
+         if( $MoveNr <= $Handicap && $use_AB_for_handicap )
          {
             $points[$coord]=$coord;
-            if( $row["MoveNr"] == $Handicap)
+            if( $MoveNr == $Handicap)
             {
                sgf_echo_point( $points, "\nPL[W]AB");
                unset($points);
@@ -201,7 +206,7 @@ function sgf_echo_point( $marks, $prop="MA" )
 
             echo( "\n;" ); //Node start
 
-            if ($row["PosX"] < -1 )
+            if ($PosX < -1 )
             { //score steps
                sgf_echo_point( $points);
             }
@@ -209,27 +214,27 @@ function sgf_echo_point( $marks, $prop="MA" )
             { //pass, normal move or non AB handicap
                unset($points);
 
-               if( $row["MoveNr"] > $Handicap)
+               if( $MoveNr > $Handicap)
                {
                   $movenum++;
-                  if( $row["MoveNr"] != $movenum+$movesync)
+                  if( $MoveNr != $movenum+$movesync)
                   {
-                     //usefull when non AB handicap or resume after SCORE
+                     //usefull when "non AB handicap" or "resume after SCORE"
                      echo "MN[$movenum]";
-                     $movesync= $row["MoveNr"]-$movenum;
+                     $movesync= $MoveNr-$movenum;
                   }
                }
 
-               echo( $row["Stone"] == WHITE ? "W" : "B" );
+               echo( $Stone == WHITE ? "W" : "B" );
             
-               if( $row["PosX"] == -1 )  //pass move
+               if( $PosX == -1 )  //pass move
                {
                   echo "[]"; //do not use [tt]
 
                   if( $sgf_pass_highlight & 1 )
                      echo "N[PASS]";
 
-                  else if ( $sgf_pass_highlight & 2 )
+                  if ( $sgf_pass_highlight & 2 )
                      $node_com .= "\nPASS";
                }
                else //move or non AB handicap
@@ -246,19 +251,19 @@ function sgf_echo_point( $marks, $prop="MA" )
             sgf_echo_comment( $node_com );
             $node_com = "";
          }
-         if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'mis", $row["Text"],
+         if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'mis", $Text,
                                           $matches, PREG__SET_ORDER) )
          {
             for($i=0; $i<$nr_matches; $i++)
             {
-               $node_com .= "\n" . ( $row["Stone"] == WHITE ? $Whitename : $Blackname )
+               $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
                         . ": " . trim($matches[2][$i]) ;
             }
          }
 
       }
-      else if ($row["Stone"] == WHITE_DEAD or $row["Stone"] == BLACK_DEAD)
-      { // toggle dead marks
+      else if ($Stone == MARKED_BY_WHITE or $Stone == MARKED_BY_BLACK)
+      { // toggle marks
          if (isset($points[$coord]))
             unset($points[$coord]);
          else
@@ -268,10 +273,16 @@ function sgf_echo_point( $marks, $prop="MA" )
       $sgf_trim_nr--;
    }
 
-   $i= false;
+   if ($sgf_trim_nr == -1)
+   {
+      sgf_echo_comment( $node_com );
+      $node_com = "";
+   }
+
    if ( $Status == 'FINISHED')
    {
       //from last skipped SCORE/SCORE2 dead stones
+      //By now, MARKED_DAME are also marked with AE[]: minor problem.
       $i= sgf_echo_point( $points, "\n;AE"); //and territories with TB+TW ?
 
       // highlighting result in last comments:
@@ -280,12 +291,12 @@ function sgf_echo_point( $marks, $prop="MA" )
       {
          $node_com.= "\nResult: " . score2text($Score, false, true) ;
       }
-   }
-   if ( $node_com )
-   {
-      if ( !$i )
-         echo "\n;" ;
-      sgf_echo_comment( $node_com );
+      if ( $node_com )
+      {
+         if ( !$i )
+            echo "\n;" ;
+         sgf_echo_comment( $node_com );
+      }
    }
 
    echo "\n)\n";

@@ -160,6 +160,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       case 'move':
       {
          check_move();
+  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
+  //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
          $query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
@@ -338,6 +340,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             error("invalid_action");
 
          check_done();
+  //ajusted globals by check_done(): $array, $score, $prisoners;
+  //here, $prisoners list the marked points (from $stonestring)
 
          $nr_prisoners = count($prisoners);
 
@@ -353,13 +357,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
-/*
-  WARNING: the formula insert the BLACK_DEAD or WHITE_DEAD constants but:
-  - BLACK_DEAD flag all the stones (black or white) toggled (dead/alive) by !!WHITE!!
-  - WHITE_DEAD flag all the stones (black or white) toggled (dead/alive) by !!BLACK!!
-  so the constants meaning is a little spurious.
-*/
-            $query .= "($gid, $Moves, " . (9 - $to_move ) . ", $x, $y, 0), ";
+            $query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
          }
 
          $query .= "($gid, $Moves, $to_move, -2, NULL, $hours) ";

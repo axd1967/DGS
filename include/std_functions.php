@@ -87,24 +87,36 @@ $cookie_pref_rows = array('Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoord
 
 $button_max = 10;
 
+
+define('ALLOW_SEKI_MARK', true);
+
 define("NONE", 0);
 define("BLACK", 1);
 define("WHITE", 2);
-define("DAME", 3);
-define("BLACK_TERRITORY", 4);
-define("WHITE_TERRITORY", 5);
 
+define("OFFSET_TERRITORY", 3);
+define("DAME", OFFSET_TERRITORY+NONE);
+define("BLACK_TERRITORY", OFFSET_TERRITORY+BLACK);
+define("WHITE_TERRITORY", OFFSET_TERRITORY+WHITE);
+
+define("OFFSET_MARKED", 6);
+define("MARKED_DAME", OFFSET_MARKED+NONE);
+define("BLACK_DEAD", OFFSET_MARKED+BLACK);
+define("WHITE_DEAD", OFFSET_MARKED+WHITE);
+
+/* Not yet used:
 define("PASS_BLACK", 3);
 define("PASS_WHITE", 4);
 define("DONE_BLACK", 5);
 define("DONE_WHITE", 6);
-
-define("BLACK_DEAD", 7);
-define("WHITE_DEAD", 8);
+*/
 
 define('SCORE_RESIGN', 1000);
 define('SCORE_TIME', 2000);
-define('SCORE_NORESULT', 10000);
+
+//Database values:
+define("MARKED_BY_WHITE", 7);
+define("MARKED_BY_BLACK", 8);
 
 define("KO", 1);
 

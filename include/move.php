@@ -20,6 +20,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
+
+//ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
+//return: $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 function check_move($print_error=true)
 {
    global $coord, $colnr, $rownr, $Size, $array, $to_move, $Black_Prisoners, $White_Prisoners,
@@ -42,7 +45,7 @@ function check_move($print_error=true)
 
 
    $prisoners = array();
-   check_prisoners($colnr,$rownr, 3-$to_move, $Size, $array, $prisoners);
+   check_prisoners($colnr,$rownr, WHITE+BLACK-$to_move, $Size, $array, $prisoners);
 
 
    $nr_prisoners = count($prisoners);
@@ -136,6 +139,8 @@ function check_handicap()
 
 }
 
+//ajusted globals by check_done(): $array, $score, $prisoners;
+//return: $prisoners list the marked points (from $stonestring)
 function check_done()
 {
    global $stonestring, $Size, $array, $prisoners, $Komi, $score,
@@ -143,7 +148,7 @@ function check_done()
 
    if( !$stonestring ) $stonestring = "1";
 
-   // add killed stones to array
+   // toggle marked stones and marked dame to array
 
    $l = strlen( $stonestring );
    $index = array();
@@ -161,10 +166,10 @@ function check_done()
          $index[$colnr][$rownr] = TRUE;
 
       $stone = $array[$colnr][$rownr];
-      if( $stone == BLACK or $stone == WHITE )
-         $array[$colnr][$rownr] = $stone + 6;
-      else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD )
-         $array[$colnr][$rownr] = $stone - 6;
+      if( $stone == BLACK or $stone == WHITE or $stone == NONE ) //NONE for MARKED_DAME
+         $array[$colnr][$rownr] = $stone + OFFSET_MARKED;
+      else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD or $stone == MARKED_DAME )
+         $array[$colnr][$rownr] = $stone - OFFSET_MARKED;
    }
 
    $prisoners = array();
@@ -181,13 +186,14 @@ function check_done()
 
 }
 
-function check_remove()
+//ajusted globals by check_remove(): $array, $stonestring;
+function check_remove( )
 {
-   global $stonestring, $Size, $array, $prisoners, $coord;
+   global $stonestring, $Size, $array, $coord;
 
    if( !$stonestring ) $stonestring = "1";
 
-   // add killed stones to array
+   // toggle marked stones and marked dame to array
 
    $l = strlen( $stonestring );
 
@@ -199,10 +205,10 @@ function check_remove()
          error("illegal_position");
 
       $stone = $array[$colnr][$rownr];
-      if( $stone == BLACK or $stone == WHITE )
-         $array[$colnr][$rownr] = $stone + 6;
-      else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD )
-         $array[$colnr][$rownr] = $stone - 6;
+      if( $stone == BLACK or $stone == WHITE or $stone == NONE ) //NONE for MARKED_DAME
+         $array[$colnr][$rownr] = $stone + OFFSET_MARKED;
+      else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD or $stone == MARKED_DAME )
+         $array[$colnr][$rownr] = $stone - OFFSET_MARKED;
    }
 
    if( $coord )
@@ -213,13 +219,16 @@ function check_remove()
          error("illegal_position");
 
       $stone = $array[$colnr][$rownr];
-      if( $stone!=BLACK and $stone!=WHITE and $stone!=BLACK_DEAD and $stone!=WHITE_DEAD )
-         error("illegal_position");
+      if ( !ALLOW_SEKI_MARK or ($stone!=NONE and $stone!=MARKED_DAME) )
+      {
+         if( $stone!=BLACK and $stone!=WHITE and $stone!=BLACK_DEAD and $stone!=WHITE_DEAD )
+            error("illegal_position");
+      }
 
-      $prisoners = array();
-      remove_dead( $colnr, $rownr, $Size, $array, $prisoners );
+      $marked = array();
+      toggle_marked_area( $colnr, $rownr, $Size, $array, $marked );
 
-      while( list($dummy, list($x,$y)) = each($prisoners) )
+      while( list($dummy, list($x,$y)) = each($marked) )
       {
          $stonestring .= number2sgf_coords($x, $y, $Size);
       }
