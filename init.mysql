@@ -51,13 +51,13 @@ CREATE TABLE Games (
   Maintime int(11),
   Byotype enum('JAP','CAN') DEFAULT 'JAP' NOT NULL,
   Byotime int(11) DEFAULT '0' NOT NULL,
-  Byoperiods int(11) DEFAULT '1' NOT NULL,
+  Byoperiods int(11) DEFAULT '0' NOT NULL,
   Black_Maintime int(11),
   White_Maintime int(11),
   Black_Byotime int(11) DEFAULT '0' NOT NULL,
   White_Byotime int(11) DEFAULT '0' NOT NULL,
-  Black_Byoperiods int(11) DEFAULT '1' NOT NULL,
-  White_Byoperiods int(11) DEFAULT '1' NOT NULL,
+  Black_Byoperiods int(11) DEFAULT '-1' NOT NULL,
+  White_Byoperiods int(11) DEFAULT '-1' NOT NULL,
   LastTicks int(11),
   ClockUsed int(11) DEFAULT '0' NOT NULL,
   Rated enum('N','Y','Done') DEFAULT 'N' NOT NULL,
@@ -93,11 +93,12 @@ INSERT INTO Players SET
 # Table structure for table 'Moves??' (one per game)
 #
 #CREATE TABLE Moves1 (
-#  ID int(11) NOT NULL auto_increment,
-#  MoveNr int(11),
-#  Stone int(11) DEFAULT '0' NOT NULL,
-#  PosX int(11),
-#  PosY int(11),
+#  ID smallint(5) unsigned NOT NULL auto_increment,
+#  MoveNr smallint(5) unsigned,
+#  Stone smallint(5) unsigned DEFAULT '0' NOT NULL,
+#  PosX smallint(6),
+#  PosY smallint(6),
+#  Hours SMALLINT UNSIGNED NOT NULL,
 #  Text text,
 #  PRIMARY KEY (ID)
 #);

@@ -67,6 +67,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
     if( $no_cache )
         disable_cache();
     
+    //    ob_start();
 echo '
 <HTML>
   <HEAD>
@@ -142,6 +143,7 @@ echo '
 </HTML>
 ';
 
+ // ob_end_flush();
 }
 
 function make_session_code()
@@ -275,7 +277,7 @@ function time_remaining($ticks, &$main, &$byotime, &$byoper, $startmaintime,
 
     $elapsed -= $main;
 
-    if( $main > 0 ) // entering byoyomi
+    if( $main > 0 or $byoperiods < 0 ) // entering byoyomi
         {
             $byotime = $startbyotime;
             $byoper = $startbyoper;
