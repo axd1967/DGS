@@ -133,7 +133,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    }
    else
    {
-      echo tablehead(14, T_('Rated?'), 'Rated', true) .
+      echo tablehead(14, T_('Rated'), 'Rated', true) .
          tablehead(13, T_('Last Move'), 'Lastchanged', true) .
          tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
    }
