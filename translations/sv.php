@@ -19,7 +19,9 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-add_to_known_languages( "sv", "Svenska", 1018728671 );
+/* Automatically generated at 2002-04-13 21:10:06 GMT */
+
+add_to_known_languages( "sv", "Svenska", 1018732206 );
 
 class sv_Language extends Language
 {
@@ -201,8 +203,7 @@ The reasons for this problem could be any of the following:
 <li> You haven\'t got an <a href="%1$s/register.php">account</a>, or haven\'t <a href="%1$s/index.php">logged in</a> yet.
 <li> Your cookies have expired. This happens once a week.
 <li> You haven\'t enabled cookies in your browser.
-</ul>
-' =>
+</ul>' =>
 'Tyvärr, men du måste vara inloggad för att göra detta.
 <p>
 Anledningen till detta problem kan vara ett av följande:
@@ -210,8 +211,7 @@ Anledningen till detta problem kan vara ett av följande:
 <li> Du har inget <a href="%1$s/register.php">konto</a>, eller så har du inte <a href="%1$s/index.php">loggat in</a> än.
 <li> Dina kakor har blivit ogiltiga. Detta händer en gång i veckan.
 <li> Du har inte slagit på kakor i din webbläsare.
-</ul>
-',
+</ul>',
 
 'Sorry, it\'s not your turn.' =>
 '',

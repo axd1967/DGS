@@ -249,7 +249,7 @@ array( /* From std_functions.php */
       "<li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.\n" .
       "<li> Your cookies have expired. This happens once a week.\n" .
       "<li> You haven't enabled cookies in your browser.\n" .
-      "</ul>\n" =>
+      "</ul>" =>
       array( 'Groups' => array( 'Error' ) ),
 
       "Sorry, it's not your turn." =>
