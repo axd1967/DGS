@@ -51,7 +51,7 @@ require( "include/form_functions.php" );
       {
          echo T_("Sorry, you can't change the vacation length at the moment.");
       }
-      if( isset($_POST['change_vacation']) and
+      else if( isset($_POST['change_vacation']) and
           !(!is_numeric($vacationdiff) or $vacationdiff == 0 or
             $vacationdiff < $minimum_days or $vacationdiff > $days_left))
       {

@@ -18,6 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+//Rod: Warning: Here, $base_path is not already defined
 if( file_exists($base_path . "translations/known_languages.php") )
    include( $base_path . "translations/known_languages.php" );
 
@@ -25,7 +26,7 @@ function T_($string)
 {
    global $Tr;
 
-   $s = $Tr[$string];
+   $s = @$Tr[$string];
    if( empty($s) )
       return $string;
    else
@@ -100,7 +101,7 @@ function get_preferred_browser_language()
 
    foreach( $accept_langcodes as $lang )
       {
-         list($lang, $q_val) = explode(';', trim($lang));
+         @list($lang, $q_val) = explode(';', trim($lang));
          $lang = substr(trim($lang), 0, 2);
          $q_val = preg_replace('/q=/i','', trim($q_val));
          if( empty($q_val) or !is_numeric($q_val) )

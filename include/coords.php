@@ -19,11 +19,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-define("LEFT",1);
-define("UP",2);
-define("RIGHT",4);
-define("DOWN",8);
-
 function number2sgf_coords($x, $y, $Size)
 {
    if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
