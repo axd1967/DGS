@@ -124,5 +124,5 @@ require( "include/translation_info.php" );
         }
     }
 
-  jump_to("translate.php?translate_lang=$translate_lang&group=$group");
+  jump_to("translate.php?translate_lang=$translate_lang&group=" . urlencode($group));
 }
