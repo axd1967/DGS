@@ -108,7 +108,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             $r1 = echo_rating($Ratingmin+50,false);
             $r2 = echo_rating($Ratingmax-50,false);
             if( $r1 == $r2 )
-               $Ratinglimit = $r1 . ' ' . T_('only');
+               $Ratinglimit = sprintf( T_('%s only'), $r1);
             else
                $Ratinglimit = $r1 . ' - ' . $r2;
          }
