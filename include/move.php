@@ -275,10 +275,10 @@ function draw_game_info($row)
 
   echo '     <td>' . T_('Rating') . ":</td>\n";
   echo '     <td>' . echo_rating( ($row['Status']==='FINISHED' ?
-                                   $row['White_Rating'] : $row['Whiterating'] ),
+                                   $row['White_Start_Rating'] : $row['Whiterating'] ),
                                   true, $row['White_ID'] ) . "</td>\n";
   echo '     <td>' . echo_rating( ($row['Status']==='FINISHED' ?
-                                   $row['Black_Rating'] : $row['Blackrating'] ),
+                                   $row['Black_Start_Rating'] : $row['Blackrating'] ),
                                   true, $row['Black_ID'] ) . "</td>\n";
   echo "   </tr><tr>\n";
 
