@@ -46,7 +46,8 @@ require( "include/std_functions.php" );
 
   $row = mysql_fetch_array($result);
 
-  $title =  T_('Rating graph for') . ' ' . $row['Name'];
+  $title =  T_('Rating graph for') . ' ' . "<A href=\"userinfo.php?uid=$uid\">" .
+     $row['Name'] . "</A>";
 
   start_page($title, true, $logged_in, $player_row );
 
