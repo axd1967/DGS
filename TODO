@@ -72,6 +72,8 @@ SMALLER TASKS
         Make it possible to limit the number of handicap stones.
         Rated only if less than x handicap option.
 
+* Start game from uploaded position.
+
 * Notification: Remove ugly html in messages.
 
 * Add fun variations (torusgo etc.)
