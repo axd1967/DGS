@@ -30,6 +30,7 @@ function make_known_languages()
 
    fwrite( $fd, "<?php\n\n\$known_languages = array(\n" );
 
+   $prev_lang = '';
    $first = true;
    while( $row = mysql_fetch_array($result) )
    {

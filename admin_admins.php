@@ -52,8 +52,9 @@ require_once( "include/table_columns.php" );
   }
 
 
-  if( $_GET["update"] == 't' )
+  if( @$_GET["update"] == 't' )
   {
+     $Admin['new'] = 0;
      foreach( $_POST as $item => $value )
      {
         if( $value != 'Y' )
@@ -85,8 +86,9 @@ require_once( "include/table_columns.php" );
            error("new_admin_already_admin");
 
         $Admin[$row['ID']] = $Admin['new'];
-        unset($Admin['new']);
+        $AdminOldLevel[$row['ID']] = 0;
      }
+     unset($Admin['new']);
 
      foreach( $Admin as $id => $adm_level )
      {
