@@ -35,7 +35,7 @@ function draw_post($post_type, $my_post, $Subject, $Text, $GoDiagrams)
                          'preview' => 'cceecc',
                          'edit' => 'eeeecc' );
 
-   $txt = make_html_safe(trim($Text), true);
+   $txt = make_html_safe( $Text, true);
    $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
    if( strlen($txt) == 0 ) $txt = '&nbsp;';
@@ -46,7 +46,7 @@ function draw_post($post_type, $my_post, $Subject, $Text, $GoDiagrams)
 
    if( $post_type == 'preview' )
       echo "<tr><td bgcolor='#cceecc'><a name=\"preview\"><font size=\"+1\"><b>" .
-         make_html_safe(trim($_POST['Subject'])) . "</b></font></a><br> " . T_('by') .
+         make_html_safe(trim(@$_POST['Subject'])) . "</b></font></a><br> " . T_('by') .
          " ".user_reference( true, true, "black", $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n" .
          '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
@@ -148,10 +148,10 @@ function change_depth(&$cur_depth, $new_depth)
 
 
 {
-   $forum = $_REQUEST['forum']+0;
-   $thread = $_REQUEST['thread']+0;
-   $reply = $_GET['reply']+0;
-   $edit = $_REQUEST['edit']+0;
+   $forum = @$_REQUEST['forum']+0;
+   $thread = @$_REQUEST['thread']+0;
+   $reply = @$_GET['reply']+0;
+   $edit = @$_REQUEST['edit']+0;
 
    connect2mysql();
 
@@ -169,7 +169,7 @@ function change_depth(&$cur_depth, $new_depth)
    }
 
    $preview = isset($_POST['preview']);
-   $preview_ID = ($edit > 0 ? $edit : $_POST['parent']);
+   $preview_ID = ($edit > 0 ? $edit : @$_POST['parent']);
 
    $cols=2;
    $headline = array(T_("Reading thread") => "colspan=$cols");
@@ -179,13 +179,12 @@ function change_depth(&$cur_depth, $new_depth)
    {
       $links |= LINK_TOGGLE_EDITOR;
 
-      if( $_GET['show'] > 0 )
-         approve_message( $_GET['show'], $thread, true );
-      else if( $_GET['hide'] > 0 )
-         approve_message( $_GET['hide'], $thread, false );
+      if( @$_GET['show'] > 0 )
+         approve_message( @$_GET['show'], $thread, true );
+      else if( @$_GET['hide'] > 0 )
+         approve_message( @$_GET['hide'], $thread, false );
 
       toggle_editor_cookie();
-
       $is_editor = ($_COOKIE['forumeditor'] === 'y');
    }
 
@@ -193,8 +192,8 @@ function change_depth(&$cur_depth, $new_depth)
 
    echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
 
-   if( $_GET['revision_history'] > 0 )
-      revision_history($_GET['revision_history']);
+   if( @$_GET['revision_history'] > 0 )
+      revision_history(@$_GET['revision_history']); //set $Lastread
 
    start_table($headline, $links, 'width="99%"', $cols);
 
@@ -215,6 +214,7 @@ function change_depth(&$cur_depth, $new_depth)
 
    echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
+   $Lastchangedthread = 0 ;
    $cur_depth=1;
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -226,7 +226,7 @@ function change_depth(&$cur_depth, $new_depth)
       if( $hidden and !$is_editor )
          continue;
 
-      if( $thread_ID == $ID )
+      if( $thread == $ID )
          $thread_Subject = $Subject;
 
       change_depth( $cur_depth, $Depth );
@@ -254,8 +254,10 @@ function change_depth(&$cur_depth, $new_depth)
       if( $preview and $preview_ID == $ID )
       {
          change_depth( $cur_depth, $cur_depth + 1 );
-         $Subject = $_POST['Subject'];
-         $Text = $_POST['Text'];
+         $Subject = @$_POST['Subject'];
+         $Subject = stripslashes(trim($Subject));
+         $Text = @$_POST['Text'];
+         $Text = stripslashes(trim($Text));
          $GoDiagrams = create_godiagrams($Text);
          $post_type = 'preview';
          draw_post($post_type, false, $Subject, $Text, $GoDiagrams);
@@ -277,8 +279,10 @@ function change_depth(&$cur_depth, $new_depth)
    if( $preview and $preview_ID == 0 )
    {
       change_depth( $cur_depth, $cur_depth + 1 );
-      $Subject = $_POST['Subject'];
-      $Text = $_POST['Text'];
+      $Subject = @$_POST['Subject'];
+         $Subject = stripslashes(trim($Subject));
+      $Text = @$_POST['Text'];
+         $Text = stripslashes(trim($Text));
       $GoDiagrams = create_godiagrams($Text);
       draw_post('preview', false, $Subject, $Text, $GoDiagrams);
       echo "<tr><td>\n";
