@@ -88,7 +88,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   *
   *** TODO
   *
-  * * Change to class.
   * * Add more types (if necessary).
   * * To be able to use the type functions separately
   *   (probably possible already but not tested).
