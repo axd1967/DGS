@@ -22,6 +22,45 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 
+function mail_link( $nam, $lnk)
+{
+  global $HOSTBASE;
+
+   $nam = trim($nam);
+   $lnk = trim($lnk);
+   if( $lnk )
+   {
+      if( strcspn($lnk,":?#") == strcspn($lnk,"?#") 
+          && !is_numeric(strpos($lnk,'//'))
+          && strtolower(substr($lnk,0,4)) != "www."
+        )
+         $lnk = $HOSTBASE."/".$lnk;
+      $nam = ( $nam ? "$nam " : "" ) . "($lnk)";
+   }
+   $nam = str_replace("\\\"","\"",$nam);
+   return "[$nam]";
+}
+
+//see also make_html_safe()
+function mail_strip_html( $str)
+{
+   $tmp = '[\x1-\x20]*=[\x1-\x20]*(\"|\'|)([^>\x1-\x20]*?)';
+   $reps = array(
+    "%&nbsp;%si" => " ",
+    "%<A([\x1-\x20]+((href$tmp\\4)|(\w+$tmp\\7)|(\w+)))*[\x1-\x20]*>(.*?)</A>%sie"
+       => "mail_link('\\10','\\5')",
+    "%</?(UL|BR)[\x1-\x20]*/?>%si" => "\n",
+    "%</?P[\x1-\x20]*/?>%si" => "\n\n",
+    "%<LI[\x1-\x20]*/?>%si" => "\n - ",
+   );
+
+   $str = strip_tags($str, '<a><br><p><ul><ol><li><goban>');
+   $str = preg_replace(array_keys($reps), array_values($reps), $str);
+   $str = strip_tags($str, '<goban>');
+   $str = html_entity_decode($str, ENT_QUOTES, 'iso-8859-1');
+   return $str;
+}
+
 {
    connect2mysql();
 
@@ -80,13 +119,13 @@ require_once( "include/board.php" );
 
                $msg .= str_pad('', 47, '-') . "\n";
                $msg .= "Game ID: $ID  ($HOSTBASE/game.php?gid=$ID)\n";
-               $msg .= "Black: ".make_html_safe("$Blackname ($Blackhandle)")."\n";
-               $msg .= "White: ".make_html_safe("$Whitename ($Whitehandle)")."\n";
+               $msg .= "Black: ".mail_strip_html("$Blackname ($Blackhandle)")."\n";
+               $msg .= "White: ".mail_strip_html("$Whitename ($Whitehandle)")."\n";
                $msg .= "Move $Moves: " . number2board_coords($Last_X, $Last_Y, $Size) . "\n";
 
                if( !(strpos($SendEmail, 'BOARD') === false) )
                   $msg .= draw_ascii_board($Size, $array, $ID, $Last_X, $Last_Y, 15,
-                                           make_html_safe($mess, 'game'));
+                                           mail_strip_html($mess));
             }
          }
       }
@@ -119,16 +158,16 @@ require_once( "include/board.php" );
             {
                extract($msg_row);
                if($FromName && $FromHandle)
-                  $From= make_html_safe("$FromName ($FromHandle)");
+                  $From= mail_strip_html("$FromName ($FromHandle)");
                else
                   $From= 'Server message';
 
                $msg .= str_pad('', 47, '-') . "\n" .
                    "Date: " . date($date_fmt, $date) . "\n" .
                    "From: $From\n" .
-                   "Subject: " . make_html_safe($Subject) .
+                   "Subject: " . mail_strip_html($Subject) .
                    "  ($HOSTBASE/show_message.php?mid=$ID)\n\n" .
-                   wordwrap(make_html_safe($Text),47) . "\n";
+                   wordwrap(mail_strip_html($Text),47) . "\n";
             }
          }
       }
