@@ -58,28 +58,11 @@ require_once( "include/form_functions.php" );
    }
 
 
-   header('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
-
-   echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n";
-   echo "<HTML><HEAD>\n";
-   echo " <META http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">\n";
-   echo " <TITLE>data_report</TITLE>\n";
-
-   echo " <STYLE TYPE=\"text/css\">
-  table.tbl {
-   border:0;
-   background: #c0c0c0;
-  }
-  tr.row1 {
-   background: #ffffff;
-  }
-  tr.row2 {
-   background: #dddddd;
-  }
-  tr.hil {
-   background: #ffb010;
-  }
- </STYLE>\n";
+   start_html( 'data_report', 0, 
+      "  table.tbl { border:0; background: #c0c0c0; }\n" .
+      "  tr.row1 { background: #ffffff; }\n" .
+      "  tr.row2 { background: #dddddd; }\n" .
+      "  tr.hil { background: #ffb010; }" );
 
    echo " <SCRIPT language=\"JavaScript\" type=\"text/javascript\"><!-- \n";
    echo "   function row_click(row,rcl) {
@@ -87,10 +70,6 @@ require_once( "include/form_functions.php" );
    }\n";
 //     row.bgColor=((row.bgColor.toLowerCase()==hcol)?rcol:hcol);
    echo " --></SCRIPT>\n";
-
-   echo "</HEAD>\n";
-   echo "<BODY>\n";
-
 
 
    $dform = new Form('dform', 'data_report.php', FORM_POST, true );
@@ -142,6 +121,7 @@ require_once( "include/form_functions.php" );
                }
                echo "\n</tr>";
             }
+            //onClick onmousedown ondblclick
             echo "<tr class=row$c ondblclick=\"row_click(this,'row$c')\">\n";
             foreach( $row as $key => $val )
             {
@@ -161,7 +141,6 @@ require_once( "include/form_functions.php" );
       }
    }
 
-   echo "</BODY>\n";
-   echo "</HTML>\n";
+   end_html();
 }
 ?>
