@@ -46,8 +46,8 @@ CREATE TABLE Players (
   Won int(11) NOT NULL default '0',
   Lost int(11) NOT NULL default '0',
   Translator varchar(160) NOT NULL default '',
-  IP varchar(15) NOT NULL default '',
-  Browser varchar(64) NOT NULL default '',
+  IP varchar(15) default NULL,
+  Browser varchar(100) default NULL,
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
 ) TYPE=ISAM PACK_KEYS=1;

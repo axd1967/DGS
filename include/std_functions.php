@@ -724,7 +724,7 @@ function is_logged_in($hdl, $scode, &$row)
       "Lastaccess=FROM_UNIXTIME($NOW), " .
       "Notify='NONE'";
 
-   $browser = substr($_SERVER['HTTP_USER_AGENT'], 0, 64);
+   $browser = substr($_SERVER['HTTP_USER_AGENT'], 0, 100);
    if( $row['Browser'] !== $browser )
       $query .= ", Browser='$browser'";
 
