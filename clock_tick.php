@@ -131,6 +131,7 @@ if( !$is_down )
                       "AND SendEmail LIKE '%ON%' AND Notify='NONE' LIMIT 2" ) ;
 
          update_rating($gid);
+         update_rating2($gid);
 
          delete_all_observers($gid, ($Moves >= 10+$Handicap), $Text);
 

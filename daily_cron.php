@@ -84,6 +84,7 @@ require( "forum/forum_functions.php" );
    while( $row = mysql_fetch_array( $result ) )
    {
       update_rating($row["gid"]);
+      update_rating2($row["gid"]);
    }
 
    $result = mysql_query( "UPDATE Players SET RatingStatus='READY' " .

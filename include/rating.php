@@ -234,7 +234,7 @@ function update_rating2($gid)
        "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
        "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
        "FROM Games, Players as white, Players as black " .
-       "WHERE Status='FINISHED'  AND Games.ID=$gid " .
+       "WHERE Status='FINISHED' AND Games.ID=$gid AND Rated!='N' " .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
        "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
        "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
@@ -260,12 +260,6 @@ function update_rating2($gid)
 
    $bOld = $bRating;
    $wOld = $wRating;
-   echo "wRating: $wRating<br>\n" .
-      "wRatingMin: $wRatingMin<br>\n" .
-      "wRatingMax: $wRatingMax<br>\n" .
-      "bRating: $bRating<br>\n" .
-      "bRatingMin: $bRatingMin<br>\n" .
-      "bRatingMax: $bRatingMax<p>";
 
    // Calculate factor used to alter how much the the ratings are to be changed
    $Factor = log(($bRatingMax - $bRatingMin)/($wRatingMax-$wRatingMin));
@@ -321,13 +315,6 @@ function update_rating2($gid)
    if( $wRating < $wRatingMin + $Dist )
       $wRatingMin = ($wRating - $wRatingMax * $k) / (1-$k);
 
-
-   echo "wRating: $wRating<br>\n" .
-      "wRatingMin: $wRatingMin<br>\n" .
-      "wRatingMax: $wRatingMax<br>\n" .
-      "bRating: $bRating<br>\n" .
-      "bRatingMin: $bRatingMin<br>\n" .
-      "bRatingMax: $bRatingMax<br>";
 
    if( $Rated !== 'Done' )
       mysql_query( "UPDATE Games SET Rated='Done', " .
