@@ -290,8 +290,8 @@ function draw_game_info()
      "</A></td>\n";
   echo "   </tr><tr>\n";
   echo '     <td>' . T_('Rating') . ":</td>\n";
-  echo '     <td>' . echo_rating( $Whiterating ) . "</td>\n";
-  echo '     <td>' . echo_rating( $Blackrating ) . "</td>\n";
+  echo '     <td>' . echo_rating( $Whiterating, true, $White_ID ) . "</td>\n";
+  echo '     <td>' . echo_rating( $Blackrating, true, $Black_ID ) . "</td>\n";
   echo "   </tr><tr>\n";
   echo '     <td>' . T_('Rank info') . ":</td>\n";
   echo '     <td>' . make_html_safe($Whiterank) . "</td>\n";
@@ -397,6 +397,24 @@ function draw_moves()
    }
    echo "</tr></table>\n";
 
+}
+
+function draw_notes()
+{
+   echo "<table width=100 cellspacing=0 cellpadding=2>\n";
+   echo "<tr bgcolor=#7aa07a><td><font color=white><b>" . T_('Game notes') .
+      "</b></font></td></tr>\n";
+   echo "<tr bgcolor=#ddf0dd><td>\n";
+
+   require_once "include/form_functions.php";
+
+   $form = new Form('noteform', 'game.php', FORM_POST );
+
+   $form->add_row( array( 'TEXTAREA', 'Text', 20, 10, '' ) );
+   $form->echo_string();
+
+   echo "</td></tr>\n";
+   echo "</table>\n";
 }
 
 ?>

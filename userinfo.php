@@ -59,7 +59,7 @@ require( "include/rating.php" );
     <tr><td><b>' . T_('Name') . '</b></td><td>' . make_html_safe($row['Name']) . '</td></tr>
     <tr><td><b>' . T_('Userid') . '</b></td><td>' . make_html_safe($row['Handle']) . '</td></tr>
     <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . make_html_safe($row['Open'],true) . '</td></tr>
-    <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating($row['Rating']) . '</td></tr>
+    <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating($row['Rating'],true,$row['ID']) . '</td></tr>
     <tr><td><b>' . T_('Rank info') . '</b></td><td>' . make_html_safe($row['Rank'],true) . '</td></tr>
     <tr><td><b>' . T_('Registration date') . '</b></td><td>' . $row['Registerdate'] . '</td></tr>
     <tr><td><b>' . T_('Last access') . '</b></td><td>' . date($date_fmt,$row['Time']) . '</td></tr>

@@ -18,10 +18,10 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-include( "include/table_columns.php" );
-include( "include/form_functions.php" );
-include( "include/rating.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/table_columns.php" );
+require_once( "include/form_functions.php" );
+require_once( "include/rating.php" );
 
 {
    connect2mysql();
@@ -221,7 +221,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             echo "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
                make_html_safe($blackHandle) . "</font></a></td>\n";
          if( (1 << 18) & $column_set )
-            echo "<td>" . echo_rating($blackRating) . "&nbsp;</td>\n";
+            echo "<td>" . echo_rating($blackRating,true,$blackID) . "&nbsp;</td>\n";
          if( (1 << 19) & $column_set )
             echo "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
                make_html_safe($whiteName) . "</font></a></td>\n";
@@ -229,7 +229,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             echo "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
                make_html_safe($whiteHandle) . "</font></a></td>\n";
          if( (1 << 21) & $column_set )
-            echo "<td>" . echo_rating($whiteRating) . "&nbsp;</td>\n";
+            echo "<td>" . echo_rating($whiteRatingtrue,$whiteID) . "&nbsp;</td>\n";
       }
       else
       {
@@ -240,7 +240,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Handle) . "</font></a></td>\n";
          if( (1 << 15) & $column_set )
-            echo "<td>" . echo_rating($Rating) . "&nbsp;</td>\n";
+            echo "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>\n";
          if( (1 << 4) & $column_set )
             echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
       }

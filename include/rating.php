@@ -342,7 +342,7 @@ function update_rating2($gid)
 $dan = T_('dan');
 $kyu = T_('kyu');
 
-function echo_rating($rating, $show_percent=true)
+function echo_rating($rating, $show_percent=true, $graph_uid=0)
 {
    global $dan, $kyu;
 
@@ -351,7 +351,9 @@ function echo_rating($rating, $show_percent=true)
    $spc = ( $show_percent ? '&nbsp;' : ' ' );
 
    $rank_val = round($rating/100);
-   $string = '';
+
+   $string = ($graph_uid > 0 ?
+              "<a href=\"ratinggraph.php?uid=$graph_uid\"><font color=black>" : '');
 
    if( $rank_val > 20.5 )
    {
@@ -368,6 +370,8 @@ function echo_rating($rating, $show_percent=true)
       $string .= $spc . '('. ( $percent > 0 ? '+' : '') . $percent . '%)';
    }
 
+   if( $graph_uid > 0 )
+      $string .= '</font></a>';
    return $string;
 }
 

@@ -18,11 +18,11 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-include( "include/rating.php" );
-include( "include/table_columns.php" );
-include( "include/form_functions.php" );
-include( "include/message_functions.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/rating.php" );
+require_once( "include/table_columns.php" );
+require_once( "include/form_functions.php" );
+require_once( "include/message_functions.php" );
 
 {
    connect2mysql();
@@ -123,7 +123,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             echo "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Handle) . "</font></a></td>\n";
          if( (1 << 2) & $column_set )
-            echo "<td nowrap>" . echo_rating($Rating) . "&nbsp;</td>\n";
+            echo "<td nowrap>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>\n";
          if( (1 << 3) & $column_set )
          {
             if( empty($Comment) ) $Comment = '&nbsp;';
@@ -241,7 +241,8 @@ function show_game_info($game_row, $mygame=false)
    echo '<tr><td><b>' . T_('Player') . '<b></td><td>' .
       "<A href=\"userinfo.php?uid=$pid\"><font color=black>$Name ($Handle)</a></td></tr>\n";
 
-   echo '<tr><td><b>' . T_('Rating') . '<b></td><td>' . echo_rating($Rating) . "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Rating') . '<b></td><td>' .
+      echo_rating($Rating,true,$pid) . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Size') . '<b></td><td>' . $Size . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Komi') . '<b></td><td>' .
       ( ($Handicaptype == 'conv' or $Handicaptype == 'proper') ? '-' : $Komi ) .

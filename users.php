@@ -110,7 +110,7 @@ require_once( "include/form_functions.php" );
       if( (1 << 3) & $column_set )
          echo '<td>' . make_html_safe($row['Rankinfo'],true) . '&nbsp;</td>';
       if( (1 << 4) & $column_set )
-         echo '<td>' . echo_rating($row['Rating']) . '&nbsp;</td>';
+         echo '<td>' . echo_rating($row['Rating'],true,$ID) . '&nbsp;</td>';
       if( (1 << 5) & $column_set )
          echo '<td>' . make_html_safe($row['Open'],true) . '&nbsp;</td>';
       if( (1 << 6) & $column_set )

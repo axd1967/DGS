@@ -66,7 +66,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
        <tr><td><b>' . T_("Open for matches?") . '</b></td>
            <td>' . make_html_safe($player_row["Open"], true) . '</td></tr>
        <tr><td><b>' . T_("Rating") . '</b></td>
-           <td>' . echo_rating($player_row["Rating"]) .  '</td></tr>
+           <td>' . echo_rating($player_row["Rating"],true,$player_row['ID']) .  '</td></tr>
        <tr><td><b>' . T_('Rank info') . '</b></td>
            <td>' . make_html_safe($player_row["Rank"], true) . '</td></tr>
     </table>
@@ -188,7 +188,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Handle) . "</font></a></td>\n";
          if( (1 << 15) & $column_set )
-            echo "<td>" . echo_rating($Rating) . "&nbsp;</td>\n";
+            echo "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>\n";
          if( (1 << 4) & $column_set )
             echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
          if( (1 << 5) & $column_set )
