@@ -190,7 +190,7 @@ $array=array();
 
    //Last marked dame property: (uppercase only)
    // ''= no mark, 'MA'/'CR'/'TR'/'SQ'= mark them
-   $marked_dame_prop = 'CR';
+   $marked_dame_prop = '';
 
 
    if( !$gid )
@@ -322,7 +322,7 @@ $array=array();
             else
             {
                if( $array[$PosX][$PosY] == NONE )
-                  $points[$coord]='CR';
+                  $points[$coord]='MA';
                else
                   $points[$coord]='MA';
             }
