@@ -56,15 +56,15 @@ disable_cache();
 
    $opponent_row = mysql_fetch_array($result);
    $opponent_ID = $opponent_row["ID"];
-   $my_ID = $player_row["ID"];
+   $my_id = $player_row["ID"];
 
 // Check if dispute game exists
    if( $disputegid > 0 )
    {
       $result = mysql_query("SELECT ID FROM Games WHERE ID=$disputegid " .
                             "AND Status='INVITED' AND " .
-                            "((Black_ID=$my_ID AND White_ID=$opponent_ID) OR " .
-                            "(Black_ID=$opponent_ID AND White_ID=$my_ID))");
+                            "((Black_ID=$my_id AND White_ID=$opponent_ID) OR " .
+                            "(Black_ID=$opponent_ID AND White_ID=$my_id))");
 
       if( mysql_num_rows($result) != 1 )
          error('unknown_game');
@@ -81,12 +81,12 @@ disable_cache();
       if( $color == "White" )
       {
          $Black_ID = $opponent_ID;
-         $White_ID = $my_ID;
+         $White_ID = $my_id;
       }
       else
       {
          $White_ID = $opponent_ID;
-         $Black_ID = $my_ID;
+         $Black_ID = $my_id;
       }
 
       if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
@@ -107,7 +107,7 @@ disable_cache();
 
       interpret_time_limit_forms();
 
-      if( $rated != 'Y' or $my_ID == $opponent_ID )
+      if( $rated != 'Y' or $my_id == $opponent_ID )
          $rated = 'N';
 
       if( $weekendclock != 'Y' )
@@ -171,7 +171,7 @@ disable_cache();
          $rating_black = $opponent_row["Rating2"];
          $rating_white = $player_row["Rating2"];
       }
-      else if( $my_ID == $game_row["Black_ID"] )
+      else if( $my_id == $game_row["Black_ID"] )
       {
          $clock_used_white = $opponent_row["ClockUsed"];
          $clock_used_black = $player_row["ClockUsed"];
@@ -244,7 +244,7 @@ disable_cache();
       $query .= "Starttime=FROM_UNIXTIME($NOW), " .
          "Lastchanged=FROM_UNIXTIME($NOW) " .
          "WHERE ID=$gid AND Status='INVITED' " .
-         "AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
+         "AND ( Black_ID=$my_id OR White_ID=$my_id ) " .
          "AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
          "LIMIT 1";
 
@@ -285,14 +285,14 @@ disable_cache();
 
       mysql_query( "UPDATE Players SET Running=Running+" . ( $handitype == -4 ? 2 : 1 ) .
                    ( $Rated ? ", RatingStatus='RATED'" : '' ) .
-                   " WHERE ID=$my_ID OR ID=$opponent_ID LIMIT 2" );
+                   " WHERE ID=$my_id OR ID=$opponent_ID LIMIT 2" );
 
       $subject = "Game invitation accepted";
    }
    else if( $declinetype )
    {
       $result = mysql_query( "DELETE FROM Games WHERE ID=$gid AND Status='INVITED'" .
-                             " AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
+                             " AND ( Black_ID=$my_id OR White_ID=$my_id ) " .
                              " AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
                              "LIMIT 1");
 
@@ -310,7 +310,7 @@ disable_cache();
 // Update database
 
    $query = "INSERT INTO Messages SET " .
-       "From_ID=$my_ID, " .
+       "From_ID=$my_id, " .
        "To_ID=$opponent_ID, " .
        "Time=FROM_UNIXTIME($NOW), " .
        "Type='$type', ";
@@ -334,17 +334,17 @@ disable_cache();
       "($opponent_ID, $mid, 'N', 2)";
 
    $result = mysql_query( $query );
-   if( mysql_affected_rows() != 1)
+   if( mysql_affected_rows() != 2)
       error("mysql_insert_message",true);
 
    if( $reply )
    {
       mysql_query( "UPDATE MessageCorrespondents SET Replied='Y' " .
-                   "WHERE mid=$reply AND Sender='Y' AND uid=$my_ID LIMIT 1" );
+                   "WHERE mid=$reply AND Sender='Y' AND uid=$my_id LIMIT 1" );
 
       if( $disputegid > 0 )
          mysql_query( "UPDATE Messages SET Type='DISPUTED' " .
-                      "WHERE ID=$reply AND To_ID=$my_ID LIMIT 1");
+                      "WHERE ID=$reply AND To_ID=$my_id LIMIT 1");
    }
 
 

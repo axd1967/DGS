@@ -39,13 +39,6 @@ require_once( "include/timezones.php" );
    $my_folders = get_folders($my_id);
    change_folders_for_marked_messages($my_id, $my_folders);
 
-   $query = "UPDATE Messages " .
-      "SET Flags=" .
-      ( $_GET['del'] > 0 ? "CONCAT_WS(',',Flags,'DELETED')" : "REPLACE(Flags,'DELETED','')" ) .
-      " WHERE To_ID=$my_id AND ID=" . abs($_GET['del']) . " AND " .
-      "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' ) LIMIT 1";
-
-   mysql_query($query);
 
    $current_folder = $_GET['folder'];
    if( empty($my_folders[$current_folder]) )
@@ -118,9 +111,7 @@ require_once( "include/timezones.php" );
    $result = mysql_query( $query )
        or die ( error("mysql_query_failed") );
 
-   $title = ( $_GET['sent'] == 1 ? T_('Sent messages') :
-              ( $_GET['all'] == 1 ? T_('All messages') :
-                T_('Message list') ));
+   $title = T_('Message list');
 
    start_page($title, true, $logged_in, $player_row );
 
@@ -189,23 +180,6 @@ require_once( "include/timezones.php" );
       $form->print_insert_select_box( 'folder', '1', $fld, '', '') .
       "</form>\n";
 
-
-   $menu_array = array( T_('Send a message') => 'message.php?mode=NewMessage' );
-
-
-   if( $_GET['sent']==1 )
-      $menu_array[T_('Show recieved messages')] = 'list_messages.php';
-   else
-   {
-      if( $_GET['all']==1 )
-         $menu_array[T_('Hide deleted')] = 'list_messages.php';
-      else
-         $menu_array[T_('Show all')] = 'list_messages.php?all=1';
-
-      $menu_array[T_('Show sent messages')] = 'list_messages.php?sent=1';
-      $menu_array[T_('Delete all')] = "list_messages.php?del=all$all_str";
-   }
-
-   end_page($menu_array);
+   end_page();
 }
 ?>

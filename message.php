@@ -102,24 +102,21 @@ $mode = $_GET['mode'];
       if( $mode == 'ShowMessage' or !$can_reply )
       {
          $default_subject = $Subject;
-         if( strcasecmp(substr($Subject,0,3), "re:") != 0 )
-            $default_subject = "RE: " . $Subject;
+         if( strcasecmp(substr($default_subject,0,3), "re:") != 0 )
+            $default_subject = "RE: " . $default_subject;
 
-         // Remove NEW flag
-         $pos = strpos($Flags,'NEW');
-
-         if( $to_me and !($pos === false) )
+         if( $Folder_nr == FOLDER_NEW )
          {
-            $Flags = substr_replace($Flags, '', $pos, 3);
-
-            mysql_query( "UPDATE Messages SET Flags='$Flags' " .
-                         "WHERE ID=$mid AND To_ID=$my_id LIMIT 1" ) or die( mysql_error());
+            // Remove NEW flag
+            mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=" . FOLDER_MAIN . " " .
+                         "WHERE mid=$mid AND uid=$my_id LIMIT 1" )
+               or die( mysql_error());
 
             if( mysql_affected_rows() != 1)
-               error("mysql_message_info", true);
+               error("mysql_message_info", 'remove new-flag failed');
          }
 
-         if( $Type=='INVITATION' )
+         if( $Type == 'INVITATION' )
          {
             if( $Status=='INVITED' and !($Replied == 'N'))
             {
