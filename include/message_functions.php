@@ -410,7 +410,7 @@ function get_folders($uid, $remove_all_received=true)
    {
       if( empty($row['Name']))
          $row['Name'] = ( $row['Folder_nr'] < 6 ?
-                          $STANDARD_FOLDERS['Folder_nr'][0] : T_('Folder name') );
+                          $STANDARD_FOLDERS[$row['Folder_nr']][0] : T_('Folder name') );
       $flds[$row['Folder_nr']] = array($row['Name'], $row['BGColor'], $row['FGColor']);
    }
 
