@@ -61,8 +61,8 @@ if( !$is_down )
    // Check if any game has timed out
 
    $result = mysql_query('SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
+                         'black.Handle as blackhandle, white.Handle as whitehandle, ' .
                          'black.Name as blackname, white.Name as whitename ' .
-                         'black.Handle as blackhandle, white.Handle as whitehandle ' .
                          'FROM Games, Clock ,Players as white, Players as black ' .
                          'WHERE Status!="INVITED" AND Status!="FINISHED" ' .
                          'AND Games.ClockUsed >= 0 ' .
