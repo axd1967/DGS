@@ -47,14 +47,14 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 
 {
-   if( @$_GET['nextback'] )
+   if( @$_REQUEST['nextback'] )
       jump_to("game.php?gid=$gid");
 
    connect2mysql();
 
-   if( !@$_GET['gid'] )
+   if( !@$_REQUEST['gid'] )
       error("no_game_nr");
-   $gid = $_GET['gid'] ;
+   $gid = $_REQUEST['gid'] ;
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
@@ -77,7 +77,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    extract(mysql_fetch_array($result));
 
-   if( @$_GET['skip'] )
+   if( @$_REQUEST['skip'] )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
@@ -111,7 +111,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       error("database_corrupted");
 
 
-   $action = @$_GET['action'];
+   $action = @$_REQUEST['action'];
 
    $next_to_move = WHITE+BLACK-$to_move;
 
@@ -175,13 +175,15 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    $where_clause = " ID=$gid AND Moves=$old_moves";
    $handi = false;
+   $game_finished = false;
+   $query2 = '';
 
    switch( $action )
    {
       case 'move':
       {
-         $coord = @$_GET['coord'];
-         $prisoner_string = @$_GET['prisoner_string'];
+         $coord = @$_REQUEST['coord'];
+         $prisoner_string = @$_REQUEST['prisoner_string'];
 
          check_move();
   //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
@@ -271,7 +273,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'PLAY' or $Moves != 1 )
             error("invalid_action");
 
-         $stonestring = @$_GET['stonestring'];
+         $stonestring = @$_REQUEST['stonestring'];
          check_handicap(); //adjust $handi, $stonestring and others
 
          if( strlen( $stonestring ) != 2 * $Handicap + 1 )
@@ -364,7 +366,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
             error("invalid_action");
 
-         $stonestring = @$_GET['stonestring'];
+         $stonestring = @$_REQUEST['stonestring'];
          check_remove();
   //ajusted globals by check_remove(): $array, $score, $stonestring;
 
@@ -429,7 +431,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    if( mysql_affected_rows() < 1 and $action != 'delete' )
       error("mysql_insert_move", true);
 
-   if( strlen($query2) > 0 )
+   if( $query2 )
    {
       $result = mysql_query( $query2 );
 
@@ -546,11 +548,11 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 // Jump somewhere
 
-   if( @$_GET['nextstatus'] )
+   if( @$_REQUEST['nextstatus'] )
    {
       jump_to("status.php");
    }
-   else if( @$_GET['nextgame'] )
+   else if( @$_REQUEST['nextgame'] )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
