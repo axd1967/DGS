@@ -25,7 +25,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * \brief For class Tournament.
   */
 
- require( "include/tournament_round.php" );
+require( "include/tournament_round.php" );
 
 /* Tournament states */
 define( "TOUR_STATE_INACTIVE", 0 );
@@ -92,7 +92,7 @@ class Tournament
     * accepted between rounds. Other behaviour should be possible to define
     * though.
     */
-   var $RecieveApplicationsAfterStart;
+   var $ReceiveApplicationsAfterStart;
    /*!
     * \brief The maximum number of participants.
     *
@@ -134,6 +134,46 @@ class Tournament
       }
 
    /*!
+    * \static
+    * \brief Create new tournament from user supplied data.
+    * \return The object of the new tournament;
+    */
+   function Create( $name,
+                    $description,
+                    $orig_organizer_id )
+      {
+         $tour = new Tournament();
+
+         $tour->Name = $name;
+         $tour->Description = $description;
+         $tour->State = TOUR_STATE_INACTIVE;
+         $tour->ListOfOrganizers = array( 0 => $orig_organizer_id );
+
+         $result = mysql_query( "INSERT INTO Tournament SET " .
+                                "Name='$tour->Name', " .
+                                "Description='$tour->Description', " .
+                                "State=$tour->State" )
+            or error("tournament_error_message_to_be_decided_later");
+
+         if( mysql_affected_rows() != 1)
+            error("tournament_error_message_to_be_decided_later");
+
+         $tour->ID = mysql_insert_id();
+
+         $result = mysql_query( "INSERT INTO TournamentOrganizers SET " .
+                                "tid=$tour->ID, " .
+                                "pid=" . $tour->ListOfOrganizers[0] );
+
+         if( mysql_affected_rows() != 1)
+         {
+            mysql_query( "DELETE FROM Tournament WHERE ID=$tid" );
+            error("mysql_insert_tournament");
+         }
+
+         return $tour;
+      }
+
+   /*!
     * \brief Fill tournament values from database.
     */
    function get_from_database()
@@ -146,13 +186,24 @@ class Tournament
 
          $row = mysql_fetch_array( $result );
          foreach( $row as $key => $value )
-           $this->$key = $value;
+            {
+               if( is_string( $key ) and $key != "FirstRound" )
+               {
+                  $this->$key = $value;
+               }
+            }
 
-         $ListOfOrganizers = array();
+         $Rounds = array();
+         if( !is_null($row['FirstRound']) )
+         {
+            array_push($Rounds, $row['FirstRound']);
+         }
+
+         $this->ListOfOrganizers = array();
          $orgresult = mysql_query( "SELECT * FROM TournamentOrganizers " .
                                    "WHERE tid='$this->ID'" );
          while( $row = mysql_fetch_array( $orgresult ) )
-           array_push( $ListOfOrganizers, $row['pid'] );
+           array_push( $this->ListOfOrganizers, $row['pid'] );
       }
    /*!
     * Returns a round from the round-list.
@@ -160,7 +211,7 @@ class Tournament
     * Loads the round into memory if it is not in memory already.
     *
     * \param $round Not decided yet what this should be.
-    * \todo Decide how to reference a round.
+    * \todo Work out how to get rounds in a nice manner.
     */
    function get_round( $round )
       {
