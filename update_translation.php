@@ -55,8 +55,8 @@ function replace_unnecessary_chars( $string )
       $last_updated = $LANG_UPDATE_TIMESTAMPS[ $translate_lang ];
       $query = "SELECT * FROM Translationlog WHERE Language='$translate_lang' ";
       if( $last_updated > 0 )
-        $query .= "AND timestamp > FROM_UNIXTIME($last_updated)";
-      $query .= "ORDER BY ID";
+        $query .= "AND Date > FROM_UNIXTIME($last_updated)";
+      $query .= "ORDER BY Date, ID";
 
       $result = mysql_query($query);
       $translation_changes = array();
@@ -98,7 +98,8 @@ function replace_unnecessary_chars( $string )
           $lang_php_code = sprintf( $translation_template_top,
                                     $translate_lang,
                                     $k_langs[$translate_lang],
-                                    $NOW );
+                                    $NOW,
+                                    gmdate( 'Y-m-d H:i:s T', $NOW ) );
 
           foreach( $translation_info as $string => $info )
             {
