@@ -50,10 +50,10 @@ require_once( "include/rating.php" );
       'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
       'black.Name AS Blackname, ' .
       'black.Handle AS Blackhandle, ' .
-      "IF(Games.Status='FINISHED',Games.Black_Rating, black.Rating2 ) AS Blackrating, " .
+      "IF(Games.Status='FINISHED', Games.Black_End_Rating, black.Rating2 ) AS Blackrating, " .
       'white.Name AS Whitename, ' .
       'white.Handle AS Whitehandle, ' .
-      "IF(Games.Status='FINISHED',Games.White_Rating, white.Rating2 ) AS Whiterating " .
+      "IF(Games.Status='FINISHED',Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
       'FROM Games, Players AS black, Players AS white ' .
       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
       or die(mysql_error());
