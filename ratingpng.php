@@ -55,7 +55,7 @@ function get_rating_data($uid)
       "UNIX_TIMESTAMP(Registerdate) AS seconds " .
       "FROM Players WHERE ID=$uid");
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       exit;
 
    $min_row = mysql_fetch_assoc($result);
@@ -86,7 +86,7 @@ function get_rating_data($uid)
                          "UNIX_TIMESTAMP(Time) AS seconds " .
                          "FROM Ratinglog WHERE uid=$uid ORDER BY Time") or die(mysql_error());
 
-   if( mysql_num_rows( $result ) < 1 )
+   if( @mysql_num_rows( $result ) < 1 )
       exit;
 
    $first = true;
@@ -212,10 +212,6 @@ function imagemultiline($im, $points, $nr_points, $color)
 
 //   if( !$logged_in )
 //      error("not_logged_in");
-
-// globals used by echo_rating()
-   $dan = T_('dan');
-   $kyu = T_('kyu');
 
 
 //First check font and find pagging constantes

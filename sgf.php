@@ -283,13 +283,13 @@ if( @$_GET['quick_mode'] )
 
    if( isset($Blackrating) or isset($Whiterating) )
    {
-      echo "\nBR[" . ( isset($Blackrating) ? echo_rating($Blackrating, false) : '?' ) . "]" .
-           "\nWR[" . ( isset($Whiterating) ? echo_rating($Whiterating, false) : '?' ) . "]";
+      echo "\nBR[" . ( isset($Blackrating) ? echo_rating($Blackrating, 0,0,1) : '?' ) . "]" .
+           "\nWR[" . ( isset($Whiterating) ? echo_rating($Whiterating, 0,0,1) : '?' ) . "]";
    }
 
    if ($sgf_version >= 4)
    {
-      echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)) . "]";
+      echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, 1)) . "]";
       //may specify CA (charset)
    }
 
@@ -318,7 +318,7 @@ if( @$_GET['quick_mode'] )
 
       while ( $sgf_trim_nr >=0 )
       {
-         if (!mysql_data_seek ($result, $sgf_trim_nr))
+         if (!mysql_data_seek($result, $sgf_trim_nr))
             break;
          if (!$row = mysql_fetch_array($result))
             break;
@@ -327,7 +327,7 @@ if( @$_GET['quick_mode'] )
             break;
          $sgf_trim_nr-- ;
       }
-      mysql_data_seek ($result, 0) ;
+      mysql_data_seek($result, 0) ;
    }
 
 

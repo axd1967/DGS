@@ -20,6 +20,8 @@ if( $is_down )
 }
 else
 {
+   disable_cache();
+
    connect2mysql();
 
    // logged in?

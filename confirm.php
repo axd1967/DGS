@@ -38,7 +38,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                          "ORDER BY Lastchanged,ID " .
                          "LIMIT 1");
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       jump_to("status.php");
 
    $row = mysql_fetch_assoc($result);
@@ -188,7 +188,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $prisoner_string = @$_REQUEST['prisoner_string'];
 
          check_move();
-  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
+  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
   //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
          $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
@@ -253,7 +253,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
-             "PosX=-1, " .
+             "PosX=-1, PosY=0, " .
              "Hours=$hours";
 
          if( $message )
@@ -316,7 +316,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
-             "PosX=-3, " .
+             "PosX=-3, PosY=0, " .
              "Hours=$hours";
 
          if( $message )
@@ -401,12 +401,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Status='$next_status', ";
 
          if( $next_status != 'FINISHED' )
-         {
-            if( $next_to_move == BLACK )
-               $game_query .= "ToMove_ID=$Black_ID, ";
-            else
-               $game_query .= "ToMove_ID=$White_ID, ";
-         }
+            $game_query .= "ToMove_ID=$next_to_move_ID, ";
          else
             $game_query .= "ToMove_ID=0, ";
 
@@ -495,7 +490,7 @@ if( HOT_SECTION )
       $result = mysql_query( "SELECT * FROM Players WHERE ID=" .
                              ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) );
 
-      if( mysql_num_rows($result) != 1 )
+      if( @mysql_num_rows($result) != 1 )
          error("opponent_not_found", true);
 
       $opponent_row = mysql_fetch_array($result);

@@ -71,7 +71,7 @@ require_once( "include/rating.php" );
                           "FROM Games, Players AS black, Players AS white " .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
 
-   if(  mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
 
 
@@ -173,7 +173,7 @@ require_once( "include/rating.php" );
       case 'move':
       {
          check_move();
-  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
+  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
   //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
          reset($prisoners);
