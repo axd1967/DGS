@@ -27,10 +27,10 @@ define('HOT_SECTION', true);
 
 disable_cache();
 
-function jump_to_next_game($id, $Lastchanged, $gid)
+function jump_to_next_game($uid, $Lastchanged, $gid)
 {
    $result = mysql_query("SELECT ID FROM Games " .
-                         "WHERE ToMove_ID=$id "  .
+                         "WHERE ToMove_ID=$uid "  .
                          "AND Status!='INVITED' AND Status!='FINISHED' " .
                          "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
                          "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
@@ -118,14 +118,12 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
    $next_to_move = WHITE+BLACK-$to_move;
 
-   if( $Moves+1 < $Handicap ) $next_to_move = BLACK;
+   if( $old_moves+1 < $Handicap ) $next_to_move = BLACK;
 
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
 
 // Update clock
-
-   $hours = 0;
 
    if( $Maintime > 0 or $Byotime > 0)
    {
@@ -150,10 +148,6 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "White_Byoperiods=$White_Byoperiods, ";
       }
 
-      $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
-      if( $WeekendClock != 'Y' )
-         $next_clockused += 100;
-
       if( $next_to_move == BLACK and $Blackonvacation > 0 or
           $next_to_move == WHITE and $Whiteonvacation > 0 )
       {
@@ -161,10 +155,20 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $next_ticks = 0;
       }
       else
+      {
+         $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
+         if( $WeekendClock != 'Y' )
+            $next_clockused += 100;
          $next_ticks = get_clock_ticks($next_clockused);
+      }
 
       $time_query .= "LastTicks=$next_ticks, " .
           "ClockUsed=$next_clockused, ";
+   }
+   else
+   {
+      $hours = 0;
+      $time_query = '';
    }
 
    $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
@@ -458,7 +462,7 @@ if( HOT_SECTION )
    $tmp = mysql_fetch_assoc($result);
 
    if( $tmp["Moves"] != $old_moves )
-      error("already_played");
+      error("already_played",'conf6');
 }//HOT_SECTION
 
    $result = mysql_query( $move_query );
@@ -560,14 +564,30 @@ if( HOT_SECTION )
          delete_all_observers($gid, $rated_status!=1, addslashes( $tmp));
       }
 
+      $message_from_server_way = true; //else simulate a message from this player
+      //nervertheless, the clock_tick.php messages are always sent by the server
+      if( $message_from_server_way )
+      {
+         //The server messages does not allow a reply,
+         // so add a *in message* reference to this player.
          $Text.= "Send a message to:<center>"
                . send_reference( 1, 1, '', $player_row["ID"], $player_row["Name"], $player_row["Handle"])
                . "</center>" ;
+      }
 
          $Text = addslashes( $Text);
       if ( $message )
       {
-         $Text .= "Your opponent wrote:<p>" . $message;
+         if( $message_from_server_way )
+         {
+            //A server message will only be read by this player
+            $Text .= "Your opponent wrote:<p>" . $message;
+         }
+         else
+         {
+            //Because both players will read this message
+            $Text .= "The final message was:<p>" . $message;
+         }
       }
 
       mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
@@ -578,9 +598,18 @@ if( HOT_SECTION )
 
       $mid = mysql_insert_id();
 
-      mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                  "(" . $opponent_row['ID'] . ", $mid, 'N', ".FOLDER_NEW.")");
+      $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+                  "(" . $opponent_row['ID'] . ", $mid, 'N', ".FOLDER_NEW.")" ;
 
+      if( !$message_from_server_way )
+      {
+         //This simulate a message sent by this player
+         //This will allow a direct message reply but will fill his *sent* folder
+         $query.= ",(" . $player_row["ID"] . ", $mid, 'Y', ".FOLDER_SENT.")" ;
+         //else we could force a NULL Folder_nr (trashed message)
+      }
+
+      mysql_query( $query);
 
    }
 
