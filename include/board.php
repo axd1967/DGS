@@ -413,18 +413,19 @@ $no_marked_dead = false )
 
    while( $row = mysql_fetch_array($result) )
    {
-      extract($row);
 
-      if( $MoveNr > $move )
+      if( $row["MoveNr"] > $move )
       {
-         if( $MoveNr > $max_moves )
+         if( $row["MoveNr"] > $max_moves )
             fix_corrupted_move_table($gid);
          break;
       }
 
+      extract($row);
+
       if( $Stone <= WHITE )
       {
-         if( $row["PosX" ] < 0 ) continue;
+         if( $PosX < 0 ) continue;
 
          $array[$PosX][$PosY] = $Stone;
 
@@ -438,7 +439,7 @@ $no_marked_dead = false )
             $removed_dead = TRUE;
          }
          array_push($marked_dead, array($PosX,$PosY));
-         $PosX = $PosY = 0; // don't use as lastx/lasty
+         $PosX = $PosY = NULL; // don't use as lastx/lasty
       }
    }
 
