@@ -36,6 +36,8 @@ start_page("Edit password", true, $logged_in, $player_row );
 echo "<CENTER>\n";
 echo form_start( 'passwordform', 'change_password.php', 'POST' );
 
+echo form_insert_row( 'DESCRIPTION', 'Old password',
+                      'PASSWORD', 'oldpasswd',16,16 );
 echo form_insert_row( 'DESCRIPTION', 'New password',
                       'PASSWORD', 'passwd',16,16 );
 echo form_insert_row( 'DESCRIPTION', 'Confirm password',
