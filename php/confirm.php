@@ -74,7 +74,8 @@ if( $Moves < $Handicap ) $next_to_move = BLACK;
 
 $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
-
+if( $message )
+     make_html_safe( $message );
 
 
 

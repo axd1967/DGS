@@ -1,6 +1,4 @@
 
-* Email notification
-
 * Forgot password? -> send email
 
 * sgf-files
@@ -12,8 +10,6 @@
 * FAQ
 
 * Introduction page
-
-* Make messages HTML-safe
 
 * Allow for fixed handicap
 
@@ -34,6 +30,10 @@
 * Delete messages (all/individual)
 
 * Logout link
+
+* Score number->text
+
+* Reply: show previous msg and give default subject
 
 * Message boards
 

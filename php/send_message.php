@@ -154,6 +154,7 @@ $query = "INSERT INTO Messages$opponent_ID SET " .
 if( $gid ) 
      $query .= "Game_ID=$gid, ";
 
+make_html_safe($message);
 $query .= "Subject=\"$subject\", " .
           "Text=\"$message\"";
 

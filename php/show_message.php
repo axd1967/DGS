@@ -98,7 +98,7 @@ if( $info == 'NEW' )
 
 start_page("Show Message", true, $logged_in, $player_row );
 
-echo "
+echo "<center>
     <table>
         <tr><td>Date:</td><td>" . $row["date"] . "</td></tr>
         <tr><td>From:</td><td><A href=\"userinfo.php?uid=" . $row["pid"] ."\">" . 
@@ -106,24 +106,31 @@ echo "
 
 switch( $type )
 {
-case 'NORMAL':
-echo "<tr><td>Subject:</td><td>" . $row["Subject"] . "</td></tr>\n";
-break;
+ case 'NORMAL':
+     echo "<tr><td>Subject:</td><td>" . $row["Subject"] . "</td></tr>\n";
+     break;
+     
+ case 'INVITATION':
+     echo "<tr><td>Subject:</td><td>Game invitation</td></tr>\n";
+     break;
+     
+ case 'ACCEPT':
+     echo "<tr><td>Subject:</td><td>Invitation declined</td></tr>\n";
+     break;
 
-case 'INVITATION':
-echo "<tr><td>Subject:</td><td>Game invitation</td></tr>\n";
-break;
-
-case 'ACCEPT':
-echo "<tr><td>Subject:</td><td>Invitation declined</td></tr>\n";
-break;
-
-case 'DECLINE':
-echo "<tr><td>Subject:</td><td>Invitation accepted</td></tr>\n";
-break;
+ case 'DECLINE':
+     echo "<tr><td>Subject:</td><td>Invitation accepted</td></tr>\n";
+     break;
 }
 
-echo "<tr><td>Message:</td><td>" . $row["Text"] . "</td></tr>\n</table>\n";
+echo "<tr><td valign=\"top\">Message:</td><td align=\"center\">\n" . 
+     "<table border=2 align=center><tr>" . 
+     "<td width=\"" . ($player_row["Stonesize"]*19) . "\" align=left>" .$row["Text"] .
+     "</td></tr></table><BR>\n";
+
+
+echo "</td></tr>\n</table></center>\n";
+
 
 
 if( $type == 'INVITATION' and $info != 'REPLIED' )
