@@ -371,7 +371,7 @@ require_once( "include/rating.php" );
       else if( $my_game && $Status == 'FINISHED' && $opponent_ID > 0) //&& $action == 'just_looking'
       {
          $menu_array[T_('Send message to user')] = "message.php?mode=NewMessage&uid=$opponent_ID" ;
-         $menu_array[T_('Insite this user')] = "message.php?mode=Invite&uid=$opponent_ID" ;
+         $menu_array[T_('Invite this user')] = "message.php?mode=Invite&uid=$opponent_ID" ;
       }
 
       $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid");
