@@ -267,7 +267,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       echo "\n  </td>";
    }
    //this <table><tr><td> is left open until page end
-   echo "\n  <td id=\"page_body\" width=\"100%\" align=center valign=top><BR>";
+   echo "\n  <td id=\"page_body\" width=\"100%\" align=center valign=top><BR>\n\n";
 
    if( $is_down )
    {
@@ -282,7 +282,7 @@ function end_page( $menu_array=NULL )
    global $page_microtime, $admin_level, $base_path,
       $menu_bg_color, $menu_fg_color, $bg_color;
 
-   echo "&nbsp;<br>\n";
+   echo "\n\n&nbsp;<br>";
 
    echo "\n  </td>";
 
@@ -326,7 +326,7 @@ function end_page( $menu_array=NULL )
       . "\n</table>";
 
    echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$bg_color>"
-      . "\n </tr>";
+      . "\n <tr>";
 
 global $HOSTNAME;
 
