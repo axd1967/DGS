@@ -71,7 +71,8 @@ array( 'Admin', 'Common', 'Documentation', 'Edit bio',
        'Edit password', 'Edit profile', 'Error',
        'Game', 'Index', 'Introduction', 'Language',
        'Links', 'Messages', 'Misc', 'Register',
-       'Site map', 'Status', 'Users', 'Waiting room' );
+       'Site map', 'Status', 'Users', 'Waiting room',
+       'Untranslated phrases' );
 
 $translation_info =
 array(

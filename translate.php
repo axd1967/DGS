@@ -120,8 +120,12 @@ When translating you should keep in mind the following things:
           !in_array( $tlc, $translator_array ) )
         error('not_correct_transl_language');
 
-      if( !$group )
+      if( !$group or !in_array( $group, $translation_groups ) )
         $group = 'Common';
+
+      $untranslated = false;
+      if( strcmp( $group, 'Untranslated phrases' ) == 0 )
+        $untranslated = true;
 
       $old_lang = $the_translator->current_language;
       $the_translator->change_language( $translate_lang );
@@ -144,16 +148,27 @@ When translating you should keep in mind the following things:
       $translate_form->add_row( array( 'HEADER', 'Translate the following strings' ) );
 
       $counter = 0;
+      $nr_messages = 0;
       foreach( $translation_info as $string => $info )
         {
           $counter++;
-          if( in_array( $group, $info['Groups'] ) )
+          if( in_array( $group, $info['Groups'] ) || $untranslated )
             {
               $translation = '';
               if( array_key_exists( $string, $new_translations ) )
                 $translation = $new_translations[$string];
               else
                 $translation = T_($string);
+
+              if( $untranslated &&
+                  ($nr_messages > 50 || !empty($translation)) )
+                {
+                  continue;
+                }
+              else
+                {
+                  $nr_messages++;
+                }
 
               $hsize = 60;
               $vsize = intval(floor(min( max( 2,
@@ -175,6 +190,22 @@ When translating you should keep in mind the following things:
       $the_translator->change_language( $old_lang );
       $the_translator->set_return_empty( false );
 
+      if( $untranslated && $nr_messages >= 50 )
+        {
+          $translate_form->add_row( array( 'SPACE' ) );
+          $translate_form->add_row( array( 'OWNHTML',
+                                           "<tr>\n" .
+                                           "  <td align=\"center\" colspan=\"2\" " .
+                                           "style=\"  border: solid; border-color: " .
+                                           "#ff6666; border-width: 2pt;\">\n" .
+                                           "    Note that only the first fifty untranslated " .
+                                           "messages are displayed, so that there won't be " .
+                                           "too many messages at the same time.\n" .
+                                           "  </td>\n" .
+                                           "</tr>\n" ) );
+
+        }
+
       $translate_form->add_row( array( 'SPACE' ) );
       $translate_form->add_row( array( 'HEADER', 'Groups' ) );
       $translate_form->add_row( array( 'HIDDEN', 'translate_lang', $translate_lang ) );
@@ -182,7 +213,6 @@ When translating you should keep in mind the following things:
                                        'SELECTBOX', 'group', 1,
                                        array_value_to_key_and_value( $translation_groups ),
                                        $group, false ) );
-
       $translate_form->add_row( array( 'SPACE' ) );
 
       $translate_form->add_row( array( 'OWNHTML',
