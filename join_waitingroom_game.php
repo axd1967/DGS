@@ -40,7 +40,7 @@ require( "include/rating.php" );
       $id=0;
 
    $result = mysql_query("SELECT Waitingroom.*,Name,Handle," .
-                         "Rating2 AS Rating,RatingStatus,ClockUsed " .
+                         "Rating2 AS Rating,RatingStatus,ClockUsed,OnVacation " .
                          "FROM Waitingroom,Players " .
                          "WHERE Players.ID=Waitingroom.uid AND Waitingroom.ID=$id");
 
@@ -74,8 +74,9 @@ require( "include/rating.php" );
 
 // set me to black and swap later if necessary
 
-   $clock_used_white = $ClockUsed;
-   $clock_used_black = $player_row["ClockUsed"];
+   $clock_used_white = ( $OnVacation > 0 ? -1 : $ClockUsed);
+   $clock_used_black =  ( $player_row['OnVacation'] > 0 ? -1 : $player_row["ClockUsed"] );
+
    $opponent_rating = $Rating;
    $my_rating = $player_row["Rating2"];
 

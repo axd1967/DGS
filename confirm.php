@@ -64,7 +64,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    $result = mysql_query( "SELECT Games.*, " .
                           "Games.Flags+0 AS flags, " .
                           "black.ClockUsed AS Blackclock, " .
-                          "white.ClockUsed AS Whiteclock " .
+                          "white.ClockUsed AS Whiteclock, " .
+                          "black.OnVacation AS Blackonvacation, " .
+                          "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
 
@@ -138,7 +140,15 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
       if( $WeekendClock != 'Y' )
          $next_clockused += 100;
-      $next_ticks = get_clock_ticks($next_clockused);
+
+      if( $next_to_move == BLACK and $Blackonvacation > 0 or
+          $next_to_move == WHITE and $Whiteonvacation > 0 )
+      {
+         $next_clockused = -1;
+         $next_ticks = 0;
+      }
+      else
+         $next_ticks = get_clock_ticks($next_clockused);
 
       $time_query .= "LastTicks=$next_ticks, " .
           "ClockUsed=$next_clockused, ";

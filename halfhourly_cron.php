@@ -147,7 +147,7 @@ require( "include/board.php" );
 // Check end of vacations
 
    $result = mysql_query("SELECT ID, ClockUsed from Players " .
-                         "WHERE OnVacation>0 AND OnVacation <= 1/(12*24)");
+                         "WHERE OnVacation>0 AND OnVacation <= 1/(2*24)");
 
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -173,8 +173,8 @@ require( "include/board.php" );
 // Change vacation days
 
    mysql_query("UPDATE Players SET " .
-               "VacationDays=LEAST(365.24/12, VacationDays + 1/(12*24)), " .
-               "OnVacation=GREATEST(0, OnVacation - 1/(12*24))");
+               "VacationDays=LEAST(365.24/12, VacationDays + 1/(12*2*24)), " .
+               "OnVacation=GREATEST(0, OnVacation - 1/(2*24))");
 
 }
 ?>
