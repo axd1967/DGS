@@ -377,7 +377,7 @@ CREATE TABLE Translationlog (
 
 CREATE TABLE TranslationTexts (
   ID int(11) NOT NULL auto_increment,
-  Text text,
+  Text blob,
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
@@ -389,7 +389,7 @@ CREATE TABLE TranslationTexts (
 CREATE TABLE Translations (
   Original_ID int(11) NOT NULL default '0',
   Language_ID int(11) NOT NULL default '0',
-  Text text,
+  Text blob,
   PRIMARY KEY  (Language_ID,Original_ID)
 ) TYPE=MyISAM;
 
