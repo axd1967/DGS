@@ -34,6 +34,7 @@ require( "include/table_columns.php" );
 
   $admin_tasks = array( 'TRANS' => ADMIN_TRANSLATORS,
                         'FAQ' => ADMIN_FAQ,
+                        'Forum' => ADMIN_FORUM,
                         'ADMIN' => ADMIN_ADMINS,
                         'TIME' => ADMIN_TIME );
 
@@ -122,6 +123,7 @@ require( "include/table_columns.php" );
       echo tablehead(1, T_('Name'), NULL, false, true);
       echo tablehead(1, T_('Translators'), NULL, true, true);
       echo tablehead(1, T_('FAQ'), NULL, true, true);
+      echo tablehead(1, T_('Forum'), NULL, true, true);
       echo tablehead(1, T_('Admins'), NULL, true, true);
       echo tablehead(1, T_('Time'), NULL, true, true);
       echo "</tr>\n";
@@ -145,6 +147,8 @@ require( "include/table_columns.php" );
             (($row["admin_level"] & ADMIN_TRANSLATORS) ? ' checked' : '') . "></td>\n";
          echo "<td align=center><input type=\"checkbox\" name=\"FAQ_$id\" value=\"Y\"" .
             (($row["admin_level"] & ADMIN_FAQ) ? ' checked' : '') . "></td>\n";
+         echo "<td align=center><input type=\"checkbox\" name=\"Forum_$id\" value=\"Y\"" .
+            (($row["admin_level"] & ADMIN_FORUM) ? ' checked' : '') . "></td>\n";
          echo "<td align=center><input type=\"checkbox\" name=\"ADMIN_$id\" value=\"Y\"" .
             (($row["admin_level"] & ADMIN_ADMINS) ? ' checked' : '') . "></td>\n";
          echo "<td align=center><input type=\"checkbox\" name=\"TIME_$id\" value=\"Y\"" .
@@ -158,12 +162,13 @@ require( "include/table_columns.php" );
          ': <input type="text" name="newadmin" value="" size="16" maxlength="16">'."\n";
       echo "<td align=center><input type=\"checkbox\" name=\"TRANS_new\" value=\"Y\"></td>\n";
       echo "<td align=center><input type=\"checkbox\" name=\"FAQ_new\" value=\"Y\"></td>\n";
+      echo "<td align=center><input type=\"checkbox\" name=\"Forum_new\" value=\"Y\"></td>\n";
       echo "<td align=center><input type=\"checkbox\" name=\"ADMIN_new\" value=\"Y\"></td>\n";
       echo "<td align=center><input type=\"checkbox\" name=\"TIME_new\" value=\"Y\"></td>\n";
 
 
 
-      echo '<tr><td align=right colspan=7>' .
+      echo '<tr><td align=right colspan=8>' .
          '<input type="submit" name="action" value="' . T_('Update changes') . "\">\n";
       echo "</table><p>\n";
    }

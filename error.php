@@ -453,9 +453,9 @@ require( "include/std_functions.php" );
       }
       break;
 
-      case("faq_admin_no_such_entry"):
+      case("admin_no_such_entry"):
       {
-        echo T_("Sorry, couldn't find that faq entry.");
+        echo T_("Sorry, couldn't find that entry.");
       }
       break;
 
