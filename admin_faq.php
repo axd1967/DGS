@@ -117,10 +117,15 @@ require( "include/form_functions.php" );
      $question = trim( $_POST["question"] );
      $answer = trim( $_POST["answer"] );
 
-     if( empty($question) and empty($answer) and $row["Translatable"] == 'Y' )
+     if( empty($question) and empty($answer) and $row["Translatable"] == 'N' and
+         ($row["Level"] == 2 or
+          mysql_num_rows(mysql_query("SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1")) == 0 ))
      {
         mysql_query("DELETE FROM FAQ WHERE ID=$id LIMIT 1");
+        mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1 " .
+                    "WHERE Parent=" . $row["Parent"] . " AND SortOrder>" . $row["SortOrder"]);
      }
+
      mysql_query("UPDATE FAQ SET Question=\"$question\", Answer=\"$answer\" " .
                  "WHERE ID=$id LIMIT 1");
 
@@ -227,6 +232,8 @@ require( "include/form_functions.php" );
 
      while( $row = mysql_fetch_array( $result ) )
      {
+        $question = (empty($row['Question']) ? '-' : $row['Question']);
+
         if( $row['Level'] == 1 )
         {
            echo '<tr><td colspan=2>';
@@ -239,7 +246,7 @@ require( "include/form_functions.php" );
         }
 
         echo "<A href=\"admin_faq.php?edit=$typechar&id=" . $row['ID'] .
-           '" title="' . T_("Edit") . '">' . $row['Question'] . "</A>\n";
+           '" title="' . T_("Edit") . "\">$question</A>\n";
 
         echo '<td width=40 align=right><a href="admin_faq.php?move=u&id=' .
            $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png"></a>';

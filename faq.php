@@ -69,15 +69,17 @@ require( "include/std_functions.php" );
 
      while( $row = mysql_fetch_array( $result ) )
      {
+        $question = (empty($row['Question']) ? '-' : $row['Question']);
+
         if( $row['Level'] == 1 )
         {
            echo "</table></ul>\n";
-           echo '<A href="faq.php?read=t&cat=' . $row['ID'] . '">' . $row['Question'] . "</A>\n";
+           echo '<A href="faq.php?read=t&cat=' . $row['ID'] . "\">$question</A>\n";
            echo "<ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
         }
         else
            echo '<li><A href="faq.php?read=t&cat=' . $row['Parent'] .
-              '#Entry' . $row['ID'] . '">' . $row['Question'] . "</A>\n";
+              '#Entry' . $row['ID'] . "\">$question</A>\n";
      }
 
 
