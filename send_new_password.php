@@ -42,6 +42,10 @@ require( "include/std_functions.php" );
 
    $row = mysql_fetch_array($result);
 
+
+   if( empty($row['Email')) )
+      error('no_email');
+
    if( !empty($row['Newpassword']) )
       error("newpassword_already_sent");
 
