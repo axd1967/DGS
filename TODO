@@ -7,19 +7,31 @@
 
 * Allow for fixed handicap
 
-* Time control
-
 * Customizable time format
 
 * Installation information and scripts
 
 * Show message: link if it's a reply
 
-* More user info: Location, languages, web pages, etc.
+* More user info: Location, languages, web pages, register date, etc.
+
+* Send moves/board with email notification
+
+* Save timestamp/clock with each move
+
+* Add time
+
+* Two-game-match
+
+* Sorting users/messages
+
+* Scoring: show more info
+
+* Delete old messages
+
+* Themes
 
 
-
-* Message boards
 
 * Tournaments
 
@@ -27,6 +39,9 @@
 
 * Rengo (team go)
 
+* Admin page
+
+* Rewrite forums
 
 
 BUGS
