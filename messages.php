@@ -37,7 +37,7 @@ require( "include/std_functions.php" );
       if( $del == 'all' )
       {
          $result = mysql_query("UPDATE Messages ". 
-                               "SET Flags=CONCAT_WS(',',Flags,'DELETED'), Time=Time " .
+                               "SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
                                "WHERE To_ID=$my_id AND " .
                                "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )");
       }
@@ -46,8 +46,7 @@ require( "include/std_functions.php" );
          $query = "UPDATE Messages " . 
              "SET Flags=" . 
              ( $del > 0 ? "CONCAT_WS(',',Flags,'DELETED')" : "REPLACE(Flags,'DELETED','')" ) .
-             ", Time=Time " .
-             "WHERE To_ID=$my_id AND ID=" . abs($del) . " AND " .
+             " WHERE To_ID=$my_id AND ID=" . abs($del) . " AND " .
              "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )";
          
          mysql_query($query);
