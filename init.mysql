@@ -25,46 +25,48 @@ CREATE TABLE Players (
   ClockChanged datetime default NULL,
   Rating double default NULL,
   RatingStatus enum('INIT','READY','RATED') default NULL,
+  Open varchar(40) default NULL,
   PRIMARY KEY  (ID),
-  UNIQUE KEY Handle (Handle),
-  KEY Handle_2 (Handle)
-);
+  UNIQUE KEY Handle (Handle)
+) TYPE=ISAM PACK_KEYS=1;
 
 #
 # Table structure for table 'Games'
 #
 CREATE TABLE Games (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  Black_ID int(11),
-  White_ID int(11),
-  ToMove_ID int(11),
-  Size int(11) DEFAULT '19',
-  Komi decimal(6,1) DEFAULT '5.5',
-  Handicap int(11) DEFAULT '0' NOT NULL,
-  Status enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') DEFAULT 'INVITED' NOT NULL,
-  Moves int(11) DEFAULT '0' NOT NULL,
-  Black_Prisoners int(11) DEFAULT '0' NOT NULL,
-  White_Prisoners int(11) DEFAULT '0' NOT NULL,
-  Last_X int(11),
-  Last_Y int(11),
-  Flags set('Ko'),
-  Score decimal(7,1),
-  Maintime int(11),
-  Byotype enum('JAP','CAN') DEFAULT 'JAP' NOT NULL,
-  Byotime int(11) DEFAULT '0' NOT NULL,
-  Byoperiods int(11) DEFAULT '0' NOT NULL,
-  Black_Maintime int(11),
-  White_Maintime int(11),
-  Black_Byotime int(11) DEFAULT '0' NOT NULL,
-  White_Byotime int(11) DEFAULT '0' NOT NULL,
-  Black_Byoperiods int(11) DEFAULT '-1' NOT NULL,
-  White_Byoperiods int(11) DEFAULT '-1' NOT NULL,
-  LastTicks int(11),
-  ClockUsed int(11) DEFAULT '0' NOT NULL,
-  Rated enum('N','Y','Done') DEFAULT 'N' NOT NULL,
-  PRIMARY KEY (ID)
-);
-
+  ID int(11) NOT NULL auto_increment,
+  Starttime datetime default NULL,
+  Lastchanged timestamp(14) NOT NULL,
+  Black_ID int(11) default NULL,
+  White_ID int(11) default NULL,
+  ToMove_ID int(11) NOT NULL default '0',
+  Size int(11) default '19',
+  Komi decimal(6,1) default '5.5',
+  Handicap int(11) NOT NULL default '0',
+  Status enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED',
+  Moves int(11) NOT NULL default '0',
+  Black_Prisoners int(11) NOT NULL default '0',
+  White_Prisoners int(11) NOT NULL default '0',
+  Last_X int(11) default NULL,
+  Last_Y int(11) default NULL,
+  Flags set('Ko') default NULL,
+  Score decimal(7,1) default NULL,
+  Maintime int(11) default NULL,
+  Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+  Byotime int(11) NOT NULL default '0',
+  Byoperiods int(11) NOT NULL default '0',
+  Black_Maintime int(11) default NULL,
+  White_Maintime int(11) default NULL,
+  Black_Byotime int(11) NOT NULL default '0',
+  White_Byotime int(11) NOT NULL default '0',
+  Black_Byoperiods int(11) NOT NULL default '-1',
+  White_Byoperiods int(11) NOT NULL default '-1',
+  LastTicks int(11) default NULL,
+  ClockUsed int(11) NOT NULL default '0',
+  Rated enum('N','Y','Done') NOT NULL default 'N',
+  PRIMARY KEY  (ID),
+  KEY ToMove_ID (ToMove_ID)
+) TYPE=MyISAM;
 
 #
 # Insert Guest account
@@ -95,14 +97,15 @@ INSERT INTO Players SET
 #
 #CREATE TABLE Moves1 (
 #  ID smallint(5) unsigned NOT NULL auto_increment,
-#  MoveNr smallint(5) unsigned,
-#  Stone smallint(5) unsigned DEFAULT '0' NOT NULL,
-#  PosX smallint(6),
-#  PosY smallint(6),
-#  Hours SMALLINT UNSIGNED NOT NULL,
+#  MoveNr smallint(5) unsigned default NULL,
+#  Stone smallint(5) unsigned NOT NULL default '0',
+#  PosX smallint(6) default NULL,
+#  PosY smallint(6) default NULL,
+#  Hours smallint(5) unsigned default NULL,
 #  Text text,
-#  PRIMARY KEY (ID)
+#  PRIMARY KEY  (ID)
 #);
+
 
  
       
