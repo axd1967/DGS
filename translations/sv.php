@@ -19,14 +19,15 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* Automatically generated at 2002-04-16 13:20:19 GMT */
-
-add_to_known_languages( "sv", "Svenska", 1018963219 );
+/* Automatically generated at 2002-04-17 20:03:50 GMT */
 
 class sv_Language extends Language
 {
   function sv_Language()
     {
+      $this->full_name = 'Svenska';
+      $this->last_updated = 1019073830;
+
       $this->translated_strings = array(
 '%s per %s stones' =>
 '',
@@ -98,10 +99,10 @@ class sv_Language extends Language
 '',
 
 'black' =>
-'',
+'svart',
 
 'Black' =>
-'',
+'Svart',
 
 'Board graphics' =>
 'Brädgrafik',
@@ -179,13 +180,13 @@ class sv_Language extends Language
 '',
 
 'Date' =>
-'',
+'Datum',
 
 'day' =>
-'',
+'dag',
 
 'days' =>
-'',
+'dagar',
 
 'Decline' =>
 '',
@@ -290,7 +291,7 @@ class sv_Language extends Language
 'Glömt lösenordet?',
 
 'Forum' =>
-'',
+'Forum',
 
 'Forums' =>
 'Forum',
@@ -314,7 +315,7 @@ class sv_Language extends Language
 'Hela namnet',
 
 'Game' =>
-'',
+'Spel',
 
 'Game ID' =>
 '',
@@ -377,10 +378,10 @@ class sv_Language extends Language
 '',
 
 'hour' =>
-'',
+'timme',
 
 'hours' =>
-'',
+'timmar',
 
 'How to Teach Go' =>
 '',
@@ -569,10 +570,10 @@ class sv_Language extends Language
 '',
 
 'no' =>
-'',
+'nej',
 
 'No' =>
-'',
+'Nej',
 
 'No games found' =>
 'Inga spel finns',
@@ -958,7 +959,7 @@ Anledningen till detta problem kan vara ett av följande:
 'Status',
 
 'stones' =>
-'',
+'stenar',
 
 'Stone size' =>
 '',
@@ -1078,7 +1079,7 @@ Anledningen till detta problem kan vara ett av följande:
 '',
 
 'White' =>
-'',
+'Vit',
 
 'Win?' =>
 '',
@@ -1105,10 +1106,10 @@ Anledningen till detta problem kan vara ett av följande:
 '',
 
 'yes' =>
-'',
+'ja',
 
 'Yes' =>
-'',
+'Ja',
 
 'You have to know what other players are talking about.' =>
 '',
