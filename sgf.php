@@ -345,7 +345,7 @@ $array=array();
 
             //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
             if( $nr_matches = preg_match_all("'<($regexp)>(.*?)</($regexp)>'mis", $Text,
-                                             $matches, PREG__SET_ORDER) )
+                                             $matches) )
             {
                for($i=0; $i<$nr_matches; $i++)
                {
