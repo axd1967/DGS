@@ -33,10 +33,6 @@ require_once( "include/rating.php" );
    $coord = @$_GET['coord'];
    $stonestring = @$_GET['stonestring'];
    $toggleobserve = @$_GET['toggleobserve'];
-   if( @$_GET['msg'] )
-      $msg = $_GET['msg'];
-   else
-      $msg = '';
 
    // abbreviations used to reduce file size
    if( @$_GET['g'] ) $gid=$_GET['g'];
@@ -61,7 +57,7 @@ require_once( "include/rating.php" );
 //       error("not_logged_in");
 
    $result = mysql_query( "SELECT Games.*, " .
-                          "Games.Flags+0 AS flags, " .
+//                          "Games.Flags+0 AS flags, " .
                           "black.Name AS Blackname, " .
                           "black.Handle AS Blackhandle, " .
                           "black.Rank AS Blackrank, " .
