@@ -167,7 +167,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $menu_array[T_('Add new game')] = "waiting_room.php" .
          ($orderstring ? "?$orderstring" : '' ) . "#add" ;
 
-   if( $pid == $player_row['ID'] )
+   if( $info_row['pid'] == $player_row['ID'] )
       $menu_array[T_('Delete game')] = "join_waitingroom_game.php?id=$ID&delete=t";
 
    end_page($menu_array);
