@@ -145,16 +145,16 @@ function show_button(nr, button_mode, button_function, image, alt, width, height
 {
   var stonesz = stonesize[nr];
   document.write('<table border=0 cellpadding=0 cellspacing=0 align=center valign=center bgcolor=#fdd69b>');
-   document.write('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_1" src="images/'+(on ? 'bl.png':'gr.png')+'\"></td></tr>');
-   document.write('<tr><td><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_2" src="images/'+(on ? 'bl.png':'gr.png')+'"></td>');
+   document.write('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_1" src="images/'+(on ? 'bl.' : 'gr.')+img+'\"></td></tr>');
+   document.write('<tr><td><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_2" src="images/'+(on ? 'bl.' : 'gr.')+img+'"></td>');
 
    if( version == 1 )
       document.write('<td width='+width+' height='+height+' align=center><img border=0 name="'+button_mode+'_'+nr+'" src="'+image+'" onClick="'+button_function+'('+nr+',\''+button_mode+'\')"></td>');
    else
-      document.write('<td width='+width+' height='+height+' align=center><a href="javascript:change_mode('+nr+',\''+button_mode+'\');"><img border=0 align=center name="'+button_mode+'_'+nr+'" src="'+image+'"></a></td>');
+      document.write('<td width='+width+' height='+height+' align=center><a href="javascript:'+button_function+'('+nr+',\''+button_mode+'\');"><img border=0 align=center name="'+button_mode+'_'+nr+'" src="'+image+'"></a></td>');
 
-   document.write('<td align=right><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_3" src="images/'+(on ? 'bl.png':'gr.png')+'"></td></tr>');
-   document.writeln('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_4" src="images/'+(on ? 'bl.png':'gr.png')+'"></td></tr></table>');
+   document.write('<td align=right><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_3" src="images/'+(on ? 'bl.' : 'gr.')+img+'"></td></tr>');
+   document.writeln('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_4" src="images/'+(on ? 'bl.' : 'gr.')+img+'"></td></tr></table>');
 }
 
 
