@@ -70,6 +70,20 @@ function getmicrotime()
    return ((float)$usec + (float)$sec); 
 } 
 
+function unix_timestamp($date)
+{
+   $pattern = "/(19|20)(\d{2})-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2})/";
+   $m = preg_match ($pattern, $date, $matches);
+       
+   if(empty($date) or $date == "0000-00-00" or !$m) 
+   {
+      return NULL;
+   }
+
+   list($whole, $y1, $y2, $month, $day, $hour, $minute, $second) = $matches;
+   return mktime($hour,$minute,$second,$month,$day,$y1.$y2);
+}
+
 function disable_cache($stamp=NULL)
 {
    global $NOW;
