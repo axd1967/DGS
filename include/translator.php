@@ -40,7 +40,7 @@ class Translator
     {
       global $known_languages;
 
-      if( !is_null( $lang ) )
+      if( !is_null( $lang ) and $lang != 'C' )
         {
           if( is_object( $lang ) )
             $this->current_language = $lang;
@@ -92,6 +92,7 @@ class Translator
   function &get_language()
     {
       global $HOSTBASE;
+
       if( strcmp( $this->current_language->lang_code, 'C' ) == 0 )
         {
           return false;
