@@ -32,32 +32,34 @@ require( "include/form_functions.php" );
 
   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-  start_page("Home", true, $logged_in, $player_row );
+  start_page(_("Home"), true, $logged_in, $player_row );
+
+
+  echo "<center>\n";
+  echo '<IMG  width=666 height=172  border=0 alt="Dragon Go Server" SRC="images/dragon_logo.jpg">';
+  echo "\n<BR>\n<BR>\n";
+  echo '<B><font size="+0">' . T_('Please login.') .
+    '</font></B><font color="red"> ' .
+    sprintf( T_("To look around, use %s."), "'guest' / 'guest'" ) . " </font>\n";
+
+  echo form_start( 'loginform', 'login.php', 'POST' );
+  echo form_insert_row( 'DESCRIPTION', T_('Userid'),
+                        'TEXTINPUT', 'userid',16,16,'' );
+  echo form_insert_row( 'DESCRIPTION', T_('Password'),
+                        'PASSWORD', 'passwd',16,16,
+                        'SUBMITBUTTON', 'login', T_('Log in'),
+                        'TEXT',
+                        '<A href="forgot.php"><font size="-2">' . 
+                        T_('Forgot password?') . '</font></A>',
+                        'HIDDEN', 'url', 'status.php' );
+  echo form_end();
+
+  echo "<HR>\n";
+  echo '<a href="register.php"><B>' .
+    T_("Register new account") . "</B></a>\n<HR>\n";
+  echo "</center>\n";
+
+  end_page();
+
 }
-
-?>
-<center>
-<IMG  width=666 height=172  border=0 alt='Dragon Go Server' SRC="images/dragon_logo.jpg">
-<BR>
-<BR>
-<B><font size="+0">Please login.</font></B><font color="red"> To look around, use 'guest' / 'guest'.</font>
-<?php
-
-echo form_start( 'loginform', 'login.php', 'POST' );
-echo form_insert_row( 'DESCRIPTION', 'Userid',
-                      'TEXTINPUT', 'userid',16,16,'' );
-echo form_insert_row( 'DESCRIPTION', 'Password',
-                      'PASSWORD', 'passwd',16,16,
-                      'SUBMITBUTTON', 'login', 'Log in',
-                      'TEXT', '<A href="forgot.php"><font size="-2">Forgot password?</font></A>',
-                      'HIDDEN', 'url', 'status.php' );
-echo form_end();
-?>
-    <HR>
-    <a href="register.php"><B>Register new account</B></a>
-    <HR>
-</center>
-
-<?php
-end_page();
 ?>
