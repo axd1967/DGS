@@ -30,8 +30,9 @@ require("forum_functions.php");
 
    start_page("Forum $Forumname", true, $logged_in, $player_row );
 
-   $result = mysql_query("SELECT Subject, Posts.Thread_ID, Lastchanged, Posts.User_ID, Replies, " .
-                         "Name, UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
+   $result = mysql_query("SELECT Subject, Posts.Thread_ID, Lastchanged, " .
+                         "Posts.User_ID, Replies, Name, " .
+                         "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
                          "UNIX_TIMESTAMP(Lastchanged) AS Lastchangedstamp " .
                          "FROM Posts LEFT JOIN Players ON Players.ID=Posts.User_ID " .
                          "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
@@ -43,7 +44,7 @@ require("forum_functions.php");
    $cols = 4;
    $headline = array("Thread"=>"width=50%","Author"=>"width=20%",
                      "Replies"=>"width=10%  align=center","Date"=>"width=20%");
-   $links = LINK_FORUMS | LINK_THREADS | LINK_NEW_TOPIC;
+   $links = LINK_FORUMS | LINK_NEW_TOPIC;
    start_table($headline, $links, "width=98%", $cols);
 
    $odd = true;

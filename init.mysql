@@ -361,7 +361,9 @@ CREATE TABLE Forums (
   ID int(11) NOT NULL auto_increment,
   Name varchar(40) default NULL,
   Description varchar(255) default NULL,
+  SortVal double NOT NULL default '0',
   PRIMARY KEY  (ID)
+  UNIQUE KEY (SortVal)
 ) TYPE=MyISAM;
 
 

@@ -37,7 +37,7 @@ include("forum_functions.php");
    {
       $result = mysql_query("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
                             "WHERE ID=$parent AND Forum_ID=$forum");
-      
+
       if( mysql_num_rows($result) != 1 )
          error("Unknown parent post");
 
@@ -79,7 +79,7 @@ include("forum_functions.php");
        "PosIndex=\"$PosIndex\"";
 
    mysql_query( $query );
-   
+
    if( mysql_affected_rows() != 1)
       error("mysql_insert_post");
 
@@ -92,7 +92,7 @@ include("forum_functions.php");
          error("mysql_insert_post");
    }
 
-   mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1" .
+   mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1 " .
                 "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
                 "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
 

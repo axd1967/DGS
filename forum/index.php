@@ -29,9 +29,9 @@ start_page("Forum list", true, $logged_in, $player_row );
 
 $result = mysql_query("SELECT Forums.ID,Description,Name, " .
                       "UNIX_TIMESTAMP(MAX(Lastchanged)) AS Timestamp,Count(*) AS Count " .
-                      "FROM Posts,Forums " .
-                      "WHERE Forums.ID=Forum_ID " .
-                      "GROUP BY Posts.Forum_ID");
+                      "FROM Forums LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
+                      "GROUP BY Forums.ID " .
+                      "ORDER BY SortVal");
 
 $cols = 3;
 $headline   = array("Forums" => "colspan=$cols");
@@ -43,13 +43,19 @@ start_table($headline, $links, "width=98%", $cols);
 while( $row = mysql_fetch_array( $result ) )
 {
    extract($row);
+   $date = date($date_fmt, $Timestamp);
+
+   if( empty($row['Timestamp']) )
+   {
+      $date='&nbsp;&nbsp;-';
+      $Count = 0;
+   }
 
    echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID . '">' . $Name .
       '</a></b></td>' .
       '<td nowrap>Posts: <b>' . $Count .  '&nbsp;&nbsp;&nbsp;</b></td>' .
-      '<td nowrap>Last Post: <b>' . date($date_fmt, $Timestamp) . '</b></td></tr>
-
-<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description . '</dl></td></tr>';   
+      '<td nowrap>Last Post: <b>' . $date . '</b></td></tr>
+<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description . '</dl></td></tr>';
 }
 
 end_table($links, $cols);

@@ -61,7 +61,7 @@ on ' . date($date_fmt, $Timestamp) . '</td></tr>
 
    $cols=2;
    $headline   = array("Reading thread" => "colspan=$cols");
-   $links = LINK_FORUMS | LINK_THREADS | LINK_EXPAND_VIEW;
+   $links = LINK_FORUMS | LINK_THREADS;
 
    start_table($headline, $links, 'width="99%"', $cols);
 
