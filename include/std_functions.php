@@ -663,7 +663,6 @@ function parse_atbs_safe( &$trail, &$bad)
       $head.= $quote;
       $bad = 1;
    }
-//RodLog("args$bad=$head + $trail");
    return $head;
 }
 
@@ -687,13 +686,11 @@ function parse_tags_safe( &$trail, &$bad, $stop)
          if( $tag == '/br' ) $tag = 'br' ; //historically used in end game messages.
       $trail = $matches[3] ;
       unset($matches);
-//RodLog("found:$stop=$tag");
       $head = $tag . parse_atbs_safe( $trail, $bad) ;
       if( $bad)
          return $before .'<'. $head .'>' ;
       $head = preg_replace('%[\x01-\x20]+%', ' ', $head);
 
-//RodLog("stop:$tag = $before + $trail");
       if( $stop == $tag )
          return $before .ALLOWED_LT. $head .ALLOWED_GT ;
 
@@ -701,7 +698,6 @@ function parse_tags_safe( &$trail, &$bad, $stop)
       if( $to_be_closed )
       {
          $inside = parse_tags_safe( $trail, $bad, '/'.$tag) ;
-//RodLog("inside$bad:$tag = $before + $inside + $trail");
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
       }
@@ -714,18 +710,15 @@ function parse_tags_safe( &$trail, &$bad, $stop)
    }
    if( $stop )
       $bad = 1;
-//RodLog("close:$stop= $before + $trail");
    return $before ;
 }
 
 function parse_html_safe( $msg)
 {
 
-//RodLog("safe<= $msg");
    $bad = 0;
    $str = parse_tags_safe( $msg, $bad, '') ;
    $str.= $msg;
-//RodLog("safe".($bad?'#':'>')."= $str");
    return $str;
 }
 

@@ -328,7 +328,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'PLAY' or ( $Moves >= 1+DELETE_LIMIT+$Handicap ) )
             error("invalid_action");
 
-/* Rod:
+/*
   Here, the previous line was:
          $query = "DELETE FROM Moves WHERE gid=$gid LIMIT $Moves";
   But, the number of records of Moves could be greater than the number of moves if:

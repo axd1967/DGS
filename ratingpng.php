@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
- require_once( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
 $defaultsize = 640;
@@ -227,7 +227,8 @@ function imagemultiline($im, $points, $nr_points, $color)
                echo_rating(3000, false)); //10dan
 
    if ( function_exists('imagettftext') //TTF need GD and Freetype.
-        && is_file(TTF_FONT) ) //Rod: ...and access rights check if needed
+        && is_file(TTF_FONT) //...and access rights check if needed
+   )
    {
       define('LABEL_FONT'  ,-1);
       define('LABEL_HEIGHT',9);
