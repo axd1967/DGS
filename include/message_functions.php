@@ -27,6 +27,13 @@ define("FOLDER_IMPORTANT", 3);
 define("FOLDER_DELETED", 4);
 define("FOLDER_SENT", 5);
 
+$STANDARD_FOLDERS = array(
+   FOLDER_ALL_RECEIVED => array(T_('All Received'),'f7f5e300','000000'),
+   FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
+   FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
+   FOLDER_IMPORTANT => array(T_('Important'), 'ffaaaa80', '000000'),
+   FOLDER_DELETED => array(T_('Trashcan'), 'ff88ee00', '000000'),
+   FOLDER_SENT => array(T_('Sent'), '00000000', '0000ff'));
 
 // Prints game setting form used by invite.php
 
@@ -207,26 +214,48 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 }
 
 function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_handle,
-                            $subject, $reply_mid, $text)
+                            $subject, $reply_mid, $text, $folders=null, $folder_nr=null)
 {
    global $date_fmt;
 
-   echo "<table>\n" .
+   echo "<table border=0 witdh=\"50%\">\n" .
       "<tr><td><b>" . T_('Date') . ":</b></td>" .
-      "<td>" . date($date_fmt, $date) . "</td></tr>\n" .
+      "<td colspan=2>" . date($date_fmt, $date) . "</td></tr>\n" .
       "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .
-      "<td><A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" .
-      "</td></tr>\n" .
-      "<tr><td><b>" . T_('Subject') . ":</b></td><td>$subject</td></tr>\n" .
+      "<td colspan=2><A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" .
+      "</td></tr>\n";
+
+   echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>$subject</td></tr>\n" .
       "<tr><td valign=\"top\">" .
       ( $reply_mid > 0 ?
         "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">" . T_('Replied') . ":</a>" :
         "<b>" . T_('Message') . ":</b>" ) .
       "</td>\n" .
-      "<td align=\"center\">\n" .
+      "<td align=\"center\" colspan=2>\n" .
       "<table border=2 align=center><tr>" .
-      "<td width=475 align=left>" . make_html_safe($text, true) . "</td></tr></table><BR>\n" .
-      "</td></tr>\n</table>\n";
+      "<td width=475 align=left>" . make_html_safe($text, true) .
+      "</td></tr></table><BR></td></tr>\n";
+
+   if( isset($folders) )
+   {
+      echo "<tr><td><b>" . T_('Folder') . ":</b></td>\n<td><table cellpadding=3><tr>" .
+         echo_folder_box($folders, $folder_nr, 'f7f5e3') . "</table></td>\n";
+
+      echo "<td><form name=\"movefolders\" action=\"" . basename($_SERVER['REQUEST_URI']) .
+         "\" method=\"POST\">\n";
+      $form = new Form('','','');
+      $fld = array('' => '');
+      foreach( $folders as $key => $val )
+         if( $key != $folder_nr and ($to_me xor $key == FOLDER_SENT) and $key != FOLDER_NEW )
+            $fld[$key] = $val[0];
+
+      echo $form->print_insert_select_box('folder', '1', $fld, '', '') .
+         $form->print_insert_submit_button('foldermove', T_('Move to folder')) .
+         "</form></td></tr>\n";
+   }
+
+
+   echo "</table>\n";
 }
 
 
@@ -360,18 +389,26 @@ function interpret_time_limit_forms()
 
 }
 
-function get_folders($uid)
+function get_folders($uid, $remove_all_received=true)
 {
-   $result = mysql_query("SELECT * FROM Folders WHERE uid=0 OR uid=$uid ORDER BY Folder_nr")
+   global $STANDARD_FOLDERS;
+
+   $result = mysql_query("SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr")
       or die(mysql_error());
 
-   $array = array();
+   $flds = $STANDARD_FOLDERS;
+   if( $remove_all_received )
+      unset($flds[FOLDER_ALL_RECEIVED]);
+
    while( $row = mysql_fetch_array($result) )
    {
-      $array[$row['Folder_nr']] = array($row['Name'], $row['Color']);
+      if( empty($row['Name']))
+         $row['Name'] = ( $row['Folder_nr'] < 6 ?
+                          $STANDARD_FOLDERS['Folder_nr'][0] : T_('Folder name') );
+      $flds[$row['Folder_nr']] = array($row['Name'], $row['BGColor'], $row['FGColor']);
    }
 
-   return $array;
+   return $flds;
 }
 
 function change_folders_for_marked_messages($uid, $folders)
@@ -389,14 +426,8 @@ function change_folders_for_marked_messages($uid, $folders)
       if( !isset($folders[$new_folder]) )
          return;
 
-      $query = "UPDATE Messages SET From_Folder_nr=$new_folder " .
-         "WHERE From_ID=$uid AND ID IN (" . implode(',', $message_ids) . ") " .
-         "LIMIT " . count($message_ids);
-
-      mysql_query( $query ) or die(mysql_error());
-
-      $query = "UPDATE Messages SET To_Folder_nr=$new_folder " .
-         "WHERE To_ID=$uid AND ID IN (" . implode(',', $message_ids) . ") " .
+      $query = "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
+         "WHERE uid='$uid' AND mid IN (" . implode(',', $message_ids) . ") " .
          "LIMIT " . count($message_ids);
 
       mysql_query( $query ) or die(mysql_error());
@@ -405,8 +436,13 @@ function change_folders_for_marked_messages($uid, $folders)
 
 function echo_folders($folders, $current_folder)
 {
+   global $STANDARD_FOLDERS;
+
    $string = '<table align=center border=0 cellpadding=0 cellspacing=17><tr>' . "\n" .
       '<td><b>' . T_('Folder') . ":&nbsp;&nbsp;&nbsp;</b></td>\n";
+
+   $folders[FOLDER_ALL_RECEIVED] = $STANDARD_FOLDERS[FOLDER_ALL_RECEIVED];
+   ksort($folders);
 
    foreach( $folders as $nr => $val )
       {
@@ -422,4 +458,24 @@ function echo_folders($folders, $current_folder)
    return $string;
 }
 
+function folder_is_removable($nr, $uid)
+{
+   $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
+                         "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1");
+
+   return (mysql_num_rows($result) === 0);
+}
+
+function echo_folder_box($folders, $folder_nr, $bgcolor)
+{
+      list($foldername, $folderbgcolor, $folderfgcolor) = $folders[$folder_nr];
+      $folderbgcolor = blend_alpha_hex($folderbgcolor, $bgcolor);
+
+      if( empty($foldername) )
+         $foldername = ( $folder_nr <= 5 ? $STANDARD_FOLDERS[$folder_nr][0]
+                         : T_('Folder name') );
+
+      return "<td bgcolor=\"#$folderbgcolor\" nowrap><font color=\"#$folderfgcolor\">$foldername</font></td>";
+
+}
 ?>

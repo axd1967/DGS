@@ -316,10 +316,7 @@ disable_cache();
        "Type='$type', ";
 
    if( $type == 'INVITATION' )
-   {
-      $query .= "Game_ID=$gid, " .
-          "Flags='NEW,REPLY REQUIRED', ";
-   }
+      $query .= "Game_ID=$gid, ";
 
    if( $reply )
       $query .= "ReplyTo=$reply, ";
@@ -328,15 +325,26 @@ disable_cache();
    $query .= "Subject=\"$subject\", Text=\"$message\"";
 
    $result = mysql_query( $query );
-
    if( mysql_affected_rows() != 1)
       error("mysql_insert_message",true);
 
+   $mid = mysql_insert_id();
+   $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+      "($my_id, $mid, 'Y', 5), " .
+      "($opponent_ID, $mid, 'N', 2)";
+
+   $result = mysql_query( $query );
+   if( mysql_affected_rows() != 1)
+      error("mysql_insert_message",true);
 
    if( $reply )
    {
-      mysql_query( "UPDATE Messages SET Flags='REPLIED' " .
-                   "WHERE ID=$reply AND To_ID=$my_ID LIMIT 1" );
+      mysql_query( "UPDATE MessageCorrespondents SET Replied='Y' " .
+                   "WHERE mid=$reply AND Sender='Y' AND uid=$my_ID LIMIT 1" );
+
+      if( $disputegid > 0 )
+         mysql_query( "UPDATE Messages SET Type='DISPUTED' " .
+                      "WHERE ID=$reply AND To_ID=$my_ID LIMIT 1");
    }
 
 

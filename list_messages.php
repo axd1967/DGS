@@ -60,15 +60,6 @@ require_once( "include/timezones.php" );
       $folderstring =implode(',', array_keys($fldrs));
    }
 
-   $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-      "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
-      "Players.Name AS sender, " .
-      "IF( From_ID=$my_id, From_Folder_nr, To_Folder_nr) AS folder " .
-      "FROM Messages, Players " .
-      "WHERE (From_ID=$my_id AND From_Folder_nr IN ($folderstring) " .
-      "OR (To_ID=$my_id AND To_Folder_nr IN ($folderstring) ) ) " .
-      "AND To_ID=Players.ID ";
-
    if(!$_GET['sort1'])
    {
       $_GET['sort1'] = 'date';
@@ -82,7 +73,47 @@ require_once( "include/timezones.php" );
    if( !is_numeric($_GET['from_row']) or $_GET['from_row'] < 0 )
       $_GET['from_row'] = 0;
 
-   $query .= "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+   $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS time, " .
+      "me.mid, me.mid as date, Messages.Subject, me.Replied, " .
+      "Players.Name AS sender, me.Folder_nr AS folder " .
+      "FROM MessageCorrespondents AS me " .
+      "LEFT JOIN Messages ON Messages.ID=me.mid " .
+      "LEFT JOIN MessageCorrespondents AS other " .
+      "ON other.mid=me.mid AND other.Sender != me.Sender " .
+      "LEFT JOIN Players ON Players.ID=other.uid " .
+      "WHERE me.uid=$my_id AND me.Folder_nr IN ($folderstring) " .
+      "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+
+//    $rec_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+//       "Players.Name AS sender, To_Folder_nr AS folder " .
+//       "FROM Messages, Players " .
+//       "WHERE To_ID=$my_id AND To_Folder_nr IN ($folderstring) AND To_ID=Players.ID " .
+//       "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+
+//    $sent_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+//       "Players.Name AS sender, From_Folder_nr AS folder " .
+//       "FROM Messages, Players " .
+//       "WHERE From_ID=$my_id AND From_Folder_nr IN ($folderstring) AND To_ID=Players.ID " .
+//       "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
+
+
+// for mysql 4.0
+
+//    $l = $_GET['from_row']+$MaxRowsPerPage;
+//    $query = "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " ,
+//       "Players.Name AS sender, From_Folder_nr AS folder " .
+//       "FROM Messages, Players WHERE From_ID=$my_id AND From_Folder_nr IN ($folderstring) " .
+//       "AND To_ID=Players.ID order by $order limit $l)" .
+//       "UNION " .
+//       "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+//       "Players.Name AS sender, To_Folder_nr AS folder " .
+//       "FROM Messages, Players WHERE To_ID=$my_id AND To_Folder_nr IN ($folderstring) " .
+//       "AND From_ID=Players.ID order by $order limit $l)" .
+//       "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
 
    $result = mysql_query( $query )
        or die ( error("mysql_query_failed") );
@@ -98,10 +129,7 @@ require_once( "include/timezones.php" );
    echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
    echo "<form name=\"marked\" action=\"list_messages.php\" method=\"GET\">\n";
 
-   $mtable = new Table( make_url( 'list_messages.php',
-                                  true,
-                                  array('all' => $_GET['all'], 'sent' => $_GET['sent']) ),
-                        '', '', true );
+   $mtable = new Table( 'list_messages.php', '', '', true );
    $show_rows = mysql_num_rows($result);
    if( $show_rows == $MaxRowsPerPage )
    {
@@ -109,13 +137,14 @@ require_once( "include/timezones.php" );
       $mtable->Last_Page = false;
    }
 
+   $mtable->add_tablehead( 1, T_('Folder'), '', true, true );
+
    if( $_GET['sent'] == 1 )
    {
       $mtable->add_tablehead( 2, T_('To'), 'sender', false, true );
    }
    else
    {
-      $mtable->add_tablehead( 1, T_('Folder'), '', true, true );
       $mtable->add_tablehead( 2, T_('From'), 'sender', false, true );
    }
 
@@ -126,31 +155,20 @@ require_once( "include/timezones.php" );
 
 
    $i=0;
-   $row_color=2;
    while( $row = mysql_fetch_array( $result ) )
    {
-      $row_color=3-$row_color;
-      $bgcolor = ${"table_row_color$row_color"};
-
       $mid = $row["mid"];
-      if( !($_GET['sent']==1) and !(strpos($row["Flags"],'DELETED') === false) )
-      {
-         $mid = -$row["mid"];
-         $bgcolor=${"table_row_color_del$row_color"};
-      }
+      $bgcolor = substr($mtable->Row_Colors[count($mtable->Tablerows) % 2], 2, 6);
 
-      $row_strings['BG_Color'] = $bgcolor;
-      list($foldername, $foldercolor) = $my_folders[$row['folder']];
-      $row_strings[1] = "<td bgcolor=\"#$foldercolor\">" . T_("$foldername") . "</td>";
-
-      $row_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&mid=" . $row["mid"] . "\">" .
+      $row_strings[1] = echo_folder_box($my_folders, $row['folder'], $bgcolor);
+      $row_strings[2] = "<td><A href=\"message.php?mode=ShowMessage&mid=$mid\">" .
          make_html_safe($row["sender"]) . "</A></td>";
       $row_strings[3] = "<td>" . make_html_safe($row["Subject"]) . "&nbsp;</td>";
       $row_strings[0] = "<td>" .
          ($row['Replied'] == 'Y' ? '<font color="#009900">A</font>' : '&nbsp;' ) . '</td>';
-      $row_strings[4] = "<td>" . date($date_fmt, $row["date"]) . "</td>";
+      $row_strings[4] = "<td>" . date($date_fmt, $row["time"]) . "</td>";
       $row_strings[5] = '<td align=center>'  .
-         '<input type="checkbox" name="mark' . $row['mid'] .  '" value="Y"></td>';
+         '<input type="checkbox" name="mark' . $mid . '" value="Y"></td>';
 
       $mtable->add_row( $row_strings );
 
@@ -161,10 +179,14 @@ require_once( "include/timezones.php" );
    $mtable->echo_table();
 
    $form = new Form('','','');
+   $fld = array();
+   foreach( $my_folders as $key => $val )
+      $fld[$key] = $val[0];
+
    echo '<center>' .
       '<input type="submit" name="move_marked" value="' .
       T_('Move marked messages to folder') . '">' .
-      $form->print_insert_select_box( 'folder', '1', $my_folders, '', '') .
+      $form->print_insert_select_box( 'folder', '1', $fld, '', '') .
       "</form>\n";
 
 

@@ -614,29 +614,30 @@ function make_mysql_safe(&$msg)
    $msg = str_replace("\"", "\\\"", $msg);
 }
 
-function score2text($score, $verbose, $draw_for_jigo=false)
+function score2text($score, $verbose, $sgf=false)
 {
    if( !isset($score) )
-      $text = "?";
-   else if( $score == 0 )
-      $text = ( $draw_for_jigo ? 'Draw' : 'Jigo' );
-   else
-   {
-      $prep = ( abs($score) > 1999 ? 'on' : 'by' );
-      if( $verbose )
-         $text = ( $score > 0 ? "White wins $prep " : "Black wins $prep " );
-      else
-         $text = ( $score > 0 ? "W+" : "B+" );
+      return "?";
 
-      if( abs($score) > 1999 )
-         $text .= "Time";
-      else if( abs($score) > 999 )
-         $text .= "Resign";
-      else
-         $text .= abs($score);
+   if( $score == 0 )
+   {
+      return ( $sgf ? 'Draw' : ( $verbose ? T_('Jigo') : 'Jigo' ));
    }
 
-   return $text;
+   $color = ($verbose ? ( $score > 0 ? T_('White') : T_('Black') )
+             : ( $score > 0 ? 'W' : 'B' ));
+
+   if( abs($score) > 1999 )
+   {
+      return ( $verbose ? sprintf(T_("%s wins on time"), $color) : $color . "+Time" );
+   }
+   else if( abs($score) > 999 )
+   {
+      return ( $verbose ? sprintf(T_("%s wins by resign"), $color) : $color . "+Resign" );
+   }
+   else
+      return ( $verbose ? sprintf(T_("%s wins by %.1f"), $color, abs($score))
+               : $color . '+' . abs($score) );
 }
 
 function is_base_dir()
@@ -856,6 +857,38 @@ function delete_all_observers( $gid, $notify, $Text='' )
    }
 
    mysql_query("DELETE FROM Observers WHERE gid=$gid");
+}
+
+function blend_alpha($red, $green, $blue, $alpha, $bgred=247, $bggreen=245, $bgblue=227)
+{
+   $a = $alpha/255;
+   $r = $a*$red + (1-$a)*$bgred;
+   $g = $a*$green + (1-$a)*$bggreen;
+   $b = $a*$blue + (1-$a)*$bgblue;
+   return sprintf("%02x%02x%02x", $r, $g, $b);
+}
+
+function blend_alpha_hex($color, $bgcolor="f7f5e3")
+{
+   return blend_alpha(base_convert(substr($color, 0, 2), 16, 10),
+                      base_convert(substr($color, 2, 2), 16, 10),
+                      base_convert(substr($color, 4, 2), 16, 10),
+                      base_convert(substr($color, 6, 2), 16, 10),
+                      base_convert(substr($bgcolor, 0, 2), 16, 10),
+                      base_convert(substr($bgcolor, 2, 2), 16, 10),
+                      base_convert(substr($bgcolor, 4, 2), 16, 10));
+}
+
+function limit($val, $minimum, $maximum, $default)
+{
+   if( !is_numeric($val) )
+      return (isset($default) ? $default : $val );
+   else if( $val < $minimum )
+      return $minimum;
+   else if( $val > $maximum )
+      return $maximum;
+
+   return $val;
 }
 
 ?>

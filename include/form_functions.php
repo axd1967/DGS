@@ -574,7 +574,8 @@ class Form
     */
    function print_td_start( $alignment = 'left', $colspan = 1 )
       {
-         return "      <TD align=\"$alignment\" colspan=\"$colspan\">";
+         return "      <TD align=\"$alignment\" " .
+            ($colspan > 1 ? " colspan=\"$colspan\"" : '') . ">";
       }
 
    /*!

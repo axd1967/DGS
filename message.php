@@ -26,11 +26,9 @@ require( "include/form_functions.php" );
 
 
 // Input variables:
-//
-// $mid        -- Message ID
-// $mode       -- NewMessage(Default),ShowMessage,Dispute or Invite
-// $disputegid -- game ID for dispute
-//
+
+$mid = $_GET['mid'];
+$mode = $_GET['mode'];
 
 {
    connect2mysql();
@@ -61,24 +59,32 @@ require( "include/form_functions.php" );
       }
    }
 
+   $folders = get_folders($my_id);
+
+   if( isset($_POST['foldermove']) and isset($folders[$_POST['folder']]) )
+   {
+      mysql_query( "UPDATE MessageCorrespondents SET Folder_nr='{$_POST['folder']}' " .
+                   "WHERE uid='$my_id' AND mid='$mid' LIMIT 1" );
+   }
 
    if( $mode == 'ShowMessage' or $mode == 'Dispute' )
    {
       if( !($mid > 0) )
          error("unknown_message");
 
-      $result = mysql_query("SELECT Messages.*, " .
+      $result = mysql_query("SELECT Messages.*, me.Sender, me.Folder_nr, me.Replied, " .
                             "UNIX_TIMESTAMP(Messages.Time) AS date, " .
                             "Players.Name AS sender_name, " .
                             "Players.Handle AS sender_handle, Players.ID AS sender_id, " .
                             "Games.Status, Size, Komi, Handicap, Maintime, Byotype, " .
                             "Byotime, Byoperiods, Rated, Weekendclock, " .
                             "ToMove_ID, (White_ID=$my_id)+1 AS Color " .
-                            "FROM Messages,Players " .
+                            "FROM Messages, MessageCorrespondents AS me, " .
+                            "MessageCorrespondents AS other, Players " .
                             "LEFT JOIN Games ON Games.ID=Game_ID " .
-                            "WHERE Messages.ID=$mid " .
-                            "AND ((Messages.To_ID=$my_id AND From_ID=Players.ID) " .
-                            "OR (Messages.From_ID=$my_id AND To_ID=Players.ID))");
+                            "WHERE Messages.ID=$mid AND me.mid=$mid AND me.uid=$my_id " .
+                            "AND other.mid=$mid AND other.uid!=$my_id " .
+                            "AND Players.ID=other.uid");
 
       if( @mysql_num_rows($result) != 1 )
          error("unknown_message");
@@ -91,7 +97,6 @@ require( "include/form_functions.php" );
       $sender_handle_safe = make_html_safe($sender_handle);
 
       $to_me = $can_reply = ( $To_ID == $my_id );
-      $has_replied = !(strpos($Flags,'REPLIED') === false);
 
 
       if( $mode == 'ShowMessage' or !$can_reply )
@@ -116,7 +121,7 @@ require( "include/form_functions.php" );
 
          if( $Type=='INVITATION' )
          {
-            if( $Status=='INVITED' and !$has_replied)
+            if( $Status=='INVITED' and !($Replied == 'N'))
             {
                $mode = 'ShowInvite';
             }
@@ -133,7 +138,6 @@ require( "include/form_functions.php" );
 
    }
 
-
    start_page("Message - $mode", true, $logged_in, $player_row );
 
    echo "<center>\n";
@@ -145,8 +149,9 @@ require( "include/form_functions.php" );
       case 'AlreadyDeclined':
       case 'AlreadyAccepted':
       {
+         $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
-                            $Subject, $ReplyTo, $Text);
+                            $Subject, $ReplyTo, $Text, $folders, $Folder_nr, $message_form);
          if( $mode == 'AlreadyAccepted' )
          {
             echo '<font color=green>';
@@ -160,7 +165,6 @@ require( "include/form_functions.php" );
 
          if( $can_reply )
             {
-              $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
               $message_form->add_row( array( 'HEADER', T_('Reply') ) );
               $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
               $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
@@ -191,8 +195,9 @@ require( "include/form_functions.php" );
       case 'ShowInvite':
       case 'ShowMyInvite':
       {
+         $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
          message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle_safe,
-                            $Subject, $ReplyTo, $Text);
+                            $Subject, $ReplyTo, $Text, $folders, $Folder_nr, $message_form);
 
          if( $Color == BLACK )
          {
@@ -220,7 +225,6 @@ require( "include/form_functions.php" );
                T_('Dispute settings') . '</a>';
             echo "<p>&nbsp;<p>\n";
 
-            $message_form = new Form( 'messageform', 'send_message.php', FORM_GET );
             $message_form->add_row( array( 'HEADER', T_('Reply') ) );
             $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
             $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
@@ -244,7 +248,7 @@ require( "include/form_functions.php" );
          $message_form->add_row( array( 'HEADER', T_('Dispute settings') ) );
          $message_form->add_row( array( 'HIDDEN', 'mode', $mode ) );
          $message_form->add_row( array( 'HIDDEN', 'subject', 'Game invitation dispute' ) );
-         $message_form->add_row( array( 'HIDDEN', 'disputegid', $disputegid ) );
+         $message_form->add_row( array( 'HIDDEN', 'disputegid', $Game_ID ) );
          $message_form->add_row( array( 'HIDDEN', 'to', $sender_handle ) );
          $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
          $message_form->add_row( array( 'HIDDEN', 'type', 'INVITATION' ) );
