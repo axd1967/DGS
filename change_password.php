@@ -34,18 +34,20 @@ require( "include/rating.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
+   check_password( $player_row["Password"], $player_row["Newpassword"], $oldpasswd );
+
    if( $passwd != $passwd2 )
    {
-      error("password_missmatch");
+      error("password_mismatch");
    }
    else if( strlen($passwd) < 6 )
    {
       error("password_too_short");
-   } 
+   }
 
    $query = "UPDATE Players SET " .
        "Password=PASSWORD('$passwd') " .
-       "WHERE ID=" . $player_row['ID'];    
+       "WHERE ID=" . $player_row['ID'];
 
    mysql_query( $query );
 

@@ -217,7 +217,7 @@ The reasons for this problem could be any of the following:
       }
       break;
 
-      case("password_missmatch"):
+      case("password_mismatch"):
       {
          echo "The confirmed password didn't match the password, please go back and retry.";
       }
@@ -314,7 +314,7 @@ The reasons for this problem could be any of the following:
 
       case("wrong_password"):
       {
-         echo "Sorry, invalid password.";
+         echo "Sorry, you didn't write your current password correctly.";
       }
       break;
 

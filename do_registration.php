@@ -23,7 +23,7 @@ require( "include/std_functions.php" );
 {
    if( $passwd != $passwd2 )
    {
-      error("password_missmatch");
+      error("password_mismatch");
    }
    else if( strlen($passwd) < 6 )
    {
