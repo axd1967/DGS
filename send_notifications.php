@@ -31,7 +31,8 @@ require( "include/board.php" );
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
-      $msg = '';
+
+      $msg = "A message or game move is waiting for you at $HOSTBASE/status.php\n";
 
       // Find games
 
@@ -59,7 +60,7 @@ require( "include/board.php" );
                make_array( $ID, $array, $mess, $Moves, NULL, $moves_result, $marked_dead );
 
                $msg .= str_pad('', 47, '-') . "\n";
-               $msg .= "Game ID: $ID\n";
+               $msg .= "Game ID: $ID  ($HOSTBASE/game.php?gid=$ID\n";
                $msg .= "Black: $Blackname ($Blackhandle)\n";
                $msg .= "White: $Whitename ($Whitehandle)\n";
                $msg .= "Move $Moves: " . number2board_coords($Last_X, $Last_Y, $Size) . "\n";
@@ -93,19 +94,17 @@ require( "include/board.php" );
             {
                extract($msg_row);
                
-               $msg .= str_pad('', 47, '-') . "\n";
-               $msg .= "Date: " . date($date_fmt, $date) . "\n";
-               $msg .= "From: $FromName($FromHandle)\n";
-               $msg .= "Subject: " . make_html_safe($Subject) . "\n\n";
-               $msg .=  wordwrap(make_html_safe($Text),47) . "\n";
+               $msg .= str_pad('', 47, '-') . "\n" .
+                   "Date: " . date($date_fmt, $date) . "\n" .
+                   "From: $FromName($FromHandle)\n" .
+                   "Subject: " . make_html_safe($Subject) . 
+                   "  ($HOSTBASE/show_message.php?mid=$ID)\n\n" .
+                   wordwrap(make_html_safe($Text),47) . "\n";
             }
          }
       }
 
-      if( $msg == '' )
-         $msg = "A message or game move is waiting for you at $HOSTBASE/status.php";
-      else
-         $msg .= str_pad('', 47, '-');
+      $msg .= str_pad('', 47, '-');
 
       mail( $Email, 'Dragon Go Server notification', $msg, "From: $EMAIL_FROM" );
    }
