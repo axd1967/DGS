@@ -69,7 +69,7 @@
 
     texture
     {
-      pigment { colour 0.14*<1,1,1> }
+      pigment { colour 0.13*<1,1,1> }
       finish
       {
         ambient 1.3
@@ -98,8 +98,8 @@
       finish  {
         ambient 0.26
         diffuse 0.55
-        //     reflection 0.1
-        specular 0.8
+        reflection 0.1
+        specular 0.15
         roughness 0.003
 //        phong 1
 //        phong_size 40

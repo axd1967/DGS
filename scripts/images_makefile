@@ -11,15 +11,16 @@ SIZES = 13 17 21 25 29 35 42 50
 BOARD_SIZES = 13/board 17/board 21/board 25/board 29/board 35/board 42/board 50/board
 STONES_SIZES = 13/stones 17/stones 21/stones 25/stones 29/stones 35/stones 42/stones 50/stones
 
-BIGSTONES = BigBlack.png BigBlackMark.png BigWhite.png BigWhiteMark.png YinYang.png BigPlayBlack.png BigPlayWhite.png
+BIGSTONES = BigWhite.png BigBlack.png BigBlackMark.png BigWhiteMark.png YinYang.png BigPlayBlack.png BigPlayWhite.png
 BIGSTONES_POV = BigBlack_pov.png BigWhite_pov.png YinYang_pov.png BigPlayBlack_pov.png BigPlayWhite_pov.png
 
 POVFILES = stone.inc stone.pov
 
 POVRAY = povray
 POVRAY_ARGS = +D +sp16 +ep4 -P -V +UA +A +J +W1024 +H768 +FN
+#POVRAY_ARGS = +D +sp16 +ep4 -P -V +UA +J +W512 +H384 +FN
 
-target: board stones
+target: $(BIGSTONES) board stones
 
 BigPlayBlack_pov.png: $(POVFILES)
 	$(POVRAY) $(POVRAY_ARGS) Declare=PLAY_B=1 +O$@ stone.pov
@@ -39,7 +40,7 @@ YinYang_pov.png: $(POVFILES)
 %.png: %_pov.png generate_big_images.pl
 	./generate_big_images.pl $@ $<
 
-%Mark.png: %_pov.png generate_big_images.pl
+%Mark.png: %_pov.png %.png generate_big_images.pl
 	./generate_big_images.pl $@ $<
 
 %/board: generate_board_images.pl

@@ -41,33 +41,38 @@ camera
   angle 2.5
 }
 
+
+
+
 light_source {
-
-  <-0.9, 3, 1.4>
-
-  color 1.2*<1.0, 1.0, 0.95>
-
-  area_light <2, 0, 0>, <0, 0, 2>, 5, 5
-
-  adaptive 1
-
-  jitter
+  <-0.9, 5, 2.4>
+  color 0.7*<1.0, 1.0, 1.03>
 }
 
-light_source {
-  <-5.9, 6, -5.4>
+// light_source {
+//   <-0.9, 1, 5.4>
+//   color 0.3*<1.0, 1.0, 0.95>
+// }
 
-  color 0.11*<1.0, 1.0, 0.95>
+light_source
+{
+  10*<-0.9, -0.1, 2.4>
+  colour 0.5
 
-  area_light <2, 0, -2>, <0, 2, 0>, 5, 5
-
-  adaptive 1
-
-  jitter
+  shadowless
 }
 
 
+light_source {
+  <-3.9, 1, 0.4>
+  color 0.4*<1.0, 1.0, 0.95>
+}
 
+
+light_source {
+  <2.9, 4, -2.7>
+  color 0.4*<1.0, 1.0, 0.95>
+}
 
 #declare StoneSize = 0.0212;
 #declare ExtraSizeBlack = 0.0006;
