@@ -71,7 +71,7 @@ function replace_unnecessary_chars( $string )
         {
           $counter++;
 
-          if( ${"transl$counter"} )
+          if( !is_null(${"transl$counter"}) )
             {
               $current_translation = '';
               if( array_key_exists( $string, $translation_changes ) )
