@@ -32,57 +32,59 @@ start_page("Messages", true, false, $player_row );
 
 switch( $err )
 {
+ case("early pass"):
+     {
+         echo "Sorry, you may not pass before all handicap stones are placed.";
+     }
+     break;
+
+ case("illegal_position"):
+     {
+         echo "Move outside board??";
+     }
+     break;
+
+ case("invalid_action"):
+     {
+         echo "This type action is either unknown or can't be use in this state of the game.";
+     }
+     break;
+
+ case("invited_to_unknown_game"):
+     {
+         echo "Sorry, can't find the game you are invited to. Already declined?";
+     }
+     break;
+
+ case("ko"):
+     {
+         echo "Sorry, you may not retake a stone which has just captured a stone, " . 
+             "since it would repeat a previous board position. Look for 'ko' in the rules.";
+     }
+     break;
+
+ case("komi_range"):
+     {
+         echo "The komi is out of range, please choose a move reasonable value.";
+     }
+     break;
+
+
  case("mysql_connect_failed"):
      {
          echo "Connection to database failed. Please wait a few minutes and test again.";
      }
      break;
 
- case("mysql_select_db_failed"):
+ case("mysql_delete_game_invitation"):
      {
-         echo "Couldn't select the database. Please wait a few minutes and test again. ";
+         echo "Delete game failed. This is problably not a problem.";
      }
      break;
 
- case("wrong_userid"):
+ case("mysql_insert_message"):
      {
-         echo "Sorry, I don't know anyone with that userid.";
-     }
-     break;
-
- case("wrong_password"):
-     {
-         echo "Sorry, invalid password.";
-     }
-     break;
-
- case("not_logged_in"):
-     {
-         echo "Sorry, you have to be logged in to do that.";
-     }
-     break;
-
- case("no_game_nr"):
-     {
-         echo "Sorry, I need a game number to know what game to show.";
-     }
-     break;
-
- case("unknown_game"):
-     {
-         echo "Sorry, I can't find that game.";
-     }
-     break;
-
- case("not_your_turn"):
-     {
-         echo "Sorry, it's not your turn.";
-     }
-     break;
-
- case("not_empty"):
-     {
-         echo "Sorry, you may only place stones on empty points.";
+         echo "Sorry, the additon of the message to the database seems to have failed.";
      }
      break;
 
@@ -95,38 +97,86 @@ switch( $err )
      }
      break;
 
- case("suicide"):
+ case("mysql_insert_player"):
      {
-         echo "Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset.";
+         echo "The insertion of your data into the database seems to have failed. " .
+             "If you can't log in, please try once more and, if this fails, contact the support.";
      }
      break;
 
- case("ko"):
+ case("mysql_message_info"):
      {
-         echo "Sorry, you may not retake a stone which has just captured a stone, " . 
-             "since it would repeat a previous board position. Look for 'ko' in the rules.";
+         echo "Couldn't update message status. Please retry in a few minutes. ";
      }
      break;
 
- case("reciever_not_found"):
+ case("mysql_select_db_failed"):
      {
-         echo "Sorry, couldn't find the reciever of your message. Make sure to use " .
-             "the userid, not the full name.";
+         echo "Couldn't select the database. Please wait a few minutes and try again. ";
      }
      break;
 
- case("mysql_insert_message"):
+ case("mysql_start_game"):
      {
-         echo "Sorry, the additon of the message to the database seems to have failed.";
+         echo "Sorry, couldn't start the game. Please wait a few minutes and try again.";
      }
      break;
-     
- case("unknown_message"):
+
+ case("mysql_update_player"):
      {
-         echo "Sorry, I couldn't find the message you wanted to show.";
+         echo "Sorry, couldn't update player data. Please wait a few minutes and try again.";
      }
      break;
-     
+
+ case("name_not_given"):
+     {
+         echo "Sorry, you have to supply a name.";
+     }
+     break;
+
+ case("no_action"):
+     {
+         echo "Nothing to be done?";
+     }
+     break;
+
+
+ case("no_game_nr"):
+     {
+         echo "Sorry, I need a game number to know what game to show.";
+     }
+     break;
+
+ case("no_uid"):
+     {
+         echo "Sorry, I need to known for which user to show the data.";
+     }
+     break;
+
+ case("not_allowed_for_guest"):
+     {
+         echo "Sorry, this is not allowed for guests, please first register a personal account";
+     }
+     break;
+
+ case("not_empty"):
+     {
+         echo "Sorry, you may only place stones on empty points.";
+     }
+     break;
+
+ case("not_logged_in"):
+     {
+         echo "Sorry, you have to be logged in to do that.";
+     }
+     break;
+
+ case("not_your_turn"):
+     {
+         echo "Sorry, it's not your turn.";
+     }
+     break;
+
  case("password_missmatch"):
      {
          echo "The confirmed password didn't match the password, please go back and retry.";
@@ -139,18 +189,70 @@ switch( $err )
      }
      break;
 
+ case("reciever_not_found"):
+     {
+         echo "Sorry, couldn't find the reciever of your message. Make sure to use " .
+             "the userid, not the full name.";
+     }
+     break;
+
+ case("reciver_self"):
+     {
+         echo "Sorry, you can't send messages to your self.";
+     }
+     break;
+
+ case("suicide"):
+     {
+         echo "Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset.";
+     }
+     break;
+
+ case("unknown_game"):
+     {
+         echo "Sorry, I can't find that game.";
+     }
+     break;
+
+     
+ case("unknown_message"):
+     {
+         echo "Sorry, I couldn't find the message you wanted to show.";
+     }
+     break;
+     
+
+ case("unknown_message"):
+     {
+         echo "Sorry, I couldn't find this user.";
+     }
+     break;
+
  case("userid_in_use"):
      {
          echo "Sorry, this userid is already used, please try to find a unique userid.";
      }
      break;
 
- case("mysql_insert_player"):
+ case("userid_too_short"):
      {
-         echo "The insertion of your data into the database seems to have failed. " .
-             "If you can't log in, please try once more and, if this fails, contact the support.";
+         echo "Sorry, userid must be at least 3 letters long.";
      }
      break;
+
+
+ case("wrong_password"):
+     {
+         echo "Sorry, invalid password.";
+     }
+     break;
+
+ case("wrong_userid"):
+     {
+         echo "Sorry, I don't know anyone with that userid.";
+     }
+     break;
+
 
 
  default:
