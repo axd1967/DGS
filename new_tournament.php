@@ -28,8 +28,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
    start_page(T_('Create New Tournament'), true, $logged_in, $player_row);
 
-   echo "<CENTER>\n";
-
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
    $tour_form = new Form( 'tournamentform', 'create_tournament.php', FORM_POST );
@@ -41,6 +39,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
                                'TEXTAREA', 'description', 50, 8, "" ) );
    $tour_form->add_row( array( 'SUBMITBUTTON', 'action', 'Submit' ) );
 
+   echo "<CENTER>\n";
+   $tour_form->echo_string();
    echo "</CENTER>\n";
 
    end_page(false);
