@@ -64,20 +64,25 @@ function getmicrotime()
    return ((float)$usec + (float)$sec); 
 } 
 
-function disable_cache()
+function disable_cache($stamp=NULL)
 {
-   header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT');              // Date in the past
-   header ('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
-   header ('Cache-Control: no-cache, must-revalidate, max_age=0'); // HTTP/1.1
-   header ('Pragma: no-cache');                                    // HTTP/1.0
+  // Force revalidation
+   header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+   header ('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
+   header ('Pragma: no-cache');                                              // HTTP/1.0
+
+   if( !$stamp )
+      header ('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');    // Always modified
+   else
+      header ('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
 }
 
-function start_page( $title, $no_cache, $logged_in, &$player_row )
+function start_page( $title, $no_cache, $logged_in, &$player_row, $last_modified_stamp=NULL )
 {
    global $HOSTBASE, $is_down;
 
    if( $no_cache )
-      disable_cache();
+      disable_cache($last_modified_stamp);
 
 
 //     $use_gz = true; 
