@@ -77,7 +77,7 @@ function get_rating_data($uid)
 
    $result = mysql_query("SELECT Rating, RatingMax, RatingMin, " .
                          "UNIX_TIMESTAMP(Time) AS seconds " .
-                         "FROM Ratinglog WHERE uid=$uid") or die(mysql_error());
+                         "FROM Ratinglog WHERE uid=$uid order by Time") or die(mysql_error());
 
    if( mysql_num_rows( $result ) < 2 )
       exit;
