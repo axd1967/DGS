@@ -313,7 +313,7 @@ function end_page( $menu_array=NULL )
         . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
         . "</font>&nbsp;<br>";
 
-   if( $admin_level & ~(ADMIN_TIME|ADMIN_VALIDATE) )
+   if( $admin_level & ~(ADMIN_TIME) )
       echo "<a href=\"{$base_path}admin.php\"><b><font color=$menu_fg_color>"
         . T_('Admin') . "</font></b></a>&nbsp;&nbsp;&nbsp;";
 
@@ -329,12 +329,6 @@ function end_page( $menu_array=NULL )
       . "\n </tr>";
 
 global $HOSTNAME;
-
-   if( $admin_level & ADMIN_VALIDATE )
-      echo "\n  "
-         . '<td align=left valign=top><a href="http://validator.w3.org/check?uri=referer">'
-         . '<img border=0 src="http://www.w3.org/Icons/valid-html401"'
-         . 'alt="Valid HTML 4.01!" height="31" width="88"></a></td>';
 
    if( $HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
       $hostlink= '<A href="http://sourceforge.net" target="_blank"><IMG src="http://sourceforge.net/sflogo.php?group_id=29933&amp;type=1" alt="SourceForge.net Logo" width=88 height=31 border=0 align=middle></A>';
