@@ -162,7 +162,7 @@ function check_remove( $coord=false )
       if( !isset($rownr) or !isset($colnr) )
          error("illegal_position");
 
-      $stone = $array[$colnr][$rownr];
+      $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
       if( $stone == BLACK or $stone == WHITE or $stone == NONE ) //NONE for MARKED_DAME
          $array[$colnr][$rownr] = $stone + OFFSET_MARKED;
       else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD or $stone == MARKED_DAME )
@@ -181,7 +181,7 @@ function check_remove( $coord=false )
       if( !isset($rownr) or !isset($colnr) )
          error("illegal_position");
 
-      $stone = $array[$colnr][$rownr];
+      $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
       if ( MAX_SEKI_MARK<=0 or ($stone!=NONE and $stone!=MARKED_DAME) )
       {
          if( $stone!=BLACK and $stone!=WHITE and $stone!=BLACK_DEAD and $stone!=WHITE_DEAD )
@@ -216,7 +216,7 @@ function check_remove( $coord=false )
 
 function draw_message_box()
 {
-   global $action, $gid, $stonestring, $coord, $prisoner_string;
+   global $action, $gid, $stonestring, $coord, $prisoner_string, $move;
 
    echo '
   <FORM name="confirmform" action="confirm.php" method="GET">
@@ -228,7 +228,8 @@ function draw_message_box()
             <textarea name="message" cols="50" rows="8" wrap="virtual"></textarea></TD>
         </TR>
         <input type="hidden" name="gid" value="' . $gid . '">
-          <input type="hidden" name="action" value="' . $action .'">
+        <input type="hidden" name="move" value="' . $move .'">
+        <input type="hidden" name="action" value="' . $action .'">
 ';
 
     if( $action == 'move' )
@@ -390,9 +391,9 @@ function draw_moves()
 function draw_notes()
 {
    echo "<table width=100 cellspacing=0 cellpadding=2>\n";
-   echo "<tr bgcolor=#7aa07a><td><font color=white><b>" . T_('Game notes') .
+   echo "<tr bgcolor='#7aa07a'><td><font color=white><b>" . T_('Game notes') .
       "</b></font></td></tr>\n";
-   echo "<tr bgcolor=#ddf0dd><td>\n";
+   echo "<tr bgcolor='#ddf0dd'><td>\n";
 
    require_once "include/form_functions.php";
 

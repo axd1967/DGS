@@ -238,6 +238,12 @@ require_once( "include/std_functions.php" );
       }
       break;
 
+      case("already_played"):
+      {
+         echo T_("Sorry, this turn has already been played.");
+      }
+      break;
+
       case("password_illegal_chars"):
       {
          echo T_("The password contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+.,:;?!%* are allowed.");

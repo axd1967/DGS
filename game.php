@@ -20,19 +20,29 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
-require( "include/std_functions.php" );
-require( "include/board.php" );
-require( "include/move.php" );
-require( "include/rating.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/board.php" );
+require_once( "include/move.php" );
+require_once( "include/rating.php" );
 
 
 {
+   $gid = @$_GET['gid'];
+   $action = @$_GET['action'];
+   $move = @$_GET['move'];
+   $coord = @$_GET['coord'];
+   $stonestring = @$_GET['stonestring'];   
+   if( @$_GET['msg'] )
+      $msg = $_GET['msg'];
+   else
+      $msg = '';
+
    // abbreviations used to reduce file size
-   if( $g ) $gid=$g;
-   if( $a ) $action=$a;
-   if( $m ) $move=$m;
-   if( $c ) $coord=$c;
-   if( $s ) $stonestring=$s;
+   if( @$_GET['g'] ) $gid=$_GET['g'];
+   if( @$_GET['a'] ) $action=$_GET['a'];
+   if( @$_GET['m'] ) $move=$_GET['m'];
+   if( @$_GET['c'] ) $coord=$_GET['c'];
+   if( @$_GET['s'] ) $stonestring=$_GET['s'];
 
    connect2mysql();
 
@@ -78,8 +88,8 @@ require( "include/rating.php" );
    if( $action and $player_row["ID"] != $ToMove_ID )
       error("not_your_turn");
 
-
-   $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and (!$move or $move == $Moves) );
+   if( !$move ) $move = $Moves;
+   $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and $move == $Moves );
 
    $my_game = ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID );
 
@@ -144,7 +154,7 @@ require( "include/rating.php" );
          if( $Status == 'FINISHED' )
             $extra_message = "<font color=\"blue\">" . score2text($Score, true) . "</font>";
          $enable_message = false;
-         if( $move )
+         if( $lastx > 0 && $lasty > 0 )
          {
             $Last_X = $lastx;
             $Last_Y = $lasty;
@@ -274,7 +284,7 @@ require( "include/rating.php" );
 
    if( $enable_message )
    {
-      draw_message_box(); //use $stonestring, $prisoner_string
+      draw_message_box(); //use $stonestring, $prisoner_string, $move
    }
 
    echo "<HR>\n";

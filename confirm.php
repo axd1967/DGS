@@ -80,11 +80,6 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
 
-   $old_moves = $Moves;
-
-   if( $player_row["ID"] != $ToMove_ID )
-      error("not_your_turn");
-
    if( $Status == 'INVITED' )
    {
       error("game_not_started");
@@ -93,6 +88,17 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    {
       error("game_finished");
    }
+
+   if( $player_row["ID"] != $ToMove_ID )
+      error("not_your_turn");
+
+   $old_moves = $Moves;
+   $qry_move = @$_REQUEST['move'];
+   //could append in case of multi-players account with simultaneous logins
+   //or if one player hit twice the validation button during a net lag
+   //and if opponent has already played between the two confirm.php calls.
+   if( $qry_move > 0 && $qry_move < $old_moves )
+      error("already_played");
 
 
    if( $Black_ID == $ToMove_ID )
@@ -123,7 +129,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       if( $to_move == BLACK )
       {
          time_remaining($hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
-         $Byotype, $Byotime, $Byoperiods, true);
+            $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "Black_Maintime=$Black_Maintime, " .
              "Black_Byotime=$Black_Byotime, " .
              "Black_Byoperiods=$Black_Byoperiods, ";
@@ -131,7 +137,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       else
       {
          time_remaining($hours, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
-         $Byotype, $Byotime, $Byoperiods, true);
+            $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "White_Maintime=$White_Maintime, " .
              "White_Byotime=$White_Byotime, " .
              "White_Byoperiods=$White_Byoperiods, ";
