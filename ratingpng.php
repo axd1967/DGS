@@ -18,10 +18,10 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-require( "include/rating.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/rating.php" );
 
-$defaltsize = 800;
+$defaltsize = 640;
 
 function get_rating_data($uid)
 {
@@ -125,6 +125,8 @@ function imagemultiline($im, $points, $nr_points,$color)
 
 
 {
+   $starttime = getmicrotime();
+
    connect2mysql();
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
@@ -148,11 +150,6 @@ function imagemultiline($im, $points, $nr_points,$color)
    $nr_points = count($ratings);
 
    $im = imagecreate( $SizeX, $SizeY );
-
-//     echo $nr_points;
-//     print_r($ratings);
-//     echo '<p>';
-//     exit;
 
    $bg = imagecolorallocate ($im, 247, 245, 227);
    $black = imagecolorallocate ($im, 0, 0, 0);
@@ -210,6 +207,8 @@ function imagemultiline($im, $points, $nr_points,$color)
       $no_text = false;
    }
 
+   if( $_GET['show_time'] == 'y' )
+      imagestring($im, 2, 50, 0, sprintf('%0.2f', (getmicrotime()-$starttime)*1000), $black);
 
    imagemultiline($im, interleave_data($time, $ratings), $nr_points, $black);
 

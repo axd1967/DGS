@@ -49,8 +49,16 @@ require( "include/std_functions.php" );
   start_page($title, true, $logged_in, $player_row );
 
   echo '<center>';
-  echo "<h3><font color=$h3_color>$title</font><h3><p>\n";
-  echo '<img src="ratingpng.php?uid=' . $uid . "\">\n";
+  echo "<h3><font color=$h3_color>$title</font></h3><p>\n";
+
+  $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2");
+
+  if( mysql_num_rows($result) < 2 )
+     echo T_("Sorry, too few rated games to draw a graph") . "\n";
+  else
+     echo '<img src="ratingpng.php?uid=' . $uid .
+        ($_GET['show_time'] == 'y' ? '&show_time=y' : '') . "\">\n";
+
   echo '</center>';
 
   end_page();
