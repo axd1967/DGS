@@ -122,7 +122,7 @@ for($i=1; $i<6; $i++ )
 }
 
 echo form_insert_row( 'DESCRIPTION', 'Wood color',
-                      'RADIOBUTTONS', 'woodcolor', 1, $vals,
+                      'RADIOBUTTONS', 'woodcolor', $vals,
                       $player_row["Woodcolor"], false );
 
 $s = $player_row["Boardcoords"];
