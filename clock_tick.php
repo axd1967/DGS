@@ -124,7 +124,7 @@ if( !$is_down )
 
          mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
                      "($Black_ID, $mid, 'N', 2), " .
-                     "($White_ID, $mid, 'N', 2), ");
+                     "($White_ID, $mid, 'N', 2)");
 
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .

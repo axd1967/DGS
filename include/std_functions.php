@@ -880,7 +880,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
          $mid = mysql_insert_id();
 
          mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                     "(" . $row['pid'] . ", $mid, 'N', 2), ");
+                     "(" . $row['pid'] . ", $mid, 'N', 2)");
       }
    }
 
