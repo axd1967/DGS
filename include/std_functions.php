@@ -23,7 +23,8 @@ require( "include/connect2mysql.php" );
 
 if( @is_readable("timeadjust.php" ) )
    include( "timeadjust.php" );
-else
+
+if( !is_numeric($timeadjust) )
    $timeadjust = 0;
 
 $NOW = time() + (int)$timeadjust;
