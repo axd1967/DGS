@@ -168,6 +168,18 @@ if( mysql_affected_rows() != 1)
     exit;
 }
 
+if( $reply )
+{
+    mysql_query( "UPDATE Messages SET Info='REPLIED' WHERE ID=$reply AND To_ID=$my_ID" );
+
+    if( mysql_affected_rows() != 1)
+        {
+            header("Location: error.php?err=mysql_message_info");
+            exit;
+        }
+}
+
+
 start_page("Message Sent", true, $logged_in, $player_row );
 
 echo "Message sent!";

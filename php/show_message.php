@@ -37,7 +37,8 @@ if( !$logged_in )
 $result = mysql_query("SELECT Messages.*, " .
                       "DATE_FORMAT(Messages.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
                       "Players.Name AS sender, " .
-                      "Players.Handle, Players.ID AS pid " .
+                      "Players.Handle, Players.ID AS pid, " .
+                      "Messages.Info " .
                       "FROM Messages,Players " .
                       "WHERE Messages.ID=$mid AND To_ID=" . $player_row["ID"] . 
                       " AND From_ID=Players.ID");
@@ -51,6 +52,49 @@ if( mysql_num_rows($result) != 1 )
 $row = mysql_fetch_array($result);
 
 $type = $row["Type"];
+$info = $row["Info"];
+
+
+if( $type == 'INVITATION' and $info != 'REPLIED' )
+{
+    $result = mysql_query( "SELECT * FROM Games WHERE ID=" . $row["Game_ID"] . 
+                           " AND Status='INVITED'" );
+
+    if( mysql_num_rows($result) != 1 )
+        {
+            header("Location: error.php?err=invited_to_unknown_game");
+            exit;
+        } 
+    
+    $game_row = mysql_fetch_array($result);
+
+    if( $game_row["Black_ID"] == $player_row["ID"] )
+        $col = "Black";
+    else if( $game_row["White_ID"] == $player_row["ID"] )
+        $col = "White";
+    else
+        {
+            header("Location: error.php?err=invited_to_unknown_game");
+            exit;
+        } 
+}
+
+if( $info == 'NEW' )
+{
+    if( $type == 'INVITATION' )
+        $new_info = 'REPLY REQUIRED';
+    else
+        $new_info = 'NONE';
+
+    mysql_query( "UPDATE Messages SET Info='$new_info' WHERE ID=$mid" );
+
+    if( mysql_affected_rows() != 1)
+        {
+            header("Location: error.php?err=mysql_message_info");
+            exit;
+        }
+
+}
 
 start_page("Show Message", true, $logged_in, $player_row );
 
@@ -77,35 +121,13 @@ break;
 case 'DECLINE':
 echo "<tr><td>Subject:</td><td>Invitation accepted</td></tr>\n";
 break;
-
 }
 
 echo "<tr><td>Message:</td><td>" . $row["Text"] . "</td></tr>\n</table>\n";
 
 
-if( $type == 'INVITATION' )
+if( $type == 'INVITATION' and $info != 'REPLIED' )
 {
-    $result = mysql_query( "SELECT * FROM Games WHERE ID=" . $row["Game_ID"] . 
-                           " AND Status='INVITED'" );
-
-    if( mysql_num_rows($result) != 1 )
-        {
-            header("Location: error.php?err=invited_to_unknown_game");
-            exit;
-        } 
-    
-    $game_row = mysql_fetch_array($result);
-
-    if( $game_row["Black_ID"] == $player_row["ID"] )
-        $col = "Black";
-    else if( $game_row["White_ID"] == $player_row["ID"] )
-        $col = "White";
-    else
-        {
-            header("Location: error.php?err=invited_to_unknown_game");
-            exit;
-        } 
-
 ?>
     <table align=center border=2 cellpadding=3 cellspacing=3>
       <tr><td>Size: </td><td><?php echo( $game_row["Size"] );?></td></tr>
@@ -116,6 +138,8 @@ if( $type == 'INVITATION' )
 <?php
 }
 
+if( $type != 'INVITATION' or $info != 'REPLIED' )
+{
 ?>
 
 
@@ -127,6 +151,7 @@ if( $type == 'INVITATION' )
     <TABLE align="center">
       
       <input type="hidden" name="to" value="<?php echo $row["Handle"]; ?>">
+      <input type="hidden" name="reply" value="<?php echo $mid; ?>">
 
 <?php if( $type != "INVITATION" ) { ?>
       
@@ -146,7 +171,8 @@ if( $type == 'INVITATION' )
       <TR>
         
 <?php
-if( $type == "INVITATION" )
+
+if( $type == "INVITATION" and $info != 'REPLIED' )
 {
     echo "<input type=hidden name=\"gid\" value=\"" . $row["Game_ID"] . "\">\n";
     echo "<TD></TD><TD><input type=submit name=\"type\" value=\"Accept\">\n";
@@ -159,5 +185,7 @@ else
 
 echo "</TR></table></FORM>\n";
    
+}
+
 end_page();
 ?>

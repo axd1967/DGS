@@ -34,7 +34,8 @@ if( !$logged_in )
 }
 
 $result = mysql_query("SELECT DATE_FORMAT(Messages.Time, \"%H:%i  %Y-%m-%d\") AS date, " .
-                      "Messages.ID as mid, Messages.Subject, Players.Name AS sender " .
+                      "Messages.ID as mid, Messages.Subject, Messages.Info, " . 
+                      "Players.Name AS sender " .
                       "FROM Messages,Players " .
                       "WHERE To_ID=" . $player_row["ID"] . " AND From_ID=Players.ID");
 
@@ -43,13 +44,31 @@ start_page("Messages", true, $logged_in, $player_row );
 
 
 echo "<table border=3>\n";
-echo "<tr><th>From</th><th>Subject</th><th>Date</th></tr>\n";
+echo "<tr><th></th><th>From</th><th>Subject</th><th>Date</th></tr>\n";
 
 
 
 while( $row = mysql_fetch_array( $result ) )
 {
-    echo "<tr><td><A href=\"show_message.php?mid=" . $row["mid"] . "\">" .
+    echo "<tr>";
+
+    switch( $row["Info"] )
+        {
+        case 'NONE':
+            echo "<td></td>\n";
+            break;
+        case 'NEW':
+            echo "<td bgcolor=\"00F464\">New</td>\n";
+            break;
+        case 'REPLIED':
+            echo "<td bgcolor=\"FFEE00\">Replied</td>\n";
+            break;
+        case 'REPLY REQUIRED':
+            echo "<td bgcolor=\"FFA27A\">Reply!</td>\n";
+            break;
+        }
+
+    echo "<td><A href=\"show_message.php?mid=" . $row["mid"] . "\">" .
         $row["sender"] . "</A></td>\n" . 
         "<td>" . $row["Subject"] . "</td>\n" .
         "<td>" . $row["date"] . "</td></tr>\n";
