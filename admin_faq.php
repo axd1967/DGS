@@ -24,6 +24,19 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
+/* Translatable flag meaning - See also translate.php
+  Value    Meaning              admin_toggle  admin_changed_box  translator_box
+  N        not translatable     change to Y   -                  -
+  Y        to be translated     change to N   -                  change to Done
+  Done     already translated   -             change to Changed  -
+  Changed  to be re-translated  -             -                  change to Done
+
+  Question and Answer are independently translated.
+  If Answer exist, admin_toggle appears only if both Q & A have not already
+    been translated (not Done nor Changed) and Answer.Translatable is always
+    equal to Question.Translatable.
+*/
+
 {
   connect2mysql();
 
@@ -39,16 +52,6 @@ require_once( "include/make_translationfiles.php" );
 
   $show_list = true;
 
-  function get_faq_group()
-     {
-        $result = mysql_query("SELECT ID FROM TranslationGroups WHERE Groupname='FAQ'");
-
-        if( mysql_num_rows($result) != 1 )
-           error("mysql_query_failed", "Group 'FAQ' Missing in TranslationGroups");
-
-        $row = mysql_fetch_array( $result );
-        return $row['ID'];
-     }
 
   // ***********        Edit entry       ****************
 
@@ -63,39 +66,41 @@ require_once( "include/make_translationfiles.php" );
 
      echo "<center>\n";
 
-     $result = mysql_query(
-        "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A, Question.Translatable ".
-        "FROM FAQ, TranslationTexts AS Question " .
-        "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
-        "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question" );
-
-     if( mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry");
-
-     $row = mysql_fetch_array( $result );
+     $row = get_entry_row( $id );
 
      $faq_edit_form = new Form( 'faqeditform', "admin_faq.php?do_edit=t&id=$id", FORM_POST );
 
-     if( $row["Level"] == 1 )
+     if( $row["Level"] == 1 ) //i.e. Category
      {
         $faq_edit_form->add_row( array( 'HEADER', T_('Edit category') ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Category'),
                                         'TEXTINPUT', 'question', 80, 80, $row["Q"] ) );
+        if( $row['QTranslatable'] === 'Done' )
+        {
+           $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
+                                           'CHECKBOX', 'Qchanged', 'Y',
+                                           'Mark entry as changed for translators', false) );
+        }
      }
-     else
+     else //i.e. Question/Answer
      {
         $faq_edit_form->add_row( array( 'HEADER', T_('Edit FAQ entry') ) );
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Question'),
                                         'TEXTINPUT', 'question', 80, 80, $row["Q"] ) );
+        if( $row['QTranslatable'] === 'Done' )
+        {
+           $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
+                                           'CHECKBOX', 'Qchanged', 'Y',
+                                           'Mark entry as changed for translators', false) );
+        }
         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
                                         'TEXTAREA', 'answer', 80, 20, $row["A"] ) );
-     }
-
-     if( $row['Translatable'] === 'Done' )
-     {
-        $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
-                                        'CHECKBOX', 'changed', 'Y',
-                                        'Mark entry as changed for translators', false) );
+        if( $row['ATranslatable'] === 'Done' )
+        {
+           $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
+                                           'CHECKBOX', 'Achanged', 'Y',
+                                           'Mark entry as changed for translators', false) );
+        }
      }
 
      $faq_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
@@ -187,13 +192,8 @@ require_once( "include/make_translationfiles.php" );
 
   else if( $_GET["do_edit"] == 't' )
   {
-     $result = mysql_query( "SELECT *,Translatable FROM FAQ, TranslationTexts " .
-                            "WHERE FAQ.ID=$id AND TranslationTexts.ID=FAQ.Question" );
 
-     if( mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry");
-
-     $row = mysql_fetch_array( $result );
+     $row = get_entry_row( $id );
 
      if( !isset( $_POST["question"] ) )
         error("No data");
@@ -202,37 +202,46 @@ require_once( "include/make_translationfiles.php" );
      $answer = trim( $_POST["answer"] );
 
      // Delete or update ?
-     if( empty($question) and empty($answer) and $row["Translatable"] != 'Done' and
+     if( empty($question) and empty($answer)
+       and $row["QTranslatable"] != 'Done'
+       and $row["ATranslatable"] != 'Done'
+       and
          ($row["Level"] == 2 or
           mysql_num_rows(mysql_query("SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1")) == 0 ))
      {
         mysql_query("DELETE FROM FAQ WHERE ID=$id LIMIT 1");
         mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1 " .
-                    "WHERE Parent=" . $row["Parent"] . " AND SortOrder>" . $row["SortOrder"]);
+                    "WHERE Parent=" . $row["Parent"] . 
+                    " AND SortOrder>" . $row["SortOrder"]);
 
         mysql_query("DELETE FROM TranslationFoundInGroup " .
                     "WHERE Text_ID='" . $row['Question'] . "' " .
                     "OR Text_ID='" . $row['Answer'] . "'");
         mysql_query("DELETE FROM TranslationTexts " .
-                    "WHERE ID='" . $row['Question'] . "' OR ID='" . $row['Answer'] . "'");
+                    "WHERE ID='" . $row['Question'] . "' " .
+                    "OR ID='" . $row['Answer'] . "'");
      }
-     else
+     else //Update
      {
-        $changed = ( $row['Translatable'] === 'Done' and $_POST['changed'] === 'Y' ) ?
+        $Qchanged = ( $_POST['Qchanged'] === 'Y' && $row['QTranslatable'] === 'Done') ?
            ', Translatable="Changed"' : '';
-
-        mysql_query("UPDATE TranslationTexts SET Text=\"$question\" $changed" .
+        mysql_query("UPDATE TranslationTexts SET Text=\"$question\" $Qchanged" .
                     "WHERE ID=" . $row['Question'] . " LIMIT 1");
 
-        if( $row['Level'] == 2 )
-           mysql_query("UPDATE TranslationTexts SET Text=\"$answer\" " .
+        if( $row['Answer'] )
+        {
+           $Achanged = ( $_POST['Achanged'] === 'Y' && $row['ATranslatable'] === 'Done') ?
+              ', Translatable="Changed"' : '';
+           mysql_query("UPDATE TranslationTexts SET Text=\"$answer\" $Achanged" .
                        "WHERE ID=" . $row['Answer'] . " LIMIT 1");
+        }
 
         mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ", FAQID=$id, " .
                     "Question=\"$question\", Answer=\"$answer\"");
      }
 
-     if( $row['Translatable'] !== 'N' )
+     if( $row['QTranslatable'] !== 'N' 
+         || ( $row['Answer'] && $row['ATranslatable'] !== 'N' ) )
         make_include_files(null, 'FAQ');
 
      jump_to("admin_faq.php");
@@ -355,26 +364,22 @@ require_once( "include/make_translationfiles.php" );
 
   if( $_GET["transl"] === 't' )
   {
-     $result = mysql_query(
-        "SELECT FAQ.*, Answer.Text AS A, Question.Text AS Q, Question.Translatable ".
-        "FROM FAQ, TranslationTexts AS Question " .
-        "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
-        "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question" )
-        or die(mysql_error());
 
-     if( mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry");
-
-     $row = mysql_fetch_array( $result );
+     $row = get_entry_row( $id );
 
      $FAQ_group = get_faq_group();
 
-     if( $row['Translatable'] == 'Done' or $row['Translatable'] == 'Changed' )
+//Warning: for toggle, Answer follow Question
+//         but they could be translated independently
+     if( $row['QTranslatable'] == 'Done' or $row['QTranslatable'] == 'Changed'
+         || ( $row['Answer'] && (
+           $row['ATranslatable'] == 'Done' or $row['ATranslatable'] == 'Changed' ) )
+       )
         error('admin_already_translated');
      else
      {
         $query = "UPDATE TranslationTexts " .
-                    "SET Translatable='" . ($row['Translatable'] == 'Y' ? 'N' : 'Y' ) . "' " .
+                    "SET Translatable='" . ($row['QTranslatable'] == 'Y' ? 'N' : 'Y' ) . "' " .
                     "WHERE ID=" . $row['Question'] .
            ( $row['Level'] == 1 ? ' LIMIT 1' : " OR ID=" . $row['Answer'] . " LIMIT 2" );
 
@@ -399,9 +404,11 @@ require_once( "include/make_translationfiles.php" );
 
 
      $result = mysql_query(
-        "SELECT entry.*, Question.Text AS Q, Question.Translatable, " .
-        "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
+        "SELECT entry.*, Question.Text AS Q".
+        ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
+        ", IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
         "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
+        "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
         "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
         "AND entry.Level<3 AND entry.Level>0 " .
         "ORDER BY CatOrder,entry.Level,entry.SortOrder")
@@ -449,7 +456,9 @@ require_once( "include/make_translationfiles.php" );
            ($typechar == 'e' ? T_('Add new entry') : T_('Add new category')) .
            '" src="images/new.png"></a>';
 
-        $transl = $row['Translatable'];
+        $transl = $row['ATranslatable'];
+        if( !$row['Answer'] or ( $transl !== 'Done' and $transl !== 'Changed') )
+            $transl = $row['QTranslatable'];
         if( $transl !== 'Done' and $transl !== 'Changed' )
            echo "<td><a href=\"admin_faq.php?transl=t&id=" . $row['ID'] .
            '"><img border=0 title="' .
@@ -469,4 +478,57 @@ require_once( "include/make_translationfiles.php" );
 
   end_page();
 }
+
+function get_faq_group()
+{
+  $result = mysql_query("SELECT ID FROM TranslationGroups WHERE Groupname='FAQ'");
+
+  if( mysql_num_rows($result) != 1 )
+     error("mysql_query_failed", "Group 'FAQ' Missing in TranslationGroups");
+
+  $row = mysql_fetch_array( $result );
+  return $row['ID'];
+}
+
+function get_entry_row( $id, $Qonly = false )
+{
+/*
+   if ($Qonly)
+      $result = mysql_query(
+           "SELECT FAQ.*, Question.Text AS Q".
+           ", Question.Translatable AS QTranslatable ".
+           "FROM FAQ, TranslationTexts AS Question " .
+           "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question"
+      ) or die(mysql_error());
+   else
+*/
+      $result = mysql_query(
+           "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
+           ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
+           "FROM FAQ, TranslationTexts AS Question " .
+           "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
+           "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question"
+      ) or die(mysql_error());
+
+/*
+           "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
+           ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
+           "FROM FAQ, TranslationTexts AS Answer " .
+           "LEFT JOIN TranslationTexts AS Question ON Question.ID=FAQ.Question " .
+           "WHERE FAQ.ID='$id' AND Answer.ID=FAQ.Answer"
+*/
+/*
+           "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
+           ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
+           "FROM FAQ, TranslationTexts AS Question, TranslationTexts AS Answer " .
+           "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question AND Answer.ID=FAQ.Answer"
+*/
+
+   if( mysql_num_rows($result) != 1 )
+      error("admin_no_such_entry");
+
+   return mysql_fetch_assoc( $result );
+}
+
+
 ?>
