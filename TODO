@@ -62,6 +62,8 @@ SMALLER TASKS
 
 * game.php: Show more info for finished games
 
+* Show time for last move in show_games.php and status.php.
+
 BUGS
 ----
 
