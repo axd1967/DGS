@@ -111,11 +111,11 @@ require_once( "include/countries.php" );
              "<img title=\"" . T_($COUNTRIES[$c]) ."\" src=\"images/flags/$c.gif\">") . "</td>";
       }
       if( $utable->Is_Column_Displayed[4] )
-         $urow_strings[4] = '<td>' . make_html_safe(@$row['Rankinfo'],true) . '&nbsp;</td>';
+         $urow_strings[4] = '<td>' . make_html_safe(@$row['Rankinfo'],INFO_HTML) . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[5] )
          $urow_strings[5] = '<td>' . echo_rating(@$row['Rating2'],true,$ID) . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[6] )
-         $urow_strings[6] = '<td>' . make_html_safe($row['Open'],true) . '&nbsp;</td>';
+         $urow_strings[6] = '<td>' . make_html_safe($row['Open'],INFO_HTML) . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[7] )
          $urow_strings[7] = '<td>' . $row['Games'] . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[8] )

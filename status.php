@@ -57,11 +57,11 @@ require_once( "include/message_functions.php" );
        <tr><td><b>' . T_("Userid") . '</b></td>
            <td>' . $player_row["Handle"] . '</td></tr>
        <tr><td><b>' . T_("Open for matches?") . '</b></td>
-           <td>' . make_html_safe($player_row["Open"], true) . '</td></tr>
+           <td>' . make_html_safe($player_row["Open"],INFO_HTML) . '</td></tr>
        <tr><td><b>' . T_("Rating") . '</b></td>
            <td>' . echo_rating($player_row["Rating2"],true,$player_row['ID']) .  '</td></tr>
        <tr><td><b>' . T_('Rank info') . '</b></td>
-           <td>' . make_html_safe($player_row["Rank"], true) . '</td></tr>
+           <td>' . make_html_safe($player_row["Rank"],INFO_HTML) . '</td></tr>
        <tr><td><b><a href="edit_vacation.php"><font color=black>' .
       T_('Vacation days left') . '</font></a></b></td>
            <td>' . echo_day(floor($player_row["VacationDays"]))
