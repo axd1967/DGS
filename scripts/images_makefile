@@ -1,5 +1,11 @@
 #!/usr/bin/make -f
+
 # Use 'make -f images_makefile' to generate the images
+
+# Needed software: (later versions might work too)
+# povray 3.5
+# gimp 1.2
+# gimp-perl 1.2
 
 SIZES = 13 17 21 25 29 35 42 50
 
@@ -34,23 +40,18 @@ YinYang_pov.png: $(POVFILES)
 %Mark.png: %_pov.png generate_big_images.pl
 	./generate_big_images.pl $@ $<
 
-#	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-#	@echo -e "   Running povray (v3.5 or higher) to generate some nice stone images.";
-#	@echo -e "\n------------------------------------------------------------------------------------\n";
-#	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-#	@echo -e "   Now crop the images with gimp (v1.2 other versions might work too).";
-#	@echo -e "\n------------------------------------------------------------------------------------\n";
+
 
 board: generate_board_images.pl
 	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Draw some board images with gimp (v1.2 other versions might work too).";
+	@echo -e "   Draw some board images with gimp";
 	@echo -e "\n------------------------------------------------------------------------------------\n";
 	./generate_board_images.pl board
 	touch board
 
 stones: $(BIGSTONES) generate_board_images.pl
 	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Draw stone images with gimp (v1.2 other versions might work too).";
+	@echo -e "   Draw stone images with gimp";
 	@echo -e "\n------------------------------------------------------------------------------------\n";
 	./generate_board_images.pl stones
 	touch stones
