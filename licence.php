@@ -24,7 +24,7 @@ connect2mysql();
 
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-start_page("General Public Licence", true, $logged_in, $player_row );
+start_page(T_('General Public Licence'), true, $logged_in, $player_row );
 
 echo "<table align=center><tr><td>\n";
 echo "<pre>\n";

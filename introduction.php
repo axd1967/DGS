@@ -24,7 +24,7 @@ connect2mysql();
 
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-start_page("Introduction", true, $logged_in, $player_row );
+start_page(T_('Introduction'), true, $logged_in, $player_row );
 
 ?>
 

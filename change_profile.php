@@ -102,7 +102,7 @@ require( "include/rating.php" );
    mysql_query( $query )
       or error("mysql_query_failed");
 
-   $msg = urlencode("Profile updated!");
+   $msg = urlencode(T_('Profile updated!'));
 
    jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
 }

@@ -29,11 +29,11 @@ require( "include/rating.php" );
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-   if( !$logged_in ) 
+   if( !$logged_in )
       error("not_logged_in");
 
 
-   if( $player_row["Handle"] == "guest" ) 
+   if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
 
@@ -59,7 +59,7 @@ require( "include/rating.php" );
       if( $EnteredText == "" )
          $query = "DELETE FROM Bio WHERE ID=$ID";
       else
-         $query = "UPDATE Bio set uid=" . $player_row["ID"] . 
+         $query = "UPDATE Bio set uid=" . $player_row["ID"] .
             ", Text=\"$EnteredText\", Category=\"$EnteredCategory\" " .
             "WHERE ID=$ID";
 
@@ -73,19 +73,19 @@ require( "include/rating.php" );
 
       if( $EnteredCategory == 'Other:' )
          $EnteredCategory = trim(${"newother$i"});
-      
+
       if( $EnteredText == "" )
          continue;
 
-      $query = "INSERT INTO Bio set uid=" . $player_row["ID"] . 
+      $query = "INSERT INTO Bio set uid=" . $player_row["ID"] .
           ", Text=\"$EnteredText\", Category=\"$EnteredCategory\"";
 
       mysql_query( $query ) or error("mysql_query_failed",true);
-      
+
    }
 
 
-   $msg = urlencode("Bio updated!");
+   $msg = urlencode(T_('Bio updated!'));
 
    jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
 }

@@ -214,10 +214,11 @@ require( "include/std_functions.php" );
                    "<p>\n" .
                    "The reasons for this problem could be any of the following:\n" .
                    "<ul>\n" .
-                   "<li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.\n" .
+                   "<li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, " .
+                   "or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.\n" .
                    "<li> Your cookies have expired. This happens once a week.\n" .
                    "<li> You haven't enabled cookies in your browser.\n" .
-                   "</ul>\n"),
+                   "</ul>"),
                 $HOSTBASE );
       }
       break;
@@ -307,7 +308,7 @@ require( "include/std_functions.php" );
 
       case("value_out_of_range"):
       {
-         echo T_("Couldn't extrapolate value in function interpolate()");
+         echo T_("Couldn't extrapolate value in function interpolate");
       }
       break;
 

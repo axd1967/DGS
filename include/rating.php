@@ -206,11 +206,11 @@ function echo_rating($rating, $show_percent=true)
 
    if( $rank_val > 20.5 )
    {
-      $string .= ( $rank_val - 20 ) . $spc . 'dan';
+      $string .= ( $rank_val - 20 ) . $spc . T_('dan');
    }
    else
    {
-      $string .= ( 21 - $rank_val ) . $spc . 'kyu';
+      $string .= ( 21 - $rank_val ) . $spc . T_('kyu');
    }
 
    if( $show_percent )

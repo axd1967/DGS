@@ -23,9 +23,6 @@ include( "include/rating.php" );
 include( "include/table_columns.php" );
 include( "include/form_functions.php" );
 
-$table_columns = array('ID','sgf','Opponent','Nick','Color','Size','Handicap','Komi',
-                       'Moves','Score','Win?','End date','Last Move');
-
 
 {
    connect2mysql();
@@ -49,7 +46,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       'background-repeat : no-repeat;  background-position : center; }';
 
 
-   start_page("Status", true, $logged_in, $player_row, $style );
+   start_page(T_('Status'), true, $logged_in, $player_row, $style );
 
    echo "<center>";
 
@@ -87,10 +84,10 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       echo "<HR><font color=$h3_color><B>New messages:</B></font><p>\n";
 
       echo start_end_column_table(true);
-      echo tablehead(1, 'Flags', NULL, true, true);
-      echo tablehead(1, 'To', NULL, false, true);
-      echo tablehead(1, 'Subject', NULL, false, true);
-      echo tablehead(1, 'Date', NULL, true, true);
+      echo tablehead(1, T_('Flags'), NULL, true, true);
+      echo tablehead(1, T_('To'), NULL, false, true);
+      echo tablehead(1, T_('Subject'), NULL, false, true);
+      echo tablehead(1, T_('Date'), NULL, true, true);
       echo "</tr>\n";
 
       $row_color=2;
@@ -103,11 +100,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
          if( !(strpos($row["Flags"],'NEW') === false) )
          {
-            echo "<td bgcolor=\"00F464\">New</td>\n";
+            echo '<td bgcolor="00F464">' . T_('New') . "</td>\n";
          }
          else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
          {
-            echo "<td bgcolor=\"FFA27A\">Reply!</td>\n";
+            echo '<td bgcolor="FFA27A">' . T_('Reply!') . "</td>\n";
          }
          else
          {
@@ -150,16 +147,16 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    else
    {
       echo start_end_column_table(true) .
-         tablehead(1, 'ID', NULL, NULL, true) .
-         tablehead(2, 'sgf') .
-         tablehead(3, 'Opponent') .
-         tablehead(4, 'Nick') .
-         tablehead(5, 'Color') .
-         tablehead(6, 'Size') .
-         tablehead(7, 'Handicap') .
-         tablehead(8, 'Komi') .
-         tablehead(9, 'Moves') .
-         tablehead(13, 'Last Move') .
+         tablehead(1, T_('ID'), NULL, NULL, true) .
+         tablehead(2, T_('sgf')) .
+         tablehead(3, T_('Opponent')) .
+         tablehead(4, T_('Nick')) .
+         tablehead(5, T_('Color')) .
+         tablehead(6, T_('Size')) .
+         tablehead(7, T_('Handicap')) .
+         tablehead(8, T_('Komi')) .
+         tablehead(9, T_('Moves')) .
+         tablehead(13, T_('Last Move')) .
          "</tr>\n";
 
       $row_color=2;

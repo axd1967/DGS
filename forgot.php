@@ -25,29 +25,29 @@ connect2mysql();
 
 $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-start_page("Forgot password?", true, $logged_in, $player_row );
+start_page(T_('Forgot password?'), true, $logged_in, $player_row );
 
-?>
-
+echo '
 <p>
 
 <CENTER>
 <TABLE cellpadding=10 width=80% >
 <TR><TD align="left">
 <p>
- If you have forgot your password we can email a new one. The new password
+' . T_('If you have forgot your password we can email a new one. The new password
   will be randomly generated, but you can of course change it later from the
-  edit profile page.
+  edit profile page.') . '
 </TD></TR>
 <FORM name="forgot" action="send_new_password.php" method="POST">
 
-<TR><TD align=center>Userid: <input type="text" name="userid" size="16" maxlength="16">
+<TR><TD align=center>' . T_('Userid:') .
+  ' <input type="text" name="userid" size="16" maxlength="16">
 <input type=submit name="action" value="Send password"></TR>
 <TR><TD align="right"><input type=submit name="action" value="Go back"></TD></TR>
 </FORM>
 </TABLE>
 </CENTER>
+';
 
-<?php
 end_page();
 ?>

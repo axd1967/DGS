@@ -557,16 +557,22 @@ function echo_time($hours)
    $days = (int)($hours/15);
    if( $days > 0 )
    {
-      echo $days . '&nbsp;day';
-      if( $days != 1 ) echo 's';
+      if( $days == 1 )
+         echo '1&nbsp;' . T_('day');
+      else
+         echo $days .'&nbsp;' . T_('days');
    }
 
-   if( $hours % 15 > 0 )
+   $h = $hours % 15;
+   if( $h > 0 )
    {
       if( $days > 0 )
-         echo '&nbsp;and&nbsp;';
-      echo $hours % 15 . '&nbsp;hour';
-      if( $hours % 15 != 1 ) echo 's';
+         echo '&nbsp;' . T_('and') . '&nbsp;';
+
+      if( $h == 1 )
+         echo '1&nbsp;' . T_('hour');
+      else
+         echo $h . '&nbsp;' . T_('hours');
    }
 }
 

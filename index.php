@@ -50,17 +50,13 @@ require( "include/form_functions.php" );
                         'TD',
                         'SUBMITBUTTON', 'login', T_('Log in'),
                         'TEXT',
-                        '<A href="forgot.php"><font size="-2">' . 
+                        '<A href="forgot.php"><font size="-2">' .
                         T_('Forgot password?') . '</font></A>',
                         'HIDDEN', 'url', 'status.php' );
   echo form_end();
 
-  echo "<HR>\n";
-  echo '<a href="register.php"><B>' .
-    T_("Register new account") . "</B></a>\n<HR>\n";
-  echo "</center>\n";
+  $menu_array = array( T_("Register new account") => 'register.php' );
 
-  end_page();
-
+  end_page($menu_array);
 }
 ?>

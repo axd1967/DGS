@@ -23,17 +23,17 @@ require( "include/timezones.php" );
 require( "include/rating.php" );
 require( "include/form_functions.php" );
 
-$categories = array( 'Other:' => 'Other:',
-                     'Country' => 'Country',
-                     'City' => 'City',
-                     'State' => 'State',
-                     'Club' => 'Club',
-                     'Homepage' => 'Homepage',
-                     'Email' => 'Email',
-                     'ICQ-number' => 'ICQ-number',
-                     'Game preferences' => 'Game preferences',
-                     'Hobbies' => 'Hobbies',
-                     'Occupation' => 'Occupation' );
+$categories = array( T_('Other:') => T_('Other:'),
+                     T_('Country') => T_('Country'),
+                     T_('City') => T_('City'),
+                     T_('State') => T_('State'),
+                     T_('Club') => T_('Club'),
+                     T_('Homepage') => T_('Homepage'),
+                     T_('Email') => T_('Email'),
+                     T_('ICQ-number') => T_('ICQ-number'),
+                     T_('Game preferences') => T_('Game preferences'),
+                     T_('Hobbies') => T_('Hobbies'),
+                     T_('Occupation') => T_('Occupation') );
 
 function find_category_box_text($cat)
 {
@@ -42,7 +42,7 @@ function find_category_box_text($cat)
    if( in_array($cat, $categories) )
       return $cat;
    else
-      return 'Other:';
+      return T_('Other:');
 }
 
 {

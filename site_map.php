@@ -56,64 +56,65 @@ function item($text,$link,$working, $level,$last=false)
 
 
    echo "<table width=80% align=center><tr><td>\n";
-   echo "<center><h3><font color=$h3_color>Site map</font></h3></center>";
+   echo "<center><h3><font color=$h3_color>" . T_('Site map') . "</font></h3></center>";
    echo "<table cellspacing=0 cellpadding=0 border=0><tr><td colspan=3>" .
-      "<a href=\"index.php\"><font color=0C41C9>Welcome page</font></a></td></tr>\n";
+      "<a href=\"index.php\"><font color=0C41C9>" . T_('Welcome page') .
+      "</font></a></td></tr>\n";
 
    {
-      item("Status", "status.php", true, 0);
+      item(T_('Status'), "status.php", true, 0);
       {
-         item("My user info", "userinfo.php?uid=" . $player_row["ID"], true, 1);
+         item(T_('My user info'), "userinfo.php?uid=" . $player_row["ID"], true, 1);
          {
-            item("Edit profil", "edit_profile.php", true, 2);
-            item("Edit bio", "edit_bio.php", true, 2);
-            item("Change password", "edit_password.php", true, 2, true);
+            item(T_('Edit profil'), "edit_profile.php", true, 2);
+            item(T_('Edit bio'), "edit_bio.php", true, 2);
+            item(T_('Change password'), "edit_password.php", true, 2, true);
          }
-         item("Show message", "message.php?mode=ShowMessage", false, 1);
-         item("Game", "game.php", false, 1, true);
+         item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
+         item(T_('Game'), "game.php", false, 1, true);
       }
 
-      item("Messages", "messages.php", true, 0);
+      item(T_('Messages'), "messages.php", true, 0);
       {
-         item("Send a message", "message.php", true, 1);
-         item("Show message", "message.php?mode=ShowMessage", false, 1);
-         item("Show all messages", "list_messages.php?all=1", true, 1);
-         item("Show sent messages", "list_messages.php?sent=1", true, 1, true);
+         item(T_('Send a message'), "message.php", true, 1);
+         item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
+         item(T_('Show all messages'), "list_messages.php?all=1", true, 1);
+         item(T_('Show sent messages'), "list_messages.php?sent=1", true, 1, true);
       }
 
-      item("Invite", "message.php?mode=Invite", true, 0);
+      item(T_('Invite'), "message.php?mode=Invite", true, 0);
 
-      item("Users", "users.php", true, 0);
+      item(T_('Users'), "users.php", true, 0);
       {
-         item("User info", "userinfo.php", false, 1, true);
+         item(T_('User info'), "userinfo.php", false, 1, true);
          {
-            item("Show running games", "show_games.php", false, 2);
-            item("Show finished games", "show_games.php?finished=1", false, 2);
+            item(T_('Show running games'), "show_games.php", false, 2);
+            item(T_('Show finished games'), "show_games.php?finished=1", false, 2);
             {
-               item("Game", "game.php", false, 3);
-               item("SGF file of game", "sgf.php", false, 3, true);
+               item(T_('Game'), "game.php", false, 3);
+               item(T_('SGF file of game'), "sgf.php", false, 3, true);
             }
-            item("Send a message", "message.php", true, 2, true);
+            item(T_('Send a message'), "message.php", true, 2, true);
          }
       }
 
-      item("Forum", "phorum/index.php", true, 0);
+      item(T_('Forum'), "phorum/index.php", true, 0);
       {
-         item("Thread list", "phorum/list.php", false, 1, true);
+         item(T_('Thread list'), "phorum/list.php", false, 1, true);
          {
-            item("Read forum", "phorum/read.php", false, 2);
-            item("New topic", "phorum/post.php", false, 2, true);
+            item(T_('Read forum'), "phorum/read.php", false, 2);
+            item(T_('New topic'), "phorum/post.php", false, 2, true);
          }
       }
 
-      item("Documentation", "docs.php", true, 0, true);
+      item(T_('Documentation'), "docs.php", true, 0, true);
       {
-         item("Introduction", "introduction.php", true, 1);
-         item("Site map", "site_map.php", true, 1);
-         item("FAQ", "phorum/list.php?f=3", true, 1);
-         item("Links", "links.php", true, 1);
-         item("Todo list", "todo.php", true, 1);
-         item("Licence", "licence.php", true, 1, true);
+         item(T_('Introduction'), "introduction.php", true, 1);
+         item(T_('Site map'), "site_map.php", true, 1);
+         item(T_('FAQ'), "phorum/list.php?f=3", true, 1);
+         item(T_('Links'), "links.php", true, 1);
+         item(T_('Todo list'), "todo.php", true, 1);
+         item(T_('Licence'), "licence.php", true, 1, true);
       }
    }
 

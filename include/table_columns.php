@@ -39,7 +39,7 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
          "\"><sup><font size=\"-1\" color=red>x</font></sup></a>";
 
    if( !$sort_string )
-      return "<th nowrap valign=bottom><font color=black>" . _($Head) .
+      return "<th nowrap valign=bottom><font color=black>" . $Head .
          "</font>$delete_string</th>\n";
 
    if( $sort_string == $sort1 )
@@ -58,7 +58,7 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
    }
 
    return "<th nowrap valign=bottom><A href=\"$page" . order_string($s1,$d1,$s2,$d2) .
-      "\"><font color=black>" .  _($Head) .
+      "\"><font color=black>" .  $Head .
       "</font></A>$delete_string</th>\n";
 }
 
@@ -124,7 +124,7 @@ if( !function_exists("array_search") )
 
 function add_or_del($add, $del, $mysql_column)
 {
-   global $column_set, $player_row, $table_columns;
+   global $column_set, $player_row;
 
    if( $del or $add )
    {

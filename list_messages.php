@@ -97,7 +97,7 @@ require( "include/timezones.php" );
        or die ( error("mysql_query_failed") );
 
 
-   start_page("Message list", true, $logged_in, $player_row );
+   start_page(T_('Message list'), true, $logged_in, $player_row );
 
    $column_set=255;
    $page = make_url('list_messages.php', true, 'all', $all, 'sent', $sent);
@@ -108,20 +108,20 @@ require( "include/timezones.php" );
    echo start_end_column_table(true);
    if( $sent == 1 )
    {
-      echo tablehead(1, 'From', 'sender', false, true);
+      echo tablehead(1, T_('From'), 'sender', false, true);
    }
    else
    {
-      echo tablehead(1, 'Flags', '', true, true);
-      echo tablehead(1, 'To', 'sender', false, true);
+      echo tablehead(1, T_('Flags'), '', true, true);
+      echo tablehead(1, T_('To'), 'sender', false, true);
    }
 
-   echo tablehead(1, 'Subject', 'Subject', false, true) .
-      tablehead(1, 'Date', 'date', true, true);
+   echo tablehead(1, T_('Subject'), 'Subject', false, true) .
+      tablehead(1, T_('Date'), 'date', true, true);
 
 
    if( !($sent==1) )
-      echo tablehead(1, 'Del', NULL, true, true);
+      echo tablehead(1, T_('Del'), NULL, true, true);
 
    echo "</tr>\n";
 
@@ -145,15 +145,15 @@ require( "include/timezones.php" );
       {
          if( !(strpos($row["Flags"],'NEW') === false) )
          {
-            echo "<td bgcolor=\"00F464\">New</td>\n";
+            echo "<td bgcolor=\"00F464\">" . T_('New') . "</td>\n";
          }
          else if( !(strpos($row["Flags"],'REPLIED') === false) )
          {
-            echo "<td bgcolor=\"FFEE00\">Replied</td>\n";
+            echo '<td bgcolor="FFEE00">'. T_('Replied') . "</td>\n";
          }
          else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
          {
-            echo "<td bgcolor=\"FFA27A\">Reply!</td>\n";
+            echo '<td bgcolor="FFA27A">' . T_('Reply!') . "</td>\n";
          }
          else
          {

@@ -51,7 +51,7 @@ require( "include/rating.php" );
 
    mysql_query( $query );
 
-   $msg = urlencode("Password changed!");
+   $msg = urlencode(T_('Password changed!'));
 
    jump_to("userinfo.php?uid=" . $player_row["ID"] . "&msg=$msg");
 }
