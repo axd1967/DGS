@@ -48,7 +48,8 @@ require( "include/translation_info.php" );
         error("admin_add_lang_exists");
 
       $new_lang_php_code = sprintf( $translation_template_top,
-                                    $twoletter, $langname );
+                                    $twoletter, $langname,
+                                    $NOW, gmdate( 'Y-m-d H:i:s T', $NOW ) );
       $new_lang_php_code =
         substr( $new_lang_php_code, 0, -1 ) .
         $translation_template_bottom;
@@ -57,9 +58,11 @@ require( "include/translation_info.php" );
 
       $new_all_languages_php_code = $translation_template_copyright . "\n";
       foreach( $k_langs as $lang => $desc )
-        $new_all_languages_php_code .= "include( \"translations/$lang.php\" );\n";
+        $new_all_languages_php_code .=
+        "add_to_known_languages( \"$lang\", \"$desc\" );\n";
 
-      $new_all_languages_php_code .= "include( \"translations/$twoletter.php\" );\n";
+      $new_all_languages_php_code .=
+        "add_to_known_languages( \"$twoletter\", \"$langname\" );\n";
       $new_all_languages_php_code .= "\n?>\n";
 
       write_to_file( "translations/all_languages.php", $new_all_languages_php_code );
