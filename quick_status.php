@@ -1,33 +1,27 @@
 <?php
 
 require_once( "include/config.php" );
+require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
-
-define("FOLDER_NEW", 2);
 
 function slashed($string)
 {
    return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
 }
 
+if( $is_down )
 {
-
+   echo "Warning: ".$is_down_message;
+}
+else
+{
    connect2mysql();
-
-   $timeadjust = 0;
-   if( @is_readable("timeadjust.php" ) )
-      include( "timeadjust.php" );
-
-   if( !is_numeric($timeadjust) )
-      $timeadjust = 0;
-
-   $NOW = time() + (int)$timeadjust;
 
    // logged in?
 
    $result = @mysql_query( "SELECT ID, Timezone, " .
                            "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
-                           "FROM Players WHERE Handle='{$_COOKIE['handle']}'" );
+                           "FROM Players WHERE Handle='{$_COOKIE[COOKIE_PREFIX.'handle']}'" );
 
 
    if( @mysql_num_rows($result) != 1 )
@@ -38,7 +32,7 @@ function slashed($string)
 
    $player_row = mysql_fetch_array($result);
 
-   if( $player_row['Sessioncode'] !== @$_COOKIE['sessioncode']
+   if( $player_row['Sessioncode'] !== @$_COOKIE[COOKIE_PREFIX.'sessioncode']
        or $player_row["Expire"] < $NOW )
    {
       echo "Error: not logged in";
