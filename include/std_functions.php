@@ -436,7 +436,7 @@ function make_menu_vertical($menu_array)
          echo "<A href=\"$HOSTBASE/$link\"><font color=black>$text</font></A><br>\n";
       }
 
-   echo '<tr><td height=5><img src="images/dot.gif" alt=""></td></tr></table>' . "\n";
+   echo '<tr><td height=5><img height=1 src="' . $HOSTBASE . '/images/dot.gif" alt=""></td></tr></table>' . "\n";
    echo '</table></td><td width="100%" align=center valign=top><BR>' . "\n";
 }
 
