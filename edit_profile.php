@@ -235,7 +235,7 @@ require_once( "include/countries.php" );
             ) );
       else
          $profile_form->add_row( array(
-               'TEXT', '<b>' . T_("$typ boards from") . ':</b>',
+               'TEXT', '<b>' . T_("Large boards from") . ':</b>',
                'TD', 'SELECTBOX', 'notescutoff', 1, $notescutoffs, $player_row["NotesCutoff"], false,
             ) );
 
