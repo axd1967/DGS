@@ -52,20 +52,32 @@ function add_contributor( $text, $contributor, $uid = -1 )
   $query_result = mysql_query( "SELECT ID,Handle,Name,Translator FROM Players " .
                                "WHERE LENGTH(Translator)>0" );
 
-  $k_langs = get_known_languages_with_full_names();
   $per_language = array();
   while( $row = mysql_fetch_array( $query_result ) )
     {
       $langs = explode(',', $row['Translator']);
       foreach( $langs as $lang )
         {
-          if( array_key_exists( $lang, $per_language ) )
-            array_push( $per_language[$lang], $row );
-          else
-            $per_language[$lang] = array( $row );
+          list($lang_c, $charset) = explode( '.', $lang, 2 );
+          if( is_null( $charset ) )
+            {
+              $lang = null;
+              $entries = $known_languages->get_lang( $lang_c );
+              if( !empty( $entries ) )
+                $lang = $entries[0]->lang_code . "." . $entries[0]->charset;
+            }
+
+          if( !is_null( $lang ) )
+            {
+              if( array_key_exists( $lang, $per_language ) )
+                array_push( $per_language[$lang], $row );
+              else
+                $per_language[$lang] = array( $row );
+            }
         }
     }
 
+  $k_langs = $known_languages->get_descriptions_translated();
   foreach( $per_language as $lang => $translators )
     {
       $first = true;
@@ -74,7 +86,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
           $text = '';
           if( $first )
             {
-              $text = T_($k_langs[$lang]);
+              $text = $k_langs[$lang];
               $first = false;
             }
 
