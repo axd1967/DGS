@@ -84,7 +84,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    if( mysql_num_rows($result) > 0 )
    {
-      echo "<HR><font color=$h3_color><B>" . T('New messages') . ":</B></font><p>\n";
+      echo "<HR><font color=$h3_color><B>" . T_('New messages') . ":</B></font><p>\n";
 
       echo start_end_column_table(true);
       echo tablehead(1, T_('Flags'), NULL, true, true);
