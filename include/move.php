@@ -273,7 +273,7 @@ function draw_game_info()
     $Whitename, $Blackname, $Whitehandle, $Blackhandle, $White_Prisoners, $Black_Prisoners,
     $White_ID, $Black_ID, $Komi, $Handicap, $Status, $Maintime, $Byotime, $White_Maintime, 
     $Black_Maintime, $White_Byotime, $Black_Byotime, $White_Byoperiods, $Black_Byoperiods,
-    $Byotype, $Rated;
+     $Byotype, $Rated, $Byoperiods;
 ?>
     <table align=center border=2 cellpadding=3 cellspacing=3>
         <tr>
@@ -404,12 +404,13 @@ function draw_moves()
          $c = $col . ($Size - $row["PosY"]);
       }
       if( $i == $move )
-         printf('<td  class=r>%s</td>', $c );
+         printf('<td class=r bgcolor=F7F5E3><font color=red>%s</font></td>
+', $c );
       else if( $s == BLACK )        
-         printf( '<td><a class=b href="game.php?gid=%d&move=%d">%s</A></td>
+         printf( '<td><A class=b href="game.php?gid=%d&move=%d">%s</A></td>
 ', $gid, $i, $c );
       else
-         printf( '<td><a class=w href="game.php?gid=%d&move=%d">%s</A></td>
+         printf( '<td><a class=w href="game.php?gid=%d&move=%d">%s</a></td>
 ', $gid, $i, $c );
 
       $i++;    
