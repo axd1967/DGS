@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require( "include/std_functions.php" );
 require( "include/timezones.php" );
 require( "include/rating.php" );
+require( "include/form_functions.php" );
 
 connect2mysql();
 
@@ -32,30 +33,16 @@ if( !$logged_in )
 
 start_page("Edit password", true, $logged_in, $player_row );
 
-?>
-<CENTER>
-  <FORM name="passwordform" action="change_password.php" method="POST">
-      <table>
-      <TR>
-        <TD align=right>New Password:</TD>
-        <TD align=left><input type="password" name="passwd" size="16" maxlength="16"></TD>
-      </TR>
-      
-      <TR>
-        <TD align=right>Confirm Password:</TD>
-        <TD align=left><input type="password" name="passwd2" size="16" maxlength="16"></TD>
-      </TR>
-    </TABLE>
+echo "<CENTER>\n";
+echo form_start( 'passwordform', 'change_password.php', 'POST' );
 
-<input type=submit name="action" value="Change password">
-
-      
-
-  </FORM>
-</CENTER>  
-
-
-<?php
+echo form_insert_row( 'DESCRIPTION', 'New password',
+                      'PASSWORD', 'passwd',16,16 );
+echo form_insert_row( 'DESCRIPTION', 'Confirm password',
+                      'PASSWORD', 'passwd2',16,16 );
+echo form_insert_row( 'SUBMITBUTTON', 'action', 'Change password' );
+echo form_end();
+echo "</CENTER>\n";
 
 end_page(false);
 

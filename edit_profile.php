@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require( "include/std_functions.php" );
 require( "include/timezones.php" );
 require( "include/rating.php" );
+require( "include/form_functions.php" );
 
 connect2mysql();
 
@@ -36,159 +37,107 @@ if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
 
 start_page("Edit profile", true, $logged_in, $player_row );
 
+echo "<CENTER>\n";
 
+echo form_start( 'profileform', 'change_profile.php', 'POST' );
 
-?>
+echo "    <tr><td><h3><font color=\"#800000\">Personal settings:</font></h3></td></tr>";
 
-<CENTER>
-  <FORM name="profileform" action="change_profile.php" method="POST">
+echo form_insert_row( 'DESCRIPTION', 'Userid',
+                      'TEXT', $player_row["Handle"] );
+echo form_insert_row( 'DESCRIPTION', 'Full name',
+                      'TEXTINPUT', 'name', 16, 40, $player_row["Name"] );
+echo form_insert_row( 'DESCRIPTION', 'Email',
+                      'TEXTINPUT', 'email', 16, 80, $player_row["Email"] );
+echo form_insert_row( 'DESCRIPTION', 'Open for matches',
+                      'TEXTINPUT', 'open', 16, 40, $player_row["Open"] );
+echo form_insert_row( 'DESCRIPTION', 'Rank info',
+                      'TEXTINPUT', 'rank', 16, 40, $player_row["Rank"] );
 
-    <TABLE>
+$vals = array( 'dragonrating' => 'dragonrating',
+               'eurorank' => 'eurorank',
+               'eurorating' => 'eurorating',
+               'aga' => 'aga',
+               'agarating' => 'agarating',
+               'igs' => 'igs',
+               'igsrating' => 'igsrating',
+               'iytgg' => 'iytgg',
+               'nngs' => 'nngs',
+               'nngsrating' => 'nngsrating',
+               'japan' => 'japan',
+               'china' => 'china',
+               'korea' => 'korea' );
 
-    <tr><td><h3><font color="#800000">Personal settings:</font></h3></td></tr>
-
-      <TR>
-        <TD align=right>Userid:</TD>
-        <TD align=left> <?php echo $player_row["Handle"]; ?></TD>
-      </TR>
-
-      <TR>
-        <TD align=right>Full name:</TD>
-        <TD align=left> <input type="text" name="name" value="<?php echo $player_row["Name"]; ?>" size="16" maxlength="40"></TD>
-      </TR>
-
-      <TR>
-        <TD align=right>Email:</TD>
-        <TD align=left> <input type="text" name="email" value="<?php echo $player_row["Email"]; ?>" size="16" maxlength="80"></TD>
-      </TR>
-
-      <TR>
-        <TD align=right>Open for matches:</TD>
-        <TD align=left> <input type="text" name="open" value="<?php echo $player_row["Open"]; ?>" size="16" maxlength="40"></TD>
-      </TR>
-
-
-      <TR>
-        <TD align=right>Rank info:</TD>
-        <TD align=left> <input type="text" name="rank" value="<?php echo $player_row["Rank"]; ?>" size="16" maxlength="40"></TD>
-      </TR>
-
-      <TR>
-        <TD align=right>Rating:</TD><TD align=left>
-        <?php if( $player_row["RatingStatus"] != 'RATED' )
-{?>
-        <input type="text" name="rating" value="<?php echo echo_rating( $player_row["Rating"], true); ?>" size="16" maxlength="16">
-<?php
-
- $vals = array('dragonrating', 'eurorank', 'eurorating','aga', 'agarating', 'igs', 'igsrating',
-               'iytgg', 'nngs', 'nngsrating', 'japan', 'china', 'korea');
-
- echo html_build_select_box_from_array($vals, 'ratingtype', 'dragonrating', true);
+if( $player_row["RatingStatus"] != 'RATED' )
+{
+  echo form_insert_row( 'DESCRIPTION', 'Rating',
+                        'TEXTINPUT', 'rating', 16,16,echo_rating($player_row["Rating"],true),
+                        'SELECTBOX', 'ratingtype', 1, $vals, 'dragonrating', false );
 }
-else echo echo_rating( $player_row["Rating"] );
-?>
-         </TD>
-      </TR>
+else
+{
+  echo form_insert_row( 'DESCRIPTION', 'Rating',
+                        'TEXT', echo_rating( $player_row["Rating"] ) );
+}
 
-
-      <TR>
-        <TD align=right>Email notifications:</TD>
-        <TD align=left>  <select name="emailnotify">
-<?php
 $s = 0;
 if(!(strpos($player_row["SendEmail"], 'ON') === false) ) $s++;
 if(!(strpos($player_row["SendEmail"], 'MOVE') === false) ) $s++;
 if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
-?>
-            <option<?php if($s == 0) echo " selected"; ?> value=0>Off</option>
-            <option<?php if($s == 1) echo " selected"; ?> value=1>Notify only</option>
-            <option<?php if($s == 2) echo " selected"; ?> value=2>Moves and messages</option>
-            <option<?php if($s == 3) echo " selected"; ?> value=3>Full board and messages</option>
-          </select>
-        </TD>
-      </TR>
 
-      <TR>
-        <TD align=right>Timezone:</TD>
-        <TD align=left>
-          <?php echo html_get_timezone_popup('timezone', $player_row['Timezone']); ?>
-        </TD>
-      </TR>
+$vals = array( 0 => 'Off',
+               1 => 'Notify only',
+               2 => 'Moves and messages',
+               3 => 'Full board and messages' );
 
-      <TR>
-        <TD align=right>Nighttime:</TD>
-        <TD align=left>
-<?php $s = $player_row["Nightstart"]; ?>
-          <select name="nightstart">
-<?php
+echo form_insert_row( 'DESCRIPTION', 'Email notifications',
+                      'SELECTBOX', 'emailnotify', 1, $vals, $s, false );
+
+echo form_insert_row( 'DESCRIPTION', 'Timezone',
+                      'SELECTBOX', 'timezone', 1,
+                      get_timezone_array(), $player_row['Timezone'], false );
+
+$vals = array();
 for($i=0; $i<24; $i++)
 {
-   echo "<option";
-   if($s == $i) echo " selected";
-   echo " value=$i>";
-   printf('%02d-%02d',$i,($i+9)%24) . "</option>\n";
+  $vals[$i] = sprintf('%02d-%02d',$i,($i+9)%24);
 }
+
+echo form_insert_row( 'DESCRIPTION', 'Nighttime',
+                      'SELECTBOX', 'nightstart', 1, $vals, $player_row["Nightstart"], false );
+
+echo "    <tr><td height=20px>&nbsp;</td></tr>\n";
+echo "    <tr><td><h3><font color=\"#800000\">Board graphics:</font></h3></td></tr>\n";
+
+$vals = array( 13 => 13, 17 => 17, 21 => 21, 25 => 25,
+               29 => 29, 35 => 35, 42 => 42, 50 => 50 );
+
+echo form_insert_row( 'DESCRIPTION', 'Stone size',
+                      'SELECTBOX', 'stonesize', 1, $vals, $player_row["Stonesize"], false );
+
+$vals = array();
+for($i=1; $i<6; $i++ )
+{
+  $vals[$i] = '<img width=30 height=30 src="images/smallwood'.$i.'.gif">';
+}
+
+echo form_insert_row( 'DESCRIPTION', 'Wood color',
+                      'RADIOBUTTONS', 'woodcolor', 1, $vals,
+                      $player_row["Woodcolor"], false );
+
+$s = $player_row["Boardcoords"];
+echo form_insert_row( 'DESCRIPTION', 'Coordinate sides',
+                      'CHECKBOX', 'coordsleft', 1, 'Left', ($s & 1),
+                      'CHECKBOX', 'coordsup', 1, 'Up', ($s & 2),
+                      'CHECKBOX', 'coordsright', 1, 'Right', ($s & 4),
+                      'CHECKBOX', 'coordsdown', 1, 'Down', ($s & 8) );
+
 ?>
-          </select>
-
-        </TD>
-      </tr><tr><td height=20px>&nbsp;</td></tr>
-         <tr><td><h3><font color="#800000">Board graphics:</font></h3></td></tr>
-      <TR>
-        <TD align=right>Stone size:</TD>
-        <TD align=left>
-<?php $s = $player_row["Stonesize"]; ?>
-          <select name="stonesize">
-            <option<?php if($s == 13) echo " selected"; ?>>13</option>
-            <option<?php if($s == 17) echo " selected"; ?>>17</option>
-            <option<?php if($s == 21) echo " selected"; ?>>21</option>
-            <option<?php if($s == 25) echo " selected"; ?>>25</option>
-            <option<?php if($s == 29) echo " selected"; ?>>29</option>
-            <option<?php if($s == 35) echo " selected"; ?>>35</option>
-            <option<?php if($s == 42) echo " selected"; ?>>42</option>
-            <option<?php if($s == 50) echo " selected"; ?>>50</option>
-          </select>
-      </TR>
-
-      <TR>
-        <TD align=right>Wood color:</TD>
-        <TD align=left>
-          <?php $s = $player_row["Woodcolor"]; ?>
-          <INPUT type="radio" name="woodcolor" value=1 <?php if($s == 1) echo " checked"; ?>>
-            <img width=30 height=30 src="images/smallwood1.gif">
-          <INPUT type="radio" name="woodcolor" value=2 <?php if($s == 2) echo " checked"; ?>>
-            <img width=30 height=30 src="images/smallwood2.gif">
-          <INPUT type="radio" name="woodcolor" value=3 <?php if($s == 3) echo " checked"; ?>>
-            <img width=30 height=30 src="images/smallwood3.gif">
-          <INPUT type="radio" name="woodcolor" value=4 <?php if($s == 4) echo " checked"; ?>>
-            <img width=30 height=30 src="images/smallwood4.gif">
-          <INPUT type="radio" name="woodcolor" value=5 <?php if($s == 5) echo " checked"; ?>>
-            <img width=30 height=30 src="images/smallwood5.gif">
-        </TD>
-      </TR>
-
-      <TR>
-        <TD align=right>Coordinate sides:</TD>
-        <TD align=left>
-          <?php $s = $player_row["Boardcoords"]; ?>
-          <INPUT type="checkbox" name="coordsleft" value=1
-            <?php if($s & 1) echo " checked"; ?> > Left
-          <INPUT type="checkbox" name="coordsup" value=1
-            <?php if($s & 2) echo " checked"; ?>>  Up
-          <INPUT type="checkbox" name="coordsright" value=1
-            <?php if($s & 4) echo " checked"; ?>> Right
-
-          <INPUT type="checkbox" name="coordsdown" value=1
-            <?php if($s & 8) echo " checked"; ?>> Down
-        </TD>
-      </TR>
-
-
-      <TR>
-        <TD align=right>Game id button:</TD>
-        <TD align=left>
-          <TABLE border=0 cellspacing=0 cellpadding=3>
-            <TR>
+    <TR>
+      <TD align=right>Game id button:</TD>
+      <TD align=left>
+        <TABLE border=0 cellspacing=0 cellpadding=3>
+          <TR>
 <?php
 for($i=0; $i<=$button_max; $i++)
 {
@@ -205,18 +154,17 @@ for($i=0; $i<=$button_max; $i++)
    if( $i % 4 == 3 )
       echo "</TR>\n<TR>\n";
 }
-              ?>
+?>
           </TR>
-       </table>
-    </table>
-    <BR>
-
-          <input type=submit name="action" value="Change profile">
-
-  </FORM>
-</CENTER>
-
+        </table>
+      </TD>
+    </TR>
 <?php
+
+echo "    <TR><TD><BR></TD></TR>\n";
+echo form_insert_row( 'SUBMITBUTTON', 'action', 'Change profile' );
+echo form_end();
+echo "</CENTER>\n";
 
 end_page(false);
 

@@ -19,53 +19,40 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require( "include/std_functions.php" );
+require( "include/form_functions.php" );
 
-{    
-    connect2mysql();
- 
-    if( $logout )
-        {
-            set_cookies("","", true);
-            jump_to("index.php");
-        }
+{
+  connect2mysql();
 
+  if( $logout )
+    {
+      set_cookies("","", true);
+      jump_to("index.php");
+    }
 
-    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+  $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-    start_page("Home", true, $logged_in, $player_row );
+  start_page("Home", true, $logged_in, $player_row );
 }
 
 ?>
-    
 <center>
 <IMG  width=666 height=172  border=0 alt='Dragon Go Server' SRC="images/dragon_logo.jpg">
 <BR>
 <BR>
-    <FORM name="loginform" action="login.php" method="POST">
+<B><font size="+0">Please login.</font></B><font color="red"> To look around, use 'guest' / 'guest'.</font>
+<?php
 
-      <B><font size="+0">Please login.</font></B><font color="red"> To look around, use 'guest' / 'guest'.</font>
-      <TABLE>
-
-          <TR>
-            <TD align=right>Userid:</TD>
-            <TD align=left> <input type="text" name="userid" size="16" maxlength="16"></TD>
-          </TR>
-
-          <TR>
-            <TD align=right>Password:</TD>
-            <TD align=left><input type="password" name="passwd" size="16" maxlength="16"></TD>
-            <TD><input type=submit name="login" value="Log in"></TD>
-            <TD><A href="forgot.php"><font size="-2">Forgot password?</font></A></td>
-</TR>
-
-      </TABLE>
-
-      <INPUT type="hidden" name="url" value="status.php">
-
-
-
-    </FORM>
-
+echo form_start( 'loginform', 'login.php', 'POST' );
+echo form_insert_row( 'DESCRIPTION', 'Userid',
+                      'TEXTINPUT', 'userid',16,16,'' );
+echo form_insert_row( 'DESCRIPTION', 'Password',
+                      'PASSWORD', 'passwd',16,16,
+                      'SUBMITBUTTON', 'login', 'Log in',
+                      'TEXT', '<A href="forgot.php"><font size="-2">Forgot password?</font></A>',
+                      'HIDDEN', 'url', 'status.php' );
+echo form_end();
+?>
     <HR>
     <a href="register.php"><B>Register new account</B></a>
     <HR>
