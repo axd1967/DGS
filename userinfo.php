@@ -83,12 +83,12 @@ require( "include/countries.php" );
     <tr><td><b>' . T_('Country') . '</b></td><td>' .  (empty($cntr) ? '&nbsp;' :
              '<img title="' . $COUNTRIES[$cntr][0] . "\" src=\"images/flags/$cntr.gif\">") . '</td>
     <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . make_html_safe($row['Open'],true) . '</td></tr>
-    <tr><td><b>' . T_('Acitvity') . '</b></td><td>' . $activity . '</td></tr>
+    <tr><td><b>' . T_('Activity') . '</b></td><td>' . $activity . '</td></tr>
     <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating($row['Rating2'],true,$row['ID']) . '</td></tr>
     <tr><td><b>' . T_('Rank info') . '</b></td><td>' . make_html_safe($row['Rank'],true) . '</td></tr>
     <tr><td><b>' . T_('Registration date') . '</b></td><td>' . $row['Registerdate'] . '</td></tr>
     <tr><td><b>' . T_('Last access') . '</b></td><td>' . $lastaccess . '</td></tr>
-    <tr><td><b>' . T_('Last moved') . '</b></td><td>' . $lastmove . '</td></tr>
+    <tr><td><b>' . T_('Last move') . '</b></td><td>' . $lastmove . '</td></tr>
     <tr><td><b>' . T_('Vacation days left') . '</b></td><td>' . sprintf("%d", $row["VacationDays"]) . "</td></tr>\n";
 
    if( $row['OnVacation'] > 0 )
