@@ -125,6 +125,8 @@ When translating you should keep in mind the following things:
 
      $untranslated = ($group === 'Untranslated phrases');
 
+// See admin_faq.php to know the Translatable flag meaning.
+
      $query = "SELECT Translations.Text,TranslationTexts.ID AS Original_ID," .
         "TranslationTexts.Text AS Original " .
         "FROM TranslationTexts, TranslationGroups, " .
@@ -136,6 +138,11 @@ When translating you should keep in mind the following things:
         $query .= "WHERE TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
            "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
            "AND TranslationLanguages.Language='$translate_lang' " .
+/* 
+  Translations.Text IS NOT NULL (but maybe '' i.e. same) and Translatable='Y'
+    (instead of Done) is the default status for all the system messages.
+  So Translations.Text IS NULL and Translatable!='N' mean never translated.
+*/
            "AND Translatable!='N' " .
            "AND (Translations.Text IS NULL OR Translatable='Changed') " .
            "ORDER BY Group_ID LIMIT 50";

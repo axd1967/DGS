@@ -33,6 +33,8 @@ require( "forum_functions.php" );
   if( !( $adm & ADMIN_FORUM ) )
      error("adminlevel_too_low");
 
+  $id = $_GET["id"];
+
   $show_list = true;
 
   // ***********        New forum       ****************
