@@ -139,6 +139,10 @@ array(
       'Add new game' =>
       array( 'Groups' => array( 'Waiting room' ) ),
 
+      /* Found in these files: game.php */
+      'Add to observe list' =>
+      array( 'Groups' => array( 'Game' ) ),
+
       /* Found in these files: admin.php, include/std_functions.php */
       'Admin' =>
       array( 'Groups' => array( 'Admin', 'Common' ) ),
@@ -214,6 +218,18 @@ array(
       /* Found in these files: include/message_functions.php, include/move.php */
       'Black' =>
       array( 'Groups' => array( 'Common' ) ),
+
+      /* Found in these files: show_games.php */
+      'Black name' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: show_games.php */
+      'Black rating' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: show_games.php */
+      'Black userid' =>
+      array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: edit_profile.php */
       'Board graphics' =>
@@ -492,6 +508,10 @@ array(
       array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: show_games.php */
+      'Finished games' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: show_games.php */
       'Finished games for %s' =>
       array( 'Groups' => array( 'Users' ) ),
 
@@ -639,6 +659,10 @@ array(
       'Homepage' =>
       array( 'Groups' => array( 'Edit bio' ) ),
 
+      /* Found in these files: edit_profile.php */
+      'Horizontal' =>
+      array( 'Groups' => array( 'Edit profile' ) ),
+
       /* Found in these files: include/std_functions.php */
       'hour' =>
       array( 'Groups' => array( 'Common' ) ),
@@ -666,6 +690,10 @@ array(
       /* Found in these files: forgot.php */
       'If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.' =>
       array( 'Groups' => array( 'Misc' ) ),
+
+      /* Found in these files: error.php */
+      'If you want to help translating dragon, please post a message to the \'translation\' forum.' =>
+      array( 'Groups' => array( 'Error' ) ),
 
       /* Found in these files: docs.php */
       'if you want your own dragon' =>
@@ -823,6 +851,10 @@ array(
       'Meet other turn-based go players' =>
       array( 'Groups' => array( 'Links' ) ),
 
+      /* Found in these files: edit_profile.php */
+      'Menu direction' =>
+      array( 'Groups' => array( 'Edit profile' ) ),
+
       /* Found in these files: include/message_functions.php, include/move.php, message.php */
       'Message' =>
       array( 'Groups' => array( 'Game', 'Messages' ) ),
@@ -946,6 +978,10 @@ array(
       /* Found in these files: waiting_room.php */
       'Number of games to add' =>
       array( 'Groups' => array( 'Waiting room' ) ),
+
+      /* Found in these files: show_games.php */
+      'Observed games' =>
+      array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: edit_bio.php */
       'Occupation' =>
@@ -1111,6 +1147,10 @@ array(
       'Registration date' =>
       array( 'Groups' => array( 'Users' ) ),
 
+      /* Found in these files: game.php */
+      'Remove from observe list' =>
+      array( 'Groups' => array( 'Game' ) ),
+
       /* Found in these files: include/message_functions.php, list_messages.php */
       'Replied' =>
       array( 'Groups' => array( 'Messages' ) ),
@@ -1149,6 +1189,10 @@ array(
 
       /* Found in these files: users.php */
       'Running' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: show_games.php */
+      'Running games' =>
       array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: show_games.php */
@@ -1250,6 +1294,10 @@ array(
       /* Found in these files: site_map.php */
       'Show message' =>
       array( 'Groups' => array( 'Site map' ) ),
+
+      /* Found in these files: show_games.php, status.php */
+      'Show observed games' =>
+      array( 'Groups' => array( 'Status', 'Users' ) ),
 
       /* Found in these files: list_messages.php */
       'Show recieved messages' =>
@@ -1638,6 +1686,10 @@ The reasons for this problem could be any of the following:
       'User to set privileges for (use the userid)' =>
       array( 'Groups' => array( 'Admin' ) ),
 
+      /* Found in these files: edit_profile.php */
+      'Vertical' =>
+      array( 'Groups' => array( 'Edit profile' ) ),
+
       /* Found in these files: links.php */
       'Very well written introduction by the British Go Association.' =>
       array( 'Groups' => array( 'Links' ) ),
@@ -1665,6 +1717,18 @@ The reasons for this problem could be any of the following:
       /* Found in these files: include/message_functions.php, include/move.php */
       'White' =>
       array( 'Groups' => array( 'Common', 'Game' ) ),
+
+      /* Found in these files: show_games.php */
+      'White name' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: show_games.php */
+      'White rating' =>
+      array( 'Groups' => array( 'Users' ) ),
+
+      /* Found in these files: show_games.php */
+      'White userid' =>
+      array( 'Groups' => array( 'Users' ) ),
 
       /* Found in these files: docs.php */
       'who contributes to Dragon' =>
