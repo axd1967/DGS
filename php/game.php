@@ -467,24 +467,29 @@ else if( $action == 'handicap' )
 
 // display moves
 
-if( $player_row["ID"] == 'ejlo' and !$enable_message and $Moves > 0 )
+if( $player_row["Handle"] == 'ejlo' and !$enable_message and $Moves > 0 )
 {
     mysql_data_seek($moves_result, 0);
 
 
 echo '<table border=4 cellspacing=0 cellpadding=1 align=center class="moves"><tr align=center><th>Moves</th>
 ';
-for($i=0;$i<20;$i++)
+
+$moves_per_row = 20;
+
+for($i=0; $i<$moves_per_row; $i++)
      echo "<td>$i</td>";
 
-echo "</tr>\n<tr align=center><td>1-19</td><td>&nbsp;</td>";
+echo '</tr>
+<tr align=center><td>1-'. ($moves_per_row - 1) . '</td><td>&nbsp;</td>';
+
 $i=1;
 while( $row = mysql_fetch_array($moves_result) )
 {
     $s = $row["Stone"];
     if( $s != BLACK and $s != WHITE ) continue;
-    if( $i % 20 == 0 )
-        echo "</tr>\n<tr align=center><td>$i-" . ($i + 19) . "</td>\n";
+    if( $i % $moves_per_row == 0 )
+        echo "</tr>\n<tr align=center><td>$i-" . ($i + $moves_per_row - 1) . "</td>\n";
 
     if( $row["PosX"] == -1 )
         $c = 'P';
