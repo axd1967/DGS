@@ -1075,6 +1075,10 @@ array(
       'Players waiting' =>
       array( 'Groups' => array( 'Waiting room' ) ),
 
+      /* Found in these files: index.php */
+      'Please, feel free to register and play some games.' =>
+      array( 'Groups' => array( 'Index' ) ),
+
       /* Found in these files: register.php */
       'Please enter data' =>
       array( 'Groups' => array( 'Register' ) ),
@@ -1709,6 +1713,10 @@ The reasons for this problem could be any of the following:
       /* Found in these files: introduction.php */
       'Welcome to Dragon Go Server, a <a href="licence.php">free</a>server for playing <a href="links.php">go</a>, where the games tends to \'drag on\'.' =>
       array( 'Groups' => array( 'Introduction' ) ),
+
+      /* Found in these files: index.php */
+      'Welcome to the dragon go server!' =>
+      array( 'Groups' => array( 'Index' ) ),
 
       /* Found in these files: message.php */
       'white' =>
