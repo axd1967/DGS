@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
 
 require( "include/std_functions.php" );
+require( "include/rating.php" );
 
 connect2mysql();
 
@@ -32,21 +33,25 @@ if( !$logged_in )
     exit;
 }
 
-$result = mysql_query("SELECT * FROM Players");
+$result = mysql_query("SELECT *, Rank as Rankinfo FROM Players");
 
 
 start_page("Users", true, $logged_in, $player_row );
 
 
 echo "<table border=3 align=center>\n";
-echo "<tr><th>Userid</th><th>Full Name</th><th>rank</th></tr>\n";
+echo "<tr><th>Player</th><th>userid</th><th>Rank info</th><th>Rating</th><th>Open for matches?</th></tr>\n";
 
 
 
 while( $row = mysql_fetch_array( $result ) )
 {
-    echo "<tr><td><A href=\"userinfo.php?uid=" . $row["ID"] . "\">" . $row["Handle"] . 
-        "</A></td><td>" . $row["Name"] . "</td><td>" . $row["Rank"] . "</td></tr>\n";
+    echo '<tr><td><A href="userinfo.php?uid=' . $row["ID"] . '">' . $row["Name"] . '</A></td>' .
+      '<td><A href="userinfo.php?uid=' . $row["ID"] . '">' . $row["Handle"] . '</A></td>' .
+        '<td>' . $row["Rankinfo"] . '</td><td>';     
+    echo_rating( $row["Rating"] ); 
+    echo '</td><td>' . $row["Open"] . '</td></tr>
+';
 }
 
 echo "</table>\n";

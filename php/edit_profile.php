@@ -53,7 +53,7 @@ start_page("Edit profile", true, $logged_in, $player_row );
 
       <TR>
         <TD align=right>Full name:</TD>
-        <TD align=left> <input type="text" name="name" value="<?php echo $player_row["Name"]; ?>" size="16" maxlength="80"></TD>
+        <TD align=left> <input type="text" name="name" value="<?php echo $player_row["Name"]; ?>" size="16" maxlength="40"></TD>
       </TR>
 
       <TR>
@@ -62,8 +62,14 @@ start_page("Edit profile", true, $logged_in, $player_row );
       </TR>
 
       <TR>
+        <TD align=right>Open for matches:</TD>
+        <TD align=left> <input type="text" name="open" value="<?php echo $player_row["Open"]; ?>" size="16" maxlength="40"></TD>
+      </TR>
+
+
+      <TR>
         <TD align=right>Rank info:</TD>
-        <TD align=left> <input type="text" name="rank" value="<?php echo $player_row["Rank"]; ?>" size="16" maxlength="80"></TD>
+        <TD align=left> <input type="text" name="rank" value="<?php echo $player_row["Rank"]; ?>" size="16" maxlength="40"></TD>
       </TR>
 
       <TR>

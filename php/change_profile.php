@@ -57,6 +57,7 @@ if( $action == "Change profile" )
          "Name='$name', " .
          "Email='$email', " .
          "Rank='$rank', " .
+         "Open='$open', " .
          "Stonesize=$stonesize, " .
          "Boardfontsize='$boardfontsize', " .
          "Flags=$flags, ";
