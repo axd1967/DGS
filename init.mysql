@@ -34,7 +34,7 @@ CREATE TABLE Players (
   Boardcoords int(11) NOT NULL default '15',
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
-) TYPE=ISAM PACK_KEYS=1;
+) TYPE=MyISAM PACK_KEYS=1;
 
 #
 # Table structure for table 'Games'
@@ -208,12 +208,27 @@ CREATE TABLE Posts (
   Parent_ID int(11) default NULL,
   Thread_ID int(11) NOT NULL default '0',
   AnswerNr int(11) NOT NULL default '0',
+  Replies int(11) NOT NULL default '0',
   Depth int(11) NOT NULL default '0',
   crc32 int(11) default NULL,
   PosIndex varchar(80) binary default NULL,
+  old_ID int(11) default '0',
   PRIMARY KEY  (ID),
   KEY Pos (Thread_ID,PosIndex)
 ) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Forumreads'
+#
+
+CREATE TABLE Forumreads (
+  User_ID int(11) NOT NULL default '0',
+  Thread_ID int(11) NOT NULL default '0',
+  Time datetime default NULL,
+  PRIMARY KEY  (User_ID,Thread_ID)
+) TYPE=MyISAM;
+
 
 #
 # Table structure for table 'Clock'
@@ -224,7 +239,8 @@ CREATE TABLE Clock (
   Ticks int(11) default '0',
   Lastchanged datetime NOT NULL,
   PRIMARY KEY  (ID)
-) TYPE=ISAM PACK_KEYS=1;
+) TYPE=MyISAM PACK_KEYS=1;
+
 
 #
 # Dumping data for table 'Clock'

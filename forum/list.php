@@ -19,7 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-include("forum_functions.php");
+require("forum_functions.php");
 
 {
    connect2mysql();
@@ -30,29 +30,33 @@ include("forum_functions.php");
    
    start_page("Forum $Forumname", true, $logged_in, $player_row );
 
-   $result = mysql_query("SELECT Subject,Thread_ID,Lastchanged,User_ID,Name " .
-                         "FROM Posts,Players " .
-                         "WHERE Forum_ID=$forum AND Depth=1 AND Players.ID=User_ID " .
-                         "ORDER BY Lastchanged");
+   $result = mysql_query("SELECT Subject, Posts.Thread_ID, Lastchanged, Posts.User_ID, Replies, " .
+                         "Name, UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
+                         "UNIX_TIMESTAMP(Lastchanged) AS Lastchangedstamp " .
+                         "FROM Posts LEFT JOIN Players ON Players.ID=Posts.User_ID " .
+                         "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
+                         " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
+                         "WHERE Forum_ID=$forum AND Depth=1 " .
+                         "ORDER BY Lastchanged desc")
+   or die(mysql_error());
 
-   $cols = 3;
-   $headline = array("Thread"=>"width=50%","Author"=>"width=25%","Date"=>"width=25%");
+   $cols = 4;
+   $headline = array("Thread"=>"width=50%","Author"=>"width=20%",
+                     "Replies"=>"width=10%  align=center","Date"=>"width=20%");
    $links = LINK_FORUMS | LINK_THREADS | LINK_NEW_TOPIC;
    start_table($headline, $links, "width=98%", $cols); 
                
    $odd = true;
    while( $row = mysql_fetch_array( $result ) )
    {
+      $Name = '?';
+      $Lastread = NULL;
       extract($row);
 
-      $color = ( $odd ? "" : " bgcolor=white" );
-      
-      if(  $Lastchanged > $player_row["Forumreaddate$forum"] )
-         $new = "<font color=red size=\"-1\">&nbsp;&nbsp;new</i></font>";
-      else
-         $new = "";
+      $new = get_new_string($Lastchangedstamp, $Lastread);
 
-      echo "<tr$color><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a>$new</td><td>$Name</td><td>$Lastchanged</td></tr>\n";
+      $color = ( $odd ? "" : " bgcolor=white" );
+      echo "<tr$color><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a>$new</td><td>$Name</td><td align=center>" . ($Replies-1) . "</td><td nowrap>$Lastchanged</td></tr>\n";
       $odd = !$odd;
    }
 

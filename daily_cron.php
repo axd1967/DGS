@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 require( "include/rating.php" );
+require( "forum/forum_functions.php" );
 
 {
    connect2mysql();
@@ -45,13 +46,13 @@ require( "include/rating.php" );
 
          mysql_query("DELETE FROM Messages$id WHERE " .
                      "( Info='None' OR Info='REPLIED' ) AND " .
-                     "TO_DAYS(Now())-TO_DAYS(Time) > $messege_timelimit" );
+                     "TO_DAYS(FROM_UNIXTIME($NOW))-TO_DAYS(Time) > $messege_timelimit" );
 
          //delete old invitations
 
          $result2 = mysql_query( "SELECT Game_ID FROM Messages$id WHERE " .
                                  "Type='INVITATION' AND " .
-                                 "TO_DAYS(Now())-TO_DAYS(Time) > $invite_timelimit" );
+                                 "TO_DAYS(FROM_UNIXTIME($NOW))-TO_DAYS(Time) > $invite_timelimit" );
 
          if( mysql_num_rows($result2) > 0 )
          {
@@ -65,7 +66,7 @@ require( "include/rating.php" );
 
             mysql_query( "DELETE FROM Messages$id WHERE " .
                          "Type='INVITATION' AND " .
-                         "TO_DAYS(Now())-TO_DAYS(Time) > $invite_timelimit" );
+                         "TO_DAYS(FROM_UNIXTIME($NOW))-TO_DAYS(Time) > $invite_timelimit" );
       
          }
 
@@ -96,7 +97,7 @@ require( "include/rating.php" );
       update_rating($row["gid"]);    
    }
 
-   $result = mysql_query( "UPDATE Players SET RatingStatus='READY', Lastaccess=Lastaccess " .
+   $result = mysql_query( "UPDATE Players SET RatingStatus='READY' " .
                           "WHERE RatingStatus='INIT' " );
   
 
@@ -115,7 +116,7 @@ require( "include/rating.php" );
    extract( mysql_fetch_array(mysql_query( $q_users )));
 
    mysql_query( "INSERT INTO Statistics SET " .
-                "Time=NOW(), " .
+                "Time=FROM_UNIXTIME($NOW), " .
                 "Hits=$Hits, " .
                 "Users=$Users, " .
                 "Moves=" . ($MovesFinished+$MovesRunning) . ", " .
@@ -125,5 +126,25 @@ require( "include/rating.php" );
                 "GamesFinished=$GamesFinished, " .
                 "GamesRunning=$GamesRunning, " .
                 "Activity=$Activity" );
+
+
+
+
+// Delete old forumreads
+
+   $result = mysql_query("SELECT ID FROM Posts " .
+                         "WHERE Depth=1 " .
+                         "AND UNIX_TIMESTAMP(Lastchanged) + $new_end < $NOW " .
+                         "AND UNIX_TIMESTAMP(Lastchanged) + $new_end + 7*24*3600 > $NOW");
+
+   $query = "DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time) + $new_end < $NOW";
+
+   while( $row = mysql_fetch_array($result) )
+   {
+      $query .= " OR Thread_ID=" . $row["ID"];
+   }
+
+   mysql_query( $query );
+
 } 
 ?>

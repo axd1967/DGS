@@ -19,12 +19,16 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-chdir("../");
-require( "include/std_functions.php" );
+if( basename(getcwd()) == 'forum' )
+   chdir("../");
+require_once( "include/std_functions.php" );
 chdir("forum");
 
 
 $order_str = "+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
+
+$new_level1 = 2*7*24*3600;  // two week
+$new_end =  4*7*24*3600;  // four weeks
 
 define("LINK_FORUMS",1);
 define("LINK_THREADS",2);
@@ -117,6 +121,27 @@ function echo_links($cols)
 
    echo "&nbsp;</td></tr>\n";
 
+}
+
+function get_new_string($Lastchangedstamp, $Lastread)
+{
+   global $NOW, $new_level1, $new_end;
+
+   $color = "ff0000";
+
+   if( (empty($Lastread) or $Lastchangedstamp > $Lastread) 
+       and $Lastchangedstamp + $new_end > $NOW )
+   {
+      if( $Lastchangedstamp + $new_level1 < $NOW )
+      {
+         $color = "ff7777";
+      }
+      $new = "<font color=\"#$color\" size=\"-1\">&nbsp;&nbsp;new</font>";
+   }
+   else
+      $new = "";
+
+   return $new;
 }
 
 function message_box($forum, $parent=-1, $Subject=NULL)

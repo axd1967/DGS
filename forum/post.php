@@ -67,8 +67,8 @@ include("forum_functions.php");
    $query = "INSERT INTO Posts SET " .
        "Forum_ID=$forum, " .
        "Thread_ID=$Thread_ID, " .
-       "Time=NOW(), " .
-       "Lastchanged=NOW(), " .
+       "Time=FROM_UNIXTIME($NOW), " .
+       "Lastchanged=FROM_UNIXTIME($NOW), " .
        "Subject=\"$Subject\", " .
        "Text=\"$Text\", " .
        "User_ID=" . $player_row["ID"] . ", " .
@@ -92,7 +92,7 @@ include("forum_functions.php");
          error("mysql_insert_post");
    }
 
-   mysql_query( "UPDATE Posts SET Lastchanged=NOW() " .
+   mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1" .
                 "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
                 "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
 

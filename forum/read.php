@@ -24,12 +24,16 @@ include("forum_functions.php");
 function draw_post($reply_link=true)
 {
    global $Subject, $Text, $ID, $User_ID, $HOSTBASE, $forum, $Name, $thread, $Timestamp, 
-      $date_fmt;
+      $date_fmt, $Lastread;
 
    $txt = make_html_safe($Text, true);
    if( strlen($txt) == 0 ) $txt = '&nbsp';
+
+   $color = "ff0000";
+   $new = get_new_string($Timestamp, $Lastread);
+
    echo '<tr><td bgcolor=cccccc>
-<a name="' . $ID . '"><font size="+1"><b>' . make_html_safe($Subject) . '</b></font></a><br>
+<a name="' . $ID . '"><font size="+1"><b>' . make_html_safe($Subject) . '</b></font>' . $new . '</a><br>
 by <a href="' . $HOSTBASE . '/userinfo.php?uid=' . $User_ID . '">' . $Name . '</a>
 on ' . date($date_fmt, $Timestamp) . '</td></tr>
 <tr><td bgcolor=white>' . $txt . '</td></tr>
@@ -37,6 +41,8 @@ on ' . date($date_fmt, $Timestamp) . '</td></tr>
    if( $reply_link )
       echo "<tr><td bgcolor=white align=left><a href =\"read.php?forum=$forum&thread=$thread&reply=$ID#$ID\">[ reply ]</a></td></tr>\n";
 }
+
+
 
 
 //  input: $forum, $thread, $reply
@@ -59,18 +65,29 @@ on ' . date($date_fmt, $Timestamp) . '</td></tr>
 
    start_table($headline, $links, 'width="99%"', $cols);
 
-   $result = mysql_query("SELECT Posts.*, UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
+   $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) AS Lastread FROM Forumreads " .
+                         "WHERE User_ID=" . $player_row["ID"] . " AND Thread_ID=$thread");
+
+   if( mysql_num_rows($result) == 1 )
+      extract( mysql_fetch_array( $result ) );
+
+   $result = mysql_query("SELECT Posts.*, " .
+                         "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
+                         "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
                          "Players.Name " .
-                         "FROM Posts, Players " .
+                         "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
-                         "AND Posts.User_ID=Players.ID " .
                          "ORDER BY PosIndex");
 
    echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
    $cur_depth=1;
    while( $row = mysql_fetch_array( $result ) )
    {
+      $Name = '?';
       extract($row);
+
+      if( !$Lastchangedthread )
+         $Lastchangedthread = $Lastchangedstamp;
 
       while( $cur_depth < $Depth )
       {
@@ -103,6 +120,17 @@ on ' . date($date_fmt, $Timestamp) . '</td></tr>
    echo "</table></td></tr>\n";
    
    end_table($links, $cols);
+
+   
+// Update Forumreads to remove the 'new' flag
+
+   if( $Lastchangedthread + $new_end > $NOW )
+   {
+      mysql_query( "REPLACE INTO Forumreads SET " .
+                   "User_ID=" . $player_row["ID"] . ", " .
+                   "Thread_ID=$thread, " .
+                   "Time=FROM_UNIXTIME($NOW)" );
+   }
 
    end_page();
 }
