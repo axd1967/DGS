@@ -70,7 +70,7 @@ if( $Handicap > 0 and $correct_handicap )
 
 while( $row = mysql_fetch_array($result) )
 {
-    if( $row["Stone"] != WHITE and $row["Stone"] != BLACK )
+    if( $row["PosX"] < 0 or ($row["Stone"] != WHITE and $row["Stone"] != BLACK ) )
         continue;
     
     if( $row["MoveNr"] > $Handicap or !$correct_handicap )
@@ -81,4 +81,3 @@ while( $row = mysql_fetch_array($result) )
 }
 echo "\n;)\n";
 
-//}
