@@ -19,6 +19,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
+$TranslateGroups[] = "Start";
+
 require_once( "include/std_functions.php" );
 
 
@@ -92,7 +94,7 @@ rememberable.
    'From: ' . $EMAIL_FROM);
 
 
-   $msg = urlencode("New password sent!");
+   $msg = urlencode(T_("New password sent!"));
    if( $logged_in )
       jump_to("status.php?msg=$msg");
    jump_to("index.php?msg=$msg");
