@@ -72,6 +72,10 @@ $Moves++;
 
 if( $Moves < $Handicap ) $next_to_move = BLACK;
 
+$next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
+
+
+
 
 
 switch( $action )
@@ -116,13 +120,9 @@ switch( $action )
              else
                  $game_query .= "White_Prisoners=" . ( $White_Prisoners + $nr_prisoners ) . ", ";
          
-         if( $next_to_move == BLACK )
-             $game_query .= "ToMove_ID=$Black_ID, ";
-         else
-             $game_query .= "ToMove_ID=$White_ID, ";
-
-         $game_query .= "Flags=$flags" .
-              " WHERE ID=$gid";
+         $game_query .= "ToMove_ID=$next_to_move_ID, " .
+              "Flags=$flags " .
+              "WHERE ID=$gid";
      }
      break;
 
@@ -155,15 +155,10 @@ switch( $action )
          $game_query = "UPDATE Games SET " .
               "Moves=$Moves, " .
               "Last_X=-1, " .
-              "Status='$next_status', ";
-
-         if( $next_to_move == BLACK )
-             $game_query .= "ToMove_ID=$Black_ID, ";
-         else
-             $game_query .= "ToMove_ID=$White_ID, ";
-
-         $game_query .= "Flags=0" .
-              " WHERE ID=$gid";
+              "Status='$next_status', " .
+              "ToMove_ID=$next_to_move_ID, " .
+              "Flags=0 " .
+              "WHERE ID=$gid";
      }
      break;
      
@@ -270,6 +265,22 @@ if( mysql_affected_rows() != 1)
 {
     header("Location: error.php?err=mysql_update_game");
     exit;
+}
+
+
+// Notify opponent about move
+
+if( $next_to_move_ID != $player_row["ID"] )
+{
+  $result = mysql_query( "SELECT Flags+0 AS flags, Notify " .
+                           "FROM Players WHERE ID='$next_to_move_ID'" );
+
+  if( $row = mysql_fetch_array($result) and 
+      $row["flags"] & WANT_EMAIL and $row["Notify"] == 'NONE' )
+      {
+          $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
+                                 "WHERE ID='$next_to_move_ID'" );
+      }
 }
 
 

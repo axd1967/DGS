@@ -34,6 +34,8 @@ CREATE TABLE Players (
   Rank varchar(40),
   Stonesize int(11) DEFAULT '25',
   Boardfontsize char(2) DEFAULT '+0',
+  Flags set('WANT_EMAIL') DEFAULT '' NOT NULL,
+  Notify enum('NONE','NEXT','NOW','DONE') DEFAULT 'NONE',
   PRIMARY KEY (ID),
   UNIQUE Handle (Handle),
   KEY Handle_2 (Handle)

@@ -41,6 +41,7 @@ define("WHITE_DEAD", 8);
 
 define("KO", 1);
 
+define("WANT_EMAIL", 1);
 
 function getmicrotime()
 {
@@ -142,7 +143,9 @@ function is_logged_in($hdl, $scode, &$row)
     if( !$hdl )
         return false;
 
-    $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire FROM Players WHERE Handle='" . $hdl . "'" );
+    $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
+                           "Flags+0 AS flags " .
+                           "FROM Players WHERE Handle='$hdl'" );
     
     if( mysql_num_rows($result) != 1 )
         return false;
@@ -151,6 +154,15 @@ function is_logged_in($hdl, $scode, &$row)
 
     if( $row["Sessioncode"] != $scode or $row["Expire"] < time() )
         return false;
+
+    if( $row["flags"] & WANT_EMAIL AND $row["Notify"] != 'NONE' )
+        {
+            $result = mysql_query( "UPDATE Players " .
+                                   "SET Notify='NONE' WHERE Handle='$hdl'" );
+            
+            if( mysql_affected_rows() != 1 )
+                return false;
+        }
 
     return true;
 }

@@ -42,7 +42,8 @@ if( $player_row["Handle"] == "guest" )
 
 
 
-$result = mysql_query( "SELECT ID FROM Players WHERE Handle='$to'" );
+$result = mysql_query( "SELECT ID, Flags+0 AS flags, Notify " . 
+                       "FROM Players WHERE Handle='$to'" );
 
 if( mysql_num_rows( $result ) != 1 )
 {
@@ -175,6 +176,15 @@ if( $reply )
             header("Location: error.php?err=mysql_message_info");
             exit;
         }
+}
+
+
+// Notify reciever about message
+
+if( $row["flags"] & WANT_EMAIL and $row["Notify"] == 'NONE' )
+{
+   $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
+                          "WHERE Handle='$to'" );
 }
 
 
