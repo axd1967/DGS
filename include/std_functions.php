@@ -164,23 +164,17 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    ob_start("ob_gzhandler");
 
-   if( $logged_in and !is_null($player_row['Lang']) and
-       strcmp($player_row['Handle'],'guest') != 0 )
-   {
-      $the_translator->change_language( $player_row['Lang'] );
-   }
-
-
-   // Character-encodings
-   if( $the_translator->current_language == 'C' )
-      header ('Content-Type: text/html; charset=ISO-8859-1');
-   else
-      header ('Content-Type: text/html; charset='.
-              $CHARACTER_ENCODINGS[ $the_translator->current_language ]);
+   $charenc = ( strcmp($the_translator->current_language,'C') == 0 ?
+                'ISO-8859-1' :
+                $CHARACTER_ENCODINGS[ $the_translator->current_language ] );
+   header ('Content-Type: text/html; charset=$charenc'); // Character-encoding
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
   <HEAD>';
+
+  echo "
+  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$charenc\">\n";
 
 //   if( $no_cache )
 //       {
@@ -226,11 +220,11 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       ( ($logged_in and !$is_down) ? T_("Logged in as") . ': ' . $player_row["Handle"]
         : T_("Not logged in") ) .
       " </B></font></td>\n";
+   echo "     </tr>\n";
 
    make_menu($menu_array);
 
-   echo "     </tr>
-    </table>
+   echo "    </table>
     <BR>\n";
 
    if( $is_down )
@@ -246,8 +240,7 @@ function end_page( $menu_array=NULL )
 {
    global $time, $show_time, $HOSTBASE, $menu_bg_color, $menu_fg_color, $bg_color;
 
-   echo '<p>
-    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . ">\n";
+   echo '<table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . ">\n";
 
    if( $menu_array )
       make_menu($menu_array);
@@ -282,7 +275,7 @@ function make_menu($menu_array)
 {
    global $HOSTBASE, $bg_color;
 
-   $width = 'width=' . floor(100/count($menu_array)) . '%';
+   $width = 'width="' . floor(100/count($menu_array)) . '%"';
 
    if( count($menu_array) == 1 )
       $width .= ' colspan=2';
@@ -663,7 +656,7 @@ function make_url($page, $sep)
 function is_logged_in($hdl, $scode, &$row)
 {
    global $time, $show_time, $HOSTBASE, $PHP_SELF, $HOSTNAME, $HTTP_HOST,
-      $ActivityHalvingTime, $ActivityForHit, $NOW;
+      $ActivityHalvingTime, $ActivityForHit, $NOW, $the_translator;
 
    $time = getmicrotime();
    $show_time = false;
@@ -708,6 +701,13 @@ function is_logged_in($hdl, $scode, &$row)
 
    if( !empty( $row["Timezone"] ) )
       putenv('TZ='.$row["Timezone"] );
+
+   if( !is_null($row['Lang']) and
+       strcmp($row['Handle'],'guest') != 0 )
+     {
+       $the_translator->change_language( $row['Lang'] );
+     }
+
 
 //     bindtextdomain ("dragon", "./locale");
 //     textdomain ("dragon");
