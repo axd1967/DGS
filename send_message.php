@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Messages";
+
 require( "include/std_functions.php" );
 require( "include/rating.php" );
 require( "include/message_functions.php" );
@@ -332,6 +334,8 @@ disable_cache();
    {
       $result = mysql_query( "UPDATE Players SET Notify='NEXT' WHERE Handle='$to' LIMIT 1" );
    }
+
+   include_all_translate_groups($player_row);
 
    $msg = urlencode(T_('Message sent!'));
 

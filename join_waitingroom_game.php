@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Game";
+
 require( "include/std_functions.php" );
 require( "include/message_functions.php" );
 require( "include/rating.php" );
@@ -33,6 +35,8 @@ require( "include/rating.php" );
 
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
+
+   include_all_translate_groups($player_row);
 
    if( !is_numeric($id) )
       $id=0;

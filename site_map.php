@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Docs";
+
 require( "include/std_functions.php" );
 
 
@@ -124,7 +126,7 @@ function item($text,$link,$working, $level,$last=false)
       {
          item(T_('Introduction'), "introduction.php", true, 1);
          item(T_('Site map'), "site_map.php", true, 1);
-         item(T_('FAQ'), "phorum/list.php?f=3", true, 1);
+         item(T_('FAQ'), "faq.php", true, 1);
          item(T_('Links'), "links.php", true, 1);
          item(T_('Todo list'), "todo.php", true, 1);
          item(T_('Licence'), "licence.php", true, 1, true);
