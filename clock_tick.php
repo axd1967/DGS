@@ -25,6 +25,17 @@ require_once( "include/rating.php" );
 
 if( !$is_down )
 {
+   $chained = @$_REQUEST['chained'];
+   if( @$chained ) //to be chained to other cron jobs (see at EOF)
+   {
+      $i = 3600/$tick_frequency;
+      $tick_diff = $i - 10;
+      $chained = $i;
+   }
+   else
+   {
+      $tick_diff = 3600/$tick_frequency - 10;
+   }
    connect2mysql();
 
 
@@ -36,7 +47,6 @@ if( !$is_down )
 
    $row = mysql_fetch_array( $result );
 
-   $tick_diff = 3600/$tick_frequency - 10;
    if( $row['timediff'] < $tick_diff )
       if( !@$_REQUEST['forced'] ) exit;
 
@@ -179,7 +189,7 @@ if( !$is_down )
       }
    }
 
-if( !@$_REQUEST['chained'] ) exit;
+if( !@$chained ) exit;
 //the whole cron stuff in one cron job (else comments those 2 lines):
 include_once( "halfhourly_cron.php" );
 include_once( "daily_cron.php" );

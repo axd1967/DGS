@@ -83,7 +83,17 @@ function mail_strip_html( $str)
 
 if( !$is_down )
 {
-   connect2mysql();
+   if( @$chained ) //when chained after clock_tick.php
+   {
+      $i = 3600/2;
+      $half_diff = $i - $chained/2;
+      $chained = $i;
+   }
+   else
+   {
+      $half_diff = 1500;
+      connect2mysql();
+   }
 
 
    // Check that updates are not too frequent
@@ -94,10 +104,6 @@ if( !$is_down )
 
    $row = mysql_fetch_array( $result );
 
-   if( @$tick_diff ) //when chained after clock_tick.php
-      $half_diff = 3600/2 - $tick_diff/2;
-   else
-      $half_diff = 1500;
    if( $row['timediff'] < $half_diff )
       if( !@$_REQUEST['forced'] ) exit;
 
@@ -210,8 +216,13 @@ if( !$is_down )
 
       $msg .= str_pad('', 47, '-');
 
+      $headers = "From: $EMAIL_FROM\n";
+      //if HTML in mail allowed:
+      //$headers.= "MIME-Version: 1.0\n";
+      //$headers.= "Content-type: text/html; charset=iso-8859-1\n";
+
       if( !function_exists('mail')
-       or !mail( $Email, 'Dragon Go Server notification', $msg, "From: $EMAIL_FROM" ) )
+       or !mail( trim($Email), 'Dragon Go Server notification', $msg, $headers ) )
          error('mail_failure',"Uid:$uid Addr:$Email Text:$msg");
    }
 

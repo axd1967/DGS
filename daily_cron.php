@@ -25,7 +25,17 @@ require_once( "include/std_functions.php" );
 
 if( !$is_down )
 {
-   connect2mysql();
+   if( @$chained ) //when chained after halfhourly_cron.php
+   {
+      $i = 3600*24;
+      $daily_diff = $i - $chained/2;
+      $chained = $i;
+   }
+   else
+   {
+      $daily_diff = 3600*23;
+      connect2mysql();
+   }
 
 
    // Check that updates are not too frequent
@@ -36,10 +46,6 @@ if( !$is_down )
 
    $row = mysql_fetch_array( $result );
 
-   if( @$half_diff ) //when chained after halfhourly_cron.php
-      $daily_diff = 3600*24 - $half_diff/2;
-   else
-      $daily_diff = 3600*23;
    if( $row['timediff'] < $daily_diff )
       if( !@$_REQUEST['forced'] ) exit;
 
