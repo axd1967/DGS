@@ -22,18 +22,22 @@ require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 
-connect2mysql();
 {
+   connect2mysql();
+
+   if( !($gid=@$_REQUEST['gid']) )
+      $where = "AND DATE_ADD(Lastchanged,INTERVAL 7 day) > FROM_UNIXTIME($NOW)" ;
+   //elseif( $gid='all' ) $where = "" ;
+   else
+      $where = "AND ID=" . $_REQUEST['gid'] ;
+
    $result = mysql_query("SELECT ID FROM Games WHERE Status!='INVITED' " .
-                         "AND DATE_ADD(Lastchanged,INTERVAL 7 day) > FROM_UNIXTIME($NOW) " .
-                         "ORDER BY ID");
+                         "$where ORDER BY ID");
 
    while( $row = mysql_fetch_array( $result ) )
    {
       check_consistency($row["ID"]);
    }
-
-
 
 }
 ?>
