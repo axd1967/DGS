@@ -40,8 +40,8 @@ require_once( "include/rating.php" );
        "FROM Games, Players as white, Players as black " .
        "WHERE Status='FINISHED' AND Rated='Done' " .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
-       "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
-       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) " .
+       "AND ( NOT ISNULL(white.RatingStatus) ) " .
+       "AND ( NOT ISNULL(black.RatingStatus) ) " .
        "ORDER BY Lastchanged, gid";
 
 
@@ -52,7 +52,7 @@ require_once( "include/rating.php" );
    while( $row = mysql_fetch_array( $result ) )
    {
       echo $row["gid"] . " ";
-      update_rating2($row["gid"]);
+      update_rating2($row["gid"], false);
       $count++;
    }
    echo "<p>Finished!\n" .
