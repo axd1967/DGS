@@ -268,7 +268,6 @@ function draw_message_box()
 
 }
 
-/* TODO: This function (draw_game_info()) needs a cleanup, especially */
 function draw_game_info()
 {
   global $Size, $Whiterating, $Blackrating, $Whiterank, $Blackrank,
