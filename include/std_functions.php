@@ -222,20 +222,22 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       " </B></font></td></tr></table>\n";
 
    $menu_array = array(
-      '<b><font size="+1">' . T_('Status') . '</font></b>' => array('status.php',1,1),
-      T_('Waiting room') => array('waiting_room.php',1,2),
-      T_('User info') => array('userinfo.php',1,3),
-      T_('Messages') => array('list_messages.php',2,1),
-      T_('Send a message') => array('message.php?mode=NewMessage',2,2),
-      T_('Invite') => array('message.php?mode=Invite',2,3),
+      '<b><font size="+1">' . T_('Status') . '</font></b>' => array('status.php" accesskey="s',1,1),
+      T_('Waiting room') => array('waiting_room.php" accesskey="w',1,2),
+      T_('User info') => array('userinfo.php" accesskey="p',1,3),
 
-      T_('Users') => array('users.php',3,1),
-      T_('Games') => array('show_games.php?uid=all&finished=1',3,2),
-      T_('Translate') => array('translate.php',3,3),
-      T_('Forums') => array('forum/index.php',4,1),
-      T_('FAQ') => array('faq.php',4,2),
+      T_('Messages') => array('list_messages.php" accesskey="b',2,1),
+      T_('Send a message') => array('message.php?mode=NewMessage" accesskey="m',2,2),
+      T_('Invite') => array('message.php?mode=Invite" accesskey="i',2,3),
+
+      T_('Users') => array('users.php" accesskey="u',3,1),
+      T_('Games') => array('show_games.php?uid=all&finished=1" accesskey="g',3,2),
+      T_('Translate') => array('translate.php" accesskey="t',3,3),
+
+      T_('Forums') => array('forum/index.php" accesskey="f',4,1),
+      T_('FAQ') => array('faq.php" accesskey="q',4,2),
 //      T_('Site map') => array('site_map.php',4,3),
-      T_('Docs') => array('docs.php',4,3)
+      T_('Docs') => array('docs.php" accesskey="d',4,3)
       );
 
    if( $player_row['MenuDirection'] == 'HORIZONTAL' )
@@ -297,7 +299,7 @@ function end_page( $menu_array=NULL )
       echo '<b><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
          T_('Admin') . '</font></a></b>&nbsp;&nbsp;&nbsp;';
 
-   echo '<A href="' . $base_path . 'index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
+   echo '<A href="' . $base_path . 'index.php?logout=t" accesskey="x"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
 
    echo '
       </tr>
@@ -311,42 +313,37 @@ function end_page( $menu_array=NULL )
 
 function make_menu($menu_array)
 {
-   global $base_path, $bg_color,$max_links_in_main_menu,$menu_bg_color;
+   global $base_path, $bg_color, $max_links_in_main_menu;
 
    $new_row= '<tr bgcolor=' . $bg_color . ' align="center">' . "\n";
 
-   echo "<table width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>\n" . $new_row;
+   echo "<table width=\"100%\" border=0 cellspacing=0 cellpadding=4>\n" . $new_row;
 
 
-   $break_point_array = array();
    $nr_menu_links = count($menu_array);
    $menu_levels = ceil($nr_menu_links/$max_links_in_main_menu);
-   $menu_width = round($nr_menu_links/$menu_levels+0.01);
-   $even = ((count($menu_array) % $menu_width) == 0);
+   $menu_width = ceil($nr_menu_links/$menu_levels);
+   $remain = ($menu_levels*$menu_width) - $nr_menu_links +1;
    $w = 100/$menu_width;
-
-   $i = 1;
-   while( $i < $menu_levels )
-     {
-       $break_point_array[] = $menu_width*$i;
-       $i++;
-     }
 
    $cumwidth = $cumw = 0;
    $i = 0;
    foreach( $menu_array as $text => $link )
       {
-        $i++;
+         $i++;
          $cumw += $w;
          $width = round($cumw - $cumwidth);
-         if( $i == count($menu_array) && !$even )
-           $span = " colspan=2";
+/*
+         if( $i == $nr_menu_links && $remain>1 )
+           $span = " colspan=$remain";
          else
+*/
            $span = "";
 
-         echo "<td$span width=\"$width%\"><B><A href=\"$base_path$link\">$text</A></B></td>\n";
+         $j = $i % 10;
+         echo "<td$span width=\"$width%\"><B><A href=\"$base_path$link\" accesskey=\"$j\">$text</A></B></td>\n";
          $cumwidth += $width;
-         if( in_array($i, $break_point_array) )
+         if( !($i % $menu_width) )
            {
              echo "</tr>" . $new_row;
              $cumw = 0;
