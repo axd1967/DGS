@@ -171,6 +171,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    if( $message ) $message = trim($message);
 
    $where_clause = " ID=$gid AND Moves=$old_moves";
+   $handi = false;
 
    switch( $action )
    {
@@ -264,7 +265,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'PLAY' or $Moves != 1 )
             error("invalid_action");
 
-         check_handicap();
+         check_handicap(); //adjust $handi, $stonestring and others
 
          if( strlen( $stonestring ) != 2 * $Handicap + 1 )
             error("wrong_number_of_handicap_stone");
@@ -376,7 +377,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
             $query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
          }
 
-         $query .= "($gid, $Moves, $to_move, -2, NULL, $hours) ";
+         $query .= "($gid, $Moves, $to_move, -2, -2, $hours) ";
+
 
          if( $message )
             $query2 = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
