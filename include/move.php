@@ -197,6 +197,9 @@ function check_remove( )
 
    $l = strlen( $stonestring );
 
+   // $stonearray is used to cancel out duplicates, in order to make $stonestring shorter.
+   $stonearray = array();
+
    for( $i=1; $i < $l; $i += 2 )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
@@ -209,6 +212,11 @@ function check_remove( )
          $array[$colnr][$rownr] = $stone + OFFSET_MARKED;
       else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD or $stone == MARKED_DAME )
          $array[$colnr][$rownr] = $stone - OFFSET_MARKED;
+
+      if( !isset( $stonearray[$colnr][$rownr] ) )
+         $stonearray[$colnr][$rownr] = true;
+      else
+         unset( $stonearray[$colnr][$rownr] );
    }
 
    if( $coord )
@@ -228,9 +236,21 @@ function check_remove( )
       $marked = array();
       toggle_marked_area( $colnr, $rownr, $Size, $array, $marked );
 
-      while( list($dummy, list($x,$y)) = each($marked) )
+      while( list($dummy, list($colnr,$rownr)) = each($marked) )
       {
-         $stonestring .= number2sgf_coords($x, $y, $Size);
+         if( !isset( $stonearray[$colnr][$rownr] ) )
+            $stonearray[$colnr][$rownr] = true;
+         else
+            unset( $stonearray[$colnr][$rownr] );
+      }
+   }
+
+   $stonestring = '1';
+   while( list($colnr, $sub) = each($stonearray) )
+   {
+      while( list($rownr, $dummy) = each($sub) )
+      {
+         $stonestring .= number2sgf_coords($colnr, $rownr, $Size);
       }
    }
 
