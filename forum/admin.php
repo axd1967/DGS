@@ -45,7 +45,7 @@ require_once( "forum_functions.php" );
      echo "<center>\n";
 
 
-     $forum_edit_form = new Form( 'forumform', "admin.php?do_new=t&id=0", FORM_POST );
+     $forum_edit_form = new Form( 'forumform', "admin.php?do_new=t".URI_AMP."id=0", FORM_POST );
 
      $forum_edit_form->add_row( array( 'HEADER', T_('New Forum') ) );
      $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
@@ -106,7 +106,7 @@ require_once( "forum_functions.php" );
 
      $row = mysql_fetch_array( $result );
 
-     $forum_edit_form = new Form( 'forumform', "admin.php?do_edit=t&id=$id", FORM_POST );
+     $forum_edit_form = new Form( 'forumform', "admin.php?do_edit=t".URI_AMP."id=$id", FORM_POST );
 
      $forum_edit_form->add_row( array( 'HEADER', T_('New Forum') ) );
      $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
@@ -215,7 +215,7 @@ require_once( "forum_functions.php" );
      echo "<table>\n";
 
 
-     echo "<tr><td colspan=4 align=right><a href=\"admin.php?new=t&id=0\">" .
+     echo "<tr><td colspan=4 align=right><a href=\"admin.php?new=t".URI_AMP."id=0\">" .
         '<img border=0 title="' . T_('Add new forum') . '" src="../images/new.png" alt="N"></a>';
 
      while( $row = mysql_fetch_array( $result ) )
@@ -223,14 +223,14 @@ require_once( "forum_functions.php" );
         $name = (empty($row['Name']) ? '-' : $row['Name']);
 
         echo '<tr><td>';
-        echo "<A href=\"admin.php?edit=t&id=" . $row['ID'] .
+        echo "<A href=\"admin.php?edit=t".URI_AMP."id=" . $row['ID'] .
            '" title="' . T_("Edit") . "\">$name</A>\n";
 
-        echo '<td width=40 align=right><a href="admin.php?move=u&id=' . $row['ID'] .
+        echo '<td width=40 align=right><a href="admin.php?move=u'.URI_AMP.'id=' . $row['ID'] .
            '"><img border=0 title="' . T_("Move up") . '" src="../images/up.png" alt="u"></a>';
-        echo '<td><a href="admin.php?move=d&id=' . $row['ID'] .
+        echo '<td><a href="admin.php?move=d'.URI_AMP.'id=' . $row['ID'] .
            '"><img border=0 title="' . T_("Move down") . '" src="../images/down.png" alt="d"></a>';
-        echo "<td><a href=\"admin.php?new=t&id=" . $row['ID'] .
+        echo "<td><a href=\"admin.php?new=t".URI_AMP."id=" . $row['ID'] .
            '"><img border=0 title="' . T_('Add new forum') . '" src="../images/new.png" alt="N"></a>';
      }
 

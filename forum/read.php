@@ -58,7 +58,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
          T_('by')." " . user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
       if( $Lastedited > 0 )
-         echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum&thread=$thread&revision_history=$ID\">" . T_('edited') .
+         echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."revision_history=$ID\">" . T_('edited') .
             "</a> " . date($date_fmt, $Lasteditedstamp) . ")";
       echo "</td></tr>\n" .
          '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
@@ -69,13 +69,13 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       $hidden = $post_type == 'hidden';
       echo "<tr><td bgcolor=white align=left>";
       if(  $post_type == 'normal' ) // reply link
-         echo "<a href =\"read.php?forum=$forum&thread=$thread&reply=$ID#$ID\">[ " .
+         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."reply=$ID#$ID\">[ " .
             T_('reply') . " ]</a>&nbsp;&nbsp;";
       if( $my_post ) // edit link
-         echo "<a href =\"read.php?forum=$forum&thread=$thread&edit=$ID#$ID\">" .
+         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."edit=$ID#$ID\">" .
             "<font color=\"#ee6666\">[ " . T_('edit') . " ]</font></a>&nbsp;&nbsp;";
       if( $is_editor ) // hide/show link
-         echo "<a href =\"read.php?forum=$forum&thread=$thread&" .
+         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
             ( $hidden ? 'show' : 'hide' ) . "=$ID#$ID\"><font color=\"#ee6666\">[ " .
             ( $hidden ? T_('show') : T_('hide') ) . " ]</font></a>";
 

@@ -57,7 +57,7 @@ function make_link_array($links)
       $link_array_left[T_("Threads")] = "list.php?forum=$forum";
 
    if( $links & LINK_BACK_TO_THREAD )
-      $link_array_left[T_("Back to thread")] = "read.php?forum=$forum&thread=$thread";
+      $link_array_left[T_("Back to thread")] = "read.php?forum=$forum".URI_AMP."thread=$thread";
 
 
    if( $links & LINK_NEW_TOPIC )
@@ -79,9 +79,9 @@ function make_link_array($links)
    }
 
    if( $links & LINK_PREV_PAGE )
-      $link_array_right[T_("Prev Page")] = "list.php?forum=$forum&offset=".($offset-$RowsPerPage);
+      $link_array_right[T_("Prev Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset-$RowsPerPage);
    if( $links & LINK_NEXT_PAGE )
-      $link_array_right[T_("Next Page")] = "list.php?forum=$forum&offset=".($offset+$RowsPerPage);
+      $link_array_right[T_("Next Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset+$RowsPerPage);
 }
 
 function start_table(&$headline, &$links, $width, $cols)
