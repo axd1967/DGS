@@ -71,7 +71,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *                       'CHECKBOX', 'box7', 1, 'box7', true,
  *                       'CHECKBOX', 'box8', 1, 'box8', false,
  *                       'CHECKBOX', 'box9', 1, 'box9', true,
- * echo form_insert_row( 'SUBMITBUTTON', 'Go Ahead' );
+ * echo form_insert_row( 'SUBMITBUTTON', 'submit', 'Go Ahead' );
  * echo form_end();
  *
  *** Will look somewhat like this:
@@ -359,7 +359,9 @@ function form_insert_checkbox( $name, $value, $description, $selected )
  *
  * This will insert a text input box in a standard form.
  *
- * $text          --- the text on the submit button.
+ * $name        --- the field name that will be used as the variable name
+ *                  in the GET or POST.
+ * $text        --- the text on the submit button.
  */
 function form_insert_submit_button( $name, $text )
 {
@@ -369,7 +371,7 @@ function form_insert_submit_button( $name, $text )
 
 /*
  * --------------------------------------------------------------------------
- *                        form_insert_submit_button
+ *                        form_insert_row
  * --------------------------------------------------------------------------
  */
 function form_insert_row()
