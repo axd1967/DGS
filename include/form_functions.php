@@ -50,9 +50,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *** Other things you could have in a row.
  *
- * * SPACE -- Makes some additional space, should be used on it's own row.
- * * BR    -- Forces a linebreak within the row.
- * * TD    -- Forces a column change.
+ * * SPACE     -- Makes some additional space, should be used on it's own row.
+ * * BR        -- Forces a linebreak within the row.
+ * * TD        -- Forces a column change.
  *
  *** Example:
  *
@@ -114,6 +114,7 @@ function form_start( $name, $action_page, $method )
 {
   global $form_started;
   $form_started = true;
+  $max_nr_columns = 0;
   $result =
     "<FORM name=\"".$name."\" action=\"".$action_page."\" method=\"".$method."\">\n".
     "  <TABLE>\n";
@@ -619,14 +620,27 @@ function form_insert_row()
                 $submit = form_insert_submit_button( $name, $text );
                 $current_arg += 2;
 
-                if( $column_started )
-                  $result .= form_td_end();
+                if( $nr_columns == 0 )
+                  {
+                    if( $column_started )
+                      $result .= form_td_end();
 
-                $result .=
-                  form_td_start( 'center', $max_nr_columns - $nr_columns ).
-                  $submit.
-                  form_td_end( true );
-                $column_started = false;
+                    $result .=
+                      form_td_start( 'center', max($max_nr_columns - $nr_columns,1) ).
+                      $submit.
+                      form_td_end( true );
+                    $column_started = false;
+                  }
+                elseif( $nr_columns > 0 )
+                  {
+                    if( !$column_started )
+                      {
+                        $result .= form_td_start()."\n";
+                        $column_started = true;
+                        $nr_columns++;
+                      }
+                    $result .= "        ".$submit."\n";
+                  }
               }
           }
           break;
