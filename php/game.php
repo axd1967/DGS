@@ -289,7 +289,8 @@ switch( $action )
          $score = create_territories_and_score( $Size, $array );
          $score += $White_Prisoners - $Black_Prisoners + $Komi;
 
-         $extra_message = "<font color=\"blue\">Score: $score</font>";
+         $extra_message = "<font color=\"blue\">Score: " . 
+              score2text($Score, true) . "</font>";
      }
      break;
 

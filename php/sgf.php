@@ -56,21 +56,7 @@ $correct_handicap = true;
         "BR[$Whiterank]\n";
     if( isset($Score) )
         {
-            echo "RE[";
-            if( $Score == 0 )
-                echo "Jigo";
-            else
-                {
-                    echo( $Score > 0 ? "W+" : "B+" );
-                    
-                    if( abs($Score) == 1000 )
-                        echo "Resign";
-                    else if( abs($Score) == 2000 )
-                        echo "Time";
-                    else 
-                        echo $Score;                    
-                }
-            echo "]\n";
+            echo "RE[" . score2text($Score, false) . "]\n";
         }
 
 echo "SZ[$Size]\n";
