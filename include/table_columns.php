@@ -72,8 +72,11 @@ function tableelement($nr, $Head, $string, $align_center=false, $extra_options=N
    if( strlen($string) < 1 )
       $string = '&nbsp;';
 
-   return "<td" . ( $align_center ? ' align=center' : '' ) .
-      ( $extra_options ? ' ' . $extra_options : '' ) . ">$string</td>\n";
+   if( !$align_center and !$extra_options )
+      echo "<td>$string</td>\n";
+   else
+      echo '<td' . ( $align_center ? ' align=center' : '' ) .
+         ( $extra_options ? ' ' . $extra_options : '' ) . ">$string</td>\n";
 }
 
 function order_string($sortA, $descA, $sortB, $descB)

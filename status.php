@@ -162,22 +162,22 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
 
          $row_color=3-$row_color;
-         echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n" .
-            tableelement(1, 'ID', "<A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;" .
-                         "&nbsp;$ID&nbsp;&nbsp;&nbsp;</A>", true, "class=button width=92" ) .
-            tableelement(2, 'sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
-                         "sgf</font></A>") .
-            tableelement(3, 'Opponent', "<A href=\"userinfo.php?uid=$pid\">" .
-                         "<font color=black>$Name</font></a>") .
-            tableelement(4, 'Nick', "<A href=\"userinfo.php?uid=$pid\">" .
-                         "<font color=black>$Handle</font></a>") .
-            tableelement(5, 'Color', "<img src=\"17/$color.gif\" alt=$color>", true) .
-            tableelement(6, 'Size', $Size) .
-            tableelement(7, 'Handicap', $Handicap) .
-            tableelement(8, 'Komi', $Komi) .
-            tableelement(9, 'Moves', $Moves ) .
-            tableelement(13, 'Last Move', date($date_fmt2, $Time)) .
-            "</tr>\n";
+         echo "<tr bgcolor=" . ${"table_row_color$row_color"} . ">\n";
+         tableelement(1, 'ID', "<A class=button href=\"game.php?gid=$ID\">&nbsp;&nbsp;" .
+                      "&nbsp;$ID&nbsp;&nbsp;&nbsp;</A>", true, "class=button width=92" );
+         tableelement(2, 'sgf', "<A href=\"sgf.php?gid=$ID\"><font color=$gid_color>" .
+                      "sgf</font></A>");
+         tableelement(3, 'Opponent', "<A href=\"userinfo.php?uid=$pid\">" .
+                      "<font color=black>$Name</font></a>");
+         tableelement(4, 'Nick', "<A href=\"userinfo.php?uid=$pid\">" .
+                      "<font color=black>$Handle</font></a>");
+         tableelement(5, 'Color', "<img src=\"17/$color.gif\" alt=$color>", true);
+         tableelement(6, 'Size', $Size);
+         tableelement(7, 'Handicap', $Handicap);
+         tableelement(8, 'Komi', $Komi);
+         tableelement(9, 'Moves', $Moves );
+         tableelement(13, 'Last Move', date($date_fmt2, $Time));
+         echo "</tr>\n";
       }
       echo start_end_column_table(false);
    }
