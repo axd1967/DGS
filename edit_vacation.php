@@ -70,7 +70,7 @@ require( "include/form_functions.php" );
          $days = array();
 
          for( $i=$minimum_days; $i<=$days_left; $i++ )
-            $days[$i] = ( $i >= 0 ? T_('Add') : T_('Remove') ) . " $i " .
+            $days[$i] = ( $i >= 0 ? T_('Add') : T_('Remove') ) . ' ' . abs($i) . ' ' .
                (abs($i) == 1 ? T_('day') : T_('days'));
 
          $vacation_form->add_row( array( 'HEADER', T_('Change vacation length') ) );
