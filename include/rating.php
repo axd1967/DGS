@@ -407,19 +407,16 @@ function convert_to_rating($string, $type)
    if( strpos($string, 'd') > 0 )
       $kyu = 2;
 
-   $igs_table[0]['KEY'] = -100;
+   $igs_table[0]['KEY'] = 200;
    $igs_table[0]['VAL'] = 500;
 
-   $igs_table[1]['KEY'] = 600;
+   $igs_table[1]['KEY'] = 900;
    $igs_table[1]['VAL'] = 1000;
 
-   $igs_table[2]['KEY'] = 1200;
+   $igs_table[2]['KEY'] = 1500;
    $igs_table[2]['VAL'] = 1500;
 
-   $igs_table[3]['KEY'] = 1900;
-   $igs_table[3]['VAL'] = 2100;
-
-   $igs_table[4]['KEY'] = 2200;
+   $igs_table[4]['KEY'] = 2400;
    $igs_table[4]['VAL'] = 2400;
 
 
@@ -480,15 +477,15 @@ function convert_to_rating($string, $type)
       }
       break;
 
-      case 'igsrating':
-      {
-         if( $kyu > 0 )
-            error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
+//       case 'igsrating':
+//       {
+//          if( $kyu > 0 )
+//             error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
 
-         $rating = $val*100 - 1130 ;
-         $rating = interpolate($rating, $igs_table, true);
-      }
-      break;
+//          $rating = $val*100 - 1130 ;
+//          $rating = interpolate($rating, $igs_table, true);
+//       }
+//       break;
 
       case 'iytgg':
       case 'nngs':
