@@ -143,7 +143,8 @@ function disable_cache($stamp=NULL)
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $HOSTBASE, $is_down, $bg_color, $menu_bg_color, $menu_fg_color, $the_translator;
+   global $HOSTBASE, $is_down, $bg_color, $menu_bg_color, $menu_fg_color,
+      $the_translator, $CHARACTER_ENCODINGS;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -165,15 +166,17 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( $logged_in and !is_null($player_row['Lang']) and
        strcmp($player_row['Handle'],'guest') != 0 )
-     {
-       $the_translator->change_language( $player_row['Lang'] );
-     }
+   {
+      $the_translator->change_language( $player_row['Lang'] );
+   }
 
-   if( strcmp($the_translator->current_language,'C') == 0  )
-     header ('Content-Type: text/html; charset=ISO-8859-1'); // Character-encoding
+
+   // Character-encodings
+   if( $the_translator->current_language == 'C' )
+      header ('Content-Type: text/html; charset=ISO-8859-1');
    else
-     header ('Content-Type: text/html; '.
-             $CHARACTER_ENCODINGS[ $the_translator->current_language ]); // Character-encoding
+      header ('Content-Type: text/html; charset='.
+              $CHARACTER_ENCODINGS[ $the_translator->current_language ]);
 
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
