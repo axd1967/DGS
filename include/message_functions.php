@@ -649,7 +649,7 @@ function message_list_table( &$mtable, $result, $show_rows
 
    $page = '';
 
-   $p = T_('Answer'); $n = T_('Answered');
+   $p = T_('Answer'); $n = T_('Replied');
    $tits[0                        ] = T_('Message') ;
    $tits[FLOW_ANSWER              ] = $p ;
    $tits[            FLOW_ANSWERED] = $n ;
