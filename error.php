@@ -64,6 +64,12 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("invite_self"):
+      {
+         echo T_("Sorry, you can't invite yourself.");
+      }
+      break;
+
       case("invited_to_unknown_game"):
       {
          echo T_("Sorry, can't find the game you are invited to. Already declined?");
@@ -251,12 +257,6 @@ require( "include/std_functions.php" );
       {
          echo T_("Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' " .
                  "for this ratingtype");
-      }
-      break;
-
-      case("reciver_self"):
-      {
-         echo T_("Sorry, you can't send messages to your self.");
       }
       break;
 
