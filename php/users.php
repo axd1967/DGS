@@ -38,15 +38,15 @@ $result = mysql_query("SELECT * FROM Players");
 start_page("Users", true, $logged_in, $player_row );
 
 
-echo "<table border=3>\n";
-echo "<tr><th>Userid</th><th>Full Name</th></tr>\n";
+echo "<table border=3 align=center>\n";
+echo "<tr><th>Userid</th><th>Full Name</th><th>rank</th></tr>\n";
 
 
 
 while( $row = mysql_fetch_array( $result ) )
 {
     echo "<tr><td><A href=\"userinfo.php?uid=" . $row["ID"] . "\">" . $row["Handle"] . 
-        "</A></td><td>" . $row["Name"] . "</td></tr>\n";
+        "</A></td><td>" . $row["Name"] . "</td><td>" . $row["Rank"] . "</td></tr>\n";
 }
 
 echo "</table>\n";
