@@ -28,7 +28,7 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
    {
       if( !is_array($removed_columns) )
          $removed_columns = array('');
-      array_push($removed_columns, $Head);
+      $removed_columns[$nr] = $Head;
       return;
    }
 
@@ -100,11 +100,10 @@ function add_column_form()
    if( count($removed_columns) <= 1 )
       return '';
 
-   $string = "<form name=\"add_column_form\" action=\"" . strip_last_et($page) .
-       "\" method=\"POST\">" .
-       html_build_select_box_from_array($removed_columns, 'add', '', true) .
-       "<input type=submit name=\"action\" value=\"Add Column\">\n" .
-       "</form>\n";
+   $string = form_start( 'add_column_form', strip_last_et($page), 'POST' ) .
+      form_insert_row('SELECTBOX', 'add', 1, $removed_columns, '', false,
+                      'SUBMITBUTTON', 'action', 'Add Column') .
+      form_end();
 
    return $string;
 }
@@ -130,7 +129,7 @@ function add_or_del($add, $del, $mysql_column)
    if( $del or $add )
    {
       if( $add )
-         $column_set |= 1 << array_search($add, $table_columns);
+         $column_set |= 1 << ($add-1);
       if( $del )
          $column_set &= ~(1 << ($del-1));
 
