@@ -66,6 +66,7 @@ $result = mysql_query( "INSERT INTO Players SET " .
                        "Handle='$userid', " .
                        "Name='$name', " .
                        "Password=PASSWORD('$passwd'), " .
+                       "Registerdate=NOW(), " .
                        "Sessioncode='$code', " .
                        "Sessionexpire=DATE_ADD(NOW(),INTERVAL $session_duration second)" );
 

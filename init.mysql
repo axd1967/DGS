@@ -9,6 +9,7 @@ CREATE TABLE Players (
   Sessioncode varchar(32),
   Sessionexpire datetime,
   Lastaccess timestamp(14),
+  Registerdate date,
   Hits int(11) DEFAULT '0',
   Name varchar(80),
   Email varchar(80),
