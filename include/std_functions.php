@@ -546,7 +546,7 @@ function is_logged_in($hdl, $scode, &$row)
        "Activity=Activity + $ActivityForHit, " .
        "Lastaccess=FROM_UNIXTIME($NOW), " .
        "Notify='NONE' " .
-       "WHERE Handle='$hdl'";
+       "WHERE Handle='$hdl' LIMIT 1";
 
    $result = mysql_query( $query );
 
@@ -588,9 +588,9 @@ function check_password( $password, $new_password, $given_password )
   if( !empty( $new_password ) )
     {
       mysql_query( 'UPDATE Players ' .
-                   "SET Password='".$given_password_encrypted[0]."', " .
+                   "SET Password='" . $given_password_encrypted[0] . "', " .
                    'Newpassword=NULL ' .
-                   "Where Handle='$handle'" );
+                   "WHERE Handle='$handle' LIMIT 1" );
     }
 }
 

@@ -30,25 +30,25 @@ require( "include/std_functions.php" );
 
    $my_id = $player_row["ID"];
 
-   if( $del ) 
+   if( $del )
    {
       // delete messages
 
       if( $del == 'all' )
       {
-         $result = mysql_query("UPDATE Messages ". 
+         $result = mysql_query("UPDATE Messages " .
                                "SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
                                "WHERE To_ID=$my_id AND " .
                                "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )");
       }
       else
       {
-         $query = "UPDATE Messages " . 
-             "SET Flags=" . 
+         $query = "UPDATE Messages " .
+             "SET Flags=" .
              ( $del > 0 ? "CONCAT_WS(',',Flags,'DELETED')" : "REPLACE(Flags,'DELETED','')" ) .
              " WHERE To_ID=$my_id AND ID=" . abs($del) . " AND " .
-             "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )";
-         
+             "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' ) LIMIT 1";
+
          mysql_query($query);
 
       }
@@ -56,7 +56,7 @@ require( "include/std_functions.php" );
 
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-       "Messages.ID AS mid, Messages.Subject, Messages.Flags, " . 
+       "Messages.ID AS mid, Messages.Subject, Messages.Flags, " .
        "Players.Name AS sender " .
        "FROM Messages, Players ";
 
@@ -65,7 +65,7 @@ require( "include/std_functions.php" );
    else
    {
       $query .= "WHERE To_ID=$my_id AND From_ID=Players.ID ";
-      
+
       if( !($all==1) )
          $query .= "AND NOT (Messages.Flags LIKE '%DELETED%') ";
       else
@@ -73,12 +73,12 @@ require( "include/std_functions.php" );
    }
 
 
-   if(!($limit > 0 )) 
+   if(!($limit > 0 ))
       $limit = 0;
 
    $query .= "ORDER BY Time DESC";
 
-   $result = mysql_query( $query ) 
+   $result = mysql_query( $query )
        or die ( error("mysql_query_failed") );
 
 
@@ -86,10 +86,10 @@ require( "include/std_functions.php" );
 
 
    echo "<table border=3 align=center>\n";
-   echo "<tr>" . ($sent==1 ? "<th>To" : "<th width=40></th><th>From") . 
+   echo "<tr>" . ($sent==1 ? "<th>To" : "<th width=40></th><th>From") .
       "</th><th>Subject</th><th>Date</th>";
-   
-   if( !($sent==1) ) 
+
+   if( !($sent==1) )
       echo "<th>Del</th></tr>\n";
 
 
@@ -108,16 +108,16 @@ require( "include/std_functions.php" );
          $mid = $row["mid"];
          echo ">";
       }
-      
+
       if( !($sent==1) )
       {
          if( !(strpos($row["Flags"],'NEW') === false) )
          {
-            echo "<td bgcolor=\"00F464\">New</td>\n";        
+            echo "<td bgcolor=\"00F464\">New</td>\n";
          }
          else if( !(strpos($row["Flags"],'REPLIED') === false) )
          {
-            echo "<td bgcolor=\"FFEE00\">Replied</td>\n";        
+            echo "<td bgcolor=\"FFEE00\">Replied</td>\n";
          }
          else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
          {
@@ -130,11 +130,11 @@ require( "include/std_functions.php" );
       }
 
       echo "<td><A href=\"show_message.php?mid=" . $row["mid"] . "\">" .
-         $row["sender"] . "</A></td>\n" . 
+         $row["sender"] . "</A></td>\n" .
          "<td>" . make_html_safe($row["Subject"]) . "&nbsp;</td>\n" .
          "<td>" . date($date_fmt, $row["date"]) . "</td>\n";
 
-      if( !($sent==1) and strpos($row["Flags"],'NEW') === false and 
+      if( !($sent==1) and strpos($row["Flags"],'NEW') === false and
           ( strpos($row["Flags"],'REPLY REQUIRED') === false or
             !(strpos($row["Flags"],'REPLIED') === false) ) )
       {
@@ -142,7 +142,7 @@ require( "include/std_functions.php" );
             "\"> <img width=15 height=16 border=0 alt='X' src=\"images/trashcan.gif\"></A></td>\n";
       }
       echo "</tr>\n";
-        
+
    }
 
    echo "</table>

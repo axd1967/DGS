@@ -40,7 +40,7 @@ disable_cache();
 
 // find reciever of the message
 
-   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed " . 
+   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed " .
                           "FROM Players WHERE Handle='$to'" );
 
    if( mysql_num_rows( $result ) != 1 )
@@ -101,7 +101,7 @@ disable_cache();
             $byohours *= 15;
          if( $timeunit_can == 'months' )
             $byohours *= 30;
-            
+
          $byoperiods = $byostones_can;
       }
       else if( $byoyomitype == 'FIS' )
@@ -111,7 +111,7 @@ disable_cache();
             $byohours *= 15;
          if( $timeunit_fis == 'months' )
             $byohours *= 30;
-            
+
          $byoperiods = 0;
       }
 
@@ -136,8 +136,8 @@ disable_cache();
                              "Byoperiods=$byoperiods, " .
                              "Black_Maintime=$hours, " .
                              "White_Maintime=$hours," .
-                             "WeekendClock='$weekendclock', " . 
-                             "Rated='$rated'" 
+                             "WeekendClock='$weekendclock', " .
+                             "Rated='$rated'"
          );
 
       if( mysql_affected_rows() != 1)
@@ -153,8 +153,8 @@ disable_cache();
 
       if( mysql_num_rows($result) != 1)
          error("mysql_start_game");
-    
-    
+
+
       $game_row = mysql_fetch_array($result);
       if( $opponent_ID == $game_row["Black_ID"] )
       {
@@ -168,7 +168,7 @@ disable_cache();
       {
          error("mysql_start_game");
       }
-        
+
       if( $weekendclock != 'Y' )
          $clock_used += 100;
 
@@ -182,7 +182,8 @@ disable_cache();
                              "LastTicks=$ticks " .
                              "WHERE ID=$gid AND Status='INVITED'" .
                              " AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
-                             " AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " );
+                             " AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
+                             "LIMIT 1" );
 
       if( mysql_affected_rows() != 1)
          error("mysql_start_game");
@@ -196,7 +197,8 @@ disable_cache();
    {
       $result = mysql_query( "DELETE FROM Games WHERE ID=$gid AND Status='INVITED'" .
                              " AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
-                             " AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " );
+                             " AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
+                             "LIMIT 1");
 
       if( mysql_affected_rows() != 1)
       {
@@ -238,16 +240,16 @@ disable_cache();
    if( $reply )
    {
       mysql_query( "UPDATE Messages SET Flags='REPLIED' " .
-                   "WHERE ID=$reply AND To_ID=$my_ID" );
+                   "WHERE ID=$reply AND To_ID=$my_ID LIMIT 1" );
    }
 
 
 // Notify reciever about message
 
-   if( !(strpos($opponent_row["SendEmail"], 'ON') === false) 
+   if( !(strpos($opponent_row["SendEmail"], 'ON') === false)
        and $opponent_row["Notify"] == 'NONE' )
    {
-      $result = mysql_query( "UPDATE Players SET Notify='NEXT' WHERE Handle='$to'" );
+      $result = mysql_query( "UPDATE Players SET Notify='NEXT' WHERE Handle='$to' LIMIT 1" );
    }
 
    $msg = urlencode("Message sent!");

@@ -23,15 +23,15 @@ require( "include/std_functions.php" );
 if( !$is_down )
 {
    connect2mysql();
-    
-    
+
+
    $hour = gmdate('G', $NOW);
-   $day_of_week = gmdate('w', $NOW); 
+   $day_of_week = gmdate('w', $NOW);
 
    // Check that ticks are not too frequent
 
    $result = mysql_query( "SELECT MIN($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff FROM Clock WHERE ID=0 OR ID=12" );
-    
+
 
    $row = mysql_fetch_array( $result );
 
@@ -43,47 +43,47 @@ if( !$is_down )
 
    $query = "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) " .
        "WHERE ((ID>$hour OR ID<". ($hour-8) . ') AND ID< '. ($hour+16) . ')';
-    
+
    if( $day_of_week > 0 and $day_of_week < 6 )
-      $query .= ' OR (ID>=100 AND (ID>' . ($hour+100) . ' OR ID<'. ($hour+92) . 
+      $query .= ' OR (ID>=100 AND (ID>' . ($hour+100) . ' OR ID<'. ($hour+92) .
          ') AND ID< '. ($hour+116) . ')';
-   
-   
+
+
    mysql_query( $query );
 
 
 
 
    // Check if any game has timed out
-    
+
    $result = mysql_query('SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
-                         'black.Name as blackname, white.Name as whitename ' . 
+                         'black.Name as blackname, white.Name as whitename ' .
                          'FROM Games, Clock ,Players as white, Players as black ' .
                          'WHERE Status!="INVITED" AND Status!="FINISHED" ' .
                          'AND ( Maintime>0 OR Byotime>0 ) ' .
-                         'AND Games.ClockUsed=Clock.ID ' . 
-                         'AND white.ID=White_ID AND black.ID=Black_ID' ); 
+                         'AND Games.ClockUsed=Clock.ID ' .
+                         'AND white.ID=White_ID AND black.ID=Black_ID' );
 
    while($row = mysql_fetch_array($result))
    {
       extract($row);
       $ticks = $ticks - $LastTicks;
       $hours = ( $ticks > 0 ? (int)(($ticks-1) / $tick_frequency) : 0 );
-        
+
       if( $ToMove_ID == $Black_ID )
       {
-         time_remaining( $hours, $Black_Maintime, $Black_Byotime, 
+         time_remaining( $hours, $Black_Maintime, $Black_Byotime,
          $Black_Byoperiods, $Maintime,
          $Byotype, $Byotime, $Byoperiods, false);
-            
+
          $time_is_up = ( $Black_Maintime == 0 and $Black_Byotime == 0 );
       }
       else if( $ToMove_ID == $White_ID )
       {
-         time_remaining( $hours, $White_Maintime, $White_Byotime, 
+         time_remaining( $hours, $White_Maintime, $White_Byotime,
          $White_Byoperiods, $Maintime,
          $Byotype, $Byotime, $Byoperiods, false);
-            
+
          $time_is_up = ( $White_Maintime == 0 and $White_Byotime == 0 );
       }
 
@@ -100,7 +100,7 @@ if( !$is_down )
              "ToMove_ID=0, " .
              "Score=$score, " .
              "Flags=0" .
-             " WHERE ID=$gid";
+             " WHERE ID=$gid LIMIT 1";
 
          mysql_query( $query );
 
@@ -108,10 +108,10 @@ if( !$is_down )
             error("Couldn't update game.");
 
          // Send messages to the players
-         $Text = "The result in the game <A href=\"game.php?gid=$gid\">" . 
-             "$whitename (W)  vs. $blackname (B) </A>" . 
+         $Text = "The result in the game <A href=\"game.php?gid=$gid\">" .
+             "$whitename (W)  vs. $blackname (B) </A>" .
              "was: <p><center>" . score2text($score,true) . "</center></BR>";
-          
+
          mysql_query( "INSERT INTO Messages SET " .
                       "From_ID=" . $White_ID . ", " .
                       "To_ID=" . $Black_ID . ", " .
@@ -123,13 +123,26 @@ if( !$is_down )
                       "To_ID=" . $White_ID . ", " .
                       "Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'" );
-          
+
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .
                       "WHERE (ID='$Black_ID' OR ID='$White_ID') " .
-                      "AND SendEmail LIKE '%ON%' AND Notify='NONE'" ) ;
+                      "AND SendEmail LIKE '%ON%' AND Notify='NONE' LIMIT 2" ) ;
 
          update_rating($gid);
+
+
+         // Change some stats
+         mysql_query( "UPDATE Players " .
+                      "SET Running=Running-1, Finished=Finished+1" .
+                      ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : "")) .
+                      " WHERE ID=$White_ID LIMIT 1" );
+
+         mysql_query( "UPDATE Players " .
+                      "SET Running=Running-1, Finished=Finished+1" .
+                      ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
+                      " WHERE ID=$Black_ID LIMIT 1" );
+
       }
    }
 

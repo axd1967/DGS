@@ -316,9 +316,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          if( $Status != 'PLAY' or ( $Moves >= 4+$Handicap ) )
             error("invalid_action");
 
-         $query = "DELETE FROM Moves WHERE gid=$gid";
-         $query2 = "DELETE FROM MoveMessages WHERE gid=$gid";
-         $game_query = "DELETE FROM Games WHERE ID=$gid";
+         $query = "DELETE FROM Moves WHERE gid=$gid LIMIT $Moves";
+         $query2 = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
+         $game_query = "DELETE FROM Games WHERE ID=$gid LIMIT 1";
 
          $game_finished = true;
       }
@@ -456,18 +456,25 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                    "Time=FROM_UNIXTIME($NOW), " .
                    "Game_ID=$gid, Subject='$Subject', Text='$Text'");
 
-      update_rating($gid);
+      if( $action == 'delete' )
+      {
+         mysql_query("UPDATE Players SET Running=Running-1 " .
+                     "WHERE ID=$Black_ID OR ID=$White_ID LIMIT 2");
+      }
+      else
+      {
+         update_rating($gid);
 
-      mysql_query( "UPDATE Players " .
-                   "SET Running=Running-1, Finished=Finished+1" .
-                   ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : "")) .
-                    " WHERE ID=$White_ID LIMIT 1" );
+         mysql_query( "UPDATE Players " .
+                      "SET Running=Running-1, Finished=Finished+1" .
+                      ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : "")) .
+                      " WHERE ID=$White_ID LIMIT 1" );
 
-      mysql_query( "UPDATE Players " .
-                   "SET Running=Running-1, Finished=Finished+1" .
-                   ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
-                    " WHERE ID=$Black_ID LIMIT 1" );
-
+         mysql_query( "UPDATE Players " .
+                      "SET Running=Running-1, Finished=Finished+1" .
+                      ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
+                      " WHERE ID=$Black_ID LIMIT 1" );
+      }
 
    }
 
