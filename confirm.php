@@ -68,7 +68,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                           "black.OnVacation AS Blackonvacation, " .
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
-                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
+                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
+            or die(mysql_error());
 
    if(  mysql_num_rows($result) != 1 )
       error("unknown_game");
@@ -97,7 +98,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    //could append in case of multi-players account with simultaneous logins
    //or if one player hit twice the validation button during a net lag
    //and if opponent has already played between the two confirm.php calls.
-   if( $qry_move > 0 && $qry_move < $old_moves )
+   if( $qry_move > 0 && $qry_move != $old_moves )
       error("already_played");
 
 
@@ -219,7 +220,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$flags " .
-             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
+             " WHERE $where_clause LIMIT 1";
       }
       break;
 
@@ -254,7 +255,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Lastchanged=FROM_UNIXTIME($NOW), " .
              "ToMove_ID=$next_to_move_ID, " . $time_query .
              "Flags=0 " .
-             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
+             " WHERE $where_clause LIMIT 1";
       }
       break;
 
@@ -294,7 +295,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " . $time_query .
              "ToMove_ID=$White_ID " .
-             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
+             " WHERE $where_clause LIMIT 1";
       }
       break;
 
@@ -323,7 +324,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
              "ToMove_ID=0, " .
              "Score=$score, " . $time_query .
              "Flags=0" .
-             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
+             " WHERE $where_clause LIMIT 1";
 
          $game_finished = true;
       }
@@ -401,7 +402,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          $game_query .=
              "Flags=0, " .
              "Score=$score" .
-             " WHERE ID=$gid AND Moves=$old_moves LIMIT 1";
+             " WHERE $where_clause LIMIT 1";
 
       }
       break;
