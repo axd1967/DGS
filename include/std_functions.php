@@ -202,6 +202,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    $menu_array = array( T_('Status') => 'status.php',
                         T_('Messages') => 'list_messages.php',
+                        T_('Tournaments') => 'tournaments.php',
                         T_('Invite') => 'message.php?mode=Invite',
                         T_('Users') => 'users.php',
                         T_('Forums') => 'forum/index.php');

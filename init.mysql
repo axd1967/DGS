@@ -41,6 +41,7 @@ CREATE TABLE Players (
   Won int(11) NOT NULL default '0',
   Lost int(11) NOT NULL default '0',
   GamesColumns int(10) unsigned NOT NULL default '4087',
+  TournamentsColumns int(10) unsigned NOT NULL default '62',
   Translator varchar(16) NOT NULL default '',
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
@@ -53,6 +54,7 @@ CREATE TABLE Games (
   ID int(11) NOT NULL auto_increment,
   Starttime datetime default NULL,
   Lastchanged datetime NOT NULL,
+  Tournament_ID int(11) default NULL,
   Black_ID int(11) default NULL,
   White_ID int(11) default NULL,
   ToMove_ID int(11) NOT NULL default '0',
@@ -205,6 +207,75 @@ CREATE TABLE MoveMessages (
   PRIMARY KEY  (gid,MoveNr)
 ) TYPE=MyISAM;
 
+
+#
+# Table structure for table 'Tournament'
+#
+
+CREATE TABLE Tournament (
+  ID int(11) NOT NULL auto_increment,
+  Name varchar(80) default NULL,
+  Description text,
+  Type int(11) NOT NULL default '5',
+  State enum('INACTIVE','WAITING','RUNNING', 'FINISHED') default 'INACTIVE',
+  CreationTime datetime default NULL,
+  EndTime datetime default NULL,
+  FirstStartTime datetime default NULL,
+  StartTime datetime default NULL,
+  Deadline datetime default NULL,
+  MinParticipants int(11) NOT NULL default '2',
+  MaxParticipants int(11) default NULL,
+  Size int(11) default '19',
+  Komi decimal(6,1) default '5.5',
+  Maintime int(11) default NULL,
+  Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+  Byotime int(11) NOT NULL default '0',
+  Byoperiods int(11) NOT NULL default '0',
+  Rated enum('N','Y','Done') NOT NULL default 'N',
+  WeekendClock enum('N','Y') NOT NULL default 'Y',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Knockout'
+#
+
+
+CREATE TABLE Knockout (
+  Tournament_ID int(11) NOT NULL default '0',
+  Seedings int(11) NOT NULL default '0',
+  UseHandicap enum('Y','N') NOT NULL default 'Y',
+  PRIMARY KEY  (Tournament_ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TournamentOrganizers'
+#
+
+
+CREATE TABLE TournamentOrganizers (
+  ID int(11) NOT NULL auto_increment,
+  tid int(11) NOT NULL default '0',
+  pid int(11) NOT NULL default '0',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TournamentParticipants'
+#
+
+
+CREATE TABLE TournamentParticipants (
+  ID int(11) NOT NULL auto_increment,
+  tid int(11) NOT NULL default '0',
+  pid int(11) NOT NULL default '0',
+  Seeding int(11) NOT NULL default '0',
+  PlayerNumber int(11) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
 
 #
 # Table structure for table 'Errorlog'

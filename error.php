@@ -417,6 +417,48 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("unknown_organizer"):
+      {
+        echo T_("Sorry, one or more users in the organizer list couldn't be found.");
+      }
+      break;
+
+      case("mysql_insert_tournament"):
+      {
+        echo T_("Sorry, the tournament creation in the mysql database failed.");
+      }
+      break;
+
+      case("strange_tournament_id"):
+      {
+        echo T_("Sorry, I don't seem to understand the given tournament id.");
+      }
+      break;
+
+      case("no_such_tournament"):
+      {
+        echo T_("Sorry, I couldn't find the given tournament.");
+      }
+      break;
+
+      case("remove_form_tournament_failed"):
+      {
+        echo T_("Sorry, something went wrong when removing you from the tournament.");
+      }
+      break;
+
+      case("add_form_tournament_failed"):
+      {
+        echo T_("Sorry, something went wrong when adding you to the tournament.");
+      }
+      break;
+
+      case("could_not_start_tournament"):
+      {
+        echo T_("Sorry, something went wrong when trying start a tournament.");
+      }
+      break;
+
       default:
       {
          echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
