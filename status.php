@@ -57,7 +57,7 @@ require( "include/rating.php" );
                          "WHERE To_ID=$my_id " .
                          "AND (Messages.Flags LIKE '%NEW%' OR Messages.Flags LIKE '%REPLY REQUIRED%') " .
                          "AND From_ID=Players.ID " .
-                         "ORDER BY Time DESC") or error( "", true );
+                         "ORDER BY Time DESC") or error( "mysql_query_failed", true );
 
 
    if( mysql_num_rows($result) > 0 )

@@ -124,6 +124,12 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("mysql_query_failed"):
+      {
+         echo "Database query failed. Please wait a few minutes and try again. ";
+      }
+      break;
+
       case("mysql_select_db_failed"):
       {
          echo "Couldn't select the database. Please wait a few minutes and try again. ";
