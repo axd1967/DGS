@@ -35,18 +35,22 @@ require_once( "include/countries.php" );
       error("not_logged_in");
 
    $page = "users.php?";
-   if( @$_GET['showall'] ) $page .= "showall=1&";
+   $where_clause = '';
+   if( @$_GET['showall'] ) 
+      $page .= "showall=1&";
+   else
+      $where_clause = "WHERE Activity>$ActiveLevel1 ";
 
    if(!@$_GET['sort1'])
       $_GET['sort1'] = 'ID';
+
+   if(!@$_GET['sort2'] && $_GET['sort1'] != 'ID')
+      $_GET['sort2'] = 'ID';
 
    $utable = new Table( $page, "UsersColumns" );
    $utable->add_or_del_column();
 
    $order = $utable->current_order_string();
-
-   if( !@$_GET['showall'] )
-       $where_clause = "WHERE Activity>$ActiveLevel1 ";
 
    $query = "SELECT *, Rank AS Rankinfo, " .
        "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
@@ -138,13 +142,18 @@ require_once( "include/countries.php" );
 
    $orderstring = $utable->current_sort_string();
 
-   if( strlen( $orderstring ) > 0 )
-      $vars = '?' . $orderstring . ( $_GET['showall'] ? '' : '&showall=1');
+   if( @$_GET['showall'] )
+   {
+      $str = T_("Only active users");
+      $vars = ( $orderstring ? '?'.$orderstring : '');
+   }
    else
-      $vars = '?showall=1';
+   {
+      $str = T_("Show all users");
+      $vars = '?showall=1' . ( $orderstring ? '&'.$orderstring : '');
+   }
 
-   $menu_array = array( ( $_GET['showall'] ? T_("Only active users")  : T_("Show all users") ) =>
-                        "users.php$vars" );
+   $menu_array = array( $str => "users.php$vars" );
 
    end_page(@$menu_array);
 }
