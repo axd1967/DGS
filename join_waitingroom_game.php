@@ -198,7 +198,7 @@ require( "include/rating.php" );
       "Time=FROM_UNIXTIME($NOW), " .
       "Game_ID=$gid, " .
       "Subject=\"$subject\", " .
-      "Text=''";
+      "Text=\"$reply\"";
 
    mysql_query( $query );
 

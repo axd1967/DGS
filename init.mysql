@@ -34,13 +34,15 @@ CREATE TABLE Players (
   Woodcolor int(11) NOT NULL default '1',
   Boardcoords int(11) NOT NULL default '31',
   Button int(11) NOT NULL default '0',
-  UsersColumns int(10) unsigned NOT NULL default '589886',
+  UsersColumns int(10) unsigned NOT NULL default '62',
+  GamesColumns int(10) unsigned NOT NULL default '589886',
+  TournamentsColumns int(10) unsigned NOT NULL default '62',
+  WaitingroomColumns int(10) unsigned NOT NULL default '253',
   Running int(11) NOT NULL default '0',
   Finished int(11) NOT NULL default '0',
   Won int(11) NOT NULL default '0',
   Lost int(11) NOT NULL default '0',
-  GamesColumns int(10) unsigned NOT NULL default '4087',
-  TournamentsColumns int(10) unsigned NOT NULL default '62',
+
   Translator varchar(16) NOT NULL default '',
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
