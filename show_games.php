@@ -158,10 +158,10 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
        echo tablehead(17, T_('Black name'), 'blackName') .
           tablehead(18, T_('Black userid'), 'blackHandle') .
-          tablehead(19, T_('Black rating'), 'Rating', true) .
+          tablehead(19, T_('Black rating'), 'blackRating', true) .
           tablehead(20, T_('White name'), 'whiteName') .
           tablehead(21, T_('White userid'), 'whiteHandle') .
-          tablehead(22, T_('White rating'), 'Rating', true);
+          tablehead(22, T_('White rating'), 'whiteRating', true);
    }
    else
    {
