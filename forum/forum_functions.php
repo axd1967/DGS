@@ -160,9 +160,9 @@ function get_new_string($Lastchangedstamp, $Lastread)
    return $new;
 }
 
-function message_box( $post_type, $id, $Subject='', $Text='')
+function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
 {
-   global $forum, $thread, $GoDiagrams;
+   global $forum, $thread;
 
    if( $post_type != 'edit' and $post_type != 'preview' and strlen($Subject) > 0 and
        strcasecmp(substr($Subject,0,3), "re:") != 0 )
@@ -180,7 +180,9 @@ function message_box( $post_type, $id, $Subject='', $Text='')
    $form->add_row( array( 'SPACE', 'TEXTAREA', 'Text', 70, 25,
                           preg_replace('/<goban([^>]*)>/i', '<goban>', $Text) ) );
 
-   $str = draw_editors($GoDiagrams);
+   if( isset($GoDiagrams) )
+      $str = draw_editors($GoDiagrams);
+
    if( !empty($str) )
    {
       $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str ));

@@ -24,10 +24,10 @@ require_once("post.php");
 
 
 
-function draw_post($post_type, $my_post, $Subject, $Text)
+function draw_post($post_type, $my_post, $Subject, $Text, $GoDiagrams)
 {
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
-      $thread, $Timestamp, $date_fmt, $Lastread, $is_editor, $NOW, $player_row, $GoDiagrams;
+      $thread, $Timestamp, $date_fmt, $Lastread, $is_editor, $NOW, $player_row;
 
    $post_colors = array( 'normal' => 'cccccc',
                          'hidden' => 'eecccc',
@@ -113,7 +113,7 @@ function revision_history($post_id)
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
-      draw_post(($cur_depth==1 ? 'reply' : 'edit' ), true, $row['Subject'], $row['Text']);
+      draw_post(($cur_depth==1 ? 'reply' : 'edit' ), true, $row['Subject'], $row['Text'], null);
       change_depth($cur_depth,2);
    }
 
@@ -140,6 +140,12 @@ function change_depth(&$cur_depth, $new_depth)
       $cur_depth--;
    }
 }
+
+
+
+
+
+
 
 
 {
@@ -243,7 +249,8 @@ function change_depth(&$cur_depth, $new_depth)
          $post_type = 'edit';
 
       $GoDiagrams = create_godiagrams($ID, $Text);
-      draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text);
+
+      draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text, $GoDiagrams);
 
       if( $preview and $preview_ID == $ID )
       {
@@ -251,14 +258,19 @@ function change_depth(&$cur_depth, $new_depth)
          $Subject = $_POST['Subject'];
          $Text = $_POST['Text'];
          $GoDiagrams = create_godiagrams(null, $Text);
-         draw_post('preview', false, $Subject, $Text);
+         $post_type = 'preview';
+         draw_post($post_type, false, $Subject, $Text, $GoDiagrams);
       }
 
       if( $post_type != 'normal' and $post_type != 'hidden' )
       {
-         if( $post_type == 'reply' ) $Text = '';
+         if( $post_type == 'reply' )
+         {
+            $Text = '';
+            $GoDiagrams = null;
+         }
          echo "<tr><td>\n";
-         message_box($post_type, $ID, $Subject, $Text);
+         message_box($post_type, $ID, $GoDiagrams, $Subject, $Text);
          echo "</td></tr>\n";
       }
    }
@@ -269,9 +281,9 @@ function change_depth(&$cur_depth, $new_depth)
       $Subject = $_POST['Subject'];
       $Text = $_POST['Text'];
       $GoDiagrams = create_godiagrams(null, $Text);
-      draw_post('preview', false, $Subject, $Text);
+      draw_post('preview', false, $Subject, $Text, $GoDiagrams);
       echo "<tr><td>\n";
-      message_box('preview', $thread, $Subject, $Text);
+      message_box('preview', $thread, $GoDiagrams, $Subject, $Text);
       echo "</td></tr>\n";
    }
 
@@ -282,7 +294,7 @@ function change_depth(&$cur_depth, $new_depth)
       echo "<tr><td>\n";
       if( $thread > 0 )
          echo '<hr>';
-      message_box('normal', $thread, $thread_Subject);
+      message_box('normal', $thread, null, $thread_Subject);
       echo "</td></tr>\n";
    }
 

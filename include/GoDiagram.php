@@ -18,6 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+require_once( "include/coords.php" );
 
 $hoshi_dist = array(0,0,0,0,0,3,0,4,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
 $hoshi_pos  = array(0,0,0,0,0,1,0,1,4,5,4,5,4,7,7,7,7,7,7,7,7,7,7,7,7,7);
@@ -48,7 +49,7 @@ class GoDiagram
    function limit($val, $minimum, $maximum, $default)
       {
          if( !is_numeric($val) )
-            return $default;
+            return (isset($default) ? $default : $val );
          else if( $val < $minimum )
             return $minimum;
          else if( $val > $maximum )
@@ -57,9 +58,9 @@ class GoDiagram
          return $val;
       }
 
-   function extract_value($string, $name, $minimum, $maximum, $default)
+   function extract_value($string, $name, $minimum=null, $maximum=null, $default=null)
       {
-         preg_match("/$name=(\w+)/i", $string, $matches);
+         preg_match("/$name=([-\w]+)/i", $string, $matches);
          return $this->limit( $matches[1], $minimum, $maximum, $default );
       }
 
@@ -106,10 +107,26 @@ class GoDiagram
    function set_values_from_goban_tag( $s )
       {
          $this->Size = $this->extract_value($s, 'size', 2, 25, 19);
-         $this->Left = $this->extract_value($s, 'left', 1, $this->Size - 1, 1);
-         $this->Right = $this->extract_value($s, 'right', $this->Left + 1, $this->Size, $this->Size);
-         $this->Up = $this->extract_value($s, 'up', 1, $this->Size - 1, 1);
-         $this->Down = $this->extract_value($s, 'down', $this->Up + 1, $this->Size, $this->Size);
+         $rect = $this->extract_value($s, 'rect');
+         if(isset($rect))
+         {
+            list($dl,$ur) = split('-', $rect);
+            list($l,$d) = board_coords2number($dl, $this->Size);
+            list($r,$u) = board_coords2number($ur, $this->Size);
+
+            $this->Left = $this->limit($l+1, 1, $this->Size - 1, 1);
+            $this->Right = $this->limit($r+1, $this->Left + 1, $this->Size, $this->Size);
+            $this->Up = $this->limit($u+1, 1, $this->Size - 1, 1);
+            $this->Down = $this->limit($d+1, $this->Up + 1, $this->Size, $this->Size);
+         }
+         else
+         {
+            $this->Left = $this->extract_value($s, 'left', 1, $this->Size - 1, 1);
+            $this->Right = $this->extract_value($s, 'right', $this->Left + 1, $this->Size, $this->Size);
+            $this->Up = $this->extract_value($s, 'up', 1, $this->Size - 1, 1);
+            $this->Down = $this->extract_value($s, 'down', $this->Up + 1, $this->Size, $this->Size);
+         }
+
          $this->clear_data();
       }
 
@@ -213,7 +230,7 @@ function create_godiagrams($mid, $text)
       // New message, get info from $_POST or <goban> tag
 
       if( !preg_match_all('/<goban([^>]*)>/i', $text, $matches) )
-         return;
+         return $diagrams;
 
 //      $text = preg_replace('/<goban([^>]*)>/i','<goban>', $text);
 
@@ -249,7 +266,7 @@ function create_godiagrams($mid, $text)
       $N = preg_match_all('/<goban( id=(\d+))?>/i', $text, $matches);
 
       if( !($N) )
-         return;
+         return $diagrams;
 
       $result = mysql_query("SELECT * FROM GoDiagrams WHERE mid='$mid'");
 
@@ -284,6 +301,24 @@ function draw_editors($GoDiagrams)
       }
 
    return $string;
+}
+
+function save_diagrams($GoDiagrams, $mid)
+{
+   if( empty($GoDiagrams[1]) )
+      return;
+
+   $query = 'INSERT INTO GoDiagrams ' .
+      '(diagid, mid, Size, View_Left, View_Right, View_Up, View_Down, Data) VALUES ';
+
+   $c = '';
+   foreach( $GoDiagrams as $nr => $diagram )
+      {
+         $query .= "$c($nr, $mid, {$diagram->Size}, {$diagram->Left}, {$diagram->Right}, {$diagram->Up}, $diagram->Down, '{$diagram->Data}')";
+         $c = ',';
+      }
+
+   mysql_query( $query ) or die(mysql_error());
 }
 
 ?>
