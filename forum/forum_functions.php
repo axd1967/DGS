@@ -219,15 +219,19 @@ function toggle_editor_cookie()
 {
    global $NOW, $SUB_PATH;
 
-   if( ($_GET['editor'] === 'y' and $_COOKIE['forumeditor'] !== 'y') or
-       ($_GET['editor'] === 'n' and $_COOKIE['forumeditor'] === 'y'))
+   $editor = @$_GET['editor'];
+   $cookie = @$_COOKIE['forumeditor'];
+   if( $editor === 'y' or $editor === 'n' )
+   {
+      if( $editor === 'n' )
+         $editor = '';
+      if( $editor !== $cookie )
       {
-         if( $_COOKIE['forumeditor'] == 'y' )
-            setcookie ("forumeditor", '', $NOW-3600, "$SUB_PATH" );
-         else
-            setcookie ("forumeditor", 'y', $NOW+3600, "$SUB_PATH" );
-         $_COOKIE['forumeditor'] = $_GET['editor'];
+         $cookie = $editor;
+         setcookie ("forumeditor", $cookie, $NOW+ ( $editor ? 3600 : -3600 ), "$SUB_PATH" );
       }
+   }
+   $_COOKIE['forumeditor'] = $cookie;
 }
 
 function approve_message($id, $thread, $approve=true)
