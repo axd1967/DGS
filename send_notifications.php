@@ -49,5 +49,5 @@ mysql_query( "UPDATE Players SET Notify='NOW', Lastaccess=Lastaccess " .
 
 // Update activities
 
-mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, "
+mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, " .
              "Activity=Activity * EXP( -LOG(2) * 30 / $ActivityHalvingTime )" );
