@@ -114,7 +114,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          "(White_ID=$uid)+1 AS Color ";
 
       if( $finished )
-         $query .= ", (Black_ID=$uid AND Score<0)*2 + (White_ID=$uid AND Score>0)*2-1 AS Win ";
+         $query .= ", (Black_ID=$uid AND Score<0)*2 + (White_ID=$uid AND Score>0)*2 + " .
+            "(Score=0) - 1 AS Win ";
 
       $query .= "FROM Games,Players WHERE " .
          ( $finished ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .
