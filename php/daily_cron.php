@@ -26,6 +26,8 @@ connect2mysql();
 
 
 $delete_msgs = false;
+$messege_timelimit = 92;
+$invite_timelimit = 92;
 
 // Delete old messages
 
@@ -41,12 +43,14 @@ if( $delete_msgs )
       // delete read messages
 
       mysql_query("DELETE FROM Messages$id WHERE " .
-                  "( Info='None' OR Info='REPLIED' ) AND TO_DAYS(Now())-TO_DAYS(Time) > 62" );
+                  "( Info='None' OR Info='REPLIED' ) AND " .
+                  "TO_DAYS(Now())-TO_DAYS(Time) > $messege_timelimit" );
 
       //delete old invitations
 
       $result2 = mysql_query( "SELECT Game_ID FROM Messages$id WHERE " .
-                              "Type='INVITATION' AND TO_DAYS(Now())-TO_DAYS(Time) > 62" );
+                              "Type='INVITATION' AND " .
+                              "TO_DAYS(Now())-TO_DAYS(Time) > $invite_timelimit" );
 
       if( mysql_num_rows($result2) > 0 )
         {
@@ -59,7 +63,8 @@ if( $delete_msgs )
             }
 
           mysql_query( "DELETE FROM Messages$id WHERE " .
-                       "Type='INVITATION' AND TO_DAYS(Now())-TO_DAYS(Time) > 62" );
+                       "Type='INVITATION' AND " .
+                       "TO_DAYS(Now())-TO_DAYS(Time) > $invite_timelimit" );
       
         }
 

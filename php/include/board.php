@@ -200,7 +200,7 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
   
     if( !$move ) $move = $max_moves;
 
-    $result = mysql_query( "SELECT * FROM Moves$gid" );
+    $result = mysql_query( "SELECT * FROM Moves$gid order by ID" );
 
     $removed_dead = FALSE;
     $marked_dead = array();

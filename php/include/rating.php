@@ -137,12 +137,12 @@ function change_rating(&$rating_A, &$rating_B, $result, $size, $komi, $handicap)
 function update_rating(&$wRating, &$bRating, $score, $size, $komi, $handicap, 
                        $gid, $Black_ID, $White_ID)
 {
-  change_rating($wRating, $bRating, $result, $size, $komi, $handicap);
+
   $result = 0.5;
   if( $Score > 0 ) $result = 1.0;
   if( $Score < 0 ) $result = 0.0;
 
-  echo "White rating = $wRating, black rating = $bRating\n";
+  change_rating($wRating, $bRating, $result, $size, $komi, $handicap);
 
   mysql_query( "UPDATE Games SET Lastchanged=Lastchanged, Rated='DONE' WHERE ID=$gid" );
   mysql_query( "UPDATE Players SET Lastaccess=Lastaccess, Rating=$bRating, " .
