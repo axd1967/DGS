@@ -47,12 +47,16 @@ function get_rating_data($uid)
    if( mysql_num_rows($result) != 1 )
       exit;
 
+
    $tmp = mysql_fetch_array($result);
+
+   $min_interval = min( $ratingpng_min_interval, $NOW - $tmp['seconds'] );
+
    if( $starttime < $tmp['seconds'] - 2*24*3600 )
       $starttime = $tmp['seconds'] - 2*24*3600;
 
-   if( $endtime < $tmp['seconds'] + $ratingpng_min_interval/2 )
-      $endtime = $tmp['seconds'] + $ratingpng_min_interval/2;
+   if( $endtime < $tmp['seconds'] + $min_interval/2 )
+      $endtime = $tmp['seconds'] + $min_interval/2;
 
    $result = mysql_query("SELECT MAX(UNIX_TIMESTAMP(Time)) AS seconds " .
                          "FROM Ratinglog WHERE uid=$uid") or die(mysql_error());
@@ -61,14 +65,14 @@ function get_rating_data($uid)
    if( $endtime > $max_row['seconds'] + 2*24*3600)
       $endtime = $max_row['seconds'] + 2*24*3600;
 
-   if( $starttime > $max_row['seconds'] - $ratingpng_min_interval )
-      $starttime = $max_row['seconds'] - $ratingpng_min_interval;
+   if( $starttime > $max_row['seconds'] - $min_interval )
+      $starttime = $max_row['seconds'] - $min_interval;
 
-   if( $endtime - $starttime < $ratingpng_min_interval )
+   if( $endtime - $starttime < $min_interval )
    {
       $mean = ( $starttime + $endtime )/2;
-      $starttime = $mean - $ratingpng_min_interval/2;
-      $endtime = $mean + $ratingpng_min_interval/2;
+      $starttime = $mean - $min_interval/2;
+      $endtime = $mean + $min_interval/2;
    }
 
    $result = mysql_query("SELECT Rating, RatingMax, RatingMin, " .
