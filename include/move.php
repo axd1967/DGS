@@ -395,7 +395,7 @@ function draw_moves()
 
       $i++;
    }
-   echo "</tr></table>";
+   echo "</tr></table>\n";
 
 }
 

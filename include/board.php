@@ -114,12 +114,6 @@ $coord_borders, $woodcolor  )
 
    $coord_width=$coord_width_array[$stone_size];
 
-   $board_begin = '<table border=0 cellpadding=0 cellspacing=0 ' .
-      'align=center valign=center background="">';
-   $board_end = "</table>\n";
-   $row_start = '<tr>';
-   $row_end = "</tr>\n";
-
    $coord_start_number = "<td><img class=c$stone_size src=$stone_size/c";
    $coord_start_letter = "<td><img class=s$stone_size src=$stone_size/c";
    $coord_alt = '.gif alt=';
@@ -163,14 +157,17 @@ $coord_borders, $woodcolor  )
 
    echo '<table border=0 cellpadding=0 cellspacing=0 background="images/wood' . $woodcolor . '.gif" align=center><tr><td valign=top>';
 
-   echo $board_begin;
+   echo '<table border=0 cellpadding=0 cellspacing=0 ' .
+      'align=center valign=center background="">';
 
    if( $coord_borders & UP )
    {
+      echo '<tr>';
+
       $span = ($coord_borders & LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
       $w = ($coord_borders & LEFT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
       if( $span > 0 )
-         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" width=$w alt=\"  \" height=$stone_size></td>";
+         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
 
       $colnr = 1;
       $letter = 'a';
@@ -227,7 +224,7 @@ $coord_borders, $woodcolor  )
 
    for($rownr = $Size; $rownr > 0; $rownr-- )
    {
-      echo $row_start;
+      echo '<tr>';
 
       if( $coord_borders & LEFT )
          echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
@@ -327,7 +324,6 @@ $coord_borders, $woodcolor  )
          echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
 
       $letter_r++;
-      echo $row_end;
    }
 
    if( $smooth_edge )
@@ -354,13 +350,11 @@ $coord_borders, $woodcolor  )
 
       if( $coord_borders & RIGHT )
          echo "<td><img src=\"images/blank.gif\" alt=\"  \" width=$coord_width height=10></td>";
-
-      echo "</tr>\n";
    }
 
    if( $coord_borders & DOWN )
    {
-      echo $row_start;
+      echo '<tr>';
 
       $span = ($coord_borders & LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
       $w = ($coord_borders & LEFT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
@@ -381,13 +375,10 @@ $coord_borders, $woodcolor  )
       $span = ($coord_borders & RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
       $w = ($coord_borders & RIGHT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
       if( $span > 0 )
-         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size align=center></td>";
+         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
    }
 
-   echo $board_end;
-
-   echo '</td></tr></table>
-';
+   echo '</table></td></tr></table>' . "\n";
 }
 
 
