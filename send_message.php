@@ -232,7 +232,7 @@ disable_cache();
 
       if( $handitype == -2 ) // Proper handi
       {
-         if( $rating_black > $rating_black )
+         if( $rating_black > $rating_white )
          {
             $swap = true;
             list($handicap,$komi) = suggest($rating_black, $rating_white, $game_row["Size"]);
