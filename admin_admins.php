@@ -119,7 +119,7 @@ require( "include/table_columns.php" );
 
       echo start_end_column_table(true);
       echo tablehead(1, T_('ID'), NULL, true, true);
-      echo tablehead(1, T_('Handle'), NULL, false, true);
+      echo tablehead(1, T_('Nick'), NULL, false, true);
       echo tablehead(1, T_('Name'), NULL, false, true);
       echo tablehead(1, T_('Translators'), NULL, true, true);
       echo tablehead(1, T_('FAQ'), NULL, true, true);

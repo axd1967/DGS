@@ -16,7 +16,7 @@ while( <*.php include/*.php> )
     $/ = ""; # take all input
     while (<INFILE>)
     {
-        while( /T_\((['"].*?["'])\)[^'"]/gs )
+        while( /T_\((['"].*?['"])\)[^'"]/gs )
         {
             $a = $1;
             $a =~ s/['"]\s+\.\s+["']//g;
