@@ -27,9 +27,22 @@ function draw_board($Size, &$array, $may_play, $gid,
 $Last_X, $Last_Y, $stone_size, $font_size, $msg, $stonestring, $handi, 
 $board_type, $coord_borders, $woodcolor  )
 {
+   $mark_letter = 'm';
+   $board_type = 3;
+   $sizestringtype = 1;
+   
+   if( !( $woodcolor >= 1 and $woodcolor <= 5) ) 
+   {
+      $woodcolor = 1;
+      $coord_borders = 15;
+      $board_type = 3;
+   }
+
+
    $use_second_table = ( $board_type != 2 );
 
    $use_gif_coords = ( $board_type != 1 );
+
 
    if( !$stone_size ) $stone_size = 25;
    if( !$font_size ) $font_size = "+0";
@@ -43,7 +56,7 @@ $board_type, $coord_borders, $woodcolor  )
       $row_end = "</tr>\n";
       $table_start = "<td>";
       $table_start_c = "<td align=center>";
-      $table_end = "</td>";
+      $table_end = "</td>\n";
    }
    else
    {
@@ -52,22 +65,37 @@ $board_type, $coord_borders, $woodcolor  )
       $table_start = $table_start_c = $table_end = "";
    }
 
-   
+   if( $sizestringtype == 2 )
+   {
+      $size_str = "width=$stone_size heigth=$stone_size";
+      $size_str2 = "width=" . floor($stone_size * 31/25) . " heigth=$stone_size";
+   }
+   else if( $sizestringtype == 1 )
+   {
+      $size_str = "class=s$stone_size";
+      $size_str2 = "class=c$stone_size";      
+   }
    if( $use_gif_coords )
    {
-      $coord_start = $table_start . "<img src=$stone_size/c";
-      $coord_end = ".gif>" . $table_end;
-      $coord_empty = $table_start . "<img src=$stone_size/.gif>" . $table_end;
+      $coord_start_number = $table_start . "<img $size_str2 src=$stone_size/c";
+      $coord_start_letter = $table_start . "<img $size_str src=$stone_size/c";
+      $coord_alt = '.gif alt=';
+      $coord_end = ">" . $table_end;
+      $coord_empty = $table_start . "<img $size_str2 alt=\" \" src=$stone_size/.gif>" . $table_end;
    }
    else
    {
+      $coord_start_letter = $coord_start_number = $table_start_c . 
+          ( $font_size != "+0"  ? "<font size=\"$font_size\">" :"");
       $coord_start = $table_start_c . ( $font_size != "+0"  ? "<font size=\"$font_size\">" :"");
       $coord_end = ( $font_size != "+0"  ? "</font>" : "") . $table_end;
       $coord_empty = "<td>&nbsp;</td>";
    }
 
-   $str1 = "$table_start<IMG alt=\"";
-   $str4 = ".gif></A>$table_end";
+
+   $str1 = "$table_start<IMG $size_str alt=\"";
+   $str4 = ".gif></A>". $table_end;
+   $str5 = ".gif>" . $table_end;
    if( $may_play )
    {
       if( $handi or !$stonestring )
@@ -76,17 +104,17 @@ $board_type, $coord_borders, $woodcolor  )
       if( $handi )
       {
          $str2 = "$table_start<A href=\"game.php?g=$gid&a=handicap&c=";
-         $str3 = "&s=$stonestring\"><IMG border=0 alt=\"";
+         $str3 = "&s=$stonestring\"><IMG $size_str border=0 alt=\"";
       }
       else if( $stonestring )
       {
          $str2 = "$table_start<A href=\"game.php?g=$gid&a=remove&c=";
-         $str3 = "&s=$stonestring\"><IMG border=0 alt=\"";
+         $str3 = "&s=$stonestring\"><IMG $size_str border=0 alt=\"";
       }
       else
       {
          $str2 = "$table_start<A href=\"game.php?g=$gid&a=move&c=";
-         $str3 = "\"><IMG border=0 alt=\"";
+         $str3 = "\"><IMG $size_str border=0 alt=\"";
       }
    }
     
@@ -106,7 +134,10 @@ $board_type, $coord_borders, $woodcolor  )
       $letter = 'a';
       while( $colnr <= $Size )
       {
-         echo $coord_start . $letter . $coord_end;
+         echo $coord_start_letter . $letter . $coord_alt;
+         if( $use_gif_coords )
+            echo $letter;
+         echo $coord_end;
          $colnr++;
          $letter++;
          if( $letter == 'i' ) $letter++;
@@ -128,7 +159,13 @@ $board_type, $coord_borders, $woodcolor  )
    {
       echo $row_start;
       if( $coord_borders & LEFT )
-         echo $coord_start . $rownr . $coord_end;
+      {
+         echo $coord_start_number . $rownr . $coord_alt;
+         if( $use_gif_coords )
+            echo  $rownr;
+         
+         echo $coord_end;
+      }
             
       $hoshi_r = 0;
       if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
@@ -198,19 +235,27 @@ $board_type, $coord_borders, $woodcolor  )
          }
 
          if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y )
-            $type .= 'm';
+         {
+            $type .= $mark_letter;
+            $alt = ( $alt == '#' ? 'X' : '@' );
+         }
                     
          if( $may_play and ( $empty xor !$on_empty ) )
             echo "$str2$letter_c$letter_r$str3$alt\" SRC=$stone_size/$type$str4";
          else
-            echo "$str1$alt\" SRC=$stone_size/$type$str4";
+            echo "$str1$alt\" SRC=$stone_size/$type$str5";
 
          $letter_c ++;
       }
 
       if( $coord_borders & RIGHT )
-         echo $coord_start . $rownr . $coord_end;
-
+      {
+         echo $coord_start_number . $rownr . $coord_alt;
+         if( $use_gif_coords )
+            echo  $rownr;
+         
+         echo $coord_end;
+      }
       $letter_r++;
       echo $row_end;
    }
@@ -224,7 +269,11 @@ $board_type, $coord_borders, $woodcolor  )
       $letter = 'a';
       while( $colnr <= $Size )
       {
-         echo $coord_start . $letter . $coord_end;
+         echo $coord_start_letter . $letter . $coord_alt;
+         if( $use_gif_coords )
+            echo $letter;
+         echo $coord_end;
+
          $colnr++;
          $letter++;
          if( $letter == 'i' ) $letter++;
