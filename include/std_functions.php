@@ -272,9 +272,9 @@ function end_page( $menu_array=NULL )
 
    if( $admin_level > 0 )
       echo '<b><a href="' . $base_path . 'admin.php"><font color=' . $menu_fg_color . '>' .
-         T_('Admin') . '</font></a></b></td>';
-   else
-      echo '<A href="' . $base_path . 'index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
+         T_('Admin') . '</font></a></b>&nbsp;&nbsp;&nbsp;';
+
+   echo '<A href="' . $base_path . 'index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
 
    echo '
       </tr>
