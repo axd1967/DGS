@@ -79,9 +79,9 @@ $buttoncolors = array('white','white','white','white',
                       '#990000','white','white','white',
                       'white','white','white');
 
-$button_max = 10;
+$cookie_pref_rows = array('Stonsize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button');
 
-$update_script = false; /* Should always be false false for include/std_functions.php */
+$button_max = 10;
 
 define("NONE", 0);
 define("BLACK", 1);
@@ -515,7 +515,7 @@ function generate_random_password()
    return $return;
 }
 
-function set_cookies($uid, $code, $delete=false)
+function set_cookies($handl, $code, $delete=false)
 {
    global $session_duration, $SUB_PATH, $NOW;
 
@@ -526,9 +526,31 @@ function set_cookies($uid, $code, $delete=false)
    }
    else
    {
-      setcookie ("handle", $uid, $NOW+$session_duration*5, "$SUB_PATH" );
+      setcookie ("handle", $handl, $NOW+$session_duration*5, "$SUB_PATH" );
       setcookie ("sessioncode", $code, $NOW+$session_duration, "$SUB_PATH" );
    }
+}
+
+function get_cookie_prefs(&$player_row)
+{
+   global $cookie_prefs, $cookie_pref_rows;
+
+   $cookie_prefs = unserialize(stripslashes($_COOKIE['prefs']));
+   if( !is_array( $cookie_prefs ) )
+      $cookie_prefs = array();
+
+   foreach( $cookie_prefs as $key => $value )
+      {
+         if( in_array($key, $cookie_pref_rows) )
+            $player_row[$key] = $value;
+      }
+}
+
+function set_cookie_prefs()
+{
+   global $cookie_prefs, $NOW, $session_duration;
+
+   setcookie ('prefs', serialize($cookie_prefs), $NOW+$session_duration*36, "$SUB_PATH" );
 }
 
 function add_line_breaks($msg)
@@ -865,6 +887,8 @@ function is_logged_in($hdl, $scode, &$row)
 
    if( $row["admin_level"] >= 1 )
       $admin_level = $row["admin_level"];
+
+   get_cookie_prefs($row);
 
    if( !empty( $row["Timezone"] ) )
       putenv('TZ='.$row["Timezone"] );

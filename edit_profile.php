@@ -78,7 +78,7 @@ start_page(T_("Edit profile"), true, $logged_in, $player_row );
 
 echo "<CENTER>\n";
 
-$profile_form = new Form( 'profileform', 'change_profile.php', 'POST' );
+$profile_form = new Form( 'profileform', 'change_profile.php', FORM_GET );
 $profile_form->add_row( array( 'HEADER', T_('Personal settings') ) );
 $profile_form->add_row( array( 'DESCRIPTION', T_('Userid'),
                                'TEXT', $player_row["Handle"] ) );
@@ -178,10 +178,16 @@ for($i=0; $i<=$button_max; $i++)
 $button_code .= "          </TR>\n";
 $button_code .= "        </table>\n";
 $button_code .= "      </TD>\n";
-$button_code .= "     </TR>\n";
 
-$button_code .= "    <TR><TD><BR></TD>\n";
 $profile_form->add_row( array( 'OWNHTML', $button_code ) );
+
+$profile_form->add_row( array( 'TD',
+                               'OWNHTML', '<TD>',
+                               'CHECKBOX', 'locally', 1,
+                               T_('Change board graphics for this browser only'), false) );
+
+$profile_form->add_row( array( 'OWNHTML', '<TD>&nbsp;</TD>' ) );
+
 $profile_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change profile') ) );
 
 $profile_form->echo_string();

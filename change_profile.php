@@ -35,62 +35,74 @@ require( "include/rating.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-
-   if( strlen( $name ) < 1 )
+   if( strlen( $_GET['name'] ) < 1 )
       error("name_not_given");
 
-   if( $emailnotify == 0 or empty($email) )
+   if( $_GET['emailnotify'] == 0 or empty($email) )
       $sendemail = '';
 
-   if( $emailnotify >= 1 )
+   if( $_GET['emailnotify'] >= 1 )
       $sendemail = 'ON';
 
-   if( $emailnotify >= 2 )
+   if( $_GET['emailnotify'] >= 2 )
       $sendemail .= ',MOVE,MESSAGE';
 
-   if( $emailnotify == 3 )
+   if( $_GET['emailnotify'] == 3 )
       $sendemail .= ',BOARD';
 
-   $boardcoords = ( $coordsleft ? LEFT : 0 ) + ( $coordsup ? UP : 0 ) +
-      ( $coordsright ? RIGHT : 0 ) + ( $coordsdown ? DOWN : 0 ) +
-      ( $smoothedge ? SMOOTH_EDGE : 0 );
+   $boardcoords = ( $_GET['coordsleft'] ? LEFT : 0 ) + ( $_GET['coordsup'] ? UP : 0 ) +
+      ( $_GET['coordsright'] ? RIGHT : 0 ) + ( $_GET['coordsdown'] ? DOWN : 0 ) +
+      ( $_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
 
    $menudirection = ( $menudir == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
    $query = "UPDATE Players SET " .
-       "Name='" . trim($name) . "', " .
-       "Email='" . trim($email) . "', " .
-       "Rank='" . trim($rank) . "', " .
-       "Open='" . trim($open) . "', " .
-       "Stonesize=$stonesize, " .
-       "Boardcoords=$boardcoords, " .
-       "MenuDirection='$menudirection', " .
-       "Woodcolor=$woodcolor, " .
-       "Button=$button, " .
-       "SendEmail='$sendemail', ";
+      "Name='" . trim($name) . "', " .
+      "Email='" . trim($email) . "', " .
+      "Rank='" . trim($rank) . "', " .
+      "Open='" . trim($open) . "', " .
+      "SendEmail='$sendemail', ";
 
-   list($lang,$enc) = explode('.', $language);
+   if( $_GET['locally'] == 1 )
+   {
+      $cookie_prefs['Stonesize'] = $_GET['stonesize'];
+      $cookie_prefs['Boardcoords'] = $boardcoords;
+      $cookie_prefs['MenuDirection'] = $menudirection;
+      $cookie_prefs['Woodcolor'] = $_GET['woodcolor'];
+      $cookie_prefs['Button'] = $_GET['button'];
 
-   if( $language === 'C' or ( $language !== $player_row['Lang'] and
+      set_cookie_prefs();
+   }
+   else
+      $query .=
+         "Stonesize=" . $_GET['stonesize'] . ", " .
+         "Boardcoords=$boardcoords, " .
+         "MenuDirection='$menudirection', " .
+         "Woodcolor=" . $_GET['woodcolor'] . ", " .
+         "Button=" . $_GET['button'] . ", ";
+
+   list($lang,$enc) = explode('.', $_GET['language']);
+
+   if( $_GET['language'] === 'C' or ( $_GET['language'] !== $player_row['Lang'] and
                               array_key_exists($lang, $known_languages) and
                               array_key_exists($enc, $known_languages[$lang])) )
      {
-       $query .= "Lang='$language', ";
+       $query .= "Lang='" . $_GET['language'] . "', ";
      }
 
-   if( $nightstart != $player_row["Nightstart"] ||
-       $timezone != $player_row["Timezone"] )
+   if( $_GET['nightstart'] != $player_row["Nightstart"] ||
+       $_GET['timezone'] != $player_row["Timezone"] )
    {
-      putenv("TZ=$timezone" );
+      putenv("TZ=" . $_GET['timezone'] );
 
       $query .= "ClockChanged='Y', ";
 
-      // ClockUsed is uppdated only once a day to prevent ternal night...
+      // ClockUsed is uppdated only once a day to prevent eternal night...
       // $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
    }
 
 
-   $newrating = convert_to_rating($rating, $ratingtype);
+   $newrating = convert_to_rating($_GET['rating'], $POST_['ratingtype']);
 
    if( $player_row["RatingStatus"] != 'RATED' and is_numeric($newrating) and
        ( $ratingtype != 'dragonrating' or !is_numeric($player_row["Rating2"])
@@ -105,8 +117,8 @@ require( "include/rating.php" );
 
    }
 
-   $query .= "Timezone='$timezone', " .
-       "Nightstart=$nightstart" .
+   $query .= "Timezone='" . $_GET['timezone'] . "', " .
+       "Nightstart=" . $_GET['nightstart'] .
        " WHERE ID=" . $player_row['ID'];
 
    mysql_query( $query )
