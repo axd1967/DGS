@@ -20,12 +20,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Messages";
 
-define("FOLDER_ALL_RECEIVED", 0);
-define("FOLDER_MAIN", 1);
-define("FOLDER_NEW", 2);
-define("FOLDER_REPLY", 3);
-define("FOLDER_DELETED", 4);
-define("FOLDER_SENT", 5);
 
 function init_standard_folders()
 {
@@ -343,6 +337,7 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
 }
 
 
+//Set global $hours,$byohours,$byoperiods
 function interpret_time_limit_forms()
 {
    global $hours, $timevalue, $timeunit, $byoyomitype, $byohours, $byoperiods,
@@ -408,16 +403,17 @@ function get_folders($uid, $remove_all_received=true)
       or die(mysql_error());
 
    $flds = $STANDARD_FOLDERS;
-   if( $remove_all_received )
-      unset($flds[FOLDER_ALL_RECEIVED]);
 
    while( $row = mysql_fetch_array($result) )
    {
       if( empty($row['Name']))
-         $row['Name'] = ( $row['Folder_nr'] < 6 ?
+         $row['Name'] = ( $row['Folder_nr'] < USER_FOLDERS ?
                           $STANDARD_FOLDERS[$row['Folder_nr']][0] : T_('Folder name') );
       $flds[$row['Folder_nr']] = array($row['Name'], $row['BGColor'], $row['FGColor']);
    }
+
+   if( $remove_all_received )
+      unset($flds[FOLDER_ALL_RECEIVED]);
 
    return $flds;
 }
@@ -452,7 +448,7 @@ function change_folders_for_marked_messages($uid, $folders)
 
    if( count($message_ids) )
    {
-      mysql_query("UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
+      mysql_query("UPDATE MessageCorrespondents SET Folder_nr='$new_folder' " .
                   "WHERE uid='$uid' $sender_where_clause " .
                   "AND mid IN (" . implode(',', $message_ids) . ") " .
                   "LIMIT " . count($message_ids) )
@@ -474,9 +470,9 @@ function echo_folders($folders, $current_folder)
       {
          list($name, $color) = $val;
          if( $nr == $current_folder )
-            $string .= "<td><div style=\"align:right; color: black; border: solid #6666ff; padding: 7px;\">$name</div></td>\n";
-            else
-         $string .= "<td><a href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
+            $string .= "<td><div style=\"align:right; color: black; border:'solid #6666ff'; padding: 7px;\">$name</div></td>\n";
+         else
+            $string .= "<td><a href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
       }
 
    $string .= '</tr></table>' . "\n";
@@ -500,7 +496,7 @@ function echo_folder_box($folders, $folder_nr, $bgcolor)
       $folderbgcolor = blend_alpha_hex($folderbgcolor, $bgcolor);
 
       if( empty($foldername) )
-         $foldername = ( $folder_nr <= 5 ? $STANDARD_FOLDERS[$folder_nr][0]
+         $foldername = ( $folder_nr < USER_FOLDERS ? $STANDARD_FOLDERS[$folder_nr][0]
                          : T_('Folder name') );
 
       return "<td bgcolor=\"#$folderbgcolor\" nowrap><font color=\"#$folderfgcolor\">$foldername</font></td>";

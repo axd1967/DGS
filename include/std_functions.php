@@ -146,6 +146,13 @@ define("ADMIN_ADMINS",0x08);
 define("ADMIN_TIME",0x10);
 
 
+define("FOLDER_ALL_RECEIVED", 0);
+define("FOLDER_MAIN", 1);
+define("FOLDER_NEW", 2);
+define("FOLDER_REPLY", 3);
+define("FOLDER_DELETED", 4);
+define("FOLDER_SENT", 5);
+define("USER_FOLDERS", 6);
 
 
 function disable_cache($stamp=NULL)
@@ -896,7 +903,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
          $mid = mysql_insert_id();
 
          mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                     "(" . $row['pid'] . ", $mid, 'N', 2)");
+                     "(" . $row['pid'] . ", $mid, 'N', '".FOLDER_NEW."')");
       }
    }
 

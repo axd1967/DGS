@@ -118,6 +118,7 @@ disable_cache();
 
       $komi = $komi_m;
       $tomove = $Black_ID;
+      //ToMove_ID=$tomove will hold handitype until ACCEPTED
       if($handicap_type == 'conv' ) { $tomove = -1; $komi = 0; }
       else if($handicap_type == 'proper' ) { $tomove = -2; $komi = 0; }
       else if($handicap_type == 'nigiri' ) { $tomove = -3; $komi = $komi_n; }
@@ -126,7 +127,7 @@ disable_cache();
       if( !($komi <= 200 and $komi >= -200) )
          error("komi_range");
 
-      interpret_time_limit_forms();
+      interpret_time_limit_forms(); //Set global $hours,$byohours,$byoperiods
 
       if( $rated != 'Y' or $my_id == $opponent_ID )
          $rated = 'N';
@@ -204,7 +205,7 @@ disable_cache();
          error("mysql_start_game");
       }
 
-      if( $weekendclock != 'Y' )
+      if( $game_row['WeekendClock'] != 'Y' )
       {
          $clock_used_white += 100;
          $clock_used_black += 100;
@@ -213,6 +214,7 @@ disable_cache();
       $ticks_black = get_clock_ticks($clock_used_black);
       $ticks_white = get_clock_ticks($clock_used_white);
 
+      //ToMove_ID hold handitype since INVITATION
       $handitype = $game_row["ToMove_ID"];
 
       mt_srand ((double) microtime() * 1000000);
@@ -351,8 +353,8 @@ disable_cache();
 
    $mid = mysql_insert_id();
    $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-      "($my_id, $mid, 'Y', 5), " .
-      "($opponent_ID, $mid, 'N', 2)";
+      "($my_id, $mid, 'Y', '".FOLDER_SENT."'), " .
+      "($opponent_ID, $mid, 'N', '".FOLDER_NEW."')";
 
    $result = mysql_query( $query );
    if( mysql_affected_rows() != 2)

@@ -46,7 +46,7 @@ function make_folder_form_row(&$form, $name, $nr,
                    'DESCRIPTION', T_('Alpha'),
                    'TEXTINPUT', "bgalpha$nr", 3, 3, "$bgalpha" );
 
-   if( $nr <= 5 )
+   if( $nr < USER_FOLDERS )
       array_push( $array, 'OWNHTML', '<tr><td colspan=2>' );
    else
       array_push( $array,  'OWNHTML', '<tr><td><td>',
@@ -105,7 +105,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
       $onstatuspage = ( $_POST["onstatuspage$nr"] == 't' );
 
-      if( $nr > 5 and ( in_array($nr, $status_page_folders) xor $onstatuspage ) )
+      if( $nr >= USER_FOLDERS and ( in_array($nr, $status_page_folders) xor $onstatuspage ) )
       {
          if( $onstatuspage )
             array_push($status_page_folders, $nr);
@@ -122,7 +122,7 @@ function make_folder_form_row(&$form, $name, $nr,
          if( $nr > $max_folder )
             continue;
 
-         if( $nr <= 5 )
+         if( $nr < USER_FOLDERS )
             list($name, $bgcolor, $fgcolor) = $STANDARD_FOLDERS[$nr];
       }
 
@@ -133,10 +133,10 @@ function make_folder_form_row(&$form, $name, $nr,
       list($oldname, $oldbgcolor, $oldfgcolor) = $folders[$nr];
 
       $is_old = ( array_key_exists($nr, $folders) and
-                  ( $nr > 5 or $STANDARD_FOLDERS[$nr] !== $folders[$nr] ) );
+                  ( $nr >= USER_FOLDERS or $STANDARD_FOLDERS[$nr] !== $folders[$nr] ) );
 
-      $delete = (($nr <= 5 and $STANDARD_FOLDERS[$nr] === $newfolder) or
-                 ($nr > 5 and empty($name) and $is_old and
+      $delete = (($nr < USER_FOLDERS and $STANDARD_FOLDERS[$nr] === $newfolder) or
+                 ($nr >= USER_FOLDERS and empty($name) and $is_old and
                   folder_is_removable($nr, $my_id)));
 
       if( $delete )

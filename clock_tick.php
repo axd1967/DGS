@@ -114,7 +114,7 @@ if( !$is_down )
          // Send messages to the players
          $Text = "The result in the game <A href=\"game.php?gid=$gid\">" .
              "$whitename (W)  vs. $blackname (B) </A>" .
-             "was: <p><center>" . score2text($score,true,true) . "</center></BR>";
+             "was: <p><center>" . score2text($score,true,true) . "</center><br>";
 
          mysql_query( "INSERT INTO Messages SET " .
                       "Time=FROM_UNIXTIME($NOW), " .
@@ -123,8 +123,8 @@ if( !$is_down )
          $mid = mysql_insert_id();
 
          mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                     "($Black_ID, $mid, 'N', 2), " .
-                     "($White_ID, $mid, 'N', 2)");
+                     "($Black_ID, $mid, 'N', '".FOLDER_NEW."'), " .
+                     "($White_ID, $mid, 'N', '".FOLDER_NEW."')");
 
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .
