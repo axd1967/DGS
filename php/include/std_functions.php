@@ -214,8 +214,8 @@ function set_cookies($uid, $code, $delete=false)
 function make_html_safe(&$msg, $some_html=false)
 {
 
-   $msg = str_replace('&', '&amp;', $msg);
-   $msg = str_replace('"', '&quot;', $msg);
+//   $msg = str_replace('&', '&amp;', $msg);
+//   $msg = str_replace('"', '&quot;', $msg);
 
 
    if( $some_html )
@@ -223,18 +223,25 @@ function make_html_safe(&$msg, $some_html=false)
       // make sure the <, > replacements: {anglstart}, {anglend} are removed from the string
       $msg = str_replace("{anglstart}", "<", $msg);
       $msg = str_replace("{anglend}", ">", $msg);
+
+
+      // replace <, > with {anglstart}, {anglend} for legal html code
+
       $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>", 
                          "{anglstart}a href=\"\\1\\2\"{anglend}\\2{anglstart}/a{anglend}", $msg);
       $msg=eregi_replace("<([http|news|ftp]+://[^ >\n\t]+)>", 
                          "{anglstart}a href=\"\\1\"{anglend}\\1{anglstart}/a{anglend}", $msg);
-  
+/*
+      $msg=eregi_replace("<a[[:space:]]+href=\"?([^ >\n\t\"\']+)\"?>([^<]+)</a>", 
+                         "{anglstart}a href=\"\\1\"{anglend}\\2{anglstart}/a{anglend}", $msg);
+*/
 
-      // replace <, > with {anglstart}, {anglend} for legal html code
-      $msg=eregi_replace ("<(/?[bi])>", "{anglstart}\\1{anglend}", $msg);
-      $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>", 
-                         "{anglstart}a href=\"\\1\\2\"{anglend}\\2{anglstart}/a{anglend}", $msg);
-      $msg=eregi_replace("<([http|news|ftp]+://[^ >\n\t]+)>",
-                         "{anglstart}a href=\"\\1\"{anglend}\\1{anglstart}/a{anglend}", $msg);
+
+      $html_code = "a|b|i|u|center|li|ul|ol|font|p|br";
+
+      $msg=eregi_replace("<(/*($html_code) *[^>]*)>[[:space:]]*", "{anglstart}\\1{anglend}", $msg);
+//      $msg=eregi_replace ("<(/?$html_code)>[[:space:]]*", "{anglstart}\\1{anglend}", $msg);
+
   
    }
 
