@@ -48,6 +48,7 @@ function disable_cache($stamp=NULL)
 
 function error($err, $debugmsg=NULL)
 {
+
    $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
 
    $uri = "error.php?err=" . urlencode($err);
@@ -66,6 +67,7 @@ function error($err, $debugmsg=NULL)
    
    if( empty($debugmsg) )
    {
+    global $SUB_PATH;
       $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));

@@ -336,7 +336,7 @@ function make_menu($menu_array)
    $i = 0;
    foreach( $menu_array as $text => $link )
       {
-         if( ($i % $menu_width)==0 && i>0 )
+         if( ($i % $menu_width)==0 && $i>0 )
            {
              echo "</tr>" . $new_row;
              $cumw = 0;
@@ -589,11 +589,11 @@ function add_line_breaks( $str)
    $str = trim($str);
 
    // Strip out carriage returns
-  $str=preg_replace('%[\x01-\x09\x0B-\x20]*\x0A%','<BR>', $str);
+  $str=preg_replace('%[\\x01-\\x09\\x0B-\\x20]*\\x0A%','<BR>', $str);
 
    // Handle collapsed vertical white spaces
   for( $i=0; $i<2; $i++)
-  $str=preg_replace('%[\x01-\x20]*<(BR|P)[\x01-\x20]*/?\>[\x01-\x20]*<(BR|P)[\x01-\x20]*/?\>%i','<\\1>&nbsp;<\\2>', $str);
+  $str=preg_replace('%[\\x01-\\x20]*<(BR|P)[\\x01-\\x20]*/?\>[\\x01-\\x20]*<(BR|P)[\\x01-\\x20]*/?\>%i','<\\1>&nbsp;<\\2>', $str);
 
    return $str;
 }
@@ -611,6 +611,8 @@ $html_code['msg'] = 'br'.$html_code_closed['msg'].'p|goban|li|/br';
 
 define( 'ALLOWED_LT', '{anglstart}');
 define( 'ALLOWED_GT', '{anglend}');
+define( 'ALLOWED_QUOT', '{allowedquot}');
+define( 'ALLOWED_APOS', '{allowedapos}');
 
 /* Simple syntax check of element's attributes up to the next '>'.
    Check for quote mismatches.
@@ -646,7 +648,10 @@ function parse_atbs_safe( &$trail, &$bad)
       }
       else if( $quote )
       {
-         $head.= substr($trail,0,$i+1);
+         $quote.= substr($trail,0,$i+1);
+         $quote = str_replace('"', ALLOWED_QUOT, $quote);
+         $quote = str_replace("'", ALLOWED_APOS, $quote);
+         $head = substr($head,0,-1) . $quote;
          $trail = substr($trail,$i+1);
          $quote = '';
       }
@@ -675,7 +680,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
 {
 
    $before = '';
-   $reg = "%^(.*?)<(" . ( $stop ? "$stop|" : "" ) . "$html_code)([\x01-\x20>].*)$%is";
+   $reg = "%^(.*?)<(" . ( $stop ? "$stop|" : "" ) . "$html_code)([\\x01-\\x20>].*)$%is";
 
    while ( preg_match($reg, $trail, $matches) )
    {
@@ -687,7 +692,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       $head = $tag . parse_atbs_safe( $trail, $bad) ;
       if( $bad)
          return $before .'<'. $head .'>' ;
-      $head = preg_replace('%[\x01-\x20]+%', ' ', $head);
+      $head = preg_replace('%[\\x01-\\x20]+%', ' ', $head);
 
       if( $stop == $tag )
          return $before .ALLOWED_LT. $head .ALLOWED_GT ;
@@ -737,8 +742,10 @@ function make_html_safe( $msg, $some_html=false)
    if( $some_html )
    {
       // make sure the <, > replacements: ALLOWED_LT, ALLOWED_GT are removed from the string
-      $msg = str_replace(ALLOWED_LT, "<", $msg);
-      $msg = str_replace(ALLOWED_GT, ">", $msg);
+      $msg = str_replace(ALLOWED_LT, '<', $msg);
+      $msg = str_replace(ALLOWED_GT, '>', $msg);
+      $msg = str_replace(ALLOWED_QUOT, '"', $msg);
+      $msg = str_replace(ALLOWED_APOS, "'", $msg);
 
       // replace <, > with ALLOWED_LT, ALLOWED_GT for legal html code
       if( $some_html === 'game' )
@@ -756,10 +763,10 @@ function make_html_safe( $msg, $some_html=false)
          $some_html = 'msg';
 
       $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>",
-                         ALLOWED_LT."a href=\"\\1\\2\"".ALLOWED_GT.
+                         ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT.
                          "\\2".ALLOWED_LT."/a".ALLOWED_GT, $msg);
       $msg=eregi_replace("<((http:|https:|news:|ftp:)//[^ >\n\t]+)>",
-                         ALLOWED_LT."a href=\"\\1\"".ALLOWED_GT.
+                         ALLOWED_LT."a href=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT.
                          "\\1".ALLOWED_LT."/a".ALLOWED_GT, $msg);
 
       //link: <game gid[,move]> =>show game
@@ -774,7 +781,7 @@ function make_html_safe( $msg, $some_html=false)
 
       //tag: <color col>...</color> =>translated to <font color="col">...</font>
       $msg=eregi_replace("<color +([#0-9a-zA-Z]+) *>",
-                           ALLOWED_LT."font color=\"\\1\"".ALLOWED_GT, $msg);
+                           ALLOWED_LT."font color=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT, $msg);
       $msg=eregi_replace("</color *>",
                            ALLOWED_LT."/font".ALLOWED_GT, $msg);
 
@@ -782,19 +789,26 @@ function make_html_safe( $msg, $some_html=false)
       $msg = parse_html_safe( $msg, $some_html) ;
    }
 
-      $msg = str_replace('&', '&amp;', $msg);
-      $msg=eregi_replace("&amp;((#[0-9]+|[a-zA-Z]+);)", "&\\1", $msg);
-
    // Filter out HTML code
 
-   $msg = str_replace("<", "&lt;", $msg);
-   $msg = str_replace(">", "&gt;", $msg);
+   /*
+      $msg = str_replace('&', '&amp;', $msg);
+   $msg = eregi_replace('&amp;((#[0-9]+|[A-Z][0-9A-Z]*);)', '&\\1', $msg);
+   */
+   $msg = preg_replace('%&(?!(#[0-9]+|[A-Z][0-9A-Z]*);)%si', '&amp;', $msg);
+
+   $msg = str_replace('<', '&lt;', $msg);
+   $msg = str_replace('>', '&gt;', $msg);
+   $msg = str_replace('"', '&quot;', $msg);
+   $msg = str_replace("'", '&#039;', $msg);
 
    if( $some_html )
    {
       // change back to <, > from ALLOWED_LT, ALLOWED_GT
-      $msg = str_replace(ALLOWED_LT, "<", $msg);
-      $msg = str_replace(ALLOWED_GT, ">", $msg);
+      $msg = str_replace(ALLOWED_LT, '<', $msg);
+      $msg = str_replace(ALLOWED_GT, '>', $msg);
+      $msg = str_replace(ALLOWED_QUOT, '"', $msg);
+      $msg = str_replace(ALLOWED_APOS, "'", $msg);
    }
 
    $msg = add_line_breaks($msg);
@@ -1128,7 +1142,10 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
       if( $link & REF_LINK_BLANK )
         $tmp.= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
+      {
+        $tmp = str_replace('"', ALLOWED_QUOT, $tmp);
         $whitename = ALLOWED_LT.$tmp.ALLOWED_GT.$whitename.ALLOWED_LT."/A".ALLOWED_GT ;
+      }
       else
         $whitename = "<$tmp>$whitename</A>" ;
    }
@@ -1213,7 +1230,10 @@ function user_reference( $link, $safe, $color, $player_id, $player_name=false, $
       if( $link & REF_LINK_BLANK )
         $tmp.= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
+      {
+        $tmp = str_replace('"', ALLOWED_QUOT, $tmp);
         $player_name = ALLOWED_LT.$tmp.ALLOWED_GT.$player_name.ALLOWED_LT."/A".ALLOWED_GT ;
+      }
       else
         $player_name = "<$tmp>$player_name</A>" ;
    }

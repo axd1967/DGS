@@ -236,7 +236,7 @@ function message_info_table($mid, $date, $to_me,
    else
      $name = $other_name; //i.e. T_("Server message");
 
-   echo "<table border=0 witdh=\"50%\">\n" .
+   echo "<table border=0>\n" .
       "<tr><td><b>" . T_('Date') . ":</b></td>" .
       "<td colspan=2>" . date($date_fmt, $date) . "</td></tr>\n" .
       "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .

@@ -218,7 +218,7 @@ class Table
          if( !$tmp )
            $tmp = '&nbsp;';
          $string .= ' <tr><td colspan=99 align=right>'
-              . '<a name="' . $this->Prefix . 'tblac">'. $tmp . '</a>'
+              . '<a name="' . $this->Prefix . 'tblac"></a>'. $tmp
               . "</td></tr>\n";
 
          $string .= "</table>\n";
@@ -534,7 +534,7 @@ class Table
          {
             if( !empty( $query ) )
             {
-               list( $key, $value ) = explode( "=", $query );
+               @list( $key, $value ) = explode( '=', $query );
                array_push( $form_array, 'HIDDEN', $key, $value );
             }
          }
