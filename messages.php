@@ -69,17 +69,17 @@ require( "include/std_functions.php" );
       if( !($all==1) )
          $query .= "AND NOT (Messages.Flags LIKE '%DELETED%') ";
       else
-         $all_str = "&all=1";
+         $all_str = "&all=1 ";
    }
 
 
    if(!($limit > 0 )) 
       $limit = 0;
 
-   $query .= "ORDER BY Time DESC LIMIT $limit,$MessagesPerPage";
+   $query .= "ORDER BY Time DESC";
 
    $result = mysql_query( $query ) 
-       or die ( mysql_error("mysql_query_failed", true));
+       or die ( error("mysql_query_failed") );
 
 
    start_page("Messages", true, $logged_in, $player_row );
