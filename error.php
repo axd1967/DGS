@@ -231,6 +231,18 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("password_illegal_chars"):
+      {
+         echo T_("The password contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+.,:;?!%* are allowed.");
+      }
+      break;
+
+      case("userid_illegal_chars"):
+      {
+         echo T_("The userid contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+ are allowed.");
+      }
+      break;
+
       case("password_mismatch"):
       {
          echo T_("The confirmed password didn't match the password, please go back and retry.");

@@ -20,8 +20,24 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/std_functions.php" );
 
+function illegal_chars( $string, $punctuation=false )
+{
+   $legal_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_+';
+   if( $punctuation )
+      $legal_chars .= '.,:;?!%*';
+
+   return strspn( $string , $legal_chars ) != strlen( $string );
+}
+
+
 {
    connect2mysql();
+
+   if( illegal_chars( $userid ) )
+      error("userid_illegal_chars");
+
+   if( illegal_chars( $passwd, true ) )
+      error("password_illegal_chars");
 
    if( $passwd != $passwd2 )
    {
@@ -61,7 +77,6 @@ require( "include/std_functions.php" );
                           "Name='$name', " .
                           "Password=PASSWORD('$passwd'), " .
                           "Registerdate=FROM_UNIXTIME($NOW), " .
-                          "Lang='$the_translator->current_language', " .
                           "Sessioncode='$code', " .
                           "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration)" );
 
