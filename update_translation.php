@@ -78,7 +78,7 @@ require_once( "include/make_translationfiles.php" );
   {
      $transl = trim('' . $_POST["transl" . $row['Original_ID']]);
      $same = ( $_POST["same" . $row['Original_ID']] === 'Y' );
-     if( (empty($transl) and !$same) or $transl === $row['Text'] )
+     if( (empty($transl) and !$same) or stripslashes($transl) === $row['Text'] )
         continue;
 
 //     echo '<p>' . $row['Original_ID'] . ': ' . $_POST["transl" . $row['Original_ID']];
