@@ -114,7 +114,7 @@ if( !$is_down )
          // Send messages to the players
          $Text = "The result in the game <A href=\"game.php?gid=$gid\">" .
              "$whitename (W)  vs. $blackname (B) </A>" .
-             "was: <p><center>" . score2text($score,true) . "</center></BR>";
+             "was: <p><center>" . score2text($score,true,true) . "</center></BR>";
 
          mysql_query( "INSERT INTO Messages SET " .
                       "Time=FROM_UNIXTIME($NOW), " .

@@ -454,7 +454,7 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       $Text = "The result in the game <a href=\"game.php?gid=$gid\">" .
           "$whitename (W)  vs. $blackname (B) </a>" .
-          "was: <p><center>" . score2text($score,true) . "</center></br>";
+          "was: <p><center>" . score2text($score,true,true) . "</center></br>";
 
       $Subject = 'Game result';
 

@@ -651,29 +651,31 @@ function make_mysql_safe(&$msg)
    $msg = str_replace("\"", "\\\"", $msg);
 }
 
-function score2text($score, $verbose, $sgf=false)
+function score2text($score, $verbose, $keep_english=false)
 {
    if( !isset($score) )
       return "?";
 
    if( $score == 0 )
    {
-      return ( $sgf ? 'Draw' : ( $verbose ? T_('Jigo') : 'Jigo' ));
+      return ( $keep_english ? 'Draw' : ( $verbose ? T_('Jigo') : 'Jigo' ));
    }
 
-   $color = ($verbose ? ( $score > 0 ? T_('White') : T_('Black') )
+   $color = ($verbose
+             ? ( $score > 0 ? ( $keep_english ? 'White' : T_('White') )
+                            : ( $keep_english ? 'Black' : T_('Black') ) )
              : ( $score > 0 ? 'W' : 'B' ));
 
    if( abs($score) == SCORE_TIME )
    {
-      return ( $verbose ? sprintf(T_("%s wins on time"), $color) : $color . "+Time" );
+      return ( $verbose ? sprintf( $keep_english ? "%s wins on time" : T_("%s wins on time"), $color) : $color . "+Time" );
    }
    else if( abs($score) == SCORE_RESIGN )
    {
-      return ( $verbose ? sprintf(T_("%s wins by resign"), $color) : $color . "+Resign" );
+      return ( $verbose ? sprintf( $keep_english ? "%s wins by resign" : T_("%s wins by resign"), $color) : $color . "+Resign" );
    }
    else
-      return ( $verbose ? sprintf(T_("%s wins by %.1f"), $color, abs($score))
+      return ( $verbose ? sprintf( $keep_english ? "%s wins by %.1f" : T_("%s wins by %.1f"), $color, abs($score))
                : $color . '+' . abs($score) );
 }
 
