@@ -167,6 +167,12 @@ define("FOLDER_SENT", 5);
 define("USER_FOLDERS", 6);
 
 
+
+function fnop( $a)
+{
+   return $a;
+}
+
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
@@ -489,6 +495,7 @@ function sysmsg($msg)
 
 //must never allow quotes, ampersand, < and >
 define('HANDLE_LEGAL_REGS', '-_+a-zA-Z0-9');
+define('HANDLE_TAG_CHAR', '='); //not in HANDLE_LEGAL_REGS
 define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'.,:;?!%*');
 
 function illegal_chars( $string, $punctuation=false )
@@ -547,7 +554,7 @@ function get_cookie_prefs(&$player_row)
 {
    global $cookie_prefs, $cookie_pref_rows;
 
-   $cookie_prefs = unserialize(arg_stripslashes(
+   $cookie_prefs = unserialize(arg_stripslashes((string)
          @$_COOKIE[COOKIE_PREFIX."prefs{$player_row['ID']}"] ));
    if( !is_array( $cookie_prefs ) )
       $cookie_prefs = array();
@@ -718,6 +725,7 @@ function make_html_safe( $msg, $some_html=false)
       {
          // mark sgf comments
          $msg = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg));
+
          $msg = eregi_replace("<c(omment)? *>",
                               ALLOWED_LT."font color=blue".ALLOWED_GT."\\0", $msg);
          $msg = eregi_replace("</c(omment)? *>",
@@ -730,6 +738,16 @@ function make_html_safe( $msg, $some_html=false)
       $msg=eregi_replace("<((http:|https:|news:|ftp:)//[^ >\n\t]+)>",
                          ALLOWED_LT."a href=\"\\1\"".ALLOWED_GT.
                          "\\1".ALLOWED_LT."/a".ALLOWED_GT, $msg);
+
+      //link: <game gid[,move]> =>show game
+      $msg=preg_replace("%<game *([0-9]+)( *,? *([0-9]+))? *>%ise",
+                        "game_reference(2,1,\\1,\\3+0)",
+                        $msg);
+      //link: <user uid> or <user =uhandle> =>show user info
+      //link: <send uid> or <send =uhandle> =>send a message to user
+      $msg=preg_replace("%<(user|send) *(".HANDLE_TAG_CHAR."?[".HANDLE_LEGAL_REGS."]+) *>%ise",
+                        "\\1_reference(2,1,0,'\\2')",
+                        $msg);
 
       // Regular allowed html tags
       $msg = parse_html_safe($msg) ;
@@ -763,6 +781,8 @@ function textarea_safe( $msg, $charenc=false)
 
 function score2text($score, $verbose, $keep_english=false)
 {
+   $T_= ( $keep_english ? 'fnop' : 'T_' );
+
    if( !isset($score) )
       return "?";
 
@@ -772,20 +792,19 @@ function score2text($score, $verbose, $keep_english=false)
    }
 
    $color = ($verbose
-             ? ( $score > 0 ? ( $keep_english ? 'White' : T_('White') )
-                            : ( $keep_english ? 'Black' : T_('Black') ) )
+             ? ( $score > 0 ? $T_('White') : $T_('Black') )
              : ( $score > 0 ? 'W' : 'B' ));
 
    if( abs($score) == SCORE_TIME )
    {
-      return ( $verbose ? sprintf( $keep_english ? "%s wins on time" : T_("%s wins on time"), $color) : $color . "+Time" );
+      return ( $verbose ? sprintf( $T_("%s wins on time"), $color) : $color . "+Time" );
    }
    else if( abs($score) == SCORE_RESIGN )
    {
-      return ( $verbose ? sprintf( $keep_english ? "%s wins by resign" : T_("%s wins by resign"), $color) : $color . "+Resign" );
+      return ( $verbose ? sprintf( $T_("%s wins by resign"), $color) : $color . "+Resign" );
    }
    else
-      return ( $verbose ? sprintf( $keep_english ? "%s wins by %.1f" : T_("%s wins by %.1f"), $color, abs($score))
+      return ( $verbose ? sprintf( $T_("%s wins by %.1f"), $color, abs($score))
                : $color . '+' . abs($score) );
 }
 
@@ -856,18 +875,18 @@ function get_request_url()
    return $url;
 }
 
+define('UHANDLE_NAM', 'user');
 function get_request_user( &$uid, &$uhandle, $from_referer=false)
 {
 //Priorities: URI(id) > URI(handle) > REFERER(id) > REFERER(handle)
-//Warning: + (a URI reserved char) must be substitued with %2B in 'handle'.
+//Warning: + (an URI reserved char) must be substitued with %2B in 'handle'.
    $uid_nam = 'uid';
    $uid = @$_REQUEST[$uid_nam];
    $uhandle = '';  
    if( !($uid > 0) )
    {
       $uid = 0;
-      $uhandle_nam = 'user';
-      $uhandle = @$_REQUEST[$uhandle_nam];
+      $uhandle = @$_REQUEST[UHANDLE_NAM];
       if( !$uhandle && $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
       {
 //default user = last referenced user
@@ -877,7 +896,7 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
          if( !($uid > 0) )
          {
             $uid = 0;
-            if( eregi("[?&]$uhandle_nam=([".HANDLE_LEGAL_REGS."]+)", $refer, $result) )
+            if( eregi("[?&]".UHANDLE_NAM."=([".HANDLE_LEGAL_REGS."]+)", $refer, $result) )
               $uhandle = $result[1];
          }
       }
@@ -919,7 +938,7 @@ function is_logged_in($hdl, $scode, &$row)
       return false;
    }
 
-   $row = mysql_fetch_array($result);
+   $row = mysql_fetch_assoc($result);
 
    include_all_translate_groups($row);
 
@@ -1021,18 +1040,67 @@ function nsq_addslashes( $str )
   return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $str );
 }
 
-function game_reference( $link, $safe, $gid, $whitename='', $blackname='')
+function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackname=false)
 {
  global $base_path;
-   $whitename = "$whitename (W)  vs. $blackname (B)" ;
+
+   $gid = (int)$gid;
+   $legal = ( $gid<=0 ? 0 : 1 );
+   if( ($whitename===false or $blackname===false) && $legal )
+   {
+     $tmp = 'SELECT black.Name as blackname, white.Name as whitename ' .
+            'FROM Games, Players as white, Players as black ' .
+            "WHERE Games.ID=$gid " .
+            ' AND white.ID=Games.White_ID ' .
+            ' AND black.ID=Games.Black_ID ' .
+            'LIMIT 1' ;
+     $result = mysql_query( $tmp );
+     if( @mysql_num_rows($result) == 1 )
+     {
+       $tmp = mysql_fetch_assoc($result);
+       if( $whitename===false )
+         $whitename = $tmp['whitename'];
+       if( $blackname===false )
+         $blackname = $tmp['blackname'];
+       $safe = true;
+     }
+     else
+       $legal = 0;
+   }
+   $whitename = trim($whitename);
+   $blackname = trim($blackname);
+   if( $whitename )
+      $whitename = "$whitename (W)" ;
+   if( $blackname )
+      $blackname = "$blackname (B)" ;
+   if( !$whitename && !$blackname )
+      $whitename = "Game#$gid" ;
+   else if( $whitename && $blackname )
+      $whitename = "$whitename vs. $blackname" ;
+   else
+      $whitename = "$whitename$blackname" ;
    if( $safe )
       $whitename = make_html_safe($whitename) ;
-   if( $link )
-      $whitename = "<A href=\"".$base_path."game.php?gid=$gid\">$whitename</A>" ;
+   if( $link && $legal )
+   {
+      $tmp = 'A href="'.$base_path."game.php?gid=$gid" .
+                   ($move>0 ? "&move=$move" : "") . '"';
+      if( $link+0==2 )
+        $whitename = ALLOWED_LT.$tmp.ALLOWED_GT.$whitename.ALLOWED_LT."/A".ALLOWED_GT ;
+      else
+        $whitename = "<$tmp>$whitename</A>" ;
+   }
    return $whitename ;
 }
 
-function user_reference( $link, $safe, $color, $player_id, $player_name='', $player_handle='')
+function send_reference( $link, $safe, $color, $player_id, $player_name=false, $player_handle=false)
+{
+ global $base_path;
+   return user_reference( ($link ? $link+10 : 0)
+      , $safe, $color, $player_id, $player_name, $player_handle);
+}
+
+function user_reference( $link, $safe, $color, $player_id, $player_name=false, $player_handle=false)
 {
  global $base_path;
    if( is_array($player_id) ) //i.e. $player_row
@@ -1043,16 +1111,69 @@ function user_reference( $link, $safe, $color, $player_id, $player_name='', $pla
          $player_handle = $player_id['Handle'];
       $player_id = $player_id['ID'];
    }
+   $legal = 1;
+   if( is_string($player_id) && $player_id{0}==HANDLE_TAG_CHAR )
+   {
+      $player_id = substr($player_id,1);
+      if( illegal_chars( $player_id) )
+         $legal = 0;
+      $byid = 0;
+   }
+   else
+   {
+      $player_id = (int)$player_id;
+      if( $player_id<=0)
+         $legal = 0;
+      $byid = 1;
+   }
+   if( ($player_name===false or $player_handle===false) && $legal )
+   {
+     $tmp = 'SELECT Name, Handle ' .
+            'FROM Players ' .
+            "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='$player_id' " .
+            'LIMIT 1' ;
+     $result = mysql_query( $tmp );
+     if( @mysql_num_rows($result) == 1 )
+     {
+       $tmp = mysql_fetch_assoc($result);
+       if( $player_name===false )
+         $player_name = $tmp['Name'];
+       if( $player_handle===false )
+         $player_handle = $tmp['Handle'];
+       $safe = true;
+     }
+     else
+       $legal = 0;
+   }
+   $player_name = trim($player_name);
+   $player_handle = trim($player_handle);
    if( !$player_name )
-      $player_name = "#$player_id";
+      $player_name = "User#$player_id";
    if( $player_handle )
       $player_name.= " ($player_handle)" ;
    if( $safe )
       $player_name = make_html_safe($player_name) ;
    if( $color )
       $player_name = "<FONT color=\"$color\">$player_name</FONT>" ;
-   if( $link )
-      $player_name = "<A href=\"".$base_path."userinfo.php?uid=$player_id\">$player_name</A>" ;
+   if( $link && $legal )
+   {
+      $link+= 0;
+      if( $link>10 )
+      {
+         $link-=10;
+         $tmp = 'A href="'.$base_path."message.php?mode=NewMessage&";
+      }
+      else
+      {
+         $tmp = 'A href="'.$base_path."userinfo.php?";
+      }
+      $tmp.= ( $byid ? "uid=$player_id" 
+                 : UHANDLE_NAM."=".str_replace('+','%2B',$player_id) ) . '"';
+      if( $link==2 )
+        $player_name = ALLOWED_LT.$tmp.ALLOWED_GT.$player_name.ALLOWED_LT."/A".ALLOWED_GT ;
+      else
+        $player_name = "<$tmp>$player_name</A>" ;
+   }
    return $player_name ;
 }
 
