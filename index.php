@@ -47,6 +47,7 @@ require( "include/form_functions.php" );
                         'TEXTINPUT', 'userid',16,16,'' );
   echo form_insert_row( 'DESCRIPTION', T_('Password'),
                         'PASSWORD', 'passwd',16,16,
+                        'TD',
                         'SUBMITBUTTON', 'login', T_('Log in'),
                         'TEXT',
                         '<A href="forgot.php"><font size="-2">' . 
