@@ -39,21 +39,6 @@ CREATE TABLE Players (
   KEY Handle_2 (Handle)
 );
 
-#
-# Table structure for table 'Messages'
-#
-CREATE TABLE Messages (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  From_ID int(11),
-  To_ID int(11),
-  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') DEFAULT 'NORMAL',
-  Info enum('NONE','NEW','REPLIED','REPLY REQUIRED') DEFAULT 'NEW',
-  Game_ID int(11),
-  Time timestamp(14),
-  Subject varchar(80),
-  Text text,
-  PRIMARY KEY (ID)
-);
 
 #
 # Insert Guest account
@@ -63,4 +48,34 @@ INSERT INTO Players SET
        Handle='guest',
        Name='Guest',
        Password=PASSWORD('guest');
-       
+
+#
+# Table structure for table 'Messages??' (one per player)
+#
+#CREATE TABLE Messages1 (
+#  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+#  From_ID int(11),
+#  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') DEFAULT 'NORMAL',
+#  Info enum('NONE','NEW','REPLIED','REPLY REQUIRED') DEFAULT 'NEW',
+#  Game_ID int(11),
+#  Time timestamp(14),
+#  Subject varchar(80),
+#  Text text,
+#  PRIMARY KEY (ID)
+#);
+
+#
+# Table structure for table 'Moves??' (one per game)
+#
+#CREATE TABLE Moves1 (
+#  ID int(11) NOT NULL auto_increment,
+#  MoveNr int(11),
+#  Stone int(11) DEFAULT '0' NOT NULL,
+#  PosX int(11),
+#  PosY int(11),
+#  Text text,
+#  PRIMARY KEY (ID)
+#);
+
+ 
+      
