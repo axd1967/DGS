@@ -322,7 +322,7 @@ function echo_time($hours)
     if( $hours % 15 > 0 )
         {
           if( $days > 0 )
-            echo ' and';
+            echo ' and ';
             echo $hours % 15 . ' hour';
             if( $hours % 15 != 1 ) echo 's';
         }
