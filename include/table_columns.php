@@ -347,10 +347,10 @@ class Table
       {
          $string = "";
 
-         if( $$this->From_Row > 0 )
+         if( $this->From_Row > 0 )
          {
             $string .= "  <td><a href=\"" . $this->Page .
-               $this->Prefix . "from_row=" . ($from_row-$RowsPerPage) .
+               $this->Prefix . "from_row=" . ($this->From_Row-$this->Rows_Per_Page) . '&' .
                $this->make_sort_string( $this->Sort1,
                                         $this->Desc1,
                                         $this->Sort2,
@@ -362,7 +362,7 @@ class Table
          if( !$this->Last_Page )
          {
             $string .= "  <td align=\"right\" colspan=20><a href=\"" . $this->Page .
-               $this->Prefix . "from_row=" . ($from_row+$RowsPerPage) .
+               $this->Prefix . "from_row=" . ($this->From_Row+$this->Rows_Per_Page) . '&' .
                $this->make_sort_string( $this->Sort1,
                                         $this->Desc1,
                                         $this->Sort2,
