@@ -20,6 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require( "include/config.php" );
 require( "include/connect2mysql.php" );
+require( "include/translator.php" );
 
 if( @is_readable("timeadjust.php" ) )
    include( "timeadjust.php" );
@@ -193,19 +194,19 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 
    if( $logged_in and !$is_down )
-      echo '          <td colspan=4 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . _("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
+      echo '          <td colspan=4 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . T_("Logged in as") . ': ' . $player_row["Handle"] . ' </B></font></td>';
    else
-      echo '          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . _("Not logged in") . '</B></font></td>';
+      echo '          <td colspan=3 align=right width="50%"><font color=' . $menu_fg_color . '><B>' . T_("Not logged in") . '</B></font></td>';
 
    echo '
         </tr>
         <tr bgcolor=' . $bg_color . ' align="center">
-          <td><B><A href="' . $HOSTBASE . '/status.php">' . _("Status") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/list_messages.php">' . _("Messages") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/message.php?mode=Invite">' . _("Invite") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/users.php">' . _("Users") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/forum/index.php">' . _("Forums") . '</A></B></td>
-          <td><B><A href="' . $HOSTBASE . '/docs.php">' . _("Docs") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/status.php">' . T_("Status") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/list_messages.php">' . T_("Messages") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/message.php?mode=Invite">' . T_("Invite") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/users.php">' . T_("Users") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/forum/index.php">' . T_("Forums") . '</A></B></td>
+          <td><B><A href="' . $HOSTBASE . '/docs.php">' . T_("Docs") . '</A></B></td>
         </tr>
     </table>
     <BR>
@@ -234,10 +235,10 @@ function end_page( $new_paragraph = true )
         <td align="right" width="50%">';
    if( $show_time )
       echo '
-        <font color=' . $menu_fg_color . '><B>' . _("Page created in") . ' ' .
+        <font color=' . $menu_fg_color . '><B>' . T_("Page created in") . ' ' .
          sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s' . $timeadjust. '</B></font></td>';
    else
-      echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . _("Logout") . '</B></font></A></td>';
+      echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=' . $menu_fg_color . '><B>' . T_("Logout") . '</B></font></A></td>';
 
    echo '
       </tr>
