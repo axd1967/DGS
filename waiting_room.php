@@ -223,7 +223,7 @@ function add_new_game_form()
 
    $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
 
-   $addgame_form->echo_string();
+   $addgame_form->echo_string(1);
 }
 
 function show_game_info($game_row, $mygame=false, $my_rating=false)
@@ -269,7 +269,7 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
       $delete_form->add_row( array( 'SUBMITBUTTON', 'deletebut', T_('Delete'),
                                     'HIDDEN', 'id', $ID,
                                     'HIDDEN', 'delete', 't') );
-      $delete_form->echo_string();
+      $delete_form->echo_string(1);
    }
    else if( $good_rating )
    {
@@ -278,7 +278,7 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
                                   'HIDDEN', 'id', $ID,
                                   'TEXTAREA', 'reply', 40, 4, "",
                                   'SUBMITBUTTON', 'join', T_('Join') ) );
-      $join_form->echo_string();
+      $join_form->echo_string(1);
    }
 
 }

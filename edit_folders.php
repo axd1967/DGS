@@ -238,7 +238,7 @@ function make_folder_form_row(&$form, $name, $nr,
 //                          'SUBMITBUTTON', 'action_preview', T_('Preview'),
                           'SUBMITBUTTON', 'action', T_('Update')) );
 
-   $form->echo_string();
+   $form->echo_string(1);
 
    echo "</center>\n";
 

@@ -42,7 +42,7 @@ $reg_form->add_row( array( 'DESCRIPTION', T_('Password'),
 $reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
                            'PASSWORD', 'passwd2', 16, 16, '' ) );
 $reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Register') ) );
-$reg_form->echo_string();
+$reg_form->echo_string(1);
 echo "</center>\n";
 
 end_page();

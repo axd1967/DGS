@@ -192,7 +192,7 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
       $form->add_row( array( 'TAB', 'SUBMITBUTTON', 'post', ' ' . T_('Post') . ' ',
                           'SUBMITBUTTON', 'preview', ' ' . T_('Preview') . ' ') );
 
-   $form->echo_string();
+   $form->echo_string(1);
 
    echo "</ul>\n";
 }

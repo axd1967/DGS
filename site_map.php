@@ -56,7 +56,7 @@ function item($text,$link,$working, $level,$last=false)
 
    $logged_in = who_is_logged( $player_row);
 
-   start_page("Site map", true, $logged_in, $player_row );
+   start_page(T_('Site map'), true, $logged_in, $player_row );
 
    if( !$logged_in )
       error("not_logged_in");

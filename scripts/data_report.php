@@ -105,7 +105,7 @@ require_once( "include/form_functions.php" );
       'OWNHTML', '<INPUT type="submit" name="apply" accesskey="a" value="A-pply">',
       ) );
 
-   $dform->echo_string();
+   $dform->echo_string(1);
 
 
    if( $apply && $select )

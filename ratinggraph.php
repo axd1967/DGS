@@ -130,7 +130,7 @@ require_once( "include/form_functions.php" );
                             'OWNHTML', '&nbsp;&nbsp;',
                             'SUBMITBUTTON', 'submit', T_('Change interval') ) );
 
-     $form->echo_string();
+     $form->echo_string(1);
   }
 
   echo '</center>';

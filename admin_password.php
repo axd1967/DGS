@@ -52,7 +52,7 @@ require_once( "include/form_functions.php" );
                                  'TD',
                                  'TEXT', T_("to replace user's one"),
                                ) );
-   $passwd_form->echo_string();
+   $passwd_form->echo_string(1);
 
    echo "</center>\n";
    end_page();

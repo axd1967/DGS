@@ -56,7 +56,7 @@ require_once( "forum_functions.php" );
      $forum_edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
                                        'CHECKBOX', 'moderated', 1, '', false));
      $forum_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
-     $forum_edit_form->echo_string();
+     $forum_edit_form->echo_string(1);
 
      $show_list = false;
   }
@@ -117,7 +117,7 @@ require_once( "forum_functions.php" );
      $forum_edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
                                        'CHECKBOX', 'moderated', 1, '', $row['Moderated'] == 'Y'));
      $forum_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
-     $forum_edit_form->echo_string();
+     $forum_edit_form->echo_string(1);
 
      $show_list = false;
   }

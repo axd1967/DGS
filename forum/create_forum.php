@@ -85,7 +85,7 @@ require_once( "forum_functions.php" );
    $form->add_row( array('HIDDEN', 'do_create', 'Y',
                          'SUBMITBUTTON', 'submit', T_('Add forum') ) );
 
-   $form->echo_string();
+   $form->echo_string(1);
 
    end_page();
 }

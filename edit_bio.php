@@ -102,7 +102,7 @@ function find_category_box_text($cat)
    }
 
    $bio_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change bio') ) );
-   $bio_form->echo_string();
+   $bio_form->echo_string(1);
 
    echo "</CENTER><BR>\n";
 

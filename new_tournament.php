@@ -43,7 +43,7 @@ require_once( "include/tournament.php" );
    $tour_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Submit') ) );
 
    echo "<CENTER>\n";
-   $tour_form->echo_string();
+   $tour_form->echo_string(1);
    echo "</CENTER>\n";
 
    end_page();

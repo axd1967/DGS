@@ -47,11 +47,10 @@ $pass_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
                             'PASSWORD', 'passwd2',16,16 ) );
 $pass_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change password') ) );
 
-$pass_form->echo_string();
+$pass_form->echo_string(1);
 
 echo "</CENTER>\n";
 
 end_page();
 
 ?>
-

@@ -275,7 +275,7 @@ require_once( "include/countries.php" );
    $profile_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change profile') ) );
 
 
-   $profile_form->echo_string();
+   $profile_form->echo_string(1);
    echo "</CENTER>\n";
 
    end_page();

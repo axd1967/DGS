@@ -83,7 +83,7 @@ require_once( "include/form_functions.php" );
                   'SELECTBOX', 'vacationdiff', 1, $days, 0, false,
                   'SUBMITBUTTON', 'change_vacation', T_('Change vacation length') ) );
 
-         $vacation_form->echo_string();
+         $vacation_form->echo_string(1);
       }
    }
    else
@@ -135,7 +135,7 @@ require_once( "include/form_functions.php" );
                   'SELECTBOX', 'vacationlength', 1, $days, $vacation_min_days, false,
                   'SUBMITBUTTON', 'start_vacation', T_('Start vacation') ) );
 
-         $vacation_form->echo_string();
+         $vacation_form->echo_string(1);
       }
 
    }

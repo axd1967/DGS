@@ -81,7 +81,7 @@ define('ALLOW_PROFIL_CHARSET', 0);
 When translating you should keep in mind the following things:
 <ul>
   <li> If a translated word is the same as in english, leave it blank and click
-       the \'same\' box to the right.
+       the \'untranslated\' box to the right.
   <li> In some places there is a percent-character followed by some characters.
        This is a special place where the program might put some data in.
        <br>
@@ -134,7 +134,7 @@ When translating you should keep in mind the following things:
                             'CHECKBOX', 'profil_charset', 'Y', 'use profil encoding', $profil_charset,
                               ) );
 
-     $langchoice_form->echo_string();
+     $langchoice_form->echo_string(1);
      echo "</CENTER>\n";
   }
   else
@@ -249,7 +249,7 @@ When translating you should keep in mind the following things:
                                        $translate_form->print_insert_submit_button( 'apply_changes', 'Apply translation changes to Dragon' ) . "</td>\n" .
                                        "  </tr></table>\n" ) );
 
-      $translate_form->echo_string();
+      $translate_form->echo_string(1);
   }
 
   end_page();

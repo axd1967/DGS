@@ -322,7 +322,7 @@ require_once( "include/form_functions.php" );
       break;
    }
 
-   $message_form->echo_string();
+   $message_form->echo_string(1);
 
    echo "</center>\n";
 

@@ -49,7 +49,7 @@ require_once( "include/form_functions.php" );
    $passwd_form->add_row( array( 'CELL', 2, 'align="right"',
                                  'SUBMITBUTTON', 'goback', T_("Go back"),
                                ) );
-   $passwd_form->echo_string();
+   $passwd_form->echo_string(1);
 
    echo "</center>\n";
    end_page();
