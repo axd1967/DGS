@@ -130,7 +130,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             make_html_safe($Name) . "</font></a></td>\n";
          echo "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
             make_html_safe($Handle) . "</font></a></td>\n";
-         echo "<td nowrap>" . echo_rating($Rating) . "</td>\n";
+         echo "<td nowrap>" . echo_rating($Rating) . "&nbsp;</td>\n";
          if( empty($Comment) ) $Comment = '&nbsp;';
          echo "<td nowrap>" . make_html_safe($Comment, true) . "</td>\n";
          echo "<td nowrap>" . $handi_array[$Handicaptype] . "</td>\n";

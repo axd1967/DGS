@@ -162,7 +162,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          echo "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
             make_html_safe($Handle) . "</font></a></td>\n";
       if( (1 << 15) & $column_set )
-         echo "<td>" . echo_rating($Rating) . "</td>\n";
+         echo "<td>" . echo_rating($Rating) . "&nbsp;</td>\n";
       if( (1 << 4) & $column_set )
          echo "<td align=center><img src=\"17/$color.gif\" alt=$color></td>\n";
       if( (1 << 5) & $column_set )
