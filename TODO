@@ -64,6 +64,8 @@ SMALLER TASKS
 
 * Show time for last move in show_games.php and status.php.
 
+* Make it possible to add comments to the sgf file.
+
 BUGS
 ----
 
