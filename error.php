@@ -371,7 +371,8 @@ require( "include/std_functions.php" );
       /* Should show information about how to become a translator */
       case("not_translator"):
       {
-        echo T_("Sorry, only translators are allowed to translate.");
+         echo T_("Sorry, only translators are allowed to translate.") . '<p>' .
+            T_("If you want to help translating dragon, please post a message to the 'translation' forum.");
       }
       break;
 
