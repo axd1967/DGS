@@ -68,10 +68,9 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
         disable_cache();
     
     ob_start();
-echo '
+echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
-  <HEAD>
-';
+  <HEAD>';
 
 //   if( $no_cache )
 //       {
@@ -86,17 +85,17 @@ echo '
   </HEAD>
   <BODY bgcolor="F7F5E3">
 
-    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=#0C41C9>
+    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=0C41C9>
         <tr>
-          <td colspan="3" width="50%">
-          <A href="' . $HOSTBASE . '/index.php"><B><font color=#FFFC70>Dragon Go Server</font></B></A></td>
+          <td colspan=3 width="50%">
+          <A href="' . $HOSTBASE . '/index.php"><B><font color=FFFC70>Dragon Go Server</font></B></A></td>
 ';
 
 
 if( $logged_in ) 
-    echo '          <td colspan="3" align="right" width="50%"><font color=#FFFC70><B>Logged in as: ' . $player_row["Handle"] . ' </B></font></td>';
+    echo '          <td colspan=3 align=right width="50%"><font color=FFFC70><B>Logged in as: ' . $player_row["Handle"] . ' </B></font></td>';
 else
-    echo '          <td colspan="3" align="right" width="50%"><font color=#FFFC70><B>Not logged in</B></font></td>';
+    echo '          <td colspan=3 align=right width="50%"><font color=FFFC70><B>Not logged in</B></font></td>';
 
 echo '
         </tr>
@@ -124,17 +123,17 @@ function end_page( $new_paragraph = true )
     if( $new_paragraph )
         echo "<p>";
 echo '
-    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=#0C41C9>
+    <table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=0C41C9>
       <tr>
         <td align="left" width="50%">
-          <A href="' . $HOSTBASE . '/index.php"><font color=#FFFC70><B>Dragon Go Server</B></font></A></td>
+          <A href="' . $HOSTBASE . '/index.php"><font color=FFFC70><B>Dragon Go Server</B></font></A></td>
         <td align="right" width="50%">';
  if( $show_time )
      echo '
-        <font color=#FFFC70><B>Page created in ' . 
+        <font color=FFFC70><B>Page created in ' . 
          sprintf ("%0.5f", getmicrotime() - $time) . '&nbsp;s</B></font></td>';
  else
-     echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=#FFFC70><B>Logout</B></font></A></td>';
+     echo '<A href="' . $HOSTBASE . '/index.php?logout=t"><font color=FFFC70><B>Logout</B></font></A></td>';
 
  echo '
       </tr>

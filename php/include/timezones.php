@@ -16,27 +16,25 @@ function html_build_select_box_from_array ($vals,$select_name,$checked_val='xzxz
       The third parameter is optional. Pass the value of the item that should be checked
 	*/
 
-	$return .= '
-		<SELECT NAME="'.$select_name.'">';
+	$return .= "\n<SELECT NAME=\"$select_name\">";
 
 	$rows=count($vals);
 
 	for ($i=0; $i<$rows; $i++) {
 		if ( $samevals ) {
-			$return .= "\n\t\t<OPTION VALUE=\"" . $vals[$i] . "\"";
+			$return .= "\n<OPTION VALUE=\"" . $vals[$i] . "\"";
 			if ($vals[$i] == $checked_val) {
 				$return .= ' SELECTED';
 			}
 		} else {
-			$return .= "\n\t\t<OPTION VALUE=\"" . $i .'"';
+			$return .= "\n<OPTION VALUE=\"" . $i .'"';
 			if ($i == $checked_val) {
 				$return .= ' SELECTED';
 			}
 		}
 		$return .= '>'.$vals[$i].'</OPTION>';
 	}
-	$return .= '
-		</SELECT>';
+	$return .= "\n</SELECT>";
 
 	return $return;
 }

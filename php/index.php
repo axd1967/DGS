@@ -39,12 +39,12 @@ start_page("Home", true, $logged_in, $player_row );
 ?>
     
 <center>
-<IMG  width=666 height=172  border=0 alt='Dragon Go Server' align="center" SRC="images/dragon_logo.jpg">
+<IMG  width=666 height=172  border=0 alt='Dragon Go Server' SRC="images/dragon_logo.jpg">
 <BR>
 <BR>
     <FORM name="loginform" action="login.php" method="POST">
 
-      <B><font size=+0>Please login.</font></B><font color="red"> To look around, use 'guest' / 'guest'.</font>
+      <B><font size="+0">Please login.</font></B><font color="red"> To look around, use 'guest' / 'guest'.</font>
       <TABLE>
 
           <TR>

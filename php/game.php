@@ -327,7 +327,7 @@ else if( $action == 'done' or $action == 'handicap' )
 if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0))
 {
 ?>
-      </tr><tr>
+      <tr>
           <td>Main Time:</td><td> <?php echo_time( $White_Maintime );?></td>
           <td><?php echo_time( $Black_Maintime );?> </td>
         </tr>
@@ -336,7 +336,7 @@ if( $Black_Byotime > 0 or $White_Byotime > 0 )
     {
 ?>
 
-      </tr><tr>
+      <tr>
           <td>Byoyomi:</td>
           <td> 
 <?php echo_time( $White_Byotime );
@@ -352,7 +352,7 @@ if( $Black_Byotime > 0 or $White_Byotime > 0 )
 <?php                                                        
     }
 ?>
-      </tr><tr>
+      <tr>
             <td>Time limit:</td><td colspan=2> 
 <?php 
       if ( $Maintime > 0 )
@@ -392,7 +392,7 @@ if( !$enable_message and $Moves > 0 )
     mysql_data_seek($moves_result, 0);
 
 
-echo '<table border=4 cellspacing=0 cellpadding=1 align=center class="moves"><tr align=center><th>Moves</th>
+echo '<table border=4 cellspacing=0 cellpadding=1 align=center bgcolor=66C17B><tr align=center><th>Moves</th>
 ';
 
 $moves_per_row = 20;
@@ -409,7 +409,7 @@ while( $row = mysql_fetch_array($moves_result) )
     $s = $row["Stone"];
     if( $s != BLACK and $s != WHITE ) continue;
     if( $i % $moves_per_row == 0 )
-        echo "</tr>\n<tr align=center><td>$i-" . ($i + $moves_per_row - 1) . "</td>\n";
+        echo "</tr>\n<tr align=center><td>$i-" . ($i + $moves_per_row - 1) . '</td>';
 
     if( $row["PosX"] == -1 )
         $c = 'P';
@@ -425,13 +425,12 @@ while( $row = mysql_fetch_array($moves_result) )
             $c = $col . ($Size - $row["PosY"]);
         }
     if( $i == $move )
-        printf('<td  class="r">%s</td>
-', $c );
+        printf('<td  class=r>%s</td>', $c );
     else if( $s == BLACK )        
-      printf( '<td><a class="b" href=game.php?gid=%d&move=%d>%s</A></td>
+      printf( '<td><a class=b href="game.php?gid=%d&move=%d">%s</A></td>
 ', $gid, $i, $c );
     else
-      printf( '<td><a class="w" href=game.php?gid=%d&move=%d>%s</A></td>
+      printf( '<td><a class=w href="game.php?gid=%d&move=%d">%s</A></td>
 ', $gid, $i, $c );
 
     $i++;    

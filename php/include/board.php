@@ -26,7 +26,13 @@ function draw_board($Size, &$array, $may_play, $gid,
     if( !$stone_size ) $stone_size = 25;
     if( !$font_size ) $font_size = "+0";
 
-    $str1 = "<td><IMG class=s$stone_size border=0 alt=\"";
+    $font_start = "<font size=\"$font_size\"";
+    $font_end = "</font>";
+
+    if( $font_size == "+0" )
+      $font_start = $font_end = "";
+
+    $str1 = "<td><IMG border=0 alt=\"";
     if( $may_play )
         {
             if( $handi or !$stonestring )
@@ -34,18 +40,18 @@ function draw_board($Size, &$array, $may_play, $gid,
 
             if( $handi )
                 {
-                    $str2 = "<td><A href=game.php?gid=$gid&action=handicap&coord=";
-                    $str3 = "&stonestring=$stonestring><IMG class=s$stone_size border=0 alt=\"";
+                    $str2 = "<td><A href=\"game.php?gid=$gid&action=handicap&coord=";
+                    $str3 = "&stonestring=$stonestring\"><IMG border=0 alt=\"";
                 }
             else if( $stonestring )
                 {
-                    $str2 = "<td><A href=game.php?gid=$gid&action=remove&coord=";
-                    $str3 = "&stonestring=$stonestring><IMG class=s$stone_size border=0 alt=\"";
+                    $str2 = "<td><A href=\"game.php?gid=$gid&action=remove&coord=";
+                    $str3 = "&stonestring=$stonestring\"><IMG border=0 alt=\"";
                 }
             else
                 {
-                    $str2 = "<td><A href=game.php?gid=$gid&action=move&coord=";
-                    $str3 = "><IMG class=s$stone_size border=0 alt=\"";
+                    $str2 = "<td><A href=\"game.php?gid=$gid&action=move&coord=";
+                    $str3 = "\"><IMG border=0 alt=\"";
                 }
         }
     
@@ -62,7 +68,7 @@ function draw_board($Size, &$array, $may_play, $gid,
     $letter = 'a';
     while( $colnr <= $Size )
         {
-            echo '<td align=center><font size=' . $font_size . '><B>' . $letter . '</B></font></td>' . "\n";
+            echo "<td align=center>$font_start<B>$letter</B>$font_end</td>\n";
             $colnr++;
             $letter++;
             if( $letter == 'i' ) $letter++;
@@ -83,7 +89,7 @@ function draw_board($Size, &$array, $may_play, $gid,
 
     for($rownr = $Size; $rownr > 0; $rownr-- )
         {
-            echo '<tr><td align=center><font size=' . $font_size . '><B>' . $rownr . '</B></font></td>' . "\n";
+            echo "<tr><td align=center>$font_start<B>$rownr</B>$font_end</td>\n";
             
             
             $hoshi_r = 0;
@@ -166,10 +172,10 @@ function draw_board($Size, &$array, $may_play, $gid,
                     $letter_c ++;
                 }
 
-            echo '<td align=center><font size=' . $font_size . '><B>' . $rownr . '</B></font></td>' . "\n";
+            echo "<td align=center>$font_start<B>$rownr</B>$font_end</td>\n";
 
             $letter_r++;
-            echo '</tr>' . "\n";
+            echo "</tr>\n";
         }
 
     echo '<tr>
@@ -178,7 +184,7 @@ function draw_board($Size, &$array, $may_play, $gid,
     $letter = 'a';
     while( $colnr <= $Size )
         {
-            echo '<td align=center><font size=' . $font_size . '><B>' . $letter . '</B></font></td>' . "\n";
+            echo "<td align=center>$font_start<B>$letter</B>$font_end</td>\n";
             $colnr++;
             $letter++;
             if( $letter == 'i' ) $letter++;
@@ -186,7 +192,7 @@ function draw_board($Size, &$array, $may_play, $gid,
     echo '<td width=5>&nbsp;</td>
 </tr>
 </table>
-</tr></td></table>
+</td></tr></table>
 ';
 }
 
