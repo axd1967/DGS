@@ -388,10 +388,13 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       error("mysql_insert_move", true);
 
 
-   $result = mysql_query( "UPDATE Games set Consistent='$Consistent' WHERE ID=$gid" );
-
-   if( mysql_affected_rows() != 1 )
-      error("mysql_update_game", true);
+   if( $action != 'delete' )
+   {
+      $result = mysql_query( "UPDATE Games set Consistent='$Consistent' WHERE ID=$gid" );
+      
+      if( mysql_affected_rows() != 1 )
+         error("mysql_update_game", true);
+   }
     
    if( $game_finished )
    {
