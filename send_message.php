@@ -187,6 +187,9 @@ disable_cache();
       if( mysql_affected_rows() != 1)
          error("mysql_start_game");
 
+      mysql_query( "UPDATE Players SET Running=Running+1 " .
+                   "WHERE ID=$my_ID OR ID=$opponent_ID" );
+
       $subject = "Game invitation accepted";
    }
    else if( $type == "Decline" )

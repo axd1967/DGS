@@ -19,8 +19,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require( "include/std_functions.php" );
-require( "include/board.php" );
-require( "include/move.php" );
+include( "include/board.php" );
+include( "include/move.php" );
+include( "include/rating.php" );
 
 disable_cache();
 
@@ -455,6 +456,18 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                    "Game_ID=$gid, Subject='$Subject', Text='$Text'");
 
       update_rating($gid);
+
+      mysql_query( "UPDATE Players " .
+                   "SET Running=Running-1, Finished=Finished+1" .
+                   ($score > 0 ? ", Win=Win+1" : ($score < 0 ? ", Lost=Lost+1 " : "")) .
+                    " WHERE ID=$White_ID" );
+                    
+      mysql_query( "UPDATE Players " .
+                   "SET Running=Running-1, Finished=Finished+1" .
+                   ($score < 0 ? ", Win=Win+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
+                    " WHERE ID=$Black_ID" );
+                    
+                    
    }
 
 
