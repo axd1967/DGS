@@ -39,11 +39,13 @@ define("LINK_SEARCH",16);
 define("LINK_MARK_READ",32);
 define("LINK_PREV_PAGE",1024);
 define("LINK_NEXT_PAGE",2048);
+define("LINK_TOGGLE_EDITOR",4096);
+define("LINK_TOGGLE_EDITOR_LIST",8192);
 
 
-function make_link_array( $links)
+function make_link_array($links)
 {
-   global $link_array_left, $link_array_right, $forum;
+   global $link_array_left, $link_array_right, $forum, $offset, $RowsPerPage;
 
    $link_array_left = $link_array_right = array();
 
@@ -62,11 +64,19 @@ function make_link_array( $links)
       $link_array_left["Mark All Read"] = "";
 
    if( $links & LINK_PREV_PAGE )
-      $link_array_right["Prev Page"] = "test$prev_page";
+      $link_array_right["Prev Page"] = "list.php?forum=$forum&offset=".($offset-$RowsPerPage);
    if( $links & LINK_NEXT_PAGE )
-      $link_array_right["Next Page"] = "$next_page";
+      $link_array_right["Next Page"] = "list.php?forum=$forum&offset=".($offset+$RowsPerPage);
 
-
+   if( ($links & LINK_TOGGLE_EDITOR) or ($links & LINK_TOGGLE_EDITOR_LIST) )
+   {
+      $get = $_GET;
+      $get['editor'] = ( $_COOKIE['forumeditor'] == 'y'? 'n' : 'y' );
+      $link_array_right["Toggle forum editor"] =
+         ($links & LINK_TOGGLE_EDITOR ?
+          make_url( "read.php", false, $get ) :
+          make_url( "list.php", false, $get ) );
+   }
 }
 
 function start_table(&$headline, &$links, $width, $cols)
@@ -145,17 +155,21 @@ function get_new_string($Lastchangedstamp, $Lastread)
    return $new;
 }
 
-function message_box($forum, $parent=-1, $thread='', $Subject='', $Text='')
+function message_box( $post_type, $id, $Subject='', $Text='')
 {
-   if( strlen($Subject) > 0 and strcasecmp(substr($Subject,0,3), "re:") != 0 )
+   global $forum, $thread;
+
+   if( $post_type != 'edit' and strlen($Subject) > 0 and
+       strcasecmp(substr($Subject,0,3), "re:") != 0 )
       $Subject = "RE: " . $Subject;
 
    echo "<ul>\n";
+
    $form = new Form( 'messageform', "read.php#preview", FORM_POST );
 
    $form->add_row( array( 'DESCRIPTION', T_('Subject'),
                           'TEXTINPUT', 'Subject', 50, 80, $Subject,
-                          'HIDDEN', 'parent', $parent,
+                          'HIDDEN', ($post_type == 'edit' ? 'edit' : 'parent'), $id,
                           'HIDDEN', 'thread', $thread,
                           'HIDDEN', 'forum', $forum ));
    $form->add_row( array( 'SPACE', 'TEXTAREA', 'Text', 70, 25, $Text ) );
@@ -165,19 +179,41 @@ function message_box($forum, $parent=-1, $thread='', $Subject='', $Text='')
    echo "</ul>\n";
 }
 
-function forum_name($forum)
+function forum_name($forum, &$moderated)
 {
    if( !($forum > 0) )
       error("unknown_forum");
 
-   $result = mysql_query("SELECT Name AS Forumname FROM Forums WHERE ID=$forum");
+   $result = mysql_query("SELECT Name AS Forumname, Unmoderated FROM Forums WHERE ID=$forum");
 
    if( mysql_num_rows($result) != 1 )
       error("unknown_forum");
 
    $row = mysql_fetch_array($result);
 
+   $moderated = ($row['Unmoderated'] == 'N');
    return $row["Forumname"];
+}
+
+function toggle_editor_cookie()
+{
+   global $NOW, $SUB_PATH;
+
+   if( ($_GET['editor'] === 'y' and $_COOKIE['forumeditor'] !== 'y') or
+       ($_GET['editor'] === 'n' and $_COOKIE['forumeditor'] === 'y'))
+      {
+         if( $_COOKIE['forumeditor'] == 'y' )
+            setcookie ("forumeditor", '', $NOW-3600, "$SUB_PATH" );
+         else
+            setcookie ("forumeditor", 'y', $NOW+3600, "$SUB_PATH" );
+         $_COOKIE['forumeditor'] = $_GET['editor'];
+      }
+}
+
+function approve_message($id, $thread, $approve=true)
+{
+   mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "' " .
+               "WHERE ID=$id AND Thread_ID=$thread LIMIT 1");
 }
 
 ?>

@@ -45,13 +45,15 @@ require( "forum_functions.php" );
      echo "<center>\n";
 
 
-     $forum_edit_form = new Form( 'forumform', "admin.php?do_new=t&id=$id", FORM_POST );
+     $forum_edit_form = new Form( 'forumform', "admin.php?do_new=t&id=0", FORM_POST );
 
      $forum_edit_form->add_row( array( 'HEADER', T_('New Forum') ) );
      $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
                                        'TEXTINPUT', 'name', 50, 80, '' ) );
      $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
                                        'TEXTAREA', 'description', 50, 4, '' ) );
+     $forum_edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
+                                       'CHECKBOX', 'moderated', 1, '', false));
      $forum_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
      $forum_edit_form->echo_string();
 
@@ -77,12 +79,13 @@ require( "forum_functions.php" );
      if( !empty($name) and !empty($description))
      {
         mysql_query("UPDATE Forums SET SortOrder=SortOrder+1 " .
-                    'WHERE SortOrder>' . $row["SortOrder"] );
+                    'WHERE SortOrder>' . $SortOrder );
 
         mysql_query("INSERT INTO Forums SET " .
                     "Name=\"$name\", " .
                     "Description=\"$description\", " .
-                    "SortOrder=" . ($row["SortOrder"]+1));
+                    "Unmoderated=" . ($moderated ? '"N"' : '"Y"') . ", " .
+                    "SortOrder=" . ($SortOrder+1));
      }
 
      jump_to("forum/admin.php");
@@ -110,6 +113,8 @@ require( "forum_functions.php" );
                                        'TEXTINPUT', 'name', 50, 80, $row['Name'] ) );
      $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
                                        'TEXTAREA', 'description', 50, 4, $row['Description'] ) );
+     $forum_edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
+                                       'CHECKBOX', 'moderated', 1, '', $row['Unmoderated'] == 'N'));
      $forum_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
      $forum_edit_form->echo_string();
 
@@ -146,8 +151,11 @@ require( "forum_functions.php" );
      }
      else
      {
-        mysql_query("UPDATE Forums SET Name=\"$name\", Description=\"$description\" " .
-                    "WHERE ID=" . $row['ID']);
+        mysql_query("UPDATE Forums SET ".
+                    "Name=\"$name\", " .
+                    "Description=\"$description\", " .
+                    "Unmoderated=" . ($moderated ? '"N"' : '"Y"') . " " .
+                    "WHERE ID=" . $row['ID'] . " LIMIT 1");
      }
 
      jump_to("forum/admin.php");
@@ -178,7 +186,7 @@ require( "forum_functions.php" );
         mysql_query( "UPDATE Forums SET SortOrder=SortOrder-($dir) " .
                      'WHERE SortOrder=' . ($row["SortOrder"]+$dir) );
         mysql_query( "UPDATE Forums SET SortOrder=SortOrder+($dir) " .
-                     "WHERE ID=" . $row["ID"] );
+                     "WHERE ID=" . $row["ID"] . " LIMIT 1");
      }
      jump_to("forum/admin.php");
   }
@@ -206,7 +214,7 @@ require( "forum_functions.php" );
      echo "<table>\n";
 
 
-     echo "<tr><td colspan=4 align=right><a href=\"admin.php?new=t&id=1\">" .
+     echo "<tr><td colspan=4 align=right><a href=\"admin.php?new=t&id=0\">" .
         '<img border=0 title="' . T_('Add new forum') . '" src="../images/new.png"></a>';
 
      while( $row = mysql_fetch_array( $result ) )

@@ -19,46 +19,75 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-include("forum_functions.php");
-include("post.php");
+require_once("forum_functions.php");
+require_once("post.php");
 
-function draw_post($reply_link=true)
+
+function draw_post($post_type, $my_post, $Subject, $Text)
 {
-   global $Subject, $Text, $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle,
-      $thread, $Timestamp, $date_fmt, $Lastread;
+   global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
+      $thread, $Timestamp, $date_fmt, $Lastread, $is_editor, $NOW, $player_row, $cur_depth;
 
-   $txt = make_html_safe($Text, true);
+   $post_colors = array( 'normal' => 'cccccc',
+                         'hidden' => 'eecccc',
+                         'reply' => 'cccccc',
+                         'preview' => 'cceecc',
+                         'edit' => 'eeeecc' );
+
+   $txt = make_html_safe(trim($Text), true);
+
+   if( $post_type == 'preview' )
+   {
+      $txt = make_html_safe(trim($_POST['Text']), true);
+      change_depth( $cur_depth, $cur_depth + 1 );
+   }
+
    if( strlen($txt) == 0 ) $txt = '&nbsp';
 
    $color = "ff0000";
    $new = get_new_string($Timestamp, $Lastread);
 
-   echo "<tr><td bgcolor=cccccc><a name=\"$ID\"><font size=\"+1\"><b>" .
-      make_html_safe($Subject) . "</b></font>$new</a><br> " . T_('by') .
-      " <a href=\"$HOSTBASE/userinfo.php?uid=$User_ID\">" . make_html_safe($Name) .
-      " ($Handle)</a>" .
-      ' &nbsp;&nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp) . '</td></tr>
-<tr><td bgcolor=white>' . $txt . '</td></tr>
-';
-   if( $reply_link )
-      echo "<tr><td bgcolor=white align=left><a href =\"read.php?forum=$forum&thread=$thread&reply=$ID#$ID\">[ " . T_('reply') . " ]</a></td></tr>\n";
+
+   if( $post_type == 'preview' )
+      echo "<tr><td bgcolor=cceecc><a name=\"preview\"><font size=\"+1\"><b>" .
+         make_html_safe(trim($_POST['Subject'])) . "</b></font></a><br> " . T_('by') .
+         " <a href=\"$HOSTBASE/userinfo.php?uid=" . $player_row['ID'] . '">' .
+         make_html_safe($player_row['Name']) . ' (' . $player_row['Handle'] . ')</a>' .
+         ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n" .
+         '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
+   else
+   {
+      echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
+         "\"><a name=\"$ID\"><font size=\"+1\"><b>" .
+         make_html_safe($Subject) . "</b></font>$new</a><br> " . T_('by') .
+         " <a href=\"$HOSTBASE/userinfo.php?uid=$User_ID\">" . make_html_safe($Name) .
+         " ($Handle)</a>" . ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
+      if( $Lastedited > 0 )
+         echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?revision_history=$ID\">" . T_('edited') .
+            "</a> " . date($date_fmt, $Lasteditedstamp) . ")";
+      echo "</td></tr>\n" .
+         '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
+   }
+
+   if( $post_type == 'normal' or $post_type == 'hidden' )
+   {
+      $hidden = $post_type == 'hidden';
+      echo "<tr><td bgcolor=white align=left>";
+      if(  $post_type == 'normal' ) // reply link
+         echo "<a href =\"read.php?forum=$forum&thread=$thread&reply=$ID#$ID\">[ " .
+            T_('reply') . " ]</a>&nbsp;&nbsp;";
+      if( $my_post ) // edit link
+         echo "<a href =\"read.php?forum=$forum&thread=$thread&edit=$ID#$ID\">" .
+            "<font color=\"#ee6666\">[ " . T_('edit') . " ]</font></a>&nbsp;&nbsp;";
+      if( $is_editor ) // hide/show link
+         echo "<a href =\"read.php?forum=$forum&thread=$thread&" .
+            ( $hidden ? 'show' : 'hide' ) . "=$ID#$ID\"><font color=\"#ee6666\">[ " .
+            ( $hidden ? T_('show') : T_('hide') ) . " ]</font></a>";
+
+      echo "</td></tr>\n";
+   }
 }
 
-function draw_preview_post($reply_link=true)
-{
-   global $player_row, $NOW, $date_fmt, $HOSTBASE;
-
-   $txt = make_html_safe(trim($_POST['Text']), true);
-   if( strlen($txt) == 0 ) $txt = '&nbsp';
-
-   echo "<tr><td bgcolor=cceecc><a name=\"preview\"><font size=\"+1\"><b>" .
-      make_html_safe(trim($_POST['Subject'])) . "</b></font></a><br> " . T_('by') .
-      " <a href=\"$HOSTBASE/userinfo.php?uid=" . $player_row['ID'] . '">' .
-      make_html_safe($player_row['Name']) . ' (' . $player_row['Handle'] . ')</a>' .
-      ' &nbsp;&nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . '</td></tr>
-<tr><td bgcolor=white>' . $txt . '</td></tr>
-';
-}
 
 function change_depth(&$cur_depth, $new_depth)
 {
@@ -80,6 +109,7 @@ function change_depth(&$cur_depth, $new_depth)
    $forum = $_REQUEST['forum']+0;
    $thread = $_REQUEST['thread']+0;
    $reply = $_GET['reply']+0;
+   $edit = $_REQUEST['edit']+0;
 
    connect2mysql();
 
@@ -88,6 +118,8 @@ function change_depth(&$cur_depth, $new_depth)
    if( !$logged_in and ( ($reply > 0) or isset($_POST['post']) ) )
       error("not_logged_in");
 
+   $Forumname = forum_name($forum, $moderated);
+
    if( isset($_POST['post']) )
    {
       post_message($player_row);
@@ -95,16 +127,29 @@ function change_depth(&$cur_depth, $new_depth)
    }
 
    $preview = isset($_POST['preview']);
-
-   $Forumname = forum_name($forum);
-
-   start_page("Reading forum $Forumname", true, $logged_in, $player_row );
-
-   echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
+   $preview_ID = ($edit > 0 ? $edit : $_POST['parent']);
 
    $cols=2;
-   $headline = array("Reading thread" => "colspan=$cols");
+   $headline = array(T_("Reading thread") => "colspan=$cols");
    $links = LINK_FORUMS | LINK_THREADS;
+
+   if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
+   {
+      $links |= LINK_TOGGLE_EDITOR;
+
+      if( $_GET['show'] > 0 )
+         approve_message( $_GET['show'], $thread, true );
+      else if( $_GET['hide'] > 0 )
+         approve_message( $_GET['hide'], $thread, false );
+
+      toggle_editor_cookie();
+
+      $is_editor = ($_COOKIE['forumeditor'] === 'y');
+   }
+
+   start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
+
+   echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
 
    start_table($headline, $links, 'width="99%"', $cols);
 
@@ -116,8 +161,9 @@ function change_depth(&$cur_depth, $new_depth)
 
    $result = mysql_query("SELECT Posts.*, " .
                          "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
+                         "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
                          "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
-                         "Players.Name, Players.Handle " .
+                         "Players.ID AS uid, Players.Name, Players.Handle " .
                          "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
                          "ORDER BY PosIndex");
@@ -130,6 +176,11 @@ function change_depth(&$cur_depth, $new_depth)
       $Name = '?';
       extract($row);
 
+      $hidden = ($Approved == 'N' or ($Approved == 'Y' and $moderated));
+
+      if( $hidden and !$is_editor )
+         continue;
+
       if( $thread_ID == $ID )
          $thread_Subject = $Subject;
 
@@ -138,32 +189,56 @@ function change_depth(&$cur_depth, $new_depth)
       if( !$Lastchangedthread )
          $Lastchangedthread = $Lastchangedstamp;
 
-      draw_post($reply != $ID);
+
+
+      $post_type = 'normal';
+
+      if( $hidden )
+         $post_type = 'hidden';
 
       if( $reply == $ID )
-      {
-         echo "<tr><td>\n";
-         message_box($forum, $ID, $thread, $Subject);
-         echo "</td></tr>\n";
-      }
-      else if( $preview and $parent==$ID )
+         $post_type = 'reply';
+
+      if( $edit == $ID )
+         $post_type = 'edit';
+
+      draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text);
+
+      if( $preview and $preview_ID == $ID )
       {
          change_depth( $cur_depth, $cur_depth + 1 );
-         draw_preview_post();
+         $Subject = $_POST['Subject'];
+         $Text = $_POST['Text'];
+         draw_post('preview', false, $Subject, $Text);
+      }
+
+      if( $post_type != 'normal' and $post_type != 'hidden' )
+      {
+         if( $post_type == 'reply' ) $Text = '';
          echo "<tr><td>\n";
-         message_box($forum, $ID, $thread, $_POST['Subject'], $_POST['Text']);
+         message_box($post_type, $ID, $Subject, $Text);
          echo "</td></tr>\n";
       }
    }
 
+   if( $preview and $preview_ID == 0 )
+   {
+      $Subject = $_POST['Subject'];
+      $Text = $_POST['Text'];
+      draw_post('preview', false, $Subject, $Text);
+      echo "<tr><td>\n";
+      message_box($post_type, $thread, $Subject, $Text);
+      echo "</td></tr>\n";
+   }
+
    change_depth($cur_depth, 1);
 
-   if( !($reply > 0) and !$preview)
+   if( !($reply > 0) and !$preview and !($edit>0))
    {
       echo "<tr><td>\n";
       if( $thread > 0 )
          echo '<hr>';
-      message_box($forum, $thread, $thread, $thread_Subject);
+      message_box('normal', $thread, $thread_Subject);
       echo "</td></tr>\n";
    }
 

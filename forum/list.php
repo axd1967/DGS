@@ -26,9 +26,11 @@ require("forum_functions.php");
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-   $Forumname = forum_name($forum);
+   $Forumname = forum_name($forum, $moderated);
 
-   start_page("Forum $Forumname", true, $logged_in, $player_row );
+   start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
+
+   $offset = (isset($_GET['offset']) ? $_GET['offset'] : 0);
 
    $result = mysql_query("SELECT Subject, Posts.Thread_ID, Lastchanged, " .
                          "Posts.User_ID, Replies, Name, " .
@@ -37,18 +39,35 @@ require("forum_functions.php");
                          "FROM Posts LEFT JOIN Players ON Players.ID=Posts.User_ID " .
                          "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
                          " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
-                         "WHERE Forum_ID=$forum AND Depth=1 AND Approved='Y'" .
-                         "ORDER BY Lastchanged desc")
+                         "WHERE Forum_ID=$forum AND Depth=1 " .
+                         "ORDER BY Lastchanged desc LIMIT $offset,$MaxRowsPerPage")
    or die(mysql_error());
 
+   $show_rows = $nr_rows = mysql_num_rows($result);
+   if( $nr_rows == $MaxRowsPerPage )
+      $show_rows = $RowsPerPage;
+
    $cols = 4;
-   $headline = array("Thread"=>"width=50%","Author"=>"width=20%",
-                     "Replies"=>"width=10%  align=center","Date"=>"width=20%");
+   $headline = array(T_("Thread")=>"width=50%",T_("Author")=>"width=20%",
+                     T_("Replies")=>"width=10%  align=center",T_("Date")=>"width=20%");
    $links = LINK_FORUMS | LINK_NEW_TOPIC;
+
+   if( $offset > 0 )
+      $links |= LINK_PREV_PAGE;
+   if( $show_rows < $nr_rows )
+      $links |= LINK_NEXT_PAGE;
+
+   if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
+   {
+      $links |= LINK_TOGGLE_EDITOR_LIST;
+      toggle_editor_cookie();
+      $is_editor = ($_COOKIE['forumeditor'] === 'y');
+   }
+
    start_table($headline, $links, "width=98%", $cols);
 
    $odd = true;
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysql_fetch_array( $result ) and $show_rows > 0)
    {
       $Name = '?';
       $Lastread = NULL;
@@ -59,6 +78,7 @@ require("forum_functions.php");
       $color = ( $odd ? "" : " bgcolor=white" );
       echo "<tr$color><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a>$new</td><td>" . make_html_safe($Name) . "</td><td align=center>" . ($Replies-1) . "</td><td nowrap>$Lastchanged</td></tr>\n";
       $odd = !$odd;
+      $show_rows--;
    }
 
    end_table($links, $cols);

@@ -390,6 +390,7 @@ CREATE TABLE Posts (
   Forum_ID int(11) NOT NULL default '0',
   Time datetime default NULL,
   Lastchanged datetime default NULL,
+  Lastedited datetime default NULL,
   Subject varchar(80) default NULL,
   Text text,
   User_ID int(11) default NULL,
@@ -401,6 +402,7 @@ CREATE TABLE Posts (
   crc32 int(11) default NULL,
   PosIndex varchar(80) binary default NULL,
   old_ID int(11) default '0',
+  Approved char(1) NOT NULL default 'Y',
   PRIMARY KEY  (ID),
   KEY Pos (Thread_ID,PosIndex)
 ) TYPE=MyISAM;

@@ -25,8 +25,45 @@ function post_message($player_row)
 
    $forum = $_POST['forum']+0;
    $parent = $_POST['parent']+0;
+   $edit = $_POST['edit']+0;
 
-   if( $parent > 0 )
+   $Text = trim($_POST['Text']);
+   $Subject = trim($_POST['Subject']);
+
+   // -------   Edit old post  ----------
+
+   if( $edit > 0 )
+   {
+      $result = mysql_query("SELECT Subject,Text,Time FROM Posts WHERE ID=$edit")
+         or error("unknown_parent_post");
+
+       if( mysql_num_rows($result) != 1 )
+         error("unknown_parent_post");
+
+       $row = mysql_fetch_array($result);
+
+       mysql_query("UPDATE Posts SET " .
+                   "Lastedited=FROM_UNIXTIME($NOW), " .
+                   "Subject=\"$Subject\", " .
+                   "Text=\"$Text\" " .
+                   "WHERE ID=$edit LIMIT 1") or die(mysql_error());
+
+       mysql_query("INSERT INTO Posts SET " .
+                   'Time="' . $row['Time'] .'", ' .
+                   "Parent_ID=$edit, " .
+                   "Forum_ID=" . $row['Forum_ID'] . ", " .
+                   "User_ID=" . $player_row['ID'] . ", " .
+                   'Subject="' . $row['Subject'] . '", ' .
+                   'Text="' . $row['Text'] . '"') or die(mysql_error());
+
+       return;
+   }
+
+
+
+   // -------   Reply  ----------
+
+   else if( $parent > 0 )
    {
       $result = mysql_query("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
                             "WHERE ID=$parent AND Forum_ID=$forum")
@@ -44,6 +81,10 @@ function post_message($player_row)
 
       if( !($answer_nr > 0) ) $answer_nr=0;
    }
+
+
+   // -------   New thread  ----------
+
    else
    {
       // New thread
@@ -55,8 +96,6 @@ function post_message($player_row)
 
    $PosIndex .= $order_str[$answer_nr];
    $Depth++;
-   $Text = trim($_POST['Text']);
-   $Subject = trim($_POST['Subject']);
 
    $query = "INSERT INTO Posts SET " .
        "Forum_ID=$forum, " .
