@@ -18,9 +18,15 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-//Rod: Warning: Here, $base_path is not already defined
+/*>>Rod: Warning: Here, $base_path was used but not needed (because
+    translation_functions.php is only included from std_functions.php with include/ path)
+    Hopefully, $base_path was initially undefined at this point.
 if( file_exists($base_path . "translations/known_languages.php") )
    include( $base_path . "translations/known_languages.php" );
+*/
+//if( file_exists( "translations/known_languages.php") )
+   include( "translations/known_languages.php" );
+
 
 function T_($string)
 {
@@ -35,7 +41,7 @@ function T_($string)
 
 function include_all_translate_groups($player_row=null)
 {
-   global $TranslateGroups, $known_languages, $base_path, $time;
+   global $TranslateGroups, $known_languages, $base_path;
 
    if( !file_exists($base_path . "translations/known_languages.php") )
    {
