@@ -3,6 +3,7 @@
 $TranslateGroups[] = "Countries";
 
 // ISO 3166 code => Name
+//plus some international languages
 
 // The comments are required for 'scripts/generate_translation_texts.php'.
 
@@ -64,6 +65,7 @@ $COUNTRIES = array(
    'sv' => 'El Salvador', // T_('El Salvador')
    'gq' => 'Equatorial Guinea', // T_('Equatorial Guinea')
    'er' => 'Eritrea', // T_('Eritrea')
+   'eo' => 'Esperanto', // T_('Esperanto') //international language
    'ee' => 'Estonia', // T_('Estonia')
    'et' => 'Ethiopia', // T_('Ethiopia')
    'fj' => 'Fiji', // T_('Fiji')
@@ -87,6 +89,7 @@ $COUNTRIES = array(
    'is' => 'Iceland', // T_('Iceland')
    'in' => 'India', // T_('India')
    'id' => 'Indonesia', // T_('Indonesia')
+   'ia' => 'Interlingua', // T_('Interlingua') //international language
    'ir' => 'Iran', // T_('Iran')
    'iq' => 'Iraq', // T_('Iraq')
    'ie' => 'Ireland', // T_('Ireland')
