@@ -24,6 +24,27 @@ require( "include/std_functions.php" );
 require( "include/board.php" );
 require( "include/move.php" );
 
+function jump_to_next_game($id, $Lastchanged, $gid)
+{
+  $result = mysql_query("SELECT ID FROM Games " .
+                        "WHERE ToMove_ID=$id "  . 
+                        "AND Status!='INVITED' AND Status!='FINISHED' " .
+                        "AND ( Lastchanged > $Lastchanged " .
+                              "OR ( Lastchanged = $Lastchanged AND ID>$gid )) " .
+                        "ORDER BY Lastchanged,ID " .
+                        "LIMIT 1");
+
+    if( mysql_num_rows($result) != 1 )
+        {
+            header("Location: status.php");
+            exit;
+        }
+    $row = mysql_fetch_array($result);
+
+    header("Location: game.php?gid=" . $row["ID"]);
+    exit;
+}
+
 if( !$gid )
 {
     header("Location: error.php?err=no_game_nr");
@@ -60,6 +81,12 @@ if(  mysql_num_rows($result) != 1 )
 }
 
 extract(mysql_fetch_array($result));
+
+if( $next == 'Skip to next game' )
+{
+  jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
+}
+
 
 if( $player_row["ID"] != $ToMove_ID )
 {
@@ -479,22 +506,7 @@ if( $next == "Submit and go to status" )
 }
 else if( $next == "Submit and go to next game" )
 {
-    $result = mysql_query("SELECT ID FROM Games " .
-                          "WHERE ToMove_ID=" . $player_row["ID"]  . 
-                          " AND Status!='INVITED' AND Status!='FINISHED' " .
-                          "AND Lastchanged >= $Lastchanged " .
-                          "ORDER BY Lastchanged " .
-                          "LIMIT 1");
-
-    if( mysql_num_rows($result) != 1 )
-        {
-            header("Location: status.php");
-            exit;
-        }
-    $row = mysql_fetch_array($result);
-
-    header("Location: game.php?gid=" . $row["ID"]);
-    exit;
+  jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
 }
 
 header("Location: game.php?gid=$gid");

@@ -441,6 +441,7 @@ echo "</tr></table>";
 if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' or 
     $action == 'handicap' )
 {
+  $width="100%";
 echo '
     <p>
     <table width="100%" border=0 cellspacing=0 cellpadding=4>
@@ -448,31 +449,38 @@ echo '
 ';
 if( $action == 'choose_move' )
     {
-      $width= ( $Moves < 4+$Handicap ? '25%' : '33%' );
+      $width= ( $Moves < 4+$Handicap ? '20%' : '25%' );
 
-      echo "<td width=$width><B><A href=\"game.php?gid=$gid&action=pass\">Pass</A></B></td>\n";
+      echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=pass\">Pass</A></B></td>\n";
 
       if( $Moves < 4+$Handicap )
-        echo "<td width=25%><B><A href=\"game.php?gid=$gid&action=delete\">Delete game</A></B></td>\n";
+        echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=delete\">Delete game</A></B></td>\n";
     }
 else if( $action == 'remove' )
     {
-   echo "<td width=25%><B><A href=\"game.php?gid=$gid&action=done&stonestring=$stonestring\">Done</A></B></td>
-<td width=25%><B><A href=\"game.php?gid=$gid&action=choose_move\">Resume playing</A></B></td>\n";
-   $width="25%";
+      $width="25%";
+      echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=done&stonestring=$stonestring\">Done</A></B></td>\n";
+      echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=choose_move\">Resume playing</A></B></td>\n";
+
     }
 else if( $action == 'handicap' )
   {
-    echo "<td width=50%><B><A href=\"game.php?gid=$gid&action=delete\">Delete game</A></B></td>\n";
-    $width="50%";
+    $width="33%";
+    echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=delete\">Delete game</A></B></td>\n";
+
   }
 
-echo "<td><B><A href=\"sgf.php?gid=$gid\">Download sgf</A></B></td>\n";
+echo "<td width=\"$width\"><B><A href=\"sgf.php?gid=$gid\">Download sgf</A></B></td>\n";
 
- if( $action != 'just_looking' and $action != 'handicap' )
-     echo "<td width=$width><B><A href=\"game.php?gid=$gid&action=resign\">Resign</A></B></td>\n";
-echo "
 
+ if( $action == 'choose_move' )
+     echo "<td width=\"$width\"><B><A href=\"game.php?gid=$gid&action=resign\">Resign</A></B></td>\n";
+
+ if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' ) 
+   echo "<td width=\"$width\"><B><A href=\"confirm.php?gid=$gid&next=Skip+to+next+game\">Skip to next game</A></B></td>\n";
+
+
+echo"
       </tr>
     </table>
 ";
