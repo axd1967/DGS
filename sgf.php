@@ -19,7 +19,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/rating.php" );
 
 
 {
@@ -30,7 +31,7 @@ require( "include/std_functions.php" );
 
    $use_HA = false;
    $use_AB_for_handicap = true;
-//$rules = "New Zealand";
+
    $sgf_version = 3;
 
    if( !$gid )
@@ -48,10 +49,10 @@ require( "include/std_functions.php" );
                           'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
                           'black.Name AS Blackname, ' .
                           'black.Handle AS Blackhandle, ' .
-                          'black.Rank AS Blackrank, ' .
+                          'black.Rating2 AS Blackrating, ' .
                           'white.Name AS Whitename, ' .
                           'white.Handle AS Whitehandle, ' .
-                          'white.Rank AS Whiterank ' .
+                          'white.Rating2 AS Whiterating ' .
                           'FROM Games, Players AS black, Players AS white ' .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
 
@@ -73,15 +74,18 @@ require( "include/std_functions.php" );
    echo "(;FF[$sgf_version]GM[1]
 PC[Dragon Go Server: $HOSTBASE]
 DT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]
-PB[$Blackname]
-PW[$Whitename]
-BR[$Blackrank]
-WR[$Whiterank]
-";
+PB[$Blackname ($Blackhandle)]
+PW[$Whitename ($Whitehandle)]\n";
+
+   if( isset($Blackrating) or isset($Whiterating) )
+   {
+      echo "BR[" . ( isset($Blackrating) ? echo_rating($Blackrating, false) : '?' ) . "]\n" .
+         "WR[" . ( isset($Whiterating) ? echo_rating($Whiterating, false) : '?' ) . "]\n";
+   }
 
    if( isset($Score) )
    {
-      echo "RE[" . score2text($Score, false) . "]\n";
+      echo "RE[" . score2text($Score, false, true) . "]\n";
    }
 
    echo "SZ[$Size]\n";

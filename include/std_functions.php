@@ -633,12 +633,12 @@ function make_mysql_safe(&$msg)
    $msg = str_replace("\"", "\\\"", $msg);
 }
 
-function score2text($score, $verbose)
+function score2text($score, $verbose, $draw_for_jigo=false)
 {
    if( !isset($score) )
       $text = "?";
    else if( $score == 0 )
-      $text = "Jigo";
+      $text = ( $draw_for_jigo ? 'Draw' : 'Jigo' );
    else
    {
       $prep = ( abs($score) > 1999 ? 'on' : 'by' );
