@@ -41,7 +41,7 @@ require_once( "include/make_translationfiles.php" );
   $translator_array = explode(',', $player_row['Translator']);
 
   if( !in_array( $translate_lang, $translator_array ) )
-     error('translation_not_correct_language');
+     error('translation_not_correct_language', $translate_lang.':'.$player_row['Translator'].':'.implode("*", $translator_array));
 
   $untranslated = ($group === 'Untranslated phrases');
 
