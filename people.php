@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Docs";
 $TranslateGroups[] = "Users";
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
 
 function add_contributor( $text, $contributor, $uid = -1 )
 {

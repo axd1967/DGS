@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "forum_functions.php" );
+require_once( "forum_functions.php" );
 
 {
   connect2mysql();
@@ -207,7 +207,7 @@ require( "forum_functions.php" );
 
      $result =
         mysql_query("SELECT Forums.ID,Description,Name, " .
-                    "UNIX_TIMESTAMP(MAX(Lastchanged)) AS Timestamp,Count(*) AS Count " .
+                    "UNIX_TIMESTAMP(MAX(Lastchanged)) AS Timestamp " .
                     "FROM Forums LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
                     "GROUP BY Forums.ID " .
                     "ORDER BY SortOrder");

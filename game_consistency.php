@@ -18,9 +18,9 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-require( "include/board.php" );
-require( "include/move.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/board.php" );
+require_once( "include/move.php" );
 
 connect2mysql();
 {

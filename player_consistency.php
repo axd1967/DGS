@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // Checks and fixes errors in Running, Finished, Won and Lost fields in the database.
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
 
 {
    connect2mysql();

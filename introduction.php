@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Start";
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
 
 connect2mysql();
 

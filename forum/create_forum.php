@@ -19,8 +19,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-require("forum_functions.php");
-require("../include/form_functions.php");
+require_once("forum_functions.php");
+require_once("../include/form_functions.php");
 
 {
    connect2mysql();

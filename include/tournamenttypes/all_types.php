@@ -20,6 +20,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 /* The code in this file is written by Ragnar Ouchterlony */
 
-require( "include/tournamenttypes/macmahon.php" );
+require_once( "include/tournamenttypes/macmahon.php" );
 
 ?>
