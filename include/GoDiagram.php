@@ -46,18 +46,6 @@ class GoDiagram
          $this->Data = $_Data;
       }
 
-   function limit($val, $minimum, $maximum, $default)
-      {
-         if( !is_numeric($val) )
-            return (isset($default) ? $default : $val );
-         else if( $val < $minimum )
-            return $minimum;
-         else if( $val > $maximum )
-            return $maximum;
-
-         return $val;
-      }
-
    function extract_value($string, $name, $minimum=null, $maximum=null, $default=null)
       {
          preg_match("/$name=([-\w]+)/i", $string, $matches);
