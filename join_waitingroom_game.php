@@ -76,8 +76,8 @@ require( "include/rating.php" );
 
    $clock_used_white = $ClockUsed;
    $clock_used_black = $player_row["ClockUsed"];
-   $rating_white = $Rating;
-   $rating_black = $player_row["Rating2"];
+   $opponent_rating = $Rating;
+   $my_rating = $player_row["Rating2"];
 
    if( $MustBeRated == 'Y' and
        !($player_row["Rating2"]>=$Ratingmin and $player_row["Rating2"]<=$Ratingmax) )
@@ -107,21 +107,25 @@ require( "include/rating.php" );
                !empty($player_row['RatingStatus']) ) ? 'Y' : 'N' );
 
    if( $Handicaptype == 'proper' )
-      list($Handicap,$Komi,$swap) = suggest_proper($rating_white, $rating_black, $Size);
+      list($Handicap,$Komi,$swap) = suggest_proper($opponent_rating, $my_rating, $Size);
 
 
    if( $Handicaptype == 'conv' )
-      list($Handicap,$Komi,$swap) = suggest_conventional($rating_white, $rating_black, $Size);
+      list($Handicap,$Komi,$swap) = suggest_conventional($opponent_rating, $my_rating, $Size);
 
    if( $swap )
       $query .= "Black_ID=$uid, " .
          "White_ID=" . $player_row["ID"] . ", " .
+         (is_numeric($my_rating) ? "White_Rating=$my_rating, " : '' ) .
+         (is_numeric($opponent_rating) ? "Black_Rating=$opponent_rating, " : '' ) .
          "ToMove_ID=$uid, " .
          "ClockUsed=$clock_used_white, " .
          "LastTicks=$ticks_white, ";
    else
       $query .= "White_ID=$uid, " .
          "Black_ID=" . $player_row["ID"] . ", " .
+         (is_numeric($my_rating) ? "Black_Rating=$my_rating, " : '' ) .
+         (is_numeric($opponent_rating) ? "White_Rating=$opponent_rating, " : '' ) .
          "ToMove_ID=" . $player_row["ID"] . ", " .
          "ClockUsed=$clock_used_black, " .
          "LastTicks=$ticks_black, ";
@@ -152,6 +156,8 @@ require( "include/rating.php" );
       $query = "INSERT INTO Games SET " .
          "Black_ID=$uid, " .
          "White_ID=" . $player_row["ID"] . ", " .
+         (is_numeric($my_rating) ? "White_Rating=$my_rating, " : '' ) .
+         (is_numeric($opponent_rating) ? "Black_Rating=$opponent_rating, " : '' ) .
          "ToMove_ID=$uid, " .
          "Status='PLAY', " .
          "ClockUsed=$clock_used_white, " .

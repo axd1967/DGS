@@ -105,10 +105,15 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "black.Name AS blackName, black.Handle AS blackHandle, black.ID AS blackID, " .
          "white.Name AS whiteName, white.Handle AS whiteHandle, white.ID AS whiteID, " .
+         "black.Rating2 AS blackRating, white.Rating2 AS whiteRating, " .
+         "Games.Black_Rating AS blackStartRating, Games.White_Rating AS whiteStartRating " .
          ( $_GET['finished']
-           ? "Games.Black_Rating AS blackRating, Games.White_Rating AS whiteRating "
-           : "black.Rating2 AS blackRating, white.Rating2 AS whiteRating " ) .
+           ? ", blog.Rating AS blackEndRating, wlog.Rating AS whiteEndRating, " .
+           "blog.RatingDiff AS blackDiff, wlog.RatingDiff AS whiteDiff " : '' ) .
          "FROM Games, Players AS white, Players AS black " .
+         ( $_GET['finished'] ?
+           "LEFT JOIN Ratinglog AS blog ON blog.gid=Games.ID AND blog.uid=Black_ID ".
+           "LEFT JOIN Ratinglog AS wlog ON wlog.gid=Games.ID AND wlog.uid=White_ID " : '' ) .
          "WHERE " . ( $_GET['finished']
                       ? "Status='FINISHED' "
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
@@ -119,9 +124,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
       $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
          "Name, Handle, Players.ID as pid, " .
-         ( $_GET['finished']
-           ? 'IF(Black_ID=' . $_GET['uid'] . ', Games.White_Rating, Games.Black_Rating) '
-           : 'Rating2' ) . ' AS Rating, ' .
+         "Rating2 AS Rating, " .
+         'IF(Black_ID=' . $_GET['uid'] .
+         ', Games.White_Rating, Games.Black_Rating) AS startRating, ' .
+         ( $_GET['finished'] ?
+           "opplog.Rating AS endRating, mylog.RatingDiff AS ratingDiff, " : '' ) .
          "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
          "IF(White_ID=" . $_GET['uid'] . ", 2, 1) AS Color ";
 
@@ -132,8 +139,12 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
             "(Score=0) - 1 AS Win ";
       }
 
-      $query .= "FROM Games,Players WHERE " .
-         ( $_GET['finished'] ? "Status='FINISHED' " : "Status!='INVITED' AND Status!='FINISHED' " ) .
+      $query .= "FROM Games,Players " .
+         ( $_GET['finished'] ?
+           "LEFT JOIN Ratinglog AS mylog ON mylog.gid=Games.ID AND mylog.uid=" . $_GET['uid'] . ' ' .
+           "LEFT JOIN Ratinglog AS opplog ON opplog.gid=Games.ID AND opplog.uid!=" . $_GET['uid'] . ' ' : '' ) .
+         "WHERE " . ( $_GET['finished'] ? "Status='FINISHED' "
+                      : "Status!='INVITED' AND Status!='FINISHED' " ) .
          "AND (( Black_ID=" . $_GET['uid'] . " AND White_ID=Players.ID ) " .
          "OR ( White_ID=" . $_GET['uid'] . " AND Black_ID=Players.ID )) " .
          "ORDER BY $order LIMIT " . $_GET['from_row'] . ",$MaxRowsPerPage";
@@ -174,16 +185,31 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    {
       $gtable->add_tablehead(17, T_('Black name'), 'blackName');
       $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
+      $gtable->add_tablehead(26, T_('Black start rating'), 'blackStartRating', true);
+      if( $_GET['finished'] )
+         $gtable->add_tablehead(27, T_('Black end rating'), 'blackEndRating', true);
       $gtable->add_tablehead(19, T_('Black rating'), 'blackRating', true);
+      if( $_GET['finished'] )
+         $gtable->add_tablehead(28, T_('Black rating diff'), 'blackDiff', true);
       $gtable->add_tablehead(20, T_('White name'), 'whiteName');
       $gtable->add_tablehead(21, T_('White userid'), 'whiteHandle');
+      $gtable->add_tablehead(29, T_('White start rating'), 'whiteStartRating', true);
+      if( $_GET['finished'] )
+         $gtable->add_tablehead(30, T_('White end rating'), 'whiteEndRating', true);
       $gtable->add_tablehead(22, T_('White rating'), 'whiteRating', true);
+      if( $_GET['finished'] )
+         $gtable->add_tablehead(31, T_('White rating diff'), 'whiteDiff', true);
    }
    else
    {
       $gtable->add_tablehead(3, T_('Opponent'), 'Name');
       $gtable->add_tablehead(4, T_('Nick'), 'Handle');
+      $gtable->add_tablehead(23, T_('Start rating'), 'startRating', true);
+      if( $_GET['finished'] )
+         $gtable->add_tablehead(24, T_('End rating'), 'endRating', true);
       $gtable->add_tablehead(16, T_('Rating'), 'Rating', true);
+      if( $_GET['finished'] )
+         $gtable->add_tablehead(25, T_('Rating diff'), 'ratingDiff', true);
       $gtable->add_tablehead(5, T_('Color'), 'Color');
    }
 
@@ -216,6 +242,9 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
    while( $row = mysql_fetch_array( $result ) )
    {
       $Rating = $blackRating = $whiteRating = NULL;
+      $startRating = $blackStartRating = $whiteStartRating = NULL;
+      $endRating = $blackEndRating = $whiteEndRating = NULL;
+      $blackDiff = $whiteDiff = $ratingDiff = NULL;
       extract($row);
       $color = ( $Color == BLACK ? 'b' : 'w' );
 
@@ -236,16 +265,32 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          if( $gtable->Is_Column_Displayed[18] )
             $grow_strings[18] = "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
                make_html_safe($blackHandle) . "</font></a></td>";
+         if( $gtable->Is_Column_Displayed[26] )
+            $grow_strings[26] = "<td>" . echo_rating($blackStartRating,true,$blackID) . "&nbsp;</td>";
+         if( $_GET['finished'] and $gtable->Is_Column_Displayed[27] )
+            $grow_strings[27] = "<td>" . echo_rating($blackEndRating,true,$blackID) . "&nbsp;</td>";
          if( $gtable->Is_Column_Displayed[19] )
             $grow_strings[19] = "<td>" . echo_rating($blackRating,true,$blackID) . "&nbsp;</td>";
+         if( $_GET['finished'] and $gtable->Is_Column_Displayed[28] )
+            $grow_strings[28] = "<td>" .
+               (isset($blackDiff) ? ($blackDiff > 0 ? '+' : '') .
+                sprintf("%0.2f",$blackDiff*0.01) : '&nbsp' ) . "</td>";
          if( $gtable->Is_Column_Displayed[20] )
             $grow_strings[20] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
                make_html_safe($whiteName) . "</font></a></td>";
          if( $gtable->Is_Column_Displayed[21] )
             $grow_strings[21] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
                make_html_safe($whiteHandle) . "</font></a></td>";
+         if( $gtable->Is_Column_Displayed[29] )
+            $grow_strings[29] = "<td>" . echo_rating($whiteStartRating,true,$whiteID) . "&nbsp;</td>";
+         if( $_GET['finished'] and $gtable->Is_Column_Displayed[30] )
+            $grow_strings[30] = "<td>" . echo_rating($whiteEndRating,true,$whiteID) . "&nbsp;</td>";
          if( $gtable->Is_Column_Displayed[22] )
             $grow_strings[22] = "<td>" . echo_rating($whiteRating,true,$whiteID) . "&nbsp;</td>";
+         if( $_GET['finished'] and $gtable->Is_Column_Displayed[31] )
+            $grow_strings[31] = "<td>" .
+               (isset($whiteDiff) ? ($whiteDiff > 0 ? '+' : '') .
+                sprintf("%0.2f",$whiteDiff*0.01) : '&nbsp' ) . "</td>";
       }
       else
       {
@@ -255,8 +300,16 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          if( $gtable->Is_Column_Displayed[4] )
             $grow_strings[4] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Handle) . "</font></a></td>";
+         if( $gtable->Is_Column_Displayed[23] )
+            $grow_strings[23] = "<td>" . echo_rating($startRating,true,$pid) . "&nbsp;</td>";
+         if( $_GET['finished'] and $gtable->Is_Column_Displayed[24] )
+            $grow_strings[24] = "<td>" . echo_rating($endRating,true,$pid) . "&nbsp;</td>";
          if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
+         if( $_GET['finished'] and $gtable->Is_Column_Displayed[25] )
+            $grow_strings[25] = "<td>" .
+               (isset($ratingDiff) ? ($ratingDiff > 0 ? '+' : '') .
+                sprintf("%0.2f",$ratingDiff*0.01) : '&nbsp' ) . "</td>";
          if( $gtable->Is_Column_Displayed[5] )
             $grow_strings[5] = "<td align=center><img src=\"17/$color.gif\" alt=$color></td>";
       }
@@ -281,13 +334,13 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
                  ( $Win == -1 ? 'no.gif" alt=' . T_('No') :
                    'dash.gif" alt=' . T_('jigo') ));
 
-         if( $gtable->Is_Column_Displayed[11] )
-            $grow_strings[11] = "<td align=center><img src=$src></td>";
+            if( $gtable->Is_Column_Displayed[11] )
+               $grow_strings[11] = "<td align=center><img src=$src></td>";
          }
          if( $gtable->Is_Column_Displayed[14] )
             $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
          if( $gtable->Is_Column_Displayed[12] )
-            $grow_strings[12] = '<td>' . date($date_fmt, $Time) . "</td>";
+            $grow_strings[12] = '<td>' . date($date_fmt2, $Time) . "</td>";
       }
       else
       {
@@ -296,11 +349,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
          if( $gtable->Is_Column_Displayed[13] )
             $grow_strings[13] = '<td>' . date($date_fmt2, $Time) . "</td>";
 
-         if( !$_GET['observe'] and !$all )
-         {
-            if( $gtable->Is_Column_Displayed[15] )
-               $grow_strings[15] = '<td align=center>' . date($date_fmt2, $Lastaccess) . "</td>";
-         }
+         if( !$_GET['observe'] and !$all and $gtable->Is_Column_Displayed[15] )
+            $grow_strings[15] = '<td align=center>' . date($date_fmt2, $Lastaccess) . "</td>";
       }
 
       $gtable->add_row( $grow_strings );

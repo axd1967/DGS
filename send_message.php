@@ -230,10 +230,14 @@ disable_cache();
          $query .= "Black_ID=" . $game_row["White_ID"] . ", " .
             "White_ID=" . $game_row["Black_ID"] . ", " .
             "ToMove_ID=" . $game_row["White_ID"] . ", " .
+            (is_numeric($rating_black) ? "White_Rating=$rating_black, " : '' ) .
+            (is_numeric($rating_white) ? "Black_Rating=$rating_white, " : '' ) .
             "ClockUsed=$clock_used_white, " .
             "LastTicks=$ticks_white, ";
       else
          $query .= "ToMove_ID=Black_ID, " .
+            (is_numeric($rating_black) ? "Black_Rating=$rating_black, " : '' ) .
+            (is_numeric($rating_white) ? "White_Rating=$rating_white, " : '' ) .
             "ClockUsed=$clock_used_black, " .
             "LastTicks=$ticks_black, ";
 
@@ -269,6 +273,8 @@ disable_cache();
             "Byoperiods=" . $game_row["Byoperiods"] . ", " .
             "Black_Maintime=" . $game_row["Maintime"] . ", " .
             "White_Maintime=" . $game_row["Maintime"] . "," .
+            (is_numeric($rating_black) ? "Black_Rating=$rating_black, " : '' ) .
+            (is_numeric($rating_white) ? "White_Rating=$rating_white, " : '' ) .
             "WeekendClock='" . $game_row["WeekendClock"] . "', " .
             "Rated='" . ($Rated ? 'Y' : 'N' ) . "'";
 
