@@ -30,7 +30,7 @@ require_once( "include/std_functions.php" );
   start_page(T_('Introduction'), true, $logged_in, $player_row );
 
   echo "<table align=center width=\"85%\"><tr><td>\n";
-  echo "<center><h3><font color=\"$h3_color\">" .
+  echo "<center><h3><font color=$h3_color>" .
     T_("Introduction to Dragon") . "</font></h3></center>\n";
 
   echo T_("Welcome to Dragon Go Server, a <a href=\"licence.php\">free</a> " .

@@ -29,6 +29,9 @@ require_once( "include/std_functions.php" );
 
   start_page(T_("FAQ"), true, $logged_in, $player_row );
 
+//$blk='ul';
+$blk='blockquote';
+
   echo "<table align=center width=\"87%\" border=0><tr><td>\n";
   echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
     T_('Frequently Asked Questions') . "</font></h3>\n";
@@ -49,7 +52,7 @@ require_once( "include/std_functions.php" );
         "ORDER BY CatOrder,ParentOrder,entry.SortOrder")
         or error('mysql_query_failed');
 
-     echo "<ul><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
+     echo "<$blk><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
 
      $first = true;
      while( $row = mysql_fetch_array( $result ) )
@@ -58,7 +61,8 @@ require_once( "include/std_functions.php" );
         {
            if( !$first )
               echo "</ul><hr>\n";
-           echo '<p><b><A href="faq.php">' . T_( $row['Q'] ) . "</A></b><ul>\n";
+           echo '<p><b><A href="faq.php">' . T_( $row['Q'] ) . "</A></b>\n";
+           echo "<ul>\n";
            $first = false;
         }
         else
@@ -68,8 +72,8 @@ require_once( "include/std_functions.php" );
         }
      }
 
-
-     echo "</ul></table></ul></table>\n";
+       echo "</ul>\n";
+     echo "</td></tr></table></$blk>\n";
   }
   else
   {
@@ -81,30 +85,32 @@ require_once( "include/std_functions.php" );
         "AND entry.Level<3 AND entry.Level>0 " .
         "ORDER BY CatOrder,entry.Level,entry.SortOrder");
 
-     echo "<ul><table><tr><td>\n";
-     $first = true;
+     echo "<$blk><table><tr><td>\n";
 
+     $first = true;
      while( $row = mysql_fetch_array( $result ) )
      {
         $question = (empty($row['Q']) ? '-' : T_($row['Q']));
 
         if( $row['Level'] == 1 )
         {
-           if( $first )
-              $first = false;
-           else
-              echo "</ul></table>\n";
-
-           echo '<p><b><A href="faq.php?read=t&cat=' . $row['ID'] . "\">$question</A></b>\n";
+           if( !$first )
+              echo "</ul></td></tr></table>\n";
+           echo '<p><b><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['ID'] . "\">$question</A></b>\n";
            echo "<table><tr><td><ul>\n";
+              $first = false;
         }
         else
-           echo '<li><A href="faq.php?read=t&cat=' . $row['Parent'] .
+        {
+           echo '<li><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['Parent'] .
               '#Entry' . $row['ID'] . "\">$question</A>\n";
+        }
      }
 
-     echo "</ul></table></table></ul></table>\n";
+       echo "</ul></td></tr></table>\n";
+     echo "</td></tr></table></$blk>\n";
   }
+  echo "</td></tr></table>\n";
 
   if( $cat !== 'all' )
      $menu_array = array( T_('Show the whole FAQ in one page') => "faq.php?read=t&cat=all" );

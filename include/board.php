@@ -38,15 +38,15 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
 
    $coord_width=floor($stone_size*31/25);
 
-   $coord_start_number = "<td><img class=c$stone_size src=$stone_size/c";
-   $coord_start_letter = "<td><img class=s$stone_size src=$stone_size/c";
-   $coord_alt = '.gif alt=';
-   $coord_end = '></td>';
+   $coord_start_number = "<td><img class=c$stone_size src=\"$stone_size/c";
+   $coord_start_letter = "<td><img class=s$stone_size src=\"$stone_size/c";
+   $coord_alt = '.gif" alt="';
+   $coord_end = '"></td>';
 
 
-   $str1 = "<td><IMG class=s$stone_size alt=\"";
-   $str4 = '.gif></A></td>';
-   $str5 = '.gif></td>';
+   $move_end = '.gif"></A></td>';
+   $nomove_start = "<td><IMG class=s$stone_size alt=\"";
+   $nomove_end = '.gif"></td>';
 
 // Variables for the 3d-looking border
    $border_start = 140 - ( $coord_borders & LEFT ? $coord_width : 0 );
@@ -67,22 +67,24 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
          $on_not_empty = true;
          if( MAX_SEKI_MARK>0 and $stonestring )
             $on_empty = true;
+         else
+            $on_empty = false;
       }
 
       if( $handi )
       {
-         $str2 = "<td><A href=\"game.php?g=$gid&a=handicap&c=";
-         $str3 = "&s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
+         $move_start = "<td><A href=\"game.php?g=$gid&a=handicap&c=";
+         $move_alt = "&s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
       }
       else if( $stonestring )
       {
-         $str2 = "<td><A href=\"game.php?g=$gid&a=remove&c=";
-         $str3 = "&s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
+         $move_start = "<td><A href=\"game.php?g=$gid&a=remove&c=";
+         $move_alt = "&s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
       }
       else
       {
-         $str2 = "<td><A href=\"game.php?g=$gid&a=move&c=";
-         $str3 = "\"><IMG class=s$stone_size border=0 alt=\"";
+         $move_start = "<td><A href=\"game.php?g=$gid&a=move&c=";
+         $move_alt = "\"><IMG class=s$stone_size border=0 alt=\"";
       }
    }
 
@@ -91,14 +93,12 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
          "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
    $woodstring = ( $woodcolor > 10
-                   ? 'bgcolor=' . $woodbgcolors[$woodcolor - 10]
+                   ? 'bgcolor="' . $woodbgcolors[$woodcolor - 10] . '"'
                    : 'background="images/wood' . $woodcolor . '.gif"');
 
-   echo '<table border=0 cellpadding=0 cellspacing=0 ' . $woodstring .
-      ' align=center><tr><td valign=top>';
 
    echo '<table border=0 cellpadding=0 cellspacing=0 ' .
-      'align=center background="">'; //no valign for TABLE, if needed use TBODY
+       $woodstring . ' align=center>';
 
    if( $coord_borders & UP )
    {
@@ -107,7 +107,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       $span = ($coord_borders & LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
       $w = ($coord_borders & LEFT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
       if( $span > 0 )
-         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
+         echo "<td colspan=$span><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
 
       $colnr = 1;
       $letter = 'a';
@@ -122,7 +122,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       $span = ($coord_borders & RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
       $w = ($coord_borders & RIGHT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
       if( $span > 0 )
-         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
+         echo "<td colspan=$span><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
 
       echo "</tr>\n";
    }
@@ -219,9 +219,9 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
             $type = 'e';
             $alt = '.';
             if( $rownr == 1 ) $type = 'd';
-            if( $rownr == $Size ) $type = 'u';
+            else if( $rownr == $Size ) $type = 'u';
             if( $colnr == 0 ) $type .= 'l';
-            if( $colnr == $Size-1 ) $type .= 'r';
+            else if( $colnr == $Size-1 ) $type .= 'r';
 
             if( $hoshi_r > 0 and $type=='e' )
             {
@@ -258,12 +258,10 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
             else if( $stone == MARKED_DAME )
             {
                $type .= 'g';
-               $alt = 's';
+               $alt = 's'; //for seki
             }
 
             $empty = true;
-
-
          }
 
          if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y
@@ -278,9 +276,9 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
 
          if( $may_play and !$no_click and
              ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
-            echo "$str2$letter_c$letter_r$str3$alt\" SRC=$stone_size/$type$str4";
+            echo "$move_start$letter_c$letter_r$move_alt$alt\" src=\"$stone_size/$type$move_end";
          else
-            echo "$str1$alt\" SRC=$stone_size/$type$str5";
+            echo "$nomove_start$alt\" src=\"$stone_size/$type$nomove_end";
 
          $letter_c ++;
          $letter++;
@@ -334,7 +332,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       $span = ($coord_borders & LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
       $w = ($coord_borders & LEFT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
       if( $span > 0 )
-         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
+         echo "<td colspan=$span><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
 
       $colnr = 1;
       $letter = 'a';
@@ -350,12 +348,12 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       $span = ($coord_borders & RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
       $w = ($coord_borders & RIGHT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
       if( $span > 0 )
-         echo "<td colspan=$span background=\"images/blank.gif\"><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
+         echo "<td colspan=$span><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
 
       echo "</tr>\n";
    }
 
-   echo '</table></td></tr></table>' . "\n";
+   echo "</table>\n";
 }
 
 
@@ -716,7 +714,7 @@ function toggle_marked_area( $x, $y, $size, &$array, &$marked, $companion_groups
 
 function check_consistency($gid)
 {
-   global $coord, $Size, $array, $to_move, $flags, $Last_X, $Last_Y,
+   global $coord, $Size, $array, $to_move, $Last_X, $Last_Y,
       $Black_Prisoners, $White_Prisoners, $nr_prisoners;
 
    echo "Game $gid: ";

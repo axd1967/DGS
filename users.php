@@ -107,9 +107,9 @@ require_once( "include/countries.php" );
       {
          $cntr = @$row['Country'];
          $cntrn = T_(@$COUNTRIES[$cntr]);
-         $urow_strings[16] = "<td>" .
-            (empty($cntr) ? '&nbsp;' :
-             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">") . "</td>";
+         $cntrn = (empty($cntr) ? '' :
+             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
+         $urow_strings[16] = "<td>" . $cntrn . "</td>";
       }
       if( $utable->Is_Column_Displayed[4] )
          $urow_strings[4] = '<td>' . make_html_safe(@$row['Rankinfo'],INFO_HTML) . '&nbsp;</td>';

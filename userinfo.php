@@ -80,12 +80,14 @@ require_once( "include/countries.php" );
 
    $cntr = @$row['Country'];
    $cntrn = T_(@$COUNTRIES[$cntr]);
+   $cntrn = (empty($cntr) ? '' :
+             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
+
    echo '
  <table border=3>
     <tr><td><b>' . T_('Name') . '</b></td><td>' . $name_safe . '</td></tr>
     <tr><td><b>' . T_('Userid') . '</b></td><td>' . $handle_safe . '</td></tr>
-    <tr><td><b>' . T_('Country') . '</b></td><td>' .  (empty($cntr) ? '&nbsp;' :
-             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">") . '</td></tr>
+    <tr><td><b>' . T_('Country') . '</b></td><td>' . $cntrn . '</td></tr>
     <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . make_html_safe($row['Open'],INFO_HTML) . '</td></tr>
     <tr><td><b>' . T_('Activity') . '</b></td><td>' . $activity . '</td></tr>
     <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating(@$row['Rating2'],true,$row['ID']) . '</td></tr>

@@ -36,18 +36,25 @@ require_once( "include/make_translationfiles.php" );
      error("adminlevel_too_low");
 
   $addlanguage = @$_REQUEST['addlanguage'];
-  $twoletter = strtolower(trim(@$_REQUEST['twoletter']));
-  $charenc = strtolower(trim(@$_REQUEST['charenc']));
-  $langname = trim(@$_REQUEST['langname']);
 
 
   if( $addlanguage )
     {
+      $twoletter = trim(@$_REQUEST['twoletter']);
+      $charenc = trim(@$_REQUEST['charenc']);
+      $langname = trim(@$_REQUEST['langname']);
+
+      $twoletter = strtolower($twoletter);
+      //$charenc = strtolower($charenc);
+      $langname = ucfirst($langname); //ucword()
+
       if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
         error("translator_admin_add_lang_missing_field");
 
       if( array_key_exists( $twoletter , $known_languages ) and
-          array_key_exists( $charenc, $known_languages[$twoletter] ) )
+          ( array_key_exists( $charenc, $known_languages[$twoletter] )
+         or array_key_exists( $langname, array_flip($known_languages[$twoletter]) )
+        ) )
         error("translator_admin_add_lang_exists");
 
 

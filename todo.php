@@ -29,7 +29,10 @@ start_page("To do", true, $logged_in, $player_row );
 echo "<table align=center><tr><td>\n";
 echo "<pre>\n";
 
-readfile("TODO");
+   //readfile("TODO");
+   $file= implode('', file('TODO'));
+   $file= @htmlentities($file, ENT_QUOTES);
+   echo $file;
 
 echo "</pre>\n";
 echo "</td></tr></table>\n";

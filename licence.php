@@ -31,7 +31,11 @@ start_page(T_('General Public Licence'), true, $logged_in, $player_row );
 echo "<table align=center><tr><td>\n";
 echo "<pre>\n";
 
-readfile("COPYING");
+   //readfile("COPYING");
+   $file= implode('', file('COPYING'));
+   $file= str_replace("\x0c", "\n\n", $file);
+   $file= @htmlentities($file, ENT_QUOTES);
+   echo $file;
 
 echo "</pre>\n";
 echo "</td></tr></table>\n";

@@ -29,7 +29,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
   if( $uid === -1 )
     echo "<td><b>$contributor</b></td></tr>\n";
   else
-    echo "<td><a href=\"userinfo.php?uid=$uid\">$contributor</td></tr>\n";
+    echo "<td><a href=\"userinfo.php?uid=$uid\">$contributor</a></td></tr>\n";
 }
 
 {

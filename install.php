@@ -33,7 +33,9 @@ echo "<pre>\n";
 
 $contents = join ('', file ('INSTALL'));
 
-echo eregi_replace("<(http://[^ >\n\t]+)>", "(<a href=\"\\1\">\\1</a>)", $contents);
+$contents = @htmlentities($contents, ENT_QUOTES);
+$contents = preg_replace("%&lt;(http://.*?)&gt;%is", "(<a href=\"\\1\">\\1</a>)", $contents);
+echo $contents;
 
 echo "</pre>\n";
 echo "</td></tr></table>\n";

@@ -112,7 +112,7 @@ function check_handicap() //adjust $handi, $stonestring, $enable_message and oth
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
 
-      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] != NONE )
+      if( !isset($rownr) or !isset($colnr) or @$array[$colnr][$rownr] != NONE )
          error("illegal_position",'move2');
 
       $array[$colnr][$rownr] = BLACK;
@@ -122,7 +122,7 @@ function check_handicap() //adjust $handi, $stonestring, $enable_message and oth
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
-      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] != NONE )
+      if( !isset($rownr) or !isset($colnr) or @$array[$colnr][$rownr] != NONE )
          error("illegal_position",'move3');
 
       $array[$colnr][$rownr] = BLACK;
@@ -227,11 +227,18 @@ function draw_message_box()
         <TR>
           <TD align=right>' . T_('Message') . ':</TD>
           <TD align=left>
-            <textarea name="message" tabindex="'.($tabindex++).'" cols="50" rows="8" wrap="virtual"></textarea></TD>
+            <textarea name="message" tabindex="'.($tabindex++).'" cols="50" rows="8"></textarea></TD>
         </TR>
-        <input type="hidden" name="gid" value="' . $gid . '">
-        <input type="hidden" name="move" value="' . $move .'">
-        <input type="hidden" name="action" value="' . $action .'">
+      </TABLE>
+<TABLE align=center cellpadding=5>
+<TR><TD><input type=submit name="nextgame" tabindex="'.($tabindex++).'" value="' .
+      T_('Submit and go to next game') . '"></TD>
+    <TD><input type=submit name="nextstatus" tabindex="'.($tabindex++).'" value="' .
+      T_("Submit and go to status") . '"></TD></TR>
+<TR><TD align=right colspan=2><input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' .
+      T_("Go back") . '"></TD></TR>
+      </TABLE>
+    </CENTER>
 ';
 
     if( $action == 'move' )
@@ -245,16 +252,9 @@ function draw_message_box()
     }
 
    echo '
-      </TABLE>
-<TABLE align=center cellpadding=5>
-<TR><TD><input type=submit name="nextgame" tabindex="'.($tabindex++).'" value="' .
-      T_('Submit and go to next game') . '"></TD>
-    <TD><input type=submit name="nextstatus" tabindex="'.($tabindex++).'" value="' .
-      T_("Submit and go to status") . '"></TD></TR>
-<TR><TD align=right colspan=2><input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' .
-      T_("Go back") . '"></TD></TR>
-      </TABLE>
-    </CENTER>
+  <input type="hidden" name="gid" value="' . $gid . '">
+  <input type="hidden" name="move" value="' . $move .'">
+  <input type="hidden" name="action" value="' . $action .'">
   </FORM>
 ';
 
@@ -402,7 +402,7 @@ function draw_notes( $notes, $height, $width, $gid)
       T_('Private game notes') . "</span></b></font></td></tr>\n";
    echo "  <tr><td bgcolor='#ddf0dd'>\n";
    $notes = textarea_safe($notes); //always inside an edit box... no HTML effects.
-   echo "   <textarea name=\"notes\" id=\"notes\" cols=\"$width\" rows=\"$height\" wrap=\"virtual\">$notes</textarea>";
+   echo "   <textarea name=\"notes\" id=\"notes\" cols=\"$width\" rows=\"$height\">$notes</textarea>";
    echo "  </td></tr>\n";
    echo "  <tr><td><input type=\"submit\" value=\"" . T_('Save notes') . "\"></td></tr>\n";
    echo " </table>\n";
