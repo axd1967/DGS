@@ -27,10 +27,10 @@ function post_message($player_row, $moderated)
    $parent = $_POST['parent']+0;
    $edit = $_POST['edit']+0;
 
-   $Text = trim($_POST['Text']);
-   $Subject = trim($_POST['Subject']);
-
+   $Subject = trim(@$_POST['Subject']);
+   $Text = stripslashes(trim(@$_POST['Text']));
    $GoDiagrams = create_godiagrams($Text);
+   $Text = addslashes($Text);
 
    // -------   Edit old post  ----------
 
@@ -45,12 +45,14 @@ function post_message($player_row, $moderated)
 
        $row = mysql_fetch_array($result);
 
+       //Update old record with new text
        mysql_query("UPDATE Posts SET " .
                    "Lastedited=FROM_UNIXTIME($NOW), " .
                    "Subject=\"$Subject\", " .
                    "Text=\"$Text\" " .
                    "WHERE ID=$edit LIMIT 1") or die(mysql_error());
 
+       //Insert new record with old text
        mysql_query("INSERT INTO Posts SET " .
                    'Time="' . $row['Time'] .'", ' .
                    "Parent_ID=$edit, " .
@@ -62,11 +64,12 @@ function post_message($player_row, $moderated)
        return;
    }
 
+   // -------   Else add post  ----------
 
 
    // -------   Reply  ----------
 
-   else if( $parent > 0 )
+   if( $parent > 0 )
    {
       $result = mysql_query("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
                             "WHERE ID=$parent AND Forum_ID=$forum")

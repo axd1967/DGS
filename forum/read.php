@@ -35,6 +35,7 @@ function draw_post($post_type, $my_post, $Subject, $Text, $GoDiagrams)
                          'preview' => 'cceecc',
                          'edit' => 'eeeecc' );
 
+   $sbj = make_html_safe( $Subject );
    $txt = make_html_safe( $Text, true);
    $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
@@ -45,17 +46,16 @@ function draw_post($post_type, $my_post, $Subject, $Text, $GoDiagrams)
 
 
    if( $post_type == 'preview' )
-      echo "<tr><td bgcolor='#cceecc'><a name=\"preview\"><font size=\"+1\"><b>" .
-         make_html_safe(trim(@$_POST['Subject'])) . "</b></font></a><br> " . T_('by') .
-         " ".user_reference( true, true, "black", $player_row) .
+      echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
+         "\"><a name=\"preview\"><font size=\"+1\"><b>$sbj</b></font></a><br> " . 
+         T_('by')." " . user_reference( true, true, "black", $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n" .
          '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
    else
    {
       echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
-         "\"><a name=\"$ID\"><font size=\"+1\"><b>" .
-         make_html_safe($Subject) . "</b></font>$new</a><br> " . T_('by') .
-         " ".user_reference( true, true, "black", $User_ID, $Name, $Handle) .
+         "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a><br> " .
+         T_('by')." " . user_reference( true, true, "black", $User_ID, $Name, $Handle) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
       if( $Lastedited > 0 )
          echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum&thread=$thread&revision_history=$ID\">" . T_('edited') .
@@ -150,7 +150,7 @@ function change_depth(&$cur_depth, $new_depth)
 {
    $forum = @$_REQUEST['forum']+0;
    $thread = @$_REQUEST['thread']+0;
-   $reply = @$_GET['reply']+0;
+   $reply = @$_REQUEST['reply']+0;
    $edit = @$_REQUEST['edit']+0;
 
    connect2mysql();
@@ -170,6 +170,12 @@ function change_depth(&$cur_depth, $new_depth)
 
    $preview = isset($_POST['preview']);
    $preview_ID = ($edit > 0 ? $edit : @$_POST['parent']);
+   if( $preview )
+   {
+      $preview_Subject = stripslashes(trim(@$_POST['Subject']));
+      $preview_Text = stripslashes(trim(@$_POST['Text']));
+      $preview_GoDiagrams = create_godiagrams($preview_Text);
+   }
 
    $cols=2;
    $headline = array(T_("Reading thread") => "colspan=$cols");
@@ -214,6 +220,7 @@ function change_depth(&$cur_depth, $new_depth)
 
    echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
+   $thread_Subject = '';
    $Lastchangedthread = 0 ;
    $cur_depth=1;
    while( $row = mysql_fetch_array( $result ) )
@@ -226,7 +233,7 @@ function change_depth(&$cur_depth, $new_depth)
       if( $hidden and !$is_editor )
          continue;
 
-      if( $thread == $ID )
+      if( $thread == $ID ) //Initial post of the thread
          $thread_Subject = $Subject;
 
       change_depth( $cur_depth, $Depth );
@@ -254,11 +261,9 @@ function change_depth(&$cur_depth, $new_depth)
       if( $preview and $preview_ID == $ID )
       {
          change_depth( $cur_depth, $cur_depth + 1 );
-         $Subject = @$_POST['Subject'];
-         $Subject = stripslashes(trim($Subject));
-         $Text = @$_POST['Text'];
-         $Text = stripslashes(trim($Text));
-         $GoDiagrams = create_godiagrams($Text);
+         $Subject = $preview_Subject;
+         $Text = $preview_Text;
+         $GoDiagrams = $preview_GoDiagrams;
          $post_type = 'preview';
          draw_post($post_type, false, $Subject, $Text, $GoDiagrams);
       }
@@ -279,11 +284,9 @@ function change_depth(&$cur_depth, $new_depth)
    if( $preview and $preview_ID == 0 )
    {
       change_depth( $cur_depth, $cur_depth + 1 );
-      $Subject = @$_POST['Subject'];
-         $Subject = stripslashes(trim($Subject));
-      $Text = @$_POST['Text'];
-         $Text = stripslashes(trim($Text));
-      $GoDiagrams = create_godiagrams($Text);
+      $Subject = $preview_Subject;
+      $Text = $preview_Text;
+      $GoDiagrams = $preview_GoDiagrams;
       draw_post('preview', false, $Subject, $Text, $GoDiagrams);
       echo "<tr><td>\n";
       message_box('preview', $thread, $GoDiagrams, $Subject, $Text);
