@@ -45,7 +45,8 @@ require_once( "include/make_translationfiles.php" );
   $untranslated = ($group === 'Untranslated phrases');
 
   $query = "SELECT Translations.Text,TranslationTexts.ID AS Original_ID," .
-     "TranslationTexts.Text AS Original, TranslationLanguages.ID AS Language_ID " .
+     "TranslationTexts.Text AS Original, TranslationLanguages.ID AS Language_ID, " .
+     "TranslationTexts.Translatable " .
      "FROM TranslationTexts, TranslationGroups, " .
      "TranslationFoundInGroup, TranslationLanguages " .
      "LEFT JOIN Translations ON Translations.Original_ID=TranslationTexts.ID " .
@@ -55,13 +56,14 @@ require_once( "include/make_translationfiles.php" );
      $query .= "WHERE TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
         "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
         "AND TranslationLanguages.Language='$translate_lang' " .
+        "AND Translatable!='N' " .
         "AND Translations.Text IS NULL ORDER BY Group_ID LIMIT 50";
   else
      $query .= "WHERE TranslationGroups.Groupname='$group' " .
         "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
         "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
-        "AND TranslationLanguages.Language='$translate_lang' ";
-
+        "AND TranslationLanguages.Language='$translate_lang' " .
+        "AND Translatable!='N' ";
 
   $result = mysql_query($query) or die(mysql_error());
 
@@ -71,7 +73,7 @@ require_once( "include/make_translationfiles.php" );
   $replace_query = "REPLACE INTO Translations (Original_ID,Language_ID,Text) VALUES ";
   $log_query = "INSERT INTO Translationlog " .
      "(Player_ID,Language_ID,Original_ID,Translation) VALUES ";
-
+  $translatable_query = "UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN (0";
   $has_changed = false;
   while( $row = mysql_fetch_array($result) )
   {
@@ -87,15 +89,17 @@ require_once( "include/make_translationfiles.php" );
      $log_query .= ($has_changed ? ',(' : '(') . $player_row['ID'] . ',' .
         $row['Language_ID'] . ',' . $row['Original_ID'] . ',"' . $transl . '")';
 
+     if( $row['Translatable'] === 'Y' )
+        $translatable_query .= ',' . $row['Original_ID'];
      $has_changed = true;
   }
 
-//   echo '<p>' . $replace_query . '<p>' . $log_query;
-//   exit;
+  $translatable_query .= ')';
 
   if( $has_changed )
   {
      mysql_query( $replace_query ) or die(mysql_error());
+     mysql_query( $translatable_query ) or die(mysql_error());
      mysql_query( $log_query ) or die(mysql_error());
   }
 

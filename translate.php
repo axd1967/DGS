@@ -27,7 +27,7 @@ require_once( "include/form_functions.php" );
 {
    $translation_groups =
       array( 'Common', 'Start', 'Game', 'Messages', 'Users',
-             'Docs', 'Admin', 'Error', 'Untranslated phrases' );
+             'Docs', 'FAQ', 'Admin', 'Error', 'Untranslated phrases' );
 
 
   connect2mysql();
@@ -137,12 +137,14 @@ When translating you should keep in mind the following things:
         $query .= "WHERE TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
            "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
            "AND TranslationLanguages.Language='$translate_lang' " .
-           "AND Translations.Text IS NULL ORDER BY Group_ID LIMIT 50";
+           "AND Translatable!='N' " .
+           "Translations.Text IS NULL ORDER BY Group_ID LIMIT 50";
      else
         $query .= "WHERE TranslationGroups.Groupname='$group' " .
            "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
            "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
-           "AND TranslationLanguages.Language='$translate_lang' ";
+           "AND TranslationLanguages.Language='$translate_lang' " .
+           "AND Translatable!='N' ";
 
       $result = mysql_query($query) or die(mysql_error());
       $numrows = mysql_num_rows($result);

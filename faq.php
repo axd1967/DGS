@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-$TranslateGroups[] = "Docs";
+$TranslateGroups[] = "FAQ";
 
 require( "include/std_functions.php" );
 
@@ -37,11 +37,17 @@ require( "include/std_functions.php" );
   if( $_GET["read"] == 't' )
   {
      $cat = is_numeric($_GET["cat"]) ? $_GET["cat"] : 0;
-     $result = mysql_query( "SELECT entry.*, parent.SortOrder AS ParentOrder " .
-                            "FROM FAQ AS entry, FAQ AS parent " .
-                            "WHERE entry.Parent = parent.ID " .
-                            "AND ( entry.Parent = $cat OR entry.ID = $cat ) " .
-                            "ORDER BY ParentOrder,entry.SortOrder" );
+
+
+     $result = mysql_query(
+        "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
+        "Question.Text AS Q, Question.Translatable, Answer.Text AS A " .
+        "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
+        "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
+        "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
+        "AND ( entry.Parent = $cat OR entry.ID = $cat ) " .
+        "ORDER BY ParentOrder,entry.SortOrder")
+        or die(mysql_error());
 
      echo "<ul><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
 
@@ -49,11 +55,13 @@ require( "include/std_functions.php" );
      {
         if( $row['Level'] == 1 )
         {
-           echo '<p><b><A href="faq.php">' . $row['Question'] . "</A></b><ul>\n";
+           echo '<p><b><A href="faq.php">' . T_( $row['Q'] ) . "</A></b><ul>\n";
         }
         else
-           echo '<li><A name="Entry' . $row["ID"] . '"></a><b>' . $row['Question'] .
-              "</b>\n<p>\n" . add_line_breaks($row['Answer']) . "<br>&nbsp;<p>\n";
+        {
+           echo '<li><A name="Entry' . $row["ID"] . '"></a><b>' . T_( $row['Q'] ) .
+              "</b>\n<p>\n" . add_line_breaks( T_( $row['A'] ) ) . "<br>&nbsp;<p>\n";
+        }
      }
 
 
@@ -61,19 +69,20 @@ require( "include/std_functions.php" );
   }
   else
   {
-     $result = mysql_query("SELECT entry.*, " .
-                           "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
-                           "FROM FAQ AS entry, FAQ AS parent " .
-                           "WHERE entry.Parent = parent.ID " .
-                           "AND entry.Level<3 AND entry.Level>0 " .
-                           "ORDER BY CatOrder,entry.Level,entry.SortOrder");
+     $result = mysql_query(
+        "SELECT entry.*, Question.Text AS Q, Question.Translatable, " .
+        "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
+        "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
+        "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
+        "AND entry.Level<3 AND entry.Level>0 " .
+        "ORDER BY CatOrder,entry.Level,entry.SortOrder");
 
      echo "<ul><table><tr><td>\n";
      $first = true;
 
      while( $row = mysql_fetch_array( $result ) )
      {
-        $question = (empty($row['Question']) ? '-' : $row['Question']);
+        $question = (empty($row['Q']) ? '-' : T_($row['Q']));
 
         if( $row['Level'] == 1 )
         {

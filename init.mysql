@@ -90,8 +90,10 @@ CREATE TABLE Games (
   ClockUsed int(11) NOT NULL default '0',
   Rated enum('N','Y','Done') NOT NULL default 'N',
   WeekendClock enum('N','Y') NOT NULL default 'Y',
-  Black_Rating double default NULL,
-  White_Rating double default NULL,
+  Black_Start_Rating double default NULL,
+  White_Start_Rating double default NULL,
+  Black_End_Rating double default NULL,
+  White_End_Rating double default NULL,
   PRIMARY KEY  (ID),
   KEY ToMove_ID (ToMove_ID)
 ) TYPE=MyISAM;
@@ -382,6 +384,8 @@ CREATE TABLE Translationlog (
 CREATE TABLE TranslationTexts (
   ID int(11) NOT NULL auto_increment,
   Text blob,
+  Ref_ID int(11) default NULL,
+  Translatable enum('Y','N','Done') NOT NULL default 'Y',
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
@@ -509,10 +513,8 @@ CREATE TABLE FAQ (
   Parent int(11) NOT NULL default '0',
   Level int(11) default NULL,
   SortOrder int(11) NOT NULL default '0',
-  Lang varchar(16) default NULL,
-  Translatable enum('Y','N') NOT NULL default 'N',
-  Question text,
-  Answer text,
+  Question int(11) default NULL,
+  Answer int(11) default NULL,
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
