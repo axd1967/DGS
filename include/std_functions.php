@@ -585,7 +585,7 @@ function add_line_breaks($msg)
    return $newmsg;
 }
 
-function make_html_safe(&$msg, $some_html=false)
+function make_html_safe( $msg, $some_html=false)
 {
    $magic_quote = "<!-- '\" -->";
 
