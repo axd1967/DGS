@@ -70,8 +70,19 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
            <td>' . echo_rating($player_row["Rating2"],true,$player_row['ID']) .  '</td></tr>
        <tr><td><b>' . T_('Rank info') . '</b></td>
            <td>' . make_html_safe($player_row["Rank"], true) . '</td></tr>
-       <tr><td><b><a href="edit_vacation.php"><font color=black>' . T_('Vacation days left') . '</font></b></td>
-           <td>' . sprintf("%d",$player_row["VacationDays"]) . '</td></tr>
+       <tr><td><b><a href="edit_vacation.php"><font color=black>' .
+      T_('Vacation days left') . '</font></b></td>
+           <td>' . sprintf("%d",$player_row["VacationDays"]) . '</td></tr>';
+
+   if( $player_row['OnVacation'] > 0 )
+   {
+      $days = round($player_row['OnVacation']);
+      echo '<tr><td><b><a href="edit_vacation.php"><font color=red>' . T_('On vacation') .
+         '</font></a></b></td>
+           <td>' . "$days " . ($days == 1 ? T_('day') : T_('days')) .
+         ' ' .T_('left') . '</td></tr>';
+   }
+   echo '
     </table>
     <p>';
 

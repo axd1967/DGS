@@ -527,13 +527,6 @@ require( "include/std_functions.php" );
       }
       break;
 
-      case("vacation_bad_length"):
-      {
-        echo T_("Sorry, it seems to be something wrong with the vacation length.");
-      }
-      break;
-
-
       default:
       {
          echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");

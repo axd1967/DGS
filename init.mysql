@@ -35,6 +35,7 @@ CREATE TABLE Players (
   Open varchar(40) default NULL,
   Lang varchar(20) NOT NULL default 'C',
   VacationDays double default '14',
+  OnVacation double default '0',
   Woodcolor int(11) NOT NULL default '1',
   Boardcoords int(11) NOT NULL default '31',
   Button int(11) NOT NULL default '0',
@@ -651,6 +652,6 @@ INSERT INTO Clock set ID=121;
 INSERT INTO Clock set ID=122;
 INSERT INTO Clock set ID=123;
 INSERT INTO Clock set ID=-1;
-INSERT INTO Clock set ID=200;
-INSERT INTO Clock set ID=201;
-INSERT INTO Clock set ID=202;
+INSERT INTO Clock set ID=200,Lastchanged=0;
+INSERT INTO Clock set ID=201,Lastchanged=0;
+INSERT INTO Clock set ID=202,Lastchanged=0;

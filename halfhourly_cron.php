@@ -160,7 +160,7 @@ require( "include/board.php" );
                          "AND Status!='INVITED' AND Status!='FINISHED'")
       or die(mysql_error());
 
-      while( $row2 = mysql_fetch_array( $res2 ) );
+      while( $row2 = mysql_fetch_array( $res2 ) )
       {
          mysql_query("UPDATE Games SET ClockUsed=$ClockUsed, " .
                      "LastTicks='" . $row2['ticks'] . "' " .
