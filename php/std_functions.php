@@ -87,9 +87,9 @@ echo "
         <td><font color=\"FFFC70\"><B>Dragon Go Server</B></font></td>
       </tr>
     </table>
-    <A href="http://sourceforge.net/projects/dragongoserver"> 
-    <IMG src="http://sourceforge.net/sflogo.php?group_id=29933&type=1" width="88"
-    height="31" border="0" alt="SourceForge Logo"> </A> 
+    <A href=\"http://sourceforge.net/projects/dragongoserver\"> 
+    <IMG src=\"http://sourceforge.net/sflogo.php?group_id=29933&type=1\" width=\"88\"
+    height=\"31\" border=\"0\" alt=\"SourceForge Logo\"> </A> 
   </BODY>
 </HTML>
 ";
