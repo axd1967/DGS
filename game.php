@@ -90,9 +90,10 @@ require_once( "include/rating.php" );
       error("not_your_turn");
 
    if( !$move ) $move = $Moves;
-   $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and $move == $Moves );
 
-   $my_game = ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID );
+   $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and $move == $Moves ) ;
+
+   $my_game = ( $logged_in and ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID ) ) ;
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -270,18 +271,18 @@ require_once( "include/rating.php" );
 
    if( $enable_message ) $may_play = false;
 
-   if( !$logged_in or ( $player_row["ID"] != $Black_ID and $player_row["ID"] != $White_ID ) )
-      unset( $msg );
+   if( !$my_game )
+      $msg = '';
    else
       $msg = make_html_safe($msg, 'game');
 
 
-   if ($player_row["ID"] == $Black_ID)
+   if( $my_game && $player_row["ID"] == $Black_ID )
    {
      $show_notes = true;
      $notes = $Black_Notes;
    }
-   else if ($player_row["ID"] == $White_ID)
+   elseif( $my_game && $player_row["ID"] == $White_ID )
    {
      $show_notes = true;
      $notes = $White_Notes;
