@@ -38,6 +38,8 @@ disable_cache();
    if( $to == "guest" )
       error("guest_may_not_recieve_messages");
 
+   if( $to == $player_row["Handle"] and $type == 'INVITATION' )
+      error("invite_self");
 
 
 // find reciever of the message
@@ -181,7 +183,10 @@ disable_cache();
    }
    else if( $type == "Accept" )
    {
-      $result = mysql_query( "SELECT Black_ID, White_ID, ToMove_ID, Size " .
+      $result = mysql_query( "SELECT Black_ID, White_ID, ToMove_ID, " .
+                             "Size, Handicap, Komi, " .
+                             "Maintime, Byotype, Byotime, Byoperiods, " .
+                             "Rated, WeekendClock " .
                              "FROM Games WHERE ID=$gid" );
 
       if( mysql_num_rows($result) != 1)
@@ -287,26 +292,29 @@ disable_cache();
 
       if( $handitype == -4 ) // double
       {
-         // duplicate
-         mysql_query( "INSERT INTO Games SELECT * FROM Games WHERE ID=$gid LIMIT 1" );
-         if( mysql_affected_rows() != 1)
-            error("mysql_start_game");
+         $query = "INSERT INTO Games SET " .
+            "Black_ID=" . $game_row["White_ID"] . ", " .
+            "White_ID=" . $game_row["Black_ID"] . ", " .
+            "ToMove_ID=" . $game_row["White_ID"] . ", " .
+            "Status='PLAY', " .
+            "ClockUsed=$clock_used_white, " .
+            "LastTicks=$ticks_white, " .
+            "Lastchanged=FROM_UNIXTIME($NOW), " .
+            "Size=" . $game_row["Size"] . ", " .
+            "Handicap=" . $game_row["Handicap"] . ", " .
+            "Komi=" . $game_row["Komi"] . ", " .
+            "Maintime=" . $game_row["Maintime"] . ", " .
+            "Byotype='" . $game_row["Byotype"] . "', " .
+            "Byotime=" . $game_row["Byotime"] . ", " .
+            "Byoperiods=" . $game_row["Byoperiods"] . ", " .
+            "Black_Maintime=" . $game_row["Maintime"] . ", " .
+            "White_Maintime=" . $game_row["Maintime"] . "," .
+            "WeekendClock='" . $game_row["WeekendClock"] . "', " .
+            "Rated='" . $game_row["Rated"] . "'";
 
-         $new_gid = mysql_insert_id();
+         mysql_query( $query )
+            or error("mysql_query_failed");
 
-         mysql_query( "UPDATE Games SET " .
-                      "Black_ID=White_ID, " .
-                      "White_ID=Black_ID, " .
-                      "ToMove_ID=White_ID, " .
-                      "ClockUsed=$clock_used_white, " .
-                      "LastTicks=$ticks_white " .
-                      "WHERE ID=$new_id " .
-                      "AND ( Black_ID=$my_ID OR White_ID=$my_ID ) " .
-                      "AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
-                      "LIMIT 1" );
-
-         if( mysql_affected_rows() != 1)
-            error("mysql_start_game");
       }
 
 

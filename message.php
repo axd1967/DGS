@@ -51,7 +51,7 @@ require( "include/form_functions.php" );
 
    if( $uid > 0 and $uid != $player_row["ID"] )
    {
-      $result = mysql_query( "SELECT default_handle FROM Players WHERE ID=$uid" );
+      $result = mysql_query( "SELECT Handle AS default_handle FROM Players WHERE ID=$uid" );
 
       if( mysql_num_rows( $result ) == 1 )
       {
