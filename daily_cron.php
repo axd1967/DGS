@@ -36,7 +36,7 @@ require( "forum/forum_functions.php" );
    if( $delete_msgs )
    {
       // delete read messages
-      
+
       mysql_query("UPDATE Messages " .
                   "SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
                   "WHERE $NOW-UNIX_TIMESTAMP(Time) > " . ($message_timelimit*24*3600) .
@@ -52,7 +52,7 @@ require( "forum/forum_functions.php" );
       {
          while( $row = mysql_fetch_array( $result ) )
          {
-            mysql_query( "DELETE FROM Games WHERE ID=" . $row["Game_ID"] . 
+            mysql_query( "DELETE FROM Games WHERE ID=" . $row["Game_ID"] .
                          " AND Status='INVITED'" );
          }
 
@@ -70,7 +70,7 @@ require( "forum/forum_functions.php" );
 // Update rating
 
 
-   $query = "SELECT Games.ID as gid ". 
+   $query = "SELECT Games.ID as gid ".
        "FROM Games, Players as white, Players as black " .
        "WHERE Status='FINISHED' AND Rated='Y' " .
        "AND white.ID=White_ID AND black.ID=Black_ID ".
@@ -83,12 +83,12 @@ require( "forum/forum_functions.php" );
 
    while( $row = mysql_fetch_array( $result ) )
    {
-      update_rating($row["gid"]);    
+      update_rating($row["gid"]);
    }
 
    $result = mysql_query( "UPDATE Players SET RatingStatus='READY' " .
                           "WHERE RatingStatus='INIT' " );
-  
+
 
 
 
@@ -135,5 +135,5 @@ require( "forum/forum_functions.php" );
 
    mysql_query( $query );
 
-} 
+}
 ?>
