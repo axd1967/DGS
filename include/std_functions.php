@@ -240,10 +240,12 @@ function end_page( $menu_array=NULL )
 {
    global $time, $show_time, $HOSTBASE, $menu_bg_color, $menu_fg_color, $bg_color;
 
+   echo "&nbsp;<p>\n";
    echo '<table width="100%" border=0 cellspacing=0 cellpadding=4 bgcolor=' . $menu_bg_color . ">\n";
 
    if( $menu_array )
       make_menu($menu_array);
+
 
    if( count($menu_array) >= 3 )
       $span = ' colspan=' . (count($menu_array)-1);
