@@ -253,7 +253,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
             }
             else if( $stone == MARKED_DAME )
             {
-               $type .= 's';
+               $type .= 'g';
                $alt = 's';
             }
 
