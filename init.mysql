@@ -27,7 +27,7 @@ CREATE TABLE Players (
   RatingStatus enum('INIT','READY','RATED') default NULL,
   Open varchar(40) default NULL,
   Woodcolor int(11) NOT NULL default '1',
-  Boardtype int(11) NOT NULL default '1',
+  Boardtype int(11) NOT NULL default '2',
   Boardcoords int(11) NOT NULL default '15',
   PRIMARY KEY  (ID),
   UNIQUE KEY Handle (Handle)
