@@ -214,7 +214,20 @@ function imagemultiline($im, $points, $nr_points, $color)
 //      error("not_logged_in");
 
 
-//First check font and find pagging constantes
+//Disable translations in graph if not latin
+if( eregi( '^iso-8859-', $encoding_used) )
+{
+   $keep_english= false;
+   $T_= 'T_';
+}
+else
+{
+   $keep_english= true;
+   $T_= 'fnop';
+}
+
+
+//Check font and find pagging constantes
 
 
 // Font name, if it's not found a non-ttf font is used instead (with imagestring())
@@ -227,8 +240,8 @@ function imagemultiline($im, $points, $nr_points, $color)
 
 
 //Just two string samples to evaluate MARGE_LEFT
-   $x = array (echo_rating(100, false), //20kyu
-               echo_rating(3000, false)); //10dan
+   $x = array (echo_rating(100, 0,0,$keep_english), //20kyu
+               echo_rating(3000, 0,0,$keep_english)); //10dan
 
    if ( function_exists('imagettftext') //TTF need GD and Freetype.
         && is_file(TTF_FONT) //...and access rights check if needed
@@ -347,7 +360,7 @@ function imagemultiline($im, $points, $nr_points, $color)
       imageline($im, $a, $sc, $b, $sc, IMG_COLOR_STYLED);
       if ( $y > $sc )
       {
-         imagelabel ($im, 4, $sc-LABEL_MIDDLE, echo_rating($v, false), $black);
+         imagelabel ($im, 4, $sc-LABEL_MIDDLE, echo_rating($v, 0,0,$keep_english), $black);
          $y = $sc - LABEL_HEIGHT ;
       }
       $v += 100;
@@ -367,7 +380,7 @@ function imagemultiline($im, $points, $nr_points, $color)
    {
       $x = max($x,imagelabel($im, 4,
                              $SizeY-MARGE_BOTTOM+3+ 2*(LABEL_SEPARATION+LABEL_HEIGHT),
-                             T_('Games').':', $nr_games_color));
+                             $T_('Games').':', $nr_games_color));
    }
 
    $year = date('Y',$starttime);
@@ -397,7 +410,7 @@ function imagemultiline($im, $points, $nr_points, $color)
       if ($x >= $sc)
          continue;
 
-      $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3,  T_(date('M', $dt)), $black));
+      $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3,  $T_(date('M', $dt)), $black));
       $x= max($x,imagelabel($im, $sc, $SizeY-MARGE_BOTTOM+3+LABEL_HEIGHT+LABEL_SEPARATION,
                             date('Y', $dt), $black));
       if (SHOW_NRGAMES)
