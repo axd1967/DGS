@@ -110,7 +110,7 @@ if( $type == "INVITATION" )
 
             $byoperiods = $byoperiods_jap;
         }
-    else
+    else if( $byoyomitype == 'CAN' )
         {
             $byohours = $byotimevalue_can;
             if( $timeunit_can != 'hours' )
@@ -119,6 +119,16 @@ if( $type == "INVITATION" )
                 $byohours *= 30;
             
             $byoperiods = $byostones_can;
+        }
+    else if( $byoyomitype == 'FIS' )
+        {
+            $byohours = $byotimevalue_fis;
+            if( $timeunit_fis != 'hours' )
+                $byohours *= 15;
+            if( $timeunit_fis == 'months' )
+                $byohours *= 30;
+            
+            $byoperiods = 0;
         }
 
     if( $rated != 'Y' )
@@ -251,7 +261,7 @@ if( $reply )
 
 if( $opponent_row["flags"] & WANT_EMAIL and $opponent_row["Notify"] == 'NONE' )
 {
-   $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
+   $result = mysql_query( "UPDATE Players SET Notify='NEXT', Lastaccess=Lastaccess " .
                           "WHERE Handle='$to'" );
 }
 

@@ -144,20 +144,28 @@ if( $type == 'INVITATION' and $info != 'REPLIED' )
       <tr><td>Color: </td><td><?php echo( $col );?></td></tr>
       <tr><td>Komi: </td><td><?php echo( $game_row["Komi"] );?></td></tr>
       <tr><td>Handicap: </td><td><?php echo( $game_row["Handicap"] );?></td></tr>
-      <tr><td>Main time: </td><td><?php echo( $game_row["Maintime"] . " hours" );?></td></tr>
+      <tr><td>Main time: </td><td><?php echo_time( $game_row["Maintime"] );?></td></tr>
 <?php 
                                                                               
 if( $game_row["Byotype"] == 'JAP' )
     {
-        echo '        <tr><td>Byo-yomi: </td><td> Japanese: ' . $game_row["Byotime"]  .
-            ' hours per move and ' .$game_row["Byoperiods"] . ' extra periods </td></tr>' . "\n";
+      echo '        <tr><td>Byo-yomi: </td><td> Japanese: ';
+      echo_time($game_row["Byotime"]);
+      echo ' per move and ' . $game_row["Byoperiods"] . ' extra periods </td></tr>' . "\n";
     }
- else
+ else if ( $game_row["Byotype"] == 'CAN' )
      {
-        echo '        <tr><td>Byo-yomi: </td><td> Canadian: ' . $game_row["Byotime"]  .
-            ' hours per ' .$game_row["Byoperiods"] . ' stones </td></tr>' . "\n";
-
+       echo '        <tr><td>Byo-yomi: </td><td> Canadian: '; 
+       echo_time($game_row["Byotime"]);
+       echo ' per ' .$game_row["Byoperiods"] . ' stones </td></tr>' . "\n";
+        
      }
+ else if ( $game_row["Byotype"] == 'FIS' )
+   {
+       echo '        <tr><td>Fischer time: </td><td> ';
+       echo_time($game_row["Byotime"]);
+       echo ' extra per move </td></tr>' . "\n";     
+   }
 
     echo '<tr><td>Rated: </td><td>' . ( $game_row["Rated"] == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
 </table>

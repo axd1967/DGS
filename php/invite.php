@@ -188,6 +188,23 @@ start_page("Send Invitation", true, $logged_in, $player_row );
       </TR>
 
       <TR>
+        <TD align=right>
+          <input type="radio" name="byoyomitype" value="FIS">
+            Fischer time:</TD>
+        <TD align=left>  
+
+            <input type="text" value="1" name="byotimevalue_fis" size="5" maxlength="5">
+              <select name="timeunit_fis">
+                <option>hours</option>
+                <option selected>days</option>
+                <option>months</option>
+              </select>
+
+            extra&nbsp;per move.
+        </TD>
+      </TR>
+
+      <TR>
         <TD align=right>Rated:</TD>
         <TD align=left>  <input type="radio" name="rated" value="Y" checked></TD>
 

@@ -255,7 +255,8 @@ function mod($a,$b)
         return (int) $a % $b; 
 } 
 
-function time_remaining($ticks, &$main, &$byotime, &$byoper, $byotype, $startbyotime, $startbyoper, $has_moved)
+function time_remaining($ticks, &$main, &$byotime, &$byoper, $startmaintime, 
+                        $byotype, $startbyotime, $startbyoper, $has_moved)
 {
     global $tick_frequency;
 
@@ -265,6 +266,10 @@ function time_remaining($ticks, &$main, &$byotime, &$byoper, $byotype, $startbyo
     if( $main > $elapsed ) // still have main time left
         {
             $main -= $elapsed;
+
+            if( $has_moved and $byotype == 'FIS' )
+              $main = min($startmaintime, $main + $startbyotime);
+
             return;
         }
 
@@ -285,7 +290,7 @@ function time_remaining($ticks, &$main, &$byotime, &$byoper, $byotype, $startbyo
             if( $byoper < 0 )
                 $byotime = $byoper = 0;  // time is up;
         }
-    else // canadian byoyomi
+    else if( $byotype == 'CAN' ) // canadian byoyomi
         {
             if( $has_moved )
                 $byoper--; // byo stones;
@@ -301,6 +306,10 @@ function time_remaining($ticks, &$main, &$byotime, &$byoper, $byotype, $startbyo
                 }
             
         }
+    else if( $byotype == 'FIS' )
+      {
+        $byotime = $byoper = 0;  // time is up;
+      }
 
     $main = 0;    
 }
@@ -315,15 +324,15 @@ function echo_time($hours)
     $days = (int)($hours/15);
     if( $days > 0 )
       {
-        echo $days . ' day';
+        echo $days . '&nbsp;day';
         if( $days != 1 ) echo 's';
       }
 
     if( $hours % 15 > 0 )
         {
           if( $days > 0 )
-            echo ' and ';
-            echo $hours % 15 . ' hour';
+            echo '&nbsp;and&nbsp;';
+            echo $hours % 15 . '&nbsp;hour';
             if( $hours % 15 != 1 ) echo 's';
         }
 }
