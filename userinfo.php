@@ -32,7 +32,10 @@ require_once( "include/countries.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   if( !$uid )
+   $msg = @$_GET['msg'];
+   if( @$_GET['uid'] )
+      $uid = @$_GET['uid'];
+   else
       $uid = $player_row["ID"];
 
    $my_info = ( $player_row["ID"] == $uid );
@@ -63,7 +66,7 @@ require_once( "include/countries.php" );
 
    echo "<center>";
 
-   if( $msg )
+   if( !isset($msg) )
       echo "\n<p><b><font color=green>$msg</font></b><hr>";
 
    echo "<h3><font color=$h3_color>" . $title . '</font></h3>';

@@ -35,9 +35,9 @@ require_once( "include/countries.php" );
       error("not_logged_in");
 
    $page = "users.php?";
-   if( $_GET['showall'] ) $page .= "showall=1&";
+   if( @$_GET['showall'] ) $page .= "showall=1&";
 
-   if(!$_GET['sort1'])
+   if(!@$_GET['sort1'])
       $_GET['sort1'] = 'ID';
 
    $utable = new Table( $page, "UsersColumns" );
@@ -45,7 +45,7 @@ require_once( "include/countries.php" );
 
    $order = $utable->current_order_string();
 
-   if( !$_GET['showall'] )
+   if( !@$_GET['showall'] )
        $where_clause = "WHERE Activity>$ActiveLevel1 ";
 
    $query = "SELECT *, Rank AS Rankinfo, " .

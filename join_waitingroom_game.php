@@ -96,6 +96,7 @@ require_once( "include/rating.php" );
    $ticks_black = get_clock_ticks($clock_used_black);
    $ticks_white = get_clock_ticks($clock_used_white);
 
+   $swap = 0;
    mt_srand ((double) microtime() * 1000000);
    if( $Handicaptype == 'nigiri' ) // nigiri
       $swap = mt_rand(0,1);
