@@ -217,7 +217,7 @@ function check_remove()
          error("illegal_position");
 
       $prisoners = array();
-      remove_dead( $colnr, $rownr, $array, $prisoners );
+      remove_dead( $colnr, $rownr, $Size, $array, $prisoners );
 
       while( list($dummy, list($x,$y)) = each($prisoners) )
       {
@@ -420,3 +420,4 @@ function draw_notes()
 }
 
 ?>
+

@@ -595,7 +595,7 @@ function create_territories_and_score( $size, &$array )
 
 
 
-function remove_dead( $x, $y, &$array, &$prisoners )
+function remove_dead( $x, $y, $size, &$array, &$prisoners, $cons_group=TRUE )
 {
    global $dirx,$diry;
 
@@ -616,11 +616,13 @@ function remove_dead( $x, $y, &$array, &$prisoners )
             {
                while( list($y, $val) = each($sub) )
                {
-                  array_push($prisoners, array($x,$y));
-                  if( $array[$x][$y] < 7 )
-                     $array[$x][$y] += 6;
-                  else
-                     $array[$x][$y] -= 6;
+                  if ($c == $array[$x][$y]) {
+                     array_push($prisoners, array($x,$y));
+                     if( $array[$x][$y] < 7 )
+                        $array[$x][$y] += 6;
+                     else
+                        $array[$x][$y] -= 6;
+                  }
                }
             }
 
@@ -638,9 +640,13 @@ function remove_dead( $x, $y, &$array, &$prisoners )
          $nx = $x+$dirx[$dir];
          $ny = $y+$diry[$dir];
 
+         if( ( $nx < 0 ) or ($nx >= $size) or ($ny < 0) or ($ny >= $size) or
+            $index[$nx][$ny] )
+            continue;
+
          $new_color = $array[$nx][$ny];
 
-         if( $new_color == $c and !$index[$nx][$ny])
+         if( $new_color == $c or ( $cons_group and $new_color == NONE ) )
          {
             $x = $nx;  // Go to the neigbour
             $y = $ny;
