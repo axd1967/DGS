@@ -100,7 +100,7 @@ require_once( "include/timezones.php" );
 
    start_page($title, true, $logged_in, $player_row );
 
-   echo "<h3><font color=$h3_color>" . $title . '</font></h3>';
+   echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
 
    $mtable = new Table( make_url( 'list_messages.php',
                                   true,
