@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // Prints game setting form used by invite.php
 
-function game_settings_form($my_ID=NULL, $gid=NULL)
+function game_settings_form($my_ID=NULL, $gid=NULL, $waiting_room=false)
 {
 
    // Default values:
@@ -132,15 +132,18 @@ function game_settings_form($my_ID=NULL, $gid=NULL)
    echo form_insert_row( 'DESCRIPTION', T_('Proper handicap'),
                          'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype );
 
-   echo form_insert_row( 'DESCRIPTION', T_('Manual setting'),
-                         'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
-                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('My color'),
-                         'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
+   if( !$waiting_room )
+   {
+      echo form_insert_row( 'DESCRIPTION', T_('Manual setting'),
+                            'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
+                            'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('My color'),
+                            'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
 
-                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
-                         'SELECTBOX', 'handicap', 1, $handi_array, $Handicap, false,
-                         'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                         'TEXTINPUT', 'komi_m', 5, 5, $Komi );
+                            'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
+                            'SELECTBOX', 'handicap', 1, $handi_array, $Handicap, false,
+                            'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                            'TEXTINPUT', 'komi_m', 5, 5, $Komi );
+   }
 
    echo form_insert_row( 'DESCRIPTION', T_('Even game with nigiri'),
                          'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
@@ -288,6 +291,54 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
        ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . '</td></tr>
 </table>
 ';
+
+}
+
+
+function interpret_time_limit_forms()
+{
+   global $hours, $timevalue, $timeunit, $byoyomitype, $byohours, $byoperiods,
+      $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
+      $byotimevalue_can, $timeunit_can, $byoperiods_can,
+      $byotimevalue_fis, $timeunit_fis;
+
+      $hours = $timevalue;
+      if( $timeunit != 'hours' )
+         $hours *= 15;
+      if( $timeunit == 'months' )
+         $hours *= 30;
+
+      if( $byoyomitype == 'JAP' )
+      {
+         $byohours = $byotimevalue_jap;
+         if( $timeunit_jap != 'hours' )
+            $byohours *= 15;
+         if( $timeunit_jap == 'months' )
+            $byohours *= 30;
+
+         $byoperiods = $byoperiods_jap;
+      }
+      else if( $byoyomitype == 'CAN' )
+      {
+         $byohours = $byotimevalue_can;
+         if( $timeunit_can != 'hours' )
+            $byohours *= 15;
+         if( $timeunit_can == 'months' )
+            $byohours *= 30;
+
+         $byoperiods = $byoperiods_can;
+      }
+      else if( $byoyomitype == 'FIS' )
+      {
+         $byohours = $byotimevalue_fis;
+         if( $timeunit_fis != 'hours' )
+            $byohours *= 15;
+         if( $timeunit_fis == 'months' )
+            $byohours *= 30;
+
+         $byoperiods = 0;
+      }
+
 
 }
 

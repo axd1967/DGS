@@ -102,42 +102,7 @@ disable_cache();
       if( $komi > 200 or $komi < -200 )
          error("komi_range");
 
-      $hours = $timevalue;
-      if( $timeunit != 'hours' )
-         $hours *= 15;
-      if( $timeunit == 'months' )
-         $hours *= 30;
-
-      if( $byoyomitype == 'JAP' )
-      {
-         $byohours = $byotimevalue_jap;
-         if( $timeunit_jap != 'hours' )
-            $byohours *= 15;
-         if( $timeunit_jap == 'months' )
-            $byohours *= 30;
-
-         $byoperiods = $byoperiods_jap;
-      }
-      else if( $byoyomitype == 'CAN' )
-      {
-         $byohours = $byotimevalue_can;
-         if( $timeunit_can != 'hours' )
-            $byohours *= 15;
-         if( $timeunit_can == 'months' )
-            $byohours *= 30;
-
-         $byoperiods = $byoperiods_can;
-      }
-      else if( $byoyomitype == 'FIS' )
-      {
-         $byohours = $byotimevalue_fis;
-         if( $timeunit_fis != 'hours' )
-            $byohours *= 15;
-         if( $timeunit_fis == 'months' )
-            $byohours *= 30;
-
-         $byoperiods = 0;
-      }
+      interpret_time_limit_forms();
 
       if( $rated != 'Y' or $my_ID == $opponent_ID )
          $rated = 'N';
@@ -215,7 +180,10 @@ disable_cache();
       }
 
       if( $weekendclock != 'Y' )
-         $clock_used += 100;
+      {
+         $clock_used_white += 100;
+         $clock_used_black += 100;
+      }
 
       $ticks_black = get_clock_ticks($clock_used_black);
       $ticks_white = get_clock_ticks($clock_used_white);
@@ -300,6 +268,7 @@ disable_cache();
             "ClockUsed=$clock_used_white, " .
             "LastTicks=$ticks_white, " .
             "Lastchanged=FROM_UNIXTIME($NOW), " .
+            "Starttime=FROM_UNIXTIME($NOW), " .
             "Size=" . $game_row["Size"] . ", " .
             "Handicap=" . $game_row["Handicap"] . ", " .
             "Komi=" . $game_row["Komi"] . ", " .

@@ -314,6 +314,24 @@ require( "include/std_functions.php" );
       }
       break;
 
+      case("waitingroom_game_not_found"):
+      {
+         echo T_("Sorry, couldn't find this waiting room game. Probably someone has already joined it.");
+      }
+      break;
+
+      case("waitingroom_own_game"):
+      {
+         echo T_("Sorry, you can't join your own game.");
+      }
+      break;
+
+      case("waitingroom_not_in_rating_range"):
+      {
+         echo T_("Sorry, you are not in the specified rating range.");
+      }
+      break;
+
       case("wrong_number_of_handicap_stone"):
       {
          echo T_("Wrong, number of handicap stones");

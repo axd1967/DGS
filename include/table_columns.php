@@ -18,7 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeletable=false)
+function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeletable=false,
+                   $width=NULL)
 {
    global $sort1, $desc1, $sort2, $desc2,$column_set,$page,$removed_columns;
 
@@ -38,8 +39,11 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
          "del=$nr" .
          "\"><sup><font size=\"-1\" color=red>x</font></sup></a>";
 
+   if( $width )
+      $width = " width=$width";
+
    if( !$sort_string )
-      return "<th nowrap valign=bottom><font color=black>" . $Head .
+      return "<th nowrap valign=bottom$width><font color=black>" . $Head .
          "</font>$delete_string</th>\n";
 
    if( $sort_string == $sort1 )
@@ -57,7 +61,7 @@ function tablehead($nr, $Head, $sort_string=NULL, $desc_default=false, $undeleta
       $d2 = $desc1 xor $desc_default;
    }
 
-   return "<th nowrap valign=bottom><A href=\"$page" . order_string($s1,$d1,$s2,$d2) .
+   return "<th nowrap valign=bottom $width><A href=\"$page" . order_string($s1,$d1,$s2,$d2) .
       "\"><font color=black>" .  $Head .
       "</font></A>$delete_string</th>\n";
 }

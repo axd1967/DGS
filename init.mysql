@@ -47,9 +47,11 @@ CREATE TABLE Players (
   UNIQUE KEY Handle (Handle)
 ) TYPE=ISAM PACK_KEYS=1;
 
+
 #
 # Table structure for table 'Games'
 #
+
 CREATE TABLE Games (
   ID int(11) NOT NULL auto_increment,
   Starttime datetime default NULL,
@@ -205,6 +207,32 @@ CREATE TABLE MoveMessages (
   MoveNr smallint(5) unsigned NOT NULL,
   Text text,
   PRIMARY KEY  (gid,MoveNr)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Waitingroom'
+#
+
+CREATE TABLE Waitingroom (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) default NULL,
+  nrGames int(11) default 1,
+  Time datetime default NULL,
+  Size int(11) default '19',
+  Komi decimal(6,1) default '5.5',
+  Handicaptype enum('conv','proper','nigiri','double') NOT NULL default 'conv',
+  Maintime int(11) default NULL,
+  Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+  Byotime int(11) NOT NULL default '0',
+  Byoperiods int(11) NOT NULL default '0',
+  Rated enum('N','Y','Done') NOT NULL default 'N',
+  WeekendClock enum('N','Y') NOT NULL default 'Y',
+  MustBeRated enum('N','Y','Done') NOT NULL default 'N',
+  Ratingmin double default NULL,
+  Ratingmax double default NULL,
+  Comment varchar(40) default NULL,
+  PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
 

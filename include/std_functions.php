@@ -204,6 +204,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                         T_('Messages') => 'list_messages.php',
                         T_('Tournaments') => 'tournaments.php',
                         T_('Invite') => 'message.php?mode=Invite',
+                        T_('Waiting room') => 'waiting_room.php',
                         T_('Users') => 'users.php',
                         T_('Forums') => 'forum/index.php');
 
@@ -595,7 +596,7 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)
          $str .= ' ' . T_('without byoyomi');
       else if( $Byotype == 'FIS' )
       {
-         $str .= ' ' . sprintf( 'with %s extra per move', echo_time($Byotime) );
+         $str .= ' ' . sprintf( T_('with %s extra per move'), echo_time($Byotime) );
       }
       else
       {
