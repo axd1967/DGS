@@ -593,7 +593,7 @@ function get_cookie_prefs(&$player_row)
 
 function set_cookie_prefs($id, $delete=false)
 {
-   global $cookie_prefs, $NOW, $session_duration;
+   global $cookie_prefs, $NOW, $SUB_PATH, $session_duration;
 
    if( $delete )
       setcookie("prefs$id", '', $NOW-3600, $SUB_PATH );
@@ -601,16 +601,18 @@ function set_cookie_prefs($id, $delete=false)
       setcookie("prefs$id", serialize($cookie_prefs), $NOW+$session_duration*36, $SUB_PATH );
 }
 
-function add_line_breaks($msg)
+function add_line_breaks( $str)
 {
-   // Strip out carriage returns
-   $newmsg = ereg_replace("\r","",$msg);
-   // Handle paragraphs
-   $newmsg = ereg_replace("\n\n","<P>",$newmsg);
-   // Handle line breaks
-   $newmsg = ereg_replace("\n","<BR>",$newmsg);
+   $str = trim($str);
 
-   return $newmsg;
+   // Strip out carriage returns
+  $str=preg_replace('%[\x01-\x09\x0B-\x20]*\x0A%','<BR>', $str);
+
+   // Handle collapsed vertical white spaces
+  for( $i=0; $i<2; $i++)
+  $str=preg_replace('%[\x01-\x20]*<(BR|P)[\x01-\x20]*/?\>[\x01-\x20]*<(BR|P)[\x01-\x20]*/?\>%i','<\\1>&nbsp;<\\2>', $str);
+
+   return $str;
 }
 
 // Some regular allowed html tags. Keep them lower case.
