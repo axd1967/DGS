@@ -19,7 +19,7 @@ while( <*.php include/*.php> )
         while( /T_\((['"].*?["'])\)[^'"]/gs )
         {
             $a = $1;
-            $a =~ s/['"]\s*\.\s*["']//g;
+            $a =~ s/['"]\s+\.\s+["']//g;
             $a =~ s/\\n/\n/g;
             print "array( 'CString' => " . $a . ", 'File' => '" . $filename . "' ),\n";
         }
