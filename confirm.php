@@ -460,6 +460,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       {
          mysql_query("UPDATE Players SET Running=Running-1 " .
                      "WHERE ID=$Black_ID OR ID=$White_ID LIMIT 2");
+
+         delete_all_observers($gid, false);
       }
       else
       {
@@ -474,6 +476,8 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                       "SET Running=Running-1, Finished=Finished+1" .
                       ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : "")) .
                       " WHERE ID=$Black_ID LIMIT 1" );
+
+         delete_all_observers($gid, ($old_moves >= 10+$Handicap), $Text);
       }
 
    }

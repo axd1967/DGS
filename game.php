@@ -38,6 +38,10 @@ require( "include/rating.php" );
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
+   if( $toggleobserve and $logged_in )
+      toggle_observe_list($gid, $player_row["ID"]);
+
+
 
 //    if( !$logged_in )
 //       error("not_logged_in");
@@ -72,6 +76,8 @@ require( "include/rating.php" );
 
 
    $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and (!$move or $move == $Moves) );
+
+   $my_game = ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID );
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -118,7 +124,7 @@ require( "include/rating.php" );
 
 
    $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or
-   $action == 'choose_move' or $action == 'move' );
+                       $action == 'choose_move' or $action == 'move' );
 
    list($lastx,$lasty) =
       make_array( $gid, $array, $msg, $Moves, $move, $moves_result, $marked_dead, $no_marked_dead );
@@ -295,6 +301,14 @@ require( "include/rating.php" );
 
       if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
          $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid&skip=t";
+
+      if( !$my_game and $logged_in )
+      {
+         if( is_on_observe_list( $gid, $player_row["ID"] ) )
+            $menu_array[T_('Remove from observe list')] = "game.php?gid=$gid&toggleobserve=t";
+         else
+            $menu_array[T_('Add to observe list')] = "game.php?gid=$gid&toggleobserve=t";
+      }
    }
 
    end_page($menu_array);

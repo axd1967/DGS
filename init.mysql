@@ -35,7 +35,7 @@ CREATE TABLE Players (
   Boardtype int(11) NOT NULL default '1',
   Boardcoords int(11) NOT NULL default '31',
   Button int(11) NOT NULL default '0',
-  UsersColumns int(10) unsigned NOT NULL default '62',
+  UsersColumns int(10) unsigned NOT NULL default '589886',
   Running int(11) NOT NULL default '0',
   Finished int(11) NOT NULL default '0',
   Won int(11) NOT NULL default '0',
@@ -233,6 +233,20 @@ CREATE TABLE Waitingroom (
   Ratingmax double default NULL,
   Comment varchar(40) default NULL,
   PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Observers'
+#
+
+CREATE TABLE Observers (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) default NULL,
+  gid int(11) default NULL,
+  PRIMARY KEY  (ID),
+  KEY (uid),
+  KEY (gid)
 ) TYPE=MyISAM;
 
 

@@ -214,7 +214,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$uid",
                         T_('Show running games') => "show_games.php?uid=$uid",
-                        T_('Show finished games') => "show_games.php?uid=$uid&amp;finished=1" );
+                        T_('Show finished games') => "show_games.php?uid=$uid&amp;finished=1",
+                        T_('Show observed games') => "show_games.php?observe=t" );
 
    end_page( $menu_array );
 }

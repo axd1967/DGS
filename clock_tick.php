@@ -132,6 +132,7 @@ if( !$is_down )
 
          update_rating($gid);
 
+         delete_all_observers($gid, ($Moves >= 10+$Handicap), $Text);
 
          // Change some stats
          mysql_query( "UPDATE Players " .
