@@ -283,11 +283,14 @@ function make_menu($menu_array)
 
    echo '<tr bgcolor=' . $bg_color . ' align="center">';
 
+   if( count($menu_array) == 1 )
+     $span = " colspan=2";
+
    foreach( $menu_array as $text => $link )
       {
          $cumw += $w;
          $width = round($cumw - $cumwidth);
-         echo "<td width=$width%><B><A href=\"$HOSTBASE/$link\">$text</A></B></td>\n";
+         echo "<td$span width=$width%><B><A href=\"$HOSTBASE/$link\">$text</A></B></td>\n";
          $cumwidth += $width;
       }
 
