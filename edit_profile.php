@@ -47,13 +47,17 @@ echo "    <tr><td><h3><font color=$h3_color>" .
 echo form_insert_row( 'DESCRIPTION', T_('Userid'),
                       'TEXT', $player_row["Handle"] );
 echo form_insert_row( 'DESCRIPTION', T_('Full name'),
-                      'TEXTINPUT', 'name', 16, 40, $player_row["Name"] );
+                      'TEXTINPUT', 'name', 16, 40,
+                      str_replace( "\"", "&quot;", $player_row["Name"] ) );
 echo form_insert_row( 'DESCRIPTION', T_('Email'),
-                      'TEXTINPUT', 'email', 16, 80, $player_row["Email"] );
+                      'TEXTINPUT', 'email', 16, 80,
+                      str_replace( "\"", "&quot;", $player_row["Email"] ) );
 echo form_insert_row( 'DESCRIPTION', T_('Open for matches'),
-                      'TEXTINPUT', 'open', 16, 40, $player_row["Open"] );
+                      'TEXTINPUT', 'open', 16, 40,
+                      str_replace( "\"", "&quot;", $player_row["Open"] ) );
 echo form_insert_row( 'DESCRIPTION', T_('Rank info'),
-                      'TEXTINPUT', 'rank', 16, 40, $player_row["Rank"] );
+                      'TEXTINPUT', 'rank', 16, 40,
+                      str_replace( "\"", "&quot;", $player_row["Rank"] ) );
 
 $vals = array( 'dragonrating' => 'dragonrating',
                'eurorank' => 'eurorank',
