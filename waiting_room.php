@@ -63,7 +63,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
                          "FROM Waitingroom,Players " .
                          "WHERE Players.ID=Waitingroom.uid");
 
-   echo "<font color=$h3_color><B>". T_("Players waiting") . ":</B></font><p>\n";
+   echo "<h3><font color=$h3_color><B>". T_("Players waiting") . ":</B></font></h3><p>\n";
 
    if( mysql_num_rows($result) > 0 )
    {
