@@ -101,10 +101,10 @@ if( !$is_down )
 
          $query = "UPDATE Games SET " .
              "Status='FINISHED', " .
-             "Lastchanged=FROM_UNIXTIME($NOW), " .
              "ToMove_ID=0, " .
              "Score=$score, " .
-             //"Flags=0" . //Not useful
+             //"Flags=0, " . //Not useful
+             "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE ID=$gid LIMIT 1";
 
          mysql_query( $query );
