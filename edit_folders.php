@@ -29,12 +29,19 @@ function make_folder_form_row(&$form, $name, $nr,
                               $bgred, $bggreen, $bgblue, $bgalpha, $fgred, $fggreen, $fgblue,
                               $onstatuspage)
 {
-   $name_row = '<td bgcolor="#' . blend_alpha($bgred, $bggreen, $bgblue, $bgalpha) . '">' .
-      '<font color="#' . RGBA($fgred, $fggreen, $fgblue) . '">' .
-      ( empty($name) ? T_('Folder name') : make_html_safe($name) ) . '</font></td>';
 
-   $array = array( 'OWNHTML', $name_row,
-                   'TEXTINPUT', "folder$nr", 32, 32, str_replace( "\"", "&quot;", $name ),
+   $fcol = RGBA($fgred, $fggreen, $fgblue);
+
+   $name_cel = '<td bgcolor="#' . blend_alpha($bgred, $bggreen, $bgblue, $bgalpha) . '">';
+   if( empty($name) )
+      $name_cel.= "<font color=\"#$fcol\">" . T_('Folder name') . '</font></td>';
+   else
+      $name_cel.= "<a style=\"color:'#$fcol'\" href=\"list_messages.php?folder=$nr\">" .
+                     make_html_safe($name) . '</a></td>';
+
+
+   $array = array( 'OWNHTML', $name_cel,
+                   'TEXTINPUT', "folder$nr", 32, 32, $name,
                    'DESCRIPTION', T_('Background'),
                    'DESCRIPTION', T_('Red'),
                    'TEXTINPUT', "bgred$nr", 3, 3, "$bgred",
@@ -69,7 +76,7 @@ function make_folder_form_row(&$form, $name, $nr,
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -92,19 +99,19 @@ function make_folder_form_row(&$form, $name, $nr,
 
       $nr = $matches[1];
 
-      $bgred = limit($_POST["bgred$nr"], 0, 255, 0);
-      $bggreen = limit($_POST["bggreen$nr"], 0, 255, 0);
-      $bgblue = limit($_POST["bgblue$nr"], 0, 255, 0);
-      $bgalpha = limit($_POST["bgalpha$nr"], 0, 255, 255);
-      $fgred = limit($_POST["fgred$nr"], 0, 255, 0);
-      $fggreen = limit($_POST["fggreen$nr"], 0, 255, 0);
-      $fgblue = limit($_POST["fgblue$nr"], 0, 255, 0);
+      $bgred = limit(@$_POST["bgred$nr"], 0, 255, 0);
+      $bggreen = limit(@$_POST["bggreen$nr"], 0, 255, 0);
+      $bgblue = limit(@$_POST["bgblue$nr"], 0, 255, 0);
+      $bgalpha = limit(@$_POST["bgalpha$nr"], 0, 255, 255);
+      $fgred = limit(@$_POST["fgred$nr"], 0, 255, 0);
+      $fggreen = limit(@$_POST["fggreen$nr"], 0, 255, 0);
+      $fgblue = limit(@$_POST["fgblue$nr"], 0, 255, 0);
 
       $bgcolor = RGBA( $bgred, $bggreen, $bgblue, $bgalpha);
       $fgcolor = RGBA( $fgred, $fggreen, $fgblue);
-      $name = $_POST["folder$nr"];
+      $name = trim(@$_POST["folder$nr"]);
 
-      $onstatuspage = ( $_POST["onstatuspage$nr"] == 't' );
+      $onstatuspage = ( @$_POST["onstatuspage$nr"] == 't' );
 
       if( $nr >= USER_FOLDERS and ( in_array($nr, $status_page_folders) xor $onstatuspage ) )
       {
@@ -118,34 +125,46 @@ function make_folder_form_row(&$form, $name, $nr,
          }
       }
 
-      if( empty($name) )
-      {
-         if( $nr > $max_folder )
-            continue;
-
-         if( $nr < USER_FOLDERS )
-            list($name, $bgcolor, $fgcolor) = $STANDARD_FOLDERS[$nr];
-      }
-
-      $newfolder = array($name, $bgcolor, $fgcolor);
-      if( $folders[$nr] === $newfolder )
+      if( empty($name) && $nr > $max_folder )
          continue;
 
-      list($oldname, $oldbgcolor, $oldfgcolor) = $folders[$nr];
+      $newfolder = array($name, $bgcolor, $fgcolor);
+      if( !isset($folders[$nr]) )
+      {
+         $delete = false;
+         $update = false;
+         //else insert $newfolder
+      }
+      else
+      {
+         if( $folders[$nr] === $newfolder )
+            continue;
+         if( $nr >= USER_FOLDERS )
+         {
+            if( !empty($name) )
+               $delete = false;
+            elseif( !folder_is_empty($nr, $my_id) )
+               continue;
+            else
+               $delete = true;
+            $update = true;
+         }
+         else
+         {
+            $delete = ( empty($name) or $STANDARD_FOLDERS[$nr] === $newfolder );
+            $update = ( $STANDARD_FOLDERS[$nr] !== $folders[$nr] );
+         }
+      }
 
-      $is_old = ( array_key_exists($nr, $folders) and
-                  ( $nr >= USER_FOLDERS or $STANDARD_FOLDERS[$nr] !== $folders[$nr] ) );
-
-      $delete = (($nr < USER_FOLDERS and $STANDARD_FOLDERS[$nr] === $newfolder) or
-                 ($nr >= USER_FOLDERS and empty($name) and $is_old and
-                  folder_is_removable($nr, $my_id)));
 
       if( $delete )
       {
          $query = "DELETE FROM Folders WHERE uid='$my_id' AND Folder_nr=$nr LIMIT 1";
       }
-      else if( $is_old )
+      else if( $update )
       {
+         list($oldname, $oldbgcolor, $oldfgcolor) = $folders[$nr];
+
          $query = "UPDATE Folders SET ";
          $updates = array();
          if( $name !== $oldname ) array_push($updates, "Name='$name'");
@@ -181,6 +200,9 @@ function make_folder_form_row(&$form, $name, $nr,
 
    $folders = get_folders($my_id);
    $max_folder = array_reduce(array_keys($folders), "max", USER_FOLDERS-1);
+
+
+
 
    start_page(T_("Edit message folders"), true, $logged_in, $player_row );
 
@@ -220,8 +242,11 @@ function make_folder_form_row(&$form, $name, $nr,
 
    echo "</center>\n";
 
-   $menu_array = array( T_('Show/edit userinfo') => 'userinfo.php' );
+   $menu_array = array(
+         T_('Message list') => 'list_messages.php',
+         T_('Show/edit userinfo') => 'userinfo.php',
+      );
 
-   end_page( $menu_array );
+   end_page(@$menu_array);
 }
 ?>
