@@ -143,7 +143,7 @@ sub draw_board_lines
     $c = ($final_size - $linewidth) / 2;
     $d = ($final_size + $linewidth) / 2;
 
-    if ($right <= 0)
+    if ($right <= 0 && defined($right))
     {
         gimp_rect_select ($theImage, $c, $c, $d, $linewidth, ADD, 0, 0);
     }
@@ -151,7 +151,7 @@ sub draw_board_lines
     {
         gimp_rect_select ($theImage, $c, 0, $linewidth, $d, ADD, 0, 0);
     }
-    if ($right >= 0)
+    if ($right >= 0 && defined($right))
     {
         gimp_rect_select ($theImage, 0, $c, $d, $linewidth, ADD, 0, 0);
     }
@@ -510,6 +510,10 @@ foreach $final_size (@Sizes)
                 }
             }
         }
+
+        draw_board_lines (undef, 0, 0, 1);
+        save_image ("du", 0);
+
 
 
 #--------------- Draw board letters -------------
