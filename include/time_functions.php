@@ -133,7 +133,7 @@ function echo_time($hours, $keep_english=false)
    if( $hours <= 0 )
       return '-';
 
-   $T_= ( $keep_english ? 'trim' : 'T_' );
+   $T_= ( $keep_english ? 'fnop' : 'T_' );
 
    $days = (int)($hours/15);
    if( $days > 0 )
@@ -163,7 +163,7 @@ function echo_time($hours, $keep_english=false)
 
 function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_english=false)
 {
-   $T_= ( $keep_english ? 'trim' : 'T_' );
+   $T_= ( $keep_english ? 'fnop' : 'T_' );
    $str = '';
    if ( $Maintime > 0 )
       $str = echo_time( $Maintime, $keep_english);

@@ -526,7 +526,7 @@ $kyu = 'kyu';
 
 function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false)
 {
-   $T_= ( $keep_english ? 'trim' : 'T_' );
+   $T_= ( $keep_english ? 'fnop' : 'T_' );
    //global $dan, $kyu;
 
    if( !isset($rating) ) return '';
