@@ -78,7 +78,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row )
       disable_cache();
     
 
-   ob_start();
+   ob_start("ob_gzhandler");
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
   <HEAD>';
