@@ -65,11 +65,11 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
        <tr><td><b>' . T_("Userid") . '</b></td>
            <td>' . make_html_safe($player_row["Handle"]) . '</td></tr>
        <tr><td><b>' . T_("Open for matches?") . '</b></td>
-           <td>' . make_html_safe($player_row["Open"]) . '</td></tr>
+           <td>' . make_html_safe($player_row["Open"], true) . '</td></tr>
        <tr><td><b>' . T_("Rating") . '</b></td>
            <td>' . echo_rating($player_row["Rating"]) .  '</td></tr>
        <tr><td><b>' . T_('Rank info') . '</b></td>
-           <td>' . make_html_safe($player_row["Rank"]) . '</td></tr>
+           <td>' . make_html_safe($player_row["Rank"], true) . '</td></tr>
     </table>
     <p>';
 
