@@ -81,7 +81,7 @@ require_once( "include/form_functions.php" );
   }
  </STYLE>\n";
 
-   echo " <SCRIPT language=\"JavaScript\"><!-- \n";
+   echo " <SCRIPT language=\"JavaScript\" type=\"text/javascript\"><!-- \n";
    echo "   function row_click(row,rcl) {
      row.className=((row.className=='hil')?rcl:'hil');
    }\n";
@@ -142,7 +142,7 @@ require_once( "include/form_functions.php" );
                }
                echo "\n</tr>";
             }
-            echo "<tr class=row$c onmousedown=\"row_click(this,'row$c')\">\n";
+            echo "<tr class=row$c ondblclick=\"row_click(this,'row$c')\">\n";
             foreach( $row as $key => $val )
             {
                switch( $key )

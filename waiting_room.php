@@ -187,7 +187,7 @@ function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating=fals
 
 function add_new_game_form()
 {
-   echo '<a name="add">' . "\n";
+   echo '<a name="add"></a>' . "\n";
    $addgame_form = new Form( 'addgame', 'add_to_waitingroom.php', FORM_POST );
    $addgame_form->add_row( array( 'HEADER', T_('Add new game') ) );
 
@@ -239,34 +239,34 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
 
    extract($game_row);
 
-   echo '<p><a name="info">' . "\n";
+   echo '<p><a name="info"></a>' . "\n";
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
-   echo '<tr><td><b>' . T_('Player') . '<b></td><td>' . 
+   echo '<tr><td><b>' . T_('Player') . '</b></td><td>' . 
       user_reference( 1, 1, "black", $pid, $Name, $Handle) . "</td></tr>\n";
 
-   echo '<tr><td><b>' . T_('Rating') . '<b></td><td>' .
+   echo '<tr><td><b>' . T_('Rating') . '</b></td><td>' .
       echo_rating($Rating,true,$pid) . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Size') . '<b></td><td>' . $Size . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Komi') . '<b></td><td>' .
+   echo '<tr><td><b>' . T_('Size') . '</b></td><td>' . $Size . "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' .
       ( ($Handicaptype == 'conv' or $Handicaptype == 'proper') ? '-' : $Komi ) .
       "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Handicap') . '<b></td><td>' . $handi_array[$Handicaptype] .
+   echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $handi_array[$Handicaptype] .
       "</td></tr>\n";
    list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
-   echo '<tr><td><b>' . T_('Rating range') . '<b></td><td' .
+   echo '<tr><td><b>' . T_('Rating range') . '</b></td><td' .
                ( $good_rating ? '>' 
                  : ' bgcolor="#'.blend_alpha_hex(BAD_RATING_COLOR, substr($bg_color, 2, 6))
                    .'">') . $Ratinglimit . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Time limit') . '<b></td><td>' .
+   echo '<tr><td><b>' . T_('Time limit') . '</b></td><td>' .
       echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Number of games') . '<b></td><td>' . $nrGames . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Rated') . '<b></td><td>' .
+   echo '<tr><td><b>' . T_('Number of games') . '</b></td><td>' . $nrGames . "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Rated') . '</b></td><td>' .
       ( $Rated == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Clock runs on weekends') . '<b></td><td>' .
+   echo '<tr><td><b>' . T_('Clock runs on weekends') . '</b></td><td>' .
       ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
 
-   echo '<tr><td><b>' . T_('Comment') . '<b></td><td>' . $Comment . "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Comment') . '</b></td><td>' . $Comment . "</td></tr>\n";
 
    echo "</table>\n";
 

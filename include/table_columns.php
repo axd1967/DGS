@@ -191,7 +191,7 @@ class Table
 
          /* Start of the table */
 
-         $string = '<a name="' . $this->Prefix . 'tbl">'
+         $string = '<a name="' . $this->Prefix . 'tbl"></a>'
                  . "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
          $string.= $this->make_next_prev_links();
 
@@ -221,7 +221,7 @@ class Table
               . '<a name="' . $this->Prefix . 'tblac">'. $tmp . '</a>'
               . "</td></tr>\n";
 
-         $string .= "</table></a>\n"; //</a> close the name="tbl" one
+         $string .= "</table>\n";
          return $string;
       }
 

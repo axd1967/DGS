@@ -587,7 +587,7 @@ class Form
     */
    function create_string_func_space( &$result, $args )
       {
-         $result .= "<td colspan=99 height=\"20px\"></td>";
+         $result .= "<td colspan=99 height=20></td>";
          //$result .= "&nbsp;"; //if SPACE SpanAllColumns==true
       }
 

@@ -225,7 +225,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       '<td align=right width="50%"><font color=' . $menu_fg_color .'><B>' .
       ( ($logged_in and !$is_down) ? T_("Logged in as") . ': ' . $player_row["Handle"]
         : T_("Not logged in") ) .
-      " </B></font></td></tr></table>\n";
+      " </B></font></td></tr>\n</table>\n";
 
    $menu_array = array(
       '<b><font size="+1">' . T_('Status') . '</font></b>' => array('status.php" accesskey="s',1,1),
@@ -336,6 +336,12 @@ function make_menu($menu_array)
    $i = 0;
    foreach( $menu_array as $text => $link )
       {
+         if( ($i % $menu_width)==0 && i>0 )
+           {
+             echo "</tr>" . $new_row;
+             $cumw = 0;
+             $cumwidth = 0;
+           }
          $i++;
          $cumw += $w;
          $width = round($cumw - $cumwidth);
@@ -349,12 +355,6 @@ function make_menu($menu_array)
          $j = $i % 10;
          echo "<td$span width=\"$width%\"><B><A href=\"$base_path$link\" accesskey=\"$j\">$text</A></B></td>\n";
          $cumwidth += $width;
-         if( !($i % $menu_width) )
-           {
-             echo "</tr>" . $new_row;
-             $cumw = 0;
-             $cumwidth = 0;
-           }
       }
 
    echo "</tr></table>\n";
@@ -428,10 +428,10 @@ function make_menu_horizontal($menu_array)
          echo "<td width=\"$width%\"><A href=\"$base_path$link\"><font color=black>$text</font></A></td>\n";
       }
 
-   echo '</tr></table>' . "\n";
+   echo "</tr>\n</table>\n";
 
    echo '<table width="100%" cellpadding=0 cellspacing=0><tr><td height=1 bgcolor=' . $menu_bg_color .
-      "><img src=\"{$base_path}images/dot.gif\" width=1 height=1 alt=\"\"></td></table>\n" . "
+      "><img src=\"{$base_path}images/dot.gif\" width=1 height=1 alt=\"\"></td></tr></table>\n" . "
     <BR>\n";
 
 }
@@ -440,7 +440,9 @@ function make_menu_vertical($menu_array)
 {
    global $base_path, $menu_bg_color, $bg_color;
 
+   //this <table><tr> is left open until page end
    echo '<table width="100%" border=0 cellspacing=0 cellpadding=5><tr><td valign=top rowspan=2>' . "\n";
+
    echo '<table border=0 cellspacing=0 cellpadding=1 bgcolor='.$menu_bg_color.'><tr><td>' . "\n";
    echo '<table border=0 cellspacing=0 cellpadding=5 bgcolor="#F7F5FF">' . "\n";
    echo '<tr><td align=center> <img src="' . $base_path . 'images/dragonlogo_bl.jpg" alt="Dragon">' . "\n";
@@ -448,22 +450,25 @@ function make_menu_vertical($menu_array)
    $i = 0;
 
    //  uasort($menu_array, "cmp1");
-   echo '<tr><td align=left nowrap>' . "\n";
+   echo '</td></tr><tr><td align=left nowrap>' . "\n";
 
    foreach( $menu_array as $text => $tmp )
       {
          list($link,$t1,$t2) = $tmp;
 
          if( $i % 3 == 0 and $i > 0 )
-             echo '<tr><td height=1><img src="' . $base_path . 'images/dot.gif" alt=""></td></tr><tr><td align=left nowrap>' . "\n";
+             echo '</td></tr><tr><td height=1><img src="' . $base_path . 'images/dot.gif" alt=""></td></tr><tr><td align=left nowrap>' . "\n";
 
          $i++;
 
          echo "<A href=\"$base_path$link\"><font color=black>$text</font></A><br>\n";
       }
 
-   echo '<tr><td height=5><img height=1 src="' . $base_path . 'images/dot.gif" alt=""></td></tr></table>' . "\n";
-   echo '</table></td><td width="100%" align=center valign=top><BR>' . "\n";
+   echo '</td></tr><tr><td height=5><img height=1 src="' . $base_path . 'images/dot.gif" alt=""></td></tr>'
+         . "\n</table>\n</td></tr></table>\n";
+
+   //this <td> is left open until page end
+   echo '</td><td width="100%" align=center valign=top><BR>' . "\n";
 }
 
 /* Not used
@@ -776,6 +781,9 @@ function make_html_safe( $msg, $some_html=false)
       // Regular allowed html tags
       $msg = parse_html_safe( $msg, $some_html) ;
    }
+
+      $msg = str_replace('&', '&amp;', $msg);
+      $msg=eregi_replace("&amp;((#[0-9]+|[a-zA-Z]+);)", "&\\1", $msg);
 
    // Filter out HTML code
 

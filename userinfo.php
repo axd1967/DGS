@@ -72,19 +72,20 @@ require_once( "include/countries.php" );
 
    $a = $row['ActivityLevel'];
    $activity = ( $a == 0 ? '' :
-                 ( $a == 1 ? '<img align=middle alt="*" src=images/star2.gif>' :
-                   '<img align=middle alt="*" src=images/star.gif>' .
-                   '<img align=middle alt="*" src=images/star.gif>' ) );
+                 ( $a == 1 ? '<img align=middle alt="*" src="images/star2.gif">' :
+                   '<img align=middle alt="*" src="images/star.gif">' .
+                   '<img align=middle alt="*" src="images/star.gif">' ) );
    $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
    $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
 
    $cntr = @$row['Country'];
+   $cntrn = T_($COUNTRIES[$cntr]);
    echo '
  <table border=3>
     <tr><td><b>' . T_('Name') . '</b></td><td>' . $name_safe . '</td></tr>
     <tr><td><b>' . T_('Userid') . '</b></td><td>' . $handle_safe . '</td></tr>
     <tr><td><b>' . T_('Country') . '</b></td><td>' .  (empty($cntr) ? '&nbsp;' :
-             '<img title="' . T_($COUNTRIES[$cntr]) . "\" src=\"images/flags/$cntr.gif\">") . '</td>
+             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">") . '</td></tr>
     <tr><td><b>' . T_('Open for matches') . '</b></td><td>' . make_html_safe($row['Open'],INFO_HTML) . '</td></tr>
     <tr><td><b>' . T_('Activity') . '</b></td><td>' . $activity . '</td></tr>
     <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating(@$row['Rating2'],true,$row['ID']) . '</td></tr>
@@ -129,6 +130,9 @@ require_once( "include/countries.php" );
       echo "    </table>\n";
    }
 
+
+   echo "</center>\n";
+   
 
    if( $my_info )
    {

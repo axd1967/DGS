@@ -105,10 +105,11 @@ require_once( "include/countries.php" );
             $row['Handle'] . "</A></td>";
       if( $utable->Is_Column_Displayed[16] )
       {
-         $c = @$row['Country'];
+         $cntr = @$row['Country'];
+         $cntrn = T_($COUNTRIES[$cntr]);
          $urow_strings[16] = "<td>" .
-            (empty($c) ? '&nbsp;' :
-             "<img title=\"" . T_($COUNTRIES[$c]) ."\" src=\"images/flags/$c.gif\">") . "</td>";
+            (empty($cntr) ? '&nbsp;' :
+             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">") . "</td>";
       }
       if( $utable->Is_Column_Displayed[4] )
          $urow_strings[4] = '<td>' . make_html_safe(@$row['Rankinfo'],INFO_HTML) . '&nbsp;</td>';

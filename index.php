@@ -61,8 +61,7 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
    sysmsg(get_request_arg('msg'));
 
 
-  echo '<p><font size="+0">' . T_('Please login.') .
-    '</font></B><font color="red"> ' .
+  echo '<p>' . T_('Please login.') . '<font color="red"> ' .
     sprintf( T_("To look around, use %s."), "'guest' / 'guest'" ) . " </font>\n";
 
   $login_form = new Form( 'loginform', 'login.php', FORM_POST );

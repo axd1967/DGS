@@ -178,7 +178,7 @@ class GoDiagram
 
    function echo_editor($nr, $woodcolor, $stonesize)
       {
-         return '<script language="JavaScript">' . "\n" .
+         return '<script language="JavaScript" type="text/javascript">' . "\n" .
             "goeditor($nr, {$this->Size}, {$this->Left}, {$this->Right}, {$this->Down}, $this->Up, $stonesize, $woodcolor, 1);\n" .
             "enter_data($nr, '{$this->Data}');\n" .
             "</script>\n" .
