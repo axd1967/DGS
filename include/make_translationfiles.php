@@ -102,7 +102,8 @@ function make_include_files($language=null, $group=null)
                  gmdate('Y-m-d H:i:s T', $NOW) . " */\n\n");
       }
 
-      fwrite( $fd, "\$Tr[\"" . $row['Original'] . "\"] = \"" . $row['Text'] . "\";\n" );
+      fwrite( $fd, "\$Tr[\"" . addslashes($row['Original']) . "\"] = \"" .
+              addslashes($row['Text']) . "\";\n" );
    }
 
 
