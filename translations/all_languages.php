@@ -21,5 +21,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 add_to_known_languages( "en", "English", "iso-8859-1" );
 add_to_known_languages( "sv", "Swedish", "iso-8859-1" );
+add_to_known_languages( "no", "Norwegian", "iso-8859-1" );
+add_to_known_languages( "de", "German", "iso-8859-1" );
+add_to_known_languages( "fr", "French", "iso-8859-1" );
+add_to_known_languages( "es", "Spanish", "iso-8859-1" );
+add_to_known_languages( "cs", "Czech", "iso-8859-2" );
 
 ?>
