@@ -221,7 +221,5 @@ function make_folder_form_row(&$form, $name, $nr,
    $menu_array = array( T_('Show/edit userinfo') => 'userinfo.php' );
 
    end_page( $menu_array );
-
-   end_page();
 }
 ?>
