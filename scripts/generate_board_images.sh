@@ -25,7 +25,9 @@ echo -e "   First run povray (v3.5 or higher) to generate a couple of nice stone
 echo -e "\n------------------------------------------------------------------------------------\n";
 
 
-povray +D +sp16 +ep4 -P +A +J +W1024 +H768 +FN +OBigBlack.png stone.pov
+povray +D +sp16 +ep4 -P +A +J +W1024 +H768 +FN Declare=PLAY_B=1 +OBigPlayBlack.png stone.pov
+povray +D +sp16 +ep4 -P +A +J +W1024 +H768 +FN Declare=PLAY_W=1 +OBigPlayWhite.png stone.pov
+povray +D +sp16 +ep4 -P +A +J +W1024 +H768 +FN Declare=BLACK=1 +OBigBlack.png stone.pov
 povray +D +sp16 +ep4 -P +A +J +W1024 +H768 +FN Declare=WHITE=1 +OBigWhite.png stone.pov
 povray +D +sp16 +ep4 -P +A +J +W1024 +H768 +FN Declare=YINYANG=1 +OYinYang.png stone.pov
 
@@ -69,8 +71,9 @@ gimp -i -d -b "(begin
 #"
 done;
 
-file="\"YinYang.png\"";
+files="\"YinYang.png\" \"BigPlayBlack.png\" \"BigPlayWhite.png\"";
 
+for file in $files; do
 #"
 gimp -i -d -b "(begin
 (set! theImage (car (gimp-file-load FALSE $file $file)))
@@ -81,6 +84,9 @@ gimp -i -d -b "(begin
 (file-png-save 1 theImage theLayer $file $file 0 9 0 0 0 0 0)
 (gimp-quit 0))" -b "(gimp-quit 0)";
 #"
+
+done;
+
 
 number_font="\"helvetica\"";
 number_font_weight="\"bold\"";
@@ -409,6 +415,14 @@ gimp -i -d -b "(begin
       (load-image \"YinYang.png\" 1 foreground_color)
       (save-image \"y\" 1)
 
+      (load-image \"BigPlayBlack.png\" 0 foreground_color)
+      (resize (round (/ (* final_size 644) 502)) final_size)
+      (save-image \"pb\" 1)
+
+      (load-image \"BigPlayWhite.png\" 0 foreground_color)
+      (resize (round (/ (* final_size 644) 502)) final_size)
+      (save-image \"pw\" 1)
+
 ;--------------- Draw board lines -------------
 
       (new-image final_size final_size '(0 0 0))
@@ -538,7 +552,7 @@ cd $size;
 
 rm -f *or8* ?.png ??.png ???.png ????.png
 
-pngquant -force -ordered 50 [bwy]*.orig.png
+pngquant -force -ordered 50 [bwyp]*.orig.png
 pngquant -force -ordered 16 [cl]*.orig.png
 pngquant -force -ordered 2 [eduh]*.orig.png
 pngquant -force -ordered 16 [eduh]*[tcsxwbd].orig.png
