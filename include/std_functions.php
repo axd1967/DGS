@@ -101,7 +101,7 @@ define('DELETE_LIMIT', 10);
 
 define('MAX_SEKI_MARK', 2);
 
-define("NONE", 0);
+define("NONE", 0); //i.e. DAME
 define("BLACK", 1);
 define("WHITE", 2);
 
@@ -140,6 +140,9 @@ define("UP",0x02);
 define("RIGHT",0x04);
 define("DOWN",0x08);
 define("SMOOTH_EDGE",0x10);
+
+define('MIN_BOARD_SIZE',5);
+define('MAX_BOARD_SIZE',25);
 
 
 define("ADMIN_TRANSLATORS",0x01);
@@ -722,7 +725,7 @@ function make_html_safe( $msg, $some_html=false)
       $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>",
                          ALLOWED_LT."a href=\"\\1\\2\"".ALLOWED_GT.
                          "\\2".ALLOWED_LT."/a".ALLOWED_GT, $msg);
-      $msg=eregi_replace("<((http:|news:|ftp:)//[^ >\n\t]+)>",
+      $msg=eregi_replace("<((http:|https:|news:|ftp:)//[^ >\n\t]+)>",
                          ALLOWED_LT."a href=\"\\1\"".ALLOWED_GT.
                          "\\1".ALLOWED_LT."/a".ALLOWED_GT, $msg);
 
@@ -1054,7 +1057,7 @@ function user_reference( $link, $safe, $color, $player_id, $player_name='', $pla
 function is_on_observe_list( $gid, $uid )
 {
    $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid");
-   return( mysql_num_rows($result) > 0 );
+   return( @mysql_num_rows($result) > 0 );
 }
 
 function toggle_observe_list( $gid, $uid )
@@ -1075,7 +1078,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
       $result = mysql_query("SELECT Observers.uid AS pid " .
                             "FROM Observers WHERE gid=$gid");
 
-      if(  mysql_num_rows($result) > 0 )
+      if( @mysql_num_rows($result) > 0 )
       {
 
          $Subject = 'An observed game has finished';

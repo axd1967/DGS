@@ -52,6 +52,8 @@ require_once( "include/rating.php" );
       error( "no_initial_rating" );
    }
 
+   $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_POST['size']));
+
       //for interpret_time_limit_forms{
       $byoyomitype = @$_POST['byoyomitype'];
       $timevalue = @$_POST['timevalue'];
@@ -101,7 +103,7 @@ require_once( "include/rating.php" );
       "uid=" . $player_row['ID'] . ', ' .
       "nrGames=" . (0+@$_POST['nrGames']) . ", " .
       "Time=FROM_UNIXTIME($NOW), " .
-      "Size=" . (0+@$_POST['size']) . ", " .
+      "Size=$size, " .
       "Komi=ROUND(2*($komi))/2, " .
       "Maintime=$hours, " .
       "Byotype='$byoyomitype', " .

@@ -86,7 +86,7 @@ function init(nr)
    move_history[nr] = [];
 
    if( size[nr] < 1 ) size[nr] = 19;
-   if( size[nr] > 25 ) size[nr] = 25;
+   if( size[nr] > MAX_BOARD_SIZE ) size[nr] = MAX_BOARD_SIZE;
 
    if( startx[nr] < 0 ) startx[nr] = 0;
    if( endx[nr] > size[nr] ) endx[nr] = size[nr];
@@ -260,7 +260,7 @@ function has_liberty(nr, start_x, start_y, remove)
 
             if( new_color == c && index[nr][nx][ny] < current_index[nr] )
             {
-               x = nx;  // Go to the neigbour
+               x = nx;  // Go to the neighbour
                y = ny;
                index[nr][x][y] = current_index[nr] + dir;
             }

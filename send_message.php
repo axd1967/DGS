@@ -94,7 +94,7 @@ disable_cache();
                           "Rating2, RatingStatus " .
                           "FROM Players WHERE Handle='$to'" );
 
-   if( mysql_num_rows( $result ) != 1 )
+   if( @mysql_num_rows( $result ) != 1 )
       error("receiver_not_found");
 
 
@@ -109,7 +109,7 @@ disable_cache();
 
    if( $type == "INVITATION" )
    {
-      $size = @$_REQUEST['size'];
+      $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_REQUEST['size']));
       $handicap_type = @$_REQUEST['handicap_type'];
       $color = @$_REQUEST['color'];
       $rated = @$_REQUEST['rated'];
@@ -198,7 +198,7 @@ disable_cache();
                                "((Black_ID=$my_id AND White_ID=$opponent_ID) OR " .
                                "(Black_ID=$opponent_ID AND White_ID=$my_id))");
 
-         if( mysql_num_rows($result) != 1 )
+         if( @mysql_num_rows($result) != 1 )
             error('unknown_game');
 
          $query = "UPDATE Games SET $query  WHERE ID=$disputegid LIMIT 1";
@@ -231,7 +231,7 @@ disable_cache();
                              "Rated, WeekendClock " .
                              "FROM Games WHERE ID=$gid" );
 
-      if( mysql_num_rows($result) != 1)
+      if( @mysql_num_rows($result) != 1)
          error("mysql_start_game");
 
 
@@ -255,6 +255,7 @@ disable_cache();
          error("mysql_start_game");
       }
       $swap = 0;
+      $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_row["Size"]));
 
       if( $game_row['WeekendClock'] != 'Y' )
       {
@@ -280,14 +281,14 @@ disable_cache();
       if( $handitype == -2 ) // Proper handicap
       {
             list($handicap,$komi,$swap) =
-               suggest_proper($rating_white, $rating_black, $game_row["Size"]);
+               suggest_proper($rating_white, $rating_black, $size);
 
          $query .= "Handicap=$handicap, Komi=$komi, ";
       }
       else if( $handitype == -1 ) // Conventional handicap
       {
          list($handicap,$komi,$swap) =
-            suggest_conventional($rating_white, $rating_black, $game_row["Size"]);
+            suggest_conventional($rating_white, $rating_black, $size);
 
          $query .= "Handicap=$handicap, Komi=$komi, ";
       }
@@ -337,7 +338,7 @@ disable_cache();
             "LastTicks=$ticks_white, " .
             "Lastchanged=FROM_UNIXTIME($NOW), " .
             "Starttime=FROM_UNIXTIME($NOW), " .
-            "Size=" . $game_row["Size"] . ", " .
+            "Size=$size, " .
             "Handicap=" . $game_row["Handicap"] . ", " .
             "Komi=" . $game_row["Komi"] . ", " .
             "Maintime=" . $game_row["Maintime"] . ", " .

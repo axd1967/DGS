@@ -47,7 +47,7 @@ class GoDiagram
 
    function set_geometry( $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19 )
       {
-         $this->Size = limit($_Size, 2, 25, 19);
+         $this->Size = limit($_Size, 2, MAX_BOARD_SIZE, 19);
          $this->Left = limit($_Left, 1, $this->Size - 1, 1);
          $this->Right = limit($_Right, $this->Left + 1, $this->Size, $this->Size);
          $this->Down = limit($_Down, 1, $this->Size - 1, 1);
@@ -82,7 +82,7 @@ class GoDiagram
 
    function set_values_from_goban_tag( $s )
       {
-         $this->Size = extract_value($s, 'size', 2, 25, $this->Size);
+         $this->Size = extract_value($s, 'size', 2, MAX_BOARD_SIZE, $this->Size);
          $this->set_geometry($this->Size);
 
          $view = strtolower(extract_value($s, 'view'));

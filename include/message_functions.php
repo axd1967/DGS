@@ -70,7 +70,7 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
                              "OR (Players.ID=White_ID AND Black_ID=$my_ID)) " .
                              "AND Status='INVITED'" );
 
-      if( mysql_num_rows($result) != 1 )
+      if( @mysql_num_rows($result) != 1 )
          error("unknown_game");
 
       $game_row = mysql_fetch_array($result);
@@ -125,7 +125,7 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 
 
    $value_array=array();
-   for( $bs = 5; $bs <= 25; $bs++ )
+   for( $bs = MIN_BOARD_SIZE; $bs <= MAX_BOARD_SIZE; $bs++ )
      $value_array[$bs]=$bs;
 
    $mform->add_row( array( 'SPACE' ) );
@@ -566,7 +566,7 @@ function folder_is_empty($nr, $uid)
    $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
                          "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1");
 
-   return (mysql_num_rows($result) === 0);
+   return (@mysql_num_rows($result) === 0);
 }
 
 function echo_folder_box($folders, $folder_nr, $bgcolor)
