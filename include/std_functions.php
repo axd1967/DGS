@@ -765,4 +765,9 @@ function add_link_page_link($link, $linkdesc, $extra = '')
   echo "\n";
 }
 
+function nsq_addslashes( $str )
+{
+  return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $str );
+}
+
 ?>
