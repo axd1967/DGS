@@ -253,6 +253,13 @@ require( "include/std_functions.php" );
       }
       break;
 
+
+      case("Unknown forum"):
+      {
+         echo "Sorry, I couldn't find that forum you wanted to show.";
+      }
+      break;
+
      
       case("unknown_message"):
       {

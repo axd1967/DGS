@@ -34,6 +34,8 @@ start_page("Links", true, $logged_in, $player_row );
 
 <p align="left"><a href="introduction.php">Introduction to Dragon</a></p>
 
+<p align="left"><a href="site_map.php">Site map</a></p>
+
 <p align="left"><a href="phorum/list.php?f=3">Frequently Asked Questions</a> -- with answers</p>
 
 <p align="left"><a href="links.php">Links</a>

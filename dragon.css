@@ -23,6 +23,11 @@ td.r {
         text-decoration : none;
 }
 
+a.dead {
+        color : black;
+        text-decoration : none;
+}
+
 
 img.13 {
         width : 13px;

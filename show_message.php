@@ -41,7 +41,7 @@ require( "include/std_functions.php" );
                          "AND ((Messages.To_ID=$my_id AND From_ID=Players.ID)" .
                          "OR (Messages.From_ID=$my_id AND To_ID=Players.ID))");
 
-   if( mysql_num_rows($result) != 1 )
+   if( @mysql_num_rows($result) != 1 )
       error("unknown_message");
 
    $row = mysql_fetch_array($result);
