@@ -103,12 +103,17 @@ function make_folder_form_row(&$form, $name, $nr,
       $name = $_POST["folder$nr"];
 
       $onstatuspage = ( $_POST["onstatuspage$nr"] == 't' );
-      if( $nr > 5 and ( in_array($nr, $old_statusfolders) xor $onstatuspage ) )
+
+      if( $nr > 5 and ( in_array($nr, $status_page_folders) xor $onstatuspage ) )
       {
          if( $onstatuspage )
             array_push($status_page_folders, $nr);
          else
-            unset($status_page_folders[$nr]);
+         {
+            $i=array_search( $nr, $status_page_folders);
+            if($i!==false)
+               unset($status_page_folders[$i]);
+         }
       }
 
       if( empty($name) )
