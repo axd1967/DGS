@@ -84,15 +84,22 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    if( mysql_num_rows($result) > 0 )
    {
-      echo "<HR><B>New messages:</B><p>\n";
-      echo "<table border=3>\n";
-      echo "<tr><th></th><th>From</th><th>Subject</th><th>Date</th></tr>\n";
+      echo "<HR><font color=$h3_color><B>New messages:</B></font><p>\n";
 
+      echo start_end_column_table(true);
+      echo tablehead(1, 'Flags', NULL, true, true);
+      echo tablehead(1, 'To', NULL, false, true);
+      echo tablehead(1, 'Subject', NULL, false, true);
+      echo tablehead(1, 'Date', NULL, true, true);
+      echo "</tr>\n";
 
-
+      $row_color=2;
       while( $row = mysql_fetch_array( $result ) )
       {
-         echo "<tr>";
+         $row_color=3-$row_color;
+         $bgcolor = ${"table_row_color$row_color"};
+
+         echo "<tr bgcolor=$bgcolor>";
 
          if( !(strpos($row["Flags"],'NEW') === false) )
          {
@@ -133,7 +140,8 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
    $result = mysql_query( $query ) or die(mysql_error());
 
-   echo "<hr><b>" . T_("Your turn to move in the following games:") . "</b><p>\n";
+   echo "<hr><font color=$h3_color><b>" .
+      T_("Your turn to move in the following games:") . "</b></font><p>\n";
 
    if( mysql_num_rows($result) == 0 )
    {
