@@ -350,14 +350,19 @@ function is_logged_in($hdl, $scode, &$row)
     if( $row["Sessioncode"] != $scode or $row["Expire"] < time() )
         return false;
 
+    $query = "UPDATE Players SET Hits=Hits+1";
+
     if( $row["flags"] & WANT_EMAIL AND $row["Notify"] != 'NONE' )
-        {
-            $result = mysql_query( "UPDATE Players " .
-                                   "SET Notify='NONE' WHERE Handle='$hdl'" );
-            
-            if( mysql_affected_rows() != 1 )
-                return false;
-        }
+      $query .= ", Notify='NONE'";
+    
+    $query .= " WHERE Handle='$hdl'";
+
+    $result = mysql_query( $query );
+    
+    if( mysql_affected_rows() != 1 )
+      return false;
+    
+
 
     if( $row["Adminlevel"] >= 3 )
         $show_time = true;
