@@ -50,6 +50,7 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
      T_("Welcome to the development version of the dragon go server!") . 
      '<p>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") . 
      '<p><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
+     '<p>' . T_("Have a look to the FAQ for more infos.") . 
      "</font><HR>\n";
 }else{ //for devel server
   echo "<p><font color=green>\n" .
