@@ -142,7 +142,7 @@ function suggest($rating_W, $rating_B, $size, $pos_komi=false)
 
    $H += 0.5; // advantage for playing first;
 
-   $handicap = ( $pos_komi ? $handicap = ceil($H) : round($H) );
+   $handicap = ( $pos_komi ? ceil($H) : round($H) );
 
    if( $handicap <=1 ) $handicap = 1;
 

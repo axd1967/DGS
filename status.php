@@ -85,7 +85,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
 
       echo start_end_column_table(true);
       echo tablehead(1, T_('Flags'), NULL, true, true);
-      echo tablehead(1, T_('To'), NULL, false, true);
+      echo tablehead(1, T_('From'), NULL, false, true);
       echo tablehead(1, T_('Subject'), NULL, false, true);
       echo tablehead(1, T_('Date'), NULL, true, true);
       echo "</tr>\n";
