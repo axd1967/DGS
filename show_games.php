@@ -38,16 +38,6 @@ require_once( "include/rating.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   $button_nr = $player_row["Button"];
-
-   if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
-      $button_nr = 0;
-
-   $style = 'a.button { color : ' . $buttoncolors[$button_nr] .
-      ';  font : bold 100% sans-serif;  text-decoration : none;  width : 90px; }
-td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
-      'background-repeat : no-repeat;  background-position : center; }';
-
    $column_set = $player_row["GamesColumns"];
    if( $_GET['observe'] )
       $page = 'show_games.php?observe=t&';
@@ -167,7 +157,7 @@ td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
                           make_html_safe($user_row["Handle"]) . ")</A>");
    }
 
-   start_page( $title1, true, $logged_in, $player_row, $style );
+   start_page( $title1, true, $logged_in, $player_row, button_style() );
 
    $show_rows = mysql_num_rows($result);
    if( $show_rows == $MaxRowsPerPage )

@@ -36,18 +36,7 @@ require_once( "include/message_functions.php" );
 
    $my_id = $player_row["ID"];
 
-   $button_nr = $player_row["Button"];
-
-   if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
-      $button_nr = 0;
-
-   $style = 'a.button { color : ' . $buttoncolors[$button_nr] .
-      ';  font : bold 100% sans-serif;  text-decoration : none;  width : 90px; }
-td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
-      'background-repeat : no-repeat;  background-position : center; }';
-
-
-   start_page(T_('Status'), true, $logged_in, $player_row, $style );
+   start_page(T_('Status'), true, $logged_in, $player_row, button_style() );
 
    echo "<center>";
 

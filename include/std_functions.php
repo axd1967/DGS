@@ -893,7 +893,22 @@ function limit($val, $minimum, $maximum, $default)
 
 function str_TD_class_button( &$browser)
 {
-   return "<td class=button width=92 align=center>";
+   return "<td class=button width=94 align=center>";
 }
 
+function button_style()
+{
+   global $player_row, $buttoncolors, $buttonfiles, $button_max;
+
+   $button_nr = $player_row["Button"];
+
+   if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
+      $button_nr = 0;
+
+   return 'a.button { color : ' . $buttoncolors[$button_nr] .
+      ';  font : bold 100% sans-serif;  text-decoration : none;  width : 94px; }
+td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
+      'background-repeat : no-repeat;  background-position : center; }';
+
+}
 ?>
