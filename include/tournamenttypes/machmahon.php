@@ -20,15 +20,25 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 /* The code in this file is written by Ragnar Ouchterlony */
 
+/*!
+ * \file macmahon.php
+ * \brief For class MacMahon.
+ */
+
+require( "include/tournament_round.php" );
+
+/*!
+ * \brief Implements the tournament type MacMahon.
+ */
 class MacMahon extends TournamentRound
 {
-  /* Constructor without real initialization. */
+  /*! \brief Constructor without real initialization. */
   function MacMahon()
     {
       parent::TournamentRound();
     }
 
-  /* Add things special to the MacMahon round type to the options form. */
+  /*! \brief Add things special to the MacMahon round type to the options form. */
   function add_type_specific_options_to_form( &$options_form )
     {
     }
