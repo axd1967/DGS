@@ -752,7 +752,7 @@ function check_consistency($gid)
 
       $coord = number2sgf_coords($PosX,$PosY,$Size);
 
-  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
+  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
   //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
       if( !check_move(false) )
       {

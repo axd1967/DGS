@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Game";
 
 
-//ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners;
+//ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
 //return: $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 function check_move($print_error=true)
 {
@@ -96,14 +96,14 @@ function check_move($print_error=true)
    return true;
 }
 
-function check_handicap() //adjust $handi, $stonestring and others
+function check_handicap() //adjust $handi, $stonestring, $enable_message and others
 {
    global $stonestring, $colnr, $rownr, $Size, $array, $coord, $Handicap,
       $enable_message, $extra_message, $handi;
 
    if( !$stonestring ) $stonestring = "1";
 
-   // add killed stones to array
+   // add handicap stones to array
 
    $l = strlen( $stonestring );
 
@@ -111,7 +111,7 @@ function check_handicap() //adjust $handi, $stonestring and others
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
 
-      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
+      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] != NONE )
          error("illegal_position");
 
       $array[$colnr][$rownr] = BLACK;
@@ -121,7 +121,7 @@ function check_handicap() //adjust $handi, $stonestring and others
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
-      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] >= 1 )
+      if( !isset($rownr) or !isset($colnr) or $array[$colnr][$rownr] != NONE )
          error("illegal_position");
 
       $array[$colnr][$rownr] = BLACK;
