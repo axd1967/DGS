@@ -251,8 +251,10 @@ function update_rating2($gid, $check_done=true)
 
    if( $Rated === 'N' or  $Moves < 10+$Handicap ) // Don't rate games with too few moves
    {
-      mysql_query("UPDATE Games SET Rated='N', " .
-                  "Black_Rating=$bRating, White_Rating=$wRating WHERE ID=$gid LIMIT 1");
+      mysql_query("UPDATE Games SET Rated='N'" .
+                  ( !empty($bRating) ? ", Black_Rating=$bRating" : '' ) .
+                  ( !empty($wRating) ? ", White_Rating=$wRating" : '' ) .
+                  " WHERE ID=$gid LIMIT 1");
       return;
    }
 
