@@ -34,6 +34,57 @@ function reverse_htmlentities( $str )
   return strtr($str, $reverse_htmlentities_table);
 }
 
+
+/* SGf specs:
+   Setup properties must not be mixed with move properties within a node.
+   FF[4] move & setup properties:
+ID   Description     property type    property value
+---- --------------- ---------------  --------------------------------------
+AB   Add Black       setup            list of stone
+AE   Add Empty       setup            list of point
+AW   Add White       setup            list of stone
+PL   Player to play  setup            color
+
+B    Black           move             move
+BL   Black time left move             real
+BM   Bad move        move             double
+DO   Doubtful        move             none
+IT   Interesting     move             none
+KO   Ko              move             none
+MN   set move number move             number
+OB   OtStones Black  move             number
+OW   OtStones White  move             number
+TE   Tesuji          move             double
+W    White           move             move
+WL   White time left move             real
+*/
+$prop_type ='root';
+function sgf_echo_prop( $prop )
+{
+   global $prop_type;
+
+   //if( stristr('-B-W-MN-BL-WL-KO-BM-DO-IT-OB-OW-TE-', $prop.'-') )
+   if( stristr('-B-W-MN-', '-'.$prop.'-') )
+   {
+      if( $prop_type == 'setup' )
+         echo "\n;" . $prop;
+      else
+         echo $prop;
+      $prop_type='move';
+   }
+   else if( stristr('-AB-AE-AW-PL-', '-'.$prop.'-') )
+   {
+      if( $prop_type == 'move' )
+         echo "\n;" . $prop;
+      else
+         echo $prop;
+      $prop_type='setup';
+   }
+   else
+      echo $prop;
+}
+
+
 function sgf_simpletext( $str )
 {
    return str_replace("]","\\]", str_replace("\\","\\\\",
@@ -52,7 +103,7 @@ function sgf_echo_comment( $com )
 }
 
 /* Possible properties are: (uppercase only)
- * - AB/AW/AE: add black stone/white stone/empty point
+ * - AB/AW/AE: add black stone/white stone/empty point (setup properties)
  * - MA/CR/TR/SQ: mark with a cross/circle/triangle/square (SQ is FF[4])
  * - TB/TW: mark territory black/white
  */
@@ -64,7 +115,8 @@ function sgf_echo_point( $points, $overwrite_prop=false )
    if( $overwrite_prop )
    {
       $prop= $overwrite_prop;
-      echo "\n" . $prop;
+      echo "\n";
+      sgf_echo_prop( $prop);
    }
    else
    {
@@ -76,12 +128,13 @@ function sgf_echo_point( $points, $overwrite_prop=false )
    {
       if( !$overwrite_prop && $prop !== $point_prop )
       {
+         if( !$point_prop )
+            continue;
          $prop= $point_prop;
-         if($prop)
-            echo "\n" . $prop;
+         echo "\n";
+         sgf_echo_prop( $prop);
       }
-      if($prop)
-         echo "[$coord]";
+      echo "[$coord]";
    }
 
    return true;
@@ -131,7 +184,7 @@ function sgf_create_territories( $size, &$array,
 }
 
 
-/*
+/* Example:
 > White: 66 territory + 6 prisoners + 0.5 komi = 72.5
 > Black: 64 territory + 1 prisoner = 65
 */
@@ -290,7 +343,7 @@ $array=array();
    if ($sgf_version >= 4)
    {
       echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, 1)) . "]";
-      //may specify CA (charset)
+      //may specify CA (charset) here
    }
 
    if( $rules )
@@ -417,7 +470,7 @@ $array=array();
 
             if( $MoveNr <= $Handicap && $use_AB_for_handicap )
             {
-               $points[$coord]='AB';
+               $points[$coord]='AB'; //setup property
                if( $MoveNr < $Handicap)
                   break;
 
@@ -430,19 +483,24 @@ $array=array();
             else if ($sgf_trim_nr >= 0)
             {
                if ( $Stone == WHITE )
-                  $color= "W" ;
+                  $color='W' ;
                else
-                  $color= "B" ;
+                  $color='B' ;
 
                if( $next_color != $color )
-                  echo "PL[$color]";
+               {
+                  sgf_echo_prop('PL'); //setup property
+                  echo "[$color]";
+               }
+
 
                if ( $Stone == WHITE )
-                  $next_color= "B" ;
+                  $next_color='B' ;
                else
-                  $next_color= "W" ;
+                  $next_color='W' ;
 
                echo( "\n;" ); //Node start
+               $prop_type ='';
 
                if( $MoveNr > $Handicap && $PosX >= -1 )
                {
@@ -450,7 +508,8 @@ $array=array();
                   if( $MoveNr != $movenum+$movesync)
                   {
                      //useful when "non AB handicap" or "resume after SCORE"
-                     echo "MN[$movenum]";
+                     sgf_echo_prop('MN'); //move property
+                     echo "[$movenum]";
                      $movesync= $MoveNr-$movenum;
                   }
                }
@@ -473,7 +532,8 @@ $array=array();
 
                   if( $PosX == -1 )  //pass move
                   {
-                     echo $color."[]"; //do not use [tt]
+                     sgf_echo_prop($color); //move property
+                     echo "[]"; //do not use [tt]
 
                      if( $sgf_pass_highlight & 1 )
                         echo "N[$color PASS]";
@@ -483,7 +543,8 @@ $array=array();
                   }
                   else //move or non AB handicap
                   {
-                     echo $color."[$coord]";
+                     sgf_echo_prop($color); //move property
+                     echo "[$coord]";
                   }
 
                   unset($points);
@@ -502,6 +563,7 @@ $array=array();
    if ( $Status == 'FINISHED')
    {
       echo( "\n;N[RESULT]" ); //Node start
+      $prop_type ='';
 
       // highlighting result in last comments:
       if( isset($Score) )
