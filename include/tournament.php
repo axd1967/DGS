@@ -46,12 +46,12 @@ class Tournament
    /*! \brief The identification of this tournament */
    var $ID;
    /*! \brief The name of this tournament. */
-   var $name;
+   var $Name;
    /*! \brief A longer description. */
-   var $description;
+   var $Description;
 
    /*! \brief The state of the tournament. */
-   var $state;
+   var $State;
 
    /*!
     * \brief An array of all the rounds in this tournament.
@@ -63,7 +63,7 @@ class Tournament
     * yet.
     * \sa get_round.
     */
-   var $rounds;
+   var $Rounds;
 
    /*!
     * \brief The application period of this tournamnet.
@@ -71,9 +71,9 @@ class Tournament
     * Should be an integer that says the number of days the application
     * period should last.
     */
-   var $applicationperiod;
+   var $ApplicationPeriod;
    /*! A timestamp that tells when the applicationperiod should start. */
-   var $start_of_applicationperiod;
+   var $StartOfApplicationPeriod;
    /*!
     * \brief A boolean that tells whether the tournamnet should be cancelled
     * if too few participants or if the tournament should start when the
@@ -83,7 +83,7 @@ class Tournament
     * number of participants has been reached or if it should alwas start at
     * the end of the given applicationperiod.
     */
-   var $strict_end_of_applicationperiod;
+   var $StrictEndOfApplicationPeriod;
    /*!
     * \brief This variable is a boolean that tells whether the tournament might
     * accept new participants after the tournament started.
@@ -92,20 +92,27 @@ class Tournament
     * accepted between rounds. Other behaviour should be possible to define
     * though.
     */
-   var $recieve_applications_after_start;
+   var $RecieveApplicationsAfterStart;
    /*!
     * \brief The maximum number of participants.
     *
     * If this is null or negative, there will be no limit.
     */
-   var $max_participants;
+   var $MaxParticipants;
    /*!
     * \brief The minumum number of participants.
     *
     * Should be two or more, since you can't have tournaments with just one
     * player.
     */
-   var $min_participants;
+   var $MinParticipants;
+   /*! \brief Whether the games in the tournament should change the general dragon rating. */ 
+   var $Rated;
+   /*! \brief Should the clock run on weekends? */
+   var $WeekendClock;
+
+   /*! \brief An array consisting of player ids of users organizing this tournament. */
+   var $ListOfOrganizers;
 
    /***
     * User functions.
@@ -121,8 +128,30 @@ class Tournament
    function Tournament( $ID = -1 )
       {
          $this->ID = $ID;
+
+         if( $this->ID > 0 )
+            $this->get_from_database();
       }
 
+   /*!
+    * \brief Fill tournament values from database.
+    */
+   function get_from_database()
+      {
+         $result = mysql_query( "SELECT * FROM Tournament WHERE ID='$this->ID'" );
+         if( mysql_num_rows($result) != 1 )
+           error("tournament_error_message_to_be_decided_later");
+
+         $row = mysql_fetch_array( $result );
+         foreach( $row as $key => $value )
+           $this->$key = $value;
+
+         $ListOfOrganizers = array();
+         $orgresult = mysql_query( "SELECT * FROM TournamentOrganizers "
+                                   "WHERE tid='$this->ID'" );
+         while( $row = mysql_fetch_array( $orgresult ) )
+           array_push( $ListOfOrganizers, $row['pid'] );
+      }
    /*!
     * Returns a round from the round-list.
     *

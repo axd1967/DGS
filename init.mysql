@@ -262,26 +262,36 @@ CREATE TABLE Tournament (
   ID int(11) NOT NULL auto_increment,
   Name varchar(80) default NULL,
   Description text,
-  ParentTournament int(11) default NULL,
-  NextRound int(11) default NULL,
-  PreviousRound int(11) default NULL,
-  Type int(11) NOT NULL default '5',
-  State enum('INACTIVE','WAITING','RUNNING', 'FINISHED') default 'INACTIVE',
-  CreationTime datetime default NULL,
-  Deadline datetime default NULL,
-  EndTime datetime default NULL,
-  FirstStartTime datetime default NULL,
-  StartTime datetime default NULL,
+  State int(11) default NULL,
+  FirstRound int(11) default NULL,
+  ApplicationPeriod int(11) default NULL,
+  StartOfApplicationPeriod datetime default NULL,
+  StrictEndOfApplicationPeriod enum('N','Y') NOT NULL default 'N',
+  ReceiveApplicationAfterStart enum('N','Y') NOT NULL default 'N',
   MinParticipants int(11) NOT NULL default '2',
   MaxParticipants int(11) default NULL,
-  Size int(11) default '19',
+  Rated enum('N','Y','Done') NOT NULL default 'N',
+  WeekendClock enum('N','Y') NOT NULL default 'Y',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'TournamentRound'
+#
+
+CREATE TABLE TournamentRound (
+  ID int(11) NOT NULL auto_increment,
+  TournamentID int(11) default NULL,
+  NextRound int(11) default NULL,
+  PreviousRound int(11) default NULL,
+  BoardSize int(11) default '19',
   Komi decimal(6,1) default '5.5',
+  HandicapType int(11) NOT NULL default '0',
   Maintime int(11) default NULL,
   Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
   Byotime int(11) NOT NULL default '0',
   Byoperiods int(11) NOT NULL default '0',
-  Rated enum('N','Y','Done') NOT NULL default 'N',
-  WeekendClock enum('N','Y') NOT NULL default 'Y',
+  GamesPerpair int(11) NOT NULL default '1',
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
@@ -366,7 +376,7 @@ CREATE TABLE Forums (
   Name varchar(40) default NULL,
   Description varchar(255) default NULL,
   SortOrder int NOT NULL default '0',
-  PRIMARY KEY  (ID)
+  PRIMARY KEY  (ID),
   UNIQUE KEY (SortOrder)
 ) TYPE=MyISAM;
 

@@ -76,12 +76,11 @@ class TournamentRound
    var $byoyomi_time;
    /*! \brief The number of byoyomi periods. */
    var $byoperiods;
-   /*! \brief Whether the games in the tournament should change the general dragon rating. */ 
-   var $games_rated;
-   /*! \brief Should the clock run on weekends? */
-   var $weekend_clock;
    /*! \brief The number of times each pair of players should play against each other. */
    var $games_per_pair;
+
+   /*! \brief An array consisting of player ids of all participants in this particular round. */
+   var $list_of_participants;
 
    /***
     * Internal variables.
@@ -101,6 +100,17 @@ class TournamentRound
          $ID = -1;
          $type = '';
       }
+
+   /*!
+    * \brief Construct a new Tournament round.
+    * 
+    * \static
+    *
+    * Is a static function, to make sure to use the correct derived function.
+    */
+   function construct_new_round_from_database( $round_id )
+     {
+     }
 
    /*!
     * \brief Creates a form containing all options for the round.
