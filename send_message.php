@@ -205,8 +205,8 @@ disable_cache();
       {
          $clock_used_white = $opponent_row["ClockUsed"];
          $clock_used_black = $player_row["ClockUsed"];
-         $rating_black = $opponent_row["Rating"];
-         $rating_white = $player_row["Rating"];
+         $rating_white = $opponent_row["Rating"];
+         $rating_black = $player_row["Rating"];
       }
       else
       {
@@ -254,10 +254,9 @@ disable_cache();
             $swap = mt_rand(0,1);
          }
 
-         if( $handicap < 0 )
+         if( $rating_black > $rating_white )
          {
             $swap = true;
-            $handicap = -$handicap;
          }
 
          if( $handicap == 1 )
