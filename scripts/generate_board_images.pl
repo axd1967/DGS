@@ -559,7 +559,7 @@ foreach $final_size (@Sizes)
             save_image ("c".$letter, 0);
         }
 
-        $size_x = round($final_size * 31 / 25);
+        $size_x = round($final_size * 31 / 25 - 0.5);
         resize ($size_x, $final_size);
 
         for($k=1; $k < 26; $k++)
