@@ -24,7 +24,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/timezones.php" );
 require_once( "include/rating.php" );
 require_once( "include/form_functions.php" );
-
+require_once( "include/countries.php" );
 
 {
    connect2mysql();
@@ -33,7 +33,6 @@ require_once( "include/form_functions.php" );
 
    if( !$logged_in )
       error("not_logged_in");
-require_once( "include/countries.php" );
 
    $button_nr = $player_row["Button"];
 
@@ -77,6 +76,9 @@ require_once( "include/countries.php" );
       if( $i==6 ) $i = 11;
       $woodcolors[$i] = '<img width=30 height=30 src="images/smallwood'.$i.'.gif">';
    }
+
+   foreach( $COUNTRIES as $code => $country )
+      $COUNTRIES[$code] = T_($country);
 
    asort($COUNTRIES);
    array_unshift($COUNTRIES, '');
