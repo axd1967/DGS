@@ -107,7 +107,7 @@ require( "include/rating.php" );
 
 
    if( $Handicaptype == 'conv' )
-      list($handicap,$Komi,$swap) = suggest_conventional($rating_white, $rating_black, $Size);
+      list($Handicap,$Komi,$swap) = suggest_conventional($rating_white, $rating_black, $Size);
 
    if( $swap )
       $query .= "Black_ID=$uid, " .
