@@ -27,6 +27,10 @@ require_once( "include/rating.php" );
 
 
 {
+/*
+ Because of get_request_url() from draw_notes(),
+ this page must be called with $_GET[] arguments.
+*/
    $gid = @$_GET['gid'];
    $action = @$_GET['action'];
    $move = @$_GET['move'];
@@ -319,7 +323,7 @@ require_once( "include/rating.php" );
          echo "</td></tr>\n<tr><td align='center'>";
       else //default RIGHT
          echo "</td>\n<td align='left' valign='bottom'>";
-      draw_notes($notes, $notesheight, $noteswidth);
+      draw_notes($notes, $notesheight, $noteswidth, $gid);
    }
 
    if( $enable_message )

@@ -388,9 +388,8 @@ function draw_moves()
 
 }
 
-function draw_notes($notes, $height, $width)
+function draw_notes($notes, $height, $width, $gid)
 {
-   global $gid;
 
    echo "<form name=\"savenotes\" action=\"savenotes.php\" method=\"post\">\n";
    echo "<input type=\"hidden\" name=\"refer_url\" value=\"". get_request_url() . "\">\n";
@@ -399,7 +398,7 @@ function draw_notes($notes, $height, $width)
    echo "<tr><td bgcolor='#7aa07a'><font color=white><b><span id=\"notes_caption\">" . T_('Private game notes') .
       "</span></b></font></td></tr>\n";
    echo "<tr><td bgcolor='#ddf0dd'>\n";
-   $notes = textarea_safe($notes);
+   $notes = textarea_safe($notes); //always inside an edit box... no HTML effects.
    echo "<textarea name=\"notes\" id=\"notes\" cols=\"" . $width . "\" rows=\"" . $height . "\" wrap=\"virtual\">$notes</textarea>";
    echo "</td></tr>\n";
    echo "<tr><td><input type=\"submit\" value=\"Save notes\"></td></tr>\n";
