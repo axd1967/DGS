@@ -1368,3 +1368,7 @@ Pøíèiny tohoto problému mohou být následující:
 
 "Chinese" =>
 "Èínsky" );
+    }
+};
+
+?>

@@ -1353,3 +1353,8 @@ Contactez le support du site en indiquant clairement la page incriminée et ce qu
 "Espagnol",
 
 "Czech" =>
+"Tchèque" );
+    }
+};
+
+?>

@@ -1366,4 +1366,9 @@ Der Grund für dieses Problem kann sein:
 "Czech" =>
 "Tschechisch",
 
-"Chin
+"Chinese" =>
+"" );
+    }
+};
+
+?>

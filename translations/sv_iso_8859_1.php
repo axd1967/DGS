@@ -1367,3 +1367,7 @@ The reasons for this problem could be any of the following:
 
 "Chinese (Simplified)" =>
 "" );
+    }
+};
+
+?>

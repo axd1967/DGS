@@ -1384,4 +1384,8 @@ As raz&otilde;&es deste problema podem ser qualquer das seguintes:
 "Portugu&ecirc;s",
 
 "Chinese (Simplified)" =>
-"Chin&ecirc;s (Simp
+"Chin&ecirc;s (Simplificado)" );
+    }
+};
+
+?>

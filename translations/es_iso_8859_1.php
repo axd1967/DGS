@@ -1378,4 +1378,8 @@ La razón por la que ha pasado esto puede ser una de las siguientes:
 "Portugués",
 
 "Chinese (Simplified)" =>
-"Chino (Simp
+"Chino (Simplificado)" );
+    }
+};
+
+?>

@@ -1385,4 +1385,8 @@ The reasons for this problem could be any of the following:
 "Portugisisk",
 
 "Chinese (Simplified)" =>
-"Kinesisk (f
+"Kinesisk (forenklet)" );
+    }
+};
+
+?>
