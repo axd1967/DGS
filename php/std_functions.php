@@ -50,14 +50,14 @@ echo "
 
     <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
         <tr bgcolor=\"0C41C9\">
-          <td colspan=\"3\"><font color=\"FFFC70\"><B>Dragon Go Server</B></font></td>
+          <td colspan=\"3\" width=\"50%\"><font color=\"FFFC70\"><B>Dragon Go Server</B></font></td>
 ";
 
 if( $logged_in ) 
-    echo "          <td colspan=\"3\" align=\"right\"><font color=\"FFFC70\"><B>Logged in as: " . 
+    echo "          <td colspan=\"3\" align=\"right\" width=\"50%\"><font color=\"FFFC70\"><B>Logged in as: " . 
         $player_row["Handle"] . " </B></font></td>\n";
 else
-    echo "          <td colspan=\"3\" align=\"right\"><font color=\"FFFC70\"><B>Not logged in</B></font></td>\n";
+    echo "          <td colspan=\"3\" align=\"right\" width=\"50%\"><font color=\"FFFC70\"><B>Not logged in</B></font></td>\n";
 
 echo "
         </tr>
@@ -87,9 +87,6 @@ echo "
         <td><font color=\"FFFC70\"><B>Dragon Go Server</B></font></td>
       </tr>
     </table>
-    <A href=\"http://sourceforge.net/projects/dragongoserver\"> 
-    <IMG src=\"http://sourceforge.net/sflogo.php?group_id=29933&type=1\" width=\"88\"
-    height=\"31\" border=\"0\" alt=\"SourceForge Logo\"> </A> 
   </BODY>
 </HTML>
 ";
