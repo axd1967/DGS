@@ -184,7 +184,7 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
 
    if( !empty($str) )
    {
-      $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str ));
+      $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str . '</td>'));
       $form->add_row( array( 'OWNHTML',
                              '<td><input type="submit" name="post" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . ' "></td>' .
                              '<td><input type="submit" name="preview" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \"></td>\n" ));

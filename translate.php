@@ -188,8 +188,7 @@ When translating you should keep in mind the following things:
                             'TD',
                             'CHECKBOX', 'same' . $row['Original_ID'], 'Y',
                             'same', $row['Text'] === '') );
-         $translate_form->add_row( array( 'OWNHTML',
-                                          "<td align=\"center\" colspan=\"3\"><hr></td>") );
+         $translate_form->add_row( array( 'HR' ) );
       }
 
 
@@ -197,25 +196,21 @@ When translating you should keep in mind the following things:
       {
          $translate_form->add_row( array( 'SPACE' ) );
          $translate_form->add_row( array( 'OWNHTML',
-                                          "<tr>\n" .
-                                          "  <td align=\"center\" colspan=\"2\" " .
+                                          "  <td align=\"center\" colspan=\"3\" " .
                                           "style=\"  border: solid; border-color: " .
                                           "#ff6666; border-width: 2pt;\">\n" .
                                           "    Note that only the first fifty untranslated " .
                                           "messages are displayed, so that there won't be " .
                                           "too many messages at the same time.\n" .
-                                          "  </td>\n" .
-                                          "</tr>\n" ) );
+                                          "  </td>\n" ) );
       }
 
-      $translate_form->add_row( array( 'SPACE' ) );
       $translate_form->add_row( array( 'OWNHTML',
-                                       "</table>\n" .
-                                       "<table width=\"100%\"><tr>\n"));
+                                       "  <table width=\"100%\"><tr>\n"));
       $translate_form->add_row( array( 'HEADER', 'Groups') );
-      $translate_form->add_row( array( 'HIDDEN', 'translate_lang', $translate_lang,
-                                       'HIDDEN', 'group', $group ) );
       $translate_form->add_row( array( 'DESCRIPTION', 'Change to group',
+                                       'HIDDEN', 'translate_lang', $translate_lang,
+                                       'HIDDEN', 'group', $group,
                                        'SELECTBOX', 'newgroup', 1,
                                        array_value_to_key_and_value( $translation_groups ),
                                        $group, false ) );
@@ -226,7 +221,7 @@ When translating you should keep in mind the following things:
                                        $translate_form->print_insert_submit_button( 'just_group', 'Just change group' ) . "</td>\n" .
                                        "    <td align=\"left\">" .
                                        $translate_form->print_insert_submit_button( 'apply_changes', 'Apply translation changes to Dragon' ) . "</td>\n" .
-                                       "  </tr>\n" ) );
+                                       "  </tr></table>\n" ) );
 
       $translate_form->echo_string();
   }

@@ -45,12 +45,14 @@ function make_folder_form_row(&$form, $name, $nr,
                    'DESCRIPTION', T_('Alpha'),
                    'TEXTINPUT', "bgalpha$nr", 3, 3, "$bgalpha" );
 
+   $form->add_row( $array );
+
    if( $nr < USER_FOLDERS )
-      array_push( $array, 'OWNHTML', '<tr><td colspan=2>' );
+      $array = array( 'OWNHTML', '<td colspan=2></td>' );
    else
-      array_push( $array,  'OWNHTML', '<tr><td><td>',
-                  'CHECKBOX', "onstatuspage$nr", 't',
-                  T_('Show on status page'), $onstatuspage );
+      $array = array( 'TAB',
+                      'CHECKBOX', "onstatuspage$nr", 't',
+                      T_('Show on status page'), $onstatuspage );
 
    array_push( $array, 'DESCRIPTION', T_('Foreground'),
                'DESCRIPTION', T_('Red'),
@@ -184,9 +186,9 @@ function make_folder_form_row(&$form, $name, $nr,
 
    echo "<center>\n";
 
-   echo "<h3><font color=$h3_color>" . T_('Edit message folders') . '</font></h3><br><p>';
-
    $form = new Form( 'folderform', 'edit_folders.php', FORM_POST );
+
+   $form->add_row( array( 'HEADER', T_('Edit message folders') ) );
 
    foreach( $folders as $nr => $fld )
    {
@@ -201,7 +203,6 @@ function make_folder_form_row(&$form, $name, $nr,
 
 
 
-
 // And now three empty ones:
 
    for($i=$max_folder+1; $i<=$max_folder+3; $i++)
@@ -210,7 +211,8 @@ function make_folder_form_row(&$form, $name, $nr,
    }
 
 
-   $form->add_row( array( 'SPACE',
+
+   $form->add_row( array( 
 //                          'SUBMITBUTTON', 'action_preview', T_('Preview'),
                           'SUBMITBUTTON', 'action', T_('Update')) );
 

@@ -60,7 +60,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * <b>Other things you could have in a row.</b>
   *
   * <ul>
-  * <li> SPACE     -- Makes some additional space, should be used on it's own row.
+  * <li> SPACE     -- Vertical space, should be used on it's own row.
+  * <li> HR        -- Vertical separator, should be used on it's own row.
+  * <li> TAB       -- Horizontal space. Add an empty cell.
   * <li> BR        -- Forces a linebreak within the row.
   * <li> TD        -- Forces a column change.
   * </ul>
@@ -140,6 +142,7 @@ class Form
 
          $this->line_no_step = 10;
 
+//'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
          $this->form_elements = array(
             'DESCRIPTION'  => array( 'NumArgs' => 1,
                                      'NewTD'   => true,
@@ -224,19 +227,32 @@ class Form
                                      'StartTD' => false,
                                      'EndTD'   => false,
                                      'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
+                                     'Align'   => '' ),
+            'HR'           => array( 'NumArgs' => 0,
+                                     'NewTD'   => false,
+                                     'StartTD' => false,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => true,
+                                     'Align'   => '' ),
+            'TAB'          => array( 'NumArgs' => 0,
+                                     'NewTD'   => true,
+                                     'StartTD' => true,
+                                     'EndTD'   => true,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => '' ),
             'BR'           => array( 'NumArgs' => 0,
                                      'NewTD'   => false,
                                      'StartTD' => false,
                                      'EndTD'   => false,
                                      'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
+                                     'Align'   => '' ),
             'TD'           => array( 'NumArgs' => 0,
                                      'NewTD'   => false,
                                      'StartTD' => false,
                                      'EndTD'   => true,
                                      'SpanAllColumns' => false,
-                                     'Align'   => 'left' ) );
+                                     'Align'   => '' ),
+         );
 
          if( $echo_form_start_now )
             echo $this->print_start( $this->name, $this->action, $this->method );
@@ -374,16 +390,16 @@ class Form
                                                           max( $max_nr_columns -
                                                                $nr_columns,
                                                                1 ) );
+
                         $this->$func_name( $result, $element_args );
 
                         $result .= $this->print_td_end( true );
 
-                        $nr_columns++;
+                        $nr_columns = $max_nr_columns;
                         $column_started = false;
                      }
                      else
                      {
-
                         if( $element_type['NewTD'] and $column_started )
                         {
                            $result .= $this->print_td_end();
@@ -448,8 +464,8 @@ class Form
    function create_string_func_header( &$result, $args )
       {
          global $h3_color;
-         $result .= "<b><h3><font color=$h3_color>" . $args[0] . ":" .
-            "</font></h3></b>";
+         $result .= "&nbsp;<h3><font color=$h3_color>" . $args[0] . ":" .
+            "</font></h3>";
       }
 
    /*!
@@ -544,12 +560,30 @@ class Form
       }
 
    /*!
-    * \brief Function for making space string in the standard form
+    * \brief Function for making vertical space string in the standard form
     * \internal
     */
    function create_string_func_space( &$result, $args )
       {
-         $result .= "<td height=\"20px\">&nbsp;</td>";
+         $result .= "<td colspan=99 height=\"20px\"></td>";
+         //$result .= "&nbsp;"; //if SPACE SpanAllColumns==true
+      }
+
+   /*!
+    * \brief Function for making vertical separator string in the standard form
+    * \internal
+    */
+   function create_string_func_hr( &$result, $args )
+      {
+         $result .= "<HR>";
+      }
+
+   /*!
+    * \brief Function for making horizontal space string in the standard form
+    * \internal
+    */
+   function create_string_func_tab( &$result, $args )
+      {
       }
 
    /*!
@@ -608,7 +642,7 @@ class Form
       }
 
    /*!
-    * \brief Prints end start of a table cell.
+    * \brief Prints out end of a table cell.
     *
     * \internal
     *

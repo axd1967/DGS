@@ -216,10 +216,6 @@ require_once( "include/countries.php" );
 
    $profile_form->add_row( array( 'OWNHTML', $button_code ) );
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Large boards from'),
-                                  'SELECTBOX', 'notescutoff', 1, $notescutoffs,
-                                  $player_row["NotesCutoff"], false ) );
-
    $profile_form->add_row( array( 'HEADER', T_('Notes box for small boards') ) );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Enabled'),
@@ -240,6 +236,10 @@ require_once( "include/countries.php" );
 
    $profile_form->add_row( array( 'HEADER', T_('Notes box for large boards') ) );
 
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Large boards from'),
+                                  'SELECTBOX', 'notescutoff', 1, $notescutoffs,
+                                  $player_row["NotesCutoff"], false ) );
+
    $profile_form->add_row( array( 'DESCRIPTION', T_('Enabled'),
                                   'RADIOBUTTONS', 'noteslargeenab', $notesenableds,
                                   $player_row["NotesLargeEnabled"] ) );
@@ -256,15 +256,17 @@ require_once( "include/countries.php" );
                                   'RADIOBUTTONS', 'noteslargepos', $notespositions,
                                   $player_row["NotesLargePosition"] ) );
 
-   $profile_form->add_row( array( 'TD',
-                                  'OWNHTML', '<TD>',
+   $profile_form->add_row( array( 'SPACE' ) );
+
+   $profile_form->add_row( array( 'HR' ) );
+
+   $profile_form->add_row( array( 'TAB',
                                   'CHECKBOX', 'locally', 1,
                                   T_('Change board graphics for this browser only'),
                                   !empty($_COOKIE["prefs{$player_row['ID']}"]) ) );
 
-   $profile_form->add_row( array( 'OWNHTML', '<TD>&nbsp;</TD>' ) );
-
    $profile_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change profile') ) );
+
 
    $profile_form->echo_string();
    echo "</CENTER>\n";

@@ -75,7 +75,7 @@ function find_category_box_text($cat)
       $bio_form->add_row( array( 'SELECTBOX', "category".$row["ID"], 1,
                                  $categories, $cat, false,
 
-                                 'BR','BR',
+                                 'BR',
 
                                  'TEXTINPUT', "other".$row["ID"], 15, 40,
                                  ($cat == "Other:" ? $row["Category"] : "" ),
@@ -92,7 +92,7 @@ function find_category_box_text($cat)
       $bio_form->add_row( array( 'SELECTBOX', "newcategory" . $i, 1,
                             $categories, 'Other:', false,
 
-                            'BR','BR',
+                            'BR',
 
                             'TEXTINPUT', "newother" . $i, 15, 40, "",
 
