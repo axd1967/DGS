@@ -24,6 +24,8 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
 {
+  disable_cache($NOW + 2*24*3600);
+
   connect2mysql();
 
   $logged_in = who_is_logged( $player_row);
@@ -51,8 +53,8 @@ require_once( "include/form_functions.php" );
 
   start_page(T_('Rating graph for') . " $name_safe", true, $logged_in, $player_row );
 
-  $CURRENTYEAR = date('Y', $NOW);
-  $CURRENTMONTH = date('n', $NOW);
+  $CURRENTYEAR = date('Y', $NOW + $ratingpng_min_interval);
+  $CURRENTMONTH = date('n', $NOW + $ratingpng_min_interval);
 
   echo '<center>';
 

@@ -36,7 +36,7 @@ function get_rating_data($uid)
       $time, $starttime, $endtime, $ratingpng_min_interval;
    global $NOW;
 
-   $nr_games = 0 ;
+   $nr_games = -1 ; //first point is Registerdate
 
    if( !($uid > 0 ) )
       exit;
@@ -58,27 +58,27 @@ function get_rating_data($uid)
       exit;
 
 
-   $tmp = mysql_fetch_assoc($result);
+   $row = mysql_fetch_assoc($result);
 
-   $min_interval = min( $ratingpng_min_interval, $NOW - $tmp['seconds'] );
+   $min_interval = min( $ratingpng_min_interval, $NOW - $row['seconds'] );
 
-   if( $starttime < $tmp['seconds'] - 2*24*3600 )
-      $starttime = $tmp['seconds'] - 2*24*3600;
+   if( $starttime < $row['seconds'] - $ratingpng_min_interval/2 )
+      $starttime = $row['seconds'] - $ratingpng_min_interval/2;
 
-   if( $endtime < $tmp['seconds'] + $min_interval/2 )
-      $endtime = $tmp['seconds'] + $min_interval/2;
+   if( $endtime < $row['seconds'] + $min_interval/2 )
+      $endtime = $row['seconds'] + $min_interval/2;
 
    $result = mysql_query("SELECT MAX(UNIX_TIMESTAMP(Time)) AS seconds " .
                          "FROM Ratinglog WHERE uid=$uid") or die(mysql_error());
 
    $max_row = mysql_fetch_assoc($result);
-   if( $endtime > $max_row['seconds'] + 2*24*3600)
-      $endtime = $max_row['seconds'] + 2*24*3600;
+   if( $endtime > $max_row['seconds'] + $ratingpng_min_interval/2)
+      $endtime = $max_row['seconds'] + $ratingpng_min_interval/2;
 
-   if( $starttime > $max_row['seconds'] - $min_interval )
-      $starttime = $max_row['seconds'] - $min_interval;
+   if( $starttime > $max_row['seconds'] - $min_interval/2 )
+      $starttime = $max_row['seconds'] - $min_interval/2;
 
-   if( $endtime - $starttime < $min_interval )
+   if( ($endtime - $starttime) < $min_interval )
    {
       $mean = ( $starttime + $endtime )/2;
       $starttime = $mean - $min_interval/2;
@@ -93,7 +93,8 @@ function get_rating_data($uid)
       exit;
 
    $first = true;
-   while( $row = mysql_fetch_array($result) )
+   $tmp = NULL;
+   do
    {
       if( $row['seconds'] < $starttime )
       {
@@ -104,25 +105,32 @@ function get_rating_data($uid)
 
       if( $first )
       {
-         array_push($ratings, scale2($tmp['Rating'], $row['Rating'],
-                                     $tmp['seconds'], $starttime, $row['seconds']));
-         array_push($ratingmin, scale2($tmp['RatingMin'], $row['RatingMin'],
-                                       $tmp['seconds'], $starttime, $row['seconds']));
-         array_push($ratingmax, scale2($tmp['RatingMax'], $row['RatingMax'],
-                                       $tmp['seconds'], $starttime, $row['seconds']));
-         array_push($time, $starttime);
+         if( is_array($tmp) && $tmp['seconds'] < $starttime )
+         {
+            array_push($ratings, scale2($tmp['Rating'], $row['Rating'],
+                                        $tmp['seconds'], $starttime, $row['seconds']));
+            array_push($ratingmin, scale2($tmp['RatingMin'], $row['RatingMin'],
+                                          $tmp['seconds'], $starttime, $row['seconds']));
+            array_push($ratingmax, scale2($tmp['RatingMax'], $row['RatingMax'],
+                                          $tmp['seconds'], $starttime, $row['seconds']));
+            array_push($time, $starttime);
+            $nr_games--; //first point is not a game
+         }
          $first = false;
       }
 
       if( $row['seconds'] > $endtime )
       {
-         array_push($ratings, scale2($tmp['Rating'], $row['Rating'],
-                                     $tmp['seconds'], $endtime, $row['seconds']));
-         array_push($ratingmin, scale2($tmp['RatingMin'], $row['RatingMin'],
-                                       $tmp['seconds'], $endtime, $row['seconds']));
-         array_push($ratingmax, scale2($tmp['RatingMax'], $row['RatingMax'],
-                                       $tmp['seconds'], $endtime, $row['seconds']));
-         array_push($time, $endtime);
+         if( is_array($tmp) && $tmp['seconds'] <= $endtime )
+         {
+            array_push($ratings, scale2($tmp['Rating'], $row['Rating'],
+                                        $tmp['seconds'], $endtime, $row['seconds']));
+            array_push($ratingmin, scale2($tmp['RatingMin'], $row['RatingMin'],
+                                          $tmp['seconds'], $endtime, $row['seconds']));
+            array_push($ratingmax, scale2($tmp['RatingMax'], $row['RatingMax'],
+                                          $tmp['seconds'], $endtime, $row['seconds']));
+            array_push($time, $endtime);
+         }
          break;
       }
 
@@ -132,7 +140,7 @@ function get_rating_data($uid)
       array_push($time, $row['seconds']);
 
       $tmp = $row;
-   }
+   } while( $row = mysql_fetch_assoc($result) ) ;
 }
 
 function scale($x)
@@ -144,6 +152,8 @@ function scale($x)
 
 function scale2($val1, $val3, $time1, $time2, $time3)
 {
+   if( $time1 == $time3 )
+      return $val3;
    return $val3 + ($val1-$val3)*($time2-$time3)/($time1-$time3);
 }
 
@@ -288,13 +298,13 @@ function imagemultiline($im, $points, $nr_points, $color)
    $SizeY = $SizeX * 3 / 4;
 
 
-   $starttime = 0;
+   $starttime = mktime(0,0,0,$BEGINMONTH,0,$BEGINYEAR);
    if( isset($_GET['startyear']) and isset($_GET['startmonth']) )
-      $starttime = min($NOW, mktime(0,0,0,$_GET['startmonth'],0,($_GET['startyear'])));
+      $starttime = max($starttime, mktime(0,0,0,$_GET['startmonth'],0,$_GET['startyear']));
 
-   $endtime = $NOW;
+   $endtime = $NOW + $ratingpng_min_interval;
    if( isset($_GET['endyear']) and isset($_GET['endmonth']) )
-      $endtime = min($NOW, mktime(0,0,0,$_GET['endmonth']+1,0,($_GET['endyear'])));
+      $endtime = min($endtime, mktime(0,0,0,$_GET['endmonth'],0,$_GET['endyear']));
 
    get_rating_data(@$_GET["uid"]);
 
@@ -369,7 +379,6 @@ function imagemultiline($im, $points, $nr_points, $color)
    $no_text = true;
    $b = $SizeY-MARGE_BOTTOM+3 ;
    $a = MARGE_TOP -DASH_MODULO+(($b-MARGE_TOP) % DASH_MODULO)+1 ;
-   $nr_games--;
    $ix_games = 0 ;
    for(;;$month+=$step)
    {
@@ -397,9 +406,10 @@ function imagemultiline($im, $points, $nr_points, $color)
       {
          while ($ix_games < $nr_points && $time[$ix_games] <= $sc)
             $ix_games++;
+         $v = max( 0, $nr_games+$ix_games);
          $x= max($x,imagelabel($im, $sc,
                                $SizeY-MARGE_BOTTOM+3+2*LABEL_HEIGHT+2*LABEL_SEPARATION,
-                               $nr_games+$ix_games, $nr_games_color));
+                               $v, $nr_games_color));
       }
    }
 
