@@ -24,7 +24,7 @@ require( "include/move.php" );
 
 connect2mysql();
 {
-   $result = mysql_query("SELECT ID FROM Games WHERE Status!='INVITE' " .
+   $result = mysql_query("SELECT ID FROM Games WHERE Status!='INVITED' " .
                          "AND DATE_ADD(Lastchanged,INTERVAL 7 day) > NOW() ORDER BY ID");
    
    while( $row = mysql_fetch_array( $result ) )
