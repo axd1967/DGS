@@ -173,6 +173,12 @@ function update_rating($gid)
    $row = mysql_fetch_array( $result );
    extract($row);
 
+   if( $Moves < 4+$Handicap ) // Don't rate games with too few moves
+   {
+      mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid");
+      return;
+   }
+
    $game_result = 0.5;
    if( $Score > 0 ) $game_result = 1.0;
    if( $Score < 0 ) $game_result = 0.0;
@@ -193,6 +199,82 @@ function update_rating($gid)
    mysql_query("INSERT INTO RatingChange (uid,gid,diff) VALUES " .
                "($Black_ID, $gid, " . ($bRating - $bOld) . "), " .
                "($White_ID, $gid, " . ($wRating - $wOld) . ")");
+}
+
+function update_rating2($gid)
+{
+   $query = "SELECT Games.*, ".
+       "white.Rating as wRating, white.RatingStatus as wRatingStatus, " .
+       "white.RatingMax as wRatingMax, white.RatingMin as wRatingMin, " .
+       "black.Rating as bRating, black.RatingStatus as bRatingStatus, " .
+       "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
+       "FROM Games, Players as white, Players as black " .
+       "WHERE Status='FINISHED'  AND Games.ID=$gid " .
+       "AND white.ID=White_ID AND black.ID=Black_ID ".
+       "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
+       "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) ";
+
+
+   $result = mysql_query( $query ) or die(mysql_error());
+
+   if(  mysql_num_rows($result) != 1 )
+      return;
+
+   $row = mysql_fetch_array( $result );
+   extract($row);
+
+   $game_result = 0.5;
+   if( $Score > 0 ) $game_result = 1.0;
+   if( $Score < 0 ) $game_result = 0.0;
+
+   $bOld = $bRating;
+   $wOld = $wRating;
+   echo "wRating: $wRating<br>\n" .
+      "wRatingMin: $wRatingMin<br>\n" .
+      "wRatingMax: $wRatingMax<br>\n" .
+      "bRating: $bRating<br>\n" .
+      "bRatingMin: $bRatingMin<br>\n" .
+      "bRatingMax: $bRatingMax<p>";
+
+   change_rating($wRating, $bRating, $game_result, $Size, $Komi, $Handicap);
+
+   $bTmp = $bOld;
+   change_rating($wRatingMax, $bTmp, $game_result, $Size, $Komi, $Handicap);
+
+   $bTmp = $bOld;
+   change_rating($wRatingMin, $bTmp, $game_result, $Size, $Komi, $Handicap);
+
+   $wTmp = $bOld;
+   change_rating($wTmp, $bRatingMax, $game_result, $Size, $Komi, $Handicap);
+
+   $wTmp = $bOld;
+   change_rating($wTmp, $bRatingMin, $game_result, $Size, $Komi, $Handicap);
+
+   echo "wRating: $wRating<br>\n" .
+      "wRatingMin: $wRatingMin<br>\n" .
+      "wRatingMax: $wRatingMax<br>\n" .
+      "bRating: $bRating<br>\n" .
+      "bRatingMin: $bRatingMin<br>\n" .
+      "bRatingMax: $bRatingMax<br>";
+   exit;
+
+   mysql_query( "UPDATE Games SET Rated='DONE', " .
+                "BlackRatingDiff= " . ($bRating - $bOld) .
+                " WhiteRatingDiff= " . ($wRating - $wOld) .
+                " WHERE ID=$gid" );
+
+   mysql_query( "UPDATE Players SET Rating=$bRating, " .
+                "RatingMin=$bRatingMin, RatingMax=$bRatingMax, " .
+                "RatingStatus='RATED' WHERE ID=$Black_ID" );
+
+    mysql_query( "UPDATE Players SET Rating=$wRating, " .
+                 "RatingMin=$wRatingMin, RatingMax=$wRatingMax, " .
+                 "RatingStatus='RATED' WHERE ID=$White_ID" );
+
+    mysql_query("INSERT INTO Ratinglog (uid,gid,Rating,RatingMin,RatingMax, Time) VALUES " .
+                "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, $NOW), " .
+                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, $NOW) ");
+
 }
 
 function echo_rating($rating, $show_percent=true)
