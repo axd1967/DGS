@@ -177,6 +177,14 @@ class Form
       return $line_no;
     }
 
+  /*
+   * Add another form into this.
+   * TODO: Needs to be done.
+   */
+  function add_form( $other_form, $line_no )
+    {
+    }
+
   /* Set $line_no_step */
   function set_line_no_step( $step_size )
     {

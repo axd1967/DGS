@@ -20,6 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 /* The code in this file is written by Ragnar Ouchterlony */
 
+require( "include/form_functions.php" );
 
 /* Tournament states */
 define( "TOUR_STATE_INACTIVE", 0 );
@@ -102,4 +103,54 @@ class TournamentRound
   var $board_size;
 
   /* TODO: More board- and time-variables. */
+
+  /***
+   * Local (private) variables.
+   ***/
+
+
+
+  /***
+   * User functions.
+   ***/
+
+  /* Constructor without real initialization.  */
+  function TournamentRound()
+    {
+      $ID = -1;
+      $type = '';
+    }
+
+  /* Creates a form containing all options for the round.
+   *
+   * This only creates the form for the options common to
+   * all types of tournaments.
+   * Note that the base function uses line 1000-1100 to allow the derived classes
+   * to add things before and after.
+   * It is meant that this form should be integrated in the final form displayed
+   * using Form::add_form().
+   *
+   * TODO: add more common options.
+   */
+  function create_options_form( $form_name = 'option_form',
+                                $action = 'nopage.php',
+                                $method = FORM_POST )
+    {
+      $options_form = new Form( $form_name, $action, $method );
+
+      $this->add_type_specific_options_to_form( $options_form );
+
+      return $options_form;
+    }
+
+  /***
+   * Functions that should be implemented by all derived classes.
+   ***/
+
+  /* Should be used to add specific options for each tournamenttype. */
+  function add_type_specific_options_to_form( &$options_form )
+    {
+    }
 }
+
+?>
