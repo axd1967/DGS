@@ -18,6 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$ServerTime= time();
 chdir( '../' );
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
@@ -40,10 +41,20 @@ require_once( "include/form_functions.php" );
 
    $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 utf-8
 
-   if( isset($_REQUEST['split']) )
-      $split= $_REQUEST['split'];
+   if( isset($_REQUEST['rowhdr']) )
+      $rowhdr= $_REQUEST['rowhdr'];
    else
-      $split= 20;
+      $rowhdr= 20;
+
+   if( isset($_REQUEST['colwrap']) )
+      $colwrap= $_REQUEST['colwrap'];
+   else
+      $colwrap= 'cut';
+
+   if( isset($_REQUEST['colsize']) )
+      $colsize= $_REQUEST['colsize'];
+   else
+      $colsize= 40;
 
    $apply= @$_REQUEST['apply'];
 
@@ -84,16 +95,22 @@ require_once( "include/form_functions.php" );
       $dform->add_row( array( 'DESCRIPTION', $word,
                                  'TEXTAREA', $arg, 80, 2, $$arg ) );
    }
-   $dform->add_row( array( 'CELL', 9, 'align="center"',
+
+   $dform->add_row( array(
       'HIDDEN', 'charset', $encoding_used,
+      'CELL', 9, 'align="center"',
       'OWNHTML', '<INPUT type="submit" name="apply" accesskey="a" value="A-pply">',
+      'TEXT', '&nbsp;&nbsp;col size:&nbsp;',
+      'TEXTINPUT', 'colsize', 3 , 3, $colsize,
+      'RADIOBUTTONS', 'colwrap', array('cut'=>'cut','wrap'=>'wrap',''=>'none',), $colwrap,
       ) );
 
    $dform->echo_string(1);
 
 
-   if( $apply && $select )
+   while( $apply && $select )
    {
+      $apply=0;
       $query= '';
       foreach( $arg_array as $arg => $word )
       {
@@ -102,62 +119,85 @@ require_once( "include/form_functions.php" );
       }
 
       echo 'Query&gt; ' . $query . ';<p>';
-      $result = mysql_query( $query );
-      $mysqlerror = @mysql_error();
-      $numrows = 0+@mysql_num_rows($result);
-      $i= ( $numrows>1 ? 's' : '' );
-      $c= date($date_fmt, $NOW);
-      echo "Time: $c - Result: $numrows row$i<br>";
 
-      if( $mysqlerror )
-      {
-         echo "Error: $mysqlerror<p>";
-      }
-      else 
-      {
-         if( $result && $numrows>0 )
-         {
-            $c=2;
-            $i=0;
-            echo "\n<table class=tbl cellpadding=4 cellspacing=1>\n";
-            while( $row = mysql_fetch_assoc( $result ) )
-            {
-               $c=3-$c;
-               $i++;
-               if( $i==1 or ($split>1 && ($i%$split)==1) )
-               {
-                  echo "<tr>\n";
-                  foreach( $row as $key => $val )
-                  {
-                     echo "<th>$key</th>";
-                  }
-                  echo "\n</tr>";
-               }
-               //onClick onmousedown ondblclick
-               echo "<tr class=row$c title='#$i' ondblclick=\"row_click(this,'row$c')\">\n";
-               foreach( $row as $key => $val )
-               {
-                  switch( $key )
-                  {
-                     case 'Password':
-                     case 'Sessioncode':                  
-                     case 'Email':
-                        if ($val) $val= '***';
-                        break;
-                     case 'Debug':
-                        if ($val)
-                           $val= preg_replace( "%(passwd=)[^&]*%is", "\\1***", $val);
-                        break;
-                  }
-                  echo "<td nowrap>" . textarea_safe($val) . "</td>";
-               }
-               echo "\n</tr>";
-            }
-            echo "\n</table>\n";
-         }
-      }
+      if( ($n=echo_query( $query, $rowhdr, $colsize, $colwrap)) < 0 ) break;
+
+      $s= "SELECT '$n' as 'Rows'"
+         . ",NOW() as 'Mysql time'"
+         . ",FROM_UNIXTIME($ServerTime) as 'Server time'"
+         . ",FROM_UNIXTIME($NOW) as 'Local time'"         
+         //. ",'".mysql_info()."' as 'Infos'"
+         ;
+      if( echo_query( $s, 0, 0, 0) < 0 ) break;
+
+      if( echo_query( 'EXPLAIN '.$query, 0, 0, 0) < 0 ) break;
+
    }
 
    end_html();
+}
+
+function echo_query( $query, $rowhdr=20, $colsize=40, $colwrap='cut' )
+{
+   $result = mysql_query( $query );
+
+   $mysqlerror = @mysql_error();
+   if( $mysqlerror )
+   {
+      echo "Error: $mysqlerror<p>";
+      return -1;
+   }
+
+   $numrows = 0+@mysql_num_rows($result);
+   if( !$result or $numrows<=0 )
+      return 0;
+
+   $c=2;
+   $i=0;
+   echo "\n<table title='$numrows rows' class=tbl cellpadding=4 cellspacing=1>\n";
+   while( $row = mysql_fetch_assoc( $result ) )
+   {
+      $c=3-$c;
+      $i++;
+      if( $i==1 or ($rowhdr>1 && ($i%$rowhdr)==1) )
+      {
+         echo "<tr>\n";
+         foreach( $row as $key => $val )
+         {
+            echo "<th>$key</th>";
+         }
+         echo "\n</tr>";
+      }
+      //onClick onmousedown ondblclick
+      echo "<tr class=row$c ondblclick=\"row_click(this,'row$c')\">\n";
+      foreach( $row as $key => $val )
+      {
+         switch( $key )
+         {
+            case 'Password':
+            case 'Sessioncode':                  
+            case 'Email':
+               if ($val) $val= '***';
+               break;
+            case 'Debug':
+               if ($val)
+                  $val= preg_replace( "%(passwd=)[^&]*%is", "\\1***", $val);
+               break;
+         }
+         $val= textarea_safe($val);
+         if( $colsize>0 )
+         {
+            if( $colwrap==='wrap' )
+               $val= wordwrap( $val, $colsize, '<br>', 1);
+            else if( $colwrap==='cut' )
+               $val= substr( $val, 0, $colsize);
+         }
+         echo "<td title='$key#$i' nowrap>$val</td>";
+      }
+      echo "\n</tr>";
+   }
+   echo "\n</table><br>\n";
+
+   return $numrows;
 }
 ?>
