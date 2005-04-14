@@ -1198,8 +1198,8 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
       $whitename = make_html_safe($whitename) ;
    if( $link && $legal )
    {
-      $tmp = 'A href="'.$base_path."game.php?gid=$gid" .
-                   ($move>0 ? URI_AMP."move=$move" : "") . '"';
+      $tmp = "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "");
+      $tmp = 'A href="' . $base_path. $tmp . '"';
       if( $link & REF_LINK_BLANK )
         $tmp.= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
@@ -1215,9 +1215,9 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
 
 function send_reference( $link, $safe, $color, $player_id, $player_name=false, $player_handle=false)
 {
-// global $base_path;
-   return user_reference( -$link
-      , $safe, $color, $player_id, $player_name, $player_handle);
+   if( is_numeric($link) ) //not owned reference
+      $link= -$link; //make it a send_reference
+   return user_reference( $link, $safe, $color, $player_id, $player_name, $player_handle);
 }
 
 function user_reference( $link, $safe, $color, $player_id, $player_name=false, $player_handle=false)
@@ -1234,17 +1234,17 @@ function user_reference( $link, $safe, $color, $player_id, $player_name=false, $
    $legal = 1;
    if( is_string($player_id) && $player_id{0}==HANDLE_TAG_CHAR )
    {
+      $byid = 0;
       $player_id = substr($player_id,1);
       if( illegal_chars( $player_id) )
          $legal = 0;
-      $byid = 0;
    }
    else
    {
+      $byid = 1;
       $player_id = (int)$player_id;
       if( $player_id<=0)
          $legal = 0;
-      $byid = 1;
    }
    if( ($player_name===false or $player_handle===false) && $legal )
    {
@@ -1277,17 +1277,23 @@ function user_reference( $link, $safe, $color, $player_id, $player_name=false, $
       $player_name = "<FONT color=\"$color\">$player_name</FONT>" ;
    if( $link && $legal )
    {
-      if( $link<0 )
+      if( is_string($link) ) //owned reference. Must end with '?' or URI_AMP
       {
-         $link = -$link;
-         $tmp = 'A href="'.$base_path."message.php?mode=NewMessage".URI_AMP;
+         $tmp = $link;
+         $link = 0;
       }
-      else
+      else if( $link<0 ) //send_reference
       {
-         $tmp = 'A href="'.$base_path."userinfo.php?";
+         $tmp = "message.php?mode=NewMessage".URI_AMP;
+         $link = -$link;
+      }
+      else //user_reference
+      {
+         $tmp = "userinfo.php?";
       }
       $tmp.= ( $byid ? "uid=$player_id" 
-                 : UHANDLE_NAM."=".str_replace('+','%2B',$player_id) ) . '"';
+                 : UHANDLE_NAM."=".str_replace('+','%2B',$player_id) );
+      $tmp = 'A href="' . $base_path. $tmp . '"';
       if( $link & REF_LINK_BLANK )
         $tmp.= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
