@@ -64,11 +64,13 @@ require_once( "include/rating.php" );
 //                          "Games.Flags+0 AS flags, " .
                           "black.Name AS Blackname, " .
                           "black.Handle AS Blackhandle, " .
+                          "black.OnVacation AS Blackwarning, " .
                           "black.Rank AS Blackrank, " .
                           "black.Rating2 AS Blackrating, " .
                           "black.RatingStatus AS Blackratingstatus, " .
                           "white.Name AS Whitename, " .
                           "white.Handle AS Whitehandle, " .
+                          "white.OnVacation AS Whitewarning, " .
                           "white.Rank AS Whiterank, " .
                           "white.Rating2 AS Whiterating, " .
                           "white.RatingStatus AS Whiteratingstatus " .

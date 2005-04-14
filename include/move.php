@@ -268,20 +268,22 @@ function draw_game_info($row)
     T_('White') . "</td><td width=" . ($row['Size']*9) . ">" . T_('Black') . "</td>\n";
   echo "   </tr><tr>\n";
   echo "     <td>" . T_('Name') . ":</td>\n";
+  $color= ( $row['Whitewarning'] > 0 ? 'red' : 'black' );
   echo '     <td>'
-       . user_reference( 1, 1, '', $row['White_ID'], $row['Whitename'], $row['Whitehandle'])
+       . user_reference( REF_LINK, 1, $color, $row['White_ID'], $row['Whitename'], $row['Whitehandle'])
        . "</td>\n";
+  $color= ( $row['Blackwarning'] > 0 ? 'red' : 'black' );
   echo '     <td>'
-       . user_reference( 1, 1, '', $row['Black_ID'], $row['Blackname'], $row['Blackhandle'])
+       . user_reference( REF_LINK, 1, $color, $row['Black_ID'], $row['Blackname'], $row['Blackhandle'])
        . "</td>\n";
   echo "   </tr><tr>\n";
 
   echo '     <td>' . T_('Rating') . ":</td>\n";
   echo '     <td>' . echo_rating( ($row['Status']==='FINISHED' ?
-                                   $row['White_Start_Rating'] : $row['Whiterating'] ),
+                                   $row['White_End_Rating'] : $row['Whiterating'] ),
                                   true, $row['White_ID'] ) . "</td>\n";
   echo '     <td>' . echo_rating( ($row['Status']==='FINISHED' ?
-                                   $row['Black_Start_Rating'] : $row['Blackrating'] ),
+                                   $row['Black_End_Rating'] : $row['Blackrating'] ),
                                   true, $row['Black_ID'] ) . "</td>\n";
   echo "   </tr><tr>\n";
 
