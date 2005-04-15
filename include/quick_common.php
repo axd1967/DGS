@@ -77,9 +77,9 @@ function get_request_arg( $name, $def='', $list=NULL)
    $val = (isset($_REQUEST[$name]) ? arg_stripslashes($_REQUEST[$name]) :
          //$HTTP_REQUEST_VARS does not exist
          $def) ;
-   if (is_array($list))
+   if (is_array($list) && !is_array($val))
    {
-      if (!array_key_exists($val,$list) )
+      if (!array_key_exists( (string) $val, $list) )
          $val = $def;
    }
    return $val;
