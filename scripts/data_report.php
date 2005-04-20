@@ -18,7 +18,6 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-$ServerTime= time();
 chdir( '../' );
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
@@ -124,8 +123,8 @@ require_once( "include/form_functions.php" );
 
       $s= "SELECT '$n' as 'Rows'"
          . ",NOW() as 'Mysql time'"
-         . ",FROM_UNIXTIME($ServerTime) as 'Server time'"
-         . ",FROM_UNIXTIME($NOW) as 'Local time'"         
+         . ",FROM_UNIXTIME($NOW) as 'Server time'"
+         . ",'" . date('Y-m-d H:i:s', $NOW) . "' as 'Local time'"         
          //. ",'".mysql_info()."' as 'Infos'"
          ;
       if( echo_query( $s, 0, 0, 0) < 0 ) break;
