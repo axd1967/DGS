@@ -51,7 +51,7 @@ $new_end =  4*7*24*3600;  // four weeks
 
 function quick_error($string) //Short one line message
 {
-   echo "\nError: " . ereg_replace( "[\x01-\x20]+", " ", $string);
+   echo "\n#Error: " . trim(ereg_replace( "[\x01-\x20]+", " ", $string));
    exit;
 }
 

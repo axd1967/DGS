@@ -3,7 +3,10 @@
 $TranslateGroups[] = "Countries";
 
 // ISO 3166 code => Name
-//plus some international languages
+//plus some international languages (ISO 639 code):
+// http://www.loc.gov/standards/iso639-2/englangn.html
+// http://www.oasis-open.org/cover/iso639a.html
+// http://www.w3.org/WAI/ER/IG/ert/iso639.htm
 
 // The $T_ are required for 'scripts/generate_translation_texts.php'.
 $T_ = 'fnop';

@@ -79,7 +79,7 @@ function error($err, $debugmsg=NULL)
    //if( !empty($debugmsg) )
    {
       $errorlog_query .= ", Debug='" . addslashes( $debugmsg) . "'";
-      //$err.= ' / '. $debugmsg;
+      //$err.= ' / '. $debugmsg; //Do not display this info!
    }
 
  global $dbcnx;
