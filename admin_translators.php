@@ -45,6 +45,8 @@ require_once( "include/form_functions.php" );
   $translator_form = new Form( 'translatorform', 'admin_do_translators.php', FORM_POST );
 
   /* Add language for translation */
+// International languages code (ISO 639):
+// http://www.loc.gov/standards/iso639-2/englangn.html
   $translator_form->add_row( array( 'HEADER', T_('Add language for translation') ) );
   $translator_form->add_row( array( 'DESCRIPTION', T_('Two-letter language code'),
                                     'TEXTINPUT', 'twoletter', 30, 10, '' ) );

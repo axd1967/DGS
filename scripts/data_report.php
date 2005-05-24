@@ -69,7 +69,7 @@ require_once( "include/form_functions.php" );
       );
    foreach( $arg_array as $arg => $word)
    {
-      $$arg= get_request_arg($arg);
+      $$arg= trim(get_request_arg($arg));
    }
 
 
