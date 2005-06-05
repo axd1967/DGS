@@ -58,7 +58,7 @@ TE   Tesuji          move             double
 W    White           move             move
 WL   White time left move             real
 */
-$prop_type ='root';
+$prop_type = 'root';
 function sgf_echo_prop( $prop )
 {
    global $prop_type;
@@ -70,7 +70,7 @@ function sgf_echo_prop( $prop )
          echo "\n;" . $prop;
       else
          echo $prop;
-      $prop_type='move';
+      $prop_type= 'move';
    }
    else if( stristr('-AB-AE-AW-PL-', '-'.$prop.'-') )
    {
@@ -78,7 +78,7 @@ function sgf_echo_prop( $prop )
          echo "\n;" . $prop;
       else
          echo $prop;
-      $prop_type='setup';
+      $prop_type= 'setup';
    }
    else
       echo $prop;
@@ -214,7 +214,7 @@ $array=array();
 
 
 {
-   disable_cache();
+   disable_cache( $NOW+10*60); //to allow some applications to find it in the cache
 
    connect2mysql();
 
@@ -257,7 +257,7 @@ $array=array();
    $gid = @$_GET['gid'];
    if( !$gid )
    {
-      if( eregi("game([0-9]+)", $REQUEST_URI, $result) )
+      if( eregi("game([0-9]+)", @$_SERVER['REQUEST_URI'], $result) )
          $gid = $result[1];
    }
    if( !$gid )

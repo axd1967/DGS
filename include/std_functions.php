@@ -68,6 +68,7 @@ $max_links_in_main_menu=8;
 // marks are "-" | "_" | "." | "!" | "~" | "*" | "'" | "(" | ")"
 define('URI_ORDER_CHAR','-');
 
+
 $ratingpng_min_interval = 2*31*24*3600;
 $BEGINYEAR = 2001;
 $BEGINMONTH = 8;
@@ -502,7 +503,6 @@ function make_menu_vertical($menu_array)
       . "\n  <td align=left nowrap>";
 
    $i = 0;
-
    //  uasort($menu_array, "cmp1");
    foreach( $menu_array as $text => $tmp )
    {
@@ -810,10 +810,18 @@ function make_html_safe( $msg, $some_html=false)
       $msg = str_replace(ALLOWED_APOS, "'", $msg);
 
       // replace <, > with ALLOWED_LT, ALLOWED_GT for legal html code
-      if( $some_html === 'game' )
+      if( $some_html === 'game' or $some_html === 'gameh' )
       {
          // mark sgf comments
-         $msg = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg));
+         if( $some_html === 'gameh' )
+         {
+            $msg = eregi_replace("<h(idden)? *>",
+                                 ALLOWED_LT."font color=red".ALLOWED_GT."\\0", $msg);
+            $msg = eregi_replace("</h(idden)? *>",
+                                 "\\0".ALLOWED_LT."/font".ALLOWED_GT, $msg);
+         }
+         else
+            $msg = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg));
 
          $msg = eregi_replace("<c(omment)? *>",
                               ALLOWED_LT."font color=blue".ALLOWED_GT."\\0", $msg);
@@ -1028,7 +1036,7 @@ function who_is_logged( &$row)
 function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 {
    global $HOSTNAME, $hostname_jump, $page_microtime, $admin_level,
-      $ActivityHalvingTime, $ActivityForHit, $NOW;
+      $ActivityForHit, $NOW;
 
 
    if( $hostname_jump and eregi_replace(":.*$","", @$_SERVER['HTTP_HOST']) != $HOSTNAME )

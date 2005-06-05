@@ -348,7 +348,14 @@ require_once( "include/rating.php" );
    if( !$enable_message )
    {
       if( $Moves > 0 )
+      {
          draw_moves();
+         if( $my_game )
+         {
+            echo "\n<center><A href=\"game_comments.php?gid=$gid\" target=\"game_comments\">" . 
+                  T_('Comments') . "</A></center>\n";
+         }
+      }
       if( $action == 'choose_move' )
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
