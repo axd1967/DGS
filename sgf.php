@@ -214,7 +214,8 @@ $array=array();
 
 
 {
-   disable_cache( $NOW+10*60); //to allow some applications to find it in the cache
+   //disable_cache(); //to allow some applications to find it in the cache
+   header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 
    connect2mysql();
 
