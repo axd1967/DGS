@@ -257,7 +257,7 @@ function message_info_table($mid, $date, $to_me,
              . ' title="' . T_("Previous message") . '"'
              . "></a>&nbsp;" ;
    }
-   if( $flow & FLOW_ANSWERED )
+   if( $flow & FLOW_ANSWERED && $mid > 0)
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWERED];
       $str.= "<a href=\"list_messages.php?find_answers=$mid\">" .
@@ -625,7 +625,8 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
 
    $query = "SELECT Messages.Type, Messages.Subject, " .
       "UNIX_TIMESTAMP(Messages.Time) AS Time, me.mid as date, " .
-      "IF(Messages.ReplyTo>0,".FLOW_ANSWER.",0)+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
+          "IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
+          "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
       "me.mid, me.Replied, me.Sender, me.Folder_nr AS folder, " .
       "IF(me.sender='M',' ',Players.Name) AS other_name, " . //the ' ' help to sort
       "Players.ID AS other_ID " .
@@ -633,6 +634,8 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
       "LEFT JOIN MessageCorrespondents AS other " .
         "ON other.mid=me.mid AND other.Sender!=me.Sender " .
       "LEFT JOIN Players ON Players.ID=other.uid " .
+          "LEFT JOIN MessageCorrespondents AS previous " .
+            "ON previous.mid=Messages.ReplyTo AND previous.uid=me.uid " .
       "WHERE me.uid=$my_id AND Messages.ID=me.mid $extra_where " .
         ( $folderstring=="all" ? "" : "AND me.Folder_nr IN ($folderstring) " ) .
       "ORDER BY $order $limit";

@@ -68,7 +68,8 @@ require_once( "include/form_functions.php" );
 
       $query = "SELECT Messages.*, " .
           "UNIX_TIMESTAMP(Messages.Time) AS date, " .
-          "IF(Messages.ReplyTo>0,".FLOW_ANSWER.",0)+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
+          "IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
+          "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
           "me.Replied, me.Sender, me.Folder_nr, " .
           "Players.Name AS other_name, Players.ID AS other_id, Players.Handle AS other_handle, " .
           "Games.Status, Games.mid AS Game_mid, " .
@@ -80,6 +81,8 @@ require_once( "include/form_functions.php" );
             "ON other.mid=me.mid AND other.Sender!=me.Sender " .
           "LEFT JOIN Players ON Players.ID=other.uid " .
           "LEFT JOIN Games ON Games.ID=Game_ID " .
+          "LEFT JOIN MessageCorrespondents AS previous " .
+            "ON previous.mid=Messages.ReplyTo AND previous.uid=me.uid " .
           "WHERE me.uid=$my_id AND Messages.ID=me.mid AND me.mid=$mid " .
 //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
           "ORDER BY Sender" ;
@@ -141,7 +144,7 @@ require_once( "include/form_functions.php" );
                or die( mysql_error());
 
             if( mysql_affected_rows() != 1)
-               error("mysql_message_info", 'remove new-flag failed');
+               error("mysql_message_info", "remove new-flag failed mid=$mid uid=$my_id Sender='$Sender'");
 
          }
 
