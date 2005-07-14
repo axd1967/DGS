@@ -601,12 +601,18 @@ function generate_random_password()
 
 function set_login_cookie($handl, $code, $delete=false)
 {
-   global $session_duration, $SUB_PATH, $NOW;
+   global $session_duration, $SUB_PATH, $NOW, $_SERVER;
 
    if( $delete or !$handl or !$code)
    {
+      $n= 0;
+      if( $tmp= @$_SERVER['HTTP_COOKIE'] )
+         $n= preg_match_all('='.COOKIE_PREFIX.'handle=i', $tmp, $m);
+      do {
       setcookie(COOKIE_PREFIX."handle", '', $NOW-3600, $SUB_PATH );
       setcookie(COOKIE_PREFIX."sessioncode", '', $NOW-3600, $SUB_PATH );
+         $n--;
+      } while ($n>0);
    }
    else
    {
