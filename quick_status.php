@@ -55,12 +55,12 @@ else
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
       "Messages.Subject, Players.Name AS sender " .
-      "FROM MessageCorrespondents AS me " .
-      "LEFT JOIN Messages ON Messages.ID=me.mid " .
+      "FROM Messages, MessageCorrespondents AS me " .
       "LEFT JOIN MessageCorrespondents AS other " .
         "ON other.mid=me.mid AND other.Sender!=me.Sender " .
       "LEFT JOIN Players ON Players.ID=other.uid " .
       "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
+              "AND Messages.ID=me.mid " .
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date DESC";
 
@@ -69,9 +69,9 @@ else
    while( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
-      echo "'M', {$row['mid']}, '".slashed($row['sender'])."', '" .
-         slashed($row['Subject']) . "', '" .
-         date('Y-m-d H:i', $row['date']) . "'\n";
+      echo "'M', {$row['mid']}, '".slashed(@$row['sender'])."', '" .
+         slashed(@$row['Subject']) . "', '" .
+         date('Y-m-d H:i', @$row['date']) . "'\n";
    }
 
 
@@ -91,9 +91,9 @@ else
    while( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
-      echo "'G', {$row['ID']}, '" . slashed($row['Name']) .
-         "', '" . $clrs{$row['Color']} . "', '" .
-         date('Y-m-d H:i', $row['date']) . "'\n";
+      echo "'G', {$row['ID']}, '" . slashed(@$row['Name']) .
+         "', '" . $clrs{@$row['Color']} . "', '" .
+         date('Y-m-d H:i', @$row['date']) . "'\n";
    }
 
     
