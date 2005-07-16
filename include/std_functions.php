@@ -599,36 +599,49 @@ function generate_random_password()
    return $return;
 }
 
+
+function safe_setcookie($name, $value='', $rel_expire=-3600)
+//should be: ($name, $value, $expire, $path, $domain, $secure)
+{
+ global $SUB_PATH, $NOW, $_SERVER;
+   $name= COOKIE_PREFIX.$name;
+   $n= 0;
+   if( $tmp= @$_SERVER['HTTP_COOKIE'] )
+      $n= preg_match_all(';'.$name.'[\\x01-\\x20]*=;i', $tmp, $m);
+   else
+      $n= 0;
+
+   while ($n>1) {
+      setcookie( $name, '', $NOW-3600, $SUB_PATH);
+      $n--;
+   }
+   setcookie( $name, $value, $NOW+$rel_expire, $SUB_PATH );
+}
+
 function set_login_cookie($handl, $code, $delete=false)
 {
-   global $session_duration, $SUB_PATH, $NOW, $_SERVER;
+ global $session_duration;
 
    if( $delete or !$handl or !$code)
    {
-      $n= 0;
-      if( $tmp= @$_SERVER['HTTP_COOKIE'] )
-         $n= preg_match_all('='.COOKIE_PREFIX.'handle=i', $tmp, $m);
-      do {
-      setcookie(COOKIE_PREFIX."handle", '', $NOW-3600, $SUB_PATH );
-      setcookie(COOKIE_PREFIX."sessioncode", '', $NOW-3600, $SUB_PATH );
-         $n--;
-      } while ($n>0);
+      safe_setcookie("handle");
+      safe_setcookie("sessioncode");
    }
    else
    {
-      setcookie(COOKIE_PREFIX."handle", $handl, $NOW+$session_duration*5, $SUB_PATH );
-      setcookie(COOKIE_PREFIX."sessioncode", $code, $NOW+$session_duration, $SUB_PATH );
+      safe_setcookie("handle", $handl, $session_duration*5);
+      safe_setcookie("sessioncode", $code, $session_duration);
    }
 }
 
 function set_cookie_prefs($id, $delete=false)
 {
-   global $cookie_prefs, $NOW, $SUB_PATH, $session_duration;
+ global $cookie_prefs, $session_duration;
 
    if( $delete )
-      setcookie(COOKIE_PREFIX."prefs$id", '', $NOW-3600, $SUB_PATH );
+      safe_setcookie("prefs$id");
    else
-      setcookie(COOKIE_PREFIX."prefs$id", serialize($cookie_prefs), $NOW+$session_duration*36, $SUB_PATH );
+      safe_setcookie("prefs$id", serialize($cookie_prefs), $session_duration*36);
 }
 
 function get_cookie_prefs(&$player_row)
