@@ -62,8 +62,7 @@ require_once( "forum_functions.php" );
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
       $links |= LINK_TOGGLE_EDITOR_LIST;
-      toggle_editor_cookie();
-      $is_editor = ($_COOKIE[COOKIE_PREFIX.'forumeditor'] === 'y');
+      $is_editor = set_editor_cookie();
    }
 
    start_table($headline, $links, "width=98%", $cols);

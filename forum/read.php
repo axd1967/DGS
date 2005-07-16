@@ -191,8 +191,7 @@ function change_depth(&$cur_depth, $new_depth)
       else if( @$_GET['hide'] > 0 )
          approve_message( @$_GET['hide'], $thread, false );
 
-      toggle_editor_cookie();
-      $is_editor = ($_COOKIE[COOKIE_PREFIX.'forumeditor'] === 'y');
+      $is_editor = set_editor_cookie();
    }
 
    start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );

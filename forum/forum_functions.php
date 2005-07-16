@@ -213,23 +213,22 @@ function forum_name($forum, &$moderated)
    return $row["Forumname"];
 }
 
-function toggle_editor_cookie()
+function set_editor_cookie()
 {
-   global $NOW, $SUB_PATH;
-
    $editor = @$_GET['editor'];
    $cookie = @$_COOKIE[COOKIE_PREFIX.'forumeditor'];
-   if( $editor === 'y' or $editor === 'n' )
+   if( $editor === 'n' && $cookie !== '' )
    {
-      if( $editor === 'n' )
-         $editor = '';
-      if( $editor != $cookie )
-      {
-         $cookie = $editor;
-         setcookie(COOKIE_PREFIX."forumeditor", $cookie, $NOW+ ( $editor ? 3600 : -3600 ), $SUB_PATH );
-      }
+      $cookie = '';
+      safe_setcookie( 'forumeditor');
+   }
+   else if( $editor === 'y' && $cookie !== 'y' )
+   {
+      $cookie = 'y';
+      safe_setcookie( 'forumeditor', $cookie, 3600);
    }
    $_COOKIE[COOKIE_PREFIX.'forumeditor'] = $cookie;
+   return $cookie === 'y';
 }
 
 function approve_message($id, $thread, $approve=true)
