@@ -279,7 +279,7 @@ class Table
                                                    $this->Desc1);
             }
 
-            $string .= '#' . $this->Prefix . 'tbl">' .
+            $string .= '#' . $this->Prefix . 'tbl" title="' . T_('Sort') . '">' .
                "<font color=\"black\">" . $tablehead['Description'] .
                "</font></a>";
          }
@@ -294,7 +294,7 @@ class Table
                "<a href=\"" . $this->Page .
                $this->current_sort_string( true ) .
                $this->Prefix . "del=" . $nr . 
-               '#' . $this->Prefix . 'tbl">' .
+               '#' . $this->Prefix . 'tbl" title="' . T_('Hide') . '">' .
                "<sup><font size=\"-1\" color=\"red\">x</font></sup></a>";
          }
 
