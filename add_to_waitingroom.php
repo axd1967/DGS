@@ -55,6 +55,8 @@ require_once( "include/rating.php" );
    if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )
       error("komi_range");
 
+   $nrGames = max( 1, (int)@$_POST['nrGames']);
+
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_POST['size']));
 
       //for interpret_time_limit_forms{
@@ -104,7 +106,7 @@ require_once( "include/rating.php" );
 
    $query = "INSERT INTO Waitingroom SET " .
       "uid=" . $player_row['ID'] . ', ' .
-      "nrGames=" . (0+@$_POST['nrGames']) . ", " .
+      "nrGames=$nrGames, " .
       "Time=FROM_UNIXTIME($NOW), " .
       "Size=$size, " .
       "Komi=ROUND(2*($komi))/2, " .
@@ -118,7 +120,7 @@ require_once( "include/rating.php" );
       "MustBeRated='$must_be_rated', " .
       "Ratingmin=$rating1, " .
       "Ratingmax=$rating2, " .
-      "Comment=\"" . @$_POST['comment'] . "\"";
+      "Comment=\"" . get_request_arg(@$_POST['comment']) . "\"";
 
    mysql_query( $query )
       or error("mysql_query_failed");
