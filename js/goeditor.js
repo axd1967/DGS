@@ -86,7 +86,7 @@ function init(nr)
    move_history[nr] = [];
 
    if( size[nr] < 1 ) size[nr] = 19;
-   if( size[nr] > MAX_BOARD_SIZE ) size[nr] = MAX_BOARD_SIZE;
+   if( size[nr] > 25 ) size[nr] = 25; //MAX_BOARD_SIZE
 
    if( startx[nr] < 0 ) startx[nr] = 0;
    if( endx[nr] > size[nr] ) endx[nr] = size[nr];
