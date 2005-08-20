@@ -120,7 +120,7 @@ require_once( "include/rating.php" );
       "MustBeRated='$must_be_rated', " .
       "Ratingmin=$rating1, " .
       "Ratingmax=$rating2, " .
-      "Comment=\"" . get_request_arg(@$_POST['comment']) . "\"";
+      "Comment=\"" . addslashes(trim(get_request_arg('comment'))) . "\"";
 
    mysql_query( $query )
       or error("mysql_query_failed");
