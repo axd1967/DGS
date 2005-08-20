@@ -29,6 +29,7 @@ require_once( "include/std_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    start_page("Error", true, $logged_in, $player_row );
+   echo '&nbsp;<br>';
 
    $err = @$_GET['err'];
    switch( $err )
@@ -576,6 +577,7 @@ require_once( "include/std_functions.php" );
    if( $mysqlerror )
       echo("<p>Mysql error: " . $mysqlerror );
 
+   echo '<p>';
    end_page();
 }
 ?>
