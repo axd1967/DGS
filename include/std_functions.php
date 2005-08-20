@@ -1417,6 +1417,13 @@ function blend_alpha_hex($color, $bgcolor="f7f5e3")
    return blend_alpha($r,$g,$b,$a,$br,$bg,$bb);
 }
 
+function blend_warning_cell_attb( $title='', $bgcolor='f7f5e3', $col='ff000033')
+{
+   $str= ' bgcolor="#' . blend_alpha_hex( $col, $bgcolor) . '"';
+   if ($title) $str.= ' title="' . $title . '"';
+   return $str;
+}
+
 function limit($val, $minimum, $maximum, $default)
 {
    if( is_string( $val) && is_numeric(strpos('hHxX#$',$val{0})) && substr($val,1)!='' )

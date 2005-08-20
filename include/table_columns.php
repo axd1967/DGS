@@ -314,6 +314,13 @@ class Table
             return $rowcol;
       }
 
+   function warning_cell_attb( $title='', $col='ff000033' )
+      {
+         $str= ' bgcolor="#' . $this->blend_next_row_color_hex($col) . '"';
+         if ($title) $str.= ' title="' . $title . '"';
+         return $str;
+      }
+
    function make_tablerow( $tablerow )
       {
          list(, $bgcolor) = each( $this->Row_Colors );
