@@ -322,6 +322,8 @@ function draw_game_info($row)
         echo "   </tr>\n";
       }
 
+    }
+
       echo " <tr>\n";
       echo '       <td>' . T_('Time limit') . ":</td>\n";
       echo '       <td colspan=2>';
@@ -330,8 +332,6 @@ function draw_game_info($row)
 
       echo "</td>\n";
       echo "   </tr>\n";
-
-    }
 
     echo '   <tr><td>' . T_('Rated') . ': </td><td colspan=2>' .
       ( $row['Rated'] == 'N' ? T_('No') : T_('Yes') ) . "</td></tr>\n";
@@ -347,7 +347,7 @@ function draw_moves()
    mysql_data_seek($moves_result, 0);
 
 
-   echo '<table border=4 cellspacing=0 cellpadding=1 align=center bgcolor=66C17B><tr align=center><th>' . T_('Moves') . '</th>
+   echo '<table border=4 cellspacing=0 cellpadding=1 align=center bgcolor="#66C17B"><tr align=center><th>' . T_('Moves') . '</th>
 ';
 
    $moves_per_row = 20;
