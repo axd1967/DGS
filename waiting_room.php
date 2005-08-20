@@ -26,8 +26,6 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 
-define('BAD_RATING_COLOR',"ff000033");
-
 {
    connect2mysql();
 
@@ -97,8 +95,12 @@ define('BAD_RATING_COLOR',"ff000033");
          if( @$_GET['info'] === $ID )
             $info_row = $row;
 
-         if( $Handicaptype == 'conv' or $Handicaptype == 'proper' )
-            $Komi = '-';
+         $calculated = ( $Handicaptype == 'conv' or $Handicaptype == 'proper' );
+         $needrating = ( $calculated && !is_numeric($my_rating) );
+         //$Komi+= 0;
+
+         $Comment = make_html_safe($Comment, 'cell');
+         if( empty($Comment) ) $Comment = '&nbsp;';
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[0] )
@@ -113,25 +115,24 @@ define('BAD_RATING_COLOR',"ff000033");
                $Handle . "</font></a></td>";
          if( $wrtable->Is_Column_Displayed[3] )
             $wrow_strings[3] = "<td nowrap>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
-         if( empty($Comment) )
-         {
-            $Comment = '&nbsp;';
-         }
          if( $wrtable->Is_Column_Displayed[4] )
-            $wrow_strings[4] = "<td nowrap>" . make_html_safe($Comment, true) . "</td>";
+            $wrow_strings[4] = "<td nowrap>" . $Comment . "</td>";
          if( $wrtable->Is_Column_Displayed[5] )
-            $wrow_strings[5] = "<td nowrap>" . $handi_array[$Handicaptype] . "</td>";
+         {
+            $wrow_strings[5] = '<td nowrap' .
+               ( $needrating ? $wrtable->warning_cell_attb(  T_('No initial rating') ) : '' )
+               . '>' . $handi_array[$Handicaptype] . "</td>";
+         }
          if( $wrtable->Is_Column_Displayed[6] )
-            $wrow_strings[6] = "<td>$Komi</td>";
+            $wrow_strings[6] = '<td>' . ($calculated ? '-' : $Komi) . '</td>'; 
          if( $wrtable->Is_Column_Displayed[7] )
             $wrow_strings[7] = "<td>$Size</td>";
          if( $wrtable->Is_Column_Displayed[8] )
          {
             list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
             $wrow_strings[8] = '<td nowrap' .
-               ( $good_rating ? '>' 
-                 : ' bgcolor="#'.$wrtable->blend_next_row_color_hex(BAD_RATING_COLOR)
-                   .'">') . $Ratinglimit . "</td>";
+               ( $good_rating ? '' : $wrtable->warning_cell_attb(  T_('Out of range') ) )
+               . '>' . $Ratinglimit . "</td>";
          }
          if( $wrtable->Is_Column_Displayed[9] )
             $wrow_strings[9] = '<td nowrap>' .
@@ -171,7 +172,7 @@ define('BAD_RATING_COLOR',"ff000033");
 
 function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating=false)
 {
-   if( $MustBeRated == 'N' )
+   if( $MustBeRated != 'Y' )
       return array('-', true);
 
    // +/-50 reverse the inflation from add_to_waitingroom.php
@@ -181,8 +182,11 @@ function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating=fals
       $Ratinglimit = sprintf( T_('%s only'), $r1);
    else
       $Ratinglimit = $r1 . ' - ' . $r2;
-   return array($Ratinglimit,
-      !is_numeric($my_rating) or ( $my_rating>=$Ratingmin and $my_rating<=$Ratingmax));
+   if( is_numeric($my_rating) )
+      $good = ( $my_rating>=$Ratingmin && $my_rating<=$Ratingmax );
+   else
+      $good = false;
+   return array($Ratinglimit, $good);
 }
 
 function add_new_game_form()
@@ -190,9 +194,6 @@ function add_new_game_form()
    echo '<a name="add"></a>' . "\n";
    $addgame_form = new Form( 'addgame', 'add_to_waitingroom.php', FORM_POST );
    $addgame_form->add_row( array( 'HEADER', T_('Add new game') ) );
-
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Comment'),
-                                  'TEXTINPUT', 'comment', 40, 40, "" ) );
 
    $vals = array();
 
@@ -223,9 +224,35 @@ function add_new_game_form()
                                   'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
 
 
+   $addgame_form->add_row( array( 'SPACE' ) );
+   $addgame_form->add_row( array( 'DESCRIPTION', T_('Comment'),
+                                  'TEXTINPUT', 'comment', 40, 40, "" ) );
+   $addgame_form->add_row( array( 'SPACE' ) );
+
+
    $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
 
    $addgame_form->echo_string(1);
+}
+
+function show_game_header($str)
+{
+  global $h3_color;
+
+//Rdvl:from 'My user info' style:
+//   echo "<h3><font color=$h3_color>" . $title . '</font></h3>';
+
+   return   '<tr><td colspan=99 align="center">' . 
+            "&nbsp;<B><font color=$h3_color>" . 
+            $str . ":</font></B>&nbsp;</td></tr>\n";
+}
+
+function show_game_row( $info, $cell, $hilight=false, $warning='')
+{
+   $info = eregi_replace('<BR>',' ',$info); //allow 2 lines long headers
+   return '<tr><td><b>' . $info . '</b></td><td' .
+         ( $hilight ? blend_warning_cell_attb( $warning ) : '' )
+       . '>' . $cell . "</td></tr>\n";
 }
 
 function show_game_info($game_row, $mygame=false, $my_rating=false)
@@ -238,35 +265,71 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
                          'double' => T_('Double game') );
 
    extract($game_row);
+   $calculated = ( $Handicaptype == 'conv' or $Handicaptype == 'proper' );
+   $needrating = ( $calculated && !is_numeric($my_rating) );
+   //$Komi+= 0;
 
    echo '<p><a name="info"></a>' . "\n";
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
-   echo '<tr><td><b>' . T_('Player') . '</b></td><td>' . 
-      user_reference( 1, 1, "black", $pid, $Name, $Handle) . "</td></tr>\n";
+   echo show_game_header(T_('Info'));
 
-   echo '<tr><td><b>' . T_('Rating') . '</b></td><td>' .
-      echo_rating($Rating,true,$pid) . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Size') . '</b></td><td>' . $Size . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' .
-      ( ($Handicaptype == 'conv' or $Handicaptype == 'proper') ? '-' : $Komi ) .
-      "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $handi_array[$Handicaptype] .
-      "</td></tr>\n";
+   echo show_game_row( T_('Player'), user_reference( REF_LINK, 1, "black", $pid, $Name, $Handle));
+
+   echo show_game_row( T_('Rating'), echo_rating($Rating,true,$pid));
+   echo show_game_row( T_('Size'), $Size);
+   echo show_game_row( T_('Handicap'), $handi_array[$Handicaptype]
+         , $needrating, T_('No initial rating'));
+   echo show_game_row( T_('Komi'), $calculated ? '-' : $Komi);
+
    list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
-   echo '<tr><td><b>' . T_('Rating range') . '</b></td><td' .
-               ( $good_rating ? '>' 
-                 : ' bgcolor="#'.blend_alpha_hex(BAD_RATING_COLOR, substr($bg_color, 2, 6))
-                   .'">') . $Ratinglimit . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Time limit') . '</b></td><td>' .
-      echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods) . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Number of games') . '</b></td><td>' . $nrGames . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Rated') . '</b></td><td>' .
-      ( $Rated == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Clock runs on weekends') . '</b></td><td>' .
-      ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
+   echo show_game_row( T_('Rating range'), $Ratinglimit
+         , !$good_rating, T_('Out of range'));
+   echo show_game_row( T_('Time limit'), echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods));
+   echo show_game_row( T_('Number of games'), $nrGames);
+   echo show_game_row( T_('Rated'), $Rated == 'Y' ? T_('Yes') : T_('No'));
+   echo show_game_row( T_('Clock runs on weekends'), $WeekendClock == 'Y' ? T_('Yes') : T_('No'));
 
-   echo '<tr><td><b>' . T_('Comment') . '</b></td><td>' . $Comment . "</td></tr>\n";
+   $Comment = make_html_safe($Comment, true);
+   //if( empty($Comment) ) $Comment = '&nbsp;';
+   echo show_game_row( T_('Comment'), $Comment);
+
+   if( !$mygame && $good_rating && !$needrating)
+   {
+   /* Not useful here, because RatingStatus couldn't be empty to accept the match:
+      $infoRated = (( $Rated === 'Y' and
+                  !empty($RatingStatus) and
+                  !empty($player_row['RatingStatus']) ) ? 'Y' : 'N' );
+   */
+
+      if( $Handicaptype == 'proper' )
+         list($infoHandicap,$infoKomi,$swap) = suggest_proper($Rating, $my_rating, $Size);
+      else if( $Handicaptype == 'conv' )
+         list($infoHandicap,$infoKomi,$swap) = suggest_conventional($Rating, $my_rating, $Size);
+      else
+      {
+         $infoHandicap = 0; $infoKomi = $Komi; $swap = 0;
+      }
+
+      $colortxt = '<img align="top" src="17/';
+      if( $Handicaptype == 'double' )
+         $colortxt = $colortxt . 'w.gif" alt="' . T_('White') . '">&nbsp;+&nbsp;' .
+                     $colortxt . 'b.gif" alt="' . T_('Black') . '">' ;
+      else if( $Handicaptype == 'nigiri' 
+            or $Handicaptype == 'conv' && $infoHandicap == 0 && $infoKomi == 6.5 )
+         $colortxt = $colortxt . 'y.gif" alt="' . T_('Nigiri') . '">' ;
+      else if( $swap )
+         $colortxt = $colortxt . 'w.gif" alt="' . T_('White') . '">' ;
+      else
+         $colortxt = $colortxt . 'b.gif" alt="' . T_('Black') . '">' ;
+
+      //echo "<tr height=20><td colspan=2 height=20></td></tr>\n";
+      echo show_game_header(T_('Probable settings'));
+
+      echo show_game_row( T_('Color'), $colortxt);
+      echo show_game_row( T_('Handicap'), $infoHandicap);
+      echo show_game_row( T_('Komi'), sprintf("%.1f",$infoKomi));
+   }
 
    echo "</table>\n";
 
@@ -279,7 +342,7 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
                                     'HIDDEN', 'delete', 't') );
       $delete_form->echo_string(1);
    }
-   else if( $good_rating )
+   else if( $good_rating && !$needrating )
    {
       $join_form = new Form( 'join', 'join_waitingroom_game.php', FORM_POST );
       $join_form->add_row( array( 'DESCRIPTION', T_('Reply'),
