@@ -42,7 +42,7 @@ disable_cache();
 
 
    $my_id = $player_row['ID'];
-   $message_id = @$_REQUEST['messageid'];
+   $message_id = @$_REQUEST['foldermove_mid'];
    $disputegid = @$_REQUEST['disputegid'];
    $to = @$_REQUEST['to'];
    $reply = @$_REQUEST['reply']; //ID of message replied. if set then (often?always?) == $message_id
@@ -112,11 +112,12 @@ disable_cache();
       $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_REQUEST['size']));
       $handicap_type = @$_REQUEST['handicap_type'];
       $color = @$_REQUEST['color'];
-      $rated = @$_REQUEST['rated'];
       $handicap = (int)@$_REQUEST['handicap'];
       $komi_m = (int)@$_REQUEST['komi_m'];
       $komi_n = (int)@$_REQUEST['komi_n'];
       $komi_d = (int)@$_REQUEST['komi_d'];
+      $rated = @$_REQUEST['rated'];
+      $stdhandicap = @$_REQUEST['stdhandicap'];
       $weekendclock = @$_REQUEST['weekendclock'];
 
       //for interpret_time_limit_forms{
@@ -155,13 +156,44 @@ disable_cache();
          error( "no_initial_rating" );
       }
 
-      $komi = $komi_m;
-      $tomove = $Black_ID;
       //ToMove_ID=$tomove will hold handitype until ACCEPTED
-      if($handicap_type == 'conv' ) { $tomove = -1; $komi = 0; }
-      else if($handicap_type == 'proper' ) { $tomove = -2; $komi = 0; }
-      else if($handicap_type == 'nigiri' ) { $tomove = -3; $komi = $komi_n; }
-      else if($handicap_type == 'double' ) { $tomove = -4; $komi = $komi_d; }
+      switch( $handicap_type )
+      {
+         case 'conv':
+         {
+            $tomove = INVITE_HANDI_CONV;
+            $komi = 0;
+         }
+         break;
+
+         case 'proper':
+         {
+            $tomove = INVITE_HANDI_PROPER;
+            $komi = 0;
+         }
+         break;
+
+         case 'nigiri':
+         {
+            $tomove = INVITE_HANDI_NIGIRI;
+            $komi = $komi_n;
+         }
+         break;
+
+         case 'double':
+         {
+            $tomove = INVITE_HANDI_DOUBLE;
+            $komi = $komi_d;
+         }
+         break;
+
+         default: //'manual'
+         {
+            $tomove = $Black_ID;
+            $komi = $komi_m;
+         }
+         break;
+      }
 
       if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )
          error("komi_range");
@@ -173,6 +205,9 @@ disable_cache();
 
       if( $rated != 'Y' or $my_id == $opponent_ID )
          $rated = 'N';
+
+      if( $stdhandicap != 'Y' )
+         $stdhandicap = 'N';
 
       if( $weekendclock != 'Y' )
          $weekendclock = 'N';
@@ -191,6 +226,7 @@ disable_cache();
          "Black_Maintime=$hours, " .
          "White_Maintime=$hours," .
          "WeekendClock='$weekendclock', " .
+         "StdHandicap='$stdhandicap', " .
          "Rated='$rated'";
 
       if( $disputegid > 0 )
@@ -210,10 +246,10 @@ disable_cache();
          $query = "INSERT INTO Games SET $query";
 
       $result = mysql_query( $query )
-         or error("mysql_insert_game");
+         or error('mysql_insert_game','invite1');
 
       if( mysql_affected_rows() != 1)
-         error("mysql_insert_game");
+         error('mysql_insert_game','invite2');
 
       if( $disputegid > 0 )
       {
@@ -231,7 +267,7 @@ disable_cache();
       $result = mysql_query( "SELECT Black_ID, White_ID, ToMove_ID, " .
                              "Size, Handicap, Komi, " .
                              "Maintime, Byotype, Byotime, Byoperiods, " .
-                             "Rated, WeekendClock " .
+                             "Rated, StdHandicap, WeekendClock " .
                              "FROM Games WHERE ID=$gid" );
 
       if( @mysql_num_rows($result) != 1)
@@ -257,7 +293,7 @@ disable_cache();
       {
          error("mysql_start_game",'send4');
       }
-      $swap = 0;
+
       $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_row["Size"]));
 
       if( $game_row['WeekendClock'] != 'Y' )
@@ -269,32 +305,57 @@ disable_cache();
       $ticks_black = get_clock_ticks($clock_used_black);
       $ticks_white = get_clock_ticks($clock_used_white);
 
-      //ToMove_ID hold handitype since INVITATION
-      $handitype = $game_row["ToMove_ID"];
-
-      mt_srand ((double) microtime() * 1000000);
-      if( $handitype == -3 ) // nigiri
-         $swap = mt_rand(0,1);
-
 
       $query =  "UPDATE Games SET " .
          "Status='PLAY', ";
 
 
-      if( $handitype == -2 ) // Proper handicap
+      mt_srand ((double) microtime() * 1000000);
+
+      //ToMove_ID hold handitype since INVITATION
+      $handitype = $game_row["ToMove_ID"];
+
+      switch( $handitype )
+      {
+         case INVITE_HANDI_CONV:
       {
             list($handicap,$komi,$swap) =
+               suggest_conventional($rating_white, $rating_black, $size);
+
+         $query .= "Handicap=$handicap, Komi=$komi, ";
+      }
+         break;
+
+         case INVITE_HANDI_PROPER:
+      {
+         list($handicap,$komi,$swap) =
                suggest_proper($rating_white, $rating_black, $size);
 
          $query .= "Handicap=$handicap, Komi=$komi, ";
       }
-      else if( $handitype == -1 ) // Conventional handicap
-      {
-         list($handicap,$komi,$swap) =
-            suggest_conventional($rating_white, $rating_black, $size);
+         break;
 
-         $query .= "Handicap=$handicap, Komi=$komi, ";
+         case INVITE_HANDI_NIGIRI:
+         {
+            $swap = mt_rand(0,1);
+/* already in game record: no query needed
+            $handicap= $game_row["Handicap"];
+            $komi= $game_row["Komi"];
+*/
+         }
+         break;
+
+         default:
+         {
+            $swap = 0;
+/* already in game record: no query except for second game of double game
+            $handicap= $game_row["Handicap"];
+            $komi= $game_row["Komi"];
+*/
+         }
+         break;
       }
+
 
       $Rated = ( $game_row['Rated'] === 'Y' and
                  !empty($opponent_row['RatingStatus']) and
@@ -330,7 +391,7 @@ disable_cache();
       if( mysql_affected_rows() != 1)
          error("mysql_start_game",'send5');
 
-      if( $handitype == -4 ) // double
+      if( $handitype == INVITE_HANDI_DOUBLE ) // double
       {
          $query = "INSERT INTO Games SET " .
             "Black_ID=" . $game_row["White_ID"] . ", " .
@@ -353,6 +414,7 @@ disable_cache();
             (is_numeric($rating_black) ? "Black_Start_Rating=$rating_black, " : '' ) .
             (is_numeric($rating_white) ? "White_Start_Rating=$rating_white, " : '' ) .
             "WeekendClock='" . $game_row["WeekendClock"] . "', " .
+            "StdHandicap='" . $game_row["StdHandicap"] . "', " .
             "Rated='" . ($Rated ? 'Y' : 'N' ) . "'";
 
          mysql_query( $query )
@@ -360,7 +422,7 @@ disable_cache();
 
       }
 
-      mysql_query( "UPDATE Players SET Running=Running+" . ( $handitype == -4 ? 2 : 1 ) .
+      mysql_query( "UPDATE Players SET Running=Running+" . ( $handitype == INVITE_HANDI_DOUBLE ? 2 : 1 ) .
                    ( $Rated ? ", RatingStatus='RATED'" : '' ) .
                    " WHERE ID=$my_id OR ID=$opponent_ID LIMIT 2" );
 

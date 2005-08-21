@@ -145,8 +145,9 @@ require_once( "include/rating.php" );
       "Byoperiods=$Byoperiods, " .
       "Black_Maintime=$Maintime, " .
       "White_Maintime=$Maintime," .
-      "WeekendClock='$WeekendClock', " .
       "Rated='$Rated', " .
+      "StdHandicap='$StdHandicap', " .
+      "WeekendClock='$WeekendClock', " .
       "Starttime=FROM_UNIXTIME($NOW), " .
       "Lastchanged=FROM_UNIXTIME($NOW)";
 
@@ -177,8 +178,9 @@ require_once( "include/rating.php" );
          "Byoperiods=$Byoperiods, " .
          "Black_Maintime=$Maintime, " .
          "White_Maintime=$Maintime," .
-         "WeekendClock='$WeekendClock', " .
          "Rated='$Rated', " .
+         "StdHandicap='$StdHandicap', " .
+         "WeekendClock='$WeekendClock', " .
          "Starttime=FROM_UNIXTIME($NOW), " .
          "Lastchanged=FROM_UNIXTIME($NOW)";
 
@@ -212,11 +214,11 @@ require_once( "include/rating.php" );
    $reply = trim(get_request_arg('reply'));
    if ($reply)
    {
-      $reply = addslashes(user_reference( 1, 1, '', $player_row). " wrote:\n" . $reply) ;
+      $reply = addslashes(user_reference( REF_LINK, 1, '', $player_row). " wrote:\n" . $reply) ;
    }
    else
    {
-      $reply = addslashes(user_reference( 1, 1, '', $player_row). " has joined your waiting room game.") ;
+      $reply = addslashes(user_reference( REF_LINK, 1, '', $player_row). " has joined your waiting room game.") ;
    }
 
    $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .

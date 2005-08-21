@@ -24,6 +24,9 @@ require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( "include/rating.php" );
+if( ENA_STDHANDICAP ) {
+require_once( "include/sgf_parser.php" );
+}
 
 
 {
@@ -91,7 +94,7 @@ require_once( "include/rating.php" );
       error("not_your_turn");
 
 
-   if( !$move ) $move = $Moves;
+   if( $move<=0 ) $move = $Moves;
 
    $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and $move == $Moves ) ;
 
@@ -201,10 +204,21 @@ require_once( "include/rating.php" );
       case 'handicap':
       {
          if( $Status != 'PLAY' )
-            error("invalid_action",'game3');
+            error('invalid_action','game3');
+
+         $err = '';
+         if( ENA_STDHANDICAP && !$stonestring && !$coord && $StdHandicap=='Y' && $Handicap>1 )
+         {
+            $stonestring = '2'.get_handicap_pattern( $Size, $Handicap, $err);
+            $extra_message = "<font color=\"green\">" .
+              T_('A standard placement of handicap stones has been requested.') . "</font>";
+         }
+         //else $stonestring and $coord from URL
 
          check_handicap(); //adjust $handi, $stonestring, $enable_message and others
-
+         if( $err )
+            $extra_message = "<font color=\"red\">" . $err .
+                              "</font><br>" . $extra_message;
       }
       break;
 

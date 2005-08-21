@@ -74,7 +74,7 @@ require_once( "include/form_functions.php" );
           "Players.Name AS other_name, Players.ID AS other_id, Players.Handle AS other_handle, " .
           "Games.Status, Games.mid AS Game_mid, " .
           "Size, Komi, Handicap, Maintime, Byotype, " .
-          "Byotime, Byoperiods, Rated, Weekendclock, " .
+          "Byotime, Byoperiods, Rated, Weekendclock, StdHandicap, " .
           "ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS Color " .
           "FROM Messages, MessageCorrespondents AS me " .
           "LEFT JOIN MessageCorrespondents AS other " .
@@ -260,7 +260,7 @@ require_once( "include/form_functions.php" );
          }
 
          game_info_table($Size, $colortxt, $ToMove_ID, $Komi, $Handicap, $Maintime,
-                         $Byotype, $Byotime, $Byoperiods, $Rated, $Weekendclock);
+                         $Byotype, $Byotime, $Byoperiods, $Rated, $Weekendclock, $StdHandicap);
 
          if( $can_reply )
          {

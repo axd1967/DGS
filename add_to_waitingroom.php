@@ -81,12 +81,18 @@ require_once( "include/rating.php" );
    if( ($rated=@$_POST['rated']) != 'Y' or !$player_row["RatingStatus"] )
       $rated = 'N';
 
+   if( ENA_STDHANDICAP )
+   {
+      if( ($stdhandicap=@$_POST['stdhandicap']) != 'Y' )
+         $stdhandicap = 'N';
+   } else $stdhandicap = 'N';
+
    if( ($weekendclock=@$_POST['weekendclock']) != 'Y' )
       $weekendclock = 'N';
 
-   if( ($must_be_rated=@$_POST['must_be_rated']) != 'Y' )
+   if( ($MustBeRated=@$_POST['must_be_rated']) != 'Y' )
    {
-      $must_be_rated = 'N';
+      $MustBeRated = 'N';
       //to keep a good column sorting:
       $rating1 = $rating2 = read_rating('99 kyu', 'dragonrating');
    }
@@ -117,7 +123,8 @@ require_once( "include/rating.php" );
       "Handicaptype='$handicap_type', " .
       "WeekendClock='$weekendclock', " .
       "Rated='$rated', " .
-      "MustBeRated='$must_be_rated', " .
+      "StdHandicap='$stdhandicap', " .
+      "MustBeRated='$MustBeRated', " .
       "Ratingmin=$rating1, " .
       "Ratingmax=$rating2, " .
       "Comment=\"" . addslashes(trim(get_request_arg('comment'))) . "\"";
