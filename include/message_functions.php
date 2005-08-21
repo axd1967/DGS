@@ -593,14 +593,12 @@ function echo_folders($folders, $current_folder)
    foreach( $folders as $nr => $val )
    {
       list($name, $color, $fcol) = $val;
-      $name = make_html_safe($name);
+      $name = "<font color=\"$fcol\">" . make_html_safe($name) . "</font>" ;
       $string .= '<td bgcolor="#' .blend_alpha_hex($color). '"' ;
       if( $nr == $current_folder)
-         $string .= " style=\"border:'3px solid #6666ff'; padding:4px; color:'#" .
-                    $fcol. "'\">$name</td>\n";
+         $string .= " style=\"padding:4px;border-width:2px;border:solid;border-color:#6666ff;\">$name</td>\n";
       else
-         $string .= " style=\"padding:7px;\"><a style=\"color:'#" .
-                    $fcol. "'\" href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
+         $string .= " style=\"padding:6px;\"><a href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
    }
 
    $string .= '</tr></table>' . "\n";
