@@ -268,13 +268,13 @@ function draw_game_info($row)
     T_('White') . "</td><td width=" . ($row['Size']*9) . ">" . T_('Black') . "</td>\n";
   echo "   </tr><tr>\n";
   echo "     <td>" . T_('Name') . ":</td>\n";
-  $color= ( $row['Whitewarning'] > 0 ? 'red' : 'black' );
-  echo '     <td>'
-       . user_reference( REF_LINK, 1, $color, $row['White_ID'], $row['Whitename'], $row['Whitehandle'])
+  echo '     <td' . ( $row['Whitewarning'] > 0
+             ? blend_warning_cell_attb( T_('On vacation') ) : '' ) . '>'
+       . user_reference( REF_LINK, 1, 'black', $row['White_ID'], $row['Whitename'], $row['Whitehandle'])
        . "</td>\n";
-  $color= ( $row['Blackwarning'] > 0 ? 'red' : 'black' );
-  echo '     <td>'
-       . user_reference( REF_LINK, 1, $color, $row['Black_ID'], $row['Blackname'], $row['Blackhandle'])
+  echo '     <td' . ( $row['Blackwarning'] > 0
+             ? blend_warning_cell_attb( T_('On vacation') ) : '' ) . '>'
+       . user_reference( REF_LINK, 1, 'black', $row['Black_ID'], $row['Blackname'], $row['Blackhandle'])
        . "</td>\n";
   echo "   </tr><tr>\n";
 
