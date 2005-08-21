@@ -38,8 +38,6 @@ require_once( "forum_functions.php" );
 
    start_page(T_('Create new forum'), true, $logged_in, $player_row);
 
-   sysmsg(get_request_arg('msg'));
-
    if( $_POST['do_create'] == 'Y' )
    {
       $results = mysql_query('SELECT Name,SortVal FROM Forums ORDER BY SortVal');
@@ -63,7 +61,7 @@ require_once( "forum_functions.php" );
 
       $msg = urlencode(T_('Forum added!'));
 
-      jump_to("forum/create_forum.php?msg=$msg");
+      jump_to("forum/create_forum.php?sysmsg=$msg");
    }
 
    $results = mysql_query('SELECT Name FROM Forums ORDER BY SortVal');

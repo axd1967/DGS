@@ -272,6 +272,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    //this <table><tr><td> is left open until page end
    echo "\n  <td id=\"page_body\" width=\"100%\" align=center valign=top><BR>\n\n";
 
+   sysmsg(get_request_arg('sysmsg'));
+
    if( $is_down )
    {
       echo $is_down_message . '<p>';
@@ -1003,15 +1005,17 @@ function make_url($page, $sep, $array)
    return $url;
 }
 
-function get_request_url()
+function get_request_url( $absolute=false)
 {
  global $SUB_PATH;
 
-   $url = @$_SERVER['REQUEST_URI'];
+   $url = @$_SERVER['REQUEST_URI']; //contains URI_AMP_IN and still urlencoded
    $len = strlen($SUB_PATH);
    if (!strcasecmp( $SUB_PATH, substr($url,0,$len) ))
       $url = substr($url,$len);
    $url = str_replace( URI_AMP_IN, URI_AMP, $url);
+   if( $absolute )
+      $url = $HOSTBASE . '/' . $url;
    return $url;
 }
 
