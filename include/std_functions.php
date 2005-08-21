@@ -255,7 +255,12 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       );
 
 
-   if( $player_row['MenuDirection'] == 'HORIZONTAL' )
+   if( !($logged_in and !$is_down) )
+   {
+      echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
+         . "\n <tr>";
+   }
+   else if( $player_row['MenuDirection'] == 'HORIZONTAL' )
    {
       make_menu_horizontal($menu_array);
       echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"

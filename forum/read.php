@@ -151,10 +151,10 @@ function change_depth(&$cur_depth, $new_depth)
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
+   if( !$logged_in )
+      error("not_logged_in");
 
    $reply = @$_REQUEST['reply']+0;
-   if( !$logged_in and ( ($reply > 0) or isset($_POST['post']) ) )
-      error("not_logged_in");
 
    $forum = @$_REQUEST['forum']+0;
    $thread = @$_REQUEST['thread']+0;

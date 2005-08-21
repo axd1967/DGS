@@ -25,9 +25,11 @@ require_once( "forum_functions.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
+   if( !$logged_in )
+      error("not_logged_in");
 
-   $forum = @$_GET['forum']+0;
-   $offset = @$_GET['offset']+0;
+   $forum = max(0,(int)@$_GET['forum']);
+   $offset = max(0,(int)@$_GET['offset']);
 
    $Forumname = forum_name($forum, $moderated);
 

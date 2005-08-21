@@ -21,9 +21,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require_once( "forum_functions.php" );
 
+{
 connect2mysql();
 
 $logged_in = who_is_logged( $player_row);
+   if( !$logged_in )
+      error("not_logged_in");
 
 start_page("Forum list", true, $logged_in, $player_row );
 
@@ -63,4 +66,5 @@ while( $row = mysql_fetch_array( $result ) )
 end_table($links, $cols);
 
 end_page();
+}
 ?>
