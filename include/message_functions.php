@@ -20,6 +20,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Messages";
 
+define('INVITE_HANDI_CONV',-1);
+define('INVITE_HANDI_PROPER',-2);
+define('INVITE_HANDI_NIGIRI',-3);
+define('INVITE_HANDI_DOUBLE',-4);
+
 
 function init_standard_folders()
 {
@@ -39,11 +44,14 @@ function init_standard_folders()
 function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false)
 {
 
-   // Default values:
+   // Default values: ('Invite' or waiting_room)
    $Size = 19;
-   $Komi = 6.5;
-   $Handicap = 0;
+   $Handitype = 'conv';
    $MyColor = 'White';
+   $Handicap = 0;
+   $Komi_m = 6.5;
+   $Komi_n = 6.5;
+   $Komi_d = 6.5;
    $Maintime = 3;
    $MaintimeUnit = 'months';
    $Byotype = 'JAP';
@@ -56,14 +64,14 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
    $Byotime_fis = 1;
    $ByotimeUnit_fis = 'days';
    $Weekendclock = true;
+   $StdHandicap = false;
    $Rated = true;
-   $Handitype = 'conv';
 
    // If dispute, use values from game $gid
    if( $gid > 0 )
    {
       $result = mysql_query( "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
-                             "Maintime,Byotype,Byotime,Byoperiods,Rated,Weekendclock, " .
+                             "Maintime,Byotype,Byotime,Byoperiods,Rated,StdHandicap,Weekendclock, " .
                              "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
                              "FROM Games,Players WHERE Games.ID=$gid " .
                              "AND ((Players.ID=Black_ID AND White_ID=$my_ID) " .
@@ -79,6 +87,7 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 
       $MyColor = ( $Color == BLACK ? 'Black' : 'White' );
       $Rated = ( $Rated == 'Y' );
+      $StdHandicap = ( $StdHandicap == 'Y' );
       $Weekendclock = ( $Weekendclock == 'Y' );
 
       $ByotimeUnit = 'hours';
@@ -87,13 +96,42 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
       $MaintimeUnit = 'hours';
       time_convert_to_longer_unit($Maintime, $MaintimeUnit);
 
-      $Handitype = 'manual';
+      //ToMove_ID hold handitype since INVITATION
+      switch( $ToMove_ID )
+      {
+         case INVITE_HANDI_CONV:
+         {
+            $Handitype = 'conv';
+         }
+         break;
 
-      if( $ToMove_ID == -1 ) $Handitype = 'conv';
-      else if( $ToMove_ID == -2 ) $Handitype = 'proper';
-      else if( $ToMove_ID == -3 ) $Handitype = 'nigiri';
-      else if( $ToMove_ID == -4 ) $Handitype = 'double';
+         case INVITE_HANDI_PROPER:
+         {
+            $Handitype = 'proper';
+         }
+         break;
 
+         case INVITE_HANDI_NIGIRI:
+         {
+            $Handitype = 'nigiri';
+            $Komi_n = $Komi;
+         }
+         break;
+
+         case INVITE_HANDI_DOUBLE:
+         {
+            $Handitype = 'double';
+            $Komi_d = $Komi;
+         }
+         break;
+
+         default: //Black_ID
+         {
+            $Handitype = 'manual';
+            $Komi_m = $Komi;
+         }
+         break;
+      }
 
       switch( $Byotype )
       {
@@ -156,19 +194,22 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
                               'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
                               'SELECTBOX', 'handicap', 1, $handi_stones, $Handicap, false,
                               'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                              'TEXTINPUT', 'komi_m', 5, 5, $Komi ) );
+                              'TEXTINPUT', 'komi_m', 5, 5, $Komi_m ) );
    }
 
    $mform->add_row( array( 'DESCRIPTION', T_('Even game with nigiri'),
                            'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
                            'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                           'TEXTINPUT', 'komi_n', 5, 5, $Komi ) );
+                           'TEXTINPUT', 'komi_n', 5, 5, $Komi_n ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Double game'),
                            'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
                            'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
-                           'TEXTINPUT', 'komi_d', 5, 5, $Komi ) );
+                           'TEXTINPUT', 'komi_d', 5, 5, $Komi_d ) );
 
+   if( ENA_STDHANDICAP )
+   $mform->add_row( array( 'DESCRIPTION', T_('Standard placement'),
+                           'CHECKBOX', 'stdhandicap', 'Y', "", $StdHandicap ) );
 
 
 
@@ -182,27 +223,28 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
                            'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
                            'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Japanese byo-yomi'),
+   $mform->add_row( array( 'DESCRIPTION', T_('Japanese byoyomi'),
+                           //'CELL', 1, 'nowrap',
                            'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), $Byotype,
                            'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
                            'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
                            'TEXT', T_('with') . '&nbsp;',
                            'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
-                           'TEXT', T_('extra periods.') ) );
+                           'TEXT', T_('extra periods') ) );
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Canadian byo-yomi'),
+   $mform->add_row( array( 'DESCRIPTION', T_('Canadian byoyomi'),
                            'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), $Byotype,
                            'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
                            'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
                            'TEXT', T_('for') . '&nbsp;',
                            'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
-                           'TEXT', T_('stones') . '.' ) );
+                           'TEXT', T_('stones') ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Fischer time'),
                            'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), $Byotype,
                            'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
                            'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
-                           'TEXT', T_('extra per move.') ) );
+                           'TEXT', T_('extra per move') ) );
 
    $mform->add_row( array( 'SPACE' ) );
 
@@ -231,7 +273,7 @@ function message_info_table($mid, $date, $to_me,
 
    if( $other_id > 0 )
    {
-     $name = user_reference( 1, 0, '', $other_id, $other_name, $other_handle) ;
+     $name = user_reference( REF_LINK, 0, '', $other_id, $other_name, $other_handle) ;
    }
    else
      $name = $other_name; //i.e. T_("Server message");
@@ -300,7 +342,7 @@ function message_info_table($mid, $date, $to_me,
             if( $folder_nr > FOLDER_ALL_RECEIVED )
                echo $form->print_insert_hidden_input("current_folder", $folder_nr) ;
          }
-         echo $form->print_insert_hidden_input('messageid', $mid) ;
+         echo $form->print_insert_hidden_input('foldermove_mid', $mid) ;
       }
 
       echo "\n</td></tr>\n";
@@ -312,7 +354,7 @@ function message_info_table($mid, $date, $to_me,
 
 function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
                          $Maintime, $Byotype, $Byotime, $Byoperiods,
-                         $Rated, $WeekendClock, $gid=NULL)
+                         $Rated, $WeekendClock, $StdHandicap, $gid=NULL)
 {
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
@@ -323,32 +365,38 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
 
    switch( $handicap_type )
    {
-      case -1: // conventional handicap
+      case INVITE_HANDI_CONV: // Conventional handicap
          echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' .
             T_('Conventional handicap (komi 0.5 if not even)') . "</td></tr>\n";
          break;
 
-      case -2: // Proper handicap
+      case INVITE_HANDI_PROPER: // Proper handicap
          echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' .
             T_('Proper handicap') . "</td></tr>\n";
          break;
 
-      case -3: // Nigiri
-         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+      case INVITE_HANDI_NIGIRI: // Nigiri
          echo '<tr><td><b>' . T_('Colors') . '</b></td><td>' . T_('Nigiri') . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
          break;
 
-      case -4: // Double game
-         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+      case INVITE_HANDI_DOUBLE: // Double game
          echo '<tr><td><b>' . T_('Colors') . '</b></td><td>' .
             T_('Double game') . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
          break;
 
       default:
          echo '<tr><td><b>' . T_('Colors') . "<b></td><td>$col</td></tr>\n";
-         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n" .
-            '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $Handicap . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $Handicap . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
          break;
+   }
+
+   if( ENA_STDHANDICAP )
+   {
+      echo '<tr><td><b>' . T_('Standard placement') . '</b></td><td>' .
+          ( $StdHandicap == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
    }
 
 
@@ -357,28 +405,29 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
 
    if( $Byotype == 'JAP' )
    {
-      echo '<tr><td><b>' . T_('Byoyomi') . '</b></td><td> ' . T_('Japanese') . ': ' .
+      echo '<tr><td><b>' . T_('Japanese byoyomi') . '</b></td><td> ' .
          sprintf(T_('%s per move and %s extra periods'), echo_time($Byotime), $Byoperiods) .
          ' </td></tr>' . "\n";
    }
    else if ( $Byotype == 'CAN' )
    {
-      echo '<tr><td><b>' . T_('Byoyomi') . '</b></td><td> ' . T_('Canadian') . ': ' .
+      echo '<tr><td><b>' . T_('Canadian byoyomi') . '</b></td><td> ' .
          sprintf(T_('%s per %s stones'), echo_time($Byotime), $Byoperiods) .
          ' </td></tr>' . "\n";
    }
    else if ( $Byotype == 'FIS' )
    {
       echo '<tr><td><b>' . T_('Fischer time') . '</b></td><td> ' .
-         echo_time($Byotime) . ' ' . T_('extra per move') . ' </td></tr>' . "\n";
+         sprintf(T_('%s extra per move'), echo_time($Byotime)) .
+         ' </td></tr>' . "\n";
    }
 
     echo '<tr><td><b>' . T_('Rated') . '</b></td><td>' .
-       ( $Rated == 'Y' ? T_('Yes') : T_('No') ) .
-       '</td></tr><tr><td><b>' . T_('Clock runs on weekends') . '</b></td><td>' .
-       ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . '</td></tr>
-</table>
-';
+       ( $Rated == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Clock runs on weekends') . '</b></td><td>' .
+       ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
+
+   echo "</table>\n";
 
 }
 
@@ -654,23 +703,24 @@ function message_list_table( &$mtable, $result, $show_rows
    $can_move_messages = false;
 
    $mtable->add_tablehead( 1, T_('Folder'), ( $no_sort or $current_folder>FOLDER_ALL_RECEIVED ) ? NULL : 
-                           'folder', true, true );
+                           'folder', true, false );
    $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
-                           $no_sort ? NULL : 'other_name', false, true );
-   $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'subject', false, true );
+                           $no_sort ? NULL : 'other_name', false, false );
+   $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'subject', false, false );
    list($ico,$alt) = $msg_icones[0];
-   $tit = T_('Messages');
+   $tit = str_replace('"', '&quot;', T_('Messages'));
    $mtable->add_tablehead( 0, 
       "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>"
       , $no_sort ? NULL : 'flow', false, true );
-   $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, true );
+   $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, false );
    if( !$no_mark )
       $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
 
    $page = '';
 
-   $p = T_('Answer'); $n = T_('Replied');
-   $tits[0                        ] = T_('Message') ;
+   $p = str_replace('"', '&quot;', T_('Answer'));
+   $n = str_replace('"', '&quot;', T_('Replied'));
+   $tits[0                        ] = str_replace('"', '&quot;', T_('Message')) ;
    $tits[FLOW_ANSWER              ] = $p ;
    $tits[            FLOW_ANSWERED] = $n ;
    $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p&#10;$n" ;

@@ -133,6 +133,14 @@ define("DONE_WHITE", 6);
 define('SCORE_RESIGN', 1000);
 define('SCORE_TIME', 2000);
 
+define('STONE_VALUE',13); // 2 * conventional komi
+define('MIN_BOARD_SIZE',5);
+define('MAX_BOARD_SIZE',25);
+define('MAX_KOMI_RANGE',200);
+define('MAX_HANDICAP',21);
+define('ENA_STDHANDICAP',1);
+
+
 //Database values:
 define("MARKED_BY_WHITE", 7);
 define("MARKED_BY_BLACK", 8);
@@ -146,11 +154,6 @@ define("RIGHT",0x04);
 define("DOWN",0x08);
 define("SMOOTH_EDGE",0x10);
 define("OVER",0x20);
-
-define('MIN_BOARD_SIZE',5);
-define('MAX_BOARD_SIZE',25);
-define('MAX_KOMI_RANGE',200);
-define('MAX_HANDICAP',20);
 
 
 define("ADMIN_TRANSLATORS",0x01);
