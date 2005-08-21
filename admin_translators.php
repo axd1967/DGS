@@ -40,8 +40,6 @@ require_once( "include/form_functions.php" );
 
   echo "<center>";
 
-   sysmsg(get_request_arg('msg'));
-
   $translator_form = new Form( 'translatorform', 'admin_do_translators.php', FORM_POST );
 
   /* Add language for translation */

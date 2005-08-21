@@ -76,7 +76,7 @@ disable_cache();
 /*
       $msg = urlencode(T_('Message moved!'));
 
-      jump_to("status.php?msg=$msg");
+      jump_to("status.php?sysmsg=$msg");
 */
    }
 
@@ -518,6 +518,6 @@ disable_cache();
 
    $msg = urlencode(T_('Message sent!'));
 
-   jump_to("status.php?msg=$msg");
+   jump_to("status.php?sysmsg=$msg");
 }
 ?>

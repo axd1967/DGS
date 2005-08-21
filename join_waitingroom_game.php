@@ -66,7 +66,7 @@ require_once( "include/rating.php" );
 
       $msg = urlencode(T_('Game deleted!'));
 
-      jump_to("waiting_room.php?msg=$msg");
+      jump_to("waiting_room.php?sysmsg=$msg");
    }
 
 //else... joining game
@@ -239,6 +239,6 @@ require_once( "include/rating.php" );
 
    $msg = urlencode(T_('Game joined!'));
 
-   jump_to("status.php?msg=$msg");
+   jump_to("status.php?sysmsg=$msg");
 }
 ?>

@@ -69,9 +69,10 @@ require_once( "include/std_functions.php" );
 
    $newpasswd = generate_random_password();
 
+   $Email= $row['Email'];
 
    admin_log( @$player_row['ID'], @$player_row['Handle'],
-         "send a new password to $userid at {$row['Email']}.");
+         "send a new password to $userid at $Email.");
 
 // Save password in database
 
@@ -80,7 +81,6 @@ require_once( "include/std_functions.php" );
                           "WHERE Handle='$userid' LIMIT 1" );
 
 
-   $Email= $row["Email"];
    $msg= 'You (or possibly someone else) has requested a new password, and it has
 been randomly chosen as: ' . $newpasswd . '
 
@@ -90,14 +90,16 @@ rememberable.
 
 ' . $HOSTBASE;
 
+   $headers = "From: $EMAIL_FROM\n";
+
    if( !function_exists('mail')
-    or !mail( $Email, 'Dragon Go Server: New password', $msg, "From: $EMAIL_FROM" ) )
+    or !mail( trim($Email), 'Dragon Go Server: New password', $msg, $headers ) )
       error('mail_failure',"Uid:$userid Addr:$Email Text:$msg");
 
 
    $msg = urlencode(T_("New password sent!"));
    if( $logged_in )
-      jump_to("status.php?msg=$msg");
-   jump_to("index.php?msg=$msg");
+      jump_to("status.php?sysmsg=$msg");
+   jump_to("index.php?sysmsg=$msg");
 }
 ?>

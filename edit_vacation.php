@@ -65,7 +65,7 @@ require_once( "include/form_functions.php" );
 
          $msg = urlencode(T_('Vacation length changed!'));
 
-         jump_to("status.php?msg=$msg");
+         jump_to("status.php?sysmsg=$msg");
       }
       else
       {
@@ -117,7 +117,7 @@ require_once( "include/form_functions.php" );
 
          $msg = urlencode(T_('Have a nice vacation!'));
 
-         jump_to("status.php?msg=$msg");
+         jump_to("status.php?sysmsg=$msg");
       }
       else
       {

@@ -134,6 +134,6 @@ require_once( "include/rating.php" );
 
    $msg = urlencode(T_('Game added!'));
 
-   jump_to("waiting_room.php?msg=$msg");
+   jump_to("waiting_room.php?sysmsg=$msg");
 }
 ?>

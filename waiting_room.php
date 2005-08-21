@@ -50,8 +50,6 @@ require_once( "include/message_functions.php" );
 
    echo "<center>";
 
-   sysmsg(get_request_arg('msg'));
-
    if(!@$_GET['sort1'])
       $_GET['sort1'] = 'ID';
 

@@ -35,6 +35,7 @@ require_once( "include/form_functions.php" );
 
   $logged_in = who_is_logged( $player_row);
 
+  $sysmsg= get_request_arg('sysmsg'); unset($_REQUEST['sysmsg']);
   start_page(T_("Home"), true, $logged_in, $player_row );
 
 
@@ -58,7 +59,7 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
 } //for devel server
 
 
-   sysmsg(get_request_arg('msg'));
+   sysmsg($sysmsg);
 
 
   echo '<p>' . T_('Please login.') . '<font color="red"> ' .

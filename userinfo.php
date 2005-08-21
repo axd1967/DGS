@@ -66,8 +66,6 @@ require_once( "include/countries.php" );
 
    echo "<center>";
 
-   sysmsg(get_request_arg('msg'));
-
    echo "<h3><font color=$h3_color>" . $title . '</font></h3>';
 
    $a = $row['ActivityLevel'];

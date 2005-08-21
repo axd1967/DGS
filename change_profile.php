@@ -165,6 +165,6 @@ require_once( "include/countries.php" );
 
    $msg = urlencode(T_('Profile updated!'));
 
-   jump_to("userinfo.php?uid=" . $player_row["ID"] .URI_AMP."msg=$msg");
+   jump_to("userinfo.php?uid=" . $player_row["ID"] .URI_AMP."sysmsg=$msg");
 }
 ?>

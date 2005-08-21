@@ -58,6 +58,7 @@ disable_cache();
    $refer_url = @$_POST['refer_url'];
    if( !$refer_url )
       $refer_url = "status.php";
+   else $refer_url = str_replace( URI_AMP_IN, URI_AMP, $refer_url);
    jump_to($refer_url);
 
 }
