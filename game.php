@@ -149,7 +149,7 @@ require_once( "include/sgf_parser.php" );
    $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or
                        $action == 'choose_move' or $action == 'move' );
 
-   list($lastx,$lasty) =
+   list($lastx,$lasty,$lastcol) =
       make_array( $gid, $array, $msg, $Moves, $move, $moves_result, $marked_dead, $no_marked_dead );
 
    $enable_message = true;
@@ -285,28 +285,31 @@ require_once( "include/sgf_parser.php" );
 
    if( $enable_message ) $may_play = false;
 
-   if( !$my_game )
-      $msg = '';
-   else
-      $msg = make_html_safe($msg, 'game');
 
+   if( $Status == 'FINISHED' )
+     $html_mode= 'gameh';
+   else
+     $html_mode= 'game';
 
    if( $my_game && $player_row["ID"] == $Black_ID )
    {
      $show_notes = true;
      $notes = $Black_Notes;
      $opponent_ID= $White_ID;
+     $msg = make_html_safe($msg, $lastcol==BLACK ? 'gameh' : $html_mode );
    }
    elseif( $my_game && $player_row["ID"] == $White_ID )
    {
      $show_notes = true;
      $notes = $White_Notes;
      $opponent_ID= $Black_ID;
+     $msg = make_html_safe($msg, $lastcol==WHITE ? 'gameh' : $html_mode );
    }
    else
    {
      $show_notes = false;
      $opponent_ID= 0;
+     $msg = '';
    }
      
    if ($Size >= $player_row["NotesCutoff"])
@@ -366,7 +369,7 @@ require_once( "include/sgf_parser.php" );
          draw_moves();
          if( $my_game )
          {
-            echo "\n<center><A href=\"game_comments.php?gid=$gid\" target=\"game_comments\">" . 
+            echo "\n<center><A href=\"game_comments.php?gid=$gid\" target=\"DGS_game_comments\">" . 
                   T_('Comments') . "</A></center>\n";
          }
       }

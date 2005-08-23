@@ -371,8 +371,9 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
 {
    $array = NULL;
    $lastx = $lasty = -1; // don't use as lastx/lasty
+   $lastcol = DAME;
 
-   if( !$move ) $move = $max_moves;
+   if( $move<=0 ) $move = $max_moves;
 
    $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
 
@@ -392,9 +393,15 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
       extract($row);
 
       $lastx = $lasty = -1; // don't use as lastx/lasty
-      if( $Stone <= WHITE )
+      if( $Stone <= WHITE ) //including DAME (prisoners)
       {
-         if( $PosX < 0 ) continue;
+         if( $Stone == BLACK or $Stone == WHITE )
+         {
+            if( $MoveNr == $move )
+               $lastcol = $Stone;
+         }
+         if( $PosX < 0 ) continue; //excluding PASS, RESIGN and SCORE
+
 
          $array[$PosX][$PosY] = $Stone;
          $lastx = $PosX; $lasty = $PosY;
@@ -431,7 +438,7 @@ function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked
    else
       $msg = '';
 
-   return array($lastx,$lasty);
+   return array($lastx,$lasty,$lastcol);
 }
 
 $dirx = array( -1,0,1,0 );

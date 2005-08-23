@@ -104,10 +104,11 @@ require_once( "include/table_columns.php" );
       else
         $colortxt = "<img src='17/w.gif' alt=\"" . T_('White') . "\"$colortxt>" ;
 
+      $movetxt = (int)$row['MoveNr'];
+
       $crow_strings = array();
 
-      $crow_strings[1] = "<TD align='right' valign='top'>" . $row['MoveNr'] .
-                         "&nbsp;&nbsp;$colortxt</TD>";
+      $crow_strings[1] = "<TD align='right' valign='top'>$movetxt&nbsp;&nbsp;$colortxt</TD>";
       $crow_strings[2] = "<TD>$Text</TD>";
 
       $ctable->add_row( $crow_strings );
