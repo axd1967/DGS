@@ -115,7 +115,7 @@ else
       error("database_corrupted");
 
    if( $my_id != $ToMove_ID )
-      error("not_your_turn",'qp7');
+      error("not_your_turn",'qp9');
 
 
    if( isset($_REQUEST['sgf_move']) )
@@ -155,8 +155,6 @@ else
 
 // Update clock
 
-   $hours = 0;
-
    if( $Maintime > 0 or $Byotime > 0)
    {
 
@@ -180,10 +178,6 @@ else
              "White_Byoperiods=$White_Byoperiods, ";
       }
 
-      $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
-      if( $WeekendClock != 'Y' )
-         $next_clockused += 100;
-
       if( $next_to_move == BLACK and $Blackonvacation > 0 or
           $next_to_move == WHITE and $Whiteonvacation > 0 )
       {
@@ -191,14 +185,24 @@ else
          $next_ticks = 0;
       }
       else
+      {
+         $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
+         if( $WeekendClock != 'Y' )
+            $next_clockused += 100;
          $next_ticks = get_clock_ticks($next_clockused);
+      }
 
       $time_query .= "LastTicks=$next_ticks, " .
           "ClockUsed=$next_clockused, ";
    }
+   else
+   {
+      $hours = 0;
+      $time_query = '';
+   }
 
 
-   list($lastx,$lasty) =
+   list($lastx,$lasty,$lastcol) =
       make_array( $gid, $array, $msg, $old_moves, NULL, $moves_result, $marked_dead, true );
 
    $where_clause = " ID=$gid AND Moves=$old_moves";
@@ -288,7 +292,7 @@ if( HOT_SECTION )
    $result = mysql_query( $move_query );
 
    if( mysql_affected_rows() < 1 )
-      error("mysql_insert_move");
+      error("mysql_insert_move",'qp7');
 
    $result = mysql_query( $game_query );
 
@@ -322,14 +326,9 @@ if( HOT_SECTION )
                 "WHERE ID=" . $player_row["ID"] . " LIMIT 1" );
 
 
-   if( $quick_errors )
-   {
-      echo "\nOk";
-      exit;
-   }
 
-// Jump somewhere
+// No Jump somewhere
 
-   jump_to("game.php?gid=$gid");
+   echo "\nOk";
 }
 ?>

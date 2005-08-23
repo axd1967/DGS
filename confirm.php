@@ -173,7 +173,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
 
-   list($lastx,$lasty) =
+   list($lastx,$lasty,$lastcol) =
       make_array( $gid, $array, $msg, $Moves, NULL, $moves_result, $marked_dead, $no_marked_dead );
 
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
@@ -260,7 +260,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
-             "PosX=-1, PosY=0, " .
+             "PosX=".POSX_PASS.", PosY=0, " .
              "Hours=$hours";
 
          if( $message )
@@ -268,7 +268,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
-             "Last_X=-1, " .
+             "Last_X=".POSX_PASS.", " .
              "Status='$next_status', " .
              "ToMove_ID=$next_to_move_ID, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
@@ -325,7 +325,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
-             "PosX=-3, PosY=0, " .
+             "PosX=".POSX_RESIGN.", PosY=0, " .
              "Hours=$hours";
 
          if( $message )
@@ -338,7 +338,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
-             "Last_X=-3, " .
+             "Last_X=".POSX_RESIGN.", " .
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
              "Score=$score, " .
@@ -397,7 +397,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
             $move_query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
          }
 
-         $move_query .= "($gid, $Moves, $to_move, -2, 0, $hours) ";
+         $move_query .= "($gid, $Moves, $to_move, ".POSX_SCORE.", 0, $hours) ";
 
 
          if( $message )
@@ -406,7 +406,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
-             "Last_X=-2, " .
+             "Last_X=".POSX_SCORE.", " .
              "Status='$next_status', ";
 
          if( $next_status != 'FINISHED' )
