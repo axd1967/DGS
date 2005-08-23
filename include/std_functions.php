@@ -123,12 +123,10 @@ define("WHITE_DEAD", OFFSET_MARKED+WHITE);
 define("FLAG_NOCLICK", 0x10); //keep it a power of 2
 
 
-/* Not yet used:
-define("PASS_BLACK", 3);
-define("PASS_WHITE", 4);
-define("DONE_BLACK", 5);
-define("DONE_WHITE", 6);
-*/
+define('POSX_PASS', -1);
+define('POSX_SCORE', -2);
+define('POSX_RESIGN', -3);
+define('POSX_TIME', -4);
 
 define('SCORE_RESIGN', 1000);
 define('SCORE_TIME', 2000);

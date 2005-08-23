@@ -366,11 +366,11 @@ function draw_moves()
       if( $i % $moves_per_row == 0 )
          echo "</tr>\n<tr align=center><td>$i-" . ($i + $moves_per_row - 1) . '</td>';
 
-      if( $row["PosX"] == -1 )
+      if( $row["PosX"] == POSX_PASS )
          $c = 'P';
-      else if( $row["PosX"] == -2 )
+      else if( $row["PosX"] == POSX_SCORE )
          $c = 'S';
-      else if( $row["PosX"] == -3 )
+      else if( $row["PosX"] == POSX_RESIGN )
          $c = 'R';
       else
       {
