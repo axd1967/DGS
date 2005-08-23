@@ -122,7 +122,7 @@ if( !$is_down )
          $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
 
          $query = "UPDATE Games SET " .
-             "Last_X=-4, " .
+             "Last_X=".POSX_TIME.", " .
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
              "Score=$score, " .

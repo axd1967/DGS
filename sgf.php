@@ -362,13 +362,13 @@ $array=array();
    {
       echo "\nRE[" . sgf_simpletext(score2text($Score, false, true)) . "]";
 
-      //-1= skip ending pass, -2= keep them, -999= keep everything
+      //-1= skip ending pass, -2= keep them ... -999= keep everything
       if ( abs($Score) < SCORE_RESIGN )
-         $sgf_trim_level = -1;
+         $sgf_trim_level = POSX_PASS;
       else if ( abs($Score) == SCORE_TIME )
-         $sgf_trim_level = -3;
+         $sgf_trim_level = POSX_RESIGN;
       else
-         $sgf_trim_level = -2;
+         $sgf_trim_level = POSX_SCORE;
 
       while ( $sgf_trim_nr >=0 )
       {
@@ -503,7 +503,7 @@ $array=array();
                echo( "\n;" ); //Node start
                $prop_type ='';
 
-               if( $MoveNr > $Handicap && $PosX >= -1 )
+               if( $MoveNr > $Handicap && $PosX >= POSX_PASS )
                {
                   $movenum++;
                   if( $MoveNr != $movenum+$movesync)
@@ -515,8 +515,8 @@ $array=array();
                   }
                }
 
-               if ($PosX < -1 )
-               { //score steps
+               if ($PosX < POSX_PASS )
+               { //score steps, others filtered by $sgf_trim_level
 
                   $next_color= "";
 
@@ -531,7 +531,7 @@ $array=array();
                else
                { //pass, normal move or non AB handicap
 
-                  if( $PosX == -1 )  //pass move
+                  if( $PosX == POSX_PASS )
                   {
                      sgf_echo_prop($color); //move property
                      echo "[]"; //do not use [tt]
