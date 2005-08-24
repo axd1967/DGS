@@ -18,15 +18,20 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+//define('TMP_PERSISTENT','/tmp/persistent/d/dr/dragongoserver');
+define('TMP_PERSISTENT','.'); //relative to main dir
 
 function make_known_languages() //must be called from main dir
 {
-   chdir( 'translations'); //must be called from main dir
+   chdir( TMP_PERSISTENT.'/translations'); //must be called from main dir
 
    $result = mysql_query("SELECT * FROM TranslationLanguages ORDER BY Language");
 
-   $fd = fopen('known_languages.php', 'w')
-      or error("couldnt_open_transl_file", 'known_languages');
+   $e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
+   $fd = fopen('known_languages.php', 'w');
+   error_reporting($e);
+   if( !fd )
+      error("couldnt_open_transl_file", 'known_languages');
 
    fwrite( $fd, "<?php\n\n\$known_languages = array(\n" );
 
