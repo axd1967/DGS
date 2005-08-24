@@ -23,15 +23,20 @@ define('TMP_PERSISTENT','.'); //relative to main dir
 
 function make_known_languages() //must be called from main dir
 {
-   chdir( TMP_PERSISTENT.'/translations'); //must be called from main dir
+   //chdir( 'translations'); //must be called from main dir
 
    $result = mysql_query("SELECT * FROM TranslationLanguages ORDER BY Language");
 
+   $Filename = TMP_PERSISTENT.'/translations/known_languages.php';
+
    $e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
-   $fd = fopen('known_languages.php', 'w');
+   $fd = fopen( $Filename, 'w');
    error_reporting($e);
-   if( !fd )
-      error("couldnt_open_transl_file", 'known_languages');
+   if( !$fd )
+   {
+      echo "couldnt_open_transl_file ". $Filename; exit;
+      //error("couldnt_open_transl_file", $Filename);
+   }
 
    fwrite( $fd, "<?php\n\n\$known_languages = array(\n" );
 
@@ -54,7 +59,7 @@ function make_known_languages() //must be called from main dir
    fclose($fd);
    unset($fd);
 
-   chdir('../');
+   //chdir('../');
 }
 
 function slashed($string)
