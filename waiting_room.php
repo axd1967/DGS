@@ -242,9 +242,6 @@ function show_game_header($str)
 {
   global $h3_color;
 
-//Rdvl:from 'My user info' style:
-//   echo "<h3><font color=$h3_color>" . $title . '</font></h3>';
-
    return   '<tr><td colspan=99 align="center">' . 
             "&nbsp;<B><font color=$h3_color>" . 
             $str . ":</font></B>&nbsp;</td></tr>\n";
