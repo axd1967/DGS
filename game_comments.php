@@ -59,9 +59,8 @@ require_once( "include/table_columns.php" );
 
    $my_game = ( $logged_in and ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID ) ) ;
    if( !$my_game )
-      error('not_owned_game');
-
-   //if( !$my_game ) $my_color = DAME ; else
+      $my_color = DAME ;
+   else
       $my_color = $player_row["ID"] == $Black_ID ? BLACK : WHITE ;
 
    if( $Status == 'FINISHED' )
@@ -83,7 +82,9 @@ require_once( "include/table_columns.php" );
    start_html(T_('Comments'), true);
    echo "<center>";
 
-   $str = "#$gid - " . game_reference( 0, 1, 0, 0, $Whitename, $Blackname);
+   $str = game_reference( 0, 1, 0, 0, $Whitename, $Blackname);
+   $str.= " - #$gid";
+   $str.= ' - '.( $Status == 'FINISHED' ? T_('Finished') : T_('Running'));
    echo "<h3><font color=$h3_color>$str</font></h3>";
 
 
@@ -95,7 +96,11 @@ require_once( "include/table_columns.php" );
 
    while( $row = mysql_fetch_assoc($result) )
    {
-      $Text = trim(make_html_safe($row['Text'], $row['Stone']==$my_color ? 'gameh' : $html_mode));
+      $crow_strings = array();
+      $Text = $row['Text'];
+      if( !$my_game )
+         $Text = game_tag_filter( $Text);
+      $Text = trim(make_html_safe( $Text, $row['Stone']==$my_color ? 'gameh' : $html_mode));
       if( empty($Text) ) continue;
 
       $colortxt = " align='top'";
@@ -105,8 +110,6 @@ require_once( "include/table_columns.php" );
         $colortxt = "<img src='17/w.gif' alt=\"" . T_('White') . "\"$colortxt>" ;
 
       $movetxt = (int)$row['MoveNr'];
-
-      $crow_strings = array();
 
       $crow_strings[1] = "<TD align='right' valign='top'>$movetxt&nbsp;&nbsp;$colortxt</TD>";
       $crow_strings[2] = "<TD>$Text</TD>";

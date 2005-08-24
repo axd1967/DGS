@@ -922,6 +922,24 @@ function textarea_safe( $msg, $charenc=false)
    return $msg;
 }
 
+function game_tag_filter( $msg)
+{
+   $nr_matches = preg_match_all(
+         "'(<c(omment)? *>(.*?)</c(omment)? *>)".
+         "|(<h(idden)? *>(.*?)</h(idden)? *>)'is"
+         , $msg, $matches );
+   $str = '';
+   for($i=0; $i<$nr_matches; $i++)
+   {
+      $msg = trim($matches[1][$i]);
+      if( !$msg )
+         $msg = trim($matches[5][$i]);
+      if(  $msg )
+         $str .= "\n" . $msg ;
+   }
+   return trim($str);
+}
+
 function score2text($score, $verbose, $keep_english=false)
 {
    $T_= ( $keep_english ? 'fnop' : 'T_' );

@@ -285,6 +285,20 @@ require_once( "include/sgf_parser.php" );
 
    if( $enable_message ) $may_play = false;
 
+/* Viewing of game messages while readed or downloaded (sgf):
+ : Game  : Text ::         Viewed by        :: sgf+comments by : Other  :
+ : Ended : Tag  :: Writer : Oppon. : Others :: Writer : Oppon. : sgf    :
+ : ----- : ---- :: ------ : ------ : ------ :: ------ : ------ : ------ :
+ : no    : none :: yes    : yes    : no     :: yes    : yes    : no     :
+ : no    : <c>  :: yes    : yes    : yes    :: yes    : yes    : yes    :
+ : no    : <h>  :: yes    : no     : no     :: yes    : no     : no     :
+ : yes   : none :: yes    : yes    : no     :: yes    : yes    : no     :
+ : yes   : <c>  :: yes    : yes    : yes    :: yes    : yes    : yes    :
+ : yes   : <h>  :: yes    : yes    : yes    :: yes    : yes    : yes    :
+  corresponding $html_mode (fltr=filter only keeping <c> and <h> blocks):
+ : no    : -    :: gameh  : game   : fltr+game  ::
+ : yes   : -    :: gameh  : gameh  : fltr+gameh ::
+*/
 
    if( $Status == 'FINISHED' )
      $html_mode= 'gameh';
@@ -309,7 +323,8 @@ require_once( "include/sgf_parser.php" );
    {
      $show_notes = false;
      $opponent_ID= 0;
-     $msg = '';
+     $msg = game_tag_filter( $msg);
+     $msg = make_html_safe($msg, $html_mode );
    }
      
    if ($Size >= $player_row["NotesCutoff"])
@@ -367,7 +382,7 @@ require_once( "include/sgf_parser.php" );
       if( $Moves > 0 )
       {
          draw_moves();
-         if( $my_game )
+         //if( $my_game ) //sgf comments may be viewed by observers
          {
             echo "\n<center><A href=\"game_comments.php?gid=$gid\" target=\"DGS_game_comments\">" . 
                   T_('Comments') . "</A></center>\n";

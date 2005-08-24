@@ -88,7 +88,7 @@ function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_si
       }
    }
 
-   if( $msg )
+   if( trim($msg) )
       echo "<table border=2 cellpadding=3 align=center><tr>" .
          "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
