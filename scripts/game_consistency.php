@@ -242,12 +242,14 @@ function check_consistency( $gid)
    }
    else //$Status=='FINISHED'
    {
+/*
       $few_moves = DELETE_LIMIT+$Handicap;
       if( $Moves < $few_moves )
       {
-         echo "Too few moves ($Moves &lt; $few_moves)! Should be deleted.<br>\n";
+         echo "Too few moves ($Moves &lt; $few_moves)! Chould be deleted.<br>\n";
          return false;
       }
+*/
    }
 
    echo "Ok<br>\n";
