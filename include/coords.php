@@ -46,8 +46,7 @@ function number2board_coords($x, $y, $Size)
    if( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$Size && $y<$Size) )
      return NULL;
 
-  $col = chr( $x + ord('a') );
-  if( $col >= 'i' ) $col++;
+  $col = chr( $x + ($x>=8?1:0) + ord('a') );
 
   return  $col . ($Size - $y);
 }
@@ -68,6 +67,21 @@ function board2number_coords($coord, $Size)
       }
    }
    return array(NULL,NULL);
+}
+
+//board letter:     - a b c d e f g h j k l m n o p q r s t u v w x y z
+$hoshi_dist = array(0,0,0,0,0,0,0,0,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
+$hoshi_pos  = array(0,0,0,0,0,1,0,1,4,5,4,5,4,7,4,7,4,7,4,7,4,7,4,7,4,7);
+//$hoshi_pos: 0x01 allow center, 0x02 allow side, 0x04 allow corner
+
+function is_hoshi($x, $y, $sz)
+{
+  global $hoshi_pos, $hoshi_dist;
+
+   $hd= $hoshi_dist[$sz];
+   if( $h = $x*2+1 == $sz ? 1 : ( $x == $hd-1 || $x == $sz-$hd ? 2 : 0 ) )
+       $h*= $y*2+1 == $sz ? 1 : ( $y == $hd-1 || $y == $sz-$hd ? 2 : 0 ) ;
+   return $hoshi_pos[$sz] & $h;
 }
 
 ?>
