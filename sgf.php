@@ -22,7 +22,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 if( @$_GET['quick_mode'] )
    $quick_errors = 1;
 require_once( "include/std_functions.php" );
-require_once( "include/board.php" );
 require_once( "include/rating.php" );
 
 $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
@@ -276,7 +275,6 @@ $array=array();
 
    $result = mysql_query(
       'SELECT Games.*, ' .
-//      'Games.Flags+0 AS flags, ' .
       'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' .
       'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
        $field_owned .
@@ -426,8 +424,7 @@ $array=array();
          }
 
          case NONE:
-         {
-
+         { //+prisoners
             $array[$PosX][$PosY] = $Stone;
             break;
          }
@@ -435,7 +432,6 @@ $array=array();
          case WHITE:
          case BLACK:
          {
-
             $array[$PosX][$PosY] = $Stone;
 
             //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
