@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // Checks and show errors in the Games database.
 
-//chdir( '../' ); //if moved in /scripts
+chdir( '../' );
 require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
@@ -40,26 +40,41 @@ require_once( "include/move.php" );
     error("adminlevel_too_low");
 
 
+   start_html( 'game_consistency', 0);
+
       echo "<p>--- Report only:<br>";
 
    if( ($gid=@$_REQUEST['gid']) > 0 )
-      $where = " AND ID=$gid";
+      $where = " AND ID>=$gid";
    else
-      $where = "" ;
+      $where = "";
 
+   if( ($lim=@$_REQUEST['limite']) > 0 )
+      $limit = " LIMIT $lim";
+   else
+      $limit = "";
+
+   //$since may be: "2 DAY", "12 MONTH", ...
    if( ($since=@$_REQUEST['since']) )
       $where.= " AND DATE_ADD(Lastchanged,INTERVAL $since) > FROM_UNIXTIME($NOW)";
 
-   $query = "SELECT ID FROM Games WHERE Status!='INVITED'$where ORDER BY ID";
 
-   echo "<p>query: $query;<p>";
+   $query = "SELECT ID"
+      . " FROM Games WHERE Status!='INVITED'$where ORDER BY ID$limit";
+
+   echo "\n<p>query: $query;\n";
    $result = mysql_query($query);
 
-   while( $row = mysql_fetch_array( $result ) )
+   $n= (int)@mysql_num_rows($result);
+   echo "\n<br>=&gt; result: $n rows<p>\n";
+
+   if( $n > 0 )
+   while( $row = mysql_fetch_assoc( $result ) )
    {
       //echo ' ' . $row["ID"];
       check_consistency($row["ID"]);
    }
 
+   end_html();
 }
 ?>

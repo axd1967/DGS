@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 // Checks and fixes errors in Running, Finished, Won and Lost fields in the database.
 
-//chdir( '../' ); //if moved in /scripts
+chdir( '../' );
 require_once( "include/std_functions.php" );
 
 {
@@ -38,6 +38,8 @@ require_once( "include/std_functions.php" );
   if( !($player_level & ADMIN_DATABASE) )
     error("adminlevel_too_low");
 
+
+   start_html( 'player_consistency', 0);
 
    if( $do_it=@$_REQUEST['do_it'] )
    {
@@ -73,7 +75,7 @@ require_once( "include/std_functions.php" );
    $result = mysql_query( $query)
       or die("Run.A: " . mysql_error());
 
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
       echo "<br>ID: $ID  Running: $Running  Should be: $Run";
@@ -92,7 +94,7 @@ require_once( "include/std_functions.php" );
    $result = mysql_query( $query)
       or die("Fin.A: " . mysql_error());
 
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
       echo "<br>ID: $ID  Finished: $Finished  Should be: $Fin";
@@ -112,7 +114,7 @@ require_once( "include/std_functions.php" );
    $result = mysql_query( $query)
       or die("Won.A: " . mysql_error());
 
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
       echo "<br>ID: $ID  Won: $Won  Should be: $W";
@@ -132,7 +134,7 @@ require_once( "include/std_functions.php" );
    $result = mysql_query( $query)
       or die("Los.A: " . mysql_error());
 
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
       echo "<br>ID: $ID  Lost: $Lost  Should be: $L";
@@ -149,7 +151,7 @@ require_once( "include/std_functions.php" );
       or die("Cnt.A: " . mysql_error());
 
    $err = 0;
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
       echo "<br>ID: $ID  Counts: (F=$Finished) != ((W=$Won) + (L=$Lost))";
@@ -160,5 +162,30 @@ require_once( "include/std_functions.php" );
 
    echo "<br>Counts Done.";
 
+
+   //Various check
+   $result = mysql_query("SELECT Players.ID, ClockUsed, " .
+                         "RatingStatus, Rating2, RatingMin, RatingMax " .
+                         "FROM Players " .
+                         "WHERE (" .
+                           "(RatingStatus='RATED' AND (Rating2>=RatingMax OR Rating2<=RatingMin) ) " .
+                           "OR NOT((ClockUsed>=0 AND ClockUsed<24) OR (ClockUsed>=100 AND ClockUsed<124))" .
+                         ")$where")
+      or die("Cnt.A: " . mysql_error());
+
+   $err = 0;
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      extract($row);
+      echo "<br>ID: $ID  Misc: ClockUsed=$ClockUsed, RatingMin, Rating2, RatingMax.";
+      $err++;
+   }
+   if( $err )
+      echo "<br>--- $err error(s). Must be fixed by hand.";
+
+   echo "<br>Misc Done.";
+
+
+   end_html();
 }
 ?>
