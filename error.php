@@ -255,7 +255,7 @@ require_once( "include/std_functions.php" );
       case("page_not_found"):
       {
          echo T_('Page not found. Please contact the server administrators and inform them of the time the error occurred, and anything you might have done that may have caused the error.');
-         //echo '<br>('.@$_SERVER['REDIRECT_STATUS'].': '.@$_SERVER['REDIRECT_URL'].')';
+         //echo '<br>('.@$_SERVER['REDIRECT_STATUS'].': '.@$_SERVER['REDIRECT_URL'].' / '.getcwd().')';
       }
       break;
 
@@ -434,9 +434,9 @@ require_once( "include/std_functions.php" );
       }
       break;
 
-      case("no_such_translation_language"):
+      case("translation_bad_language_or_group"):
       {
-        echo T_("Sorry, I couldn't find the language you want to translate. Please contact the support.");
+        echo T_("Sorry, I couldn't find the language or group you want to translate. Please contact the support.");
       }
       break;
 
