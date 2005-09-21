@@ -33,10 +33,15 @@ require_once( "include/make_translationfiles.php" );
   $group = @$_POST['group'];
   $profil_charset = @$_POST['profil_charset'] ? 'Y' : '';
 
-  $translator_array = explode(',', $player_row['Translator']);
+  {
+     $translator_set = @$player_row['Translator'];
+     if( !$translator_set )
+       error("not_translator");
+     $translator_array = explode(',', $translator_set);
+  }
 
   if( !in_array( $translate_lang, $translator_array ) )
-     error('translation_not_correct_language', $translate_lang.':'.$player_row['Translator'].':'.implode("*", $translator_array));
+     error('not_correct_transl_language', $translate_lang.':'.$translator_set.':'.implode("*", $translator_array));
 
   $untranslated = ($group === 'Untranslated phrases');
 
