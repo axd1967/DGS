@@ -65,7 +65,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
 
    $result = mysql_query( "SELECT Games.*, " .
-                          "Games.Flags+0 AS flags, " .
+                          "Games.Flags+0 AS GameFlags, " . //used by check_move
                           "black.ClockUsed AS Blackclock, " .
                           "white.ClockUsed AS Whiteclock, " .
                           "black.OnVacation AS Blackonvacation, " .
@@ -78,7 +78,8 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
 
-   extract(mysql_fetch_assoc($result));
+   $game_row = mysql_fetch_assoc($result);
+   extract($game_row);
 
    if( @$_REQUEST['skip'] )
    {
@@ -97,12 +98,11 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    if( $player_row["ID"] != $ToMove_ID )
       error("not_your_turn");
 
-   $old_moves = $Moves;
    $qry_move = @$_REQUEST['move'];
    //could append in case of multi-players account with simultaneous logins
    //or if one player hit twice the validation button during a net lag
    //and if opponent has already played between the two confirm.php calls.
-   if( $qry_move > 0 && $qry_move != $old_moves )
+   if( $qry_move > 0 && $qry_move != $Moves )
       error("already_played");
 
 
@@ -118,7 +118,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    $next_to_move = WHITE+BLACK-$to_move;
 
-   if( $old_moves+1 < $Handicap ) $next_to_move = BLACK;
+   if( $Moves+1 < $Handicap ) $next_to_move = BLACK;
 
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
@@ -129,20 +129,20 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    {
 
       $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
-      $hours = ( $ticks > 0 ? (int)(($ticks-1) / $tick_frequency) : 0 );
+      $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 
       if( $to_move == BLACK )
       {
-         time_remaining($hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
-            $Byotype, $Byotime, $Byoperiods, true);
+         time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "Black_Maintime=$Black_Maintime, " .
              "Black_Byotime=$Black_Byotime, " .
              "Black_Byoperiods=$Black_Byoperiods, ";
       }
       else
       {
-         time_remaining($hours, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
-            $Byotype, $Byotime, $Byoperiods, true);
+         time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "White_Maintime=$White_Maintime, " .
              "White_Byotime=$White_Byotime, " .
              "White_Byoperiods=$White_Byoperiods, ";
@@ -173,43 +173,46 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
 
-   list($lastx,$lasty,$lastcol) =
-      make_array( $gid, $array, $msg, $Moves, NULL, $moves_result, $marked_dead, $no_marked_dead );
-
-   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-   $Moves++;
+   $TheBoard = new Board( );
+   if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
+      error('internal_error', "confirm load_from_db $gid");
 
    $message = addslashes(trim(get_request_arg('message')));
-
-   $where_clause = " ID=$gid AND Moves=$old_moves";
-   $handi = false;
-   $game_finished = false;
    $message_query = '';
+
+   $game_finished = false;
+
+   $where_clause = " ID=$gid AND Moves=$Moves";
+   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
+   $old_moves = $Moves;
+   $Moves++;
 
    switch( $action )
    {
       case 'move':
       {
          $coord = @$_REQUEST['coord'];
-         $prisoner_string = @$_REQUEST['prisoner_string'];
 
-         check_move();
-  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
-  //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
+{//to fixe old way Ko detect. Could be removed when no more old way games.
+  if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
+}
+         check_move( $TheBoard, $coord, $to_move);
+//ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
+//here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
          $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
+         $prisoner_string = '';
          reset($prisoners);
-         $new_prisoner_string = "";
-
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
-            $move_query .= "($gid, $Moves, \"NONE\", $x, $y, 0), ";
-            $new_prisoner_string .= number2sgf_coords($x, $y, $Size);
+            $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
+            $prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
 
-         if( strlen($new_prisoner_string) != $nr_prisoners*2 or
-             ( $prisoner_string and $new_prisoner_string != $prisoner_string) )
+         $old_prisoner_string = @$_REQUEST['prisoner_string'];
+         if( strlen($prisoner_string) != $nr_prisoners*2 or
+             ( $old_prisoner_string and $prisoner_string != $old_prisoner_string) )
             error("move_problem");
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
@@ -219,9 +222,9 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
-             "Last_X=$colnr, " .
+             "Last_X=$colnr, " . //used with mail notifications
              "Last_Y=$rownr, " .
-             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
+             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
              "Status='PLAY', ";
 
          if( $nr_prisoners > 0 )
@@ -231,12 +234,12 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
                $game_query .= "White_Prisoners=$White_Prisoners, ";
 
          if( $nr_prisoners == 1 )
-            $flags |= KO;
+            $GameFlags |= KO;
          else
-            $flags &= ~KO;
+            $GameFlags &= ~KO;
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
-             "Flags=$flags, " .
+             "Flags=$GameFlags, " .
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
       }
@@ -272,7 +275,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
              "Status='$next_status', " .
              "ToMove_ID=$next_to_move_ID, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
-             "Flags=$flags, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
+             "Flags=$GameFlags, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
       }
@@ -283,10 +286,10 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
          if( $Status != 'PLAY' or $Moves != 1 )
             error("invalid_action",'conf2');
 
-         $stonestring = @$_REQUEST['stonestring'];
-         check_handicap(); //adjust $handi, $stonestring, $enable_message and others
+         $stonestring = (string)@$_REQUEST['stonestring'];
+         check_handicap( $TheBoard); //adjust $stonestring
 
-         if( strlen( $stonestring ) != 2 * $Handicap + 1 )
+         if( strlen( $stonestring ) != 2 * $Handicap )
             error("wrong_number_of_handicap_stone");
 
 
@@ -295,7 +298,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
          for( $i=1; $i <= $Handicap; $i++ )
          {
-            list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i*2-1, 2), $Size);
+            list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i*2-2, 2), $Size);
 
             if( !isset($rownr) or !isset($colnr) )
                error("illegal_position");
@@ -376,9 +379,9 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
             error("invalid_action",'conf4');
 
-         $stonestring = @$_REQUEST['stonestring'];
-         check_remove();
-  //ajusted globals by check_remove(): $array, $score, $stonestring;
+         $stonestring = (string)@$_REQUEST['stonestring'];
+         check_remove( $TheBoard);
+//ajusted globals by check_remove(): $score, $stonestring;
 
          $l = strlen( $stonestring );
 
@@ -391,7 +394,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
          $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
-         for( $i=1; $i < $l; $i += 2 )
+         for( $i=0; $i < $l; $i += 2 )
          {
             list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
             $move_query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
@@ -418,7 +421,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
          $game_query .=
              "Score=$score, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
-             "Flags=$flags, " . //Don't reset Flags else SCORE,RESUME could break a Ko
+             "Flags=$GameFlags, " . //Don't reset Flags else SCORE,RESUME could break a Ko
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
 
@@ -528,9 +531,9 @@ if( HOT_SECTION )
 
          $Subject = 'Game deleted';
          //reference: game is deleted => no link
-         $Text = "The game:\n<center>"
-               . game_reference( 0, 0, $gid, 0, $whitename, $blackname)
-               . "</center>\nhas been deleted by your opponent.<br>";
+         $Text = "The game:<center>"
+               . game_reference( 0, 1, $gid, 0, $whitename, $blackname)
+               . "</center>has been deleted by your opponent.<br>";
 
          delete_all_observers($gid, false);
       }
@@ -550,17 +553,17 @@ if( HOT_SECTION )
                       ) . " WHERE ID=$Black_ID LIMIT 1" );
 
          $Subject = 'Game result';
-         $Text = "The result in the game:\n<center>"
-               . game_reference( 1, 0, $gid, 0, $whitename, $blackname)
-               . "</center>\nwas:\n<center>"
+         $Text = "The result in the game:<center>"
+               . game_reference( REF_LINK, 1, $gid, 0, $whitename, $blackname)
+               . "</center>was:<center>"
                . score2text($score,true,true)
-               . "</center>\n";
+               . "</center>";
 
-         $tmp = $Text . "Send a message to:\n<center>"
+         $tmp = $Text . "Send a message to:<center>"
                . send_reference( 1, 1, '', $White_ID, $whitename, $whitehandle)
-               . "\n<br>"
+               . "<br>"
                . send_reference( 1, 1, '', $Black_ID, $blackname, $blackhandle)
-               . "</center>\n" ;
+               . "</center>" ;
          delete_all_observers($gid, $rated_status!=1, addslashes( $tmp));
       }
 
@@ -570,9 +573,9 @@ if( HOT_SECTION )
       {
          //The server messages does not allow a reply,
          // so add a *in message* reference to this player.
-         $Text.= "Send a message to:\n<center>"
+         $Text.= "Send a message to:<center>"
                . send_reference( 1, 1, '', $player_row["ID"], $player_row["Name"], $player_row["Handle"])
-               . "</center>\n" ;
+               . "</center>" ;
       }
 
          $Text = addslashes( $Text);

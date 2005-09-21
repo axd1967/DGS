@@ -58,23 +58,29 @@ function mail_link( $nam, $lnk)
 }
 
 //see also make_html_safe()
-$tmp = '[\x1-\x20]*=[\x1-\x20]*(\"|\'|)([^>\x1-\x20]*?)';
+$tmp = '[\\x1-\\x20]*=[\\x1-\\x20]*(\"|\'|)([^>\\x1-\\x20]*?)';
 $strip_html_table = array(
     "%&nbsp;%si" => " ",
-    "%<A([\x1-\x20]+((href$tmp\\4)|(\w+$tmp\\7)|(\w+)))*[\x1-\x20]*>(.*?)</A>%sie"
+    "%<A([\\x1-\\x20]+((href$tmp\\4)|(\w+$tmp\\7)|(\w+)))*[\\x1-\\x20]*>(.*?)</A>%sie"
        => "mail_link('\\10','\\5')",
-    "%</?(UL|BR)[\x1-\x20]*/?>%si"
+    "%</?(UL|BR)[\\x1-\\x20]*/?>%si"
        => "\n",
-    "%</?P[\x1-\x20]*/?>%si"
+    "%</CENTER[\\x1-\\x20]*/?>\n?%si"
+       => "\n",
+    "%\n?<CENTER[\\x1-\\x20]*/?>%si"
+       => "\n",
+    "%</?P[\\x1-\\x20]*/?>%si"
        => "\n\n",
-    "%[\x1-\x20]*<LI[\x1-\x20]*/?>[\x1-\x20]*%si"
+    "%[\\x1-\\x20]*<LI[\\x1-\\x20]*/?>[\\x1-\\x20]*%si"
        => "\n - ",
    );
 function mail_strip_html( $str)
 {
  global $strip_html_table;
-   $str = strip_tags( $str, '<a><br><p><ul><ol><li><goban>');
+   //keep replaced tags
+   $str = strip_tags( $str, '<a><br><p><center><ul><ol><li><goban>');
    $str = preg_replace( array_keys($strip_html_table), array_values($strip_html_table), $str);
+   //remove remainding tags
    $str = strip_tags( $str, '<goban>');
    $str = html_entity_decode( $str, ENT_QUOTES, 'iso-8859-1');
    return $str;
@@ -152,8 +158,10 @@ if( !$is_down )
             {
                extract($game_row);
 
-               $mess = NULL;
-               make_array( $ID, $array, $mess, $Moves, NULL, $moves_result, $marked_dead );
+               $TheBoard = new Board( );
+               if( !$TheBoard->load_from_db( $game_row) )
+                  error('internal_error', "halfhourly_cron load_from_db $ID");
+               $movemsg= $TheBoard->movemsg;
 
                $msg .= str_pad('', 47, '-') . "\n";
                $msg .= "Game ID: ".mail_link($ID,"game.php?gid=$ID")."\n";
@@ -164,8 +172,15 @@ if( !$is_down )
                $msg .= "Move $Moves: $tmp\n";
 
                if( !(strpos($SendEmail, 'BOARD') === false) )
-                  $msg .= draw_ascii_board($Size, $array, $ID, $Last_X, $Last_Y, 15,
-                                           mail_strip_html($mess));
+               {
+                  //remove sgf tags
+                  $movemsg = trim(preg_replace(
+                     "'(<c(omment)? *>(.*?)</c(omment)? *>)".
+                     "|(<h(idden)? *>(.*?)</h(idden)? *>)'is"
+                     , '', $movemsg));
+                  $movemsg = mail_strip_html( $movemsg);
+                  $msg .= $TheBoard->draw_ascii_board( $movemsg);
+               }
             }
          }
       }

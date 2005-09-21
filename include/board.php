@@ -20,983 +20,962 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require_once( "include/coords.php" );
 
+define('EDGE_SIZE', 10);
 
-function draw_board($Size, &$array, $may_play, $gid, $Last_X, $Last_Y, $stone_size,
-                    $msg, $stonestring, $handi, $coord_borders, $woodcolor  )
+
+class Board
 {
-   global $woodbgcolors;
 
-   if( !($woodcolor >= 1 and $woodcolor <= 5 or $woodcolor >= 11 and $woodcolor <= 15) )
-      $woodcolor = 1;
+   var $gid;
+   var $size;
+   var $max_moves;
+   var $coord_borders;
+   var $stone_size;
+   var $woodcolor;
 
-   if( !( $coord_borders >= 0 and $coord_borders <= 63) )
-      $coord_borders = 63;
+   var $array; //2D array: [$PosX][$PosY] => $Stone
+   var $moves; //array: [$MoveNr] => array($Stone,$PosX,$PosY)
+   var $marks; //array: [$sgf_coord] => $mark
+   var $captures; //array: [$MoveNr] => array($Stone,$PosX,$PosY)
+   var $size;
 
-   $smooth_edge = ( ($coord_borders & SMOOTH_EDGE) and ($woodcolor < 10) );
+   //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
+   var $movemrkx, $movemrky, $movecol, $movemsg;
 
-   if( !$stone_size ) $stone_size = 25;
-
-   $coord_width=floor($stone_size*31/25);
-
-   $coord_start_number = "<td><img class=c$stone_size src=\"$stone_size/c";
-   $coord_start_letter = "<td><img class=s$stone_size src=\"$stone_size/c";
-   $coord_alt = '.gif" alt="';
-   $coord_end = '"></td>';
+   var $dirx, $diry; //directions arrays
 
 
-   $move_end = '.gif"></A></td>';
-   $nomove_start = "<td><IMG class=s$stone_size alt=\"";
-   $nomove_end = '.gif"></td>';
-
-// Variables for the 3d-looking border
-   $border_start = 140 - ( $coord_borders & LEFT ? $coord_width : 0 );
-   $border_imgs = ceil( ($Size * $stone_size - $border_start) / 150 ) - 1;
-   $border_rem = $Size * $stone_size - $border_start - 150 * $border_imgs;
-   if( $border_imgs < 0 )
-      $border_rem = $Size * $stone_size;
-
-   if( $may_play )
+   // Constructor. Create a new board array and initialize it.
+   function Board( $gid=0, $size=19, $max_moves=0 )
    {
-      if( $handi or !$stonestring )
-      {
-         $on_not_empty = false;
-         $on_empty = true;
-      }
-      else
-      {
-         $on_not_empty = true;
-         if( MAX_SEKI_MARK>0 and $stonestring )
-            $on_empty = true;
-         else
-            $on_empty = false;
-      }
+      $this->gid = $gid;
+      $this->size = $size;
+      $this->max_moves = $max_moves;
 
-      if( $handi )
-      {
-         $move_start = "<td><A href=\"game.php?g=$gid".URI_AMP."a=handicap".URI_AMP."c=";
-         $move_alt = URI_AMP."s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
-      }
-      else if( $stonestring )
-      {
-         $move_start = "<td><A href=\"game.php?g=$gid".URI_AMP."a=remove".URI_AMP."c=";
-         $move_alt = URI_AMP."s=$stonestring\"><IMG class=s$stone_size border=0 alt=\"";
-      }
-      else
-      {
-         $move_start = "<td><A href=\"game.php?g=$gid".URI_AMP."a=move".URI_AMP."c=";
-         $move_alt = "\"><IMG class=s$stone_size border=0 alt=\"";
-      }
+      $this->coord_borders = -1;
+      $this->stone_size = 25;
+      $this->woodcolor = 1;
+
+      $this->array = NULL;
+      $this->moves = array();
+      $this->marks = NULL;
+      $this->captures = NULL;
+
+      $this->movemrkx = $this->movemrky = -1;
+      $this->movecol = DAME;
+      $this->movemsg = '';
+
+      $this->dirx = array( -1,0,1,0 );
+      $this->diry = array( 0,-1,0,1 );
    }
 
-   if( trim($msg) )
-      echo "<table border=2 cellpadding=3 align=center><tr>" .
-         "<td width=\"" . $stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
 
-
-   if( $woodcolor > 10 )
+   // fills $array with positions where the stones are.
+   // fills $moves with moves and coordinates.
+   // keep the coords, color and message of the move $move.
+   function load_from_db( &$game_row, $move=0, $no_marked_dead=true )
    {
-      $woodstring = 'bgcolor="' . $woodbgcolors[$woodcolor - 10] . '"';
-   }
-   else
-   {
-      //$woodstring = 'background="images/wood' . $woodcolor . '.gif"';
-      $woodstring = 'style="background-image:url(images/wood' . $woodcolor . '.gif);"';
-                  // background-repeat:repeat; background-position:center;
-   }
+      $this->array = NULL;
+      $this->moves = array();
+      $this->marks = array();
+      $this->captures = array();
+      $this->movemrkx = $this->movemrky = -1; // don't use as last move coord
+      $this->movecol = DAME;
+      $this->movemsg = '';
 
-   echo '<table border=0 cellpadding=0 cellspacing=0 ' .
-       $woodstring . ' align=center>';
+      $gid = $game_row['ID'];
+      if( $gid <= 0 )
+         return FALSE;
 
-   if( $coord_borders & UP )
-   {
-      echo '<tr>';
+      $this->gid = $gid;
+      $this->size = $game_row['Size'];
+      $this->max_moves = $game_row['Moves'];
 
-      $span = ($coord_borders & LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
-      $w = ($coord_borders & LEFT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
-      if( $span > 0 )
-         echo "<td colspan=$span><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
+      if( $this->max_moves <= 0 )
+         return TRUE;
 
-      $colnr = 1;
-      $letter = 'a';
-      while( $colnr <= $Size )
+      $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
+      if( $result===FALSE or @mysql_num_rows($result) < 1 )
+         return FALSE;
+
+      if( $move<=0 or $move>$this->max_moves )
+         $move = $this->max_moves;
+
+      $marked_dead = array();
+      $removed_dead = FALSE;
+
+      while( $row = mysql_fetch_assoc($result) )
       {
-         echo $coord_start_letter . $letter . $coord_alt . $letter . $coord_end;
-         $colnr++;
-         $letter++;
-         if( $letter == 'i' ) $letter++;
-      }
 
-      $span = ($coord_borders & RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
-      $w = ($coord_borders & RIGHT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
-      if( $span > 0 )
-         echo "<td colspan=$span><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
+         extract($row);
 
-      echo "</tr>\n";
-   }
-
-   if( $smooth_edge )
-   {
-      echo '<tr>';
-
-      if( $coord_borders & LEFT )
-         echo "<td><img src=\"images/blank.gif\" alt=\"  \" width=$coord_width height=10></td>";
-
-      echo '<td><img src="images/wood' . $woodcolor .
-         '_ul.gif" alt=" " height=10 width=10></td>' . "\n";
-
-      echo "<td colspan=$Size width=" . $Size*$stone_size . '>';
-      if( $border_imgs >= 0 )
-         echo '<img src="images/wood' . $woodcolor . '_u.gif" alt=" " height=10 width=' .
-            $border_start . '>';
-      for($i=0; $i<$border_imgs; $i++ )
-         echo '<img src="images/wood' . $woodcolor . '_u.gif" alt=" " height=10 width=150>';
-
-      echo '<img src="images/wood' . $woodcolor . '_u.gif" alt=" " height=10 width=' .
-         $border_rem . '>';
-
-      echo "</td>\n" . '<td><img src="images/wood' . $woodcolor .
-         '_ur.gif" alt=" " height=10 width=10></td>' . "\n";
-
-      if( $coord_borders & RIGHT )
-         echo "<td><img src=\"images/blank.gif\" alt=\"  \" width=$coord_width height=10></td>";
-
-      echo "</tr>\n";
-   }
-
-   if( $Size > 11 ) $hoshi_dist = 4; else $hoshi_dist = 3;
-
-   // 4 == center, 5 == side, 6 == corner
-   if( $Size >=5 ) $hoshi_1 = 4; else $hoshi_1 = 7;
-   if( $Size >=8 ) $hoshi_2 = 6; else $hoshi_2 = 7;
-   if( $Size >=13) $hoshi_3 = 5; else $hoshi_3 = 7;
-
-   $letter_r = 'a';
-
-   for($rownr = $Size; $rownr > 0; $rownr-- )
-   {
-      echo '<tr>';
-
-      if( $coord_borders & LEFT )
-         echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
-
-      if( $smooth_edge )
-         echo '<td><img src="images/wood' . $woodcolor . '_l.gif" alt=" " height=' .
-            $stone_size . ' width=10></td>';
-
-
-      $hoshi_r = 0;
-      if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
-      if( $rownr == $Size - $rownr + 1 ) $hoshi_r = 2;
-
-      $letter = 'a';
-      $letter_c = 'a';
-      for($colnr = 0; $colnr < $Size; $colnr++ )
-      {
-         $stone = (int)@$array[$colnr][$Size-$rownr];
-         $empty = false;
-         if( $stone & FLAG_NOCLICK ) {
-            $stone &= ~FLAG_NOCLICK;
-            $no_click = true;
-         }
-         else
-            $no_click=false;
-
-         if( $stone == BLACK )
-         {
-            $type = 'b';
-            $alt = 'X';
-         }
-         else if( $stone == WHITE )
-         {
-            $type = 'w';
-            $alt = 'O';
-         }
-         else if( $stone == BLACK_DEAD )
-         {
-            $type = 'bw';
-            $alt = 'x';
-         }
-         else if( $stone == WHITE_DEAD )
-         {
-            $type = 'wb';
-            $alt = 'o';
-         }
-         else
-         {
-            $type = 'e';
-            $alt = '.';
-            if( $rownr == 1 ) $type = 'd';
-            else if( $rownr == $Size ) $type = 'u';
-            if( $colnr == 0 ) $type .= 'l';
-            else if( $colnr == $Size-1 ) $type .= 'r';
-
-            if( $hoshi_r > 0 and $type=='e' )
-            {
-               $hoshi_c = 0;
-               if( $colnr == $hoshi_dist -  1 or $colnr == $Size - $hoshi_dist )
-                  $hoshi_c = 3;
-
-               if( $colnr == $Size - $colnr - 1 ) $hoshi_c = 2;
-
-               if( $hoshi_c + $hoshi_r == $hoshi_1 or
-               $hoshi_c + $hoshi_r == $hoshi_2 or
-               $hoshi_c + $hoshi_r == $hoshi_3 )
-               {
-                  $type = 'h';
-                  $alt = ',';
-               }
-            }
-
-            if( $stone == BLACK_TERRITORY )
-            {
-               $type .= 'b';
-               $alt = '+';
-            }
-            else if( $stone == WHITE_TERRITORY )
-            {
-               $type .= 'w';
-               $alt = '-';
-            }
-            else if( $stone == DAME )
-            {
-               $type .= 'd';
-               $alt = '.';
-            }
-            else if( $stone == MARKED_DAME )
-            {
-               $type .= 'g';
-               $alt = 's'; //for seki
-            }
-
-            $empty = true;
-         }
-
-         if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y
-             and ( $stone == BLACK or $stone == WHITE ) )
-         {
-            $type .= 'm';
-            $alt = ( $stone == BLACK ? '#' : '@' );
-         }
-
-         if( $coord_borders & OVER )
-            $alt.= "\" title=\"$letter$rownr";
-
-         if( $may_play and !$no_click and
-             ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
-            echo "$move_start$letter_c$letter_r$move_alt$alt\" src=\"$stone_size/$type$move_end";
-         else
-            echo "$nomove_start$alt\" src=\"$stone_size/$type$nomove_end";
-
-         $letter_c ++;
-         $letter++;
-         if( $letter == 'i' ) $letter++;
-      }
-
-      if( $smooth_edge )
-         echo '<td><img src="images/wood' . $woodcolor . '_r.gif" alt=" " height=' .
-            $stone_size . ' width=10></td>';
-
-      if( $coord_borders & RIGHT )
-         echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
-
-      echo "</tr>\n";
-      $letter_r++;
-   }
-
-   if( $smooth_edge )
-   {
-      echo '<tr>';
-
-      if( $coord_borders & LEFT )
-         echo "<td><img src=\"images/blank.gif\" alt=\"  \" width=$coord_width height=10></td>";
-
-      echo '<td><img src="images/wood' . $woodcolor .
-         '_dl.gif" alt=" " height=10 width=10></td>' . "\n";
-
-      echo "<td colspan=$Size width=" . $Size*$stone_size . '>';
-      if( $border_imgs >= 0 )
-         echo '<img src="images/wood' . $woodcolor . '_d.gif" alt=" " height=10 width=' .
-            $border_start . '>';
-      for($i=0; $i<$border_imgs; $i++ )
-         echo '<img src="images/wood' . $woodcolor . '_d.gif" alt=" " height=10 width=150>';
-
-      echo '<img src="images/wood' . $woodcolor . '_d.gif" alt=" " height=10 width=' .
-         $border_rem . '>';
-
-      echo "</td>\n" . '<td><img src="images/wood' . $woodcolor .
-         '_dr.gif" alt=" " height=10 width=10></td>' . "\n";
-
-      if( $coord_borders & RIGHT )
-         echo "<td><img src=\"images/blank.gif\" alt=\"  \" width=$coord_width height=10></td>";
-
-      echo "</tr>\n";
-   }
-
-   if( $coord_borders & DOWN )
-   {
-      echo '<tr>';
-
-      $span = ($coord_borders & LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
-      $w = ($coord_borders & LEFT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
-      if( $span > 0 )
-         echo "<td colspan=$span><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
-
-      $colnr = 1;
-      $letter = 'a';
-      while( $colnr <= $Size )
-      {
-         echo $coord_start_letter . $letter . $coord_alt . $letter . $coord_end;
-
-         $colnr++;
-         $letter++;
-         if( $letter == 'i' ) $letter++;
-      }
-
-      $span = ($coord_borders & RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
-      $w = ($coord_borders & RIGHT ? $coord_width : 0 ) + ( $smooth_edge ? 10 : 0 );
-      if( $span > 0 )
-         echo "<td colspan=$span><img src=\"images/blank.gif\" alt=\"  \" width=$w height=$stone_size></td>";
-
-      echo "</tr>\n";
-   }
-
-   echo "</table>\n";
-}
-
-
-// fills $array with positions where the stones are.
-// returns the coords of the last move
-function make_array( $gid, &$array, &$msg, $max_moves, $move, &$result, &$marked_dead,
-                     $no_marked_dead = false )
-{
-   $array = NULL;
-   $lastx = $lasty = -1; // don't use as lastx/lasty
-   $lastcol = DAME;
-
-   if( $move<=0 ) $move = $max_moves;
-
-   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
-
-   $removed_dead = FALSE;
-   $marked_dead = array();
-
-   while( $row = mysql_fetch_assoc($result) )
-   {
-
-      if( $row["MoveNr"] > $move )
-      {
-         if( $row["MoveNr"] > $max_moves )
-            fix_corrupted_move_table($gid);
-         break;
-      }
-
-      extract($row);
-
-      $lastx = $lasty = -1; // don't use as lastx/lasty
-      if( $Stone <= WHITE ) //including DAME (prisoners)
-      {
          if( $Stone == BLACK or $Stone == WHITE )
          {
-            if( $MoveNr == $move )
-               $lastcol = $Stone;
+            $this->moves[$MoveNr] = array( $Stone, $PosX, $PosY);
          }
-         if( $PosX < 0 ) continue; //excluding PASS, RESIGN and SCORE
 
-
-         $array[$PosX][$PosY] = $Stone;
-         $lastx = $PosX; $lasty = $PosY;
-
-         $removed_dead = FALSE;
-      }
-      else if( $Stone == MARKED_BY_WHITE or $Stone == MARKED_BY_BLACK)
-      {
-         if( $removed_dead == FALSE )
+         if( $MoveNr > $move )
          {
-            $marked_dead = array(); // restart removal
-            $removed_dead = TRUE;
-         }
-         array_push($marked_dead, array($PosX,$PosY));
-      }
-   }
-
-   if( !$no_marked_dead and $removed_dead == TRUE )
-   {
-      while( $sub = each($marked_dead) )
-      {
-         list($dummy, list($X, $Y)) = $sub;
-         @$array[$X][$Y] ^= OFFSET_MARKED;
-      }
-   }
-
-   $result2 = mysql_query( "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" );
-
-   if( @mysql_num_rows($result2) == 1 )
-   {
-      $row = mysql_fetch_array($result2);
-      $msg = $row["Text"];
-   }
-   else
-      $msg = '';
-
-   return array($lastx,$lasty,$lastcol);
-}
-
-$dirx = array( -1,0,1,0 );
-$diry = array( 0,-1,0,1 );
-
-
-function has_liberty_check( $x, $y, $Size, &$array, &$prisoners, $remove )
-{
-   global $dirx,$diry;
-
-   $c = @$array[$x][$y]; // Color of this stone
-
-   $index=NULL;
-   $index[$x][$y] = 7;
-
-
-   while( true )
-   {
-      if( $index[$x][$y] >= 32 )  // Have looked in all directions
-      {
-         $m = $index[$x][$y] % 8;
-
-         if( $m == 7 )   // At starting point, no liberties found
-         {
-            if( $remove )
+            if( $MoveNr > $this->max_moves )
             {
-               while( list($x, $sub) = each($index) )
+               $this->fix_corrupted_move_table( $gid);
+               break;
+            }
+            continue;
+         }
+
+         if( $Stone <= WHITE ) //including NONE (prisoners)
+         {
+            if( $PosX < 0 ) continue; //excluding PASS, RESIGN and SCORE
+
+            $this->array[$PosX][$PosY] = $Stone; //including DAME (prisoners)
+
+            $removed_dead = FALSE; // restart removal
+         }
+         else if( $Stone == MARKED_BY_WHITE or $Stone == MARKED_BY_BLACK)
+         {
+            if( !$removed_dead )
+            {
+               $marked_dead = array(); // restart removal
+               $removed_dead = TRUE;
+            }
+            $marked_dead[] = array( $PosX, $PosY);
+         }
+      }
+
+      if( !$no_marked_dead and $removed_dead )
+      {
+         foreach( $marked_dead as $sub )
+         {
+            list( $x, $y) = $sub;
+            @$this->array[$x][$y] ^= OFFSET_MARKED;
+         }
+      }
+      
+      if( isset($this->moves[$move]) )
+      {
+         list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
+
+         //No movemsg if we don't have movecol
+         $result = mysql_query( "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" );
+
+         if( @mysql_num_rows($result) == 1 )
+         {
+            $row = mysql_fetch_assoc($result);
+            $this->movemsg = trim($row['Text']);
+         }
+         //else $this->movemsg = '';
+      }
+
+      return TRUE;
+   }
+
+
+   function set_move_mark( $x=-1, $y=-1)
+   {
+      $this->movemrkx= $x;
+      $this->movemrky= $y;
+   }
+
+
+   function stones_number( $start, $end)
+   {
+      $start = max( $start, 1);
+      for( $n=$end; $n>=$start; $n-- )
+      {
+         if( isset($this->moves[$n]) )
+         {
+            list( $s, $x, $y) = $this->moves[$n];
+            //if( $s != BLACK and $s != WHITE ) continue;
+            $m = number2sgf_coords( $x, $y, $this->size);
+            if( $m )
+            {
+               $b = @$this->array[$x][$y];
+               if( $b==$s )
                {
-                  while( list($y, $val) = each($sub) )
-                  {
-                     array_push($prisoners, array($x,$y));
-                     unset($array[$x][$y]);
-                  }
+                  $this->marks[$m] = (($n-1)%100)+1;
+               }
+               else if( $b==NONE )
+               {
+                  $this->marks[$m] = 'x';
+                  $this->captures[$n] = array( $s, $x, $y);
                }
             }
-            return false;
          }
+      }      
+   }
 
-         $x -= $dirx[$m];  // Go back
-         $y -= $diry[$m];
-      }
+
+   function set_style( &$player_row)
+   {
+      if( $player_row['Boardcoords'] >= 0 and $player_row['Boardcoords'] <= 0x3F )
+         $this->coord_borders = $player_row['Boardcoords'];
       else
+         $this->coord_borders = -1;
+
+      if( $player_row['Stonesize'] >= 5 and $player_row['Stonesize'] <= 50 )
+         $this->stone_size = $player_row['Stonesize'];
+      else
+         $this->stone_size = 25;
+
+      if( $player_row['Woodcolor'] >= 1 and $player_row['Woodcolor'] <= 5
+          or $player_row['Woodcolor'] >= 11 and $player_row['Woodcolor'] <= 15 )
+         $this->woodcolor = $player_row['Woodcolor'];
+      else
+         $this->woodcolor = 1;
+   }
+
+
+   function style_string()
+   {
+      $stone_size = $this->stone_size;
+      $coord_width = floor($stone_size*31/25);
+
+      $tmp = "img.brd%s{ width:%dpx; height:%dpx;}\n";
+      return sprintf( $tmp, 'x', $stone_size, $stone_size)
+           . sprintf( $tmp, 'l', $stone_size, $stone_size)
+           . sprintf( $tmp, 'n', $coord_width, $stone_size);
+   }
+
+
+   function draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
+                            $coord_left, $coord_right )
+   {
+      echo "<tr>\n";
+
+      if( $coord_left )
+         echo $coord_left;
+
+      $colnr = 1;
+      $letter = 'a';
+      while( $colnr <= $this->size )
       {
-         $dir = (int)($index[$x][$y] / 8);
-         $index[$x][$y] += 8;
-
-         $nx = $x+$dirx[$dir];
-         $ny = $y+$diry[$dir];
-
-         $new_color = @$array[$nx][$ny];
-
-         if( (!$new_color or $new_color == NONE ) and
-             ( $nx >= 0 ) and ($nx < $Size) and ($ny >= 0) and ($ny < $Size) )
-            return true; // found liberty
-
-         if( $new_color == $c and !@$index[$nx][$ny])
-         {
-            $x = $nx;  // Go to the neighbour
-            $y = $ny;
-            $index[$x][$y] = $dir;
-         }
+         echo $coord_start_letter . $letter . $coord_alt . $letter . $coord_end;
+         $colnr++;
+         $letter++; if( $letter == 'i' ) $letter++;
       }
-   }
-}
 
+      if( $coord_right )
+         echo $coord_right;
 
-
-function check_prisoners($colnr,$rownr, $col, $Size, &$array, &$prisoners )
-{
-   global $dirx,$diry;
-
-   for($i=0; $i<4; $i++)
-   {
-      $x = $colnr+$dirx[$i];
-      $y = $rownr+$diry[$i];
-
-      if( @$array[$x][$y] == $col )
-         has_liberty_check($x,$y, $Size, $array, $prisoners, true);
+      echo "</tr>\n";
    }
 
-}
 
-
-
-function mark_territory( $x, $y, $size, &$array )
-{
-   global $dirx,$diry;
-
-   $c = -1;  // color of territory
-
-   $index[$x][$y] = 7;
-   $point_count= 1; //for the current point (theoricaly NONE)
-
-   while( true )
+   function draw_edge_row( $edge_start, $edge_coord,
+                           $border_start, $border_imgs, $border_rem )
    {
-      if( $index[$x][$y] >= 32 )  // Have looked in all directions
+      echo "<tr>\n";
+
+      if( $this->coord_borders & LEFT )
+         echo $edge_coord;
+
+      echo '<td>' . $edge_start . 'l.gif" width='.EDGE_SIZE.'>' . "</td>\n";
+
+      echo '<td colspan=' . $this->size . ' width=' . $this->size*$this->stone_size . '>';
+
+      if( $border_imgs >= 0 )
+         echo $edge_start . '.gif" width=' . $border_start . '>';
+      for($i=0; $i<$border_imgs; $i++ )
+         echo $edge_start . '.gif" width=150>';
+      echo $edge_start . '.gif" width=' . $border_rem . '>';
+
+      echo "</td>\n" . '<td>' . $edge_start . 'r.gif" width='.EDGE_SIZE.'>' . "</td>\n";
+
+      if( $this->coord_borders & RIGHT )
+         echo $edge_coord;
+
+      echo "</tr>\n";
+   }
+
+
+   function draw_board( $may_play=false, $action='', $stonestring='')
+   {
+      global $woodbgcolors;
+
+      if( ($gid=$this->gid) <= 0 )
+         $may_play= false;
+
+      $stone_size = $this->stone_size;
+      $coord_width = floor($stone_size*31/25);
+
+      $smooth_edge = ( ($this->coord_borders & SMOOTH_EDGE) and ($this->woodcolor < 10) );
+
+      if( $smooth_edge )
       {
-         $m = $index[$x][$y] % 8;
+         $border_start = 140 - ( $this->coord_borders & LEFT ? $coord_width : 0 );
+         $border_imgs = ceil( ($this->size * $stone_size - $border_start) / 150 ) - 1;
+         $border_rem = $this->size * $stone_size - $border_start - 150 * $border_imgs;
+         if( $border_imgs < 0 )
+            $border_rem = $this->size * $stone_size;
 
-         if( $m == 7 )   // At starting point, all checked
+         $edge_coord = '<td><img alt=" " height='.EDGE_SIZE.' src="images/blank.gif" width=' . $coord_width . "></td>\n";
+         $edge_start = '<img alt=" " height='.EDGE_SIZE.' src="images/wood' . $this->woodcolor . '_' ;
+         $edge_vert = '<img alt=" " height=' . $stone_size . ' width='.EDGE_SIZE.' src="images/wood' . $this->woodcolor . '_' ;
+      }
+
+      $coord_alt = '.gif" alt="';
+      $coord_end = "\"></td>\n";
+      if( $this->coord_borders & (LEFT | RIGHT) )
+      {
+         $coord_start_number = "<td><img class=brdn src=\"$stone_size/c";
+      }
+      if( $this->coord_borders & (UP | DOWN) )
+      {
+         $coord_start_letter = "<td><img class=brdl src=\"$stone_size/c";
+
+         $s = ($this->coord_borders & LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
+         if ( $s )
+            $coord_left = "<td colspan=$s><img src=\"images/blank.gif\" width=" .
+             ( ( $this->coord_borders & LEFT ? $coord_width : 0 )
+             + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
+             " height=$stone_size alt=\" \"></td>\n";
+         else
+            $coord_left = '';
+
+         $s = ($this->coord_borders & RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
+         if ( $s )
+            $coord_right = "<td colspan=$s><img src=\"images/blank.gif\" width=" .
+             ( ( $this->coord_borders & RIGHT ? $coord_width : 0 )
+             + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
+             " height=$stone_size alt=\" \"></td>\n";
+         else
+            $coord_right = '';
+      }
+
+      $nomove_start = "<td><img class=brdx alt=\"";
+      $nomove_end = ".gif\"></td>\n";
+      if( $may_play )
+      {
+         switch( $action )
          {
-            if( $c == -1 )
-               $c = DAME ;
+            case 'handicap':
+               $on_not_empty = false;
+               $on_empty = true;
+               $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=handicap".URI_AMP."c=";
+               $move_alt = "\"><img class=brdx border=0 alt=\"";
+               if( $stonestring )
+                  $move_alt = URI_AMP."s=$stonestring".$move_alt;
+               break;
+            case 'remove':
+               $on_not_empty = true;
+               if( MAX_SEKI_MARK>0 )
+                  $on_empty = true;
+               else
+                  $on_empty = false;
+               $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=remove".URI_AMP."c=";
+               $move_alt = "\"><img class=brdx border=0 alt=\"";
+               if( $stonestring )
+                  $move_alt = URI_AMP."s=$stonestring".$move_alt;
+               break;
+            default:
+               $on_not_empty = false;
+               $on_empty = true;
+               $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=move".URI_AMP."c=";
+               $move_alt = "\"><img class=brdx border=0 alt=\"";
+               break;
+         }
+         $move_end = ".gif\"></a></td>\n";
+      }
+
+      if( $this->movemsg )
+         echo "<table id=\"game_board\" border=2 cellpadding=3 align=center><tr>" .
+            "<td width=\"" . $stone_size*19 . "\" align=left>$this->movemsg</td></tr></table><BR>\n";
+
+
+      if( $this->woodcolor > 10 )
+         $woodstring = 'bgcolor="' . $woodbgcolors[$this->woodcolor - 10] . '"';
+      else
+         $woodstring = 'style="background-image:url(images/wood' . $this->woodcolor . '.gif);"';
+
+      echo '<table border=0 cellpadding=0 cellspacing=0 ' . 
+          $woodstring . ' align=center>';
+
+      if( $this->coord_borders & UP )
+         $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
+                           $coord_left, $coord_right );
+
+      if( $smooth_edge )
+         $this->draw_edge_row( $edge_start.'u', $edge_coord,
+                               $border_start, $border_imgs, $border_rem );
+
+      $letter_r = 'a';
+      for($rownr = $this->size; $rownr > 0; $rownr-- )
+      {
+         echo '<tr>';
+
+         if( $this->coord_borders & LEFT )
+            echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
+
+         if( $smooth_edge )
+            echo '<td>' . $edge_vert . "l.gif\"></td>\n";
+
+
+         $letter = 'a';
+         $letter_c = 'a';
+         for($colnr = 0; $colnr < $this->size; $colnr++ )
+         {
+            $stone = (int)@$this->array[$colnr][$this->size-$rownr];
+            $empty = false;
+            $marked = false;
+            if( $stone & FLAG_NOCLICK ) {
+               $stone &= ~FLAG_NOCLICK;
+               $no_click = true;
+            }
             else
-               $c|= OFFSET_TERRITORY ;
+               $no_click = false;
 
-            if( $c==DAME || $point_count>MAX_SEKI_MARK)
-               $c|= FLAG_NOCLICK ;
-
-            while( list($x, $sub) = each($index) )
+            if( $stone == BLACK )
             {
-               while( list($y, $val) = each($sub) )
+               $type = 'b';
+               $alt = 'X';
+            }
+            else if( $stone == WHITE )
+            {
+               $type = 'w';
+               $alt = 'O';
+            }
+            else if( $stone == BLACK_DEAD )
+            {
+               $type = 'bw';
+               $alt = 'x';
+               $marked = true;
+            }
+            else if( $stone == WHITE_DEAD )
+            {
+               $type = 'wb';
+               $alt = 'o';
+               $marked = true;
+            }
+            else
+            {
+               $empty = true;
+
+               $type = 'e';
+               $alt = '.';
+               if( $rownr == 1 ) $type = 'd';
+               else if( $rownr == $this->size ) $type = 'u';
+               if( $colnr == 0 ) $type .= 'l';
+               else if( $colnr == $this->size-1 ) $type .= 'r';
+
+               if( $stone == BLACK_TERRITORY )
                {
-                  //keep all marks unchanged and reversible
-                  if( @$array[$x][$y] < MARKED_DAME )
-                     $array[$x][$y] = $c;
+                  $type .= 'b';
+                  $alt = '+';
+                  $marked = true;
                }
-            }
-
-            return $point_count;
-         }
-
-         $x -= $dirx[$m];  // Go back
-         $y -= $diry[$m];
-      }
-      else
-      {
-         $dir = (int)($index[$x][$y] / 8);
-         $index[$x][$y] += 8;
-
-         $nx = $x+$dirx[$dir];
-         $ny = $y+$diry[$dir];
-
-         if( ( $nx < 0 ) or ($nx >= $size) or ($ny < 0) or ($ny >= $size) or
-             isset($index[$nx][$ny]) )
-            continue;
-
-         $new_color = @$array[$nx][$ny];
-
-         if( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD )
-         {
-            $x = $nx;  // Go to the neighbour
-            $y = $ny;
-            $index[$x][$y] = $dir;
-            $point_count++;
-         }
-         else //remains BLACK/WHITE/DAME/BLACK_TERRITORY/WHITE_TERRITORY and MARKED_DAME
-         {
-            if( $new_color == MARKED_DAME )
-            {
-               $c = NONE; // This area will become dame
-            }
-            else if( $c == -1 )
-            {
-               $c = $new_color;
-            }
-            else if( $c == (WHITE+BLACK-$new_color) )
-            {
-               $c = NONE; // This area has both colors as boundary
-            }
-         }
-      }
-   }
-}
-
-function create_territories_and_score( $size, &$array )
-{
-   // mark territories
-
-   for( $x=0; $x<$size; $x++)
-   {
-      for( $y=0; $y<$size; $y++)
-      {
-         if( !@$array[$x][$y] or $array[$x][$y] == NONE )
-         {
-            mark_territory( $x, $y, $size, $array );
-         }
-      }
-   }
-
-   // count
-
-   $score = 0;
-
-   for( $x=0; $x<$size; $x++)
-   {
-      for( $y=0; $y<$size; $y++)
-      {
-         switch( @$array[$x][$y] & ~FLAG_NOCLICK)
-         {
-            case BLACK_TERRITORY:
-               $score --;
-            break;
-
-            case WHITE_TERRITORY:
-               $score ++;
-            break;
-
-            case BLACK_DEAD:
-               $score += 2;
-            break;
-
-            case WHITE_DEAD:
-               $score -= 2;
-            break;
-         }
-      }
-   }
-
-   return $score;
-}
-
-
-
-function toggle_marked_area( $x, $y, $size, &$array, &$marked, $companion_groups=true )
-{
-   global $dirx,$diry;
-
-   $c = @$array[$x][$y]; // Color of this stone
-
-/* Actually, $opposite_dead force an already marked dead neighbour group from the
-   opposite color to reverse to not dead, but this does not work properly if
-   $companion_groups is not true, as both groups may be not touching themself.
-*/
-   if( $companion_groups and ($c == BLACK or $c == WHITE) )
-      $opposite_dead = WHITE+BLACK_DEAD-$c ;
-   else
-      $opposite_dead = -1 ;
-
-   $index[$x][$y] = 7;
-
-   while( true )
-   {
-      if( $index[$x][$y] >= 32 )  // Have looked in all directions
-      {
-         $m = $index[$x][$y] % 8;
-
-         if( $m == 7 )   // At starting point, all checked
-         {
-            while( list($x, $sub) = each($index) )
-            {
-               while( list($y, $val) = each($sub) )
+               else if( $stone == WHITE_TERRITORY )
                {
-                  if ($c == @$array[$x][$y]) {
-                     array_push($marked, array($x,$y));
-                     if ( isset($array[$x][$y]) )
-                        $array[$x][$y] ^= OFFSET_MARKED ;
-                     else
-                        $array[$x][$y]  = MARKED_DAME ;
+                  $type .= 'w';
+                  $alt = '-';
+                  $marked = true;
+               }
+               else if( $stone == DAME )
+               {
+                  $type .= 'd';
+                  $alt = '.';
+                  $marked = true;
+               }
+               else if( $stone == MARKED_DAME )
+               {
+                  $type .= 'g';
+                  $alt = 's'; //for seki
+                  $marked = true;
+               }
+
+               if( $type=='e' )
+               {
+                  if( is_hoshi($colnr, $this->size-$rownr, $this->size) )
+                  {
+                     $type = 'h';
+                     $alt = ',';
                   }
                }
             }
 
-            return;
-         }
-
-         $x -= $dirx[$m];  // Go back
-         $y -= $diry[$m];
-      }
-      else
-      {
-         $dir = (int)($index[$x][$y] / 8);
-         $index[$x][$y] += 8;
-
-         $nx = $x+$dirx[$dir];
-         $ny = $y+$diry[$dir];
-
-         if( ( $nx < 0 ) or ($nx >= $size) or ($ny < 0) or ($ny >= $size) or
-            @$index[$nx][$ny] )
-            continue;
-
-         $new_color = @$array[$nx][$ny];
-
-         if( $new_color == $c or ( $companion_groups and $new_color == NONE ) )
-         {
-            $x = $nx;  // Go to the neighbour
-            $y = $ny;
-            $index[$x][$y] = $dir;
-         }
-         else if( $new_color == $opposite_dead )
-         {
-            toggle_marked_area( $nx, $ny, $size, $array, $marked, $companion_groups);
-         }
-      }
-   }
-}
-
-function check_consistency($gid)
-{
-   global $coord, $Size, $array, $to_move, $Last_X, $Last_Y,
-      $Black_Prisoners, $White_Prisoners, $nr_prisoners;
-
-   echo "Game $gid: ";
-   $result = mysql_query("SELECT * from Games where ID=$gid");
-   if( @mysql_num_rows($result) != 1 )
-   {
-      echo "Doesn't exist?<br>\n";
-      return false;
-   }
-
-   extract( mysql_fetch_array( $result ) );
-
-   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
-
-   $move_nr=0;
-   $array = NULL;
-   $games_Black_Prisoners = $Black_Prisoners;
-   $games_White_Prisoners = $White_Prisoners;
-   $Black_Prisoners=$White_Prisoners=0;
-   $moves_Black_Prisoners=$moves_White_Prisoners=0;
-   while( $row = mysql_fetch_array($result) )
-   {
-      extract($row);
-      if( !($Stone == WHITE or $Stone == BLACK ) or $PosX<0 )
-      {
-         if( $Stone == NONE )
-            $nr_prisoners++;
-         elseif( $PosX < 0 )
-            $move_nr++;
-
-         continue;
-      }
-      $move_nr++;
-      $to_move=$Stone;
-      if( $to_move == BLACK )
-         $moves_Black_Prisoners += $nr_prisoners;
-      else
-         $moves_White_Prisoners += $nr_prisoners;
-
-      $coord = number2sgf_coords($PosX,$PosY,$Size);
-
-  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
-  //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
-      if( !check_move(false) )
-      {
-         echo ", problem at move $move_nr<br>\n";
-         return false;
-      }
-
-      $Last_X=$PosX;
-      $Last_Y=$PosY;
-      $nr_prisoners=0;
-   }
-
-   if( $Moves != $move_nr )
-   {
-      echo "Wrong number of moves!<br>\n";
-      return false;
-   }
-
-   if( $Black_Prisoners != $games_Black_Prisoners or
-       $White_Prisoners != $games_White_Prisoners )
-   {
-      echo "Wrong number of prisoners in Games table!<br>\n";
-      echo "Black: $games_Black_Prisoners should be:$Black_Prisoners<br>\n";
-      echo "White: $games_White_Prisoners should be:$White_Prisoners<br>\n";
-      return false;
-
-   }
-
-   if( $Black_Prisoners != $moves_Black_Prisoners or
-       $White_Prisoners != $moves_White_Prisoners )
-   {
-      echo "Wrong number of prisoners removed!<br>\n";
-      return false;
-
-   }
-
-   $handi = ($Handicap < 2 ? 1 : $Handicap );
-   $black_to_move = (($Moves < $handi) or ($Moves-$handi)%2 == 1 );
-   $to_move = ( $black_to_move ? $Black_ID : $White_ID );
-   if( $Status!='FINISHED' and $ToMove_ID!=$to_move )
-   {
-      echo "Wrong Player to move! Should be $to_move.<br>\n";
-      return false;
-   }
-
-   echo "Ok<br>\n";
-}
-
-function draw_ascii_board($Size, &$array, $gid, $Last_X, $Last_Y,  $coord_borders, $msg )
-{
-   $out = "\n";
-
-   if( $msg )
-      $out .= wordwrap("Message: $msg", 47) . "\n\n";
-
-   if( $coord_borders & UP )
-   {
-      $out .= '  ';
-      if( $coord_borders & LEFT )
-         $out .= '  ';
-
-      $colnr = 1;
-      $letter = 'a';
-      while( $colnr <= $Size )
-      {
-         $out .= " $letter";
-         $colnr++;
-         $letter++;
-         if( $letter == 'i' ) $letter++;
-      }
-      $out .= "\n";
-   }
-
-   if( $Size > 11 ) $hoshi_dist = 4; else $hoshi_dist = 3;
-
-   // 4 == center, 5 == side, 6 == corner
-   if( $Size >=5 ) $hoshi_1 = 4; else $hoshi_1 = 7;
-   if( $Size >=8 ) $hoshi_2 = 6; else $hoshi_2 = 7;
-   if( $Size >=13) $hoshi_3 = 5; else $hoshi_3 = 7;
-
-   $letter_r = 'a';
-
-   for($rownr = $Size; $rownr > 0; $rownr-- )
-   {
-      $out .= '  ';
-      if( $coord_borders & LEFT )
-         $out .= str_pad($rownr, 2, ' ', STR_PAD_LEFT);
-
-      $hoshi_r = 0;
-      if( $rownr == $hoshi_dist  or $rownr == $Size - $hoshi_dist + 1 ) $hoshi_r = 3;
-      if( $rownr == $Size - $rownr + 1 ) $hoshi_r = 2;
-
-      $letter_c = 'a';
-      for($colnr = 0; $colnr < $Size; $colnr++ )
-      {
-         $stone = (int)@$array[$colnr][$Size-$rownr];
-         $empty = false;
-         if( $stone == BLACK )
-         {
-            $type = 'X';
-         }
-         else if( $stone == WHITE )
-         {
-            $type = 'O';
-         }
-         else if( $stone == BLACK_DEAD )
-         {
-            $type = 'x';
-         }
-         else if( $stone == WHITE_DEAD )
-         {
-            $type = 'o';
-         }
-         else
-         {
-            $type = '.';
-
-            if( $hoshi_r > 0 )
+            if( !$marked )
             {
-               $hoshi_c = 0;
-               if( $colnr == $hoshi_dist -  1 or $colnr == $Size - $hoshi_dist )
-                  $hoshi_c = 3;
-
-               if( $colnr == $Size - $colnr - 1 ) $hoshi_c = 2;
-
-               if( $hoshi_c + $hoshi_r == $hoshi_1 or
-               $hoshi_c + $hoshi_r == $hoshi_2 or
-               $hoshi_c + $hoshi_r == $hoshi_3 )
+               if( !$empty && ( $stone == BLACK or $stone == WHITE )
+                   && $this->movemrkx == $colnr
+                   && $this->movemrky == $this->size-$rownr )
                {
-                  $type = ',';
+                  $type .= 'm';
+                  $alt = ( $stone == BLACK ? '#' : '@' );
+                  $marked = true;
+               }
+               elseif( is_array($this->marks) )
+               {
+                  $m = number2sgf_coords($colnr, $this->size-$rownr, $this->size);
+                  if( $m && @$this->marks[$m] )
+                  {
+                     //$alt .= $this->marks[$m];
+                     $type .= $this->marks[$m];
+                     $marked = true;
+                  }
+               }
+            }
+            if( $this->coord_borders & OVER )
+               $alt.= "\" title=\"$letter$rownr";
+
+            if( $may_play and !$no_click and
+                ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
+               echo "$move_start$letter_c$letter_r$move_alt$alt\" src=\"$stone_size/$type$move_end";
+            else
+               echo "$nomove_start$alt\" src=\"$stone_size/$type$nomove_end";
+
+            $letter_c++;
+            $letter++; if( $letter == 'i' ) $letter++;
+         }
+
+         if( $smooth_edge )
+            echo '<td>' . $edge_vert . "r.gif\"></td>\n";
+
+         if( $this->coord_borders & RIGHT )
+            echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
+
+         echo "</tr>\n";
+         $letter_r++;
+      }
+
+      if( $smooth_edge )
+         $this->draw_edge_row( $edge_start.'d', $edge_coord,
+                               $border_start, $border_imgs, $border_rem );
+
+      if( $this->coord_borders & DOWN )
+         $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
+                           $coord_left, $coord_right );
+
+      echo "</table>\n";
+   } //draw_board
+
+
+   //$coord_borders and $movemsg stay local.
+   function draw_ascii_board( $movemsg='', $coord_borders=15)
+   {
+      $out = "\n";
+
+      if( $movemsg )
+         $out .= wordwrap("Message: $movemsg", 47) . "\n\n";
+
+      if( $coord_borders & UP )
+      {
+         $out .= '  ';
+         if( $coord_borders & LEFT )
+            $out .= '  ';
+
+         $colnr = 1;
+         $letter = 'a';
+         while( $colnr <= $this->size )
+         {
+            $out .= " $letter";
+            $colnr++;
+            $letter++; if( $letter == 'i' ) $letter++;
+         }
+         $out .= "\n";
+      }
+
+      $letter_r = 'a';
+      for($rownr = $this->size; $rownr > 0; $rownr-- )
+      {
+         $out .= '  ';
+         if( $coord_borders & LEFT )
+            $out .= str_pad($rownr, 2, ' ', STR_PAD_LEFT);
+
+         $pre_mark = false;
+         $letter_c = 'a';
+         for($colnr = 0; $colnr < $this->size; $colnr++ )
+         {
+            $stone = (int)@$this->array[$colnr][$this->size-$rownr];
+            $empty = false;
+            if( $stone == BLACK )
+            {
+               $type = 'X';
+            }
+            else if( $stone == WHITE )
+            {
+               $type = 'O';
+            }
+            else if( $stone == BLACK_DEAD )
+            {
+               $type = 'x';
+            }
+            else if( $stone == WHITE_DEAD )
+            {
+               $type = 'o';
+            }
+            else
+            {
+               $empty = true;
+
+               $type = '.';
+
+               if( $stone == BLACK_TERRITORY )
+                  $type .= '+';
+               else if( $stone == WHITE_TERRITORY )
+                  $type .= '-';
+               else if( $stone == DAME )
+                  $type .= '.';
+               else if( $stone == MARKED_DAME )
+                  $type .= 's'; //for seki
+
+               if( $type=='.' )
+               {
+                  if( is_hoshi($colnr, $this->size-$rownr, $this->size) )
+                     $type = ',';
                }
             }
 
-            if( $stone == BLACK_TERRITORY )
-               $type .= '+';
-            else if( $stone == WHITE_TERRITORY )
-               $type .= '-';
-            else if( $stone == DAME )
-               $type .= '.';
-            else if( $stone == MARKED_DAME )
-               $type .= 's';
+            if( $pre_mark )
+            {
+               $out .= ")$type";
+               $pre_mark = false;
+            }
+            else if( !$empty && ( $stone == BLACK or $stone == WHITE )
+                   && $this->movemrkx == $colnr
+                   && $this->movemrky == $this->size-$rownr )
+            {
+               $out .= "($type";
+               $pre_mark = true;
+            }
+            else
+            {
+               $out .= " $type";
+            }
 
-            $empty = true;
+            $letter_c++;
          }
 
-         if( $pre_mark )
+         $out .= ( $pre_mark ? ')' : ' ' );
+
+         if( $coord_borders & RIGHT )
+            $out .= str_pad($rownr, 2, ' ', STR_PAD_RIGHT);
+
+         $letter_r++;
+         $out .= "\n";
+      }
+
+      if( $coord_borders & DOWN )
+      {
+         $out .= '  ';
+         if( $coord_borders & LEFT )
+            $out .= '  ';
+
+         $colnr = 1;
+         $letter = 'a';
+         while( $colnr <= $this->size )
          {
-            $out .= ")$type";
-            $pre_mark = false;
+            $out .= " $letter";
+            $colnr++;
+            $letter++; if( $letter == 'i' ) $letter++;
          }
-         else if( !$empty and $colnr == $Last_X and $rownr == $Size - $Last_Y
-             and ( $stone == BLACK or $stone == WHITE ) )
+         $out .= "\n";
+      }
+
+      return $out;
+   } //draw_ascii_board
+
+
+   function has_liberty_check( $x, $y, &$prisoners, $remove )
+   {
+      $c = @$this->array[$x][$y]; // Color of this stone
+
+      $index = NULL;
+      $index[$x][$y] = 7;
+
+      while( true )
+      {
+         if( $index[$x][$y] >= 32 )  // Have looked in all directions
          {
-            $out .= "($type";
-            $pre_mark = true;
+            $m = $index[$x][$y] % 8;
+
+            if( $m == 7 )   // At starting point, no liberties found
+            {
+               if( $remove )
+               {
+                  foreach( $index as $x => $sub )
+                  {
+                     foreach( $sub as $y => $val )
+                     {
+                        array_push($prisoners, array($x,$y));
+                        unset($this->array[$x][$y]);
+                     }
+                  }
+               }
+               return false;
+            }
+
+            $x -= $this->dirx[$m];  // Go back
+            $y -= $this->diry[$m];
          }
          else
          {
-            $out .= " $type";
+            $dir = (int)($index[$x][$y] / 8);
+            $index[$x][$y] += 8;
+
+            $nx = $x+$this->dirx[$dir];
+            $ny = $y+$this->diry[$dir];
+
+            $new_color = @$this->array[$nx][$ny];
+
+            if( (!$new_color or $new_color == NONE ) and
+                ($nx >= 0) and ($nx < $this->size) and
+                ($ny >= 0) and ($ny < $this->size) )
+               return true; // found liberty
+
+            if( $new_color == $c and !@$index[$nx][$ny])
+            {
+               $x = $nx;  // Go to the neighbour
+               $y = $ny;
+               $index[$x][$y] = $dir;
+            }
          }
-
-         $letter_c ++;
       }
+   } //has_liberty_check
 
-      $out .= ( $pre_mark ? ')' : ' ' );
 
-      if( $coord_borders & RIGHT )
-         $out .= str_pad($rownr, 2, ' ', STR_PAD_RIGHT);
-
-      $letter_r++;
-      $out .= "\n";
-   }
-
-   if( $coord_borders & DOWN )
+   function check_prisoners( $colnr, $rownr, $col, &$prisoners )
    {
-      $out .= '  ';
-      if( $coord_borders & LEFT )
-         $out .= '  ';
-
-      $colnr = 1;
-      $letter = 'a';
-      while( $colnr <= $Size )
+      $some = false;
+      for($i=0; $i<4; $i++)
       {
-         $out .= " $letter";
-         $colnr++;
-         $letter++;
-         if( $letter == 'i' ) $letter++;
+         $x = $colnr+$this->dirx[$i];
+         $y = $rownr+$this->diry[$i];
+
+         if( @$this->array[$x][$y] == $col )
+            if( !$this->has_liberty_check( $x, $y, $prisoners, true) )
+               $some = true;
       }
-      $out .= "\n";
+      return $some;
+   } //check_prisoners
+
+
+
+   function mark_territory( $x, $y )
+   {
+
+      $c = -1;  // color of territory
+
+      $index[$x][$y] = 7;
+      $point_count= 1; //for the current point (theoricaly NONE)
+
+      while( true )
+      {
+         if( $index[$x][$y] >= 32 )  // Have looked in all directions
+         {
+            $m = $index[$x][$y] % 8;
+
+            if( $m == 7 )   // At starting point, all checked
+            {
+               if( $c == -1 )
+                  $c = DAME ;
+               else
+                  $c|= OFFSET_TERRITORY ;
+
+               if( $c==DAME || $point_count>MAX_SEKI_MARK)
+                  $c|= FLAG_NOCLICK ;
+
+               foreach( $index as $x => $sub )
+               {
+                  foreach( $sub as $y => $val )
+                  {
+                     //keep all marks unchanged and reversible
+                     if( @$this->array[$x][$y] < MARKED_DAME )
+                        $this->array[$x][$y] = $c;
+                  }
+               }
+               return $point_count;
+            }
+
+            $x -= $this->dirx[$m];  // Go back
+            $y -= $this->diry[$m];
+         }
+         else
+         {
+            $dir = (int)($index[$x][$y] / 8);
+            $index[$x][$y] += 8;
+
+            $nx = $x+$this->dirx[$dir];
+            $ny = $y+$this->diry[$dir];
+
+            if( ( $nx < 0 ) or ($nx >= $this->size) or ($ny < 0) or ($ny >= $this->size) or
+                isset($index[$nx][$ny]) )
+               continue;
+
+            $new_color = @$this->array[$nx][$ny];
+
+            if( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD )
+            {
+               $x = $nx;  // Go to the neighbour
+               $y = $ny;
+               $index[$x][$y] = $dir;
+               $point_count++;
+            }
+            else //remains BLACK/WHITE/DAME/BLACK_TERRITORY/WHITE_TERRITORY and MARKED_DAME
+            {
+               if( $new_color == MARKED_DAME )
+               {
+                  $c = NONE; // This area will become dame
+               }
+               else if( $c == -1 )
+               {
+                  $c = $new_color;
+               }
+               else if( $c == (WHITE+BLACK-$new_color) )
+               {
+                  $c = NONE; // This area has both colors as boundary
+               }
+            }
+         }
+      }
+   } //mark_territory
+
+   function create_territories_and_score( )
+   {
+      // mark territories
+
+      for( $x=0; $x<$this->size; $x++)
+      {
+         for( $y=0; $y<$this->size; $y++)
+         {
+            if( !@$this->array[$x][$y] or $this->array[$x][$y] == NONE )
+            {
+               $this->mark_territory( $x, $y);
+            }
+         }
+      }
+
+      // count
+
+      $score = 0;
+
+      for( $x=0; $x<$this->size; $x++)
+      {
+         for( $y=0; $y<$this->size; $y++)
+         {
+            switch( @$this->array[$x][$y] & ~FLAG_NOCLICK)
+            {
+               case BLACK_TERRITORY:
+                  $score --;
+               break;
+
+               case WHITE_TERRITORY:
+                  $score ++;
+               break;
+
+               case BLACK_DEAD:
+                  $score += 2;
+               break;
+
+               case WHITE_DEAD:
+                  $score -= 2;
+               break;
+            }
+         }
+      }
+
+      return $score;
+   } //create_territories_and_score
+
+
+   function toggle_marked_area( $x, $y, &$marked, $companion_groups=true )
+   {
+
+      $c = @$this->array[$x][$y]; // Color of this stone
+
+   /* Actually, $opposite_dead force an already marked dead neighbour group from the
+      opposite color to reverse to not dead, but this does not work properly if
+      $companion_groups is not true, as both groups may be not touching themself.
+   */
+      if( $companion_groups and ($c == BLACK or $c == WHITE) )
+         $opposite_dead = WHITE+BLACK_DEAD-$c ;
+      else
+         $opposite_dead = -1 ;
+
+      $index[$x][$y] = 7;
+
+      while( true )
+      {
+         if( $index[$x][$y] >= 32 )  // Have looked in all directions
+         {
+            $m = $index[$x][$y] % 8;
+
+            if( $m == 7 )   // At starting point, all checked
+            {
+               foreach( $index as $x => $sub )
+               {
+                  foreach( $sub as $y => $val )
+                  {
+                     if ($c == @$this->array[$x][$y]) {
+                        array_push($marked, array($x,$y));
+                        @$this->array[$x][$y] ^= OFFSET_MARKED;
+                     }
+                  }
+               }
+               return;
+            }
+
+            $x -= $this->dirx[$m];  // Go back
+            $y -= $this->diry[$m];
+         }
+         else
+         {
+            $dir = (int)($index[$x][$y] / 8);
+            $index[$x][$y] += 8;
+
+            $nx = $x+$this->dirx[$dir];
+            $ny = $y+$this->diry[$dir];
+
+            if( ( $nx < 0 ) or ($nx >= $this->size) or ($ny < 0) or ($ny >= $this->size) or
+               @$index[$nx][$ny] )
+               continue;
+
+            $new_color = @$this->array[$nx][$ny];
+
+            if( $new_color == $c or ( $companion_groups and $new_color == NONE ) )
+            {
+               $x = $nx;  // Go to the neighbour
+               $y = $ny;
+               $index[$x][$y] = $dir;
+            }
+            else if( $new_color == $opposite_dead )
+            {
+               $this->toggle_marked_area( $nx, $ny, $marked, $companion_groups);
+            }
+         }
+      }
+   } //toggle_marked_area
+
+
+   // If move update was interupted between thw mysql queries, there may
+   // be extra entries in the Moves and MoveMessages tables.
+   function fix_corrupted_move_table( $gid)
+   {
+      $result = mysql_query("SELECT Moves FROM Games WHERE ID=$gid");
+
+      if( @mysql_num_rows($result) != 1 )
+         error("mysql_query_failed",'board1');
+
+      extract(mysql_fetch_assoc($result));
+
+
+      $result = mysql_query("SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid");
+
+      if( @mysql_num_rows($result) != 1 )
+         error("mysql_query_failed",'board2');
+
+      extract(mysql_fetch_assoc($result));
+
+
+      if($max_movenr == $Moves)
+         return;
+
+      if($max_movenr != $Moves+1)
+         error("mysql_data_corruption",'board2');    // Can't handle this type of problem
+
+      mysql_query("DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr");
+      mysql_query("DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr");
    }
 
-   return $out;
-}
 
-
-
-// If move update was interupted between thw mysql queries, there may
-// be extra entries in the Moves and MoveMessages tables.
-function fix_corrupted_move_table($gid)
-{
-   $result = mysql_query("SELECT Moves FROM Games WHERE ID=$gid");
-
-   if( @mysql_num_rows($result) != 1 )
-      error("mysql_query_failed",'board1');
-
-   extract(mysql_fetch_array($result));
-
-
-   $result = mysql_query("SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid");
-
-   if( @mysql_num_rows($result) != 1 )
-      error("mysql_query_failed",'board2');
-
-   extract(mysql_fetch_array($result));
-
-
-
-   if($Moves == $max_movenr)
-      return;
-
-   if($max_movenr != $Moves+1)
-      error("mysql_data_corruption");    // Can't handle this type of problem
-
-   mysql_query("DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr");
-   mysql_query("DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr");
-}
-
-
+} //class Board
 ?>

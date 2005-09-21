@@ -73,7 +73,7 @@ else
    $my_id = $player_row['ID'];
 
    $result = mysql_query( "SELECT Games.*, " .
-                          "Games.Flags+0 AS flags, " .
+                          "Games.Flags+0 AS GameFlags, " . //used by check_move
                           "black.ClockUsed AS Blackclock, " .
                           "white.ClockUsed AS Whiteclock, " .
                           "black.OnVacation AS Blackonvacation, " .
@@ -86,7 +86,7 @@ else
    if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
 
-   $Last_X = NULL; $Last_Y = NULL;
+   $Last_X = $Last_Y = -1;
    extract(mysql_fetch_assoc($result));
 
    if( $Status == 'INVITED' )
@@ -105,7 +105,6 @@ else
       error("invalid_action");
    }
 
-   $old_moves = $Moves;
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -148,7 +147,7 @@ else
 
    $next_to_move = WHITE+BLACK-$to_move;
 
-   if( $old_moves+1 < $Handicap ) $next_to_move = BLACK;
+   if( $Moves+1 < $Handicap ) $next_to_move = BLACK;
 
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
@@ -159,20 +158,20 @@ else
    {
 
       $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
-      $hours = ( $ticks > 0 ? (int)(($ticks-1) / $tick_frequency) : 0 );
+      $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 
       if( $to_move == BLACK )
       {
-         time_remaining($hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
-            $Byotype, $Byotime, $Byoperiods, true);
+         time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "Black_Maintime=$Black_Maintime, " .
              "Black_Byotime=$Black_Byotime, " .
              "Black_Byoperiods=$Black_Byoperiods, ";
       }
       else
       {
-         time_remaining($hours, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
-            $Byotype, $Byotime, $Byoperiods, true);
+         time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "White_Maintime=$White_Maintime, " .
              "White_Byotime=$White_Byotime, " .
              "White_Byoperiods=$White_Byoperiods, ";
@@ -202,33 +201,37 @@ else
    }
 
 
-   list($lastx,$lasty,$lastcol) =
-      make_array( $gid, $array, $msg, $old_moves, NULL, $moves_result, $marked_dead, true );
+   $TheBoard = new Board( );
+   if( !$TheBoard->load_from_db( $game_row) )
+      error('internal_error', "quick_play load_from_db $gid");
 
-   $where_clause = " ID=$gid AND Moves=$old_moves";
-   //$too_few_moves = ($old_moves < DELETE_LIMIT+$Handicap) ;
+   $where_clause = " ID=$gid AND Moves=$Moves";
+   //$too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
+   $old_moves = $Moves;
    $Moves++;
 
       //case 'move':
       {
          $coord = number2sgf_coords( $query_X, $query_Y, $Size);
 
-         check_move();
-  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
-  //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
+{//to fixe old way Ko detect. Could be removed when no more old way games.
+  if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
+}
+         check_move( $TheBoard, $coord, $to_move);
+//ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
+//here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
          $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
+         $prisoner_string = '';
          reset($prisoners);
-         $new_prisoner_string = "";
-
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
-            $move_query .= "($gid, $Moves, \"NONE\", $x, $y, 0), ";
-            $new_prisoner_string .= number2sgf_coords($x, $y, $Size);
+            $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
+            $prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
 
-         if( strlen($new_prisoner_string) != $nr_prisoners*2 )
+         if( strlen($prisoner_string) != $nr_prisoners*2 )
             error("move_problem");
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
@@ -247,12 +250,12 @@ else
                $game_query .= "White_Prisoners=$White_Prisoners, ";
 
          if( $nr_prisoners == 1 )
-            $flags |= KO;
+            $GameFlags |= KO;
          else
-            $flags &= ~KO;
+            $GameFlags &= ~KO;
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
-             "Flags=$flags, " .
+             "Flags=$GameFlags, " .
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
              " WHERE $where_clause LIMIT 1";
       }
