@@ -20,9 +20,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require_once( "include/coords.php" );
 
-$hoshi_dist = array(0,0,0,0,0,3,0,4,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
-$hoshi_pos  = array(0,0,0,0,0,1,0,1,4,5,4,5,4,7,7,7,7,7,7,7,7,7,7,7,7,7);
-
 class GoDiagram
 {
    var $Size;
@@ -116,22 +113,15 @@ class GoDiagram
 
    function get_empty_image($x, $y, $sz)
       {
-         global $hoshi_pos, $hoshi_dist;
-
-         $fig = 'e';
-
-         if( $hoshi_pos[$sz] &
-             ( ( ( $x == $hoshi_dist[$sz]-1 || $x == $sz-$hoshi_dist[$sz] ? 2 : 0 ) +
-                 ( $x*2+1 == $sz ? 1 : 0) ) *
-               ( ( $y == $hoshi_dist[$sz]-1 || $y == $sz-$hoshi_dist[$sz] ? 2 : 0 ) +
-                 ( $y*2+1 == $sz ? 1 : 0) ) ) )
+         if( is_hoshi($x, $y, $sz) )
             $fig = 'h';
-
+         else {
          if( $y == 0 ) $fig = 'u';
-         if( $y == $sz-1 ) $fig = 'd';
+            else if( $y == $sz-1 ) $fig = 'd';
+            else $fig = 'e';
          if( $x == 0 ) $fig .= 'l';
-         if( $x == $sz-1 ) $fig .= 'r';
-
+            else if( $x == $sz-1 ) $fig .= 'r';
+         }
          return $fig;
       }
 
@@ -160,7 +150,7 @@ class GoDiagram
             {
                $str = $row[$x-$this->Left+1];
                if( $str{0} === 'e' )
-                  if( strlen($str)>1 && $str{1} === 'l' )
+                  if( strlen($str)>2 && $str{1} === 'l' ) //empty+letter
                      $str = substr($str, 1);
                   else
                      $str = $this->get_empty_image($x, $y, $this->Size) . substr($str, 1);
