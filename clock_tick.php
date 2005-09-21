@@ -28,13 +28,13 @@ if( !$is_down )
    $chained = @$_REQUEST['chained'];
    if( @$chained ) //to be chained to other cron jobs (see at EOF)
    {
-      $i = 3600/$tick_frequency;
+      $i = floor(3600/$tick_frequency);
       $tick_diff = $i - 10;
       $chained = $i;
    }
    else
    {
-      $tick_diff = 3600/$tick_frequency - 10;
+      $tick_diff = floor(3600/$tick_frequency) - 10;
    }
    connect2mysql();
 
@@ -94,21 +94,19 @@ if( !$is_down )
    {
       extract($row);
       $ticks = $ticks - $LastTicks;
-      $hours = ( $ticks > 0 ? (int)(($ticks-1) / $tick_frequency) : 0 );
+      $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 
       if( $ToMove_ID == $Black_ID )
       {
-         time_remaining( $hours, $Black_Maintime, $Black_Byotime,
-            $Black_Byoperiods, $Maintime,
-            $Byotype, $Byotime, $Byoperiods, false);
+         time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
          $time_is_up = ( $Black_Maintime == 0 and $Black_Byotime == 0 );
       }
       else if( $ToMove_ID == $White_ID )
       {
-         time_remaining( $hours, $White_Maintime, $White_Byotime,
-            $White_Byoperiods, $Maintime,
-            $Byotype, $Byotime, $Byoperiods, false);
+         time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
          $time_is_up = ( $White_Maintime == 0 and $White_Byotime == 0 );
       }
@@ -137,16 +135,16 @@ if( !$is_down )
             error('mysql_update_game',"Couldn't update game.");
 
          // Send messages to the players
-         $Text = "The result in the game:\n<center>"
-               . game_reference( 1, 0, $gid, 0, $whitename, $blackname)
-               . "</center>\nwas:\n<center>"
+         $Text = "The result in the game:<center>"
+               . game_reference( REF_LINK, 1, $gid, 0, $whitename, $blackname)
+               . "</center>was:<center>"
                . score2text($score,true,true)
-               . "</center>\n";
-         $Text.= "Send a message to:\n<center>"
+               . "</center>";
+         $Text.= "Send a message to:<center>"
                . send_reference( 1, 1, '', $White_ID, $whitename, $whitehandle)
-               . "\n<br>"
+               . "<br>"
                . send_reference( 1, 1, '', $Black_ID, $blackname, $blackhandle)
-               . "</center>\n" ;
+               . "</center>" ;
 
          $Text = addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .

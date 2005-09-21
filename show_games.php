@@ -185,7 +185,7 @@ require_once( "include/rating.php" );
    {
       $games_for = ( $finished ? T_('Finished games for %s') : T_('Running games for %s') );
       $title1 = sprintf(  $games_for, make_html_safe($user_row["Name"]) );
-      $title2 = sprintf(  $games_for, user_reference( 1, 1, '', $user_row) );
+      $title2 = sprintf(  $games_for, user_reference( REF_LINK, 1, '', $user_row) );
    }
 
    start_page( $title1, true, $logged_in, $player_row, button_style() );
