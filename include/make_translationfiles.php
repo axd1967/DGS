@@ -18,24 +18,24 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-//define('TMP_PERSISTENT','/tmp/persistent/d/dr/dragongoserver');
-define('TMP_PERSISTENT','.'); //relative to main dir
+// The sourceforge devel server need a soft link:
+// ln -s -d /tmp/persistent/dragongoserver/translations /home/groups/d/dr/dragongoserver/htdocs/translations
 
 function make_known_languages() //must be called from main dir
 {
-   //chdir( 'translations'); //must be called from main dir
-
    $result = mysql_query("SELECT * FROM TranslationLanguages ORDER BY Language");
 
-   $Filename = TMP_PERSISTENT.'/translations/known_languages.php';
+   $Filename = 'translations/known_languages.php'; //must be called from main dir
 
    $e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
    $fd = fopen( $Filename, 'w');
    error_reporting($e);
    if( !$fd )
    {
-      echo "couldnt_open_transl_file ". $Filename; exit;
-      //error("couldnt_open_transl_file", $Filename);
+      //echo "couldnt_open_transl_file ". $Filename; exit;
+      global $quick_errors;
+      $quick_errors= 1; // nothing more can be done with an error now.
+      error("couldnt_open_transl_file", $Filename);
    }
 
    fwrite( $fd, "<?php\n\n\$known_languages = array(\n" );
@@ -58,8 +58,6 @@ function make_known_languages() //must be called from main dir
    fwrite( $fd, ( $first ? '' : ' )' ) . "\n);\n\n?>" );
    fclose($fd);
    unset($fd);
-
-   //chdir('../');
 }
 
 function slashed($string)
@@ -119,8 +117,13 @@ function make_include_files($language=null, $group=null) //must be called from m
 
          $Filename = $lang . '_' . $grp . '.php';
 
-         $fd = fopen( $Filename, 'w' )
-            or error("couldnt_open_transl_file", $Filename);
+         $e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
+         $fd = fopen( $Filename, 'w');
+         error_reporting($e);
+         if( !$fd )
+         {
+            error("couldnt_open_transl_file", $Filename);
+         }
 
          fwrite( $fd, "<?php\n\n/* Automatically generated at " .
                  gmdate('Y-m-d H:i:s T', $NOW) . " */\n\n");
@@ -158,7 +161,7 @@ function translations_query( $translate_lang, $untranslated, $group )
             "TranslationLanguages.ID AS Language_ID," .
             "TranslationFoundInGroup.Group_ID," .
             "TranslationTexts.Text AS Original," .
-     "TranslationTexts.Translatable " .
+            "TranslationTexts.Translatable " .
      "FROM TranslationTexts," .
           "TranslationLanguages," .
           "TranslationFoundInGroup," .
@@ -191,7 +194,7 @@ function translations_query( $translate_lang, $untranslated, $group )
    Workaround: using "ORDER BY Original_ID LIMIT 50";
     and filter the rows on Original_ID while computing.
    The previous sort was:
-        "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
+       "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
 */
 
    return mysql_query($query);
