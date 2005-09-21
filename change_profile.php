@@ -117,8 +117,15 @@ require_once( "include/countries.php" );
       set_cookie_prefs($player_row['ID'], true);
    }
 
-   $language = trim(@$_GET['language']) ;
-   list($lang,$charenc) = explode('.', $language);
+
+/* $_GET['language']: see also include_translate_group()
+   keeping them identical allow the sysmsg (see below, displayed in the next page)
+   to be translated in the right futur language ...
+   ... and some debug with a temporary page translation via the URL.
+*/
+   $language = trim(@$_GET['language']);
+
+   @list($lang,$charenc) = explode('.', $language);
 
    if( $language === 'C' or ( $language !== $player_row['Lang'] and
                               array_key_exists($lang, $known_languages) and

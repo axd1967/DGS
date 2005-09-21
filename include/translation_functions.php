@@ -64,42 +64,48 @@ function include_translate_group($group, $player_row) //must be called from main
 {
    global $language_used, $encoding_used, $Tr;
 
-   if( isset( $language_used ) ) //from a previous call
+   if( !empty( $language_used ) ) //from a previous call
       $language = $language_used;
    else
    {
-      if( isset($player_row['Lang']) and $player_row['Lang'] !== 'C' )
+      if( !empty($_GET['language']) )
+         $language = $_GET['language'];
+      else if( !empty($player_row['Lang']) )
          $language = $player_row['Lang'];
       else
+         $language = 'C';
+
+      if( $language === 'C' )
          $language = get_preferred_browser_language();
 
       if( empty($language) )
          $language = 'en.iso-8859-1';
       //else call to get_preferred_browser_language() for each $group
+
+      $language_used = $language;
+      @list(,$encoding_used) = explode('.', $language);
    }
 
-
-   if( empty($language) || strtolower($language)!='en.iso-8859-1' )
-   { //replace 'To#2' and 'From#2'
-   $filename = "translations/en.iso-8859-1" . '_' . $group . '.php';
-
-   if( file_exists( $filename ) )
+   //preload 'To#2' and 'From#2' if missing in the language
+   if( strtolower($language)!='en.iso-8859-1' )
    {
-      include_once( $filename );
-   }
-   }
-
-
-   if( !empty($language) )
-   {
-      $filename = "translations/$language" . '_' . $group . '.php';
+      $filename = "translations/en.iso-8859-1_${group}.php";
 
       if( file_exists( $filename ) )
       {
          include_once( $filename );
       }
-      $language_used = $language;
-      list(,$encoding_used) = explode('.', $language);
+   }
+
+   if( !empty($language) )
+   {
+      $filename = "translations/${language}_${group}.php";
+
+      if( file_exists( $filename ) )
+      {
+         include_once( $filename );
+      }
+
    }
 
 }
