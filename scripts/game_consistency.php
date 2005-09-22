@@ -49,7 +49,7 @@ require_once( "include/move.php" );
    else
       $where = "";
 
-   if( ($lim=@$_REQUEST['limite']) > 0 )
+   if( ($lim=@$_REQUEST['limit']) > 0 )
       $limit = " LIMIT $lim";
    else
       $limit = "";
