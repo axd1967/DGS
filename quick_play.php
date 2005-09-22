@@ -87,7 +87,8 @@ else
       error("unknown_game");
 
    $Last_X = $Last_Y = -1;
-   extract(mysql_fetch_assoc($result));
+   $game_row=mysql_fetch_assoc($result);
+   extract($game_row);
 
    if( $Status == 'INVITED' )
    {
