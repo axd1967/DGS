@@ -258,9 +258,10 @@ function interleave_data($arrayX, $arrayY)
    if( isset($_GET['startyear']) and isset($_GET['startmonth']) )
       $starttime = max($starttime, mktime(0,0,0,$_GET['startmonth'],1,$_GET['startyear']));
 
-   $endtime = $NOW + $ratingpng_min_interval;
    if( isset($_GET['endyear']) and isset($_GET['endmonth']) )
       $endtime = min($endtime, mktime(0,0,0,$_GET['endmonth']+1,0,$_GET['endyear']));
+
+   $endtime = max( $endtime, $starttime + $ratingpng_min_interval);
 
    get_rating_data(@$_GET["uid"]);
    //$nr_games is the number of games before the graph start
