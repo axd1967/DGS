@@ -42,7 +42,7 @@ require_once( "include/countries.php" );
 
    $result = mysql_query(
       "SELECT *," .
-      "IFNULL(100*Won/Finished,-0.01) AS Percent, " .
+      "ROUND(100*Won/RatedGames) AS Percent, " .
       "UNIX_TIMESTAMP(Lastaccess) as Time," .
       "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
       "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
@@ -102,12 +102,14 @@ require_once( "include/countries.php" );
          '</font></b></td><td>' . echo_day(floor($row['OnVacation'])) . ' ' .T_('left') . "</td></tr>\n";
    }
 
+    $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
    echo '
     <tr><td><b>' . T_('Running games') . '</b></td><td>' . $row['Running'] . '</td></tr>
     <tr><td><b>' . T_('Finished games') . '</b></td><td>' . $row['Finished'] . '</td></tr>
+    <tr><td><b>' . T_('Rated games') . '</b></td><td>' . $row['RatedGames'] . '</td></tr>
     <tr><td><b>' . T_('Won games') . '</b></td><td>' . $row['Won'] . '</td></tr>
     <tr><td><b>' . T_('Lost games') . '</b></td><td>' . $row['Lost'] . '</td></tr>
-    <tr><td><b>' . T_('Percent') . '</b></td><td>' . round($row['Percent']) . '%</td></tr>
+    <tr><td><b>' . T_('Percent') . '</b></td><td>' . $percent . '</td></tr>
 ';
 
    echo " </table>\n";

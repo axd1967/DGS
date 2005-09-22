@@ -540,15 +540,15 @@ if( HOT_SECTION )
       else
       {
 //         update_rating($gid);
-         $rated_status = update_rating2($gid);
+         $rated_status = update_rating2($gid); //0=rated game
 
-         mysql_query( "UPDATE Players SET Running=Running-1" .
-                      (!$rated_status ? '' : ", Finished=Finished+1" .
+         mysql_query( "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
+                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                        ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$White_ID LIMIT 1" );
 
-         mysql_query( "UPDATE Players SET Running=Running-1" .
-                      (!$rated_status ? '' : ", Finished=Finished+1" .
+         mysql_query( "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
+                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                        ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$Black_ID LIMIT 1" );
 

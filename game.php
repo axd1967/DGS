@@ -633,7 +633,7 @@ function draw_game_info($game_row)
       echo "</td>\n";
       echo "   </tr>\n";
 
-    echo '   <tr><td>' . T_('Rated') . ': </td><td colspan=2>' .
+    echo '   <tr><td>' . T_('Rated game') . ': </td><td colspan=2>' .
       ( $game_row['Rated'] == 'N' ? T_('No') : T_('Yes') ) . "</td></tr>\n";
     echo "    </table>\n";
 }

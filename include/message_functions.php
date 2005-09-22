@@ -422,7 +422,7 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
          ' </td></tr>' . "\n";
    }
 
-    echo '<tr><td><b>' . T_('Rated') . '</b></td><td>' .
+   echo '<tr><td><b>' . T_('Rated game') . '</b></td><td>' .
        ( $Rated == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
    echo '<tr><td><b>' . T_('Clock runs on weekends') . '</b></td><td>' .
        ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";

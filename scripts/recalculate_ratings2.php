@@ -39,6 +39,8 @@ require_once( "include/rating.php" );
     error("adminlevel_too_low");
 
 
+   start_html( 'recalculate_ratings2', 0);
+
    if( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) { 
@@ -78,12 +80,12 @@ require_once( "include/rating.php" );
 
    echo "<p>Game:";
    $count=0; $tot=0;
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysql_fetch_assoc( $result ) )
    {
       echo ' ' . $row["gid"];
       if( $do_it )
       {
-         $rated_status = update_rating2($row["gid"], false/*=check_done*/);
+         $rated_status = update_rating2($row["gid"], false/*=check_done*/); //0=rated game
          if( $rated_status == 0 )
             $count++;
          else
@@ -92,5 +94,8 @@ require_once( "include/rating.php" );
       $tot++;
    }
    echo "\n<p>Finished!<br>$count/$tot rated games.\n";
+
+
+   end_html();
 }
 ?>

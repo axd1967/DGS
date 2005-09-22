@@ -287,7 +287,7 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
          , !$good_rating, T_('Out of range'));
    echo show_game_row( T_('Time limit'), echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods));
    echo show_game_row( T_('Number of games'), $nrGames);
-   echo show_game_row( T_('Rated'), $Rated == 'Y' ? T_('Yes') : T_('No'));
+   echo show_game_row( T_('Rated game'), $Rated == 'Y' ? T_('Yes') : T_('No'));
    echo show_game_row( T_('Clock runs on weekends'), $WeekendClock == 'Y' ? T_('Yes') : T_('No'));
    if( ENA_STDHANDICAP )
       echo show_game_row( T_('Standard placement'), $StdHandicap == 'Y' ? T_('Yes') : T_('No'));

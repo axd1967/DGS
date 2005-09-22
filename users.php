@@ -55,7 +55,7 @@ require_once( "include/countries.php" );
    $query = "SELECT *, Rank AS Rankinfo, " .
        "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
        "Running+Finished AS Games, " .
-       "IFNULL(ROUND(100*Won/Finished),-0.01) AS Percent, " .
+       "ROUND(100*Won/RatedGames) AS Percent, " .
        "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
        "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
        "FROM Players $where_clause ORDER BY $order";
@@ -74,6 +74,7 @@ require_once( "include/countries.php" );
    $utable->add_tablehead(7, T_('Games'), 'Games', true);
    $utable->add_tablehead(8, T_('Running'), 'Running', true);
    $utable->add_tablehead(9, T_('Finished'), 'Finished', true);
+   $utable->add_tablehead(17, T_('Rated'), 'RatedGames', true);
    $utable->add_tablehead(10, T_('Won'), 'Won', true);
    $utable->add_tablehead(11, T_('Lost'), 'Lost', true);
    $utable->add_tablehead(12, T_('Percent'), 'Percent', true);
@@ -84,15 +85,6 @@ require_once( "include/countries.php" );
    while( $row = mysql_fetch_array( $result ) )
    {
       $ID = $row['ID'];
-      $percent = ( $row["Finished"] == 0 ? '' : $row["Percent"]. '%' );
-      $a = $row['ActivityLevel'];
-      $activity = ( $a == 0 ? '' :
-                    ( $a == 1 ? '<img align=middle alt="*" src=images/star2.gif>' :
-                      '<img align=middle alt="*" src=images/star.gif>' .
-                      '<img align=middle alt="*" src=images/star.gif>' ) );
-
-      $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
-      $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
 
       $urow_strings = array();
       if( $utable->Is_Column_Displayed[1] )
@@ -123,18 +115,36 @@ require_once( "include/countries.php" );
          $urow_strings[8] = '<td>' . $row['Running'] . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[9] )
          $urow_strings[9] = '<td>' . $row['Finished'] . '&nbsp;</td>';
+      if( $utable->Is_Column_Displayed[17] )
+         $urow_strings[17] = '<td>' . $row['RatedGames'] . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[10] )
          $urow_strings[10] = '<td>' . $row['Won'] . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[11] )
          $urow_strings[11] = '<td>' . $row['Lost'] . '&nbsp;</td>';
       if( $utable->Is_Column_Displayed[12] )
+      {
+         $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
          $urow_strings[12] = '<td>' . $percent . '&nbsp;</td>';
+      }
       if( $utable->Is_Column_Displayed[13] )
+      {
+         $a = $row['ActivityLevel'];
+         $activity = ( $a == 0 ? '' :
+                    ( $a == 1 ? '<img align=middle alt="*" src=images/star2.gif>' :
+                      '<img align=middle alt="*" src=images/star.gif>' .
+                      '<img align=middle alt="*" src=images/star.gif>' ) );
          $urow_strings[13] = '<td>' . $activity . '&nbsp;</td>';
+      }
       if( $utable->Is_Column_Displayed[14] )
+      {
+         $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
          $urow_strings[14] = '<td>' . $lastaccess . '&nbsp;</td>';
+      }
       if( $utable->Is_Column_Displayed[15] )
+      {
+         $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
          $urow_strings[15] = '<td>' . $lastmove . '&nbsp;</td>';
+      }
 
       $utable->add_row( $urow_strings );
    }

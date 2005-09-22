@@ -49,6 +49,7 @@ CREATE TABLE Players (
   StatusFolders varchar(40) NOT NULL default '',
   Running int(11) NOT NULL default '0',
   Finished int(11) NOT NULL default '0',
+  RatedGames int(11) NOT NULL default '0',
   Won int(11) NOT NULL default '0',
   Lost int(11) NOT NULL default '0',
   Translator varchar(160) NOT NULL default '',
@@ -599,6 +600,7 @@ CREATE TABLE FAQ (
   SortOrder int(11) NOT NULL default '0',
   Question int(11) default NULL,
   Answer int(11) default NULL,
+  Hidden enum('N','Y') NOT NULL default 'N',
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 

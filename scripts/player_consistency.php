@@ -62,6 +62,11 @@ require_once( "include/std_functions.php" );
    else
       $where = "" ;
 
+   if( ($lim=@$_REQUEST['limite']) > 0 )
+      $limit = " LIMIT $lim";
+   else
+      $limit = "";
+
    $is_rated = " AND Games.Rated!='N'" ;
    //$is_rated.= " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
 
@@ -69,9 +74,9 @@ require_once( "include/std_functions.php" );
 
    //count(Games.ID) and LEFT JOIN Games ON are used to find when Run=0 and Running!=0
    $query = "SELECT Players.ID, count(Games.ID) AS Run, Running FROM Players " .
-            "LEFT JOIN Games ON Status!='INVITED' AND Status!='FINISHED'$where " .
+            "LEFT JOIN Games ON Status!='INVITED' AND Status!='FINISHED' " .
             "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
-            "GROUP BY Players.ID HAVING Run!=Running";
+            "GROUP BY Players.ID HAVING Run!=Running$where$limit";
    $result = mysql_query( $query)
       or die("Run.A: " . mysql_error());
 
@@ -88,9 +93,9 @@ require_once( "include/std_functions.php" );
 
    //count(Games.ID) and LEFT JOIN Games ON are used to find when Fin=0 and Finished!=0
    $query = "SELECT Players.ID, count(Games.ID) AS Fin, Finished FROM Players " .
-            "LEFT JOIN Games ON Status='FINISHED'$where$is_rated " .
+            "LEFT JOIN Games ON Status='FINISHED' " .
             "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
-            "GROUP BY Players.ID HAVING Fin!=Finished";
+            "GROUP BY Players.ID HAVING Fin!=Finished$where$limit";
    $result = mysql_query( $query)
       or die("Fin.A: " . mysql_error());
 
@@ -105,56 +110,79 @@ require_once( "include/std_functions.php" );
    echo "<br>Finished Done.";
 
 
-   //count(Games.ID) and LEFT JOIN Games ON are used to find when W=0 and Won!=0
-   $query = "SELECT Players.ID, count(Games.ID) AS W, Won FROM Players " .
-            "LEFT JOIN Games ON Status='FINISHED'$where$is_rated " .
+   //count(Games.ID) and LEFT JOIN Games ON are used to find when Rat=0 and RatedGames!=0
+   $query = "SELECT Players.ID, count(Games.ID) AS Rat, RatedGames FROM Players " .
+            "LEFT JOIN Games ON Status='FINISHED'$is_rated " .
+            "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
+            "GROUP BY Players.ID HAVING Rat!=RatedGames$where$limit";
+   $result = mysql_query( $query)
+      or die("Rat.A: " . mysql_error());
+
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      extract($row);
+      echo "<br>ID: $ID  Rated: $RatedGames  Should be: $Rat";
+
+      dbg_query("UPDATE Players SET RatedGames=$Rat WHERE ID=$ID LIMIT 1");
+   }
+
+   echo "<br>Rated Done.";
+
+
+   //count(Games.ID) and LEFT JOIN Games ON are used to find when Win=0 and Won!=0
+   $query = "SELECT Players.ID, count(Games.ID) AS Win, Won FROM Players " .
+            "LEFT JOIN Games ON Status='FINISHED'$is_rated " .
             "AND ((Black_ID=Players.ID AND Score<0) " .
               "OR (White_ID=Players.ID AND Score>0)) " .
-            "GROUP BY Players.ID HAVING W!=Won";
+            "GROUP BY Players.ID HAVING Win!=Won$where$limit";
    $result = mysql_query( $query)
       or die("Won.A: " . mysql_error());
 
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Won: $Won  Should be: $W";
+      echo "<br>ID: $ID  Won: $Won  Should be: $Win";
 
-      dbg_query("UPDATE Players SET Won=$W WHERE ID=$ID LIMIT 1");
+      dbg_query("UPDATE Players SET Won=$Win WHERE ID=$ID LIMIT 1");
    }
 
    echo "<br>Won Done.";
 
 
-   //count(Games.ID) and LEFT JOIN Games ON are used to find when L=0 and Lost!=0
-   $query = "SELECT Players.ID, count(Games.ID) AS L, Lost FROM Players " .
-            "LEFT JOIN Games ON Status='FINISHED'$where$is_rated " .
+   //count(Games.ID) and LEFT JOIN Games ON are used to find when Los=0 and Lost!=0
+   $query = "SELECT Players.ID, count(Games.ID) AS Los, Lost FROM Players " .
+            "LEFT JOIN Games ON Status='FINISHED'$is_rated " .
             "AND ((Black_ID=Players.ID AND Score>0) " .
               "OR (White_ID=Players.ID AND Score<0)) " .
-            "GROUP BY Players.ID HAVING L!=Lost";
+            "GROUP BY Players.ID HAVING Los!=Lost$where$limit";
    $result = mysql_query( $query)
       or die("Los.A: " . mysql_error());
 
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Lost: $Lost  Should be: $L";
+      echo "<br>ID: $ID  Lost: $Lost  Should be: $Los";
 
-      dbg_query("UPDATE Players SET Lost=$L WHERE ID=$ID LIMIT 1");
+      dbg_query("UPDATE Players SET Lost=$Los WHERE ID=$ID LIMIT 1");
    }
 
    echo "<br>Lost Done.";
 
 
-   //Finished = Won + Lost consistency
-   $result = mysql_query("SELECT Players.ID, Finished, Won, Lost FROM Players " .
-                         "WHERE Finished!=(Won+Lost)$where")
+   //RatedGames = Won + Lost + Jigo consistency
+   $query = "SELECT Players.ID, count(Games.ID) AS Jigo, Won, Lost, RatedGames FROM Players " .
+            "LEFT JOIN Games ON Status='FINISHED'$is_rated " .
+            "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
+            "AND Score=0 " .
+            "GROUP BY Players.ID HAVING RatedGames!=(Won+Lost+Jigo)$where$limit";
+   $result = mysql_query( $query)
       or die("Cnt.A: " . mysql_error());
 
    $err = 0;
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Counts: (F=$Finished) != ((W=$Won) + (L=$Lost))";
+      echo "<br>ID: $ID  Counts: (Rat=$RatedGames) != (Won=$Won) + (Los=$Lost) + (Jig=$Jigo)";
       $err++;
    }
    if( $err )
@@ -163,21 +191,42 @@ require_once( "include/std_functions.php" );
    echo "<br>Counts Done.";
 
 
-   //Various check
-   $result = mysql_query("SELECT Players.ID, ClockUsed, " .
-                         "RatingStatus, Rating2, RatingMin, RatingMax " .
-                         "FROM Players " .
-                         "WHERE (" .
-                           "(RatingStatus='RATED' AND (Rating2>=RatingMax OR Rating2<=RatingMin) ) " .
-                           "OR NOT((ClockUsed>=0 AND ClockUsed<24) OR (ClockUsed>=100 AND ClockUsed<124))" .
-                         ")$where")
-      or die("Cnt.A: " . mysql_error());
+   //RatedGames && Ratinglog consistency
+   $query = "SELECT Players.ID, count(Ratinglog.ID) AS Log, RatedGames FROM Players " .
+            "LEFT JOIN Ratinglog ON uid=Players.ID " .
+            "GROUP BY Players.ID HAVING Log!=RatedGames$where$limit";
+   $result = mysql_query( $query)
+      or die("Log.A: " . mysql_error());
 
    $err = 0;
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Misc: ClockUsed=$ClockUsed, RatingMin, Rating2, RatingMax.";
+      echo "<br>ID: $ID  Ratinglog: $Log  Should be: $RatedGames";
+      $err++;
+   }
+   if( $err )
+      echo "<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
+
+   echo "<br>RatinLog Done.";
+
+
+   //Various check
+   $query = "SELECT Players.ID, ClockUsed, " .
+                         "RatingStatus, Rating2, RatingMin, RatingMax " .
+                         "FROM Players " .
+                         "WHERE (" .
+                           "(RatingStatus='RATED' AND (Rating2>=RatingMax OR Rating2<=RatingMin) ) " .
+                           "OR NOT((ClockUsed>=0 AND ClockUsed<24) OR (ClockUsed>=100 AND ClockUsed<124))" .
+            ")$where$limit";
+   $result = mysql_query( $query)
+      or die("Mis.A: " . mysql_error());
+
+   $err = 0;
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      extract($row);
+      echo "<br>ID: $ID  Misc: ClockUsed=$ClockUsed, $RatingMin &lt; $Rating2 &lt; $RatingMax.";
       $err++;
    }
    if( $err )
