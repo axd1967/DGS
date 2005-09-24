@@ -250,7 +250,7 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 
    $mform->add_row( array( 'DESCRIPTION', T_('Clock runs on weekends'),
                            'CHECKBOX', 'weekendclock', 'Y', "", $Weekendclock ) );
-   $mform->add_row( array( 'DESCRIPTION', T_('Rated'),
+   $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
                            'CHECKBOX', 'rated', 'Y', "", $Rated ) );
 }
 
