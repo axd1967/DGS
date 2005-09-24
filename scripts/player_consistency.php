@@ -71,8 +71,13 @@ require_once( "include/std_functions.php" );
    //$is_rated.= " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
 
 
+/********* CAUTION:
+  This test does not detect an inconsistency:
+   because of count(Games.ID) and LEFT JOIN Games ON,
+   a Run=0 case return nothing even if Running!=0.
+  The fommowing tests have a similar defect.
+**********/
 
-   //count(Games.ID) and LEFT JOIN Games ON are used to find when Run=0 and Running!=0
    $query = "SELECT Players.ID, count(Games.ID) AS Run, Running FROM Players " .
             "LEFT JOIN Games ON Status!='INVITED' AND Status!='FINISHED' " .
             "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
@@ -91,7 +96,6 @@ require_once( "include/std_functions.php" );
    echo "<br>Running Done.";
 
 
-   //count(Games.ID) and LEFT JOIN Games ON are used to find when Fin=0 and Finished!=0
    $query = "SELECT Players.ID, count(Games.ID) AS Fin, Finished FROM Players " .
             "LEFT JOIN Games ON Status='FINISHED' " .
             "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
@@ -110,7 +114,6 @@ require_once( "include/std_functions.php" );
    echo "<br>Finished Done.";
 
 
-   //count(Games.ID) and LEFT JOIN Games ON are used to find when Rat=0 and RatedGames!=0
    $query = "SELECT Players.ID, count(Games.ID) AS Rat, RatedGames FROM Players " .
             "LEFT JOIN Games ON Status='FINISHED'$is_rated " .
             "AND (Players.ID=White_ID OR Players.ID=Black_ID) " .
@@ -129,7 +132,6 @@ require_once( "include/std_functions.php" );
    echo "<br>Rated Done.";
 
 
-   //count(Games.ID) and LEFT JOIN Games ON are used to find when Win=0 and Won!=0
    $query = "SELECT Players.ID, count(Games.ID) AS Win, Won FROM Players " .
             "LEFT JOIN Games ON Status='FINISHED'$is_rated " .
             "AND ((Black_ID=Players.ID AND Score<0) " .
@@ -149,7 +151,6 @@ require_once( "include/std_functions.php" );
    echo "<br>Won Done.";
 
 
-   //count(Games.ID) and LEFT JOIN Games ON are used to find when Los=0 and Lost!=0
    $query = "SELECT Players.ID, count(Games.ID) AS Los, Lost FROM Players " .
             "LEFT JOIN Games ON Status='FINISHED'$is_rated " .
             "AND ((Black_ID=Players.ID AND Score>0) " .
@@ -211,7 +212,7 @@ require_once( "include/std_functions.php" );
    echo "<br>RatinLog Done.";
 
 
-   //Various check
+   //Various checks
    $query = "SELECT Players.ID, ClockUsed, " .
                          "RatingStatus, Rating2, RatingMin, RatingMax " .
                          "FROM Players " .
