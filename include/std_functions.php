@@ -61,7 +61,7 @@ $bg_color='"#F7F5E3"';  // change in dragon.css too!
 $menu_bg_color='"#0C41C9"';
 $menu_fg_color='"#FFFC70"';
 
-$max_links_in_main_menu=8;
+$max_links_in_main_menu=5;
 
 
 //This car will be a part of a URI query. From RFC 2396 unreserved
@@ -82,13 +82,14 @@ $table_row_color2='"#E0E8ED"';
 
 $h3_color='"#800000"';
 
-$button_max = 10;
+$button_max = 11;
+$button_width = 96;
 $buttonfiles = array('button0.gif','button1.gif','button2.gif','button3.gif',
                      'button4.gif','button5.gif','button6.gif','button7.gif',
-                     'button8.png','button9.png','button10.png');
+                     'button8.png','button9.png','button10.png','button8.png');
 $buttoncolors = array('white','white','white','white',
                       '#990000','white','white','white',
-                      'white','white','white');
+                      'white','white','white','black');
 
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
@@ -106,6 +107,7 @@ define('DELETE_LIMIT', 10);
 
 define('MAX_SEKI_MARK', 2);
 
+//-----
 define("NONE", 0); //i.e. DAME
 define("BLACK", 1);
 define("WHITE", 2);
@@ -121,7 +123,11 @@ define("BLACK_DEAD", OFFSET_MARKED+BLACK);
 define("WHITE_DEAD", OFFSET_MARKED+WHITE);
 
 define("FLAG_NOCLICK", 0x10); //keep it a power of 2
+//-----
 
+//Database values:
+define("MARKED_BY_WHITE", 7);
+define("MARKED_BY_BLACK", 8);
 
 define('POSX_PASS', -1);
 define('POSX_SCORE', -2);
@@ -139,21 +145,20 @@ define('MAX_HANDICAP',21);
 define('ENA_STDHANDICAP',1);
 
 
-//Database values:
-define("MARKED_BY_WHITE", 7);
-define("MARKED_BY_BLACK", 8);
-
 //keep next constants powers of 2
 define("KO", 0x01);
 
+//-----
 define("LEFT",0x01);
 define("UP",0x02);
 define("RIGHT",0x04);
 define("DOWN",0x08);
 define("SMOOTH_EDGE",0x10);
 define("OVER",0x20);
+//-----
 
 
+//-----
 define("ADMIN_TRANSLATORS",0x01);
 define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
@@ -162,8 +167,10 @@ define("ADMIN_TIME",0x10);
 define("ADMIN_ADD_ADMIN",0x20);
 define("ADMIN_PASSWORD",0x40);
 define('ADMIN_DATABASE',0x80);
+//-----
 
 
+//-----
 define("FOLDER_NONE", -1);
 define("FOLDER_ALL_RECEIVED", 0);
 //Valid folders must be > FOLDER_ALL_RECEIVED
@@ -173,7 +180,7 @@ define("FOLDER_REPLY", 3);
 define("FOLDER_DELETED", 4);
 define("FOLDER_SENT", 5);
 define("USER_FOLDERS", 6);
-
+//-----
 
 
 function fnop( $a)
@@ -568,7 +575,7 @@ function sysmsg($msg)
 
 //must never allow quotes, ampersand, < and >
 define('HANDLE_LEGAL_REGS', '-_+a-zA-Z0-9');
-define('HANDLE_TAG_CHAR', '='); //not in HANDLE_LEGAL_REGS or in "<>"
+define('HANDLE_TAG_CHAR', '='); //not in HANDLE_LEGAL_REGS or in HTML "<>"
 define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'.,:;?!%*');
 
 function illegal_chars( $string, $punctuation=false )
@@ -576,7 +583,7 @@ function illegal_chars( $string, $punctuation=false )
    if( $punctuation )
       $regs = PASSWORD_LEGAL_REGS;
    else
-      $regs = HANDLE_LEGAL_REGS;
+      $regs = 'a-zA-Z]['.HANDLE_LEGAL_REGS;
 
    return !ereg( "^[$regs]+\$", $string);
 }
@@ -922,6 +929,7 @@ function textarea_safe( $msg, $charenc=false)
    return $msg;
 }
 
+//keep the parts readable by an observer
 function game_tag_filter( $msg)
 {
    $nr_matches = preg_match_all(
@@ -1172,7 +1180,7 @@ function check_password( $userid, $password, $new_password, $given_password )
 function write_to_file( $filename, $string_to_write )
 {
   $fp = fopen( $filename, 'w' )
-    or error( "couldnt_open_file" );
+    or error( "couldnt_open_file", $filename );
 
   fwrite( $fp, $string_to_write );
   fclose( $fp );
@@ -1287,10 +1295,11 @@ function user_reference( $link, $safe, $color, $player_id, $player_name=false, $
       $player_id = $player_id['ID'];
    }
    $legal = 1;
-   if( is_string($player_id) && $player_id{0}==HANDLE_TAG_CHAR )
+   if( !is_numeric($player_id) || $player_id{0}==HANDLE_TAG_CHAR )
    {
       $byid = 0;
-      $player_id = substr($player_id,1);
+      if( $player_id{0}==HANDLE_TAG_CHAR )
+         $player_id = substr($player_id,1);
       if( illegal_chars( $player_id) )
          $legal = 0;
    }
@@ -1467,25 +1476,55 @@ function limit($val, $minimum, $maximum, $default)
    return $val;
 }
 
-function str_TD_class_button( &$browser)
+function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
 {
-   return "<td class=button width=94 align=center>";
+   $str = "<img border=0 src=\"$src\" alt=\"$alt\"";
+   if( $title )
+     $str.= " title=\"$title\"";
+   if( $height>=0 )
+     $str.= " height=\"$height\"";
+   if( $width>=0 )
+     $str.= " width=\"$width\"";
+   if( $attbs )
+     $str.= ' '.$attbs;
+   return $str.'>';
 }
 
-function button_style()
+function anchor( $href, $text='', $title='', $attbs='')
 {
-   global $player_row, $buttoncolors, $buttonfiles, $button_max;
+   $str = "<a href=\"$href\"";
+   if( $title )
+     $str.= " title=\"$title\"";
+   if( $attbs )
+     $str.= ' '.$attbs;
+   return $str.">$text</a>";
+}
 
-   $button_nr = $player_row["Button"];
+function str_TD_class_button( $href, $text='')
+{
+   return "<td class=button><a class=button href=\"$href\">&nbsp;$text&nbsp;</a></td>";
+}
+
+function button_style( $button_nr=0)
+{
+   global $buttoncolors, $buttonfiles, $button_max, $button_width;
 
    if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
       $button_nr = 0;
 
-   return 'a.button { color : ' . $buttoncolors[$button_nr] .
-      ';  font : bold 100% sans-serif;  text-decoration : none;  width : 94px; }
-td.button { background-image : url(images/' . $buttonfiles[$button_nr] . ');' .
-      'background-repeat : no-repeat;  background-position : center; }';
-
+   return 
+     "a.button {" .
+       " color: {$buttoncolors[$button_nr]};" .
+       " font: bold 100% sans-serif;" .
+       " text-decoration: none;" .
+     "}\n" .
+     "td.button {" .
+       " background-image: url(images/{$buttonfiles[$button_nr]});" .
+       " background-repeat: no-repeat;" .
+       " background-position: center;" .
+       " text-align: center;" .
+       " width: {$button_width}px;" .
+     "}";
 }
 
 ?>

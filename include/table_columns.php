@@ -63,6 +63,8 @@ class Table
    var $Static_Columns;
    /*! \brief The columns that has been removed. */
    var $Removed_Columns;
+   /*! \brief The number of columns displayed, known after make_tablehead() */
+   var $Shown_Columns;
 
    /*! \brief Boolean array used to check if the column should be display. */
    var $Is_Column_Displayed;
@@ -101,6 +103,7 @@ class Table
          global $table_row_color1, $table_row_color2, $RowsPerPage, $player_row;
 
          $this->Removed_Columns = NULL;
+         $this->Shown_Columns = 0;
          $this->Tableheads = array();
          $this->Tablerows = array();
 
@@ -187,38 +190,40 @@ class Table
       {
          global $table_head_color;
 
-         $string = '';
+         /* Make tableheads */
+
+         $this->Shown_Columns = 0;
+         $head_row = " <tr bgcolor=$table_head_color>\n";
+         foreach( $this->Tableheads as $thead )
+         {
+            $head_row .= $this->make_tablehead( $thead );
+         }
+         $head_row .= " </tr>\n";
+
+         $next_prev_row= $this->make_next_prev_links();
 
          /* Start of the table */
 
-         $string = '<a name="' . $this->Prefix . 'tbl"></a>'
-                 . "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
-         $string.= $this->make_next_prev_links();
-
-         /* Make tableheads */
-
-         $string .= " <tr bgcolor=$table_head_color>\n";
-         foreach( $this->Tableheads as $thead )
-            {
-               $string .= $this->make_tablehead( $thead );
-            }
-         $string .= " </tr>\n";
+         $string = "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
+         $string .= $next_prev_row;
+         $string .= $head_row;
 
          /* Make table rows */
 
          foreach( $this->Tablerows as $trow )
-            {
-               $string .= $this->make_tablerow( $trow );
-            }
+         {
+            $string .= $this->make_tablerow( $trow );
+         }
 
          /* End of the table */
 
-         $string .= $this->make_next_prev_links();
+         $string .= $next_prev_row;
+
          $tmp = $this->make_add_column_form();
          if( !$tmp )
            $tmp = '&nbsp;';
          $string .= ' <tr><td colspan=99 align=right>'
-              . '<a name="' . $this->Prefix . 'tblac"></a>'. $tmp
+              . "$tmp<a name=\"{$this->Prefix}tblac\"></a>"
               . "</td></tr>\n";
 
          $string .= "</table>\n";
@@ -243,14 +248,16 @@ class Table
             return "";
          }
 
+         $this->Shown_Columns++;
+
          $string = "  <th nowrap valign=\"bottom\"";
 
          if( !is_null( $tablehead['Width'] ) )
          {
-            $string .= " width=\"" . $tablehead['Width'] . "\"";
+            $string .= " width=\"{$tablehead['Width']}\"";
          }
 
-         $string .= ">";
+         $string .= '>';
 
          if( $tablehead['Sort_String'] )
          {
@@ -279,7 +286,7 @@ class Table
                                                    $this->Desc1);
             }
 
-            $string .= '#' . $this->Prefix . 'tbl" title="' . T_('Sort') . '">' .
+            $string .= "#{$this->Prefix}tbl$nr\" title=\"" . T_('Sort') . '">' .
                "<font color=\"black\">" . $tablehead['Description'] .
                "</font></a>";
          }
@@ -291,14 +298,13 @@ class Table
          if( !$tablehead['Undeletable'] && !$this->Static_Columns)
          {
             $string .=
-               "<a href=\"" . $this->Page .
-               $this->current_sort_string( true ) .
-               $this->Prefix . "del=" . $nr . 
-               '#' . $this->Prefix . 'tbl" title="' . T_('Hide') . '">' .
+               "<a href=\"{$this->Page}" . $this->current_sort_string( true ) .
+               "{$this->Prefix}del=$nr#{$this->Prefix}tblac\"" .
+               " title=\"" . T_('Hide') . '">' .
                "<sup><font size=\"-1\" color=\"red\">x</font></sup></a>";
          }
 
-         $string .= "</th>\n";
+         $string .= "<a name=\"{$this->Prefix}tbl$nr\"></a></th>\n";
 
          return $string;
       }
@@ -330,14 +336,21 @@ class Table
             list(, $bgcolor) = each( $this->Row_Colors );
          }
 
+         $hicolor = 'fF800040';
+
          if( isset($tablerow['BG_Color']) )
          {
-            $string = " <tr bgcolor=" . $tablerow['BG_Color'] .">\n";
+            $bgcolor = $tablerow['BG_Color'];
+            $hicolor = @$tablerow['HI_Color'];
          }
-         else
-         {
-            $string = " <tr bgcolor=$bgcolor>\n";
+
+         $string = " <tr bgcolor=$bgcolor";
+         if( $hicolor )
+         { //onClick onmousedown ondblclick
+            $hicolor = '"#'.strtolower(blend_alpha_hex($hicolor,substr($bgcolor, 2, 6))).'"';
+            $string.= " ondblclick='javascript:this.bgColor=((this.bgColor.toLowerCase()==$hicolor)?$bgcolor:$hicolor);'";
          }
+         $string.= ">\n";
 
          foreach( $this->Tableheads as $th )
             {
@@ -356,31 +369,47 @@ class Table
    /*! \brief Add next and prev links. */
    function make_next_prev_links()
       {
-         if ( $this->Rows_Per_Page <= 0 )
+         if ( $this->Rows_Per_Page <= 0 or $this->Shown_Columns <= 0
+               or !( $this->From_Row > 0 or !$this->Last_Page ) )
             return '';
 
-         $string = "";
+         $string = 'align=bottom'; //'align=middle'
+         $button = '';
 
          if( $this->From_Row > 0 )
-         {
-            $string .= "  <td><a href=\"" . $this->Page .
-               $this->current_sort_string( true ) .
-               $this->Prefix . "from_row=" . ($this->From_Row-$this->Rows_Per_Page) .
-               "\">" . "&lt;-- " . T_("prev page") . "</a></td>\n";
-         }
+            $button.= anchor(
+                 $this->Page . $this->current_sort_string( true )
+               . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
+               , image( 'images/prev.gif', '&lt;=', '', $string)
+               , T_("prev page")
+               );
+
+         $button.= '&nbsp;'.floor($this->From_Row/$this->Rows_Per_Page+1).'&nbsp;';
 
          if( !$this->Last_Page )
-         {
-            $string .= "  <td align=\"right\" colspan=99><a href=\"" . $this->Page .
-               $this->current_sort_string( true ) .
-               $this->Prefix . "from_row=" . ($this->From_Row+$this->Rows_Per_Page) .
-               "\">" . T_("next page") . " --&gt;" . "</a></td>\n";
-         }
+            $button.= anchor(
+                 $this->Page . $this->current_sort_string( true )
+               . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
+               , image( 'images/next.gif', '=&gt;', '', $string)
+               , T_("next page")
+               );
 
-         if( !empty( $string ) )
-         {
+
+         $string = '';
+
+         $span = floor($this->Shown_Columns/2);
+         if( $span < 2 ) $span = $this->Shown_Columns;
+         if( $span > 0 )
+            $string.= '  <td' 
+              . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
+
+         $span = $this->Shown_Columns - $span;
+         if( $span > 0 )
+            $string.= '  <td align=right' 
+              . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
+
+         if( $string )
             $string = " <tr>\n $string </tr>\n";
-         }
 
          return $string;
       }
@@ -546,14 +575,19 @@ class Table
             }
          }
 
+         asort($this->Removed_Columns);
          $this->Removed_Columns[ 0 ] = '';
          $this->Removed_Columns[ -1 ] = T_('All columns');
-         asort($this->Removed_Columns);
+/*
+         $this->Removed_Columns = array_merge(
+               array( 0 => '', -1 => T_('All columns')),            
+               $this->Removed_Columns );
+*/
          array_push( $form_array,
                      'SELECTBOX', $this->Prefix . 'add', 1,
                      $this->Removed_Columns, '', false,
                      'SUBMITBUTTON', 'action', T_('Add Column') );
-         $ac_form = new Form( 'add_column_form', $page . '#' . $this->Prefix . 'tblac', FORM_GET );
+         $ac_form = new Form( 'add_column_form', $page . "#{$this->Prefix}tblac", FORM_GET );
          $ac_form->attach_table($this);
          $ac_form->add_row( $form_array );
          return $ac_form->get_form_string();
