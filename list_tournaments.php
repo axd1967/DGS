@@ -35,13 +35,13 @@ require_once( "include/tournament.php" );
 
    $my_id = $player_row["ID"];
 
-   start_page(T_("Tournaments"), true, $logged_in, $player_row, button_style() );
+   start_page(T_("Tournaments"), true, $logged_in, $player_row, button_style($player_row['Button']) );
 
    $result = mysql_query( "SELECT ID, State, Name FROM Tournament" );
 
    $table = new Table( 'list_tournaments.php', '', 't_' );
 
-   $table->add_tablehead( 1, T_('ID'), 'ID', false, true );
+   $table->add_tablehead( 0, T_('ID'), 'ID', false, true, $button_width);
    $table->add_tablehead( 2, T_('State'), 'State', false, true );
    $table->add_tablehead( 3, T_('Name'), 'Name', false, true );
    $table->add_tablehead( 4, T_('Organizer'), null, false, true );
@@ -71,9 +71,7 @@ require_once( "include/tournament.php" );
             TOUR_STATE_RUNNING           => " bgcolor=\"00F464\"",
             TOUR_STATE_FINISHED          => " bgcolor=\"FFA27A\"" );
 
-         $row_strings[1] = str_TD_class_button($player_row["Browser"]) .
-            "<a class=button href=\"show_tournament.php?tid=$ID\">" .
-            "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</a></td>";
+         $row_strings[0] = str_TD_class_button( "show_tournament.php?tid=$ID", $ID);
          $row_strings[2] = "<td" . $state_colors[ $State ] . ">" .
             $TourState_Strings[ $State ] . "</td>";
          $row_strings[3] = "<td nowrap>$Name</td>";

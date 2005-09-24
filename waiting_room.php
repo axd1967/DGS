@@ -46,7 +46,7 @@ require_once( "include/message_functions.php" );
 
    $page = "waiting_room.php" . ( @$_GET['info'] > 0 ? '?info=' . $_GET['info'] . URI_AMP : '?' );
 
-   start_page(T_("Waiting room"), true, $logged_in, $player_row, button_style() );
+   start_page(T_("Waiting room"), true, $logged_in, $player_row, button_style($player_row['Button']) );
 
    echo "<center>";
 
@@ -71,7 +71,7 @@ require_once( "include/message_functions.php" );
 
    if( @mysql_num_rows($result) > 0 )
    {
-      $wrtable->add_tablehead(0, T_('Info'), NULL, false, true, 92);
+      $wrtable->add_tablehead(0, T_('Info'), NULL, false, true, $button_width);
       $wrtable->add_tablehead(1, T_('Name'), 'Name', false);
       $wrtable->add_tablehead(2, T_('Userid'), 'Handle', false);
       $wrtable->add_tablehead(3, T_('Rating'), 'Rating', true);
@@ -104,9 +104,8 @@ require_once( "include/message_functions.php" );
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[0] )
-            $wrow_strings[0] = str_TD_class_button($player_row["Browser"]) .
-               "<A class=button href=\"waiting_room.php?info=$ID".URI_AMP."$orderstring#info\">" .
-               "&nbsp;&nbsp;&nbsp;" . T_('Info') . "&nbsp;&nbsp;&nbsp;</A></td>";
+            $wrow_strings[0] = str_TD_class_button(
+                   "waiting_room.php?info=$ID".URI_AMP."$orderstring#info", T_('Info'));
          if( $wrtable->Is_Column_Displayed[1] )
             $wrow_strings[1] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Name) . "</font></a></td>";

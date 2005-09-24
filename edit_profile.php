@@ -201,20 +201,22 @@ require_once( "include/countries.php" );
                                   'RADIOBUTTONS', 'menudir', $menu_directions,
                                   $player_row["MenuDirection"] ) );
 
-   $button_code  = "        <TABLE border=0 cellspacing=0 cellpadding=0>\n";
+
+
+   $button_code  = "        <TABLE border=0 cellspacing=0 cellpadding=2 width=520>\n";
    $button_code .= "          <TR>\n";
 
    for($i=0; $i<=$button_max; $i++)
    {
-      $font_style = 'color : ' . $buttoncolors[$i] .
-         ';  font : bold 100% sans-serif;  text-decoration : none;  width : 90px;';
-      $button_style = 'background-image : url(images/' . $buttonfiles[$i] . ');' .
-         'background-repeat : no-repeat;  background-position : center;';
+      $font_style = ' text-align: center; color: ' . $buttoncolors[$i] .
+         '; font: bold 100% sans-serif; text-decoration: none; width: '.$button_width.'px;';
+      $button_style = 'background-image: url(images/' . $buttonfiles[$i] .
+         '); background-repeat: no-repeat; background-position: center;';
 
-      $button_code .= '<TD valign=middle><INPUT type="radio" name="button" value=' . $i .
-         ( $i == $button_nr ? ' checked' : '') . '></TD><td width=10></td>' . "\n" .
-         '<TD width=92 height=21 align=center STYLE="' . $button_style . $font_style .
-         '">1348</TD><td width=20></td>';
+      $button_code .= '<td valign=middle><INPUT type="radio" name="button" value=' . $i .
+         ( $i == $button_nr ? ' checked' : '') . '></td>' . "\n" .
+         '<td STYLE="' . $font_style . $button_style .
+         '">1348</td><td width=14></td>' . "\n";
 
       if( $i % 4 == 3 )
          $button_code .= "</TR>\n<TR>\n";

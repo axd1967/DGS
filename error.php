@@ -267,7 +267,7 @@ require_once( "include/std_functions.php" );
 
       case("userid_illegal_chars"):
       {
-         echo T_("The userid contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+ are allowed.");
+         echo T_("The userid contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+ are allowed, and the first one must be a-z, A-Z.");
       }
       break;
 

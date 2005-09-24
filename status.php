@@ -37,7 +37,7 @@ require_once( "include/message_functions.php" );
 
    $my_id = $player_row["ID"];
 
-   start_page(T_('Status'), true, $logged_in, $player_row, button_style() );
+   start_page(T_('Status'), true, $logged_in, $player_row, button_style($player_row['Button']) );
 
    echo "<center>";
 
@@ -123,17 +123,17 @@ require_once( "include/message_functions.php" );
    }
    else
    {
-      $gtable->add_tablehead( 1, T_('ID'), NULL, false, true);
+      $gtable->add_tablehead( 0, T_('ID'), NULL, false, true, $button_width);
       $gtable->add_tablehead( 2, T_('sgf'));
       $gtable->add_tablehead( 3, T_('Opponent'));
-      $gtable->add_tablehead( 4, T_('Userid')); //, 'Handle');
+      $gtable->add_tablehead( 4, T_('Userid'));
       $gtable->add_tablehead(16, T_('Rating'));
       $gtable->add_tablehead( 5, T_('Color'));
       $gtable->add_tablehead( 6, T_('Size'));
       $gtable->add_tablehead( 7, T_('Handicap'));
       $gtable->add_tablehead( 8, T_('Komi'));
       $gtable->add_tablehead( 9, T_('Moves'));
-      $gtable->add_tablehead(14, T_('Rated')); //, 'Rated', true);
+      $gtable->add_tablehead(14, T_('Rated'));
       $gtable->add_tablehead(13, T_('Last Move'));
 
       while( $row = mysql_fetch_assoc( $result ) )
@@ -142,10 +142,8 @@ require_once( "include/message_functions.php" );
          extract($row);
 
          $grow_strings = array();
-         if( $gtable->Is_Column_Displayed[1] )
-            $grow_strings[1] = str_TD_class_button($player_row["Browser"]) .
-               "<A class=button href=\"game.php?gid=$ID\">" .
-               "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>";
+         //if( $gtable->Is_Column_Displayed[0] )
+            $grow_strings[0] = str_TD_class_button( "game.php?gid=$ID", $ID);
          if( $gtable->Is_Column_Displayed[2] )
             $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
                "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";

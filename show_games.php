@@ -188,11 +188,11 @@ require_once( "include/rating.php" );
       $title2 = sprintf(  $games_for, user_reference( REF_LINK, 1, '', $user_row) );
    }
 
-   start_page( $title1, true, $logged_in, $player_row, button_style() );
+   start_page( $title1, true, $logged_in, $player_row, button_style($player_row['Button']) );
 
    echo "<center><h3><font color=$h3_color>$title2</font></H3></center>\n";
 
-   $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true);
+   $gtable->add_tablehead( 0, T_('ID'), 'ID', true, true, $button_width);
    $gtable->add_tablehead( 2, T_('sgf'));
 
    if( $observe )
@@ -301,10 +301,8 @@ require_once( "include/rating.php" );
       extract($row);
 
       $grow_strings = array();
-      if( $gtable->Is_Column_Displayed[1] )
-         $grow_strings[1] = str_TD_class_button($player_row["Browser"]) .
-            "<A class=button href=\"game.php?gid=$ID\">" .
-            "&nbsp;&nbsp;&nbsp;$ID&nbsp;&nbsp;&nbsp;</A></td>";
+      //if( $gtable->Is_Column_Displayed[0] )
+         $grow_strings[0] = str_TD_class_button( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
             "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";
