@@ -178,7 +178,7 @@ class Board
    }
 
 
-   function stones_number( $start, $end)
+   function move_numbers( $start, $end)
    {
       $start = max( $start, 1);
       for( $n=$end; $n>=$start; $n-- )
@@ -191,18 +191,69 @@ class Board
             if( $m )
             {
                $b = @$this->array[$x][$y];
-               if( $b==$s )
+               if( !isset($this->marks[$m]) )
                {
-                  $this->marks[$m] = (($n-1)%100)+1;
+                  if( ($b & 0x3)==$s ) // or $s==($b^OFFSET_MARKED) )
+                  {
+                     $this->marks[$m] = (($n-1)%100)+1;
+                     continue;
+                  }
+                  if( $b==NONE )
+                  {
+                     $this->marks[$m] = 'x';
+                  }
                }
-               else if( $b==NONE )
-               {
-                  $this->marks[$m] = 'x';
-                  $this->captures[$n] = array( $s, $x, $y);
-               }
+               $this->captures[$n] = array( $s, $x, $y);
             }
          }
       }      
+   }
+
+
+   function draw_captures_box( $caption)
+   {
+      if( !is_array($this->captures) )
+         return false;
+      $n= count($this->captures);
+      if( $n < 1 )
+         return false;
+
+      $stone_size = $this->stone_size;
+      $size = $this->size;
+
+      $wcap= array();
+      $bcap= array();
+      foreach( $this->captures as $n => $sub )
+      {
+         list( $s, $x, $y) = $sub;
+         $m = number2board_coords( $x, $y, $size);
+         $r = (($n-1)%100)+1;
+         if( $s == BLACK )
+         {
+            array_unshift( $bcap,
+                  image( "$stone_size/b$r.gif", "X$n", '', 'align=middle')
+                   . "&nbsp;:&nbsp;$m<br>\n" );
+         }
+         else if( $s == WHITE )
+         {
+            array_unshift( $wcap,
+                  image( "$stone_size/w$r.gif", "O$n", '', 'align=middle')
+                   . "&nbsp;:&nbsp;$m<br>\n" );
+         }
+      }
+
+      echo "<table class=captures>\n";
+      echo "<tr>\n<th class=captures colspan=2>$caption</th>\n </tr>\n";
+      echo "<tr>\n<td class=bcaptures>\n";
+      foreach( $bcap as $s )
+         echo $s;
+      echo "</td>\n<td class=wcaptures>\n";
+      foreach( $wcap as $s )
+         echo $s;
+      echo "</td>\n</tr>\n";
+      echo "</table>\n";
+
+      return true;
    }
 
 

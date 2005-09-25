@@ -86,7 +86,7 @@ $button_max = 11;
 $button_width = 96;
 $buttonfiles = array('button0.gif','button1.gif','button2.gif','button3.gif',
                      'button4.gif','button5.gif','button6.gif','button7.gif',
-                     'button8.png','button9.png','button10.png','button8.png');
+                     'button8.png','button9.png','button10.png','button10.png');
 $buttoncolors = array('white','white','white','white',
                       '#990000','white','white','white',
                       'white','white','white','black');
@@ -101,7 +101,7 @@ $cookie_pref_rows = array(
        'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff',
        );
 
-$vacation_min_days = 5;
+$vacation_min_days = 2;
 
 define('DELETE_LIMIT', 10);
 
@@ -143,6 +143,7 @@ define('MAX_BOARD_SIZE',25);
 define('MAX_KOMI_RANGE',200);
 define('MAX_HANDICAP',21);
 define('ENA_STDHANDICAP',1);
+define('ENA_MOVENUMBERS',1);
 
 
 //keep next constants powers of 2
