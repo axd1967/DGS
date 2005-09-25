@@ -60,7 +60,7 @@ require_once( "include/std_functions.php" );
 
       case("illegal_position"):
       {
-         echo T_("Move outside board?");
+         echo T_("This move leads to an illegal board position.");
       }
       break;
 
