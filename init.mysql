@@ -38,6 +38,7 @@ CREATE TABLE Players (
   OnVacation double default '0',
   Woodcolor int(11) NOT NULL default '1',
   Boardcoords int(11) NOT NULL default '31',
+  MoveNumbers int(11) NOT NULL default '0',
   Button int(11) NOT NULL default '0',
   UsersColumns int(10) unsigned NOT NULL default '62',
   GamesColumns int(10) unsigned NOT NULL default '593910',

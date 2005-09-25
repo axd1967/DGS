@@ -23,11 +23,44 @@ td.r {
         text-decoration : none;
 }
 
-a.dead {
-        color : black;
-        text-decoration : none;
+
+table.captures {
+   background: #f7f5ff;
+   border: 0px;
+   border-bottom: 1px solid #0c41c9;
 }
 
+th.captures {
+   background: #0c41c9;
+   color: #fffc70;
+   padding: 4;
+}
+
+td.bcaptures {
+   vertical-align:top;
+   padding: 4;
+   white-space: nowrap;
+}
+
+td.wcaptures {
+   vertical-align:top;
+   padding: 4;
+   white-space: nowrap;
+}
+
+table.gamenotes {
+   border: 0px;
+}
+
+th.gamenotes {
+   background: #7aa07a;
+   color: #fffc70;
+   padding: 4;
+}
+
+td.gamenotes {
+   background: #ddf0dd;
+}
 
 img.s5 {
         width : 5px;

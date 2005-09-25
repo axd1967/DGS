@@ -348,26 +348,48 @@ require_once( "include/sgf_parser.php" );
      $movemsg = make_html_safe($movemsg, $html_mode );
    }
      
-   if ($Size >= $player_row["NotesCutoff"])
+   if( $show_notes )
    {
-     $notesheight = $player_row["NotesLargeHeight"];
-     $noteswidth = $player_row["NotesLargeWidth"];
-     $notesmode = $player_row["NotesLargeMode"];
-   }
-   else
-   {
-     $notesheight = $player_row["NotesSmallHeight"];
-     $noteswidth = $player_row["NotesSmallWidth"];
-     $notesmode = $player_row["NotesSmallMode"];
+      if ($Size >= $player_row["NotesCutoff"])
+      {
+        $notesheight = $player_row["NotesLargeHeight"];
+        $noteswidth = $player_row["NotesLargeWidth"];
+        $notesmode = $player_row["NotesLargeMode"];
+      }
+      else
+      {
+        $notesheight = $player_row["NotesSmallHeight"];
+        $noteswidth = $player_row["NotesSmallWidth"];
+        $notesmode = $player_row["NotesSmallMode"];
+      }
+      if( isset($_GET['notesmode']) )
+         $notesmode=$_GET['notesmode'];
+      $show_notes = ( $notesmode != 'OFF' && $notesmode !== 0 ) ;
    }
 
+   if( ENA_MOVENUMBERS )
+   {
+      $movenumbers= $player_row['MoveNumbers'];
+      if( isset($_GET['movenumbers']) )
+         $movenumbers=$_GET['movenumbers'];
+   }
+   else
+      $movenumbers= 0;
 
    $TheBoard->set_style( $player_row);
 
 
+
    start_page(T_("Game"), true, $logged_in, $player_row, $TheBoard->style_string());
 
-   echo "<table align=center>\n<tr><td>"; //notes table {--------
+   echo "<table align=center>\n<tr><td>"; //board & associates table {--------
+
+   if( $movenumbers>0 )
+   {
+      $TheBoard->move_numbers( max( $move-$movenumbers, $Handicap+1), $move);
+      $TheBoard->draw_captures_box( T_('Captures'));
+   }
+   echo "</td><td>\n";
 
    $TheBoard->movemsg= $movemsg;
    $TheBoard->draw_board( $may_play, $action, $stonestring);
@@ -376,10 +398,10 @@ require_once( "include/sgf_parser.php" );
       echo "<P><center>$extra_message</center>\n";
    echo '<br>';
 
-   if( $show_notes && $notesmode != 'OFF' )
+   if( $show_notes )
    {
       if ($notesmode == 'BELOW')
-         echo "</td></tr>\n<tr><td align='center'>";
+         echo "</td></tr>\n<tr><td colspan=2 align='center'>";
       else //default RIGHT
          echo "</td>\n<td align='left' valign='center'>";
       draw_notes($notes, $gid, $notesheight, $noteswidth);
@@ -387,10 +409,10 @@ require_once( "include/sgf_parser.php" );
 
    if( $enable_message )
    {
-      echo "</td></tr>\n<tr><td align='center'>";
+      echo "</td></tr>\n<tr><td colspan=2 align='center'>";
       draw_message_box(); //use $stonestring, $prisoner_string, $move
    }
-   echo "</td></tr>\n</table>"; //notes table }--------
+   echo "</td></tr>\n</table>"; //board & associates table }--------
 
 
    echo "<HR>\n";
@@ -646,11 +668,10 @@ function draw_notes( $notes, $gid, $height=0, $width=0)
    if( $width<15 ) $width= 15;
 
    echo "<form name=\"savenotes\" action=\"savenotes.php\" method=\"POST\">\n";
-   echo " <table>";
-   echo "  <tr><td bgcolor='#7aa07a'><font color=white><b><span id=\"game_notes_caption\">" .
-      T_('Private game notes') . "</span></b></font></td></tr>\n";
-   echo "  <tr><td bgcolor='#ddf0dd'>\n";
-   echo "   <textarea name=\"game_notes\" id=\"game_notes\" cols=\"$width\" rows=\"$height\">$notes</textarea>";
+   echo " <table class=gamenotes>\n";
+   echo "  <tr><th class=gamenotes>" . T_('Private game notes') . "</td></tr>\n";
+   echo "  <tr><td class=gamenotes>\n";
+   echo "   <textarea name=\"gamenotes\" id=\"gamenotes\" cols=\"$width\" rows=\"$height\">$notes</textarea>\n";
    echo "  </td></tr>\n";
    echo "  <tr><td><input type=\"submit\" value=\"" . T_('Save notes') . "\"></td></tr>\n";
    echo " </table>\n";

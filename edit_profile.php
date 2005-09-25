@@ -197,6 +197,14 @@ require_once( "include/countries.php" );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
                                   'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
 
+   if( ENA_MOVENUMBERS )
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Move numbering'),
+                                  'TEXTINPUT', 'movenumbers', 4, 4, $player_row['MoveNumbers'],
+                                  //'CHECKBOX', 'movenumover', 1, '', ($s & MOVE_NUMBER),
+                                ) );
+
+   $profile_form->add_row( array( 'SPACE' ) );
+
    $profile_form->add_row( array( 'DESCRIPTION', T_('Menu direction'),
                                   'RADIOBUTTONS', 'menudir', $menu_directions,
                                   $player_row["MenuDirection"] ) );

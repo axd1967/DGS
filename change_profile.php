@@ -58,6 +58,8 @@ require_once( "include/countries.php" );
       ( @$_GET['coordsright'] ? RIGHT : 0 ) + ( @$_GET['coordsdown'] ? DOWN : 0 ) +
       ( @$_GET['coordsover'] ? OVER : 0 ) + ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
 
+   $movenumbers = (int)@$_GET['movenumbers'];
+
    $menudirection = ( @$_GET['menudir'] == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
    $notessmallmode = @$_GET['notessmallmod'];
@@ -84,9 +86,10 @@ require_once( "include/countries.php" );
    if( @$_GET['locally'] == 1 )
    {
       $cookie_prefs['Stonesize'] = @$_GET['stonesize'];
-      $cookie_prefs['Boardcoords'] = $boardcoords;
-      $cookie_prefs['MenuDirection'] = $menudirection;
       $cookie_prefs['Woodcolor'] = @$_GET['woodcolor'];
+      $cookie_prefs['Boardcoords'] = $boardcoords;
+      $cookie_prefs['MoveNumbers'] = $movenumbers;
+      $cookie_prefs['MenuDirection'] = $menudirection;
       $cookie_prefs['Button'] = @$_GET['button'];
       $cookie_prefs['NotesSmallHeight'] = @$_GET['notessmallheight'];
       $cookie_prefs['NotesSmallWidth'] = @$_GET['notessmallwidth'];
@@ -102,9 +105,10 @@ require_once( "include/countries.php" );
    {
       $query .=
          "Stonesize=" . @$_GET['stonesize'] . ", " .
-         "Boardcoords=$boardcoords, " .
-         "MenuDirection='$menudirection', " .
          "Woodcolor=" . @$_GET['woodcolor'] . ", " .
+         "Boardcoords=$boardcoords, " .
+         "MoveNumbers=$movenumbers, " .
+         "MenuDirection='$menudirection', " .
          "Button=" . @$_GET['button'] . ", " .
          "NotesSmallHeight=" . @$_GET['notessmallheight'] . ", " .
          "NotesSmallWidth=" . @$_GET['notessmallwidth'] . ", " .

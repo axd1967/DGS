@@ -47,7 +47,7 @@ disable_cache();
       error("not_a_player");
 
 
-   $notes = addslashes(rtrim(get_request_arg('game_notes')));
+   $notes = addslashes(rtrim(get_request_arg('gamenotes')));
 
    if ($player_row["ID"] == $Black_ID)
       mysql_query( "UPDATE Games SET Black_notes=\"$notes\" WHERE Games.ID=$gid LIMIT 1");
