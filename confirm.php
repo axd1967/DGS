@@ -103,7 +103,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    //or if one player hit twice the validation button during a net lag
    //and if opponent has already played between the two confirm.php calls.
    if( $qry_move > 0 && $qry_move != $Moves )
-      error("already_played");
+      error("already_played",'conf7');
 
 
    if( $Black_ID == $ToMove_ID )

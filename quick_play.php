@@ -201,9 +201,10 @@ else
       $time_query = '';
    }
 
+   $no_marked_dead = true; //( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
 
    $TheBoard = new Board( );
-   if( !$TheBoard->load_from_db( $game_row) )
+   if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
       error('internal_error', "quick_play load_from_db $gid");
 
    $where_clause = " ID=$gid AND Moves=$Moves";
@@ -239,9 +240,9 @@ else
 
          $game_query = "UPDATE Games SET " .
              "Moves=$Moves, " .
-             "Last_X=$colnr, " .
+             "Last_X=$colnr, " . //used with mail notifications
              "Last_Y=$rownr, " .
-             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
+             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
              "Status='PLAY', ";
 
          if( $nr_prisoners > 0 )
