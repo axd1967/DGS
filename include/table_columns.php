@@ -210,14 +210,16 @@ class Table
 
          /* Make table rows */
 
-         foreach( $this->Tablerows as $trow )
+         if( count($this->Tablerows)>0 )
          {
-            $string .= $this->make_tablerow( $trow );
+            foreach( $this->Tablerows as $trow )
+            {
+               $string .= $this->make_tablerow( $trow );
+            }
+            $string .= $next_prev_row;
          }
 
          /* End of the table */
-
-         $string .= $next_prev_row;
 
          $tmp = $this->make_add_column_form();
          if( !$tmp )
@@ -384,7 +386,7 @@ class Table
                , T_("prev page")
                );
 
-         $button.= '&nbsp;'.floor($this->From_Row/$this->Rows_Per_Page+1).'&nbsp;';
+         $button.= '&nbsp;'.round($this->From_Row/$this->Rows_Per_Page+1).'&nbsp;';
 
          if( !$this->Last_Page )
             $button.= anchor(
@@ -409,7 +411,7 @@ class Table
               . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
 
          if( $string )
-            $string = " <tr>\n $string </tr>\n";
+            $string = " <tr>\n$string</tr>\n";
 
          return $string;
       }
