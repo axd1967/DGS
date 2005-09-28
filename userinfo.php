@@ -102,13 +102,26 @@ require_once( "include/countries.php" );
          '</font></b></td><td>' . echo_day(floor($row['OnVacation'])) . ' ' .T_('left') . "</td></tr>\n";
    }
 
+    $run_link = "show_games.php?uid=$uid";
+    $fin_link = $run_link.URI_AMP.'finished=1';
+    $rat_link = $fin_link.URI_AMP.'sort1=Rated'.URI_AMP.'desc1=1';
     $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
    echo '
-    <tr><td><b>' . T_('Running games') . '</b></td><td>' . $row['Running'] . '</td></tr>
-    <tr><td><b>' . T_('Finished games') . '</b></td><td>' . $row['Finished'] . '</td></tr>
-    <tr><td><b>' . T_('Rated games') . '</b></td><td>' . $row['RatedGames'] . '</td></tr>
-    <tr><td><b>' . T_('Won games') . '</b></td><td>' . $row['Won'] . '</td></tr>
-    <tr><td><b>' . T_('Lost games') . '</b></td><td>' . $row['Lost'] . '</td></tr>
+    <tr><td><b>' . anchor( $run_link
+                  , T_('Running games'))
+            . '</b></td><td>' . $row['Running'] . '</td></tr>
+    <tr><td><b>' . anchor( $fin_link
+                  , T_('Finished games'))
+               . '</b></td><td>' . $row['Finished'] . '</td></tr>
+    <tr><td><b>' . anchor( $rat_link.URI_AMP.'sort2=ID'
+                  , T_('Rated games'))
+               . '</b></td><td>' . $row['RatedGames'] . '</td></tr>
+    <tr><td><b>' . anchor( $rat_link.URI_AMP.'sort2=Win'.URI_AMP.'desc2=1'
+                  , T_('Won games'))
+               . '</b></td><td>' . $row['Won'] . '</td></tr>
+    <tr><td><b>' . anchor( $rat_link.URI_AMP.'sort2=Win'
+                  , T_('Lost games'))
+               . '</b></td><td>' . $row['Lost'] . '</td></tr>
     <tr><td><b>' . T_('Percent') . '</b></td><td>' . $percent . '</td></tr>
 ';
 
@@ -159,10 +172,10 @@ require_once( "include/countries.php" );
    else
    {
       $menu_array =
-         array( T_('Show running games') => "show_games.php?uid=$uid",
+         array( T_('Show running games') => $run_link,
                 T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
                 T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid",
-                T_('Show finished games') => "show_games.php?uid=$uid".URI_AMP."finished=1" );
+                T_('Show finished games') => $fin_link );
    }
 
 
