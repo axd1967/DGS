@@ -211,7 +211,7 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
    echo "\n <TITLE> Dragon Go Server - $title </TITLE>"
       . "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">"
       . "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}dragon.css\">";
-
+   echo "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}printer.css\">";
 
    if( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
