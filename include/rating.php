@@ -27,7 +27,8 @@ function interpolate($value, $table, $extrapolate)
 {
    foreach ( $table as $x )
       {
-         $prev=$tmpprev;
+         if( !empty($tmpprev) )
+            $prev=$tmpprev;
 
          if( $value <= $x['KEY'] )
          {
@@ -78,6 +79,9 @@ function con($rating)
    $con_table[6]['KEY'] = 2700;
    $con_table[6]['VAL'] = 10;
 
+   $con_table[7]['KEY'] = 10000;
+   $con_table[7]['VAL'] = 10;
+
    return interpolate($rating, $con_table, true);
 }
 
@@ -89,6 +93,9 @@ function a($rating)
    $a_table[1]['KEY'] = 2700;
    $a_table[1]['VAL'] = 70;
 
+   $a_table[1]['KEY'] = 10000;
+   $a_table[1]['VAL'] = 70;
+
    return interpolate($rating, $a_table, true);
 }
 
@@ -97,8 +104,7 @@ function a($rating)
 // http://www.european-go.org/rating/gor.html
 // http://www.ujf.cas.cz/~cieply/GO/gor.html
 //
-// result: 0 - black win, 1 - white win
-
+// $result: 0 = black win, 1 = white win, 0.5 = jigo
 function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap, $factor=1)
 {
 
@@ -106,7 +112,7 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
    $D = $rating_W - $rating_B;
 
-   if( $handicap <= 0 )
+   if( $handicap < 1 )
       $handicap = 1;
 
    $H = ( $handicap - 0.5 - $komi / 13.0 );
@@ -116,19 +122,20 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
    $D -= 100.0 * $H;
 
-   if( $D > 0 )
+   if( $D >= 0 ) //ratW-ratB
    {
       $SEB = 1.0/(1.0+exp($D/a($rating_B)));
       $SEW = 1.0-$SEB;
+      if( $result != 0.5 )
+         $SEW-= $e;
    }
    else
    {
       $SEW = 1.0/(1.0+exp(-$D/a($rating_W)));
       $SEB = 1.0-$SEW;
+      if( $result != 0.5 )
+         $SEB-= $e;
    }
-
-   $SEW *= 1-$e;
-   $SEB *= 1-$e;
 
    $sizefactor = (19 - abs($size-19))*(19 - abs($size-19)) / (19*19);
 
@@ -143,7 +150,6 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 function suggest_proper($rating_W, $rating_B, $size, $pos_komi=false)
 {
    $H = abs($rating_W - $rating_B) / 100.0;
-   $swap = ( $rating_B > $rating_W );
 
    $H *= (($size-3.0)*($size-3.0)) / 256.0;  // adjust handicap to board size
 
@@ -151,7 +157,12 @@ function suggest_proper($rating_W, $rating_B, $size, $pos_komi=false)
 
    $handicap = ( $pos_komi ? ceil($H) : round($H) );
 
-   if( $handicap <=1 ) $handicap = 1;
+   if( $rating_B == $rating_W )
+      $swap = mt_rand(0,1);
+   else
+      $swap = ( $rating_B > $rating_W );
+
+   if( $handicap < 1 ) $handicap = 1;
 
    $komi = round( 26.0 * ( $handicap - $H ) ) / 2;
 
@@ -163,19 +174,21 @@ function suggest_proper($rating_W, $rating_B, $size, $pos_komi=false)
 function suggest_conventional($rating_W, $rating_B, $size, $pos_komi=false)
 {
    $handicap = abs($rating_W - $rating_B) / 100.0;
-   $swap = ( $rating_B > $rating_W );
 
    $handicap = round($handicap * (($size-3.0)*($size-3.0)) / 256.0 );
-   $komi = 0.5;
 
    if( $handicap == 0 )
    {
       $komi = 6.5;
       $swap = mt_rand(0,1);
    }
-
-   if( $handicap == 1 )
-      $handicap = 0;
+   else
+   {
+      $komi = 0.5;
+      $swap = ( $rating_B > $rating_W );
+      if( $handicap == 1 )
+         $handicap = 0;
+   }
 
    return array($handicap, $komi, $swap);
 }
@@ -282,7 +295,13 @@ function update_rating2($gid, $check_done=true)
    $wOld = $wRating;
 
    // Calculate factor used to alter how much the the ratings are to be changed
-   $Factor = log(($bRatingMax - $bRatingMin)/($wRatingMax-$wRatingMin));
+   /*
+     with R = ($bRatingMax - $bRatingMin)/($wRatingMax - $wRatingMin);
+     and logMF(x), the MAX_FACTOR based logarithm of x:
+       $bFactor = MAX_FACTOR ^ tanh( SLOPE_CONST * logMF( R ) );
+       $wFactor = MAX_FACTOR ^ tanh( SLOPE_CONST * logMF(1/R) );
+   */
+   $Factor = log(($bRatingMax - $bRatingMin)/($wRatingMax - $wRatingMin));
 
    $MAX_FACTOR = 2.5;
    $MAX_LN_FACTOR = log($MAX_FACTOR);
@@ -308,6 +327,7 @@ function update_rating2($gid, $check_done=true)
    $bTmp = $bOld;
    change_rating($wRatingMin, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
 
+
    $wTmp = $wOld;
    change_rating($wTmp, $bRating, $game_result, $Size, $Komi, $Handicap, $bFactor);
    if( $bRating < $MIN_RATING )
@@ -319,6 +339,7 @@ function update_rating2($gid, $check_done=true)
 
    $wTmp = $wOld;
    change_rating($wTmp, $bRatingMin, $game_result, $Size, $Komi, $Handicap, $bFactor);
+
 
    // Check that $Rating is within the central $WithinPercent of [$RatingMin,$RatingMax]
 
@@ -355,7 +376,7 @@ function update_rating2($gid, $check_done=true)
    mysql_query('INSERT INTO Ratinglog' .
                '(uid,gid,Rating,RatingMin,RatingMax,RatingDiff,Time) VALUES ' .
                "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, " .
-               ($bRating - $bOld) . ",'$Lastchanged'), " .
+               ($bRating - $bOld) . ", '$Lastchanged'), " .
                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, " .
                ($wRating - $wOld) . ", '$Lastchanged') ")
       or die(mysql_error());
