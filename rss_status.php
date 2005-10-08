@@ -17,10 +17,6 @@ function start_rss( $title, $description='', $html_clone='', $cache_minutes=10)
    ob_start("ob_gzhandler");
 
    $last_modified_stamp= $NOW;
-/* ???? Rdvl
-   if( is_numeric( $cache_minutes) )
-      disable_cache( $last_modified_stamp);
-???? */
 
    //if( empty($encoding_used) )
       $encoding_used = 'iso-8859-1';
@@ -146,9 +142,6 @@ else
    $allow_auth = true;
 
 
-//Rdvl >>>> 
-//Rdvl >>>> attention: d'autres userid sont utilisés avec une différente signification.
-//Rdvl >>>> 
    $userid = (string)@$_REQUEST['userid'];
    $passwd = (string)@$_REQUEST['passwd'];
    if( $allow_auth && !$userid )
@@ -162,7 +155,6 @@ else
          $passwd = '';
       }
    }
-RdvlLog("rss_pwd: $userid, $passwd, ".@$_SERVER["REMOTE_USER"].", ".@$_SERVER['PHP_AUTH_DIGEST']);//.", ".@$AuthType
 
    if( !$logged_in && $userid && $passwd )
    {
@@ -220,7 +212,6 @@ RdvlLog("rss_pwd: $userid, $passwd, ".@$_SERVER["REMOTE_USER"].", ".@$_SERVER['P
 
    $my_id = (int)$player_row['ID'];
    $my_name = rss_safe( $player_row['Handle']);
-RdvlLog("rss_status: $my_id, $my_name");
 
    $rss_nl = "\n<br />";
 
@@ -245,13 +236,11 @@ RdvlLog("rss_status: $my_id, $my_name");
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date DESC";
 
-//RdvlLog( "rss_mqry=".$query);
    $result = mysql_query( $query ) or error('mysql_query_failed','qs3');
 
    $cat= 'Status/Message';
    while( $row = mysql_fetch_assoc($result) )
    {
-//RdvlLog( "rss_mrow=", $row);
       $nothing_found = false;
       $safename = @$row['sender'];
       if( !$safename )
@@ -281,14 +270,12 @@ RdvlLog("rss_status: $my_id, $my_name");
          "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$my_id " .
        "ORDER BY date DESC, Games.ID";
 
-//RdvlLog( "rss_gqry=".$query);
    $result = mysql_query( $query ) or error('mysql_query_failed','qs4');
 
    $cat= 'Status/Game';
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )
    {
-//RdvlLog( "rss_grow=", $row);
       $nothing_found = false;
       $safename = @$row['Name'];
       $safename = rss_safe( $safename);
