@@ -66,7 +66,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
   add_contributor( T_("FAQ editor"), "Bjørn Ingmar Berg" );
 
   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level FROM Players " .
-                               "WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" );
+                               "WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0 ORDER BY ID" );
 
   $first = T_("FAQ co-editor");
   while( $row = mysql_fetch_array( $query_result ) )
@@ -88,7 +88,7 @@ function add_contributor( $text, $contributor, $uid = -1 )
   echo "</td></tr>\n";
 
   $query_result = mysql_query( "SELECT ID,Handle,Name,Translator FROM Players " .
-                               "WHERE LENGTH(Translator)>0" );
+                               "WHERE LENGTH(Translator)>0 ORDER BY ID" );
 
   $translator_list = array();
   while( $row = mysql_fetch_array( $query_result ) )
