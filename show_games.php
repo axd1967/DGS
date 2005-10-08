@@ -153,9 +153,8 @@ require_once( "include/rating.php" );
 
       if( $finished )
       {
-         $query .= ", (Black_ID=$uid AND Score<0)*2 + " .
-            "(White_ID=$uid AND Score>0)*2 + " .
-            "(Score=0) - 1 AS Win " .
+         $query .= ", SIGN(IF(Black_ID=$uid, -Score, Score)) AS Win " .
+                ", IF(Black_ID=$uid, -Score, Score) AS oScore " .
            ", IF(Black_ID=$uid" .
              ', Games.White_End_Rating, Games.Black_End_Rating) AS endRating, ' .
            'log.RatingDiff AS ratingDiff '
@@ -269,9 +268,13 @@ require_once( "include/rating.php" );
    }
    else if( $finished )
    {
-      $gtable->add_tablehead(10, T_('Score')); //, 'ABS(Score)', true);
-      if( !$all )
+      if( $all )
       {
+         $gtable->add_tablehead(10, T_('Score'), 'Score', true);
+      }
+      else
+      {
+         $gtable->add_tablehead(10, T_('Score'), 'oScore', true);
          $gtable->add_tablehead(11, T_('Win?'), 'Win', true);
       }
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
