@@ -5,12 +5,14 @@ require_once( "include/quick_common.php" );
 $date_fmt = 'Y-m-d H:i';
 require_once( "include/connect2mysql.php" );
 
-function slashed($string)
+
+function rss_safe( $str)
 {
-   return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
+   return (string)@htmlentities( (string)$str, ENT_QUOTES);
 }
 
-function start_rss( $title, $description='', $html_clone='', $cache_minutes=10)
+
+function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
 {
    global $encoding_used, $HOSTBASE, $NOW, $date_fmt; //$base_path
 
@@ -42,16 +44,13 @@ function start_rss( $title, $description='', $html_clone='', $cache_minutes=10)
       ;
 }
 
-function end_rss( )
+
+function rss_close( )
 {
    echo "\n </channel>\n</rss>";
    ob_end_flush();
 }
 
-function rss_safe( $str)
-{
-   return (string)@htmlentities( (string)$str, ENT_QUOTES);
-}
 
 function rss_item( $title, $link, $description='', $category='', $pubDate='', $guid='')
 {
@@ -75,34 +74,43 @@ function rss_item( $title, $link, $description='', $category='', $pubDate='', $g
    echo $str;
 }
 
-function rss_warning( $string)
+
+function rss_error( $str) //+error report
 {
-   rss_item( 'WARNING', '', 'Warning: '.rss_safe( $string));
+   rss_item( 'ERROR', '', 'Error: '.rss_safe( $str));
 }
+
+
+function rss_warning( $str)
+{
+   rss_item( 'WARNING', '', 'Warning: '.rss_safe( $str));
+}
+
 
 /*
    header('WWW-Authenticate: Digest realm="'.$realm.'", qop="auth", nonce="'
    .uniqid("55").'", opaque="'.md5($realm).'"');
 */
-function http_auth( $cancel_str, $userid='')
+function http_auth( $cancel_str, $uhandle='')
 {
-   //if( $userid ) $userid= ' - '.$userid; else
-      $userid= '';
+   //if( $uhandle ) $uhandle= ' - '.$uhandle; else
+      $uhandle= '';
 
    header("WWW-Authenticate: Basic realm=\"Dragon Go Server$userid\"");
    header('HTTP/1.0 401 Unauthorized');
 
    //echo "$cancel_str\n";
-   start_rss( 'ERROR');
-   rss_warning($cancel_str);
-   end_rss();
+   rss_open( 'ERROR');
+   rss_error($cancel_str);
+   rss_close();
    exit;
 }
 
-function check_password( $userid, $passwd, $new_passwd, $given_passwd )
+
+function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
    $given_passwd_encrypted =
-     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('$given_passwd')" ) );
+     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('".addslashes($given_passwd)."')" ) );
    $given_passwd_encrypted = $given_passwd_encrypted[0];
 
    if( $passwd != $given_passwd_encrypted )
@@ -118,17 +126,19 @@ function check_password( $userid, $passwd, $new_passwd, $given_passwd )
       mysql_query( 'UPDATE Players ' .
                    "SET Password='" . $given_passwd_encrypted . "', " .
                    'Newpassword=NULL ' .
-                   "WHERE Handle='$userid' LIMIT 1" );
+                   "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" );
    }
 
    return true;
 }
 
+
+
 if( $is_down )
 {
-   start_rss( 'WARNING');
+   rss_open( 'WARNING');
    rss_warning($is_down_message);
-   end_rss();
+   rss_close();
 }
 else
 {
@@ -142,49 +152,50 @@ else
    $allow_auth = true;
 
 
-   $userid = (string)@$_REQUEST['userid'];
-   $passwd = (string)@$_REQUEST['passwd'];
-   if( $allow_auth && !$userid )
+   $uhandle = get_request_arg('userid');
+   $passwd = get_request_arg('passwd');
+   if( $allow_auth && !$uhandle )
    {
-      $userid = (string)@$_SERVER['PHP_AUTH_USER'];
-      $passwd = (string)@$_SERVER['PHP_AUTH_PW'];
-      $authid = (string)@$_REQUEST['authid'];
-      if( $authid && $authid !== $userid )
+      $uhandle = arg_stripslashes((string)@$_SERVER['PHP_AUTH_USER']);
+      $passwd = arg_stripslashes((string)@$_SERVER['PHP_AUTH_PW']);
+      $authid = get_request_arg('authid');
+      if( $authid && $authid !== $uhandle )
       {
-         $userid = $authid;
+         $uhandle = $authid;
          $passwd = '';
       }
    }
 
-   if( !$logged_in && $userid && $passwd )
+   if( !$logged_in && $uhandle && $passwd )
    {
       // temp password?
 
+
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                          "FROM Players WHERE Handle='$userid'" );
+                "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {
          $player_row = mysql_fetch_array($result);
 
-         if( check_password( $userid, $player_row["Password"],
+         if( check_password( $uhandle, $player_row["Password"],
                               $player_row["Newpassword"], $passwd ) )
          {
             $logged_in = true;
          }
-         //else error("wrong_password");
+         //else error("wrong_password"); //+error report
       }
-      //else error("wrong_userid");
+      //else error("wrong_userid"); //+error report
    }
 
-   if( !$logged_in && !$userid )
+   if( !$logged_in && !$uhandle )
    {
       // logged in?
 
-      $userid= @$_COOKIE[COOKIE_PREFIX.'handle'];
+      $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
 
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                          "FROM Players WHERE Handle='$userid'" );
+                          "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {
@@ -201,14 +212,16 @@ else
 
    if( !$logged_in )
    {
-      if( $allow_auth )
-         http_auth( 'Unauthorized access forbidden!', $userid);
-      error("not_logged_in",'qs1');
+      if( $allow_auth ) //+error report
+         http_auth( 'Unauthorized access forbidden!', $uhandle);
+      error("not_logged_in",'rss1');
    }
 
 
    if( !empty( $player_row["Timezone"] ) )
       putenv('TZ='.$player_row["Timezone"] );
+
+   //+logging stat adjustments
 
    $my_id = (int)$player_row['ID'];
    $my_name = rss_safe( $player_row['Handle']);
@@ -218,7 +231,7 @@ else
    $tit= "Status of $my_name";
    $lnk= $HOSTBASE.'/status.php';
    $dsc= "Messages and Games for $my_name";
-   start_rss( $tit, $dsc, $lnk);
+   rss_open( $tit, $dsc, $lnk);
 
 
    $nothing_found = true;
@@ -236,7 +249,7 @@ else
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date DESC";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed','qs3');
+   $result = mysql_query( $query ) or error('mysql_query_failed','rss3');
 
    $cat= 'Status/Message';
    while( $row = mysql_fetch_assoc($result) )
@@ -270,7 +283,7 @@ else
          "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$my_id " .
        "ORDER BY date DESC, Games.ID";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed','qs4');
+   $result = mysql_query( $query ) or error('mysql_query_failed','rss4');
 
    $cat= 'Status/Game';
    $clrs="BW"; //player's color... so color to play.
@@ -300,6 +313,6 @@ else
       rss_warning("nothing found");
    }
 
-   end_rss();
+   rss_close();
 }
 ?>
