@@ -78,7 +78,7 @@ function include_translate_group($group, $player_row) //must be called from main
       if( $language === 'C' )
          $language = get_preferred_browser_language();
 
-      if( empty($language) )
+      if( empty($language) or $language=='en' )
          $language = 'en.iso-8859-1';
       //else call to get_preferred_browser_language() for each $group
 
