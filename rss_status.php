@@ -1,9 +1,99 @@
 <?php
 
 $quick_errors = 1;
+function error($err, $debugmsg=NULL)
+{
+   global $uhandle;
+
+   list( $err, $uri)= error_log( $uhandle, $err, $debugmsg);
+
+   if( !$rss_opened )
+      rss_open( 'ERROR');
+   rss_error( $err);
+   rss_close();
+   exit;
+}
+
 require_once( "include/quick_common.php" );
 $date_fmt = 'Y-m-d H:i';
-require_once( "include/connect2mysql.php" );
+
+//require_once( "include/connect2mysql.php" );
+//else ...
+{//standalone version ==================
+require_once( "include/config.php" );
+
+function error_log( $handle, $err, $debugmsg=NULL)
+{
+
+   $uri = "error.php?err=" . urlencode($err);
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."', " .
+      "Message='$err', IP='{$_SERVER['REMOTE_ADDR']}'" ;
+
+   $mysqlerror = @mysql_error();
+
+   if( !empty($mysqlerror) )
+   {
+      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
+      $errorlog_query .= ", MysqlError='".addslashes( $mysqlerror)."'";
+      $err.= ' / '. $mysqlerror;
+   }
+
+   
+   if( empty($debugmsg) )
+   {
+    global $SUB_PATH;
+      $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
+      //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
+      $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
+   }
+   //if( !empty($debugmsg) )
+   {
+      $errorlog_query .= ", Debug='" . addslashes( $debugmsg) . "'";
+      //$err.= ' / '. $debugmsg; //Do not display this info!
+   }
+
+ global $dbcnx;
+   if( !isset($dbcnx) )
+      connect2mysql( true);
+
+   @mysql_query( $errorlog_query );
+
+   return array( $err, $uri);
+}
+
+function disable_cache($stamp=NULL)
+{
+   global $NOW;
+  // Force revalidation
+   header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+   header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
+   header('Pragma: no-cache');                                              // HTTP/1.0
+   if( !$stamp )
+      header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $NOW) . ' GMT');  // Always modified
+   else
+      header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
+}
+
+function connect2mysql($no_errors=false)
+{
+   global $dbcnx, $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
+
+   $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
+
+   if (!$dbcnx)
+   {
+      if( $no_errors ) return;
+      error("mysql_connect_failed");
+   }
+
+   if (! @mysql_select_db($DB_NAME) )
+   {
+      if( $no_errors ) return;
+      error("mysql_select_db_failed");
+   }
+}
+}//standalone version ==================
+
 
 
 function rss_safe( $str)
@@ -12,11 +102,13 @@ function rss_safe( $str)
 }
 
 
+$rss_opened= false;
 function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
 {
    global $encoding_used, $HOSTBASE, $NOW, $date_fmt; //$base_path
 
    ob_start("ob_gzhandler");
+   $rss_opened= true;
 
    $last_modified_stamp= $NOW;
 
@@ -29,12 +121,12 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
    if( empty($description) )
       $description = $title;
 
-   header('Content-Type: text/xml; charset='.$encoding_used); // Character-encoding
+   header('Content-Type: text/xml; charset='.$encoding_used);
 
-   echo "<?xml version=\"1.0\" encoding=\"$encoding_used\"?>\n"
-      . "<rss version=\"2.0\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
-        . " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n"
-      . " <channel>\n"
+   echo "<?xml version=\"1.0\" encoding=\"$encoding_used\"?>\n";
+   echo "<rss version=\"2.0\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
+        . " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
+   echo " <channel>\n"
       . "  <title>Dragon Go Server - $title</title>\n"
       . "  <link>$html_clone</link>\n"
       . "  <pubDate>" . date($date_fmt, $last_modified_stamp) . "</pubDate>"
@@ -75,7 +167,7 @@ function rss_item( $title, $link, $description='', $category='', $pubDate='', $g
 }
 
 
-function rss_error( $str) //+error report
+function rss_error( $str)
 {
    rss_item( 'ERROR', '', 'Error: '.rss_safe( $str));
 }
@@ -91,17 +183,17 @@ function rss_warning( $str)
    header('WWW-Authenticate: Digest realm="'.$realm.'", qop="auth", nonce="'
    .uniqid("55").'", opaque="'.md5($realm).'"');
 */
-function http_auth( $cancel_str, $uhandle='')
+function rss_auth( $cancel_str, $uhandle='')
 {
    //if( $uhandle ) $uhandle= ' - '.$uhandle; else
       $uhandle= '';
 
-   header("WWW-Authenticate: Basic realm=\"Dragon Go Server$userid\"");
+   header("WWW-Authenticate: Basic realm=\"Dragon Go Server$uhandle\"");
    header('HTTP/1.0 401 Unauthorized');
 
    //echo "$cancel_str\n";
    rss_open( 'ERROR');
-   rss_error($cancel_str);
+   rss_error( $cancel_str);
    rss_close();
    exit;
 }
@@ -142,19 +234,18 @@ if( $is_down )
 }
 else
 {
-   disable_cache();
 
-   connect2mysql();
-
-   $html_clone = $HOSTBASE . '/status.php';
-
-   $logged_in = false;
    $allow_auth = true;
 
-
+   $logged_in = false;
+   $loggin_mode = '';
    $uhandle = get_request_arg('userid');
    $passwd = get_request_arg('passwd');
-   if( $allow_auth && !$uhandle )
+   if( $uhandle && $passwd )
+   {
+      $loggin_mode = 'password';
+   }
+   else if( $allow_auth )
    {
       $uhandle = arg_stripslashes((string)@$_SERVER['PHP_AUTH_USER']);
       $passwd = arg_stripslashes((string)@$_SERVER['PHP_AUTH_PW']);
@@ -163,13 +254,27 @@ else
       {
          $uhandle = $authid;
          $passwd = '';
+         $loggin_mode = 'authenticate';
+      }
+      else if( $uhandle && $passwd )
+      {
+         $loggin_mode = 'password';
       }
    }
+   if( !$loggin_mode )
+   {
+      $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
+      $loggin_mode = 'cookie';
+   }
 
-   if( !$logged_in && $uhandle && $passwd )
+
+   disable_cache();
+
+   connect2mysql();
+
+   if( $loggin_mode=='password' )
    {
       // temp password?
-
 
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                 "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
@@ -183,16 +288,14 @@ else
          {
             $logged_in = true;
          }
-         //else error("wrong_password"); //+error report
+         else error("wrong_password");
       }
-      //else error("wrong_userid"); //+error report
+      //else error("wrong_userid");
    }
 
-   if( !$logged_in && !$uhandle )
+   if( $loggin_mode=='cookie' )
    {
       // logged in?
-
-      $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
 
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
@@ -209,11 +312,10 @@ else
       }
    }
 
-
    if( !$logged_in )
    {
-      if( $allow_auth ) //+error report
-         http_auth( 'Unauthorized access forbidden!', $uhandle);
+      if( $allow_auth ) //or $loggin_mode=='authenticate'
+         rss_auth( 'Unauthorized access forbidden!', $uhandle);
       error("not_logged_in",'rss1');
    }
 
