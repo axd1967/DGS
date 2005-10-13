@@ -49,7 +49,7 @@ require_once( "include/rating.php" );
       {
          get_request_user( $uid, $uhandle, true);
          if( $uhandle )
-            $where = "Handle='$uhandle'";
+            $where = "Handle='".addslashes($uhandle)."'";
          elseif( $uid > 0 )
             $where = "ID=$uid";
          else

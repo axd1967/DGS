@@ -547,11 +547,11 @@ function make_menu_vertical($menu_array)
 /* Not used
 function warn($debugmsg)
 {
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='$handle', " .
-      "Message='WARN:$debugmsg', IP='{$_SERVER['REMOTE_ADDR']}'" ;
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."', " .
+      "Message='WARN:".addslashes($debugmsg)."', IP='{$_SERVER['REMOTE_ADDR']}'" ;
 
    if( !empty($mysql_error) )
-      $errorlog_query .= ", MysqlError='" . mysql_error() . "'";
+      $errorlog_query .= ", MysqlError='".addslashes(mysql_error())."'";
 
    @mysql_query( $errorlog_query );
 }
@@ -574,10 +574,10 @@ function sysmsg($msg)
 
 
 
-//must never allow quotes, ampersand, < and >
-define('HANDLE_LEGAL_REGS', '-_+a-zA-Z0-9');
-define('HANDLE_TAG_CHAR', '='); //not in HANDLE_LEGAL_REGS or in HTML "<>"
-define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'.,:;?!%*');
+//must never allow quotes, ampersand, < , > and URI reserved chars
+define('HANDLE_LEGAL_REGS', '-_a-zA-Z0-9');
+define('HANDLE_TAG_CHAR', '='); //not in HANDLE_LEGAL_REGS or < or >
+define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'+.,:;?!%*');
 
 function illegal_chars( $string, $punctuation=false )
 {
@@ -1011,18 +1011,19 @@ function swap(&$a, &$b)
 }
 
 // Makes url from a base page and an array of variable/value pairs
-// if $sep is true a '?' or '&' is added
+// if $sep is true, a '?' or '&' is added
 // Example:
-// make_url('test.php', false, array('a'=> 1, 'b => 'foo')  gives
+// make_url('test.php', array('a'=> 1, 'b => 'foo'), false)  gives
 // 'test.php?a=1&b=foo'
-function make_url($page, $sep, $array)
+function make_url($page, $array, $sep=false)
 {
    $url = $page;
 
-   $separator = '?';
+   $separator = ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
+   if( is_array( $array) )
    foreach( $array as $var=>$value )
    {
-      if( !empty($value) )
+      if( !empty($value) && !is_numeric($var) )
       {
          $url .= $separator . $var . '=' . urlencode($value);
          $separator = URI_AMP;
@@ -1037,7 +1038,7 @@ function make_url($page, $sep, $array)
 
 function get_request_url( $absolute=false)
 {
- global $SUB_PATH;
+ global $SUB_PATH, $HOSTBASE;
 
    $url = @$_SERVER['REQUEST_URI']; //contains URI_AMP_IN and still urlencoded
    $len = strlen($SUB_PATH);
@@ -1049,6 +1050,8 @@ function get_request_url( $absolute=false)
    return $url;
 }
 
+// don't set UHANDLE_NAM to 'userid' which is the handle of the
+// user currently browsing the site (associated to 'passwd').
 define('UHANDLE_NAM', 'user');
 function get_request_user( &$uid, &$uhandle, $from_referer=false)
 {
@@ -1091,9 +1094,10 @@ function who_is_logged( &$row)
 
 function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 {
-   global $HOSTNAME, $hostname_jump, $page_microtime, $admin_level,
+   global $HOSTNAME, $hostname_jump, $admin_level,
       $ActivityForHit, $NOW;
 
+   $row = array();
 
    if( $hostname_jump and eregi_replace(":.*$","", @$_SERVER['HTTP_HOST']) != $HOSTNAME )
    {
@@ -1108,7 +1112,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 
    $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
                            "Adminlevel+0 as admin_level " .
-                           "FROM Players WHERE Handle='$hdl'" );
+                           "FROM Players WHERE Handle='".addslashes($hdl)."'" );
 
 
    if( @mysql_num_rows($result) != 1 )
@@ -1121,9 +1125,6 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 
    include_all_translate_groups($row); //must be called from main dir
 
-   if( $row["Sessioncode"] != $scode or $row["Expire"] < $NOW )
-      return false;
-
    $query = "UPDATE Players SET " .
       "Hits=Hits+1, " .
       "Activity=Activity + $ActivityForHit, " .
@@ -1132,12 +1133,22 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 
    $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 100);
    if( $row['Browser'] !== $browser )
-      $query .= ", Browser='$browser'";
+   {
+      $query .= ", Browser='".addslashes($browser)."'";
+      $row['Browser'] = $browser;
+   }
 
-   if( $row['IP'] !== $_SERVER['REMOTE_ADDR'] )
-      $query .= ", IP='{$_SERVER['REMOTE_ADDR']}'";
+   $ip = $_SERVER['REMOTE_ADDR'];
+   if( $row['IP'] !== $ip )
+   {
+      $query .= ", IP='$ip'";
+      $row['IP'] = $ip;
+   }
 
-   $query .= " WHERE Handle='$hdl' LIMIT 1";
+   if( $row["Sessioncode"] != $scode or $row["Expire"] < $NOW )
+      return false;
+
+   $query .= " WHERE Handle='".addslashes($hdl)."' LIMIT 1";
 
    $result = @mysql_query( $query );
 
@@ -1145,7 +1156,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       return false;
 
 
-   if( $row["admin_level"] != 0 )
+   if( @$row["admin_level"] != 0 )
       $admin_level = $row["admin_level"];
 
    get_cookie_prefs($row);
@@ -1156,26 +1167,29 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
    return true;
 }
 
-function check_password( $userid, $password, $new_password, $given_password )
+function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
-  $given_password_encrypted =
-     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('$given_password')" ) );
+   $given_passwd_encrypted =
+     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('".addslashes($given_passwd)."')" ) );
+   $given_passwd_encrypted = $given_passwd_encrypted[0];
 
-  if( $password != $given_password_encrypted[0] )
-    {
+   if( $passwd != $given_passwd_encrypted )
+   {
       // Check if there is a new password
 
-      if( empty($new_password) or $new_password != $given_password_encrypted[0] )
-        error("wrong_password");
-    }
+      if( empty($new_passwd) or $new_passwd != $given_passwd_encrypted )
+         return false;
+   }
 
-  if( !empty( $new_password ) )
-    {
+   if( !empty( $new_passwd ) )
+   {
       mysql_query( 'UPDATE Players ' .
-                   "SET Password='" . $given_password_encrypted[0] . "', " .
+                   "SET Password='" . $given_passwd_encrypted . "', " .
                    'Newpassword=NULL ' .
-                   "WHERE Handle='$userid' LIMIT 1" );
-    }
+                   "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" );
+   }
+
+   return true;
 }
 
 function write_to_file( $filename, $string_to_write )
@@ -1274,7 +1288,7 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
       else
         $whitename = "<$tmp>$whitename</A>" ;
    }
-   return $whitename ;
+   return $whitename;
 }
 
 function send_reference( $link, $safe, $color, $player_id, $player_name=false, $player_handle=false)

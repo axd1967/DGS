@@ -32,13 +32,13 @@ require_once( "include/std_functions.php" );
    if( isset($_POST['goback']) )
       jump_to("index.php");
 
-   $userid = @$_POST['userid'];
+   $pswduser = get_request_arg('pswduser');
 
-   if( $userid == "guest" )
+   if( $pswduser == "guest" )
       error("not_allowed_for_guest");
 
    $result = mysql_query( "SELECT ID, Newpassword, Email " .
-                          "FROM Players WHERE Handle='$userid'" );
+                          "FROM Players WHERE Handle='".addslashes($pswduser)."'" );
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_user");
@@ -72,13 +72,13 @@ require_once( "include/std_functions.php" );
    $Email= $row['Email'];
 
    admin_log( @$player_row['ID'], @$player_row['Handle'],
-         "send a new password to $userid at $Email.");
+         "send a new password to $pswduser at $Email.");
 
 // Save password in database
 
    $result = mysql_query( "UPDATE Players " .
                           "SET Newpassword=PASSWORD('$newpasswd') " .
-                          "WHERE Handle='$userid' LIMIT 1" );
+                          "WHERE Handle='".addslashes($pswduser)."' LIMIT 1" );
 
 
    $msg= 'You (or possibly someone else) has requested a new password, and it has
@@ -94,7 +94,7 @@ rememberable.
 
    if( !function_exists('mail')
     or !mail( trim($Email), 'Dragon Go Server: New password', $msg, $headers ) )
-      error('mail_failure',"Uid:$userid Addr:$Email Text:$msg");
+      error('mail_failure',"Uid:$pswduser Addr:$Email Text:$msg");
 
 
    $msg = urlencode(T_("New password sent!"));

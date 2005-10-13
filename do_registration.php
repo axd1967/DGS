@@ -24,26 +24,26 @@ require_once( "include/std_functions.php" );
 {
    connect2mysql();
 
-   $userid = @$_POST['userid'];
-   if( strlen( $userid ) < 3 )
+   $uhandle = get_request_arg('userid');
+   if( strlen( $uhandle ) < 3 )
       error("userid_too_short");
-   if( illegal_chars( $userid ) )
+   if( illegal_chars( $uhandle ) )
       error("userid_illegal_chars");
 
-   $passwd = @$_POST['passwd'];
+   $passwd = get_request_arg('passwd');
    if( strlen($passwd) < 6 )
       error("password_too_short");
    if( illegal_chars( $passwd, true ) )
       error("password_illegal_chars");
 
-   if( $passwd != @$_POST['passwd2'] )
+   if( $passwd != get_request_arg('passwd2') )
       error("password_mismatch");
 
-   $name = @$_POST['name'];
+   $name = get_request_arg('name');
    if( strlen( $name ) < 1 )
       error("name_not_given");
 
-   $result = mysql_query( "SELECT * FROM Players WHERE Handle='" . $userid . "'" );
+   $result = mysql_query( "SELECT * FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
    if( @mysql_num_rows($result) > 0 )
       error("userid_in_use");
@@ -55,9 +55,9 @@ require_once( "include/std_functions.php" );
    $code = make_session_code();
 
    $result = mysql_query( "INSERT INTO Players SET " .
-                          "Handle='$userid', " .
-                          "Name='$name', " .
-                          "Password=PASSWORD('$passwd'), " .
+                          "Handle='".addslashes($uhandle)."', " .
+                          "Name='".addslashes($name)."', " .
+                          "Password=PASSWORD('".addslashes($passwd)."'), " .
                           "Registerdate=FROM_UNIXTIME($NOW), " .
                           "Sessioncode='$code', " .
                           "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration)" );
@@ -68,7 +68,7 @@ require_once( "include/std_functions.php" );
       error("mysql_insert_player");
 
 
-   set_login_cookie( $userid, $code );
+   set_login_cookie( $uhandle, $code );
 
    jump_to("status.php");
 }

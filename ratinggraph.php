@@ -33,7 +33,7 @@ require_once( "include/form_functions.php" );
 
    get_request_user( $uid, $uhandle, true);
    if( $uhandle )
-      $where = "Handle='$uhandle'";
+      $where = "Handle='".addslashes($uhandle)."'";
    elseif( $uid > 0 )
       $where = "ID=$uid";
    else
@@ -93,7 +93,7 @@ require_once( "include/form_functions.php" );
   echo '<center>';
 
   echo "<h3><font color=$h3_color>" . T_('Rating graph for') . ' ' .
-           user_reference( 1, 1, '', $user_row) . "</font></h3><p>\n" ;
+           user_reference( REF_LINK, 1, '', $user_row) . "</font></h3><p>\n" ;
 
   $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2");
 

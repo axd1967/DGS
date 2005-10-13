@@ -79,10 +79,11 @@ require_once( "include/table_columns.php" );
      if( !($Admin[$player_row["ID"]] & ADMIN_ADMINS) )
         error("admin_no_longer_admin_admin");
 
-     if( $Admin['new'] != 0 and !empty($_POST["newadmin"]))
+     $newadmin= get_request_arg('newadmin');
+     if( $Admin['new'] != 0 and !empty($newadmin))
      {
         $result = mysql_query("SELECT ID,Adminlevel+0 AS admin_level FROM Players " .
-                              "WHERE Handle=\"" . $_POST["newadmin"] . "\"");
+                              "WHERE Handle='".addslashes($newadmin)."'");
 
         if( @mysql_num_rows($result) != 1 )
            error("unknown_user");

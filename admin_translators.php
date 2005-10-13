@@ -63,7 +63,7 @@ require_once( "include/form_functions.php" );
   $langs = get_language_descriptions_translated();
   asort($langs);
 
-   $transluser = trim(@$_REQUEST['transluser']);
+   $transluser = get_request_arg('transluser');
 
    $translator_form->add_row( array(
       'DESCRIPTION', T_('User to set privileges for (use the userid)'),
@@ -74,7 +74,7 @@ require_once( "include/form_functions.php" );
    $transluser_langs= array();
    if( !empty($transluser) )
    {
-      $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='$transluser'" );
+      $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='".addslashes($transluser)."'" );
 
       if( mysql_affected_rows() != 1 )
         error('unknown_user','admin_tr1');

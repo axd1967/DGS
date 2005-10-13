@@ -44,7 +44,7 @@ disable_cache();
    $my_id = $player_row['ID'];
    $message_id = @$_REQUEST['foldermove_mid'];
    $disputegid = @$_REQUEST['disputegid'];
-   $to = @$_REQUEST['to'];
+   $tohdl = get_request_arg('to');
    $reply = @$_REQUEST['reply']; //ID of message replied. if set then (often?always?) == $message_id
    $subject = get_request_arg('subject');
    $message = get_request_arg('message');
@@ -81,10 +81,10 @@ disable_cache();
    }
 
 
-   if( $to == "guest" )
+   if( $tohdl == "guest" )
       error("guest_may_not_receive_messages");
 
-   if( $to == $player_row["Handle"] and $type == 'INVITATION' )
+   if( $tohdl == $player_row["Handle"] and $type == 'INVITATION' )
       error("invite_self");
 
 
@@ -92,7 +92,7 @@ disable_cache();
 
    $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed, OnVacation, " .
                           "Rating2, RatingStatus " .
-                          "FROM Players WHERE Handle='$to'" );
+                          "FROM Players WHERE Handle='".addslashes($tohdl)."'" );
 
    if( @mysql_num_rows( $result ) != 1 )
       error("receiver_not_found");
@@ -318,21 +318,21 @@ disable_cache();
       switch( $handitype )
       {
          case INVITE_HANDI_CONV:
-      {
+         {
             list($handicap,$komi,$swap) =
                suggest_conventional($rating_white, $rating_black, $size);
 
-         $query .= "Handicap=$handicap, Komi=$komi, ";
-      }
+            $query .= "Handicap=$handicap, Komi=$komi, ";
+         }
          break;
 
          case INVITE_HANDI_PROPER:
-      {
-         list($handicap,$komi,$swap) =
+         {
+            list($handicap,$komi,$swap) =
                suggest_proper($rating_white, $rating_black, $size);
 
-         $query .= "Handicap=$handicap, Komi=$komi, ";
-      }
+            $query .= "Handicap=$handicap, Komi=$komi, ";
+         }
          break;
 
          case INVITE_HANDI_NIGIRI:
@@ -513,7 +513,7 @@ disable_cache();
    if( !$to_me and !(strpos($opponent_row["SendEmail"], 'ON') === false)
        and $opponent_row["Notify"] == 'NONE')
    {
-      $result = mysql_query( "UPDATE Players SET Notify='NEXT' WHERE Handle='$to' LIMIT 1" );
+      $result = mysql_query( "UPDATE Players SET Notify='NEXT' WHERE Handle='".addslashes($tohdl)."' LIMIT 1" );
    }
 
    $msg = urlencode(T_('Message sent!'));

@@ -44,9 +44,10 @@ else
 
    // logged in?
 
+   $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
    $result = @mysql_query( "SELECT ID, Timezone, " .
                            "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
-                           "FROM Players WHERE Handle='{$_COOKIE[COOKIE_PREFIX.'handle']}'" );
+                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
    if( @mysql_num_rows($result) != 1 )
    {

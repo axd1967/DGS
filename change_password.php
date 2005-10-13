@@ -37,7 +37,9 @@ require_once( "include/std_functions.php" );
       error("not_allowed_for_guest");
 
    $oldpasswd = @$_POST['oldpasswd'];
-   check_password( $player_row["Handle"], $player_row["Password"], $player_row["Newpassword"], $oldpasswd );
+   if( !check_password( $player_row["Handle"], $player_row["Password"],
+                        $player_row["Newpassword"], $oldpasswd ) )
+      error("wrong_password");
 
    $passwd = @$_POST['passwd'];
    if( strlen($passwd) < 6 )

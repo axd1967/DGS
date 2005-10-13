@@ -89,7 +89,7 @@ require_once( "include/make_translationfiles.php" );
   $showpriv = @$_REQUEST['showpriv'];
   if( $showpriv )
     {
-      $transluser = trim(@$_REQUEST['transluser']);
+      $transluser = get_request_arg('transluser');
       if( empty($transluser) )
         error("no_specified_user");
 
@@ -99,7 +99,7 @@ require_once( "include/make_translationfiles.php" );
   $transladd = @$_REQUEST['transladd'];
   if( $transladd )
     {
-      $transluser = trim(@$_REQUEST['transluser']);
+      $transluser = get_request_arg('transluser');
       if( empty($transluser) )
         error("no_specified_user");
 
@@ -107,7 +107,7 @@ require_once( "include/make_translationfiles.php" );
       if( empty($transladdlang) )
         error("no_lang_selected");
 
-      $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='$transluser'" );
+      $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='".addslashes($transluser)."'" );
 
       if( mysql_affected_rows() != 1 )
         error("unknown_user",'admin_t3');
@@ -122,7 +122,7 @@ require_once( "include/make_translationfiles.php" );
         {
           array_push( $translator_array, $transladdlang );
           $new_langs = implode(',', array_unique($translator_array));
-          $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
+          $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='".addslashes($transluser)."'" );
 
           if( mysql_affected_rows() != 1 )
             error("unknown_user",'admin_t4');
@@ -150,7 +150,7 @@ require_once( "include/make_translationfiles.php" );
 
       $new_langs = implode(',', $transllang);
 
-      $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
+      $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='".addslashes($transluser)."'" );
       if( mysql_affected_rows() != 1 )
         error("unknown_user",'admin_t5');
 

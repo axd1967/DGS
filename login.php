@@ -33,9 +33,9 @@ require_once( "include/std_functions.php" );
 
    connect2mysql();
 
-   $userid = @$_REQUEST['userid'];
+   $uhandle = get_request_arg('userid');
    $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                          "FROM Players WHERE Handle='" . $userid . "'" );
+                          "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
    if( @mysql_num_rows($result) != 1 )
       error("wrong_userid");
@@ -43,8 +43,10 @@ require_once( "include/std_functions.php" );
 
    $row = mysql_fetch_array($result);
 
-   $passwd = @$_REQUEST['passwd'];
-   check_password( $userid, $row["Password"], $row["Newpassword"], $passwd );
+   $passwd = get_request_arg('passwd');
+   if( !check_password( $uhandle, $row["Password"],
+                        $row["Newpassword"], $passwd ) )
+      error("wrong_password");
 
    $code = $row["Sessioncode"];
 
@@ -54,19 +56,19 @@ require_once( "include/std_functions.php" );
       $result = mysql_query( "UPDATE Players SET " .
                              "Sessioncode='$code', " .
                              "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
-                             "WHERE Handle='$userid' LIMIT 1" )
+                             "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" )
                 or error("mysql_query_failed");
    }
 
-   if( @$_COOKIE[COOKIE_PREFIX.'handle'] != $userid
+   if( @$_COOKIE[COOKIE_PREFIX.'handle'] != $uhandle
       or @$_COOKIE[COOKIE_PREFIX.'sessioncode'] != $code )
    {
       if( @$_REQUEST['cookie_check'] )
          error('cookies_disabled');
 
-      set_login_cookie( $userid, $code );
+      set_login_cookie( $uhandle, $code );
       jump_to("login.php?cookie_check=1"
-             . URI_AMP."userid=".urlencode($userid)
+             . URI_AMP."userid=".urlencode($uhandle)
              . URI_AMP."passwd=".urlencode($passwd)
              . ( $quick_errors ? URI_AMP."quick_mode=1" : '' )
              );

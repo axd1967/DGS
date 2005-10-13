@@ -74,8 +74,8 @@ function make_link_array($links)
       $get['editor'] = ( @$_COOKIE[COOKIE_PREFIX.'forumeditor'] == 'y'? 'n' : 'y' );
       $link_array_right[T_("Toggle forum editor")] =
          ($links & LINK_TOGGLE_EDITOR ?
-          make_url( "read.php", false, $get ) :
-          make_url( "list.php", false, $get ) );
+          make_url( "read.php", $get, false ) :
+          make_url( "list.php", $get, false ) );
    }
 
    if( $links & LINK_PREV_PAGE )
