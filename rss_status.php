@@ -5,7 +5,7 @@ function error($err, $debugmsg=NULL)
 {
    global $uhandle;
 
-   list( $err, $uri)= error_log( $uhandle, $err, $debugmsg);
+   list( $err, $uri)= err_log( $uhandle, $err, $debugmsg);
 
    if( !$rss_opened )
       rss_open( 'ERROR');
@@ -22,7 +22,7 @@ $date_fmt = 'Y-m-d H:i';
 {//standalone version ==================
 require_once( "include/config.php" );
 
-function error_log( $handle, $err, $debugmsg=NULL)
+function err_log( $handle, $err, $debugmsg=NULL)
 {
 
    $uri = "error.php?err=" . urlencode($err);

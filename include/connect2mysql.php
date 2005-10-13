@@ -58,7 +58,7 @@ function error($err, $debugmsg=NULL)
 
    $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
 
-   list( $err, $uri)= error_log( $handle, $err, $debugmsg);
+   list( $err, $uri)= err_log( $handle, $err, $debugmsg);
 
  global $quick_errors;
    if( @$quick_errors )
@@ -71,7 +71,7 @@ function error($err, $debugmsg=NULL)
 }
 
 
-function error_log( $handle, $err, $debugmsg=NULL)
+function err_log( $handle, $err, $debugmsg=NULL)
 {
 
    $uri = "error.php?err=" . urlencode($err);
