@@ -50,13 +50,32 @@ function disable_cache($stamp=NULL)
       header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
 }
 
+
+if( !function_exists('error') )
+{
 function error($err, $debugmsg=NULL)
 {
 
    $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
 
+   list( $err, $uri)= error_log( $handle, $err, $debugmsg);
+
+ global $quick_errors;
+   if( @$quick_errors )
+      quick_error( $err ); //Short one line message
+
+   disable_cache();
+
+   jump_to( $uri );
+}
+}
+
+
+function error_log( $handle, $err, $debugmsg=NULL)
+{
+
    $uri = "error.php?err=" . urlencode($err);
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='$handle', " .
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."', " .
       "Message='$err', IP='{$_SERVER['REMOTE_ADDR']}'" ;
 
    $mysqlerror = @mysql_error();
@@ -64,7 +83,7 @@ function error($err, $debugmsg=NULL)
    if( !empty($mysqlerror) )
    {
       $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
-      $errorlog_query .= ", MysqlError='" . addslashes( $mysqlerror) . "'";
+      $errorlog_query .= ", MysqlError='".addslashes( $mysqlerror)."'";
       $err.= ' / '. $mysqlerror;
    }
 
@@ -88,20 +107,13 @@ function error($err, $debugmsg=NULL)
 
    @mysql_query( $errorlog_query );
 
- global $quick_errors;
-   if( @$quick_errors )
-      quick_error( $err ); //Short one line message
-
-   disable_cache();
-
-   jump_to( $uri );
+   return array( $err, $uri);
 }
 
 
 function admin_log( $uid, $handle, $text)
 {
-   $text= addslashes( $text);
-   $query = "INSERT INTO Adminlog SET uid='$uid', Handle='$handle', Message='$text'" ;
+   $query = "INSERT INTO Adminlog SET uid='$uid', Handle='".addslashes($handle)."', Message='".addslashes($text)."'" ;
 
    return mysql_query( $query );
 }
