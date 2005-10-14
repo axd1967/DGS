@@ -15,7 +15,7 @@ function error($err, $debugmsg=NULL)
 }
 
 require_once( "include/quick_common.php" );
-$date_fmt = 'Y-m-d H:i';
+$rss_date_fmt = 'D, d M Y H:i:s \G\M\T';
 
 //require_once( "include/connect2mysql.php" );
 //else ...
@@ -105,7 +105,7 @@ function rss_safe( $str)
 $rss_opened= false;
 function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
 {
-   global $encoding_used, $HOSTBASE, $NOW, $date_fmt; //$base_path
+   global $encoding_used, $HOSTBASE, $NOW, $rss_date_fmt; //$base_path
 
    ob_start("ob_gzhandler");
    $rss_opened= true;
@@ -129,7 +129,7 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
    echo " <channel>\n"
       . "  <title>Dragon Go Server - $title</title>\n"
       . "  <link>$html_clone</link>\n"
-      . "  <pubDate>" . date($date_fmt, $last_modified_stamp) . "</pubDate>"
+      . "  <pubDate>" . gmdate($rss_date_fmt, $last_modified_stamp) . "</pubDate>"
       . ( is_numeric( $cache_minutes) ? "  <ttl>$cache_minutes</ttl>\n" : '' )
       . "  <language>en-us</language>"
       . "  <description>$description</description>\n"
@@ -366,7 +366,7 @@ else
 
       $tit= "Message from $safename";
       $lnk= $HOSTBASE.'/message.php?mid='.$safeid;
-      $dat= date('Y-m-d H:i', (int)@$row['date']);
+      $dat= gmdate($rss_date_fmt, @$row['date']);
       $dsc= "Message: $safeid" . $rss_nl .
             //"Folder: ".FOLDER_NEW . $rss_nl .
             "From: $safename" . $rss_nl .
@@ -401,7 +401,7 @@ else
       $tit= "Game with $safename";
       $lnk= $HOSTBASE.'/game.php?gid='.$safeid;
       $mov= $lnk.URI_AMP.'move='.$move;
-      $dat= date('Y-m-d H:i', (int)@$row['date']);
+      $dat= gmdate($rss_date_fmt, @$row['date']);
       $dsc= "Game: $safeid" . $rss_nl .
             "Opponent: $safename" . $rss_nl .
             "Color: ".$clrs{@$row['Color']} . $rss_nl .
