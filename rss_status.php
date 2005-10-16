@@ -175,12 +175,14 @@ function rss_item( $title, $link, $description='', $category='', $pubDate='', $g
 
 function rss_error( $str)
 {
+ global $HOSTBASE;
    rss_item( 'ERROR', $HOSTBASE.'/', 'Error: '.rss_safe( $str));
 }
 
 
 function rss_warning( $str)
 {
+ global $HOSTBASE;
    rss_item( 'WARNING', $HOSTBASE.'/', 'Warning: '.rss_safe( $str));
 }
 
