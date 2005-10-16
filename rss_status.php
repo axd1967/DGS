@@ -1,5 +1,7 @@
 <?php
 
+define('ALLOW_AUTH',true);
+
 $quick_errors = 1;
 function error($err, $debugmsg=NULL)
 {
@@ -7,6 +9,7 @@ function error($err, $debugmsg=NULL)
 
    list( $err, $uri)= err_log( $uhandle, $err, $debugmsg);
 
+   global $rss_opened;
    if( !$rss_opened )
       rss_open( 'ERROR');
    rss_error( $err);
@@ -102,8 +105,13 @@ function rss_safe( $str)
 }
 
 
-function rss_date( $dat)
+function rss_date( $dat=0)
 {
+   if( !$dat )
+   {
+      global $NOW;
+      $dat= $NOW;
+   }
    return gmdate( 'D, d M Y H:i:s \G\M\T', $dat);
 }
 
@@ -114,6 +122,7 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
    global $encoding_used, $HOSTBASE, $NOW; //$base_path
 
    ob_start("ob_gzhandler");
+   global $rss_opened;
    $rss_opened= true;
 
    $last_modified_stamp= $NOW;
@@ -150,7 +159,7 @@ function rss_close( )
 }
 
 
-function rss_item( $title, $link, $description='', $category='', $pubDate='', $guid='')
+function rss_item( $title, $link, $description='', $pubDate='', $category='', $guid='')
 {
    if( empty($description) )
       $description = $title;
@@ -159,12 +168,13 @@ function rss_item( $title, $link, $description='', $category='', $pubDate='', $g
 
    $str = "  <item>\n"
         . "   <title>$title</title>\n";
-   //if( $link )
-      $str.= "   <link>$link</link>\n"
-           . "   <guid>$guid</guid>\n";
+   if( $link )
+      $str.= "   <link>$link</link>\n";
+   if( $guid )
+      $str.= "   <guid>$guid</guid>\n";
    if( $category )
       $str.= "   <category>$category</category>\n";
-   if( $pubDate )
+   //if( $pubDate )
       $str.= "   <pubDate>" . rss_date($pubDate) . "</pubDate>\n";
    $str.= "   <description>$description</description>\n"
         . "  </item>\n";
@@ -173,17 +183,31 @@ function rss_item( $title, $link, $description='', $category='', $pubDate='', $g
 }
 
 
-function rss_error( $str)
+function rss_error( $str, $title='', $link='')
 {
- global $HOSTBASE;
-   rss_item( 'ERROR', $HOSTBASE.'/', 'Error: '.rss_safe( $str));
+   if( !$link )
+   {
+      global $HOSTBASE;
+      $link= $HOSTBASE.'/';
+   }
+   if( !$title )
+      $title= 'ERROR';
+   $str= rss_safe( $str);
+   rss_item( $title, $link, 'Error: '.$str);
 }
 
 
-function rss_warning( $str)
+function rss_warning( $str, $title='', $link='')
 {
- global $HOSTBASE;
-   rss_item( 'WARNING', $HOSTBASE.'/', 'Warning: '.rss_safe( $str));
+   if( !$link )
+   {
+      global $HOSTBASE;
+      $link= $HOSTBASE.'/';
+   }
+   if( !$title )
+      $title= 'WARNING';
+   $str= rss_safe( $str);
+   rss_item( $title, $link, 'Warning: '.$str);
 }
 
 
@@ -237,13 +261,11 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 if( $is_down )
 {
    rss_open( 'WARNING');
-   rss_warning($is_down_message);
+   rss_warning($is_down_message, 'The server is down');
    rss_close();
 }
 else
 {
-
-   $allow_auth = true;
 
    $logged_in = false;
    $loggin_mode = '';
@@ -253,7 +275,7 @@ else
    {
       $loggin_mode = 'password';
    }
-   else if( $allow_auth )
+   else if( ALLOW_AUTH )
    {
       $uhandle = arg_stripslashes((string)@$_SERVER['PHP_AUTH_USER']);
       $passwd = arg_stripslashes((string)@$_SERVER['PHP_AUTH_PW']);
@@ -322,7 +344,7 @@ else
 
    if( !$logged_in )
    {
-      if( $allow_auth ) //or $loggin_mode=='authenticate'
+      if( ALLOW_AUTH ) //or $loggin_mode=='authenticate'
          rss_auth( 'Unauthorized access forbidden!', $uhandle);
       error("not_logged_in",'rss1');
    }
@@ -336,7 +358,7 @@ else
    $my_id = (int)$player_row['ID'];
    $my_name = rss_safe( $player_row['Handle']);
 
-   $rss_nl = "\n - ";
+   $rss_sep = "\n - ";
 
    $tit= "Status of $my_name";
    $lnk= $HOSTBASE.'/status.php';
@@ -377,11 +399,11 @@ else
       $tit= "Message from $safename";
       $lnk= $HOSTBASE.'/message.php?mid='.$safeid;
       $dat= @$row['date'];
-      $dsc= "Message: $safeid" . $rss_nl .
-            //"Folder: ".FOLDER_NEW . $rss_nl .
-            "From: $safename" . $rss_nl .
+      $dsc= "Message: $safeid" . $rss_sep .
+            //"Folder: ".FOLDER_NEW . $rss_sep .
+            "From: $safename" . $rss_sep .
             "Subject: ".rss_safe( @$row['Subject']);
-      rss_item( $tit, $lnk, $dsc, $cat, $dat);
+      rss_item( $tit, $lnk, $dsc, $dat, $cat);
    }
 
 
@@ -413,17 +435,17 @@ else
       $lnk= $HOSTBASE.'/game.php?gid='.$safeid;
       $mov= $lnk.'&amp;move='.$move;
       $dat= @$row['date'];
-      $dsc= "Game: $safeid" . $rss_nl .
-            "Opponent: $safename" . $rss_nl .
-            "Color: ".$clrs{@$row['Color']} . $rss_nl .
+      $dsc= "Game: $safeid" . $rss_sep .
+            "Opponent: $safename" . $rss_sep .
+            "Color: ".$clrs{@$row['Color']} . $rss_sep .
             "Move: ".$move;
-      rss_item( $tit, $lnk, $dsc, $cat, $dat, $mov);
+      rss_item( $tit, $lnk, $dsc, $dat, $cat, $mov);
    }
 
     
    if( $nothing_found )
    {
-      rss_warning("nothing found");
+      rss_warning('nothing found', 'nothing found', $HOSTBASE.'/status.php');
    }
 
    rss_close();
