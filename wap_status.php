@@ -192,9 +192,9 @@ function wap_item( $id, $title, $link, $description='', $pubDate='')
    $str.= "<p>$description</p>";
 
 /*
-   $str.= "<p><do type=\"prev\" label=\"back\"><prev/></do></p>"
-        . "</card>\n";
+   $str.= "<p><do type=\"prev\" label=\"back\"><prev/></do></p>";
 */
+   $str.= "</card>\n";
 
    echo $str;
 }
