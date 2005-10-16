@@ -336,7 +336,7 @@ else
    $my_id = (int)$player_row['ID'];
    $my_name = rss_safe( $player_row['Handle']);
 
-   $rss_nl = "\n<br />";
+   $rss_nl = "\n - ";
 
    $tit= "Status of $my_name";
    $lnk= $HOSTBASE.'/status.php';
