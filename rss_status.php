@@ -14,8 +14,8 @@ function error($err, $debugmsg=NULL)
    exit;
 }
 
+putenv('TZ=GMT');
 require_once( "include/quick_common.php" );
-$rss_date_fmt = 'D, d M Y H:i:s \G\M\T';
 
 //require_once( "include/connect2mysql.php" );
 //else ...
@@ -33,7 +33,7 @@ function err_log( $handle, $err, $debugmsg=NULL)
 
    if( !empty($mysqlerror) )
    {
-      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
+      $uri .= "&amp;mysqlerror=" . urlencode($mysqlerror);
       $errorlog_query .= ", MysqlError='".addslashes( $mysqlerror)."'";
       $err.= ' / '. $mysqlerror;
    }
@@ -102,10 +102,16 @@ function rss_safe( $str)
 }
 
 
+function rss_date( $dat)
+{
+   return gmdate( 'D, d M Y H:i:s \G\M\T', $dat);
+}
+
+
 $rss_opened= false;
 function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
 {
-   global $encoding_used, $HOSTBASE, $NOW, $rss_date_fmt; //$base_path
+   global $encoding_used, $HOSTBASE, $NOW; //$base_path
 
    ob_start("ob_gzhandler");
    $rss_opened= true;
@@ -129,7 +135,7 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
    echo " <channel>\n"
       . "  <title>Dragon Go Server - $title</title>\n"
       . "  <link>$html_clone</link>\n"
-      . "  <pubDate>" . gmdate($rss_date_fmt, $last_modified_stamp) . "</pubDate>"
+      . "  <pubDate>" . rss_date($last_modified_stamp) . "</pubDate>"
       . ( is_numeric( $cache_minutes) ? "  <ttl>$cache_minutes</ttl>\n" : '' )
       . "  <language>en-us</language>"
       . "  <description>$description</description>\n"
@@ -159,7 +165,7 @@ function rss_item( $title, $link, $description='', $category='', $pubDate='', $g
    if( $category )
       $str.= "   <category>$category</category>\n";
    if( $pubDate )
-      $str.= "   <pubDate>$pubDate</pubDate>\n";
+      $str.= "   <pubDate>" . rss_date($pubDate) . "</pubDate>\n";
    $str.= "   <description>$description</description>\n"
         . "  </item>\n";
 
@@ -169,13 +175,13 @@ function rss_item( $title, $link, $description='', $category='', $pubDate='', $g
 
 function rss_error( $str)
 {
-   rss_item( 'ERROR', '', 'Error: '.rss_safe( $str));
+   rss_item( 'ERROR', $HOSTBASE.'/', 'Error: '.rss_safe( $str));
 }
 
 
 function rss_warning( $str)
 {
-   rss_item( 'WARNING', '', 'Warning: '.rss_safe( $str));
+   rss_item( 'WARNING', $HOSTBASE.'/', 'Warning: '.rss_safe( $str));
 }
 
 
@@ -341,7 +347,7 @@ else
    // New messages?
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
-      "Messages.Subject, Players.Name AS sender " .
+      "Messages.Subject, Players.Name AS sender, Players.Handle AS sendhndl " .
       "FROM Messages, MessageCorrespondents AS me " .
       "LEFT JOIN MessageCorrespondents AS other " .
         "ON other.mid=me.mid AND other.Sender!=me.Sender " .
@@ -349,7 +355,7 @@ else
       "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
               "AND Messages.ID=me.mid " .
               "AND me.Sender='N' " . //exclude message to myself
-      "ORDER BY date DESC";
+      "ORDER BY date, me.mid";
 
    $result = mysql_query( $query ) or error('mysql_query_failed','rss3');
 
@@ -360,13 +366,15 @@ else
       $safename = @$row['sender'];
       if( !$safename )
          $safename = '[Server message]';
+      else
+         $safename.= " (".@$row['sendhndl'].")";
       $safename = rss_safe( $safename);
 
       $safeid = (int)@$row['mid'];
 
       $tit= "Message from $safename";
       $lnk= $HOSTBASE.'/message.php?mid='.$safeid;
-      $dat= gmdate($rss_date_fmt, @$row['date']);
+      $dat= @$row['date'];
       $dsc= "Message: $safeid" . $rss_nl .
             //"Folder: ".FOLDER_NEW . $rss_nl .
             "From: $safename" . $rss_nl .
@@ -377,13 +385,13 @@ else
 
    // Games to play?
 
-   $query = "SELECT Black_ID,White_ID,Games.ID, (White_ID=$my_id)+0 AS Color, " .
-       "UNIX_TIMESTAMP(LastChanged) as date,Games.Moves, " .
-       "opponent.Name, opponent.Handle, opponent.ID AS pid " .
+   $query = "SELECT UNIX_TIMESTAMP(LastChanged) as date,Games.ID, " .
+       "Games.Moves,(White_ID=$my_id)+0 AS Color, " .
+       "opponent.Name, opponent.Handle " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$my_id AND Status!='INVITED' AND Status!='FINISHED' " .
          "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$my_id " .
-       "ORDER BY date DESC, Games.ID";
+       "ORDER BY date, Games.ID";
 
    $result = mysql_query( $query ) or error('mysql_query_failed','rss4');
 
@@ -393,6 +401,7 @@ else
    {
       $nothing_found = false;
       $safename = @$row['Name'];
+         $safename.= " (".@$row['Handle'].")";
       $safename = rss_safe( $safename);
 
       $safeid = (int)@$row['ID'];
@@ -400,8 +409,8 @@ else
 
       $tit= "Game with $safename";
       $lnk= $HOSTBASE.'/game.php?gid='.$safeid;
-      $mov= $lnk.URI_AMP.'move='.$move;
-      $dat= gmdate($rss_date_fmt, @$row['date']);
+      $mov= $lnk.'&amp;move='.$move;
+      $dat= @$row['date'];
       $dsc= "Game: $safeid" . $rss_nl .
             "Opponent: $safename" . $rss_nl .
             "Color: ".$clrs{@$row['Color']} . $rss_nl .
