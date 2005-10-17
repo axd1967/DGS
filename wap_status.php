@@ -1,6 +1,6 @@
 <?php
 
-define('ALLOW_AUTH',false);
+define('ALLOW_AUTH', false);
 
 if( ALLOW_AUTH )
 {
@@ -171,29 +171,34 @@ function wap_close( )
 }
 
 
-function wap_item( $id, $title, $link, $description='', $pubDate='')
+function wap_item( $id, $head, $title, $link='', $description='', $pubDate='', $nid='', $pid='')
 {
    if( empty($description) )
       $description = $title;
 
-   $str = "<card id=\"$id\" title=\"$title\">";
+   $str = "<card id=\"$id\" title=\"$head\">";
+
+   if( $pid )
+      $str.= " <a href=\"#$pid\">[&lt;Prev]</a>";
+
    if( $link )
-   {
-      $str.= "<p><a href=\"$link\">$title</a></p>";
-   }
-   else
-   {
-      $str.= "<p><b>$title</b></p>";
-   }
+      $str.= " <a href=\"$link\">[Go]</a>";
+   //$str.= "<p><do type=\"prev\" label=\"back\"><prev/></do></p>";
+   //$str.= "<do type=\"prev\" label=\"back\"><prev/></do>";
+
+   if( $nid )
+      $str.= " <a href=\"#$nid\">[Next&gt;]</a>";
+
+   $str.= "<br/>";
+
+
+   $str.= "<p><b>$title</b></p>";
 
    //if( $pubDate )
       $str.= "<p>" . wap_date($pubDate) . "</p>";
 
    $str.= "<p>$description</p>";
 
-/*
-   $str.= "<p><do type=\"prev\" label=\"back\"><prev/></do></p>";
-*/
    $str.= "</card>\n";
 
    echo $str;
@@ -210,7 +215,7 @@ function wap_error( $str, $title='', $link='')
    if( !$title )
       $title= 'ERROR';
    $str= wap_safe( $str);
-   wap_item( 'E'.wap_id(), $title, $link, 'Error: '.$str);
+   wap_item( 'E'.wap_id(), 'Error', $title, $link, 'Error: '.$str);
 }
 
 
@@ -224,7 +229,7 @@ function wap_warning( $str, $title='', $link='')
    if( !$title )
       $title= 'WARNING';
    $str= wap_safe( $str);
-   wap_item( 'W'.wap_id(), $title, $link, 'Warning: '.$str);
+   wap_item( 'W'.wap_id(), 'Warning', $title, $link, 'Warning: '.$str);
 }
 
 
@@ -233,11 +238,13 @@ function wap_auth( $title, $uhandle='')
    //if( $uhandle ) $uhandle= ' - '.$uhandle; else
       $uhandle= '';
 
+/*
    global $wap_opened;
    if( !$wap_opened )
       wap_open( 'LOGIN');
+*/
 
-   echo "<card id=\"login\" title=\"$title\">"
+   $str= "<card id=\"login\" title=\"$title\">"
       ."<p>"
       ."user: <input name=\"userid\" size=\"10\" maxlength=\"16\" type=\"text\"/><br/>"
       ."pass: <input name=\"passwd\" size=\"10\" maxlength=\"16\" type=\"password\"/><br/>"
@@ -253,10 +260,13 @@ function wap_auth( $title, $uhandle='')
       ."<postfield name=\"logout\" value=\"1\"/>"
       ."</go>"
       ."</do>"
-      ."</card>";
+      ;
+   return $str;
 
+/*
    wap_close();
    exit;
+*/
 }
 
 
@@ -386,8 +396,14 @@ else
 
    if( !$logged_in )
    {
-      if( ALLOW_AUTH ) //or $loggin_mode=='authenticate'
-         wap_auth( 'Register!', $uhandle);
+      if( 1 or ALLOW_AUTH ) //or $loggin_mode=='authenticate'
+      {
+         if( !$wap_opened )
+            wap_open( 'LOGIN');
+         echo wap_auth( 'Register!', $uhandle)."</card>\n";
+         wap_close();
+         exit;
+      }
       error("not_logged_in",'wap1');
    }
 
@@ -400,15 +416,6 @@ else
    $my_id = (int)$player_row['ID'];
    $my_name = wap_safe( $player_row['Handle']);
 
-   $wap_sep = "\n<br/>";
-
-   $tit= "Status of $my_name";
-   $lnk= $HOSTBASE.'/status.php';
-   $dsc= "Messages and Games for $my_name";
-   wap_open( $tit, $dsc, $lnk);
-
-
-   $nothing_found = true;
 
    // New messages?
 
@@ -423,30 +430,8 @@ else
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date, me.mid";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed','wap3');
-
-   while( $row = mysql_fetch_assoc($result) )
-   {
-      $nothing_found = false;
-      $safename = @$row['sender'];
-      if( !$safename )
-         $safename = '[Server message]';
-      else
-         $safename.= " (".@$row['sendhndl'].")";
-      $safename = wap_safe( $safename);
-
-      $safeid = (int)@$row['mid'];
-
-      $card= 'M'.$safeid;
-      $tit= "Message from $safename";
-      $lnk= $HOSTBASE.'/message.php?mid='.$safeid;
-      $dat= @$row['date'];
-      $dsc= "Message: $safeid" . $wap_sep .
-            //"Folder: ".FOLDER_NEW . $wap_sep .
-            "From: $safename" . $wap_sep .
-            "Subject: ".wap_safe( @$row['Subject']);
-      wap_item( $card, $tit, $lnk, $dsc, $dat);
-   }
+   $resultM = mysql_query( $query ) or error('mysql_query_failed','wap3');
+   $countM = @mysql_num_rows($resultM);
 
 
    // Games to play?
@@ -459,12 +444,72 @@ else
          "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$my_id " .
        "ORDER BY date, Games.ID";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed','wap4');
+   $resultG = mysql_query( $query ) or error('mysql_query_failed','wap4');
+   $countG = @mysql_num_rows($resultG);
+
+
+   // Display results
+
+   $wap_sep = "\n<br/>";
+
+   $tit= "Status of $my_name";
+   $lnk= $HOSTBASE.'/status.php';
+   $dsc= "Messages and Games for $my_name";
+   wap_open( $tit, $dsc, $lnk);
+
+   $card = wap_auth( 'Register!', $uhandle);
+   $card.= "<p>Status of: <a href=\"$lnk\">$my_name</a></p>";
+   if( $countM>0 )
+      $card.= "Messages: <a href=\"#M1\">$countM</a><br/>";
+   else
+      $card.= "Messages: 0<br/>";
+   if( $countG>0 )
+      $card.= "Games: <a href=\"#G1\">$countG</a><br/>";
+   else
+      $card.= "Games: 0<br/>";
+   $card.= "</card>\n";
+   echo $card;
+
+   $previd='login';
+
+   $i=0;
+   while( $row = mysql_fetch_assoc($resultM) )
+   {
+      $i++;
+      $safename = @$row['sender'];
+      if( !$safename )
+         $safename = '[Server message]';
+      else
+         $safename.= " (".@$row['sendhndl'].")";
+      $safename = wap_safe( $safename);
+
+      $safeid = (int)@$row['mid'];
+
+      $cid= 'M'.$i;
+      $hdr= "Message $i";
+      $tit= "From: $safename";
+      $lnk= $HOSTBASE.'/message.php?mid='.$safeid;
+      $dat= @$row['date'];
+      $dsc= //"Message: $safeid" . $wap_sep .
+            //"Folder: ".FOLDER_NEW . $wap_sep .
+            "Subject: ".wap_safe( @$row['Subject']);
+      if( $i<$countM )
+         $nextid= 'M'.($i+1);
+      else if( $countG>0 )
+         $nextid= 'G1';
+      else
+         $nextid= 'login';
+
+      wap_item( $cid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
+      $previd= $cid;
+   }
+
 
    $clrs="BW"; //player's color... so color to play.
-   while( $row = mysql_fetch_assoc($result) )
+   $i=0;
+   while( $row = mysql_fetch_assoc($resultG) )
    {
-      $nothing_found = false;
+      $i++;
       $safename = @$row['Name'];
          $safename.= " (".@$row['Handle'].")";
       $safename = wap_safe( $safename);
@@ -472,23 +517,24 @@ else
       $safeid = (int)@$row['ID'];
       $move = (int)@$row['Moves'];
 
-      $card= 'G'.$safeid;
-      $tit= "Game with $safename";
+      $cid= 'G'.$i;
+      $hdr= "Game $i";
+      $tit= "Opponent: $safename";
       $lnk= $HOSTBASE.'/game.php?gid='.$safeid;
       $dat= @$row['date'];
-      $dsc= "Game: $safeid" . $wap_sep .
-            "Opponent: $safename" . $wap_sep .
+      $dsc= //"Game: $safeid" . $wap_sep .
+            //"Opponent: $safename" . $wap_sep .
             "Color: ".$clrs{@$row['Color']} . $wap_sep .
             "Move: ".$move;
-      wap_item( $card, $tit, $lnk, $dsc, $dat);
-   }
+      if( $i<$countG )
+         $nextid= 'G'.($i+1);
+      else
+         $nextid= 'login';
 
-    
-   if( $nothing_found )
-   {
-      wap_warning('nothing found', 'nothing found', $HOSTBASE.'/status.php');
+      wap_item( $cid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
+      $previd= $cid;
    }
-
+   
    wap_close();
 }
 ?>
