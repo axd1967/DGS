@@ -95,14 +95,14 @@ function err_log( $handle, $err, $debugmsg=NULL)
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
    }
-   //if( !empty($debugmsg) )
+   if( !empty($debugmsg) )
    {
       $errorlog_query .= ", Debug='" . addslashes( $debugmsg) . "'";
       //$err.= ' / '. $debugmsg; //Do not display this info!
    }
 
- global $dbcnx;
-   if( !isset($dbcnx) )
+   global $dbcnx;
+   if( !@$dbcnx )
       connect2mysql( true);
 
    @mysql_query( $errorlog_query );
@@ -127,15 +127,19 @@ function connect2mysql($no_errors=false)
 
    if (!$dbcnx)
    {
-      if( $no_errors ) return;
+      if( $no_errors ) return false;
       error("mysql_connect_failed");
    }
 
    if (! @mysql_select_db($DB_NAME) )
    {
-      if( $no_errors ) return;
+      mysql_close( $dbcnx);
+      $dbcnx= 0;
+      if( $no_errors ) return false;
       error("mysql_select_db_failed");
    }
+
+   return true;
 }
 
 ?>

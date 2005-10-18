@@ -259,18 +259,21 @@ class Board
 
    function set_style( &$player_row)
    {
-      if( $player_row['Boardcoords'] >= 0 and $player_row['Boardcoords'] <= 0x3F )
+      if( isset($player_row['Boardcoords']) &&
+          $player_row['Boardcoords'] >= 0 && $player_row['Boardcoords'] <= 0x3F )
          $this->coord_borders = $player_row['Boardcoords'];
       else
          $this->coord_borders = -1;
 
-      if( $player_row['Stonesize'] >= 5 and $player_row['Stonesize'] <= 50 )
+      if( isset($player_row['Stonesize']) &&
+          $player_row['Stonesize'] >= 5 && $player_row['Stonesize'] <= 50 )
          $this->stone_size = $player_row['Stonesize'];
       else
          $this->stone_size = 25;
 
-      if( $player_row['Woodcolor'] >= 1 and $player_row['Woodcolor'] <= 5
-          or $player_row['Woodcolor'] >= 11 and $player_row['Woodcolor'] <= 15 )
+      if( isset($player_row['Woodcolor']) &&
+           ( $player_row['Woodcolor'] >= 1 and $player_row['Woodcolor'] <= 5
+          or $player_row['Woodcolor'] >= 11 and $player_row['Woodcolor'] <= 15 ) )
          $this->woodcolor = $player_row['Woodcolor'];
       else
          $this->woodcolor = 1;
