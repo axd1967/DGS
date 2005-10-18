@@ -7,12 +7,13 @@ function error($err, $debugmsg=NULL)
 {
    global $uhandle;
 
+   $title= str_replace('_',' ',$err);
    list( $err, $uri)= err_log( $uhandle, $err, $debugmsg);
 
    global $rss_opened;
    if( !$rss_opened )
       rss_open( 'ERROR');
-   rss_error( $err);
+   rss_error( $err, $title);
    rss_close();
    exit;
 }
@@ -24,6 +25,7 @@ require_once( "include/quick_common.php" );
 //else ...
 {//standalone version ==================
 require_once( "include/config.php" );
+if( @URI_AMP=='URI_AMP' ) define('URI_AMP','&amp;');
 
 function err_log( $handle, $err, $debugmsg=NULL)
 {
@@ -36,7 +38,7 @@ function err_log( $handle, $err, $debugmsg=NULL)
 
    if( !empty($mysqlerror) )
    {
-      $uri .= "&amp;mysqlerror=" . urlencode($mysqlerror);
+      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
       $errorlog_query .= ", MysqlError='".addslashes( $mysqlerror)."'";
       $err.= ' / '. $mysqlerror;
    }
@@ -49,14 +51,14 @@ function err_log( $handle, $err, $debugmsg=NULL)
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
    }
-   //if( !empty($debugmsg) )
+   if( !empty($debugmsg) )
    {
       $errorlog_query .= ", Debug='" . addslashes( $debugmsg) . "'";
       //$err.= ' / '. $debugmsg; //Do not display this info!
    }
 
- global $dbcnx;
-   if( !isset($dbcnx) )
+   global $dbcnx;
+   if( !@$dbcnx )
       connect2mysql( true);
 
    @mysql_query( $errorlog_query );
@@ -85,15 +87,19 @@ function connect2mysql($no_errors=false)
 
    if (!$dbcnx)
    {
-      if( $no_errors ) return;
+      if( $no_errors ) return false;
       error("mysql_connect_failed");
    }
 
    if (! @mysql_select_db($DB_NAME) )
    {
-      if( $no_errors ) return;
+      mysql_close( $dbcnx);
+      $dbcnx= 0;
+      if( $no_errors ) return false;
       error("mysql_select_db_failed");
    }
+
+   return true;
 }
 }//standalone version ==================
 
@@ -119,7 +125,7 @@ function rss_date( $dat=0)
 $rss_opened= false;
 function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
 {
-   global $encoding_used, $HOSTBASE, $NOW; //$base_path
+   global $encoding_used, $HOSTBASE, $NOW;
 
    ob_start("ob_gzhandler");
    global $rss_opened;
@@ -433,7 +439,7 @@ else
 
       $tit= "Game with $safename";
       $lnk= $HOSTBASE.'/game.php?gid='.$safeid;
-      $mov= $lnk.'&amp;move='.$move;
+      $mov= $lnk.URI_AMP.'move='.$move;
       $dat= @$row['date'];
       $dsc= "Game: $safeid" . $rss_sep .
             "Opponent: $safename" . $rss_sep .

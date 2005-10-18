@@ -32,6 +32,7 @@ require_once( "include/quick_common.php" );
 //else ...
 {//standalone version ==================
 require_once( "include/config.php" );
+if( @URI_AMP=='URI_AMP' ) define('URI_AMP','&amp;');
 
 function err_log( $handle, $err, $debugmsg=NULL)
 {
@@ -44,7 +45,7 @@ function err_log( $handle, $err, $debugmsg=NULL)
 
    if( !empty($mysqlerror) )
    {
-      $uri .= "&amp;mysqlerror=" . urlencode($mysqlerror);
+      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
       $errorlog_query .= ", MysqlError='".addslashes( $mysqlerror)."'";
       $err.= ' / '. $mysqlerror;
    }
@@ -57,14 +58,14 @@ function err_log( $handle, $err, $debugmsg=NULL)
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
    }
-   //if( !empty($debugmsg) )
+   if( !empty($debugmsg) )
    {
       $errorlog_query .= ", Debug='" . addslashes( $debugmsg) . "'";
       //$err.= ' / '. $debugmsg; //Do not display this info!
    }
 
- global $dbcnx;
-   if( !isset($dbcnx) )
+   global $dbcnx;
+   if( !@$dbcnx )
       connect2mysql( true);
 
    @mysql_query( $errorlog_query );
@@ -93,15 +94,19 @@ function connect2mysql($no_errors=false)
 
    if (!$dbcnx)
    {
-      if( $no_errors ) return;
+      if( $no_errors ) return false;
       error("mysql_connect_failed");
    }
 
    if (! @mysql_select_db($DB_NAME) )
    {
-      if( $no_errors ) return;
+      mysql_close( $dbcnx);
+      $dbcnx= 0;
+      if( $no_errors ) return false;
       error("mysql_select_db_failed");
    }
+
+   return true;
 }
 }//standalone version ==================
 
@@ -120,7 +125,7 @@ function wap_date( $dat=0)
       global $NOW;
       $dat= $NOW;
    }
-   return gmdate( 'D, d M Y H:i:s \G\M\T', $dat);
+   return date( 'Y-m-d H:i', $dat);
 }
 
 
@@ -134,16 +139,14 @@ function wap_id()
 
 
 $wap_opened= false;
-function wap_open( $title, $description='', $html_clone='', $cache_minutes=10)
+function wap_open( $title)
 {
-   global $encoding_used, $HOSTBASE, $NOW; //$base_path
+   global $encoding_used, $HOSTBASE, $NOW;
 
    if( !ALLOW_AUTH )
       ob_start("ob_gzhandler");
    global $wap_opened;
    $wap_opened= true;
-
-   $last_modified_stamp= $NOW;
 
    //if( empty($encoding_used) )
       $encoding_used = 'iso-8859-1';
@@ -157,7 +160,7 @@ function wap_open( $title, $description='', $html_clone='', $cache_minutes=10)
    header('Content-Type: text/vnd.wap.wml; charset='.$encoding_used);
 
    echo "<?xml version=\"1.0\" encoding=\"$encoding_used\"?>\n";
-   echo "<!DOCTYPE wml PUBLIC '-//WAPFORUM//DTD WML 1.1//EN' 'http://www.wapforum.org/DTD/wml_1.1.xml'>\n";
+   echo "<!DOCTYPE wml PUBLIC '-//WAPFORUM//DTD WML 1.2//EN' 'http://www.wapforum.org/DTD/wml_1.2.xml'>\n";
 
    echo "<wml>\n";
 }
@@ -171,23 +174,20 @@ function wap_close( )
 }
 
 
-function wap_item( $id, $head, $title, $link='', $description='', $pubDate='', $nid='', $pid='')
+function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='', $nextid='', $previd='')
 {
-   if( empty($description) )
-      $description = $title;
+   $str = "<card id=\"$cardid\" title=\"$head\">";
 
-   $str = "<card id=\"$id\" title=\"$head\">";
-
-   if( $pid )
-      $str.= " <a href=\"#$pid\">[&lt;Prev]</a>";
+   if( $previd )
+      $str.= " <a accesskey=\"p\" href=\"#$previd\">[&lt;Prev]</a>";
 
    if( $link )
-      $str.= " <a href=\"$link\">[Go]</a>";
+      $str.= " <a accesskey=\"g\" href=\"$link\">[Go]</a>";
    //$str.= "<p><do type=\"prev\" label=\"back\"><prev/></do></p>";
    //$str.= "<do type=\"prev\" label=\"back\"><prev/></do>";
 
-   if( $nid )
-      $str.= " <a href=\"#$nid\">[Next&gt;]</a>";
+   if( $nextid )
+      $str.= " <a accesskey=\"n\" href=\"#$nextid\">[Next&gt;]</a>";
 
    $str.= "<br/>";
 
@@ -197,7 +197,8 @@ function wap_item( $id, $head, $title, $link='', $description='', $pubDate='', $
    //if( $pubDate )
       $str.= "<p>" . wap_date($pubDate) . "</p>";
 
-   $str.= "<p>$description</p>";
+   if( !empty($description) )
+      $str.= "<p>$description</p>";
 
    $str.= "</card>\n";
 
@@ -233,29 +234,19 @@ function wap_warning( $str, $title='', $link='')
 }
 
 
-function wap_auth( $title, $uhandle='')
+function wap_auth()
 {
-   //if( $uhandle ) $uhandle= ' - '.$uhandle; else
-      $uhandle= '';
-
-/*
-   global $wap_opened;
-   if( !$wap_opened )
-      wap_open( 'LOGIN');
-*/
-
-   $str= "<card id=\"login\" title=\"$title\">"
-      ."<p>"
+   $str= "<p>"
       ."user: <input name=\"userid\" size=\"10\" maxlength=\"16\" type=\"text\"/><br/>"
       ."pass: <input name=\"passwd\" size=\"10\" maxlength=\"16\" type=\"password\"/><br/>"
       ."</p>"
-      ."<do type=\"accept\" label=\"login!\">"
+      ."<do type=\"accept\" label=\"login\">"
       ."<go href=\"".@$_SERVER['PHP_SELF']."\" method=\"post\">"
-      ."<postfield name=\"userid\" value=\"$(userid)\"/>"
-      ."<postfield name=\"passwd\" value=\"$(passwd)\"/>"
+      ."<postfield name=\"userid\" value=\"\$(userid)\"/>"
+      ."<postfield name=\"passwd\" value=\"\$(passwd)\"/>"
       ."</go>"
       ."</do>"
-      ."<do type=\"accept\" label=\"logout!\">"
+      ."<do type=\"accept\" label=\"logout\">"
       ."<go href=\"".@$_SERVER['PHP_SELF']."\" method=\"post\">"
       ."<postfield name=\"logout\" value=\"1\"/>"
       ."</go>"
@@ -400,7 +391,10 @@ else
       {
          if( !$wap_opened )
             wap_open( 'LOGIN');
-         echo wap_auth( 'Register!', $uhandle)."</card>\n";
+         $card = "<card id=\"login\" title=\"Register!\">";
+         $card.= wap_auth();
+         $card.= "</card>\n";
+         echo $card;
          wap_close();
          exit;
       }
@@ -454,28 +448,40 @@ else
 
    $tit= "Status of $my_name";
    $lnk= $HOSTBASE.'/status.php';
-   $dsc= "Messages and Games for $my_name";
-   wap_open( $tit, $dsc, $lnk);
+   wap_open( $tit);
 
-   $card = wap_auth( 'Register!', $uhandle);
-   $card.= "<p>Status of: <a href=\"$lnk\">$my_name</a></p>";
+   $cardid= 'login';
+   $card = "<card id=\"$cardid\" title=\"Status\">";
+
+   $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status</a> of: $my_name</p>";
    if( $countM>0 )
-      $card.= "Messages: <a href=\"#M1\">$countM</a><br/>";
+   {
+      $card.= "<a accesskey=\"m\" href=\"#M1\">Messages</a>: $countM<br/>";
+   }
    else
+   {
       $card.= "Messages: 0<br/>";
+   }
    if( $countG>0 )
-      $card.= "Games: <a href=\"#G1\">$countG</a><br/>";
+   {
+      $nextMid= 'G1';
+      $card.= "<a accesskey=\"g\" href=\"#G1\">Games</a>: $countG<br/>";
+   }
    else
+   {
+      $nextMid= $cardid;
       $card.= "Games: 0<br/>";
+   }
+   $nextGid= $cardid;
+
+   $card.= wap_auth();
    $card.= "</card>\n";
    echo $card;
 
-   $previd='login';
 
-   $i=0;
+   $i= 1;
    while( $row = mysql_fetch_assoc($resultM) )
    {
-      $i++;
       $safename = @$row['sender'];
       if( !$safename )
          $safename = '[Server message]';
@@ -485,7 +491,6 @@ else
 
       $safeid = (int)@$row['mid'];
 
-      $cid= 'M'.$i;
       $hdr= "Message $i";
       $tit= "From: $safename";
       $lnk= $HOSTBASE.'/message.php?mid='.$safeid;
@@ -493,23 +498,20 @@ else
       $dsc= //"Message: $safeid" . $wap_sep .
             //"Folder: ".FOLDER_NEW . $wap_sep .
             "Subject: ".wap_safe( @$row['Subject']);
-      if( $i<$countM )
-         $nextid= 'M'.($i+1);
-      else if( $countG>0 )
-         $nextid= 'G1';
-      else
-         $nextid= 'login';
 
-      wap_item( $cid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
-      $previd= $cid;
+      $previd= $cardid;
+      $cardid= 'M'.$i;
+      $i++;
+      $nextid= ( $i > $countM ) ? $nextMid : 'M'.$i;
+
+      wap_item( $cardid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
    }
 
 
    $clrs="BW"; //player's color... so color to play.
-   $i=0;
+   $i= 1;
    while( $row = mysql_fetch_assoc($resultG) )
    {
-      $i++;
       $safename = @$row['Name'];
          $safename.= " (".@$row['Handle'].")";
       $safename = wap_safe( $safename);
@@ -517,7 +519,6 @@ else
       $safeid = (int)@$row['ID'];
       $move = (int)@$row['Moves'];
 
-      $cid= 'G'.$i;
       $hdr= "Game $i";
       $tit= "Opponent: $safename";
       $lnk= $HOSTBASE.'/game.php?gid='.$safeid;
@@ -526,13 +527,13 @@ else
             //"Opponent: $safename" . $wap_sep .
             "Color: ".$clrs{@$row['Color']} . $wap_sep .
             "Move: ".$move;
-      if( $i<$countG )
-         $nextid= 'G'.($i+1);
-      else
-         $nextid= 'login';
 
-      wap_item( $cid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
-      $previd= $cid;
+      $previd= $cardid;
+      $cardid= 'G'.$i;
+      $i++;
+      $nextid= ( $i > $countG ) ? $nextGid : 'G'.$i;
+
+      wap_item( $cardid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
    }
    
    wap_close();
