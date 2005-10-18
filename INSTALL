@@ -9,12 +9,18 @@ Requirements:
 *) mysql >= 3.23 <http://www.mysql.com>
 *) cvs client <http://www.cvshome.org>
 
+Last versions used:
+ Apache Version Apache/1.3.29 (Unix) PHP/4.3.4
+ MySQL 4.0.15
+
 
 
 
 1) Download:
 
 Either from cvs:
+(( CAUTION: Recently, sourceforge.net disable the anonymous use of cvs.
+   You must register yourself. Read the SourceForge documentations. ))
 
 > cd /path/to/the/directory/where/you/want/dragon/to/be
 > cvs -d:pserver:anonymous@cvs.dragongoserver.sourceforge.net:/cvsroot/dragongoserver login
@@ -61,22 +67,40 @@ Adjust include/config.php to your environment.
 
 
 By now, Dragon works with these PHP directives:
- error_reporting = E_ALL
- asp_tags = Off ;Unused
+ allow_call_time_pass_reference = Off ;Unused
+ allow_url_fopen = Off ;Unused
+ always_populate_raw_post_data = Off ;Unused
  arg_separator.input = &
- arg_separator.output = &amp; //or = &
- file_uploads = On
- track_vars = On ;always enabled as of PHP 4.0.3
- register_argc_argv = Off ;Unused
- register_globals = Off ;Don't care 
- safe_mode = Off
- variables_order = EGPCS
+ arg_separator.output = "&amp;" ;or = "&"
+ asp_tags = Off ;Unused
+ default_charset = ;set to empty or commented
+ default_mimetype = "text/html"
+ error_reporting = E_ALL
+ file_uploads = On ;else the pattern upload will be disabled
  gpc_order = GPC
+ implicit_flush = Off ;Unused
  magic_quotes_gpc = Off ;Don't care
  magic_quotes_runtime = Off
  magic_quotes_sybase = Off
- post_max_size = 8M 
+ max_execution_time = 30 ;except for some rebuilding scripts with large databases
+ memory_limit = 8M
+ output_buffering = Off
+ post_max_size = 8M ;greater than upload_max_filesize if used
  precision = 14
+ register_argc_argv = Off ;Unused
+ register_globals = Off ;Don't care 
+ safe_mode = Off ;else safe_mode_allowed_env_vars= must allow putenv() to modify 'TZ'
+;set sendmail_* options to your needs
+ short_open_tag = Off ;Unused
+ track_vars = On ;always enabled as of PHP 4.0.3
+ upload_max_filesize = 2M ;if used
+ variables_order = EGPCS ;or empty
+[MySQL]
+ mysql.allow_persistent = Off ;Unused
+ mysql.default_host = ;Unused
+ mysql.default_user = ;Unused
+ mysql.default_password = ;Unused
+ mysql.max_links = -1 ;Unused
 
 
 
@@ -87,8 +111,8 @@ By now, Dragon works with these PHP directives:
 > crontab -e
 
 # m  h dom mon dow command
-0,30 *  *   *   *   wget -q -O - http://your.url/halfhourly_cron.php
 */5  *  *   *   *   wget -q -O - http://your.url/clock_tick.php
+0,30 *  *   *   *   wget -q -O - http://your.url/halfhourly_cron.php
 25   5  *   *   *   wget -q -O - http://your.url/daily_cron.php
 
 
