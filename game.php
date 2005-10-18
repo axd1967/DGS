@@ -369,15 +369,15 @@ require_once( "include/sgf_parser.php" );
 
    if( ENA_MOVENUMBERS )
    {
-      $movenumbers= $player_row['MoveNumbers'];
+      $movenumbers= @$player_row['MoveNumbers'];
       if( isset($_GET['movenumbers']) )
-         $movenumbers=$_GET['movenumbers'];
+         $movenumbers= $_GET['movenumbers'];
    }
    else
       $movenumbers= 0;
 
-   $TheBoard->set_style( $player_row);
-
+   if( $logged_in )
+      $TheBoard->set_style( $player_row);
 
 
    start_page(T_("Game"), true, $logged_in, $player_row, $TheBoard->style_string());
