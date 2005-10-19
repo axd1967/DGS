@@ -198,8 +198,10 @@ function rss_error( $str, $title='', $link='')
    }
    if( !$title )
       $title= 'ERROR';
+   else
+      $title= 'ERROR: '.rss_safe( $title);
    $str= rss_safe( $str);
-   rss_item( $title, $link, 'Error: '.$str);
+   rss_item( $title, $link, 'ERROR: '.$str);
 }
 
 
@@ -211,7 +213,9 @@ function rss_warning( $str, $title='', $link='')
       $link= $HOSTBASE.'/';
    }
    if( !$title )
-      $title= 'WARNING';
+      $title= 'Warning';
+   else
+      $title= 'Warning: '.rss_safe( $title);
    $str= rss_safe( $str);
    rss_item( $title, $link, 'Warning: '.$str);
 }
@@ -449,10 +453,12 @@ else
    }
 
     
+/*
    if( $nothing_found )
    {
       rss_warning('nothing found', 'nothing found', $HOSTBASE.'/status.php');
    }
+*/
 
    rss_close();
 }
