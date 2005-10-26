@@ -20,8 +20,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
-$MAX_START_RATING = 2600;
-$MIN_RATING = -900;
+$MAX_START_RATING = 2600; //6 dan
+$MIN_RATING = -900; //30 kyu
 
 function interpolate($value, $table, $extrapolate)
 {
@@ -147,7 +147,7 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
 }
 
-function suggest_proper($rating_W, $rating_B, $size, $pos_komi=false)
+function suggest_proper($rating_W, $rating_B, $size, $positive_komi=false)
 {
    $H = abs($rating_W - $rating_B) / 100.0;
 
@@ -155,7 +155,7 @@ function suggest_proper($rating_W, $rating_B, $size, $pos_komi=false)
 
    $H += 0.5; // advantage for playing first;
 
-   $handicap = ( $pos_komi ? ceil($H) : round($H) );
+   $handicap = ( $positive_komi ? ceil($H) : round($H) );
 
    if( $rating_B == $rating_W )
       $swap = mt_rand(0,1);
@@ -164,14 +164,14 @@ function suggest_proper($rating_W, $rating_B, $size, $pos_komi=false)
 
    if( $handicap < 1 ) $handicap = 1;
 
-   $komi = round( 26.0 * ( $handicap - $H ) ) / 2;
+   $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2;
 
    if( $handicap == 1 ) $handicap = 0;
 
    return array($handicap, $komi, $swap);
 }
 
-function suggest_conventional($rating_W, $rating_B, $size, $pos_komi=false)
+function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
 {
    $handicap = abs($rating_W - $rating_B) / 100.0;
 
@@ -186,8 +186,7 @@ function suggest_conventional($rating_W, $rating_B, $size, $pos_komi=false)
    {
       $komi = 0.5;
       $swap = ( $rating_B > $rating_W );
-      if( $handicap == 1 )
-         $handicap = 0;
+      if( $handicap == 1 ) $handicap = 0;
    }
 
    return array($handicap, $komi, $swap);
@@ -649,14 +648,16 @@ function convert_to_rating($string, $type)
       return null;
 
    $string = strtolower($string);
-   $string = str_replace(Chr(160), ' ', $string); // change to normal space char.
+   $string = str_replace(chr(160), ' ', $string); // change to normal space char.
 
    $val = doubleval($string);
 
    if( strpos($string, 'k') > 0 or strpos($string, 'gup') > 0 )
       $kyu = 1;
-   if( strpos($string, 'd') > 0 )
+   else if( strpos($string, 'd') > 0 )
       $kyu = 2;
+   else
+      $kyu = 0;
 
    $igs_table[0]['KEY'] = 200;
    $igs_table[0]['VAL'] = 500;
