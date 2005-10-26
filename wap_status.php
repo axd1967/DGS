@@ -1,15 +1,5 @@
 <?php
 
-define('ALLOW_AUTH', false);
-
-if( ALLOW_AUTH )
-{
-   session_name('DGSwap');
-   session_save_path('/tmp/persistent/dragongoserver/session');
-   session_start();
-   header ("Cache-control: private");
-}
-
 $quick_errors = 1;
 function error($err, $debugmsg=NULL)
 {
@@ -143,8 +133,7 @@ function wap_open( $title)
 {
    global $encoding_used, $HOSTBASE, $NOW;
 
-   if( !ALLOW_AUTH )
-      ob_start("ob_gzhandler");
+   ob_start("ob_gzhandler");
    global $wap_opened;
    $wap_opened= true;
 
@@ -169,8 +158,7 @@ function wap_open( $title)
 function wap_close( )
 {
    echo "</wml>";
-   if( !ALLOW_AUTH )
-      ob_end_flush();
+   ob_end_flush();
 }
 
 
@@ -234,11 +222,11 @@ function wap_warning( $str, $title='', $link='')
 }
 
 
-function wap_auth()
+function wap_auth( $defid='', $defpw='')
 {
    $str= "<p>"
-      ."user: <input name=\"userid\" size=\"10\" maxlength=\"16\" type=\"text\"/><br/>"
-      ."pass: <input name=\"passwd\" size=\"10\" maxlength=\"16\" type=\"password\"/><br/>"
+      ."user: <input name=\"userid\" size=\"10\" maxlength=\"16\" value=\"$defid\" type=\"text\"/><br/>"
+      ."pass: <input name=\"passwd\" size=\"10\" maxlength=\"16\" value=\"$defpw\" type=\"password\"/><br/>"
       ."</p>"
       ."<do type=\"accept\" label=\"login\">"
       ."<go href=\"".@$_SERVER['PHP_SELF']."\" method=\"post\">"
@@ -291,7 +279,7 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 if( $is_down )
 {
    wap_open( 'WARNING');
-   wap_warning($is_down_message);
+   wap_warning( $is_down_message);
    wap_close();
 }
 else
@@ -299,40 +287,24 @@ else
 
    $logged_in = false;
    $loggin_mode = '';
-   $uhandle = get_request_arg('userid');
-   $passwd = get_request_arg('passwd');
-   if( $uhandle && $passwd )
+   if( @$_REQUEST['logout'] )
    {
-      $loggin_mode = 'password';
+      $uhandle = '';
+      $passwd = '';
    }
-   else if( ALLOW_AUTH )
+   else
    {
-      $uhandle = arg_stripslashes((string)@$_SESSION['AUTH_USER']);
-      $passwd = arg_stripslashes((string)@$_SESSION['AUTH_PW']);
-      $authid = get_request_arg('authid');
-      if( @$_REQUEST['logout'] )
-      {
-         $_SESSION= array();
-         session_destroy();
-         $uhandle = '';
-         $passwd = '';
-         $loggin_mode = 'authenticate';
-      }
-      else if( $authid && $authid !== $uhandle )
-      {
-         $uhandle = $authid;
-         $passwd = '';
-         $loggin_mode = 'authenticate';
-      }
-      else if( $uhandle && $passwd )
+      $uhandle = get_request_arg('userid');
+      $passwd = get_request_arg('passwd');
+      if( $uhandle && $passwd )
       {
          $loggin_mode = 'password';
       }
-   }
-   if( !$loggin_mode )
-   {
-      $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
-      $loggin_mode = 'cookie';
+      else if( !$uhandle && !$passwd )
+      {
+         $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
+         $loggin_mode = 'cookie';
+      }
    }
 
 
@@ -340,70 +312,51 @@ else
 
    connect2mysql();
 
-   if( $loggin_mode=='password' )
+   if( $loggin_mode )
    {
-      // temp password?
-
-      $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
-
-      if( @mysql_num_rows($result) == 1 )
-      {
-         $player_row = mysql_fetch_array($result);
-
-         if( check_password( $uhandle, $player_row["Password"],
-                              $player_row["Newpassword"], $passwd ) )
-         {
-            $logged_in = true;
-            if( ALLOW_AUTH )
-            {
-               $_SESSION['AUTH_USER']= $uhandle;
-               $_SESSION['AUTH_PW']= $passwd;
-            }
-         }
-         else error("wrong_password");
-      }
-      //else error("wrong_userid");
-   }
-
-   if( $loggin_mode=='cookie' )
-   {
-      // logged in?
-
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {
          $player_row = mysql_fetch_assoc($result);
+         if( !empty( $player_row['Timezone'] ) )
+            putenv('TZ='.$player_row['Timezone'] );
 
-         if( $player_row['Sessioncode'] === @$_COOKIE[COOKIE_PREFIX.'sessioncode']
-             && $player_row["Expire"] >= $NOW )
+         if( $loggin_mode=='password' )
          {
-            $logged_in = true;
+            if( check_password( $uhandle, $player_row["Password"],
+                                 $player_row["Newpassword"], $passwd ) )
+            {
+               $logged_in = true;
+            }
+            else error("wrong_password");
+         }
+         else //$loggin_mode=='cookie'
+         {
+            if( $player_row['Sessioncode'] === @$_COOKIE[COOKIE_PREFIX.'sessioncode']
+                && $player_row['Expire'] >= $NOW )
+            {
+               $logged_in = true;
+            }
          }
       }
+      //else error("wrong_userid");
    }
 
    if( !$logged_in )
    {
-      if( 1 or ALLOW_AUTH ) //or $loggin_mode=='authenticate'
-      {
-         if( !$wap_opened )
-            wap_open( 'LOGIN');
-         $card = "<card id=\"login\" title=\"Register!\">";
-         $card.= wap_auth();
-         $card.= "</card>\n";
-         echo $card;
-         wap_close();
-         exit;
-      }
-      error("not_logged_in",'wap1');
+      if( !$wap_opened )
+         wap_open( 'LOGIN');
+      $card = "<card id=\"login\" title=\"Register!\">";
+      $card.= wap_auth( $uhandle);
+      $card.= "</card>\n";
+      echo $card;
+      wap_close();
+      exit;
+      //error("not_logged_in",'wap1');
    }
 
-
-   if( !empty( $player_row["Timezone"] ) )
-      putenv('TZ='.$player_row["Timezone"] );
 
    //+logging stat adjustments
 
@@ -453,7 +406,7 @@ else
    $cardid= 'login';
    $card = "<card id=\"$cardid\" title=\"Status\">";
 
-   $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status</a> of: $my_name</p>";
+   $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status of</a>: $my_name</p>";
    if( $countM>0 )
    {
       $card.= "<a accesskey=\"m\" href=\"#M1\">Messages</a>: $countM<br/>";
@@ -474,7 +427,7 @@ else
    }
    $nextGid= $cardid;
 
-   $card.= wap_auth();
+   $card.= wap_auth( $uhandle, $passwd);
    $card.= "</card>\n";
    echo $card;
 
