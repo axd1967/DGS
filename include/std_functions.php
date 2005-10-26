@@ -1517,7 +1517,12 @@ function anchor( $href, $text='', $title='', $attbs='')
 
 function str_TD_class_button( $href, $text='')
 {
-   return "<td class=button><a class=button href=\"$href\">&nbsp;$text&nbsp;</a></td>";
+   $text= (string)$text;
+   return "<td class=button>" .
+      "<a class=button href=\"$href\">" .
+      "&nbsp;&nbsp;$text&nbsp;&nbsp;" .
+      "</a>" .
+      "</td>";
 }
 
 function button_style( $button_nr=0)
@@ -1529,6 +1534,8 @@ function button_style( $button_nr=0)
 
    return 
      "a.button {" .
+       " display: block;" .
+       " min-width: ".($button_width-4)."px;" .
        " color: {$buttoncolors[$button_nr]};" .
        " font: bold 100% sans-serif;" .
        " text-decoration: none;" .
