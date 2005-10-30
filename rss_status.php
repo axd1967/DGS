@@ -453,12 +453,10 @@ else
    }
 
     
-/*
    if( $nothing_found )
    {
-      rss_warning('nothing found', 'nothing found', $HOSTBASE.'/status.php');
+      rss_warning('empty lists', 'empty lists', $HOSTBASE.'/status.php');
    }
-*/
 
    rss_close();
 }

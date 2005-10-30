@@ -100,6 +100,6 @@ else
 
     
    if( $nothing_found )
-      quick_warning("nothing found");
+      quick_warning('empty lists');
 }
 ?>
