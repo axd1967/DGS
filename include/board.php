@@ -243,11 +243,11 @@ class Board
       }
 
       echo "<table class=captures>\n";
-      echo "<tr>\n<th class=captures colspan=2>$caption</th>\n </tr>\n";
-      echo "<tr>\n<td class=bcaptures>\n";
+      echo "<tr>\n<th colspan=2>$caption</th>\n </tr>\n";
+      echo "<tr>\n<td class=b>\n";
       foreach( $bcap as $s )
          echo $s;
-      echo "</td>\n<td class=wcaptures>\n";
+      echo "</td>\n<td class=w>\n";
       foreach( $wcap as $s )
          echo $s;
       echo "</td>\n</tr>\n";

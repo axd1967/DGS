@@ -572,9 +572,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
 
    $rank_val = round($rating/100.0);
 
-   $string = ($graph_uid > 0 ?
-              "<a href=\"ratinggraph.php?uid=$graph_uid\"><font color=black>" : '');
-
+   $string = '';
    if( $rank_val > 20.5 )
    {
       $string .= ( $rank_val - 20 ) . $spc . $T_('dan');
@@ -591,7 +589,10 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    }
 
    if( $graph_uid > 0 )
-      $string .= '</font></a>';
+   {
+      $string = "<a class=black href=\"ratinggraph.php?uid=$graph_uid\">"
+               . $string . '</a>';
+   }
    return $string;
 }
 

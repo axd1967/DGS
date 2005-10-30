@@ -34,6 +34,7 @@ if (!isset($page_microtime))
    $main_path = str_replace('\\', '/', getcwd()).'/';
    //$base_path is relative to the URL, not to the current dir
    $base_path = rel_base_dir();
+   $printable = (bool)@$_REQUEST['printable'];
 }
 
 require_once( "include/translation_functions.php" );
@@ -93,8 +94,6 @@ $buttoncolors = array('white','white','white','white',
 
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
-
-define('INFO_HTML', 'cell');
 $cookie_pref_rows = array(
        'Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button',
        'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
@@ -102,6 +101,8 @@ $cookie_pref_rows = array(
        );
 
 $vacation_min_days = 2;
+
+define('INFO_HTML', 'cell');
 
 define('DELETE_LIMIT', 10);
 
@@ -191,7 +192,7 @@ function fnop( $a)
 
 function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $bg_color, $encoding_used;
+   global $base_path, $bg_color, $encoding_used, $printable;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -209,8 +210,13 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
   echo "\n <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">";
 
    echo "\n <TITLE> Dragon Go Server - $title </TITLE>"
-      . "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">"
-      . "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}dragon.css\">";
+      . "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
+
+   if( $printable )
+      echo "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}printer.css\">";
+   else
+      echo "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}dragon.css\">";
+
    echo "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}printer.css\">";
 
    if( $style_string )
@@ -222,7 +228,7 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $is_down, $is_down_message,
+   global $base_path, $is_down, $is_down_message, $printable,
       $bg_color, $menu_bg_color, $menu_fg_color;
 
    start_html( $title, $no_cache, $style_string, $last_modified_stamp);
@@ -230,38 +236,50 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
    echo "\n<script language=\"JavaScript1.4\" type=\"text/javascript\"> version=1; </script>";
 
+   if( !$printable )
+   {
    echo "\n\n<table id=\"page_head\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td align=left><A href=\"{$base_path}index.php\">"
-        . "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>"
-      . "\n  <td align=right><font color=$menu_fg_color><B>"
-        . ( ($logged_in and !$is_down) ? T_("Logged in as") . ': ' . $player_row["Handle"]
-                                       : T_("Not logged in") )
-        . " </B></font></td>"
+        . "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>";
+   echo "\n  <td align=right>";
+
+   if ($logged_in and !$is_down)
+      echo "<A href=\"{$base_path}status.php\"><B><font color=$menu_fg_color>"
+           . T_("Logged in as") . ": " . $player_row["Handle"] . "</font></B></A>";
+   else
+      echo "<B><font color=$menu_fg_color>"
+           . T_("Not logged in") . "</font></B>";
+
+   echo "</td>"
       . "\n </tr>\n</table>\n";
+   }
 
+   if( !$printable )
+   {
+      $menu_array = array(
+         '<b><font size="+1">' . T_('Status') . '</font></b>' => array('status.php" accesskey="s',1,1),
+         T_('Waiting room') => array('waiting_room.php" accesskey="w',1,2),
+         T_('User info') => array('userinfo.php" accesskey="p',1,3),
 
-   $menu_array = array(
-      '<b><font size="+1">' . T_('Status') . '</font></b>' => array('status.php" accesskey="s',1,1),
-      T_('Waiting room') => array('waiting_room.php" accesskey="w',1,2),
-      T_('User info') => array('userinfo.php" accesskey="p',1,3),
+         T_('Messages') => array('list_messages.php" accesskey="b',2,1),
+         T_('Send a message') => array('message.php?mode=NewMessage" accesskey="m',2,2),
+         T_('Invite') => array('message.php?mode=Invite" accesskey="i',2,3),
 
-      T_('Messages') => array('list_messages.php" accesskey="b',2,1),
-      T_('Send a message') => array('message.php?mode=NewMessage" accesskey="m',2,2),
-      T_('Invite') => array('message.php?mode=Invite" accesskey="i',2,3),
+         T_('Users') => array('users.php" accesskey="u',3,1),
+         T_('Games') => array('show_games.php?uid=all" accesskey="g',3,2),
+         T_('Translate') => array('translate.php" accesskey="t',3,3),
 
-      T_('Users') => array('users.php" accesskey="u',3,1),
-      T_('Games') => array('show_games.php?uid=all" accesskey="g',3,2),
-      T_('Translate') => array('translate.php" accesskey="t',3,3),
-
-      T_('Forums') => array('forum/index.php" accesskey="f',4,1),
-      T_('FAQ') => array('faq.php" accesskey="q',4,2),
-//      T_('Site map') => array('site_map.php',4,3),
-      T_('Docs') => array('docs.php" accesskey="d',4,3)
+         T_('Forums') => array('forum/index.php" accesskey="f',4,1),
+         T_('FAQ') => array('faq.php" accesskey="q',4,2),
+         //T_('Site map') => array('site_map.php',4,3),
+         T_('Docs') => array('docs.php" accesskey="d',4,3),
       );
 
+   }
 
-   if( !($logged_in and !$is_down) )
+
+   if( !$logged_in or $is_down or $printable )
    {
       echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
          . "\n <tr>";
@@ -295,14 +313,14 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 function end_page( $menu_array=NULL )
 {
-   global $page_microtime, $admin_level, $base_path,
+   global $page_microtime, $admin_level, $base_path, $printable,
       $menu_bg_color, $menu_fg_color, $bg_color;
 
    echo "\n\n&nbsp;<br>";
 
    echo "\n  </td>";
 
-   if( $menu_array )
+   if( $menu_array && !$printable )
    {
       echo "\n </tr><tr>"
          . "\n  <td valign=bottom>";
@@ -314,22 +332,29 @@ function end_page( $menu_array=NULL )
    echo "\n </tr>\n</table>\n";
 
    global $NOW, $date_fmt;
-   echo "\n<table id=\"page_foot\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color >"
+   echo "\n<table id=\"page_foot\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td align=left><A href=\"{$base_path}index.php\">"
-        . "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>"
-      . "\n  <td align=center><font size=-1 color=$menu_fg_color>"
-        . T_("Page time") . ' ' . date($date_fmt, $NOW)
-        . "</font></td>"
-      . "\n  <td align=right>";
+        . "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>";
 
-   if( $admin_level & ADMIN_TIME )
-      echo "<font size=-2 color=$menu_fg_color>"
+   echo "\n  <td align=center><font size=-1 color=$menu_fg_color>"
+        . T_("Page time") . ' ' . date($date_fmt, $NOW)
+        . "</font>";
+
+   if( $admin_level & ADMIN_TIME && !$printable )
+      echo "<br><font size=-2 color=$menu_fg_color>"
         . T_('Page created in')
         . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
-        . "</font>&nbsp;<br>";
+        . "</font>";
 
-   if( $admin_level & ~(ADMIN_TIME) )
+   echo "</td>";
+
+ if( !$printable )
+ {
+
+   echo "\n  <td align=right>";
+
+   if( $admin_level & ~(ADMIN_TIME) && !$printable )
       echo "<a href=\"{$base_path}admin.php\"><b><font color=$menu_fg_color>"
         . T_('Admin') . "</font></b></a>&nbsp;&nbsp;&nbsp;";
 
@@ -337,8 +362,9 @@ function end_page( $menu_array=NULL )
         . "<B><font color=$menu_fg_color>"
         . T_("Logout") . "</font></B></A>";
 
-   echo "</td>"
-      . "\n </tr>"
+   echo "</td>";
+ }
+   echo "\n </tr>"
       . "\n</table>";
 
    echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$bg_color>"
@@ -367,11 +393,9 @@ function end_html()
 
 function make_menu($menu_array)
 {
-   global $base_path, $bg_color, $max_links_in_main_menu;
+   global $base_path, $max_links_in_main_menu;
 
-   $new_row= "\n <tr align=center bgcolor=$bg_color>";
-
-   echo "\n\n<table id=\"page_link\" width=\"100%\" border=0 cellspacing=0 cellpadding=4>" . $new_row;
+   echo "\n\n<table id=\"page_links\" class=links>\n <tr>";
 
    $nr_menu_links = count($menu_array);
    $menu_levels = ceil($nr_menu_links/$max_links_in_main_menu);
@@ -384,23 +408,17 @@ function make_menu($menu_array)
    foreach( $menu_array as $text => $link )
    {
       if( ($i % $menu_width)==0 && $i>0 )
-        {
-          echo "\n </tr>" . $new_row;
-          $cumw = 0;
-          $cumwidth = 0;
-        }
+      {
+         echo "\n </tr>\n <tr>";
+         $cumw = 0;
+         $cumwidth = 0;
+      }
       $i++;
       $cumw += $w;
       $width = round($cumw - $cumwidth);
-/*
-      if( $i == $nr_menu_links && $remain>1 )
-        $span = " colspan=$remain";
-      else
-*/
-        $span = "";
 
       $j = $i % 10;
-      echo "\n  <td$span width=\"$width%\"><B><A href=\"$base_path$link\" accesskey=\"$j\">$text</A></B></td>";
+      echo "\n  <td width=\"$width%\"><A href=\"$base_path$link\" accesskey=\"$j\">$text</A></td>";
       $cumwidth += $width;
    }
 
@@ -440,7 +458,7 @@ function make_menu_horizontal($menu_array)
 {
    global $base_path, $menu_bg_color, $bg_color;
 
-   echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=0 bgcolor=$menu_bg_color>"
+   echo "\n<table class=notprintable width=\"100%\" border=0 cellspacing=0 cellpadding=0 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
 
@@ -507,7 +525,7 @@ function make_menu_vertical($menu_array)
 {
    global $base_path, $menu_bg_color, $bg_color;
 
-   echo "\n<table border=0 cellspacing=0 cellpadding=1 bgcolor=$menu_bg_color>"
+   echo "\n<table class=notprintable border=0 cellspacing=0 cellpadding=1 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
 
@@ -877,12 +895,12 @@ function make_html_safe( $msg, $some_html=false)
       //link: <game gid[,move]> =>show game
       $msg=preg_replace("%<game(_)? +([0-9]+)( *, *([0-9]+))? *>%ise",
                         "game_reference(('\\1'=='_'?".REF_LINK_BLANK.":0)+".
-                           REF_LINK_ALLOWED.",1,\\2,\\4+0)", $msg);
+                           REF_LINK_ALLOWED.",1,'',\\2,\\4+0)", $msg);
       //link: <user uid> or <user =uhandle> =>show user info
       //link: <send uid> or <send =uhandle> =>send a message to user
       $msg=preg_replace("%<(user|send)(_)? +(".HANDLE_TAG_CHAR."?[".HANDLE_LEGAL_REGS."]+) *>%ise",
                         "\\1_reference(('\\2'=='_'?".REF_LINK_BLANK.":0)+".
-                           REF_LINK_ALLOWED.",1,0,'\\3')", $msg);
+                           REF_LINK_ALLOWED.",1,'','\\3')", $msg);
 
       //tag: <color col>...</color> =>translated to <font color="col">...</font>
       $msg=eregi_replace("<color +([#0-9a-zA-Z]+) *>",
@@ -1215,17 +1233,14 @@ function array_value_to_key_and_value( $array )
 function add_link_page_link($link, $linkdesc, $extra = '', $active = true)
 {
    if( $active )
-      echo "<p><a href=\"$link\">$linkdesc</a>";
+      echo "<p><a class=blue href=\"$link\">$linkdesc</a>";
    else
-      echo "<p><font color=gray>$linkdesc";
+      echo "<p class=gray>$linkdesc";
 
    if( !empty($extra) )
       echo " --- $extra";
 
-   if( !$active )
-      echo "</font>";
-
-   echo "\n";
+   echo "</p>\n";
 }
 
 function nsq_addslashes( $str )
@@ -1233,7 +1248,7 @@ function nsq_addslashes( $str )
   return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $str );
 }
 
-function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackname=false)
+function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, $blackname=false)
 {
  global $base_path;
 
@@ -1280,6 +1295,8 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
       $tmp = 'A href="' . $base_path. $tmp . '"';
       if( $link & REF_LINK_BLANK )
         $tmp.= ' target="_blank"';
+      if( $class )
+        $tmp.= " class=$class";
       if( $link & REF_LINK_ALLOWED )
       {
         $tmp = str_replace('"', ALLOWED_QUOT, $tmp);
@@ -1291,14 +1308,14 @@ function game_reference( $link, $safe, $gid, $move=0, $whitename=false, $blackna
    return $whitename;
 }
 
-function send_reference( $link, $safe, $color, $player_id, $player_name=false, $player_handle=false)
+function send_reference( $link, $safe, $class, $player_id, $player_name=false, $player_handle=false)
 {
    if( is_numeric($link) ) //not owned reference
       $link= -$link; //make it a send_reference
-   return user_reference( $link, $safe, $color, $player_id, $player_name, $player_handle);
+   return user_reference( $link, $safe, $class, $player_id, $player_name, $player_handle);
 }
 
-function user_reference( $link, $safe, $color, $player_id, $player_name=false, $player_handle=false)
+function user_reference( $link, $safe, $class, $player_id, $player_name=false, $player_handle=false)
 {
  global $base_path;
    if( is_array($player_id) ) //i.e. $player_row
@@ -1352,8 +1369,6 @@ function user_reference( $link, $safe, $color, $player_id, $player_name=false, $
       $player_name.= " ($player_handle)" ;
    if( $safe )
       $player_name = make_html_safe($player_name) ;
-   if( $color )
-      $player_name = "<FONT color=\"$color\">$player_name</FONT>" ;
    if( $link && $legal )
    {
       if( is_string($link) ) //owned reference. Must end with '?' or URI_AMP
@@ -1373,6 +1388,8 @@ function user_reference( $link, $safe, $color, $player_id, $player_name=false, $
       $tmp.= ( $byid ? "uid=$player_id" 
                  : UHANDLE_NAM."=".str_replace('+','%2B',$player_id) );
       $tmp = 'A href="' . $base_path. $tmp . '"';
+      if( $class )
+        $tmp.= " class=$class";
       if( $link & REF_LINK_BLANK )
         $tmp.= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
@@ -1505,7 +1522,7 @@ function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
    return $str.'>';
 }
 
-function anchor( $href, $text='', $title='', $attbs='')
+function anchor( $href, $text, $title='', $attbs='')
 {
    $str = "<a href=\"$href\"";
    if( $title )
