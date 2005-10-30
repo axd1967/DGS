@@ -48,7 +48,7 @@ require_once( "include/message_functions.php" );
    $gtable->add_or_del_column();
 
    echo '
-    <table border=3>
+    <table id=\"user_status\" class=infos border=1>
        <tr><td><b>' . T_("Name") . '</b></td>
            <td>' . make_html_safe($player_row["Name"]) . '</td></tr>
        <tr><td><b>' . T_("Userid") . '</b></td>
@@ -102,7 +102,7 @@ require_once( "include/message_functions.php" );
    $uid = $my_id;
 
 
-   $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
+   $query = "SELECT Games.*, UNIX_TIMESTAMP(Games.Lastchanged) AS Time, " .
          "IF(Rated='N','N','Y') as Rated, " .
        "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid, " .
          //extra bits of Color are for sorting purposes

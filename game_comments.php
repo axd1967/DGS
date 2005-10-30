@@ -82,7 +82,7 @@ require_once( "include/table_columns.php" );
    start_html(T_('Comments'), true);
    echo "<center>";
 
-   $str = game_reference( 0, 1, 0, 0, $Whitename, $Blackname);
+   $str = game_reference( 0, 1, '', 0, 0, $Whitename, $Blackname);
    $str.= " - #$gid";
    $str.= ' - '.( $Status == 'FINISHED' ? T_('Finished') : T_('Running'));
    echo "<h3><font color=$h3_color>$str</font></h3>";

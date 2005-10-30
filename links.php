@@ -27,7 +27,8 @@ require_once( "include/std_functions.php" );
 
   $logged_in = who_is_logged( $player_row);
 
-  start_page(T_("Links"), true, $logged_in, $player_row );
+  start_page(T_("Links"), true, $logged_in, $player_row
+      , "a.blue:visited{color:purple;}" );
 
   echo "<table align=center width=\"85%\"><tr><td>\n";
   echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .

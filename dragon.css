@@ -1,183 +1,175 @@
 
+.black {
+   color: black;
+}
+
+.gray {
+   color: gray;
+}
+
+.blue {
+   color: blue;
+}
+
+/*
+a:link {
+   color: blue;
+}
+
+a:visited {
+   color: navy;
+}
+
+a:hover {
+   color: purple;
+}
+
+a:focus {
+   color: red;
+}
+
+a:active {
+   color: red;
+}
+*/
+
+.header {
+   color: #800000;
+   text-align: center;
+}
+
+
+table.links {
+   width: 100%; 
+   border-width: 0px;
+   border-spacing: 0px;
+   margin: 4px;
+   empty-cells: hide;
+}
+
+table.links td {
+   border-width: 0px;
+   padding: 8px;
+   text-align: center;
+   color: black;
+   font-weight: bold;
+}
+
+table.links a {
+   color: blue;
+   font-weight: bold;
+}
+
+
+table.infos {
+   border-width: 2px;
+   border-spacing: 2px;
+   margin: 4px;
+   empty-cells: hide;
+}
+
+table.infos td, table.infos th {
+   border-width: 1px;
+   padding: 3px;
+   text-align: left;
+   color: black;
+}
+
+table.infos a {
+   color: black;
+}
+
+table.infos a.hdr {
+   color: black;
+   font-weight: bold;
+}
+
+
 table.moves {
-   background : #66C17B;/*#33C656;*/ /* 49BCFF;*/
+   background: #66C17B;
+   border-width: 2px;
+   border-spacing: 0px;
+   margin: 4px;
+   empty-cells: hide;
 }
 
-a.w {
-        color : white;
-        font : bold 85% sans-serif;
-        text-decoration : none;
+table.moves td, table.moves th {
+   border-width: 1px;
+   padding: 1px;
+   color: black;
+   text-align: center;
 }
 
-
-a.b {
-        color : black;
-        font : bold 85% sans-serif;
-        text-decoration : none;
+table.moves td.c {
+   background: #F7F5E3;
+   color: red;
+   font: bold 85% sans-serif;
+   text-decoration: none;
 }
 
-td.r {
-        color : red;
-        background : #F7F5E3;
-        font : bold 85% sans-serif;
-        text-decoration : none;
+table.moves a.w {
+   color: white;
+   font: bold 85% sans-serif;
+   text-decoration: none;
+}
+
+table.moves a.b {
+   color: black;
+   font: bold 85% sans-serif;
+   text-decoration: none;
 }
 
 
 table.captures {
    background: #f7f5ff;
-   border: 0px;
+   border-width: 0px;
    border-bottom: 1px solid #0c41c9;
+   margin: 4px;
 }
 
-th.captures {
+table.captures th {
    background: #0c41c9;
    color: #fffc70;
-   padding: 4;
+   padding: 4px;
 }
 
-td.bcaptures {
-   vertical-align:top;
-   padding: 4;
+table.captures td.b {
+   vertical-align: top;
+   padding: 4px;
    white-space: nowrap;
 }
 
-td.wcaptures {
-   vertical-align:top;
-   padding: 4;
+table.captures td.w {
+   vertical-align: top;
+   padding: 4px;
    white-space: nowrap;
 }
+
 
 table.gamenotes {
-   border: 0px;
+   border-width: 0px;
+   margin: 4px;
 }
 
-th.gamenotes {
+table.gamenotes th {
    background: #7aa07a;
    color: #fffc70;
-   padding: 4;
+   padding: 4px;
 }
 
-td.gamenotes {
+table.gamenotes td {
+   padding: 0px;
+   margin: 0px;
+}
+
+table.gamenotes td.notes {
    background: #ddf0dd;
+   padding: 0px;
+   margin: 0px;
 }
 
-img.s5 {
-        width : 5px;
-        height : 5px;
-}
 
-img.s7 {
-        width : 7px;
-        height : 7px;
-}
-
-img.s9 {
-        width : 9px;
-        height : 9px;
-}
-
-img.s11 {
-        width : 11px;
-        height : 11px;
-}
-
-img.s13 {
-        width : 13px;
-        height : 13px;
-}
-
-img.s17 {
-        width : 17px;
-        height : 17px;
-}
-
-img.s21 {
-        width : 21px;
-        height : 21px;
-}
-
-img.s25 {
-        width : 25px;
-        height : 25px;
-}
-
-img.s29 {
-        width : 29px;
-        height : 29px;
-}
-
-img.s35 {
-        width : 35px;
-        height : 35px;
-}
-
-img.s42 {
-        width : 42px;
-        height : 42px;
-}
-
-img.s50 {
-        width : 50px;
-        height : 50px;
-}
-
-img.c5 {
-        width : 6px;
-        height : 5px;
-}
-
-img.c7 {
-        width : 8px;
-        height : 7px;
-}
-
-img.c9 {
-        width : 11px;
-        height : 9px;
-}
-
-img.c11 {
-        width : 13px;
-        height : 11px;
-}
-
-img.c13 {
-        width : 16px;
-        height : 13px;
-}
-
-img.c17 {
-        width : 21px;
-        height : 17px;
-}
-
-img.c21 {
-        width : 26px;
-        height : 21px;
-}
-
-img.c25 {
-        width : 31px;
-        height : 25px;
-}
-
-img.c29 {
-        width : 35px;
-        height : 29px;
-}
-
-img.c35 {
-        width : 43px;
-        height : 35px;
-}
-
-img.c42 {
-        width : 52px;
-        height : 42px;
-}
-
-img.c50 {
-        width : 62px;
-        height : 50px;
+img.layoutstone {
+   width: 17px;
+   height: 17px;
 }

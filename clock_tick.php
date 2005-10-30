@@ -136,14 +136,14 @@ if( !$is_down )
 
          // Send messages to the players
          $Text = "The result in the game:<center>"
-               . game_reference( REF_LINK, 1, $gid, 0, $whitename, $blackname)
+               . game_reference( REF_LINK, 1, '', $gid, 0, $whitename, $blackname)
                . "</center>was:<center>"
                . score2text($score,true,true)
                . "</center>";
          $Text.= "Send a message to:<center>"
-               . send_reference( 1, 1, '', $White_ID, $whitename, $whitehandle)
+               . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
                . "<br>"
-               . send_reference( 1, 1, '', $Black_ID, $blackname, $blackhandle)
+               . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
                . "</center>" ;
 
          $Text = addslashes( $Text);

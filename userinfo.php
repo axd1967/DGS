@@ -82,7 +82,7 @@ require_once( "include/countries.php" );
              "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
 
    echo '
- <table border=3>
+ <table id=\"user_infos\" class=infos border=1>
     <tr><td><b>' . T_('Name') . '</b></td><td>' . $name_safe . '</td></tr>
     <tr><td><b>' . T_('Userid') . '</b></td><td>' . $handle_safe . '</td></tr>
     <tr><td><b>' . T_('Country') . '</b></td><td>' . $cntrn . '</td></tr>
@@ -108,19 +108,19 @@ require_once( "include/countries.php" );
     $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
    echo '
     <tr><td><b>' . anchor( $run_link
-                  , T_('Running games'))
+                  , T_('Running games'), '', 'class=hdr')
             . '</b></td><td>' . $row['Running'] . '</td></tr>
     <tr><td><b>' . anchor( $fin_link
-                  , T_('Finished games'))
+                  , T_('Finished games'), '', 'class=hdr')
                . '</b></td><td>' . $row['Finished'] . '</td></tr>
     <tr><td><b>' . anchor( $rat_link.URI_AMP.'sort2=ID'
-                  , T_('Rated games'))
+                  , T_('Rated games'), '', 'class=hdr')
                . '</b></td><td>' . $row['RatedGames'] . '</td></tr>
     <tr><td><b>' . anchor( $rat_link.URI_AMP.'sort2=Win'.URI_AMP.'desc2=1'
-                  , T_('Won games'))
+                  , T_('Won games'), '', 'class=hdr')
                . '</b></td><td>' . $row['Won'] . '</td></tr>
     <tr><td><b>' . anchor( $rat_link.URI_AMP.'sort2=Win'
-                  , T_('Lost games'))
+                  , T_('Lost games'), '', 'class=hdr')
                . '</b></td><td>' . $row['Lost'] . '</td></tr>
     <tr><td><b>' . T_('Percent') . '</b></td><td>' . $percent . '</td></tr>
 ';
@@ -133,7 +133,7 @@ require_once( "include/countries.php" );
    {
       echo '    <p>
     <h3><font color=' . $h3_color . '>' . T_('Biographical info') . '</font></h3>
-    <table border=3>
+    <table id=\"bio_infos\" class=infos border=1>
 ';
 
       while( $row = mysql_fetch_assoc( $result ) )

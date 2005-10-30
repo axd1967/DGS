@@ -485,16 +485,15 @@ function draw_moves()
 {
    global $TheBoard, $gid, $move, $Size;
 
-
-   echo '<table id="game_moves" border=4 cellspacing=0 cellpadding=1 align=center bgcolor="#66C17B">';
-   echo "\n<tr align=center><th>" . T_('Moves') . "</th>\n";
+   echo "<table id=\"game_moves\" class=moves border=1>\n";
+   echo "<tr><th>" . T_('Moves') . "</th>\n";
 
    $moves_per_row = 20;
 
    for($i=0; $i<$moves_per_row; $i++)
      echo "<td>$i</td>";
 
-   echo "</tr>\n<tr align=center><td>1-". ($moves_per_row - 1) . '</td><td>&nbsp;</td>';
+   echo "</tr>\n<tr><td>1-". ($moves_per_row - 1) . '</td><td>&nbsp;</td>';
 
    $i=1;
    foreach( $TheBoard->moves as $MoveNr => $sub )
@@ -502,7 +501,7 @@ function draw_moves()
       list( $Stone, $PosX, $PosY) = $sub;
       if( $Stone != BLACK and $Stone != WHITE ) continue;
       if( $i % $moves_per_row == 0 )
-         echo "</tr>\n<tr align=center><td>$i-" . ($i + $moves_per_row - 1) . '</td>';
+         echo "</tr>\n<tr><td>$i-" . ($i + $moves_per_row - 1) . '</td>';
 
       switch( $PosX )
       {
@@ -521,9 +520,9 @@ function draw_moves()
       }
 
       if( $MoveNr == $move ) // bgcolor=F7F5E3
-         printf("<td class=r>%s</td>\n", $c );
+         printf("<td class=c>%s</td>\n", $c );
       else if( $Stone == BLACK )
-         printf( '<td><A class=b href="game.php?gid=%d'.URI_AMP."move=%d\">%s</A></td>\n"
+         printf( '<td><a class=b href="game.php?gid=%d'.URI_AMP."move=%d\">%s</a></td>\n"
                , $gid, $MoveNr, $c );
       else
          printf( '<td><a class=w href="game.php?gid=%d'.URI_AMP."move=%d\">%s</a></td>\n"
@@ -584,7 +583,7 @@ function draw_message_box()
 
 function draw_game_info($game_row)
 {
-  echo "<table align=center border=2 cellpadding=3 cellspacing=3>\n";
+  echo "<table id=\"game_infos\" class=infos border=1>\n";
   echo "   <tr>\n";
   echo "     <td></td><td width=" . ($game_row['Size']*9) . ">" .
     T_('White') . "</td><td width=" . ($game_row['Size']*9) . ">" . T_('Black') . "</td>\n";
@@ -669,8 +668,8 @@ function draw_notes( $notes, $gid, $height=0, $width=0)
 
    echo "<form name=\"savenotes\" action=\"savenotes.php\" method=\"POST\">\n";
    echo " <table class=gamenotes>\n";
-   echo "  <tr><th class=gamenotes>" . T_('Private game notes') . "</td></tr>\n";
-   echo "  <tr><td class=gamenotes>\n";
+   echo "  <tr><th>" . T_('Private game notes') . "</td></tr>\n";
+   echo "  <tr><td class=notes>\n";
    echo "   <textarea name=\"gamenotes\" id=\"gamenotes\" cols=\"$width\" rows=\"$height\">$notes</textarea>\n";
    echo "  </td></tr>\n";
    echo "  <tr><td><input type=\"submit\" value=\"" . T_('Save notes') . "\"></td></tr>\n";
