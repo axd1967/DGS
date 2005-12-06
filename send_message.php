@@ -162,6 +162,7 @@ disable_cache();
          case 'conv':
          {
             $tomove = INVITE_HANDI_CONV;
+            $handicap = 0; //further computing
             $komi = 0;
          }
          break;
@@ -169,6 +170,7 @@ disable_cache();
          case 'proper':
          {
             $tomove = INVITE_HANDI_PROPER;
+            $handicap = 0; //further computing
             $komi = 0;
          }
          break;
@@ -176,6 +178,7 @@ disable_cache();
          case 'nigiri':
          {
             $tomove = INVITE_HANDI_NIGIRI;
+            $handicap = 0;
             $komi = $komi_n;
          }
          break;
@@ -183,6 +186,7 @@ disable_cache();
          case 'double':
          {
             $tomove = INVITE_HANDI_DOUBLE;
+            $handicap = 0;
             $komi = $komi_d;
          }
          break;
@@ -190,6 +194,7 @@ disable_cache();
          default: //'manual'
          {
             $tomove = $Black_ID;
+            //$handicap from query
             $komi = $komi_m;
          }
          break;
