@@ -147,6 +147,26 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
    echo "<?xml version=\"1.0\" encoding=\"$encoding_used\"?>\n";
    echo "<rss version=\"2.0\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
         . " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
+   echo "<!--
+
+If you're seeing this, you've clicked on the link 
+for DragonGo Quick RSS feed.  
+This file is not meant to be read by a web 
+browser directly.  Instead you're meant to copy 
+the URL for the file, which is:
+
+	http://www.dragongoserver.net/rss_status.php
+
+and paste it into your RSS reader or podcast program.
+
+-->\n";
+
+/*
+If you need to know more about how to do this, 
+please go to the following web pages to learn 
+about RSS services.
+*/
+
    echo " <channel>\n"
       . "  <title>Dragon Go Server - $title</title>\n"
       . "  <link>$html_clone</link>\n"
