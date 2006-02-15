@@ -155,7 +155,7 @@ This file is not meant to be read by a web
 browser directly.  Instead you're meant to copy 
 the URL for the file, which is:
 
-	http://www.dragongoserver.net/rss_status.php
+	$HOSTBASE/rss_status.php
 
 and paste it into your RSS reader or podcast program.
 
