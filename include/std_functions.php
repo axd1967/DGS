@@ -39,22 +39,14 @@ if (!isset($page_microtime))
 
 require_once( "include/translation_functions.php" );
 
+
 $hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
-
-$ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
-$ActivityForHit = 1.0;
-$ActivityForMove = 10.0;
-
-$ActiveLevel1 = 10.0;
-$ActiveLevel2 = 150.0;
-
-$RowsPerPage = 50;
-$MaxRowsPerPage = $RowsPerPage+1;
-
+// because of the cookies host, $hostname_jump = true is nearly mandatory
 
 $has_sgf_alias = false;
 // If using apache add this row to your virtual host to make this work:
 // AliasMatch game([0-9]+)\.sgf /path/to/sgf.php
+
 
 $sgf_color='"#d50047"';
 $bg_color='"#F7F5E3"';  // change in dragon.css too!
@@ -63,6 +55,16 @@ $menu_bg_color='"#0C41C9"';
 $menu_fg_color='"#FFFC70"';
 
 $max_links_in_main_menu=5;
+
+$RowsPerPage = 50;
+$MaxRowsPerPage = $RowsPerPage+1;
+
+$ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
+$ActivityForHit = 1.0;
+$ActivityForMove = 10.0;
+
+$ActiveLevel1 = 10.0;
+$ActiveLevel2 = 150.0;
 
 
 //This car will be a part of a URI query. From RFC 2396 unreserved
@@ -95,9 +97,10 @@ $buttoncolors = array('white','white','white','white',
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
 $cookie_pref_rows = array(
-       'Stonesize', 'MenuDirection', 'Woodcolor', 'Boardcoords', 'Button',
-       'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
+       'MenuDirection', 'Button',
+       'Stonesize', 'Woodcolor', 'Boardcoords',
        'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff',
+       'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
        );
 
 $vacation_min_days = 2;
@@ -259,7 +262,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       $menu_array = array(
          '<b><font size="+1">' . T_('Status') . '</font></b>' => array('status.php" accesskey="s',1,1),
-         T_('Waiting room') => array('waiting_room.php" accesskey="w',1,2),
+         T_('Waiting room') => array('waiting_room.php" accesskey="r',1,2),
          T_('User info') => array('userinfo.php" accesskey="p',1,3),
 
          T_('Messages') => array('list_messages.php" accesskey="b',2,1),
@@ -358,17 +361,17 @@ function end_page( $menu_array=NULL )
       echo "<a href=\"{$base_path}admin.php\"><b><font color=$menu_fg_color>"
         . T_('Admin') . "</font></b></a>&nbsp;&nbsp;&nbsp;";
 
-   echo "<A href=\"{$base_path}index.php?logout=t\" accesskey=\"x\">"
+   echo "<A href=\"{$base_path}index.php?logout=t\" accesskey=\"o\">"
         . "<B><font color=$menu_fg_color>"
         . T_("Logout") . "</font></B></A>";
 
-   echo "</td>";
- }
-   echo "\n </tr>"
+   echo "</td>"
+      . "\n </tr>"
       . "\n</table>";
 
    echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$bg_color>"
       . "\n <tr>";
+ }
 
 global $HOSTNAME;
 
@@ -594,7 +597,7 @@ function sysmsg($msg)
 
 //must never allow quotes, ampersand, < , > and URI reserved chars
 define('HANDLE_LEGAL_REGS', '-_a-zA-Z0-9');
-define('HANDLE_TAG_CHAR', '='); //not in HANDLE_LEGAL_REGS or < or >
+define('HANDLE_TAG_CHAR', '='); //not in: HANDLE_LEGAL_REGS or < or >
 define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'+.,:;?!%*');
 
 function illegal_chars( $string, $punctuation=false )
@@ -602,7 +605,7 @@ function illegal_chars( $string, $punctuation=false )
    if( $punctuation )
       $regs = PASSWORD_LEGAL_REGS;
    else
-      $regs = 'a-zA-Z]['.HANDLE_LEGAL_REGS;
+      $regs = 'a-zA-Z]['.HANDLE_LEGAL_REGS; //begins with a letter
 
    return !ereg( "^[$regs]+\$", $string);
 }
@@ -639,9 +642,8 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
 {
  global $SUB_PATH, $NOW, $_SERVER;
    $name= COOKIE_PREFIX.$name;
-   $n= 0;
    if( $tmp= @$_SERVER['HTTP_COOKIE'] )
-      $n= preg_match_all(';'.$name.'[\\x01-\\x20]*=;i', $tmp, $m);
+      $n= preg_match_all(';'.$name.'[\\x01-\\x20]*=;i', $tmp, $dummy);
    else
       $n= 0;
 
@@ -675,7 +677,7 @@ function set_cookie_prefs($id, $delete=false)
    if( $delete )
       safe_setcookie("prefs$id");
    else
-      safe_setcookie("prefs$id", serialize($cookie_prefs), $session_duration*36);
+      safe_setcookie("prefs$id", serialize($cookie_prefs), 3600*12*61*12*5); //5 years
 }
 
 function get_cookie_prefs(&$player_row)
@@ -777,6 +779,24 @@ function parse_atbs_safe( &$trail, &$bad)
       $head.= $quote;
       $bad = 1;
    }
+/*
+This part fix a security hole. One was able to execute a javascript code
+(if read by a the IExplorer browser) with something like:
+<b style="background:url('javascript:eval(document.all.mycode.xcode)')"
+   id="mycode" xcode="alert('Hello!!!')">Hello!</b>
+*/
+      $quote =
+          '\\bjavascript:' //main reject
+         .'|\\.inner'      //like .innerHTML
+         .'|(\\bon\\w+=)'  //like onevent=
+         .'|\\beval\\('    //eval() can split most of keyword
+         .'|\\bstyle='     //disabling style= is not bad too
+         ;
+      if ( /*$quote &&*/  preg_match( "%($quote)%i",
+            preg_replace( "%[\\x01-\\x20]+%", '', $head)) ) {
+         $bad = 2;
+      }
+   }
    if ( $bad )
    {
       $head = str_replace(ALLOWED_QUOT, '"', $head);
@@ -795,7 +815,8 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
 {
 
    $before = '';
-   $reg = "%^(.*?)<(" . ( $stop ? "$stop|" : "" ) . "$html_code)([\\x01-\\x20>].*)$%is";
+   //$stop = preg_quote($stop, '%');
+   $reg = "%^(.*?)<(" . ( $stop ? "$stop|" : '' ) . "$html_code)([\\x01-\\x20>].*)$%is";
 
    while ( preg_match($reg, $trail, $matches) )
    {
@@ -996,23 +1017,6 @@ function score2text($score, $verbose, $keep_english=false)
                : $color . '+' . abs($score) );
 }
 
-// relative to the calling URL, not to the current dir
-function rel_base_dir()
-{
-   global $SUB_PATH;
-
-   $dir = str_replace('\\','/',$_SERVER['PHP_SELF']);
-   $rel = '';
-   while( $i=strrpos($dir,'/') )
-   {
-      $dir= substr($dir,0,$i);
-      if( !strcasecmp( $dir.'/' , $SUB_PATH ) )
-         break;
-      $rel.= '../';
-   }
-   return $rel;
-}
-
 function mod($a,$b)
 {
    if ($a <= 0)
@@ -1054,11 +1058,28 @@ function make_url($page, $array, $sep=false)
    return $url;
 }
 
+// relative to the calling URL, not to the current dir
+function rel_base_dir()
+{
+   global $SUB_PATH;
+
+   $dir = str_replace('\\','/',$_SERVER['PHP_SELF']);
+   $rel = '';
+   while( $i=strrpos($dir,'/') )
+   {
+      $dir= substr($dir,0,$i);
+      if( !strcasecmp( $dir.'/' , $SUB_PATH ) )
+         break;
+      $rel.= '../';
+   }
+   return $rel;
+}
+
 function get_request_url( $absolute=false)
 {
  global $SUB_PATH, $HOSTBASE;
 
-   $url = @$_SERVER['REQUEST_URI']; //contains URI_AMP_IN and still urlencoded
+   $url = str_replace('\\','/',@$_SERVER['REQUEST_URI']); //contains URI_AMP_IN and still urlencoded
    $len = strlen($SUB_PATH);
    if (!strcasecmp( $SUB_PATH, substr($url,0,$len) ))
       $url = substr($url,$len);
