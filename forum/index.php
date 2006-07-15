@@ -40,7 +40,7 @@ $cols = 3;
 $headline   = array("Forums" => "colspan=$cols");
 
 
-start_table($headline, $links, "width=98%", $cols);
+   start_table($headline, $links, "width='98%'", $cols);
 
 
 while( $row = mysql_fetch_array( $result ) )
