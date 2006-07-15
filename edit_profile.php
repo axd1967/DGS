@@ -108,12 +108,18 @@ require_once( "include/countries.php" );
      $notescutoffs[$i] = $i;
      }
 
+
+//------------
+
    start_page(T_("Edit profile"), true, $logged_in, $player_row );
 
    echo "<CENTER>\n";
 
    $profile_form = new Form( 'profileform', 'change_profile.php', FORM_GET );
+
+
    $profile_form->add_row( array( 'HEADER', T_('Personal settings') ) );
+
    $profile_form->add_row( array( 'DESCRIPTION', T_('Userid'),
                                   'TEXT', $player_row["Handle"] ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Full name'),
@@ -210,7 +216,6 @@ require_once( "include/countries.php" );
                                   $player_row["MenuDirection"] ) );
 
 
-
    $button_code  = "        <TABLE border=0 cellspacing=0 cellpadding=2 width=520>\n";
    $button_code .= "          <TR>\n";
 
@@ -258,7 +263,7 @@ require_once( "include/countries.php" );
 
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Position'),
-               'RADIOBUTTONS', "notes{$ltyp}mod", $notesmodes, $player_row["Notes{$typ}Mode"],
+               'RADIOBUTTONS', "notes{$ltyp}mode", $notesmodes, $player_row["Notes{$typ}Mode"],
             ) );
 
       $profile_form->add_row( array(
