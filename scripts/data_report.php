@@ -98,7 +98,7 @@ require_once( "include/form_functions.php" );
    $dform->add_row( array(
       'HIDDEN', 'charset', $encoding_used,
       'CELL', 9, 'align="center"',
-      'OWNHTML', '<INPUT type="submit" name="apply" accesskey="a" value="A-pply">',
+      'OWNHTML', '<INPUT type="submit" name="apply" accesskey="x" value="Apply (&x)">',
       'TEXT', '&nbsp;&nbsp;col size:&nbsp;',
       'TEXTINPUT', 'colsize', 3 , 3, $colsize,
       'RADIOBUTTONS', 'colwrap', array('cut'=>'cut','wrap'=>'wrap',''=>'none',), $colwrap,
@@ -138,6 +138,9 @@ require_once( "include/form_functions.php" );
 
 function echo_query( $query, $rowhdr=20, $colsize=40, $colwrap='cut' )
 {
+   //kill sensible fields from a query like "SELECT Password as pwd FROM Players"
+   $query= preg_replace( "%(Password|Sessioncode|Email)%is", "***", $query);
+
    $result = mysql_query( $query );
 
    $mysqlerror = @mysql_error();
@@ -171,6 +174,7 @@ function echo_query( $query, $rowhdr=20, $colsize=40, $colwrap='cut' )
       echo "<tr class=row$c ondblclick=\"row_click(this,'row$c')\">\n";
       foreach( $row as $key => $val )
       {
+         //remove sensible fields from a query like "SELECT * FROM Players"
          switch( $key )
          {
             case 'Password':
