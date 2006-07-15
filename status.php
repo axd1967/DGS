@@ -44,9 +44,6 @@ require_once( "include/message_functions.php" );
 
    echo "<h3><font color=$h3_color>" . T_('Status') . '</font></h3>';
 
-   $gtable = new Table( "status.php", "GamesColumns" );
-   $gtable->add_or_del_column();
-
    echo '
     <table id=\"user_status\" class=infos border=1>
        <tr><td><b>' . T_("Name") . '</b></td>
@@ -75,20 +72,26 @@ require_once( "include/message_functions.php" );
     <p>';
 
 
+   // show messages
+
+   $mtable = new Table( 'status.php', '', 'm_' );
+
+   $order = 'date';
+
    $folderstring = $player_row['StatusFolders'] .
       (empty($player_row['StatusFolders']) ? '' : ',') . FOLDER_NEW . ',' . FOLDER_REPLY;
 
-   $result = message_list_query($my_id, $folderstring, 'date', 'LIMIT 20');
+   $result = message_list_query($my_id, $folderstring, $order, 'LIMIT 20');
    if( @mysql_num_rows($result) > 0 )
    {
-      $mtable = new Table( 'status.php', '', '', true );
       $my_folders = get_folders($my_id);
 
       echo "<HR><h3><font color=$h3_color>" . T_('New messages') . ":</font></h3><p>\n";
 
       message_list_table( $mtable, $result, 20
              , FOLDER_NONE /*FOLDER_ALL_RECEIVED*/, $my_folders
-             , true, true ) ;
+             , /*no_sort=*/true, true ) ;
+//no_sort must stay true because of the two tables in the same page
 
       $mtable->echo_table();
       unset($mtable);
@@ -97,10 +100,14 @@ require_once( "include/message_functions.php" );
 
 
 
-   // show games;
+   // show games
 
    $uid = $my_id;
 
+   $gtable = new Table( "status.php", "GamesColumns" );
+   $gtable->add_or_del_column();
+//can't be sorted until jump_to_next_game() adjusted to follow the sort
+   $order = "Games.LastChanged";
 
    $query = "SELECT Games.*, UNIX_TIMESTAMP(Games.Lastchanged) AS Time, " .
          "IF(Rated='N','N','Y') as Rated, " .
@@ -110,7 +117,7 @@ require_once( "include/message_functions.php" );
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
        "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$uid " .
-       "ORDER BY LastChanged, Games.ID";
+       "ORDER BY $order,Games.ID";
 
    $result = mysql_query( $query ) or die(mysql_error());
 
