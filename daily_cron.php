@@ -109,9 +109,9 @@ if( !$is_down )
 
    if( $delete_waitingroom_entries )
    {
-      $timelimit = $waitingroom_timelimit*24*3600;
+      $timelimit = $NOW - $waitingroom_timelimit*24*3600;
       $query = "DELETE FROM Waitingroom " .
-         "WHERE $NOW-UNIX_TIMESTAMP(Time) > $timelimit";
+         "WHERE UNIX_TIMESTAMP(Time) < $timelimit";
 
       mysql_query( $query )
                or error('mysql_query_failed','daily_cron3');
@@ -137,7 +137,7 @@ if( !$is_down )
 //    while( $row = mysql_fetch_array( $result ) )
 //    {
 //       update_rating($row["gid"]);
-//       $rated_status = update_rating2($row["gid"]);
+//       $rated_status = update_rating2($row["gid"]); //0=rated game
 //    }
 
 //    $result = mysql_query( "UPDATE Players SET RatingStatus='READY' " .
