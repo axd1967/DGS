@@ -49,6 +49,8 @@ disable_cache();
    $subject = get_request_arg('subject');
    $message = get_request_arg('message');
    $type = @$_REQUEST['type'];
+   if( !$type )
+      $type = "NORMAL";
    $gid = @$_REQUEST['gid'];
    $accepttype = @$_REQUEST['accepttype'];
    $declinetype = @$_REQUEST['declinetype'];
@@ -84,9 +86,6 @@ disable_cache();
    if( $tohdl == "guest" )
       error("guest_may_not_receive_messages");
 
-   if( $tohdl == $player_row["Handle"] and $type == 'INVITATION' )
-      error("invite_self");
-
 
 // find receiver of the message
 
@@ -100,12 +99,12 @@ disable_cache();
 
    $opponent_row = mysql_fetch_array($result);
    $opponent_ID = $opponent_row["ID"];
+   $to_me = ( $my_id == $opponent_ID ); //Message to myself
+   if( $to_me and $type == 'INVITATION' )
+      error("invite_self");
 
 
 // Update database
-
-   if( !$type )
-      $type = "NORMAL";
 
    if( $type == "INVITATION" )
    {
@@ -208,7 +207,7 @@ disable_cache();
 
       interpret_time_limit_forms(); //Set global $hours,$byohours,$byoperiods
 
-      if( $rated != 'Y' or $my_id == $opponent_ID )
+      if( $rated != 'Y' or $to_me )
          $rated = 'N';
 
       if( $stdhandicap != 'Y' )
@@ -352,7 +351,7 @@ disable_cache();
 
          default:
          {
-            $swap = 0;
+            $swap = 0; //important for double game!
 /* already in game record: no query except for second game of double game
             $handicap= $game_row["Handicap"];
             $komi= $game_row["Komi"];
@@ -463,6 +462,8 @@ disable_cache();
       $query .= "ReplyTo=$reply, ";
 
    $message = addslashes(trim($message));
+   //not if invitation/dispute/decline:
+   //if( !$message ) error('empty_message');
    $subject = addslashes(trim($subject));
    $query .= "Subject=\"$subject\", Text=\"$message\"";
 
@@ -471,21 +472,19 @@ disable_cache();
       error("mysql_insert_message",'send1');
 
    $mid = mysql_insert_id();
-   if( $my_id == $opponent_ID ) //Message to myself
+   if( $to_me ) //Message to myself
    {
-      $to_me = 1;
       $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
          "($my_id, $mid, 'M', ".FOLDER_NEW.")";
    }
    else
    {
-      $to_me = 0;
       $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr,Replied) VALUES " .
          "($my_id, $mid, 'Y', ".FOLDER_SENT.",'N'), " .
          "($opponent_ID, $mid, 'N', ".FOLDER_NEW.",".($type == 'INVITATION' ? "'M'" : "'N'").")";
    }
    $result = mysql_query( $query );
-   if( mysql_affected_rows() != 2-$to_me)
+   if( mysql_affected_rows() != ( $to_me ? 1 : 2) )
       error("mysql_insert_message",'send2');
 
    if( $type == "INVITATION" )
