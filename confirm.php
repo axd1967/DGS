@@ -23,9 +23,7 @@ require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( "include/rating.php" );
 
-define('HOT_SECTION', true);
 
-disable_cache();
 
 function jump_to_next_game($uid, $Lastchanged, $gid)
 {
@@ -49,9 +47,11 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
 
 {
-   if( !@$_REQUEST['gid'] )
+   disable_cache();
+
+   $gid = @$_REQUEST['gid'] ;
+   if( $gid <= 0 )
       error("no_game_nr");
-   $gid = $_REQUEST['gid'] ;
 
    if( @$_REQUEST['nextback'] )
       jump_to("game.php?gid=$gid");
@@ -95,15 +95,17 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       error("game_finished");
    }
 
+
    if( $player_row["ID"] != $ToMove_ID )
       error("not_your_turn");
 
+
+   //See *** HOT_SECTION *** below
+   if( !isset($_REQUEST['move']) )
+      error("internal_error",'conf10');
    $qry_move = @$_REQUEST['move'];
-   //could append in case of multi-players account with simultaneous logins
-   //or if one player hit twice the validation button during a net lag
-   //and if opponent has already played between the two confirm.php calls.
-   if( $qry_move > 0 && $qry_move != $Moves )
-      error("already_played",'conf7');
+   if( $qry_move != $Moves )
+      error("already_played",'conf11');
 
 
    if( $Black_ID == $ToMove_ID )
@@ -182,10 +184,33 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    $game_finished = false;
 
-   $where_clause = " ID=$gid AND Moves=$Moves";
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-   $old_moves = $Moves;
+
+
+
+/* **********************
+*** HOT_SECTION ***
+>>> See also confirm.php, quick_play.php and clock_tick.php
+Various dirty things (like duplicated moves) could append
+in case of multiple calls with the same move number. This could
+append in case of multi-players account with simultaneous logins
+or if one player hit twice the validation button during a net lag
+and/or if the opponent had already played between the two calls.
+
+Because the LOCK query is not implemented with MySQL < 4.0,
+we use the Moves field of the Games table to check those
+possible multiple queries.
+This is why:
+- the arguments are checked against the current state of the Games table
+- the current Games table give the current Moves value
+- the Games table is always modified while checking its Moves field (see $game_clause)
+- the Games table modification must always modify the Moves field (see $game_query)
+- this modification is always done in first place and checked before continuation
+*********************** */
+   $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
    $Moves++;
+
+
 
    switch( $action )
    {
@@ -220,8 +245,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
          if( $message )
             $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=$colnr, " . //used with mail notifications
              "Last_Y=$rownr, " .
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
@@ -240,8 +264,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$GameFlags, " .
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
-             " WHERE $where_clause LIMIT 1";
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
       }
       break;
 
@@ -269,21 +292,19 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
          if( $message )
             $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=".POSX_PASS.", " .
              "Status='$next_status', " .
              "ToMove_ID=$next_to_move_ID, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
              "Flags=$GameFlags, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
-             " WHERE $where_clause LIMIT 1";
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
       }
       break;
 
       case 'handicap':
       {
-         if( $Status != 'PLAY' or $Moves != 1 )
+         if( $Status != 'PLAY' or $Moves != 1 or $Handicap < 1)
             error("invalid_action",'conf2');
 
          $stonestring = (string)@$_REQUEST['stonestring'];
@@ -294,7 +315,6 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
 
          $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
-
 
          for( $i=1; $i <= $Handicap; $i++ )
          {
@@ -311,14 +331,12 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
             $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
 
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Handicap, " .
+         $game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
              "ToMove_ID=$White_ID, " .
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
-             " WHERE $where_clause LIMIT 1";
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
       }
       break;
 
@@ -339,15 +357,13 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
          else
             $score = -SCORE_RESIGN;
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=".POSX_RESIGN.", " .
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
              "Score=$score, " .
              //"Flags=0, " . //Not useful
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
-             " WHERE $where_clause LIMIT 1";
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
          $game_finished = true;
       }
@@ -368,7 +384,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 */
          $move_query = "DELETE FROM Moves WHERE gid=$gid";
          $message_query = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
-         $game_query = "DELETE FROM Games WHERE ID=$gid LIMIT 1";
+         $game_query = "DELETE FROM Games" ; //See *** HOT_SECTION ***
 
          $game_finished = true;
       }
@@ -407,8 +423,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
             $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=".POSX_SCORE.", " .
              "Status='$next_status', ";
 
@@ -422,8 +437,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
              "Score=$score, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
              "Flags=$GameFlags, " . //Don't reset Flags else SCORE,RESUME could break a Ko
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
-             " WHERE $where_clause LIMIT 1";
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
       }
       break;
@@ -435,56 +449,17 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    }
 
 
-if( HOT_SECTION )
-{
-   //*********************** HOT SECTION START ***************************
-   //could append in case of multi-players account with simultaneous logins
-   //or if one player hit twice the validation button during a net lag
-   //and if opponent has already played between the two quick_play.php/confirm.php calls.
+   //See *** HOT_SECTION *** above
+   $result = mysql_query( $game_query . $game_clause );
 
-   $result = mysql_query( "LOCK TABLES Games WRITE, Moves WRITE"
-      //. ", MoveMessages WRITE"
-      );
-
-   if ( !$result )
-      error("internal_error","confirm LOCK");
-
-   // Maybe not useful:
-   function unlock_games_tables()
-   {
-      $result = mysql_query( "UNLOCK TABLES");
-   }
-   register_shutdown_function('unlock_games_tables');
-
-   // Locked ... an ultimate verification:
-   $result = mysql_query( "SELECT Moves FROM Games WHERE Games.ID=$gid" );
-
-   if( @mysql_num_rows($result) != 1 )
-      error("internal_error", "confirm verif $gid");
-
-   $tmp = mysql_fetch_assoc($result);
-
-   if( $tmp["Moves"] != $old_moves )
-      error("already_played",'conf6');
-}//HOT_SECTION
+   if( mysql_affected_rows() != 1 )
+      error("mysql_update_game","conf20($gid)");
 
    $result = mysql_query( $move_query );
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
-      error("mysql_insert_move",'conf7');
+      error("mysql_insert_move","conf21($gid)");
 
-   $result = mysql_query( $game_query );
-
-   if( mysql_affected_rows() != 1 )
-      error("mysql_update_game");
-
-if( HOT_SECTION )
-{
-   $result = mysql_query( "UNLOCK TABLES");
-   if ( !$result )
-      error("internal_error","confirm UNLOCK");
-   //*********************** HOT SECTION END *****************************
-}//HOT_SECTION
 
 
    if( $message_query )
@@ -492,7 +467,7 @@ if( HOT_SECTION )
       $result = mysql_query( $message_query );
 
       if( mysql_affected_rows() < 1 and $action != 'delete' )
-         error("mysql_insert_move",'conf8');
+         error("mysql_insert_move","conf22($gid)");
    }
 
 
@@ -542,15 +517,17 @@ if( HOT_SECTION )
 //         update_rating($gid);
          $rated_status = update_rating2($gid); //0=rated game
 
-         mysql_query( "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                       ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
-                      ) . " WHERE ID=$White_ID LIMIT 1" );
+         $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
+                   ($rated_status ? '' : ", RatedGames=RatedGames+1" .
+                    ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
+                   ) . " WHERE ID=$White_ID LIMIT 1" ;
+         mysql_query( $query);
 
-         mysql_query( "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                       ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
-                      ) . " WHERE ID=$Black_ID LIMIT 1" );
+         $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
+                   ($rated_status ? '' : ", RatedGames=RatedGames+1" .
+                    ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
+                   ) . " WHERE ID=$Black_ID LIMIT 1" ;
+         mysql_query( $query);
 
          $Subject = 'Game result';
          $Text = "The result in the game:<center>"
@@ -569,6 +546,7 @@ if( HOT_SECTION )
 
       $message_from_server_way = true; //else simulate a message from this player
       //nervertheless, the clock_tick.php messages are always sent by the server
+      //so it's better to keep $message_from_server_way = true
       if( $message_from_server_way )
       {
          //The server messages does not allow a reply,

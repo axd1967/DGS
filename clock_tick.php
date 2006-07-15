@@ -119,20 +119,21 @@ if( !$is_down )
 
          $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
 
-         $query = "UPDATE Games SET " .
+         //$game_clause (lock) needed. See *** HOT_SECTION *** in confirm.php
+         $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
+
+         $game_query = "UPDATE Games SET Status='FINISHED', " . //See *** HOT_SECTION ***
              "Last_X=".POSX_TIME.", " .
-             "Status='FINISHED', " .
              "ToMove_ID=0, " .
              "Score=$score, " .
              //"Flags=0, " . //Not useful
-             "Lastchanged=FROM_UNIXTIME($NOW)" .
-             " WHERE ID=$gid LIMIT 1";
+             "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
-         mysql_query( $query)
-               or error('mysql_query_failed','clock_tick5');
+         mysql_query( $game_query . $game_clause)
+               or error('mysql_query_failed',"clock_tick5($gid)");
 
          if( mysql_affected_rows() != 1)
-            error('mysql_update_game',"Couldn't update game.");
+            error('mysql_update_game',"clock_tick10($gid)");
 
          // Send messages to the players
          $Text = "The result in the game:<center>"
@@ -149,7 +150,7 @@ if( !$is_down )
          $Text = addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'")
-               or error('mysql_query_failed','clock_tick6');
+               or error('mysql_query_failed',"clock_tick6($gid)");
 
          if( mysql_affected_rows() == 1)
          {
@@ -164,7 +165,7 @@ if( !$is_down )
          mysql_query( "UPDATE Players SET Notify='NEXT' " .
                       "WHERE (ID='$Black_ID' OR ID='$White_ID') " .
                       "AND SendEmail LIKE '%ON%' AND Notify='NONE' LIMIT 2")
-               or error('mysql_query_failed','clock_tick7');
+               or error('mysql_query_failed',"clock_tick7($gid)");
 
 //         update_rating($gid);
          $rated_status = update_rating2($gid); //0=rated game
@@ -174,13 +175,13 @@ if( !$is_down )
                       ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                        ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$White_ID LIMIT 1" )
-               or error('mysql_query_failed','clock_tick8');
+               or error('mysql_query_failed',"clock_tick8($gid)");
 
          mysql_query( "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
                       ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                        ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$Black_ID LIMIT 1" )
-               or error('mysql_query_failed','clock_tick9');
+               or error('mysql_query_failed',"clock_tick9($gid)");
 
          delete_all_observers($gid, $rated_status!=1, $Text);
 

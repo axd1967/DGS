@@ -24,13 +24,14 @@ require_once( "include/board.php" );
 require_once( "include/move.php" );
 //require_once( "include/rating.php" );
 
-define('HOT_SECTION', true);
 
 
 function quick_warning($string) //Short one line message
 {
    echo "\nWarning: " . ereg_replace( "[\x01-\x20]+", " ", $string);
 }
+
+
 
 if( $is_down )
 {
@@ -39,6 +40,10 @@ if( $is_down )
 else
 {
    disable_cache();
+
+   $gid = @$_REQUEST['gid'] ;
+   if( $gid <= 0 )
+      error("no_game_nr");
 
    connect2mysql();
 
@@ -62,16 +67,13 @@ else
       error("not_logged_in",'qp2');
    }
 
-   $gid = @$_REQUEST['gid'] ;
-   if( $gid <= 0 )
-      error("no_game_nr");
-
 /*
    if( !empty( $player_row["Timezone"] ) )
       putenv('TZ='.$player_row["Timezone"] );
 */
 
    $my_id = $player_row['ID'];
+
 
    $result = mysql_query( "SELECT Games.*, " .
                           "Games.Flags+0 AS GameFlags, " . //used by check_move
@@ -108,17 +110,11 @@ else
    }
 
 
-   if( $Black_ID == $ToMove_ID )
-      $to_move = BLACK;
-   else if( $White_ID == $ToMove_ID )
-      $to_move = WHITE;
-   else
-      error("database_corrupted");
-
    if( $my_id != $ToMove_ID )
       error("not_your_turn",'qp9');
 
 
+   //See *** HOT_SECTION *** below
    if( isset($_REQUEST['sgf_move']) )
       list( $query_X, $query_Y) = sgf2number_coords($_REQUEST['sgf_move'], $Size);
    elseif( isset($_REQUEST['board_move']) )
@@ -146,6 +142,16 @@ else
    if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
       error("not_your_turn",'qp8');
 
+
+   if( $Black_ID == $ToMove_ID )
+      $to_move = BLACK;
+   else if( $White_ID == $ToMove_ID )
+      $to_move = WHITE;
+   else
+      error("database_corrupted");
+
+
+   //$action = always 'move'
 
    $next_to_move = WHITE+BLACK-$to_move;
 
@@ -208,10 +214,33 @@ else
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
       error('internal_error', "quick_play load_from_db $gid");
 
-   $where_clause = " ID=$gid AND Moves=$Moves";
    //$too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-   $old_moves = $Moves;
+
+
+
+/* **********************
+*** HOT_SECTION ***
+>>> See also confirm.php, quick_play.php and clock_tick.php
+Various dirty things (like duplicated moves) could append
+in case of multiple calls with the same move number. This could
+append in case of multi-players account with simultaneous logins
+or if one player hit twice the validation button during a net lag
+and/or if the opponent had already played between the two calls.
+
+Because the LOCK query is not implemented with MySQL < 4.0,
+we use the Moves field of the Games table to check those
+possible multiple queries.
+This is why:
+- the arguments are checked against the current state of the Games table
+- the current Games table give the current Moves value
+- the Games table is always modified while checking its Moves field (see $game_clause)
+- the Games table modification must always modify the Moves field (see $game_query)
+- this modification is always done in first place and checked before continuation
+*********************** */
+   $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
    $Moves++;
+
+
 
       //case 'move':
       {
@@ -239,8 +268,8 @@ else
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
+
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=$colnr, " . //used with mail notifications
              "Last_Y=$rownr, " .
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
@@ -259,59 +288,22 @@ else
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$GameFlags, " .
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" .
-             " WHERE $where_clause LIMIT 1";
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
       }
 
 
-if( HOT_SECTION )
-{
-   //*********************** HOT SECTION START ***************************
-   //could append in case of multi-players account with simultaneous logins
-   //or if one player hit twice the validation button during a net lag
-   //and if opponent has already played between the two quick_play.php/confirm.php calls.
+   //See *** HOT_SECTION *** above
+   $result = mysql_query( $game_query . $game_clause );
 
-   $result = mysql_query( "LOCK TABLES Games WRITE, Moves WRITE" );
-
-   if ( !$result )
-      error("internal_error","quick_play LOCK");
-
-   // Maybe not useful:
-   function unlock_games_tables()
-   {
-      $result = mysql_query( "UNLOCK TABLES");
-   }
-   register_shutdown_function('unlock_games_tables');
-
-   // Locked ... an ultimate verification:
-   $result = mysql_query( "SELECT Moves FROM Games WHERE Games.ID=$gid" );
-
-   if( @mysql_num_rows($result) != 1 )
-      error("internal_error", "quick_play verif $gid");
-
-   $tmp = mysql_fetch_assoc($result);
-
-   if( $tmp["Moves"] != $old_moves )
-      error("already_played",'qp6');
-}//HOT_SECTION
+   if( mysql_affected_rows() != 1 )
+      error("mysql_update_game","qp20($gid)");
 
    $result = mysql_query( $move_query );
 
-   if( mysql_affected_rows() < 1 )
-      error("mysql_insert_move",'qp7');
+   if( mysql_affected_rows() < 1 and $action != 'delete' )
+      error("mysql_insert_move","qp21($gid)");
 
-   $result = mysql_query( $game_query );
 
-   if( mysql_affected_rows() != 1 )
-      error("mysql_update_game");
-
-if( HOT_SECTION )
-{
-   $result = mysql_query( "UNLOCK TABLES");
-   if ( !$result )
-      error("internal_error","quick_play UNLOCK");
-   //*********************** HOT SECTION END *****************************
-}//HOT_SECTION
 
 
 
