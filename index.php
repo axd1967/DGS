@@ -68,10 +68,12 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
   $login_form = new Form( 'loginform', 'login.php', FORM_POST );
 
   $login_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                               'TEXTINPUT', 'userid',16,16,'' ) );
+                               'TEXTINPUT', 'userid',16,16,'',
+                               ) );
   $login_form->add_row( array( 'DESCRIPTION', T_('Password'),
                                'PASSWORD', 'passwd',16,16,
-                               'TD',
+                               //'TD',
+                               'CELL', 99, 'align="left"',
                                'SUBMITBUTTON', 'login', T_('Log in'),
                                'TEXT',
                                '<A href="forgot.php"><font size="-2">' .
