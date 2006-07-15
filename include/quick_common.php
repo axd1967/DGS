@@ -25,6 +25,13 @@ $is_down_message = "Sorry, dragon is down for maintenance at the moment, " .
 if( !isset($quick_errors) )
    $quick_errors = false;
 
+function quick_error($string) //Short one line message
+{
+   echo "\n#Error: " . trim(ereg_replace( "[\x01-\x20]+", " ", $string));
+   exit;
+}
+
+
 $timeadjust = 0;
 if( @is_readable( "timeadjust.php" ) )
    include_once( "timeadjust.php" );
@@ -48,12 +55,6 @@ define("FOLDER_NEW", 2);
 //used in daily_cron.php
 $new_end =  4*7*24*3600;  // four weeks
 
-
-function quick_error($string) //Short one line message
-{
-   echo "\n#Error: " . trim(ereg_replace( "[\x01-\x20]+", " ", $string));
-   exit;
-}
 
 if ( get_magic_quotes_gpc() )
 {
