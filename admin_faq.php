@@ -449,7 +449,7 @@ require_once( "include/make_translationfiles.php" );
 
      echo "<table>\n";
 
-     echo "<tr><td><a href=\"admin_faq.php".URI_AMP."new=c".URI_AMP."id=1" . '"><img border=0 title="' .
+     echo "<tr><td><a href=\"admin_faq.php?new=c".URI_AMP."id=1" . '"><img border=0 title="' .
         T_('Add new category') . '" src="images/new.png" alt="N"></a></td></tr>';
 
      while( $row = mysql_fetch_array( $result ) )
