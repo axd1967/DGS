@@ -37,17 +37,19 @@ function jump_to($uri, $absolute=false)
    exit;
 }
 
-function disable_cache($stamp=NULL)
+function disable_cache($stamp=NULL, $expire=NULL)
 {
    global $NOW;
-  // Force revalidation
-   header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+   if( !$stamp )
+      $stamp = $NOW;  // Always modified
+   if( !$expire )
+      $expire = $stamp-3600;  // Force revalidation
+
+   //header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+   header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
+   header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
    header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
    header('Pragma: no-cache');                                              // HTTP/1.0
-   if( !$stamp )
-      header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $NOW) . ' GMT');  // Always modified
-   else
-      header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
 }
 
 

@@ -213,8 +213,7 @@ $array=array();
 
 
 {
-   //disable_cache(); //to allow some applications to find it in the cache
-   header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+   disable_cache( $NOW, $NOW+5*60); //to allow some mime applications to find it in the cache
 
    connect2mysql();
 
