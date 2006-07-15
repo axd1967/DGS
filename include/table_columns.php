@@ -136,10 +136,16 @@ class Table
 
          $this->Prefix = $_prefix;
 
-         $this->Sort1 = @$_GET[ $this->Prefix . 'sort1' ];
-         $this->Desc1 = @$_GET[ $this->Prefix . 'desc1' ];
-         $this->Sort2 = @$_GET[ $this->Prefix . 'sort2' ];
-         $this->Desc2 = @$_GET[ $this->Prefix . 'desc2' ];
+         $this->Sort1 = (string) arg_stripslashes(@$_GET[ $this->Prefix . 'sort1' ]);
+         $this->Desc1 = (bool) @$_GET[ $this->Prefix . 'desc1' ];
+         $this->Sort2 = (string) arg_stripslashes(@$_GET[ $this->Prefix . 'sort2' ]);
+         $this->Desc2 = (bool) @$_GET[ $this->Prefix . 'desc2' ];
+
+         //Simply remove the mySQL disturbing chars (Sort? must be a column name)
+         $t = array( '\\', '\'', '\"', ';');
+         $this->Sort1 = str_replace( $t, '', $this->Sort1 );
+         $this->Sort2 = str_replace( $t, '', $this->Sort2 );
+
 
          $this->Row_Colors = array( $table_row_color1, $table_row_color2 );
 
@@ -384,6 +390,7 @@ class Table
                . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
                , image( 'images/prev.gif', '&lt;=', '', $string)
                , T_("prev page")
+               ,'accesskey="&lt;"'
                );
 
          $button.= '&nbsp;'.round($this->From_Row/$this->Rows_Per_Page+1).'&nbsp;';
@@ -394,6 +401,7 @@ class Table
                . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
                , image( 'images/next.gif', '=&gt;', '', $string)
                , T_("next page")
+               ,'accesskey="&gt;"'
                );
 
 
