@@ -75,7 +75,7 @@ require_once( "include/std_functions.php" );
   This test does not detect an inconsistency:
    because of count(Games.ID) and LEFT JOIN Games ON,
    a Run=0 case return nothing even if Running!=0.
-  The fommowing tests have a similar defect.
+  The following tests have a similar defect.
 **********/
 
    $query = "SELECT Players.ID, count(Games.ID) AS Run, Running FROM Players " .
@@ -214,11 +214,11 @@ require_once( "include/std_functions.php" );
 
    //Various checks
    $query = "SELECT Players.ID, ClockUsed, " .
-                         "RatingStatus, Rating2, RatingMin, RatingMax " .
-                         "FROM Players " .
-                         "WHERE (" .
-                           "(RatingStatus='RATED' AND (Rating2>=RatingMax OR Rating2<=RatingMin) ) " .
-                           "OR NOT((ClockUsed>=0 AND ClockUsed<24) OR (ClockUsed>=100 AND ClockUsed<124))" .
+            "RatingStatus, Rating2, RatingMin, RatingMax " .
+            "FROM Players " .
+            "WHERE (" .
+              "(RatingStatus='RATED' AND (Rating2>=RatingMax OR Rating2<=RatingMin) ) " .
+              "OR NOT((ClockUsed>=0 AND ClockUsed<24) OR (ClockUsed>=100 AND ClockUsed<124))" .
             ")$where$limit";
    $result = mysql_query( $query)
       or die("Mis.A: " . mysql_error());

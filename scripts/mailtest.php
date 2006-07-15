@@ -74,7 +74,7 @@ require_once( "include/form_functions.php" );
    $dform->add_row( array(
       'CELL', 9, 'align="center"',
       'HIDDEN', 'charset', $encoding_used,
-      'OWNHTML', '<INPUT type="submit" name="sendit" accesskey="s" value="S-end it">',
+      'OWNHTML', '<INPUT type="submit" name="sendit" accesskey="x" value="Send it (&x)">',
       ) );
 
    $dform->echo_string(1);
