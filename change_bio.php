@@ -39,7 +39,7 @@ require_once( "include/rating.php" );
 
 
 
-   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"]);
+   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"] . " order by ID");
 
 
 
@@ -51,7 +51,7 @@ require_once( "include/rating.php" );
       $EnteredText = trim(get_request_arg("text$ID"));
       $EnteredCategory = trim(get_request_arg("category$ID"));
 
-      if( $EnteredCategory == 'Other:' )
+      if( $EnteredCategory == '' )
          $EnteredCategory = trim(get_request_arg("other$ID"));
 
       if( $EnteredText == $Text and $EnteredCategory == $Category )
@@ -59,7 +59,7 @@ require_once( "include/rating.php" );
 
       if( $EnteredText == "" )
          $query = "DELETE FROM Bio WHERE ID=$ID";
-      else
+      else //$EnteredCategory could be ''
          $query = "UPDATE Bio set uid=" . $player_row["ID"] .
             ', Text="'.addslashes($EnteredText).'"' .
             ', Category="'.addslashes($EnteredCategory).'"' .
@@ -73,7 +73,7 @@ require_once( "include/rating.php" );
       $EnteredText = trim(get_request_arg("newtext$i"));
       $EnteredCategory = trim(get_request_arg("newcategory$i"));
 
-      if( $EnteredCategory == 'Other:' )
+      if( $EnteredCategory == '' )
          $EnteredCategory = trim(get_request_arg("newother$i"));
 
       if( $EnteredText == "" )

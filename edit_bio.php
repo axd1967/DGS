@@ -33,7 +33,7 @@ function find_category_box_text($cat)
    if( in_array($cat, array_keys($categories)) )
       return $cat;
    else
-      return 'Other:';
+      return '';
 }
 
 {
@@ -44,10 +44,10 @@ function find_category_box_text($cat)
    if( !$logged_in )
       error("not_logged_in");
 
-   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"]);
+   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"] . " order by ID");
 
 
-   $categories = array( 'Other:' => T_('Other:'),
+   $categories = array( '' => T_('Other:'),
                         'Country' => T_('Country'),
                         'City' => T_('City'),
                         'State' => T_('State'),
@@ -57,7 +57,10 @@ function find_category_box_text($cat)
                         'ICQ-number' => T_('ICQ-number'),
                         'Game preferences' => T_('Game preferences'),
                         'Hobbies' => T_('Hobbies'),
-                        'Occupation' => T_('Occupation') );
+                        'Occupation' => T_('Occupation'),
+                        'Native Language' => T_('Native Language'),
+                        'Language Competence' => T_('Language Competence'),
+                        );
 
 
 
@@ -78,7 +81,7 @@ function find_category_box_text($cat)
                                  'BR',
 
                                  'TEXTINPUT', "other".$row["ID"], 15, 40,
-                                 ($cat == "Other:" ? $row["Category"] : "" ),
+                                 ($cat == '' ? $row["Category"] : '' ),
 
                                  'TD',
 
@@ -90,7 +93,7 @@ function find_category_box_text($cat)
    for($i=1; $i<=3; $i++)
    {
       $bio_form->add_row( array( 'SELECTBOX', "newcategory" . $i, 1,
-                            $categories, 'Other:', false,
+                            $categories, '', false,
 
                             'BR',
 
