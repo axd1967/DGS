@@ -45,6 +45,7 @@ require_once( "include/countries.php" );
       "ROUND(100*Won/RatedGames) AS Percent, " .
       "UNIX_TIMESTAMP(Lastaccess) as Time," .
       "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
+      "IFNULL(UNIX_TIMESTAMP(Registerdate),0) AS Registerdate, " .
       "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
       "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
       "FROM Players WHERE $where" );
@@ -73,8 +74,9 @@ require_once( "include/countries.php" );
                  ( $a == 1 ? '<img align=middle alt="*" src="images/star2.gif">' :
                    '<img align=middle alt="*" src="images/star.gif">' .
                    '<img align=middle alt="*" src="images/star.gif">' ) );
-   $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
-   $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
+   $registerdate = ($row['Registerdate'] > 0 ? date('Y-m-d', $row['Registerdate']) : NULL );
+   $lastaccess = ($row['lastaccess'] > 0 ? date($date_fmt2, $row['lastaccess']) : NULL );
+   $lastmove = ($row['Lastmove'] > 0 ? date($date_fmt2, $row['Lastmove']) : NULL );
 
    $cntr = @$row['Country'];
    $cntrn = T_(@$COUNTRIES[$cntr]);
@@ -90,7 +92,7 @@ require_once( "include/countries.php" );
     <tr><td><b>' . T_('Activity') . '</b></td><td>' . $activity . '</td></tr>
     <tr><td><b>' . T_('Rating') . '</b></td><td>' . echo_rating(@$row['Rating2'],true,$row['ID']) . '</td></tr>
     <tr><td><b>' . T_('Rank info') . '</b></td><td>' . make_html_safe(@$row['Rank'],INFO_HTML) . '</td></tr>
-    <tr><td><b>' . T_('Registration date') . '</b></td><td>' . $row['Registerdate'] . '</td></tr>
+    <tr><td><b>' . T_('Registration date') . '</b></td><td>' . $registerdate . '</td></tr>
     <tr><td><b>' . T_('Last access') . '</b></td><td>' . $lastaccess . '</td></tr>
     <tr><td><b>' . T_('Last move') . '</b></td><td>' . $lastmove . '</td></tr>
     <tr><td><b>' . T_('Vacation days left') . '</b></td>' . 
@@ -127,7 +129,7 @@ require_once( "include/countries.php" );
 
    echo " </table>\n";
 
-   $result = mysql_query("SELECT * FROM Bio where uid=$uid");
+   $result = mysql_query("SELECT * FROM Bio where uid=$uid" . " order by ID");
 
    if( @mysql_num_rows($result) > 0 )
    {
