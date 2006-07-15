@@ -189,8 +189,8 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
                              "</td>\n" ));
    }
    else
-      $form->add_row( array( 'TAB', 'SUBMITBUTTON', 'post', ' ' . T_('Post') . ' ',
-                          'SUBMITBUTTON', 'preview', ' ' . T_('Preview') . ' ') );
+      $form->add_row( array( 'TAB', 'SUBMITBUTTON', 'post" accesskey="x', ' ' . T_('Post') . ' ',
+                          'SUBMITBUTTON', 'preview" accesskey="w', ' ' . T_('Preview') . ' ') );
 
    $form->echo_string(1);
 
