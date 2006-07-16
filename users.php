@@ -42,15 +42,22 @@ require_once( "include/countries.php" );
       $where_clause = "WHERE Activity>$ActiveLevel1 ";
 
    if(!@$_GET['sort1'])
+   {
       $_GET['sort1'] = 'ID';
+      $_GET['desc1'] = 0;
+   }
 
-   if(!@$_GET['sort2'] && $_GET['sort1'] != 'ID')
-      $_GET['sort2'] = 'ID';
+   if(!@$_GET['sort2'])
+   {
+      $_GET['sort2'] = ($_GET['sort1'] != 'ID' ? 'ID' : 'Name');
+      $_GET['desc2'] = 0;
+   }
 
-   $utable = new Table( $page, "UsersColumns" );
+   $utable = new Table( $page, 'UsersColumns' );
    $utable->add_or_del_column();
 
    $order = $utable->current_order_string();
+   $limit = $utable->current_limit_string();
 
    $query = "SELECT *, Rank AS Rankinfo, " .
        "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
@@ -58,9 +65,11 @@ require_once( "include/countries.php" );
        "ROUND(100*Won/RatedGames) AS Percent, " .
        "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
        "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
-       "FROM Players $where_clause ORDER BY $order";
+       "FROM Players $where_clause ORDER BY $order $limit";
 
    $result = mysql_query( $query );
+
+   $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
 
    start_page(T_('Users'), true, $logged_in, $player_row );
 
@@ -82,7 +91,7 @@ require_once( "include/countries.php" );
    $utable->add_tablehead(14, T_('Last access'), 'Lastaccess', true);
    $utable->add_tablehead(15, T_('Last Moved'), 'Lastmove', true);
 
-   while( $row = mysql_fetch_array( $result ) )
+   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $ID = $row['ID'];
 
