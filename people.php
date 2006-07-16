@@ -23,13 +23,12 @@ $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 
-function add_contributor( $text, $contributor, $uid = -1 )
+function add_contributor( $text, $uref='', $name=false, $handle=false )
 {
   echo "<tr><td>$text</td>\n";
-  if( $uid === -1 )
-    echo "<td><b>$contributor</b></td></tr>\n";
-  else
-    echo "<td><a href=\"userinfo.php?uid=$uid\">$contributor</a></td></tr>\n";
+   echo "<td><b>" .
+      user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, 'black', $uref, $name, $handle) .
+      "</b></td></tr>\n";
 }
 
 {
@@ -44,16 +43,16 @@ function add_contributor( $text, $contributor, $uid = -1 )
     T_('Contributors to Dragon') . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
-  add_contributor( T_("Current maintainer and founder of Dragon"), "Erik Ouchterlony" );
+  add_contributor( T_("Current maintainer and founder of Dragon"), 2, 'Erik Ouchterlony' );
 
 
   $first = T_("Developer");
-  foreach( array( "Ragnar Ouchterlony",
-                  "Rod Ival",
-                  "Kris Van Hulle",
-                  ) as $name )
+  foreach( array( 'ragou' => 'Ragnar Ouchterlony',
+                  'rodival' => 'Rod Ival',
+                  4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
+                  ) as $uref => $name )
   {
-      add_contributor( $first, $name );
+      add_contributor( $first, $uref, $name);
       $first = '';
   }
 
@@ -63,20 +62,32 @@ function add_contributor( $text, $contributor, $uid = -1 )
      T_("FAQ") . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
-  add_contributor( T_("FAQ editor"), "Bjørn Ingmar Berg" );
+  $FAQmain = 'Ingmar';
+  $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
+                               " FROM Players" .
+                               " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
+                               " AND Handle='$FAQmain'" .
+                               " ORDER BY ID" );
 
-  $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level FROM Players " .
-                               "WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0 ORDER BY ID" );
+  if( $row = mysql_fetch_array( $query_result ) )
+  {
+         add_contributor( T_("FAQ editor"),
+                          $row['ID'], $row['Name'], $row['Handle'] );
+  } else $FAQmain='';
+
+
+  $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
+                               " FROM Players" .
+                               " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
+                               " ORDER BY ID" );
 
   $first = T_("FAQ co-editor");
   while( $row = mysql_fetch_array( $query_result ) )
   {
-      //add_contributor( , "Frank Schlüter" );
-      if( $row['ID'] != 0 ) //?? skip "Bjørn Ingmar Berg"
+      if( $row['Handle'] != $FAQmain )
       {
          add_contributor( $first,
-                          make_html_safe($row['Name']),
-                          $row['ID'] );
+                          $row['ID'], $row['Name'], $row['Handle'] );
          $first = '';
       }
   }
@@ -87,7 +98,9 @@ function add_contributor( $text, $contributor, $uid = -1 )
      T_('Current translators') . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
-  $query_result = mysql_query( "SELECT ID,Handle,Name,Translator FROM Players " .
+  $query_result = mysql_query( "SELECT ID,Handle,Name,Translator" .
+                               ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+                               " FROM Players" .
                                "WHERE LENGTH(Translator)>0 ORDER BY ID" );
 
   $translator_list = array();
@@ -109,14 +122,16 @@ function add_contributor( $text, $contributor, $uid = -1 )
 
   ksort($translator_list);
 
+  $info = $logged_in && $player_row['admin_level'] & ADMIN_TRANSLATORS ;
   foreach( $translator_list as $language => $translators )
      {
         $first = true;
         foreach( $translators as $translator )
            {
               add_contributor( $first ? $language : '',
-                               make_html_safe($translator['Name']),
-                               $translator['ID'] );
+                               $translator['ID'],
+                   ( $info ? '['.date($date_fmt2, $translator['Lastaccess']).'] ' : '') .
+                               $translator['Name'], $translator['Handle'] );
               $first = false;
            }
      }

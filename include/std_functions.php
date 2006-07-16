@@ -1329,45 +1329,45 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
    return $whitename;
 }
 
-function send_reference( $link, $safe, $class, $player_id, $player_name=false, $player_handle=false)
+function send_reference( $link, $safe, $class, $player_ref, $player_name=false, $player_handle=false)
 {
    if( is_numeric($link) ) //not owned reference
       $link= -$link; //make it a send_reference
-   return user_reference( $link, $safe, $class, $player_id, $player_name, $player_handle);
+   return user_reference( $link, $safe, $class, $player_ref, $player_name, $player_handle);
 }
 
-function user_reference( $link, $safe, $class, $player_id, $player_name=false, $player_handle=false)
+function user_reference( $link, $safe, $class, $player_ref, $player_name=false, $player_handle=false)
 {
  global $base_path;
-   if( is_array($player_id) ) //i.e. $player_row
+   if( is_array($player_ref) ) //i.e. $player_row
    {
       if( !$player_name )
-         $player_name = $player_id['Name'];
+         $player_name = $player_ref['Name'];
       if( !$player_handle )
-         $player_handle = $player_id['Handle'];
-      $player_id = $player_id['ID'];
+         $player_handle = $player_ref['Handle'];
+      $player_ref = $player_ref['ID'];
    }
    $legal = 1;
-   if( !is_numeric($player_id) || $player_id{0}==HANDLE_TAG_CHAR )
+   if( !is_numeric($player_ref) || $player_ref{0}==HANDLE_TAG_CHAR )
    {
       $byid = 0;
-      if( $player_id{0}==HANDLE_TAG_CHAR )
-         $player_id = substr($player_id,1);
-      if( illegal_chars( $player_id) )
+      if( $player_ref{0}==HANDLE_TAG_CHAR )
+         $player_ref = substr($player_ref,1);
+      if( !$player_ref or illegal_chars( $player_ref) )
          $legal = 0;
    }
    else
    {
       $byid = 1;
-      $player_id = (int)$player_id;
-      if( $player_id<=0)
+      $player_ref = (int)$player_ref;
+      if( $player_ref<=0)
          $legal = 0;
    }
    if( ($player_name===false or $player_handle===false) && $legal )
    {
      $tmp = 'SELECT Name, Handle ' .
             'FROM Players ' .
-            "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='$player_id' " .
+            "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='$player_ref' " .
             'LIMIT 1' ;
      $result = mysql_query( $tmp );
      if( @mysql_num_rows($result) == 1 )
@@ -1385,7 +1385,7 @@ function user_reference( $link, $safe, $class, $player_id, $player_name=false, $
    $player_name = trim($player_name);
    $player_handle = trim($player_handle);
    if( !$player_name )
-      $player_name = "User#$player_id";
+      $player_name = "User#$player_ref";
    if( $player_handle )
       $player_name.= " ($player_handle)" ;
    if( $safe )
@@ -1406,8 +1406,8 @@ function user_reference( $link, $safe, $class, $player_id, $player_name=false, $
       {
          $tmp = "userinfo.php?";
       }
-      $tmp.= ( $byid ? "uid=$player_id" 
-                 : UHANDLE_NAM."=".str_replace('+','%2B',$player_id) );
+      $tmp.= ( $byid ? "uid=$player_ref" 
+                 : UHANDLE_NAM."=".str_replace('+','%2B',$player_ref) );
       $tmp = 'A href="' . $base_path. $tmp . '"';
       if( $class )
         $tmp.= " class=$class";
