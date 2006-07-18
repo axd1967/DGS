@@ -29,7 +29,7 @@ function post_message($player_row, $moderated)
 
    $Subject = trim(@$_POST['Subject']);
    $Text = trim(@$_POST['Text']);
-   $GoDiagrams = create_godiagrams($Text);
+//   $GoDiagrams = create_godiagrams($Text);
    $Subject = addslashes($Subject);
    $Text = addslashes($Text);
 
@@ -64,94 +64,101 @@ function post_message($player_row, $moderated)
 
        return;
    }
-
+   else
+   {
    // -------   Else add post  ----------
 
 
    // -------   Reply  ----------
 
-   if( $parent > 0 )
-   {
-      $result = mysql_query("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
-                            "WHERE ID=$parent AND Forum_ID=$forum")
-         or error('unknown_parent_post');
+      if( $parent > 0 )
+      {
+         $result = mysql_query("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
+                               "WHERE ID=$parent AND Forum_ID=$forum")
+            or error('unknown_parent_post');
 
-      if( mysql_num_rows($result) != 1 )
-         error("unknown_parent_post");
+         if( mysql_num_rows($result) != 1 )
+            error("unknown_parent_post");
 
-      extract(mysql_fetch_array($result));
+         extract(mysql_fetch_array($result));
 
-      $result = mysql_query("SELECT MAX(AnswerNr) AS answer_nr " .
-                            "FROM Posts WHERE Parent_ID=$parent");
+         $result = mysql_query("SELECT MAX(AnswerNr) AS answer_nr " .
+                               "FROM Posts WHERE Parent_ID=$parent");
 
-      extract(mysql_fetch_array($result));
+         extract(mysql_fetch_array($result));
 
-      if( !($answer_nr > 0) ) $answer_nr=0;
-   }
-
-
-   // -------   New thread  ----------
-
-   else
-   {
-      // New thread
-      $answer_nr = 0;
-      $PosIndex = '';
-      $Depth = 0;
-      $Thread_ID = -1;
-   }
+         if( !($answer_nr > 0) ) $answer_nr=0;
+      }
 
 
+      // -------   New thread  ----------
+
+      else
+      {
+         // New thread
+         $answer_nr = 0;
+         $PosIndex = '';
+         $Depth = 0;
+         $Thread_ID = -1;
+      }
 
 
-   // -------   Update database   -------
 
-   $PosIndex .= $order_str[$answer_nr];
-   $Depth++;
 
-   $query = "INSERT INTO Posts SET " .
-       "Forum_ID=$forum, " .
-       "Thread_ID=$Thread_ID, " .
-       "Time=FROM_UNIXTIME($NOW), " .
-       "Lastchanged=FROM_UNIXTIME($NOW), " .
-       "Subject=\"$Subject\", " .
-       "Text=\"$Text\", " .
-       "User_ID=" . $player_row["ID"] . ", " .
-       "Parent_ID=$parent, " .
-       "AnswerNr=" . ($answer_nr+1) . ", " .
-       "Depth=$Depth, " .
-       "Approved=" . ($moderated ? "'N'" : "'Y'")  . ", " .
-       "crc32=" . crc32($Text) . ", " .
-       "PosIndex=\"$PosIndex\"";
+      // -------   Update database   -------
 
-   mysql_query( $query );
+      if( $answer_nr >= 64*64 )
+         error("internal_error", "AnswerNr too large: $answer_nr" );
 
-   if( mysql_affected_rows() != 1)
-      error("mysql_insert_post");
+      $PosIndex .= $order_str[$answer_nr/64] . $order_str[$answer_nr%64];
+      $Depth++;
 
-   $New_ID = mysql_insert_id();
+      if( $Depth >= 40 )
+         error("internal_error", "Depth too large: $Depth" );
 
-   if( !($parent > 0) )
-   {
-      mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID" );
+      $query = "INSERT INTO Posts SET " .
+         "Forum_ID=$forum, " .
+         "Thread_ID=$Thread_ID, " .
+         "Time=FROM_UNIXTIME($NOW), " .
+         "Lastchanged=FROM_UNIXTIME($NOW), " .
+         "Subject=\"$Subject\", " .
+         "Text=\"$Text\", " .
+         "User_ID=" . $player_row["ID"] . ", " .
+         "Parent_ID=$parent, " .
+         "AnswerNr=" . ($answer_nr+1) . ", " .
+         "Depth=$Depth, " .
+         "Approved=" . ($moderated ? "'N'" : "'Y'")  . ", " .
+         "crc32=" . crc32($Text) . ", " .
+         "PosIndex=\"$PosIndex\"";
+
+      mysql_query( $query );
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_post");
 
-      $Thread_ID = $New_ID;
+      $New_ID = mysql_insert_id();
+
+      if( !($parent > 0) )
+      {
+         mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID" );
+
+         if( mysql_affected_rows() != 1)
+            error("mysql_insert_post");
+
+         $Thread_ID = $New_ID;
+      }
+
+//   save_diagrams($GoDiagrams);
+
+      if( $moderated )
+      {
+         // TODO: Notify moderators;
+      }
+
+      mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1 " .
+                   "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
+                   "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
    }
-
-   save_diagrams($GoDiagrams);
-
-   if( $moderated )
-   {
-      // TODO: Notify moderators;
-   }
-
-   mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1 " .
-                "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
-                "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
-
 }
 
 ?>

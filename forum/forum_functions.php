@@ -22,15 +22,15 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 chdir("../");
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
-require_once( "include/GoDiagram.php" );
+//require_once( "include/GoDiagram.php" );
 chdir("forum");
 
 
-//$new_end =  4*7*24*3600;  // four weeks //moved in quick_common.php
+//$new_end =  4*7*24*3600;  // four weeks //moved to quick_common.php
 
-$new_level1 = 2*7*24*3600;  // two week
+$new_level1 = 2*7*24*3600;  // two weeks
 
-$order_str = "+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
+$order_str = "*+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
 
 define("LINK_FORUMS", 1 << 0);
 define("LINK_THREADS", 1 << 1);
@@ -40,8 +40,8 @@ define("LINK_SEARCH", 1 << 4);
 define("LINK_MARK_READ", 1 << 5);
 define("LINK_PREV_PAGE", 1 << 6);
 define("LINK_NEXT_PAGE", 1 << 7);
-define("LINK_TOGGLE_EDITOR", 1 << 8);
-define("LINK_TOGGLE_EDITOR_LIST", 1 << 9);
+define("LINK_TOGGLE_MODERATOR", 1 << 8);
+define("LINK_TOGGLE_MODERATOR_LIST", 1 << 9);
 
 
 function make_link_array($links)
@@ -68,12 +68,12 @@ function make_link_array($links)
    if( $links & LINK_MARK_READ )
       $link_array_left["Mark All Read"] = "";
 
-   if( ($links & LINK_TOGGLE_EDITOR) or ($links & LINK_TOGGLE_EDITOR_LIST) )
+   if( ($links & LINK_TOGGLE_MODERATOR) or ($links & LINK_TOGGLE_MODERATOR_LIST) )
    {
       $get = $_GET;
-      $get['editor'] = ( @$_COOKIE[COOKIE_PREFIX.'forumeditor'] == 'y'? 'n' : 'y' );
-      $link_array_right[T_("Toggle forum editor")] =
-         ($links & LINK_TOGGLE_EDITOR ?
+      $get['moderator'] = ( @$_COOKIE[COOKIE_PREFIX.'forummoderator'] == 'y'? 'n' : 'y' );
+      $link_array_right[T_("Toggle forum moderator")] =
+         ($links & LINK_TOGGLE_MODERATOR ?
           make_url( "read.php", $get, false ) :
           make_url( "list.php", $get, false ) );
    }
@@ -177,8 +177,8 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
                           'HIDDEN', 'forum', $forum ));
    $form->add_row( array( 'TAB', 'TEXTAREA', 'Text', 70, 25, $Text ) );
 
-   if( isset($GoDiagrams) )
-      $str = draw_editors($GoDiagrams);
+//    if( isset($GoDiagrams) )
+//       $str = draw_editors($GoDiagrams);
 
    if( !empty($str) )
    {
@@ -213,31 +213,36 @@ function forum_name($forum, &$moderated)
    return $row["Forumname"];
 }
 
-function set_editor_cookie()
+function set_moderator_cookie()
 {
-   $editor = @$_GET['editor'];
-   $cookie = @$_COOKIE[COOKIE_PREFIX.'forumeditor'];
-   if( $editor === 'n' && $cookie !== '' )
+   $moderator = @$_GET['moderator'];
+   $cookie = @$_COOKIE[COOKIE_PREFIX.'forummoderator'];
+   if( $moderator === 'n' && $cookie !== '' )
    {
       $cookie = '';
-      safe_setcookie( 'forumeditor');
+      safe_setcookie( 'forummoderator');
    }
-   else if( $editor === 'y' && $cookie !== 'y' )
+   else if( $moderator === 'y' && $cookie !== 'y' )
    {
       $cookie = 'y';
-      safe_setcookie( 'forumeditor', $cookie, 3600);
+      safe_setcookie( 'forummoderator', $cookie, 3600);
    }
-   $_COOKIE[COOKIE_PREFIX.'forumeditor'] = $cookie;
+   $_COOKIE[COOKIE_PREFIX.'forummoderator'] = $cookie;
    return $cookie === 'y';
 }
 
 function approve_message($id, $thread, $approve=true)
 {
    $result = mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "' " .
-                         "WHERE ID=$id AND Thread_ID=$thread LIMIT 1");
+                         "WHERE ID=$id AND Thread_ID=$thread " .
+                         "AND Approved='" . ( $approve ? 'N' : 'Y' ) . "' LIMIT 1");
 
    if( mysql_affected_rows() == 1 )
+   {
+      mysql_query("UPDATE Posts SET PostsInThread=PostsInThread" . ($approve ? '+1' : '-1') .
+                  " WHERE ID=$thread AND PostsInThread > 0 LIMIT 1");
       recalculate_lastchanged($id, ($approve ? 1 : -1));
+   }
 }
 
 

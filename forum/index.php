@@ -18,6 +18,28 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+/*
+
+Description of mysql table Posts:
+
+Parent_ID: The post this post replies to.
+Thread_ID: The post which started the thread.
+Replies: The number of replies to this post.
+AnswerNr: The number of siblings (i.e. posts to the parent post) when it was posted.
+Depth: The number of generations, the tread starter has depth 0.
+
+PosIndex: A string used to sort the posts in the thread. The string is composed of the
+          PosIndex of the parent plus two letters which encodes the AnswerNr in base 64,
+          where the letters are given by $order_str (see forum_functions.php).
+
+          If PosIndex is NULL, the post has been edited and is not active.
+
+PostsInThread: Total number of approved posts in the thread. Only used for the first post
+               of the thread.
+
+*/
+
+
 
 require_once( "forum_functions.php" );
 

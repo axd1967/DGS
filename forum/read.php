@@ -27,7 +27,7 @@ require_once( "post.php" );
 function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null )
 {
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
-      $thread, $Timestamp, $date_fmt, $Lastread, $is_editor, $NOW, $player_row;
+      $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row;
 
    $post_colors = array( 'normal' => 'cccccc',
                          'hidden' => 'eecccc',
@@ -37,7 +37,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 
    $sbj = make_html_safe( $Subject );
    $txt = make_html_safe( $Text, true);
-   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
+//   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
    if( strlen($txt) == 0 ) $txt = '&nbsp;';
 
@@ -68,13 +68,13 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
    {
       $hidden = $post_type == 'hidden';
       echo "<tr><td bgcolor=white align=left>";
-      if(  $post_type == 'normal' ) // reply link
+      if(  $post_type == 'normal' and !$is_moderator ) // reply link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."reply=$ID#$ID\">[ " .
             T_('reply') . " ]</a>&nbsp;&nbsp;";
       if( $my_post ) // edit link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."edit=$ID#$ID\">" .
             "<font color=\"#ee6666\">[ " . T_('edit') . " ]</font></a>&nbsp;&nbsp;";
-      if( $is_editor ) // hide/show link
+      if( $is_moderator ) // hide/show link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
             ( $hidden ? 'show' : 'hide' ) . "=$ID#$ID\"><font color=\"#ee6666\">[ " .
             ( $hidden ? T_('show') : T_('hide') ) . " ]</font></a>";
@@ -95,7 +95,7 @@ function revision_history($post_id)
       "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
       "UNIX_TIMESTAMP(GREATEST(Posts.Time,Posts.Lastedited)) AS Timestamp " .
       "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
-      "WHERE Posts.ID='$post_id' OR (Depth=0 AND Parent_ID='$post_id') " .
+      "WHERE Posts.ID='$post_id' OR (Parent_ID='$post_id' AND PosIndex IS NULL) " .
       "ORDER BY Timestamp DESC") or die(mysql_error());
 
 
@@ -175,7 +175,7 @@ function change_depth(&$cur_depth, $new_depth)
       $preview_Subject = trim(get_request_arg('Subject'));
       $preview_Text = trim(get_request_arg('Text'));
 
-      $preview_GoDiagrams = create_godiagrams($preview_Text);
+//      $preview_GoDiagrams = create_godiagrams($preview_Text);
    }
 
    $cols=2;
@@ -184,14 +184,14 @@ function change_depth(&$cur_depth, $new_depth)
 
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
-      $links |= LINK_TOGGLE_EDITOR;
+      $links |= LINK_TOGGLE_MODERATOR;
 
       if( @$_GET['show'] > 0 )
          approve_message( @$_GET['show'], $thread, true );
       else if( @$_GET['hide'] > 0 )
          approve_message( @$_GET['hide'], $thread, false );
 
-      $is_editor = set_editor_cookie();
+      $is_moderator = set_moderator_cookie();
    }
 
    start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
@@ -216,6 +216,7 @@ function change_depth(&$cur_depth, $new_depth)
                          "Players.ID AS uid, Players.Name, Players.Handle " .
                          "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
+                         "AND PosIndex IS NOT NULL " .
                          "ORDER BY PosIndex");
 
    echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
@@ -230,7 +231,7 @@ function change_depth(&$cur_depth, $new_depth)
 
       $hidden = ($Approved == 'N');
 
-      if( $hidden and !$is_editor )
+      if( $hidden and !$is_moderator )
          continue;
 
       if( $thread == $ID ) //Initial post of the thread
@@ -254,7 +255,7 @@ function change_depth(&$cur_depth, $new_depth)
       if( $edit == $ID )
          $post_type = 'edit';
 
-      $GoDiagrams = find_godiagrams($Text);
+//      $GoDiagrams = find_godiagrams($Text);
 
       draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text, $GoDiagrams);
 
@@ -263,7 +264,7 @@ function change_depth(&$cur_depth, $new_depth)
          change_depth( $cur_depth, $cur_depth + 1 );
          $Subject = $preview_Subject;
          $Text = $preview_Text;
-         $GoDiagrams = $preview_GoDiagrams;
+//         $GoDiagrams = $preview_GoDiagrams;
          $post_type = 'preview';
          draw_post($post_type, false, $Subject, $Text, $GoDiagrams);
       }
@@ -273,7 +274,7 @@ function change_depth(&$cur_depth, $new_depth)
          if( $post_type == 'reply' )
          {
             $Text = '';
-            $GoDiagrams = null;
+//            $GoDiagrams = null;
          }
          echo "<tr><td>\n";
          message_box($post_type, $ID, $GoDiagrams, $Subject, $Text);
@@ -286,7 +287,7 @@ function change_depth(&$cur_depth, $new_depth)
       change_depth( $cur_depth, $cur_depth + 1 );
       $Subject = $preview_Subject;
       $Text = $preview_Text;
-      $GoDiagrams = $preview_GoDiagrams;
+//      $GoDiagrams = $preview_GoDiagrams;
       draw_post('preview', false, $Subject, $Text, $GoDiagrams);
       echo "<tr><td>\n";
       message_box('preview', $thread, $GoDiagrams, $Subject, $Text);

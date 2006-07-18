@@ -48,6 +48,7 @@ require_once( "forum_functions.php" );
    or die(mysql_error());
 
    $show_rows = $nr_rows = mysql_num_rows($result);
+
    if( $show_rows > $RowsPerPage )
       $show_rows = $RowsPerPage;
 
@@ -63,8 +64,8 @@ require_once( "forum_functions.php" );
 
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
-      $links |= LINK_TOGGLE_EDITOR_LIST;
-      $is_editor = set_editor_cookie();
+      $links |= LINK_TOGGLE_MODERATOR_LIST;
+      $is_moderator = set_moderator_cookie();
    }
 
    start_table($headline, $links, "width=98%", $cols);
@@ -80,7 +81,7 @@ require_once( "forum_functions.php" );
 
       $color = ( $odd ? "" : " bgcolor=white" );
 
-      if( $Replies >= 0 or $is_editor )
+//      if( $Replies >= 0 or $is_moderator )
       {
          $Subject = make_html_safe( $Subject, true);
          echo "<tr$color><td><a href=\"read.php?forum=$forum".URI_AMP."thread=$Thread_ID\">$Subject</a>$new</td><td>" . make_html_safe($Name)
