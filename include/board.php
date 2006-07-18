@@ -37,7 +37,6 @@ class Board
    var $moves; //array: [$MoveNr] => array($Stone,$PosX,$PosY)
    var $marks; //array: [$sgf_coord] => $mark
    var $captures; //array: [$MoveNr] => array($Stone,$PosX,$PosY)
-   var $size;
 
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
    var $movemrkx, $movemrky, $movecol, $movemsg;
