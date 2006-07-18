@@ -70,7 +70,7 @@ light_source {  <-10, -0.5, -10.3>  colour 0.8  shadowless }
   BlackStone ( <-0.003, 0.005, 0>, StoneSize, StoneThickness )
 #end
 
-#Rodival: not well implanted:
+// Rodival: not well implanted:
 #ifdef( W_B_PLAY )
   BlackStone ( <0.003, 0, 0>, StoneSize, StoneThickness )
   WhiteStone ( <-0.003, 0.005, 0>, StoneSize, StoneThickness )

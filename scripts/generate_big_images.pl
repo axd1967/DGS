@@ -29,20 +29,20 @@ if( $outfile eq 'BigBlackMark.png' || $outfile eq 'BigWhiteMark.png' )
     if( $outfile eq 'BigBlackMark.png' )
     {
         $file='BigBlack.png';
-        $fg_color="#ffffff";
+        $fg_color= [255, 255, 255];
     }
     else
     {
         $file='BigWhite.png';
-        $fg_color="#000000";
+        $fg_color= [0, 0, 0];
     }
 
     $theImage = gimp_file_load($file, $file);
     $theLayer = gimp_image_active_drawable( $theImage );
     plug_in_autocrop( $theImage, $theLayer );
     gimp_palette_set_foreground( $fg_color );
-    gimp_ellipse_select( $theImage, 100, 100, 300, 300, REPLACE, 1, 0, 0);
-    gimp_ellipse_select( $theImage, 150, 150, 200, 200, SUB, 1, 0, 0);
+    gimp_ellipse_select( $theImage, 100, 100, 300, 300, CHANNEL_OP_REPLACE, 1, 0, 0);
+    gimp_ellipse_select( $theImage, 150, 150, 200, 200, CHANNEL_OP_SUBTRACT, 1, 0, 0);
     gimp_bucket_fill( $theLayer, FG_BUCKET_FILL, NORMAL_MODE, 80, 15, 1, 125, 125);
     gimp_selection_none( $theImage);
     file_png_save( $theImage, $theLayer, $outfile, $outfile, 0, 9, 0, 0, 0, 0, 0);
