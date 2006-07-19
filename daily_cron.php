@@ -45,6 +45,7 @@ if( !$is_down )
                or error('mysql_query_failed','daily_cron1');
 
    $row = mysql_fetch_array( $result );
+   mysql_free_result($result);
 
    if( $row['timediff'] < $daily_diff )
       if( !@$_REQUEST['forced'] ) exit;
@@ -101,6 +102,7 @@ if( !$is_down )
                or error('mysql_query_failed','daily_cron?');
          }
       }
+      mysql_free_result($result);
    }
 */
 
@@ -139,6 +141,7 @@ if( !$is_down )
 //       update_rating($row["gid"]);
 //       $rated_status = update_rating2($row["gid"]); //0=rated game
 //    }
+//    mysql_free_result($result);
 
 //    $result = mysql_query( "UPDATE Players SET RatingStatus='READY' " .
 //                           "WHERE RatingStatus='INIT' " );
@@ -158,16 +161,19 @@ if( !$is_down )
                or error('mysql_query_failed','daily_cron4');
    if( @mysql_num_rows($result) > 0 )
       extract( mysql_fetch_array($result));
+   mysql_free_result($result);
 
    $result = mysql_query( $q_running )
                or error('mysql_query_failed','daily_cron5');
    if( @mysql_num_rows($result) > 0 )
       extract( mysql_fetch_array($result));
+   mysql_free_result($result);
 
    $result = mysql_query( $q_users )
                or error('mysql_query_failed','daily_cron6');
    if( @mysql_num_rows($result) > 0 )
       extract( mysql_fetch_array($result));
+   mysql_free_result($result);
 
 
    mysql_query( "INSERT INTO Statistics SET " .
@@ -199,6 +205,7 @@ if( !$is_down )
    {
       $query .= " OR Thread_ID=" . $row["ID"];
    }
+   mysql_free_result($result);
 
    mysql_query( $query )
                or error('mysql_query_failed','daily_cron9');
@@ -214,7 +221,7 @@ if( !$is_down )
 
 
    $row = mysql_fetch_assoc($result); //is "guest" and skipped else summertime changes
-   putenv('TZ='.$row["Timezone"] ); //always GMT (guest default)
+   setTZ( $row['Timezone']); //always GMT (guest default)
 
    // Changed to/from summertime?
    if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )
@@ -223,12 +230,13 @@ if( !$is_down )
 
    while( $row = mysql_fetch_array($result) )
    {
-      putenv('TZ='.$row["Timezone"] );
+      setTZ( $row['Timezone']);
       mysql_query("UPDATE Players " .
                   "SET ClockChanged=NULL, " .
                   "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
                   "WHERE ID='" . $row['ID'] . "' LIMIT 1")
                or error('mysql_query_failed','daily_cron12');
    }
+   mysql_free_result($result);
 }
 ?>
