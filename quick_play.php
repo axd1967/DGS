@@ -68,14 +68,13 @@ else
    }
 
 /*
-   if( !empty( $player_row["Timezone"] ) )
-      putenv('TZ='.$player_row["Timezone"] );
+   setTZ( $player_row['Timezone']);
 */
 
    $my_id = $player_row['ID'];
 
-
-   $result = mysql_query( "SELECT Games.*, " .
+   $game_row = mysql_single_fetch(
+                          "SELECT Games.*, " .
                           "Games.Flags+0 AS GameFlags, " . //used by check_move
                           "black.ClockUsed AS Blackclock, " .
                           "white.ClockUsed AS Whiteclock, " .
@@ -83,10 +82,9 @@ else
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
-                        )
-            or error('mysql_query_failed');
+                        );
 
-   if( @mysql_num_rows($result) != 1 )
+   if( !$game_row )
       error("unknown_game");
 
    $Last_X = $Last_Y = -1;
