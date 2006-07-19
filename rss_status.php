@@ -18,7 +18,6 @@ function error($err, $debugmsg=NULL)
    exit;
 }
 
-putenv('TZ=GMT');
 require_once( "include/quick_common.php" );
 
 //require_once( "include/connect2mysql.php" );
@@ -31,8 +30,9 @@ function err_log( $handle, $err, $debugmsg=NULL)
 {
 
    $uri = "error.php?err=" . urlencode($err);
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."', " .
-      "Message='$err', IP='{$_SERVER['REMOTE_ADDR']}'" ;
+   $ip = (string)@$_SERVER['REMOTE_ADDR'];
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."'"
+      .", Message='".addslashes($err)."', IP='".addslashes($ip)."'" ;
 
    $mysqlerror = @mysql_error();
 
@@ -381,8 +381,7 @@ else
    }
 
 
-   if( !empty( $player_row["Timezone"] ) )
-      putenv('TZ='.$player_row["Timezone"] );
+   setTZ( $player_row['Timezone']);
 
    //+logging stat adjustments
 

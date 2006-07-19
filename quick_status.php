@@ -44,8 +44,7 @@ else
       error("not_logged_in",'qs2');
    }
 
-   if( !empty( $player_row["Timezone"] ) )
-      putenv('TZ='.$player_row["Timezone"] );
+   setTZ( $player_row['Timezone']);
 
    $my_id = $player_row['ID'];
 

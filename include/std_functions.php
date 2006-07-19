@@ -203,7 +203,7 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
    ob_start("ob_gzhandler");
 
    if( empty($encoding_used) )
-      $encoding_used = 'iso-8859-1';
+      $encoding_used = LANG_DEF_CHARSET;
 
    header('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
 
@@ -565,13 +565,14 @@ function make_menu_vertical($menu_array)
       . "\n </tr>\n</table>\n";
 }
 
-/* Not used
-function warn($debugmsg)
+/* Not used: to be reviewed
+function warn($err)
 {
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."', " .
-      "Message='WARN:".addslashes($debugmsg)."', IP='{$_SERVER['REMOTE_ADDR']}'" ;
+   $ip = (string)@$_SERVER['REMOTE_ADDR'];
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."'"
+      .", Message='".addslashes($err)."', IP='".addslashes($ip)."'" ;
 
-   if( !empty($mysql_error) )
+   if( !empty($mysql_error) ) //define it first!
       $errorlog_query .= ", MysqlError='".addslashes(mysql_error())."'";
 
    @mysql_query( $errorlog_query );
@@ -963,7 +964,7 @@ function make_html_safe( $msg, $some_html=false)
 function textarea_safe( $msg, $charenc=false)
 {
  global $encoding_used;
-   if( !$charenc) $charenc = $encoding_used; //else 'iso-8859-1'
+   if( !$charenc) $charenc = $encoding_used; //else 'iso-8859-1' LANG_DEF_CHARSET
    $msg = @htmlspecialchars($msg, ENT_QUOTES, $charenc);
 //No:   $msg = @htmlentities($msg, ENT_QUOTES, $charenc); //Too much entities for not iso-8859-1 languages
    return $msg;
@@ -1177,8 +1178,8 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       $row['Browser'] = $browser;
    }
 
-   $ip = $_SERVER['REMOTE_ADDR'];
-   if( $row['IP'] !== $ip )
+   $ip = (string)@$_SERVER['REMOTE_ADDR'];
+   if( $ip && $row['IP'] !== $ip )
    {
       $query .= ", IP='$ip'";
       $row['IP'] = $ip;
@@ -1200,8 +1201,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 
    get_cookie_prefs($row);
 
-   if( !empty( $row["Timezone"] ) )
-      putenv('TZ='.$row["Timezone"] );
+   setTZ( $row['Timezone']);
 
    return true;
 }
@@ -1283,10 +1283,8 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
             ' AND white.ID=Games.White_ID ' .
             ' AND black.ID=Games.Black_ID ' .
             'LIMIT 1' ;
-     $result = mysql_query( $tmp );
-     if( @mysql_num_rows($result) == 1 )
+     if( $tmp=mysql_single_fetch( $tmp) )
      {
-       $tmp = mysql_fetch_assoc($result);
        if( $whitename===false )
          $whitename = $tmp['whitename'];
        if( $blackname===false )
@@ -1369,10 +1367,8 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
             'FROM Players ' .
             "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='$player_ref' " .
             'LIMIT 1' ;
-     $result = mysql_query( $tmp );
-     if( @mysql_num_rows($result) == 1 )
+     if( $tmp=mysql_single_fetch( $tmp) )
      {
-       $tmp = mysql_fetch_assoc($result);
        if( $player_name===false )
          $player_name = $tmp['Name'];
        if( $player_handle===false )
