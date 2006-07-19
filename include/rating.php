@@ -633,10 +633,17 @@ function get_rating_at($uid, $date)
       or die(mysql_error());
 
    if( @mysql_num_rows($result) != 1 )
-      $result = mysql_query( "SELECT InitialRating AS Rating FROM Players WHERE ID='$uid'" );
+   {
+      mysql_free_result($result);
+      $result = mysql_query( "SELECT InitialRating AS Rating FROM Players WHERE ID='$uid'" )
+         or die(mysql_error());
+   }
 
-   $row = mysql_fetch_array( $result );
+   $row = mysql_fetch_assoc( $result );
+   mysql_free_result($result);
 
+   if( !isset($row['Rating']) )
+      return -9999;
    return $row['Rating'];
 }
 

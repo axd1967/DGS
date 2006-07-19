@@ -610,8 +610,9 @@ function folder_is_empty($nr, $uid)
 {
    $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
                          "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1");
-
-   return (@mysql_num_rows($result) === 0);
+   $nr = (@mysql_num_rows($result) === 0);
+   mysql_free_result($result);
+   return $nr;
 }
 
 function echo_folder_box($folders, $folder_nr, $bgcolor)
@@ -736,10 +737,10 @@ function message_list_table( &$mtable, $result, $show_rows
 
       if( $row['Sender'] === 'M' ) //Message to myself
       {
-         $row["other_name"] = '('.T_('Myself').')';
+         $row["other_name"] = '(' . T_('Myself') . ')';
       }
       else if( $row["other_ID"] <= 0 )
-         $row["other_name"] = '['.T_('Server message').']';
+         $row["other_name"] = '[' . T_('Server message') . ']';
       if( empty($row["other_name"]) )
          $row["other_name"] = '-';
 
