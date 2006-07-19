@@ -77,8 +77,9 @@ function err_log( $handle, $err, $debugmsg=NULL)
 {
 
    $uri = "error.php?err=" . urlencode($err);
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."', " .
-      "Message='$err', IP='{$_SERVER['REMOTE_ADDR']}'" ;
+   $ip = (string)@$_SERVER['REMOTE_ADDR'];
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."'"
+      .", Message='".addslashes($err)."', IP='".addslashes($ip)."'" ;
 
    $mysqlerror = @mysql_error();
 
@@ -113,11 +114,30 @@ function err_log( $handle, $err, $debugmsg=NULL)
 }
 
 
-function admin_log( $uid, $handle, $text)
+function admin_log( $uid, $handle, $err)
 {
-   $query = "INSERT INTO Adminlog SET uid='$uid', Handle='".addslashes($handle)."', Message='".addslashes($text)."'" ;
+   $uid = (int)$uid;
+   $ip = (string)@$_SERVER['REMOTE_ADDR'];
+   $query = "INSERT INTO Adminlog SET uid='$uid', Handle='".addslashes($handle)."'"
+      .", Message='".addslashes($err)."', IP='".addslashes($ip)."'" ;
 
-   return mysql_query( $query );
+   return @mysql_query( $query );
+}
+
+
+function mysql_single_fetch( $query, $type='assoc')
+{
+   $row = false;
+   $result = mysql_query( $query);
+   if( $result != false )
+   {
+      $type = 'mysql_fetch_'.$type;
+      if( (mysql_num_rows($result) != 1 )
+            or !($row=$type($result)) )
+         $row = false;
+      mysql_free_result($result);
+   }
+   return $row;
 }
 
 
