@@ -25,17 +25,34 @@ require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
 /* Translatable flag meaning - See also translate.php
-  Value   : Meaning             : admin_toggle : admin_mark_box    : translator_box
- ---------:---------------------:--------------:-------------------:----------------
+  Value   : Meaning             : admin_toggle : admin_mark_box    : translator_page
+ ---------:---------------------:--------------:-------------------:-------------------
   N       : not translatable    : change to Y  : -                 : -
   Y       : to be translated    : change to N  : -                 : change to Done
   Done    : already translated  : -            : change to Changed : -
   Changed : to be re-translated : -            : -                 : change to Done
 
-  Question and Answer are independently translated.
-  If Answer exist, admin_toggle appears only if both Q & A have not already
-    been translated (not Done nor Changed) and, if so, Answer.Translatable
-    is always equal to Question.Translatable.
+ ---------:---------------------:--------------:-------------------:-------------------
+  N       : not translatable    : change to Y  : -                 : -
+  Y       : to be translated    : change to N  : -                 : change to Started
+  Started : some are translated : -            : change to Changed : change to Done
+  Done    : all  are translated : -            : change to Changed : -
+  Changed : to be re-translated : -            : -                 : change to Started
+
+  When both Q & A (if any) are not translated (both Translatable == ('Y' or 'N'))
+   - admin_toggle is enabled
+   - Answer.Translatable is always equal to Question.Translatable
+  When one of them have already been translated (any Translatable(s) != ('Y' or 'N'))
+   - admin_toggle is disabled
+   - Q & A are independently translated and reversed to *be re-translated*
+
+  When an admin change a Translatable flag to 'Changed'
+   - all *language* Translateit flags are set to 'Changed'
+  When a translator change a *language* Translateit flag to 'Done'
+   - if all *language* Translateit flags are 'Done'
+       the Translatable flag is set to 'Done' 
+     else
+       the Translatable flag is set to 'Started'
 */
 
 {
@@ -147,15 +164,11 @@ require_once( "include/make_translationfiles.php" );
 
   else if( ($action=@$_GET["move"]) == 'uu' or $action == 'dd' )
   {
-     $result = mysql_query(
-        "SELECT Entry.SortOrder, Entry.Parent, Parent.SortOrder AS ParentOrder " .
-        " FROM FAQ AS Entry, FAQ AS Parent " .
-        "WHERE Entry.ID='$id' AND Parent.ID=Entry.Parent" );
-
-     if( @mysql_num_rows($result) != 1 )
+     $query = "SELECT Entry.SortOrder, Entry.Parent, Parent.SortOrder AS ParentOrder " .
+              " FROM FAQ AS Entry, FAQ AS Parent" .
+              " WHERE Entry.ID='$id' AND Parent.ID=Entry.Parent";
+     if( !($row=mysql_single_fetch( $query)) )
         error("admin_no_such_entry",'admin_e2');
-
-     $row = mysql_fetch_array( $result );
 
      $query = 'SELECT ID as NewParent FROM FAQ ' .
         'WHERE Level=1 ' .
@@ -164,19 +177,20 @@ require_once( "include/make_translationfiles.php" );
           'AND SortOrder < ' . $row['ParentOrder'] . ' ORDER BY SortOrder DESC' ) .
         ' LIMIT 1';
 
-     $result = mysql_query( $query );
-
-     if( @mysql_num_rows($result) == 1 )
+     if( $newparent_row=mysql_single_fetch( $query) )
      {
-        $newparent_row = mysql_fetch_array( $result );
         $newparent = $newparent_row["NewParent"];
 
-        $result = mysql_query( "SELECT MAX(SortOrder) as max FROM FAQ " .
-                               "WHERE Parent=$newparent" );
-
-        $max_row = mysql_fetch_array( $result );
-        $max = $max_row["max"];
-        if( !is_numeric($max) ) $max = 0;
+        if( $max_row=mysql_single_fetch( 
+               "SELECT MAX(SortOrder) as max FROM FAQ" .
+               " WHERE Parent=$newparent LIMIT 1"
+             ) )
+        {
+           $max = $max_row["max"];
+           if( !is_numeric($max) ) $max = 0;
+        }
+        else
+           $max = 0;
 
 
         mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1 " .
