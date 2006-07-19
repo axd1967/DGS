@@ -27,7 +27,8 @@ require_once( "include/rating.php" );
 
 function jump_to_next_game($uid, $Lastchanged, $gid)
 {
-   $result = mysql_query("SELECT ID FROM Games " .
+   $row = mysql_single_fetch(
+                         "SELECT ID FROM Games " .
                          "WHERE ToMove_ID=$uid "  .
                          "AND Status!='INVITED' AND Status!='FINISHED' " .
                          "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
@@ -36,10 +37,8 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
                          "ORDER BY Lastchanged,ID " .
                          "LIMIT 1");
 
-   if( @mysql_num_rows($result) != 1 )
+   if( !$row )
       jump_to("status.php");
-
-   $row = mysql_fetch_assoc($result);
 
    jump_to("game.php?gid=" . $row["ID"]);
 }
@@ -64,7 +63,8 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       error("not_logged_in");
 
 
-   $result = mysql_query( "SELECT Games.*, " .
+   $game_row = mysql_single_fetch(
+                          "SELECT Games.*, " .
                           "Games.Flags+0 AS GameFlags, " . //used by check_move
                           "black.ClockUsed AS Blackclock, " .
                           "white.ClockUsed AS Whiteclock, " .
@@ -72,13 +72,11 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
-                        )
-            or error('mysql_query_failed');
+                        );
 
-   if( @mysql_num_rows($result) != 1 )
+   if( !$game_row )
       error("unknown_game");
 
-   $game_row = mysql_fetch_assoc($result);
    extract($game_row);
 
    if( @$_REQUEST['skip'] )
@@ -475,13 +473,11 @@ This is why:
    {
       // send message to my opponent about the result
 
-      $result = mysql_query( "SELECT * FROM Players WHERE ID=" .
-                             ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) );
+      $opponent_row = mysql_single_fetch( "SELECT * FROM Players WHERE ID=" .
+                 ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) );
 
-      if( @mysql_num_rows($result) != 1 )
+      if( !$opponent_row )
          error("opponent_not_found");
-
-      $opponent_row = mysql_fetch_array($result);
 
       if( $player_row["ID"] == $Black_ID )
       {
