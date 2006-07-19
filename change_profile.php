@@ -144,7 +144,7 @@ require_once( "include/countries.php" );
 */
    $language = trim(get_request_arg('language'));
 
-   @list($lang,$charenc) = explode('.', $language);
+   @list($lang,$charenc) = explode( LANG_CHARSET_CHAR, $language, 2);
 
    if( $language === 'C' or ( $language !== $player_row['Lang'] and
                               array_key_exists($lang, $known_languages) and
@@ -174,7 +174,7 @@ require_once( "include/countries.php" );
    if( $nightstart != $player_row["Nightstart"] ||
        $timezone != $player_row["Timezone"] )
    {
-      putenv("TZ=" . $timezone );
+      setTZ( $timezone);
 
       $query .= "ClockChanged='Y', ";
 
