@@ -31,6 +31,20 @@ function quick_error($string) //Short one line message
    exit;
 }
 
+function setTZ( $tz='GMT')
+{
+   if( is_string( $tz) && !empty( $tz) )
+   {
+      if( !function_exists('date_default_timezone_set')
+            or !date_default_timezone_set( $tz) )
+      {
+         putenv( 'TZ='.$tz);
+         //putenv('PHP_TZ='.$tz); //Does not seems to realize something
+      }
+   }
+}
+
+setTZ('GMT'); //default
 
 $timeadjust = 0;
 if( @is_readable( "timeadjust.php" ) )
