@@ -75,11 +75,14 @@ $translation_groups =
     error("not_logged_in");
 
 
-  $translator_set = @$player_row['Translator'];
-  if( !$translator_set )
-    error("not_translator");
+  {
+     $translator_set = @$player_row['Translator'];
+     if( !$translator_set )
+       error("not_translator");
 
-  $translator_array = explode(',', $translator_set);
+     $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
+  }
+
 
   $group = @$_REQUEST['group'];
 
@@ -125,7 +128,7 @@ $translation_groups =
       {
          foreach( $array as $charenc => $lang_name )
          {
-            if( $twoletter . "." . $charenc == $translate_lang)
+            if( $twoletter . LANG_CHARSET_CHAR . $charenc == $translate_lang)
                $lang_string .= ",$lang_name";
          }
       }
@@ -134,7 +137,7 @@ $translation_groups =
       else
          $lang_string = $translate_lang;
 
-      list(,$translate_encoding) = explode('.', $translate_lang);
+      @list(,$translate_encoding) = explode( LANG_CHARSET_CHAR, $translate_lang, 2);
 
       if( !$profil_charset )
          $encoding_used = $translate_encoding; // before start_page()
@@ -175,8 +178,8 @@ $translation_groups =
                                     12 )));
 
          $translation = $row['Text'];
-           $translation = textarea_safe( $translation, $translate_encoding);
-         $form_row = array( 'TEXT', nl2br( textarea_safe($string, 'iso-8859-1' ) ),
+         $translation = textarea_safe( $translation, $translate_encoding);
+         $form_row = array( 'TEXT', nl2br( textarea_safe($string, LANG_DEF_CHARSET ) ),
                             'TD',
                             'TEXTAREA', "transl" . $row['Original_ID'],
                               $hsize, $vsize, $translation,
@@ -253,15 +256,15 @@ $translation_groups =
          'HEADER', 'Select language to translate to',
          ) );
 
-      $langs = get_language_descriptions_translated();
+      $lang_desc = get_language_descriptions_translated();
       $vals = array();
-      foreach( $langs as $lang => $lang_name )
-        {
-           list( $lc, $cs ) = explode( '.', $lang, 2 );
+      foreach( $lang_desc as $lang => $lang_name )
+      {
+           @list( $lc, $cs) = explode( LANG_CHARSET_CHAR, $lang, 2);
            if( in_array( $lang, $translator_array ) or
                in_array( $lc, $translator_array ) )
               $vals[$lang] = $lang_name;
-        }
+      }
 
       $langchoice_form->add_row( array(
          'CELL', 99, 'align="center"',

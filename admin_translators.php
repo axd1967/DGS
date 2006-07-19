@@ -25,6 +25,7 @@ $TranslateGroups[] = "Admin";
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
+
 {
   connect2mysql();
 
@@ -45,13 +46,18 @@ require_once( "include/form_functions.php" );
   /* Add language for translation */
 // International languages code (ISO 639):
 // http://www.loc.gov/standards/iso639-2/englangn.html
+
+      $twoletter = get_request_arg('twoletter');
+      $charenc = get_request_arg('charenc');
+      $langname = get_request_arg('langname');
+
   $translator_form->add_row( array( 'HEADER', T_('Add language for translation') ) );
   $translator_form->add_row( array( 'DESCRIPTION', T_('Two-letter language code'),
-                                    'TEXTINPUT', 'twoletter', 30, 10, '' ) );
+                                    'TEXTINPUT', 'twoletter', 30, 10, $twoletter ) );
   $translator_form->add_row( array( 'DESCRIPTION', T_('Language name (i.e. English)'),
-                                    'TEXTINPUT', 'langname', 30, 50, '' ) );
+                                    'TEXTINPUT', 'langname', 30, 50, $langname ) );
   $translator_form->add_row( array( 'DESCRIPTION', T_("Character encoding (i.e. 'iso-8859-1')"),
-                                    'TEXTINPUT', 'charenc', 30, 50, '' ) );
+                                    'TEXTINPUT', 'charenc', 30, 50, $charenc ) );
   $translator_form->add_row( array(
       'SUBMITBUTTON', 'addlanguage', T_('Add language'),
       ) );
@@ -74,29 +80,31 @@ require_once( "include/form_functions.php" );
    $transluser_langs= array();
    if( !empty($transluser) )
    {
-      $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='".addslashes($transluser)."'" );
+      $userrow = mysql_single_fetch(
+             "SELECT Translator FROM Players"
+            ." WHERE Handle='".addslashes($transluser)."'" );
 
-      if( mysql_affected_rows() != 1 )
-        error('unknown_user','admin_tr1');
-
-      $row = mysql_fetch_array( $result );
-      if( !empty($row['Translator']) )
-        $translator_array = explode(',', $row['Translator'] );
-
-      foreach( $translator_array as $value )
+      if( $userrow )
       {
-         $transluser_langs[$value] = $langs[$value];
+         if( !empty($userrow['Translator']) )
+           $translator_array = explode( LANG_TRANSL_CHAR, $userrow['Translator'] );
+
+         foreach( $translator_array as $value )
+         {
+            if( isset($langs[$value]) )
+               $transluser_langs[$value] = $langs[$value];
+         }
+         asort($transluser_langs);
+         $str= '';
+         foreach( $transluser_langs as $value => $lang_name )
+         {
+            $str.= $lang_name . ' (' . $value . ')<BR>';
+         }
+         $translator_form->add_row( array(
+            'DESCRIPTION', T_('Allowed to translate'),
+            'TEXT', $str,
+            ) );
       }
-      asort($transluser_langs);
-      $str= '';
-      foreach( $transluser_langs as $value => $lang_name )
-      {
-         $str.= $lang_name . ' (' . $value . ')<BR>';
-      }
-      $translator_form->add_row( array(
-         'DESCRIPTION', T_('Allowed to translate'),
-         'TEXT', $str,
-         ) );
    }
    //else
    {

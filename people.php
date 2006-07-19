@@ -106,10 +106,10 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   $translator_list = array();
   while( $row = mysql_fetch_array( $query_result ) )
   {
-     $languages = explode(',', $row['Translator']);
+     $languages = explode( LANG_TRANSL_CHAR, $row['Translator']);
      foreach( $languages as $language )
         {
-           list($lang, $charenc) = explode('.', $language, 2);
+           @list($lang, $charenc) = explode( LANG_CHARSET_CHAR, $language, 2);
 
            $lang_name = T_($known_languages[$lang][$charenc]);
 

@@ -37,7 +37,7 @@ require_once( "include/make_translationfiles.php" );
      $translator_set = @$player_row['Translator'];
      if( !$translator_set )
        error("not_translator");
-     $translator_array = explode(',', $translator_set);
+     $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
   }
 
   if( !in_array( $translate_lang, $translator_array ) )
