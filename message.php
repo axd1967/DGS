@@ -51,9 +51,11 @@ require_once( "include/form_functions.php" );
    $my_id = $player_row["ID"];
    $folders = get_folders($my_id);
 
-   $mid = @$_GET['mid'];
+   $mid = (int)@$_GET['mid'];
+   $gid = (int)@$_GET['gid'];
 
    $default_subject = '';
+   $default_message = '';
 
    $mode = @$_GET['mode'];
    if( !$mode )

@@ -38,7 +38,7 @@ require_once( "include/form_functions.php" );
     error("adminlevel_too_low");
 
 
-   $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 utf-8
+   $encoding_used= get_request_arg( 'charset', LANG_DEF_CHARSET); //iso-8859-1 UTF-8
 
    if( isset($_REQUEST['rowhdr']) )
       $rowhdr= $_REQUEST['rowhdr'];
@@ -87,7 +87,7 @@ require_once( "include/form_functions.php" );
    echo "\n//-->\n</SCRIPT>\n";
 
 
-   $dform = new Form('dform', 'data_report.php', FORM_POST, true );
+   $dform = new Form('dform', 'data_report.php#result', FORM_POST, true );
 
    foreach( $arg_array as $arg => $word)
    {
@@ -119,6 +119,7 @@ require_once( "include/form_functions.php" );
 
       echo 'Query&gt; ' . $query . ';<p>';
 
+      echo "<A name=\"result\"></A>\n";
       if( ($n=echo_query( $query, $rowhdr, $colsize, $colwrap)) < 0 ) break;
 
       $s= "SELECT '$n' as 'Rows'"
