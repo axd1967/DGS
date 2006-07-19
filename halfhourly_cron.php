@@ -109,6 +109,7 @@ if( !$is_down )
                or error('mysql_query_failed','halfhourly_cron1');
 
    $row = mysql_fetch_array( $result );
+   mysql_free_result($result);
 
    if( $row['timediff'] < $half_diff )
       if( !@$_REQUEST['forced'] ) exit;
@@ -183,6 +184,7 @@ if( !$is_down )
                }
             }
          }
+         mysql_free_result($res2);
       }
 
 
@@ -227,6 +229,7 @@ if( !$is_down )
                    wordwrap(mail_strip_html($Text),47) . "\n";
             }
          }
+         mysql_free_result($res3);
       }
 
       $msg .= str_pad('', 47, '-');
@@ -240,6 +243,7 @@ if( !$is_down )
        or !mail( trim($Email), 'Dragon Go Server notification', $msg, $headers ) )
          error('mail_failure',"Uid:$uid Addr:$Email Text:$msg");
    }
+   mysql_free_result($result);
 
 
    //Setting Notify to 'DONE' stop notifications until the player's visite
@@ -286,7 +290,9 @@ if( !$is_down )
                      "WHERE ID='" . $row2['gid'] . "' LIMIT 1")
                or error('mysql_query_failed','halfhourly_cron11');
       }
+      mysql_free_result($res2);
    }
+   mysql_free_result($result);
 
 
 

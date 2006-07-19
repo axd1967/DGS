@@ -46,6 +46,7 @@ if( !$is_down )
                or error('mysql_query_failed','clock_tick1');
 
    $row = mysql_fetch_array( $result );
+   mysql_free_result($result);
 
    if( $row['timediff'] < $tick_diff )
       if( !@$_REQUEST['forced'] ) exit;
@@ -187,6 +188,7 @@ if( !$is_down )
 
       }
    }
+   mysql_free_result($result);
 
 if( !@$chained ) exit;
 //the whole cron stuff in one cron job (else comments those 2 lines):
