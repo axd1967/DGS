@@ -42,14 +42,12 @@ require_once( "include/std_functions.php" );
       $uhandle = substr($uhandle,0,$i);
    }
 
-   $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+   $row = mysql_single_fetch( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
-   if( @mysql_num_rows($result) != 1 )
+   if( !$row )
       error("wrong_userid");
 
-
-   $row = mysql_fetch_array($result);
 
    $code = $row["Sessioncode"];
 
@@ -62,10 +60,10 @@ require_once( "include/std_functions.php" );
       if( !$code or $row["Expire"] < $NOW )
       {
          $code = make_session_code();
-         $result = mysql_query( "UPDATE Players SET " .
-                                "Sessioncode='$code', " .
-                                "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
-                                "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" )
+         mysql_query( "UPDATE Players SET " .
+                      "Sessioncode='$code', " .
+                      "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
+                      "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" )
                    or error("mysql_query_failed");
       }
 
