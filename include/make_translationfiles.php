@@ -44,7 +44,7 @@ function make_known_languages() //must be called from main dir
    $first = true;
    while( $row = mysql_fetch_array($result) )
    {
-      list($lang,$charenc) = explode('.', $row['Language']);
+      @list($lang,$charenc) = explode( LANG_CHARSET_CHAR, $row['Language'], 2);
 
       if( $lang === $prev_lang )
          fwrite( $fd, ",\n                 \"$charenc\" => \"" . $row["Name"] . '"');
