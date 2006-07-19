@@ -432,6 +432,13 @@ require_once( "include/sgf_parser.php" );
                   T_('Comments') . "</a></center>\n";
          }
       }
+   }
+
+   //if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
+         $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."skip=t";
+
+   if( !$enable_message )
+   {
       if( $action == 'choose_move' )
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
@@ -464,9 +471,6 @@ require_once( "include/sgf_parser.php" );
       {
          $menu_array[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
       }
-
-      if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
-         $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."skip=t";
 
       if( ($Status != 'FINISHED') and !$my_game and $logged_in )
       {
