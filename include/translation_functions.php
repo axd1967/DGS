@@ -31,6 +31,21 @@ if( file_exists( "translations/known_languages.php") )
    include_once( "translations/known_languages.php" );
 
 
+/* examples:
+* $known_languages = array(
+*    "en" => array( "iso-8859-1" => "English" ),
+*    "jp" => array( "utf-8" => "Japanese" ) );
+* $row['Translator'] = 'en.iso-8859-1,jp.utf-8';
+* get_language_descriptions_translated() : array(
+*    "en.iso-8859-1" => "English",
+*    "jp.utf-8" => "Japanese" );
+*/
+define('LANG_TRANSL_CHAR', ',');
+define('LANG_CHARSET_CHAR', '.');
+define('LANG_DEF_CHARSET', 'iso-8859-1');
+define('LANG_ENGLISH', 'en'.LANG_CHARSET_CHAR.LANG_DEF_CHARSET); //lowercase
+
+
 function T_($string)
 {
    global $Tr;
@@ -79,17 +94,17 @@ function include_translate_group($group, $player_row) //must be called from main
          $language = get_preferred_browser_language();
 
       if( empty($language) or $language=='en' )
-         $language = 'en.iso-8859-1';
+         $language = LANG_ENGLISH;
       //else call to get_preferred_browser_language() for each $group
 
       $language_used = $language;
-      @list(,$encoding_used) = explode('.', $language);
+      @list(,$encoding_used) = explode( LANG_CHARSET_CHAR, $language, 2);
    }
 
    //preload 'To#2' and 'From#2' if missing in the language
-   if( strtolower($language)!='en.iso-8859-1' )
+   if( strtolower($language) != LANG_ENGLISH )
    {
-      $filename = "translations/en.iso-8859-1_${group}.php";
+      $filename = "translations/".LANG_ENGLISH."_${group}.php";
 
       if( file_exists( $filename ) )
       {
@@ -142,14 +157,14 @@ function get_preferred_browser_language()
             {
                if( strpos( $accept_charset, strtolower($charenc) ) !== false )
                {
-                  $return_val = $lang . '.' . $charenc;
+                  $return_val = $lang . LANG_CHARSET_CHAR . $charenc;
                   break;
                }
             }
 
          // No supporting encoding found. Take the first one anyway.
          reset($known_languages[$lang]);
-         $return_val = $lang . '.' . key($known_languages[$lang]);
+         $return_val = $lang . LANG_CHARSET_CHAR . key($known_languages[$lang]);
       }
 
    return $return_val;
@@ -164,7 +179,7 @@ function get_language_descriptions_translated()
       {
          foreach( $array as $charenc => $lang_name )
             {
-               $result[ $twoletter . "." . $charenc ] = T_($lang_name);
+               $result[ $twoletter . LANG_CHARSET_CHAR . $charenc ] = T_($lang_name);
             }
       }
    return $result;
