@@ -33,7 +33,7 @@ require_once( "forum_functions.php" );
   if( !( $adm & ADMIN_FORUM ) )
      error("adminlevel_too_low");
 
-  $id = @$_GET["id"];
+  $id = @$_GET["id"]+0;
 
   $show_list = true;
 
@@ -45,7 +45,7 @@ require_once( "forum_functions.php" );
      echo "<center>\n";
 
 
-     $forum_edit_form = new Form( 'forumform', "admin.php?do_new=t".URI_AMP."id=0", FORM_POST );
+     $forum_edit_form = new Form( 'forumform', "admin.php?do_new=t".URI_AMP."id=$id", FORM_POST );
 
      $forum_edit_form->add_row( array( 'HEADER', T_('New Forum') ) );
      $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
@@ -65,7 +65,7 @@ require_once( "forum_functions.php" );
   else if( @$_GET["do_new"] == 't' )
   {
      $SortOrder = 0;
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
+     $result = mysql_query( "SELECT * FROM Forums WHERE ID=" . (@$_GET["id"]+0) );
 
      if( @mysql_num_rows($result) == 1 )
      {
@@ -76,7 +76,7 @@ require_once( "forum_functions.php" );
      $name = trim( @$_POST["name"] );
      $description = trim( @$_POST["description"] );
 
-     if( !empty($name) and !empty($description))
+     if( !empty($name) )
      {
         mysql_query("UPDATE Forums SET SortOrder=SortOrder+1 " .
                     'WHERE SortOrder>' . $SortOrder );
@@ -84,8 +84,13 @@ require_once( "forum_functions.php" );
         mysql_query("INSERT INTO Forums SET " .
                     "Name=\"$name\", " .
                     "Description=\"$description\", " .
-                    "Moderated=" . ($moderated ? '"Y"' : '"N"') . ", " .
+                    "Moderated=" . (@$_POST["moderated"] ? '"Y"' : '"N"') . ", " .
                     "SortOrder=" . ($SortOrder+1));
+     }
+     else
+     {
+        $msg = urlencode('Error: A Forum name must be given');
+        jump_to("forum/admin.php?sysmsg=$msg");
      }
 
      jump_to("forum/admin.php");
@@ -108,7 +113,7 @@ require_once( "forum_functions.php" );
 
      $forum_edit_form = new Form( 'forumform', "admin.php?do_edit=t".URI_AMP."id=$id", FORM_POST );
 
-     $forum_edit_form->add_row( array( 'HEADER', T_('New Forum') ) );
+     $forum_edit_form->add_row( array( 'HEADER', T_('Edit Forum') ) );
      $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
                                        'TEXTINPUT', 'name', 50, 80, $row['Name'] ) );
      $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
@@ -206,8 +211,7 @@ require_once( "forum_functions.php" );
         T_('Forum Admin') . "</font></h3>\n";
 
      $result =
-        mysql_query("SELECT Forums.ID,Description,Name, " .
-                    "UNIX_TIMESTAMP(MAX(Lastchanged)) AS Timestamp " .
+        mysql_query("SELECT Forums.ID,Description,Name " .
                     "FROM Forums LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
                     "GROUP BY Forums.ID " .
                     "ORDER BY SortOrder");

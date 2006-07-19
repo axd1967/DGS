@@ -36,15 +36,16 @@ require_once( "forum_functions.php" );
 
    start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
 
-   $result = mysql_query("SELECT Subject, Posts.Thread_ID, Lastchanged, " .
-                         "Posts.User_ID, Replies, Name, " .
+   $result = mysql_query("SELECT Posts.Subject, Posts.Thread_ID, " .
+                         "Posts.User_ID, Posts.PostsInThread, Name, " .
                          "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
-                         "UNIX_TIMESTAMP(Lastchanged) AS Lastchangedstamp " .
+                         "UNIX_TIMESTAMP(Posts.LastChanged) AS Lastchanged " .
                          "FROM Posts LEFT JOIN Players ON Players.ID=Posts.User_ID " .
+                         "LEFT JOIN Posts as LPost ON Posts.LastPost=LPost.ID " .
                          "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
                          " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
-                         "WHERE Forum_ID=$forum AND Depth=1 " .
-                         "ORDER BY Lastchanged desc LIMIT $offset,$MaxRowsPerPage")
+                         "WHERE Posts.Forum_ID=$forum AND Posts.Parent_ID=0 " .
+                         "ORDER BY Posts.LastChanged desc LIMIT $offset,$MaxRowsPerPage")
    or die(mysql_error());
 
    $show_rows = $nr_rows = mysql_num_rows($result);
@@ -54,7 +55,7 @@ require_once( "forum_functions.php" );
 
    $cols = 4;
    $headline = array(T_("Thread")=>"width=50%",T_("Author")=>"width=20%",
-                     T_("Replies")=>"width=10%  align=center",T_("Date")=>"width=20%");
+                     T_("Replies")=>"width=10%  align=center",T_("Last post")=>"width=20%");
    $links = LINK_FORUMS | LINK_NEW_TOPIC;
 
    if( $offset > 0 )
@@ -81,11 +82,11 @@ require_once( "forum_functions.php" );
 
       $color = ( $odd ? "" : " bgcolor=white" );
 
-//      if( $Replies >= 0 or $is_moderator )
+      if( $PostsInThread > 0 or $is_moderator )
       {
          $Subject = make_html_safe( $Subject, true);
          echo "<tr$color><td><a href=\"read.php?forum=$forum".URI_AMP."thread=$Thread_ID\">$Subject</a>$new</td><td>" . make_html_safe($Name)
-           . "</td><td align=center>" . $Replies . "</td><td nowrap>$Lastchanged</td></tr>\n";
+           . "</td><td align=center>" . ($PostsInThread-1) . "</td><td nowrap>" .date($date_fmt, $Lastchanged) . "</td></tr>\n";
          $odd = !$odd;
          $show_rows--;
       }

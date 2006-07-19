@@ -91,7 +91,6 @@ function revision_history($post_id)
    $result = mysql_query(
       "SELECT Posts.*, " .
       "Players.ID AS uid, Players.Name, Players.Handle, " .
-      "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
       "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
       "UNIX_TIMESTAMP(GREATEST(Posts.Time,Posts.Lastedited)) AS Timestamp " .
       "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
@@ -187,9 +186,9 @@ function change_depth(&$cur_depth, $new_depth)
       $links |= LINK_TOGGLE_MODERATOR;
 
       if( @$_GET['show'] > 0 )
-         approve_message( @$_GET['show'], $thread, true );
+         approve_message( @$_GET['show'], $thread, $forum, true );
       else if( @$_GET['hide'] > 0 )
-         approve_message( @$_GET['hide'], $thread, false );
+         approve_message( @$_GET['hide'], $thread, $forum, false );
 
       $is_moderator = set_moderator_cookie();
    }
@@ -210,7 +209,6 @@ function change_depth(&$cur_depth, $new_depth)
       extract( mysql_fetch_array( $result ) );
 
    $result = mysql_query("SELECT Posts.*, " .
-                         "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
                          "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
                          "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
                          "Players.ID AS uid, Players.Name, Players.Handle " .
@@ -239,8 +237,8 @@ function change_depth(&$cur_depth, $new_depth)
 
       change_depth( $cur_depth, $Depth );
 
-      if( !$Lastchangedthread )
-         $Lastchangedthread = $Lastchangedstamp;
+//      if( !$Lastchangedthread )
+//         $Lastchangedthread = $Lastchangedstamp;
 
 
 

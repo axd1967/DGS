@@ -231,7 +231,7 @@ function set_moderator_cookie()
    return $cookie === 'y';
 }
 
-function approve_message($id, $thread, $approve=true)
+function approve_message($id, $thread, $forums, $approve=true)
 {
    $result = mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "' " .
                          "WHERE ID=$id AND Thread_ID=$thread " .
@@ -240,54 +240,47 @@ function approve_message($id, $thread, $approve=true)
    if( mysql_affected_rows() == 1 )
    {
       mysql_query("UPDATE Posts SET PostsInThread=PostsInThread" . ($approve ? '+1' : '-1') .
-                  " WHERE ID=$thread AND PostsInThread > 0 LIMIT 1");
-      recalculate_lastchanged($id, ($approve ? 1 : -1));
+                  " WHERE ID=$thread LIMIT 1");
+
+      mysql_query("UPDATE Forums SET PostsInForums=PostsInForums" . ($approve ? '+1' : '-1') .
+                  " WHERE ID=$thread LIMIT 1");
+
+
+      recalculate_lastpost($thread, $forum);
    }
 }
 
 
-function recalculate_lastchanged($Post_ID, $replies_diff=0)
+
+
+function recalculate_lastpost($Thread_ID, $Forum_ID)
 {
-   $result = mysql_query("SELECT Depth,Parent_ID FROM Posts WHERE ID='$Post_ID'");
+   $result = mysql_query("SELECT ID, UNIX_TIMESTAMP(Time) AS Timestamp FROM Posts " .
+                         "WHERE Thread_ID='$Thread_ID' AND Approved='Y' " .
+                         "AND PosIndex IS NOT NULL " .
+                         "ORDER BY Time Desc LIMIT 1");
 
-   if( @mysql_num_rows($result) != 1 )
-      return;
-
-   extract(mysql_fetch_array($result));
-
-   $d = $Depth;
-   $id = $Post_ID;
-
-   while( $d > 0 )
+   if( @mysql_num_rows($result) == 1 )
    {
-      $result = mysql_query("SELECT Depth,Parent_ID FROM Posts WHERE ID='$id'");
-      if( @mysql_num_rows($result) != 1 )
-         error("internal_error", "recalculate_lastchanged: parent_missing $id $Post_ID" );
-
-      extract(mysql_fetch_array($result));
-
-      if( $Depth != $d )
-         error("internal_error", "recalculate_lastchanged: depth_error $id $Post_ID" );
-
-      $result = mysql_query("SELECT Lastchanged FROM Posts " .
-                            "WHERE Parent_ID='$id' AND Approved='Y' " .
-                            "ORDER BY Lastchanged DESC LIMIT 1");
-
-      if( @mysql_num_rows($result) != 1 )
-         mysql_query("UPDATE Posts SET Lastchanged=GREATEST(Time,Lastedited), " .
-                     "Replies=Replies+($replies_diff) " .
-                     "WHERE ID='$id' LIMIT 1");
-      else
-      {
-         extract(mysql_fetch_array($result));
-         mysql_query("UPDATE Posts " .
-                     "SET Lastchanged='$Lastchanged', Replies=Replies+($replies_diff) " .
-                     "WHERE ID='$id' LIMIT 1");
-      }
-
-      $d--;
-      $id = $Parent_ID;
+      $row = mysql_fetch_row($result);
+      mysql_query("UPDATE Posts SET LastPost=" . $row[0] . ", " .
+                  "LastChanged=FROM_UNIXTIME(" . $row[1] . ") " .
+                  "WHERE ID=$Thread_ID LIMIT 1");
    }
+
+
+   $result = mysql_query("SELECT LastPost.ID " .
+                         "FROM Posts as Thread " .
+                         "LEFT JOIN Posts as Last ON Thread.LastPost=Last.ID " .
+                         "WHERE Forum_ID=" . $Forum_ID . " AND Thread.Parent_ID IS NULL " .
+                         "ORDER BY LastPost.Time LIMIT 1");
+
+   if( @mysql_num_rows($result) == 1 )
+   {
+      $row = mysql_fetch_row($result);
+      mysql_query("UPDATE Forums SET LastPost=" . $row[0] . " WHERE ID=$Forum_ID LIMIT 1");
+   }
+
 }
 
 ?>

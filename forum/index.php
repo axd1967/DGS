@@ -24,7 +24,6 @@ Description of mysql table Posts:
 
 Parent_ID: The post this post replies to.
 Thread_ID: The post which started the thread.
-Replies: The number of replies to this post.
 AnswerNr: The number of siblings (i.e. posts to the parent post) when it was posted.
 Depth: The number of generations, the tread starter has depth 0.
 
@@ -34,9 +33,9 @@ PosIndex: A string used to sort the posts in the thread. The string is composed 
 
           If PosIndex is NULL, the post has been edited and is not active.
 
-PostsInThread: Total number of approved posts in the thread. Only used for the first post
-               of the thread.
-
+The following three pieces of data are only used for the first post of the thread.
+PostsInThread: Total number of approved posts in the thread.
+LastPost: Id of the last post in the thread.
 */
 
 
@@ -52,10 +51,9 @@ $logged_in = who_is_logged( $player_row);
 
 start_page("Forum list", true, $logged_in, $player_row );
 
-$result = mysql_query("SELECT Forums.ID,Description,Name,Moderated, " .
-                      "UNIX_TIMESTAMP(MAX(Lastchanged)) AS Timestamp,Count(*) AS Count " .
-                      "FROM Forums LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
-                      "GROUP BY Forums.ID " .
+$result = mysql_query("SELECT Forums.ID,Description,Name,Moderated, PostsInForum, " .
+                      "UNIX_TIMESTAMP(Posts.Time) AS Timestamp " .
+                      "FROM Forums LEFT JOIN Posts ON Forums.LastPost=Posts.ID " .
                       "ORDER BY SortOrder");
 
 $cols = 3;
@@ -77,11 +75,10 @@ while( $row = mysql_fetch_array( $result ) )
    }
 
    echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID . '">' . $Name .
-      '</a></b></td>' .
-      '<td nowrap>Posts: <b>' . $Count .  '&nbsp;&nbsp;&nbsp;</b></td>' .
+      '</a></b>'. ( $Moderated == 'Y' ? ' &nbsp; <font color="#ff4466">[' . T_('Moderated') . ']</font>' : '') .'</td>' .
+      '<td nowrap>Posts: <b>' . $PostsInForum .  '&nbsp;&nbsp;&nbsp;</b></td>' .
       '<td nowrap>Last Post: <b>' . $date . '</b></td></tr>
 <tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description .
-      ( $Moderated == 'Y' ? ' &nbsp; <font color="#22aacc">[' . T_('Moderated') . ']</font>' : '') .
       '</dl></td></tr>';
 }
 

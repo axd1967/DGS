@@ -120,7 +120,6 @@ function post_message($player_row, $moderated)
          "Forum_ID=$forum, " .
          "Thread_ID=$Thread_ID, " .
          "Time=FROM_UNIXTIME($NOW), " .
-         "Lastchanged=FROM_UNIXTIME($NOW), " .
          "Subject=\"$Subject\", " .
          "Text=\"$Text\", " .
          "User_ID=" . $player_row["ID"] . ", " .
@@ -140,7 +139,7 @@ function post_message($player_row, $moderated)
 
       if( !($parent > 0) )
       {
-         mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID" );
+         mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID LIMIT 1" );
 
          if( mysql_affected_rows() != 1)
             error("mysql_insert_post");
@@ -154,10 +153,17 @@ function post_message($player_row, $moderated)
       {
          // TODO: Notify moderators;
       }
+      else
+      {
+         mysql_query("UPDATE Posts " .
+                     "SET PostsInThread=PostsInThread+1, " .
+                     "LastPost=$New_ID, LastChanged=FROM_UNIXTIME($NOW) " .
+                     "WHERE ID=$Thread_ID LIMIT 1" );
 
-      mysql_query( "UPDATE Posts SET Lastchanged=FROM_UNIXTIME($NOW), Replies=Replies+1 " .
-                   "WHERE Forum_ID=$forum AND Thread_ID=$Thread_ID " .
-                   "AND LEFT(PosIndex,Depth)=LEFT(\"$PosIndex\",DEPTH)" );
+         mysql_query("UPDATE Forums " .
+                     "SET PostsInForum=PostsInForum+1, LastPost=$New_ID " .
+                     "WHERE ID=$forum LIMIT 1" );
+      }
    }
 }
 
