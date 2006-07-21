@@ -36,6 +36,8 @@ require_once( "forum_functions.php" );
 
    start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
 
+   echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
+
    $result = mysql_query("SELECT Posts.Subject, Posts.Thread_ID, " .
                          "Posts.User_ID, Posts.PostsInThread, Name, " .
                          "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
