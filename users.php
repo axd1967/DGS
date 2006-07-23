@@ -36,7 +36,8 @@ require_once( "include/countries.php" );
 
    $page = "users.php?";
    $where_clause = '';
-   if( @$_GET['showall'] ) 
+   $showall = (boolean)@$_GET['showall'];
+   if( $showall )
       $page .= "showall=1".URI_AMP;
    else
       $where_clause = "WHERE Activity>$ActiveLevel1 ";
@@ -67,7 +68,8 @@ require_once( "include/countries.php" );
        "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
        "FROM Players $where_clause ORDER BY $order $limit";
 
-   $result = mysql_query( $query );
+   $result = mysql_query( $query )
+               or error("mysql_query_failed"); //die(mysql_error());
 
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
 
@@ -162,7 +164,7 @@ require_once( "include/countries.php" );
 
    $orderstring = $utable->current_sort_string();
 
-   if( @$_GET['showall'] )
+   if( $showall )
    {
       $str = T_("Only active users");
       $vars = ( $orderstring ? '?'.$orderstring : '');
