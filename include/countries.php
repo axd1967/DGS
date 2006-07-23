@@ -2,11 +2,15 @@
 
 $TranslateGroups[] = "Countries";
 
-// ISO 3166 code => Name
+// Table of: ISO 3166 code => country name
+//     (plus some international languages (ISO 639 code))
+
+//some flags sites:
+// https://www.cia.gov/cia/publications/factbook/
+// http://setiathome.free.fr/images/flags/iso3166-1.html
 //plus some international languages (ISO 639 code):
-// http://www.loc.gov/standards/iso639-2/englangn.html
 // http://www.oasis-open.org/cover/iso639a.html
-// http://www.w3.org/WAI/ER/IG/ert/iso639.htm
+// http://www.loc.gov/standards/iso639-2/langcodes.html
 
 // The $T_ are required for 'scripts/generate_translation_texts.php'.
 $T_ = 'fnop';
@@ -134,6 +138,7 @@ $COUNTRIES = array(
    'md' => $T_('Moldova'),
    'mc' => $T_('Monaco'),
    'mn' => $T_('Mongolia'),
+   'mj' => $T_('Montenegro'),
    'ma' => $T_('Morocco'),
    'mz' => $T_('Mozambique'),
    'mm' => $T_('Myanmar'),
@@ -170,7 +175,8 @@ $COUNTRIES = array(
    'st' => $T_('Sao Tome and Principe'),
    'sa' => $T_('Saudi Arabia'),
    'sn' => $T_('Senegal'),
-   'yu' => $T_('Serbia and Montenegro (Yugoslavia)'),
+   'yu' => $T_('Serbia and Montenegro (Yugoslavia)'),//obsolet
+   'sr' => $T_('Serbia'),
    'sc' => $T_('Seychelles'),
    'sl' => $T_('Sierra Leone'),
    'sg' => $T_('Singapore'),
@@ -212,5 +218,6 @@ $COUNTRIES = array(
    'ye' => $T_('Yemen'),
    'zm' => $T_('Zambia'),
    'zw' => $T_('Zimbabwe'),
+   '__' => $T_('Earth'),
   );
 ?>
