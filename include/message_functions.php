@@ -41,7 +41,7 @@ function init_standard_folders()
 
 // Prints game setting form used by invite.php
 
-function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false)
+function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false, $iamrated=true)
 {
 
    // Default values: ('Invite' or waiting_room)
@@ -179,11 +179,15 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 
    $mform->add_row( array( 'SPACE' ) );
 
+   if( $iamrated )
+   {
+
    $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
                            'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
                            'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype ) );
+   }
 
    if( !$waiting_room )
    {
@@ -494,7 +498,7 @@ function get_folders($uid, $remove_all_received=true)
    global $STANDARD_FOLDERS;
 
    $result = mysql_query("SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr")
-      or die(mysql_error());
+               or error("mysql_query_failed"); //die(mysql_error());
 
    $flds = $STANDARD_FOLDERS;
 
@@ -688,7 +692,8 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
         ( $folderstring=="all" ? "" : "AND me.Folder_nr IN ($folderstring) " ) .
       "ORDER BY $order $limit";
 
-   $result = mysql_query( $query ) or error("mysql_query_failed"); //die(mysql_error());
+   $result = mysql_query( $query )
+               or error("mysql_query_failed"); //die(mysql_error());
    return $result;
 }
 

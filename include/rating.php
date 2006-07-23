@@ -20,8 +20,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
-$MAX_START_RATING = 2600; //6 dan
-$MIN_RATING = -900; //30 kyu
+define('MAX_START_RATING', 2600); //6 dan
+define('MIN_RATING', -900); //30 kyu
 
 function interpolate($value, $table, $extrapolate)
 {
@@ -250,7 +250,7 @@ function update_rating($gid)
 //
 function update_rating2($gid, $check_done=true)
 {
-   global $NOW, $MIN_RATING;
+   global $NOW;
 
    $WithinPercent = 1/4;
 
@@ -316,8 +316,8 @@ function update_rating2($gid, $check_done=true)
 
    $bTmp = $bOld;
    change_rating($wRating, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
-   if( $wRating < $MIN_RATING )
-      $wRating = $MIN_RATING;
+   if( $wRating < MIN_RATING )
+      $wRating = MIN_RATING;
 
    $wFactor *= $maxminFactor;
    $bTmp = $bOld;
@@ -329,8 +329,8 @@ function update_rating2($gid, $check_done=true)
 
    $wTmp = $wOld;
    change_rating($wTmp, $bRating, $game_result, $Size, $Komi, $Handicap, $bFactor);
-   if( $bRating < $MIN_RATING )
-      $bRating = $MIN_RATING;
+   if( $bRating < MIN_RATING )
+      $bRating = MIN_RATING;
 
    $bFactor *= $maxminFactor;
    $wTmp = $wOld;
@@ -642,15 +642,14 @@ function get_rating_at($uid, $date)
    $row = mysql_fetch_assoc( $result );
    mysql_free_result($result);
 
-   if( !isset($row['Rating']) )
+   if( isset($row['Rating']) )
+      return $row['Rating'];
       return -9999;
-   return $row['Rating'];
 }
 
 
 function convert_to_rating($string, $type)
 {
-   global $MAX_START_RATING, $MIN_RATING;
 
    if( empty($string) )
       return null;
@@ -798,13 +797,13 @@ function convert_to_rating($string, $type)
       }
    }
 
-   if( $rating > $MAX_START_RATING and $rating-50 <= $MAX_START_RATING )
-      $rating = $MAX_START_RATING;
+   if( $rating > MAX_START_RATING and $rating-50 <= MAX_START_RATING )
+      $rating = MAX_START_RATING;
 
-   if( $rating < $MIN_RATING and $rating+50 >= $MIN_RATING )
-      $rating = $MIN_RATING;
+   if( $rating < MIN_RATING and $rating+50 >= MIN_RATING )
+      $rating = MIN_RATING;
 
-   if( $rating > $MAX_START_RATING or $rating < $MIN_RATING )
+   if( $rating > MAX_START_RATING or $rating < MIN_RATING )
       error("rating_out_of_range");
 
    return $rating;
