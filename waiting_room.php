@@ -33,7 +33,6 @@ require_once( "include/message_functions.php" );
 
    if( !$logged_in )
       error("not_logged_in");
-   //not used: init_standard_folders();
 
    //short descriptions for table
    $handi_array = array( 'conv' => T_('Conventional'),
@@ -43,34 +42,95 @@ require_once( "include/message_functions.php" );
 
    $my_id = $player_row["ID"];
    $my_rating = $player_row["Rating2"];
+   $iamrated = ( is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
-   $page = "waiting_room.php" . ( @$_GET['info'] > 0 ? '?info=' . $_GET['info'] . URI_AMP : '?' );
+
+   $showall = (boolean)@$_GET['showall'];
+   $idinfo = (int)@$_GET['info'];
+   if( $idinfo < 0)
+      $idinfo = 0;
+
+   $page = "waiting_room.php?";
+   if( $showall )
+      $page.= 'showall=1' . URI_AMP;
+   if( $idinfo )
+      $page.= 'info='.$idinfo . URI_AMP;
 
    start_page(T_("Waiting room"), true, $logged_in, $player_row, button_style($player_row['Button']) );
 
    echo "<center>";
 
    if(!@$_GET['sort1'])
+   {
       $_GET['sort1'] = 'ID';
+      $_GET['desc1'] = 0;
+   }
 
-   if(!@$_GET['sort2'] && $_GET['sort1'] != 'ID')
-      $_GET['sort2'] = 'ID';
+   if(!@$_GET['sort2'])
+   {
+      $_GET['sort2'] = ($_GET['sort1'] != 'ID' ? 'ID' : 'Name');
+      $_GET['desc2'] = 0;
+   }
+
 
    $wrtable = new Table( $page, "WaitingroomColumns" );
    $wrtable->add_or_del_column();
 
    $order = $wrtable->current_order_string();
-   $orderstring = $wrtable->current_sort_string();
+   $limit = $wrtable->current_limit_string();
 
-   $result = mysql_query("SELECT Waitingroom.*,Name,Handle," .
-                         "Rating2 AS Rating,RatingStatus,Players.ID AS pid " .
-                         "FROM Waitingroom,Players " .
-                         "WHERE Players.ID=Waitingroom.uid ORDER BY $order");
+   $sortstring = $wrtable->current_sort_string();
+
+   $baseURL = "waiting_room.php?".$sortstring;
+   if( $showall )
+      $baseURL.= URI_AMP.'showall=1';
+
 
    echo "<h3><font color=$h3_color><B>". T_("Players waiting") . ":</B></font></h3><p>\n";
 
+
+   $query = "SELECT Waitingroom.*,Name,Handle"
+          . ",Rating2 AS Rating,RatingStatus,Players.ID AS pid"
+          ;
+
+// $calculated = ( $Handicaptype == 'conv' or $Handicaptype == 'proper' );
+// $haverating = ( !$calculated or is_numeric($my_rating) );
+// if( $MustBeRated != 'Y' )         $goodrating = true;
+// else if( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$Ratingmin && $my_rating<=$Ratingmax );
+// else                              $goodrating = false;
+
+   $calculated = "(Handicaptype='conv' OR Handicaptype='proper')";
+   if( $iamrated )
+   {
+      $haverating = "1";
+      $goodrating = "IF(MustBeRated='Y' AND"
+                  . " ($my_rating<Waitingroom.Ratingmin OR $my_rating>Waitingroom.Ratingmax)"
+                  . ",0,1)";
+   }
+   else
+   {
+      $haverating = "NOT $calculated";
+      $goodrating = "IF(MustBeRated='Y',0,1)";
+   }
+
+   $query.= ",$calculated AS calculated"
+          . ",$haverating AS haverating"
+          . ",$goodrating AS goodrating"
+          . " FROM Waitingroom,Players"
+          . " WHERE Players.ID=Waitingroom.uid"
+          . ( $showall ? '' : " HAVING haverating AND goodrating" )
+          . " ORDER BY $order $limit"
+          ;
+
+   $result = mysql_query( $query )
+               or error("mysql_query_failed"); //die(mysql_error());
+
+   $show_rows = $wrtable->compute_show_rows(mysql_num_rows($result));
+
+   $info_row = NULL;
    if( @mysql_num_rows($result) > 0 )
    {
+
       $wrtable->add_tablehead(0, T_('Info'), NULL, false, true, $button_width);
       $wrtable->add_tablehead(1, T_('Name'), 'Name', false);
       $wrtable->add_tablehead(2, T_('Userid'), 'Handle', false);
@@ -87,25 +147,20 @@ require_once( "include/message_functions.php" );
       if( ENA_STDHANDICAP )
          $wrtable->add_tablehead(13, T_('Standard placement'), 'StdHandicap', true);
 
-      while( $row = mysql_fetch_array( $result ) )
+      while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
          $Rating = NULL;
-         extract($row);
+         extract($row); //including $calculated, $haverating and $goodrating
 
-         if( @$_GET['info'] === $ID )
+         if( $idinfo == (int)$ID )
             $info_row = $row;
-
-         $calculated = ( $Handicaptype == 'conv' or $Handicaptype == 'proper' );
-         $needrating = ( $calculated && !is_numeric($my_rating) );
-         //$Komi+= 0;
 
          $Comment = make_html_safe($Comment, 'cell');
          if( empty($Comment) ) $Comment = '&nbsp;';
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[0] )
-            $wrow_strings[0] = str_TD_class_button(
-                   "waiting_room.php?info=$ID".URI_AMP."$orderstring#info", T_('Info'));
+            $wrow_strings[0] = str_TD_class_button( $baseURL.URI_AMP."info=$ID#info", T_('Info'));
          if( $wrtable->Is_Column_Displayed[1] )
             $wrow_strings[1] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
                make_html_safe($Name) . "</font></a></td>";
@@ -119,7 +174,7 @@ require_once( "include/message_functions.php" );
          if( $wrtable->Is_Column_Displayed[5] )
          {
             $wrow_strings[5] = '<td nowrap' .
-               ( $needrating ? $wrtable->warning_cell_attb(  T_('No initial rating') ) : '' )
+               ( $haverating ? '' : $wrtable->warning_cell_attb(  T_('No initial rating') ) )
                . '>' . $handi_array[$Handicaptype] . "</td>";
          }
          if( $wrtable->Is_Column_Displayed[6] )
@@ -128,9 +183,9 @@ require_once( "include/message_functions.php" );
             $wrow_strings[7] = "<td>$Size</td>";
          if( $wrtable->Is_Column_Displayed[8] )
          {
-            list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
+            $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax);
             $wrow_strings[8] = '<td nowrap' .
-               ( $good_rating ? '' : $wrtable->warning_cell_attb(  T_('Out of range') ) )
+               ( $goodrating ? '' : $wrtable->warning_cell_attb(  T_('Out of range') ) )
                . '>' . $Ratinglimit . "</td>";
          }
          if( $wrtable->Is_Column_Displayed[9] )
@@ -155,27 +210,41 @@ require_once( "include/message_functions.php" );
    else
       echo '<p>&nbsp;<p>' . T_('Seems to be empty at the moment.');
 
-   if( @$_GET['info'] > 0 and is_array($info_row) )
+   if( $idinfo and is_array($info_row) )
    {
       show_game_info($info_row, $info_row['pid'] == $player_row['ID'], $my_rating);
    }
    else
-      add_new_game_form();
+      add_new_game_form( $iamrated);
 
    echo "</center>";
 
-   if( @$_GET['info'] > 0 and is_array($info_row) )
-      $menu_array[T_('Add new game')] = "waiting_room.php" .
-         ($orderstring ? "?$orderstring" : '' ) . "#add" ;
+
+   if( $idinfo and is_array($info_row) )
+      $menu_array[T_('Add new game')] = $baseURL . "#add" ;
+
+
+   $baseURL = "waiting_room.php?".$sortstring;
+   if( $showall )
+   {
+      $str = T_("Only adequate games");
+   }
+   else
+   {
+      $baseURL.= URI_AMP.'showall=1';
+      $str = T_("Show all games");
+   }
+   $menu_array[ $str] = $baseURL ;
+
 
    end_page(@$menu_array);
 }
 
 
-function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating=false)
+function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax)
 {
    if( $MustBeRated != 'Y' )
-      return array('-', true);
+      return '-';
 
    // +/-50 reverse the inflation from add_to_waitingroom.php
    $r1 = echo_rating($Ratingmin+50,false);
@@ -184,14 +253,11 @@ function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating=fals
       $Ratinglimit = sprintf( T_('%s only'), $r1);
    else
       $Ratinglimit = $r1 . ' - ' . $r2;
-   if( is_numeric($my_rating) )
-      $good = ( $my_rating>=$Ratingmin && $my_rating<=$Ratingmax );
-   else
-      $good = false;
-   return array($Ratinglimit, $good);
+   return $Ratinglimit;
 }
 
-function add_new_game_form()
+
+function add_new_game_form( $iamrated)
 {
    echo '<a name="add"></a>' . "\n";
    $addgame_form = new Form( 'addgame', 'add_to_waitingroom.php', FORM_POST );
@@ -205,7 +271,7 @@ function add_new_game_form()
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
                                   'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
 
-   game_settings_form($addgame_form,NULL,NULL,true);
+   game_settings_form($addgame_form,NULL,NULL,true, $iamrated);
 
    $rating_array = array();
 
@@ -264,9 +330,6 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
                          'double' => T_('Double game') );
 
    extract($game_row);
-   $calculated = ( $Handicaptype == 'conv' or $Handicaptype == 'proper' );
-   $needrating = ( $calculated && !is_numeric($my_rating) );
-   //$Komi+= 0;
 
    echo '<p><a name="info"></a>' . "\n";
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
@@ -278,12 +341,12 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
    echo show_game_row( T_('Rating'), echo_rating($Rating,true,$pid));
    echo show_game_row( T_('Size'), $Size);
    echo show_game_row( T_('Handicap'), $handi_array[$Handicaptype]
-         , $needrating, T_('No initial rating'));
+         , !$haverating, T_('No initial rating'));
    echo show_game_row( T_('Komi'), $calculated ? '-' : $Komi);
 
-   list( $Ratinglimit, $good_rating)= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $my_rating);
+   $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax);
    echo show_game_row( T_('Rating range'), $Ratinglimit
-         , !$good_rating, T_('Out of range'));
+         , !$goodrating, T_('Out of range'));
    echo show_game_row( T_('Time limit'), echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods));
    echo show_game_row( T_('Number of games'), $nrGames);
    echo show_game_row( T_('Rated game'), $Rated == 'Y' ? T_('Yes') : T_('No'));
@@ -295,7 +358,7 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
    //if( empty($Comment) ) $Comment = '&nbsp;';
    echo show_game_row( T_('Comment'), $Comment);
 
-   if( !$mygame && $good_rating && !$needrating)
+   if( !$mygame && $haverating && $goodrating)
    {
    /* Not useful here, because RatingStatus couldn't be empty to accept the match:
       $infoRated = (( $Rated === 'Y' and
@@ -343,7 +406,7 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
                                     'HIDDEN', 'delete', 't') );
       $delete_form->echo_string(1);
    }
-   else if( $good_rating && !$needrating )
+   else if( $haverating && $goodrating )
    {
       $join_form = new Form( 'join', 'join_waitingroom_game.php', FORM_POST );
       $join_form->add_row( array( 'DESCRIPTION', T_('Reply'),
