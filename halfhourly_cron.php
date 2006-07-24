@@ -279,7 +279,7 @@ if( !$is_down )
       $res2 = mysql_query("SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
                           "FROM Games, Clock " .
                           "WHERE Clock.ID=$ClockUsed AND ToMove_ID='$uid' " .
-                          "AND ClockUsed=-1 " .
+                          "AND ClockUsed=".VACATION_CLOCK." " .
                           "AND Status!='INVITED' AND Status!='FINISHED'")
                or error('mysql_query_failed','halfhourly_cron10');
 

@@ -23,6 +23,9 @@ $TranslateGroups[] = "Common";
 $date_fmt = 'Y-m-d H:i';
 $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
+define('VACATION_CLOCK', -1);
+define('WEEKEND_CLOCK_OFFSET', 100);
+
 function getmicrotime()
 {
    list($usec, $sec) = explode(" ",microtime());
@@ -51,14 +54,14 @@ function get_clock_used($nightstart)
 
 function get_clock_ticks($clock_used)
 {
-   if( $clock_used == -1 or $clock_used == 99 ) return 0; // On vacation
+   if( $clock_used == VACATION_CLOCK or $clock_used == VACATION_CLOCK+WEEKEND_CLOCK_OFFSET )
+      return 0; // On vacation
 
-   $result = mysql_query( "SELECT Ticks FROM Clock WHERE ID=$clock_used" );
-   if( @mysql_num_rows( $result ) != 1 )
-      error("mysql_clock_ticks", $clock_used);
-
-   $row = mysql_fetch_row($result);
-   return $row[0];
+   if( $row=mysql_single_fetch(
+            "SELECT Ticks FROM Clock WHERE ID=$clock_used"
+     ) )
+      return (int)$row[0];
+   error("mysql_clock_ticks", $clock_used);
 }
 
 
@@ -79,45 +82,62 @@ function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
 
    $elapsed -= $main;
 
+   switch($byotype)
+   {
+      case("FIS"):
+      {
+         $main = $byotime = $byoper = 0;  // time is up;
+      }
+      break;
+     
+      case("JAP"):
+      {
    if( $main > 0 or $byoper < 0 ) // entering byoyomi
    {
+            $main = 0;
       $byotime = $startbyotime;
-      if( $byotype == 'JAP' ) // japanese byoyomi
          $byoper = $startbyoper-1;
-      else
-         $byoper = $startbyoper;
    }
 
-   if( $byotype == 'JAP' ) // japanese byoyomi
-   {
+         //because $elapsed>=0 and ($startbyotime - $byotime)>=0, this is equal to:
+         //$byoper -= floor(($elapsed - $byotime)/$startbyotime) +1;
+         //$byoper += ceil(($byotime - $elapsed)/$startbyotime) -1;
       $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
-      if( !$has_moved )
-         $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
 
       if( $byoper < 0 )
          $byotime = $byoper = 0;  // time is up;
+         else if( $has_moved )
+            $byotime = $startbyotime;
+         else 
+            $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
    }
-   else if( $byotype == 'CAN' ) // canadian byoyomi
+      break;
+
+      case("CAN"):
    {
-      if( $has_moved )
-         $byoper--; // byo stones;
+         if( $main > 0 or $byoper < 0 ) // entering byoyomi
+         {
+            $main = 0;
+            $byotime = $startbyotime;
+            $byoper = $startbyoper;
+         }
 
       $byotime -= $elapsed;
 
       if( $byotime <= 0 )
          $byotime = $byoper = 0;  // time is up;
-      else if( $byoper <= 0 ) // get new stones;
+         else if( $has_moved )
+         {
+            $byoper--; // byo stones;
+            if( $byoper <= 0 ) // get new stones;
       {
          $byotime = $startbyotime;
          $byoper = $startbyoper;
       }
    }
-   else if( $byotype == 'FIS' ) // Fischer time
-   {
-      $byotime = $byoper = 0;  // time is up;
    }
-
-   $main = 0;
+      break;
+   }
 }
 
 function echo_day($days)

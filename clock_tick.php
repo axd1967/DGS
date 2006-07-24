@@ -61,13 +61,15 @@ if( !$is_down )
 
    // Now increase clocks that are not sleeping
 
+   $mid = 0;
    $query = "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) " .
-       "WHERE (ID>=0 AND (ID>$hour OR ID<". ($hour-8) . ') AND ID< '. ($hour+16) . ')';
+             "WHERE (ID>=$mid AND (ID>$hour OR ID<". ($hour-8) . ') AND ID<'. ($hour+16) . ')';
        //WHERE ID>=0 AND ID<39 AND ((ID-$hour+23)%24)<15 //ID from 24 to 38 does not exist
 
+   $mid+= WEEKEND_CLOCK_OFFSET;
+   $hour+= WEEKEND_CLOCK_OFFSET;
    if( $day_of_week > 0 and $day_of_week < 6 )
-      $query .= ' OR (ID>=100 AND (ID>' . ($hour+100) . ' OR ID<'. ($hour+92) .
-         ') AND ID< '. ($hour+116) . ')';
+      $query.= " OR (ID>=$mid AND (ID>$hour OR ID<". ($hour-8) . ') AND ID<'. ($hour+16) . ')';
        //WHERE ID>=100 AND ID<139 AND ((ID-100-$hour+23)%24)<15 //ID from 124 to 138 does not exist
 
 

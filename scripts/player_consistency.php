@@ -88,12 +88,12 @@ require_once( "include/std_functions.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Running: $Running  Should be: $Run";
+      echo "\n<br>ID: $ID  Running: $Running  Should be: $Run";
 
       dbg_query("UPDATE Players SET Running=$Run WHERE ID=$ID LIMIT 1");
    }
 
-   echo "<br>Running Done.";
+   echo "\n<br>Running Done.";
 
 
    $query = "SELECT Players.ID, count(Games.ID) AS Fin, Finished FROM Players " .
@@ -106,12 +106,12 @@ require_once( "include/std_functions.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Finished: $Finished  Should be: $Fin";
+      echo "\n<br>ID: $ID  Finished: $Finished  Should be: $Fin";
 
       dbg_query("UPDATE Players SET Finished=$Fin WHERE ID=$ID LIMIT 1");
    }
 
-   echo "<br>Finished Done.";
+   echo "\n<br>Finished Done.";
 
 
    $query = "SELECT Players.ID, count(Games.ID) AS Rat, RatedGames FROM Players " .
@@ -124,12 +124,12 @@ require_once( "include/std_functions.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Rated: $RatedGames  Should be: $Rat";
+      echo "\n<br>ID: $ID  Rated: $RatedGames  Should be: $Rat";
 
       dbg_query("UPDATE Players SET RatedGames=$Rat WHERE ID=$ID LIMIT 1");
    }
 
-   echo "<br>Rated Done.";
+   echo "\n<br>Rated Done.";
 
 
    $query = "SELECT Players.ID, count(Games.ID) AS Win, Won FROM Players " .
@@ -143,12 +143,12 @@ require_once( "include/std_functions.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Won: $Won  Should be: $Win";
+      echo "\n<br>ID: $ID  Won: $Won  Should be: $Win";
 
       dbg_query("UPDATE Players SET Won=$Win WHERE ID=$ID LIMIT 1");
    }
 
-   echo "<br>Won Done.";
+   echo "\n<br>Won Done.";
 
 
    $query = "SELECT Players.ID, count(Games.ID) AS Los, Lost FROM Players " .
@@ -162,12 +162,12 @@ require_once( "include/std_functions.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Lost: $Lost  Should be: $Los";
+      echo "\n<br>ID: $ID  Lost: $Lost  Should be: $Los";
 
       dbg_query("UPDATE Players SET Lost=$Los WHERE ID=$ID LIMIT 1");
    }
 
-   echo "<br>Lost Done.";
+   echo "\n<br>Lost Done.";
 
 
    //RatedGames = Won + Lost + Jigo consistency
@@ -183,13 +183,13 @@ require_once( "include/std_functions.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Counts: (Rat=$RatedGames) != (Won=$Won) + (Los=$Lost) + (Jig=$Jigo)";
+      echo "\n<br>ID: $ID  Counts: (Rat=$RatedGames) != (Won=$Won) + (Los=$Lost) + (Jig=$Jigo)";
       $err++;
    }
    if( $err )
-      echo "<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
+      echo "\n<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
 
-   echo "<br>Counts Done.";
+   echo "\n<br>Counts Done.";
 
 
    //RatedGames && Ratinglog consistency
@@ -203,13 +203,13 @@ require_once( "include/std_functions.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Ratinglog: $Log  Should be: $RatedGames";
+      echo "\n<br>ID: $ID  Ratinglog: $Log  Should be: $RatedGames";
       $err++;
    }
    if( $err )
-      echo "<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
+      echo "\n<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
 
-   echo "<br>RatinLog Done.";
+   echo "\n<br>RatinLog Done.";
 
 
    //Various checks
@@ -218,8 +218,12 @@ require_once( "include/std_functions.php" );
             "FROM Players " .
             "WHERE (" .
               "(RatingStatus='RATED' AND (Rating2>=RatingMax OR Rating2<=RatingMin) ) " .
-              "OR NOT((ClockUsed>=0 AND ClockUsed<24) OR (ClockUsed>=100 AND ClockUsed<124))" .
+              "OR NOT((ClockUsed>=0 AND ClockUsed<24) " .
+                     "OR (ClockUsed>=".WEEKEND_CLOCK_OFFSET.
+                        " AND ClockUsed<".(24+WEEKEND_CLOCK_OFFSET)."))" .
+              // no VACATION_CLOCK in Players table
             ")$where$limit";
+   //echo "\n<br>MiscQry=".$query;
    $result = mysql_query( $query)
       or die("Mis.A: " . mysql_error());
 
@@ -227,13 +231,13 @@ require_once( "include/std_functions.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
-      echo "<br>ID: $ID  Misc: ClockUsed=$ClockUsed, $RatingMin &lt; $Rating2 &lt; $RatingMax.";
+      echo "\n<br>ID: $ID  Misc: ClockUsed=$ClockUsed, $RatingMin &lt; $Rating2 &lt; $RatingMax.";
       $err++;
    }
    if( $err )
-      echo "<br>--- $err error(s). Must be fixed by hand.";
+      echo "\n<br>--- $err error(s). Must be fixed by hand.";
 
-   echo "<br>Misc Done.";
+   echo "\n<br>Misc Done.";
 
 
    end_html();

@@ -281,15 +281,15 @@ disable_cache();
       $game_row = mysql_fetch_assoc($result);
       if( $opponent_ID == $game_row["Black_ID"] && $my_id == $game_row["White_ID"])
       {
-         $clock_used_black = ( $opponent_row['OnVacation'] > 0 ? -1 : $opponent_row["ClockUsed"]);
-         $clock_used_white = ( $player_row['OnVacation'] > 0 ? -1 : $player_row["ClockUsed"]);
+         $clock_used_black = ( $opponent_row['OnVacation'] > 0 ? VACATION_CLOCK : $opponent_row["ClockUsed"]);
+         $clock_used_white = ( $player_row['OnVacation'] > 0 ? VACATION_CLOCK : $player_row["ClockUsed"]);
          $rating_black = $opponent_row["Rating2"];
          $rating_white = $player_row["Rating2"];
       }
       else if( $my_id == $game_row["Black_ID"] && $opponent_ID == $game_row["White_ID"])
       {
-         $clock_used_white = ( $opponent_row['OnVacation'] > 0 ? -1 : $opponent_row["ClockUsed"]);
-         $clock_used_black = ( $player_row['OnVacation'] > 0 ? -1 : $player_row["ClockUsed"]);
+         $clock_used_white = ( $opponent_row['OnVacation'] > 0 ? VACATION_CLOCK : $opponent_row["ClockUsed"]);
+         $clock_used_black = ( $player_row['OnVacation'] > 0 ? VACATION_CLOCK : $player_row["ClockUsed"]);
          $rating_white = $opponent_row["Rating2"];
          $rating_black = $player_row["Rating2"];
       }
@@ -302,8 +302,8 @@ disable_cache();
 
       if( $game_row['WeekendClock'] != 'Y' )
       {
-         $clock_used_white += 100;
-         $clock_used_black += 100;
+         $clock_used_white += WEEKEND_CLOCK_OFFSET;
+         $clock_used_black += WEEKEND_CLOCK_OFFSET;
       }
 
       $ticks_black = get_clock_ticks($clock_used_black);

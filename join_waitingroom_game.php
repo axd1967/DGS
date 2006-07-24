@@ -78,8 +78,8 @@ require_once( "include/rating.php" );
 
 // set me to black and swap later if necessary
 
-   $clock_used_white = ( $OnVacation > 0 ? -1 : $ClockUsed );
-   $clock_used_black = ( $player_row['OnVacation'] > 0 ? -1 : $player_row["ClockUsed"] );
+   $clock_used_white = ( $OnVacation > 0 ? VACATION_CLOCK : $ClockUsed );
+   $clock_used_black = ( $player_row['OnVacation'] > 0 ? VACATION_CLOCK : $player_row["ClockUsed"] );
 
    $opponent_rating = $Rating;
    $my_rating = $player_row["Rating2"];
@@ -90,8 +90,8 @@ require_once( "include/rating.php" );
 
    if( $WeekendClock != 'Y' )
    {
-      $clock_used_white += 100;
-      $clock_used_black += 100;
+      $clock_used_white += WEEKEND_CLOCK_OFFSET;
+      $clock_used_black += WEEKEND_CLOCK_OFFSET;
    }
 
    $ticks_black = get_clock_ticks($clock_used_black);

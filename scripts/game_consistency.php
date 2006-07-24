@@ -233,8 +233,9 @@ function check_consistency( $gid)
          return false;
       }
 
-      if(  !($ClockUsed>=-1 && $ClockUsed<24)
-        && !($ClockUsed>=99 && $ClockUsed<124) )
+      if(  !($ClockUsed>=0 && $ClockUsed<24)
+        && !($ClockUsed>=0+WEEKEND_CLOCK_OFFSET && $ClockUsed<24+WEEKEND_CLOCK_OFFSET)
+        && !($ClockUsed==VACATION_CLOCK or $ClockUsed==VACATION_CLOCK+WEEKEND_CLOCK_OFFSET) )
       {
          echo "Wrong ClockUsed! Can't be $ClockUsed.<br>\n";
          return false;

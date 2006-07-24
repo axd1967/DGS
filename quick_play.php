@@ -186,14 +186,14 @@ else
       if( $next_to_move == BLACK and $Blackonvacation > 0 or
           $next_to_move == WHITE and $Whiteonvacation > 0 )
       {
-         $next_clockused = -1;
+         $next_clockused = VACATION_CLOCK;
          $next_ticks = 0;
       }
       else
       {
          $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
          if( $WeekendClock != 'Y' )
-            $next_clockused += 100;
+            $next_clockused += WEEKEND_CLOCK_OFFSET;
          $next_ticks = get_clock_ticks($next_clockused);
       }
 
