@@ -84,13 +84,13 @@ function include_translate_group($group, $player_row) //must be called from main
    else
    {
       if( !empty($_GET['language']) )
-         $language = $_GET['language'];
+         $language = (string)$_GET['language'];
       else if( !empty($player_row['Lang']) )
-         $language = $player_row['Lang'];
+         $language = (string)$player_row['Lang'];
       else
          $language = 'C';
 
-      if( $language === 'C' )
+      if( $language == 'C' )
          $language = get_preferred_browser_language();
 
       if( empty($language) or $language=='en' )

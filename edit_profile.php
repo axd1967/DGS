@@ -26,6 +26,10 @@ require_once( "include/rating.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/countries.php" );
 
+// Reminder: to friendly reset the language:
+// http://www.dragongoserver.net/edit_profile.php?language=C
+// http://www.dragongoserver.net/edit_profile.php?language=en
+
 {
    connect2mysql();
 
