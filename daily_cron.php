@@ -44,7 +44,7 @@ if( !$is_down )
                           "FROM Clock WHERE ID=203 LIMIT 1")
                or error('mysql_query_failed','daily_cron1');
 
-   $row = mysql_fetch_array( $result );
+   $row = mysql_fetch_assoc( $result );
    mysql_free_result($result);
 
    if( $row['timediff'] < $daily_diff )
@@ -91,7 +91,7 @@ if( !$is_down )
 
       if( @mysql_num_rows($result) > 0 )
       {
-         while( $row = mysql_fetch_array( $result ) )
+         while( $row = mysql_fetch_assoc( $result ) )
          {
             mysql_query( "DELETE FROM Games WHERE ID=" . $row["Game_ID"] .
                          " AND Status='INVITED' LIMIT 1" )
@@ -136,7 +136,7 @@ if( !$is_down )
 
 //    $result = mysql_query( $query );
 
-//    while( $row = mysql_fetch_array( $result ) )
+//    while( $row = mysql_fetch_assoc( $result ) )
 //    {
 //       update_rating($row["gid"]);
 //       $rated_status = update_rating2($row["gid"]); //0=rated game
@@ -160,33 +160,33 @@ if( !$is_down )
    $result = mysql_query( $q_finished )
                or error('mysql_query_failed','daily_cron4');
    if( @mysql_num_rows($result) > 0 )
-      extract( mysql_fetch_array($result));
+      extract( mysql_fetch_assoc($result));
    mysql_free_result($result);
 
    $result = mysql_query( $q_running )
                or error('mysql_query_failed','daily_cron5');
    if( @mysql_num_rows($result) > 0 )
-      extract( mysql_fetch_array($result));
+      extract( mysql_fetch_assoc($result));
    mysql_free_result($result);
 
    $result = mysql_query( $q_users )
                or error('mysql_query_failed','daily_cron6');
    if( @mysql_num_rows($result) > 0 )
-      extract( mysql_fetch_array($result));
+      extract( mysql_fetch_assoc($result));
    mysql_free_result($result);
 
 
-   mysql_query( "INSERT INTO Statistics SET " .
-                "Time=FROM_UNIXTIME($NOW), " .
-                "Hits=$Hits, " .
-                "Users=$Users, " .
-                "Moves=" . ($MovesFinished+$MovesRunning) . ", " .
-                "MovesFinished=$MovesFinished, " .
-                "MovesRunning=$MovesRunning, " .
-                "Games=" . ($GamesRunning+$GamesFinished) . ", " .
-                "GamesFinished=$GamesFinished, " .
-                "GamesRunning=$GamesRunning, " .
-                "Activity=$Activity" )
+   mysql_query( "INSERT INTO Statistics SET"
+               ." Time=FROM_UNIXTIME($NOW)"
+               .",Hits=" . (int)$Hits
+               .",Users=" . (int)$Users
+               .",Moves=" . (int)($MovesFinished+$MovesRunning)
+               .",MovesFinished=" . (int)$MovesFinished
+               .",MovesRunning=" . (int)$MovesRunning
+               .",Games=" . (int)($GamesRunning+$GamesFinished)
+               .",GamesFinished=" . (int)$GamesFinished
+               .",GamesRunning=" . (int)$GamesRunning
+               .",Activity=" . (int)$Activity )
                or error('mysql_query_failed','daily_cron7');
 
 
@@ -201,15 +201,17 @@ if( !$is_down )
 
    $query = "DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time) + $new_end < $NOW";
 
-   while( $row = mysql_fetch_array($result) )
+   if( @mysql_num_rows( $result) > 0 )
    {
-      $query .= " OR Thread_ID=" . $row["ID"];
+      while( $row = mysql_fetch_assoc($result) )
+      {
+         $query .= " OR Thread_ID=" . $row["ID"];
+      }
+
+      mysql_query( $query )
+                  or error('mysql_query_failed','daily_cron9');
    }
    mysql_free_result($result);
-
-   mysql_query( $query )
-               or error('mysql_query_failed','daily_cron9');
-
 
 
 
@@ -219,23 +221,25 @@ if( !$is_down )
                          "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID")
                or error('mysql_query_failed','daily_cron10');
 
-
-   $row = mysql_fetch_assoc($result); //is "guest" and skipped else summertime changes
-   setTZ( $row['Timezone']); //always GMT (guest default)
-
-   // Changed to/from summertime?
-   if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )
-      $result =  mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone FROM Players")
-               or error('mysql_query_failed','daily_cron11');
-
-   while( $row = mysql_fetch_array($result) )
+   if( @mysql_num_rows( $result) > 0 )
    {
-      setTZ( $row['Timezone']);
-      mysql_query("UPDATE Players " .
-                  "SET ClockChanged=NULL, " .
-                  "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
-                  "WHERE ID='" . $row['ID'] . "' LIMIT 1")
-               or error('mysql_query_failed','daily_cron12');
+      $row = mysql_fetch_assoc($result); //is "guest" and skipped else summertime changes
+      setTZ( $row['Timezone']); //always GMT (guest default)
+
+      // Changed to/from summertime?
+      if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )
+         $result =  mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone FROM Players")
+                  or error('mysql_query_failed','daily_cron11');
+
+      while( $row = mysql_fetch_assoc($result) )
+      {
+         setTZ( $row['Timezone']);
+         mysql_query("UPDATE Players " .
+                     "SET ClockChanged=NULL, " .
+                     "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
+                     "WHERE ID='" . $row['ID'] . "' LIMIT 1")
+                  or error('mysql_query_failed','daily_cron12');
+      }
    }
    mysql_free_result($result);
 }
