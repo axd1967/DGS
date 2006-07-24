@@ -76,7 +76,8 @@ require_once( "include/rating.php" );
        "AND ( NOT ISNULL(black.RatingStatus) ) " .
        "ORDER BY Lastchanged, gid";
 
-   $result = mysql_query( $query );
+   $result = mysql_query( $query )
+           or die("<BR>" . mysql_error() );
 
    echo "<p>Game:";
    $count=0; $tot=0;

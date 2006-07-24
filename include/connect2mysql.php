@@ -133,7 +133,7 @@ function mysql_single_fetch( $query, $type='assoc')
    {
       $type = 'mysql_fetch_'.$type;
       if( (mysql_num_rows($result) != 1 )
-            or !($row=$type($result)) )
+            or !is_array( $row=$type( $result) ) )
          $row = false;
       mysql_free_result($result);
    }
