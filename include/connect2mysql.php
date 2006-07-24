@@ -31,7 +31,7 @@ function jump_to($uri, $absolute=false)
    if( $absolute )
       header( "Location: " . $uri );
    else
-      header( "Location: " . $HOSTBASE . '/' . $uri );
+      header( "Location: " . $HOSTBASE . $uri );
    header('Status: 303');
    //header('Connection: close'); 
    exit;

@@ -48,7 +48,7 @@ function mail_link( $nam, $lnk)
           && !is_numeric(strpos($lnk,'//'))
           && strtolower(substr($lnk,0,4)) != "www."
         )
-         $lnk = $HOSTBASE."/".$lnk;
+         $lnk = $HOSTBASE.$lnk;
       $nam = ( $nam ? "$nam ($lnk)" : "$lnk" );
    }
    if( !$nam )

@@ -2,9 +2,9 @@
 
 // This is the main url. If the main page is, e.g., 
 // http://www.some_domain.com/~my_dir/index.php
-// set $HOSTBASE = "http://www.some_domain.com/~my_dir";
+// set $HOSTBASE = "http://www.some_domain.com/~my_dir/";
 
-$HOSTBASE = "http://localhost";
+$HOSTBASE = "http://localhost/";
 
 // This is the server name. If the main page is, e.g., 
 // http://www.some_domain.com/~my_dir/index.php
@@ -20,6 +20,9 @@ $HOSTNAME = "localhost";
 // set $SUB_PATH = "/~my_dir/";
 
 $SUB_PATH = "/";
+
+// Then you should have: $HOSTBASE = "http://" . $HOSTNAME . $SUB_PATH;
+
 
 // From address for notification emails
 $EMAIL_FROM = "noreply@localhost";

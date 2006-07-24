@@ -780,6 +780,8 @@ function parse_atbs_safe( &$trail, &$bad)
       $head.= $quote;
       $bad = 1;
    }
+   if ( !$bad && $head )
+   {
 /*
 This part fix a security hole. One was able to execute a javascript code
 (if read by a the IExplorer browser) with something like:
@@ -1086,7 +1088,7 @@ function get_request_url( $absolute=false)
       $url = substr($url,$len);
    $url = str_replace( URI_AMP_IN, URI_AMP, $url);
    if( $absolute )
-      $url = $HOSTBASE . '/' . $url;
+      $url = $HOSTBASE . $url;
    return $url;
 }
 

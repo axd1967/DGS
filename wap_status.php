@@ -142,7 +142,7 @@ function wap_open( $title)
       $encoding_used = 'iso-8859-1';
 
    if( empty($html_clone) )
-      $html_clone = $HOSTBASE . '/';
+      $html_clone = $HOSTBASE;
 
    if( empty($description) )
       $description = $title;
@@ -200,7 +200,7 @@ function wap_error( $str, $title='', $link='')
    if( !$link )
    {
       global $HOSTBASE;
-      $link= $HOSTBASE.'/';
+      $link= $HOSTBASE;
    }
    if( !$title )
       $title= 'ERROR';
@@ -214,7 +214,7 @@ function wap_warning( $str, $title='', $link='')
    if( !$link )
    {
       global $HOSTBASE;
-      $link= $HOSTBASE.'/';
+      $link= $HOSTBASE;
    }
    if( !$title )
       $title= 'WARNING';
@@ -401,7 +401,7 @@ else
    $wap_sep = "\n<br/>";
 
    $tit= "Status of $my_name";
-   $lnk= $HOSTBASE.'/status.php';
+   $lnk= $HOSTBASE.'status.php';
    wap_open( $tit);
 
    $cardid= 'login';
@@ -447,7 +447,7 @@ else
 
       $hdr= "Message $i";
       $tit= "From: $safename";
-      $lnk= $HOSTBASE.'/message.php?mid='.$safeid;
+      $lnk= $HOSTBASE.'message.php?mid='.$safeid;
       $dat= @$row['date'];
       $dsc= //"Message: $safeid" . $wap_sep .
             //"Folder: ".FOLDER_NEW . $wap_sep .
@@ -475,7 +475,7 @@ else
 
       $hdr= "Game $i";
       $tit= "Opponent: $safename";
-      $lnk= $HOSTBASE.'/game.php?gid='.$safeid;
+      $lnk= $HOSTBASE.'game.php?gid='.$safeid;
       $dat= @$row['date'];
       $dsc= //"Game: $safeid" . $wap_sep .
             //"Opponent: $safename" . $wap_sep .

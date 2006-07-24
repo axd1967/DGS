@@ -138,7 +138,7 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
       $encoding_used = 'iso-8859-1';
 
    if( empty($html_clone) )
-      $html_clone = $HOSTBASE . '/';
+      $html_clone = $HOSTBASE;
 
    if( empty($description) )
       $description = $title;
@@ -156,7 +156,7 @@ This file is not meant to be read by a web
 browser directly.  Instead you're meant to copy 
 the URL for the file, which is:
 
-	$HOSTBASE/rss_status.php
+	{$HOSTBASE}rss_status.php
 
 and paste it into your RSS reader or podcast program.
 
@@ -215,7 +215,7 @@ function rss_error( $str, $title='', $link='')
    if( !$link )
    {
       global $HOSTBASE;
-      $link= $HOSTBASE.'/';
+      $link= $HOSTBASE;
    }
    if( !$title )
       $title= 'ERROR';
@@ -231,7 +231,7 @@ function rss_warning( $str, $title='', $link='')
    if( !$link )
    {
       global $HOSTBASE;
-      $link= $HOSTBASE.'/';
+      $link= $HOSTBASE;
    }
    if( !$title )
       $title= 'Warning';
@@ -391,7 +391,7 @@ else
    $rss_sep = "\n - ";
 
    $tit= "Status of $my_name";
-   $lnk= $HOSTBASE.'/status.php';
+   $lnk= $HOSTBASE.'status.php';
    $dsc= "Messages and Games for $my_name";
    rss_open( $tit, $dsc, $lnk);
 
@@ -427,7 +427,7 @@ else
       $safeid = (int)@$row['mid'];
 
       $tit= "Message from $safename";
-      $lnk= $HOSTBASE.'/message.php?mid='.$safeid;
+      $lnk= $HOSTBASE.'message.php?mid='.$safeid;
       $dat= @$row['date'];
       $dsc= "Message: $safeid" . $rss_sep .
             //"Folder: ".FOLDER_NEW . $rss_sep .
@@ -462,7 +462,7 @@ else
       $move = (int)@$row['Moves'];
 
       $tit= "Game with $safename";
-      $lnk= $HOSTBASE.'/game.php?gid='.$safeid;
+      $lnk= $HOSTBASE.'game.php?gid='.$safeid;
       $mov= $lnk.URI_AMP.'move='.$move;
       $dat= @$row['date'];
       $dsc= "Game: $safeid" . $rss_sep .
@@ -475,7 +475,7 @@ else
     
    if( $nothing_found )
    {
-      rss_warning('empty lists', 'empty lists', $HOSTBASE.'/status.php');
+      rss_warning('empty lists', 'empty lists', $HOSTBASE.'status.php');
    }
 
    rss_close();
