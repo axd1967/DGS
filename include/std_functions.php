@@ -195,7 +195,7 @@ function fnop( $a)
 
 function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $bg_color, $encoding_used, $printable;
+   global $base_path, $bg_color, $encoding_used, $printable, $FRIENDLY_SHORT_NAME;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -212,7 +212,7 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
 
   echo "\n <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">";
 
-   echo "\n <TITLE> Dragon Go Server - $title </TITLE>"
+   echo "\n <TITLE>$FRIENDLY_SHORT_NAME - $title </TITLE>"
       . "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
 
    if( $printable )
@@ -232,7 +232,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $base_path, $is_down, $is_down_message, $printable,
-      $bg_color, $menu_bg_color, $menu_fg_color;
+      $bg_color, $menu_bg_color, $menu_fg_color, $FRIENDLY_LONG_NAME;
 
    start_html( $title, $no_cache, $style_string, $last_modified_stamp);
 
@@ -244,7 +244,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    echo "\n\n<table id=\"page_head\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td align=left><A href=\"{$base_path}index.php\">"
-        . "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>";
+        . "<B><font color=$menu_fg_color>$FRIENDLY_LONG_NAME</font></B></A></td>";
    echo "\n  <td align=right>";
 
    if ($logged_in and !$is_down)
@@ -334,11 +334,11 @@ function end_page( $menu_array=NULL )
    //close the <table><tr><td> left open since page start
    echo "\n </tr>\n</table>\n";
 
-   global $NOW, $date_fmt;
+   global $NOW, $date_fmt, $FRIENDLY_LONG_NAME;
    echo "\n<table id=\"page_foot\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td align=left><A href=\"{$base_path}index.php\">"
-        . "<B><font color=$menu_fg_color>Dragon Go Server</font></B></A></td>";
+        . "<B><font color=$menu_fg_color>$FRIENDLY_LONG_NAME</font></B></A></td>";
 
    echo "\n  <td align=center><font size=-1 color=$menu_fg_color>"
         . T_("Page time") . ' ' . date($date_fmt, $NOW)

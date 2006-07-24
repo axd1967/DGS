@@ -40,7 +40,7 @@ require_once( "include/form_functions.php" );
 
 
   echo "<center>\n";
-  echo '<IMG  width=666 height=172  border=0 alt="Dragon Go Server" SRC="images/dragon_logo.jpg">';
+  echo '<IMG  width=666 height=172  border=0 alt="'.$FRIENDLY_LONG_NAME.'" SRC="images/dragon_logo.jpg">';
   echo "\n<BR>&nbsp;";
 
 
@@ -53,7 +53,7 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
      "</font><HR>\n";
 }else{ //for devel server
   echo "<p><font color=green>\n" .
-     T_("Welcome to the dragon go server!") .
+     T_("Welcome to the $FRIENDLY_LONG_NAME!") .
      '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
      "</font><HR>\n";
 } //for devel server

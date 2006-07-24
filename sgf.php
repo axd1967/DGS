@@ -325,10 +325,10 @@ $array=array();
 
 
    echo "(\n;FF[$sgf_version]GM[1]"
-      . "\nPC[Dragon Go Server: $HOSTBASE]"
+      . "\nPC[$FRIENDLY_LONG_NAME: $HOSTBASE]"
       . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
       . "\nGN[" . sgf_simpletext($filename) . "]"
-      . "\nGC[Game ID: $gid".($Rated=='N'?'':', rated')."]"   //($HOSTBASE/game.php?gid=$gid)
+      . "\nGC[Game ID: $gid".($Rated=='N'?'':', rated')."]"   //({$HOSTBASE}game.php?gid=$gid)
       . "\nPB[" . sgf_simpletext("$Blackname ($Blackhandle)") . "]"
       . "\nPW[" . sgf_simpletext("$Whitename ($Whitehandle)") . "]";
 

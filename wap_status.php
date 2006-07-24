@@ -163,9 +163,23 @@ function wap_close( )
 }
 
 
+function card_open( $cardid, $head)
+{
+   global $FRIENDLY_SHORT_NAME;
+   $head = addslashes($FRIENDLY_SHORT_NAME).' - '.addslashes($head);
+   return "<card id=\"$cardid\" title=\"$head\">";
+}
+
+
+function card_close()
+{
+   return "</card>\n";
+}
+
+
 function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='', $nextid='', $previd='')
 {
-   $str = "<card id=\"$cardid\" title=\"$head\">";
+   $str = card_open( $cardid, $head);
 
    if( $previd )
       $str.= " <a accesskey=\"p\" href=\"#$previd\">[&lt;Prev]</a>";
@@ -189,7 +203,7 @@ function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='
    if( !empty($description) )
       $str.= "<p>$description</p>";
 
-   $str.= "</card>\n";
+   $str.= card_close();
 
    echo $str;
 }
@@ -349,9 +363,9 @@ else
    {
       if( !$wap_opened )
          wap_open( 'LOGIN');
-      $card = "<card id=\"login\" title=\"Register!\">";
+      $card = card_open( "login", "Register!");
       $card.= wap_auth( $uhandle);
-      $card.= "</card>\n";
+      $card.= card_close();
       echo $card;
       wap_close();
       exit;
@@ -405,7 +419,7 @@ else
    wap_open( $tit);
 
    $cardid= 'login';
-   $card = "<card id=\"$cardid\" title=\"Status\">";
+   $card = card_open( $cardid, "Status");
 
    $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status of</a>: $my_name</p>";
    if( $countM>0 )
@@ -429,7 +443,7 @@ else
    $nextGid= $cardid;
 
    $card.= wap_auth( $uhandle, $passwd);
-   $card.= "</card>\n";
+   $card.= card_close();
    echo $card;
 
 

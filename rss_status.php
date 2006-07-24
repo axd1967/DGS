@@ -126,7 +126,7 @@ function rss_date( $dat=0)
 $rss_opened= false;
 function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
 {
-   global $encoding_used, $HOSTBASE, $NOW;
+   global $encoding_used, $HOSTBASE, $FRIENDLY_LONG_NAME, $NOW;
 
    ob_start("ob_gzhandler");
    global $rss_opened;
@@ -151,7 +151,7 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
    echo "<!--
 
 If you're seeing this, you've clicked on the link 
-for DragonGo Quick RSS feed.  
+for $FRIENDLY_LONG_NAME Quick RSS feed.  
 This file is not meant to be read by a web 
 browser directly.  Instead you're meant to copy 
 the URL for the file, which is:
@@ -169,7 +169,7 @@ about RSS services.
 */
 
    echo " <channel>\n"
-      . "  <title>Dragon Go Server - $title</title>\n"
+      . "  <title>$FRIENDLY_LONG_NAME - $title</title>\n"
       . "  <link>$html_clone</link>\n"
       . "  <pubDate>" . rss_date($last_modified_stamp) . "</pubDate>"
       . ( is_numeric( $cache_minutes) ? "  <ttl>$cache_minutes</ttl>\n" : '' )
@@ -250,8 +250,9 @@ function rss_auth( $cancel_str, $uhandle='')
 {
    //if( $uhandle ) $uhandle= ' - '.$uhandle; else
       $uhandle= '';
+   $uhandle= $FRIENDLY_LONG_NAME . $uhandle;
 
-   header("WWW-Authenticate: Basic realm=\"Dragon Go Server$uhandle\"");
+   header("WWW-Authenticate: Basic realm=\"$uhandle\"");
    header('HTTP/1.0 401 Unauthorized');
 
    //echo "$cancel_str\n";

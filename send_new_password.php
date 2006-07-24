@@ -93,7 +93,7 @@ rememberable.
    $headers = "From: $EMAIL_FROM\n";
 
    if( !function_exists('mail')
-    or !mail( trim($Email), 'Dragon Go Server: New password', $msg, $headers ) )
+    or !mail( trim($Email), $FRIENDLY_LONG_NAME.': New password', $msg, $headers ) )
       error('mail_failure',"Uid:$pswduser Addr:$Email Text:$msg");
 
 

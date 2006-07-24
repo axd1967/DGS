@@ -1,5 +1,11 @@
 <?php
 
+// Friendly names. Keep them AscII!
+
+$FRIENDLY_LONG_NAME = "Dragon Go Server";
+$FRIENDLY_SHORT_NAME = "DGS";
+
+
 // This is the main url. If the main page is, e.g., 
 // http://www.some_domain.com/~my_dir/index.php
 // set $HOSTBASE = "http://www.some_domain.com/~my_dir/";
@@ -36,6 +42,8 @@ $MYSQLUSER = "dragongoserver";
 $MYSQLPASSWORD = "";
 $DB_NAME = "dragongoserver";
 
+
+// Dependent  of the configuration of your server:
 
 define('URI_AMP_IN','&'); //ini_get('arg_separator.input')
 //URI_AMP at '&amp;' work even if arg_separator.output is set to '&'

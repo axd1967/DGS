@@ -240,7 +240,7 @@ if( !$is_down )
       //$headers.= "Content-type: text/html; charset=iso-8859-1\n";
 
       if( !function_exists('mail')
-       or !mail( trim($Email), 'Dragon Go Server notification', $msg, $headers ) )
+       or !mail( trim($Email), $FRIENDLY_LONG_NAME.' notification', $msg, $headers ) )
          error('mail_failure',"Uid:$uid Addr:$Email Text:$msg");
    }
    mysql_free_result($result);
