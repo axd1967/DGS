@@ -26,12 +26,23 @@ require_once( "include/std_functions.php" );
 {
    connect2mysql(true);
 
+   $err = get_request_arg('err');
+   $redir = get_request_arg('redir');
+   if( $redir /* && @$_SERVER['REDIRECT_STATUS'] == 401 */ )
+   {
+      error( $err, "$redir ".@$_SERVER['REDIRECT_STATUS']
+                 .': '.@$_SERVER['REDIRECT_URL']
+                 .': '.@$_SERVER['REDIRECT_ERROR_NOTES']
+                 .' / '.getcwd());
+      //exit;
+   }
+   
+   
    $logged_in = who_is_logged( $player_row);
 
    start_page("Error", true, $logged_in, $player_row );
    echo '&nbsp;<br>';
 
-   $err = @$_GET['err'];
    switch( $err )
    {
       case("early_pass"):
@@ -482,18 +493,6 @@ require_once( "include/std_functions.php" );
       }
       break;
 
-      case("translator_admin_add_lang_missing_field"):
-      {
-        echo T_("Sorry, there was a missing or incorrect field when adding a language.");
-      }
-      break;
-
-      case("translator_admin_add_lang_exists"):
-      {
-        echo T_("Sorry, the language you tried to add already exists.");
-      }
-      break;
-
       case("admin_no_such_entry"):
       {
         echo T_("Sorry, couldn't find that entry.");
@@ -503,12 +502,6 @@ require_once( "include/std_functions.php" );
       case("no_specified_user"):
       {
         echo T_("Sorry, you must specify a user.");
-      }
-      break;
-
-      case("no_lang_selected"):
-      {
-        echo T_("Sorry, you must specify a language.");
       }
       break;
 
