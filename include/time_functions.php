@@ -60,7 +60,9 @@ function get_clock_ticks($clock_used)
    if( $row=mysql_single_fetch(
             "SELECT Ticks FROM Clock WHERE ID=$clock_used"
      ) )
-      return (int)$row[0];
+   {
+      return (int)@$row['Ticks'];
+   }
    error("mysql_clock_ticks", $clock_used);
 }
 
