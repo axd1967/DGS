@@ -784,16 +784,16 @@ function parse_atbs_safe( &$trail, &$bad)
    {
 /*
 This part fix a security hole. One was able to execute a javascript code
-(if read by a the IExplorer browser) with something like:
+(if read by some browsers: IExplorer, for instance) with something like:
 <b style="background:url('javascript:eval(document.all.mycode.xcode)')"
    id="mycode" xcode="alert('Hello!!!')">Hello!</b>
 */
       $quote =
-          '\\bjavascript:' //main reject
+          '\\bjavascript\\s*:'   //main reject
          .'|\\.inner'      //like .innerHTML
-         .'|(\\bon\\w+=)'  //like onevent=
-         .'|\\beval\\('    //eval() can split most of keyword
-         .'|\\bstyle='     //disabling style= is not bad too
+         .'|(\\bon\\w+\\s*=)'    //like onevent=
+         .'|\\beval\\s*\\('      //eval() can split most of the keywords
+         .'|\\bstyle\\s*='       //disabling style= is not bad too
          ;
       if ( /*$quote &&*/  preg_match( "%($quote)%i",
             preg_replace( "%[\\x01-\\x20]+%", '', $head)) ) {
