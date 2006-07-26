@@ -121,18 +121,18 @@ disable_cache();
 
       //for interpret_time_limit_forms{
       $byoyomitype = @$_REQUEST['byoyomitype'];
-      $timevalue = @$_REQUEST['timevalue'];
+      $timevalue = (int)@$_REQUEST['timevalue'];
       $timeunit = @$_REQUEST['timeunit'];
 
-      $byotimevalue_jap = @$_REQUEST['byotimevalue_jap'];
+      $byotimevalue_jap = (int)@$_REQUEST['byotimevalue_jap'];
       $timeunit_jap = @$_REQUEST['timeunit_jap'];
-      $byoperiods_jap = @$_REQUEST['byoperiods_jap'];
+      $byoperiods_jap = (int)@$_REQUEST['byoperiods_jap'];
 
-      $byotimevalue_can = @$_REQUEST['byotimevalue_can'];
+      $byotimevalue_can = (int)@$_REQUEST['byotimevalue_can'];
       $timeunit_can = @$_REQUEST['timeunit_can'];
-      $byoperiods_can = @$_REQUEST['byoperiods_can'];
+      $byoperiods_can = (int)@$_REQUEST['byoperiods_can'];
 
-      $byotimevalue_fis = @$_REQUEST['byotimevalue_fis'];
+      $byotimevalue_fis = (int)@$_REQUEST['byotimevalue_fis'];
       $timeunit_fis = @$_REQUEST['timeunit_fis'];
       //for interpret_time_limit_forms}
 
