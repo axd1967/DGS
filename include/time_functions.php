@@ -155,14 +155,14 @@ function echo_hour($hours)
 function echo_time($hours, $keep_english=false)
 {
    if( $hours <= 0 )
-      return '-';
+      return '---';
 
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 
    $days = (int)($hours/15);
    if( $days > 0 )
    {
-      if( $days == 1 )
+      if( $days <= 1 )
          $str = '1&nbsp;' . $T_('day');
       else
          $str = $days .'&nbsp;' . $T_('days');
@@ -171,12 +171,12 @@ function echo_time($hours, $keep_english=false)
          $str = '';
 
    $h = $hours % 15;
-   if( $h > 0 )
+   //if( $h > 0 )
    {
       if( $days > 0 )
          $str .='&nbsp;' . $T_('and') . '&nbsp;';
 
-      if( $h == 1 )
+      if( $h <= 1 )
          $str .= '1&nbsp;' . $T_('hour');
       else
          $str .= $h . '&nbsp;' . $T_('hours');
@@ -189,7 +189,7 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
 {
    $T_= ( $keep_english ? 'fnop' : 'T_' );
    $str = '';
-   if ( $Maintime > 0 )
+   //if ( $Maintime > 0 )
       $str = echo_time( $Maintime, $keep_english);
 
    if( $Byotime <= 0 )
