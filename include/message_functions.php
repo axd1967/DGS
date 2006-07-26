@@ -67,21 +67,19 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
    $StdHandicap = false;
    $Rated = true;
 
-   // If dispute, use values from game $gid
-   if( $gid > 0 )
+   if( $gid > 0 ) //'Dispute'
    {
-      $result = mysql_query( "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
+      // If dispute, use values from game $gid
+      $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
                              "Maintime,Byotype,Byotime,Byoperiods,Rated,StdHandicap,Weekendclock, " .
                              "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
                              "FROM Games,Players WHERE Games.ID=$gid " .
                              "AND ((Players.ID=Black_ID AND White_ID=$my_ID) " .
                              "OR (Players.ID=White_ID AND Black_ID=$my_ID)) " .
-                             "AND Status='INVITED'" );
+                 "AND Status='INVITED'" ;
 
-      if( @mysql_num_rows($result) != 1 )
+      if( !($game_row=mysql_single_fetch( $query)) )
          error("unknown_game");
-
-      $game_row = mysql_fetch_array($result);
 
       extract($game_row);
 
@@ -151,8 +149,9 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
          }
          break;
 
-         case 'FIS':
+         default: //case 'FIS':
          {
+            $Byotype = 'FIS';
             $Byotime_fis = $Byotime;
             $ByotimeUnit_fis = $ByotimeUnit;
          }
@@ -390,7 +389,7 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
          echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
          break;
 
-      default:
+      default: // Manual: $handicap_type = $Black_ID
          echo '<tr><td><b>' . T_('Colors') . "<b></td><td>$col</td></tr>\n";
          echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $Handicap . "</td></tr>\n";
          echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
@@ -404,26 +403,28 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
    }
 
 
-   echo '<tr><td><b>' . T_('Main time') . '</b></td><td>' .
-      echo_time($Maintime) . "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Main time') . '</b></td><td>'
+            . echo_time($Maintime) 
+         . "</td></tr>\n";
 
    if( $Byotype == 'JAP' )
    {
       echo '<tr><td><b>' . T_('Japanese byoyomi') . '</b></td><td> ' .
-         sprintf(T_('%s per move and %s extra periods'), echo_time($Byotime), $Byoperiods) .
-         ' </td></tr>' . "\n";
+         sprintf(T_('%s per move and %s extra periods')
+            , echo_time($Byotime), $Byoperiods)
+         . "</td></tr>\n";
    }
    else if ( $Byotype == 'CAN' )
    {
       echo '<tr><td><b>' . T_('Canadian byoyomi') . '</b></td><td> ' .
-         sprintf(T_('%s per %s stones'), echo_time($Byotime), $Byoperiods) .
-         ' </td></tr>' . "\n";
+         sprintf(T_('%s per %s stones'), echo_time($Byotime), $Byoperiods)
+         . "</td></tr>\n";
    }
    else if ( $Byotype == 'FIS' )
    {
       echo '<tr><td><b>' . T_('Fischer time') . '</b></td><td> ' .
-         sprintf(T_('%s extra per move'), echo_time($Byotime)) .
-         ' </td></tr>' . "\n";
+         sprintf(T_('%s extra per move'), echo_time($Byotime))
+         . "</td></tr>\n";
    }
 
    echo '<tr><td><b>' . T_('Rated game') . '</b></td><td>' .
@@ -445,7 +446,7 @@ function interpret_time_limit_forms()
           $byotimevalue_can, $timeunit_can, $byoperiods_can,
           $byotimevalue_fis, $timeunit_fis;
 
-      $hours = $timevalue;
+      $hours = (int)$timevalue;
       if( $timeunit != 'hours' )
          $hours *= 15;
       if( $timeunit == 'months' )
@@ -456,32 +457,33 @@ function interpret_time_limit_forms()
 
       if( $byoyomitype == 'JAP' )
       {
-         $byohours = $byotimevalue_jap;
+         $byohours = (int)$byotimevalue_jap;
          if( $timeunit_jap != 'hours' ) $byohours *= 15;
          if( $timeunit_jap == 'months' ) $byohours *= 30;
 
          if( $byohours > 5475 ) $byohours = 5475;
          else if( $byohours < 0 ) $byohours = 0;
 
-         $byoperiods = $byoperiods_jap;
+         $byoperiods = (int)$byoperiods_jap;
          if( $byohours * ($byoperiods+1) > 5475 )
             $byoperiods = floor(5475/$byohours) - 1;
       }
       else if( $byoyomitype == 'CAN' )
       {
-         $byohours = $byotimevalue_can;
+         $byohours = (int)$byotimevalue_can;
          if( $timeunit_can != 'hours' ) $byohours *= 15;
          if( $timeunit_can == 'months' ) $byohours *= 30;
 
          if( $byohours > 5475 ) $byohours = 5475;
          else if( $byohours < 0 ) $byohours = 0;
 
-         $byoperiods = $byoperiods_can;
+         $byoperiods = (int)$byoperiods_can;
          if( $byoperiods < 1 ) $byoperiods = 1;
       }
-      else if( $byoyomitype == 'FIS' )
+      else // if( $byoyomitype == 'FIS' )
       {
-         $byohours = $byotimevalue_fis;
+         $byoyomitype = 'FIS';
+         $byohours = (int)$byotimevalue_fis;
          if( $timeunit_fis != 'hours' ) $byohours *= 15;
          if( $timeunit_fis == 'months' ) $byohours *= 30;
 
