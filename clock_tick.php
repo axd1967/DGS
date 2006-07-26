@@ -88,14 +88,19 @@ if( !$is_down )
                          'WHERE Status!="INVITED" AND Status!="FINISHED" ' .
                          'AND Games.ClockUsed >= 0 ' .
                          "AND Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
-                         'AND ( Maintime>0 OR Byotime>0 ) ' .
+                         //if both are <=0, the game will never finish:
+                         //'AND ( Maintime>0 OR Byotime>0 ) ' .
                          'AND Games.ClockUsed=Clock.ID ' .
                          'AND white.ID=White_ID AND black.ID=Black_ID' )
                or error('mysql_query_failed','clock_tick4');
 
-   while($row = mysql_fetch_array($result))
+   while($row = mysql_fetch_assoc($result))
    {
       extract($row);
+
+      //$game_clause (lock) needed. See *** HOT_SECTION *** in confirm.php
+      $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
+
       $ticks = $ticks - $LastTicks;
       $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 
@@ -121,9 +126,6 @@ if( !$is_down )
       {
 
          $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
-
-         //$game_clause (lock) needed. See *** HOT_SECTION *** in confirm.php
-         $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
 
          $game_query = "UPDATE Games SET Status='FINISHED', " . //See *** HOT_SECTION ***
              "Last_X=".POSX_TIME.", " .
