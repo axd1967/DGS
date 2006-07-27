@@ -57,7 +57,7 @@ require_once( "forum_functions.php" );
 
    $cols = 4;
    $headline = array(T_("Thread")=>"width=50%",T_("Author")=>"width=20%",
-                     T_("Replies")=>"width=10%  align=center",T_("Last post")=>"width=20%");
+                     T_("Posts")=>"width=10%  align=center",T_("Last post")=>"width=20%");
    $links = LINK_FORUMS | LINK_NEW_TOPIC;
 
    if( $offset > 0 )
@@ -88,7 +88,7 @@ require_once( "forum_functions.php" );
       {
          $Subject = make_html_safe( $Subject, true);
          echo "<tr$color><td><a href=\"read.php?forum=$forum".URI_AMP."thread=$Thread_ID\">$Subject</a>$new</td><td>" . make_html_safe($Name)
-           . "</td><td align=center>" . ($PostsInThread-1) . "</td><td nowrap>" .date($date_fmt, $Lastchanged) . "</td></tr>\n";
+           . "</td><td align=center>" . $PostsInThread . "</td><td nowrap>" .date($date_fmt, $Lastchanged) . "</td></tr>\n";
          $odd = !$odd;
          $show_rows--;
       }

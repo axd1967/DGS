@@ -231,7 +231,7 @@ function set_moderator_cookie()
    return $cookie === 'y';
 }
 
-function approve_message($id, $thread, $forums, $approve=true)
+function approve_message($id, $thread, $forum, $approve=true)
 {
    $result = mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "' " .
                          "WHERE ID=$id AND Thread_ID=$thread " .
@@ -242,8 +242,8 @@ function approve_message($id, $thread, $forums, $approve=true)
       mysql_query("UPDATE Posts SET PostsInThread=PostsInThread" . ($approve ? '+1' : '-1') .
                   " WHERE ID=$thread LIMIT 1");
 
-      mysql_query("UPDATE Forums SET PostsInForums=PostsInForums" . ($approve ? '+1' : '-1') .
-                  " WHERE ID=$thread LIMIT 1");
+      mysql_query("UPDATE Forums SET PostsInForum=PostsInForum" . ($approve ? '+1' : '-1') .
+                  " WHERE ID=$forum LIMIT 1");
 
 
       recalculate_lastpost($thread, $forum);
