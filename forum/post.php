@@ -19,9 +19,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-function post_message($player_row, $moderated)
+function post_message($player_row, $moderated_forum)
 {
    global $NOW, $order_str;
+
+   if( $player_row['MayPostOnForum'] == 'N' )
+      return T_('Sorry, you are not allowed to post on the forum');
 
    $forum = @$_POST['forum']+0;
    $parent = @$_POST['parent']+0;
@@ -32,6 +35,8 @@ function post_message($player_row, $moderated)
 //   $GoDiagrams = create_godiagrams($Text);
    $Subject = addslashes($Subject);
    $Text = addslashes($Text);
+
+   $moderated = ($moderated_forum or $player_row['MayPostOnForum'] == 'M');
 
    // -------   Edit old post  ----------
 
@@ -152,6 +157,8 @@ function post_message($player_row, $moderated)
       if( $moderated )
       {
          // TODO: Notify moderators;
+
+         return T_('This post is subject to moderation. It will be shown once the moderators have approved it.');
       }
       else
       {
@@ -163,6 +170,8 @@ function post_message($player_row, $moderated)
          mysql_query("UPDATE Forums " .
                      "SET PostsInForum=PostsInForum+1, LastPost=$New_ID " .
                      "WHERE ID=$forum LIMIT 1" );
+
+         return T_('Message sent!');
       }
    }
 }

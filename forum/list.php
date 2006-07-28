@@ -80,7 +80,7 @@ require_once( "forum_functions.php" );
       $Lastread = NULL;
       extract($row);
 
-      $new = get_new_string($Lastchangedstamp, $Lastread);
+      $new = get_new_string($Lastchanged, $Lastread);
 
       $color = ( $odd ? "" : " bgcolor=white" );
 

@@ -269,11 +269,11 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
    }
 
 
-   $result = mysql_query("SELECT LastPost.ID " .
+   $result = mysql_query("SELECT Last.ID " .
                          "FROM Posts as Thread " .
-                         "LEFT JOIN Posts as Last ON Thread.LastPost=Last.ID " .
-                         "WHERE Forum_ID=" . $Forum_ID . " AND Thread.Parent_ID IS NULL " .
-                         "ORDER BY LastPost.Time LIMIT 1");
+                         "JOIN Posts as Last ON Thread.LastPost=Last.ID " .
+                         "WHERE Thread.Forum_ID=" . $Forum_ID . " AND Thread.Parent_ID=0 " .
+                         "ORDER BY Last.Time DESC LIMIT 1");
 
    if( @mysql_num_rows($result) == 1 )
    {
@@ -281,6 +281,26 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
       mysql_query("UPDATE Forums SET LastPost=" . $row[0] . " WHERE ID=$Forum_ID LIMIT 1");
    }
 
+}
+
+
+function recalculate_postsinforum($Forum_ID)
+{
+   $result = mysql_query("SELECT COUNT(*), Thread_ID FROM Posts WHERE Forum_ID=$Forum_ID AND Approved='Y' GROUP BY Thread_ID");
+
+   $sum = 0;
+   while( $row = mysql_fetch_row( $result ) )
+   {
+      $sum += $row[0];
+
+      mysql_query("UPDATE Posts SET PostsInThread=" . $row[0] . " WHERE ID=" .$row[1])
+         or die(mysql_error());
+
+      recalculate_lastpost($row[1], $Forum_ID);
+   }
+
+   mysql_query("UPDATE Forums SET PostsInForum=$sum WHERE ID=$Forum_ID")
+      or die(mysql_error());
 }
 
 ?>

@@ -163,8 +163,8 @@ function change_depth(&$cur_depth, $new_depth)
 
    if( isset($_POST['post']) )
    {
-      post_message($player_row, $moderated);
-      jump_to("forum/list.php?forum=$forum");
+      $msg = urlencode(post_message($player_row, $moderated));
+      jump_to("forum/list.php?forum=$forum&sysmsg=$msg");
    }
 
    $preview = isset($_POST['preview']);
@@ -210,6 +210,7 @@ function change_depth(&$cur_depth, $new_depth)
 
    $result = mysql_query("SELECT Posts.*, " .
                          "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
+                         "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
                          "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
                          "Players.ID AS uid, Players.Name, Players.Handle " .
                          "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
@@ -227,19 +228,19 @@ function change_depth(&$cur_depth, $new_depth)
       $Name = '?';
       extract($row);
 
+      if( $thread == $ID ) //Initial post of the thread
+      {
+         $thread_Subject = $Subject;
+         $Lastchangedthread = $Lastchangedstamp;
+      }
+
       $hidden = ($Approved == 'N');
 
       if( $hidden and !$is_moderator )
          continue;
 
-      if( $thread == $ID ) //Initial post of the thread
-         $thread_Subject = $Subject;
 
       change_depth( $cur_depth, $Depth );
-
-//      if( !$Lastchangedthread )
-//         $Lastchangedthread = $Lastchangedstamp;
-
 
 
       $post_type = 'normal';
@@ -310,7 +311,7 @@ function change_depth(&$cur_depth, $new_depth)
 
 // Update Forumreads to remove the 'new' flag
 
-   if( $Lastchangedthread + $new_end > $NOW )
+   if( !$Lastread or $Lastread < $Lastchangedthread )
    {
       mysql_query( "REPLACE INTO Forumreads SET " .
                    "User_ID=" . $player_row["ID"] . ", " .
