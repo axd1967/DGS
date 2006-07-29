@@ -94,29 +94,29 @@ function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
      
       case("JAP"):
       {
-   if( $main > 0 or $byoper < 0 ) // entering byoyomi
-   {
+         if( $main > 0 or $byoper < 0 ) // entering byoyomi
+         {
             $main = 0;
-      $byotime = $startbyotime;
-         $byoper = $startbyoper-1;
-   }
+            $byotime = $startbyotime;
+            $byoper = $startbyoper-1;
+         }
 
          //because $elapsed>=0 and ($startbyotime - $byotime)>=0, this is equal to:
          //$byoper -= floor(($elapsed - $byotime)/$startbyotime) +1;
          //$byoper += ceil(($byotime - $elapsed)/$startbyotime) -1;
-      $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
+         $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
 
-      if( $byoper < 0 )
-         $byotime = $byoper = 0;  // time is up;
+         if( $byoper < 0 )
+            $byotime = $byoper = 0;  // time is up;
          else if( $has_moved )
             $byotime = $startbyotime;
          else 
             $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
-   }
+      }
       break;
 
       case("CAN"):
-   {
+      {
          if( $main > 0 or $byoper < 0 ) // entering byoyomi
          {
             $main = 0;
@@ -124,20 +124,20 @@ function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
             $byoper = $startbyoper;
          }
 
-      $byotime -= $elapsed;
+         $byotime -= $elapsed;
 
-      if( $byotime <= 0 )
-         $byotime = $byoper = 0;  // time is up;
+         if( $byotime <= 0 )
+            $byotime = $byoper = 0;  // time is up;
          else if( $has_moved )
          {
             $byoper--; // byo stones;
             if( $byoper <= 0 ) // get new stones;
-      {
-         $byotime = $startbyotime;
-         $byoper = $startbyoper;
+            {
+               $byotime = $startbyotime;
+               $byoper = $startbyoper;
+            }
+         }
       }
-   }
-   }
       break;
    }
 }
