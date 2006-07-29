@@ -18,6 +18,15 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+if( @$_REQUEST['nextgame']
+      or @$_REQUEST['nextstatus']
+      or @$_REQUEST['nextback']
+   )
+{
+   include_once( "confirm.php");
+   exit;
+}
+
 $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
@@ -28,25 +37,40 @@ if( ENA_STDHANDICAP ) {
 require_once( "include/sgf_parser.php" );
 }
 
+// abbreviations used to reduce file size
+function get_alt_arg( $n1, $n2)
+{
+// $_GET must have priority at least for those used in the board links
+// for instance, $_POST['coord'] is the current (last used) coord
+// while $_GET['coord'] is the coord selected in the board (next coord)
+
+   if( isset( $_GET[$n1]) )
+      return $_GET[$n1];
+   if( isset( $_GET[$n2]) )
+      return $_GET[$n2];
+
+   if( isset( $_POST[$n1]) )
+      return $_POST[$n1];
+   if( isset( $_POST[$n2]) )
+      return $_POST[$n2];
+
+   return '';
+}
 
 {
-/*
- Because of get_request_url() from draw_notes(),
- this page must be called with $_GET[] arguments.
-*/
-   $gid = @$_GET['gid'];
-   $action = @$_GET['action'];
-   $move = @$_GET['move'];
-   $coord = @$_GET['coord'];
-   $stonestring = (string)@$_GET['stonestring'];
-   $toggleobserve = @$_GET['toggleobserve'];
 
-   // abbreviations used to reduce file size
-   if( @$_GET['g'] ) $gid=$_GET['g'];
-   if( @$_GET['a'] ) $action=$_GET['a'];
-   if( @$_GET['m'] ) $move=$_GET['m'];
-   if( @$_GET['c'] ) $coord=$_GET['c'];
-   if( @$_GET['s'] ) $stonestring=(string)$_GET['s'];
+   $gid = (int)get_alt_arg( 'gid', 'g');
+   $action = (string)get_alt_arg( 'action', 'a');
+   $move = (int)get_alt_arg( 'move', 'm');
+   $coord = (string)get_alt_arg( 'coord', 'c');
+   $stonestring = (string)get_alt_arg( 'stonestring', 's');
+
+   $prisoner_string = (string)@$_REQUEST['prisoner_string'];
+
+   $toggleobserve = (boolean)@$_REQUEST['toggleobserve'];
+
+   $message = get_request_arg( 'message');
+
 
    connect2mysql();
 
@@ -328,17 +352,31 @@ require_once( "include/sgf_parser.php" );
 
    if( $my_game && $player_row["ID"] == $Black_ID )
    {
-     $show_notes = true;
-     $notes = $Black_Notes;
-     $opponent_ID= $White_ID;
-     $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
+      $show_notes = true;
+      if( @$_REQUEST['savenotes'] )
+      {
+         $notes = rtrim(get_request_arg('gamenotes'));
+         mysql_query( "UPDATE Games SET Black_notes=\""
+                     . addslashes($notes) . "\" WHERE Games.ID=$gid LIMIT 1");
+      }
+      else
+         $notes = $Black_Notes;
+      $opponent_ID= $White_ID;
+      $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
    }
    elseif( $my_game && $player_row["ID"] == $White_ID )
    {
-     $show_notes = true;
-     $notes = $White_Notes;
-     $opponent_ID= $Black_ID;
-     $movemsg = make_html_safe($movemsg, $movecol==WHITE ? 'gameh' : $html_mode );
+      $show_notes = true;
+      if( @$_REQUEST['savenotes'] )
+      {
+         $notes = rtrim(get_request_arg('gamenotes'));
+         mysql_query( "UPDATE Games SET White_notes=\""
+                     . addslashes($notes) . "\" WHERE Games.ID=$gid LIMIT 1");
+      }
+      else
+         $notes = $White_Notes;
+      $opponent_ID= $Black_ID;
+      $movemsg = make_html_safe($movemsg, $movecol==WHITE ? 'gameh' : $html_mode );
    }
    else
    {
@@ -382,6 +420,12 @@ require_once( "include/sgf_parser.php" );
 
    start_page(T_("Game"), true, $logged_in, $player_row, $TheBoard->style_string());
 
+
+
+   // [ game_form start
+   echo "<FORM name`\"game_form\" action=\"game.php\" method=\"POST\">\n";
+   $page_hiddens[] = array();
+
    echo "<table align=center>\n<tr><td>"; //board & associates table {--------
 
    if( $movenumbers>0 )
@@ -400,20 +444,40 @@ require_once( "include/sgf_parser.php" );
 
    if( $show_notes )
    {
-      if ($notesmode == 'BELOW')
+      if( $notesmode == 'BELOW' )
          echo "</td></tr>\n<tr><td colspan=2 align='center'>";
       else //default RIGHT
          echo "</td>\n<td align='left' valign='center'>";
-      draw_notes($notes, $gid, $notesheight, $noteswidth);
+      draw_notes( $notes, $gid, $notesheight, $noteswidth);
    }
 
    if( $enable_message )
    {
       echo "</td></tr>\n<tr><td colspan=2 align='center'>";
-      draw_message_box(); //use $stonestring, $prisoner_string, $move
+      draw_message_box( $message);
    }
-   echo "</td></tr>\n</table>"; //board & associates table }--------
 
+   echo "</td></tr>\n</table>\n"; //board & associates table }--------
+
+
+
+   $page_hiddens['gid'] = $gid;
+   $page_hiddens['action'] = $action;
+   $page_hiddens['move'] = $move;
+   if( @$coord )
+      $page_hiddens['coord'] = $coord;
+   if( @$stonestring )
+      $page_hiddens['stonestring'] = $stonestring;
+   if( @$prisoner_string )
+      $page_hiddens['prisoner_string'] = $prisoner_string;
+
+
+   foreach( $page_hiddens as $key => $val )
+   {
+      echo "<input type=\"hidden\" name=\"$key\" value=\"$val\">\n";
+   }
+   echo "</FORM>\n";
+   // ] game_form end
 
    echo "<HR>\n";
    draw_game_info($game_row);
@@ -538,19 +602,18 @@ function draw_moves()
 }
 
 
-function draw_message_box()
+function draw_message_box( $message)
 {
-   global $action, $gid, $stonestring, $coord, $prisoner_string, $move;
 
    $tabindex=1;
    echo '
-  <FORM name="confirmform" action="confirm.php" method="POST">
     <center>
       <TABLE align="center">
         <TR>
           <TD align=right>' . T_('Message') . ':</TD>
           <TD align=left>
-            <textarea name="message" tabindex="'.($tabindex++).'" cols="50" rows="8"></textarea></TD>
+            <textarea name="message" tabindex="'.($tabindex++).'" cols="50" rows="8">'
+               . textarea_safe( $message) . '</textarea></TD>
         </TR>
       </TABLE>
 <TABLE align=center cellpadding=5>
@@ -562,24 +625,6 @@ function draw_message_box()
       T_("Go back") . '"></TD></TR>
       </TABLE>
     </CENTER>
-';
-
-    if( $action == 'move' )
-    {
-       echo "<input type=\"hidden\" name=\"coord\" value=\"$coord\">\n";
-       echo "<input type=\"hidden\" name=\"prisoner_string\" value=\"$prisoner_string\">\n";
-    }
-    else if( $action == 'done' or $action == 'handicap' )
-    {
-       if( @$stonestring )
-         echo "<input type=\"hidden\" name=\"stonestring\" value=\"$stonestring\">\n";
-    }
-
-   echo '
-  <input type="hidden" name="gid" value="' . $gid . '">
-  <input type="hidden" name="move" value="' . $move .'">
-  <input type="hidden" name="action" value="' . $action .'">
-  </FORM>
 ';
 
 }
@@ -666,22 +711,18 @@ function draw_game_info($game_row)
 
 function draw_notes( $notes, $gid, $height=0, $width=0)
 {
-   $notes = textarea_safe($notes); //always inside an edit box... no HTML effects.
    if( $height<3 ) $height= 3;
    if( $width<15 ) $width= 15;
 
-   echo "<form name=\"savenotes\" action=\"savenotes.php\" method=\"POST\">\n";
    echo " <table class=gamenotes>\n";
    echo "  <tr><th>" . T_('Private game notes') . "</td></tr>\n";
    echo "  <tr><td class=notes>\n";
-   echo "   <textarea name=\"gamenotes\" id=\"gamenotes\" cols=\"$width\" rows=\"$height\">$notes</textarea>\n";
+   echo "   <textarea name=\"gamenotes\" id=\"gamenotes\" cols=\"$width\" rows=\"$height\">"
+            . textarea_safe( $notes) . "</textarea>\n";
    echo "  </td></tr>\n";
-   echo "  <tr><td><input type=\"submit\" value=\"" . T_('Save notes') . "\"></td></tr>\n";
+   echo "  <tr><td><input name=\"savenotes\" type=\"submit\" value=\""
+            . T_('Save notes') . "\"></td></tr>\n";
    echo " </table>\n";
-//   echo " <input type=\"hidden\" name=\"refer_url\" value=\"". urlencode(get_request_url()) . "\">\n";
-   echo " <input type=\"hidden\" name=\"refer_url\" value=\"". get_request_url() . "\">\n";
-   echo " <input type=\"hidden\" name=\"gid\" value=\"". $gid . "\">\n";
-   echo "</form>\n";
 }
 
 ?>
