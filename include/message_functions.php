@@ -438,14 +438,12 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
 
 
 //Set global $hours,$byohours,$byoperiods
-function interpret_time_limit_forms()
-{
-   global $hours, $byohours, $byoperiods; //outputs
-   global $byoyomitype, $timevalue, $timeunit, //inputs
-          $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
-          $byotimevalue_can, $timeunit_can, $byoperiods_can,
-          $byotimevalue_fis, $timeunit_fis;
+function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
+                                    $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
+                                    $byotimevalue_can, $timeunit_can, $byoperiods_can,
+                                    $byotimevalue_fis, $timeunit_fis)
 
+{
       $hours = (int)$timevalue;
       if( $timeunit != 'hours' )
          $hours *= 15;
@@ -493,6 +491,7 @@ function interpret_time_limit_forms()
          $byoperiods = 0;
       }
 
+      return array($hours, $byohours, $byoperiods);
 }
 
 function get_folders($uid, $remove_all_received=true)

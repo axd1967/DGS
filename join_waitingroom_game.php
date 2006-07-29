@@ -23,13 +23,14 @@ $TranslateGroups[] = "Game";
 require_once( "include/std_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/rating.php" );
+require_once( "include/make_game.php" );
 
 {
    disable_cache();
 
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged($player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -42,20 +43,24 @@ require_once( "include/rating.php" );
    if( !is_numeric($id) or $id<0 )
       $id=0;
 
-   $result = mysql_query("SELECT Waitingroom.*,Name,Handle," .
-                         "Rating2 AS Rating,RatingStatus,ClockUsed,OnVacation " .
-                         "FROM Waitingroom,Players " .
-                         "WHERE Players.ID=Waitingroom.uid AND Waitingroom.ID=$id");
+   $result = mysql_query("SELECT Waitingroom.* FROM Waitingroom WHERE ID=$id");
 
    if( @mysql_num_rows($result) != 1)
       error("waitingroom_game_not_found");
 
+   $game_info_row = mysql_fetch_array($result);
+   $uid = $game_info_row['uid'];
 
-   extract(mysql_fetch_array($result));
+   $result = mysql_query("SELECT ID,Name,Handle," .
+                         "Rating2,RatingStatus,ClockUsed,OnVacation " .
+                         "FROM Players WHERE ID=$uid");
 
-   if( ($Handicaptype == 'proper' or $Handicaptype == 'conv')
-       and !$player_row["RatingStatus"] )
-      error("no_initial_rating");
+   if( @mysql_num_rows($result) != 1)
+      error("waitingroom_game_not_found");
+
+   $opponent_row = mysql_fetch_array($result);
+
+
 
    if( @$_REQUEST['delete'] == 't' )
    {
@@ -71,126 +76,58 @@ require_once( "include/rating.php" );
 
 //else... joining game
 
+   if( ($game_info_row['Handicaptype'] == 'proper' or
+        $game_info_row['Handicaptype'] == 'conv') and !$player_row["RatingStatus"] )
+      error("no_initial_rating");
+
    if( $player_row['ID'] == $uid )
       error("waitingroom_own_game");
 
-
-
-// set me to black and swap later if necessary
-
-   $clock_used_white = ( $OnVacation > 0 ? VACATION_CLOCK : $ClockUsed );
-   $clock_used_black = ( $player_row['OnVacation'] > 0 ? VACATION_CLOCK : $player_row["ClockUsed"] );
-
-   $opponent_rating = $Rating;
-   $my_rating = $player_row["Rating2"];
-
-   if( $MustBeRated == 'Y' and
-       !($my_rating>=$Ratingmin and $my_rating<=$Ratingmax) )
+   if( $game_info_row['MustBeRated'] == 'Y' and
+       !($player_row['Rating2'] >= $game_info_row['Ratingmin']
+         and $player_row['Rating2'] <= $game_info_row['Ratingmax']) )
       error("waitingroom_not_in_rating_range");
 
-   if( $WeekendClock != 'Y' )
-   {
-      $clock_used_white += WEEKEND_CLOCK_OFFSET;
-      $clock_used_black += WEEKEND_CLOCK_OFFSET;
-   }
 
-   $ticks_black = get_clock_ticks($clock_used_black);
-   $ticks_white = get_clock_ticks($clock_used_white);
 
-   $swap = 0;
+
+
+   $i_am_black = false;
+
+
    mt_srand ((double) microtime() * 1000000);
    if( $Handicaptype == 'nigiri' ) // nigiri
-      $swap = mt_rand(0,1);
+      $i_am_black = mt_rand(0,1);
 
 
-   $query =  "INSERT INTO Games SET " .
-      "Status='PLAY', ";
+   $game_info_row['Handicap'] = 0;
+   $size = $game_info_row['Size'];
 
-   $Handicap = 0;
+   if( $game_info_row['Handicaptype'] == 'proper' )
+      list($game_info_row['Handicap'],$game_info_row['Komi'],$i_am_black) =
+         suggest_proper($player_row['Rating2'], $opponent_row['Rating2'], $size);
 
-   $Rated = (( $Rated === 'Y' and
-               !empty($RatingStatus) and
-               !empty($player_row['RatingStatus']) ) ? 'Y' : 'N' );
-
-   if( $Handicaptype == 'proper' )
-      list($Handicap,$Komi,$swap) = suggest_proper($opponent_rating, $my_rating, $Size);
+   if( $game_info_row['Handicaptype'] == 'conv' )
+      list($game_info_row['Handicap'],$game_info_row['Komi'],$i_am_black) =
+         suggest_conventional($player_row['Rating2'], $opponent_row['Rating2'], $size);
 
 
-   if( $Handicaptype == 'conv' )
-      list($Handicap,$Komi,$swap) = suggest_conventional($opponent_rating, $my_rating, $Size);
-
-   if( $swap )
-      $query .= "Black_ID=$uid, " .
-         "White_ID=" . $player_row["ID"] . ", " .
-         (is_numeric($my_rating) ? "White_Start_Rating=$my_rating, " : '' ) .
-         (is_numeric($opponent_rating) ? "Black_Start_Rating=$opponent_rating, " : '' ) .
-         "ToMove_ID=$uid, " .
-         "ClockUsed=$clock_used_white, " .
-         "LastTicks=$ticks_white, ";
-   else
-      $query .= "White_ID=$uid, " .
-         "Black_ID=" . $player_row["ID"] . ", " .
-         (is_numeric($my_rating) ? "Black_Start_Rating=$my_rating, " : '' ) .
-         (is_numeric($opponent_rating) ? "White_Start_Rating=$opponent_rating, " : '' ) .
-         "ToMove_ID=" . $player_row["ID"] . ", " .
-         "ClockUsed=$clock_used_black, " .
-         "LastTicks=$ticks_black, ";
-
-   $query .= "Size=$Size, " .
-      "Handicap=$Handicap, " .
-      "Komi=$Komi, " .
-      "Maintime=$Maintime, " .
-      "Byotype='$Byotype', " .
-      "Byotime=$Byotime, " .
-      "Byoperiods=$Byoperiods, " .
-      "Black_Maintime=$Maintime, " .
-      "White_Maintime=$Maintime," .
-      "Rated='$Rated', " .
-      "StdHandicap='$StdHandicap', " .
-      "WeekendClock='$WeekendClock', " .
-      "Starttime=FROM_UNIXTIME($NOW), " .
-      "Lastchanged=FROM_UNIXTIME($NOW)";
-
-   $result = mysql_query( $query );
-
-   if( mysql_affected_rows() != 1)
-      error("mysql_start_game");
-
-   $gid = mysql_insert_id();
-
-   if( $Handicaptype == 'double' ) // extra game for double
+   if( $game_info_row['Handicaptype'] == 'double' )
    {
-      $query = "INSERT INTO Games SET " .
-         "Black_ID=$uid, " .
-         "White_ID=" . $player_row["ID"] . ", " .
-         (is_numeric($my_rating) ? "White_Start_Rating=$my_rating, " : '' ) .
-         (is_numeric($opponent_rating) ? "Black_Start_Rating=$opponent_rating, " : '' ) .
-         "ToMove_ID=$uid, " .
-         "Status='PLAY', " .
-         "ClockUsed=$clock_used_white, " .
-         "LastTicks=$ticks_white, " .
-         "Size=$Size, " .
-         "Handicap=$Handicap, " .
-         "Komi=$Komi, " .
-         "Maintime=$Maintime, " .
-         "Byotype='$Byotype', " .
-         "Byotime=$Byotime, " .
-         "Byoperiods=$Byoperiods, " .
-         "Black_Maintime=$Maintime, " .
-         "White_Maintime=$Maintime," .
-         "Rated='$Rated', " .
-         "StdHandicap='$StdHandicap', " .
-         "WeekendClock='$WeekendClock', " .
-         "Starttime=FROM_UNIXTIME($NOW), " .
-         "Lastchanged=FROM_UNIXTIME($NOW)";
-
-      mysql_query( $query )
-         or error("mysql_query_failed");
-
+      $gid = create_game($player_row, $opponent_row, $game_info_row);
+      create_game($opponent_row, $player_row, $game_info_row);
+   }
+   else
+   {
+      if( $i_am_black )
+         $gid = create_game($player_row, $opponent_row, $game_info_row);
+      else
+         $gid = create_game($opponent_row, $player_row, $game_info_row);
    }
 
+
    mysql_query( "UPDATE Players SET Running=Running+" .
-                ( $Handicaptype == 'double' ? 2 : 1 ) .
+                ( $game_info_row['Handicaptype'] == 'double' ? 2 : 1 ) .
                 ( $Rated == 'Y' ? ", RatingStatus='RATED'" : '' ) .
                 " WHERE ID=$uid OR ID=" . $player_row['ID'] . " LIMIT 2" );
 

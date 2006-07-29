@@ -76,7 +76,12 @@ require_once( "include/rating.php" );
       $timeunit_fis = @$_POST['timeunit_fis'];
       //for interpret_time_limit_forms}
 
-   interpret_time_limit_forms(); //Set global $hours,$byohours,$byoperiods
+   list($hours, $byohours, $byoperiods) =
+      interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
+                                 $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
+                                 $byotimevalue_can, $timeunit_can, $byoperiods_can,
+                                 $byotimevalue_fis, $timeunit_fis);
+
 
    if( ($rated=@$_POST['rated']) != 'Y' or !$player_row["RatingStatus"] )
       $rated = 'N';
