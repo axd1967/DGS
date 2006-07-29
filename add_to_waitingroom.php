@@ -40,11 +40,11 @@ require_once( "include/rating.php" );
 
    $handicap_type = @$_POST['handicap_type'];
    if( $handicap_type == 'nigiri' )
-      $komi = @$_POST['komi_n'];
+      $komi = (float)@$_POST['komi_n'];
    elseif( $handicap_type == 'double' )
-      $komi = @$_POST['komi_d'];
+      $komi = (float)@$_POST['komi_d'];
    else
-      $komi = 0;
+      $komi = 0.0;
 
    if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
        !$player_row["RatingStatus"] )
