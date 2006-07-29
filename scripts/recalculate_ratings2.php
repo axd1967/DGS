@@ -38,6 +38,11 @@ require_once( "include/rating.php" );
   if( !($player_level & ADMIN_DATABASE) )
     error("adminlevel_too_low");
 
+   if( ($lim=@$_REQUEST['limit']) > '' )
+      $limit = " LIMIT $lim";
+   else
+      $limit = "";
+
 
    start_html( 'recalculate_ratings2', 0);
 
@@ -57,16 +62,17 @@ require_once( "include/rating.php" );
    }
 
 
+   if( !($lim > 0) )
+   {
+      echo "<br>Reset Players' ratings";
+      dbg_query( "UPDATE Players SET " .
+                 "Rating2=InitialRating, " .
+                 "RatingMax=InitialRating+200+GREATEST(1600-InitialRating,0)*2/15, " .
+                 "RatingMin=InitialRating-200-GREATEST(1600-InitialRating,0)*2/15" );
 
-   echo "<br>Reset Players' ratings";
-   dbg_query( "UPDATE Players SET " .
-                "Rating2=InitialRating, " .
-                "RatingMax=InitialRating+200+GREATEST(1600-InitialRating,0)*2/15, " .
-                "RatingMin=InitialRating-200-GREATEST(1600-InitialRating,0)*2/15" );
-
-   echo "<br>Reset Ratinglog";
-   dbg_query( "DELETE FROM Ratinglog" );
-
+      echo "<br>Reset Ratinglog";
+      dbg_query( "DELETE FROM Ratinglog" );
+   }
 
    $query = "SELECT Games.ID as gid ".
        "FROM Games, Players as white, Players as black " .
@@ -74,7 +80,7 @@ require_once( "include/rating.php" );
        "AND white.ID=White_ID AND black.ID=Black_ID ".
        "AND ( NOT ISNULL(white.RatingStatus) ) " .
        "AND ( NOT ISNULL(black.RatingStatus) ) " .
-       "ORDER BY Lastchanged, gid";
+       "ORDER BY Lastchanged, gid $limit";
 
    $result = mysql_query( $query )
            or die("<BR>" . mysql_error() );
