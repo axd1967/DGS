@@ -714,18 +714,29 @@ function add_line_breaks( $str)
 // Some regular allowed html tags. Keep them lower case.
 // 'cell': tags that does not disturb a table cell.
 // 'msg': tags allowed in messages
+// 'game': tags allowed in game messages
 //Warning: </br> was historically used in end game messages. It remains in database.
- //keep a '|' at both end:
-$html_code_closed['cell'] = '|b|i|u|';
-$html_code_closed['msg'] = '|a|b|i|u|center|ul|ol|font|tt|pre|';
- //more? '|/li|/p|/br|/ *br';
-$html_code['cell'] = 'b|i|u';
-$html_code['msg'] = 'br'.$html_code_closed['msg'].'p|goban|li|/br';
 
-define( 'ALLOWED_LT', '{anglstart}');
-define( 'ALLOWED_GT', '{anglend}');
-define( 'ALLOWED_QUOT', '{allowedquot}');
-define( 'ALLOWED_APOS', '{allowedapos}');
+ // ** don't use parenthesis **
+ // ** keep a '|' at both ends:
+$html_code_closed['cell'] = '|b|i|u|color|';
+$html_code_closed['msg'] = '|a|b|i|u|color|center|ul|ol|font|tt|pre|';
+$html_code_closed['game'] = $html_code_closed['msg'].'h|hidden|c|comment|';
+ // more? '|/li|/p|/br|/ *br';
+
+ // ** no '|' at ends:
+$html_code['cell'] = 'b|i|u|color';
+$html_code['msg'] = 'br|p|li'.$html_code_closed['msg']
+   .'goban|mailto|https?|news|game_?|user_?|send_?|/br';
+$html_code['game'] = 'br|p|li'.$html_code_closed['game']
+   .'goban|mailto|https?|news|game_?|user_?|send_?|/br';
+
+
+ //** no reg exp chars nor ampersand:
+define( 'ALLOWED_LT', "\x10anglstart\x10");
+define( 'ALLOWED_GT', "\x10anglend\x10");
+define( 'ALLOWED_QUOT', "\x10allowedquot\x10");
+define( 'ALLOWED_APOS', "\x10allowedapos\x10");
 
 /* Simple syntax check of element's attributes up to the next '>'.
    Check for quote mismatches.
@@ -790,13 +801,13 @@ This part fix a security hole. One was able to execute a javascript code
 */
       $quote =
           '\\bjavascript\\s*:'   //main reject
-         .'|\\.inner'      //like .innerHTML
+         .'|\\.inner'            //like .innerHTML
          .'|(\\bon\\w+\\s*=)'    //like onevent=
          .'|\\beval\\s*\\('      //eval() can split most of the keywords
          .'|\\bstyle\\s*='       //disabling style= is not bad too
          ;
       if ( /*$quote &&*/  preg_match( "%($quote)%i",
-            preg_replace( "%[\\x01-\\x20]+%", '', $head)) ) {
+            preg_replace( "%[\\x01-\\x1f]+%", '', $head)) ) {
          $bad = 2;
       }
    }
@@ -819,7 +830,8 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
 
    $before = '';
    //$stop = preg_quote($stop, '%');
-   $reg = "%^(.*?)<(" . ( $stop ? "$stop|" : '' ) . "$html_code)([\\x01-\\x20>].*)$%is";
+   //$reg = "%^(.*?)<(" . ( $stop ? "$stop|" : '' ) . "$html_code)([\\x01-\\x20>:].*)$%is";
+   $reg = "%^(.*?)<(" . ( $stop ? "$stop|" : '' ) . $html_code . ")\b(.*)$%is";
 
    while ( preg_match($reg, $trail, $matches) )
    {
@@ -867,16 +879,14 @@ function parse_html_safe( $msg, $some_html)
    return $str;
 }
 
+
 define('REF_LINK', 0x1);
 define('REF_LINK_ALLOWED', 0x2);
 define('REF_LINK_BLANK', 0x4);
-//$some_html could be false, 'cell', 'game' or 'msg'==default
+
+//$some_html may be false, 'cell', 'game', 'gameh' or 'msg'
 function make_html_safe( $msg, $some_html=false)
 {
-
-//   $msg = str_replace('&', '&amp;', $msg);
-//   $msg = str_replace('"', '&quot;', $msg);
-
 
    if( $some_html )
    {
@@ -886,55 +896,76 @@ function make_html_safe( $msg, $some_html=false)
       $msg = str_replace(ALLOWED_QUOT, '"', $msg);
       $msg = str_replace(ALLOWED_APOS, "'", $msg);
 
-      // replace <, > with ALLOWED_LT, ALLOWED_GT for legal html code
-      if( $some_html === 'game' or $some_html === 'gameh' )
+      if( !is_string( $some_html ) )
       {
-         // mark sgf comments
-         if( $some_html === 'gameh' )
+         $some_html = 'msg' ;
+      }
+      else if( $some_html == 'gameh' )
+      {
+         $gameh = 1 ;
+         $some_html = 'game';
+      }
+      else
+         $gameh = 0 ;
+
+      // regular (and extended) allowed html tags check
+      $msg = parse_html_safe( $msg, $some_html) ;
+
+
+      // formats legal html code
+      if( $some_html == 'game' )
+      {
+         if( $gameh ) // show hidden sgf comments
          {
-            $msg = eregi_replace("<h(idden)? *>",
+            $msg = eregi_replace(ALLOWED_LT."h(idden)? *".ALLOWED_GT,
                                  ALLOWED_LT."font color=red".ALLOWED_GT."\\0", $msg);
-            $msg = eregi_replace("</h(idden)? *>",
+            $msg = eregi_replace(ALLOWED_LT."/h(idden)? *".ALLOWED_GT,
                                  "\\0".ALLOWED_LT."/font".ALLOWED_GT, $msg);
          }
-         else
-            $msg = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg));
+         else // hide hidden sgf comments
+            $msg = trim(preg_replace("%".ALLOWED_LT."h(idden)? *".ALLOWED_GT
+                                          ."(.*?)".ALLOWED_LT."/h(idden)? *"
+                                          .ALLOWED_GT."%is", "", $msg));
 
-         $msg = eregi_replace("<c(omment)? *>",
+
+         $msg = eregi_replace(ALLOWED_LT."c(omment)? *".ALLOWED_GT,
                               ALLOWED_LT."font color=blue".ALLOWED_GT."\\0", $msg);
-         $msg = eregi_replace("</c(omment)? *>",
+         $msg = eregi_replace(ALLOWED_LT."/c(omment)? *".ALLOWED_GT,
                               "\\0".ALLOWED_LT."/font".ALLOWED_GT, $msg);
+
          $some_html = 'msg';
       }
-      else if( $some_html !== 'cell' )
-         $some_html = 'msg';
 
-      $msg=eregi_replace("<(mailto:)([^ >\n\t]+)>",
+
+      $msg=eregi_replace(ALLOWED_LT."(mailto:)([^ >\n\t]+)".ALLOWED_GT,
                          ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT.
                          "\\2".ALLOWED_LT."/a".ALLOWED_GT, $msg);
-      $msg=eregi_replace("<((http:|https:|news:|ftp:)//[^ >\n\t]+)>",
+      $msg=eregi_replace(ALLOWED_LT."((http:|https:|news:|ftp:)//[^ >\n\t]+)".ALLOWED_GT,
                          ALLOWED_LT."a href=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT.
                          "\\1".ALLOWED_LT."/a".ALLOWED_GT, $msg);
 
+
       //link: <game gid[,move]> =>show game
-      $msg=preg_replace("%<game(_)? +([0-9]+)( *, *([0-9]+))? *>%ise",
+      $msg=preg_replace("%".ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *"
+                              .ALLOWED_GT."%ise",
                         "game_reference(('\\1'=='_'?".REF_LINK_BLANK.":0)+".
                            REF_LINK_ALLOWED.",1,'',\\2,\\4+0)", $msg);
       //link: <user uid> or <user =uhandle> =>show user info
       //link: <send uid> or <send =uhandle> =>send a message to user
-      $msg=preg_replace("%<(user|send)(_)? +(".HANDLE_TAG_CHAR."?[".HANDLE_LEGAL_REGS."]+) *>%ise",
+      $msg=preg_replace("%".ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR
+                              ."?[".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT."%ise",
                         "\\1_reference(('\\2'=='_'?".REF_LINK_BLANK.":0)+".
                            REF_LINK_ALLOWED.",1,'','\\3')", $msg);
 
+
       //tag: <color col>...</color> =>translated to <font color="col">...</font>
-      $msg=eregi_replace("<color +([#0-9a-zA-Z]+) *>",
+      $msg=eregi_replace( ALLOWED_LT."color +([#0-9a-zA-Z]+) *".ALLOWED_GT,
                            ALLOWED_LT."font color=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT, $msg);
-      $msg=eregi_replace("</color *>",
+      $msg=eregi_replace( ALLOWED_LT."/color *".ALLOWED_GT,
                            ALLOWED_LT."/font".ALLOWED_GT, $msg);
 
-      // Regular allowed html tags
-      $msg = parse_html_safe( $msg, $some_html) ;
    }
+
 
    // Filter out HTML code
 
