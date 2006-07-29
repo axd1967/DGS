@@ -33,36 +33,52 @@ require_once( "include/form_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   get_request_user( $uid, $uhandle, true);
-   if( !$uhandle and $uid > 0 )
+
+   $preview = @$_REQUEST['preview'];
+
+   $default_uhandle = get_request_arg('to');
+   if( !$default_uhandle )
    {
-      if( $uid == $player_row["ID"] )
-         $uhandle = $player_row["Handle"];
-      else
+      get_request_user( $uid, $uhandle, true);
+      if( !$uhandle and $uid > 0 )
       {
-         $result = mysql_query( "SELECT Handle AS uhandle FROM Players WHERE ID=$uid" );
-         if( @mysql_num_rows( $result ) == 1 )
-            extract(mysql_fetch_assoc($result));
+         if( $uid == $player_row["ID"] )
+            $uhandle = $player_row["Handle"];
+         else
+         {
+            $row = mysql_single_fetch( "SELECT Handle AS uhandle FROM Players WHERE ID=$uid" );
+            if( $row )
+               extract($row);
+         }
       }
+      $default_uhandle = $uhandle;
+      unset($uid); unset($uhandle); //no more used
    }
-   //unset($uid); //no more used
 
    init_standard_folders();
    $my_id = $player_row["ID"];
    $folders = get_folders($my_id);
 
-   $mid = (int)@$_GET['mid'];
-   $gid = (int)@$_GET['gid'];
 
-   $default_subject = '';
-   $default_message = '';
+   $default_subject = get_request_arg('subject');
+   $default_message = get_request_arg('message');
 
-   $mode = @$_GET['mode'];
+
+   $mid = (int)@$_REQUEST['mid'];
+
+
+   $mode = @$_REQUEST['mode'];
    if( !$mode )
    {
       $mode = ($mid > 0 ? 'ShowMessage' : 'NewMessage');
    }
+   else if( @$_REQUEST['mode_dispute'] )
+   {
+      $mode = 'Dispute';
+   }
 
+
+   $submode = $mode;
    if( $mode == 'ShowMessage' or $mode == 'Dispute' )
    {
       if( !($mid > 0) )
@@ -89,15 +105,12 @@ require_once( "include/form_functions.php" );
 //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
           "ORDER BY Sender" ;
 
-      $result = mysql_query( $query ) or error("mysql_query_failed"); //die(mysql_error());
-
-      if( @mysql_num_rows($result) != 1 and @mysql_num_rows($result) != 2 )
+      $row = mysql_single_fetch( $query);
+      if( !$row )
          error("unknown_message");
 
-
-      $row = mysql_fetch_array($result);
-
       extract($row);
+
 
       if( $Sender === 'M' ) //Message to myself
       {
@@ -121,8 +134,8 @@ require_once( "include/form_functions.php" );
 /* Here, the line was:
       $can_reply = ( $To_ID == $my_id && $other_id && $other_handle);
    but: 
-    - me.uid=$my_id and $Sender=me.Sender
-    - $To_ID is always a ID associed with a not sender
+    - $my_id=me.uid and $Sender=me.Sender
+    - $To_ID is always an ID associated with a *not sender*
    so the old ($To_ID == $my_id) is near of ($Sender != 'Y')
    or maybe ($Sender == 'N') or... check for new Sender types.
 */
@@ -131,7 +144,11 @@ require_once( "include/form_functions.php" );
 
       if( $mode == 'ShowMessage' )
       {
-         $default_subject = $Subject;
+         if( !$preview )
+         {
+            $default_subject = $Subject;
+            $default_message = '';
+         }
          if( strcasecmp(substr($default_subject,0,3), "re:") != 0 )
             $default_subject = "RE: " . $default_subject;
 
@@ -155,35 +172,38 @@ require_once( "include/form_functions.php" );
             if( $Status=='INVITED' and ($Replied != 'Y') )
             {
                if( $to_me )
-                  $mode = 'ShowInvite';
+                  $submode = 'ShowInvite';
                else
-                  $mode = 'ShowMyInvite';
+                  $submode = 'ShowMyInvite';
             }
             else if( is_null($Status) )
             {
-               $mode = 'AlreadyDeclined';
+               $submode = 'AlreadyDeclined';
             }
             else
             {
-               $mode = 'AlreadyAccepted';
+               $submode = 'AlreadyAccepted';
             }
          }
          else if( $Type == 'DISPUTED' )
          {
-            $mode = 'InviteDisputed';
+            $submode = 'InviteDisputed';
          }
 
       }
 
    }
 
-   start_page("Message - $mode", true, $logged_in, $player_row );
+   start_page("Message - $submode", true, $logged_in, $player_row );
 
    echo "<center>\n";
 
-   $message_form = new Form('messageform', 'send_message.php', FORM_POST, true );
+   $message_form = new Form('messageform', 'message_selector.php#preview', FORM_POST, true );
+   //by default:
+   $message_form->add_hidden( 'mode', $mode);
+   $message_form->add_hidden( 'mid', $mid);
 
-   switch( $mode )
+   switch( $submode )
    {
       case 'ShowMessage':
       case 'AlreadyDeclined':
@@ -192,47 +212,70 @@ require_once( "include/form_functions.php" );
       {
          message_info_table($mid, $date, $to_me,
                             $other_id, $other_name, $other_handle,
-                            $Subject, $ReplyTo, $flow, $Text,
+                            $Subject, $Text,
+                            $ReplyTo, $flow,
                             $folders, $Folder_nr, $message_form, $Replied=='M');
 
-         if( $mode == 'AlreadyAccepted' )
+         if( $submode == 'AlreadyAccepted' )
          {
             echo '<font color=green>' .
                sprintf( T_('This %sgame%s invitation has already been accepted.'),
                         "<a href=\"game.php?gid=$Game_ID\">", '</a>' ) . '</font>';
          }
-         else if( $mode == 'AlreadyDeclined' )
+         else if( $submode == 'AlreadyDeclined' )
             echo '<font color=green>' .
                T_('This invitation has been declined or the game deleted') . '</font>';
-         else if( $mode == 'InviteDisputed' )
+         else if( $submode == 'InviteDisputed' )
             echo '<font color=green>' .
                sprintf(T_('The settings for this game invitation has been %sdisputed%s'),
                        "<a href=\"message.php?mid=$Game_mid\">", '</a>' ) . '</font>';
 
          if( $can_reply )
          {
-           $message_form->add_row( array( 'HEADER', T_('Reply') ) );
-           $message_form->add_row( array( 'HIDDEN', 'to', $other_handle ) );
-           $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
-           $message_form->add_row( array( 'DESCRIPTION', T_('Subject'),
-                                          'TEXTINPUT', 'subject', 50, 80, $default_subject ) );
-           $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
-                                          'TEXTAREA', 'message', 50, 8, "" ) );
-           $message_form->add_row( array( 'SUBMITBUTTON', 'send', T_('Send Reply') ) );
+            $message_form->add_row( array(
+                  'HEADER', T_('Reply'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Subject'),
+                  'TEXTINPUT', 'subject', 50, 80, $default_subject,
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
+            $message_form->add_row( array(
+                  'HIDDEN', 'to', $other_handle,
+                  'HIDDEN', 'reply', $mid,
+                  'TAB',
+                  'SUBMITBUTTON', 'send_message', T_('Send Reply'),
+                  'SUBMITBUTTON', 'preview', T_('Preview'),
+               ) );
          }
       }
       break;
 
       case 'NewMessage':
       {
-        $message_form->add_row( array( 'HEADER', T_('New message') ) );
-        $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)') ,
-                                       'TEXTINPUT', 'to', 50, 80, $uhandle ) );
-        $message_form->add_row( array( 'DESCRIPTION', T_('Subject'),
-                                       'TEXTINPUT', 'subject', 50, 80, "" ) );
-        $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
-                                       'TEXTAREA', 'message', 50, 8, "" ) );
-        $message_form->add_row( array( 'SUBMITBUTTON', 'send', T_('Send Message') ) );
+            $message_form->add_row( array(
+                  'HEADER', T_('New message'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('To (userid)'),
+                  'TEXTINPUT', 'to', 50, 80, $default_uhandle,
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Subject'),
+                  'TEXTINPUT', 'subject', 50, 80, $default_subject,
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
+            $message_form->add_row( array(
+                  'TAB',
+                  'SUBMITBUTTON', 'send_message', T_('Send Message'),
+                  'SUBMITBUTTON', 'preview', T_('Preview'),
+               ) );
       }
       break;
 
@@ -241,22 +284,24 @@ require_once( "include/form_functions.php" );
       {
          message_info_table($mid, $date, $to_me,
                             $other_id, $other_name, $other_handle,
-                            $Subject, $ReplyTo, $flow, $Text,
-                            $folders, $Folder_nr, $message_form, ($mode=='ShowInvite' or $Replied=='M'));
+                            $Subject, $Text,
+                            $ReplyTo, $flow,
+                            $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' or $Replied=='M'));
 
+         $colortxt = " align='top'";
          if( $Color == BLACK )
          {
-            $colortxt = "<img src='17/w.gif' alt='" . T_('White') . "'> " .
+            $colortxt = "<img src='17/w.gif' alt=\"" . T_('White') . "\"$colortxt> " .
                user_reference( 0, 1, '', 0, $other_name, $other_handle) .
-               "&nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
+               "&nbsp;&nbsp;<img src='17/b.gif' alt=\"" . T_('Black') . "\"$colortxt> " .
                user_reference( 0, 1, '', $player_row) .
                '&nbsp;&nbsp;';
          }
          else
          {
-            $colortxt = "<img src='17/w.gif' alt='" . T_('White') . "'> " .
+            $colortxt = "<img src='17/w.gif' alt=\"" . T_('White') . "\"$colortxt> " .
                user_reference( 0, 1, '', $player_row) .
-               "&nbsp;&nbsp;<img src='17/b.gif' alt='" . T_('Black') . "'> " .
+               "&nbsp;&nbsp;<img src='17/b.gif' alt=\"" . T_('Black') . "\"$colortxt> " .
                user_reference( 0, 1, '', 0, $other_name, $other_handle) .
                '&nbsp;&nbsp;';
          }
@@ -266,24 +311,27 @@ require_once( "include/form_functions.php" );
 
          if( $can_reply )
          {
-            echo '&nbsp;<br><a href="message.php?mode=Dispute'.URI_AMP.'mid=' . $mid . '">' .
-               T_('Dispute settings') . '</a>';
+            $message_form->add_row( array(
+                  'TAB',
+                  'SUBMITBUTTON', 'mode_dispute', T_('Dispute settings'),
+               ) );
 
             $message_form->add_row( array(
                   'HEADER', T_('Reply'),
                ) );
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 50, 8, "",
+                  'TEXTAREA', 'message', 50, 8, $default_message,
                ) );
             $message_form->add_row( array(
-                  'TEXT', '', 
                   'HIDDEN', 'to', $other_handle,
                   'HIDDEN', 'reply', $mid,
+                  'HIDDEN', 'subject', "Game invitation accepted (or declined)",
                   'HIDDEN', 'gid', $Game_ID,
-                  'TD',
-                  'SUBMITBUTTON', 'accepttype', T_('Accept'),
-                  'SUBMITBUTTON', 'declinetype', T_('Decline'),
+                  'TAB',
+                  'SUBMITBUTTON', 'send_accept', T_('Accept'),
+                  'SUBMITBUTTON', 'send_decline', T_('Decline'),
+                  'SUBMITBUTTON', 'preview', T_('Preview'),
                ) );
 
          }
@@ -294,42 +342,78 @@ require_once( "include/form_functions.php" );
       {
          message_info_table($mid, $date, $to_me,
                             $other_id, $other_name, $other_handle,
-                            $Subject, $ReplyTo, $flow, $Text); //no folders, so no move
+                            $Subject, $Text,
+                            $ReplyTo, $flow); //no folders, so no move
 
-         $message_form->add_row( array( 'HEADER', T_('Dispute settings') ) );
-         $message_form->add_row( array( 'HIDDEN', 'subject', 'Game invitation dispute' ) );
-         $message_form->add_row( array( 'HIDDEN', 'disputegid', $Game_ID ) );
-         $message_form->add_row( array( 'HIDDEN', 'to', $other_handle ) );
-         $message_form->add_row( array( 'HIDDEN', 'reply', $mid ) );
-         $message_form->add_row( array( 'HIDDEN', 'type', 'INVITATION' ) );
-         $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
-                                        'TEXTAREA', 'message', 50, 8, "" ) );
+         if( $preview )
+            game_settings_form($message_form, 'redraw', @$_POST);
+         else
+            game_settings_form($message_form, $my_id, $Game_ID);
 
-         game_settings_form($message_form, $my_id, $Game_ID);
+            $message_form->add_row( array(
+                  'HEADER', T_('Dispute settings'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
 
-         $message_form->add_row( array( 'SUBMITBUTTON', 'send', T_('Send Reply') ) );
+            $message_form->add_row( array(
+                  'HIDDEN', 'to', $other_handle,
+                  'HIDDEN', 'reply', $mid,
+                  'HIDDEN', 'subject', 'Game invitation dispute',
+                  'HIDDEN', 'type', 'INVITATION',
+                  'HIDDEN', 'disputegid', $Game_ID,
+                  'TAB',
+                  'SUBMITBUTTON', 'send_message', T_('Send Reply'),
+                  'SUBMITBUTTON', 'preview', T_('Preview'),
+               ) );
       }
       break;
 
       case 'Invite':
       {
-         $message_form->add_row( array( 'HEADER', T_('Invitation message') ) );
-         $message_form->add_row( array( 'HIDDEN', 'type', 'INVITATION' ) );
-         $message_form->add_row( array( 'DESCRIPTION', T_('To (userid)'),
-                                        'TEXTINPUT', 'to', 50, 80, $uhandle ) );
-         $message_form->add_row( array( 'DESCRIPTION', T_('Message'),
-                                        'TEXTAREA', 'message', 50, 8, "" ) );
+         if( $preview )
+            game_settings_form($message_form, 'redraw', @$_POST);
+         else
+            game_settings_form($message_form);
 
-         game_settings_form($message_form);
+            $message_form->add_row( array(
+                  'HEADER', T_('Invitation message'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('To (userid)'),
+                  'TEXTINPUT', 'to', 50, 80, $default_uhandle,
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
 
-         $message_form->add_row( array( 'SUBMITBUTTON', 'send', T_('Send Invitation') ) );
+            $message_form->add_row( array(
+                  'HIDDEN', 'subject', 'Game invitation',
+                  'HIDDEN', 'type', 'INVITATION',
+                  'TAB',
+                  'SUBMITBUTTON', 'send_message', T_('Send Invitation'),
+                  'SUBMITBUTTON', 'preview', T_('Preview'),
+               ) );
       }
       break;
    }
 
    $message_form->echo_string(1);
 
-   echo "</center>\n";
+   if( $preview )
+   {
+      echo "\n<a name=\"preview\"><h3><font color=$h3_color>" . 
+               T_('Preview') . ":</font></h3></a>\n";
+      //$mid==0 means preview - display a *to_me* like message
+      message_info_table(0, $NOW, true,
+                         $my_id, make_html_safe($player_row["Name"]), $player_row["Handle"],
+                         $default_subject, $default_message);
+   }
+
+   echo "\n</center>\n";
 
    end_page();
 }

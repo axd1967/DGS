@@ -67,15 +67,66 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
    $StdHandicap = false;
    $Rated = true;
 
-   if( $gid > 0 ) //'Dispute'
+   if( $my_ID==='redraw' && is_array($gid) )
+   {
+      // If redraw, use values from array $gid
+      // ($gid[] is the $_POST[] of the form asking the preview (i.e. this form))
+      if( isset($gid['size']) )
+         $Size = (int)$gid['size'];
+
+      if( isset($gid['handicap_type']) )
+         $Handitype = (string)$gid['handicap_type'];
+      if( isset($gid['color']) )
+         $MyColor = (string)$gid['color'];
+      if( isset($gid['handicap']) )
+         $Handicap = (int)$gid['handicap'];
+      if( isset($gid['komi_m']) )
+         $Komi_m = (float)$gid['komi_m'];
+      if( isset($gid['komi_n']) )
+         $Komi_n = (float)$gid['komi_n'];
+      if( isset($gid['komi_d']) )
+         $Komi_d = (float)$gid['komi_d'];
+
+      if( isset($gid['byoyomitype']) )
+         $Byotype = (string)$gid['byoyomitype'];
+
+      if( isset($gid['timevalue']) )
+         $Maintime = (int)$gid['timevalue'];
+      if( isset($gid['timeunit']) )
+         $MaintimeUnit = (string)$gid['timeunit'];
+
+      if( isset($gid['byotimevalue_jap']) )
+         $Byotime_jap = (int)$gid['byotimevalue_jap'];
+      if( isset($gid['timeunit_jap']) )
+         $ByotimeUnit_jap = (string)$gid['timeunit_jap'];
+      if( isset($gid['byoperiods_jap']) )
+         $Byoperiods_jap = (int)$gid['byoperiods_jap'];
+
+      if( isset($gid['byotimevalue_can']) )
+         $Byotime_can = (int)$gid['byotimevalue_can'];
+      if( isset($gid['timeunit_can']) )
+         $ByotimeUnit_can = (string)$gid['timeunit_can'];
+      if( isset($gid['byoperiods_can']) )
+         $Byoperiods_can = (int)$gid['byoperiods_can'];
+
+      if( isset($gid['byotimevalue_fis']) )
+         $Byotime_fis = (int)$gid['byotimevalue_fis'];
+      if( isset($gid['timeunit_fis']) )
+         $ByotimeUnit_fis = (string)$gid['timeunit_fis'];
+
+      $Weekendclock = ( @$gid['weekendclock'] == 'Y' );
+      $StdHandicap = ( @$gid['stdhandicap'] == 'Y' );
+      $Rated = ( @$gid['rated'] == 'Y' );
+   }
+   else if( $gid > 0 ) //'Dispute'
    {
       // If dispute, use values from game $gid
       $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
-                             "Maintime,Byotype,Byotime,Byoperiods,Rated,StdHandicap,Weekendclock, " .
-                             "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
-                             "FROM Games,Players WHERE Games.ID=$gid " .
-                             "AND ((Players.ID=Black_ID AND White_ID=$my_ID) " .
-                             "OR (Players.ID=White_ID AND Black_ID=$my_ID)) " .
+                 "Maintime,Byotype,Byotime,Byoperiods,Rated,StdHandicap,Weekendclock, " .
+                 "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
+                 "FROM Games,Players WHERE Games.ID=$gid " .
+                 "AND ((Players.ID=Black_ID AND White_ID=$my_ID) " .
+                 "OR (Players.ID=White_ID AND Black_ID=$my_ID)) " .
                  "AND Status='INVITED'" ;
 
       if( !($game_row=mysql_single_fetch( $query)) )
@@ -181,11 +232,11 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
    if( $iamrated )
    {
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
-                           'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype ) );
+      $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
+                              'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype ) );
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
-                           'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype ) );
+      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
+                              'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype ) );
    }
 
    if( !$waiting_room )
@@ -267,9 +318,10 @@ define('FLOW_ANSWERED',0x2);
   FLOW_ANSWER|FLOW_ANSWERED => array('msg_2r','&gt;-&gt;'),
       );
 
-function message_info_table($mid, $date, $to_me,
+function message_info_table($mid, $date, $to_me, //$mid==0 means preview
                             $other_id, $other_name, $other_handle, //must be html_safe
-                            $subject, $reply_mid, $flow, $text, //must NOT be html_safe
+                            $subject, $text, //must NOT be html_safe
+                            $reply_mid=0, $flow=0,
                             $folders=null, $folder_nr=null, $form=null, $delayed_move=false)
 {
    global $date_fmt, $msg_icones, $bg_color;
@@ -442,8 +494,8 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
                                     $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
                                     $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                     $byotimevalue_fis, $timeunit_fis)
-
 {
+
       $hours = (int)$timevalue;
       if( $timeunit != 'hours' )
          $hours *= 15;
@@ -687,8 +739,8 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
       "LEFT JOIN MessageCorrespondents AS other " .
         "ON other.mid=me.mid AND other.Sender!=me.Sender " .
       "LEFT JOIN Players ON Players.ID=other.uid " .
-          "LEFT JOIN MessageCorrespondents AS previous " .
-            "ON previous.mid=Messages.ReplyTo AND previous.uid=me.uid " .
+      "LEFT JOIN MessageCorrespondents AS previous " .
+        "ON previous.mid=Messages.ReplyTo AND previous.uid=me.uid " .
       "WHERE me.uid=$my_id AND Messages.ID=me.mid $extra_where " .
         ( $folderstring=="all" ? "" : "AND me.Folder_nr IN ($folderstring) " ) .
       "ORDER BY $order $limit";
