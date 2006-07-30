@@ -62,7 +62,6 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
          }
          echo "\n</tr>";
       }
-      //Rdvl: onClick onmousedown ondblclick
       echo "<tr class=row$c ondblclick=\"row_click(this,'row$c')\">\n";
       foreach( $row as $key => $val )
       {
