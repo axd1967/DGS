@@ -26,6 +26,9 @@ use POSIX;
 
 #Gimp::set_trace (TRACE_ALL);
 
+$HIGHEST_STONE_NUMBER = 500;
+
+
 sub round
 {
     my ($val) = @_;
@@ -419,11 +422,11 @@ foreach $final_size (@Sizes)
             print "$number_font_size \n";
             $number_font_height = get_font_height ($number_font);
             print "$number_font_height \n";
-            for($k=1; $k < 101; $k++)
+            for($k=1; $k <= $HIGHEST_STONE_NUMBER; $k++)
             {
                 paste_into_layer($final_size * 8, $foreground_color);
                 draw_number( $k );
-                save_image( $color.$k, ($k==100) );
+                save_image( $color.$k, ($k==$HIGHEST_STONE_NUMBER) );
             }
         }
 
