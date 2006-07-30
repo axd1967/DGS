@@ -114,8 +114,8 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
      $notescutoffs[$i] = $i;
      }
 
-   $HAmarks = array( '' => '', '1' => '1', 'x' => 'X',
-                        't' => 'T', 's' => 'S', 'c' => 'C' );
+//    $HAmarks = array( '' => '', '1' => '1', 'x' => 'X',
+//                         't' => 'T', 's' => 'S', 'c' => 'C' );
 
 
 //------------
@@ -246,8 +246,8 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                                   'CHECKBOX', 'coordsup', 1, T_('Up'), ($s & COORD_UP),
                                   'CHECKBOX', 'coordsright', 1, T_('Right'), ($s & COORD_RIGHT),
                                   'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & COORD_DOWN),
-                                  'CHECKBOX', 'coordsover', 1, T_('Over'), ($s & COORD_OVER),
-                                  'CHECKBOX', 'coordssgfover', 1, T_('Sgf over'), ($s & COORD_SGFOVER),
+                                  'CHECKBOX', 'coordsover', 1, T_('Hover'), ($s & COORD_OVER),
+//                                  'CHECKBOX', 'coordssgfover', 1, T_('Sgf over'), ($s & COORD_SGFOVER),
                                 ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
                                   'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
@@ -256,12 +256,12 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    {
    $profile_form->add_row( array( 'DESCRIPTION', T_('Move numbering'),
                                   'TEXTINPUT', 'movenumbers', 4, 4, $player_row['MoveNumbers'],
-                                  'CHECKBOX', 'movemodulo', 100, T_('100 cycle') . SMALL_SPACING
+                                  'CHECKBOX', 'movemodulo', 100, T_('Don\'t use numbers above 100') . SMALL_SPACING
                                   , ($player_row['MoveModulo']>0 ?1 :0),
-                                  'SELECTBOX', 'movehamark', 1, $HAmarks
-                                  , $player_row['MoveHAmark'], false,
-                                  'TEXT', T_('Handicap mark') . SMALL_SPACING,
-                                  'CHECKBOX', 'numbersover', 1, T_('Over'), ($s & NUMBER_OVER),
+//                                   'SELECTBOX', 'movehamark', 1, $HAmarks
+//                                   , $player_row['MoveHAmark'], false,
+//                                  'TEXT', T_('Handicap mark') . SMALL_SPACING,
+//                                  'CHECKBOX', 'numbersover', 1, T_('Over'), ($s & NUMBER_OVER),
                                 ) );
    }
 

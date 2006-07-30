@@ -435,12 +435,12 @@ function get_alt_arg( $n1, $n2)
       {
          $tmp2= $move-$movenumbers;
          $TheBoard->move_marks( max( $tmp2, $Handicap+1), $move, $tmp);
-         if( $tmp2 <= $Handicap )
-         {
-            $tmp= trim((string)@$player_row['MoveHAmark']);
-            if( $tmp )
-               $TheBoard->move_marks( 1, $Handicap, $tmp);
-         }
+//          if( $tmp2 <= $Handicap )
+//          {
+//             $tmp= trim((string)@$player_row['MoveHAmark']);
+//             if( $tmp )
+//                $TheBoard->move_marks( 1, $Handicap, $tmp);
+//          }
          $TheBoard->draw_captures_box( T_('Captures'));
       }
    }
