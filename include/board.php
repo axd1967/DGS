@@ -36,7 +36,7 @@ class Board
    var $array; //2D array: [$PosX][$PosY] => $Stone
    var $moves; //array: [$MoveNr] => array($Stone,$PosX,$PosY)
    var $marks; //array: [$sgf_coord] => $mark
-   var $captures; //array: [$MoveNr] => array($Stone,$PosX,$PosY)
+   var $captures; //array: [$MoveNr] => array($Stone,$PosX,$PosY,$mark)
 
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
    var $movemrkx, $movemrky, $movecol, $movemsg;
@@ -177,32 +177,55 @@ class Board
    }
 
 
-   function move_numbers( $start, $end)
+   function move_marks( $start, $end, $mark=0)
    {
+      if( is_string( $mark) )
+      {
+         $mod = 0;
+      }
+      else if( is_numeric( $mark) )
+      {
+         if( $mark > 0 )
+            $mod = $mark;
+         else
+            $mod = MAX_MOVENUMBERS;
+         $mod = min( $mod, MAX_MOVENUMBERS);
+         if( $mod <= 1 )
+            return;
+         $mark = '';
+      }
+      else 
+         return;
+
       $start = max( $start, 1);
+
       for( $n=$end; $n>=$start; $n-- )
       {
          if( isset($this->moves[$n]) )
          {
             list( $s, $x, $y) = $this->moves[$n];
             //if( $s != BLACK and $s != WHITE ) continue;
-            $m = number2sgf_coords( $x, $y, $this->size);
-            if( $m )
+            $sgfc = number2sgf_coords( $x, $y, $this->size);
+            if( $sgfc )
             {
-               $b = @$this->array[$x][$y];
-               if( !isset($this->marks[$m]) )
+               if( $mod > 1 )
+                  $mrk = (($n-1) % $mod)+1;
+               else
+                  $mrk = $mark;
+
+               if( !isset($this->marks[$sgfc]) )
                {
-                  if( ($b & 0x3)==$s ) // or $s==($b^OFFSET_MARKED) )
+                  $b = @$this->array[$x][$y];
+                  if( ($b % OFFSET_MARKED) == $s ) // or $s==($b^OFFSET_MARKED)
                   {
-                     $this->marks[$m] = (($n-1)%100)+1;
+                     if( $mrk > '' )
+                        $this->marks[$sgfc] = $mrk;
                      continue;
                   }
                   if( $b==NONE )
-                  {
-                     $this->marks[$m] = 'x';
-                  }
+                     $this->marks[$sgfc] = 'x';
                }
-               $this->captures[$n] = array( $s, $x, $y);
+               $this->captures[$n] = array( $s, $x, $y, $mrk);
             }
          }
       }      
@@ -224,20 +247,19 @@ class Board
       $bcap= array();
       foreach( $this->captures as $n => $sub )
       {
-         list( $s, $x, $y) = $sub;
-         $m = number2board_coords( $x, $y, $size);
-         $r = (($n-1)%100)+1;
+         list( $s, $x, $y, $mrk) = $sub;
+         $brdc = number2board_coords( $x, $y, $size);
          if( $s == BLACK )
          {
             array_unshift( $bcap,
-                  image( "$stone_size/b$r.gif", "X$n", '', 'align=middle')
-                   . "&nbsp;:&nbsp;$m<br>\n" );
+                  image( "$stone_size/b$mrk.gif", "X$n", '', 'align=middle')
+                   . "&nbsp;:&nbsp;$brdc<br>\n" );
          }
          else if( $s == WHITE )
          {
             array_unshift( $wcap,
-                  image( "$stone_size/w$r.gif", "O$n", '', 'align=middle')
-                   . "&nbsp;:&nbsp;$m<br>\n" );
+                  image( "$stone_size/w$mrk.gif", "O$n", '', 'align=middle')
+                   . "&nbsp;:&nbsp;$brdc<br>\n" );
          }
       }
 
@@ -258,8 +280,9 @@ class Board
 
    function set_style( &$player_row)
    {
-      if( isset($player_row['Boardcoords']) &&
-          $player_row['Boardcoords'] >= 0 && $player_row['Boardcoords'] <= 0x3F )
+      if( isset($player_row['Boardcoords']) && is_numeric($player_row['Boardcoords'])
+        //&& $player_row['Boardcoords'] >= 0 && $player_row['Boardcoords'] <= 0xFF
+        )
          $this->coord_borders = $player_row['Boardcoords'];
       else
          $this->coord_borders = -1;
@@ -320,7 +343,7 @@ class Board
    {
       echo "<tr>\n";
 
-      if( $this->coord_borders & LEFT )
+      if( $this->coord_borders & COORD_LEFT )
          echo $edge_coord;
 
       echo '<td>' . $edge_start . 'l.gif" width='.EDGE_SIZE.'>' . "</td>\n";
@@ -335,7 +358,7 @@ class Board
 
       echo "</td>\n" . '<td>' . $edge_start . 'r.gif" width='.EDGE_SIZE.'>' . "</td>\n";
 
-      if( $this->coord_borders & RIGHT )
+      if( $this->coord_borders & COORD_RIGHT )
          echo $edge_coord;
 
       echo "</tr>\n";
@@ -356,7 +379,7 @@ class Board
 
       if( $smooth_edge )
       {
-         $border_start = 140 - ( $this->coord_borders & LEFT ? $coord_width : 0 );
+         $border_start = 140 - ( $this->coord_borders & COORD_LEFT ? $coord_width : 0 );
          $border_imgs = ceil( ($this->size * $stone_size - $border_start) / 150 ) - 1;
          $border_rem = $this->size * $stone_size - $border_start - 150 * $border_imgs;
          if( $border_imgs < 0 )
@@ -369,27 +392,27 @@ class Board
 
       $coord_alt = '.gif" alt="';
       $coord_end = "\"></td>\n";
-      if( $this->coord_borders & (LEFT | RIGHT) )
+      if( $this->coord_borders & (COORD_LEFT | COORD_RIGHT) )
       {
          $coord_start_number = "<td><img class=brdn src=\"$stone_size/c";
       }
-      if( $this->coord_borders & (UP | DOWN) )
+      if( $this->coord_borders & (COORD_UP | COORD_DOWN) )
       {
          $coord_start_letter = "<td><img class=brdl src=\"$stone_size/c";
 
-         $s = ($this->coord_borders & LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
+         $s = ($this->coord_borders & COORD_LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
          if ( $s )
             $coord_left = "<td colspan=$s><img src=\"images/blank.gif\" width=" .
-             ( ( $this->coord_borders & LEFT ? $coord_width : 0 )
+             ( ( $this->coord_borders & COORD_LEFT ? $coord_width : 0 )
              + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
              " height=$stone_size alt=\" \"></td>\n";
          else
             $coord_left = '';
 
-         $s = ($this->coord_borders & RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
+         $s = ($this->coord_borders & COORD_RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
          if ( $s )
             $coord_right = "<td colspan=$s><img src=\"images/blank.gif\" width=" .
-             ( ( $this->coord_borders & RIGHT ? $coord_width : 0 )
+             ( ( $this->coord_borders & COORD_RIGHT ? $coord_width : 0 )
              + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
              " height=$stone_size alt=\" \"></td>\n";
          else
@@ -444,7 +467,7 @@ class Board
       echo '<table border=0 cellpadding=0 cellspacing=0 ' . 
           $woodstring . ' align=center>';
 
-      if( $this->coord_borders & UP )
+      if( $this->coord_borders & COORD_UP )
          $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
                            $coord_left, $coord_right );
 
@@ -457,7 +480,7 @@ class Board
       {
          echo '<tr>';
 
-         if( $this->coord_borders & LEFT )
+         if( $this->coord_borders & COORD_LEFT )
             echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
 
          if( $smooth_edge )
@@ -546,6 +569,16 @@ class Board
                }
             }
 
+            $sgfc = number2sgf_coords($colnr, $this->size-$rownr, $this->size);
+            $mrk = '';
+            if( is_array($this->marks) )
+            {
+               if( $sgfc && @$this->marks[$sgfc] )
+               {
+                  $mrk = $this->marks[$sgfc];
+               }
+            }
+
             if( !$marked )
             {
                if( !$empty && ( $stone == BLACK or $stone == WHITE )
@@ -556,19 +589,24 @@ class Board
                   $alt = ( $stone == BLACK ? '#' : '@' );
                   $marked = true;
                }
-               elseif( is_array($this->marks) )
+               elseif( $mrk )
                {
-                  $m = number2sgf_coords($colnr, $this->size-$rownr, $this->size);
-                  if( $m && @$this->marks[$m] )
-                  {
-                     //$alt .= $this->marks[$m];
-                     $type .= $this->marks[$m];
-                     $marked = true;
-                  }
+                  //$alt .= $mrk;
+                  $type .= $mrk;
+                  $marked = true;
                }
             }
-            if( $this->coord_borders & OVER )
-               $alt.= "\" title=\"$letter$rownr";
+
+            $tit = '';
+            if( $mrk && $this->coord_borders & NUMBER_OVER )
+               $tit = strtoupper( $mrk);
+            if( $this->coord_borders & COORD_OVER )
+               //strtoupper? -> change capturebox too
+               $tit = ( $tit ? $tit.' - ' : '' ) . $letter.$rownr;
+            if( $this->coord_borders & COORD_SGFOVER )
+               $tit = ( $tit ? $tit.' - ' : '' ) . $sgfc;
+            if( $tit )
+               $alt.= "\" title=\"$tit";
 
             if( $may_play and !$no_click and
                 ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
@@ -583,7 +621,7 @@ class Board
          if( $smooth_edge )
             echo '<td>' . $edge_vert . "r.gif\"></td>\n";
 
-         if( $this->coord_borders & RIGHT )
+         if( $this->coord_borders & COORD_RIGHT )
             echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
 
          echo "</tr>\n";
@@ -594,7 +632,7 @@ class Board
          $this->draw_edge_row( $edge_start.'d', $edge_coord,
                                $border_start, $border_imgs, $border_rem );
 
-      if( $this->coord_borders & DOWN )
+      if( $this->coord_borders & COORD_DOWN )
          $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
                            $coord_left, $coord_right );
 
@@ -610,10 +648,10 @@ class Board
       if( $movemsg )
          $out .= wordwrap("Message: $movemsg", 47) . "\n\n";
 
-      if( $coord_borders & UP )
+      if( $coord_borders & COORD_UP )
       {
          $out .= '  ';
-         if( $coord_borders & LEFT )
+         if( $coord_borders & COORD_LEFT )
             $out .= '  ';
 
          $colnr = 1;
@@ -631,7 +669,7 @@ class Board
       for($rownr = $this->size; $rownr > 0; $rownr-- )
       {
          $out .= '  ';
-         if( $coord_borders & LEFT )
+         if( $coord_borders & COORD_LEFT )
             $out .= str_pad($rownr, 2, ' ', STR_PAD_LEFT);
 
          $pre_mark = false;
@@ -700,17 +738,17 @@ class Board
 
          $out .= ( $pre_mark ? ')' : ' ' );
 
-         if( $coord_borders & RIGHT )
+         if( $coord_borders & COORD_RIGHT )
             $out .= str_pad($rownr, 2, ' ', STR_PAD_RIGHT);
 
          $letter_r++;
          $out .= "\n";
       }
 
-      if( $coord_borders & DOWN )
+      if( $coord_borders & COORD_DOWN )
       {
          $out .= '  ';
-         if( $coord_borders & LEFT )
+         if( $coord_borders & COORD_LEFT )
             $out .= '  ';
 
          $colnr = 1;

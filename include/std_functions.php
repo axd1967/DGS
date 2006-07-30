@@ -101,6 +101,7 @@ $cookie_pref_rows = array(
        'Stonesize', 'Woodcolor', 'Boardcoords',
        'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff',
        'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
+       'MoveNumbers', 'MoveModulo', 'MoveHAmark',
        );
 
 $vacation_min_days = 2;
@@ -148,18 +149,21 @@ define('MAX_KOMI_RANGE',200);
 define('MAX_HANDICAP',21);
 define('ENA_STDHANDICAP',1);
 define('ENA_MOVENUMBERS',1);
+define('MAX_MOVENUMBERS', 500);
 
 
 //keep next constants powers of 2
 define("KO", 0x01);
 
 //-----
-define("LEFT",0x01);
-define("UP",0x02);
-define("RIGHT",0x04);
-define("DOWN",0x08);
-define("SMOOTH_EDGE",0x10);
-define("OVER",0x20);
+define('COORD_LEFT',0x01);
+define('COORD_UP',0x02);
+define('COORD_RIGHT',0x04);
+define('COORD_DOWN',0x08);
+define('SMOOTH_EDGE',0x10);
+define('COORD_OVER',0x20);
+define('COORD_SGFOVER',0x40);
+define('NUMBER_OVER',0x80);
 //-----
 
 
