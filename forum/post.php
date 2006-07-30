@@ -93,6 +93,8 @@ function post_message($player_row, $moderated_forum)
 
          extract(mysql_fetch_array($result));
 
+         $lastchanged_string = '';
+
          if( !($answer_nr > 0) ) $answer_nr=0;
       }
 
@@ -106,6 +108,7 @@ function post_message($player_row, $moderated_forum)
          $PosIndex = '';
          $Depth = 0;
          $Thread_ID = -1;
+         $lastchanged_string = "LastChanged=FROM_UNIXTIME($NOW), ";
       }
 
 
@@ -126,6 +129,7 @@ function post_message($player_row, $moderated_forum)
          "Forum_ID=$forum, " .
          "Thread_ID=$Thread_ID, " .
          "Time=FROM_UNIXTIME($NOW), " .
+         $lastchanged_string .
          "Subject=\"$Subject\", " .
          "Text=\"$Text\", " .
          "User_ID=" . $player_row["ID"] . ", " .

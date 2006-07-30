@@ -260,7 +260,7 @@ function change_depth(&$cur_depth, $new_depth)
 
 //      $GoDiagrams = find_godiagrams($Text);
 
-      draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text, $GoDiagrams);
+      draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text); //, $GoDiagrams);
 
       if( $preview and $preview_ID == $ID )
       {

@@ -164,7 +164,7 @@ require_once( "forum_functions.php" );
         mysql_query("UPDATE Forums SET ".
                     "Name=\"$name\", " .
                     "Description=\"$description\", " .
-                    "Moderated=" . ($moderated ? '"Y"' : '"N"') . " " .
+                    "Moderated=" . (@$_GET['moderated'] ? '"Y"' : '"N"') . " " .
                     "WHERE ID=" . $row['ID'] . " LIMIT 1")
            or die(mysql_error());
      }
