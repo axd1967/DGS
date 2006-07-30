@@ -15,7 +15,7 @@ require_once("../forum/forum_functions.php");
                   "Name=\"" . $row0["name"] . "\", " .
                   "Description=\"" . $row0['description'] . "\", " .
                   "Moderated=" . ($row0["moderation"] == 'y' ? '"Y"' : '"N"') . ", " .
-                  "SortOrder=" . ($SortOrder) or die(mysql_error());
+                  "SortOrder=" . $SortOrder) or die(mysql_error());
 
       if( mysql_affected_rows() != 1)
          die(mysql_error());
