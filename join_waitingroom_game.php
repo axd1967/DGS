@@ -128,12 +128,12 @@ require_once( "include/make_game.php" );
 
    mysql_query( "UPDATE Players SET Running=Running+" .
                 ( $game_info_row['Handicaptype'] == 'double' ? 2 : 1 ) .
-                ( $Rated == 'Y' ? ", RatingStatus='RATED'" : '' ) .
+                ( $game_info_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
                 " WHERE ID=$uid OR ID=" . $player_row['ID'] . " LIMIT 2" );
 
 // Reduce number of games left in the waiting room
 
-   if( $nrGames <= 1 )
+   if( $game_info_row['nrGames'] <= 1 )
    {
       mysql_query("DELETE FROM Waitingroom where ID=$id LIMIT 1");
    }
