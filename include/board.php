@@ -94,8 +94,13 @@ class Board
          return TRUE;
 
       $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
-      if( $result===FALSE or @mysql_num_rows($result) < 1 )
+      if( !$result )
          return FALSE;
+      if( @mysql_num_rows($result) <= 0 )
+      {
+         mysql_free_result($result);
+         return FALSE;
+      }
 
       if( $move<=0 or $move>$this->max_moves )
          $move = $this->max_moves;
@@ -141,6 +146,7 @@ class Board
             $marked_dead[] = array( $PosX, $PosY);
          }
       }
+      mysql_free_result($result);
 
       if( !$no_marked_dead and $removed_dead )
       {
@@ -155,12 +161,11 @@ class Board
       {
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 
-         //No movemsg if we don't have movecol
-         $result = mysql_query( "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" );
-
-         if( @mysql_num_rows($result) == 1 )
+         //No need of movemsg if we don't have movecol??
+         if( $row=mysql_single_fetch( 
+                     "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" 
+               ) )
          {
-            $row = mysql_fetch_assoc($result);
             $this->movemsg = trim($row['Text']);
          }
          //else $this->movemsg = '';
@@ -1041,20 +1046,18 @@ class Board
    // be extra entries in the Moves and MoveMessages tables.
    function fix_corrupted_move_table( $gid)
    {
-      $result = mysql_query("SELECT Moves FROM Games WHERE ID=$gid");
-
-      if( @mysql_num_rows($result) != 1 )
+     if( !($row=mysql_single_fetch(
+            "SELECT Moves FROM Games WHERE ID=$gid")) )
          error("mysql_query_failed",'board1');
 
-      extract(mysql_fetch_assoc($result));
+      extract($row);
 
 
-      $result = mysql_query("SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid");
-
-      if( @mysql_num_rows($result) != 1 )
+     if( !($row=mysql_single_fetch(
+            "SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid")) )
          error("mysql_query_failed",'board2');
 
-      extract(mysql_fetch_assoc($result));
+      extract($row);
 
 
       if($max_movenr == $Moves)
