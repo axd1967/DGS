@@ -96,7 +96,7 @@ require_once( "include/make_game.php" );
 
 
    mt_srand ((double) microtime() * 1000000);
-   if( $Handicaptype == 'nigiri' ) // nigiri
+   if( $game_info_row['Handicaptype'] == 'nigiri' ) // nigiri
       $i_am_black = mt_rand(0,1);
 
 
