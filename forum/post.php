@@ -88,7 +88,8 @@ function post_message($player_row, $moderated_forum)
          extract(mysql_fetch_array($result));
 
          $result = mysql_query("SELECT MAX(AnswerNr) AS answer_nr " .
-                               "FROM Posts WHERE Parent_ID=$parent");
+                               "FROM Posts WHERE Parent_ID=$parent")
+            or die(mysql_error());
 
          extract(mysql_fetch_array($result));
 
@@ -135,7 +136,7 @@ function post_message($player_row, $moderated_forum)
          "crc32=" . crc32($Text) . ", " .
          "PosIndex=\"$PosIndex\"";
 
-      mysql_query( $query );
+      mysql_query( $query ) or die(mysql_error());
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_post");
@@ -144,7 +145,8 @@ function post_message($player_row, $moderated_forum)
 
       if( !($parent > 0) )
       {
-         mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID LIMIT 1" );
+         mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID LIMIT 1" )
+            or die(mysql_error());
 
          if( mysql_affected_rows() != 1)
             error("mysql_insert_post");
@@ -165,11 +167,11 @@ function post_message($player_row, $moderated_forum)
          mysql_query("UPDATE Posts " .
                      "SET PostsInThread=PostsInThread+1, " .
                      "LastPost=$New_ID, LastChanged=FROM_UNIXTIME($NOW) " .
-                     "WHERE ID=$Thread_ID LIMIT 1" );
+                     "WHERE ID=$Thread_ID LIMIT 1" ) or die(mysql_error());
 
          mysql_query("UPDATE Forums " .
                      "SET PostsInForum=PostsInForum+1, LastPost=$New_ID " .
-                     "WHERE ID=$forum LIMIT 1" );
+                     "WHERE ID=$forum LIMIT 1" ) or die(mysql_error());
 
          return T_('Message sent!');
       }

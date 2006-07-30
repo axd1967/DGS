@@ -180,6 +180,7 @@ function change_depth(&$cur_depth, $new_depth)
    $cols=2;
    $headline = array(T_("Reading thread") => "colspan=$cols");
    $links = LINK_FORUMS | LINK_THREADS;
+   $is_moderator = false;
 
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
@@ -203,10 +204,13 @@ function change_depth(&$cur_depth, $new_depth)
    start_table($headline, $links, 'width="99%"', $cols);
 
    $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) AS Lastread FROM Forumreads " .
-                         "WHERE User_ID=" . $player_row["ID"] . " AND Thread_ID=$thread");
+                         "WHERE User_ID=" . $player_row["ID"] . " AND Thread_ID=$thread")
+      or die(mysql_error());
 
    if( @mysql_num_rows($result) == 1 )
       extract( mysql_fetch_array( $result ) );
+   else
+      $Lastread = NULL;
 
    $result = mysql_query("SELECT Posts.*, " .
                          "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
@@ -216,8 +220,8 @@ function change_depth(&$cur_depth, $new_depth)
                          "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
                          "AND PosIndex IS NOT NULL " .
-                         "ORDER BY PosIndex");
-
+                         "ORDER BY PosIndex")
+      or die(mysql_error());
    echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
    $thread_Subject = '';
@@ -287,9 +291,9 @@ function change_depth(&$cur_depth, $new_depth)
       $Subject = $preview_Subject;
       $Text = $preview_Text;
 //      $GoDiagrams = $preview_GoDiagrams;
-      draw_post('preview', false, $Subject, $Text, $GoDiagrams);
+      draw_post('preview', false, $Subject, $Text); //, $GoDiagrams);
       echo "<tr><td>\n";
-      message_box('preview', $thread, $GoDiagrams, $Subject, $Text);
+      message_box('preview', $thread, NULL /*$GoDiagrams*/, $Subject, $Text);
       echo "</td></tr>\n";
    }
 
@@ -316,7 +320,7 @@ function change_depth(&$cur_depth, $new_depth)
       mysql_query( "REPLACE INTO Forumreads SET " .
                    "User_ID=" . $player_row["ID"] . ", " .
                    "Thread_ID=$thread, " .
-                   "Time=FROM_UNIXTIME($NOW)" );
+                   "Time=FROM_UNIXTIME($NOW)" ) or die(mysql_error());
    }
 
    end_page();

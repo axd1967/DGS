@@ -65,6 +65,7 @@ require_once( "forum_functions.php" );
    if( $show_rows < $nr_rows )
       $links |= LINK_NEXT_PAGE;
 
+   $is_moderator = false;
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
       $links |= LINK_TOGGLE_MODERATOR_LIST;

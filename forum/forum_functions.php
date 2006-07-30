@@ -202,7 +202,8 @@ function forum_name($forum, &$moderated)
    if( !($forum > 0) )
       error("unknown_forum");
 
-   $result = mysql_query("SELECT Name AS Forumname, Moderated FROM Forums WHERE ID=$forum");
+   $result = mysql_query("SELECT Name AS Forumname, Moderated FROM Forums WHERE ID=$forum")
+      or die(mysql_error());
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_forum");
@@ -235,15 +236,16 @@ function approve_message($id, $thread, $forum, $approve=true)
 {
    $result = mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "' " .
                          "WHERE ID=$id AND Thread_ID=$thread " .
-                         "AND Approved='" . ( $approve ? 'N' : 'Y' ) . "' LIMIT 1");
+                         "AND Approved='" . ( $approve ? 'N' : 'Y' ) . "' LIMIT 1")
+      or die(mysql_error());
 
    if( mysql_affected_rows() == 1 )
    {
       mysql_query("UPDATE Posts SET PostsInThread=PostsInThread" . ($approve ? '+1' : '-1') .
-                  " WHERE ID=$thread LIMIT 1");
+                  " WHERE ID=$thread LIMIT 1") or die(mysql_error());
 
       mysql_query("UPDATE Forums SET PostsInForum=PostsInForum" . ($approve ? '+1' : '-1') .
-                  " WHERE ID=$forum LIMIT 1");
+                  " WHERE ID=$forum LIMIT 1") or die(mysql_error());
 
 
       recalculate_lastpost($thread, $forum);
@@ -258,14 +260,16 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
    $result = mysql_query("SELECT ID, UNIX_TIMESTAMP(Time) AS Timestamp FROM Posts " .
                          "WHERE Thread_ID='$Thread_ID' AND Approved='Y' " .
                          "AND PosIndex IS NOT NULL " .
-                         "ORDER BY Time Desc LIMIT 1");
+                         "ORDER BY Time Desc LIMIT 1")
+      or die(mysql_error());
 
    if( @mysql_num_rows($result) == 1 )
    {
       $row = mysql_fetch_row($result);
       mysql_query("UPDATE Posts SET LastPost=" . $row[0] . ", " .
                   "LastChanged=FROM_UNIXTIME(" . $row[1] . ") " .
-                  "WHERE ID=$Thread_ID LIMIT 1");
+                  "WHERE ID=$Thread_ID LIMIT 1")
+         or die(mysql_error());
    }
 
 
@@ -273,12 +277,14 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
                          "FROM Posts as Thread " .
                          "JOIN Posts as Last ON Thread.LastPost=Last.ID " .
                          "WHERE Thread.Forum_ID=" . $Forum_ID . " AND Thread.Parent_ID=0 " .
-                         "ORDER BY Last.Time DESC LIMIT 1");
+                         "ORDER BY Last.Time DESC LIMIT 1")
+      or die(mysql_error());
 
    if( @mysql_num_rows($result) == 1 )
    {
       $row = mysql_fetch_row($result);
-      mysql_query("UPDATE Forums SET LastPost=" . $row[0] . " WHERE ID=$Forum_ID LIMIT 1");
+      mysql_query("UPDATE Forums SET LastPost=" . $row[0] . " WHERE ID=$Forum_ID LIMIT 1")
+         or die(mysql_error());
    }
 
 }
@@ -286,7 +292,9 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
 
 function recalculate_postsinforum($Forum_ID)
 {
-   $result = mysql_query("SELECT COUNT(*), Thread_ID FROM Posts WHERE Forum_ID=$Forum_ID AND Approved='Y' GROUP BY Thread_ID");
+   $result = mysql_query("SELECT COUNT(*), Thread_ID FROM Posts " .
+                         "WHERE Forum_ID=$Forum_ID AND Approved='Y' GROUP BY Thread_ID")
+      or die(mysql_error());
 
    $sum = 0;
    while( $row = mysql_fetch_row( $result ) )

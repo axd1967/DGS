@@ -65,7 +65,8 @@ require_once( "forum_functions.php" );
   else if( @$_GET["do_new"] == 't' )
   {
      $SortOrder = 0;
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=" . (@$_GET["id"]+0) );
+     $result = mysql_query( "SELECT * FROM Forums WHERE ID=" . (@$_GET["id"]+0) )
+        or die(mysql_error());
 
      if( @mysql_num_rows($result) == 1 )
      {
@@ -79,13 +80,15 @@ require_once( "forum_functions.php" );
      if( !empty($name) )
      {
         mysql_query("UPDATE Forums SET SortOrder=SortOrder+1 " .
-                    'WHERE SortOrder>' . $SortOrder );
+                    'WHERE SortOrder>' . $SortOrder )
+           or die(mysql_error());
 
         mysql_query("INSERT INTO Forums SET " .
                     "Name=\"$name\", " .
                     "Description=\"$description\", " .
                     "Moderated=" . (@$_POST["moderated"] ? '"Y"' : '"N"') . ", " .
-                    "SortOrder=" . ($SortOrder+1));
+                    "SortOrder=" . ($SortOrder+1))
+           or die(mysql_error());
      }
      else
      {
@@ -104,7 +107,8 @@ require_once( "forum_functions.php" );
 
      echo "<center>\n";
 
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
+     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" )
+        or die(mysql_error());
 
      if( @mysql_num_rows($result) != 1 )
         error("admin_no_such_entry",'admin1');
@@ -131,7 +135,8 @@ require_once( "forum_functions.php" );
 
   else if( @$_GET["do_edit"] == 't' )
   {
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
+     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" )
+        or die(mysql_error());
 
      if( @mysql_num_rows($result) != 1 )
         error("admin_no_such_entry",'admin2');
@@ -150,9 +155,9 @@ require_once( "forum_functions.php" );
          @mysql_num_rows(mysql_query("SELECT ID FROM Posts " .
                                     "WHERE Forum_ID=" . $row["ID"] . " LIMIT 1")) == 0 )
      {
-        mysql_query("DELETE FROM Forums WHERE ID=$id LIMIT 1");
+        mysql_query("DELETE FROM Forums WHERE ID=$id LIMIT 1") or die(mysql_error());
         mysql_query("UPDATE Forums SET SortOrder=SortOrder-1 " .
-                    "WHERE SortOrder>" . $row["SortOrder"]);
+                    "WHERE SortOrder>" . $row["SortOrder"]) or die(mysql_error());
      }
      else
      {
@@ -160,7 +165,8 @@ require_once( "forum_functions.php" );
                     "Name=\"$name\", " .
                     "Description=\"$description\", " .
                     "Moderated=" . ($moderated ? '"Y"' : '"N"') . " " .
-                    "WHERE ID=" . $row['ID'] . " LIMIT 1");
+                    "WHERE ID=" . $row['ID'] . " LIMIT 1")
+           or die(mysql_error());
      }
 
      jump_to("forum/admin.php");
@@ -172,14 +178,14 @@ require_once( "forum_functions.php" );
 
   else if( @$_GET["move"] == 'u' or @$_GET["move"] == 'd' )
   {
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" );
+     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" ) or die(mysql_error());
 
      if( @mysql_num_rows($result) != 1 )
         error("admin_no_such_entry",'admin3');
 
      $row = mysql_fetch_array( $result );
 
-     $result = mysql_query( "SELECT MAX(SortOrder) as max FROM Forums");
+     $result = mysql_query( "SELECT MAX(SortOrder) as max FROM Forums") or die(mysql_error());
      $row2 = mysql_fetch_array( $result );
      $max = $row2["max"];
 
@@ -189,9 +195,9 @@ require_once( "forum_functions.php" );
         $dir = (@$_GET["move"] == 'd' ? 1 : -1 );
 
         mysql_query( "UPDATE Forums SET SortOrder=SortOrder-($dir) " .
-                     'WHERE SortOrder=' . ($row["SortOrder"]+$dir) );
+                     'WHERE SortOrder=' . ($row["SortOrder"]+$dir) ) or die(mysql_error());
         mysql_query( "UPDATE Forums SET SortOrder=SortOrder+($dir) " .
-                     "WHERE ID=" . $row["ID"] . " LIMIT 1");
+                     "WHERE ID=" . $row["ID"] . " LIMIT 1") or die(mysql_error());
      }
      jump_to("forum/admin.php");
   }
@@ -214,7 +220,8 @@ require_once( "forum_functions.php" );
         mysql_query("SELECT Forums.ID,Description,Name " .
                     "FROM Forums LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
                     "GROUP BY Forums.ID " .
-                    "ORDER BY SortOrder");
+                    "ORDER BY SortOrder")
+      or die(mysql_error());
 
      echo "<table>\n";
 
