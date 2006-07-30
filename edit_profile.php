@@ -30,6 +30,8 @@ require_once( "include/countries.php" );
 // http://www.dragongoserver.net/edit_profile.php?language=C
 // http://www.dragongoserver.net/edit_profile.php?language=en
 
+define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
+
 {
    connect2mysql();
 
@@ -78,7 +80,7 @@ require_once( "include/countries.php" );
    $woodcolors = array();
    for($i=1; $i<16; $i++ )
    {
-      $woodcolors[$i] = "<img width=30 height=30 src=\"images/smallwood$i.gif\" alt=\"wood$i\">&nbsp;&nbsp;";
+      $woodcolors[$i] = "<img width=30 height=30 src=\"images/smallwood$i.gif\" alt=\"wood$i\">" . SMALL_SPACING;
       if( $i==5 ) 
       {
          $woodcolors[$i].= '<BR>';
@@ -111,6 +113,9 @@ require_once( "include/countries.php" );
      {
      $notescutoffs[$i] = $i;
      }
+
+   $HAmarks = array( '' => '', '1' => '1', 'x' => 'X',
+                        't' => 'T', 's' => 'S', 'c' => 'C' );
 
 
 //------------
@@ -186,34 +191,10 @@ require_once( "include/countries.php" );
 
    $profile_form->add_row( array( 'HR' ) );
 
-   $profile_form->add_row( array( 'HEADER', T_('Board graphics') ) );
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Stone size'),
-                                  'SELECTBOX', 'stonesize', 1, $stonesizes,
-                                  $player_row["Stonesize"], false ) );
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Wood color'),
-                                  'RADIOBUTTONS', 'woodcolor', $woodcolors,
-                                  $player_row["Woodcolor"] ) );
+   $profile_form->add_row( array( 'HEADER', T_('Appearences') ) );
 
-   $s = $player_row["Boardcoords"];
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Coordinate sides'),
-                                  'CHECKBOX', 'coordsleft', 1, T_('Left'), ($s & LEFT),
-                                  'CHECKBOX', 'coordsup', 1, T_('Up'), ($s & UP),
-                                  'CHECKBOX', 'coordsright', 1, T_('Right'), ($s & RIGHT),
-                                  'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & DOWN),
-                                  'CHECKBOX', 'coordsover', 1, T_('Over'), ($s & OVER),
-                                ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
-                                  'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
-
-   if( ENA_MOVENUMBERS )
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Move numbering'),
-                                  'TEXTINPUT', 'movenumbers', 4, 4, $player_row['MoveNumbers'],
-                                  //'CHECKBOX', 'movenumover', 1, '', ($s & MOVE_NUMBER),
-                                ) );
-
-   $profile_form->add_row( array( 'SPACE' ) );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Menu direction'),
                                   'RADIOBUTTONS', 'menudir', $menu_directions,
@@ -249,6 +230,45 @@ require_once( "include/countries.php" );
 
 
 
+   $profile_form->add_row( array( 'HEADER', T_('Board graphics') ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Stone size'),
+                                  'SELECTBOX', 'stonesize', 1, $stonesizes,
+                                  $player_row["Stonesize"], false ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Wood color'),
+                                  'RADIOBUTTONS', 'woodcolor', $woodcolors,
+                                  $player_row["Woodcolor"] ) );
+
+   $s = $player_row["Boardcoords"];
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Coordinate sides'),
+                                  'CHECKBOX', 'coordsleft', 1, T_('Left'), ($s & COORD_LEFT),
+                                  'CHECKBOX', 'coordsup', 1, T_('Up'), ($s & COORD_UP),
+                                  'CHECKBOX', 'coordsright', 1, T_('Right'), ($s & COORD_RIGHT),
+                                  'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & COORD_DOWN),
+                                  'CHECKBOX', 'coordsover', 1, T_('Over'), ($s & COORD_OVER),
+                                  'CHECKBOX', 'coordssgfover', 1, T_('Sgf over'), ($s & COORD_SGFOVER),
+                                ) );
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
+                                  'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
+
+   if( ENA_MOVENUMBERS )
+   {
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Move numbering'),
+                                  'TEXTINPUT', 'movenumbers', 4, 4, $player_row['MoveNumbers'],
+                                  'CHECKBOX', 'movemodulo', 100, T_('100 cycle') . SMALL_SPACING
+                                  , ($player_row['MoveModulo']>0 ?1 :0),
+                                  'SELECTBOX', 'movehamark', 1, $HAmarks
+                                  , $player_row['MoveHAmark'], false,
+                                  'TEXT', T_('Handicap mark') . SMALL_SPACING,
+                                  'CHECKBOX', 'numbersover', 1, T_('Over'), ($s & NUMBER_OVER),
+                                ) );
+   }
+
+//   $profile_form->add_row( array( 'SPACE' ) );
+//
+
+
    $profile_form->add_row( array( 'HEADER', T_('Private game notes') ) );
 
    foreach( array( 'Small', 'Large') as $typ )
@@ -272,10 +292,10 @@ require_once( "include/countries.php" );
 
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Size'),
-               'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Height') . '&nbsp;',
                'SELECTBOX', "notes{$ltyp}height", 1, $notesheights, $player_row["Notes{$typ}Height"], false,
-               'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Width') . '&nbsp;',
+               'TEXT', T_('Height') . SMALL_SPACING,
                'SELECTBOX', "notes{$ltyp}width", 1, $noteswidths, $player_row["Notes{$typ}Width"], false,
+               'TEXT', T_('Width'),
             ) );
    }
 

@@ -55,11 +55,18 @@ require_once( "include/countries.php" );
       }
    }
 
-   $boardcoords = ( @$_GET['coordsleft'] ? LEFT : 0 ) + ( @$_GET['coordsup'] ? UP : 0 ) +
-      ( @$_GET['coordsright'] ? RIGHT : 0 ) + ( @$_GET['coordsdown'] ? DOWN : 0 ) +
-      ( @$_GET['coordsover'] ? OVER : 0 ) + ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
+   $boardcoords = ( @$_GET['coordsleft'] ? COORD_LEFT : 0 )
+                + ( @$_GET['coordsup'] ? COORD_UP : 0 )
+                + ( @$_GET['coordsright'] ? COORD_RIGHT : 0 )
+                + ( @$_GET['coordsdown'] ? COORD_DOWN : 0 )
+                + ( @$_GET['coordsover'] ? COORD_OVER : 0 )
+                + ( @$_GET['coordssgfover'] ? COORD_SGFOVER : 0 )
+                + ( @$_GET['numbersover'] ? NUMBER_OVER : 0 )
+                + ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
 
    $movenumbers = (int)@$_GET['movenumbers'];
+   $movemodulo = (int)@$_GET['movemodulo'];
+   $moveHAmark = (string)@$_GET['movehamark'];
 
    $menudirection = ( @$_GET['menudir'] == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
@@ -100,10 +107,13 @@ require_once( "include/countries.php" );
 
    if( @$_GET['locally'] == 1 )
    {
+      // adjust $cookie_pref_rows too
       $cookie_prefs['Stonesize'] = (int)@$_GET['stonesize'];
       $cookie_prefs['Woodcolor'] = (int)@$_GET['woodcolor'];
       $cookie_prefs['Boardcoords'] = $boardcoords;
       $cookie_prefs['MoveNumbers'] = $movenumbers;
+      $cookie_prefs['MoveModulo'] = $movemodulo;
+      $cookie_prefs['MoveHAmark'] = $moveHAmark;
       $cookie_prefs['MenuDirection'] = $menudirection;
       $cookie_prefs['Button'] = (int)@$_GET['button'];
       $cookie_prefs['NotesSmallHeight'] = (int)@$_GET['notessmallheight'];
@@ -123,6 +133,8 @@ require_once( "include/countries.php" );
          "Woodcolor=" . (int)@$_GET['woodcolor'] . ", " .
          "Boardcoords=$boardcoords, " .
          "MoveNumbers=$movenumbers, " .
+         "MoveModulo=$movemodulo, " .
+         "MoveHAmark='$moveHAmark', " .
          "MenuDirection='$menudirection', " .
          "Button=" . (int)@$_GET['button'] . ", " .
          "NotesSmallHeight=" . (int)@$_GET['notessmallheight'] . ", " .

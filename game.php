@@ -400,16 +400,16 @@ function get_alt_arg( $n1, $n2)
         $noteswidth = $player_row["NotesSmallWidth"];
         $notesmode = $player_row["NotesSmallMode"];
       }
-      if( isset($_GET['notesmode']) )
-         $notesmode=$_GET['notesmode'];
-      $show_notes = ( $notesmode != 'OFF' && $notesmode !== 0 ) ;
+      if( isset($_REQUEST['notesmode']) )
+         $notesmode= (string)$_REQUEST['notesmode'];
+      $show_notes = ( $notesmode != 'OFF' && $notesmode != 0 ) ;
    }
 
    if( ENA_MOVENUMBERS )
    {
-      $movenumbers= @$player_row['MoveNumbers'];
-      if( isset($_GET['movenumbers']) )
-         $movenumbers= $_GET['movenumbers'];
+      $movenumbers= (int)@$player_row['MoveNumbers'];
+      if( isset($_REQUEST['movenumbers']) )
+         $movenumbers= (int)$_REQUEST['movenumbers'];
    }
    else
       $movenumbers= 0;
@@ -430,8 +430,19 @@ function get_alt_arg( $n1, $n2)
 
    if( $movenumbers>0 )
    {
-      $TheBoard->move_numbers( max( $move-$movenumbers, $Handicap+1), $move);
-      $TheBoard->draw_captures_box( T_('Captures'));
+      $tmp= (int)@$player_row['MoveModulo'];
+      if( $tmp >= 0 )
+      {
+         $tmp2= $move-$movenumbers;
+         $TheBoard->move_marks( max( $tmp2, $Handicap+1), $move, $tmp);
+         if( $tmp2 <= $Handicap )
+         {
+            $tmp= trim((string)@$player_row['MoveHAmark']);
+            if( $tmp )
+               $TheBoard->move_marks( 1, $Handicap, $tmp);
+         }
+         $TheBoard->draw_captures_box( T_('Captures'));
+      }
    }
    echo "</td><td>\n";
 
@@ -446,7 +457,7 @@ function get_alt_arg( $n1, $n2)
    {
       if( $notesmode == 'BELOW' )
          echo "</td></tr>\n<tr><td colspan=2 align='center'>";
-      else //default RIGHT
+      else //default 'RIGHT'
          echo "</td>\n<td align='left' valign='center'>";
       draw_notes( $notes, $gid, $notesheight, $noteswidth);
    }
@@ -470,6 +481,13 @@ function get_alt_arg( $n1, $n2)
       $page_hiddens['stonestring'] = $stonestring;
    if( @$prisoner_string )
       $page_hiddens['prisoner_string'] = $prisoner_string;
+
+   if( @$_REQUEST['movenumbers'] )
+      $page_hiddens['movenumbers'] = $_REQUEST['movenumbers'];
+   if( @$_REQUEST['notesmode'] )
+      $page_hiddens['notesmode'] = $_REQUEST['notesmode'];
+   if( @$_REQUEST['stdhandicap'] )
+      $page_hiddens['stdhandicap'] = $_REQUEST['stdhandicap'];
 
 
    foreach( $page_hiddens as $key => $val )
