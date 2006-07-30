@@ -116,7 +116,7 @@ require_once( "include/message_functions.php" );
          "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
-       "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$uid " .
+         "AND opponent.ID=(Black_ID+White_ID-$uid) " .
        "ORDER BY $order,Games.ID";
 
    $result = mysql_query( $query ) or die(mysql_error());

@@ -403,7 +403,7 @@ else
        "opponent.Name, opponent.Handle " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$my_id AND Status!='INVITED' AND Status!='FINISHED' " .
-         "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$my_id " .
+         "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        "ORDER BY date, Games.ID";
 
    $resultG = mysql_query( $query ) or error('mysql_query_failed','wap4');
