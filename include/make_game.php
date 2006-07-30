@@ -312,7 +312,7 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
          if( !isset($rownr) or !isset($colnr) )
             error("illegal_position",'std_handicap');
 
-         $query .= "($gid, " . $i/2 . ", " . BLACK . ", $colnr, $rownr, 0)";
+         $query .= "($gid, " . ($i/2 + 1) . ", " . BLACK . ", $colnr, $rownr, 0)";
          if( $i+2 < $l ) $query .= ", ";
       }
    }
