@@ -274,9 +274,9 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
 
 
    $result = mysql_query("SELECT Last.ID " .
-                         "FROM Posts as Thread " .
-                         "JOIN Posts as Last ON Thread.LastPost=Last.ID " .
-                         "WHERE Thread.Forum_ID=" . $Forum_ID . " AND Thread.Parent_ID=0 " .
+                         "FROM Posts as Thread, Posts as Last " .
+                         "WHERE Thread.LastPost=Last.ID AND " .
+                         "Thread.Forum_ID=" . $Forum_ID . " AND Thread.Parent_ID=0 " .
                          "ORDER BY Last.Time DESC LIMIT 1")
       or die(mysql_error());
 
@@ -310,5 +310,11 @@ function recalculate_postsinforum($Forum_ID)
    mysql_query("UPDATE Forums SET PostsInForum=$sum WHERE ID=$Forum_ID")
       or die(mysql_error());
 }
+
+function display_posts_pending_approval()
+{
+   
+}
+
 
 ?>
