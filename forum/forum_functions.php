@@ -234,7 +234,8 @@ function set_moderator_cookie()
 
 function approve_message($id, $thread, $forum, $approve=true)
 {
-   $result = mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "' " .
+   $result = mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "', " .
+                         "PendingApproval='N' " .
                          "WHERE ID=$id AND Thread_ID=$thread " .
                          "AND Approved='" . ( $approve ? 'N' : 'Y' ) . "' LIMIT 1")
       or die(mysql_error());
@@ -313,7 +314,37 @@ function recalculate_postsinforum($Forum_ID)
 
 function display_posts_pending_approval()
 {
-   
+   global $date_fmt;
+
+   $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) as Time,Subject,Forum_ID,Thread_ID, " .
+                         "Posts.ID as Post_ID,User_ID,Name,Handle " .
+                         "FROM Posts,Players " .
+                         "WHERE PendingApproval='Y' AND Players.ID=User_ID " .
+                         "ORDER BY Time DESC")
+      or die(mysql_error());
+
+   if( mysql_num_rows($result) == 0 )
+      return;
+
+   $cols = 3;
+   $headline  = array(T_("Posts pending approval") => "colspan=$cols");
+   $links = 0;
+   start_table($headline, $links, "width=90%", $cols);
+
+   $odd = true;
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      $color = ( $odd ? "" : " bgcolor=white" );
+
+      $Subject = make_html_safe( $row['Subject'], true);
+      echo "<tr$color><td><a href=\"forum/read.php?forum=" . $row['Forum_ID'] . URI_AMP .
+         "thread=" . $row['Thread_ID'] . URI_AMP . "moderator=y#" . $row['Post_ID'] . "\">$Subject</a></td><td>" .
+         user_reference( REF_LINK, 1, NULL, $row['User_ID'], $row['Name'], $row['Handle']) .
+         "</td><td nowrap align=right>" .date($date_fmt, $row['Time']) . "</td></tr>\n";
+      $odd = !$odd;
+
+   }
+   end_table($links, $cols);
 }
 
 

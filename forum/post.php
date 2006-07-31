@@ -137,6 +137,7 @@ function post_message($player_row, $moderated_forum)
          "AnswerNr=" . ($answer_nr+1) . ", " .
          "Depth=$Depth, " .
          "Approved=" . ($moderated ? "'N'" : "'Y'")  . ", " .
+         "PendingApproval=" . ($moderated ? "'Y'" : "'N'")  . ", " .
          "crc32=" . crc32($Text) . ", " .
          "PosIndex=\"$PosIndex\"";
 
@@ -162,8 +163,6 @@ function post_message($player_row, $moderated_forum)
 
       if( $moderated )
       {
-         // TODO: Notify moderators;
-
          return T_('This post is subject to moderation. It will be shown once the moderators have approved it.');
       }
       else

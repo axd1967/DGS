@@ -199,6 +199,17 @@ require_once( "include/message_functions.php" );
    }
    echo "</center>";
 
+   if( $player_row['Adminlevel'] & ADMIN_FORUM )
+   {
+      chdir('forum');
+      require_once('forum_functions.php');
+      display_posts_pending_approval();
+      chdir('..');
+   }
+
+
+
+
    $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$my_id",
                         T_('Show running games') => "show_games.php?uid=$my_id",
                         T_('Show finished games') => "show_games.php?uid=$my_id".URI_AMP."finished=1",

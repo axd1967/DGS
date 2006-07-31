@@ -570,9 +570,12 @@ CREATE TABLE Posts (
   crc32 int(11) default NULL,
   PosIndex varchar(80) binary default NULL,
   old_ID int(11) default '0',
-  Approved char(1) default NULL,
+  Approved enum('Y', 'N') NOT NULL default 'Y',
+  PendingApproval enum('Y', 'N') NOT NULL default 'N';
   PRIMARY KEY  (ID),
-  KEY Pos (Thread_ID,PosIndex)
+  KEY Pos (Thread_ID, PosIndex),
+  KEY List (Forum_ID, Lastchanged),
+  KEY PendingApproval (PendingApproval,Time DESC)
 ) TYPE=MyISAM;
 
 
