@@ -404,9 +404,10 @@ function get_alt_arg( $n1, $n2)
         $noteswidth = $player_row["NotesSmallWidth"];
         $notesmode = $player_row["NotesSmallMode"];
       }
+
       if( isset($_REQUEST['notesmode']) )
          $notesmode= (string)$_REQUEST['notesmode'];
-      $show_notes = ( $notesmode !== 'OFF' && $notesmode !== 0 ) ;
+      $show_notes = ( $notesmode and $notesmode !== '0' and $notesmode !== 'OFF' );
    }
 
    if( ENA_MOVENUMBERS )
@@ -612,7 +613,7 @@ function draw_moves()
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">\n";
 }
 
-function draw_message_box( $message)
+function draw_message_box(&$message)
 {
 
    $tabindex=1;
@@ -639,83 +640,72 @@ function draw_message_box( $message)
 
 }
 
-
-function draw_game_info($game_row)
+function draw_game_info(&$game_row)
 {
-  echo "<table id=\"game_infos\" class=infos border=1>\n";
-  echo "   <tr>\n";
-  echo "     <td></td><td width=" . ($game_row['Size']*9) . ">" .
-    T_('White') . "</td><td width=" . ($game_row['Size']*9) . ">" . T_('Black') . "</td>\n";
-  echo "   </tr><tr>\n";
-  echo "     <td>" . T_('Name') . ":</td>\n";
-  echo '     <td' . ( $game_row['Whitewarning'] > 0
-             ? blend_warning_cell_attb( T_('On vacation') ) : '' ) . '>'
-       . user_reference( REF_LINK, 1, 'black', $game_row['White_ID'], $game_row['Whitename'], $game_row['Whitehandle'])
-       . "</td>\n";
-  echo '     <td' . ( $game_row['Blackwarning'] > 0
-             ? blend_warning_cell_attb( T_('On vacation') ) : '' ) . '>'
-       . user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'], $game_row['Blackname'], $game_row['Blackhandle'])
-       . "</td>\n";
-  echo "   </tr><tr>\n";
+   global $table_row_color2;
 
-  echo '     <td>' . T_('Rating') . ":</td>\n";
-  echo '     <td>' . echo_rating( ($game_row['Status']==='FINISHED' ?
-                                   $game_row['White_End_Rating'] : $game_row['Whiterating'] ),
-                                  true, $game_row['White_ID'] ) . "</td>\n";
-  echo '     <td>' . echo_rating( ($game_row['Status']==='FINISHED' ?
+   echo '<table border=0 cellspacing=0 cellpadding=3 align=center>' . "\n";
+   echo '<tr bgcolor="#DDDDDD">' . "\n";
+   echo "<td align=center><img src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
+   echo '<td' . ( $game_row['Blackwarning'] > 0
+                   ? blend_warning_cell_attb( T_('On vacation') ) : '' ) . '>' .
+      user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'],
+                      $game_row['Blackname'], $game_row['Blackhandle']) . "</td>\n";
+
+   echo '<td>' . echo_rating( ($game_row['Status']==='FINISHED' ?
                                    $game_row['Black_End_Rating'] : $game_row['Blackrating'] ),
                                   true, $game_row['Black_ID'] ) . "</td>\n";
-  echo "   </tr><tr>\n";
+   echo '<td>&nbsp;</td>' . "\n";
+   echo '<td>' . T_('Prisoners') . ': ' . $game_row['Black_Prisoners'] . "</td>\n";
+   echo "</tr>\n";
 
-  echo '     <td>' . T_('Rank info') . ":</td>\n";
-  echo '     <td>' . make_html_safe($game_row['Whiterank'], true) . "</td>\n";
-  echo '     <td>' . make_html_safe($game_row['Blackrank'], true) . "</td>\n";
-  echo "   </tr><tr>\n";
-  echo '     <td>' . T_('Prisoners') . ":</td>\n";
-  echo '     <td>' . $game_row['White_Prisoners'] . "</td>\n";
-  echo '     <td>' . $game_row['Black_Prisoners'] . "</td>\n";
-  echo "   </tr><tr>\n";
-  echo '     <td></td><td>' . T_('Komi') . ': ' . $game_row['Komi'] . "</td>\n";
-  echo '     <td>' . T_('Handicap') . ': ' . $game_row['Handicap'] . "</td>\n";
-  echo "   </tr>\n";
+   echo '<tr bgcolor="#DDDDDD">' . "\n";
+   echo "<td colspan=5>\n" . T_("Time remaining") . ": " .
+      echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
+                          $game_row['Byotime'], $game_row['Byoperiods'],
+                          $game_row['Black_Maintime'], $game_row['Black_Byotime'],
+                          $game_row['Black_Byoperiods']) . "</td>\n";
+   echo "</tr>\n";
 
-    if( $game_row['Status'] != 'FINISHED' and ($game_row['Maintime'] > 0 or $game_row['Byotime'] > 0))
-    {
-      echo " <tr>\n";
-      echo '     <td>' . T_('Main time') . ":</td>\n";
-      echo '     <td>' .  echo_time( $game_row['White_Maintime'] ) . "</td>\n";
-      echo '     <td>' .  echo_time( $game_row['Black_Maintime'] ) . "</td>\n";
-      echo "   </tr>\n";
 
-      if( $game_row['Black_Byotime'] > 0 or $game_row['White_Byotime'] > 0 )
-      {
-        echo " <tr>\n";
-        echo '     <td>' . T_('Byoyomi') . ":</td>\n";
-        echo '     <td>' .  echo_time( $game_row['White_Byotime'] );
-        if( $game_row['White_Byotime'] > 0 ) echo ' (' . $game_row['White_Byoperiods'] . ')';
+   echo '<tr bgcolor="#FFFFFF">' . "\n";
+   echo "<td align=center><img src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
+   echo '<td' . ( $game_row['Whitewarning'] > 0
+                   ? blend_warning_cell_attb( T_('On vacation') ) : '' ) . '>' .
+      user_reference( REF_LINK, 1, 'black', $game_row['White_ID'],
+                      $game_row['Whitename'], $game_row['Whitehandle']) . "</td>\n";
 
-        echo "</td>\n";
-        echo '     <td>' . echo_time( $game_row['Black_Byotime'] );
+   echo '<td>' . echo_rating( ($game_row['Status']==='FINISHED' ?
+                                   $game_row['White_End_Rating'] : $game_row['Whiterating'] ),
+                                  true, $game_row['White_ID'] ) . "</td>\n";
+   echo '<td>&nbsp;</td>' . "\n";
+   echo '<td>' . T_('Prisoners') . ': ' . $game_row['White_Prisoners'] . "</td>\n";
+   echo "</tr>\n";
 
-        if( $game_row['Black_Byotime'] > 0 ) echo ' (' . $game_row['Black_Byoperiods'] . ')';
-        echo "</td>\n";
-        echo "   </tr>\n";
-      }
 
-    }
+   echo '<tr bgcolor="#FFFFFF">' . "\n";
+   echo "<td colspan=5>\n" . T_("Time remaining") . ": " .
+      echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
+                          $game_row['Byotime'], $game_row['Byoperiods'],
+                          $game_row['White_Maintime'], $game_row['White_Byotime'],
+                          $game_row['White_Byoperiods']) . "</td>\n";
+   echo "</tr>\n";
 
-      echo " <tr>\n";
-      echo '       <td>' . T_('Time limit') . ":</td>\n";
-      echo '       <td colspan=2>';
+   echo '<tr bgcolor=' . $table_row_color2 . '>' . "\n";
+   echo "<td colspan=5>" . T_('Rules') . ': ';
+   echo T_('Komi') . ': ' . $game_row['Komi'] . ", " .
+      T_('Handicap') . ': ' . $game_row['Handicap'];
+   echo ', ' . T_('Rated game') . ': ' .
+      ( $game_row['Rated'] == 'N' ? T_('No') : T_('Yes') ) . "</td>\n";
 
-      echo echo_time_limit($game_row['Maintime'], $game_row['Byotype'], $game_row['Byotime'], $game_row['Byoperiods']);
+   echo "</tr>\n";
 
-      echo "</td>\n";
-      echo "   </tr>\n";
+   echo '<tr bgcolor=' . $table_row_color2 . '>' . "\n";
+   echo "<td colspan=5>" . T_('Time limit') . ': ' .
+      echo_time_limit($game_row['Maintime'], $game_row['Byotype'],
+                      $game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
+   echo "</table>\n";
 
-    echo '   <tr><td>' . T_('Rated game') . ': </td><td colspan=2>' .
-      ( $game_row['Rated'] == 'N' ? T_('No') : T_('Yes') ) . "</td></tr>\n";
-    echo "    </table>\n";
 }
 
 
