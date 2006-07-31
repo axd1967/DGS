@@ -215,7 +215,7 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
               !empty($white_row['RatingStatus']) );
 
    $stdhandicap = $game_info_row['StdHandicap'];
-   if( $stdhandicap == 'Y' and
+   if( $stdhandicap != 'Y' or
        !standard_handicap_is_possible($size, $game_info_row['Handicap'] ) )
       $stdhandicap = 'N';
 
