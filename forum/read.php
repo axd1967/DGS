@@ -269,7 +269,7 @@ function change_depth(&$cur_depth, $new_depth)
          $Text = $preview_Text;
 //         $GoDiagrams = $preview_GoDiagrams;
          $post_type = 'preview';
-         draw_post($post_type, false, $Subject, $Text, $GoDiagrams);
+         draw_post($post_type, false, $Subject, $Text); //, $GoDiagrams);
       }
 
       if( $post_type != 'normal' and $post_type != 'hidden' )
@@ -280,7 +280,7 @@ function change_depth(&$cur_depth, $new_depth)
 //            $GoDiagrams = null;
          }
          echo "<tr><td>\n";
-         message_box($post_type, $ID, $GoDiagrams, $Subject, $Text);
+         message_box($post_type, $ID, NULL /*$GoDiagrams*/, $Subject, $Text);
          echo "</td></tr>\n";
       }
    }
