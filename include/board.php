@@ -28,7 +28,6 @@ class Board
 
    var $gid;
    var $size;
-   var $handicap;
    var $max_moves;
    var $coord_borders;
    var $stone_size;
@@ -89,7 +88,6 @@ class Board
 
       $this->gid = $gid;
       $this->size = $game_row['Size'];
-      $this->handicap = $game_row['Handicap'];
       $this->max_moves = $game_row['Moves'];
 
       if( $this->max_moves <= 0 )
@@ -163,9 +161,6 @@ class Board
       {
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 
-         if( $move <= $this->handicap )
-            $this->movemrkx = $this->movemrky = -1;
-
          //No need of movemsg if we don't have movecol??
          if( $row=mysql_single_fetch( 
                      "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" 
@@ -219,9 +214,9 @@ class Board
             if( $sgfc )
             {
                if( $mod > 1 )
-                  $mrk = (($n-$this->handicap-1) % $mod)+1;
+                  $mrk = (($n-1) % $mod)+1;
                else
-                  $mrk = $mark-$this->handicap;
+                  $mrk = $mark;
 
                if( !isset($this->marks[$sgfc]) )
                {
