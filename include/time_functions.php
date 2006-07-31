@@ -189,39 +189,70 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
 {
    $T_= ( $keep_english ? 'fnop' : 'T_' );
    $str = '';
-   //if ( $Maintime > 0 )
-      $str = echo_time( $Maintime, $keep_english);
 
-   if( $Byotime <= 0 )
-         $str .= ' ' . $T_('without byoyomi');
-   else if( $Byotype == 'FIS' )
-      {
-         $str .= ' ' . sprintf( $T_('with %s extra per move'), echo_time($Byotime, $keep_english) );
-         if( !$short )
-            $str .= ' - ' . $T_('Fischer time');
-      }
+   if( $Byotype == 'FIS' )
+   {
+      if( !$short ) $str .= $T_('Fischer time') . ', ';
+
+      $str .= echo_time($Maintime, $keep_english) . ' ' .
+         sprintf( $T_('with %s extra per move'), echo_time($Byotime, $keep_english) );
+   }
    else
+   {
+      $str .= echo_time($Maintime, $keep_english);
+
+      if( $Byotime <= 0 )
+         $str .= ' ' . $T_('without byoyomi');
+      else
       {
-         if ( $Maintime > 0 )
-            $str .= ' + ';
-         $str .= echo_time($Byotime, $keep_english);
+         $str .= ' + ' . echo_time($Byotime, $keep_english);
 
          if( $Byotype == 'JAP' )
          {
             $str .= ' * ' . $Byoperiods . ' ' . $T_('periods');
             if( !$short )
-               $str .= ' - ' . $T_('Japanese byoyomi');
+               $str .= ' ' . $T_('Japanese byoyomi');
          }
          else
          {
             $str .= ' / ' . $Byoperiods . ' ' . $T_('stones');
             if( !$short )
-               $str .= ' - ' . $T_('Canadian byoyomi');
+               $str .= ' ' . $T_('Canadian byoyomi');
          }
       }
-
+   }
    return $str;
 }
+
+function echo_time_remaining($Maintime, $Byotype, $Byotime, $Byoperiods,
+                             $Maintime_left, $Byotime_left, $Byoperiods_left)
+{
+   $str = '';
+   if( $Maintime_left > 0 )
+   {
+      $str .= echo_time($Maintime_left);
+   }
+   else if( $Byotime_left > 0 )
+   {
+      $str .= T_('In byoyomi') . ': ';
+      if( $Byotype == 'JAP' )
+      {
+         $str .= echo_time($Byotime_left) . '(' . $byoperiods_left . ' ' .
+            ($byoperiods_left == 1 ? T_('period') : T_('periods'));
+      }
+      else if( $Byotype == 'CAN' )
+      {
+         $str .= echo_time($Byotime_left) . T_('and') . $byoperiods_left . ' ' .
+            ($byoperiods_left == 1 ? T_('stone') : T_('stones'));
+      }
+   }
+   else
+   {
+      $str .= T_('The time is up');
+   }
+   return $str;
+}
+
 
 function time_convert_to_longer_unit(&$time, &$unit)
 {
