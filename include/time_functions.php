@@ -209,13 +209,15 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
 
          if( $Byotype == 'JAP' )
          {
-            $str .= ' * ' . $Byoperiods . ' ' . $T_('periods');
+            $str .= ' * ' . $Byoperiods . ' ' .
+               ($Byoperiods == 1 ? T_('period') : T_('periods'));
             if( !$short )
                $str .= ' ' . $T_('Japanese byoyomi');
          }
          else
          {
-            $str .= ' / ' . $Byoperiods . ' ' . $T_('stones');
+            $str .= ' / ' . $Byoperiods . ' ' .
+               ($Byoperiods == 1 ? T_('stone') : T_('stones'));
             if( !$short )
                $str .= ' ' . $T_('Canadian byoyomi');
          }
@@ -237,13 +239,13 @@ function echo_time_remaining($Maintime, $Byotype, $Byotime, $Byoperiods,
       $str .= T_('In byoyomi') . ': ';
       if( $Byotype == 'JAP' )
       {
-         $str .= echo_time($Byotime_left) . '(' . $byoperiods_left . ' ' .
-            ($byoperiods_left == 1 ? T_('period') : T_('periods'));
+         $str .= echo_time($Byotime_left) . ' * ' . $Byoperiods_left . ' ' .
+            ($Byoperiods_left == 1 ? T_('period') : T_('periods'));
       }
       else if( $Byotype == 'CAN' )
       {
-         $str .= echo_time($Byotime_left) . T_('and') . $byoperiods_left . ' ' .
-            ($byoperiods_left == 1 ? T_('stone') : T_('stones'));
+         $str .= echo_time($Byotime_left) . T_(' / ') . $Byoperiods_left . ' ' .
+            ($Byoperiods_left == 1 ? T_('stone') : T_('stones'));
       }
    }
    else
