@@ -359,6 +359,8 @@ function get_alt_arg( $n1, $n2)
          mysql_query( "UPDATE Games SET Black_notes=\""
                      . addslashes($notes) . "\" WHERE Games.ID=$gid LIMIT 1");
       }
+      else if( @$_REQUEST['movechange'] )
+         $notes = rtrim(get_request_arg('gamenotes'));
       else
          $notes = $Black_Notes;
       $opponent_ID= $White_ID;
@@ -373,6 +375,8 @@ function get_alt_arg( $n1, $n2)
          mysql_query( "UPDATE Games SET White_notes=\""
                      . addslashes($notes) . "\" WHERE Games.ID=$gid LIMIT 1");
       }
+      else if( @$_REQUEST['movechange'] )
+         $notes = rtrim(get_request_arg('gamenotes'));
       else
          $notes = $White_Notes;
       $opponent_ID= $Black_ID;
@@ -402,7 +406,7 @@ function get_alt_arg( $n1, $n2)
       }
       if( isset($_REQUEST['notesmode']) )
          $notesmode= (string)$_REQUEST['notesmode'];
-      $show_notes = ( $notesmode != 'OFF' && $notesmode != 0 ) ;
+      $show_notes = ( $notesmode !== 'OFF' && $notesmode !== 0 ) ;
    }
 
    if( ENA_MOVENUMBERS )
@@ -423,7 +427,7 @@ function get_alt_arg( $n1, $n2)
 
 
    // [ game_form start
-   echo "<FORM name`\"game_form\" action=\"game.php\" method=\"POST\">\n";
+   echo "<FORM name=\"game_form\" action=\"game.php\" method=\"POST\">\n";
    $page_hiddens[] = array();
 
    echo "<table align=center>\n<tr><td>"; //board & associates table {--------
@@ -434,7 +438,7 @@ function get_alt_arg( $n1, $n2)
       if( $tmp >= 0 )
       {
          $tmp2= $move-$movenumbers;
-         $TheBoard->move_marks( max( $tmp2, $Handicap+1), $move, $tmp);
+         $TheBoard->move_marks( $tmp2, $move, $tmp);
 //          if( $tmp2 <= $Handicap )
 //          {
 //             $tmp= trim((string)@$player_row['MoveHAmark']);
@@ -494,12 +498,7 @@ function get_alt_arg( $n1, $n2)
    {
       echo "<input type=\"hidden\" name=\"$key\" value=\"$val\">\n";
    }
-   echo "</FORM>\n";
-   // ] game_form end
 
-   echo "<HR>\n";
-   draw_game_info($game_row);
-   echo "<HR>\n";
 
 // display moves
 
@@ -515,6 +514,16 @@ function get_alt_arg( $n1, $n2)
          }
       }
    }
+
+   echo "</FORM>\n";
+   // ] game_form end
+
+
+   echo "<HR>\n";
+   draw_game_info($game_row);
+   echo "<HR>\n";
+
+
 
    //if( $action == 'choose_move' or $action == 'handicap' or $action == 'remove' )
          $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."skip=t";
@@ -566,59 +575,42 @@ function get_alt_arg( $n1, $n2)
    end_page(@$menu_array);
 }
 
-
 function draw_moves()
 {
    global $TheBoard, $gid, $move, $Size;
 
-   echo "<table id=\"game_moves\" class=moves border=1>\n";
-   echo "<tr><th>" . T_('Moves') . "</th>\n";
+   echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">\n";
+   echo '<SELECT name="move" size="1">' . "\n";
 
-   $moves_per_row = 20;
-
-   for($i=0; $i<$moves_per_row; $i++)
-     echo "<td>$i</td>";
-
-   echo "</tr>\n<tr><td>1-". ($moves_per_row - 1) . '</td><td>&nbsp;</td>';
-
-   $i=1;
    foreach( $TheBoard->moves as $MoveNr => $sub )
    {
       list( $Stone, $PosX, $PosY) = $sub;
       if( $Stone != BLACK and $Stone != WHITE ) continue;
-      if( $i % $moves_per_row == 0 )
-         echo "</tr>\n<tr><td>$i-" . ($i + $moves_per_row - 1) . '</td>';
 
       switch( $PosX )
       {
          case POSX_PASS :
-            $c = 'P';
+            $c = T_('Pass');
             break;
          case POSX_SCORE :
-            $c = 'S';
+            $c = T_('Scoring');
             break;
          case POSX_RESIGN :
-            $c = 'R';
+            $c = T_('Resign');
             break;
          default :
             $c = number2board_coords($PosX, $PosY, $Size);
             break;
       }
 
-      if( $MoveNr == $move ) // bgcolor=F7F5E3
-         printf("<td class=c>%s</td>\n", $c );
-      else if( $Stone == BLACK )
-         printf( '<td><a class=b href="game.php?gid=%d'.URI_AMP."move=%d\">%s</a></td>\n"
-               , $gid, $MoveNr, $c );
-      else
-         printf( '<td><a class=w href="game.php?gid=%d'.URI_AMP."move=%d\">%s</a></td>\n"
-               , $gid, $MoveNr, $c );
-
-      $i++;
+      if( $Stone == WHITE ) $c = str_repeat('&nbsp;', 12) . $c;
+      if( $MoveNr < 10 ) $c = '&nbsp;'.$c;
+      printf('<OPTION value="%d" %s>Move %s:&nbsp;&nbsp;%s</OPTION>' . "\n",
+             $MoveNr, ($MoveNr == $move ? ' selected' : ''), $MoveNr, $c);
    }
-   echo "</tr></table>\n";
+   echo "</SELECT>\n";
+   echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">\n";
 }
-
 
 function draw_message_box( $message)
 {
