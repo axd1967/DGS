@@ -210,14 +210,14 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
          if( $Byotype == 'JAP' )
          {
             $str .= ' * ' . $Byoperiods . ' ' .
-               ($Byoperiods == 1 ? T_('period') : T_('periods'));
+               ($Byoperiods == 1 ? $T_('period') : $T_('periods'));
             if( !$short )
                $str .= ' ' . $T_('Japanese byoyomi');
          }
          else
          {
             $str .= ' / ' . $Byoperiods . ' ' .
-               ($Byoperiods == 1 ? T_('stone') : T_('stones'));
+               ($Byoperiods == 1 ? $T_('stone') : $T_('stones'));
             if( !$short )
                $str .= ' ' . $T_('Canadian byoyomi');
          }
