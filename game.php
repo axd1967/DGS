@@ -60,14 +60,12 @@ function get_alt_arg( $n1, $n2)
 {
 
    $gid = (int)get_alt_arg( 'gid', 'g');
-   $action = (string)get_alt_arg( 'action', 'a');
+   $mainaction = (string)get_alt_arg( 'action', 'a');
    $move = (int)get_alt_arg( 'move', 'm');
    $coord = (string)get_alt_arg( 'coord', 'c');
    $stonestring = (string)get_alt_arg( 'stonestring', 's');
 
    $prisoner_string = (string)@$_REQUEST['prisoner_string'];
-
-   $toggleobserve = (boolean)@$_REQUEST['toggleobserve'];
 
    $message = get_request_arg( 'message');
 
@@ -79,13 +77,12 @@ function get_alt_arg( $n1, $n2)
 
    $logged_in = who_is_logged( $player_row);
 
-   if( $toggleobserve and $logged_in )
-      toggle_observe_list($gid, $player_row["ID"]);
-
-
-
 //    if( !$logged_in )
 //       error("not_logged_in");
+
+   if( $logged_in && @$_REQUEST['toggleobserve'] )
+      toggle_observe_list($gid, $player_row["ID"]);
+
 
    $result = mysql_query( "SELECT Games.*, " .
                           "Games.Flags+0 AS GameFlags, " . //used by check_move
@@ -114,13 +111,41 @@ function get_alt_arg( $n1, $n2)
    if( $Status == 'INVITED' )
       error("unknown_game",'game2');
 
-   if( $action and $logged_in and $player_row["ID"] != $ToMove_ID )
+
+   if( @$_REQUEST['movechange'] )
+      $move = @$_REQUEST['gotomove'];
+   if( $move<=0 )
+      $move = $Moves;
+   if( $move < $Moves )
+   {
+      $may_play = false ;
+      $action = 'just_looking';
+   }
+   else
+   {
+      $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID ) ;
+      $action = $mainaction;
+      if( !$action )
+      {
+         $action = 'just_looking';
+         if( $may_play )
+         {
+            if( $Status == 'PLAY' or $Status == 'PASS' )
+            {
+               $action = 'choose_move';
+               if( $Moves < $Handicap )
+                  $action = 'handicap';
+            }
+            else if( $Status == 'SCORE' or $Status == 'SCORE2' )
+               $action = 'remove';
+         }
+      }
+   }
+
+
+   if( $action != 'just_looking'
+         && $logged_in && $player_row["ID"] != $ToMove_ID )
       error("not_your_turn");
-
-
-   if( $move<=0 ) $move = $Moves;
-
-   $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID and $move == $Moves ) ;
 
    $my_game = ( $logged_in and ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID ) ) ;
 
@@ -132,22 +157,6 @@ function get_alt_arg( $n1, $n2)
       $to_move = WHITE;
    else if( $ToMove_ID )
       error("database_corrupted");
-
-   if( !$action )
-   {
-      $action = 'just_looking';
-      if( $may_play )
-      {
-         if( $Status == 'PLAY' or $Status == 'PASS' )
-         {
-            $action = 'choose_move';
-            if( $Moves < $Handicap )
-               $action = 'handicap';
-         }
-         else if( $Status == 'SCORE' or $Status == 'SCORE2' )
-            $action = 'remove';
-      }
-   }
 
    if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0) )
    {
@@ -203,7 +212,7 @@ function get_alt_arg( $n1, $n2)
 
       case 'move':
       {
-{//to fixe old way Ko detect. Could be removed when no more old way games.
+{//to fix old way Ko detect. Could be removed when no more old way games.
   if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
 }
          check_move( $TheBoard, $coord, $to_move);
@@ -359,8 +368,10 @@ function get_alt_arg( $n1, $n2)
          mysql_query( "UPDATE Games SET Black_notes=\""
                      . addslashes($notes) . "\" WHERE Games.ID=$gid LIMIT 1");
       }
+/*
       else if( @$_REQUEST['movechange'] )
          $notes = rtrim(get_request_arg('gamenotes'));
+*/
       else
          $notes = $Black_Notes;
       $opponent_ID= $White_ID;
@@ -375,8 +386,10 @@ function get_alt_arg( $n1, $n2)
          mysql_query( "UPDATE Games SET White_notes=\""
                      . addslashes($notes) . "\" WHERE Games.ID=$gid LIMIT 1");
       }
+/*
       else if( @$_REQUEST['movechange'] )
          $notes = rtrim(get_request_arg('gamenotes'));
+*/
       else
          $notes = $White_Notes;
       $opponent_ID= $Black_ID;
@@ -427,9 +440,9 @@ function get_alt_arg( $n1, $n2)
 
 
 
-   // [ game_form start
    echo "<FORM name=\"game_form\" action=\"game.php\" method=\"POST\">\n";
    $page_hiddens[] = array();
+   // [ game_form start
 
    echo "<table align=center>\n<tr><td>"; //board & associates table {--------
 
@@ -476,9 +489,25 @@ function get_alt_arg( $n1, $n2)
    echo "</td></tr>\n</table>\n"; //board & associates table }--------
 
 
+// display moves
 
+   if( !$enable_message )
+   {
+      if( $Moves > 0 )
+      {
+         draw_moves();
+         //if( $my_game ) //sgf comments may be viewed by observers
+         {
+            echo "\n<center><a href=\"game_comments.php?gid=$gid\" target=\"DGS_game_comments\">" . 
+                  T_('Comments') . "</a></center>\n";
+         }
+      }
+   }
+
+
+   // ] game_form end
    $page_hiddens['gid'] = $gid;
-   $page_hiddens['action'] = $action;
+   $page_hiddens['action'] = $mainaction;
    $page_hiddens['move'] = $move;
    if( @$coord )
       $page_hiddens['coord'] = $coord;
@@ -499,25 +528,7 @@ function get_alt_arg( $n1, $n2)
    {
       echo "<input type=\"hidden\" name=\"$key\" value=\"$val\">\n";
    }
-
-
-// display moves
-
-   if( !$enable_message )
-   {
-      if( $Moves > 0 )
-      {
-         draw_moves();
-         //if( $my_game ) //sgf comments may be viewed by observers
-         {
-            echo "\n<center><a href=\"game_comments.php?gid=$gid\" target=\"DGS_game_comments\">" . 
-                  T_('Comments') . "</a></center>\n";
-         }
-      }
-   }
-
    echo "</FORM>\n";
-   // ] game_form end
 
 
    echo "<HR>\n";
@@ -581,8 +592,9 @@ function draw_moves()
    global $TheBoard, $gid, $move, $Size;
 
    echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">\n";
-   echo '<SELECT name="move" size="1">' . "\n";
+   echo '<SELECT name="gotomove" size="1">' . "\n";
 
+   $str = '';
    foreach( $TheBoard->moves as $MoveNr => $sub )
    {
       list( $Stone, $PosX, $PosY) = $sub;
@@ -606,10 +618,11 @@ function draw_moves()
 
       if( $Stone == WHITE ) $c = str_repeat('&nbsp;', 12) . $c;
       if( $MoveNr < 10 ) $c = '&nbsp;'.$c;
-      printf('<OPTION value="%d" %s>Move %s:&nbsp;&nbsp;%s</OPTION>' . "\n",
-             $MoveNr, ($MoveNr == $move ? ' selected' : ''), $MoveNr, $c);
+      $str = sprintf('<OPTION value="%d" %s>Move %s:&nbsp;&nbsp;%s</OPTION>' . "\n",
+                   $MoveNr, ($MoveNr == $move ? ' selected' : ''), $MoveNr, $c)
+          . $str;
    }
-   echo "</SELECT>\n";
+   echo "$str</SELECT>\n";
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">\n";
 }
 
