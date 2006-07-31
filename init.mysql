@@ -116,10 +116,21 @@ CREATE TABLE Games (
   White_Start_Rating double default NULL,
   Black_End_Rating double default NULL,
   White_End_Rating double default NULL,
-  Black_Notes text NOT NULL default '',
-  White_Notes text NOT NULL default '',
   PRIMARY KEY  (ID),
   KEY ToMove_ID (ToMove_ID)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'GamesNotes'
+#
+
+CREATE TABLE GamesNotes (
+  ID int(11) unsigned NOT NULL auto_increment,
+  gid int(11) NOT NULL default '0',
+  Black_Notes text NOT NULL default '',
+  White_Notes text NOT NULL default '',
+  PRIMARY KEY  (gid),
+  KEY ID (ID)
 ) TYPE=MyISAM;
 
 #

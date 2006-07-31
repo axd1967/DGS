@@ -359,52 +359,53 @@ function get_alt_arg( $n1, $n2)
    else
      $html_mode= 'game';
 
-   if( $my_game && $player_row["ID"] == $Black_ID )
+   if( $my_game )
    {
-      $show_notes = true;
+      $Black_Notes= $White_Notes= '';
+      if( $tmp=mysql_single_fetch( "SELECT Black_Notes, White_Notes"
+                  . " FROM GamesNotes WHERE gid=$gid" ) )
+         extract( $tmp);
+      unset( $tmp);
+
+      if( $player_row["ID"] == $Black_ID )
+      {
+         if( @$_REQUEST['savenotes'] )
+            $notes = rtrim(get_request_arg('gamenotes'));
+/*
+         else if( @$_REQUEST['movechange'] )
+            $notes = rtrim(get_request_arg('gamenotes'));
+*/
+         else
+            $notes= $Black_Notes;
+
+         $Black_Notes = $notes;
+         $opponent_ID= $White_ID;
+         $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
+      }
+      else //if( $player_row["ID"] == $White_ID )
+      {
+         if( @$_REQUEST['savenotes'] )
+            $notes = rtrim(get_request_arg('gamenotes'));
+/*
+         else if( @$_REQUEST['movechange'] )
+            $notes = rtrim(get_request_arg('gamenotes'));
+*/
+         else
+            $notes = $White_Notes;
+
+         $White_Notes= $notes;
+         $opponent_ID= $Black_ID;
+         $movemsg = make_html_safe($movemsg, $movecol==WHITE ? 'gameh' : $html_mode );
+      }
+
       if( @$_REQUEST['savenotes'] )
       {
-         $notes = rtrim(get_request_arg('gamenotes'));
-         mysql_query( "UPDATE Games SET Black_notes=\""
-                     . addslashes($notes) . "\" WHERE Games.ID=$gid LIMIT 1");
+         mysql_query( "REPLACE INTO GamesNotes (gid,Black_Notes,White_Notes)"
+                  . " VALUES ($gid,'". addslashes($Black_Notes) . "','"
+                                     . addslashes($White_Notes) . "')" );
+                  // or die(mysql_error());
       }
-/*
-      else if( @$_REQUEST['movechange'] )
-         $notes = rtrim(get_request_arg('gamenotes'));
-*/
-      else
-         $notes = $Black_Notes;
-      $opponent_ID= $White_ID;
-      $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
-   }
-   elseif( $my_game && $player_row["ID"] == $White_ID )
-   {
-      $show_notes = true;
-      if( @$_REQUEST['savenotes'] )
-      {
-         $notes = rtrim(get_request_arg('gamenotes'));
-         mysql_query( "UPDATE Games SET White_notes=\""
-                     . addslashes($notes) . "\" WHERE Games.ID=$gid LIMIT 1");
-      }
-/*
-      else if( @$_REQUEST['movechange'] )
-         $notes = rtrim(get_request_arg('gamenotes'));
-*/
-      else
-         $notes = $White_Notes;
-      $opponent_ID= $Black_ID;
-      $movemsg = make_html_safe($movemsg, $movecol==WHITE ? 'gameh' : $html_mode );
-   }
-   else
-   {
-     $show_notes = false;
-     $opponent_ID= 0;
-     $movemsg = game_tag_filter( $movemsg);
-     $movemsg = make_html_safe($movemsg, $html_mode );
-   }
-     
-   if( $show_notes )
-   {
+      unset( $Black_Notes); unset( $White_Notes);
       if ($Size >= $player_row["NotesCutoff"])
       {
         $notesheight = $player_row["NotesLargeHeight"];
@@ -422,7 +423,14 @@ function get_alt_arg( $n1, $n2)
          $notesmode= (string)$_REQUEST['notesmode'];
       $show_notes = ( $notesmode and $notesmode !== '0' and $notesmode !== 'OFF' );
    }
-
+   else // !$my_game
+   {
+      $opponent_ID= 0;
+      $movemsg = game_tag_filter( $movemsg);
+      $movemsg = make_html_safe($movemsg, $html_mode );
+      $show_notes = false;
+   }
+     
    if( ENA_MOVENUMBERS )
    {
       $movenumbers= (int)@$player_row['MoveNumbers'];
@@ -440,7 +448,7 @@ function get_alt_arg( $n1, $n2)
 
 
 
-   echo "<FORM name=\"game_form\" action=\"game.php\" method=\"POST\">\n";
+   echo "<FORM name=\"game_form\" action=\"game.php?gid=$gid\" method=\"POST\">\n";
    $page_hiddens[] = array();
    // [ game_form start
 
@@ -506,7 +514,7 @@ function get_alt_arg( $n1, $n2)
 
 
    // ] game_form end
-   $page_hiddens['gid'] = $gid;
+   //$page_hiddens['gid'] = $gid; //set in the URL (allow a cool OK button in the browser)
    $page_hiddens['action'] = $mainaction;
    $page_hiddens['move'] = $move;
    if( @$coord )
