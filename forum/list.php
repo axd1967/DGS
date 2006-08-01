@@ -58,7 +58,7 @@ require_once( "forum_functions.php" );
    $cols = 4;
    $headline = array(T_("Thread")=>"width=50%",T_("Author")=>"width=20%",
                      T_("Posts")=>"width=10%  align=center",T_("Last post")=>"width=20%");
-   $links = LINK_FORUMS | LINK_NEW_TOPIC;
+   $links = LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
 
    if( $offset > 0 )
       $links |= LINK_PREV_PAGE;

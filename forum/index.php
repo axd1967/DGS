@@ -57,9 +57,9 @@ $result = mysql_query("SELECT Forums.ID,Description,Name,Moderated, PostsInForum
                       "ORDER BY SortOrder")
    or die(mysql_error());
 
-$cols = 3;
+$cols = 4;
 $headline   = array("Forums" => "colspan=$cols");
-
+$links = LINK_SEARCH;
 
    start_table($headline, $links, "width='98%'", $cols);
 

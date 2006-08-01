@@ -120,7 +120,7 @@ function change_depth(&$cur_depth, $new_depth)
 
    $cols=2;
    $headline = array(T_("Reading thread") => "colspan=$cols");
-   $links = LINK_FORUMS | LINK_THREADS;
+   $links = LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
    $is_moderator = false;
 
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
