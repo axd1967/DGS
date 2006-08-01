@@ -564,7 +564,8 @@ foreach $final_size (@Sizes)
 
 #--------------- Draw board letters -------------
 
-        $letter_font_size = $final_size * 4 / 5;
+        $letter_font_size = $final_size * 0.2 *
+            ( $final_size < 13 ? ( $final_size < 9 ? 6 : 5) : 4) / 5;
         $letters = "abcdefghijklmnopqrstuvwxyz";
         gimp_context_set_foreground ([0, 0, 0]);
 
@@ -579,7 +580,8 @@ foreach $final_size (@Sizes)
 #--------------- Draw redo/undo -------------
 
         gimp_context_set_background ([253, 214, 155]);
-        $letter_font_size = $final_size * 4 / 5;
+        $letter_font_size = $final_size * 0.2 *
+            ( $final_size < 13 ? ( $final_size < 9 ? 6 : 5) : 4 );
         resize ($final_size * 2, $final_size);
         bg_fill_image ();
         draw_letter ("b  undo  d", $size * 2, $size);
@@ -593,7 +595,8 @@ foreach $final_size (@Sizes)
 #--------------- Draw coord images ---------------
 
         gimp_context_set_background ([247, 245, 227]);
-        $letter_font_size = $final_size * 3.2 / 5;
+        $letter_font_size = $final_size * 0.16 *
+            ( $final_size < 13 ? ( $final_size < 9 ? 6 : 5) : 4 );
         resize ($final_size, $final_size);
         $letters = "abcdefghjklmnopqrstuvwxyz";
 
