@@ -1,99 +1,57 @@
 #
-# Table structure for table 'Players'
-#
-CREATE TABLE Players (
-  ID int(11) NOT NULL auto_increment,
-  Handle varchar(16) NOT NULL default '',
-  Password varchar(16) default NULL,
-  Newpassword varchar(16) default NULL,
-  Sessioncode varchar(32) default NULL,
-  Sessionexpire datetime default NULL,
-  Lastaccess timestamp(14) NOT NULL,
-  Registerdate date default NULL,
-  Hits int(11) default '0',
-  Name varchar(40) default NULL,
-  Email varchar(80) default NULL,
-  Rank varchar(40) default NULL,
-  Stonesize int(11) default '25',
-  Boardfontsize char(2) default '+0',
-  Flags set('WANT_EMAIL') NOT NULL default '',
-  Notify enum('NONE','NEXT','NOW','DONE') default 'NONE',
-  Adminlevel int(11) NOT NULL default '0',
-  Timezone varchar(40) NOT NULL default 'GMT',
-  Nightstart int(11) NOT NULL default '22',
-  ClockUsed int(11) NOT NULL default '22',
-  ClockChanged datetime default NULL,
-  Rating double default NULL,
-  RatingStatus enum('INIT','READY','RATED') default NULL,
-  Open varchar(40) default NULL,
-  PRIMARY KEY  (ID),
-  UNIQUE KEY Handle (Handle)
-) TYPE=ISAM PACK_KEYS=1;
-
-#
 # Table structure for table 'Games'
 #
 CREATE TABLE Games (
-  ID int(11) NOT NULL auto_increment,
-  Starttime datetime default NULL,
-  Lastchanged timestamp(14) NOT NULL,
-  Black_ID int(11) default NULL,
-  White_ID int(11) default NULL,
-  ToMove_ID int(11) NOT NULL default '0',
-  Size int(11) default '19',
-  Komi decimal(6,1) default '5.5',
-  Handicap int(11) NOT NULL default '0',
-  Status enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED',
-  Moves int(11) NOT NULL default '0',
-  Black_Prisoners int(11) NOT NULL default '0',
-  White_Prisoners int(11) NOT NULL default '0',
-  Last_X int(11) default NULL,
-  Last_Y int(11) default NULL,
-  Flags set('Ko') default NULL,
-  Score decimal(7,1) default NULL,
-  Maintime int(11) default NULL,
-  Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
-  Byotime int(11) NOT NULL default '0',
-  Byoperiods int(11) NOT NULL default '0',
-  Black_Maintime int(11) default NULL,
-  White_Maintime int(11) default NULL,
-  Black_Byotime int(11) NOT NULL default '0',
-  White_Byotime int(11) NOT NULL default '0',
-  Black_Byoperiods int(11) NOT NULL default '-1',
-  White_Byoperiods int(11) NOT NULL default '-1',
-  LastTicks int(11) default NULL,
-  ClockUsed int(11) NOT NULL default '0',
-  Rated enum('N','Y','Done') NOT NULL default 'N',
-  PRIMARY KEY  (ID),
-  KEY ToMove_ID (ToMove_ID)
-) TYPE=MyISAM;
+  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  Black_ID int(11),
+  White_ID int(11),
+  ToMove_ID int(11),
+  Size int(11) DEFAULT '19',
+  Komi decimal(3,1) DEFAULT '5.5',
+  Handicap int(11) DEFAULT '0' NOT NULL,
+  Status enum('INVITED','RUNNING','FINNISHED') DEFAULT 'INVITED',
+  Moves int(11) DEFAULT '0' NOT NULL,
+  Black_Prisoners int(11) DEFAULT '0' NOT NULL,
+  White_Prisoners int(11) DEFAULT '0' NOT NULL,
+  Last_X int(11),
+  Last_Y int(11),
+  Flags set('Ko'),
+  PRIMARY KEY (ID)
+);
 
 #
-# Table structure for table 'Bio'
+# Table structure for table 'Players'
 #
+CREATE TABLE Players (
+  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  Handle varchar(16) DEFAULT '' NOT NULL,
+  Password varchar(16),
+  Sessioncode varchar(32),
+  Sessionexpire timestamp(14),
+  Name varchar(80),
+  Email varchar(80),
+  Rank varchar(40),
+  Stonesize int(11) DEFAULT '25',
+  Boardfontsize char(2) DEFAULT '+0',
+  PRIMARY KEY (ID),
+  UNIQUE Handle (Handle),
+  KEY Handle_2 (Handle)
+);
 
-CREATE TABLE Bio (
-  ID int(11) NOT NULL auto_increment,
-  uid int(11) NOT NULL default '0',
-  Category varchar(40) default NULL,
+#
+# Table structure for table 'Messages'
+#
+CREATE TABLE Messages (
+  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  From_ID int(11),
+  To_ID int(11),
+  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') DEFAULT 'NORMAL',
+  Game_ID int(11),
+  Time timestamp(14),
+  Subject varchar(80),
   Text text,
-  PRIMARY KEY  (ID),
-  KEY uid (uid)
-) TYPE=MyISAM;
-
-#
-# Table structure for table 'RatingChange'
-#
-
-CREATE TABLE RatingChange (
-  ID int(11) NOT NULL auto_increment,
-  uid int(11) NOT NULL default '0',
-  gid int(11) NOT NULL default '0',
-  diff double default NULL,
-  PRIMARY KEY  (ID),
-  KEY uid (uid)
-) TYPE=MyISAM;
-
+  PRIMARY KEY (ID)
+);
 
 #
 # Insert Guest account
@@ -103,55 +61,4 @@ INSERT INTO Players SET
        Handle='guest',
        Name='Guest',
        Password=PASSWORD('guest');
-
-#
-# Table structure for table 'Messages'
-#
-
-CREATE TABLE Messages (
-  ID int(11) NOT NULL auto_increment,
-  To_ID int(11) default NULL,
-  From_ID int(11) default NULL,
-  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') default 'NORMAL',
-  Flags set('DELETED','NEW','REPLIED','REPLY REQUIRED') NOT NULL default 'NEW',
-  ReplyTo int(11) default NULL,
-  Game_ID int(11) default NULL,
-  Time timestamp(14) NOT NULL,
-  Subject varchar(80) default NULL,
-  Text text,
-  PRIMARY KEY  (ID),
-  KEY To_ID (To_ID),
-  KEY From_ID (From_ID)
-) TYPE=MyISAM;
-
-
-#
-# Table structure for table 'Bio'
-#
-
-CREATE TABLE Bio (
-  ID int(11) NOT NULL auto_increment,
-  uid int(11) NOT NULL default '0',
-  Category varchar(40) default NULL,
-  Text text,
-  PRIMARY KEY  (ID),
-  KEY uid (uid)
-) TYPE=MyISAM;
-
-#
-# Table structure for table 'Moves??' (one per game)
-#
-#CREATE TABLE Moves1 (
-#  ID smallint(5) unsigned NOT NULL auto_increment,
-#  MoveNr smallint(5) unsigned default NULL,
-#  Stone smallint(5) unsigned NOT NULL default '0',
-#  PosX smallint(6) default NULL,
-#  PosY smallint(6) default NULL,
-#  Hours smallint(5) unsigned default NULL,
-#  Text text,
-#  PRIMARY KEY  (ID)
-#);
-
-
- 
-      
+       

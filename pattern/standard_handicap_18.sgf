@@ -1,0 +1,64 @@
+(;FF[4]GM[1]
+PC[Dragon Go Server: http://www.dragongoserver.net]
+SZ[18]
+GC[Standard handicap patterns]
+GN[standard_handicap_18]
+;B[od]
+C[Standard handicap patterns don't take care about colors.
+They just use the moves coordinates and their succession.
+If the current variation does not held enought moves, the next variation is used (so, keep the variations in the order from shortest to longest).
+For instance, on a 19x19 board:
+- a 5 stones handicap will stay in the main branch,
+- but a 6 stones handicap will switch to the variation of move #5 to find the 5th and 6th stones coordinates.
+]
+;W[do]
+;B[oo]
+;W[dd]
+(
+;B[jj]
+)
+(
+;B[oj]
+;W[dj]
+(
+;B[jj]
+)
+(
+;B[jo]
+;W[jd]
+;B[jj]
+;W[lg]
+;B[gl]
+;W[ll]
+;B[gg]
+;W[pc]
+;B[cp]
+;W[pp]
+;B[cc]
+;W[pj]
+;B[cj]
+;W[jp]
+;B[jc]
+;W[og]
+;B[dl]
+;W[lo]
+;B[gd]
+;W[ld]
+;B[go]
+;W[ol]
+;B[dg]
+;W[lj]
+;B[gj]
+;W[jl]
+;B[jg]
+;W[pg]
+;B[cl]
+;W[lp]
+;B[gc]
+;W[lc]
+;B[gp]
+;W[pl]
+;B[cg]
+)
+)
+)

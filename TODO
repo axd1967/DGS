@@ -1,59 +1,42 @@
 
+* Email notification
+
+* Forgot password? -> send email
+
+* sgf-files
+
+* show moves of games
+
+* Add two gamelists (running/finished) per player in the database
+
+* FAQ
+
 * Introduction page
+
+* Make messages HTML-safe
+
+* Allow for fixed handicap
+
+* Smother handicap placement
+
+* Nicer territory/dead stones grafics
+
+* Time control
+
+* Customizable time zones and time format
+
+* submit->next game
+
+* show finished games
 
 * Installation information and scripts
 
-* Show message: link if it's a reply
+* Delete messages (all/individual)
 
-* Send moves/board with email notification
+* Logout link
 
-* Save timestamp/clock with each move
+* Message boards
 
-* Sgf: handle finished games properly.
-
-* Add time
-
-* Two-game-match
-
-* Scoring: show more info
-
-* Delete old messages
-
-* Themes
-
-* Show number of games for players in users.php
-
-* Activity measure
-
-* Make menues more consistent. Invite/send message add default reciever at, e.g., show_games.
-
-* Consistency checks for games.
-
-* 'Show coordinates' flag.
-
-* TODO-page in docs.php
-
-* Move prediction (if/then)
-
-* Suggest (handicap/komi)
-
-* Better 'Open' options.
-
-* User search.
-
-* ascii->graphics in messages
-
-
---------------------------------
 * Tournaments
 
 * Rengo (team go)
-
-* Admin system
-
-* Rewrite forums
-
-
-BUGS
-----
-

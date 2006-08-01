@@ -1,0 +1,46 @@
+
+# Use 'make -f images_makefile' to generate the images
+
+SIZES = 13 17 21 25 29 35 42 50
+
+BIGSTONES = BigBlack.png BigBlackMark.png BigWhite.png BigWhiteMark.png YinYang.png BigPlayBlack.png BigPlayWhite.png
+
+POVFILES = stone.inc stone.pov
+
+POVRAY = povray +D +sp16 +ep4 -P +A +J +W1024 +H768 +FN
+
+target: board stones
+
+.PHONY: bigstones
+
+bigstones: $(BIGSTONES) $(POVFILES) generate_big_images.pl
+	@echo -e "\n\n------------------------------------------------------------------------------------\n";
+	@echo -e "   Running povray (v3.5 or higher) to generate some nice stone images.";
+	@echo -e "\n------------------------------------------------------------------------------------\n";
+	$(POVRAY) +FN Declare=PLAY_B=1 +OBigPlayBlack.png stone.pov
+	$(POVRAY) Declare=PLAY_W=1 +OBigPlayWhite.png stone.pov
+	$(POVRAY) Declare=BLACK=1 +OBigBlack.png stone.pov
+	$(POVRAY) Declare=WHITE=1 +OBigWhite.png stone.pov
+	$(POVRAY) Declare=YINYANG=1 +OYinYang.png stone.pov
+	@echo -e "\n\n------------------------------------------------------------------------------------\n";
+	@echo -e "   Now crop the images with gimp (v1.2 other versions might work too).";
+	@echo -e "\n------------------------------------------------------------------------------------\n";
+	generate_big_stones.pl
+
+board: generate_board_images.pl
+	@echo -e "\n\n------------------------------------------------------------------------------------\n";
+	@echo -e "   Draw some board images with gimp (v1.2 other versions might work too).";
+	@echo -e "\n------------------------------------------------------------------------------------\n";
+	generate_board_images.pl board
+	touch board
+
+stones: bigstones generate_board_images.pl
+	@echo -e "\n\n------------------------------------------------------------------------------------\n";
+	@echo -e "   Draw stone images with gimp (v1.2 other versions might work too).";
+	@echo -e "\n------------------------------------------------------------------------------------\n";
+	generate_board_images.pl stones
+	touch stones
+
+
+clean:
+	 rm -rf $(SIZES)

@@ -1,0 +1,59 @@
+
+Installation instructions
+-------------------------
+
+Requirements:
+
+*) A webserver which can use php, e.g., apache <http://httpd.apache.org>
+*) php >= 4.0.4 <http://www.php.net>
+*) mysql >= 3.23 <http://www.mysql.com>
+*) cvs client <http://www.cvshome.org>
+
+
+
+
+1) Download from cvs:
+
+> cd /path/to/the/directory/where/you/want/dragon/to/be
+> cvs -d:pserver:anonymous@cvs.dragongoserver.sourceforge.net:/cvsroot/dragongoserver login
+> cvs -z3 -d:pserver:anonymous@cvs.dragongoserver.sourceforge.net:/cvsroot/dragongoserver co DragonGoServer
+> mv DragonGoServer/* .
+> rmdir DragonGoServer
+
+
+
+2) Make a mysql database and a mysql user to access the database:
+
+mysql> CREATE DATABASE dragon;
+mysql> GRANT select, insert, update, delete ON dragon.* TO dragon@localhost IDENTIFIED BY 'secret';
+
+
+
+3) Create mysql tables:
+
+> mysql < init.mysql
+
+
+
+4) Edit include/config.php and make readable only for the web server:
+
+Find which group your webserver is using (e.g. www-data).
+> su -c 'chgrp www-data include/config.php'
+> chmod 640 include/config.php
+
+
+
+5) Add some cron jobs. These should preferrably be run on a remote machine, so that the
+   clock is not running when the network is down.
+
+> crontab -e
+
+# m  h dom mon dow command
+0,30 *  *   *   *   wget -q -O - http://your.url/send_notifications.php
+*/5  *  *   *   *   wget -q -O - http://your.url/clock_tick.php
+25   5  *   *   *   wget -q -O - http://your.url/daily_cron.php
+
+
+
+6) Complain to the support forum at dragon <http://www.dragongoserver.net> if it doesn't
+   work.
