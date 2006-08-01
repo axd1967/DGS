@@ -740,10 +740,10 @@ $html_code['game'] = 'br|p|li'.$html_code_closed['game']
 
 
  //** no reg exp chars nor ampersand:
-define( 'ALLOWED_LT', "\x10anglstart\x10");
-define( 'ALLOWED_GT', "\x10anglend\x10");
-define( 'ALLOWED_QUOT', "\x10allowedquot\x10");
-define( 'ALLOWED_APOS', "\x10allowedapos\x10");
+define( 'ALLOWED_LT', "`anglstart`");
+define( 'ALLOWED_GT', "`anglend`");
+define( 'ALLOWED_QUOT', "`allowedquot`");
+define( 'ALLOWED_APOS', "`allowedapos`");
 
 /* Simple syntax check of element's attributes up to the next '>'.
    Check for quote mismatches.
