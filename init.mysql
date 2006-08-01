@@ -22,7 +22,7 @@ CREATE TABLE Players (
   Notify enum('NONE','NEXT','NOW','DONE') default 'NONE',
   MenuDirection enum('VERTICAL','HORIZONTAL') default 'VERTICAL',
   Adminlevel int(11) NOT NULL default '0',
-  MayPostOnForum enum('N', 'Y', 'M') NOT NULL Default 'Y';
+  MayPostOnForum enum('N', 'Y', 'M') NOT NULL Default 'Y',
   Timezone varchar(40) NOT NULL default 'GMT',
   Nightstart int(11) NOT NULL default '22',
   ClockUsed int(11) NOT NULL default '22',
