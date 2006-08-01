@@ -72,7 +72,8 @@ require_once( "forum_functions.php" );
          "Forums.Name as ForumName " .
          "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
          "LEFT JOIN Forums ON Forums.ID = Posts.Forum_ID " .
-         "WHERE MATCH (Subject,Text) AGAINST ('$search_terms') AND Approved='Y'" .
+         "WHERE MATCH (Subject,Text) AGAINST ('$search_terms') AND Approved='Y' " .
+         "AND PosIndex IS NOT NULL " .
          "LIMIT $offset,$MaxSearchPostsPerPage";
 
       $result = mysql_query($query) or die(mysql_error());
