@@ -202,7 +202,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
          "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a>";
 
-      if( $post_type='search_result' )
+      if( $post_type=='search_result' )
       {
          echo '<font size="+1" color="#FFFFFF"> found in forum </font><a href="list.php?forum=' .
             $Forum_ID . '" class=black>' . $ForumName . '</a>' . "\n";
