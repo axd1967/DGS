@@ -42,11 +42,14 @@ define("LINK_PREV_PAGE", 1 << 6);
 define("LINK_NEXT_PAGE", 1 << 7);
 define("LINK_TOGGLE_MODERATOR", 1 << 8);
 define("LINK_TOGGLE_MODERATOR_LIST", 1 << 9);
+define("LINK_SEARCH_PREV_PAGE", 1 << 6);
+define("LINK_SEARCH_NEXT_PAGE", 1 << 7);
 
 
 function make_link_array($links)
 {
-   global $link_array_left, $link_array_right, $forum, $thread, $offset, $RowsPerPage;
+   global $link_array_left, $link_array_right, $forum, $thread, $offset,
+      $RowsPerPage, $SearchPostsPerPage, $search_terms;
 
    $link_array_left = $link_array_right = array();
 
@@ -78,10 +81,16 @@ function make_link_array($links)
           make_url( "list.php", $get, false ) );
    }
 
-   if( $links & LINK_PREV_PAGE )
-      $link_array_right[T_("Prev Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset-$RowsPerPage);
    if( $links & LINK_NEXT_PAGE )
       $link_array_right[T_("Next Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset+$RowsPerPage);
+   if( $links & LINK_PREV_PAGE )
+      $link_array_right[T_("Prev Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset-$RowsPerPage);
+
+   if( $links & LINK_SEARCH_NEXT_PAGE )
+      $link_array_right[T_("Next Page")] = "search.php?search_terms=$search_terms".URI_AMP."offset=".($offset+$SearchPostsPerPage);
+   if( $links & LINK_SEARCH_PREV_PAGE )
+      $link_array_right[T_("Prev Page")] = "search.php?search_terms=$search_terms".URI_AMP."offset=".($offset-$SearchPostsPerPage);
+
 }
 
 function start_table(&$headline, &$links, $width, $cols)
@@ -159,12 +168,14 @@ function get_new_string($Lastchangedstamp, $Lastread)
 }
 
 
-function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null )
+function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null)
 {
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
-      $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row;
+      $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
+      $ForumName, $Score, $Forum_ID;
 
    $post_colors = array( 'normal' => 'cccccc',
+                         'search_result' => '77bb88',
                          'hidden' => 'eecccc',
                          'reply' => 'cccccc',
                          'preview' => 'cceecc',
@@ -189,8 +200,16 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
    else
    {
       echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
-         "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a><br> " .
-         T_('by')." " . user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
+         "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a>";
+
+      if( $post_type='search_result' )
+      {
+         echo '<font size="+1" color="#FFFFFF"> found in forum </font><a href="list.php?forum=' .
+            $Forum_ID . '" class=black>' . $ForumName . '</a>' . "\n";
+         echo '<font color="#FFFFFF"> with </font> Score <font color="#000000">' . $Score  . '</font>' . "\n";
+      }
+      echo "<br> " . T_('by') . " " .
+         user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
       if( $Lastedited > 0 )
          echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."revision_history=$ID\">" . T_('edited') .
