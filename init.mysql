@@ -575,7 +575,8 @@ CREATE TABLE Posts (
   PRIMARY KEY  (ID),
   KEY Pos (Thread_ID, PosIndex),
   KEY List (Forum_ID, Lastchanged),
-  KEY PendingApproval (PendingApproval,Time DESC)
+  KEY PendingApproval (PendingApproval,Time DESC),
+  FULLTEXT (Subject,Text)
 ) TYPE=MyISAM;
 
 

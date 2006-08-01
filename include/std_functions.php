@@ -59,6 +59,9 @@ $max_links_in_main_menu=5;
 $RowsPerPage = 50;
 $MaxRowsPerPage = $RowsPerPage+1;
 
+$SearchPostsPerPage = 20;
+$MaxSearchPostsPerPage = $SearchPostsPerPage+1;
+
 $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
 $ActivityForHit = 1.0;
 $ActivityForMove = 10.0;
@@ -1106,7 +1109,7 @@ function rel_base_dir()
    while( $i=strrpos($dir,'/') )
    {
       $dir= substr($dir,0,$i);
-      if( !strcasecmp( $dir.'/' , $SUB_PATH ) )
+      if( !strcasecmp( $dir , $SUB_PATH ) )
          break;
       $rel.= '../';
    }

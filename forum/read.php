@@ -24,65 +24,6 @@ require_once( "post.php" );
 
 
 
-function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null )
-{
-   global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
-      $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row;
-
-   $post_colors = array( 'normal' => 'cccccc',
-                         'hidden' => 'eecccc',
-                         'reply' => 'cccccc',
-                         'preview' => 'cceecc',
-                         'edit' => 'eeeecc' );
-
-   $sbj = make_html_safe( $Subject );
-   $txt = make_html_safe( $Text, true);
-//   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
-
-   if( strlen($txt) == 0 ) $txt = '&nbsp;';
-
-   $color = "ff0000";
-   $new = get_new_string($Timestamp, $Lastread);
-
-
-   if( $post_type == 'preview' )
-      echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
-         "\"><a name=\"preview\"><font size=\"+1\"><b>$sbj</b></font></a><br> " . 
-         T_('by')." " . user_reference( 1, 1, "black", $player_row) .
-         ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n" .
-         '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
-   else
-   {
-      echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
-         "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a><br> " .
-         T_('by')." " . user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
-         ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
-      if( $Lastedited > 0 )
-         echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."revision_history=$ID\">" . T_('edited') .
-            "</a> " . date($date_fmt, $Lasteditedstamp) . ")";
-      echo "</td></tr>\n" .
-         '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
-   }
-
-   if( $post_type == 'normal' or $post_type == 'hidden' )
-   {
-      $hidden = $post_type == 'hidden';
-      echo "<tr><td bgcolor=white align=left>";
-      if(  $post_type == 'normal' and !$is_moderator ) // reply link
-         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."reply=$ID#$ID\">[ " .
-            T_('reply') . " ]</a>&nbsp;&nbsp;";
-      if( $my_post ) // edit link
-         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."edit=$ID#$ID\">" .
-            "<font color=\"#ee6666\">[ " . T_('edit') . " ]</font></a>&nbsp;&nbsp;";
-      if( $is_moderator ) // hide/show link
-         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
-            ( $hidden ? 'show' : 'hide' ) . "=$ID#$ID\"><font color=\"#ee6666\">[ " .
-            ( $hidden ? T_('show') : T_('hide') ) . " ]</font></a>";
-
-      echo "</td></tr>\n";
-   }
-}
-
 
 function revision_history($post_id)
 {
