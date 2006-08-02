@@ -55,8 +55,12 @@ require_once( "forum_functions.php" );
    echo '
 <CENTER>
 <FORM name="search" action="search.php" method="GET">
-        Search terms:
-        <INPUT type="text" name="search_terms" value="' . $search_terms . '" tabindex="1" size="40" maxlength="80">
+        Search terms:';
+
+   echo '<INPUT type="text" name="search_terms" value="' 
+         . textarea_safe($search_terms) . '" tabindex="1" size="40" maxlength="80">';
+
+   echo '
         <INPUT type="submit" name="action" value="Do search" tabindex="2">
 <p>
         <INPUT type="checkbox" name="bool" value="1" ' . ($bool ? 'checked ' : '' ) . 'tabindex="3"> Boolean mode
