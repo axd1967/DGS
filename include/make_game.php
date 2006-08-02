@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Game";
 
 
-function make_invite_game($player_row, $opponent_row)
+function make_invite_game($player_row, $opponent_row, $disputegid)
 {
    global $NOW;
 
@@ -126,7 +126,7 @@ function make_invite_game($player_row, $opponent_row)
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
-   if( $rated != 'Y' or $to_me )
+   if( $rated != 'Y' )
       $rated = 'N';
 
    if( $stdhandicap != 'Y' or !standard_handicap_is_possible($size, $handicap) )

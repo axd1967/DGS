@@ -109,7 +109,7 @@ disable_cache();
 
    if( $type == "INVITATION" )
    {
-      $disputegid = make_invite_game($player_row, $opponent_row);
+      $disputegid = make_invite_game($player_row, $opponent_row, $disputegid);
       if( $disputegid > 0 )
       {
          $gid = $disputegid;
