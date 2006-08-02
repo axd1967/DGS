@@ -30,11 +30,11 @@ function post_message($player_row, $moderated_forum)
    $parent = @$_POST['parent']+0;
    $edit = @$_POST['edit']+0;
 
-   $Subject = trim(@$_POST['Subject']);
-   $Text = trim(@$_POST['Text']);
+   $Subject = get_request_arg('Subject');
+   $Text = get_request_arg('Text');
 //   $GoDiagrams = create_godiagrams($Text);
-   $Subject = addslashes($Subject);
-   $Text = addslashes($Text);
+   $Subject = mysql_escape_string(trim($Subject));
+   $Text = mysql_escape_string(trim($Text));
 
    $moderated = ($moderated_forum or $player_row['MayPostOnForum'] == 'M');
 
