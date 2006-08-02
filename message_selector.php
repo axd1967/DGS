@@ -18,9 +18,11 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-   $send_message = @$_REQUEST['send_message']
-                or @$_REQUEST['send_accept']
-                or @$_REQUEST['send_decline'];
+   $send_message = ( @$_REQUEST['send_message']
+                  or @$_REQUEST['send_accept']
+                  or @$_REQUEST['send_decline']
+                  ) ;
+
    $preview = @$_REQUEST['preview'];
 
    if( !$send_message or $preview )

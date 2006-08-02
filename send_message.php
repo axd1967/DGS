@@ -44,7 +44,6 @@ disable_cache();
 
    $my_id = $player_row['ID'];
    $message_id = @$_REQUEST['foldermove_mid'];
-   $disputegid = @$_REQUEST['disputegid'];
    $tohdl = get_request_arg('to');
    $reply = @$_REQUEST['reply']; //ID of message replied. if set then (often?always?) == $message_id
    $subject = get_request_arg('subject');
@@ -107,19 +106,19 @@ disable_cache();
 
 // Update database
 
+   $disputegid = -1;
    if( $type == "INVITATION" )
    {
-      $disputegid = make_invite_game($player_row, $opponent_row, $disputegid);
+      $disputegid = @$_REQUEST['disputegid'];
+      if( !is_numeric( $disputegid) )
+         $disputegid = 0;
+
+      $gid = make_invite_game($player_row, $opponent_row, $disputegid);
+
       if( $disputegid > 0 )
-      {
-         $gid = $disputegid;
          $subject = "Game invitation dispute";
-      }
       else
-      {
-         $gid = mysql_insert_id();
          $subject = "Game invitation";
-      }
    }
    else if( $accepttype )
    {

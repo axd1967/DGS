@@ -174,7 +174,12 @@ function make_invite_game($player_row, $opponent_row, $disputegid)
    if( mysql_affected_rows() != 1)
       error('mysql_insert_game','invite2');
 
-   return $disputegid;
+   if( $disputegid > 0 )
+      $gid = $disputegid;
+   else
+      $gid = mysql_insert_id();
+
+   return $gid;
 }
 
 
