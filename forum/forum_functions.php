@@ -172,7 +172,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 {
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
       $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
-      $ForumName, $Score, $Forum_ID;
+      $ForumName, $Score, $Forum_ID, $Thread_ID, $bool;
 
    $post_colors = array( 'normal' => 'cccccc',
                          'search_result' => '77bb88',
@@ -199,15 +199,22 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
          '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
    else
    {
-      echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
-         "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a>";
-
       if( $post_type=='search_result' )
       {
+         echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
+            '"><font size="+1"><a href="read.php?forum=' .
+            $Forum_ID . URI_AMP . 'thread=' . $Thread_ID . '#' . $ID .
+            "\" class=black><b>$sbj</b></a></font></a>";
+
          echo '<font size="+1" color="#FFFFFF"> found in forum </font><a href="list.php?forum=' .
             $Forum_ID . '" class=black>' . $ForumName . '</a>' . "\n";
-         echo '<font color="#FFFFFF"> with </font> Score <font color="#000000">' . $Score  . '</font>' . "\n";
+         if( !$bool )
+            echo '<font color="#FFFFFF"> with </font> Score <font color="#000000">' . $Score  . '</font>' . "\n";
       }
+      else
+         echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
+            "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a>";
+
       echo "<br> " . T_('by') . " " .
          user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);

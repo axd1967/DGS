@@ -46,6 +46,7 @@ require_once( "forum_functions.php" );
 
    $offset = max(0,(int)@$_REQUEST['offset']);
    $search_terms = mysql_escape_string(@$_REQUEST['search_terms']);
+   $bool = (int)(@$_REQUEST['bool']) > 0;
 
    echo "<center><h4><font color=$h3_color>Forum search</font></H4></center>\n";
 
@@ -57,6 +58,8 @@ require_once( "forum_functions.php" );
         Search terms:
         <INPUT type="text" name="search_terms" value="' . $search_terms . '" tabindex="1" size="40" maxlength="80">
         <INPUT type="submit" name="action" value="Do search" tabindex="2">
+<p>
+        <INPUT type="checkbox" name="bool" value="1" ' . ($bool ? 'checked ' : '' ) . 'tabindex="3"> Boolean mode
 </FORM>
 </CENTER>
 ';
@@ -67,13 +70,16 @@ require_once( "forum_functions.php" );
          "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
          "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
          "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
-         "MATCH (Subject,Text) AGAINST ('$search_terms') as Score, " .
+         "MATCH (Subject,Text) AGAINST ('$search_terms'" .
+         ($bool ? ' IN BOOLEAN MODE' : '') . ") as Score, " .
          "Players.ID AS uid, Players.Name, Players.Handle, " .
          "Forums.Name as ForumName " .
          "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
          "LEFT JOIN Forums ON Forums.ID = Posts.Forum_ID " .
-         "WHERE MATCH (Subject,Text) AGAINST ('$search_terms') AND Approved='Y' " .
+         "WHERE MATCH (Subject,Text) AGAINST ('$search_terms'" .
+         ($bool ? ' IN BOOLEAN MODE' : '') . ") AND Approved='Y' " .
          "AND PosIndex IS NOT NULL " .
+         ($bool ? 'ORDER BY TIME DESC ' : '') .
          "LIMIT $offset,$MaxSearchPostsPerPage";
 
       $result = mysql_query($query) or die(mysql_error());
