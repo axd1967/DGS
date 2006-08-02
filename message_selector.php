@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
    $send_message = ( @$_REQUEST['send_message']
                   or @$_REQUEST['send_accept']
                   or @$_REQUEST['send_decline']
+                  or @$_REQUEST['foldermove']
                   ) ;
 
    $preview = @$_REQUEST['preview'];

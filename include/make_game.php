@@ -67,7 +67,7 @@ function make_invite_game($player_row, $opponent_row, $disputegid)
    if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
        ( !$player_row["RatingStatus"] or !$opponent_row["RatingStatus"] ) )
    {
-      error( "no_initial_rating" );
+      error("no_initial_rating");
    }
 
    //ToMove_ID=$tomove will hold handitype until ACCEPTED
@@ -126,7 +126,7 @@ function make_invite_game($player_row, $opponent_row, $disputegid)
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
-   if( $rated != 'Y' )
+   if( $rated != 'Y' or $Black_ID == $White_ID )
       $rated = 'N';
 
    if( $stdhandicap != 'Y' or !standard_handicap_is_possible($size, $handicap) )
@@ -155,13 +155,15 @@ function make_invite_game($player_row, $opponent_row, $disputegid)
    if( $disputegid > 0 )
    {
       // Check if dispute game exists
-      $result = mysql_query("SELECT ID FROM Games WHERE ID=$disputegid " .
-                            "AND Status='INVITED' AND " .
-                            "((Black_ID=$my_id AND White_ID=$opponent_ID) OR " .
-                            "(Black_ID=$opponent_ID AND White_ID=$my_id))");
+      $row= mysql_single_fetch("SELECT ID, Black_ID, White_ID FROM Games"
+                             . " WHERE ID=$disputegid AND Status='INVITED'");
 
-      if( @mysql_num_rows($result) != 1 )
-         error('unknown_game');
+      if( !$row )
+         error('unknown_game','make_invite_game1');
+      if( ( $row['Black_ID']!=$player_row['ID'] or $row['White_ID']!=$opponent_row['ID'] )
+       && ( $row['White_ID']!=$player_row['ID'] or $row['Black_ID']!=$opponent_row['ID'] )
+        )
+         error('unknown_game','make_invite_game2');
 
       $query = "UPDATE Games SET $query WHERE ID=$disputegid LIMIT 1";
    }
@@ -169,10 +171,10 @@ function make_invite_game($player_row, $opponent_row, $disputegid)
       $query = "INSERT INTO Games SET $query";
 
    $result = mysql_query( $query )
-      or error('mysql_insert_game','invite1');
+      or error('mysql_insert_game','make_invite_game3');
 
    if( mysql_affected_rows() != 1)
-      error('mysql_insert_game','invite2');
+      error('mysql_insert_game','make_invite_game4');
 
    if( $disputegid > 0 )
       $gid = $disputegid;
