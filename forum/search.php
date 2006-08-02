@@ -45,7 +45,7 @@ require_once( "forum_functions.php" );
    }
 
    $offset = max(0,(int)@$_REQUEST['offset']);
-   $search_terms = mysql_escape_string(@$_REQUEST['search_terms']);
+   $search_terms = mysql_escape_string(get_request_arg('search_terms'));
    $bool = (int)(@$_REQUEST['bool']) > 0;
 
    echo "<center><h4><font color=$h3_color>Forum search</font></H4></center>\n";
