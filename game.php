@@ -668,10 +668,12 @@ function draw_game_info(&$game_row)
    echo '<table border=0 cellspacing=0 cellpadding=3 align=center>' . "\n";
    echo '<tr bgcolor="#DDDDDD">' . "\n";
    echo "<td align=center><img src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
-   echo '<td' . ( $game_row['Blackwarning'] > 0
-                   ? blend_warning_cell_attb( T_('On vacation') ) : '' ) . '>' .
+   echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'],
-                      $game_row['Blackname'], $game_row['Blackhandle']) . "</td>\n";
+                      $game_row['Blackname'], $game_row['Blackhandle']) .
+      ( $game_row['Blackwarning'] > 0 ?
+        '<font color=red> ' . T_('On vacation') . '</font>' : '' ) .
+      "</td>\n";
 
    echo '<td>' . echo_rating( ($game_row['Status']==='FINISHED' ?
                                    $game_row['Black_End_Rating'] : $game_row['Blackrating'] ),
@@ -691,10 +693,12 @@ function draw_game_info(&$game_row)
 
    echo '<tr bgcolor="#FFFFFF">' . "\n";
    echo "<td align=center><img src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
-   echo '<td' . ( $game_row['Whitewarning'] > 0
-                   ? blend_warning_cell_attb( T_('On vacation') ) : '' ) . '>' .
+   echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['White_ID'],
-                      $game_row['Whitename'], $game_row['Whitehandle']) . "</td>\n";
+                      $game_row['Whitename'], $game_row['Whitehandle']) .
+      ( $game_row['Whitewarning'] > 0 ?
+        '<font color=red> ' . T_('On vacation') . '</font>' : '' ) .
+      "</td>\n";
 
    echo '<td>' . echo_rating( ($game_row['Status']==='FINISHED' ?
                                    $game_row['White_End_Rating'] : $game_row['Whiterating'] ),
