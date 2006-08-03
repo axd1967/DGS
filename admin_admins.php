@@ -58,7 +58,7 @@ require_once( "include/table_columns.php" );
   }
 
 
-  if( @$_GET["update"] == 't' )
+  if( @$_GET['update'] == 't' && @$_REQUEST['action'] )
   {
      $Admin['new'] = 0;
      foreach( $_POST as $item => $value )
