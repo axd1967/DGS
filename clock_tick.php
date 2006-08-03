@@ -49,7 +49,8 @@ if( !$is_down )
    mysql_free_result($result);
 
    if( $row['timediff'] < $tick_diff )
-      if( !@$_REQUEST['forced'] ) exit;
+      //if( !@$_REQUEST['forced'] )
+         exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201")
                or error('mysql_query_failed','clock_tick2');

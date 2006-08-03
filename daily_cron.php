@@ -48,23 +48,24 @@ if( !$is_down )
    mysql_free_result($result);
 
    if( $row['timediff'] < $daily_diff )
-      if( !@$_REQUEST['forced'] ) exit;
+      //if( !@$_REQUEST['forced'] )
+         exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203")
                or error('mysql_query_failed','daily_cron2');
 
-   $delete_msgs = false;
-   $delete_invitations = false;
+   //$delete_messages = false;
+   //$delete_invitations = false;
    $delete_waitingroom_entries = true;
-   $message_timelimit = 90; //days
-   $invite_timelimit = 60; //days
+   //$message_timelimit = 90; //days
+   //$invite_timelimit = 60; //days
    $waitingroom_timelimit = 30; //days
 
-// Delete old messages
 
 /* to be reviewed: the field *Flags* doesn't exist.
-   if( $delete_msgs )
+   if( $delete_messages )
    {
+      // Delete old messages
       mysql_query("UPDATE Messages " .
                   "SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
                   "WHERE $NOW-UNIX_TIMESTAMP(Time) > " . ($message_timelimit*24*3600) .
@@ -74,11 +75,10 @@ if( !$is_down )
 */
 
 
-// Delete old invitations
-
 /* to be reviewed: the field *Type* 'DELETED' no more used (replaced by Folder_nr = NULL).
    if( $delete_invitations )
    {
+      // Delete old invitations
       $timelimit = $invite_timelimit*24*3600;
       $query = "SELECT Messages.ID as mid, Game_ID " .
          "FROM Messages, Games " .
@@ -107,10 +107,9 @@ if( !$is_down )
 */
 
 
-// Delete old waiting list entries
-
    if( $delete_waitingroom_entries )
    {
+      // Delete old waitingroom list entries
       $timelimit = $NOW - $waitingroom_timelimit*24*3600;
       $query = "DELETE FROM Waitingroom " .
          "WHERE UNIX_TIMESTAMP(Time) < $timelimit";

@@ -112,7 +112,8 @@ if( !$is_down )
    mysql_free_result($result);
 
    if( $row['timediff'] < $half_diff )
-      if( !@$_REQUEST['forced'] ) exit;
+      //if( !@$_REQUEST['forced'] )
+         exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202")
                or error('mysql_query_failed','halfhourly_cron2');
