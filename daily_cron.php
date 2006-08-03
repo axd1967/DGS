@@ -193,26 +193,9 @@ if( !$is_down )
 
 // Delete old forumreads
 
-   $result = mysql_query("SELECT ID FROM Posts " .
-                         "WHERE Depth=1 " .
-                         "AND UNIX_TIMESTAMP(Lastchanged) + $new_end < $NOW " .
-                         "AND UNIX_TIMESTAMP(Lastchanged) + $new_end + 7*24*3600 > $NOW")
-               or error('mysql_query_failed','daily_cron8');
 
-   $query = "DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time) + $new_end < $NOW";
-
-   if( @mysql_num_rows( $result) > 0 )
-   {
-      while( $row = mysql_fetch_assoc($result) )
-      {
-         $query .= " OR Thread_ID=" . $row["ID"];
-      }
-
-      mysql_query( $query )
-                  or error('mysql_query_failed','daily_cron9');
-   }
-   mysql_free_result($result);
-
+   mysql_query("DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time) + $new_end < $NOW")
+      or error('mysql_query_failed','daily_cron8');
 
 
 // Apply recently changed night hours
