@@ -361,51 +361,6 @@ function get_alt_arg( $n1, $n2)
 
    if( $my_game )
    {
-      $Black_Notes= $White_Notes= '';
-      if( $tmp=mysql_single_fetch( "SELECT Black_Notes, White_Notes"
-                  . " FROM GamesNotes WHERE gid=$gid" ) )
-         extract( $tmp);
-      unset( $tmp);
-
-      if( $player_row["ID"] == $Black_ID )
-      {
-         if( @$_REQUEST['savenotes'] )
-            $notes = rtrim(get_request_arg('gamenotes'));
-/*
-         else if( @$_REQUEST['movechange'] )
-            $notes = rtrim(get_request_arg('gamenotes'));
-*/
-         else
-            $notes= $Black_Notes;
-
-         $Black_Notes = $notes;
-         $opponent_ID= $White_ID;
-         $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
-      }
-      else //if( $player_row["ID"] == $White_ID )
-      {
-         if( @$_REQUEST['savenotes'] )
-            $notes = rtrim(get_request_arg('gamenotes'));
-/*
-         else if( @$_REQUEST['movechange'] )
-            $notes = rtrim(get_request_arg('gamenotes'));
-*/
-         else
-            $notes = $White_Notes;
-
-         $White_Notes= $notes;
-         $opponent_ID= $Black_ID;
-         $movemsg = make_html_safe($movemsg, $movecol==WHITE ? 'gameh' : $html_mode );
-      }
-
-      if( @$_REQUEST['savenotes'] )
-      {
-         mysql_query( "REPLACE INTO GamesNotes (gid,Black_Notes,White_Notes)"
-                  . " VALUES ($gid,'". addslashes($Black_Notes) . "','"
-                                     . addslashes($White_Notes) . "')" );
-                  // or die(mysql_error());
-      }
-      unset( $Black_Notes); unset( $White_Notes);
       if ($Size >= $player_row["NotesCutoff"])
       {
         $notesheight = $player_row["NotesLargeHeight"];
@@ -418,10 +373,69 @@ function get_alt_arg( $n1, $n2)
         $noteswidth = $player_row["NotesSmallWidth"];
         $notesmode = $player_row["NotesSmallMode"];
       }
-
       if( isset($_REQUEST['notesmode']) )
          $notesmode= (string)$_REQUEST['notesmode'];
       $show_notes = ( $notesmode and $notesmode !== '0' and $notesmode !== 'OFF' );
+
+      if( $player_row["ID"] == $Black_ID )
+      {
+         $dbplayer= 'B';
+         $opponent_ID= $White_ID;
+         $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
+      }
+      else //if( $player_row["ID"] == $White_ID )
+      {
+         $dbplayer= 'W';
+         $opponent_ID= $Black_ID;
+         $movemsg = make_html_safe($movemsg, $movecol==WHITE ? 'gameh' : $html_mode );
+      }
+
+      if( $show_notes && $tmp=mysql_single_fetch(
+                    "SELECT Hidden,Notes FROM GamesNotes"
+                  . " WHERE gid=$gid AND player='$dbplayer'"
+                  ) )
+      {
+         $dbhidden = $tmp['Hidden'];
+         $dbnotes = $tmp['Notes'];
+         unset( $tmp);
+      }
+      else
+      {
+         $dbhidden = 'Y';
+         $dbnotes = '';
+      }
+
+      if( $show_notes && (@$_REQUEST['savenotes'] or @$_REQUEST['togglenotes']) )
+      {
+         if( @$_REQUEST['togglenotes'] )
+            $collapse_notes = ($dbhidden == 'Y' ? 'N' : 'Y' );
+         else
+            $collapse_notes = $dbhidden;
+
+         if( @$_REQUEST['savenotes'] )
+            $notes = rtrim(get_request_arg('gamenotes'));
+         else
+            $notes = $dbnotes;
+
+         mysql_query(
+                 "REPLACE INTO GamesNotes (gid,player,Hidden,Notes)"
+               . " VALUES ($gid,'$dbplayer','$collapse_notes','"
+                  . addslashes($notes) . "')"
+               ); // or die(mysql_error());
+      }
+/*
+      else if( $show_notes && @$_REQUEST['movechange'] )
+      {
+         $collapse_notes = $dbhidden;
+         $notes = rtrim(get_request_arg('gamenotes'));
+      }
+*/
+      else
+      {
+         $collapse_notes = $dbhidden;
+         $notes = $dbnotes;
+      }
+      unset( $dbplayer, $dbnotes, $dbhidden);
    }
    else // !$my_game
    {
@@ -429,6 +443,7 @@ function get_alt_arg( $n1, $n2)
       $movemsg = game_tag_filter( $movemsg);
       $movemsg = make_html_safe($movemsg, $html_mode );
       $show_notes = false;
+      $collapse_notes = 'Y';
    }
      
    if( ENA_MOVENUMBERS )
@@ -485,7 +500,7 @@ function get_alt_arg( $n1, $n2)
          echo "</td></tr>\n<tr><td colspan=2 align='center'>";
       else //default 'RIGHT'
          echo "</td>\n<td align='left' valign='center'>";
-      draw_notes( $notes, $gid, $notesheight, $noteswidth);
+      draw_notes( $notes, $gid, $notesheight, $noteswidth, $collapse_notes);
    }
 
    if( $enable_message )
@@ -504,6 +519,16 @@ function get_alt_arg( $n1, $n2)
       if( $Moves > 0 )
       {
          draw_moves();
+
+         if( $show_notes )
+         { // restore it in draw_notes() if removed from here
+            if( $collapse_notes == 'Y' )
+            {
+               echo "  <input name=\"togglenotes\" type=\"submit\" value=\""
+                        . T_('Show notes') . "\">\n";
+            }
+         }
+
          //if( $my_game ) //sgf comments may be viewed by observers
          {
             echo "\n<center><a href=\"game_comments.php?gid=$gid\" target=\"DGS_game_comments\">" . 
@@ -729,13 +754,25 @@ function draw_game_info(&$game_row)
    echo "<td colspan=5>" . T_('Time limit') . ': ' .
       echo_time_limit($game_row['Maintime'], $game_row['Byotype'],
                       $game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
+
+   echo "</tr>\n";
    echo "</table>\n";
 
 }
 
 
-function draw_notes( $notes, $gid, $height=0, $width=0)
+function draw_notes( $notes, $gid, $height=0, $width=0, $collapsed='N')
 {
+   if( $collapsed == 'Y' )
+   {
+      //echo textarea_safe( $notes) . "\n";
+/* moved after draw_moves()
+      echo "  <input name=\"togglenotes\" type=\"submit\" value=\""
+               . T_('Show notes') . "\">\n";
+*/
+      return;
+   }
+
    if( $height<3 ) $height= 3;
    if( $width<15 ) $width= 15;
 
@@ -746,7 +783,15 @@ function draw_notes( $notes, $gid, $height=0, $width=0)
             . textarea_safe( $notes) . "</textarea>\n";
    echo "  </td></tr>\n";
    echo "  <tr><td><input name=\"savenotes\" type=\"submit\" value=\""
-            . T_('Save notes') . "\"></td></tr>\n";
+            . T_('Save notes') . "\">\n";
+
+   if( $collapsed == 'N' )
+   {
+   echo "  <input name=\"togglenotes\" type=\"submit\" value=\""
+            . T_('Hide notes') . "\">\n";
+   }
+
+   echo "  </td></tr>\n";
    echo " </table>\n";
 }
 
