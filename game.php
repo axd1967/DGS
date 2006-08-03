@@ -248,6 +248,7 @@ function get_alt_arg( $n1, $n2)
             $extra_message = "<font color=\"green\">"
               . T_('A standard placement of handicap stones has been requested.')
               . "</font>";
+            //$coord = ''; // $coord is incoherent with the following
          }
          //else //$stonestring and/or $coord from URL
          {
@@ -267,6 +268,7 @@ function get_alt_arg( $n1, $n2)
          if( $paterr )
             $extra_message = "<font color=\"red\">" . $paterr .
                               "</font><br>" . $extra_message;
+         $coord = ''; // already processed
       }
       break;
 
@@ -315,6 +317,7 @@ function get_alt_arg( $n1, $n2)
             . sprintf( T_("Please mark dead stones and click %s'done'%s when finished."),
                         "<a href=\"$done_url\">", '</a>' )
             . "</font>";
+         $coord = ''; // already processed
       }
       break;
 
@@ -506,6 +509,16 @@ function get_alt_arg( $n1, $n2)
    if( $enable_message )
    {
       echo "</td></tr>\n<tr><td colspan=2 align='center'>";
+         if( $show_notes )
+         { // restore it in draw_notes() if removed from here
+            if( $collapse_notes == 'Y' )
+            {
+               echo "  <input name=\"togglenotes\" type=\"submit\" value=\""
+                        . T_('Show notes') . "\">\n";
+            }
+            $show_notes = false;
+         }
+
       draw_message_box( $message);
    }
 
@@ -527,6 +540,7 @@ function get_alt_arg( $n1, $n2)
                echo "  <input name=\"togglenotes\" type=\"submit\" value=\""
                         . T_('Show notes') . "\">\n";
             }
+            $show_notes = false;
          }
 
          //if( $my_game ) //sgf comments may be viewed by observers
@@ -536,6 +550,17 @@ function get_alt_arg( $n1, $n2)
          }
       }
    }
+
+
+         if( $show_notes )
+         { // restore it in draw_notes() if removed from here
+            if( $collapse_notes == 'Y' )
+            {
+               echo "  <input name=\"togglenotes\" type=\"submit\" value=\""
+                        . T_('Show notes') . "\">\n";
+            }
+            $show_notes = false;
+         }
 
 
    // ] game_form end
