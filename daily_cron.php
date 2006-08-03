@@ -217,7 +217,7 @@ if( !$is_down )
       {
          setTZ( $row['Timezone']);
          mysql_query("UPDATE Players " .
-                     "SET ClockChanged=NULL, " .
+                     "SET ClockChanged='N', " .
                      "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
                      "WHERE ID='" . $row['ID'] . "' LIMIT 1")
                   or error('mysql_query_failed','daily_cron12');
