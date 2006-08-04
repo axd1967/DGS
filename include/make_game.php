@@ -192,10 +192,10 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
 
 //   var_dump($game_info_row);
 //   die();
-   if($gid > 0 and !( $game_row["Black_ID"] == $player_row['ID'] and
-                      $game_row["White_ID"] == $opponent_row['ID'] or
-                      $game_row["White_ID"] == $player_row['ID'] and
-                      $game_row["Black_ID"] == $opponent_row['ID'] ))
+   if($gid > 0 and !( $game_info_row["Black_ID"] == $black_row['ID'] and
+                      $game_info_row["White_ID"] == $white_row['ID'] or
+                      $game_info_row["White_ID"] == $black_row['ID'] and
+                      $game_info_row["Black_ID"] == $white_row['ID'] ))
       error("mysql_start_game",'not_correct_players');
 
    $clock_used_black = ( $black_row['OnVacation'] > 0 ? VACATION_CLOCK
