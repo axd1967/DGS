@@ -408,8 +408,18 @@ require_once( "include/form_functions.php" );
       echo "\n<a name=\"preview\"><h3><font color=$h3_color>" . 
                T_('Preview') . ":</font></h3></a>\n";
       //$mid==0 means preview - display a *to_me* like message
-      message_info_table(0, $NOW, true,
-                         $my_id, make_html_safe($player_row["Name"]), $player_row["Handle"],
+
+      $row = mysql_single_fetch('SELECT ID, Name FROM Players ' .
+                                'WHERE Handle ="' . mysql_escape_string($default_uhandle) .
+                                "\"\n");
+      if( !$row )
+         $Name = '<font color="red">' . T_('Receiver not found') . '</font>';
+      else
+         $Name = make_html_safe($row["Name"]);
+
+      message_info_table(0, $NOW, false,
+                         (int)$row['ID'], $Name,
+                         make_html_safe($default_uhandle),
                          $default_subject, $default_message);
    }
 
