@@ -52,8 +52,8 @@ disable_cache();
    if( !$type )
       $type = "NORMAL";
    $gid = @$_REQUEST['gid'];
-   $accepttype = @$_REQUEST['accepttype'];
-   $declinetype = @$_REQUEST['declinetype'];
+   $accepttype = isset($_REQUEST['send_accept']);
+   $declinetype = isset($_REQUEST['send_decline']);
 
    $folders = get_folders($my_id);
    $new_folder = @$_REQUEST['folder'];
