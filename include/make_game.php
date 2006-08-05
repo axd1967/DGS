@@ -323,8 +323,7 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
    }
 
    mysql_query( $query )
-      or error("internal_error','insert std_handicap');
-;
+      or error('internal_error','insert std_handicap');
 
    return true;
 }
