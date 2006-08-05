@@ -198,24 +198,21 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
                       $game_info_row["Black_ID"] == $white_row['ID'] ))
       error("mysql_start_game",'not_correct_players');
 
-   $clock_used_black = ( $black_row['OnVacation'] > 0 ? VACATION_CLOCK
-                         : $black_row["ClockUsed"]);
-   $clock_used_white = ( $white_row['OnVacation'] > 0 ? VACATION_CLOCK
-                         : $white_row["ClockUsed"]);
-
    $rating_black = $black_row["Rating2"];
    $rating_white = $white_row["Rating2"];
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row["Size"]));
 
+   $clock_used_black = ( $black_row['OnVacation'] > 0 ? VACATION_CLOCK
+                         : $black_row["ClockUsed"]);
+   $clock_used_white = ( $white_row['OnVacation'] > 0 ? VACATION_CLOCK
+                         : $white_row["ClockUsed"]);
+
    if( $game_info_row['WeekendClock'] != 'Y' )
    {
-      $clock_used_white += WEEKEND_CLOCK_OFFSET;
       $clock_used_black += WEEKEND_CLOCK_OFFSET;
+      $clock_used_white += WEEKEND_CLOCK_OFFSET;
    }
-
-   $ticks_black = get_clock_ticks($clock_used_black);
-   $ticks_white = get_clock_ticks($clock_used_white);
 
    $Rated = ( $game_info_row['Rated'] === 'Y' and
               !empty($black_row['RatingStatus']) and
@@ -232,14 +229,13 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
    {
       $to_move_id = $white_row['ID'];
       $clock_used = $clock_used_white;
-      $last_ticks = $ticks_white;
    }
    else
    {
       $to_move_id = $black_row['ID'];
       $clock_used = $clock_used_black;
-      $last_ticks = $ticks_black;
    }
+   $last_ticks = get_clock_ticks($clock_used);
 
    $set_query =
       "Black_ID=" . $black_row["ID"] . ", " .
@@ -248,7 +244,7 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
       "Status='PLAY', " .
       "Moves=$moves, " .
       "ClockUsed=$clock_used, " .
-      "LastTicks=$ticks_white, " .
+      "LastTicks=$last_ticks, " .
       "Lastchanged=FROM_UNIXTIME($NOW), " .
       "Starttime=FROM_UNIXTIME($NOW), " .
       "Size=$size, " .
@@ -268,14 +264,16 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
 
    if( $gid > 0 )
    {
-      mysql_query("UPDATE Games SET $set_query WHERE ID=$gid LIMIT 1") or die(mysql_error());
+      mysql_query("UPDATE Games SET $set_query WHERE ID=$gid LIMIT 1")
+         or error("mysql_start_game","update_game $gid");
       if( mysql_affected_rows() != 1)
-         error("mysql_start_game",'create_game');
+         error("mysql_start_game","update_game_row $gid");
 
    }
    else
    {
-      mysql_query("INSERT INTO Games SET $set_query") or die(mysql_error());
+      mysql_query("INSERT INTO Games SET $set_query")
+         or error("mysql_start_game",'insert_game');
       $gid = mysql_insert_id();
    }
 
@@ -307,7 +305,7 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
    {
       $l = strlen( $stonestring );
       if( $l != 2*$hcp )
-         die("Bad stonestring in make_standard_placement_of_handicap_stones");
+         error('internal_error','bad stonestring std_handicap');
 
 
       $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
@@ -324,10 +322,11 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
       }
    }
 
-   mysql_query( $query ) or die(mysql_error());
+   mysql_query( $query )
+      or error("internal_error','insert std_handicap');
+;
 
    return true;
 }
-
 
 ?>
