@@ -3,44 +3,23 @@ BIG TASKS
 
 * Tournaments
 
-* Rewrite forums
+* rss feeds
 
+* use css throughout the site.
 
-SMALLER TASKS
--------------
-
-* Sgf:
-        Save time usage (how?)
-
-* Add time for opponent
-
-* Scoring: show more info
-
-* Themes/Layout option
+* Write better errorhandling code.
 
 * Move speedup (if/then)
 
-* Better 'Open' options.
+* <goban> in forums (and messages)
 
 * Searching: users/games/messages/docs etc.
 
-* go ascii->graphics in messages
-
 * Rengo (team go)
 
-* Games:
-        Show more info for finished games.
-        Start game from a setup position.
+* Improve weekend clock code.
 
-* Improve caching
-
-* Area scoring (?)
-
-* Send notification delay customizable (?)
-
-* Save the previous invite settings as default.
-
-* Komi bidding (?)
+* Game from a setup position.
 
 * Ratings:
         Implement Glicko (?)
@@ -52,14 +31,8 @@ SMALLER TASKS
 
 * Help system.
 
-* Auto refresh (?)
-
-* Teaching mode, with undo (?)
-
 * Invite/waitingroom:
         Make it possible to limit the number of handicap stones.
         Rated only if less than x handicap option.
-
-* Add fun variations (torusgo etc.)
 
 * Show observers of a game.
