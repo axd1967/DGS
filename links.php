@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2003  Jim Heiney and Erik Ouchterlony
+Copyright (C) 2001-2006  Jim Heiney and Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,6 +29,15 @@ require_once( "include/std_functions.php" );
 
   start_page(T_("Links"), true, $logged_in, $player_row
       , "a.blue:visited{color:purple;}" );
+
+/* see also:
+http://www.usgo.org
+http://linkexplorer.net/go/go.html
+http://news.world-go.org/
+Go News, Go Scene (2000-2003): http://www.kyoto.zaq.ne.jp/momoyama/index.html
+The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
+*/
+
 
   echo "<table align=center width=\"85%\"><tr><td>\n";
   echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
@@ -76,6 +85,7 @@ require_once( "include/std_functions.php" );
   echo "<h3 align=left><a name=\"strategy\"></a><font color=$h3_color>" .
     T_('Strategy and terms') . "</font></h3>\n";
 
+  //No more found:
   add_link_page_link("http://www.igoweb.org/~pahle/go-stuff/shape.html",
                      T_('An Introduction to Shape'));
   add_link_page_link("http://www.goproblems.com/",
