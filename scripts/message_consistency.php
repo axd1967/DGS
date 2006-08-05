@@ -39,6 +39,8 @@ require_once( "include/std_functions.php" );
     error("adminlevel_too_low");
 
 
+   start_html( 'message_consistency', 0);
+
    if( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) { 
@@ -81,6 +83,8 @@ require_once( "include/std_functions.php" );
 
    echo "<br>Lost replied done.\n";
 
+
+   end_html();
 }
 
 // Try to find Myself message
