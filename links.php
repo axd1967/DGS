@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2006  Jim Heiney and Erik Ouchterlony
+Copyright (C) 2001-2003  Jim Heiney and Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,25 +34,27 @@ require_once( "include/std_functions.php" );
   echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
     T_('General Info') . "</font></h3>\n";
 
-  add_link_page_link("http://gobase.org",
-                     T_('Jan van der Steens Pages'), T_('Lots of info on go'));
-  add_link_page_link("http://www.igoweb.org/~pahle/go-faq/index.html",
-                     T_('Go FAQ'),
-                     T_('Frequently asked questions about go for the rec.games.go newsgroup'));
-  add_link_page_link("http://www.msoworld.com/mindzine/news/orient/go/go.html",
-                     T_('Mind Sport Zine'),
-                     T_('An excellent, but unfortunately no longer updated site.'));
-  add_link_page_link("http://home.san.rr.com/rafgo/go.html",
-                     T_('Rafael\'s Go Page'),
-                     T_('Another go site with lots of useful info.'));
   add_link_page_link("http://senseis.xmp.net",
                      T_('Sensei\'s Library'),
                      T_('A collaboration web site. Read and contribute!'));
-  add_link_page_link("http://www.kyoto.zaq.ne.jp/momoyama/news/news.html",
+  add_link_page_link("http://gobase.org",
+                     T_('Jan van der Steens Pages'), T_('Lots of info on go'));
+  add_link_page_link("http://www.gogod.demon.co.uk",
+                     T_('GoGoD database and encyclopaedia'), T_('A large database of professional games'));
+  add_link_page_link("http://senseis.xmp.net/?RGGFAQ",
+                     T_('Go FAQ'),
+                     T_('Frequently asked questions about go for the rec.games.go newsgroup'));
+//  add_link_page_link("http://www.msoworld.com/mindzine/news/orient/go/go.html",
+//                     T_('Mind Sport Zine'),
+//                     T_('An excellent, but unfortunately no longer updated site.'));
+//  add_link_page_link("http://home.san.rr.com/rafgo/go.html",
+//                     T_('Rafael\'s Go Page'),
+//                     T_('Another go site with lots of useful info.'));
+  add_link_page_link("http://igo-kisen.hp.infoseek.co.jp/topics.html",
                      T_('Go News'), T_('News and games from the professional scene'));
   add_link_page_link("http://finance.baylor.edu/rich/go/goguild.html",
                      T_('Turn-based go guild'), T_('Meet other turn-based go players'));
-  add_link_page_link("http://www.toriyamaworld.com/hikago",
+  add_link_page_link("http://senseis.xmp.net/?HikaruNoGo",
                      T_('Hikaru no Go'), T_('A manga about go. Recommended!'));
 
 
@@ -69,9 +71,6 @@ require_once( "include/std_functions.php" );
   add_link_page_link("http://sentex.net/~mmcadams/teachgo/index.html",
                      T_('How to Teach Go'),
                      T_('This is all you need to get started. Very basic stuff'));
-  add_link_page_link("http://home.earthlink.net/~scotmc/",
-                     T_('Scot\'s Go Page'),
-                     T_('This is more in-depth.'));
 
   echo "<p>&nbsp;\n";
   echo "<h3 align=left><a name=\"strategy\"></a><font color=$h3_color>" .
@@ -84,7 +83,7 @@ require_once( "include/std_functions.php" );
   add_link_page_link("http://gtl.jeudego.org/",
                      T_('Go Teaching Ladder'),
                      T_('Submit your games for comments to see where you might have played better.'));
-  add_link_page_link("http://nngs.cosmic.org/hmkw/stuff/definitions.html",
+  add_link_page_link("http://senseis.xmp.net/?EssentialGoTerms",
                      T_('Common Japanese Go Terms'),
                      T_('You have to know what other players are talking about.'));
   add_link_page_link("http://www.gbgo.nu/GobanKen/palund/glossary/term_000.htm",
@@ -114,7 +113,7 @@ require_once( "include/std_functions.php" );
   add_link_page_link("http://www.kiseido.com/", 'Kiseido');
   add_link_page_link("http://www.yutopian.com/go/", 'Yutopian');
   add_link_page_link("http://www.samarkand.net/", 'Samarkand');
-  add_link_page_link("http://www.xs4all.nl/~paard/", 'Het Paard', T_('European shop'));
+  add_link_page_link("http://www.schaakengo.nl/", 'Het Paard', T_('European shop'));
 
   echo "<p>&nbsp;\n";
   echo "<h3 align=left><a name=\"servers\"></a><font color=$h3_color>" .
@@ -126,11 +125,9 @@ require_once( "include/std_functions.php" );
   add_link_page_link("http://kgs.kiseido.com",
                      'Kiseido Go Server',
                      T_('Server with java interface'));
-  add_link_page_link("http://panda-igs.joyjoy.net/English/contents.html",
+  add_link_page_link("http://www.pandanet.co.jp/English/",
                      'IGS', T_('A large server for realtime play'));
-  add_link_page_link("http://nngs.cosmic.org",
-                     'NNGS', T_('An open sourced go server'));
-  add_link_page_link("http://www.britgo.org/gopcres/play.html",
+  add_link_page_link("http://senseis.xmp.net/?GoServers",
                      T_('Server list'), T_('A more complete list of servers'));
 
   echo "</td></tr></table>\n";
