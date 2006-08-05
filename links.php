@@ -85,9 +85,6 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
   echo "<h3 align=left><a name=\"strategy\"></a><font color=$h3_color>" .
     T_('Strategy and terms') . "</font></h3>\n";
 
-  //No more found:
-  add_link_page_link("http://www.igoweb.org/~pahle/go-stuff/shape.html",
-                     T_('An Introduction to Shape'));
   add_link_page_link("http://www.goproblems.com/",
                      T_('Go Problems'), T_('Working through these can help out your game.'));
   add_link_page_link("http://gtl.jeudego.org/",
