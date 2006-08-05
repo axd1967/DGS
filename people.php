@@ -98,9 +98,9 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
      T_('Current translators') . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
-  $query_result = mysql_query( "SELECT ID,Handle,Name,Translator" .
-                               ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
-                               " FROM Players" .
+  $query_result = mysql_query( "SELECT ID,Handle,Name,Translator," .
+                               "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess ".
+                               "FROM Players " .
                                "WHERE LENGTH(Translator)>0 ORDER BY ID" );
 
   $translator_list = array();
