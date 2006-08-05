@@ -126,6 +126,7 @@ require_once( "include/form_functions.php" );
          . ",NOW() as 'Mysql time'"
          . ",FROM_UNIXTIME($NOW) as 'Server time'"
          . ",'" . date('Y-m-d H:i:s', $NOW) . "' as 'Local time'"         
+         . ",'" . gmdate('Y-m-d H:i:s', $NOW) . "' as 'GMT time'"         
          //. ",'".mysql_info()."' as 'Infos'"
          ;
       if( echo_query( $s, 0, 0, 0) < 0 ) break;
