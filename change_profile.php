@@ -156,11 +156,9 @@ require_once( "include/countries.php" );
 */
    $language = trim(get_request_arg('language'));
 
-   @list($lang,$charenc) = explode( LANG_CHARSET_CHAR, $language, 2);
-
-   if( $language === 'C' or ( $language !== $player_row['Lang'] and
-                              array_key_exists($lang, $known_languages) and
-                              array_key_exists($charenc, $known_languages[$lang])) )
+   if( $language === 'C' or 
+         ( $language !== $player_row['Lang'] && language_exists( $language ) )
+     )
    {
        $query .= "Lang='" . $language . "', ";
    }
@@ -186,11 +184,10 @@ require_once( "include/countries.php" );
    if( $nightstart != $player_row["Nightstart"] ||
        $timezone != $player_row["Timezone"] )
    {
-      setTZ( $timezone);
-
       $query .= "ClockChanged='Y', ";
 
       // ClockUsed is uppdated only once a day to prevent eternal night...
+      // setTZ( $timezone);
       // $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
    }
 
@@ -199,7 +196,7 @@ require_once( "include/countries.php" );
        " WHERE ID=" . $player_row['ID'];
 
    mysql_query( $query )
-      or error("mysql_query_failed");
+      or error('mysql_query_failed','change_profile');
 
    $msg = urlencode(T_('Profile updated!'));
 

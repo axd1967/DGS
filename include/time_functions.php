@@ -49,7 +49,21 @@ function unix_timestamp($date)
 
 function get_clock_used($nightstart)
 {
-   return gmdate('G', mktime ($nightstart,0,0,date("m"),date("d"),date("Y")));
+//Rdvl:   return gmdate('G', mktime( $nightstart,0,0));
+// because mktime() can return undefined result if DST is active
+   $d= date("d");
+   $m= date("m");
+   $y= date("Y");
+   $n= NULL;
+   for($i=0; $i<5; $i++)
+   {
+      $o= $n;
+      $n= mktime($nightstart,0,0,$m,$d+$i,$y);
+      if( $n<0 ) continue;
+      $n= gmdate('G', $n);
+      if( $n === $o ) break;
+   }
+   return $n;
 }
 
 function get_clock_ticks($clock_used)

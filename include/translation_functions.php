@@ -93,7 +93,7 @@ function include_translate_group($group, $player_row) //must be called from main
       if( $language == 'C' )
          $language = get_preferred_browser_language();
 
-      if( empty($language) or $language=='en' )
+      if( empty($language) or $language == 'en' )
          $language = LANG_ENGLISH;
       //else call to get_preferred_browser_language() for each $group
 
@@ -138,9 +138,9 @@ function get_preferred_browser_language()
 
    foreach( $accept_langcodes as $lang )
       {
-         @list($lang, $q_val) = explode(';', trim($lang));
+         @list($lang, $q_val) = explode( ';', trim($lang));
          $lang = substr(trim($lang), 0, 2);
-         $q_val = preg_replace('/q=/i','', trim($q_val));
+         $q_val = preg_replace( '/q=/i', '', trim($q_val));
          if( empty($q_val) or !is_numeric($q_val) )
             $q_val = 1.0;
 
@@ -183,6 +183,24 @@ function get_language_descriptions_translated()
             }
       }
    return $result;
+}
+
+
+function language_exists( $twoletter, $charenc='', $langname='' )
+{
+   global $known_languages;
+
+   if( empty($twoletter) )
+      return false;
+   if( empty($charenc) )
+      @list($twoletter,$charenc) = explode( LANG_CHARSET_CHAR, $twoletter, 2);
+
+   return array_key_exists( $twoletter , $known_languages ) &&
+       ( array_key_exists( $charenc, $known_languages[$twoletter] )
+      or ( !empty($langname)
+        && array_key_exists( $langname, array_flip($known_languages[$twoletter]) )
+         )
+       );
 }
 
 ?>

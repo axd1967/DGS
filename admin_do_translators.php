@@ -30,16 +30,6 @@ function lang_illegal( $str)
    return substr( $str, strcspn( $str, LANG_TRANSL_CHAR.LANG_CHARSET_CHAR), 1);
 }
 
-function language_exists( $langname, $charenc, $twoletter )
-{
-   global $known_languages;
-
-   return array_key_exists( $twoletter , $known_languages ) &&
-       ( array_key_exists( $charenc, $known_languages[$twoletter] )
-      or array_key_exists( $langname, array_flip($known_languages[$twoletter]) )
-       );
-}
-
 function retry_admin( $msg)
 {
    if( $tmp = trim( $msg) )
@@ -114,7 +104,7 @@ function retry_admin( $msg)
       if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
         retry_admin( T_("Sorry, there was a missing or incorrect field when adding a language."));
 
-      if( language_exists( $langname, $charenc, $twoletter ) )
+      if( language_exists( $twoletter, $charenc, $langname ) )
         retry_admin( T_("Sorry, the language you tried to add already exists."));
 
 
@@ -173,11 +163,8 @@ function retry_admin( $msg)
    if( $transladd )
    {
       if( !empty($transladdlang) )
-      {
-         @list( $twoletter, $charenc) = explode( LANG_CHARSET_CHAR, $transladdlang, 2);
-         if( !language_exists( '', $charenc, $twoletter ) )
+         if( !language_exists( $transladdlang ) )
             $transladdlang = '';
-      }
       if( empty($transladdlang) )
          retry_admin( T_("Sorry, you must specify existing languages."));
 
