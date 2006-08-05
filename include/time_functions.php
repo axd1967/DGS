@@ -54,7 +54,7 @@ function get_clock_used($nightstart)
    $d= date("d");
    $m= date("m");
    $y= date("Y");
-   $n= NULL;
+   $n= -1;
    for($i=0; $i<5; $i++)
    {
       $o= $n;
@@ -63,7 +63,7 @@ function get_clock_used($nightstart)
       $n= gmdate('G', $n);
       if( $n === $o ) break;
    }
-   return $n;
+   return ((($n % 24) + 24) % 24);
 }
 
 function get_clock_ticks($clock_used)
