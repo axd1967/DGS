@@ -41,7 +41,6 @@ CREATE TABLE Players (
   Boardcoords int(11) NOT NULL default '31',
   MoveNumbers smallint(5) unsigned NOT NULL default '0',
   MoveModulo smallint(5) unsigned NOT NULL default '0',
-  MoveHAmark char(1) NOT NULL default '1',
   Button int(11) NOT NULL default '0',
   UsersColumns int(10) unsigned NOT NULL default '62',
   GamesColumns int(10) unsigned NOT NULL default '593910',

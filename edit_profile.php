@@ -114,9 +114,6 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
      $notescutoffs[$i] = $i;
      }
 
-//    $HAmarks = array( '' => '', '1' => '1', 'x' => 'X',
-//                         't' => 'T', 's' => 'S', 'c' => 'C' );
-
 
 //------------
 
@@ -258,9 +255,7 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                                   'TEXTINPUT', 'movenumbers', 4, 4, $player_row['MoveNumbers'],
                                   'CHECKBOX', 'movemodulo', 100, T_('Don\'t use numbers above 100') . SMALL_SPACING
                                   , ($player_row['MoveModulo']>0 ?1 :0),
-//                                   'SELECTBOX', 'movehamark', 1, $HAmarks
-//                                   , $player_row['MoveHAmark'], false,
-//                                  'TEXT', T_('Handicap mark') . SMALL_SPACING,
+//                                  'TEXT', SMALL_SPACING,
 //                                  'CHECKBOX', 'numbersover', 1, T_('Over'), ($s & NUMBER_OVER),
                                 ) );
    }

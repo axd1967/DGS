@@ -478,14 +478,7 @@ function get_alt_arg( $n1, $n2)
       $tmp= (int)@$player_row['MoveModulo'];
       if( $tmp >= 0 )
       {
-         $tmp2= $move-$movenumbers;
-         $TheBoard->move_marks( $tmp2, $move, $tmp);
-//          if( $tmp2 <= $Handicap )
-//          {
-//             $tmp= trim((string)@$player_row['MoveHAmark']);
-//             if( $tmp )
-//                $TheBoard->move_marks( 1, $Handicap, $tmp);
-//          }
+         $TheBoard->move_marks( $move-$movenumbers, $move, $tmp);
          $TheBoard->draw_captures_box( T_('Captures'));
       }
    }

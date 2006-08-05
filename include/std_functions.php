@@ -104,7 +104,7 @@ $cookie_pref_rows = array(
        'Stonesize', 'Woodcolor', 'Boardcoords',
        'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff',
        'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
-       'MoveNumbers', 'MoveModulo', 'MoveHAmark',
+       'MoveNumbers', 'MoveModulo',
        );
 
 $vacation_min_days = 2;
