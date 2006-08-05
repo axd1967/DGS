@@ -85,7 +85,8 @@ function retry_admin( $msg)
    $transladdlang = trim(get_request_arg('transladdlang'));
 
    $translpriv = @$_REQUEST['translpriv'];
-   //transllang[] is a MULTIPLE select box
+   //transllang[] is a MULTIPLE select box => no get_request_arg()
+
    $transllang = get_request_arg('transllang');
 
    $twoletter = strtolower($twoletter);
