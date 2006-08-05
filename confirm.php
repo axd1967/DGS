@@ -127,7 +127,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    if( $Maintime > 0 or $Byotime > 0)
    {
-
+      // LastTicks may handle -(time spend) at the moment of the start of vacations
       $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
       $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 
@@ -148,21 +148,18 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
              "White_Byoperiods=$White_Byoperiods, ";
       }
 
-      if( $next_to_move == BLACK and $Blackonvacation > 0 or
-          $next_to_move == WHITE and $Whiteonvacation > 0 )
+      if( ($next_to_move == BLACK ? $Blackonvacation : $Whiteonvacation) > 0 )
       {
          $next_clockused = VACATION_CLOCK;
-         $next_ticks = 0; //get_clock_ticks() "OnVacation" value
       }
       else
       {
          $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
          if( $WeekendClock != 'Y' )
             $next_clockused += WEEKEND_CLOCK_OFFSET;
-         $next_ticks = get_clock_ticks($next_clockused);
       }
 
-      $time_query .= "LastTicks=$next_ticks, " .
+      $time_query .= "LastTicks=" . get_clock_ticks($next_clockused) . ", " .
           "ClockUsed=$next_clockused, ";
    }
    else

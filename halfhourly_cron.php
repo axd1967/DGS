@@ -149,14 +149,14 @@ if( !$is_down )
              "WHERE ToMove_ID=$uid AND Black_ID=black.ID AND White_ID=white.ID" .
              " AND UNIX_TIMESTAMP(Lastchanged) >= UNIX_TIMESTAMP('$Lastaccess')";
 
-         $res2 = mysql_query( $query )
+         $gres = mysql_query( $query )
                or error('mysql_query_failed','halfhourly_cron4' . $query);
 
-         if( @mysql_num_rows($res2) > 0 )
+         if( @mysql_num_rows($gres) > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  Games:\n";
 
-            while( $game_row = mysql_fetch_array( $res2 ) )
+            while( $game_row = mysql_fetch_array( $gres ) )
             {
                extract($game_row);
 
@@ -185,7 +185,7 @@ if( !$is_down )
                }
             }
          }
-         mysql_free_result($res2);
+         mysql_free_result($gres); unset($game_row);
       }
 
 
@@ -272,28 +272,30 @@ if( !$is_down )
                          "WHERE OnVacation>0 AND OnVacation <= 1/(2*24)")
                or error('mysql_query_failed','halfhourly_cron9');
 
-   while( $row = mysql_fetch_array( $result ) )
+   while( $prow = mysql_fetch_array( $result ) )
    {
-      $uid = $row['ID'];
-      $ClockUsed = $row['ClockUsed'];
+      $uid = $prow['ID'];
+      $ClockUsed = $prow['ClockUsed'];
 
-      $res2 = mysql_query("SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
-                          "FROM Games, Clock " .
-                          "WHERE Clock.ID=$ClockUsed AND ToMove_ID='$uid' " .
-                          "AND ClockUsed=".VACATION_CLOCK." " .
-                          "AND Status!='INVITED' AND Status!='FINISHED'")
+      // LastTicks may handle -(time spend) at the moment of the start of vacations
+      $gres = mysql_query("SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
+                         "FROM Games, Clock " .
+                         "WHERE Status!='INVITED' AND Status!='FINISHED' " .
+                         "AND Games.ClockUsed < 0 " . // VACATION_CLOCK
+                         "AND Clock.ID=$ClockUsed " .
+                         "AND ToMove_ID='$uid'" )
                or error('mysql_query_failed','halfhourly_cron10');
 
-      while( $row2 = mysql_fetch_array( $res2 ) )
+      while( $game_row = mysql_fetch_array( $gres ) )
       {
-         mysql_query("UPDATE Games SET ClockUsed=$ClockUsed, " .
-                     "LastTicks='" . $row2['ticks'] . "' " .
-                     "WHERE ID='" . $row2['gid'] . "' LIMIT 1")
-               or error('mysql_query_failed','halfhourly_cron11');
+            mysql_query("UPDATE Games SET ClockUsed=$ClockUsed"
+                      . ", LastTicks='" . $game_row['ticks'] . "'"
+                      . " WHERE ID='" . $game_row['gid'] . "' LIMIT 1")
+                  or error('mysql_query_failed','halfhourly_cron11');
       }
-      mysql_free_result($res2);
+      mysql_free_result($gres); unset($game_row);
    }
-   mysql_free_result($result);
+   mysql_free_result($result); unset($prow);
 
 
 

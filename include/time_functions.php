@@ -23,8 +23,8 @@ $TranslateGroups[] = "Common";
 $date_fmt = 'Y-m-d H:i';
 $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
-define('VACATION_CLOCK', -1);
 define('WEEKEND_CLOCK_OFFSET', 100);
+define('VACATION_CLOCK', -1-WEEKEND_CLOCK_OFFSET); // stay < 0 over weekend
 
 function getmicrotime()
 {
@@ -54,7 +54,7 @@ function get_clock_used($nightstart)
 
 function get_clock_ticks($clock_used)
 {
-   if( $clock_used == VACATION_CLOCK or $clock_used == VACATION_CLOCK+WEEKEND_CLOCK_OFFSET )
+   if( $clock_used < 0) // VACATION_CLOCK
       return 0; // On vacation
 
    if( $row=mysql_single_fetch(

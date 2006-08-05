@@ -96,17 +96,20 @@ require_once( "include/form_functions.php" );
       else if( isset($_POST['start_vacation']) and
          $vacationlength >= $vacation_min_days and $vacationlength <= $days_left )
       {
+         // LastTicks will handle -(time spend) at the moment of the start of vacations
          $result = mysql_query("SELECT Games.ID as gid, LastTicks-Clock.Ticks AS ticks " .
-                               "FROM Games, Clock " .
-                               "WHERE Clock.ID=ClockUsed " .
-                               "AND ToMove_ID='" . $player_row['ID'] . "' " .
-                               "AND Status!='INVITED' AND Status!='FINISHED'")
+                         "FROM Games, Clock " .
+                         "WHERE Status!='INVITED' AND Status!='FINISHED' " .
+                         'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
+                         'AND Clock.ID=Games.ClockUsed ' .
+                         "AND ToMove_ID='" . $player_row['ID'] . "'" )
             or error("internal_error",'edit_v2');
 
-         while( $row = mysql_fetch_array( $result ) )
+         while( $game_row = mysql_fetch_array( $result ) )
          {
-            mysql_query("UPDATE Games SET LastTicks='" . $row['ticks'] . "', ClockUsed=-1 " .
-                        "WHERE ID=" . $row['gid'] . " LIMIT 1" )
+            mysql_query("UPDATE Games SET ClockUsed=" .VACATION_CLOCK
+                      . ", LastTicks='" . $game_row['ticks'] . "'" 
+                      . " WHERE ID=" . $game_row['gid'] . " LIMIT 1" )
                or error("internal_error",'edit_v3');
          }
 
