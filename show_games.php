@@ -171,7 +171,8 @@ require_once( "include/rating.php" );
          "ORDER BY $order,Games.ID $limit";
    }
 
-   $result = mysql_query( $query ) or die(mysql_error());
+   $result = mysql_query( $query )
+               or error("mysql_query_failed"); //die(mysql_error());
 
    $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
 
