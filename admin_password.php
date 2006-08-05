@@ -43,7 +43,7 @@ require_once( "include/form_functions.php" );
    $passwd_form->add_row( array( 'HEADER', T_('New password') ) );
 
    $passwd_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                                 'TEXTINPUT', 'userid', 16, 16, '',
+                                 'TEXTINPUT', 'pswduser', 16, 16, '',
                                  'TD',
                                  'SUBMITBUTTON', 'action', T_("Send password"),
                                ) );
