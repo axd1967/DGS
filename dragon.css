@@ -38,9 +38,13 @@ a:active {
    text-align: center;
 }
 
-tt {
+pre.code {
    background: #dddddd;
    padding: 8px;
+/*
+   width: auto;
+   margin-right: auto;
+*/
 }
 
 table.links {

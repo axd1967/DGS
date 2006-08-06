@@ -726,8 +726,8 @@ function add_line_breaks( $str)
 
  // ** don't use parenthesis **
  // ** keep a '|' at both ends:
-$html_code_closed['cell'] = '|b|i|u|color|';
-$html_code_closed['msg'] = '|a|b|i|u|color|center|ul|ol|font|tt|pre|';
+$html_code_closed['cell'] = '|b|i|u|tt|color|';
+$html_code_closed['msg'] = '|a|b|i|u|color|center|ul|ol|font|tt|pre|code|';
 $html_code_closed['game'] = $html_code_closed['msg'].'h|hidden|c|comment|';
  // more? '|/li|/p|/br|/ *br';
 
@@ -856,6 +856,29 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          return $before .ALLOWED_LT. $head .ALLOWED_GT ;
 
       $to_be_closed = is_numeric(strpos($html_code_closed,'|'.$tag.'|')) ;
+      if( $tag == 'code' )
+      {
+         // does not allow inside HTML
+         $tmp= '/'.$tag;
+         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, $tmp) ;
+         if( $bad)
+            return $before .'<'. $head .'>'. $inside ;
+         $inside = str_replace('&', '&amp;', $inside);
+      }
+      else
+      if( $tag == 'tt' )
+      {
+         // TT is mainly designed to be used when $some_html=='cell'
+         // does not allow inside HTML and remove line breaks
+         $tmp= '/'.$tag;
+         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, $tmp) ;
+         if( $bad)
+            return $before .'<'. $head .'>'. $inside ;
+         //$inside = str_replace('&', '&amp;', $inside);
+         $inside = preg_replace('%[\\x09\\x20]%', '&nbsp;', $inside);
+         $inside = preg_replace('%[\\x01-\\x1F]*%', '', $inside);
+      }
+      else
       if( $to_be_closed )
       {
          $inside = parse_tags_safe( $trail, $bad, $html_code, $html_code_closed, '/'.$tag) ;
@@ -886,6 +909,14 @@ function parse_html_safe( $msg, $some_html)
    return $str;
 }
 
+function reverse_allowed( $msg)
+{
+   $msg = str_replace(ALLOWED_LT, '<', $msg);
+   $msg = str_replace(ALLOWED_GT, '>', $msg);
+   $msg = str_replace(ALLOWED_QUOT, '"', $msg);
+   $msg = str_replace(ALLOWED_APOS, "'", $msg);
+   return $msg;
+}
 
 define('REF_LINK', 0x1);
 define('REF_LINK_ALLOWED', 0x2);
@@ -898,10 +929,7 @@ function make_html_safe( $msg, $some_html=false)
    if( $some_html )
    {
       // make sure the <, > replacements: ALLOWED_LT, ALLOWED_GT are removed from the string
-      $msg = str_replace(ALLOWED_LT, '<', $msg);
-      $msg = str_replace(ALLOWED_GT, '>', $msg);
-      $msg = str_replace(ALLOWED_QUOT, '"', $msg);
-      $msg = str_replace(ALLOWED_APOS, "'", $msg);
+      $msg= reverse_allowed( $msg);
 
       if( !is_string( $some_html ) )
       {
@@ -944,10 +972,10 @@ function make_html_safe( $msg, $some_html=false)
       }
 
 
-      $msg=eregi_replace(ALLOWED_LT."(mailto:)([^ >\n\t]+)".ALLOWED_GT,
+      $msg=eregi_replace(ALLOWED_LT."(mailto:)([^ `\n\t]+)".ALLOWED_GT,
                          ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT.
                          "\\2".ALLOWED_LT."/a".ALLOWED_GT, $msg);
-      $msg=eregi_replace(ALLOWED_LT."((http:|https:|news:|ftp:)//[^ >\n\t]+)".ALLOWED_GT,
+      $msg=eregi_replace(ALLOWED_LT."((http:|https:|news:|ftp:)//[^ `\n\t]+)".ALLOWED_GT,
                          ALLOWED_LT."a href=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT.
                          "\\1".ALLOWED_LT."/a".ALLOWED_GT, $msg);
 
@@ -971,6 +999,22 @@ function make_html_safe( $msg, $some_html=false)
       $msg=eregi_replace( ALLOWED_LT."/color *".ALLOWED_GT,
                            ALLOWED_LT."/font".ALLOWED_GT, $msg);
 
+      //tag: <code>...</code> =>translated to <pre class="code">...</pre>
+      // see also parse_tags_safe() for the suppression of inner html code
+      $msg=eregi_replace( ALLOWED_LT."code([^`\n\t]*)".ALLOWED_GT,
+                           ALLOWED_LT."pre class=".ALLOWED_QUOT."code".ALLOWED_QUOT."\\1".ALLOWED_GT, $msg);
+      $msg=eregi_replace( ALLOWED_LT."/code *".ALLOWED_GT,
+                           ALLOWED_LT."/pre".ALLOWED_GT, $msg);
+
+/*
+      //tag: <tt>...</tt> =>translated to <pre>...</pre>
+      // see also parse_tags_safe() for the suppression of inner html code
+      $msg=eregi_replace( ALLOWED_LT."tt([^`\n\t]*)".ALLOWED_GT,
+                           ALLOWED_LT."pre\\1".ALLOWED_GT, $msg);
+      $msg=eregi_replace( ALLOWED_LT."/tt *".ALLOWED_GT,
+                           ALLOWED_LT."/pre".ALLOWED_GT, $msg);
+*/
+
    }
 
 
@@ -990,13 +1034,13 @@ function make_html_safe( $msg, $some_html=false)
    if( $some_html )
    {
       // change back to <, > from ALLOWED_LT, ALLOWED_GT
-      $msg = str_replace(ALLOWED_LT, '<', $msg);
-      $msg = str_replace(ALLOWED_GT, '>', $msg);
-      $msg = str_replace(ALLOWED_QUOT, '"', $msg);
-      $msg = str_replace(ALLOWED_APOS, "'", $msg);
+      $msg= reverse_allowed( $msg);
    }
 
+   if( $some_html && $some_html != 'cell' )
+   {
    $msg = add_line_breaks($msg);
+   }
 
    return $msg;
 }
