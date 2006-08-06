@@ -173,7 +173,8 @@ function echo_time($hours, $keep_english=false)
 
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 
-   $days = (int)($hours/15);
+   $h = $hours % 15;
+   $days = ($hours-$h) / 15;
    if( $days > 0 )
    {
       if( $days <= 1 )
@@ -184,10 +185,9 @@ function echo_time($hours, $keep_english=false)
    else
          $str = '';
 
-   $h = $hours % 15;
-   //if( $h > 0 )
+   if( $h > 0 ) //or $str == '' )
    {
-      if( $days > 0 )
+      if( $str > '' )
          $str .='&nbsp;' . $T_('and') . '&nbsp;';
 
       if( $h <= 1 )
