@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require_once( "include/coords.php" );
 
 define('EDGE_SIZE', 10);
+define('COORD_MASK', COORD_UP+COORD_RIGHT+COORD_DOWN+COORD_LEFT);
 
 
 class Board
@@ -452,7 +453,7 @@ class Board
             default:
                $on_not_empty = false;
                $on_empty = true;
-               $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=move".URI_AMP."c=";
+               $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=domove".URI_AMP."c=";
                $move_alt = "\"><img class=brdx border=0 alt=\"";
                break;
          }
@@ -646,7 +647,7 @@ class Board
 
 
    //$coord_borders and $movemsg stay local.
-   function draw_ascii_board( $movemsg='', $coord_borders=15)
+   function draw_ascii_board( $movemsg='', $coord_borders=COORD_MASK)
    {
       $out = "\n";
 
