@@ -109,12 +109,13 @@ function change_depth(&$cur_depth, $new_depth)
    }
 
    $preview = isset($_POST['preview']);
-   $preview_ID = ($edit > 0 ? $edit : @$_POST['parent']);
+   $preview_ID = ($edit > 0 ? $edit : @$_REQUEST['parent']+0 );
    if( $preview )
    {
       $preview_Subject = trim(get_request_arg('Subject'));
       $preview_Text = trim(get_request_arg('Text'));
-
+      if( !$edit > 0 )
+         $reply = @$_REQUEST['parent']+0;
 //      $preview_GoDiagrams = create_godiagrams($preview_Text);
    }
 
@@ -201,6 +202,7 @@ function change_depth(&$cur_depth, $new_depth)
 
 //      $GoDiagrams = find_godiagrams($Text);
 
+
       draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text); //, $GoDiagrams);
 
       if( $preview and $preview_ID == $ID )
@@ -209,13 +211,12 @@ function change_depth(&$cur_depth, $new_depth)
          $Subject = $preview_Subject;
          $Text = $preview_Text;
 //         $GoDiagrams = $preview_GoDiagrams;
-         $post_type = 'preview';
-         draw_post($post_type, false, $Subject, $Text); //, $GoDiagrams);
+         draw_post('preview', false, $Subject, $Text); //, $GoDiagrams);
       }
 
       if( $post_type != 'normal' and $post_type != 'hidden' )
       {
-         if( $post_type == 'reply' )
+         if( $post_type == 'reply' and !($preview and $preview_ID == $ID) )
          {
             $Text = '';
 //            $GoDiagrams = null;
