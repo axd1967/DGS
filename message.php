@@ -247,8 +247,8 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'to', $other_handle,
                   'HIDDEN', 'reply', $mid,
                   'TAB',
-                  'SUBMITBUTTON', 'send_message', T_('Send Reply'),
-                  'SUBMITBUTTON', 'preview', T_('Preview'),
+                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Reply'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
                ) );
          }
       }
@@ -273,8 +273,8 @@ require_once( "include/form_functions.php" );
                ) );
             $message_form->add_row( array(
                   'TAB',
-                  'SUBMITBUTTON', 'send_message', T_('Send Message'),
-                  'SUBMITBUTTON', 'preview', T_('Preview'),
+                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Message'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
                ) );
       }
       break;
@@ -329,9 +329,9 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'subject', "Game invitation accepted (or declined)",
                   'HIDDEN', 'gid', $Game_ID,
                   'TAB',
-                  'SUBMITBUTTON', 'send_accept', T_('Accept'),
+                  'SUBMITBUTTON', 'send_accept" accesskey="x', T_('Accept'),
                   'SUBMITBUTTON', 'send_decline', T_('Decline'),
-                  'SUBMITBUTTON', 'preview', T_('Preview'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
                ) );
 
          }
@@ -365,8 +365,8 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'type', 'INVITATION',
                   'HIDDEN', 'disputegid', $Game_ID,
                   'TAB',
-                  'SUBMITBUTTON', 'send_message', T_('Send Reply'),
-                  'SUBMITBUTTON', 'preview', T_('Preview'),
+                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Reply'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
                ) );
       }
       break;
@@ -394,8 +394,8 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'subject', 'Game invitation',
                   'HIDDEN', 'type', 'INVITATION',
                   'TAB',
-                  'SUBMITBUTTON', 'send_message', T_('Send Invitation'),
-                  'SUBMITBUTTON', 'preview', T_('Preview'),
+                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Invitation'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
                ) );
       }
       break;
@@ -405,8 +405,8 @@ require_once( "include/form_functions.php" );
 
    if( $preview )
    {
-      echo "\n<a name=\"preview\"><h3><font color=$h3_color>" . 
-               T_('Preview') . ":</font></h3></a>\n";
+      echo "\n<a name=\"preview\"></a><h3><font color=$h3_color>" . 
+               T_('Preview') . ":</font></h3>\n";
       //$mid==0 means preview - display a *to_me* like message
 
       $row = mysql_single_fetch('SELECT ID, Name FROM Players ' .

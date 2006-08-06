@@ -193,7 +193,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 
    if( $post_type == 'preview' )
       echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
-         "\"><a name=\"preview\"><font size=\"+1\"><b>$sbj</b></font></a><br> " . 
+         "\"><a name=\"preview\"></a><font size=\"+1\"><b>$sbj</b></font><br> " . 
          T_('by')." " . user_reference( 1, 1, "black", $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n" .
          '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
@@ -271,8 +271,8 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
    {
       $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str . '</td>'));
       $form->add_row( array( 'OWNHTML', '<td colspan=2 align="center">' . 
-                             '<input type="submit" name="post" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . " \">\n" .
-                             '<input type="submit" name="preview" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \">\n" .
+                             '<input type="submit" name="post" accesskey="x" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . " \">\n" .
+                             '<input type="submit" name="preview" accesskey="w" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \">\n" .
                              "</td>\n" ));
    }
    else
