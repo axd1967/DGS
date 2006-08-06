@@ -79,7 +79,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    extract($game_row);
 
-   if( @$_REQUEST['skip'] )
+   if( @$_REQUEST['nextskip'] )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
@@ -100,10 +100,10 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    //See *** HOT_SECTION *** below
    if( !isset($_REQUEST['move']) )
-      error("internal_error",'conf10');
+      error("internal_error",'confirm10');
    $qry_move = @$_REQUEST['move'];
    if( $qry_move != $Moves )
-      error("already_played",'conf11');
+      error("already_played",'confirm11');
 
 
    if( $Black_ID == $ToMove_ID )
@@ -168,7 +168,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       $time_query = '';
    }
 
-   $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
+   $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'domove' );
 
    $TheBoard = new Board( );
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
@@ -209,9 +209,13 @@ This is why:
 
    switch( $action )
    {
-      case 'move':
+      case 'domove': //stonestring is the list of prisoners
       {
+         if( $Status != 'PLAY' )
+            error('invalid_action','confirm0');
+
          $coord = @$_REQUEST['coord'];
+         $stonestring = @$_REQUEST['stonestring'];
 
 {//to fixe old way Ko detect. Could be removed when no more old way games.
   if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
@@ -230,9 +234,9 @@ This is why:
             $prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
 
-         $old_prisoner_string = @$_REQUEST['prisoner_string'];
+
          if( strlen($prisoner_string) != $nr_prisoners*2 or
-             ( $old_prisoner_string and $prisoner_string != $old_prisoner_string) )
+             ( $stonestring and $prisoner_string != $stonestring) )
             error("move_problem");
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
@@ -274,7 +278,7 @@ This is why:
          else if( $Status == 'PASS' )
             $next_status = 'SCORE';
          else
-            error("invalid_action",'conf1');
+            error('invalid_action','confirm1');
 
 
          $move_query = "INSERT INTO Moves SET " .
@@ -297,10 +301,10 @@ This is why:
       }
       break;
 
-      case 'handicap':
+      case 'handicap': //stonestring is the list of handicap stones
       {
-         if( $Status != 'PLAY' or $Moves != 1 or $Handicap < 1)
-            error("invalid_action",'conf2');
+         if( $Status != 'PLAY' or !( $Handicap>1 && $Moves==1 ) )
+            error('invalid_action','confirm2');
 
          $stonestring = (string)@$_REQUEST['stonestring'];
          check_handicap( $TheBoard); //adjust $stonestring
@@ -367,7 +371,7 @@ This is why:
       case 'delete':
       {
          if( $Status != 'PLAY' or !$too_few_moves )
-            error("invalid_action",'conf3');
+            error('invalid_action','confirm3');
 
 /*
   Here, the previous line was:
@@ -385,10 +389,10 @@ This is why:
       }
       break;
 
-      case 'done':
+      case 'done': //stonestring is the list of toggled points
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error("invalid_action",'conf4');
+            error('invalid_action','confirm4');
 
          $stonestring = (string)@$_REQUEST['stonestring'];
          check_remove( $TheBoard);
@@ -439,7 +443,7 @@ This is why:
 
       default:
       {
-         error("invalid_action",'conf5');
+         error('invalid_action','confirm5');
       }
    }
 

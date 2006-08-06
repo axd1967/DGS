@@ -88,7 +88,6 @@ else
       error("unknown_game");
 
    $Last_X = $Last_Y = -1;
-   $game_row=mysql_fetch_assoc($result);
    extract($game_row);
 
    if( $Status == 'INVITED' )
@@ -149,7 +148,7 @@ else
       error("database_corrupted");
 
 
-   //$action = always 'move'
+   //$action = always 'domove'
 
    $next_to_move = WHITE+BLACK-$to_move;
 
@@ -237,8 +236,11 @@ This is why:
 
 
 
-      //case 'move':
+      //case 'domove':
       {
+         if( $Status != 'PLAY' )
+            error('invalid_action','qp0');
+
          $coord = number2sgf_coords( $query_X, $query_Y, $Size);
 
 {//to fixe old way Ko detect. Could be removed when no more old way games.
