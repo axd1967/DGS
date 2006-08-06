@@ -285,7 +285,7 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
 
 function standard_handicap_is_possible($size, $hcp)
 {
-   return( $hcp == 19 or $hcp <= 4 or ($hcp <= 9 and $size%2 == 1 and $size>=9) );
+   return( $size == 19 or $hcp <= 4 or ($hcp <= 9 and $size%2 == 1 and $size>=9) );
 }
 
 function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
