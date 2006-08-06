@@ -38,6 +38,10 @@ a:active {
    text-align: center;
 }
 
+tt {
+   background: #dddddd;
+   padding: 8px;
+}
 
 table.links {
    width: 100%; 
