@@ -189,7 +189,7 @@ disable_cache();
       }
 
       mysql_query( "UPDATE Players SET Running=Running+" . ( $handitype == INVITE_HANDI_DOUBLE ? 2 : 1 ) .
-                   ( $Rated ? ", RatingStatus='RATED'" : '' ) .
+                   ( $game_row['Rated'] ? ", RatingStatus='RATED'" : '' ) .
                    " WHERE ID=$my_id OR ID=$opponent_ID LIMIT 2" );
 
       $subject = "Game invitation accepted";
@@ -264,7 +264,7 @@ disable_cache();
          $query .= ", Folder_nr=$new_folder";
       }
 
-      $query .= " WHERE mid=$reply AND Sender!='Y' AND Replied!='Y' AND uid=$my_id LIMIT 1";
+      $query .= " WHERE mid=$reply AND Sender!='Y' AND uid=$my_id LIMIT 1";
 
       mysql_query( $query ) or die(mysql_error());
 
