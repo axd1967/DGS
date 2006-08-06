@@ -227,6 +227,8 @@ function get_alt_arg( $n1, $n2)
          check_move( $TheBoard, $coord, $to_move);
 //ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
 //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
+         $game_row['Black_Prisoners'] = $Black_Prisoners;
+         $game_row['White_Prisoners'] = $White_Prisoners;
 
          $stonestring = '';
          reset($prisoners);
@@ -717,13 +719,16 @@ function draw_game_info(&$game_row)
    echo '<td>' . T_('Prisoners') . ': ' . $game_row['Black_Prisoners'] . "</td>\n";
    echo "</tr>\n";
 
-   echo '<tr bgcolor="#DDDDDD">' . "\n";
-   echo "<td colspan=99>\n" . T_("Time remaining") . ": " .
-      echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
-                          $game_row['Byotime'], $game_row['Byoperiods'],
-                          $game_row['Black_Maintime'], $game_row['Black_Byotime'],
-                          $game_row['Black_Byoperiods']) . "</td>\n";
-   echo "</tr>\n";
+   if( $game_row['Status'] != 'FINISHED' )
+   {
+      echo '<tr bgcolor="#DDDDDD">' . "\n";
+      echo "<td colspan=99>\n" . T_("Time remaining") . ": " .
+         echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
+                             $game_row['Byotime'], $game_row['Byoperiods'],
+                             $game_row['Black_Maintime'], $game_row['Black_Byotime'],
+                             $game_row['Black_Byoperiods']) . "</td>\n";
+      echo "</tr>\n";
+   }
 
 
    echo '<tr bgcolor="#FFFFFF">' . "\n";
@@ -743,13 +748,16 @@ function draw_game_info(&$game_row)
    echo "</tr>\n";
 
 
-   echo '<tr bgcolor="#FFFFFF">' . "\n";
-   echo "<td colspan=99>\n" . T_("Time remaining") . ": " .
-      echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
-                          $game_row['Byotime'], $game_row['Byoperiods'],
-                          $game_row['White_Maintime'], $game_row['White_Byotime'],
-                          $game_row['White_Byoperiods']) . "</td>\n";
-   echo "</tr>\n";
+   if( $game_row['Status'] != 'FINISHED' )
+   {
+      echo '<tr bgcolor="#FFFFFF">' . "\n";
+      echo "<td colspan=99>\n" . T_("Time remaining") . ": " .
+         echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
+                             $game_row['Byotime'], $game_row['Byoperiods'],
+                             $game_row['White_Maintime'], $game_row['White_Byotime'],
+                             $game_row['White_Byoperiods']) . "</td>\n";
+      echo "</tr>\n";
+   }
 
    $sep = ',&nbsp;&nbsp;&nbsp;';
    echo '<tr bgcolor=' . $table_row_color2 . '>' . "\n";
