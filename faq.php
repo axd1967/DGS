@@ -70,7 +70,10 @@ require_once( "include/std_functions.php" );
         else
         {
            echo '<li><A name="Entry' . $row["ID"] . '"></a><b>' . T_( $row['Q'] ) .
-              "</b>\n<p>\n" . add_line_breaks( T_( $row['A'] ) ) . "<br>&nbsp;<p>\n";
+              "</b>\n<p>\n" 
+              //. add_line_breaks( T_( $row['A'] ) ) 
+              . make_html_safe( T_( $row['A'] ) , 'faq') 
+              . "<br>&nbsp;<p>\n";
         }
      }
      if( !$first )

@@ -722,24 +722,28 @@ function add_line_breaks( $str)
 // 'cell': tags that does not disturb a table cell.
 // 'msg': tags allowed in messages
 // 'game': tags allowed in game messages
+// 'faq': tags allowed in the FAQ pages
 //Warning: </br> was historically used in end game messages. It remains in database.
 
- // ** don't use parenthesis **
- // ** keep a '|' at both ends:
+// ** keep them lowercase and do not use parenthesis **
+  // ** keep a '|' at both ends:
 $html_code_closed['cell'] = '|b|i|u|tt|color|';
 $html_code_closed['msg'] = '|a|b|i|u|color|center|ul|ol|font|tt|pre|code|';
 $html_code_closed['game'] = $html_code_closed['msg'].'h|hidden|c|comment|';
- // more? '|/li|/p|/br|/ *br';
+//$html_code_closed['faq'] = '|'; //no closed check
+$html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
 
- // ** no '|' at ends:
+  // ** no '|' at ends:
 $html_code['cell'] = 'b|i|u|color';
 $html_code['msg'] = 'br|p|li'.$html_code_closed['msg']
    .'goban|mailto|https?|news|game_?|user_?|send_?|/br';
 $html_code['game'] = 'br|p|li'.$html_code_closed['game']
    .'goban|mailto|https?|news|game_?|user_?|send_?|/br';
+$html_code['faq'] = '\w+'; //all not empty words
+  // more? '|/li|/p|/br|/ *br';
 
 
- //** no reg exp chars nor ampersand:
+  //** no reg exp chars nor ampersand:
 define( 'ALLOWED_LT', "`anglstart`");
 define( 'ALLOWED_GT', "`anglend`");
 define( 'ALLOWED_QUOT', "`allowedquot`");
@@ -922,7 +926,7 @@ define('REF_LINK', 0x1);
 define('REF_LINK_ALLOWED', 0x2);
 define('REF_LINK_BLANK', 0x4);
 
-//$some_html may be false, 'cell', 'game', 'gameh' or 'msg'
+//$some_html may be false, 'cell', 'faq', 'game', 'gameh' or 'msg'
 function make_html_safe( $msg, $some_html=false)
 {
 
@@ -1039,7 +1043,7 @@ function make_html_safe( $msg, $some_html=false)
 
    if( $some_html && $some_html != 'cell' )
    {
-   $msg = add_line_breaks($msg);
+      $msg = add_line_breaks($msg);
    }
 
    return $msg;
