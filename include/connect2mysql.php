@@ -58,7 +58,7 @@ if( !function_exists('error') )
 function error($err, $debugmsg=NULL)
 {
 
-   $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
+   $handle = safe_getcookie('handle');
 
    list( $err, $uri)= err_log( $handle, $err, $debugmsg);
 

@@ -305,7 +305,7 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    $profile_form->add_row( array( 'TAB',
                                   'CHECKBOX', 'locally', 1,
                                   T_('Change board graphics for this browser only'),
-                                  !empty($_COOKIE[COOKIE_PREFIX."prefs{$player_row['ID']}"]) ) );
+                                  !empty(safe_getcookie("prefs{$player_row['ID']}") ) );
 
    $profile_form->add_row( array( 'HR' ) );
 

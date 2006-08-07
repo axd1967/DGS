@@ -49,7 +49,7 @@ else
 
    // logged in?
 
-   $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
+   $uhandle= safe_getcookie('handle');
    $result = @mysql_query( "SELECT ID, Timezone, " .
                            "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
                            "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
@@ -61,7 +61,7 @@ else
 
    $player_row = mysql_fetch_assoc($result);
 
-   if( $player_row['Sessioncode'] !== @$_COOKIE[COOKIE_PREFIX.'sessioncode']
+   if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
        or $player_row["Expire"] < $NOW )
    {
       error("not_logged_in",'qp2');

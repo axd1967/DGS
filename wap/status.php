@@ -342,7 +342,7 @@ else
       }
       else if( !$uhandle && !$passwd )
       {
-         $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
+         $uhandle= safe_getcookie('handle');
          $loggin_mode = 'cookie';
       }
    }
@@ -374,7 +374,7 @@ else
          }
          else //$loggin_mode=='cookie'
          {
-            if( $player_row['Sessioncode'] === @$_COOKIE[COOKIE_PREFIX.'sessioncode']
+            if( $player_row['Sessioncode'] === safe_getcookie('sessioncode')
                 && $player_row['Expire'] >= $NOW )
             {
                $logged_in = true;

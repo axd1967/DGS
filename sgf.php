@@ -296,14 +296,14 @@ $array=array();
    if ( $owned_comments )
    {
       $owned_comments = DAME;
-      if ($Blackhandle == @$_COOKIE[COOKIE_PREFIX.'handle'])
+      if( $Blackhandle == safe_getcookie('handle') )
       {
-         if( $Blackscode == @$_COOKIE[COOKIE_PREFIX.'sessioncode'] && $Blackexpire >= $NOW )
+         if( $Blackscode == safe_getcookie('sessioncode') && $Blackexpire >= $NOW )
             $owned_comments = BLACK ;
       }
-      elseif ($Whitehandle == @$_COOKIE[COOKIE_PREFIX.'handle'])
+      elseif( $Whitehandle == safe_getcookie('handle') )
       {
-         if( $Whitescode == @$_COOKIE[COOKIE_PREFIX.'sessioncode'] && $Whiteexpire >= $NOW )
+         if( $Whitescode == safe_getcookie('sessioncode') && $Whiteexpire >= $NOW )
             $owned_comments = WHITE ;
       }
    }

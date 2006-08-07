@@ -60,8 +60,8 @@ $tick_frequency = 12; // ticks/hour
 
 
 //a $_REQUEST['handle'] will not overlap $_COOKIE['cookie_handle']
-//define('COOKIE_PREFIX', 'cookie_');
-define('COOKIE_PREFIX', '');
+define('COOKIE_PREFIX', 'cookie_');
+//define('COOKIE_PREFIX', '');
 
 //used in quick_status.php
 define("FOLDER_NEW", 2);
@@ -85,6 +85,17 @@ if ( get_magic_quotes_gpc() )
    {
       return $arg;
    }
+}
+
+function safe_getcookie($name)
+{
+   $cookie = arg_stripslashes((string)@$_COOKIE[COOKIE_PREFIX.$name]);
+   if( !$cookie ) //compatibility with old cookies: to be removed in a while
+   {
+      if( $name=='handle' or $name=='sessioncode' or substr($name,0,5)=='prefs' )
+         $cookie = arg_stripslashes((string)@$_COOKIE[$name]);
+   }
+   return $cookie;
 }
 
 function get_request_arg( $name, $def='', $list=NULL)

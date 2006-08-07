@@ -668,13 +668,13 @@ function set_login_cookie($handl, $code, $delete=false)
 
    if( $delete or !$handl or !$code)
    {
-      safe_setcookie("handle");
-      safe_setcookie("sessioncode");
+      safe_setcookie('handle');
+      safe_setcookie('sessioncode');
    }
    else
    {
-      safe_setcookie("handle", $handl, $session_duration*5);
-      safe_setcookie("sessioncode", $code, $session_duration);
+      safe_setcookie('handle', $handl, $session_duration*5);
+      safe_setcookie('sessioncode', $code, $session_duration);
    }
 }
 
@@ -692,8 +692,7 @@ function get_cookie_prefs(&$player_row)
 {
    global $cookie_prefs, $cookie_pref_rows;
 
-   $cookie_prefs = unserialize(arg_stripslashes((string)
-         @$_COOKIE[COOKIE_PREFIX."prefs{$player_row['ID']}"] ));
+   $cookie_prefs = unserialize( safe_getcookie("prefs{$player_row['ID']}") );
    if( !is_array( $cookie_prefs ) )
       $cookie_prefs = array();
 
@@ -1210,8 +1209,8 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
 
 function who_is_logged( &$row)
 {
-   $handle = @$_COOKIE[COOKIE_PREFIX.'handle'];
-   $sessioncode = @$_COOKIE[COOKIE_PREFIX.'sessioncode'];
+   $handle = safe_getcookie('handle');
+   $sessioncode = safe_getcookie('sessioncode');
    $curdir = getcwd();
    global $main_path;
    chdir( $main_path);

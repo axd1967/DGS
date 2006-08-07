@@ -75,8 +75,8 @@ require_once( "include/std_functions.php" );
    }
    //else cookie_check
 
-   if( @$_COOKIE[COOKIE_PREFIX.'handle'] != $uhandle
-      or @$_COOKIE[COOKIE_PREFIX.'sessioncode'] != $code )
+   if( safe_getcookie('handle') != $uhandle
+      or safe_getcookie('sessioncode') != $code )
    {
       error('cookies_disabled');
    }
