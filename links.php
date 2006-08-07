@@ -90,6 +90,8 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
   add_link_page_link("http://gtl.jeudego.org/",
                      T_('Go Teaching Ladder'),
                      T_('Submit your games for comments to see where you might have played better.'));
+  add_link_page_link("http://www.yomiuri.co.jp/dy/columns/0001/",
+                     T_('The Magic of Go'), T_('A weekly go column by Rob Van Zeijst.'));
   add_link_page_link("http://senseis.xmp.net/?EssentialGoTerms",
                      T_('Common Japanese Go Terms'),
                      T_('You have to know what other players are talking about.'));
