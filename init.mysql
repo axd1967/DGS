@@ -630,15 +630,15 @@ CREATE TABLE GoDiagrams (
 CREATE TABLE FAQ (
   ID int(11) NOT NULL auto_increment,
   Parent int(11) NOT NULL default '0',
-  Level int(11) default NULL,
+  Level int(11) NOT NULL default '0',
   SortOrder int(11) NOT NULL default '0',
-  Question int(11) default NULL,
-  Answer int(11) default NULL,
+  Question int(11) NOT NULL default '0',
+  Answer int(11) NOT NULL default '0',
   Hidden enum('N','Y') NOT NULL default 'N',
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
-INSERT INTO FAQ VALUES (1,1,NULL,0,NULL,NULL,'Y');
+# INSERT INTO FAQ VALUES (1,1,0,0,0,0,'N');
 
 
 #
