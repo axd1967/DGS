@@ -65,7 +65,6 @@ function err_log( $handle, $err, $debugmsg=NULL)
    if( empty($debugmsg) )
    {
     global $SUB_PATH;
-//Rdvl: parfois, REQUEST_URI != PHP_SELF+qqch si redirection _URI = original _SELF = en cours
       $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
@@ -153,7 +152,6 @@ function wap_id()
 
 $wap_opened= false;
 function wap_open( $title)
-//Rdvl , $description='', $html_clone='', $cache_minutes=10)
 {
    global $encoding_used, $HOSTBASE, $NOW;
 
@@ -164,18 +162,6 @@ function wap_open( $title)
    //if( empty($encoding_used) )
       $encoding_used = 'iso-8859-1';
 
-/* ???? Rdvl
-   $last_modified_stamp= $NOW;
-   if( is_numeric( $cache_minutes) )
-      disable_cache( $last_modified_stamp);
-   header ("Cache-control: private");
-
-   if( empty($html_clone) )
-      $html_clone = $HOSTBASE;
-
-   if( empty($description) )
-      $description = $title;
-???? Rdvl */
 
    header('Content-Type: text/vnd.wap.wml; charset='.$encoding_used);
 
@@ -309,7 +295,6 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
      mysql_fetch_row( mysql_query( "SELECT PASSWORD ('".addslashes($given_passwd)."')" ) );
    $given_passwd_encrypted = $given_passwd_encrypted[0];
 
-//RdvlLog("wap_chk: $uhandle, $passwd, $new_passwd, $given_passwd, $given_passwd_encrypted");
    if( $passwd != $given_passwd_encrypted )
    {
       // Check if there is a new password
@@ -339,7 +324,6 @@ if( $is_down )
 }
 else
 {
-//Rdvl: ???!!! add a $hostname_jump
 
    $logged_in = false;
    $loggin_mode = '';
@@ -347,8 +331,6 @@ else
    {
       $uhandle = '';
       $passwd = '';
-      //Rdvl:set_login_cookie("","", true);
-      //$loggin_mode = 'authenticate';
    }
    else
    {
@@ -364,7 +346,6 @@ else
          $loggin_mode = 'cookie';
       }
    }
-RdvlLog("wap_pwd: $loggin_mode, $uhandle, $passwd, ".@$_SERVER["REMOTE_USER"]);
 
 
    disable_cache();
@@ -388,8 +369,6 @@ RdvlLog("wap_pwd: $loggin_mode, $uhandle, $passwd, ".@$_SERVER["REMOTE_USER"]);
                                  $player_row["Newpassword"], $passwd ) )
             {
                $logged_in = true;
-               //Rdvl:$code = make_session_code();
-               //Rdvl:set_login_cookie( $uhandle, $player_row['Sessioncode'] );
             }
             else error("wrong_password");
          }
@@ -423,7 +402,6 @@ RdvlLog("wap_pwd: $loggin_mode, $uhandle, $passwd, ".@$_SERVER["REMOTE_USER"]);
 
    $my_id = (int)$player_row['ID'];
    $my_name = wap_safe( $player_row['Handle']);
-RdvlLog("wap_status: $my_id, $my_name");
 
 
    // New messages?
@@ -439,7 +417,6 @@ RdvlLog("wap_status: $my_id, $my_name");
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date, me.mid";
 
-//RdvlLog( "wap_mqry=".$query);
    $resultM = mysql_query( $query ) or error('mysql_query_failed','wap3');
    $countM = @mysql_num_rows($resultM);
 
@@ -454,7 +431,6 @@ RdvlLog("wap_status: $my_id, $my_name");
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        "ORDER BY date, Games.ID";
 
-//RdvlLog( "wap_gqry=".$query);
    $resultG = mysql_query( $query ) or error('mysql_query_failed','wap4');
    $countG = @mysql_num_rows($resultG);
 
@@ -499,7 +475,6 @@ RdvlLog("wap_status: $my_id, $my_name");
    $i= 1;
    while( $row = mysql_fetch_assoc($resultM) )
    {
-//RdvlLog( "wap_mrow=", $row);
       $safename = @$row['sender'];
       if( !$safename )
          $safename = '[Server message]';
@@ -530,7 +505,6 @@ RdvlLog("wap_status: $my_id, $my_name");
    $i= 1;
    while( $row = mysql_fetch_assoc($resultG) )
    {
-//RdvlLog( "wap_grow=", $row);
       $safename = @$row['Name'];
          $safename.= " (".@$row['Handle'].")";
       $safename = wap_safe( $safename);

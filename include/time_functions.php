@@ -49,7 +49,6 @@ function unix_timestamp($date)
 
 function get_clock_used($nightstart)
 {
-//Rdvl:   return gmdate('G', mktime( $nightstart,0,0));
 // because mktime() can return undefined result if DST is active
    $d= date("d");
    $m= date("m");

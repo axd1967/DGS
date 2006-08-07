@@ -68,7 +68,6 @@ function err_log( $handle, $err, $debugmsg=NULL)
    if( empty($debugmsg) )
    {
     global $SUB_PATH;
-//Rdvl: parfois, REQUEST_URI != PHP_SELF+qqch si redirection _URI = original _SELF = en cours
       $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
@@ -155,10 +154,6 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
    $rss_opened= true;
 
    $last_modified_stamp= $NOW;
-/* ???? Rdvl
-   if( is_numeric( $cache_minutes) )
-      disable_cache( $last_modified_stamp);
-???? */
 
    //if( empty($encoding_used) )
       $encoding_used = 'iso-8859-1';
@@ -324,7 +319,6 @@ if( $is_down )
 }
 else
 {
-//Rdvl: ???!!! add a $hostname_jump
 
    $logged_in = false;
    $loggin_mode = '';
@@ -355,7 +349,6 @@ else
       $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
       $loggin_mode = 'cookie';
    }
-RdvlLog("rss_pwd: $loggin_mode, $uhandle, $passwd, ".@$_SERVER["REMOTE_USER"].", ".@$_SERVER['PHP_AUTH_DIGEST']);
 
 
    disable_cache();
@@ -416,7 +409,6 @@ RdvlLog("rss_pwd: $loggin_mode, $uhandle, $passwd, ".@$_SERVER["REMOTE_USER"].",
 
    $my_id = (int)$player_row['ID'];
    $my_name = rss_safe( $player_row['Handle']);
-RdvlLog("rss_status: $my_id, $my_name");
 
    //$rss_sep = "\n<br />";
    $rss_sep = "\n - ";
@@ -442,13 +434,11 @@ RdvlLog("rss_status: $my_id, $my_name");
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date, me.mid";
 
-//RdvlLog( "rss_mqry=".$query);
    $result = mysql_query( $query ) or error('mysql_query_failed','rss3');
 
    $cat= 'Status/Message';
    while( $row = mysql_fetch_assoc($result) )
    {
-//RdvlLog( "rss_mrow=", $row);
       $nothing_found = false;
       $safename = @$row['sender'];
       if( !$safename )
@@ -480,14 +470,12 @@ RdvlLog("rss_status: $my_id, $my_name");
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        "ORDER BY date, Games.ID";
 
-//RdvlLog( "rss_gqry=".$query);
    $result = mysql_query( $query ) or error('mysql_query_failed','rss4');
 
    $cat= 'Status/Game';
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )
    {
-//RdvlLog( "rss_grow=", $row);
       $nothing_found = false;
       $safename = @$row['Name'];
          $safename.= " (".@$row['Handle'].")";
