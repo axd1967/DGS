@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Game";
 
 
-function make_invite_game($player_row, $opponent_row, $disputegid)
+function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 {
    global $NOW;
 
@@ -186,7 +186,7 @@ function make_invite_game($player_row, $opponent_row, $disputegid)
 
 
 
-function create_game($black_row, $white_row, $game_info_row, $gid=null)
+function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
 {
    global $NOW;
 
