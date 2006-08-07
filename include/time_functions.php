@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@ $TranslateGroups[] = "Common";
 $date_fmt = 'Y-m-d H:i';
 $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
-$NOW = time() + (int)$timeadjust;
+define('WEEKEND_CLOCK_OFFSET', 100);
+define('VACATION_CLOCK', -1-WEEKEND_CLOCK_OFFSET); // stay < 0 over weekend
 
 function getmicrotime()
 {
@@ -48,22 +49,40 @@ function unix_timestamp($date)
 
 function get_clock_used($nightstart)
 {
-   return gmdate('G', mktime ($nightstart,0,0,date("m"),date("d"),date("Y")));
+//Rdvl:   return gmdate('G', mktime( $nightstart,0,0));
+// because mktime() can return undefined result if DST is active
+   $d= date("d");
+   $m= date("m");
+   $y= date("Y");
+   $n= -1;
+   for($i=0; $i<5; $i++)
+   {
+      $o= $n;
+      $n= mktime($nightstart,0,0,$m,$d+$i,$y);
+      if( $n<0 ) continue;
+      $n= gmdate('G', $n);
+      if( $n === $o ) break;
+   }
+   return ((($n % 24) + 24) % 24);
 }
 
 function get_clock_ticks($clock_used)
 {
-   $result = mysql_query( "SELECT Ticks FROM Clock WHERE ID=$clock_used" );
-   if( mysql_num_rows( $result ) != 1 )
-      error("mysql_clock_ticks", true);
+   if( $clock_used < 0) // VACATION_CLOCK
+      return 0; // On vacation
 
-   $row = mysql_fetch_row($result);
-   return $row[0];
+   if( $row=mysql_single_fetch(
+            "SELECT Ticks FROM Clock WHERE ID=$clock_used"
+     ) )
+   {
+      return (int)@$row['Ticks'];
+   }
+   error("mysql_clock_ticks", $clock_used);
 }
 
 
 function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
-$byotype, $startbyotime, $startbyoper, $has_moved)
+   $byotype, $startbyotime, $startbyoper, $has_moved)
 {
    $elapsed = $hours;
 
@@ -79,101 +98,177 @@ $byotype, $startbyotime, $startbyoper, $has_moved)
 
    $elapsed -= $main;
 
-   if( $main > 0 or $byoper < 0 ) // entering byoyomi
+   switch($byotype)
    {
-      $byotime = $startbyotime;
-      $byoper = $startbyoper;
-   }
-
-   if( $byotype == 'JAP' )
-   {
-      $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
-      if( !$has_moved )
-         $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
-
-      if( $byoper < 0 )
-         $byotime = $byoper = 0;  // time is up;
-   }
-   else if( $byotype == 'CAN' ) // canadian byoyomi
-   {
-      if( $has_moved )
-         $byoper--; // byo stones;
-
-      $byotime -= $elapsed;
-
-      if( $byotime <= 0 )
-         $byotime = 0;
-      else if( $byoper <= 0 ) // get new stones;
+      case("FIS"):
       {
-         $byotime = $startbyotime;
-         $byoper = $startbyoper;
+         $main = $byotime = $byoper = 0;  // time is up;
       }
+      break;
+     
+      case("JAP"):
+      {
+         if( $main > 0 or $byoper < 0 ) // entering byoyomi
+         {
+            $main = 0;
+            $byotime = $startbyotime;
+            $byoper = $startbyoper-1;
+         }
 
-   }
-   else if( $byotype == 'FIS' )
-   {
-      $byotime = $byoper = 0;  // time is up;
-   }
+         //because $elapsed>=0 and ($startbyotime - $byotime)>=0, this is equal to:
+         //$byoper -= floor(($elapsed - $byotime)/$startbyotime) +1;
+         //$byoper += ceil(($byotime - $elapsed)/$startbyotime) -1;
+         $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
 
-   $main = 0;
+         if( $byoper < 0 )
+            $byotime = $byoper = 0;  // time is up;
+         else if( $has_moved )
+            $byotime = $startbyotime;
+         else 
+            $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
+      }
+      break;
+
+      case("CAN"):
+      {
+         if( $main > 0 or $byoper < 0 ) // entering byoyomi
+         {
+            $main = 0;
+            $byotime = $startbyotime;
+            $byoper = $startbyoper;
+         }
+
+         $byotime -= $elapsed;
+
+         if( $byotime <= 0 )
+            $byotime = $byoper = 0;  // time is up;
+         else if( $has_moved )
+         {
+            $byoper--; // byo stones;
+            if( $byoper <= 0 ) // get new stones;
+            {
+               $byotime = $startbyotime;
+               $byoper = $startbyoper;
+            }
+         }
+      }
+      break;
+   }
 }
 
-function echo_time($hours)
+function echo_day($days)
+{
+   return $days .'&nbsp;' . ( abs($days) <= 1 ? T_('day') : T_('days') );
+}
+
+function echo_hour($hours)
+{
+   return $hours .'&nbsp;' . ( abs($hours) <= 1 ? T_('hour') : T_('hours') );
+}
+
+function echo_time($hours, $keep_english=false)
 {
    if( $hours <= 0 )
-      return '-';
+      return '---';
 
-   $days = (int)($hours/15);
-   if( $days > 0 )
-   {
-      if( $days == 1 )
-         $str = '1&nbsp;' . T_('day');
-      else
-         $str = $days .'&nbsp;' . T_('days');
-   }
+   $T_= ( $keep_english ? 'fnop' : 'T_' );
 
    $h = $hours % 15;
-   if( $h > 0 )
+   $days = ($hours-$h) / 15;
+   if( $days > 0 )
    {
-      if( $days > 0 )
-         $str .='&nbsp;' . T_('and') . '&nbsp;';
-
-      if( $h == 1 )
-         $str .= '1&nbsp;' . T_('hour');
+      if( $days <= 1 )
+         $str = '1&nbsp;' . $T_('day');
       else
-         $str .= $h . '&nbsp;' . T_('hours');
+         $str = $days .'&nbsp;' . $T_('days');
+   }
+   else
+         $str = '';
+
+   if( $h > 0 ) //or $str == '' )
+   {
+      if( $str > '' )
+         $str .='&nbsp;' . $T_('and') . '&nbsp;';
+
+      if( $h <= 1 )
+         $str .= '1&nbsp;' . $T_('hour');
+      else
+         $str .= $h . '&nbsp;' . $T_('hours');
    }
 
    return $str;
 }
 
-function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods)
+function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_english=false, $short=false)
 {
+   $T_= ( $keep_english ? 'fnop' : 'T_' );
    $str = '';
-   if ( $Maintime > 0 )
-      $str = echo_time( $Maintime );
 
-   if( $Byotime <= 0 )
-         $str .= ' ' . T_('without byoyomi');
-      else if( $Byotype == 'FIS' )
-      {
-         $str .= ' ' . sprintf( T_('with %s extra per move'), echo_time($Byotime) );
-      }
+   if( $Byotype == 'FIS' )
+   {
+      if( !$short ) $str .= $T_('Fischer time') . ', ';
+
+      $str .= echo_time($Maintime, $keep_english) . ' ' .
+         sprintf( $T_('with %s extra per move'), echo_time($Byotime, $keep_english) );
+   }
+   else
+   {
+      $str .= echo_time($Maintime, $keep_english);
+
+      if( $Byotime <= 0 )
+         $str .= ' ' . $T_('without byoyomi');
       else
       {
-         if ( $Maintime > 0 )
-            $str .= ' + ';
-         $str .= echo_time($Byotime);
-         $str .= '/' . $Byoperiods . ' ';
+         $str .= ' + ' . echo_time($Byotime, $keep_english);
 
          if( $Byotype == 'JAP' )
-            $str .= T_('periods') . ' ' . T_('Japanese byoyomi');
+         {
+            $str .= ' * ' . $Byoperiods . ' ' .
+               ($Byoperiods == 1 ? $T_('period') : $T_('periods'));
+            if( !$short )
+               $str .= ' ' . $T_('Japanese byoyomi');
+         }
          else
-            $str .= T_('stones') . ' ' . T_('Canadian byoyomi');
+         {
+            $str .= ' / ' . $Byoperiods . ' ' .
+               ($Byoperiods == 1 ? $T_('stone') : $T_('stones'));
+            if( !$short )
+               $str .= ' ' . $T_('Canadian byoyomi');
+         }
       }
-
-      return $str;
+   }
+   return $str;
 }
+
+function echo_time_remaining($Maintime, $Byotype, $Byotime, $Byoperiods,
+                             $Maintime_left, $Byotime_left, $Byoperiods_left)
+{
+   $str = '';
+   if( $Maintime_left > 0 )
+   {
+      $str .= echo_time($Maintime_left);
+   }
+   else if( $Byotime_left > 0 )
+   {
+      $str .= T_('In byoyomi') . ': ';
+      if( $Byotype == 'JAP' )
+      {
+         $str .= echo_time($Byotime_left) . ' * ' . $Byoperiods_left . ' ' .
+            ($Byoperiods_left == 1 ? T_('period') : T_('periods'));
+      }
+      else if( $Byotype == 'CAN' )
+      {
+         $str .= echo_time($Byotime_left) . T_(' / ') . $Byoperiods_left . ' ' .
+            ($Byoperiods_left == 1 ? T_('stone') : T_('stones'));
+      }
+   }
+   else
+   {
+      $str .= T_('The time is up');
+   }
+   return $str;
+}
+
 
 function time_convert_to_longer_unit(&$time, &$unit)
 {
@@ -189,3 +284,4 @@ function time_convert_to_longer_unit(&$time, &$unit)
       $time /= 30;
    }
 }
+?>

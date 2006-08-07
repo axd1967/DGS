@@ -1,57 +1,212 @@
 #
-# Table structure for table 'Games'
-#
-CREATE TABLE Games (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  Black_ID int(11),
-  White_ID int(11),
-  ToMove_ID int(11),
-  Size int(11) DEFAULT '19',
-  Komi decimal(3,1) DEFAULT '5.5',
-  Handicap int(11) DEFAULT '0' NOT NULL,
-  Status enum('INVITED','RUNNING','FINNISHED') DEFAULT 'INVITED',
-  Moves int(11) DEFAULT '0' NOT NULL,
-  Black_Prisoners int(11) DEFAULT '0' NOT NULL,
-  White_Prisoners int(11) DEFAULT '0' NOT NULL,
-  Last_X int(11),
-  Last_Y int(11),
-  Flags set('Ko'),
-  PRIMARY KEY (ID)
-);
-
-#
 # Table structure for table 'Players'
 #
 CREATE TABLE Players (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  Handle varchar(16) DEFAULT '' NOT NULL,
-  Password varchar(16),
-  Sessioncode varchar(32),
-  Sessionexpire timestamp(14),
-  Name varchar(80),
-  Email varchar(80),
-  Rank varchar(40),
-  Stonesize int(11) DEFAULT '25',
-  Boardfontsize char(2) DEFAULT '+0',
-  PRIMARY KEY (ID),
-  UNIQUE Handle (Handle),
-  KEY Handle_2 (Handle)
-);
+  ID int(11) NOT NULL auto_increment,
+  Handle varchar(16) NOT NULL default '',
+  Password varchar(16) default NULL,
+  Newpassword varchar(16) default NULL,
+  Sessioncode varchar(16) default NULL,
+  Sessionexpire datetime default NULL,
+  Lastaccess datetime default NULL,
+  LastMove datetime default NULL,
+  Registerdate date default NULL,
+  Hits int(11) default '0',
+  Moves int(11) default '0',
+  Activity double NOT NULL default '15',
+   Name varchar(40) NOT NULL default '',
+  Email varchar(80) default NULL,
+  Rank varchar(40) default NULL,
+   Stonesize tinyint(3) unsigned NOT NULL default '25',
+  SendEmail set('ON','MOVE','BOARD','MESSAGE') NOT NULL default '',
+   Notify enum('NONE','NEXT','NOW','DONE') NOT NULL default 'NONE',
+   MenuDirection enum('VERTICAL','HORIZONTAL') NOT NULL default 'VERTICAL',
+  Adminlevel int(11) NOT NULL default '0',
+  MayPostOnForum enum('N', 'Y', 'M') NOT NULL Default 'Y',
+  Timezone varchar(40) NOT NULL default 'GMT',
+  Nightstart int(11) NOT NULL default '22',
+  ClockUsed int(11) NOT NULL default '22',
+   ClockChanged enum('N','Y') NOT NULL default 'Y',
+  Rating double default NULL,
+  Rating2 double default NULL,
+  RatingMin double default NULL,
+  RatingMax double default NULL,
+  InitialRating double default NULL,
+  RatingStatus enum('INIT','RATED') default NULL,
+  Open varchar(40) default NULL,
+  Lang varchar(20) NOT NULL default 'C',
+  VacationDays double default '14',
+  OnVacation double default '0',
+  Woodcolor int(11) NOT NULL default '1',
+  Boardcoords int(11) NOT NULL default '31',
+  MoveNumbers smallint(5) unsigned NOT NULL default '0',
+  MoveModulo smallint(5) unsigned NOT NULL default '0',
+  Button int(11) NOT NULL default '0',
+  UsersColumns int(10) unsigned NOT NULL default '62',
+  GamesColumns int(10) unsigned NOT NULL default '593910',
+  RunningGamesColumns int(10) unsigned NOT NULL default '593910',
+  FinishedGamesColumns int(10) unsigned NOT NULL default '593910',
+  ObservedGamesColumns int(10) unsigned NOT NULL default '593910',
+  TournamentsColumns int(10) unsigned NOT NULL default '62',
+  WaitingroomColumns int(10) unsigned NOT NULL default '253',
+  StatusFolders varchar(40) NOT NULL default '',
+  Running int(11) NOT NULL default '0',
+  Finished int(11) NOT NULL default '0',
+  RatedGames int(11) NOT NULL default '0',
+  Won int(11) NOT NULL default '0',
+  Lost int(11) NOT NULL default '0',
+  Translator varchar(160) NOT NULL default '',
+  IP varchar(15) default NULL,
+  Browser varchar(100) default NULL,
+  Country char(2) default NULL,
+  NotesSmallHeight tinyint(3) unsigned NOT NULL default '25',
+  NotesSmallWidth tinyint(3) unsigned NOT NULL default '30',
+  NotesSmallMode enum('OFF','RIGHT','BELOW') NOT NULL default 'RIGHT',
+  NotesLargeHeight tinyint(3) unsigned NOT NULL default '25',
+  NotesLargeWidth tinyint(3) unsigned NOT NULL default '30',
+  NotesLargeMode enum('OFF','RIGHT','BELOW') NOT NULL default 'RIGHT',
+  NotesCutoff tinyint(3) unsigned NOT NULL default '13',
+  PRIMARY KEY  (ID),
+   UNIQUE KEY Handle (Handle),
+   KEY Rating2 (Rating2),
+   KEY Name (Name)
+) TYPE=MyISAM;
+
 
 #
-# Table structure for table 'Messages'
+# Table structure for table 'Games'
 #
-CREATE TABLE Messages (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  From_ID int(11),
-  To_ID int(11),
-  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED') DEFAULT 'NORMAL',
-  Game_ID int(11),
-  Time timestamp(14),
-  Subject varchar(80),
+
+CREATE TABLE Games (
+  ID int(11) NOT NULL auto_increment,
+   Starttime datetime NOT NULL default '0000-00-00 00:00:00',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   mid int(11) NOT NULL default '0',
+   Tournament_ID int(11) NOT NULL default '0',
+   Black_ID int(11) NOT NULL default '0',
+   White_ID int(11) NOT NULL default '0',
+  ToMove_ID int(11) NOT NULL default '0',
+   Size int(11) NOT NULL default '19',
+   Komi decimal(6,1) NOT NULL default '6.5',
+  Handicap int(11) NOT NULL default '0',
+  Status enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED',
+  Moves int(11) NOT NULL default '0',
+  Black_Prisoners int(11) NOT NULL default '0',
+  White_Prisoners int(11) NOT NULL default '0',
+   Last_X int(11) NOT NULL default '-1',
+   Last_Y int(11) NOT NULL default '-1',
+   Last_Move char(2) NOT NULL default '',
+   Flags set('Ko') NOT NULL default '',
+   Score decimal(7,1) NOT NULL default '0.0',
+   Maintime int(11) NOT NULL default '0',
+  Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+  Byotime int(11) NOT NULL default '0',
+  Byoperiods int(11) NOT NULL default '0',
+   Black_Maintime int(11) NOT NULL default '0',
+   White_Maintime int(11) NOT NULL default '0',
+  Black_Byotime int(11) NOT NULL default '0',
+  White_Byotime int(11) NOT NULL default '0',
+  Black_Byoperiods int(11) NOT NULL default '-1',
+  White_Byoperiods int(11) NOT NULL default '-1',
+   LastTicks int(11) NOT NULL default '0',
+  ClockUsed int(11) NOT NULL default '0',
+  Rated enum('N','Y','Done') NOT NULL default 'N',
+  StdHandicap enum('N','Y') NOT NULL default 'N',
+  WeekendClock enum('N','Y') NOT NULL default 'Y',
+   Black_Start_Rating double NOT NULL default '-9999',
+   White_Start_Rating double NOT NULL default '-9999',
+   Black_End_Rating double NOT NULL default '-9999',
+   White_End_Rating double NOT NULL default '-9999',
+  PRIMARY KEY  (ID),
+   KEY ToMove_ID (ToMove_ID),
+   KEY Size (Size),
+   KEY Lastchanged (Lastchanged),
+   KEY Status (Status),
+   KEY ClockUsed (ClockUsed),
+   KEY Maintime (Maintime),
+   KEY Byotime (Byotime),
+   KEY Black_ID (Black_ID),
+   KEY White_ID (White_ID)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'GamesNotes'
+#
+
+CREATE TABLE GamesNotes (
+  ID int(11) unsigned NOT NULL auto_increment,
+  gid int(11) NOT NULL default '0',
+   player enum('B','W') NOT NULL default 'B',
+   Notes text NOT NULL,
+   Hidden enum('N','Y') NOT NULL default 'N',
+   PRIMARY KEY  (gid,player),
+  KEY ID (ID)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'Bio'
+#
+
+CREATE TABLE Bio (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  Category varchar(40) default NULL,
   Text text,
-  PRIMARY KEY (ID)
-);
+  PRIMARY KEY  (ID),
+  KEY uid (uid)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'RatingChange'
+#
+
+CREATE TABLE RatingChange (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  gid int(11) NOT NULL default '0',
+  diff double default NULL,
+  PRIMARY KEY  (ID),
+  KEY uid (uid)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Ratinglog'
+#
+
+CREATE TABLE Ratinglog (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  gid int(11) NOT NULL default '0',
+  Time datetime NOT NULL default '0000-00-00 00:00:00',
+  Rating double default NULL,
+  RatingMin double default NULL,
+  RatingMax double default NULL,
+  RatingDiff double default NULL,
+  PRIMARY KEY  (ID),
+   KEY uid (uid),
+   KEY gid (gid,uid)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Statistics'
+#
+
+CREATE TABLE Statistics (
+  ID int(11) NOT NULL auto_increment,
+  Time datetime default NULL,
+  Hits int(11) default NULL,
+  Users int(11) default NULL,
+  Moves int(11) default NULL,
+  MovesFinished int(11) default NULL,
+  MovesRunning int(11) default NULL,
+  Games int(11) default NULL,
+  GamesFinished int(11) default NULL,
+  GamesRunning int(11) default NULL,
+  Activity int(11) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
 
 #
 # Insert Guest account
@@ -61,4 +216,511 @@ INSERT INTO Players SET
        Handle='guest',
        Name='Guest',
        Password=PASSWORD('guest');
-       
+
+
+#
+# Table structure for table 'Messages'
+#
+
+CREATE TABLE Messages (
+  ID int(11) NOT NULL auto_increment,
+  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED') default 'NORMAL',
+  ReplyTo int(11) default NULL,
+  Game_ID int(11) default NULL,
+  Time datetime default NULL,
+  Subject varchar(80) default NULL,
+  Text text,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'MessageCorrespondents'
+#
+
+CREATE TABLE MessageCorrespondents (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) default NULL,
+  mid int(11) default NULL,
+  Folder_nr int(11) default NULL,
+  Sender enum('M','N','Y') NOT NULL default 'Y',
+  Replied enum('M','N','Y') NOT NULL default 'N',
+  PRIMARY KEY  (ID),
+  KEY mid (mid),
+  KEY uid (uid),
+  KEY Folder_nr (Folder_nr,uid)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Folders'
+#
+
+CREATE TABLE Folders (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  Folder_nr int(11) NOT NULL default '0',
+  Name varchar(40) NOT NULL default '',
+  BGColor varchar(8) NOT NULL default 'f7f5e3FF',
+  FGColor varchar(6) NOT NULL default '000000',
+  PRIMARY KEY  (uid,Folder_nr),
+  KEY ID (ID)
+) TYPE=MyISAM;
+
+#
+# Table structure for table 'Moves'
+#
+
+CREATE TABLE Moves (
+  ID int(11) NOT NULL auto_increment,
+  gid int(11) NOT NULL default '0',
+  MoveNr smallint(5) unsigned NOT NULL default '0',
+   Stone tinyint(3) unsigned NOT NULL default '0',
+   PosX tinyint(4) NOT NULL default '-128',
+   PosY tinyint(4) NOT NULL default '-128',
+  Hours smallint(5) unsigned default NULL,
+  PRIMARY KEY  (ID),
+  KEY gid (gid,ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'MoveMessages'
+#
+
+CREATE TABLE MoveMessages (
+  ID int(11) unsigned NOT NULL auto_increment,
+  gid int(11) NOT NULL default '0',
+  MoveNr smallint(5) unsigned NOT NULL default '0',
+  Text text,
+  PRIMARY KEY  (gid,MoveNr),
+  KEY ID (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Waitingroom'
+#
+
+CREATE TABLE Waitingroom (
+  ID int(11) NOT NULL auto_increment,
+   uid int(11) NOT NULL default '0',
+   nrGames int(11) NOT NULL default '1',
+   Time datetime NOT NULL default '0000-00-00 00:00:00',
+   Size int(11) NOT NULL default '19',
+   Komi decimal(6,1) NOT NULL default '6.5',
+  Handicaptype enum('conv','proper','nigiri','double') NOT NULL default 'conv',
+   Maintime int(11) NOT NULL default '0',
+  Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+  Byotime int(11) NOT NULL default '0',
+  Byoperiods int(11) NOT NULL default '0',
+  Rated enum('N','Y','Done') NOT NULL default 'N',
+  StdHandicap enum('N','Y') NOT NULL default 'N',
+  WeekendClock enum('N','Y') NOT NULL default 'Y',
+  MustBeRated enum('N','Y','Done') NOT NULL default 'N',
+   Ratingmin double NOT NULL default '-9999',
+   Ratingmax double NOT NULL default '-9999',
+   Comment varchar(40) NOT NULL default '',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Observers'
+#
+
+CREATE TABLE Observers (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) default NULL,
+  gid int(11) default NULL,
+  PRIMARY KEY  (ID),
+   KEY uid (uid),
+   KEY gid (gid)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Tournament'
+#
+
+CREATE TABLE Tournament (
+  ID int(11) NOT NULL auto_increment,
+  Name varchar(80) default NULL,
+  Description text,
+  State int(11) NOT NULL default '0',
+  FirstRound int(11) default NULL,
+  ApplicationPeriod int(11) default NULL,
+  StartOfApplicationPeriod datetime default NULL,
+  StrictEndOfApplicationPeriod enum('N','Y') NOT NULL default 'N',
+  ReceiveApplicationsAfterStart enum('N','Y') NOT NULL default 'N',
+  MinParticipants int(11) NOT NULL default '2',
+  MaxParticipants int(11) default NULL,
+  Rated enum('N','Y') NOT NULL default 'N',
+  WeekendClock enum('N','Y') NOT NULL default 'Y',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TournamentRound'
+#
+
+CREATE TABLE TournamentRound (
+  ID int(11) NOT NULL auto_increment,
+  TournamentID int(11) default NULL,
+  NextRound int(11) default NULL,
+  PreviousRound int(11) default NULL,
+  BoardSize int(11) default '19',
+  Komi decimal(6,1) default '6.5',
+  HandicapType int(11) NOT NULL default '0',
+  Maintime int(11) default NULL,
+  Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+  Byotime int(11) NOT NULL default '0',
+  Byoperiods int(11) NOT NULL default '0',
+  GamesPerpair int(11) NOT NULL default '1',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Knockout'
+#
+
+CREATE TABLE Knockout (
+  Tournament_ID int(11) NOT NULL default '0',
+  Seedings int(11) NOT NULL default '0',
+  UseHandicap enum('Y','N') NOT NULL default 'Y',
+  PRIMARY KEY  (Tournament_ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TournamentOrganizers'
+#
+
+CREATE TABLE TournamentOrganizers (
+  ID int(11) NOT NULL auto_increment,
+  tid int(11) NOT NULL default '0',
+  pid int(11) NOT NULL default '0',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TournamentParticipants'
+#
+
+CREATE TABLE TournamentParticipants (
+  ID int(11) NOT NULL auto_increment,
+  tid int(11) NOT NULL default '0',
+  pid int(11) NOT NULL default '0',
+  Seeding int(11) NOT NULL default '0',
+  PlayerNumber int(11) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Errorlog'
+#
+
+CREATE TABLE Errorlog (
+  ID int(11) NOT NULL auto_increment,
+   Handle varchar(16) NOT NULL default '',
+   Message text NOT NULL,
+   MysqlError text NOT NULL,
+   Debug text NOT NULL,
+   IP varchar(16) NOT NULL default '',
+  Date timestamp(14) NOT NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Adminlog'
+#
+
+CREATE TABLE Adminlog (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+   Handle varchar(16) NOT NULL default '',
+   Message text NOT NULL,
+  Date timestamp(14) NOT NULL,
+   IP varchar(16) NOT NULL default '',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Translationlog'
+#
+
+CREATE TABLE Translationlog (
+  ID int(11) NOT NULL auto_increment,
+  Player_ID int(11) default NULL,
+  Language_ID int(11) default NULL,
+  Original_ID int(11) default NULL,
+  Handle varchar(16) default NULL,
+  Language varchar(16) default NULL,
+   CString text NOT NULL,
+   OldTranslation blob NOT NULL,
+   Translation blob NOT NULL,
+  Date timestamp(14) NOT NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationTexts'
+#
+
+CREATE TABLE TranslationTexts (
+  ID int(11) NOT NULL auto_increment,
+   Text blob NOT NULL,
+  Ref_ID int(11) default NULL,
+  Translatable enum('Y','N','Done','Changed') NOT NULL default 'Y',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Translations'
+#
+
+CREATE TABLE Translations (
+  Original_ID int(11) NOT NULL default '0',
+  Language_ID int(11) NOT NULL default '0',
+   Text blob NOT NULL,
+  PRIMARY KEY  (Language_ID,Original_ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationLanguages'
+#
+
+CREATE TABLE TranslationLanguages (
+  ID int(11) NOT NULL auto_increment,
+  Language varchar(32) default NULL,
+  Name varchar(32) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationGroups'
+#
+
+CREATE TABLE TranslationGroups (
+  ID int(11) NOT NULL auto_increment,
+  Groupname varchar(32) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationFoundInGroup'
+#
+
+CREATE TABLE TranslationFoundInGroup (
+  Text_ID int(11) NOT NULL default '0',
+  Group_ID int(11) NOT NULL default '0',
+  PRIMARY KEY  (Text_ID,Group_ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'TranslationPages'
+#
+
+CREATE TABLE TranslationPages (
+  ID int(11) NOT NULL auto_increment,
+  Page varchar(64) default NULL,
+  Group_ID int(11) default NULL,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+
+
+#
+# Table structure for table 'Forums'
+#
+
+CREATE TABLE Forums (
+  ID int(11) NOT NULL auto_increment,
+  Name varchar(40) default NULL,
+  Description varchar(255) default NULL,
+  LastPost int(11) default NULL,
+   PostsInForum int(11) NOT NULL default '0',
+  SortOrder int(11) NOT NULL default '0',
+  Moderated char(1) NOT NULL default 'N',
+  PRIMARY KEY  (ID),
+  KEY SortOrder (SortOrder)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Posts'
+#
+
+CREATE TABLE Posts (
+  ID int(11) NOT NULL auto_increment,
+  Forum_ID int(11) NOT NULL default '0',
+  Time datetime default NULL,
+  Lastchanged datetime default NULL,
+  LastPost int(11) default NULL,
+  Lastedited datetime default NULL,
+  Subject varchar(80) default NULL,
+  Text text,
+  User_ID int(11) default NULL,
+  Parent_ID int(11) default NULL,
+  Thread_ID int(11) NOT NULL default '0',
+  AnswerNr int(11) NOT NULL default '0',
+  PostsInThread int(11) default NULL,
+  Depth int(11) NOT NULL default '0',
+  crc32 int(11) default NULL,
+  PosIndex varchar(80) binary default NULL,
+  old_ID int(11) default '0',
+  Approved enum('Y', 'N') NOT NULL default 'Y',
+  PendingApproval enum('Y', 'N') NOT NULL default 'N';
+  PRIMARY KEY  (ID),
+  KEY Pos (Thread_ID, PosIndex),
+  KEY List (Forum_ID, Lastchanged),
+  KEY PendingApproval (PendingApproval,Time DESC),
+  FULLTEXT (Subject,Text)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Forumreads'
+#
+
+CREATE TABLE Forumreads (
+  User_ID int(11) NOT NULL default '0',
+  Thread_ID int(11) NOT NULL default '0',
+  Time datetime default NULL,
+  PRIMARY KEY  (User_ID,Thread_ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'GoDiagrams'
+#
+
+CREATE TABLE GoDiagrams (
+  ID int(11) NOT NULL auto_increment,
+  Size int(11) default NULL,
+  View_Left int(11) default NULL,
+  View_Right int(11) default NULL,
+  View_Up int(11) default NULL,
+  View_Down int(11) default NULL,
+  Date datetime NOT NULL default '0000-00-00 00:00:00',
+  Saved enum('Y','N') NOT NULL default 'N',
+  Data text,
+  SGF text,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'FAQ'
+#
+
+CREATE TABLE FAQ (
+  ID int(11) NOT NULL auto_increment,
+  Parent int(11) NOT NULL default '0',
+  Level int(11) default NULL,
+  SortOrder int(11) NOT NULL default '0',
+  Question int(11) default NULL,
+  Answer int(11) default NULL,
+  Hidden enum('N','Y') NOT NULL default 'N',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+INSERT INTO FAQ VALUES (1,1,NULL,0,NULL,NULL,'Y');
+
+
+#
+# Table structure for table 'FAQlog'
+#
+
+CREATE TABLE FAQlog (
+  ID int(11) NOT NULL auto_increment,
+  uid int(11) NOT NULL default '0',
+  FAQID int(11) NOT NULL default '0',
+  Question text,
+  Answer text,
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM;
+
+
+#
+# Table structure for table 'Clock'
+#
+
+CREATE TABLE Clock (
+  ID int(11) NOT NULL default '0',
+  Ticks int(11) default '0',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (ID)
+) TYPE=MyISAM PACK_KEYS=1;
+
+
+#
+# Dumping data for table 'Clock'
+#
+
+INSERT INTO Clock set ID=0;
+INSERT INTO Clock set ID=1;
+INSERT INTO Clock set ID=2;
+INSERT INTO Clock set ID=3;
+INSERT INTO Clock set ID=4;
+INSERT INTO Clock set ID=5;
+INSERT INTO Clock set ID=6;
+INSERT INTO Clock set ID=7;
+INSERT INTO Clock set ID=8;
+INSERT INTO Clock set ID=9;
+INSERT INTO Clock set ID=10;
+INSERT INTO Clock set ID=11;
+INSERT INTO Clock set ID=12;
+INSERT INTO Clock set ID=13;
+INSERT INTO Clock set ID=14;
+INSERT INTO Clock set ID=15;
+INSERT INTO Clock set ID=16;
+INSERT INTO Clock set ID=17;
+INSERT INTO Clock set ID=18;
+INSERT INTO Clock set ID=19;
+INSERT INTO Clock set ID=20;
+INSERT INTO Clock set ID=21;
+INSERT INTO Clock set ID=22;
+INSERT INTO Clock set ID=23;
+INSERT INTO Clock set ID=100;
+INSERT INTO Clock set ID=101;
+INSERT INTO Clock set ID=102;
+INSERT INTO Clock set ID=103;
+INSERT INTO Clock set ID=104;
+INSERT INTO Clock set ID=105;
+INSERT INTO Clock set ID=106;
+INSERT INTO Clock set ID=107;
+INSERT INTO Clock set ID=108;
+INSERT INTO Clock set ID=109;
+INSERT INTO Clock set ID=110;
+INSERT INTO Clock set ID=111;
+INSERT INTO Clock set ID=112;
+INSERT INTO Clock set ID=113;
+INSERT INTO Clock set ID=114;
+INSERT INTO Clock set ID=115;
+INSERT INTO Clock set ID=116;
+INSERT INTO Clock set ID=117;
+INSERT INTO Clock set ID=118;
+INSERT INTO Clock set ID=119;
+INSERT INTO Clock set ID=120;
+INSERT INTO Clock set ID=121;
+INSERT INTO Clock set ID=122;
+INSERT INTO Clock set ID=123;
+# INSERT INTO Clock set ID=-1;
+# INSERT INTO Clock set ID=200,Lastchanged=0;
+INSERT INTO Clock set ID=201,Lastchanged=0;
+INSERT INTO Clock set ID=202,Lastchanged=0;
+INSERT INTO Clock set ID=203,Lastchanged=0;

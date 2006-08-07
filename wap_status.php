@@ -1,14 +1,22 @@
 <?php
+/*
+Dragon Go Server
+Copyright (C) 2005-2006  Erik Ouchterlony, Rod Ival
 
-define('ALLOW_AUTH',false);
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-if( ALLOW_AUTH )
-{
-   session_name('DGSwap');
-   session_save_path('/tmp/persistent/dragongoserver/session');
-   session_start();
-   header ("Cache-control: private");
-}
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 $quick_errors = 1;
 function error($err, $debugmsg=NULL)
@@ -25,26 +33,27 @@ function error($err, $debugmsg=NULL)
    exit;
 }
 
-putenv('TZ=GMT');
 require_once( "include/quick_common.php" );
 
 //require_once( "include/connect2mysql.php" );
 //else ...
 {//standalone version ==================
 require_once( "include/config.php" );
+if( @URI_AMP=='URI_AMP' ) define('URI_AMP','&amp;');
 
 function err_log( $handle, $err, $debugmsg=NULL)
 {
 
    $uri = "error.php?err=" . urlencode($err);
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."', " .
-      "Message='$err', IP='{$_SERVER['REMOTE_ADDR']}'" ;
+   $ip = (string)@$_SERVER['REMOTE_ADDR'];
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."'"
+      .", Message='".addslashes($err)."', IP='".addslashes($ip)."'" ;
 
    $mysqlerror = @mysql_error();
 
    if( !empty($mysqlerror) )
    {
-      $uri .= "&amp;mysqlerror=" . urlencode($mysqlerror);
+      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
       $errorlog_query .= ", MysqlError='".addslashes( $mysqlerror)."'";
       $err.= ' / '. $mysqlerror;
    }
@@ -57,14 +66,14 @@ function err_log( $handle, $err, $debugmsg=NULL)
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
    }
-   //if( !empty($debugmsg) )
+   if( !empty($debugmsg) )
    {
       $errorlog_query .= ", Debug='" . addslashes( $debugmsg) . "'";
       //$err.= ' / '. $debugmsg; //Do not display this info!
    }
 
- global $dbcnx;
-   if( !isset($dbcnx) )
+   global $dbcnx;
+   if( !@$dbcnx )
       connect2mysql( true);
 
    @mysql_query( $errorlog_query );
@@ -72,17 +81,18 @@ function err_log( $handle, $err, $debugmsg=NULL)
    return array( $err, $uri);
 }
 
-function disable_cache($stamp=NULL)
+function disable_cache($stamp=NULL, $expire=NULL)
 {
    global $NOW;
-  // Force revalidation
-   header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+   if( !$stamp )
+      $stamp = $NOW;  // Always modified
+   if( !$expire )
+      $expire = $stamp-3600;  // Force revalidation
+
+   header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
+   header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
    header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
    header('Pragma: no-cache');                                              // HTTP/1.0
-   if( !$stamp )
-      header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $NOW) . ' GMT');  // Always modified
-   else
-      header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
 }
 
 function connect2mysql($no_errors=false)
@@ -93,15 +103,19 @@ function connect2mysql($no_errors=false)
 
    if (!$dbcnx)
    {
-      if( $no_errors ) return;
+      if( $no_errors ) return false;
       error("mysql_connect_failed");
    }
 
    if (! @mysql_select_db($DB_NAME) )
    {
-      if( $no_errors ) return;
+      mysql_close( $dbcnx);
+      $dbcnx= 0;
+      if( $no_errors ) return false;
       error("mysql_select_db_failed");
    }
+
+   return true;
 }
 }//standalone version ==================
 
@@ -120,7 +134,7 @@ function wap_date( $dat=0)
       global $NOW;
       $dat= $NOW;
    }
-   return gmdate( 'D, d M Y H:i:s \G\M\T', $dat);
+   return date( 'Y-m-d H:i', $dat);
 }
 
 
@@ -134,22 +148,19 @@ function wap_id()
 
 
 $wap_opened= false;
-function wap_open( $title, $description='', $html_clone='', $cache_minutes=10)
+function wap_open( $title)
 {
-   global $encoding_used, $HOSTBASE, $NOW; //$base_path
+   global $encoding_used, $HOSTBASE, $NOW;
 
-   if( !ALLOW_AUTH )
-      ob_start("ob_gzhandler");
+   ob_start("ob_gzhandler");
    global $wap_opened;
    $wap_opened= true;
-
-   $last_modified_stamp= $NOW;
 
    //if( empty($encoding_used) )
       $encoding_used = 'iso-8859-1';
 
    if( empty($html_clone) )
-      $html_clone = $HOSTBASE . '/';
+      $html_clone = $HOSTBASE;
 
    if( empty($description) )
       $description = $title;
@@ -157,7 +168,7 @@ function wap_open( $title, $description='', $html_clone='', $cache_minutes=10)
    header('Content-Type: text/vnd.wap.wml; charset='.$encoding_used);
 
    echo "<?xml version=\"1.0\" encoding=\"$encoding_used\"?>\n";
-   echo "<!DOCTYPE wml PUBLIC '-//WAPFORUM//DTD WML 1.1//EN' 'http://www.wapforum.org/DTD/wml_1.1.xml'>\n";
+   echo "<!DOCTYPE wml PUBLIC '-//WAPFORUM//DTD WML 1.2//EN' 'http://www.wapforum.org/DTD/wml_1.2.xml'>\n";
 
    echo "<wml>\n";
 }
@@ -166,33 +177,51 @@ function wap_open( $title, $description='', $html_clone='', $cache_minutes=10)
 function wap_close( )
 {
    echo "</wml>";
-   if( !ALLOW_AUTH )
-      ob_end_flush();
+   ob_end_flush();
 }
 
 
-function wap_item( $id, $title, $link, $description='', $pubDate='')
+function card_open( $cardid, $head)
 {
-   if( empty($description) )
-      $description = $title;
+   global $FRIENDLY_SHORT_NAME;
+   $head = addslashes($FRIENDLY_SHORT_NAME).' - '.addslashes($head);
+   return "<card id=\"$cardid\" title=\"$head\">";
+}
 
-   $str = "<card id=\"$id\" title=\"$title\">";
+
+function card_close()
+{
+   return "</card>\n";
+}
+
+
+function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='', $nextid='', $previd='')
+{
+   $str = card_open( $cardid, $head);
+
+   if( $previd )
+      $str.= " <a accesskey=\"p\" href=\"#$previd\">[&lt;Prev]</a>";
+
    if( $link )
-   {
-      $str.= "<p><a href=\"$link\">$title</a></p>";
-   }
-   else
-   {
-      $str.= "<p><b>$title</b></p>";
-   }
+      $str.= " <a accesskey=\"g\" href=\"$link\">[Go]</a>";
+   //$str.= "<p><do type=\"prev\" label=\"back\"><prev/></do></p>";
+   //$str.= "<do type=\"prev\" label=\"back\"><prev/></do>";
+
+   if( $nextid )
+      $str.= " <a accesskey=\"n\" href=\"#$nextid\">[Next&gt;]</a>";
+
+   $str.= "<br/>";
+
+
+   $str.= "<p><b>$title</b></p>";
 
    //if( $pubDate )
       $str.= "<p>" . wap_date($pubDate) . "</p>";
 
-   $str.= "<p>$description</p>";
+   if( !empty($description) )
+      $str.= "<p>$description</p>";
 
-   $str.= "<p><do type=\"prev\" label=\"back\"><prev/></do></p>"
-        . "</card>\n";
+   $str.= card_close();
 
    echo $str;
 }
@@ -203,12 +232,12 @@ function wap_error( $str, $title='', $link='')
    if( !$link )
    {
       global $HOSTBASE;
-      $link= $HOSTBASE.'/';
+      $link= $HOSTBASE;
    }
    if( !$title )
       $title= 'ERROR';
    $str= wap_safe( $str);
-   wap_item( 'E'.wap_id(), $title, $link, 'Error: '.$str);
+   wap_item( 'E'.wap_id(), 'Error', $title, $link, 'Error: '.$str);
 }
 
 
@@ -217,44 +246,39 @@ function wap_warning( $str, $title='', $link='')
    if( !$link )
    {
       global $HOSTBASE;
-      $link= $HOSTBASE.'/';
+      $link= $HOSTBASE;
    }
    if( !$title )
       $title= 'WARNING';
    $str= wap_safe( $str);
-   wap_item( 'W'.wap_id(), $title, $link, 'Warning: '.$str);
+   wap_item( 'W'.wap_id(), 'Warning', $title, $link, 'Warning: '.$str);
 }
 
 
-function wap_auth( $title, $uhandle='')
+function wap_auth( $defid='', $defpw='')
 {
-   //if( $uhandle ) $uhandle= ' - '.$uhandle; else
-      $uhandle= '';
-
-   global $wap_opened;
-   if( !$wap_opened )
-      wap_open( 'LOGIN');
-
-   echo "<card id=\"login\" title=\"$title\">"
-      ."<p>"
-      ."user: <input name=\"userid\" size=\"10\" maxlength=\"16\" type=\"text\"/><br/>"
-      ."pass: <input name=\"passwd\" size=\"10\" maxlength=\"16\" type=\"password\"/><br/>"
+   $str= "<p>"
+      ."user: <input name=\"userid\" size=\"10\" maxlength=\"16\" value=\"$defid\" type=\"text\"/><br/>"
+      ."pass: <input name=\"passwd\" size=\"10\" maxlength=\"16\" value=\"$defpw\" type=\"password\"/><br/>"
       ."</p>"
-      ."<do type=\"accept\" label=\"login!\">"
+      ."<do type=\"accept\" label=\"login\">"
       ."<go href=\"".@$_SERVER['PHP_SELF']."\" method=\"post\">"
-      ."<postfield name=\"userid\" value=\"$(userid)\"/>"
-      ."<postfield name=\"passwd\" value=\"$(passwd)\"/>"
+      ."<postfield name=\"userid\" value=\"\$(userid)\"/>"
+      ."<postfield name=\"passwd\" value=\"\$(passwd)\"/>"
       ."</go>"
       ."</do>"
-      ."<do type=\"accept\" label=\"logout!\">"
+      ."<do type=\"accept\" label=\"logout\">"
       ."<go href=\"".@$_SERVER['PHP_SELF']."\" method=\"post\">"
       ."<postfield name=\"logout\" value=\"1\"/>"
       ."</go>"
       ."</do>"
-      ."</card>";
+      ;
+   return $str;
 
+/*
    wap_close();
    exit;
+*/
 }
 
 
@@ -288,7 +312,7 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 if( $is_down )
 {
    wap_open( 'WARNING');
-   wap_warning($is_down_message);
+   wap_warning( $is_down_message);
    wap_close();
 }
 else
@@ -296,40 +320,24 @@ else
 
    $logged_in = false;
    $loggin_mode = '';
-   $uhandle = get_request_arg('userid');
-   $passwd = get_request_arg('passwd');
-   if( $uhandle && $passwd )
+   if( @$_REQUEST['logout'] )
    {
-      $loggin_mode = 'password';
+      $uhandle = '';
+      $passwd = '';
    }
-   else if( ALLOW_AUTH )
+   else
    {
-      $uhandle = arg_stripslashes((string)@$_SESSION['AUTH_USER']);
-      $passwd = arg_stripslashes((string)@$_SESSION['AUTH_PW']);
-      $authid = get_request_arg('authid');
-      if( @$_REQUEST['logout'] )
-      {
-         $_SESSION= array();
-         session_destroy();
-         $uhandle = '';
-         $passwd = '';
-         $loggin_mode = 'authenticate';
-      }
-      else if( $authid && $authid !== $uhandle )
-      {
-         $uhandle = $authid;
-         $passwd = '';
-         $loggin_mode = 'authenticate';
-      }
-      else if( $uhandle && $passwd )
+      $uhandle = get_request_arg('userid');
+      $passwd = get_request_arg('passwd');
+      if( $uhandle && $passwd )
       {
          $loggin_mode = 'password';
       }
-   }
-   if( !$loggin_mode )
-   {
-      $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
-      $loggin_mode = 'cookie';
+      else if( !$uhandle && !$passwd )
+      {
+         $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
+         $loggin_mode = 'cookie';
+      }
    }
 
 
@@ -337,36 +345,8 @@ else
 
    connect2mysql();
 
-   if( $loggin_mode=='password' )
+   if( $loggin_mode )
    {
-      // temp password?
-
-      $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
-
-      if( @mysql_num_rows($result) == 1 )
-      {
-         $player_row = mysql_fetch_array($result);
-
-         if( check_password( $uhandle, $player_row["Password"],
-                              $player_row["Newpassword"], $passwd ) )
-         {
-            $logged_in = true;
-            if( ALLOW_AUTH )
-            {
-               $_SESSION['AUTH_USER']= $uhandle;
-               $_SESSION['AUTH_PW']= $passwd;
-            }
-         }
-         else error("wrong_password");
-      }
-      //else error("wrong_userid");
-   }
-
-   if( $loggin_mode=='cookie' )
-   {
-      // logged in?
-
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
@@ -374,39 +354,48 @@ else
       {
          $player_row = mysql_fetch_assoc($result);
 
-         if( $player_row['Sessioncode'] === @$_COOKIE[COOKIE_PREFIX.'sessioncode']
-             && $player_row["Expire"] >= $NOW )
+         setTZ( $player_row['Timezone']);
+
+         if( $loggin_mode=='password' )
          {
-            $logged_in = true;
+            if( check_password( $uhandle, $player_row["Password"],
+                                 $player_row["Newpassword"], $passwd ) )
+            {
+               $logged_in = true;
+            }
+            else error("wrong_password");
+         }
+         else //$loggin_mode=='cookie'
+         {
+            if( $player_row['Sessioncode'] === @$_COOKIE[COOKIE_PREFIX.'sessioncode']
+                && $player_row['Expire'] >= $NOW )
+            {
+               $logged_in = true;
+            }
          }
       }
+      //else error("wrong_userid");
    }
 
    if( !$logged_in )
    {
-      if( ALLOW_AUTH ) //or $loggin_mode=='authenticate'
-         wap_auth( 'Register!', $uhandle);
-      error("not_logged_in",'wap1');
+      if( !$wap_opened )
+         wap_open( 'LOGIN');
+      $card = card_open( "login", "Register!");
+      $card.= wap_auth( $uhandle);
+      $card.= card_close();
+      echo $card;
+      wap_close();
+      exit;
+      //error("not_logged_in",'wap1');
    }
 
-
-   if( !empty( $player_row["Timezone"] ) )
-      putenv('TZ='.$player_row["Timezone"] );
 
    //+logging stat adjustments
 
    $my_id = (int)$player_row['ID'];
    $my_name = wap_safe( $player_row['Handle']);
 
-   $wap_sep = "\n<br/>";
-
-   $tit= "Status of $my_name";
-   $lnk= $HOSTBASE.'/status.php';
-   $dsc= "Messages and Games for $my_name";
-   wap_open( $tit, $dsc, $lnk);
-
-
-   $nothing_found = true;
 
    // New messages?
 
@@ -421,30 +410,8 @@ else
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date, me.mid";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed','wap3');
-
-   while( $row = mysql_fetch_assoc($result) )
-   {
-      $nothing_found = false;
-      $safename = @$row['sender'];
-      if( !$safename )
-         $safename = '[Server message]';
-      else
-         $safename.= " (".@$row['sendhndl'].")";
-      $safename = wap_safe( $safename);
-
-      $safeid = (int)@$row['mid'];
-
-      $card= 'M'.$safeid;
-      $tit= "Message from $safename";
-      $lnk= $HOSTBASE.'/message.php?mid='.$safeid;
-      $dat= @$row['date'];
-      $dsc= "Message: $safeid" . $wap_sep .
-            //"Folder: ".FOLDER_NEW . $wap_sep .
-            "From: $safename" . $wap_sep .
-            "Subject: ".wap_safe( @$row['Subject']);
-      wap_item( $card, $tit, $lnk, $dsc, $dat);
-   }
+   $resultM = mysql_query( $query ) or error('mysql_query_failed','wap3');
+   $countM = @mysql_num_rows($resultM);
 
 
    // Games to play?
@@ -454,15 +421,83 @@ else
        "opponent.Name, opponent.Handle " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$my_id AND Status!='INVITED' AND Status!='FINISHED' " .
-         "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$my_id " .
+         "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        "ORDER BY date, Games.ID";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed','wap4');
+   $resultG = mysql_query( $query ) or error('mysql_query_failed','wap4');
+   $countG = @mysql_num_rows($resultG);
+
+
+   // Display results
+
+   $wap_sep = "\n<br/>";
+
+   $tit= "Status of $my_name";
+   $lnk= $HOSTBASE.'status.php';
+   wap_open( $tit);
+
+   $cardid= 'login';
+   $card = card_open( $cardid, "Status");
+
+   $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status of</a>: $my_name</p>";
+   if( $countM>0 )
+   {
+      $card.= "<a accesskey=\"m\" href=\"#M1\">Messages</a>: $countM<br/>";
+   }
+   else
+   {
+      $card.= "Messages: 0<br/>";
+   }
+   if( $countG>0 )
+   {
+      $nextMid= 'G1';
+      $card.= "<a accesskey=\"g\" href=\"#G1\">Games</a>: $countG<br/>";
+   }
+   else
+   {
+      $nextMid= $cardid;
+      $card.= "Games: 0<br/>";
+   }
+   $nextGid= $cardid;
+
+   $card.= wap_auth( $uhandle, $passwd);
+   $card.= card_close();
+   echo $card;
+
+
+   $i= 1;
+   while( $row = mysql_fetch_assoc($resultM) )
+   {
+      $safename = @$row['sender'];
+      if( !$safename )
+         $safename = '[Server message]';
+      else
+         $safename.= " (".@$row['sendhndl'].")";
+      $safename = wap_safe( $safename);
+
+      $safeid = (int)@$row['mid'];
+
+      $hdr= "Message $i";
+      $tit= "From: $safename";
+      $lnk= $HOSTBASE.'message.php?mid='.$safeid;
+      $dat= @$row['date'];
+      $dsc= //"Message: $safeid" . $wap_sep .
+            //"Folder: ".FOLDER_NEW . $wap_sep .
+            "Subject: ".wap_safe( @$row['Subject']);
+
+      $previd= $cardid;
+      $cardid= 'M'.$i;
+      $i++;
+      $nextid= ( $i > $countM ) ? $nextMid : 'M'.$i;
+
+      wap_item( $cardid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
+   }
+
 
    $clrs="BW"; //player's color... so color to play.
-   while( $row = mysql_fetch_assoc($result) )
+   $i= 1;
+   while( $row = mysql_fetch_assoc($resultG) )
    {
-      $nothing_found = false;
       $safename = @$row['Name'];
          $safename.= " (".@$row['Handle'].")";
       $safename = wap_safe( $safename);
@@ -470,23 +505,23 @@ else
       $safeid = (int)@$row['ID'];
       $move = (int)@$row['Moves'];
 
-      $card= 'G'.$safeid;
-      $tit= "Game with $safename";
-      $lnk= $HOSTBASE.'/game.php?gid='.$safeid;
+      $hdr= "Game $i";
+      $tit= "Opponent: $safename";
+      $lnk= $HOSTBASE.'game.php?gid='.$safeid;
       $dat= @$row['date'];
-      $dsc= "Game: $safeid" . $wap_sep .
-            "Opponent: $safename" . $wap_sep .
+      $dsc= //"Game: $safeid" . $wap_sep .
+            //"Opponent: $safename" . $wap_sep .
             "Color: ".$clrs{@$row['Color']} . $wap_sep .
             "Move: ".$move;
-      wap_item( $card, $tit, $lnk, $dsc, $dat);
-   }
 
-    
-   if( $nothing_found )
-   {
-      wap_warning('nothing found', 'nothing found', $HOSTBASE.'/status.php');
-   }
+      $previd= $cardid;
+      $cardid= 'G'.$i;
+      $i++;
+      $nextid= ( $i > $countG ) ? $nextGid : 'G'.$i;
 
+      wap_item( $cardid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
+   }
+   
    wap_close();
 }
 ?>

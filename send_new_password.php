@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,63 +19,87 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-require( "include/std_functions.php" );
+$TranslateGroups[] = "Start";
+
+require_once( "include/std_functions.php" );
 
 
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
+   if( isset($_POST['goback']) )
+      jump_to("index.php");
 
+   $pswduser = get_request_arg('pswduser');
 
-   if( $action == 'Go back' )
-   {
-      header("Location: index.php");
-      exit;
-   }
+   if( $pswduser == "guest" )
+      error("not_allowed_for_guest");
 
-   $result = mysql_query( "SELECT Newpassword, Email " .
-                          "FROM Players WHERE Handle='$handle'" );
-  
-   if( mysql_num_rows($result) != 1 )
+   $result = mysql_query( "SELECT ID, Newpassword, Email " .
+                          "FROM Players WHERE Handle='".addslashes($pswduser)."'" );
+
+   if( @mysql_num_rows($result) != 1 )
       error("unknown_user");
 
+   $row = mysql_fetch_assoc($result);
 
-   $row = mysql_fetch_array($result);
+   if( $row['ID'] == 1 )
+      error("not_allowed_for_guest");
 
    if( !empty($row['Newpassword']) )
       error("newpassword_already_sent");
 
+   if( !empty($_POST['email']) )
+   {
+     // Could force email only if admin
+     if( !$logged_in )
+       error("not_logged_in");
+     if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
+       error("adminlevel_too_low");
+
+     $row['Email'] = trim($_POST['email']);
+   }
+
+   if( empty($row['Email']) )
+      error('no_email');
 
 // Now generate new password:
 
    $newpasswd = generate_random_password();
 
+   $Email= $row['Email'];
+
+   admin_log( @$player_row['ID'], @$player_row['Handle'],
+         "send a new password to $pswduser at $Email.");
+
 // Save password in database
 
    $result = mysql_query( "UPDATE Players " .
-                          "SET Newpassword=PASSWORD('$newpasswd') Where Handle='$handle'" );
-         
+                          "SET Newpassword=PASSWORD('$newpasswd') " .
+                          "WHERE Handle='".addslashes($pswduser)."' LIMIT 1" );
 
-   mail( $row["Email"], 
-   'Dragon Go Server: New password', 
-   'You (or possibly someone else) has requested a new password, and it has 
+
+   $msg= 'You (or possibly someone else) has requested a new password, and it has
 been randomly chosen as: ' . $newpasswd . '
 
-Both the old and the new password will also be valid until your next 
-login. Now please login and then change your password to something more 
+Both the old and the new password will also be valid until your next
+login. Now please login and then change your password to something more
 rememberable.
- 
-' . $HOSTBASE,
 
-   'From: ' . $EMAIL_FROM);
+' . $HOSTBASE;
+
+   $headers = "From: $EMAIL_FROM\n";
+
+   if( !function_exists('mail')
+    or !mail( trim($Email), $FRIENDLY_LONG_NAME.': New password', $msg, $headers ) )
+      error('mail_failure',"Uid:$pswduser Addr:$Email Text:$msg");
 
 
-   start_page("New password sent", true, $logged_in, $player_row );
-
-   echo "New password sent!";
-
-   end_page();
+   $msg = urlencode(T_("New password sent!"));
+   if( $logged_in )
+      jump_to("status.php?sysmsg=$msg");
+   jump_to("index.php?sysmsg=$msg");
 }
 ?>

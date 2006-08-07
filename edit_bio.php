@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,91 +18,97 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-require( "include/timezones.php" );
-require( "include/rating.php" );
+$TranslateGroups[] = "Users";
 
-$categories = array('Other:', 'Country', 'City','State', 'Club', 'Homepage', 'Email',
-                    'ICQ-number', 'Game preferences', 'Hobbies', 'Occupation');
+require_once( "include/std_functions.php" );
+require_once( "include/timezones.php" );
+require_once( "include/rating.php" );
+require_once( "include/form_functions.php" );
+
 
 function find_category_box_text($cat)
 {
    global $categories;
-   
-   if( in_array($cat, $categories) )
+
+   if( in_array($cat, array_keys($categories)) )
       return $cat;
    else
-      return 'Other:';
+      return '';
 }
 
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
 
+   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"] . " order by ID");
 
-   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"]);
 
-   start_page("Edit biopgraphical info", true, $logged_in, $player_row );
+   $categories = array( '' => T_('Other:'),
+                        'Country' => T_('Country'),
+                        'City' => T_('City'),
+                        'State' => T_('State'),
+                        'Club' => T_('Club'),
+                        'Homepage' => T_('Homepage'),
+                        'Email' => T_('Email'),
+                        'ICQ-number' => T_('ICQ-number'),
+                        'Game preferences' => T_('Game preferences'),
+                        'Hobbies' => T_('Hobbies'),
+                        'Occupation' => T_('Occupation'),
+                        'Native Language' => T_('Native Language'),
+                        'Language Competence' => T_('Language Competence'),
+                        );
 
-   echo '<CENTER>
-<FORM name="bioform" action="change_bio.php" method=post>
-';
+
+
+   start_page(T_("Edit biopgraphical info"), true, $logged_in, $player_row );
+
+
+
+   echo "<CENTER>\n";
+   $bio_form = new Form( 'bioform', 'change_bio.php', FORM_POST );
 
    while( $row = mysql_fetch_array( $result ) )
    {
       $cat = find_category_box_text($row["Category"]);
-?>
 
+      $bio_form->add_row( array( 'SELECTBOX', "category".$row["ID"], 1,
+                                 $categories, $cat, false,
 
- <table>
-    <tr>
-     <TD align=right><?php 
-     echo html_build_select_box_from_array($categories,"category" . $row["ID"],$cat,true);
-?></TD>
-     <TD align=left rowspan=2>
-          <textarea name="text<?php echo $row["ID"]?>" cols="40" rows="4" wrap="virtual"><?php 
-echo $row["Text"]?></textarea></TD></TR>
-     <TR><TD align=left>
-      <input type="text" name="other<?php echo $row["ID"]?>" size="15" maxlength="40"<?php 
-if( $cat == "Other:" ) echo ' value="' . $row["Category"] . '"' ?>></TD>
-      </TR>
- </table>
-<?php
+                                 'BR',
+
+                                 'TEXTINPUT', "other".$row["ID"], 15, 40,
+                                 ($cat == '' ? $row["Category"] : '' ),
+
+                                 'TD',
+
+                                 'TEXTAREA', "text".$row["ID"],40,4,$row["Text"] ) );
     }
 
 // And now three empty ones:
 
    for($i=1; $i<=3; $i++)
    {
-  ?>
- <table>
-    <tr>
-     <TD align=right><?php 
-     echo html_build_select_box_from_array($categories,"newcategory" . $i,'Other:',true);
-?></TD>
-     <TD align=left rowspan=2>
-          <textarea name="newtext<?php echo $i?>" cols="40" rows="4" wrap="virtual"></textarea></TD></TR>
-     <TR><TD align=left>
-      <input type="text" name="newother<?php echo $i?>" size="15" maxlength="40"></TD>
-      </TR>
- </table>
-<?php 
+      $bio_form->add_row( array( 'SELECTBOX', "newcategory" . $i, 1,
+                            $categories, '', false,
+
+                            'BR',
+
+                            'TEXTINPUT', "newother" . $i, 15, 40, "",
+
+                            'TD',
+
+                            'TEXTAREA', "newtext" . $i, 40, 4, "" ) );
    }
 
-?>
+   $bio_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change bio') ) );
+   $bio_form->echo_string(1);
 
+   echo "</CENTER><BR>\n";
 
-  <input type=submit name="action" value="Change bio">
-</FORM>
-</CENTER>  
-<BR>
-
-<?php
-
-   end_page(false);
+   end_page();
 }
 ?>

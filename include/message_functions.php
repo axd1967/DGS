@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,17 +18,40 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Messages";
+
+define('INVITE_HANDI_CONV',-1);
+define('INVITE_HANDI_PROPER',-2);
+define('INVITE_HANDI_NIGIRI',-3);
+define('INVITE_HANDI_DOUBLE',-4);
+
+
+function init_standard_folders()
+{
+   global $STANDARD_FOLDERS;
+   $STANDARD_FOLDERS = array(
+      FOLDER_ALL_RECEIVED => array(T_('All Received'),'f7f5e300','000000'),
+      FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
+      FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
+      FOLDER_REPLY => array(T_('Reply!'), 'ffaaaa80', '000000'),
+      FOLDER_DELETED => array(T_('Trashcan'), 'ff88ee00', '000000'),
+      FOLDER_SENT => array(T_('Sent'), '00000000', '0000ff'),
+      );
+}
 
 // Prints game setting form used by invite.php
 
-function game_settings_form($my_ID, $gid=NULL)
+function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false, $iamrated=true)
 {
 
-   // Default values:
+   // Default values: ('Invite' or waiting_room)
    $Size = 19;
-   $Komi = 6.5;
-   $Handicap = 0;
+   $Handitype = 'conv';
    $MyColor = 'White';
+   $Handicap = 0;
+   $Komi_m = 6.5;
+   $Komi_n = 6.5;
+   $Komi_d = 6.5;
    $Maintime = 3;
    $MaintimeUnit = 'months';
    $Byotype = 'JAP';
@@ -41,30 +64,79 @@ function game_settings_form($my_ID, $gid=NULL)
    $Byotime_fis = 1;
    $ByotimeUnit_fis = 'days';
    $Weekendclock = true;
+   $StdHandicap = false;
    $Rated = true;
 
-
-   // If dispute, use values from game $gid
-   if( $gid > 0 )
+   if( $my_ID==='redraw' && is_array($gid) )
    {
-      $my_ID = $player_row['ID'];
-      $result = mysql_query( "SELECT Handle,Size,Komi,Handicap," .
-                             "Maintime,Byotype,Byotime,Byoperiods,Rated,Weekendclock, " .
-                             "(White_ID=$my_ID)+1 AS Color " .
-                             "FROM Games,Players WHERE Games.ID=$gid " .
-                             "AND ((Players.ID=Black_ID AND White_ID=$my_ID) " .
-                             "OR (Players.ID=White_ID AND Black_ID=$my_ID)) " .
-                             "AND Status='INVITED'" );
+      // If redraw, use values from array $gid
+      // ($gid[] is the $_POST[] of the form asking the preview (i.e. this form))
+      if( isset($gid['size']) )
+         $Size = (int)$gid['size'];
 
-      if( mysql_num_rows($result) != 1 )
+      if( isset($gid['handicap_type']) )
+         $Handitype = (string)$gid['handicap_type'];
+      if( isset($gid['color']) )
+         $MyColor = (string)$gid['color'];
+      if( isset($gid['handicap']) )
+         $Handicap = (int)$gid['handicap'];
+      if( isset($gid['komi_m']) )
+         $Komi_m = (float)$gid['komi_m'];
+      if( isset($gid['komi_n']) )
+         $Komi_n = (float)$gid['komi_n'];
+      if( isset($gid['komi_d']) )
+         $Komi_d = (float)$gid['komi_d'];
+
+      if( isset($gid['byoyomitype']) )
+         $Byotype = (string)$gid['byoyomitype'];
+
+      if( isset($gid['timevalue']) )
+         $Maintime = (int)$gid['timevalue'];
+      if( isset($gid['timeunit']) )
+         $MaintimeUnit = (string)$gid['timeunit'];
+
+      if( isset($gid['byotimevalue_jap']) )
+         $Byotime_jap = (int)$gid['byotimevalue_jap'];
+      if( isset($gid['timeunit_jap']) )
+         $ByotimeUnit_jap = (string)$gid['timeunit_jap'];
+      if( isset($gid['byoperiods_jap']) )
+         $Byoperiods_jap = (int)$gid['byoperiods_jap'];
+
+      if( isset($gid['byotimevalue_can']) )
+         $Byotime_can = (int)$gid['byotimevalue_can'];
+      if( isset($gid['timeunit_can']) )
+         $ByotimeUnit_can = (string)$gid['timeunit_can'];
+      if( isset($gid['byoperiods_can']) )
+         $Byoperiods_can = (int)$gid['byoperiods_can'];
+
+      if( isset($gid['byotimevalue_fis']) )
+         $Byotime_fis = (int)$gid['byotimevalue_fis'];
+      if( isset($gid['timeunit_fis']) )
+         $ByotimeUnit_fis = (string)$gid['timeunit_fis'];
+
+      $Weekendclock = ( @$gid['weekendclock'] == 'Y' );
+      $StdHandicap = ( @$gid['stdhandicap'] == 'Y' );
+      $Rated = ( @$gid['rated'] == 'Y' );
+   }
+   else if( $gid > 0 ) //'Dispute'
+   {
+      // If dispute, use values from game $gid
+      $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
+                 "Maintime,Byotype,Byotime,Byoperiods,Rated,StdHandicap,Weekendclock, " .
+                 "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
+                 "FROM Games,Players WHERE Games.ID=$gid " .
+                 "AND ((Players.ID=Black_ID AND White_ID=$my_ID) " .
+                 "OR (Players.ID=White_ID AND Black_ID=$my_ID)) " .
+                 "AND Status='INVITED'" ;
+
+      if( !($game_row=mysql_single_fetch( $query)) )
          error("unknown_game");
-
-      $game_row = mysql_fetch_array($result);
 
       extract($game_row);
 
-      $MyColor = ( $color == BLACK ? 'Black' : 'White' );
+      $MyColor = ( $Color == BLACK ? 'Black' : 'White' );
       $Rated = ( $Rated == 'Y' );
+      $StdHandicap = ( $StdHandicap == 'Y' );
       $Weekendclock = ( $Weekendclock == 'Y' );
 
       $ByotimeUnit = 'hours';
@@ -72,6 +144,43 @@ function game_settings_form($my_ID, $gid=NULL)
 
       $MaintimeUnit = 'hours';
       time_convert_to_longer_unit($Maintime, $MaintimeUnit);
+
+      //ToMove_ID hold handitype since INVITATION
+      switch( $ToMove_ID )
+      {
+         case INVITE_HANDI_CONV:
+         {
+            $Handitype = 'conv';
+         }
+         break;
+
+         case INVITE_HANDI_PROPER:
+         {
+            $Handitype = 'proper';
+         }
+         break;
+
+         case INVITE_HANDI_NIGIRI:
+         {
+            $Handitype = 'nigiri';
+            $Komi_n = $Komi;
+         }
+         break;
+
+         case INVITE_HANDI_DOUBLE:
+         {
+            $Handitype = 'double';
+            $Komi_d = $Komi;
+         }
+         break;
+
+         default: //Black_ID
+         {
+            $Handitype = 'manual';
+            $Komi_m = $Komi;
+         }
+         break;
+      }
 
       switch( $Byotype )
       {
@@ -91,8 +200,9 @@ function game_settings_form($my_ID, $gid=NULL)
          }
          break;
 
-         case 'FIS':
+         default: //case 'FIS':
          {
+            $Byotype = 'FIS';
             $Byotime_fis = $Byotime;
             $ByotimeUnit_fis = $ByotimeUnit;
          }
@@ -103,121 +213,639 @@ function game_settings_form($my_ID, $gid=NULL)
 
 
    $value_array=array();
-   for( $bs = 5; $bs <= 25; $bs++ )
+   for( $bs = MIN_BOARD_SIZE; $bs <= MAX_BOARD_SIZE; $bs++ )
      $value_array[$bs]=$bs;
 
-   echo form_insert_row( 'DESCRIPTION', 'Board size',
-                         'SELECTBOX', 'size', 1, $value_array, $Size, false );
+   $mform->add_row( array( 'SPACE' ) );
+   $mform->add_row( array( 'DESCRIPTION', T_('Board size'),
+                           'SELECTBOX', 'size', 1, $value_array, $Size, false ) );
 
-   $value_array=array( 'White' => 'White', 'Black' => 'Black' );
-   echo form_insert_row( 'DESCRIPTION', 'My color',
-                         'SELECTBOX', 'color', 1, $value_array, $MyColor, false );
+   $color_array = array( 'White' => T_('White'), 'Black' => T_('Black') );
 
-   $value_array=array( 0 => 0 );
-   for( $bs = 2; $bs <= 20; $bs++ )
-     $value_array[$bs]=$bs;
+   $handi_stones=array( 0 => 0 );
+   for( $bs = 2; $bs <= MAX_HANDICAP; $bs++ )
+     $handi_stones[$bs]=$bs;
 
-   echo form_insert_row( 'DESCRIPTION', 'Handicap',
-                         'SELECTBOX', 'handicap', 1, $value_array, $Handicap, false );
 
-   echo form_insert_row( 'DESCRIPTION', 'Komi',
-                         'TEXTINPUT', 'komi', 5, 5, $Komi );
+   $mform->add_row( array( 'SPACE' ) );
 
-   $value_array=array( 'hours' => 'hours', 'days' => 'days', 'months' => 'months' );
-   echo form_insert_row( 'DESCRIPTION', 'Main time',
-                         'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
-                         'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false );
+   if( $iamrated )
+   {
 
-   echo form_insert_row( 'DESCRIPTION', 'Japanese byo-yomi',
-                         'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), $Byotype,
-                         'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
-                         'SELECTBOX', 'timeunit_jap', 1, $value_array, $ByotimeUnit_jap, false,
-                         'TEXT', 'with&nbsp;',
-                         'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
-                         'TEXT', 'extra periods.' );
+      $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
+                              'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype ) );
 
-   echo form_insert_row( 'DESCRIPTION', 'Canadian byo-yomi',
-                         'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), $Byotype,
-                         'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
-                         'SELECTBOX', 'timeunit_can', 1, $value_array, $ByotimeUnit_can, false,
-                         'TEXT', 'for&nbsp;',
-                         'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
-                         'TEXT', 'stones.' );
+      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
+                              'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype ) );
+   }
 
-   echo form_insert_row( 'DESCRIPTION', 'Fischer time',
-                         'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), $Byotype,
-                         'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
-                         'SELECTBOX', 'timeunit_fis', 1, $value_array, $ByotimeUnit_fis, false,
-                         'TEXT', 'extra&nbsp;per move.' );
+   if( !$waiting_room )
+   {
+      $mform->add_row( array( 'DESCRIPTION', T_('Manual setting'),
+                              'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
+                              'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('My color'),
+                              'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
+                              'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
+                              'SELECTBOX', 'handicap', 1, $handi_stones, $Handicap, false,
+                              'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                              'TEXTINPUT', 'komi_m', 5, 5, $Komi_m ) );
+   }
 
-   echo form_insert_row( 'DESCRIPTION', 'Clock runs on weekends',
-                         'CHECKBOX', 'weekendclock', 'Y', "", $Weekendclock );
-   echo form_insert_row( 'DESCRIPTION', 'Rated',
-                         'CHECKBOX', 'rated', 'Y', "", $Rated );
+   $mform->add_row( array( 'DESCRIPTION', T_('Even game with nigiri'),
+                           'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
+                           'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                           'TEXTINPUT', 'komi_n', 5, 5, $Komi_n ) );
+
+   $mform->add_row( array( 'DESCRIPTION', T_('Double game'),
+                           'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
+                           'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                           'TEXTINPUT', 'komi_d', 5, 5, $Komi_d ) );
+
+   if( ENA_STDHANDICAP )
+   $mform->add_row( array( 'DESCRIPTION', T_('Standard placement'),
+                           'CHECKBOX', 'stdhandicap', 'Y', "", $StdHandicap ) );
+
+
+
+   $value_array=array( 'hours' => T_('hours'),
+                       'days' => T_('days'),
+                       'months' => T_('months') );
+
+   $mform->add_row( array( 'SPACE' ) );
+
+   $mform->add_row( array( 'DESCRIPTION', T_('Main time'),
+                           'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
+                           'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
+
+   $mform->add_row( array( 'DESCRIPTION', T_('Japanese byoyomi'),
+                           //'CELL', 1, 'nowrap',
+                           'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), $Byotype,
+                           'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
+                           'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
+                           'TEXT', T_('with') . '&nbsp;',
+                           'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
+                           'TEXT', T_('extra periods') ) );
+
+   $mform->add_row( array( 'DESCRIPTION', T_('Canadian byoyomi'),
+                           'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), $Byotype,
+                           'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
+                           'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
+                           'TEXT', T_('for') . '&nbsp;',
+                           'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
+                           'TEXT', T_('stones') ) );
+
+   $mform->add_row( array( 'DESCRIPTION', T_('Fischer time'),
+                           'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), $Byotype,
+                           'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
+                           'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
+                           'TEXT', T_('extra per move') ) );
+
+   $mform->add_row( array( 'SPACE' ) );
+
+   $mform->add_row( array( 'DESCRIPTION', T_('Clock runs on weekends'),
+                           'CHECKBOX', 'weekendclock', 'Y', "", $Weekendclock ) );
+   $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
+                           'CHECKBOX', 'rated', 'Y', "", $Rated ) );
 }
 
-function message_info_table($date, $to_me, $sender_id, $sender_name, $sender_handle,
-                            $subject, $reply_mid, $text)
-{
-   global $date_fmt;
 
-   echo "<table>\n" .
-      "<tr><td>Date:</td><td>" . date($date_fmt, $date) . "</td></tr>\n" .
-      "<tr><td>" . ($to_me ? "From" : "To" ) . ":</td>\n" .
-      "<td><A href=\"userinfo.php?uid=$sender_id\">$sender_name ($sender_handle)</A>" .
-      "</td></tr>\n" .
-      "<tr><td>Subject:</td><td>$subject</td></tr>\n" .
-      "<tr><td valign=\"top\">" .
-      ( $reply_mid > 0 ?
-        "<a href=\"message.php?mode=ShowMessage&mid=$reply_mid\">Replied:</a>" :
-        "Message:" ) . "</td>\n" .
-      "<td align=\"center\">\n" .
+define('FLOW_ANSWER'  ,0x1);
+define('FLOW_ANSWERED',0x2);
+   $msg_icones = array(
+  0                         => array('msg'   ,'&nbsp;-&nbsp;'),
+  FLOW_ANSWER               => array('msg_lr','&gt;-&nbsp;'), //is an answer
+              FLOW_ANSWERED => array('msg_rr','&nbsp;-&gt;'), //is answered
+  FLOW_ANSWER|FLOW_ANSWERED => array('msg_2r','&gt;-&gt;'),
+      );
+
+function message_info_table($mid, $date, $to_me, //$mid==0 means preview
+                            $other_id, $other_name, $other_handle, //must be html_safe
+                            $subject, $text, //must NOT be html_safe
+                            $reply_mid=0, $flow=0,
+                            $folders=null, $folder_nr=null, $form=null, $delayed_move=false)
+{
+   global $date_fmt, $msg_icones, $bg_color;
+
+   if( $other_id > 0 )
+   {
+     $name = user_reference( REF_LINK, 0, '', $other_id, $other_name, $other_handle) ;
+   }
+   else
+     $name = $other_name; //i.e. T_("Server message");
+
+   echo "<table border=0>\n" .
+      "<tr><td><b>" . T_('Date') . ":</b></td>" .
+      "<td colspan=2>" . date($date_fmt, $date) . "</td></tr>\n" .
+      "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .
+      "<td colspan=2>$name</td>" .
+      "</tr>\n";
+
+   echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>" .
+      make_html_safe($subject, true) . "</td></tr>\n" .
+      "<tr><td valign=\"top\">" ;
+
+   echo "<b>" . T_('Message') . ":</b>" ;
+   $str = '';
+   if( $flow & FLOW_ANSWER && $reply_mid > 0 )
+   {
+      list($ico,$alt) = $msg_icones[FLOW_ANSWER];
+      $str.= "<a href=\"message.php?mode=ShowMessage".URI_AMP."mid=$reply_mid\">" .
+             "<img border=0 alt='$alt' src='images/$ico.gif'"
+             . ' title="' . T_("Previous message") . '"'
+             . "></a>&nbsp;" ;
+   }
+   if( $flow & FLOW_ANSWERED && $mid > 0)
+   {
+      list($ico,$alt) = $msg_icones[FLOW_ANSWERED];
+      $str.= "<a href=\"list_messages.php?find_answers=$mid\">" .
+             "<img border=0 alt='$alt' src='images/$ico.gif'"
+             . ' title="' . T_("Next messages") . '"'
+             . "></a>&nbsp;" ;
+   }
+   if( $str )
+     echo "<center>$str</center>";
+
+   echo "</td>\n" .
+
+      "<td align=\"center\" colspan=2>\n" .
       "<table border=2 align=center><tr>" .
-      "<td width=475 align=left>" . make_html_safe($text, true) . "</td></tr></table><BR>\n" .
-      "</td></tr>\n</table>\n";
+      "<td width=475 align=left>" . make_html_safe($text, true) .
+      "</td></tr></table><BR></td></tr>\n";
+
+   if( isset($folders) && $mid > 0 )
+   {
+      echo "<tr>\n<td><b>" . T_('Folder') . ":</b></td>\n<td><table cellpadding=3><tr>" .
+         echo_folder_box($folders, $folder_nr, substr($bg_color, 2, 6))
+          . "</tr></table></td>\n<td>";
+
+      $deleted = ( is_null($folder_nr) );
+      if( !$deleted )
+      {
+
+         $fld = array('' => '');
+         foreach( $folders as $key => $val )
+            if( $key != $folder_nr and (!$to_me or $key != FOLDER_SENT) and $key != FOLDER_NEW )
+               $fld[$key] = $val[0];
+
+         echo $form->print_insert_select_box('folder', '1', $fld, '', '');
+         if( $delayed_move )
+            echo T_('Move to folder when replying');
+         else
+         {
+            echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
+            echo $form->print_insert_hidden_input("mark$mid", 'Y') ;
+            if( $folder_nr > FOLDER_ALL_RECEIVED )
+               echo $form->print_insert_hidden_input("current_folder", $folder_nr) ;
+         }
+         echo $form->print_insert_hidden_input('foldermove_mid', $mid) ;
+      }
+
+      echo "\n</td></tr>\n";
+   }
+
+   echo "</table>\n";
 }
 
 
-function game_info_table($Size, $col, $Komi, $Handicap,
+function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
                          $Maintime, $Byotype, $Byotime, $Byoperiods,
-                         $Rated, $WeekendClock, $gid=NULL)
+                         $Rated, $WeekendClock, $StdHandicap, $gid=NULL)
 {
-   echo '    <table align=center border=2 cellpadding=3 cellspacing=3>';
+   echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
    if( $gid > 0 )
-      echo "\n<tr><td>Game ID: </td><td><a href=\"game.php?gid=$gid\">$gid</a></td></tr>";
+      echo "<tr><td><b>" . T_('Game ID') . "</b></td><td><a href=\"game.php?gid=$gid\">$gid</a></td></tr>\n";
 
-   echo '
-      <tr><td>Size: </td><td>' . $Size .'</td></tr>
-      <tr><td>Color: </td><td>' . $col . '</td></tr>
-      <tr><td>Komi: </td><td>' . $Komi . '</td></tr>
-      <tr><td>Handicap: </td><td>' . $Handicap . '</td></tr>
-      <tr><td>Main time: </td><td>'; echo_time($Maintime); echo "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Size') . '<b></td><td>' . $Size . "</td></tr>\n";
+
+   switch( $handicap_type )
+   {
+      case INVITE_HANDI_CONV: // Conventional handicap
+         echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' .
+            T_('Conventional handicap (komi 0.5 if not even)') . "</td></tr>\n";
+         break;
+
+      case INVITE_HANDI_PROPER: // Proper handicap
+         echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' .
+            T_('Proper handicap') . "</td></tr>\n";
+         break;
+
+      case INVITE_HANDI_NIGIRI: // Nigiri
+         echo '<tr><td><b>' . T_('Colors') . '</b></td><td>' . T_('Nigiri') . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+         break;
+
+      case INVITE_HANDI_DOUBLE: // Double game
+         echo '<tr><td><b>' . T_('Colors') . '</b></td><td>' .
+            T_('Double game') . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+         break;
+
+      default: // Manual: $handicap_type = $Black_ID
+         echo '<tr><td><b>' . T_('Colors') . "<b></td><td>$col</td></tr>\n";
+         echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $Handicap . "</td></tr>\n";
+         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+         break;
+   }
+
+   if( ENA_STDHANDICAP )
+   {
+      echo '<tr><td><b>' . T_('Standard placement') . '</b></td><td>' .
+          ( $StdHandicap == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
+   }
+
+
+   echo '<tr><td><b>' . T_('Main time') . '</b></td><td>'
+            . echo_time($Maintime) 
+         . "</td></tr>\n";
 
    if( $Byotype == 'JAP' )
    {
-      echo '        <tr><td>Byo-yomi: </td><td> Japanese: ';
-      echo_time($Byotime);
-      echo ' per move and ' . $Byoperiods . ' extra periods </td></tr>' . "\n";
+      echo '<tr><td><b>' . T_('Japanese byoyomi') . '</b></td><td> ' .
+         sprintf(T_('%s per move and %s extra periods')
+            , echo_time($Byotime), $Byoperiods)
+         . "</td></tr>\n";
    }
    else if ( $Byotype == 'CAN' )
    {
-      echo '        <tr><td>Byo-yomi: </td><td> Canadian: ';
-      echo_time($Byotime);
-      echo ' per ' .$Byoperiods . ' stones </td></tr>' . "\n";
+      echo '<tr><td><b>' . T_('Canadian byoyomi') . '</b></td><td> ' .
+         sprintf(T_('%s per %s stones'), echo_time($Byotime), $Byoperiods)
+         . "</td></tr>\n";
    }
    else if ( $Byotype == 'FIS' )
    {
-      echo '        <tr><td>Fischer time: </td><td> ';
-      echo_time($Byotime);
-      echo ' extra per move </td></tr>' . "\n";
+      echo '<tr><td><b>' . T_('Fischer time') . '</b></td><td> ' .
+         sprintf(T_('%s extra per move'), echo_time($Byotime))
+         . "</td></tr>\n";
    }
 
-    echo '<tr><td>Rated: </td><td>' . ( $Rated == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
-<tr><td>Clock runs on weekends: </td><td>' . ( $WeekendClock == 'Y' ? 'Yes' : 'No' ) . '</td></tr>
-</table>
-';
+   echo '<tr><td><b>' . T_('Rated game') . '</b></td><td>' .
+       ( $Rated == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
+   echo '<tr><td><b>' . T_('Clock runs on weekends') . '</b></td><td>' .
+       ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
+
+   echo "</table>\n";
 
 }
 
+
+//Set global $hours,$byohours,$byoperiods
+function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
+                                    $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
+                                    $byotimevalue_can, $timeunit_can, $byoperiods_can,
+                                    $byotimevalue_fis, $timeunit_fis)
+{
+
+      $hours = (int)$timevalue;
+      if( $timeunit != 'hours' )
+         $hours *= 15;
+      if( $timeunit == 'months' )
+         $hours *= 30;
+
+      if( $hours > 5475 ) $hours = 5475; //365*15
+      else if( $hours < 0 ) $hours = 0;
+
+      if( $byoyomitype == 'JAP' )
+      {
+         $byohours = (int)$byotimevalue_jap;
+         if( $timeunit_jap != 'hours' ) $byohours *= 15;
+         if( $timeunit_jap == 'months' ) $byohours *= 30;
+
+         if( $byohours > 5475 ) $byohours = 5475;
+         else if( $byohours < 0 ) $byohours = 0;
+
+         $byoperiods = (int)$byoperiods_jap;
+         if( $byohours * ($byoperiods+1) > 5475 )
+            $byoperiods = floor(5475/$byohours) - 1;
+      }
+      else if( $byoyomitype == 'CAN' )
+      {
+         $byohours = (int)$byotimevalue_can;
+         if( $timeunit_can != 'hours' ) $byohours *= 15;
+         if( $timeunit_can == 'months' ) $byohours *= 30;
+
+         if( $byohours > 5475 ) $byohours = 5475;
+         else if( $byohours < 0 ) $byohours = 0;
+
+         $byoperiods = (int)$byoperiods_can;
+         if( $byoperiods < 1 ) $byoperiods = 1;
+      }
+      else // if( $byoyomitype == 'FIS' )
+      {
+         $byoyomitype = 'FIS';
+         $byohours = (int)$byotimevalue_fis;
+         if( $timeunit_fis != 'hours' ) $byohours *= 15;
+         if( $timeunit_fis == 'months' ) $byohours *= 30;
+
+         if( $byohours > $hours ) $byohours = $hours;
+         else if( $byohours < 0 ) $byohours = 0;
+
+         $byoperiods = 0;
+      }
+
+      return array($hours, $byohours, $byoperiods);
+}
+
+function get_folders($uid, $remove_all_received=true)
+{
+   global $STANDARD_FOLDERS;
+
+   $result = mysql_query("SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr")
+               or error("mysql_query_failed"); //die(mysql_error());
+
+   $flds = $STANDARD_FOLDERS;
+
+   while( $row = mysql_fetch_array($result) )
+   {
+      if( empty($row['Name']))
+         $row['Name'] = ( $row['Folder_nr'] < USER_FOLDERS ?
+                          $STANDARD_FOLDERS[$row['Folder_nr']][0] : T_('Folder name') );
+      $flds[$row['Folder_nr']] = array($row['Name'], $row['BGColor'], $row['FGColor']);
+   }
+
+   if( $remove_all_received )
+      unset($flds[FOLDER_ALL_RECEIVED]);
+
+   return $flds;
+}
+
+function change_folders_for_marked_messages($uid, $folders)
+{
+
+   if( isset($_GET['move_marked']) )
+   {
+      if( !isset($_GET['folder']) )
+         return -1; //i.e. no move query
+      $new_folder = $_GET['folder'];
+   }
+   else if( isset($_GET['destroy_marked'] ) )
+   {
+      $new_folder = "NULL";
+   }
+   else
+      return -1; //i.e. no move query
+
+   $message_ids = array();
+   foreach( $_GET as $key => $val )
+   {
+      if( preg_match("/^mark(\d+)$/", $key, $matches) )
+         array_push($message_ids, $matches[1]);
+   }
+
+   return change_folders($uid, $folders, $message_ids, $new_folder, @$_GET['current_folder']);
+}
+
+function change_folders($uid, $folders, $message_ids, $new_folder, $current_folder=false, $need_replied=false)
+{
+
+   if( count($message_ids) <= 0 )
+      return 0;
+
+   if( $new_folder == "NULL" )
+   {
+      $where_clause = "AND Folder_nr='" .FOLDER_DELETED. "' ";      
+   }
+   else
+   {
+      if( !isset($new_folder) or !isset($folders[$new_folder])
+        or $new_folder == FOLDER_NEW or $new_folder == FOLDER_ALL_RECEIVED )
+         error('folder_not_found');
+
+      if( $new_folder == FOLDER_SENT )
+         $where_clause = "AND (Sender='Y' or Sender='M') ";
+      else if( $new_folder == FOLDER_REPLY )
+         $where_clause = "AND (Sender='N' or Sender='M') ";
+      else
+         $where_clause = '';
+
+      if( $current_folder > FOLDER_ALL_RECEIVED && isset($folders[$current_folder])
+            && $current_folder != 'NULL' )
+         $where_clause.= "AND Folder_nr='" .$current_folder. "' ";      
+   }
+
+   if( $need_replied )
+      $where_clause.= "AND Replied='Y' ";
+   else
+      $where_clause.= "AND Replied!='M' ";
+
+   mysql_query("UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
+               "WHERE uid='$uid' $where_clause" .
+               "AND NOT ISNULL(Folder_nr) " .
+               "AND mid IN (" . implode(',', $message_ids) . ") " .
+               "LIMIT " . count($message_ids) )
+      or error("mysql_query_failed"); //die(mysql_error());
+   return mysql_affected_rows() ;
+}
+
+function echo_folders($folders, $current_folder)
+{
+   global $STANDARD_FOLDERS;
+
+   $string = '<table align=center border=0 cellpadding=0 cellspacing=7><tr>' . "\n" .
+      '<td><b>' . T_('Folder') . ":&nbsp;&nbsp;&nbsp;</b></td>\n";
+
+   $folders[FOLDER_ALL_RECEIVED] = $STANDARD_FOLDERS[FOLDER_ALL_RECEIVED];
+   ksort($folders);
+
+   foreach( $folders as $nr => $val )
+   {
+      list($name, $color, $fcol) = $val;
+      $name = "<font color=\"$fcol\">" . make_html_safe($name) . "</font>" ;
+      $string .= '<td bgcolor="#' .blend_alpha_hex($color). '"' ;
+      if( $nr == $current_folder)
+         $string .= " style=\"padding:4px;border-width:2px;border:solid;border-color:#6666ff;\">$name</td>\n";
+      else
+         $string .= " style=\"padding:6px;\"><a href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
+   }
+
+   $string .= '</tr></table>' . "\n";
+
+   return $string;
+}
+
+function folder_is_empty($nr, $uid)
+{
+   $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
+                         "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1");
+   $nr = (@mysql_num_rows($result) === 0);
+   mysql_free_result($result);
+   return $nr;
+}
+
+function echo_folder_box($folders, $folder_nr, $bgcolor)
+{
+ global $STANDARD_FOLDERS;
+
+   if ( is_null($folder_nr) ) //case of $deleted messages
+     list($foldername, $folderbgcolor, $folderfgcolor) = array('---',0,0);
+   else
+     list($foldername, $folderbgcolor, $folderfgcolor) = @$folders[$folder_nr];
+
+   if( empty($foldername) )
+     if ( $folder_nr < USER_FOLDERS )
+       list($foldername, $folderbgcolor, $folderfgcolor) = $STANDARD_FOLDERS[$folder_nr];
+     else
+       $foldername = T_('Folder name');
+
+   $folderbgcolor = blend_alpha_hex($folderbgcolor, $bgcolor);
+   if( empty($folderfgcolor) )
+      $folderfgcolor = "000000" ;
+
+   return "<td bgcolor=\"#$folderbgcolor\"><font color=\"#$folderfgcolor\">".
+          make_html_safe($foldername) . "</font></td>";
+}
+
+function message_list_query($my_id, $folderstring='all', $order='date', $limit='', $extra_where='')
+{
+//    $rec_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+//       "Players.Name AS other_name, To_Folder_nr AS folder " .
+//       "FROM Messages, Players " .
+//       "WHERE obsolet(To_ID)=$my_id AND To_Folder_nr IN ($folderstring) AND To_ID=Players.ID " .
+//       "ORDER BY $order $limit";
+
+//    $sent_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+//       "Players.Name AS other_name, From_Folder_nr AS folder " .
+//       "FROM Messages, Players " .
+//       "WHERE obsolet(From_ID)=$my_id AND From_Folder_nr IN ($folderstring) AND obsolet(To_ID)=Players.ID " .
+//       "ORDER BY $order $limit";
+
+
+// for mysql 4.0
+
+//    $l = $_GET['from_row']+$MaxRowsPerPage;
+//    $query = "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " ,
+//       "Players.Name AS other_name, From_Folder_nr AS folder " .
+//       "FROM Messages, Players WHERE obsolet(From_ID)=$my_id AND From_Folder_nr IN ($folderstring) " .
+//       "AND obsolet(To_ID)=Players.ID order by $order limit $l)" .
+//       "UNION " .
+//       "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
+//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
+//       "Players.Name AS other_name, To_Folder_nr AS folder " .
+//       "FROM Messages, Players WHERE obsolet(To_ID)=$my_id AND To_Folder_nr IN ($folderstring) " .
+//       "AND obsolet(From_ID)=Players.ID order by $order limit $l)" .
+//       "ORDER BY $order $limit";
+
+   $query = "SELECT Messages.Type, Messages.Subject, " .
+      "UNIX_TIMESTAMP(Messages.Time) AS Time, me.mid as date, " .
+          "IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
+          "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
+      "me.mid, me.Replied, me.Sender, me.Folder_nr AS folder, " .
+      "IF(me.sender='M',' ',Players.Name) AS other_name, " . //the ' ' help to sort
+      "Players.ID AS other_ID " .
+      "FROM Messages, MessageCorrespondents AS me " .
+      "LEFT JOIN MessageCorrespondents AS other " .
+        "ON other.mid=me.mid AND other.Sender!=me.Sender " .
+      "LEFT JOIN Players ON Players.ID=other.uid " .
+      "LEFT JOIN MessageCorrespondents AS previous " .
+        "ON previous.mid=Messages.ReplyTo AND previous.uid=me.uid " .
+      "WHERE me.uid=$my_id AND Messages.ID=me.mid $extra_where " .
+        ( $folderstring=="all" ? "" : "AND me.Folder_nr IN ($folderstring) " ) .
+      "ORDER BY $order $limit";
+
+   $result = mysql_query( $query )
+               or error("mysql_query_failed"); //die(mysql_error());
+   return $result;
+}
+
+function message_list_table( &$mtable, $result, $show_rows
+             , $current_folder, $my_folders
+             , $no_sort=true, $no_mark=true, $toggle_marks=false
+             )
+{
+ global $date_fmt, $msg_icones;
+
+   $can_move_messages = false;
+
+   $mtable->add_tablehead( 1, T_('Folder'), ( $no_sort or $current_folder>FOLDER_ALL_RECEIVED ) ? NULL : 
+                           'folder', true, false );
+   $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
+                           $no_sort ? NULL : 'other_name', false, false );
+   $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'subject', false, false );
+   list($ico,$alt) = $msg_icones[0];
+   $tit = str_replace('"', '&quot;', T_('Messages'));
+   $mtable->add_tablehead( 0, 
+      "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>"
+      , $no_sort ? NULL : 'flow', false, true );
+   $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, false );
+   if( !$no_mark )
+      $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
+
+   $page = '';
+
+   $p = str_replace('"', '&quot;', T_('Answer'));
+   $n = str_replace('"', '&quot;', T_('Replied'));
+   $tits[0                        ] = str_replace('"', '&quot;', T_('Message')) ;
+   $tits[FLOW_ANSWER              ] = $p ;
+   $tits[            FLOW_ANSWERED] = $n ;
+   $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p - $n" ;
+
+   while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
+   {
+      $mid = $row["mid"];
+      $mrow_strings = array();
+
+      $folder_nr = $row['folder'];
+      $deleted = ( is_null($folder_nr) );
+      $bgcolor = $mtable->blend_next_row_color_hex();
+
+      $mrow_strings[1] = echo_folder_box($my_folders, $folder_nr, $bgcolor);
+
+      if( $row['Sender'] === 'M' ) //Message to myself
+      {
+         $row["other_name"] = '(' . T_('Myself') . ')';
+      }
+      else if( $row["other_ID"] <= 0 )
+         $row["other_name"] = '[' . T_('Server message') . ']';
+      if( empty($row["other_name"]) )
+         $row["other_name"] = '-';
+
+      $str = make_html_safe($row["other_name"]) ;
+      //if( !$deleted )
+         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid\">$str</A>";
+      if( $row['Sender'] === 'Y' )
+         $str = T_('To') . ': ' . $str;
+      $mrow_strings[2] = "<td>$str</td>";
+
+      $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "&nbsp;</td>";
+
+      list($ico,$alt) = $msg_icones[$row["flow"]];
+      $tit = $tits[$row["flow"]];
+      $str = "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>";
+      //if( !$deleted )
+         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid\">$str</A>";
+      $mrow_strings[0] = "<td>$str</td>";
+
+      $mrow_strings[4] = "<td>" . date($date_fmt, $row["Time"]) . "</td>";
+
+      if( !$no_mark )
+      {
+         if( $folder_nr == FOLDER_NEW or $row['Replied'] == 'M'
+           or ( $folder_nr == FOLDER_REPLY and $row['Type'] == 'INVITATION'
+              and $row['Replied'] != 'Y' )
+           or $deleted )
+            $mrow_strings[5] = '<td>&nbsp;</td>';
+         else
+         {
+            $can_move_messages = true;
+            $checked = ((@$_REQUEST["mark$mid"]=='Y') xor $toggle_marks) ;
+            if( $checked )
+               $page.= "mark$mid=Y".URI_AMP ;
+            $mrow_strings[5] = "<td align=center>"  .
+               "<input type='checkbox' name='mark$mid' value='Y'".
+               ($checked ? ' checked' : '') .
+               '></td>';
+         }
+      }
+      $mtable->add_row( $mrow_strings );
+
+   }
+
+
+   $mtable->Page.= $page ;
+
+   return $can_move_messages ;
+}
 ?>

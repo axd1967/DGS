@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2003  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,14 +19,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-define("LEFT",1);
-define("UP",2);
-define("RIGHT",4);
-define("DOWN",8);
-
 function number2sgf_coords($x, $y, $Size)
 {
-   if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
+   if( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$Size && $y<$Size) )
       return NULL;
 
    return chr(ord('a')+$x) . chr(ord('a')+$y);
@@ -37,38 +32,56 @@ function sgf2number_coords($coord, $Size)
    if( !is_string($coord) or strlen($coord)!=2 )
       return array(NULL,NULL);
 
-   $x = ord($coord[0])-ord('a');
-   $y = ord($coord[1])-ord('a');
+   $x = ord($coord{0})-ord('a');
+   $y = ord($coord{1})-ord('a');
 
    if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
       return array(NULL,NULL);
 
-   return array(ord($coord[0])-ord('a'), ord($coord[1])-ord('a'));
+   return array($x, $y);
 }
 
 function number2board_coords($x, $y, $Size)
 {
-  if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
+   if( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$Size && $y<$Size) )
      return NULL;
 
-  $col = chr( $x + ord('a') );
-  if( $col >= 'i' ) $col++;
+  $col = chr( $x + ($x>=8?1:0) + ord('a') );
 
   return  $col . ($Size - $y);
-
 }
 
-function board_coords2number($string, $Size)
+function board2number_coords($coord, $Size)
 {
-   $x = ord($string{0}) - ord('a');
-   if( $x > 8 ) $x--;
+   if( is_string($coord) && strlen($coord)>=2 )
+   {
+      $x = ord($coord{0}) - ord('a');
+      if( $x != 8 )
+      {
+         if( $x > 8 ) $x--;
 
-   $y = $Size - substr($string, 1);
+         $y = $Size - substr($coord, 1);
 
-   if( !($x<$Size and $y<$Size and $x>=0 and $y>=0) )
-      return NULL;
+         if( $x<$Size and $y<$Size and $x>=0 and $y>=0 )
+            return  array($x, $y);
+      }
+   }
+   return array(NULL,NULL);
+}
 
-   return  array($x, $y);
+//board letter:     - a b c d e f g h j k l m n o p q r s t u v w x y z
+$hoshi_dist = array(0,0,0,0,0,0,0,0,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
+$hoshi_pos  = array(0,0,0,0,0,1,0,1,4,5,4,5,4,7,4,7,4,7,4,7,4,7,4,7,4,7);
+//$hoshi_pos: 0x01 allow center, 0x02 allow side, 0x04 allow corner
+
+function is_hoshi($x, $y, $sz)
+{
+  global $hoshi_pos, $hoshi_dist;
+
+   $hd= $hoshi_dist[$sz];
+   if( $h = $x*2+1 == $sz ? 1 : ( $x == $hd-1 || $x == $sz-$hd ? 2 : 0 ) )
+       $h*= $y*2+1 == $sz ? 1 : ( $y == $hd-1 || $y == $sz-$hd ? 2 : 0 ) ;
+   return $hoshi_pos[$sz] & $h;
 }
 
 ?>

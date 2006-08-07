@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,43 +18,39 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-require( "include/timezones.php" );
-require( "include/rating.php" );
+$TranslateGroups[] = "Users";
+
+require_once( "include/std_functions.php" );
+require_once( "include/timezones.php" );
+require_once( "include/rating.php" );
+require_once( "include/form_functions.php" );
 
 connect2mysql();
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
+$logged_in = who_is_logged( $player_row);
 
 if( !$logged_in )
    error("not_logged_in");
 
 
-start_page("Edit password", true, $logged_in, $player_row );
+start_page(T_("Edit password"), true, $logged_in, $player_row );
+
+echo "<CENTER>\n";
+
+$pass_form = new Form( 'passwordform', 'change_password.php', FORM_POST );
+
+$pass_form->add_row( array( 'DESCRIPTION', T_('Old password'),
+                            'PASSWORD', 'oldpasswd',16,16 ) );
+$pass_form->add_row( array( 'DESCRIPTION', T_('New password'),
+                            'PASSWORD', 'passwd',16,16 ) );
+$pass_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
+                            'PASSWORD', 'passwd2',16,16 ) );
+$pass_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change password') ) );
+
+$pass_form->echo_string(1);
+
+echo "</CENTER>\n";
+
+end_page();
 
 ?>
-<CENTER>
-  <FORM name="passwordform" action="change_password.php" method="POST">
-      <table>
-      <TR>
-        <TD align=right>New Password:</TD>
-        <TD align=left><input type="password" name="passwd" size="16" maxlength="16"></TD>
-      </TR>
-      
-      <TR>
-        <TD align=right>Confirm Password:</TD>
-        <TD align=left><input type="password" name="passwd2" size="16" maxlength="16"></TD>
-        <TD><input type=submit name="action" value="Change password"></TD>
-      </TR>
-      
-    </TABLE>
-  </FORM>
-</CENTER>  
-
-
-<?php
-
-end_page(false);
-
-?>
-

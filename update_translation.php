@@ -1,8 +1,7 @@
 <?php
-
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival, Ragnar Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,78 +18,97 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* The code in this file is written by Ragnar Ouchterlony */
-
-require( "include/std_functions.php" );
-require( "include/translation_info.php" );
-
-function replace_unnecessary_chars( $string )
-{
-  return str_replace( "'", "\\'", $string );
-}
+require_once( "include/std_functions.php" );
+require_once( "include/make_translationfiles.php" );
 
 {
   connect2mysql();
 
-  $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+  $logged_in = who_is_logged( $player_row);
 
   if( !$logged_in )
     error("not_logged_in");
 
-  if( $just_change )
-    {
-      jump_to("translate.php?translate_lang=$translate_lang&group=$group");
-    }
+  $translate_lang = @$_POST['translate_lang'];
+  $group = @$_POST['group'];
+  $profil_charset = @$_POST['profil_charset'] ? 'Y' : '';
 
-  if( $update )
-    {
-      $translator_array = explode(',', $player_row['Translator']);
+  {
+     $translator_set = @$player_row['Translator'];
+     if( !$translator_set )
+       error("not_translator");
+     $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
+  }
 
-      if( !in_array( $translate_lang, get_known_languages() ) )
-        error('no_such_translation_language');
+  if( !in_array( $translate_lang, $translator_array ) )
+     error('not_correct_transl_language', $translate_lang.':'.$translator_set.':'.implode("*", $translator_array));
 
-      if( !in_array( $translate_lang, $translator_array ) )
-        error('not_correct_transl_lang');
+  $untranslated = ($group === 'Untranslated phrases');
 
-      $k_langs = get_known_languages_with_full_names();
+      $result = translations_query( $translate_lang, $untranslated, $group )
+                or error('mysql_query_failed','uptranslat1'); //die(mysql_error());
+      $numrows = @mysql_num_rows($result);
+      if( $numrows == 0 and !$untranslated )
+         error('translation_bad_language_or_group','uptranslat1');
 
-      $the_translator->change_language($translate_lang);
-      $the_translator->set_return_empty();
 
-      $lang_php_code = sprintf( $translation_template_top,
-                                $translate_lang,
-                                $k_langs[$translate_lang] );
-      $counter = 0;
-      foreach( $translation_info as $string => $info )
-        {
-          $counter++;
-          if( ${"transl$counter"} )
-            $translation = ${"transl$counter"};
-          else
-            $translation = T_( $string );
+  $replace_set = '';
+  $log_set = '';
+  $done_set = '';
+  $oid= -1;
+  while( $row = mysql_fetch_assoc($result) )
+  {
+     if( $oid == $row['Original_ID'] ) continue;
+     $oid = $row['Original_ID'];
 
-          $r_string = replace_unnecessary_chars( $string );
-          $r_translation = replace_unnecessary_chars( $translation );
+     $translation = trim(get_request_arg("transl" . $row['Original_ID']));
+     $same = ( @$_POST["same" . $row['Original_ID']] === 'Y' );
+     $unchanged = ( @$_POST["unch" . $row['Original_ID']] === 'Y' );
 
-          $lang_php_code .= "'$r_string' =>\n'$r_translation',\n\n";
-        }
+     if( $unchanged && $untranslated && $row['Text'] !== '' )
+     {
 
-      $lang_php_code = substr( $lang_php_code, 0, -3 );
-      $lang_php_code .= $translation_template_bottom;
-    }
+        if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
+           $done_set .= ',' . $row['Original_ID'];
 
-  $filename = "translations/" . $translate_lang . ".php";
+     }
+     else if( (  $same && $row['Text'] !== '' )
+           or ( !empty($translation) && $row['Text'] !== $translation ) )
+     {
+//        echo '<p>' . $row['Original_ID'] . ': ' . @$_POST["transl" . $row['Original_ID']];
 
-  if( !copy( $filename, $filename . ".bak" ) )
-    error( "couldnt_make_backup" );
+        if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
+           $done_set .= ',' . $row['Original_ID'];
 
-  chmod( $filename . ".bak", 0666 );
+        if( $same ) $translation = '';
+        else $translation = addslashes($translation);
 
-  if( !($fp = fopen( $filename, 'w' )) )
-    error( "couldnt_open_transl_file" );
+        $replace_set .= ',(' . $row['Original_ID'] . ',' .
+           $row['Language_ID'] . ',"' . $translation . '")';
 
-  fwrite( $fp, $lang_php_code );
-  fclose( $fp );
+        $log_set .= ',(' . $player_row['ID'] . ',' .
+           $row['Language_ID'] . ',' . $row['Original_ID'] . ',"' . $translation . '")';
 
-  jump_to("translate.php?translate_lang=$translate_lang&group=$group");
+     }
+  }
+
+  if( $replace_set )
+     mysql_query( "REPLACE INTO Translations (Original_ID,Language_ID,Text) VALUES " .
+                  substr($replace_set,1) ) or die(mysql_error());
+
+  if( $log_set )
+     mysql_query( "INSERT INTO Translationlog " .
+                  "(Player_ID,Language_ID,Original_ID,Translation) VALUES " .
+                  substr($log_set,1) ) or die(mysql_error());
+
+  if( $done_set )
+     mysql_query( "UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN (" .
+                  substr($done_set,1) . ')' ) or die(mysql_error());
+
+  make_include_files($translate_lang); //must be called from main dir
+
+  jump_to("translate.php?translate_lang=$translate_lang" .
+              URI_AMP."profil_charset=$profil_charset".URI_AMP."group=" . urlencode($group));
+
 }
+?>

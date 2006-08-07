@@ -1,5 +1,5 @@
 <?php
-require("form_functions.php");
+require_once("form_functions.php");
 $the_form = new Form( "myname", "myactionpage.php", FORM_POST );
 $the_form->add_row( array( 'DESCRIPTION', 'Description',
                            'TEXTINPUT', 'descr', 40, 80, "default description" ) );

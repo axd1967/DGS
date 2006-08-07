@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,85 +18,156 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-include_once( "translations/known_languages.php" );
+/*
+    translation_functions.php is only included from std_functions.php
+>>Info:
+    If known_languages.php is missing, it will be automatically
+    built in make_known_languages() ...
+    called by include_all_translate_groups() ...
+    only called by is_logged_in() ...
+    so very soon.
+*/
+if( file_exists( "translations/known_languages.php") )
+   include_once( "translations/known_languages.php" );
+
+
+/* examples:
+* $known_languages = array(
+*    "en" => array( "iso-8859-1" => "English" ),
+*    "jp" => array( "utf-8" => "Japanese" ) );
+* $row['Translator'] = 'en.iso-8859-1,jp.utf-8';
+* get_language_descriptions_translated() : array(
+*    "en.iso-8859-1" => "English",
+*    "jp.utf-8" => "Japanese" );
+*/
+define('LANG_TRANSL_CHAR', ',');
+define('LANG_CHARSET_CHAR', '.');
+define('LANG_DEF_CHARSET', 'iso-8859-1');
+define('LANG_ENGLISH', 'en'.LANG_CHARSET_CHAR.LANG_DEF_CHARSET); //lowercase
+
 
 function T_($string)
 {
    global $Tr;
 
-   $s = $Tr[$string];
+   $s = @$Tr[$string];
    if( empty($s) )
       return $string;
    else
       return $s;
 }
 
-function include_all_translate_groups($player_row)
+function include_all_translate_groups($player_row=null) //must be called from main dir
 {
-   global $TranslateGroups;
+   global $TranslateGroups, $known_languages;
+
+   if( !file_exists( "translations/known_languages.php") )
+   {
+      require_once( "include/make_translationfiles.php" );
+      make_known_languages(); //must be called from main dir
+      make_include_files(); //must be called from main dir
+   }
+   include_once( "translations/known_languages.php" );
 
    $TranslateGroups = array_unique($TranslateGroups);
 
    foreach( $TranslateGroups as $i => $group )
-      include_translate_group($group, $player_row);
+      include_translate_group($group, $player_row); //must be called from main dir
 }
 
-function include_translate_group($group, $player_row)
+function include_translate_group($group, $player_row) //must be called from main dir
 {
-   global $HTTP_ACCEPT_LANGUAGE, $HTTP_ACCEPT_CHARSET,
-      $language_used, $encoding_used, $base_path, $Tr;
+   global $language_used, $encoding_used, $Tr;
 
-   if( !isset( $language_used ) )
-   {
-      if( isset($player_row['Lang']) and $player_row['Lang'] !== 'C' )
-         $language = $player_row['Lang'];
-      else
-         $language = get_preferred_browser_language();
-   }
-   else
+   if( !empty( $language_used ) ) //from a previous call
       $language = $language_used;
-
-   if( !empty($language) )
+   else
    {
-      $filename = $base_path . "include/translatefiles/$language" .
-         "_" . $group . '.php';
+      if( !empty($_GET['language']) )
+         $language = (string)$_GET['language'];
+      else if( !empty($player_row['Lang']) )
+         $language = (string)$player_row['Lang'];
+      else
+         $language = 'C';
+
+      if( $language == 'C' )
+         $language = get_preferred_browser_language();
+
+      if( empty($language) or $language == 'en' )
+         $language = LANG_ENGLISH;
+      //else call to get_preferred_browser_language() for each $group
+
+      $language_used = $language;
+      @list(,$encoding_used) = explode( LANG_CHARSET_CHAR, $language, 2);
+   }
+
+   //preload 'To#2' and 'From#2' if missing in the language
+   if( strtolower($language) != LANG_ENGLISH )
+   {
+      $filename = "translations/".LANG_ENGLISH."_${group}.php";
 
       if( file_exists( $filename ) )
       {
-         include ( $filename );
+         include_once( $filename );
       }
-      $language_used = $language;
-      list(,$encoding_used) = explode('.', $language);
    }
+
+   if( !empty($language) )
+   {
+      $filename = "translations/${language}_${group}.php";
+
+      if( file_exists( $filename ) )
+      {
+         include_once( $filename );
+      }
+
+   }
+
 }
 
 
 function get_preferred_browser_language()
 {
-   global $known_languages, $HTTP_ACCEPT_LANGUAGE, $HTTP_ACCEPT_CHARSET;
+   global $known_languages;
 
-   $accept_langcodes = explode( ", ", $HTTP_ACCEPT_LANGUAGE );
+   $accept_langcodes = explode( ',', @$_SERVER['HTTP_ACCEPT_LANGUAGE'] );
+   $accept_charset = strtolower(trim(@$_SERVER['HTTP_ACCEPT_CHARSET']));
+
+   $current_q_val = -1;
+   $return_val = NULL;
 
    foreach( $accept_langcodes as $lang )
       {
-         list($lang) = explode(';', $lang);
+         @list($lang, $q_val) = explode( ';', trim($lang));
+         $lang = substr(trim($lang), 0, 2);
+         $q_val = preg_replace( '/q=/i', '', trim($q_val));
+         if( empty($q_val) or !is_numeric($q_val) )
+            $q_val = 1.0;
 
-         if( !array_key_exists($lang, $known_languages))
+         if( $current_q_val >= $q_val )
             continue;
 
+         if( !$lang or !array_key_exists($lang, $known_languages))
+            continue;
 
-         foreach( $known_languages[$lang] as $enc => $name )
+         $current_q_val = $q_val;
+
+         if( $accept_charset )
+            foreach( $known_languages[$lang] as $charenc => $name )
             {
-               if( strpos(strtolower($HTTP_ACCEPT_CHARSET), $enc) !== false )
-                  return $lang . '.' . $enc;
-
-               // No supporting encoding found. Take the first one anyway.
-               reset($known_languages[$lang]);
-               return $lang . '.' . key($known_languages[$lang]);
+               if( strpos( $accept_charset, strtolower($charenc) ) !== false )
+               {
+                  $return_val = $lang . LANG_CHARSET_CHAR . $charenc;
+                  break;
+               }
             }
+
+         // No supporting encoding found. Take the first one anyway.
+         reset($known_languages[$lang]);
+         $return_val = $lang . LANG_CHARSET_CHAR . key($known_languages[$lang]);
       }
 
-   return NULL;
+   return $return_val;
 }
 
 function get_language_descriptions_translated()
@@ -104,14 +175,32 @@ function get_language_descriptions_translated()
    global $known_languages;
 
    $result = array();
-   foreach( $known_languages as $entry => $array )
+   foreach( $known_languages as $twoletter => $array )
       {
-         foreach( $array as $enc => $lang_name )
+         foreach( $array as $charenc => $lang_name )
             {
-               $result[ $entry . "." . $enc ] = T_($lang_name);
+               $result[ $twoletter . LANG_CHARSET_CHAR . $charenc ] = T_($lang_name);
             }
       }
    return $result;
+}
+
+
+function language_exists( $twoletter, $charenc='', $langname='' )
+{
+   global $known_languages;
+
+   if( empty($twoletter) )
+      return false;
+   if( empty($charenc) )
+      @list($twoletter,$charenc) = explode( LANG_CHARSET_CHAR, $twoletter, 2);
+
+   return array_key_exists( $twoletter , $known_languages ) &&
+       ( array_key_exists( $charenc, $known_languages[$twoletter] )
+      or ( !empty($langname)
+        && array_key_exists( $langname, array_flip($known_languages[$twoletter]) )
+         )
+       );
 }
 
 ?>

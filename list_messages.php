@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,196 +18,179 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-require( "include/table_columns.php" );
-require( "include/timezones.php" );
+$TranslateGroups[] = "Messages";
+
+require_once( "include/std_functions.php" );
+require_once( "include/table_columns.php" );
+require_once( "include/form_functions.php" );
+require_once( "include/message_functions.php" );
+require_once( "include/timezones.php" );
 
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
+   init_standard_folders();
 
    $my_id = $player_row["ID"];
 
-   if( $del )
+   if(!@$_GET['sort1'])
    {
-      // delete messages
-
-      if( $del == 'all' )
-      {
-         $result = mysql_query("UPDATE Messages " .
-                               "SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
-                               "WHERE To_ID=$my_id AND " .
-                               "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )");
-      }
-      else
-      {
-         $query = "UPDATE Messages " .
-             "SET Flags=" .
-             ( $del > 0 ? "CONCAT_WS(',',Flags,'DELETED')" : "REPLACE(Flags,'DELETED','')" ) .
-             " WHERE To_ID=$my_id AND ID=" . abs($del) . " AND " .
-             "NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' ) LIMIT 1";
-
-         mysql_query($query);
-
-      }
+      $_GET['sort1'] = 'date';
+      $_GET['desc1'] = 1;
    }
 
+   $find_answers = @$_GET['find_answers'] ;
 
-   $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-       "Messages.ID AS mid, Messages.Subject, Messages.Flags, " .
-       "Players.Name AS sender " .
-       "FROM Messages, Players ";
+   $my_folders = get_folders($my_id);
 
-   if( $sent==1 )
-      $query .= "WHERE From_ID=$my_id AND To_ID=Players.ID ";
+/* 
+   *folder* args rules:
+   - no &folder= neither &current_folder= set:
+       assume enter FOLDER_ALL_RECEIVED without move
+   - &folder= set but not &current_folder=:
+       assume enter &folder= without move
+   - no &folder= but &current_folder= set (may be 0=FOLDER_ALL_RECEIVED):
+       reenter &current_folder= without move
+   - both &folder= and &current_folder= set:
+       reenter &current_folder=
+       &folder= is the move query field, effective on a *move_marked* click
+
+   *folder* vars meaning:
+   - $current_folder: folder shown
+   - $folder: destination folder for move queries,
+       effective on a *move_marked* click
+       kept if != $current_folder
+*/
+   $folder = @$_GET['folder'];
+   if( !isset($folder) or $folder < FOLDER_ALL_RECEIVED )
+      $folder = FOLDER_ALL_RECEIVED; //ineffective for move
+   $current_folder = @$_GET['current_folder'];
+   if( !isset($current_folder) )
+   {
+      $current_folder = $folder;
+      $folder = FOLDER_ALL_RECEIVED; //ineffective for move
+   }
+   if( !isset($my_folders[$current_folder]) )
+      $current_folder = FOLDER_ALL_RECEIVED;
+
+   if( isset($_GET['toggle_marks']) )
+      $toggle_marks= true;
    else
    {
-      $query .= "WHERE To_ID=$my_id AND From_ID=Players.ID ";
-
-      if( !($all==1) )
-         $query .= "AND NOT (Messages.Flags LIKE '%DELETED%') ";
-      else
-         $all_str = "&all=1 ";
+      $toggle_marks= false;
+      if( change_folders_for_marked_messages($my_id, $my_folders) > 0 )
+         if( isset($my_folders[$folder]) && $current_folder != FOLDER_DELETED )
+            $current_folder= $folder; //follow the move if one
    }
 
-
-   if(!($limit > 0 ))
-      $limit = 0;
-
-   if(!$sort1)
+   $page = '';
+   if( $find_answers > 0 )
    {
-      $sort1 = 'date';
-      $desc1 = 1;
-   }
-
-   $order = $sort1 . ( $desc1 ? ' DESC' : '' );
-   if( $sort2 )
-      $order .= ",$sort2" . ( $desc2 ? ' DESC' : '' );
-
-   if( !is_numeric($from_row) or $from_row < 0 )
-      $from_row = 0;
-
-   $query .= "ORDER BY $order LIMIT $from_row,$MaxRowsPerPage";
-
-   $result = mysql_query( $query )
-       or die ( error("mysql_query_failed") );
-
-
-   start_page("Message list", true, $logged_in, $player_row );
-
-   $column_set=255;
-   $page = make_url('list_messages.php', true, 'all', $all, 'sent', $sent);
-   $show_rows = $nr_rows = mysql_num_rows($result);
-   if( $nr_rows == $MaxRowsPerPage )
-      $show_rows = $RowsPerPage;
-
-   echo start_end_column_table(true);
-   if( $sent == 1 )
-   {
-      echo tablehead(1, 'From', 'sender', false, true);
+      $title = T_('Answers list');
+      $page.= URI_AMP.'find_answers=' . $find_answers ;
+      $where = "AND Messages.ReplyTo=$find_answers";
+      $current_folder = FOLDER_NONE;
+      $folderstring = 'all';
    }
    else
    {
-      echo tablehead(1, 'Flags', '', true, true);
-      echo tablehead(1, 'To', 'sender', false, true);
-   }
+      $title = T_('Message list');
+      $where = "";
 
-   echo tablehead(1, 'Subject', 'Subject', false, true) .
-      tablehead(1, 'Date', 'date', true, true);
-
-
-   if( !($sent==1) )
-      echo tablehead(1, 'Del', NULL, true, true);
-
-   echo "</tr>\n";
-
-
-   $i=0;
-   $row_color=2;
-   while( $row = mysql_fetch_array( $result ) )
-   {
-      $row_color=3-$row_color;
-      $bgcolor = ${"table_row_color$row_color"};
-
-      $mid = $row["mid"];
-      if( !($sent==1) and !(strpos($row["Flags"],'DELETED') === false) )
+      if( $current_folder == FOLDER_ALL_RECEIVED )
       {
-         $mid = -$row["mid"];
-         $bgcolor=${"table_row_color_del$row_color"};
+         $fldrs = $my_folders;
+         unset($fldrs[FOLDER_SENT]);
+         unset($fldrs[FOLDER_DELETED]);
+         $folderstring =implode(',', array_keys($fldrs));
+         unset($fldrs);
       }
-      echo "<tr bgcolor=$bgcolor>\n";
-
-      if( !($sent==1) )
-      {
-         if( !(strpos($row["Flags"],'NEW') === false) )
-         {
-            echo "<td bgcolor=\"00F464\">New</td>\n";
-         }
-         else if( !(strpos($row["Flags"],'REPLIED') === false) )
-         {
-            echo "<td bgcolor=\"FFEE00\">Replied</td>\n";
-         }
-         else if( !(strpos($row["Flags"],'REPLY REQUIRED') === false) )
-         {
-            echo "<td bgcolor=\"FFA27A\">Reply!</td>\n";
-         }
-         else
-         {
-            echo "<td>&nbsp;</td>\n";
-         }
-      }
-
-      echo "<td><A href=\"message.php?mode=ShowMessage&mid=" . $row["mid"] . "\">" .
-         $row["sender"] . "</A></td>\n" .
-         "<td>" . make_html_safe($row["Subject"]) . "&nbsp;</td>\n" .
-         "<td>" . date($date_fmt, $row["date"]) . "</td>\n";
-
-      if( !($sent==1) and strpos($row["Flags"],'NEW') === false and
-          ( strpos($row["Flags"],'REPLY REQUIRED') === false or
-            !(strpos($row["Flags"],'REPLIED') === false) ) )
-      {
-         echo '<td align=center><a href="' .
-            make_url('list_messages.php',false,'del',$mid,'all',$all,
-                     'sort1',$sort1,'desc1',$desc1,'sort2',$sort2,'desc2',$desc2 ) .
-            "\"> <img width=15 height=16 border=0 alt='X' src=\"images/trashcan.gif\"></A></td>\n";
-      }
-      else if( !($sent==1) )
-         echo "<td>&nbsp;</td>\n";
-      echo "</tr>\n";
-
-      if(++$i >= $show_rows)
-         break;
-   }
-
-   echo start_end_column_table(false);
-
-   echo "
-    <p>
-    <table width=\"100%\" border=0 cellspacing=0 cellpadding=4>
-      <tr align=\"center\">
-        <td><B><A href=\"message.php?mode=NewMessage\">" . _("Send a message") . "</A></B></td>\n";
-
-   if( $sent==1 )
-      echo "<td><B><A href=\"list_messages.php\">" . _("Show recieved messages") . "</A></B></td>\n";
-   else
-   {
-      if( $all==1 )
-         echo "<td><B><A href=\"list_messages.php\">" . _("Hide deleted") . "</A></B></td>\n";
       else
-         echo "<td><B><A href=\"list_messages.php?all=1\">" . _("Show all") . "</A></B></td>\n";
-
-      echo "        <td><B><A href=\"list_messages.php?sent=1\">" . _("Show sent messages") . "</A></B></td>\n";
-      echo "        <td><B><A href=\"list_messages.php?del=all$all_str\">" . _("Delete all") . "</A></B></td>\n";
+      {
+         $folderstring = (string)$current_folder;
+      }
    }
 
-   echo "      </tr>
-    </table>
-";
+   $page.= URI_AMP.'current_folder=' . $current_folder ;
+   if( $folder!=$current_folder )
+      $page.= URI_AMP.'folder=' . $folder ;
 
-   end_page(false);
+   start_page($title, true, $logged_in, $player_row );
+
+
+   if( $page )
+      $page= '?'.substr( $page, strlen(URI_AMP));
+   $mtable = new Table( 'list_messages.php' . $page );
+
+   $order = $mtable->current_order_string();
+   $limit = $mtable->current_limit_string();
+
+   $result = message_list_query($my_id, $folderstring, $order, $limit, $where);
+
+   $show_rows = $mtable->compute_show_rows(mysql_num_rows($result));
+
+   $marked_form = new Form('','', FORM_GET);
+   echo "<form name=\"marked\" action=\"list_messages.php\" method=\"GET\">\n";
+
+   echo echo_folders($my_folders, $current_folder);
+
+   echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
+
+   $can_move_messages =
+     message_list_table( $mtable, $result, $show_rows
+             , $current_folder, $my_folders
+             , false, $current_folder == FOLDER_NEW, $toggle_marks) ;
+
+   $mtable->echo_table();
+   //echo "<br>\n";
+
+   if( $can_move_messages && $current_folder != FOLDER_NEW )
+   {
+/* Actually, toggle marks does not destroy sort
+        but sort destroy marks
+   (unless a double *toggle marks* that transfert marks in URL)
+   (<$>but then, the URL limited length may not be enought)
+*/
+      echo '<center>';
+      echo $mtable->echo_hiddens();
+
+      if( $find_answers > 0 )
+        echo '<input type="hidden" name="find_answers" value="' . $find_answers . "\">\n";
+      else if( $current_folder >= FOLDER_ALL_RECEIVED )
+        echo '<input type="hidden" name="current_folder" value="' . $current_folder . "\">\n";
+
+      echo '<input type="submit" name="toggle_marks" value="' . T_('Marks toggle') . "\">\n";
+
+      if( $current_folder == FOLDER_DELETED )
+      {
+         echo '<input type="submit" name="destroy_marked" value="' .
+            T_('Destroy marked messages') . "\">\n";
+      }
+      else
+      {
+         $fld = array('' => '');
+         foreach( $my_folders as $key => $val )
+            if( $key != $current_folder and $key != FOLDER_NEW and
+                !($current_folder == FOLDER_SENT and $key == FOLDER_REPLY ) )
+               $fld[$key] = $val[0];
+
+         echo '<input type="submit" name="move_marked" value="' .
+            T_('Move marked messages to folder') . "\">\n" .
+            $marked_form->print_insert_select_box( 'folder', '1', $fld, $folder, '') ;
+      }
+      echo "</center>\n";
+   }
+   echo "</form>\n";
+
+   if( $find_answers > 0 )
+      $menu_array = array( T_('Back to message') => "message.php?mode=ShowMessage".URI_AMP."mid=$find_answers" );
+   else
+      $menu_array = array( T_('Edit folders') => "edit_folders.php" );
+
+   end_page(@$menu_array);
 }
 ?>

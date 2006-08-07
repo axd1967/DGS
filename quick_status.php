@@ -1,84 +1,122 @@
 <?php
+/*
+Dragon Go Server
+Copyright (C) 2005-2006  Erik Ouchterlony, Rod Ival
 
-require_once( "include/config.php" );
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+$quick_errors = 1;
+require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
 
-
-
+function slashed($string)
 {
+   return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
+}
+
+function quick_warning($string) //Short one line message
+{
+   echo "\nWarning: " . ereg_replace( "[\x01-\x20]+", " ", $string);
+}
+
+if( $is_down )
+{
+   quick_warning($is_down_message);
+}
+else
+{
+   disable_cache();
 
    connect2mysql();
 
-   if( @is_readable("timeadjust.php" ) )
-      include( "timeadjust.php" );
-
-   if( !is_numeric($timeadjust) )
-      $timeadjust = 0;
-
-   $NOW = time() + (int)$timeadjust;
-
    // logged in?
 
+   $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
    $result = @mysql_query( "SELECT ID, Timezone, " .
                            "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
-                           "FROM Players WHERE Handle='{$_COOKIE['handle']}'" );
-
+                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
    if( @mysql_num_rows($result) != 1 )
    {
-      echo "Error: not logged in";
-      exit;
+      error("not_logged_in",'qs1');
    }
 
-   $player_row = mysql_fetch_array($result);
+   $player_row = mysql_fetch_assoc($result);
 
-   if( $player_row['Sessioncode'] !== $_COOKIE['sessioncode']
+   if( $player_row['Sessioncode'] !== @$_COOKIE[COOKIE_PREFIX.'sessioncode']
        or $player_row["Expire"] < $NOW )
    {
-      echo "Error: not logged in";
-      exit;
+      error("not_logged_in",'qs2');
    }
 
-   if( !empty( $player_row["Timezone"] ) )
-      putenv('TZ='.$player_row["Timezone"] );
+   setTZ( $player_row['Timezone']);
 
    $my_id = $player_row['ID'];
 
+   $nothing_found = true;
+
+
    // New messages?
 
-   $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS time, me.mid, " .
+   $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
       "Messages.Subject, Players.Name AS sender " .
-      "FROM MessageCorrespondents AS me " .
-      "LEFT JOIN Messages ON Messages.ID=me.mid " .
+      "FROM Messages, MessageCorrespondents AS me " .
       "LEFT JOIN MessageCorrespondents AS other " .
-      "ON other.mid=me.mid AND other.Sender != me.Sender " .
+        "ON other.mid=me.mid AND other.Sender!=me.Sender " .
       "LEFT JOIN Players ON Players.ID=other.uid " .
-      "WHERE me.uid=$my_id AND me.Folder_nr=2 " .
-      "ORDER BY Time DESC";
+      "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
+              "AND Messages.ID=me.mid " .
+              "AND me.Sender='N' " . //exclude message to myself
+      "ORDER BY date DESC";
 
-   $result = mysql_query( $query ) or die(mysql_error());
+   $result = mysql_query( $query ) or error('mysql_query_failed','qs3');
 
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
-      echo "'M', {$row['mid']}, '{$row['sender']}', '" .
-         str_replace('\'', '\\\'', $row['Subject']) . "', '" .
-         date('Y-m-d H:i', $row['time']) . "'\n";
+      $nothing_found = false;
+      if( !@$row['sender'] ) $row['sender']='[Server message]';
+      echo "'M', {$row['mid']}, '".slashed(@$row['sender'])."', '" .
+         slashed(@$row['Subject']) . "', '" .
+         date('Y-m-d H:i', @$row['date']) . "'\n";
    }
 
 
-   $query = "SELECT Black_ID,White_ID,Games.ID, (White_ID=$my_id)+1 AS Color, " .
+   // Games to play?
+
+   $query = "SELECT Black_ID,White_ID,Games.ID, (White_ID=$my_id)+0 AS Color, " .
+       "UNIX_TIMESTAMP(LastChanged) as date, " .
        "opponent.Name, opponent.Handle, opponent.ID AS pid " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$my_id AND Status!='INVITED' AND Status!='FINISHED' " .
-       "AND (opponent.ID=Black_ID OR opponent.ID=White_ID) AND opponent.ID!=$my_id " .
-       "ORDER BY LastChanged, Games.ID";
+         "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
+       "ORDER BY date DESC, Games.ID";
 
-   $result = mysql_query( $query ) or die(mysql_error());
+   $result = mysql_query( $query ) or error('mysql_query_failed','qs4');
 
-
-   while( $row = mysql_fetch_array($result) )
+   $clrs="BW"; //player's color... so color to play.
+   while( $row = mysql_fetch_assoc($result) )
    {
-      echo "'G', {$row['ID']}, '{$row['Name']}', '{$row['Color']}'\n";
+      $nothing_found = false;
+      echo "'G', {$row['ID']}, '" . slashed(@$row['Name']) .
+         "', '" . $clrs{@$row['Color']} . "', '" .
+         date('Y-m-d H:i', @$row['date']) . "'\n";
    }
+
+    
+   if( $nothing_found )
+      quick_warning('empty lists');
 }
 ?>

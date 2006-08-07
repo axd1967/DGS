@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001 Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,20 +18,24 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
+$TranslateGroups[] = "Docs";
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
 
 connect2mysql();
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
+$logged_in = who_is_logged( $player_row);
 
-start_page("General Public Licence", true, $logged_in, $player_row );
+start_page(T_('General Public Licence'), true, $logged_in, $player_row );
 
 echo "<table align=center><tr><td>\n";
 echo "<pre>\n";
 
-readfile("COPYING");
+   //readfile("COPYING");
+   $file= implode('', file('COPYING'));
+   $file= str_replace("\x0c", "\n\n", $file);
+   $file= @htmlentities($file, ENT_QUOTES);
+   echo $file;
 
 echo "</pre>\n";
 echo "</td></tr></table>\n";

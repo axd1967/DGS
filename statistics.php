@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,12 +18,12 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
 
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -33,7 +33,7 @@ require( "include/std_functions.php" );
 
    $q1 = "SELECT Status,SUM(Moves) as moves, COUNT(*) as count FROM Games GROUP BY Status";
    $q2 = "SELECT SUM(Moves) as moves, COUNT(*) as count FROM Games";
-   $q3 = "SELECT SUM(Hits) as hits, Count(*) as count FROM Players";
+   $q3 = "SELECT SUM(Hits) as hits, Count(*) as count, sum(Activity) as activity FROM Players";
 
    $result = mysql_query( $q1 );
 
@@ -43,14 +43,14 @@ require( "include/std_functions.php" );
 
    while( $row = mysql_fetch_array( $result ) )
    {
-      echo '<tr><td>' . $row["Status"] . '</td><td>' . $row["moves"] . '</td><td>' . $row["count"] . '</td></tr>
+      echo '<tr><td>' . $row["Status"] . '</td><td align="right">' . $row["moves"] . '</td><td align="right">' . $row["count"] . '</td></tr>
 ';
    }
 
    $result = mysql_query( $q2 );
    $row = mysql_fetch_array( $result );
 
-   echo '<tr><td>Total</td><td>' . $row["moves"] . '</td><td>' . $row["count"] . '</td></tr>
+   echo '<tr><td>Total</td><td align="right">' . $row["moves"] . '</td><td align="right">' . $row["count"] . '</td></tr>
 </table>
 ';
 
@@ -59,7 +59,11 @@ require( "include/std_functions.php" );
    $row = mysql_fetch_array( $result );
 
    echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
+   echo '<p>Activity: ' . round($row['activity']);
 
+   $x = floor($NOW/86400);
+   echo "\n<p><img src=\"statisticspng.php?date=$x\"" .
+        " alt=\"" . T_('Statistics graph') . "\">";
 
    end_page();
 }

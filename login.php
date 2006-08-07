@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,58 +18,74 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-
-disable_cache();
+if( @$_REQUEST['quick_mode'] )
+   $quick_errors = 1;
+require_once( "include/std_functions.php" );
 
 {
+   if( @$_REQUEST['logout'] )
+   {
+      set_login_cookie("","", true);
+      if( $quick_errors )
+         exit;
+      jump_to("index.php");
+   }
+
    connect2mysql();
 
-   $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                          "FROM Players WHERE Handle='" . $userid . "'" );
 
-   if( mysql_num_rows($result) != 1 )
+   $uhandle = (string)get_request_arg('userid');
+   $passwd = (string)get_request_arg('passwd');
+   if( !$passwd && is_numeric( $i= strcspn( $uhandle, ':') ) )
+   {
+      $passwd = substr($uhandle,$i+1);
+      $uhandle = substr($uhandle,0,$i);
+   }
+
+   $row = mysql_single_fetch( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+                          "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
+
+   if( !$row )
       error("wrong_userid");
 
 
-   $row = mysql_fetch_array($result);
-   $passwd_encrypt = mysql_fetch_row( mysql_query( "SELECT PASSWORD('$passwd')" ) );
-
-   if( $row["Password"] != $passwd_encrypt[0] )
-   {
-      // Check if there is a new password
-
-      if( empty($row["Newpassword"]) or $row["Newpassword"] != $passwd_encrypt[0] )
-         error("wrong_password");
-
-
-   }
-
-// Remove the new password.
-   if( !empty($row["Newpassword"]) )
-   {
-      mysql_query( 'UPDATE Players ' .
-                   "SET Password='$passwd_encrypt[0]', " .
-                   'Newpassword=NULL ' .
-                   "Where Handle='$handle'" );
-   }
-
    $code = $row["Sessioncode"];
 
-   if( !$code or $row["Expire"] < time() )
+   if( !@$_REQUEST['cookie_check'] )
    {
-      $code = make_session_code();
-      $result = mysql_query( "UPDATE Players SET " . 
-                             "Sessioncode='$code', " .
-                             "Sessionexpire=DATE_ADD(NOW(),INTERVAL $session_duration second) " .
-                             "WHERE Handle='$userid'" );
+      if( !check_password( $uhandle, $row["Password"],
+                           $row["Newpassword"], $passwd ) )
+         error("wrong_password");
 
+      if( !$code or $row["Expire"] < $NOW )
+      {
+         $code = make_session_code();
+         mysql_query( "UPDATE Players SET " .
+                      "Sessioncode='$code', " .
+                      "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
+                      "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" )
+                   or error("mysql_query_failed");
+      }
+
+      set_login_cookie( $uhandle, $code );
+      jump_to("login.php?cookie_check=1"
+             . URI_AMP."userid=".urlencode($uhandle)
+             . ( $quick_errors ? URI_AMP."quick_mode=1" : '' )
+             );
+   }
+   //else cookie_check
+
+   if( @$_COOKIE[COOKIE_PREFIX.'handle'] != $uhandle
+      or @$_COOKIE[COOKIE_PREFIX.'sessioncode'] != $code )
+   {
+      error('cookies_disabled');
    }
 
-   if( $handle != $userid or $sessioncode != $code )
+   if( $quick_errors )
    {
-      set_cookies( $userid, $code );
+      echo "\nOk";
+      exit;
    }
-   header("Location: status.php");
+   jump_to("status.php");
 }
 ?>

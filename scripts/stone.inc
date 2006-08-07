@@ -1,5 +1,5 @@
 // Dragon Go Server
-// Copyright (C) 2002  Erik Ouchterlony
+// Copyright (C) 2002-2003  Erik Ouchterlony
 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -72,14 +72,11 @@
       pigment { colour 0.14*<1,1,1> }
       finish
       {
-        ambient 1.4
-//         diffuse 0.1
-//         brilliance 0.2
-//         reflection 0.2
-//         specular 0.15
-//         roughness 0.3
+        ambient 1
+//        ambient 1.3
         phong 0.25
-        phong_size 6
+        phong_size 5
+//        phong_size 6
       }
     }
   }
@@ -95,15 +92,23 @@
     texture
     {
       pigment { colour rgb 1 }
-      finish  {
-        ambient 0.26
+
+      finish
+      {
+        ambient 0.25
         diffuse 0.55
         //     reflection 0.1
         specular 0.8
         roughness 0.003
-//        phong 1
-//        phong_size 40
+
+//         ambient 0.42
+//         diffuse 0.45
+//         reflection { 0.1, 1.0 fresnel on }
+//         specular 0.2
+//         roughness 0.0015
+//         brilliance 1.2
       }
+//     interior { ior 1.5 }
     }
   }
 

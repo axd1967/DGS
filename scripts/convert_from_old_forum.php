@@ -15,7 +15,7 @@ require_once("../forum/forum_functions.php");
                   "Name=\"" . $row0["name"] . "\", " .
                   "Description=\"" . $row0['description'] . "\", " .
                   "Moderated=" . ($row0["moderation"] == 'y' ? '"Y"' : '"N"') . ", " .
-                  "SortOrder=" . ($SortOrder+1)) or die(mysql_error());
+                  "SortOrder=" . $SortOrder) or die(mysql_error());
 
       if( mysql_affected_rows() != 1)
          die(mysql_error());
@@ -24,7 +24,7 @@ require_once("../forum/forum_functions.php");
 
 
       $query = "SELECT $fname.*," . $fname . "_bodies.body FROM $fname, " . $fname . "_bodies " .
-         "WHERE $fname.id=" . $fname . "_bodies.id ORDER by $fname.id";
+         "WHERE $fname.id=" . $fname . "_bodies.id AND approved='Y' ORDER by $fname.id";
 
       $result_1 = mysql_query( $query ) or die(mysql_error());
 
@@ -50,8 +50,10 @@ require_once("../forum/forum_functions.php");
                or die(mysql_error());
 
             if( mysql_num_rows($result) != 1 )
-               die( "Unknown parent post" );
-
+            {
+               echo "Unknown parent post\n";   //die( "Unknown parent post" );
+               continue;
+            }
             extract(mysql_fetch_array($result));
 
             $result = mysql_query("SELECT MAX(AnswerNr) AS answer_nr " .

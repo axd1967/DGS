@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2003  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,7 +45,8 @@ require_once( "forum_functions.php" );
    }
 
    $offset = max(0,(int)@$_REQUEST['offset']);
-   $search_terms = mysql_escape_string(@$_REQUEST['search_terms']);
+   $search_terms = get_request_arg('search_terms');
+   $bool = (int)(@$_REQUEST['bool']) > 0;
 
    echo "<center><h4><font color=$h3_color>Forum search</font></H4></center>\n";
 
@@ -54,33 +55,62 @@ require_once( "forum_functions.php" );
    echo '
 <CENTER>
 <FORM name="search" action="search.php" method="GET">
-        Search terms:
-        <INPUT type="text" name="search_terms" value="" tabindex="1" size="40" maxlength="80">
+        Search terms:';
+
+   echo '<INPUT type="text" name="search_terms" value="' 
+         . textarea_safe($search_terms) . '" tabindex="1" size="40" maxlength="80">';
+
+   echo '
         <INPUT type="submit" name="action" value="Do search" tabindex="2">
+<p>
+        <INPUT type="checkbox" name="bool" value="1" ' . ($bool ? 'checked ' : '' ) . 'tabindex="3"> Boolean mode
 </FORM>
 </CENTER>
 ';
 
    if( $search_terms )  // Display results
    {
-      $query = "SELECT Posts.*, MATCH (Subject,Text) AGAINST ('$search_terms') as Score, " .
-         "Players.ID AS uid, Players.Name, Players.Handle " .
-         "FROM Posts  LEFT JOIN Players ON Posts.User_ID=Players.ID " .
-         "WHERE MATCH (Subject,Text) AGAINST ('$search_terms') " .
+      $query = "SELECT Posts.*, " .
+         "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
+         "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
+         "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
+         "MATCH (Subject,Text) AGAINST ('".mysql_escape_string($search_terms)."'" .
+         ($bool ? ' IN BOOLEAN MODE' : '') . ") as Score, " .
+         "Players.ID AS uid, Players.Name, Players.Handle, " .
+         "Forums.Name as ForumName " .
+         "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
+         "LEFT JOIN Forums ON Forums.ID = Posts.Forum_ID " .
+         "WHERE MATCH (Subject,Text) AGAINST ('".mysql_escape_string($search_terms)."'" .
+         ($bool ? ' IN BOOLEAN MODE' : '') . ") AND Approved='Y' " .
+         "AND PosIndex IS NOT NULL " .
+         ($bool ? 'ORDER BY TIME DESC ' : '') .
          "LIMIT $offset,$MaxSearchPostsPerPage";
 
       $result = mysql_query($query) or die(mysql_error());
 
-      $cols=5;
+      $show_rows = $nr_rows = mysql_num_rows($result);
+      if( $show_rows > $SearchPostsPerPage )
+         $show_rows = $SearchPostsPerPage;
+
+      $cols=2;
       $headline = array(T_("Reading thread") => "colspan=$cols");
-      $links = LINK_NEXT_PAGE;
+
+      $links = LINK_FORUMS;
+      if( $offset > 0 ) $links |= LINK_SEARCH_PREV_PAGE;
+      if( $show_rows < $nr_rows ) $links |= LINK_SEARCH_NEXT_PAGE;
+
 
       start_table($headline, $links, 'width="99%"', $cols);
+      echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
       while( $row = mysql_fetch_array( $result ) )
       {
-         draw_post('normal', false, $row['Subject'], $row['Text']);
+         extract($row);
+         draw_post('search_result', false, $row['Subject'], $row['Text']);
+         echo '<tr><td colspan=$cols></td></tr>' . "\n";
       }
+      echo "</table></td></tr>\n";
+      end_table($links, $cols);
    }
 
    end_page();

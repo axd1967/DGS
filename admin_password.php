@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2003  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -43,14 +43,16 @@ require_once( "include/form_functions.php" );
    $passwd_form->add_row( array( 'HEADER', T_('New password') ) );
 
    $passwd_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                                 'TEXTINPUT', 'userid', 16, 16, '',
+                                 'TEXTINPUT', 'pswduser', 16, 16, '',
+                                 'TD',
                                  'SUBMITBUTTON', 'action', T_("Send password"),
                                ) );
    $passwd_form->add_row( array( 'DESCRIPTION', T_('Email'),
-                                 'TEXTINPUT', 'email', 16, 80, '',
-                                 'TEXT', T_("to overwrite user's one"),
+                                 'TEXTINPUT', 'email', 32, 80, '',
+                                 'TD',
+                                 'TEXT', T_("to replace user's one"),
                                ) );
-   $passwd_form->echo_string();
+   $passwd_form->echo_string(1);
 
    echo "</center>\n";
    end_page();

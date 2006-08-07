@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2003  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -229,6 +229,7 @@ function scale($x)
    imagesetdash($im, $black);
 
    $v = ceil($MAX/10)*10;
+   if( abs($v)<1 ) $v=0;
    $a = MARGE_LEFT-4 ;
    $b = $SizeX ;
    $b = $b - ((($b-$a) % DASH_MODULO)+1) ; //so all lines start in the same way

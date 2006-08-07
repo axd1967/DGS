@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,63 +17,75 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
-    
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
-    
-require( "include/std_functions.php" );
 
-{    
-    connect2mysql();
- 
-    if( $logout )
-        {
-            set_cookies("","", true);
-            header("Location: " . $HOSTBASE ."/index.php");
-            exit;
-        }
+$TranslateGroups[] = "Start";
+
+require_once( "include/std_functions.php" );
+require_once( "include/form_functions.php" );
+
+{
+  connect2mysql();
 
 
-    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+  if( @$_GET['logout'] )
+    {
+      set_login_cookie("","", true);
+      jump_to("index.php");
+    }
 
-    start_page("Home", true, $logged_in, $player_row );
+  $logged_in = who_is_logged( $player_row);
+
+  $sysmsg= get_request_arg('sysmsg'); unset($_REQUEST['sysmsg']);
+  start_page(T_("Home"), true, $logged_in, $player_row );
+
+
+  echo "<center>\n";
+  echo '<IMG  width=666 height=172  border=0 alt="'.$FRIENDLY_LONG_NAME.'" SRC="images/dragon_logo.jpg">';
+  echo "\n<BR>&nbsp;";
+
+
+if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
+  echo "<p><font color=green>\n" .
+     T_("Welcome to the development version of the dragon go server!") . 
+     '<br>&nbsp;<br>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") . 
+     '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
+     '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") . 
+     "</font><HR>\n";
+}else{ //for devel server
+  echo "<p><font color=green>\n" .
+     T_("Welcome to the $FRIENDLY_LONG_NAME!") .
+     '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
+     "</font><HR>\n";
+} //for devel server
+
+
+   sysmsg($sysmsg);
+
+
+  echo '<p>' . T_('Please login.') . '<font color="red"> ' .
+    sprintf( T_("To look around, use %s."), "'guest' / 'guest'" ) . " </font>\n";
+
+  $login_form = new Form( 'loginform', 'login.php', FORM_POST );
+
+  $login_form->add_row( array( 'DESCRIPTION', T_('Userid'),
+                               'TEXTINPUT', 'userid',16,16,'',
+                               ) );
+  $login_form->add_row( array( 'DESCRIPTION', T_('Password'),
+                               'PASSWORD', 'passwd',16,16,
+                               //'TD',
+                               'CELL', 99, 'align="left"',
+                               'SUBMITBUTTON', 'login', T_('Log in'),
+                               'TEXT',
+                               '<A href="forgot.php"><font size="-2">' .
+                               T_('Forgot password?') . '</font></A>',
+                               //'HIDDEN', 'url', 'status.php',
+                               ) );
+
+  $login_form->echo_string(1);
+  echo "</center>\n";
+
+  $menu_array = array( T_("Register new account") => 'register.php' );
+
+  end_page(@$menu_array);
 }
-
-?>
-    
-<center>
-<IMG  width=666 height=172  border=0 alt='Dragon Go Server' SRC="images/dragon_logo.jpg">
-<BR>
-<BR>
-    <FORM name="loginform" action="login.php" method="POST">
-
-      <B><font size="+0">Please login.</font></B><font color="red"> To look around, use 'guest' / 'guest'.</font>
-      <TABLE>
-
-          <TR>
-            <TD align=right>Userid:</TD>
-            <TD align=left> <input type="text" name="userid" size="16" maxlength="16"></TD>
-          </TR>
-
-          <TR>
-            <TD align=right>Password:</TD>
-            <TD align=left><input type="password" name="passwd" size="16" maxlength="16"></TD>
-            <TD><input type=submit name="login" value="Log in"></TD>
-            <TD><A href="forgot.php"><font size="-2">Forgot password?</font></A></td>
-</TR>
-
-      </TABLE>
-
-      <INPUT type="hidden" name="url" value="status.php">
-
-
-
-    </FORM>
-
-    <HR>
-    <a href="register.php"><B>Register new account</B></a>
-    <HR>
-</center>
-
-<?php
-end_page();
 ?>

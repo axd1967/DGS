@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,21 +18,23 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
+$TranslateGroups[] = "Docs";
+$TranslateGroups[] = "Users";
 
-function add_contributor( $text, $contributor, $uid = -1 )
+require_once( "include/std_functions.php" );
+
+function add_contributor( $text, $uref='', $name=false, $handle=false )
 {
   echo "<tr><td>$text</td>\n";
-  if( $uid === -1 )
-    echo "<td><b>$contributor</b></td></tr>\n";
-  else
-    echo "<td><a href=\"userinfo.php?uid=$uid\">$contributor</td></tr>\n";
+   echo "<td><b>" .
+      user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, 'black', $uref, $name, $handle) .
+      "</b></td></tr>\n";
 }
 
 {
   connect2mysql();
 
-  $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+  $logged_in = who_is_logged( $player_row);
 
   start_page(T_("People"), true, $logged_in, $player_row );
 
@@ -41,48 +43,98 @@ function add_contributor( $text, $contributor, $uid = -1 )
     T_('Contributors to Dragon') . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
-  add_contributor( T_("Current maintainer and founder of Dragon"), "Erik Ouchterlony" );
-  add_contributor( T_("Developer"), "Ragnar Ouchterlony" );
+  add_contributor( T_("Current maintainer and founder of Dragon"), 2, 'Erik Ouchterlony' );
 
-  echo "<tr><td colspan=2>\n";
+
+  $first = T_("Developer");
+  foreach( array( 'ragou' => 'Ragnar Ouchterlony',
+                  'rodival' => 'Rod Ival',
+                  4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
+                  ) as $uref => $name )
+  {
+      add_contributor( $first, $uref, $name);
+      $first = '';
+  }
+
+
+  echo "<tr><td colspan=2>&nbsp;<p>\n";
   echo "<center><h3><font color=$h3_color>" .
-    T_('Current translators') . "</font></h3></center>\n";
+     T_("FAQ") . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
-  $query_result = mysql_query( "SELECT ID,Handle,Name,Translator FROM Players " .
-                               "WHERE LENGTH(Translator)>0" );
+  $FAQmain = 'Ingmar';
+  $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
+                               " FROM Players" .
+                               " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
+                               " AND Handle='$FAQmain'" .
+                               " ORDER BY ID" );
 
-  $k_langs = get_known_languages_with_full_names();
-  $per_language = array();
+  if( $row = mysql_fetch_array( $query_result ) )
+  {
+         add_contributor( T_("FAQ editor"),
+                          $row['ID'], $row['Name'], $row['Handle'] );
+  } else $FAQmain='';
+
+
+  $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
+                               " FROM Players" .
+                               " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
+                               " ORDER BY ID" );
+
+  $first = T_("FAQ co-editor");
   while( $row = mysql_fetch_array( $query_result ) )
-    {
-      $langs = explode(',', $row['Translator']);
-      foreach( $langs as $lang )
-        {
-          if( array_key_exists( $lang, $per_language ) )
-            array_push( $per_language[$lang], $row );
-          else
-            $per_language[$lang] = array( $row );
-        }
-    }
+  {
+      if( $row['Handle'] != $FAQmain )
+      {
+         add_contributor( $first,
+                          $row['ID'], $row['Name'], $row['Handle'] );
+         $first = '';
+      }
+  }
 
-  foreach( $per_language as $lang => $translators )
-    {
-      $first = true;
-      foreach( $translators as $translator )
+
+  echo "<tr><td colspan=2>&nbsp;<p>\n";
+  echo "<center><h3><font color=$h3_color>" .
+     T_('Current translators') . "</font></h3></center>\n";
+  echo "</td></tr>\n";
+
+  $query_result = mysql_query( "SELECT ID,Handle,Name,Translator," .
+                               "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess ".
+                               "FROM Players " .
+                               "WHERE LENGTH(Translator)>0 ORDER BY ID" );
+
+  $translator_list = array();
+  while( $row = mysql_fetch_array( $query_result ) )
+  {
+     $languages = explode( LANG_TRANSL_CHAR, $row['Translator']);
+     foreach( $languages as $language )
         {
-          $text = '';
-          if( $first )
-            {
-              $text = T_($k_langs[$lang]);
+           @list($lang, $charenc) = explode( LANG_CHARSET_CHAR, $language, 2);
+
+           $lang_name = T_($known_languages[$lang][$charenc]);
+
+           if( !isset($translator_list[$lang_name]) )
+              $translator_list[$lang_name] = array();
+
+           array_push($translator_list[$lang_name], $row);
+        }
+  }
+
+  ksort($translator_list);
+
+  $info = $logged_in && $player_row['admin_level'] & ADMIN_TRANSLATORS ;
+  foreach( $translator_list as $language => $translators )
+     {
+        $first = true;
+        foreach( $translators as $translator )
+           {
+              add_contributor( $first ? $language : '',
+                               $translator['ID'],
+                   ( $info ? '['.date($date_fmt2, $translator['Lastaccess']).'] ' : '') .
+                               $translator['Name'], $translator['Handle'] );
               $first = false;
-            }
-
-          add_contributor( $text,
-                           $translator['Name'],
-                           $translator['ID'] );
-        }
-    }
+           }
+     }
 
   echo "</table>\n";
   echo "<br>&nbsp;\n";

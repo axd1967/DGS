@@ -1,46 +1,73 @@
+#!/usr/bin/make -f
 
 # Use 'make -f images_makefile' to generate the images
 
-SIZES = 13 17 21 25 29 35 42 50
+# Needed software: (later versions might work too)
+# povray 3.5
+# gimp 1.2
+# gimp-perl 1.2
 
-BIGSTONES = BigBlack.png BigBlackMark.png BigWhite.png BigWhiteMark.png YinYang.png BigPlayBlack.png BigPlayWhite.png
+SIZES = 5 7 9 11 13 17 21 25 29 35 42 50
+
+BOARD_SIZES = 5/board 7/board 9/board 11/board 13/board 17/board 21/board 25/board 29/board 35/board 42/board 50/board
+
+STONES_SIZES = 5/stones 7/stones 9/stones 11/stones 13/stones 17/stones 21/stones 25/stones 29/stones 35/stones 42/stones 50/stones
+
+BIGSTONES = BigWhite.png BigBlack.png BigBlackMark.png BigWhiteMark.png YinYang.png BigPlayBlack.png BigPlayWhite.png BigBlackBlack.png BigBlackWhite.png BigWhiteBlack.png BigWhiteWhite.png
+#BIGSTONES_POV = BigBlack_pov.png BigWhite_pov.png YinYang_pov.png BigPlayBlack_pov.png BigPlayWhite_pov.png
 
 POVFILES = stone.inc stone.pov
 
-POVRAY = povray +D +sp16 +ep4 -P +A +J +W1024 +H768 +FN
+POVRAY = povray
+POVRAY_ARGS = +D +sp16 +ep4 -P -V +UA +A +J +W1024 +H768 +FN
+#POVRAY_ARGS = +D +sp16 +ep4 -P -V +UA +J +W512 +H384 +FN
 
-target: board stones
+target: $(BIGSTONES) board stones
 
-.PHONY: bigstones
+BigPlayBlack_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=PLAY_B=1 +O$@ stone.pov
 
-bigstones: $(BIGSTONES) $(POVFILES) generate_big_images.pl
-	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Running povray (v3.5 or higher) to generate some nice stone images.";
-	@echo -e "\n------------------------------------------------------------------------------------\n";
-	$(POVRAY) +FN Declare=PLAY_B=1 +OBigPlayBlack.png stone.pov
-	$(POVRAY) Declare=PLAY_W=1 +OBigPlayWhite.png stone.pov
-	$(POVRAY) Declare=BLACK=1 +OBigBlack.png stone.pov
-	$(POVRAY) Declare=WHITE=1 +OBigWhite.png stone.pov
-	$(POVRAY) Declare=YINYANG=1 +OYinYang.png stone.pov
-	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Now crop the images with gimp (v1.2 other versions might work too).";
-	@echo -e "\n------------------------------------------------------------------------------------\n";
-	generate_big_stones.pl
+BigPlayWhite_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=PLAY_W=1 +O$@ stone.pov
 
-board: generate_board_images.pl
-	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Draw some board images with gimp (v1.2 other versions might work too).";
-	@echo -e "\n------------------------------------------------------------------------------------\n";
-	generate_board_images.pl board
-	touch board
+BigBlack_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=BLACK=1 +O$@ stone.pov
 
-stones: bigstones generate_board_images.pl
-	@echo -e "\n\n------------------------------------------------------------------------------------\n";
-	@echo -e "   Draw stone images with gimp (v1.2 other versions might work too).";
-	@echo -e "\n------------------------------------------------------------------------------------\n";
-	generate_board_images.pl stones
-	touch stones
+BigWhite_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=WHITE=1 +O$@ stone.pov
 
+BigBlackBlack_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=B_B_PLAY=1 +O$@ stone.pov
+
+BigBlackWhite_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=B_W_PLAY=1 +O$@ stone.pov
+
+BigWhiteBlack_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=W_B_PLAY=1 +O$@ stone.pov
+
+BigWhiteWhite_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=W_W_PLAY=1 +O$@ stone.pov
+
+YinYang_pov.png: $(POVFILES)
+	$(POVRAY) $(POVRAY_ARGS) Declare=YINYANG=1 +O$@ stone.pov
+
+%.png: %_pov.png generate_big_images.pl
+	./generate_big_images.pl $@ $<
+
+%Mark.png: %_pov.png %.png generate_big_images.pl
+	./generate_big_images.pl $@ $<
+
+%/board: generate_board_images.pl
+	./generate_board_images.pl board $*
+	touch $@
+
+%/stones: $(BIGSTONES) generate_board_images.pl
+	./generate_board_images.pl stones $*
+	touch $@
+
+board: $(BOARD_SIZES)
+
+stones: $(STONES_SIZES)
 
 clean:
 	 rm -rf $(SIZES)

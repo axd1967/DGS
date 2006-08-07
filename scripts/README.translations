@@ -1,7 +1,13 @@
-To use the translation scripts her just cd to the base directory of
-DragonGoServer and do
+To update the database with new english texts, run
 
-$ scripts/get_update.sh
+generate_translation_texts.php
 
-The result should be place in include/translation_info.php instead of
-the contents of the old $translation_info array.
+
+
+
+To create all translation files used by the server, run
+
+make_all_translationfiles.php
+
+
+

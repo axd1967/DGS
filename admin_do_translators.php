@@ -1,8 +1,7 @@
 <?php
-
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival, Ragnar Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,116 +18,209 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-/* The code in this file is written by Ragnar Ouchterlony */
+$TranslateGroups[] = "Admin";
 
-require( "include/std_functions.php" );
-require( "include/form_functions.php" );
-require( "include/translation_info.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/form_functions.php" );
+require_once( "include/make_translationfiles.php" );
+
+
+function lang_illegal( $str)
+{
+   return substr( $str, strcspn( $str, LANG_TRANSL_CHAR.LANG_CHARSET_CHAR), 1);
+}
+
+function retry_admin( $msg)
+{
+   if( $tmp = trim( $msg) )
+   {
+      $tmp = '?sysmsg='.urlencode($tmp);
+      $sep = URI_AMP;
+   }
+   else
+   {
+      $tmp = '';
+      $sep = '?';
+   }
+
+   foreach( array(
+         'langname',
+         'charenc',
+         'twoletter',
+         'transluser',
+         'transladdlang',
+         ) as $arg )
+   {
+      global $$arg;
+      if( isset($$arg) && (!is_string($$arg) or $$arg>'') )
+      {
+         $tmp.= $sep.$arg."=".urlencode($$arg);
+         $sep = URI_AMP;
+      }
+   }
+
+   jump_to("admin_translators.php" . $tmp);
+}
+
 
 {
+   connect2mysql();
 
-  connect2mysql();
+   $logged_in = who_is_logged( $player_row);
 
-  $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   if( !$logged_in )
+      error("not_logged_in");
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
+      error("adminlevel_too_low");
 
-  if( $player_row['Adminlevel'] < 2 )
-    error("adminlevel_too_low");
+   $addlanguage = @$_REQUEST['addlanguage'];
+   $twoletter = trim(get_request_arg('twoletter'));
+   $charenc = trim(get_request_arg('charenc'));
+   $langname = trim(get_request_arg('langname'));
 
-  $extra_url_parts = '';
-  if( $addlanguage )
-    {
+   $showpriv = @$_REQUEST['showpriv'];
+
+   $transladd = @$_REQUEST['transladd'];
+   $transladdlang = trim(get_request_arg('transladdlang'));
+
+   $translpriv = @$_REQUEST['translpriv'];
+   //transllang[] is a MULTIPLE select box => no get_request_arg()
+
+   $transllang = get_request_arg('transllang');
+
+   $twoletter = strtolower($twoletter);
+   $charenc = strtolower($charenc);
+   $langname = ucfirst($langname); //ucword()
+
+
+   $msg = '';
+
+   if( $addlanguage )
+   {
+      $tmp = lang_illegal($twoletter.$langname.$charenc);
+      if( $tmp )
+         retry_admin( T_("Sorry, there was an illegal character in a language field.") . " ($tmp)");
+
       if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
-        error("translator_admin_add_lang_missing_field");
+        retry_admin( T_("Sorry, there was a missing or incorrect field when adding a language."));
 
-      $k_langs = $known_languages->get_descriptions();
-      if( array_key_exists( $twoletter . "." .$charenc, $k_langs ) ||
-          in_array( $langname, $k_langs ) )
-        error("translator_admin_add_lang_exists");
+      if( language_exists( $twoletter, $charenc, $langname ) )
+        retry_admin( T_("Sorry, the language you tried to add already exists."));
 
-      $entry = new LangEntry( $twoletter, $langname, $charenc );
-      $new_lang_php_code = sprintf( $translation_template_top,
-                                    Translator::create_class_name( $entry ),
-                                    $langname,
-                                    $NOW, gmdate( 'Y-m-d H:i:s T', $NOW ) );
-      $new_lang_php_code =
-        substr( $new_lang_php_code, 0, -1 ) .
-        $translation_template_bottom;
 
-      $lang_code_name = Translator::create_lang_name( $entry );
-      write_to_file( "translations/$lang_code_name.php", $new_lang_php_code );
+      mysql_query("INSERT INTO TranslationLanguages SET " .
+                  "Language='" . $twoletter . LANG_CHARSET_CHAR . $charenc . "', " .
+                  "Name='$langname'");
 
-      $new_all_languages_php_code = $translation_template_copyright . "\n";
-      foreach( $known_languages->languages as $lang )
-        {
-          $new_all_languages_php_code .=
-            "\$known_languages->add( \"".$lang->lang_code."\", " .
-            "\"".$lang->description."\", \"".$lang->charset."\" );\n";
-        }
+      make_known_languages(); //must be called from main dir
 
-      $new_all_languages_php_code .=
-        "\$known_languages->add( \"$twoletter\", \"$langname\", \"$charenc\" );\n";
-      $new_all_languages_php_code .= "\n?>\n";
+      $row = mysql_single_fetch(
+               "SELECT ID FROM TranslationGroups WHERE Groupname='Users'");
+      if( !$row )
+         error('internal_error','admin_t1');
 
-      write_to_file( "translations/all_languages.php", $new_all_languages_php_code );
+      $Group_ID = $row['ID'];
 
-      $extra_url_parts = "?what=addlanguage&twoletter=$twoletter&langname=$langname&charenc=$charenc";
-    }
+      $tmp = mysql_query(
+               "SELECT ID FROM TranslationTexts WHERE Text=\"$langname\"");
+      if( @mysql_num_rows( $tmp ) === 0 )
+      {
+         mysql_query("INSERT INTO TranslationTexts SET Text=\"$langname\"")
+            or error('internal_error','admin_t2');
 
-  if( $transladd )
-    {
+         mysql_query("REPLACE INTO TranslationFoundInGroup " .
+                     "SET Text_ID=" . mysql_insert_id() . ", " .
+                     "Group_ID=" . $Group_ID );
+      }
+
+      retry_admin( sprintf( T_("Added language %s with code %s and characterencoding %s.")
+                                 , $langname, $twoletter, $charenc ));
+   }
+
+//-------------------
+// Queries with a user:
+
+   $old_langs = '';
+   if( $showpriv or $transladd or $translpriv )
+   {
+      $transluser = get_request_arg('transluser');
       if( empty($transluser) )
-        error("no_specified_user");
+         retry_admin( T_("Sorry, you must specify a user."));
+      $row = mysql_single_fetch(
+                    "SELECT Translator FROM Players"
+                   ." WHERE Handle='".addslashes($transluser)."'" );
+      if( !$row )
+         retry_admin( T_("Sorry, I couldn't find this user."));
+      if( !empty($row['Translator']) )
+         $old_langs = $row['Translator'];
+   }
 
-      if( !isset($transladdlang) or empty($transladdlang) )
-        error("no_lang_selected");
+   if( $showpriv )
+      retry_admin('');
 
-      $result = mysql_query( "SELECT Translator FROM Players WHERE Handle='$transluser'" );
+   $translator_array = array();
+   $update_it = false;
+   if( $transladd )
+   {
+      if( !empty($transladdlang) )
+         if( !language_exists( $transladdlang ) )
+            $transladdlang = '';
+      if( empty($transladdlang) )
+         retry_admin( T_("Sorry, you must specify existing languages."));
 
+      if( $old_langs )
+         $translator_array = explode( LANG_TRANSL_CHAR, $old_langs );
+
+      if( in_array( $transladdlang, $translator_array) )
+         retry_admin( sprintf( T_("User %s is already translator for language %s."),
+                           $transluser, $transladdlang) );
+      array_push( $translator_array, $transladdlang );
+
+      $update_it = 'admin_t4';
+      $msg = sprintf( T_("Added user %s as translator for language %s.")
+                           , $transluser, $transladdlang );
+   }
+   else if( $translpriv )
+   {
+      if( is_array( $transllang ) )
+         $translator_array = $transllang;
+
+      $update_it = 'admin_t5';
+      $msg = sprintf( T_("Changed translator privileges info for user %s.")
+                           , $transluser );
+   }
+
+   if( $update_it )
+   {
+      $new_langs = implode( LANG_TRANSL_CHAR, array_unique($translator_array));
+
+      if( $new_langs == $old_langs )
+         retry_admin( $msg);
+
+      mysql_query( "UPDATE Players SET Translator='$new_langs'"
+                  ." WHERE Handle='".addslashes($transluser)."'" );
       if( mysql_affected_rows() != 1 )
-        error("unknown_user");
+         error('internal_error', $update_it);
 
-      $row = mysql_fetch_array( $result );
-      if( empty($row['Translator']) )
-        $translator = array();
+      // Check result (
+      $tmp = mysql_single_fetch(
+                   "SELECT Translator FROM Players"
+                  ." WHERE Handle='".addslashes($transluser)."'" );
+      if( !$tmp )
+         $update_it.= '.1';
+      else if( !isset($tmp['Translator']) )
+         $update_it.= '.2';
+      else if( $tmp['Translator'] != $new_langs )
+         $update_it.= '.3'; //surely, the field truncats the string
       else
-        $translator = explode( ',', $row['Translator'] );
+         retry_admin( $msg);
 
-      if( !in_array( $transladdlang, $translator ) )
-        {
-          array_push( $translator, $transladdlang );
-          $new_langs = implode(',', $translator);
-          $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
-
-          if( mysql_affected_rows() != 1 )
-            error("unknown_user");
-
-          $extra_url_parts = "?what=transladd&user=$transluser&lang=$transladdlang";
-        }
-      else
-        {
-          $extra_url_parts = "?what=tadd_already&user=$transluser&lang=$transladdlang";
-        }
-    }
-
-  if( $translpriv )
-    {
-      if( empty($transluser) )
-        error("no_specified_user");
-
-      if( !isset( $transllang ) )
-        $transllang = array();
-
-      $new_langs = implode(',', $transllang);
-
-      $result = mysql_query( "UPDATE Players SET Translator='$new_langs' WHERE Handle='$transluser'" );
-      if( mysql_affected_rows() != 1 )
-        error("unknown_user");
-
-      $extra_url_parts = "?what=transluser&user=$transluser";
-    }
-
-  jump_to("admin_translators.php$extra_url_parts");
+      // Something went wrong. Restore to old set then error
+      mysql_query( "UPDATE Players SET Translator='$old_langs'"
+                  ." WHERE Handle='".addslashes($transluser)."'" );
+      error('internal_error', $update_it);
+   }
+   retry_admin('');
 }
+?>

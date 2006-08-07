@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,11 +19,13 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-chdir('..');
-require( 'include/std_functions.php' );
-require( 'include/make_translationfiles.php' );
+chdir('../');
+require_once( "include/std_functions.php" );
+require_once( "include/make_translationfiles.php" );
 
 connect2mysql();
 
-make_known_languages();
-make_include_files();
+make_known_languages(); //must be called from main dir
+make_include_files(); //must be called from main dir
+
+?>

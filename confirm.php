@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,73 +18,71 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-require( "include/board.php" );
-require( "include/move.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/board.php" );
+require_once( "include/move.php" );
+require_once( "include/rating.php" );
 
-disable_cache();
 
-function jump_to_next_game($id, $Lastchanged, $gid)
+
+function jump_to_next_game($uid, $Lastchanged, $gid)
 {
-   $result = mysql_query("SELECT ID FROM Games " .
-                         "WHERE ToMove_ID=$id "  . 
+   $row = mysql_single_fetch(
+                         "SELECT ID FROM Games " .
+                         "WHERE ToMove_ID=$uid "  .
                          "AND Status!='INVITED' AND Status!='FINISHED' " .
-                         "AND ( Lastchanged > $Lastchanged " .
-                         "OR ( Lastchanged = $Lastchanged AND ID>$gid )) " .
+                         "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
+                         "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
+                         "AND ID>$gid )) " .
                          "ORDER BY Lastchanged,ID " .
                          "LIMIT 1");
 
-   if( mysql_num_rows($result) != 1 )
-   {
-      header("Location: status.php");
-      exit;
-   }
-   $row = mysql_fetch_array($result);
+   if( !$row )
+      jump_to("status.php");
 
-   header("Location: game.php?gid=" . $row["ID"]);
-   exit;
+   jump_to("game.php?gid=" . $row["ID"]);
 }
 
 
 
 {
-   if( !$gid )
+   disable_cache();
+
+   $gid = @$_REQUEST['gid'] ;
+   if( $gid <= 0 )
       error("no_game_nr");
 
-   if( $next == 'Go back' )
-   {
-      header("Location: game.php?gid=$gid");
-      exit;
-   }
+   if( @$_REQUEST['nextback'] )
+      jump_to("game.php?gid=$gid");
 
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
 
 
-   $result = mysql_query( "SELECT Games.*, " .
-                          "Games.Flags+0 AS flags, " .
-                          "black.ClockUsed AS Blackclock, " . 
-                          "white.ClockUsed AS Whiteclock " . 
+   $game_row = mysql_single_fetch(
+                          "SELECT Games.*, " .
+                          "Games.Flags+0 AS GameFlags, " . //used by check_move
+                          "black.ClockUsed AS Blackclock, " .
+                          "white.ClockUsed AS Whiteclock, " .
+                          "black.OnVacation AS Blackonvacation, " .
+                          "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
-                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" );
+                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
+                        );
 
-   if(  mysql_num_rows($result) != 1 )
+   if( !$game_row )
       error("unknown_game");
 
-   extract(mysql_fetch_array($result));
+   extract($game_row);
 
-   if( $next == 'Skip to next game' )
+   if( @$_REQUEST['nextskip'] )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
-
-
-   if( $player_row["ID"] != $ToMove_ID )
-      error("not_your_turn");
 
    if( $Status == 'INVITED' )
    {
@@ -96,6 +94,18 @@ function jump_to_next_game($id, $Lastchanged, $gid)
    }
 
 
+   if( $player_row["ID"] != $ToMove_ID )
+      error("not_your_turn");
+
+
+   //See *** HOT_SECTION *** below
+   if( !isset($_REQUEST['move']) )
+      error("internal_error",'confirm10');
+   $qry_move = @$_REQUEST['move'];
+   if( $qry_move != $Moves )
+      error("already_played",'confirm11');
+
+
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
    else if( $White_ID == $ToMove_ID )
@@ -104,7 +114,9 @@ function jump_to_next_game($id, $Lastchanged, $gid)
       error("database_corrupted");
 
 
-   $next_to_move = 3-$to_move;
+   $action = @$_REQUEST['action'];
+
+   $next_to_move = WHITE+BLACK-$to_move;
 
    if( $Moves+1 < $Handicap ) $next_to_move = BLACK;
 
@@ -113,74 +125,130 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
 // Update clock
 
-   $hours = 0;
-
    if( $Maintime > 0 or $Byotime > 0)
    {
-
+      // LastTicks may handle -(time spend) at the moment of the start of vacations
       $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
-      $hours = ( $ticks > 0 ? (int)(($ticks-1) / $tick_frequency) : 0 );
+      $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 
       if( $to_move == BLACK )
       {
-         time_remaining($hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
-         $Byotype, $Byotime, $Byoperiods, true);
+         time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "Black_Maintime=$Black_Maintime, " .
              "Black_Byotime=$Black_Byotime, " .
              "Black_Byoperiods=$Black_Byoperiods, ";
       }
       else
       {
-         time_remaining($hours, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
-         $Byotype, $Byotime, $Byoperiods, true);
+         time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "White_Maintime=$White_Maintime, " .
              "White_Byotime=$White_Byotime, " .
              "White_Byoperiods=$White_Byoperiods, ";
       }
 
-      $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
-      $next_ticks = get_clock_ticks($next_clockused);
+      if( ($next_to_move == BLACK ? $Blackonvacation : $Whiteonvacation) > 0 )
+      {
+         $next_clockused = VACATION_CLOCK;
+      }
+      else
+      {
+         $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
+         if( $WeekendClock != 'Y' )
+            $next_clockused += WEEKEND_CLOCK_OFFSET;
+      }
 
-      $time_query .= "LastTicks=$next_ticks, " .
+      $time_query .= "LastTicks=" . get_clock_ticks($next_clockused) . ", " .
           "ClockUsed=$next_clockused, ";
    }
+   else
+   {
+      $hours = 0;
+      $time_query = '';
+   }
 
-   $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
+   $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'domove' );
 
-   list($lastx,$lasty) = 
-      make_array( $gid, $array, $msg, $Moves, NULL, $moves_result, $marked_dead, $no_marked_dead );
+   $TheBoard = new Board( );
+   if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
+      error('internal_error', "confirm load_from_db $gid");
 
+   $message = addslashes(trim(get_request_arg('message')));
+   $message_query = '';
+
+   $game_finished = false;
+
+   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
+
+
+
+/* **********************
+*** HOT_SECTION ***
+>>> See also confirm.php, quick_play.php and clock_tick.php
+Various dirty things (like duplicated moves) could append
+in case of multiple calls with the same move number. This could
+append in case of multi-players account with simultaneous logins
+or if one player hit twice the validation button during a net lag
+and/or if the opponent had already played between the two calls.
+
+Because the LOCK query is not implemented with MySQL < 4.0,
+we use the Moves field of the Games table to check those
+possible multiple queries.
+This is why:
+- the arguments are checked against the current state of the Games table
+- the current Games table give the current Moves value
+- the Games table is always modified while checking its Moves field (see $game_clause)
+- the Games table modification must always modify the Moves field (see $game_query)
+- this modification is always done in first place and checked before continuation
+*********************** */
+   $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
    $Moves++;
 
-   if( $message ) $message = trim($message);
+
 
    switch( $action )
    {
-      case 'move':
+      case 'domove': //stonestring is the list of prisoners
       {
-         check_move();
+         if( $Status != 'PLAY' )
+            error('invalid_action','confirm0');
 
-         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
+         $coord = @$_REQUEST['coord'];
+         $stonestring = @$_REQUEST['stonestring'];
 
+{//to fixe old way Ko detect. Could be removed when no more old way games.
+  if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
+}
+         check_move( $TheBoard, $coord, $to_move);
+//ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
+//here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
+
+         $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
+
+         $prisoner_string = '';
          reset($prisoners);
-
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
-            $query .= "($Moves, \"NONE\", $x, $y, 0, NULL), ";
+            $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
+            $prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
-       
+
+
+         if( strlen($prisoner_string) != $nr_prisoners*2 or
+             ( $stonestring and $prisoner_string != $stonestring) )
+            error("move_problem");
+
+         $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
          if( $message )
-            $query .= "($Moves, $to_move, $colnr, $rownr, $hours, \"$message\") ";
-         else
-            $query .= "($Moves, $to_move, $colnr, $rownr, $hours, NULL) ";
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
-
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
-             "Last_X=$colnr, " .
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+             "Last_X=$colnr, " . //used with mail notifications
              "Last_Y=$rownr, " .
-             "Status='PLAY', " . $time_query;
+             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
+             "Status='PLAY', ";
 
          if( $nr_prisoners > 0 )
             if( $to_move == BLACK )
@@ -189,13 +257,13 @@ function jump_to_next_game($id, $Lastchanged, $gid)
                $game_query .= "White_Prisoners=$White_Prisoners, ";
 
          if( $nr_prisoners == 1 )
-            $flags |= KO;
+            $GameFlags |= KO;
          else
-            $flags &= ~KO;
-         
+            $GameFlags &= ~KO;
+
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
-             "Flags=$flags " .
-             "WHERE ID=$gid";
+             "Flags=$GameFlags, " .
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
       }
       break;
 
@@ -210,91 +278,91 @@ function jump_to_next_game($id, $Lastchanged, $gid)
          else if( $Status == 'PASS' )
             $next_status = 'SCORE';
          else
-            error("invalid_action");
+            error('invalid_action','confirm1');
 
 
-         $query = "INSERT INTO Moves$gid SET " . 
+         $move_query = "INSERT INTO Moves SET " .
+             "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
-             "PosX=-1, " .
+             "PosX=".POSX_PASS.", PosY=0, " .
              "Hours=$hours";
 
          if( $message )
-            $query .= ", Text=\"$message\"";
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
-             "Last_X=-1, " .
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+             "Last_X=".POSX_PASS.", " .
              "Status='$next_status', " .
-             "ToMove_ID=$next_to_move_ID, " . $time_query .
-             "Flags=0 " .
-             "WHERE ID=$gid";
+             "ToMove_ID=$next_to_move_ID, " .
+             "Last_Move='$Last_Move', " . //Not a move, re-use last one
+             "Flags=$GameFlags, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
       }
       break;
-     
-      case 'handicap':
+
+      case 'handicap': //stonestring is the list of handicap stones
       {
-         if( $Status != 'PLAY' or $Moves != 1 )
-            error("invalid_action");
+         if( $Status != 'PLAY' or !( $Handicap>1 && $Moves==1 ) )
+            error('invalid_action','confirm2');
 
-         check_handicap();
+         $stonestring = (string)@$_REQUEST['stonestring'];
+         check_handicap( $TheBoard); //adjust $stonestring
 
-         if( strlen( $stonestring ) != 2 * $Handicap + 1 )
+         if( strlen( $stonestring ) != 2 * $Handicap )
             error("wrong_number_of_handicap_stone");
 
 
-         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
-
+         $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
          for( $i=1; $i <= $Handicap; $i++ )
          {
-            $colnr = ord($stonestring[$i*2-1])-ord('a');
-            $rownr = ord($stonestring[$i*2])-ord('a');
+            list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i*2-2, 2), $Size);
 
-            if( $i == $Handicap )
-               if( $message )
-                  $query .= "($i, " . BLACK . ", $colnr, $rownr, $hours, \"$message\")";
-               else
-                  $query .= "($i, " . BLACK . ", $colnr, $rownr, $hours, NULL)";
-                 
-            else
-               $query .= "($i, " . BLACK . ", $colnr, $rownr, 0, NULL), ";
+            if( !isset($rownr) or !isset($colnr) )
+               error("illegal_position");
+
+            $move_query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
+               ($i == $Handicap ? "$hours)" : "0), " );
          }
 
+         if( $message )
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Handicap, " .
+
+         $game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
              "Last_X=$colnr, " .
-             "Last_Y=$rownr, " . $time_query .
-             "ToMove_ID=$White_ID " .
-             "WHERE ID=$gid";
+             "Last_Y=$rownr, " .
+             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
+             "ToMove_ID=$White_ID, " .
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
       }
       break;
 
       case 'resign':
       {
-         $query = "INSERT INTO Moves$gid SET " . 
+         $move_query = "INSERT INTO Moves SET " .
+             "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
-             "PosX=-3, " .
+             "PosX=".POSX_RESIGN.", PosY=0, " .
              "Hours=$hours";
 
          if( $message )
-            $query .= ", Text=\"$message\"";
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
          if( $to_move == BLACK )
-            $score = 1000;
+            $score = SCORE_RESIGN;
          else
-            $score = -1000;
+            $score = -SCORE_RESIGN;
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
-             "Last_X=-3, " .
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+             "Last_X=".POSX_RESIGN.", " .
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
-             "Score=$score, " . $time_query .
-             "Flags=0" .
-             " WHERE ID=$gid";
+             "Score=$score, " .
+             //"Flags=0, " . //Not useful
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
          $game_finished = true;
       }
@@ -302,166 +370,257 @@ function jump_to_next_game($id, $Lastchanged, $gid)
 
       case 'delete':
       {
-         if( $Status != 'PLAY' or ( $Moves >= 4+$Handicap ) )
-            error("invalid_action");
-       
-         $query = "DROP TABLE Moves$gid";
+         if( $Status != 'PLAY' or !$too_few_moves )
+            error('invalid_action','confirm3');
 
-         $game_query = "DELETE FROM Games WHERE ID=$gid";
+/*
+  Here, the previous line was:
+         $move_query = "DELETE FROM Moves WHERE gid=$gid LIMIT $Moves";
+  But, the number of records of Moves could be greater than the number of moves if:
+  - there are prisoners
+  - a sequence like PASS/PASS/SCORE.../RESUME had already occured.
+  So some garbage records could remains alone because of the LIMIT.
+*/
+         $move_query = "DELETE FROM Moves WHERE gid=$gid";
+         $message_query = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
+         $game_query = "DELETE FROM Games" ; //See *** HOT_SECTION ***
 
          $game_finished = true;
       }
       break;
 
-      case 'done':
+      case 'done': //stonestring is the list of toggled points
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error("invalid_action");
+            error('invalid_action','confirm4');
 
-         check_done();
+         $stonestring = (string)@$_REQUEST['stonestring'];
+         check_remove( $TheBoard);
+//ajusted globals by check_remove(): $score, $stonestring;
 
-         $nr_prisoners = count($prisoners);
+         $l = strlen( $stonestring );
 
          $next_status = 'SCORE2';
-         if( $Status == 'SCORE2' and  $nr_prisoners == 0 )
+         if( $Status == 'SCORE2' and  $l < 2 )
          {
             $next_status = 'FINISHED';
             $game_finished = true;
          }
 
-         $query = "INSERT INTO Moves$gid ( MoveNr, Stone, PosX, PosY, Hours, Text ) VALUES ";
+         $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
-
-         while( list($dummy, list($x,$y)) = each($prisoners) )
+         for( $i=0; $i < $l; $i += 2 )
          {
-            $query .= "($Moves, " . (9 - $to_move ) . ", $x, $y, 0, NULL), ";
+            list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
+            $move_query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
          }
+
+         $move_query .= "($gid, $Moves, $to_move, ".POSX_SCORE.", 0, $hours) ";
 
 
          if( $message )
-            $query .= "($Moves, $to_move, -2, NULL, $hours, \"$message\") ";
-         else
-            $query .= "($Moves, $to_move, -2, NULL, $hours, NULL) ";
+            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
 
-
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
-             "Last_X=-2, " .
-             "Status='$next_status', " . $time_query;
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+             "Last_X=".POSX_SCORE.", " .
+             "Status='$next_status', ";
 
          if( $next_status != 'FINISHED' )
-         {
-            if( $next_to_move == BLACK )
-               $game_query .= "ToMove_ID=$Black_ID, ";
-            else
-               $game_query .= "ToMove_ID=$White_ID, ";
-         }
+            $game_query .= "ToMove_ID=$next_to_move_ID, ";
          else
             $game_query .= "ToMove_ID=0, ";
 
-                
 
          $game_query .=
-             "Flags=0, " .
-             "Score=$score" .
-             " WHERE ID=$gid";
-         
+             "Score=$score, " .
+             "Last_Move='$Last_Move', " . //Not a move, re-use last one
+             "Flags=$GameFlags, " . //Don't reset Flags else SCORE,RESUME could break a Ko
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+
       }
       break;
 
       default:
       {
-         error("invalid_action");
-         exit;
+         error('invalid_action','confirm5');
       }
    }
 
 
-   if( $query )
+   //See *** HOT_SECTION *** above
+   $result = mysql_query( $game_query . $game_clause );
+
+   if( mysql_affected_rows() != 1 )
+      error("mysql_update_game","conf20($gid)");
+
+   $result = mysql_query( $move_query );
+
+   if( mysql_affected_rows() < 1 and $action != 'delete' )
+      error("mysql_insert_move","conf21($gid)");
+
+
+
+   if( $message_query )
    {
-      $result = mysql_query( $query );
-        
+      $result = mysql_query( $message_query );
+
       if( mysql_affected_rows() < 1 and $action != 'delete' )
-         error("mysql_insert_move", true);
+         error("mysql_insert_move","conf22($gid)");
    }
 
 
-
-   $result = mysql_query( $game_query );
-
-
-   if( mysql_affected_rows() != 1 )
-      error("mysql_update_game", true);
-
-
-
-// Notify opponent about move
-
-   mysql_query( "UPDATE Players SET Notify='NEXT', Lastaccess=Lastaccess " .
-                "WHERE ID='$next_to_move_ID' AND Flags LIKE '%WANT_EMAIL%' " .
-                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "'") ;
-
-    
    if( $game_finished )
    {
       // send message to my opponent about the result
 
-      $result = mysql_query( "SELECT * FROM Players WHERE ID=" . 
-                             ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) ); 
+      $opponent_row = mysql_single_fetch( "SELECT * FROM Players WHERE ID=" .
+                 ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) );
 
-      if( mysql_num_rows($result) != 1 )
-         error("opponent_not_found", true);
-
-      $opponent_row = mysql_fetch_array($result);
+      if( !$opponent_row )
+         error("opponent_not_found");
 
       if( $player_row["ID"] == $Black_ID )
       {
          $blackname = $player_row["Name"];
          $whitename = $opponent_row["Name"];
+         $blackhandle = $player_row["Handle"];
+         $whitehandle = $opponent_row["Handle"];
       }
       else
       {
          $whitename = $player_row["Name"];
          $blackname = $opponent_row["Name"];
+         $whitehandle = $player_row["Handle"];
+         $blackhandle = $opponent_row["Handle"];
       }
 
-
-      $Text = "The result in the game <a href=\"game.php?gid=$gid\">" . 
-          "$whitename (W)  vs. $blackname (B) </a>" . 
-          "was: <p><center>" . score2text($score,true) . "</center></br>";
-
-      $Subject = 'Game result';
 
       if( $action == 'delete' )
       {
-         $Text = "The game $whitename (W)  vs. $blackname (B) " .
-             "has been deleted by your opponent";
+         mysql_query("UPDATE Players SET Running=Running-1 " .
+                     "WHERE ID=$Black_ID OR ID=$White_ID LIMIT 2");
+
          $Subject = 'Game deleted';
+         //reference: game is deleted => no link
+         $Text = "The game:<center>"
+               . game_reference( 0, 1, '', $gid, 0, $whitename, $blackname)
+               . "</center>has been deleted by your opponent.<br>";
+
+         delete_all_observers($gid, false);
+      }
+      else
+      {
+//         update_rating($gid);
+         $rated_status = update_rating2($gid); //0=rated game
+
+         $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
+                   ($rated_status ? '' : ", RatedGames=RatedGames+1" .
+                    ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
+                   ) . " WHERE ID=$White_ID LIMIT 1" ;
+         mysql_query( $query);
+
+         $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
+                   ($rated_status ? '' : ", RatedGames=RatedGames+1" .
+                    ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
+                   ) . " WHERE ID=$Black_ID LIMIT 1" ;
+         mysql_query( $query);
+
+         $Subject = 'Game result';
+         $Text = "The result in the game:<center>"
+               . game_reference( REF_LINK, 1, '', $gid, 0, $whitename, $blackname)
+               . "</center>was:<center>"
+               . score2text($score,true,true)
+               . "</center>";
+
+         $tmp = $Text . "Send a message to:<center>"
+               . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
+               . "<br>"
+               . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
+               . "</center>" ;
+         delete_all_observers($gid, $rated_status!=1, addslashes( $tmp));
       }
 
+      $message_from_server_way = true; //else simulate a message from this player
+      //nervertheless, the clock_tick.php messages are always sent by the server
+      //so it's better to keep $message_from_server_way = true
+      if( $message_from_server_way )
+      {
+         //The server messages does not allow a reply,
+         // so add a *in message* reference to this player.
+         $Text.= "Send a message to:<center>"
+               . send_reference( REF_LINK, 1, '', $player_row["ID"], $player_row["Name"], $player_row["Handle"])
+               . "</center>" ;
+      }
+
+         $Text = addslashes( $Text);
       if ( $message )
       {
-         $Text .= "<p>Your opponent wrote:<p>" . $message;
+         if( $message_from_server_way )
+         {
+            //A server message will only be read by this player
+            $Text .= "Your opponent wrote:<p>" . $message;
+         }
+         else
+         {
+            //Because both players will read this message
+            $Text .= "The final message was:<p>" . $message;
+         }
       }
 
-      mysql_query( "INSERT INTO Messages" . $opponent_row["ID"] . " SET " .
-                   "From_ID=" . $player_row["ID"] . 
-                   ", Game_ID=$gid, Subject='$Subject', Text='$Text'" );
+      mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
+                   "Game_ID=$gid, Subject='$Subject', Text='$Text'");
+
+      if( mysql_affected_rows() != 1)
+         error("mysql_insert_message");
+
+      $mid = mysql_insert_id();
+
+      $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+                  "(" . $opponent_row['ID'] . ", $mid, 'N', ".FOLDER_NEW.")" ;
+
+      if( !$message_from_server_way )
+      {
+         //This simulate a message sent by this player
+         //This will allow a direct message reply but will fill his *sent* folder
+         $query.= ",(" . $player_row["ID"] . ", $mid, 'Y', ".FOLDER_SENT.")" ;
+         //else we could force a NULL Folder_nr (trashed message)
+      }
+
+      mysql_query( $query);
 
    }
 
-   if( $next == "Submit and go to status" )
+
+// Notify opponent about move
+
+   mysql_query( "UPDATE Players SET Notify='NEXT' " .
+                "WHERE ID='$next_to_move_ID' AND SendEmail LIKE '%ON%' " .
+                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "' LIMIT 1") ;
+
+
+
+// Increase moves and activity
+
+   mysql_query( "UPDATE Players " .
+                "SET Activity=Activity + $ActivityForMove, " .
+                "Moves=Moves+1, " .
+                "LastMove=FROM_UNIXTIME($NOW) " .
+                "WHERE ID=" . $player_row["ID"] . " LIMIT 1" );
+
+
+
+// Jump somewhere
+
+   if( @$_REQUEST['nextstatus'] )
    {
-      header("Location: status.php");
-      exit;
+      jump_to("status.php");
    }
-   else if( $next == "Submit and go to next game" )
+   else if( @$_REQUEST['nextgame'] )
    {
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
 
-   header("Location: game.php?gid=$gid");
-   exit;
+   jump_to("game.php?gid=$gid");
 }
 ?>

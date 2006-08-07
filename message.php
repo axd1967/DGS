@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2002  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,230 +18,414 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
-require( "include/message_functions.php" );
-require( "include/form_functions.php" );
+$TranslateGroups[] = "Messages";
 
+require_once( "include/std_functions.php" );
+require_once( "include/message_functions.php" );
+require_once( "include/form_functions.php" );
 
-// Input variables:
-//
-// $mid        -- Message ID
-// $mode       -- NewMessage(Default),ShowMessage,Dispute or Invite
-// $disputegid -- game ID for dispute
-//
 
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
 
-   $my_id = $player_row["ID"];
-   $can_reply = true;
-   if( !$mode )
-      $mode = "NewMessage";
 
-   if( !$uid )
+   $preview = @$_REQUEST['preview'];
+
+   $default_uhandle = get_request_arg('to');
+   if( !$default_uhandle )
    {
-      if( eregi("uid=([0-9]+)", $HTTP_REFERER, $result) )
-         $uid = $result[1];
-   }
-
-   if( $uid > 0 and $uid != $player_row["ID"] )
-   {
-      $result = mysql_query( "SELECT default_handle FROM Players WHERE ID=$uid" );
-
-      if( mysql_num_rows( $result ) == 1 )
+      get_request_user( $uid, $uhandle, true);
+      if( !$uhandle and $uid > 0 )
       {
-         extract(mysql_fetch_array($result));
+         if( $uid == $player_row["ID"] )
+            $uhandle = $player_row["Handle"];
+         else
+         {
+            $row = mysql_single_fetch( "SELECT Handle AS uhandle FROM Players WHERE ID=$uid" );
+            if( $row )
+               extract($row);
+         }
       }
+      $default_uhandle = $uhandle;
+      unset($uid); unset($uhandle); //no more used
+   }
+
+   init_standard_folders();
+   $my_id = $player_row["ID"];
+   $folders = get_folders($my_id);
+
+
+   $default_subject = get_request_arg('subject');
+   $default_message = get_request_arg('message');
+
+
+   $mid = (int)@$_REQUEST['mid'];
+
+
+   $mode = @$_REQUEST['mode'];
+   if( !$mode )
+   {
+      $mode = ($mid > 0 ? 'ShowMessage' : 'NewMessage');
+   }
+   else if( @$_REQUEST['mode_dispute'] )
+   {
+      $mode = 'Dispute';
    }
 
 
-   if( $mode == 'ShowMessage' )
+   $submode = $mode;
+   if( $mode == 'ShowMessage' or $mode == 'Dispute' )
    {
       if( !($mid > 0) )
          error("unknown_message");
 
-      $result = mysql_query("SELECT Messages.*, " .
-                            "UNIX_TIMESTAMP(Messages.Time) AS date, " .
-                            "Players.Name AS sender_name, " .
-                            "Players.Handle AS sender_handle, Players.ID AS sender_id, " .
-                            "Games.Status, Size, Komi, Handicap, Maintime, Byotype, " .
-                            "Byotime, Byoperiods, Rated, Weekendclock, " .
-                            "(White_ID=$my_id)+1 AS Color " .
-                            "FROM Messages,Players " .
-                            "LEFT JOIN Games ON Games.ID=Game_ID " .
-                            "WHERE Messages.ID=$mid " .
-                            "AND ((Messages.To_ID=$my_id AND From_ID=Players.ID) " .
-                            "OR (Messages.From_ID=$my_id AND To_ID=Players.ID))");
+      $query = "SELECT Messages.*, " .
+          "UNIX_TIMESTAMP(Messages.Time) AS date, " .
+          "IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
+          "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
+          "me.Replied, me.Sender, me.Folder_nr, " .
+          "Players.Name AS other_name, Players.ID AS other_id, Players.Handle AS other_handle, " .
+          "Games.Status, Games.mid AS Game_mid, " .
+          "Size, Komi, Handicap, Maintime, Byotype, " .
+          "Byotime, Byoperiods, Rated, Weekendclock, StdHandicap, " .
+          "ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS Color " .
+          "FROM Messages, MessageCorrespondents AS me " .
+          "LEFT JOIN MessageCorrespondents AS other " .
+            "ON other.mid=me.mid AND other.Sender!=me.Sender " .
+          "LEFT JOIN Players ON Players.ID=other.uid " .
+          "LEFT JOIN Games ON Games.ID=Game_ID " .
+          "LEFT JOIN MessageCorrespondents AS previous " .
+            "ON previous.mid=Messages.ReplyTo AND previous.uid=me.uid " .
+          "WHERE me.uid=$my_id AND Messages.ID=me.mid AND me.mid=$mid " .
+//sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
+          "ORDER BY Sender" ;
 
-      if( @mysql_num_rows($result) != 1 )
+      $row = mysql_single_fetch( $query);
+      if( !$row )
          error("unknown_message");
-
-      $row = mysql_fetch_array($result);
 
       extract($row);
 
-      $to_me = $can_reply = ( $To_ID == $my_id );
-      $has_replied = !(strpos($Flags,'REPLIED') === false);
 
-      $default_subject = $Subject;
-      if( strcasecmp(substr($Subject,0,3), "re:") != 0 )
-         $default_subject = "RE: " . $Subject;
-
-      $color = ( $Color == BLACK ? 'Black' : 'White' );
-
-      // Remove NEW flag
-      $pos = strpos($Flags,'NEW');
-
-      if( $to_me and !($pos === false) )
+      if( $Sender === 'M' ) //Message to myself
       {
-         $Flags = substr_replace($Flags, '', $pos, 3);
-
-         mysql_query( "UPDATE Messages SET Flags='$Flags' " .
-                      "WHERE ID=$mid AND To_ID=$my_id LIMIT 1" ) or die( mysql_error());
-
-         if( mysql_affected_rows() != 1)
-            error("mysql_message_info", true);
+         $other_name = $player_row["Name"];
+         $other_id = $my_id;
+         $other_handle = $player_row["Handle"];
+      }
+      else if( $other_id <= 0 )
+      {
+         $other_name = '['.T_('Server message').']';
+         $other_handle = '';
+      }
+      if( empty($other_name) )
+      {
+         $other_name = '-';
+         $other_handle = '';
       }
 
-      if( $Type=='INVITATION' )
+      $other_name = make_html_safe($other_name);
+
+/* Here, the line was:
+      $can_reply = ( $To_ID == $my_id && $other_id && $other_handle);
+   but: 
+    - $my_id=me.uid and $Sender=me.Sender
+    - $To_ID is always an ID associated with a *not sender*
+   so the old ($To_ID == $my_id) is near of ($Sender != 'Y')
+   or maybe ($Sender == 'N') or... check for new Sender types.
+*/
+      $can_reply = ( $Sender != 'Y' && $other_id && $other_handle);
+      $to_me = ( $Sender != 'Y' );
+
+      if( $mode == 'ShowMessage' )
       {
-         if( $can_reply and $Status=='INVITED' and !$has_replied)
+         if( !$preview )
          {
-            $mode = 'ShowInvite';
+            $default_subject = $Subject;
+            $default_message = '';
          }
-         else if( is_null($Status) )
+         if( strcasecmp(substr($default_subject,0,3), "re:") != 0 )
+            $default_subject = "RE: " . $default_subject;
+
+         if( $Folder_nr == FOLDER_NEW )
          {
-            $mode = 'AlreadyDeclined';
+            // Remove NEW flag
+
+            $Folder_nr = ( $Type == 'INVITATION' ? FOLDER_REPLY : FOLDER_MAIN );
+
+            mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
+                         "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" )
+               or die( mysql_error());
+
+            if( mysql_affected_rows() != 1)
+               error("mysql_message_info", "remove new-flag failed mid=$mid uid=$my_id Sender='$Sender'");
+
          }
-         else
+
+         if( $Type == 'INVITATION' )
          {
-            $mode = 'AlreadyAccepted';
+            if( $Status=='INVITED' and ($Replied != 'Y') )
+            {
+               if( $to_me )
+                  $submode = 'ShowInvite';
+               else
+                  $submode = 'ShowMyInvite';
+            }
+            else if( is_null($Status) )
+            {
+               $submode = 'AlreadyDeclined';
+            }
+            else
+            {
+               $submode = 'AlreadyAccepted';
+            }
          }
+         else if( $Type == 'DISPUTED' )
+         {
+            $submode = 'InviteDisputed';
+         }
+
       }
 
    }
 
-
-
-   start_page("Message - $mode", true, $logged_in, $player_row );
+   start_page("Message - $submode", true, $logged_in, $player_row );
 
    echo "<center>\n";
 
-   switch( $mode )
+   $message_form = new Form('messageform', 'message_selector.php#preview', FORM_POST, true );
+   //by default:
+   $message_form->add_hidden( 'mode', $mode);
+   $message_form->add_hidden( 'mid', $mid);
+
+   switch( $submode )
    {
       case 'ShowMessage':
       case 'AlreadyDeclined':
       case 'AlreadyAccepted':
+      case 'InviteDisputed':
       {
-         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
-                            $Subject, $ReplyTo, $Text);
-         if( $mode == 'AlreadyAccepted' )
-            echo '<font color=green>This <a href="game.php?gid=' . $Game_ID .
-               '">game</a> invitation has already been accepted</font>';
+         message_info_table($mid, $date, $to_me,
+                            $other_id, $other_name, $other_handle,
+                            $Subject, $Text,
+                            $ReplyTo, $flow,
+                            $folders, $Folder_nr, $message_form, $Replied=='M');
 
-         if( $mode == 'AlreadyDeclined' )
-            echo '<font color=green>This invitation has been declined or the game deleted</font>';
+         if( $submode == 'AlreadyAccepted' )
+         {
+            echo '<font color=green>' .
+               sprintf( T_('This %sgame%s invitation has already been accepted.'),
+                        "<a href=\"game.php?gid=$Game_ID\">", '</a>' ) . '</font>';
+         }
+         else if( $submode == 'AlreadyDeclined' )
+            echo '<font color=green>' .
+               T_('This invitation has been declined or the game deleted') . '</font>';
+         else if( $submode == 'InviteDisputed' )
+            echo '<font color=green>' .
+               sprintf(T_('The settings for this game invitation has been %sdisputed%s'),
+                       "<a href=\"message.php?mid=$Game_mid\">", '</a>' ) . '</font>';
 
          if( $can_reply )
          {
-            echo "<B><h3><font color=$h3_color>Reply:</font></B><p>\n";
-            echo form_start( 'messageform', 'send_message.php', 'POST' );
-            echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
-            echo form_insert_row( 'HIDDEN', 'reply', $mid );
-            echo form_insert_row( 'DESCRIPTION', 'Subject',
-                                  'TEXTINPUT', 'subject', 50, 80, $default_subject );
-            echo form_insert_row( 'DESCRIPTION', 'Message',
-                                  'TEXTAREA', 'message', 50, 8, "" );
-            echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Reply' );
-
-
+            $message_form->add_row( array(
+                  'HEADER', T_('Reply'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Subject'),
+                  'TEXTINPUT', 'subject', 50, 80, $default_subject,
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
+            $message_form->add_row( array(
+                  'HIDDEN', 'to', $other_handle,
+                  'HIDDEN', 'reply', $mid,
+                  'TAB',
+                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Reply'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+               ) );
          }
       }
       break;
 
       case 'NewMessage':
       {
-         echo "<B><h3><font color=$h3_color>New message:</font></B><p>\n";
-         echo form_start( 'messageform', 'send_message.php', 'POST' );
-         echo form_insert_row( 'DESCRIPTION', 'To (userid)',
-                               'TEXTINPUT', 'to', 50, 80, $default_handle );
-         echo form_insert_row( 'DESCRIPTION', 'Subject',
-                               'TEXTINPUT', 'subject', 50, 80, "" );
-         echo form_insert_row( 'DESCRIPTION', 'Message',
-                               'TEXTAREA', 'message', 50, 8, "" );
-         echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Message' );
+            $message_form->add_row( array(
+                  'HEADER', T_('New message'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('To (userid)'),
+                  'TEXTINPUT', 'to', 50, 80, $default_uhandle,
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Subject'),
+                  'TEXTINPUT', 'subject', 50, 80, $default_subject,
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
+            $message_form->add_row( array(
+                  'TAB',
+                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Message'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+               ) );
       }
       break;
 
       case 'ShowInvite':
+      case 'ShowMyInvite':
       {
-         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
-                            $Subject, $ReplyTo, $Text);
+         message_info_table($mid, $date, $to_me,
+                            $other_id, $other_name, $other_handle,
+                            $Subject, $Text,
+                            $ReplyTo, $flow,
+                            $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' or $Replied=='M'));
 
-         game_info_table($Size, $color, $Komi, $Handicap, $Maintime, $Byotype, $Byotime,
-                         $Byoperiods, $Rated, $Weekendclock);
-         echo '<a href="message.php?mode=Dispute&mid=' . $mid . '">Dispute settings</a>';
-         echo "<p>&nbsp;<p><B><h3><font color=$h3_color>Reply:</font></B>\n";
-         echo form_start( 'messageform', 'send_message.php', 'POST' );
-         echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
-         echo form_insert_row( 'HIDDEN', 'reply', $mid );
-         echo form_insert_row( 'HIDDEN', 'gid', $Game_ID );
-         echo form_insert_row( 'DESCRIPTION', 'Message',
-                               'TEXTAREA', 'message', 50, 8, "" );
-         echo "<td><td><INPUT type=\"submit\" name=\"type\" value=\"Accept\">" .
-            "<INPUT type=\"submit\" name=\"type\" value=\"Decline\"></td>";
+         $colortxt = " align='top'";
+         if( $Color == BLACK )
+         {
+            $colortxt = "<img src='17/w.gif' alt=\"" . T_('White') . "\"$colortxt> " .
+               user_reference( 0, 1, '', 0, $other_name, $other_handle) .
+               "&nbsp;&nbsp;<img src='17/b.gif' alt=\"" . T_('Black') . "\"$colortxt> " .
+               user_reference( 0, 1, '', $player_row) .
+               '&nbsp;&nbsp;';
+         }
+         else
+         {
+            $colortxt = "<img src='17/w.gif' alt=\"" . T_('White') . "\"$colortxt> " .
+               user_reference( 0, 1, '', $player_row) .
+               "&nbsp;&nbsp;<img src='17/b.gif' alt=\"" . T_('Black') . "\"$colortxt> " .
+               user_reference( 0, 1, '', 0, $other_name, $other_handle) .
+               '&nbsp;&nbsp;';
+         }
+
+         game_info_table($Size, $colortxt, $ToMove_ID, $Komi, $Handicap, $Maintime,
+                         $Byotype, $Byotime, $Byoperiods, $Rated, $Weekendclock, $StdHandicap);
+
+         if( $can_reply )
+         {
+            $message_form->add_row( array(
+                  'TAB',
+                  'SUBMITBUTTON', 'mode_dispute', T_('Dispute settings'),
+               ) );
+
+            $message_form->add_row( array(
+                  'HEADER', T_('Reply'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
+            $message_form->add_row( array(
+                  'HIDDEN', 'to', $other_handle,
+                  'HIDDEN', 'reply', $mid,
+                  'HIDDEN', 'subject', "Game invitation accepted (or declined)",
+                  'HIDDEN', 'gid', $Game_ID,
+                  'TAB',
+                  'SUBMITBUTTON', 'send_accept" accesskey="x', T_('Accept'),
+                  'SUBMITBUTTON', 'send_decline', T_('Decline'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+               ) );
+
+         }
       }
       break;
 
       case 'Dispute':
       {
-         message_info_table($date, $can_reply, $sender_id, $sender_name, $sender_handle,
-                            $Subject, $ReplyTo, $Text);
+         message_info_table($mid, $date, $to_me,
+                            $other_id, $other_name, $other_handle,
+                            $Subject, $Text,
+                            $ReplyTo, $flow); //no folders, so no move
 
-         echo "<B><h3><font color=$h3_color>Disputing settings:</font></B><p>\n";
-         echo form_start( 'messageform', 'send_message.php', 'POST' );
-         echo form_insert_row( 'HIDDEN', 'mode', $mode );
-         echo form_insert_row( 'HIDDEN', 'subject', 'Game invitation dispute' );
-         echo form_insert_row( 'HIDDEN', 'disputegid', $disputegid );
-         echo form_insert_row( 'HIDDEN', 'to', $sender_handle );
-         echo form_insert_row( 'HIDDEN', 'reply', $mid );
-         echo form_insert_row( 'HIDDEN', 'type', 'INVITATION' );
-         echo form_insert_row( 'DESCRIPTION', 'Message',
-                               'TEXTAREA', 'message', 50, 8, "" );
+         if( $preview )
+            game_settings_form($message_form, 'redraw', @$_POST);
+         else
+            game_settings_form($message_form, $my_id, $Game_ID);
 
-         game_settings_form($my_ID, $disputegid);
+            $message_form->add_row( array(
+                  'HEADER', T_('Dispute settings'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
 
-         echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Reply' );
+            $message_form->add_row( array(
+                  'HIDDEN', 'to', $other_handle,
+                  'HIDDEN', 'reply', $mid,
+                  'HIDDEN', 'subject', 'Game invitation dispute',
+                  'HIDDEN', 'type', 'INVITATION',
+                  'HIDDEN', 'disputegid', $Game_ID,
+                  'TAB',
+                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Reply'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+               ) );
       }
       break;
 
       case 'Invite':
       {
-         echo "<B><h3><font color=$h3_color>Invitation message:</font></B><p>\n";
-         echo form_start( 'messageform', 'send_message.php', 'POST' );
-         echo form_insert_row( 'HIDDEN', 'type', 'INVITATION' );
-         echo form_insert_row( 'DESCRIPTION', 'To (userid)',
-                               'TEXTINPUT', 'to', 50, 80, $Handle );
-         echo form_insert_row( 'DESCRIPTION', 'Message',
-                               'TEXTAREA', 'message', 50, 8, "" );
+         if( $preview )
+            game_settings_form($message_form, 'redraw', @$_POST);
+         else
+            game_settings_form($message_form);
 
-         game_settings_form($my_ID, $disputegid);
+            $message_form->add_row( array(
+                  'HEADER', T_('Invitation message'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('To (userid)'),
+                  'TEXTINPUT', 'to', 50, 80, $default_uhandle,
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
 
-         echo form_insert_row( 'SUBMITBUTTON', 'send', 'Send Invitation' );
+            $message_form->add_row( array(
+                  'HIDDEN', 'subject', 'Game invitation',
+                  'HIDDEN', 'type', 'INVITATION',
+                  'TAB',
+                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Invitation'),
+                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+               ) );
       }
       break;
    }
 
-   if( $can_reply )
-      echo form_end();
+   $message_form->echo_string(1);
 
-   echo "</center>\n";
+   if( $preview )
+   {
+      echo "\n<a name=\"preview\"></a><h3><font color=$h3_color>" . 
+               T_('Preview') . ":</font></h3>\n";
+      //$mid==0 means preview - display a *to_me* like message
+
+      $row = mysql_single_fetch('SELECT ID, Name FROM Players ' .
+                                'WHERE Handle ="' . mysql_escape_string($default_uhandle) .
+                                "\"\n");
+      if( !$row )
+         $Name = '<font color="red">' . T_('Receiver not found') . '</font>';
+      else
+         $Name = make_html_safe($row["Name"]);
+
+      message_info_table(0, $NOW, false,
+                         (int)$row['ID'], $Name,
+                         make_html_safe($default_uhandle),
+                         $default_subject, $default_message);
+   }
+
+   echo "\n</center>\n";
 
    end_page();
 }
+
 ?>

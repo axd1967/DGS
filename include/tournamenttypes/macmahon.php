@@ -25,7 +25,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * \brief For class MacMahon.
  */
 
-require( "include/tournament_round.php" );
+require_once( "include/tournament_round.php" );
 
 /*!
  * \brief Implements the tournament type MacMahon.
@@ -40,6 +40,21 @@ class MacMahon extends TournamentRound
 
   /*! \brief Add things special to the MacMahon round type to the options form. */
   function add_type_specific_options_to_form( &$options_form )
+    {
+    }
+
+  /*! \brief Generate games in a MacMahon round. */
+  function generate_games()
+    {
+    }
+
+  /*! \brief Checks and ends the round if applicable. */
+  function end_of_round()
+    {
+    }
+
+  /*! \brief Prints a view of the results of this round. */
+  function print_result_view()
     {
     }
 }

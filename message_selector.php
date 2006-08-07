@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2003  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,9 +18,12 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-   $send_message = @$_REQUEST['send_message']
-                or @$_REQUEST['send_accept']
-                or @$_REQUEST['send_decline'];
+   $send_message = ( @$_REQUEST['send_message']
+                  or @$_REQUEST['send_accept']
+                  or @$_REQUEST['send_decline']
+                  or @$_REQUEST['foldermove']
+                  ) ;
+
    $preview = @$_REQUEST['preview'];
 
    if( !$send_message or $preview )

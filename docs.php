@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Jim Heiney and Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,29 +18,40 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
+$TranslateGroups[] = "Docs";
 
-connect2mysql();
+require_once( "include/std_functions.php" );
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
+{
+  connect2mysql();
 
-start_page("Links", true, $logged_in, $player_row );
+  $logged_in = who_is_logged( $player_row);
 
-?>
+  start_page(T_("Docs"), true, $logged_in, $player_row );
 
-<p align="left">&nbsp;</p>
-<h3><font color="#800000">Documentaion</font></h3>
+  echo "<table align=center><tr><td>\n";
+  echo "<center><h3><font color=$h3_color>" .
+    T_('Documentation') . "</font></h3></center>\n";
 
+  add_link_page_link('introduction.php', T_('Introduction to Dragon'));
+  add_link_page_link('site_map.php', T_('Site map'));
+  add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
+  add_link_page_link("people.php", T_("People"), T_("who contributes to Dragon"));
+  add_link_page_link("links.php", T_('Links'));
+  add_link_page_link("todo.php", T_('To do list'), T_('plans for future improvements'));
+  add_link_page_link("install.php", T_('Installation instructions'),
+                     T_('if you want your own dragon'));
+  add_link_page_link("snapshot", T_('Download dragon sources'),
+                     T_('daily snapshot of the cvs'));
+  add_link_page_link("http://dragongoserver.cvs.sourceforge.net/dragongoserver/DragonGoServer/",
+                     T_('Browse Dragon source code'));
+  add_link_page_link("http://sourceforge.net/projects/dragongoserver/",
+                     T_('Dragon project page at sourceforge'));
+  add_link_page_link("licence.php", T_('Licence'), 'GPL');
 
-<p align="left"><a href="introduction.php">Introduction to Dragon</a></p>
+  echo "<br>&nbsp;\n</td></tr></table>\n";
 
-<p align="left"><a href="phorum/list.php?f=3">Frequently Asked Questions</a> -- with answers</p>
+  end_page();
+}
 
-<p align="left"><a href="links.php">Links</a>
-  -- to rules and more</p>
-
-<p align="left">&nbsp;</p>
-
-<?php
-end_page();
 ?>

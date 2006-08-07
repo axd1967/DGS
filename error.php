@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,306 +18,559 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
+$TranslateGroups[] = "Error";
+
+require_once( "include/std_functions.php" );
 
 
 {
-   $player_row = 0;
-  
-   start_page("Error", true, false, $player_row );
- 
+   connect2mysql(true);
+
+   $err = get_request_arg('err');
+   $redir = get_request_arg('redir');
+   if( $redir /* && @$_SERVER['REDIRECT_STATUS'] == 401 */ )
+   {
+      error( $err, "$redir ".@$_SERVER['REDIRECT_STATUS']
+                 .': '.@$_SERVER['REDIRECT_URL']
+                 .': '.@$_SERVER['REDIRECT_ERROR_NOTES']
+                 .' / '.getcwd());
+      //exit;
+   }
+   
+   
+   $logged_in = who_is_logged( $player_row);
+
+   start_page("Error", true, $logged_in, $player_row );
+   echo '&nbsp;<br>';
+
    switch( $err )
    {
-      case("early pass"):
+      case("early_pass"):
       {
-         echo "Sorry, you may not pass before all handicap stones are placed.";
+         echo T_("Sorry, you may not pass before all handicap stones are placed.");
       }
       break;
 
       case("game_finished"):
       {
-         echo "Sorry, the game has already finished.";
+         echo T_("Sorry, the game has already finished.");
       }
       break;
 
       case("game_not_started"):
       {
-         echo "Sorry, the game hasn't started yet.";
+         echo T_("Sorry, the game hasn't started yet.");
       }
       break;
 
-      case("guest_may_not_recieve_messages"):
+      case("guest_may_not_receive_messages"):
       {
-         echo "Error, guest may not recieve messages";
+         echo T_("Error, guest may not recieve messages");
       }
       break;
 
       case("illegal_position"):
       {
-         echo "Move outside board??";
+         echo T_("This move leads to an illegal board position.");
       }
       break;
 
       case("invalid_action"):
       {
-         echo "This type action is either unknown or can't be use in this state of the game.";
+         echo T_("This type of action is either unknown or can't be used in this state of the game.");
+      }
+      break;
+
+      case("invite_self"):
+      {
+         echo T_("Sorry, you can't invite yourself.");
       }
       break;
 
       case("invited_to_unknown_game"):
       {
-         echo "Sorry, can't find the game you are invited to. Already declined?";
+         echo T_("Sorry, can't find the game you are invited to. Already declined?");
       }
       break;
 
       case("ko"):
       {
-         echo "Sorry, you may not retake a stone which has just captured a stone, " . 
-            "since it would repeat a previous board position. Look for 'ko' in the rules.";
+         echo T_("Sorry, you may not retake a stone which has just captured a stone, " .
+                 "since it would repeat a previous board position. Look for 'ko' in the rules.");
       }
       break;
 
       case("komi_range"):
       {
-         echo "The komi is out of range, please choose a move reasonable value.";
+         echo T_("The komi is out of range, please choose a more reasonable value.");
       }
       break;
 
+      case("move_problem"):
+      {
+         echo T_("An error occurred for this move. Usually it works if you try again, otherwise please contact the support.");
+      }
+      break;
 
       case("mysql_connect_failed"):
       {
-         echo "Connection to database failed. Please wait a few minutes and test again.";
+         echo T_("Connection to database failed. Please wait a few minutes and test again.");
       }
       break;
 
       case("mysql_delete_game_invitation"):
       {
-         echo "Delete game failed. This is problably not a problem.";
+         echo T_("Delete game failed. This is problably not a problem.");
       }
       break;
 
       case("mysql_insert_message"):
       {
-         echo "Sorry, the additon of the message to the database seems to have failed.";
+         echo T_("Sorry, the additon of the message to the database seems to have failed.");
       }
       break;
 
       case("mysql_insert_game"):
       {
-         echo "Sorry, the additon of the game to the database seems to have failed.";
+         echo T_("Sorry, the additon of the game to the database seems to have failed.");
       }
       break;
 
       case("mysql_insert_move"):
       case("mysql_update_game"):
       {
-         echo "The insertion of the move into the database seems to have failed. " .
+         echo T_("The insertion of the move into the database seems to have failed. " .
             "This may or may not be a problem, please return to the game to see " .
-            "if the move has been registered.";
+            "if the move has been registered.");
       }
       break;
 
       case("mysql_insert_player"):
       {
-         echo "The insertion of your data into the database seems to have failed. " .
-            "If you can't log in, please try once more and, if this fails, contact the support.";
+         echo T_("The insertion of your data into the database seems to have failed. " .
+                 "If you can't log in, please try once more and, if this fails, contact the support.");
+      }
+      break;
+
+      case("mysql_query_failed"):
+      {
+         echo T_("Database query failed. Please wait a few minutes and try again. ");
       }
       break;
 
       case("mysql_select_db_failed"):
       {
-         echo "Couldn't select the database. Please wait a few minutes and try again. ";
+         echo T_("Couldn't select the database. Please wait a few minutes and try again. ");
       }
       break;
 
       case("mysql_start_game"):
       {
-         echo "Sorry, couldn't start the game. Please wait a few minutes and try again.";
+         echo T_("Sorry, couldn't start the game. Please wait a few minutes and try again.");
       }
       break;
 
       case("mysql_update_player"):
       {
-         echo "Sorry, couldn't update player data. Please wait a few minutes and try again.";
+         echo T_("Sorry, couldn't update player data. Please wait a few minutes and try again.");
       }
       break;
 
       case("name_not_given"):
       {
-         echo "Sorry, you have to supply a name.";
+         echo T_("Sorry, you have to supply a name.");
       }
       break;
 
       case("newpassword_already_sent"):
       {
-         echo "A new password has already been sent to this user, please use that password instead of sending another one.";
+         echo T_("A new password has already been sent to this user, please use that password instead of sending another one.");
       }
       break;
 
       case("no_action"):
       {
-         echo "Nothing to be done?";
+         echo T_("Nothing to be done?");
       }
       break;
 
+      case('no_email'):
+      {
+         echo T_("Sorry, no email has been given, so I can't send you the password. Please log in as guest and use the support forum to get help.");
+      }
+      break;
 
       case("no_game_nr"):
       {
-         echo "Sorry, I need a game number to know what game to show.";
+         echo T_("Sorry, I need a game number to know what game to show.");
+      }
+      break;
+
+      case("no_initial_rating"):
+      {
+         echo T_("Sorry, you and your opponent need to set an initial rating, otherwise I can't find a suitable handicap");
       }
       break;
 
       case("no_uid"):
       {
-         echo "Sorry, I need to known for which user to show the data.";
+         echo T_("Sorry, I need to known for which user to show the data.");
       }
       break;
 
       case("not_allowed_for_guest"):
       {
-         echo "Sorry, this is not allowed for guests, please first register a personal account";
+         echo T_("Sorry, this is not allowed for guests, please first register a personal account");
       }
       break;
 
       case("not_empty"):
       {
-         echo "Sorry, you may only place stones on empty points.";
+         echo T_("Sorry, you may only place stones on empty points.");
       }
       break;
 
       case("not_logged_in"):
       {
-         echo "Sorry, you have to be logged in to do that.";
+        printf( T_("Sorry, you have to be logged in to do that.\n" .
+                   "<p>\n" .
+                   "The reasons for this problem could be any of the following:\n" .
+                   "<ul>\n" .
+                   "<li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, " .
+                   "or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.\n" .
+                   "<li> Your cookies have expired. This happens once a month.\n" .
+                   "<li> You haven't enabled cookies in your browser.\n" .
+                   "</ul>"),
+                $HOSTBASE );
+      }
+      break;
+
+      case('cookies_disabled'):
+      {
+         echo T_("Sorry, you haven't enabled cookies in your browser.");         
       }
       break;
 
       case("not_your_turn"):
       {
-         echo "Sorry, it's not your turn.";
+         echo T_("Sorry, it's not your turn.");
       }
       break;
 
-      case("password_missmatch"):
+      case("already_played"):
       {
-         echo "The confirmed password didn't match the password, please go back and retry.";
+         echo T_("Sorry, this turn has already been played.");
+      }
+      break;
+
+      case("page_not_found"):
+      {
+         echo T_('Page not found. Please contact the server administrators and inform them of the time the error occurred, and anything you might have done that may have caused the error.');
+         //echo '<br>('.@$_SERVER['REDIRECT_STATUS'].': '.@$_SERVER['REDIRECT_URL'].' / '.getcwd().')';
+      }
+      break;
+
+      case("password_illegal_chars"):
+      {
+         echo T_("The password contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+.,:;?!%* are allowed.");
+      }
+      break;
+
+      case("userid_illegal_chars"):
+      {
+         echo T_("The userid contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+ are allowed, and the first one must be a-z, A-Z.");
+      }
+      break;
+
+      case("password_mismatch"):
+      {
+         echo T_("The confirmed password didn't match the password, please go back and retry.");
       }
       break;
 
       case("password_too_short"):
       {
-         echo "Sorry, the password must be at least six letters.";
+         echo T_("Sorry, the password must be at least six letters.");
       }
       break;
 
-      case("reciever_not_found"):
+      case("receiver_not_found"):
       {
-         echo "Sorry, couldn't find the reciever of your message. Make sure to use " .
-            "the userid, not the full name.";
+         echo T_("Sorry, couldn't find the reciever of your message. Make sure to use " .
+                 "the userid, not the full name.");
       }
       break;
 
-      case("rank_not_rating");
+      case("rank_not_rating"):
       {
-         echo "Sorry, I've problem with the rating, did you forget to specify 'kyu' or 'dan'?";
+         echo T_("Sorry, I've problem with the rating, did you forget to specify 'kyu' or 'dan'?");
       }
       break;
 
-      case("rating_not_rank");
+      case("rating_not_rank"):
       {
-         echo "Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' " .
-            "for this ratingtype";
-      }
-      break;
-
-      case("reciver_self"):
-      {
-         echo "Sorry, you can't send messages to your self.";
+         echo T_("Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' " .
+                 "for this ratingtype");
       }
       break;
 
       case("suicide"):
       {
-         echo "Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset.";
+         echo T_("Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset.");
       }
       break;
 
       case("unknown_game"):
       {
-         echo "Sorry, I can't find that game.";
+         echo T_("Sorry, I can't find that game.");
       }
       break;
 
-     
-      case("unknown_message"):
+
+      case("unknown_forum"):
       {
-         echo "Sorry, I couldn't find the message you wanted to show.";
+         echo T_("Sorry, I couldn't find that forum you wanted to show.");
       }
       break;
-     
+
+
+      case("unknown_parent_post"):
+      {
+         echo T_("Hmm, this message seems to be a reply to a non-existing post.");
+      }
+      break;
+
+
+      case("unknown_message"):
+      {
+         echo T_("Sorry, I couldn't find the message you wanted to show.");
+      }
+      break;
+
 
       case("unknown_user"):
       {
-         echo "Sorry, I couldn't find this user.";
+         echo T_("Sorry, I couldn't find this user.");
       }
       break;
 
       case("userid_in_use"):
       {
-         echo "Sorry, this userid is already used, please try to find a unique userid.";
+         echo T_("Sorry, this userid is already used, please try to find a unique userid.");
       }
       break;
 
       case("userid_too_short"):
       {
-         echo "Sorry, userid must be at least 3 letters long.";
+         echo T_("Sorry, userid must be at least 3 letters long.");
       }
       break;
 
-      case("value_out_of_range");
+      case("value_out_of_range"):
       {
-         echo "Couldn't extrapolate value in function interpolate()";
+         echo T_("Couldn't extrapolate value in function interpolate");
       }
       break;
 
-      case("wrong_number_of_handicap_stone");
+      case("waitingroom_delete_not_own"):
       {
-         echo "Wrong, number of handicap stones";
+         echo T_("Sorry, you may only delete your own game.");
+      }
+      break;
+
+      case("waitingroom_game_not_found"):
+      {
+         echo T_("Sorry, couldn't find this waiting room game. Probably someone has already joined it.");
+      }
+      break;
+
+      case("waitingroom_own_game"):
+      {
+         echo T_("Sorry, you can't join your own game.");
+      }
+      break;
+
+      case("waitingroom_not_in_rating_range"):
+      {
+         echo T_("Sorry, you are not in the specified rating range.");
+      }
+      break;
+
+      case("wrong_number_of_handicap_stone"):
+      {
+         echo T_("Wrong number of handicap stones");
       }
       break;
 
       case("wrong_password"):
       {
-         echo "Sorry, invalid password.";
+         echo T_("Sorry, you didn't write your current password correctly.");
       }
       break;
-      
-      case("wrong_rank_type");
+
+      case("wrong_rank_type"):
       {
-         echo "Unknown rank type";
+         echo T_("Unknown rank type");
       }
       break;
 
       case("wrong_userid"):
       {
-         echo "Sorry, I don't know anyone with that userid.";
+         echo T_("Sorry, I don't know anyone with that userid.");
       }
       break;
 
-      case("rating_out_of_range");
+      case("rating_out_of_range"):
       {
-         echo "Sorry, the initial rating must be between 30 kyu and 6 dan";
+         echo T_("Sorry, the initial rating must be between 30 kyu and 6 dan.");
       }
+      break;
+
+      case("value_not_numeric"):
+      {
+        echo T_("Sorry, you wrote a non-numeric value on a numeric field.");
+      }
+      break;
+
+      case("not_translator"):
+      {
+         echo T_("Sorry, only translators are allowed to translate.") . '<p>' .
+            T_("If you want to help translating dragon, please post a message to the 'translation' forum.");
+      }
+      break;
+
+      case("not_correct_transl_language"):
+      {
+        echo T_("Sorry, you are not allowed to translate the specified language.");
+      }
+      break;
+
+      case("translation_bad_language_or_group"):
+      {
+        echo T_("Sorry, I couldn't find the language or group you want to translate. Please contact the support.");
+      }
+      break;
+
+      case("couldnt_update_translation"):
+      {
+        echo T_("Sorry, something went wrong when trying to insert the new translations into the database.");
+      }
+      break;
+
+      case("couldnt_make_backup"):
+      {
+        echo T_("Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support.");
+      }
+      break;
+
+      case("couldnt_open_transl_file"):
+      {
+        echo T_("Sorry, I was unable to open a file for writing. Please contact the support.");
+      }
+      break;
+
+      case('admin_already_translated'):
+      {
+         echo T_("Sorry, this entry is already translated, so I cannot make untranslatable.");
+      }
+      break;
+
+      case("adminlevel_too_low"):
+      {
+        echo T_("Sorry, this page is solely for users with administrative tasks.");
+      }
+      break;
+
+      case("admin_no_longer_admin_admin"):
+      {
+         echo T_("Hmm, you seem to try to revoke your abillity to edit the admin staff.");
+      }
+      break;
+
+      case("new_admin_already_admin"):
+      {
+         echo T_("This user is already an admin.");
+      }
+      break;
+
+      case("admin_no_such_entry"):
+      {
+        echo T_("Sorry, couldn't find that entry.");
+      }
+      break;
+
+      case("no_specified_user"):
+      {
+        echo T_("Sorry, you must specify a user.");
+      }
+      break;
+
+      case("unknown_organizer"):
+      {
+        echo T_("Sorry, one or more users in the organizer list couldn't be found.");
+      }
+      break;
+
+      case("mysql_insert_tournament"):
+      {
+        echo T_("Sorry, the tournament creation in the mysql database failed.");
+      }
+      break;
+
+      case("strange_tournament_id"):
+      {
+        echo T_("Sorry, a correct tournament id is required.");
+      }
+      break;
+
+      case("no_such_tournament"):
+      {
+        echo T_("Sorry, I couldn't find the given tournament.");
+      }
+      break;
+
+      case("remove_form_tournament_failed"):
+      {
+        echo T_("Sorry, something went wrong when removing you from the tournament.");
+      }
+      break;
+
+      case("add_form_tournament_failed"):
+      {
+        echo T_("Sorry, something went wrong when adding you to the tournament.");
+      }
+      break;
+
+      case("could_not_start_tournament"):
+      {
+        echo T_("Sorry, something went wrong when trying start a tournament.");
+      }
+      break;
+
+      case("folder_not_found"):
+      {
+         echo T_("Sorry, couldn't find the specified message folder.");
+      }
+      break;
+
+      case("not_a_player"):
+      {
+         echo T_("Sorry, you're not a player in this game.");
+      }
+      break;
 
       default:
       {
-         echo "Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.";
+         echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.")." ($err)";
       }
       break;
    }
 
-   if( $mysql and mysql_error())
-      echo("<p>Mysql error: " . mysql_error() );
+   $mysqlerror = get_request_arg('mysqlerror'); //@$_GET['mysqlerror'];
+   if( $mysqlerror )
+      echo("<p>Mysql error: " . $mysqlerror );
 
+   echo '<p>';
    end_page();
 }
 ?>

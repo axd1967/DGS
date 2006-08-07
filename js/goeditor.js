@@ -1,6 +1,6 @@
 /*
 Dragon Go Server
-Copyright (C) 2002  Erik Ouchterlony
+Copyright (C) 2002-2003  Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -58,6 +58,9 @@ var path = '';
 
 var letters = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
+var woodbgcolors = ['', '#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848'];
+
 function init(nr)
 {
    var x, y;
@@ -75,13 +78,15 @@ function init(nr)
    current_mode[nr] = 'play';
    current_index[nr] = 0;
 
+   number_mode = 'number2';
+
    goban[nr] = [];
    index[nr] = [];
    mark[nr] = [];
    move_history[nr] = [];
 
    if( size[nr] < 1 ) size[nr] = 19;
-   if( size[nr] > 25 ) size[nr] = 25;
+   if( size[nr] > 25 ) size[nr] = 25; //MAX_BOARD_SIZE
 
    if( startx[nr] < 0 ) startx[nr] = 0;
    if( endx[nr] > size[nr] ) endx[nr] = size[nr];
@@ -110,8 +115,11 @@ function show_goban(nr)
 {
   var x, y, fig;
   var stonesz = stonesize[nr];
+  var woodstring = ( woodcolor[nr] > 10
+                    ? 'bgcolor=' + woodbgcolors[woodcolor[nr] - 10]
+                    : 'background="' + path + 'images/wood' + woodcolor[nr] + '.gif"');
 
-  document.write('<table border=0 cellpadding=0 cellspacing=0 background="'+path+'images/wood'+woodcolor[nr]+'.gif" align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
+  document.write('<table border=0 cellpadding=0 cellspacing=0 '+woodstring+' align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
   for( y=starty[nr]; y<endy[nr]; y++)
   {
      document.write('<tr>');
@@ -132,6 +140,13 @@ function show_goban(nr)
 
 function change_mode(nr, new_mode)
 {
+   if( current_mode[nr] == new_mode )
+   {
+      if( new_mode == 'play' || new_mode == 'number2' )
+         change_col_next(nr, 3-col_next[nr]);
+
+      return;
+   }
    document.images[current_mode[nr]+'_'+nr+'_1'].src = path+'images/gr.png';
    document.images[current_mode[nr]+'_'+nr+'_2'].src = path+'images/gr.png';
    document.images[current_mode[nr]+'_'+nr+'_3'].src = path+'images/gr.png';
@@ -185,7 +200,7 @@ function show_editor_buttons(nr)
    document.writeln("</td></tr><tr><td>");
    show_button(nr, 'letter', 'change_mode', stonesz+'/la.'+img, 'Letter', sz, sz, border, 0);
    document.writeln("</td><td>");
-   show_button(nr, 'number', 'change_mode', stonesz+'/b1.'+img, 'Number', sz, sz, border, 0);
+   show_button(nr, number_mode, 'change_mode', stonesz+'/b1.'+img, 'Number', sz, sz, border, 0);
    document.writeln('</td></tr><tr><td><img src="'+path+'images/blank.gif" width=1 height='+(border*2)+'></td></tr><tr><td colspan=2>');
    show_button(nr, 'undo', 'undo', stonesz+'/undo.'+img, 'Undo', Math.round(sz*1.8), Math.round(sz*0.8), border, 0);
    document.writeln("</td></tr><tr><td colspan=2>");
@@ -220,11 +235,7 @@ function has_liberty(nr, start_x, start_y, remove)
                   for( ny=0; ny<size[nr]; ny++ )
                      if( index[nr][nx][ny] >= current_index[nr] )
                      {
-                        add_to_history(nr, nx, ny, goban[nr][nx][ny], mark[nr][nx][ny],
-                                       0, mark[nr][nx][ny]);
-
-                        goban[nr][nx][ny] = 0;
-                        set_image(nr, nx, ny);
+                        change_goban(nr, nx, ny, 0);
                      }
             }
             return false;
@@ -249,7 +260,7 @@ function has_liberty(nr, start_x, start_y, remove)
 
             if( new_color == c && index[nr][nx][ny] < current_index[nr] )
             {
-               x = nx;  // Go to the neigbour
+               x = nx;  // Go to the neighbour
                y = ny;
                index[nr][x][y] = current_index[nr] + dir;
             }
@@ -264,36 +275,20 @@ function has_liberty(nr, start_x, start_y, remove)
 function click(nr,x,y)
 {
    if( x < 0 || y < 0 || x >= size[nr] || y >= size[nr] ||
-       ( goban[nr][x][y] > 0 &&
-         ( current_mode[nr] == 'play' || current_mode[nr]=='letter' ) ) ||
+       ( goban[nr][x][y] > 0 && ( current_mode[nr] == 'play' ||
+                                  current_mode[nr] == 'letter' ) ) ||
        ( goban[nr][x][y] == 0 && current_mode[nr] == 'number' ) )
       return;
 
    move_nr[nr]++;
 
+   if( max_move_nr[nr] == move_nr[nr] )
+       max_move_nr[nr]++;  // make sure history is cleaned.
+
    if( lastx[nr] >= 0 && lasty[nr] >=0 && mark[nr][lastx[nr]][lasty[nr]] == 'm' &&
        !( current_mode[nr] == 'play' && goban[nr][x][y] > 0 ) )
    {
-      add_to_history(nr, lastx[nr], lasty[nr], goban[nr][lastx[nr]][lasty[nr]], 'm',
-                     goban[nr][lastx[nr]][lasty[nr]], '');
-      mark[nr][lastx[nr]][lasty[nr]] = '';
-      set_image(nr, lastx[nr], lasty[nr]);
-      lastx[nr] = lasty[nr] = -1;
-   }
-
-   var remove = false;
-   if( mark[nr][x][y].charAt(1) == letters[current_letter[nr]-1] && current_letter[nr] > 1)
-   {
-      document.images['letter_'+nr].src =
-         path+stonesize[nr]+'/l'+letters[--current_letter[nr]]+'.'+img;
-      remove = true;
-   }
-
-   if( Number(mark[nr][x][y]) == current_number[nr]-1 && current_number[nr] > 1)
-   {
-      document.images['number_'+nr].src =
-         path+stonesize[nr]+'/b'+(--current_number[nr])+'.'+img;
-      remove = true;
+      change_last(nr, -1, -1);
    }
 
    old_goban = goban[nr][x][y];
@@ -303,10 +298,8 @@ function click(nr,x,y)
    switch( current_mode[nr] )
    {
       case 'play':
-         if( mark[nr][x][y] == '' || mark[nr][x][y].charAt(0) == 'l')
-            mark[nr][x][y] = 'm';
-
-         goban[nr][x][y] = col_next[nr];
+         change_goban(nr, x, y, col_next[nr]);
+         change_last(nr, x, y);
 
          if( x > 0 && goban[nr][x-1][y] == 3-col_next[nr] )
             has_liberty(nr, x-1, y, true);
@@ -322,83 +315,63 @@ function click(nr,x,y)
 
          has_liberty(nr, x, y, true);
 
-         col_next[nr] = 3-col_next[nr];
-         document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
-         lastx[nr] = x;
-         lasty[nr] = y;
+         change_col_next(nr, 3-col_next[nr]);
          break;
 
       case 'black':
          if( goban[nr][x][y] == 1 )
-            goban[nr][x][y] = 0;
+            change_goban(nr, x, y, 0);
          else
          {
-            goban[nr][x][y] = 1;
-
-            if( mark[nr][x][y].charAt(1) == 'l' )
-               mark[nr][x][y] = '';
-
-            if( col_next[nr] = 1 )
-            {
-               col_next[nr] = 2;
-               document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
-            }
+            change_goban(nr, x, y, 1);
+            change_col_next(nr, 2);
          }
          break;
 
       case 'white':
          if( goban[nr][x][y] == 2 )
-            goban[nr][x][y] = 0;
+            change_goban(nr, x, y, 0);
          else
          {
-            goban[nr][x][y] = 2;
-
-            if( mark[nr][x][y].charAt(1) == 'l' )
-               mark[nr][x][y] = '';
-
-            if( col_next[nr] = 2 )
-            {
-               col_next[nr] = 1;
-               document.images['play_'+nr].src =
-                  path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
-            }
+            change_goban(nr, x, y, 2);
+            change_col_next(nr, 1);
          }
          break;
 
       case 'triangle':
-         mark[nr][x][y] = ( mark[nr][x][y] == 't' ? '' : 't' );
+         change_mark(nr, x, y, (mark[nr][x][y] == 't' ? '' : 't') );
          break;
 
       case 'circle':
-         mark[nr][x][y] = ( mark[nr][x][y] == 'c' ? '' : 'c' );
+         change_mark(nr, x, y, (mark[nr][x][y] == 'c' ? '' : 'c') );
          break;
 
       case 'square':
-         mark[nr][x][y] = ( mark[nr][x][y] == 's' ? '' : 's' );
+         change_mark(nr, x, y, (mark[nr][x][y] == 's' ? '' : 's') );
          break;
 
       case 'cross':
-         mark[nr][x][y] = ( mark[nr][x][y] == 'x' ? '' : 'x' );
+         change_mark(nr, x, y, (mark[nr][x][y] == 'x' ? '' : 'x') );
          break;
 
       case 'letter':
-         mark[nr][x][y] = ( remove ? '' : 'l'+letters[current_letter[nr]++] );
-
-         document.images['letter_'+nr].src =
-            path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
+         change_mark(nr, x, y, 'l'+letters[current_letter[nr]]);
+         increase_letter(nr);
          break;
 
       case 'number':
-         mark[nr][x][y] = ( remove ? '' : ''+(current_number[nr]++) );
+         change_mark(nr, x, y, ''+(current_number[nr]));
+         increase_number(nr);
+         break;
 
-         document.images['number_'+nr].src =
-            path+stonesize[nr]+'/b'+current_number[nr]+'.'+img;
+      case 'number2':
+         change_goban(nr, x, y, col_next[nr]);
+         change_mark(nr, x, y, ''+(current_number[nr]));
+         increase_number(nr);
+         change_col_next(nr, 3-col_next[nr]);
          break;
 
    }
-
-   add_to_history(nr, x, y, old_goban, old_mark, goban[nr][x][y], mark[nr][x][y]);
-   set_image(nr, x, y);
 }
 
 function undo(nr, mode)
@@ -406,45 +379,47 @@ function undo(nr, mode)
    var a;
    if( move_nr[nr] == 0 ) return;
 
-   for( var i=0; i<move_history[nr][move_nr[nr]].length; i++ )
+   for(var i=move_history[nr][move_nr[nr]].length-1; i>=0; i--)
    {
       a = move_history[nr][move_nr[nr]][i];
-      goban[nr][a[0]][a[1]] = a[2];
-      mark[nr][a[0]][a[1]] = a[3];
-      set_image(nr, a[0], a[1]);
 
-      if( a[3] == 'm' )
+      switch( a[0] )
       {
-         lastx[nr] = a[0];
-         lasty[nr] = a[1];
-      }
+         case 'l':
+            lastx[nr] = a[1];
+            lasty[nr] = a[2];
+            break;
 
-      if( Number(a[5]) >= 1 && !isNaN(Number(a[5])))
-      {
-         current_number[nr] = Number(a[5]);
-         document.images['number_'+nr].src =
-            path+stonesize[nr]+'/b'+current_number[nr]+'.'+img;
-      }
-      else if( Number(a[3]) == current_number[nr] )
-         document.images['number_'+nr].src =
-            path+stonesize[nr]+'/b'+(++current_number[nr])+'.'+img;
+         case '1':
+            current_number[nr] = a[1];
+            document.images[number_mode+'_'+nr].src =
+               path+stonesize[nr]+'/b'+(current_number[nr])+'.'+img;
+            break;
 
-      if( a[5].charAt(0) == 'l' )
-      {
-         current_letter[nr] = (a[5].charCodeAt(1) - 'a'.charCodeAt(0) + 1);
-         document.images['letter_'+nr].src =
-            path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
-      }
-      else if( a[3].charAt(1) == letters[current_letter[nr]] )
-         document.images['letter_'+nr].src =
-            path+stonesize[nr]+'/l'+letters[++current_letter[nr]]+'.'+img;
+         case 'a':
+            current_letter[nr] = a[1];
+            document.images['letter_'+nr].src =
+               path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
+            break;
 
-      if( a[2] == 0 && a[4] > 0 )
-      {
-         col_next[nr] = 3-col_next[nr];
-         document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
-      }
+         case 'g':
+            goban[nr][a[1]][a[2]] = a[3];
+            set_image(nr, a[1], a[2]);
+            break;
 
+         case 'm':
+            mark[nr][a[1]][a[2]] = a[3];
+            set_image(nr, a[1], a[2]);
+            break;
+
+         case 'n':
+            col_next[nr] = a[1];
+            document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[a[1]]+'.'+img;
+            if( number_mode == 'number2' )
+               document.images['number2_'+nr].src =
+                  path+stonesize[nr]+'/'+col[a[1]]+current_number[nr]+'.'+img;
+            break;
+      }
    }
 
    move_nr[nr]--;
@@ -453,52 +428,56 @@ function undo(nr, mode)
 function redo(nr, mode)
 {
    var a;
-   if( move_nr[nr] == max_move_nr[nr] ) return;
+
+   if( move_nr[nr] == max_move_nr[nr] )
+   {
+      refresh(nr);
+      return;
+   }
+
    move_nr[nr]++;
 
-   for( var i=0; i<move_history[nr][move_nr[nr]].length; i++ )
+   for(var i=0; i<move_history[nr][move_nr[nr]].length; i++)
    {
       a = move_history[nr][move_nr[nr]][i];
-      goban[nr][a[0]][a[1]] = a[4];
-      mark[nr][a[0]][a[1]] = a[5];
-      set_image(nr, a[0], a[1]);
 
-      if( a[5] == 'm' )
+      switch( a[0] )
       {
-         lastx[nr] = a[0];
-         lasty[nr] = a[1];
-      }
+         case 'l':
+            lastx[nr] = a[3];
+            lasty[nr] = a[4];
+            break;
 
-      if( Number(a[5]) == current_number[nr] )
-         document.images['number_'+nr].src =
-            path+stonesize[nr]+'/b'+(++current_number[nr])+'.'+img;
-      else if( Number(a[3]) >= 1 && !isNaN(Number(a[5])))
-      {
-         current_number[nr] = Number(a[3]);
-         document.images['number_'+nr].src =
-            path+stonesize[nr]+'/b'+current_number[nr]+'.'+img;
-      }
+         case '1':
+            current_number[nr] = a[2];
+            document.images[number_mode+'_'+nr].src =
+               path+stonesize[nr]+'/b'+(current_number[nr])+'.'+img;
+            break;
 
+         case 'a':
+            current_letter[nr] = a[2];
+            document.images['letter_'+nr].src =
+               path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
+            break;
 
-      if( a[5].charAt(1) == letters[current_letter[nr]] )
-      {
-         document.images['letter_'+nr].src =
-            path+stonesize[nr]+'/l'+letters[++current_letter[nr]]+'.'+img;
-      }
-      else if( a[3].charAt(0) == 'l'  )
-      {
-         current_letter[nr] = (a[3].charCodeAt(1) - 'a'.charCodeAt(0) + 1);
-         document.images['letter_'+nr].src =
-            path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
-      }
+         case 'g':
+            goban[nr][a[1]][a[2]] = a[4];
+            set_image(nr, a[1], a[2]);
+            break;
 
-      if( a[4] == 0 && a[2] > 0 )
-      {
-         col_next[nr] = 3-col_next[nr];
-         document.images['play_'+nr].src =
-            path+stonesize[nr]+'/p'+col[col_next[nr]]+'.'+img;
-      }
+         case 'm':
+            mark[nr][a[1]][a[2]] = a[4];
+            set_image(nr, a[1], a[2]);
+            break;
 
+         case 'n':
+            col_next[nr] = a[2];
+            document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[a[2]]+'.'+img;
+            if( number_mode == 'number2' )
+               document.images['number2_'+nr].src =
+                  path+stonesize[nr]+'/'+col[a[2]]+current_number[nr]+'.'+img;
+            break;
+      }
    }
 }
 
@@ -517,8 +496,10 @@ function dump_data(nr, formname)
       }
       separator = ';';
    }
-   document.forms[formname].elements['dimensions'+nr].value =
-      size[nr] +','+ startx[nr] +','+ endx[nr] + ','+ starty[nr] +','+ endy[nr];
+   //   document.forms[formname].elements['dimensions'+nr].value =
+   //      size[nr] +','+ (startx[nr]+1) +','+ endx[nr] + ','+ (starty[nr]+1) +','+ endy[nr];
+   document.forms[formname].elements['altered'+nr].value =
+       ( move_history[nr].length > 0 ? 'Y' : 'N' );
    document.forms[formname].elements['data'+nr].value = string;
 }
 
@@ -553,7 +534,7 @@ function get_empty_image(x, y, sz)
 function set_image(nr, x, y)
 {
    var prefix = col[goban[nr][x][y]];
-
+//   alert('x: '+x+'  y: '+y+'   g: '+prefix+'   m: '+mark[nr][x][y]);
    if( prefix == 'e' )
       prefix = get_empty_image(x, y, size[nr]);
 
@@ -565,7 +546,7 @@ function set_image(nr, x, y)
    document.images["pos"+nr+"_"+x+"_"+y].src = path+stonesize[nr]+'/'+prefix+'.'+img;
 }
 
-function add_to_history(nr, x, y, before_goban, before_mark, after_goban, after_mark)
+function push_history(nr, push_array)
 {
    var i;
 
@@ -577,16 +558,136 @@ function add_to_history(nr, x, y, before_goban, before_mark, after_goban, after_
       max_move_nr[nr] = move_nr[nr];
    }
 
-   move_history[nr][move_nr[nr]].
-      push([x, y, before_goban, before_mark, after_goban, after_mark]);
+   move_history[nr][move_nr[nr]][move_history[nr][move_nr[nr]].length] = push_array;
+   //   move_history[nr][move_nr[nr]].push(push_array);
+}
+
+function change_last(nr, x, y)
+{
+   push_history(nr, ['l', lastx[nr], lasty[nr], x , y]);
+   if( lastx[nr] >= 0 && lasty[nr] >= 0 && mark[nr][lastx[nr]][lasty[nr]] == 'm' )
+   {
+      push_history(nr, ['m', lastx[nr], lasty[nr], mark[nr][lastx[nr]][lasty[nr]], '']);
+      mark[nr][lastx[nr]][lasty[nr]] = '';
+      set_image(nr, lastx[nr], lasty[nr]);
+   }
+   lastx[nr] = x;
+   lasty[nr] = y;
+
+   if( x >= 0 && y >= 0 && ( mark[nr][x][y] == '' || mark[nr][x][y].charAt(0) == 'l' ) )
+   {
+      push_history(nr, ['m', x, y, mark[nr][x][y], 'm']);
+      mark[nr][x][y] = 'm';
+      set_image(nr, x, y);
+   }
+}
+
+function change_col_next(nr, val)
+{
+   if( val == col_next[nr] )
+      return;
+
+   if( move_nr[nr] > 0 )
+      push_history(nr, ['n', col_next[nr], val]);
+   col_next[nr] = val;
+   document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[val]+'.'+img;
+   if( number_mode == 'number2' )
+      document.images['number2_'+nr].src =
+         path+stonesize[nr]+'/'+col[val]+current_number[nr]+'.'+img;
+}
+
+function increase_number(nr)
+{
+   push_history(nr, ['1', current_number[nr], current_number[nr] + 1]);
+   current_number[nr] ++;
+   if( current_number[nr] > 100 )
+      current_number[nr] = 1;
+   document.images[number_mode+'_'+nr].src =
+      path+stonesize[nr]+'/b'+(current_number[nr])+'.'+img;
+}
+
+function increase_letter(nr)
+{
+   push_history(nr, ['a', current_letter[nr], current_letter[nr] + 1]);
+   current_letter[nr] ++;
+   if( current_letter[nr] > 26 )
+      current_letter[nr] = 1;
+   document.images['letter_'+nr].src =
+      path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
+}
+
+function change_goban(nr, x, y, val)
+{
+   var m = mark[nr][x][y];
+
+
+   push_history(nr, ['g', x, y, goban[nr][x][y], val]);
+   goban[nr][x][y] = val;
+   if( (val > 0 && (m.charAt(0) == 'l')) ||
+       (( val == 0 && Number(m) >= 1 && !isNaN(Number(m))) ) )
+   {
+      push_history(nr, ['m', x, y, mark[nr][x][y], '']);
+      mark[nr][x][y] = '';
+   }
+
+   set_image(nr, x, y);
+}
+
+function change_mark(nr, x, y, val)
+{
+   var g = goban[nr][x][y];
+   if( g > 0 && (val.charAt(0) == 'l') ||
+       g == 0 && Number(val) >= 1 && !isNaN(Number(val)) )
+      return;
+
+   push_history(nr, ['m', x, y, mark[nr][x][y], val]);
+   mark[nr][x][y] = val;
+
+   set_image(nr, x, y);
+}
+
+function refresh(nr)
+{
+   for(y=starty[nr]; y<endy[nr]; y++)
+   {
+      for(x=startx[nr]; x<endx[nr]; x++)
+      {
+         set_image(nr, x, y);
+      }
+   }
+
+}
+
+function enter_data(nr, data)
+{
+   var row;
+   var data_rows = data.split(';');
+   var c, v;
+
+   for(y=starty[nr]; y<endy[nr]; y++)
+   {
+      row = data_rows[y-starty[nr]].split(',');
+
+      for(x=startx[nr]; x<endx[nr]; x++)
+      {
+         c = row[x-startx[nr]].charAt(0);
+         v = ( c == 'b' ? 1 : ( c == 'w' ? 2 : 0 ) );
+         goban[nr][x][y] = v;
+         mark[nr][x][y] = row[x-startx[nr]].substr(1);
+         if( mark[nr][x][y] == 'm' )
+             {
+                 lastx[nr] = x;
+                 lasty[nr] = y;
+             }
+         set_image(nr, x, y);
+      }
+   }
 }
 
 /* Main function
 */
 function goeditor(nr, sz, start_x, end_x, start_y, end_y, stonesz, wood_color, subdir)
 {
-/*image_preload();*/
-
    path = ( subdir ? '../' : '' );
 
    size[nr] = sz;

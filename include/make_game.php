@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2003  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Game";
 
 
-function make_invite_game($player_row, $opponent_row)
+function make_invite_game($player_row, $opponent_row, $disputegid)
 {
    global $NOW;
 
@@ -67,7 +67,7 @@ function make_invite_game($player_row, $opponent_row)
    if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
        ( !$player_row["RatingStatus"] or !$opponent_row["RatingStatus"] ) )
    {
-      error( "no_initial_rating" );
+      error("no_initial_rating");
    }
 
    //ToMove_ID=$tomove will hold handitype until ACCEPTED
@@ -126,7 +126,7 @@ function make_invite_game($player_row, $opponent_row)
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
-   if( $rated != 'Y' or $to_me )
+   if( $rated != 'Y' or $Black_ID == $White_ID )
       $rated = 'N';
 
    if( $stdhandicap != 'Y' or !standard_handicap_is_possible($size, $handicap) )
@@ -155,13 +155,15 @@ function make_invite_game($player_row, $opponent_row)
    if( $disputegid > 0 )
    {
       // Check if dispute game exists
-      $result = mysql_query("SELECT ID FROM Games WHERE ID=$disputegid " .
-                            "AND Status='INVITED' AND " .
-                            "((Black_ID=$my_id AND White_ID=$opponent_ID) OR " .
-                            "(Black_ID=$opponent_ID AND White_ID=$my_id))");
+      $row= mysql_single_fetch("SELECT ID, Black_ID, White_ID FROM Games"
+                             . " WHERE ID=$disputegid AND Status='INVITED'");
 
-      if( @mysql_num_rows($result) != 1 )
-         error('unknown_game');
+      if( !$row )
+         error('unknown_game','make_invite_game1');
+      if( ( $row['Black_ID']!=$player_row['ID'] or $row['White_ID']!=$opponent_row['ID'] )
+       && ( $row['White_ID']!=$player_row['ID'] or $row['Black_ID']!=$opponent_row['ID'] )
+        )
+         error('unknown_game','make_invite_game2');
 
       $query = "UPDATE Games SET $query WHERE ID=$disputegid LIMIT 1";
    }
@@ -169,12 +171,17 @@ function make_invite_game($player_row, $opponent_row)
       $query = "INSERT INTO Games SET $query";
 
    $result = mysql_query( $query )
-      or error('mysql_insert_game','invite1');
+      or error('mysql_insert_game','make_invite_game3');
 
    if( mysql_affected_rows() != 1)
-      error('mysql_insert_game','invite2');
+      error('mysql_insert_game','make_invite_game4');
 
-   return $disputegid;
+   if( $disputegid > 0 )
+      $gid = $disputegid;
+   else
+      $gid = mysql_insert_id();
+
+   return $gid;
 }
 
 
@@ -185,37 +192,34 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
 
 //   var_dump($game_info_row);
 //   die();
-   if($gid > 0 and !( $game_row["Black_ID"] == $player_row['ID'] and
-                      $game_row["White_ID"] == $opponent_row['ID'] or
-                      $game_row["White_ID"] == $player_row['ID'] and
-                      $game_row["Black_ID"] == $opponent_row['ID'] ))
+   if($gid > 0 and !( $game_info_row["Black_ID"] == $black_row['ID'] and
+                      $game_info_row["White_ID"] == $white_row['ID'] or
+                      $game_info_row["White_ID"] == $black_row['ID'] and
+                      $game_info_row["Black_ID"] == $white_row['ID'] ))
       error("mysql_start_game",'not_correct_players');
-
-   $clock_used_black = ( $black_row['OnVacation'] > 0 ? VACATION_CLOCK
-                         : $black_row["ClockUsed"]);
-   $clock_used_white = ( $white_row['OnVacation'] > 0 ? VACATION_CLOCK
-                         : $white_row["ClockUsed"]);
 
    $rating_black = $black_row["Rating2"];
    $rating_white = $white_row["Rating2"];
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row["Size"]));
 
+   $clock_used_black = ( $black_row['OnVacation'] > 0 ? VACATION_CLOCK
+                         : $black_row["ClockUsed"]);
+   $clock_used_white = ( $white_row['OnVacation'] > 0 ? VACATION_CLOCK
+                         : $white_row["ClockUsed"]);
+
    if( $game_info_row['WeekendClock'] != 'Y' )
    {
-      $clock_used_white += WEEKEND_CLOCK_OFFSET;
       $clock_used_black += WEEKEND_CLOCK_OFFSET;
+      $clock_used_white += WEEKEND_CLOCK_OFFSET;
    }
-
-   $ticks_black = get_clock_ticks($clock_used_black);
-   $ticks_white = get_clock_ticks($clock_used_white);
 
    $Rated = ( $game_info_row['Rated'] === 'Y' and
               !empty($black_row['RatingStatus']) and
               !empty($white_row['RatingStatus']) );
 
    $stdhandicap = $game_info_row['StdHandicap'];
-   if( $stdhandicap == 'Y' and
+   if( $stdhandicap != 'Y' or
        !standard_handicap_is_possible($size, $game_info_row['Handicap'] ) )
       $stdhandicap = 'N';
 
@@ -225,14 +229,13 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
    {
       $to_move_id = $white_row['ID'];
       $clock_used = $clock_used_white;
-      $last_ticks = $ticks_white;
    }
    else
    {
       $to_move_id = $black_row['ID'];
       $clock_used = $clock_used_black;
-      $last_ticks = $ticks_black;
    }
+   $last_ticks = get_clock_ticks($clock_used);
 
    $set_query =
       "Black_ID=" . $black_row["ID"] . ", " .
@@ -241,7 +244,7 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
       "Status='PLAY', " .
       "Moves=$moves, " .
       "ClockUsed=$clock_used, " .
-      "LastTicks=$ticks_white, " .
+      "LastTicks=$last_ticks, " .
       "Lastchanged=FROM_UNIXTIME($NOW), " .
       "Starttime=FROM_UNIXTIME($NOW), " .
       "Size=$size, " .
@@ -261,14 +264,16 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
 
    if( $gid > 0 )
    {
-      mysql_query("UPDATE Games SET $set_query WHERE ID=$gid LIMIT 1") or die(mysql_error());
+      mysql_query("UPDATE Games SET $set_query WHERE ID=$gid LIMIT 1")
+         or error("mysql_start_game","update_game $gid");
       if( mysql_affected_rows() != 1)
-         error("mysql_start_game",'create_game');
+         error("mysql_start_game","update_game_row $gid");
 
    }
    else
    {
-      mysql_query("INSERT INTO Games SET $set_query") or die(mysql_error());
+      mysql_query("INSERT INTO Games SET $set_query")
+         or error("mysql_start_game",'insert_game');
       $gid = mysql_insert_id();
    }
 
@@ -280,7 +285,7 @@ function create_game($black_row, $white_row, $game_info_row, $gid=null)
 
 function standard_handicap_is_possible($size, $hcp)
 {
-   return( $hcp == 19 or $hcp <= 4 or ($hcp <= 9 and $size%2 == 1 and $size>=9) );
+   return( $size == 19 or $hcp <= 4 or ($hcp <= 9 and $size%2 == 1 and $size>=9) );
 }
 
 function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
@@ -300,7 +305,7 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
    {
       $l = strlen( $stonestring );
       if( $l != 2*$hcp )
-         die("Bad stonestring in make_standard_placement_of_handicap_stones");
+         error('internal_error','bad stonestring std_handicap');
 
 
       $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
@@ -312,15 +317,15 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
          if( !isset($rownr) or !isset($colnr) )
             error("illegal_position",'std_handicap');
 
-         $query .= "($gid, " . $i/2 . ", " . BLACK . ", $colnr, $rownr, 0)";
+         $query .= "($gid, " . ($i/2 + 1) . ", " . BLACK . ", $colnr, $rownr, 0)";
          if( $i+2 < $l ) $query .= ", ";
       }
    }
 
-   mysql_query( $query ) or die(mysql_error());
+   mysql_query( $query )
+      or error('internal_error','insert std_handicap');
 
    return true;
 }
-
 
 ?>

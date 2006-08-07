@@ -1,4 +1,22 @@
 <?php
+/*
+Dragon Go Server
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 $quick_errors = 1;
 require_once( "include/std_functions.php" );
@@ -6,13 +24,14 @@ require_once( "include/board.php" );
 require_once( "include/move.php" );
 //require_once( "include/rating.php" );
 
-define('HOT_SECTION', true);
 
 
 function quick_warning($string) //Short one line message
 {
    echo "\nWarning: " . ereg_replace( "[\x01-\x20]+", " ", $string);
 }
+
+
 
 if( $is_down )
 {
@@ -22,17 +41,22 @@ else
 {
    disable_cache();
 
+   $gid = @$_REQUEST['gid'] ;
+   if( $gid <= 0 )
+      error("no_game_nr");
+
    connect2mysql();
 
    // logged in?
 
+   $uhandle= @$_COOKIE[COOKIE_PREFIX.'handle'];
    $result = @mysql_query( "SELECT ID, Timezone, " .
                            "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
-                           "FROM Players WHERE Handle='{$_COOKIE[COOKIE_PREFIX.'handle']}'" );
+                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
 
    if( @mysql_num_rows($result) != 1 )
    {
-      error("not_logged_in");
+      error("not_logged_in",'qp1');
    }
 
    $player_row = mysql_fetch_assoc($result);
@@ -40,43 +64,81 @@ else
    if( $player_row['Sessioncode'] !== @$_COOKIE[COOKIE_PREFIX.'sessioncode']
        or $player_row["Expire"] < $NOW )
    {
-      error("not_logged_in");
+      error("not_logged_in",'qp2');
    }
 
-   $gid = @$_REQUEST['gid'] ;
-   if( $gid <= 0 )
-      error("unknown_game");
-
-
-   if( !empty( $player_row["Timezone"] ) )
-      putenv('TZ='.$player_row["Timezone"] );
+/*
+   setTZ( $player_row['Timezone']);
+*/
 
    $my_id = $player_row['ID'];
 
-   $result = mysql_query( "SELECT Games.*, " .
-                          "Games.Flags+0 AS flags, " .
+   $game_row = mysql_single_fetch(
+                          "SELECT Games.*, " .
+                          "Games.Flags+0 AS GameFlags, " . //used by check_move
                           "black.ClockUsed AS Blackclock, " .
                           "white.ClockUsed AS Whiteclock, " .
                           "black.OnVacation AS Blackonvacation, " .
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
-                        )
-            or error('mysql_query_failed');
+                        );
 
-   if( @mysql_num_rows($result) != 1 )
+   if( !$game_row )
       error("unknown_game");
 
-   $Last_X = NULL; $Last_Y = NULL;
-   extract(mysql_fetch_assoc($result));
+   $Last_X = $Last_Y = -1;
+   extract($game_row);
 
-   if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
+   if( $Status == 'INVITED' )
+   {
+      error("game_not_started");
+   }
+   else if( $Status == 'FINISHED' )
+   {
+      error("game_finished");
+   }
+   else if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
       or !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
       or ($Handicap>1 && $Moves<=$Handicap) //exclude first white move after handicap stones
      )
+   {
       error("invalid_action");
+   }
 
-   $old_moves = $Moves;
+
+   if( $my_id != $ToMove_ID )
+      error("not_your_turn",'qp9');
+
+
+   //See *** HOT_SECTION *** below
+   if( isset($_REQUEST['sgf_move']) )
+      list( $query_X, $query_Y) = sgf2number_coords($_REQUEST['sgf_move'], $Size);
+   elseif( isset($_REQUEST['board_move']) )
+      list( $query_X, $query_Y) = board2number_coords($_REQUEST['board_move'], $Size);
+   else
+      list( $query_X, $query_Y) = array( NULL, NULL);
+
+   if( is_null($query_X) or is_null($query_Y) )
+      error("illegal_position",'qp3');
+
+   if( isset($_REQUEST['sgf_prev']) )
+      list( $prev_X, $prev_Y) = sgf2number_coords($_REQUEST['sgf_prev'], $Size);
+   elseif( isset($_REQUEST['board_prev']) )
+      list( $prev_X, $prev_Y) = board2number_coords($_REQUEST['board_prev'], $Size);
+   else
+      list( $prev_X, $prev_Y) = array( NULL, NULL);
+
+   if( is_null($prev_X) or is_null($prev_Y) )
+      error("illegal_position",'qp4');
+
+   if( $prev_X != $Last_X or $prev_Y != $Last_Y )
+      error("already_played",'qp5');
+
+   $move_color = @$_REQUEST['color'];
+   if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
+      error("not_your_turn",'qp8');
+
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -85,128 +147,130 @@ else
    else
       error("database_corrupted");
 
-   if( $my_id != $ToMove_ID )
-      error("not_your_turn");
 
-
-   if( isset($_REQUEST['sgf_move']) )
-      list( $query_X, $query_Y) = sgf2number_coords($_REQUEST['sgf_move'], $Size);
-   elseif( isset($_REQUEST['board_move']) )
-      list( $query_X, $query_Y) = board2number_coords($_REQUEST['board_move'], $Size);
-   else
-      list( $query_X, $query_Y) = array( -1, -1);
-
-   if( is_null($query_X) or is_null($query_Y) )
-      error("illegal_position");
-
-   if( isset($_REQUEST['sgf_prev']) )
-      list( $prev_X, $prev_Y) = sgf2number_coords($_REQUEST['sgf_prev'], $Size);
-   elseif( isset($_REQUEST['board_prev']) )
-      list( $prev_X, $prev_Y) = board2number_coords($_REQUEST['board_prev'], $Size);
-   else
-      list( $prev_X, $prev_Y) = array( -1, -1);
-
-   if( is_null($prev_X) or is_null($prev_Y) )
-      error("illegal_position");
-
-   if( $prev_X != $Last_X or $prev_Y != $Last_Y )
-      error("already_played");
-
-   $move_color = @$_REQUEST['color'];
-   if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
-      error("not_your_turn");
-
+   //$action = always 'domove'
 
    $next_to_move = WHITE+BLACK-$to_move;
 
-   if( $old_moves+1 < $Handicap ) $next_to_move = BLACK;
+   if( $Moves+1 < $Handicap ) $next_to_move = BLACK;
 
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
 
 // Update clock
 
-   $hours = 0;
-
    if( $Maintime > 0 or $Byotime > 0)
    {
-
+      // LastTicks may handle -(time spend) at the moment of the start of vacations
       $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
-      $hours = ( $ticks > 0 ? (int)(($ticks-1) / $tick_frequency) : 0 );
+      $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 
       if( $to_move == BLACK )
       {
-         time_remaining($hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods, $Maintime,
-            $Byotype, $Byotime, $Byoperiods, true);
+         time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "Black_Maintime=$Black_Maintime, " .
              "Black_Byotime=$Black_Byotime, " .
              "Black_Byoperiods=$Black_Byoperiods, ";
       }
       else
       {
-         time_remaining($hours, $White_Maintime, $White_Byotime, $White_Byoperiods, $Maintime,
-            $Byotype, $Byotime, $Byoperiods, true);
+         time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
+            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
          $time_query = "White_Maintime=$White_Maintime, " .
              "White_Byotime=$White_Byotime, " .
              "White_Byoperiods=$White_Byoperiods, ";
       }
 
-      $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
-      if( $WeekendClock != 'Y' )
-         $next_clockused += 100;
-
-      if( $next_to_move == BLACK and $Blackonvacation > 0 or
-          $next_to_move == WHITE and $Whiteonvacation > 0 )
+      if( ($next_to_move == BLACK ? $Blackonvacation : $Whiteonvacation) > 0 )
       {
-         $next_clockused = -1;
-         $next_ticks = 0;
+         $next_clockused = VACATION_CLOCK;
       }
       else
-         $next_ticks = get_clock_ticks($next_clockused);
+      {
+         $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
+         if( $WeekendClock != 'Y' )
+            $next_clockused += WEEKEND_CLOCK_OFFSET;
+      }
 
-      $time_query .= "LastTicks=$next_ticks, " .
+      $time_query .= "LastTicks=" . get_clock_ticks($next_clockused) . ", " .
           "ClockUsed=$next_clockused, ";
    }
+   else
+   {
+      $hours = 0;
+      $time_query = '';
+   }
 
-   //$no_marked_dead = true; //( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
+   $no_marked_dead = true; //( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
 
-   list($lastx,$lasty) =
-      make_array( $gid, $array, $msg, $old_moves, NULL, $moves_result, $marked_dead, true );
+   $TheBoard = new Board( );
+   if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
+      error('internal_error', "quick_play load_from_db $gid");
 
-   $where_clause = " ID=$gid AND Moves=$old_moves";
-   $garbage = ($old_moves < DELETE_LIMIT+$Handicap) ;
+   //$too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
+
+
+
+/* **********************
+*** HOT_SECTION ***
+>>> See also confirm.php, quick_play.php and clock_tick.php
+Various dirty things (like duplicated moves) could append
+in case of multiple calls with the same move number. This could
+append in case of multi-players account with simultaneous logins
+or if one player hit twice the validation button during a net lag
+and/or if the opponent had already played between the two calls.
+
+Because the LOCK query is not implemented with MySQL < 4.0,
+we use the Moves field of the Games table to check those
+possible multiple queries.
+This is why:
+- the arguments are checked against the current state of the Games table
+- the current Games table give the current Moves value
+- the Games table is always modified while checking its Moves field (see $game_clause)
+- the Games table modification must always modify the Moves field (see $game_query)
+- this modification is always done in first place and checked before continuation
+*********************** */
+   $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
    $Moves++;
 
-      //case 'move':
+
+
+      //case 'domove':
       {
+         if( $Status != 'PLAY' )
+            error('invalid_action','qp0');
+
          $coord = number2sgf_coords( $query_X, $query_Y, $Size);
 
-         check_move();
-  //ajusted globals by check_move(): $array, $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
-  //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
+{//to fixe old way Ko detect. Could be removed when no more old way games.
+  if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
+}
+         check_move( $TheBoard, $coord, $to_move);
+//ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
+//here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
          $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
+         $prisoner_string = '';
          reset($prisoners);
-         $new_prisoner_string = "";
-
          while( list($dummy, list($x,$y)) = each($prisoners) )
          {
-            $move_query .= "($gid, $Moves, \"NONE\", $x, $y, 0), ";
-            $new_prisoner_string .= number2sgf_coords($x, $y, $Size);
+            $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
+            $prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
 
-         if( strlen($new_prisoner_string) != $nr_prisoners*2 )
+         if( strlen($prisoner_string) != $nr_prisoners*2 )
             error("move_problem");
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
-         $game_query = "UPDATE Games SET " .
-             "Moves=$Moves, " .
-             "Last_X=$colnr, " .
+
+         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+             "Last_X=$colnr, " . //used with mail notifications
              "Last_Y=$rownr, " .
-             "Lastchanged=FROM_UNIXTIME($NOW), " .
-             "Status='PLAY', " . $time_query;
+             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
+             "Status='PLAY', ";
 
          if( $nr_prisoners > 0 )
             if( $to_move == BLACK )
@@ -215,64 +279,28 @@ else
                $game_query .= "White_Prisoners=$White_Prisoners, ";
 
          if( $nr_prisoners == 1 )
-            $flags |= KO;
+            $GameFlags |= KO;
          else
-            $flags &= ~KO;
+            $GameFlags &= ~KO;
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
-             "Flags=$flags " .
-             " WHERE $where_clause LIMIT 1";
+             "Flags=$GameFlags, " .
+             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
       }
 
 
-if( HOT_SECTION )
-{
-   //*********************** HOT SECTION START ***************************
-   //could append in case of multi-players account with simultaneous logins
-   //or if one player hit twice the validation button during a net lag
-   //and if opponent has already played between the two quick_play.php/confirm.php calls.
+   //See *** HOT_SECTION *** above
+   $result = mysql_query( $game_query . $game_clause );
 
-   $result = mysql_query( "LOCK TABLES Games WRITE, Moves WRITE" );
-
-   if ( !$result )
-      error("internal_error","quick_play LOCK");
-
-   // Maybe not useful:
-   function unlock_games_tables()
-   {
-      $result = mysql_query( "UNLOCK TABLES");
-   }
-   register_shutdown_function('unlock_games_tables');
-
-   // Locked ... an ultimate verification:
-   $result = mysql_query( "SELECT Moves FROM Games WHERE Games.ID=$gid" );
-
-   if( @mysql_num_rows($result) != 1 )
-      error("internal_error", "quick_play verif $gid");
-
-   $tmp = mysql_fetch_assoc($result);
-
-   if( $tmp["Moves"] != $old_moves )
-      error("already_played");
-}//HOT_SECTION
+   if( mysql_affected_rows() != 1 )
+      error("mysql_update_game","qp20($gid)");
 
    $result = mysql_query( $move_query );
 
-   if( mysql_affected_rows() < 1 ) //and $action != 'delete' )
-      error("mysql_insert_move");
+   if( mysql_affected_rows() < 1 and $action != 'delete' )
+      error("mysql_insert_move","qp21($gid)");
 
-   $result = mysql_query( $game_query );
 
-   if( mysql_affected_rows() != 1 )
-      error("mysql_update_game");
-
-if( HOT_SECTION )
-{
-   $result = mysql_query( "UNLOCK TABLES");
-   if ( !$result )
-      error("internal_error","quick_play UNLOCK");
-   //*********************** HOT SECTION END *****************************
-}//HOT_SECTION
 
 
 
@@ -293,12 +321,9 @@ if( HOT_SECTION )
                 "WHERE ID=" . $player_row["ID"] . " LIMIT 1" );
 
 
-   if( $quick_errors )
-   {
-      echo "\nOk";
-      exit;
-   }
 
-   jump_to("game.php?gid=$gid");
+// No Jump somewhere
+
+   echo "\nOk";
 }
 ?>

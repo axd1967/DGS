@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2003  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -40,10 +40,13 @@ require_once( "include/form_functions.php" );
 
    $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 UTF-8
 
+   $sendit= @$_REQUEST['sendit'];
    $Email= get_request_arg( 'email', '');
+   $From= get_request_arg( 'from', '');
+   if( !$sendit && !$From )
+      $From= $EMAIL_FROM;
    $Subject= get_request_arg( 'subject', 'Mail test');
    $Text= "This is a test\nLine 2\nLine 3\n";
-   $sendit= @$_REQUEST['sendit'];
 
 
    start_html( 'mailtest', 0,
@@ -52,12 +55,16 @@ require_once( "include/form_functions.php" );
    $dform = new Form('dform', 'mailtest.php', FORM_POST, true );
 
    $dform->add_row( array(
-      'DESCRIPTION', 'Email',
-      'TEXTAREA', 'email', 80, 1, $Email,
+      'DESCRIPTION', 'To',
+      'TEXTINPUT', 'email', 80, 100, $Email,
+      ) );
+   $dform->add_row( array(
+      'DESCRIPTION', 'From',
+      'TEXTINPUT', 'from', 80, 100, $From,
       ) );
    $dform->add_row( array(
       'DESCRIPTION', 'Subject',
-      'TEXTAREA', 'subject', 80, 1, $Subject,
+      'TEXTINPUT', 'subject', 80, 100, $Subject,
       ) );
    $dform->add_row( array(
       'DESCRIPTION', 'Text',
@@ -67,7 +74,7 @@ require_once( "include/form_functions.php" );
    $dform->add_row( array(
       'CELL', 9, 'align="center"',
       'HIDDEN', 'charset', $encoding_used,
-      'OWNHTML', '<INPUT type="submit" name="sendit" accesskey="s" value="S-end it">',
+      'OWNHTML', '<INPUT type="submit" name="sendit" accesskey="x" value="Send it (&x)">',
       ) );
 
    $dform->echo_string(1);
@@ -79,11 +86,14 @@ require_once( "include/form_functions.php" );
    }
    else if( $sendit && $Email )
    {
-      $headers = "From: $EMAIL_FROM\n";
+      if( $From )
+         $headers = "From: $From\n";
+      else
+         $headers = "";
 
       $msg = str_pad('', 47, '-') . "\n" .
           "Date: ".date($date_fmt, $NOW) . "\n" .
-          "From: Admin staff\n" .
+          "From: DragonGo admin staff\n" .
           "Subject: ".strip_tags( $Subject, '') . "\n\n" .
           strip_tags( $Text, '') . "\n";
 
@@ -94,7 +104,7 @@ require_once( "include/form_functions.php" );
       }
       else
       {
-         echo "<br>Message sent to $Email:<br>";
+         echo "<br>Message sent to $Email / $From:<br>";
          echo "<pre>$msg</pre>";
       }
    }

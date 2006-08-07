@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,42 +19,83 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-include("forum_functions.php");
+require_once( "forum_functions.php" );
 
 {
    connect2mysql();
 
-   $logged_in = is_logged_in($handle, $sessioncode, $player_row);
-   
-   if( !($forum > 0 ) )
-      error("Unknown forum");
-       
-   $result = mysql_query("SELECT Name as Forumname from Forums where ID=$forum");
-   
-   if( mysql_num_rows($result) != 1 )
-      error("Unknown forum");
-   
-   extract(mysql_fetch_array($result));
+   $logged_in = who_is_logged( $player_row);
+   if( !$logged_in )
+      error("not_logged_in");
 
-   start_page("Forum $Forumname", true, $logged_in, $player_row );
+   $forum = max(0,(int)@$_GET['forum']);
+   $offset = max(0,(int)@$_GET['offset']);
 
-   $result = mysql_query("SELECT Posts.*, Lastchanged from Posts, Threads " .
-                         "WHERE Posts.Thread_ID=Threads.ID " .
-                         "ORDER BY Lastchanged, PosIndex");
+   $Forumname = forum_name($forum, $moderated);
 
-   $headline   = array("Thread"=>"width=50%","Author"=>"width=25%","Date"=>"width=25%");
-   $link_array = array("New Topic"=>"new_topic.php?forum=$forum"); 
-   start_table($headline, $link_array, "width=98%"); 
-               
 
-   while( $row = mysql_fetch_array( $result ) )
+   start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
+
+   echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
+
+   $result = mysql_query("SELECT Posts.Subject, Posts.Thread_ID, " .
+                         "Posts.User_ID, Posts.PostsInThread, Name, " .
+                         "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
+                         "UNIX_TIMESTAMP(Posts.LastChanged) AS Lastchanged " .
+                         "FROM Posts LEFT JOIN Players ON Players.ID=Posts.User_ID " .
+                         "LEFT JOIN Posts as LPost ON Posts.LastPost=LPost.ID " .
+                         "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
+                         " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
+                         "WHERE Posts.Forum_ID=$forum AND Posts.Parent_ID=0 " .
+                         "ORDER BY Posts.LastChanged desc LIMIT $offset,$MaxRowsPerPage")
+   or die(mysql_error());
+
+   $show_rows = $nr_rows = mysql_num_rows($result);
+
+   if( $show_rows > $RowsPerPage )
+      $show_rows = $RowsPerPage;
+
+   $cols = 4;
+   $headline = array(T_("Thread")=>"width=50%",T_("Author")=>"width=20%",
+                     T_("Posts")=>"width=10%  align=center",T_("Last post")=>"width=20%");
+   $links = LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
+
+   if( $offset > 0 )
+      $links |= LINK_PREV_PAGE;
+   if( $show_rows < $nr_rows )
+      $links |= LINK_NEXT_PAGE;
+
+   $is_moderator = false;
+   if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
-      extract($row);
-
-      echo "<tr><td><a href=\"read.php?forum=$forum&thread=$Thread_ID\">$Subject</a></td><td>$User_ID</td><td>$Time</td></tr>\n";
+      $links |= LINK_TOGGLE_MODERATOR_LIST;
+      $is_moderator = set_moderator_cookie();
    }
 
-   end_table($headline, $link_array);
+   start_table($headline, $links, "width=98%", $cols);
+
+   $odd = true;
+   while( $row = mysql_fetch_array( $result ) and $show_rows > 0)
+   {
+      $Name = '?';
+      $Lastread = NULL;
+      extract($row);
+
+      $new = get_new_string($Lastchanged, $Lastread);
+
+      $color = ( $odd ? "" : " bgcolor=white" );
+
+      if( $PostsInThread > 0 or $is_moderator )
+      {
+         $Subject = make_html_safe( $Subject, true);
+         echo "<tr$color><td><a href=\"read.php?forum=$forum".URI_AMP."thread=$Thread_ID\">$Subject</a>$new</td><td>" . make_html_safe($Name)
+           . "</td><td align=center>" . $PostsInThread . "</td><td nowrap>" .date($date_fmt, $Lastchanged) . "</td></tr>\n";
+         $odd = !$odd;
+         $show_rows--;
+      }
+   }
+
+   end_table($links, $cols);
 
    end_page();
 }

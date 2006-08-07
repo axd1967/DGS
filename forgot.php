@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,36 +18,40 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Start";
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
+require_once( "include/form_functions.php" );
 
-connect2mysql();
+{
+   connect2mysql();
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-start_page("Forgot password?", true, $logged_in, $player_row );
+   start_page(T_('Forgot password?'), true, $logged_in, $player_row );
 
-?>
+   echo "<center>\n";
 
-<p>
-
-<CENTER>
-<TABLE cellpadding=10 width=80% >
-<TR><TD align="left">
-<p>
- If you have forgot your password we can email a new one. The new password
-  will be randomly generated, but you can of course change it later from the
-  edit profile page.
+   echo '<TABLE border=0 cellpadding=0 width="80%"><TR><TD align="left">&nbsp;<P>
+' . T_('If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.')
+. '
 </TD></TR>
-<FORM name="forgot" action="send_new_password.php" method="POST">
+</TABLE>';
 
-<TR><TD align=center>Userid: <input type="text" name="handle" size="16" maxlength="16">
-<input type=submit name="action" value="Send password"></TR>
-<TR><TD align="right"><input type=submit name="action" value="Go back"></TD></TR>
-</FORM>
-</TABLE>
-</CENTER>
+   $passwd_form = new Form( 'newpasswdform', "send_new_password.php", FORM_POST );
 
-<?php
-end_page();
+   $passwd_form->add_row( array( 'HEADER', T_('New password') ) );
+
+   $passwd_form->add_row( array( 'DESCRIPTION', T_('Userid'),
+                                 'TEXTINPUT', 'pswduser', 16, 16, '',
+                                 'SUBMITBUTTON', 'action', T_("Send password"),
+                               ) );
+   $passwd_form->add_row( array( 'CELL', 2, 'align="right"',
+                                 'SUBMITBUTTON', 'goback', T_("Go back"),
+                               ) );
+   $passwd_form->echo_string(1);
+
+   echo "</center>\n";
+   end_page();
+}
 ?>

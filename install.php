@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001 Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,20 +18,24 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require( "include/std_functions.php" );
+$TranslateGroups[] = "Docs";
+
+require_once( "include/std_functions.php" );
 
 connect2mysql();
 
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
+$logged_in = who_is_logged( $player_row);
 
-start_page("Installation instructions", true, $logged_in, $player_row );
+start_page(T_('Installation instructions'), true, $logged_in, $player_row );
 
 echo "<table align=center><tr><td>\n";
 echo "<pre>\n";
 
 $contents = join ('', file ('INSTALL'));
 
-echo eregi_replace("<(http://[^ >\n\t]+)>", "(<a href=\"\\1\">\\1</a>)", $contents);
+$contents = @htmlentities($contents, ENT_QUOTES);
+$contents = preg_replace("%&lt;(http://.*?)&gt;%is", "(<a href=\"\\1\">\\1</a>)", $contents);
+echo $contents;
 
 echo "</pre>\n";
 echo "</td></tr></table>\n";

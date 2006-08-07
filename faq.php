@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001  Erik Ouchterlony
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,34 +18,105 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
+$TranslateGroups[] = "FAQ";
 
-require( "include/std_functions.php" );
+require_once( "include/std_functions.php" );
 
-connect2mysql();
-
-$logged_in = is_logged_in($handle, $sessioncode, $player_row);
-
-start_page("FAQ", true, $logged_in, $player_row );
-
-
-$result = mysql_query("SELECT * FROM FAQ");
-
-echo "<H4>Questions:</H4>\n";
-while( $row = mysql_fetch_array( $result ) )
 {
-    echo '<P><A href="#q' . $row["ID"] . '">' . $row["Question"] . "</A>\n";
+  connect2mysql();
+
+  $logged_in = who_is_logged( $player_row);
+
+  start_page(T_("FAQ"), true, $logged_in, $player_row );
+
+  //$blk='ul';
+  $blk='blockquote';
+  //$faqhide = "AND entry.Hidden='N' AND (entry.Level=1 OR parent.Hidden='N') ";
+  $faqhide = "AND entry.Hidden='N' AND parent.Hidden='N' "; //need a viewable root
+
+  echo "<table align=center width=\"87%\" border=0><tr><td>\n";
+  echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
+    T_('Frequently Asked Questions') . "</font></h3>\n";
+
+
+  $cat = @$_GET['cat'];
+  if( $cat !== 'all' && !is_numeric($cat) ) $cat = 0;
+  if( @$_GET["read"] == 't' )
+  { //expand answers
+     $result = mysql_query(
+        "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
+        "Question.Text AS Q, Answer.Text AS A, " .
+        "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
+        "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
+        "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
+        "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question $faqhide" .
+        ( $cat === 'all' ? '' : "AND ( entry.Parent = $cat OR entry.ID = $cat ) " ) .
+        "ORDER BY CatOrder,ParentOrder,entry.SortOrder")
+        or error('mysql_query_failed');
+
+     echo "<$blk><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
+
+     $first = true;
+     while( $row = mysql_fetch_array( $result ) )
+     {
+        if( $row['Level'] == 1 )
+        {
+           if( !$first )
+              echo "</ul><hr>\n";
+           echo '<p><b><A href="faq.php">' . T_( $row['Q'] ) . "</A></b>\n";
+           echo "<ul>\n";
+           $first = false;
+        }
+        else
+        {
+           echo '<li><A name="Entry' . $row["ID"] . '"></a><b>' . T_( $row['Q'] ) .
+              "</b>\n<p>\n" . add_line_breaks( T_( $row['A'] ) ) . "<br>&nbsp;<p>\n";
+        }
+     }
+     if( !$first )
+       echo "</ul>\n";
+     echo "</td></tr></table></$blk>\n";
+  }
+  else
+  { //titles only
+     $result = mysql_query(
+        "SELECT entry.*, Question.Text AS Q, " .
+        "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
+        "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
+        "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question $faqhide" .
+         "AND entry.Level<3 AND entry.Level>0 " .
+        "ORDER BY CatOrder,entry.Level,entry.SortOrder");
+
+     echo "<$blk><table width=\"93%\" border=0><tr><td>\n";
+
+     $first = true;
+     while( $row = mysql_fetch_array( $result ) )
+     {
+        $question = (empty($row['Q']) ? '-' : T_($row['Q']));
+
+        if( $row['Level'] == 1 )
+        {
+           if( !$first )
+              echo "</ul></td></tr></table>\n";
+           echo '<p><b><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['ID'] . "\">$question</A></b>\n";
+           echo "<table><tr><td><ul>\n";
+           $first = false;
+        }
+        else
+        {
+           echo '<li><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['Parent'] .
+              '#Entry' . $row['ID'] . "\">$question</A>\n";
+        }
+     }
+     if( !$first )
+       echo "</ul></td></tr></table>\n";
+     echo "</td></tr></table></$blk>\n";
+  }
+  echo "</td></tr></table>\n";
+
+  if( $cat !== 'all' )
+     $menu_array = array( T_('Show the whole FAQ in one page') => "faq.php?read=t".URI_AMP."cat=all" );
+
+   end_page(@$menu_array);
 }
-
-mysql_data_seek($result, 0);
-
-echo "<HR><H4>Answers:</H4>\n";
-while( $row = mysql_fetch_array( $result ) )
-{
-    echo '<HR><A name="q' . $row["ID"] . '">' . $row["Question"] .
-        "</A><UL><LI>\n<p>" . $row["Answer"] . "</UL>\n";
-}
-
-end_page();
 ?>
-    
