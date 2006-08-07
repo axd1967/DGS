@@ -1,0 +1,36 @@
+
+* Tournaments
+
+* rss feeds
+
+* use css throughout the site.
+
+* Write better errorhandling code.
+
+* Move speedup (if/then)
+
+* <goban> in forums (and messages)
+
+* Searching: users/games/messages/docs etc.
+
+* Rengo (team go)
+
+* Improve weekend clock code.
+
+* Game from a setup position.
+
+* Ratings:
+        Implement Glicko (?)
+        Add admin code to change a players rating.
+
+* Delete game when it's the opponents turn.
+
+* Bio: sort order.
+
+* Help system.
+
+* Invite/waitingroom:
+        Make it possible to limit the number of handicap stones.
+        Rated only if less than x handicap option.
+
+* Show observers of a game.
