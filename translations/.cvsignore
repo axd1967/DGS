@@ -6,5 +6,9 @@ fr*.php
 nl*.php
 no*.php
 pt*.php
+sk*.php
+sr*.php
 sv*.php
+th*.php
 zh*.php
+??.*.php
