@@ -56,7 +56,8 @@ function post_message($player_row, $moderated_forum)
                    "Lastedited=FROM_UNIXTIME($NOW), " .
                    "Subject=\"$Subject\", " .
                    "Text=\"$Text\" " .
-                   "WHERE ID=$edit LIMIT 1") or die(mysql_error());
+                   "WHERE ID=$edit LIMIT 1")
+          or error("mysql_query_failed",'forum_post1');
 
        //Insert new record with old text
        mysql_query("INSERT INTO Posts SET " .
@@ -65,7 +66,8 @@ function post_message($player_row, $moderated_forum)
                    "Forum_ID=" . $row['Forum_ID'] . ", " .
                    "User_ID=" . $player_row['ID'] . ", " .
                    'Subject="' . $row['Subject'] . '", ' .
-                   'Text="' . $row['Text'] . '"') or die(mysql_error());
+                   'Text="' . $row['Text'] . '"')
+          or error("mysql_query_failed",'forum_post2');
 
        return;
    }
@@ -89,7 +91,7 @@ function post_message($player_row, $moderated_forum)
 
          $result = mysql_query("SELECT MAX(AnswerNr) AS answer_nr " .
                                "FROM Posts WHERE Parent_ID=$parent")
-            or die(mysql_error());
+          or error("mysql_query_failed",'forum_post3');
 
          extract(mysql_fetch_array($result));
 
@@ -141,7 +143,7 @@ function post_message($player_row, $moderated_forum)
          "crc32=" . crc32($Text) . ", " .
          "PosIndex=\"$PosIndex\"";
 
-      mysql_query( $query ) or die(mysql_error());
+      mysql_query( $query ) or error("mysql_query_failed",'forum_post4');
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_post");
@@ -151,7 +153,7 @@ function post_message($player_row, $moderated_forum)
       if( !($parent > 0) )
       {
          mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID LIMIT 1" )
-            or die(mysql_error());
+            or error("mysql_query_failed",'forum_post5');
 
          if( mysql_affected_rows() != 1)
             error("mysql_insert_post");
@@ -170,11 +172,13 @@ function post_message($player_row, $moderated_forum)
          mysql_query("UPDATE Posts " .
                      "SET PostsInThread=PostsInThread+1, " .
                      "LastPost=$New_ID, LastChanged=FROM_UNIXTIME($NOW) " .
-                     "WHERE ID=$Thread_ID LIMIT 1" ) or die(mysql_error());
+                     "WHERE ID=$Thread_ID LIMIT 1" )
+                      or error("mysql_query_failed",'forum_post6');
 
          mysql_query("UPDATE Forums " .
                      "SET PostsInForum=PostsInForum+1, LastPost=$New_ID " .
-                     "WHERE ID=$forum LIMIT 1" ) or die(mysql_error());
+                     "WHERE ID=$forum LIMIT 1" )
+          or error("mysql_query_failed",'forum_post7');
 
          return T_('Message sent!');
       }

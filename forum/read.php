@@ -262,7 +262,8 @@ function change_depth(&$cur_depth, $new_depth)
       mysql_query( "REPLACE INTO Forumreads SET " .
                    "User_ID=" . $player_row["ID"] . ", " .
                    "Thread_ID=$thread, " .
-                   "Time=FROM_UNIXTIME($NOW)" ) or die(mysql_error());
+                   "Time=FROM_UNIXTIME($NOW)" )
+         or error("mysql_query_failed",'forum_read1');
    }
 
    end_page();

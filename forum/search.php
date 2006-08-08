@@ -86,7 +86,7 @@ require_once( "forum_functions.php" );
          ($bool ? 'ORDER BY TIME DESC ' : '') .
          "LIMIT $offset,$MaxSearchPostsPerPage";
 
-      $result = mysql_query($query) or die(mysql_error());
+      $result = mysql_query($query) or error("mysql_query_failed",'forum_search1');
 
       $show_rows = $nr_rows = mysql_num_rows($result);
       if( $show_rows > $SearchPostsPerPage )

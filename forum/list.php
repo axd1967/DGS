@@ -48,7 +48,7 @@ require_once( "forum_functions.php" );
                          " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
                          "WHERE Posts.Forum_ID=$forum AND Posts.Parent_ID=0 " .
                          "ORDER BY Posts.LastChanged desc LIMIT $offset,$MaxRowsPerPage")
-   or die(mysql_error());
+      or error("mysql_query_failed",'forum_list1');
 
    $show_rows = $nr_rows = mysql_num_rows($result);
 
