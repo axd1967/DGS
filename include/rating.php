@@ -566,7 +566,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    $T_= ( $keep_english ? 'fnop' : 'T_' );
    //global $dan, $kyu;
 
-   if( !isset($rating) ) return '';
+   if( !isset($rating) or $rating < -1000 ) return '';
 
    $spc = ( $show_percent === true ? '&nbsp;' : ' ' );
 
