@@ -339,6 +339,8 @@ function handicap_push( &$vars, &$var, $nb)
 function get_handicap_pattern( $size, $handicap, &$err)
 {
    $stonestring='';
+   if( $handicap < 2 ) return $stonestring;
+
    $game= array();
 
    $filename = "pattern/standard_handicap_$size.sgf";

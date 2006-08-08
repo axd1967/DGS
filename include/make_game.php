@@ -301,7 +301,7 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
 
    if( $err )
       return false;
-   else
+   else if( $hcp >= 2 )
    {
       $l = strlen( $stonestring );
       if( $l != 2*$hcp )
@@ -320,10 +320,10 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
          $query .= "($gid, " . ($i/2 + 1) . ", " . BLACK . ", $colnr, $rownr, 0)";
          if( $i+2 < $l ) $query .= ", ";
       }
-   }
 
-   mysql_query( $query )
-      or error('internal_error','insert std_handicap');
+      mysql_query( $query )
+         or error('internal_error','insert std_handicap');
+   }
 
    return true;
 }
