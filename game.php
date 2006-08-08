@@ -712,9 +712,10 @@ function draw_game_info(&$game_row)
         '&nbsp;&nbsp;&nbsp;<font color=red>' . T_('On vacation') . '</font>' : '' ) .
       "</td>\n";
 
-   echo '<td>' . echo_rating( ($game_row['Status']==='FINISHED' ?
-                                   $game_row['Black_End_Rating'] : $game_row['Blackrating'] ),
-                                  true, $game_row['Black_ID'] ) . "</td>\n";
+   $rating = ( $game_row['Status']==='FINISHED' ?
+               $game_row['Black_Start_Rating'] : $game_row['Blackrating'] );
+
+   echo '<td>' . echo_rating( $rating, true, $game_row['Black_ID'] ) . "</td>\n";
    echo '<td>&nbsp;</td>' . "\n";
    echo '<td>' . T_('Prisoners') . ': ' . $game_row['Black_Prisoners'] . "</td>\n";
    echo "</tr>\n";
@@ -740,9 +741,10 @@ function draw_game_info(&$game_row)
         '&nbsp;&nbsp;&nbsp;<font color=red>' . T_('On vacation') . '</font>' : '' ) .
       "</td>\n";
 
-   echo '<td>' . echo_rating( ($game_row['Status']==='FINISHED' ?
-                                   $game_row['White_End_Rating'] : $game_row['Whiterating'] ),
-                                  true, $game_row['White_ID'] ) . "</td>\n";
+   $rating = ( $game_row['Status']==='FINISHED' ?
+               $game_row['White_Start_Rating'] : $game_row['Whiterating'] );
+
+   echo '<td>' . echo_rating( $rating, true, $game_row['White_ID'] ) . "</td>\n";
    echo '<td>&nbsp;</td>' . "\n";
    echo '<td>' . T_('Prisoners') . ': ' . $game_row['White_Prisoners'] . "</td>\n";
    echo "</tr>\n";
