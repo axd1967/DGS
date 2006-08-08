@@ -89,15 +89,15 @@ disable_cache();
 
 // find receiver of the message
 
-   $result = mysql_query( "SELECT ID, SendEmail, Notify, ClockUsed, OnVacation, " .
+   $opponent_row = mysql_single_fetch( 
+                          "SELECT ID, SendEmail, Notify, ClockUsed, OnVacation, " .
                           "Rating2, RatingStatus " .
                           "FROM Players WHERE Handle='".addslashes($tohdl)."'" );
 
-   if( @mysql_num_rows( $result ) != 1 )
+   if( !$opponent_row )
       error("receiver_not_found");
 
 
-   $opponent_row = mysql_fetch_array($result);
    $opponent_ID = $opponent_row["ID"];
    $to_me = ( $my_id == $opponent_ID ); //Message to myself
    if( $to_me and $type == 'INVITATION' )
@@ -122,74 +122,74 @@ disable_cache();
    }
    else if( $accepttype )
    {
-      $result = mysql_query( "SELECT Black_ID, White_ID, ToMove_ID, " .
+      $game_row = mysql_single_fetch(
+                             "SELECT Black_ID, White_ID, ToMove_ID, " .
                              "Size, Handicap, Komi, " .
                              "Maintime, Byotype, Byotime, Byoperiods, " .
                              "Rated, StdHandicap, WeekendClock " .
                              "FROM Games WHERE ID=$gid" );
 
-      if( @mysql_num_rows($result) != 1)
+      if( !$game_row )
          error("mysql_start_game",'send3');
-
-
-      $game_row = mysql_fetch_assoc($result);
-
-      mt_srand ((double) microtime() * 1000000);
 
       //ToMove_ID hold handitype since INVITATION
       $handitype = $game_row["ToMove_ID"];
       $size = $game_row["Size"];
 
+      $my_rating = $player_row["Rating2"];
+      $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+      $opprating = $opponent_row["Rating2"];
+      $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
+
+
       switch( $handitype )
       {
          case INVITE_HANDI_CONV:
          {
+            if( !$iamrated or !$opprated )
+               error('no_initial_rating');
             list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
-               suggest_conventional($player_row['Rating2'], $opponent_row['Rating2'], $size);
+               suggest_conventional( $my_rating, $opprating, $size);
          }
          break;
 
          case INVITE_HANDI_PROPER:
          {
+            if( !$iamrated or !$opprated )
+               error('no_initial_rating');
             list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
-               suggest_proper($player_row['Rating2'], $opponent_row['Rating2'], $size);
+               suggest_proper( $my_rating, $opprating, $size);
          }
          break;
 
          case INVITE_HANDI_NIGIRI:
          {
+            mt_srand ((double) microtime() * 1000000);
             $i_am_black = mt_rand(0,1);
          }
          break;
 
          case INVITE_HANDI_DOUBLE:
          {
-            $i_am_black = false; // the value is not important.
+            create_game($player_row, $opponent_row, $game_row);
+            $i_am_black = false;
          }
          break;
 
-         default: // manual
+         default: // 'manual'
          {
-            $i_am_black = ( $game_row["Black_ID"] == $player_row['ID'] );
+            $i_am_black = ( $game_row["Black_ID"] == $my_id );
          }
          break;
       }
 
-      if( $handitype == INVITE_HANDI_DOUBLE )
-      {
+      if( $i_am_black )
          create_game($player_row, $opponent_row, $game_row, $gid);
-         create_game($opponent_row, $player_row, $game_row);
-      }
       else
-      {
-         if( $i_am_black )
-            create_game($player_row, $opponent_row, $game_row, $gid);
-         else
-            create_game($opponent_row, $player_row, $game_row, $gid);
-      }
+         create_game($opponent_row, $player_row, $game_row, $gid);
 
       mysql_query( "UPDATE Players SET Running=Running+" . ( $handitype == INVITE_HANDI_DOUBLE ? 2 : 1 ) .
-                   ( $game_row['Rated'] ? ", RatingStatus='RATED'" : '' ) .
+                   ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
                    " WHERE ID=$my_id OR ID=$opponent_ID LIMIT 2" );
 
       $subject = "Game invitation accepted";

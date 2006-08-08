@@ -28,7 +28,8 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_REQUEST['size']));
    $handicap_type = @$_REQUEST['handicap_type'];
    $color = @$_REQUEST['color'];
-   $handicap = (int)@$_REQUEST['handicap'];
+   $handicap_m = (int)@$_REQUEST['handicap_m'];
+   $handicap_d = (int)@$_REQUEST['handicap_d'];
    $komi_m = (float)@$_REQUEST['komi_m'];
    $komi_n = (float)@$_REQUEST['komi_n'];
    $komi_d = (float)@$_REQUEST['komi_d'];
@@ -64,17 +65,19 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       $Black_ID = $player_row['ID'];
    }
 
-   if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
-       ( !$player_row["RatingStatus"] or !$opponent_row["RatingStatus"] ) )
-   {
-      error("no_initial_rating");
-   }
+   $my_rating = $player_row["Rating2"];
+   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $opprating = $opponent_row["Rating2"];
+   $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
+
 
    //ToMove_ID=$tomove will hold handitype until ACCEPTED
    switch( $handicap_type )
    {
       case 'conv':
       {
+         if( !$iamrated or !$opprated )
+            error('no_initial_rating');
          $tomove = INVITE_HANDI_CONV;
          $handicap = 0; //further computing
          $komi = 0;
@@ -83,33 +86,37 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 
       case 'proper':
       {
+         if( !$iamrated or !$opprated )
+            error('no_initial_rating');
          $tomove = INVITE_HANDI_PROPER;
          $handicap = 0; //further computing
          $komi = 0;
       }
       break;
 
+      case 'double':
+      {
+         $tomove = INVITE_HANDI_DOUBLE;
+         $handicap = $handicap_d;
+         $komi = $komi_d;
+      }
+      break;
+
+      case 'manual':
+      {
+         $tomove = $Black_ID;
+         $handicap = $handicap_m;
+         $komi = $komi_m;
+      }
+      break;
+
+      default: //always available even if waiting room or unrated
+         $handicap_type = 'nigiri'; 
       case 'nigiri':
       {
          $tomove = INVITE_HANDI_NIGIRI;
          $handicap = 0;
          $komi = $komi_n;
-      }
-      break;
-
-      case 'double':
-      {
-         $tomove = INVITE_HANDI_DOUBLE;
-         $handicap = 0;
-         $komi = $komi_d;
-      }
-      break;
-
-      default: //'manual'
-      {
-         $tomove = $Black_ID;
-         //$handicap from query
-         $komi = $komi_m;
       }
       break;
    }
@@ -200,6 +207,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
 
    $rating_black = $black_row["Rating2"];
    $rating_white = $white_row["Rating2"];
+   $black_rated = ( $black_row['RatingStatus'] && is_numeric($rating_black) && $rating_black >= MIN_RATING );
+   $white_rated = ( $white_row['RatingStatus'] && is_numeric($rating_white) && $rating_white >= MIN_RATING );
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row["Size"]));
 
@@ -214,9 +223,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
       $clock_used_white += WEEKEND_CLOCK_OFFSET;
    }
 
-   $Rated = ( $game_info_row['Rated'] === 'Y' and
-              !empty($black_row['RatingStatus']) and
-              !empty($white_row['RatingStatus']) );
+   $rated = ( $game_info_row['Rated'] === 'Y' && $black_rated && $white_rated );
+   $game_info_row['Rated'] = ( $rated ? 'Y' : 'N' );
 
    $stdhandicap = $game_info_row['StdHandicap'];
    if( $stdhandicap != 'Y' or
@@ -290,6 +298,9 @@ function standard_handicap_is_possible($size, $hcp)
 
 function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
 {
+   if( $hcp < 2 )
+      return false;
+
    if( !standard_handicap_is_possible($size, $hcp) )
       return false;
 
@@ -301,29 +312,26 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
 
    if( $err )
       return false;
-   else if( $hcp >= 2 )
+
+   $l = strlen( $stonestring );
+   if( $l != 2*$hcp )
+      error('internal_error','bad stonestring std_handicap');
+
+   $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
+
+   for( $i=0; $i < $l; $i += 2 )
    {
-      $l = strlen( $stonestring );
-      if( $l != 2*$hcp )
-         error('internal_error','bad stonestring std_handicap');
+      list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $size);
 
+      if( !isset($rownr) or !isset($colnr) )
+         error("illegal_position",'std_handicap');
 
-      $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
-
-      for( $i=0; $i < $l; $i += 2 )
-      {
-         list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $size);
-
-         if( !isset($rownr) or !isset($colnr) )
-            error("illegal_position",'std_handicap');
-
-         $query .= "($gid, " . ($i/2 + 1) . ", " . BLACK . ", $colnr, $rownr, 0)";
-         if( $i+2 < $l ) $query .= ", ";
-      }
-
-      mysql_query( $query )
-         or error('internal_error','insert std_handicap');
+      $query .= "($gid, " . ($i/2 + 1) . ", " . BLACK . ", $colnr, $rownr, 0)";
+      if( $i+2 < $l ) $query .= ", ";
    }
+
+   mysql_query( $query )
+      or error('internal_error','insert std_handicap');
 
    return true;
 }

@@ -76,10 +76,6 @@ require_once( "include/make_game.php" );
 
 //else... joining game
 
-   if( ($game_info_row['Handicaptype'] == 'proper' or
-        $game_info_row['Handicaptype'] == 'conv') and !$player_row["RatingStatus"] )
-      error("no_initial_rating");
-
    if( $player_row['ID'] == $uid )
       error("waitingroom_own_game");
 
@@ -88,43 +84,62 @@ require_once( "include/make_game.php" );
          and $player_row['Rating2'] <= $game_info_row['Ratingmax']) )
       error("waitingroom_not_in_rating_range");
 
-
-
-
-
-   $i_am_black = false;
-
-
-   mt_srand ((double) microtime() * 1000000);
-   if( $game_info_row['Handicaptype'] == 'nigiri' ) // nigiri
-      $i_am_black = mt_rand(0,1);
-
-
-   $game_info_row['Handicap'] = 0;
    $size = $game_info_row['Size'];
 
-   if( $game_info_row['Handicaptype'] == 'proper' )
-      list($game_info_row['Handicap'],$game_info_row['Komi'],$i_am_black) =
-         suggest_proper($player_row['Rating2'], $opponent_row['Rating2'], $size);
-
-   if( $game_info_row['Handicaptype'] == 'conv' )
-      list($game_info_row['Handicap'],$game_info_row['Komi'],$i_am_black) =
-         suggest_conventional($player_row['Rating2'], $opponent_row['Rating2'], $size);
+   $my_rating = $player_row["Rating2"];
+   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $opprating = $opponent_row["Rating2"];
+   $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
 
 
-   if( $game_info_row['Handicaptype'] == 'double' )
+   switch( $game_info_row['Handicaptype'] )
    {
+      case 'conv':
+      {
+         if( !$iamrated or !$opprated )
+            error('no_initial_rating');
+         list($game_info_row['Handicap'],$game_info_row['Komi'],$i_am_black) =
+            suggest_conventional( $my_rating, $opprating, $size);
+      }
+      break;
+
+      case 'proper':
+      {
+         if( !$iamrated or !$opprated )
+            error('no_initial_rating');
+         list($game_info_row['Handicap'],$game_info_row['Komi'],$i_am_black) =
+            suggest_proper( $my_rating, $opprating, $size);
+      }
+      break;
+
+      case 'double':
+      {
+         create_game($player_row, $opponent_row, $game_info_row);
+         $i_am_black = false;
+      }
+      break;
+
+      default: //always available even if waiting room or unrated
+         $game_info_row['Handicaptype'] = 'nigiri'; 
+      case 'nigiri':
+      {
+         $game_info_row['Handicap'] = 0;
+         mt_srand ((double) microtime() * 1000000);
+         $i_am_black = mt_rand(0,1);
+      }
+      break;
+
+      case 'manual':
+      {
+         $i_am_black = false;
+      }
+      break;
+   }
+
+   if( $i_am_black )
       $gid = create_game($player_row, $opponent_row, $game_info_row);
-      create_game($opponent_row, $player_row, $game_info_row);
-   }
    else
-   {
-      if( $i_am_black )
-         $gid = create_game($player_row, $opponent_row, $game_info_row);
-      else
-         $gid = create_game($opponent_row, $player_row, $game_info_row);
-   }
-
+      $gid = create_game($opponent_row, $player_row, $game_info_row);
 
    mysql_query( "UPDATE Players SET Running=Running+" .
                 ( $game_info_row['Handicaptype'] == 'double' ? 2 : 1 ) .

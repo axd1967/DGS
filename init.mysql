@@ -309,6 +309,7 @@ CREATE TABLE Waitingroom (
    Time datetime NOT NULL default '0000-00-00 00:00:00',
    Size int(11) NOT NULL default '19',
    Komi decimal(6,1) NOT NULL default '6.5',
+   Handicap int(11) NOT NULL default '0',
   Handicaptype enum('conv','proper','nigiri','double') NOT NULL default 'conv',
    Maintime int(11) NOT NULL default '0',
   Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',

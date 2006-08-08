@@ -42,7 +42,7 @@ require_once( "include/message_functions.php" );
 
    $my_id = $player_row["ID"];
    $my_rating = $player_row["Rating2"];
-   $iamrated = ( is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
 
    $showall = (boolean)@$_GET['showall'];
@@ -271,7 +271,7 @@ function add_new_game_form( $iamrated)
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
                                   'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
 
-   game_settings_form($addgame_form,NULL,NULL,true, $iamrated);
+   game_settings_form($addgame_form, 'waitingroom', $iamrated);
 
    $rating_array = array();
 

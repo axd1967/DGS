@@ -35,21 +35,46 @@ require_once( "include/rating.php" );
       error("not_logged_in");
    //not used: init_standard_folders();
 
-   if( $player_row["Handle"] == "guest" )
-      error("not_allowed_for_guest");
+   if( $player_row["Handle"] == 'guest' )
+      error('not_allowed_for_guest');
+
+   $my_rating = $player_row['Rating2'];
+   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $handicap_type = @$_POST['handicap_type'];
-   if( $handicap_type == 'nigiri' )
-      $komi = (float)@$_POST['komi_n'];
-   elseif( $handicap_type == 'double' )
-      $komi = (float)@$_POST['komi_d'];
-   else
-      $komi = 0.0;
-
-   if( ( $handicap_type == 'conv' or $handicap_type == 'proper' ) and
-       !$player_row["RatingStatus"] )
+   switch( $handicap_type )
    {
-      error( "no_initial_rating" );
+      case 'conv':
+      {
+         if( !$iamrated )
+            error('no_initial_rating');
+         $komi = 0.0;
+      }
+      break;
+
+      case 'proper':
+      {
+         if( !$iamrated )
+            error('no_initial_rating');
+         $komi = 0.0;
+      }
+      break;
+
+      case 'double':
+      {
+         $komi = (float)@$_POST['komi_d'];
+      }
+      break;
+
+      case 'manual': //not allowed in waiting room
+         //$komi = (float)@$_POST['komi_m'];
+      default: //always available even if waiting room or unrated
+         $handicap_type = 'nigiri'; 
+      case 'nigiri':
+      {
+         $komi = (float)@$_POST['komi_n'];
+      }
+      break;
    }
 
    if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )

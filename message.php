@@ -57,6 +57,8 @@ require_once( "include/form_functions.php" );
 
    init_standard_folders();
    $my_id = $player_row["ID"];
+   $my_rating = $player_row["Rating2"];
+   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
    $folders = get_folders($my_id);
 
 
@@ -346,9 +348,9 @@ require_once( "include/form_functions.php" );
                             $ReplyTo, $flow); //no folders, so no move
 
          if( $preview )
-            game_settings_form($message_form, 'redraw', @$_POST);
+            game_settings_form($message_form, 'dispute', $iamrated, 'redraw', @$_POST);
          else
-            game_settings_form($message_form, $my_id, $Game_ID);
+            game_settings_form($message_form, 'dispute', $iamrated, $my_id, $Game_ID);
 
             $message_form->add_row( array(
                   'HEADER', T_('Dispute settings'),
@@ -374,9 +376,9 @@ require_once( "include/form_functions.php" );
       case 'Invite':
       {
          if( $preview )
-            game_settings_form($message_form, 'redraw', @$_POST);
+            game_settings_form($message_form, 'invite', $iamrated, 'redraw', @$_POST);
          else
-            game_settings_form($message_form);
+            game_settings_form($message_form, 'invite', $iamrated);
 
             $message_form->add_row( array(
                   'HEADER', T_('Invitation message'),
