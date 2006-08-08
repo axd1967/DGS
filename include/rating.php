@@ -20,9 +20,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
-define('MAX_START_RATING', 2600); //6 dan
-define('MIN_RATING', -900); //30 kyu
-
 function interpolate($value, $table, $extrapolate)
 {
    foreach ( $table as $x )
@@ -566,7 +563,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    $T_= ( $keep_english ? 'fnop' : 'T_' );
    //global $dan, $kyu;
 
-   if( !isset($rating) or $rating < -2000 ) return '';
+   if( !isset($rating) or !is_numeric($rating) or $rating < MIN_RATING ) return '';
 
    $spc = ( $show_percent === true ? '&nbsp;' : ' ' );
 
@@ -644,7 +641,7 @@ function get_rating_at($uid, $date)
 
    if( isset($row['Rating']) )
       return $row['Rating'];
-      return -9999;
+   return MIN_RATING-1;
 }
 
 

@@ -39,16 +39,29 @@ function init_standard_folders()
       );
 }
 
-// Prints game setting form used by invite.php
 
-function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false, $iamrated=true)
+if( !defined('SMALL_SPACING') )
+   define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
+
+// Prints game setting form used by message.php and waiting_room.php
+function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $gid=NULL)
 {
 
-   // Default values: ('Invite' or waiting_room)
+   if( $formstyle != 'dispute' &&  $formstyle != 'waitingroom' )
+       $formstyle = 'invite';
+
+   $allowed = true;
+
+
+   // Default values: ('invite' or 'waitingroom')
    $Size = 19;
-   $Handitype = 'conv';
+   if( $iamrated )
+      $Handitype = 'conv';
+   else
+      $Handitype = 'nigiri';
    $MyColor = 'White';
-   $Handicap = 0;
+   $Handicap_m = 0;
+   $Handicap_d = 0;
    $Komi_m = 6.5;
    $Komi_n = 6.5;
    $Komi_d = 6.5;
@@ -78,8 +91,10 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
          $Handitype = (string)$gid['handicap_type'];
       if( isset($gid['color']) )
          $MyColor = (string)$gid['color'];
-      if( isset($gid['handicap']) )
-         $Handicap = (int)$gid['handicap'];
+      if( isset($gid['handicap_m']) )
+         $Handicap_m = (int)$gid['handicap_m'];
+      if( isset($gid['handicap_d']) )
+         $Handicap_d = (int)$gid['handicap_d'];
       if( isset($gid['komi_m']) )
          $Komi_m = (float)$gid['komi_m'];
       if( isset($gid['komi_n']) )
@@ -118,15 +133,15 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
       $StdHandicap = ( @$gid['stdhandicap'] == 'Y' );
       $Rated = ( @$gid['rated'] == 'Y' );
    }
-   else if( $gid > 0 ) //'Dispute'
+   else if( $gid > 0 && $my_ID > 0 ) //'Dispute'
    {
       // If dispute, use values from game $gid
       $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
                  "Maintime,Byotype,Byotime,Byoperiods,Rated,StdHandicap,Weekendclock, " .
                  "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
                  "FROM Games,Players WHERE Games.ID=$gid " .
-                 "AND ((Players.ID=Black_ID AND White_ID=$my_ID) " .
-                 "OR (Players.ID=White_ID AND Black_ID=$my_ID)) " .
+                 "AND ((White_ID=$my_ID AND Players.ID=Black_ID) " .
+                   "OR (Black_ID=$my_ID AND Players.ID=White_ID)) " .
                  "AND Status='INVITED'" ;
 
       if( !($game_row=mysql_single_fetch( $query)) )
@@ -170,6 +185,7 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
          case INVITE_HANDI_DOUBLE:
          {
             $Handitype = 'double';
+            $Handicap_d = $Handicap;
             $Komi_d = $Komi;
          }
          break;
@@ -177,6 +193,7 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
          default: //Black_ID
          {
             $Handitype = 'manual';
+            $Handicap_m = $Handicap;
             $Komi_m = $Komi;
          }
          break;
@@ -211,6 +228,20 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 
    }
 
+   switch( $Handitype )
+   {
+      case 'conv':
+      case 'proper':
+      case 'double':
+      case 'nigiri':
+         break;
+      case 'manual': //not allowed in waiting room
+         if( $formstyle != 'waitingroom' )
+            break;
+      default: //always available even if waiting room or unrated
+         $Handitype = 'nigiri';
+         break;
+   }
 
    $value_array=array();
    for( $bs = MIN_BOARD_SIZE; $bs <= MAX_BOARD_SIZE; $bs++ )
@@ -238,27 +269,51 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
       $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
                               'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype ) );
    }
+   else if( $formstyle=='dispute' && $Handitype=='conv' )
+   {
+      $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
+                              'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
+                            ));
+      $Handitype = 'nigiri';
+      $allowed = false;
+   }
+   else if( $formstyle=='dispute' && $Handitype=='proper' )
+   {
+      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
+                              'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
+                            ));
+      $Handitype = 'nigiri';
+      $allowed = false;
+   }
 
-   if( !$waiting_room )
+
+   if( $formstyle != 'waitingroom' )
    {
       $mform->add_row( array( 'DESCRIPTION', T_('Manual setting'),
                               'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
-                              'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('My color'),
+                              'TEXT', SMALL_SPACING . T_('My color'),
                               'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
-                              'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Handicap'),
-                              'SELECTBOX', 'handicap', 1, $handi_stones, $Handicap, false,
-                              'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                              'TEXT', SMALL_SPACING . T_('Handicap'),
+                              'SELECTBOX', 'handicap_m', 1, $handi_stones, $Handicap_m, false,
+                              'TEXT', SMALL_SPACING . T_('Komi'),
                               'TEXTINPUT', 'komi_m', 5, 5, $Komi_m ) );
+   }
+   else if( $Handitype=='manual' )
+   {
+      $Handitype = 'nigiri';
+      $allowed = false;
    }
 
    $mform->add_row( array( 'DESCRIPTION', T_('Even game with nigiri'),
                            'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
-                           'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                           'TEXT', SMALL_SPACING . T_('Komi'),
                            'TEXTINPUT', 'komi_n', 5, 5, $Komi_n ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Double game'),
                            'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
-                           'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('Komi'),
+                           'TEXT', SMALL_SPACING . T_('Handicap'),
+                           'SELECTBOX', 'handicap_d', 1, $handi_stones, $Handicap_d, false,
+                           'TEXT', SMALL_SPACING . T_('Komi'),
                            'TEXTINPUT', 'komi_d', 5, 5, $Komi_d ) );
 
    if( ENA_STDHANDICAP )
@@ -304,8 +359,22 @@ function game_settings_form(&$mform, $my_ID=NULL, $gid=NULL, $waiting_room=false
 
    $mform->add_row( array( 'DESCRIPTION', T_('Clock runs on weekends'),
                            'CHECKBOX', 'weekendclock', 'Y', "", $Weekendclock ) );
-   $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
-                           'CHECKBOX', 'rated', 'Y', "", $Rated ) );
+
+   if( $iamrated )
+   {
+      $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
+                              'CHECKBOX', 'rated', 'Y', "", $Rated ) );
+   }
+   else if( $formstyle=='dispute' && $Rated=='Y' )
+   {
+      $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
+                              'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
+                              //'HIDDEN', 'rated', '',
+                            ));
+      $allowed = false;
+   }
+
+   return $allowed;
 }
 
 
@@ -441,7 +510,7 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
          echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
          break;
 
-      default: // Manual: $handicap_type = $Black_ID
+      default: // Manual: $handicap_type == $Black_ID
          echo '<tr><td><b>' . T_('Colors') . "<b></td><td>$col</td></tr>\n";
          echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $Handicap . "</td></tr>\n";
          echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";

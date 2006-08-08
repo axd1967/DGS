@@ -75,6 +75,9 @@ $ActiveLevel2 = 150.0;
 define('URI_ORDER_CHAR','-');
 
 
+define('MAX_START_RATING', 2600); //6 dan
+define('MIN_RATING', -900); //30 kyu
+
 $ratingpng_min_interval = 2*31*24*3600;
 $BEGINYEAR = 2001;
 $BEGINMONTH = 8;
