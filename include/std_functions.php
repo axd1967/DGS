@@ -648,8 +648,17 @@ function generate_random_password()
 function safe_setcookie($name, $value='', $rel_expire=-3600)
 //should be: ($name, $value, $expire, $path, $domain, $secure)
 {
- global $SUB_PATH, $NOW, $_SERVER;
+   global $SUB_PATH, $NOW;
+
+   if( COOKIE_OLD_COMPATIBILITY )
+   {
+      setcookie( $name, '', $NOW-3600, $SUB_PATH);
+   }
+
    $name= COOKIE_PREFIX.$name;
+
+   //remove duplicated cookies sometime occuring with some browsers
+   global $_SERVER;
    if( $tmp= @$_SERVER['HTTP_COOKIE'] )
       $n= preg_match_all(';'.$name.'[\\x01-\\x20]*=;i', $tmp, $dummy);
    else
@@ -660,6 +669,8 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
       $n--;
    }
    setcookie( $name, $value, $NOW+$rel_expire, $SUB_PATH );
+   //for current session:
+   $_COOKIE[$name] = $value; //??? add magic_quotes_gpc like slashes?
 }
 
 function set_login_cookie($handl, $code, $delete=false)

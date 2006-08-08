@@ -61,10 +61,11 @@ $tick_frequency = 12; // ticks/hour
 
 //a $_REQUEST['handle'] will not overlap $_COOKIE['cookie_handle']
 define('COOKIE_PREFIX', 'cookie_');
-//define('COOKIE_PREFIX', '');
+//compatibility with old cookies: to be removed in a while (as partner code limes)
+define('COOKIE_OLD_COMPATIBILITY', 1 && COOKIE_PREFIX>'');
 
-//used in quick_status.php
-define("FOLDER_NEW", 2);
+//used in quick_status.php and associated (wap, rss ...)
+define('FOLDER_NEW', 2);
 
 //used in daily_cron.php
 $new_end =  4*7*24*3600;  // four weeks
@@ -90,7 +91,7 @@ if ( get_magic_quotes_gpc() )
 function safe_getcookie($name)
 {
    $cookie = arg_stripslashes((string)@$_COOKIE[COOKIE_PREFIX.$name]);
-   if( !$cookie ) //compatibility with old cookies: to be removed in a while
+   if( COOKIE_OLD_COMPATIBILITY && !$cookie )
    {
       if( $name=='handle' or $name=='sessioncode' or substr($name,0,5)=='prefs' )
          $cookie = arg_stripslashes((string)@$_COOKIE[$name]);
