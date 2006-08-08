@@ -74,7 +74,7 @@ function make_link_array($links)
    if( ($links & LINK_TOGGLE_MODERATOR) or ($links & LINK_TOGGLE_MODERATOR_LIST) )
    {
       $get = $_GET;
-      $get['moderator'] = ( @$_COOKIE[COOKIE_PREFIX.'forummoderator'] == 'y'? 'n' : 'y' );
+      $get['moderator'] = ( safe_getcookie('forummoderator') == 'y'? 'n' : 'y' );
       $link_array_right[T_("Toggle forum moderator")] =
          ($links & LINK_TOGGLE_MODERATOR ?
           make_url( "read.php", $get, false ) :
@@ -304,7 +304,7 @@ function forum_name($forum, &$moderated)
 function set_moderator_cookie()
 {
    $moderator = @$_GET['moderator'];
-   $cookie = @$_COOKIE[COOKIE_PREFIX.'forummoderator'];
+   $cookie = safe_getcookie('forummoderator');
    if( $moderator === 'n' && $cookie !== '' )
    {
       $cookie = '';
@@ -315,7 +315,6 @@ function set_moderator_cookie()
       $cookie = 'y';
       safe_setcookie( 'forummoderator', $cookie, 3600);
    }
-   $_COOKIE[COOKIE_PREFIX.'forummoderator'] = $cookie;
    return $cookie === 'y';
 }
 
