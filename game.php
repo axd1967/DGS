@@ -114,7 +114,7 @@ function get_alt_arg( $n1, $n2)
       $move = (int)@$_REQUEST['gotomove'];
    if( $move<=0 )
       $move = $Moves;
-   if( $move < $Moves )
+   if( $Status == 'FINISHED' or $move < $Moves )
    {
       $may_play = false;
       $just_looking = true;
@@ -208,8 +208,10 @@ function get_alt_arg( $n1, $n2)
    {
       case 'choose_move': //single input pass
       {
-         if( $Status != 'PLAY' )
-            error('invalid_action','game_choose_move');
+         if( $Status != 'PLAY' && $Status != 'PASS' 
+          && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
+           )
+            error('invalid_action','game.choose_move');
 
          $validation_step = false;
       }
@@ -217,8 +219,10 @@ function get_alt_arg( $n1, $n2)
 
       case 'domove': //for validation after 'choose_move'
       {
-         if( $Status != 'PLAY' )
-            error('invalid_action','game_domove');
+         if( $Status != 'PLAY' && $Status != 'PASS'
+          && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
+           )
+            error('invalid_action','game.domove');
 
          $validation_step = true;
 {//to fix old way Ko detect. Could be removed when no more old way games.
@@ -248,7 +252,7 @@ function get_alt_arg( $n1, $n2)
       case 'handicap': //multiple input pass + validation
       {
          if( $Status != 'PLAY' or !( $Handicap>1 && $Moves==0 ) )
-            error('invalid_action','game_handicap');
+            error('invalid_action','game.handicap');
 
          $paterr = '';
          $patdone = 0;
@@ -296,7 +300,7 @@ function get_alt_arg( $n1, $n2)
       case 'pass': //for validation
       {
          if( $Status != 'PLAY' and $Status != 'PASS' )
-            error('invalid_action','game_pass');
+            error('invalid_action','game.pass');
 
          $validation_step = true;
          $extra_message = "<font color=\"green\">" . T_('Passing') . "</font>";
@@ -306,7 +310,7 @@ function get_alt_arg( $n1, $n2)
       case 'delete': //for validation
       {
          if( $Status != 'PLAY' or !$too_few_moves )
-            error('invalid_action','game_delete');
+            error('invalid_action','game.delete');
 
          $validation_step = true;
          $extra_message = "<font color=\"red\">" . T_('Deleting game') . "</font>";
@@ -316,7 +320,7 @@ function get_alt_arg( $n1, $n2)
       case 'remove': //multiple input pass
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error('invalid_action','game_remove');
+            error('invalid_action','game.remove');
 
          $validation_step = false;
          check_remove( $TheBoard, $coord);
@@ -339,7 +343,7 @@ function get_alt_arg( $n1, $n2)
       case 'done': //for validation after 'remove'
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error('invalid_action','game_done');
+            error('invalid_action','game.done');
 
          $validation_step = true;
          check_remove( $TheBoard);
@@ -352,7 +356,7 @@ function get_alt_arg( $n1, $n2)
 
       default:
       {
-         error('invalid_action','game_noaction');
+         error('invalid_action','game.noaction');
       }
    }
    if( $validation_step ) $may_play = false;
@@ -528,7 +532,7 @@ function get_alt_arg( $n1, $n2)
       }
       draw_message_box( $message);
    }
-   else if( $Moves > 0 )
+   else if( $Moves > 1 )
    {
       draw_moves();
       if( $show_notes )
@@ -589,7 +593,7 @@ function get_alt_arg( $n1, $n2)
    {
       if( $action == 'choose_move' )
       {
-         if( $Status != 'SCORE' and $Status != 'SCORE2' )
+         if( $Status != 'SCORE' && $Status != 'SCORE2' )
             $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."a=pass";
 
          if( $too_few_moves )
@@ -607,7 +611,7 @@ function get_alt_arg( $n1, $n2)
       {
          $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
       }
-      else if( $my_game && $Status == 'FINISHED' && $opponent_ID > 0) //&& $just_looking
+      else if( $Status == 'FINISHED' && $my_game && $opponent_ID > 0) //&& $just_looking
       {
          $menu_array[T_('Send message to user')] = "message.php?mode=NewMessage".URI_AMP."uid=$opponent_ID" ;
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$opponent_ID" ;

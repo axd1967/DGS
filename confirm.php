@@ -211,8 +211,10 @@ This is why:
    {
       case 'domove': //stonestring is the list of prisoners
       {
-         if( $Status != 'PLAY' )
-            error('invalid_action','confirm0');
+         if( $Status != 'PLAY' && $Status != 'PASS'
+          && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
+           )
+            error('invalid_action','confirm.domove');
 
          $coord = @$_REQUEST['coord'];
          $stonestring = @$_REQUEST['stonestring'];
@@ -278,7 +280,7 @@ This is why:
          else if( $Status == 'PASS' )
             $next_status = 'SCORE';
          else
-            error('invalid_action','confirm1');
+            error('invalid_action','confirm.pass');
 
 
          $move_query = "INSERT INTO Moves SET " .
@@ -304,7 +306,7 @@ This is why:
       case 'handicap': //stonestring is the list of handicap stones
       {
          if( $Status != 'PLAY' or !( $Handicap>1 && $Moves==1 ) )
-            error('invalid_action','confirm2');
+            error('invalid_action','confirm.handicap');
 
          $stonestring = (string)@$_REQUEST['stonestring'];
          check_handicap( $TheBoard); //adjust $stonestring
@@ -371,7 +373,7 @@ This is why:
       case 'delete':
       {
          if( $Status != 'PLAY' or !$too_few_moves )
-            error('invalid_action','confirm3');
+            error('invalid_action','confirm.delete');
 
 /*
   Here, the previous line was:
@@ -392,7 +394,7 @@ This is why:
       case 'done': //stonestring is the list of toggled points
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error('invalid_action','confirm4');
+            error('invalid_action','confirm.done');
 
          $stonestring = (string)@$_REQUEST['stonestring'];
          check_remove( $TheBoard);
@@ -443,7 +445,7 @@ This is why:
 
       default:
       {
-         error('invalid_action','confirm5');
+         error('invalid_action','confirm.noaction');
       }
    }
 
