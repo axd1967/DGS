@@ -127,19 +127,24 @@ function change_depth(&$cur_depth, $new_depth)
 
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
-      $links |= LINK_TOGGLE_MODERATOR;
-
-      if( @$_GET['show'] > 0 )
-         approve_message( @$_GET['show'], $thread, $forum, true );
-      else if( @$_GET['hide'] > 0 )
-         approve_message( @$_GET['hide'], $thread, $forum, false );
-
+      $links |= LINK_TOGGLE_MODERATOR_READ;
       $is_moderator = set_moderator_cookie();
+
+      if( (int)@$_GET['show'] > 0 )
+         approve_message( (int)@$_GET['show'], $thread, $forum, true );
+      else if( (int)@$_GET['hide'] > 0 )
+         approve_message( (int)@$_GET['hide'], $thread, $forum, false );
+      else if( (int)@$_GET['approve'] > 0 )
+         approve_message( (int)@$_GET['approve'], $thread, $forum, true, true );
+      else if( (int)@$_GET['reject'] > 0 )
+         approve_message( (int)@$_GET['reject'], $thread, $forum, false, true );
    }
 
    start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
 
    echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
+
+   print_moderation_note($is_moderator, '99%');
 
    if( @$_GET['revision_history'] > 0 )
       revision_history(@$_GET['revision_history']); //set $Lastread
@@ -216,7 +221,7 @@ function change_depth(&$cur_depth, $new_depth)
          draw_post('preview', false, $Subject, $Text); //, $GoDiagrams);
       }
 
-      if( $post_type != 'normal' and $post_type != 'hidden' )
+      if( $post_type != 'normal' and $post_type != 'hidden' and !$is_moderator )
       {
          if( $post_type == 'reply' and !($preview and $preview_ID == $ID) )
          {
@@ -229,7 +234,7 @@ function change_depth(&$cur_depth, $new_depth)
       }
    }
 
-   if( $preview and $preview_ID == 0 )
+   if( $preview and $preview_ID == 0 and !$is_moderator )
    {
       change_depth( $cur_depth, $cur_depth + 1 );
       $Subject = $preview_Subject;
@@ -243,7 +248,7 @@ function change_depth(&$cur_depth, $new_depth)
 
    change_depth($cur_depth, 1);
 
-   if( !($reply > 0) and !$preview and !($edit>0))
+   if( !($reply > 0) and !$preview and !($edit>0) and !$is_moderator )
    {
       echo "<tr><td>\n";
       if( $thread > 0 )

@@ -40,11 +40,14 @@ define("LINK_SEARCH", 1 << 4);
 define("LINK_MARK_READ", 1 << 5);
 define("LINK_PREV_PAGE", 1 << 6);
 define("LINK_NEXT_PAGE", 1 << 7);
-define("LINK_TOGGLE_MODERATOR", 1 << 8);
+define("LINK_TOGGLE_MODERATOR_READ", 1 << 8);
 define("LINK_TOGGLE_MODERATOR_LIST", 1 << 9);
+define("LINK_TOGGLE_MODERATOR_INDEX", 1 << 10);
 define("LINK_SEARCH_PREV_PAGE", 1 << 6);
 define("LINK_SEARCH_NEXT_PAGE", 1 << 7);
 
+define("LINK_TOGGLE_MODERATOR", LINK_TOGGLE_MODERATOR_INDEX |
+       LINK_TOGGLE_MODERATOR_READ | LINK_TOGGLE_MODERATOR_LIST );
 
 function make_link_array($links)
 {
@@ -71,14 +74,16 @@ function make_link_array($links)
    if( $links & LINK_MARK_READ )
       $link_array_left["Mark All Read"] = "";
 
-   if( ($links & LINK_TOGGLE_MODERATOR) or ($links & LINK_TOGGLE_MODERATOR_LIST) )
+   if( $links & LINK_TOGGLE_MODERATOR )
    {
       $get = $_GET;
       $get['moderator'] = ( safe_getcookie('forummoderator') == 'y'? 'n' : 'y' );
       $link_array_right[T_("Toggle forum moderator")] =
-         ($links & LINK_TOGGLE_MODERATOR ?
+         ($links & LINK_TOGGLE_MODERATOR_READ ?
           make_url( "read.php", $get, false ) :
-          make_url( "list.php", $get, false ) );
+          ($links & LINK_TOGGLE_MODERATOR_LIST ?
+           make_url( "list.php", $get, false ) :
+           make_url( "index.php", $get, false ) ) );
    }
 
    if( $links & LINK_NEXT_PAGE )
@@ -91,6 +96,12 @@ function make_link_array($links)
    if( $links & LINK_SEARCH_PREV_PAGE )
       $link_array_right[T_("Prev Page")] = "search.php?search_terms=$search_terms".URI_AMP."offset=".($offset-$SearchPostsPerPage);
 
+}
+
+function print_moderation_note($is_moderator, $width)
+{
+   if( $is_moderator)
+      echo "<table width='$width'><tr><td align=right><font color=red>" . T_("Moderating") . "</font></td></tr></table>\n";
 }
 
 function start_table(&$headline, &$links, $width, $cols)
@@ -172,7 +183,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 {
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
       $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
-      $ForumName, $Score, $Forum_ID, $Thread_ID, $bool;
+      $ForumName, $Score, $Forum_ID, $Thread_ID, $bool, $PendingApproval;
 
    $post_colors = array( 'normal' => 'cccccc',
                          'search_result' => '77bb88',
@@ -232,14 +243,23 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       if(  $post_type == 'normal' and !$is_moderator ) // reply link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."reply=$ID#$ID\">[ " .
             T_('reply') . " ]</a>&nbsp;&nbsp;";
-      if( $my_post ) // edit link
+      if( $my_post and !$is_moderator ) // edit link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."edit=$ID#$ID\">" .
             "<font color=\"#ee6666\">[ " . T_('edit') . " ]</font></a>&nbsp;&nbsp;";
       if( $is_moderator ) // hide/show link
-         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
-            ( $hidden ? 'show' : 'hide' ) . "=$ID#$ID\"><font color=\"#ee6666\">[ " .
-            ( $hidden ? T_('show') : T_('hide') ) . " ]</font></a>";
-
+      {
+         if( $PendingApproval !== 'Y' )
+            echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
+               ( $hidden ? 'show' : 'hide' ) . "=$ID#$ID\"><font color=\"#ee6666\">[ " .
+               ( $hidden ? T_('show') : T_('hide') ) . " ]</font></a>";
+         else
+            echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
+               "approve=$ID#$ID\"><font color=\"#ee6666\">[ " .
+               T_('Approve')  . " ]</font></a>&nbsp;&nbsp;" .
+               "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
+               "reject=$ID#$ID\"><font color=\"#ee6666\">[ " .
+               T_('Reject')  . " ]</font></a>";
+      }
       echo "</td></tr>\n";
    }
 }
@@ -318,8 +338,26 @@ function set_moderator_cookie()
    return $cookie === 'y';
 }
 
-function approve_message($id, $thread, $forum, $approve=true)
+function approve_message($id, $thread, $forum, $approve=true,
+                         $approve_reject_pending_approval=false)
 {
+   if( $approve_reject_pending_approval )
+   {
+      $row = mysql_single_fetch("SELECT Approved FROM Posts " .
+                         "WHERE ID=$id AND Thread_ID=$thread LIMIT 1", 'row')
+         or error("mysql_query_failed",'forum_approve_message0a');
+      $Approved = ($row[0] == 'Y');
+
+      if( $Approved === $approve )
+      {
+         mysql_query("UPDATE Posts SET PendingApproval='N' " .
+                     "WHERE ID=$id AND Thread_ID=$thread " .
+                     "AND PendingApproval='Y' LIMIT 1")
+            or error("mysql_query_failed",'forum_approve_message0b');
+         return;
+      }
+   }
+
    $result = mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "', " .
                          "PendingApproval='N' " .
                          "WHERE ID=$id AND Thread_ID=$thread " .

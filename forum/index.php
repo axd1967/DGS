@@ -43,48 +43,60 @@ LastPost: Id of the last post in the thread.
 require_once( "forum_functions.php" );
 
 {
-connect2mysql();
+   connect2mysql();
 
-$logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error("not_logged_in");
 
-start_page("Forum list", true, $logged_in, $player_row );
+   start_page("Forum list", true, $logged_in, $player_row );
 
-$result = mysql_query("SELECT Forums.ID,Description,Name,Moderated, PostsInForum, " .
-                      "UNIX_TIMESTAMP(Posts.Time) AS Timestamp " .
-                      "FROM Forums LEFT JOIN Posts ON Forums.LastPost=Posts.ID " .
-                      "ORDER BY SortOrder")
-   or error("mysql_query_failed",'forum_index1');
 
-$cols = 4;
-$headline   = array("Forums" => "colspan=$cols");
-$links = LINK_SEARCH;
+
+   $result = mysql_query("SELECT Forums.ID,Description,Name,Moderated, PostsInForum, " .
+                         "UNIX_TIMESTAMP(Posts.Time) AS Timestamp " .
+                         "FROM Forums LEFT JOIN Posts ON Forums.LastPost=Posts.ID " .
+                         "ORDER BY SortOrder")
+      or error("mysql_query_failed",'forum_index1');
+
+   $cols = 4;
+   $headline   = array("Forums" => "colspan=$cols");
+   $links = LINK_SEARCH;
+
+   $is_moderator = false;
+   if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
+   {
+      $links |= LINK_TOGGLE_MODERATOR_INDEX;
+      $is_moderator = set_moderator_cookie();
+   }
+
+   print_moderation_note($is_moderator, '98%');
+
 
    start_table($headline, $links, "width='98%'", $cols);
 
 
-while( $row = mysql_fetch_array( $result ) )
-{
-   extract($row);
-   $date = date($date_fmt, $Timestamp);
-
-   if( empty($row['Timestamp']) )
+   while( $row = mysql_fetch_array( $result ) )
    {
-      $date='&nbsp;&nbsp;-';
-      $Count = 0;
+      extract($row);
+      $date = date($date_fmt, $Timestamp);
+
+      if( empty($row['Timestamp']) )
+      {
+         $date='&nbsp;&nbsp;-';
+         $Count = 0;
+      }
+
+      echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID . '">' . $Name .
+         '</a></b>'. ( $Moderated == 'Y' ? ' &nbsp; <font color="#ff4466">[' . T_('Moderated') . ']</font>' : '') .'</td>' .
+         '<td nowrap>Posts: <b>' . $PostsInForum .  '&nbsp;&nbsp;&nbsp;</b></td>' .
+         '<td nowrap>Last Post: <b>' . $date . '</b></td></tr>
+<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description .
+         '</dl></td></tr>';
    }
 
-   echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID . '">' . $Name .
-      '</a></b>'. ( $Moderated == 'Y' ? ' &nbsp; <font color="#ff4466">[' . T_('Moderated') . ']</font>' : '') .'</td>' .
-      '<td nowrap>Posts: <b>' . $PostsInForum .  '&nbsp;&nbsp;&nbsp;</b></td>' .
-      '<td nowrap>Last Post: <b>' . $date . '</b></td></tr>
-<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description .
-      '</dl></td></tr>';
-}
+   end_table($links, $cols);
 
-end_table($links, $cols);
-
-end_page();
+   end_page();
 }
 ?>

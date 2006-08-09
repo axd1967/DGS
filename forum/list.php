@@ -72,6 +72,8 @@ require_once( "forum_functions.php" );
       $is_moderator = set_moderator_cookie();
    }
 
+   print_moderation_note($is_moderator, '98%');
+
    start_table($headline, $links, "width=98%", $cols);
 
    $odd = true;
