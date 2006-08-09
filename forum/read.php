@@ -70,13 +70,15 @@ function change_depth(&$cur_depth, $new_depth)
 {
    while( $cur_depth < $new_depth )
    {
-      echo "<tr><td><ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+      if( $cur_depth < FORUM_MAXIMUM_DEPTH )
+         echo "<tr><td><ul><li><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
       $cur_depth++;
    }
 
    while( $cur_depth > $new_depth )
    {
-      echo "</table></ul></td></tr>\n";
+      if( $cur_depth <= FORUM_MAXIMUM_DEPTH )
+         echo "</table></ul></td></tr>\n";
       $cur_depth--;
    }
 }

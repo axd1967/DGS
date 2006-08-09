@@ -49,6 +49,8 @@ define("LINK_SEARCH_NEXT_PAGE", 1 << 7);
 define("LINK_TOGGLE_MODERATOR", LINK_TOGGLE_MODERATOR_INDEX |
        LINK_TOGGLE_MODERATOR_READ | LINK_TOGGLE_MODERATOR_LIST );
 
+define("FORUM_MAXIMUM_DEPTH", 10);
+
 function make_link_array($links)
 {
    global $link_array_left, $link_array_right, $forum, $thread, $offset,
