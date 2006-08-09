@@ -36,7 +36,8 @@ function revision_history($post_id)
       "UNIX_TIMESTAMP(GREATEST(Posts.Time,Posts.Lastedited)) AS Timestamp " .
       "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
       "WHERE Posts.ID='$post_id' OR (Parent_ID='$post_id' AND PosIndex IS NULL) " .
-      "ORDER BY Timestamp DESC") or die(mysql_error());
+      "ORDER BY Timestamp DESC")
+      or error("mysql_query_failed",'forum_read1');
 
 
    $headline = array(T_("Revision history") => "colspan=$cols");
@@ -147,7 +148,7 @@ function change_depth(&$cur_depth, $new_depth)
 
    $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) AS Lastread FROM Forumreads " .
                          "WHERE User_ID=" . $player_row["ID"] . " AND Thread_ID=$thread")
-      or die(mysql_error());
+      or error("mysql_query_failed",'forum_read2');
 
    if( @mysql_num_rows($result) == 1 )
       extract( mysql_fetch_array( $result ) );
@@ -163,7 +164,8 @@ function change_depth(&$cur_depth, $new_depth)
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
                          "AND PosIndex IS NOT NULL " .
                          "ORDER BY PosIndex")
-      or die(mysql_error());
+      or error("mysql_query_failed",'forum_read3');
+
    echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
    $thread_Subject = '';
@@ -263,7 +265,7 @@ function change_depth(&$cur_depth, $new_depth)
                    "User_ID=" . $player_row["ID"] . ", " .
                    "Thread_ID=$thread, " .
                    "Time=FROM_UNIXTIME($NOW)" )
-         or error("mysql_query_failed",'forum_read1');
+         or error("mysql_query_failed",'forum_read4');
    }
 
    end_page();
