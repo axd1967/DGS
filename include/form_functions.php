@@ -126,6 +126,7 @@ class Form
    /*! \brief Construction variables. */
    var $column_started;
    var $nr_columns;
+   var $max_nr_columns;
    var $tabindex;
    var $safe_text;
 
@@ -346,7 +347,7 @@ class Form
    function create_form_string()
       {
          $formstr = "";
-         $max_nr_columns = 99; //actually build on the fly, it is often inadequate for the top rows of the form
+         $this->max_nr_columns = 2; //actually build on the fly, it is often inadequate for the top rows of the form
 
          if( !$this->echo_form_start_now )
             $formstr .= $this->print_start( $this->name, $this->action, $this->method );
@@ -403,7 +404,7 @@ class Form
 
                         if( !$this->column_started )
                         $result .= $this->print_td_start( $element_type['Align'],
-                                                          max( $max_nr_columns -
+                                                          max( $this->max_nr_columns -
                                                                $this->nr_columns,
                                                                1 ) )."\n";
 
@@ -411,7 +412,7 @@ class Form
                         $this->$func_name( $result, $element_args );
                         $result .= "\n";
 
-                        $this->nr_columns = $max_nr_columns;
+                        $this->nr_columns = $this->max_nr_columns;
                         $this->column_started = true;
                      }
                      else
@@ -441,8 +442,8 @@ class Form
                      }
                   }
 
-                  if( $this->nr_columns > $max_nr_columns )
-                     $max_nr_columns = $this->nr_columns;
+                  if( $this->nr_columns > $this->max_nr_columns )
+                     $this->max_nr_columns = $this->nr_columns;
                }
                if( $this->column_started )
                   $result .= $this->print_td_end();
@@ -588,7 +589,7 @@ class Form
     */
    function create_string_func_space( &$result, $args )
       {
-         $result .= "<td colspan=99 height=20></td>";
+         $result .= "<td colspan=" .$this->max_nr_columns . "height=20></td>";
          //$result .= "&nbsp;"; //if SPACE SpanAllColumns==true
       }
 
