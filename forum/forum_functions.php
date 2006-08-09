@@ -110,7 +110,7 @@ function print_moderation_note($is_moderator, $width)
 function start_table(&$headline, &$links, $width, $cols)
 {
    echo "<center>
-<table bgcolor=e0e8ed border=0 cellspacing=0 cellpadding=3 $width>\n";
+<table bgcolor=\"#e0e8ed\" border=0 cellspacing=0 cellpadding=3 $width>\n";
 
    make_link_array( $links );
 
@@ -137,7 +137,7 @@ function echo_links($cols)
 {
    global $link_array_left, $link_array_right;
 
-   echo "<tr><td bgcolor=d0d0d0 colspan=" . ($cols/2) . " align=left>&nbsp;";
+   echo "<tr><td bgcolor=d0d0d0 align=left>&nbsp;";
    $first=true;
    reset($link_array_left);
    while( list($name, $link) = each($link_array_left) )
@@ -146,7 +146,7 @@ function echo_links($cols)
       echo "<a href=\"$link\"><font color=000000>$name</font></a>";
       $first=false;
    }
-   echo "&nbsp;</td>\n<td bgcolor=d0d0d0 align=right colspan=" . ($cols-$cols/2) . ">&nbsp;";
+   echo "&nbsp;</td>\n<td bgcolor=d0d0d0 align=right colspan=" . ($cols-1) . ">&nbsp;";
 
    $first=true;
    reset($link_array_right);
@@ -276,8 +276,6 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
        strcasecmp(substr($Subject,0,3), "re:") != 0 )
       $Subject = "RE: " . $Subject;
 
-   echo "<ul>\n";
-
    $form = new Form( 'messageform', "read.php#preview", FORM_POST );
 
    $form->add_row( array( 'DESCRIPTION', T_('Subject'),
@@ -303,8 +301,6 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
                           'SUBMITBUTTON', 'preview" accesskey="w', ' ' . T_('Preview') . ' ') );
 
    $form->echo_string(1);
-
-   echo "</ul>\n";
 }
 
 function forum_name($forum, &$moderated)
