@@ -42,14 +42,10 @@ function post_message($player_row, $moderated_forum)
 
    if( $edit > 0 )
    {
-      $result = mysql_query("SELECT Subject,Text,Forum_ID,GREATEST(Time,Lastedited) AS Time ".
-                            "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'])
+      $row = mysql_single_fetch(
+                  "SELECT Subject,Text,Forum_ID,GREATEST(Time,Lastedited) AS Time ".
+                  "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'])
          or error("unknown_parent_post");
-
-       if( mysql_num_rows($result) != 1 )
-         error("unknown_parent_post");
-
-       $row = mysql_fetch_array($result);
 
        //Update old record with new text
        mysql_query("UPDATE Posts SET " .
@@ -65,8 +61,8 @@ function post_message($player_row, $moderated_forum)
                    "Parent_ID=$edit, " .
                    "Forum_ID=" . $row['Forum_ID'] . ", " .
                    "User_ID=" . $player_row['ID'] . ", " .
-                   'Subject="' . $row['Subject'] . '", ' .
-                   'Text="' . $row['Text'] . '"')
+                   'Subject="' . addslashes($row['Subject']) . '", ' .
+                   'Text="' . addslashes($row['Text']) . '"')
           or error("mysql_query_failed",'forum_post2');
 
        return;
