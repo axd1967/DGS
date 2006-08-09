@@ -120,10 +120,9 @@ function start_table(&$headline, &$links, $width, $cols)
    echo "<tr>";
    while( list($name, $extra) = each($headline) )
    {
-      echo "<td bgcolor=000080 $extra><font color=white>&nbsp;$name</font></td>";
+      echo "<td bgcolor=\"#000080\" $extra><font color=white>&nbsp;$name</font></td>";
    }
    echo "</tr>\n";
-
 }
 
 function end_table($links,$cols)
@@ -137,7 +136,8 @@ function echo_links($cols)
 {
    global $link_array_left, $link_array_right;
 
-   echo "<tr><td bgcolor=d0d0d0 align=left>&nbsp;";
+   $rcols = 1; //$cols/2;
+   echo "<tr><td bgcolor=\"#d0d0d0\" colspan=" . ($cols-$rcols) . " align=left>&nbsp;";
    $first=true;
    reset($link_array_left);
    while( list($name, $link) = each($link_array_left) )
@@ -146,7 +146,7 @@ function echo_links($cols)
       echo "<a href=\"$link\"><font color=000000>$name</font></a>";
       $first=false;
    }
-   echo "&nbsp;</td>\n<td bgcolor=d0d0d0 align=right colspan=" . ($cols-1) . ">&nbsp;";
+   echo "&nbsp;</td>\n<td bgcolor=\"#d0d0d0\" align=right colspan=" . ($rcols) . ">&nbsp;";
 
    $first=true;
    reset($link_array_right);

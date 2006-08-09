@@ -22,8 +22,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require_once( "forum_functions.php" );
 require_once( "post.php" );
 
-
-
+define('LIST_NR_COLUMNS', 2 * FORUM_MAXIMUM_DEPTH);
 
 function revision_history($post_id)
 {
@@ -45,10 +44,9 @@ function revision_history($post_id)
    $Lastread = $NOW;
 
    start_table($headline, $links, 'width="99%"', $cols);
+   $cur_depth= -1;
 
-   echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
-   $cur_depth = 1;
    change_depth($cur_depth,1);
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -68,23 +66,33 @@ function revision_history($post_id)
 
 function change_depth(&$cur_depth, $new_depth)
 {
-   while( $cur_depth < $new_depth )
-   {
-      if( $cur_depth < FORUM_MAXIMUM_DEPTH )
-         echo "<tr><td width=\"" . FORUM_INDENTATION_PIXELS . "\">&nbsp;</td><td><table width=\"100%\" cellpadding=0 cellspacing=0 border=0>\n";
-      $cur_depth++;
-   }
+   if( $cur_depth > 0 )
+      echo "</table></td></tr>";
+   else
+      $cur_depth= 1;
 
-   while( $cur_depth > $new_depth )
+   echo "<tr>";
+   $i= max( 1, min( $new_depth, FORUM_MAXIMUM_DEPTH));
+   $c= LIST_NR_COLUMNS+1-$i;
+   $indent= "<td class=\"indent\">&nbsp;</td>";
+   switch( $i )
    {
-      if( $cur_depth <= FORUM_MAXIMUM_DEPTH )
-         echo "</table></td></tr>\n";
-      $cur_depth--;
+      case 1:
+      break;
+      case 2:
+         echo "$indent";
+      break;
+      case 3:
+         echo "<td>&nbsp;</td>$indent";
+      break;
+      default:
+         echo "<td colspan=".($i-2).">&nbsp;</td>$indent";
+      break;
    }
+   echo "<td colspan=$c><table width=\"100%\" border=0 cellspacing=0 cellpadding=3>";
+
+   $cur_depth = $new_depth;
 }
-
-
-
 
 
 
@@ -122,7 +130,8 @@ function change_depth(&$cur_depth, $new_depth)
 //      $preview_GoDiagrams = create_godiagrams($preview_Text);
    }
 
-   $cols=2;
+   $cols= LIST_NR_COLUMNS;
+
    $headline = array(T_("Reading thread") => "colspan=$cols");
    $links = LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
    $is_moderator = false;
@@ -142,7 +151,10 @@ function change_depth(&$cur_depth, $new_depth)
          approve_message( (int)@$_GET['reject'], $thread, $forum, false, true );
    }
 
-   start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
+   start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row,
+      "td.indent{ width:" . FORUM_INDENTATION_PIXELS .
+      "px; min-width:" . FORUM_INDENTATION_PIXELS . "px;}\n"
+      );
 
    echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
 
@@ -152,6 +164,8 @@ function change_depth(&$cur_depth, $new_depth)
       revision_history(@$_GET['revision_history']); //set $Lastread
 
    start_table($headline, $links, 'width="99%"', $cols);
+   $cur_depth= -1;
+
 
    $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) AS Lastread FROM Forumreads " .
                          "WHERE User_ID=" . $player_row["ID"] . " AND Thread_ID=$thread")
@@ -173,11 +187,9 @@ function change_depth(&$cur_depth, $new_depth)
                          "ORDER BY PosIndex")
       or error("mysql_query_failed",'forum_read3');
 
-   echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=0 cellspacing=0 border=0>\n";
 
    $thread_Subject = '';
    $Lastchangedthread = 0 ;
-   $cur_depth=1;
    while( $row = mysql_fetch_array( $result ) )
    {
       $Name = '?';
@@ -260,7 +272,6 @@ function change_depth(&$cur_depth, $new_depth)
    }
 
    echo "</table></td></tr>\n";
-
    end_table($links, $cols);
 
 
