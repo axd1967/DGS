@@ -108,7 +108,7 @@ function change_depth(&$cur_depth, $new_depth)
    if( isset($_POST['post']) )
    {
       $msg = urlencode(post_message($player_row, $moderated));
-      jump_to("forum/list.php?forum=$forum&sysmsg=$msg");
+      jump_to("forum/list.php?forum=$forum".URI_AMP."sysmsg=$msg");
    }
 
    $preview = isset($_POST['preview']);
