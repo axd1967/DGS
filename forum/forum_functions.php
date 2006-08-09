@@ -50,6 +50,7 @@ define("LINK_TOGGLE_MODERATOR", LINK_TOGGLE_MODERATOR_INDEX |
        LINK_TOGGLE_MODERATOR_READ | LINK_TOGGLE_MODERATOR_LIST );
 
 define("FORUM_MAXIMUM_DEPTH", 10);
+define("FORUM_INDENTATION_PIXELS", 15);
 
 function make_link_array($links)
 {
@@ -205,11 +206,11 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 
 
    if( $post_type == 'preview' )
-      echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
+      echo '<tr><td colspan=2 bgcolor="#' . $post_colors[ $post_type ] .
          "\"><a name=\"preview\"></a><font size=\"+1\"><b>$sbj</b></font><br> " . 
          T_('by')." " . user_reference( 1, 1, "black", $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n" .
-         '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
+         '<tr><td colspan=2 bgcolor=white>' . $txt . "</td></tr>\n";
    else
    {
       if( $post_type=='search_result' )
@@ -225,7 +226,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
             echo '<font color="#FFFFFF"> with </font> Score <font color="#000000">' . $Score  . '</font>' . "\n";
       }
       else
-         echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
+         echo '<tr><td colspan=2 bgcolor="#' . $post_colors[ $post_type ] .
             "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a>";
 
       echo "<br> " . T_('by') . " " .
@@ -235,13 +236,13 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
          echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."revision_history=$ID\">" . T_('edited') .
             "</a> " . date($date_fmt, $Lasteditedstamp) . ")";
       echo "</td></tr>\n" .
-         '<tr><td bgcolor=white>' . $txt . "</td></tr>\n";
+         '<tr><td colspan=2 bgcolor=white>' . $txt . "</td></tr>\n";
    }
 
    if( $post_type == 'normal' or $post_type == 'hidden' )
    {
       $hidden = $post_type == 'hidden';
-      echo "<tr><td bgcolor=white align=left>";
+      echo "<tr><td colspan=2 bgcolor=white align=left>";
       if(  $post_type == 'normal' and !$is_moderator ) // reply link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."reply=$ID#$ID\">[ " .
             T_('reply') . " ]</a>&nbsp;&nbsp;";
@@ -262,7 +263,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
                "reject=$ID#$ID\"><font color=\"#ee6666\">[ " .
                T_('Reject')  . " ]</font></a>";
       }
-      echo "</td></tr>\n";
+      echo "</td></tr><tr><td height=2></td></tr>\n";
    }
 }
 

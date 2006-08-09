@@ -71,14 +71,14 @@ function change_depth(&$cur_depth, $new_depth)
    while( $cur_depth < $new_depth )
    {
       if( $cur_depth < FORUM_MAXIMUM_DEPTH )
-         echo "<tr><td><ul><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+         echo "<tr><td width=\"" . FORUM_INDENTATION_PIXELS . "\">&nbsp;</td><td><table width=\"100%\" cellpadding=0 cellspacing=0 border=0>\n";
       $cur_depth++;
    }
 
    while( $cur_depth > $new_depth )
    {
       if( $cur_depth <= FORUM_MAXIMUM_DEPTH )
-         echo "</table></ul></td></tr>\n";
+         echo "</table></td></tr>\n";
       $cur_depth--;
    }
 }
@@ -230,7 +230,7 @@ function change_depth(&$cur_depth, $new_depth)
             $Text = '';
 //            $GoDiagrams = null;
          }
-         echo "<tr><td>\n";
+         echo "<tr><td colspan=2>\n";
          message_box($post_type, $ID, NULL /*$GoDiagrams*/, $Subject, $Text);
          echo "</td></tr>\n";
       }
@@ -243,7 +243,7 @@ function change_depth(&$cur_depth, $new_depth)
       $Text = $preview_Text;
 //      $GoDiagrams = $preview_GoDiagrams;
       draw_post('preview', false, $Subject, $Text); //, $GoDiagrams);
-      echo "<tr><td>\n";
+      echo "<tr><td colspan=2>\n";
       message_box('preview', $thread, NULL /*$GoDiagrams*/, $Subject, $Text);
       echo "</td></tr>\n";
    }
@@ -252,7 +252,7 @@ function change_depth(&$cur_depth, $new_depth)
 
    if( !($reply > 0) and !$preview and !($edit>0) and !$is_moderator )
    {
-      echo "<tr><td>\n";
+      echo "<tr><td colspan=2>\n";
       if( $thread > 0 )
          echo '<hr>';
       message_box('normal', $thread, null, $thread_Subject);
