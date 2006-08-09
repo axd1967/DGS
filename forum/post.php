@@ -61,8 +61,8 @@ function post_message($player_row, $moderated_forum)
                    "Parent_ID=$edit, " .
                    "Forum_ID=" . $row['Forum_ID'] . ", " .
                    "User_ID=" . $player_row['ID'] . ", " .
-                   'Subject="' . addslashes($row['Subject']) . '", ' .
-                   'Text="' . addslashes($row['Text']) . '"')
+                   'Subject="' . mysql_escape_string($row['Subject']) . '", ' .
+                   'Text="' . mysql_escape_string($row['Text']) . '"')
           or error("mysql_query_failed",'forum_post2');
 
        return;
