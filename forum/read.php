@@ -23,7 +23,8 @@ require_once( "forum_functions.php" );
 require_once( "post.php" );
 
 
-
+define('RDVL_MOD', 2);
+define('RDVL_MAX', FORUM_MAXIMUM_DEPTH);
 
 function revision_history($post_id)
 {
@@ -68,19 +69,69 @@ function revision_history($post_id)
 
 function change_depth(&$cur_depth, $new_depth)
 {
+//RdvlLog("change_depth(&$cur_depth, $new_depth)".RDVL_MOD);
+switch(RDVL_MOD){
+case 2:
+   echo "</table></td></tr><tr>\n";
+   $i= min( max( 1, $new_depth), FORUM_MAXIMUM_DEPTH);
+   $c= RDVL_MAX+1-$i;
+   //$ident= "-$i-$c-";
+   $ident= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+   switch( $i )
+   {
+   case 1:
+   break;
+   case 2:
+      echo "<td>$ident</td>\n";
+   break;
+   case 3:
+      echo "<td></td><td>$ident</td>\n";
+   break;
+   default:
+      echo "<td colspan=".($i-2)."></td><td>$ident</td>\n";
+   break;
+   }
+   echo "<td colspan=$c><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+   $cur_depth = $new_depth;
+break;
+case 1:
    while( $cur_depth < $new_depth )
    {
       if( $cur_depth < FORUM_MAXIMUM_DEPTH )
-         echo "<tr><td width=\"" . FORUM_INDENTATION_PIXELS . "\">&nbsp;</td><td><table width=\"100%\" cellpadding=0 cellspacing=0 border=0>\n";
+         echo "<tr><td>X--X</td><td><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
       $cur_depth++;
    }
+break;
+default:
+   while( $cur_depth < $new_depth )
+   {
+      if( $cur_depth < FORUM_MAXIMUM_DEPTH )
+         echo "<tr><td><blockquote><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+      $cur_depth++;
+   }
+break;
+}
 
+switch(RDVL_MOD){
+case 2:
+break;
+case 1:
    while( $cur_depth > $new_depth )
    {
-      if( $cur_depth <= FORUM_MAXIMUM_DEPTH )
-         echo "</table></td></tr>\n";
       $cur_depth--;
+      if( $cur_depth < FORUM_MAXIMUM_DEPTH )
+         echo "</table></td></tr>\n";
    }
+break;
+default:
+   while( $cur_depth > $new_depth )
+   {
+      $cur_depth--;
+      if( $cur_depth < FORUM_MAXIMUM_DEPTH )
+         echo "</table></blockquote></td></tr>\n";
+   }
+break;
+}
 }
 
 
@@ -122,7 +173,14 @@ function change_depth(&$cur_depth, $new_depth)
 //      $preview_GoDiagrams = create_godiagrams($preview_Text);
    }
 
+switch(RDVL_MOD){
+case 2:
+   $cols= RDVL_MAX;
+break;
+default:
    $cols=2;
+break;
+}
    $headline = array(T_("Reading thread") => "colspan=$cols");
    $links = LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
    $is_moderator = false;
@@ -173,7 +231,17 @@ function change_depth(&$cur_depth, $new_depth)
                          "ORDER BY PosIndex")
       or error("mysql_query_failed",'forum_read3');
 
-   echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=0 cellspacing=0 border=0>\n";
+switch(RDVL_MOD){
+case 2:
+   //echo "</table></td></tr><tr><td colspan=$i>-$i-$c-</td><td colspan=$c><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+   $c= RDVL_MAX;
+   echo "<tr><td colspan=$c><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+   echo "<tr><td colspan=$c></td></tr>\n";
+break;
+default:
+   echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+break;
+}
 
    $thread_Subject = '';
    $Lastchangedthread = 0 ;
@@ -194,7 +262,6 @@ function change_depth(&$cur_depth, $new_depth)
       if( $hidden and !$is_moderator )
          continue;
 
-
       change_depth( $cur_depth, $Depth );
 
 
@@ -210,7 +277,6 @@ function change_depth(&$cur_depth, $new_depth)
          $post_type = 'edit';
 
 //      $GoDiagrams = find_godiagrams($Text);
-
 
       draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text); //, $GoDiagrams);
 
@@ -230,7 +296,7 @@ function change_depth(&$cur_depth, $new_depth)
             $Text = '';
 //            $GoDiagrams = null;
          }
-         echo "<tr><td colspan=2 align=center>\n";
+         echo "<tr><td>\n";
          message_box($post_type, $ID, NULL /*$GoDiagrams*/, $Subject, $Text);
          echo "</td></tr>\n";
       }
@@ -243,7 +309,7 @@ function change_depth(&$cur_depth, $new_depth)
       $Text = $preview_Text;
 //      $GoDiagrams = $preview_GoDiagrams;
       draw_post('preview', false, $Subject, $Text); //, $GoDiagrams);
-      echo "<tr><td colspan=2 align=center>\n";
+      echo "<tr><td>\n";
       message_box('preview', $thread, NULL /*$GoDiagrams*/, $Subject, $Text);
       echo "</td></tr>\n";
    }
@@ -252,14 +318,24 @@ function change_depth(&$cur_depth, $new_depth)
 
    if( !($reply > 0) and !$preview and !($edit>0) and !$is_moderator )
    {
-      echo "<tr><td colspan=2 align=center>\n";
+      echo "<tr><td>\n";
       if( $thread > 0 )
          echo '<hr>';
       message_box('normal', $thread, null, $thread_Subject);
       echo "</td></tr>\n";
    }
 
+switch(RDVL_MOD){
+case 2:
+   $c= RDVL_MAX;
+   //echo "<tr><td colspan=$c><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
    echo "</table></td></tr>\n";
+break;
+default:
+   //echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+   echo "</table></td></tr>\n";
+break;
+}
 
    end_table($links, $cols);
 
