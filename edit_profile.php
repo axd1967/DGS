@@ -94,6 +94,10 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    asort($COUNTRIES);
    array_unshift($COUNTRIES, '');
    
+   $langs = get_language_descriptions_translated();
+   arsort($langs);
+   $langs['C'] = T_('Use browser settings');
+
    $notesheights = array();
    for($i=5; $i<26; $i++ )
      {
@@ -131,18 +135,6 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    $profile_form->add_row( array( 'DESCRIPTION', T_('Full name'),
                                   'TEXTINPUT', 'name', 32, 40,
                                   $player_row["Name"] ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Country'),
-                                  'SELECTBOX', 'country', 1, $COUNTRIES,
-                                  $player_row["Country"], false ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Email'),
-                                  'TEXTINPUT', 'email', 32, 80,
-                                  $player_row["Email"] ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches'),
-                                  'TEXTINPUT', 'open', 32, 40,
-                                  $player_row["Open"] ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Rank info'),
-                                  'TEXTINPUT', 'rank', 32, 40,
-                                  $player_row["Rank"] ) );
 
    if( $player_row["RatingStatus"] != 'RATED' )
    {
@@ -157,6 +149,12 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
       $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
                                      'TEXT', echo_rating($player_row["Rating2"],2,0,0 ) ) );
    }
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Rank info'),
+                                  'TEXTINPUT', 'rank', 32, 40,
+                                  $player_row["Rank"] ) );
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches'),
+                                  'TEXTINPUT', 'open', 32, 40,
+                                  $player_row["Open"] ) );
 
    $s = 0;
    if(!(strpos($player_row["SendEmail"], 'ON') === false) ) $s++;
@@ -165,10 +163,13 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Email notifications'),
                                   'SELECTBOX', 'emailnotify', 1, $notify_mess, $s, false ) );
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Email'),
+                                  'TEXTINPUT', 'email', 32, 80,
+                                  $player_row["Email"] ) );
 
-   $langs = get_language_descriptions_translated();
-   arsort($langs);
-   $langs['C'] = T_('Use browser settings');
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Country'),
+                                  'SELECTBOX', 'country', 1, $COUNTRIES,
+                                  $player_row["Country"], false ) );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Language'),
                                   'SELECTBOX', 'language', 1,
