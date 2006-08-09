@@ -52,15 +52,15 @@ function err_log( $handle, $err, $debugmsg=NULL)
 
    $uri = "error.php?err=" . urlencode($err);
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."'"
-      .", Message='".addslashes($err)."', IP='".addslashes($ip)."'" ;
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".mysql_escape_string($handle)."'"
+      .", Message='".mysql_escape_string($err)."', IP='".mysql_escape_string($ip)."'" ;
 
    $mysqlerror = @mysql_error();
 
    if( !empty($mysqlerror) )
    {
       $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
-      $errorlog_query .= ", MysqlError='".addslashes( $mysqlerror)."'";
+      $errorlog_query .= ", MysqlError='".mysql_escape_string( $mysqlerror)."'";
       $err.= ' / '. $mysqlerror;
    }
 
@@ -74,7 +74,7 @@ function err_log( $handle, $err, $debugmsg=NULL)
    }
    if( !empty($debugmsg) )
    {
-      $errorlog_query .= ", Debug='" . addslashes( $debugmsg) . "'";
+      $errorlog_query .= ", Debug='" . mysql_escape_string( $debugmsg) . "'";
       //$err.= ' / '. $debugmsg; //Do not display this info!
    }
 
@@ -287,7 +287,7 @@ function rss_auth( $cancel_str, $uhandle='')
 function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
    $given_passwd_encrypted =
-     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('".addslashes($given_passwd)."')" ) );
+     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('".mysql_escape_string($given_passwd)."')" ) );
    $given_passwd_encrypted = $given_passwd_encrypted[0];
 
    if( $passwd != $given_passwd_encrypted )
@@ -303,7 +303,7 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
       mysql_query( 'UPDATE Players ' .
                    "SET Password='" . $given_passwd_encrypted . "', " .
                    'Newpassword=NULL ' .
-                   "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" );
+                   "WHERE Handle='".mysql_escape_string($uhandle)."' LIMIT 1" );
    }
 
    return true;
@@ -360,7 +360,7 @@ else
       // temp password?
 
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
+                "FROM Players WHERE Handle='".mysql_escape_string($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {
@@ -381,7 +381,7 @@ else
       // logged in?
 
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                          "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
+                          "FROM Players WHERE Handle='".mysql_escape_string($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {

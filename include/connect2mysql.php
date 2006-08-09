@@ -78,15 +78,15 @@ function err_log( $handle, $err, $debugmsg=NULL)
 
    $uri = "error.php?err=" . urlencode($err);
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."'"
-      .", Message='".addslashes($err)."', IP='".addslashes($ip)."'" ;
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".mysql_escape_string($handle)."'"
+      .", Message='".mysql_escape_string($err)."', IP='".mysql_escape_string($ip)."'" ;
 
    $mysqlerror = @mysql_error();
 
    if( !empty($mysqlerror) )
    {
       $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
-      $errorlog_query .= ", MysqlError='".addslashes( $mysqlerror)."'";
+      $errorlog_query .= ", MysqlError='".mysql_escape_string( $mysqlerror)."'";
       $err.= ' / '. $mysqlerror;
    }
 
@@ -100,7 +100,7 @@ function err_log( $handle, $err, $debugmsg=NULL)
    }
    if( !empty($debugmsg) )
    {
-      $errorlog_query .= ", Debug='" . addslashes( $debugmsg) . "'";
+      $errorlog_query .= ", Debug='" . mysql_escape_string( $debugmsg) . "'";
       //$err.= ' / '. $debugmsg; //Do not display this info!
    }
 
@@ -118,8 +118,8 @@ function admin_log( $uid, $handle, $err)
 {
    $uid = (int)$uid;
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   $query = "INSERT INTO Adminlog SET uid='$uid', Handle='".addslashes($handle)."'"
-      .", Message='".addslashes($err)."', IP='".addslashes($ip)."'" ;
+   $query = "INSERT INTO Adminlog SET uid='$uid', Handle='".mysql_escape_string($handle)."'"
+      .", Message='".mysql_escape_string($err)."', IP='".mysql_escape_string($ip)."'" ;
 
    return @mysql_query( $query );
 }
