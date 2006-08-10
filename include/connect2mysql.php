@@ -125,10 +125,10 @@ function admin_log( $uid, $handle, $err)
 }
 
 
-function mysql_single_fetch( $query, $type='assoc')
+function mysql_single_fetch( $query, $type='assoc', $error_debug='single_fetch')
 {
    $row = false;
-   $result = mysql_query( $query);
+   $result = mysql_query( $query ) or error("mysql_query_failed", $error_debug);
    if( $result != false )
    {
       $type = 'mysql_fetch_'.$type;
