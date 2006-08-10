@@ -60,7 +60,7 @@ require_once( "include/std_functions.php" );
 
    echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
    echo '<p>Activity: ' . round($row['activity']);
-   echo '<p>Loadavg: ' . `cat /proc/loadavg`;
+   //echo '<p>Loadavg: ' . `cat /proc/loadavg`; //only under Linux like systems and with safe_mode=off
 
    $x = floor($NOW/86400);
    echo "\n<p><img src=\"statisticspng.php?date=$x\"" .
