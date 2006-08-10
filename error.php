@@ -106,6 +106,12 @@ require_once( "include/std_functions.php" );
       }
       break;
 
+      case('time_limit_too_small'):
+      {
+         echo T_("The time limit is too small, please choose at least one hour.");
+      }
+      break;
+
       case("move_problem"):
       {
          echo T_("An error occurred for this move. Usually it works if you try again, otherwise please contact the support.");

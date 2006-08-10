@@ -84,7 +84,6 @@ require_once( "include/rating.php" );
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_POST['size']));
 
-      //for interpret_time_limit_forms{
       $byoyomitype = @$_POST['byoyomitype'];
       $timevalue = @$_POST['timevalue'];
       $timeunit = @$_POST['timeunit'];
@@ -99,13 +98,15 @@ require_once( "include/rating.php" );
 
       $byotimevalue_fis = @$_POST['byotimevalue_fis'];
       $timeunit_fis = @$_POST['timeunit_fis'];
-      //for interpret_time_limit_forms}
 
    list($hours, $byohours, $byoperiods) =
       interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
                                  $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
+
+   if( $hours<1 or $byohours<1 )
+      error('time_limit_too_small');
 
 
    if( ($rated=@$_POST['rated']) != 'Y' or !$player_row["RatingStatus"] )

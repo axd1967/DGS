@@ -37,7 +37,6 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    $stdhandicap = @$_REQUEST['stdhandicap'];
    $weekendclock = @$_REQUEST['weekendclock'];
 
-   //for interpret_time_limit_forms{
    $byoyomitype = @$_REQUEST['byoyomitype'];
    $timevalue = (int)@$_REQUEST['timevalue'];
    $timeunit = @$_REQUEST['timeunit'];
@@ -52,7 +51,6 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 
    $byotimevalue_fis = (int)@$_REQUEST['byotimevalue_fis'];
    $timeunit_fis = @$_REQUEST['timeunit_fis'];
-   //for interpret_time_limit_forms}
 
    if( $color == "White" )
    {
@@ -132,6 +130,10 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
                                  $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
+
+   if( $hours<1 or $byohours<1 )
+      error('time_limit_too_small');
+
 
    if( $rated != 'Y' or $Black_ID == $White_ID )
       $rated = 'N';
@@ -276,7 +278,6 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
          or error("mysql_start_game","update_game $gid");
       if( mysql_affected_rows() != 1)
          error("mysql_start_game","update_game_row $gid");
-
    }
    else
    {
