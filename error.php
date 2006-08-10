@@ -340,6 +340,12 @@ require_once( "include/std_functions.php" );
       break;
 
 
+      case("unknown_post"):
+      {
+         echo T_("Sorry, I couldn't find the post you wanted to show.");
+      }
+      break;
+
       case("unknown_parent_post"):
       {
          echo T_("Hmm, this message seems to be a reply to a non-existing post.");

@@ -45,7 +45,9 @@ function revision_history($post_id)
 
 
    $row = mysql_single_fetch( $query_select . "WHERE Posts.ID='$post_id'", 'array',
-                                    'forum_read1a' );
+                                    'forum_read1a' )
+      or error("unknown_post");
+
    extract($row);
    change_depth( $cur_depth, 1, $cols);
    draw_post( 'reply', true, $row['Subject'], $row['Text']);
