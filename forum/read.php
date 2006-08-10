@@ -89,7 +89,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    $cur_depth = $new_depth;
    echo "<tr>";
    $i= min( $cur_depth, FORUM_MAXIMUM_DEPTH);
-   $c= FORUM_MAXIMUM_DEPTH+1 - $i;
+   $c= FORUM_MAXIMUM_DEPTH+1 - $i +2; //last +2 added for Opera browser "try to fix a bug"
    $indent= "<td class=\"indent\">&nbsp;</td>";
    switch( $i )
    {
