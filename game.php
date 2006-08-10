@@ -540,18 +540,18 @@ function get_alt_arg( $n1, $n2)
          draw_notes('Y');
          $show_notes = false;
       }
-
-      //if( $my_game ) //sgf comments may be viewed by observers
-      {
-         echo "\n<center><a href=\"game_comments.php?gid=$gid\" target=\"DGS_game_comments\">" . 
-               T_('Comments') . "</a></center>\n";
-      }
    }
 
       if( $show_notes )
       {
          draw_notes('Y');
          $show_notes = false;
+      }
+
+      //if( $my_game ) //sgf comments may be viewed by observers
+      {
+         echo "\n<center><a href=\"game_comments.php?gid=$gid\" target=\"DGS_game_comments\">" . 
+               T_('Comments') . "</a></center>\n";
       }
 
    echo "</td></tr>\n</table>\n"; //board & associates table }--------
