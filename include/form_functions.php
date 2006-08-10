@@ -589,7 +589,7 @@ class Form
     */
    function create_string_func_space( &$result, $args )
       {
-         $result .= "<td colspan=" .$this->max_nr_columns . "height=20></td>";
+         $result .= "<td colspan=" .$this->max_nr_columns . " height=20></td>";
          //$result .= "&nbsp;"; //if SPACE SpanAllColumns==true
       }
 
