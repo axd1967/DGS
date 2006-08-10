@@ -513,7 +513,7 @@ function get_alt_arg( $n1, $n2)
    if( $show_notes && $collapse_notes != 'Y' )
    {
       if( $notesmode == 'BELOW' )
-         echo "</td></tr>\n<tr><td colspan=99 align='center'>";
+         echo "</td></tr>\n<tr><td colspan=2 align='center'>";
       else //default 'RIGHT'
          echo "</td>\n<td align='left' valign='center'>";
       draw_notes( 'N', $notes, $notesheight, $noteswidth);
@@ -694,7 +694,7 @@ function draw_message_box(&$message)
       T_('Submit and go to next game') . '"></TD>
     <TD><input type=submit name="nextstatus" tabindex="'.($tabindex++).'" value="' .
       T_("Submit and go to status") . '"></TD></TR>
-<TR><TD align=right colspan=99><input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' .
+<TR><TD align=right colspan=2><input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' .
       T_("Go back") . '"></TD></TR>
       </TABLE>
     </CENTER>
@@ -724,10 +724,12 @@ function draw_game_info(&$game_row)
    echo '<td>' . T_('Prisoners') . ': ' . $game_row['Black_Prisoners'] . "</td>\n";
    echo "</tr>\n";
 
+   $cols = 5;
+
    if( $game_row['Status'] != 'FINISHED' )
    {
       echo '<tr bgcolor="#DDDDDD">' . "\n";
-      echo "<td colspan=99>\n" . T_("Time remaining") . ": " .
+      echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
          echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
                              $game_row['Byotime'], $game_row['Byoperiods'],
                              $game_row['Black_Maintime'], $game_row['Black_Byotime'],
@@ -757,7 +759,7 @@ function draw_game_info(&$game_row)
    if( $game_row['Status'] != 'FINISHED' )
    {
       echo '<tr bgcolor="#FFFFFF">' . "\n";
-      echo "<td colspan=99>\n" . T_("Time remaining") . ": " .
+      echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
          echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
                              $game_row['Byotime'], $game_row['Byoperiods'],
                              $game_row['White_Maintime'], $game_row['White_Byotime'],
@@ -767,7 +769,7 @@ function draw_game_info(&$game_row)
 
    $sep = ',&nbsp;&nbsp;&nbsp;';
    echo '<tr bgcolor=' . $table_row_color2 . '>' . "\n";
-   echo "<td colspan=99>" . T_('Rules') . ': ';
+   echo "<td colspan=\"" . $cols . "\">" . T_('Rules') . ': ';
    echo T_('Komi') . ': ' . $game_row['Komi'] ;
    echo $sep . T_('Handicap') . ': ' . $game_row['Handicap'];
    echo $sep . T_('Rated game') . ': ' .
@@ -776,7 +778,7 @@ function draw_game_info(&$game_row)
    echo "</tr>\n";
 
    echo '<tr bgcolor=' . $table_row_color2 . '>' . "\n";
-   echo "<td colspan=99>" . T_('Time limit') . ': ' .
+   echo "<td colspan=\"" . $cols . "\">" . T_('Time limit') . ': ' .
       echo_time_limit($game_row['Maintime'], $game_row['Byotype'],
                       $game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
 

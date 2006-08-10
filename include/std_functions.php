@@ -390,7 +390,7 @@ global $HOSTNAME;
    else //for devel server
       $hostlink= '<a href="http://www.samurajdata.se" target="_blank"><img src="'.$base_path.'images/samurajlogo.gif" alt="Samuraj Logo" width=160 height=20 border=0 align=middle></a>';
 
-   echo "\n  <td valign=top align=right colspan=99><font size=-1>Hosted by&nbsp;&nbsp;</font>$hostlink</td>";
+   echo "\n  <td valign=top align=right><font size=-1>Hosted by&nbsp;&nbsp;</font>$hostlink</td>";
 
    echo "\n </tr>"
       . "\n</table>";
