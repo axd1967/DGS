@@ -69,7 +69,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       return;      
    }
 
-   if( $cur_depth >= 1 ) //this means already opened
+   if( $cur_depth >= 1 ) //this means that a cell table is already opened
    {
       echo "</table></td></tr>";
    }
@@ -86,6 +86,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       echo "<tr><td colspan=$cols><table width=\"100%\" border=0 cellspacing=0 cellpadding=0>";
    }
 
+   // then build the indenting row
    $cur_depth = $new_depth;
    echo "<tr>";
    $i= min( $cur_depth, FORUM_MAXIMUM_DEPTH);
@@ -105,6 +106,8 @@ function change_depth( &$cur_depth, $new_depth, $cols)
          echo "<td colspan=".($i-2).">&nbsp;</td>$indent";
       break;
    }
+
+   // finally, open the cell table
    echo "<td colspan=$c><table width=\"100%\" border=0 cellspacing=0 cellpadding=3>";
 }
 
@@ -177,10 +180,10 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    if( @$_GET['revision_history'] > 0 )
       revision_history(@$_GET['revision_history']); //set $Lastread
 
-// The table structure of the page:
+// The table structure of the list:
 // level 1: the header, body and footer TABLE of the list
 // level 2: the boby of the list: one row per post managing its indent
-// level 3: the post TABLE
+// level 3: the post cell TABLE
 
    start_table($headline, $links, 'width="99%"', $cols);
    $cur_depth= -1;
