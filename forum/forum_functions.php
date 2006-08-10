@@ -29,6 +29,7 @@ chdir("forum");
 //$new_end =  4*7*24*3600;  // four weeks //moved to quick_common.php
 
 $new_level1 = 2*7*24*3600;  // two weeks
+$firstnew = true;
 
 $order_str = "*+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
 
@@ -174,6 +175,13 @@ function get_new_string($Lastchangedstamp, $Lastread)
       else
          $color = '#ff7777'; //older 'new'
       $new = '<font color="' . $color . '" size="-1">&nbsp;&nbsp;' . T_('new') .'</font>';
+
+      global $firstnew;
+      if( $firstnew )
+      {
+         $firstnew= false;
+         $new = "<a name=\"firstnew\">$new</a>";
+      }
    }
    else
       $new = '';
@@ -201,7 +209,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 
    if( strlen($txt) == 0 ) $txt = '&nbsp;';
 
-   $color = "ff0000";
+   $color = "ff0000"; //useful?? 
    $new = get_new_string($Timestamp, $Lastread);
 
 
@@ -227,7 +235,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       }
       else
          echo '<tr><td colspan=2 bgcolor="#' . $post_colors[ $post_type ] .
-            "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font>$new</a>";
+            "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font></a>$new";
 
       echo "<br> " . T_('by') . " " .
          user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
