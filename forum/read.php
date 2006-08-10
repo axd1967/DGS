@@ -25,17 +25,8 @@ require_once( "post.php" );
 
 function revision_history($post_id)
 {
-   global $links, $cols, $Name, $Handle, $Lasteditedstamp, $Timestamp, $Lastread, $NOW;
-
-   $result = mysql_query(
-      "SELECT Posts.*, " .
-      "Players.ID AS uid, Players.Name, Players.Handle, " .
-      "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
-      "UNIX_TIMESTAMP(GREATEST(Posts.Time,Posts.Lastedited)) AS Timestamp " .
-      "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
-      "WHERE Posts.ID='$post_id' OR (Parent_ID='$post_id' AND PosIndex IS NULL) " .
-      "ORDER BY Timestamp DESC")
-      or error("mysql_query_failed",'forum_read1');
+   global $links, $cols, $Name, $Handle, $User_ID,
+      $Lasteditedstamp, $Timestamp, $Lastread, $NOW;
 
 
    $headline = array(T_("Revision history") => "colspan=$cols");
@@ -46,12 +37,32 @@ function revision_history($post_id)
    $cur_depth= -1;
 
 
+   $query_select = "SELECT Posts.*, " .
+      "Players.ID AS User_ID, Players.Name, Players.Handle, " .
+      "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
+      "UNIX_TIMESTAMP(GREATEST(Posts.Time,Posts.Lastedited)) AS Timestamp " .
+      "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID ";
+
+
+   $row = mysql_single_fetch( $query_select . "WHERE Posts.ID='$post_id'", 'array',
+                                    'forum_read1a' );
+   extract($row);
    change_depth( $cur_depth, 1, $cols);
+   draw_post( 'reply', true, $row['Subject'], $row['Text']);
+   echo "<tr><td height=2></td></tr>";
+   change_depth( $cur_depth, 2, $cols);
+
+   $result = mysql_query( $query_select .
+                          "WHERE Parent_ID='$post_id' AND PosIndex IS NULL " .
+                          "ORDER BY Timestamp DESC")
+      or error("mysql_query_failed",'forum_read1b');
+
+
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
-      draw_post(($cur_depth==1 ? 'reply' : 'edit' ), true, $row['Subject'], $row['Text'], null);
-      change_depth( $cur_depth, 2, $cols);
+      draw_post( 'edit' , true, $row['Subject'], $row['Text']);
+      echo "<tr><td height=2></td></tr>";
    }
 
 
