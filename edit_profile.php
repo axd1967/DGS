@@ -100,15 +100,15 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 
    $notesheights = array();
    for($i=5; $i<26; $i++ )
-     {
+   {
      $notesheights[$i] = $i;
-     }
+   }
    
    $noteswidths = array();
-   for($i=3; $i<16; $i++ )
-     {
-     $noteswidths[$i*5] = $i * 5;
-     }
+   for($i=15; $i<105; $i+=5 )
+   {
+     $noteswidths[$i] = $i;
+   }
    
    $notesmodes = array('OFF' => T_('Off'), 'RIGHT' => T_('Right'), 'BELOW' => T_('Below'));
 
