@@ -227,7 +227,7 @@ require_once( "include/message_functions.php" );
    $baseURL = "waiting_room.php?".$sortstring;
    if( $showall )
    {
-      $str = T_("Only adequate games");
+      $str = T_("Show only adequate games");
    }
    else
    {
