@@ -232,6 +232,16 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
 
    echo "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}printer.css\">";
 
+   global $SUB_PATH;
+   switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
+   {
+      case 'status.php':
+         // RSS Autodiscovery:
+         echo "\n <link rel=\"alternate\" type=\"application/rss+xml\"" 
+             ." title=\"$FRIENDLY_SHORT_NAME Status RSS Feed\" href=\"/rss/status.php\">";
+      break;
+   }
+
    if( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
 
@@ -661,7 +671,7 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
    $name= COOKIE_PREFIX.$name;
 
    //remove duplicated cookies sometime occuring with some browsers
-   global $_SERVER;
+   //global $HTTP_SERVER_VARS; old == new $_SERVER
    if( $tmp= @$_SERVER['HTTP_COOKIE'] )
       $n= preg_match_all(';'.$name.'[\\x01-\\x20]*=;i', $tmp, $dummy);
    else
@@ -1181,6 +1191,8 @@ function get_request_url( $absolute=false)
 {
  global $SUB_PATH, $HOSTBASE;
 
+//CAUTION: sometime, REQUEST_URI != PHP_SELF+args
+//if there is a redirection, _URI==requested, while _SELF==reached (running one)
    $url = str_replace('\\','/',@$_SERVER['REQUEST_URI']); //contains URI_AMP_IN and still urlencoded
    $len = strlen($SUB_PATH);
    if (!strcasecmp( $SUB_PATH, substr($url,0,$len) ))

@@ -68,6 +68,8 @@ function err_log( $handle, $err, $debugmsg=NULL)
    if( empty($debugmsg) )
    {
     global $SUB_PATH;
+//CAUTION: sometime, REQUEST_URI != PHP_SELF+args
+//if there is a redirection, _URI==requested, while _SELF==reached (running one)
       $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
@@ -269,6 +271,7 @@ function rss_warning( $str, $title='', $link='')
 */
 function rss_auth( $cancel_str, $uhandle='')
 {
+   global $FRIENDLY_LONG_NAME;
    //if( $uhandle ) $uhandle= ' - '.$uhandle; else
       $uhandle= '';
    $uhandle= $FRIENDLY_LONG_NAME . $uhandle;
