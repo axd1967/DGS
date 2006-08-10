@@ -22,7 +22,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require_once( "forum_functions.php" );
 require_once( "post.php" );
 
-define('LIST_NR_COLUMNS', 2 * FORUM_MAXIMUM_DEPTH);
 
 function revision_history($post_id)
 {
@@ -47,33 +46,50 @@ function revision_history($post_id)
    $cur_depth= -1;
 
 
-   change_depth($cur_depth,1);
+   change_depth( $cur_depth, 1, $cols);
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
       draw_post(($cur_depth==1 ? 'reply' : 'edit' ), true, $row['Subject'], $row['Text'], null);
-      change_depth($cur_depth,2);
+      change_depth( $cur_depth, 2, $cols);
    }
 
-   change_depth($cur_depth,1);
 
-   echo "</table></td></tr>\n";
+   change_depth( $cur_depth, -1, $cols);
    end_table($links, $cols);
    end_page();
    exit;
 }
 
 
-function change_depth(&$cur_depth, $new_depth)
+function change_depth( &$cur_depth, $new_depth, $cols)
 {
-   if( $cur_depth > 0 )
-      echo "</table></td></tr>";
-   else
-      $cur_depth= 1;
+   if( $new_depth < 1 && $cur_depth < 1 )
+   {
+      return;      
+   }
 
+   if( $cur_depth >= 1 ) //this means already opened
+   {
+      echo "</table></td></tr>";
+   }
+
+   if( $new_depth < 1 ) //this means close it
+   {
+      echo "</table></td></tr>";
+      $cur_depth = -1;
+      return;
+   }
+
+   if( $cur_depth < 1 ) //this means opened it
+   {
+      echo "<tr><td colspan=$cols><table width=\"100%\" border=0 cellspacing=0 cellpadding=0>";
+   }
+
+   $cur_depth = $new_depth;
    echo "<tr>";
-   $i= max( 1, min( $new_depth, FORUM_MAXIMUM_DEPTH));
-   $c= LIST_NR_COLUMNS+1-$i;
+   $i= min( $cur_depth, FORUM_MAXIMUM_DEPTH);
+   $c= FORUM_MAXIMUM_DEPTH+1 - $i;
    $indent= "<td class=\"indent\">&nbsp;</td>";
    switch( $i )
    {
@@ -90,8 +106,6 @@ function change_depth(&$cur_depth, $new_depth)
       break;
    }
    echo "<td colspan=$c><table width=\"100%\" border=0 cellspacing=0 cellpadding=3>";
-
-   $cur_depth = $new_depth;
 }
 
 
@@ -130,7 +144,7 @@ function change_depth(&$cur_depth, $new_depth)
 //      $preview_GoDiagrams = create_godiagrams($preview_Text);
    }
 
-   $cols= LIST_NR_COLUMNS;
+   $cols= 2;
 
    $headline = array(T_("Reading thread") => "colspan=$cols");
    $links = LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
@@ -207,7 +221,7 @@ function change_depth(&$cur_depth, $new_depth)
          continue;
 
 
-      change_depth( $cur_depth, $Depth );
+      change_depth( $cur_depth, $Depth, $cols);
 
 
       $post_type = 'normal';
@@ -228,7 +242,7 @@ function change_depth(&$cur_depth, $new_depth)
 
       if( $preview and $preview_ID == $ID )
       {
-         change_depth( $cur_depth, $cur_depth + 1 );
+         change_depth( $cur_depth, $cur_depth + 1, $cols);
          $Subject = $preview_Subject;
          $Text = $preview_Text;
 //         $GoDiagrams = $preview_GoDiagrams;
@@ -250,7 +264,7 @@ function change_depth(&$cur_depth, $new_depth)
 
    if( $preview and $preview_ID == 0 and !$is_moderator )
    {
-      change_depth( $cur_depth, $cur_depth + 1 );
+      change_depth( $cur_depth, $cur_depth + 1, $cols);
       $Subject = $preview_Subject;
       $Text = $preview_Text;
 //      $GoDiagrams = $preview_GoDiagrams;
@@ -260,7 +274,7 @@ function change_depth(&$cur_depth, $new_depth)
       echo "</td></tr>\n";
    }
 
-   change_depth($cur_depth, 1);
+   change_depth( $cur_depth, 1, $cols);
 
    if( !($reply > 0) and !$preview and !($edit>0) and !$is_moderator )
    {
@@ -271,7 +285,7 @@ function change_depth(&$cur_depth, $new_depth)
       echo "</td></tr>\n";
    }
 
-   echo "</table></td></tr>\n";
+   change_depth( $cur_depth, -1, $cols);
    end_table($links, $cols);
 
 

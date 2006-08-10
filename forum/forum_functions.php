@@ -136,7 +136,7 @@ function echo_links($cols)
 {
    global $link_array_left, $link_array_right;
 
-   $rcols = 1; //$cols/2;
+   $rcols = $cols-1; //1; $cols/2; $cols-1;
    echo "<tr><td bgcolor=\"#d0d0d0\" colspan=" . ($cols-$rcols) . " align=left>&nbsp;";
    $first=true;
    reset($link_array_left);
@@ -210,7 +210,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
          "\"><a name=\"preview\"></a><font size=\"+1\"><b>$sbj</b></font><br> " . 
          T_('by')." " . user_reference( 1, 1, "black", $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n" .
-         '<tr><td colspan=2 bgcolor=white>' . $txt . "</td></tr>\n";
+         '<tr><td colspan=2 bgcolor=white>' . $txt . "</td></tr>";
    else
    {
       if( $post_type=='search_result' )
@@ -236,7 +236,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
          echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."revision_history=$ID\">" . T_('edited') .
             "</a> " . date($date_fmt, $Lasteditedstamp) . ")";
       echo "</td></tr>\n" .
-         '<tr><td colspan=2 bgcolor=white>' . $txt . "</td></tr>\n";
+         '<tr><td colspan=2 bgcolor=white>' . $txt . "</td></tr>";
    }
 
    if( $post_type == 'normal' or $post_type == 'hidden' )
@@ -263,7 +263,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
                "reject=$ID#$ID\"><font color=\"#ee6666\">[ " .
                T_('Reject')  . " ]</font></a>";
       }
-      echo "</td></tr><tr><td height=2></td></tr>\n";
+      echo "</td></tr><tr><td height=2></td></tr>";
    }
 }
 
