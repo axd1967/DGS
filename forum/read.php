@@ -89,7 +89,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    $cur_depth = $new_depth;
    echo "<tr>";
    $i= min( $cur_depth, FORUM_MAXIMUM_DEPTH);
-   $c= FORUM_MAXIMUM_DEPTH+1 - $i +2; //last +2 added for Opera browser "try to fix a bug"
+   $c= FORUM_MAXIMUM_DEPTH+1 - $i;
    $indent= "<td class=\"indent\">&nbsp;</td>";
    switch( $i )
    {
@@ -130,7 +130,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    if( isset($_POST['post']) )
    {
       $msg = urlencode(post_message($player_row, $moderated));
-      jump_to("forum/list.php?forum=$forum".URI_AMP."sysmsg=$msg");
+      jump_to("forum/read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."sysmsg=$msg");
    }
 
    $preview = isset($_POST['preview']);
@@ -176,6 +176,11 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
    if( @$_GET['revision_history'] > 0 )
       revision_history(@$_GET['revision_history']); //set $Lastread
+
+// The table structure of the page:
+// level 1: the header, body and footer TABLE of the list
+// level 2: the boby of the list: one row per post managing its indent
+// level 3: the post TABLE
 
    start_table($headline, $links, 'width="99%"', $cols);
    $cur_depth= -1;
