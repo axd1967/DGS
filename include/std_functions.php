@@ -299,6 +299,18 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
          T_('Docs') => array('docs.php" accesskey="d',4,3),
       );
 
+      $tools_array = array();
+      global $SUB_PATH, $FRIENDLY_SHORT_NAME;
+      switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
+      {
+         case 'status.php':
+            $tools_array['rss/status.php'] = 
+               array( $base_path.'images/feed-icon.png', 
+                      '',
+                      T_("$FRIENDLY_SHORT_NAME Status RSS Feed")
+                     );
+         break;
+      }
    }
 
 
@@ -306,12 +318,15 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
          . "\n <tr>";
+      $br = ( $printable ? '' : '<br>' );
    }
    else if( $player_row['MenuDirection'] == 'HORIZONTAL' )
    {
       make_menu_horizontal($menu_array);
+      make_tools( $tools_array, 0);
       echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
          . "\n <tr>";
+      $br = '';
    }
    else
    {
@@ -319,10 +334,12 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
          . "\n <tr>"
          . "\n  <td valign=top rowspan=2>\n";
       make_menu_vertical($menu_array);
+      make_tools( $tools_array, 4);
       echo "\n  </td>";
+      $br = '<br>';
    }
    //this <table><tr><td> is left open until page end
-   echo "\n  <td id=\"page_body\" width=\"100%\" align=center valign=top><BR>\n\n";
+   echo "\n  <td id=\"page_body\" width=\"100%\" align=center valign=top>$br\n\n";
 
    sysmsg(get_request_arg('sysmsg'));
 
@@ -583,6 +600,27 @@ function make_menu_vertical($menu_array)
 
    echo "\n  </td>"
       . "\n </tr>\n</table>\n";
+}
+
+function make_tools( $array, $width=0)
+{
+   if( !is_array($array) or count($array)==0 )
+      return;
+   echo "<table class=notprintable id=\"page_tools\" border=0 cellspacing=0 cellpadding=6>\n<tr>\n";
+   $i= 0;
+   foreach( $array as $lnk => $sub )
+   {
+      list( $src, $alt, $tit) = $sub;
+      if( $i && $i==$width )
+      {
+         echo "</tr><tr>\n";
+         $i= 1;
+      }
+      else
+         $i++;
+      echo '<td>'.anchor( $lnk, image( $src, $alt, $tit))."</td>\n";
+   }
+   echo "</tr>\n</table>\n";
 }
 
 /* Not used: to be reviewed
