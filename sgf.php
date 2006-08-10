@@ -213,7 +213,7 @@ $array=array();
 
 
 {
-   disable_cache( $NOW, $NOW+5*60); //to allow some mime applications to find it in the cache
+   disable_cache( $NOW, $NOW+5*24*60*60); //to allow some mime applications to find it in the cache
 
    connect2mysql();
 
