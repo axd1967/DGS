@@ -119,9 +119,6 @@ require_once( "include/timezones.php" );
    if( $folder!=$current_folder )
       $page.= URI_AMP.'folder=' . $folder ;
 
-   start_page($title, true, $logged_in, $player_row );
-
-
    if( $page )
       $page= '?'.substr( $page, strlen(URI_AMP));
    $mtable = new Table( 'list_messages.php' . $page );
@@ -131,7 +128,20 @@ require_once( "include/timezones.php" );
 
    $result = message_list_query($my_id, $folderstring, $order, $limit, $where);
 
-   $show_rows = $mtable->compute_show_rows(mysql_num_rows($result));
+   $show_rows = mysql_num_rows($result);
+
+   if( $find_answers && $show_rows == 1 )
+   {
+      $row = mysql_fetch_assoc( $result);
+      $mid = $row["mid"];
+      jump_to( "message.php?mode=ShowMessage".URI_AMP."mid=$mid");
+   }
+
+   $show_rows = $mtable->compute_show_rows( $show_rows);
+
+
+   start_page($title, true, $logged_in, $player_row );
+
 
    $marked_form = new Form('','', FORM_GET);
    echo "<form name=\"marked\" action=\"list_messages.php\" method=\"GET\">\n";
