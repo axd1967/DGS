@@ -262,8 +262,8 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
          echo "</td><td rowspan=2 align=right>";
 
          if( $post_type == 'hidden'  )
-            echo '<b><font color="#990000">' . T_('Hidden') .
-               ( $PendingApproval == 'Y' ? '<br>' . T_('awaiting<br>approval') : '' ) .
+            echo '<b><font color="#990000">' .
+               ( $PendingApproval == 'Y' ? T_('Awaiting<br>approval') : T_('Hidden') ) .
                '</font></b>';
 
          echo "</td></tr>\n";
