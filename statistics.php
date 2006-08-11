@@ -46,24 +46,33 @@ require_once( "include/std_functions.php" );
       echo '<tr><td>' . $row["Status"] . '</td><td align="right">' . $row["moves"] . '</td><td align="right">' . $row["count"] . '</td></tr>
 ';
    }
+   mysql_free_result($result);
 
-   $result = mysql_query( $q2 );
-   $row = mysql_fetch_array( $result );
+   $row = mysql_single_fetch( $q2 );
+   if( $row )
+   {
+      echo '<tr><td>Total</td><td align="right">' . $row["moves"] 
+         . '</td><td align="right">' . $row["count"] . "</td></tr>\n";
+   }
+   echo "</table>\n";
 
-   echo '<tr><td>Total</td><td align="right">' . $row["moves"] . '</td><td align="right">' . $row["count"] . '</td></tr>
-</table>
-';
+   $row = mysql_single_fetch( $q3 );
+   if( $row )
+   {
+      echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
+      echo '<p>Activity: ' . round($row['activity']) . "\n";
+   }
 
-
-   $result = mysql_query( $q3 );
-   $row = mysql_fetch_array( $result );
-
-   echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
-   echo '<p>Activity: ' . round($row['activity']);
    //echo '<p>Loadavg: ' . `cat /proc/loadavg`; //only under Linux like systems and with safe_mode=off
+   $tmp = '/proc/loadavg';
+   if( file_exists( $tmp ) )
+   {
+      $tmp = trim(implode('', file($tmp)));
+      echo '<p>Loadavg: ' . $tmp;
+   }
 
-   $x = floor($NOW/86400);
-   echo "\n<p><img src=\"statisticspng.php?date=$x\"" .
+   $tmp = floor($NOW/86400); //to force the caches (daily)
+   echo "\n<p><img src=\"statisticspng.php?date=$tmp\"" .
         " alt=\"" . T_('Statistics graph') . "\">";
 
    end_page();
