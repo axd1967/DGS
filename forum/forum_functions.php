@@ -480,7 +480,7 @@ function display_posts_pending_approval()
    {
       $color = ( $odd ? "" : " bgcolor=white" );
 
-      $Subject = make_html_safe( $row['Subject'], true);
+      $Subject = make_html_safe( $row['Subject']);
       echo "<tr$color><td><a href=\"forum/read.php?forum=" . $row['Forum_ID'] . URI_AMP .
          "thread=" . $row['Thread_ID'] . URI_AMP . "moderator=y#" . $row['Post_ID'] . "\">$Subject</a></td><td>" .
          user_reference( REF_LINK, 1, NULL, $row['User_ID'], $row['Name'], $row['Handle']) .
