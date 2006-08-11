@@ -170,7 +170,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
       $links |= LINK_TOGGLE_MODERATOR;
-      $is_moderator = set_moderator_cookie();
+      $is_moderator = set_moderator_cookie($player_row['ID']);
 
       if( (int)@$_GET['show'] > 0 )
          approve_message( (int)@$_GET['show'], $thread, $forum, true );

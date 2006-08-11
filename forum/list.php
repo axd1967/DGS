@@ -71,7 +71,7 @@ require_once( "forum_functions.php" );
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
       $links |= LINK_TOGGLE_MODERATOR;
-      $is_moderator = set_moderator_cookie();
+      $is_moderator = set_moderator_cookie($player_row['ID']);
    }
 
    print_moderation_note($is_moderator, '98%');

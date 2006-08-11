@@ -41,7 +41,7 @@ require_once( "forum_functions.php" );
       else if( @$_GET['hide'] > 0 )
          approve_message( @$_GET['hide'], $thread, $forum, false );
 
-      $is_moderator = set_moderator_cookie();
+      $is_moderator = set_moderator_cookie($player_row['ID']);
    }
 
    $offset = max(0,(int)@$_REQUEST['offset']);

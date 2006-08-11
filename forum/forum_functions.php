@@ -59,7 +59,7 @@ define("FORUM_INDENTATION_PIXELS", 15);
 function make_link_array($links)
 {
    global $link_array_left, $link_array_right, $forum, $thread, $offset,
-      $RowsPerPage, $SearchPostsPerPage, $search_terms;
+      $RowsPerPage, $SearchPostsPerPage, $search_terms, $player_row;
 
    $link_array_left = $link_array_right = array();
 
@@ -87,7 +87,7 @@ function make_link_array($links)
    if( $links & LINK_TOGGLE_MODERATOR )
    {
       $get = $_GET;
-      $get['moderator'] = ( safe_getcookie('forummoderator') == 'y'? 'n' : 'y' );
+      $get['moderator'] = ( safe_getcookie('forummoderator' . $player_row['ID']) == 'y'? 'n' : 'y' );
       $link_array_right[T_("Toggle forum moderator")] =
          ($links & LINKPAGE_READ ?
           make_url( "read.php", $get, false ) :
@@ -370,19 +370,19 @@ function forum_name($forum, &$moderated)
    return $row["Forumname"];
 }
 
-function set_moderator_cookie()
+function set_moderator_cookie($id)
 {
    $moderator = @$_GET['moderator'];
-   $cookie = safe_getcookie('forummoderator');
+   $cookie = safe_getcookie("forummoderator$id");
    if( $moderator === 'n' && $cookie !== '' )
    {
       $cookie = '';
-      safe_setcookie( 'forummoderator');
+      safe_setcookie( "forummoderator$id");
    }
    else if( $moderator === 'y' && $cookie !== 'y' )
    {
       $cookie = 'y';
-      safe_setcookie( 'forummoderator', $cookie, 3600);
+      safe_setcookie( "forummoderator$id", $cookie, 3600);
    }
    return $cookie === 'y';
 }
