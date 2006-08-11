@@ -996,17 +996,21 @@ function make_html_safe( $msg, $some_html=false)
       // make sure the <, > replacements: ALLOWED_LT, ALLOWED_GT are removed from the string
       $msg= reverse_allowed( $msg);
 
-      if( !is_string( $some_html ) )
+      switch( $some_html )
       {
-         $some_html = 'msg' ;
-      }
-      else if( $some_html == 'gameh' )
-      {
+      case 'gameh':
          $gameh = 1 ;
          $some_html = 'game';
-      }
-      else
+         break;
+      default:
+         $some_html = 'msg';
+      case 'msg':
+      case 'cell':
+      case 'game':
+      case 'faq':
          $gameh = 0 ;
+         break;
+      }
 
       // regular (and extended) allowed html tags check
       $msg = parse_html_safe( $msg, $some_html) ;
