@@ -145,7 +145,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
    if( isset($_POST['post']) )
    {
-      $msg = urlencode(post_message($player_row, $moderated));
+      $msg = urlencode(post_message($player_row, $moderated, $thread));
       jump_to("forum/read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."sysmsg=$msg#firstnew");
    }
 
@@ -238,7 +238,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
       $hidden = ($Approved == 'N');
 
-      if( $hidden and !$is_moderator )
+      if( $hidden and !$is_moderator and $uid !== $player_row['ID'] )
          continue;
 
 
