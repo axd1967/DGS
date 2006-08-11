@@ -243,13 +243,13 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
    else
    {
       // first line of Subject header
-      if( $post_type=='search_result' )
+      if( $post_type == 'search_result' )
       {
          $hdrcols = 2;
-         echo "<tr><td colspan=$hdrcols bgcolor=\"#" . $post_colors[ $post_type ] .
-            '"><font size="+1"><a href="read.php?forum=' .
-            $Forum_ID . URI_AMP . 'thread=' . $Thread_ID . '#' . $ID .
-            "\" class=black><b>$sbj</b></a></font></a>";
+
+         echo '<tr bgcolor="#' . $post_colors[ $post_type ] . "\"><td colspan=$hdrcols>";
+         echo '<a class=black href="read.php?forum=' . $Forum_ID .URI_AMP
+            . "thread=$Thread_ID#$ID\"><b><font size=\"+1\">$sbj</font></b></a>";
 
          echo '<font size="+1" color="#FFFFFF"> found in forum </font><a href="list.php?forum=' .
             $Forum_ID . '" class=black>' . $ForumName . '</a>' . "\n";
@@ -260,16 +260,21 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       }
       else
       {
-         $hdrcols = 1; //because of the rowspan=2 in the second column
-         echo '<tr bgcolor="#' . $post_colors[ $post_type ] . '"><td>';
-         echo "<a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font></a>$new";
-         echo "</td><td rowspan=2 align=right>";
+         if( $post_type == 'hidden' )
+            $hdrcols = 1; //because of the rowspan=2 in the second column
+         else
+            $hdrcols = 2;
 
-         if( $post_type == 'hidden'  )
+         echo '<tr bgcolor="#' . $post_colors[ $post_type ] . "\"><td colspan=$hdrcols>";
+         echo "<a name=\"$ID\"><b><font size=\"+1\">$sbj</font></b></a>$new";
+
+         if( $hdrcols == 1 )
+         {
+            echo "</td><td rowspan=2 align=right>";
             echo '<b><font color="#990000">' .
                ( $PendingApproval == 'Y' ? T_('Awaiting<br>approval') : T_('Hidden') ) .
                '</font></b>';
-
+         }
          echo "</td></tr>\n";
       }
 
@@ -313,7 +318,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
                "reject=$ID#$ID\"><font color=\"#ee6666\">[ " .
                T_('Reject')  . " ]</font></a>";
       }
-      echo "</td></tr><tr><td height=2></td></tr>";
+      echo "</td></tr><tr><td colspan=2 height=2></td></tr>";
    }
 }
 
