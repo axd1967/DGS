@@ -213,7 +213,8 @@ $array=array();
 
 
 {
-   disable_cache( $NOW, $NOW+5*24*60*60); //to allow some mime applications to find it in the cache
+   // see the Expires header below
+   //disable_cache( $NOW, $NOW+5*60);
 
    connect2mysql();
 
@@ -229,6 +230,7 @@ $array=array();
      (but, actually, the translation database is not available here)
    We could use the CA[] (FF[4]) property if we know what it is.
 */
+   $charset = 'UTF-8'; //by default
 
    $rules = "Japanese"; //Mandatory for Go (GM[1])
 /*
@@ -323,8 +325,12 @@ $array=array();
    header( "Content-Disposition: inline; filename=\"$filename.sgf\"" );
    header( "Content-Description: PHP Generated Data" );
 
+   //to allow some mime applications to find it in the cache
+   header('Expires: ' . gmdate('D, d M Y H:i:s',$NOW+5*60) . ' GMT');
+   header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$NOW) . ' GMT');
 
-   echo "(\n;FF[$sgf_version]GM[1]"
+
+   echo "(\n;FF[$sgf_version]GM[1]" . ( $charset ? "CA[$charset]" : '' )
       . "\nPC[$FRIENDLY_LONG_NAME: $HOSTBASE]"
       . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
       . "\nGN[" . sgf_simpletext($filename) . "]"
@@ -341,7 +347,6 @@ $array=array();
    if ($sgf_version >= 4)
    {
       echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, 1)) . "]";
-      //may specify CA (charset) here
    }
 
    if( $rules )

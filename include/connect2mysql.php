@@ -48,8 +48,11 @@ function disable_cache($stamp=NULL, $expire=NULL)
    //header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
    header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
    header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
-   header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
-   header('Pragma: no-cache');                                              // HTTP/1.0
+   if( !$expire or $expire<=$NOW )
+   {
+      header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
+      header('Pragma: no-cache');                                              // HTTP/1.0
+   }
 }
 
 
@@ -94,6 +97,8 @@ function err_log( $handle, $err, $debugmsg=NULL)
    if( empty($debugmsg) )
    {
     global $SUB_PATH;
+//CAUTION: sometime, REQUEST_URI != PHP_SELF+args
+//if there is a redirection, _URI==requested, while _SELF==reached (running one)
       $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
