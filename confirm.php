@@ -84,6 +84,16 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
 
+   if( $Black_ID == $ToMove_ID )
+      $to_move = BLACK;
+   else if( $White_ID == $ToMove_ID )
+      $to_move = WHITE;
+   else
+      error("database_corrupted");
+
+   if( $player_row["ID"] != $ToMove_ID )
+      error("not_your_turn");
+
    if( $Status == 'INVITED' )
    {
       error("game_not_started");
@@ -94,9 +104,6 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    }
 
 
-   if( $player_row["ID"] != $ToMove_ID )
-      error("not_your_turn");
-
 
    //See *** HOT_SECTION *** below
    if( !isset($_REQUEST['move']) )
@@ -105,13 +112,6 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    if( $qry_move != $Moves )
       error("already_played",'confirm11');
 
-
-   if( $Black_ID == $ToMove_ID )
-      $to_move = BLACK;
-   else if( $White_ID == $ToMove_ID )
-      $to_move = WHITE;
-   else
-      error("database_corrupted");
 
 
    $action = @$_REQUEST['action'];

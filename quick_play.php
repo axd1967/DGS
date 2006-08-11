@@ -45,6 +45,7 @@ else
    if( $gid <= 0 )
       error("no_game_nr");
 
+
    connect2mysql();
 
    // logged in?
@@ -90,6 +91,16 @@ else
    $Last_X = $Last_Y = -1;
    extract($game_row);
 
+   if( $Black_ID == $ToMove_ID )
+      $to_move = BLACK;
+   else if( $White_ID == $ToMove_ID )
+      $to_move = WHITE;
+   else
+      error("database_corrupted");
+
+   if( $my_id != $ToMove_ID )
+      error("not_your_turn",'qp9');
+
    if( $Status == 'INVITED' )
    {
       error("game_not_started");
@@ -106,9 +117,6 @@ else
       error("invalid_action");
    }
 
-
-   if( $my_id != $ToMove_ID )
-      error("not_your_turn",'qp9');
 
 
    //See *** HOT_SECTION *** below
@@ -135,18 +143,9 @@ else
    if( $prev_X != $Last_X or $prev_Y != $Last_Y )
       error("already_played",'qp5');
 
-   $move_color = @$_REQUEST['color'];
+   $move_color = strtoupper( @$_REQUEST['color']);
    if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
       error("not_your_turn",'qp8');
-
-
-   if( $Black_ID == $ToMove_ID )
-      $to_move = BLACK;
-   else if( $White_ID == $ToMove_ID )
-      $to_move = WHITE;
-   else
-      error("database_corrupted");
-
 
    //$action = always 'domove'
 
