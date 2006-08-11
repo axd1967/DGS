@@ -33,8 +33,8 @@ function post_message($player_row, $moderated_forum, &$thread)
    $Subject = get_request_arg('Subject');
    $Text = get_request_arg('Text');
 //   $GoDiagrams = create_godiagrams($Text);
-   $Subject = mysql_escape_string(trim($Subject));
-   $Text = mysql_escape_string(trim($Text));
+   $Subject = mysql_escape_string( trim($Subject));
+   $Text = mysql_escape_string( trim($Text));
 
    $moderated = ($moderated_forum or $player_row['MayPostOnForum'] == 'M');
 
@@ -47,6 +47,11 @@ function post_message($player_row, $moderated_forum, &$thread)
                   "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'])
          or error("unknown_parent_post");
 
+      $oldSubject = mysql_escape_string( trim($row['Subject']));
+      $oldText = mysql_escape_string( trim($row['Text']));
+
+      if( $oldSubject != $Subject or $oldText != $Text )
+      {
        //Update old record with new text
        mysql_query("UPDATE Posts SET " .
                    "Lastedited=FROM_UNIXTIME($NOW), " .
@@ -61,11 +66,11 @@ function post_message($player_row, $moderated_forum, &$thread)
                    "Parent_ID=$edit, " .
                    "Forum_ID=" . $row['Forum_ID'] . ", " .
                    "User_ID=" . $player_row['ID'] . ", " .
-                   'Subject="' . mysql_escape_string($row['Subject']) . '", ' .
-                   'Text="' . mysql_escape_string($row['Text']) . '"')
+                            "Subject=\"$oldSubject\", " .
+                      "Text=\"$oldText\"" )
           or error("mysql_query_failed",'forum_post2');
-
-       return '';
+      } 
+      return $edit;
    }
    else
    {
@@ -76,20 +81,17 @@ function post_message($player_row, $moderated_forum, &$thread)
 
       if( $parent > 0 )
       {
-         $result = mysql_query("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
+         $row = mysql_single_fetch("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
                                "WHERE ID=$parent AND Forum_ID=$forum")
             or error('unknown_parent_post');
 
-         if( mysql_num_rows($result) != 1 )
-            error("unknown_parent_post");
+         extract( $row);
 
-         extract(mysql_fetch_array($result));
-
-         $result = mysql_query("SELECT MAX(AnswerNr) AS answer_nr " .
+         $row = mysql_single_fetch("SELECT MAX(AnswerNr) AS answer_nr " .
                                "FROM Posts WHERE Parent_ID=$parent")
           or error("mysql_query_failed",'forum_post3');
 
-         extract(mysql_fetch_array($result));
+         extract( $row);
 
          $lastchanged_string = '';
 
