@@ -234,7 +234,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
    {
       if( $post_type=='search_result' )
       {
-         echo '<tr><td bgcolor="#' . $post_colors[ $post_type ] .
+         echo '<tr><td colspan=2 bgcolor="#' . $post_colors[ $post_type ] .
             '"><font size="+1"><a href="read.php?forum=' .
             $Forum_ID . URI_AMP . 'thread=' . $Thread_ID . '#' . $ID .
             "\" class=black><b>$sbj</b></a></font></a>";
@@ -245,15 +245,27 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
             echo '<font color="#FFFFFF"> with </font> Score <font color="#000000">' . $Score  . '</font>' . "\n";
       }
       else
-         echo '<tr><td colspan=2 bgcolor="#' . $post_colors[ $post_type ] .
-            "\"><a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font></a>$new";
+      {
+         echo '<tr bgcolor="#' . $post_colors[ $post_type ] . '"><td>';
+         echo "<a name=\"$ID\"><font size=\"+1\"><b>$sbj</b></font></a>$new";
+         echo "</td><td rowspan=2 align=right>";
 
-      echo "<br> " . T_('by') . " " .
+         if( $post_type == 'hidden'  )
+            echo '<b><font color="#990000">' . T_('Hidden') .
+               ( $PendingApproval == 'Y' ? ', ' . T_('awaiting approval') : '' ) .
+               '</font></b>';
+
+         echo "</td></tr>\n";
+      }
+
+      echo '<tr bgcolor="#' . $post_colors[ $post_type ] . '"><td colspan=2>';
+      echo T_('by') . " " .
          user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
       if( $Lastedited > 0 )
          echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."revision_history=$ID\">" . T_('edited') .
             "</a> " . date($date_fmt, $Lasteditedstamp) . ")";
+
       echo "</td></tr>\n" .
          '<tr><td colspan=2 bgcolor=white>' . $txt . "</td></tr>";
    }
