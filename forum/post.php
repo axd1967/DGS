@@ -19,7 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-function post_message($player_row, $moderated_forum)
+function post_message($player_row, $moderated_forum, &$thread)
 {
    global $NOW, $order_str;
 
@@ -154,7 +154,7 @@ function post_message($player_row, $moderated_forum)
          if( mysql_affected_rows() != 1)
             error("mysql_insert_post");
 
-         $Thread_ID = $New_ID;
+         $thread = $Thread_ID = $New_ID;
       }
 
 //   save_diagrams($GoDiagrams);
