@@ -262,7 +262,6 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    if( $iamrated )
    {
-
       $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
                               'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype ) );
 
@@ -766,37 +765,6 @@ function echo_folder_box($folders, $folder_nr, $bgcolor)
 
 function message_list_query($my_id, $folderstring='all', $order='date', $limit='', $extra_where='')
 {
-//    $rec_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
-//       "Players.Name AS other_name, To_Folder_nr AS folder " .
-//       "FROM Messages, Players " .
-//       "WHERE obsolet(To_ID)=$my_id AND To_Folder_nr IN ($folderstring) AND To_ID=Players.ID " .
-//       "ORDER BY $order $limit";
-
-//    $sent_query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
-//       "Players.Name AS other_name, From_Folder_nr AS folder " .
-//       "FROM Messages, Players " .
-//       "WHERE obsolet(From_ID)=$my_id AND From_Folder_nr IN ($folderstring) AND obsolet(To_ID)=Players.ID " .
-//       "ORDER BY $order $limit";
-
-
-// for mysql 4.0
-
-//    $l = $_GET['from_row']+$MaxRowsPerPage;
-//    $query = "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " ,
-//       "Players.Name AS other_name, From_Folder_nr AS folder " .
-//       "FROM Messages, Players WHERE obsolet(From_ID)=$my_id AND From_Folder_nr IN ($folderstring) " .
-//       "AND obsolet(To_ID)=Players.ID order by $order limit $l)" .
-//       "UNION " .
-//       "(SELECT UNIX_TIMESTAMP(Messages.Time) AS date, " .
-//       "Messages.ID AS mid, Messages.Subject, Messages.Replied, " .
-//       "Players.Name AS other_name, To_Folder_nr AS folder " .
-//       "FROM Messages, Players WHERE obsolet(To_ID)=$my_id AND To_Folder_nr IN ($folderstring) " .
-//       "AND obsolet(From_ID)=Players.ID order by $order limit $l)" .
-//       "ORDER BY $order $limit";
-
    $query = "SELECT Messages.Type, Messages.Subject, " .
       "UNIX_TIMESTAMP(Messages.Time) AS Time, me.mid as date, " .
           "IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
@@ -851,7 +819,7 @@ function message_list_table( &$mtable, $result, $show_rows
    $tits[            FLOW_ANSWERED] = $n ;
    $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p - $n" ;
 
-   while( ($row = mysql_fetch_array( $result )) && $show_rows-- > 0 )
+   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $mid = $row["mid"];
       $mrow_strings = array();
@@ -911,7 +879,7 @@ function message_list_table( &$mtable, $result, $show_rows
       $mtable->add_row( $mrow_strings );
 
    }
-
+   mysql_free_result($result);
 
    $mtable->Page.= $page ;
 
