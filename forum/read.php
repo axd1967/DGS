@@ -146,7 +146,12 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    if( isset($_POST['post']) )
    {
       $msg = urlencode(post_message($player_row, $moderated, $thread));
-      jump_to("forum/read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."sysmsg=$msg#firstnew");
+      if( is_numeric( $msg) && $msg>0 )
+         jump_to("forum/read.php?forum=$forum".URI_AMP."thread=$thread"
+            . "#$msg");
+      else
+         jump_to("forum/read.php?forum=$forum".URI_AMP."thread=$thread"
+            . URI_AMP."sysmsg=$msg#firstnew");
    }
 
    $preview = isset($_POST['preview']);
