@@ -99,16 +99,20 @@ function make_link_array($links)
    if( $links & LINK_PREV_PAGE )
    {
       if( $links & LINKPAGE_SEARCH )
-         $link_array_right[T_("Prev Page")] = "search.php?search_terms=$search_terms".URI_AMP."offset=".($offset-$SearchPostsPerPage);
+         $link_array_right[T_("Prev Page")] = "search.php?search_terms=$search_terms"
+            . URI_AMP."offset=".($offset-$SearchPostsPerPage) . '" accesskey="&lt;';
       else
-         $link_array_right[T_("Prev Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset-$RowsPerPage);
+         $link_array_right[T_("Prev Page")] = "list.php?forum=$forum"
+            . URI_AMP."offset=".($offset-$RowsPerPage) . '" accesskey="&lt;';
    }
    if( $links & LINK_NEXT_PAGE )
    {
       if( $links & LINKPAGE_SEARCH )
-         $link_array_right[T_("Next Page")] = "search.php?search_terms=$search_terms".URI_AMP."offset=".($offset+$SearchPostsPerPage);
+         $link_array_right[T_("Next Page")] = "search.php?search_terms=$search_terms"
+            . URI_AMP."offset=".($offset+$SearchPostsPerPage) . '" accesskey="&gt;';
       else
-         $link_array_right[T_("Next Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset+$RowsPerPage);
+         $link_array_right[T_("Next Page")] = "list.php?forum=$forum"
+            . URI_AMP."offset=".($offset+$RowsPerPage) . '" accesskey="&gt;';
    }
 
 }
