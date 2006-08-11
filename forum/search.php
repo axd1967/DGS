@@ -30,7 +30,7 @@ require_once( "forum_functions.php" );
    start_page(T_('Forum') . " - Search", true, $logged_in, $player_row );
 
    $is_moderator = false;
-   $links = 0;
+   $links = LINKPAGE_SEARCH;
 
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
@@ -95,9 +95,9 @@ require_once( "forum_functions.php" );
       $cols=2;
       $headline = array(T_("Reading thread") => "colspan=$cols");
 
-      $links = LINK_FORUMS;
-      if( $offset > 0 ) $links |= LINK_SEARCH_PREV_PAGE;
-      if( $show_rows < $nr_rows ) $links |= LINK_SEARCH_NEXT_PAGE;
+      $links |= LINK_FORUMS;
+      if( $offset > 0 ) $links |= LINK_PREV_PAGE;
+      if( $show_rows < $nr_rows ) $links |= LINK_NEXT_PAGE;
 
 
       start_table($headline, $links, 'width="99%"', $cols);

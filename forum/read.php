@@ -161,14 +161,15 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    }
 
    $cols= 2;
+   $links = LINKPAGE_READ;
 
    $headline = array(T_("Reading thread") => "colspan=$cols");
-   $links = LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
+   $links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
    $is_moderator = false;
 
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
-      $links |= LINK_TOGGLE_MODERATOR_READ;
+      $links |= LINK_TOGGLE_MODERATOR;
       $is_moderator = set_moderator_cookie();
 
       if( (int)@$_GET['show'] > 0 )

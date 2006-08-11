@@ -56,9 +56,11 @@ require_once( "forum_functions.php" );
       $show_rows = $RowsPerPage;
 
    $cols = 4;
+   $links = LINKPAGE_LIST;
+
    $headline = array(T_("Thread")=>"width=50%",T_("Author")=>"width=20%",
                      T_("Posts")=>"width=10%  align=center",T_("Last post")=>"width=20%");
-   $links = LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
+   $links |= LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
 
    if( $offset > 0 )
       $links |= LINK_PREV_PAGE;
@@ -68,7 +70,7 @@ require_once( "forum_functions.php" );
    $is_moderator = false;
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
-      $links |= LINK_TOGGLE_MODERATOR_LIST;
+      $links |= LINK_TOGGLE_MODERATOR;
       $is_moderator = set_moderator_cookie();
    }
 

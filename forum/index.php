@@ -49,6 +49,7 @@ require_once( "forum_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
+   $links = LINKPAGE_INDEX;
    start_page("Forum list", true, $logged_in, $player_row );
 
 
@@ -61,12 +62,12 @@ require_once( "forum_functions.php" );
 
    $cols = 4;
    $headline   = array("Forums" => "colspan=$cols");
-   $links = LINK_SEARCH;
+   $links |= LINK_SEARCH;
 
    $is_moderator = false;
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
-      $links |= LINK_TOGGLE_MODERATOR_INDEX;
+      $links |= LINK_TOGGLE_MODERATOR;
       $is_moderator = set_moderator_cookie();
    }
 

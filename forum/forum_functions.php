@@ -41,14 +41,17 @@ define("LINK_SEARCH", 1 << 4);
 define("LINK_MARK_READ", 1 << 5);
 define("LINK_PREV_PAGE", 1 << 6);
 define("LINK_NEXT_PAGE", 1 << 7);
-define("LINK_TOGGLE_MODERATOR_READ", 1 << 8);
-define("LINK_TOGGLE_MODERATOR_LIST", 1 << 9);
-define("LINK_TOGGLE_MODERATOR_INDEX", 1 << 10);
-define("LINK_SEARCH_PREV_PAGE", 1 << 6);
-define("LINK_SEARCH_NEXT_PAGE", 1 << 7);
+define("LINKPAGE_READ", 1 << 8);
+define("LINKPAGE_LIST", 1 << 9);
+define("LINKPAGE_INDEX", 1 << 10);
+define("LINKPAGE_SEARCH", 1 << 11);
+define("LINK_TOGGLE_MODERATOR", 1 << 12);
+define("LINKPAGE_STATUS", 1 << 13);
 
-define("LINK_TOGGLE_MODERATOR", LINK_TOGGLE_MODERATOR_INDEX |
-       LINK_TOGGLE_MODERATOR_READ | LINK_TOGGLE_MODERATOR_LIST );
+
+define("LINK_MASKS", ~(LINKPAGE_READ | LINKPAGE_LIST | LINKPAGE_INDEX
+          | LINKPAGE_SEARCH | LINKPAGE_STATUS) );
+
 
 define("FORUM_MAXIMUM_DEPTH", 15);
 define("FORUM_INDENTATION_PIXELS", 15);
@@ -59,6 +62,9 @@ function make_link_array($links)
       $RowsPerPage, $SearchPostsPerPage, $search_terms;
 
    $link_array_left = $link_array_right = array();
+
+   if( !( $links & LINK_MASKS ) )
+      return;
 
    if( $links & LINK_FORUMS )
       $link_array_left[T_("Forums")] = "index.php";
@@ -83,22 +89,27 @@ function make_link_array($links)
       $get = $_GET;
       $get['moderator'] = ( safe_getcookie('forummoderator') == 'y'? 'n' : 'y' );
       $link_array_right[T_("Toggle forum moderator")] =
-         ($links & LINK_TOGGLE_MODERATOR_READ ?
+         ($links & LINKPAGE_READ ?
           make_url( "read.php", $get, false ) :
-          ($links & LINK_TOGGLE_MODERATOR_LIST ?
+          ($links & LINKPAGE_LIST ?
            make_url( "list.php", $get, false ) :
            make_url( "index.php", $get, false ) ) );
    }
 
-   if( $links & LINK_NEXT_PAGE )
-      $link_array_right[T_("Next Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset+$RowsPerPage);
    if( $links & LINK_PREV_PAGE )
-      $link_array_right[T_("Prev Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset-$RowsPerPage);
-
-   if( $links & LINK_SEARCH_NEXT_PAGE )
-      $link_array_right[T_("Next Page")] = "search.php?search_terms=$search_terms".URI_AMP."offset=".($offset+$SearchPostsPerPage);
-   if( $links & LINK_SEARCH_PREV_PAGE )
-      $link_array_right[T_("Prev Page")] = "search.php?search_terms=$search_terms".URI_AMP."offset=".($offset-$SearchPostsPerPage);
+   {
+      if( $links & LINKPAGE_SEARCH )
+         $link_array_right[T_("Prev Page")] = "search.php?search_terms=$search_terms".URI_AMP."offset=".($offset-$SearchPostsPerPage);
+      else
+         $link_array_right[T_("Prev Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset-$RowsPerPage);
+   }
+   if( $links & LINK_NEXT_PAGE )
+   {
+      if( $links & LINKPAGE_SEARCH )
+         $link_array_right[T_("Next Page")] = "search.php?search_terms=$search_terms".URI_AMP."offset=".($offset+$SearchPostsPerPage);
+      else
+         $link_array_right[T_("Next Page")] = "list.php?forum=$forum".URI_AMP."offset=".($offset+$RowsPerPage);
+   }
 
 }
 
@@ -115,7 +126,7 @@ function start_table(&$headline, &$links, $width, $cols)
 
    make_link_array( $links );
 
-   if( $links > 0 )
+   if( $links & LINK_MASKS )
       echo_links($cols);
 
    echo "<tr>";
@@ -128,7 +139,7 @@ function start_table(&$headline, &$links, $width, $cols)
 
 function end_table($links,$cols)
 {
-   if( $links > 0 )
+   if( $links & LINK_MASKS )
       echo_links($cols);
    echo "</table></center>\n";
 }
@@ -461,7 +472,7 @@ function display_posts_pending_approval()
 
    $cols = 3;
    $headline  = array(T_("Posts pending approval") => "colspan=$cols");
-   $links = 0;
+   $links = LINKPAGE_STATUS;
    start_table($headline, $links, "width=90%", $cols);
 
    $odd = true;

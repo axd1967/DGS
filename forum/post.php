@@ -65,7 +65,7 @@ function post_message($player_row, $moderated_forum, &$thread)
                    'Text="' . mysql_escape_string($row['Text']) . '"')
           or error("mysql_query_failed",'forum_post2');
 
-       return;
+       return '';
    }
    else
    {
