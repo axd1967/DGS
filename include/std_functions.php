@@ -306,8 +306,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
          case 'status.php':
             $tools_array['rss/status.php'] = 
                array( $base_path.'images/rss-icon.png', 
-                      '',
-                      T_("$FRIENDLY_SHORT_NAME Status RSS Feed")
+                      'RSS',
+                      $FRIENDLY_SHORT_NAME . ' ' . T_("Status RSS Feed")
                      );
          break;
       }
