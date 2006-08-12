@@ -54,31 +54,38 @@ require_once( "include/std_functions.php" );
         "ORDER BY CatOrder,ParentOrder,entry.SortOrder")
         or error('mysql_query_failed');
 
-     echo "<$blk><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
-
-     $first = true;
-     while( $row = mysql_fetch_array( $result ) )
+     if( mysql_num_rows($result) > 0 )
      {
-        if( $row['Level'] == 1 )
+        echo "<$blk><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
+
+        $first = -1;
+        while( $row = mysql_fetch_array( $result ) )
         {
-           if( !$first )
-              echo "</ul><hr>\n";
-           echo '<p><b><A href="faq.php">' . T_( $row['Q'] ) . "</A></b>\n";
-           echo "<ul>\n";
-           $first = false;
+           if( $row['Level'] == 1 )
+           {
+              if( !$first )
+                 echo "</ul>\n";
+              if( $first >= 0 )
+                 echo "<hr><p></p>";
+              $first = 1;
+              echo '<b><A href="faq.php">' . T_( $row['Q'] ) . "</A></b><p></p>\n";
+           }
+           else
+           {
+              if( $first )
+                 echo "<ul>\n";
+              $first = 0;
+              echo '<li><A name="Entry' . $row["ID"] . '"></a><b>' . T_( $row['Q'] ) .
+                 "</b>\n<p></p>\n" 
+                 //. add_line_breaks( T_( $row['A'] ) ) 
+                 . make_html_safe( T_( $row['A'] ) , 'faq') 
+                 . "<br>&nbsp;<p></p></li>\n";
+           }
         }
-        else
-        {
-           echo '<li><A name="Entry' . $row["ID"] . '"></a><b>' . T_( $row['Q'] ) .
-              "</b>\n<p>\n" 
-              //. add_line_breaks( T_( $row['A'] ) ) 
-              . make_html_safe( T_( $row['A'] ) , 'faq') 
-              . "<br>&nbsp;<p>\n";
-        }
+        if( !$first )
+          echo "</ul>\n";
+        echo "</td></tr></table></$blk>\n";
      }
-     if( !$first )
-       echo "</ul>\n";
-     echo "</td></tr></table></$blk>\n";
   }
   else
   { //titles only
@@ -90,30 +97,38 @@ require_once( "include/std_functions.php" );
          "AND entry.Level<3 AND entry.Level>0 " .
         "ORDER BY CatOrder,entry.Level,entry.SortOrder");
 
-     echo "<$blk><table width=\"93%\" border=0><tr><td>\n";
-
-     $first = true;
-     while( $row = mysql_fetch_array( $result ) )
+     if( mysql_num_rows($result) > 0 )
      {
-        $question = (empty($row['Q']) ? '-' : T_($row['Q']));
+        echo "<$blk><table width=\"93%\" border=0><tr><td>\n";
 
-        if( $row['Level'] == 1 )
+        $first = -1;
+        while( $row = mysql_fetch_array( $result ) )
         {
-           if( !$first )
-              echo "</ul></td></tr></table>\n";
-           echo '<p><b><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['ID'] . "\">$question</A></b>\n";
-           echo "<table><tr><td><ul>\n";
-           $first = false;
+           $question = (empty($row['Q']) ? '-' : T_($row['Q']));
+
+           if( $row['Level'] == 1 )
+           {
+              if( !$first )
+                 echo "</ul></td></tr></table>\n";
+              if( $first >= 0 )
+                 echo "<p></p>";
+              $first = 1;
+              echo '<b><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['ID']  .
+                 "\">$question</A></b>\n";
+           }
+           else
+           {
+              if( $first )
+                 echo "<table><tr><td><ul>\n";
+              $first = 0;
+              echo '<li><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['Parent'] .
+                 '#Entry' . $row['ID'] . "\">$question</A></li>\n";
+           }
         }
-        else
-        {
-           echo '<li><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['Parent'] .
-              '#Entry' . $row['ID'] . "\">$question</A>\n";
-        }
+        if( !$first )
+          echo "</ul></td></tr></table>\n";
+        echo "</td></tr></table></$blk>\n";
      }
-     if( !$first )
-       echo "</ul></td></tr></table>\n";
-     echo "</td></tr></table></$blk>\n";
   }
   echo "</td></tr></table>\n";
 
