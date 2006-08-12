@@ -73,7 +73,12 @@ require_once( "include/countries.php" );
 
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
 
-   start_page(T_('Users'), true, $logged_in, $player_row );
+
+   $title = T_('Users');
+   start_page( $title, true, $logged_in, $player_row );
+
+   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
+
 
    $utable->add_tablehead(1, T_('ID'), 'ID');
    $utable->add_tablehead(2, T_('Name'), 'Name');
