@@ -140,6 +140,9 @@ function sgf_echo_point( $points, $overwrite_prop=false )
 }
 
 // {--- from old board.php (before board class)
+$dirx = array( -1,0,1,0 );
+$diry = array( 0,-1,0,1 );
+
 function mark_territory( $x, $y, $size, &$array )
 {
    global $dirx,$diry;
@@ -560,7 +563,7 @@ $array=array();
                   break;
 
                sgf_echo_point( $points);
-               unset($points);
+               $points= array();
 
                sgf_echo_comment( $node_com );
                $node_com= "";
@@ -632,7 +635,7 @@ $array=array();
                      echo "[$coord]";
                   }
 
-                  unset($points);
+                  $points= array();
                }
 
                sgf_echo_comment( $node_com );
@@ -655,7 +658,7 @@ $array=array();
       {
          $node_com.= "\n";
 
-         if ( abs($Score) < SCORE_RESIGN )
+         if ( abs($Score) < SCORE_RESIGN ) // scor-able
          {
 
             $black_territory = array();
