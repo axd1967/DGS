@@ -270,7 +270,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
       (is_numeric($rating_white) ? "White_Start_Rating=$rating_white, " : '' ) .
       "WeekendClock='" . $game_info_row["WeekendClock"] . "', " .
       "StdHandicap='$stdhandicap', " .
-      "Rated='" . ($game_info_row["Rated"] ? 'Y' : 'N' ) . "'";
+      "Rated='" . $game_info_row["Rated"] . "'";
 
    if( $gid > 0 )
    {
