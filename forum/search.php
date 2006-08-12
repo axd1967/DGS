@@ -27,7 +27,9 @@ require_once( "forum_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   start_page(T_('Forum') . " - Search", true, $logged_in, $player_row );
+   $title = T_('Forum') . " - " . T_('Search');
+   start_page($title, true, $logged_in, $player_row );
+   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
    $is_moderator = false;
    $links = LINKPAGE_SEARCH;
@@ -48,8 +50,6 @@ require_once( "forum_functions.php" );
    $search_terms = get_request_arg('search_terms');
    $bool = (int)(@$_REQUEST['bool']) > 0;
 
-   echo "<center><h4><font color=$h3_color>Forum search</font></H4></center>\n";
-
 
    // Search form
    echo '
@@ -61,9 +61,10 @@ require_once( "forum_functions.php" );
          . textarea_safe($search_terms) . '" tabindex="1" size="40" maxlength="80">';
 
    echo '
-        <INPUT type="submit" name="action" value="Do search" tabindex="2">
+        <INPUT type="submit" name="action" value="'.T_('Search').'" tabindex="2">
 <p>
-        <INPUT type="checkbox" name="bool" value="1" ' . ($bool ? 'checked ' : '' ) . 'tabindex="3"> Boolean mode
+        <INPUT type="checkbox" name="bool" value="1" ' . ($bool ? 'checked ' : '' ) 
+            . 'tabindex="3">' . T_('Boolean mode') . '
 </FORM>
 </CENTER>
 ';
@@ -107,7 +108,7 @@ require_once( "forum_functions.php" );
       {
          extract($row);
          draw_post('search_result', false, $row['Subject'], $row['Text']);
-         echo '<tr><td colspan=$cols></td></tr>' . "\n";
+         echo "<tr><td colspan=$cols></td></tr>\n";
       }
       echo "</table></td></tr>\n";
       end_table($links, $cols);
