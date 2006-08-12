@@ -131,7 +131,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
-   if( $hours<1 or $byohours<1 )
+   if( $hours<1 and ($byohours<1 or $byoyomitype == 'FIS') )
       error('time_limit_too_small');
 
 
