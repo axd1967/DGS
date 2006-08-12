@@ -74,7 +74,10 @@ require_once( "include/countries.php" );
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
 
 
-   $title = T_('Users');
+   if( $showall )
+      $title = T_('Users');
+   else
+      $title = T_('Active users');
    start_page( $title, true, $logged_in, $player_row );
 
    echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
