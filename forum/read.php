@@ -51,7 +51,7 @@ function revision_history($post_id)
    extract($row);
    change_depth( $cur_depth, 1, $cols);
    draw_post( 'reply', true, $row['Subject'], $row['Text']);
-   echo "<tr><td height=2></td></tr>";
+   echo "<tr><td colspan=$cols height=2></td></tr>";
    change_depth( $cur_depth, 2, $cols);
 
    $result = mysql_query( $query_select .
@@ -64,7 +64,7 @@ function revision_history($post_id)
    {
       extract($row);
       draw_post( 'edit' , true, $row['Subject'], $row['Text']);
-      echo "<tr><td height=2></td></tr>";
+      echo "<tr><td colspan=$cols height=2></td></tr>";
    }
 
 
@@ -187,12 +187,12 @@ function change_depth( &$cur_depth, $new_depth, $cols)
          approve_message( (int)@$_GET['reject'], $thread, $forum, false, true );
    }
 
-   start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row,
+   $title = T_('Forum').' - '.$Forumname);
+   start_page($title, true, $logged_in, $player_row,
       "td.indent{ width:" . FORUM_INDENTATION_PIXELS .
       "px; min-width:" . FORUM_INDENTATION_PIXELS . "px;}\n"
       );
-
-   echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
+   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
    print_moderation_note($is_moderator, '99%');
 
@@ -283,11 +283,11 @@ function change_depth( &$cur_depth, $new_depth, $cols)
             $Text = '';
 //            $GoDiagrams = null;
          }
-         echo "<tr><td colspan=2 align=center>\n";
+         echo "<tr><td colspan=$cols align=center>\n";
          message_box($post_type, $ID, NULL /*$GoDiagrams*/, $Subject, $Text);
          echo "</td></tr>\n";
       }
-   }
+   } //posts loop
 
    if( $preview and $preview_ID == 0 and !$is_moderator )
    {
@@ -296,16 +296,15 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       $Text = $preview_Text;
 //      $GoDiagrams = $preview_GoDiagrams;
       draw_post('preview', false, $Subject, $Text); //, $GoDiagrams);
-      echo "<tr><td colspan=2 align=center>\n";
+      echo "<tr><td colspan=$cols align=center>\n";
       message_box('preview', $thread, NULL /*$GoDiagrams*/, $Subject, $Text);
       echo "</td></tr>\n";
    }
 
-   change_depth( $cur_depth, 1, $cols);
-
    if( !($reply > 0) and !$preview and !($edit>0) and !$is_moderator )
    {
-      echo "<tr><td colspan=2 align=center>\n";
+      change_depth( $cur_depth, 1, $cols);
+      echo "<tr><td colspan=$cols align=center>\n";
       if( $thread > 0 )
          echo '<hr>';
       message_box('normal', $thread, null, $thread_Subject);
