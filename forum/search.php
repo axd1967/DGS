@@ -27,10 +27,6 @@ require_once( "forum_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   $title = T_('Forum') . " - " . T_('Search');
-   start_page($title, true, $logged_in, $player_row );
-   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
-
    $is_moderator = false;
    $links = LINKPAGE_SEARCH;
 
@@ -45,6 +41,11 @@ require_once( "forum_functions.php" );
 
       $is_moderator = set_moderator_cookie($player_row['ID']);
    }
+
+
+   $title = T_('Forum') . " - " . T_('Search');
+   start_page($title, true, $logged_in, $player_row );
+   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
    $offset = max(0,(int)@$_REQUEST['offset']);
    $search_terms = get_request_arg('search_terms');

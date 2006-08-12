@@ -33,11 +33,6 @@ require_once( "forum_functions.php" );
 
    $Forumname = forum_name($forum, $moderated);
 
-
-   $title = T_('Forum').' - '.$Forumname;
-   start_page($title, true, $logged_in, $player_row );
-   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
-
    $result = mysql_query("SELECT Posts.Subject, Posts.Thread_ID, " .
                          "Posts.User_ID, Posts.PostsInThread, Name, " .
                          "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
@@ -73,6 +68,11 @@ require_once( "forum_functions.php" );
       $links |= LINK_TOGGLE_MODERATOR;
       $is_moderator = set_moderator_cookie($player_row['ID']);
    }
+
+
+   $title = T_('Forum').' - '.$Forumname;
+   start_page($title, true, $logged_in, $player_row );
+   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
    print_moderation_note($is_moderator, '98%');
 
