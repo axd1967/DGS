@@ -50,8 +50,10 @@ require_once( "forum_functions.php" );
       error("not_logged_in");
 
    $links = LINKPAGE_INDEX;
-   start_page("Forum list", true, $logged_in, $player_row );
 
+   $title = T_('Forum list');
+   start_page($title, true, $logged_in, $player_row );
+   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
 
    $result = mysql_query("SELECT Forums.ID,Description,Name,Moderated, PostsInForum, " .

@@ -34,9 +34,9 @@ require_once( "forum_functions.php" );
    $Forumname = forum_name($forum, $moderated);
 
 
-   start_page(T_('Forum') . " - $Forumname", true, $logged_in, $player_row );
-
-   echo "<center><h4><font color=$h3_color>$Forumname</font></H4></center>\n";
+   $title = T_('Forum').' - '.$Forumname);
+   start_page($title, true, $logged_in, $player_row );
+   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
    $result = mysql_query("SELECT Posts.Subject, Posts.Thread_ID, " .
                          "Posts.User_ID, Posts.PostsInThread, Name, " .

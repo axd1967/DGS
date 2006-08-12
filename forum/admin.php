@@ -41,9 +41,12 @@ require_once( "forum_functions.php" );
 
   if( @$_GET["new"] == 't' )
   {
-     start_page(T_("Forum Admin").' - '.T_('New forum'), true, $logged_in, $player_row );
-     echo "<center>\n";
+     $title = T_('Forum Admin').' - '.T_('New forum');
+     start_page($title, true, $logged_in, $player_row );
+     echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
+     $show_list = false;
+     echo "<center>\n";
 
      $forum_edit_form = new Form( 'forumform', "admin.php?do_new=t".URI_AMP."id=$id", FORM_POST );
 
@@ -56,8 +59,6 @@ require_once( "forum_functions.php" );
                                        'CHECKBOX', 'moderated', 1, '', false));
      $forum_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
      $forum_edit_form->echo_string(1);
-
-     $show_list = false;
   }
 
   // ***********        Save new forum       ****************
@@ -103,8 +104,11 @@ require_once( "forum_functions.php" );
 
   else if( @$_GET["edit"] == 't' )
   {
-     start_page(T_("Forum Admin").' - '.T_('Edit forum'), true, $logged_in, $player_row );
+     $title = T_('Forum Admin').' - '.T_('Edit forum');
+     start_page($title, true, $logged_in, $player_row );
+     echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
+     $show_list = false;
      echo "<center>\n";
 
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" )
@@ -126,8 +130,6 @@ require_once( "forum_functions.php" );
                                        'CHECKBOX', 'moderated', 1, '', $row['Moderated'] == 'Y'));
      $forum_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
      $forum_edit_form->echo_string(1);
-
-     $show_list = false;
   }
 
 
@@ -210,13 +212,15 @@ require_once( "forum_functions.php" );
 
   if( $show_list )
   {
-     start_page(T_("Forum Admin"), true, $logged_in, $player_row );
+     $title = T_('Forum Admin');
+     start_page($title, true, $logged_in, $player_row );
+     //echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
+     echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
+        T_('Forum Admin') . "</font></h3>\n";
+
      echo "<center>\n";
 
      echo "<table align=center width=\"85%\" border=0><tr><td>\n";
-
-     echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
-        T_('Forum Admin') . "</font></h3>\n";
 
      $result =
         mysql_query("SELECT Forums.ID,Description,Name " .
