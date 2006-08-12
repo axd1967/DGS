@@ -187,7 +187,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
          approve_message( (int)@$_GET['reject'], $thread, $forum, false, true );
    }
 
-   $title = T_('Forum').' - '.$Forumname);
+   $title = T_('Forum').' - '.$Forumname;
    start_page($title, true, $logged_in, $player_row,
       "td.indent{ width:" . FORUM_INDENTATION_PIXELS .
       "px; min-width:" . FORUM_INDENTATION_PIXELS . "px;}\n"

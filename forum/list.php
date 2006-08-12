@@ -34,7 +34,7 @@ require_once( "forum_functions.php" );
    $Forumname = forum_name($forum, $moderated);
 
 
-   $title = T_('Forum').' - '.$Forumname);
+   $title = T_('Forum').' - '.$Forumname;
    start_page($title, true, $logged_in, $player_row );
    echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
