@@ -139,6 +139,90 @@ function sgf_echo_point( $points, $overwrite_prop=false )
    return true;
 }
 
+// {--- from old board.php (before board class)
+function mark_territory( $x, $y, $size, &$array )
+{
+   global $dirx,$diry;
+
+   $c = -1;  // color of territory
+
+   $index[$x][$y] = 7;
+   $point_count= 1; //for the current point (theoricaly NONE)
+
+   while( true )
+   {
+      if( $index[$x][$y] >= 32 )  // Have looked in all directions
+      {
+         $m = $index[$x][$y] % 8;
+
+         if( $m == 7 )   // At starting point, all checked
+         {
+            if( $c == -1 )
+               $c = DAME ;
+            else
+               $c|= OFFSET_TERRITORY ;
+
+            if( $c==DAME || $point_count>MAX_SEKI_MARK)
+               $c|= FLAG_NOCLICK ;
+
+            while( list($x, $sub) = each($index) )
+            {
+               while( list($y, $val) = each($sub) )
+               {
+                  //keep all marks unchanged and reversible
+                  if( @$array[$x][$y] < MARKED_DAME )
+                     $array[$x][$y] = $c;
+               }
+            }
+
+            return $point_count;
+         }
+
+         $x -= $dirx[$m];  // Go back
+         $y -= $diry[$m];
+      }
+      else
+      {
+         $dir = (int)($index[$x][$y] / 8);
+         $index[$x][$y] += 8;
+
+         $nx = $x+$dirx[$dir];
+         $ny = $y+$diry[$dir];
+
+         if( ( $nx < 0 ) or ($nx >= $size) or ($ny < 0) or ($ny >= $size) or
+             isset($index[$nx][$ny]) )
+            continue;
+
+         $new_color = @$array[$nx][$ny];
+
+         if( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD )
+         {
+            $x = $nx;  // Go to the neighbour
+            $y = $ny;
+            $index[$x][$y] = $dir;
+            $point_count++;
+         }
+         else //remains BLACK/WHITE/DAME/BLACK_TERRITORY/WHITE_TERRITORY and MARKED_DAME
+         {
+            if( $new_color == MARKED_DAME )
+            {
+               $c = NONE; // This area will become dame
+            }
+            else if( $c == -1 )
+            {
+               $c = $new_color;
+            }
+            else if( $c == (WHITE+BLACK-$new_color) )
+            {
+               $c = NONE; // This area has both colors as boundary
+            }
+         }
+      }
+   }
+}
+// }--- from old board.php (before board class)
+
+
 //need ./include/board.php
 function sgf_create_territories( $size, &$array,
    &$black_territory, &$white_territory,
