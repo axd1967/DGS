@@ -218,6 +218,8 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
                          'preview' => 'cceecc',
                          'edit' => 'eeeecc' );
 
+   $cols = 2;
+
    $sbj = make_html_safe( $Subject );
    $txt = make_html_safe( $Text, true);
 //   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
@@ -232,20 +234,20 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
    if( $post_type == 'preview' )
    {
       // one line Subject header
-      echo '<tr><td colspan=2 bgcolor="#' . $post_colors[ $post_type ] .
+      echo "<tr><td colspan=$cols bgcolor=\"#" . $post_colors[ $post_type ] .
          "\"><a name=\"preview\"></a><font size=\"+1\"><b>$sbj</b></font><br> " . 
          T_('by')." " . user_reference( 1, 1, "black", $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n";
 
       // post body
-      echo '<tr><td colspan=2 bgcolor=white>' . $txt . "</td></tr>";
+      echo "<tr bgcolor=white><td colspan=$cols>$txt</td></tr>";
    }
    else
    {
       // first line of Subject header
       if( $post_type == 'search_result' )
       {
-         $hdrcols = 2;
+         $hdrcols = $cols;
 
          echo '<tr bgcolor="#' . $post_colors[ $post_type ] . "\"><td colspan=$hdrcols>";
          echo '<a class=black href="read.php?forum=' . $Forum_ID .URI_AMP
@@ -261,14 +263,14 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       else
       {
          if( $post_type == 'hidden' )
-            $hdrcols = 1; //because of the rowspan=2 in the second column
+            $hdrcols = $cols-1; //because of the rowspan=2 in the second column
          else
-            $hdrcols = 2;
+            $hdrcols = $cols;
 
          echo '<tr bgcolor="#' . $post_colors[ $post_type ] . "\"><td colspan=$hdrcols>";
          echo "<a name=\"$ID\"><b><font size=\"+1\">$sbj</font></b></a>$new";
 
-         if( $hdrcols == 1 )
+         if( $hdrcols != $cols )
          {
             echo "</td><td rowspan=2 align=right>";
             echo '<b><font color="#990000">' .
@@ -290,14 +292,14 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       echo "</td></tr>\n";
 
       // post body
-      echo '<tr><td colspan=2 bgcolor=white>' . $txt . "</td></tr>";
+      echo "<tr bgcolor=white><td colspan=$cols>$txt</td></tr>";
    }
 
    // bottom line (footer)
    if( $post_type == 'normal' or $post_type == 'hidden' )
    {
       $hidden = $post_type == 'hidden';
-      echo "<tr><td colspan=2 bgcolor=white align=left>";
+      echo "<tr bgcolor=white><td colspan=$cols align=left>";
       if(  $post_type == 'normal' and !$is_moderator ) // reply link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."reply=$ID#$ID\">[ " .
             T_('reply') . " ]</a>&nbsp;&nbsp;";
@@ -318,7 +320,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
                "reject=$ID#$ID\"><font color=\"#ee6666\">[ " .
                T_('Reject')  . " ]</font></a>";
       }
-      echo "</td></tr><tr><td colspan=2 height=2></td></tr>";
+      echo "</td></tr><tr><td colspan=$cols height=2></td></tr>";
    }
 }
 
