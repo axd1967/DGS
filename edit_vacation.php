@@ -33,10 +33,6 @@ require_once( "include/form_functions.php" );
       error("not_logged_in");
 
 
-   start_page(T_("Vacation"), true, $logged_in, $player_row );
-
-
-   echo "<CENTER>\n";
 
    $days_left = floor($player_row['VacationDays']);
    $on_vacation = floor($player_row['OnVacation']);
@@ -44,12 +40,14 @@ require_once( "include/form_functions.php" );
    $vacationdiff = round(@$_POST['vacationdiff']);
    $vacationlength = round(@$_POST['vacationlength']);
 
+   $str = '';
+
    if( $on_vacation > 0 )
    {
       if( $minimum_days > $days_left or
           ( $minimum_days == $days_left and $minimum_days == 0 ) )
       {
-         echo T_("Sorry, you can't change the vacation length at the moment.");
+         $str .= T_("Sorry, you can't change the vacation length at the moment.");
       }
       else if( isset($_POST['change_vacation']) and
             $vacationdiff >= $minimum_days and $vacationdiff <= $days_left )
@@ -61,7 +59,7 @@ require_once( "include/form_functions.php" );
                      "OnVacation=OnVacation+($vacationdiff) " .
                      "WHERE ID=" . $player_row['ID'] . " " .
                      "AND VacationDays >= ($vacationdiff) LIMIT 1" )
-             or error("internal_error",'edit_v1');
+             or error("mysql_query_failed",'edit_v1');
 
          $msg = urlencode(T_('Vacation length changed!'));
 
@@ -84,14 +82,14 @@ require_once( "include/form_functions.php" );
                   'SELECTBOX', 'vacationdiff', 1, $days, 0, false,
                   'SUBMITBUTTON', 'change_vacation', T_('Change vacation length') ) );
 
-         $vacation_form->echo_string(1);
+         $str .= $vacation_form->get_form_string(1);
       }
    }
    else
    {
       if( $days_left < $vacation_min_days )
       {
-         echo sprintf(T_("Sorry, you need at least %d vacation days to be able to start a vacation period."), $vacation_min_days);
+         $str .= sprintf(T_("Sorry, you need at least %d vacation days to be able to start a vacation period."), $vacation_min_days);
       }
       else if( isset($_POST['start_vacation']) and
          $vacationlength >= $vacation_min_days and $vacationlength <= $days_left )
@@ -103,21 +101,21 @@ require_once( "include/form_functions.php" );
                          'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                          'AND Clock.ID=Games.ClockUsed ' .
                          "AND ToMove_ID='" . $player_row['ID'] . "'" )
-            or error("internal_error",'edit_v2');
+            or error("mysql_query_failed",'edit_v2');
 
          while( $game_row = mysql_fetch_array( $result ) )
          {
             mysql_query("UPDATE Games SET ClockUsed=" .VACATION_CLOCK
                       . ", LastTicks='" . $game_row['ticks'] . "'" 
                       . " WHERE ID=" . $game_row['gid'] . " LIMIT 1" )
-               or error("internal_error",'edit_v3');
+               or error("mysql_query_failed",'edit_v3');
          }
 
          mysql_query("UPDATE Players SET VacationDays=VacationDays-$vacationlength, " .
                      "OnVacation=$vacationlength " .
                      "WHERE ID=" . $player_row['ID'] . " " .
                      "AND VacationDays >= ($vacationlength) LIMIT 1" )
-            or error("internal_error",'edit_v4');
+            or error("mysql_query_failed",'edit_v4');
 
          $msg = urlencode(T_('Have a nice vacation!'));
 
@@ -139,10 +137,15 @@ require_once( "include/form_functions.php" );
                   'SELECTBOX', 'vacationlength', 1, $days, $vacation_min_days, false,
                   'SUBMITBUTTON', 'start_vacation', T_('Start vacation') ) );
 
-         $vacation_form->echo_string(1);
+         $str .= $vacation_form->get_form_string(1);
       }
 
    }
+
+   start_page(T_("Vacation"), true, $logged_in, $player_row );
+
+   echo "<CENTER>\n";
+   echo $str;
    echo "</CENTER>\n";
 
    end_page();
