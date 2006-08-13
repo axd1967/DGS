@@ -19,8 +19,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 $is_down = false;
-$is_down_message = "Sorry, dragon is down for maintenance at the moment, " .
-                   "please return in an hour or so.";
+$is_down_message = "Sorry, dragon is down for maintenance at the moment,"
+                 . " please return in an hour or so."
+                 . " Don't worry: the clocks are frozen until the server restarts";
 
 if( !isset($quick_errors) )
    $quick_errors = false;
