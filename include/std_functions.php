@@ -688,6 +688,7 @@ function random_letter()
 
 function generate_random_password()
 {
+   $return = '';
    mt_srand((double)microtime()*1000000);
    for( $i=0; $i<8; $i++ )
       $return .= random_letter();
