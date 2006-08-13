@@ -84,7 +84,14 @@ require_once( "include/timezones.php" );
       $toggle_marks= false;
       if( change_folders_for_marked_messages($my_id, $my_folders) > 0 )
          if( isset($my_folders[$folder]) && $current_folder != FOLDER_DELETED )
-            $current_folder= $folder; //follow the move if one
+         {
+            //follow the move if one
+            $current_folder= $folder;
+            // first page if a move. keep $mtable prefix
+            $_GET['from_row'] = 0;
+            // WARNING: it should be better to follow the message but
+            // we don't know its page in the new folder+sorting.
+         }
    }
 
    $page = '';
@@ -154,6 +161,7 @@ require_once( "include/timezones.php" );
      message_list_table( $mtable, $result, $show_rows
              , $current_folder, $my_folders
              , false, $current_folder == FOLDER_NEW, $toggle_marks) ;
+   //mysql_free_result($result); //already free
 
    $mtable->echo_table();
    //echo "<br>\n";
