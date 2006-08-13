@@ -387,7 +387,7 @@ class Table
          if( $this->From_Row > 0 )
             $button.= anchor(
                  $this->Page . $this->current_sort_string( true )
-               . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
+                 . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
                , image( 'images/prev.gif', '&lt;=', '', $string)
                , T_("prev page")
                ,'accesskey="&lt;"'
@@ -398,7 +398,7 @@ class Table
          if( !$this->Last_Page )
             $button.= anchor(
                  $this->Page . $this->current_sort_string( true )
-               . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
+                 . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
                , image( 'images/next.gif', '=&gt;', '', $string)
                , T_("next page")
                ,'accesskey="&gt;"'
@@ -496,6 +496,19 @@ class Table
          }
       }
 
+   /*! \brief Retrieve from part of url from table. */
+   function current_from_string( $add_sep=false )
+      {
+         if( $this->From_Row>0 )
+         {
+            $str = $this->Prefix . 'from_row=' . $this->From_Row;
+            if ($add_sep)
+               $str .= URI_AMP ;
+            return $str;
+         }
+         return '';
+      }
+
    /*! \brief Retrieve sort part of url from table. */
    function current_sort_string( $add_sep=false )
       {
@@ -581,7 +594,8 @@ class Table
             if( !empty( $query ) )
             {
                @list( $key, $value ) = explode( '=', $query );
-               array_push( $form_array, 'HIDDEN', $key, $value );
+               if( @$value )
+                  array_push( $form_array, 'HIDDEN', $key, $value );
             }
          }
 

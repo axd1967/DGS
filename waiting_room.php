@@ -81,7 +81,8 @@ require_once( "include/message_functions.php" );
 
    $sortstring = $wrtable->current_sort_string();
 
-   $baseURL = "waiting_room.php?".$sortstring;
+   $baseURL = "waiting_room.php?"
+      . $wrtable->current_from_string(1) . $sortstring;
    if( $showall )
       $baseURL.= URI_AMP.'showall=1';
 
@@ -224,7 +225,7 @@ require_once( "include/message_functions.php" );
       $menu_array[T_('Add new game')] = $baseURL . "#add" ;
 
 
-   $baseURL = "waiting_room.php?".$sortstring;
+   $baseURL = "waiting_room.php?".$sortstring; //reset it to minimum
    if( $showall )
    {
       $str = T_("Show only adequate games");
