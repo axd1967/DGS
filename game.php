@@ -550,8 +550,8 @@ function get_alt_arg( $n1, $n2)
 
       //if( $my_game ) //sgf comments may be viewed by observers
       {
-         echo "\n<center><a href=\"game_comments.php?gid=$gid\" target=\"DGS_game_comments\">" . 
-               T_('Comments') . "</a></center>\n";
+         echo "\n<center><a href=\"game_comments.php?gid=$gid\" target=\"DGS_game_comments\""
+            . " accesskey=\"c\">" . T_('Comments') . "</a></center>\n";
       }
 
    echo "</td></tr>\n</table>\n"; //board & associates table }--------
