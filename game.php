@@ -707,7 +707,7 @@ function draw_game_info(&$game_row)
    global $table_row_color2;
 
    echo '<table border=0 cellspacing=0 cellpadding=3 align=center>' . "\n";
-   echo '<tr bgcolor="#DDDDDD">' . "\n";
+   echo '<tr id="blackinfo" bgcolor="#DDDDDD">' . "\n";
    echo "<td align=center><img src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'],
@@ -728,7 +728,7 @@ function draw_game_info(&$game_row)
 
    if( $game_row['Status'] != 'FINISHED' )
    {
-      echo '<tr bgcolor="#DDDDDD">' . "\n";
+      echo '<tr id="blacktime" bgcolor="#DDDDDD">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
          echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
                              $game_row['Byotime'], $game_row['Byoperiods'],
@@ -738,7 +738,7 @@ function draw_game_info(&$game_row)
    }
 
 
-   echo '<tr bgcolor="#FFFFFF">' . "\n";
+   echo '<tr id="whiteinfo" bgcolor="#FFFFFF">' . "\n";
    echo "<td align=center><img src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['White_ID'],
@@ -758,7 +758,7 @@ function draw_game_info(&$game_row)
 
    if( $game_row['Status'] != 'FINISHED' )
    {
-      echo '<tr bgcolor="#FFFFFF">' . "\n";
+      echo '<tr id="whitetime" bgcolor="#FFFFFF">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
          echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
                              $game_row['Byotime'], $game_row['Byoperiods'],
@@ -768,7 +768,7 @@ function draw_game_info(&$game_row)
    }
 
    $sep = ',&nbsp;&nbsp;&nbsp;';
-   echo '<tr bgcolor=' . $table_row_color2 . '>' . "\n";
+   echo '<tr id="gamerules" bgcolor=' . $table_row_color2 . '>' . "\n";
    echo "<td colspan=\"" . $cols . "\">" . T_('Rules') . ': ';
    echo T_('Komi') . ': ' . $game_row['Komi'] ;
    echo $sep . T_('Handicap') . ': ' . $game_row['Handicap'];
@@ -777,7 +777,7 @@ function draw_game_info(&$game_row)
 
    echo "</tr>\n";
 
-   echo '<tr bgcolor=' . $table_row_color2 . '>' . "\n";
+   echo '<tr id="gametime" bgcolor=' . $table_row_color2 . '>' . "\n";
    echo "<td colspan=\"" . $cols . "\">" . T_('Time limit') . ': ' .
       echo_time_limit($game_row['Maintime'], $game_row['Byotype'],
                       $game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
