@@ -1071,7 +1071,7 @@ function make_html_safe( $msg, $some_html=false)
 
       //tag: <code>...</code> =>translated to <pre class="code">...</pre>
       // see also parse_tags_safe() for the suppression of inner html code
-      $msg=eregi_replace( ALLOWED_LT."code([^`\n\t]*)".ALLOWED_GT,
+      $msg=preg_replace( "%".ALLOWED_LT."code([^`\n\t]*)".ALLOWED_GT."%is",
                            ALLOWED_LT."pre class=".ALLOWED_QUOT."code".ALLOWED_QUOT."\\1".ALLOWED_GT, $msg);
       $msg=eregi_replace( ALLOWED_LT."/code *".ALLOWED_GT,
                            ALLOWED_LT."/pre".ALLOWED_GT, $msg);
