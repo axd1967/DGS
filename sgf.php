@@ -24,6 +24,7 @@ if( @$_GET['quick_mode'] )
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
+// can't use html_entity_decode() because of the '&nbsp;' below: 
 $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
 $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
 $reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_entity_decode()
@@ -317,7 +318,8 @@ $array=array();
      (but, actually, the translation database is not available here)
    We could use the CA[] (FF[4]) property if we know what it is.
 */
-   $charset = 'UTF-8'; //by default
+   //$charset = 'UTF-8'; //by default
+   $charset = '';
 
    $rules = "Japanese"; //Mandatory for Go (GM[1])
 /*
