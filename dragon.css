@@ -93,6 +93,29 @@ table.infos a.hdr {
 }
 
 
+table.bio_infos {
+   border-width: 2px;
+   border-spacing: 2px;
+   margin: 4px;
+   empty-cells: hide;
+}
+
+table.bio_infos td, table.bio_infos th {
+   border-width: 1px;
+   padding: 3px;
+   text-align: left;
+   color: black;
+}
+
+table.bio_infos a {
+}
+
+table.bio_infos a.hdr {
+   color: black;
+   font-weight: bold;
+}
+
+
 table.moves {
    background: #66C17B;
    border-width: 2px;

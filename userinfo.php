@@ -135,7 +135,7 @@ require_once( "include/countries.php" );
    {
       echo '    <p>
     <h3><font color=' . $h3_color . '>' . T_('Biographical info') . '</font></h3>
-    <table id=\"bio_infos\" class=infos border=1>
+    <table class="bio_infos" border=1>
 ';
 
       while( $row = mysql_fetch_assoc( $result ) )
