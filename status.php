@@ -150,6 +150,7 @@ require_once( "include/message_functions.php" );
       while( $row = mysql_fetch_assoc( $result ) )
       {
          $Rating=NULL;
+         $Ticks=0;
          extract($row);
 
          $grow_strings = array();

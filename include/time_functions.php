@@ -265,12 +265,12 @@ function echo_time_remaining($Byotype, $Maintime_left, $Byotime_left,
       if( $Byotype == 'JAP' )
       {
          $str .= echo_time($Byotime_left,false,$short) . ' * ' . $Byoperiods_left . ' ' .
-            ($Byoperiods_left == 1 ? T_('period') : T_('periods'));
+            ($Byoperiods_left <= 1 ? T_('period') : T_('periods'));
       }
       else if( $Byotype == 'CAN' )
       {
-         $str .= echo_time($Byotime_left,false,$short) . T_(' / ') . $Byoperiods_left . ' ' .
-            ($Byoperiods_left == 1 ? T_('stone') : T_('stones'));
+         $str .= echo_time($Byotime_left,false,$short) . ' / ' . $Byoperiods_left . ' ' .
+            ($Byoperiods_left <= 1 ? T_('stone') : T_('stones'));
       }
    }
    else
