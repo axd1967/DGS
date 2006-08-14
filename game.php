@@ -510,18 +510,22 @@ function get_alt_arg( $n1, $n2)
       echo "<P><center>$extra_message</center>\n";
    echo '<br>';
 
+   $cols = 2;
    if( $show_notes && $collapse_notes != 'Y' )
    {
       if( $notesmode == 'BELOW' )
-         echo "</td></tr>\n<tr><td colspan=2 align='center'>";
+         echo "</td></tr>\n<tr><td colspan=$cols align='center'>";
       else //default 'RIGHT'
+      {
+         $cols++;
          echo "</td>\n<td align='left' valign='center'>";
+      }
       draw_notes( 'N', $notes, $notesheight, $noteswidth);
       $show_notes = false;
    }
 
    // colspan = captures+board column
-   echo "</td></tr>\n<tr><td colspan=3 align='center'>";
+   echo "</td></tr>\n<tr><td colspan=$cols align='center'>";
 
    if( $validation_step )
    {
