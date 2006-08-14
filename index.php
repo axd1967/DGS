@@ -53,7 +53,7 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
      "</font><HR>\n";
 }else{ //for devel server
   echo "<p><font color=green>\n" .
-     T_("Welcome to the $FRIENDLY_LONG_NAME!") .
+     sprintf( T_('Welcome to the %s!'), $FRIENDLY_LONG_NAME) .
      '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
      "</font><HR>\n";
 } //for devel server

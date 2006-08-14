@@ -33,9 +33,10 @@ require_once( "include/std_functions.php" );
   echo "<center><h3><font color=$h3_color>" .
     T_("Introduction to Dragon") . "</font></h3></center>\n";
 
-  echo T_("Welcome to $FRIENDLY_LONG_NAME, a <a href=\"licence.php\">free</a> " .
-          "server for playing <a href=\"links.php\">go</a>, " .
-          "where the games tends to 'drag on'.") . "\n";
+  echo sprintf( T_("Welcome to %s, a %sfree%s " .
+          "server for playing %sgo%s, where the games tends to 'drag on'.")
+          , $FRIENDLY_LONG_NAME, '<a href="licence.php">', '</a>'
+          , '<a href="links.php">', '</a>' ) . "\n";
 
   echo "<p>\n";
 
