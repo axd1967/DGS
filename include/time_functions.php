@@ -111,6 +111,11 @@ function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
          {
             $main = 0;
             $byotime = $startbyotime;
+            if( $byotime == 0 )
+            {
+               $byoper = 0; // No byoyomi
+               break;
+            }
             $byoper = $startbyoper-1;
          }
 
