@@ -59,7 +59,11 @@ require_once( "include/move.php" );
 
 
 
-   $query = "select Games.ID as gid, ClockUsed, LastTicks, Clock.Ticks from Games, Clock where Clock.ID=Games.ClockUsed AND Games.Status!='FINISHED' AND Games.Status!='INVITED' HAVING Clock.Ticks < LastTicks";
+   $query = "SELECT Games.ID AS gid, ClockUsed, LastTicks, Clock.Ticks " .
+      "FROM Games, Clock " .
+      "WHERE Clock.ID=Games.ClockUsed " .
+      "AND Games.Status!='FINISHED' AND Games.Status!='INVITED' " .
+      "HAVING Clock.Ticks < LastTicks";
 
    $result = mysql_query($query);
 
@@ -69,10 +73,14 @@ require_once( "include/move.php" );
    if( $n > 0 )
    while( $row = mysql_fetch_assoc( $result ) )
    {
-      echo '<hr>Game_ID: ' . $row["gid"] . ":<br>\n";
+      echo '<hr>Game_ID: ' . $row["gid"] . ": &nbsp; " .
+         "ClockUsed: " . $row['ClockUsed'] .
+         ", LastTicks: " . $row['LastTicks'] .
+         ", Clock.Ticks: " . $row['Ticks'] .
+         "<br>\n";
       dbg_query("UPDATE Games " .
                 "SET LastTicks=" . $row['Ticks'] . " " .
-                "WHERE ID=" . $row['gid']);
+                "WHERE ID=" . $row['gid'] . " LIMIT 1");
    }
 
    echo "<hr>Done!!!\n";
