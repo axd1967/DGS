@@ -245,7 +245,7 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                                   'CHECKBOX', 'coordsright', 1, T_('Right'), ($s & COORD_RIGHT),
                                   'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & COORD_DOWN),
                                   'CHECKBOX', 'coordsover', 1, T_('Hover'), ($s & COORD_OVER),
-//                                  'CHECKBOX', 'coordssgfover', 1, T_('Sgf over'), ($s & COORD_SGFOVER),
+//                                  'CHECKBOX', 'coordssgfover', 1, T_ ('Sgf over'), ($s & COORD_SGFOVER),
                                 ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
                                   'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
@@ -257,7 +257,7 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                                   'CHECKBOX', 'movemodulo', 100, T_('Don\'t use numbers above 100') . SMALL_SPACING
                                   , ($player_row['MoveModulo']>0 ?1 :0),
 //                                  'TEXT', SMALL_SPACING,
-//                                  'CHECKBOX', 'numbersover', 1, T_('Over'), ($s & NUMBER_OVER),
+//                                  'CHECKBOX', 'numbersover', 1, T_ ('Over'), ($s & NUMBER_OVER),
                                 ) );
    }
 
