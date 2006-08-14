@@ -521,7 +521,7 @@ function get_alt_arg( $n1, $n2)
    }
 
    // colspan = captures+board column
-   echo "</td></tr>\n<tr><td colspan=2 align='center'>";
+   echo "</td></tr>\n<tr><td colspan=3 align='center'>";
 
    if( $validation_step )
    {
