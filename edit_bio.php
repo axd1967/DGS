@@ -64,8 +64,9 @@ function find_category_box_text($cat)
 
 
 
-   start_page(T_("Edit biopgraphical info"), true, $logged_in, $player_row );
-
+   $title = T_("Edit biographical info");
+   start_page( $title, true, $logged_in, $player_row );
+   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
 
 
    echo "<CENTER>\n";
