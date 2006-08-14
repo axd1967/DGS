@@ -21,7 +21,18 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 chdir("../");
 
-define('ALLOW_AUTH',true);
+define('ALLOW_AUTH', true);
+
+// Allowed characters are not obvious with our RSS Feeder
+// - because XML restrictions are strong
+// - because our RSS can be read over the world
+// - because it could have to send any original DGS charsets (within user names) 
+// There are two ways left (to be tested). Shortly:
+// - 'iso': iso-8859-1 charsset + chars [^\x20-\x7f] escaped
+// - 'utf': UTF-8 charsset + chars [\x00-\x1f] escaped
+define('CHARSET_MODE', 'utf'); //'iso' or 'utf' 
+
+define('CACHE_MIN', 10);
 
 $quick_errors = 1;
 function error($err, $debugmsg=NULL)
@@ -99,8 +110,11 @@ function disable_cache($stamp=NULL, $expire=NULL)
 
    header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
    header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
-   header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
-   header('Pragma: no-cache');                                              // HTTP/1.0
+   if( !$expire or $expire<=$NOW )
+   {
+      header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
+      header('Pragma: no-cache');                                              // HTTP/1.0
+   }
 }
 
 function connect2mysql($no_errors=false)
@@ -128,10 +142,81 @@ function connect2mysql($no_errors=false)
 }//standalone version ==================
 
 
+/*
+$xmltrans = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES); //ENT_COMPAT
+foreach ($xmltrans as $key => $value)
+   $xmltrans[$key] = '&#'.ord($key).';';
+*/
+$xmltrans = array();
+for ( $i=1; $i<0x20 ; $i++ )
+   $xmltrans[chr($i)] = ''; //"&#$i;";
+unset( $xmltrans["\t"]);
+unset( $xmltrans["\n"]);
 
+// XML only supports these entities: &amp; &lt; &gt; &quot;
+//  but they must be used in text fields 
+// see also <![CDATA[#]]> for particular cases. 
+$xmltrans['&'] = '&amp;';
+$xmltrans['<'] = '&lt;';
+$xmltrans['>'] = '&gt;';
+$xmltrans['"'] = '&quot;';
+      
+switch( CHARSET_MODE )
+{
+   case 'iso':
+   {
+      $encoding_used = 'iso-8859-1';
+
+      for ( $i=0x80; $i<0x100 ; $i++ )
+         $xmltrans[chr($i)] = "&#$i;";
+   }
+   break;
+   case 'utf':
+   {
+      $encoding_used = 'UTF-8';
+
+      for ( $i=0x80; $i<0x100 ; $i++ )
+         $xmltrans[chr($i)] = "&#$i;";
+   }
+   break;
+   default:
+      error('internal_error', 'rss.no_charset');
+}
+
+
+// can't use html_entity_decode() because of the '&nbsp;' below:
+//HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES 
+$reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
+$reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
+$reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_entity_decode()
+function reverse_htmlentities( $str)
+{
+   //return html_entity_decode($str, ENT_QUOTES, 'UTF-8');
+ global $reverse_htmlentities_table;
+   return strtr($str, $reverse_htmlentities_table);
+}
+
+
+// could not be called twice on the same string
 function rss_safe( $str)
 {
-   return (string)@htmlentities( (string)$str, ENT_QUOTES);
+   $str = reverse_htmlentities( $str);
+ global $xmltrans;
+   return strtr($str, $xmltrans);
+/*
+   //XML only supports these entities: &amp; &lt; &gt; &quot;
+   return str_replace(
+      array( '&', '"', '<', '>'),
+      array( '&amp;', '&quot;', '&lt;', '&gt;'),
+      $str );
+*/
+}
+
+// could not be called twice on the same string
+function rss_link( $lnk)
+{
+   //XML does not support some URL chars (like '#')
+   return '<![CDATA[' . $lnk . ']]>'; 
 }
 
 
@@ -145,9 +230,15 @@ function rss_date( $dat=0)
    return gmdate( 'D, d M Y H:i:s \G\M\T', $dat);
 }
 
+// $tag must be valid and $str must be safe
+function rss_tag( $tag, $str)
+{
+   return "<$tag>$str</$tag>\n";
+}
+
 
 $rss_opened= false;
-function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
+function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACHE_MIN)
 {
    global $encoding_used, $HOSTBASE, $FRIENDLY_LONG_NAME, $NOW;
 
@@ -157,8 +248,9 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes=10)
 
    $last_modified_stamp= $NOW;
 
-   //if( empty($encoding_used) )
-      $encoding_used = 'iso-8859-1';
+   if( empty($encoding_used) )
+      $encoding_used = 'UTF-8'; //really better for RSS feeders
+      //$encoding_used = 'iso-8859-1';
 
    if( empty($html_clone) )
       $html_clone = $HOSTBASE;
@@ -179,7 +271,7 @@ This file is not meant to be read by a web
 browser directly.  Instead you're meant to copy 
 the URL for the file, which is:
 
-	{$HOSTBASE}rss/status.php
+  {$HOSTBASE}rss/status.php
 
 and paste it into your RSS reader or podcast program.
 
@@ -191,13 +283,15 @@ please go to the following web pages to learn
 about RSS services.
 */
 
+   $title = $FRIENDLY_LONG_NAME.' - '.$title;
    echo " <channel>\n"
-      . "  <title>$FRIENDLY_LONG_NAME - $title</title>\n"
-      . "  <link>$html_clone</link>\n"
-      . "  <pubDate>" . rss_date($last_modified_stamp) . "</pubDate>"
-      . ( is_numeric( $cache_minutes) ? "  <ttl>$cache_minutes</ttl>\n" : '' )
-      . "  <language>en-us</language>"
-      . "  <description>$description</description>\n"
+      . '  '.rss_tag( 'title', rss_safe( $title)) 
+      . '  '.rss_tag( 'link', rss_link( $html_clone)) 
+      . '  '.rss_tag( 'pubDate', rss_date( $last_modified_stamp)) 
+      . ( is_numeric( $cache_minutes)
+            ? '  '.rss_tag( 'ttl', $cache_minutes) : '')
+      . '  '.rss_tag( 'language', 'en-us') 
+      . '  '.rss_tag( 'description', rss_safe( $description)) 
       ;
 }
 
@@ -216,18 +310,18 @@ function rss_item( $title, $link, $description='', $pubDate='', $category='', $g
    if( empty($guid) )
       $guid = $link;
 
-   $str = "  <item>\n"
-        . "   <title>$title</title>\n";
+   $str = "  <item>\n";
+   $str.= '   '.rss_tag( 'title', rss_safe( $title));
    if( $link )
-      $str.= "   <link>$link</link>\n";
+      $str.= '   '.rss_tag( 'link', rss_link( $link));
    if( $guid )
-      $str.= "   <guid>$guid</guid>\n";
+      $str.= '   '.rss_tag( 'guid', rss_link( $guid));
    if( $category )
-      $str.= "   <category>$category</category>\n";
+      $str.= '   '.rss_tag( 'category', rss_safe( $category));
    //if( $pubDate )
-      $str.= "   <pubDate>" . rss_date($pubDate) . "</pubDate>\n";
-   $str.= "   <description>$description</description>\n"
-        . "  </item>\n";
+      $str.= '   '.rss_tag( 'pubDate', rss_date( $pubDate));
+   $str.= '   '.rss_tag( 'description', rss_safe( $description));
+   $str.= "  </item>\n";
 
    echo $str;
 }
@@ -243,8 +337,8 @@ function rss_error( $str, $title='', $link='')
    if( !$title )
       $title= 'ERROR';
    else
-      $title= 'ERROR: '.rss_safe( $title);
-   $str= rss_safe( $str);
+      $title= 'ERROR: '.$title;
+
    rss_item( $title, $link, 'ERROR: '.$str);
 }
 
@@ -259,8 +353,8 @@ function rss_warning( $str, $title='', $link='')
    if( !$title )
       $title= 'Warning';
    else
-      $title= 'Warning: '.rss_safe( $title);
-   $str= rss_safe( $str);
+      $title= 'Warning: '.$title;
+
    rss_item( $title, $link, 'Warning: '.$str);
 }
 
@@ -354,7 +448,8 @@ else
    }
 
 
-   disable_cache();
+   //disabling caches make some RSS feeders to instantaneously refresh.
+   disable_cache( $NOW, $NOW + CACHE_MIN*60);
 
    connect2mysql();
 
@@ -411,7 +506,7 @@ else
    //+logging stat adjustments
 
    $my_id = (int)$player_row['ID'];
-   $my_name = rss_safe( $player_row['Handle']);
+   $my_name = (string)$player_row['Handle'];
 
    //$rss_sep = "\n<br />";
    $rss_sep = "\n - ";
@@ -443,22 +538,21 @@ else
    while( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
-      $safename = @$row['sender'];
-      if( !$safename )
-         $safename = '[Server message]';
+      $sendname = @$row['sender'];
+      if( !$sendname )
+         $sendname = '[Server message]';
       else
-         $safename.= " (".@$row['sendhndl'].")";
-      $safename = rss_safe( $safename);
+         $sendname.= " (".@$row['sendhndl'].")";
 
-      $safeid = (int)@$row['mid'];
+      $mid = (int)@$row['mid'];
 
-      $tit= "Message from $safename";
-      $lnk= $HOSTBASE.'message.php?mid='.$safeid;
+      $tit= "Message from $sendname";
+      $lnk= $HOSTBASE.'message.php?mid='.$mid;
       $dat= @$row['date'];
-      $dsc= "Message: $safeid" . $rss_sep .
+      $dsc= "Message: $mid" . $rss_sep .
             //"Folder: ".FOLDER_NEW . $rss_sep .
-            "From: $safename" . $rss_sep .
-            "Subject: ".rss_safe( @$row['Subject']);
+            "From: $sendname" . $rss_sep .
+            "Subject: ".@$row['Subject'];
       rss_item( $tit, $lnk, $dsc, $dat, $cat);
    }
 
@@ -480,19 +574,18 @@ else
    while( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
-      $safename = @$row['Name'];
-         $safename.= " (".@$row['Handle'].")";
-      $safename = rss_safe( $safename);
+      $opponame = @$row['Name'];
+         $opponame.= " (".@$row['Handle'].")";
 
-      $safeid = (int)@$row['ID'];
+      $gid = (int)@$row['ID'];
       $move = (int)@$row['Moves'];
 
-      $tit= "Game with $safename";
-      $lnk= $HOSTBASE.'game.php?gid='.$safeid;
+      $tit= "Game with $opponame";
+      $lnk= $HOSTBASE.'game.php?gid='.$gid;
       $mov= $lnk.URI_AMP.'move='.$move;
       $dat= @$row['date'];
-      $dsc= "Game: $safeid" . $rss_sep .
-            "Opponent: $safename" . $rss_sep .
+      $dsc= "Game: $gid" . $rss_sep .
+            "Opponent: $opponame" . $rss_sep .
             "Color: ".$clrs{@$row['Color']} . $rss_sep .
             "Move: ".$move;
       rss_item( $tit, $lnk, $dsc, $dat, $cat, $mov);
@@ -501,7 +594,12 @@ else
     
    if( $nothing_found )
    {
-      rss_warning('empty lists', 'empty lists', $HOSTBASE.'status.php');
+      //rss_warning('empty lists', 'empty lists', $HOSTBASE.'status.php');
+      $tit= "Empty lists";
+      $lnk= $HOSTBASE.'status.php';
+      $dsc= "No awaiting games" . $rss_sep .
+            "No awaiting messages";
+      rss_item( $tit, $lnk, $dsc);
    }
 
    rss_close();

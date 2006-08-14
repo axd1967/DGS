@@ -96,8 +96,11 @@ function disable_cache($stamp=NULL, $expire=NULL)
 
    header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
    header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
-   header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
-   header('Pragma: no-cache');                                              // HTTP/1.0
+   if( !$expire or $expire<=$NOW )
+   {
+      header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
+      header('Pragma: no-cache');                                              // HTTP/1.0
+   }
 }
 
 function connect2mysql($no_errors=false)
@@ -126,9 +129,43 @@ function connect2mysql($no_errors=false)
 
 
 
+$xmltrans = array();
+for ( $i=1; $i<0x20 ; $i++ )
+   $xmltrans[chr($i)] = ''; //"&#$i;";
+unset( $xmltrans["\t"]);
+unset( $xmltrans["\n"]);
+
+// XML only supports these entities: &amp; &lt; &gt; &quot;
+//  but they must be used in text fields 
+// see also <![CDATA[#]]> for particular cases.
+$xmltrans['&'] = '&amp;';
+$xmltrans['<'] = '&lt;';
+$xmltrans['>'] = '&gt;';
+$xmltrans['"'] = '&quot;';
+      
+for ( $i=0x80; $i<0x100 ; $i++ )
+   $xmltrans[chr($i)] = "&#$i;";
+
+
+// can't use html_entity_decode() because of the '&nbsp;' below:
+//HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES 
+$reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
+$reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
+$reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_entity_decode()
+function reverse_htmlentities( $str)
+{
+   //return html_entity_decode($str, ENT_QUOTES, 'UTF-8');
+ global $reverse_htmlentities_table;
+   return strtr($str, $reverse_htmlentities_table);
+}
+
+
+// could not be called twice on the same string
 function wap_safe( $str)
 {
-   return (string)@htmlentities( (string)$str, ENT_QUOTES);
+   $str = reverse_htmlentities( $str);
+ global $xmltrans;
+   return strtr($str, $xmltrans);
 }
 
 
@@ -161,9 +198,9 @@ function wap_open( $title)
    global $wap_opened;
    $wap_opened= true;
 
-   //if( empty($encoding_used) )
-      $encoding_used = 'iso-8859-1';
-
+   if( empty($encoding_used) )
+      $encoding_used = 'UTF-8';
+      //$encoding_used = 'iso-8859-1';
 
    header('Content-Type: text/vnd.wap.wml; charset='.$encoding_used);
 
@@ -213,13 +250,17 @@ function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='
    $str.= "<br/>";
 
 
+   $title = wap_safe( $title);
    $str.= "<p><b>$title</b></p>";
 
    //if( $pubDate )
       $str.= "<p>" . wap_date($pubDate) . "</p>";
 
    if( !empty($description) )
+   {
+      $description = wap_safe( $description);
       $str.= "<p>$description</p>";
+   }
 
    $str.= card_close();
 
@@ -236,7 +277,7 @@ function wap_error( $str, $title='', $link='')
    }
    if( !$title )
       $title= 'ERROR';
-   $str= wap_safe( $str);
+
    wap_item( 'E'.wap_id(), 'Error', $title, $link, 'Error: '.$str);
 }
 
@@ -250,7 +291,7 @@ function wap_warning( $str, $title='', $link='')
    }
    if( !$title )
       $title= 'WARNING';
-   $str= wap_safe( $str);
+
    wap_item( 'W'.wap_id(), 'Warning', $title, $link, 'Warning: '.$str);
 }
 
@@ -403,7 +444,7 @@ else
    //+logging stat adjustments
 
    $my_id = (int)$player_row['ID'];
-   $my_name = wap_safe( $player_row['Handle']);
+   $my_name = $player_row['Handle'];
 
 
    // New messages?
@@ -448,7 +489,7 @@ else
    $cardid= 'login';
    $card = card_open( $cardid, "Status");
 
-   $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status of</a>: $my_name</p>";
+   $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status of</a>: " .wap_safe($my_name). "</p>";
    if( $countM>0 )
    {
       $card.= "<a accesskey=\"m\" href=\"#M1\">Messages</a>: $countM<br/>";
@@ -477,22 +518,21 @@ else
    $i= 1;
    while( $row = mysql_fetch_assoc($resultM) )
    {
-      $safename = @$row['sender'];
-      if( !$safename )
-         $safename = '[Server message]';
+      $sendname = @$row['sender'];
+      if( !$sendname )
+         $sendname = '[Server message]';
       else
-         $safename.= " (".@$row['sendhndl'].")";
-      $safename = wap_safe( $safename);
+         $sendname.= " (".@$row['sendhndl'].")";
 
-      $safeid = (int)@$row['mid'];
+      $mid = (int)@$row['mid'];
 
       $hdr= "Message $i";
-      $tit= "From: $safename";
-      $lnk= $HOSTBASE.'message.php?mid='.$safeid;
+      $tit= "From: $sendname";
+      $lnk= $HOSTBASE.'message.php?mid='.$mid;
       $dat= @$row['date'];
-      $dsc= //"Message: $safeid" . $wap_sep .
+      $dsc= //"Message: $mid" . $wap_sep .
             //"Folder: ".FOLDER_NEW . $wap_sep .
-            "Subject: ".wap_safe( @$row['Subject']);
+            "Subject: ".@$row['Subject'];
 
       $previd= $cardid;
       $cardid= 'M'.$i;
@@ -507,19 +547,18 @@ else
    $i= 1;
    while( $row = mysql_fetch_assoc($resultG) )
    {
-      $safename = @$row['Name'];
-         $safename.= " (".@$row['Handle'].")";
-      $safename = wap_safe( $safename);
+      $opponame = @$row['Name'];
+         $opponame.= " (".@$row['Handle'].")";
 
-      $safeid = (int)@$row['ID'];
+      $gid = (int)@$row['ID'];
       $move = (int)@$row['Moves'];
 
       $hdr= "Game $i";
-      $tit= "Opponent: $safename";
-      $lnk= $HOSTBASE.'game.php?gid='.$safeid;
+      $tit= "Opponent: $opponame";
+      $lnk= $HOSTBASE.'game.php?gid='.$gid;
       $dat= @$row['date'];
-      $dsc= //"Game: $safeid" . $wap_sep .
-            //"Opponent: $safename" . $wap_sep .
+      $dsc= //"Game: $gid" . $wap_sep .
+            //"Opponent: $opponame" . $wap_sep .
             "Color: ".$clrs{@$row['Color']} . $wap_sep .
             "Move: ".$move;
 
