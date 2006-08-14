@@ -79,6 +79,12 @@ function get_clock_ticks($clock_used)
    error("mysql_clock_ticks", $clock_used);
 }
 
+function ticks_to_hours($ticks)
+{
+   global $tick_frequency;
+
+   return ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
+}
 
 function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
    $byotype, $startbyotime, $startbyoper, $has_moved)
@@ -170,7 +176,7 @@ function echo_hour($hours)
    return $hours .'&nbsp;' . ( abs($hours) <= 1 ? T_('hour') : T_('hours') );
 }
 
-function echo_time($hours, $keep_english=false)
+function echo_time($hours, $keep_english=false, $short=false)
 {
    if( $hours <= 0 )
       return '---';
@@ -182,9 +188,9 @@ function echo_time($hours, $keep_english=false)
    if( $days > 0 )
    {
       if( $days <= 1 )
-         $str = '1&nbsp;' . $T_('day');
+         $str = '1' . ( $short ? 'd' : '&nbsp;' . $T_('day') );
       else
-         $str = $days .'&nbsp;' . $T_('days');
+         $str = $days . ( $short ? 'd' : '&nbsp;' . $T_('days') );
    }
    else
          $str = '';
@@ -192,12 +198,12 @@ function echo_time($hours, $keep_english=false)
    if( $h > 0 ) //or $str == '' )
    {
       if( $str > '' )
-         $str .='&nbsp;' . $T_('and') . '&nbsp;';
+         $str .= ( $short ? ',&nbsp;' : '&nbsp;' . $T_('and') . '&nbsp;');
 
       if( $h <= 1 )
-         $str .= '1&nbsp;' . $T_('hour');
+         $str .= '1' . ( $short ? 'h' : '&nbsp;' . $T_('hour') );
       else
-         $str .= $h . '&nbsp;' . $T_('hours');
+         $str .= $h . ( $short ? 'h' : '&nbsp;' . $T_('hours') );
    }
 
    return $str;
@@ -212,18 +218,19 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
    {
       if( !$short ) $str .= $T_('Fischer time') . ', ';
 
-      $str .= echo_time($Maintime, $keep_english) . ' ' .
+      $str .= echo_time($Maintime, $keep_english, $short) . ' ' .
          sprintf( $T_('with %s extra per move'), echo_time($Byotime, $keep_english) );
    }
    else
    {
-      $str .= echo_time($Maintime, $keep_english);
+      $str .= echo_time($Maintime, $keep_english, $short);
 
       if( $Byotime <= 0 )
-         $str .= ' ' . $T_('without byoyomi');
+         if( !$short )
+            $str .= ' ' . $T_('without byoyomi');
       else
       {
-         $str .= ' + ' . echo_time($Byotime, $keep_english);
+         $str .= ' + ' . echo_time($Byotime, $keep_english, $short);
 
          if( $Byotype == 'JAP' )
          {
@@ -244,25 +251,25 @@ function echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, $keep_engli
    return $str;
 }
 
-function echo_time_remaining($Maintime, $Byotype, $Byotime, $Byoperiods,
-                             $Maintime_left, $Byotime_left, $Byoperiods_left)
+function echo_time_remaining($Byotype, $Maintime_left, $Byotime_left,
+                             $Byoperiods_left, $short=false)
 {
    $str = '';
    if( $Maintime_left > 0 )
    {
-      $str .= echo_time($Maintime_left);
+      $str .= echo_time($Maintime_left,false,$short);
    }
    else if( $Byotime_left > 0 )
    {
-      $str .= T_('In byoyomi') . ': ';
+      if( !$short ) $str .= T_('In byoyomi') . ': ';
       if( $Byotype == 'JAP' )
       {
-         $str .= echo_time($Byotime_left) . ' * ' . $Byoperiods_left . ' ' .
+         $str .= echo_time($Byotime_left,false,$short) . ' * ' . $Byoperiods_left . ' ' .
             ($Byoperiods_left == 1 ? T_('period') : T_('periods'));
       }
       else if( $Byotype == 'CAN' )
       {
-         $str .= echo_time($Byotime_left) . T_(' / ') . $Byoperiods_left . ' ' .
+         $str .= echo_time($Byotime_left,false,$short) . T_(' / ') . $Byoperiods_left . ' ' .
             ($Byoperiods_left == 1 ? T_('stone') : T_('stones'));
       }
    }

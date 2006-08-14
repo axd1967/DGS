@@ -110,16 +110,19 @@ require_once( "include/message_functions.php" );
    $order = "Games.LastChanged";
 
    $query = "SELECT Games.*, UNIX_TIMESTAMP(Games.Lastchanged) AS Time, " .
-         "IF(Rated='N','N','Y') as Rated, " .
-       "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid, " .
+      "IF(Rated='N','N','Y') as Rated, " .
+      "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid, " .
          //extra bits of Color are for sorting purposes
-         "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color " .
-       "FROM Games,Players AS opponent " .
-       "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
-         "AND opponent.ID=(Black_ID+White_ID-$uid) " .
-       "ORDER BY $order,Games.ID";
+      "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color, " .
+      "Clock.Ticks " .
+      "FROM Games,Players AS opponent " .
+      "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed " .
+      "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
+      "AND opponent.ID=(Black_ID+White_ID-$uid) " .
+      "ORDER BY $order,Games.ID";
 
-   $result = mysql_query( $query ) or die(mysql_error());
+   $result = mysql_query( $query )
+      or error('mysql_query_failed', 'status1');
 
    echo "<hr><h3><font color=$h3_color>" .
       T_("Your turn to move in the following games:") . "</font></h3><p>\n";
@@ -142,6 +145,7 @@ require_once( "include/message_functions.php" );
       $gtable->add_tablehead( 9, T_('Moves'));
       $gtable->add_tablehead(14, T_('Rated'));
       $gtable->add_tablehead(13, T_('Last Move'));
+      $gtable->add_tablehead(10, T_('Time remaining'));
 
       while( $row = mysql_fetch_assoc( $result ) )
       {
@@ -191,6 +195,22 @@ require_once( "include/message_functions.php" );
             $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
          if( $gtable->Is_Column_Displayed[13] )
             $grow_strings[13] = '<td>' . date($date_fmt, $Time) . "</td>";
+         if( $gtable->Is_Column_Displayed[10] )
+         {
+            $grow_strings[10] = '<td align=center>';
+            $my_Maintime = ( ($Color & 2) ? $White_Maintime : $Black_Maintime );
+            $my_Byotime = ( ($Color & 2)  ? $White_Byotime : $Black_Byotime );
+            $my_Byoperiods = ( ($Color & 2) ? $White_Byoperiods : $Black_Byoperiods );
+
+            $hours = ticks_to_hours($Ticks - $LastTicks);
+
+            time_remaining($hours, $my_Maintime, $my_Byotime, $my_Byoperiods,
+                           $Maintime, $Byotype, $Byotime, $Byoperiods, false);
+
+            $grow_strings[10] .= echo_time_remaining($Byotype, $my_Maintime,
+                                                     $my_Byotime, $my_Byoperiods, true);
+            $grow_strings[10] .= "</td>";
+         }
 
          $gtable->add_row( $grow_strings );
       }

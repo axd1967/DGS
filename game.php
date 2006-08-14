@@ -165,7 +165,7 @@ function get_alt_arg( $n1, $n2)
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
       $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
-      $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
+      $hours = ticks_to_hours($ticks);
 
       if( $to_move == BLACK )
       {
@@ -730,11 +730,9 @@ function draw_game_info(&$game_row)
    {
       echo '<tr id="blacktime" bgcolor="#DDDDDD">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
-         echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
-                             $game_row['Byotime'], $game_row['Byoperiods'],
-                             $game_row['Black_Maintime'], $game_row['Black_Byotime'],
-                             $game_row['Black_Byoperiods']) . "</td>\n";
-      echo "</tr>\n";
+         echo_time_remaining($game_row['Byotype'], $game_row['Black_Maintime'],
+                             $game_row['Black_Byotime'], $game_row['Black_Byoperiods']) .
+         "</td>\n</tr>\n";
    }
 
 
@@ -760,11 +758,9 @@ function draw_game_info(&$game_row)
    {
       echo '<tr id="whitetime" bgcolor="#FFFFFF">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
-         echo_time_remaining($game_row['Maintime'], $game_row['Byotype'],
-                             $game_row['Byotime'], $game_row['Byoperiods'],
-                             $game_row['White_Maintime'], $game_row['White_Byotime'],
-                             $game_row['White_Byoperiods']) . "</td>\n";
-      echo "</tr>\n";
+         echo_time_remaining($game_row['Byotype'], $game_row['White_Maintime'],
+                             $game_row['White_Byotime'], $game_row['White_Byoperiods']) .
+         "</td>\n</tr>\n";
    }
 
    $sep = ',&nbsp;&nbsp;&nbsp;';
