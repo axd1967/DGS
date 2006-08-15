@@ -647,6 +647,11 @@ function draw_moves()
    echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">\n";
    echo '<SELECT name="gotomove" size="1">' . "\n";
 
+   $trmov = T_('Move');
+   $trpas = T_('Pass');
+   $trsco = T_('Scoring');
+   $trres = T_('Resign');
+
    $str = '';
    foreach( $TheBoard->moves as $MoveNr => $sub )
    {
@@ -656,13 +661,13 @@ function draw_moves()
       switch( $PosX )
       {
          case POSX_PASS :
-            $c = T_('Pass');
+            $c = $trpas;
             break;
          case POSX_SCORE :
-            $c = T_('Scoring');
+            $c = $trsco;
             break;
          case POSX_RESIGN :
-            $c = T_('Resign');
+            $c = $trres;
             break;
          default :
             $c = number2board_coords($PosX, $PosY, $Size);
@@ -671,8 +676,9 @@ function draw_moves()
 
       if( $Stone == WHITE ) $c = str_repeat('&nbsp;', 12) . $c;
       if( $MoveNr < 10 ) $c = '&nbsp;'.$c;
-      $str = sprintf('<OPTION value="%d" %s>Move %s:&nbsp;&nbsp;%s</OPTION>' . "\n",
-                   $MoveNr, ($MoveNr == $move ? ' selected' : ''), $MoveNr, $c)
+      $str = sprintf('<OPTION value="%d" %s>%s&nbsp;%s:&nbsp;&nbsp;%s</OPTION>' . "\n"
+                 , $MoveNr, ($MoveNr == $move ? ' selected' : '')
+                 , $trmov, $MoveNr, $c)
           . $str;
    }
    echo "$str</SELECT>\n";
