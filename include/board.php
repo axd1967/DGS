@@ -249,6 +249,7 @@ class Board
       $stone_size = $this->stone_size;
       $size = $this->size;
 
+      $stone_attb = 'align=bottom'; //'align=middle';
       $wcap= array();
       $bcap= array();
       foreach( $this->captures as $n => $sub )
@@ -258,13 +259,13 @@ class Board
          if( $s == BLACK )
          {
             array_unshift( $bcap,
-                  image( "$stone_size/b$mrk.gif", "X$n", '', 'align=middle')
+                  image( "$stone_size/b$mrk.gif", "X$n", '', $stone_attb)
                    . "&nbsp;:&nbsp;$brdc<br>\n" );
          }
          else if( $s == WHITE )
          {
             array_unshift( $wcap,
-                  image( "$stone_size/w$mrk.gif", "O$n", '', 'align=middle')
+                  image( "$stone_size/w$mrk.gif", "O$n", '', $stone_attb)
                    . "&nbsp;:&nbsp;$brdc<br>\n" );
          }
       }
