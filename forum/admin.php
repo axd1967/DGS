@@ -67,7 +67,7 @@ require_once( "forum_functions.php" );
   {
      $SortOrder = 0;
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=" . (@$_GET["id"]+0) )
-        or error("mysql_query_failed",'forum_admin1');
+        or error("mysql_query_failed",'forum_admin.do_new.find_forums');
 
      if( @mysql_num_rows($result) == 1 )
      {
@@ -82,14 +82,14 @@ require_once( "forum_functions.php" );
      {
         mysql_query("UPDATE Forums SET SortOrder=SortOrder+1 " .
                     'WHERE SortOrder>' . $SortOrder )
-        or error("mysql_query_failed",'forum_admin2');
+        or error("mysql_query_failed",'forum_admin.update_sortorder');
 
         mysql_query("INSERT INTO Forums SET " .
                     "Name=\"$name\", " .
                     "Description=\"$description\", " .
                     "Moderated=" . (@$_POST["moderated"] ? '"Y"' : '"N"') . ", " .
                     "SortOrder=" . ($SortOrder+1))
-           or error("mysql_query_failed",'forum_admin3');
+           or error("mysql_query_failed",'forum_admin.insert');
      }
      else
      {
@@ -112,10 +112,10 @@ require_once( "forum_functions.php" );
      echo "<center>\n";
 
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" )
-           or error("mysql_query_failed",'forum_admin4');
+           or error("mysql_query_failed",'forum_admin.edit.find_forums');
 
      if( @mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry",'admin1');
+        error("admin_no_such_entry",'forum_admin.edit.find_forums');
 
      $row = mysql_fetch_array( $result );
 
@@ -138,10 +138,10 @@ require_once( "forum_functions.php" );
   else if( @$_GET["do_edit"] == 't' )
   {
      $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" )
-        or error("mysql_query_failed",'forum_admin5');
+        or error("mysql_query_failed",'forum_admin.do_edit.find_forums');
 
      if( @mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry",'admin2');
+        error("admin_no_such_entry",'forum_admin.do_edit.find_forums');
 
      $row = mysql_fetch_array( $result );
 
@@ -158,10 +158,10 @@ require_once( "forum_functions.php" );
                                     "WHERE Forum_ID=" . $row["ID"] . " LIMIT 1")) == 0 )
      {
         mysql_query("DELETE FROM Forums WHERE ID=$id LIMIT 1")
-           or error("mysql_query_failed",'forum_admin6');
+           or error("mysql_query_failed",'forum_admin.do_edit.delete');
         mysql_query("UPDATE Forums SET SortOrder=SortOrder-1 " .
                     "WHERE SortOrder>" . $row["SortOrder"])
-           or error("mysql_query_failed",'forum_admin7');
+           or error("mysql_query_failed",'forum_admin.do_edit.update_sortorder');
      }
      else
      {
@@ -170,7 +170,7 @@ require_once( "forum_functions.php" );
                     "Description=\"$description\", " .
                     "Moderated=" . (@$_POST['moderated'] ? '"Y"' : '"N"') . " " .
                     "WHERE ID=" . $row['ID'] . " LIMIT 1")
-           or error("mysql_query_failed",'forum_admin8');
+           or error("mysql_query_failed",'forum_admin.do_edit.update_forums');
      }
 
      jump_to("forum/admin.php");
@@ -182,14 +182,17 @@ require_once( "forum_functions.php" );
 
   else if( @$_GET["move"] == 'u' or @$_GET["move"] == 'd' )
   {
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" ) or die(mysql_error());
+     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" )
+        or error('mysql_query_failed','forum_admin.move.find_forums');
 
      if( @mysql_num_rows($result) != 1 )
         error("admin_no_such_entry",'admin3');
 
      $row = mysql_fetch_array( $result );
 
-     $result = mysql_query( "SELECT MAX(SortOrder) as max FROM Forums") or die(mysql_error());
+     $result = mysql_query( "SELECT MAX(SortOrder) as max FROM Forums")
+        or error('mysql_query_failed','forum_admin.move.max_sortorder');
+
      $row2 = mysql_fetch_array( $result );
      $max = $row2["max"];
 
@@ -199,9 +202,12 @@ require_once( "forum_functions.php" );
         $dir = (@$_GET["move"] == 'd' ? 1 : -1 );
 
         mysql_query( "UPDATE Forums SET SortOrder=SortOrder-($dir) " .
-                     'WHERE SortOrder=' . ($row["SortOrder"]+$dir) ) or die(mysql_error());
+                     'WHERE SortOrder=' . ($row["SortOrder"]+$dir) )
+           or error('mysql_query_failed','forum_admin.move.update_sortorder1');
+
         mysql_query( "UPDATE Forums SET SortOrder=SortOrder+($dir) " .
-                     "WHERE ID=" . $row["ID"] . " LIMIT 1") or die(mysql_error());
+                     "WHERE ID=" . $row["ID"] . " LIMIT 1")
+           or error('mysql_query_failed','forum_admin.move.update_sortorder2');
      }
      jump_to("forum/admin.php");
   }
@@ -227,7 +233,7 @@ require_once( "forum_functions.php" );
                     "FROM Forums LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
                     "GROUP BY Forums.ID " .
                     "ORDER BY SortOrder")
-      or die(mysql_error());
+        or error('mysql_query_failed','forum_admin.list.find_forums');
 
      echo "<table>\n";
 

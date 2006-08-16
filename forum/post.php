@@ -44,7 +44,8 @@ function post_message($player_row, $moderated_forum, &$thread)
    {
       $row = mysql_single_fetch(
                   "SELECT Subject,Text,Forum_ID,GREATEST(Time,Lastedited) AS Time ".
-                  "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'])
+                  "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'],
+                  'assoc', 'forum_post.post_message.edit.find')
          or error("unknown_parent_post");
 
       $oldSubject = mysql_escape_string( trim($row['Subject']));
@@ -58,7 +59,7 @@ function post_message($player_row, $moderated_forum, &$thread)
                    "Subject=\"$Subject\", " .
                    "Text=\"$Text\" " .
                    "WHERE ID=$edit LIMIT 1")
-          or error("mysql_query_failed",'forum_post1');
+          or error('mysql_query_failed','forum_post.post_message.edit.update');
 
        //Insert new record with old text
        mysql_query("INSERT INTO Posts SET " .
@@ -68,8 +69,8 @@ function post_message($player_row, $moderated_forum, &$thread)
                    "User_ID=" . $player_row['ID'] . ", " .
                             "Subject=\"$oldSubject\", " .
                       "Text=\"$oldText\"" )
-          or error("mysql_query_failed",'forum_post2');
-      } 
+          or error('mysql_query_failed','forum_post.post_message.edit.insert');
+      }
       return $edit;
    }
    else
@@ -82,14 +83,16 @@ function post_message($player_row, $moderated_forum, &$thread)
       if( $parent > 0 )
       {
          $row = mysql_single_fetch("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
-                               "WHERE ID=$parent AND Forum_ID=$forum")
-            or error('unknown_parent_post');
+                                   "WHERE ID=$parent AND Forum_ID=$forum",
+                                   'assoc', 'forum_post.reply.find')
+            or error('unknown_parent_post', 'forum_post.reply.find');
 
          extract( $row);
 
          $row = mysql_single_fetch("SELECT MAX(AnswerNr) AS answer_nr " .
-                               "FROM Posts WHERE Parent_ID=$parent")
-          or error("mysql_query_failed",'forum_post3');
+                                   "FROM Posts WHERE Parent_ID=$parent",
+                                   'assoc', 'forum_post.reply.max')
+            or error('unknown_parent_post', 'forum_post.reply.max');
 
          extract( $row);
 
@@ -141,20 +144,21 @@ function post_message($player_row, $moderated_forum, &$thread)
          "crc32=" . crc32($Text) . ", " .
          "PosIndex=\"$PosIndex\"";
 
-      mysql_query( $query ) or error("mysql_query_failed",'forum_post4');
+      mysql_query( $query )
+         or error('mysql_query_failed','forum_post.insert_new_post');
 
       if( mysql_affected_rows() != 1)
-         error("mysql_insert_post");
+         error("mysql_insert_post", 'forum_post.insert_new_post');
 
       $New_ID = mysql_insert_id();
 
       if( !($parent > 0) )
       {
          mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID LIMIT 1" )
-            or error("mysql_query_failed",'forum_post5');
+            or error('mysql_query_failed','forum_post.new_thread');
 
          if( mysql_affected_rows() != 1)
-            error("mysql_insert_post");
+            error("mysql_insert_post", 'forum_post.new_thread');
 
          $thread = $Thread_ID = $New_ID;
       }
@@ -171,12 +175,12 @@ function post_message($player_row, $moderated_forum, &$thread)
                      "SET PostsInThread=PostsInThread+1, " .
                      "LastPost=$New_ID, LastChanged=FROM_UNIXTIME($NOW) " .
                      "WHERE ID=$Thread_ID LIMIT 1" )
-                      or error("mysql_query_failed",'forum_post6');
+            or error('mysql_query_failed','forum_post.moderated.postsinthread');
 
          mysql_query("UPDATE Forums " .
                      "SET PostsInForum=PostsInForum+1, LastPost=$New_ID " .
                      "WHERE ID=$forum LIMIT 1" )
-          or error("mysql_query_failed",'forum_post7');
+          or error('mysql_query_failed','forum_post.moderated.postsinforum');
 
          return T_('Message sent!');
       }

@@ -366,7 +366,7 @@ function forum_name($forum, &$moderated)
       error("unknown_forum");
 
    $result = mysql_query("SELECT Name AS Forumname, Moderated FROM Forums WHERE ID=$forum")
-      or error("mysql_query_failed",'forum_name1');
+      or error('mysql_query_failed','forum_functions.forum_name');
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_forum");
@@ -400,8 +400,10 @@ function approve_message($id, $thread, $forum, $approve=true,
    if( $approve_reject_pending_approval )
    {
       $row = mysql_single_fetch("SELECT Approved FROM Posts " .
-                         "WHERE ID=$id AND Thread_ID=$thread LIMIT 1", 'row')
-         or error("mysql_query_failed",'forum_approve_message0a');
+                                "WHERE ID=$id AND Thread_ID=$thread LIMIT 1", 'row',
+                                'assoc', 'forum_functions.approve_message.find_post')
+         or error('unknown_post','forum_functions.approve_message.find_post');
+
       $Approved = ($row[0] == 'Y');
 
       if( $Approved === $approve )
@@ -409,7 +411,7 @@ function approve_message($id, $thread, $forum, $approve=true,
          mysql_query("UPDATE Posts SET PendingApproval='N' " .
                      "WHERE ID=$id AND Thread_ID=$thread " .
                      "AND PendingApproval='Y' LIMIT 1")
-            or error("mysql_query_failed",'forum_approve_message0b');
+            or error('mysql_query_failed','forum_functions.approve_message.pend_appr');
          return;
       }
    }
@@ -418,17 +420,17 @@ function approve_message($id, $thread, $forum, $approve=true,
                          "PendingApproval='N' " .
                          "WHERE ID=$id AND Thread_ID=$thread " .
                          "AND Approved='" . ( $approve ? 'N' : 'Y' ) . "' LIMIT 1")
-      or error("mysql_query_failed",'forum_approve_message1');
+      or error('mysql_query_failed','forum_functions.approve_message.set_approved');
 
    if( mysql_affected_rows() == 1 )
    {
       mysql_query("UPDATE Posts SET PostsInThread=PostsInThread" . ($approve ? '+1' : '-1') .
                   " WHERE ID=$thread LIMIT 1")
-      or error("mysql_query_failed",'forum_approve_message2');
+         or error('mysql_query_failed','forum_functions.approve_message.set_postsinthread');
 
       mysql_query("UPDATE Forums SET PostsInForum=PostsInForum" . ($approve ? '+1' : '-1') .
                   " WHERE ID=$forum LIMIT 1")
-      or error("mysql_query_failed",'forum_approve_message3');
+         or error('mysql_query_failed','forum_functions.approve_message.set_postsinforum');
 
 
       recalculate_lastpost($thread, $forum);
@@ -444,7 +446,7 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
                          "WHERE Thread_ID='$Thread_ID' AND Approved='Y' " .
                          "AND PosIndex IS NOT NULL " .
                          "ORDER BY Time Desc LIMIT 1")
-      or error("mysql_query_failed",'forum_recalculate_lastpost1');
+      or error('mysql_query_failed','forum_functions.recalculate_lastpost.find');
 
    if( @mysql_num_rows($result) == 1 )
    {
@@ -452,7 +454,7 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
       mysql_query("UPDATE Posts SET LastPost=" . $row[0] . ", " .
                   "LastChanged=FROM_UNIXTIME(" . $row[1] . ") " .
                   "WHERE ID=$Thread_ID LIMIT 1")
-         or error("mysql_query_failed",'forum_recalculate_lastpost2');
+         or error('mysql_query_failed','forum_functions.recalculate_lastpost.update');
    }
 
 
@@ -461,13 +463,13 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
                          "WHERE Thread.LastPost=Last.ID AND " .
                          "Thread.Forum_ID=" . $Forum_ID . " AND Thread.Parent_ID=0 " .
                          "ORDER BY Last.Time DESC LIMIT 1")
-      or error("mysql_query_failed",'forum_recalculate_lastpost3');
+      or error('mysql_query_failed','forum_functions.recalculate_lastpost.lastid');
 
    if( @mysql_num_rows($result) == 1 )
    {
       $row = mysql_fetch_row($result);
       mysql_query("UPDATE Forums SET LastPost=" . $row[0] . " WHERE ID=$Forum_ID LIMIT 1")
-         or error("mysql_query_failed",'forum_recalculate_lastpost4');
+         or error('mysql_query_failed','forum_functions.recalculate_lastpost.lastpost');
    }
 
 }
@@ -477,7 +479,7 @@ function recalculate_postsinforum($Forum_ID)
 {
    $result = mysql_query("SELECT COUNT(*), Thread_ID FROM Posts " .
                          "WHERE Forum_ID=$Forum_ID AND Approved='Y' GROUP BY Thread_ID")
-      or error("mysql_query_failed",'forum_recalculate_postsinforum1');
+      or error('mysql_query_failed','forum_functions.recalculate_postsinforum.find');
 
    $sum = 0;
    while( $row = mysql_fetch_row( $result ) )
@@ -485,13 +487,13 @@ function recalculate_postsinforum($Forum_ID)
       $sum += $row[0];
 
       mysql_query("UPDATE Posts SET PostsInThread=" . $row[0] . " WHERE ID=" .$row[1])
-      or error("mysql_query_failed",'forum_recalculate_postsinforum2');
+      or error('mysql_query_failed','forum_functions.recalculate_postsinforum.postsintrhead');
 
       recalculate_lastpost($row[1], $Forum_ID);
    }
 
    mysql_query("UPDATE Forums SET PostsInForum=$sum WHERE ID=$Forum_ID")
-      or error("mysql_query_failed",'forum_recalculate_postsinforum3');
+      or error('mysql_query_failed','forum_functions.recalculate_postsinforum.postsinofrum');
 }
 
 function display_posts_pending_approval()
@@ -503,7 +505,7 @@ function display_posts_pending_approval()
                          "FROM Posts,Players " .
                          "WHERE PendingApproval='Y' AND Players.ID=User_ID " .
                          "ORDER BY Time DESC")
-      or error("mysql_query_failed",'forum_display_posts_pending_approval1');
+      or error('mysql_query_failed','forum_functions.display_posts_pending_approval.find');
 
    if( mysql_num_rows($result) == 0 )
       return;

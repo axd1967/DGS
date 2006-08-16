@@ -44,8 +44,8 @@ function revision_history($post_id)
       "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID ";
 
 
-   $row = mysql_single_fetch( $query_select . "WHERE Posts.ID='$post_id'", 'array',
-                                    'forum_read1a' )
+   $row = mysql_single_fetch( $query_select . "WHERE Posts.ID='$post_id'",
+                              'array', 'forum_read.revision_history.find_post' )
       or error("unknown_post");
 
    extract($row);
@@ -57,7 +57,7 @@ function revision_history($post_id)
    $result = mysql_query( $query_select .
                           "WHERE Parent_ID='$post_id' AND PosIndex IS NULL " .
                           "ORDER BY Timestamp DESC")
-      or error("mysql_query_failed",'forum_read1b');
+      or error('mysql_query_failed','forum_read.revision_history.find_edits');
 
 
    while( $row = mysql_fetch_array( $result ) )
@@ -210,7 +210,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
    $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) AS Lastread FROM Forumreads " .
                          "WHERE User_ID=" . $player_row["ID"] . " AND Thread_ID=$thread")
-      or error("mysql_query_failed",'forum_read2');
+      or error('mysql_query_failed','forum_read.forumreads');
 
    if( @mysql_num_rows($result) == 1 )
       extract( mysql_fetch_array( $result ) );
@@ -226,7 +226,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
                          "AND PosIndex IS NOT NULL " .
                          "ORDER BY PosIndex")
-      or error("mysql_query_failed",'forum_read3');
+      or error('mysql_query_failed','forum_read.find_posts');
 
 
    $thread_Subject = '';
@@ -323,7 +323,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
                    "User_ID=" . $player_row["ID"] . ", " .
                    "Thread_ID=$thread, " .
                    "Time=FROM_UNIXTIME($NOW)" )
-         or error("mysql_query_failed",'forum_read4');
+         or error('mysql_query_failed','forum_read.replace_forumreads');
    }
 
    end_page();
