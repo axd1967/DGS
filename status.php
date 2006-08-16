@@ -122,7 +122,7 @@ require_once( "include/message_functions.php" );
       "ORDER BY $order,Games.ID";
 
    $result = mysql_query( $query )
-      or error('mysql_query_failed', 'status1');
+      or error('mysql_query_failed', 'status.find_games');
 
    echo "<hr><h3><font color=$h3_color>" .
       T_("Your turn to move in the following games:") . "</font></h3><p>\n";

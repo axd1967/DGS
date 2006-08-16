@@ -111,27 +111,32 @@ function retry_admin( $msg)
 
       mysql_query("INSERT INTO TranslationLanguages SET " .
                   "Language='" . $twoletter . LANG_CHARSET_CHAR . $charenc . "', " .
-                  "Name='$langname'");
+                  "Name='$langname'")
+         or error('mysql_query_failed','admin_do_translators.add.insert');
 
       make_known_languages(); //must be called from main dir
 
       $row = mysql_single_fetch(
-               "SELECT ID FROM TranslationGroups WHERE Groupname='Users'");
+         "SELECT ID FROM TranslationGroups WHERE Groupname='Users'",
+         'assoc', 'admin_do_translators.add.find_group');
       if( !$row )
-         error('internal_error','admin_t1');
+         error('internal_error','admin_do_translators.add.find_group');
 
       $Group_ID = $row['ID'];
 
       $tmp = mysql_query(
-               "SELECT ID FROM TranslationTexts WHERE Text=\"$langname\"");
+         "SELECT ID FROM TranslationTexts WHERE Text=\"$langname\"")
+         or error('mysql_query_failed','admin_do_translators.add.find_transltexts');
+
       if( @mysql_num_rows( $tmp ) === 0 )
       {
          mysql_query("INSERT INTO TranslationTexts SET Text=\"$langname\"")
-            or error('internal_error','admin_t2');
+            or error('mysql_query_failed','admin_do_translators.add.insert_transltexts');
 
          mysql_query("REPLACE INTO TranslationFoundInGroup " .
                      "SET Text_ID=" . mysql_insert_id() . ", " .
-                     "Group_ID=" . $Group_ID );
+                     "Group_ID=" . $Group_ID )
+            or error('mysql_query_failed','admin_do_translators.add.update_translfig');
       }
 
       retry_admin( sprintf( T_("Added language %s with code %s and characterencoding %s.")
@@ -149,7 +154,8 @@ function retry_admin( $msg)
          retry_admin( T_("Sorry, you must specify a user."));
       $row = mysql_single_fetch(
                     "SELECT Translator FROM Players"
-                   ." WHERE Handle='".addslashes($transluser)."'" );
+                    ." WHERE Handle='".addslashes($transluser)."'",
+                    'assoc', 'admin_do_translators.user.find');
       if( !$row )
          retry_admin( T_("Sorry, I couldn't find this user."));
       if( !empty($row['Translator']) )
@@ -199,14 +205,17 @@ function retry_admin( $msg)
          retry_admin( $msg);
 
       mysql_query( "UPDATE Players SET Translator='$new_langs'"
-                  ." WHERE Handle='".addslashes($transluser)."'" );
+                  ." WHERE Handle='".addslashes($transluser)."'" )
+         or error('mysql_query_failed','admin_do_translators.user.update');
+
       if( mysql_affected_rows() != 1 )
          error('internal_error', $update_it);
 
       // Check result (
       $tmp = mysql_single_fetch(
                    "SELECT Translator FROM Players"
-                  ." WHERE Handle='".addslashes($transluser)."'" );
+                   ." WHERE Handle='".addslashes($transluser)."'",
+                   'assoc', 'admin_do_translators.user.translator');
       if( !$tmp )
          $update_it.= '.1';
       else if( !isset($tmp['Translator']) )
@@ -218,7 +227,8 @@ function retry_admin( $msg)
 
       // Something went wrong. Restore to old set then error
       mysql_query( "UPDATE Players SET Translator='$old_langs'"
-                  ." WHERE Handle='".addslashes($transluser)."'" );
+                  ." WHERE Handle='".addslashes($transluser)."'" )
+         or error('mysql_query_failed','admin_do_translators.user.revert');
       error('internal_error', $update_it);
    }
    retry_admin('');

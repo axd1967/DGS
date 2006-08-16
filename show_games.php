@@ -55,7 +55,8 @@ require_once( "include/rating.php" );
          else
             error("no_uid");
 
-         $result = mysql_query( "SELECT ID, Name, Handle FROM Players WHERE $where" );
+         $result = mysql_query( "SELECT ID, Name, Handle FROM Players WHERE $where" )
+            or error('mysql_query_failed', 'show_games.find_player');
 
          if( @mysql_num_rows($result) != 1 )
             error("unknown_user");
@@ -172,7 +173,7 @@ require_once( "include/rating.php" );
    }
 
    $result = mysql_query( $query )
-               or error("mysql_query_failed"); //die(mysql_error());
+      or error('mysql_query_failed', 'show_games.find_games');
 
    $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
 

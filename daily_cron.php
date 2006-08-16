@@ -19,9 +19,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-$quick_errors = 1; //just store errors in log database
 require_once( "include/std_functions.php" );
 //require_once( "include/rating.php" );
+
+$TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !$is_down )
 {
@@ -42,7 +43,7 @@ if( !$is_down )
 
    $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
                           "FROM Clock WHERE ID=203 LIMIT 1")
-               or error('mysql_query_failed','daily_cron1');
+               or error('mysql_query_failed','daily_cron.check_frequency');
 
    $row = mysql_fetch_assoc( $result );
    mysql_free_result($result);
@@ -52,7 +53,7 @@ if( !$is_down )
          exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203")
-               or error('mysql_query_failed','daily_cron2');
+               or error('mysql_query_failed','daily_cron.set_lastchanged');
 
    //$delete_messages = false;
    //$delete_invitations = false;
@@ -115,7 +116,7 @@ if( !$is_down )
          "WHERE UNIX_TIMESTAMP(Time) < $timelimit";
 
       mysql_query( $query )
-               or error('mysql_query_failed','daily_cron3');
+         or error('mysql_query_failed','daily_cron.waitingroom');
    }
 
 
@@ -157,19 +158,21 @@ if( !$is_down )
    $q_users = "SELECT SUM(Hits) as Hits, Count(*) as Users, SUM(Activity) as Activity FROM Players";
 
    $result = mysql_query( $q_finished )
-               or error('mysql_query_failed','daily_cron4');
+      or error('mysql_query_failed','daily_cron.statistics_moves_finished');
    if( @mysql_num_rows($result) > 0 )
       extract( mysql_fetch_assoc($result));
    mysql_free_result($result);
 
    $result = mysql_query( $q_running )
-               or error('mysql_query_failed','daily_cron5');
+      or error('mysql_query_failed','daily_cron.statistics_moves_running');
+
    if( @mysql_num_rows($result) > 0 )
       extract( mysql_fetch_assoc($result));
    mysql_free_result($result);
 
    $result = mysql_query( $q_users )
-               or error('mysql_query_failed','daily_cron6');
+      or error('mysql_query_failed','daily_cron.statistics_users');
+
    if( @mysql_num_rows($result) > 0 )
       extract( mysql_fetch_assoc($result));
    mysql_free_result($result);
@@ -186,7 +189,7 @@ if( !$is_down )
                .",GamesFinished=" . (int)$GamesFinished
                .",GamesRunning=" . (int)$GamesRunning
                .",Activity=" . (int)$Activity )
-               or error('mysql_query_failed','daily_cron7');
+      or error('mysql_query_failed','daily_cron.statistics_insert');
 
 
 
@@ -194,14 +197,14 @@ if( !$is_down )
 
 
    mysql_query("DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time) + $new_end < $NOW")
-      or error('mysql_query_failed','daily_cron8');
+      or error('mysql_query_failed','daily_cron.forumreads');
 
 
 // Apply recently changed night hours
 
    $result = mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone " .
                          "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID")
-               or error('mysql_query_failed','daily_cron10');
+               or error('mysql_query_failed','daily_cron.night_hours');
 
    if( @mysql_num_rows( $result) > 0 )
    {
@@ -211,7 +214,7 @@ if( !$is_down )
       // Changed to/from summertime?
       if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )
          $result =  mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone FROM Players")
-                  or error('mysql_query_failed','daily_cron11');
+                  or error('mysql_query_failed','daily_cron.summertime_check');
 
       while( $row = mysql_fetch_assoc($result) )
       {
@@ -220,9 +223,11 @@ if( !$is_down )
                      "SET ClockChanged='N', " .
                      "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
                      "WHERE ID='" . $row['ID'] . "' LIMIT 1")
-                  or error('mysql_query_failed','daily_cron12');
+            or error('mysql_query_failed','daily_cron.summertime_update');
       }
    }
    mysql_free_result($result);
+
+   $TheErrors->echo_error_list();
 }
 ?>

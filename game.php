@@ -101,13 +101,13 @@ function get_alt_arg( $n1, $n2)
            "FROM Games, Players AS black, Players AS white " .
            "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID";
 
-   if( !($game_row=mysql_single_fetch( $query)) )
-      error('unknown_game','game1');
+   if( !($game_row=mysql_single_fetch($query, 'assoc', 'game.findgame')) )
+      error('unknown_game','game.findgame');
 
    extract($game_row);
 
    if( $Status == 'INVITED' )
-      error('unknown_game','game2');
+      error('unknown_game','game.invited');
 
 
    if( @$_REQUEST['movechange'] )
@@ -414,9 +414,8 @@ function get_alt_arg( $n1, $n2)
       }
 
       if( $show_notes && $tmp=mysql_single_fetch(
-                    "SELECT Hidden,Notes FROM GamesNotes"
-                  . " WHERE gid=$gid AND player='$dbplayer'"
-                  ) )
+             "SELECT Hidden,Notes FROM GamesNotes"
+             . " WHERE gid=$gid AND player='$dbplayer'", 'assoc', 'game.gameotes') )
       {
          $dbhidden = $tmp['Hidden'];
          $dbnotes = $tmp['Notes'];
@@ -443,8 +442,8 @@ function get_alt_arg( $n1, $n2)
          mysql_query(
                  "REPLACE INTO GamesNotes (gid,player,Hidden,Notes)"
                . " VALUES ($gid,'$dbplayer','$collapse_notes','"
-                  . addslashes($notes) . "')"
-               ); // or die(mysql_error());
+                  . addslashes($notes) . "')")
+            or error('mysql_query_failed', 'game.replace_gamenote');
       }
 /*
       else if( $show_notes && @$_REQUEST['movechange'] )

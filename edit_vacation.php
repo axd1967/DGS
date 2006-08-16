@@ -59,7 +59,7 @@ require_once( "include/form_functions.php" );
                      "OnVacation=OnVacation+($vacationdiff) " .
                      "WHERE ID=" . $player_row['ID'] . " " .
                      "AND VacationDays >= ($vacationdiff) LIMIT 1" )
-             or error("mysql_query_failed",'edit_v1');
+            or error('mysql_query_failed', 'edit_vacation.change_vacation');
 
          $msg = urlencode(T_('Vacation length changed!'));
 
@@ -101,21 +101,21 @@ require_once( "include/form_functions.php" );
                          'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                          'AND Clock.ID=Games.ClockUsed ' .
                          "AND ToMove_ID='" . $player_row['ID'] . "'" )
-            or error("mysql_query_failed",'edit_v2');
+            or error('mysql_query_failed', 'edit_vacation.find_games');
 
          while( $game_row = mysql_fetch_array( $result ) )
          {
             mysql_query("UPDATE Games SET ClockUsed=" .VACATION_CLOCK
                       . ", LastTicks='" . $game_row['ticks'] . "'" 
                       . " WHERE ID=" . $game_row['gid'] . " LIMIT 1" )
-               or error("mysql_query_failed",'edit_v3');
+            or error('mysql_query_failed', 'edit_vacation.update_games');
          }
 
          mysql_query("UPDATE Players SET VacationDays=VacationDays-$vacationlength, " .
                      "OnVacation=$vacationlength " .
                      "WHERE ID=" . $player_row['ID'] . " " .
                      "AND VacationDays >= ($vacationlength) LIMIT 1" )
-            or error("mysql_query_failed",'edit_v4');
+            or error('mysql_query_failed', 'edit_vacation.update_player');
 
          $msg = urlencode(T_('Have a nice vacation!'));
 

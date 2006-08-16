@@ -38,7 +38,8 @@ require_once( "include/std_functions.php" );
       error("not_allowed_for_guest");
 
    $result = mysql_query( "SELECT ID, Newpassword, Email " .
-                          "FROM Players WHERE Handle='".addslashes($pswduser)."'" );
+                          "FROM Players WHERE Handle='".addslashes($pswduser)."'" )
+      or error('mysql_query_failed', 'send_new_password.find_player');
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_user");
@@ -78,7 +79,8 @@ require_once( "include/std_functions.php" );
 
    $result = mysql_query( "UPDATE Players " .
                           "SET Newpassword=PASSWORD('$newpasswd') " .
-                          "WHERE Handle='".addslashes($pswduser)."' LIMIT 1" );
+                          "WHERE Handle='".addslashes($pswduser)."' LIMIT 1" )
+      or error('mysql_query_failed', 'send_new_password.update');
 
 
    $msg= 'You (or possibly someone else) has requested a new password, and it has

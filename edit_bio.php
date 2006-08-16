@@ -44,7 +44,8 @@ function find_category_box_text($cat)
    if( !$logged_in )
       error("not_logged_in");
 
-   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"] . " order by ID");
+   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"] . " order by ID")
+      or error('mysql_query_failed', 'edit_bio.find_bios');
 
 
    $categories = array( '' => T_('Other:'),

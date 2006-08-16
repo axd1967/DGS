@@ -69,7 +69,7 @@ require_once( "include/countries.php" );
        "FROM Players $where_clause ORDER BY $order $limit";
 
    $result = mysql_query( $query )
-               or error("mysql_query_failed"); //die(mysql_error());
+      or error('mysql_query_failed', 'users.find_data');
 
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
 

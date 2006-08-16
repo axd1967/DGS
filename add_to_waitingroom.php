@@ -161,7 +161,7 @@ require_once( "include/rating.php" );
       "Comment=\"" . addslashes(trim(get_request_arg('comment'))) . "\"";
 
    mysql_query( $query )
-      or error("mysql_query_failed");
+     or error('mysql_query_failed','add_to_waitingroom.insert');
 
    $msg = urlencode(T_('Game added!'));
 

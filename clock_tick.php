@@ -19,9 +19,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-$quick_errors = 1; //just store errors in log database
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
+
+$TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !$is_down )
 {
@@ -43,7 +44,7 @@ if( !$is_down )
 
    $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
                           "FROM Clock WHERE ID=201 LIMIT 1")
-               or error('mysql_query_failed','clock_tick1');
+               or error('mysql_query_failed','clock_tick.check_frequency');
 
    $row = mysql_fetch_array( $result );
    mysql_free_result($result);
@@ -53,7 +54,7 @@ if( !$is_down )
          exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201")
-               or error('mysql_query_failed','clock_tick2');
+               or error('mysql_query_failed','clock_tick.set_lastchanged');
 
 
 
@@ -75,7 +76,7 @@ if( !$is_down )
 
 
    mysql_query( $query)
-               or error('mysql_query_failed','clock_tick3');
+      or error('mysql_query_failed','clock_tick.increase_clocks');
 
 
 
@@ -93,7 +94,7 @@ if( !$is_down )
                          //if both are <=0, the game will never finish by time:
                          //'AND ( Maintime>0 OR Byotime>0 ) ' .
                          'AND white.ID=White_ID AND black.ID=Black_ID' )
-               or error('mysql_query_failed','clock_tick4');
+               or error('mysql_query_failed','clock_tick.find_timeout_games');
 
    while($row = mysql_fetch_assoc($result))
    {
@@ -136,10 +137,10 @@ if( !$is_down )
              "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
          mysql_query( $game_query . $game_clause)
-               or error('mysql_query_failed',"clock_tick5($gid)");
+               or error('mysql_query_failed',"clock_tick.time_is_up($gid)");
 
          if( mysql_affected_rows() != 1)
-            error('mysql_update_game',"clock_tick10($gid)");
+            error('mysql_update_game',"clock_tick.time_is_up($gid)");
 
          // Send messages to the players
          $Text = "The result in the game:<center>"
@@ -156,7 +157,7 @@ if( !$is_down )
          $Text = addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'")
-               or error('mysql_query_failed',"clock_tick6($gid)");
+               or error('mysql_query_failed',"clock_tick.timeup_message($gid)");
 
          if( mysql_affected_rows() == 1)
          {
@@ -164,14 +165,15 @@ if( !$is_down )
 
             mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
                         "($Black_ID, $mid, 'N', ".FOLDER_NEW."), " .
-                        "($White_ID, $mid, 'N', ".FOLDER_NEW.")");
+                        "($White_ID, $mid, 'N', ".FOLDER_NEW.")")
+               or error('mysql_query_failed',"clock_tick.timeup_mess_corr($gid)");
          }
 
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .
                       "WHERE (ID='$Black_ID' OR ID='$White_ID') " .
                       "AND SendEmail LIKE '%ON%' AND Notify='NONE' LIMIT 2")
-               or error('mysql_query_failed',"clock_tick7($gid)");
+               or error('mysql_query_failed',"clock_tick.timeup_notify($gid)");
 
 //         update_rating($gid);
          $rated_status = update_rating2($gid); //0=rated game
@@ -181,19 +183,21 @@ if( !$is_down )
                       ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                        ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$White_ID LIMIT 1" )
-               or error('mysql_query_failed',"clock_tick8($gid)");
+               or error('mysql_query_failed',"clock_tick.timeup_update_white($gid)");
 
          mysql_query( "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
                       ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                        ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$Black_ID LIMIT 1" )
-               or error('mysql_query_failed',"clock_tick9($gid)");
+               or error('mysql_query_failed',"clock_ticktimeup_update_black($gid)");
 
          delete_all_observers($gid, $rated_status!=1, $Text);
 
       }
    }
    mysql_free_result($result);
+
+   $TheErrors->echo_error_list();
 
 if( !@$chained ) exit;
 //the whole cron stuff in one cron job (else comments those 2 lines):

@@ -124,7 +124,7 @@ require_once( "include/message_functions.php" );
           ;
 
    $result = mysql_query( $query )
-               or error("mysql_query_failed"); //die(mysql_error());
+      or error('mysql_query_failed', 'waiting_room.find_waiters');
 
    $show_rows = $wrtable->compute_show_rows(mysql_num_rows($result));
 

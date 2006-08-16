@@ -43,7 +43,8 @@ require_once( "include/std_functions.php" );
    if( strlen( $name ) < 1 )
       error("name_not_given");
 
-   $result = mysql_query( "SELECT * FROM Players WHERE Handle='".addslashes($uhandle)."'" );
+   $result = mysql_query( "SELECT * FROM Players WHERE Handle='".addslashes($uhandle)."'" )
+      or error('mysql_query_failed', 'do_registration.find_player');
 
    if( @mysql_num_rows($result) > 0 )
       error("userid_in_use");
@@ -60,7 +61,8 @@ require_once( "include/std_functions.php" );
                           "Password=PASSWORD('".addslashes($passwd)."'), " .
                           "Registerdate=FROM_UNIXTIME($NOW), " .
                           "Sessioncode='$code', " .
-                          "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration)" );
+                          "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration)" )
+      or error('mysql_query_failed', 'do_registration.insert_player');
 
    $new_id = mysql_insert_id();
 

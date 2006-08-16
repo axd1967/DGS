@@ -67,7 +67,8 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
                                " FROM Players" .
                                " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
                                " AND Handle='$FAQmain'" .
-                               " ORDER BY ID" );
+                               " ORDER BY ID" )
+     or error('mysql_query_failed', 'people.faq_main');
 
   if( $row = mysql_fetch_array( $query_result ) )
   {
@@ -79,7 +80,8 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
                                " FROM Players" .
                                " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
-                               " ORDER BY ID" );
+                               " ORDER BY ID" )
+     or error('mysql_query_failed', 'people.faq_admins');
 
   $first = T_("FAQ co-editor");
   while( $row = mysql_fetch_array( $query_result ) )
@@ -101,7 +103,8 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   $query_result = mysql_query( "SELECT ID,Handle,Name,Translator," .
                                "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess ".
                                "FROM Players " .
-                               "WHERE LENGTH(Translator)>0 ORDER BY ID" );
+                               "WHERE LENGTH(Translator)>0 ORDER BY ID" )
+     or error('mysql_query_failed', 'people.translators');
 
   $translator_list = array();
   while( $row = mysql_fetch_array( $query_result ) )

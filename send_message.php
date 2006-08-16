@@ -92,7 +92,8 @@ disable_cache();
    $opponent_row = mysql_single_fetch( 
                           "SELECT ID, SendEmail, Notify, ClockUsed, OnVacation, " .
                           "Rating2, RatingStatus " .
-                          "FROM Players WHERE Handle='".addslashes($tohdl)."'" );
+                          "FROM Players WHERE Handle='".addslashes($tohdl)."'",
+                          'assoc', 'send_message.find_receiver');
 
    if( !$opponent_row )
       error("receiver_not_found");
@@ -127,7 +128,7 @@ disable_cache();
                              "Size, Handicap, Komi, " .
                              "Maintime, Byotype, Byotime, Byoperiods, " .
                              "Rated, StdHandicap, WeekendClock " .
-                             "FROM Games WHERE ID=$gid" );
+                             "FROM Games WHERE ID=$gid", 'assoc', 'send_message.accept');
 
       if( !$game_row )
          error("mysql_start_game",'send3');
@@ -190,7 +191,8 @@ disable_cache();
 
       mysql_query( "UPDATE Players SET Running=Running+" . ( $handitype == INVITE_HANDI_DOUBLE ? 2 : 1 ) .
                    ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
-                   " WHERE ID=$my_id OR ID=$opponent_ID LIMIT 2" );
+                   " WHERE ID=$my_id OR ID=$opponent_ID LIMIT 2" )
+         or error('mysql_query_failed', 'send_message.update_player');
 
       $subject = "Game invitation accepted";
    }
@@ -199,7 +201,8 @@ disable_cache();
       $result = mysql_query( "DELETE FROM Games WHERE ID=$gid AND Status='INVITED'" .
                              " AND ( Black_ID=$my_id OR White_ID=$my_id ) " .
                              " AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
-                             "LIMIT 1");
+                             "LIMIT 1")
+         or error('mysql_query_failed', 'send_message.decline');
 
       if( mysql_affected_rows() != 1)
       {
@@ -229,7 +232,9 @@ disable_cache();
    $subject = addslashes(trim($subject));
    $query .= "Subject=\"$subject\", Text=\"$message\"";
 
-   $result = mysql_query( $query );
+   $result = mysql_query( $query )
+      or error('mysql_query_failed', 'send_message.insert_message');
+
    if( mysql_affected_rows() != 1)
       error("mysql_insert_message",'send1');
 
@@ -245,12 +250,14 @@ disable_cache();
          "($my_id, $mid, 'Y', ".FOLDER_SENT.",'N'), " .
          "($opponent_ID, $mid, 'N', ".FOLDER_NEW.",".($type == 'INVITATION' ? "'M'" : "'N'").")";
    }
-   $result = mysql_query( $query );
+   $result = mysql_query( $query )
+      or error('mysql_query_failed', 'send_message.insert_mess_corr');
    if( mysql_affected_rows() != ( $to_me ? 1 : 2) )
       error("mysql_insert_message",'send2');
 
    if( $type == "INVITATION" )
-      mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" );
+      mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" )
+         or error('mysql_query_failed', 'send_message.invitation');
 
    if( $reply > 0 )
    {
@@ -266,11 +273,13 @@ disable_cache();
 
       $query .= " WHERE mid=$reply AND Sender!='Y' AND uid=$my_id LIMIT 1";
 
-      mysql_query( $query ) or die(mysql_error());
+      mysql_query( $query )
+         or error('mysql_query_failed', 'send_message.reply');
 
       if( $disputegid > 0 )
          mysql_query( "UPDATE Messages SET Type='DISPUTED' " .
-                      "WHERE ID=$reply LIMIT 1");
+                      "WHERE ID=$reply LIMIT 1")
+            or error('mysql_query_failed', 'send_message.dispute');
    }
 
 
@@ -279,7 +288,9 @@ disable_cache();
    if( !$to_me and !(strpos($opponent_row["SendEmail"], 'ON') === false)
        and $opponent_row["Notify"] == 'NONE')
    {
-      $result = mysql_query( "UPDATE Players SET Notify='NEXT' WHERE Handle='".addslashes($tohdl)."' LIMIT 1" );
+      $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
+                             "WHERE Handle='".addslashes($tohdl)."' LIMIT 1" )
+         or error('mysql_query_failed', 'send_message.notify_receiver');
    }
 
    $msg = urlencode(T_('Message sent!'));

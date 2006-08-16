@@ -48,7 +48,7 @@ require_once( "include/table_columns.php" );
       "white.Name AS Whitename " .
       'FROM Games, Players AS black, Players AS white ' .
       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
-     or error("mysql_query_failed");
+      or error('mysql_query_failed', 'game_comments.find_game');
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
@@ -75,7 +75,7 @@ require_once( "include/table_columns.php" );
                            "AND MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
                            "AND (Moves.Stone=".WHITE." OR Moves.Stone=".BLACK.") " .
                           "ORDER BY Moves.MoveNr" )
-               or error("mysql_query_failed");
+      or error('mysql_query_failed', 'game_comments.messages');
 
 
 

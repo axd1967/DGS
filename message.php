@@ -46,7 +46,8 @@ require_once( "include/form_functions.php" );
             $uhandle = $player_row["Handle"];
          else
          {
-            $row = mysql_single_fetch( "SELECT Handle AS uhandle FROM Players WHERE ID=$uid" );
+            $row = mysql_single_fetch( "SELECT Handle AS uhandle FROM Players WHERE ID=$uid",
+                                       'assoc', 'message.handle');
             if( $row )
                extract($row);
          }
@@ -107,7 +108,7 @@ require_once( "include/form_functions.php" );
 //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
           "ORDER BY Sender" ;
 
-      $row = mysql_single_fetch( $query);
+      $row = mysql_single_fetch($query, 'assoc', 'message.find');
       if( !$row )
          error("unknown_message");
 
@@ -162,7 +163,7 @@ require_once( "include/form_functions.php" );
 
             mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
                          "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" )
-               or die( mysql_error());
+               or error('mysql_query_failed', 'message.update_mess_corr');
 
             if( mysql_affected_rows() != 1)
                error("mysql_message_info", "remove new-flag failed mid=$mid uid=$my_id Sender='$Sender'");
@@ -413,7 +414,7 @@ require_once( "include/form_functions.php" );
 
       $row = mysql_single_fetch('SELECT ID, Name FROM Players ' .
                                 'WHERE Handle ="' . mysql_escape_string($default_uhandle) .
-                                "\"\n");
+                                "\"\n", 'assoc', 'message.preview');
       if( !$row )
          $Name = '<font color="red">' . T_('Receiver not found') . '</font>';
       else

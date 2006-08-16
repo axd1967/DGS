@@ -52,7 +52,7 @@ require_once( "include/std_functions.php" );
         "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question $faqhide" .
         ( $cat === 'all' ? '' : "AND ( entry.Parent = $cat OR entry.ID = $cat ) " ) .
         "ORDER BY CatOrder,ParentOrder,entry.SortOrder")
-        or error('mysql_query_failed');
+      or error('mysql_query_failed', 'faq.find_entries');
 
      if( mysql_num_rows($result) > 0 )
      {
@@ -95,7 +95,8 @@ require_once( "include/std_functions.php" );
         "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
         "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question $faqhide" .
          "AND entry.Level<3 AND entry.Level>0 " .
-        "ORDER BY CatOrder,entry.Level,entry.SortOrder");
+        "ORDER BY CatOrder,entry.Level,entry.SortOrder")
+        or error('mysql_query_failed', 'faq.find_titles');
 
      if( mysql_num_rows($result) > 0 )
      {

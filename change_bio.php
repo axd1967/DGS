@@ -39,7 +39,8 @@ require_once( "include/rating.php" );
 
 
 
-   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"] . " order by ID");
+   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"] . " order by ID")
+      or error('mysql_query_failed','change_bio.find_bio');
 
 
 
@@ -65,7 +66,8 @@ require_once( "include/rating.php" );
             ', Category="'.addslashes($EnteredCategory).'"' .
             " WHERE ID=$ID";
 
-      mysql_query( $query ) or error("mysql_query_failed","change_bio 1");
+      mysql_query( $query )
+         or error('mysql_query_failed','change_bio.alter_bio');
    }
 
    for($i=1; $i<=3; $i++)
@@ -83,7 +85,8 @@ require_once( "include/rating.php" );
             ', Text="'.addslashes($EnteredText).'"' .
             ', Category="'.addslashes($EnteredCategory).'"' ;
 
-      mysql_query( $query ) or error("mysql_query_failed","change_bio 2");
+      mysql_query( $query )
+         or error('mysql_query_failed','change_bio.insert_bio');
    }
 
    $msg = urlencode(T_('Bio updated!'));

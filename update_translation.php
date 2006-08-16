@@ -46,7 +46,8 @@ require_once( "include/make_translationfiles.php" );
   $untranslated = ($group === 'Untranslated phrases');
 
       $result = translations_query( $translate_lang, $untranslated, $group )
-                or error('mysql_query_failed','uptranslat1'); //die(mysql_error());
+         or error('mysql_query_failed','update_translation.translations_query');
+
       $numrows = @mysql_num_rows($result);
       if( $numrows == 0 and !$untranslated )
          error('translation_bad_language_or_group','uptranslat1');
@@ -94,16 +95,19 @@ require_once( "include/make_translationfiles.php" );
 
   if( $replace_set )
      mysql_query( "REPLACE INTO Translations (Original_ID,Language_ID,Text) VALUES " .
-                  substr($replace_set,1) ) or die(mysql_error());
+                  substr($replace_set,1) )
+        or error('mysql_query_failed','update_translation.replace');
 
   if( $log_set )
      mysql_query( "INSERT INTO Translationlog " .
                   "(Player_ID,Language_ID,Original_ID,Translation) VALUES " .
-                  substr($log_set,1) ) or die(mysql_error());
+                  substr($log_set,1) )
+        or error('mysql_query_failed','update_translation.log');
 
   if( $done_set )
      mysql_query( "UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN (" .
-                  substr($done_set,1) . ')' ) or die(mysql_error());
+                  substr($done_set,1) . ')' )
+         or error('mysql_query_failed','update_translation.done');
 
   make_include_files($translate_lang); //must be called from main dir
 

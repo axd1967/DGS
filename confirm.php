@@ -35,7 +35,8 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
                          "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
                          "AND ID>$gid )) " .
                          "ORDER BY Lastchanged,ID " .
-                         "LIMIT 1");
+                         "LIMIT 1",
+                         'assoc', 'confirm.jump_to_next_game');
 
    if( !$row )
       jump_to("status.php");
@@ -71,8 +72,8 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
                           "black.OnVacation AS Blackonvacation, " .
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
-                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
-                        );
+                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID",
+                          'assoc', 'confirm.find_game');
 
    if( !$game_row )
       error("unknown_game");
@@ -450,12 +451,14 @@ This is why:
 
 
    //See *** HOT_SECTION *** above
-   $result = mysql_query( $game_query . $game_clause );
+   $result = mysql_query( $game_query . $game_clause )
+      or error('mysql_query_failed','confirm.update_game');
 
    if( mysql_affected_rows() != 1 )
       error("mysql_update_game","conf20($gid)");
 
-   $result = mysql_query( $move_query );
+   $result = mysql_query( $move_query )
+      or error('mysql_query_failed','confirm.update_moves');
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
       error("mysql_insert_move","conf21($gid)");
@@ -464,7 +467,8 @@ This is why:
 
    if( $message_query )
    {
-      $result = mysql_query( $message_query );
+      $result = mysql_query( $message_query )
+         or error('mysql_query_failed','confirm.message_query');
 
       if( mysql_affected_rows() < 1 and $action != 'delete' )
          error("mysql_insert_move","conf22($gid)");
@@ -475,8 +479,10 @@ This is why:
    {
       // send message to my opponent about the result
 
-      $opponent_row = mysql_single_fetch( "SELECT * FROM Players WHERE ID=" .
-                 ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ) );
+      $opponent_row = mysql_single_fetch(
+         "SELECT * FROM Players WHERE ID=" .
+         ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ),
+         'assoc', 'confirm.find_opponent');
 
       if( !$opponent_row )
          error("opponent_not_found");
@@ -500,7 +506,8 @@ This is why:
       if( $action == 'delete' )
       {
          mysql_query("UPDATE Players SET Running=Running-1 " .
-                     "WHERE ID=$Black_ID OR ID=$White_ID LIMIT 2");
+                     "WHERE ID=$Black_ID OR ID=$White_ID LIMIT 2")
+            or error('mysql_query_failed','confirm.update_players_delete');
 
          $Subject = 'Game deleted';
          //reference: game is deleted => no link
@@ -519,13 +526,15 @@ This is why:
                    ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                     ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
                    ) . " WHERE ID=$White_ID LIMIT 1" ;
-         mysql_query( $query);
+         mysql_query( $query)
+            or error('mysql_query_failed','confirm.update_players_finished');
 
          $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
                    ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                     ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                    ) . " WHERE ID=$Black_ID LIMIT 1" ;
-         mysql_query( $query);
+         mysql_query($query)
+            or error('mysql_query_failed','confirm.delete');
 
          $Subject = 'Game result';
          $Text = "The result in the game:<center>"
@@ -570,7 +579,8 @@ This is why:
       }
 
       mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
-                   "Game_ID=$gid, Subject='$Subject', Text='$Text'");
+                   "Game_ID=$gid, Subject='$Subject', Text='$Text'")
+            or error('mysql_query_failed','confirm.messages');
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_message");
@@ -588,7 +598,8 @@ This is why:
          //else we could force a NULL Folder_nr (trashed message)
       }
 
-      mysql_query( $query);
+      mysql_query( $query)
+         or error('mysql_query_failed','confirm.mess_corr');
 
    }
 
@@ -597,7 +608,8 @@ This is why:
 
    mysql_query( "UPDATE Players SET Notify='NEXT' " .
                 "WHERE ID='$next_to_move_ID' AND SendEmail LIKE '%ON%' " .
-                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "' LIMIT 1") ;
+                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "' LIMIT 1")
+      or error('mysql_query_failed','confirm.notify_opponent');
 
 
 
@@ -607,7 +619,8 @@ This is why:
                 "SET Activity=Activity + $ActivityForMove, " .
                 "Moves=Moves+1, " .
                 "LastMove=FROM_UNIXTIME($NOW) " .
-                "WHERE ID=" . $player_row["ID"] . " LIMIT 1" );
+                "WHERE ID=" . $player_row["ID"] . " LIMIT 1" )
+      or error('mysql_query_failed','confirm.activity');
 
 
 

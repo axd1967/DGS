@@ -43,7 +43,8 @@ require_once( "include/std_functions.php" );
    }
 
    $row = mysql_single_fetch( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                          "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
+                              "FROM Players WHERE Handle='".addslashes($uhandle)."'",
+                              'assoc', 'login.find_player');
 
    if( !$row )
       error("wrong_userid");
@@ -64,7 +65,7 @@ require_once( "include/std_functions.php" );
                       "Sessioncode='$code', " .
                       "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
                       "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" )
-                   or error("mysql_query_failed");
+            or error('mysql_query_failed', 'login.update_player');
       }
 
       set_login_cookie( $uhandle, $code );

@@ -118,7 +118,8 @@ $translation_groups =
          error('not_correct_transl_language');
 
       $result = translations_query( $translate_lang, $untranslated, $group )
-                or error('mysql_query_failed','translat1'); //die(mysql_error());
+         or error('mysql_query_failed','translate.translation_query');
+
       $numrows = @mysql_num_rows($result);
       if( $numrows == 0 and !$untranslated )
          error('translation_bad_language_or_group','translat1');

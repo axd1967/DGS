@@ -18,23 +18,20 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-$quick_errors = 1;
 require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
+
+$TheErrors->set_mode(ERROR_MODE_PRINT);
 
 function slashed($string)
 {
    return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
 }
 
-function quick_warning($string) //Short one line message
-{
-   echo "\nWarning: " . ereg_replace( "[\x01-\x20]+", " ", $string);
-}
 
 if( $is_down )
 {
-   quick_warning($is_down_message);
+   warning($is_down_message);
 }
 else
 {
@@ -45,13 +42,14 @@ else
    // logged in?
 
    $uhandle= safe_getcookie('handle');
-   $result = @mysql_query( "SELECT ID, Timezone, " .
-                           "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
-                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
+   $result = mysql_query( "SELECT ID, Timezone, " .
+                          "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
+                          "FROM Players WHERE Handle='".addslashes($uhandle)."'" )
+      or error('mysql_query_failed', 'quick_status.find_player');
 
    if( @mysql_num_rows($result) != 1 )
    {
-      error("not_logged_in",'qs1');
+      error("not_logged_in",'quick_status.find_player');
    }
 
    $player_row = mysql_fetch_assoc($result);
@@ -59,7 +57,7 @@ else
    if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
        or $player_row["Expire"] < $NOW )
    {
-      error("not_logged_in",'qs2');
+      error("not_logged_in",'quick_status.expired');
    }
 
    setTZ( $player_row['Timezone']);
@@ -82,7 +80,8 @@ else
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date DESC";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed','qs3');
+   $result = mysql_query( $query )
+      or error('mysql_query_failed','quick_status.find_messages');
 
    while( $row = mysql_fetch_assoc($result) )
    {
@@ -104,7 +103,8 @@ else
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        "ORDER BY date DESC, Games.ID";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed','qs4');
+   $result = mysql_query( $query )
+      or error('mysql_query_failed','quick_status.find_games');
 
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )
@@ -117,6 +117,6 @@ else
 
     
    if( $nothing_found )
-      quick_warning('empty lists');
+      warning('empty lists');
 }
 ?>

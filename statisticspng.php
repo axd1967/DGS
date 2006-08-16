@@ -42,7 +42,9 @@ function get_stat_data( )
                ",MIN(Moves) AS minMoves,MAX(Moves) AS maxMoves" .
                ",MIN(Games) AS minGames,MAX(Games) AS maxGames" .
                ",MIN(GamesRunning) AS minGameR,MAX(GamesRunning) AS maxGameR" .
-               " FROM Statistics") or die(mysql_error());
+               " FROM Statistics")
+      or error('mysql_query_failed', 'statisticspng.min_max');
+
    if( @mysql_num_rows( $result ) != 1 )
       exit;
 
@@ -51,7 +53,8 @@ function get_stat_data( )
 
    $result = mysql_query("SELECT *,UNIX_TIMESTAMP(Time) as times" .
                          " FROM Statistics ORDER BY Time")
-          or die(mysql_error());      
+      or error('mysql_query_failed', 'statisticspng.load_data');
+
    if( @mysql_num_rows( $result ) < 1 )
       exit;
 

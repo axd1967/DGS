@@ -51,7 +51,8 @@ function get_rating_data($uid)
       "InitialRating+200+GREATEST(1600-InitialRating,0)*2/15 AS RatingMax, " .
       "InitialRating-200-GREATEST(1600-InitialRating,0)*2/15 AS RatingMin, " .
       "UNIX_TIMESTAMP(Registerdate) AS seconds " .
-      "FROM Players WHERE ID=$uid");
+      "FROM Players WHERE ID=$uid")
+      or error('mysql_query_failed', 'ratingpng.initial');
 
    if( @mysql_num_rows($result) != 1 )
       exit;
@@ -64,7 +65,8 @@ function get_rating_data($uid)
 
 
    $result = mysql_query("SELECT MAX(UNIX_TIMESTAMP(Time)) AS seconds " .
-                         "FROM Ratinglog WHERE uid=$uid") or die(mysql_error());
+                         "FROM Ratinglog WHERE uid=$uid")
+      or error('mysql_query_failed', 'ratingpng.max_time');
 
    $max_row = mysql_fetch_assoc($result);
    if( $starttime > $max_row['seconds'] - $bound_interval )
@@ -82,7 +84,8 @@ function get_rating_data($uid)
 
    $result = mysql_query("SELECT Rating, RatingMax, RatingMin, " .
                          "UNIX_TIMESTAMP(Time) AS seconds " .
-                         "FROM Ratinglog WHERE uid=$uid ORDER BY Time") or die(mysql_error());
+                         "FROM Ratinglog WHERE uid=$uid ORDER BY Time")
+      or error('mysql_query_failed', 'ratingpng.ratingdata');
 
    if( @mysql_num_rows( $result ) < 1 )
       exit;

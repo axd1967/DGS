@@ -19,10 +19,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-$quick_errors = 1; //just store errors in log database
 require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 
+$TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.sourceforge.net
 {
@@ -86,6 +86,14 @@ function mail_strip_html( $str)
    return $str;
 }
 
+function verify_email($email)
+{
+   $regexp = "^([_a-z0-9-]+)(\.[_a-z0-9-]+)*@([a-z0-9-]+)(\.[a-z0-9-]+)*(\.[a-z]{2,4})$";
+   if( !eregi($regexp, $email) )
+      error('bad_mail_address', "$email");
+   return eregi($regexp, $email);
+}
+
 
 if( !$is_down )
 {
@@ -106,17 +114,17 @@ if( !$is_down )
 
    $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
                           "FROM Clock WHERE ID=202 LIMIT 1")
-               or error('mysql_query_failed','halfhourly_cron1');
+               or error('mysql_query_failed','halfhourly_cron.check_frequency');
 
    $row = mysql_fetch_array( $result );
    mysql_free_result($result);
 
    if( $row['timediff'] < $half_diff )
-      //if( !@$_REQUEST['forced'] )
+      if( !@$_REQUEST['forced'] )
          exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202")
-               or error('mysql_query_failed','halfhourly_cron2');
+               or error('mysql_query_failed','halfhourly_cron.set_lastchanged');
 
 
 // Send notifications
@@ -124,7 +132,7 @@ if( !$is_down )
 
    $result = mysql_query( "SELECT ID as uid, Email, SendEmail, Lastaccess FROM Players " .
                           "WHERE SendEmail LIKE '%ON%' AND Notify='NOW'" )
-               or error('mysql_query_failed','halfhourly_cron3');
+               or error('mysql_query_failed','halfhourly_cron.find_notifications');
 
 
    while( $row = mysql_fetch_array( $result ) )
@@ -150,7 +158,7 @@ if( !$is_down )
              " AND UNIX_TIMESTAMP(Lastchanged) >= UNIX_TIMESTAMP('$Lastaccess')";
 
          $gres = mysql_query( $query )
-               or error('mysql_query_failed','halfhourly_cron4' . $query);
+               or error('mysql_query_failed','halfhourly_cron.find_games');
 
          if( @mysql_num_rows($gres) > 0 )
          {
@@ -209,7 +217,7 @@ if( !$is_down )
 
 
          $res3 = mysql_query( $query )
-               or error('mysql_query_failed','halfhourly_cron5' . $query);
+               or error('mysql_query_failed','halfhourly_cron.find_new_messages');
          if( @mysql_num_rows($res3) > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  New messages:\n";
@@ -240,9 +248,8 @@ if( !$is_down )
       //$headers.= "MIME-Version: 1.0\n";
       //$headers.= "Content-type: text/html; charset=iso-8859-1\n";
 
-      if( !function_exists('mail')
-       or !mail( trim($Email), $FRIENDLY_LONG_NAME.' notification', $msg, $headers ) )
-         error('mail_failure',"Uid:$uid Addr:$Email Text:$msg");
+      if( function_exists('mail') and verify_email(trim($Email)) )
+         mail( trim($Email), $FRIENDLY_LONG_NAME.' notification', $msg, $headers );
    }
    mysql_free_result($result);
 
@@ -250,11 +257,11 @@ if( !$is_down )
    //Setting Notify to 'DONE' stop notifications until the player's visite
    mysql_query( "UPDATE Players SET Notify='DONE' " .
                 "WHERE SendEmail LIKE '%ON%' AND Notify='NOW' " )
-               or error('mysql_query_failed','halfhourly_cron6');
+      or error('mysql_query_failed','halfhourly_cron.update_players_notify_Done');
 
    mysql_query( "UPDATE Players SET Notify='NOW' " .
                 "WHERE SendEmail LIKE '%ON%' AND Notify='NEXT' " )
-               or error('mysql_query_failed','halfhourly_cron7');
+      or error('mysql_query_failed','halfhourly_cron.update_players_notify_Now');
 
 
 
@@ -263,14 +270,14 @@ if( !$is_down )
    $factor = exp( -M_LN2 * 30 / $ActivityHalvingTime );
 
    mysql_query("UPDATE Players SET Activity=Activity * $factor")
-               or error('mysql_query_failed','halfhourly_cron8');
+      or error('mysql_query_failed','halfhourly_cron.activity');
 
 
 // Check end of vacations
 
    $result = mysql_query("SELECT ID, ClockUsed from Players " .
                          "WHERE OnVacation>0 AND OnVacation <= 1/(2*24)")
-               or error('mysql_query_failed','halfhourly_cron9');
+      or error('mysql_query_failed','halfhourly_cron.onvacation');
 
    while( $prow = mysql_fetch_array( $result ) )
    {
@@ -284,14 +291,14 @@ if( !$is_down )
                          "AND Games.ClockUsed < 0 " . // VACATION_CLOCK
                          "AND Clock.ID=$ClockUsed " .
                          "AND ToMove_ID='$uid'" )
-               or error('mysql_query_failed','halfhourly_cron10');
+         or error('mysql_query_failed','halfhourly_cron.find_vacation_games');
 
       while( $game_row = mysql_fetch_array( $gres ) )
       {
             mysql_query("UPDATE Games SET ClockUsed=$ClockUsed"
                       . ", LastTicks='" . $game_row['ticks'] . "'"
                       . " WHERE ID='" . $game_row['gid'] . "' LIMIT 1")
-                  or error('mysql_query_failed','halfhourly_cron11');
+               or error('mysql_query_failed','halfhourly_cron.update_vacation_games');
       }
       mysql_free_result($gres); unset($game_row);
    }
@@ -304,7 +311,9 @@ if( !$is_down )
    mysql_query("UPDATE Players SET " .
                "VacationDays=LEAST(365.24/12, VacationDays + 1/(12*2*24)), " .
                "OnVacation=GREATEST(0, OnVacation - 1/(2*24))")
-               or error('mysql_query_failed','halfhourly_cron12');
+      or error('mysql_query_failed','halfhourly_cron.vacation_days');
+
+   $TheErrors->echo_error_list();
 
 }
 ?>

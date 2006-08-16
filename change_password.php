@@ -54,7 +54,8 @@ require_once( "include/std_functions.php" );
        "Password=PASSWORD('$passwd') " .
        "WHERE ID=" . $player_row['ID'] . " LIMIT 1";
 
-   mysql_query( $query );
+   mysql_query( $query )
+      or error('mysql_query_failed','change_password');
 
    $msg = urlencode(T_('Password changed!'));
 

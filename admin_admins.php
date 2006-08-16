@@ -49,7 +49,8 @@ require_once( "include/table_columns.php" );
 
 // Make sure all previous admins gets into the Admin array
   $result = mysql_query("SELECT ID, Adminlevel+0 AS admin_level FROM Players " .
-                        "WHERE Adminlevel != 0");
+                        "WHERE Adminlevel != 0")
+     or error('mysql_query_failed','admin_admins.find_admins');
 
   while( $row = mysql_fetch_array($result) )
   {
@@ -83,7 +84,8 @@ require_once( "include/table_columns.php" );
      if( $Admin['new'] != 0 and !empty($newadmin))
      {
         $result = mysql_query("SELECT ID,Adminlevel+0 AS admin_level FROM Players " .
-                              "WHERE Handle='".addslashes($newadmin)."'");
+                              "WHERE Handle='".addslashes($newadmin)."'")
+           or error('mysql_query_failed','admin_admins.find_new_admin');
 
         if( @mysql_num_rows($result) != 1 )
            error("unknown_user");
@@ -109,17 +111,19 @@ require_once( "include/table_columns.php" );
            admin_log( @$player_row['ID'], @$player_row['Handle'], 
                 sprintf("grants %s from 0x%x to 0x%x.", (string)$id, $AdminOldLevel[$id], $adm_level) );
 
-           mysql_query("UPDATE Players SET Adminlevel=$adm_level WHERE ID=$id LIMIT 1");
+           mysql_query("UPDATE Players SET Adminlevel=$adm_level WHERE ID=$id LIMIT 1")
+              or error('mysql_query_failed','admin_admins.update_admin');
         }
      }
 
      $player_level = (int)$Admin[$player_row["ID"]];
   }
 
-  start_page(T_("Admin").' - '.T_('Edit admin staff'), true, $logged_in, $player_row );
-
   $result = mysql_query("SELECT ID, Handle, Name, Adminlevel+0 AS admin_level FROM Players " .
-                        "WHERE Adminlevel != 0");
+                        "WHERE Adminlevel != 0")
+     or error('mysql_query_failed','admin_admins.find_admins2');
+
+  start_page(T_("Admin").' - '.T_('Edit admin staff'), true, $logged_in, $player_row );
 
 
    echo "<center>&nbsp;<p><h3><font color=$h3_color><B>" . T_('Admins') . ":</B></font></h3><p>\n";

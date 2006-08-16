@@ -43,7 +43,8 @@ require_once( "include/make_game.php" );
    if( !is_numeric($id) or $id<0 )
       $id=0;
 
-   $result = mysql_query("SELECT Waitingroom.* FROM Waitingroom WHERE ID=$id");
+   $result = mysql_query("SELECT Waitingroom.* FROM Waitingroom WHERE ID=$id")
+      or error('mysql_query_failed', 'join_waitingroom_game.find_game');
 
    if( @mysql_num_rows($result) != 1)
       error("waitingroom_game_not_found");
@@ -53,7 +54,8 @@ require_once( "include/make_game.php" );
 
    $result = mysql_query("SELECT ID,Name,Handle," .
                          "Rating2,RatingStatus,ClockUsed,OnVacation " .
-                         "FROM Players WHERE ID=$uid");
+                         "FROM Players WHERE ID=$uid")
+      or error('mysql_query_failed', 'join_waitingroom_game.find_players');
 
    if( @mysql_num_rows($result) != 1)
       error("waitingroom_game_not_found");
@@ -67,7 +69,8 @@ require_once( "include/make_game.php" );
       if( $player_row['ID'] !== $uid )
          error('waitingroom_delete_not_own');
 
-      mysql_query("DELETE FROM Waitingroom WHERE ID=$id LIMIT 1");
+      mysql_query("DELETE FROM Waitingroom WHERE ID=$id LIMIT 1")
+         or error('mysql_query_failed', 'join_waitingroom_game.delete');
 
       $msg = urlencode(T_('Game deleted!'));
 
@@ -144,17 +147,20 @@ require_once( "include/make_game.php" );
    mysql_query( "UPDATE Players SET Running=Running+" .
                 ( $game_info_row['Handicaptype'] == 'double' ? 2 : 1 ) .
                 ( $game_info_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
-                " WHERE ID=$uid OR ID=" . $player_row['ID'] . " LIMIT 2" );
+                " WHERE ID=$uid OR ID=" . $player_row['ID'] . " LIMIT 2" )
+      or error('mysql_query_failed', 'join_waitingroom_game.update_players');
 
 // Reduce number of games left in the waiting room
 
    if( $game_info_row['nrGames'] <= 1 )
    {
-      mysql_query("DELETE FROM Waitingroom where ID=$id LIMIT 1");
+      mysql_query("DELETE FROM Waitingroom where ID=$id LIMIT 1")
+         or error('mysql_query_failed', 'join_waitingroom_game.reduce_delete');
    }
    else
    {
-      mysql_query("UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$id LIMIT 1");
+      mysql_query("UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$id LIMIT 1")
+         or error('mysql_query_failed', 'join_waitingroom_game.reduce');
    }
 
 
@@ -178,7 +184,8 @@ require_once( "include/make_game.php" );
       "Subject='$subject', " .
       "Text='$reply'";
 
-   mysql_query( $query );
+   mysql_query( $query )
+      or error('mysql_query_failed', 'join_waitingroom_game.message');
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_message");
@@ -186,7 +193,8 @@ require_once( "include/make_game.php" );
    $mid = mysql_insert_id();
 
    mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-               "($uid, $mid, 'N', ".FOLDER_NEW.")");
+               "($uid, $mid, 'N', ".FOLDER_NEW.")")
+      or error('mysql_query_failed', 'join_waitingroom_game.mess_corr');
 
 
    $msg = urlencode(T_('Game joined!'));

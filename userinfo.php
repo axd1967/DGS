@@ -48,7 +48,8 @@ require_once( "include/countries.php" );
       "IFNULL(UNIX_TIMESTAMP(Registerdate),0) AS Registerdate, " .
       "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
       "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
-      "FROM Players WHERE $where" );
+      "FROM Players WHERE $where" )
+      or error('mysql_query_failed', 'userinfo.find');
 
    if( mysql_affected_rows() != 1 )
       error("unknown_user");
@@ -129,7 +130,8 @@ require_once( "include/countries.php" );
 
    echo " </table>\n";
 
-   $result = mysql_query("SELECT * FROM Bio where uid=$uid" . " order by ID");
+   $result = mysql_query("SELECT * FROM Bio where uid=$uid" . " order by ID")
+      or error('mysql_query_failed', 'userinfo.bio');
 
    if( @mysql_num_rows($result) > 0 )
    {

@@ -376,7 +376,7 @@ $array=array();
       "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
       'FROM Games, Players AS black, Players AS white ' .
       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
-     or error("mysql_query_failed");
+      or error('mysql_query_failed', 'sgf.find');
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_game");
@@ -407,7 +407,7 @@ $array=array();
                           "FROM Moves LEFT JOIN MoveMessages " .
                           "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
                           "WHERE Moves.gid=$gid ORDER BY Moves.ID" )
-               or error("mysql_query_failed");
+      or error('mysql_query_failed', 'sgf.moves');
 
    header( 'Content-Type: application/x-go-sgf' );
    $filename= "$Whitehandle-$Blackhandle-$gid-" . date('Ymd', $timestamp) ;

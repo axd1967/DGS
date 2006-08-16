@@ -18,24 +18,17 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-$quick_errors = 1;
 require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 //require_once( "include/rating.php" );
 
-
-
-function quick_warning($string) //Short one line message
-{
-   echo "\nWarning: " . ereg_replace( "[\x01-\x20]+", " ", $string);
-}
-
+$TheErrors->set_mode(ERROR_MODE_PRINT);
 
 
 if( $is_down )
 {
-   quick_warning($is_down_message);
+   warning($is_down_message);
 }
 else
 {
@@ -53,7 +46,8 @@ else
    $uhandle= safe_getcookie('handle');
    $result = @mysql_query( "SELECT ID, Timezone, " .
                            "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
-                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
+                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" )
+      or error('mysql_query_failed', 'quick_play.find_player');
 
    if( @mysql_num_rows($result) != 1 )
    {
@@ -82,8 +76,8 @@ else
                           "black.OnVacation AS Blackonvacation, " .
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
-                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
-                        );
+                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID",
+                          'assoc', 'quick_play.find_game');
 
    if( !$game_row )
       error("unknown_game");
@@ -289,12 +283,14 @@ This is why:
 
 
    //See *** HOT_SECTION *** above
-   $result = mysql_query( $game_query . $game_clause );
+   $result = mysql_query( $game_query . $game_clause )
+      or error('mysql_query_failed', 'quick_play.update_game');
 
    if( mysql_affected_rows() != 1 )
       error("mysql_update_game","qp20($gid)");
 
-   $result = mysql_query( $move_query );
+   $result = mysql_query( $move_query )
+      or error('mysql_query_failed', 'quick_play.update_moves');
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
       error("mysql_insert_move","qp21($gid)");
@@ -307,7 +303,8 @@ This is why:
 
    mysql_query( "UPDATE Players SET Notify='NEXT' " .
                 "WHERE ID='$next_to_move_ID' AND SendEmail LIKE '%ON%' " .
-                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "' LIMIT 1") ;
+                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "' LIMIT 1")
+      or error('mysql_query_failed', 'quick_play.notify_opponent');
 
 
 
@@ -317,7 +314,8 @@ This is why:
                 "SET Activity=Activity + $ActivityForMove, " .
                 "Moves=Moves+1, " .
                 "LastMove=FROM_UNIXTIME($NOW) " .
-                "WHERE ID=" . $player_row["ID"] . " LIMIT 1" );
+                "WHERE ID=" . $player_row["ID"] . " LIMIT 1" )
+      or error('mysql_query_failed', 'quick_play.update_player');
 
 
 
