@@ -18,19 +18,13 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+require_once( "include/error_functions.php" );
+
 $is_down = false;
 $is_down_message = "Sorry, dragon is down for maintenance at the moment,"
                  . " please return in an hour or so."
                  . " Don't worry: the clocks are frozen until the server restarts";
 
-if( !isset($quick_errors) )
-   $quick_errors = false;
-
-function quick_error($string) //Short one line message
-{
-   echo "\n#Error: " . trim(ereg_replace( "[\x01-\x20]+", " ", $string));
-   exit;
-}
 
 function setTZ( $tz='GMT')
 {

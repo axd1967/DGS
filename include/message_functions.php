@@ -144,7 +144,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                    "OR (Black_ID=$my_ID AND Players.ID=White_ID)) " .
                  "AND Status='INVITED'" ;
 
-      if( !($game_row=mysql_single_fetch( $query)) )
+      if( !($game_row=mysql_single_fetch( $query,
+                                          'assoc', 'message_functions.game_settings_form')) )
          error("unknown_game");
 
       extract($game_row);
@@ -619,7 +620,7 @@ function get_folders($uid, $remove_all_received=true)
    global $STANDARD_FOLDERS;
 
    $result = mysql_query("SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr")
-               or error("mysql_query_failed"); //die(mysql_error());
+      or error('mysql_query_failed', 'message_functions.get_folders');
 
    $flds = $STANDARD_FOLDERS;
 
@@ -701,7 +702,8 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
                "AND NOT ISNULL(Folder_nr) " .
                "AND mid IN (" . implode(',', $message_ids) . ") " .
                "LIMIT " . count($message_ids) )
-      or error("mysql_query_failed"); //die(mysql_error());
+      or error('mysql_query_failed','message_functions.change_folders');
+
    return mysql_affected_rows() ;
 }
 
@@ -734,7 +736,9 @@ function echo_folders($folders, $current_folder)
 function folder_is_empty($nr, $uid)
 {
    $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
-                         "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1");
+                         "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1")
+      or error('mysql_query_failed','message_functions.folder_is_empty');
+
    $nr = (@mysql_num_rows($result) === 0);
    mysql_free_result($result);
    return $nr;
@@ -783,7 +787,8 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
       "ORDER BY $order $limit";
 
    $result = mysql_query( $query )
-               or error("mysql_query_failed"); //die(mysql_error());
+      or error('mysql_query_failed','message_functions.message_list_query');
+
    return $result;
 }
 

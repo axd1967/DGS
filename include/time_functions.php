@@ -70,13 +70,12 @@ function get_clock_ticks($clock_used)
    if( $clock_used < 0) // VACATION_CLOCK
       return 0; // On vacation
 
-   if( $row=mysql_single_fetch(
-            "SELECT Ticks FROM Clock WHERE ID=$clock_used"
-     ) )
+   if( $row=mysql_single_fetch("SELECT Ticks FROM Clock WHERE ID=$clock_used",
+                               'assoc', 'time_functions.get_clock_ticks') )
    {
       return (int)@$row['Ticks'];
    }
-   error("mysql_clock_ticks", $clock_used);
+   error("mysql_clock_ticks", 'time_functions.get_clock_ticks: ' . $clock_used);
 }
 
 function ticks_to_hours($ticks)

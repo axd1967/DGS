@@ -23,7 +23,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 function make_known_languages() //must be called from main dir
 {
-   $result = mysql_query("SELECT * FROM TranslationLanguages ORDER BY Language");
+   $result = mysql_query("SELECT * FROM TranslationLanguages ORDER BY Language")
+      or error('mysql_query_failed', 'make_translationfiles.make_knownlanguages');
 
    $Filename = 'translations/known_languages.php'; //must be called from main dir
 
@@ -96,7 +97,8 @@ function make_include_files($language=null, $group=null) //must be called from m
 
    $query .= "ORDER BY Language,Groupname";
 
-   $result = mysql_query( $query ) or die(mysql_error());
+   $result = mysql_query( $query )
+      or error('mysql_query_failed', 'make_translationfiles.make_include_files');
 
    $grp = '';
    $lang = '';

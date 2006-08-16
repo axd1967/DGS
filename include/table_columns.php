@@ -572,7 +572,8 @@ class Table
                   " SET " . $this->Player_Column . "=" . $this->Column_set .
                   " WHERE ID=" . $player_row["ID"];
 
-               mysql_query($query);
+               mysql_query($query)
+                  or error('mysql_query_failed','table_columns.add_or_del_column');
             }
          }
       }

@@ -94,7 +94,8 @@ class Board
       if( $this->max_moves <= 0 )
          return TRUE;
 
-      $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
+      $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" )
+         or error('mysql_query_failed','board.load_from_db.find_moves');
       if( !$result )
          return FALSE;
       if( @mysql_num_rows($result) <= 0 )
@@ -164,7 +165,8 @@ class Board
 
          //No need of movemsg if we don't have movecol??
          if( $row=mysql_single_fetch( 
-                     "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move" 
+                "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move",
+                'assoc', 'board.load_from_db.movemessage');
                ) )
          {
             $this->movemsg = trim($row['Text']);
@@ -1049,27 +1051,32 @@ class Board
    function fix_corrupted_move_table( $gid)
    {
      if( !($row=mysql_single_fetch(
-            "SELECT Moves FROM Games WHERE ID=$gid")) )
-         error("mysql_query_failed",'board1');
+              "SELECT Moves FROM Games WHERE ID=$gid",
+              'assoc', "board.fix_corrupted_move_table.moves: $gid")) )
+        error("internal_error", "board.fix_corrupted_move_table.moves: $gid");
 
       extract($row);
 
 
      if( !($row=mysql_single_fetch(
-            "SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid")) )
-         error("mysql_query_failed",'board2');
+              "SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid",
+              'assoc', "board.fix_corrupted_move_table.max: $gid")) )
+        error("internal_error", "board.fix_corrupted_move_table.max: $gid");
 
-      extract($row);
+     extract($row);
 
 
-      if($max_movenr == $Moves)
-         return;
+     if($max_movenr == $Moves)
+        return;
 
-      if($max_movenr != $Moves+1)
-         error("mysql_data_corruption",'board2');    // Can't handle this type of problem
+     if($max_movenr != $Moves+1)
+        error("mysql_data_corruption",
+              "board.fix_corrupted_move_table.unfixable: $gid"); // Can't handle this type of problem
 
-      mysql_query("DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr");
-      mysql_query("DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr");
+     mysql_query("DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr")
+        or error('mysql_query_failed','board.fix_corrupted_move_table.delete_moves');
+     mysql_query("DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr")
+        or error('mysql_query_failed','board.fix_corrupted_move_table.delete_move_mess');
    }
 
 

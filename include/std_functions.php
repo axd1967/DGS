@@ -256,8 +256,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    start_html( $title, $no_cache, $style_string, $last_modified_stamp);
 
-   echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
-   echo "\n<script language=\"JavaScript1.4\" type=\"text/javascript\"> version=1; </script>";
+//    echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
+//    echo "\n<script language=\"JavaScript1.4\" type=\"text/javascript\"> version=1; </script>";
 
    if( !$printable )
    {
@@ -623,19 +623,6 @@ function make_tools( $array, $width=0)
    echo "</tr>\n</table>\n";
 }
 
-/* Not used: to be reviewed
-function warn($err)
-{
-   $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".addslashes($handle)."'"
-      .", Message='".addslashes($err)."', IP='".addslashes($ip)."'" ;
-
-   if( !empty($mysql_error) ) //define it first!
-      $errorlog_query .= ", MysqlError='".addslashes(mysql_error())."'";
-
-   @mysql_query( $errorlog_query );
-}
-*/
 
 /* Not used
 function help($topic)
@@ -1306,9 +1293,10 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       return false;
    }
 
-   $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
-                           "Adminlevel+0 as admin_level " .
-                           "FROM Players WHERE Handle='".addslashes($hdl)."'" );
+   $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
+                          "Adminlevel+0 as admin_level " .
+                          "FROM Players WHERE Handle='".addslashes($hdl)."'" )
+      or error('mysql_query_failed','std_functions.is_logged_in.find_player');
 
 
    if( @mysql_num_rows($result) != 1 )
@@ -1346,7 +1334,8 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 
    $query .= " WHERE Handle='".addslashes($hdl)."' LIMIT 1";
 
-   $result = @mysql_query( $query );
+   $result = mysql_query( $query )
+      or error('mysql_query_failed','std_functions.is_logged_in.update_player');
 
    if( @mysql_affected_rows() != 1 )
       return false;
@@ -1381,7 +1370,8 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
       mysql_query( 'UPDATE Players ' .
                    "SET Password='" . $given_passwd_encrypted . "', " .
                    'Newpassword=NULL ' .
-                   "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" );
+                   "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" )
+         or error('mysql_query_failed','std_functions.check_password.set_password');
    }
 
    return true;
@@ -1433,18 +1423,18 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
    $legal = ( $gid<=0 ? 0 : 1 );
    if( ($whitename===false or $blackname===false) && $legal )
    {
-     $tmp = 'SELECT black.Name as blackname, white.Name as whitename ' .
-            'FROM Games, Players as white, Players as black ' .
-            "WHERE Games.ID=$gid " .
-            ' AND white.ID=Games.White_ID ' .
-            ' AND black.ID=Games.Black_ID ' .
-            'LIMIT 1' ;
-     if( $tmp=mysql_single_fetch( $tmp) )
+     $query = 'SELECT black.Name as blackname, white.Name as whitename ' .
+              'FROM Games, Players as white, Players as black ' .
+              "WHERE Games.ID=$gid " .
+              ' AND white.ID=Games.White_ID ' .
+              ' AND black.ID=Games.Black_ID ' .
+              'LIMIT 1' ;
+     if( $row=mysql_single_fetch( $query, 'assoc', 'std_functions.game_reference' ) )
      {
        if( $whitename===false )
-         $whitename = $tmp['whitename'];
+         $whitename = $row['whitename'];
        if( $blackname===false )
-         $blackname = $tmp['blackname'];
+         $blackname = $row['blackname'];
        $safe = true;
      }
      else
@@ -1466,19 +1456,19 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
       $whitename = make_html_safe($whitename) ;
    if( $link && $legal )
    {
-      $tmp = "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "");
-      $tmp = 'A href="' . $base_path. $tmp . '"';
+      $url = "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "");
+      $url = 'A href="' . $base_path. $url . '"';
       if( $link & REF_LINK_BLANK )
-        $tmp.= ' target="_blank"';
+        $url.= ' target="_blank"';
       if( $class )
-        $tmp.= " class=$class";
+        $url.= " class=$class";
       if( $link & REF_LINK_ALLOWED )
       {
-        $tmp = str_replace('"', ALLOWED_QUOT, $tmp);
-        $whitename = ALLOWED_LT.$tmp.ALLOWED_GT.$whitename.ALLOWED_LT."/A".ALLOWED_GT ;
+        $url = str_replace('"', ALLOWED_QUOT, $url);
+        $whitename = ALLOWED_LT.$url.ALLOWED_GT.$whitename.ALLOWED_LT."/A".ALLOWED_GT ;
       }
       else
-        $whitename = "<$tmp>$whitename</A>" ;
+        $whitename = "<$url>$whitename</A>" ;
    }
    return $whitename;
 }
@@ -1519,16 +1509,16 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
    }
    if( ($player_name===false or $player_handle===false) && $legal )
    {
-     $tmp = 'SELECT Name, Handle ' .
-            'FROM Players ' .
-            "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='$player_ref' " .
-            'LIMIT 1' ;
-     if( $tmp=mysql_single_fetch( $tmp) )
+     $query = 'SELECT Name, Handle ' .
+              'FROM Players ' .
+              "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='$player_ref' " .
+              'LIMIT 1' ;
+     if( $row=mysql_single_fetch( $query, 'assoc', 'std_functions.user_reference' ) )
      {
        if( $player_name===false )
-         $player_name = $tmp['Name'];
+         $player_name = $row['Name'];
        if( $player_handle===false )
-         $player_handle = $tmp['Handle'];
+         $player_handle = $row['Handle'];
        $safe = true;
      }
      else
@@ -1546,48 +1536,51 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
    {
       if( is_string($link) ) //owned reference. Must end with '?' or URI_AMP
       {
-         $tmp = $link;
+         $url = $link;
          $link = 0;
       }
       else if( $link<0 ) //send_reference
       {
-         $tmp = "message.php?mode=NewMessage".URI_AMP;
+         $url = "message.php?mode=NewMessage".URI_AMP;
          $link = -$link;
       }
       else //user_reference
       {
-         $tmp = "userinfo.php?";
+         $url = "userinfo.php?";
       }
-      $tmp.= ( $byid ? "uid=$player_ref" 
+      $url.= ( $byid ? "uid=$player_ref" 
                  : UHANDLE_NAM."=".str_replace('+','%2B',$player_ref) );
-      $tmp = 'A href="' . $base_path. $tmp . '"';
+      $url = 'A href="' . $base_path. $url . '"';
       if( $class )
-        $tmp.= " class=$class";
+        $url.= " class=$class";
       if( $link & REF_LINK_BLANK )
-        $tmp.= ' target="_blank"';
+        $url.= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
       {
-        $tmp = str_replace('"', ALLOWED_QUOT, $tmp);
-        $player_name = ALLOWED_LT.$tmp.ALLOWED_GT.$player_name.ALLOWED_LT."/A".ALLOWED_GT ;
+        $url = str_replace('"', ALLOWED_QUOT, $url);
+        $player_name = ALLOWED_LT.$url.ALLOWED_GT.$player_name.ALLOWED_LT."/A".ALLOWED_GT ;
       }
       else
-        $player_name = "<$tmp>$player_name</A>" ;
+        $player_name = "<$url>$player_name</A>" ;
    }
    return $player_name ;
 }
 
 function is_on_observe_list( $gid, $uid )
 {
-   $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid");
+   $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid")
+      or error('mysql_query_failed','std_functions.is_on_observe_list');
    return( @mysql_num_rows($result) > 0 );
 }
 
 function toggle_observe_list( $gid, $uid )
 {
    if( is_on_observe_list( $gid, $uid ) )
-      mysql_query("DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
+      mysql_query("DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1")
+         or error('mysql_query_failed','std_functions.toggle_observe_list.delete');
    else
-      mysql_query("INSERT INTO Observers SET gid=$gid, uid=$uid");
+      mysql_query("INSERT INTO Observers SET gid=$gid, uid=$uid")
+         or error('mysql_query_failed','std_functions.toggle_observe_list.insert');
 }
 
 //Text must be escaped by addslashes()
@@ -1598,7 +1591,8 @@ function delete_all_observers( $gid, $notify, $Text='' )
    if( $notify )
    {
       $result = mysql_query("SELECT Observers.uid AS pid " .
-                            "FROM Observers WHERE gid=$gid");
+                            "FROM Observers WHERE gid=$gid")
+         or error('mysql_query_failed','std_functions.delete_all_observers.find');
 
       if( @mysql_num_rows($result) > 0 )
       {
@@ -1606,7 +1600,8 @@ function delete_all_observers( $gid, $notify, $Text='' )
          $Subject = 'An observed game has finished';
 
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
-                      "Game_ID=$gid, Subject='$Subject', Text='$Text'" );
+                      "Game_ID=$gid, Subject='$Subject', Text='$Text'" )
+            or error('mysql_query_failed','std_functions.delete_all_observers.message');
 
          if( mysql_affected_rows() == 1)
          {
@@ -1615,14 +1610,16 @@ function delete_all_observers( $gid, $notify, $Text='' )
             while( $row = mysql_fetch_array( $result ) )
             {
                mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                           "(" . $row['pid'] . ", $mid, 'N', ".FOLDER_NEW.")");
+                           "(" . $row['pid'] . ", $mid, 'N', ".FOLDER_NEW.")")
+                  or error('mysql_query_failed','std_functions.delete_all_observers.message');
             }
          }
 
       }
    }
 
-   mysql_query("DELETE FROM Observers WHERE gid=$gid");
+   mysql_query("DELETE FROM Observers WHERE gid=$gid")
+      or error('mysql_query_failed','std_functions.delete_all_observers.delete');
 }
 
 function RGBA($r, $g, $b, $a=NULL)

@@ -165,7 +165,8 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    {
       // Check if dispute game exists
       $row= mysql_single_fetch("SELECT ID, Black_ID, White_ID FROM Games"
-                             . " WHERE ID=$disputegid AND Status='INVITED'");
+                             . " WHERE ID=$disputegid AND Status='INVITED'",
+                               'assoc', 'make_game.make_invite_game.dispute');
 
       if( !$row )
          error('unknown_game','make_invite_game1');
@@ -180,10 +181,10 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       $query = "INSERT INTO Games SET $query";
 
    $result = mysql_query( $query )
-      or error('mysql_insert_game','make_invite_game3');
+      or error('mysql_insert_game','make_game.make_invite_game.update_game');
 
    if( mysql_affected_rows() != 1)
-      error('mysql_insert_game','make_invite_game4');
+      error('mysql_start_game', 'make_game.make_invite_game.update_game');
 
    if( $disputegid > 0 )
       $gid = $disputegid;
@@ -275,14 +276,15 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
    if( $gid > 0 )
    {
       mysql_query("UPDATE Games SET $set_query WHERE ID=$gid LIMIT 1")
-         or error("mysql_start_game","update_game $gid");
+         or error('mysql_query_failed',"make_game.create_game.update: $gid");
+
       if( mysql_affected_rows() != 1)
-         error("mysql_start_game","update_game_row $gid");
+         error("mysql_start_game","make_game.create_game.update: $gid");
    }
    else
    {
       mysql_query("INSERT INTO Games SET $set_query")
-         or error("mysql_start_game",'insert_game');
+         or error('mysql_query_failed','make_game.create_game.insert');
       $gid = mysql_insert_id();
    }
 
@@ -332,7 +334,7 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
    }
 
    mysql_query( $query )
-      or error('internal_error','insert std_handicap');
+      or error('mysql_query_failed','make_game.make_standard_placement_of_handicap_stones');
 
    return true;
 }

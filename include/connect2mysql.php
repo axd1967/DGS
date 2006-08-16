@@ -56,67 +56,6 @@ function disable_cache($stamp=NULL, $expire=NULL)
 }
 
 
-if( !function_exists('error') )
-{
-function error($err, $debugmsg=NULL)
-{
-
-   $handle = safe_getcookie('handle');
-
-   list( $err, $uri)= err_log( $handle, $err, $debugmsg);
-
- global $quick_errors;
-   if( @$quick_errors )
-      quick_error( $err ); //Short one line message
-
-   disable_cache();
-
-   jump_to( $uri );
-}
-}
-
-
-function err_log( $handle, $err, $debugmsg=NULL)
-{
-
-   $uri = "error.php?err=" . urlencode($err);
-   $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".mysql_escape_string($handle)."'"
-      .", Message='".mysql_escape_string($err)."', IP='".mysql_escape_string($ip)."'" ;
-
-   $mysqlerror = @mysql_error();
-
-   if( !empty($mysqlerror) )
-   {
-      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
-      $errorlog_query .= ", MysqlError='".mysql_escape_string( $mysqlerror)."'";
-      $err.= ' / '. $mysqlerror;
-   }
-
-   
-   if( empty($debugmsg) )
-   {
-    global $SUB_PATH;
-//CAUTION: sometime, REQUEST_URI != PHP_SELF+args
-//if there is a redirection, _URI==requested, while _SELF==reached (running one)
-      $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
-      //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
-      $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
-   }
-   if( !empty($debugmsg) )
-   {
-      $errorlog_query .= ", Debug='" . mysql_escape_string( $debugmsg) . "'";
-      //$err.= ' / '. $debugmsg; //Do not display this info!
-   }
-
-   global $dbcnx;
-   if( !@$dbcnx )
-      connect2mysql( true);
-
-   @mysql_query( $errorlog_query );
-
-   return array( $err, $uri);
-}
 
 
 function admin_log( $uid, $handle, $err)
@@ -126,7 +65,8 @@ function admin_log( $uid, $handle, $err)
    $query = "INSERT INTO Adminlog SET uid='$uid', Handle='".mysql_escape_string($handle)."'"
       .", Message='".mysql_escape_string($err)."', IP='".mysql_escape_string($ip)."'" ;
 
-   return @mysql_query( $query );
+   return ( mysql_query( $query )
+            or error('mysql_query_failed','connect2mysql.admin_log') );
 }
 
 
