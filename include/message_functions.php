@@ -717,8 +717,13 @@ function echo_folders($folders, $current_folder)
    $folders[FOLDER_ALL_RECEIVED] = $STANDARD_FOLDERS[FOLDER_ALL_RECEIVED];
    ksort($folders);
 
+   $i = 0;
    foreach( $folders as $nr => $val )
    {
+      if( $i > 0 && ($i % 8) == 0 )
+          $string .= "</tr>\n<tr><td>&nbsp;</td>";
+      $i++;
+
       list($name, $color, $fcol) = $val;
       $name = "<font color=\"$fcol\">" . make_html_safe($name) . "</font>" ;
       $string .= '<td bgcolor="#' .blend_alpha_hex($color). '"' ;
