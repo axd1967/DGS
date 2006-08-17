@@ -36,6 +36,11 @@ function post_message($player_row, $moderated_forum, &$thread)
    $Subject = mysql_escape_string( trim($Subject));
    $Text = mysql_escape_string( trim($Text));
 
+   if( $Text == '' )
+      return '';
+   if( $Subject == '' )
+      $Subject = '???';
+
    $moderated = ($moderated_forum or $player_row['MayPostOnForum'] == 'M');
 
    // -------   Edit old post  ----------
