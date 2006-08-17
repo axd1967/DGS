@@ -31,8 +31,8 @@ chdir("forum");
 $new_level1 = 2*7*24*3600;  // two weeks
 $firstnew = true;
 
-//Should be: $order_str = "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-$order_str = "*+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
+// must follow the "ORDER BY PosIndex" order: 
+$order_str = "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 define("LINK_FORUMS", 1 << 0);
 define("LINK_THREADS", 1 << 1);
