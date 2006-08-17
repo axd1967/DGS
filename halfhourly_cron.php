@@ -26,7 +26,8 @@ $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.sourceforge.net
 {
-   $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
+   //HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES
+   $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
    $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
 
    function html_entity_decode($str, $quote_style=ENT_COMPAT, $charset='iso-8859-1')
@@ -120,7 +121,7 @@ if( !$is_down )
    mysql_free_result($result);
 
    if( $row['timediff'] < $half_diff )
-      if( !@$_REQUEST['forced'] )
+      //if( !@$_REQUEST['forced'] )
          exit;
 
    mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202")
