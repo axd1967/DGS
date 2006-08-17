@@ -65,7 +65,7 @@ require_once( "include/std_functions.php" );
 
    //echo '<p>Loadavg: ' . `cat /proc/loadavg`; //only under Linux like systems and with safe_mode=off
    $tmp = '/proc/loadavg';
-   if( file_exists( $tmp ) )
+   if( @is_readable( $tmp ) )
    {
       $tmp = trim(implode('', file($tmp)));
       echo '<p>Loadavg: ' . $tmp;
