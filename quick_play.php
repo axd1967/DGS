@@ -145,8 +145,6 @@ else
 
    $next_to_move = WHITE+BLACK-$to_move;
 
-   if( $Moves+1 < $Handicap ) $next_to_move = BLACK;
-
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
 
