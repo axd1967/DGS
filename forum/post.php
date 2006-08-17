@@ -72,6 +72,7 @@ function post_message($player_row, $moderated_forum, &$thread)
                    "Parent_ID=$edit, " .
                    "Forum_ID=" . $row['Forum_ID'] . ", " .
                    "User_ID=" . $player_row['ID'] . ", " .
+                      //PosIndex=NULL
                             "Subject=\"$oldSubject\", " .
                       "Text=\"$oldText\"" )
           or error('mysql_query_failed','forum_post.post_message.edit.insert');
