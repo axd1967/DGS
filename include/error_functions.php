@@ -25,7 +25,7 @@ define('ERROR_MODE_JUMP', 1);
 define('ERROR_MODE_PRINT', 2);
 define('ERROR_MODE_COLLECT', 3);
 
-class Error
+class Errors
 {
       var $mode;
       var $errors_are_fatal;
@@ -33,21 +33,33 @@ class Error
 
       var $error_list;
 
-      function Error()
+      function Errors()
       {
-         $this->mode = ERROR_MODE_JUMP;
          $this->error_list = array();
-         $this->errors_are_fatal = true;
-         $this->log_errors = true;
+         $this->set_mode( ERROR_MODE_JUMP);
       }
 
       function set_mode($m)
       {
-         if( $m == ERROR_MODE_JUMP or $m == ERROR_MODE_PRINT or $m == ERROR_MODE_COLLECT )
+         switch( $m )
+         {
+         case ERROR_MODE_PRINT:
             $this->mode = $m;
-
-         if( $this->mode == ERROR_MODE_COLLECT )
+            $this->errors_are_fatal = true;
+            $this->log_errors = true;
+            break;
+         case ERROR_MODE_COLLECT:
+            $this->mode = $m;
             $this->errors_are_fatal = false;
+            $this->log_errors = true;
+            break;
+         default:
+         case ERROR_MODE_JUMP:
+            $this->mode = ERROR_MODE_JUMP;
+            $this->errors_are_fatal = true;
+            $this->log_errors = true;
+            break;
+         }
       }
 
 
@@ -55,6 +67,7 @@ class Error
       {
          $str = '';
 
+         reset($this->error_list);
          while( list($key, $val) = each($this->error_list) )
          {
             list($err, $debugmsg) = $val;
@@ -78,6 +91,8 @@ class Error
 
          if( $this->log_errors and !$warn )
             list( $err, $uri)= err_log( $handle, $err, $debugmsg);
+         else
+            $uri = "error.php?err=" . urlencode($err);
 
 
          if( $this->mode == ERROR_MODE_COLLECT )
@@ -102,22 +117,29 @@ class Error
 
 }
 
+$TheErrors = new Errors();
+
+
+
+if( !function_exists('error') )
+{
 function error($err, $debugmsg=NULL)
 {
    global $TheErrors;
 
    $TheErrors->add_error($err, $debugmsg);
 }
+}
 
+if( !function_exists('warning') )
+{
 function warning($err)
 {
    global $TheErrors;
 
    $TheErrors->add_error($err, NULL, true);
 }
-
-$TheErrors = new Error();
-
+}
 
 
 

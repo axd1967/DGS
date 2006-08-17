@@ -21,112 +21,24 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 chdir("../");
 
-$quick_errors = 1;
 function error($err, $debugmsg=NULL)
 {
    global $uhandle;
 
-   list( $err, $uri)= err_log( $uhandle, $err, $debugmsg);
+   list( $xerr, $uri)= err_log( $uhandle, $err, $debugmsg);
 
    global $wap_opened;
    if( !$wap_opened )
       wap_open( 'ERROR');
-   wap_error( $err);
+   wap_error( $xerr);
    wap_close();
    exit;
 }
 
 require_once( "include/quick_common.php" );
+require_once( "include/connect2mysql.php" );
 
-//require_once( "include/connect2mysql.php" );
-//else ...
-{//standalone version ==================
-require_once( "include/config.php" );
-if( @URI_AMP=='URI_AMP' ) define('URI_AMP','&amp;');
-
-function err_log( $handle, $err, $debugmsg=NULL)
-{
-
-   $uri = "error.php?err=" . urlencode($err);
-   $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".mysql_escape_string($handle)."'"
-      .", Message='".mysql_escape_string($err)."', IP='".mysql_escape_string($ip)."'" ;
-
-   $mysqlerror = @mysql_error();
-
-   if( !empty($mysqlerror) )
-   {
-      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
-      $errorlog_query .= ", MysqlError='".mysql_escape_string( $mysqlerror)."'";
-      $err.= ' / '. $mysqlerror;
-   }
-
-   
-   if( empty($debugmsg) )
-   {
-    global $SUB_PATH;
-//CAUTION: sometime, REQUEST_URI != PHP_SELF+args
-//if there is a redirection, _URI==requested, while _SELF==reached (running one)
-      $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
-      //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
-      $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
-   }
-   if( !empty($debugmsg) )
-   {
-      $errorlog_query .= ", Debug='" . mysql_escape_string( $debugmsg) . "'";
-      //$err.= ' / '. $debugmsg; //Do not display this info!
-   }
-
-   global $dbcnx;
-   if( !@$dbcnx )
-      connect2mysql( true);
-
-   @mysql_query( $errorlog_query );
-
-   return array( $err, $uri);
-}
-
-function disable_cache($stamp=NULL, $expire=NULL)
-{
-   global $NOW;
-   if( !$stamp )
-      $stamp = $NOW;  // Always modified
-   if( !$expire )
-      $expire = $stamp-3600;  // Force revalidation
-
-   header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
-   header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
-   if( !$expire or $expire<=$NOW )
-   {
-      header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
-      header('Pragma: no-cache');                                              // HTTP/1.0
-   }
-}
-
-function connect2mysql($no_errors=false)
-{
-   global $dbcnx, $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
-
-   $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
-
-   if (!$dbcnx)
-   {
-      if( $no_errors ) return false;
-      error("mysql_connect_failed");
-   }
-
-   if (! @mysql_select_db($DB_NAME) )
-   {
-      mysql_close( $dbcnx);
-      $dbcnx= 0;
-      if( $no_errors ) return false;
-      error("mysql_select_db_failed");
-   }
-
-   return true;
-}
-}//standalone version ==================
-
+$TheErrors->set_mode(ERROR_MODE_PRINT);
 
 
 $xmltrans = array();
@@ -332,32 +244,6 @@ function wap_auth( $defid='', $defpw='')
 }
 
 
-function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
-{
-   $given_passwd_encrypted =
-     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('".mysql_escape_string($given_passwd)."')" ) );
-   $given_passwd_encrypted = $given_passwd_encrypted[0];
-
-   if( $passwd != $given_passwd_encrypted )
-   {
-      // Check if there is a new password
-
-      if( empty($new_passwd) or $new_passwd != $given_passwd_encrypted )
-         return false;
-   }
-
-   if( !empty( $new_passwd ) )
-   {
-      mysql_query( 'UPDATE Players ' .
-                   "SET Password='" . $given_passwd_encrypted . "', " .
-                   'Newpassword=NULL ' .
-                   "WHERE Handle='".mysql_escape_string($uhandle)."' LIMIT 1" );
-   }
-
-   return true;
-}
-
-
 
 if( $is_down )
 {
@@ -460,7 +346,8 @@ else
               "AND me.Sender='N' " . //exclude message to myself
       "ORDER BY date, me.mid";
 
-   $resultM = mysql_query( $query ) or error('mysql_query_failed','wap3');
+   $resultM = mysql_query( $query )
+      or error('mysql_query_failed','wap3');
    $countM = @mysql_num_rows($resultM);
 
 
@@ -474,7 +361,8 @@ else
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        "ORDER BY date, Games.ID";
 
-   $resultG = mysql_query( $query ) or error('mysql_query_failed','wap4');
+   $resultG = mysql_query( $query )
+      or error('mysql_query_failed','wap4');
    $countG = @mysql_num_rows($resultG);
 
 

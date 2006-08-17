@@ -34,8 +34,8 @@ function make_known_languages() //must be called from main dir
    if( !$fd )
    {
       //echo "couldnt_open_transl_file ". $Filename; exit;
-      global $quick_errors;
-      $quick_errors= 1; // nothing more can be done with an error now.
+      global $TheErrors;
+      $TheErrors->set_mode(ERROR_MODE_PRINT);
       error("couldnt_open_transl_file", $Filename);
    }
 
