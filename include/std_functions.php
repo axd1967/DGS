@@ -1269,6 +1269,7 @@ function who_is_logged( &$row)
    $sessioncode = safe_getcookie('sessioncode');
    $curdir = getcwd();
    global $main_path;
+// because include_all_translate_groups() must be called from main dir
    chdir( $main_path);
    $res = is_logged_in($handle, $sessioncode, $row);
    chdir( $curdir);
@@ -1347,32 +1348,6 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
    get_cookie_prefs($row);
 
    setTZ( $row['Timezone']);
-
-   return true;
-}
-
-function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
-{
-   $given_passwd_encrypted =
-     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('".addslashes($given_passwd)."')" ) );
-   $given_passwd_encrypted = $given_passwd_encrypted[0];
-
-   if( $passwd != $given_passwd_encrypted )
-   {
-      // Check if there is a new password
-
-      if( empty($new_passwd) or $new_passwd != $given_passwd_encrypted )
-         return false;
-   }
-
-   if( !empty( $new_passwd ) )
-   {
-      mysql_query( 'UPDATE Players ' .
-                   "SET Password='" . $given_passwd_encrypted . "', " .
-                   'Newpassword=NULL ' .
-                   "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" )
-         or error('mysql_query_failed','std_functions.check_password.set_password');
-   }
 
    return true;
 }
