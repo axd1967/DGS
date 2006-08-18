@@ -218,16 +218,17 @@ require_once( "include/message_functions.php" );
 
       $gtable->echo_table();
    }
-   echo "</center>";
 
    if( $player_row['Adminlevel'] & ADMIN_FORUM )
    {
+      echo "<hr><br>";
       chdir('forum');
       require_once('forum_functions.php');
       display_posts_pending_approval();
       chdir('..');
    }
 
+   echo "</center>";
 
 
 
