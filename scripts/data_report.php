@@ -111,13 +111,20 @@ require_once( "include/form_functions.php" );
    {
       $apply=0;
       $query= '';
+      $uri= 'http://' . $HOSTNAME . @$_SERVER['PHP_SELF'] . '?';
       foreach( $arg_array as $arg => $word )
       {
          if( $$arg )
+         {
             $query.= $word . ' ' . $$arg . ' ';
+            $uri.= $arg . '=' . urlencode($$arg) . URI_AMP;
+         }
       }
+      $uri.= 'apply=1#result';
 
-      echo 'Query&gt; ' . $query . ';<p>';
+      echo 'Query&gt; ' . anchor( $uri, $query.' ;') . "<p>\n";
+
+
 
       echo "<A name=\"result\"></A>\n";
       if( ($n=echo_query( $query, $rowhdr, $colsize, $colwrap)) < 0 ) break;
@@ -133,6 +140,7 @@ require_once( "include/form_functions.php" );
 
       if( echo_query( 'EXPLAIN '.$query, 0, 0, 0) < 0 ) break;
 
+      echo 'Query&gt; ' . anchor( $uri, $query.' ;') . "<p>\n";
    }
 
    end_html();
