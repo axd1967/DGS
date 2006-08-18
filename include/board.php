@@ -166,8 +166,8 @@ class Board
          //No need of movemsg if we don't have movecol??
          if( $row=mysql_single_fetch( 
                 "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move",
-                'assoc', 'board.load_from_db.movemessage');
-               ) )
+                'assoc', 'board.load_from_db.movemessage')
+               )
          {
             $this->movemsg = trim($row['Text']);
          }
