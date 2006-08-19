@@ -48,7 +48,7 @@ require_once( "include/std_functions.php" );
           "and <a href=\"edit_bio.php\">enter some biographical info</a>, especially " .
           "the fields 'Open for matches?', 'Rating' and 'Rank info' are useful for " .
           "finding opponents. Next you can study the <a href=\"users.php\">user list</a> " .
-          "and use the <a href=\"phorum/index.php\">forums</a> to find suitable opponents " .
+          "and use the <a href=\"forum/index.php\">forums</a> to find suitable opponents " .
           "to <a href=\"message.php?mode=Invite\">invite</a> for a game.") . "\n";
 
   echo "<p>\n";
