@@ -38,7 +38,7 @@ PostsInThread: Total number of approved posts in the thread.
 LastPost: Id of the last post in the thread.
 */
 
-
+$TranslateGroups[] = "Forum";
 
 require_once( "forum_functions.php" );
 
