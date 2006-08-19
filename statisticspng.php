@@ -136,7 +136,7 @@ function scale($x)
    $nr_points = count($tTime);
 
    $graphs[]= array(
-      'name' => $T_('Running Games'), 
+      'name' => $T_('Running games'), 
       'x' => &$tTime,
       'y' => &$tGameR,
       'max' => $maxGameR,
