@@ -4,8 +4,8 @@
 CREATE TABLE Players (
   ID int(11) NOT NULL auto_increment,
   Handle varchar(16) NOT NULL default '',
-  Password varchar(16) default NULL,
-  Newpassword varchar(16) default NULL,
+  Password varchar(41) default NULL,
+  Newpassword varchar(41) default NULL,
   Sessioncode varchar(16) default NULL,
   Sessionexpire datetime default NULL,
   Lastaccess datetime default NULL,
@@ -69,7 +69,8 @@ CREATE TABLE Players (
   PRIMARY KEY  (ID),
    UNIQUE KEY Handle (Handle),
    KEY Rating2 (Rating2),
-   KEY Name (Name)
+   KEY Name (Name),
+   KEY Activity (Activity)
 ) TYPE=MyISAM;
 
 
