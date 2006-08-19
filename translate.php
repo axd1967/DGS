@@ -61,9 +61,12 @@ $info_box = '<CENTER>
 <p>
 ';
 
+// SELECT * FROM 'TranslationGroups' 
+// + 'Untranslated phrases'
 $translation_groups =
-   array( 'Common', 'Start', 'Game', 'Messages', 'Users',
-          'Docs', 'FAQ', 'Admin', 'Error', 'Countries', 'Untranslated phrases' );
+   array( 'Common', 'Start', 'Game', 'Messages', 'Users', 'Forum',
+          'Docs', 'FAQ', 'Admin', 'Error', 'Countries',
+          'Untranslated phrases' );
 
 {
 
