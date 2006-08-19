@@ -97,7 +97,7 @@ require_once( "forum_functions.php" );
          $show_rows = $SearchPostsPerPage;
 
       $cols=2;
-      $headline = array(T_("Reading thread") => "colspan=$cols");
+      $headline = array(T_("Search result") => "colspan=$cols");
 
       $links |= LINK_FORUMS;
       if( $offset > 0 ) $links |= LINK_PREV_PAGE;
