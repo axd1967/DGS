@@ -26,6 +26,79 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 chdir( '../' );
 require_once( "include/std_functions.php" );
 
+if (!function_exists('glob')) {
+//glob exists by default since PHP version 4.3.9 (The PHP Group)
+/* Valid flags:
+Note : GLOB_ONLYDIR is not available on Windows.
+*/
+define('GLOB_MARK'    ,0x01); //+ Adds a slash to each item returned
+define('GLOB_NOSORT'  ,0x02); //+ Return files as they appear in the directory (no sorting)
+define('GLOB_NOCHECK' ,0x04); //+ Return the search pattern if no files matching it were found
+define('GLOB_NOESCAPE',0x08); // Backslashes do not quote metacharacters
+define('GLOB_BRACE'   ,0x10); // Expands {a,b,c} to match 'a', 'b', or 'c'
+define('GLOB_ONLYDIR' ,0x20); //+ Return only directory entries which match the pattern
+function glob($pat, $flg=0)
+{
+   //$pat= realpath($pat);
+   $dir= pathinfo($pat);
+   $rexp=filepat2preg($dir['basename']);
+   $dir= $dir['dirname'];
+   $dir=dir_slashe( $dir, 1);
+   //echo "glob: dir='$dir' rexp=$rexp<br>";
+
+   $res= array();
+   if (is_dir($dir)) {
+     if ($dh = opendir($dir)) {
+       while (($file = readdir($dh)) !== false) {
+         if (preg_match($rexp,$file)) {
+           if (!($flg & GLOB_ONLYDIR) || is_dir($dir.$file))
+             $res[]=$dir.$file.(($flg & GLOB_MARK)?'/':'');
+         }
+       }
+       closedir($dh);
+     }
+   }
+   if (count($res)) {
+     if (!($flg & GLOB_NOSORT)) sort($res);
+   } else {
+     if ( ($flg & GLOB_NOCHECK)) $res=$rexp;
+     else $res=false;
+   }
+   return $res;
+}//glob
+
+function dir_slashe( $fn, $trail=false)
+{
+  if( $fn == '.' )
+    return '';
+  $fn=str_replace('\\','/',$fn);
+  if( $trail )
+    if( substr($fn, -1) !== '/' )
+      $fn.='/';
+  return $fn;
+}//dir_slashe
+
+function filepat2preg($p, $flg=0)
+{
+  $p=preg_quote($p);
+  $p=strtr($p, array(
+      '\\?'=>'[^/\\\\]',
+      '\\*'=>'[^/\\\\]*?',
+      '\\['=>'[',
+      '\\]'=>']',
+    ));
+  if( ($flg & GLOB_BRACE) )
+    $p=preg_replace('%\\\\{([^}]*)\\\\}%e'
+      ,"'('.strtr('\\1',array('\\\\\\\\\\\\\\\\,'=>',',','=>'|')).')'"
+      ,$p);
+  //the '+' are antislashed and unused in replacements
+  $p='+^'.$p.'$+is';
+  return $p;
+}//filepat2preg
+
+}//function_exists('glob')
+
+
 function find_php_files( )
 {
    $directories = array( '', 'include/', 'forum/' );
@@ -36,6 +109,7 @@ function find_php_files( )
    {
       foreach (glob("$dir*.php") as $filename)
       {
+         //echo "filename=$filename<br>";
          $array[] = $filename;
       }
    }
