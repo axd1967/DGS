@@ -20,11 +20,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
-//if( @$_GET['quick_mode'] )
-   $quick_errors = 1;
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
 
+$TheErrors->set_mode(ERROR_MODE_PRINT);
 
 {
    connect2mysql();
