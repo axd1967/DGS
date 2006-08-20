@@ -45,7 +45,7 @@ require_once( "include/message_functions.php" );
    echo "<h3><font color=$h3_color>" . T_('Status') . '</font></h3>';
 
    echo '
-    <table id=\"user_status\" class=infos border=1>
+    <table id="user_status" class=infos border=1>
        <tr><td><b>' . T_("Name") . '</b></td>
            <td>' . make_html_safe($player_row["Name"]) . '</td></tr>
        <tr><td><b>' . T_("Userid") . '</b></td>
