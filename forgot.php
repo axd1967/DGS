@@ -32,7 +32,7 @@ require_once( "include/form_functions.php" );
 
    echo "<center>\n";
 
-   echo '<TABLE border=0 cellpadding=0 width="80%"><TR><TD align="left">&nbsp;<P>
+   echo '<TABLE border=0 cellpadding=0 width="80%"><TR><TD align="left">&nbsp;<p></p>
 ' . T_('If you have forgot your password we can email a new one. The new password will be randomly generated, but you can of course change it later from the edit profile page.')
 . '
 </TD></TR>

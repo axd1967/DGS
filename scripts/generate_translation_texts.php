@@ -41,7 +41,7 @@ chdir( 'scripts' );
      $Filename = $row['Page'];
      $Group_ID = $row['Group_ID'];
 
-     echo "<hr><p>$Filename<hr><p>\n";
+     echo "<hr><p></p>$Filename $Group_ID<hr><p></p>\n";
 
      $fd = fopen( $main_path . $Filename, 'r' )
         or error( 'couldnt_open_file' );
@@ -52,7 +52,7 @@ chdir( 'scripts' );
      preg_match_all( $pattern, $contents, $matches );
 
      foreach( $matches[1] as $string )
-        {
+     {
   //Actually, the 'T_' argument may contains concatenations but with the same quoting 
            $string = preg_replace( '/[\'"]\s+\.\s+[\'"]/s', "", $string );
            $string = preg_replace( '/\\n/', '\n', $string );
@@ -84,12 +84,15 @@ chdir( 'scripts' );
               $text_row = mysql_fetch_array($res);
               $Text_ID = $text_row['ID'];
            }
+           mysql_free_result($res);
 
 //           mysql_query("INSERT INTO TranslationFoundInGroup " .
            mysql_query("REPLACE INTO TranslationFoundInGroup " .
                        "SET Text_ID=$Text_ID, Group_ID=$Group_ID" );
-        }
+     }
   }
+  mysql_free_result($result);
+
 }
 
 ?>

@@ -45,14 +45,14 @@ require_once( "include/form_functions.php" );
 
 
 if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
-  echo "<p><font color=green>\n" .
-     T_("Welcome to the development version of the dragon go server!") . 
+  echo "<p></p><font color=green>\n" .
+     T_("Welcome to the development version of the Dragon Go Server!") . 
      '<br>&nbsp;<br>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") . 
      '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
      '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") . 
      "</font><HR>\n";
 }else{ //for devel server
-  echo "<p><font color=green>\n" .
+  echo "<p></p><font color=green>\n" .
      sprintf( T_('Welcome to the %s!'), $FRIENDLY_LONG_NAME) .
      '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
      "</font><HR>\n";
@@ -62,7 +62,7 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
    sysmsg($sysmsg);
 
 
-  echo '<p>' . T_('Please login.') . '<font color="red"> ' .
+  echo '<p></p>' . T_('Please login.') . '<font color="red"> ' .
     sprintf( T_("To look around, use %s."), "'guest' / 'guest'" ) . " </font>\n";
 
   $login_form = new Form( 'loginform', 'login.php', FORM_POST );

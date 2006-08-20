@@ -48,12 +48,12 @@ require_once( "include/move.php" );
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p>*** Fixes errors:<br>";
+      echo "<p></p>*** Fixes errors:<br>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p>(just show queries needed):<br>";
+      echo "<p></p>(just show queries needed):<br>";
    }
 
 
@@ -68,7 +68,7 @@ require_once( "include/move.php" );
    $result = mysql_query($query);
 
    $n= (int)@mysql_num_rows($result);
-   echo "\n<br>=&gt; result: $n rows<p>\n";
+   echo "\n<br>=&gt; result: $n rows<p></p>\n";
 
    if( $n > 0 )
    while( $row = mysql_fetch_assoc( $result ) )

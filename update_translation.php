@@ -76,8 +76,6 @@ require_once( "include/make_translationfiles.php" );
      else if( (  $same && $row['Text'] !== '' )
            or ( !empty($translation) && $row['Text'] !== $translation ) )
      {
-//        echo '<p>' . $row['Original_ID'] . ': ' . @$_POST["transl" . $row['Original_ID']];
-
         if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
            $done_set .= ',' . $row['Original_ID'];
 

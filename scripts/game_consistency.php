@@ -42,7 +42,7 @@ require_once( "include/move.php" );
 
    start_html( 'game_consistency', 0);
 
-      echo "<p>--- Report only:<br>";
+      echo "<p></p>--- Report only:<br>";
 
    if( ($gid=@$_REQUEST['gid']) > 0 )
       $where = " AND ID>=$gid";
@@ -62,11 +62,11 @@ require_once( "include/move.php" );
    $query = "SELECT ID"
       . " FROM Games WHERE Status!='INVITED'$where ORDER BY ID$limit";
 
-   echo "\n<p>query: $query;\n";
+   echo "\n<p></p>query: $query;\n";
    $result = mysql_query($query);
 
    $n= (int)@mysql_num_rows($result);
-   echo "\n<br>=&gt; result: $n rows<p>\n";
+   echo "\n<br>=&gt; result: $n rows<p></p>\n";
 
    if( $n > 0 )
    while( $row = mysql_fetch_assoc( $result ) )

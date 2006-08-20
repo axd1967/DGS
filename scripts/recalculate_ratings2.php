@@ -53,12 +53,12 @@ require_once( "include/rating.php" );
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p>*** Fixes errors:<br>";
+      echo "<p></p>*** Fixes errors:<br>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p>(just show queries needed):<br>";
+      echo "<p></p>(just show queries needed):<br>";
    }
 
 
@@ -85,7 +85,7 @@ require_once( "include/rating.php" );
    $result = mysql_query( $query )
            or die("<BR>" . mysql_error() );
 
-   echo "<p>Game:";
+   echo "<p></p>Game:";
    $count=0; $tot=0;
    while( $row = mysql_fetch_assoc( $result ) )
    {
@@ -100,7 +100,7 @@ require_once( "include/rating.php" );
       }
       $tot++;
    }
-   echo "\n<p>Finished!<br>$count/$tot rated games.\n";
+   echo "\n<p></p>Finished!<br>$count/$tot rated games.\n";
 
 
    end_html();

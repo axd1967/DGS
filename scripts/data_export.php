@@ -115,7 +115,7 @@ function get_tables( $database)
       $mysqlerror = @mysql_error();
       if( $mysqlerror )
       {
-         echo "Error: $mysqlerror<p>";
+         echo "Error: $mysqlerror<p></p>";
          return -1;
       }
 

@@ -135,7 +135,7 @@ require_once( "include/countries.php" );
 
    if( @mysql_num_rows($result) > 0 )
    {
-      echo '    <p>
+      echo '    <p></p>
     <h3><font color=' . $h3_color . '>' . T_('Biographical info') . '</font></h3>
     <table class="bio_infos" border=1>
 ';

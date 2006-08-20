@@ -76,7 +76,7 @@ function item($text,$link,$working, $level,$last=false)
          item(T_('My user info'), "userinfo.php?uid=$id", true, 1);
          {
             item(T_('Edit profile'), "edit_profile.php", true, 2);
-            item(T_('Edit bio'), "edit_bio.php", true, 2);
+            item(T_('Edit biographical info'), "edit_bio.php", true, 2);
             item(T_('Change password'), "edit_password.php", true, 2);
             item(T_('Edit vacation'), "edit_vacation.php", true, 2, true);
          }
@@ -133,7 +133,7 @@ function item($text,$link,$working, $level,$last=false)
 
 }
 
-echo "</table>\n<p>";
+echo "</table>\n<p></p>";
 echo T_('The black links require an argument to work, so they are not usable.') . "\n";
 echo "</td></tr></table>\n";
 

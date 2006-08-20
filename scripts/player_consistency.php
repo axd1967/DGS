@@ -38,7 +38,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
    {
-      echo "Error: $mysqlerror<p>";
+      echo "Error: $mysqlerror<p></p>";
       return -1;
    }
 
@@ -235,12 +235,12 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p>*** Fixes errors:<br>";
+      echo "<p></p>*** Fixes errors:<br>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p>(just show queries needed):<br>";
+      echo "<p></p>(just show queries needed):<br>";
    }
 
 

@@ -48,12 +48,12 @@ require_once( "include/std_functions.php" );
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p>*** Fixes errors:<br>";
+      echo "<p></p>*** Fixes errors:<br>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p>(just show queries needed):<br>";
+      echo "<p></p>(just show queries needed):<br>";
    }
 
 
@@ -64,7 +64,7 @@ require_once( "include/std_functions.php" );
 
 
 
-   echo "<p>Lost replied:";
+   echo "<p></p>Lost replied:";
 
    $query = "SELECT org.*, cor.Replied, cor.Sender, cor.ID as cid, rep.ID as rid"
      ." FROM Messages as rep, Messages as org, MessageCorrespondents AS cor, MessageCorrespondents AS cre"
@@ -91,7 +91,7 @@ require_once( "include/std_functions.php" );
 //see also: message_list_query and message_list_table
 function check_myself_message( $user_id=false)
 {
-   echo "<p>Messages to myself:";
+   echo "<p></p>Messages to myself:";
 
 //Find old way *messages to myself*, i.e. where sender and receiver are the same user.
    $query = "SELECT me.mid as mid, " .

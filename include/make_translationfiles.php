@@ -109,7 +109,7 @@ function make_include_files($language=null, $group=null) //must be called from m
          $grp = $row['Groupname'];
          $lang = $row['Language'];
 
-//         echo "<p>$lang -- $grp\n";
+//         echo "<p></p>$lang -- $grp\n";
 
          if( isset( $fd ) )
          {
@@ -187,7 +187,7 @@ function translations_query( $translate_lang, $untranslated, $group )
 /* Translations.Text IS NOT NULL (but maybe empty if the 'same' box is checked)
     and Translatable='Y' (instead of Done as for a FAQ message)
     is the default status for a translated system message.
-   So, Translations.Text IS NULL mean "never translated".
+   So, Translations.Text IS NULL means "never translated".
 */
 /* Note: Some items appear two or more times within the untranslated set
     when from different groups. But we can't use:

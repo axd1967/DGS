@@ -506,7 +506,7 @@ function get_alt_arg( $n1, $n2)
    $TheBoard->draw_board( $may_play, $action, $stonestring);
 
    if( $extra_message ) //score messages
-      echo "<P><center>$extra_message</center>\n";
+      echo "<p></p><center>$extra_message</center>\n";
    echo '<br>';
 
    $cols = 2;

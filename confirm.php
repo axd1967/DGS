@@ -569,12 +569,12 @@ This is why:
          if( $message_from_server_way )
          {
             //A server message will only be read by this player
-            $Text .= "Your opponent wrote:<p>" . $message;
+            $Text .= "Your opponent wrote:<p></p>" . $message;
          }
          else
          {
             //Because both players will read this message
-            $Text .= "The final message was:<p>" . $message;
+            $Text .= "The final message was:<p></p>" . $message;
          }
       }
 

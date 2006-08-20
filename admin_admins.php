@@ -126,7 +126,7 @@ require_once( "include/table_columns.php" );
   start_page(T_("Admin").' - '.T_('Edit admin staff'), true, $logged_in, $player_row );
 
 
-   echo "<center>&nbsp;<p><h3><font color=$h3_color><B>" . T_('Admins') . ":</B></font></h3><p>\n";
+   echo "<center>&nbsp;<p></p><h3><font color=$h3_color><B>" . T_('Admins') . ":</B></font></h3>\n";
 
    echo '<form name="admform" action="admin_admins.php?update=t" method="POST">'."\n";
 

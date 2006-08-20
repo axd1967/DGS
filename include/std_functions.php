@@ -345,7 +345,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( $is_down )
    {
-      echo $is_down_message . '<p>';
+      echo $is_down_message . '<p></p>';
       end_page();
       exit;
    }
@@ -636,7 +636,7 @@ function help($topic)
 function sysmsg($msg)
 {
    if( isset($msg) && trim($msg) )
-      echo "\n<p><b><font color=\"green\">".make_html_safe($msg)."</font></b><hr>\n";
+      echo "\n<p></p><b><font color=\"green\">".make_html_safe($msg)."</font></b><hr>\n";
 }
 
 

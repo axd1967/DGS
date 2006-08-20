@@ -61,20 +61,20 @@ require_once( "include/std_functions.php" );
    $row = mysql_single_fetch( $q3 );
    if( $row )
    {
-      echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
-      echo '<p>Activity: ' . round($row['activity']) . "\n";
+      echo '<p></p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
+      echo '<p></p>Activity: ' . round($row['activity']) . "\n";
    }
 
-   //echo '<p>Loadavg: ' . `cat /proc/loadavg`; //only under Linux like systems and with safe_mode=off
+   //echo '<p></p>Loadavg: ' . `cat /proc/loadavg`; //only under Linux like systems and with safe_mode=off
    $tmp = '/proc/loadavg';
    if( @is_readable( $tmp ) )
    {
       $tmp = trim(implode('', file($tmp)));
-      echo '<p>Loadavg: ' . $tmp;
+      echo '<p></p>Loadavg: ' . $tmp;
    }
 
    $tmp = floor($NOW/86400); //to force the caches (daily)
-   echo "\n<p><img src=\"statisticspng.php?date=$tmp\"" .
+   echo "\n<p></p><img src=\"statisticspng.php?date=$tmp\"" .
         " alt=\"" . T_('Statistics graph') . "\">";
 
    end_page();

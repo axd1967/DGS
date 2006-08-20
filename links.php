@@ -67,7 +67,7 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
                      T_('Hikaru no Go'), T_('A manga about go. Recommended!'));
 
 
-  echo "<p>&nbsp;\n";
+  echo "<p>&nbsp;</p>\n";
   echo "<h3 align=left><a name=\"rules\"></a><font color=$h3_color>" .
     T_('Rules') . "</font></h3>\n";
 
@@ -81,7 +81,7 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
                      T_('How to Teach Go'),
                      T_('This is all you need to get started. Very basic stuff'));
 
-  echo "<p>&nbsp;\n";
+  echo "<p>&nbsp;</p>\n";
   echo "<h3 align=left><a name=\"strategy\"></a><font color=$h3_color>" .
     T_('Strategy and terms') . "</font></h3>\n";
 
@@ -100,7 +100,7 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
                      T_('Translated and explained.'));
 
 
-  echo "<p>&nbsp;\n";
+  echo "<p>&nbsp;</p>\n";
   echo "<h3 align=left><a name=\"history\"></a><font color=$h3_color>" .
     T_('History') . "</font></h3>\n";
 
@@ -111,7 +111,7 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
                      T_('The Extended History'),
                      T_('In case you\'re an aspiring know-it-all.'));
   
-  echo "<p>&nbsp;\n";
+  echo "<p>&nbsp;</p>\n";
   echo "<h3 align=left><a name=\"stuff\"></a><font color=$h3_color>" .
     T_('Go books, equipment and software') . "</font></h3>\n";
 
@@ -124,7 +124,7 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
   add_link_page_link("http://www.samarkand.net/", 'Samarkand');
   add_link_page_link("http://www.schaakengo.nl/", 'Het Paard', T_('European shop'));
 
-  echo "<p>&nbsp;\n";
+  echo "<p>&nbsp;</p>\n";
   echo "<h3 align=left><a name=\"servers\"></a><font color=$h3_color>" .
     T_('Other go servers') . "</font></h3>\n";
 

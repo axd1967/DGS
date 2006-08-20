@@ -25,7 +25,7 @@ require_once( "include/std_functions.php" );
 
 function add_contributor( $text, $uref='', $name=false, $handle=false )
 {
-  echo "<tr><td>$text</td>\n";
+   echo "<tr><td>$text</td>\n";
    echo "<td><b>" .
       user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, 'black', $uref, $name, $handle) .
       "</b></td></tr>\n";
@@ -57,7 +57,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   }
 
 
-  echo "<tr><td colspan=2>&nbsp;<p>\n";
+  echo "<tr><td colspan=2><p>&nbsp;</p>\n";
   echo "<center><h3><font color=$h3_color>" .
      T_("FAQ") . "</font></h3></center>\n";
   echo "</td></tr>\n";
@@ -95,7 +95,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   }
 
 
-  echo "<tr><td colspan=2>&nbsp;<p>\n";
+  echo "<tr><td colspan=2><p>&nbsp;</p>\n";
   echo "<center><h3><font color=$h3_color>" .
      T_('Current translators') . "</font></h3></center>\n";
   echo "</td></tr>\n";

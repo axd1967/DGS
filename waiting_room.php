@@ -87,7 +87,7 @@ require_once( "include/message_functions.php" );
       $baseURL.= URI_AMP.'showall=1';
 
 
-   echo "<h3><font color=$h3_color><B>". T_("Players waiting") . ":</B></font></h3><p>\n";
+   echo "<h3><font color=$h3_color><B>". T_("Players waiting") . ":</B></font></h3>\n";
 
 
    $query = "SELECT Waitingroom.*,Name,Handle"
@@ -209,7 +209,7 @@ require_once( "include/message_functions.php" );
       $wrtable->echo_table();
    }
    else
-      echo '<p>&nbsp;<p>' . T_('Seems to be empty at the moment.');
+      echo '<p></p>&nbsp;<p></p>' . T_('Seems to be empty at the moment.');
 
    if( $idinfo and is_array($info_row) )
    {
@@ -332,7 +332,7 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
 
    extract($game_row);
 
-   echo '<p><a name="info"></a>' . "\n";
+   echo '<p></p><a name="info"></a>' . "\n";
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
    echo show_game_header(T_('Info'));

@@ -122,8 +122,7 @@ require_once( "include/form_functions.php" );
       }
       $uri.= 'apply=1#result';
 
-      echo 'Query&gt; ' . anchor( $uri, $query.' ;') . "<p>\n";
-
+      echo 'Query&gt; ' . anchor( $uri, $query.' ;') . "<p></p>\n";
 
 
       echo "<A name=\"result\"></A>\n";
@@ -140,7 +139,7 @@ require_once( "include/form_functions.php" );
 
       if( echo_query( 'EXPLAIN '.$query, 0, 0, 0) < 0 ) break;
 
-      echo 'Query&gt; ' . anchor( $uri, $query.' ;') . "<p>\n";
+      echo 'Query&gt; ' . anchor( $uri, $query.' ;') . "<p></p>\n";
    }
 
    end_html();
@@ -156,7 +155,7 @@ function echo_query( $query, $rowhdr=20, $colsize=40, $colwrap='cut' )
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
    {
-      echo "Error: $mysqlerror<p>";
+      echo "Error: $mysqlerror<p></p>";
       return -1;
    }
 

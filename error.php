@@ -239,11 +239,11 @@ require_once( "include/std_functions.php" );
       case("not_logged_in"):
       {
         printf( T_("Sorry, you have to be logged in to do that.\n" .
-                   "<p>\n" .
+                   "<p></p>\n" .
                    "The reasons for this problem could be any of the following:\n" .
                    "<ul>\n" .
-                   "<li> You haven't got an <a href=\"%1\$s/register.php\">account</a>, " .
-                   "or haven't <a href=\"%1\$s/index.php\">logged in</a> yet.\n" .
+                   "<li> You haven't got an <a href=\"%1\$sregister.php\">account</a>, " .
+                   "or haven't <a href=\"%1\$sindex.php\">logged in</a> yet.\n" .
                    "<li> Your cookies have expired. This happens once a month.\n" .
                    "<li> You haven't enabled cookies in your browser.\n" .
                    "</ul>"),
@@ -446,7 +446,7 @@ require_once( "include/std_functions.php" );
 
       case("not_translator"):
       {
-         echo T_("Sorry, only translators are allowed to translate.") . '<p>' .
+         echo T_("Sorry, only translators are allowed to translate.") . '<p></p>' .
             T_("If you want to help translating dragon, please post a message to the 'translation' forum.");
       }
       break;
@@ -580,9 +580,9 @@ require_once( "include/std_functions.php" );
 
    $mysqlerror = get_request_arg('mysqlerror'); //@$_GET['mysqlerror'];
    if( $mysqlerror )
-      echo("<p>Mysql error: " . $mysqlerror );
+      echo("<p></p>Mysql error: " . $mysqlerror );
 
-   echo '<p>';
+   echo '<p></p>';
    end_page();
 }
 ?>

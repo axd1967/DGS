@@ -94,7 +94,7 @@ require_once( "include/form_functions.php" );
   echo '<center>';
 
   echo "<h3><font color=$h3_color>" . T_('Rating graph for') . ' ' .
-           user_reference( REF_LINK, 1, '', $user_row) . "</font></h3><p>\n" ;
+           user_reference( REF_LINK, 1, '', $user_row) . "</font></h3>\n" ;
 
   $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2")
      or error('mysql_query_failed', 'ratinggraph.find_rating_data');
@@ -110,7 +110,7 @@ require_once( "include/form_functions.php" );
         URI_AMP."endmonth=$endmonth".URI_AMP."endyear=$endyear\"" .
         " alt=\"" . T_('Rating graph') . "\">\n";
 
-     echo "<p>\n";
+     echo "<p></p>\n";
 
      $form = new Form( 'date_form', 'ratinggraph.php', FORM_GET );
 

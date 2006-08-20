@@ -69,7 +69,7 @@ require_once( "include/message_functions.php" );
    }
    echo '
     </table>
-    <p>';
+    <p></p>';
 
 
    // show messages
@@ -86,7 +86,7 @@ require_once( "include/message_functions.php" );
    {
       $my_folders = get_folders($my_id);
 
-      echo "<HR><h3><font color=$h3_color>" . T_('New messages') . ":</font></h3><p>\n";
+      echo "<HR><h3><font color=$h3_color>" . T_('New messages') . ":</font></h3>\n";
 
       message_list_table( $mtable, $result, 20
              , FOLDER_NONE /*FOLDER_ALL_RECEIVED*/, $my_folders
@@ -95,7 +95,7 @@ require_once( "include/message_functions.php" );
 
       $mtable->echo_table();
       unset($mtable);
-      echo "<p>\n";
+      echo "<p></p>\n";
    }
 
 
@@ -125,7 +125,7 @@ require_once( "include/message_functions.php" );
       or error('mysql_query_failed', 'status.find_games');
 
    echo "<hr><h3><font color=$h3_color>" .
-      T_("Your turn to move in the following games:") . "</font></h3><p>\n";
+      T_("Your turn to move in the following games:") . "</font></h3>\n";
 
    if( @mysql_num_rows($result) == 0 )
    {

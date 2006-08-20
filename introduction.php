@@ -38,7 +38,7 @@ require_once( "include/std_functions.php" );
           , $FRIENDLY_LONG_NAME, '<a href="licence.php">', '</a>'
           , '<a href="links.php">', '</a>' ) . "\n";
 
-  echo "<p>\n";
+  echo "<p></p>\n";
 
   echo T_("You can look at it as kind of play-by-email, " .
           "where a web-interface is used to make the board look prettier." .
@@ -51,14 +51,14 @@ require_once( "include/std_functions.php" );
           "and use the <a href=\"forum/index.php\">forums</a> to find suitable opponents " .
           "to <a href=\"message.php?mode=Invite\">invite</a> for a game.") . "\n";
 
-  echo "<p>\n";
+  echo "<p></p>\n";
 
 
   echo T_("More information can be found in the " .
           "<a href=\"faq.php\">FAQ forum</a> where you are " .
           "also encouraged to submit your own questions.") . "\n";
 
-  echo "<p>\n";
+  echo "<p></p>\n";
 
   echo T_("Once again welcome, and enjoy your visit here!") . "\n";
 

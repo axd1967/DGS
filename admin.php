@@ -37,7 +37,7 @@ require_once( "include/form_functions.php" );
   start_page(T_('Admin'), true, $logged_in, $player_row);
 
   echo "<table><tr><td>\n";
-  echo "<h3 class=header>" . T_('Administration') . "</h3><p>\n";
+  echo "<h3 class=header>" . T_('Administration') . "</h3>\n";
 
   add_link_page_link('admin_password.php', T_('New password'),
                      '', $admin_level & ADMIN_PASSWORD);
