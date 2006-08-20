@@ -47,6 +47,34 @@ pre.code {
 */
 }
 
+div.quote {
+    border: 1px solid #8cacbb;
+    margin: 0.3em 2px 0.3em 0.5em;
+    padding: 0.3em 0em 0.3em 0.5em;
+    width: auto;
+/*
+    line-height: 1.5em;
+*/
+}
+
+.image-left {
+   float: left;
+   clear: both;
+   margin: 0.5em 1em 0.5em 0em;
+   border: 0px solid Black;
+}
+
+.image-inline {
+   float: none;
+}
+
+.image-right {
+   float: right;
+   clear: both;
+   margin: 0.5em;
+   border: 0px solid Black;
+}
+
 table.links {
    width: 100%; 
    border-width: 0px;

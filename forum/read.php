@@ -265,8 +265,8 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
 //      $GoDiagrams = find_godiagrams($Text);
 
-
-      draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text); //, $GoDiagrams);
+      $post_reference =
+         draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text); //, $GoDiagrams);
 
       if( $preview and $preview_ID == $ID )
       {
@@ -281,7 +281,12 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       {
          if( $post_type == 'reply' and !($preview and $preview_ID == $ID) )
          {
-            $Text = '';
+            if( @$_REQUEST['quote'] )
+            {
+               $Text = "<quote>&gt; $post_reference\n\n$Text</quote>";
+            }
+            else
+               $Text = '';
 //            $GoDiagrams = null;
          }
          echo "<tr><td colspan=$cols align=center>\n";

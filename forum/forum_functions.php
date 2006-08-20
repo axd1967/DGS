@@ -220,6 +220,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
                          'preview' => 'cceecc',
                          'edit' => 'eeeecc' );
 
+   $post_reference = '';
    $cols = 2;
 
    $sbj = make_html_safe( $Subject );
@@ -284,14 +285,21 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 
       // second line of Subject header
       echo '<tr bgcolor="#' . $post_colors[ $post_type ] . "\"><td colspan=$hdrcols>";
-      echo T_('by') . " " .
-         user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
-         ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $Timestamp);
+
+      $post_reference = date($date_fmt, $Timestamp);
+      echo T_('by') . " " . user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
+         " &nbsp;&nbsp;&nbsp;$post_reference";      
+
       if( $Lastedited > 0 )
-         echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."revision_history=$ID\">" . T_('edited') .
-            "</a> " . date($date_fmt, $Lasteditedstamp) . ")";
+      {
+         $post_reference = date($date_fmt, $Lasteditedstamp);
+         echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."revision_history=$ID\">"
+            . T_('edited') . "</a> $post_reference)";
+      }
 
       echo "</td></tr>\n";
+
+      $post_reference = T_('by') . " <user $User_ID> - $post_reference";
 
       // post body
       echo "<tr bgcolor=white><td colspan=$cols>$txt</td></tr>";
@@ -303,8 +311,14 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       $hidden = $post_type == 'hidden';
       echo "<tr bgcolor=white><td colspan=$cols align=left>";
       if(  $post_type == 'normal' and !$is_moderator ) // reply link
-         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."reply=$ID#$ID\">[ " .
+      {
+         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
+            .URI_AMP."reply=$ID#$ID\">[ " .
             T_('reply') . " ]</a>&nbsp;&nbsp;";
+         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
+            .URI_AMP."reply=$ID".URI_AMP."quote=1#$ID\">[ " .
+            T_('quote') . " ]</a>&nbsp;&nbsp;";
+      }
       if( $my_post and !$is_moderator ) // edit link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."edit=$ID#$ID\">" .
             "<font color=\"#ee6666\">[ " . T_('edit') . " ]</font></a>&nbsp;&nbsp;";
@@ -324,6 +338,8 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       }
       echo "</td></tr><tr><td colspan=$cols height=2></td></tr>";
    }
+   
+   return $post_reference;
 }
 
 

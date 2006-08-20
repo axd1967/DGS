@@ -777,7 +777,7 @@ function add_line_breaks( $str)
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends:
 $html_code_closed['cell'] = '|b|i|u|strong|em|tt|color|';
-$html_code_closed['msg'] = '|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|';
+$html_code_closed['msg'] = '|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|quote|';
 $html_code_closed['game'] = $html_code_closed['msg'].'h|hidden|c|comment|';
 //$html_code_closed['faq'] = '|'; //no closed check
 $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
@@ -785,10 +785,10 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
 
   // ** no '|' at ends:
 $html_code['cell'] = 'b|i|u|strong|em|tt|color';
-$html_code['msg'] = 'br|p|li'.$html_code_closed['msg']
-   .'goban|mailto|https?|news|game_?|user_?|send_?|/br';
-$html_code['game'] = 'br|p|li'.$html_code_closed['game']
-   .'goban|mailto|https?|news|game_?|user_?|send_?|/br';
+$html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
+   .'goban|mailto|https?|news|game_?|user_?|send_?';
+$html_code['game'] = 'br|/br|p|/p|li'.$html_code_closed['game']
+   .'goban|mailto|https?|news|game_?|user_?|send_?';
 $html_code['faq'] = '\w+|/\w+'; //all not empty words
 
 
@@ -1057,11 +1057,17 @@ function make_html_safe( $msg, $some_html=false)
                            ALLOWED_LT."/font".ALLOWED_GT, $msg);
 
       //tag: <code>...</code> =>translated to <pre class="code">...</pre>
-      // see also parse_tags_safe() for the suppression of inner html code
+      // see also parse_tags_safe() for the suppression of inner html codes
       $msg=preg_replace( "%".ALLOWED_LT."code([^`\n\t]*)".ALLOWED_GT."%is",
                            ALLOWED_LT."pre class=".ALLOWED_QUOT."code".ALLOWED_QUOT."\\1".ALLOWED_GT, $msg);
       $msg=eregi_replace( ALLOWED_LT."/code *".ALLOWED_GT,
                            ALLOWED_LT."/pre".ALLOWED_GT, $msg);
+
+      //tag: <quote>...</quote> =>translated to <div class="quote">...</div>
+      $msg=preg_replace( "%".ALLOWED_LT."quote([^`\n\t]*)".ALLOWED_GT."%is",
+                           ALLOWED_LT."div class=".ALLOWED_QUOT."quote".ALLOWED_QUOT."\\1".ALLOWED_GT, $msg);
+      $msg=eregi_replace( ALLOWED_LT."/quote *".ALLOWED_GT,
+                           ALLOWED_LT."/div".ALLOWED_GT, $msg);
 
 /*
       //tag: <tt>...</tt> =>translated to <pre>...</pre>
