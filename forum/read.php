@@ -283,7 +283,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
          {
             if( @$_REQUEST['quote'] )
             {
-               $Text = "<quote>&gt; $post_reference\n\n$Text</quote>";
+               $Text = "<quote>&gt; $post_reference\n\n$Text</quote>\n";
             }
             else
                $Text = '';
