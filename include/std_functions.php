@@ -777,7 +777,7 @@ function add_line_breaks( $str)
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends:
 $html_code_closed['cell'] = '|b|i|u|strong|em|tt|color|';
-$html_code_closed['msg'] = '|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|quote|';
+$html_code_closed['msg'] = '|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|quote|home|';
 $html_code_closed['game'] = $html_code_closed['msg'].'h|hidden|c|comment|';
 //$html_code_closed['faq'] = '|'; //no closed check
 $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
@@ -792,7 +792,7 @@ $html_code['game'] = 'br|/br|p|/p|li'.$html_code_closed['game']
 $html_code['faq'] = '\w+|/\w+'; //all not empty words
 
 
-  //** no reg exp chars nor ampersand:
+  //** no reg exp chars nor ampersand nor '%' (see also $html_safe_preg):
 define( 'ALLOWED_LT', "`anglstart`");
 define( 'ALLOWED_GT', "`anglend`");
 define( 'ALLOWED_QUOT', "`allowedquot`");
@@ -964,16 +964,80 @@ function parse_html_safe( $msg, $some_html)
 
 function reverse_allowed( $msg)
 {
-   $msg = str_replace(ALLOWED_LT, '<', $msg);
-   $msg = str_replace(ALLOWED_GT, '>', $msg);
-   $msg = str_replace(ALLOWED_QUOT, '"', $msg);
-   $msg = str_replace(ALLOWED_APOS, "'", $msg);
-   return $msg;
+   return str_replace(
+      array( ALLOWED_LT, ALLOWED_GT, ALLOWED_QUOT, ALLOWED_APOS)
+      , array( '<', '>', '"', "'")
+      , $msg);
 }
 
 define('REF_LINK', 0x1);
 define('REF_LINK_ALLOWED', 0x2);
 define('REF_LINK_BLANK', 0x4);
+
+
+//Note: some of those check for the '`' i.e. the first char of ALLOWED_* vars
+$html_safe_preg = array(
+
+//<mailto:...>
+ "%".ALLOWED_LT."(mailto:)([^ `\n\t]+)".ALLOWED_GT."%is"
+  => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT
+                        ."\\2".ALLOWED_LT."/a".ALLOWED_GT,
+
+//<http://...>, <https://...>, <news://...>, <ftp://...>
+ "%".ALLOWED_LT."((http:|https:|news:|ftp:)//[^ `\n\t]+)".ALLOWED_GT."%is"
+  => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT
+                        ."\\1".ALLOWED_LT."/a".ALLOWED_GT,
+
+//<game gid[,move]> =>show game
+ "%".ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *".ALLOWED_GT."%ise"
+  => "game_reference(('\\1'=='_'?".REF_LINK_BLANK.":0)+"
+                        .REF_LINK_ALLOWED.",1,'',\\2,\\4+0)",
+
+//<user uid> or <user =uhandle> =>show user info
+//<send uid> or <send =uhandle> =>send a message to user
+ "%".ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR
+                        ."?[".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT."%ise"
+  => "\\1_reference(('\\2'=='_'?".REF_LINK_BLANK.":0)+"
+                        .REF_LINK_ALLOWED.",1,'','\\3')",
+
+//<color col>...</color> =>translated to <font color="col">...</font>
+ "%".ALLOWED_LT."color +([#0-9a-zA-Z]+) *".ALLOWED_GT."%is"
+  => ALLOWED_LT."font color=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT,
+ "%".ALLOWED_LT."/color *".ALLOWED_GT."%is"
+  => ALLOWED_LT."/font".ALLOWED_GT,
+
+//<tt>...</tt> =>translated to <pre>...</pre>
+// see also parse_tags_safe() for the suppression of inner html code
+/*
+ "%".ALLOWED_LT."tt([^`\n\t]*)".ALLOWED_GT
+  => ALLOWED_LT."pre\\1".ALLOWED_GT,
+ "%".ALLOWED_LT."/tt *".ALLOWED_GT
+  => ALLOWED_LT."/pre".ALLOWED_GT,
+*/
+
+//<code>...</code> =>translated to <pre class="code">...</pre>
+// see also parse_tags_safe() for the suppression of inner html codes
+ "%".ALLOWED_LT."code([^`\n\t]*)".ALLOWED_GT."%is"
+  => ALLOWED_LT."pre class=".ALLOWED_QUOT."code".ALLOWED_QUOT
+                        ."\\1".ALLOWED_GT,
+ "%".ALLOWED_LT."/code *".ALLOWED_GT."%is"
+  => ALLOWED_LT."/pre".ALLOWED_GT,
+
+//<quote>...</quote> =>translated to <div class="quote">...</div>
+ "%".ALLOWED_LT."quote([^`\n\t]*)".ALLOWED_GT."%is"
+  => ALLOWED_LT."div class=".ALLOWED_QUOT."quote".ALLOWED_QUOT
+                        ."\\1".ALLOWED_GT,
+ "%".ALLOWED_LT."/quote *".ALLOWED_GT."%is"
+  => ALLOWED_LT."/div".ALLOWED_GT,
+
+//<home page>...</home> =>translated to <a href="$HOSTBASE$page">...</a>
+ "%".ALLOWED_LT."home[\n\s]+([^`\n\s]*)".ALLOWED_GT."%is"
+  => ALLOWED_LT."a href=".ALLOWED_QUOT.$HOSTBASE."\\1".ALLOWED_QUOT.ALLOWED_GT,
+ "%".ALLOWED_LT."/home *".ALLOWED_GT."%is"
+  => ALLOWED_LT."/a".ALLOWED_GT,
+
+); //$html_safe_preg
+
 
 //$some_html may be false, 'cell', 'faq', 'game', 'gameh' or 'msg'
 function make_html_safe( $msg, $some_html=false)
@@ -1028,55 +1092,8 @@ function make_html_safe( $msg, $some_html=false)
          $some_html = 'msg';
       }
 
-
-      $msg=eregi_replace(ALLOWED_LT."(mailto:)([^ `\n\t]+)".ALLOWED_GT,
-                         ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT.
-                         "\\2".ALLOWED_LT."/a".ALLOWED_GT, $msg);
-      $msg=eregi_replace(ALLOWED_LT."((http:|https:|news:|ftp:)//[^ `\n\t]+)".ALLOWED_GT,
-                         ALLOWED_LT."a href=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT.
-                         "\\1".ALLOWED_LT."/a".ALLOWED_GT, $msg);
-
-
-      //link: <game gid[,move]> =>show game
-      $msg=preg_replace("%".ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *"
-                              .ALLOWED_GT."%ise",
-                        "game_reference(('\\1'=='_'?".REF_LINK_BLANK.":0)+".
-                           REF_LINK_ALLOWED.",1,'',\\2,\\4+0)", $msg);
-      //link: <user uid> or <user =uhandle> =>show user info
-      //link: <send uid> or <send =uhandle> =>send a message to user
-      $msg=preg_replace("%".ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR
-                              ."?[".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT."%ise",
-                        "\\1_reference(('\\2'=='_'?".REF_LINK_BLANK.":0)+".
-                           REF_LINK_ALLOWED.",1,'','\\3')", $msg);
-
-
-      //tag: <color col>...</color> =>translated to <font color="col">...</font>
-      $msg=eregi_replace( ALLOWED_LT."color +([#0-9a-zA-Z]+) *".ALLOWED_GT,
-                           ALLOWED_LT."font color=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT, $msg);
-      $msg=eregi_replace( ALLOWED_LT."/color *".ALLOWED_GT,
-                           ALLOWED_LT."/font".ALLOWED_GT, $msg);
-
-      //tag: <code>...</code> =>translated to <pre class="code">...</pre>
-      // see also parse_tags_safe() for the suppression of inner html codes
-      $msg=preg_replace( "%".ALLOWED_LT."code([^`\n\t]*)".ALLOWED_GT."%is",
-                           ALLOWED_LT."pre class=".ALLOWED_QUOT."code".ALLOWED_QUOT."\\1".ALLOWED_GT, $msg);
-      $msg=eregi_replace( ALLOWED_LT."/code *".ALLOWED_GT,
-                           ALLOWED_LT."/pre".ALLOWED_GT, $msg);
-
-      //tag: <quote>...</quote> =>translated to <div class="quote">...</div>
-      $msg=preg_replace( "%".ALLOWED_LT."quote([^`\n\t]*)".ALLOWED_GT."%is",
-                           ALLOWED_LT."div class=".ALLOWED_QUOT."quote".ALLOWED_QUOT."\\1".ALLOWED_GT, $msg);
-      $msg=eregi_replace( ALLOWED_LT."/quote *".ALLOWED_GT,
-                           ALLOWED_LT."/div".ALLOWED_GT, $msg);
-
-/*
-      //tag: <tt>...</tt> =>translated to <pre>...</pre>
-      // see also parse_tags_safe() for the suppression of inner html code
-      $msg=eregi_replace( ALLOWED_LT."tt([^`\n\t]*)".ALLOWED_GT,
-                           ALLOWED_LT."pre\\1".ALLOWED_GT, $msg);
-      $msg=eregi_replace( ALLOWED_LT."/tt *".ALLOWED_GT,
-                           ALLOWED_LT."/pre".ALLOWED_GT, $msg);
-*/
+      global $html_safe_preg;
+      $msg= preg_replace( array_keys($html_safe_preg), $html_safe_preg, $msg);
 
    }
 
@@ -1089,10 +1106,10 @@ function make_html_safe( $msg, $some_html=false)
    */
    $msg = preg_replace('%&(?!(#[0-9]+|[A-Z][0-9A-Z]*);)%si', '&amp;', $msg);
 
-   $msg = str_replace('<', '&lt;', $msg);
-   $msg = str_replace('>', '&gt;', $msg);
-   $msg = str_replace('"', '&quot;', $msg);
-   $msg = str_replace("'", '&#039;', $msg);
+   $msg = str_replace(
+              array( '<', '>', '"', "'")
+            , array( '&lt;', '&gt;', '&quot;', '&#039;')
+            , $msg);
 
    if( $some_html )
    {
@@ -1435,6 +1452,8 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
       $whitename = "$whitename$blackname" ;
    if( $safe )
       $whitename = make_html_safe($whitename) ;
+   if( $move>0 )
+      $whitename.= " #$move";
    if( $link && $legal )
    {
       $url = "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "");
