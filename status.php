@@ -208,8 +208,9 @@ require_once( "include/message_functions.php" );
             time_remaining($hours, $my_Maintime, $my_Byotime, $my_Byoperiods,
                            $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
-            $grow_strings[10] .= echo_time_remaining($Byotype, $my_Maintime,
-                                                     $my_Byotime, $my_Byoperiods, true);
+            $grow_strings[10] .=
+               echo_time_remaining( $my_Maintime, $Byotype, $my_Byotime,
+                                   $my_Byoperiods, false, true, true);
             $grow_strings[10] .= "</td>";
          }
 

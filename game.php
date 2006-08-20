@@ -739,8 +739,8 @@ function draw_game_info(&$game_row)
    {
       echo '<tr id="blacktime" bgcolor="#DDDDDD">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
-         echo_time_remaining($game_row['Byotype'], $game_row['Black_Maintime'],
-                             $game_row['Black_Byotime'], $game_row['Black_Byoperiods']) .
+         echo_time_remaining( $game_row['Black_Maintime'], $game_row['Byotype'],
+                       $game_row['Black_Byotime'], $game_row['Black_Byoperiods']) .
          "</td>\n</tr>\n";
    }
 
@@ -767,8 +767,8 @@ function draw_game_info(&$game_row)
    {
       echo '<tr id="whitetime" bgcolor="#FFFFFF">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
-         echo_time_remaining($game_row['Byotype'], $game_row['White_Maintime'],
-                             $game_row['White_Byotime'], $game_row['White_Byoperiods']) .
+         echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype'],
+                       $game_row['White_Byotime'], $game_row['White_Byoperiods']) .
          "</td>\n</tr>\n";
    }
 
@@ -784,8 +784,8 @@ function draw_game_info(&$game_row)
 
    echo '<tr id="gametime" bgcolor=' . $table_row_color2 . '>' . "\n";
    echo "<td colspan=\"" . $cols . "\">" . T_('Time limit') . ': ' .
-      echo_time_limit($game_row['Maintime'], $game_row['Byotype'],
-                      $game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
+      echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
+                   $game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
 
    echo "</tr>\n";
    echo "</table>\n";

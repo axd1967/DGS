@@ -528,25 +528,9 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
             . echo_time($Maintime) 
          . "</td></tr>\n";
 
-   if( $Byotype == 'JAP' )
-   {
-      echo '<tr><td><b>' . T_('Japanese byoyomi') . '</b></td><td> ' .
-         sprintf(T_('%s per move and %s extra periods')
-            , echo_time($Byotime), $Byoperiods)
-         . "</td></tr>\n";
-   }
-   else if ( $Byotype == 'CAN' )
-   {
-      echo '<tr><td><b>' . T_('Canadian byoyomi') . '</b></td><td> ' .
-         sprintf(T_('%s per %s stones'), echo_time($Byotime), $Byoperiods)
-         . "</td></tr>\n";
-   }
-   else if ( $Byotype == 'FIS' )
-   {
-      echo '<tr><td><b>' . T_('Fischer time') . '</b></td><td> ' .
-         sprintf(T_('%s extra per move'), echo_time($Byotime))
-         . "</td></tr>\n";
-   }
+   echo '<tr><td><b>' . echo_byotype($Byotype) . '</b></td><td> ';
+   echo echo_time_limit( -1, $Byotype, $Byotime, $Byoperiods
+                       , false, false, false) . "</td></tr>\n";
 
    echo '<tr><td><b>' . T_('Rated game') . '</b></td><td>' .
        ( $Rated == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";

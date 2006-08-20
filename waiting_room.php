@@ -191,7 +191,7 @@ require_once( "include/message_functions.php" );
          }
          if( $wrtable->Is_Column_Displayed[9] )
             $wrow_strings[9] = '<td nowrap>' .
-               echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, 0, 1) .
+               echo_time_limit( $Maintime, $Byotype, $Byotime, $Byoperiods, 0, 1) .
                "</td>";
          if( $wrtable->Is_Column_Displayed[10] )
             $wrow_strings[10] = "<td>$nrGames</td>";
@@ -348,14 +348,14 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
    $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax);
    echo show_game_row( T_('Rating range'), $Ratinglimit
          , !$goodrating, T_('Out of range'));
-   echo show_game_row( T_('Time limit'), echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods));
+   echo show_game_row( T_('Time limit'), echo_time_limit( $Maintime, $Byotype, $Byotime, $Byoperiods));
    echo show_game_row( T_('Number of games'), $nrGames);
    echo show_game_row( T_('Rated game'), $Rated == 'Y' ? T_('Yes') : T_('No'));
    echo show_game_row( T_('Clock runs on weekends'), $WeekendClock == 'Y' ? T_('Yes') : T_('No'));
    if( ENA_STDHANDICAP )
       echo show_game_row( T_('Standard placement'), $StdHandicap == 'Y' ? T_('Yes') : T_('No'));
 
-   $Comment = make_html_safe($Comment, true);
+   $Comment = make_html_safe($Comment, 'cell');
    //if( empty($Comment) ) $Comment = '&nbsp;';
    echo show_game_row( T_('Comment'), $Comment);
 
