@@ -89,7 +89,7 @@ function item($text,$link,$working, $level,$last=false)
          item(T_('SGF file of game'), "sgf.php", false, 1, true);
       }
 
-      item(T_('Messages'), "message.php", true, 0);
+      item(T_('Messages'), "list_messages.php", false, 0);
       {
          item(T_('Send a message'), "message.php?mode=NewMessage", true, 1);
          item(T_('Invite'), "message.php?mode=Invite", true, 1);
