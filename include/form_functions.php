@@ -143,6 +143,7 @@ class Form
          $this->method = $method;
          $this->echo_form_start_now = $echo_form_start_now;
 
+         $this->max_nr_columns = 2; //actually build on the fly, it is often inadequate for the top rows of the form
          $this->rows = array();
 
          $this->form_string = "";
@@ -347,7 +348,6 @@ class Form
    function create_form_string()
       {
          $formstr = "";
-         $this->max_nr_columns = 2; //actually build on the fly, it is often inadequate for the top rows of the form
 
          if( !$this->echo_form_start_now )
             $formstr .= $this->print_start( $this->name, $this->action, $this->method );
