@@ -1665,8 +1665,20 @@ function blend_warning_cell_attb( $title='', $bgcolor='f7f5e3', $col='ff000033')
 
 function limit($val, $minimum, $maximum, $default)
 {
-   if( is_string( $val) && is_numeric(strpos('hHxX#$',$val{0})) && substr($val,1)!='' )
-      $val = base_convert( substr($val,1), 16, 10);
+   if( is_string( $val) )
+   {
+      $val = trim( $val);
+      if( strlen( $val) > 1 )
+      {
+         if( substr($val,-1) == '%'
+               && is_numeric($minimum) 
+               && is_numeric($maximum) 
+               )
+            $val = ($maximum-$minimum)*(substr($val,0,-1)/100.) + $minimum;
+         elseif( is_numeric(strpos('hHxX#$',$val{0})) )
+            $val = base_convert( substr($val,1), 16, 10);
+      } 
+   }
 
    if( !is_numeric($val) )
       return (isset($default) ? $default : $val );
