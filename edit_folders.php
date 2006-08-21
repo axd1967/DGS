@@ -44,13 +44,13 @@ function make_folder_form_row(&$form, $name, $nr,
                    'TEXTINPUT', "folder$nr", 32, 32, $name,
                    'DESCRIPTION', T_('Background'),
                    'DESCRIPTION', T_('Red'),
-                   'TEXTINPUT', "bgred$nr", 3, 3, "$bgred",
+                   'TEXTINPUT', "bgred$nr", 3, 5, "$bgred",
                    'DESCRIPTION', T_('Green'),
-                   'TEXTINPUT', "bggreen$nr", 3, 3, "$bggreen",
+                   'TEXTINPUT', "bggreen$nr", 3, 5, "$bggreen",
                    'DESCRIPTION', T_('Blue'),
-                   'TEXTINPUT', "bgblue$nr", 3, 3, "$bgblue",
+                   'TEXTINPUT', "bgblue$nr", 3, 5, "$bgblue",
                    'DESCRIPTION', T_('Alpha'),
-                   'TEXTINPUT', "bgalpha$nr", 3, 3, "$bgalpha" );
+                   'TEXTINPUT', "bgalpha$nr", 3, 5, "$bgalpha" );
 
    $form->add_row( $array );
 
@@ -63,11 +63,11 @@ function make_folder_form_row(&$form, $name, $nr,
 
    array_push( $array, 'DESCRIPTION', T_('Foreground'),
                'DESCRIPTION', T_('Red'),
-               'TEXTINPUT', "fgred$nr", 3, 3, "$fgred",
+               'TEXTINPUT', "fgred$nr", 3, 5, "$fgred",
                'DESCRIPTION', T_('Green'),
-               'TEXTINPUT', "fggreen$nr", 3, 3, "$fggreen",
+               'TEXTINPUT', "fggreen$nr", 3, 5, "$fggreen",
                'DESCRIPTION', T_('Blue'),
-               'TEXTINPUT', "fgblue$nr", 3, 3, "$fgblue");
+               'TEXTINPUT', "fgblue$nr", 3, 5, "$fgblue");
 
    $form->add_row( $array );
    $form->add_row( array('SPACE'));
@@ -80,15 +80,18 @@ function make_folder_form_row(&$form, $name, $nr,
 
    if( !$logged_in )
       error("not_logged_in");
+
    init_standard_folders();
 
    $my_id = $player_row['ID'];
 
    $folders = get_folders($my_id);
    $max_folder = array_reduce(array_keys($folders), "max", USER_FOLDERS-1);
-   $status_page_folders = empty($player_row['StatusFolders']) ? array() :
+   $statusfolders = empty($player_row['StatusFolders']) ? array() :
       explode( ',', $player_row['StatusFolders'] );
-   $old_statusfolders = $status_page_folders;
+   $old_statusfolders = $statusfolders;
+
+   $sysmsg = '';
 
    // Update folders
 
@@ -113,15 +116,15 @@ function make_folder_form_row(&$form, $name, $nr,
 
       $onstatuspage = ( @$_POST["onstatuspage$nr"] == 't' );
 
-      if( $nr >= USER_FOLDERS and ( in_array($nr, $status_page_folders) xor $onstatuspage ) )
+      if( $nr >= USER_FOLDERS and ( in_array($nr, $statusfolders) xor $onstatuspage ) )
       {
          if( $onstatuspage )
-            array_push($status_page_folders, $nr);
+            array_push($statusfolders, $nr);
          else
          {
-            $i=array_search( $nr, $status_page_folders);
+            $i=array_search( $nr, $statusfolders);
             if($i!==false)
-               unset($status_page_folders[$i]);
+               unset($statusfolders[$i]);
          }
       }
 
@@ -143,16 +146,19 @@ function make_folder_form_row(&$form, $name, $nr,
          {
             if( !empty($name) )
                $delete = false;
-            elseif( !folder_is_empty($nr, $my_id) )
-               continue;
-            else
+            elseif( folder_is_empty($nr, $my_id) )
                $delete = true;
-            $update = true;
+            else
+            {
+               $sysmsg = T_('A folder must be empty to be deleted!');
+               continue;
+            }
+            $update = !$delete;
          }
          else
          {
             $delete = ( empty($name) or $STANDARD_FOLDERS[$nr] === $newfolder );
-            $update = ( $STANDARD_FOLDERS[$nr] !== $folders[$nr] );
+            $update = !$delete;
          }
       }
 
@@ -189,15 +195,24 @@ function make_folder_form_row(&$form, $name, $nr,
 
       mysql_query($query)
          or error('mysql_query_failed', 'edit_folders.main');
+
+      if( !$sysmsg )
+         $sysmsg = T_('Folders adjusted!');
    }
 
 
-   if( $status_page_folders != $old_statusfolders )
+   asort($statusfolders);
+   if( $statusfolders != $old_statusfolders )
    {
       mysql_query("UPDATE Players SET StatusFolders='" .
-                  implode(',',$status_page_folders) . "' WHERE ID=$my_id LIMIT 1")
+                  implode(',',$statusfolders) . "' WHERE ID=$my_id LIMIT 1")
          or error('mysql_query_failed', 'edit_folders.statusfolders');
+
+      if( !$sysmsg )
+         $sysmsg = T_('Folders adjusted!');
    }
+
+
 
    $folders = get_folders($my_id);
    $max_folder = array_reduce(array_keys($folders), "max", USER_FOLDERS-1);
@@ -206,10 +221,12 @@ function make_folder_form_row(&$form, $name, $nr,
 
 
    start_page(T_("Edit message folders"), true, $logged_in, $player_row );
+   sysmsg( $sysmsg);
 
    echo "<center>\n";
 
    $form = new Form( 'folderform', 'edit_folders.php', FORM_POST );
+   $form->max_nr_columns = 11; 
 
    $form->add_row( array( 'HEADER', T_('Edit message folders') ) );
 
@@ -221,7 +238,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
       make_folder_form_row($form, $name, $nr,
                            $bgred, $bggreen, $bgblue, $bgalpha, $fgred, $fggreen, $fgblue,
-                           in_array($nr, $status_page_folders));
+                           in_array($nr, $statusfolders));
    }
 
 
@@ -236,7 +253,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
 
    $form->add_row( array( 
-                          'HIDDEN', 'sysmsg', T_('Folders adjusted!'),
+//                          'HIDDEN', 'sysmsg', T_('Folders adjusted!'),
 //                          'SUBMITBUTTON', 'action_preview" accesskey="w', T_('Preview'),
                           'SUBMITBUTTON', 'action" accesskey="x', T_('Update')) );
 
