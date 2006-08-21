@@ -256,8 +256,8 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                                   'TEXTINPUT', 'movenumbers', 4, 4, $player_row['MoveNumbers'],
                                   'CHECKBOX', 'movemodulo', 100, T_('Don\'t use numbers above 100') . SMALL_SPACING
                                   , ($player_row['MoveModulo']>0 ?1 :0),
-//                                  'TEXT', SMALL_SPACING,
-//                                  'CHECKBOX', 'numbersover', 1, T_*('Over'), ($s & NUMBER_OVER),
+                                  'TEXT', SMALL_SPACING,
+                                  'CHECKBOX', 'numbersover', 1, T_('Hover'), ($s & NUMBER_OVER),
                                 ) );
    }
 
