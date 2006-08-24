@@ -102,7 +102,7 @@ class Errors
          else if( $this->mode == ERROR_MODE_PRINT or $warn )
          {
             echo ( $warn ? "#Warning: " : "#Error: " ) .
-               trim(ereg_replace( "[\x01-\x20]+", " ", $err));
+               trim(ereg_replace( "[\x01-\x20]+", " ", $err))."\n";
          }
          else // case ERROR_MODE_JUMP:
          {
@@ -123,22 +123,20 @@ $TheErrors = new Errors();
 
 if( !function_exists('error') )
 {
-function error($err, $debugmsg=NULL)
-{
-   global $TheErrors;
-
-   $TheErrors->add_error($err, $debugmsg);
-}
+   function error($err, $debugmsg=NULL)
+   {
+      global $TheErrors;
+      $TheErrors->add_error($err, $debugmsg);
+   }
 }
 
 if( !function_exists('warning') )
 {
-function warning($err)
-{
-   global $TheErrors;
-
-   $TheErrors->add_error($err, NULL, true);
-}
+   function warning($err)
+   {
+      global $TheErrors;
+      $TheErrors->add_error($err, NULL, true);
+   }
 }
 
 
