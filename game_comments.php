@@ -33,13 +33,13 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    if( !$logged_in )
       error("not_logged_in");
 
-   $gid = @$_GET['gid'];
-   if( !$gid )
+   $gid = (int)@$_GET['gid'];
+   if( $gid <= 0 )
    {
       if( eregi("game([0-9]+)", @$_SERVER['REQUEST_URI'], $result) )
          $gid = $result[1];
    }
-   if( !$gid )
+   if( $gid <= 0 )
       error("unknown_game");
 
    $result = mysql_query(
