@@ -62,6 +62,8 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
      T_("FAQ") . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
+
+  $FAQexclude = array( 'ejlo', 'rodival');
   $FAQmain = 'Ingmar';
   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
                                " FROM Players" .
@@ -74,10 +76,12 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   {
          add_contributor( T_("FAQ editor"),
                           $row['ID'], $row['Name'], $row['Handle'] );
+         $FAQexclude[] = $FAQmain; 
   } else $FAQmain='';
 
 
   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
+                               ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
                                " FROM Players" .
                                " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
                                " ORDER BY ID" )
@@ -86,12 +90,11 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   $first = T_("FAQ co-editor");
   while( $row = mysql_fetch_array( $query_result ) )
   {
-      if( $row['Handle'] != $FAQmain )
-      {
-         add_contributor( $first,
-                          $row['ID'], $row['Name'], $row['Handle'] );
-         $first = '';
-      }
+      if( in_array( $row['Handle'], $FAQexclude) )
+         continue;
+      add_contributor( $first,
+                       $row['ID'], $row['Name'], $row['Handle'] );
+      $first = '';
   }
 
 
@@ -100,10 +103,11 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
      T_('Current translators') . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
-  $query_result = mysql_query( "SELECT ID,Handle,Name,Translator," .
-                               "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess ".
-                               "FROM Players " .
-                               "WHERE LENGTH(Translator)>0 ORDER BY ID" )
+  $query_result = mysql_query( "SELECT ID,Handle,Name,Translator" .
+                               ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+                               " FROM Players" .
+                               " WHERE LENGTH(Translator)>0" .
+                               " ORDER BY Lastaccess DESC,ID" )
      or error('mysql_query_failed', 'people.translators');
 
   $translator_list = array();
@@ -128,14 +132,14 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   $info = $logged_in && $player_row['admin_level'] & ADMIN_TRANSLATORS ;
   foreach( $translator_list as $language => $translators )
      {
-        $first = true;
+        $first = $language;
         foreach( $translators as $translator )
            {
-              add_contributor( $first ? $language : '',
+              add_contributor( $first,
                                $translator['ID'],
                    ( $info ? '['.date($date_fmt2, $translator['Lastaccess']).'] ' : '') .
                                $translator['Name'], $translator['Handle'] );
-              $first = false;
+              $first = '';
            }
      }
 
