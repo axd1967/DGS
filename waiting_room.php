@@ -86,7 +86,7 @@ require_once( "include/message_functions.php" );
    }
    else
    {
-      $title = T_("Adequate waiting games");
+      $title = T_("Suitable waiting games");
    }
 
    start_page($title, true, $logged_in, $player_row, button_style($player_row['Button']) );
@@ -232,7 +232,7 @@ require_once( "include/message_functions.php" );
    $baseURL = "waiting_room.php?".$sortstring; //reset it to minimum
    if( $showall )
    {
-      $str = T_("Show only adequate games");
+      $str = T_("Show only suitable games");
    }
    else
    {
