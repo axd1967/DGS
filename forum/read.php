@@ -152,7 +152,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
             . "#$msg");
       else
          jump_to("forum/read.php?forum=$forum".URI_AMP."thread=$thread"
-            . URI_AMP."sysmsg=".urlencode($msg)."#firstnew");
+            . URI_AMP."sysmsg=".urlencode($msg)."#new1");
    }
 
    $preview = isset($_POST['preview']);

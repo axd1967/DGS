@@ -94,7 +94,7 @@ require_once( "forum_functions.php" );
       {
          $Subject = make_html_safe( $Subject);
          echo "<tr$color><td><a href=\"read.php?forum=$forum" . URI_AMP
-           . "thread=$Thread_ID#firstnew\">$Subject</a>$new</td><td>" . make_html_safe($Name)
+           . "thread=$Thread_ID#new1\">$Subject</a>$new</td><td>" . make_html_safe($Name)
            . "</td><td align=center>" . $PostsInThread . "</td><td nowrap>"
            . date($date_fmt, $Lastchanged) . "</td></tr>\n";
          $odd = !$odd;

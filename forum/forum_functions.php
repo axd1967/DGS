@@ -30,7 +30,7 @@ chdir("forum");
 //$new_end =  4*7*24*3600;  // four weeks //moved to quick_common.php
 
 $new_level1 = 2*7*24*3600;  // two weeks
-$firstnew = true;
+$new_count = 0;
 
 // must follow the "ORDER BY PosIndex" order: 
 $order_str = "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -193,12 +193,9 @@ function get_new_string($Lastchangedstamp, $Lastread)
          $color = '#ff7777'; //older 'new'
       $new = '<font color="' . $color . '" size="-1">&nbsp;&nbsp;' . T_('new') .'</font>';
 
-      global $firstnew;
-      if( $firstnew )
-      {
-         $firstnew= false;
-         $new = "<a name=\"firstnew\">$new</a>";
-      }
+      global $new_count;
+      $new_count++;
+      $new = "<a name=\"new$new_count\">$new</a>";
    }
    else
       $new = '';
