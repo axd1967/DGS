@@ -1256,9 +1256,7 @@ function get_request_url( $absolute=false)
    return $url;
 }
 
-// don't set UHANDLE_NAM to 'userid' which is the handle of the
-// user currently browsing the site (associated to 'passwd').
-define('UHANDLE_NAM', 'user');
+
 function get_request_user( &$uid, &$uhandle, $from_referer=false)
 {
 //Priorities: URI(id) > URI(handle) > REFERER(id) > REFERER(handle)
@@ -1269,7 +1267,7 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
    if( !($uid > 0) )
    {
       $uid = 0;
-      $uhandle = @$_REQUEST[UHANDLE_NAM];
+      $uhandle = @$_REQUEST[UHANDLE_NAME];
       if( !$uhandle && $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
       {
 //default user = last referenced user
@@ -1279,7 +1277,7 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
          if( !($uid > 0) )
          {
             $uid = 0;
-            if( eregi("[?".URI_AMP_IN."]".UHANDLE_NAM."=([".HANDLE_LEGAL_REGS."]+)", $refer, $result) )
+            if( eregi("[?".URI_AMP_IN."]".UHANDLE_NAME."=([".HANDLE_LEGAL_REGS."]+)", $refer, $result) )
               $uhandle = $result[1];
          }
       }
@@ -1549,7 +1547,7 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
          $url = "userinfo.php?";
       }
       $url.= ( $byid ? "uid=$player_ref" 
-                 : UHANDLE_NAM."=".str_replace('+','%2B',$player_ref) );
+                 : UHANDLE_NAME."=".str_replace('+','%2B',$player_ref) );
       $url = 'A href="' . $base_path. $url . '"';
       if( $class )
         $url.= " class=$class";
