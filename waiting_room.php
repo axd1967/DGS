@@ -56,10 +56,6 @@ require_once( "include/message_functions.php" );
    if( $idinfo )
       $page.= 'info='.$idinfo . URI_AMP;
 
-   start_page(T_("Waiting room"), true, $logged_in, $player_row, button_style($player_row['Button']) );
-
-   echo "<center>";
-
    if(!@$_GET['sort1'])
    {
       $_GET['sort1'] = 'Rating'; //'ID';
@@ -84,10 +80,18 @@ require_once( "include/message_functions.php" );
    $baseURL = "waiting_room.php?"
       . $wrtable->current_from_string(1) . $sortstring;
    if( $showall )
+   {
       $baseURL.= URI_AMP.'showall=1';
+      $title = T_("All waiting games");
+   }
+   else
+   {
+      $title = T_("Adequate waiting games");
+   }
 
+   start_page($title, true, $logged_in, $player_row, button_style($player_row['Button']) );
 
-   echo "<h3><font color=$h3_color><B>". T_("Players waiting") . ":</B></font></h3>\n";
+   echo "<center><h3><font color=$h3_color><B>". $title . ":</B></font></h3>\n";
 
 
    $query = "SELECT Waitingroom.*,Name,Handle"
