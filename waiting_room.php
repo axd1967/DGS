@@ -62,8 +62,8 @@ require_once( "include/message_functions.php" );
 
    if(!@$_GET['sort1'])
    {
-      $_GET['sort1'] = 'ID';
-      $_GET['desc1'] = 0;
+      $_GET['sort1'] = 'Rating'; //'ID';
+      $_GET['desc1'] = 1;
    }
 
    if(!@$_GET['sort2'])
