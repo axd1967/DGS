@@ -39,58 +39,92 @@ else
 
    connect2mysql();
 
-   // logged in?
-
-   $uhandle= safe_getcookie('handle');
-   $result = mysql_query( "SELECT ID, Timezone, " .
-                          "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
-                          "FROM Players WHERE Handle='".addslashes($uhandle)."'" )
-      or error('mysql_query_failed', 'quick_status.find_player');
-
-   if( @mysql_num_rows($result) != 1 )
+   $uhandle = '';  
+   $uid = @$_REQUEST['uid'];
+   if( $uid > 0 )
+      $idmode= 'uid';
+   else
    {
-      error("not_logged_in",'quick_status.find_player');
+      $uid = 0;
+      $uhandle = @$_REQUEST[UHANDLE_NAME];
+      if( $uhandle )
+         $idmode= 'handle';
+      else
+      {
+         $uhandle= safe_getcookie('handle');
+         if( $uhandle ) 
+            $idmode= 'cookie';
+         else
+            error('no_uid','quick_status');
+      }
+   }
+   
+
+   $player_row = mysql_single_fetch(
+                  "SELECT ID, Timezone, " .
+                  "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
+                  "FROM Players WHERE " .
+                  ( $idmode=='uid'
+                        ? "ID=".$uid
+                        : "Handle='".addslashes($uhandle)."'"
+                  ), 'assoc', 'quick_status.find_player');
+
+   if( !$player_row )
+   {
+      error('unknown_user','quick_status.find_player');
    }
 
-   $player_row = mysql_fetch_assoc($result);
-
-   if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
-       or $player_row["Expire"] < $NOW )
+   $logged_in = false;
+   if( $idmode == 'cookie' )
    {
-      error("not_logged_in",'quick_status.expired');
+      if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
+          or $player_row["Expire"] < $NOW )
+      {
+         error("not_logged_in",'quick_status.expired');
+      }
+      $logged_in = true;
+      setTZ( $player_row['Timezone']);
    }
+   else
+      setTZ( 'GMT');
 
-   setTZ( $player_row['Timezone']);
 
    $my_id = $player_row['ID'];
 
    $nothing_found = true;
 
-
-   // New messages?
-
-   $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
-      "Messages.Subject, Players.Name AS sender " .
-      "FROM Messages, MessageCorrespondents AS me " .
-      "LEFT JOIN MessageCorrespondents AS other " .
-        "ON other.mid=me.mid AND other.Sender!=me.Sender " .
-      "LEFT JOIN Players ON Players.ID=other.uid " .
-      "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
-              "AND Messages.ID=me.mid " .
-              "AND me.Sender='N' " . //exclude message to myself
-      "ORDER BY date DESC";
-
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','quick_status.find_messages');
-
-   while( $row = mysql_fetch_assoc($result) )
+   if( $logged_in )
    {
-      $nothing_found = false;
-      if( !@$row['sender'] ) $row['sender']='[Server message]';
-      echo "'M', {$row['mid']}, '".slashed(@$row['sender'])."', '" .
-         slashed(@$row['Subject']) . "', '" .
-         date('Y-m-d H:i', @$row['date']) . "'\n";
-   }
+      // New messages?
+   
+      $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
+         "Messages.Subject, Players.Name AS sender " .
+         "FROM Messages, MessageCorrespondents AS me " .
+         "LEFT JOIN MessageCorrespondents AS other " .
+           "ON other.mid=me.mid AND other.Sender!=me.Sender " .
+         "LEFT JOIN Players ON Players.ID=other.uid " .
+         "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
+                 "AND Messages.ID=me.mid " .
+                 "AND me.Sender='N' " . //exclude message to myself
+         "ORDER BY date DESC";
+   
+      $result = mysql_query( $query )
+         or error('mysql_query_failed','quick_status.find_messages');
+   
+      while( $row = mysql_fetch_assoc($result) )
+      {
+         $nothing_found = false;
+         if( !@$row['sender'] ) $row['sender']='[Server message]';
+         echo "'M', {$row['mid']}, '".slashed(@$row['sender'])."', '" .
+            slashed(@$row['Subject']) . "', '" .
+            date('Y-m-d H:i', @$row['date']) . "'\n";
+      }
+
+   } //$logged_in
+   else
+   {
+      warning('messages list not shown');
+   } //$logged_in
 
 
    // Games to play?
