@@ -89,7 +89,8 @@ function get_stat_data( )
 function scale($x)
 {
    global $MAX, $MIN, $SIZE, $OFFSET;
-
+   if( $MAX == $MIN )
+      return $OFFSET;
    return round( $OFFSET + (($x-$MIN)/($MAX-$MIN))*$SIZE);
 }
 

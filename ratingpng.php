@@ -145,7 +145,8 @@ function get_rating_data($uid)
 function scale($x)
 {
    global $MAX, $MIN, $SIZE, $OFFSET;
-
+   if( $MAX == $MIN )
+      return $OFFSET;
    return round( $OFFSET + (($x-$MIN)/($MAX-$MIN))*$SIZE);
 }
 
