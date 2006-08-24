@@ -30,7 +30,7 @@ require_once( "include/make_game.php" );
 
    connect2mysql();
 
-   $logged_in = who_is_logged($player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error("not_logged_in");
@@ -47,7 +47,7 @@ require_once( "include/make_game.php" );
       or error('mysql_query_failed', 'join_waitingroom_game.find_game');
 
    if( @mysql_num_rows($result) != 1)
-      error("waitingroom_game_not_found");
+      error("waitingroom_game_not_found", 'join_waitingroom_game.find_game');
 
    $game_info_row = mysql_fetch_array($result);
    $uid = $game_info_row['uid'];
@@ -58,7 +58,7 @@ require_once( "include/make_game.php" );
       or error('mysql_query_failed', 'join_waitingroom_game.find_players');
 
    if( @mysql_num_rows($result) != 1)
-      error("waitingroom_game_not_found");
+      error("waitingroom_game_not_found", 'join_waitingroom_game.find_players');
 
    $opponent_row = mysql_fetch_array($result);
 
@@ -172,17 +172,19 @@ require_once( "include/make_game.php" );
    $reply = trim(get_request_arg('reply'));
    if ($reply)
    {
-      $reply = addslashes(user_reference( REF_LINK, 1, '', $player_row). " wrote:\n" . $reply) ;
+      $reply = user_reference( REF_LINK, 1, '', $player_row). " wrote:\n" . $reply;
    }
    else
    {
-      $reply = addslashes(user_reference( REF_LINK, 1, '', $player_row). " has joined your waiting room game.") ;
+      $reply = user_reference( REF_LINK, 1, '', $player_row). " has joined your waiting room game.";
    }
+   if( !empty($game_info_row['Comment']) )
+      $reply = 'Comment: '.$game_info_row['Comment']."\n".$reply;
 
    $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
       "Game_ID=$gid, " .
       "Subject='$subject', " .
-      "Text='$reply'";
+      "Text='".mysql_escape_string($reply)."'";
 
    mysql_query( $query )
       or error('mysql_query_failed', 'join_waitingroom_game.message');
