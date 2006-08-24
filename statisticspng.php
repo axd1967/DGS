@@ -60,21 +60,6 @@ function get_stat_data( )
    if( @mysql_num_rows( $result ) < 1 )
       exit;
 
-/*
-   mysql_query( "INSERT INTO Statistics SET " .
-                "Time=FROM_UNIXTIME($NOW), " .
-                "Hits=$Hits, " .
-                "Users=$Users, " .
-                "Moves=" . ($MovesFinished+$MovesRunning) . ", " .
-                "MovesFinished=$MovesFinished, " .
-                "MovesRunning=$MovesRunning, " .
-                "Games=" . ($GamesRunning+$GamesFinished) . ", " .
-                "GamesFinished=$GamesFinished, " .
-                "GamesRunning=$GamesRunning, " .
-                "Activity=$Activity" )
-               or error('mysql_query_failed','daily_cron7');
- global $tTime, $tUsers, $tMoves, $tGames, $tGameR;
-*/
 
    while( $row = mysql_fetch_assoc($result) )
    {
