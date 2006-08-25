@@ -74,7 +74,7 @@ else
       error('unknown_user','quick_status.find_player');
    }
 
-   $logged_in = false;
+
    if( $idmode == 'cookie' )
    {
       if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
@@ -84,10 +84,14 @@ else
       }
       $logged_in = true;
       setTZ( $player_row['Timezone']);
+      $datfmt = 'Y-m-d H:i';
    }
    else
+   {
+      $logged_in = false;
       setTZ( 'GMT');
-
+      $datfmt = 'Y-m-d H:i \G\M\T';
+   }
 
    $my_id = $player_row['ID'];
 
@@ -117,7 +121,7 @@ else
          if( !@$row['sender'] ) $row['sender']='[Server message]';
          echo "'M', {$row['mid']}, '".slashed(@$row['sender'])."', '" .
             slashed(@$row['Subject']) . "', '" .
-            date('Y-m-d H:i', @$row['date']) . "'\n";
+            date($datfmt, @$row['date']) . "'\n";
       }
 
    } //$logged_in
@@ -146,7 +150,7 @@ else
       $nothing_found = false;
       echo "'G', {$row['ID']}, '" . slashed(@$row['Name']) .
          "', '" . $clrs{@$row['Color']} . "', '" .
-         date('Y-m-d H:i', @$row['date']) . "'\n";
+         date($datfmt, @$row['date']) . "'\n";
    }
 
     
