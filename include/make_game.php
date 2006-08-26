@@ -137,7 +137,8 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    if( $rated != 'Y' or $Black_ID == $White_ID )
       $rated = 'N';
 
-   if( $stdhandicap != 'Y' or !standard_handicap_is_possible($size, $handicap) )
+   if( $stdhandicap != 'Y' or
+       !standard_handicap_is_possible($size, $handicap) )
       $stdhandicap = 'N';
 
    if( $weekendclock != 'Y' )
@@ -233,15 +234,21 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
        !standard_handicap_is_possible($size, $game_info_row['Handicap'] ) )
       $stdhandicap = 'N';
 
-   $moves = ( $stdhandicap == 'Y' ? $game_info_row['Handicap'] : 0 );
+   if( ENA_STDHANDICAP&2 && $stdhandicap == 'Y' && $game_info_row['Handicap'] > 0 )
+      $skip_handicap_validation = true;
+   else 
+      $skip_handicap_validation = false; 
 
-   if( $game_info_row['Handicap'] > 0 and $stdhandicap == 'Y' )
+
+   if( $skip_handicap_validation )
    {
+      $moves = $game_info_row['Handicap'];
       $to_move_id = $white_row['ID'];
       $clock_used = $clock_used_white;
    }
    else
    {
+      $moves = 0;
       $to_move_id = $black_row['ID'];
       $clock_used = $clock_used_black;
    }
@@ -287,17 +294,22 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
       $gid = mysql_insert_id();
    }
 
-   if( $stdhandicap == 'Y' )
-       make_standard_placement_of_handicap_stones($size, $game_info_row['Handicap'], $gid);
+   if( $skip_handicap_validation )
+      if( !make_standard_placement_of_handicap_stones($size
+                                 , $game_info_row['Handicap'], $gid) )
+            error('internal_error','make_game.std_handicap'.fail);
 
    return $gid;
 }
 
 function standard_handicap_is_possible($size, $hcp)
 {
+   if( ENA_STDHANDICAP&4 ) //allow everything
+      return true;
    return( $size == 19 or $hcp <= 4 or ($hcp <= 9 and $size%2 == 1 and $size>=9) );
 }
 
+if( ENA_STDHANDICAP&2 ) { //skip black validation
 function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
 {
    if( $hcp < 2 )
@@ -337,5 +349,6 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
 
    return true;
 }
+} //ENA_STDHANDICAP&2
 
 ?>

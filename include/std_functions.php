@@ -153,7 +153,9 @@ define('MIN_BOARD_SIZE',5);
 define('MAX_BOARD_SIZE',25);
 define('MAX_KOMI_RANGE',200);
 define('MAX_HANDICAP',21);
-define('ENA_STDHANDICAP',1);
+// b0=standard placement, b1=with black validation skip, b2=all placements
+// both b1 and b2 set is not fully checked (error if unfinished pattern)
+define('ENA_STDHANDICAP',0x3);
 define('ENA_MOVENUMBERS',1);
 define('MAX_MOVENUMBERS', 500);
 
