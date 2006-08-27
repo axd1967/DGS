@@ -27,10 +27,6 @@ For instance, on a 19x19 board:
 ;B[df]
 ;W[db]
 ;B[dd]
-;W[fb]
-;B[bf]
-;W[ff]
-;B[bb]
 )
 )
 )

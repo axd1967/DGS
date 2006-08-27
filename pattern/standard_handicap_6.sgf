@@ -15,13 +15,13 @@ For instance, on a 19x19 board:
 ;B[ee]
 ;W[bb]
 (
-;B[dd]
+;B[dc]
 )
 (
-;B[ed]
-;W[bd]
+;B[ec]
+;W[bc]
 (
-;B[dd]
+;B[dc]
 )
 (
 ;B[de]
