@@ -191,11 +191,12 @@ function get_new_string($Lastchangedstamp, $Lastread)
          $color = '#ff0000'; //recent 'new'
       else
          $color = '#ff7777'; //older 'new'
-      $new = '<font color="' . $color . '" size="-1">&nbsp;&nbsp;' . T_('new') .'</font>';
+      $new = '<font color="' . $color . '" size="-1">' . T_('new') .'</font>';
 
       global $new_count;
       $new_count++;
-      $new = "<a href=\"#new".($new_count+1)."\" name=\"new$new_count\">$new</a>";
+      $new = "&nbsp;&nbsp;<a name=\"new$new_count\" href=\"#new"
+                        . ($new_count+1) . "\">$new</a>";
    }
    else
       $new = '';
