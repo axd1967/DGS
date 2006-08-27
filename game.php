@@ -384,6 +384,19 @@ function get_alt_arg( $n1, $n2)
 
    if( $my_game )
    {
+      if( $player_row["ID"] == $Black_ID )
+      {
+         $my_color= 'B';
+         $opponent_ID= $White_ID;
+         $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
+      }
+      else //if( $player_row["ID"] == $White_ID )
+      {
+         $my_color= 'W';
+         $opponent_ID= $Black_ID;
+         $movemsg = make_html_safe($movemsg, $movecol==WHITE ? 'gameh' : $html_mode );
+      }
+
       if ($Size >= $player_row["NotesCutoff"])
       {
         $notesheight = $player_row["NotesLargeHeight"];
@@ -397,67 +410,43 @@ function get_alt_arg( $n1, $n2)
         $notesmode = $player_row["NotesSmallMode"];
       }
       if( isset($_REQUEST['notesmode']) )
-         $notesmode= (string)$_REQUEST['notesmode'];
-      $show_notes = ( $notesmode and $notesmode !== '0' and $notesmode !== 'OFF' );
+         $notesmode= strtoupper((string)$_REQUEST['notesmode']);
 
-      if( $player_row["ID"] == $Black_ID )
-      {
-         $dbplayer= 'B';
-         $opponent_ID= $White_ID;
-         $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
-      }
-      else //if( $player_row["ID"] == $White_ID )
-      {
-         $dbplayer= 'W';
-         $opponent_ID= $Black_ID;
-         $movemsg = make_html_safe($movemsg, $movecol==WHITE ? 'gameh' : $html_mode );
-      }
+      $show_notes = true;
+      $notes = '';
+      $noteshide = ( substr( $notesmode, -3) == 'OFF' ? 'Y' : 'N' );
+      if( $noteshide == 'Y' )
+         $notesmode = substr( $notesmode, 0, -3);
 
-      if( $show_notes && $tmp=mysql_single_fetch(
+      if( $tmp=mysql_single_fetch(
              "SELECT Hidden,Notes FROM GamesNotes"
-             . " WHERE gid=$gid AND player='$dbplayer'", 'assoc', 'game.gameotes') )
+             . " WHERE gid=$gid AND player='$my_color'", 'assoc', 'game.gameotes') )
       {
-         $dbhidden = $tmp['Hidden'];
-         $dbnotes = $tmp['Notes'];
+         $notes = $tmp['Notes'];
+         $noteshide = $tmp['Hidden'];
          unset( $tmp);
       }
-      else
-      {
-         $dbhidden = 'Y';
-         $dbnotes = '';
-      }
 
-      if( $show_notes && (@$_REQUEST['savenotes'] or @$_REQUEST['togglenotes']) )
+      if( @$_REQUEST['savenotes'] or @$_REQUEST['togglenotes'] )
       {
          if( @$_REQUEST['togglenotes'] )
-            $collapse_notes = ($dbhidden == 'Y' ? 'N' : 'Y' );
-         else
-            $collapse_notes = $dbhidden;
+            $noteshide = ($noteshide == 'Y' ? 'N' : 'Y' );
 
          if( @$_REQUEST['savenotes'] )
             $notes = rtrim(get_request_arg('gamenotes'));
-         else
-            $notes = $dbnotes;
 
          mysql_query(
                  "REPLACE INTO GamesNotes (gid,player,Hidden,Notes)"
-               . " VALUES ($gid,'$dbplayer','$collapse_notes','"
+               . " VALUES ($gid,'$my_color','$noteshide','"
                   . addslashes($notes) . "')")
             or error('mysql_query_failed', 'game.replace_gamenote');
       }
 /*
       else if( $show_notes && @$_REQUEST['movechange'] )
       {
-         $collapse_notes = $dbhidden;
          $notes = rtrim(get_request_arg('gamenotes'));
       }
 */
-      else
-      {
-         $collapse_notes = $dbhidden;
-         $notes = $dbnotes;
-      }
-      unset( $dbplayer, $dbnotes, $dbhidden);
    }
    else // !$my_game
    {
@@ -465,7 +454,7 @@ function get_alt_arg( $n1, $n2)
       $movemsg = game_tag_filter( $movemsg);
       $movemsg = make_html_safe($movemsg, $html_mode );
       $show_notes = false;
-      $collapse_notes = 'Y';
+      $noteshide = 'Y';
    }
      
    if( ENA_MOVENUMBERS )
@@ -510,7 +499,7 @@ function get_alt_arg( $n1, $n2)
    echo '<br>';
 
    $cols = 2;
-   if( $show_notes && $collapse_notes != 'Y' )
+   if( $show_notes && $noteshide != 'Y' )
    {
       if( $notesmode == 'BELOW' )
          echo "</td></tr>\n<tr><td colspan=$cols align='center'>";

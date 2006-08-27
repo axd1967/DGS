@@ -60,8 +60,8 @@ require_once( "include/countries.php" );
                 + ( @$_GET['coordsright'] ? COORD_RIGHT : 0 )
                 + ( @$_GET['coordsdown'] ? COORD_DOWN : 0 )
                 + ( @$_GET['coordsover'] ? COORD_OVER : 0 )
-                + ( @$_GET['coordssgfover'] ? COORD_SGFOVER : 0 )
-//                + ( @$_GET['numbersover'] ? NUMBER_OVER : 0 )
+//                + ( @$_GET['coordssgfover'] ? COORD_SGFOVER : 0 )
+                + ( @$_GET['numbersover'] ? NUMBER_OVER : 0 )
                 + ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
 
    $movenumbers = (int)@$_GET['movenumbers'];
@@ -69,25 +69,14 @@ require_once( "include/countries.php" );
 
    $menudirection = ( @$_GET['menudir'] == 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' );
 
-   $notessmallmode = strtoupper(@$_GET['notessmallmode']);
-   switch( $notessmallmode )
+   foreach( array( 'small', 'large') as $ltyp )
    {
-      case 'OFF':
-      case 'BELOW':
-         break;
-      default:
-      $notessmallmode = 'RIGHT';
-         break;
-   }
-   $noteslargemode = strtoupper(@$_GET['noteslargemode']);
-   switch( $noteslargemode )
-   {
-      case 'OFF':
-      case 'BELOW':
-         break;
-      default:
-      $noteslargemode = 'RIGHT';
-         break;
+      $notesmode = "notes{$ltyp}mode";
+      $$notesmode = strtoupper(@$_GET[$notesmode]);
+      if( $$notesmode != 'BELOW' )
+         $$notesmode = 'RIGHT';
+      if( @$_GET["notes{$ltyp}hide"] )
+         $$notesmode.= 'OFF';
    }
 
 
@@ -183,7 +172,6 @@ require_once( "include/countries.php" );
        $timezone != $player_row["Timezone"] )
    {
       $query .= "ClockChanged='Y', ";
-
       // ClockUsed is uppdated only once a day to prevent eternal night...
       // setTZ( $timezone);
       // $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";

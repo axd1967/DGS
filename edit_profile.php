@@ -110,13 +110,13 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
      $noteswidths[$i] = $i;
    }
    
-   $notesmodes = array('OFF' => T_('Off'), 'RIGHT' => T_('Right'), 'BELOW' => T_('Below'));
+   $notesmodes = array('RIGHT' => T_('Right'), 'BELOW' => T_('Below'));
 
    $notescutoffs = array();
    for($i=5; $i<26; $i++ )
-     {
+   {
      $notescutoffs[$i] = $i;
-     }
+   }
 
 
 //------------
@@ -156,10 +156,10 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                                   'TEXTINPUT', 'open', 32, 40,
                                   $player_row["Open"] ) );
 
-   $s = 0;
-   if(!(strpos($player_row["SendEmail"], 'ON') === false) ) $s++;
-   if(!(strpos($player_row["SendEmail"], 'MOVE') === false) ) $s++;
-   if(!(strpos($player_row["SendEmail"], 'BOARD') === false) ) $s++;
+   if( strpos($player_row["SendEmail"], 'BOARD') !== false ) $s= 3;
+   elseif( strpos($player_row["SendEmail"], 'MOVE') !== false ) $s= 2;
+   elseif( strpos($player_row["SendEmail"], 'ON') !== false ) $s= 1;
+   else $s= 0;
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Email notifications'),
                                   'SELECTBOX', 'emailnotify', 1, $notify_mess, $s, false ) );
@@ -254,7 +254,7 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    {
    $profile_form->add_row( array( 'DESCRIPTION', T_('Move numbering'),
                                   'TEXTINPUT', 'movenumbers', 4, 4, $player_row['MoveNumbers'],
-                                  'CHECKBOX', 'movemodulo', 100, T_('Don\'t use numbers above 100') . SMALL_SPACING
+                                  'CHECKBOX', 'movemodulo', 100, T_('Don\'t use numbers above 100')
                                   , ($player_row['MoveModulo']>0 ?1 :0),
                                   'TEXT', SMALL_SPACING,
                                   'CHECKBOX', 'numbersover', 1, T_('Hover'), ($s & NUMBER_OVER),
@@ -281,9 +281,17 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                'TD', 'SELECTBOX', 'notescutoff', 1, $notescutoffs, $player_row["NotesCutoff"], false,
             ) );
 
+      $notesmode = $player_row["Notes{$typ}Mode"];
+      $noteshide = substr( $notesmode, -3) == 'OFF';
+      if( $noteshide )
+         $notesmode = substr( $notesmode, 0, -3);
+      if( $notesmode != 'BELOW' )
+         $notesmode = 'RIGHT';
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Position'),
-               'RADIOBUTTONS', "notes{$ltyp}mode", $notesmodes, $player_row["Notes{$typ}Mode"],
+               'RADIOBUTTONS', "notes{$ltyp}mode", $notesmodes, $notesmode,
+               'TEXT', SMALL_SPACING,
+               'CHECKBOX', "notes{$ltyp}hide", 1, T_('Hidden'), $noteshide,
             ) );
 
       $profile_form->add_row( array(
