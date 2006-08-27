@@ -195,7 +195,7 @@ function get_new_string($Lastchangedstamp, $Lastread)
 
       global $new_count;
       $new_count++;
-      $new = "<a name=\"new$new_count\">$new</a>";
+      $new = "<a href=\"#new".($new_count+1)."\" name=\"new$new_count\">$new</a>";
    }
    else
       $new = '';
