@@ -255,7 +255,9 @@ function make_folder_form_row(&$form, $name, $nr,
    $form->add_row( array( 
 //                          'HIDDEN', 'sysmsg', T_('Folders adjusted!'),
 //                          'SUBMITBUTTON', 'action_preview" accesskey="w', T_('Preview'),
-                          'SUBMITBUTTON', 'action" accesskey="x', T_('Update')) );
+                          'SUBMITBUTTONX', 'action', T_('Update'),
+                              array('accesskey' => 'x'),
+                          ) );
 
    $form->echo_string(1);
 

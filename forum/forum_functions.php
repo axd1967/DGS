@@ -92,29 +92,33 @@ function make_link_array($links)
       $get['moderator'] = ( safe_getcookie('forummoderator' . $player_row['ID']) == 'y'? 'n' : 'y' );
       $link_array_right[T_("Toggle forum moderator")] =
          ($links & LINKPAGE_READ ?
-          make_url( "read.php", $get, false ) :
-          ($links & LINKPAGE_LIST ?
-           make_url( "list.php", $get, false ) :
-           make_url( "index.php", $get, false ) ) );
+            make_url( "read.php", $get, false ) :
+            ($links & LINKPAGE_LIST ?
+               make_url( "list.php", $get, false ) :
+               make_url( "index.php", $get, false ) ) );
    }
 
    if( $links & LINK_PREV_PAGE )
    {
       if( $links & LINKPAGE_SEARCH )
-         $link_array_right[T_("Prev Page")] = "search.php?search_terms=$search_terms"
-            . URI_AMP."offset=".($offset-$SearchPostsPerPage) . '" accesskey="&lt;';
+         $href = "search.php?search_terms=$search_terms"
+                     . URI_AMP."offset=".($offset-$SearchPostsPerPage);
       else
-         $link_array_right[T_("Prev Page")] = "list.php?forum=$forum"
-            . URI_AMP."offset=".($offset-$RowsPerPage) . '" accesskey="&lt;';
+         $href = "list.php?forum=$forum"
+                     . URI_AMP."offset=".($offset-$RowsPerPage);
+      $link_array_right[T_("Prev Page")] = array(
+         $href, '', array('accesskey' => '<') );
    }
    if( $links & LINK_NEXT_PAGE )
    {
       if( $links & LINKPAGE_SEARCH )
-         $link_array_right[T_("Next Page")] = "search.php?search_terms=$search_terms"
-            . URI_AMP."offset=".($offset+$SearchPostsPerPage) . '" accesskey="&gt;';
+         $href = "search.php?search_terms=$search_terms"
+                     . URI_AMP."offset=".($offset+$SearchPostsPerPage);
       else
-         $link_array_right[T_("Next Page")] = "list.php?forum=$forum"
-            . URI_AMP."offset=".($offset+$RowsPerPage) . '" accesskey="&gt;';
+         $href = "list.php?forum=$forum"
+                     . URI_AMP."offset=".($offset+$RowsPerPage);
+      $link_array_right[T_("Next Page")] = array(
+         $href, '', array('accesskey' => '>') );
    }
 
 }
@@ -155,26 +159,31 @@ function echo_links($cols)
    global $link_array_left, $link_array_right;
 
    $rcols = $cols-1; //1; $cols/2; $cols-1;
-   echo "<tr><td bgcolor=\"#d0d0d0\" colspan=" . ($cols-$rcols) . " align=left>&nbsp;";
+   echo '<tr class="forum_header"><td colspan=' . ($cols-$rcols) . " align=left>&nbsp;";
    $first=true;
    reset($link_array_left);
-   while( list($name, $link) = each($link_array_left) )
+   foreach( $link_array_left as $name => $link )
    {
       if(!$first) echo "&nbsp;|&nbsp;";
-      echo "<a href=\"$link\"><font color=000000>$name</font></a>";
       $first=false;
+      if( is_array($link) )
+         echo anchor( $link[0], $name, $link[1], $link[2]);
+      else
+         echo anchor( $link, $name);
    }
-   echo "&nbsp;</td>\n<td bgcolor=\"#d0d0d0\" align=right colspan=" . ($rcols) . ">&nbsp;";
 
+   echo "&nbsp;</td>\n<td colspan=" . ($rcols) . " align=right>&nbsp;";
    $first=true;
    reset($link_array_right);
-   while( list($name, $link) = each($link_array_right) )
+   foreach( $link_array_right as $name => $link )
    {
       if(!$first) echo "&nbsp;|&nbsp;";
-      echo "<a href=\"$link\"><font color=000000>$name</font></a>";
       $first=false;
+      if( is_array($link) )
+         echo anchor( $link[0], $name, $link[1], $link[2]);
+      else
+         echo anchor( $link, $name);
    }
-
 
    echo "&nbsp;</td></tr>\n";
 
@@ -358,20 +367,28 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
                           'HIDDEN', 'forum', $forum ));
    $form->add_row( array( 'TAB', 'TEXTAREA', 'Text', 70, 25, $Text ) );
 
-//    if( isset($GoDiagrams) )
-//       $str = draw_editors($GoDiagrams);
+/*
+    if( isset($GoDiagrams) )
+       $str = draw_editors($GoDiagrams);
 
    if( !empty($str) )
    {
       $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str . '</td>'));
-      $form->add_row( array( 'OWNHTML', '<td colspan=2 align="center">' . 
+      $form->add_row( array( 'OWNHTML', '<td colspan=2 align="center">' .
+//review accesskey: 
                              '<input type="submit" name="post" accesskey="x" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . " \">\n" .
                              '<input type="submit" name="preview" accesskey="w" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \">\n" .
                              "</td>\n" ));
    }
    else
-      $form->add_row( array( 'TAB', 'SUBMITBUTTON', 'post" accesskey="x', ' ' . T_('Post') . ' ',
-                          'SUBMITBUTTON', 'preview" accesskey="w', ' ' . T_('Preview') . ' ') );
+*/
+      $form->add_row( array(
+                  'TAB',
+                  'SUBMITBUTTONX', 'post', ' ' . T_('Post') . ' ',
+                     array('accesskey' => 'x'),
+                  'SUBMITBUTTONX', 'preview', ' ' . T_('Preview') . ' ',
+                     array('accesskey' => 'w'),
+                  ) );
 
    $form->echo_string(1);
 }

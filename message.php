@@ -250,8 +250,10 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'to', $other_handle,
                   'HIDDEN', 'reply', $mid,
                   'TAB',
-                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Reply'),
-                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+                  'SUBMITBUTTONX', 'send_message', T_('Send Reply'),
+                              array('accesskey' => 'x'),
+                  'SUBMITBUTTONX', 'preview', T_('Preview'),
+                              array('accesskey' => 'w'),
                ) );
          }
       }
@@ -276,8 +278,10 @@ require_once( "include/form_functions.php" );
                ) );
             $message_form->add_row( array(
                   'TAB',
-                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Message'),
-                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+                  'SUBMITBUTTONX', 'send_message', T_('Send Message'),
+                              array('accesskey' => 'x'),
+                  'SUBMITBUTTONX', 'preview', T_('Preview'),
+                              array('accesskey' => 'w'),
                ) );
       }
       break;
@@ -332,11 +336,12 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'subject', "Game invitation accepted (or declined)",
                   'HIDDEN', 'gid', $Game_ID,
                   'TAB',
-                  'SUBMITBUTTON', 'send_accept" accesskey="x', T_('Accept'),
+                  'SUBMITBUTTONX', 'send_accept', T_('Accept'),
+                              array('accesskey' => 'x'),
                   'SUBMITBUTTON', 'send_decline', T_('Decline'),
-                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+                  'SUBMITBUTTONX', 'preview', T_('Preview'),
+                              array('accesskey' => 'w'),
                ) );
-
          }
       }
       break;
@@ -368,8 +373,10 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'type', 'INVITATION',
                   'HIDDEN', 'disputegid', $Game_ID,
                   'TAB',
-                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Reply'),
-                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+                  'SUBMITBUTTONX', 'send_message', T_('Send Reply'),
+                              array('accesskey' => 'x'),
+                  'SUBMITBUTTONX', 'preview', T_('Preview'),
+                              array('accesskey' => 'w'),
                ) );
       }
       break;
@@ -397,8 +404,10 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'subject', 'Game invitation',
                   'HIDDEN', 'type', 'INVITATION',
                   'TAB',
-                  'SUBMITBUTTON', 'send_message" accesskey="x', T_('Send Invitation'),
-                  'SUBMITBUTTON', 'preview" accesskey="w', T_('Preview'),
+                  'SUBMITBUTTONX', 'send_message', T_('Send Invitation'),
+                              array('accesskey' => 'x'),
+                  'SUBMITBUTTONX', 'preview', T_('Preview'),
+                              array('accesskey' => 'w'),
                ) );
       }
       break;
