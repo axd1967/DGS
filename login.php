@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-if( @$_REQUEST['quick_mode'] )
-   $quick_errors = 1;
+$quick_errors = isset($_REQUEST['quick_mode']);
+
 require_once( "include/std_functions.php" );
 
 {
