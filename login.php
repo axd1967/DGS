@@ -18,15 +18,17 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-$quick_errors = isset($_REQUEST['quick_mode']);
-
 require_once( "include/std_functions.php" );
+
+$quick_mode = (boolean)@$_REQUEST['quick_mode'];
+if( $quick_mode )
+   $TheErrors->set_mode(ERROR_MODE_PRINT);
 
 {
    if( @$_REQUEST['logout'] )
    {
       set_login_cookie("","", true);
-      if( $quick_errors )
+      if( $quick_mode )
          exit;
       jump_to("index.php");
    }
@@ -71,7 +73,7 @@ require_once( "include/std_functions.php" );
       set_login_cookie( $uhandle, $code );
       jump_to("login.php?cookie_check=1"
              . URI_AMP."userid=".urlencode($uhandle)
-             . ( $quick_errors ? URI_AMP."quick_mode=1" : '' )
+             . ( $quick_mode ? URI_AMP."quick_mode=1" : '' )
              );
    }
    //else cookie_check
@@ -82,7 +84,7 @@ require_once( "include/std_functions.php" );
       error('cookies_disabled');
    }
 
-   if( $quick_errors )
+   if( $quick_mode )
    {
       echo "\nOk";
       exit;
