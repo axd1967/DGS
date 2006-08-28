@@ -388,9 +388,9 @@ class Table
             $button.= anchor(
                  $this->Page . $this->current_sort_string( true )
                  . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
-               , image( 'images/prev.gif', '&lt;=', '', $string)
+               , image( 'images/prev.gif', '<=', '', $string)
                , T_("prev page")
-               ,'accesskey="&lt;"'
+               , array('accesskey' => '<')
                );
 
          $button.= '&nbsp;'.round($this->From_Row/$this->Rows_Per_Page+1).'&nbsp;';
@@ -399,9 +399,9 @@ class Table
             $button.= anchor(
                  $this->Page . $this->current_sort_string( true )
                  . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
-               , image( 'images/next.gif', '=&gt;', '', $string)
+               , image( 'images/next.gif', '=>', '', $string)
                , T_("next page")
-               ,'accesskey="&gt;"'
+               , array('accesskey' => '>')
                );
 
 

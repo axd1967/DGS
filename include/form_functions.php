@@ -50,6 +50,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * <li> Radiobuttons
   * <li> Checkbox
   * <li> Submitbutton
+  * <li> SubmitbuttonX  
   * <li> Text
   * <li> Header  --- Creates a header line.
   * <li> Chapter --- Creates a chapter line.
@@ -227,6 +228,12 @@ class Form
                                      'SpanAllColumns' => false,
                                      'Align'   => 'left' ),
             'SUBMITBUTTON' => array( 'NumArgs' => 2,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => true,
+                                     'Align'   => 'center' ),
+            'SUBMITBUTTONX' => array( 'NumArgs' => 3,
                                      'NewTD'   => false,
                                      'StartTD' => true,
                                      'EndTD'   => false,
@@ -533,7 +540,7 @@ class Form
     */
    function create_string_func_hidden( &$result, $args )
       {
-         //$result .= $this->print_insert_hidden_input( $args[0], $args[1] );
+         //hiddens are delayed to the end of form
          $this->add_hidden( $args[0], $args[1] );
       }
 
@@ -581,6 +588,15 @@ class Form
    function create_string_func_submitbutton( &$result, $args )
       {
          $result .= $this->print_insert_submit_button( $args[0], $args[1] );
+      }
+
+   /*!
+    * \brief Function for making submitbuttonx string in the standard form
+    * \internal
+    */
+   function create_string_func_submitbuttonx( &$result, $args )
+      {
+         $result .= $this->print_insert_submit_buttonx( $args[0], $args[1], $args[2] );
       }
 
    /*!
@@ -878,6 +894,46 @@ class Form
          return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
             ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
          ">";
+      }
+
+   /*!
+    * \brief This will insert a text input box in a standard form.
+    *
+    * \param $name The field name that will be used as the variable name
+    *              in the GET or POST.
+    * \param $text The text on the submit button.
+    * \param $attbs Additionnal attributs.
+    */
+   function print_insert_submit_buttonx( $name, $text, $attbs )
+      {
+         $str = '';
+         if( is_array($attbs) )
+         {
+            if( isset($attbs['title']) )
+            {
+               $title = trim($attbs['title']);
+               unset($attbs['title']);
+            }
+            else
+               $title = '';
+            if( isset($attbs['accesskey']) )
+            {
+               $xkey = trim($attbs['accesskey']);
+               unset($attbs['accesskey']);
+               if( $xkey )
+               {
+                  $xkey = substr($xkey,0,1);
+                  $title.= " [&amp;$xkey]";
+                  $str.= ' accesskey='.attb_quote($xkey);
+               }
+            }
+            if( $title )
+               $str.= ' title='.attb_quote($title);
+         }
+         $str.= attb_build($attbs);
+         return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
+            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
+         "$str>";
       }
 
    /* ******************************************************************** */

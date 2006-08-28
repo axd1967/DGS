@@ -283,22 +283,22 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    if( !$printable )
    {
       $menu_array = array(
-         '<b><font size="+1">' . T_('Status') . '</font></b>' => array('status.php" accesskey="s',1,1),
-         T_('Waiting room') => array('waiting_room.php" accesskey="r',1,2),
-         T_('User info') => array('userinfo.php" accesskey="p',1,3),
+         T_('Status') => array(1,1, 'status.php',array('accesskey'=>'s','class'=>'strong')),
+         T_('Waiting room') => array(1,2, 'waiting_room.php',array('accesskey'=>'r')),
+         T_('User info') => array(1,3, 'userinfo.php',array('accesskey'=>'p')),
 
-         T_('Messages') => array('list_messages.php" accesskey="b',2,1),
-         T_('Send a message') => array('message.php?mode=NewMessage" accesskey="m',2,2),
-         T_('Invite') => array('message.php?mode=Invite" accesskey="i',2,3),
+         T_('Messages') => array(2,1, 'list_messages.php',array('accesskey'=>'b')),
+         T_('Send a message') => array(2,2, 'message.php?mode=NewMessage',array('accesskey'=>'m')),
+         T_('Invite') => array(2,3, 'message.php?mode=Invite',array('accesskey'=>'i')),
 
-         T_('Users') => array('users.php" accesskey="u',3,1),
-         T_('Games') => array('show_games.php?uid=all" accesskey="g',3,2),
-         T_('Translate') => array('translate.php" accesskey="t',3,3),
+         T_('Users') => array(3,1, 'users.php',array('accesskey'=>'u')),
+         T_('Games') => array(3,2, 'show_games.php?uid=all',array('accesskey'=>'g')),
+         T_('Translate') => array(3,3, 'translate.php',array('accesskey'=>'t')),
 
-         T_('Forums') => array('forum/index.php" accesskey="f',4,1),
-         T_('FAQ') => array('faq.php" accesskey="q',4,2),
-         //T_('Site map') => array('site_map.php',4,3),
-         T_('Docs') => array('docs.php" accesskey="d',4,3),
+         T_('Forums') => array(4,1, 'forum/index.php',array('accesskey'=>'f')),
+         T_('FAQ') => array(4,2, 'faq.php',array('accesskey'=>'q')),
+         //T_('Site map') => array(4,3, 'site_map.php'),
+         T_('Docs') => array(4,3, 'docs.php',array('accesskey'=>'d')),
       );
 
       $tools_array = array();
@@ -400,9 +400,11 @@ function end_page( $menu_array=NULL )
       echo "<a href=\"{$base_path}admin.php\"><b><font color=$menu_fg_color>"
         . T_('Admin') . "</font></b></a>&nbsp;&nbsp;&nbsp;";
 
-   echo "<A href=\"{$base_path}index.php?logout=t\" accesskey=\"o\">"
-        . "<B><font color=$menu_fg_color>"
-        . T_("Logout") . "</font></B></A>";
+   echo anchor( $base_path."index.php?logout=t"
+              , "<B><font color=$menu_fg_color>" . T_("Logout") . "</font></B>"
+              , ''
+              , array( 'accesskey' => 'o' )
+              );
 
    echo "</td>"
       . "\n </tr>"
@@ -459,8 +461,14 @@ function make_menu($menu_array)
       $cumw += $w;
       $width = round($cumw - $cumwidth);
 
-      $j = $i % 10;
-      echo "\n  <td width=\"$width%\"><A href=\"$base_path$link\" accesskey=\"$j\">$text</A></td>";
+      echo "\n  <td width=\"$width%\">"
+         . anchor( "$base_path$link"
+                 , $text
+                 , ''
+                 , array( 'accesskey' => $i % 10 )
+                 )
+         . '</td>';
+
       $cumwidth += $width;
    }
 
@@ -469,8 +477,8 @@ function make_menu($menu_array)
 
 function cmp1($a, $b)
 {
-   list($d,$a1,$a2) = $a;
-   list($d,$b1,$b2) = $b;
+   list($a1,$a2,$d) = $a;
+   list($b1,$b2,$d) = $b;
 
    if ($a1 != $b1)
       return ( $a1 > $b1 ? 1 : -1 );
@@ -483,8 +491,8 @@ function cmp1($a, $b)
 
 function cmp2($a, $b)
 {
-   list($d,$a1,$a2) = $a;
-   list($d,$b1,$b2) = $b;
+   list($a1,$a2,$d) = $a;
+   list($b1,$b2,$d) = $b;
 
    if ($a2 != $b2)
       return ( $a2 > $b2 ? 1 : -1 );
@@ -543,7 +551,8 @@ function make_menu_horizontal($menu_array)
       }
       $i++;
 
-      list($link,$t1,$t2) = $tmp;
+      $attbs= '';
+      @list($t1,$t2,$link,$attbs) = $tmp;
       if( $width )
       {
          $cumw += $w;
@@ -552,7 +561,9 @@ function make_menu_horizontal($menu_array)
          $width = " width=\"$width%\"";
       }
 
-      echo "\n  <td$width><A href=\"$base_path$link\"><font color=black>$text</font></A></td>";
+      echo "\n  <td$width>";
+      echo anchor( $base_path.$link, $text, '', $attbs);
+      echo "</td>";
    }
 
    echo "\n </tr>\n</table>\n";
@@ -590,8 +601,10 @@ function make_menu_vertical($menu_array)
              . "\n  <td align=left nowrap>";
       $i++;
 
-      list($link,$t1,$t2) = $tmp;
-      echo "<A href=\"$base_path$link\"><font color=black>$text</font></A><br>";
+      $attbs= '';
+      @list($t1,$t2,$link,$attbs) = $tmp;
+      echo anchor( $base_path.$link, $text, '', $attbs);
+      echo "<br>";
    }
 
    echo "</td>"
@@ -613,7 +626,7 @@ function make_tools( $array, $width=0)
    foreach( $array as $lnk => $sub )
    {
       list( $src, $alt, $tit) = $sub;
-      if( $i && $i==$width )
+      if( $width>0 && $i==$width )
       {
          echo "</tr><tr>\n";
          $i= 1;
@@ -638,7 +651,7 @@ function help($topic)
 function sysmsg($msg)
 {
    if( isset($msg) && trim($msg) )
-      echo "\n<p></p><b><font color=\"green\">".make_html_safe($msg)."</font></b><hr>\n";
+      echo "\n<p class=sysmsg>".make_html_safe($msg)."</p><hr>\n";
 }
 
 
@@ -964,6 +977,14 @@ function parse_html_safe( $msg, $some_html)
    return $str;
 }
 
+function basic_safe( $str)
+{
+   return str_replace(
+              array( '<', '>', '"', "'")
+            , array( '&lt;', '&gt;', '&quot;', '&#039;')
+            , $str);
+}
+
 function reverse_allowed( $msg)
 {
    return str_replace(
@@ -1108,10 +1129,7 @@ function make_html_safe( $msg, $some_html=false)
    */
    $msg = preg_replace('%&(?!(#[0-9]+|[A-Z][0-9A-Z]*);)%si', '&amp;', $msg);
 
-   $msg = str_replace(
-              array( '<', '>', '"', "'")
-            , array( '&lt;', '&gt;', '&quot;', '&#039;')
-            , $msg);
+   $msg = basic_safe( $msg);
 
    if( $some_html )
    {
@@ -1690,27 +1708,64 @@ function limit($val, $minimum, $maximum, $default)
    return $val;
 }
 
+function attb_quote( $str)
+{
+   return '"'.basic_safe(trim($str)).'"';
+}
+
+function attb_build( $attbs)
+{
+   if( is_array( $attbs) )
+   {
+      $str= '';
+      foreach( $attbs as $key => $val )
+      {
+         $str.= ' '.$key.'='.attb_quote($val);
+      }
+      return $str;
+   }
+   if( is_string( $attbs) )
+   {
+      $str= trim($attbs);
+      if( $str )
+         return ' '.$str;
+   }
+   return '';
+}
+
 function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
 {
-   $str = "<img border=0 src=\"$src\" alt=\"$alt\"";
+   $str = "<img border=0 src=\"$src\" alt=".attb_quote($alt);
    if( $title )
-     $str.= " title=\"$title\"";
+     $str.= ' title='.attb_quote($title);
    if( $height>=0 )
      $str.= " height=\"$height\"";
    if( $width>=0 )
      $str.= " width=\"$width\"";
-   if( $attbs )
-     $str.= ' '.$attbs;
+   $str.= attb_build($attbs);
    return $str.'>';
 }
 
 function anchor( $href, $text, $title='', $attbs='')
 {
    $str = "<a href=\"$href\"";
+   if( is_array($attbs) )
+   {
+      if( isset($attbs['accesskey']) )
+      {
+         $xkey = trim($attbs['accesskey']);
+         unset($attbs['accesskey']);
+         if( $xkey )
+         {
+            $xkey = substr($xkey,0,1);
+            $title.= " [&amp;$xkey]";
+            $str.= ' accesskey='.attb_quote($xkey);
+         }
+      }
+   }
    if( $title )
-     $str.= " title=\"$title\"";
-   if( $attbs )
-     $str.= ' '.$attbs;
+      $str.= ' title='.attb_quote($title);
+   $str.= attb_build($attbs);
    return $str.">$text</a>";
 }
 
@@ -1735,6 +1790,7 @@ function button_style( $button_nr=0)
      "a.button {" .
        " display: block;" .
        " min-width: ".($button_width-4)."px;" .
+//       " width: ".($button_width-4)."px;" .
        " color: {$buttoncolors[$button_nr]};" .
        " font: bold 100% sans-serif;" .
        " text-decoration: none;" .
@@ -1743,8 +1799,10 @@ function button_style( $button_nr=0)
        " background-image: url(images/{$buttonfiles[$button_nr]});" .
        " background-repeat: no-repeat;" .
        " background-position: center;" .
-       " text-align: center;" .
+       " padding: 0px 2px 0px 2px;" .
+       " min-width: {$button_width}px;" .
        " width: {$button_width}px;" .
+       " text-align: center;" .
      "}";
 }
 
