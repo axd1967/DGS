@@ -322,9 +322,9 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
             .URI_AMP."reply=$ID#$ID\">[ " .
             T_('reply') . " ]</a>&nbsp;&nbsp;";
-         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
-            .URI_AMP."reply=$ID".URI_AMP."quote=1#$ID\">[ " .
-            T_('quote') . " ]</a>&nbsp;&nbsp;";
+//          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
+//             .URI_AMP."reply=$ID".URI_AMP."quote=1#$ID\">[ " .
+//             T_('quote') . " ]</a>&nbsp;&nbsp;";
       }
       if( $my_post and !$is_moderator ) // edit link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."edit=$ID#$ID\">" .
