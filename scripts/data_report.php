@@ -98,7 +98,7 @@ require_once( "include/form_functions.php" );
    $dform->add_row( array(
       'HIDDEN', 'charset', $encoding_used,
       'CELL', 9, 'align="center"',
-      'OWNHTML', '<INPUT type="submit" name="apply" accesskey="x" value="Apply (&x)">',
+      'OWNHTML', '<INPUT type="submit" name="apply" accesskey="x" value="Apply [&x]">',
       'TEXT', '&nbsp;&nbsp;col size:&nbsp;',
       'TEXTINPUT', 'colsize', 3 , 3, $colsize,
       'RADIOBUTTONS', 'colwrap', array('cut'=>'cut','wrap'=>'wrap',''=>'none',), $colwrap,
@@ -122,7 +122,7 @@ require_once( "include/form_functions.php" );
       }
       $uri.= 'apply=1#result';
 
-      echo 'Query&gt; ' . anchor( $uri, $query.' ;') . "<p></p>\n";
+      echo 'Query&gt; ' . anchor( $uri, $query.';') . "<p></p>\n";
 
 
       echo "<A name=\"result\"></A>\n";
@@ -139,7 +139,7 @@ require_once( "include/form_functions.php" );
 
       if( echo_query( 'EXPLAIN '.$query, 0, 0, 0) < 0 ) break;
 
-      echo 'Query&gt; ' . anchor( $uri, $query.' ;') . "<p></p>\n";
+      echo 'Query&gt; ' . anchor( $uri, $query.';') . "<p></p>\n";
    }
 
    end_html();

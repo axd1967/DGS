@@ -74,7 +74,7 @@ require_once( "include/form_functions.php" );
    $dform->add_row( array(
       'CELL', 9, 'align="center"',
       'HIDDEN', 'charset', $encoding_used,
-      'OWNHTML', '<INPUT type="submit" name="sendit" accesskey="x" value="Send it (&x)">',
+      'OWNHTML', '<INPUT type="submit" name="sendit" accesskey="x" value="Send it [&x]">',
       ) );
 
    $dform->echo_string(1);
@@ -93,11 +93,11 @@ require_once( "include/form_functions.php" );
 
       $msg = str_pad('', 47, '-') . "\n" .
           "Date: ".date($date_fmt, $NOW) . "\n" .
-          "From: DragonGo admin staff\n" .
+          "From: $FRIENDLY_LONG_NAME admin staff\n" .
           "Subject: ".strip_tags( $Subject, '') . "\n\n" .
           strip_tags( $Text, '') . "\n";
 
-      $res= mail( trim($Email), 'Dragon Go Server mail test', $msg, $headers );
+      $res= mail( trim($Email), $FRIENDLY_LONG_NAME.' mail test', $msg, $headers );
       if( !$res )
       {
          echo "<br>mail() function failed.<br>";
