@@ -38,6 +38,11 @@ a:active {
    text-align: center;
 }
 
+.sysmsg {
+   color: green;
+   font-weight: bold;
+}
+
 pre.code {
    background: #dddddd;
    padding: 8px;
@@ -233,3 +238,24 @@ img.layoutstone {
    width: 17px;
    height: 17px;
 }
+
+
+tr.forum_header {
+   background: #d0d0d0;
+   color: black;
+}
+
+tr.forum_header a {
+   color: black;
+}
+
+table#page_menu a {
+   color: black;
+}
+
+table#page_menu a.strong {
+   color: black;
+   font-weight: bold;
+   font-size: 1.1em;
+}
+
