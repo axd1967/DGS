@@ -297,7 +297,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 
       echo "</td></tr>\n";
 
-      $post_reference = T_('by') . " <user $User_ID> - $post_reference";
+      $post_reference = "<user $User_ID> ($post_reference):";
 
       // post body
       echo "<tr bgcolor=white><td colspan=$cols>$txt</td></tr>";
