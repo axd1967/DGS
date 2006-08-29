@@ -60,7 +60,7 @@ require_once( "forum_functions.php" );
       or error("mysql_query_failed",'forum_index1');
 
    $cols = 4;
-   $headline   = array("Forums" => "colspan=$cols");
+   $headline   = array(T_("Forums") => "colspan=$cols");
    $links |= LINK_SEARCH;
 
    $is_moderator = false;
@@ -93,8 +93,8 @@ require_once( "forum_functions.php" );
 
       echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID . '">' . $Name .
          '</a></b>'. ( $Moderated == 'Y' ? ' &nbsp; <font color="#ff4466">[' . T_('Moderated') . ']</font>' : '') .'</td>' .
-         '<td nowrap>Posts: <b>' . $PostsInForum .  '&nbsp;&nbsp;&nbsp;</b></td>' .
-         '<td nowrap>Last Post: <b>' . $date . '</b></td></tr>
+         '<td nowrap>'.T_('Posts').': <b>' . $PostsInForum .  '&nbsp;&nbsp;&nbsp;</b></td>' .
+         '<td nowrap>'.T_('Last post').': <b>' . $date . '</b></td></tr>
 <tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description .
          '</dl></td></tr>';
    }
