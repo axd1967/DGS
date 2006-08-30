@@ -11,6 +11,12 @@
    color: blue;
 }
 
+.none {
+   text-decoration: none;
+   font-weight: normal;
+}
+
+
 /*
 a:link {
    color: blue;
@@ -240,6 +246,8 @@ img.layoutstone {
 }
 
 
+/* forums layout */
+
 tr.forum_header {
    background: #d0d0d0;
    color: black;
@@ -247,6 +255,86 @@ tr.forum_header {
 
 tr.forum_header a {
    color: black;
+}
+
+tr.post_head {
+   color: black;
+}
+
+tr.post_head.normal {
+   background: #cccccc;
+   color: black;
+}
+tr.post_head.search_result {
+   background: #77bb88;
+   color: black;
+}
+tr.post_head.hidden {
+   background: #eecccc;
+   color: black;
+}
+tr.post_head.reply {
+   background: #cccccc;
+   color: black;
+}
+tr.post_head.preview {
+   background: #cceecc;
+   color: black;
+}
+tr.post_head.edit {
+   background: #eeeecc;
+   color: black;
+}
+
+tr.post_head .post_subject {
+   color: black;
+   font-size: larger;
+   font-weight: bold;
+}
+
+tr.post_body {
+   background: white;
+   color: black;
+}
+
+tr.post_buttons {
+   background: white;
+   color: black;
+}
+
+
+/* common page layout */
+
+body {
+   background: #F7F5E3;
+   color: black;
+}
+
+table#page_head {
+   background: #0C41C9;
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+table#page_head a {
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+table#page_foot {
+   background: #0C41C9;
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+table#page_foot a {
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+table#page_foot .page_time {
+   font-weight: normal;
+   font-size: smaller;
 }
 
 table#page_menu a {

@@ -48,11 +48,24 @@ $has_sgf_alias = false;
 // AliasMatch game([0-9]+)\.sgf /path/to/sgf.php
 
 
-$sgf_color='"#d50047"';
-$bg_color='"#F7F5E3"';  // change in dragon.css too!
+//----- { layout : change in dragon.css too!
+$bg_color='"#F7F5E3"';
 
 $menu_bg_color='"#0C41C9"';
-$menu_fg_color='"#FFFC70"';
+//$menu_fg_color='"#FFFC70"';
+
+$table_head_color='"#CCCCCC"';
+$table_row_color1='"#FFFFFF"';
+$table_row_color2='"#E0E8ED"';
+//$table_row_color_del1='"#FFCFCF"';
+//$table_row_color_del2='"#F0B8BD"';
+
+$h3_color='"#800000"';
+
+$sgf_color='"#d50047"';
+
+//----- } layout : change in dragon.css too!
+
 
 $max_links_in_main_menu=5;
 
@@ -82,14 +95,6 @@ $ratingpng_min_interval = 2*31*24*3600;
 $BEGINYEAR = 2001;
 $BEGINMONTH = 8;
 
-
-$table_head_color='"#CCCCCC"';
-$table_row_color1='"#FFFFFF"';
-$table_row_color2='"#E0E8ED"';
-//$table_row_color_del1='"#FFCFCF"';
-//$table_row_color_del2='"#F0B8BD"';
-
-$h3_color='"#800000"';
 
 $button_max = 11;
 $button_width = 96;
@@ -207,7 +212,7 @@ function fnop( $a)
 
 function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $bg_color, $encoding_used, $printable, $FRIENDLY_SHORT_NAME;
+   global $base_path, $encoding_used, $printable, $FRIENDLY_SHORT_NAME;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -247,14 +252,14 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
    if( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
 
-   echo "\n</HEAD>\n<BODY bgcolor=$bg_color>\n";
+   echo "\n</HEAD>\n<BODY>\n";
 }
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $base_path, $is_down, $is_down_message, $printable,
-      $bg_color, $menu_bg_color, $menu_fg_color, $FRIENDLY_LONG_NAME;
+      $bg_color, $FRIENDLY_LONG_NAME, $HOSTBASE;
 
    start_html( $title, $no_cache, $style_string, $last_modified_stamp);
 
@@ -263,18 +268,17 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( !$printable )
    {
-   echo "\n\n<table id=\"page_head\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>"
+   echo "\n\n<table id=\"page_head\" width=\"100%\" border=0 cellspacing=0 cellpadding=4>"
       . "\n <tr>"
-      . "\n  <td align=left><A href=\"{$base_path}index.php\">"
-        . "<B><font color=$menu_fg_color>$FRIENDLY_LONG_NAME</font></B></A></td>";
+      . "\n  <td align=left><A id=\"home_id\" href=\"{$HOSTBASE}index.php\">"
+        . "$FRIENDLY_LONG_NAME</A></td>";
    echo "\n  <td align=right>";
 
    if ($logged_in and !$is_down)
-      echo "<A href=\"{$base_path}status.php\"><B><font color=$menu_fg_color>"
-           . T_("Logged in as") . ": " . $player_row["Handle"] . "</font></B></A>";
+      echo T_("Logged in as") . ": <A id=\"logged_id\" href=\"{$base_path}status.php\">"
+           . $player_row["Handle"] . "</A>";
    else
-      echo "<B><font color=$menu_fg_color>"
-           . T_("Not logged in") . "</font></B>";
+      echo T_("Not logged in");
 
    echo "</td>"
       . "\n </tr>\n</table>\n";
@@ -356,7 +360,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 function end_page( $menu_array=NULL )
 {
    global $page_microtime, $admin_level, $base_path, $printable,
-      $menu_bg_color, $menu_fg_color, $bg_color;
+      $bg_color;
 
    echo "\n\n&nbsp;<br>";
 
@@ -374,20 +378,20 @@ function end_page( $menu_array=NULL )
    echo "\n </tr>\n</table>\n";
 
    global $NOW, $date_fmt, $FRIENDLY_LONG_NAME;
-   echo "\n<table id=\"page_foot\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$menu_bg_color>"
+   echo "\n<table id=\"page_foot\" width=\"100%\" border=0 cellspacing=0 cellpadding=4>"
       . "\n <tr>"
       . "\n  <td align=left><A href=\"{$base_path}index.php\">"
-        . "<B><font color=$menu_fg_color>$FRIENDLY_LONG_NAME</font></B></A></td>";
+        . "$FRIENDLY_LONG_NAME</A></td>";
 
-   echo "\n  <td align=center><font size=-1 color=$menu_fg_color>"
-        . T_("Page time") . ' ' . date($date_fmt, $NOW)
-        . "</font>";
+   echo "\n  <td class=\"page_time\" align=center>"
+        . T_("Page time") . ' <span id="page_time">' . date($date_fmt, $NOW)
+        . "</span>";
 
    if( $admin_level & ADMIN_TIME && !$printable )
-      echo "<br><font size=-2 color=$menu_fg_color>"
-        . T_('Page created in')
+      echo "<br><font size=-2>"
+        . T_('Page created in') . ' <span id="page_lapse">'
         . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
-        . "</font>";
+        . "</span></font>";
 
    echo "</td>";
 
@@ -397,11 +401,11 @@ function end_page( $menu_array=NULL )
    echo "\n  <td align=right>";
 
    if( $admin_level & ~(ADMIN_TIME) && !$printable )
-      echo "<a href=\"{$base_path}admin.php\"><b><font color=$menu_fg_color>"
-        . T_('Admin') . "</font></b></a>&nbsp;&nbsp;&nbsp;";
+      echo "<a href=\"{$base_path}admin.php\">"
+        . T_('Admin') . "</a>&nbsp;&nbsp;&nbsp;";
 
    echo anchor( $base_path."index.php?logout=t"
-              , "<B><font color=$menu_fg_color>" . T_("Logout") . "</font></B>"
+              , T_("Logout")
               , ''
               , array( 'accesskey' => 'o' )
               );
@@ -410,6 +414,7 @@ function end_page( $menu_array=NULL )
       . "\n </tr>"
       . "\n</table>";
 
+   // Start of host line
    echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$bg_color>"
       . "\n <tr>";
  }
@@ -508,6 +513,7 @@ function make_menu_horizontal($menu_array)
 {
    global $base_path, $menu_bg_color, $bg_color;
 
+   //table for bottom line
    echo "\n<table class=notprintable width=\"100%\" border=0 cellspacing=0 cellpadding=0 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
@@ -568,6 +574,7 @@ function make_menu_horizontal($menu_array)
 
    echo "\n </tr>\n</table>\n";
 
+   //table for bottom line
    echo "\n  </td>"
       . "\n </tr><tr>"
       . "\n  <td height=1><img src=\"{$base_path}images/dot.gif\" width=1 height=1 alt=\"\"></td>"
@@ -578,6 +585,7 @@ function make_menu_vertical($menu_array)
 {
    global $base_path, $menu_bg_color, $bg_color;
 
+   //table for border line
    echo "\n<table class=notprintable border=0 cellspacing=0 cellpadding=1 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
@@ -613,6 +621,7 @@ function make_menu_vertical($menu_array)
       . "\n </tr>"
       . "\n</table>";
 
+   //table for border line
    echo "\n  </td>"
       . "\n </tr>\n</table>\n";
 }

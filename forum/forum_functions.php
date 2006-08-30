@@ -216,16 +216,13 @@ function get_new_string($Lastchangedstamp, $Lastread)
 
 function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null)
 {
+/* $post_type could be:
+   'normal', 'search_result', 'hidden', 'reply', 'preview', 'edit'
+*/
+
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
       $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
       $ForumName, $Score, $Forum_ID, $Thread_ID, $bool, $PendingApproval;
-
-   $post_colors = array( 'normal' => 'cccccc',
-                         'search_result' => '77bb88',
-                         'hidden' => 'eecccc',
-                         'reply' => 'cccccc',
-                         'preview' => 'cceecc',
-                         'edit' => 'eeeecc' );
 
    $post_reference = '';
    $cols = 2;
@@ -244,13 +241,13 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
    if( $post_type == 'preview' )
    {
       // one line Subject header
-      echo "<tr><td colspan=$cols bgcolor=\"#" . $post_colors[ $post_type ] .
-         "\"><a name=\"preview\"></a><font size=\"+1\"><b>$sbj</b></font><br> " . 
+      echo "<tr class=\"post_head $post_type\">\n <td colspan=$cols" .
+         "\"><a class=\"post_subject\" name=\"preview\">$sbj</a><br> " . 
          T_('by')." " . user_reference( 1, 1, "black", $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n";
 
       // post body
-      echo "<tr bgcolor=white><td colspan=$cols>$txt</td></tr>";
+      echo "<tr class=\"post_body\">\n <td colspan=$cols>$txt</td></tr>";
    }
    else
    {
@@ -259,14 +256,16 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       {
          $hdrcols = $cols;
 
-         echo '<tr bgcolor="#' . $post_colors[ $post_type ] . "\"><td colspan=$hdrcols>";
-         echo '<a class=black href="read.php?forum=' . $Forum_ID .URI_AMP
-            . "thread=$Thread_ID#$ID\"><b><font size=\"+1\">$sbj</font></b></a>";
+         echo "<tr class=\"post_head $post_type\">\n <td colspan=$hdrcols>";
+         echo '<a class=\"post_subject\" href="read.php?forum=' . $Forum_ID .URI_AMP
+            . "thread=$Thread_ID#$ID\">$sbj</a>";
 
-         echo '<font size="+1" color="#FFFFFF"> found in forum </font><a href="list.php?forum=' .
-            $Forum_ID . '" class=black>' . $ForumName . '</a>' . "\n";
+         echo ' <font size="+1" color="#FFFFFF">' . T_('found in forum')
+            . '</font> <a href="list.php?forum=' .
+            $Forum_ID . '" class=black>' . $ForumName . "</a>\n";
          if( !$bool )
-            echo '<font color="#FFFFFF"> with </font> Score <font color="#000000">' . $Score  . '</font>' . "\n";
+            echo ' <font color="#FFFFFF">' . T_('with') . '</font> ' . T_('Score')
+               . ' <font color="#000000">' . $Score  . "</font>\n";
 
          echo "</td></tr>\n";
       }
@@ -277,12 +276,12 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
          else
             $hdrcols = $cols;
 
-         echo '<tr bgcolor="#' . $post_colors[ $post_type ] . "\"><td colspan=$hdrcols>";
-         echo "<a name=\"$ID\"><b><font size=\"+1\">$sbj</font></b></a>$new";
+         echo "<tr class=\"post_head $post_type\">\n <td colspan=$hdrcols>";
+         echo "<a class=\"post_subject\" name=\"$ID\">$sbj</a>$new";
 
          if( $hdrcols != $cols )
          {
-            echo "</td><td rowspan=2 align=right>";
+            echo "</td>\n <td rowspan=2 align=right>";
             echo '<b><font color="#990000">' .
                ( $PendingApproval == 'Y' ? T_('Awaiting<br>approval') : T_('Hidden') ) .
                '</font></b>';
@@ -291,7 +290,7 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       }
 
       // second line of Subject header
-      echo '<tr bgcolor="#' . $post_colors[ $post_type ] . "\"><td colspan=$hdrcols>";
+      echo "<tr class=\"post_head $post_type\">\n <td colspan=$hdrcols>";
 
       $post_reference = date($date_fmt, $Timestamp);
       echo T_('by') . " " . user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
@@ -309,14 +308,14 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       $post_reference = "<user $User_ID> ($post_reference):";
 
       // post body
-      echo "<tr bgcolor=white><td colspan=$cols>$txt</td></tr>";
+      echo "<tr class=\"post_body\">\n <td colspan=$cols>$txt</td></tr>";
    }
 
    // bottom line (footer)
    if( $post_type == 'normal' or $post_type == 'hidden' )
    {
       $hidden = $post_type == 'hidden';
-      echo "<tr bgcolor=white><td colspan=$cols align=left>";
+      echo "<tr class=\"post_buttons\">\n <td colspan=$cols align=left>";
       if(  $post_type == 'normal' and !$is_moderator ) // reply link
       {
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
@@ -343,7 +342,10 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
                "reject=$ID#$ID\"><font color=\"#ee6666\">[ " .
                T_('Reject')  . " ]</font></a>";
       }
-      echo "</td></tr><tr><td colspan=$cols height=2></td></tr>";
+      echo "</td></tr>\n";
+      
+      //vertical space
+      echo "<tr><td colspan=$cols height=2></td></tr>\n";
    }
    
    return $post_reference;
