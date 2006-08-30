@@ -51,8 +51,11 @@ $has_sgf_alias = false;
 //----- { layout : change in dragon.css too!
 $bg_color='"#F7F5E3"';
 
-$menu_bg_color='"#0C41C9"';
 //$menu_fg_color='"#FFFC70"';
+if( $FRIENDLY_SHORT_NAME == 'DGS' )
+   $menu_bg_color='"#0C41C9"'; //live server
+else
+   $menu_bg_color='"#C9410C"'; //devel server
 
 $table_head_color='"#CCCCCC"';
 $table_row_color1='"#FFFFFF"';
@@ -252,7 +255,7 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
    if( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
 
-   echo "\n</HEAD>\n<BODY>\n";
+   echo "\n</HEAD>\n<BODY id=\"$FRIENDLY_SHORT_NAME\">\n";
 }
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,

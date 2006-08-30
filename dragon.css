@@ -316,6 +316,12 @@ table#page_head {
    font-weight: bold;
 }
 
+body#dDGS table#page_head {
+   background: #C9410C;
+   color: #FFFC70;
+   font-weight: bold;
+}
+
 table#page_head a {
    color: #FFFC70;
    font-weight: bold;
@@ -323,6 +329,12 @@ table#page_head a {
 
 table#page_foot {
    background: #0C41C9;
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+body#dDGS table#page_foot {
+   background: #C9410C;
    color: #FFFC70;
    font-weight: bold;
 }
