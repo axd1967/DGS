@@ -175,7 +175,11 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
    {
-      $links |= LINK_TOGGLE_MODERATOR;
+      //toggle moderator and preview does not work together.
+      //(else add $_POST in the moderator link buid)
+      if( !$preview )
+         $links |= LINK_TOGGLE_MODERATOR;
+
       $is_moderator = set_moderator_cookie($player_row['ID']);
 
       if( (int)@$_GET['show'] > 0 )
