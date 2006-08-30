@@ -57,7 +57,9 @@ require_once( "forum_functions.php" );
    echo '
 <CENTER>
 <FORM name="search" action="search.php" method="GET">
-        Search terms:';
+';
+
+   echo T_('Search terms') . ':&nbsp;&nbsp;';
 
    echo '<INPUT type="text" name="search_terms" value="' 
          . textarea_safe($search_terms) . '" tabindex="1" size="40" maxlength="80">';
@@ -65,9 +67,9 @@ require_once( "forum_functions.php" );
    echo '
         <INPUT type="submit" name="action" value="'.T_('Search').'" tabindex="2">
 <p>
-        <INPUT type="checkbox" name="bool" value="1" ' . ($bool ? 'checked ' : '' ) 
-            . 'tabindex="3">' . T_('Boolean mode') . '
-</FORM>
+        <INPUT type="checkbox" name="bool" value="1"' . ($bool ? ' checked' : '' ) 
+            . ' tabindex="3">' . T_('Boolean mode') . '
+</p></FORM>
 </CENTER>
 ';
 
