@@ -23,9 +23,12 @@ $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 
-function add_contributor( $text, $uref='', $name=false, $handle=false )
+$cols = 3;
+function add_contributor( $text, $uref='', $name=false, $handle=false, $img='' )
 {
    echo "<tr><td>$text</td>\n";
+   //if( $img )
+      echo "<td>$img</td>\n";   
    echo "<td><b>" .
       user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, 'black', $uref, $name, $handle) .
       "</b></td></tr>\n";
@@ -38,7 +41,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
 
   start_page(T_("People"), true, $logged_in, $player_row );
 
-  echo "<table align=center><tr><td colspan=2>\n";
+  echo "<table align=center><tr><td colspan=$cols>\n";
   echo "<center><h3><font color=$h3_color>" .
     T_('Contributors to Dragon') . "</font></h3></center>\n";
   echo "</td></tr>\n";
@@ -57,7 +60,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   }
 
 
-  echo "<tr><td colspan=2><p>&nbsp;</p>\n";
+  echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
   echo "<center><h3><font color=$h3_color>" .
      T_("FAQ") . "</font></h3></center>\n";
   echo "</td></tr>\n";
@@ -66,6 +69,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   $FAQexclude = array( 'ejlo', 'rodival');
   $FAQmain = 'Ingmar';
   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
+            ",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel" .
                                " FROM Players" .
                                " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
                                " AND Handle='$FAQmain'" .
@@ -82,6 +86,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
 
   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
                                ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+            ",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel" .
                                " FROM Players" .
                                " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
                                " ORDER BY ID" )
@@ -98,13 +103,14 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
   }
 
 
-  echo "<tr><td colspan=2><p>&nbsp;</p>\n";
+  echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
   echo "<center><h3><font color=$h3_color>" .
      T_('Current translators') . "</font></h3></center>\n";
   echo "</td></tr>\n";
 
   $query_result = mysql_query( "SELECT ID,Handle,Name,Translator" .
                                ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+            ",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel" .
                                " FROM Players" .
                                " WHERE LENGTH(Translator)>0" .
                                " ORDER BY Lastaccess DESC,ID" )
@@ -138,7 +144,9 @@ function add_contributor( $text, $uref='', $name=false, $handle=false )
               add_contributor( $first,
                                $translator['ID'],
                    ( $info ? '['.date($date_fmt2, $translator['Lastaccess']).'] ' : '') .
-                               $translator['Name'], $translator['Handle'] );
+                               $translator['Name'], $translator['Handle']
+                               , activity_string( $translator['ActivityLevel'])
+                               );
               $first = '';
            }
      }

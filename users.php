@@ -147,11 +147,7 @@ require_once( "include/countries.php" );
       }
       if( $utable->Is_Column_Displayed[13] )
       {
-         $a = $row['ActivityLevel'];
-         $activity = ( $a == 0 ? '' :
-                    ( $a == 1 ? '<img align=middle alt="*" src=images/star2.gif>' :
-                      '<img align=middle alt="*" src=images/star.gif>' .
-                      '<img align=middle alt="*" src=images/star.gif>' ) );
+         $activity = activity_string( $row['ActivityLevel']);
          $urow_strings[13] = '<td>' . $activity . '&nbsp;</td>';
       }
       if( $utable->Is_Column_Displayed[14] )

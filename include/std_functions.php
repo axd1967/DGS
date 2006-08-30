@@ -1435,6 +1435,18 @@ function add_link_page_link($link, $linkdesc, $extra = '', $active = true)
    echo "</p>\n";
 }
 
+function activity_string( $act_lvl)
+{
+ global $base_path;
+   return ( $act_lvl == 0 ? '&nbsp;' :
+           ( $act_lvl == 1
+             ? '<img align=middle alt="*" src="'.$base_path.'images/star2.gif">'
+             : '<img align=middle alt="*" src="'.$base_path.'images/star.gif">'
+              .'<img align=middle alt="*" src="'.$base_path.'images/star.gif">' 
+             ) );
+}
+
+
 function nsq_addslashes( $str )
 {
   return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $str );

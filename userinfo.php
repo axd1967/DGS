@@ -70,11 +70,7 @@ require_once( "include/countries.php" );
 
    echo "<h3><font color=$h3_color>" . $title . '</font></h3>';
 
-   $a = $row['ActivityLevel'];
-   $activity = ( $a == 0 ? '' :
-                 ( $a == 1 ? '<img align=middle alt="*" src="images/star2.gif">' :
-                   '<img align=middle alt="*" src="images/star.gif">' .
-                   '<img align=middle alt="*" src="images/star.gif">' ) );
+   $activity = activity_string( $row['ActivityLevel']);
    $registerdate = ($row['Registerdate'] > 0 ? date('Y-m-d', $row['Registerdate']) : NULL );
    $lastaccess = ($row['lastaccess'] > 0 ? date($date_fmt2, $row['lastaccess']) : NULL );
    $lastmove = ($row['Lastmove'] > 0 ? date($date_fmt2, $row['Lastmove']) : NULL );
