@@ -40,12 +40,20 @@ if (!isset($page_microtime))
 require_once( "include/translation_functions.php" );
 
 
-$hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
 // because of the cookies host, $hostname_jump = true is nearly mandatory
+$hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
 
-$has_sgf_alias = false;
 // If using apache add this row to your virtual host to make this work:
 // AliasMatch game([0-9]+)\.sgf /path/to/sgf.php
+$has_sgf_alias = false;
+
+
+// when modified, run $HOSTBASE."change_password.php?guestpass=1"
+// with ADMIN_PASSWORD privileges
+if( $FRIENDLY_SHORT_NAME == 'DGS' )
+   $GUESTPASS = 'guest'.'pass';
+else
+   $GUESTPASS = 'guest';
 
 
 //----- { layout : change in dragon.css too!
@@ -391,10 +399,10 @@ function end_page( $menu_array=NULL )
         . "</span>";
 
    if( $admin_level & ADMIN_TIME && !$printable )
-      echo "<br><font size=-2>"
+      echo "<br><span style=\"font-size:84%;\">"
         . T_('Page created in') . ' <span id="page_lapse">'
         . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
-        . "</span></font>";
+        . "</span></span>";
 
    echo "</td>";
 

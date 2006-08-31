@@ -21,7 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
-//require_once( "include/rating.php" );
+
 
 {
    disable_cache();
@@ -36,23 +36,39 @@ require_once( "include/std_functions.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-   $oldpasswd = @$_POST['oldpasswd'];
-   if( !check_password( $player_row["Handle"], $player_row["Password"],
-                        $player_row["Newpassword"], $oldpasswd ) )
-      error("wrong_password");
+   if( @$_REQUEST['guestpass'] )
+   {
+      if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
+         error("adminlevel_too_low");
 
-   $passwd = @$_POST['passwd'];
-   if( strlen($passwd) < 6 )
-      error("password_too_short");
-   if( illegal_chars( $passwd, true ) )
-      error("password_illegal_chars");
+      $passwd = $GUESTPASS;
+      if( illegal_chars( $passwd, true ) )
+         error("password_illegal_chars");
 
-   if( $passwd != @$_POST['passwd2'] )
-      error("password_mismatch");
-
-   $query = "UPDATE Players SET " .
-       "Password=PASSWORD('$passwd') " .
-       "WHERE ID=" . $player_row['ID'] . " LIMIT 1";
+      $query = "UPDATE Players SET " .
+          "Password=PASSWORD('$passwd') " .
+          "WHERE Handle='guest' LIMIT 1";
+   }
+   else
+   {
+      $oldpasswd = @$_POST['oldpasswd'];
+      if( !check_password( $player_row["Handle"], $player_row["Password"],
+                           $player_row["Newpassword"], $oldpasswd ) )
+         error("wrong_password");
+   
+      $passwd = @$_POST['passwd'];
+      if( strlen($passwd) < 6 )
+         error("password_too_short");
+      if( illegal_chars( $passwd, true ) )
+         error("password_illegal_chars");
+   
+      if( $passwd != @$_POST['passwd2'] )
+         error("password_mismatch");
+   
+      $query = "UPDATE Players SET " .
+          "Password=PASSWORD('$passwd') " .
+          "WHERE ID=" . $player_row['ID'] . " LIMIT 1";
+   }
 
    mysql_query( $query )
       or error('mysql_query_failed','change_password');
