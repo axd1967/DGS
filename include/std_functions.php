@@ -272,6 +272,17 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    global $base_path, $is_down, $is_down_message, $printable,
       $bg_color, $FRIENDLY_LONG_NAME, $HOSTBASE;
 
+   if( $is_down && $logged_in )
+   {
+      //$is_down_allowed = array('ejlo','rodival');
+      if( isset($is_down_allowed) && is_array($is_down_allowed)
+         && in_array( $player_row['Handle'], $is_down_allowed) )
+      {
+         $is_down = false;
+      }
+      unset( $is_down_allowed);
+   }
+
    start_html( $title, $no_cache, $style_string, $last_modified_stamp);
 
 //    echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
