@@ -580,11 +580,14 @@ class Board
 
             $sgfc = number2sgf_coords($colnr, $this->size-$rownr, $this->size);
             $mrk = '';
+            $numover = false;
             if( is_array($this->marks) )
             {
                if( $sgfc && @$this->marks[$sgfc] )
                {
                   $mrk = $this->marks[$sgfc];
+                  if( is_numeric($mrk) && $this->coord_borders & NUMBER_OVER )
+                     $numover = true;
                }
             }
 
@@ -601,14 +604,17 @@ class Board
                elseif( $mrk )
                {
                   //$alt .= $mrk;
-                  $type .= $mrk;
-                  $marked = true;
+                  if( !$numover )
+                  {
+                     $type .= $mrk;
+                     $marked = true;
+                  }
                }
             }
 
             $tit = '';
-            if( $mrk && $this->coord_borders & NUMBER_OVER )
-               $tit = strtoupper( $mrk);
+            if( $numover )
+               $tit = $mrk;
             if( $this->coord_borders & COORD_OVER )
                //strtoupper? -> change capturebox too
                $tit = ( $tit ? $tit.' - ' : '' ) . $letter.$rownr;
