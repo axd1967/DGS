@@ -105,6 +105,7 @@ require_once( "include/form_functions.php" );
       ) );
 
    $dform->echo_string(1);
+   echo "<p>&nbsp;</p>\n";
 
 
    while( $apply && $select )
@@ -122,10 +123,10 @@ require_once( "include/form_functions.php" );
       }
       $uri.= 'apply=1#result';
 
-      echo 'Query&gt; ' . anchor( $uri, $query.';') . "<p></p>\n";
+      echo 'Query&gt; ' . anchor( $uri, textarea_safe($query).';') . "&nbsp;<br>\n";
 
 
-      echo "<A name=\"result\"></A>\n";
+      echo "<A name=\"result\"></A><br>\n";
       if( ($n=echo_query( $query, $rowhdr, $colsize, $colwrap)) < 0 ) break;
 
       $s= "SELECT '$n' as 'Rows'"
@@ -139,7 +140,7 @@ require_once( "include/form_functions.php" );
 
       if( echo_query( 'EXPLAIN '.$query, 0, 0, 0) < 0 ) break;
 
-      echo 'Query&gt; ' . anchor( $uri, $query.';') . "<p></p>\n";
+      echo 'Query&gt; ' . anchor( $uri, textarea_safe($query).';') . "&nbsp;<br>\n";
    }
 
    end_html();
@@ -155,13 +156,19 @@ function echo_query( $query, $rowhdr=20, $colsize=40, $colwrap='cut' )
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
    {
-      echo "Error: $mysqlerror<p></p>";
+      echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
       return -1;
    }
 
-   $numrows = 0+@mysql_num_rows($result);
-   if( !$result or $numrows<=0 )
+   if( !$result )
       return 0;
+
+   $numrows = @mysql_num_rows($result);
+   if( $numrows<=0 )
+   {
+      @mysql_free_result( $result);
+      return 0;
+   }
 
    $c=2;
    $i=0;
@@ -208,8 +215,10 @@ function echo_query( $query, $rowhdr=20, $colsize=40, $colwrap='cut' )
       }
       echo "\n</tr>";
    }
+   mysql_free_result( $result);
    echo "\n</table><br>\n";
 
    return $numrows;
 }
+
 ?>

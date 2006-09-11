@@ -580,7 +580,7 @@ require_once( "include/std_functions.php" );
 
    $mysqlerror = get_request_arg('mysqlerror'); //@$_GET['mysqlerror'];
    if( $mysqlerror )
-      echo("<p></p>Mysql error: " . $mysqlerror );
+      echo "<p>Mysql error: ".textarea_safe($mysqlerror)."</p>";
 
    echo '<p></p>';
    end_page();

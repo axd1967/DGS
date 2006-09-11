@@ -84,7 +84,7 @@ function insert_set( $table, $query, $title=false)
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
    {
-      echo "<p>Error: $mysqlerror</p>";
+      echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
       return -1;
    }
 
@@ -132,7 +132,7 @@ function insert_values( $table, $names, $query, $title=false)
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
    {
-      echo "<p>Error: $mysqlerror</p>";
+      echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
       return -1;
    }
 
@@ -305,7 +305,7 @@ function get_tables( $database)
       $mysqlerror = @mysql_error();
       if( $mysqlerror )
       {
-         echo "Error: $mysqlerror<p></p>";
+         echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
          return -1;
       }
 
