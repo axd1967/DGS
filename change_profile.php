@@ -41,7 +41,9 @@ require_once( "include/countries.php" );
    if( strlen( $name ) < 1 )
       error("name_not_given");
 
-   $email = trim(get_request_arg('email')) ;
+   $email = trim(get_request_arg('email'));
+   verify_email($email, 'change_profile');
+
    $sendemail = '';
    $emailnotify = (int)@$_GET['emailnotify'];
    if( !empty($email) && $emailnotify >= 1 )

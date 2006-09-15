@@ -41,7 +41,7 @@ require_once( "include/form_functions.php" );
    $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 UTF-8
 
    $sendit= @$_REQUEST['sendit'];
-   $Email= get_request_arg( 'email', '');
+   $Email= trim(get_request_arg( 'email', ''));
    $From= get_request_arg( 'from', '');
    if( !$sendit && !$From )
       $From= $EMAIL_FROM;
@@ -86,26 +86,33 @@ require_once( "include/form_functions.php" );
    }
    else if( $sendit && $Email )
    {
-      if( $From )
-         $headers = "From: $From\n";
-      else
-         $headers = "";
-
-      $msg = str_pad('', 47, '-') . "\n" .
-          "Date: ".date($date_fmt, $NOW) . "\n" .
-          "From: $FRIENDLY_LONG_NAME admin staff\n" .
-          "Subject: ".strip_tags( $Subject, '') . "\n\n" .
-          strip_tags( $Text, '') . "\n";
-
-      $res= mail( trim($Email), $FRIENDLY_LONG_NAME.' mail test', $msg, $headers );
-      if( !$res )
+      if( !verify_email($Email) )
       {
-         echo "<br>mail() function failed.<br>";
+         echo "<br>bad mail address: ".html_safe($Email)."<br>";
       }
       else
       {
-         echo "<br>Message sent to $Email / $From:<br>";
-         echo "<pre>$msg</pre>";
+         if( $From )
+            $headers = "From: $From\n";
+         else
+            $headers = "";
+
+         $msg = str_pad('', 47, '-') . "\n" .
+             "Date: ".date($date_fmt, $NOW) . "\n" .
+             "From: $FRIENDLY_LONG_NAME admin staff\n" .
+             "Subject: ".strip_tags( $Subject, '') . "\n\n" .
+             strip_tags( $Text, '') . "\n";
+
+         $res= @mail( $Email, $FRIENDLY_LONG_NAME.' mail test', $msg, $headers );
+         if( !$res )
+         {
+            echo "<br>mail() function failed.<br>";
+         }
+         else
+         {
+            echo "<br>Message sent to $Email / $From:<br>";
+            echo "<pre>$msg</pre>";
+         }
       }
    }
 

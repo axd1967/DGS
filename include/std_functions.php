@@ -729,6 +729,15 @@ function generate_random_password()
    return $return;
 }
 
+function verify_email( $email, $debugmsg='')
+{
+   $regexp = "^([-_a-z0-9]+)(\.[-_a-z0-9]+)*@([-a-z0-9]+)(\.[-a-z0-9]+)*(\.[a-z]{2,4})$";
+   $res= eregi($regexp, $email);
+   if( $debugmsg && !$res )
+      error('bad_mail_address', "$debugmsg=$email");
+   return $res;
+}
+
 
 function safe_setcookie($name, $value='', $rel_expire=-3600)
 //should be: ($name, $value, $expire, $path, $domain, $secure)

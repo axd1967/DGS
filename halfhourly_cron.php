@@ -30,7 +30,7 @@ if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.
    $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
    $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
 
-   function html_entity_decode($str, $quote_style=ENT_COMPAT, $charset='iso-8859-1')
+   function html_entity_decode($str, $quote_style=ENT_COMPAT, $charset='ISO-8859-1')
    {
     global $reverse_htmlentities_table;
       return strtr($str, $reverse_htmlentities_table);
@@ -85,14 +85,6 @@ function mail_strip_html( $str)
    $str = strip_tags( $str, '<goban>');
    $str = html_entity_decode( $str, ENT_QUOTES, 'iso-8859-1');
    return $str;
-}
-
-function verify_email($email)
-{
-   $regexp = "^([_a-z0-9-]+)(\.[_a-z0-9-]+)*@([a-z0-9-]+)(\.[a-z0-9-]+)*(\.[a-z]{2,4})$";
-   if( !eregi($regexp, $email) )
-      error('bad_mail_address', "$email");
-   return eregi($regexp, $email);
 }
 
 
@@ -249,9 +241,19 @@ if( !$is_down )
       //$headers.= "MIME-Version: 1.0\n";
       //$headers.= "Content-type: text/html; charset=iso-8859-1\n";
 
-      if( function_exists('mail') and verify_email(trim($Email)) )
-         mail( trim($Email), $FRIENDLY_LONG_NAME.' notification', $msg, $headers );
-   }
+      $Email= trim($Email);
+      if( verify_email($Email, 'halfhourly_cron') )
+      {
+         if( !function_exists('mail')
+            or !@mail( $Email, $FRIENDLY_LONG_NAME.' notification', $msg, $headers )
+           )
+         {
+            //can't connect mail feature
+            error('mail_failure', 'halfhourly_cron');
+            break;
+         }
+      }
+   } //notifications found
    mysql_free_result($result);
 
 
@@ -276,7 +278,7 @@ if( !$is_down )
 
 // Check end of vacations
 
-   $result = mysql_query("SELECT ID, ClockUsed from Players " .
+   $result = mysql_query("SELECT ID, ClockUsed FROM Players " .
                          "WHERE OnVacation>0 AND OnVacation <= 1/(2*24)")
       or error('mysql_query_failed','halfhourly_cron.onvacation');
 

@@ -70,7 +70,7 @@ require_once( "include/std_functions.php" );
 
    $newpasswd = generate_random_password();
 
-   $Email= $row['Email'];
+   $Email= trim($row['Email']);
 
    admin_log( @$player_row['ID'], @$player_row['Handle'],
          "send a new password to $pswduser at $Email.");
@@ -83,9 +83,12 @@ require_once( "include/std_functions.php" );
       or error('mysql_query_failed', 'send_new_password.update');
 
 
-   $msg= 'You (or possibly someone else) has requested a new password, and it has
-been randomly chosen as: ' . $newpasswd . '
+   $msg= 
+"You (or possibly someone else) has requested a new password\n" .
+//" for the account: $pswduser\n" .
+" and it has been randomly chosen as: $newpasswd\n" .
 
+'
 Both the old and the new password will also be valid until your next
 login. Now please login and then change your password to something more
 rememberable.
@@ -94,8 +97,11 @@ rememberable.
 
    $headers = "From: $EMAIL_FROM\n";
 
-   if( !function_exists('mail')
-    or !mail( trim($Email), $FRIENDLY_LONG_NAME.': New password', $msg, $headers ) )
+   if( function_exists('mail') && verify_email($Email, 'send_new_password') )
+      $res= @mail( $Email, $FRIENDLY_LONG_NAME.' notification', $msg, $headers );
+   else
+      $res= false;
+   if( !$res )
       error('mail_failure',"Uid:$pswduser Addr:$Email Text:$msg");
 
 

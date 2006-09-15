@@ -206,6 +206,12 @@ require_once( "include/std_functions.php" );
       }
       break;
 
+      case('bad_mail_address'):
+      {
+         echo T_("Sorry, the email given is not a valid address.");
+      }
+      break;
+
       case("no_game_nr"):
       {
          echo T_("Sorry, I need a game number to know what game to show.");
