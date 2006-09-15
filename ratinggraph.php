@@ -43,7 +43,7 @@ require_once( "include/form_functions.php" );
      or error('mysql_query_failed', 'ratinggraph.find_player');
 
   if( @mysql_num_rows($result) != 1 )
-     error("unknown user");
+     error("unknown_user");
 
   $user_row = mysql_fetch_array($result);
 
