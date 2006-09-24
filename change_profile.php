@@ -42,7 +42,8 @@ require_once( "include/countries.php" );
       error("name_not_given");
 
    $email = trim(get_request_arg('email'));
-   verify_email($email, 'change_profile');
+   if( $email )
+      verify_email($email, 'change_profile');
 
    $sendemail = '';
    $emailnotify = (int)@$_GET['emailnotify'];
