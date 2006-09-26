@@ -585,7 +585,7 @@ CREATE TABLE Posts (
   PosIndex varchar(80) binary default NULL,
   old_ID int(11) default '0',
   Approved enum('Y', 'N') NOT NULL default 'Y',
-  PendingApproval enum('Y', 'N') NOT NULL default 'N';
+  PendingApproval enum('Y', 'N') NOT NULL default 'N',
   PRIMARY KEY  (ID),
   KEY Pos (Thread_ID, PosIndex),
   KEY List (Forum_ID, Lastchanged),
