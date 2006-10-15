@@ -19,10 +19,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 
-if( @$_GET['quick_mode'] )
-   $quick_errors = 1;
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
+
+$quick_mode = (boolean)@$_REQUEST['quick_mode'];
+if( $quick_mode )
+   $TheErrors->set_mode(ERROR_MODE_PRINT);
 
 // can't use html_entity_decode() because of the '&nbsp;' below: 
 $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
@@ -404,7 +406,7 @@ $array=array();
    $node_com = "";
 
    $result = mysql_query( "SELECT Moves.*,MoveMessages.Text " .
-                          "FROM Moves LEFT JOIN MoveMessages " .
+                          "FROM (Moves) LEFT JOIN MoveMessages " .
                           "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
                           "WHERE Moves.gid=$gid ORDER BY Moves.ID" )
       or error('mysql_query_failed', 'sgf.moves');

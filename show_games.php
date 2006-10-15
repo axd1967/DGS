@@ -130,7 +130,7 @@ require_once( "include/rating.php" );
          ( $finished
            ? ", Black_End_Rating AS blackEndRating, White_End_Rating AS whiteEndRating, " .
            "blog.RatingDiff AS blackDiff, wlog.RatingDiff AS whiteDiff " : '' ) .
-         "FROM Games, Players AS white, Players AS black " .
+         "FROM (Games, Players AS white, Players AS black) " .
          ( $finished ?
            "LEFT JOIN Ratinglog AS blog ON blog.gid=Games.ID AND blog.uid=Black_ID ".
            "LEFT JOIN Ratinglog AS wlog ON wlog.gid=Games.ID AND wlog.uid=White_ID " : '' ) .
@@ -162,7 +162,7 @@ require_once( "include/rating.php" );
             ;
       }
 
-      $query .= "FROM Games,Players " .
+      $query .= "FROM (Games,Players) " .
          ( $finished ?
            "LEFT JOIN Ratinglog AS log ON log.gid=Games.ID AND log.uid=$uid " : '' ) .
          "WHERE " . ( $finished ? "Status='FINISHED' "

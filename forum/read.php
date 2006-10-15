@@ -42,7 +42,7 @@ function revision_history($post_id)
       "Players.ID AS User_ID, Players.Name, Players.Handle, " .
       "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
       "UNIX_TIMESTAMP(GREATEST(Posts.Time,Posts.Lastedited)) AS Timestamp " .
-      "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID ";
+      "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID ";
 
 
    $row = mysql_single_fetch( $query_select . "WHERE Posts.ID='$post_id'",
@@ -227,7 +227,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
                          "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
                          "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
                          "Players.ID AS uid, Players.Name, Players.Handle " .
-                         "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
+                         "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID " .
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
                          "AND PosIndex IS NOT NULL " .
                          "ORDER BY PosIndex")

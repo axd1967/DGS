@@ -55,7 +55,7 @@ require_once( "forum_functions.php" );
 
    $result = mysql_query("SELECT Forums.ID,Description,Name,Moderated, PostsInForum, " .
                          "UNIX_TIMESTAMP(Posts.Time) AS Timestamp " .
-                         "FROM Forums LEFT JOIN Posts ON Forums.LastPost=Posts.ID " .
+                         "FROM (Forums) LEFT JOIN Posts ON Forums.LastPost=Posts.ID " .
                          "ORDER BY SortOrder")
       or error("mysql_query_failed",'forum_index1');
 

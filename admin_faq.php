@@ -477,7 +477,7 @@ require_once( "include/make_translationfiles.php" );
         "SELECT entry.*, Question.Text AS Q".
         ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
         ", IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
-        "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
+        "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
         "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
         "AND entry.Level<3 AND entry.Level>0 " .
@@ -576,7 +576,7 @@ function get_entry_row( $id )
    $row = mysql_single_fetch(
         "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
         ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
-        "FROM FAQ, TranslationTexts AS Question " .
+        "FROM (FAQ, TranslationTexts AS Question) " .
         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
         "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question",
         'assoc', 'admin_faq.get_entry_row')

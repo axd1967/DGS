@@ -164,10 +164,10 @@ function translations_query( $translate_lang, $untranslated, $group )
             "TranslationFoundInGroup.Group_ID," .
             "TranslationTexts.Text AS Original," .
             "TranslationTexts.Translatable " .
-     "FROM TranslationTexts," .
+     "FROM (TranslationTexts," .
           "TranslationLanguages," .
           "TranslationFoundInGroup," .
-          "TranslationGroups " .
+          "TranslationGroups) " .
      "LEFT JOIN Translations " .
         "ON Translations.Original_ID=TranslationTexts.ID " .
        "AND Translations.Language_ID=TranslationLanguages.ID " .

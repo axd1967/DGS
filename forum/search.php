@@ -83,7 +83,7 @@ require_once( "forum_functions.php" );
          ($bool ? ' IN BOOLEAN MODE' : '') . ") as Score, " .
          "Players.ID AS uid, Players.Name, Players.Handle, " .
          "Forums.Name as ForumName " .
-         "FROM Posts LEFT JOIN Players ON Posts.User_ID=Players.ID " .
+         "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID " .
          "LEFT JOIN Forums ON Forums.ID = Posts.Forum_ID " .
          "WHERE MATCH (Subject,Text) AGAINST ('".mysql_escape_string($search_terms)."'" .
          ($bool ? ' IN BOOLEAN MODE' : '') . ") AND Approved='Y' " .

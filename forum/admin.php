@@ -230,7 +230,7 @@ require_once( "forum_functions.php" );
 
      $result =
         mysql_query("SELECT Forums.ID,Description,Name " .
-                    "FROM Forums LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
+                    "FROM (Forums) LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
                     "GROUP BY Forums.ID " .
                     "ORDER BY SortOrder")
         or error('mysql_query_failed','forum_admin.list.find_forums');

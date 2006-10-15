@@ -47,7 +47,7 @@ require_once( "include/std_functions.php" );
         "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
         "Question.Text AS Q, Answer.Text AS A, " .
         "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
-        "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
+        "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
         "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question $faqhide" .
         ( $cat === 'all' ? '' : "AND ( entry.Parent = $cat OR entry.ID = $cat ) " ) .

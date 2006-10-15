@@ -97,7 +97,7 @@ require_once( "include/form_functions.php" );
           "Size, Komi, Handicap, Maintime, Byotype, " .
           "Byotime, Byoperiods, Rated, Weekendclock, StdHandicap, " .
           "ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS Color " .
-          "FROM Messages, MessageCorrespondents AS me " .
+          "FROM (Messages, MessageCorrespondents AS me) " .
           "LEFT JOIN MessageCorrespondents AS other " .
             "ON other.mid=me.mid AND other.Sender!=me.Sender " .
           "LEFT JOIN Players ON Players.ID=other.uid " .

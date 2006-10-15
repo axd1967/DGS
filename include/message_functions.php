@@ -763,9 +763,9 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
           "IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
           "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
       "me.mid, me.Replied, me.Sender, me.Folder_nr AS folder, " .
-      "IF(me.sender='M',' ',Players.Name) AS other_name, " . //the ' ' help to sort
+      "IF(me.sender='M',' ',Players.Name) AS other_name, " . //the ' ' helps to sort
       "Players.ID AS other_ID " .
-      "FROM Messages, MessageCorrespondents AS me " .
+      "FROM (Messages, MessageCorrespondents AS me) " .
       "LEFT JOIN MessageCorrespondents AS other " .
         "ON other.mid=me.mid AND other.Sender!=me.Sender " .
       "LEFT JOIN Players ON Players.ID=other.uid " .

@@ -198,7 +198,7 @@ if( !$is_down )
          $query = "SELECT Messages.*, " .
             "UNIX_TIMESTAMP(Messages.Time) AS date, " .
             "Players.Name AS FromName, Players.Handle AS FromHandle " .
-            "FROM Messages, MessageCorrespondents AS me " .
+            "FROM (Messages, MessageCorrespondents AS me) " .
             "LEFT JOIN MessageCorrespondents AS other " .
               "ON other.mid=me.mid AND other.Sender!=me.Sender " .
             "LEFT JOIN Players ON Players.ID=other.uid " .
