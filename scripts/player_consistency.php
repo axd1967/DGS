@@ -374,9 +374,11 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
             "WHERE (" .
               "(RatingStatus='RATED' AND (Rating2>=RatingMax OR Rating2<=RatingMin) ) " .
               "OR NOT((ClockUsed>=0 AND ClockUsed<24) " .
-                     "OR (ClockUsed>=".WEEKEND_CLOCK_OFFSET.
-                        " AND ClockUsed<".(24+WEEKEND_CLOCK_OFFSET)."))" .
+              // no WEEKEND_CLOCK in Players table
+              //       "OR (ClockUsed>=".WEEKEND_CLOCK_OFFSET.
+              //          " AND ClockUsed<".(24+WEEKEND_CLOCK_OFFSET).")" .
               // no VACATION_CLOCK in Players table
+              ")" .
             ")"
             .uid_clause( 'Players.ID', 'AND')
             ." ORDER BY Players.ID$limit";
