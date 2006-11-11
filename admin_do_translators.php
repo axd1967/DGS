@@ -27,7 +27,10 @@ require_once( "include/make_translationfiles.php" );
 
 function lang_illegal( $str)
 {
-   return substr( $str, strcspn( $str, LANG_TRANSL_CHAR.LANG_CHARSET_CHAR), 1);
+   return substr( $str
+                , strcspn( $str, '*?\\/"\':;[]{}<>' //special filename chars
+                        . LANG_TRANSL_CHAR.LANG_CHARSET_CHAR)
+                , 1);
 }
 
 function retry_admin( $msg)
@@ -75,7 +78,13 @@ function retry_admin( $msg)
       error("adminlevel_too_low");
 
    $addlanguage = @$_REQUEST['addlanguage'];
-   $twoletter = trim(get_request_arg('twoletter'));
+/* Originally, the language code was a 2 letters code (like ISO 639-1).
+   Because of language particularities within the same charset (like
+   en-gb and en-us), the language code is now a "at least a 2 letters" code.
+   Because of get_preferred_browser_language(), it must follow the code
+   used by browsers, i.e. IANA Language Subtag Registry.
+*/
+   $langcode = trim(get_request_arg('twoletter')); //twoletter kept for URL compatibility
    $charenc = trim(get_request_arg('charenc'));
    $langname = trim(get_request_arg('langname'));
 
@@ -85,32 +94,32 @@ function retry_admin( $msg)
    $transladdlang = trim(get_request_arg('transladdlang'));
 
    $translpriv = @$_REQUEST['translpriv'];
-   //transllang[] is a MULTIPLE select box => no get_request_arg()
-
+   //transllang[] is a MULTIPLE select box
    $transllang = get_request_arg('transllang');
 
-   $twoletter = strtolower($twoletter);
+   // Normalization for the array_key_exists() matchings
+   $langcode = strtolower($langcode);
    $charenc = strtolower($charenc);
-   $langname = ucfirst($langname); //ucword()
+   $langname = ucfirst(strtolower($langname)); //ucwords()
 
 
    $msg = '';
 
    if( $addlanguage )
    {
-      $tmp = lang_illegal($twoletter.$langname.$charenc);
+      $tmp = lang_illegal( $langcode.$langname.$charenc);
       if( $tmp )
          retry_admin( T_("Sorry, there was an illegal character in a language field.") . " ($tmp)");
 
-      if( strlen( $twoletter ) < 2 || empty( $langname ) || empty( $charenc ) )
+      if( strlen( $langcode ) < 2 || empty( $langname ) || empty( $charenc ) )
         retry_admin( T_("Sorry, there was a missing or incorrect field when adding a language."));
 
-      if( language_exists( $twoletter, $charenc, $langname ) )
+      if( language_exists( $langcode, $charenc, $langname ) )
         retry_admin( T_("Sorry, the language you tried to add already exists."));
 
 
       mysql_query("INSERT INTO TranslationLanguages SET " .
-                  "Language='" . $twoletter . LANG_CHARSET_CHAR . $charenc . "', " .
+                  "Language='" . $langcode . LANG_CHARSET_CHAR . $charenc . "', " .
                   "Name='$langname'")
          or error('mysql_query_failed','admin_do_translators.add.insert');
 
@@ -140,7 +149,7 @@ function retry_admin( $msg)
       }
 
       retry_admin( sprintf( T_("Added language %s with code %s and characterencoding %s.")
-                                 , $langname, $twoletter, $charenc ));
+                                 , $langname, $langcode, $charenc ));
    }
 
 //-------------------

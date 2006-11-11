@@ -34,14 +34,17 @@ if( file_exists( "translations/known_languages.php") )
 /* examples:
 * $known_languages = array(
 *    "en" => array( "iso-8859-1" => "English" ),
+*    "zh" => array( "utf-8" => "Chinese (Traditional)" ),
+*    "zh-cn" => array( "utf-8" => "Chinese (Simplified)" ),
 *    "jp" => array( "utf-8" => "Japanese" ) );
-* $row['Translator'] = 'en.iso-8859-1,jp.utf-8';
+* $row['Translator'] = 'en.iso-8859-1,zh-cn.utf-8,jp.utf-8';
 * get_language_descriptions_translated() : array(
 *    "en.iso-8859-1" => "English",
+*    "zh-cn.utf-8" => "Chinese (Simplified)",
 *    "jp.utf-8" => "Japanese" );
 */
-define('LANG_TRANSL_CHAR', ',');
-define('LANG_CHARSET_CHAR', '.');
+define('LANG_TRANSL_CHAR', ','); //do not use '-'
+define('LANG_CHARSET_CHAR', '.'); //do not use '-'
 define('LANG_DEF_CHARSET', 'iso-8859-1');
 define('LANG_ENGLISH', 'en'.LANG_CHARSET_CHAR.LANG_DEF_CHARSET); //lowercase
 
@@ -81,7 +84,7 @@ function include_translate_group($group, $player_row) //must be called from main
 
    if( !empty( $language_used ) ) //from a previous call
       $language = $language_used;
-   else
+   else //first call
    {
       if( !empty($_GET['language']) )
          $language = (string)$_GET['language'];
@@ -95,7 +98,6 @@ function include_translate_group($group, $player_row) //must be called from main
 
       if( empty($language) or $language == 'en' )
          $language = LANG_ENGLISH;
-      //else call to get_preferred_browser_language() for each $group
 
       $language_used = $language;
       @list(,$encoding_used) = explode( LANG_CHARSET_CHAR, $language, 2);
@@ -120,9 +122,7 @@ function include_translate_group($group, $player_row) //must be called from main
       {
          include_once( $filename );
       }
-
    }
-
 }
 
 
@@ -133,39 +133,60 @@ function get_preferred_browser_language()
    $accept_langcodes = explode( ',', @$_SERVER['HTTP_ACCEPT_LANGUAGE'] );
    $accept_charset = strtolower(trim(@$_SERVER['HTTP_ACCEPT_CHARSET']));
 
-   $current_q_val = -1;
+   $current_q_val = -100;
    $return_val = NULL;
 
    foreach( $accept_langcodes as $lang )
+   {
+      @list($langcode, $q_val) = explode( ';', trim($lang));
+
+      $q_val = preg_replace( '/q=/i', '', trim($q_val));
+      if( empty($q_val) or !is_numeric($q_val) )
+         $q_val = 1.0;
+      if( $current_q_val >= $q_val )
+         continue;
+
+      // Normalization for the array_key_exists() matchings
+      $langcode = strtolower(trim($langcode));
+      while( $langcode && !array_key_exists($langcode, $known_languages))
       {
-         @list($lang, $q_val) = explode( ';', trim($lang));
-         $lang = substr(trim($lang), 0, 2);
-         $q_val = preg_replace( '/q=/i', '', trim($q_val));
-         if( empty($q_val) or !is_numeric($q_val) )
-            $q_val = 1.0;
-
-         if( $current_q_val >= $q_val )
-            continue;
-
-         if( !$lang or !array_key_exists($lang, $known_languages))
-            continue;
-
-         $current_q_val = $q_val;
-
-         if( $accept_charset )
-            foreach( $known_languages[$lang] as $charenc => $name )
-            {
-               if( strpos( $accept_charset, strtolower($charenc) ) !== false )
-               {
-                  $return_val = $lang . LANG_CHARSET_CHAR . $charenc;
-                  break;
-               }
-            }
-
-         // No supporting encoding found. Take the first one anyway.
-         reset($known_languages[$lang]);
-         $return_val = $lang . LANG_CHARSET_CHAR . key($known_languages[$lang]);
+         $tmp = strrpos( $langcode, '-');
+         if( !is_numeric($tmp)  or $tmp < 2 )
+         {
+            $langcode = '';
+            break;
+         }
+         $langcode = substr( $langcode, 0, $tmp);
+         $q_val-= 1.0;
       }
+      if( !$langcode )
+         continue;
+
+      if( $current_q_val >= $q_val )
+         continue;
+
+      $found = false;
+      if( $accept_charset )
+      {
+         foreach( $known_languages[$langcode] as $charenc => $langname )
+         {
+            //$charenc = strtolower($charenc); // Normalization
+            if( strpos( $accept_charset, $charenc) !== false )
+            {
+               $found = true;
+               break;
+            }
+         }
+      }
+      if( !$found )
+      {  // No supporting encoding found. Take the first one anyway.
+         reset($known_languages[$langcode]);
+         $charenc = key($known_languages[$langcode]);
+      }
+
+      $return_val = $langcode . LANG_CHARSET_CHAR . $charenc;
+      $current_q_val = $q_val;
+   }
 
    return $return_val;
 }
@@ -175,32 +196,38 @@ function get_language_descriptions_translated()
    global $known_languages;
 
    $result = array();
-   foreach( $known_languages as $twoletter => $array )
+   foreach( $known_languages as $langcode => $array )
+   {
+      foreach( $array as $charenc => $langname )
       {
-         foreach( $array as $charenc => $lang_name )
-            {
-               $result[ $twoletter . LANG_CHARSET_CHAR . $charenc ] = T_($lang_name);
-            }
+         $result[ $langcode . LANG_CHARSET_CHAR . $charenc ] = T_($langname);
       }
+   }
    return $result;
 }
 
 
-function language_exists( $twoletter, $charenc='', $langname='' )
+function language_exists( $langcode, $charenc='', $langname='' )
 {
    global $known_languages;
 
-   if( empty($twoletter) )
+   if( empty($langcode) )
       return false;
    if( empty($charenc) )
-      @list($twoletter,$charenc) = explode( LANG_CHARSET_CHAR, $twoletter, 2);
+      @list($langcode,$charenc) = explode( LANG_CHARSET_CHAR, $langcode, 2);
 
-   return array_key_exists( $twoletter , $known_languages ) &&
-       ( array_key_exists( $charenc, $known_languages[$twoletter] )
-      or ( !empty($langname)
-        && array_key_exists( $langname, array_flip($known_languages[$twoletter]) )
-         )
-       );
+   if( !array_key_exists( $langcode , $known_languages ) )
+      return false;
+
+   $langs = $known_languages[$langcode];
+   if( !empty($charenc) &&
+       array_key_exists( $charenc, $langs ) )
+      return true;
+   if( !empty($langname) &&
+       array_key_exists( $langname, array_flip($langs) ) )
+      return true;
+
+   return false;
 }
 
 ?>

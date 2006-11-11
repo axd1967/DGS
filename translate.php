@@ -128,12 +128,12 @@ $translation_groups =
          error('translation_bad_language_or_group','translat1');
 
       $lang_string = '';
-      foreach( $known_languages as $twoletter => $array )
+      foreach( $known_languages as $langcode => $array )
       {
-         foreach( $array as $charenc => $lang_name )
+         foreach( $array as $charenc => $langname )
          {
-            if( $twoletter . LANG_CHARSET_CHAR . $charenc == $translate_lang)
-               $lang_string .= ",$lang_name";
+            if( $langcode . LANG_CHARSET_CHAR . $charenc == $translate_lang)
+               $lang_string .= ",$langname";
          }
       }
       if( $lang_string )
@@ -262,12 +262,12 @@ $translation_groups =
 
       $lang_desc = get_language_descriptions_translated();
       $vals = array();
-      foreach( $lang_desc as $lang => $lang_name )
+      foreach( $lang_desc as $lang => $langname )
       {
            @list( $lc, $cs) = explode( LANG_CHARSET_CHAR, $lang, 2);
            if( in_array( $lang, $translator_array ) or
                in_array( $lc, $translator_array ) )
-              $vals[$lang] = $lang_name;
+              $vals[$lang] = $langname;
       }
 
       $langchoice_form->add_row( array(

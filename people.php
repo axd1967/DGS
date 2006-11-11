@@ -121,21 +121,24 @@ function add_contributor( $text, $uref='', $name=false, $handle=false, $img='' )
   {
      $languages = explode( LANG_TRANSL_CHAR, $row['Translator']);
      foreach( $languages as $language )
-        {
-           @list($lang, $charenc) = explode( LANG_CHARSET_CHAR, $language, 2);
+     {
+        @list($langcode, $charenc) = explode( LANG_CHARSET_CHAR, $language, 2);
+        // Normalization for the array_key_exists() matchings
+        $langcode = strtolower(trim($langcode));
+        $charenc = strtolower(trim($charenc));
 
-           $lang_name = T_($known_languages[$lang][$charenc]);
+        $langname = T_($known_languages[$langcode][$charenc]);
 
-           if( !isset($translator_list[$lang_name]) )
-              $translator_list[$lang_name] = array();
+        if( !isset($translator_list[$langname]) )
+           $translator_list[$langname] = array();
 
-           array_push($translator_list[$lang_name], $row);
-        }
+        array_push($translator_list[$langname], $row);
+     }
   }
 
   ksort($translator_list);
 
-  $info = $logged_in && $player_row['admin_level'] & ADMIN_TRANSLATORS ;
+  $extra_info = $logged_in && $player_row['admin_level'] & ADMIN_TRANSLATORS ;
   foreach( $translator_list as $language => $translators )
      {
         $first = $language;
@@ -143,7 +146,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false, $img='' )
            {
               add_contributor( $first,
                                $translator['ID'],
-                   ( $info ? '['.date($date_fmt2, $translator['Lastaccess']).'] ' : '') .
+                   ( $extra_info ? '['.date($date_fmt2, $translator['Lastaccess']).'] ' : '') .
                                $translator['Name'], $translator['Handle']
                                , activity_string( $translator['ActivityLevel'])
                                );
