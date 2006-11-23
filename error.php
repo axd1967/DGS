@@ -372,6 +372,12 @@ require_once( "include/std_functions.php" );
       }
       break;
 
+      case('user_mismatch'):
+      {
+         echo T_("Sorry, the logged user seems to have changed during the operation.");
+      }
+      break;
+
       case("userid_in_use"):
       {
          echo T_("Sorry, this userid is already used, please try to find a unique userid.");

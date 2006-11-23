@@ -205,6 +205,7 @@ require_once( "include/form_functions.php" );
    //by default:
    $message_form->add_hidden( 'mode', $mode);
    $message_form->add_hidden( 'mid', $mid);
+   $message_form->add_hidden( 'senderid', $my_id);
 
    switch( $submode )
    {

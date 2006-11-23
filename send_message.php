@@ -43,6 +43,10 @@ disable_cache();
 
 
    $my_id = $player_row['ID'];
+   $tmp = @$_REQUEST['senderid'];
+   if( $tmp>0 && $my_id != $tmp )
+      error('user_mismatch');
+
    $message_id = @$_REQUEST['foldermove_mid'];
    $tohdl = get_request_arg('to');
    $reply = @$_REQUEST['reply']; //ID of message replied. if set then (often?always?) == $message_id
