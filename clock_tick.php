@@ -103,8 +103,7 @@ if( !$is_down )
       //$game_clause (lock) needed. See *** HOT_SECTION *** in confirm.php
       $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
 
-      $ticks = $ticks - $LastTicks;
-      $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
+      $hours = ticks_to_hours($ticks - $LastTicks);
 
       if( $ToMove_ID == $Black_ID )
       {

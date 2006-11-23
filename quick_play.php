@@ -153,8 +153,7 @@ else
    if( $Maintime > 0 or $Byotime > 0)
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
-      $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
-      $hours = ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
+      $hours = ticks_to_hours(get_clock_ticks($ClockUsed) - $LastTicks);
 
       if( $to_move == BLACK )
       {
