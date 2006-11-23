@@ -100,7 +100,7 @@ function retry_admin( $msg)
    // Normalization for the array_key_exists() matchings
    $langcode = strtolower($langcode);
    $charenc = strtolower($charenc);
-   $langname = ucfirst(strtolower($langname)); //ucwords()
+   $langname = ucfirst($langname); //ucfirst(strtolower($langname)); //ucwords()
 
 
    $msg = '';
