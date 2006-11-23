@@ -81,7 +81,7 @@ function get_clock_ticks($clock_used)
 function ticks_to_hours($ticks)
 {
    global $tick_frequency;
-
+   //always return an integer
    return ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 }
 
@@ -118,7 +118,7 @@ function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
             $byotime = $startbyotime;
             if( $byotime == 0 )
             {
-               $byoper = 0; // No byoyomi
+               $byoper = 0; // No byoyomi. time is up;
                break;
             }
             $byoper = $startbyoper-1;
