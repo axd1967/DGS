@@ -66,6 +66,7 @@ CREATE TABLE Players (
   NotesLargeWidth tinyint(3) unsigned NOT NULL default '30',
   NotesLargeMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
   NotesCutoff tinyint(3) unsigned NOT NULL default '13',
+  SkinName varchar(32) NOT NULL default '',
   PRIMARY KEY  (ID),
    UNIQUE KEY Handle (Handle),
    KEY Rating2 (Rating2),

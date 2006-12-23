@@ -73,7 +73,7 @@ require_once( "include/form_functions.php" );
    }
 
 
-   start_html( 'data_report', 0, 
+   start_html( 'data_report', 0, '', //@$player_row['SkinName'],
 "  table.table {
       background: #cccccc;
       border-spacing: 1px;

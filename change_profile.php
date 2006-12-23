@@ -82,6 +82,8 @@ require_once( "include/countries.php" );
          $$notesmode.= 'OFF';
    }
 
+   $skinname = get_request_arg('skinname');
+
 
    $query = "UPDATE Players SET " .
       "Name='" . addslashes($name) . "', " .
@@ -113,6 +115,7 @@ require_once( "include/countries.php" );
       $cookie_prefs['NotesLargeWidth'] = (int)@$_GET['noteslargewidth'];
       $cookie_prefs['NotesLargeMode'] = $noteslargemode;
       $cookie_prefs['NotesCutoff'] = (int)@$_GET['notescutoff'];
+      $cookie_prefs['SkinName'] = $skinname;
 
       set_cookie_prefs($player_row['ID']);
    }
@@ -132,7 +135,8 @@ require_once( "include/countries.php" );
          "NotesLargeHeight=" . (int)@$_GET['noteslargeheight'] . ", " .
          "NotesLargeWidth=" . (int)@$_GET['noteslargewidth'] . ", " .
          "NotesLargeMode='$noteslargemode', " .
-         "NotesCutoff=" . (int)@$_GET['notescutoff'] . ", ";
+         "NotesCutoff=" . (int)@$_GET['notescutoff'] . ", " .
+         "SkinName='" . addslashes($skinname) . "', ";
 
       set_cookie_prefs($player_row['ID'], true);
    }

@@ -118,6 +118,9 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
      $notescutoffs[$i] = $i;
    }
 
+   include_once( 'skins/known_skins.php' );
+//   $known_skins = array('dragon' => 'Dragon Go Server original');
+
 
 //------------
 
@@ -193,6 +196,9 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 
    $profile_form->add_row( array( 'HEADER', T_('Appearences') ) );
 
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Skin'),
+                                  'SELECTBOX', 'skinname', 1, $known_skins,
+                                  $player_row['SkinName'], false ) );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Menu direction'),
                                   'RADIOBUTTONS', 'menudir', $menu_directions,

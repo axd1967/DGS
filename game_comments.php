@@ -79,7 +79,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
 
 
-   start_html(T_('Comments'), true);
+   start_html(T_('Comments'), true, @$player_row['SkinName']);
    echo "<center>";
 
    $str = game_reference( 0, 1, '', 0, 0, $Whitename, $Blackname);

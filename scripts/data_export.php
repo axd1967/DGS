@@ -773,7 +773,7 @@ ID,Page,Group_ID
 
    //====================
 
-   start_html( 'data_export', 0, 
+   start_html( 'data_export', 0, '', //@$player_row['SkinName'],
       "  table.tbl { border:0; background: #c0c0c0; }\n" .
       "  tr.row1 { background: #ffffff; }\n" .
       "  tr.row2 { background: #dddddd; }\n" .

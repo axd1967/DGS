@@ -221,7 +221,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
     error("adminlevel_too_low");
 
 
-   start_html( 'player_consistency', 0, 
+   start_html( 'player_consistency', 0, '',
       "  table.tbl { border:0; background: #c0c0c0; }\n" .
       "  tr.row1 { background: #ffffff; }\n" .
       "  tr.row2 { background: #dddddd; }\n" .

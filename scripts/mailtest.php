@@ -49,7 +49,7 @@ require_once( "include/form_functions.php" );
    $Text= "This is a test\nLine 2\nLine 3\n";
 
 
-   start_html( 'mailtest', 0,
+   start_html( 'mailtest', 0, '',
       "  pre { background: #c0c0c0; }" );
 
    $dform = new Form('dform', 'mailtest.php', FORM_POST, true );

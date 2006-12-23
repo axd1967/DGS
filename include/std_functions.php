@@ -121,6 +121,7 @@ $buttoncolors = array('white','white','white','white',
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
 $cookie_pref_rows = array(
+       'SkinName',
        'MenuDirection', 'Button',
        'Stonesize', 'Woodcolor', 'Boardcoords',
        'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff',
@@ -245,12 +246,14 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
    echo "\n <TITLE>$FRIENDLY_SHORT_NAME - $title </TITLE>"
       . "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
 
-   if( $printable )
-      echo "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}printer.css\">";
-   else
-      echo "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}dragon.css\">";
-
-   echo "\n <LINK rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}printer.css\">";
+   if( !isset($skinname) or !$skinname )
+      $skinname = 'dragon';
+   if( !file_exists("{$base_path}skins/$skinname/screen.css") )
+      $skinname = 'dragon';
+   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skinname/screen.css\">";
+   if( !file_exists("{$base_path}skins/$skinname/print.css") )
+      $skinname = 'dragon';
+   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skinname/print.css\">";
 
    global $SUB_PATH;
    switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
@@ -285,7 +288,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       unset( $is_down_allowed);
    }
 
-   start_html( $title, $no_cache, $style_string, $last_modified_stamp);
+   start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp);
 
 //    echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
 //    echo "\n<script language=\"JavaScript1.4\" type=\"text/javascript\"> version=1; </script>";
