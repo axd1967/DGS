@@ -453,7 +453,9 @@ $array=array();
    $sgf_trim_nr = @mysql_num_rows($result) - 1 ;
    if ( $Status == 'FINISHED' && isset($Score) )
    {
-      echo "\nRE[" . sgf_simpletext(score2text($Score, false, true)) . "]";
+      echo "\nRE[" . sgf_simpletext(
+         $Score==0 ? '0' : score2text($Score, false, true)
+         ) . "]";
 
       //-1= skip ending pass, -2= keep them ... -999= keep everything
       if ( abs($Score) < SCORE_RESIGN )
