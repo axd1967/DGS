@@ -33,6 +33,31 @@ require_once( "include/form_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
+/* Actual GET calls used:
+   if(message.php?mode=...)
+      NewMessage           : from menu
+                              (or site_map)
+      NewMessage&uid=      : from user info
+      ShowMessage&mid=     : from message_list_table()
+                              or message_info_table()
+                              or list_messages
+                              or here 
+      Invite               : from menu
+                              (or site_map or introduction)
+      Invite&uid=          : from user_info
+                              or show_games
+      Dispute&mid=         : from here
+   else if(message.php?...)
+      mid=                 : from notifications
+                              or here 
+                           => ShowMessage&mid=
+   else if(message.php)(alone)
+                           : from site_map
+                           => NewMessage
+
+   Other $mode are just local.
+   Where uid=ID is used, user=handle could be substitued, default from HTTP_REFERER.
+*/
 
    $preview = @$_REQUEST['preview'];
 
