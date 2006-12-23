@@ -1,6 +1,14 @@
 
+/* ------------------------- */
+/* global use styles */
+/* ------------------------- */
+
 .black {
    color: black;
+}
+
+.white {
+   color: white;
 }
 
 .gray {
@@ -11,9 +19,30 @@
    color: blue;
 }
 
+.red {
+   color: red;
+}
+
+.green {
+   color: green;
+}
+
+.bold {
+   font-weight: bold;
+}
+
 .none {
    text-decoration: none;
    font-weight: normal;
+}
+
+.center {
+   text-align: center;
+}
+
+.nowrap
+{
+   white-space: nowrap;
 }
 
 
@@ -49,26 +78,6 @@ a:active {
    font-weight: bold;
 }
 
-pre.code {
-   background: #dddddd;
-   padding: 8px;
-/*
-   width: auto;
-   margin-right: auto;
-*/
-}
-
-div.quote {
-    border: 1px solid #8cacbb;
-    margin: 0.3em 2px 0.3em 0.5em;
-    padding: 0.3em 0em 0.3em 0.5em;
-    width: auto;
-    font-style: italic;
-/*
-    line-height: 1.5em;
-*/
-}
-
 .image-left {
    float: left;
    clear: both;
@@ -87,6 +96,72 @@ div.quote {
    border: 0px solid Black;
 }
 
+img.layoutstone {
+   width: 17px;
+   height: 17px;
+}
+
+table {
+   empty-cells: hide;
+   table-layout: auto;
+}
+
+/* ------------------------- */
+/* common page layout */
+/* ------------------------- */
+
+body {
+   background: #F7F5E3;
+   color: black;
+}
+
+table#page_head {
+   background: #0C41C9;
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+body#dDGS table#page_head {
+   background: #C9410C;
+}
+
+table#page_head a {
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+table#page_foot {
+   background: #0C41C9;
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+body#dDGS table#page_foot {
+   background: #C9410C;
+}
+
+table#page_foot a {
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+table#page_foot .page_time {
+   font-weight: normal;
+   font-size: smaller;
+}
+
+
+table#page_menu a {
+   color: black;
+}
+
+table#page_menu a.strong {
+   color: black;
+   font-weight: bold;
+   font-size: 1.1em;
+}
+
+/* links of bottom menu */
 table.links {
    width: 100%; 
    border-width: 0px;
@@ -108,6 +183,54 @@ table.links a {
    font-weight: bold;
 }
 
+
+
+
+/* ------------------------- */
+/* usual tables */
+/* ------------------------- */
+
+table.table {
+   border: #cccccc solid 0px;
+   border-spacing: 0px;
+   margin: 0px;
+   text-align: left;
+   empty-cells: show;
+}
+
+table.table td, table.table th {
+   border: #cccccc solid 0px;
+   margin: 0px;
+   padding: 3px;
+}
+
+table.table tr.head {
+   background: #cccccc;
+   text-align: center;
+}
+
+table.table tr.row1, table.table tr.row3 {
+   background: #ffffff;
+}
+table.table tr.row2, table.table tr.row4 {
+   background: #e0e8ed;
+}
+table.table tr.row2 td.warning, table.table tr.row3 td.warning {
+   background: #ffcccc;
+}
+table.table tr.row2 td.warning, table.table tr.row4 td.warning {
+   background: #e6b9bd;
+}
+table.table tr.highlight {
+   background: #ffd070;
+}
+
+
+
+
+/* ------------------------- */
+/* user info and status page */
+/* ------------------------- */
 
 table.infos {
    border-width: 2px;
@@ -132,7 +255,9 @@ table.infos a.hdr {
    font-weight: bold;
 }
 
-
+/* biographical infos:
+  same as "infos" tables except for links left normal
+*/
 table.bio_infos {
    border-width: 2px;
    border-spacing: 2px;
@@ -156,44 +281,14 @@ table.bio_infos a.hdr {
 }
 
 
-table.moves {
-   background: #66C17B;
-   border-width: 2px;
-   border-spacing: 0px;
-   margin: 4px;
-   empty-cells: hide;
-}
 
-table.moves td, table.moves th {
-   border-width: 1px;
-   padding: 1px;
-   color: black;
-   text-align: center;
-}
-
-table.moves td.c {
-   background: #F7F5E3;
-   color: red;
-   font: bold 85% sans-serif;
-   text-decoration: none;
-}
-
-table.moves a.w {
-   color: white;
-   font: bold 85% sans-serif;
-   text-decoration: none;
-}
-
-table.moves a.b {
-   color: black;
-   font: bold 85% sans-serif;
-   text-decoration: none;
-}
-
+/* ------------------------- */
+/* board page */
+/* ------------------------- */
 
 table.captures {
    background: #f7f5ff;
-   border-width: 0px;
+   border-width: 0px 0px 1px 0px;
    border-bottom: 1px solid #0c41c9;
    margin: 4px;
 }
@@ -239,14 +334,46 @@ table.gamenotes td.notes {
    margin: 0px;
 }
 
+/* board page - old moves table */
 
-img.layoutstone {
-   width: 17px;
-   height: 17px;
+table.moves {
+   background: #66C17B;
+   border-width: 2px;
+   border-spacing: 0px;
+   margin: 4px;
+   empty-cells: hide;
+}
+
+table.moves td, table.moves th {
+   border-width: 1px;
+   padding: 1px;
+   color: black;
+   text-align: center;
+}
+
+table.moves td.c {
+   background: #F7F5E3;
+   color: red;
+   font: bold 85% sans-serif;
+   text-decoration: none;
+}
+
+table.moves a.w {
+   color: white;
+   font: bold 85% sans-serif;
+   text-decoration: none;
+}
+
+table.moves a.b {
+   color: black;
+   font: bold 85% sans-serif;
+   text-decoration: none;
 }
 
 
+/* ------------------------- */
 /* forums layout */
+/* ------------------------- */
 
 tr.forum_header {
    background: #d0d0d0;
@@ -303,59 +430,30 @@ tr.post_buttons {
 }
 
 
-/* common page layout */
 
-body {
-   background: #F7F5E3;
-   color: black;
+/* ------------------------- */
+/* message allowed tags */
+/* ------------------------- */
+
+pre.code {
+   background: #dddddd;
+   padding: 8px;
+/*
+   width: auto;
+   margin-right: auto;
+*/
 }
 
-table#page_head {
-   background: #0C41C9;
-   color: #FFFC70;
-   font-weight: bold;
+div.quote {
+    border: 1px solid #8cacbb;
+    margin: 0.3em 2px 0.3em 0.5em;
+    padding: 0.3em 0em 0.3em 0.5em;
+    width: auto;
+    font-style: italic;
+/*
+    line-height: 1.5em;
+*/
 }
 
-body#dDGS table#page_head {
-   background: #C9410C;
-   color: #FFFC70;
-   font-weight: bold;
-}
 
-table#page_head a {
-   color: #FFFC70;
-   font-weight: bold;
-}
-
-table#page_foot {
-   background: #0C41C9;
-   color: #FFFC70;
-   font-weight: bold;
-}
-
-body#dDGS table#page_foot {
-   background: #C9410C;
-   color: #FFFC70;
-   font-weight: bold;
-}
-
-table#page_foot a {
-   color: #FFFC70;
-   font-weight: bold;
-}
-
-table#page_foot .page_time {
-   font-weight: normal;
-   font-size: smaller;
-}
-
-table#page_menu a {
-   color: black;
-}
-
-table#page_menu a.strong {
-   color: black;
-   font-weight: bold;
-   font-size: 1.1em;
-}
-
+/* ------------------------- */

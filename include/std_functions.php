@@ -65,9 +65,11 @@ if( $FRIENDLY_SHORT_NAME == 'DGS' )
 else
    $menu_bg_color='"#C9410C"'; //devel server
 
-$table_head_color='"#CCCCCC"';
+//{ N.B.: only used for folder transparency but CSS incompatible
 $table_row_color1='"#FFFFFF"';
 $table_row_color2='"#E0E8ED"';
+//}
+//$table_head_color='"#CCCCCC"';
 //$table_row_color_del1='"#FFCFCF"';
 //$table_row_color_del2='"#F0B8BD"';
 

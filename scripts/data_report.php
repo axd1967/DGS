@@ -74,16 +74,19 @@ require_once( "include/form_functions.php" );
 
 
    start_html( 'data_report', 0, 
-      "  table.tbl { border:0; background: #c0c0c0; }\n" .
-      "  tr.row1 { background: #ffffff; }\n" .
-      "  tr.row2 { background: #dddddd; }\n" .
-      "  tr.hil { background: #ffb010; }" );
+"  table.table {
+      background: #cccccc;
+      border-spacing: 1px;
+   }\n" .
+"  table.table td, table.table th {
+      padding: 4px;
+   }"
+      );
 
    echo " <SCRIPT language=\"JavaScript\" type=\"text/javascript\"><!-- \n";
    echo "   function row_click(row,rcl) {
-     row.className=((row.className=='hil')?rcl:'hil');
+     row.className=((row.className=='highlight')?rcl:'highlight');
    }\n";
-//     row.bgColor=((row.bgColor.toLowerCase()==hcol)?rcol:hcol);
    echo "\n//-->\n</SCRIPT>\n";
 
 
@@ -127,18 +130,18 @@ require_once( "include/form_functions.php" );
 
 
       echo "<A name=\"result\"></A><br>\n";
-      if( ($n=echo_query( $query, $rowhdr, $colsize, $colwrap)) < 0 ) break;
+      if( ($n=echo_query( $query, 'query_result', $rowhdr, $colsize, $colwrap)) < 0 ) break;
 
       $s= "SELECT '$n' as 'Rows'"
          . ",NOW() as 'Mysql time'"
          . ",FROM_UNIXTIME($NOW) as 'Server time'"
-         . ",'" . date('Y-m-d H:i:s', $NOW) . "' as 'Local time'"         
-         . ",'" . gmdate('Y-m-d H:i:s', $NOW) . "' as 'GMT time'"         
+         . ",'" . date('Y-m-d H:i:s', $NOW) . "' as 'Local time'"
+         . ",'" . gmdate('Y-m-d H:i:s', $NOW) . "' as 'GMT time'"
          //. ",'".mysql_info()."' as 'Infos'"
          ;
-      if( echo_query( $s, 0, 0, 0) < 0 ) break;
+      if( echo_query( $s, 'query_info', 0, 0, 0) < 0 ) break;
 
-      if( echo_query( 'EXPLAIN '.$query, 0, 0, 0) < 0 ) break;
+      if( echo_query( 'EXPLAIN '.$query, 'query_explain', 0, 0, 0) < 0 ) break;
 
       echo 'Query&gt; ' . anchor( $uri, textarea_safe($query).';') . "&nbsp;<br>\n";
    }
@@ -146,7 +149,7 @@ require_once( "include/form_functions.php" );
    end_html();
 }
 
-function echo_query( $query, $rowhdr=20, $colsize=40, $colwrap='cut' )
+function echo_query( $query, $qid='', $rowhdr=20, $colsize=40, $colwrap='cut' )
 {
    //kill sensible fields from a query like "SELECT Password as pwd FROM Players"
    $query= preg_replace( "%(Password|Sessioncode|Email)%is", "***", $query);
@@ -170,23 +173,27 @@ function echo_query( $query, $rowhdr=20, $colsize=40, $colwrap='cut' )
       return 0;
    }
 
+
    $c=2;
    $i=0;
-   echo "\n<table title='$numrows rows' class=tbl cellpadding=4 cellspacing=1>\n";
+   if( $qid>'' )
+      $qid = " id='$qid'";
+   else
+      $qid = '';
+   echo "\n<table$qid class=table title='$numrows rows'>\n";
    while( $row = mysql_fetch_assoc( $result ) )
    {
       $c=3-$c;
       $i++;
       if( $i==1 or ($rowhdr>1 && ($i%$rowhdr)==1) )
       {
-         echo "<tr>\n";
+         echo "<tr class=head>\n";
          foreach( $row as $key => $val )
          {
             echo "<th>$key</th>";
          }
          echo "\n</tr>";
       }
-      //onClick onmousedown ondblclick
       echo "<tr class=row$c ondblclick=\"row_click(this,'row$c')\">\n";
       foreach( $row as $key => $val )
       {
@@ -194,7 +201,7 @@ function echo_query( $query, $rowhdr=20, $colsize=40, $colwrap='cut' )
          switch( $key )
          {
             case 'Password':
-            case 'Sessioncode':                  
+            case 'Sessioncode':
             case 'Email':
                if ($val) $val= '***';
                break;

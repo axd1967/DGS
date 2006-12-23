@@ -36,10 +36,15 @@ require_once( "include/form_functions.php" );
 
 //~(0) is negative (PHP) and database field is unsigned: INT(10) unsigned NOT NULL
 define('ALL_COLUMNS', 0x7fffffff); //=2147483647
+define('ALLOW_JSCRIPT', 1);
+
 
 class Table
 {
    /*! \privatesection */
+
+   /*! \brief Id to be used in <table id='...'>. */
+   var $Id;
 
    /*! \brief The primary column to sort on. */
    var $Sort1;
@@ -80,6 +85,7 @@ class Table
    var $Tablerows;
 
    /*! \brief The colors to alternate between for the rows. */
+   //N.B.: only used for folder transparency but CSS incompatible
    var $Row_Colors;
 
    /*! \brief The row number to start from.
@@ -95,12 +101,12 @@ class Table
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
-   function Table( $_page,
+   function Table( $_tableid, $_page,
                    $_player_column = '',
                    $_prefix = ''
                  )
       {
-         global $table_row_color1, $table_row_color2, $RowsPerPage, $player_row;
+         global $RowsPerPage, $player_row;
 
          $this->Removed_Columns = NULL;
          $this->Shown_Columns = 0;
@@ -134,6 +140,7 @@ class Table
             $this->Column_set = $player_row[ $this->Player_Column ];
          }
 
+         $this->Id = $_tableid;
          $this->Prefix = $_prefix;
 
          $this->Sort1 = (string) arg_stripslashes(@$_GET[ $this->Prefix . 'sort1' ]);
@@ -142,12 +149,15 @@ class Table
          $this->Desc2 = (bool) @$_GET[ $this->Prefix . 'desc2' ];
 
          //Simply remove the mySQL disturbing chars (Sort? must be a column name)
-         $t = array( '\\', '\'', '\"', ';');
-         $this->Sort1 = str_replace( $t, '', $this->Sort1 );
-         $this->Sort2 = str_replace( $t, '', $this->Sort2 );
+         $tmp = array( '\\', '\'', '\"', ';');
+         $this->Sort1 = str_replace( $tmp, '', $this->Sort1 );
+         $this->Sort2 = str_replace( $tmp, '', $this->Sort2 );
 
 
+         //{ N.B.: only used for folder transparency but CSS incompatible
+         global $table_row_color1, $table_row_color2;
          $this->Row_Colors = array( $table_row_color1, $table_row_color2 );
+         //}
 
          $this->From_Row = @$_GET[ $this->Prefix . 'from_row' ];
          if( !is_numeric($this->From_Row) or $this->From_Row < 0 )
@@ -194,12 +204,10 @@ class Table
    /*! \brief Create a string of the table. */
    function make_table()
       {
-         global $table_head_color;
-
          /* Make tableheads */
 
          $this->Shown_Columns = 0;
-         $head_row = " <tr bgcolor=$table_head_color>\n";
+         $head_row = " <tr class=head>\n";
          foreach( $this->Tableheads as $thead )
          {
             $head_row .= $this->make_tablehead( $thead );
@@ -210,7 +218,7 @@ class Table
 
          /* Start of the table */
 
-         $string = "<table border=0 cellspacing=0 cellpadding=3 align=center>\n";
+         $string = "<table id='{$this->Id}_table' class='table'>\n";
          $string .= $next_prev_row;
          $string .= $head_row;
 
@@ -218,9 +226,11 @@ class Table
 
          if( count($this->Tablerows)>0 )
          {
+            $c=0;
             foreach( $this->Tablerows as $trow )
             {
-               $string .= $this->make_tablerow( $trow );
+               $c=($c%4)+1;
+               $string .= $this->make_tablerow( $trow, "row$c" );
             }
             $string .= $next_prev_row;
          }
@@ -230,7 +240,7 @@ class Table
          $tmp = $this->make_add_column_form();
          if( !$tmp )
            $tmp = '&nbsp;';
-         $string .= ' <tr><td colspan=99 align=right>'
+         $string .= " <tr><td colspan={$this->Shown_Columns} align=right>"
               . "$tmp<a name=\"{$this->Prefix}tblac\"></a>"
               . "</td></tr>\n";
 
@@ -258,7 +268,7 @@ class Table
 
          $this->Shown_Columns++;
 
-         $string = "  <th nowrap valign=\"bottom\"";
+         $string = "  <th scope='col' nowrap valign=\"bottom\"";
 
          if( !is_null( $tablehead['Width'] ) )
          {
@@ -317,6 +327,7 @@ class Table
          return $string;
       }
 
+   //{ N.B.: only used for folder transparency but CSS incompatible
    function blend_next_row_color_hex( $col=false )
       {
          $rowcol = substr($this->Row_Colors[
@@ -327,36 +338,27 @@ class Table
          else
             return $rowcol;
       }
+   //}
 
-   function warning_cell_attb( $title='', $col='ff000033' )
+   function warning_cell_attb( $title='')
       {
-         $str= ' bgcolor="#' . $this->blend_next_row_color_hex($col) . '"';
+         $str= ' class="warning"';
          if ($title) $str.= ' title="' . $title . '"';
          return $str;
       }
 
-   function make_tablerow( $tablerow )
+   function make_tablerow( $tablerow, $rclass='row1' )
       {
-         list(, $bgcolor) = each( $this->Row_Colors );
-         if( !$bgcolor )
+
+         if( isset($tablerow['class']) )
          {
-            reset( $this->Row_Colors );
-            list(, $bgcolor) = each( $this->Row_Colors );
+            $rclass = $tablerow['class'];
          }
 
-         $hicolor = 'fF800040';
-
-         if( isset($tablerow['BG_Color']) )
-         {
-            $bgcolor = $tablerow['BG_Color'];
-            $hicolor = @$tablerow['HI_Color'];
-         }
-
-         $string = " <tr bgcolor=$bgcolor";
-         if( $hicolor )
+         $string = " <tr class='$rclass'";
+         if( ALLOW_JSCRIPT )
          { //onClick onmousedown ondblclick
-            $hicolor = '"#'.strtolower(blend_alpha_hex($hicolor,substr($bgcolor, 2, 6))).'"';
-            $string.= " ondblclick='javascript:this.bgColor=((this.bgColor.toLowerCase()==$hicolor)?$bgcolor:$hicolor);'";
+            $string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
          }
          $string.= ">\n";
 
@@ -375,6 +377,20 @@ class Table
 
 
    /*! \brief Add next and prev links. */
+   /*
+      To show the page index: page number / number of pages
+         mysql> SELECT SQL_CALC_FOUND_ROWS * FROM tbl_name
+             -> WHERE id > 100 LIMIT 10;
+         mysql> SELECT FOUND_ROWS();
+      SQL_CALC_FOUND_ROWS must be at the front of any fields
+       in the SELECT statement.
+      Be aware that using SQL_CALC_FOUND_ROWS and FOUND_ROWS()
+       disables ORDER BY ... LIMIT optimizations.
+      The first query is longer that without the SQL_CALC_FOUND_ROWS
+       but if the ORDER BY is on a not indexed column, this is small.
+      MySQL >= 4.0.0. Refs at:
+       http://dev.mysql.com/doc/refman/4.1/en/information-functions.html
+   */
    function make_next_prev_links()
       {
          if ( $this->Rows_Per_Page <= 0 or $this->Shown_Columns <= 0
@@ -410,7 +426,7 @@ class Table
          $span = floor($this->Shown_Columns/2);
          if( $span < 2 ) $span = $this->Shown_Columns;
          if( $span > 0 )
-            $string.= '  <td' 
+            $string.= '  <td align=left'
               . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
 
          $span = $this->Shown_Columns - $span;
