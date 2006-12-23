@@ -54,7 +54,7 @@ require_once( "include/countries.php" );
       $_GET['desc2'] = 0;
    }
 
-   $utable = new Table( $page, 'UsersColumns' );
+   $utable = new Table( 'user', $page, 'UsersColumns' );
    $utable->add_or_del_column();
 
    $order = $utable->current_order_string();

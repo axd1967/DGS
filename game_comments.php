@@ -88,7 +88,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    echo "<h3><font color=$h3_color>$str</font></h3>";
 
 
-   $ctable = new Table('');
+   $ctable = new Table( 'comment', '');
    
    $ctable->add_tablehead(1, T_('Moves'), NULL, true, true);
    $ctable->add_tablehead(2, T_('Comments'), NULL, true, true);

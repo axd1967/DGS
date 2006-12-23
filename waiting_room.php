@@ -69,7 +69,7 @@ require_once( "include/message_functions.php" );
    }
 
 
-   $wrtable = new Table( $page, "WaitingroomColumns" );
+   $wrtable = new Table( 'waitingroom', $page, "WaitingroomColumns" );
    $wrtable->add_or_del_column();
 
    $order = $wrtable->current_order_string();
@@ -372,12 +372,14 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
    */
 
       if( $Handicaptype == 'proper' )
-         list($infoHandicap,$infoKomi,$swap) = suggest_proper($Rating, $my_rating, $Size);
+         list($infoHandicap,$infoKomi,$info_i_am_black) =
+            suggest_proper($my_rating, $Rating, $Size);
       else if( $Handicaptype == 'conv' )
-         list($infoHandicap,$infoKomi,$swap) = suggest_conventional($Rating, $my_rating, $Size);
+         list($infoHandicap,$infoKomi,$info_i_am_black) =
+            suggest_conventional($my_rating, $Rating, $Size);
       else
       {
-         $infoHandicap = 0; $infoKomi = $Komi; $swap = 0;
+         $infoHandicap = 0; $infoKomi = $Komi; $info_i_am_black = 0;
       }
 
       $colortxt = '<img align="top" src="17/';
@@ -387,10 +389,10 @@ function show_game_info($game_row, $mygame=false, $my_rating=false)
       else if( $Handicaptype == 'nigiri' 
             or $Handicaptype == 'conv' && $infoHandicap == 0 && $infoKomi == 6.5 )
          $colortxt = $colortxt . 'y.gif" alt="' . T_('Nigiri') . '">' ;
-      else if( $swap )
-         $colortxt = $colortxt . 'w.gif" alt="' . T_('White') . '">' ;
-      else
+      else if( $info_i_am_black )
          $colortxt = $colortxt . 'b.gif" alt="' . T_('Black') . '">' ;
+      else
+         $colortxt = $colortxt . 'w.gif" alt="' . T_('White') . '">' ;
 
       //echo "<tr height=20><td colspan=2 height=20></td></tr>\n";
       echo show_game_header(T_('Probable settings'));

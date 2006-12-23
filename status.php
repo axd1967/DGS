@@ -74,7 +74,7 @@ require_once( "include/message_functions.php" );
 
    // show messages
 
-   $mtable = new Table( 'status.php', '', 'm_' );
+   $mtable = new Table( 'message', 'status.php', '', 'm_' );
 
    $order = 'date';
 
@@ -104,7 +104,7 @@ require_once( "include/message_functions.php" );
 
    $uid = $my_id;
 
-   $gtable = new Table( "status.php", "GamesColumns" );
+   $gtable = new Table( 'game', "status.php", "GamesColumns" );
    $gtable->add_or_del_column();
 //can't be sorted until jump_to_next_game() adjusted to follow the sort
    $order = "Games.LastChanged";
@@ -114,7 +114,7 @@ require_once( "include/message_functions.php" );
       "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid, " .
          //extra bits of Color are for sorting purposes
       "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color, " .
-      "Clock.Ticks " .
+      "Clock.Ticks " . //always my clock because always my turn (status page)
       "FROM (Games,Players AS opponent) " .
       "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed " .
       "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .

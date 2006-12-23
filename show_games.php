@@ -68,16 +68,19 @@ require_once( "include/rating.php" );
 
    if( $observe )
    {
+      $tableid = 'observed';
       $page = 'show_games.php?observe=1'.URI_AMP;
       $column_set_name = "ObservedGamesColumns";
    }
    else if( $finished )
    {
+      $tableid = 'finished';
       $page = "show_games.php?uid=$uid".URI_AMP."finished=1".URI_AMP;
       $column_set_name = "FinishedGamesColumns";
    }
    else
    {
+      $tableid = 'running';
       $page = "show_games.php?uid=$uid".URI_AMP;
       $column_set_name = "RunningGamesColumns";
    }
@@ -96,7 +99,7 @@ require_once( "include/rating.php" );
       $_GET['desc2'] = 1;
    }
 
-   $gtable = new Table( $page, $column_set_name );
+   $gtable = new Table( $tableid, $page, $column_set_name );
    $gtable->add_or_del_column();
 
    $order = $gtable->current_order_string();

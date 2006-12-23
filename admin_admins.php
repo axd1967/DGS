@@ -130,7 +130,7 @@ require_once( "include/table_columns.php" );
 
    echo '<form name="admform" action="admin_admins.php?update=t" method="POST">'."\n";
 
-   $atable = new Table( '');
+   $atable = new Table( 'admin', '');
 
    $atable->add_tablehead(1, T_('ID'), NULL, true, true);
    $atable->add_tablehead(2, T_('Userid'), NULL, true, true);
