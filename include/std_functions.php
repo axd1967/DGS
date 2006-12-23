@@ -247,7 +247,7 @@ function start_html( $title, $no_cache, $style_string=NULL, $last_modified_stamp
       . "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
 
    if( !isset($skinname) or !$skinname )
-      $skinname = 'dragon';
+      $skinname = 'dragon2';
    if( !file_exists("{$base_path}skins/$skinname/screen.css") )
       $skinname = 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skinname/screen.css\">";
@@ -290,6 +290,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp);
 
+echo 'skin='.@$player_row['SkinName'].'<br>';
 //    echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
 //    echo "\n<script language=\"JavaScript1.4\" type=\"text/javascript\"> version=1; </script>";
 
