@@ -226,12 +226,12 @@ INSERT INTO Players SET
 
 CREATE TABLE Messages (
   ID int(11) NOT NULL auto_increment,
-  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED') default 'NORMAL',
-  ReplyTo int(11) default NULL,
-  Game_ID int(11) default NULL,
-  Time datetime default NULL,
-  Subject varchar(80) default NULL,
-  Text text,
+  Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED','RESULT') default 'NORMAL',
+  ReplyTo int(11) NOT NULL default 0,
+  Game_ID int(11) NOT NULL default 0,
+  Time datetime NOT NULL default '0000-00-00 00:00:00',
+  Subject varchar(80) NOT NULL default '',
+  Text text NOT NULL,
   PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
 
@@ -242,8 +242,8 @@ CREATE TABLE Messages (
 
 CREATE TABLE MessageCorrespondents (
   ID int(11) NOT NULL auto_increment,
-  uid int(11) default NULL,
-  mid int(11) default NULL,
+  uid int(11) NOT NULL default 0,
+  mid int(11) NOT NULL default 0,
   Folder_nr int(11) default NULL,
   Sender enum('M','N','Y') NOT NULL default 'Y',
   Replied enum('M','N','Y') NOT NULL default 'N',
