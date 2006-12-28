@@ -60,14 +60,14 @@ else
    }
    
 
-   $player_row = mysql_single_fetch(
+   $player_row = mysql_single_fetch( 'quick_status.find_player',
                   "SELECT ID, Timezone, " .
                   "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
                   "FROM Players WHERE " .
                   ( $idmode=='uid'
                         ? "ID=".$uid
                         : "Handle='".addslashes($uhandle)."'"
-                  ), 'assoc', 'quick_status.find_player');
+                  ) );
 
    if( !$player_row )
    {

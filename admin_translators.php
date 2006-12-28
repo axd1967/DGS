@@ -114,7 +114,7 @@ require_once( "include/form_functions.php" );
    $transluser_langs= array();
    if( !empty($transluser) )
    {
-      $userrow = mysql_single_fetch(
+      $userrow = mysql_single_fetch( 'admin_translators.transluser',
              "SELECT Translator FROM Players"
             ." WHERE Handle='".addslashes($transluser)."'" );
 

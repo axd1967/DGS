@@ -434,12 +434,12 @@ function approve_message($id, $thread, $forum, $approve=true,
 {
    if( $approve_reject_pending_approval )
    {
-      $row = mysql_single_fetch("SELECT Approved FROM Posts " .
-                                "WHERE ID=$id AND Thread_ID=$thread LIMIT 1", 'row',
-                                'assoc', 'forum_functions.approve_message.find_post')
+      $row = mysql_single_fetch( 'forum_functions.approve_message.find_post',
+               "SELECT Approved FROM Posts " .
+               "WHERE ID=$id AND Thread_ID=$thread LIMIT 1" )
          or error('unknown_post','forum_functions.approve_message.find_post');
 
-      $Approved = ($row[0] == 'Y');
+      $Approved = ($row['Approved'] == 'Y');
 
       if( $Approved === $approve )
       {

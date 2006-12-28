@@ -241,7 +241,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
       . "\n<HTML>\n<HEAD>";
 
-  echo "\n <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">";
+   echo "\n <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">";
 
    echo "\n <TITLE>$FRIENDLY_SHORT_NAME - $title </TITLE>"
       . "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
@@ -852,7 +852,7 @@ $html_code['game'] = 'br|/br|p|/p|li'.$html_code_closed['game']
 $html_code['faq'] = '\w+|/\w+'; //all not empty words
 
 
-  //** no reg exp chars nor ampersand nor '%' (see also $html_safe_preg):
+//** no reg_exp chars nor ampersand nor '%' (see also $html_safe_preg):
 define( 'ALLOWED_LT', "`anglstart`");
 define( 'ALLOWED_GT', "`anglend`");
 define( 'ALLOWED_QUOT', "`allowedquot`");
@@ -1067,6 +1067,7 @@ $html_safe_preg = array(
                         ."?[".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT."%ise"
   => "\\1_reference(('\\2'=='_'?".REF_LINK_BLANK.":0)+"
                         .REF_LINK_ALLOWED.",1,'','\\3')",
+// because of HANDLE_LEGAL_REGS, no need of ...,str_replace('\"','"','\\3')...
 
 //<color col>...</color> =>translated to <font color="col">...</font>
  "%".ALLOWED_LT."color +([#0-9a-zA-Z]+) *".ALLOWED_GT."%is"
@@ -1203,8 +1204,8 @@ function textarea_safe( $msg, $charenc=false)
 function game_tag_filter( $msg)
 {
    $nr_matches = preg_match_all(
-         "'(<c(omment)? *>(.*?)</c(omment)? *>)".
-         "|(<h(idden)? *>(.*?)</h(idden)? *>)'is"
+         "%(<c(omment)? *>(.*?)</c(omment)? *>)".
+         "|(<h(idden)? *>(.*?)</h(idden)? *>)%is"
          , $msg, $matches );
    $str = '';
    for($i=0; $i<$nr_matches; $i++)
@@ -1502,7 +1503,7 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
               ' AND white.ID=Games.White_ID ' .
               ' AND black.ID=Games.Black_ID ' .
               'LIMIT 1' ;
-     if( $row=mysql_single_fetch( $query, 'assoc', 'std_functions.game_reference' ) )
+     if( $row=mysql_single_fetch( 'std_functions.game_reference', $query ) )
      {
        if( $whitename===false )
          $whitename = $row['whitename'];
@@ -1588,7 +1589,7 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
               'FROM Players ' .
               "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='$player_ref' " .
               'LIMIT 1' ;
-     if( $row=mysql_single_fetch( $query, 'assoc', 'std_functions.user_reference' ) )
+     if( $row=mysql_single_fetch( 'std_functions.user_reference', $query ) )
      {
        if( $player_name===false )
          $player_name = $row['Name'];

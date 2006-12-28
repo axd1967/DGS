@@ -70,12 +70,11 @@ function get_clock_ticks($clock_used)
    if( $clock_used < 0) // VACATION_CLOCK
       return 0; // On vacation
 
-   if( $row=mysql_single_fetch("SELECT Ticks FROM Clock WHERE ID=$clock_used",
-                               'assoc', 'time_functions.get_clock_ticks') )
-   {
+   $row= mysql_single_fetch( 'time_functions.get_clock_ticks',
+                  "SELECT Ticks FROM Clock WHERE ID=$clock_used" );
+   if( $row )
       return (int)@$row['Ticks'];
-   }
-   error("mysql_clock_ticks", 'time_functions.get_clock_ticks: ' . $clock_used);
+   error('mysql_clock_ticks', 'time_functions.get_clock_ticks: '.$clock_used);
 }
 
 function ticks_to_hours($ticks)
@@ -85,8 +84,8 @@ function ticks_to_hours($ticks)
    return ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 }
 
-function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
-   $byotype, $startbyotime, $startbyoper, $has_moved)
+function time_remaining( $hours, &$main, &$byotime, &$byoper
+   , $startmaintime, $byotype, $startbyotime, $startbyoper, $has_moved)
 {
    $elapsed = $hours;
 

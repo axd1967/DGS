@@ -88,20 +88,20 @@ function get_alt_arg( $n1, $n2)
            "Games.Flags+0 AS GameFlags, " . //used by check_move
            "black.Name AS Blackname, " .
            "black.Handle AS Blackhandle, " .
-           "black.OnVacation AS Blackwarning, " .
+           "black.OnVacation>0 AS Blackwarning, " .
            "black.Rank AS Blackrank, " .
            "black.Rating2 AS Blackrating, " .
            "black.RatingStatus AS Blackratingstatus, " .
            "white.Name AS Whitename, " .
            "white.Handle AS Whitehandle, " .
-           "white.OnVacation AS Whitewarning, " .
+           "white.OnVacation>0 AS Whitewarning, " .
            "white.Rank AS Whiterank, " .
            "white.Rating2 AS Whiterating, " .
            "white.RatingStatus AS Whiteratingstatus " .
            "FROM Games, Players AS black, Players AS white " .
            "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID";
 
-   if( !($game_row=mysql_single_fetch($query, 'assoc', 'game.findgame')) )
+   if( !($game_row=mysql_single_fetch( 'game.findgame', $query)) )
       error('unknown_game','game.findgame');
 
    extract($game_row);
@@ -372,7 +372,7 @@ function get_alt_arg( $n1, $n2)
  : yes   : none :: yes    : yes    : no         :: yes    : yes    : no     :
  : yes   : <c>  :: yes    : yes    : yes        :: yes    : yes    : yes    :
  : yes   : <h>  :: yes    : yes    : yes        :: yes    : yes    : yes    :
-  corresponding $html_mode (fltr=filter only keeping <c> and <h> blocks):
+  corresponding $html_mode (fltr= a filter only keeping <c> and <h> blocks):
  : no    : -    :: gameh  : game   : fltr+game  ::   ... see sgf.php ...
  : yes   : -    :: gameh  : gameh  : fltr+gameh ::
 */
@@ -418,9 +418,9 @@ function get_alt_arg( $n1, $n2)
       if( $noteshide == 'Y' )
          $notesmode = substr( $notesmode, 0, -3);
 
-      if( $tmp=mysql_single_fetch(
+      if( $tmp=mysql_single_fetch( 'game.gamenotes',
              "SELECT Hidden,Notes FROM GamesNotes"
-             . " WHERE gid=$gid AND player='$my_color'", 'assoc', 'game.gameotes') )
+             ." WHERE gid=$gid AND player='$my_color'") )
       {
          $notes = $tmp['Notes'];
          $noteshide = $tmp['Hidden'];
@@ -716,7 +716,7 @@ function draw_game_info(&$game_row)
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'],
                       $game_row['Blackname'], $game_row['Blackhandle']) .
-      ( $game_row['Blackwarning'] > 0 ?
+      ( $game_row['Blackwarning'] ?
         '&nbsp;&nbsp;&nbsp;<font color=red>' . T_('On vacation') . '</font>' : '' ) .
       "</td>\n";
 
@@ -745,7 +745,7 @@ function draw_game_info(&$game_row)
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['White_ID'],
                       $game_row['Whitename'], $game_row['Whitehandle']) .
-      ( $game_row['Whitewarning'] > 0 ?
+      ( $game_row['Whitewarning'] ?
         '&nbsp;&nbsp;&nbsp;<font color=red>' . T_('On vacation') . '</font>' : '' ) .
       "</td>\n";
 

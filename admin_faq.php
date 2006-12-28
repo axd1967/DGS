@@ -132,16 +132,14 @@ require_once( "include/make_translationfiles.php" );
 
   else if( ($action=@$_GET["move"]) == 'u' or $action == 'd' )
   {
-     $row = mysql_single_fetch( "SELECT * FROM FAQ WHERE ID=$id",
-                                'assoc', 'admin_faq.move.find');
-     if( !$row )
-        error('admin_no_such_entry',"admin_faq.move.$action.read($id)");
+     $row = mysql_single_fetch( 'admin_faq.move.find',
+               "SELECT * FROM FAQ WHERE ID=$id")
+         or error('admin_no_such_entry',"admin_faq.move.$action.read($id)");
 
-     $row2 = mysql_single_fetch( "SELECT MAX(SortOrder) as max FROM FAQ " .
-                                 "WHERE Parent=" . $row["Parent"],
-                                 'assoc', 'admin_faq.move.max_sortorder');
-     if( !$row2 )
-        error('mysql_query_failed','admin_faq.move.max');
+     $row2 = mysql_single_fetch( 'admin_faq.move.max',
+               "SELECT MAX(SortOrder) as max FROM FAQ " .
+               "WHERE Parent=" . $row["Parent"])
+         or error('mysql_query_failed','admin_faq.move.max');
      $max = $row2["max"];
 
      if( ( $action != 'u' or $row["SortOrder"] > 1 ) and
@@ -170,8 +168,8 @@ require_once( "include/make_translationfiles.php" );
               " FROM FAQ AS Entry, FAQ AS Parent" .
               " WHERE Entry.ID='$id' AND Parent.ID=Entry.Parent";
 
-     if( !($row=mysql_single_fetch($query, 'assoc', 'admin_faq.bigmove.find')) )
-        error('admin_no_such_entry',"admin_faq.move.$action.read($id)");
+     $row= mysql_single_fetch('admin_faq.bigmove.find', $query)
+        or error('admin_no_such_entry',"admin_faq.move.$action.read($id)");
 
      $query = 'SELECT ID as NewParent FROM FAQ ' .
         'WHERE Level=1 ' .
@@ -180,16 +178,15 @@ require_once( "include/make_translationfiles.php" );
           'AND SortOrder < ' . $row['ParentOrder'] . ' ORDER BY SortOrder DESC' ) .
         ' LIMIT 1';
 
-     if( $newparent_row=mysql_single_fetch($query, 'assoc', 'admin_faq.bigmove.newparent') )
+     if( $newparent_row=mysql_single_fetch('admin_faq.bigmove.newparent', $query) )
      {
         $newparent = $newparent_row["NewParent"];
 
-        if( $max_row=mysql_single_fetch(
+        if( $max_row=mysql_single_fetch( 'admin_faq.bigmove.max_sortorder',
                "SELECT MAX(SortOrder) as max FROM FAQ" .
-               " WHERE Parent=$newparent LIMIT 1",
-               'assoc', 'admin_faq.bigmove.max_sortorder') )
+               " WHERE Parent=$newparent LIMIT 1") )
         {
-           $max = $max_row["max"];
+           $max = $max_row['max'];
            if( !is_numeric($max) ) $max = 0;
         }
         else
@@ -227,8 +224,8 @@ require_once( "include/make_translationfiles.php" );
        and $row["QTranslatable"] != 'Done'
        and $row["ATranslatable"] != 'Done'
        and ($row["Level"] > 1 or
-          !mysql_single_fetch("SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1",
-                              'assoc', 'admin_faq.do_edit.id') )
+          !mysql_single_fetch( 'admin_faq.do_edit.id',
+                  "SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1") )
        )
      {
         mysql_query("DELETE FROM FAQ WHERE ID=$id LIMIT 1")
@@ -321,7 +318,7 @@ require_once( "include/make_translationfiles.php" );
   else if( ($action=@$_GET["do_new"]) == 'c' or $action == 'e' )
   {
      $query = "SELECT * FROM FAQ WHERE ID=$id";
-     $row = mysql_single_fetch( $query, 'assoc', 'admin_faq.do_new.find1' );
+     $row = mysql_single_fetch( 'admin_faq.do_new.find1', $query );
 
      if( $id==1 && (!$row or $row['Hidden']=='Y') )
      {
@@ -330,7 +327,7 @@ require_once( "include/make_translationfiles.php" );
            "REPLACE INTO FAQ (ID,Parent,Level,SortOrder,Question,Answer,Hidden)"
                   . " VALUES (1,1,0,0,0,0,'N')"
            ) or error('mysql_query_failed','admin_faq.do_new.replece_into');
-        $row = mysql_single_fetch( $query, 'assoc', 'admin_faq.do_new.find2' );
+        $row = mysql_single_fetch( 'admin_faq.do_new.find2', $query );
      }
 
      if( !$row )
@@ -563,23 +560,22 @@ require_once( "include/make_translationfiles.php" );
 
 function get_faq_group_id()
 {
-  $row = mysql_single_fetch("SELECT ID FROM TranslationGroups WHERE Groupname='FAQ'",
-                            'assoc', 'admin_faq.get_faq_group_id');
-  if( !$row )
-     error('internal_error', 'admin_faq.get_faq_group_id');
+   $row = mysql_single_fetch( 'admin_faq.get_faq_group_id',
+            "SELECT ID FROM TranslationGroups WHERE Groupname='FAQ'" )
+      or error('internal_error', 'admin_faq.get_faq_group_id');
 
-  return $row['ID'];
+   return $row['ID'];
 }
 
 function get_entry_row( $id )
 {
-   $row = mysql_single_fetch(
+   $row = mysql_single_fetch( 'admin_faq.get_entry_row',
         "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
-        ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
+        ", Question.Translatable AS QTranslatable".
+        ", Answer.Translatable AS ATranslatable ".
         "FROM (FAQ, TranslationTexts AS Question) " .
         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
-        "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question",
-        'assoc', 'admin_faq.get_entry_row')
+        "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question" )
       or error('internal_error','get_entry_row');
 
    return $row;

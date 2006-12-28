@@ -140,14 +140,16 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                  "Maintime,Byotype,Byotime,Byoperiods," .
                  "Rated,StdHandicap,Weekendclock, " .
                  "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
-                 "FROM Games,Players WHERE Games.ID=$gid " .
-                 "AND ((White_ID=$my_ID AND Players.ID=Black_ID) " .
-                   "OR (Black_ID=$my_ID AND Players.ID=White_ID)) " .
-                 "AND Status='INVITED'" ;
-
-      if( !($game_row=mysql_single_fetch( $query,
-                                          'assoc', 'message_functions.game_settings_form')) )
-         error("unknown_game");
+                 "FROM (Games,Players) WHERE Games.ID=$gid" .
+                 " AND $my_ID IN (White_ID,Black_ID)" .
+                 " AND Players.ID=White_ID+Black_ID-$my_ID" .
+                 //" AND ((White_ID=$my_ID AND Players.ID=Black_ID)" .
+                 //  " OR (Black_ID=$my_ID AND Players.ID=White_ID))" .
+                 " AND Status='INVITED'" ;
+      $game_row= mysql_single_fetch( 'message_functions.game_settings_form',
+                                     $query );
+      if( !$game_row )
+         error('unknown_game');
 
       $Size = $game_row['Size'];
       $MyColor = ( $game_row['Color'] == BLACK ? 'Black' : 'White' );

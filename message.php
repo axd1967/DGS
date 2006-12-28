@@ -68,13 +68,13 @@ require_once( "include/form_functions.php" );
       if( !$uhandle and $uid > 0 )
       {
          if( $uid == $player_row["ID"] )
-            $uhandle = $player_row["Handle"];
+            $uhandle = $player_row['Handle'];
          else
          {
-            $row = mysql_single_fetch( "SELECT Handle AS uhandle FROM Players WHERE ID=$uid",
-                                       'assoc', 'message.handle');
+            $row = mysql_single_fetch( 'message.handle',
+                  "SELECT Handle FROM Players WHERE ID=$uid" );
             if( $row )
-               extract($row);
+               $uhandle = $row['Handle'];
          }
       }
       $default_uhandle = $uhandle;
@@ -119,23 +119,23 @@ require_once( "include/form_functions.php" );
           "me.Replied, me.Sender, me.Folder_nr, " .
           "Players.Name AS other_name, Players.ID AS other_id, Players.Handle AS other_handle, " .
           "Games.Status, Games.mid AS Game_mid, " .
-          "Size, Komi, Handicap, Maintime, Byotype, " .
-          "Byotime, Byoperiods, Rated, Weekendclock, StdHandicap, " .
+          "Size, Komi, Handicap, Rated, Weekendclock, StdHandicap, " .
+          "Maintime, Byotype, Byotime, Byoperiods, " .
           "ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS Color " .
           "FROM (Messages, MessageCorrespondents AS me) " .
           "LEFT JOIN MessageCorrespondents AS other " .
-            "ON other.mid=me.mid AND other.Sender!=me.Sender " .
+            "ON other.mid=$mid AND other.Sender!=me.Sender " .
           "LEFT JOIN Players ON Players.ID=other.uid " .
           "LEFT JOIN Games ON Games.ID=Game_ID " .
           "LEFT JOIN MessageCorrespondents AS previous " .
-            "ON previous.mid=Messages.ReplyTo AND previous.uid=me.uid " .
-          "WHERE me.uid=$my_id AND Messages.ID=me.mid AND me.mid=$mid " .
+            "ON previous.mid=Messages.ReplyTo AND previous.uid=$my_id " .
+          "WHERE Messages.ID=$mid AND me.mid=$mid AND me.uid=$my_id " .
 //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
           "ORDER BY Sender" ;
 
-      $row = mysql_single_fetch($query, 'assoc', 'message.find');
+      $row = mysql_single_fetch( 'message.find', $query);
       if( !$row )
-         error("unknown_message");
+         error('unknown_message');
 
       extract($row);
 
@@ -339,8 +339,9 @@ require_once( "include/form_functions.php" );
                '&nbsp;&nbsp;';
          }
 
-         game_info_table($Size, $colortxt, $ToMove_ID, $Komi, $Handicap, $Maintime,
-                         $Byotype, $Byotime, $Byoperiods, $Rated, $Weekendclock, $StdHandicap);
+         game_info_table($Size, $colortxt, $ToMove_ID, $Komi, $Handicap
+                     , $Maintime, $Byotype, $Byotime, $Byoperiods
+                     , $Rated, $Weekendclock, $StdHandicap);
 
          if( $can_reply )
          {
@@ -447,9 +448,9 @@ require_once( "include/form_functions.php" );
                T_('Preview') . ":</font></h3>\n";
       //$mid==0 means preview - display a *to_me* like message
 
-      $row = mysql_single_fetch('SELECT ID, Name FROM Players ' .
-                                'WHERE Handle ="' . mysql_escape_string($default_uhandle) .
-                                "\"", 'assoc', 'message.preview');
+      $row = mysql_single_fetch( 'message.preview',
+            'SELECT ID, Name FROM Players ' .
+            'WHERE Handle="' . mysql_escape_string($default_uhandle) . '"' );
       if( !$row )
          $Name = '<font color="red">' . T_('Receiver not found') . '</font>';
       else

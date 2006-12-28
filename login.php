@@ -44,10 +44,9 @@ if( $quick_mode )
       $uhandle = substr($uhandle,0,$i);
    }
 
-   $row = mysql_single_fetch( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                              "FROM Players WHERE Handle='".addslashes($uhandle)."'",
-                              'assoc', 'login.find_player');
-
+   $row = mysql_single_fetch( 'login.find_player',
+                  "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+                  "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
    if( !$row )
       error("wrong_userid");
 

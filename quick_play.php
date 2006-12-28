@@ -68,7 +68,7 @@ else
 
    $my_id = $player_row['ID'];
 
-   $game_row = mysql_single_fetch(
+   $game_row = mysql_single_fetch( 'quick_play.find_game',
                           "SELECT Games.*, " .
                           "Games.Flags+0 AS GameFlags, " . //used by check_move
                           "black.ClockUsed AS Blackclock, " .
@@ -77,7 +77,7 @@ else
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID",
-                          'assoc', 'quick_play.find_game');
+                          );
 
    if( !$game_row )
       error("unknown_game");

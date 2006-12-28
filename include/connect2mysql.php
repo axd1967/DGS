@@ -70,18 +70,21 @@ function admin_log( $uid, $handle, $err)
 }
 
 
-function mysql_single_fetch( $query, $type='assoc', $error_debug='single_fetch')
+function mysql_single_fetch( $debugmsg, $query, $type='assoc')
 {
    $row = false;
-   $result = mysql_query( $query ) or error("mysql_query_failed", $error_debug);
-   if( $result != false )
+   $result = mysql_query( $query );
+   if( $result == false )
    {
-      $type = 'mysql_fetch_'.$type;
-      if( (mysql_num_rows($result) != 1 )
-            or !is_array( $row=$type( $result) ) )
-         $row = false;
-      mysql_free_result($result);
+      if( $debugmsg !== false )
+         error('mysql_query_failed', ((string)$debugmsg).'.single_fetch');
+      return false;
    }
+   $type = 'mysql_fetch_'.$type;
+   if( (mysql_num_rows($result) != 1 )
+         or !is_array( $row=$type( $result) ) )
+      return false;
+   mysql_free_result($result);
    return $row;
 }
 

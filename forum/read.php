@@ -45,9 +45,9 @@ function revision_history($post_id)
       "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID ";
 
 
-   $row = mysql_single_fetch( $query_select . "WHERE Posts.ID='$post_id'",
-                              'array', 'forum_read.revision_history.find_post' )
-      or error("unknown_post");
+   $row = mysql_single_fetch( 'forum_read.revision_history.find_post',
+            $query_select . "WHERE Posts.ID='$post_id'" )
+      or error('unknown_post');
 
    extract($row);
    change_depth( $cur_depth, 1, $cols);

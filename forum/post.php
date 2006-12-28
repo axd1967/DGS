@@ -48,35 +48,34 @@ function post_message($player_row, $moderated_forum, &$thread)
 
    if( $edit > 0 )
    {
-      $row = mysql_single_fetch(
-                  "SELECT Subject,Text,Forum_ID,GREATEST(Time,Lastedited) AS Time ".
-                  "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'],
-                  'assoc', 'forum_post.post_message.edit.find')
-         or error("unknown_parent_post");
+      $row = mysql_single_fetch( 'forum_post.post_message.edit.find',
+               "SELECT Subject,Text,Forum_ID,GREATEST(Time,Lastedited) AS Time ".
+               "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'] )
+         or error('unknown_parent_post', 'forum_post.post_message.edit.find');
 
       $oldSubject = mysql_escape_string( trim($row['Subject']));
       $oldText = mysql_escape_string( trim($row['Text']));
 
       if( $oldSubject != $Subject or $oldText != $Text )
       {
-       //Update old record with new text
-       mysql_query("UPDATE Posts SET " .
-                   "Lastedited=FROM_UNIXTIME($NOW), " .
-                   "Subject=\"$Subject\", " .
-                   "Text=\"$Text\" " .
-                   "WHERE ID=$edit LIMIT 1")
-          or error('mysql_query_failed','forum_post.post_message.edit.update');
+         //Update old record with new text
+         mysql_query("UPDATE Posts SET " .
+                     "Lastedited=FROM_UNIXTIME($NOW), " .
+                     "Subject=\"$Subject\", " .
+                     "Text=\"$Text\" " .
+                     "WHERE ID=$edit LIMIT 1")
+            or error('mysql_query_failed','forum_post.post_message.edit.update');
 
-       //Insert new record with old text
-       mysql_query("INSERT INTO Posts SET " .
-                   'Time="' . $row['Time'] .'", ' .
-                   "Parent_ID=$edit, " .
-                   "Forum_ID=" . $row['Forum_ID'] . ", " .
-                   "User_ID=" . $player_row['ID'] . ", " .
-                      //PosIndex=NULL
-                            "Subject=\"$oldSubject\", " .
-                      "Text=\"$oldText\"" )
-          or error('mysql_query_failed','forum_post.post_message.edit.insert');
+         //Insert new record with old text
+         mysql_query("INSERT INTO Posts SET " .
+                     'Time="' . $row['Time'] .'", ' .
+                     "Parent_ID=$edit, " .
+                     "Forum_ID=" . $row['Forum_ID'] . ", " .
+                     "User_ID=" . $player_row['ID'] . ", " .
+                     //PosIndex=NULL
+                     "Subject=\"$oldSubject\", " .
+                     "Text=\"$oldText\"" )
+            or error('mysql_query_failed','forum_post.post_message.edit.insert');
       }
       return $edit;
    }
@@ -89,23 +88,22 @@ function post_message($player_row, $moderated_forum, &$thread)
 
       if( $parent > 0 )
       {
-         $row = mysql_single_fetch("SELECT PosIndex,Depth,Thread_ID FROM Posts " .
-                                   "WHERE ID=$parent AND Forum_ID=$forum",
-                                   'assoc', 'forum_post.reply.find')
+         $row = mysql_single_fetch( 'forum_post.reply.find',
+                        "SELECT PosIndex,Depth,Thread_ID FROM Posts " .
+                        "WHERE ID=$parent AND Forum_ID=$forum" )
             or error('unknown_parent_post', 'forum_post.reply.find');
 
          extract( $row);
 
-         $row = mysql_single_fetch("SELECT MAX(AnswerNr) AS answer_nr " .
-                                   "FROM Posts WHERE Parent_ID=$parent",
-                                   'assoc', 'forum_post.reply.max')
+         $row = mysql_single_fetch( 'forum_post.reply.max',
+                        "SELECT MAX(AnswerNr) AS answer_nr " .
+                        "FROM Posts WHERE Parent_ID=$parent" )
             or error('unknown_parent_post', 'forum_post.reply.max');
-
-         extract( $row);
+         $answer_nr = $row['answer_nr'];
 
          $lastchanged_string = '';
 
-         if( !($answer_nr > 0) ) $answer_nr=0;
+         if( $answer_nr <= 0 ) $answer_nr=0;
       }
 
 

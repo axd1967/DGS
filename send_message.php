@@ -93,14 +93,13 @@ disable_cache();
 
 // find receiver of the message
 
-   $opponent_row = mysql_single_fetch( 
+   $opponent_row = mysql_single_fetch( 'send_message.find_receiver',
                           "SELECT ID, SendEmail, Notify, ClockUsed, OnVacation, " .
                           "Rating2, RatingStatus " .
-                          "FROM Players WHERE Handle='".addslashes($tohdl)."'",
-                          'assoc', 'send_message.find_receiver');
+                          "FROM Players WHERE Handle='".addslashes($tohdl)."'" );
 
    if( !$opponent_row )
-      error("receiver_not_found");
+      error('receiver_not_found');
 
 
    $opponent_ID = $opponent_row["ID"];
@@ -127,15 +126,15 @@ disable_cache();
    }
    else if( $accepttype )
    {
-      $game_row = mysql_single_fetch(
+      $game_row = mysql_single_fetch( 'send_message.accept',
                              "SELECT Black_ID, White_ID, ToMove_ID, " .
                              "Size, Handicap, Komi, " .
                              "Maintime, Byotype, Byotime, Byoperiods, " .
                              "Rated, StdHandicap, WeekendClock " .
-                             "FROM Games WHERE ID=$gid", 'assoc', 'send_message.accept');
+                             "FROM Games WHERE ID=$gid" );
 
       if( !$game_row )
-         error("mysql_start_game",'send3');
+         error('mysql_start_game','send_message.accept');
 
       //ToMove_ID hold handitype since INVITATION
       $handitype = $game_row["ToMove_ID"];

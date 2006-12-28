@@ -50,7 +50,7 @@ require_once( "include/std_functions.php" );
    }
    mysql_free_result($result);
 
-   $row = mysql_single_fetch( $q2 );
+   $row = mysql_single_fetch( 'statistics.q2', $q2 );
    if( $row )
    {
       echo '<tr><td>Total</td><td align="right">' . $row["moves"] 
@@ -58,7 +58,7 @@ require_once( "include/std_functions.php" );
    }
    echo "</table>\n";
 
-   $row = mysql_single_fetch( $q3 );
+   $row = mysql_single_fetch( 'statistics.q3', $q3 );
    if( $row )
    {
       echo '<p></p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';

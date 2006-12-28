@@ -164,10 +164,9 @@ class Board
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 
          //No need of movemsg if we don't have movecol??
-         if( $row=mysql_single_fetch( 
-                "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move",
-                'assoc', 'board.load_from_db.movemessage')
-               )
+         $row= mysql_single_fetch( 'board.load_from_db.movemessage',
+                  "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move");
+         if( $row )
          {
             $this->movemsg = trim($row['Text']);
          }
@@ -1056,21 +1055,17 @@ class Board
    // be extra entries in the Moves and MoveMessages tables.
    function fix_corrupted_move_table( $gid)
    {
-     if( !($row=mysql_single_fetch(
-              "SELECT Moves FROM Games WHERE ID=$gid",
-              'assoc', "board.fix_corrupted_move_table.moves: $gid")) )
-        error("internal_error", "board.fix_corrupted_move_table.moves: $gid");
+     $row= mysql_single_fetch( "board.fix_corrupted_move_table.moves: $gid",
+              "SELECT Moves FROM Games WHERE ID=$gid" );
+     if( !$row )
+        error('internal_error', "board.fix_corrupted_move_table.moves: $gid");
+     $Moves= $row['Moves'];
 
-      extract($row);
-
-
-     if( !($row=mysql_single_fetch(
-              "SELECT MAX(MoveNr) AS max_movenr FROM Moves WHERE gid=$gid",
-              'assoc', "board.fix_corrupted_move_table.max: $gid")) )
-        error("internal_error", "board.fix_corrupted_move_table.max: $gid");
-
-     extract($row);
-
+     $row= mysql_single_fetch( "board.fix_corrupted_move_table.max: $gid",
+              "SELECT MAX(MoveNr) AS max FROM Moves WHERE gid=$gid" );
+     if( !$row )
+        error('internal_error', "board.fix_corrupted_move_table.max: $gid");
+     $max_movenr= $row['max'];
 
      if($max_movenr == $Moves)
         return;

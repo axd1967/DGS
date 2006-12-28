@@ -27,21 +27,20 @@ require_once( "include/rating.php" );
 
 function jump_to_next_game($uid, $Lastchanged, $gid)
 {
-   $row = mysql_single_fetch(
-                         "SELECT ID FROM Games " .
-                         "WHERE ToMove_ID=$uid "  .
-                         "AND Status!='INVITED' AND Status!='FINISHED' " .
-                         "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
-                         "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
-                         "AND ID>$gid )) " .
-                         "ORDER BY Lastchanged,ID " .
-                         "LIMIT 1",
-                         'assoc', 'confirm.jump_to_next_game');
+   $row = mysql_single_fetch( 'confirm.jump_to_next_game',
+            "SELECT ID FROM Games " .
+            "WHERE ToMove_ID=$uid "  .
+            "AND Status!='INVITED' AND Status!='FINISHED' " .
+            "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
+               "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
+                  "AND ID>$gid )) " .
+            "ORDER BY Lastchanged,ID " .
+            "LIMIT 1" );
 
    if( !$row )
       jump_to("status.php");
 
-   jump_to("game.php?gid=" . $row["ID"]);
+   jump_to("game.php?gid=" . $row['ID']);
 }
 
 
@@ -64,19 +63,16 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       error("not_logged_in");
 
 
-   $game_row = mysql_single_fetch(
-                          "SELECT Games.*, " .
-                          "Games.Flags+0 AS GameFlags, " . //used by check_move
-                          "black.ClockUsed AS Blackclock, " .
-                          "white.ClockUsed AS Whiteclock, " .
-                          "black.OnVacation AS Blackonvacation, " .
-                          "white.OnVacation AS Whiteonvacation " .
-                          "FROM Games, Players AS black, Players AS white " .
-                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID",
-                          'assoc', 'confirm.find_game');
-
-   if( !$game_row )
-      error("unknown_game");
+   $game_row = mysql_single_fetch( 'confirm.find_game',
+                 "SELECT Games.*, " .
+                 "Games.Flags+0 AS GameFlags, " . //used by check_move
+                 "black.ClockUsed AS Blackclock, " .
+                 "white.ClockUsed AS Whiteclock, " .
+                 "black.OnVacation AS Blackonvacation, " .
+                 "white.OnVacation AS Whiteonvacation " .
+                 "FROM Games, Players AS black, Players AS white " .
+                 "WHERE Games.ID=$gid AND black.ID=Black_ID AND white.ID=White_ID" )
+      or error('unknown_game');
 
    extract($game_row);
 
@@ -478,13 +474,10 @@ This is why:
    {
       // send message to my opponent about the result
 
-      $opponent_row = mysql_single_fetch(
-         "SELECT * FROM Players WHERE ID=" .
-         ( $player_row["ID"] == $Black_ID ? $White_ID : $Black_ID ),
-         'assoc', 'confirm.find_opponent');
-
-      if( !$opponent_row )
-         error("opponent_not_found");
+      $opponent_row = mysql_single_fetch( 'confirm.find_opponent',
+                        "SELECT * FROM Players WHERE ID=" .
+                           $White_ID + $Black_ID - $player_row['ID'] )
+         or error('opponent_not_found');
 
       if( $player_row["ID"] == $Black_ID )
       {

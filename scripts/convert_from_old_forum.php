@@ -8,7 +8,8 @@ require_once("../forum/forum_functions.php");
    {
       $fname = $row0['table_name'];
 
-      $r = mysql_single_fetch("SELECT MAX(SortOrder) FROM Forums", 'row' );
+      $r = mysql_single_fetch( 'conv_forum',
+                  "SELECT MAX(SortOrder) FROM Forums", 'row' );
       $SortOrder = $r[0] + 1;
 
       mysql_query("INSERT INTO Forums SET " .

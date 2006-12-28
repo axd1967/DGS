@@ -125,11 +125,9 @@ function retry_admin( $msg)
 
       make_known_languages(); //must be called from main dir
 
-      $row = mysql_single_fetch(
-         "SELECT ID FROM TranslationGroups WHERE Groupname='Users'",
-         'assoc', 'admin_do_translators.add.find_group');
-      if( !$row )
-         error('internal_error','admin_do_translators.add.find_group');
+      $row = mysql_single_fetch( 'admin_do_translators.add.find_group',
+            "SELECT ID FROM TranslationGroups WHERE Groupname='Users'")
+         or error('internal_error','admin_do_translators.add.find_group');
 
       $Group_ID = $row['ID'];
 
@@ -161,10 +159,9 @@ function retry_admin( $msg)
       $transluser = get_request_arg('transluser');
       if( empty($transluser) )
          retry_admin( T_("Sorry, you must specify a user."));
-      $row = mysql_single_fetch(
+      $row = mysql_single_fetch( 'admin_do_translators.user.find',
                     "SELECT Translator FROM Players"
-                    ." WHERE Handle='".addslashes($transluser)."'",
-                    'assoc', 'admin_do_translators.user.find');
+                    ." WHERE Handle='".addslashes($transluser)."'" );
       if( !$row )
          retry_admin( T_("Sorry, I couldn't find this user."));
       if( !empty($row['Translator']) )
@@ -221,10 +218,9 @@ function retry_admin( $msg)
          error('internal_error', $update_it);
 
       // Check result (
-      $tmp = mysql_single_fetch(
+      $tmp = mysql_single_fetch( 'admin_do_translators.user.translator',
                    "SELECT Translator FROM Players"
-                   ." WHERE Handle='".addslashes($transluser)."'",
-                   'assoc', 'admin_do_translators.user.translator');
+                   ." WHERE Handle='".addslashes($transluser)."'" );
       if( !$tmp )
          $update_it.= '.1';
       else if( !isset($tmp['Translator']) )

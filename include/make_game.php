@@ -164,10 +164,9 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    if( $disputegid > 0 )
    {
       // Check if dispute game exists
-      $row= mysql_single_fetch("SELECT ID, Black_ID, White_ID FROM Games"
-                             . " WHERE ID=$disputegid AND Status='INVITED'",
-                               'assoc', 'make_game.make_invite_game.dispute');
-
+      $row= mysql_single_fetch( 'make_game.make_invite_game.dispute',
+                     "SELECT ID, Black_ID, White_ID FROM Games"
+                    ." WHERE ID=$disputegid AND Status='INVITED'" );
       if( !$row )
          error('unknown_game','make_invite_game1');
       if( ( $row['Black_ID']!=$player_row['ID'] or $row['White_ID']!=$opponent_row['ID'] )

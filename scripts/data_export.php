@@ -443,7 +443,7 @@ class dbTable
       $incr = '';
       $ok = 0;
 
-      if( $row=mysql_single_fetch( 
+      if( $row=mysql_single_fetch( false,
             'SHOW TABLE STATUS FROM ' . $this->qdatabase
             . ' LIKE \'' . $this->uname . '\'') )
       {
@@ -502,7 +502,7 @@ class dbTable
    function structure_body()
    {
       $body = '';
-      if( $row=mysql_single_fetch(
+      if( $row=mysql_single_fetch( false,
              'SHOW CREATE TABLE ' . $this->qpath
            , 'array') )
       {
@@ -691,7 +691,7 @@ ID,Page,Group_ID
 
    $encoding_used= get_request_arg( 'charset', LANG_DEF_CHARSET); //iso-8859-1 UTF-8
 
-   if( $row=mysql_single_fetch( 'SELECT VERSION() AS version') )
+   if( $row=mysql_single_fetch( false, 'SELECT VERSION() AS version') )
    {
       define('MYSQL_VERSION', $row['version']);
 /*
@@ -699,7 +699,7 @@ ID,Page,Group_ID
       define('MYSQL_VERSION_INT', (int)sprintf('%d%02d%02d'
                   , $row[0], $row[1], intval($row[2])));
 */
-   } else{
+   } else {
       define('MYSQL_VERSION', '3.23.32');
 /*
       define('MYSQL_VERSION_INT', 32332);
