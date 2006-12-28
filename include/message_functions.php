@@ -137,7 +137,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    {
       // If dispute, use values from game $gid
       $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
-                 "Maintime,Byotype,Byotime,Byoperiods,Rated,StdHandicap,Weekendclock, " .
+                 "Maintime,Byotype,Byotime,Byoperiods," .
+                 "Rated,StdHandicap,Weekendclock, " .
                  "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
                  "FROM Games,Players WHERE Games.ID=$gid " .
                  "AND ((White_ID=$my_ID AND Players.ID=Black_ID) " .
@@ -148,21 +149,14 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                                           'assoc', 'message_functions.game_settings_form')) )
          error("unknown_game");
 
-      extract($game_row);
-
-      $MyColor = ( $Color == BLACK ? 'Black' : 'White' );
-      $Rated = ( $Rated == 'Y' );
-      $StdHandicap = ( $StdHandicap == 'Y' );
-      $Weekendclock = ( $Weekendclock == 'Y' );
-
-      $ByotimeUnit = 'hours';
-      time_convert_to_longer_unit($Byotime, $ByotimeUnit);
-
-      $MaintimeUnit = 'hours';
-      time_convert_to_longer_unit($Maintime, $MaintimeUnit);
+      $Size = $game_row['Size'];
+      $MyColor = ( $game_row['Color'] == BLACK ? 'Black' : 'White' );
+      $Rated = ( $game_row['Rated'] == 'Y' );
+      $StdHandicap = ( $game_row['StdHandicap'] == 'Y' );
+      $Weekendclock = ( $game_row['Weekendclock'] == 'Y' );
 
       //ToMove_ID hold handitype since INVITATION
-      switch( $ToMove_ID )
+      switch( $game_row['ToMove_ID'] )
       {
          case INVITE_HANDI_CONV:
          {
@@ -179,55 +173,66 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
          case INVITE_HANDI_NIGIRI:
          {
             $Handitype = 'nigiri';
-            $Komi_n = $Komi;
+            $Komi_n = $game_row['Komi'];
          }
          break;
 
          case INVITE_HANDI_DOUBLE:
          {
             $Handitype = 'double';
-            $Handicap_d = $Handicap;
-            $Komi_d = $Komi;
+            $Handicap_d = $game_row['Handicap'];
+            $Komi_d = $game_row['Komi'];
          }
          break;
 
          default: //Black_ID
          {
             $Handitype = 'manual';
-            $Handicap_m = $Handicap;
-            $Komi_m = $Komi;
+            $Handicap_m = $game_row['Handicap'];
+            $Komi_m = $game_row['Komi'];
          }
          break;
       }
 
+      $MaintimeUnit = 'hours';
+      $Maintime = $game_row['Maintime'];
+      time_convert_to_longer_unit($Maintime, $MaintimeUnit);
+
+      $game_row['ByotimeUnit'] = 'hours';
+      time_convert_to_longer_unit($game_row['Byotime'], $game_row['ByotimeUnit']);
+
+      $Byotype = $game_row['Byotype'];
       switch( $Byotype )
       {
          case 'JAP':
          {
-            $Byotime_jap = $Byotime;
-            $ByotimeUnit_jap = $ByotimeUnit;
-            $Byoperiods_jap = $Byoperiods;
+            $Byotime_jap = $game_row['Byotime'];
+            $ByotimeUnit_jap = $game_row['ByotimeUnit'];
+            $Byoperiods_jap = $game_row['Byoperiods'];
          }
          break;
 
          case 'CAN':
          {
-            $Byotime_can = $Byotime;
-            $ByotimeUnit_can = $ByotimeUnit;
-            $Byoperiods_can = $Byoperiods;
+            $Byotime_can = $game_row['Byotime'];
+            $ByotimeUnit_can = $game_row['ByotimeUnit'];
+            $Byoperiods_can = $game_row['Byoperiods'];
          }
          break;
 
          default: //case 'FIS':
          {
             $Byotype = 'FIS';
-            $Byotime_fis = $Byotime;
-            $ByotimeUnit_fis = $ByotimeUnit;
+            $Byotime_fis = $game_row['Byotime'];
+            $ByotimeUnit_fis = $game_row['ByotimeUnit'];
          }
          break;
       }
 
    }
+
+
+   // Now, compute datas
 
    switch( $Handitype )
    {
@@ -365,7 +370,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
                               'CHECKBOX', 'rated', 'Y', "", $Rated ) );
    }
-   else if( $formstyle=='dispute' && $Rated=='Y' )
+   else if( $formstyle=='dispute' && $Rated )
    {
       $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
                               'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
@@ -478,7 +483,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
 function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
                          $Maintime, $Byotype, $Byotime, $Byoperiods,
-                         $Rated, $WeekendClock, $StdHandicap, $gid=NULL)
+                         $Rated, $WeekendClock, $StdHandicap, $gid=0)
 {
    echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
 
@@ -525,7 +530,7 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
 
 
    echo '<tr><td><b>' . T_('Main time') . '</b></td><td>'
-            . echo_time($Maintime) 
+            . echo_time($Maintime)
          . "</td></tr>\n";
 
    echo '<tr><td><b>' . echo_byotype($Byotype) . '</b></td><td> ';
@@ -542,7 +547,6 @@ function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
 }
 
 
-//Set global $hours,$byohours,$byoperiods
 function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
                                     $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
                                     $byotimevalue_can, $timeunit_can, $byoperiods_can,
@@ -656,7 +660,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
 
    if( $new_folder == "NULL" )
    {
-      $where_clause = "AND Folder_nr='" .FOLDER_DELETED. "' ";      
+      $where_clause = "AND Folder_nr='" .FOLDER_DELETED. "' ";
    }
    else
    {
@@ -673,7 +677,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
 
       if( $current_folder > FOLDER_ALL_RECEIVED && isset($folders[$current_folder])
             && $current_folder != 'NULL' )
-         $where_clause.= "AND Folder_nr='" .$current_folder. "' ";      
+         $where_clause.= "AND Folder_nr='" .$current_folder. "' ";
    }
 
    if( $need_replied )
@@ -797,7 +801,7 @@ function message_list_table( &$mtable, $result, $show_rows
    $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'subject', false, false );
    list($ico,$alt) = $msg_icones[0];
    $tit = str_replace('"', '&quot;', T_('Messages'));
-   $mtable->add_tablehead( 0, 
+   $mtable->add_tablehead( 0,
       "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>"
       , $no_sort ? NULL : 'flow', false, true );
    $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, false );
