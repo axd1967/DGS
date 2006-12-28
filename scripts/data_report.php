@@ -159,7 +159,7 @@ function echo_query( $query, $qid='', $rowhdr=20, $colsize=40, $colwrap='cut' )
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
    {
-      echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
+      echo "<p id=query_error>Error: ".textarea_safe($mysqlerror)."</p>";
       return -1;
    }
 
