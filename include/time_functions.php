@@ -167,6 +167,8 @@ function time_remaining($hours, &$main, &$byotime, &$byoper, $startmaintime,
 
 function echo_day( $days, $keep_english=false, $short=false)
 {
+   if( $short && $keep_english )
+      return $days . 'd';
    $T_= ( $keep_english ? 'fnop' : 'T_' );
    if( $short )
       return $days . ( abs($days) <= 1 ? $T_('day#short') : $T_('days#short') );
@@ -175,6 +177,8 @@ function echo_day( $days, $keep_english=false, $short=false)
 
 function echo_hour( $hours, $keep_english=false, $short=false)
 {
+   if( $short && $keep_english )
+      return $hours . 'h';
    $T_= ( $keep_english ? 'fnop' : 'T_' );
    if( $short )
       return $hours . ( abs($hours) <= 1 ? $T_('hour#short') : $T_('hours#short') );
