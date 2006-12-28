@@ -221,10 +221,13 @@ function language_exists( $langcode, $charenc='', $langname='' )
 
    $langs = $known_languages[$langcode];
    if( !empty($charenc) &&
-       array_key_exists( $charenc, $langs ) )
+       array_key_exists( $charenc, $langs )
+     )
       return true;
    if( !empty($langname) &&
-       array_key_exists( $langname, array_flip($langs) ) )
+       array_key_exists( strtolower( $langname),
+          array_change_key_case( array_flip($langs), CASE_LOWER))
+     )
       return true;
 
    return false;
