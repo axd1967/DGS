@@ -5,7 +5,7 @@
 // Lines formed as: 'folder_name' /*32 chars max*/ => 'Convivial name',
 $known_skins = array(
    'dragon' => 'Dragon Go Server original',
-   'dragon2' => 'DGS devel skin test',
+   'dragon2' => 'DGS devel skins test',
 );
 
 ?>
