@@ -102,7 +102,7 @@ img.layoutstone {
 }
 
 table {
-   empty-cells: hide;
+   empty-cells: show;
    table-layout: auto;
 }
 
