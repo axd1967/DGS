@@ -734,11 +734,11 @@ function generate_random_password()
    return $return;
 }
 
-function verify_email( $email, $debugmsg='')
+function verify_email( $debugmsg, $email)
 {
    $regexp = "^([-_a-z0-9]+)(\.[-_a-z0-9]+)*@([-a-z0-9]+)(\.[-a-z0-9]+)*(\.[a-z]{2,4})$";
    $res= eregi($regexp, $email);
-   if( $debugmsg && !$res )
+   if( $debugmsg!==false && !$res )
       error('bad_mail_address', "$debugmsg=$email");
    return $res;
 }

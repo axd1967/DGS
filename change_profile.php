@@ -43,7 +43,7 @@ require_once( "include/countries.php" );
 
    $email = trim(get_request_arg('email'));
    if( $email )
-      verify_email($email, 'change_profile');
+      verify_email( 'change_profile', $email);
 
    $sendemail = '';
    $emailnotify = (int)@$_GET['emailnotify'];

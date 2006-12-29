@@ -97,7 +97,8 @@ rememberable.
 
    $headers = "From: $EMAIL_FROM\n";
 
-   if( function_exists('mail') && verify_email($Email, 'send_new_password') )
+   verify_email( 'send_new_password', $Email);
+   if( function_exists('mail') )
       $res= @mail( $Email, $FRIENDLY_LONG_NAME.' notification', $msg, $headers );
    else
       $res= false;

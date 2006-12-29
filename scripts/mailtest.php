@@ -86,7 +86,7 @@ require_once( "include/form_functions.php" );
    }
    else if( $sendit && $Email )
    {
-      if( !verify_email($Email) )
+      if( !verify_email( false, $Email) )
       {
          echo "<br>bad mail address: ".html_safe($Email)."<br>";
       }
