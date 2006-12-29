@@ -128,9 +128,15 @@ if( !$is_down )
                or error('mysql_query_failed','halfhourly_cron.find_notifications');
 
 
-   while( $row = mysql_fetch_array( $result ) )
+   while( $row = mysql_fetch_assoc( $result ) )
    {
       extract($row);
+      $Email= trim($Email);
+      if( !$Email or !verify_email( false, $Email) )
+      {
+         //error('bad_mail_address', "halfhourly_cron=$Email");
+         continue;
+      }
 
       $msg = "A message or game move is waiting for you at:\n "
                 . mail_link('',"status.php")."\n"
@@ -159,24 +165,25 @@ if( !$is_down )
 
             while( $game_row = mysql_fetch_array( $gres ) )
             {
-               extract($game_row);
 
-               $TheBoard = new Board( );
+               $TheBoard = new Board();
                if( !$TheBoard->load_from_db( $game_row) )
-                  error('internal_error', "halfhourly_cron load_from_db $ID");
+                  error('internal_error', 'halfhourly_cron load_from_db '.$game_row['ID']);
                $movemsg= $TheBoard->movemsg;
 
                $msg .= str_pad('', 47, '-') . "\n";
-               $msg .= "Game ID: ".mail_link($ID,"game.php?gid=$ID")."\n";
-               $msg .= "Black: ".mail_strip_html("$Blackname ($Blackhandle)")."\n";
-               $msg .= "White: ".mail_strip_html("$Whitename ($Whitehandle)")."\n";
-               $tmp = number2board_coords($Last_X, $Last_Y, $Size);
-               if( empty($tmp) ) $tmp = "lead to $Status step";
-               $msg .= "Move $Moves: $tmp\n";
+               $msg .= "Game ID: ".mail_link($game_row['ID'],'game.php?gid='.$game_row['ID'])."\n";
+               $msg .= "Black: ".mail_strip_html(
+                        $game_row['Blackname'].' ('.$game_row['Blackhandle'].')')."\n";
+               $msg .= "White: ".mail_strip_html(
+                        $game_row['Whitename'].' ('.$game_row['Whitehandle'].')')."\n";
+               $tmp = number2board_coords($game_row['Last_X'], $game_row['Last_Y'], $game_row['Size']);
+               if( empty($tmp) ) $tmp = 'lead to '.$game_row['Status'].' step';
+               $msg .= 'Move '.$game_row['Moves'].": $tmp\n";
 
                if( !(strpos($SendEmail, 'BOARD') === false) )
                {
-                  //remove sgf tags
+                  //remove all sgf tags
                   $movemsg = trim(preg_replace(
                      "'(<c(omment)? *>(.*?)</c(omment)? *>)".
                      "|(<h(idden)? *>(.*?)</h(idden)? *>)'is"
@@ -184,6 +191,7 @@ if( !$is_down )
                   $movemsg = mail_strip_html( $movemsg);
                   $msg .= $TheBoard->draw_ascii_board( $movemsg);
                }
+               unset($TheBoard);
             }
          }
          mysql_free_result($gres); unset($game_row);
@@ -194,20 +202,19 @@ if( !$is_down )
 
       if( !(strpos($SendEmail, 'MESSAGE') === false) )
       {
-  $folderstring=FOLDER_NEW;
-         $query = "SELECT Messages.*, " .
+         $folderstring = FOLDER_NEW;
+         $query = "SELECT Messages.ID,Subject,Text, " .
             "UNIX_TIMESTAMP(Messages.Time) AS date, " .
             "Players.Name AS FromName, Players.Handle AS FromHandle " .
             "FROM (Messages, MessageCorrespondents AS me) " .
             "LEFT JOIN MessageCorrespondents AS other " .
-              "ON other.mid=me.mid AND other.Sender!=me.Sender " .
+              "ON other.mid=me.mid AND other.Sender='Y' " .
             "LEFT JOIN Players ON Players.ID=other.uid " .
             "WHERE me.uid=$uid AND Messages.ID=me.mid " .
               "AND me.Folder_nr IN ($folderstring) " .
               "AND me.Sender='N' " . //exclude message to myself
               "AND UNIX_TIMESTAMP(Messages.Time) > UNIX_TIMESTAMP('$Lastaccess') " .
             "ORDER BY Time DESC";
-
 
          $res3 = mysql_query( $query )
                or error('mysql_query_failed','halfhourly_cron.find_new_messages');
@@ -216,22 +223,22 @@ if( !$is_down )
             $msg .= str_pad('', 47, '-') . "\n  New messages:\n";
             while( $msg_row = mysql_fetch_array( $res3 ) )
             {
-               extract($msg_row);
 
-               if($FromName && $FromHandle)
-                  $From= mail_strip_html("$FromName ($FromHandle)");
+               if($msg_row['FromName'] && $msg_row['FromHandle'])
+                  $From= mail_strip_html(
+                     $msg_row['FromName'].' ('.$msg_row['FromHandle'].')');
                else
                   $From= 'Server message';
 
                $msg .= str_pad('', 47, '-') . "\n" .
-                   "Message: ".mail_link('',"message.php?mid=$ID") . "\n" .
-                   "Date: ".date($date_fmt, $date) . "\n" .
+                   "Message: ".mail_link('','message.php?mid='.$msg_row['ID']) . "\n" .
+                   "Date: ".date($date_fmt, $msg_row['date']) . "\n" .
                    "From: $From\n" .
-                   "Subject: ".mail_strip_html($Subject) . "\n\n" .
-                   wordwrap(mail_strip_html($Text),47) . "\n";
+                   "Subject: ".mail_strip_html($msg_row['Subject']) . "\n\n" .
+                   wordwrap(mail_strip_html($msg_row['Text']),47) . "\n";
             }
          }
-         mysql_free_result($res3);
+         mysql_free_result($res3); unset($msg_row);
       }
 
       $msg .= str_pad('', 47, '-');
@@ -241,17 +248,13 @@ if( !$is_down )
       //$headers.= "MIME-Version: 1.0\n";
       //$headers.= "Content-type: text/html; charset=iso-8859-1\n";
 
-      $Email= trim($Email);
-      if( verify_email($Email, 'halfhourly_cron') )
+      if( !function_exists('mail')
+         or !@mail( $Email, $FRIENDLY_LONG_NAME.' notification', $msg, $headers )
+        )
       {
-         if( !function_exists('mail')
-            or !@mail( $Email, $FRIENDLY_LONG_NAME.' notification', $msg, $headers )
-           )
-         {
-            //can't connect mail feature
-            error('mail_failure', 'halfhourly_cron');
-            break;
-         }
+         //can't connect mail feature
+         error('mail_failure', 'halfhourly_cron');
+         break;
       }
    } //notifications found
    mysql_free_result($result);
