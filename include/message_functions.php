@@ -141,10 +141,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                  "Rated,StdHandicap,Weekendclock, " .
                  "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
                  "FROM (Games,Players) WHERE Games.ID=$gid" .
-                 " AND $my_ID IN (White_ID,Black_ID)" .
-                 " AND Players.ID=White_ID+Black_ID-$my_ID" .
-                 //" AND ((White_ID=$my_ID AND Players.ID=Black_ID)" .
-                 //  " OR (Black_ID=$my_ID AND Players.ID=White_ID))" .
+                 " AND ((White_ID=$my_ID AND Players.ID=Black_ID)" .
+                   " OR (Black_ID=$my_ID AND Players.ID=White_ID))" .
                  " AND Status='INVITED'" ;
       $game_row= mysql_single_fetch( 'message_functions.game_settings_form',
                                      $query );
