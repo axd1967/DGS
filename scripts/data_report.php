@@ -154,7 +154,9 @@ function echo_query( $query, $qid='', $rowhdr=20, $colsize=40, $colwrap='cut' )
    //kill sensible fields from a query like "SELECT Password as pwd FROM Players"
    $query= preg_replace( "%(Password|Sessioncode|Email)%is", "***", $query);
 
-   $result = mysql_query( $query );
+   $time = getmicrotime();
+      $result = mysql_query( $query );
+   $time = round((getmicrotime() - $time) * 1000, 2);
 
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
@@ -223,7 +225,9 @@ function echo_query( $query, $qid='', $rowhdr=20, $colsize=40, $colwrap='cut' )
       echo "\n</tr>";
    }
    mysql_free_result( $result);
-   echo "\n</table><br>\n";
+   echo "\n</table>";
+   echo "<font size=-1>Query time: $time&nbsp;ms</font><br>\n";
+   echo "&nbsp;<br>\n";
 
    return $numrows;
 }
