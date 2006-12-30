@@ -170,8 +170,10 @@ require_once( "include/rating.php" );
            "LEFT JOIN Ratinglog AS log ON log.gid=Games.ID AND log.uid=$uid " : '' ) .
          "WHERE " . ( $finished ? "Status='FINISHED' "
                       : "Status!='INVITED' AND Status!='FINISHED' " ) .
-         "AND (( Black_ID=$uid AND White_ID=Players.ID ) " .
-           "OR ( White_ID=$uid AND Black_ID=Players.ID )) " .
+            //"AND (( Black_ID=$uid AND White_ID=Players.ID ) " .
+            //  "OR ( White_ID=$uid AND Black_ID=Players.ID )) " .
+            "AND (White_ID=$uid OR Black_ID=$uid) " .
+            "AND Players.ID=White_ID+Black_ID-$uid " .
          "ORDER BY $order,Games.ID $limit";
    }
 
