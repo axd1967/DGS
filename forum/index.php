@@ -94,9 +94,9 @@ require_once( "forum_functions.php" );
       echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID . '">' . $Name .
          '</a></b>'. ( $Moderated == 'Y' ? ' &nbsp; <font color="#ff4466">[' . T_('Moderated') . ']</font>' : '') .'</td>' .
          '<td nowrap>'.T_('Posts').': <b>' . $PostsInForum .  '&nbsp;&nbsp;&nbsp;</b></td>' .
-         '<td nowrap>'.T_('Last post').': <b>' . $date . '</b></td></tr>
-<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description .
-         '</dl></td></tr>';
+         '<td nowrap>'.T_('Last post').': <b>' . $date . "</b></td></tr>\n" .
+         '<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description .
+         "</dl></td></tr>\n";
    }
 
    end_table($links, $cols);

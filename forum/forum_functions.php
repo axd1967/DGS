@@ -55,8 +55,11 @@ define("LINK_MASKS", ~(LINKPAGE_READ | LINKPAGE_LIST | LINKPAGE_INDEX
           | LINKPAGE_SEARCH | LINKPAGE_STATUS) );
 
 
-define("FORUM_MAXIMUM_DEPTH", 15);
-define("FORUM_INDENTATION_PIXELS", 15);
+define('ALLOW_QUOTING', 0);
+define('FORUM_MAXIMUM_DEPTH', 15);
+define('FORUM_INDENTATION_PIXELS', 15);
+
+
 
 function make_link_array($links)
 {
@@ -321,9 +324,10 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
             .URI_AMP."reply=$ID#$ID\">[ " .
             T_('reply') . " ]</a>&nbsp;&nbsp;";
-//          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
-//             .URI_AMP."reply=$ID".URI_AMP."quote=1#$ID\">[ " .
-//             T_('quote') . " ]</a>&nbsp;&nbsp;";
+         if( ALLOW_QUOTING )
+         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
+            .URI_AMP."reply=$ID".URI_AMP."quote=1#$ID\">[ " .
+            T_('quote') . " ]</a>&nbsp;&nbsp;";
       }
       if( $my_post and !$is_moderator ) // edit link
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."edit=$ID#$ID\">" .
@@ -536,16 +540,17 @@ function display_posts_pending_approval()
    global $date_fmt;
 
    $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) as Time,Subject,Forum_ID,Thread_ID, " .
-                         "Posts.ID as Post_ID,User_ID,Name,Handle " .
-                         "FROM Posts,Players " .
-                         "WHERE PendingApproval='Y' AND Players.ID=User_ID " .
+                         "Posts.ID as Post_ID,Forums.Name AS Forumname," .
+                         "User_ID,Players.Name as User_Name,Handle " .
+                         "FROM (Posts,Players,Forums) " .
+                         "WHERE PendingApproval='Y' AND Players.ID=User_ID AND Forums.ID=Forum_ID " .
                          "ORDER BY Time DESC")
       or error('mysql_query_failed','forum_functions.display_posts_pending_approval.find');
 
    if( mysql_num_rows($result) == 0 )
       return;
 
-   $cols = 3;
+   $cols = 4;
    $headline  = array(T_("Posts pending approval") => "colspan=$cols");
    $links = LINKPAGE_STATUS;
    start_table($headline, $links, "width=90%", $cols);
@@ -556,10 +561,14 @@ function display_posts_pending_approval()
       $color = ( $odd ? "" : " bgcolor=white" );
 
       $Subject = make_html_safe( $row['Subject']);
-      echo "<tr$color><td><a href=\"forum/read.php?forum=" . $row['Forum_ID'] . URI_AMP .
-         "thread=" . $row['Thread_ID'] . URI_AMP . "moderator=y#" . $row['Post_ID'] . "\">$Subject</a></td><td>" .
-         user_reference( REF_LINK, 1, NULL, $row['User_ID'], $row['Name'], $row['Handle']) .
-         "</td><td nowrap align=right>" .date($date_fmt, $row['Time']) . "</td></tr>\n";
+      echo "<tr$color><td>" . ($cols>3?$row['Forumname'] . "</td><td>" : '') .
+         "<a href=\"forum/read.php?forum=" . $row['Forum_ID'] .
+         URI_AMP . "thread=" . $row['Thread_ID'] . URI_AMP .
+         "moderator=y#" . $row['Post_ID'] . "\">$Subject</a></td><td>" .
+         user_reference( REF_LINK, 1, NULL, $row['User_ID'],
+               $row['User_Name'], $row['Handle']) .
+         "</td><td nowrap align=right>" .date($date_fmt, $row['Time']) .
+         "</td></tr>\n";
       $odd = !$odd;
 
    }

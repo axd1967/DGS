@@ -1793,7 +1793,7 @@ function attb_build( $attbs)
 
 function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
 {
-   $str = "<img border=0 src=\"$src\" alt=".attb_quote($alt);
+   $str = "<img src=\"$src\" alt=".attb_quote($alt);
    if( $title )
      $str.= ' title='.attb_quote($title);
    if( $height>=0 )

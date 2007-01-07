@@ -45,6 +45,10 @@
    white-space: nowrap;
 }
 
+.warning {
+   color: red;
+}
+
 
 /*
 a:link {
@@ -68,6 +72,11 @@ a:active {
 }
 */
 
+a[target] /*, a[target="new"], a[target="_blank"]*/
+{
+   color:olive;
+}
+
 .header {
    color: #800000;
    text-align: center;
@@ -78,11 +87,12 @@ a:active {
    font-weight: bold;
 }
 
+/*
 .image-left {
    float: left;
    clear: both;
    margin: 0.5em 1em 0.5em 0em;
-   border: 0px solid Black;
+   border: 0px solid black;
 }
 
 .image-inline {
@@ -93,12 +103,20 @@ a:active {
    float: right;
    clear: both;
    margin: 0.5em;
-   border: 0px solid Black;
+   border: 0px solid black;
+}
+*/
+
+img {
+   border: 0px solid black;
+   vertical-align: middle;
 }
 
-img.layoutstone {
+img.intextstone {
    width: 17px;
    height: 17px;
+   border: 0px solid black;
+   vertical-align: middle;
 }
 
 table {
@@ -191,7 +209,7 @@ table.links a {
 /* ------------------------- */
 
 table.table {
-   border: #cccccc solid 0px;
+   border: 0px solid #cccccc;
    border-spacing: 0px;
    margin: 0px;
    text-align: left;
@@ -199,7 +217,7 @@ table.table {
 }
 
 table.table td, table.table th {
-   border: #cccccc solid 0px;
+   border: 0px solid #cccccc;
    margin: 0px;
    padding: 3px;
 }
@@ -215,10 +233,12 @@ table.table tr.row1, table.table tr.row3 {
 table.table tr.row2, table.table tr.row4 {
    background: #e0e8ed;
 }
-table.table tr.row2 td.warning, table.table tr.row3 td.warning {
+table.table tr.row1 td.warning, table.table tr.row3 td.warning {
+   color: black;
    background: #ffcccc;
 }
 table.table tr.row2 td.warning, table.table tr.row4 td.warning {
+   color: black;
    background: #e6b9bd;
 }
 table.table tr.highlight {
@@ -311,6 +331,20 @@ table.captures td.w {
    white-space: nowrap;
 }
 
+table.captures dl {
+   padding: 0px;
+   margin: 0px;
+}
+
+table.captures dt {
+   padding: 0px;
+   margin: 0px;
+}
+
+table.captures img {
+   vertical-align: middle;
+}
+
 
 table.gamenotes {
    border-width: 0px;
@@ -333,6 +367,34 @@ table.gamenotes td.notes {
    padding: 0px;
    margin: 0px;
 }
+
+
+table.gameinfos {
+   border: 0px solid #e0e8ed;
+   border-spacing: 0px;
+   margin: 0px;
+   text-align: left;
+   empty-cells: show;
+}
+
+table.gameinfos td, table.gameinfos th {
+   border: 0px solid #e0e8ed;
+   margin: 0px;
+   padding: 4px;
+}
+
+table.gameinfos tr {
+   background: #e0e8ed;
+}
+
+table.gameinfos tr#blackinfo, table.gameinfos tr#blacktime {
+   background: #dddddd;
+}
+
+table.gameinfos tr#whiteinfo, table.gameinfos tr#whitetime {
+   background: #ffffff;
+}
+
 
 /* board page - old moves table */
 
@@ -437,21 +499,23 @@ tr.post_buttons {
 
 pre.code {
    background: #dddddd;
-   padding: 8px;
-/*
+   margin: 0.3em 2px 0.3em 0.5em;
+   padding: 0.3em 0em 0.3em 0.5em;
    width: auto;
+/*
+   padding: 8px;
    margin-right: auto;
 */
 }
 
 div.quote {
-    border: 1px solid #8cacbb;
-    margin: 0.3em 2px 0.3em 0.5em;
-    padding: 0.3em 0em 0.3em 0.5em;
-    width: auto;
-    font-style: italic;
+   border: 1px solid #8cacbb;
+   margin: 0.3em 2px 0.3em 0.5em;
+   padding: 0.3em 0em 0.3em 0.5em;
+   width: auto;
+   font-style: italic;
 /*
-    line-height: 1.5em;
+   line-height: 1.5em;
 */
 }
 

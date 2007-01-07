@@ -249,36 +249,47 @@ class Board
 
       $stone_size = $this->stone_size;
       $size = $this->size;
+      $numover = $this->coord_borders & NUMBER_OVER ;
 
-      $stone_attb = 'align=bottom'; //'align=middle';
+      $stone_attb = 'class="intextstone capt"';
       $wcap= array();
       $bcap= array();
       foreach( $this->captures as $n => $sub )
       {
          list( $s, $x, $y, $mrk) = $sub;
+         if( $numover )
+         {
+            $tit= (string)$n;
+            if( is_numeric($mrk) )
+               $mrk= ''; //no mark if $numover
+         }
+         else
+            $tit= '';
          $brdc = number2board_coords( $x, $y, $size);
          if( $s == BLACK )
          {
             array_unshift( $bcap,
-                  image( "$stone_size/b$mrk.gif", "X$n", '', $stone_attb)
-                   . "&nbsp;:&nbsp;$brdc<br>\n" );
+                  image( "$stone_size/b$mrk.gif", "X$n", $tit, $stone_attb)
+                   . "&nbsp;:&nbsp;$brdc" );
          }
          else if( $s == WHITE )
          {
             array_unshift( $wcap,
-                  image( "$stone_size/w$mrk.gif", "O$n", '', $stone_attb)
-                   . "&nbsp;:&nbsp;$brdc<br>\n" );
+                  image( "$stone_size/w$mrk.gif", "O$n", $tit, $stone_attb)
+                   . "&nbsp;:&nbsp;$brdc" );
          }
       }
 
       echo "<table class=captures>\n";
       echo "<tr>\n<th colspan=2>$caption</th>\n </tr>\n";
       echo "<tr>\n<td class=b>\n";
-      foreach( $bcap as $s )
-         echo $s;
+      if( count($bcap)>0 )
+         echo '<dl><dt>'.implode("\n<dt>", $bcap)."</dl>";
+         //echo implode("<br>\n", $bcap);
       echo "</td>\n<td class=w>\n";
-      foreach( $wcap as $s )
-         echo $s;
+      if( count($wcap)>0 )
+         echo '<dl><dt>'.implode("\n<dt>", $wcap)."</dl>";
+         //echo implode("<br>\n", $wcap);
       echo "</td>\n</tr>\n";
       echo "</table>\n";
 
@@ -315,10 +326,12 @@ class Board
       $stone_size = $this->stone_size;
       $coord_width = floor($stone_size*31/25);
 
-      $tmp = "img.brd%s{ width:%dpx; height:%dpx;}\n";
-      return sprintf( $tmp, 'x', $stone_size, $stone_size)
-           . sprintf( $tmp, 'l', $stone_size, $stone_size)
-           . sprintf( $tmp, 'n', $coord_width, $stone_size);
+      $tmp = "img.%s{ width:%dpx; height:%dpx; border-width:0px;}\n";
+      return sprintf( $tmp, 'brdx', $stone_size, $stone_size) //board stones
+           . sprintf( $tmp, 'brdl', $stone_size, $stone_size) //letter coords
+           . sprintf( $tmp, 'brdn', $coord_width, $stone_size) //num coords
+           . sprintf( $tmp, 'capt', $stone_size, $stone_size) //capture box
+           ;
    }
 
 
@@ -437,7 +450,7 @@ class Board
                $on_not_empty = false;
                $on_empty = true;
                $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=handicap".URI_AMP."c=";
-               $move_alt = "\"><img class=brdx border=0 alt=\"";
+               $move_alt = "\"><img class=brdx alt=\"";
                if( $stonestring )
                   $move_alt = URI_AMP."s=$stonestring".$move_alt;
                break;
@@ -448,7 +461,7 @@ class Board
                else
                   $on_empty = false;
                $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=remove".URI_AMP."c=";
-               $move_alt = "\"><img class=brdx border=0 alt=\"";
+               $move_alt = "\"><img class=brdx alt=\"";
                if( $stonestring )
                   $move_alt = URI_AMP."s=$stonestring".$move_alt;
                break;
@@ -456,14 +469,14 @@ class Board
                $on_not_empty = false;
                $on_empty = true;
                $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=domove".URI_AMP."c=";
-               $move_alt = "\"><img class=brdx border=0 alt=\"";
+               $move_alt = "\"><img class=brdx alt=\"";
                break;
          }
          $move_end = ".gif\"></a></td>\n";
       }
 
       if( $this->movemsg )
-         echo "<table id=\"game_board\" border=2 cellpadding=3 align=center><tr>" .
+         echo "<table id=\"game_board\" border=2 cellpadding=3><tr>" . //align=center
             "<td width=\"" . $stone_size*19 . "\" align=left>$this->movemsg</td></tr></table><BR>\n";
 
 
@@ -595,7 +608,7 @@ class Board
                if( !$empty && ( $stone == BLACK or $stone == WHITE )
                    && $this->movemrkx == $colnr
                    && $this->movemrky == $this->size-$rownr )
-               {
+               { //last move mark
                   $type .= 'm';
                   $alt = ( $stone == BLACK ? '#' : '@' );
                   $marked = true;
@@ -607,7 +620,7 @@ class Board
                   {
                      $type .= $mrk;
                      $marked = true;
-                  }
+                  } //else no mark if $numover
                }
             }
 
