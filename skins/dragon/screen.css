@@ -72,12 +72,16 @@ a:active {
 }
 */
 
+a.rating {
+   color: black;
+}
+
 a[target] /*, a[target="new"], a[target="_blank"]*/
 {
    color:olive;
 }
 
-.header {
+h3.header {
    color: #800000;
    text-align: center;
 }
@@ -123,6 +127,7 @@ table {
    empty-cells: show;
    table-layout: auto;
 }
+
 
 /* ------------------------- */
 /* common page layout */
@@ -249,55 +254,75 @@ table.table tr.highlight {
 
 
 /* ------------------------- */
-/* user info and status page */
+/* infos tables */
 /* ------------------------- */
 
 table.infos {
-   border-width: 2px;
+   table-layout: fixed;
+   border: 2px outset #F7F5E3; /* page background-color */
    border-spacing: 2px;
+   border-collapse: separate;
    margin: 4px;
    empty-cells: hide;
 }
 
 table.infos td, table.infos th {
-   border-width: 1px;
+   border: 1px inset #F7F5E3; /* page background-color */
    padding: 3px;
    text-align: left;
    color: black;
 }
 
-table.infos a {
+table.infos td.header, table.infos th.header {
+   font-weight: bold;
+}
+
+table.infos td.header_red {
+   color: red;
+   font-weight: bold;
+}
+
+table.infos td.header a {
    color: black;
 }
 
-table.infos a.hdr {
-   color: black;
-   font-weight: bold;
+table.infos tr.highlight {
+   background: #ffd070;
 }
+
+table.infos tr.warning, table.infos td.warning {
+   background: #f8c4b8;
+}
+
 
 /* biographical infos:
-  same as "infos" tables except for links left normal
+   must left the links in the right column natural
 */
-table.bio_infos {
-   border-width: 2px;
-   border-spacing: 2px;
-   margin: 4px;
-   empty-cells: hide;
+/*
+table#bio_infos a {
+   color: blue;
+}
+*/
+
+
+form#bioform_form td {
+   vertical-align: top;
 }
 
-table.bio_infos td, table.bio_infos th {
-   border-width: 1px;
-   padding: 3px;
-   text-align: left;
-   color: black;
+table#biomove_infos td {
+   vertical-align: top;
 }
 
-table.bio_infos a {
+table#biomove_infos div {
+   margin: 0px;
 }
 
-table.bio_infos a.hdr {
-   color: black;
-   font-weight: bold;
+table#biomove_infos img {
+   width: 12px;
+   height: 12px;
+   border: 0px solid black;
+   margin: 4px 4px 0px 4px;
+   vertical-align: top;
 }
 
 
@@ -440,6 +465,7 @@ table.moves a.b {
 tr.forum_header {
    background: #d0d0d0;
    color: black;
+   text-align: left;
 }
 
 tr.forum_header a {

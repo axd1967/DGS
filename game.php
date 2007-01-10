@@ -708,31 +708,28 @@ function draw_message_box(&$message)
 
 function draw_game_info(&$game_row)
 {
-   global $table_row_color2;
-
-   echo '<table border=0 cellspacing=0 cellpadding=3 align=center>' . "\n";
-   echo '<tr id="blackinfo" bgcolor="#DDDDDD">' . "\n";
-   echo "<td align=center><img src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
+   echo '<table class=gameinfos>' . "\n";
+   echo '<tr id="blackinfo">' . "\n";
+   echo "<td><img class=intextstone src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'],
                       $game_row['Blackname'], $game_row['Blackhandle']) .
       ( $game_row['Blackwarning'] ?
-        '&nbsp;&nbsp;&nbsp;<font color=red>' . T_('On vacation') . '</font>' : '' ) .
+        '&nbsp;&nbsp;&nbsp;<span class=warning>' . T_('On vacation') . '</span>' : '' ) .
       "</td>\n";
 
    $rating = ( $game_row['Status']==='FINISHED' ?
                $game_row['Black_Start_Rating'] : $game_row['Blackrating'] );
 
-   echo '<td>' . echo_rating( $rating, true, $game_row['Black_ID'] ) . "</td>\n";
-   echo '<td>&nbsp;</td>' . "\n";
-   echo '<td>' . T_('Prisoners') . ': ' . $game_row['Black_Prisoners'] . "</td>\n";
+   echo '<td class=center>' . echo_rating( $rating, true, $game_row['Black_ID'] ) . "</td>\n";
+   echo '<td class=center>' . T_('Prisoners') . ': ' . $game_row['Black_Prisoners'] . "</td>\n";
    echo "</tr>\n";
 
-   $cols = 5;
+   $cols = 4;
 
    if( $game_row['Status'] != 'FINISHED' )
    {
-      echo '<tr id="blacktime" bgcolor="#DDDDDD">' . "\n";
+      echo '<tr id="blacktime">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
          echo_time_remaining( $game_row['Black_Maintime'], $game_row['Byotype'],
                        $game_row['Black_Byotime'], $game_row['Black_Byoperiods']) .
@@ -740,27 +737,26 @@ function draw_game_info(&$game_row)
    }
 
 
-   echo '<tr id="whiteinfo" bgcolor="#FFFFFF">' . "\n";
-   echo "<td align=center><img src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
+   echo '<tr id="whiteinfo">' . "\n";
+   echo "<td><img class=intextstone src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['White_ID'],
                       $game_row['Whitename'], $game_row['Whitehandle']) .
       ( $game_row['Whitewarning'] ?
-        '&nbsp;&nbsp;&nbsp;<font color=red>' . T_('On vacation') . '</font>' : '' ) .
+        '&nbsp;&nbsp;&nbsp;<span class=warning>' . T_('On vacation') . '</span>' : '' ) .
       "</td>\n";
 
    $rating = ( $game_row['Status']==='FINISHED' ?
                $game_row['White_Start_Rating'] : $game_row['Whiterating'] );
 
-   echo '<td>' . echo_rating( $rating, true, $game_row['White_ID'] ) . "</td>\n";
-   echo '<td>&nbsp;</td>' . "\n";
-   echo '<td>' . T_('Prisoners') . ': ' . $game_row['White_Prisoners'] . "</td>\n";
+   echo '<td class=center>' . echo_rating( $rating, true, $game_row['White_ID'] ) . "</td>\n";
+   echo '<td class=center>' . T_('Prisoners') . ': ' . $game_row['White_Prisoners'] . "</td>\n";
    echo "</tr>\n";
 
 
    if( $game_row['Status'] != 'FINISHED' )
    {
-      echo '<tr id="whitetime" bgcolor="#FFFFFF">' . "\n";
+      echo '<tr id="whitetime">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
          echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype'],
                        $game_row['White_Byotime'], $game_row['White_Byoperiods']) .
@@ -768,7 +764,7 @@ function draw_game_info(&$game_row)
    }
 
    $sep = ',&nbsp;&nbsp;&nbsp;';
-   echo '<tr id="gamerules" bgcolor=' . $table_row_color2 . '>' . "\n";
+   echo '<tr id="gamerules">' . "\n";
    echo "<td colspan=\"" . $cols . "\">" . T_('Rules') . ': ';
    echo T_('Komi') . ': ' . $game_row['Komi'] ;
    echo $sep . T_('Handicap') . ': ' . $game_row['Handicap'];
@@ -777,7 +773,7 @@ function draw_game_info(&$game_row)
 
    echo "</tr>\n";
 
-   echo '<tr id="gametime" bgcolor=' . $table_row_color2 . '>' . "\n";
+   echo '<tr id="gametime">' . "\n";
    echo "<td colspan=\"" . $cols . "\">" . T_('Time limit') . ': ' .
       echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
                    $game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";

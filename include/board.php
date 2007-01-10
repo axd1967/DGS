@@ -251,7 +251,7 @@ class Board
       $size = $this->size;
       $numover = $this->coord_borders & NUMBER_OVER ;
 
-      $stone_attb = 'class="intextstone capt"';
+      $stone_attb = 'class=capt';
       $wcap= array();
       $bcap= array();
       foreach( $this->captures as $n => $sub )

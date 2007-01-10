@@ -168,6 +168,7 @@ function suggest_proper($rating_W, $rating_B, $size, $positive_komi=false)
    return array($handicap, $komi, $swap);
 }
 
+// also: suggest_conventional( $my_rating, $opp_rating, $size)
 function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
 {
    $handicap = abs($rating_W - $rating_B) / 100.0;
@@ -603,7 +604,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
 
    if( $graph_uid > 0 )
    {
-      $string = "<a class=black href=\"ratinggraph.php?uid=$graph_uid\">"
+      $string = "<a class=rating href=\"ratinggraph.php?uid=$graph_uid\">"
                . $string . '</a>';
    }
    return $string;

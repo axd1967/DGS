@@ -162,7 +162,7 @@ function echo_links($cols)
    global $link_array_left, $link_array_right;
 
    $rcols = $cols-1; //1; $cols/2; $cols-1;
-   echo '<tr class="forum_header"><td colspan=' . ($cols-$rcols) . " align=left>&nbsp;";
+   echo '<tr class=forum_header><td colspan=' . ($cols-$rcols) . ">&nbsp;";
    $first=true;
    reset($link_array_left);
    foreach( $link_array_left as $name => $link )
