@@ -1,20 +1,26 @@
-To scan PHP files and recover Groups+Pages, run
+To scan PHP files and recover Groups+Pages,
+run (need the ADMIN_DATABASE privilege):
 
-update_translation_pages.php
-
-
-
-
-To update the database with new english texts, run
-
-generate_translation_texts.php
+> update_translation_pages.php
+then, after checking:
+> update_translation_pages.php?do_it=1
 
 
 
 
-To create all translation files used by the server, run
+To scan PHP files and recover the "T_()" strings
+then update the database with new english texts,
+run (need the ADMIN_TRANSLATORS privilege):
 
-make_all_translationfiles.php
+> generate_translation_texts.php
+
+
+
+
+To create all translation files used by the server,
+run (need no privilege):
+
+> make_all_translationfiles.php
 
 
 
