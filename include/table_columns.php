@@ -137,7 +137,9 @@ class Table
          else
          {
             $this->Static_Columns = false;
-            $this->Column_set = $player_row[ $this->Player_Column ];
+            $this->Column_set = @$player_row[ $this->Player_Column ];
+            if( !$this->Column_set )
+               $this->Column_set = ALL_COLUMNS;
          }
 
          $this->Id = $_tableid;
@@ -218,7 +220,7 @@ class Table
 
          /* Start of the table */
 
-         $string = "<table id='{$this->Id}_table' class='table'>\n";
+         $string = "<table id='{$this->Id}_table' class=table>\n";
          $string .= $next_prev_row;
          $string .= $head_row;
 
@@ -342,20 +344,19 @@ class Table
 
    function warning_cell_attb( $title='')
       {
-         $str= ' class="warning"';
+         $str= ' class=warning';
          if ($title) $str.= ' title="' . $title . '"';
          return $str;
       }
 
    function make_tablerow( $tablerow, $rclass='row1' )
       {
-
          if( isset($tablerow['class']) )
          {
             $rclass = $tablerow['class'];
          }
 
-         $string = " <tr class='$rclass'";
+         $string = " <tr class=$rclass";
          if( ALLOW_JSCRIPT )
          { //onClick onmousedown ondblclick
             $string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
@@ -582,7 +583,11 @@ class Table
                $this->Column_set = 0;
             }
 
-            if( !empty($this->Player_Column) )
+            if( !empty($this->Player_Column)
+               && isset($player_row)
+               && isset($player_row["ID"])
+               && $player_row["ID"]>0
+               )
             {
                $query = "UPDATE Players" .
                   " SET " . $this->Player_Column . "=" . $this->Column_set .

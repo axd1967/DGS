@@ -1084,18 +1084,16 @@ $html_safe_preg = array(
   => ALLOWED_LT."/pre".ALLOWED_GT,
 */
 
-//<code>...</code> =>translated to <pre class="code">...</pre>
+//<code>...</code> =>translated to <pre class=code>...</pre>
 // see also parse_tags_safe() for the suppression of inner html codes
  "%".ALLOWED_LT."code([^`\n\t]*)".ALLOWED_GT."%is"
-  => ALLOWED_LT."pre class=".ALLOWED_QUOT."code".ALLOWED_QUOT
-                        ."\\1".ALLOWED_GT,
+  => ALLOWED_LT."pre class=code \\1".ALLOWED_GT,
  "%".ALLOWED_LT."/code *".ALLOWED_GT."%is"
   => ALLOWED_LT."/pre".ALLOWED_GT,
 
-//<quote>...</quote> =>translated to <div class="quote">...</div>
+//<quote>...</quote> =>translated to <div class=quote>...</div>
  "%".ALLOWED_LT."quote([^`\n\t]*)".ALLOWED_GT."%is"
-  => ALLOWED_LT."div class=".ALLOWED_QUOT."quote".ALLOWED_QUOT
-                        ."\\1".ALLOWED_GT,
+  => ALLOWED_LT."div class=quote \\1".ALLOWED_GT,
  "%".ALLOWED_LT."/quote *".ALLOWED_GT."%is"
   => ALLOWED_LT."/div".ALLOWED_GT,
 
