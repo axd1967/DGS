@@ -177,7 +177,7 @@ function find_category_box_text($cat)
    }
    $menu_array = array(
          $othertitle  => $page,
-         T_('User info') => 'userinfo.php',
+         T_('My user info') => 'userinfo.php',
       );
 
    end_page(@$menu_array);
