@@ -23,8 +23,6 @@ $TranslateGroups[] = "Admin";
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
-//Rdvl test for repository
-
 {
   connect2mysql();
 
