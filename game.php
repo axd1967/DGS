@@ -435,6 +435,7 @@ function get_alt_arg( $n1, $n2)
          if( @$_REQUEST['savenotes'] )
             $notes = rtrim(get_request_arg('gamenotes'));
 
+         // note: PRIMARY KEY (gid,player) is needed for:
          mysql_query(
                  "REPLACE INTO GamesNotes (gid,player,Hidden,Notes)"
                . " VALUES ($gid,'$my_color','$noteshide','"
@@ -731,8 +732,9 @@ function draw_game_info(&$game_row)
    {
       echo '<tr id="blacktime">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
-         echo_time_remaining( $game_row['Black_Maintime'], $game_row['Byotype'],
-                       $game_row['Black_Byotime'], $game_row['Black_Byoperiods']) .
+         echo_time_remaining( $game_row['Black_Maintime'], $game_row['Byotype']
+                       ,$game_row['Black_Byotime'], $game_row['Black_Byoperiods']
+                       ,$game_row['Byotime']) .
          "</td>\n</tr>\n";
    }
 
@@ -758,8 +760,9 @@ function draw_game_info(&$game_row)
    {
       echo '<tr id="whitetime">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
-         echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype'],
-                       $game_row['White_Byotime'], $game_row['White_Byoperiods']) .
+         echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype']
+                       ,$game_row['White_Byotime'], $game_row['White_Byoperiods']
+                       ,$game_row['Byotime']) .
          "</td>\n</tr>\n";
    }
 
@@ -775,8 +778,8 @@ function draw_game_info(&$game_row)
 
    echo '<tr id="gametime">' . "\n";
    echo "<td colspan=\"" . $cols . "\">" . T_('Time limit') . ': ' .
-      echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
-                   $game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
+      echo_time_limit( $game_row['Maintime'], $game_row['Byotype']
+                  ,$game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
 
    echo "</tr>\n";
    echo "</table>\n";

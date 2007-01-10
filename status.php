@@ -210,7 +210,7 @@ require_once( "include/message_functions.php" );
 
             $grow_strings[10] .=
                echo_time_remaining( $my_Maintime, $Byotype, $my_Byotime,
-                                   $my_Byoperiods, false, true, true);
+                           $my_Byoperiods, $Byotime, false, true, true);
             $grow_strings[10] .= "</td>";
          }
 
