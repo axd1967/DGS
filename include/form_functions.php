@@ -124,11 +124,16 @@ class Form
    /*! \brief Echo the <from ...> element immediately. */
    var $echo_form_start_now;
 
+   /*! \brief If set, the following input fields will have the 'disabled' attribut. */
+   var $disabled;
+
+   /*! \brief This handle the tabindex of input fields. Purely incremental. */
+   var $tabindex;
+
    /*! \brief Construction variables. */
    var $column_started;
    var $nr_columns;
    var $max_nr_columns;
-   var $tabindex;
    var $safe_text;
 
    /*! \brief Constructor. Initializes various variables. */
@@ -202,7 +207,13 @@ class Form
                                      'StartTD' => false,
                                      'EndTD'   => false,
                                      'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
+                                     'Align'   => '' ),
+            'ENABLE'       => array( 'NumArgs' => 1,
+                                     'NewTD'   => false,
+                                     'StartTD' => false,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => '' ),
             'TEXTAREA'     => array( 'NumArgs' => 4,
                                      'NewTD'   => false,
                                      'StartTD' => true,
@@ -359,7 +370,7 @@ class Form
          if( !$this->echo_form_start_now )
             $formstr .= $this->print_start( $this->name, $this->action, $this->method );
 
-         $formstr .= "  <TABLE border=0>\n"; //form table
+         $formstr .= "  <TABLE class=form_table>\n"; //form table
 
          ksort($this->rows);
 
@@ -402,7 +413,7 @@ class Form
 
                      $current_arg += $element_type[ 'NumArgs' ];
 
-                     if( $element_name == 'HIDDEN' )
+                     if( $element_name == 'HIDDEN' || $element_name == 'ENABLE' )
                      {
                         $this->$func_name( $result, $element_args );
                      }
@@ -545,6 +556,15 @@ class Form
       }
 
    /*!
+    * \brief Function for enabling/disabling fields in the standard form
+    * \internal
+    */
+   function create_string_func_enable( &$result, $args )
+   {
+      $this->enable_input( $args[0] );
+   }
+
+   /*!
     * \brief Function for making textarea string in the standard form
     * \internal
     */
@@ -624,6 +644,7 @@ class Form
     */
    function create_string_func_tab( &$result, $args )
       {
+         //equal: $result .= "<td></td>";
       }
 
    /*!
@@ -672,7 +693,7 @@ class Form
          $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
          return "\n<FORM name=\"$name\" action=\"$action_page\" method=\"" .
-            $pg_arr[$method] . "\">\n";
+            $pg_arr[$method] . "\" id=\"{$name}_form\">\n";
       }
 
    /*!
@@ -733,8 +754,7 @@ class Form
          if( $this->safe_text )
             $initial_value = textarea_safe($initial_value);
          return "<INPUT type=\"text\" name=\"$name\" value=\"$initial_value\"" .
-            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-            " size=\"$size\" maxlength=\"$maxlength\">";
+            $this->get_input_attbs() . " size=\"$size\" maxlength=\"$maxlength\">";
       }
 
    /*!
@@ -751,8 +771,7 @@ class Form
    function print_insert_password_input( $name, $size, $maxlength )
       {
          return "<INPUT type=\"password\" name=\"$name\"" .
-            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-            " size=\"$size\" maxlength=\"$maxlength\">";
+            $this->get_input_attbs() . " size=\"$size\" maxlength=\"$maxlength\">";
       }
 
    /*!
@@ -781,8 +800,7 @@ class Form
          if( $this->safe_text )
             $initial_text = textarea_safe($initial_text);
          return "<TEXTAREA name=\"$name\" cols=\"$columns\"" .
-            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-            " rows=\"$rows\">$initial_text</TEXTAREA>";
+            $this->get_input_attbs() . " rows=\"$rows\">$initial_text</TEXTAREA>";
 
       }
 
@@ -807,9 +825,7 @@ class Form
          $result = "        <SELECT name=\"$name\" size=\"$size\" ";
          if( $multiple )
             $result .= "multiple";
-         $result .= 
-            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-            ">\n";
+         $result .= $this->get_input_attbs() . ">\n";
 
          foreach( $value_array as $value => $info )
             {
@@ -852,9 +868,7 @@ class Form
                if($value == $selected)
                   $result .= " checked";
 
-               $result .= 
-            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-                  "> $info\n";
+               $result .= $this->get_input_attbs() . "> $info\n";
             }
 
          return $result;
@@ -875,9 +889,7 @@ class Form
          if($selected)
             $result .= " checked";
 
-         $result .= 
-            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-            "> $description";
+         $result .= $this->get_input_attbs() . "> $description";
 
          return $result;
       }
@@ -890,11 +902,10 @@ class Form
     * \param $text The text on the submit button.
     */
    function print_insert_submit_button( $name, $text )
-      {
-         return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
-            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-         ">";
-      }
+   {
+      return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
+         $this->get_input_attbs() . ">";
+   }
 
    /*!
     * \brief This will insert a text input box in a standard form.
@@ -905,36 +916,54 @@ class Form
     * \param $attbs Additionnal attributs.
     */
    function print_insert_submit_buttonx( $name, $text, $attbs )
+   {
+      $str = '';
+      if( is_array($attbs) )
       {
-         $str = '';
-         if( is_array($attbs) )
+         if( isset($attbs['title']) )
          {
-            if( isset($attbs['title']) )
-            {
-               $title = trim($attbs['title']);
-               unset($attbs['title']);
-            }
-            else
-               $title = '';
-            if( isset($attbs['accesskey']) )
-            {
-               $xkey = trim($attbs['accesskey']);
-               unset($attbs['accesskey']);
-               if( $xkey )
-               {
-                  $xkey = substr($xkey,0,1);
-                  $title.= " [&amp;$xkey]";
-                  $str.= ' accesskey='.attb_quote($xkey);
-               }
-            }
-            if( $title )
-               $str.= ' title='.attb_quote($title);
+            $title = trim($attbs['title']);
+            unset($attbs['title']);
          }
-         $str.= attb_build($attbs);
-         return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
-            ($this->tabindex ? " tabindex=\"".($this->tabindex++)."\"" : "") .
-         "$str>";
+         else
+            $title = '';
+         if( isset($attbs['accesskey']) )
+         {
+            $xkey = trim($attbs['accesskey']);
+            unset($attbs['accesskey']);
+            if( $xkey )
+            {
+               $xkey = substr($xkey,0,1);
+               $title.= " [&amp;$xkey]";
+               $str.= ' accesskey='.attb_quote($xkey);
+            }
+         }
+         if( $title )
+            $str.= ' title='.attb_quote($title);
       }
+      $str.= attb_build($attbs);
+      return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
+         $this->get_input_attbs() . $str . '>';
+   }
+
+   /*!
+    * \brief This will add or not the 'disabled' attribut
+    *        to all the following input fields.
+    *
+    * \param $on if false, 'disabled' will be added.
+    */
+   function enable_input( $on)
+   {
+      $this->disabled = ($on == false);
+   }
+
+   /*! \brief Get the global attributs string of input fields. */
+   function get_input_attbs()
+   {
+      return ($this->disabled ? ' disabled'
+            : ($this->tabindex ? ' tabindex="'.($this->tabindex++).'"'
+             : ''));
+   }
 
    /* ******************************************************************** */
 
@@ -958,6 +987,15 @@ class Form
    function add_hidden( $key, $val)
    {
       $this->hiddens[$key] = $val;
+   }
+
+   function get_hiddens( &$hiddens)
+   {
+      $hiddens = array_merge( (array)$hiddens, $this->hiddens); 
+      foreach ($this->attached as $attach)
+      {
+         $attach->get_hiddens( $hiddens);
+      }
    }
 
    function echo_hiddens()
