@@ -239,12 +239,15 @@ class Table
 
          /* End of the table */
 
-         $tmp = $this->make_add_column_form();
-         if( !$tmp )
-           $tmp = '&nbsp;';
-         $string .= " <tr><td colspan={$this->Shown_Columns} align=right>"
-              . "$tmp<a name=\"{$this->Prefix}tblac\"></a>"
-              . "</td></tr>\n";
+         if( !$this->Static_Columns )
+         {
+            $tmp = $this->make_add_column_form();
+            if( !$tmp )
+              $tmp = '&nbsp;';
+            $string .= " <tr><td colspan={$this->Shown_Columns} align=right>"
+                 . "$tmp<a name=\"{$this->Prefix}tblac\"></a>"
+                 . "</td></tr>\n";
+         }
 
          $string .= "</table>\n";
          return $string;

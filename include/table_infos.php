@@ -44,7 +44,15 @@ class Table_info
    /*! \brief Array of rows to be diplayed.
     * Each row should consist of an array like this:
     * array( $column_nr1 => assoc( header, info, rattbs, hattbs, iattbs),
-    *        $column_nr2 => assoc( header, info, rattbs, hattbs, iattbs));
+    *        $column_nr2 => assoc( rawheader, rawinfo, rattbs, hattbs, iattbs));
+    * with (all optional):
+    *    header    = the "HTML safe" left column text.
+    *    info      = the "HTML safe" right column text.
+    *    rawheader = the unsafe left column text (will be healed).
+    *    rawinfo   = the unsafe right column text (will be healed).
+    *    hattbs    = the attributs of left cellule.
+    *    iattbs    = the attributs of right cellule.
+    *    rattbs    = the attributs of the row.
     */
    var $Tablerows;
 
@@ -127,15 +135,29 @@ class Table_info
          $rattbs = attb_build($tablerow['hattbs']);
       else
          $rattbs = ' class=header';
-      $string.= "<td$rattbs>" . @$tablerow['header'] . '</td>';
+
+      $string.= "<td$rattbs>";
+
+      if( isset($tablerow['rawheader']) )
+         $rattbs = make_html_safe($tablerow['rawheader'],INFO_HTML);
+      else
+         $rattbs = @$tablerow['header'];
+
+      $string.= $rattbs.'</td>';
 
       if( isset($tablerow['iattbs']) )
          $rattbs = attb_build($tablerow['iattbs']);
       else
          $rattbs = ' class=info';
-      $string.= "<td$rattbs>" . @$tablerow['info'] . '</td>';
 
-      $string .= "\n </tr>\n";
+      $string.= "<td$rattbs>";
+
+      if( isset($tablerow['rawinfo']) )
+         $rattbs = make_html_safe($tablerow['rawinfo'],INFO_HTML);
+      else
+         $rattbs = @$tablerow['info'];
+
+      $string.= $rattbs."</td>\n </tr>\n";
 
       return $string;
    }

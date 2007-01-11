@@ -50,7 +50,7 @@ function find_category_box_text($cat)
    $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"]
                . " order by SortOrder, ID")
       or error('mysql_query_failed', 'edit_bio.find_bios');
-
+   $row_cnt = @mysql_num_rows($result);
 
    $categories = array( '' => T_('Other:'),
                         'Country' => T_('Country'),
@@ -100,7 +100,7 @@ function find_category_box_text($cat)
       }
       $moveurl.= '?';
 
-      while( $row = mysql_fetch_array( $result ) )
+      while( $row = mysql_fetch_assoc( $result ) )
       {
          $cat = find_category_box_text($row["Category"]);
 
@@ -170,15 +170,17 @@ function find_category_box_text($cat)
    echo "</CENTER><BR>\n";
 
 
-   if ( $editorder ) {
-      $page = $page;
-   } else {
-      $page = make_url($page, array( 'editorder' => '1') );
+   $menu_array[T_('Show/edit userinfo')] = 'userinfo.php';
+
+   if ( !$editorder )
+   {
+      if ( $row_cnt > 1 )
+         $page = make_url($page, array( 'editorder' => '1') );
+      else
+         $page = '';
    }
-   $menu_array = array(
-         $othertitle  => $page,
-         T_('My user info') => 'userinfo.php',
-      );
+   if ( $page )
+      $menu_array[$othertitle] = $page;
 
    end_page(@$menu_array);
 }

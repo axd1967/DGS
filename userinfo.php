@@ -55,7 +55,7 @@ require_once( "include/countries.php" );
    if( mysql_affected_rows() != 1 )
       error("unknown_user");
 
-   $row = mysql_fetch_array( $result );
+   $row = mysql_fetch_assoc( $result );
    $uid = $row['ID'];
 
    $bio_result = mysql_query("SELECT * FROM Bio WHERE uid=" . $uid
@@ -110,7 +110,7 @@ require_once( "include/countries.php" );
             ) );
    $uitable->add_row( array(
             'header' => T_('Open for matches'),
-            'info' => make_html_safe($row['Open'],INFO_HTML),
+            'rawinfo' => $row['Open'],
             ) );
    $uitable->add_row( array(
             'header' => T_('Activity'),
@@ -122,7 +122,7 @@ require_once( "include/countries.php" );
             ) );
    $uitable->add_row( array(
             'header' => T_('Rank info'),
-            'info' => make_html_safe(@$row['Rank'],INFO_HTML),
+            'rawinfo' => @$row['Rank'],
             ) );
    $uitable->add_row( array(
             'header' => T_('Registration date'),
@@ -143,9 +143,9 @@ require_once( "include/countries.php" );
    if( $row['OnVacation'] > 0 )
    {
       $uitable->add_row( array(
-               'hattbs' => 'class=header_red',
+               'hattbs' => 'class=onvacation',
                'header' => T_('On vacation'),
-               'info' => echo_day(floor($row['OnVacation'])) . ' ' .T_('left#2'),
+               'info' => echo_day(floor($row['OnVacation'])).' '.T_('left#2'),
                ) );
    }
    $uitable->add_row( array(
@@ -187,8 +187,8 @@ require_once( "include/countries.php" );
       while( $row = mysql_fetch_assoc( $bio_result ) )
       {
          $uitable->add_row( array(
-                  'header' => make_html_safe(T_($row["Category"])),
-                  'info' => make_html_safe($row["Text"],true),
+                  'rawheader' => T_($row["Category"]),
+                  'info' => make_html_safe($row["Text"],true), //no 'rawinfo'
                   ) );
       }
 

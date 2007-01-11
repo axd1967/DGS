@@ -277,7 +277,7 @@ table.infos td.header, table.infos th.header {
    font-weight: bold;
 }
 
-table.infos td.header_red {
+table.infos td.onvacation, table.infos td.onvacation a {
    color: red;
    font-weight: bold;
 }

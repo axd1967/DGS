@@ -22,7 +22,7 @@ $TranslateGroups[] = "Common";
 
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
-require_once( "include/form_functions.php" ); //for test
+require_once( 'include/table_infos.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/message_functions.php" );
 
@@ -38,38 +38,51 @@ require_once( "include/message_functions.php" );
    $my_id = $player_row["ID"];
 
    start_page(T_('Status'), true, $logged_in, $player_row, button_style($player_row['Button']) );
+   echo "<h3 class=header>" . T_('Status') . "</h3>\n";
 
    echo "<center>";
 
 
-   echo "<h3><font color=$h3_color>" . T_('Status') . '</font></h3>';
+   // show user infos
 
-   echo '
-    <table id="user_status" class=infos border=1>
-       <tr><td><b>' . T_("Name") . '</b></td>
-           <td>' . make_html_safe($player_row["Name"]) . '</td></tr>
-       <tr><td><b>' . T_("Userid") . '</b></td>
-           <td>' . $player_row["Handle"] . '</td></tr>
-       <tr><td><b>' . T_("Open for matches?") . '</b></td>
-           <td>' . make_html_safe($player_row["Open"],INFO_HTML) . '</td></tr>
-       <tr><td><b>' . T_("Rating") . '</b></td>
-           <td>' . echo_rating($player_row["Rating2"],true,$player_row['ID']) .  '</td></tr>
-       <tr><td><b>' . T_('Rank info') . '</b></td>
-           <td>' . make_html_safe($player_row["Rank"],INFO_HTML) . '</td></tr>
-       <tr><td><b><a href="edit_vacation.php"><font color=black>' .
-      T_('Vacation days left') . '</font></a></b></td>
-           <td>' . echo_day(floor($player_row["VacationDays"]))
-           . '</td></tr>';
+   $uitable= new Table_info('user');
 
-   if( $player_row['OnVacation'] > 0 )
-   {
-      echo '<tr><td><b><a href="edit_vacation.php"><font color=red>' . T_('On vacation') .
-         '</font></a></b></td><td>' . 
-         echo_day(floor($player_row['OnVacation'])) . ' ' .T_('left') . '</td></tr>';
-   }
-   echo '
-    </table>
-    <p></p>';
+      $uitable->add_row( array(
+            'header' => T_('Name'),
+            'info' => make_html_safe($player_row["Name"]),
+            ) );
+      $uitable->add_row( array(
+            'header' => T_('Userid'),
+            'info' => $player_row["Handle"],
+            ) );
+      $uitable->add_row( array(
+            'header' => T_('Open for matches?'),
+            'rawinfo' => $player_row["Open"],
+            ) );
+      $uitable->add_row( array(
+            'header' => T_('Rating'),
+            'info' => echo_rating($player_row["Rating2"],true,$player_row['ID']),
+            ) );
+      $uitable->add_row( array(
+            'header' => T_('Rank info'),
+            'rawinfo' => $player_row["Rank"],
+            ) );
+      $uitable->add_row( array(
+            'header' => anchor( "edit_vacation.php", T_('Vacation days left')),
+            'info' => echo_day(floor($player_row["VacationDays"])),
+            ) );
+
+      if( $player_row['OnVacation'] > 0 )
+      {
+         $uitable->add_row( array(
+               'hattbs' => 'class=onvacation',
+               'header' => anchor( "edit_vacation.php", T_('On vacation')),
+               'info' => echo_day(floor($player_row['OnVacation'])).' '.T_('left#2'),
+               ) );
+      }
+
+   $uitable->echo_table(); unset($uitable);
+
 
 
    // show messages
@@ -86,7 +99,7 @@ require_once( "include/message_functions.php" );
    {
       $my_folders = get_folders($my_id);
 
-      echo "<HR><h3><font color=$h3_color>" . T_('New messages') . ":</font></h3>\n";
+      echo "<br><hr id=sect_message><h3 class=header>" . T_('New messages') . ":</h3>\n";
 
       message_list_table( $mtable, $result, 20
              , FOLDER_NONE /*FOLDER_ALL_RECEIVED*/, $my_folders
@@ -95,7 +108,6 @@ require_once( "include/message_functions.php" );
 
       $mtable->echo_table();
       unset($mtable);
-      echo "<p></p>\n";
    }
 
 
@@ -124,8 +136,8 @@ require_once( "include/message_functions.php" );
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'status.find_games');
 
-   echo "<hr><h3><font color=$h3_color>" .
-      T_("Your turn to move in the following games:") . "</font></h3>\n";
+   echo "<br><hr id=sect_game><h3 class=header>" .
+         T_("Your turn to move in the following games:") . "</h3>\n";
 
    if( @mysql_num_rows($result) == 0 )
    {
@@ -220,9 +232,12 @@ require_once( "include/message_functions.php" );
       $gtable->echo_table();
    }
 
+
+   // show pending posts
+
    if( $player_row['Adminlevel'] & ADMIN_FORUM )
    {
-      echo "<hr><br>";
+      echo "<hr id=sect_pending><br>";
       chdir('forum');
       require_once('forum_functions.php');
       display_posts_pending_approval();
