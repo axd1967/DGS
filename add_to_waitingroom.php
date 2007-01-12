@@ -158,7 +158,7 @@ require_once( "include/rating.php" );
       "MustBeRated='$MustBeRated', " .
       "Ratingmin=$rating1, " .
       "Ratingmax=$rating2, " .
-      "Comment=\"" . addslashes(trim(get_request_arg('comment'))) . "\"";
+      "Comment=\"" . mysql_addslashes(trim(get_request_arg('comment'))) . "\"";
 
    mysql_query( $query )
      or error('mysql_query_failed','add_to_waitingroom.insert');

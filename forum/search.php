@@ -79,13 +79,13 @@ require_once( "forum_functions.php" );
          "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
          "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
          "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
-         "MATCH (Subject,Text) AGAINST ('".mysql_escape_string($search_terms)."'" .
+         "MATCH (Subject,Text) AGAINST ('".mysql_addslashes($search_terms)."'" .
          ($bool ? ' IN BOOLEAN MODE' : '') . ") as Score, " .
          "Players.ID AS uid, Players.Name, Players.Handle, " .
          "Forums.Name as ForumName " .
          "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID " .
          "LEFT JOIN Forums ON Forums.ID = Posts.Forum_ID " .
-         "WHERE MATCH (Subject,Text) AGAINST ('".mysql_escape_string($search_terms)."'" .
+         "WHERE MATCH (Subject,Text) AGAINST ('".mysql_addslashes($search_terms)."'" .
          ($bool ? ' IN BOOLEAN MODE' : '') . ") AND Approved='Y' " .
          "AND PosIndex IS NOT NULL " .
          ($bool ? 'ORDER BY TIME DESC ' : '') .

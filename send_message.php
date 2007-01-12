@@ -96,7 +96,7 @@ disable_cache();
    $opponent_row = mysql_single_fetch( 'send_message.find_receiver',
                           "SELECT ID, SendEmail, Notify, ClockUsed, OnVacation, " .
                           "Rating2, RatingStatus " .
-                          "FROM Players WHERE Handle='".addslashes($tohdl)."'" );
+                          "FROM Players WHERE Handle='".mysql_addslashes($tohdl)."'" );
 
    if( !$opponent_row )
       error('receiver_not_found');
@@ -192,9 +192,10 @@ disable_cache();
       else
          create_game($opponent_row, $player_row, $game_row, $gid);
 
-      mysql_query( "UPDATE Players SET Running=Running+" . ( $handitype == INVITE_HANDI_DOUBLE ? 2 : 1 ) .
+      mysql_query( "UPDATE Players SET Running=Running+" .
+                   ( $handitype == INVITE_HANDI_DOUBLE ? 2 : 1 ) .
                    ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
-                   " WHERE ID=$my_id OR ID=$opponent_ID LIMIT 2" )
+                   " WHERE (ID=$my_id OR ID=$opponent_ID) LIMIT 2" )
          or error('mysql_query_failed', 'send_message.update_player');
 
       $subject = "Game invitation accepted";
@@ -202,9 +203,11 @@ disable_cache();
    else if( $declinetype )
    {
       $result = mysql_query( "DELETE FROM Games WHERE ID=$gid AND Status='INVITED'" .
-                             " AND ( Black_ID=$my_id OR White_ID=$my_id ) " .
-                             " AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
-                             "LIMIT 1")
+                             //" AND ( Black_ID=$my_id OR White_ID=$my_id ) " .
+                             //" AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
+                             " AND (White_ID=$my_id OR Black_ID=$my_id)" .
+                             " AND $opponent_ID=White_ID+Black_ID-$my_id" .
+                             " LIMIT 1")
          or error('mysql_query_failed', 'send_message.decline');
 
       if( mysql_affected_rows() != 1)
@@ -229,10 +232,10 @@ disable_cache();
    if( $reply > 0 )
       $query .= "ReplyTo=$reply, ";
 
-   $message = addslashes(trim($message));
+   $message = mysql_addslashes(trim($message));
    //not if invitation/dispute/decline:
    //if( !$message ) error('empty_message');
-   $subject = addslashes(trim($subject));
+   $subject = mysql_addslashes(trim($subject));
    $query .= "Subject=\"$subject\", Text=\"$message\"";
 
    $result = mysql_query( $query )
@@ -292,7 +295,7 @@ disable_cache();
        and $opponent_row["Notify"] == 'NONE')
    {
       $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
-                             "WHERE Handle='".addslashes($tohdl)."' LIMIT 1" )
+                             "WHERE Handle='".mysql_addslashes($tohdl)."' LIMIT 1" )
          or error('mysql_query_failed', 'send_message.notify_receiver');
    }
 

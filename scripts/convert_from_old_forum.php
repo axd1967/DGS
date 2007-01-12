@@ -1,5 +1,6 @@
 <?php
-require_once("../forum/forum_functions.php");
+chdir("../forum/");
+require_once("forum_functions.php");
 {
    connect2mysql();
 
@@ -85,8 +86,8 @@ require_once("../forum/forum_functions.php");
             "Thread_ID=$Thread_ID, " .
             "Time=\"$Time\", " .
             "Lastchanged=\"$Time\", " .
-            "Subject=\"" . mysql_real_escape_string($Subject) . "\", " .
-            "Text=\"" . mysql_real_escape_string($Text) . "\", " .
+            "Subject=\"" . mysql_addslashes($Subject) . "\", " .
+            "Text=\"" . mysql_addslashes($Text) . "\", " .
             "User_ID=$uid, " .
             "Parent_ID=$parent, " .
             "AnswerNr=" . ($answer_nr+1) . ", " .

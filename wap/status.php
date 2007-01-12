@@ -284,7 +284,7 @@ else
    if( $loggin_mode )
    {
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                          "FROM Players WHERE Handle='".mysql_escape_string($uhandle)."'" );
+                     "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {

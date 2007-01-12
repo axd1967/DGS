@@ -57,13 +57,28 @@ function disable_cache($stamp=NULL, $expire=NULL)
 
 
 
+if( function_exists('mysql_real_escape_string') ) //PHP >= 4.3.0
+{
+   function mysql_addslashes($str) { return mysql_real_escape_string($str); }
+}
+else if( function_exists('mysql_escape_string') ) //PHP >= 4.0.3
+{
+   function mysql_addslashes($str) { return mysql_escape_string($str); }
+}
+else
+{
+   function mysql_addslashes($str) { return addslashes($str); }
+}
+
 
 function admin_log( $uid, $handle, $err)
 {
    $uid = (int)$uid;
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   $query = "INSERT INTO Adminlog SET uid='$uid', Handle='".mysql_escape_string($handle)."'"
-      .", Message='".mysql_escape_string($err)."', IP='".mysql_escape_string($ip)."'" ;
+   $query = "INSERT INTO Adminlog SET uid='$uid'"
+                  .", Handle='".mysql_addslashes($handle)."'"
+                  .", Message='".mysql_addslashes($err)."'"
+                  .", IP='".mysql_addslashes($ip)."'" ;
 
    return ( mysql_query( $query )
             or error('mysql_query_failed','connect2mysql.admin_log') );
@@ -72,19 +87,23 @@ function admin_log( $uid, $handle, $err)
 
 function mysql_single_fetch( $debugmsg, $query, $type='assoc')
 {
-   $row = false;
-   $result = mysql_query( $query );
+   $result = mysql_query($query);
    if( $result == false )
    {
       if( $debugmsg !== false )
          error('mysql_query_failed', ((string)$debugmsg).'.single_fetch');
       return false;
    }
-   $type = 'mysql_fetch_'.$type;
-   if( (mysql_num_rows($result) != 1 )
-         or !is_array( $row=$type( $result) ) )
+   if( mysql_num_rows($result) != 1 )
+   {
+      mysql_free_result($result);
       return false;
+   }
+   $type = 'mysql_fetch_'.$type;
+   $row = $type($result);
    mysql_free_result($result);
+   if( !is_array($row) )
+      return false;
    return $row;
 }
 
@@ -116,24 +135,27 @@ function connect2mysql($no_errors=false)
 function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
    $given_passwd_encrypted =
-     mysql_fetch_row( mysql_query( "SELECT PASSWORD ('".addslashes($given_passwd)."')" ) );
+      mysql_single_fetch( 'check_password',
+               "SELECT PASSWORD ('".mysql_addslashes($given_passwd)."')"
+               ,'row')
+         or error('mysql_query_failed','check_password.get_password');
+
    $given_passwd_encrypted = $given_passwd_encrypted[0];
 
    if( $passwd != $given_passwd_encrypted )
    {
       // Check if there is a new password
-
       if( empty($new_passwd) or $new_passwd != $given_passwd_encrypted )
          return false;
    }
 
-   if( !empty( $new_passwd ) )
+   if( !empty($new_passwd) )
    {
       mysql_query( 'UPDATE Players ' .
                    "SET Password='" . $given_passwd_encrypted . "', " .
                    'Newpassword=NULL ' .
-                   "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" )
-         or error('mysql_query_failed','std_functions.check_password.set_password');
+                   "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" )
+         or error('mysql_query_failed','check_password.set_password');
    }
 
    return true;

@@ -66,7 +66,7 @@ else
                   "FROM Players WHERE " .
                   ( $idmode=='uid'
                         ? "ID=".$uid
-                        : "Handle='".addslashes($uhandle)."'"
+                        : "Handle='".mysql_addslashes($uhandle)."'"
                   ) );
 
    if( !$player_row )

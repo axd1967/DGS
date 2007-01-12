@@ -450,7 +450,7 @@ require_once( "include/form_functions.php" );
 
       $row = mysql_single_fetch( 'message.preview',
             'SELECT ID, Name FROM Players ' .
-            'WHERE Handle="' . mysql_escape_string($default_uhandle) . '"' );
+            'WHERE Handle="' . mysql_addslashes($default_uhandle) . '"' );
       if( !$row )
          $Name = '<font color="red">' . T_('Receiver not found') . '</font>';
       else

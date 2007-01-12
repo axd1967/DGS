@@ -84,7 +84,7 @@ require_once( "include/table_columns.php" );
      if( $Admin['new'] != 0 and !empty($newadmin))
      {
         $result = mysql_query("SELECT ID,Adminlevel+0 AS admin_level FROM Players " .
-                              "WHERE Handle='".addslashes($newadmin)."'")
+                              "WHERE Handle='".mysql_addslashes($newadmin)."'")
            or error('mysql_query_failed','admin_admins.find_new_admin');
 
         if( @mysql_num_rows($result) != 1 )

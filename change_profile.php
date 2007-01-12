@@ -86,15 +86,15 @@ require_once( "include/countries.php" );
 
 
    $query = "UPDATE Players SET " .
-      "Name='" . addslashes($name) . "', " .
-      "Email='" . addslashes($email) . "', " .
-      "Rank='" . addslashes(trim(get_request_arg('rank'))) . "', " .
-      "Open='" . addslashes(trim(get_request_arg('open'))) . "', " .
+      "Name='" . mysql_addslashes($name) . "', " .
+      "Email='" . mysql_addslashes($email) . "', " .
+      "Rank='" . mysql_addslashes(trim(get_request_arg('rank'))) . "', " .
+      "Open='" . mysql_addslashes(trim(get_request_arg('open'))) . "', " .
       "SendEmail='$sendemail', ";
 
    $country = trim(get_request_arg('country')) ;
    if( isset($COUNTRIES[$country]) )
-      $query .= "Country='" . addslashes($country) . "', ";
+      $query .= "Country='" . mysql_addslashes($country) . "', ";
    else if( empty($country) )
       $query .= "Country=NULL, ";
 
@@ -136,7 +136,7 @@ require_once( "include/countries.php" );
          "NotesLargeWidth=" . (int)@$_GET['noteslargewidth'] . ", " .
          "NotesLargeMode='$noteslargemode', " .
          "NotesCutoff=" . (int)@$_GET['notescutoff'] . ", " .
-         "SkinName='" . addslashes($skinname) . "', ";
+         "SkinName='" . mysql_addslashes($skinname) . "', ";
 
       set_cookie_prefs($player_row['ID'], true);
    }

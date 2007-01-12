@@ -161,7 +161,7 @@ function retry_admin( $msg)
          retry_admin( T_("Sorry, you must specify a user."));
       $row = mysql_single_fetch( 'admin_do_translators.user.find',
                     "SELECT Translator FROM Players"
-                    ." WHERE Handle='".addslashes($transluser)."'" );
+                    ." WHERE Handle='".mysql_addslashes($transluser)."'" );
       if( !$row )
          retry_admin( T_("Sorry, I couldn't find this user."));
       if( !empty($row['Translator']) )
@@ -211,7 +211,7 @@ function retry_admin( $msg)
          retry_admin( $msg);
 
       mysql_query( "UPDATE Players SET Translator='$new_langs'"
-                  ." WHERE Handle='".addslashes($transluser)."'" )
+                  ." WHERE Handle='".mysql_addslashes($transluser)."'" )
          or error('mysql_query_failed','admin_do_translators.user.update');
 
       if( mysql_affected_rows() != 1 )
@@ -220,7 +220,7 @@ function retry_admin( $msg)
       // Check result (
       $tmp = mysql_single_fetch( 'admin_do_translators.user.translator',
                    "SELECT Translator FROM Players"
-                   ." WHERE Handle='".addslashes($transluser)."'" );
+                   ." WHERE Handle='".mysql_addslashes($transluser)."'" );
       if( !$tmp )
          $update_it.= '.1';
       else if( !isset($tmp['Translator']) )
@@ -232,7 +232,7 @@ function retry_admin( $msg)
 
       // Something went wrong. Restore to old set then error
       mysql_query( "UPDATE Players SET Translator='$old_langs'"
-                  ." WHERE Handle='".addslashes($transluser)."'" )
+                  ." WHERE Handle='".mysql_addslashes($transluser)."'" )
          or error('mysql_query_failed','admin_do_translators.user.revert');
       error('internal_error', $update_it);
    }

@@ -46,7 +46,7 @@ else
    $uhandle= safe_getcookie('handle');
    $result = @mysql_query( "SELECT ID, Timezone, " .
                            "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
-                           "FROM Players WHERE Handle='".addslashes($uhandle)."'" )
+                           "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" )
       or error('mysql_query_failed', 'quick_play.find_player');
 
    if( @mysql_num_rows($result) != 1 )

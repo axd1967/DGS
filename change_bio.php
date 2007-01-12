@@ -25,8 +25,6 @@ require_once( "include/std_functions.php" );
 
 
 {
-   disable_cache();
-
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -113,8 +111,8 @@ require_once( "include/std_functions.php" );
             continue;
 
          $query = "UPDATE Bio set uid=" . $player_row["ID"] .
-            ', Text="'.addslashes($EnteredText).'"' .
-            ', Category="'.addslashes($EnteredCategory).'"' .
+            ', Text="'.mysql_addslashes($EnteredText).'"' .
+            ', Category="'.mysql_addslashes($EnteredCategory).'"' .
             ', SortOrder="'.$row['newpos'].'"' .
             " WHERE ID=$ID";
       }
@@ -124,8 +122,8 @@ require_once( "include/std_functions.php" );
             continue;
 
          $query = "UPDATE Bio set uid=" . $player_row["ID"] .
-            //', Text="'.addslashes($row['Text']).'"' .
-            //', Category="'.addslashes($row['Category']).'"' .
+            //', Text="'.mysql_addslashes($row['Text']).'"' .
+            //', Category="'.mysql_addslashes($row['Category']).'"' .
             ', SortOrder="'.$row['newpos'].'"' .
             " WHERE ID=$ID";
       }
@@ -149,8 +147,8 @@ require_once( "include/std_functions.php" );
          continue;
 
       $query = "INSERT INTO Bio set uid=" . $player_row["ID"] .
-            ', Text="'.addslashes($EnteredText).'"' .
-            ', Category="'.addslashes($EnteredCategory).'"' .
+            ', Text="'.mysql_addslashes($EnteredText).'"' .
+            ', Category="'.mysql_addslashes($EnteredCategory).'"' .
             ', SortOrder="'.(++$max_pos).'"';
 
       mysql_query( $query )

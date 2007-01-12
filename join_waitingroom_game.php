@@ -147,7 +147,7 @@ require_once( "include/make_game.php" );
    mysql_query( "UPDATE Players SET Running=Running+" .
                 ( $game_info_row['Handicaptype'] == 'double' ? 2 : 1 ) .
                 ( $game_info_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
-                " WHERE ID=$uid OR ID=" . $player_row['ID'] . " LIMIT 2" )
+                " WHERE (ID=$uid OR ID=" . $player_row['ID'] . ") LIMIT 2" )
       or error('mysql_query_failed', 'join_waitingroom_game.update_players');
 
 // Reduce number of games left in the waiting room
@@ -167,7 +167,7 @@ require_once( "include/make_game.php" );
    // Send message to notify opponent
 
 // This was often truncated by the database field:
-//   $subject = addslashes('<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game");
+//   $subject = mysql_addslashes('<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game");
    $subject = 'Your waiting room game has been joined.';
    $reply = trim(get_request_arg('reply'));
    if ($reply)
@@ -184,7 +184,7 @@ require_once( "include/make_game.php" );
    $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
       "Game_ID=$gid, " .
       "Subject='$subject', " .
-      "Text='".mysql_escape_string($reply)."'";
+      "Text='".mysql_addslashes($reply)."'";
 
    mysql_query( $query )
       or error('mysql_query_failed', 'join_waitingroom_game.message');

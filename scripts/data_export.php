@@ -69,7 +69,7 @@ function safe_value( $val=NULL)
    if( $val === NULL )
       $val = 'NULL';
    else if( !is_numeric($val) )
-      $val = "'".mysql_escape_string($val)."'";
+      $val = "'".mysql_addslashes($val)."'";
    return $val;
 } //safe_value
 

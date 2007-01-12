@@ -46,7 +46,7 @@ if( $quick_mode )
 
    $row = mysql_single_fetch( 'login.find_player',
                   "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                  "FROM Players WHERE Handle='".addslashes($uhandle)."'" );
+                  "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
    if( !$row )
       error("wrong_userid");
 
@@ -65,7 +65,7 @@ if( $quick_mode )
          mysql_query( "UPDATE Players SET " .
                       "Sessioncode='$code', " .
                       "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration) " .
-                      "WHERE Handle='".addslashes($uhandle)."' LIMIT 1" )
+                      "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" )
             or error('mysql_query_failed', 'login.update_player');
       }
 

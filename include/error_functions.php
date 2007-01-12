@@ -144,20 +144,23 @@ if( !function_exists('warning') )
 function err_log( $handle, $err, $debugmsg=NULL)
 {
 
+   $mysqlerror = @mysql_error();
+
+   global $dbcnx;
+   if( !@$dbcnx )
+      connect2mysql( true);
+
    $uri = "error.php?err=" . urlencode($err);
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".mysql_escape_string($handle)."'"
-      .", Message='".mysql_escape_string($err)."', IP='".mysql_escape_string($ip)."'" ;
-
-   $mysqlerror = @mysql_error();
+   $errorlog_query = "INSERT INTO Errorlog SET Handle='".mysql_addslashes($handle)."'"
+      .", Message='".mysql_addslashes($err)."', IP='".mysql_addslashes($ip)."'" ;
 
    if( !empty($mysqlerror) )
    {
       $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
-      $errorlog_query .= ", MysqlError='".mysql_escape_string( $mysqlerror)."'";
+      $errorlog_query .= ", MysqlError='".mysql_addslashes( $mysqlerror)."'";
       $err.= ' / '. $mysqlerror;
    }
-
 
    if( empty($debugmsg) )
    {
@@ -170,13 +173,9 @@ function err_log( $handle, $err, $debugmsg=NULL)
    }
    if( !empty($debugmsg) )
    {
-      $errorlog_query .= ", Debug='" . mysql_escape_string( $debugmsg) . "'";
+      $errorlog_query .= ", Debug='" . mysql_addslashes( $debugmsg) . "'";
       //$err.= ' / '. $debugmsg; //Do not display this info!
    }
-
-   global $dbcnx;
-   if( !@$dbcnx )
-      connect2mysql( true);
 
    @mysql_query( $errorlog_query );
 

@@ -169,7 +169,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
       error('internal_error', "confirm load_from_db $gid");
 
-   $message = addslashes(trim(get_request_arg('message')));
+   $message = mysql_addslashes(trim(get_request_arg('message')));
    $message_query = '';
 
    $game_finished = false;
@@ -498,7 +498,7 @@ This is why:
       if( $action == 'delete' )
       {
          mysql_query("UPDATE Players SET Running=Running-1 " .
-                     "WHERE ID=$Black_ID OR ID=$White_ID LIMIT 2")
+                     "WHERE (ID=$Black_ID OR ID=$White_ID) LIMIT 2")
             or error('mysql_query_failed','confirm.update_players_delete');
 
          $Subject = 'Game deleted';
@@ -540,7 +540,7 @@ This is why:
                . "<br>"
                . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
                . "</center>" ;
-         delete_all_observers($gid, $rated_status!=1, addslashes( $tmp));
+         delete_all_observers($gid, $rated_status!=1, mysql_addslashes( $tmp));
       }
 
       $message_from_server_way = true; //else simulate a message from this player
@@ -555,7 +555,7 @@ This is why:
                . "</center>" ;
       }
 
-         $Text = addslashes( $Text);
+         $Text = mysql_addslashes( $Text);
       if ( $message )
       {
          if( $message_from_server_way )

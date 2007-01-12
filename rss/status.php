@@ -55,6 +55,26 @@ require_once( "include/connect2mysql.php" );
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
 
+/* For a default layout:
+
+Beginning to Style Your RSS Feed
+- http://mondaybynoon.com/2006/08/14/beginning-to-style-your-rss-feed/
+
+Adding a CSS StyleSheet to your RSS Feed
+- http://www.petefreitag.com/item/208.cfm
+
+Some examples:
+- http://mondaybynoon.com/feed
+- http://www.tlc.ac.uk/xml/news-atom.xml
+*/
+
+
+
+/*
+   Special characters and different charset are a worry with xml+rss.
+   We have not yet found the good solution.
+*/
+
 /*
 $xmltrans = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES); //ENT_COMPAT
 foreach ($xmltrans as $key => $value)
@@ -357,7 +377,7 @@ else
       // temp password?
 
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                "FROM Players WHERE Handle='".mysql_escape_string($uhandle)."'" );
+                "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {
@@ -378,7 +398,7 @@ else
       // logged in?
 
       $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                          "FROM Players WHERE Handle='".mysql_escape_string($uhandle)."'" );
+                          "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {

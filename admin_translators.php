@@ -116,7 +116,7 @@ require_once( "include/form_functions.php" );
    {
       $userrow = mysql_single_fetch( 'admin_translators.transluser',
              "SELECT Translator FROM Players"
-            ." WHERE Handle='".addslashes($transluser)."'" );
+            ." WHERE Handle='".mysql_addslashes($transluser)."'" );
 
       if( $userrow )
       {

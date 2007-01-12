@@ -439,7 +439,7 @@ function get_alt_arg( $n1, $n2)
          mysql_query(
                  "REPLACE INTO GamesNotes (gid,player,Hidden,Notes)"
                . " VALUES ($gid,'$my_color','$noteshide','"
-                  . addslashes($notes) . "')")
+                  . mysql_addslashes($notes) . "')")
             or error('mysql_query_failed', 'game.replace_gamenote');
       }
 /*

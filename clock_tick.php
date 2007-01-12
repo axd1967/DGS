@@ -153,7 +153,7 @@ if( !$is_down )
                . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
                . "</center>" ;
 
-         $Text = addslashes( $Text);
+         $Text = mysql_addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'")
                or error('mysql_query_failed',"clock_tick.timeup_message($gid)");
@@ -195,6 +195,7 @@ if( !$is_down )
       }
    }
    mysql_free_result($result);
+   unset($ticks);
 
    $TheErrors->echo_error_list();
 

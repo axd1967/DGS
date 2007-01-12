@@ -31,16 +31,16 @@ function post_message($player_row, $moderated_forum, &$thread)
    $parent = @$_POST['parent']+0;
    $edit = @$_POST['edit']+0;
 
-   $Subject = get_request_arg('Subject');
-   $Text = get_request_arg('Text');
-//   $GoDiagrams = create_godiagrams($Text);
-   $Subject = mysql_escape_string( trim($Subject));
-   $Text = mysql_escape_string( trim($Text));
-
+   $Text = trim(get_request_arg('Text'));
    if( $Text == '' )
       return '';
+   $Subject = trim(get_request_arg('Subject'));
    if( $Subject == '' )
       $Subject = '???';
+//   $GoDiagrams = create_godiagrams($Text);
+   $Subject = mysql_addslashes( $Subject);
+   $Text = mysql_addslashes( $Text);
+
 
    $moderated = ($moderated_forum or $player_row['MayPostOnForum'] == 'M');
 
@@ -53,28 +53,28 @@ function post_message($player_row, $moderated_forum, &$thread)
                "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'] )
          or error('unknown_parent_post', 'forum_post.post_message.edit.find');
 
-      $oldSubject = mysql_escape_string( trim($row['Subject']));
-      $oldText = mysql_escape_string( trim($row['Text']));
+      $oldSubject = mysql_addslashes( trim($row['Subject']));
+      $oldText = mysql_addslashes( trim($row['Text']));
 
       if( $oldSubject != $Subject or $oldText != $Text )
       {
          //Update old record with new text
          mysql_query("UPDATE Posts SET " .
                      "Lastedited=FROM_UNIXTIME($NOW), " .
-                     "Subject=\"$Subject\", " .
-                     "Text=\"$Text\" " .
+                     "Subject='$Subject', " .
+                     "Text='$Text' " .
                      "WHERE ID=$edit LIMIT 1")
             or error('mysql_query_failed','forum_post.post_message.edit.update');
 
          //Insert new record with old text
          mysql_query("INSERT INTO Posts SET " .
-                     'Time="' . $row['Time'] .'", ' .
+                     "Time='" . $row['Time'] ."', " .
                      "Parent_ID=$edit, " .
                      "Forum_ID=" . $row['Forum_ID'] . ", " .
                      "User_ID=" . $player_row['ID'] . ", " .
                      //PosIndex=NULL
-                     "Subject=\"$oldSubject\", " .
-                     "Text=\"$oldText\"" )
+                     "Subject='$oldSubject', " .
+                     "Text='$oldText'" )
             or error('mysql_query_failed','forum_post.post_message.edit.insert');
       }
       return $edit;
@@ -147,7 +147,7 @@ function post_message($player_row, $moderated_forum, &$thread)
          "Approved=" . ($moderated ? "'N'" : "'Y'")  . ", " .
          "PendingApproval=" . ($moderated ? "'Y'" : "'N'")  . ", " .
          "crc32=" . crc32($Text) . ", " .
-         "PosIndex=\"$PosIndex\"";
+         "PosIndex='$PosIndex'";
 
       mysql_query( $query )
          or error('mysql_query_failed','forum_post.insert_new_post');

@@ -1381,7 +1381,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 
    $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
                           "Adminlevel+0 as admin_level " .
-                          "FROM Players WHERE Handle='".addslashes($hdl)."'" )
+                          "FROM Players WHERE Handle='".mysql_addslashes($hdl)."'" )
       or error('mysql_query_failed','std_functions.is_logged_in.find_player');
 
 
@@ -1404,7 +1404,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
    $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 100);
    if( $row['Browser'] !== $browser )
    {
-      $query .= ", Browser='".addslashes($browser)."'";
+      $query .= ", Browser='".mysql_addslashes($browser)."'";
       $row['Browser'] = $browser;
    }
 
@@ -1418,7 +1418,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
    if( $row["Sessioncode"] != $scode or $row["Expire"] < $NOW )
       return false;
 
-   $query .= " WHERE Handle='".addslashes($hdl)."' LIMIT 1";
+   $query .= " WHERE Handle='".mysql_addslashes($hdl)."' LIMIT 1";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed','std_functions.is_logged_in.update_player');
