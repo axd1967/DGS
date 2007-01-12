@@ -56,10 +56,11 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
    }
    else
    {
-   //reject the oO0, lL1, sS5 confusing matchings (used by account usurpers)
+   //reject the O0, l1I and S5 confusing matchings (used by account usurpers)
+   //for instance, with the Arial font, a I and a l can't be distinguished
       $regx = preg_quote($uhandle); //quotemeta()
       $regx = eregi_replace( '[0o]', '[0o]', $regx);
-      $regx = eregi_replace( '[1l]', '[1l]', $regx);
+      $regx = eregi_replace( '[1li]', '[1li]', $regx);
       $regx = eregi_replace( '[5s]', '[5s]', $regx);
       $regx = mysql_addslashes($regx);
       $regx = '^'.$regx.'$';
