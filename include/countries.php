@@ -76,6 +76,7 @@ $COUNTRIES = array(
    'eo' => $T_('Esperanto'),
    'ee' => $T_('Estonia'),
    'et' => $T_('Ethiopia'),
+   //'eu' => $T_//('Europa'),
    'fj' => $T_('Fiji'),
    'fi' => $T_('Finland'),
    'fr' => $T_('France'),
