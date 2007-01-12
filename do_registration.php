@@ -20,6 +20,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 require_once( "include/std_functions.php" );
 
+define('USE_REGEXP_REGISTRATION',1); //loose account name reject
+
 
 {
    connect2mysql();
@@ -43,11 +45,33 @@ require_once( "include/std_functions.php" );
    if( strlen( $name ) < 1 )
       error("name_not_given");
 
-   $result = mysql_query( "SELECT * FROM Players WHERE Handle='".addslashes($uhandle)."'" )
-      or error('mysql_query_failed', 'do_registration.find_player');
+   if( !USE_REGEXP_REGISTRATION )
+   {
+   //if foO exist, reject foo but accept fo0 (with a zero instead of uppercase o)
+      $result = mysql_query(
+            "SELECT Handle FROM Players WHERE Handle='"
+                  .mysql_addslashes($uhandle)."'"
+         )
+         or error('mysql_query_failed','do_registration.find_player');
+   }
+   else
+   {
+   //reject the oO0, lL1, sS5 confusing matchings (used by account usurpers)
+      $regx = preg_quote($uhandle); //quotemeta()
+      $regx = eregi_replace( '[0o]', '[0o]', $regx);
+      $regx = eregi_replace( '[1l]', '[1l]', $regx);
+      $regx = eregi_replace( '[5s]', '[5s]', $regx);
+      $regx = mysql_addslashes($regx);
+      $regx = '^'.$regx.'$';
+
+      $result = mysql_query(
+            "SELECT Handle FROM Players WHERE Handle REGEXP '$regx'"
+         )
+         or error('mysql_query_failed','do_registration.find_player_regexp');
+   }
 
    if( @mysql_num_rows($result) > 0 )
-      error("userid_in_use");
+      error('userid_in_use');
 
 
 
@@ -56,12 +80,12 @@ require_once( "include/std_functions.php" );
    $code = make_session_code();
 
    $result = mysql_query( "INSERT INTO Players SET " .
-                          "Handle='".addslashes($uhandle)."', " .
-                          "Name='".addslashes($name)."', " .
-                          "Password=PASSWORD('".addslashes($passwd)."'), " .
+                          "Handle='".mysql_addslashes($uhandle)."', " .
+                          "Name='".mysql_addslashes($name)."', " .
+                          "Password=PASSWORD('".mysql_addslashes($passwd)."'), " .
                           "Registerdate=FROM_UNIXTIME($NOW), " .
                           "Sessioncode='$code', " .
-                          "Sessionexpire=FROM_UNIXTIME($NOW + $session_duration)" )
+                          "Sessionexpire=FROM_UNIXTIME(".($NOW+$session_duration).")" )
       or error('mysql_query_failed', 'do_registration.insert_player');
 
    $new_id = mysql_insert_id();
