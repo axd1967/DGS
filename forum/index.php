@@ -30,12 +30,13 @@ Depth: The number of generations, the tread starter has depth 0.
 PosIndex: A string used to sort the posts in the thread. The string is composed of the
           PosIndex of the parent plus two letters which encodes the AnswerNr in base 64,
           where the letters are given by $order_str (see forum_functions.php).
-
-          If PosIndex is NULL, the post has been edited and is not active.
+          Any PosIndex will begin by '**' (2 times the first char of $order_str)
+          If PosIndex is empty, the post has been edited and is not active.
 
 The following three pieces of data are only used for the first post of the thread.
 PostsInThread: Total number of approved posts in the thread.
 LastPost: Id of the last post in the thread.
+LastChanged: Time of the last post in the thread.
 */
 
 $TranslateGroups[] = "Forum";

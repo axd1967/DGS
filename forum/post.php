@@ -72,7 +72,7 @@ function post_message($player_row, $moderated_forum, &$thread)
                      "Parent_ID=$edit, " .
                      "Forum_ID=" . $row['Forum_ID'] . ", " .
                      "User_ID=" . $player_row['ID'] . ", " .
-                     //PosIndex=NULL
+                     "PosIndex='', " . // '' == inactived (edited)
                      "Subject='$oldSubject', " .
                      "Text='$oldText'" )
             or error('mysql_query_failed','forum_post.post_message.edit.insert');
@@ -113,7 +113,7 @@ function post_message($player_row, $moderated_forum, &$thread)
       {
          // New thread
          $answer_nr = 0;
-         $PosIndex = '';
+         $PosIndex = ''; //just right now...
          $Depth = 0;
          $Thread_ID = -1;
          $lastchanged_string = "LastChanged=FROM_UNIXTIME($NOW), ";

@@ -24,7 +24,7 @@ chdir("../");
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 //require_once( "include/GoDiagram.php" );
-chdir("forum");
+chdir("forum/");
 
 
 //$new_end =  4*7*24*3600;  // four weeks //moved to quick_common.php
@@ -78,7 +78,12 @@ function make_link_array($links)
       $link_array_left[T_("Threads")] = "list.php?forum=$forum";
 
    if( $links & LINK_BACK_TO_THREAD )
-      $link_array_left[T_("Back to thread")] = "read.php?forum=$forum".URI_AMP."thread=$thread";
+   {
+      global $back_post_id;
+      $link_array_left[T_("Back to thread")] = "read.php?forum=$forum"
+            .URI_AMP."thread=$thread"
+            .( isset($back_post_id) ?"#$back_post_id" :'');
+   }
 
 
    if( $links & LINK_NEW_TOPIC )
@@ -483,7 +488,7 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
 {
    $result = mysql_query("SELECT ID, UNIX_TIMESTAMP(Time) AS Timestamp FROM Posts " .
                          "WHERE Thread_ID='$Thread_ID' AND Approved='Y' " .
-                         "AND PosIndex IS NOT NULL " .
+                         "AND PosIndex>'' " . // '' == inactived (edited)
                          "ORDER BY Time Desc LIMIT 1")
       or error('mysql_query_failed','forum_functions.recalculate_lastpost.find');
 

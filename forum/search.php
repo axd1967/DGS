@@ -87,7 +87,7 @@ require_once( "forum_functions.php" );
          "LEFT JOIN Forums ON Forums.ID = Posts.Forum_ID " .
          "WHERE MATCH (Subject,Text) AGAINST ('".mysql_addslashes($search_terms)."'" .
          ($bool ? ' IN BOOLEAN MODE' : '') . ") AND Approved='Y' " .
-         "AND PosIndex IS NOT NULL " .
+         "AND PosIndex>'' " . // '' == inactived (edited)
          ($bool ? 'ORDER BY TIME DESC ' : '') .
          "LIMIT $offset,$MaxSearchPostsPerPage";
 

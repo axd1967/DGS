@@ -70,7 +70,7 @@ require_once("forum_functions.php");
          {
             // New thread
             $answer_nr = 0;
-            $PosIndex = '';
+            $PosIndex = ''; //just right now...
             $Depth = 0;
             $Thread_ID = -1;
             $parent = 0;
@@ -86,15 +86,15 @@ require_once("forum_functions.php");
             "Thread_ID=$Thread_ID, " .
             "Time=\"$Time\", " .
             "Lastchanged=\"$Time\", " .
-            "Subject=\"" . mysql_addslashes($Subject) . "\", " .
-            "Text=\"" . mysql_addslashes($Text) . "\", " .
+            "Subject='" . mysql_addslashes($Subject) . "', " .
+            "Text='" . mysql_addslashes($Text) . "', " .
             "User_ID=$uid, " .
             "Parent_ID=$parent, " .
             "AnswerNr=" . ($answer_nr+1) . ", " .
             "Depth=$Depth, " .
             "Approved=\"" . $row['approved'] . "\", " .
             "crc32=" . crc32($Text) . ", " .
-            "PosIndex=\"$PosIndex\", " .
+            "PosIndex='$PosIndex', " .
             "old_ID=$old_ID";
 
          mysql_query( $query ) or die(mysql_error());

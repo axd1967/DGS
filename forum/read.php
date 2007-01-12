@@ -31,6 +31,8 @@ function revision_history($post_id)
 
 
    $headline = array(T_("Revision history") => "colspan=$cols");
+   global $back_post_id;
+   $back_post_id = $post_id;
    $links |= LINK_BACK_TO_THREAD;
    $Lastread = $NOW;
 
@@ -56,8 +58,8 @@ function revision_history($post_id)
    change_depth( $cur_depth, 2, $cols);
 
    $result = mysql_query( $query_select .
-                          "WHERE Parent_ID='$post_id' AND PosIndex IS NULL " .
-                          "ORDER BY Timestamp DESC")
+           "WHERE Parent_ID='$post_id' AND PosIndex='' " . // '' == inactived (edited)
+           "ORDER BY Timestamp DESC")
       or error('mysql_query_failed','forum_read.revision_history.find_edits');
 
 
@@ -229,7 +231,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
                          "Players.ID AS uid, Players.Name, Players.Handle " .
                          "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID " .
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
-                         "AND PosIndex IS NOT NULL " .
+                         "AND PosIndex>'' " . // '' == inactived (edited)
                          "ORDER BY PosIndex")
       or error('mysql_query_failed','forum_read.find_posts');
 
