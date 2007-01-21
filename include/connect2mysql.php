@@ -19,6 +19,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require_once( "include/config.php" );
+@ignore_user_abort(true); //because we will use MySQL
+@set_time_limit(0);
 
 //At least needed when connect2mysql.php is used alone (as in quick_status.php):
 function jump_to($uri, $absolute=false)
@@ -27,6 +29,9 @@ function jump_to($uri, $absolute=false)
 
    $uri= str_replace( URI_AMP, URI_AMP_IN, $uri);
    session_write_close();
+   @ignore_user_abort(false);
+   if( connection_aborted() )
+      exit;
    //header('HTTP/1.1 303 REDIRECT');
    if( $absolute )
       header( "Location: " . $uri );
@@ -59,7 +64,12 @@ function disable_cache($stamp=NULL, $expire=NULL)
 
 if( function_exists('mysql_real_escape_string') ) //PHP >= 4.3.0
 {
-   function mysql_addslashes($str) { return mysql_real_escape_string($str); }
+   function mysql_addslashes($str) {
+      global $dbcnx;
+      if( !$dbcnx )
+         return mysql_escape_string($str);
+      return mysql_real_escape_string($str, $dbcnx);
+   }
 }
 else if( function_exists('mysql_escape_string') ) //PHP >= 4.0.3
 {
