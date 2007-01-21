@@ -79,7 +79,7 @@ function find_category_box_text($cat)
    }
 
    start_page( $title, true, $logged_in, $player_row );
-   echo "<h3 class=header>$title</h3>\n";
+   echo "<h3 class=Header>$title</h3>\n";
 
    echo "<CENTER>\n";
 
@@ -107,7 +107,7 @@ function find_category_box_text($cat)
          if ( !$editorder )
          {
             $bio_row = array(
-               'CELL', 0, 'class=header',
+               'CELL', 0, 'class=Header',
                'SELECTBOX', "category".$row["ID"], 1, $categories, $cat, false,
                'BR',
                'TEXTINPUT', "other".$row["ID"], $cat_width, $cat_max
@@ -120,10 +120,11 @@ function find_category_box_text($cat)
          }
          else
          {
-            $bio_table->add_row( array(
-               'header' => '<div class=bold>'
-                     . make_html_safe($cat == ''
-                                 ? $row["Category"] : $categories[$cat] )
+            $bio_table->add_sinfo(
+               '<div>'
+                     . make_html_safe($cat != '' ? $categories[$cat]
+                           :($row["Category"] ? $row["Category"] : '&nbsp;')
+                           , INFO_HTML)
                      . "\n</div><div class=center>\n"
                      . anchor($moveurl.'move'.$row['ID'].'=1'
                            , image( 'images/down.png', 'down')
@@ -132,9 +133,10 @@ function find_category_box_text($cat)
                      . anchor($moveurl.'move'.$row['ID'].'=-1'
                            , image( 'images/up.png', 'up')
                            , T_("Move up"))
-                     . "\n</div>",
-               'info' => make_html_safe($row["Text"],true),
-            ) );
+                     . "\n</div>"
+               //don't use add_info() to avoid the INFO_HTML here:
+               ,make_html_safe($row["Text"], true)
+            );
          }
       } //while($row)
 
@@ -157,7 +159,8 @@ function find_category_box_text($cat)
 
          $bio_form->add_row( array(
                   'HIDDEN', 'newcnt', USER_BIO_ADDENTRIES,
-                  'SUBMITBUTTON', 'action', T_('Change bio')
+                  'SUBMITBUTTONX', 'action', T_('Change bio')
+                     ,array('accesskey'=>'x')
                ) );
          $bio_form->echo_string(1);
       }

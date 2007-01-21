@@ -75,22 +75,21 @@ require_once( "include/std_functions.php" );
       $ID= $row['ID'];
 
       // check for bios movements
-      $move = (int)@$_REQUEST['move'.$ID];
-      if ( !$move )
+      $pos = (int)@$_REQUEST['move'.$ID];
+      if ( !$pos )
          continue;
 
-      $pos = $idx + $move;
+      $pos+= $idx;
       while( $pos < 1 )
          $pos+= $max_pos;
       while( $pos > $max_pos )
          $pos-= $max_pos;
 
       // swap in internal struct
-      $move = $bios[$idx]['newpos'];
-      $bios[$idx]['newpos'] = $bios[$pos]['newpos'];
-      $bios[$pos]['newpos'] = $move;
-      // note: the result is slightly different if multiple adjacent ups or
-      // multiple adjacent downs but it is called with only one move at a time.
+      swap( $bios[$idx]['newpos'], $bios[$pos]['newpos']);
+      // note: the result is slightly different in case of
+      // multiple adjacent ups or multiple adjacent downs
+      // but, usually, this is executed with only one move at a time.
    }
 
    // update existing DB-entries
