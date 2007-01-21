@@ -155,6 +155,7 @@ if( !$is_down )
 
          $Text = mysql_addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
+                      "Type='RESULT'," .
                       "Game_ID=$gid, Subject='Game result', Text='$Text'")
                or error('mysql_query_failed',"clock_tick.timeup_message($gid)");
 

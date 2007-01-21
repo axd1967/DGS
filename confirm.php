@@ -214,7 +214,7 @@ This is why:
          $coord = @$_REQUEST['coord'];
          $stonestring = @$_REQUEST['stonestring'];
 
-{//to fixe old way Ko detect. Could be removed when no more old way games.
+{//to fix the old way Ko detect. Could be removed when no more old way games.
   if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
 }
          check_move( $TheBoard, $coord, $to_move);
@@ -571,6 +571,7 @@ This is why:
       }
 
       mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
+                   "Type='RESULT'," .
                    "Game_ID=$gid, Subject='$Subject', Text='$Text'")
             or error('mysql_query_failed','confirm.messages');
 
