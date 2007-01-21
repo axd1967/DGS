@@ -1,0 +1,99 @@
+
+-----------------
+General instructions for developers:
+-----------------
+
+   Try to keep an homogeneous code presentation.
+
+   -Use a 3 real spaces tabing.
+   -CR, LF or CR+LF should not cause problem.
+   -Keep the files Ansi (don't use utf-8 encoding)
+   -Instead of:
+      if ( c!=0 ) exit;
+      if ( a!=0 ) {
+         ...
+      } else {
+         ...
+      }
+   use:
+      if( c!=0 )
+         exit;
+      if( a!=0 )
+      {
+         ...
+      }
+      else
+      {
+         ...
+      }
+
+-----------------
+
+   Try to avoid the extract($row) function. Or just use it inside a
+   short function. At top level, the values of $row become global
+   variables. This is really risky. Even inside a function, as the $row
+   come most of the time from a mysql_query("SELECT *,..."), if we add
+   a column to the database table, the resulting var will maybe disturb
+   your code.
+   
+   We know that there is still a lot of extract() in our code but we are
+   working to remove them. Instead we clearly rename the $row var with,
+   let say, $game_row then we use $game_row['ID'] when needed.
+   Feel free to replace in such way any extract() that you find.
+   
+   This is a query issued from some bad experiences.
+
+-----------------
+
+   Take care of URI_AMP and URI_AMP_IN.
+   - URI_AMP_IN is what you use when you decode an URL coming
+      from the server (e.g. $_SERVER['REQUEST_URI']).
+   - Use URI_AMP when you build a URL to be gave to the server.
+   In short, URI_AMP_IN = ini_get('arg_separator.input')
+         and URI_AMP    = ini_get('arg_separator.output')
+         
+   This is because the ampersand is not allowed in an URL (curiously!)
+   Some server replace it with a ';' but it seems that, now a day, the
+   '&amp;' become the standard. When the server receive a '&amp;', it
+   translate it with a '&'. But this is purely server dependant. We even
+   can't be sure that it is a one char string. So use:
+      if( substr($str, -strlen(URI_AMP)) != URI_AMP )
+         $str .= URI_AMP;
+   instead of:
+      if( substr($str, -1, 1) != URI_AMP )
+         $str .= URI_AMP;
+
+   By the way, make_url($page, array()) is a function that works fine
+   if $page is already a well formed URL and is safer because it use
+   an urlencode().
+
+-----------------
+
+   Take care of the T_() function and tranlation features.
+
+   Use the T_() enclosure each time that the string need a
+   translation. Don't use such an enclosure anywhere else: most
+   of the PHP files are scanned to find it and so, the strings
+   to translate.
+
+   During the scan process, the $TranslateGroups[] var at the top of
+   some files is used too. As of the TranslationPages table in the
+   database. These are the two places to modify when you add a new
+   PHP file containing T_() translations. As a start point, have a
+   look at the README.translations file in the scripts folder.
+
+   When adding a new string, try to first find if a similar one
+   already exist in the database.
+
+   Maybe this is not the better way to do the translations but
+   it is hard to modify it. Any suggestion?
+
+-----------------
+
+   Even if $num is numeric, think to use the quoted syntaxe to set it
+   in a MySQL query, e.g. $query = ... "Num='$num'," ...;
+   If $num is not set and if the Num column is numeric, Num='', will set
+   it to the default while Num=, will return a MySQL syntaxe error.
+   That's an alternative that must be known.
+
+-----------------

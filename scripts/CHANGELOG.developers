@@ -1,0 +1,152 @@
+-----------------
+Previous update: 2006-09
+
+-----------------
+2006-12-24 17:37:40 by Rodival:
+
+== skins added
+Database:
+ALTER TABLE `Players`
+ ADD `SkinName` VARCHAR( 32 ) DEFAULT '' NOT NULL AFTER `OnVacation` ;
+
+Added-file:
+   skins/
+   skins/index.php
+   skins/known_skins.php
+   skins/dragon/index.php
+   skins/dragon/screen.css
+   skins/dragon/print.css
+
+Modified:
+   include/std_functions.php:
+      start_page()
+   change_profile.php
+   edit_profile.php
+   and where start_page(..., $skinname) is used
+
+== removing NULL fields in database
+Database:
+ALTER TABLE `Messages`
+ CHANGE `Type` `Type` ENUM( 'NORMAL', 'INVITATION', 'ACCEPTED', 'DECLINED', 'DELETED', 'DISPUTED', 'RESULT' ) DEFAULT 'NORMAL' NOT NULL
+ CHANGE `ReplyTo` `ReplyTo` INT( 11 ) DEFAULT 0 NOT NULL ,
+ CHANGE `Game_ID` `Game_ID` INT( 11 ) DEFAULT 0 NOT NULL ,
+ CHANGE `Time` `Time` DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL ,
+ CHANGE `Subject` `Subject` VARCHAR( 80 ) DEFAULT '' NOT NULL ,
+ CHANGE `Text` `Text` TEXT NOT NULL ;
+ALTER TABLE `MessageCorrespondents`
+ CHANGE `uid` `uid` INT( 11 ) DEFAULT 0 NOT NULL ,
+ CHANGE `mid` `mid` INT( 11 ) DEFAULT 0 NOT NULL ;
+
+-----------------
+2006-12-27 17:37:40 by Rodival:
+Modified:
+   flags/__.gif (resizing)
+Added-file:
+   flags/eu.gif
+      ajusted it but not enabled it in countries.php
+
+== to fix the bad display of the JAP byoyomi when byoyomi reached
+== ( --- + 3 periods of 4h   instead of   4h + 3 periods of 1d)
+Modified:
+   include/time_functions.php
+      echo_time_remaining()
+   + adjusted the corresponding calls to echo_time_remaining()
+
+-----------------
+2007-01-09 08:04:54 by Rodival:
+
+== adding the "bio infos order" feature
+>>> N.B.: from a code mailing of JUG
+Database:
+ALTER TABLE `Bio`
+ ADD `SortOrder` INT( 11 ) DEFAULT 0 NOT NULL AFTER `Text` ;
+
+ALTER TABLE `Bio`
+ CHANGE `Category` `Category` VARCHAR( 40 ) NOT NULL DEFAULT '' ,
+ CHANGE `Text` `Text` TEXT NOT NULL DEFAULT '' ;
+
+Modified:
+   edit_bio.php
+   change_bio.php
+
+== Adding the class Table_infos for more CSS friendship
+Added-file:
+   include/table_infos.php
+  
+Modified:
+   userinfo.php
+   edit_bio.php
+   status.php
+      using the Table_infos class
+
+-----------------
+2007-01-12 11:05:02 by Rodival:
+
+== removing NULL fields in database
+Database:
+ALTER TABLE `Players`
+ CHANGE `IP` `IP` varchar(16) NOT NULL default '' ;
+ALTER TABLE `Posts`
+ CHANGE `Lastchanged` `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00' ,
+ CHANGE `Time` `Time` datetime NOT NULL default '0000-00-00 00:00:00' ,
+ CHANGE `Lastedited` `Lastedited` datetime NOT NULL default '0000-00-00 00:00:00' ,
+ CHANGE `LastPost` `LastPost` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `Subject` `Subject` varchar(80) NOT NULL default '' ,
+ CHANGE `User_ID` `User_ID` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `Parent_ID` `Parent_ID` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `PostsInThread` `PostsInThread` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `old_ID` `old_ID` int(11) NOT NULL DEFAULT 0 ;
+ALTER TABLE `Posts`
+ CHANGE `Text` `Text` text NOT NULL ;
+// >>> need a code adjust (that had been commited):
+ALTER TABLE `Posts`
+ CHANGE `PosIndex` `PosIndex` varchar(80) binary NOT NULL default '' ;
+// >>>
+// crc32 int(11) default NULL, seems to be kept
+
+Modified:
+   the whole set of forum files/functions using 'PosIndex'
+
+== Generalization of the right MySQL addslashes feature
+Added-code:
+   include/connect2mysql.php
+      mysql_addslashes()
+   and modified most of the other files where needed
+
+== To reject some account usurpers
+Modified:
+   do_registration.php
+
+== Table_infos class
+Modified:
+   include/table_infos.php
+      to handle waiting_room particularities
+   waiting_room.php
+   userinfo.php
+   edit_bio.php
+   status.php
+      using the new Table_infos class properties
+   skins/dragon/screen.css
+      accordingly
+
+-----------------
+2007-01-21 18:12:12 by Rodival:
+
+Added-file:
+   scripts/README.developers
+   scripts/CHANGELOG.developers
+   CHANGELOG
+
+-----------------
+-----------------
+TODO:
+
+
+-----------------
+-----------------
+Rdvl: notes ---------------------
+TODO:
+ALTER TABLE `Messages` -->Non
+ ADD `IP` varchar(16) NOT NULL default '' AFTER `Text` ;
+ALTER TABLE `Posts` -->for guest tracking?
+ ADD `IP` varchar(16) NOT NULL default '' AFTER `Text` ;
