@@ -46,7 +46,7 @@ require_once( "forum_functions.php" );
 
    $title = T_('Forum') . " - " . T_('Search');
    start_page($title, true, $logged_in, $player_row );
-   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
+   echo "<h3 class=Header>$title</h3>\n";
 
    $offset = max(0,(int)@$_REQUEST['offset']);
    $search_terms = get_request_arg('search_terms');
@@ -87,7 +87,7 @@ require_once( "forum_functions.php" );
          "LEFT JOIN Forums ON Forums.ID = Posts.Forum_ID " .
          "WHERE MATCH (Subject,Text) AGAINST ('".mysql_addslashes($search_terms)."'" .
          ($bool ? ' IN BOOLEAN MODE' : '') . ") AND Approved='Y' " .
-         "AND PosIndex>'' " . // '' == inactived (edited)
+         "AND PosIndex>'' " . // '' == inactivated (edited)
          ($bool ? 'ORDER BY TIME DESC ' : '') .
          "LIMIT $offset,$MaxSearchPostsPerPage";
 
@@ -106,17 +106,17 @@ require_once( "forum_functions.php" );
       if( $show_rows < $nr_rows ) $links |= LINK_NEXT_PAGE;
 
 
-      start_table($headline, $links, 'width="99%"', $cols);
+      forum_start_table('Search', $headline, $links, $cols);
       echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
       while( $row = mysql_fetch_array( $result ) )
       {
          extract($row);
-         draw_post('search_result', false, $row['Subject'], $row['Text']);
+         draw_post('SearchResult', false, $row['Subject'], $row['Text']);
          echo "<tr><td colspan=$cols></td></tr>\n";
       }
       echo "</table></td></tr>\n";
-      end_table($links, $cols);
+      forum_end_table($links, $cols);
    }
 
    end_page();

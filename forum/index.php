@@ -73,34 +73,41 @@ require_once( "forum_functions.php" );
 
    $title = T_('Forum list');
    start_page($title, true, $logged_in, $player_row );
-   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
+   echo "<h3 class=Header>$title</h3>\n";
 
    print_moderation_note($is_moderator, '98%');
 
 
-   start_table($headline, $links, "width='98%'", $cols);
+   forum_start_table('Index',$headline, $links, $cols);
 
 
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
-      $date = date($date_fmt, $Timestamp);
-
       if( empty($row['Timestamp']) )
       {
          $date='&nbsp;&nbsp;-';
          $Count = 0;
       }
+      else
+         $date = date($date_fmt, $Timestamp);
 
-      echo '<tr><td width="60%"><b>&nbsp;<a href="list.php?forum=' . $ID . '">' . $Name .
-         '</a></b>'. ( $Moderated == 'Y' ? ' &nbsp; <font color="#ff4466">[' . T_('Moderated') . ']</font>' : '') .'</td>' .
-         '<td nowrap>'.T_('Posts').': <b>' . $PostsInForum .  '&nbsp;&nbsp;&nbsp;</b></td>' .
-         '<td nowrap>'.T_('Last post').': <b>' . $date . "</b></td></tr>\n" .
-         '<tr bgcolor=white><td colspan=3><dl><dt><dd>&nbsp;' . $Description .
+      //incompatible with: $c=($c % LIST_ROWS_MODULO)+1;
+      echo "<tr class=Row1><td class=Name>" .
+         '<a href="list.php?forum=' . $ID . '">' . $Name . '</a>'
+         . ( $Moderated == 'Y'
+            ? ' &nbsp;&nbsp;<span class=Moderated>[' . T_('Moderated') . ']</span>'
+            : '') .'</td>' .
+         '<td class=Postcnt>'.T_('Posts').': <strong>'
+               . $PostsInForum . '</strong></td>' .
+         '<td class=Postdate>'.T_('Last post').': <strong>'
+               . $date . "</strong></td></tr>\n";
+
+      echo '<tr class=Row2><td colspan=3><dl><dd>' . $Description .
          "</dl></td></tr>\n";
    }
 
-   end_table($links, $cols);
+   forum_end_table($links, $cols);
 
    end_page();
 }

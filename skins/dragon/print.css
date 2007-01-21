@@ -1,15 +1,23 @@
 
-body {
-   background: white;
-   color: black;
+/* ------------------------- */
+/* global styles */
+/* ------------------------- */
+.Rdvllime { background: lime !important; }
+
+.TextBrowsers {
+   display: none;
 }
 
-.notprintable {
+.NotPrintable {
    display: none;
 }
 
 .black {
    color: black;
+}
+
+.white {
+   color: white;
 }
 
 .gray {
@@ -20,11 +28,38 @@ body {
    color: blue;
 }
 
-a {
-   color: black;
+.red {
+   color: red;
 }
 
-a.blue {
+.green {
+   color: green;
+}
+
+.bold {
+   font-weight: bold;
+}
+
+.none {
+   text-decoration: none;
+   font-weight: normal;
+}
+
+.center {
+   text-align: center;
+}
+
+.nowrap
+{
+   white-space: nowrap;
+}
+
+.InlineWarning {
+   color: red;
+}
+
+
+a {
    color: black;
 }
 
@@ -50,26 +85,202 @@ a:active {
 }
 */
 
-.header {
+h3.header {
    color: #800000;
    text-align: center;
 }
 
+span.header,
+.inlineHeader {
+   color: #800000;
+   font-weight: bold;
+}
 
+.sysmsg {
+   color: green;
+   font-weight: bold;
+}
+
+img {
+   border: 0px solid black;
+   vertical-align: middle;
+}
+
+img.InTextStone {
+   width: 17px;
+   height: 17px;
+   border: 0px solid black;
+   vertical-align: middle;
+}
+
+table {
+   table-layout: auto; /* auto fixed */
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+/*
+   width: auto;
+*/
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-align: center;
+   text-indent: 0;
+}
+
+
+/* ------------------------- */
+/* common page layout */
+/* ------------------------- */
+
+body {
+   background: white;
+   color: black;
+   margin: 0px;
+}
+
+table#pageHead {
+   display: none;
+}
+
+table#pageFoot {
+   table-layout: auto;
+   background: white;
+   color: black;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   font-weight: bold;
+   text-align: center;
+}
+
+table#pageFoot th,
+table#pageFoot td,
+table#pageHead th,
+table#pageHead td {
+   border: 0px solid red;
+   padding: 4px;
+}
+
+table#pageFoot a,
+table#pageHead a {
+   color: black;
+   font-weight: bold;
+}
+
+table#pageFoot .ServerHome,
+table#pageHead .ServerHome {
+   text-align: left;
+}
+
+table#pageFoot .LoginBox,
+table#pageHead .LoginBox {
+   display: none;
+}
+
+table#pageFoot .PageTime {
+   text-align: center;
+   font-weight: normal;
+   font-size: 90%;
+}
+
+table#pageFoot .PageLapse {
+   display: none;
+   font-weight: normal;
+   font-size: 80%;
+}
+
+table.HostedBy {
+   float: right;
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   vertical-align: top;
+   color: black;
+}
+
+td#hostedBy {
+   border: 0px solid red;
+   padding: 4px;
+   text-align: right;
+   font-size: 90%;
+}
+
+
+table#pageMenu {
+   display: none;
+   table-layout: auto;
+   background: white;
+   color: black;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-align: center;
+}
+
+table.MenuHorizontal {
+   width: 100%;
+}
+
+table.MenuVertical {
+   width: auto;
+}
+
+table#pageMenu th,
+table#pageMenu td {
+   border: 0px solid red;
+   margin: 0px;
+   padding: 4px;
+}
+
+
+table#pageMenu a {
+   color: black;
+}
+
+table#pageMenu a.strong {
+   color: black;
+   font-weight: bold;
+   font-size: 110%;
+}
+
+/* links of bottom menu */
 table.links {
    display: none;
-   width: 100%; 
-   border-width: 0px;
+   table-layout: auto;
+   border: 0px solid red;
    border-spacing: 0px;
+   border-collapse: collapse;
    margin: 4px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
    empty-cells: hide;
+   text-align: center;
 }
 
 table.links td {
-   border-width: 0px;
+   color: black;
+   border: 0px solid red;
    padding: 8px;
    text-align: center;
-   color: black;
+   vertical-align: top;
    font-weight: bold;
 }
 
@@ -79,38 +290,400 @@ table.links a {
 }
 
 
-table.infos {
-   border: 1px solid black;
-   border-spacing: 0px;
-   margin: 4px;
-   empty-cells: hide;
+.pageSection {
+ border: 1px dashed red;
+   text-align: center;
+   overflow: hidden; /* hidden visible */
+   margin: 0px auto;
+   padding: 0px;
+   max-width: none;
 }
+.pageSection table {
+   margin: 0px auto;
+}
+.pageSection form {
+   margin: 0px auto;
+}
+/* ------------------------- */
+/* usual tables */
+/* ------------------------- */
 
-table.infos td, table.infos th {
+table.Table {
+   table-layout: auto;
    border: 1px solid gray;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px auto;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-align: center;
+}
+
+table.Table th,
+table.Table td {
+   border-width: 0px 0px 1px 0px;
+   border-bottom: 1px solid gray;
+   margin: 0px;
    padding: 3px;
-   text-align: left;
-   color: black;
 }
 
-table.infos a {
-   color: black;
+table.Table tr.Head th {
+   white-space: pre; /* nowrap - pre: allow &#10; */
+   text-align: center;
+   vertical-align: bottom;
 }
 
-table.infos a.hdr {
+table.Table th a,
+table.Table th {
    color: black;
    font-weight: bold;
 }
 
+table.Table td a,
+table.Table td {
+   white-space: nowrap;
+   color: black;
+}
+
+table.Table th sup a,
+table.Table th sup {
+   display: none;
+   color: red;
+   font-weight: bold;
+   font-size: 90%;
+}
+
+table.Table tr.Head {
+   decoration: none;
+   background: gray;
+}
+
+table.Table tr.Row3,
+table.Table tr.Row1 {
+   background: white;
+}
+table.Table tr.Row4,
+table.Table tr.Row2 {
+   background: white;
+}
+table.Table tr.Row3 td.Warning,
+table.Table tr.Row1 td.Warning {
+   color: black;
+   background: #ffcccc;
+}
+table.Table tr.Row4 td.Warning,
+table.Table tr.Row2 td.Warning {
+   color: black;
+   background: #ffcccc;
+}
+table.Table tr.highlight {
+   background: #ffd070;
+}
+
+table.Table td.Mark {
+   text-align: center;
+}
+
+table.Table th.button {
+   margin: 0px;
+   padding: 3px;
+   text-align: center;
+}
+
+table.Table td.button {
+   background: white;
+   margin: 0px;
+   padding: 3px;
+   text-align: center;
+   white-space: nowrap;
+}
+
+table.Table a.button {
+   display: block;
+   margin: 0px;
+   padding: 0px;
+   text-decoration: none;
+   font-weight: bold;
+   text-align: center;
+   white-space: nowrap;
+}
+
+
+/* ------------------------- */
+/* infos tables */
+/* ------------------------- */
+
+table.Infos {
+   border: 1px solid gray;
+   table-layout: auto;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px auto;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+}
+
+table.Infos th,
+table.Infos td {
+   border: 1px solid gray;
+   margin: 0px;
+   padding: 3px;
+}
+
+table.Infos th {
+   color: #800000;
+   text-align: center;
+   font-weight: bold;
+   font-size: larger;
+}
+
+table.Infos td {
+   color: black;
+   text-align: left;
+}
+
+table.Infos col.ColRubric,
+table.Infos td.Rubric a,
+table.Infos td.Rubric {
+   color: black;
+   font-weight: bold;
+   white-space: nowrap;
+}
+
+table.Infos .Warning {
+   background: #ffcccc;
+}
+
+table.Infos td.RubricWarning a,
+table.Infos td.RubricWarning {
+   background: #ffcccc;
+   color: black;
+   font-weight: bold;
+   white-space: nowrap;
+}
+
+table.Infos .RubricOnVacation a,
+table.Infos .RubricOnVacation,
+table.Infos .OnVacation a,
+table.Infos .OnVacation {
+   color: red;
+   font-weight: bold;
+   white-space: nowrap;
+}
+
+table.Infos .highlight {
+   background: #ffd070;
+}
+
+
+/* biographical infos modifications:
+*/
+form#bioformForm td {
+   vertical-align: top;
+}
+
+table#biomoveInfos td {
+   vertical-align: top;
+}
+
+table#biomoveInfos div {
+   margin: 0px;
+}
+
+table#biomoveInfos img {
+   width: 12px;
+   height: 12px;
+   border: 0px solid black;
+   margin: 4px 4px 0px 4px;
+   vertical-align: top;
+}
+
+
+/* ------------------------- */
+/* edit profile page */
+/* ------------------------- */
+
+table.EditProfilButtons {
+   table-layout: fixed;
+   width: 535px; /* 524px auto /* 4*button_width+7*other_cells_width) */
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px 0px;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: center;
+}
+
+table.EditProfilButtons td { /* radio button */
+   color: black;
+   width: 20px;
+   border: 0px solid red;
+   padding: 0px;
+   white-space: nowrap;
+   text-align: center;
+   vertical-align: middle;
+}
+
+table.EditProfilButtons td.button {
+   background: white;
+   width: 96px;
+   height: 25px;
+/*
+   font: bold 100% sans-serif;
+*/
+   font-weight: bold;
+   font-size: 100%;
+   text-decoration: none;
+   text-align: center;
+   vertical-align: middle;
+}
+
+
+/* ------------------------- */
+/* board page */
+/* ------------------------- */
+
+table.goban {
+   background: white;
+   border: 0px solid red;
+  border-collapse: collapse;
+  margin: 0px; /* 0px 1em; */
+  line-height: 0px;
+   border-spacing: 0px;
+   empty-cells: hide; /* hide show */
+}
+
+table.goban td {
+  padding: 0px;
+   border: 0px solid red;
+   margin: 0px;
+   text-align: left;
+   vertical-align: top;
+   color: black;
+}
+
+table.goban img {
+   border: 0px solid black;
+   vertical-align: top;
+  padding: 0px;
+   margin: 0px;
+}
+
+
+
+table.captures {
+   background: white;
+   border: 1px solid gray;
+   border-spacing: 0px;
+   margin: 4px;
+}
+
+table.captures th {
+   background: white;
+   color: black;
+   border: 1px solid gray;
+   padding: 4px;
+}
+
+table.captures td.b {
+   border: 0px;
+   vertical-align: top;
+   padding: 4px;
+   white-space: nowrap;
+}
+
+table.captures td.w {
+   border: 0px;
+   vertical-align: top;
+   padding: 4px;
+   white-space: nowrap;
+}
+
+table.captures dl {
+   padding: 0px;
+   margin: 0px;
+}
+
+table.captures dt {
+   padding: 0px;
+   margin: 0px;
+}
+
+table.captures img {
+   vertical-align: middle;
+}
+
+
+table.gamenotes {
+   border-width: 0px;
+   margin: 4px;
+}
+
+table.gamenotes th {
+   background: white;
+   color: black;
+   padding: 4px;
+}
+
+table.gamenotes td {
+   background: white;
+   padding: 0px;
+   margin: 0px;
+}
+
+table.gamenotes td.notes {
+   background: white;
+   padding: 0px;
+   margin: 0px;
+}
+
+
+table.gameinfos {
+   border: 1px solid gray;
+   border-spacing: 0px;
+   margin: 0px;
+   text-align: left;
+   empty-cells: show;
+}
+
+table.gameinfos th,
+table.gameinfos td {
+   border: 0px solid #e0e8ed;
+   margin: 0px;
+   padding: 4px;
+}
+
+table.gameinfos tr {
+   background: white;
+}
+
+table.gameinfos tr#blackinfo,
+table.gameinfos tr#blacktime {
+   background: white;
+}
+
+table.gameinfos tr#whiteinfo,
+table.gameinfos tr#whitetime {
+   background: white;
+}
+
+
+/* board page - old moves table */
 
 table.moves {
-   border: 1px solid black;
+   border: 1px solid gray;
    border-spacing: 0px;
    margin: 4px;
    empty-cells: hide;
 }
 
-table.moves td, table.moves th {
+table.moves th,
+table.moves td {
    border: 1px solid gray;
    padding: 1px;
    color: black;
@@ -118,6 +691,7 @@ table.moves td, table.moves th {
 }
 
 table.moves td.c {
+   background: white;
    color: red;
    font: bold 85% sans-serif;
    text-decoration: none;
@@ -136,55 +710,234 @@ table.moves a.b {
 }
 
 
-table.captures {
-   border: 1px solid black;
-   border-spacing: 0px;
-   margin: 4px;
-}
+/* ------------------------- */
+/* forums layout */
+/* ------------------------- */
 
-table.captures th {
+table.forum {
+   background: white;
+   color: black;
+   text-align: left;
    border: 1px solid gray;
+  border-collapse: collapse;
+  margin: 0px;
+   border-spacing: 0px;
+   empty-cells: show;
+   width: 99%;
+}
+
+/* in status page */
+table#forumpending {
+   width: 90%;
+}
+
+table.forum table {
+   background: white;
    color: black;
-   padding: 4px;
+   text-align: left;
+   border: 0px solid black;
+  border-collapse: collapse;
+  margin: 0px;
+   border-spacing: 0px;
+   empty-cells: show;
+   width: 100%;
 }
 
-table.captures td.b {
-   border: 0px;
-   vertical-align: top;
-   padding: 4px;
-   white-space: nowrap;
-}
-
-table.captures td.w {
-   border: 0px;
-   vertical-align: top;
-   padding: 4px;
-   white-space: nowrap;
-}
-
-
-table.gamenotes {
-   border-width: 0px;
-   margin: 4px;
-}
-
-table.gamenotes th {
+/* forum lists */
+table.forum .Row3,
+table.forum .Row1 {
+   background: white;
    color: black;
-   padding: 4px;
+}
+table.forum .Row4,
+table.forum .Row2 {
+   background: white;
+   color: black;
 }
 
-table.gamenotes td {
+table#forumindex tr.Row2 td {
    padding: 0px;
    margin: 0px;
 }
 
-table.gamenotes td.notes {
+table#forumindex tr.Row2 {
    padding: 0px;
    margin: 0px;
 }
 
-
-img.layoutstone {
-   width: 17px;
-   height: 17px;
+/*
+table#forumindex tr.Row2 dd,
+table#forumindex tr.Row2 dt,
+*/
+table#forumindex tr.Row2 dl {
+   margin: 0px;
 }
+
+
+table#forumindex td.name {
+   width: 60%;
+   padding: 3px 8px 3px 8px;
+}
+table#forumindex td.name a {
+   font-weight: bold;
+}
+table#forumindex td.postcnt,
+table#forumindex td.postdate {
+   white-space: nowrap;
+}
+
+
+table.forum .moderated {
+   color: red;
+}
+
+table.forum td {
+   border: 0px solid red;
+   padding: 3px;
+   margin: 0px;
+   text-align: left;
+   color: black;
+}
+
+table.forum td.indent {
+   width: 15px;
+   min-width: 15px;
+   padding: 0px;
+   margin: 0px;
+   border: 0px solid blue;
+}
+
+table.forum td.indent2 {
+   padding: 0px;
+   margin: 0px;
+   border: 0px solid red;
+}
+
+table.forum tr.caption td {
+   background: white;
+   color: black;
+   text-align: left;
+   padding: 3px 3px 3px 8px;
+}
+
+table.forum tr.forumlinksT td,
+table.forum tr.forumlinksB td {
+   background: white;
+   color: black;
+   padding: 3px 8px 3px 8px;
+   text-align: center;
+}
+
+
+table.forum .linksL {
+   background: white;
+   color: black;
+   border: 0px solid lime;
+   margin: 0px;
+   text-align: left;
+  float: left;
+  top: 0%;
+}
+
+table.forum .linksR {
+   background: white;
+   color: black;
+   border: 0px solid lime;
+   margin: 0px;
+   text-align: right;
+  float: right;
+  top: 0%;
+}
+
+table.forum .linksL a {
+   color: black;
+}
+
+table.forum .linksR a {
+   color: black;
+}
+
+/*
+  The headers of the posts have the class="PostHead subclass"
+   where subclass is one of:
+    normal, hidden, reply, preview, edit, searchResult
+*/
+table.forum tr.postHead {
+   color: black;
+}
+
+table.forum tr.postHead .postSubject {
+   color: black;
+   font-size: larger;
+   font-weight: bold;
+}
+
+table.forum tr.normal {
+   background: #cccccc;
+   color: black;
+}
+table.forum tr.reply {
+   background: #cccccc;
+   color: black;
+}
+table.forum tr.preview {
+   background: #cceecc;
+   color: black;
+}
+table.forum tr.edit {
+   background: #eeeecc;
+   color: black;
+}
+table.forum tr.hidden {
+   background: #eecccc;
+   color: black;
+}
+table.forum tr.searchResult {
+   background: #77bb88;
+   color: black;
+}
+
+table.forum tr.postBody {
+   background: white;
+   color: black;
+}
+
+table.forum tr.postButtons {
+   background: white;
+   color: black;
+}
+
+table.forum tr.postButtons a.highlight {
+   color: #ee6666;
+}
+
+
+
+/* ------------------------- */
+/* message allowed tags */
+/* ------------------------- */
+
+pre.code {
+   background: #dddddd;
+   margin: 0.3em 2px 0.3em 0.5em;
+   padding: 0.3em 0em 0.3em 0.5em;
+   width: auto;
+/*
+   padding: 8px;
+   margin-right: auto;
+*/
+}
+
+div.quote {
+   border: 1px solid gray;
+   margin: 0.3em 2px 0.3em 0.5em;
+   padding: 0.3em 0em 0.3em 0.5em;
+   width: auto;
+   font-style: italic;
+/*
+   line-height: 1.5em;
+*/
+}
+
+
+/* ------------------------- */

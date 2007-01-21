@@ -73,11 +73,11 @@ require_once( "forum_functions.php" );
 
    $title = T_('Forum').' - '.$Forumname;
    start_page($title, true, $logged_in, $player_row );
-   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
+   echo "<h3 class=Header>$title</h3>\n";
 
    print_moderation_note($is_moderator, '98%');
 
-   start_table($headline, $links, "width=98%", $cols);
+   forum_start_table('List', $headline, $links, $cols);
 
    $odd = true;
    while( $row = mysql_fetch_array( $result ) and $show_rows > 0)
@@ -102,7 +102,7 @@ require_once( "forum_functions.php" );
       }
    }
 
-   end_table($links, $cols);
+   forum_end_table($links, $cols);
 
    end_page();
 }

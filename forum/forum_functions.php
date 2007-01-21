@@ -57,8 +57,6 @@ define("LINK_MASKS", ~(LINKPAGE_READ | LINKPAGE_LIST | LINKPAGE_INDEX
 
 define('ALLOW_QUOTING', 0);
 define('FORUM_MAXIMUM_DEPTH', 15);
-define('FORUM_INDENTATION_PIXELS', 15);
-
 
 
 function make_link_array($links)
@@ -137,37 +135,41 @@ function print_moderation_note($is_moderator, $width)
       echo "<table width='$width'><tr><td align=right><font color=red>" . T_("Moderating") . "</font></td></tr></table>\n";
 }
 
-function start_table(&$headline, &$links, $width, $cols)
+function forum_start_table( $table_id, &$headline, &$links, $cols)
 {
-   echo "<center>
-<table bgcolor=\"#e0e8ed\" border=0 cellspacing=0 cellpadding=3 $width>\n";
+/* $table_id could be: (begining by an uppercase letter because used as sub-ID name)
+   'Index', 'List', 'Read', 'Search', 'Revision', 'Pending'
+*/
+
+   echo "<table id='forum$table_id' class=Forum>\n";
 
    make_link_array( $links );
 
    if( $links & LINK_MASKS )
-      echo_links($cols);
+      echo_links('T',$cols);
 
-   echo "<tr>";
-   while( list($name, $extra) = each($headline) )
+   echo "<tr class=Caption>";
+   while( list($name, $attbs) = each($headline) )
    {
-      echo "<td bgcolor=\"#000080\" $extra><font color=white>&nbsp;$name</font></td>";
+      echo "<td $attbs>$name</td>";
    }
    echo "</tr>\n";
 }
 
-function end_table($links,$cols)
+function forum_end_table($links,$cols)
 {
    if( $links & LINK_MASKS )
-      echo_links($cols);
-   echo "</table></center>\n";
+      echo_links('B',$cols);
+   echo "</table>\n";
 }
 
-function echo_links($cols)
+function echo_links($id,$cols)
 {
    global $link_array_left, $link_array_right;
 
-   $rcols = $cols-1; //1; $cols/2; $cols-1;
-   echo '<tr class=forum_header><td colspan=' . ($cols-$rcols) . ">&nbsp;";
+   $lcols = $cols; //1; $cols/2; $cols-1;
+   $tmp = ( $lcols > 1 ? ' colspan='.$lcols : '' );
+   echo "<tr class=ForumLinks$id><td$tmp><div class=LinksL>";
    $first=true;
    reset($link_array_left);
    foreach( $link_array_left as $name => $link )
@@ -180,7 +182,12 @@ function echo_links($cols)
          echo anchor( $link, $name);
    }
 
-   echo "&nbsp;</td>\n<td colspan=" . ($rcols) . " align=right>&nbsp;";
+   $lcols = $cols-$lcols;
+   $tmp = ( $lcols > 1 ? ' colspan='.$lcols : '' );
+   if( $lcols > 0 )
+      echo "</div></td><td$tmp><div class=LinksR>";
+   else
+      echo "</div><div class=LinksR>";
    $first=true;
    reset($link_array_right);
    foreach( $link_array_right as $name => $link )
@@ -193,7 +200,7 @@ function echo_links($cols)
          echo anchor( $link, $name);
    }
 
-   echo "&nbsp;</td></tr>\n";
+   echo "</div></td></tr>\n";
 
 }
 
@@ -222,10 +229,10 @@ function get_new_string($Lastchangedstamp, $Lastread)
 }
 
 
-function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null)
+function draw_post($postClass, $my_post, $Subject='', $Text='', $GoDiagrams=null)
 {
-/* $post_type could be:
-   'normal', 'search_result', 'hidden', 'reply', 'preview', 'edit'
+/* $postClass could be: (no '_' because used as sub-class name => CSS compliance)
+   'Normal', 'Hidden', 'Reply', 'Preview', 'Edit', 'SearchResult'
 */
 
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
@@ -246,26 +253,26 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 
 
    // Subject header + post body
-   if( $post_type == 'preview' )
+   if( $postClass == 'Preview' )
    {
       // one line Subject header
-      echo "<tr class=\"post_head $post_type\">\n <td colspan=$cols" .
-         "\"><a class=\"post_subject\" name=\"preview\">$sbj</a><br> " . 
-         T_('by')." " . user_reference( 1, 1, "black", $player_row) .
+      echo "<tr class=PostHead$postClass>\n <td colspan=$cols" .
+         "\"><a class=PostSubject name='preview'>$sbj</a><br> " .
+         T_('by')." " . user_reference( REF_LINK, 1, 'black', $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n";
 
       // post body
-      echo "<tr class=\"post_body\">\n <td colspan=$cols>$txt</td></tr>";
+      echo "<tr class=PostBody>\n <td colspan=$cols>$txt</td></tr>";
    }
    else
    {
       // first line of Subject header
-      if( $post_type == 'search_result' )
+      if( $postClass == 'SearchResult' )
       {
          $hdrcols = $cols;
 
-         echo "<tr class=\"post_head $post_type\">\n <td colspan=$hdrcols>";
-         echo '<a class=\"post_subject\" href="read.php?forum=' . $Forum_ID .URI_AMP
+         echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
+         echo '<a class=PostSubject href="read.php?forum=' . $Forum_ID .URI_AMP
             . "thread=$Thread_ID#$ID\">$sbj</a>";
 
          echo ' <font size="+1" color="#FFFFFF">' . T_('found in forum')
@@ -279,13 +286,13 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       }
       else
       {
-         if( $post_type == 'hidden' )
+         if( $postClass == 'Hidden' )
             $hdrcols = $cols-1; //because of the rowspan=2 in the second column
          else
             $hdrcols = $cols;
 
-         echo "<tr class=\"post_head $post_type\">\n <td colspan=$hdrcols>";
-         echo "<a class=\"post_subject\" name=\"$ID\">$sbj</a>$new";
+         echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
+         echo "<a class=PostSubject name=\"$ID\">$sbj</a>$new";
 
          if( $hdrcols != $cols )
          {
@@ -298,10 +305,10 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       }
 
       // second line of Subject header
-      echo "<tr class=\"post_head $post_type\">\n <td colspan=$hdrcols>";
+      echo "<tr class=postHead$postClass>\n <td colspan=$hdrcols>";
 
       $post_reference = date($date_fmt, $Timestamp);
-      echo T_('by') . " " . user_reference( 1, 1, "black", $User_ID, $Name, $Handle) .
+      echo T_('by') . " " . user_reference( REF_LINK, 1, 'black', $User_ID, $Name, $Handle) .
          " &nbsp;&nbsp;&nbsp;$post_reference";      
 
       if( $Lastedited > 0 )
@@ -316,15 +323,16 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
       $post_reference = "<user $User_ID> ($post_reference):";
 
       // post body
-      echo "<tr class=\"post_body\">\n <td colspan=$cols>$txt</td></tr>";
+      echo "<tr class=PostBody>\n <td colspan=$cols>$txt</td></tr>";
    }
 
    // bottom line (footer)
-   if( $post_type == 'normal' or $post_type == 'hidden' )
+   if( $postClass == 'Normal' or $postClass == 'Hidden' )
    {
-      $hidden = $post_type == 'hidden';
-      echo "<tr class=\"post_buttons\">\n <td colspan=$cols align=left>";
-      if(  $post_type == 'normal' and !$is_moderator ) // reply link
+      $hidden = $postClass == 'Hidden';
+      echo "<tr class=PostButtons>\n <td colspan=$cols>";
+
+      if( $postClass == 'Normal' and !$is_moderator ) // reply link
       {
          echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
             .URI_AMP."reply=$ID#$ID\">[ " .
@@ -335,21 +343,25 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
             T_('quote') . " ]</a>&nbsp;&nbsp;";
       }
       if( $my_post and !$is_moderator ) // edit link
-         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."edit=$ID#$ID\">" .
-            "<font color=\"#ee6666\">[ " . T_('edit') . " ]</font></a>&nbsp;&nbsp;";
+      {
+         echo "<a class=Highlight href=\"read.php?forum=$forum".URI_AMP
+            ."thread=$thread".URI_AMP."edit=$ID#$ID\">"
+            ."[ " . T_('edit') . " ]</a>&nbsp;&nbsp;";
+      }
+
       if( $is_moderator ) // hide/show link
       {
          if( $PendingApproval !== 'Y' )
-            echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
-               ( $hidden ? 'show' : 'hide' ) . "=$ID#$ID\"><font color=\"#ee6666\">[ " .
-               ( $hidden ? T_('show') : T_('hide') ) . " ]</font></a>";
+            echo "<a class=Highlight href=\"read.php?forum=$forum".URI_AMP
+               ."thread=$thread".URI_AMP . ($hidden ?'show' :'hide') . "=$ID#$ID\">"
+               ."[ " . ($hidden ?T_('show') :T_('hide')) . " ]</a>";
          else
-            echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
-               "approve=$ID#$ID\"><font color=\"#ee6666\">[ " .
-               T_('Approve')  . " ]</font></a>&nbsp;&nbsp;" .
-               "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP .
-               "reject=$ID#$ID\"><font color=\"#ee6666\">[ " .
-               T_('Reject')  . " ]</font></a>";
+            echo "<a class=Highlight href=\"read.php?forum=$forum".URI_AMP
+               ."thread=$thread".URI_AMP."approve=$ID#$ID\">"
+               ."[ " . T_('Approve') . " ]</a>&nbsp;&nbsp;"
+               ."<a class=Highlight href=\"read.php?forum=$forum".URI_AMP
+               ."thread=$thread".URI_AMP."reject=$ID#$ID\">"
+               ."[ " . T_('Reject') . " ]</a>";
       }
       echo "</td></tr>\n";
       
@@ -361,11 +373,11 @@ function draw_post($post_type, $my_post, $Subject='', $Text='', $GoDiagrams=null
 }
 
 
-function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
+function forum_message_box( $postClass, $id, $GoDiagrams=null, $Subject='', $Text='')
 {
    global $forum, $thread;
 
-   if( $post_type != 'edit' and $post_type != 'preview' and strlen($Subject) > 0 and
+   if( $postClass != 'Edit' and $postClass != 'Preview' and strlen($Subject) > 0 and
        strcasecmp(substr($Subject,0,3), "re:") != 0 )
       $Subject = "RE: " . $Subject;
 
@@ -373,7 +385,7 @@ function message_box( $post_type, $id, $GoDiagrams=null, $Subject='', $Text='')
 
    $form->add_row( array( 'DESCRIPTION', T_('Subject'),
                           'TEXTINPUT', 'Subject', 50, 80, $Subject,
-                          'HIDDEN', ($post_type == 'edit' ? 'edit' : 'parent'), $id,
+                          'HIDDEN', ($postClass == 'Edit' ? 'edit' : 'parent'), $id,
                           'HIDDEN', 'thread', $thread,
                           'HIDDEN', 'forum', $forum ));
    $form->add_row( array( 'TAB', 'TEXTAREA', 'Text', 70, 25, $Text ) );
@@ -488,7 +500,7 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
 {
    $result = mysql_query("SELECT ID, UNIX_TIMESTAMP(Time) AS Timestamp FROM Posts " .
                          "WHERE Thread_ID='$Thread_ID' AND Approved='Y' " .
-                         "AND PosIndex>'' " . // '' == inactived (edited)
+                         "AND PosIndex>'' " . // '' == inactivated (edited)
                          "ORDER BY Time Desc LIMIT 1")
       or error('mysql_query_failed','forum_functions.recalculate_lastpost.find');
 
@@ -558,7 +570,7 @@ function display_posts_pending_approval()
    $cols = 4;
    $headline  = array(T_("Posts pending approval") => "colspan=$cols");
    $links = LINKPAGE_STATUS;
-   start_table($headline, $links, "width=90%", $cols);
+   forum_start_table('Pending', $headline, $links, $cols);
 
    $odd = true;
    while( $row = mysql_fetch_array( $result ) )
@@ -570,14 +582,14 @@ function display_posts_pending_approval()
          "<a href=\"forum/read.php?forum=" . $row['Forum_ID'] .
          URI_AMP . "thread=" . $row['Thread_ID'] . URI_AMP .
          "moderator=y#" . $row['Post_ID'] . "\">$Subject</a></td><td>" .
-         user_reference( REF_LINK, 1, NULL, $row['User_ID'],
+         user_reference( REF_LINK, 1, '', $row['User_ID'],
                $row['User_Name'], $row['Handle']) .
          "</td><td nowrap align=right>" .date($date_fmt, $row['Time']) .
          "</td></tr>\n";
       $odd = !$odd;
 
    }
-   end_table($links, $cols);
+   forum_end_table($links, $cols);
 }
 
 

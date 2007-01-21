@@ -1,7 +1,10 @@
 
 /* ------------------------- */
-/* global use styles */
+/* global styles */
 /* ------------------------- */
+.TextBrowsers {
+   display: none;
+}
 
 .black {
    color: black;
@@ -45,7 +48,7 @@
    white-space: nowrap;
 }
 
-.warning {
+.InlineWarning {
    color: red;
 }
 
@@ -76,6 +79,12 @@ a.rating {
    color: black;
 }
 
+a.gameblack,
+a.sendblack,
+a.userblack {
+   color: black;
+}
+
 a[target] /*, a[target="new"], a[target="_blank"]*/
 {
    color:olive;
@@ -86,37 +95,29 @@ h3.header {
    text-align: center;
 }
 
+.InlineHeader {
+   color: #800000;
+   font-weight: bold;
+}
+
 .sysmsg {
    color: green;
    font-weight: bold;
 }
 
-/*
-.image-left {
-   float: left;
-   clear: both;
-   margin: 0.5em 1em 0.5em 0em;
-   border: 0px solid black;
-}
-
-.image-inline {
-   float: none;
-}
-
-.image-right {
-   float: right;
-   clear: both;
-   margin: 0.5em;
-   border: 0px solid black;
-}
-*/
-
 img {
    border: 0px solid black;
+/*
+  No vertical-align here, else Avant browser
+  will badly display the table.goban img:
+  enlarging the text display will increase the
+  height of the table cells too.
    vertical-align: middle;
+*/
+   margin: 0px;
 }
 
-img.intextstone {
+img.InTextStone {
    width: 17px;
    height: 17px;
    border: 0px solid black;
@@ -124,8 +125,16 @@ img.intextstone {
 }
 
 table {
-   empty-cells: show;
    table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-align: center;
+   text-indent: 0;
 }
 
 
@@ -136,6 +145,7 @@ table {
 body {
    background: #F7F5E3;
    color: black;
+   margin: 0px;
 }
 
 table#page_head {
@@ -250,6 +260,29 @@ table.table tr.highlight {
    background: #ffd070;
 }
 
+table.table th.button {
+   min-width: 96px;
+   width: 96px;
+   white-space: nowrap;
+}
+table.table td.button {
+   background-repeat: no-repeat;
+   background-position: center;
+   padding: 0px 2px 0px 2px;
+   min-width: 96px;
+   width: 96px;
+   text-align: center;
+   white-space: nowrap;
+}
+table.table a.button {
+   display: block;
+   width: 92px;
+/*
+*/
+   min-width: 92px;
+   font: bold 100% sans-serif;
+   text-decoration: none;
+}
 
 
 
@@ -277,7 +310,8 @@ table.infos td.header, table.infos th.header {
    font-weight: bold;
 }
 
-table.infos td.onvacation, table.infos td.onvacation a {
+table.infos td.onvacation,
+table.infos td.onvacation a {
    color: red;
    font-weight: bold;
 }
@@ -331,70 +365,113 @@ table#biomove_infos img {
 /* board page */
 /* ------------------------- */
 
-table.captures {
+table.Goban {
+   background-repeat: repeat;
+   background-position: top left; /*  0% 0% top left */
+   empty-cells: hide;
+   border-collapse: collapse !important;
+   border-spacing: 0px !important;
+}
+
+table.Goban,
+table.Goban img,
+table.Goban tr,
+table.Goban td {
+   margin: 0px !important;
+   padding: 0px !important;
+   line-height: 1px !important;
+   white-space: nowrap !important;
+   border: 0px solid red !important;
+/*
+  No vertical-align: here, else Avant browser
+  will badly display the table.goban img:
+  enlarging the text display will increase the
+  height of the table cells too.
+   vertical-align: top !important;
+*/
+}
+
+table.Goban td {
+   padding: 0px;
+   margin: 0px;
+   text-align: left;
+   color: black;
+}
+
+table.Goban img {
+   border: 0px solid black;
+   margin: 0px;
+}
+
+
+
+table.Captures {
    background: #f7f5ff;
    border-width: 0px 0px 1px 0px;
    border-bottom: 1px solid #0c41c9;
    margin: 4px;
 }
 
-table.captures th {
+table.Captures th {
    background: #0c41c9;
    color: #fffc70;
+   border: 0px solid gray;
    padding: 4px;
 }
 
-table.captures td.b {
+table.Captures td.B {
+   border: 0px;
    vertical-align: top;
    padding: 4px;
    white-space: nowrap;
 }
 
-table.captures td.w {
+table.Captures td.W {
+   border: 0px;
    vertical-align: top;
    padding: 4px;
    white-space: nowrap;
 }
 
-table.captures dl {
+table.Captures dl {
    padding: 0px;
    margin: 0px;
 }
 
-table.captures dt {
+table.Captures dt {
    padding: 0px;
    margin: 0px;
 }
 
-table.captures img {
+table.Captures img {
    vertical-align: middle;
 }
 
 
-table.gamenotes {
+table.GameNotes {
    border-width: 0px;
    margin: 4px;
 }
 
-table.gamenotes th {
+table.GameNotes th {
    background: #7aa07a;
    color: #fffc70;
    padding: 4px;
 }
 
-table.gamenotes td {
+table.GameNotes td {
    padding: 0px;
    margin: 0px;
 }
 
-table.gamenotes td.notes {
+table.GameNotes td.Notes {
    background: #ddf0dd;
    padding: 0px;
    margin: 0px;
 }
 
 
-table.gameinfos {
+table.GameInfos {
    border: 0px solid #e0e8ed;
    border-spacing: 0px;
    margin: 0px;
@@ -402,21 +479,24 @@ table.gameinfos {
    empty-cells: show;
 }
 
-table.gameinfos td, table.gameinfos th {
+table.GameInfos th,
+table.GameInfos td {
    border: 0px solid #e0e8ed;
    margin: 0px;
    padding: 4px;
 }
 
-table.gameinfos tr {
+table.GameInfos tr {
    background: #e0e8ed;
 }
 
-table.gameinfos tr#blackinfo, table.gameinfos tr#blacktime {
+table.GameInfos tr#blackInfo,
+table.GameInfos tr#blackTime {
    background: #dddddd;
 }
 
-table.gameinfos tr#whiteinfo, table.gameinfos tr#whitetime {
+table.GameInfos tr#whiteInfo,
+table.GameInfos tr#whiteTime {
    background: #ffffff;
 }
 
@@ -431,7 +511,8 @@ table.moves {
    empty-cells: hide;
 }
 
-table.moves td, table.moves th {
+table.moves th,
+table.moves td {
    border-width: 1px;
    padding: 1px;
    color: black;
@@ -462,59 +543,207 @@ table.moves a.b {
 /* forums layout */
 /* ------------------------- */
 
-tr.forum_header {
-   background: #d0d0d0;
+table.Forum {
+   background: #e0e8ed;
    color: black;
    text-align: left;
+   border: 0px solid red;
+   border-collapse: collapse;
+   margin: 0px;
+   border-spacing: 0px;
+   empty-cells: show;
+   width: 99%;
 }
 
-tr.forum_header a {
+/* in status page */
+table#forumPending {
+   width: 90%;
+}
+
+table.Forum table {
+   background: #e0e8ed;
+   color: black;
+   text-align: left;
+   border: 0px solid black;
+   border-collapse: collapse;
+   margin: 0px;
+   border-spacing: 0px;
+   empty-cells: show;
+   width: 100%;
+}
+
+/* forum lists */
+table.Forum .Row3,
+table.Forum .Row1 {
+   background: #e0e8ed;
+   color: black;
+}
+table.Forum .Row4,
+table.Forum .Row2 {
+   background: white;
    color: black;
 }
 
-tr.post_head {
+table#forumIndex tr.Row2 td {
+   padding: 0px;
+   margin: 0px;
+}
+
+table#forumIndex tr.Row2 {
+   padding: 0px;
+   margin: 0px;
+}
+
+/*
+table#forumIndex tr.Row2 dd,
+table#forumIndex tr.Row2 dt,
+*/
+table#forumIndex tr.Row2 dl {
+   margin: 0px;
+}
+
+
+table#forumIndex td.name {
+   width: 60%;
+   padding: 3px 8px 3px 8px;
+}
+table#forumIndex td.name a {
+   font-weight: bold;
+}
+table#forumIndex td.PostCnt,
+table#forumIndex td.PostDate {
+   white-space: nowrap;
+}
+
+
+table.Forum .Moderated {
+   color: #ff4466;
+}
+
+table.Forum td {
+   border: 0px solid red;
+   padding: 3px;
+   margin: 0px;
+   text-align: left;
    color: black;
 }
 
-tr.post_head.normal {
+table.Forum td.Indent {
+   width: 15px;
+   min-width: 15px;
+   padding: 0px;
+   margin: 0px;
+   border: 0px solid blue;
+/*
+   display: none;
+   visible: none;
+   display: none;
+*/
+}
+
+table.Forum td.Indent2 {
+   padding: 0px;
+   margin: 0px;
+   border: 0px solid red;
+}
+
+table.Forum tr.Caption td {
+   background: #000080;
+   color: white;
+   text-align: left;
+   padding: 3px 3px 3px 8px;
+}
+
+table.Forum tr.ForumLinksT td,
+table.Forum tr.ForumLinksB td {
+   background: #d0d0d0;
+   color: black;
+   padding: 3px 8px 3px 8px;
+   text-align: center;
+}
+
+
+table.Forum .LinksL {
+   background: #d0d0d0;
+   color: black;
+   border: 0px solid lime;
+   margin: 0px;
+   text-align: left;
+   float: left;
+   top: 0%;
+}
+
+table.Forum .LinksR {
+   background: #d0d0d0;
+   color: black;
+   border: 0px solid lime;
+   margin: 0px;
+   text-align: right;
+   float: right;
+   top: 0%;
+}
+
+table.Forum .LinksL a {
+   color: black;
+}
+
+table.Forum .LinksR a {
+   color: black;
+}
+
+/*
+  The headers of the posts have the class="PostHeadSubclass"
+   where Subclass is one of:
+    Normal, Hidden, Reply, Preview, Edit, SearchResult
+*/
+table.Forum tr.PostHeadNormal {
    background: #cccccc;
    color: black;
 }
-tr.post_head.search_result {
-   background: #77bb88;
-   color: black;
-}
-tr.post_head.hidden {
-   background: #eecccc;
-   color: black;
-}
-tr.post_head.reply {
+table.Forum tr.PostHeadReply {
    background: #cccccc;
    color: black;
 }
-tr.post_head.preview {
+table.Forum tr.PostHeadPreview {
    background: #cceecc;
    color: black;
 }
-tr.post_head.edit {
+table.Forum tr.PostHeadEdit {
    background: #eeeecc;
    color: black;
 }
+table.Forum tr.PostHeadHidden {
+   background: #eecccc;
+   color: black;
+}
+table.Forum tr.PostHeadSearchResult {
+   background: #77bb88;
+   color: black;
+}
 
-tr.post_head .post_subject {
+table.Forum tr.PostHeadSearchResult .PostSubject,
+table.Forum tr.PostHeadEdit .PostSubject,
+table.Forum tr.PostHeadPreview .PostSubject,
+table.Forum tr.PostHeadReply .PostSubject,
+table.Forum tr.PostHeadHidden .PostSubject,
+table.Forum tr.PostHeadNormal .PostSubject {
    color: black;
    font-size: larger;
    font-weight: bold;
 }
 
-tr.post_body {
+table.Forum tr.PostBody {
    background: white;
    color: black;
 }
 
-tr.post_buttons {
+table.Forum tr.PostButtons {
    background: white;
    color: black;
+}
+
+table.Forum tr.PostButtons a.Highlight {
+   color: #ee6666;
 }
 
 

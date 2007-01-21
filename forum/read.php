@@ -36,7 +36,7 @@ function revision_history($post_id)
    $links |= LINK_BACK_TO_THREAD;
    $Lastread = $NOW;
 
-   start_table($headline, $links, 'width="99%"', $cols);
+   forum_start_table('Revision', $headline, $links, $cols);
    $cur_depth= -1;
 
 
@@ -53,12 +53,12 @@ function revision_history($post_id)
 
    extract($row);
    change_depth( $cur_depth, 1, $cols);
-   draw_post( 'reply', true, $row['Subject'], $row['Text']);
+   draw_post( 'Reply', true, $row['Subject'], $row['Text']);
    echo "<tr><td colspan=$cols height=2></td></tr>";
    change_depth( $cur_depth, 2, $cols);
 
    $result = mysql_query( $query_select .
-           "WHERE Parent_ID='$post_id' AND PosIndex='' " . // '' == inactived (edited)
+           "WHERE Parent_ID='$post_id' AND PosIndex='' " . // '' == inactivated (edited)
            "ORDER BY Timestamp DESC")
       or error('mysql_query_failed','forum_read.revision_history.find_edits');
 
@@ -66,13 +66,13 @@ function revision_history($post_id)
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
-      draw_post( 'edit' , true, $row['Subject'], $row['Text']);
+      draw_post( 'Edit' , true, $row['Subject'], $row['Text']);
       echo "<tr><td colspan=$cols height=2></td></tr>";
    }
 
 
    change_depth( $cur_depth, -1, $cols);
-   end_table($links, $cols);
+   forum_end_table($links, $cols);
    end_page();
    exit;
 }
@@ -107,7 +107,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    echo "<tr>";
    $i= min( $cur_depth, FORUM_MAXIMUM_DEPTH);
    $c= FORUM_MAXIMUM_DEPTH+1 - $i;
-   $indent= "<td class=\"indent\">&nbsp;</td>";
+   $indent= "<td class=Indent>&nbsp;</td>";
    switch( $i )
    {
       case 1:
@@ -116,10 +116,10 @@ function change_depth( &$cur_depth, $new_depth, $cols)
          echo "$indent";
       break;
       case 3:
-         echo "<td>&nbsp;</td>$indent";
+         echo "<td class=Indent2></td>$indent";
       break;
       default:
-         echo "<td colspan=".($i-2).">&nbsp;</td>$indent";
+         echo "<td class=Indent2 colspan=".($i-2)."></td>$indent";
       break;
    }
 
@@ -195,23 +195,23 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    }
 
    $title = T_('Forum').' - '.$Forumname;
-   start_page($title, true, $logged_in, $player_row,
-      "td.indent{ width:" . FORUM_INDENTATION_PIXELS .
-      "px; min-width:" . FORUM_INDENTATION_PIXELS . "px;}\n"
-      );
-   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
+   start_page($title, true, $logged_in, $player_row);
+   echo "<h3 class=Header>$title</h3>\n";
 
    print_moderation_note($is_moderator, '99%');
 
    if( @$_GET['revision_history'] > 0 )
+   {
       revision_history(@$_GET['revision_history']); //set $Lastread
+      exit; //done in revision_history
+   }
 
 // The table structure of the list:
 // level 1: the header, body and footer TABLE of the list
 // level 2: the boby of the list: one row per post managing its indent
 // level 3: the post cell TABLE
 
-   start_table($headline, $links, 'width="99%"', $cols);
+   forum_start_table('Read', $headline, $links, $cols);
    $cur_depth= -1;
 
 
@@ -231,7 +231,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
                          "Players.ID AS uid, Players.Name, Players.Handle " .
                          "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID " .
                          "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
-                         "AND PosIndex>'' " . // '' == inactived (edited)
+                         "AND PosIndex>'' " . // '' == inactivated (edited)
                          "ORDER BY PosIndex")
       or error('mysql_query_failed','forum_read.find_posts');
 
@@ -258,21 +258,21 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       change_depth( $cur_depth, $Depth, $cols);
 
 
-      $post_type = 'normal';
+      $postClass = 'Normal';
 
       if( $hidden )
-         $post_type = 'hidden';
+         $postClass = 'Hidden';
 
       if( $reply == $ID )
-         $post_type = 'reply';
+         $postClass = 'Reply';
 
       if( $edit == $ID )
-         $post_type = 'edit';
+         $postClass = 'Edit';
 
 //      $GoDiagrams = find_godiagrams($Text);
 
       $post_reference =
-         draw_post($post_type, $uid == $player_row['ID'], $Subject, $Text); //, $GoDiagrams);
+         draw_post($postClass, $uid == $player_row['ID'], $Subject, $Text); //, $GoDiagrams);
 
       if( $preview and $preview_ID == $ID )
       {
@@ -280,12 +280,12 @@ function change_depth( &$cur_depth, $new_depth, $cols)
          $Subject = $preview_Subject;
          $Text = $preview_Text;
 //         $GoDiagrams = $preview_GoDiagrams;
-         draw_post('preview', false, $Subject, $Text); //, $GoDiagrams);
+         draw_post('Preview', false, $Subject, $Text); //, $GoDiagrams);
       }
 
-      if( $post_type != 'normal' and $post_type != 'hidden' and !$is_moderator )
+      if( $postClass != 'Normal' and $postClass != 'Hidden' and !$is_moderator )
       {
-         if( $post_type == 'reply' and !($preview and $preview_ID == $ID) )
+         if( $postClass == 'Reply' and !($preview and $preview_ID == $ID) )
          {
             if( @$_REQUEST['quote'] )
             {
@@ -296,7 +296,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 //            $GoDiagrams = null;
          }
          echo "<tr><td colspan=$cols align=center>\n";
-         message_box($post_type, $ID, NULL /*$GoDiagrams*/, $Subject, $Text);
+         forum_message_box($postClass, $ID, NULL /*$GoDiagrams*/, $Subject, $Text);
          echo "</td></tr>\n";
       }
    } //posts loop
@@ -307,9 +307,9 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       $Subject = $preview_Subject;
       $Text = $preview_Text;
 //      $GoDiagrams = $preview_GoDiagrams;
-      draw_post('preview', false, $Subject, $Text); //, $GoDiagrams);
+      draw_post('Preview', false, $Subject, $Text); //, $GoDiagrams);
       echo "<tr><td colspan=$cols align=center>\n";
-      message_box('preview', $thread, NULL /*$GoDiagrams*/, $Subject, $Text);
+      forum_message_box('Preview', $thread, NULL /*$GoDiagrams*/, $Subject, $Text);
       echo "</td></tr>\n";
    }
 
@@ -319,12 +319,12 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       echo "<tr><td colspan=$cols align=center>\n";
       if( $thread > 0 )
          echo '<hr>';
-      message_box('normal', $thread, null, $thread_Subject);
+      forum_message_box('Normal', $thread, null, $thread_Subject);
       echo "</td></tr>\n";
    }
 
    change_depth( $cur_depth, -1, $cols);
-   end_table($links, $cols);
+   forum_end_table($links, $cols);
 
 
 // Update Forumreads to remove the 'new' flag
