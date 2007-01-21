@@ -233,7 +233,7 @@ This is why:
 
          $coord = number2sgf_coords( $query_X, $query_Y, $Size);
 
-{//to fixe old way Ko detect. Could be removed when no more old way games.
+{//to fix the old way Ko detect. Could be removed when no more old way games.
   if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
 }
          check_move( $TheBoard, $coord, $to_move);

@@ -49,20 +49,25 @@ function unix_timestamp($date)
 
 function get_clock_used($nightstart)
 {
-// because mktime() can return undefined result if DST is active
+/***
+ * originally:  return gmdate('G', mktime( $nightstart,0,0));
+ * but because ($nightstart,0,0) could fall in the one hour gap
+ * when DST is active, mktime() can return undefined result.
+ * must ALWAYS return an integer 0 <= n < 24   => clock ID
+ ***/
    $d= date("d");
    $m= date("m");
    $y= date("Y");
    $n= -1;
-   for($i=0; $i<5; $i++)
-   {
+   for($i=0; $i<6; $i++) //within the 6 next days,
+   { //try to find two days with the same result
       $o= $n;
       $n= mktime($nightstart,0,0,$m,$d+$i,$y);
       if( $n<0 ) continue;
-      $n= gmdate('G', $n);
+      $n= gmdate('G', $n); //hour without leading zeros. 0..23
       if( $n === $o ) break;
    }
-   return ((($n % 24) + 24) % 24);
+   return ((($n % 24) + 24) % 24); //ALWAYS integer 0..23
 }
 
 function get_clock_ticks($clock_used)
@@ -123,17 +128,54 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
             $byoper = $startbyoper-1;
          }
 
-         //because $elapsed>=0 and ($startbyotime - $byotime)>=0, this is equal to:
-         //$byoper -= floor(($elapsed - $byotime)/$startbyotime) +1;
-         //$byoper += ceil(($byotime - $elapsed)/$startbyotime) -1;
-         $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
+         /***
+          * previous formula:
+          *  $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
+          * only BECAUSE $elapsed>=0 and ($startbyotime - $byotime)>=0,
+          * the (int)x cast is a floor(x) and this is equal to:
+          *  $byoper -= floor(($elapsed - $byotime)/$startbyotime) +1;
+          *  $byoper += ceil(($byotime - $elapsed)/$startbyotime) -1;
+          * so don't make the (int) cast works on a negative number
+          ***/
+         $deltaper = (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
+         $byoper -= $deltaper;
 
          if( $byoper < 0 )
             $byotime = $byoper = 0;  // time is up;
          else if( $has_moved )
             $byotime = $startbyotime;
          else 
-            $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
+            $byotime-= $elapsed - $deltaper*$startbyotime;
+         /***
+          * previous formula:
+          *  $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
+          * initially, the amount of time was:
+          *  A = B + P * S    //B=$byotime, P=$byoper, S=$startbyotime)
+          * now, we have:     //E=$elapsed
+          *  a = b + p * S
+          *  a = (B-E-1)-S*floor((B-E-1)/S)+1 + S*(P-floor((E-B)/S)-1)
+          *  a = (B-E-1)+1 +S*(P -floor((E-B)/S)-1 -floor((B-E-1)/S))
+          *  a = B -E +S*(P -floor((E-B)/S) -floor((B-E-1)/S) -1)
+          *  E = A - a
+          *  E = B + S*P -B +E -S*(P -floor((E-B)/S) -floor((B-E-1)/S) -1)
+          *  E = E -S*(-floor((E-B)/S) -floor((B-E-1)/S) -1)
+          *  => (-floor((E-B)/S) -floor((B-E-1)/S) -1) = 0
+          *  => floor(-K/S) +floor((K-1)/S) = -1        //eq#1
+          *  a) if K/S integer then
+          *     floor(-K/S) = -K/S
+          *     floor((K-1)/S) = K/S + floor(-1/S) = K/S -1
+          *     eq#1 verified
+          *  b) because we have only integers, if S don't divide K then
+          *     floor(-K/S) = ceil(-K/S) -1 = -floor(K/S) -1
+          *     floor((K-1)/S) = floor(K/S)
+          *     eq#1 verified
+          * the b calculus could have been:
+          *  b = a -S*p = A -E -S*p = B +S*P -E -S*p = B -E +S*(P-p)
+          *  p = P -(P-p)
+          * i.e:         *
+          *  $p-= (P-p)
+          *  $b-= E-S*(P-p)
+          ***/
       }
       break;
 

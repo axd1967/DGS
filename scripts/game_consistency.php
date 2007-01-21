@@ -102,7 +102,7 @@ function check_consistency( $gid)
    $games_White_Prisoners = $White_Prisoners;
    $games_Last_X = $Last_X;
    $games_Last_Y = $Last_Y;
-{//to fixe old way Ko detect. Could be removed when no more old way games.
+{//to fix the old way Ko detect. Could be removed when no more old way games.
   if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
 }
    $games_Last_Move = $Last_Move;
