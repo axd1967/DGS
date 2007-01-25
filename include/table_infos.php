@@ -43,16 +43,27 @@ class Table_info
 
    /*! \brief Array of rows to be diplayed.
     * Each row should consist of an array like this:
-    * array( $column_nr1 => assoc( header, info, rattbs, hattbs, iattbs),
-    *        $column_nr2 => assoc( rawheader, rawinfo, rattbs, hattbs, iattbs));
-    * with (all optional):
-    *    header    = the "HTML safe" left column text.
-    *    info      = the "HTML safe" right column text.
-    *    rawheader = the unsafe left column text (will be healed).
-    *    rawinfo   = the unsafe right column text (will be healed).
-    *    hattbs    = the attributs of left cellule.
-    *    iattbs    = the attributs of right cellule.
+    *   array( $column_nr1 => assoc( {s}name, {s}info, rattb, nattb, iattb),
+    *          $column_nr2 => assoc( sname, info, rattb, iattb)),
+    *          $column_nr3 => assoc( {s}caption, cattb, rattb));
+    *
+    * with:
+    *      - all optional,
+    *      - "unsafe" exclude "safe"
+    *      - {s}caption exclude ({s}name, {s}info)):
+    *
     *    rattbs    = the attributs of the row.
+    *
+    *    sname     = the "HTML safe" left cellule text.
+    *    sinfo     = the "HTML safe" right cellule text.
+    *    name      = the unsafe left cellule text (will be healed).
+    *    info      = the unsafe right cellule text (will be healed).
+    *    nattbs    = the attributs of left cellule.
+    *    iattbs    = the attributs of right cellule.
+    *
+    *    scaption  = the "HTML safe" extended cellule text.
+    *    caption   = the unsafe extended cellule text (will be healed).
+    *    cattbs    = the attributs of extended cellule.
     */
    var $Tablerows;
 
@@ -74,13 +85,66 @@ class Table_info
       array_push( $this->Tablerows, $row_array );
    }
 
+   /*! \brief Add an caption row to be displayed.
+    *  assuming that the string is not yet "HTML safe"
+    * \see $Tablerows
+    */
+   function add_caption( $capt)
+   {
+      array_push( $this->Tablerows, array(
+            'caption' => $capt,
+            'cattb' => 'class=Caption'
+            ) );
+   }
+
+   /*! \brief Add an caption row to be displayed.
+    *  assuming that the string IS "HTML safe"
+    * \see $Tablerows
+    */
+   function add_scaption( $scapt='')
+   {
+      array_push( $this->Tablerows, array(
+            'scaption' => $scapt,
+            'cattb' => 'class=Caption'
+            ) );
+   }
+
+   /*! \brief Add an info row to be displayed.
+    *  assuming that the strings are not yet "HTML safe"
+    * \see $Tablerows
+    */
+   function add_info( $name='', $info='', $warningtitle='')
+   {
+      array_push( $this->Tablerows, array(
+            'name' => $name,
+            'info' => $info,
+            'iattb' => ( !$warningtitle ? '' :
+                  $this->warning_cell_attb( $warningtitle) )
+            ) );
+   }
+
+   /*! \brief Add an info row to be displayed.
+    *  assuming that the strings ARE "HTML safe"
+    * \see $Tablerows
+    */
+   function add_sinfo( $sname='', $sinfo='', $warningtitle='')
+   {
+      array_push( $this->Tablerows, array(
+            'sname' => $sname,
+            'sinfo' => $sinfo,
+            'iattb' => ( !$warningtitle ? '' :
+                  $this->warning_cell_attb( $warningtitle) )
+            ) );
+   }
+
    /*! \brief Create a string of the table. */
-   function make_table( $tattbs='class=infos')
+   function make_table( $tattbs='class=Infos')
    {
       /* Start of the table */
 
       $tattbs = attb_build($tattbs);
-      $string = "<table id='{$this->Id}_infos'$tattbs>\n";
+      $string = "<table id='{$this->Id}Infos'$tattbs>\n";
+      $string.= "<colgroup><col class=ColRubric><col class=ColInfo></colgroup>\n";
 
       /* Make table rows */
 
@@ -90,8 +154,8 @@ class Table_info
          $c=0;
          foreach( $this->Tablerows as $trow )
          {
-            $c=($c%4)+1;
-            $string .= $this->make_tablerow( $trow, "class=row$c" );
+            $c=($c % LIST_ROWS_MODULO)+1;
+            $string .= $this->make_tablerow( $trow, "class=Row$c", "Row$c" );
          }
       }
 
@@ -107,61 +171,64 @@ class Table_info
       echo $this->make_table();
    }
 
-   /*! \privatesection */
-
+   /*! \brief Return the attributs of a warning cellule. */
    function warning_cell_attb( $title='')
    {
-      $str= ' class=warning';
-      if ($title) $str.= ' title="' . $title . '"';
+      $str= ' class=Warning';
+      if( $title ) $str.= ' title=' . attb_quote($title);
       return $str;
    }
 
-   function make_tablerow( $tablerow, $rattbs='class=row1')
+   /*! \privatesection */
+
+   function make_tablerow( $tablerow, $rattbs='', $rclass='')
    {
-      if( isset($tablerow['rattbs']) )
-         $rattbs = $tablerow['rattbs'];
+      if( isset($tablerow['rattb']) )
+         $rattbs = $tablerow['rattb'];
       $rattbs = attb_build($rattbs);
 
       $string = " <tr$rattbs";
-      /*
-      if( ALLOW_JSCRIPT )
+      if( ALLOW_JSCRIPT && $rclass )
       {
          $string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
       }
-      */
       $string.= ">\n  ";
 
-      if( isset($tablerow['hattbs']) )
-         $rattbs = attb_build($tablerow['hattbs']);
+      if( isset($tablerow['caption'])
+         || isset($tablerow['scaption'])
+         )
+      {
+         $string.= $this->add_cell( $tablerow,
+            'caption', 'scaption', 'cattb', '<th colspan=2$>', '</th>');
+      }
       else
-         $rattbs = ' class=header';
+      {
+         $string.= $this->add_cell( $tablerow,
+            'name', 'sname', 'nattb', '<td$>', '</td>', array('class'=>'Rubric'));
+         $string.= $this->add_cell( $tablerow,
+            'info', 'sinfo', 'iattb', '<td$>', '</td>');
+      }
 
-      $string.= "<td$rattbs>";
-
-      if( isset($tablerow['rawheader']) )
-         $rattbs = make_html_safe($tablerow['rawheader'],INFO_HTML);
-      else
-         $rattbs = @$tablerow['header'];
-
-      $string.= $rattbs.'</td>';
-
-      if( isset($tablerow['iattbs']) )
-         $rattbs = attb_build($tablerow['iattbs']);
-      else
-         $rattbs = ' class=info';
-
-      $string.= "<td$rattbs>";
-
-      if( isset($tablerow['rawinfo']) )
-         $rattbs = make_html_safe($tablerow['rawinfo'],INFO_HTML);
-      else
-         $rattbs = @$tablerow['info'];
-
-      $string.= $rattbs."</td>\n </tr>\n";
+      $string.= "\n </tr>\n";
 
       return $string;
    }
 
-}
+   function add_cell( $tablerow, $unsafe, $safe, $attbs, $start, $stop, $arymrg=NULL)
+   {
+      $attbs = @$tablerow[$attbs];
+      if( isset($arymrg) )
+         $attbs = attb_merge( attb_parse($attbs), $arymrg);
+      $attbs = attb_build( @$attbs);
+
+      if( isset($tablerow[$unsafe]) )
+         $str = make_html_safe( $tablerow[$unsafe], INFO_HTML);
+      else
+         $str = @$tablerow[$safe];
+
+      return str_replace('$',$attbs,$start).$str.$stop;
+   }
+
+} //class Table_info
 
 ?>
