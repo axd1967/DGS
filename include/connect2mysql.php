@@ -66,12 +66,22 @@ if( function_exists('mysql_real_escape_string') ) //PHP >= 4.3.0
 {
    function mysql_addslashes($str) {
       global $dbcnx;
-      if( !$dbcnx )
-         return mysql_escape_string($str);
-      return mysql_real_escape_string($str, $dbcnx);
+      if( @$dbcnx )
+      {
+         //If no connection is found, an E_WARNING level warning is generated.
+         //Warning: Can't connect to MySQL server on '...' in ... on line ...
+         $e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
+         $res= mysql_real_escape_string($str, $dbcnx);
+         error_reporting($e);
+         if( $res !== false )
+            return $res;
+         //error('mysql_query_failed','mysql_addslashes');
+      }
+      return mysql_escape_string($str);
    }
 }
-else if( function_exists('mysql_escape_string') ) //PHP >= 4.0.3
+else
+if( function_exists('mysql_escape_string') ) //PHP >= 4.0.3
 {
    function mysql_addslashes($str) { return mysql_escape_string($str); }
 }
