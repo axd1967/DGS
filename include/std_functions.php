@@ -816,10 +816,12 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
 {
    global $SUB_PATH, $NOW;
 
+/*
    if( COOKIE_OLD_COMPATIBILITY )
    {
       setcookie( $name, '', $NOW-3600, $SUB_PATH);
    }
+*/
 
    $name= COOKIE_PREFIX.$name;
 

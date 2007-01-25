@@ -57,8 +57,6 @@ $tick_frequency = 12; // ticks/hour
 
 //a $_REQUEST['handle'] will not overlap $_COOKIE['cookie_handle']
 define('COOKIE_PREFIX', 'cookie_');
-//compatibility with old cookies: to be removed in a while (as partner code lines)
-define('COOKIE_OLD_COMPATIBILITY', 1 && COOKIE_PREFIX>'');
 
 
 // don't set UHANDLE_NAME to 'userid' which is the handle of the
@@ -94,11 +92,15 @@ if ( get_magic_quotes_gpc() )
 function safe_getcookie($name)
 {
    $cookie = arg_stripslashes((string)@$_COOKIE[COOKIE_PREFIX.$name]);
+/*
+//compatibility with old cookies: to be removed in a while (as partner code lines)
+define('COOKIE_OLD_COMPATIBILITY', 1 && COOKIE_PREFIX>'');
    if( COOKIE_OLD_COMPATIBILITY && !$cookie )
    {
       if( $name=='handle' or $name=='sessioncode' or substr($name,0,5)=='prefs' )
          $cookie = arg_stripslashes((string)@$_COOKIE[$name]);
    }
+*/
    return $cookie;
 }
 
