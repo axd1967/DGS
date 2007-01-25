@@ -99,12 +99,14 @@ define( "FORM_POST", 1 );
 
 class Form
 {
-   /*! \brief The form name. */
+   /*! \brief The form name (and ID prefix too). */
    var $name;
    /*! \brief The page to go to when submitting. */
    var $action;
    /*! \brief The method to send. should be FORM_GET or FORM_POST. */
    var $method;
+   /*! \brief The form class, default 'formClass'. */
+   var $fclass;
 
    /*! \brief Internal variable to contain all the information on the rows of the form. */
    var $rows;
@@ -137,7 +139,8 @@ class Form
    var $safe_text;
 
    /*! \brief Constructor. Initializes various variables. */
-   function Form( $name, $action_page, $method, $echo_form_start_now=false )
+   function Form( $name, $action_page, $method
+         , $echo_form_start_now=false, $class='FormClass' )
       {
          $this->attached = array();
          $this->hiddens_echoed = false;
@@ -147,6 +150,7 @@ class Form
          $this->name = $name;
          $this->action = $action_page;
          $this->method = $method;
+         $this->fclass = $class;
          $this->echo_form_start_now = $echo_form_start_now;
 
          $this->max_nr_columns = 2; //actually build on the fly, it is often inadequate for the top rows of the form
@@ -158,7 +162,7 @@ class Form
 
          $this->line_no_step = 10;
 
-//'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
+         //'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
          $this->form_elements = array(
             'DESCRIPTION'  => array( 'NumArgs' => 1,
                                      'NewTD'   => true,
@@ -289,23 +293,23 @@ class Form
          );
 
          if( $echo_form_start_now )
-            echo $this->print_start( $this->name, $this->action, $this->method );
+            echo $this->print_start_default();
 
       }
 
    /*! \brief Get $form_string and update it if necessary. */
    function get_form_string( $tabindex=0 )
-      {
-         $this->tabindex= $tabindex;
-         $this->update_form_string();
-         return $this->form_string;
-      }
+   {
+      $this->tabindex= $tabindex;
+      $this->update_form_string();
+      return $this->form_string;
+   }
 
    /*! \brief Echo $form_string */
    function echo_string( $tabindex=0 )
-      {
-         echo $this->get_form_string($tabindex);
-      }
+   {
+      echo $this->get_form_string($tabindex);
+   }
 
    /*!
     * \brief Add a new row to the form.
@@ -367,10 +371,17 @@ class Form
       {
          $formstr = "";
 
-         if( !$this->echo_form_start_now )
-            $formstr .= $this->print_start( $this->name, $this->action, $this->method );
+         if( count($this->rows) <= 0 )
+         {
+            if( $this->echo_form_start_now )
+               $formstr .= $this->print_end();
+            return $formstr;
+         }
 
-         $formstr .= "  <TABLE class=form_table>\n"; //form table
+         if( !$this->echo_form_start_now )
+            $formstr .= $this->print_start_default();
+
+         $formstr .= "  <TABLE class=FormClass>\n"; //form table
 
          ksort($this->rows);
 
@@ -472,9 +483,6 @@ class Form
 
          $formstr .= "  </TABLE>\n";
 
-         if (!$this->hiddens_echoed)
-            $formstr .= $this->echo_hiddens();
-
          $formstr .= $this->print_end();
 
          return $formstr;
@@ -504,9 +512,7 @@ class Form
     */
    function create_string_func_header( &$result, $args )
       {
-         global $h3_color;
-         $result .= "&nbsp;<h3><font color=$h3_color>" . $args[0] . ":" .
-            "</font></h3>";
+         $result .= "&nbsp;<h3 class=Header>" . $args[0] . ":" . "</h3>";
       }
 
    /*!
@@ -680,6 +686,7 @@ class Form
          $this->nr_columns+= $colspan;
       }
 
+
    /*!
     * \brief This will start a standard form.
     *
@@ -687,22 +694,32 @@ class Form
     * \param $action_page The page to access when submitting.
     * \param $method      FORM_GET or FORM_POST (GET means in url and POST hidden).
     */
-   function print_start( $name, $action_page, $method )
-      {
-         assert( $method == FORM_GET or $method == FORM_POST );
-         $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
+   function print_start( $name, $action_page, $method, $class='FormClass' )
+   {
+      assert( $method == FORM_GET or $method == FORM_POST );
+      $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
-         return "\n<FORM name=\"$name\" action=\"$action_page\" method=\"" .
-            $pg_arr[$method] . "\" id=\"{$name}_form\">\n";
-      }
+      return "\n<FORM id=\"{$name}Form\" name=\"$name\" class=\"$class\"" .
+         " action=\"$action_page\" method=\"" . $pg_arr[$method] . "\">\n";
+   }
+   function print_start_default()
+   {
+      return $this->print_start( $this->name, $this->action
+            , $this->method, $this->fclass);
+   }
 
    /*!
     * \brief This will end a standard form.
     */
    function print_end()
-      {
-         return "</FORM>\n";
-      }
+   {
+      $formstr = '';
+      if (!$this->hiddens_echoed)
+         $formstr .= $this->get_hiddens_string();
+
+      return $formstr."</FORM>\n";
+   }
+
 
    /*!
     * \brief Prints out start of a table cell.
@@ -801,7 +818,6 @@ class Form
             $initial_text = textarea_safe($initial_text);
          return "<TEXTAREA name=\"$name\" cols=\"$columns\"" .
             $this->get_input_attbs() . " rows=\"$rows\">$initial_text</TEXTAREA>";
-
       }
 
    /*!
@@ -822,14 +838,14 @@ class Form
     */
    function print_insert_select_box( $name, $size, $value_array, $selected, $multiple )
       {
-         $result = "        <SELECT name=\"$name\" size=\"$size\" ";
+         $result = "  <SELECT name=\"$name\" size=\"$size\" ";
          if( $multiple )
             $result .= "multiple";
          $result .= $this->get_input_attbs() . ">\n";
 
          foreach( $value_array as $value => $info )
             {
-               $result .= "          <OPTION value=\"$value\"";
+               $result .= "    <OPTION value=\"$value\"";
                if( (! $multiple and $value == $selected) or
                    ($multiple and array_key_exists($value,$selected)) )
                   $result .= " selected";
@@ -841,7 +857,7 @@ class Form
 
                $result .= ">".$info."</OPTION>\n";
             }
-         $result .= "        </SELECT>\n";
+         $result .= "  </SELECT>\n";
 
          return $result;
       }
@@ -864,11 +880,11 @@ class Form
          $result = '';
          foreach( $value_array as $value => $info )
             {
-               $result .= "        <INPUT type=\"radio\" name=\"$name\" value=\"$value\"";
+               $result .= "\n<INPUT type=\"radio\" name=\"$name\" value=\"$value\"";
                if($value == $selected)
                   $result .= " checked";
 
-               $result .= $this->get_input_attbs() . "> $info\n";
+               $result .= $this->get_input_attbs() . "> $info";
             }
 
          return $result;
@@ -904,7 +920,7 @@ class Form
    function print_insert_submit_button( $name, $text )
    {
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
-         $this->get_input_attbs() . ">";
+         $this->get_input_attbs() . ">\n";
    }
 
    /*!
@@ -918,7 +934,7 @@ class Form
    function print_insert_submit_buttonx( $name, $text, $attbs )
    {
       $str = '';
-      if( is_array($attbs) )
+      if( is_array($attbs=attb_parse($attbs)) )
       {
          if( isset($attbs['title']) )
          {
@@ -940,10 +956,11 @@ class Form
          }
          if( $title )
             $str.= ' title='.attb_quote($title);
+
+         $str.= attb_build($attbs);
       }
-      $str.= attb_build($attbs);
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
-         $this->get_input_attbs() . $str . '>';
+         $this->get_input_attbs() . $str . ">\n";
    }
 
    /*!
@@ -955,6 +972,14 @@ class Form
    function enable_input( $on)
    {
       $this->disabled = ($on == false);
+   }
+
+   /*! \brief Set the global tabindex attribut of input fields. */
+   function set_tabindex( $tabindex)
+   {
+      $val = $this->tabindex;
+      $this->tabindex = $tabindex;
+      return $val;
    }
 
    /*! \brief Get the global attributs string of input fields. */
@@ -998,14 +1023,15 @@ class Form
       }
    }
 
-   function echo_hiddens()
+   function get_hiddens_string()
    {
+      $hiddens = $this->hiddens;
       foreach ($this->attached as $attach)
       {
-         $attach->get_hiddens( $this->hiddens);
+         $attach->get_hiddens( $hiddens);
       }
       $str = '';
-      foreach ($this->hiddens as $key => $val)
+      foreach ($hiddens as $key => $val)
       {
          $str.= "<input type=\"hidden\" name=\"$key\" value=\"$val\">\n";
       }
