@@ -71,129 +71,134 @@ require_once( "include/countries.php" );
               sprintf(T_('User info for %s'), user_reference( 0, 0, '', 0, $name_safe, $handle_safe)) );
 
    start_page($title, true, $logged_in, $player_row );
-   echo "<h3 class=header>$title</h3>\n";
+   echo "<h3 class=Header>$title</h3>\n";
 
    echo "<center>";
 
 
-   //User infos
-   $activity = activity_string( $row['ActivityLevel']);
-   $registerdate = ($row['Registerdate'] > 0 ? date('Y-m-d', $row['Registerdate']) : NULL );
-   $lastaccess = ($row['lastaccess'] > 0 ? date($date_fmt2, $row['lastaccess']) : NULL );
-   $lastmove = ($row['Lastmove'] > 0 ? date($date_fmt2, $row['Lastmove']) : NULL );
+   { //User infos
+      $activity = activity_string( $row['ActivityLevel']);
+      $registerdate = (@$row['Registerdate'] > 0
+                        ? date('Y-m-d', $row['Registerdate']) : '' );
+      $lastaccess = (@$row['lastaccess'] > 0
+                        ? date($date_fmt2, $row['lastaccess']) : '' );
+      $lastmove = (@$row['Lastmove'] > 0
+                        ? date($date_fmt2, $row['Lastmove']) : '' );
 
-   $cntr = @$row['Country'];
-   $cntrn = T_(@$COUNTRIES[$cntr]);
-   $cntrn = (empty($cntr) ? '' :
-             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
+      $cntr = @$row['Country'];
+      $cntrn = T_(@$COUNTRIES[$cntr]);
+      $cntrn = (empty($cntr) ? '' :
+                "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
 
-   $run_link = "show_games.php?uid=$uid";
-   $fin_link = $run_link.URI_AMP.'finished=1';
-   $rat_link = $fin_link.URI_AMP.'sort1=Rated'.URI_AMP.'desc1=1';
-   $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
+      $run_link = "show_games.php?uid=$uid";
+      $fin_link = $run_link.URI_AMP.'finished=1';
+      $rat_link = $fin_link.URI_AMP.'sort1=Rated'.URI_AMP.'desc1=1';
+      $los_link = $rat_link.URI_AMP.'sort2=Win';
+      $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
 
 
-   $uitable= new Table_info('user');
+      $itable= new Table_info('user');
 
-   $uitable->add_row( array(
-            'header' => T_('Name'),
-            'info' => $name_safe,
-            //'iattbs' => $uitable->warning_cell_attb( 'test'),
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Userid'),
-            'info' => $handle_safe,
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Country'),
-            'info' => $cntrn,
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Open for matches'),
-            'rawinfo' => $row['Open'],
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Activity'),
-            'info' => $activity,
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Rating'),
-            'info' => echo_rating(@$row['Rating2'],true,$row['ID']),
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Rank info'),
-            'rawinfo' => @$row['Rank'],
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Registration date'),
-            'info' => $registerdate,
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Last access'),
-            'info' => $lastaccess,
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Last move'),
-            'info' => $lastmove,
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Vacation days left'),
-            'info' => echo_day(floor($row["VacationDays"])),
-            ) );
-   if( $row['OnVacation'] > 0 )
-   {
-      $uitable->add_row( array(
-               'hattbs' => 'class=onvacation',
-               'header' => T_('On vacation'),
-               'info' => echo_day(floor($row['OnVacation'])).' '.T_('left#2'),
+      $itable->add_row( array(
+               'sname' => T_('Name'),
+               'sinfo' => $name_safe,
                ) );
-   }
-   $uitable->add_row( array(
-            'header' => anchor( $run_link, T_('Running games')),
-            'info' => $row['Running'],
-            ) );
-   $uitable->add_row( array(
-            'header' => anchor( $fin_link, T_('Finished games')),
-            'info' => $row['Finished'],
-            ) );
-   $uitable->add_row( array(
-            'header' => anchor( $rat_link.URI_AMP.'sort2=ID', T_('Rated games')),
-            'info' => $row['RatedGames'],
-            ) );
-   $uitable->add_row( array(
-            'header' => anchor( $rat_link.URI_AMP.'sort2=Win'.URI_AMP.'desc2=1'
-                  , T_('Won games')),
-            'info' => $row['Won'],
-            ) );
-   $uitable->add_row( array(
-            'header' => anchor( $rat_link.URI_AMP.'sort2=Win', T_('Lost games')),
-            'info' => $row['Lost'],
-            ) );
-   $uitable->add_row( array(
-            'header' => T_('Percent'),
-            'info' => $percent,
-            ) );
+      $itable->add_row( array(
+               'sname' => T_('Userid'),
+               'sinfo' => $handle_safe,
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Country'),
+               'sinfo' => $cntrn,
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Open for matches?'),
+               'info' => @$row['Open'],
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Activity'),
+               'sinfo' => $activity,
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Rating'),
+               'sinfo' => echo_rating(@$row['Rating2'],true,$row['ID']),
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Rank info'),
+               'info' => @$row['Rank'],
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Registration date'),
+               'sinfo' => $registerdate,
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Last access'),
+               'sinfo' => $lastaccess,
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Last move'),
+               'sinfo' => $lastmove,
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Vacation days left'),
+               'sinfo' => echo_day(floor($row["VacationDays"])),
+               ) );
+      if( $row['OnVacation'] > 0 )
+      {
+         $itable->add_row( array(
+                  'nattb' => 'class=OnVacation',
+                  'sname' => T_('On vacation'),
+                  'sinfo' => echo_day(floor($row['OnVacation'])).' '.T_('left#2'),
+                  ) );
+      }
+      $itable->add_row( array(
+               'sname' => anchor( $run_link, T_('Running games')),
+               'sinfo' => $row['Running'],
+               ) );
+      $itable->add_row( array(
+               'sname' => anchor( $fin_link, T_('Finished games')),
+               'sinfo' => $row['Finished'],
+               ) );
+      $itable->add_row( array(
+               'sname' => anchor( $rat_link.URI_AMP.'sort2=ID', T_('Rated games')),
+               'sinfo' => $row['RatedGames'],
+               ) );
+      $itable->add_row( array(
+               'sname' => anchor( $los_link.URI_AMP.'desc2=1', T_('Won games')),
+               'sinfo' => $row['Won'],
+               ) );
+      $itable->add_row( array(
+               'sname' => anchor( $los_link, T_('Lost games')),
+               'sinfo' => $row['Lost'],
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Percent'),
+               'sinfo' => $percent,
+               ) );
 
-   $uitable->echo_table(); unset($uitable);
+      $itable->echo_table();
+      unset($itable);
+   } //User infos
 
 
-   //Bio infos
    if( @mysql_num_rows($bio_result) > 0 )
-   {
-      echo '<p></p><h3 class=header>' . T_('Biographical info') . "</h3>\n";
+   {//Bio infos
+      echo '<p></p><h3 class=Header>' . T_('Biographical info') . "</h3>\n";
 
-      $uitable= new Table_info('bio');
+      $itable= new Table_info('bio');
 
       while( $row = mysql_fetch_assoc( $bio_result ) )
       {
-         $uitable->add_row( array(
-                  'rawheader' => T_($row["Category"]),
-                  'info' => make_html_safe($row["Text"],true), //no 'rawinfo'
-                  ) );
+         $itable->add_sinfo(
+                   make_html_safe(T_($row["Category"]), INFO_HTML)
+                  //don't use add_info() to avoid the INFO_HTML here:
+                  ,make_html_safe($row["Text"], true)
+                  );
       }
 
-      $uitable->echo_table(); unset($uitable);
-   }
+      $itable->echo_table();
+      unset($itable);
+   }//Bio infos
 
 
 

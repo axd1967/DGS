@@ -37,57 +37,65 @@ require_once( "include/message_functions.php" );
 
    $my_id = $player_row["ID"];
 
-   start_page(T_('Status'), true, $logged_in, $player_row, button_style($player_row['Button']) );
-   echo "<h3 class=header>" . T_('Status') . "</h3>\n";
 
-   echo "<center>";
+   $gtable = new Table( 'game', "status.php", "GamesColumns" );
+   $gtable->set_default_sort( 'Games.Lastchanged', 0, 'Games.ID', 0);
+   $gtable->add_or_del_column();
+
+   start_page(T_('Status'), true, $logged_in, $player_row,
+               $gtable->button_style($player_row['Button']) );
+
+   echo "<h3 class=Header>" . T_('Status') . "</h3>\n";
 
 
-   // show user infos
 
-   $uitable= new Table_info('user');
+{ // show user infos
+   $itable= new Table_info('user');
 
-      $uitable->add_row( array(
-            'header' => T_('Name'),
-            'info' => make_html_safe($player_row["Name"]),
+      $itable->add_row( array(
+            'sname' => T_('Name'),
+            'info' => $player_row["Name"],
             ) );
-      $uitable->add_row( array(
-            'header' => T_('Userid'),
-            'info' => $player_row["Handle"],
+      $itable->add_row( array(
+            'sname' => T_('Userid'),
+            'sinfo' => $player_row["Handle"],
             ) );
-      $uitable->add_row( array(
-            'header' => T_('Open for matches?'),
-            'rawinfo' => $player_row["Open"],
+      $itable->add_row( array(
+            'sname' => T_('Open for matches?'),
+            'info' => @$player_row["Open"],
             ) );
-      $uitable->add_row( array(
-            'header' => T_('Rating'),
-            'info' => echo_rating($player_row["Rating2"],true,$player_row['ID']),
+      $itable->add_row( array(
+            'sname' => T_('Rating'),
+            'sinfo' => echo_rating(@$player_row["Rating2"],true,$player_row['ID']),
             ) );
-      $uitable->add_row( array(
-            'header' => T_('Rank info'),
-            'rawinfo' => $player_row["Rank"],
+      $itable->add_row( array(
+            'sname' => T_('Rank info'),
+            'info' => @$player_row["Rank"],
             ) );
-      $uitable->add_row( array(
-            'header' => anchor( "edit_vacation.php", T_('Vacation days left')),
-            'info' => echo_day(floor($player_row["VacationDays"])),
+      $itable->add_row( array(
+            'sname' => anchor( "edit_vacation.php", T_('Vacation days left')),
+            'sinfo' => echo_day(floor($player_row["VacationDays"])),
             ) );
 
       if( $player_row['OnVacation'] > 0 )
       {
-         $uitable->add_row( array(
-               'hattbs' => 'class=onvacation',
-               'header' => anchor( "edit_vacation.php", T_('On vacation')),
-               'info' => echo_day(floor($player_row['OnVacation'])).' '.T_('left#2'),
+         $itable->add_row( array(
+               'nattb' => 'class=OnVacation',
+               'sname' => anchor( "edit_vacation.php", T_('On vacation')),
+               'sinfo' => echo_day(floor($player_row['OnVacation'])).' '.T_('left#2'),
                ) );
       }
 
-   $uitable->echo_table(); unset($uitable);
+   $itable->echo_table();
+   unset($itable);
+} // show user infos
 
 
+{ // show messages
 
-   // show messages
-
-   $mtable = new Table( 'message', 'status.php', '', 'm_' );
+   $mtable = new Table( 'message', 'status.php', '', 'MSG' );
+   $mtable->set_default_sort( 'date', 0);
+   //$mtable->add_or_del_column();
 
    $order = 'date';
 
@@ -99,7 +107,7 @@ require_once( "include/message_functions.php" );
    {
       $my_folders = get_folders($my_id);
 
-      echo "<br><hr id=sect_message><h3 class=header>" . T_('New messages') . ":</h3>\n";
+      echo "<br><hr id=secMessage><h3 class=Header>" . T_('New messages') . ":</h3>\n";
 
       message_list_table( $mtable, $result, 20
              , FOLDER_NONE /*FOLDER_ALL_RECEIVED*/, $my_folders
@@ -107,17 +115,14 @@ require_once( "include/message_functions.php" );
 //no_sort must stay true because of the two tables in the same page
 
       $mtable->echo_table();
-      unset($mtable);
    }
+   unset($mtable);
+} // show messages
 
 
-
-   // show games
-
+{ // show games
    $uid = $my_id;
 
-   $gtable = new Table( 'game', "status.php", "GamesColumns" );
-   $gtable->add_or_del_column();
 //can't be sorted until jump_to_next_game() adjusted to follow the sort
    $order = "Games.LastChanged";
 
@@ -136,7 +141,7 @@ require_once( "include/message_functions.php" );
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'status.find_games');
 
-   echo "<br><hr id=sect_game><h3 class=header>" .
+   echo "<br><hr id=sect_game><h3 class=Header>" .
          T_("Your turn to move in the following games:") . "</h3>\n";
 
    if( @mysql_num_rows($result) == 0 )
@@ -145,7 +150,10 @@ require_once( "include/message_functions.php" );
    }
    else
    {
-      $gtable->add_tablehead( 0, T_('ID'), NULL, false, true, $button_width);
+      $gtable->add_tablehead( 0,
+         $gtable->button_TD_width_insert().
+         T_('ID'), NULL, false, true, array( 'class' => 'button') );
+
       $gtable->add_tablehead( 2, T_('sgf'));
       $gtable->add_tablehead( 3, T_('Opponent'));
       $gtable->add_tablehead( 4, T_('Userid'));
@@ -167,7 +175,7 @@ require_once( "include/message_functions.php" );
 
          $grow_strings = array();
          //if( $gtable->Is_Column_Displayed[0] )
-            $grow_strings[0] = str_TD_class_button( "game.php?gid=$ID", $ID);
+            $grow_strings[0] = $gtable->button_TD_anchor( "game.php?gid=$ID", $ID);
          if( $gtable->Is_Column_Displayed[2] )
             $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
                "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";
@@ -215,6 +223,7 @@ require_once( "include/message_functions.php" );
             $my_Byotime = ( ($Color & 2)  ? $White_Byotime : $Black_Byotime );
             $my_Byoperiods = ( ($Color & 2) ? $White_Byoperiods : $Black_Byoperiods );
 
+            //if( !(($Color+1) & 2) ) //is it my turn? (always set in status page)
             $hours = ticks_to_hours($Ticks - $LastTicks);
 
             time_remaining($hours, $my_Maintime, $my_Byotime, $my_Byoperiods,
@@ -231,10 +240,11 @@ require_once( "include/message_functions.php" );
 
       $gtable->echo_table();
    }
+   unset($gtable);
+} // show games
 
 
-   // show pending posts
-
+{ // show pending posts
    if( $player_row['Adminlevel'] & ADMIN_FORUM )
    {
       echo "<hr id=sect_pending><br>";
@@ -243,8 +253,7 @@ require_once( "include/message_functions.php" );
       display_posts_pending_approval();
       chdir('..');
    }
-
-   echo "</center>";
+} // show pending posts
 
 
 

@@ -23,7 +23,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Common";
 
 require_once( "include/quick_common.php" );
-require_once( "include/connect2mysql.php" );
 
 require_once( "include/time_functions.php" );
 if (!isset($page_microtime))
@@ -56,6 +55,9 @@ else
    $GUESTPASS = 'guest';
 
 
+define('ALLOW_JSCRIPT', 0);
+
+
 //----- { layout : change in dragon.css too!
 $bg_color='"#F7F5E3"';
 
@@ -84,6 +86,7 @@ $max_links_in_main_menu=5;
 
 $RowsPerPage = 50;
 $MaxRowsPerPage = $RowsPerPage+1;
+define('LIST_ROWS_MODULO', 4);
 
 $SearchPostsPerPage = 20;
 $MaxSearchPostsPerPage = $SearchPostsPerPage+1;
@@ -224,6 +227,64 @@ function fnop( $a)
    return $a;
 }
 
+/****
+ * get rid of the negative results of ($k % $m)
+ * ( remember: ((-$k) % $m) == -($k % $m) )
+ * return a int within [0..(int)abs($m)[
+ *
+ * if used with float, the truncation is toward zero,
+ *  (( i.e. in the same way that the PHP (int)$x does:
+ *     (int)$x := ( $x < 0 ? ceil($x) : floor($x) )
+ *     ceil($x) := -floor(-$x)
+ *  ))
+ * with $m integer, an other way is to use (int)modf($k,$m):
+ *  $k   abs($m)  mod($k,$m) (int)modf($k,$m)  modf($k,$m)
+ *  3.0     3         0            0              0.0
+ *  2.5     3         2            2              2.5
+ *  2.0     3         2            2              2.0
+ *  1.5     3         1            1              1.5
+ *  1.0     3         1            1              1.0
+ *  0.5     3         0            0              0.5
+ *  0.0     3         0            0              0.0
+ * -0.5     3         0     <>     2              2.5
+ * -1.0     3         2            2              2.0
+ * -1.5     3         2     <>     1              1.5
+ * -2.0     3         1            1              1.0
+ * -2.5     3         1     <>     0              0.5
+ * -3.0     3         0            0              0.0
+ ****/
+//equ: function mod( $k, $m) { return ($k % $m + $m) % $m; }
+function mod( $k, $m)
+{
+   $m= (int)( $m < 0 ? -$m : $m);
+   $k= $k % $m; return ( $k < 0 ? $k+$m : $k);
+}
+
+
+//get rid of the negative results of fmod($k % $m)
+//return a float within [0..abs($m)[
+function modf( $k, $m)
+{
+   if( $m < 0 ) $m = -$m;
+   return $k - $m * floor($k/$m);
+}
+
+function swap(&$a, &$b)
+{
+   $tmp = $a;
+   $a = $b;
+   $b = $tmp;
+}
+
+function array_value_to_key_and_value( $array )
+{
+  $new_array = array();
+  foreach( $array as $value )
+    $new_array[$value] = $value;
+
+  return $new_array;
+}
+
 function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $base_path, $encoding_used, $printable, $FRIENDLY_SHORT_NAME;
@@ -241,10 +302,10 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
       . "\n<HTML>\n<HEAD>";
 
-   echo "\n <meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">";
+   echo "\n <TITLE>$FRIENDLY_SHORT_NAME - $title </TITLE>";
 
-   echo "\n <TITLE>$FRIENDLY_SHORT_NAME - $title </TITLE>"
-      . "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
+   echo "\n <META http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">";
+   echo "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
 
    if( !isset($skinname) or !$skinname )
       $skinname = 'dragon';
@@ -275,7 +336,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $base_path, $is_down, $is_down_message, $printable,
-      $bg_color, $FRIENDLY_LONG_NAME, $HOSTBASE;
+      $FRIENDLY_LONG_NAME, $HOSTBASE;
 
    if( $is_down && $logged_in )
    {
@@ -295,14 +356,15 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( !$printable )
    {
-   echo "\n\n<table id=\"page_head\" width=\"100%\" border=0 cellspacing=0 cellpadding=4>"
+   echo "\n\n<table id='pageHead'>"
       . "\n <tr>"
-      . "\n  <td align=left><A id=\"home_id\" href=\"{$HOSTBASE}index.php\">"
+      . "\n  <td class=ServerHome><A id='homeId' href=\"{$HOSTBASE}index.php\">"
         . "$FRIENDLY_LONG_NAME</A></td>";
-   echo "\n  <td align=right>";
+
+   echo "\n  <td class=LoginBox>";
 
    if ($logged_in and !$is_down)
-      echo T_("Logged in as") . ": <A id=\"logged_id\" href=\"{$base_path}status.php\">"
+      echo T_("Logged in as") . ": <A id='loggedId' href=\"{$base_path}status.php\">"
            . $player_row["Handle"] . "</A>";
    else
       echo T_("Not logged in");
@@ -372,7 +434,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $br = '<br>';
    }
    //this <table><tr><td> is left open until page end
-   echo "\n  <td id=\"page_body\" width=\"100%\" align=center valign=top>$br\n\n";
+   echo "\n  <td id=\"pageBody\">$br\n\n";
 
    sysmsg(get_request_arg('sysmsg'));
 
@@ -386,8 +448,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 function end_page( $menu_array=NULL )
 {
-   global $page_microtime, $admin_level, $base_path, $printable,
-      $bg_color;
+   global $page_microtime, $admin_level, $base_path, $printable;
 
    echo "\n\n&nbsp;<br>";
 
@@ -404,19 +465,31 @@ function end_page( $menu_array=NULL )
    //close the <table><tr><td> left open since page start
    echo "\n </tr>\n</table>\n";
 
+   { //hostlink build
+
+      global $HOSTNAME;
+
+      if( $HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
+         $hostlink= '<A href="http://sourceforge.net" target="_blank"><IMG src="http://sourceforge.net/sflogo.php?group_id=29933&amp;type=1" alt="SourceForge.net Logo" width=88 height=31 border=0 align=middle></A>';
+      else //for devel server
+         $hostlink= '<a href="http://www.samurajdata.se" target="_blank"><img src="'.$base_path.'images/samurajlogo.gif" alt="Samuraj Logo" width=160 height=20 border=0 align=middle></a>';
+
+   } //hostlink build
+
+
    global $NOW, $date_fmt, $FRIENDLY_LONG_NAME;
-   echo "\n<table id=\"page_foot\" width=\"100%\" border=0 cellspacing=0 cellpadding=4>"
+   echo "\n<table id='pageFoot'>"
       . "\n <tr>"
-      . "\n  <td align=left><A href=\"{$base_path}index.php\">"
+      . "\n  <td class=ServerHome><A href=\"{$base_path}index.php\">"
         . "$FRIENDLY_LONG_NAME</A></td>";
 
-   echo "\n  <td class=\"page_time\" align=center>"
-        . T_("Page time") . ' <span id="page_time">' . date($date_fmt, $NOW)
+   echo "\n  <td class=PageTime>"
+        . T_("Page time") . ' <span id="pageTime">' . date($date_fmt, $NOW)
         . "</span>";
 
    if( $admin_level & ADMIN_TIME && !$printable )
-      echo "<br><span style=\"font-size:84%;\">"
-        . T_('Page created in') . ' <span id="page_lapse">'
+      echo "<br><span class=PageLapse>"
+        . T_('Page created in') . ' <span id="pageLapse">'
         . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
         . "</span></span>";
 
@@ -425,7 +498,7 @@ function end_page( $menu_array=NULL )
  if( !$printable )
  {
 
-   echo "\n  <td align=right>";
+   echo "\n  <td class=LoginBox>";
 
    if( $admin_level & ~(ADMIN_TIME) && !$printable )
       echo "<a href=\"{$base_path}admin.php\">"
@@ -441,19 +514,13 @@ function end_page( $menu_array=NULL )
       . "\n </tr>"
       . "\n</table>";
 
-   // Start of host line
-   echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=$bg_color>"
+   // Start of a new host line
+   echo "\n<table class=HostedBy>"
       . "\n <tr>";
  }
 
-global $HOSTNAME;
-
-   if( $HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
-      $hostlink= '<A href="http://sourceforge.net" target="_blank"><IMG src="http://sourceforge.net/sflogo.php?group_id=29933&amp;type=1" alt="SourceForge.net Logo" width=88 height=31 border=0 align=middle></A>';
-   else //for devel server
-      $hostlink= '<a href="http://www.samurajdata.se" target="_blank"><img src="'.$base_path.'images/samurajlogo.gif" alt="Samuraj Logo" width=160 height=20 border=0 align=middle></a>';
-
-   echo "\n  <td valign=top align=right><font size=-1>Hosted by&nbsp;&nbsp;</font>$hostlink</td>";
+   //continuation of host line
+   echo "\n  <td id='hostedBy'>Hosted by&nbsp;&nbsp;$hostlink</td>";
 
    echo "\n </tr>"
       . "\n</table>";
@@ -471,7 +538,7 @@ function make_menu($menu_array)
 {
    global $base_path, $max_links_in_main_menu;
 
-   echo "\n\n<table id=\"page_links\" class=links>\n <tr>";
+   echo "\n\n<table id=\"pageLinks\" class=links>\n <tr>";
 
    $nr_menu_links = count($menu_array);
    $menu_levels = ceil($nr_menu_links/$max_links_in_main_menu);
@@ -545,7 +612,7 @@ function make_menu_horizontal($menu_array)
       . "\n <tr>"
       . "\n  <td>";
 
-   echo "\n<table id=\"page_menu\" width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=\"#F7F5FF\">"
+   echo "\n<table id=\"pageMenu\" class=MenuHorizontal width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=\"#F7F5FF\">"
       . "\n <tr>";
 
    $cols = 4;
@@ -617,7 +684,7 @@ function make_menu_vertical($menu_array)
       . "\n <tr>"
       . "\n  <td>";
 
-   echo "\n<table id=\"page_menu\" border=0 cellspacing=0 cellpadding=4 bgcolor=\"#F7F5FF\">"
+   echo "\n<table id=\"pageMenu\" class=MenuVertical border=0 cellspacing=0 cellpadding=4 bgcolor=\"#F7F5FF\">"
       . "\n <tr>";
 
    echo "\n  <td align=center><img src=\"{$base_path}images/dragonlogo_bl.jpg\" alt=\"Dragon\"></td>"
@@ -657,7 +724,7 @@ function make_tools( $array, $width=0)
 {
    if( !is_array($array) or count($array)==0 )
       return;
-   echo "<table class=notprintable id=\"page_tools\" border=0 cellspacing=0 cellpadding=6>\n<tr>\n";
+   echo "<table class=NotPrintable id='pageTools' border=0 cellspacing=0 cellpadding=6>\n<tr>\n";
    $i= 0;
    foreach( $array as $lnk => $sub )
    {
@@ -1217,6 +1284,11 @@ function game_tag_filter( $msg)
    return trim($str);
 }
 
+function yesno( $yes)
+{
+   return ( $yes && strtolower(substr($yes,0,1))!='n' ) ? T_('Yes') : T_('No');
+}
+
 function score2text($score, $verbose, $keep_english=false)
 {
    $T_= ( $keep_english ? 'fnop' : 'T_' );
@@ -1246,37 +1318,31 @@ function score2text($score, $verbose, $keep_english=false)
                : $color . '+' . abs($score) );
 }
 
-function mod($a,$b)
-{
-   if ($a <= 0)
-      return (int) ($b*(int)(-$a/$b+1)+$a) % $b;
-   else
-      return (int) $a % $b;
-}
-
-function swap(&$a, &$b)
-{
-   $tmp = $a;
-   $a = $b;
-   $b = $tmp;
-}
-
 // Makes url from a base page and an array of variable/value pairs
 // if $sep is true, a '?' or '&' is added
 // Example:
 // make_url('test.php', array('a'=> 1, 'b => 'foo'), false)  gives
 // 'test.php?a=1&b=foo'
-function make_url($page, $array, $sep=false)
+function make_url($page, $args, $sep=false)
 {
    $url = $page;
 
    $separator = ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
-   if( is_array( $array) )
-   foreach( $array as $var=>$value )
+   if( is_array( $args) )
+   foreach( $args as $var=>$value )
    {
-      if( !empty($value) && !is_numeric($var) )
+      if( empty($value) || is_numeric($var) )
+         continue;
+      if( !is_array($value) )
       {
          $url .= $separator . $var . '=' . urlencode($value);
+         $separator = URI_AMP;
+         continue;
+      }
+      $var .= '%5b%5d'; //encoded []
+      foreach( $value as $tmp )
+      {
+         $url .= $separator . $var . '=' . urlencode($tmp);
          $separator = URI_AMP;
       }
    }
@@ -1285,6 +1351,36 @@ function make_url($page, $array, $sep=false)
       $url .= $separator;
 
    return $url;
+}
+
+//see also the PHP parse_str() and parse_url()
+//this one use URI_AMP by default to be the make_url() mirror
+function split_url($url, &$page, &$args, $sep='')
+{
+   if( !$sep ) $sep = URI_AMP;
+   $url = split( '([?#]|'.$sep.')', $url );
+   list( , $page ) = each( $url );
+   $args = array();
+   while( list( , $query ) = each( $url ) )
+   {
+      if( !empty( $query ) )
+      {
+         @list( $var, $value ) = explode( '=', $query );
+         if( @$value )
+         {
+            $var = urldecode($var);
+            if( substr($var,-2) != '[]' ) //'%5B%5D'
+            {
+               $args[$var] = urldecode($value);
+               continue;
+            }
+            $var = substr($var,0,-2);
+            $tmp = @$args[$var];
+            $tmp[] = urldecode($value);
+            $args[$var] = $tmp;
+         }
+      }
+   }
 }
 
 // relative to the calling URL, not to the current dir
@@ -1354,7 +1450,7 @@ function who_is_logged( &$row)
    $sessioncode = safe_getcookie('sessioncode');
    $curdir = getcwd();
    global $main_path;
-// because include_all_translate_groups() must be called from main dir
+// because of include_all_translate_groups() must be called from main dir
    chdir( $main_path);
    $res = is_logged_in($handle, $sessioncode, $row);
    chdir( $curdir);
@@ -1367,6 +1463,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       $ActivityForHit, $NOW;
 
    $row = array();
+   $admin_level = 0;
 
    if( $hostname_jump and eregi_replace(":.*$","", @$_SERVER['HTTP_HOST']) != $HOSTNAME )
    {
@@ -1379,9 +1476,11 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       return false;
    }
 
-   $result = mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
-                          "Adminlevel+0 as admin_level " .
-                          "FROM Players WHERE Handle='".mysql_addslashes($hdl)."'" )
+   $query = "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
+            "Adminlevel+0 as admin_level " .
+            "FROM Players WHERE Handle='".mysql_addslashes($hdl)."'";
+
+   $result = mysql_query( $query )
       or error('mysql_query_failed','std_functions.is_logged_in.find_player');
 
 
@@ -1446,15 +1545,6 @@ function write_to_file( $filename, $string_to_write )
   fclose( $fp );
 
   @chmod( $filename, 0666 );
-}
-
-function array_value_to_key_and_value( $array )
-{
-  $new_array = array();
-  foreach( $array as $value )
-    $new_array[$value] = $value;
-
-  return $new_array;
 }
 
 function add_link_page_link($link, $linkdesc, $extra = '', $active = true)
@@ -1534,6 +1624,7 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
       $url = 'A href="' . $base_path. $url . '"';
       if( $link & REF_LINK_BLANK )
         $url.= ' target="_blank"';
+      $class = 'Game'.$class;
       if( $class )
         $url.= " class=$class";
       if( $link & REF_LINK_ALLOWED )
@@ -1612,15 +1703,18 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
       {
          $url = $link;
          $link = 0;
+         $class = 'Ref'.$class;
       }
       else if( $link<0 ) //send_reference
       {
          $url = "message.php?mode=NewMessage".URI_AMP;
          $link = -$link;
+         $class = 'Send'.$class;
       }
       else //user_reference
       {
          $url = "userinfo.php?";
+         $class = 'User'.$class;
       }
       $url.= ( $byid ? "uid=$player_ref" 
                  : UHANDLE_NAME."=".str_replace('+','%2B',$player_ref) );
@@ -1657,7 +1751,7 @@ function toggle_observe_list( $gid, $uid )
          or error('mysql_query_failed','std_functions.toggle_observe_list.insert');
 }
 
-//Text must be escaped by addslashes()
+//Text must be escaped by mysql_addslashes()
 function delete_all_observers( $gid, $notify, $Text='' )
 {
    global $NOW;
@@ -1704,7 +1798,8 @@ function RGBA($r, $g, $b, $a=NULL)
       return sprintf("%02x%02x%02x%02x", $r, $g, $b, $a);
 }
 
-function blend_alpha($red, $green, $blue, $alpha, $bgred=0xf7, $bggreen=0xf5, $bgblue=0xe3)
+function blend_alpha($red, $green, $blue, $alpha,
+      $bgred=0xf7, $bggreen=0xf5, $bgblue=0xe3) //$bg_color values
 {
    $a = $alpha/255;
    $r = $a*$red + (1-$a)*$bgred;
@@ -1769,9 +1864,34 @@ function attb_quote( $str)
    return '"'.basic_safe(trim($str)).'"';
 }
 
+function attb_parse( $attbs)
+{
+   if( is_array($attbs) )
+      return array_change_key_case( $attbs, CASE_LOWER);
+   if( !is_string($attbs) )
+      return array();
+
+   $nr_matches = preg_match_all(
+      "%\\b([a-z][a-z0-9]*)\\s*=\\s*(((['\"])(.*?)\\4)|([a-z0-9]+\\b))%is"
+      , $attbs, $matches );
+
+   $attbs = array();
+   for($i=0; $i<$nr_matches; $i++)
+   {
+      $key = $matches[1][$i];
+      if( !$key )
+         continue;
+      $val = $matches[6][$i];
+      if( !$val )
+         $val = $matches[5][$i];
+      $attbs[strtolower($key)]= $val;
+   }
+   return $attbs;
+}
+
 function attb_build( $attbs)
 {
-   if( is_array( $attbs) )
+   if( is_array($attbs) )
    {
       $str= '';
       foreach( $attbs as $key => $val )
@@ -1780,13 +1900,29 @@ function attb_build( $attbs)
       }
       return $str;
    }
-   if( is_string( $attbs) )
+   if( is_string($attbs) )
    {
       $str= trim($attbs);
       if( $str )
          return ' '.$str;
    }
    return '';
+}
+
+function attb_merge( $attb1, $attb2, $class_sep='')
+{
+/* must be done before call:
+   $attb1 = attb_parse( $attb1);
+   $attb2 = attb_parse( $attb2);
+*/
+   if( is_string($class_sep)
+      && isset($attb1['class'])
+      && isset($attb2['class']) )
+   {
+      $attb1['class'] = $attb2['class'].$class_sep.$attb1['class'];
+      unset($attb2['class']);
+   }
+   return array_merge($attb1, $attb2);
 }
 
 function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)

@@ -85,21 +85,8 @@ require_once( "include/rating.php" );
       $column_set_name = "RunningGamesColumns";
    }
 
-   if(!@$_GET['sort1'])
-   {
-      $_GET['sort1'] = 'Lastchanged';
-      $_GET['desc1'] = 1;
-      $_GET['sort2'] = 'ID';
-      $_GET['desc2'] = 1;
-   }
-
-   if(!@$_GET['sort2'])
-   {
-      $_GET['sort2'] = 'Lastchanged';
-      $_GET['desc2'] = 1;
-   }
-
    $gtable = new Table( $tableid, $page, $column_set_name );
+   $gtable->set_default_sort( 'Lastchanged', 1, 'ID', 1);
    $gtable->add_or_del_column();
 
    $order = $gtable->current_order_string();
@@ -194,11 +181,16 @@ require_once( "include/rating.php" );
       $title2 = sprintf(  $games_for, user_reference( REF_LINK, 1, '', $user_row) );
    }
 
-   start_page( $title1, true, $logged_in, $player_row, button_style($player_row['Button']) );
 
-   echo "<center><h3><font color=$h3_color>$title2</font></H3></center>\n";
+   start_page( $title1, true, $logged_in, $player_row,
+               $gtable->button_style($player_row['Button']) );
 
-   $gtable->add_tablehead( 0, T_('ID'), 'ID', true, true, $button_width);
+   echo "<h3 class=Header>$title2</h3>\n";
+
+      $gtable->add_tablehead( 0,
+         $gtable->button_TD_width_insert().
+         T_('ID'), 'ID', true, true, array( 'class' => 'button') );
+
    $gtable->add_tablehead( 2, T_('sgf'));
 
    if( $observe )
@@ -312,7 +304,7 @@ require_once( "include/rating.php" );
 
       $grow_strings = array();
       //if( $gtable->Is_Column_Displayed[0] )
-         $grow_strings[0] = str_TD_class_button( "game.php?gid=$ID", $ID);
+         $grow_strings[0] = $gtable->button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
             "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";
