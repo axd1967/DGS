@@ -2,6 +2,89 @@
 /* ------------------------- */
 /* global styles */
 /* ------------------------- */
+
+/* ------------------------- */
+/* same initial states for any browsers */
+/* ------------------------- */
+
+* {
+   margin: 0px;
+   padding: 0px;
+/*
+   font-family: Times New Roman, Times, Geneva, serif, Arial, Helvetica, sans-serif, Verdana;
+*/
+}
+
+img {
+   border: 0px solid black;
+/*
+  No vertical-align here, else Avant browser
+  will badly display the table.goban img:
+  enlarging the text display will increase the
+  height of the table cells too.
+   vertical-align: middle;
+*/
+   margin: 0px;
+}
+
+table {
+   table-layout: auto;
+   border: 0px solid blue;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+/*
+   width: auto;
+*/
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-align: center;
+   text-indent: 0;
+}
+
+hr {
+   display: block;
+   margin: 7px 0px;
+   height: 1px;
+   padding: 0px;
+   color: #808080;
+   background-color: #808080;
+   border: 0px;
+}
+
+/*
+a:link {
+   color: blue;
+}
+
+a:visited {
+   color: navy;
+}
+
+a:hover {
+   color: purple;
+}
+
+a:focus {
+   color: red;
+}
+
+a:active {
+   color: red;
+}
+*/
+
+
+/* ------------------------- */
+/* global properties */
+/* ------------------------- */
+
+a[target] /*, a[target="new"], a[target="_blank"]*/
+{
+   color:olive;
+}
+
 .TextBrowsers {
    display: none;
 }
@@ -52,29 +135,6 @@
    color: red;
 }
 
-
-/*
-a:link {
-   color: blue;
-}
-
-a:visited {
-   color: navy;
-}
-
-a:hover {
-   color: purple;
-}
-
-a:focus {
-   color: red;
-}
-
-a:active {
-   color: red;
-}
-*/
-
 a.rating {
    color: black;
 }
@@ -85,10 +145,6 @@ a.userblack {
    color: black;
 }
 
-a[target] /*, a[target="new"], a[target="_blank"]*/
-{
-   color:olive;
-}
 
 h3.header {
    color: #800000;
@@ -105,36 +161,11 @@ h3.header {
    font-weight: bold;
 }
 
-img {
-   border: 0px solid black;
-/*
-  No vertical-align here, else Avant browser
-  will badly display the table.goban img:
-  enlarging the text display will increase the
-  height of the table cells too.
-   vertical-align: middle;
-*/
-   margin: 0px;
-}
-
 img.InTextStone {
    width: 17px;
    height: 17px;
    border: 0px solid black;
    vertical-align: middle;
-}
-
-table {
-   table-layout: auto;
-   border: 0px solid red;
-   border-spacing: 0px;
-   border-collapse: collapse;
-   margin: 0px;
-   max-width: none;
-   overflow: visible;
-   empty-cells: show;
-   text-align: center;
-   text-indent: 0;
 }
 
 
@@ -148,66 +179,225 @@ body {
    margin: 0px;
 }
 
-table#page_head {
+table#pageHead,
+table#pageFoot {
+   table-layout: auto;
    background: #0C41C9;
    color: #FFFC70;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
    font-weight: bold;
+   text-align: center;
 }
 
-body#dDGS table#page_head {
+table#pageFoot th,
+table#pageFoot td,
+table#pageHead th,
+table#pageHead td {
+   border: 0px solid red;
+   padding: 4px;
+}
+
+/* alternate server particularity */
+body#dDGS table#pageFoot,
+body#dDGS table#pageHead {
    background: #C9410C;
 }
 
-table#page_head a {
+table#pageFoot a,
+table#pageHead a {
    color: #FFFC70;
    font-weight: bold;
 }
 
-table#page_foot {
-   background: #0C41C9;
-   color: #FFFC70;
-   font-weight: bold;
+table#pageFoot .ServerHome,
+table#pageHead .ServerHome {
+   text-align: left;
 }
 
-body#dDGS table#page_foot {
-   background: #C9410C;
+table#pageFoot .LoginBox,
+table#pageHead .LoginBox {
+   text-align: right;
 }
 
-table#page_foot a {
-   color: #FFFC70;
-   font-weight: bold;
-}
-
-table#page_foot .page_time {
+table#pageFoot .PageTime {
+   text-align: center;
    font-weight: normal;
-   font-size: smaller;
+   font-size: 90%;
 }
 
+table#pageFoot .PageLapse {
+   font-weight: normal;
+   font-size: 80%;
+}
 
-table#page_menu a {
+table.HostedBy {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   vertical-align: top;
    color: black;
 }
 
-table#page_menu a.strong {
+td#hostedBy {
+   border: 0px solid red;
+   padding: 4px;
+   text-align: right;
+   font-size: 90%;
+}
+
+
+table#pageMenu {
+   background: #f7f5ff;
+   color: black;
+   border-color: #0C41C9;
+   border-style: solid;
+   table-layout: auto;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-align: left;
+}
+
+table.MenuHorizontal {
+   border-width: 0px 0px 1px 0px;
+   width: 100%;
+}
+
+table.MenuVertical {
+   border-width: 1px;
+   width: auto;
+/*
+   float: left;
+*/
+}
+
+/* alternate server particularity */
+body#dDGS table#pageMenu {
+   border-color: #C9410C;
+}
+
+table#pageMenu th,
+table#pageMenu td {
+   border: 0px solid red;
+   margin: 0px;
+   white-space: nowrap;
+   padding: 4px 4px;
+}
+
+table.MenuHorizontal th,
+table.MenuHorizontal td {
+   width: 16%; /* for 4 columns */
+   white-space: nowrap;
+   padding: 4px 4px;
+}
+
+table.MenuHorizontal td.Logo1 {
+   width: 21%;
+}
+
+table.MenuHorizontal td.Logo2 {
+   width: 15%;
+   text-align: right;
+}
+
+table.MenuHorizontal dl {
+	padding: 0px;
+	margin:  0.3em 0px 0.3em 0px;
+/*
+	list-style-type:none;
+*/
+}
+table.MenuHorizontal dt {
+	white-space: nowrap;
+	padding: 0.1em 0px;
+	height: 30%;
+/*
+	display: block;
+	line-height: 90%;
+*/
+}
+
+#pageBody {
+}
+table.MenuVertical th,
+table.MenuVertical td {
+   white-space: nowrap;
+   padding: 0px 4px;
+}
+
+table.MenuVertical td.Logo1 {
+   text-align: center;
+}
+
+table.MenuVertical td.Logo2 {
+   display: none;
+   text-align: center;
+}
+
+table.MenuVertical dl {
+   padding: 0px;
+   margin:  0.3em 0px 0.3em 0px;
+/*
+   list-style-type:none;
+*/
+}
+table.MenuVertical dt {
+   white-space: nowrap;
+   padding: 0.1em 0px;
+   height: 30%;
+/*
+   display: block;
+   line-height: 90%;
+*/
+}
+
+
+table#pageMenu a {
+   color: black;
+}
+
+table#pageMenu a.strong {
    color: black;
    font-weight: bold;
-   font-size: 1.1em;
+   font-size: 110%;
 }
 
 /* links of bottom menu */
-table.links {
-   width: 100%; 
-   border-width: 0px;
+table.Links {
+   table-layout: auto;
+   border: 0px solid red;
    border-spacing: 0px;
+   border-collapse: collapse;
    margin: 4px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
    empty-cells: hide;
+   text-align: center;
 }
 
-table.links td {
-   border-width: 0px;
+table.Links td {
+   color: black;
+   border: 0px solid red;
    padding: 8px;
    text-align: center;
-   color: black;
+   vertical-align: top;
    font-weight: bold;
 }
 
@@ -219,113 +409,180 @@ table.links a {
 
 
 
+
 /* ------------------------- */
 /* usual tables */
 /* ------------------------- */
 
-table.table {
-   border: 0px solid #cccccc;
+table.Table {
+   table-layout: auto;
+   border: 0px solid red;
    border-spacing: 0px;
-   margin: 0px;
-   text-align: left;
+   border-collapse: collapse;
+   margin: 0px auto;
+   width: auto;
+   max-width: none;
+   overflow: visible;
    empty-cells: show;
+   text-align: center;
 }
 
-table.table td, table.table th {
-   border: 0px solid #cccccc;
+table.Table th,
+table.Table td {
+   border: 0px solid red;
    margin: 0px;
    padding: 3px;
 }
 
-table.table tr.head {
+table.Table tr.Head th {
+   white-space: pre; /* nowrap - pre: allow &#10; */
+   text-align: center;
+   vertical-align: bottom;
+}
+
+table.Table th a,
+table.Table th {
+   color: black;
+   font-weight: bold;
+}
+
+table.Table td a,
+table.Table td {
+   white-space: nowrap;
+   color: black;
+}
+
+table.Table th sup a,
+table.Table th sup {
+   color: red;
+   font-weight: bold;
+   font-size: 90%;
+}
+
+table.Table tr.Head {
    background: #cccccc;
    text-align: center;
 }
 
-table.table tr.row1, table.table tr.row3 {
+table.Table tr.Row3,
+table.Table tr.Row1 {
    background: #ffffff;
 }
-table.table tr.row2, table.table tr.row4 {
+table.Table tr.Row4,
+table.Table tr.Row2 {
    background: #e0e8ed;
 }
-table.table tr.row1 td.warning, table.table tr.row3 td.warning {
+table.Table tr.Row3 td.Warning,
+table.Table tr.Row1 td.Warning {
    color: black;
    background: #ffcccc;
 }
-table.table tr.row2 td.warning, table.table tr.row4 td.warning {
+table.Table tr.Row4 td.Warning,
+table.Table tr.Row2 td.Warning {
    color: black;
    background: #e6b9bd;
 }
-table.table tr.highlight {
+table.Table tr.Highlight {
    background: #ffd070;
 }
 
-table.table th.button {
-   min-width: 96px;
-   width: 96px;
-   white-space: nowrap;
+table.Table td.Mark {
+   text-align: center;
 }
-table.table td.button {
+
+table.Table th.Button {
+   margin: 0px;
+   padding: 3px;
+   text-align: center;
+}
+
+table.Table td.Button {
    background-repeat: no-repeat;
    background-position: center;
-   padding: 0px 2px 0px 2px;
-   min-width: 96px;
-   width: 96px;
+   margin: 0px;
+   padding: 3px;
    text-align: center;
    white-space: nowrap;
 }
-table.table a.button {
-   display: block;
-   width: 92px;
-/*
-*/
-   min-width: 92px;
-   font: bold 100% sans-serif;
-   text-decoration: none;
-}
 
+table.Table a.Button {
+   display: block;
+   margin: 0px;
+   padding: 0px;
+   text-decoration: none;
+   font-weight: bold;
+   text-align: center;
+   white-space: nowrap;
+}
 
 
 /* ------------------------- */
 /* infos tables */
 /* ------------------------- */
 
-table.infos {
-   table-layout: fixed;
+table.Infos {
    border: 2px outset #F7F5E3; /* page background-color */
+   table-layout: auto;
    border-spacing: 2px;
    border-collapse: separate;
-   margin: 4px;
+   margin: 0px auto;
+   width: auto;
+   max-width: none;
+   overflow: visible;
    empty-cells: hide;
-}
-
-table.infos td, table.infos th {
-   border: 1px inset #F7F5E3; /* page background-color */
-   padding: 3px;
    text-align: left;
-   color: black;
 }
 
-table.infos td.header, table.infos th.header {
+table.Infos th,
+table.Infos td {
+   border: 1px inset #F7F5E3; /* page background-color */
+   margin: 0px;
+   padding: 3px;
+}
+
+table.Infos th {
+   color: #800000;
+   text-align: center;
    font-weight: bold;
+   font-size: larger;
 }
 
-table.infos td.onvacation,
-table.infos td.onvacation a {
+table.Infos td {
+   color: black;
+   text-align: left;
+}
+
+table.Infos col.ColRubric,
+table.Infos td.Rubric a,
+table.Infos td.Rubric {
+   color: black;
+   font-weight: bold;
+   white-space: nowrap;
+}
+
+table.Infos .Warning {
+   background: #f8c4b8;
+}
+
+table.Infos td.RubricWarning a,
+table.Infos td.RubricWarning {
+   background: #f8c4b8; /* #ffcccc; */
+   color: black;
+   font-weight: bold;
+   white-space: nowrap;
+}
+
+table.Infos .RubricOnVacation a,
+table.Infos .RubricOnVacation,
+table.Infos .OnVacation a,
+table.Infos .OnVacation {
    color: red;
    font-weight: bold;
+   white-space: nowrap;
 }
 
-table.infos td.header a {
-   color: black;
-}
-
-table.infos tr.highlight {
+table.Infos .Highlight {
    background: #ffd070;
-}
-
-table.infos tr.warning, table.infos td.warning {
-   background: #f8c4b8;
 }
 
 
@@ -333,25 +590,26 @@ table.infos tr.warning, table.infos td.warning {
    must left the links in the right column natural
 */
 /*
-table#bio_infos a {
-   color: blue;
+table#bioInfos a {
+   color: default;
 }
 */
 
-
-form#bioform_form td {
+/* biographical infos modifications:
+*/
+form#bioformForm td {
    vertical-align: top;
 }
 
-table#biomove_infos td {
+table#biomoveInfos td {
    vertical-align: top;
 }
 
-table#biomove_infos div {
+table#biomoveInfos div {
    margin: 0px;
 }
 
-table#biomove_infos img {
+table#biomoveInfos img {
    width: 12px;
    height: 12px;
    border: 0px solid black;
@@ -359,6 +617,47 @@ table#biomove_infos img {
    vertical-align: top;
 }
 
+
+/* ------------------------- */
+/* edit profile page */
+/* ------------------------- */
+
+table.EditProfilButtons {
+   table-layout: fixed;
+   width: 535px; /* 524px auto /* 4*button_width+7*other_cells_width) */
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px 0px;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: center;
+}
+
+table.EditProfilButtons td { /* radio button */
+   color: black;
+   width: 20px;
+   border: 0px solid red;
+   padding: 0px;
+   white-space: nowrap;
+   text-align: center;
+   vertical-align: middle;
+}
+
+table.EditProfilButtons td.button {
+   background-repeat: no-repeat;
+   background-position: center;
+   width: 96px;
+   height: 25px;
+/*
+   font: bold 100% sans-serif;
+*/
+   font-weight: bold;
+   font-size: 100%;
+   text-decoration: none;
+   text-align: center;
+   vertical-align: middle;
+}
 
 
 /* ------------------------- */
@@ -692,8 +991,8 @@ table.Forum .LinksR a {
 }
 
 /*
-  The headers of the posts have the class="PostHeadSubclass"
-   where Subclass is one of:
+  The headers of the posts have the class="PostHead subclass"
+   where subclass is one of:
     Normal, Hidden, Reply, Preview, Edit, SearchResult
 */
 table.Forum tr.PostHeadNormal {

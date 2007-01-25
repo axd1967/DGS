@@ -362,19 +362,21 @@ function get_alt_arg( $n1, $n2)
    if( $validation_step ) $may_play = false;
 
 
-/* Viewing of game messages while readed or downloaded (sgf):
- : Game  : Text ::         Viewed by            :: sgf+comments by : Other  :
- : Ended : Tag  :: Writer : Oppon. : Others     :: Writer : Oppon. : sgf    :
- : ----- : ---- :: ------ : ------ : ---------- :: ------ : ------ : ------ :
- : no    : none :: yes    : yes    : no         :: yes    : yes    : no     :
- : no    : <c>  :: yes    : yes    : yes        :: yes    : yes    : yes    :
- : no    : <h>  :: yes    : no     : no         :: yes    : no     : no     :
- : yes   : none :: yes    : yes    : no         :: yes    : yes    : no     :
- : yes   : <c>  :: yes    : yes    : yes        :: yes    : yes    : yes    :
- : yes   : <h>  :: yes    : yes    : yes        :: yes    : yes    : yes    :
-  corresponding $html_mode (fltr= a filter only keeping <c> and <h> blocks):
- : no    : -    :: gameh  : game   : fltr+game  ::   ... see sgf.php ...
- : yes   : -    :: gameh  : gameh  : fltr+gameh ::
+/*
+ : Viewing of game messages while readed or downloaded (sgf):
+ : Game  : Text ::         Viewed by         :: sgf+comments by : sgf only :
+ : Ended : Tag  :: Writer : Oppon. : Others  :: Writer : Oppon. : any ones :
+ : ----- : ---- :: ------ : ------ : ------- :: ------ : ------ : -------- :
+ : no    : none :: yes    : yes    : no      :: yes    : yes    : no       :
+ : no    : <c>  :: yes    : yes    : yes     :: yes    : yes    : yes      :
+ : no    : <h>  :: yes    : no     : no      :: yes    : no     : no       :
+ : yes   : none :: yes    : yes    : no      :: yes    : yes    : no       :
+ : yes   : <c>  :: yes    : yes    : yes     :: yes    : yes    : yes      :
+ : yes   : <h>  :: yes    : yes    : yes     :: yes    : yes    : yes      :
+ : ----- : ---- :: ------ : ------ : ------- :: ------ : ------ : -------- :
+  corresponding $html_mode (F= a filter only keeping <c> and <h> blocks):
+ : no    : -    :: gameh  : game   : F+game  ::   ... see sgf.php ...
+ : yes   : -    :: gameh  : gameh  : F+gameh ::
 */
 
    if( $Status == 'FINISHED' )
@@ -709,14 +711,14 @@ function draw_message_box(&$message)
 
 function draw_game_info(&$game_row)
 {
-   echo '<table class=gameinfos>' . "\n";
+   echo '<table class=GameInfos>' . "\n";
    echo '<tr id="blackinfo">' . "\n";
-   echo "<td><img class=intextstone src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
+   echo "<td><img class=InTextStone src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'],
                       $game_row['Blackname'], $game_row['Blackhandle']) .
       ( $game_row['Blackwarning'] ?
-        '&nbsp;&nbsp;&nbsp;<span class=warning>' . T_('On vacation') . '</span>' : '' ) .
+        '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
       "</td>\n";
 
    $rating = ( $game_row['Status']==='FINISHED' ?
@@ -740,12 +742,12 @@ function draw_game_info(&$game_row)
 
 
    echo '<tr id="whiteinfo">' . "\n";
-   echo "<td><img class=intextstone src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
+   echo "<td><img class=InTextStone src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['White_ID'],
                       $game_row['Whitename'], $game_row['Whitehandle']) .
       ( $game_row['Whitewarning'] ?
-        '&nbsp;&nbsp;&nbsp;<span class=warning>' . T_('On vacation') . '</span>' : '' ) .
+        '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
       "</td>\n";
 
    $rating = ( $game_row['Status']==='FINISHED' ?

@@ -123,35 +123,36 @@ img.layoutstone {
 
 /* OSOITZ */
 
-#page_head, #page_foot{
-	width:100%;
-	border:none;
-	}
+#pageHead,
+#pageFoot{
+   width:100%;
+   border:none;
+   }
 
-#page_head td, #page_foot td {
+#pageHead td, #pageFoot td {
 padding:4px;
 }
 
-.server_name a {
+.serverName a {
 text-align:left;
 font-weight:bold;
 text-decoration:none;
 }
 
-#page_time {text-align:center; font-size:smaller;}
-#page_time span {font-size:smaller;}
+#pageTime {text-align:center; font-size:smaller;}
+#pageTime span {font-size:smaller;}
 
-#logged_as {font-weight:bold; text-decoration:none;}
+#loggedAs {font-weight:bold; text-decoration:none;}
 
 #status {
-	font-weight:bold;
-	font-size:bigger;
-	}
-	
+   font-weight:bold;
+   font-size:bigger;
+   }
+   
 #container {
-	width:100%;
-	border:0;
-	}
+   width:100%;
+   border:0;
+   }
 
 /*#container td {padding:5px;}*/
 
@@ -168,9 +169,9 @@ $menu_fg_color='"#FFFC70"';
 
 body {background: #FFF5E3;}
 
-#page_head, #page_foot{background:#0C41C9;}
+#pageHead, #pageFoot{background:#0C41C9;}
 
-.server_name a, #page_time, #logged_as  {color:#FFFC70;}
+.serverName a, #pageTime, #loggedAs  {color:#FFFC70;}
 
 
 .black {
