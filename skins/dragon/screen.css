@@ -27,7 +27,7 @@ img {
    margin: 0px;
 }
 
-table {
+table { /* skeleton tables */
    table-layout: auto;
    border: 0px solid blue;
    border-spacing: 0px;
@@ -45,12 +45,22 @@ table {
 
 hr {
    display: block;
+   width: 100%;
    margin: 7px 0px;
    height: 1px;
    padding: 0px;
    color: #808080;
-   background-color: #808080;
+   background: #808080;
    border: 0px;
+}
+
+pre {
+   display: block;
+   width: 100%;
+   border: 0px;
+   margin: 0.5em;
+   padding: 0.5em;
+   text-align: left;
 }
 
 /*
