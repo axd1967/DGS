@@ -112,17 +112,19 @@ require_once( "include/form_functions.php" );
       if( !($mid > 0) )
          error("unknown_message");
 
-      $query = "SELECT Messages.*, " .
-          "UNIX_TIMESTAMP(Messages.Time) AS date, " .
-          "IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
-          "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
-          "me.Replied, me.Sender, me.Folder_nr, " .
-          "Players.Name AS other_name, Players.ID AS other_id, Players.Handle AS other_handle, " .
-          "Games.Status, Games.mid AS Game_mid, " .
-          "Size, Komi, Handicap, Rated, Weekendclock, StdHandicap, " .
-          "Maintime, Byotype, Byotime, Byoperiods, " .
-          "ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS Color " .
-          "FROM (Messages, MessageCorrespondents AS me) " .
+      $query = "SELECT Messages.*"
+         .",UNIX_TIMESTAMP(Messages.Time) AS date"
+         .",IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)"
+         . "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow"
+         .",me.Replied, me.Sender, me.Folder_nr"
+         .",Players.ID AS other_id,Players.Handle AS other_handle"
+         .",Players.Name AS other_name,Players.Rating2 AS other_rating"
+         .",Players.RatingStatus AS other_ratingstatus"
+         .",Games.Status,Games.mid AS Game_mid"
+         .",Size, Komi, Handicap, Rated, WeekendClock, StdHandicap"
+         .",Maintime, Byotype, Byotime, Byoperiods"
+         .",ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS myColor"
+         ." FROM (Messages, MessageCorrespondents AS me) " .
           "LEFT JOIN MessageCorrespondents AS other " .
             "ON other.mid=$mid AND other.Sender!=me.Sender " .
           "LEFT JOIN Players ON Players.ID=other.uid " .
@@ -133,11 +135,11 @@ require_once( "include/form_functions.php" );
 //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
           "ORDER BY Sender" ;
 
-      $row = mysql_single_fetch( 'message.find', $query);
-      if( !$row )
+      $msg_row = mysql_single_fetch( 'message.find', $query);
+      if( !$msg_row )
          error('unknown_message');
 
-      extract($row);
+      extract($msg_row);
 
 
       if( $Sender === 'M' ) //Message to myself
@@ -149,11 +151,13 @@ require_once( "include/form_functions.php" );
       else if( $other_id <= 0 )
       {
          $other_name = '['.T_('Server message').']';
+         $other_id = 0;
          $other_handle = '';
       }
       if( empty($other_name) )
       {
          $other_name = '-';
+         $other_id = 0;
          $other_handle = '';
       }
 
@@ -167,7 +171,7 @@ require_once( "include/form_functions.php" );
    so the old ($To_ID == $my_id) is near of ($Sender != 'Y')
    or maybe ($Sender == 'N') or... check for new Sender types.
 */
-      $can_reply = ( $Sender != 'Y' && $other_id && $other_handle);
+      $can_reply = ( $Sender != 'Y' && $other_id>0 && $other_handle);
       $to_me = ( $Sender != 'Y' );
 
       if( $mode == 'ShowMessage' )
@@ -321,27 +325,7 @@ require_once( "include/form_functions.php" );
                             $ReplyTo, $flow,
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' or $Replied=='M'));
 
-         $colortxt = " align='top'";
-         if( $Color == BLACK )
-         {
-            $colortxt = "<img src='17/w.gif' alt=\"" . T_('White') . "\"$colortxt> " .
-               user_reference( 0, 1, '', 0, $other_name, $other_handle) .
-               "&nbsp;&nbsp;<img src='17/b.gif' alt=\"" . T_('Black') . "\"$colortxt> " .
-               user_reference( 0, 1, '', $player_row) .
-               '&nbsp;&nbsp;';
-         }
-         else
-         {
-            $colortxt = "<img src='17/w.gif' alt=\"" . T_('White') . "\"$colortxt> " .
-               user_reference( 0, 1, '', $player_row) .
-               "&nbsp;&nbsp;<img src='17/b.gif' alt=\"" . T_('Black') . "\"$colortxt> " .
-               user_reference( 0, 1, '', 0, $other_name, $other_handle) .
-               '&nbsp;&nbsp;';
-         }
-
-         game_info_table($Size, $colortxt, $ToMove_ID, $Komi, $Handicap
-                     , $Maintime, $Byotype, $Byotime, $Byoperiods
-                     , $Rated, $Weekendclock, $StdHandicap);
+         game_info_table( 'invite', $msg_row, $player_row, $iamrated);
 
          if( $can_reply )
          {
@@ -444,21 +428,26 @@ require_once( "include/form_functions.php" );
 
    if( $preview )
    {
-      echo "\n<a name=\"preview\"></a><h3><font color=$h3_color>" . 
-               T_('Preview') . ":</font></h3>\n";
+      echo "\n<a name=\"preview\"><h3 class=Header>" .
+               T_('Preview') . "</h3></a>\n";
       //$mid==0 means preview - display a *to_me* like message
 
       $row = mysql_single_fetch( 'message.preview',
-            'SELECT ID, Name FROM Players ' .
+            'SELECT ID, Handle, Name FROM Players ' .
             'WHERE Handle="' . mysql_addslashes($default_uhandle) . '"' );
       if( !$row )
-         $Name = '<font color="red">' . T_('Receiver not found') . '</font>';
+      {
+         $row['Name'] = '<span class=InlineWarning>' . T_('Receiver not found') . '</span>';
+         $row['ID'] = 0;
+         $row['Handle'] = '';
+      }
       else
-         $Name = make_html_safe($row["Name"]);
+      {
+         $row['Name'] = make_html_safe($row['Name']);
+      }
 
-      message_info_table(0, $NOW, false,
-                         (int)$row['ID'], $Name,
-                         make_html_safe($default_uhandle),
+      message_info_table( 0 /* preview */, $NOW, false,
+                         $row['ID'], $row['Name'], $row['Handle'],
                          $default_subject, $default_message);
    }
 

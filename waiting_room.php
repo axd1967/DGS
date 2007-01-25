@@ -40,8 +40,8 @@ require_once( "include/message_functions.php" );
                          'nigiri' => T_('Even game'),
                          'double' => T_('Double game') );
 
-   $my_id = $player_row["ID"];
-   $my_rating = $player_row["Rating2"];
+   $my_id = $player_row['ID'];
+   $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
 
@@ -56,20 +56,9 @@ require_once( "include/message_functions.php" );
    if( $idinfo )
       $page.= 'info='.$idinfo . URI_AMP;
 
-   if(!@$_GET['sort1'])
-   {
-      $_GET['sort1'] = 'Rating'; //'ID';
-      $_GET['desc1'] = 1;
-   }
-
-   if(!@$_GET['sort2'])
-   {
-      $_GET['sort2'] = ($_GET['sort1'] != 'ID' ? 'ID' : 'Name');
-      $_GET['desc2'] = 0;
-   }
-
 
    $wrtable = new Table( 'waitingroom', $page, "WaitingroomColumns" );
+   $wrtable->set_default_sort( 'other_rating', 1, 'other_handle', 0);
    $wrtable->add_or_del_column();
 
    $order = $wrtable->current_order_string();
@@ -89,14 +78,11 @@ require_once( "include/message_functions.php" );
       $title = T_("Suitable waiting games");
    }
 
-   start_page($title, true, $logged_in, $player_row, button_style($player_row['Button']) );
-
-   echo "<center><h3><font color=$h3_color><B>". $title . ":</B></font></h3>\n";
-
-
-   $query = "SELECT Waitingroom.*,Name,Handle"
-          . ",Rating2 AS Rating,RatingStatus,Players.ID AS pid"
-          ;
+   $query = "SELECT Waitingroom.*"
+         .",Players.ID AS other_id,Players.Handle AS other_handle"
+         .",Players.Name AS other_name,Players.Rating2 AS other_rating"
+         .",Players.RatingStatus AS other_ratingstatus"
+      ;
 
 // $calculated = ( $Handicaptype == 'conv' or $Handicaptype == 'proper' );
 // $haverating = ( !$calculated or is_numeric($my_rating) );
@@ -124,22 +110,30 @@ require_once( "include/message_functions.php" );
           . " FROM Waitingroom,Players"
           . " WHERE Players.ID=Waitingroom.uid"
           . ( $showall ? '' : " HAVING haverating AND goodrating" )
-          . " ORDER BY $order $limit"
+          . " ORDER BY $order,ID $limit"
           ;
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'waiting_room.find_waiters');
 
+
+   start_page($title, true, $logged_in, $player_row,
+               $wrtable->button_style($player_row['Button']) );
+
+   echo "<h3 class=Header>". $title . "</h3>\n";
+
+
    $show_rows = $wrtable->compute_show_rows(mysql_num_rows($result));
-
    $info_row = NULL;
-   if( @mysql_num_rows($result) > 0 )
+   if( $show_rows > 0 )
    {
+      $wrtable->add_tablehead(0,
+         $wrtable->button_TD_width_insert().
+         T_('Info'), NULL, false, true, array( 'class' => 'button') );
 
-      $wrtable->add_tablehead(0, T_('Info'), NULL, false, true, $button_width);
-      $wrtable->add_tablehead(1, T_('Name'), 'Name', false);
-      $wrtable->add_tablehead(2, T_('Userid'), 'Handle', false);
-      $wrtable->add_tablehead(3, T_('Rating'), 'Rating', true);
+      $wrtable->add_tablehead(1, T_('Name'), 'other_handle', false);
+      $wrtable->add_tablehead(2, T_('Userid'), 'other_handle', false);
+      $wrtable->add_tablehead(3, T_('Rating'), 'other_rating', true);
       $wrtable->add_tablehead(4, T_('Comment'));
       $wrtable->add_tablehead(5, T_('Handicap'), 'Handicaptype', false);
       $wrtable->add_tablehead(6, T_('Komi'), 'Komi', true);
@@ -154,58 +148,57 @@ require_once( "include/message_functions.php" );
 
       while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
-         $Rating = NULL;
+         $other_rating = NULL;
          extract($row); //including $calculated, $haverating and $goodrating
 
          if( $idinfo == (int)$ID )
             $info_row = $row;
 
          $Comment = make_html_safe($Comment, 'cell');
-         if( empty($Comment) ) $Comment = '&nbsp;';
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[0] )
-            $wrow_strings[0] = str_TD_class_button( $baseURL.URI_AMP."info=$ID#info", T_('Info'));
+            $wrow_strings[0] = $wrtable->button_TD_anchor( $baseURL.URI_AMP."info=$ID#roomInfos", T_('Info'));
          if( $wrtable->Is_Column_Displayed[1] )
-            $wrow_strings[1] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Name) . "</font></a></td>";
+            $wrow_strings[1] = '<td>'.
+               user_reference( REF_LINK, 1, 'black', $other_id, $other_name, '') . "</td>";
          if( $wrtable->Is_Column_Displayed[2] )
-            $wrow_strings[2] = "<td nowrap><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               $Handle . "</font></a></td>";
+            $wrow_strings[2] = "<td>" .
+               user_reference( REF_LINK, 1, 'black', $other_id, $other_handle, '') . "</td>";
          if( $wrtable->Is_Column_Displayed[3] )
-            $wrow_strings[3] = "<td nowrap>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
+            $wrow_strings[3] = "<td>" . echo_rating($other_rating,true,$other_id) . "&nbsp;</td>";
          if( $wrtable->Is_Column_Displayed[4] )
-            $wrow_strings[4] = "<td nowrap>" . $Comment . "</td>";
+            $wrow_strings[4] = "<td>" . $Comment . "</td>";
          if( $wrtable->Is_Column_Displayed[5] )
          {
-            $wrow_strings[5] = '<td nowrap' .
+            $wrow_strings[5] = '<td' .
                ( $haverating ? '' : $wrtable->warning_cell_attb(  T_('No initial rating') ) )
                . '>' . $handi_array[$Handicaptype] . "</td>";
          }
          if( $wrtable->Is_Column_Displayed[6] )
-            $wrow_strings[6] = '<td>' . ($calculated ? '-' : $Komi) . '</td>'; 
+            $wrow_strings[6] = '<td>' . ($calculated ? '-' : $Komi) . "</td>";
          if( $wrtable->Is_Column_Displayed[7] )
             $wrow_strings[7] = "<td>$Size</td>";
          if( $wrtable->Is_Column_Displayed[8] )
          {
             $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax);
-            $wrow_strings[8] = '<td nowrap' .
+            $wrow_strings[8] = '<td' .
                ( $goodrating ? '' : $wrtable->warning_cell_attb(  T_('Out of range') ) )
                . '>' . $Ratinglimit . "</td>";
          }
          if( $wrtable->Is_Column_Displayed[9] )
-            $wrow_strings[9] = '<td nowrap>' .
+            $wrow_strings[9] = '<td>' .
                echo_time_limit( $Maintime, $Byotype, $Byotime, $Byoperiods, 0, 1) .
                "</td>";
          if( $wrtable->Is_Column_Displayed[10] )
             $wrow_strings[10] = "<td>$nrGames</td>";
          if( $wrtable->Is_Column_Displayed[11] )
-            $wrow_strings[11] = "<td>".( $Rated == 'Y' ? T_('Yes') : T_('No') )."</td>";
+            $wrow_strings[11] = "<td>".yesno( $Rated)."</td>";
          if( $wrtable->Is_Column_Displayed[12] )
-            $wrow_strings[12] = "<td>".( $WeekendClock == 'Y' ? T_('Yes') : T_('No') )."</td>";
+            $wrow_strings[12] = "<td>".yesno( $WeekendClock)."</td>";
          if( ENA_STDHANDICAP )
             if( $wrtable->Is_Column_Displayed[13] )
-               $wrow_strings[13] = "<td>".( $StdHandicap == 'Y' ? T_('Yes') : T_('No') )."</td>";
+               $wrow_strings[13] = "<td>".yesno( $StdHandicap)."</td>";
 
          $wrtable->add_row( $wrow_strings );
       }
@@ -215,18 +208,18 @@ require_once( "include/message_functions.php" );
    else
       echo '<p></p>&nbsp;<p></p>' . T_('Seems to be empty at the moment.');
 
+
+   $form_id = 'addgame'; //==> ID='addgameForm'
    if( $idinfo and is_array($info_row) )
    {
-      show_game_info($info_row, $info_row['pid'] == $player_row['ID'], $my_rating);
+      add_old_game_form( 'joingame', $info_row, $iamrated);
+
+      $menu_array[T_('Add new game')] = $baseURL . '#'.$form_id.'Form' ;
    }
    else
-      add_new_game_form( $iamrated);
-
-   echo "</center>";
+      add_new_game_form( $form_id, $iamrated); //==> ID='addgameForm'
 
 
-   if( $idinfo and is_array($info_row) )
-      $menu_array[T_('Add new game')] = $baseURL . "#add" ;
 
 
    $baseURL = "waiting_room.php?".$sortstring; //reset it to minimum
@@ -262,10 +255,10 @@ function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax)
 }
 
 
-function add_new_game_form( $iamrated)
+function add_new_game_form( $form_id, $iamrated)
 {
-   echo '<a name="add"></a>' . "\n";
-   $addgame_form = new Form( 'addgame', 'add_to_waitingroom.php', FORM_POST );
+   $addgame_form = new Form( $form_id, 'add_to_waitingroom.php', FORM_POST );
+
    $addgame_form->add_row( array( 'HEADER', T_('Add new game') ) );
 
    $vals = array();
@@ -308,120 +301,31 @@ function add_new_game_form( $iamrated)
    $addgame_form->echo_string(1);
 }
 
-function show_game_header($str)
+function add_old_game_form( $form_id, $game_row, $iamrated)
 {
-  global $h3_color;
+   $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
+   $game_form->set_tabindex(1);
 
-   return   '<tr><td colspan=99 align="center">' . 
-            "&nbsp;<B><font color=$h3_color>" . 
-            $str . ":</font></B>&nbsp;</td></tr>\n";
-}
+   global $player_row;
+   game_info_table( 'waitingroom', $game_row, $player_row, $iamrated);
 
-function show_game_row( $info, $cell, $hilight=false, $warning='')
-{
-   $info = eregi_replace('<BR>',' ',$info); //allow 2 lines long headers
-   return '<tr><td><b>' . $info . '</b></td><td' .
-         ( $hilight ? blend_warning_cell_attb( $warning ) : '' )
-       . '>' . $cell . "</td></tr>\n";
-}
+   $mygame= $game_row['other_id'] == $player_row['ID'];
 
-function show_game_info($game_row, $mygame=false, $my_rating=false)
-{
-   global $bg_color;
-   //long descriptions for box
-   $handi_array = array( 'conv' => T_('Conventional handicap (komi 0.5 if not even)'),
-                         'proper' => T_('Proper handicap'),
-                         'nigiri' => T_('Even game with nigiri'),
-                         'double' => T_('Double game') );
-
-   extract($game_row);
-
-   echo '<p></p><a name="info"></a>' . "\n";
-   echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
-
-   echo show_game_header(T_('Info'));
-
-   echo show_game_row( T_('Player'), user_reference( REF_LINK, 1, "black", $pid, $Name, $Handle));
-
-   echo show_game_row( T_('Rating'), echo_rating($Rating,true,$pid));
-   echo show_game_row( T_('Size'), $Size);
-   echo show_game_row( T_('Handicap'), $handi_array[$Handicaptype]
-         , !$haverating, T_('No initial rating'));
-   echo show_game_row( T_('Komi'), $calculated ? '-' : $Komi);
-
-   $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax);
-   echo show_game_row( T_('Rating range'), $Ratinglimit
-         , !$goodrating, T_('Out of range'));
-   echo show_game_row( T_('Time limit'), echo_time_limit( $Maintime, $Byotype, $Byotime, $Byoperiods));
-   echo show_game_row( T_('Number of games'), $nrGames);
-   echo show_game_row( T_('Rated game'), $Rated == 'Y' ? T_('Yes') : T_('No'));
-   echo show_game_row( T_('Clock runs on weekends'), $WeekendClock == 'Y' ? T_('Yes') : T_('No'));
-   if( ENA_STDHANDICAP )
-      echo show_game_row( T_('Standard placement'), $StdHandicap == 'Y' ? T_('Yes') : T_('No'));
-
-   $Comment = make_html_safe($Comment, 'cell');
-   //if( empty($Comment) ) $Comment = '&nbsp;';
-   echo show_game_row( T_('Comment'), $Comment);
-
-   if( !$mygame && $haverating && $goodrating)
-   {
-   /* Not useful here, because RatingStatus couldn't be empty to accept the match:
-      $infoRated = (( $Rated === 'Y' and
-                  !empty($RatingStatus) and
-                  !empty($player_row['RatingStatus']) ) ? 'Y' : 'N' );
-   */
-
-      if( $Handicaptype == 'proper' )
-         list($infoHandicap,$infoKomi,$info_i_am_black) =
-            suggest_proper($my_rating, $Rating, $Size);
-      else if( $Handicaptype == 'conv' )
-         list($infoHandicap,$infoKomi,$info_i_am_black) =
-            suggest_conventional($my_rating, $Rating, $Size);
-      else
-      {
-         $infoHandicap = 0; $infoKomi = $Komi; $info_i_am_black = 0;
-      }
-
-      $colortxt = '<img align="top" src="17/';
-      if( $Handicaptype == 'double' )
-         $colortxt = $colortxt . 'w.gif" alt="' . T_('White') . '">&nbsp;+&nbsp;' .
-                     $colortxt . 'b.gif" alt="' . T_('Black') . '">' ;
-      else if( $Handicaptype == 'nigiri' 
-            or $Handicaptype == 'conv' && $infoHandicap == 0 && $infoKomi == 6.5 )
-         $colortxt = $colortxt . 'y.gif" alt="' . T_('Nigiri') . '">' ;
-      else if( $info_i_am_black )
-         $colortxt = $colortxt . 'b.gif" alt="' . T_('Black') . '">' ;
-      else
-         $colortxt = $colortxt . 'w.gif" alt="' . T_('White') . '">' ;
-
-      //echo "<tr height=20><td colspan=2 height=20></td></tr>\n";
-      echo show_game_header(T_('Probable settings'));
-
-      echo show_game_row( T_('Color'), $colortxt);
-      echo show_game_row( T_('Handicap'), $infoHandicap);
-      echo show_game_row( T_('Komi'), sprintf("%.1f",$infoKomi));
-   }
-
-   echo "</table>\n";
-
-
+   $game_form->add_hidden( 'id', $game_row['ID']);
    if( $mygame )
    {
-      $delete_form = new Form( 'delete', 'join_waitingroom_game.php', FORM_POST );
-      $delete_form->add_row( array( 'SUBMITBUTTON', 'deletebut', T_('Delete'),
-                                    'HIDDEN', 'id', $ID,
-                                    'HIDDEN', 'delete', 't') );
-      $delete_form->echo_string(1);
+      $game_form->add_hidden( 'delete', 't');
+      echo $game_form->print_insert_submit_button(
+               'deletebut', T_('Delete'));
    }
-   else if( $haverating && $goodrating )
+   else if( $game_row['haverating'] && $game_row['goodrating'] )
    {
-      $join_form = new Form( 'join', 'join_waitingroom_game.php', FORM_POST );
-      $join_form->add_row( array( 'DESCRIPTION', T_('Reply'),
-                                  'HIDDEN', 'id', $ID,
-                                  'TEXTAREA', 'reply', 40, 4, "",
-                                  'SUBMITBUTTON', 'join', T_('Join') ) );
-      $join_form->echo_string(1);
+      echo T_('Reply');
+      echo $game_form->print_insert_textarea( 'reply', 50, 4, '');
+      echo $game_form->print_insert_submit_buttonx(
+               'join', T_('Join'), array('accesskey'=>'x'));
    }
-
+   echo $game_form->print_end();
 }
+
 ?>

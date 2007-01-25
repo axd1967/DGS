@@ -20,6 +20,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Messages";
 
+
+require_once( 'include/table_infos.php' );
+require_once( "include/rating.php" );
+
 define('INVITE_HANDI_CONV',-1);
 define('INVITE_HANDI_PROPER',-2);
 define('INVITE_HANDI_NIGIRI',-3);
@@ -30,7 +34,7 @@ function init_standard_folders()
 {
    global $STANDARD_FOLDERS;
    $STANDARD_FOLDERS = array(
-      FOLDER_ALL_RECEIVED => array(T_('All Received'),'f7f5e300','000000'),
+      FOLDER_ALL_RECEIVED => array(T_('All Received'),'00000000','000000'),
       FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
       FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
       FOLDER_REPLY => array(T_('Reply!'), 'ffaaaa80', '000000'),
@@ -57,6 +61,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $Size = 19;
    if( $iamrated )
       $Handitype = 'conv';
+   else if( $formstyle != 'waitingroom' )
+      $Handitype = 'manual';
    else
       $Handitype = 'nigiri';
    $MyColor = 'White';
@@ -76,7 +82,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $Byoperiods_can = 15;
    $Byotime_fis = 1;
    $ByotimeUnit_fis = 'days';
-   $Weekendclock = true;
+   $WeekendClock = true;
    $StdHandicap = false;
    $Rated = true;
 
@@ -129,7 +135,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       if( isset($gid['timeunit_fis']) )
          $ByotimeUnit_fis = (string)$gid['timeunit_fis'];
 
-      $Weekendclock = ( @$gid['weekendclock'] == 'Y' );
+      $WeekendClock = ( @$gid['weekendclock'] == 'Y' );
       $StdHandicap = ( @$gid['stdhandicap'] == 'Y' );
       $Rated = ( @$gid['rated'] == 'Y' );
    }
@@ -138,11 +144,11 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       // If dispute, use values from game $gid
       $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
                  "Maintime,Byotype,Byotime,Byoperiods," .
-                 "Rated,StdHandicap,Weekendclock, " .
+                 "Rated,StdHandicap,WeekendClock, " .
                  "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
                  "FROM (Games,Players) WHERE Games.ID=$gid" .
-                 " AND ((White_ID=$my_ID AND Players.ID=Black_ID)" .
-                   " OR (Black_ID=$my_ID AND Players.ID=White_ID))" .
+                 " AND (White_ID=$my_ID OR Black_ID=$my_ID)" .
+                 " AND Players.ID=White_ID+Black_ID-$my_ID" .
                  " AND Status='INVITED'" ;
       $game_row= mysql_single_fetch( 'message_functions.game_settings_form',
                                      $query );
@@ -153,7 +159,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $MyColor = ( $game_row['Color'] == BLACK ? 'Black' : 'White' );
       $Rated = ( $game_row['Rated'] == 'Y' );
       $StdHandicap = ( $game_row['StdHandicap'] == 'Y' );
-      $Weekendclock = ( $game_row['Weekendclock'] == 'Y' );
+      $WeekendClock = ( $game_row['WeekendClock'] == 'Y' );
 
       //ToMove_ID hold handitype since INVITATION
       switch( $game_row['ToMove_ID'] )
@@ -185,7 +191,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
          }
          break;
 
-         default: //Black_ID
+         default: //Manual: $game_row['ToMove_ID'] == $Black_ID
          {
             $Handitype = 'manual';
             $Handicap_m = $game_row['Handicap'];
@@ -279,7 +285,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
                               'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
                             ));
-      $Handitype = 'nigiri';
+      $Handitype = 'manual';
       $allowed = false;
    }
    else if( $formstyle=='dispute' && $Handitype=='proper' )
@@ -287,7 +293,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
                               'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
                             ));
-      $Handitype = 'nigiri';
+      $Handitype = 'manual';
       $allowed = false;
    }
 
@@ -363,7 +369,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $mform->add_row( array( 'SPACE' ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Clock runs on weekends'),
-                           'CHECKBOX', 'weekendclock', 'Y', "", $Weekendclock ) );
+                           'CHECKBOX', 'weekendclock', 'Y', "", $WeekendClock ) );
 
    if( $iamrated )
    {
@@ -402,10 +408,10 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
    if( $other_id > 0 )
    {
-     $name = user_reference( REF_LINK, 0, '', $other_id, $other_name, $other_handle) ;
+     $name = user_reference( REF_LINK, 0, 'black', $other_id, $other_name, $other_handle) ;
    }
    else
-     $name = $other_name; //i.e. T_("Server message");
+     $name = $other_name; //i.e. T_("Server message"); or T_('Receiver not found');
 
    echo "<table border=0>\n" .
       "<tr><td><b>" . T_('Date') . ":</b></td>" .
@@ -481,69 +487,279 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 }
 
 
-function game_info_table($Size, $col, $handicap_type, $Komi, $Handicap,
-                         $Maintime, $Byotype, $Byotime, $Byoperiods,
-                         $Rated, $WeekendClock, $StdHandicap, $gid=0)
+function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 {
-   echo '<table align=center border=2 cellpadding=3 cellspacing=3>' . "\n";
-
-   if( $gid > 0 )
-      echo "<tr><td><b>" . T_('Game ID') . "</b></td><td><a href=\"game.php?gid=$gid\">$gid</a></td></tr>\n";
-
-   echo '<tr><td><b>' . T_('Size') . '<b></td><td>' . $Size . "</td></tr>\n";
-
-   switch( $handicap_type )
+   extract($game_row);
+   
+   if( $tablestyle == 'waitingroom' )
    {
-      case INVITE_HANDI_CONV: // Conventional handicap
-         echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' .
-            T_('Conventional handicap (komi 0.5 if not even)') . "</td></tr>\n";
+      switch( $Handicaptype )
+      {
+         case 'conv':
+         case 'proper':
+         case 'double':
+         case 'nigiri':
+            $Handitype = $Handicaptype;
+            break;
+         case 'manual': //not allowed in waiting room
+         default: //always available even if waiting room or unrated
+            $Handitype = 'nigiri';
+            break;
+      }
+   }
+   else
+   {
+      $tablestyle = 'invite';
+      //ToMove_ID hold handitype since INVITATION
+      switch( $game_row['ToMove_ID'] )
+      {
+         case INVITE_HANDI_CONV:
+            $Handitype = 'conv';
+            $calculated = true;
+            break;
+         case INVITE_HANDI_PROPER:
+            $Handitype = 'proper';
+            $calculated = true;
+            break;
+         case INVITE_HANDI_NIGIRI:
+            $Handitype = 'nigiri';
+            $calculated = false;
+            break;
+         case INVITE_HANDI_DOUBLE:
+            $Handitype = 'double';
+            $calculated = false;
+            break;
+         default: //Manual: $game_row['ToMove_ID'] == $Black_ID
+            $Handitype = 'manual';
+            $calculated = false;
+            break;
+      }
+      $goodrating = 1;
+      if( $iamrated )
+         $haverating = 1;
+      else
+         $haverating = !$calculated;
+   }
+
+
+   $itable= new Table_info('game'); //==> ID='gameInfos'
+
+   if( $tablestyle == 'waitingroom' )
+   {
+         $itable->add_scaption(T_('Info'));
+
+         $itable->add_sinfo(
+                   T_('Number of games')
+                  ,$nrGames
+                  );
+
+         $itable->add_row( array(
+                  'sname' => T_('Player'),
+                  'sinfo' => user_reference( REF_LINK, 1, 'black', $other_id, $other_name, $other_handle),
+                  ) );
+   }
+
+         $itable->add_row( array(
+                  'sname' => T_('Rating'),
+                  'sinfo' => echo_rating($other_rating,true,$other_id),
+                  ) );
+
+
+         $itable->add_sinfo(
+                   T_('Size')
+                  , $Size
+                  );
+
+   switch( $Handitype )
+   {
+      case 'conv': // Conventional handicap
+         $itable->add_row( array(
+                  'sname' => T_('Handicap'),
+                  'sinfo' => T_('Conventional handicap (komi 0.5 if not even)'),
+                  'iattb' => ( $haverating ? ''
+                    : $itable->warning_cell_attb( T_('No initial rating'))
+                    ),
+                  ) );
          break;
 
-      case INVITE_HANDI_PROPER: // Proper handicap
-         echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' .
-            T_('Proper handicap') . "</td></tr>\n";
+      case 'proper': // Proper handicap
+         $itable->add_row( array(
+                  'sname' => T_('Handicap'),
+                  'sinfo' => T_('Proper handicap'),
+                  'iattb' => ( $haverating ? ''
+                    : $itable->warning_cell_attb( T_('No initial rating'))
+                    ),
+                  ) );
          break;
 
-      case INVITE_HANDI_NIGIRI: // Nigiri
-         echo '<tr><td><b>' . T_('Colors') . '</b></td><td>' . T_('Nigiri') . "</td></tr>\n";
-         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+      case 'nigiri': // Nigiri
+         //'nigiri' => T_('Even game with nigiri'),
+         $itable->add_sinfo(
+                   T_('Colors')
+                  , T_('Nigiri')
+                  );
+         $itable->add_sinfo(
+                   T_('Komi')
+                  , $Komi
+                  );
          break;
 
-      case INVITE_HANDI_DOUBLE: // Double game
-         echo '<tr><td><b>' . T_('Colors') . '</b></td><td>' .
-            T_('Double game') . "</td></tr>\n";
-         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+      case 'double': // Double game
+         //'double' => T_('Double game') );
+         $itable->add_sinfo(
+                   T_('Colors')
+                  , T_('Double game')
+                  );
+         $itable->add_sinfo(
+                   T_('Komi')
+                  , $Komi
+                  );
          break;
 
-      default: // Manual: $handicap_type == $Black_ID
-         echo '<tr><td><b>' . T_('Colors') . "<b></td><td>$col</td></tr>\n";
-         echo '<tr><td><b>' . T_('Handicap') . '</b></td><td>' . $Handicap . "</td></tr>\n";
-         echo '<tr><td><b>' . T_('Komi') . '</b></td><td>' . $Komi . "</td></tr>\n";
+      default: // 'manual'
+         $colortxt = 'class=InTextStone';
+         if( $game_row['myColor'] == BLACK )
+         {
+            $colortxt = image( '17/w.gif', T_('White'), '', $colortxt) . '&nbsp;'
+                      . user_reference( 0, 1, '', 0, $other_name, $other_handle)
+                      . '&nbsp;&nbsp;'
+                      . image( '17/b.gif', T_('Black'), '', $colortxt) . '&nbsp;'
+                      . user_reference( 0, 1, '', $player_row)
+                      ;
+         }
+         else
+         {
+            $colortxt = image( '17/w.gif', T_('White'), '', $colortxt) . '&nbsp;'
+                      . user_reference( 0, 1, '', $player_row)
+                      . '&nbsp;&nbsp;'
+                      . image( '17/b.gif', T_('Black'), '', $colortxt) . '&nbsp;'
+                      . user_reference( 0, 1, '', 0, $other_name, $other_handle)
+                      ;
+         }
+
+         $itable->add_sinfo(
+                   T_('Colors')
+                  , $colortxt
+                  );
+         $itable->add_sinfo(
+                   T_('Handicap')
+                  , $Handicap
+                  );
+         $itable->add_sinfo(
+                   T_('Komi')
+                  , $Komi
+                  );
          break;
    }
 
    if( ENA_STDHANDICAP )
    {
-      echo '<tr><td><b>' . T_('Standard placement') . '</b></td><td>' .
-          ( $StdHandicap == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
+         $itable->add_sinfo(
+                   T_('Standard placement')
+                  , yesno( $StdHandicap)
+                  );
    }
 
+   if( $tablestyle == 'waitingroom' )
+   {
+         $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax);
+         $itable->add_row( array(
+                  'sname' => T_('Rating range'),
+                  'sinfo' => $Ratinglimit,
+                  'iattb' => ( $goodrating ? ''
+                    : $itable->warning_cell_attb( T_('Out of range'))
+                    ),
+                  ) );
+   }
 
-   echo '<tr><td><b>' . T_('Main time') . '</b></td><td>'
-            . echo_time($Maintime)
-         . "</td></tr>\n";
+         $itable->add_sinfo(
+                   T_('Main time')
+                  , echo_time($Maintime)
+                  );
+         $itable->add_sinfo(
+                   echo_byotype($Byotype)
+                  , echo_time_limit( -1, $Byotype, $Byotime, $Byoperiods
+                                       , false, false, false)
+                  );
 
-   echo '<tr><td><b>' . echo_byotype($Byotype) . '</b></td><td> ';
-   echo echo_time_limit( -1, $Byotype, $Byotime, $Byoperiods
-                       , false, false, false) . "</td></tr>\n";
+         $itable->add_row( array(
+                  'sname' => T_('Rated game'),
+                  'sinfo' => yesno( $Rated),
+                  'iattb' => ( $iamrated || $Rated != 'Y' ? ''
+                    : $itable->warning_cell_attb( T_('No initial rating'))
+                    ),
+                  ) );
+         $itable->add_sinfo(
+                   T_('Clock runs on weekends')
+                  , yesno( $WeekendClock)
+                  );
 
-   echo '<tr><td><b>' . T_('Rated game') . '</b></td><td>' .
-       ( $Rated == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
-   echo '<tr><td><b>' . T_('Clock runs on weekends') . '</b></td><td>' .
-       ( $WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td></tr>\n";
+   if( $tablestyle == 'waitingroom' )
+   {
+         //if( empty($Comment) ) $Comment = '&nbsp;';
+         $itable->add_row( array(
+                  'sname' => T_('Comment'),
+                  'info' => $Comment,
+                  ) );
+   }
 
-   echo "</table>\n";
+   if( $calculated && $haverating && $goodrating &&
+       ( $game_row['other_id'] != $player_row['ID'] //not my game
+       or $tablestyle != 'waitingroom'
+       ) )
+   {
+         // compute the 'Probable settings'
 
+         if( $Handitype == 'proper' )
+            list($infoHandicap,$infoKomi,$info_i_am_black) =
+               suggest_proper($player_row['Rating2'], $other_rating, $Size);
+         else if( $Handitype == 'conv' )
+            list($infoHandicap,$infoKomi,$info_i_am_black) =
+               suggest_conventional($player_row['Rating2'], $other_rating, $Size);
+         else
+         {
+            $infoHandicap = 0; $infoKomi = $Komi; $info_i_am_black = 0;
+         }
+
+         $colortxt = 'class=InTextStone';
+         if( $Handitype == 'double' )
+         {
+            $colortxt = image( '17/w.gif', T_('White'), '', $colortxt)
+                      . '&nbsp;+&nbsp;'
+                      . image( '17/b.gif', T_('Black'), '', $colortxt);
+         }
+         else if( $Handitype == 'nigiri'
+                  or ($Handitype == 'conv'
+                        && $infoHandicap == 0 && $infoKomi == 6.5) )
+         {
+            $colortxt = image( '17/y.gif', T_('Nigiri'), T_('Nigiri'), $colortxt);
+         }
+         else if( $info_i_am_black )
+         {
+            $colortxt = image( '17/b.gif', T_('Black'), '', $colortxt);
+         }
+         else
+         {
+            $colortxt = image( '17/w.gif', T_('White'), '', $colortxt);
+         }
+
+         $itable->add_scaption(T_('Probable settings'));
+
+         $itable->add_row( array(
+                  'sname' => T_('Color'),
+                  'sinfo' => $colortxt,
+                  ) );
+         $itable->add_sinfo(
+                   T_('Handicap')
+                  ,$infoHandicap
+                  );
+         $itable->add_sinfo(
+                   T_('Komi')
+                  ,sprintf("%.1f",$infoKomi)
+                  );
+   } //Probable settings
+
+   $itable->echo_table();
 }
 
 
@@ -669,9 +885,9 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
          error('folder_not_found');
 
       if( $new_folder == FOLDER_SENT )
-         $where_clause = "AND (Sender='Y' or Sender='M') ";
+         $where_clause = "AND (Sender='Y' OR Sender='M') ";
       else if( $new_folder == FOLDER_REPLY )
-         $where_clause = "AND (Sender='N' or Sender='M') ";
+         $where_clause = "AND (Sender='N' OR Sender='M') ";
       else
          $where_clause = '';
 
@@ -794,15 +1010,13 @@ function message_list_table( &$mtable, $result, $show_rows
 
    $can_move_messages = false;
 
-   $mtable->add_tablehead( 1, T_('Folder'), ( $no_sort or $current_folder>FOLDER_ALL_RECEIVED ) ? NULL : 
+   $mtable->add_tablehead( 1, T_('Folder'), ( $no_sort or $current_folder>FOLDER_ALL_RECEIVED ) ? NULL :
                            'folder', true, false );
    $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
                            $no_sort ? NULL : 'other_name', false, false );
    $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'subject', false, false );
    list($ico,$alt) = $msg_icones[0];
-   $tit = str_replace('"', '&quot;', T_('Messages'));
-   $mtable->add_tablehead( 0,
-      "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>"
+   $mtable->add_tablehead( 0, image( "images/$ico.gif", $alt, T_('Messages'))
       , $no_sort ? NULL : 'flow', false, true );
    $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, false );
    if( !$no_mark )
@@ -810,9 +1024,9 @@ function message_list_table( &$mtable, $result, $show_rows
 
    $page = '';
 
-   $p = str_replace('"', '&quot;', T_('Answer'));
-   $n = str_replace('"', '&quot;', T_('Replied'));
-   $tits[0                        ] = str_replace('"', '&quot;', T_('Message')) ;
+   $p = T_('Answer');
+   $n = T_('Replied');
+   $tits[0                        ] = T_('Message');
    $tits[FLOW_ANSWER              ] = $p ;
    $tits[            FLOW_ANSWERED] = $n ;
    $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p - $n" ;
@@ -846,9 +1060,8 @@ function message_list_table( &$mtable, $result, $show_rows
 
       $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "&nbsp;</td>";
 
-      list($ico,$alt) = $msg_icones[$row["flow"]];
-      $tit = $tits[$row["flow"]];
-      $str = "<img border=0 alt='$alt' title=\"$tit\" src='images/$ico.gif'>";
+      list($ico,$alt) = $msg_icones[$row['flow']];
+      $str = image( "images/$ico.gif", $alt, $tits[$row['flow']]);
       //if( !$deleted )
          $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid\">$str</A>";
       $mrow_strings[0] = "<td>$str</td>";
@@ -865,11 +1078,12 @@ function message_list_table( &$mtable, $result, $show_rows
          else
          {
             $can_move_messages = true;
-            $checked = ((@$_REQUEST["mark$mid"]=='Y') xor $toggle_marks) ;
+            $n = $mtable->Prefix."mark$mid";
+            $checked = ((@$_REQUEST[$n]=='Y') xor $toggle_marks);
             if( $checked )
-               $page.= "mark$mid=Y".URI_AMP ;
-            $mrow_strings[5] = "<td align=center>"  .
-               "<input type='checkbox' name='mark$mid' value='Y'".
+               $page.= "$n=Y".URI_AMP ;
+            $mrow_strings[5] = "<td class=Mark>"  .
+               "<input type='checkbox' name='$n' value='Y'".
                ($checked ? ' checked' : '') .
                '></td>';
          }
@@ -879,7 +1093,10 @@ function message_list_table( &$mtable, $result, $show_rows
    }
    mysql_free_result($result);
 
-   $mtable->Page.= $page ;
+   //insertion of the marks in the URL of sort, page move and add/del column.
+   //it's useless to add marks to the URLs while they are only used with actions
+   // that change the order or the page because the marks will not stay on display.
+   //$mtable->Page.= $page ;
 
    return $can_move_messages ;
 }
