@@ -24,7 +24,6 @@ require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
-require_once( "include/timezones.php" );
 
 {
    connect2mysql();
@@ -36,12 +35,6 @@ require_once( "include/timezones.php" );
    init_standard_folders();
 
    $my_id = $player_row["ID"];
-
-   if(!@$_GET['sort1'])
-   {
-      $_GET['sort1'] = 'date';
-      $_GET['desc1'] = 1;
-   }
 
    $find_answers = @$_GET['find_answers'] ;
 
@@ -128,7 +121,18 @@ require_once( "include/timezones.php" );
 
    if( $page )
       $page= '?'.substr( $page, strlen(URI_AMP));
+
+   start_page($title, true, $logged_in, $player_row );
+
+
    $mtable = new Table( 'message', 'list_messages.php' . $page );
+   $mtable->set_default_sort( 'date', 1);
+   //$mtable->add_or_del_column();
+
+   $marked_form = new Form('messageMove','list_messages.php#action', FORM_GET, true, 'formTable');
+   $marked_form->set_tabindex(1);
+   $marked_form->attach_table( $mtable);
+
 
    $order = $mtable->current_order_string();
    $limit = $mtable->current_limit_string();
@@ -147,15 +151,9 @@ require_once( "include/timezones.php" );
    $show_rows = $mtable->compute_show_rows( $show_rows);
 
 
-   start_page($title, true, $logged_in, $player_row );
-
-
-   $marked_form = new Form('','', FORM_GET);
-   echo "<form name=\"marked\" action=\"list_messages.php\" method=\"GET\">\n";
-
    echo echo_folders($my_folders, $current_folder);
 
-   echo "<center><h3><font color=$h3_color>" . $title . '</font></h3></center>';
+   echo "<h3 class=Header>$title</h3>\n";
 
    $can_move_messages =
      message_list_table( $mtable, $result, $show_rows
@@ -168,41 +166,46 @@ require_once( "include/timezones.php" );
 
    if( $can_move_messages && $current_folder != FOLDER_NEW )
    {
-/* Actually, toggle marks does not destroy sort
-        but sort destroy marks
-   (unless a double *toggle marks* that transfert marks in URL)
-   (<$>but then, the URL limited length may not be enought)
-*/
-      echo '<center>';
-      echo $mtable->echo_hiddens();
+      /****
+       *      Actually, toggle marks does not destroy sort
+       *      but sort, page move and add/del column destroy marks.
+       * (unless a double *toggle marks* that transfert marks in URL)
+       * (but then, the URL limited length may not be enought)
+       * See message_list_table() to re-insert the marks in the URL
+       ****/
 
       if( $find_answers > 0 )
-        echo '<input type="hidden" name="find_answers" value="' . $find_answers . "\">\n";
+         $marked_form->add_hidden( 'find_answers', $find_answers);
       else if( $current_folder >= FOLDER_ALL_RECEIVED )
-        echo '<input type="hidden" name="current_folder" value="' . $current_folder . "\">\n";
+         $marked_form->add_hidden( 'current_folder', $current_folder);
 
-      echo '<input type="submit" name="toggle_marks" value="' . T_('Marks toggle') . "\">\n";
+      echo $marked_form->print_insert_submit_buttonx( 'toggle_marks',
+               T_('Marks toggle'), array('accesskey'=>'w'));
 
       if( $current_folder == FOLDER_DELETED )
       {
-         echo '<input type="submit" name="destroy_marked" value="' .
-            T_('Destroy marked messages') . "\">\n";
+         echo $marked_form->print_insert_submit_button( 'destroy_marked',
+                  T_('Destroy marked messages'));
       }
       else
       {
          $fld = array('' => '');
          foreach( $my_folders as $key => $val )
+         {
             if( $key != $current_folder and $key != FOLDER_NEW and
                 !($current_folder == FOLDER_SENT and $key == FOLDER_REPLY ) )
                $fld[$key] = $val[0];
+         }
 
-         echo '<input type="submit" name="move_marked" value="' .
-            T_('Move marked messages to folder') . "\">\n" .
-            $marked_form->print_insert_select_box( 'folder', '1', $fld, $folder, '') ;
+         echo $marked_form->print_insert_submit_buttonx( 'action',
+                  T_('Move marked messages to folder'),
+                  array('id'=>'action','accesskey'=>'x'));
+         echo $marked_form->print_insert_select_box( 'folder',
+                  '1', $fld, $folder, '');
       }
-      echo "</center>\n";
    }
-   echo "</form>\n";
+   echo $marked_form->print_end();
+
 
    if( $find_answers > 0 )
       $menu_array = array( T_('Back to message') => "message.php?mode=ShowMessage".URI_AMP."mid=$find_answers" );
