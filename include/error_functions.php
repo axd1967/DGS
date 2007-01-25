@@ -114,7 +114,6 @@ class Errors
             exit;
       }
 
-
 }
 
 $TheErrors = new Errors();
@@ -177,7 +176,8 @@ function err_log( $handle, $err, $debugmsg=NULL)
       //$err.= ' / '. $debugmsg; //Do not display this info!
    }
 
-   @mysql_query( $errorlog_query );
+   if( $dbcnx )
+      @mysql_query( $errorlog_query );
 
    return array( $err, $uri);
 }

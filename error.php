@@ -24,8 +24,6 @@ require_once( "include/std_functions.php" );
 
 
 {
-   connect2mysql(true);
-
    $err = get_request_arg('err');
    $redir = get_request_arg('redir');
    if( $redir /* && @$_SERVER['REDIRECT_STATUS'] == 401 */ )
@@ -36,9 +34,18 @@ require_once( "include/std_functions.php" );
                  .' / '.getcwd());
       //exit;
    }
-   
-   
-   $logged_in = who_is_logged( $player_row);
+
+   connect2mysql(true);
+   if( $dbcnx )
+   {
+      //may call error() again:
+      $logged_in = who_is_logged( $player_row);
+   }
+   else
+   {
+      $logged_in = false;
+      $player_row = NULL;
+   }
 
    start_page("Error", true, $logged_in, $player_row );
    echo '&nbsp;<br>';
