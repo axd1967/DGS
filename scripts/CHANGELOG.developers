@@ -144,9 +144,3 @@ TODO:
 
 -----------------
 -----------------
-Rdvl: notes ---------------------
-TODO:
-ALTER TABLE `Messages` -->Non
- ADD `IP` varchar(16) NOT NULL default '' AFTER `Text` ;
-ALTER TABLE `Posts` -->for guest tracking?
- ADD `IP` varchar(16) NOT NULL default '' AFTER `Text` ;

@@ -1,8 +1,10 @@
 <?php
 
-// Friendly names. Keep them AscII!
+// Friendly names.
 
+//Long name: Keep it AscII
 $FRIENDLY_LONG_NAME = "Dragon Go Server";
+//Short name: Begining with a letter then only letters or numbers
 $FRIENDLY_SHORT_NAME = "DGS";
 
 
