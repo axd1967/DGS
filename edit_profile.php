@@ -155,7 +155,7 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    $profile_form->add_row( array( 'DESCRIPTION', T_('Rank info'),
                                   'TEXTINPUT', 'rank', 32, 40,
                                   $player_row["Rank"] ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches'),
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches?'),
                                   'TEXTINPUT', 'open', 32, 40,
                                   $player_row["Open"] ) );
 
@@ -205,27 +205,26 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                                   $player_row["MenuDirection"] ) );
 
 
-   $button_code  = "        <TABLE border=0 cellspacing=0 cellpadding=2 width=520>\n";
-   $button_code .= "          <TR>\n";
-
+   $button_code  = "<table class=EditProfilButtons>\n <tr>\n";
    for($i=0; $i<=$button_max; $i++)
    {
-      $font_style = ' text-align: center; color: ' . $buttoncolors[$i] .
-         '; font: bold 100% sans-serif; text-decoration: none; width: '.$button_width.'px;';
-      $button_style = 'background-image: url(images/' . $buttonfiles[$i] .
-         '); background-repeat: no-repeat; background-position: center;';
-
-      $button_code .= '<td valign=middle><INPUT type="radio" name="button" value=' . $i .
-         ( $i == $button_nr ? ' checked' : '') . '></td>' . "\n" .
-         '<td STYLE="' . $font_style . $button_style .
-         '">1348</td><td width=14></td>' . "\n";
-
-      if( $i % 4 == 3 )
-         $button_code .= "</TR>\n<TR>\n";
+      if( $i % 4 == 0 )
+      {
+         if( $i > 0 )
+            $button_code .= " </tr>\n <tr>\n";
+      }
+      else
+      {
+         $button_code .= "  <td></td>\n";
+      }
+      $button_style = 'color:' . $buttoncolors[$i] . ';' .
+                  'background-image:url(images/' . $buttonfiles[$i] . ');';
+      $button_code .=
+         "  <td><input type='radio' name='button' value=$i" .
+               ( $i == $button_nr ? ' checked' : '') . "></td>\n" .
+         "  <td class=button style='$button_style'>1348</td>\n";
    }
-
-   $button_code .= "          </TR>\n";
-   $button_code .= "        </table>\n";
+   $button_code .= "</tr>\n</table>\n";
 
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Game id button'),

@@ -35,13 +35,18 @@ require_once( "include/tournament.php" );
 
    $my_id = $player_row["ID"];
 
-   start_page(T_("Tournaments"), true, $logged_in, $player_row, button_style($player_row['Button']) );
+   $table = new Table( 'tournament', 'list_tournaments.php'); //, '', 'TRN' );
+   $table->set_default_sort( 'Name', 0, 'ID', 1);
+   //$table->add_or_del_column();
 
    $result = mysql_query( "SELECT ID, State, Name FROM Tournament" );
 
-   $table = new Table( 'tournament', 'list_tournaments.php', '', 't_' );
+   start_page(T_("Tournaments"), true, $logged_in, $player_row,
+               $table->button_style($player_row['Button']) );
 
-   $table->add_tablehead( 0, T_('ID'), 'ID', false, true, $button_width);
+      $table->add_tablehead( 0,
+         $table->button_TD_width_insert().
+         T_('ID'), 'ID', false, true, array( 'class' => 'Button') );
    $table->add_tablehead( 2, T_('State'), 'State', false, true );
    $table->add_tablehead( 3, T_('Name'), 'Name', false, true );
    $table->add_tablehead( 4, T_('Organizer'), null, false, true );
@@ -71,7 +76,7 @@ require_once( "include/tournament.php" );
             TOUR_STATE_RUNNING           => " bgcolor=\"00F464\"",
             TOUR_STATE_FINISHED          => " bgcolor=\"FFA27A\"" );
 
-         $row_strings[0] = str_TD_class_button( "show_tournament.php?tid=$ID", $ID);
+         $row_strings[0] = $table->button_TD_anchor( "show_tournament.php?tid=$ID", $ID);
          $row_strings[2] = "<td" . $state_colors[ $State ] . ">" .
             $TourState_Strings[ $State ] . "</td>";
          $row_strings[3] = "<td nowrap>$Name</td>";

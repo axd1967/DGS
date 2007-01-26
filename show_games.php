@@ -189,7 +189,7 @@ require_once( "include/rating.php" );
 
       $gtable->add_tablehead( 0,
          $gtable->button_TD_width_insert().
-         T_('ID'), 'ID', true, true, array( 'class' => 'button') );
+         T_('ID'), 'ID', true, true, array( 'class' => 'Button') );
 
    $gtable->add_tablehead( 2, T_('sgf'));
 

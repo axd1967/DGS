@@ -323,10 +323,10 @@ class Table
          $button_nr = 0;
 
       return
-        "table.table a.button {" .
+        "table.Table a.Button {" .
           " color: {$buttoncolors[$button_nr]};" .
         "}\n" .
-        "table.table td.button {" .
+        "table.Table td.Button {" .
           " background-image: url(images/{$buttonfiles[$button_nr]});" .
         "}";
    }

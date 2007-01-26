@@ -129,7 +129,7 @@ require_once( "include/message_functions.php" );
    {
       $wrtable->add_tablehead(0,
          $wrtable->button_TD_width_insert().
-         T_('Info'), NULL, false, true, array( 'class' => 'button') );
+         T_('Info'), NULL, false, true, array( 'class' => 'Button') );
 
       $wrtable->add_tablehead(1, T_('Name'), 'other_handle', false);
       $wrtable->add_tablehead(2, T_('Userid'), 'other_handle', false);
