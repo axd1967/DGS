@@ -156,7 +156,7 @@ a.userblack {
 }
 
 
-h3.header {
+h3.Header {
    color: #800000;
    text-align: center;
 }
@@ -1006,7 +1006,7 @@ table.Forum .LinksR a {
 }
 
 /*
-  The headers of the posts have the class="PostHead subclass"
+  The headers of the posts have the class="PostHeadsubclass"
    where subclass is one of:
     Normal, Hidden, Reply, Preview, Edit, SearchResult
 */
