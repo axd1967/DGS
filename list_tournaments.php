@@ -45,7 +45,6 @@ require_once( "include/tournament.php" );
                $table->button_style($player_row['Button']) );
 
       $table->add_tablehead( 0,
-         $table->button_TD_width_insert().
          T_('ID'), 'ID', false, true, array( 'class' => 'Button') );
    $table->add_tablehead( 2, T_('State'), 'State', false, true );
    $table->add_tablehead( 3, T_('Name'), 'Name', false, true );

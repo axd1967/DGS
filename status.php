@@ -151,7 +151,6 @@ require_once( "include/message_functions.php" );
    else
    {
       $gtable->add_tablehead( 0,
-         $gtable->button_TD_width_insert().
          T_('ID'), NULL, false, true, array( 'class' => 'Button') );
 
       $gtable->add_tablehead( 2, T_('sgf'));

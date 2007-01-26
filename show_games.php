@@ -188,7 +188,6 @@ require_once( "include/rating.php" );
    echo "<h3 class=Header>$title2</h3>\n";
 
       $gtable->add_tablehead( 0,
-         $gtable->button_TD_width_insert().
          T_('ID'), 'ID', true, true, array( 'class' => 'Button') );
 
    $gtable->add_tablehead( 2, T_('sgf'));

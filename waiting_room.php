@@ -128,7 +128,6 @@ require_once( "include/message_functions.php" );
    if( $show_rows > 0 )
    {
       $wrtable->add_tablehead(0,
-         $wrtable->button_TD_width_insert().
          T_('Info'), NULL, false, true, array( 'class' => 'Button') );
 
       $wrtable->add_tablehead(1, T_('Name'), 'other_handle', false);

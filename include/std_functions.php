@@ -546,7 +546,7 @@ function make_menu($menu_array)
 {
    global $base_path, $max_links_in_main_menu;
 
-   echo "\n\n<table id=\"pageLinks\" class=links>\n <tr>";
+   echo "\n\n<table id=\"pageLinks\" class=Links>\n <tr>";
 
    $nr_menu_links = count($menu_array);
    $menu_levels = ceil($nr_menu_links/$max_links_in_main_menu);
@@ -616,7 +616,7 @@ function make_menu_horizontal($menu_array)
    global $base_path, $menu_bg_color, $bg_color;
 
    //table for bottom line
-   echo "\n<table class=notprintable width=\"100%\" border=0 cellspacing=0 cellpadding=0 bgcolor=$menu_bg_color>"
+   echo "\n<table class=NotPrintable width=\"100%\" border=0 cellspacing=0 cellpadding=0 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
 
@@ -688,7 +688,7 @@ function make_menu_vertical($menu_array)
    global $base_path, $menu_bg_color, $bg_color;
 
    //table for border line
-   echo "\n<table class=notprintable border=0 cellspacing=0 cellpadding=1 bgcolor=$menu_bg_color>"
+   echo "\n<table class=NotPrintable border=0 cellspacing=0 cellpadding=1 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
 

@@ -343,14 +343,16 @@ class Table
    /*! \brief Return a stratagem to force a minimal column width.
     * Must be inserted before a cell inner text at least one time for a column.
     */
-   function button_TD_width_insert()
+   function button_TD_width_insert( $width=false)
    {
       global $base_path, $button_width;
       //a stratagem to force a minimal column width.
       //must be changed when, a day, the CSS min-width
       // command will work fine with every browser.
-      //dot.gif is 1x1 transparent image.
-      return "<img class=MinWidth src='{$base_path}images/dot.gif' width=$button_width height=1 alt=''><br>";
+      //dot.gif is a 1x1 transparent image.
+      if( !is_numeric($width) )
+         $width = $button_width;
+      return "<img class=MinWidth src='{$base_path}images/dot.gif' width=$width height=1 alt=''><br>";
    }
 
 
@@ -539,19 +541,37 @@ class Table
       $curColId = $this->Prefix.'Col'.$nr;
       $string = "  <th id=\"$curColId\" scope=col";
 
-      if( !is_null( $tablehead['attbs'] ) )
+      $width = -1;
+      if( isset($tablehead['attbs']) )
       {
-         if( is_array($tablehead['attbs']) )
+         $attbs =& $tablehead['attbs'];
+         if( is_array($attbs) )
          {
-            $string .= attb_build($tablehead['attbs']);
+            $string .= attb_build($attbs);
+            
+            if( is_numeric( strpos((string)@$attbs['class'],'Button')) )
+            {
+               global $button_width;
+               $width = max($width, $button_width);
+            }
+            if( isset($attbs['width']) )
+            {
+               $width = max($width, (int)$attbs['width']);
+               unset( $attbs['width']);
+            }
          }
          else
          {
-            $string .= " width=\"{$tablehead['attbs']}\"";
+            //$string .= " width=\"{$tablehead['attbs']}\"";
+            $width = max($width, (int)$attbs);
+            unset( $tablehead['attbs']);
          }
       }
 
       $string .= '>';
+
+      if( $width >= 0 )
+         $string .= $this->button_TD_width_insert($width);
 
       $title = $tablehead['Description'];
       $csort = $tablehead['Sort_String'];
@@ -703,7 +723,7 @@ class Table
 
       $span = $this->Shown_Columns - $span;
       if( $span > 0 )
-         $string.= '  <td align=right' 
+         $string.= '  <td align=right'
            . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
 
       if( $string )
