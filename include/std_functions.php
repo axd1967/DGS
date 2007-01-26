@@ -297,22 +297,30 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    if( empty($encoding_used) )
       $encoding_used = LANG_DEF_CHARSET;
 
-   header('Content-Type: text/html; charset='.$encoding_used); // Character-encoding
+   header('Content-Type: text/html;charset='.$encoding_used); // Character-encoding
 
-   echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
-      . "\n<HTML>\n<HEAD>";
+   //This full DOCTYPE make most of the browsers to leave the "quirks" mode.
+   //This may be a disavantage with IE5-mac because its "conform" mode is worst.
+   echo '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+	           "http://www.w3.org/TR/html4/loose.dtd">';
+
+   echo "\n<HTML>\n<HEAD>";
 
    echo "\n <TITLE>$FRIENDLY_SHORT_NAME - $title </TITLE>";
 
-   echo "\n <META http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding_used\">";
+   echo "\n <META http-equiv=\"content-type\" content=\"text/html;charset=$encoding_used\">";
+
+   echo "\n <META NAME=\"DESCRIPTION\" CONTENT=\"To play go on a turn by turn basis.\">";
+
    echo "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
 
+   global $main_path;
    if( !isset($skinname) or !$skinname )
       $skinname = 'dragon';
-   if( !file_exists("{$base_path}skins/$skinname/screen.css") )
+   if( !file_exists("{$main_path}skins/$skinname/screen.css") )
       $skinname = 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skinname/screen.css\">";
-   if( !file_exists("{$base_path}skins/$skinname/print.css") )
+   if( !file_exists("{$main_path}skins/$skinname/print.css") )
       $skinname = 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skinname/print.css\">";
 
@@ -754,7 +762,7 @@ function help($topic)
 function sysmsg($msg)
 {
    if( isset($msg) && trim($msg) )
-      echo "\n<p class=sysmsg>".make_html_safe($msg)."</p><hr>\n";
+      echo "\n<p class=Sysmsg>".make_html_safe($msg)."</p><hr>\n";
 }
 
 
@@ -1172,6 +1180,10 @@ $html_safe_preg = array(
  "%".ALLOWED_LT."/home *".ALLOWED_GT."%is"
   => ALLOWED_LT."/a".ALLOWED_GT,
 
+//reverse to bad the skiped (faulty) ones
+ "%".ALLOWED_LT."(/?(home|quote|tt|code|color|user|send|game|mailto|http)[^`]*)"
+    .ALLOWED_GT."%is"
+  => "&lt;\\1&gt;",
 ); //$html_safe_preg
 
 
@@ -1184,7 +1196,7 @@ function make_html_safe( $msg, $some_html=false)
       // make sure the <, > replacements: ALLOWED_LT, ALLOWED_GT are removed from the string
       $msg= reverse_allowed( $msg);
 
-      switch( $some_html )
+      switch( (string)$some_html )
       {
       case 'gameh':
          $gameh = 1 ;
@@ -1325,6 +1337,7 @@ function score2text($score, $verbose, $keep_english=false)
 // Example:
 // make_url('test.php', array('a'=> 1, 'b => 'foo'), false)  gives
 // 'test.php?a=1&b=foo'
+//Since PHP5, there is http_build_query() that do nearly the same thing
 function make_url($page, $args, $sep=false)
 {
    $url = $page;
