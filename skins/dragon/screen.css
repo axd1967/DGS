@@ -178,6 +178,11 @@ img.InTextStone {
    vertical-align: middle;
 }
 
+img.MinWidth {
+   border: 0px solid black;
+   visibility: hidden;
+}
+
 
 /* ------------------------- */
 /* common page layout */
@@ -411,7 +416,7 @@ table.Links td {
    font-weight: bold;
 }
 
-table.links a {
+table.Links a {
    color: blue;
    font-weight: bold;
 }
