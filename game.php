@@ -712,7 +712,7 @@ function draw_message_box(&$message)
 function draw_game_info(&$game_row)
 {
    echo '<table class=GameInfos>' . "\n";
-   echo '<tr id="blackinfo">' . "\n";
+   echo '<tr id="blackInfo">' . "\n";
    echo "<td><img class=InTextStone src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'],
@@ -732,7 +732,7 @@ function draw_game_info(&$game_row)
 
    if( $game_row['Status'] != 'FINISHED' )
    {
-      echo '<tr id="blacktime">' . "\n";
+      echo '<tr id="blackTime">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
          echo_time_remaining( $game_row['Black_Maintime'], $game_row['Byotype']
                        ,$game_row['Black_Byotime'], $game_row['Black_Byoperiods']
@@ -741,7 +741,7 @@ function draw_game_info(&$game_row)
    }
 
 
-   echo '<tr id="whiteinfo">' . "\n";
+   echo '<tr id="whiteInfo">' . "\n";
    echo "<td><img class=InTextStone src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
    echo '<td>' .
       user_reference( REF_LINK, 1, 'black', $game_row['White_ID'],
@@ -760,7 +760,7 @@ function draw_game_info(&$game_row)
 
    if( $game_row['Status'] != 'FINISHED' )
    {
-      echo '<tr id="whitetime">' . "\n";
+      echo '<tr id="whiteTime">' . "\n";
       echo "<td colspan=\"" . $cols . "\">\n" . T_("Time remaining") . ": " .
          echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype']
                        ,$game_row['White_Byotime'], $game_row['White_Byoperiods']
@@ -769,7 +769,7 @@ function draw_game_info(&$game_row)
    }
 
    $sep = ',&nbsp;&nbsp;&nbsp;';
-   echo '<tr id="gamerules">' . "\n";
+   echo '<tr id="gameRules">' . "\n";
    echo "<td colspan=\"" . $cols . "\">" . T_('Rules') . ': ';
    echo T_('Komi') . ': ' . $game_row['Komi'] ;
    echo $sep . T_('Handicap') . ': ' . $game_row['Handicap'];
@@ -778,7 +778,7 @@ function draw_game_info(&$game_row)
 
    echo "</tr>\n";
 
-   echo '<tr id="gametime">' . "\n";
+   echo '<tr id="gameTime">' . "\n";
    echo "<td colspan=\"" . $cols . "\">" . T_('Time limit') . ': ' .
       echo_time_limit( $game_row['Maintime'], $game_row['Byotype']
                   ,$game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
@@ -802,10 +802,10 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
    if( $height<3 ) $height= 3;
    if( $width<15 ) $width= 15;
 
-   echo " <table class=gamenotes>\n";
+   echo " <table class=GameNotes>\n";
    echo "  <tr><th>" . T_('Private game notes') . "</td></tr>\n";
-   echo "  <tr><td class=notes>\n";
-   echo "   <textarea name=\"gamenotes\" id=\"gamenotes\" cols=\"$width\" rows=\"$height\">"
+   echo "  <tr><td class=Notes>\n";
+   echo "   <textarea name=\"gamenotes\" id=\"gameNotes\" cols=\"$width\" rows=\"$height\">"
             . textarea_safe( $notes) . "</textarea>\n";
    echo "  </td></tr>\n";
    echo "  <tr><td><input name=\"savenotes\" type=\"submit\" value=\""
