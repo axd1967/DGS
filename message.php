@@ -428,8 +428,8 @@ require_once( "include/form_functions.php" );
 
    if( $preview )
    {
-      echo "\n<a name=\"preview\"><h3 class=Header>" .
-               T_('Preview') . "</h3></a>\n";
+      echo "\n<h3 id='preview' class=Header>" .
+               T_('Preview') . "</h3>\n";
       //$mid==0 means preview - display a *to_me* like message
 
       $row = mysql_single_fetch( 'message.preview',
