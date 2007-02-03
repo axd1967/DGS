@@ -1,170 +1,218 @@
------------------
-Reference at:
+------------------------------------------------------------------
+General infos
+------------------------------------------------------------------
+changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
------------------
-Previous update: 2006-09
------------------
+previous server update: 2006-09
+release [2006-08-07] - DGS 1.0.12 - CVS-tag [DGS-stable-200608]
 
------------------
-2006-12-24 17:37:40 by Rodival:
+quick INFO:
+2007-02-03 rodival
+   I've reformatted the changelog file with last changes at top.
+   I'm working on the bad centered alignement of FAQ, docs and other pages.
 
-== skins added
-Database:
+quick TODO:
+
+------------------------------------------------------------------
+
+------------------------------------------------------------------
+Changelog
+------------------------------------------------------------------
+
+2007-02-03 rodival
+
+   * include/graph.php, ratingpng.php, ratinggraph.php:
+   - rating graph displayed "by number of games"
+     (new X-axis option added to the old "by date of games")
+   - complete rebuild of graph.php. Graph class added.
+     handling the "bynum" option
+
+   * statisticspng.php, statistics.php:
+   - using the new Graph class
+   
+   * include/rating.php, include/std_functions.php:
+   - small modifications consequently
+
+
+2007-01-25 rodival
+
+   * include/table_columns.php:
+   - enhancements mainly to fix the "button" column min-width
+     until CSS min-width is working
+   - introduced use of external form (var ExternalForm)
+   - added funcs: set_default_sort(), get_arg()
+
+   * include/std_functions.php (split_url, yesno, modf & more),
+   * include/message_functions.php:
+   - added funcs
+   - adaptations for enhanced Table_Info class, "button" columns and
+     common to waitingroom and message
+
+   * edit_bio.php,
+	* list_messages.php,
+   * message.php,
+   * show_games.php,
+   * skins/dragon/screen.css,
+   * status.php,
+   * userinfo.php,
+   * waiting_room.php:
+   - using new Table_Info class properties, for games infos and
+     common to waitingroom and message
+
+	* NEWS, news.php skins/dragon/screen.css:
+   - adding NEWS file [initally built by JUG] with user-visible changes
+
+
+2007-01-21 rodival
+
+   * scripts/README.developers, scripts/CHANGELOG.developers, CHANGELOG:
+   - added info files
+
+
+2007-01-12 rodival
+
+   * include/connect2mysql.php (mysql_addslashes) + most of the other
+   * files (used nearly everywhere):
+   - generalization of the right MySQL addslashes feature,
+     introducing function to properly escape value in SQL-statements
+
+   * do_registration.php:
+   - rejection of some account usurpers
+
+   * whole set of forum files/functions using table 'Posts.PosIndex':
+   - changed 'Posts.PosIndex' to NOT NULL
+-------------
+ALTER TABLE `Posts`
+   CHANGE `PosIndex` `PosIndex` varchar(80) binary NOT NULL default '' ;
+-------------
+
+   - removing NULL fields
+     the Posts.crc32 int(11) default NULL, seems to be
+     kept (while not yet used)
+-------------
 ALTER TABLE `Players`
- ADD `SkinName` VARCHAR( 32 ) DEFAULT '' NOT NULL AFTER `OnVacation` ;
+   CHANGE `IP` `IP` varchar(16) NOT NULL default '' ;
 
-Added-file:
-   skins/
-   skins/index.php
-   skins/known_skins.php
-   skins/dragon/index.php
-   skins/dragon/screen.css
-   skins/dragon/print.css
+ALTER TABLE `Posts`
+   CHANGE `Lastchanged` `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00' ,
+   CHANGE `Time` `Time` datetime NOT NULL default '0000-00-00 00:00:00' ,
+   CHANGE `Lastedited` `Lastedited` datetime NOT NULL default '0000-00-00 00:00:00' ,
+   CHANGE `LastPost` `LastPost` int(11) NOT NULL DEFAULT 0 ,
+   CHANGE `Subject` `Subject` varchar(80) NOT NULL default '' ,
+   CHANGE `User_ID` `User_ID` int(11) NOT NULL DEFAULT 0 ,
+   CHANGE `Parent_ID` `Parent_ID` int(11) NOT NULL DEFAULT 0 ,
+   CHANGE `PostsInThread` `PostsInThread` int(11) NOT NULL DEFAULT 0 ,
+   CHANGE `old_ID` `old_ID` int(11) NOT NULL DEFAULT 0 ;
+ALTER TABLE `Posts`
+   CHANGE `Text` `Text` text NOT NULL ;
+-------------
 
-Modified:
-   include/std_functions.php:
-      start_page()
-   change_profile.php
-   edit_profile.php
-   and where start_page(..., $skinname) is used
+   * include/table_infos.php:
+   - enhanced Table_Info class to handle waiting_room particularities and
+     games info
+   - changed syntax of row/column-description (properties)
 
-== removing NULL fields in database
-Database:
+   * waiting_room.php,
+   * userinfo.php,
+   * edit_bio.php,
+   * status.php,
+   - using the new Table_infos class properties
+
+   * skins/dragon/screen.css
+   - to follow the Table_infos modifications
+
+
+2007-01-10 rodival
+
+   * include/table_infos.php:
+   - adding class Table_infos for more CSS friendship
+
+   * userinfo.php, edit_bio.php, status.php:
+   - using class Table_infos
+
+
+2007-01-09 rodival
+
+   * change_bio.php, edit_bio.php: [from code mailing of JUG]
+   - adding the "bio infos order" feature
+   - removing NULL fields
+-------------
+ALTER TABLE `Bio`
+   ADD `SortOrder` INT( 11 ) DEFAULT 0 NOT NULL AFTER `Text` ;
+
+ALTER TABLE `Bio`
+   CHANGE `Category` `Category` VARCHAR( 40 ) NOT NULL DEFAULT '' ,
+   CHANGE `Text` `Text` TEXT NOT NULL DEFAULT '' ;
+-------------
+
+
+2006-12-29 rodival
+
+   * include/std_functions.php (verify_email) + all callers:
+   - adjusted error signature and error behaviour
+
+
+2006-12-28 rodival
+
+   * init.mysql:
+   - removing NULL fields in database
+   - added 'RESULT' to enum Messages.Type for a futur message chain walking
+     throught the game comments. The 'RESULT' messages are those send at
+     the end of a game.
+-------------
 ALTER TABLE `Messages`
- CHANGE `Type` `Type` ENUM( 'NORMAL', 'INVITATION', 'ACCEPTED', 'DECLINED', 'DELETED', 'DISPUTED', 'RESULT' ) DEFAULT 'NORMAL' NOT NULL
- CHANGE `ReplyTo` `ReplyTo` INT( 11 ) DEFAULT 0 NOT NULL ,
- CHANGE `Game_ID` `Game_ID` INT( 11 ) DEFAULT 0 NOT NULL ,
- CHANGE `Time` `Time` DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL ,
- CHANGE `Subject` `Subject` VARCHAR( 80 ) DEFAULT '' NOT NULL ,
- CHANGE `Text` `Text` TEXT NOT NULL ;
+   CHANGE `Type` `Type` ENUM( 'NORMAL', 'INVITATION', 'ACCEPTED', 'DECLINED', 'DELETED', 'DISPUTED', 'RESULT' ) DEFAULT 'NORMAL' NOT NULL ,
+   CHANGE `ReplyTo` `ReplyTo` INT( 11 ) DEFAULT 0 NOT NULL ,
+   CHANGE `Game_ID` `Game_ID` INT( 11 ) DEFAULT 0 NOT NULL ,
+   CHANGE `Time` `Time` DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL ,
+   CHANGE `Subject` `Subject` VARCHAR( 80 ) DEFAULT '' NOT NULL ,
+   CHANGE `Text` `Text` TEXT NOT NULL ;
+
 ALTER TABLE `MessageCorrespondents`
- CHANGE `uid` `uid` INT( 11 ) DEFAULT 0 NOT NULL ,
- CHANGE `mid` `mid` INT( 11 ) DEFAULT 0 NOT NULL ;
+   CHANGE `uid` `uid` INT( 11 ) DEFAULT 0 NOT NULL ,
+   CHANGE `mid` `mid` INT( 11 ) DEFAULT 0 NOT NULL ;
+-------------
 
------------------
-2006-12-27 17:37:40 by Rodival:
-Modified:
-   flags/__.gif (resizing)
-Added-file:
-   flags/eu.gif
-      ajusted it but not enabled it in countries.php
+   * include/time_functions.php (echo_time_remaining) + all callers:
+   - fix bad display of JAP byoyomi when byoyomi reached
+     ( "--- + 3 periods of 4h" instead of "4h + 3 periods of 1d" )
 
-== to fix the bad display of the JAP byoyomi when byoyomi reached
-== ( --- + 3 periods of 4h   instead of   4h + 3 periods of 1d)
-Modified:
-   include/time_functions.php
-      echo_time_remaining()
-   + adjusted the corresponding calls to echo_time_remaining()
+   * include/std_functions.php (mysql_single_fetch) + all callers:
+   - force to use $debugmsg with mysql_single_fetch()
 
------------------
-2007-01-09 08:04:54 by Rodival:
 
-== adding the "bio infos order" feature
->>> N.B.: from a code mailing of JUG
-Database:
-ALTER TABLE `Bio`
- ADD `SortOrder` INT( 11 ) DEFAULT 0 NOT NULL AFTER `Text` ;
+2006-12-27 rodival
 
-ALTER TABLE `Bio`
- CHANGE `Category` `Category` VARCHAR( 40 ) NOT NULL DEFAULT '' ,
- CHANGE `Text` `Text` TEXT NOT NULL DEFAULT '' ;
+   * images/flags/__.gif:
+   - resizing
 
-Modified:
-   edit_bio.php
-   change_bio.php
+   * images/flags/eu.gif:
+   - added, though not enabled in countries.php
 
-== Adding the class Table_infos for more CSS friendship
-Added-file:
-   include/table_infos.php
-  
-Modified:
-   userinfo.php
-   edit_bio.php
-   status.php
-      using the Table_infos class
 
------------------
-2007-01-12 11:05:02 by Rodival:
+2006-12-23 rodival
 
-== removing NULL fields in database
-Database:
+   * init.mysql:
+   - added skinname
+-------------
 ALTER TABLE `Players`
- CHANGE `IP` `IP` varchar(16) NOT NULL default '' ;
-ALTER TABLE `Posts`
- CHANGE `Lastchanged` `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00' ,
- CHANGE `Time` `Time` datetime NOT NULL default '0000-00-00 00:00:00' ,
- CHANGE `Lastedited` `Lastedited` datetime NOT NULL default '0000-00-00 00:00:00' ,
- CHANGE `LastPost` `LastPost` int(11) NOT NULL DEFAULT 0 ,
- CHANGE `Subject` `Subject` varchar(80) NOT NULL default '' ,
- CHANGE `User_ID` `User_ID` int(11) NOT NULL DEFAULT 0 ,
- CHANGE `Parent_ID` `Parent_ID` int(11) NOT NULL DEFAULT 0 ,
- CHANGE `PostsInThread` `PostsInThread` int(11) NOT NULL DEFAULT 0 ,
- CHANGE `old_ID` `old_ID` int(11) NOT NULL DEFAULT 0 ;
-ALTER TABLE `Posts`
- CHANGE `Text` `Text` text NOT NULL ;
-// >>> need a code adjust (that had been commited):
-ALTER TABLE `Posts`
- CHANGE `PosIndex` `PosIndex` varchar(80) binary NOT NULL default '' ;
-// >>>
-// crc32 int(11) default NULL, seems to be kept
+   ADD `SkinName` VARCHAR( 32 ) DEFAULT '' NOT NULL AFTER `OnVacation` ;
+-------------
 
-Modified:
-   the whole set of forum files/functions using 'PosIndex'
+   * skins/,
+   * skins/index.php,
+   * skins/known_skins.php,
+   * skins/dragon/index.php,
+   * skins/dragon/screen.css,
+   * skins/dragon/print.css:
+   - added CSS files for skins
 
-== Generalization of the right MySQL addslashes feature
-Added-code:
-   include/connect2mysql.php
-      mysql_addslashes()
-   and modified most of the other files where needed
+   * include/std_functions.php (start_page) + all callers:
+   - use of skins
 
-== To reject some account usurpers
-Modified:
-   do_registration.php
-
-== Table_infos class
-Modified:
-   include/table_infos.php
-      to handle waiting_room particularities
-   waiting_room.php
-   userinfo.php
-   edit_bio.php
-   status.php
-      using the new Table_infos class properties
-   skins/dragon/screen.css
-      accordingly
-
------------------
-2007-01-21 18:12:12 by Rodival:
-
-Added-file:
-   scripts/README.developers
-   scripts/CHANGELOG.developers
-   CHANGELOG
-
------------------
-2007-02-03 02:40:30 by Rodival:
-
-== Rating graph displayed "by number of games"
-  (new X-axis option added to the old "by date of games")
-Modified:
-   include/graph.php
-      complete rebuild. Graph class added.
-   ratingpng.php
-      using the new Graph class
-   ratinggraph.php
-      handling the "bynum" option
-   statisticspng.php
-      using the new Graph class
-   statistics.php
-      small modifications accordingly
-   include/rating.php
-   include/std_functions.php
-
------------------
------------------
-TODO:
+   * sgf.php:
+   - score 0 for Jigo
 
 
------------------
------------------
+-------------
