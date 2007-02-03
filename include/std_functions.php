@@ -39,6 +39,11 @@ if (!isset($page_microtime))
 require_once( "include/translation_functions.php" );
 
 
+// Server birth date:
+define('BEGINYEAR', 2001);
+define('BEGINMONTH', 8);
+
+
 // because of the cookies host, $hostname_jump = true is nearly mandatory
 $hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
 
@@ -107,9 +112,9 @@ define('URI_ORDER_CHAR','-');
 define('MAX_START_RATING', 2600); //6 dan
 define('MIN_RATING', -900); //30 kyu
 
-$ratingpng_min_interval = 2*31*24*3600;
-$BEGINYEAR = 2001;
-$BEGINMONTH = 8;
+//Allow the "by number of games" graphic (as well as "by date of games").
+define('GRAPH_RATING_BY_NUM_ENA', true);
+define('GRAPH_RATING_MIN_INTERVAL', 2*31*24*3600);
 
 
 $button_max = 11;
@@ -276,6 +281,21 @@ function swap(&$a, &$b)
    $b = $tmp;
 }
 
+if( !function_exists('array_combine') ) //exists in PHP5
+{
+   function array_combine($keys, $values)
+   {
+      $res = array();
+      while( (list(, $k)=each( $keys))
+          && (list(, $v)=each( $values))
+         )
+      {
+         $res[$k]= $v;
+      }
+      return $res;
+   }
+}
+
 function array_value_to_key_and_value( $array )
 {
   $new_array = array();
@@ -284,6 +304,28 @@ function array_value_to_key_and_value( $array )
 
   return $new_array;
 }
+
+/**
+ * Quick search in a sorted array. $haystack must be sorted.
+ * will return:
+ *  the index where $needle was found (the lower doublon if duplicates).
+ *  the index of the next highter if not found (where it must be inserted).
+ *  count($haystack) if no highter ($needle must be appended).
+ **/
+function array_bsearch($needle, &$haystack)
+{
+   $h= count($haystack);
+   $l= 0;
+   while( $h > $l )
+   {
+      $p= ($h+$l)>>1;
+      if( $needle > $haystack[$p] )
+         $l= $p+1;
+      else
+         $h= $p;
+   }
+   return $h;
+} //array_bsearch
 
 function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $last_modified_stamp=NULL )
 {

@@ -20,30 +20,33 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Game";
 
-function interpolate($value, $table, $extrapolate)
+function table_interpolate($value, $table, $extrapolate=false)
 {
    foreach ( $table as $x )
+   {
+      if( !empty($tmpprev) )
+         $prev=$tmpprev;
+
+      if( $value <= $x['KEY'] )
       {
-         if( !empty($tmpprev) )
-            $prev=$tmpprev;
-
-         if( $value <= $x['KEY'] )
+         if( empty($prev) )
          {
-            if( empty($prev) )
-            {
-               if( !$extrapolate )
-                  error("value_out_of_range",'rat1');
-            }
-            else
-               return $prev['VAL'] + ($value-$prev['KEY'])/($x['KEY']-$prev['KEY']) *
-                  ($x['VAL']-$prev['VAL']);
+            if( !$extrapolate )
+               error('value_out_of_range','table_interpolate1');
          }
-
-         $tmpprev = $x;
+         else
+         {
+            //i.e.: $extrapolate = true; break;
+            return $prev['VAL'] + ($value-$prev['KEY'])/($x['KEY']-$prev['KEY']) *
+               ($x['VAL']-$prev['VAL']);
+         }
       }
 
+      $tmpprev = $x;
+   }
+
    if( !$extrapolate )
-      error("value_out_of_range",'rat2');
+      error('value_out_of_range','table_interpolate2');
 
    // extrapolate
 
@@ -53,7 +56,7 @@ function interpolate($value, $table, $extrapolate)
 }
 
 
-function con($rating)
+function con_value($rating)
 {
    $con_table[0]['KEY'] = 100;
    $con_table[0]['VAL'] = 116;
@@ -76,13 +79,14 @@ function con($rating)
    $con_table[6]['KEY'] = 2700;
    $con_table[6]['VAL'] = 10;
 
+   //highter, should be constant
    $con_table[7]['KEY'] = 10000;
    $con_table[7]['VAL'] = 10;
 
-   return interpolate($rating, $con_table, true);
+   return table_interpolate($rating, $con_table, true);
 }
 
-function a($rating)
+function a_value($rating)
 {
    $a_table[0]['KEY'] = 100;
    $a_table[0]['VAL'] = 200;
@@ -90,10 +94,11 @@ function a($rating)
    $a_table[1]['KEY'] = 2700;
    $a_table[1]['VAL'] = 70;
 
+   //highter, should be constant
    $a_table[1]['KEY'] = 10000;
    $a_table[1]['VAL'] = 70;
 
-   return interpolate($rating, $a_table, true);
+   return table_interpolate($rating, $a_table, true);
 }
 
 
@@ -121,14 +126,14 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
    if( $D >= 0 ) //ratW-ratB
    {
-      $SEB = 1.0/(1.0+exp($D/a($rating_B)));
+      $SEB = 1.0/(1.0+exp($D/a_value($rating_B)));
       $SEW = 1.0-$SEB;
       if( $result != 0.5 )
          $SEW-= $e;
    }
    else
    {
-      $SEW = 1.0/(1.0+exp(-$D/a($rating_W)));
+      $SEW = 1.0/(1.0+exp(-$D/a_value($rating_W)));
       $SEB = 1.0-$SEW;
       if( $result != 0.5 )
          $SEB-= $e;
@@ -136,8 +141,8 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
    $sizefactor = (19 - abs($size-19))*(19 - abs($size-19)) / (19*19);
 
-   $conW = con($rating_W) * $sizefactor * $factor;
-   $conB = con($rating_B) * $sizefactor * $factor;
+   $conW = con_value($rating_W) * $sizefactor * $factor;
+   $conB = con_value($rating_B) * $sizefactor * $factor;
 
    $rating_W += $conW * ($result - $SEW);
    $rating_B += $conB * (1-$result - $SEB);
@@ -604,7 +609,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
 
    if( $graph_uid > 0 )
    {
-      $string = "<a class=rating href=\"ratinggraph.php?uid=$graph_uid\">"
+      $string = "<a class=Rating href=\"ratinggraph.php?uid=$graph_uid\">"
                . $string . '</a>';
    }
    return $string;
@@ -746,7 +751,7 @@ function convert_to_rating($string, $type)
       case 'igs':
       {
          $rating = rank_to_rating($val, $kyu);
-         $rating = interpolate($rating, $igs_table, true);
+         $rating = table_interpolate($rating, $igs_table, true);
       }
       break;
 
@@ -756,7 +761,7 @@ function convert_to_rating($string, $type)
 //             error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
 
 //          $rating = $val*100 - 1130 ;
-//          $rating = interpolate($rating, $igs_table, true);
+//          $rating = table_interpolate($rating, $igs_table, true);
 //       }
 //       break;
 

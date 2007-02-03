@@ -74,8 +74,10 @@ require_once( "include/std_functions.php" );
    }
 
    $tmp = floor($NOW/86400); //to force the caches (daily)
-   echo "\n<p></p><img src=\"statisticspng.php?date=$tmp\"" .
-        " alt=\"" . T_('Statistics graph') . "\">";
+   echo "<p></p>\n";
+   echo "<img src=\"statisticspng.php?date=$tmp" .
+        (@$_REQUEST['show_time'] == 'y' ? URI_AMP.'show_time=y' : '') .
+        "\" alt=\"" . T_('Statistics graph') . "\">\n";
 
    end_page();
 }

@@ -23,9 +23,207 @@ $TranslateGroups[] = "Game";
 require_once( "include/std_functions.php" );
 require_once( "include/graph.php" );
 
-define('IMAGE_BORDER',6);
 
-function get_stat_data( )
+{
+   connect2mysql();
+
+   $logged_in = who_is_logged( $player_row);
+
+//   if( !$logged_in )
+//      error("not_logged_in");
+
+
+   //disable translations in graph if not latin
+   if( eregi( '^iso-8859-', $encoding_used) )
+   {
+      $keep_english= false;
+      $T_= 'T_';
+      $datelabel = create_function('$x',
+         'return T_(date("M",$x)).date("\\nY",$x);' );
+   }
+   else
+   {
+      $keep_english= true;
+      $T_= 'fnop';
+      $datelabel = create_function('$x',
+         'return date("M\\nY",$x);' );
+   }
+
+
+   //prepare the graph
+
+   $SizeX = max( 200, @$_GET['size'] > 0 ? $_GET['size'] : 640 );
+   $SizeY = $SizeX * 3 / 4;
+
+   $gr = new Graph($SizeX, $SizeY, substr($bg_color, 1, -1));
+
+   $black = $gr->getcolor(0, 0, 0);
+   $red = $gr->getcolor(205, 159, 156);
+
+
+   //fetch and prepare datas
+
+   get_stat_data();
+   $nr_points = count($tTime);
+
+   $graphs[]= array(
+      'name' => $T_('Running games'), 
+      'x' => &$tTime,
+      'y' => &$tGameR,
+      'max' => $maxGameR,
+      'min' => $minGameR,
+      'c' => $gr->getcolor( 255,   0,   0),
+   );
+   $graphs[]= array(
+      'name' => $T_('Games'), 
+      'x' => &$tTime,
+      'y' => &$tGames,
+      'max' => $maxGames,
+      'min' => $minGames,
+      'c' => $gr->getcolor( 255,   0, 200),
+   );
+   $graphs[]= array(
+      'name' => $T_('Moves'), 
+      'x' => &$tTime,
+      'y' => &$tMoves,
+      'max' => $maxMoves,
+      'min' => $minMoves,
+      'c' => $gr->getcolor(   0, 180, 200),
+   );
+   $graphs[]= array(
+      'name' => $T_('Users'), 
+      'x' => &$tTime,
+      'y' => &$tUsers,
+      'max' => $maxUsers,
+      'min' => $minUsers,
+      'c' => $gr->getcolor(   0, 200,   0),
+   );
+
+
+   //start by drawing the headers to find the graph position
+
+   $title_fmt= '%s / %d';
+   $title_sep= 4*max($gr->border, $gr->labelMetrics['WIDTH']);
+
+   $curves_min= 1;
+   $y = $gr->border;
+   $x = 0;
+   $a = $gr->width-2*$title_sep;
+   $m = 0;
+   for( $i=0 ; $i<count($graphs) ; $i++ )
+   {
+      $graph= &$graphs[$i];
+      if( $graph['max'] )
+         $curves_min = min($curves_min,$graph['min']/$graph['max']);
+
+      $v= sprintf($title_fmt, $graph['name'], $graph['max']);
+
+      $b= $gr->labelbox($v);
+      $b= $x+$b['x'];
+      if( $b > $a )
+      {
+         $b-= $x;
+         $x = 0;
+         $y+= $gr->labelMetrics['LINEH'];
+      }
+
+      $graph['label']= $v;
+      $graph['labelX']= $x;
+      $graph['labelY']= $y;
+
+      $m= max($m,$b);
+      $x= $b+$title_sep;
+   }
+   $title_align= $title_sep+($a-$m)/2;
+   $title_bottom= $y+$gr->labelMetrics['LINEH'];
+
+
+   //just a string sample to evaluate $marge_left
+   $b= $gr->labelbox('100%');
+   $x= $b['x'];
+   $y= $title_bottom + $gr->labelMetrics['HEIGHT'];
+   $marge_left  = $gr->border+10 +$x;
+   $marge_right = max(10,DASH_MODULO+2); //better if > DASH_MODULO
+   $marge_top   = max($y,DASH_MODULO+2); //better if > DASH_MODULO
+   $marge_bottom= $gr->border+ 2*$gr->labelMetrics['LINEH'];
+
+   $gr->setgraphbox(
+      $marge_left,
+      $marge_top,
+      $gr->width-$marge_right,
+      $gr->height-$marge_bottom
+      );
+
+
+   //scale datas
+
+   $gr->setgraphviewX($minTime, $maxTime);
+
+   $curves_min-= 0.01; //add a little spacing
+   for( $i=0 ; $i<count($graphs) ; $i++ )
+   {
+      $graph= &$graphs[$i];
+
+      $y = $graph['max'];
+      $gr->setgraphviewY($y, $y*$curves_min);
+      $graph['y'] = $gr->mapscaleY($graph['y']);
+   }
+   $ymax = 100.;
+   $ymin = 100*$curves_min;
+   $gr->setgraphviewY($ymax, $ymin);
+
+   $tTime = $gr->mapscaleX($tTime);
+
+
+   //vertical scaling
+
+   $step = 10; //10%
+   $start = ceil($ymin/$step)*$step;
+   $gr->gridY( $start, $step, $gr->border
+      , create_function('$x', 'return $x."%";' ), $black
+      , '', $black);
+
+
+   //horizontal scaling
+
+      $step = 20.; //min grid distance in pixels
+      $step/= $gr->sizeX; //graph width
+      $step/= 3600*24*30; //one month
+      $step = ceil(($maxTime - $minTime) * $step);
+
+      $month = date('n',$minTime)+1;
+      $year = date('Y',$minTime);
+      $dategrid = create_function('$x',
+         "return mktime(0,0,0,\$x,1,$year,0);" );
+      $gr->gridX( $month, $step, $gr->boxbottom+3
+         , $datelabel, $black
+         , $dategrid, $red);
+
+
+
+   //draw the curves
+
+   for( $i=0 ; $i<count($graphs) ; $i++ )
+   {
+      $graph= &$graphs[$i];
+
+      $gr->curve($graph['x'], $graph['y'], $nr_points, $graph['c']);
+      $gr->label($title_align+$graph['labelX'], $graph['labelY']
+               , $graph['label'], $graph['c']);
+   }
+
+
+   //misc drawings
+
+   if( @$_GET['show_time'] == 'y')
+      $gr->label( 0, 0,
+                 sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
+
+   $gr->imagesend();
+}
+
+
+function get_stat_data()
 {
  global $tTime, $tUsers, $tMoves, $tGames, $tGameR;
  global $minTime, $minUsers, $minMoves, $minGames, $minGameR;
@@ -36,7 +234,7 @@ function get_stat_data( )
    $tMoves = array();
    $tGames = array();
    $tGameR = array();
- 
+
    $result = mysql_query(
                "SELECT MAX(UNIX_TIMESTAMP(Time)) AS maxTime" .
                ",MIN(UNIX_TIMESTAMP(Time)) AS minTime" .
@@ -68,242 +266,7 @@ function get_stat_data( )
       array_push($tMoves, $row['Moves']);
       array_push($tGames, $row['Games']);
       array_push($tGameR, $row['GamesRunning']);
-   } 
+   }
 }
 
-function scale($x)
-{
-   global $MAX, $MIN, $SIZE, $OFFSET;
-   if( $MAX == $MIN )
-      return $OFFSET;
-   return round( $OFFSET + (($x-$MIN)/($MAX-$MIN))*$SIZE);
-}
-
-
-{
-
-   connect2mysql();
-
-   $logged_in = who_is_logged( $player_row);
-
-//   if( !$logged_in )
-//      error("not_logged_in");
-
-
-   //Disable translations in graph if not latin
-   if( eregi( '^iso-8859-', $encoding_used) )
-   {
-      $keep_english= false;
-      $T_= 'T_';
-   }
-   else
-   {
-      $keep_english= true;
-      $T_= 'fnop';
-   }
-
-
-
-//Then draw the graph
-
-   $SizeX = ( @$_GET['size'] > 0 ? $_GET['size'] : $defaultsize );
-   $SizeY = $SizeX * 3 / 4;
-
-   $im = imagecreate( $SizeX, $SizeY );
-   list($r,$g,$b,$a)= split_RGBA(substr($bg_color, 2, 6), 0);
-   $bg = imagecolorallocate ($im, $r,$g,$b); //first=background color
-
-   $black = imagecolorallocate ($im, 0, 0, 0);
-   $red = imagecolorallocate ($im, 205, 159, 156);
-
-
-   get_stat_data();
-
-   $nr_points = count($tTime);
-
-   $graphs[]= array(
-      'name' => $T_('Running games'), 
-      'x' => &$tTime,
-      'y' => &$tGameR,
-      'max' => $maxGameR,
-      'min' => $minGameR,
-      'c' => imagecolorallocate ($im, 255,   0,   0),
-   );
-   $graphs[]= array(
-      'name' => $T_('Games'), 
-      'x' => &$tTime,
-      'y' => &$tGames,
-      'max' => $maxGames,
-      'min' => $minGames,
-      'c' => imagecolorallocate ($im, 255,   0, 200),
-   );
-   $graphs[]= array(
-      'name' => $T_('Moves'), 
-      'x' => &$tTime,
-      'y' => &$tMoves,
-      'max' => $maxMoves,
-      'min' => $minMoves,
-      'c' => imagecolorallocate ($im,   0, 180, 200),
-   );
-   $graphs[]= array(
-      'name' => $T_('Users'), 
-      'x' => &$tTime,
-      'y' => &$tUsers,
-      'max' => $maxUsers,
-      'min' => $minUsers,
-      'c' => imagecolorallocate ($im,   0, 200,   0),
-   );
-
-
-   $b= imagelabelbox($im, '100%');
-   define('MARGE_LEFT'  ,$b['x'] +IMAGE_BORDER+10);
-   define('MARGE_RIGHT' ,max(10,DASH_MODULO+2)); //Better if > DASH_MODULO
-
-   $title_fmt= '%s / %d';
-   $title_sep= 4*max(IMAGE_BORDER,LABEL_WIDTH);
-
-   $curve_bottom= 1;
-   $y = IMAGE_BORDER;
-   $x = 0;
-   $a = $SizeX-2*$title_sep;
-   $m = 0;
-   for( $i=0 ; $i<count($graphs) ; $i++ )
-   {
-      $graph= &$graphs[$i];
-
-      $v= sprintf($title_fmt, $graph['name'], $graph['max']);
-
-      $b= imagelabelbox($im, $v);
-      $b= $x+$b['x'];
-      if( $b > $a )
-      {
-         $b-= $x;
-         $x = 0;
-         $y+= LABEL_HEIGHT+LABEL_SEPARATION;
-      }
-
-      $graph['label']= $v;
-      $graph['labelX']= $x;
-      $graph['labelY']= $y;
-      if( $graph['max'] )
-         $curve_bottom = min($curve_bottom,$graph['min']/$graph['max']);
-
-      $m= max($m,$b);
-      $x= $b+$title_sep;
-   }
-   $title_left= $title_sep+($a-$m)/2;
-
-   $y+= 2*LABEL_HEIGHT+LABEL_SEPARATION;
-   define('MARGE_TOP'   ,max($y,DASH_MODULO+2)); //Better if > DASH_MODULO
-   define('MARGE_BOTTOM',IMAGE_BORDER+2*(LABEL_HEIGHT+LABEL_SEPARATION));
-
-
-   //vertical scaling
-
-   $SIZE = $SizeY-MARGE_BOTTOM-MARGE_TOP;
-   $OFFSET = MARGE_TOP;
-
-   $curve_bottom-= 0.01;
-   for( $i=0 ; $i<count($graphs) ; $i++ )
-   {
-      $graph= &$graphs[$i];
-
-      $MIN = $graph['max'];
-      $MAX = $MIN*$curve_bottom;
-      $graph['y'] = array_map('scale', $graph['y']);
-   }
-
-
-   $MIN = 100;
-   $MAX = $MIN*$curve_bottom;
-
-   imagesetdash($im, $black);
-
-   $v = ceil($MAX/10)*10;
-   if( abs($v)<1 ) $v=0;
-   $a = MARGE_LEFT-4 ;
-   $b = $SizeX ;
-   $b = $b - ((($b-$a) % DASH_MODULO)+1) ; //so all lines start in the same way
-   $y = $SizeY ;
-   while( $v <= $MIN )
-   {
-      $sc = scale($v);
-      imageline($im, $a, $sc, $b, $sc, IMG_COLOR_STYLED);
-      if ( $y > $sc )
-      {
-         imagelabel($im, IMAGE_BORDER, $sc-LABEL_ALIGN
-                  , $v.'%', $black);
-         $y = $sc - LABEL_HEIGHT ;
-      }
-      $v += 10;
-   }
-
-
-   //horizontal scaling
-
-   $SIZE = $SizeX-MARGE_LEFT-MARGE_RIGHT;
-   $OFFSET = MARGE_LEFT;
-   $MIN = $minTime;
-   $MAX = $maxTime;
-   $tTime = array_map('scale', $tTime);
-
-   imagesetdash($im, $red);
-
-   $year = date('Y',$minTime);
-   $month = date('n',$minTime)+1;
-
-   $step = ceil(($maxTime - $minTime)/(3600*24*30) * 20 / $SIZE);
-   $no_text = true;
-   $b = $SizeY-MARGE_BOTTOM+3 ;
-   $a = MARGE_TOP ;
-   $a = $a - (DASH_MODULO-((($b-$a) % DASH_MODULO)+1)) ;
-   $x = MARGE_LEFT-1 ;
-   $y = $SizeY-MARGE_BOTTOM+3;
-   for(;;$month+=$step)
-   {
-      $dt = mktime(0,0,0,$month,1,$year);
-      if( $dt > $maxTime )
-      {
-         if( !$no_text ) break;
-         $dt = $minTime;
-         $sc = scale($dt);
-      }
-      else
-      {
-         $sc = scale($dt);
-         imageline($im, $sc, $a, $sc, $b, IMG_COLOR_STYLED);
-      }
-
-      $no_text = false;
-      if ($x >= $sc)
-         continue;
-
-      $x= max($x,LABEL_WIDTH+
-            imagelabel($im, $sc, $y,
-                        $T_(date('M', $dt)), $black));
-      $x= max($x,LABEL_WIDTH+
-            imagelabel($im, $sc, $y+LABEL_HEIGHT+LABEL_SEPARATION,
-                        date('Y', $dt), $black));
-   }
-
-
-   //drawings
-
-   for( $i=0 ; $i<count($graphs) ; $i++ )
-   {
-      $graph= &$graphs[$i];
-
-      imagecurve($im, $graph['x'], $graph['y'], $nr_points, $graph['c']);
-      imagelabel($im, $title_left+$graph['labelX'], $graph['labelY']
-               , $graph['label'], $graph['c']);
-   }
-
-
-   if( @$_GET['show_time'] == 'y')
-      imagelabel($im, 0, 0,
-                 sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
-
-
-   imagesend($im);
-}
 ?>
