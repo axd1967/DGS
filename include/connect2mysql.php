@@ -19,8 +19,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require_once( "include/config.php" );
-@ignore_user_abort(true); //because we will use MySQL
-@set_time_limit(0);
+//@set_time_limit(0); //does not work with safe_mode
+
+//because we will use MySQL, this will help to
+//complete the *multiple queries* transactions.
+@ignore_user_abort(true);
+
 
 //At least needed when connect2mysql.php is used alone (as in quick_status.php):
 function jump_to($uri, $absolute=false)
