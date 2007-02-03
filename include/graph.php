@@ -37,9 +37,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *  the %s will be replaced by the font name.
  *  for Windows, something like 'C:/WINDOWS/FONTS/%s.TTF'
  *  for Linux, something like '/var/lib/defoma/fontconfig.d/F/%s.ttf'
+ * TTF_HEIGHT:
+ *  adjust it to match the embedded font height
  */
-   define('TTF_PATH','/var/lib/defoma/fontconfig.d/F/%s.ttf'); // Font path
-   define('TTF_NAME','FreeSans-Medium'); //Font name
+   define('TTF_PATH', '/var/lib/defoma/fontconfig.d/F/%s.ttf'); // Font path
+   define('TTF_NAME', 'FreeSans-Medium'); //Font name
+   define('TTF_HEIGHT', 10); //Font height
 
 //if( function_exists('imagefilledarc') && defined('IMG_ARC_PIE') )
    define('GD2_ARC',function_exists('imagefilledarc') && defined('IMG_ARC_PIE'));
@@ -908,7 +911,7 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
        */
       function TTFdefaultlabelMetrics(&$gr)
       {
-         $h = 9;
+         $h = TTF_HEIGHT;
          $s = 3;
          $b= imagettfbbox($h, 0, $gr->TTFfile, 'MIXmix');
          $gr->labelMetrics = array(
@@ -951,7 +954,7 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
        */
       function TTFdefaultlabelMetrics(&$gr)
       {
-         $h = 9; //too match the embedded font
+         $h = TTF_HEIGHT; //too match the embedded font
          $s = 3;
          $gr->labelMetrics = array(
           'HEIGHT' => $h,
