@@ -20,6 +20,21 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-02-04 rodival
+
+   * init.mysql:
+   - full periodic check
+-----------
+ALTER TABLE `TournamentRound`
+   CHANGE `Handicaptype` `HandicapType` int(11) NOT NULL default '0' ;
+ALTER TABLE `TranslationGroups`
+   CHANGE `Groupname` `Groupname` varchar( 32 ) NOT NULL default '' ;
+-----------
+
+   * data_export.php:
+   - Create_options management added and CSS adjusted.
+
+
 2007-02-03 rodival
 
    * include/graph.php, ratingpng.php, ratinggraph.php:
@@ -82,15 +97,15 @@ Changelog
 
    * whole set of forum files/functions using table 'Posts.PosIndex':
    - changed 'Posts.PosIndex' to NOT NULL
--------------
+-----------
 ALTER TABLE `Posts`
    CHANGE `PosIndex` `PosIndex` varchar(80) binary NOT NULL default '' ;
--------------
+-----------
 
    - removing NULL fields
      the Posts.crc32 int(11) default NULL, seems to be
      kept (while not yet used)
--------------
+-----------
 ALTER TABLE `Players`
    CHANGE `IP` `IP` varchar(16) NOT NULL default '' ;
 
@@ -106,7 +121,7 @@ ALTER TABLE `Posts`
    CHANGE `old_ID` `old_ID` int(11) NOT NULL DEFAULT 0 ;
 ALTER TABLE `Posts`
    CHANGE `Text` `Text` text NOT NULL ;
--------------
+-----------
 
    * include/table_infos.php:
    - enhanced Table_Info class to handle waiting_room particularities and
@@ -137,14 +152,14 @@ ALTER TABLE `Posts`
    * change_bio.php, edit_bio.php: [from code mailing of JUG]
    - adding the "bio infos order" feature
    - removing NULL fields
--------------
+-----------
 ALTER TABLE `Bio`
    ADD `SortOrder` INT( 11 ) DEFAULT 0 NOT NULL AFTER `Text` ;
 
 ALTER TABLE `Bio`
    CHANGE `Category` `Category` VARCHAR( 40 ) NOT NULL DEFAULT '' ,
    CHANGE `Text` `Text` TEXT NOT NULL DEFAULT '' ;
--------------
+-----------
 
 
 2006-12-29 rodival
@@ -160,7 +175,7 @@ ALTER TABLE `Bio`
    - added 'RESULT' to enum Messages.Type for a futur message chain walking
      throught the game comments. The 'RESULT' messages are those send at
      the end of a game.
--------------
+-----------
 ALTER TABLE `Messages`
    CHANGE `Type` `Type` ENUM( 'NORMAL', 'INVITATION', 'ACCEPTED', 'DECLINED', 'DELETED', 'DISPUTED', 'RESULT' ) DEFAULT 'NORMAL' NOT NULL ,
    CHANGE `ReplyTo` `ReplyTo` INT( 11 ) DEFAULT 0 NOT NULL ,
@@ -172,7 +187,7 @@ ALTER TABLE `Messages`
 ALTER TABLE `MessageCorrespondents`
    CHANGE `uid` `uid` INT( 11 ) DEFAULT 0 NOT NULL ,
    CHANGE `mid` `mid` INT( 11 ) DEFAULT 0 NOT NULL ;
--------------
+-----------
 
    * include/time_functions.php (echo_time_remaining) + all callers:
    - fix bad display of JAP byoyomi when byoyomi reached
@@ -195,10 +210,10 @@ ALTER TABLE `MessageCorrespondents`
 
    * init.mysql:
    - added skinname
--------------
+-----------
 ALTER TABLE `Players`
    ADD `SkinName` VARCHAR( 32 ) DEFAULT '' NOT NULL AFTER `OnVacation` ;
--------------
+-----------
 
    * skins/,
    * skins/index.php,
@@ -215,4 +230,4 @@ ALTER TABLE `Players`
    - score 0 for Jigo
 
 
--------------
+-----------

@@ -39,6 +39,7 @@ if(OLD_STYLE_DUMP){
 } //OLD_STYLE_DUMP
 define('DROP_TABLE', 0);
 define('AUTO_INCREMENT', 0);
+define('CREATE_OPTION', 1);
 
 
 //define('COMMENT_LINE_STR', '//');
@@ -354,12 +355,20 @@ function fdate( $sdat)
    return date( $fmt, $sdat); //date gmdate
 } //fdate
 
+define('HTML_PRE', 1);
 function dump2html( $str)
 {
    $str = textarea_safe( $str);
-   return str_replace( ' ', '&nbsp;' //&nbsp;&deg;
-         , str_replace( CR, "<br>\n", $str) //§
-         );
+   if( HTML_PRE )
+   {
+      $str = trim( $str);
+   }
+   else
+   {
+      $str = str_replace( ' ', '&nbsp;', $str); //&nbsp;&deg;
+      $str = str_replace( CR, "<br>\n", $str);
+   }
+   return $str;
 } //dump2html
 
 function echoTR( $typ, $str)
@@ -376,14 +385,19 @@ function echoTR( $typ, $str)
    {
    case 'th':
    case 'td':
-      $str= "<tr>\n"
-         . "<$typ nowrap align=left><br>\n" . dump2html( $str) . "\n<br></$typ>\n"
-         . "</tr>\n";
+      if( HTML_PRE )
+         $str= "<pre>\n" . dump2html( $str) . "\n</pre>";
+      else
+         $str= "<br>\n" . dump2html( $str) . "\n<br>";
+      $str= "<tr>\n<$typ nowrap>" . $str . "</$typ>\n</tr>\n";
       break;
    default:
+      if( HTML_PRE )
+         $str= "<pre>\n" . dump2html( $str) . "\n</pre>";
+      else
+         $str= "<br>\n" . dump2html( $str) . "\n<br>";
       $str= "<tr class=\"$typ\" ondblclick=\"row_click(this,'$typ')\">\n"
-         . "<td nowrap><br>\n" . dump2html( $str) . "\n<br></td>\n"
-         . "</tr>\n";
+         . "<td nowrap>" . $str . "</td>\n</tr>\n";
       break;
    }
 
@@ -441,6 +455,7 @@ class dbTable
       $head = '';
       $body = '';
       $incr = '';
+      $opts = '';
       $ok = 0;
 
       if( $row=mysql_single_fetch( false,
@@ -453,10 +468,18 @@ class dbTable
             $ok = 1;
             $this->type = $row['Type'];
             if( AUTO_INCREMENT && @$row['Auto_increment'] )
-               $incr = ' AUTO_INCREMENT=' . $row['Auto_increment'] . ' ';
+               $incr = ' AUTO_INCREMENT=' . $row['Auto_increment'];
 
             if( CREATE_TIME && @$row['Create_time'] ) //also 'Update_time'
                $comment .= 'Created: '.fdate( $row['Create_time']).chr(10);
+
+            if( CREATE_OPTION && @$row['Create_options'] )
+            {
+               $opts = $row['Create_options'];
+               $opts = strtoupper(trim($opts));
+               if( $opts )
+                  $opts = ' ' . $opts;
+            }
          }
       }
 
@@ -484,7 +507,7 @@ class dbTable
                . ( IF_NOT_EXISTS ?'IF NOT EXISTS ' :'' )
                . $this->xname.' ('.CR
             . $body
-            . ') TYPE='.$this->type.$incr.';'.CR
+            . ') TYPE='.$this->type.$opts.$incr.';'.CR
             ;
       }
       return $struct;
@@ -544,10 +567,20 @@ class dbTable
          $spc = '   ';
          $str = '';
          if( count($defs) )
-            $str.= $spc.implode( CR.$spc, $defs).CR;
+         {
+            $defs = implode( CR.$spc, $defs);
+            if( !QUOTE_NAME )
+               $defs = str_replace('`', '', $defs);
+            $str.= $spc.$defs.CR;
+         }
          //$str.= comment_line( '----')
          if( count($keys) )
-            $str.= $spc.implode( CR.$spc, $keys).CR;
+         {
+            $keys = implode( CR.$spc, $keys);
+            if( !QUOTE_NAME )
+               $keys = str_replace('`', '', $keys);
+            $str.= $spc.$keys.CR;
+         }
 
          $body.= $str;
       }
@@ -579,18 +612,17 @@ function init_dump( $database)
    $text = dump_header( $database);
    $text = echoTR( 'th', $text);
 
-   $c=1;
+   $c=0;
    foreach( $tables as $table)
    {
+      $c=($c % LIST_ROWS_MODULO)+1;
       $tbl = new dbTable( $database, $table);
       $str = $tbl->structure();
 
-      $text.= echoTR( "row$c", $str);
+      $text.= echoTR( "Row$c", $str);
 
       $str = after_table( $table);
       $text.= echoTR( 'td', $str);
-
-      $c=3-$c;
    }
    
    return $text;
@@ -650,9 +682,10 @@ ID,Page,Group_ID
             (OLD_STYLE_DUMP ?'' :'Page,Group_ID')),
       );
 
-   $c=1;
+   $c=0;
    foreach( $tables as $table => $fields )
    {
+      $c=($c % LIST_ROWS_MODULO)+1;
       @list($fields, $order) = $fields;
       if( $order )
          $order = ' ORDER BY '.$order;
@@ -665,8 +698,7 @@ ID,Page,Group_ID
             , ''
             );
 
-      $text.= echoTR( "row$c", $str);
-      $c=3-$c;
+      $text.= echoTR( "Row$c", $str);
    }
 
    return $text;
@@ -774,9 +806,9 @@ ID,Page,Group_ID
    //====================
 
    start_html( 'data_export', 0, '', //@$player_row['SkinName'],
-      "  table.tbl { border:0; background: #c0c0c0; }\n" .
-      "  tr.row1 { background: #ffffff; }\n" .
-      "  tr.row2 { background: #dddddd; }\n" .
+      "  table.Table { border:0; background: #c0c0c0; }\n" .
+      "  tr.Row1 { background: #ffffff; }\n" .
+      "  tr.Row2 { background: #dddddd; }\n" .
       "  tr.hil { background: #ffb010; }" );
 
    echo " <SCRIPT language=\"JavaScript\" type=\"text/javascript\"><!-- \n";
@@ -810,7 +842,7 @@ ID,Page,Group_ID
 
    if( $show_it && $text)
    {
-      echo "\n<table class=tbl cellpadding=4 cellspacing=1>\n"
+      echo "\n<table class=Table cellpadding=4 cellspacing=1>\n"
          . $text ."</table>\n";
 
       $hiddens = array( 'dumptype' => $dumptype);
