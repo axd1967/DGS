@@ -718,8 +718,7 @@ ID,Page,Group_ID
 
 function freesql_dump( $database, $query)
 {
-   $title = "Free SQL: ".textarea_safe($query).';';
-   $table = 'freesql';
+   $title = "Free SQL: ".$query.';';
 
    $result = mysql_query( $query)
             or die(mysql_error());
@@ -735,10 +734,11 @@ function freesql_dump( $database, $query)
       return 0;
 
    $numrows = @mysql_num_rows($result);
+   $title .= chr(10).' => '.$numrows;
    if( $numrows<=0 )
    {
       @mysql_free_result( $result);
-      return 0;
+      return echoTR('th', comment_block( $title));
    }
 
    $hdrs = NULL;
@@ -748,6 +748,7 @@ function freesql_dump( $database, $query)
    while( $row = mysql_fetch_assoc( $result ) )
    {
       $c=($c % LIST_ROWS_MODULO)+1;
+      $title .= ','.is_array($row).'+'.@$row['Type'];
 
       if( !isset($hdrs) )
       {
@@ -769,8 +770,9 @@ function freesql_dump( $database, $query)
    mysql_free_result($result);
 
    if( $title !== false )
-      $text = "<tr><td colspan=$col>".comment_block( $title)
-         .'</td></tr>'.CR.$text;
+      $text = "<tr><td colspan=$col><pre>"
+         .dump2html(comment_block( $title))
+         .'</pre></td></tr>'.CR.$text;
 
    return $text;
 } //freesql_dump
@@ -833,12 +835,13 @@ if( $MYSQLUSER == 'd29933rw' && $MYSQLPASSWORD == 'ao8aNsMo' )
    $show_it= @$_REQUEST['show_it'];
    $export_it= @$_REQUEST['export_it'];
 
+   $freesql_it= @$_REQUEST['freesql_it'];
    $freesql= trim(get_request_arg('freesql'));
 
    //====================
 
    $text = '';
-   if( @$GLOBALS['Super_admin'] && $freesql )
+   if( @$GLOBALS['Super_admin'] && $freesql_it && $freesql )
    {
       $text = freesql_dump( $DB_NAME, $freesql);
       $show_it = true;
@@ -925,7 +928,7 @@ if( $MYSQLUSER == 'd29933rw' && $MYSQLPASSWORD == 'ao8aNsMo' )
    {
       $dform->add_row( array(
          'DESCRIPTION', 'free SQL',
-         'TEXTAREA', 'freesql', 60, 5, $freesql,
+         'TEXTAREA', 'freesql', 60, 3, $freesql,
          ) );
       $dform->add_row( array(
          'SUBMITBUTTON', 'freesql_it', 'free SQL',
