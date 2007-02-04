@@ -458,9 +458,9 @@ class dbTable
       $opts = '';
       $ok = 0;
 
-      if( $row=mysql_single_fetch( false,
-            'SHOW TABLE STATUS FROM ' . $this->qdatabase
-            . ' LIKE \'' . $this->uname . '\'') )
+      $query = 'SHOW TABLE STATUS FROM ' . $this->qdatabase
+             . ' LIKE \'' . $this->uname . '\'';
+      if( $row=mysql_single_fetch( false, $query) )
       {
 
          if( @$row['Type'] )
@@ -484,7 +484,13 @@ class dbTable
       }
 
       if( !$ok )
+      {
          $comment.= 'Not found.'.chr(10);
+         if( @$GLOBALS['Super_admin'] )
+         {
+            $comment.= "QUERY: ".$query.chr(10);
+         }
+      }
 
       $struct = //CR.
            comment_block( 'Table structure for table '.quoteit( $this->uname, QUOTE)
@@ -599,6 +605,12 @@ function dump_header( $database)
    $str.= "Server version: ".@$_SERVER['SERVER_SOFTWARE'].chr(10);
    $str.= "PHP version: ".@phpversion().chr(10);
    $str.= "MySQL version: ".MYSQL_VERSION.chr(10);
+   
+   if( @$GLOBALS['Super_admin'] )
+   {
+      $str.= "MYSQLUSER: ".@$GLOBALS['MYSQLUSER'].chr(10);
+      $str.= "MYSQLPASSWORD: ".@$GLOBALS['MYSQLPASSWORD'].chr(10);
+   }
 
    return comment_block( $str);
 } //dump_header
@@ -708,6 +720,7 @@ ID,Page,Group_ID
 {
    disable_cache();
 
+//The devel server need an admin user to show the tables structures?
 if( $MYSQLUSER == 'd29933rw' && $MYSQLPASSWORD == 'ao8aNsMo' )
 {
    $MYSQLUSER = 'd29933admin';
@@ -725,6 +738,10 @@ if( $MYSQLUSER == 'd29933rw' && $MYSQLPASSWORD == 'ao8aNsMo' )
    if( !($player_level & ADMIN_DATABASE) )
       error("adminlevel_too_low");
 
+   if( $player_row['Handle'] == 'rodival' )
+      $Super_admin = true;
+   else
+      $Super_admin = false;
 
    $encoding_used= get_request_arg( 'charset', LANG_DEF_CHARSET); //iso-8859-1 UTF-8
 
