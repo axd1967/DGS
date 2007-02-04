@@ -24,7 +24,7 @@ require_once( "include/table_columns.php" );
 //require_once( "include/form_functions.php" );
 
 
-define('OLD_STYLE_DUMP',1);
+define('OLD_STYLE_DUMP', !(bool)@$_REQUEST['new_style']);
 
 if(OLD_STYLE_DUMP){
   define('QUOTE_NAME', 0);
@@ -636,7 +636,7 @@ function init_dump( $database)
       $str = after_table( $table);
       $text.= echoTR( 'td', $str);
    }
-   
+
    return $text;
 } //init_dump
 
@@ -682,7 +682,7 @@ ID,Page,Group_ID
          => array('ID,Text,Ref_ID,Translatable','ID'),
       'Translations' //better to split it in different files
          => array('Original_ID,Language_ID,Text',
-            (OLD_STYLE_DUMP ?'' :'Language_ID,Original_ID')),
+            (0&& OLD_STYLE_DUMP ?'' :'Language_ID,Original_ID')),
       'TranslationLanguages'
          => array('ID,Language,Name','ID'),
       'TranslationGroups'
@@ -691,7 +691,7 @@ ID,Page,Group_ID
          => array('Text_ID,Group_ID','Text_ID,Group_ID'),
       'TranslationPages'
          => array('ID,Page,Group_ID',
-            (OLD_STYLE_DUMP ?'' :'Page,Group_ID')),
+            (0&& OLD_STYLE_DUMP ?'' :'Page,Group_ID')),
       );
 
    $c=0;
@@ -715,6 +715,65 @@ ID,Page,Group_ID
 
    return $text;
 } //transl_dump
+
+function freesql_dump( $database, $query)
+{
+   $title = "Free SQL: ".textarea_safe($query).';';
+   $table = 'freesql';
+
+   $result = mysql_query( $query)
+            or die(mysql_error());
+
+   $mysqlerror = @mysql_error();
+   if( $mysqlerror )
+   {
+      echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
+      return -1;
+   }
+
+   if( !$result )
+      return 0;
+
+   $numrows = @mysql_num_rows($result);
+   if( $numrows<=0 )
+   {
+      @mysql_free_result( $result);
+      return 0;
+   }
+
+   $hdrs = NULL;
+   $col = 0;
+   $text = '';
+   $c=0;
+   while( $row = mysql_fetch_assoc( $result ) )
+   {
+      $c=($c % LIST_ROWS_MODULO)+1;
+
+      if( !isset($hdrs) )
+      {
+         $hdrs = array_keys( $row);
+         $col = count($hdrs);
+         $str = implode('</th><th>',$hdrs);
+         $text.= "<tr><th>".$str.'</th></tr>'.CR;
+      }
+
+      $str = '';
+      $sep = '';
+      foreach( $hdrs as $key )
+      {
+         $str.= $sep.safe_value(@$row[$key]);
+         $sep = '</td><td>';
+      }
+      $text.= "<tr class=Row$c><td>".$str.'</td></tr>'.CR;
+   }
+   mysql_free_result($result);
+
+   if( $title !== false )
+      $text = "<tr><td colspan=$col>".comment_block( $title)
+         .'</td></tr>'.CR.$text;
+
+   return $text;
+} //freesql_dump
 
 
 {
@@ -774,10 +833,17 @@ if( $MYSQLUSER == 'd29933rw' && $MYSQLPASSWORD == 'ao8aNsMo' )
    $show_it= @$_REQUEST['show_it'];
    $export_it= @$_REQUEST['export_it'];
 
+   $freesql= trim(get_request_arg('freesql'));
 
    //====================
 
    $text = '';
+   if( @$GLOBALS['Super_admin'] && $freesql )
+   {
+      $text = freesql_dump( $DB_NAME, $freesql);
+      $show_it = true;
+      $dumptype = 'freeSQL';
+   } else
    switch($dumptype)
    {
    case 'init': {
@@ -848,14 +914,23 @@ if( $MYSQLUSER == 'd29933rw' && $MYSQLPASSWORD == 'ao8aNsMo' )
       'SELECTBOX', 'dumptype', 1, $dumptypes, $dumptype, false,
       ) );
    $dform->add_row( array(
-/*
-      'HIDDEN', 'olddumptype', $dumptype,
-*/
+      'HIDDEN', 'new_style', (OLD_STYLE_DUMP ?'0' :'1'),
       'SUBMITBUTTONX', 'show_it', 'Show it [&s]',
                array('accesskey' => 's'),
       'SUBMITBUTTONX', 'export_it', 'Download it [&d]',
                array('accesskey' => 'd'),
       ) );
+
+   if( @$GLOBALS['Super_admin'] )
+   {
+      $dform->add_row( array(
+         'DESCRIPTION', 'free SQL',
+         'TEXTAREA', 'freesql', 60, 5, $freesql,
+         ) );
+      $dform->add_row( array(
+         'SUBMITBUTTON', 'freesql_it', 'free SQL',
+         ) );
+   }
 
    $dform->echo_string(1);
 
