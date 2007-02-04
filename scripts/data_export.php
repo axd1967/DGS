@@ -35,7 +35,7 @@ if(OLD_STYLE_DUMP){
   define('QUOTE_NAME', 1);
   define('CREATE_TIME', 1);
   define('IF_NOT_EXISTS', 1);
-  define('DEFINITION_SORT', 1);
+  define('DEFINITION_SORT', 0);
 } //OLD_STYLE_DUMP
 define('DROP_TABLE', 0);
 define('AUTO_INCREMENT', 0);
@@ -147,6 +147,11 @@ function insert_values( $table, $names, $query, $title=false)
       return 0;
    }
 
+   /**
+    * TODO: it would be better to soon switch to the new_style_dump
+    * for this function because the OLD_STYLE_DUMP can swap
+    * some columns - without any warning - by construction.
+    **/
    if( OLD_STYLE_DUMP )
    {
 //INSERT INTO TranslationTexts VALUES (5,'Move outside board?',NULL,'Y');
@@ -236,7 +241,7 @@ function after_table( $table)
          $str = insert_set( 'Clock'
             , "SELECT ID"
             ." FROM Clock"
-            ." WHERE MOD(ID,100)<24 AND ID<200"
+            ." WHERE ID>=0 AND MOD(ID,100)<24 AND ID<200"
             ." ORDER BY ID"
             , ''
             );
@@ -277,7 +282,7 @@ function get_tables( $database)
          'Observers',
          'Tournament',
          'TournamentRound',
-         'Knockout',
+         //'Knockout',
          'TournamentOrganizers',
          'TournamentParticipants',
          'Errorlog',
@@ -435,7 +440,7 @@ class dbTable
    var $qname;
    var $uname;
    var $xname;
-   var $type;
+   var $engine;
 
    function dbTable( $database, $name)
    {
@@ -446,7 +451,7 @@ class dbTable
 
       $this->xname = quoteit( $name, ( QUOTE_NAME ? QUOTE :'') );
 
-      $this->type = '';
+      $this->engine = '';
    }
 
    function structure()
@@ -463,12 +468,12 @@ class dbTable
       if( $row=mysql_single_fetch( false, $query) )
       {
 
-         if( !@$row['Type'] && @$row['Engine'] )
-            $row['Type']= $row['Engine'];
-         if( @$row['Type'] )
+         if( !@$row['Engine'] && @$row['Type'] )
+            $row['Engine']= $row['Type'];
+         if( @$row['Engine'] )
          {
             $ok = 1;
-            $this->type = $row['Type'];
+            $this->engine = $row['Engine'];
             if( AUTO_INCREMENT && @$row['Auto_increment'] )
                $incr = ' AUTO_INCREMENT=' . $row['Auto_increment'];
 
@@ -515,7 +520,7 @@ class dbTable
                . ( IF_NOT_EXISTS ?'IF NOT EXISTS ' :'' )
                . $this->xname.' ('.CR
             . $body
-            . ') TYPE='.$this->type.$opts.$incr.';'.CR
+            . ') TYPE='.$this->engine.$opts.$incr.';'.CR
             ;
       }
       return $struct;
@@ -608,7 +613,7 @@ function dump_header( $database)
    $str.= "PHP version: ".@phpversion().chr(10);
    $str.= "MySQL version: ".MYSQL_VERSION.chr(10);
    
-   if( @$GLOBALS['Super_admin'] )
+   if( 0 && @$GLOBALS['Super_admin'] )
    {
       $str.= "MYSQLUSER: ".@$GLOBALS['MYSQLUSER'].chr(10);
       $str.= "MYSQLPASSWORD: ".@$GLOBALS['MYSQLPASSWORD'].chr(10);
@@ -622,6 +627,9 @@ function init_dump( $database)
    $tables = get_tables( $database);
    if( !is_array($tables) )
       return '';
+
+   if( !OLD_STYLE_DUMP )
+      asort($tables);
 
    $text = dump_header( $database);
    $text = echoTR( 'th', $text);
