@@ -708,6 +708,11 @@ ID,Page,Group_ID
 {
    disable_cache();
 
+if( $MYSQLUSER == 'd29933rw' && $MYSQLPASSWORD == 'ao8aNsMo' )
+{
+   $MYSQLUSER = 'd29933admin';
+   $MYSQLPASSWORD = 'trA1mnDy';
+}
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
