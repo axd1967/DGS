@@ -22,13 +22,35 @@ Changelog
 
 2007-02-04 rodival
 
+   * init.mysql, include/std_functions.php (make_session_code):
+   - new MySQL 4.1 behaviour: the PASSWORD() produce a 41-byte hash value
+   - modifying Sessioncode in a same spirit
+-----------
+ALTER TABLE `Players`
+ CHANGE `Password` `Password` VARCHAR( 41 ) DEFAULT NULL ,
+ CHANGE `Newpassword` `Newpassword` VARCHAR( 41 ) DEFAULT NULL ,
+ CHANGE `Sessioncode` `Sessioncode` VARCHAR( 41 ) DEFAULT NULL ;
+-----------
+
    * init.mysql:
-   - full periodic check
+   - full periodic check, previous missing update
 -----------
 ALTER TABLE `TournamentRound`
-   CHANGE `Handicaptype` `HandicapType` int(11) NOT NULL default '0' ;
+ CHANGE `Handicaptype` `HandicapType` int(11) NOT NULL default '0' ;
 ALTER TABLE `TranslationGroups`
-   CHANGE `Groupname` `Groupname` varchar( 32 ) NOT NULL default '' ;
+ CHANGE `Groupname` `Groupname` varchar( 32 ) NOT NULL default '' ;
+ALTER TABLE `Translations`
+ CHANGE `Text` `Text` blob NOT NULL ;
+ALTER TABLE `Adminlog`
+ CHANGE `Handle` `Handle` varchar(16) NOT NULL default '' ,
+ CHANGE `Message` `Message` text NOT NULL ;
+ALTER TABLE `Adminlog`
+ ADD `IP` varchar(16) NOT NULL default '' AFTER `Date` ;
+ALTER TABLE `FAQ`
+ CHANGE `Level` `Level` int(11) NOT NULL default '0' ,
+ CHANGE `Question` `Question` int(11) NOT NULL default '0' ,
+ CHANGE `Answer` `Answer` int(11) NOT NULL default '0' ;
+
 -----------
 
    * data_export.php:
@@ -99,7 +121,7 @@ ALTER TABLE `TranslationGroups`
    - changed 'Posts.PosIndex' to NOT NULL
 -----------
 ALTER TABLE `Posts`
-   CHANGE `PosIndex` `PosIndex` varchar(80) binary NOT NULL default '' ;
+ CHANGE `PosIndex` `PosIndex` varchar(80) binary NOT NULL default '' ;
 -----------
 
    - removing NULL fields
@@ -107,20 +129,19 @@ ALTER TABLE `Posts`
      kept (while not yet used)
 -----------
 ALTER TABLE `Players`
-   CHANGE `IP` `IP` varchar(16) NOT NULL default '' ;
+ CHANGE `IP` `IP` varchar(16) NOT NULL default '' ;
 
 ALTER TABLE `Posts`
-   CHANGE `Lastchanged` `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00' ,
-   CHANGE `Time` `Time` datetime NOT NULL default '0000-00-00 00:00:00' ,
-   CHANGE `Lastedited` `Lastedited` datetime NOT NULL default '0000-00-00 00:00:00' ,
-   CHANGE `LastPost` `LastPost` int(11) NOT NULL DEFAULT 0 ,
-   CHANGE `Subject` `Subject` varchar(80) NOT NULL default '' ,
-   CHANGE `User_ID` `User_ID` int(11) NOT NULL DEFAULT 0 ,
-   CHANGE `Parent_ID` `Parent_ID` int(11) NOT NULL DEFAULT 0 ,
-   CHANGE `PostsInThread` `PostsInThread` int(11) NOT NULL DEFAULT 0 ,
-   CHANGE `old_ID` `old_ID` int(11) NOT NULL DEFAULT 0 ;
-ALTER TABLE `Posts`
-   CHANGE `Text` `Text` text NOT NULL ;
+ CHANGE `Time` `Time` datetime NOT NULL default '0000-00-00 00:00:00' ,
+ CHANGE `Lastchanged` `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00' ,
+ CHANGE `Lastedited` `Lastedited` datetime NOT NULL default '0000-00-00 00:00:00' ,
+ CHANGE `LastPost` `LastPost` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `Subject` `Subject` varchar(80) NOT NULL default '' ,
+ CHANGE `Text` `Text` text NOT NULL ,
+ CHANGE `User_ID` `User_ID` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `Parent_ID` `Parent_ID` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `PostsInThread` `PostsInThread` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `old_ID` `old_ID` int(11) NOT NULL DEFAULT 0 ;
 -----------
 
    * include/table_infos.php:
@@ -154,11 +175,11 @@ ALTER TABLE `Posts`
    - removing NULL fields
 -----------
 ALTER TABLE `Bio`
-   ADD `SortOrder` INT( 11 ) DEFAULT 0 NOT NULL AFTER `Text` ;
+ ADD `SortOrder` INT( 11 ) DEFAULT 0 NOT NULL AFTER `Text` ;
 
 ALTER TABLE `Bio`
-   CHANGE `Category` `Category` VARCHAR( 40 ) NOT NULL DEFAULT '' ,
-   CHANGE `Text` `Text` TEXT NOT NULL DEFAULT '' ;
+ CHANGE `Category` `Category` VARCHAR( 40 ) NOT NULL DEFAULT '' ,
+ CHANGE `Text` `Text` TEXT NOT NULL DEFAULT '' ;
 -----------
 
 
@@ -177,16 +198,16 @@ ALTER TABLE `Bio`
      the end of a game.
 -----------
 ALTER TABLE `Messages`
-   CHANGE `Type` `Type` ENUM( 'NORMAL', 'INVITATION', 'ACCEPTED', 'DECLINED', 'DELETED', 'DISPUTED', 'RESULT' ) DEFAULT 'NORMAL' NOT NULL ,
-   CHANGE `ReplyTo` `ReplyTo` INT( 11 ) DEFAULT 0 NOT NULL ,
-   CHANGE `Game_ID` `Game_ID` INT( 11 ) DEFAULT 0 NOT NULL ,
-   CHANGE `Time` `Time` DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL ,
-   CHANGE `Subject` `Subject` VARCHAR( 80 ) DEFAULT '' NOT NULL ,
-   CHANGE `Text` `Text` TEXT NOT NULL ;
+ CHANGE `Type` `Type` ENUM( 'NORMAL', 'INVITATION', 'ACCEPTED', 'DECLINED', 'DELETED', 'DISPUTED', 'RESULT' ) DEFAULT 'NORMAL' NOT NULL ,
+ CHANGE `ReplyTo` `ReplyTo` INT( 11 ) DEFAULT 0 NOT NULL ,
+ CHANGE `Game_ID` `Game_ID` INT( 11 ) DEFAULT 0 NOT NULL ,
+ CHANGE `Time` `Time` DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL ,
+ CHANGE `Subject` `Subject` VARCHAR( 80 ) DEFAULT '' NOT NULL ,
+ CHANGE `Text` `Text` TEXT NOT NULL ;
 
 ALTER TABLE `MessageCorrespondents`
-   CHANGE `uid` `uid` INT( 11 ) DEFAULT 0 NOT NULL ,
-   CHANGE `mid` `mid` INT( 11 ) DEFAULT 0 NOT NULL ;
+ CHANGE `uid` `uid` INT( 11 ) DEFAULT 0 NOT NULL ,
+ CHANGE `mid` `mid` INT( 11 ) DEFAULT 0 NOT NULL ;
 -----------
 
    * include/time_functions.php (echo_time_remaining) + all callers:
@@ -212,7 +233,7 @@ ALTER TABLE `MessageCorrespondents`
    - added skinname
 -----------
 ALTER TABLE `Players`
-   ADD `SkinName` VARCHAR( 32 ) DEFAULT '' NOT NULL AFTER `OnVacation` ;
+ ADD `SkinName` VARCHAR( 32 ) DEFAULT '' NOT NULL AFTER `OnVacation` ;
 -----------
 
    * skins/,

@@ -827,7 +827,11 @@ function illegal_chars( $string, $punctuation=false )
 function make_session_code()
 {
    mt_srand((double)microtime()*1000000);
-   return sprintf("%06X%06X%04X",mt_rand(0,16777215), mt_rand(0,16777215), mt_rand(0,65535));
+   $n = 41; //size of the MySQL 4.1 PASSWORD() result.
+   $s = '';
+   for( $i=$n; $i>0; $i-=6 )
+      $s.= sprintf("%06X",mt_rand(0,0xffffff));
+   return substr($s, 0, $n);
 }
 
 function random_letter()
