@@ -463,6 +463,8 @@ class dbTable
       if( $row=mysql_single_fetch( false, $query) )
       {
 
+         if( !@$row['Type'] && @$row['Engine'] )
+            $row['Type']= $row['Engine'];
          if( @$row['Type'] )
          {
             $ok = 1;
@@ -781,12 +783,6 @@ function freesql_dump( $database, $query)
 {
    disable_cache();
 
-//The devel server need an admin user to show the tables structures?
-if( $MYSQLUSER == 'd29933rw' && $MYSQLPASSWORD == 'ao8aNsMo' )
-{
-   $MYSQLUSER = 'd29933admin';
-   $MYSQLPASSWORD = 'trA1mnDy';
-}
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
