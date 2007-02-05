@@ -4,7 +4,7 @@
 # devel Dragon Go Server dump
 # Host: dragongoserver.sourceforge.net
 # Database: d29933_dragongoserver
-# Generation Time: 2007-02-04 07:27:00 GMT
+# Generation Time: 2007-02-04 23:41:04 GMT
 # Server version: Apache/1.3.33 (Unix) PHP/4.3.10
 # PHP version: 4.3.10
 # MySQL version: 4.1.21-standard-log
@@ -21,7 +21,7 @@ CREATE TABLE Players (
    Handle varchar(16) NOT NULL default '',
    Password varchar(41) default NULL,
    Newpassword varchar(41) default NULL,
-   Sessioncode varchar(16) default NULL,
+   Sessioncode varchar(41) default NULL,
    Sessionexpire datetime default NULL,
    Lastaccess datetime default NULL,
    LastMove datetime default NULL,
@@ -70,7 +70,7 @@ CREATE TABLE Players (
    RatedGames int(11) NOT NULL default '0',
    Won int(11) NOT NULL default '0',
    Lost int(11) NOT NULL default '0',
-   Translator varchar(160) NOT NULL default '',
+   Translator varchar(80) NOT NULL default '',
    IP varchar(16) NOT NULL default '',
    Browser varchar(100) default NULL,
    Country char(2) default NULL,
@@ -168,8 +168,8 @@ CREATE TABLE GamesNotes (
    ID int(11) unsigned NOT NULL auto_increment,
    gid int(11) NOT NULL default '0',
    player enum('B','W') NOT NULL default 'B',
-   Notes text NOT NULL,
    Hidden enum('N','Y') NOT NULL default 'N',
+   Notes text NOT NULL,
    PRIMARY KEY  (gid,player),
    KEY ID (ID)
 ) TYPE=MyISAM;
@@ -254,7 +254,7 @@ CREATE TABLE Statistics (
 
 CREATE TABLE Messages (
    ID int(11) NOT NULL auto_increment,
-   Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED') NOT NULL default 'NORMAL',
+   Type enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED','RESULT') NOT NULL default 'NORMAL',
    ReplyTo int(11) NOT NULL default '0',
    Game_ID int(11) NOT NULL default '0',
    Time datetime NOT NULL default '0000-00-00 00:00:00',
@@ -419,19 +419,6 @@ CREATE TABLE TournamentRound (
    Byoperiods int(11) NOT NULL default '0',
    GamesPerpair int(11) NOT NULL default '1',
    PRIMARY KEY  (ID)
-) TYPE=MyISAM;
-# }
-
-# {
-#
-# Table structure for table 'Knockout'
-#
-
-CREATE TABLE Knockout (
-   Tournament_ID int(11) NOT NULL default '0',
-   Seedings int(11) NOT NULL default '0',
-   UseHandicap enum('Y','N') NOT NULL default 'Y',
-   PRIMARY KEY  (Tournament_ID)
 ) TYPE=MyISAM;
 # }
 
@@ -602,10 +589,10 @@ CREATE TABLE Forums (
    ID int(11) NOT NULL auto_increment,
    Name varchar(40) default NULL,
    Description varchar(255) default NULL,
-   LastPost int(11) default NULL,
-   PostsInForum int(11) NOT NULL default '0',
    SortOrder int(11) NOT NULL default '0',
    Moderated char(1) NOT NULL default 'N',
+   LastPost int(11) default NULL,
+   PostsInForum int(11) NOT NULL default '0',
    PRIMARY KEY  (ID),
    KEY SortOrder (SortOrder)
 ) TYPE=MyISAM;
@@ -621,7 +608,6 @@ CREATE TABLE Posts (
    Forum_ID int(11) NOT NULL default '0',
    Time datetime NOT NULL default '0000-00-00 00:00:00',
    Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
-   LastPost int(11) NOT NULL default '0',
    Lastedited datetime NOT NULL default '0000-00-00 00:00:00',
    Subject varchar(80) NOT NULL default '',
    Text text NOT NULL,
@@ -629,12 +615,13 @@ CREATE TABLE Posts (
    Parent_ID int(11) NOT NULL default '0',
    Thread_ID int(11) NOT NULL default '0',
    AnswerNr int(11) NOT NULL default '0',
-   PostsInThread int(11) NOT NULL default '0',
    Depth int(11) NOT NULL default '0',
    crc32 int(11) default NULL,
    PosIndex varchar(80) binary NOT NULL default '',
    old_ID int(11) NOT NULL default '0',
    Approved enum('Y','N') NOT NULL default 'Y',
+   PostsInThread int(11) NOT NULL default '0',
+   LastPost int(11) NOT NULL default '0',
    PendingApproval enum('Y','N') NOT NULL default 'N',
    PRIMARY KEY  (ID),
    KEY Pos (Thread_ID,PosIndex),
@@ -671,7 +658,7 @@ CREATE TABLE GoDiagrams (
    View_Down int(11) default NULL,
    Date datetime NOT NULL default '0000-00-00 00:00:00',
    Saved enum('Y','N') NOT NULL default 'N',
-   Data text,
+   Data text NOT NULL,
    SGF text NOT NULL,
    PRIMARY KEY  (ID)
 ) TYPE=MyISAM;
