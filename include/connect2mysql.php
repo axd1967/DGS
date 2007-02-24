@@ -59,7 +59,7 @@ function disable_cache($stamp=NULL, $expire=NULL)
    header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
    if( !$expire or $expire<=$NOW )
    {
-      header('Cache-Control: no-store, no-cache, must-revalidate, max_age=0'); // HTTP/1.1
+      header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0'); // HTTP/1.1
       header('Pragma: no-cache');                                              // HTTP/1.0
    }
 }
