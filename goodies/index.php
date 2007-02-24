@@ -1,3 +1,10 @@
+<?php
+   $NOW = time();
+   header('Expires: ' . gmdate('D, d M Y H:i:s',$NOW) . ' GMT');
+   header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$NOW-30) . ' GMT');
+   header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0'); // HTTP/1.1
+   header('Pragma: no-cache');                                              // HTTP/1.0
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
@@ -20,13 +27,14 @@
 
 <body>
  <h3>Dragon Go goodies</h3>
- <ul><h4>GreaseMonkey scripts</h4>
+ <div>
+  <h4>GreaseMonkey scripts</h4>
   <em>
    Depending of your GreaseMonkey version, either Click or Right-Click
    a desired name link to install it:
   </em>
- <?php
-   $NOW = time();
+  <ul>
+  <?php
    $files = array();
    if( $fh = opendir('.') )
    {
@@ -76,12 +84,13 @@
       $txt = "<dl>\n$txt</dl>\n";
 
       //the ?date=$NOW ensure to reload the file (fake no-cache)
-      $str = "<p><strong>Name: <a href='./$file?date=$NOW'>$name</a></strong></p>\n";
+      //$str = "<p><strong>Name: <a href='./$file?date=$NOW'>$name</a></strong></p>\n";
+      $str = "<p><strong>Name: <a href='./$file'>$name</a></strong></p>\n";
       $txt = "<li>$str$txt</li>\n";
       
       echo $txt;
    } //$files
- ?>
- </ul>
-
+  ?>
+  </ul>
+ </div>
 </body></html>
