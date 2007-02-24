@@ -8,17 +8,20 @@
 // @include     *dragongoserver.sourceforge.net/game.php*
 // ==/UserScript==
 
-/*
+/* <scriptinfos>
  You must set a valid - on board - stone numbering option in your Dragon
     profile settings (for instance, a 10 value and Hover unchecked)
+
  Tested with Win98 + FireFox 1.0.7 + GreaseMonkey 0.5.3
              WinXP + FireFox 2.0.0.1 + GreaseMonkey 0.6.7.20070131
              Suze  + FireFox 2.0.0.1 by axd
 
  Creator:
-   Rodival (rodival) http://www.dragongoserver.net/userinfo.php?uid=1056
+   Rodival (rodival)
+      http://www.dragongoserver.net/userinfo.php?uid=1056
  Contributors:
-   alex (axd) http://www.dragongoserver.net/userinfo.php?uid=3209
+   alex (axd)
+      http://www.dragongoserver.net/userinfo.php?uid=3209
 
  Version 0.2.1.20070223: rodival
    added separate server+user memorizations.
@@ -26,7 +29,7 @@
    added a memorization of the show/hide state while changing pages.
  Version 0.1.0.20070220: rodival
    first version
-*/
+</scriptinfos> */
 
 
 //alert('start');

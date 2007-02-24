@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 
-/*
+/* <scriptinfos>
  Known bugs:
    When you post a message, the "new" flag will be set because there
    is a post in the forum that is newer that your last entrance.
@@ -30,7 +30,7 @@
    added separate server+user memorizations of the flags.
  Version 0.1.0.20050526: dmwit
    first version
-*/
+</scriptinfos> */
 
 
 //alert('start');

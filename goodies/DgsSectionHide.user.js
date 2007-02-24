@@ -9,9 +9,8 @@
 // ==/UserScript==
 
 
-/*
- Known bugs:
-   none
+/* <scriptinfos>
+ Actually, only works in the Status page.
 
  Tested with Win98 + FireFox 1.0.7 + GreaseMonkey 0.5.3
              WinXP + FireFox 2.0.0.1 + GreaseMonkey 0.6.7.20070131
@@ -23,7 +22,7 @@
 
  Version 0.1.0.20070223: rodival
    first version
-*/
+</scriptinfos> */
 
 
 //alert('start');
@@ -56,20 +55,22 @@ var getUserHandle = function()
    return snap[1];
 } //getUserHandle
 
-function createButton(func, tit, alt, width, height, src) {
+function createButton(func, tit, alt, width, height, src, bgcol) {
     var img, but;
     img = document.createElement('img');
     img.alt = alt;
     img.width = width;
     img.height = height;
     img.src = src;
-    img.style.border = "1px outset #F7F5E3"; // page background-color
+    img.style.backgroundColor = bgcol;
+    img.style.border = "1px outset "+bgcol;
 /*
     img.style.borderTop = img.style.borderLeft = "1px solid #ccc";
     img.style.borderRight = img.style.borderBottom = "1px solid #888";
 */
     img.style.margin = "0px 4px";
     img.style.verticalAlign = "top !important";
+
     but = document.createElement('a');
     but.title = tit;
     but.href = '#';
@@ -78,6 +79,21 @@ function createButton(func, tit, alt, width, height, src) {
     return but;
 }
 
+function getbgcolor(elt)
+{
+   var col = '';
+   while( elt != undefined )
+   {
+      col = getComputedStyle(elt, '');
+      col= col.backgroundColor;
+      if( col == undefined || col == 'transparent' )
+         col = '';
+      if( col > '' )
+         break;
+      elt= elt.parentNode;
+   }
+   return col;
+}
 
 var DGSsh_toggle = function(event) {
 //alert('e='+typeof(event));
@@ -184,7 +200,10 @@ var DGSsh_init = function()
          id = i;
       //alert('h3.2='+id);
 
-      var but= createButton(DGSsh_toggle, 'Hide section', '-', 8, 8, smnus);
+      var but= getbgcolor(node);
+      if( but == '' )
+         but = '#F7F5e3'; // #F7F5E3 page background-color
+      but= createButton(DGSsh_toggle, 'Hide section', '-', 8, 8, smnus, but);
       but._gmvar= DGSsh_prefix+id+'.hidden'; //GM var name prefix
       but._div= div;
       elt= but.firstChild;
