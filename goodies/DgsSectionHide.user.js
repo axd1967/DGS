@@ -20,12 +20,15 @@
       http://www.dragongoserver.net/userinfo.php?uid=1056
  Contributors:
 
+ Version 0.1.1.20070224: rodival
+   better way to handle  custom properties.
  Version 0.1.0.20070223: rodival
    first version
 </scriptinfos> */
 
 
 //alert('start');
+var DGSsh_divs = new Array();
 var DGSsh_prefix = '';
 
 
@@ -56,27 +59,27 @@ var getUserHandle = function()
 } //getUserHandle
 
 function createButton(func, tit, alt, width, height, src, bgcol) {
-    var img, but;
-    img = document.createElement('img');
-    img.alt = alt;
-    img.width = width;
-    img.height = height;
-    img.src = src;
-    img.style.backgroundColor = bgcol;
-    img.style.border = "1px outset "+bgcol;
+   var img, but;
+   img = document.createElement('img');
+   img.alt = alt;
+   img.width = width;
+   img.height = height;
+   img.src = src;
+   img.style.backgroundColor = bgcol;
+   img.style.border = "1px outset "+bgcol;
 /*
-    img.style.borderTop = img.style.borderLeft = "1px solid #ccc";
-    img.style.borderRight = img.style.borderBottom = "1px solid #888";
+   img.style.borderTop = img.style.borderLeft = "1px solid #ccc";
+   img.style.borderRight = img.style.borderBottom = "1px solid #888";
 */
-    img.style.margin = "0px 4px";
-    img.style.verticalAlign = "top !important";
+   img.style.margin = "0px 4px";
+   img.style.verticalAlign = "top !important";
 
-    but = document.createElement('a');
-    but.title = tit;
-    but.href = '#';
-    but.onclick = func;
-    but.appendChild(img);
-    return but;
+   but = document.createElement('a');
+   but.title = tit;
+   but.href = '#';
+   but.addEventListener('click', func, true);
+   but.appendChild(img);
+   return but;
 }
 
 function getbgcolor(elt)
@@ -107,41 +110,42 @@ var DGSsh_toggle = function(event) {
    if( event.currentTarget == undefined )
    {
       link = event;
-      if( link._gmvar == undefined )
+      if( link.getAttribute('_gmvar') == undefined )
          return;
-      gmvar = link._gmvar;
+      gmvar = link.getAttribute('_gmvar');
       hidden = GM_getValue(gmvar, false); //reset state
    }
    else
    {
       event.preventDefault();
+      event.stopPropagation();
       link = event.currentTarget;
-      if( link._gmvar == undefined )
+      if( link.getAttribute('_gmvar') == undefined )
          return;
-      gmvar = link._gmvar;
+      gmvar = link.getAttribute('_gmvar');
       hidden = !GM_getValue(gmvar, false); //toggle state
       GM_setValue(gmvar, hidden);
    }
 //alert('e.gmvar='+gmvar+'='+hidden);
 
-   div = link._div;
-   but = link.firstChild;
    link.blur();
+   div = DGSsh_divs[link.getAttribute('_div')];
+   but = link.firstChild;
    if( hidden )
    {
-      but.src= but._hsrc;
-      but.alt= but._halt;
-      but.title= but._htit;
+      but.src= but.getAttribute('_hsrc');
+      but.alt= but.getAttribute('_halt');
+      but.title= but.getAttribute('_htit');
       div.style.display= 'none';
    }
    else
    {
-      but.src= but._ssrc;
-      but.alt= but._salt;
-      but.title= but._stit;
+      but.src= but.getAttribute('_ssrc');
+      but.alt= but.getAttribute('_salt');
+      but.title= but.getAttribute('_stit');
       div.style.display= 'block';
    }
-//alert('e.0');
+//alert('e.x');
 } //DGSsh_toggle
 
 
@@ -195,7 +199,7 @@ var DGSsh_init = function()
          //alert('d0.2='+id);
       }
       //alert('h3.1='+div.innerHTML);
-      div = node.parentNode.insertBefore(div, node.nextSibling);
+      node.parentNode.insertBefore(div, node.nextSibling);
       if( id == '' )
          id = i;
       //alert('h3.2='+id);
@@ -204,28 +208,28 @@ var DGSsh_init = function()
       if( but == '' )
          but = '#F7F5e3'; // #F7F5E3 page background-color
       but= createButton(DGSsh_toggle, 'Hide section', '-', 8, 8, smnus, but);
-      but._gmvar= DGSsh_prefix+id+'.hidden'; //GM var name prefix
-      but._div= div;
+      but.setAttribute('_gmvar', DGSsh_prefix+id+'.hidden'); //GM var name
+      DGSsh_divs[i] =div;
+      but.setAttribute('_div', i);
       elt= but.firstChild;
       //alert('h3.3');
-      elt._ssrc= smnus;
-      elt._salt= '-';
-      elt._stit= 'Hide section';
-      elt._hsrc= splus;
-      elt._halt= '+';
-      elt._htit= 'Show section';
+      elt.setAttribute('_ssrc', smnus);
+      elt.setAttribute('_salt', '-');
+      elt.setAttribute('_stit', 'Hide section');
+      elt.setAttribute('_hsrc', splus);
+      elt.setAttribute('_halt', '+');
+      elt.setAttribute('_htit', 'Show section');
 
-      but = node.insertBefore(but, node.firstChild);
-      //alert('h3.4='+but._gmvar);
-      elt= GM_getValue(but._gmvar, false); //fails if var is reseted with about:config??
+      node.insertBefore(but, node.firstChild);
+      //alert('h3.4='+DGSsh_divs[but.getAttribute('_div')].innerHTML);
+      elt= GM_getValue(but.getAttribute('_gmvar'), false); //fails if var is reseted with about:config??
       //alert('h3.5='+elt);
       if( elt == undefined )
          elt= false;
       if( elt )
          DGSsh_toggle(but); //reset state
 
-      //alert('h3.6');
-      delete(but);
+      //alert('h3.6='+but.getAttribute('_div'));
    }
 } //DGSsh_init
 

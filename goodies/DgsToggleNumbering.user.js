@@ -19,11 +19,12 @@
  Creator:
    Rodival (rodival)
       http://www.dragongoserver.net/userinfo.php?uid=1056
-
  Contributors:
    alex (axd)
       http://www.dragongoserver.net/userinfo.php?uid=3209
 
+ Version 0.2.2.20070224: rodival
+   better way to handle custom properties.
  Version 0.2.1.20070223: rodival
    added separate server+user memorizations.
  Version 0.2.0.20070222: rodival
@@ -71,16 +72,19 @@ var DGStn_toggle = function(event)
 //alert('toggle');
    var elt;
    if( event != undefined )
+   {
       event.preventDefault();
+      event.stopPropagation();
+   }
    DGStn_hidden = !DGStn_hidden;
    GM_setValue(DGStn_prefix+'hidden', DGStn_hidden);
    for( var i=DGStn_stones.length-1; i >= 0; i-- )
    {
       elt = DGStn_stones[i];
       if( DGStn_hidden )
-         elt.src = elt.xsrc;
+         elt.src = elt.getAttribute('xsrc');
       else
-         elt.src = elt.nsrc;
+         elt.src = elt.getAttribute('nsrc');
    }
 } //DGStn_toggle
 
@@ -109,8 +113,8 @@ var DGStn_init = function()
       xsrc = nsrc.replace( /\x2F(b|w)\d+\./i , '/$1.');
       if( nsrc == xsrc )
          continue;
-      elt.nsrc = nsrc;
-      elt.xsrc = xsrc;
+      elt.setAttribute('nsrc', nsrc);
+      elt.setAttribute('xsrc', xsrc);
       DGStn_stones[num]= elt;
       num++;
    }
@@ -159,10 +163,10 @@ var DGStn_init = function()
 //alert('where='+where.nodeName);
    /*
    if( where.tagName.toUpperCase() == 'BR' )
-      elt = where.parentNode.replaceChild(elt, where);
+      where.parentNode.replaceChild(elt, where);
    else
    */
-      elt = where.parentNode.insertBefore(elt, where);
+      where.parentNode.insertBefore(elt, where);
 
    elt.parentNode.style.textAlign = 'center';
    elt.innerHTML = "<img id=DGStnButton class=brdx alt='#'>";
@@ -170,11 +174,11 @@ var DGStn_init = function()
    //elt.style.margin = '0px 6px -0.2em 0px';
    elt.style.margin = '0px';
    elt.style.border = '0px solid black';
-   xsrc = DGStn_stones[0].xsrc;
+   xsrc = DGStn_stones[0].getAttribute('xsrc');
    xsrc = xsrc.replace(/\x2Fw\./i, '/b.');
    nsrc = xsrc.replace(/\x2Fb\./i, '/b99.');
-   elt.nsrc = xsrc; //swapped for button
-   elt.xsrc = nsrc;
+   elt.setAttribute('nsrc', xsrc); //swapped for button
+   elt.setAttribute('xsrc', nsrc);
    elt.src = xsrc;
    DGStn_stones[num]= elt;
 

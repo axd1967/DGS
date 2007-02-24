@@ -72,7 +72,7 @@ var forumid = function(name)
 
 
 var DGSfi_eventhandler = function(event) {
-    var flink = event.target; //children[0].getElementsByTagName('a')[0]; // HACK
+    var flink = event.currentTarget; //children[0].getElementsByTagName('a')[0]; // HACK
     var gmvar = DGSfi_forumlinks[flink][0];
     if( gmvar == undefined ) return;
     var stamp = DGSfi_forumlinks[flink][1];
