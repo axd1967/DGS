@@ -1,0 +1,14 @@
+#
+# From / goodies
+#
+
+Options -Indexes
+IndexIgnore *.bak *.ph* .h*
+
+
+# Expire time in the client's cache
+# Apache must have the mod_expires module enabled
+ExpiresActive On
+# immédiatly for GreaseMonkey *.user.js
+ExpiresDefault A1
+
