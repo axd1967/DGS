@@ -21,6 +21,7 @@
    pre {
       margin: 0.5em 0px;
       background-color: #f0f0f0;
+      overflow: visible;
    }
  </style>
 </head>
@@ -83,9 +84,16 @@
 
       $txt = "<dl>\n$txt</dl>\n";
 
+      //disabling the caches while installing the script cause me some problems.
       //the ?date=$NOW ensure to reload the file (fake no-cache)
-      //$str = "<p><strong>Name: <a href='./$file?date=$NOW'>$name</a></strong></p>\n";
-      $str = "<p><strong>Name: <a href='./$file'>$name</a></strong></p>\n";
+      //the $NOW.user.js give a fake extension to feed the GreaseMonkey install
+      $str = "<p><strong>Name: <a href='./$file?date=$NOW.user.js'>$name</a></strong></p>\n";
+      //if the .htaccess modules could accept:
+      //ExpiresActive On
+      //ExpiresDefault A1
+      //use the simple:
+      //$str = "<p><strong>Name: <a href='./$file'>$name</a></strong></p>\n";
+
       $txt = "<li>$str$txt</li>\n";
       
       echo $txt;
