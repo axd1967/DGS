@@ -10,7 +10,7 @@
 
 
 /* <scriptinfos>
- Actually, only works in the Status page.
+ Actually, it only works in the Status page.
 
  Tested with Win98 + FireFox 1.0.7 + GreaseMonkey 0.5.3
              WinXP + FireFox 2.0.0.1 + GreaseMonkey 0.6.7.20070131
@@ -21,7 +21,7 @@
  Contributors:
 
  Version 0.1.1.20070224: rodival
-   better way to handle  custom properties.
+   better way to handle custom properties.
  Version 0.1.0.20070223: rodival
    first version
 </scriptinfos> */
