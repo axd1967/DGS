@@ -14,7 +14,7 @@
 
  Tested with Win98 + FireFox 1.0.7 + GreaseMonkey 0.5.3
              WinXP + FireFox 2.0.0.1 + GreaseMonkey 0.6.7.20070131
-             Suze  + FireFox 2.0.0.1 by axd
+             SuSE  + FireFox 2.0.0.1 by axd
 
  Creator:
    Rodival (rodival)
