@@ -13,30 +13,22 @@ quick INFO:
    I'm working on the bad centered alignement of FAQ, docs and other pages.
 
 quick TODO:
- $$$$ remove it from devel server + code adjust
-ALTER TABLE `Adminlog`
- CHANGE `Date` `Date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP ;
-Check all other CURRENT_TIMESTAMP too
-e.g. in Errorlog
-
-ALTER TABLE `MoveMessages` ADD `ID` int(11) unsigned NOT NULL auto_increment FIRST;
-ALTER TABLE `MoveMessages` CHANGE `gid` `gid` int(11) NOT NULL default '0';
-ALTER TABLE `MoveMessages` CHANGE `MoveNr` `MoveNr` smallint(5) unsigned NOT NULL default '0';
-ALTER TABLE `MoveMessages` DROP PRIMARY KEY, ADD PRIMARY KEY( `gid`, `MoveNr`);
-ALTER TABLE `MoveMessages` DROP INDEX `ID`, ADD INDEX `ID` ( `ID` );
-
-ALTER TABLE `Folders` DROP PRIMARY KEY, ADD PRIMARY KEY( `uid`, `Folder_nr`);
-ALTER TABLE `Folders` DROP INDEX `ID`, ADD INDEX `ID` ( `ID` );
-
-ALTER DATABASE `gowww` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
-ALTER TABLE `Adminlog`  DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
-...
-
 ------------------------------------------------------------------
 
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-03-01 rodival
+
+   * images/flags/ls.gif:
+   - replaced by the new Lesotho flag (old one kept in ls_old.gif)
+   
+   * images/forward.gif, images/backward.gif,
+   * images/end.gif, images/start.gif,
+   * images/plus.gif, images/minus.gif, images/cross.gif:
+   - added images
+
 
 2007-02-04 rodival
 
