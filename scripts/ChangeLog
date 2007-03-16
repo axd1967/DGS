@@ -19,6 +19,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-03-17 rodival
+
+   * confirm.php:
+   - added a missing parenthesis.
+
+   * admin_faq.php:
+   - adjusting a 'NULL'.
+
+
 2007-03-01 rodival
 
    * images/flags/ls.gif:
@@ -37,9 +46,9 @@ Changelog
    - modifying Sessioncode in a same spirit
 -----------
 ALTER TABLE `Players`
- CHANGE `Password` `Password` VARCHAR( 41 ) DEFAULT NULL ,
- CHANGE `Newpassword` `Newpassword` VARCHAR( 41 ) DEFAULT NULL ,
- CHANGE `Sessioncode` `Sessioncode` VARCHAR( 41 ) DEFAULT NULL ;
+ CHANGE `Password` `Password` VARCHAR( 41 ) NOT NULL default '' ,
+ CHANGE `Newpassword` `Newpassword` VARCHAR( 41 ) NOT NULL default '' ,
+ CHANGE `Sessioncode` `Sessioncode` VARCHAR( 41 ) NOT NULL default '' ;
 -----------
 
    * init.mysql:
