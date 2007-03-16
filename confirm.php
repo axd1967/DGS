@@ -476,7 +476,7 @@ This is why:
 
       $opponent_row = mysql_single_fetch( 'confirm.find_opponent',
                         "SELECT * FROM Players WHERE ID=" .
-                           $White_ID + $Black_ID - $player_row['ID'] )
+                           ($White_ID + $Black_ID - $player_row['ID']) )
          or error('opponent_not_found');
 
       if( $player_row["ID"] == $Black_ID )
@@ -543,6 +543,8 @@ This is why:
          delete_all_observers($gid, $rated_status!=1, mysql_addslashes( $tmp));
       }
 
+      //Send a message to the opponent
+
       $message_from_server_way = true; //else simulate a message from this player
       //nervertheless, the clock_tick.php messages are always sent by the server
       //so it's better to keep $message_from_server_way = true
@@ -597,7 +599,7 @@ This is why:
    }
 
 
-// Notify opponent about move
+   // Notify opponent about move
 
    mysql_query( "UPDATE Players SET Notify='NEXT' " .
                 "WHERE ID='$next_to_move_ID' AND SendEmail LIKE '%ON%' " .
@@ -606,7 +608,7 @@ This is why:
 
 
 
-// Increase moves and activity
+   // Increase moves and activity
 
    mysql_query( "UPDATE Players " .
                 "SET Activity=Activity + $ActivityForMove, " .
@@ -617,7 +619,7 @@ This is why:
 
 
 
-// Jump somewhere
+   // Jump somewhere
 
    if( @$_REQUEST['nextstatus'] )
    {
