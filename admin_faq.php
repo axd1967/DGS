@@ -373,8 +373,8 @@ require_once( "include/make_translationfiles.php" );
                     "Ref_ID=$faq_id, Translatable = 'N' " )
            or error('mysql_query_failed','admin_faq.do_new.transltexts1');
 
-        $q_id =  mysql_insert_id();
-        $a_id = 'NULL';
+        $q_id = mysql_insert_id();
+        $a_id = 0;
         mysql_query("INSERT INTO TranslationFoundInGroup " .
                     "SET Text_ID=$q_id, Group_ID=$FAQ_group" )
            or error('mysql_query_failed','admin_faq.do_new.translfoundingrp1');
@@ -385,7 +385,7 @@ require_once( "include/make_translationfiles.php" );
                         "Ref_ID=$faq_id, Translatable = 'N' " )
                or error('mysql_query_failed','admin_faq.do_new.transltexts2');
 
-            $a_id =  mysql_insert_id();
+            $a_id = mysql_insert_id();
             mysql_query("INSERT INTO TranslationFoundInGroup " .
                         "SET Text_ID=$a_id, Group_ID=$FAQ_group" )
                or error('mysql_query_failed','admin_faq.do_new.translfoundingrp2)');
