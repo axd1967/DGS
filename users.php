@@ -61,12 +61,16 @@ require_once( "include/countries.php" );
    $limit = $utable->current_limit_string();
 
    $query = "SELECT *, Rank AS Rankinfo, " .
-       "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
-       "Running+Finished AS Games, " .
-       "ROUND(100*Won/RatedGames) AS Percent, " .
-       "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
-       "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
-       "FROM Players $where_clause ORDER BY $order $limit";
+      "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
+      "Running+Finished AS Games, " .
+      //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
+      "ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent, " .
+      //oldies:
+      //"ROUND(100*Won/RatedGames) AS Percent, " .
+      //"IFNULL(ROUND(100*Won/Finished),-0.01) AS Percent, " .
+      "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
+      "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
+      "FROM Players $where_clause ORDER BY $order $limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'users.find_data');

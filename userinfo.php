@@ -43,8 +43,11 @@ require_once( "include/countries.php" );
 
    $result = mysql_query(
       "SELECT *," .
-      "ROUND(100*Won/RatedGames) AS Percent, " .
-      //"UNIX_TIMESTAMP(Lastaccess) as Time," .
+      //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
+      "ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent, " .
+      //oldies:
+      //"ROUND(100*Won/RatedGames) AS Percent, " .
+      //"IFNULL(ROUND(100*Won/Finished),-0.01) AS Percent, " .
       "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
       "IFNULL(UNIX_TIMESTAMP(Registerdate),0) AS Registerdate, " .
       "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
