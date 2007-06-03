@@ -209,7 +209,7 @@ This is why:
          if( $Status != 'PLAY' && $Status != 'PASS'
           && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
            )
-            error('invalid_action','confirm.domove');
+            error('invalid_action',"confirm.domove.$Status");
 
          $coord = @$_REQUEST['coord'];
          $stonestring = @$_REQUEST['stonestring'];
@@ -275,7 +275,7 @@ This is why:
          else if( $Status == 'PASS' )
             $next_status = 'SCORE';
          else
-            error('invalid_action','confirm.pass');
+            error('invalid_action',"confirm.pass.$Status");
 
 
          $move_query = "INSERT INTO Moves SET " .
@@ -301,7 +301,7 @@ This is why:
       case 'handicap': //stonestring is the list of handicap stones
       {
          if( $Status != 'PLAY' or !( $Handicap>1 && $Moves==1 ) )
-            error('invalid_action','confirm.handicap');
+            error('invalid_action',"confirm.handicap.$Status");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
          check_handicap( $TheBoard); //adjust $stonestring
@@ -367,8 +367,10 @@ This is why:
 
       case 'delete':
       {
-         if( $Status != 'PLAY' or !$too_few_moves )
-            error('invalid_action','confirm.delete');
+         if( !$too_few_moves or
+           !($Status='PLAY' or $Status='PASS' or $Status='SCORE' or $Status='SCORE2')
+            )
+            error('invalid_action',"confirm.delete.$Status");
 
 /*
   Here, the previous line was:
@@ -381,6 +383,9 @@ This is why:
          $move_query = "DELETE FROM Moves WHERE gid=$gid";
          $message_query = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
          $game_query = "DELETE FROM Games" ; //See *** HOT_SECTION ***
+         
+         mysql_query("DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2")
+            or error('mysql_query_failed', "confirm.delete.gamenote.$gid");
 
          $game_finished = true;
       }
@@ -389,7 +394,7 @@ This is why:
       case 'done': //stonestring is the list of toggled points
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error('invalid_action','confirm.done');
+            error('invalid_action',"confirm.done.$Status");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
          check_remove( $TheBoard);
@@ -440,7 +445,7 @@ This is why:
 
       default:
       {
-         error('invalid_action','confirm.noaction');
+         error('invalid_action',"confirm.noaction.$Status");
       }
    }
 

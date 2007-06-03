@@ -211,7 +211,7 @@ function get_alt_arg( $n1, $n2)
          if( $Status != 'PLAY' && $Status != 'PASS' 
           && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
            )
-            error('invalid_action','game.choose_move');
+            error('invalid_action',"game.choose_move.$Status");
 
          $validation_step = false;
       }
@@ -222,7 +222,7 @@ function get_alt_arg( $n1, $n2)
          if( $Status != 'PLAY' && $Status != 'PASS'
           && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
            )
-            error('invalid_action','game.domove');
+            error('invalid_action',"game.domove.$Status");
 
          $validation_step = true;
 {//to fix old way Ko detect. Could be removed when no more old way games.
@@ -252,7 +252,7 @@ function get_alt_arg( $n1, $n2)
       case 'handicap': //multiple input pass + validation
       {
          if( $Status != 'PLAY' or !( $Handicap>1 && $Moves==0 ) )
-            error('invalid_action','game.handicap');
+            error('invalid_action',"game.handicap.$Status");
 
          $paterr = '';
          $patdone = 0;
@@ -300,7 +300,7 @@ function get_alt_arg( $n1, $n2)
       case 'pass': //for validation
       {
          if( $Status != 'PLAY' and $Status != 'PASS' )
-            error('invalid_action','game.pass');
+            error('invalid_action',"game.pass.$Status");
 
          $validation_step = true;
          $extra_message = "<font color=\"green\">" . T_('Passing') . "</font>";
@@ -309,18 +309,20 @@ function get_alt_arg( $n1, $n2)
 
       case 'delete': //for validation
       {
-         if( $Status != 'PLAY' or !$too_few_moves )
-            error('invalid_action','game.delete');
+         if( !$too_few_moves or
+           !($Status='PLAY' or $Status='PASS' or $Status='SCORE' or $Status='SCORE2')
+            )
+            error('invalid_action',"game.delete.$Status");
 
          $validation_step = true;
          $extra_message = "<font color=\"red\">" . T_('Deleting game') . "</font>";
       }
       break;
 
-      case 'remove': //multiple input pass
+      case 'remove': //multiple input step
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error('invalid_action','game.remove');
+            error('invalid_action',"game.remove.$Status");
 
          $validation_step = false;
          check_remove( $TheBoard, $coord);
@@ -343,7 +345,7 @@ function get_alt_arg( $n1, $n2)
       case 'done': //for validation after 'remove'
       {
          if( $Status != 'SCORE' and $Status != 'SCORE2' )
-            error('invalid_action','game.done');
+            error('invalid_action',"game.done.$Status");
 
          $validation_step = true;
          check_remove( $TheBoard);
@@ -356,7 +358,7 @@ function get_alt_arg( $n1, $n2)
 
       default:
       {
-         error('invalid_action','game.noaction');
+         error('invalid_action',"game.noaction.$Status");
       }
    }
    if( $validation_step ) $may_play = false;
@@ -478,7 +480,7 @@ function get_alt_arg( $n1, $n2)
 
 
    echo "<FORM name=\"game_form\" action=\"game.php?gid=$gid\" method=\"POST\">\n";
-   $page_hiddens[] = array();
+   $page_hiddens = array();
    // [ game_form start
 
    echo "<table align=center>\n<tr><td>"; //board & associates table {--------
@@ -560,6 +562,7 @@ function get_alt_arg( $n1, $n2)
 
    // ] game_form end
    //$page_hiddens['gid'] = $gid; //set in the URL (allow a cool OK button in the browser)
+                     //and more: a hidden gid may already be set by draw_moves()
    $page_hiddens['action'] = $action;
    $page_hiddens['move'] = $move;
    if( @$coord )
@@ -597,16 +600,20 @@ function get_alt_arg( $n1, $n2)
          if( $Status != 'SCORE' && $Status != 'SCORE2' )
             $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."a=pass";
 
+         $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=resign";
+
          if( $too_few_moves )
             $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
-
-         $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=resign";
       }
       else if( $action == 'remove' )
       {
          if( @$done_url )
             $menu_array[T_('Done')] = $done_url;
+
          $menu_array[T_('Resume playing')] = "game.php?gid=$gid".URI_AMP."a=choose_move";
+
+         if( $too_few_moves )
+            $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
       }
       else if( $action == 'handicap' )
       {
@@ -641,7 +648,6 @@ function draw_moves()
 {
    global $TheBoard, $gid, $move, $Size;
 
-   echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">\n";
    echo '<SELECT name="gotomove" size="1">' . "\n";
 
    $trmov = T_('Move');
@@ -679,6 +685,7 @@ function draw_moves()
           . $str;
    }
    echo "$str</SELECT>\n";
+   echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">\n";
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">\n";
 }
 
