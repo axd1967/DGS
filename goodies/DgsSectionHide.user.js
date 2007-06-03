@@ -129,7 +129,7 @@ var DGSsh_toggle = function(event) {
 //alert('e.gmvar='+gmvar+'='+hidden);
 
    link.blur();
-   div = DGSsh_divs[link.getAttribute('_div')];
+   div = DGSsh_divs[link.getAttribute('_divnb')];
    but = link.firstChild;
    if( hidden )
    {
@@ -181,6 +181,7 @@ var DGSsh_init = function()
 */
 
    //alert('h3='+sects.snapshotLength);
+   var divcnt = 0;
    for( var i=sects.snapshotLength-1; i>=0 ; i--)
    {
       node = sects.snapshotItem(i);
@@ -209,10 +210,11 @@ var DGSsh_init = function()
          but = '#F7F5e3'; // #F7F5E3 page background-color
       but= createButton(DGSsh_toggle, 'Hide section', '-', 8, 8, smnus, but);
       but.setAttribute('_gmvar', DGSsh_prefix+id+'.hidden'); //GM var name
-      DGSsh_divs[i] =div;
-      but.setAttribute('_div', i);
+      but.setAttribute('_divnb', divcnt);
+      DGSsh_divs[divcnt] =div;
+      divcnt++;
+
       elt= but.firstChild;
-      //alert('h3.3');
       elt.setAttribute('_ssrc', smnus);
       elt.setAttribute('_salt', '-');
       elt.setAttribute('_stit', 'Hide section');
@@ -221,7 +223,6 @@ var DGSsh_init = function()
       elt.setAttribute('_htit', 'Show section');
 
       node.insertBefore(but, node.firstChild);
-      //alert('h3.4='+DGSsh_divs[but.getAttribute('_div')].innerHTML);
       elt= GM_getValue(but.getAttribute('_gmvar'), false); //fails if var is reseted with about:config??
       //alert('h3.5='+elt);
       if( elt == undefined )
@@ -229,7 +230,7 @@ var DGSsh_init = function()
       if( elt )
          DGSsh_toggle(but); //reset state
 
-      //alert('h3.6='+but.getAttribute('_div'));
+      //alert('h3.6='+but.getAttribute('_divnb'));
    }
 } //DGSsh_init
 

@@ -10,11 +10,13 @@
 
 /* <scriptinfos>
  You must set a valid - on board - stone numbering option in your Dragon
-    profile settings (for instance, a 10 value and Hover unchecked)
+   profile settings (for instance, a 10 value and Hover unchecked)
 
- Tested with Win98 + FireFox 1.0.7 + GreaseMonkey 0.5.3
-             WinXP + FireFox 2.0.0.1 + GreaseMonkey 0.6.7.20070131
-             SuSE  + FireFox 2.0.0.1 by axd
+ Tested with
+   Win98 + FireFox 1.0.7 + Greasemonkey 0.5.3
+   WinXP + FireFox 2.0.0.1 + Greasemonkey 0.6.7.20070131
+   SuSE + FireFox 2.0.0.1 by axd
+   Mac OSX 10.4.9 + Firefox 2.0.0.3 + Greasemonkey 0.6.9.20070507.0 by alan
 
  Creator:
    Rodival (rodival)
@@ -22,6 +24,8 @@
  Contributors:
    alex (axd)
       http://www.dragongoserver.net/userinfo.php?uid=3209
+   Mister Cat (alan)
+      http://www.dragongoserver.net/userinfo.php?uid=4600
 
  Version 0.2.2.20070224: rodival
    better way to handle custom properties.

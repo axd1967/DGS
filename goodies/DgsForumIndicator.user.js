@@ -15,8 +15,10 @@
    is a post in the forum that is newer that your last entrance.
    This could not be avoided. Just re-enter and quit the forum.
 
- Tested with Win98 + FireFox 1.0.7 + GreaseMonkey 0.5.3
-             WinXP + FireFox 2.0.0.1 + GreaseMonkey 0.6.7.20070131
+ Tested with
+   Win98 + FireFox 1.0.7 + GreaseMonkey 0.5.3
+   WinXP + FireFox 2.0.0.1 + GreaseMonkey 0.6.7.20070131
+   Mac OSX 10.4.9 + Firefox 2.0.0.3 + Greasemonkey 0.6.9.20070507.0 by alan
 
  Creator:
    Daniel Wagner (dmwit)
@@ -25,6 +27,8 @@
  Contributors:
    Rodival (rodival)
       http://www.dragongoserver.net/userinfo.php?uid=1056
+   Mister Cat (alan)
+      http://www.dragongoserver.net/userinfo.php?uid=4600
 
  Version 0.2.0.20070223: rodival
    added separate server+user memorizations of the flags.
