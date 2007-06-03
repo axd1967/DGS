@@ -35,14 +35,14 @@ require_once( "include/form_functions.php" );
 
 
    $days_left = floor($player_row['VacationDays']);
-   $on_vacation = floor($player_row['OnVacation']);
-   $minimum_days = $vacation_min_days - $on_vacation;
+   $floor_onvacation = floor($player_row['OnVacation']);
+   $minimum_days = $vacation_min_days - $floor_onvacation;
    $vacationdiff = round(@$_POST['vacationdiff']);
    $vacationlength = round(@$_POST['vacationlength']);
 
    $str = '';
 
-   if( $on_vacation > 0 )
+   if( $player_row['OnVacation'] > 0 )
    {
       if( $minimum_days > $days_left or
           ( $minimum_days == $days_left and $minimum_days == 0 ) )
@@ -78,7 +78,7 @@ require_once( "include/form_functions.php" );
 
          $vacation_form->add_row( array( 'SPACE' ) );
          $vacation_form->add_row( array(
-                  'DESCRIPTION', echo_day($on_vacation),
+                  'DESCRIPTION', echo_day($floor_onvacation),
                   'SELECTBOX', 'vacationdiff', 1, $days, 0, false,
                   'SUBMITBUTTON', 'change_vacation', T_('Change vacation length') ) );
 
