@@ -19,6 +19,30 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-06-03 rodival
+
+   * game.php, confirm.php:
+   - fixed the bug: can't deleted a game while PASS or SCORE step entered
+     before the delete limit.
+     added the GamesNotes deletion to the delete feature.
+
+   * include/std_functions.php (user_reference):
+   - because of old DGS users having a pure numeric Handle (not starting
+     by a letter), the illegal_chars($player_ref) call had been replaced
+     by a simple ereg() comparison here.
+     
+   * userinfo.php, users.php:
+   - changed the Percent calculus to 100*(Won+Jigo/2)/RatedGames instead
+     of the previous 100*Won/RatedGames.
+
+
+2007-03-27 rodival
+
+   * edit_vacation.php:
+   - fixed the bug: adding 2.00 days to 0.25 days gave 2.00 days.
+     In fact, when OnVacation was < 1, one can't add but just start vacations.
+
+
 2007-03-17 rodival
 
    * confirm.php:
