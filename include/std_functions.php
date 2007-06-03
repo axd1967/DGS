@@ -64,7 +64,7 @@ define('ALLOW_JSCRIPT', 0);
 
 
 //----- { layout : change in dragon.css too!
-$bg_color='"#F7F5E3"';
+$bg_color='"#f7f5e3"';
 
 //$menu_fg_color='"#FFFC70"';
 if( $FRIENDLY_SHORT_NAME == 'DGS' )
@@ -803,8 +803,8 @@ function help($topic)
 
 function sysmsg($msg)
 {
-   if( isset($msg) && trim($msg) )
-      echo "\n<p class=Sysmsg>".make_html_safe($msg)."</p><hr>\n";
+   if( isset($msg) && ($msg=trim(make_html_safe($msg,'msg'))) )
+      echo "\n<p class=Sysmsg>$msg</p><hr>\n";
 }
 
 
@@ -1723,7 +1723,9 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
       $byid = 0;
       if( $player_ref{0}==HANDLE_TAG_CHAR )
          $player_ref = substr($player_ref,1);
-      if( !$player_ref or illegal_chars( $player_ref) )
+      //because of old DGS users having a pure numeric Handle
+      //illegal_chars( $player_ref) had been replaced by !ereg() here
+      if( !$player_ref or !ereg( "^[".HANDLE_LEGAL_REGS."]+\$", $player_ref) )
          $legal = 0;
    }
    else
