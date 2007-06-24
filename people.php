@@ -19,16 +19,13 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 $TranslateGroups[] = "Docs";
-$TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 
-$cols = 3;
-function add_contributor( $text, $uref='', $name=false, $handle=false, $img='' )
+$cols = 2;
+function add_contributor( $text, $uref='', $name=false, $handle=false)
 {
    echo "<tr><td>$text</td>\n";
-   //if( $img )
-      echo "<td>$img</td>\n";   
    echo "<td><b>" .
       user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, 'black', $uref, $name, $handle) .
       "</b></td></tr>\n";
@@ -42,8 +39,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false, $img='' )
   start_page(T_("People"), true, $logged_in, $player_row );
 
   echo "<table align=center><tr><td colspan=$cols>\n";
-  echo "<center><h3><font color=$h3_color>" .
-    T_('Contributors to Dragon') . "</font></h3></center>\n";
+  echo "<h3 class=Header>" . T_('Contributors to Dragon') . "</h3>\n";
   echo "</td></tr>\n";
 
   add_contributor( T_("Current maintainer and founder of Dragon"), 2, 'Erik Ouchterlony' );
@@ -61,15 +57,13 @@ function add_contributor( $text, $uref='', $name=false, $handle=false, $img='' )
 
 
   echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
-  echo "<center><h3><font color=$h3_color>" .
-     T_("FAQ") . "</font></h3></center>\n";
+  echo "<h3 class=Header>" . T_("FAQ") . "</h3>\n";
   echo "</td></tr>\n";
 
 
   $FAQexclude = array( 'ejlo', 'rodival');
   $FAQmain = 'Ingmar';
   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
-            ",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel" .
                                " FROM Players" .
                                " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
                                " AND Handle='$FAQmain'" .
@@ -86,7 +80,6 @@ function add_contributor( $text, $uref='', $name=false, $handle=false, $img='' )
 
   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
                                ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
-            ",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel" .
                                " FROM Players" .
                                " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
                                " ORDER BY ID" )
@@ -104,55 +97,63 @@ function add_contributor( $text, $uref='', $name=false, $handle=false, $img='' )
 
 
   echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
-  echo "<center><h3><font color=$h3_color>" .
-     T_('Current translators') . "</font></h3></center>\n";
+  echo "<h3 class=Header>" . T_('Current translators') . "</h3>\n";
   echo "</td></tr>\n";
 
   $query_result = mysql_query( "SELECT ID,Handle,Name,Translator" .
                                ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
-            ",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel" .
                                " FROM Players" .
                                " WHERE LENGTH(Translator)>0" .
-                               " ORDER BY Lastaccess DESC,ID" )
+                               " ORDER BY ID" )
      or error('mysql_query_failed', 'people.translators');
 
-  $translator_list = array();
-  while( $row = mysql_fetch_array( $query_result ) )
-  {
-     $languages = explode( LANG_TRANSL_CHAR, $row['Translator']);
-     foreach( $languages as $language )
-     {
-        @list($langcode, $charenc) = explode( LANG_CHARSET_CHAR, $language, 2);
-        // Normalization for the array_key_exists() matchings
-        $langcode = strtolower(trim($langcode));
-        $charenc = strtolower(trim($charenc));
+   $extra_info = $logged_in && $player_row['admin_level'] & ADMIN_TRANSLATORS ;
+   $translator_list = array();
+   while( $row = mysql_fetch_array( $query_result ) )
+   {
+      $uid = $row['ID'];
+      $languages = explode( LANG_TRANSL_CHAR, $row['Translator']);
+      foreach( $languages as $language )
+      {
+         @list($browsercode, $charenc) = explode( LANG_CHARSET_CHAR, $language, 2);
+         // Normalization for the array_key_exists() matchings
+         $browsercode = strtolower(trim($browsercode));
+         $charenc = strtolower(trim($charenc));
 
-        $langname = T_($known_languages[$langcode][$charenc]);
+         $langname = T_($known_languages[$browsercode][$charenc]);
 
-        if( !isset($translator_list[$langname]) )
-           $translator_list[$langname] = array();
+         if( $extra_info )
+         {
+            $query = 'SELECT UNIX_TIMESTAMP(T.Date) AS Date'
+               . ' FROM (Translationlog AS T,TranslationLanguages AS L)'
+               . ' WHERE T.Language_ID=L.ID'
+                  . " AND T.Player_ID=$uid AND L.Language='$language'"
+               . ' ORDER BY T.Date DESC LIMIT 1';
+            $tmp = mysql_single_fetch( 'people.translators.lastupdate', $query);
+            $row['LastUpdate'] = $tmp ? $tmp['Date'] : 0;
+         }
 
-        array_push($translator_list[$langname], $row);
-     }
-  }
+         $translator_list[$langname][$uid] = $row;
+      }
+   }
 
-  ksort($translator_list);
+   ksort($translator_list);
 
-  $extra_info = $logged_in && $player_row['admin_level'] & ADMIN_TRANSLATORS ;
-  foreach( $translator_list as $language => $translators )
-     {
-        $first = $language;
-        foreach( $translators as $translator )
-           {
-              add_contributor( $first,
-                               $translator['ID'],
-                   ( $extra_info ? '['.date($date_fmt2, $translator['Lastaccess']).'] ' : '') .
-                               $translator['Name'], $translator['Handle']
-                               , activity_string( $translator['ActivityLevel'])
-                               );
-              $first = '';
-           }
-     }
+   foreach( $translator_list as $langname => $translators )
+   {
+      //ksort($translators);
+      $first = $langname;
+      foreach( $translators as $translator )
+      {
+         add_contributor( $first,
+                        $translator['ID'],
+            ( $extra_info && $translator['LastUpdate']
+               ? '['.date($date_fmt2, $translator['LastUpdate']).'] ' : '') .
+                        $translator['Name'], $translator['Handle']
+                        );
+         $first = '';
+      }
+   }
 
   echo "</table>\n";
   echo "<br>&nbsp;\n";
