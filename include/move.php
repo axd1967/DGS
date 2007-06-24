@@ -23,7 +23,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 //ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
 //$prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
-function check_move( &$board, $coord, $to_move, $print_error=true)
+function check_move( &$board, $coord, $to_move, $error_exit=true)
 {
    $Size= $board->size;
    $array= &$board->array;
@@ -34,13 +34,10 @@ function check_move( &$board, $coord, $to_move, $print_error=true)
 
    if( !isset($rownr) or !isset($colnr) or @$array[$colnr][$rownr] != NONE )
    {
-      if( $print_error )
-         error("illegal_position",'move1');
+      if( $error_exit )
+         error('illegal_position','move1');
       else
-      {
-         echo "Illegal_position";
-         return false;
-      }
+         return 'illegal_position';
    }
 
    $array[$colnr][$rownr] = $to_move;
@@ -63,19 +60,16 @@ function check_move( &$board, $coord, $to_move, $print_error=true)
       {
          if(!$suicide_allowed)
          {
-            if( $print_error )
-               error("suicide");
+            if( $error_exit )
+               error('suicide');
             else
-            {
-               echo "suicide";
-               return false;
-            }
+               return 'suicide';
 
          }
       }
 
       // Ok, all tests passed.
-      return true;
+      return '';
    }
 
 
@@ -90,13 +84,10 @@ function check_move( &$board, $coord, $to_move, $print_error=true)
 
       if( $Last_Move == number2sgf_coords( $x, $y, $Size) )
       {
-         if( $print_error )
-            error("ko");
+         if( $error_exit )
+            error('ko');
          else
-         {
-            echo "ko";
-            return false;
-         }
+            return 'ko';
       }
    }
 
@@ -110,7 +101,7 @@ function check_move( &$board, $coord, $to_move, $print_error=true)
 
 
    // Ok, all tests passed.
-   return true;
+   return '';
 }
 
 

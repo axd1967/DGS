@@ -33,11 +33,11 @@ require_once( "include/move.php" );
   $logged_in = who_is_logged( $player_row);
 
   if( !$logged_in )
-    error("not_logged_in");
+    error('not_logged_in');
 
   $player_level = (int)$player_row['admin_level'];
   if( !($player_level & ADMIN_DATABASE) )
-    error("adminlevel_too_low");
+    error('adminlevel_too_low');
 
 
    start_html( 'game_consistency', 0);
@@ -45,7 +45,7 @@ require_once( "include/move.php" );
       echo "<p></p>--- Report only:<br>";
 
    if( ($gid=@$_REQUEST['gid']) > 0 )
-      $where = " AND ID>=$gid";
+      $where = " AND Games.ID>=$gid";
    else
       $where = "";
 
@@ -56,8 +56,10 @@ require_once( "include/move.php" );
 
    //$since may be: "2 DAY", "12 MONTH", ...
    if( ($since=@$_REQUEST['since']) )
-      $where.= " AND DATE_ADD(Lastchanged,INTERVAL $since) > FROM_UNIXTIME($NOW)";
+      $where.= " AND DATE_ADD(Games.Lastchanged,INTERVAL $since) > FROM_UNIXTIME($NOW)";
 
+//---------
+if( 1 ) {
 
    $query = "SELECT ID"
       . " FROM Games WHERE Status!='INVITED'$where ORDER BY ID$limit";
@@ -71,9 +73,86 @@ require_once( "include/move.php" );
    if( $n > 0 )
    while( $row = mysql_fetch_assoc( $result ) )
    {
-      //echo ' ' . $row["ID"];
-      check_consistency($row["ID"]);
+      //echo ' ' . $row['ID'];
+      $gid = $row['ID'];
+      if( ($err=check_consistency($gid)) )
+      {
+         echo "Game $gid: "
+            . str_replace("\n","<br>\n&nbsp;- ",trim($err))."<br>\n";
+      }
+      //else echo "Game $gid: Ok<br>\n";
    }
+   mysql_free_result($result);
+
+} //0/1
+   echo "\n---------<br>\n";
+
+   $query = "SELECT ID,Black_Start_Rating,White_Start_Rating"
+      . " FROM Games WHERE"
+      . " (  (Black_Start_Rating<".MIN_RATING." AND Black_Start_Rating!=-9999)"
+      . " OR (White_Start_Rating<".MIN_RATING." AND White_Start_Rating!=-9999) )"
+      . "$where ORDER BY ID$limit";
+
+   echo "\n<p></p>query: $query;\n";
+   $result = mysql_query($query);
+
+   $n= (int)@mysql_num_rows($result);
+   echo "\n<br>=&gt; result: $n rows<p></p>\n";
+
+   if( $n > 0 )
+   while( $row = mysql_fetch_assoc( $result ) )
+   {
+      echo "Game ".$row['ID'].": Wrong start rating!<br>\n";
+      echo "&nbsp;- B=".$row['Black_Start_Rating']." / W=".$row['White_Start_Rating']."<br>\n";
+   }
+   mysql_free_result($result);
+
+   echo "\n---------<br>\n";
+
+   $query = "SELECT ID,Starttime,Lastchanged"
+      //. ",DATE_SUB(Lastchanged,INTERVAL '1 MONTH') as FakeStart"
+      . " FROM Games WHERE Status!='INVITED' AND Starttime>Lastchanged"
+      . "$where ORDER BY ID$limit";
+
+   echo "\n<p></p>query: $query;\n";
+   $result = mysql_query($query);
+
+   $n= (int)@mysql_num_rows($result);
+   echo "\n<br>=&gt; result: $n rows<p></p>\n";
+
+   if( $n > 0 )
+   while( $row = mysql_fetch_assoc( $result ) )
+   {
+      echo "Game ".$row['ID'].": Wrong start/end dates!<br>\n";
+      echo "&nbsp;- ".$row['Starttime']." >= ".$row['Lastchanged']."<br>\n";
+   }
+   mysql_free_result($result);
+
+   echo "\n---------<br>\n";
+
+   $query = "SELECT Games.ID,Games.Lastchanged,B.Time as Black_Time,W.Time as White_Time"
+      . " FROM (Games,Ratinglog as B,Ratinglog as W)"
+      . " WHERE Games.Rated='Done'"
+      . " AND B.gid=Games.ID AND B.uid=Games.Black_ID"
+      . " AND W.gid=Games.ID AND W.uid=Games.White_ID"
+      . " AND (Games.Lastchanged!=B.Time OR Games.Lastchanged!=W.Time)"
+      . "$where ORDER BY Games.ID$limit";
+
+   echo "\n<p></p>query: $query;\n";
+   $result = mysql_query($query);
+
+   $n= (int)@mysql_num_rows($result);
+   echo "\n<br>=&gt; result: $n rows<p></p>\n";
+
+   if( $n > 0 )
+   while( $row = mysql_fetch_assoc( $result ) )
+   {
+      echo "Game ".$row['ID'].": Wrong Ratinglog end dates!<br>\n";
+      echo "&nbsp;- (".$row['Lastchanged'].",".$row['Black_Time'].",".$row['White_Time'].")<br>\n";
+   }
+   mysql_free_result($result);
+
+//---------
 
    end_html();
 }
@@ -86,12 +165,11 @@ function check_consistency( $gid)
    global $prisoners, $nr_prisoners, $Black_Prisoners, $White_Prisoners,
       $colnr, $rownr, $Last_Move, $GameFlags;
 
-   echo "Game $gid: ";
+   //echo "Game $gid: ";
    $result = mysql_query("SELECT * from Games where ID=$gid");
    if( @mysql_num_rows($result) != 1 )
    {
-      echo "Doesn't exist?<br>\n";
-      return false;
+      return "Doesn't exist?";
    }
 
    $game_row = mysql_fetch_assoc($result);
@@ -108,7 +186,7 @@ function check_consistency( $gid)
    $games_Last_Move = $Last_Move;
    $games_Flags = ( $Flags ? KO : 0 );
 
-   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid order by ID" );
+   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
 
    $Last_Move=''; $Last_X= $Last_Y= -1;
    $move_nr = 1; $to_move = BLACK; $GameFlags = 0;
@@ -126,15 +204,13 @@ function check_consistency( $gid)
          {
             if( $move_nr != $MoveNr )
             {
-               echo "Wrong move number in Moves table!<br>\n";
-               echo "&nbsp;- $MoveNr should be $move_nr<br>\n";
-               return false;
+               return "Wrong move number in Moves table!"
+                  . "\n$MoveNr should be $move_nr";
             }
             if( $to_move != $Stone )
             {
-               echo "Wrong color in Moves table!<br>\n";
-               echo "&nbsp;- Move $MoveNr should be $to_move<br>\n";
-               return false;
+               return "Wrong color in Moves table!"
+                  . "\nMove $MoveNr should be $to_move";
             }
 
             $Last_X = $PosX;
@@ -150,15 +226,13 @@ function check_consistency( $gid)
 
       if( $move_nr != $MoveNr )
       {
-         echo "Wrong move number in Moves table!<br>\n";
-         echo "&nbsp;- $MoveNr should be $move_nr<br>\n";
-         return false;
+         return "Wrong move number in Moves table!"
+            . "\n$MoveNr should be $move_nr";
       }
       if( $to_move != $Stone )
       {
-         echo "Wrong color in Moves table!<br>\n";
-         echo "&nbsp;- Move $MoveNr should be $to_move<br>\n";
-         return false;
+         return "Wrong color in Moves table!"
+            . "\nMove $MoveNr should be $to_move";
       }
 
       if( $to_move == BLACK )
@@ -170,11 +244,8 @@ function check_consistency( $gid)
 
 //ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
 //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
-      if( !check_move( $TheBoard, $coord, $to_move, false) )
-      {
-         echo ", problem at move $move_nr<br>\n";
-         return false;
-      }
+      if( ($err=check_move( $TheBoard, $coord, $to_move, false)) )
+         return "Problem at move $move_nr: $err";
 
       if( $nr_prisoners == 1 )
          $GameFlags |= KO;
@@ -193,24 +264,21 @@ function check_consistency( $gid)
    $move_nr--;
    if( $Moves != $move_nr )
    {
-      echo "Wrong number of moves!<br>\n";
-      return false;
+      return "Wrong number of moves!";
    }
 
    if( $Black_Prisoners != $games_Black_Prisoners or
        $White_Prisoners != $games_White_Prisoners )
    {
-      echo "Wrong number of prisoners in Games table!<br>\n";
-      echo "&nbsp;- Black: $games_Black_Prisoners should be $Black_Prisoners<br>\n";
-      echo "&nbsp;- White: $games_White_Prisoners should be $White_Prisoners<br>\n";
-      return false;
+      return "Wrong number of prisoners in Games table!"
+         . "\nBlack: $games_Black_Prisoners should be $Black_Prisoners"
+         . "\nWhite: $games_White_Prisoners should be $White_Prisoners";
    }
 
    if( $Black_Prisoners != $moves_Black_Prisoners or
        $White_Prisoners != $moves_White_Prisoners )
    {
-      echo "Wrong number of prisoners removed!<br>\n";
-      return false;
+      return "Wrong number of prisoners removed!";
    }
 
    if( $Status!='FINISHED' )
@@ -220,25 +288,22 @@ function check_consistency( $gid)
       $to_move = ( $black_to_move ? $Black_ID : $White_ID );
       if( $ToMove_ID!=$to_move )
       {
-         echo "Wrong Player to move! Should be $to_move.<br>\n";
-         return false;
+         return "Wrong Player to move! Should be $to_move.";
       }
 
       if( $games_Flags!=$GameFlags 
         or ( $GameFlags & KO && $games_Last_Move!=$Last_Move ) )
       {
-         echo "Wrong Ko status!<br>\n";
-         echo "&nbsp;- Last_Move: '$games_Last_Move' should be '$Last_Move'<br>\n";
-         echo "&nbsp;- Flags: $games_Flags should be $GameFlags<br>\n";
-         return false;
+         return "Wrong Ko status!"
+            . "\nLast_Move: [$games_Last_Move] should be [$Last_Move]"
+            . "\nFlags: $games_Flags should be $GameFlags";
       }
 
       if(  !($ClockUsed>=0 && $ClockUsed<24)
         && !($ClockUsed>=0+WEEKEND_CLOCK_OFFSET && $ClockUsed<24+WEEKEND_CLOCK_OFFSET)
         && !($ClockUsed==VACATION_CLOCK or $ClockUsed==VACATION_CLOCK+WEEKEND_CLOCK_OFFSET) )
       {
-         echo "Wrong ClockUsed! Can't be $ClockUsed.<br>\n";
-         return false;
+         return "Wrong ClockUsed! Can't be $ClockUsed.";
       }
    }
    else //$Status=='FINISHED'
@@ -247,14 +312,12 @@ function check_consistency( $gid)
       $few_moves = DELETE_LIMIT+$Handicap;
       if( $Moves < $few_moves )
       {
-         echo "Too few moves ($Moves &lt; $few_moves)! Chould be deleted.<br>\n";
-         return false;
+         return "Too few moves ($Moves &lt; $few_moves)! Should be deleted.";
       }
 */
    }
 
-   echo "Ok<br>\n";
-   return true;
+   return ''; //no error
 } //check_consistency
 
 ?>
