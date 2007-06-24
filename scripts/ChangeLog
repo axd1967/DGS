@@ -19,6 +19,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-06-24 rodival
+
+   * scripts/game_consistency.php, include/move.php (check_move):
+   - enhanced consistency check.  Added some Time and Rating checks.
+     Now, check_move() returns '' if no error or the error message
+     (instead of returning false on error and true else).
+   
+   * people.php:
+   - changed the info about translators' activity to "LastUpadte".
+
+
 2007-06-03 rodival
 
    * game.php, confirm.php:
