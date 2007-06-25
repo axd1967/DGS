@@ -7,10 +7,17 @@ http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 previous server update: 2006-09
 release [2006-08-07] - DGS 1.0.12 - CVS-tag [DGS-stable-200608]
 
+
 quick INFO:
 2007-02-03 rodival
    I've reformatted the changelog file with last changes at top.
    I'm working on the bad centered alignement of FAQ, docs and other pages.
+
+2007-06-26 rodival
+   I've executed the DGS player_consistency.php script to fix some
+   (near 20) bugged players' infos (see "Running" in this day section)
+   I've not found the reason of this bug. Keep an eye on it!
+
 
 quick TODO:
 ------------------------------------------------------------------
@@ -18,6 +25,23 @@ quick TODO:
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-06-26 rodival
+
+   * add_to_waitingroom.php, join_waitingroom_game.php, waiting_room.php:
+   - fixed the "double game" handicap option from the waitingroom
+-----------
+ALTER TABLE `Waitingroom`
+ ADD `Handicap` Handicap int(11) NOT NULL default '0' AFTER `Komi` ;
+-----------
+
+   * message_functions.php, send_message.php, make_game.php:
+   - adjusted to follow the "double game" handicap fix
+   - and a try to fix the bad Running count bug:
+     In the Players table, near 20 of the Running counts were 1 or 2
+     points too hight. I've not found why this occured. Maybe a script
+     abort between two MySQL updates, I don't know.
+     Other counts like Finished, Won or Lost were not corrupted.
 
 
 2007-06-25 rodival
