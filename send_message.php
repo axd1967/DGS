@@ -146,6 +146,7 @@ disable_cache();
       $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
 
 
+      $double = false;
       switch( $handitype )
       {
          case INVITE_HANDI_CONV:
@@ -175,25 +176,30 @@ disable_cache();
 
          case INVITE_HANDI_DOUBLE:
          {
-            create_game($player_row, $opponent_row, $game_row);
-            $i_am_black = false;
+            $double = true;
+            $i_am_black = true;
          }
          break;
 
-         default: // 'manual'
+         default: // 'manual': any positive value
          {
             $i_am_black = ( $game_row["Black_ID"] == $my_id );
          }
          break;
       }
 
-      if( $i_am_black )
-         create_game($player_row, $opponent_row, $game_row, $gid);
+      //TODO: HOT_SECTION ???
+      $gids = array();
+      if( $i_am_black or $double )
+         $gids[] = create_game($player_row, $opponent_row, $game_row, $gid);
       else
-         create_game($opponent_row, $player_row, $game_row, $gid);
+         $gids[] = create_game($opponent_row, $player_row, $game_row, $gid);
+      if( $double )
+         $gids[] = create_game($opponent_row, $player_row, $game_row);
 
-      mysql_query( "UPDATE Players SET Running=Running+" .
-                   ( $handitype == INVITE_HANDI_DOUBLE ? 2 : 1 ) .
+      //TODO: provide a link between the two paired "double" games
+      $cnt = count($gids);
+      mysql_query( "UPDATE Players SET Running=Running+$cnt" .
                    ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
                    " WHERE (ID=$my_id OR ID=$opponent_ID) LIMIT 2" )
          or error('mysql_query_failed', 'send_message.update_player');

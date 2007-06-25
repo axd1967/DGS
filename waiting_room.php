@@ -134,9 +134,17 @@ require_once( "include/message_functions.php" );
       $wrtable->add_tablehead(2, T_('Userid'), 'other_handle', false);
       $wrtable->add_tablehead(3, T_('Rating'), 'other_rating', true);
       $wrtable->add_tablehead(4, T_('Comment'));
-      $wrtable->add_tablehead(5, T_('Handicap'), 'Handicaptype', false);
-      $wrtable->add_tablehead(6, T_('Komi'), 'Komi', true);
       $wrtable->add_tablehead(7, T_('Size'), 'Size', true);
+      $wrtable->add_tablehead(5, T_('Colors'), 'Handicaptype', false);
+      /** TODO: the handicap stones info may be merged in the Komi column
+       * with the standard placement... something like: "%d H + %d K (S)"
+       * where:
+       *   H=Tr$['Handicap stones#short']
+       *   K=Tr$['Komi#short']
+       *   S=Tr$['Standard placement#short']
+       **/
+      $wrtable->add_tablehead(14, T_('Handicap'), 'Handicap');
+      $wrtable->add_tablehead(6, T_('Komi'), 'Komi');
       $wrtable->add_tablehead(8, T_('Rating range'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true);
       $wrtable->add_tablehead(9, T_('Time limit'));
       $wrtable->add_tablehead(10, T_('#Games'), 'nrGames', true);
@@ -174,6 +182,8 @@ require_once( "include/message_functions.php" );
                ( $haverating ? '' : $wrtable->warning_cell_attb(  T_('No initial rating') ) )
                . '>' . $handi_array[$Handicaptype] . "</td>";
          }
+         if( $wrtable->Is_Column_Displayed[14] )
+            $wrow_strings[14] = '<td>' . ($calculated ? '-' : $Handicap) . "</td>";
          if( $wrtable->Is_Column_Displayed[6] )
             $wrow_strings[6] = '<td>' . ($calculated ? '-' : $Komi) . "</td>";
          if( $wrtable->Is_Column_Displayed[7] )

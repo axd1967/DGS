@@ -94,7 +94,7 @@ require_once( "include/make_game.php" );
    $opprating = $opponent_row["Rating2"];
    $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
 
-
+   $double = false;
    switch( $game_info_row['Handicaptype'] )
    {
       case 'conv':
@@ -117,11 +117,18 @@ require_once( "include/make_game.php" );
 
       case 'double':
       {
-         create_game($player_row, $opponent_row, $game_info_row);
-         $i_am_black = false;
+         $double = true;
+         $i_am_black = true;
       }
       break;
 
+      case 'manual':
+      /* to be adjusted if 'manual' is allowed in the waitingroom
+      {
+         $i_am_black = false;
+      }
+      break;
+      */
       default: //always available even if waiting room or unrated
          $game_info_row['Handicaptype'] = 'nigiri'; 
       case 'nigiri':
@@ -131,21 +138,21 @@ require_once( "include/make_game.php" );
          $i_am_black = mt_rand(0,1);
       }
       break;
-
-      case 'manual':
-      {
-         $i_am_black = false;
-      }
-      break;
    }
-
-   if( $i_am_black )
-      $gid = create_game($player_row, $opponent_row, $game_info_row);
+   
+   //TODO: HOT_SECTION ???
+   $gids = array();
+   if( $i_am_black or $double )
+      $gids[] = create_game($player_row, $opponent_row, $game_info_row);
    else
-      $gid = create_game($opponent_row, $player_row, $game_info_row);
+      $gids[] = create_game($opponent_row, $player_row, $game_info_row);
+   $gid = $gids[0];
+   if( $double )
+      $gids[] = create_game($opponent_row, $player_row, $game_info_row);
 
-   mysql_query( "UPDATE Players SET Running=Running+" .
-                ( $game_info_row['Handicaptype'] == 'double' ? 2 : 1 ) .
+   //TODO: provide a link between the two paired "double" games
+   $cnt = count($gids);
+   mysql_query( "UPDATE Players SET Running=Running+$cnt" .
                 ( $game_info_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
                 " WHERE (ID=$uid OR ID=" . $player_row['ID'] . ") LIMIT 2" )
       or error('mysql_query_failed', 'join_waitingroom_game.update_players');

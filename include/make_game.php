@@ -74,7 +74,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       case 'conv':
       {
          if( !$iamrated or !$opprated )
-            error('no_initial_rating');
+            error('no_initial_rating','make_invite_game.conv');
          $tomove = INVITE_HANDI_CONV;
          $handicap = 0; //further computing
          $komi = 0;
@@ -84,7 +84,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       case 'proper':
       {
          if( !$iamrated or !$opprated )
-            error('no_initial_rating');
+            error('no_initial_rating','make_invite_game.proper');
          $tomove = INVITE_HANDI_PROPER;
          $handicap = 0; //further computing
          $komi = 0;
@@ -101,7 +101,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 
       case 'manual':
       {
-         $tomove = $Black_ID;
+         $tomove = $Black_ID; //no real meaning now, any positive value
          $handicap = $handicap_m;
          $komi = $komi_m;
       }
@@ -119,10 +119,10 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    }
 
    if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )
-      error("komi_range");
+      error('komi_range','make_invite_game');
 
    if( !($handicap <= MAX_HANDICAP and $handicap >= 0) )
-      error("handicap_range");
+      error('handicap_range','make_invite_game');
 
    list($hours, $byohours, $byoperiods) =
       interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
@@ -131,7 +131,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
                                  $byotimevalue_fis, $timeunit_fis);
 
    if( $hours<1 and ($byohours<1 or $byoyomitype == 'FIS') )
-      error('time_limit_too_small');
+      error('time_limit_too_small','make_invite_game');
 
 
    if( $rated != 'Y' or $Black_ID == $White_ID )
@@ -168,11 +168,11 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
                      "SELECT ID, Black_ID, White_ID FROM Games"
                     ." WHERE ID=$disputegid AND Status='INVITED'" );
       if( !$row )
-         error('unknown_game','make_invite_game1');
+         error('unknown_game','make_invite_game.1');
       if( ( $row['Black_ID']!=$player_row['ID'] or $row['White_ID']!=$opponent_row['ID'] )
        && ( $row['White_ID']!=$player_row['ID'] or $row['Black_ID']!=$opponent_row['ID'] )
         )
-         error('unknown_game','make_invite_game2');
+         error('unknown_game','make_invite_game.2');
 
       $query = "UPDATE Games SET $query WHERE ID=$disputegid LIMIT 1";
    }
@@ -180,18 +180,21 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       $query = "INSERT INTO Games SET $query";
 
    $result = mysql_query( $query )
-      or error('mysql_insert_game','make_game.make_invite_game.update_game');
+      or error('mysql_insert_game','make_invite_game.update_game');
 
    if( mysql_affected_rows() != 1)
-      error('mysql_start_game', 'make_game.make_invite_game.update_game');
+      error('mysql_start_game','make_invite_game.update_game');
 
    if( $disputegid > 0 )
       $gid = $disputegid;
    else
       $gid = mysql_insert_id();
 
+   if( $gid <= 0 )
+      error('internal_error','make_invite_game.gameID='.$gid);
+
    return $gid;
-}
+} //make_invite_game
 
 
 
@@ -205,7 +208,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
                       $game_info_row["White_ID"] == $white_row['ID'] or
                       $game_info_row["White_ID"] == $black_row['ID'] and
                       $game_info_row["Black_ID"] == $white_row['ID'] ))
-      error("mysql_start_game",'not_correct_players');
+      error('mysql_start_game','create_game.not_correct_players');
 
    $rating_black = $black_row["Rating2"];
    $rating_white = $white_row["Rating2"];
@@ -242,13 +245,13 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
    if( $skip_handicap_validation )
    {
       $moves = $game_info_row['Handicap'];
-      $to_move_id = $white_row['ID'];
+      $tomove = $white_row['ID'];
       $clock_used = $clock_used_white;
    }
    else
    {
       $moves = 0;
-      $to_move_id = $black_row['ID'];
+      $tomove = $black_row['ID'];
       $clock_used = $clock_used_black;
    }
    $last_ticks = get_clock_ticks($clock_used);
@@ -256,7 +259,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
    $set_query =
       "Black_ID=" . $black_row["ID"] . ", " .
       "White_ID=" . $white_row["ID"] . ", " .
-      "ToMove_ID=$to_move_id, " .
+      "ToMove_ID=$tomove, " .
       "Status='PLAY', " .
       "Moves=$moves, " .
       "ClockUsed=$clock_used, " .
@@ -281,25 +284,28 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
    if( $gid > 0 )
    {
       mysql_query("UPDATE Games SET $set_query WHERE ID=$gid LIMIT 1")
-         or error('mysql_query_failed',"make_game.create_game.update: $gid");
+         or error('mysql_query_failed','create_game.update:'.$gid);
 
       if( mysql_affected_rows() != 1)
-         error("mysql_start_game","make_game.create_game.update: $gid");
+         error('mysql_start_game','create_game.update:'.$gid);
    }
    else
    {
       mysql_query("INSERT INTO Games SET $set_query")
-         or error('mysql_query_failed','make_game.create_game.insert');
+         or error('mysql_query_failed','create_game.insert');
       $gid = mysql_insert_id();
    }
+   
+   if( $gid <= 0 )
+      error('internal_error','create_game.gameID='.$gid);
 
    if( $skip_handicap_validation )
       if( !make_standard_placement_of_handicap_stones($size
                                  , $game_info_row['Handicap'], $gid) )
-            error('internal_error','make_game.std_handicap'.fail);
+            error('internal_error','create_game.std_handicap.fail');
 
    return $gid;
-}
+} //create_game
 
 function standard_handicap_is_possible($size, $hcp)
 {

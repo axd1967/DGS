@@ -33,7 +33,7 @@ define('INVITE_HANDI_DOUBLE',-4);
 function init_standard_folders()
 {
    global $STANDARD_FOLDERS;
-   $STANDARD_FOLDERS = array(
+   $STANDARD_FOLDERS = array( //$bg_color value (#f7f5e3)
       FOLDER_ALL_RECEIVED => array(T_('All Received'),'00000000','000000'),
       FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
       FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
@@ -65,7 +65,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $Handitype = 'manual';
    else
       $Handitype = 'nigiri';
-   $MyColor = 'White';
+   $myColor = 'White';
    $Handicap_m = 0;
    $Handicap_d = 0;
    $Komi_m = 6.5;
@@ -96,7 +96,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       if( isset($gid['handicap_type']) )
          $Handitype = (string)$gid['handicap_type'];
       if( isset($gid['color']) )
-         $MyColor = (string)$gid['color'];
+         $myColor = (string)$gid['color'];
       if( isset($gid['handicap_m']) )
          $Handicap_m = (int)$gid['handicap_m'];
       if( isset($gid['handicap_d']) )
@@ -141,11 +141,11 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    }
    else if( $gid > 0 && $my_ID > 0 ) //'Dispute'
    {
-      // If dispute, use values from game $gid
+      // If dispute, use values from game $gid tables
       $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
                  "Maintime,Byotype,Byotime,Byoperiods," .
                  "Rated,StdHandicap,WeekendClock, " .
-                 "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS Color " .
+                 "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS myColor " .
                  "FROM (Games,Players) WHERE Games.ID=$gid" .
                  " AND (White_ID=$my_ID OR Black_ID=$my_ID)" .
                  " AND Players.ID=White_ID+Black_ID-$my_ID" .
@@ -153,10 +153,10 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $game_row= mysql_single_fetch( 'message_functions.game_settings_form',
                                      $query );
       if( !$game_row )
-         error('unknown_game');
+         error('unknown_game','game_settings_form');
 
       $Size = $game_row['Size'];
-      $MyColor = ( $game_row['Color'] == BLACK ? 'Black' : 'White' );
+      $myColor = ( $game_row['myColor'] == BLACK ? 'Black' : 'White' );
       $Rated = ( $game_row['Rated'] == 'Y' );
       $StdHandicap = ( $game_row['StdHandicap'] == 'Y' );
       $WeekendClock = ( $game_row['WeekendClock'] == 'Y' );
@@ -191,7 +191,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
          }
          break;
 
-         default: //Manual: $game_row['ToMove_ID'] == $Black_ID
+         default: //Manual: any positive value
          {
             $Handitype = 'manual';
             $Handicap_m = $game_row['Handicap'];
@@ -235,7 +235,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
          break;
       }
 
-   }
+   } //collecting datas
 
 
    // Now, compute datas
@@ -290,7 +290,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    }
    else if( $formstyle=='dispute' && $Handitype=='proper' )
    {
-      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
+      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'), //T_('No initial rating')
                               'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
                             ));
       $Handitype = 'manual';
@@ -303,7 +303,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $mform->add_row( array( 'DESCRIPTION', T_('Manual setting'),
                               'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
                               'TEXT', SMALL_SPACING . T_('My color'),
-                              'SELECTBOX', 'color', 1, $color_array, $MyColor, false,
+                              'SELECTBOX', 'color', 1, $color_array, $myColor, false,
                               'TEXT', SMALL_SPACING . T_('Handicap'),
                               'SELECTBOX', 'handicap_m', 1, $handi_stones, $Handicap_m, false,
                               'TEXT', SMALL_SPACING . T_('Komi'),
@@ -529,7 +529,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             $Handitype = 'double';
             $calculated = false;
             break;
-         default: //Manual: $game_row['ToMove_ID'] == $Black_ID
+         default: //Manual: any positive value
             $Handitype = 'manual';
             $calculated = false;
             break;
@@ -596,7 +596,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          //'nigiri' => T_('Even game with nigiri'),
          $itable->add_sinfo(
                    T_('Colors')
-                  , T_('Nigiri')
+                  , T_('Even game with nigiri') //T_('Nigiri')
                   );
          $itable->add_sinfo(
                    T_('Komi')
@@ -609,6 +609,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          $itable->add_sinfo(
                    T_('Colors')
                   , T_('Double game')
+                  );
+         $itable->add_sinfo(
+                   T_('Handicap')
+                  , $Handicap
                   );
          $itable->add_sinfo(
                    T_('Komi')
@@ -718,7 +722,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
                suggest_conventional($player_row['Rating2'], $other_rating, $Size);
          else
          {
-            $infoHandicap = 0; $infoKomi = $Komi; $info_i_am_black = 0;
+            $infoHandicap = $Handicap; $infoKomi = $Komi; $info_i_am_black = 0;
          }
 
          $colortxt = 'class=InTextStone';
@@ -1100,4 +1104,5 @@ function message_list_table( &$mtable, $result, $show_rows
 
    return $can_move_messages ;
 }
+
 ?>

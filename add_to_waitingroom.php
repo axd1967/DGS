@@ -48,6 +48,7 @@ require_once( "include/rating.php" );
       {
          if( !$iamrated )
             error('no_initial_rating');
+         $handicap = 0; //further computing
          $komi = 0.0;
       }
       break;
@@ -56,22 +57,31 @@ require_once( "include/rating.php" );
       {
          if( !$iamrated )
             error('no_initial_rating');
+         $handicap = 0; //further computing
          $komi = 0.0;
       }
       break;
 
       case 'double':
       {
+         $handicap = (int)@$_POST['handicap_d'];
          $komi = (float)@$_POST['komi_d'];
       }
       break;
 
       case 'manual': //not allowed in waiting room
-         //$komi = (float)@$_POST['komi_m'];
+      /*
+      {
+         $handicap = (int)@$_POST['handicap_m'];
+         $komi = (float)@$_POST['komi_m'];
+      }
+      break;
+      */
       default: //always available even if waiting room or unrated
          $handicap_type = 'nigiri'; 
       case 'nigiri':
       {
+         $handicap = 0;
          $komi = (float)@$_POST['komi_n'];
       }
       break;
@@ -79,6 +89,9 @@ require_once( "include/rating.php" );
 
    if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )
       error("komi_range");
+
+   if( !($handicap <= MAX_HANDICAP and $handicap >= 0) )
+      error("handicap_range");
 
    $nrGames = max( 1, (int)@$_POST['nrGames']);
 
@@ -147,11 +160,12 @@ require_once( "include/rating.php" );
       "Time=FROM_UNIXTIME($NOW), " .
       "Size=$size, " .
       "Komi=ROUND(2*($komi))/2, " .
+      "Handicap=$handicap, " .
+      "Handicaptype='$handicap_type', " .
       "Maintime=$hours, " .
       "Byotype='$byoyomitype', " .
       "Byotime=$byohours, " .
       "Byoperiods=$byoperiods, " .
-      "Handicaptype='$handicap_type', " .
       "WeekendClock='$weekendclock', " .
       "Rated='$rated', " .
       "StdHandicap='$stdhandicap', " .
