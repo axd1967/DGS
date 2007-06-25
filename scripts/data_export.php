@@ -24,18 +24,23 @@ require_once( "include/table_columns.php" );
 //require_once( "include/form_functions.php" );
 
 
-define('OLD_STYLE_DUMP', !(bool)@$_REQUEST['new_style']);
+$new_style = (int)(bool)get_request_arg('new_style',0);
+$defs_orig = (int)(bool)get_request_arg('defs_orig',0);
+$defs_sort = (int)(bool)get_request_arg('defs_sort',0);
+
+define('OLD_STYLE_DUMP', 1 xor $new_style);
+define('DEFINITION_ORIG', 0 xor $defs_orig);
 
 if(OLD_STYLE_DUMP){
   define('QUOTE_NAME', 0);
   define('CREATE_TIME', 0);
   define('IF_NOT_EXISTS', 0);
-  define('DEFINITION_SORT', 0);
+  define('DEFINITION_SORT', 0 xor $defs_sort);
 }else{ //OLD_STYLE_DUMP
   define('QUOTE_NAME', 1);
   define('CREATE_TIME', 1);
   define('IF_NOT_EXISTS', 1);
-  define('DEFINITION_SORT', 0);
+  define('DEFINITION_SORT', 1 xor $defs_sort);
 } //OLD_STYLE_DUMP
 define('DROP_TABLE', 0);
 define('AUTO_INCREMENT', 0);
@@ -60,7 +65,7 @@ if(OLD_STYLE_DUMP){
   //define('QUOTE', "'");
 } //OLD_STYLE_DUMP
 
-define('CRINDENT', CR.'     ');
+define('CRINDENT', CR.'   ');
 define('BLOCKBEG', CR.COMMENT_LINE_STR.' {'.CR);
 define('BLOCKEND', CR.COMMENT_LINE_STR.' }'.CR);
 
@@ -107,7 +112,7 @@ function insert_set( $table, $query, $title=false)
       foreach( $row as $key => $val )
       {
          $str.= $sep.$key.'='.safe_value($val);
-         $sep = ','; 
+         $sep = ',';
       }
       if( $str )
          $text.= "INSERT INTO "
@@ -149,9 +154,11 @@ function insert_values( $table, $names, $query, $title=false)
 
    /**
     * TODO: it would be better to soon switch to the new_style_dump
-    * for this function because the OLD_STYLE_DUMP can swap
-    * some columns - without any warning - by construction.
+    * for this function because the OLD_STYLE_DUMP syntaxe does not
+    * insure that some columns are not swaped.
+    * - by construction - without warning -
     **/
+   //TODO: substitute REPLACE to INSERT?
    if( OLD_STYLE_DUMP )
    {
 //INSERT INTO TranslationTexts VALUES (5,'Move outside board?',NULL,'Y');
@@ -166,7 +173,7 @@ function insert_values( $table, $names, $query, $title=false)
 //       (5,'Move outside board?',NULL,'Y'),
       $rowbeg = CRINDENT."(";
       $rowend = "),";
-   }
+   } //OLD_STYLE_DUMP
 
    $hdrs = explode(',',$names);
    $text = '';
@@ -177,7 +184,7 @@ function insert_values( $table, $names, $query, $title=false)
       foreach( $hdrs as $key )
       {
          $str.= $sep.safe_value(@$row[$key]);
-         $sep = ','; 
+         $sep = ',';
       }      
       if( $str )
       {
@@ -199,13 +206,40 @@ INSERT INTO TranslationTexts
             . quoteit( $table, ( QUOTE_NAME ? QUOTE :'') )
             . CRINDENT."($names) VALUES"
             . substr( $text, 0, -1) .";";
-   }
+   } //OLD_STYLE_DUMP
    
    if( $title !== false )
       $text = comment_block( $title).$text.CR;
 
    return $text;
 } //insert_values
+
+function multi_insert_values( $tables, $title=false, $rowmod=0)
+{
+   $text = '';
+   foreach( $tables as $table => $fields )
+   {
+      $rowmod = ($rowmod % LIST_ROWS_MODULO)+1;
+      @list($fields, $where, $order) = $fields;
+      if( $where )
+         $where = ' WHERE '.$where;
+      else
+         $where = '';
+      if( $order )
+         $order = ' ORDER BY '.$order;
+      else
+         $order = '';
+
+      $str = insert_values( $table
+            , $fields
+            , "SELECT $fields FROM $table$where$order"
+            , $title
+            );
+
+      $text.= echoTR( "Row$rowmod", $str);
+   }
+   return $text;
+} //multi_insert_values
 
 function after_table( $table)
 {
@@ -323,10 +357,143 @@ function get_tables( $database)
       mysql_free_result($result);
       sort( $tables);
       break;
-   }
+   } //switch($dumptype)
 
    return $tables;
 } //get_tables
+
+
+// definitions_fix -------------
+// hide some variations between MySQL or DGS versions.
+$defs_bef= array();
+$defs_aft= array();
+$defs_rep= array();
+
+//those are the default values of older versions
+// Date timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+// Date timestamp(14) NOT NULL,
+foreach( array(
+   'Adminlog',
+   'Errorlog',
+   'Translationlog',
+) as $table ) {
+ $defs_rep[$table]['Date']
+   ['%\s+default\s+CURRENT_TIMESTAMP\s+on\s+update\s+CURRENT_TIMESTAMP\b%is'] = '';
+ $defs_rep[$table]['Date']
+   ['%timestamp(\s*[^\(])%is'] = 'timestamp(14)\\1';
+ $defs_bef[$table]['Date'] = 'PRIMARY';
+}
+// PosIndex varchar(80) character set latin1 collate latin1_bin NOT NULL default '',
+// PosIndex varchar(80) binary NOT NULL default '',
+$defs_rep['*']['*']
+   ['%\s+character\s+set\s+latin1\s+collate\s+latin1_bin\b%is'] = ' binary';
+// Handle varchar(16) character set latin1 NOT NULL default '',
+$defs_rep['*']['*']
+   ['%\s+character\s+set\s+latin1\b%is'] = '';
+
+
+switch( $FRIENDLY_SHORT_NAME ) {
+case 'dDGS':{
+//$defs_aft['GoDiagrams']['Date'] = 'SGF';
+} break;
+case 'DGS':{
+//$defs_???['Messages']['To_ID'] = ''; //still exist in DGS
+//$defs_???['Messages']['From_ID'] = ''; //still exist in DGS
+$defs_aft['Players']['MayPostOnForum'] = 'Adminlevel';
+$defs_aft['Players']['Rating2'] = 'Rating';
+$defs_bef['Players']['StatusFolders'] = 'Running';
+$defs_aft['Waitingroom']['Handicap'] = 'Komi';
+} break;
+} //$FRIENDLY_SHORT_NAME
+//$defs_aft['GamesNotes']['Notes'] = 'Hidden';
+$defs_bef['GamesNotes']['Notes'] = 'PRIMARY';
+
+
+function definitions_fix( $table, $keys)
+{
+   global $defs_bef, $defs_aft, $defs_rep;
+
+   //move columns
+   $ary = array();
+   foreach( $keys as $str )
+   {
+      $row = def_split($str);
+      $name = $row[0];
+      $ary[$name][]= $str;
+   }
+   foreach( array('defs_bef','defs_aft') as $mov )
+      if( isset(${$mov}[$table]) )
+         foreach( ${$mov}[$table] as $src => $dst )
+   {
+      $keys = array();
+      $tmp = 0;
+      foreach( $ary as $name => $row )
+      {
+         if( $name == $src )
+            continue;
+         if( $name != $dst )
+         {
+            $keys[$name]= $row;
+            continue;
+         }
+         $tmp = 1;
+         if( $mov == 'defs_bef' )
+         {
+            $keys[$src]= $ary[$src];
+            $keys[$name]= $row;
+         }
+         else
+         {
+            $keys[$name]= $row;
+            $keys[$src]= $ary[$src];
+         }
+      }
+      if( $tmp )
+         $ary = $keys;
+   }
+   $keys = array();
+   foreach( $ary as $name => $row )
+      foreach( $row as $str )
+   {
+      foreach( array($table,'*') as $tbl )
+         foreach( array($name,'*') as $nam )
+            if( isset($defs_rep[$tbl]) && isset($defs_rep[$tbl][$nam]) )
+      {
+         foreach( $defs_rep[$tbl][$nam] as $rgx => $rep )
+            $str= preg_replace($rgx, $rep, $str);
+      }
+      $keys[]= $str;
+   }
+   //end move columns
+
+   //misc adjusts
+   $defs = array();
+   foreach( $keys as $str )
+   {
+      $row = def_split($str);
+      $name = $row[0];
+
+      switch($table)
+      {
+      case('Posts'):
+         switch($name)
+         {
+         case('KEY'): //can't have this option with older versions
+            if( $row[1] == 'PendingApproval' )
+            {
+               $str= eregi_replace('Time DESC','Time',$str);
+            }
+            break;
+         }
+         break;
+      }
+      if( $str )
+      {
+         $defs[] = $str;
+      }
+   }
+   return $defs;
+}
 
 function quoteit( $mixed, $quote='`')
 {
@@ -338,7 +505,7 @@ function quoteit( $mixed, $quote='`')
       return $result;
    }
    if( !empty($mixed) or is_numeric($mixed) )
-      return $quote . trim( $mixed, " '`$quote") . $quote;
+      return $quote . trim($mixed, " '`$quote") . $quote;
    return $mixed;
 } //quoteit
 
@@ -350,6 +517,11 @@ function adj_eol( $str, $cr=CR, $trim=' ')
          $cr, 
          $str );
 } //adj_eol
+
+function def_split( $str)
+{
+   return preg_split('%[\s,\'`]+%', $str, -1, PREG_SPLIT_NO_EMPTY);
+} //def_split
 
 function fdate( $sdat)
 {
@@ -370,8 +542,8 @@ function dump2html( $str)
    }
    else
    {
-      $str = str_replace( ' ', '&nbsp;', $str); //&nbsp;&deg;
-      $str = str_replace( CR, "<br>\n", $str);
+      $str = str_replace(' ', '&nbsp;', $str); //&nbsp;&deg;
+      $str = str_replace(CR, "<br>\n", $str);
    }
    return $str;
 } //dump2html
@@ -530,8 +702,8 @@ class dbTable
       'PRIMARY'   => 1, // KEY (index_col_name,...)
       'KEY'       => 2, // [index_name] (index_col_name,...)
       'INDEX'     => 3, // [index_name] (index_col_name,...)
-      'UNIQUE'    => 4, // [INDEX] [index_name] (index_col_name,...)
-      'FULLTEXT'  => 5, // [INDEX] [index_name] (index_col_name,...)
+      'FULLTEXT'  => 4, // [INDEX] [index_name] (index_col_name,...)
+      'UNIQUE'    => 5, // [INDEX] [index_name] (index_col_name,...)
       'CHECK'     => 6, // (expr)
       ) ;
 
@@ -546,53 +718,55 @@ class dbTable
             $str = @$row[1];
          if( !$str ) return '';
 
+         //find the inner text of external parentheses
          if( preg_match( '%^[^\\(]*\\((.*)\\)[^\\)]*$%s'
                        , $str, $row) <= 0 )
             return '';
 
-         $str = trim( adj_eol( @$row[1], chr(10)) );
+         $str = trim( preg_replace('%[\t ]+%', ' '
+                     , adj_eol(@$row[1], chr(10))));
          if( !$str ) return '';
 
          $keys = explode( chr(10), $str);
+         if( !DEFINITION_ORIG )
+            $keys = definitions_fix( $this->uname, $keys);
          $defs = array();
          if( DEFINITION_SORT )
          {
             $ary = array();
+            $spc = array();
             foreach( $keys as $str )
             {
-               $row = explode( ' ', $str, 2);
+               $row = explode(' ', $str, 2); //def_split($str);
                if( array_key_exists( @$row[0], $this->keywords) )
                   $ary[$str] = $this->keywords[$row[0]].$str;
-               else
-               {
+               else if( eregi('auto_increment', $str) )//( @$row[0] == 'ID' )
                   $defs[] = $str;
-               }
+               else
+                  $spc[] = $str;
             }
             if( DEFINITION_SORT )
             {
-               asort( $defs);
-               asort( $ary);
+               asort($defs);
+               asort($spc);
+               asort($ary);
             } //DEFINITION_SORT
 
-            $keys = array_keys( $ary);
+            $defs = array_merge($defs, $spc);
+            $keys = array_keys($ary);
          } //DEFINITION_SORT
 
          $spc = '   ';
          $str = '';
-         if( count($defs) )
+         foreach( array('defs','keys') as $ary )
+            if( count($$ary) )
          {
-            $defs = implode( CR.$spc, $defs);
+            $$ary = implode(CR.$spc, $$ary);
             if( !QUOTE_NAME )
-               $defs = str_replace('`', '', $defs);
-            $str.= $spc.$defs.CR;
-         }
-         //$str.= comment_line( '----')
-         if( count($keys) )
-         {
-            $keys = implode( CR.$spc, $keys);
-            if( !QUOTE_NAME )
-               $keys = str_replace('`', '', $keys);
-            $str.= $spc.$keys.CR;
+               $$ary = str_replace('`', '', $$ary);
+               //$$ary = ereg_replace("['`]+", '', $$ary);
+            $str.= $spc.$$ary.CR;
+            //$str.= comment_line( '----')
          }
 
          $body.= $str;
@@ -688,63 +862,107 @@ INSERT INTO TranslationPages VALUES (3,'error.php',8);
 ID,Page,Group_ID
 */
    $tables = array(
-      'TranslationTexts'
-         => array('ID,Text,Ref_ID,Translatable','ID'),
-      'Translations' //better to split it in different files
-         => array('Original_ID,Language_ID,Text',
-            (0&& OLD_STYLE_DUMP ?'' :'Language_ID,Original_ID')),
-      'TranslationLanguages'
-         => array('ID,Language,Name','ID'),
+      // table => array( fields, where, order )
       'TranslationGroups'
-         => array('ID,Groupname','ID'),
-      'TranslationFoundInGroup'
-         => array('Text_ID,Group_ID','Text_ID,Group_ID'),
+         => array('ID,Groupname','','ID'),
       'TranslationPages'
-         => array('ID,Page,Group_ID',
-            (0&& OLD_STYLE_DUMP ?'' :'Page,Group_ID')),
+         => OLD_STYLE_DUMP
+            ?array('ID,Page,Group_ID','', 'Page,Group_ID')
+            :array('Page,Group_ID','', 'Group_ID,Page')
+         ,
+      'TranslationTexts' //Originals
+         => array('ID,Text,Ref_ID,Translatable','','ID'),
+      'TranslationFoundInGroup'
+         => array('Text_ID,Group_ID','','Text_ID,Group_ID'),
+/**
+ * TODO: insert at least english translations? (Cf language_dump())
+ * either, here:
+      $langID = ID_of('en.iso-8859-1'); //which is not 1, actually
+      'TranslationLanguages'
+         => array('ID,Language,Name',"ID=$langID", 'ID'),
+      'Translations' //better to split it in different files
+         => OLD_STYLE_DUMP
+            ?array('Original_ID,Language_ID,Text',"Language_ID=$langID",
+               'Original_ID,Language_ID')
+            :array('Language_ID,Original_ID,Text',"Language_ID=$langID",
+               'Language_ID,Original_ID'),
+ * or, farther:
+      $text.= language_dump( $database, 'en.iso-8859-1', false);
+ **/
       );
 
-   $c=0;
-   foreach( $tables as $table => $fields )
-   {
-      $c=($c % LIST_ROWS_MODULO)+1;
-      @list($fields, $order) = $fields;
-      if( $order )
-         $order = ' ORDER BY '.$order;
-      else
-         $order = '';
-
-      $str = insert_values( $table
-            , $fields
-            , "SELECT $fields FROM $table$order"
-            , ''
-            );
-
-      $text.= echoTR( "Row$c", $str);
-   }
+   $text.= multi_insert_values( $tables, '');
 
    return $text;
 } //transl_dump
+
+function language_dump( $database, $lang, $header=true)
+{
+   global $lang_desc;
+
+   if( $header === true )
+      $text = dump_header( $database);
+   else if( is_string($header) )
+      $text = trim($header);
+   else
+      $text = '';
+   if( $text )
+      $text = echoTR( 'th', $text);
+
+   $langname = @$lang_desc[$lang];
+   //@list( $browsercode, $charenc) = explode( LANG_CHARSET_CHAR, $lang, 2);
+
+   $title = "Datas for language: $langname ($lang)";
+
+   $query = "SELECT ID FROM TranslationLanguages WHERE Language='$lang'";
+   if( ($row=mysql_single_fetch( false, $query))
+         && @$row['ID'] > 0 )
+      $langID = $row['ID'];
+   else
+   {
+      $str = $title.chr(10).'Not found.';
+      $str = comment_block( $str);
+      $text.= echoTR( "Row$c", $str);
+      return $text;
+   }
+
+   $tables = array(
+      'TranslationLanguages'
+         => array('ID,Language,Name',"ID=$langID", 'ID'),
+      'Translations' //better to split it in different files
+         => OLD_STYLE_DUMP
+            ?array('Original_ID,Language_ID,Text',"Language_ID=$langID",
+               'Original_ID,Language_ID')
+            :array('Language_ID,Original_ID,Text',"Language_ID=$langID",
+               'Language_ID,Original_ID'),
+   );
+
+   $text.= multi_insert_values( $tables, $title);
+
+   return $text;
+} //language_dump
 
 function freesql_dump( $database, $query)
 {
    $title = "Free SQL: ".$query.';';
 
-   $result = mysql_query( $query)
-            or die(mysql_error());
+   $result = mysql_query( $query);
 
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
    {
-      echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
-      return -1;
+      $title .= chr(10)."Error: ".textarea_safe($mysqlerror);
+      return echoTR('th', comment_block( $title));
    }
 
    if( !$result )
-      return 0;
+   {
+      $title .= chr(10)."Error: Fail";
+      return echoTR('th', comment_block( $title));
+   }
 
    $numrows = @mysql_num_rows($result);
-   $title .= chr(10).' => '.$numrows;
+   $title .= chr(10)." => $numrows rows";
    if( $numrows<=0 )
    {
       @mysql_free_result( $result);
@@ -754,11 +972,12 @@ function freesql_dump( $database, $query)
    $hdrs = NULL;
    $col = 0;
    $text = '';
+   $n=0;
    $c=0;
    while( $row = mysql_fetch_assoc( $result ) )
    {
+      $n++;
       $c=($c % LIST_ROWS_MODULO)+1;
-      $title .= ','.is_array($row).'+'.@$row['Type'];
 
       if( !isset($hdrs) )
       {
@@ -770,12 +989,16 @@ function freesql_dump( $database, $query)
 
       $str = '';
       $sep = '';
+      $rnam= '';
       foreach( $hdrs as $key )
       {
+         if( !$rnam )
+            $rnam= basic_safe(trim(@$row[$key]));
          $str.= $sep.safe_value(@$row[$key]);
          $sep = '</td><td>';
       }
-      $text.= "<tr class=Row$c><td>".$str.'</td></tr>'.CR;
+      $rnam= "Row$n".($rnam ?'-'.$rnam :'');
+      $text.= "<tr class=Row$c title='$rnam'><td>".$str.'</td></tr>'.CR;
    }
    mysql_free_result($result);
 
@@ -803,12 +1026,13 @@ function freesql_dump( $database, $query)
    if( !($player_level & ADMIN_DATABASE) )
       error("adminlevel_too_low");
 
-   if( $player_row['Handle'] == 'rodival' )
+   if( $player_row['Handle'] == 'rodival'
+      )
       $Super_admin = true;
    else
       $Super_admin = false;
 
-   $encoding_used= get_request_arg( 'charset', LANG_DEF_CHARSET); //iso-8859-1 UTF-8
+   $encoding_used= get_request_arg( 'charset', 'UTF-8'); //LANG_DEF_CHARSET iso-8859-1 UTF-8
 
    if( $row=mysql_single_fetch( false, 'SELECT VERSION() AS version') )
    {
@@ -826,11 +1050,18 @@ function freesql_dump( $database, $query)
    }
 
 
+   $lang_desc = get_language_descriptions_translated( true);
+   ksort($lang_desc);
+
    $dumptypes = array(
          '' => '',
          'init' => 'init.mysql',
          'transl' => 'translationdata.mysql',
       );
+   foreach( $lang_desc as $lang => $langname )
+   {
+      $dumptypes['lang.'.$lang] = "translationdata.$lang.mysql";
+   }
 
    $dumptype = trim(get_request_arg('dumptype'));
    if( !array_key_exists( $dumptype, $dumptypes) )
@@ -844,14 +1075,17 @@ function freesql_dump( $database, $query)
 
    //====================
 
+   $row = explode('.', $dumptype, 2);
+   $export_file = $dumptypes[$dumptype];
    $text = '';
    if( @$GLOBALS['Super_admin'] && $freesql_it && $freesql )
    {
       $text = freesql_dump( $DB_NAME, $freesql);
       $show_it = true;
       $dumptype = 'freeSQL';
+      $export_file= 'db_export.mysql';
    } else
-   switch($dumptype)
+   switch( $row[0] )
    {
    case 'init': {
       $text = init_dump( $DB_NAME);
@@ -859,26 +1093,17 @@ function freesql_dump( $database, $query)
    case 'transl': {
       $text = transl_dump( $DB_NAME);
       } break; //'transl'
+   case 'lang': {
+      $text = language_dump( $DB_NAME, $row[1]);
+      } break; //'lang'
    } //switch($dumptype)
 
 
    //====================
 
-   if( $export_it && $text )
+   if( $export_it && $text && $export_file )
    {
-      switch($dumptype)
-      {
-      case 'init':
-         $filename= 'init.mysql';
-         break;
-      case 'transl':
-         $filename= 'translationdata.mysql';
-         break;
-      default:
-         $filename= 'db_export.mysql';
-         break;
-      }
-      $filename= $FRIENDLY_SHORT_NAME.'-'.$filename;
+      $export_file= $FRIENDLY_SHORT_NAME.'-'.$export_file;
 
       // this one open the text/plain in the browser by default
       //header( 'Content-type: text/plain' ); //; charset=iso-8859-1' ); //$encoding_used
@@ -886,7 +1111,7 @@ function freesql_dump( $database, $query)
       //header( 'Content-type: application/octet-stream' );
       // this last does not exist but it force the "record to disk"
       header( 'Content-type: application/x-mysql' );
-      header( "Content-Disposition: inline; filename=\"$filename\"" );
+      header( "Content-Disposition: inline; filename=\"$export_file\"" );
       header( "Content-Description: PHP Generated Data" );
    
       //to allow some mime applications to find it in the cache
@@ -901,7 +1126,9 @@ function freesql_dump( $database, $query)
    //====================
 
    start_html( 'data_export', 0, '', //@$player_row['SkinName'],
-      "  table.Table { border:0; background: #c0c0c0; }\n" .
+      "  table.Table { border:0; background:#c0c0c0; text-align:left;\n" .
+      "   border-spacing:1px; border-collapse:separate; margin:0.5em 2px; }\n" .
+      "  table.Table td, table.Table th { padding:4px; }\n" .
       "  tr.Row1 { background: #ffffff; }\n" .
       "  tr.Row2 { background: #dddddd; }\n" .
       "  tr.hil { background: #ffb010; }" );
@@ -921,11 +1148,14 @@ function freesql_dump( $database, $query)
       'SELECTBOX', 'dumptype', 1, $dumptypes, $dumptype, false,
       ) );
    $dform->add_row( array(
-      'HIDDEN', 'new_style', (OLD_STYLE_DUMP ?'0' :'1'),
+      'HIDDEN', 'charset', $encoding_used,
       'SUBMITBUTTONX', 'show_it', 'Show it [&s]',
                array('accesskey' => 's'),
       'SUBMITBUTTONX', 'export_it', 'Download it [&d]',
                array('accesskey' => 'd'),
+      'CHECKBOX', 'new_style', 1, 'New style&nbsp;', $new_style,
+      'CHECKBOX', 'defs_sort', 1, 'Defs sort&nbsp;', $defs_sort,
+      'CHECKBOX', 'defs_orig', 1, 'original&nbsp;', $defs_orig,
       ) );
 
    if( @$GLOBALS['Super_admin'] )
