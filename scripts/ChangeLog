@@ -26,17 +26,29 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-06-28 rodival
+
+   * statistics.php, graph.php, ratingpng.php, statisticspng.php:
+   - added the statratingspng.php file which display stats on ratings.
+     Minor adjustements of other files to handle it.
+     Added the function patterncolor() to graph.php.
+
+
 2007-06-26 rodival
 
    * add_to_waitingroom.php, join_waitingroom_game.php, waiting_room.php:
-   - fixed the "double game" handicap option from the waitingroom
+   - fixed the "double game" handicap option from the waitingroom.
+     In the waitingroom table, renamed the old "Handicap" column to
+     "Colors" and added the new "Handicap" one containing the number
+     of handicap stones.
 -----------
 ALTER TABLE `Waitingroom`
  ADD `Handicap` Handicap int(11) NOT NULL default '0' AFTER `Komi` ;
 -----------
 
-   * message_functions.php, send_message.php, make_game.php:
-   - adjusted to follow the "double game" handicap fix
+   * message_functions.php (game_info_table), send_message.php,
+   * make_game.php:
+   - adjusted to follow the "double game" handicap fix and its display.
    - and a try to fix the bad Running count bug:
      In the Players table, near 20 of the Running counts were 1 or 2
      points too hight. I've not found why this occured. Maybe a script

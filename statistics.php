@@ -73,11 +73,19 @@ require_once( "include/std_functions.php" );
       echo '<p></p>Loadavg: ' . $tmp;
    }
 
-   $tmp = floor($NOW/86400); //to force the caches (daily)
-   echo "<p></p>\n";
-   echo "<img src=\"statisticspng.php?date=$tmp" .
+   $forcecache = floor($NOW/86400); //to force the caches (daily)
+   
+   $title = T_('Statistics graph');
+   echo "<h3 class=Header>$title</h3>\n";
+   echo "<img src=\"statisticspng.php?date=$forcecache" .
         (@$_REQUEST['show_time'] == 'y' ? URI_AMP.'show_time=y' : '') .
-        "\" alt=\"" . T_('Statistics graph') . "\">\n";
+        "\" alt=\"$title\">\n";
+
+   $title = T_('Rating Histogram');
+   echo "<h3 class=Header>$title</h3>\n";
+   echo "<img src=\"statratingspng.php?date=$forcecache" .
+        (@$_REQUEST['show_time'] == 'y' ? URI_AMP.'show_time=y' : '') .
+        "\" alt=\"$title\">\n";
 
    end_page();
 }

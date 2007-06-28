@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-$TranslateGroups[] = "Game";
+$TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 require_once( "include/graph.php" );
@@ -67,7 +67,7 @@ require_once( "include/graph.php" );
    $nr_points = count($tTime);
 
    $graphs[]= array(
-      'name' => $T_('Running games'), 
+      'name' => $T_('Running games'),
       'x' => &$tTime,
       'y' => &$tGameR,
       'max' => $maxGameR,
@@ -75,7 +75,7 @@ require_once( "include/graph.php" );
       'c' => $gr->getcolor( 255,   0,   0),
    );
    $graphs[]= array(
-      'name' => $T_('Games'), 
+      'name' => $T_('Games'),
       'x' => &$tTime,
       'y' => &$tGames,
       'max' => $maxGames,
@@ -83,7 +83,7 @@ require_once( "include/graph.php" );
       'c' => $gr->getcolor( 255,   0, 200),
    );
    $graphs[]= array(
-      'name' => $T_('Moves'), 
+      'name' => $T_('Moves'),
       'x' => &$tTime,
       'y' => &$tMoves,
       'max' => $maxMoves,
@@ -91,7 +91,7 @@ require_once( "include/graph.php" );
       'c' => $gr->getcolor(   0, 180, 200),
    );
    $graphs[]= array(
-      'name' => $T_('Users'), 
+      'name' => $T_('Users'),
       'x' => &$tTime,
       'y' => &$tUsers,
       'max' => $maxUsers,
@@ -105,6 +105,7 @@ require_once( "include/graph.php" );
    $title_fmt= '%s / %d';
    $title_sep= 4*max($gr->border, $gr->labelMetrics['WIDTH']);
 
+   // $curves_min only works if $graph['max'] > 0
    $curves_min= 1;
    $y = $gr->border;
    $x = 0;
@@ -113,8 +114,11 @@ require_once( "include/graph.php" );
    for( $i=0 ; $i<count($graphs) ; $i++ )
    {
       $graph= &$graphs[$i];
-      if( $graph['max'] )
-         $curves_min = min($curves_min,$graph['min']/$graph['max']);
+      
+      $max = $graph['max'];
+      $min = $graph['min'];
+      if( $max )
+         $curves_min = min($curves_min,$min/$max);
 
       $v= sprintf($title_fmt, $graph['name'], $graph['max']);
 
@@ -163,9 +167,10 @@ require_once( "include/graph.php" );
    for( $i=0 ; $i<count($graphs) ; $i++ )
    {
       $graph= &$graphs[$i];
-
-      $y = $graph['max'];
-      $gr->setgraphviewY($y, $y*$curves_min);
+      
+      $max = $graph['max'];
+      //$min = $graph['min'];
+      $gr->setgraphviewY($max, $max*$curves_min);
       $graph['y'] = $gr->mapscaleY($graph['y']);
    }
    $ymax = 100.;
@@ -198,7 +203,6 @@ require_once( "include/graph.php" );
       $gr->gridX( $month, $step, $gr->boxbottom+3
          , $datelabel, $black
          , $dategrid, $red);
-
 
 
    //draw the curves

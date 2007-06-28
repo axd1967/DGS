@@ -228,6 +228,19 @@ function colortoRGB($r, $g=NULL, $b=NULL)
    return array( $r&255, $g&255, $b&255);
 } //colortoRGB
 
+/*! \brief return a fixed pattern color.
+ */
+function patterncolor($n)
+{
+   $x = $n%6;
+   $y = 255-($n-$x)*8;
+   $x++;
+   $b = $x&1 ?0 :$y;
+   $r = $x&2 ?0 :$y;
+   $g = $x&4 ?0 :$y;
+   return array( $r&255, $g&255, $b&255);
+} //patterncolor
+
 
 /*!
  * \class Graph
@@ -775,19 +788,10 @@ class Graph
       for( $i=0; $i<$nbval; $i++ )
       {
          if( isset($colors[$i]) )
-         {
             list($r,$g,$b) = colortoRGB($colors[$i]);
-         }
          else
-         {
-            $x = $n%6;
-            $y = 255-($n-$x)*7;
-            $n++;
-            $x++;
-            $b = $x&1 ?0 :$y;
-            $r = $x&2 ?0 :$y;
-            $g = $x&4 ?0 :$y;
-         }
+            list($r,$g,$b) = patterncolor($n++);
+
          $colors[$i] = $this->getcolor($r, $g, $b);
 
          // front edge colors
