@@ -49,7 +49,7 @@ function retry_admin( $msg)
    foreach( array(
          'langname',
          'charenc',
-         'twoletter',
+         'browsercode',
          'transluser',
          'transladdlang',
          ) as $arg )
