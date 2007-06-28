@@ -248,9 +248,9 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
          $color = array( 255,   0, 200);
          break;
       case 2:
-         $name = $T_('Rated games');
+         $name = $T_('Rated games') . ($rscale>1 ? " / $rscale" : '');
          $query =
-            "SELECT ROUND(Rating/100)-(".MIN_RANK.") as rank,COUNT(*) as cnt"
+            "SELECT ROUND(Rating/100)-(".MIN_RANK.") as rank,COUNT(*)/$rscale as cnt"
             . " FROM Ratinglog WHERE Rating>=".MIN_RATING
             . " GROUP BY rank ORDER BY rank;" ;
          $color = array(   0, 180, 200);
