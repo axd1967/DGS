@@ -46,12 +46,12 @@ ALTER TABLE `Waitingroom`
 
 2007-06-25 rodival
 
-   * scripts/data_report.php
+   * scripts/data_report.php:
    - implementation of a two steps validation:
      first, just the EXPLAIN, then the full result.
    - differenciation of the NULL values.
    
-   * scripts/data_export.php
+   * scripts/data_export.php:
    - including the translations tables export
      and hidding some minor variations.
 
@@ -64,7 +64,7 @@ ALTER TABLE `Waitingroom`
      (instead of returning false on error and true else).
    
    * people.php:
-   - changed the info about translators' activity to "LastUpadte".
+   - changed the info about translators' activity to "LastUpdate".
 
 
 2007-06-03 rodival
