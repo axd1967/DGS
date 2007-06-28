@@ -26,6 +26,30 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-06-29 rodival
+
+   * translate.php, translation_functions.php
+   *  (language_exists, T_, get_language_descriptions_translated):
+   - case insensitive search of the language name in language_exists().
+   - added an automatic cut of the #xxx part of the alternate english words
+     in T_().
+   - added a $keep_english parameter to get_language_descriptions_translated().
+   - changed all $langcode names to the now more accurate $browsercode.
+   
+   * translate.php, make_translationfiles.php (translations_query),
+   * admin_translators.php, admin_do_translators.php, update_translation.php,
+   * generate_translation_texts.php:
+   - added the add_text_to_translate function.
+   - added the insertion of the new language names in the translation process.
+   - added an optional alphabetical sort in translations_query().
+   - added a better "T_(...)" detection in generate_translation_texts.php
+     using eval(). Also added a "do_it" URL argument.
+   - changed all $langcode names to the now more accurate $browsercode.
+
+   * update_translation_pages.php (find_php_files):
+   - updated the $directories array in find_php_files().
+
+
 2007-06-28 rodival
 
    * statistics.php, graph.php, ratingpng.php, statisticspng.php:
