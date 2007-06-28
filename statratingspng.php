@@ -206,10 +206,26 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
    global $ActiveLevel1, $T_;
 
    $Xaxis = array();
+   $graphs = array();
    $Xmin = 0;
+   $Xmax = 0;
    $Ymin = 0;
    $Ymax = 0;
-   $graphs = array();
+   
+   $row = mysql_single_fetch( 'statratingspng.get_ratings_data.Ratinglog.cnt',
+         "SELECT COUNT(*) as cnt FROM Ratinglog")
+      or error('internal_error','statratingspng.get_ratings_data.Ratinglog.cnt');
+   $rscale = $row['cnt'];
+   $row = mysql_single_fetch( 'statratingspng.get_ratings_data.Players.cnt',
+         "SELECT COUNT(*) as cnt FROM Players")
+      or error('internal_error','statratingspng.get_ratings_data.Players.cnt');
+   $tmp = $row['cnt'];
+   if( $tmp > 0 )
+      $rscale/= $tmp;
+   else
+      $rscale = 1;
+   $rscale = pow(10, round(log10($rscale)));
+
    for( $i=0; $i<3 ;$i++ )
    {
       switch( $i )
