@@ -20,6 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 chdir( '../' );
 require_once( "include/std_functions.php" );
+require_once( "include/make_translationfiles.php" );
 chdir( 'scripts' );
 
 {
@@ -27,72 +28,74 @@ chdir( 'scripts' );
 
    $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+      error('not_logged_in');
 
-  if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
-     error("adminlevel_too_low");
+   if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
+      error('adminlevel_too_low');
+
+   $TheErrors->set_mode(ERROR_MODE_PRINT);
+
+   start_html('update_translation_pages', 0);
+
+   if( $do_it=@$_REQUEST['do_it'] )
+   {
+      function dbg_query($s) {
+        if( !mysql_query( $s) )
+           die("<BR>$s;<BR>" . mysql_error() );
+        echo " --- fixed. ";
+      }
+      echo "<p>*** Fixes errors:</p>";
+   }
+   else
+   {
+      function dbg_query($s) { echo " --- query:<BR>$s; ";}
+      echo "<p>(just show queries needed)"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
+         ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
+         ."</p>";
+   }
 
 
-  $result = mysql_query("SELECT * FROM TranslationPages");
+   $result = mysql_query("SELECT * FROM TranslationPages");
 
-  while( $row = mysql_fetch_array($result) )
-  {
-     $Filename = $row['Page'];
-     $Group_ID = $row['Group_ID'];
+   while( $row = mysql_fetch_array($result) )
+   {
+      $Filename = $row['Page'];
+      $Group_ID = $row['Group_ID'];
 
-     echo "<hr><p></p>$Filename $Group_ID<hr><p></p>\n";
+      echo "<hr><p>$Filename $Group_ID</p><hr>\n";
 
-     $fd = fopen( $main_path . $Filename, 'r' )
-        or error( 'couldnt_open_file' );
+      $fd = fopen( $main_path . $Filename, 'r' )
+         or error( 'couldnt_open_file' );
 
-     $contents = fread($fd, filesize ($main_path . $Filename));
+      $contents = fread($fd, filesize ($main_path . $Filename));
 
-     $pattern = "/T_\((['\"].*?['\"])\)[^'\"]/s";
-     preg_match_all( $pattern, $contents, $matches );
+      $pattern = "%T_\((['\"].*?['\"])\)[^'\"]%s";
+      preg_match_all( $pattern, $contents, $matches );
 
-     foreach( $matches[1] as $string )
-     {
-  //Actually, the 'T_' argument may contains concatenations but with the same quoting 
-           $string = preg_replace( '/[\'"]\s+\.\s+[\'"]/s', "", $string );
-           $string = preg_replace( '/\\n/', '\n', $string );
-  /* As this argument will be interpreted while the page is build,
-     maybe it's better to interprets it here too,
-     replacing the two previous lines with something like:
-           eval( "\$string = $string;" );
-           $string = addslashes($string);
-     then:
-           $string = "'" . $string . "'";
-     or use the more conventionals:
-           $res = mysql_query("SELECT ID FROM TranslationTexts WHERE Text='$string'");
-       and:
-           mysql_query("INSERT INTO TranslationTexts SET Text='$string'")
-  */
+      foreach( $matches[1] as $str )
+      {
+         unset($string);
+         eval( "\$string = $str;" );
+         if( !isset($string) || $string == '' )
+         {
+            echo "*** Error: something went wrong with [$str]<br>";
+            continue;
+         }
+         $tmp= add_text_to_translate('generate_translation_texts'
+               , $string, $Group_ID, $do_it);
+         if( $do_it && $tmp )
+            $tmp= '++ '.$string;
+         if( $tmp )
+            echo textarea_safe($tmp)."<br>";
+      }
+   }
+   mysql_free_result($result);
 
-           $res = mysql_query("SELECT ID FROM TranslationTexts WHERE Text=$string");
-           if( @mysql_num_rows( $res ) == 0 )
-           {
-              mysql_query("INSERT INTO TranslationTexts SET Text=$string")
-                 or die(mysql_error());
-              $Text_ID = mysql_insert_id();
+   echo "<hr>Done!!!\n";
 
-              echo "<br>$string";
-
-           }
-           else
-           {
-              $text_row = mysql_fetch_array($res);
-              $Text_ID = $text_row['ID'];
-           }
-           mysql_free_result($res);
-
-//           mysql_query("INSERT INTO TranslationFoundInGroup " .
-           mysql_query("REPLACE INTO TranslationFoundInGroup " .
-                       "SET Text_ID=$Text_ID, Group_ID=$Group_ID" );
-     }
-  }
-  mysql_free_result($result);
-
+   end_html();
 }
 
 ?>

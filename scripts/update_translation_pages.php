@@ -101,7 +101,13 @@ function filepat2preg($p, $flg=0)
 
 function find_php_files( )
 {
-   $directories = array( '', 'include/', 'forum/' );
+   $directories = array( ''
+         , 'include/'
+         , 'forum/'
+         , 'translations/'
+         , 'rss/'
+         , 'wap/'
+         );
 
    $array = array();
 
@@ -121,6 +127,8 @@ function grep_file($regexp, $file, &$matches)
    $fd = fopen($file, 'r');
 
    $contents = fread($fd, filesize($file));
+   
+   fclose($fd);
 
    return preg_match($regexp.'m', $contents, $matches);
 }
@@ -132,14 +140,14 @@ function grep_file($regexp, $file, &$matches)
 
    connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+      error("not_logged_in");
 
-  $player_level = (int)$player_row['admin_level'];
-  if( !($player_level & ADMIN_DATABASE) )
-    error("adminlevel_too_low");
+   $player_level = (int)$player_row['admin_level'];
+   if( !($player_level & ADMIN_DATABASE) )
+      error("adminlevel_too_low");
 
    start_html('update_translation_pages', 0);
 
@@ -150,12 +158,15 @@ function grep_file($regexp, $file, &$matches)
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p></p>*** Fixes errors:<br>";
+      echo "<p>*** Fixes errors:</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p></p>(just show queries needed):<br>";
+      echo "<p>(just show queries needed)"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
+         ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
+         ."</p>";
    }
 
 
@@ -176,9 +187,11 @@ function grep_file($regexp, $file, &$matches)
    $translationpages_found = array();
    foreach( $files as $file )
    {
-      if( grep_file('/^\$TranslateGroups\[\] = \"(\w+)\";$/', $file, $matches) )
+      //note: only keep the first match of the file (starting at column 1)
+      //TODO: is this wanted?
+      if( grep_file('/^\$TranslateGroups\[\] = \"(\w+)\";/', $file, $matches) )
       {
-//         echo $file . " " . $matches[1] . ", " . $translationgroups[$matches[1]] . "<br>\n";
+         //echo $file . " " . $matches[1] . ", " . $translationgroups[$matches[1]] . "<br>\n";
          $translationpages_found[$file] = array($translationgroups[$matches[1]], false);
       }
    }
@@ -199,6 +212,7 @@ function grep_file($regexp, $file, &$matches)
       if( !isset($translationpages_found[$row['Page']]) )
       {
          echo "<hr>Should be deleted: " . $row['Page'] . "<br>\n";
+         //TODO: could we drop the ID column of TranslationPages: it is used only here, isn't it?
          dbg_query("DELETE FROM TranslationPages WHERE ID=" . $row['ID'] . " LIMIT 1");
       }
       else

@@ -29,9 +29,7 @@ define('ALLOW_PROFIL_CHARSET', 0);
 $info_box = '<CENTER>
 <table border="2">
 <tr><td>
-<CENTER>
- <h3><font color=' . $h3_color . '>Read this before translating:</font></h3>
-</CENTER>
+ <h3 class=Header>Read this before translating:</h3>
 &nbsp;When translating you should keep in mind the following things:
 <ul>
   <li> If a translated word is the same as in english, leave it blank and click
@@ -70,18 +68,18 @@ $translation_groups =
 
 {
 
-  connect2mysql();
+   connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+      error('not_logged_in');
 
 
   {
      $translator_set = @$player_row['Translator'];
      if( !$translator_set )
-       error("not_translator");
+       error('not_translator');
 
      $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
   }
@@ -95,6 +93,7 @@ $translation_groups =
   $untranslated = ($group === 'Untranslated phrases');
 
   $translate_lang = @$_REQUEST['translate_lang'];
+  $alpha_order = (int)(bool)@$_REQUEST['alpha_order'];
 
    if( count( $translator_array ) > 1 )
    {
@@ -120,7 +119,7 @@ $translation_groups =
       if( !in_array( $translate_lang, $translator_array ) )
          error('not_correct_transl_language');
 
-      $result = translations_query( $translate_lang, $untranslated, $group )
+      $result = translations_query( $translate_lang, $untranslated, $group, $alpha_order)
          or error('mysql_query_failed','translate.translation_query');
 
       $numrows = @mysql_num_rows($result);
@@ -128,11 +127,11 @@ $translation_groups =
          error('translation_bad_language_or_group','translat1');
 
       $lang_string = '';
-      foreach( $known_languages as $langcode => $array )
+      foreach( $known_languages as $browsercode => $array )
       {
          foreach( $array as $charenc => $langname )
          {
-            if( $langcode . LANG_CHARSET_CHAR . $charenc == $translate_lang)
+            if( $browsercode . LANG_CHARSET_CHAR . $charenc == $translate_lang)
                $lang_string .= ",$langname";
          }
       }
@@ -227,6 +226,7 @@ $translation_groups =
          'HIDDEN', 'translate_lang', $translate_lang,
          'HIDDEN', 'profil_charset', $profil_charset,
          'HIDDEN', 'group', $group,
+         'HIDDEN', 'alpha_order', $alpha_order,
          'SUBMITBUTTON', 'apply_changes', 'Apply translation changes to Dragon',
          ) );
 
@@ -247,6 +247,7 @@ $translation_groups =
          'HIDDEN', 'translate_lang', $translate_lang,
          'HIDDEN', 'profil_charset', $profil_charset,
          'SUBMITBUTTON', 'just_group', 'Just change group',
+         'CHECKBOX', 'alpha_order', 1, 'alpha order', $alpha_order,
          ) );
 
       $groupchoice_form->echo_string($tabindex);
@@ -260,13 +261,13 @@ $translation_groups =
          'HEADER', 'Select language to translate to',
          ) );
 
-      $lang_desc = get_language_descriptions_translated();
+      $lang_desc = get_language_descriptions_translated( true);
       $vals = array();
       foreach( $lang_desc as $lang => $langname )
       {
-           @list( $lc, $cs) = explode( LANG_CHARSET_CHAR, $lang, 2);
+           @list( $browsercode, $charenc) = explode( LANG_CHARSET_CHAR, $lang, 2);
            if( in_array( $lang, $translator_array ) or
-               in_array( $lc, $translator_array ) )
+               in_array( $browsercode, $translator_array ) )
               $vals[$lang] = $langname;
       }
 
@@ -274,6 +275,7 @@ $translation_groups =
          'CELL', 99, 'align="center"',
          'SELECTBOX', 'translate_lang', 1, $vals, $translate_lang, false,
          'HIDDEN', 'group', $group,
+         'HIDDEN', 'alpha_order', $alpha_order,
          'SUBMITBUTTON', 'cl', 'Select',
          ) );
 

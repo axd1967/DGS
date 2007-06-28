@@ -32,6 +32,7 @@ require_once( "include/make_translationfiles.php" );
   $translate_lang = @$_POST['translate_lang'];
   $group = @$_POST['group'];
   $profil_charset = @$_POST['profil_charset'] ? 'Y' : '';
+  $alpha_order = (int)(bool)@$_POST['alpha_order'];
 
   {
      $translator_set = @$player_row['Translator'];
@@ -45,7 +46,7 @@ require_once( "include/make_translationfiles.php" );
 
   $untranslated = ($group === 'Untranslated phrases');
 
-      $result = translations_query( $translate_lang, $untranslated, $group )
+      $result = translations_query( $translate_lang, $untranslated, $group, $alpha_order )
          or error('mysql_query_failed','update_translation.translations_query');
 
       $numrows = @mysql_num_rows($result);
@@ -99,7 +100,7 @@ require_once( "include/make_translationfiles.php" );
   if( $log_set )
      mysql_query( "INSERT INTO Translationlog " .
                   "(Player_ID,Language_ID,Original_ID,Translation) VALUES " .
-                  substr($log_set,1) )
+                  substr($log_set,1) ) //+ Date= timestamp
         or error('mysql_query_failed','update_translation.log');
 
   if( $done_set )
@@ -109,8 +110,11 @@ require_once( "include/make_translationfiles.php" );
 
   make_include_files($translate_lang); //must be called from main dir
 
-  jump_to("translate.php?translate_lang=$translate_lang" .
-              URI_AMP."profil_charset=$profil_charset".URI_AMP."group=" . urlencode($group));
+  jump_to("translate.php?translate_lang=".urlencode($translate_lang)
+              .URI_AMP."profil_charset=".urlencode($profil_charset)
+              .URI_AMP."group=".urlencode($group)
+              .URI_AMP."alpha_order=$alpha_order"
+              );
 
 }
 ?>

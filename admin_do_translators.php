@@ -84,7 +84,7 @@ function retry_admin( $msg)
    Because of get_preferred_browser_language(), it must follow the code
    used by browsers, i.e. IANA Language Subtag Registry.
 */
-   $langcode = trim(get_request_arg('twoletter')); //twoletter kept for URL compatibility
+   $browsercode = trim(get_request_arg('browsercode'));
    $charenc = trim(get_request_arg('charenc'));
    $langname = trim(get_request_arg('langname'));
 
@@ -98,7 +98,7 @@ function retry_admin( $msg)
    $transllang = get_request_arg('transllang');
 
    // Normalization for the array_key_exists() matchings
-   $langcode = strtolower($langcode);
+   $browsercode = strtolower($browsercode);
    $charenc = strtolower($charenc);
    $langname = ucfirst($langname); //ucfirst(strtolower($langname)); //ucwords()
 
@@ -107,20 +107,23 @@ function retry_admin( $msg)
 
    if( $addlanguage )
    {
-      $tmp = lang_illegal( $langcode.$langname.$charenc);
+      $tmp = lang_illegal( $browsercode.$langname.$charenc);
       if( $tmp )
          retry_admin( T_("Sorry, there was an illegal character in a language field.") . " ($tmp)");
 
-      if( strlen( $langcode ) < 2 || empty( $langname ) || empty( $charenc ) )
+      if( strlen( $browsercode ) < 2 || empty( $langname ) || empty( $charenc ) )
         retry_admin( T_("Sorry, there was a missing or incorrect field when adding a language."));
 
-      if( language_exists( $langcode, $charenc, $langname ) )
-        retry_admin( T_("Sorry, the language you tried to add already exists."));
+      $tmp= language_exists( $browsercode, $charenc, $langname );
+      if( $tmp )
+        retry_admin( T_("Sorry, the language you tried to add already exists.")
+                     ."\n" . $tmp);
 
 
+      $tmp = mysql_addslashes( $browsercode . LANG_CHARSET_CHAR . $charenc );
       mysql_query("INSERT INTO TranslationLanguages SET " .
-                  "Language='" . $langcode . LANG_CHARSET_CHAR . $charenc . "', " .
-                  "Name='$langname'")
+                  "Name='" . mysql_addslashes($langname) . "', " .
+                  "Language='$tmp'" )
          or error('mysql_query_failed','admin_do_translators.add.insert');
 
       make_known_languages(); //must be called from main dir
@@ -131,23 +134,10 @@ function retry_admin( $msg)
 
       $Group_ID = $row['ID'];
 
-      $tmp = mysql_query(
-         "SELECT ID FROM TranslationTexts WHERE Text=\"$langname\"")
-         or error('mysql_query_failed','admin_do_translators.add.find_transltexts');
-
-      if( @mysql_num_rows( $tmp ) === 0 )
-      {
-         mysql_query("INSERT INTO TranslationTexts SET Text=\"$langname\"")
-            or error('mysql_query_failed','admin_do_translators.add.insert_transltexts');
-
-         mysql_query("REPLACE INTO TranslationFoundInGroup " .
-                     "SET Text_ID=" . mysql_insert_id() . ", " .
-                     "Group_ID=" . $Group_ID )
-            or error('mysql_query_failed','admin_do_translators.add.update_translfig');
-      }
+      $tmp = add_text_to_translate('admin_do_translators.add', $langname, $Group_ID);
 
       retry_admin( sprintf( T_("Added language %s with code %s and characterencoding %s.")
-                                 , $langname, $langcode, $charenc ));
+                                 , $langname, $browsercode, $charenc ));
    }
 
 //-------------------
@@ -217,7 +207,7 @@ function retry_admin( $msg)
       if( mysql_affected_rows() != 1 )
          error('internal_error', $update_it);
 
-      // Check result (
+      // Check result
       $tmp = mysql_single_fetch( 'admin_do_translators.user.translator',
                    "SELECT Translator FROM Players"
                    ." WHERE Handle='".mysql_addslashes($transluser)."'" );
@@ -234,7 +224,8 @@ function retry_admin( $msg)
       mysql_query( "UPDATE Players SET Translator='$old_langs'"
                   ." WHERE Handle='".mysql_addslashes($transluser)."'" )
          or error('mysql_query_failed','admin_do_translators.user.revert');
-      error('internal_error', $update_it);
+
+      error('couldnt_update_translation', $update_it);
    }
    retry_admin('');
 }

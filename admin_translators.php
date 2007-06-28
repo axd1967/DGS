@@ -45,7 +45,7 @@ require_once( "include/form_functions.php" );
 >>> Obsolete (old 2 letters language code restriction -> $twoletter):
     International languages code (ISO 639-1):
      http://www.loc.gov/standards/iso639-2/englangn.html
->>> Replaced by (at least 2 letters code -> $langcode):
+>>> Replaced by (at least 2 letters code -> $browsercode):
     IANA Language Subtag Registry
      http://www.iana.org/assignments/language-subtag-registry
      http://www.iana.org/assignments/language-tags
@@ -66,10 +66,12 @@ require_once( "include/form_functions.php" );
      http://www.w3.org/International/tutorials/tutorial-char-enc/en/all.html#Slide0240
 */
 
-      $langcode = get_request_arg('twoletter'); //twoletter kept for URL compatibility
-      $charenc = get_request_arg('charenc');
-      $langname = get_request_arg('langname');
-      $transluser = get_request_arg('transluser');
+      $browsercode = trim(get_request_arg('browsercode'));
+      if( !$browsercode ) //twoletter kept for old URL compatibility
+         $browsercode = trim(get_request_arg('twoletter'));
+      $charenc = trim(get_request_arg('charenc'));
+      $langname = trim(get_request_arg('langname'));
+      $transluser = trim(get_request_arg('transluser'));
       $transladdlang = get_request_arg('transladdlang');
 
 
@@ -82,12 +84,11 @@ require_once( "include/form_functions.php" );
 
   $translator_form = new Form( 'translatorform', 'admin_do_translators.php', FORM_POST );
 
-
   /* Add language for translation */
   $translator_form->add_row( array( 'HEADER', T_('Add language for translation') ) );
   //$translator_form->add_row( array( 'DESCRIPTION', T_('Two-letter language code (see ISO 639-1)'),
   $translator_form->add_row( array( 'DESCRIPTION', T_('Language code (e.g. XML meta-tags code)'),
-                                    'TEXTINPUT', 'twoletter', 30, 10, $langcode ) );
+                                    'TEXTINPUT', 'browsercode', 30, 10, $browsercode ) );
   $translator_form->add_row( array( 'DESCRIPTION', T_('English language name (i.e. French)'),
                                     'TEXTINPUT', 'langname', 30, 50, $langname ) );
   $translator_form->add_row( array( 'DESCRIPTION', T_("Character encoding (i.e. UTF-8)"),
@@ -111,7 +112,7 @@ require_once( "include/form_functions.php" );
       ) );
 
    $translator_array = array();
-   $transluser_langs= array();
+   $transluser_langs = array();
    if( !empty($transluser) )
    {
       $userrow = mysql_single_fetch( 'admin_translators.transluser',

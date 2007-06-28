@@ -55,7 +55,7 @@ function T_($string)
 
    $s = @$Tr[$string];
    if( empty($s) )
-      return $string;
+      return preg_replace('%#[0-9a-z]+$%i', '', $string);
    else
       return $s;
 }
@@ -138,7 +138,7 @@ function get_preferred_browser_language()
 
    foreach( $accept_langcodes as $lang )
    {
-      @list($langcode, $q_val) = explode( ';', trim($lang));
+      @list($browsercode, $q_val) = explode( ';', trim($lang));
 
       $q_val = preg_replace( '/q=/i', '', trim($q_val));
       if( empty($q_val) or !is_numeric($q_val) )
@@ -147,19 +147,19 @@ function get_preferred_browser_language()
          continue;
 
       // Normalization for the array_key_exists() matchings
-      $langcode = strtolower(trim($langcode));
-      while( $langcode && !array_key_exists($langcode, $known_languages))
+      $browsercode = strtolower(trim($browsercode));
+      while( $browsercode && !array_key_exists($browsercode, $known_languages))
       {
-         $tmp = strrpos( $langcode, '-');
+         $tmp = strrpos( $browsercode, '-');
          if( !is_numeric($tmp)  or $tmp < 2 )
          {
-            $langcode = '';
+            $browsercode = '';
             break;
          }
-         $langcode = substr( $langcode, 0, $tmp);
+         $browsercode = substr( $browsercode, 0, $tmp);
          $q_val-= 1.0;
       }
-      if( !$langcode )
+      if( !$browsercode )
          continue;
 
       if( $current_q_val >= $q_val )
@@ -168,7 +168,7 @@ function get_preferred_browser_language()
       $found = false;
       if( $accept_charset )
       {
-         foreach( $known_languages[$langcode] as $charenc => $langname )
+         foreach( $known_languages[$browsercode] as $charenc => $langname )
          {
             //$charenc = strtolower($charenc); // Normalization
             if( strpos( $accept_charset, $charenc) !== false )
@@ -180,55 +180,57 @@ function get_preferred_browser_language()
       }
       if( !$found )
       {  // No supporting encoding found. Take the first one anyway.
-         reset($known_languages[$langcode]);
-         $charenc = key($known_languages[$langcode]);
+         reset($known_languages[$browsercode]);
+         $charenc = key($known_languages[$browsercode]);
       }
 
-      $return_val = $langcode . LANG_CHARSET_CHAR . $charenc;
+      $return_val = $browsercode . LANG_CHARSET_CHAR . $charenc;
       $current_q_val = $q_val;
    }
 
    return $return_val;
 }
 
-function get_language_descriptions_translated()
+function get_language_descriptions_translated( $keep_english=false)
 {
    global $known_languages;
 
    $result = array();
-   foreach( $known_languages as $langcode => $array )
+   foreach( $known_languages as $browsercode => $array )
    {
       foreach( $array as $charenc => $langname )
       {
-         $result[ $langcode . LANG_CHARSET_CHAR . $charenc ] = T_($langname);
+         $result[ $browsercode . LANG_CHARSET_CHAR . $charenc ] =
+                     ( $keep_english ?$langname :T_($langname) );
       }
    }
    return $result;
 }
 
 
-function language_exists( $langcode, $charenc='', $langname='' )
+function language_exists( $browsercode, $charenc='', $langname='' )
 {
    global $known_languages;
 
-   if( empty($langcode) )
+   if( empty($browsercode) )
       return false;
    if( empty($charenc) )
-      @list($langcode,$charenc) = explode( LANG_CHARSET_CHAR, $langcode, 2);
+      @list($browsercode,$charenc) = explode( LANG_CHARSET_CHAR, $browsercode, 2);
 
-   if( !array_key_exists( $langcode , $known_languages ) )
+   if( !array_key_exists( $browsercode , $known_languages ) )
       return false;
 
-   $langs = $known_languages[$langcode];
-   if( !empty($charenc) &&
-       array_key_exists( $charenc, $langs )
-     )
-      return true;
-   if( !empty($langname) &&
-       array_key_exists( strtolower( $langname),
-          array_change_key_case( array_flip($langs), CASE_LOWER))
-     )
-      return true;
+   $langs = $known_languages[$browsercode];
+   if( !empty($charenc) && array_key_exists( $charenc, $langs ) )
+      return $langs[$charenc] . ' (' . $browsercode . LANG_CHARSET_CHAR . $charenc . ')';;
+
+   $langname= strtolower( $langname);
+   $revlangs= array_change_key_case( array_flip($langs), CASE_LOWER);
+   if( !empty($langname) && array_key_exists( $langname, $revlangs) )
+   {
+      $charenc= $revlangs[$langname];
+      return $langs[$charenc] . ' (' . $browsercode . LANG_CHARSET_CHAR . $charenc . ')';
+   }
 
    return false;
 }
