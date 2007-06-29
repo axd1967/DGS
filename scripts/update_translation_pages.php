@@ -198,9 +198,11 @@ function grep_file($regexp, $file, &$matches)
             echo "<hr>Should be adjusted NOW: '$tmp' from $file ... OR be added:<br>\n";
             dbg_query("INSERT INTO TranslationGroups"
                ." SET Groupname='" . mysql_addslashes($tmp) . "' LIMIT 1");
+            echo "<hr>Fatal error: re-run the script!!!\n";
+            end_html();
+            exit;
          }
-         else
-            $translationpages_found[$file] = array($translationgroups[$tmp], false);
+         $translationpages_found[$file] = array($translationgroups[$tmp], false);
       }
    }
 
