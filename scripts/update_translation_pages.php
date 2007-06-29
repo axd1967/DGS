@@ -191,8 +191,16 @@ function grep_file($regexp, $file, &$matches)
       //TODO: is this wanted?
       if( grep_file('/^\$TranslateGroups\[\] = \"(\w+)\";/', $file, $matches) )
       {
-         //echo $file . " " . $matches[1] . ", " . $translationgroups[$matches[1]] . "<br>\n";
-         $translationpages_found[$file] = array($translationgroups[$matches[1]], false);
+         $tmp = $matches[1];
+         //echo $file . " " . $tmp . ", " . $translationgroups[$tmp] . "<br>\n";
+         if( !isset($translationgroups[$tmp]) )
+         {
+            echo "<hr>Should be adjusted NOW: '$tmp' from $file ... OR be added:<br>\n";
+            dbg_query("INSERT INTO TranslationGroups"
+               ." SET Groupname='" . mysql_addslashes($tmp) . "' LIMIT 1");
+         }
+         else
+            $translationpages_found[$file] = array($translationgroups[$tmp], false);
       }
    }
 
@@ -243,7 +251,7 @@ function grep_file($regexp, $file, &$matches)
       {
          echo "<hr>To be added: " . $page . "<br>\n";
          dbg_query("INSERT INTO TranslationPages " .
-                   "SET Page='" . $page . "', Group_ID=" . $val[0]);
+            "SET Page='" . mysql_addslashes($page) . "', Group_ID=" . $val[0]);
       }
    }
 
