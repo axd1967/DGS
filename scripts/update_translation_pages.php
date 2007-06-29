@@ -197,7 +197,7 @@ function grep_file($regexp, $file, &$matches)
          {
             echo "<hr>Should be adjusted NOW: '$tmp' from $file ... OR be added:<br>\n";
             dbg_query("INSERT INTO TranslationGroups"
-               ." SET Groupname='" . mysql_addslashes($tmp) . "' LIMIT 1");
+               ." SET Groupname='" . mysql_addslashes($tmp) . "'");
             echo "<hr>Fatal error: re-run the script!!!\n";
             end_html();
             exit;
