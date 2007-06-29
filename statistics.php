@@ -81,7 +81,7 @@ require_once( "include/std_functions.php" );
         (@$_REQUEST['show_time'] == 'y' ? URI_AMP.'show_time=y' : '') .
         "\" alt=\"$title\">\n";
 
-   $title = T_('Rating Histogram');
+   $title = T_('Rating histogram');
    echo "<h3 class=Header>$title</h3>\n";
    echo "<img src=\"statratingspng.php?date=$forcecache" .
         (@$_REQUEST['show_time'] == 'y' ? URI_AMP.'show_time=y' : '') .
