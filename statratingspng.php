@@ -224,7 +224,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
       $rscale/= $tmp;
    else
       $rscale = 1;
-   $rscale = pow(10, round(log10($rscale)));
+   $rscale = max( 1, pow(10, round(log10($rscale))));
 
    for( $i=0; $i<3 ;$i++ )
    {
