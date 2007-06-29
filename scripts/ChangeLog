@@ -28,6 +28,14 @@ Changelog
 
 2007-06-29 rodival
 
+   * people.php:
+   - added the info about FAQadmins' activity to "LastUpdate".
+-----------
+ALTER TABLE `FAQlog`
+ ADD `Date` timestamp(14) NOT NULL AFTER `Answer` ;
+UPDATE `FAQlog` SET `Date` = '0' ;
+-----------
+
    * translate.php, translation_functions.php
    *  (language_exists, T_, get_language_descriptions_translated):
    - case insensitive search of the language name in language_exists().
@@ -42,12 +50,16 @@ Changelog
    - added the add_text_to_translate function.
    - added the insertion of the new language names in the translation process.
    - added an optional alphabetical sort in translations_query().
-   - added a better "T_(...)" detection in generate_translation_texts.php
-     using eval(). Also added a "do_it" URL argument.
+   - added a better "T_(...)" template detection using eval() in
+     generate_translation_texts.php. Also added a "do_it" URL argument.
    - changed all $langcode names to the now more accurate $browsercode.
 
    * update_translation_pages.php (find_php_files):
    - updated the $directories array in find_php_files().
+   - added a "Fatal error" - waiting for a fix - in case of a $TranslateGroups
+     not found in the database. The bug may come from a typo in the PHP code
+     or from a missing row in the database. The default "do_it" action fix
+     this last case.
 
 
 2007-06-28 rodival

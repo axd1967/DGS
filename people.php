@@ -32,82 +32,113 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
 }
 
 {
-  connect2mysql();
+   connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  start_page(T_("People"), true, $logged_in, $player_row );
+   start_page(T_("People"), true, $logged_in, $player_row );
 
-  echo "<table align=center><tr><td colspan=$cols>\n";
-  echo "<h3 class=Header>" . T_('Contributors to Dragon') . "</h3>\n";
-  echo "</td></tr>\n";
-
-  add_contributor( T_("Current maintainer and founder of Dragon"), 2, 'Erik Ouchterlony' );
+   echo "<table align=center><tr><td colspan=$cols>\n";
+   echo "<h3 class=Header>" . T_('Contributors to Dragon') . "</h3>\n";
+   echo "</td></tr>\n";
 
 
-  $first = T_("Developer");
-  foreach( array( 'ragou' => 'Ragnar Ouchterlony',
+   add_contributor( T_("Current maintainer and founder of Dragon")
+                     , 2, 'Erik Ouchterlony' );
+
+
+   $first = T_("Developer");
+   foreach( array( 'ragou' => 'Ragnar Ouchterlony',
                   'rodival' => 'Rod Ival',
                   4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
                   ) as $uref => $name )
-  {
+   {
       add_contributor( $first, $uref, $name);
       $first = '';
-  }
+   }
 
+   //---------
 
-  echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
-  echo "<h3 class=Header>" . T_("FAQ") . "</h3>\n";
-  echo "</td></tr>\n";
+   echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
+   echo "<h3 class=Header>" . T_("FAQ") . "</h3>\n";
+   echo "</td></tr>\n";
 
+   $extra_info = $logged_in && $player_row['admin_level'] & ADMIN_ADMINS ;
+   if( $extra_info )
+      $FAQexclude = array();
+   else
+      $FAQexclude = array( 'ejlo', 'rodival');
+   $FAQmain = 'Ingmar';
+   $FAQmainID = 0;
 
-  $FAQexclude = array( 'ejlo', 'rodival');
-  $FAQmain = 'Ingmar';
-  $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
-                               " FROM Players" .
-                               " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
-                               " AND Handle='$FAQmain'" .
-                               " ORDER BY ID" )
-     or error('mysql_query_failed', 'people.faq_main');
+   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
+            ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+            " FROM Players" .
+            " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
+            " ORDER BY ID" )
+      or error('mysql_query_failed', 'people.faq_admins');
 
-  if( $row = mysql_fetch_array( $query_result ) )
-  {
-         add_contributor( T_("FAQ editor"),
-                          $row['ID'], $row['Name'], $row['Handle'] );
-         $FAQexclude[] = $FAQmain; 
-  } else $FAQmain='';
+   $FAQ_list = array();
+   while( $row = mysql_fetch_array( $query_result ) )
+   {
+      $uid = $row['ID'];
+      if( $extra_info )
+      {
+         $query = 'SELECT UNIX_TIMESTAMP(T.Date) AS Date'
+            . ' FROM (FAQlog AS T)'
+            . " WHERE T.uid=$uid"
+            . ' ORDER BY T.Date DESC LIMIT 1';
+         $tmp = mysql_single_fetch( 'people.faq_admins.lastupdate', $query);
+         $row['LastUpdate'] = $tmp ? $tmp['Date'] : 0;
+      }
 
+      if( $row['Handle'] == $FAQmain )
+         $FAQmainID = $uid;
+      
+      $FAQ_list[$uid] = $row;
+   }
 
-  $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
-                               ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
-                               " FROM Players" .
-                               " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
-                               " ORDER BY ID" )
-     or error('mysql_query_failed', 'people.faq_admins');
+   if( $FAQmainID > 0 )
+   {
+      $row = $FAQ_list[$FAQmainID];
+      add_contributor( T_("FAQ editor"),
+                     $row['ID'],
+         ( $extra_info && $row['LastUpdate']
+            ? '['.date($date_fmt2, $row['LastUpdate']).'] ' : '') .
+                     $row['Name'], $row['Handle']
+                     );
+      $FAQexclude[] = $FAQmain;
+   } else $FAQmain='';
 
-  $first = T_("FAQ co-editor");
-  while( $row = mysql_fetch_array( $query_result ) )
-  {
+   $first = T_("FAQ co-editor");
+   foreach( $FAQ_list as $uid => $row )
+   {
       if( in_array( $row['Handle'], $FAQexclude) )
          continue;
       add_contributor( $first,
-                       $row['ID'], $row['Name'], $row['Handle'] );
+                     $row['ID'],
+         ( $extra_info && $row['LastUpdate']
+            ? '['.date($date_fmt2, $row['LastUpdate']).'] ' : '') .
+                     $row['Name'], $row['Handle']
+                     );
       $first = '';
-  }
+   }
 
+   //---------
 
-  echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
-  echo "<h3 class=Header>" . T_('Current translators') . "</h3>\n";
-  echo "</td></tr>\n";
-
-  $query_result = mysql_query( "SELECT ID,Handle,Name,Translator" .
-                               ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
-                               " FROM Players" .
-                               " WHERE LENGTH(Translator)>0" .
-                               " ORDER BY ID" )
-     or error('mysql_query_failed', 'people.translators');
+   echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
+   echo "<h3 class=Header>" . T_('Current translators') . "</h3>\n";
+   echo "</td></tr>\n";
 
    $extra_info = $logged_in && $player_row['admin_level'] & ADMIN_TRANSLATORS ;
+
+   $query_result = mysql_query( "SELECT ID,Handle,Name,Translator" .
+            ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+            " FROM Players" .
+            " WHERE LENGTH(Translator)>0" .
+            " ORDER BY ID" )
+      or error('mysql_query_failed', 'people.translators');
+
    $translator_list = array();
    while( $row = mysql_fetch_array( $query_result ) )
    {
@@ -143,22 +174,22 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
    {
       //ksort($translators);
       $first = $langname;
-      foreach( $translators as $translator )
+      foreach( $translators as $row )
       {
          add_contributor( $first,
-                        $translator['ID'],
-            ( $extra_info && $translator['LastUpdate']
-               ? '['.date($date_fmt2, $translator['LastUpdate']).'] ' : '') .
-                        $translator['Name'], $translator['Handle']
+                        $row['ID'],
+            ( $extra_info && $row['LastUpdate']
+               ? '['.date($date_fmt2, $row['LastUpdate']).'] ' : '') .
+                        $row['Name'], $row['Handle']
                         );
          $first = '';
       }
    }
 
-  echo "</table>\n";
-  echo "<br>&nbsp;\n";
+   echo "</table>\n";
+   echo "<br>&nbsp;\n";
 
-  end_page();
+   end_page();
 }
 
 ?>
