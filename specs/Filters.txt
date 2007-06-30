@@ -1,0 +1,840 @@
+# Topic: Filters
+# Description: Seaching-capabilities for DGS (Filter-Framework)
+# URL: http://dragongoserver.sourceforge.net/forum/read.php?forum=1&thread=338
+# Author: Jens-Uwe Gaspar, DGS 'jug'
+
+Topics:
+
+   1. Introduction
+   2. Classes and Files (comprising and supporting filters)
+   3. Users Guide (how to use filters)
+   4. Development Guide (how to develop new filters)
+   5. FAQ
+   6. Future Enhancements
+   7. Known Bugs
+
+#-------- (1) Introduction ----------------------------------------------------
+
+The Filters-Framework provides support to build SQL-queries with restrictions
+on SQL-fields in an easy and flexible way. A "filter" is comprised by the
+following items:
+
+   - a filter-type
+   - a specification of corresponding SQL-field(s) you want to restrict
+   - input-form-element(s) for GUI allowing to enter or select values
+   - a syntax-description for the values to enter
+   - a mapping to transform entered values into parts of a SQL-query
+
+A filter can also be used without the presentational part (form-elements),
+though the normal usage is to show the input-elements in a separate form
+or together with a table listing of data to select from the database.
+
+Values entered with the form-elements of a filter are parsed by the filter-
+framework according to the specific filters' syntax and transformed into
+a SQL-part that contributes to a main SQL-query used to select data from
+the database.
+
+
+#-------- (2) Classes and Files -----------------------------------------------
+
+This section shortly describes the framework-classes and files, additional
+supporting classes and functions as well as filter-extensions of the Table
+and Form-class (classes are given in braces "{ ClassName }" ). For more
+details you may also check the source-code documentation of the classes,
+their variables and functions.
+
+   - include/filter.php:
+     Contains main classes with container { SearchFilter } to manage different
+     filters and various predefined filters { Filter } specialized on some
+     DGS-table-columns.
+
+   - include/filter_functions.php:
+     internal helping functions used for filters
+
+   - include/filter_parser.php:
+     Containing classes to parse numeric-values { NumericParser}, texts
+     { TextParser} and dates { DateParser } supporting several basic syntaxes
+     like range-syntax or using wildcards.
+
+   - include/tokenizer.php:
+     Classes to parse and split a string into tokens with support of different
+     quote-types (escaping, quoting, doubling) and special characters
+     according to a basic underlying syntax { StringTokenizer, XmlTokenizer },
+     the latter used for search-term-hightlighting for example.
+
+   - include/std_classes.php:
+     - Class { QuerySQL } is used to specify more complex SQL-query-parts to be
+       used together with single filters.
+     - Class { RequestParameters } is a container for key-value pairs provding
+       a common interface to be used to transport vars per URL or form-hiddens.
+
+
+   - include/table_columns.php:
+     A Table { Table } can be equipped with filters to be applied on the
+     different table-columns.
+
+   - include/form_functions.php:
+     Added two new elements 'FILTER' and 'FILTERERROR' to be used with the
+     class { Form } adding filters and its error-messages within an form.
+
+
+   - code_examples/filter_example.php:
+     Filter-Example showing three different usages of filters with and without
+     using Table-class and external Form.
+
+   - code_examples/filter_example2.php:
+     Filter-Example showing all available filter-types and all available
+     configs you can use to change the behaviour and layout of filters.
+
+   - code_examples/query_sql.php:
+     Examples for use of the class { QuerySQL }.
+
+   - code_examples/tokenizer_example.php:
+     Examples for use of the Tokenizer-classes { StringTokenizer } and
+     { XmlTokenizer }.
+
+
+#-------- (3) Users Guide -----------------------------------------------------
+
+This section contains several subsections, you may be interested in:
+
+   - How to add filters to a page
+   - What filters are available
+   - Standard syntax for numerics and texts
+   - How to create a filter
+   - How to specify SQL-queries
+   - Reference to examples
+   - Page-links and form-elements
+   - How to combine tables, forms and additional URL-vars with filters
+   - How to manage different filter-sets on one page
+
+
+Filters can be used with a static form (only), can be included in a Table
+or can be used as static external form together with a Table with or
+without Table-Filters. Additional support is possible to include
+more variables passed via URL.
+
+In general, filters can also be used without any form, but then the use of
+a filter is restricted on the parsing of a value and building a SQL-query.
+But this is a special case, which is not described.
+
+# ----- add filters to a page
+
+You need the following steps to include filters on your page building a query,
+which should be restricted on certain SQL-fields. The global order of
+instructions is important and must not be changed:
+
+   # creates main-containter for (grouped) filters
+   $filter = new SearchFilter();
+
+   # add filters
+   # (when used with Table, the filter- and table-column IDs must match)
+   $filter->add_filter( id1, type1, dbfield1, active1, config1);
+   $filter->add_filter( id2, type2, dbfield2, active2, config2);
+   $filter->init();   # parse values from URL into filters
+
+   # add filters to Table
+   $table = new Table(...);
+   $table->register_filter( $filter );
+   $table->add_or_del_columns();
+
+   # from here on, values/results from Table and Filters can be retrieved
+
+   # columns-specification for table
+   $table->add_tablehead( id, ...);
+
+   # extract resulting SQL-query from table and/or filters
+   $qsql = $table->get_query();
+   # or in other cases: $qsql = $filter->get_query();
+
+The last statement returns a SQL-query represented in a QuerySQL-object
+that is combining the restrictions of all added filters. The final SQL-query
+as string can be extracted with:
+
+   # merge with basic-query
+   $query = $qsql->get_select();
+
+# ----- filter-types
+
+Several special filters are implemented (for syntax and special configuration
+check out the documentation at the respective Filter-class and have a look
+at the code-examples):
+
+   - FilterNumeric        - numeric values (positive integers or doubles)
+   - FilterText           - text-based values
+   - FilterRating         - rank-values
+   - FilterCountry        - selection of country
+   - FilterDate           - dates
+   - FilterRelativeDate   - relative- and/or absolute dates
+   - FilterSelection      - select one or more of some choices
+   - FilterBoolSelect     - select 'Y' or 'N' or all
+   - FilterRatedSelect    - special Bool-Select for Rated-SQL-field
+   - FilterBoolean        - boolean-selection of 'Y' or 'N'
+   - FilterMysqlMatch     - special MysqlMatch-syntax
+   - FilterScore          - score-values
+   - FilterRatingDiff     - double-values representing rating-difference
+   - FilterCheckboxArray  - selection of multiple checkboxes
+
+# ----- standard syntax for numerics and texts
+
+There are some standard syntaxes for text- and numeric-based filters
+searching for:
+
+   * exact value (numerics + texts):
+     17   foo
+
+   * ranges (numerics + texts):
+     3-7  3-  -7   a-e  a-  -e
+
+   * wildcard-matching (texts):
+     foo*bar*
+     *baz (starting wildcard not allowed by default)
+
+   * special-syntaxes for ...
+     - Rating: allow full syntax of read_rating()-func in "include/rating.php"
+     - RelativeDate: combines absolute date-syntax from Date-Filter and
+       relative date-syntax using ">30", see filter-class documentation
+     - MysqlMatch (for boolean-mode): see filter-class-documentation
+
+The above cases uses "special characters" (range-char '-', wildcard-char '*'),
+which need to be escaped. For that purpose, the filter-framework provides
+three different quote-types (at the moment the default is using escape-char).
+Examples to escape the range-char '-':
+
+   * escape by escape-char: a\-e
+   * escape by quote-chars: 'a-e'  or  a'-'e  or  a'-e'
+   * escape by doubling:    a--e
+
+However, so  far there is no way to obtain the following within a single
+filter (the first three are also potential inefficient queries, that should
+be avoided if possible):
+
+   * <>value
+   * <de OR >do
+   * =v1 OR =v2   => a future enhancement may allow this using lists: v1,v2
+   * complex SQL, using UNIONs (that must be built manually)
+
+# ----- create a filter
+
+To add a filter to the SearchFilter-container use the following class-function:
+
+   add_filter( $id, $type, $dbfield, $active = false, $config = null );
+
+Each filter is identified with a numerical id in range 1..32. When used with
+the Table-class, the identifiers of the filter must match with the respective
+table-column-id.
+
+Type $type is a string specifying which filter you want to use on your
+SQL-field (see class-documentation in include/filters.php).
+
+For example with the following instructions a numeric-Filter
+is used. Values that are entered in the input-form-element are transformed
+into a SQL-query, that restrict the SQL-field 'P.ID'. The $dbfield must
+reference a valid SQL-field in the resulting main-query. Here, the resulting
+query must contain a FROM-part with 'Players P' for example. Of course,
+you can also write 'Players.ID' as $dbfield.
+
+   $filter = new SearchFilter();
+   $f1 =& $filter->add_filter( 1, 'Numeric', 'P.ID', true);
+
+   $filter->init(); # parses form-values from URL: sf1=3-7
+   # or:
+   $f1->parse("3-7"); # filters can directly be initialized
+
+   $f1->get_query() returns a QuerySQL-object with a WHERE-clause-part
+   transformed by a parsed range-syntax:
+
+      P.ID >= 3 AND P.ID <= 7
+
+If no value entered in the input-elements for the filter, $filter->get_query()
+returns NULL. However when using the SearchFilters-class to handle the filters
+the query-parts of all added filters are merged automatically:
+
+   $filter->has_query() can check, if there is a query
+   $filter->get_query() returns a non-null QuerySQL-object.
+
+# ----- specify SQL-queries with $dbfield argument
+
+The underlying global query must be merged with the filter-restrictions.
+For that purpose, the QuerySQL-class (see include/std_classes.php) has been
+introduced. It allows to build (rather complex) SQL-queries by adding
+separate SQL-parts or merging it with other query-parts. Not every possible
+SQL-query can be created with this class, but the standard cases pose
+no problem (use of AND, some simple ORs, JOINs). More complex queries
+like using UNIONs are not supported yet.
+
+When using filters, an existing global SQL-query must be written using
+a QuerySQL-object. If your query is too complex to be built using the
+QuerySQL-class, that step can also be done manually, but then you have
+to do the merging with the filters by yourself.
+
+However the $dbfield is not only restricted to simple SQL-fields.
+You may only associate more complex queries with a filter.
+This often occurs with static external forms, when a filter needs some
+more tables to be joined into the main-query.
+
+Example:
+   You have a page showing entries from a table Table1 with some standard
+   restriction. Additionally you want to restrict the query with
+   a numeric-filter that needs to join with another table Table2, but only
+   if there is some value specified for the filter.
+
+   Your main query is
+
+      SELECT T1.* FROM Table1 T1 WHERE T1.std > 2
+
+   This must be written using a QuerySQL-object:
+
+      $qsql = new QuerySQL(
+         SQLP_FIELDS, 'T1.*',
+         SQLP_FROM,   'Table1 T1',
+         SQLP_WHERE,  'T1.std > 2' );
+
+   Then the filters:
+
+      $filter = new SearchFilter();
+      $filter->add_filter( 1, 'Numeric',
+         new QuerySQL( SQLP_FNAMES, 'T2.numval', SQLP_FROM, 'Table2 T2' ),
+         true );
+      $filter->init();
+
+      ...
+      $qsql->merge( $filter->get_query() );
+      $query = $qsql->get_select();
+
+
+The $active argument controls the activity-state of a filter. If a filter
+is not active, then it's value does not contribute to a merged query.
+An inactive filter used within a Table, is shown as hidden filters ('+')
+and can be shown (activated) clicking on the '+'-symbol.
+
+The $config argument to the add_filter-functions allows to specify additional
+configuration to change the appearance of the filter-GUI or the behaviour
+of the filter (available syntax for example, see class-documentation of
+the filters).
+
+# ----- examples
+
+How to use the filters is best and easiest explained by example.
+Besides the two examples-files, which can be opened in your browser
+(see previous section for content):
+
+   code_examples/filter_example.php   - Form / Table / Filters
+   code_examples/filter_example2.php  - all filters-types and configs
+
+you can also have a look into the various DGS-pages using filters:
+
+   waiting_room.php      - Table + Filters
+   show_games.php        - Table + Filters
+   users.php             - Table + Filters, adding extra URL-varlink
+
+   user_stats.php        - External Form + Table + Filters
+   search_messages.php   - External Form + Table + Filters
+
+   forum/search.php      - Only Form with Filters, show data only if query
+
+For testing purposes all of those pages have a var $DEBUG_SQL (normally
+commented out). If set to true, the resulting query is shown on the page.
+
+# ----- page-links and form-elements
+
+There is an inherent problem when combining links with form-elements.
+Links can be prepared to contain the values the page was initially shown
+with, but freshly changed values are lost if following the link. So it's
+best to avoid to many links on pages when used together with related
+form-elements. However, it's not always useful and not everything can
+be done using form-elements alone.
+
+Using filters with a Table needs some hints how to properly handle links.
+A table with filters has form elements in the table-head and below the
+table to control the table (start/reset-search, show-rows, add column).
+It also has several links:
+
+   1. the offset-links for paging (navigate within the resultset)
+   2. the sort-links on the table-heads
+   3. the delete-column-link beside the table-heads
+   4. the hide- and show-links for the filters
+
+   - links on the values in the table-rows
+
+When you want to refresh the page using additional links (for example
+at the bottom-page) and want to preserve the values of all the
+form-elements, the URL of the links must contain these URL-encoded values.
+
+Vice versa, when submitting the form to refresh the page, also the
+current from-offset (1), the sort-fields and directions (2) must be
+preserved using hidden-form-elements.
+
+If correctly initialized, the filter-framework handles this automatically.
+Have a look to code_examples/filter_example.php and the DGS-standard
+pages referenced as example-pages above.
+
+However, for page-links you may need to manually build the URL.
+For this purpose, there are the following functions you can use to get
+this kind of information ( $table is the Table-object ):
+
+   $table->current_from_string()    - current page-offset (1)
+   $table->current_sort_string()    - current sort­fields and directions (2)
+   $table->current_filter_string()  - visible and managing filter-values
+   $table->current_rows_string()    - current max-rows
+
+The page "user_stats.php" is a good example for this.
+
+Values for the filters are not only consist of the shown form-elements
+but also of some filter-managing variables that need to be included too.
+
+
+# ----- combining tables, filters and additional URL-vars
+
+For the following combinations, see "code_examples/filter_example.php":
+
+   - External-Form with Filters
+   - External-Form with Filters + Table with Filters
+   - Table with Filters
+
+
+# Table + additional URL-var
+Sometimes you want to have a page, that not only contains forms with or
+without a Table and filters, but also can be controlled with some additional
+variable passed via URL (e.g. show_games.php, users.php).
+
+To correctly handling this URL passing it on when submitting a form, you
+have to register it. It depends on what combination of table, form and
+filters you are using
+
+Example (from users.php):
+   The page is showing users in a Table with filters.
+   If the URL-var 'observe=<gameID>' is set, the page shows the observers
+   of the specified game-ID.
+
+   # get URL-var
+   $observe_gid = (int)get_request_arg('observe');
+
+   # define table-filters
+   $ufilter = new SearchFilter();
+   $ufilter->add_filter( 1, 'Numeric', 'P.ID', true);
+   ...
+   $ufilter->init(); // parse current value from URL
+
+   # define table + register filters
+   $utable = new Table( 'user', $page, 'UsersColumns' );
+   $utable->register_filter( $ufilter );
+   $utable->add_or_del_column();
+
+   # register additional URL-var
+   if ( $observe_gid ) {
+      $rp = new RequestParameters();
+      $rp->add_entry( 'observe', $observe_gid );
+      $utable->add_external_parameters( $rp, true );
+   }
+
+The 'true' is important in the last statement add_external_parameters().
+
+
+# External-Form + Table + additional URL-var
+But if you want to have a page also with an external-form, the registering
+of additional URL-vars and the joining of the external-form with the table
+is different to avoid that some vars are inserted twice within the hidden-
+elements.
+
+For such a complex example using an external form, a table with filters and
+additional URL-vars you may have a look at "user_stats.php".
+The basic order of instructions in that case is:
+
+   # get URL-vars
+   $uid = get_request_arg( 'uid' );
+
+   # define static filters (external form)
+   $usfilter = new SearchFilter('s');
+   $usfilter->add_filter( 1, 'Numeric', 'G.Size', true);
+   $usfilter->init();
+
+   # define table-filters
+   $ufilter = new SearchFilter();
+   $ufilter->add_filter( 1, 'Numeric', 'P.ID', true);
+   $ufilter->init();
+
+   # specify External-Form
+   $usform = new Form( $utable->Prefix, $page, FORM_GET, false, 'formTable');
+   $utable->set_externalform( $usform ); # also attach offset, sort, manage-filter as hidden (table) to ext-form
+   $usform->attach_table( $usfilter );   # attach manage-filter as hiddens (static) to ext-form
+
+   # URL-page-vars
+   $page_vars = new RequestParameters();
+   $page_vars->add_entry( 'uid', $uid );
+   $usform->attach_table( $page_vars ); # for page­vars as hiddens in form
+
+
+# ----- different filter-sets
+
+The page "show_games.php" basically have three different views (observed,
+finished, running games) and needed special handling for the filters.
+That is because for some IDs (table-col-id) different SQL-fields are
+used in the different views. Therefore also the filters need to have
+different "views".
+
+This is accomplished using three different SearchFilter-objects, one for
+each view, but with different prefixes:
+
+   # fprefix: o=observed-games, r=running-games, f=finished-games
+   $gfilter = new SearchFilter( $fprefix );
+
+Each filter has an ID. This number is used as suffix to build the form-
+element-names. The standard prefix is 'sf' when the constructor of
+SearchFilter() is used without an argument. So the value '20' for the
+filter:
+
+   $filter = new SearchFilter();
+   $filter->add_filter( 1, 'Numeric', 'P.ID', true);
+
+is transported in the URL-var 'sf1' (GET or POST-method).
+When using a prefix like:
+
+   $filter = new SearchFilter( 'f' );
+   $filter->add_filter( 1, 'Numeric', 'P.ID', true);
+
+the filter-value is transported in the URL-var 'fsf1'.
+So by introducing a prefix in the page "show_games.php", also the
+filters "live" in different namespaces concerning the values for
+the filters in the different views.
+
+
+The same trick is and should be used, when you have a static form
+with filters combined with a table with filters. In the above example
+in the previous subsection, two SearchFilters are defined:
+
+   # define static filters (external form)
+   $usfilter = new SearchFilter('s');
+   ...
+
+   # define table-filters
+   $ufilter = new SearchFilter();
+
+one with prefix and one without to have different namespaces.
+With that mechanism you can also define more than 32 filters, though only
+32 filters applied on a single table and its corresponding filters.
+
+Be aware that there is an exception when using the filter-config FC_FNAME.
+If you specify an alternative form-elements-name with this config, the prefix
+is not applied.
+With this feature it's possible to declare common filters shared among
+different views. The other purpose of FC_FNAME was to allow to pass-in
+a filter-value over URL without using a cryptic name like 'sf<ID>',
+that could be subject to change, if the order of filter-IDs is changed
+(for example, see the page "users.php" for the 'active'-filter).
+
+
+#-------- (4) Development Guide -----------------------------------------------
+
+This section gives some insights when you need to develop a new type of
+filter, though it doesn't describe every detail. For that, you may take
+a look into in the sources.
+
+Besides of thinking about adding a new filter, you may also want to add
+a new filter-config, a new syntax for numeric- and text-based filters
+(range-syntax, wildcard-syntax), a new quoting mechanism or enhancements
+of the underlying framework or helping classes (like QuerySQL for example).
+Except for adding new filters and new filter-configs, please consult
+me (juga) first before changing the framework.
+
+Before thinking about what filter to use or thinking about developing
+a new filter, best practice is to follow the following steps.
+
+   1. Before using a filter, take a minute to think, if it makes sense
+      to provide that filter. Especially it shouldn't put too much workload
+      on the server. So it would be good that the resulting filter-query
+      can be optimized by the database using indexes; or at least the
+      table-scans can be performed efficiently (for example only resulting
+      in a few selected entries to be searched for).
+
+   2. check, if the filter you are searching for, can't be built using
+      the existing filters. Try to find a filter in the example-file
+      "code_examples/filter_examples2.php" that matches your needs, even if
+      not fully.
+
+   3. If you found a filter that basically fulfills your needs, but not
+      completly, check out the filters' class-documentation for additional
+      configs that can be used to change the filters behaviour:
+         see "include/filters.php", class Filter<Type>
+
+   4. Read the FAQ-section (5) in this file. Maybe there's somebody in,
+      that can fulfill your needs.
+
+   5. If no filter does match your needs, maybe a combination of existing
+      filters can fulfill the same purpose. If not directly, then maybe
+      by adding a new filter indirectly using other Filter-classes.
+      As example you may take a look at the classes: FilterRatingDiff,
+      FilterRelativeDate. They extend and implicitly use other filters.
+
+The first decision is, if you need more than one form-element for your filter
+(multi-element-filter). That is influencing the interface, that needs to
+be implemented.
+
+To develop a new filter, take the following basic steps:
+
+   1. Think of a type (name) for your filter.
+
+   2. Copy one of the existing Filter-classes, e.g. FilterNumeric to your new
+      filter-class 'Filter<type>' and adjust it to your needs.
+      For a multi-element-filter, you may use the FilterScore-class to copy.
+      It is preferred to add filters in "include/filters.php", so that isn't
+      an absolute requirement. However, the SearchFilter-class must be able
+      to find the new class, so during runtime, the file containing your new
+      filter should be included once.
+
+   3. Change the constructor:
+
+      - provide optional default-config
+      - set the type
+      - check args and options if needed
+      - set syntax-description
+      - init internal vars if needed
+
+   4. Implement the filter-interface-functions (declared as abstract in
+      Filter-class):
+
+      - parse_value( $name, $val )
+      - build_query(), only for multi-element-filters
+      - get_input_element($prefix, $attr = array() )
+
+   5. adjust the class-documentation, scan all available FC_-configs,
+      if they can be used with your filter and document them accordingly.
+
+   6. add your new filter to "code_examples/filter_example2.php" with
+      all special new options you defined.
+
+   7. adjust this file to list your new filters in the sections:
+      - (2) Classes and Files
+      - (3) Users Guide
+      - (5) FAQ
+      - (7) Known Bugs (if any)
+
+
+Changing one of the following classes is sensible work and shouldn't be done
+without my (juga) consultation; or you volunteer to write some unit-tests
+to assert the correct functionality of existing parsers and framework
+after your changes ;)
+
+   - SearchFilter, Filter
+   - BasicTokenizer, StringTokenizer
+   - BasicParser, TextParser, NumericParser, DateParser
+   - QuerySQL, RequestParameters
+
+
+#-------- (5) FAQ -------------------------------------------------------------
+
+This section contains some questions regarding the usage of filters for
+developers of DGS. When reffering to "see examples", the example-files
+"code_examples/filter_example.php" and "code_examples/filter_example.php2"
+are meant. More documentation you will also find in the sources,
+see section (2) Classes and Files.
+
+* What filter can be used to search for negative numeric values ?
+
+  Not possible at the moment when you still want to use the range-syntax.
+  The Numeric-Filter does not allow this, because the minus '-' is used as
+  special range-char.
+
+  However, if you forbid range-syntax using filter-config FC_NO_RANGE,
+  then the '-' is treated as minus-sign. But that also allows to specify
+  exact values for that filter.
+
+* Can I use numeric double-values ?
+
+  Yes. Use Numeric-Filter: a double 7.5 is also considered a numeric.
+
+* Can I use SQL-queries using the OR-operator ?
+
+  Yes, but it depends on the resulting query. Take a look on the
+  example-files searching for FC_SQL_TEMPLATE and FC_GROUP_SQL_OR and have
+  a look in "include/filters.php" at the documentation for those
+  filter-configs (where the constants are defined).
+
+  If those filter-configs are not sufficient, you may use a complex
+  query using the QuerySQL-class. For that check out the examples too.
+
+* How can the size or maximum length of the text-input-elements be changed ?
+
+  This is filter-specific, but normally can be changed with the
+  filter-config FC_SIZE and FC_MAXLEN. Read the according documentation
+  of the according Filter-class.
+
+* Can I allow a text to start with a wildcard ?
+
+  Yes. See filter-config FC_START_WILD and see example-files for
+  the possible values for this config.
+
+* Can I forbid wildcards to be used ?
+
+  Yes. See filter-config FC_NO_WILD.
+  The wildcard-char '*' then is treated as normal character.
+
+* Can I forbid the range-syntax to be used ?
+
+  Yes. See filter-config FC_NO_RANGE.
+  The wildcard-char '-' then is treated as normal character.
+
+* How can I build a complex query, but still using the filter-framework
+  to input values for a filter ?
+
+  Use filter-config FC_SQL_SKIP. See also example-files and check out
+  the possibilities you have with QuerySQL (see "include/std_classes.php"
+  and "code_examples/query_sql.php").
+  Then the particular filter-query isn't merged in the SearchFilter-class
+  and you must handle the merge manually:
+
+    $qsql = $searchfilter->get_query();
+    $f =& $searchfilter->get_filter(id);
+    if ( $f->has_query() ) {
+       $fq = $f->get_query();
+       $where = $fq->get_part( SQLP_WHERE ); ...
+    }
+
+* Can I add a SQL-part using the HAVING-clause instead of the WHERE-clause ?
+
+  Yes. See filter-config FC_ADD_HAVING and/or use the QuerySQL-class.
+  See also example-files.
+
+* Can I provide default-values to filters without specifying it in the URL ?
+
+  Yes. See filter-config FC_DEFAULT and see the big defaults-example in
+  the example-files. Be aware that this config is filter-specific, so take
+  also a close look on the filter-specific documentation. Escpecially for
+  the multi-element-filters this is important.
+
+* How can I use numeric-values on the SQL-fields that differ from the
+  entered value by some factor ?
+
+  Use Numeric-Filter with filter-config FC_NUM_FACTOR. See example-files.
+
+* Can I change the default used quoting-type used for text- and numeric-
+  based filters ?
+
+  Yes. See filter-config FC_QUOTETYPE and in example-files.
+  Though this is not recommended. The config was merely added to allow
+  for some tests of the quoting-mechanisms.
+
+* Can I make the filters static when used with a Table, so that they
+  are always shown and can't be hidden ?
+
+  Yes. See filter-config FC_STATIC and in example-file
+  "code_examples/filter_example.php".
+
+* Can I use multiple-select elements for filters ?
+
+  Yes. There are some predefined filters allowing to select more
+  than one element. See FilterSelection, FilterCheckboxArray.
+  Also see example-files. This must be activated filter-specific
+  using the filter-config FC_MULTIPLE. See the filter-class-documentation.
+
+* How can I set filter-values via URL-vars ?
+
+  There are two ways how to accomplish this:
+
+  1. Directly use the filters form-element-name to specify the value.
+     It's recommended to use the filter-config FC_FNAME for this.
+     That name is absolute and not changed even if several SearchFilter-
+     objects are used with prefixes. See also section (4) Developement Guide.
+
+  2. Do your own parsing of the URL-var, and after the filter-init() call,
+     parse the value into the filters:
+
+        $parsed_value = get_request_arg( 'myvar' );
+
+        $filter = new SearchFilter();
+        $f1 =& $filter->add_filter( 1, 'Numeric', 'P.ID', true);
+        $filter->init(); # parse URL-vars
+        $f1->parse_value( $parsed_value );
+
+* Can I use filters that depend on the values in other filters ?
+
+  Yes. See filter-config FC_IF and see example-files.
+
+* Can I use a filter for searching on table-columns with values 'Y|N' ?
+
+  Yes. Use BoolSelect-Filter and see example-files.
+  For the Rated-column in the Games-table there is also the special
+  RatedSelect-Filter also taking the 'Done'-value into account.
+
+* Must I escape the '-40%' for a rank when using Rating-Filter ?
+
+  No. The minus-sign '-' is treated in a special way and need not to be
+  escaped while still allowing to use range-syntax.
+  However you may do escape it: "7k (-20%)" and "7k (\-20%)" are equivalent.
+
+
+#-------- (6) Possible Future Enhancements ------------------------------------
+# Priority (1=high, 5=low, ?=unknown) is added, e.g. Prio(1)
+
+This section outlines some ideas that came to my (juga) mind regarding the
+filters, but are not necessarily going to be implemented. Just wanted to
+write them down somewhere.
+
+
+* Prio(1): Save filter-specific settings for user:
+  - Prio(1): visibility-state (like column-visibility)
+  - Prio(?): quote-type, quote-chars, range-sep, wildcard-char, range-sep-str{2}, relrange-str{2}
+  - Prio(?): FCONF_ShowToggleFilter/FilterTableHead
+
+* Prio(?): new basic filter-syntax allowing to search for list of values
+  (if implemented need to be supported by StringTokenizer-class to be used
+  for numeric- and text-based filters):
+  - possible syntax: "val1, val2" use ',' as separator of values;
+    or more general provide list-separating-char(s) with filter-config:
+    FC_LISTSEP = ' ,;' for example
+  - corresponding SQL: field IN (val1, val2, ...)
+  - list-syntax mutually exclusive to range-syntax or wildcard-syntax
+
+* Prio(?): add support for UNION-SQL-syntax in QuerySQL-class to be able to
+  optimize queries (instead of using OR)
+
+* Prio(?): Perform global checks on Filters before building query to be able
+  to avoid costly queries. Possible global restrictions could be:
+  - minimum set of used filter-values in fields (to be able to optimize search)
+
+* Prio(?): new filter-config for text-based filters:
+  - FC_IMPLICIT_WILDCARD: 0(default) | 1
+  - filter on 'abc' -> would implicitly search for 'abc*'
+
+* Prio(?): including additional help-reference to Help or FAQ-page
+  - maybe using new filter-config FC_HELP => faq_label
+  - could show up as '?' near input-element
+
+* Prio(?): LINK_VALUE-feature for Tables with Filters:
+  An additional submit-button 'Link Navigation' could switch the displayed
+  values in a table to be equipped with links (or an additional link)
+  that would restrict the corresponding table-column to exactly that value
+  (use the clicked value as new value for a designated filter).
+  For example, the Games Handicap-column shows value '3'. Clicking on the
+  additional link would restrict the filter on the handicap-column to use
+  the '3' as new value.
+
+  Cool feature to quickly restrict a search to what you want, but may need
+  some deep changes:
+  - get rid of <TD> in table-rows or use a parser to add additional link-code
+  - could be a table-feature, adding the <td> by Table-class (but then
+    need way to specify attributes to <td>)
+  - could be configured only for selected filters -> FC_LINK_VALUE-config
+
+
+#-------- (7) Known Bugs ------------------------------------------------------
+# Priority (1=high, 3=low, E=enhancement/feature) is added, e.g. Prio(1)
+
+The listed problems in this section doesn't disturb the basic functioning
+of the filter-framework, but are identified as bugs, though some could also
+be considered a feature ;)
+
+
+* Prio(E): Using Table with Filters: if user selects a new max-rows or select
+  a new column to add to table, also the "Start/Reset Search" submit-button
+  executes the according action (change max-rows or add-column).
+  => the submit-buttons should only carry out "their" action
+
+* Prio(E): If used without external-form, the submit-buttons "Start Search"
+  and "Reset Search" may disappear, when no filter is active and is shown in
+  Table-head.
+
+* Prio(3): The class XmlTokenizer may not able to correctly parse non-conform
+  XML like "<move, ...>".
+
+
