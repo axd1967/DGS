@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Common";
 
 require_once( "include/form_functions.php" );
+require_once( "include/filter.php" );
 
 /*!
  * \file table_columns.php
@@ -37,6 +38,14 @@ require_once( "include/form_functions.php" );
 //~(0) is negative (PHP) and database field is unsigned: INT(10) unsigned NOT NULL
 define('ALL_COLUMNS', 0x7fffffff); //=2147483647
 
+define('CHAR_SHOWFILTER', '+');
+
+define('FCONF_SHOW_TOGGLE_FILTER', 'ShowToggleFilter');    // true to show hide-toggle besides input-fields (default true)
+define('FCONF_FILTER_TABLEHEAD',   'FilterTableHead');     // true to show filters above table-rows (default defined as LAYOUT_FILTER_IN_TABLEHEAD)
+define('FCONF_EXTERNAL_SUBMITS',   'ExternalSubmits');     // false to include start/reset-submits into table-structure (default false), else omit
+
+define('TFORM_VAL_SHOWROWS', 'maxrows'); // form-elementname for Show-Rows
+
 
 class Table
 {
@@ -46,7 +55,7 @@ class Table
    var $Id;
    /*! \brief Prefix to be used in _GET to avoid clashes with other tables and variables. */
    var $Prefix;
-   /*! \brief already opened Form class to be used by add_column */
+   /*! \brief already opened Form class to be used by add_column and filters */
    var $ExternalForm;
 
    /*! \brief The primary column to sort on. */
@@ -77,7 +86,10 @@ class Table
    /*! \brief Boolean array used to check if the column should be display. */
    var $Is_Column_Displayed;
 
-   /*! \brief Array describing all tableheads. */
+   /*!
+    * \brief Array describing all tableheads:
+    *        [ Nr, Description, Sort_String, Desc_Default, Undeletable, attbs(Width) ]
+    */
    var $Tableheads;
 
    /*! \brief Array of rows to be diplayed.
@@ -100,14 +112,39 @@ class Table
    /*! \brief The number of rows to be displayed (normally) on one page.
     * \see make_next_prev_links() */
    var $Rows_Per_Page;
+   /*! \brief true, if number of rows to show should be configurable (otherwise use global RowsPerPage). */
+   var $Use_Show_Rows;
+
+   /*!
+    * \brief array of objects with external request-parameters,
+    *        expecting interfaces: get_hiddens() and get_url_parts()
+    * \see RequestParameters
+    */
+   var $ext_req_params;
+   /*! \brief if false, don't use for get_hiddens-func */
+   var $ext_req_params_use_hidden;
+   /*! \brief cache for current_extparams_string() storing: add_sep => string */
+   var $cache_curr_extparam;
+
+   // filter-stuff
+
+   /*! \brief non-null SearchFilter-instance containing attached filters */
+   var $Filters;
+   /*! \brief true to show filters within table */
+   var $UseFilters;
+   /*! \brief configuration-array for filters used with table: ( key => config-val )
+    *         keys are defined by consts FCONF_... */
+   var $ConfigFilters;
+   /*! \brief The number of filter-columns displayed, known after make_table_filter-func */
+   var $Shown_Filters;
+   /*! \brief cache for current_filter_string-func storing: ( filter-choice => string ) */
+   var $cache_curr_filter;
+
 
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
-   function Table( $_tableid, $_page,
-                   $_player_column = '',
-                   $_prefix = ''
-                 )
+   function Table( $_tableid, $_page, $_player_column = '', $_prefix = '')
       {
          global $RowsPerPage, $player_row;
 
@@ -120,6 +157,7 @@ class Table
          $this->Id = $_tableid;
          $this->Prefix = $_prefix;
 
+         // prepare for appending URL-parts (ends with either '?' or URI_AMP)
          $this->Page = $_page;
          if( strstr( $this->Page, '?' ) )
          {
@@ -170,7 +208,42 @@ class Table
             $this->From_Row = 0;
          $this->Last_Page = true;
          $this->Rows_Per_Page = $RowsPerPage;
+         $this->Use_Show_Rows = true;
+
+         // filter-stuff
+         $this->ext_req_params = array();
+         $this->ext_req_params_use_hidden = false;
+         $this->cache_curr_extparam = array();
+
+         $this->Filters = new SearchFilter();
+         $this->UseFilters    = false;
+         $this->Shown_Filters = 0;
+         $this->ConfigFilters = array( // set defaults
+            FCONF_SHOW_TOGGLE_FILTER => true,
+            FCONF_FILTER_TABLEHEAD   => LAYOUT_FILTER_IN_TABLEHEAD,
+            FCONF_EXTERNAL_SUBMITS   => false,
+         );
+         $this->cache_curr_filter = array();
       }
+
+   /*! \brief Sets external form for this table, $form is passed as reference */
+   function set_externalform( &$form )
+   {
+      $this->ExternalForm = $form;
+      $form->attach_table($this);
+   }
+
+   /*! \brief Overwrites standard rows-per-page for this table */
+   function set_rows_per_page( $rows )
+   {
+      $this->Rows_Per_Page = $rows;
+   }
+
+   /*! \brief if false, rows-selection is not shown (table using static number of maxrows); default is true. */
+   function use_show_rows( $use )
+   {
+      $this->Use_Show_Rows = (bool)$use;
+   }
 
    /*! \brief Add a tablehead. */
    function add_tablehead( $nr,
@@ -188,7 +261,9 @@ class Table
                    'Undeletable' => $undeletable,
                    'attbs' => $attbs );
 
-         $this->Is_Column_Displayed[$nr] = $this->is_column_displayed( $nr);
+         $visible = $this->Is_Column_Displayed[$nr] = $this->is_column_displayed( $nr);
+         if ( $this->UseFilters ) // fix filter-visibility (especially for static cols)
+            $this->Filters->set_visible($nr, $visible);
       }
 
    /*! \brief Check if column is displayed. */
@@ -199,7 +274,8 @@ class Table
              ( $nr < 1 ? 1 : (1 << ($nr-1)) & $this->Column_set );
    }
 
-   /*! \brief Add a row to be displayed.
+   /*!
+    * \brief Add a row to be displayed.
     * \see $Tablerows
     */
    function add_row( $row_array )
@@ -221,6 +297,11 @@ class Table
       }
       $head_row .= " </tr>\n";
 
+      /* Make filter row */
+
+      $filter_row = '';
+      $need_form = $this->make_filter_row( $thead, $filter_row );
+
       /* Make table rows */
 
       $table_rows = '';
@@ -241,60 +322,66 @@ class Table
       $string = "<table id='{$this->Id}Table' class=Table>\n";
       $string .= $next_prev_row;
       $string .= $head_row;
-      $string .= $table_rows;
+      if ( $this->ConfigFilters[FCONF_FILTER_TABLEHEAD] )
+      { // filter at table-header
+         $string .= $filter_row; // maybe empty
+         $string .= $table_rows;
+      }
+      else
+      { // filter at table-bottom
+         $string .= $table_rows;
+         $string .= $filter_row; // maybe empty
+      }
       if( $table_rows )
          $string .= $next_prev_row;
       $string .= "</table>\n";
 
-      /* Add column form */
+      /* Add filter + column form, embedding main-table into table-form */
 
-      if( !$this->Static_Columns )
+      // NOTE: avoid nested forms with other forms (because nested hiddens are not working)
+
+      $page_str = clean_url( $this->Page );
+      $table_form = $this->ExternalForm; // read-only
+      if ( !isset($this->ExternalForm) )
       {
-         if( $this->ExternalForm )
+         if ( $need_form or !$this->Static_Columns ) // need form for filter or add-column
          {
-            $ac_form = $this->ExternalForm;
-            if( ($add_string=$this->make_add_column_form( $ac_form)) )
-            {
-               $ac_form->attach_table($this);
-               $string .= $add_string;
-            }
-         }
-         else
-         {
-            if( substr( $this->Page, -1 ) == '?' )
-            {
-               $page = substr( $this->Page, 0, -1);
-            }
-            else if( substr( $this->Page, -strlen(URI_AMP) ) == URI_AMP)
-            {
-               $page = substr( $this->Page, 0, -strlen(URI_AMP));
-            }
-            else
-            {
-               $page = $this->Page;
-            }
-            $ac_form = new Form( $this->Prefix.'addcol',
-               $page."#{$this->Prefix}TableAC", FORM_GET, false, 'formTable');
-
-            if( ($add_string=$this->make_add_column_form( $ac_form)) )
-            {
-               $ac_form->attach_table($this);
-               $string =
-                     // '<div class=addcolout>'.
-                     // '<table><tr><td>' .
-                       $ac_form->print_start_default()
-                     //. '<div class=addcolin>'
-                     . $string
-                     //. '</div>'
-                     . $add_string
-                     . $ac_form->print_end()
-                     //. '</td></tr></table>'
-                     //. '</div>'
-                     ;
-            }
-            unset($ac_form);
+            $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
+               $page_str."#{$this->Prefix}TableFAC", FORM_GET, false, 'formTable');
+            $table_form->attach_table($this);
          }
       }
+
+      if( !$this->Static_Columns or $need_form ) // add-col & filter-submits
+      {
+         $addcol_str = $this->make_add_column_form( $table_form);
+         $string .= $addcol_str;
+
+         /*! \todo put into nested table to align add-column-table with main-table (OR use CSS somehow) OR leave it as it is */
+         /*
+         //if ( !$this->ExternalForm )
+         $string = " <br>\n"
+            //. '<div class=addcolout>'
+            //. '<table><tr><td>'
+            //. '<div class=addcolin>'
+            . $string
+            //. '</div>'
+            . $addcol_str
+            //. '</td></tr></table>'
+            //. '</div>'
+            ;
+         */
+      }
+
+      // build form for Filter + AddColumn
+      if ( isset($table_form) and is_null($this->ExternalForm) )
+      {
+         $string = "<br>\n"
+            . $table_form->print_start_default()
+            . $string // embed table
+            . $table_form->print_end();
+      }
+      unset($table_form);
 
       return $string;
    }
@@ -303,6 +390,64 @@ class Table
    function echo_table()
    {
       echo $this->make_table();
+   }
+
+   /*!
+    * \brief Passes back filter_row per ref and return true, if form needed because of filters.
+    * signature: bool need_form = make_filter_row( tablehead, &filter_row)
+    */
+   function make_filter_row( $thead, &$filter_row )
+   {
+      // make filter-row
+      $this->Shown_Filters = 0;
+      $need_form  = false;
+      $filter_row = '';
+
+      if ( $this->UseFilters )
+      {
+         // make filters
+         $filter_cells = array( '' );
+         foreach( $this->Tableheads as $thead )
+             $filter_cells[0] .= $this->make_table_filter( $thead );
+
+         // add error-messages for filters
+         if ( $this->Shown_Filters > 0 )
+         {
+            // build error-messages
+            $arr = $this->Filters->get_filter_keys(GETFILTER_ERROR);
+            $arr_err = array();
+            foreach ($arr as $id) {
+               $filter = $this->Filters->get_filter($id);
+               $syntax = $filter->get_syntax_description();
+               array_push( $arr_err,
+                  "<b>{$this->Tableheads[$id]['Description']}:</b> "
+                  . '<font color=darkred>' . T_('Error') . ': ' . $filter->errormsg() . '</font>'
+                  . ( ($syntax != '') ? "; $syntax" : '') );
+            }
+            $errormessages = ( count($arr_err) > 0 ) ? implode( "<br>", $arr_err ) : "";
+
+            if ( $errormessages != '' )
+               array_push( $filter_cells,
+                  "  <td colspan=($this->Shown_Columns) align=left>$errormessages</td>\n");
+
+            $need_form = true;
+         }
+
+         // include row only, if there are filters
+         if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] or $this->Shown_Filters > 0 )
+         {
+            $tr_attbs = "id=\"{$this->Prefix}TableFilter\""; // only for 1st entry
+            foreach( $filter_cells as $cells )
+            {
+               $filter_row .= " <tr ${tr_attbs} class=Filter>\n";
+               $filter_row .= $cells;
+               $filter_row .= " </tr>\n";
+               $tr_attbs = '';
+            }
+         }
+      }
+
+      return $need_form;
    }
 
    /*! \brief Return the attributs of a warning cellule. */
@@ -331,16 +476,21 @@ class Table
         "}";
    }
 
-   /*! \brief Return the cell part of a button with anchor. */
-   function button_TD_anchor( $href, $text='')
+   /*!
+    * \brief Return the cell part of a button with anchor.
+    * param $use_link if false, no link is included into the td-field (used for search-messages)
+    */
+   function button_TD_anchor( $href, $text='', $use_link=true)
    {
       //$text= (string)$text;
-      return "<td class=Button>" .
-         "<a class=Button href=\"$href\">" .
-         $text . "</a></td>";
+      if ( $use_link )
+         return "<td class=Button><a class=Button href=\"$href\">$text</a></td>";
+      else
+         return "<td class=Center># $text</td>";
    }
 
-   /*! \brief Return a stratagem to force a minimal column width.
+   /*!
+    * \brief Return a stratagem to force a minimal column width.
     * Must be inserted before a cell inner text at least one time for a column.
     */
    function button_TD_width_insert( $width=false)
@@ -355,33 +505,66 @@ class Table
       return "<img class=MinWidth src='{$base_path}images/dot.gif' width=$width height=1 alt=''><br>";
    }
 
+   /*!
+    * \brief Returns (locally cached) URL-parts for all filters (even if not used).
+    * signature: string querystring = current_filter_string ([ choice = GETFILTER_ALL ])
+    */
+   function current_filter_string( $add_sep = false, $filter_choice = GETFILTER_ALL ) {
+      if ( !isset($this->cache_curr_filter[$filter_choice]) )
+      {
+         $trash = null;
+         $this->cache_curr_filter[$filter_choice] = $this->Filters->get_url_parts( $trash, $filter_choice );
+      }
+      $url = $this->cache_curr_filter[$filter_choice];
+      if ( $url != '' and $add_sep )
+         $url .= URI_AMP ;
+      return $url;
+   }
 
-   /*! \brief Add or delete a column from the column set and apply it to the database. */
+   /*!
+    * \brief Add or delete a column from the column set and apply it to the database;
+    *        Also handle to show or hide filters and parsing max-rows from URL.
+    */
    function add_or_del_column()
    {
       global $player_row;
 
+      // handle filter-visibility
+      $this->Filters->add_or_del_filter();
+
+      // handle show-rows
+      $this->handle_show_rows();
+
+      // handle column-visibility (+ adjust filters)
       $del = (int)$this->get_arg('del');
       $add = (int)$this->get_arg('add');
 
       if( $del or $add )
       {
-         if( $add > 0 )
+         if( $add > 0 ) // add col
          {
             $this->Column_set |= (1 << ($add-1));
+            $this->Filters->reset_filter($add);
+            $this->Filters->set_active($add, true);
          }
-         else if( $add < 0 )
+         else if( $add < 0 ) // add all cols
          {
             $this->Column_set = ALL_COLUMNS;
+            $this->Filters->reset_filters( GETFILTER_ALL );
+            $this->Filters->setall_active(true);
          }
 
-         if( $del > 0 )
+         if( $del > 0 ) // del col
          {
             $this->Column_set &= ~(1 << ($del-1));
+            $this->Filters->reset_filter($del);
+            $this->Filters->set_active($del, false);
          }
-         else if( $del < 0 )
+         else if( $del < 0 ) // del all cols
          {
             $this->Column_set = 0;
+            $this->Filters->reset_filters( GETFILTER_ALL );
+            $this->Filters->setall_active(false);
          }
 
          if( !empty($this->Player_Column)
@@ -397,6 +580,17 @@ class Table
             mysql_query($query)
                or error('mysql_query_failed','table_columns.add_or_del_column');
          }
+      }
+   }
+
+   /*! \brief Sets Rows_Per_Page (according to changed Show-Rows-form-element). */
+   function handle_show_rows()
+   {
+      if ( $this->Use_Show_Rows )
+      {
+         global $RowsPerPage;
+         $rows = (int) $this->get_arg(TFORM_VAL_SHOWROWS); // nr of rows
+         $this->Rows_Per_Page = get_maxrows( $rows, MAXROWS_PER_PAGE, $RowsPerPage );
       }
    }
 
@@ -480,6 +674,18 @@ class Table
       return '';
    }
 
+   /*! \brief Retrieves maxrows URL-part. */
+   function current_rows_string( $add_sep=false )
+   {
+      if( !$this->Use_Show_Rows )
+         return '';
+
+      $str = $this->Prefix . TFORM_VAL_SHOWROWS . '=' . $this->Rows_Per_Page;
+      if ($add_sep)
+         $str .= URI_AMP;
+      return $str;
+   }
+
    /*! \brief Retrieve sort part of url from table. */
    function current_sort_string( $add_sep=false )
    {
@@ -491,10 +697,10 @@ class Table
    }
 
    /*! \brief Retrieve hidden part from table as a form string. */
-   function get_hiddens_string()
+   function get_hiddens_string( $filter_choice = GETFILTER_ALL )
    {
       $hiddens= array();
-      $this->get_hiddens( $hiddens);
+      $this->get_hiddens( $hiddens, $filter_choice );
       $str = '';
       foreach( $hiddens as $key => $val )
       {
@@ -503,8 +709,8 @@ class Table
       return $str;
    }
 
-   /*! \brief Retrieve hidden part from table. */
-   function get_hiddens( &$hiddens)
+   /*! \brief Retrieve hidden part from table for form. */
+   function get_hiddens( &$hiddens )
    {
       if ($this->Sort1)
       {
@@ -517,10 +723,38 @@ class Table
                $hiddens[$this->Prefix . 'desc2'] = $this->Desc2;
          }
       }
+
+      // include from_row (if unchanged search), otherwise remove from_row !?
+      //   => reset from_row somehow (checking using hashcode on filter-values)
       if ( $this->Rows_Per_Page > 0 && $this->From_Row > 0 )
-      {
          $hiddens[$this->Prefix . 'from_row'] = $this->From_Row;
+
+      // NOTE: no active-fields needed, because they have form-values and
+      //       inactive need not to be saved; but need general filter-attribs
+      if ( $this->UseFilters )
+         $this->Filters->get_filter_hiddens( $hiddens, GETFILTER_NONE );
+
+      // include hiddens from external RequestParameters
+      if ( $this->ext_req_params_use_hidden )
+      {
+         foreach( $this->ext_req_params as $rp )
+            $rp->get_hiddens( $hiddens );
       }
+   }
+
+   /*!
+    * \brief Returns array with Nr and description of displayed tableheads.
+    * signature: array( Nr => Descr ) = get_displayed_tableheads()
+    */
+   function get_displayed_tableheads()
+   {
+      $arr_displayed = array(); // Nr => Description
+      foreach( $this->Tableheads as $thead )
+      {
+         $nr = $thead['Nr'];
+         if ( $this->Is_Column_Displayed[$nr] ) $arr_displayed[$nr] = $thead['Description'];
+      }
+      return $arr_displayed;
    }
 
 
@@ -548,7 +782,7 @@ class Table
          if( is_array($attbs) )
          {
             $string .= attb_build($attbs);
-            
+
             if( is_numeric( strpos((string)@$attbs['class'],'Button')) )
             {
                global $button_width;
@@ -573,35 +807,33 @@ class Table
       if( $width >= 0 )
          $string .= $this->button_TD_width_insert($width);
 
+      $common_url = $this->current_rows_string(true)
+         . $this->current_filter_string(true)
+         . $this->current_extparams_string();
+
+      // field-sort-link
       $title = $tablehead['Description'];
       $csort = $tablehead['Sort_String'];
-
       if( $csort )
       {
          $string .= "<a href=\"" . $this->Page;
 
          if( $csort == $this->Sort1 )
          { //Click on main column: just toggle its order
-            $string .= $this->make_sort_string( $this->Sort1,
-                                                !$this->Desc1,
-                                                $this->Sort2,
-                                                $this->Desc2 );
+            $string .= $this->make_sort_string( $this->Sort1, !$this->Desc1, $this->Sort2, $this->Desc2, true );
          }
          else
          if( $csort == $this->Sort2 )
          { //Click on second column: just swap the columns
-            $string .= $this->make_sort_string( $this->Sort2,
-                                                $this->Desc2,
-                                                $this->Sort1,
-                                                $this->Desc1 );
+            $string .= $this->make_sort_string( $this->Sort2, $this->Desc2, $this->Sort1, $this->Desc1, true );
          }
          else
          { //Click on a new column: just push it
-            $string .= $this->make_sort_string( $csort,
-                                                $tablehead['Desc_Default'],
-                                                $this->Sort1,
-                                                $this->Desc1);
+            $string .= $this->make_sort_string( $csort, $tablehead['Desc_Default'], $this->Sort1, $this->Desc1, true);
          }
+
+         $string .= $common_url . URI_AMP;
+         $string .= $this->current_from_string();
 
          $string .= "#$curColId\" title=" . attb_quote(T_('Sort')) . '>' .
             $title . '</a>';
@@ -613,8 +845,21 @@ class Table
 
       if( !$tablehead['Undeletable'] && !$this->Static_Columns)
       {
+         $query_del = $this->Page
+            . $this->current_sort_string(true)
+            . $common_url;
+
+         // add from_row, if filter-value is empty,
+         //   or else has a value but has an error (then removing of filter or column doesn't change the page)
+         if ( $this->UseFilters )
+         {
+            $filter = $this->Filters->get_filter($nr);
+            if ( isset($filter) and ( $filter->is_empty() ^ $filter->has_error() ) )
+               $query_del .= URI_AMP . $this->current_from_string();
+         }
+
          $string .=
-            '<sup><a href="' .$this->Page.$this->current_sort_string( true) .
+            "<sup><a href=\"{$query_del}" . URI_AMP .
             "{$this->Prefix}del=$nr#{$this->PrevColId}\"" .
             " title=" . attb_quote(T_('Hide')) . '>' .
             "x</a></sup>";
@@ -625,6 +870,84 @@ class Table
       $this->PrevColId = $curColId;
       return $string;
    }
+
+   /*!
+    * \brief Returns html for filter of passed TableHead
+    * \internal
+    */
+   function make_table_filter( $thead )
+   {
+      // get filter for column
+      $fid = $thead['Nr']; // keep as sep var
+      $filter =& $this->Filters->get_filter($fid); // need ref for update
+
+      // check, if column displayed
+      $nr = $thead['Nr']; // keep as sep var
+      $col_displayed = $this->Is_Column_Displayed[$nr];
+      if ( !$col_displayed )
+         return '';
+      if ( !$filter )
+         return TD_EMPTY;
+      // now: $filter valid
+
+      // prepare strings for toggle-filter (if filter existing for field)
+      $togglestr_show = '';
+      $togglestr_hide = '';
+      if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] )
+      {
+         $query =
+            make_url( $this->Page, array(
+                  $this->Prefix . FFORM_TOGGLE_ACTION => 1,
+                  $this->Prefix . FFORM_TOGGLE_FID    => $fid ), true)
+            . $this->current_sort_string(true)
+            . $this->current_rows_string(true)
+            . $this->current_filter_string(true)
+            . $this->current_extparams_string(true);
+
+         // add from_row, if filter-value is empty, or else has a value but has an error
+         //    (then removing of filter or column doesn't change the page)
+         if ( $filter->is_empty() ^ $filter->has_error() )
+            $query .= URI_AMP . $this->current_from_string();
+
+         $fcolor_hide = ( $filter->errormsg() ) ? 'white' : 'red';
+         $togglestr_show =
+            "<a href=\"{$query}\" title=\"" . attb_quote(T_('Show')) . '">' .
+            "<font color=\"blue\">" . CHAR_SHOWFILTER ."</font></a>";
+         $togglestr_hide =
+            "<sup><a href=\"{$query}\" title=\"" . attb_quote(T_('Hide')) . '">' .
+            "<font size=\"-1\" color=\"{$fcolor_hide}\">x</font></a></sup>";
+      }
+
+      $tdstr = "  <td valign=\"bottom\"";
+      if ( $filter->has_error() )
+         $tdstr .= " class=Error";
+      $tdstr .= '>';
+
+      $td_empty = TD_EMPTY;
+      if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] )
+      {
+         // replace td-class-attr
+         $td = preg_replace( '/ class="?\w+"?/i', '', $tdstr, 1 );
+         $td = preg_replace( '/>$/', " class=ShowFilter>", $td, 1 ); // td.class
+         $td_empty = $td . $togglestr_show. "</td>\n";
+      }
+
+      // check, if filter-field shown or hidden
+      if ( !$filter->is_active() )
+         return $td_empty;
+      $this->Shown_Filters++;
+
+      // filter input-element
+      $result = $tdstr;
+      $result .= $filter->get_input_element( $this->Filters->Prefix, $thead );
+      if ( !$filter->is_static() and $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] )
+         $result .= $togglestr_hide;
+
+      $result .= "</td>\n";
+
+      return $result;
+   }
+
 
    //{ N.B.: only used for folder transparency but CSS incompatible
    function blend_next_row_color_hex( $col=false )
@@ -678,7 +1001,7 @@ class Table
        in the SELECT statement.
       Be aware that using SQL_CALC_FOUND_ROWS and FOUND_ROWS()
        disables ORDER BY ... LIMIT optimizations.
-      The first query is longer that without the SQL_CALC_FOUND_ROWS
+      The first query is longer than without the SQL_CALC_FOUND_ROWS
        but if the ORDER BY is on a not indexed column, this is small.
       MySQL >= 4.0.0. Refs at:
        http://dev.mysql.com/doc/refman/4.1/en/information-functions.html
@@ -692,9 +1015,15 @@ class Table
       $string = 'align=bottom'; //'align=middle'
       $button = '';
 
+      $qstr = $this->Page
+         . $this->current_sort_string(true)
+         . $this->current_rows_string(true)
+         . $this->current_filter_string(true)
+         . $this->current_extparams_string(true);
+
       if( $this->From_Row > 0 )
          $button.= anchor(
-              $this->Page . $this->current_sort_string( true )
+              $qstr
               . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
             , image( 'images/prev.gif', '<=', '', $string)
             , T_("prev page")
@@ -705,7 +1034,7 @@ class Table
 
       if( !$this->Last_Page )
          $button.= anchor(
-              $this->Page . $this->current_sort_string( true )
+              $qstr
               . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
             , image( 'images/next.gif', '=>', '', $string)
             , T_("next page")
@@ -754,27 +1083,60 @@ class Table
    /*! \brief Adds a form for adding columns. */
    function make_add_column_form( &$ac_form)
    {
-      if( $this->Static_Columns or
-          count($this->Removed_Columns) < 1 )
+      // add-column-elements
+      $ac_string = '';
+      if( !($this->Static_Columns or count($this->Removed_Columns) < 1 ) )
       {
-         return false;
-      }
+         split_url($this->Page,$page,$args);
+         foreach( $args as $key => $value ) {
+            $ac_form->add_hidden( $key, $value);
+         }
 
-      split_url($this->Page,$page,$args);
-      foreach( $args as $key => $value ) {
-         $ac_form->add_hidden( $key, $value);
-      }
-
-      asort($this->Removed_Columns);
-      $this->Removed_Columns[ 0 ] = '';
-      $this->Removed_Columns[ -1 ] = T_('All columns');
-      $string = $ac_form->print_insert_select_box(
+         asort($this->Removed_Columns);
+         $this->Removed_Columns[ 0 ] = '';
+         $this->Removed_Columns[ -1 ] = T_('All columns');
+         $ac_string = $ac_form->print_insert_select_box(
                $this->Prefix.'add', '1', $this->Removed_Columns, '', false);
-      $string.= $ac_form->print_insert_submit_button(
+         $ac_string.= $ac_form->print_insert_submit_button(
                $this->Prefix.'addcol', T_('Add Column'));
+      }
 
-      $string = "<div id='{$this->Prefix}TableAC'>".$string.'</div>';
+      // add filter-submits in add-column-row if not in table-head and need form for filter
+      $f_string = '';
+      if ( $this->UseFilters and !$this->ConfigFilters[FCONF_EXTERNAL_SUBMITS] )
+         $f_string = implode( '', $this->Filters->get_submit_elements() );
+
+      // add show-rows elements in add-column-row
+      $r_string = $this->make_show_rows( $ac_form );
+
+      $string = false;
+      if ( $ac_string or $f_string or $r_string )
+      {
+         $arr = array();
+         if ( $f_string )  array_push($arr, $f_string);
+         if ( $r_string )  array_push($arr, $r_string);
+         if ( $ac_string ) array_push($arr, $ac_string);
+
+         $string = "<div id='{$this->Prefix}TableFAC'>";
+         $string .= implode( '&nbsp;&nbsp;&nbsp;', $arr );
+         $string .= '</div>';
+      }
+
       return $string;
+   }
+
+   /*! \brief Builds select-box and submit-button to be able to change 'show-max-rows' */
+   function make_show_rows( &$form )
+   {
+      if ( !$this->Use_Show_Rows )
+         return '';
+
+      $rows = $this->Rows_Per_Page;
+      $elems = $form->print_insert_select_box(
+            $this->Prefix.TFORM_VAL_SHOWROWS, '1', build_maxrows_array($rows), $rows, false);
+      $elems.= $form->print_insert_submit_button(
+            $this->Prefix.'showrows', T_('Show Rows'));
+      return $elems;
    }
 
    function get_arg( $name)
@@ -789,5 +1151,69 @@ class Table
       $_GET[ $this->Prefix.$name ] = $value;
    }
 */
-}
+
+   /*!
+    * \brief Attaches SearchFilter to this table.
+    * \param $searchfilter SearchFilter-object to attach to table.
+    * \param $config array with configuration for table used with filters, \see $ConfigFilters
+    */
+   function register_filter( &$searchfilter, $config = null )
+   {
+      $this->Filters = $searchfilter;
+      $this->UseFilters = true;
+      if ( is_array($config) )
+      {
+         foreach( $config as $key => $value )
+            $this->ConfigFilters[$key] = $value;
+      }
+
+      // reset from-row if filters have changed
+      if ( $this->UseFilters and ($this->Filters->HashCode != $this->Filters->hashcode()) )
+         $this->From_Row = 0;
+   }
+
+   /*!
+    * \brief Returns non-null merged QuerySQL for all active filters (if $UseFilters is true).
+    * signature: QuerySQL get_query()
+    */
+   function get_query()
+   {
+      return ( $this->UseFilters ) ? $this->Filters->get_query() : new QuerySQL();
+   }
+
+   /*!
+    * \brief Adds external-parameters included into URL
+    *        (expecting to have 2 interface-methods 'get_hiddens' and 'get_url_parts').
+    * \param rp \see RequestParameters
+    * \param use_hidden true, if parameters should be included into table-hiddens; default is false
+    */
+   function add_external_parameters( $rp, $use_hidden = false )
+   {
+      if ( is_object($rp) and method_exists($rp, 'get_hiddens') and method_exists($rp, 'get_url_parts') )
+         array_push( $this->ext_req_params, $rp );
+      else
+         error("ERROR: Table.add_external_parameters: expecting object-argument with interfaces get_hiddens() and get_url_parts()");
+      $this->ext_req_params_use_hidden = $use_hidden;
+      $this->cache_curr_extparam = array();
+   }
+
+   /*! \brief Retrieves additional / external URL-part for table. */
+   function current_extparams_string( $add_sep = false )
+   {
+      if ( !isset($this->cache_curr_extparam[$add_sep]) )
+      {
+         $url_str = '';
+         foreach( $this->ext_req_params as $rp )
+         {
+            $url_str .= $rp->get_url_parts();
+            if ( $url_str != '' and $add_sep )
+               $url_str .= URI_AMP ;
+         }
+         $this->cache_curr_extparam[$add_sep] = $url_str;
+      }
+      return $this->cache_curr_extparam[$add_sep];
+   }
+
+} // end of 'Table'
+
 ?>
