@@ -160,6 +160,7 @@ ALTER TABLE Messages     -- ca. +80% of data-size (biggest change)
 
    * scripts/README.developers:
    - added categories and more hints about (surprising) PHP-behaviour
+   - don't use filenames with upper-case
 
 
 2007-06-30 rodival

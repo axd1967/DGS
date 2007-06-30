@@ -3,6 +3,13 @@
 General instructions for developers:
 -----------------
 
+----------------- CVS, new files:
+
+   Don't use uppercase letters in the filenames (unless a special needed
+   meaning). In such cases, contact the other developers first.
+   The developers using MS Window systems may not be able to distinguish
+   filenames different only in their upper- and lower-case letters.
+
 ----------------- PHP, Layout:
 
    Try to keep an homogeneous code presentation.
