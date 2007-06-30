@@ -8,6 +8,14 @@ Copyright (C) 2001-2006  Erik Ouchterlony
 
    * User Edit-Bio: allow to change order, return to user-page without change
 
+   * Searching Capabilities for pages:
+      - Waiting-Room
+      - Messages
+      - Users (show own opponents)
+      - Games
+      - Forum
+
+   * Show observers of game
 
 [2006-08-07] - DGS 1.0.12
    see also http://www.dragongoserver.net/faq.php?read=t&cat=160
