@@ -120,6 +120,7 @@ function find_category_box_text($cat)
          }
          else
          {
+            $text = cut_string( $row['Text'], 200 );
             $bio_table->add_sinfo(
                '<div>'
                      . make_html_safe($cat != '' ? $categories[$cat]
@@ -135,7 +136,7 @@ function find_category_box_text($cat)
                            , T_("Move up"))
                      . "\n</div>"
                //don't use add_info() to avoid the INFO_HTML here:
-               ,make_html_safe($row["Text"], true)
+               ,make_html_safe($text, true)
             );
          }
       } //while($row)
@@ -187,4 +188,14 @@ function find_category_box_text($cat)
 
    end_page(@$menu_array);
 }
+
+// try to cut after potential tag, but the xml could be broken (cutting off end-tags)
+function cut_string( $str, $len )
+{
+   $r = preg_replace( "/^(.*?)<[^<>]*?$/", "\\1", substr( $str, 0, $len) );
+   if ( strlen($str) > $len )
+      $r .= ' [...]';
+   return $r;
+}
+
 ?>
