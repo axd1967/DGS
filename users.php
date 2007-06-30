@@ -21,12 +21,15 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( "include/std_classes.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/countries.php" );
+require_once( "include/filter.php" );
 
 {
+   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -34,43 +37,106 @@ require_once( "include/countries.php" );
    if( !$logged_in )
       error("not_logged_in");
 
+   $uid = $player_row["ID"];
+   $user = $player_row["Handle"];
    $page = "users.php?";
-   $where_clause = '';
-   $showall = (boolean)@$_GET['showall'];
-   if( $showall )
-      $page .= "showall=1".URI_AMP;
-   else
-      $where_clause = "WHERE Activity>$ActiveLevel1 ";
 
    if(!@$_GET['sort1'])
    {
-      $_GET['sort1'] = 'ID';
+      $_GET['sort1'] = 'P.ID';
       $_GET['desc1'] = 0;
    }
 
    if(!@$_GET['sort2'])
    {
-      $_GET['sort2'] = ($_GET['sort1'] != 'ID' ? 'ID' : 'Name');
+      $_GET['sort2'] = ($_GET['sort1'] != 'P.ID' ? 'P.ID' : 'P.Name');
       $_GET['desc2'] = 0;
    }
 
+   // observers of game
+   $observe_gid = (int)get_request_arg('observe');
+
+   // table filters
+   $ufilter = new SearchFilter();
+   $ufilter->add_filter( 1, 'Numeric', 'P.ID', true);
+   $ufilter->add_filter( 2, 'Text',    'P.Name', true,
+         array( FC_FNAME => 'name', FC_SIZE => 12, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
+   $ufilter->add_filter( 3, 'Text',    'P.Handle', true,
+         array( FC_FNAME => 'user', FC_SIZE => 10, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
+   #$ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info
+   $ufilter->add_filter( 5, 'Rating',  'P.Rating2', true);
+   #$ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches
+   $ufilter->add_filter( 7, 'Numeric', 'Games', true,    # =P.Running+P.Finished
+         array( FC_ADD_HAVING => 1 ));
+   $ufilter->add_filter( 8, 'Numeric', 'P.Running', true);
+   $ufilter->add_filter( 9, 'Numeric', 'P.Finished', true);
+   $ufilter->add_filter(10, 'Numeric', 'P.Won', true);
+   $ufilter->add_filter(11, 'Numeric', 'P.Lost', true);
+   $ufilter->add_filter(13, 'Boolean', "P.Activity>$ActiveLevel1", true,
+         array( FC_FNAME => 'active', FC_LABEL => T_('Active'), FC_STATIC => 1,
+                FC_DEFAULT => ($observe_gid ? 0 : 1) ) );
+   $ufilter->add_filter(14, 'RelativeDate', 'P.Lastaccess', true);
+   $ufilter->add_filter(15, 'RelativeDate', 'P.Lastmove', true,
+         array( FC_TIME_UNITS => FRDTU_DHM ));
+   $ufilter->add_filter(16, 'Country', 'P.Country', false);
+   $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true);
+   $ufilter->init(); // parse current value from _GET
+   $f_active =& $ufilter->get_filter(13);
+
    $utable = new Table( 'user', $page, 'UsersColumns' );
+   $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
+
+   if ( $observe_gid )
+   {
+      $rp = new RequestParameters();
+      $rp->add_entry( 'observe', $observe_gid );
+      $utable->add_external_parameters( $rp, true );
+   }
 
    $order = $utable->current_order_string();
    $limit = $utable->current_limit_string();
 
-   $query = "SELECT *, Rank AS Rankinfo, " .
-      "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
-      "Running+Finished AS Games, " .
+   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
+   $utable->add_tablehead( 1, T_('ID'), 'P.ID', false, true);
+   $utable->add_tablehead( 2, T_('Name'), 'P.Name');
+   $utable->add_tablehead( 3, T_('Userid'), 'P.Handle');
+   $utable->add_tablehead(16, T_('Country'), 'P.Country');
+   $utable->add_tablehead( 4, T_('Rank info'));
+   $utable->add_tablehead( 5, T_('Rating'), 'P.Rating2', true);
+   $utable->add_tablehead( 6, T_('Open for matches?'));
+   $utable->add_tablehead( 7, T_('Games'), 'Games', true);
+   $utable->add_tablehead( 8, T_('Running'), 'P.Running', true);
+   $utable->add_tablehead( 9, T_('Finished'), 'P.Finished', true);
+   $utable->add_tablehead(17, T_('Rated'), 'P.RatedGames', true);
+   $utable->add_tablehead(10, T_('Won'), 'P.Won', true);
+   $utable->add_tablehead(11, T_('Lost'), 'P.Lost', true);
+   $utable->add_tablehead(12, T_('Percent'), 'Percent', true);
+   $utable->add_tablehead(13, T_('Activity'), 'ActivityLevel', true, true);
+   $utable->add_tablehead(14, T_('Last access'), 'P.Lastaccess', true);
+   $utable->add_tablehead(15, T_('Last Moved'), 'P.Lastmove', true);
+
+   // build SQL-query
+   $qsql = new QuerySQL();
+   $qsql->add_part( SQLP_FIELDS,
+      'P.*', 'P.Rank AS Rankinfo',
+      "(P.Activity>$ActiveLevel1)+(P.Activity>$ActiveLevel2) AS ActivityLevel",
+      'P.Running+P.Finished AS Games',
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
-      "ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent, " .
+      'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',
       //oldies:
-      //"ROUND(100*Won/RatedGames) AS Percent, " .
-      //"IFNULL(ROUND(100*Won/Finished),-0.01) AS Percent, " .
-      "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
-      "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
-      "FROM Players $where_clause ORDER BY $order $limit";
+      //'ROUND(100*P.Won/P.RatedGames) AS Percent',
+      //'IFNULL(ROUND(100*Won/Finished),-0.01) AS Percent',
+      'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccess',
+      'IFNULL(UNIX_TIMESTAMP(P.LastMove),0) AS Lastmove' );
+   $qsql->add_part( SQLP_FROM, 'Players P' );
+
+   if ( $observe_gid )
+      $qsql->add_part( SQLP_FROM, "JOIN Observers OB ON P.ID=OB.uid AND OB.gid=$observe_gid" );
+
+   $query_ufilter = $utable->get_query(); // clause-parts for filter
+   $qsql->merge( $query_ufilter );
+   $query = $qsql->get_select() . " ORDER BY $order $limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'users.find_data');
@@ -78,32 +144,23 @@ require_once( "include/countries.php" );
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
 
 
-   if( $showall )
-      $title = T_('Users');
+   if ( $f_active->get_value() )
+      $title = T_('Active Users');
    else
-      $title = T_('Active users');
+      $title = T_('Users');
+   if ( $observe_gid )
+   {
+      $title .= ' - '
+         . sprintf( T_('Observers of game %s'),
+                    "<a href=\"game.php?gid=$observe_gid\">$observe_gid</a>" );
+   }
+
+
    start_page( $title, true, $logged_in, $player_row );
+   if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_ufilter->get_select()) ."<br>";
+   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
-
-
-   $utable->add_tablehead(1, T_('ID'), 'ID');
-   $utable->add_tablehead(2, T_('Name'), 'Name');
-   $utable->add_tablehead(3, T_('Userid'), 'Handle');
-   $utable->add_tablehead(16, T_('Country'), 'Country');
-   $utable->add_tablehead(4, T_('Rank info'));
-   $utable->add_tablehead(5, T_('Rating'), 'Rating2', true);
-   $utable->add_tablehead(6, T_('Open for matches?'));
-   $utable->add_tablehead(7, T_('Games'), 'Games', true);
-   $utable->add_tablehead(8, T_('Running'), 'Running', true);
-   $utable->add_tablehead(9, T_('Finished'), 'Finished', true);
-   $utable->add_tablehead(17, T_('Rated'), 'RatedGames', true);
-   $utable->add_tablehead(10, T_('Won'), 'Won', true);
-   $utable->add_tablehead(11, T_('Lost'), 'Lost', true);
-   $utable->add_tablehead(12, T_('Percent'), 'Percent', true);
-   $utable->add_tablehead(13, T_('Activity'), 'ActivityLevel', true);
-   $utable->add_tablehead(14, T_('Last access'), 'Lastaccess', true);
-   $utable->add_tablehead(15, T_('Last Moved'), 'Lastmove', true);
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
@@ -170,20 +227,10 @@ require_once( "include/countries.php" );
 
    $utable->echo_table();
 
-   $orderstring = $utable->current_sort_string();
+   // end of table
 
-   if( $showall )
-   {
-      $str = T_("Only active users");
-      $vars = ( $orderstring ? '?'.$orderstring : '');
-   }
-   else
-   {
-      $str = T_("Show all users");
-      $vars = '?showall=1' . ( $orderstring ? URI_AMP.$orderstring : '');
-   }
-
-   $menu_array = array( $str => "users.php$vars" );
+   $menu_array = array(
+      T_('Show my opponents') => "user_stats.php" );
 
    end_page(@$menu_array);
 }
