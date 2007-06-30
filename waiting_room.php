@@ -285,7 +285,7 @@ require_once( "include/countries.php" );
 
    $menu_array[T_('Show all games')] =
       $baseURLMenu.URI_AMP.'handi=0'.URI_AMP.'good=0';
-   $menu_array[T_('Show only suitable games')] =
+   $menu_array[T_('Show all suitable games')] =
       $baseURLMenu.URI_AMP.'handi=1'.URI_AMP.'good=1';
 
    end_page(@$menu_array);
