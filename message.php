@@ -39,7 +39,7 @@ require_once( "include/form_functions.php" );
                               (or site_map)
       NewMessage&uid=      : from user info
       ShowMessage&mid=     : from message_list_table()
-                              or message_info_table()
+          &terms=             or message_info_table()
                               or list_messages
                               or here 
       Invite               : from menu
@@ -60,6 +60,7 @@ require_once( "include/form_functions.php" );
 */
 
    $preview = @$_REQUEST['preview'];
+   $terms = get_request_arg('terms'); // rx-terms: abc|def|...
 
    $default_uhandle = get_request_arg('to');
    if( !$default_uhandle )
@@ -247,7 +248,7 @@ require_once( "include/form_functions.php" );
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
                             $ReplyTo, $flow,
-                            $folders, $Folder_nr, $message_form, $Replied=='M');
+                            $folders, $Folder_nr, $message_form, $Replied=='M', $terms);
 
          if( $submode == 'AlreadyAccepted' )
          {
@@ -323,7 +324,8 @@ require_once( "include/form_functions.php" );
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
                             $ReplyTo, $flow,
-                            $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' or $Replied=='M'));
+                            $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' or $Replied=='M'),
+                            $terms);
 
          game_info_table( 'invite', $msg_row, $player_row, $iamrated);
 
@@ -362,7 +364,8 @@ require_once( "include/form_functions.php" );
          message_info_table($mid, $date, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $ReplyTo, $flow); //no folders, so no move
+                            $ReplyTo, $flow, //no folders, so no move
+                            null, null, null, false, $terms);
 
          if( $preview )
             game_settings_form($message_form, 'dispute', $iamrated, 'redraw', @$_POST);
