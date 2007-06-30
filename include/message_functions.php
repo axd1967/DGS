@@ -33,7 +33,7 @@ define('INVITE_HANDI_DOUBLE',-4);
 function init_standard_folders()
 {
    global $STANDARD_FOLDERS;
-   $STANDARD_FOLDERS = array( //$bg_color value (#f7f5e3)
+   $STANDARD_FOLDERS = array(  // arr=( Name, BGColor, FGColor ); $bg_color value (#f7f5e3)
       FOLDER_ALL_RECEIVED => array(T_('All Received'),'00000000','000000'),
       FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
       FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
@@ -402,7 +402,8 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
                             $other_id, $other_name, $other_handle, //must be html_safe
                             $subject, $text, //must NOT be html_safe
                             $reply_mid=0, $flow=0,
-                            $folders=null, $folder_nr=null, $form=null, $delayed_move=false)
+                            $folders=null, $folder_nr=null, $form=null, $delayed_move=false,
+                            $rx_terms='')
 {
    global $date_fmt, $msg_icones, $bg_color;
 
@@ -419,6 +420,12 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .
       "<td colspan=2>$name</td>" .
       "</tr>\n";
+
+   if ($rx_terms != '')
+   {
+      $subject = mark_terms( $subject, $rx_terms, true );
+      $text    = mark_terms( $text,    $rx_terms, true );
+   }
 
    echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>" .
       make_html_safe($subject, true) . "</td></tr>\n" .
@@ -490,7 +497,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 {
    extract($game_row);
-   
+
    if( $tablestyle == 'waitingroom' )
    {
       switch( $Handicaptype )
@@ -957,7 +964,9 @@ function folder_is_empty($nr, $uid)
    return $nr;
 }
 
-function echo_folder_box($folders, $folder_nr, $bgcolor)
+// param bgcolor: if null, fall back to default-val (in blend_alpha_hex-func)
+// param attbs, prefix, suffix: optional text (needed for filters)
+function echo_folder_box( $folders, $folder_nr, $bgcolor, $attbs='', $prefix='', $suffix='' )
 {
  global $STANDARD_FOLDERS;
 
@@ -976,55 +985,90 @@ function echo_folder_box($folders, $folder_nr, $bgcolor)
    if( empty($folderfgcolor) )
       $folderfgcolor = "000000" ;
 
-   return "<td bgcolor=\"#$folderbgcolor\"><font color=\"#$folderfgcolor\">".
-          make_html_safe($foldername) . "</font></td>";
+   return "<td bgcolor=\"#$folderbgcolor\" $attbs><font color=\"#$folderfgcolor\">".
+          $prefix .
+          make_html_safe($foldername) .
+          $suffix .
+          "</font></td>";
 }
 
-function message_list_query($my_id, $folderstring='all', $order='date', $limit='', $extra_where='')
+// param extra_querysql: QuerySQL-object to extend query
+// return array( result, merged-QuerySQL )
+function message_list_query($my_id, $folderstring='all', $order='date', $limit='', $extra_querysql=null)
 {
-   $query = "SELECT Messages.Type, Messages.Subject, " .
-      "UNIX_TIMESTAMP(Messages.Time) AS Time, me.mid as date, " .
-          "IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
-          "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " .
-      "me.mid, me.Replied, me.Sender, me.Folder_nr AS folder, " .
-      "IF(me.sender='M',' ',Players.Name) AS other_name, " . //the ' ' helps to sort
-      "Players.ID AS other_ID " .
-      "FROM (Messages, MessageCorrespondents AS me) " .
-      "LEFT JOIN MessageCorrespondents AS other " .
-        "ON other.mid=me.mid AND other.Sender!=me.Sender " .
-      "LEFT JOIN Players ON Players.ID=other.uid " .
-      "LEFT JOIN MessageCorrespondents AS previous " .
-        "ON previous.mid=Messages.ReplyTo AND previous.uid=me.uid " .
-      "WHERE me.uid=$my_id AND Messages.ID=me.mid $extra_where " .
-        ( $folderstring=="all" ? "" : "AND me.Folder_nr IN ($folderstring) " ) .
-      "ORDER BY $order $limit";
+   $qsql = new QuerySQL();
+   $qsql->add_part( SQLP_FIELDS,
+      'M.Type', 'M.Subject', 'M.Game_ID',
+      'UNIX_TIMESTAMP(M.Time) AS Time',
+      'me.mid as date',
+      "IF(M.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
+          "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
+      'me.mid', 'me.Replied', 'me.Sender', 'me.Folder_nr AS folder',
+      "IF(me.sender='M',' ',otherP.Name) AS other_name", // the ' ' helps to sort
+      'otherP.ID AS other_ID',
+      'otherP.Handle AS other_handle' );
+   $qsql->add_part( SQLP_FROM,
+      'Messages M ' .
+      'JOIN MessageCorrespondents AS me ON M.ID=me.mid',
+      'LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender',
+      'LEFT JOIN Players otherP ON otherP.ID=other.uid',
+      'LEFT JOIN MessageCorrespondents AS previous ON previous.mid=M.ReplyTo AND previous.uid=me.uid' );
+   $qsql->add_part( SQLP_WHERE, "me.uid=$my_id" );
+   if ( $folderstring != "all" and $folderstring != '' )
+      $qsql->add_part( SQLP_WHERE, "me.Folder_nr IN ($folderstring)" );
+   $qsql->add_part( SQLP_ORDER, $order );
+   $qsql->merge( $extra_querysql );
+   $query = $qsql->get_select() . " $limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed','message_functions.message_list_query');
 
-   return $result;
+   return array( $result, $qsql );
 }
 
+// param full_details: if true, show additional fields for message-search
+// param only_tablehead: if null or true, only tableheads are added (needed for message-search);
+//                       if null, the workflow goes on (needed for list-messages)
+// param terms: rx with terms to be marked within text
 function message_list_table( &$mtable, $result, $show_rows
              , $current_folder, $my_folders
              , $no_sort=true, $no_mark=true, $toggle_marks=false
+             , $full_details=false, $only_tablehead=null, $terms=''
              )
 {
  global $date_fmt, $msg_icones;
 
    $can_move_messages = false;
 
-   $mtable->add_tablehead( 1, T_('Folder'), ( $no_sort or $current_folder>FOLDER_ALL_RECEIVED ) ? NULL :
-                           'folder', true, false );
-   $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
-                           $no_sort ? NULL : 'other_name', false, false );
-   $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'subject', false, false );
-   list($ico,$alt) = $msg_icones[0];
-   $mtable->add_tablehead( 0, image( "images/$ico.gif", $alt, T_('Messages'))
-      , $no_sort ? NULL : 'flow', false, true );
-   $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, false );
-   if( !$no_mark )
-      $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
+   if ( is_null($only_tablehead) or $only_tablehead )
+   {
+      // add_tablehead($nr, $description, $sort_string = NULL, $desc_default = false, $undeletable = false, $width = NULL)
+      $mtable->add_tablehead( 1, T_('Folder'),
+         ( $no_sort or $current_folder>FOLDER_ALL_RECEIVED ) ? NULL : 'folder', true, false );
+
+      if ( $full_details )
+      {
+         // additional fields for search-messages
+         $mtable->add_tablehead( 6, T_('Type'), 'M.Type', false, true );
+         $mtable->add_tablehead( 7, T_('Direction'), $no_sort ? NULL : 'Sender', false, false );
+         $mtable->add_tablehead( 2, T_('Message Partner'), $no_sort ? NULL : 'other_name', false, false );
+      }
+      else
+         $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
+            $no_sort ? NULL : 'other_name', false, false );
+
+      $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'Subject', false, false );
+      list($ico,$alt) = $msg_icones[0];
+      $mtable->add_tablehead( 0, image( "images/$ico.gif", $alt, T_('Messages')),
+         $no_sort ? NULL : 'flow', false, true );
+      $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, false );
+      if( !$no_mark )
+         $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
+
+      // stop if not null
+      if ( !is_null($only_tablehead) )
+         return $can_move_messages;
+   }
 
    $page = '';
 
@@ -1034,6 +1078,8 @@ function message_list_table( &$mtable, $result, $show_rows
    $tits[FLOW_ANSWER              ] = $p ;
    $tits[            FLOW_ANSWERED] = $n ;
    $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p - $n" ;
+
+   $url_terms = ($terms != '') ? URI_AMP."terms=".urlencode($terms) : '';
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
@@ -1057,20 +1103,33 @@ function message_list_table( &$mtable, $result, $show_rows
 
       $str = make_html_safe($row["other_name"]) ;
       //if( !$deleted )
-         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid\">$str</A>";
-      if( $row['Sender'] === 'Y' )
+         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid{$url_terms}\">$str</A>";
+      if( !$full_details and $row['Sender'] === 'Y' )
          $str = T_('To') . ': ' . $str;
       $mrow_strings[2] = "<td>$str</td>";
 
-      $mrow_strings[3] = "<td>" . make_html_safe($row["Subject"], true) . "&nbsp;</td>";
+      $subject = $row['Subject'];
+      if ($terms != '')
+         $subject = mark_terms( $subject, $terms, false );
+      $mrow_strings[3] = "<td>" . make_html_safe($subject, true) . "&nbsp;</td>";
 
       list($ico,$alt) = $msg_icones[$row['flow']];
       $str = image( "images/$ico.gif", $alt, $tits[$row['flow']]);
       //if( !$deleted )
-         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid\">$str</A>";
+         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid{$url_terms}\">$str</A>";
       $mrow_strings[0] = "<td>$str</td>";
 
       $mrow_strings[4] = "<td>" . date($date_fmt, $row["Time"]) . "</td>";
+
+      // additional fields for search-messages
+      if ( $full_details )
+      {
+         $type = $row['Type'];
+         $mrow_strings[6] = "<td>" . strtoupper($type{0}) . strtolower(substr($type,1)) . "</td>";
+
+         $msgdir = ( $row['Sender'] === 'Y' ) ? 'To' : 'From';
+         $mrow_strings[7] = "<td class=Right>$msgdir:&nbsp;&nbsp;</td>";
+      }
 
       if( !$no_mark )
       {
