@@ -26,6 +26,136 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-06-30 juga
+
+   * include/filter.php,
+     include/filter_functions.php,
+     include/filter_parser.php,
+     include/std_classes.php,
+     include/tokenizer.php,
+   * code_examples/filter_example.php,
+     code_examples/filter_example2.php,
+     code_examples/query_sql.php,
+     code_examples/tokenizer_example.php,
+   * skins/dragon/screen.css,
+   * specs/Filters.txt:
+   - added classes and functions comprising new Filter-framework
+   - added examples for filter-stuff
+   - added some CSS for filters
+   - added main-doc in specs/Filters.txt
+
+   * include/table_columns.php:
+   - added searching capabilities on table-columns using Filter-framework
+     see specs/Filters.txt and code_examples/form_example2.php
+   - fixed paging-link-bug preserving form-values with links
+   - added maxrows-selection to restrict row-size of table-list
+
+   * include/form_functions.php,
+     code_examples/form_example.php,
+     code_examples/form_example2.php:
+   - added Form-types 'FILTER' and 'FILTERERROR' for Filter-framework
+   - added area-group layouting and some additional layout-config
+     when used as External-Form with Table(-Filters)
+   - added example for area-layouting, allow examples to be opened in browser
+
+   * show_games.php, forum/search.php, users.php, waiting_room.php,
+     message.php, status.php:
+   - added or extended searching capabilities using filter-framework
+   - adjustments for using filters
+   - added (recommended) new indexes to support new filters;
+     needed space (reasons given as comment)
+-----------
+ALTER TABLE Games        -- +3 MB (for filter)
+ ADD INDEX Handicap (Handicap) ;
+ALTER TABLE Games        -- +2 MB (for filter/sort)
+ ADD INDEX Moves (Moves) ;
+ALTER TABLE Games        -- +3 MB (for filter/sort)
+ ADD INDEX Score (Score) ;
+
+ALTER TABLE Posts        -- +0.2 MB (for filter)
+ ADD INDEX Parent_ID (Parent_ID) ;
+ALTER TABLE Posts        -- +0.2 MB (for filter/sort)
+ ADD INDEX Time (Time) ;
+
+ALTER TABLE Players      -- +0.2 MB (for filter)
+ ADD INDEX Country (Country) ;
+ALTER TABLE Players      -- +0.4 MB (for filter/sort, often changed)
+ ADD INDEX Lastaccess (Lastaccess) ;
+-----------
+
+   * search_messages.php, list_messages.php,
+     include/message_functions.php:
+   - added new page for searching messages using filters
+   - signature-change of funcs to change layout or highlight search-terms:
+     message_list_query/_list_table/_info_table, echo_folder_box
+   - signature-change of message_list_table-func adding args to control
+     message-list output including fields for message-searching:
+     folder, type, Direction, message partner
+   - added (mandatory) fulltext-index for search on messages
+   - slight modifications of SQL using table-alias and join on
+     MessageCorrespondents
+-----------
+ALTER TABLE Messages     -- ca. +80% of data-size (biggest change)
+ ADD FULLTEXT INDEX Subject (Subject,Text) ;
+-----------
+
+   * users.php:
+   - replaced URL-var 'showall' and page-bottom-link with 'Active'-Table-Filter
+
+   * user_stats.php, userinfo.php, users.php:
+   - added new page to show opponents and games-statistics for two players
+
+   * waiting_room.php:
+   - added Player-Country-column and Filter on it
+   - bugfix: used wrong SQL-field for table-column #1 (name)
+   - replaced URL-var 'showall' and page-bottom-link with two Table-Filters
+     Suitable-Handicap and Suitable-Rating-Range
+   - change page-title reflecting current "suitable"-state
+   - re-added page-bottom-links "Show all games" and "Show only suitable
+     games" to reset to filter-defaults
+
+   * forum/read.php, forum/search.php,
+     forum/forum_functions.php (make_link_array, forum_start_table),
+     include/quick_common.php:
+   - added order-selectbox in forum-search
+   - added support to highlight search-terms in a post or message
+   - fixed bug for paging to preserve form- and filter-values
+   - fixed bug with relevance when using search-terms in boolean-mode
+   - added const DAYS_NEW_END used for forum-reads
+
+   * include/std_functions.php:
+   - added some functions and consts to support Filter-framework:
+     - support to handle maxrows of table-listing, added funcs
+       get_maxrows, build_maxrows_array
+     - added allowed HTML-text <term> to support term-highlighting
+     - added mark_terms-func to highlight terms within potential XML-text
+     - added defaults for Table-Filter-layout
+     - adjusted body-width to 90% fixing some strange centric-related layout-
+       effects with nested tables (may hopefully get fixed later using CSS)
+   - fixed bug in make_url-func only append URI_AMP or '?' if not there,
+     added clean_url-func to chop off trailing URI_AMP or '?'
+   - changed default-handling of bgcolor for echo_folder_box-func
+   - added has_observers-func
+
+   * edit_bio.php:
+   - reduce output of bio-texts to 200 chars (main-focus is ordering)
+
+   * site_map.php:
+   - added new and search pages
+
+   * game.php:
+   - added page-bottom-link to show observers (users.php?observe=<gid>)
+
+   * NEWS, TODO:
+   - cleanup some items done
+
+   * INSTALL:
+   - move also dot-files like .cvsignore after CVS-checkout
+
+   * scripts/README.developers:
+   - added categories and more hints about (surprising) PHP-behaviour
+
+
 2007-06-30 rodival
 
    * include/std_functions.php, list.php:
@@ -57,7 +187,7 @@ UPDATE `FAQlog` SET `Date` = '0' ;
      in T_().
    - added a $keep_english parameter to get_language_descriptions_translated().
    - changed all $langcode names to the now more accurate $browsercode.
-   
+
    * include/make_translationfiles.php (translations_query),
    * admin_translators.php, admin_do_translators.php,
    * translate.php, update_translation.php,
@@ -113,7 +243,7 @@ ALTER TABLE `Waitingroom`
    - implementation of a two steps validation:
      first, just the EXPLAIN, then the full result.
    - differenciation of the NULL values.
-   
+
    * scripts/data_export.php:
    - including the translations tables export
      and hidding some minor variations.
@@ -125,7 +255,7 @@ ALTER TABLE `Waitingroom`
    - enhanced consistency check.  Added some Time and Rating checks.
      Now, check_move() returns '' if no error or the error message
      (instead of returning false on error and true else).
-   
+
    * people.php:
    - changed the info about translators' activity to "LastUpdate".
 
@@ -141,7 +271,7 @@ ALTER TABLE `Waitingroom`
    - because of old DGS users having a pure numeric Handle (not starting
      by a letter), the illegal_chars($player_ref) call had been replaced
      by a simple ereg() comparison here.
-     
+
    * userinfo.php, users.php:
    - changed the Percent calculus to 100*(Won+Jigo/2)/RatedGames instead
      of the previous 100*Won/RatedGames.
@@ -167,7 +297,7 @@ ALTER TABLE `Waitingroom`
 
    * images/flags/ls.gif:
    - replaced by the new Lesotho flag (old one kept in ls_old.gif)
-   
+
    * images/forward.gif, images/backward.gif,
    * images/end.gif, images/start.gif,
    * images/plus.gif, images/minus.gif, images/cross.gif:
@@ -220,7 +350,7 @@ ALTER TABLE `FAQ`
 
    * statisticspng.php, statistics.php:
    - using the new Graph class
-   
+
    * include/rating.php, include/std_functions.php:
    - small modifications consequently
 
@@ -240,7 +370,7 @@ ALTER TABLE `FAQ`
      common to waitingroom and message
 
    * edit_bio.php,
-	* list_messages.php,
+   * list_messages.php,
    * message.php,
    * show_games.php,
    * skins/dragon/screen.css,
@@ -250,7 +380,7 @@ ALTER TABLE `FAQ`
    - using new Table_Info class properties, for games infos and
      common to waitingroom and message
 
-	* NEWS, news.php skins/dragon/screen.css:
+   * NEWS, news.php, skins/dragon/screen.css:
    - adding NEWS file [initally built by JUG] with user-visible changes
 
 
