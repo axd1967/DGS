@@ -25,7 +25,7 @@ Either from cvs:
 > cd /path/to/the/directory/where/you/want/dragon/to/be
 > cvs -d:pserver:anonymous@cvs.dragongoserver.sourceforge.net:/cvsroot/dragongoserver login
 > cvs -z3 -d:pserver:anonymous@cvs.dragongoserver.sourceforge.net:/cvsroot/dragongoserver co DragonGoServer
-> mv DragonGoServer/* .
+> mv DragonGoServer/* DragonGoServer/.[a-z]* .
 > rmdir DragonGoServer
 
 or download a cvs snapshot from <http://www.dragongoserver.net/snapshot>
