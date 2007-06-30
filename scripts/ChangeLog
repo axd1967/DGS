@@ -26,9 +26,23 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-06-30 rodival
+
+   * include/std_functions.php, list.php:
+   - removed the unused $MaxRowsPerPage global var.
+
+   * include/make_translationfiles.php (translations_query),
+   * translate.php, update_translation.php:
+   - added a "prev/next" management of the translators' pages.
+     added the $from_row argument to translations_query()
+
+   * scripts/README.translations:
+   - documenting the "do_it" URL argument of generate_translation_texts.php
+
+
 2007-06-29 rodival
 
-   * people.php:
+   * people.php, admin_faq.php:
    - added the info about FAQadmins' activity to "LastUpdate".
 -----------
 ALTER TABLE `FAQlog`
@@ -36,17 +50,18 @@ ALTER TABLE `FAQlog`
 UPDATE `FAQlog` SET `Date` = '0' ;
 -----------
 
-   * translate.php, translation_functions.php
-   *  (language_exists, T_, get_language_descriptions_translated):
+   * translate.php, include/translation_functions.php (language_exists,
+   *  T_, get_language_descriptions_translated):
    - case insensitive search of the language name in language_exists().
    - added an automatic cut of the #xxx part of the alternate english words
      in T_().
    - added a $keep_english parameter to get_language_descriptions_translated().
    - changed all $langcode names to the now more accurate $browsercode.
    
-   * translate.php, make_translationfiles.php (translations_query),
-   * admin_translators.php, admin_do_translators.php, update_translation.php,
-   * generate_translation_texts.php:
+   * include/make_translationfiles.php (translations_query),
+   * admin_translators.php, admin_do_translators.php,
+   * translate.php, update_translation.php,
+   * scripts/generate_translation_texts.php:
    - added the add_text_to_translate function.
    - added the insertion of the new language names in the translation process.
    - added an optional alphabetical sort in translations_query().
@@ -54,7 +69,7 @@ UPDATE `FAQlog` SET `Date` = '0' ;
      generate_translation_texts.php. Also added a "do_it" URL argument.
    - changed all $langcode names to the now more accurate $browsercode.
 
-   * update_translation_pages.php (find_php_files):
+   * scripts/update_translation_pages.php (find_php_files):
    - updated the $directories array in find_php_files().
    - added a "Fatal error" - waiting for a fix - in case of a $TranslateGroups
      not found in the database. The bug may come from a typo in the PHP code
@@ -82,8 +97,8 @@ ALTER TABLE `Waitingroom`
  ADD `Handicap` Handicap int(11) NOT NULL default '0' AFTER `Komi` ;
 -----------
 
-   * message_functions.php (game_info_table), send_message.php,
-   * make_game.php:
+   * include/message_functions.php (game_info_table), send_message.php,
+   * include/make_game.php:
    - adjusted to follow the "double game" handicap fix and its display.
    - and a try to fix the bad Running count bug:
      In the Players table, near 20 of the Running counts were 1 or 2

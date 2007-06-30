@@ -18,8 +18,10 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-// The sourceforge devel server need a soft link:
+// The Sourceforge devel server need a soft link:
 // ln -s -d /tmp/persistent/dragongoserver/translations /home/groups/d/dr/dragongoserver/htdocs/translations
+
+define('TRANS_ROW_PER_PAGE', 30);
 
 function make_known_languages() //must be called from main dir
 {
@@ -40,7 +42,7 @@ function make_known_languages() //must be called from main dir
    }
 
    fwrite( $fd, "<?php\n\n"
-."\$TranslateGroups[] = \"Users\";\n"
+."\$Translate" /* break */ . "Groups[] = \"Users\";\n"
 ."// The \$T_ are required for 'scripts/generate_translation_texts.php'.\n"
 ."\$T_ = 'fnop';\n"
 ."\n\$known_languages = array(\n" );
@@ -150,7 +152,7 @@ function make_include_files($language=null, $group=null) //must be called from m
 
 
 function translations_query( $translate_lang, $untranslated, $group
-               , $alpha_order=false )
+               , $alpha_order=false, $from_row=0)
 {
 // See admin_faq.php to know the Translatable flag meaning.
 /* Translations.Text IS NOT NULL (but maybe empty if the 'same' box is checked)
@@ -158,6 +160,7 @@ function translations_query( $translate_lang, $untranslated, $group
     is the default status for a translated system message.
    So, Translations.Text IS NULL means "never translated".
 */
+
 /* Note: Some items appear two or more times within the untranslated set
     when from different groups. But we can't use:
        ( $untranslated ? "DISTINCT " : "")
@@ -166,12 +169,17 @@ function translations_query( $translate_lang, $untranslated, $group
     and filter the rows on Original_ID while computing.
    The previous sort was:
        "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
+   As the Original are identical when the Original_ID are identical,
+    an other possible sort is "ORDER BY Original,Original_ID";
 */
-
    if( $alpha_order )
       $order = ' ORDER BY Original,Original_ID';
    else
       $order = ' ORDER BY Original_ID';
+   if( $from_row > 0 )
+      $limit = " LIMIT $from_row,".(TRANS_ROW_PER_PAGE+1);
+   else
+      $limit = ' LIMIT 0,'.(TRANS_ROW_PER_PAGE+1);
 
    $query = 
      "SELECT Translations.Text," .
@@ -196,11 +204,11 @@ function translations_query( $translate_lang, $untranslated, $group
    if( !$untranslated )
      $query .= 
        "AND TranslationGroups.Groupname='$group'" .
-       $order; //." LIMIT 50";
+       $order.$limit;
    else
-     $query .= 
+     $query .=
        "AND (Translations.Text IS NULL OR TranslationTexts.Translatable='Changed') " .
-       $order." LIMIT 50";
+       $order.$limit;
 
    return mysql_query($query);
 }

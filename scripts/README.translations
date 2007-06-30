@@ -8,11 +8,13 @@ then, after checking:
 
 
 
-To scan PHP files and recover the "T_()" strings
+To scan PHP files and recover the "T_('')" strings
 then update the database with new english texts,
 run (need the ADMIN_TRANSLATORS privilege):
 
 > generate_translation_texts.php
+then, after checking:
+> generate_translation_texts.php?do_it=1
 
 
 
