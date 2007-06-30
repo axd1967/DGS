@@ -1,5 +1,17 @@
 <?php
-require_once("form_functions.php");
+
+/*
+ * Code example with simple form using Form-class.
+ *
+ * Usage: open its URL in browser
+ */
+
+chdir("../");
+require_once("include/form_functions.php");
+chdir("code_examples/");
+
+echo "<html><body>\n";
+
 $the_form = new Form( "myname", "myactionpage.php", FORM_POST );
 $the_form->add_row( array( 'DESCRIPTION', 'Description',
                            'TEXTINPUT', 'descr', 40, 80, "default description" ) );
@@ -17,4 +29,7 @@ $the_form->add_row( array( 'DESCRIPTION', 'Checkboxes',
                             'CHECKBOX', 'box9', 1, 'box9', true ) );
 $the_form->add_row( array( 'SUBMITBUTTON', 'submit', 'Go Ahead' ) );
 $the_form->echo_string();
+
+echo "</body></html>\n";
+
 ?>
