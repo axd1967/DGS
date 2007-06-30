@@ -424,7 +424,6 @@ table.Links a {
 
 
 
-
 /* ------------------------- */
 /* usual tables */
 /* ------------------------- */
@@ -473,10 +472,34 @@ table.Table th sup {
    color: red;
    font-weight: bold;
    font-size: 90%;
+   text-decoration: none;
 }
 
 table.Table tr.Head {
    background: #cccccc;
+}
+
+table.Table tr.Filter {
+   background: #dddddd;
+   text-align: left;
+   white-space: nowrap;
+}
+
+table.Table tr.Filter td.Error {
+   background: #dd0080;
+   text-decoration: none;
+}
+
+table.Table tr.Filter td.ShowFilter {
+   text-align: center;
+   font-color: blue;
+}
+
+table.Table tr.Filter td sup a,
+table.Table tr.Filter td sup {
+   font-weight: bold;
+   font-size: 90%;
+   text-decoration: none;
 }
 
 table.Table tr.Row3,
@@ -502,6 +525,14 @@ table.Table tr.Highlight {
 }
 
 table.Table td.Mark {
+   text-align: center;
+}
+
+table.Table td.Right {
+   text-align: right;
+}
+
+table.Table td.Center {
    text-align: center;
 }
 
