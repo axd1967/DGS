@@ -69,7 +69,8 @@ define('UHANDLE_NAME', 'user'); //see quick_status.php and get_request_user()
 define('FOLDER_NEW', 2);
 
 //used in daily_cron.php
-$new_end =  4*7*24*3600;  // four weeks
+define('DAYS_NEW_END', 4*7); // four weeks [days]
+$new_end = DAYS_NEW_END *24*3600;  // four weeks [secs]
 
 
 if ( get_magic_quotes_gpc() )
@@ -104,6 +105,8 @@ define('COOKIE_OLD_COMPATIBILITY', 1 && COOKIE_PREFIX>'');
    return $cookie;
 }
 
+// Returns value for passed varname $name or else $default if varname not set or if value is invalid
+//    (invalid = not an element of the optional list containg the valid values)
 function get_request_arg( $name, $def='', $list=NULL)
 {
    $val = (isset($_REQUEST[$name]) ? arg_stripslashes($_REQUEST[$name]) :
