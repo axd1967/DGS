@@ -39,6 +39,7 @@ require_once( "include/message_functions.php" );
 
 
    $gtable = new Table( 'game', "status.php", "GamesColumns" );
+   $gtable->use_show_rows(false);
    $gtable->set_default_sort( 'Games.Lastchanged', 0, 'Games.ID', 0);
    $gtable->add_or_del_column();
 
@@ -102,7 +103,7 @@ require_once( "include/message_functions.php" );
    $folderstring = $player_row['StatusFolders'] .
       (empty($player_row['StatusFolders']) ? '' : ',') . FOLDER_NEW . ',' . FOLDER_REPLY;
 
-   $result = message_list_query($my_id, $folderstring, $order, 'LIMIT 20');
+   list( $result ) = message_list_query($my_id, $folderstring, $order, 'LIMIT 20');
    if( @mysql_num_rows($result) > 0 )
    {
       $my_folders = get_folders($my_id);
