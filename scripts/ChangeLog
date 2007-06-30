@@ -28,6 +28,12 @@ Changelog
 
 2007-06-30 juga
 
+   * waiting_room.php:
+   - changed bottom-link to 'Show all suitable games' to indicate it's a reset
+
+
+2007-06-30 juga
+
    * include/filter.php,
      include/filter_functions.php,
      include/filter_parser.php,
@@ -38,15 +44,15 @@ Changelog
      code_examples/query_sql.php,
      code_examples/tokenizer_example.php,
    * skins/dragon/screen.css,
-   * specs/Filters.txt:
+   * specs/filters.txt:
    - added classes and functions comprising new Filter-framework
    - added examples for filter-stuff
    - added some CSS for filters
-   - added main-doc in specs/Filters.txt
+   - added main-doc in specs/filters.txt
 
    * include/table_columns.php:
    - added searching capabilities on table-columns using Filter-framework
-     see specs/Filters.txt and code_examples/form_example2.php
+     see specs/filters.txt and code_examples/form_example2.php
    - fixed paging-link-bug preserving form-values with links
    - added maxrows-selection to restrict row-size of table-list
 
@@ -63,7 +69,7 @@ Changelog
    - added or extended searching capabilities using filter-framework
    - adjustments for using filters
    - added (recommended) new indexes to support new filters;
-     needed space (reasons given as comment)
+     needed space + reasons given as comment:
 -----------
 ALTER TABLE Games        -- +3 MB (for filter)
  ADD INDEX Handicap (Handicap) ;
@@ -138,7 +144,7 @@ ALTER TABLE Messages     -- ca. +80% of data-size (biggest change)
    - added has_observers-func
 
    * edit_bio.php:
-   - reduce output of bio-texts to 200 chars (main-focus is ordering)
+   - reduce output of bio-texts to 200 chars when changing order
 
    * site_map.php:
    - added new and search pages
