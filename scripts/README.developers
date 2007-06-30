@@ -3,6 +3,8 @@
 General instructions for developers:
 -----------------
 
+----------------- PHP, Layout:
+
    Try to keep an homogeneous code presentation.
 
    -Use a 3 real spaces tabing.
@@ -27,7 +29,7 @@ General instructions for developers:
          ...
       }
 
------------------
+----------------- PHP, Database:
 
    Try to avoid the extract($row) function. Or just use it inside a
    short function. At top level, the values of $row become global
@@ -35,15 +37,15 @@ General instructions for developers:
    come most of the time from a mysql_query("SELECT *,..."), if we add
    a column to the database table, the resulting var will maybe disturb
    your code.
-   
+
    We know that there is still a lot of extract() in our code but we are
    working to remove them. Instead we clearly rename the $row var with,
    let say, $game_row then we use $game_row['ID'] when needed.
    Feel free to replace in such way any extract() that you find.
-   
+
    This is a query issued from some bad experiences.
 
------------------
+----------------- PHP, URL:
 
    Take care of URI_AMP and URI_AMP_IN.
    - URI_AMP_IN is what you use when you decode an URL coming
@@ -51,7 +53,7 @@ General instructions for developers:
    - Use URI_AMP when you build a URL to be gave to the server.
    In short, URI_AMP_IN = ini_get('arg_separator.input')
          and URI_AMP    = ini_get('arg_separator.output')
-         
+
    This is because the ampersand is not allowed in an URL (curiously!)
    Some server replace it with a ';' but it seems that, now a day, the
    '&amp;' become the standard. When the server receive a '&amp;', it
@@ -67,7 +69,7 @@ General instructions for developers:
    if $page is already a well formed URL and is safer because it use
    an urlencode().
 
------------------
+----------------- PHP, DGS, Translations:
 
    Take care of the T_() function and tranlation features.
 
@@ -88,7 +90,7 @@ General instructions for developers:
    Maybe this is not the better way to do the translations but
    it is hard to modify it. Any suggestion?
 
------------------
+----------------- PHP, Database:
 
    Even if $num is numeric, think to use the quoted syntaxe to set it
    in a MySQL query, e.g. $query = ... "Num='$num'," ...;
@@ -96,4 +98,78 @@ General instructions for developers:
    it to the default while Num=, will return a MySQL syntaxe error.
    That's an alternative that must be known.
 
+----------------- PHP:
+
+   Operator "(expr) ? A : B" returns a copy of A|B and not a reference
+
+   $this->value{$pos} with var-pos DOES NOT WORK in all cases for
+   unknown reason! For example, it doesn't work when filter resetted or
+   not initialized yet !! ok with const so far!
+
+----------------- PHP, URL:
+
+   Question:
+      Regarding String-comparison the code sometimes fails, if you compare
+      a string with '=='. Comparing a string against a constant-String
+      with '===' is more reliable, but sometimes it also works with '=='.
+
+      That really puzzles me.
+      Do you have any clarification on that effect?
+      Or is it maybe better to use strcmp()?
+
+   Answer (Rod):
+      That's not always obvious. The problem is because PHP is a "not typed"
+      language (contrary to C, for instance). So PHP is doing again and again
+      hidden cast-ings.
+
+      There is too a problem, for instance, with the strpos() function.
+      It may return false if nothing is found, or 0 if something is found at
+      index 0. So you have to use: "if( false === strpos(...) )"
+      to know is something is found because: "if( false == strpos(...) )"
+      will also be true when the function returns the 0 index, as
+      false may be cast-ed to 0, and 0 to false.
+
+      Another example with those lines:
+         $v = "-1.25"; // $v is a string
+         $v = 0 + $v;  // now $v is a float
+         if( $v < -1 ) // true if $v is a float
+
+         True if $v is a float because PHP will cast (int)-1 to (float)-1.
+         But if you remove/comment the second line, the test MAY be false.
+
+         In fact, to compare two entities, PHP need to cast them to the same type.
+         Here, if the second line is absent, PHP had to compare an integer (-1)
+         and a string ("-1.25"). But we can't know if PHP will cast -1 to "-1"
+         or "-1.25" to -1.25. If it cast -1 to "-1", the test will be:
+         if( "-1.25" < "-1" ) and be false because of the lengths difference.
+
+      As you can see, the problem is not only around a comparison.
+
+      So, as the typage is extremly volatile in PHP, don't hesitate to add
+      security casts when needed:
+
+         if( ((float)$v) < -1 ) // true even if $v is a string
+
+      Effectively, I think that strcmp() may be the solution to compare the
+      values as strings, because it should do by definition.
+
+      In the same spirit, be aware that everything that come from an URI or
+      a cookie IS a string (e.g. with "game.php?gid=1234", $_GET['gid'] will
+      always return the string "1234"). It act as an int only when you
+      implicitly use it as an integer.
+      So a preventive cast each time you use a $_GET is a good thing too.
+
+----------------- PHP:
+
+   Depending on the context the following expression does fail to work as
+   expected because of the same reason as described in the URL-section.
+   The reason is propably a bad implicit casting used by PHP.
+
+   The expression    ( $value != '' )   sometimes results in an unexpected
+   FALSE-value if the $value is '0'. Better use the following expression,
+   that will work as expected:
+
+      ( (string)$value != '' )
+
 -----------------
+
