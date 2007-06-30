@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+require_once( "include/std_functions.php" );
+
  /* The code in this file is written by Ragnar Ouchterlony */
 
  /*!
@@ -50,12 +52,14 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * <li> Radiobuttons
   * <li> Checkbox
   * <li> Submitbutton
-  * <li> SubmitbuttonX  
+  * <li> SubmitbuttonX
   * <li> Text
   * <li> Header  --- Creates a header line.
   * <li> Chapter --- Creates a chapter line.
   * <li> Ownhtml --- Does not produce td:s and such things, it will only add the code
   *                  specified by the user.
+  * <li> Filter  --- Include Filter-form-elements; args: SearchFilters, filter-id
+  * <li> FilterError --- args: SearchFilters, filter-id, msg-prefix, msg-suffix, bool with_syntax
   * </ul>
   *
   * <b>Other things you could have in a row.</b>
@@ -78,6 +82,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
  /*!
   * \example form_example.php
+  *
   * Example of how to use the form functions.  Here is one textinput and
   * nine checkboxes added plus the submitbutton.
   *
@@ -94,8 +99,43 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * </pre>
   */
 
+/*!
+  * \example form_example2.php
+  *
+  * Example of how to use the form functions with area-grouping layout.
+  */
+
 define( "FORM_GET", 0 );
 define( "FORM_POST", 1 );
+
+// form-layout-config
+define('FLAYOUT_GLOBAL', 'global'); // global layout for whole form (default is to use none)
+define('FLAYOUT_AREACONF', 'areaconf'); // area-config
+define('FAREA_ALL', 'all'); // form-area get area-config for 'all' areas
+define('FAC_TABLE', 'table'); // form-area-context for a TABLE
+define('FAC_ENVTABLE', 'td_table'); // form-area-context for a TD before a group-TABLE
+
+// form-element-config
+define('FEC_TR_ATTR', 'tr_attr'); // additional attributes for <tr>-element
+define('FEC_EXTERNAL_FORM', 'form_external_form'); // true, if form start/end externally printed
+
+// for overwriting form-element-attributes
+define('FEA_NUMARGS',     'NumArgs');
+define('FEA_NEWTD',       'NewTD');
+define('FEA_ENDTD',       'EndTD');
+define('FEA_STARTTD',     'StartTD');
+define('FEA_SPANALLCOLS', 'SpanAllColumns');
+define('FEA_ALIGN',       'Align');
+
+// known attribute-names for form-elements and read-only-state
+$ARR_FORMELEM_READONLY = array(
+   FEA_NUMARGS     => 1,
+   FEA_NEWTD       => 0,
+   FEA_ENDTD       => 0,
+   FEA_STARTTD     => 0,
+   FEA_SPANALLCOLS => 0,
+   FEA_ALIGN       => 0,
+);
 
 class Form
 {
@@ -107,9 +147,20 @@ class Form
    var $method;
    /*! \brief The form class, default 'formClass'. */
    var $fclass;
+   /*! \brief Additional config for the form (with influence to layouting form-elements). */
+   var $config;
 
-   /*! \brief Internal variable to contain all the information on the rows of the form. */
+   /*! \brief Internal variable to contain all the information on the rows of the form: rows[line] = ( safe, row-arr, area ). */
    var $rows;
+
+   /*! \brief Layout for grouping areas, \see set_layout(): key => value */
+   var $layout;
+   /*! \brief Layout for specific areas: areas[area] = ( layout => ...) */
+   var $areas;
+   /*! \brief Current area (initial is 1). */
+   var $area;
+   /*! \brief Config for group-layouting: ( area-num|0|FAREA_ALL => ( FAC_TABLE|TR|TD => attbs, )) */
+   var $areaconf;
 
    /*! \brief Holds the cached form of the form string. */
    var $form_string;
@@ -138,6 +189,7 @@ class Form
    var $max_nr_columns;
    var $safe_text;
 
+
    /*! \brief Constructor. Initializes various variables. */
    function Form( $name, $action_page, $method
          , $echo_form_start_now=false, $class='FormClass' )
@@ -151,10 +203,16 @@ class Form
          $this->action = $action_page;
          $this->method = $method;
          $this->fclass = $class;
+         $this->config = array();
          $this->echo_form_start_now = $echo_form_start_now;
 
          $this->max_nr_columns = 2; //actually build on the fly, it is often inadequate for the top rows of the form
          $this->rows = array();
+
+         $this->layout = array();
+         $this->areas = array( 1 => 1 );
+         $this->area = 1;
+         $this->areaconf = array();
 
          $this->form_string = "";
 
@@ -290,12 +348,182 @@ class Form
                                      'EndTD'   => false,
                                      'SpanAllColumns' => false,
                                      'Align'   => '' ),
+            'FILTER'       => array( 'NumArgs' => 2,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
+            'FILTERERROR'  => array( 'NumArgs' => 5,
+                                     'NewTD'   => false,
+                                     'StartTD' => true,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => 'left' ),
          );
 
          if( $echo_form_start_now )
             echo $this->print_start_default();
 
       }
+
+
+   /*! \brief add additional form-config. */
+   function set_config( $name, $value )
+   {
+      $this->config[$name] = $value;
+   }
+
+   /*! \brief Returning additional non-null form-config, '' if unset. */
+   function get_config( $name )
+   {
+      if ( isset($this->config[$name]) )
+         return $this->config[$name];
+      else
+         return '';
+   }
+
+   /*!
+    * \brief Allows to overwrite (reconfigure) form-element-config (not for read-only)
+    * \param $name     form-element name, e.g. DESCRIPTION
+    * \param $attrname allowed attribute-names: FEA_STARTTD, FEA_NEWTD, FEA_ENDTD, FEA_SPANALLCOLS, FEA_ALIGN
+    * \param $value    value for attribute
+    */
+   function set_attr_form_element( $name, $attrname, $value )
+   {
+      global $ARR_FORMELEM_READONLY;
+      $rx_attrs = "/^(" . implode('|', array_keys($ARR_FORMELEM_READONLY) ) . ")$/";
+
+      $name = strtoupper($name);
+      if ( !preg_match( $rx_attrs, $attrname ) )
+         error("ERROR: Form.set_attr_form_element: bad attribute-name [$attrname] used in set_attr_form_element for form-element [$name]");
+      if ( @$ARR_FORMELEM_READONLY[$attrname] )
+         error("ERROR: Form.set_attr_form_element: attribute [$attrname] for form-element [$name] can't be altered");
+      if ( !isset($this->form_elements[$name]) )
+         error("ERROR: Form.set_attr_form_element: no form-element [$name] defined");
+
+      $this->form_elements[$name][$attrname] = $value;
+   }
+
+   /*!
+    * \brief Sets layout for areas
+    * \param $key FLAYOUT_GLOBAL (expecting 1 arg: layout-syntax with num ',' '|' '(..)'; \see parse_layout_areaconf ) \n
+    *             FLAYOUT_AREACONF (expecting 2 args: config-key, array)
+    * \param $value direct value for chosen key
+    * \param $arr additional array for configuration of layout (depends on $key)
+    */
+   function set_layout( $key, $value, $arr=NULL )
+   {
+      if ( $key === FLAYOUT_GLOBAL )
+         $this->parse_layout_global( $value );
+      elseif ( $key === FLAYOUT_AREACONF )
+         $this->parse_layout_areaconf( $value, $arr );
+      else
+         error("ERROR: Form.set_layout(): unknown key [$key]");
+   }
+
+   /*!
+    * \brief Parses syntax for global-layout grouping areas.
+    * Syntax is: num = area num (starting with 1..),
+    *            ',' = vertical area-grouping,
+    *            '|' = horizontal area-grouping,
+    *            '(..)' = grouping because '(' has higher prio than '|' than ','
+    * \internal
+    */
+   function parse_layout_global( $layout ) // varargs: more args after value possible
+   {
+      $this->orig_layout = $layout;
+      $this->layout = array();
+      $this->areas  = array();
+
+      // syntax-checks: allowed chars, non-empty braces
+      if ( !preg_match( "/(^[\d,|\(\)]+$|\(\))/", $layout ) )
+         error("ERROR: Form.parse_layout_global(): bad syntax for layout [$layout]");
+
+      $groups = array();
+      $grcnt = 0;
+      $L = "($layout)";
+      while (true)
+      {
+         $epos = strpos( $L, ')' );
+         if ( $epos === false )
+            break;
+         # found ')', search backwards to '(' -> group
+         $spos = strrpos( substr($L, 0, $epos), '(' );
+         if ( $spos === false )
+            error("ERROR: Form.parse_layout_global(): bracing-mismatch in layout [$layout]");
+
+         $group = substr( $L, $spos + 1, $epos - $spos - 1 ); // no '()' in group, only x or x, or x|
+         $arr = array();
+         $arr_horiz = explode( ',', $group );
+         foreach( $arr_horiz as $hgr )
+         {
+            if ( strlen($hgr) == 0 )
+               error("ERROR: Form.parse_layout_global(): missing area-num around a ',' [$layout]");
+            $arr_vert = explode( '|', $hgr );
+            if ( count($arr_vert) == 1 )
+            {
+               if ( $hgr{0} == 'G' )
+                  $hgr = $groups[ substr($hgr,1) ];
+               elseif ( $hgr == 0 )
+                  error("ERROR: Form.parse_layout_global(): area-num 0 is not allowed, start with 1");
+               else
+                  $this->areas[$hgr] = 1;
+               array_push( $arr, $hgr );
+            }
+            else
+            {
+               $arrv = array( 'H' );
+               foreach( $arr_vert as $vgr )
+               {
+                  if ( strlen($vgr) == 0 )
+                     error("ERROR: Form.parse_layout_global(): missing area-num around a '|' [$layout]");
+                  if ( $vgr{0} == 'G' )
+                     $vgr = $groups[ substr($vgr,1) ];
+                  elseif ( $vgr == 0 )
+                     error("ERROR: Form.parse_layout_global(): area-num 0 is not allowed, start with 1");
+                  else
+                     $this->areas[$vgr] = 1;
+                  array_push( $arrv, $vgr );
+               }
+               array_push( $arr, $arrv );
+            }
+         }
+
+         $groups[$grcnt] = $arr;
+         $L = substr_replace( $L, "G$grcnt", $spos, $epos - $spos + 1);
+         $grcnt++;
+      }
+
+      if ( !(strpos( $L, '(' ) === false) )
+         error("ERROR: Form.parse_layout_global(): bracing-mismatch in layout [$layout]");
+      if ( preg_match( "/[\|,]/", $L ) )
+         error("ERROR: Form.parse_layout_global(): bad syntax for layout [$layout] with one of '|,'");
+
+      $result = $groups[$grcnt-1];
+      while ( is_array($result) and count($result) == 1 )
+         $result = array_shift($result);
+      $this->layout[FLAYOUT_GLOBAL] = $result;
+   }
+
+   /*!
+    * \brief Parses and sets area-config: area (=num|0|FAREA_ALL), config = array( context => ... )
+    * \internal
+    */
+   function parse_layout_areaconf( $area, $config )
+   {
+      if ( !preg_match( "/^(\d+|".FAREA_ALL.")$/", $area) )
+         error("ERROR: Form.parse_layout_areaconf(): bad area-num [$area] used");
+      if ( !is_array( $config ) )
+         error("ERROR: Form.parse_layout_areaconf(): expected config-arg of type array");
+
+      // don't overwrite existing config
+      if ( !isset($this->areaconf[$area]) )
+         $this->areaconf[$area] = array();
+      foreach( $config as $key => $val )
+         $this->areaconf[$area][$key] = $val;
+   }
+
 
    /*! \brief Get $form_string and update it if necessary. */
    function get_form_string( $tabindex=0 )
@@ -309,6 +537,16 @@ class Form
    function echo_string( $tabindex=0 )
    {
       echo $this->get_form_string($tabindex);
+   }
+
+   /*! \brief Changes current area (area-num must exist in specified layout \see set_layout ). */
+   function set_area( $area )
+   {
+      if ( !isset($this->layout[FLAYOUT_GLOBAL]) )
+         error("ERROR: Form.set_area(): can only be used with set layout");
+      if ( !isset($this->areas[$area]) )
+         error("ERROR: Form.set_area(): bad area [$area] used");
+      $this->area = $area;
    }
 
    /*!
@@ -335,11 +573,17 @@ class Form
             }
          }
 
-         $this->rows[ $line_no ] = array($safe,$row_array);
+         $this->rows[ $line_no ] = array( $safe, $row_array, $this->area );
          $this->updated = false;
 
          return $line_no;
       }
+
+   /*! \brief wrapper to add empty-row. */
+   function add_empty_row()
+   {
+      $this->add_row( array( 'TEXT', '&nbsp;' ));
+   }
 
    /*!
     * \brief Add another form into this.
@@ -369,26 +613,34 @@ class Form
    /*! \brief Create a string from the rows */
    function create_form_string()
       {
-         $formstr = "";
+         $has_layout = isset($this->layout[FLAYOUT_GLOBAL]);
+         $rootformstr = "";
 
          if( count($this->rows) <= 0 )
          {
-            if( $this->echo_form_start_now )
-               $formstr .= $this->print_end();
-            return $formstr;
+            if ( !$this->get_config(FEC_EXTERNAL_FORM) and $this->echo_form_start_now )
+               $rootformstr .= $this->print_end();
+            return $rootformstr;
          }
 
-         if( !$this->echo_form_start_now )
-            $formstr .= $this->print_start_default();
+         if ( !$this->get_config(FEC_EXTERNAL_FORM) and !$this->echo_form_start_now )
+            $rootformstr .= $this->print_start_default();
 
-         $formstr .= "  <TABLE class=FormClass>\n"; //form table
+         $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
+         $rootformstr .= "  <TABLE $table_attbs class=FormClass>\n"; //form table
 
          ksort($this->rows);
 
+         // prepare area-grouping
+         $area_rows = array();
+         foreach( $this->areas as $area => $tmp )
+            $area_rows[$area] = '';
+
          foreach( $this->rows as $row_args )
             {
-               list( $this->safe_text, $row_args ) = $row_args;
+               list( $this->safe_text, $row_args, $curr_area ) = $row_args;
                $args = array_values( $row_args );
+               $formstr = "";
 
                $current_arg = 0;
                $this->nr_columns = 0;
@@ -478,15 +730,98 @@ class Form
                   $result .= $this->print_td_end();
 
                if( $result )
-                  $formstr .= "    <TR>\n$result\n    </TR>\n";
+               {
+                  $tr_attrs = $this->get_config(FEC_TR_ATTR);
+                  $formstr .= "    <TR";
+                  $formstr .= ( $tr_attrs != '') ? " $tr_attrs" : '';
+                  $formstr .= ">\n$result\n    </TR>\n";
+                  $area_rows[$curr_area] .= $formstr;
+               }
             }
 
-         $formstr .= "  </TABLE>\n";
+         // build area-groups
+         if ( $has_layout )
+            $rootformstr .= $this->build_areas( $this->layout[FLAYOUT_GLOBAL], $area_rows );
+         else
+            $rootformstr .= implode( "\n", $area_rows );
 
-         $formstr .= $this->print_end();
+         $rootformstr .= "  </TABLE>\n";
 
-         return $formstr;
+         if ( !$this->get_config(FEC_EXTERNAL_FORM) )
+            $rootformstr .= $this->print_end();
+
+         return $rootformstr;
        }
+
+   /*!
+    * \brief Return form pressed into areas grouped as specified by layout (called recursively).
+    * \param $L layout-array: is-arr(vert|horiz) OR is-num(=area)
+    * \param $AR AR[areanum] contains the tablerows as string for the different areas
+    * \internal
+    */
+   function build_areas( $L, $AR )
+   {
+      $areastr = '';
+
+      if ( is_numeric($L) )
+      {
+         $table_attbs = $this->get_areaconf( $L, FAC_TABLE );
+         $tdtable_attbs = $this->get_areaconf( $L, FAC_ENVTABLE );
+         $areastr .= "<!-- Area #$L -->\n";
+         $areastr .= "<TR><TD $tdtable_attbs><TABLE $table_attbs class=FormClass>\n";
+         $areastr .= $AR[$L];
+         $areastr .= "</TABLE></TD></TR>\n";
+         return $areastr;
+      }
+
+      if ( !is_array($L) )
+         error("ERROR: Form.build_areas(): processing-error with bad type for layout [$L]");
+      if ( count($L) == 0 )
+         error("ERROR: Form.build_areas(): processing-error with empty-layout-array");
+
+      $table_attbs_all = $this->get_areaconf( FAREA_ALL, FAC_TABLE );
+
+      if ( $L[0] == 'H' )
+      { // horizontal grouping
+         $areastr .= "<TR valign=top><TD><TABLE $table_attbs_all class=FormClass><TR valign=top>\n";
+         for ($i=1; $i < count($L); $i++)
+         {
+            $area = $L[$i];
+
+            $table_attbs = (is_numeric($area)) ? $this->get_areaconf( $area, FAC_TABLE ) : $table_attbs_all;
+            $tdtable_attbs = $this->get_areaconf( (is_numeric($area) ? $area : FAREA_ALL), FAC_ENVTABLE );
+            $areastr .= "<TD $tdtable_attbs><TABLE $table_attbs class=FormClass>\n";
+            $areastr .= $this->build_areas( $L[$i], $AR );
+            $areastr .= "</TABLE></TD>\n";
+         }
+         $areastr .= "</TR></TABLE></TD></TR>\n";
+      }
+      else
+      { // vertical grouping
+         $areastr .= "<TR valign=top><TD><TABLE $table_attbs_all class=FormClass>\n";
+         foreach( $L as $area )
+         {
+            $areastr .= $this->build_areas( $area, $AR );
+         }
+         $areastr .= "</TABLE></TD></TR>\n";
+      }
+
+      return $areastr;
+   }
+
+   /*!
+    * \brief Returns area-config for specified area-num (num|0|FAREA_ALL) for context given.
+    * \internal
+    */
+   function get_areaconf( $area, $context )
+   {
+      if ( isset($this->areaconf[$area][$context]) )
+         return $this->areaconf[$area][$context]; // special first
+      if ( $area !== FAREA_ALL ) // all already checked
+         if ( isset($this->areaconf[FAREA_ALL][$context]) )
+            return $this->areaconf[FAREA_ALL][$context]; // all
+      return '';
+   }
 
    /*!
     * \brief Function for making a description string in the standard form.
@@ -650,6 +985,7 @@ class Form
     */
    function create_string_func_tab( &$result, $args )
       {
+         //JUG: $result .= "&nbsp;";
          //equal: $result .= "<td></td>";
       }
 
@@ -686,6 +1022,27 @@ class Form
          $this->nr_columns+= $colspan;
       }
 
+   /*!
+    * \brief Function for making new filter-element string in the standard form
+    * \internal
+    */
+   function create_string_func_filter( &$result, $args )
+   {
+      // args: SearchFilters, filter-id
+      // note: filter-attr could be implemented with additional 'FILTERX'-element
+      $result .= $this->print_insert_filter( $args[0], $args[1], array() );
+   }
+
+   /*!
+    * \brief Function to include filter-error-string in the standard form if filter has error, return '' otherwise
+    * \internal
+    */
+   function create_string_func_filtererror( &$result, $args )
+   {
+      // args: SearchFilters, filter-id, prefix, suffix, with_syntax
+      $result .= $this->print_insert_filtererror( $args[0], $args[1], $args[2], $args[3], $args[4] );
+   }
+
 
    /*!
     * \brief This will start a standard form.
@@ -693,6 +1050,7 @@ class Form
     * \param $name        The name of the form, might be useful for scripting.
     * \param $action_page The page to access when submitting.
     * \param $method      FORM_GET or FORM_POST (GET means in url and POST hidden).
+    * \param $class       CSS-class, default FormClass
     */
    function print_start( $name, $action_page, $method, $class='FormClass' )
    {
@@ -754,6 +1112,7 @@ class Form
     */
    function print_description( $description )
       {
+         //! \todo no safe-text needed here ?
          return "      <TD align=\"right\">$description:</TD>\n";
       }
 
@@ -911,7 +1270,7 @@ class Form
       }
 
    /*!
-    * \brief This will insert a text input box in a standard form.
+    * \brief This will insert a submit button in a standard form.
     *
     * \param $name The field name that will be used as the variable name
     *              in the GET or POST.
@@ -924,12 +1283,12 @@ class Form
    }
 
    /*!
-    * \brief This will insert a text input box in a standard form.
+    * \brief This will insert a submit button in a standard form.
     *
     * \param $name The field name that will be used as the variable name
     *              in the GET or POST.
     * \param $text The text on the submit button.
-    * \param $attbs Additionnal attributs.
+    * \param $attbs Additionnal attributes.
     */
    function print_insert_submit_buttonx( $name, $text, $attbs )
    {
@@ -961,6 +1320,43 @@ class Form
       }
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
          $this->get_input_attbs() . $str . ">\n";
+   }
+
+   /*!
+    * \brief This will insert filter-elements.
+    *
+    * \param $filters SearchFilters-object
+    * \param $fid     filter-id
+    * \param $attr    additional attributes to print filter-form-elements, default empty-array
+    */
+   function print_insert_filter( $filters, $fid, $attr = array() )
+   {
+      $filter = $filters->get_filter($fid);
+      if ( isset($filter) )
+         return $filter->get_input_element( $filters->Prefix, $attr );
+      else
+         return '';
+   }
+
+   /*!
+    * \brief This will insert filter-error if filter has an error.
+    *
+    * \param $filters   SearchFilters-object
+    * \param $fid       filter-id
+    * \param $prefix    error-msg prefixed with, default ''
+    * \param $suffix    error-msg suffixed with, default ''
+    * \param $with_syntax syntax-description appended to error-msg, default true
+    */
+   function print_insert_filtererror( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = true )
+   {
+      $filter = $filters->get_filter($fid);
+      if ( !isset($filter) or !$filter->has_error() )
+         return '';
+
+      $syntax = $filter->get_syntax_description();
+      if ( $with_syntax and $syntax != '' )
+         $syntax = "; $syntax";
+      return $prefix . T_('Error') . ': ' . make_html_safe( $filter->errormsg() . $syntax ) . $suffix;
    }
 
    /*!
@@ -1016,7 +1412,7 @@ class Form
 
    function get_hiddens( &$hiddens)
    {
-      $hiddens = array_merge( (array)$hiddens, $this->hiddens); 
+      $hiddens = array_merge( (array)$hiddens, $this->hiddens);
       foreach ($this->attached as $attach)
       {
          $attach->get_hiddens( $hiddens);
