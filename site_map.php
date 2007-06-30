@@ -96,6 +96,7 @@ function item($text,$link,$working, $level,$last=false)
          item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
          item(T_('Message list'), "list_messages.php", true, 1, true);
          {
+            item(T_('Search messages'), "search_messages.php", true, 2);
             item(T_('Edit message folders'), "edit_folders.php", true, 2, true);
          }
       }
@@ -104,19 +105,32 @@ function item($text,$link,$working, $level,$last=false)
 
       item(T_('Users'), "users.php", true, 0);
       {
-         item(T_('User info'), "userinfo.php", false, 1, true);
+         item(T_('User info'), "userinfo.php", false, 1, false);
+         {
+            item(T_('Show opponents'), "user_stats.php", false, 2, true);
+         }
+         item(T_('Show my opponents'), "user_stats.php", true, 1, true);
       }
 
       item(T_('Forum'), "forum/index.php", true, 0);
       {
-         item(T_('Thread list'), "forum/list.php", false, 1, true);
+         item(T_('Thread list'), "forum/list.php", false, 1);
          {
             item(T_('Read forum'), "forum/read.php", false, 2);
             item(T_('New topic'), "forum/post.php", false, 2, true);
          }
+
+         item(T_('Search topics'), "forum/search.php", true, 1, true);
       }
 
       item(T_('Games'), "show_games.php?uid=all".URI_AMP."finished=1", true, 0);
+      {
+         item(T_('Show all running games'), "show_games.php?uid=all", true, 1);
+         item(T_('Show all finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true, 1);
+         item(T_('Show my running games'), "show_games.php?uid=$id", true, 1);
+         item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true, 1);
+         item(T_('Show my observed games'), "show_games.php?observe=1", true, 1, true);
+      }
 
       item(T_('Translate'), "translate.php", true, 0);
 
