@@ -20,14 +20,24 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Forum";
 
+chdir("../");
+require_once( "include/std_functions.php" );
+require_once( "include/std_classes.php" );
+require_once( "include/form_functions.php" );
+require_once( "include/filter.php" );
+chdir("forum/");
 require_once( "forum_functions.php" );
+
 {
+   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error("not_logged_in");
 
+   $uid = $player_row["ID"];
+   $page = "search.php?";
    $is_moderator = false;
    $links = LINKPAGE_SEARCH;
 
@@ -45,51 +55,136 @@ require_once( "forum_functions.php" );
 
 
    $title = T_('Forum') . " - " . T_('Search');
+   $prefix = '';
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
-   $offset = max(0,(int)@$_REQUEST['offset']);
-   $search_terms = get_request_arg('search_terms');
-   $bool = (int)(@$_REQUEST['bool']) > 0;
-
-
-   // Search form
-   echo '
-<CENTER>
-<FORM name="search" action="search.php" method="GET">
-';
-
-   echo T_('Search terms') . ':&nbsp;&nbsp;';
-
-   echo '<INPUT type="text" name="search_terms" value="' 
-         . textarea_safe($search_terms) . '" tabindex="1" size="40" maxlength="80">';
-
-   echo '
-        <INPUT type="submit" name="action" value="'.T_('Search').'" tabindex="2">
-<p>
-        <INPUT type="checkbox" name="bool" value="1"' . ($bool ? ' checked' : '' ) 
-            . ' tabindex="3">' . T_('Boolean mode') . '
-</p></FORM>
-</CENTER>
-';
-
-   if( $search_terms )  // Display results
+   if ( @$_GET[FFORM_RESET_ACTION] )
    {
-      $query = "SELECT Posts.*, " .
-         "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
-         "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
-         "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
-         "MATCH (Subject,Text) AGAINST ('".mysql_addslashes($search_terms)."'" .
-         ($bool ? ' IN BOOLEAN MODE' : '') . ") as Score, " .
-         "Players.ID AS uid, Players.Name, Players.Handle, " .
-         "Forums.Name as ForumName " .
-         "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID " .
-         "LEFT JOIN Forums ON Forums.ID = Posts.Forum_ID " .
-         "WHERE MATCH (Subject,Text) AGAINST ('".mysql_addslashes($search_terms)."'" .
-         ($bool ? ' IN BOOLEAN MODE' : '') . ") AND Approved='Y' " .
-         "AND PosIndex>'' " . // '' == inactivated (edited)
-         ($bool ? 'ORDER BY TIME DESC ' : '') .
-         "LIMIT $offset,$MaxSearchPostsPerPage";
+      $offset = 0;
+      $sql_order = '';
+   }
+   else
+   {
+      $offset = max(0,(int)@$_REQUEST['offset']);
+      $sql_order = get_request_arg( 'order', '' );
+   }
+
+   // build forum-array for filter
+   //! \todo build statically somewhere, so it's only read once: arr( Name => Forum_ID )
+   $arr_forum = array( T_('All') => '' );
+   $query = "SELECT ID, Name FROM Forums ORDER BY SortOrder";
+   $result = mysql_query($query)
+      or error('mysql_query_failed','forum_name_search.find');
+   while( $row = mysql_fetch_array( $result ) )
+      $arr_forum[$row['Name']] = "Posts.Forum_ID=" . $row['ID'];
+
+   // for order-form-element
+   $arr_order = array(
+      'Score DESC, Time DESC'  => T_('Term Relevance'),
+      'Time DESC'              => T_('Message Created'),
+      'Posts.Lastchanged DESC' => T_('Message Last Changed'),
+   );
+
+   // static filters
+   $ffilter = new SearchFilter();
+   $ffilter->add_filter( 1, 'Selection', $arr_forum, true);
+   $ffilter->add_filter( 2, 'MysqlMatch', 'Subject,Text', true);
+   $ffilter->add_filter( 3, 'Text', '(P.Handle #OP #VAL OR P.Name #OP #VAL)', true,
+         array( FC_SIZE => 16, FC_SQL_TEMPLATE => 1 ));
+   $ffilter->add_filter( 4, 'Selection',     #! \todo Handle New Forum-Posts
+         array( T_('All messages') => '',
+                T_('First messages') => 'Posts.Parent_ID=0' ),
+         true);
+   $ffilter->add_filter( 5, 'RelativeDate', 'Posts.Time', true,
+         array( FC_SIZE => 12, FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL ) );
+   #global $NOW;
+   #$ffilter->add_filter( 6, 'Boolean', new QuerySQL( SQLP_FIELDS, "(Posts.Time + INTERVAL ".DAYS_NEW_END." DAY > FROM_UNIXTIME($NOW) AND ISNULL(FR.Time) OR Posts.Time > FR.Time) AS NewPost", SQLP_FROM, "LEFT JOIN Forumreads FR ON FR.User_ID=$uid AND FR.Thread_ID=Posts.Thread_ID", SQLP_HAVING, "NewPost=1" ), true, array( FC_LABEL => T_('Restrict to new messages') ) ); //! \todo Handle New Forum-Posts
+   $ffilter->init(); // parse current value from _GET
+   $filter2 =& $ffilter->get_filter(2);
+
+   // form for static filters
+   $fform = new Form( 'tableFSF', "{$page}#TableFSF", FORM_GET );
+   $fform->set_config( FEC_TR_ATTR, 'valign=top' );
+   $fform->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );
+   $fform->attach_table($ffilter); // add hiddens
+
+   $fform->add_row( array(
+         'DESCRIPTION', T_('Forum'),
+         'FILTER',      $ffilter, 1 ));
+   $fform->add_row( array(
+         'DESCRIPTION', T_('Search Terms'),
+         'CELL',        1, 'align=left width=500',
+         'FILTER',      $ffilter, 2,
+         'BR',
+         'FILTERERROR', $ffilter, 2, $FERR1, $FERR2."<BR>", true,
+         ));
+   $fform->add_row( array(
+         'DESCRIPTION', T_('Author'),
+         'FILTER',      $ffilter, 3,
+         'FILTERERROR', $ffilter, 3, "<br>$FERR1", $FERR2, true,
+         ));
+   $fform->add_row( array(
+         'DESCRIPTION', T_('Message Scope'),
+         'FILTER',      $ffilter, 4,
+         'BR',
+         #'FILTER',      $ffilter, 6,
+         ));
+   $fform->add_row( array(
+         'DESCRIPTION', T_('Date'),
+         'CELL',        1, 'align=left',
+         'FILTER',      $ffilter, 5,
+         'FILTERERROR', $ffilter, 5, "<br>$FERR1", $FERR2, true,
+         ));
+   $fform->add_empty_row();
+   $fform->add_row( array(
+         'DESCRIPTION', T_('Order'),
+         'SELECTBOX',   'order', 1, $arr_order, $sql_order, false, ));
+   $fform->add_row( array(
+         'TAB',
+         'CELL',        1, 'align=left',
+         'OWNHTML',     implode( '', $ffilter->get_submit_elements() ) ));
+
+   echo "<br><center>\n"
+      . $fform->get_form_string()
+      . "</center><br><br>\n";
+
+   $query_filter = $ffilter->get_query(); // clause-parts for filter
+   if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_filter->get_select()) . "<br>\n";
+   if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe( implode(' | ', $filter2->get_terms()) ) . "<br>\n";
+
+   if( $ffilter->has_query() )  // Display results
+   {
+      // get clause-part for mysql-match as select-col
+      if ( is_null($filter2->get_query()) )
+         $query_match = "1";
+      else
+         $query_match = $filter2->get_match_query_part();
+
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS,
+         'Posts.*',
+         'UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp',
+         'UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp',
+         'UNIX_TIMESTAMP(Posts.Time) AS Timestamp',
+         "$query_match as Score",
+         'P.ID AS uid', 'P.Name', 'P.Handle',
+         'Forums.Name as ForumName' );
+      $qsql->add_part( SQLP_FROM,
+         'Forums',
+         'JOIN Posts ON Forums.ID=Posts.Forum_ID ',
+         'JOIN Players P ON Posts.User_ID=P.ID ' );
+      $qsql->add_part( SQLP_WHERE,
+         "Approved='Y'",
+         "PosIndex>''" ); // '' == inactivated (edited)
+      $qsql->merge($query_filter);
+
+      if ( $sql_order)
+         $qsql->add_part( SQLP_ORDER, $sql_order );
+      $qsql->add_part( SQLP_LIMIT, "$offset,$MaxSearchPostsPerPage" );
+      $query = $qsql->get_select();
+
+      if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) . "<br>\n";
 
       $result = mysql_query($query)
          or error("mysql_query_failed",'forum_search.find');
@@ -105,14 +200,22 @@ require_once( "forum_functions.php" );
       if( $offset > 0 ) $links |= LINK_PREV_PAGE;
       if( $show_rows < $nr_rows ) $links |= LINK_NEXT_PAGE;
 
+      // build navi-URL for paging
+      $rp = $ffilter->get_req_params();
+      #$rp->add_entry( 'offset', $offset ); set in forum_start_table-func
+      $rp->add_entry( 'order',  $sql_order );
 
-      forum_start_table('Search', $headline, $links, $cols);
+      // show resultset of search
+      $search_terms = implode('|', $filter2->get_terms() );
+      $show_score = true; // used in draw_post per global-var
+
+      forum_start_table('Search', $headline, $links, $cols, $rp);
       echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
       while( $row = mysql_fetch_array( $result ) )
       {
          extract($row);
-         draw_post('SearchResult', false, $row['Subject'], $row['Text']);
+         draw_post('SearchResult', false, $row['Subject'], $row['Text'], null, $search_terms);
          echo "<tr><td colspan=$cols></td></tr>\n";
       }
       echo "</table></td></tr>\n";
