@@ -21,9 +21,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Messages";
 
 require_once( "include/std_functions.php" );
+require_once( "include/std_classes.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
+require_once( "include/filter.php" );
 
 {
    connect2mysql();
@@ -40,7 +42,7 @@ require_once( "include/message_functions.php" );
 
    $my_folders = get_folders($my_id);
 
-/* 
+/*
    *folder* args rules:
    - no &folder= neither &current_folder= set:
        assume enter FOLDER_ALL_RECEIVED without move
@@ -88,18 +90,18 @@ require_once( "include/message_functions.php" );
    }
 
    $page = '';
+   $qsql = new QuerySQL(); // add extra-parts to SQL-statement
    if( $find_answers > 0 )
    {
       $title = T_('Answers list');
       $page.= URI_AMP.'find_answers=' . $find_answers ;
-      $where = "AND Messages.ReplyTo=$find_answers";
+      $qsql->add_part( SQLP_WHERE, "M.ReplyTo=$find_answers" );
       $current_folder = FOLDER_NONE;
       $folderstring = 'all';
    }
    else
    {
       $title = T_('Message list');
-      $where = "";
 
       if( $current_folder == FOLDER_ALL_RECEIVED )
       {
@@ -124,6 +126,7 @@ require_once( "include/message_functions.php" );
 
    start_page($title, true, $logged_in, $player_row );
 
+   $terms = get_request_arg('terms');
 
    $mtable = new Table( 'message', 'list_messages.php' . $page );
    $mtable->set_default_sort( 'date', 1);
@@ -133,11 +136,10 @@ require_once( "include/message_functions.php" );
    $marked_form->set_tabindex(1);
    $marked_form->attach_table( $mtable);
 
-
    $order = $mtable->current_order_string();
    $limit = $mtable->current_limit_string();
 
-   $result = message_list_query($my_id, $folderstring, $order, $limit, $where);
+   list( $result ) = message_list_query($my_id, $folderstring, $order, $limit, $qsql);
 
    $show_rows = mysql_num_rows($result);
 
@@ -145,7 +147,7 @@ require_once( "include/message_functions.php" );
    {
       $row = mysql_fetch_assoc( $result);
       $mid = $row["mid"];
-      jump_to( "message.php?mode=ShowMessage".URI_AMP."mid=$mid");
+      jump_to( "message.php?mode=ShowMessage".URI_AMP."mid=$mid".URI_AMP."terms=".urlencode($terms) );
    }
 
    $show_rows = $mtable->compute_show_rows( $show_rows);
@@ -158,7 +160,8 @@ require_once( "include/message_functions.php" );
    $can_move_messages =
      message_list_table( $mtable, $result, $show_rows
              , $current_folder, $my_folders
-             , false, $current_folder == FOLDER_NEW, $toggle_marks) ;
+             , /*sort*/false, $current_folder == FOLDER_NEW, $toggle_marks
+             , /*full-details*/false, /*only-TH*/null, $terms);
    //mysql_free_result($result); //already free
 
    $mtable->echo_table();
@@ -207,10 +210,13 @@ require_once( "include/message_functions.php" );
    echo $marked_form->print_end();
 
 
+   $menu_array = array();
+   $menu_array[ T_('Search messages') ] = "search_messages.php";
+
    if( $find_answers > 0 )
-      $menu_array = array( T_('Back to message') => "message.php?mode=ShowMessage".URI_AMP."mid=$find_answers" );
+      $menu_array[ T_('Back to message') ] = "message.php?mode=ShowMessage".URI_AMP."mid=$find_answers".URI_AMP."terms=".urlencode($terms);
    else
-      $menu_array = array( T_('Edit folders') => "edit_folders.php" );
+      $menu_array[ T_('Edit folders') ] = "edit_folders.php";
 
    end_page(@$menu_array);
 }
