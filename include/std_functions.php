@@ -38,6 +38,8 @@ if (!isset($page_microtime))
 
 require_once( "include/translation_functions.php" );
 
+require_once( "include/tokenizer.php" );
+
 
 // Server birth date:
 define('BEGINYEAR', 2001);
@@ -62,6 +64,12 @@ else
 
 define('ALLOW_JSCRIPT', 0);
 
+$DEBUG_SQL = false; // for debugging filter showing where-clause on page
+
+define('LAYOUT_FILTER_IN_TABLEHEAD', true); // default is to show filters within tablehead (not below rows)
+define('LAYOUT_FILTER_EXTFORM_HEAD', true); // default is to show external-filter-form above filter-table
+
+define('TD_EMPTY', "  <td>&nbsp;</td>\n");
 
 //----- { layout : change in dragon.css too!
 $bg_color='"#f7f5e3"';
@@ -89,6 +97,7 @@ $sgf_color='"#d50047"';
 
 $max_links_in_main_menu=5;
 
+define('MAXROWS_PER_PAGE', 100);
 $RowsPerPage = 50;
 define('LIST_ROWS_MODULO', 4);
 
@@ -173,6 +182,7 @@ define('POSX_TIME', -4);
 
 define('SCORE_RESIGN', 1000);
 define('SCORE_TIME', 2000);
+define('SCORE_MAX', min(SCORE_RESIGN,SCORE_TIME) - 1); // =min(SCORE_...) - 1
 
 define('STONE_VALUE',13); // 2 * conventional komi
 define('MIN_BOARD_SIZE',5);
@@ -304,6 +314,19 @@ function array_value_to_key_and_value( $array )
   return $new_array;
 }
 
+// returns string-representation of flat map: "key=[val], ..."
+function map_to_string( $map, $sep = ', ' )
+{
+   if ( !is_array($map) )
+      return '';
+
+   $arr = array();
+   foreach( $map as $key => $val )
+      array_push( $arr, "$key=[$val]" );
+
+   return implode( $sep, $arr );
+}
+
 /**
  * Quick search in a sorted array. $haystack must be sorted.
  * will return:
@@ -371,7 +394,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    {
       case 'status.php':
          // RSS Autodiscovery:
-         echo "\n <link rel=\"alternate\" type=\"application/rss+xml\"" 
+         echo "\n <link rel=\"alternate\" type=\"application/rss+xml\""
              ." title=\"$FRIENDLY_SHORT_NAME Status RSS Feed\" href=\"/rss/status.php\">";
       break;
    }
@@ -449,8 +472,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
       {
          case 'status.php':
-            $tools_array['rss/status.php'] = 
-               array( $base_path.'images/rss-icon.png', 
+            $tools_array['rss/status.php'] =
+               array( $base_path.'images/rss-icon.png',
                       'RSS',
                       $FRIENDLY_SHORT_NAME . ' ' . T_("Status RSS Feed")
                      );
@@ -459,6 +482,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    }
 
 
+   $body_width = '';
    if( !$logged_in or $is_down or $printable )
    {
       echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
@@ -474,7 +498,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $br = '';
    }
    else
-   {
+   { // vertical
       echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
          . "\n <tr>"
          . "\n  <td valign=top rowspan=2>\n";
@@ -482,9 +506,10 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       make_tools( $tools_array, 4);
       echo "\n  </td>";
       $br = '<br>';
+      $body_width = 'width="90%"';
    }
    //this <table><tr><td> is left open until page end
-   echo "\n  <td id=\"pageBody\">$br\n\n";
+   echo "\n  <td $body_width id=\"pageBody\">$br\n\n";
 
    sysmsg(get_request_arg('sysmsg'));
 
@@ -684,7 +709,7 @@ function make_menu_horizontal($menu_array)
                $t2 = 'dragonlogo_bl.jpg';
                $width = "*";
             }
-            else 
+            else
             {
                $t1 = 100-$cumwidth;
                $t1 = " width=\"$t1%\" align=right";
@@ -963,7 +988,7 @@ function add_line_breaks( $str)
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends:
 $html_code_closed['cell'] = '|b|i|u|strong|em|tt|color|';
-$html_code_closed['msg'] = '|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|quote|home|';
+$html_code_closed['msg'] = '|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|quote|home|term|';
 $html_code_closed['game'] = $html_code_closed['msg'].'h|hidden|c|comment|';
 //$html_code_closed['faq'] = '|'; //no closed check
 $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
@@ -988,7 +1013,7 @@ define( 'ALLOWED_APOS', "`allowedapos`");
    Check for quote mismatches.
    If so, simply add the missing quote at the (supposed?) end of tag.
 */
-//attribut not string - allowed characters (HTML4.01): [-_:.a-zA-Z0-9] 
+//attribut not string - allowed characters (HTML4.01): [-_:.a-zA-Z0-9]
 function parse_atbs_safe( &$trail, &$bad)
 {
    $head = '';
@@ -1140,9 +1165,9 @@ function parse_html_safe( $msg, $some_html)
 {
  global $html_code, $html_code_closed;
    $bad = 0;
-   $str = parse_tags_safe( $msg, $bad, 
-               $html_code[$some_html], 
-               $html_code_closed[$some_html], 
+   $str = parse_tags_safe( $msg, $bad,
+               $html_code[$some_html],
+               $html_code_closed[$some_html],
                '') ;
    $str.= $msg;
    return $str;
@@ -1228,6 +1253,12 @@ $html_safe_preg = array(
   => ALLOWED_LT."a href=".ALLOWED_QUOT.$HOSTBASE."\\1".ALLOWED_QUOT.ALLOWED_GT,
  "%".ALLOWED_LT."/home *".ALLOWED_GT."%is"
   => ALLOWED_LT."/a".ALLOWED_GT,
+
+//<term>...</term> =>translated to <div class=term>..</div>
+ "%".ALLOWED_LT."term([^`\n\t]*)".ALLOWED_GT."%is"
+  => ALLOWED_LT."font color=darkred".ALLOWED_GT.ALLOWED_LT."b".ALLOWED_GT,
+ "%".ALLOWED_LT."/term *".ALLOWED_GT."%is"
+  => ALLOWED_LT."/b".ALLOWED_GT.ALLOWED_LT."/font".ALLOWED_GT,
 
 //reverse to bad the skiped (faulty) ones
  "%".ALLOWED_LT."(/?(home|quote|tt|code|color|user|send|game|mailto|http)[^`]*)"
@@ -1347,6 +1378,41 @@ function game_tag_filter( $msg)
    return trim($str);
 }
 
+// replace case-insensitive regex-terms in text with "<term>..</term>" used to highlight search-texts.
+//   take XML-tags in text into account if $is_xml=true
+// param $rx_terms: terms separated by '|', e.g. word1|word2|word3; can be also valid regex, but be cautious with .* (!)
+// param $is_xml: if true, text is treated as XML, class XmlTokenizer is used to parse the XML
+// NOTE: invalid XML-tags in text are not replaced, because then they also can't be
+//       displayed correctly -> so invalid tags matching the terms can also be highlighted.
+function mark_terms( $text, $rx_terms, $is_xml = true )
+{
+   if ( $rx_terms == '' )
+      return $text;
+
+   // don't handle text as xml
+   $regex = "/($rx_terms)/is";
+   if ( !$is_xml )
+      return preg_replace( $regex, "<term>\\1</term>", $text );
+
+   // parse XML
+   $tokenizer = new XmlTokenizer();
+   $success = $tokenizer->parse($text); // ignore errors
+   $tokens = $tokenizer->tokens();
+
+   // mark terms only in text-tokens
+   $arr_out = array();
+   foreach( $tokens as $tok )
+   {
+      if ( $tok->get_type() == TOK_TEXT )
+         $t = preg_replace( $regex, "<term>\\1</term>", $tok->get_token() );
+      else
+         $t = substr( $text, $tok->spos, $tok->get_endpos() - $tok->spos + 1 ); // copy other tokens
+
+      array_push( $arr_out, $t );
+   }
+   return implode('', $arr_out);
+}
+
 function yesno( $yes)
 {
    return ( $yes && strtolower(substr($yes,0,1))!='n' ) ? T_('Yes') : T_('No');
@@ -1381,40 +1447,69 @@ function score2text($score, $verbose, $keep_english=false)
                : $color . '+' . abs($score) );
 }
 
+// returns rows checked against min/max-limits; return default-rows if unset or exceeding limits
+function get_maxrows( $rows, $maxrows, $defrows )
+{
+   return ( is_numeric($rows) and $rows > 0 and $rows <= $maxrows ) ? $rows : $defrows;
+}
+
+// returns array with standard rows and with customized maxrows (added to standard list at the right place)
+// RETURN: array ( row_count => row_count, ...); ready to be used for selectbox
+function build_maxrows_array( $maxrows )
+{
+   global $RowsPerPage;
+
+   $maxrows = get_maxrows( $maxrows, MAXROWS_PER_PAGE, $RowsPerPage );
+   $arr_maxrows = array();
+   foreach( array( 5, 10, 15, 20, 25, 30, 40, 50, 75, 100 ) as $k)
+      $arr_maxrows[$k] = $k;
+   $arr_maxrows[$maxrows] = $maxrows; // add manually added value
+   ksort( $arr_maxrows, SORT_NUMERIC );
+   return $arr_maxrows;
+}
+
 // Makes url from a base page and an array of variable/value pairs
 // if $sep is true, a '?' or '&' is added
+// NOTE: Since PHP5, there is http_build_query() that do nearly the same thing
+//
 // Example:
-// make_url('test.php', array('a'=> 1, 'b' => 'foo'), false)  gives
-// 'test.php?a=1&b=foo'
-//Since PHP5, there is http_build_query() that do nearly the same thing
+//    make_url('test.php', array('a'=> 1, 'b => 'foo'), false)  gives  'test.php?a=1&b=foo'
+//
+// Example (also handle value-arrays):
+//    make_url('arr.php', array('a' => array( 44, 55 ))  gives  'arr.php?a[]=44&a[]=55'
 function make_url($page, $args, $sep=false)
 {
-   $url = $page;
-
-   $separator = ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
+   $url = '';
    if( is_array( $args) )
-   foreach( $args as $var=>$value )
    {
-      if( empty($value) || is_numeric($var) )
-         continue;
-      if( !is_array($value) )
+      $arr = array();
+      foreach( $args as $var=>$value )
       {
-         $url .= $separator . $var . '=' . urlencode($value);
-         $separator = URI_AMP;
-         continue;
+         if( empty($value) || is_numeric($var) )
+            continue;
+         if( is_array($value) )
+         {
+            $var .= '%5b%5d'; //encoded []
+            foreach( $value as $tmp )
+               array_push( $arr, $var . '=' . urlencode($tmp) );
+         }
+         else
+            array_push( $arr, $var . '=' . urlencode($value) );
       }
-      $var .= '%5b%5d'; //encoded []
-      foreach( $value as $tmp )
-      {
-         $url .= $separator . $var . '=' . urlencode($tmp);
-         $separator = URI_AMP;
-      }
+      $url = implode( URI_AMP, $arr );
    }
 
-   if( $sep )
-      $url .= $separator;
+   // has no '?' and want sep or has URL-vars
+   if ( !is_numeric(strpos($page, '?')) and ( $url != '' or $sep ) )
+      $page .= '?';
 
-   return $url;
+   $page .= $url;
+
+   // add URI_AMP if wanted and not already has
+   if( $sep and substr($page, -strlen(URI_AMP)) != URI_AMP )
+      $page .= URI_AMP;
+
+   return $page;
 }
 
 //see also the PHP parse_str() and parse_url()
@@ -1445,6 +1540,16 @@ function split_url($url, &$page, &$args, $sep='')
          }
       }
    }
+}
+
+// chop off trailing URI_AMP and '?' from passed url/query
+function clean_url( $url )
+{
+   if( substr( $url, -strlen(URI_AMP) ) == URI_AMP ) // strip '&'
+      $url = substr( $url, 0, -strlen(URI_AMP) );
+   if( substr( $url, -1 ) == '?' ) // strip '?'
+      $url = substr( $url, 0, -1);
+   return $url;
 }
 
 // relative to the calling URL, not to the current dir
@@ -1487,7 +1592,7 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
 //Warning: + (an URI reserved char) must be substitued with %2B in 'handle'.
    $uid_nam = 'uid';
    $uid = @$_REQUEST[$uid_nam];
-   $uhandle = '';  
+   $uhandle = '';
    if( !($uid > 0) )
    {
       $uid = 0;
@@ -1631,7 +1736,7 @@ function activity_string( $act_lvl)
            ( $act_lvl == 1
              ? '<img align=middle alt="*" src="'.$base_path.'images/star2.gif">'
              : '<img align=middle alt="*" src="'.$base_path.'images/star.gif">'
-              .'<img align=middle alt="*" src="'.$base_path.'images/star.gif">' 
+              .'<img align=middle alt="*" src="'.$base_path.'images/star.gif">'
              ) );
 }
 
@@ -1782,7 +1887,7 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
          $url = "userinfo.php?";
          $class = 'User'.$class;
       }
-      $url.= ( $byid ? "uid=$player_ref" 
+      $url.= ( $byid ? "uid=$player_ref"
                  : UHANDLE_NAME."=".str_replace('+','%2B',$player_ref) );
       $url = 'A href="' . $base_path. $url . '"';
       if( $class )
@@ -1804,6 +1909,14 @@ function is_on_observe_list( $gid, $uid )
 {
    $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid")
       or error('mysql_query_failed','std_functions.is_on_observe_list');
+   return( @mysql_num_rows($result) > 0 );
+}
+
+// returns true, if there are observers for specified game
+function has_observers( $gid )
+{
+   $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid LIMIT 1")
+      or error('mysql_query_failed','std_functions.has_observers');
    return( @mysql_num_rows($result) > 0 );
 }
 
@@ -1884,8 +1997,11 @@ function split_RGBA($color, $alpha=NULL)
          );
 }
 
-function blend_alpha_hex($color, $bgcolor="f7f5e3")
+// param bgcolor: if null, use default
+function blend_alpha_hex($color, $bgcolor=null)
 {
+   if ( is_null($bgcolor) )
+      $bgcolor = "f7f5e3";
    list($r,$g,$b,$a)= split_RGBA($color, 0);
    list($br,$bg,$bb,$ba)= split_RGBA($bgcolor);
    return blend_alpha($r,$g,$b,$a,$br,$bg,$bb);
@@ -1906,13 +2022,13 @@ function limit($val, $minimum, $maximum, $default)
       if( strlen( $val) > 1 )
       {
          if( substr($val,-1) == '%'
-               && is_numeric($minimum) 
-               && is_numeric($maximum) 
+               && is_numeric($minimum)
+               && is_numeric($maximum)
                )
             $val = ($maximum-$minimum)*(substr($val,0,-1)/100.) + $minimum;
          elseif( is_numeric(strpos('hHxX#$',$val{0})) )
             $val = base_convert( substr($val,1), 16, 10);
-      } 
+      }
    }
 
    if( !is_numeric($val) )
@@ -2044,7 +2160,7 @@ function button_style( $button_nr=0)
    if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
       $button_nr = 0;
 
-   return 
+   return
      "a.button {" .
        " display: block;" .
        " min-width: ".($button_width-4)."px;" .
