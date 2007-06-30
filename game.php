@@ -639,6 +639,9 @@ function get_alt_arg( $n1, $n2)
          else
             $menu_array[T_('Add to observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=t";
       }
+
+      if ( has_observers( $gid ) )
+         $menu_array[T_('Show observers')] = "users.php?observe=$gid";
    }
 
    end_page(@$menu_array);
