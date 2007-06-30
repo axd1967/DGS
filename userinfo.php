@@ -227,13 +227,14 @@ require_once( "include/countries.php" );
          if( $days_left >= 7 )
             $menu_array[T_('Start vacation')] = 'edit_vacation.php';
    }
-   else
+   else // others info
    {
       $menu_array =
          array( T_('Show running games') => $run_link,
                 T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
                 T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid",
-                T_('Show finished games') => $fin_link );
+                T_('Show finished games') => $fin_link,
+                T_('Show opponents') => "user_stats.php?uid=$uid" );
    }
 
 
