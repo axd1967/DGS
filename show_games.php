@@ -26,6 +26,7 @@ require_once( "include/form_functions.php" );
 require_once( "include/rating.php" );
 
 {
+   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -65,131 +66,157 @@ require_once( "include/rating.php" );
          $uid = $user_row['ID'];
       }
    }
+   $running = !$observe && !$finished; // 'and' don't work here, why? :(
 
    if( $observe )
    {
       $tableid = 'observed';
       $page = 'show_games.php?observe=1'.URI_AMP;
       $column_set_name = "ObservedGamesColumns";
+      $fprefix = 'o';
    }
    else if( $finished )
    {
       $tableid = 'finished';
       $page = "show_games.php?uid=$uid".URI_AMP."finished=1".URI_AMP;
       $column_set_name = "FinishedGamesColumns";
+      $fprefix = 'f';
    }
    else
    {
       $tableid = 'running';
       $page = "show_games.php?uid=$uid".URI_AMP;
       $column_set_name = "RunningGamesColumns";
+      $fprefix = 'r';
    }
 
+   // table filters
+   $gfilter = new SearchFilter( $fprefix );
+   $gfilter->add_filter( 1, 'Numeric', 'Games.ID', true, array( FC_SIZE => 8 ) );
+   $gfilter->add_filter( 6, 'Numeric', 'Games.Size', true);
+   $gfilter->add_filter( 7, 'Numeric', 'Games.Handicap', true);
+   $gfilter->add_filter( 8, 'Numeric', 'Games.Komi', true);
+   $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true);
+   $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true);
+   $gfilter->add_filter(14, 'RatedSelect', 'Rated', true);
+   if ( !$observe and !$all )
+   {
+      $gfilter->add_filter( 3, 'Text',   'Name',   true);
+      $gfilter->add_filter( 4, 'Text',   'Handle', true);
+      $gfilter->add_filter(16, 'Rating', 'Rating2', true);
+   }
+   if ( $running and !$all )
+   {
+      $gfilter->add_filter( 5, 'Selection',     # filter on my color (not on who-to-move)
+            array( T_('All') => '',
+                   'B' => new QuerySQL( SQLP_HAVING, 'iamBlack=1' ),
+                   'W' => new QuerySQL( SQLP_HAVING, 'iamBlack=0' ) ),
+            true);
+      $gfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
+      $gfilter->add_filter(15, 'RelativeDate', 'Lastaccess', true);
+      $gfilter->add_filter(23, 'Rating', 'startRating', true, array( FC_ADD_HAVING => 1 ) );
+   }
+   if ( $finished )
+   {
+      $gfilter->add_filter(10, 'Score', 'Score', true);
+      $gfilter->add_filter(11, 'Selection',
+            array( T_('All')  => '',
+                   T_('Won')  => new QuerySQL( SQLP_HAVING, 'Win=1' ),
+                   T_('Lost') => new QuerySQL( SQLP_HAVING, 'Win=-1' ),
+                   T_('Jigo') => 'Score=0' ),
+            true);
+      $gfilter->add_filter(12, 'RelativeDate', 'Lastchanged', true);
+      if ( $all )
+      {
+         $gfilter->add_filter(27, 'Rating', 'Black_End_Rating', true);
+         $gfilter->add_filter(30, 'Rating', 'White_End_Rating', true);
+         $gfilter->add_filter(28, 'RatingDiff', 'blog.RatingDiff', true);
+         $gfilter->add_filter(31, 'RatingDiff', 'wlog.RatingDiff', true);
+      }
+      else // user
+      {
+         $gfilter->add_filter( 5, 'Selection',
+               array( T_('All') => '', 'B' => "Black_ID=$uid", 'W' => "White_ID=$uid" ),
+               true);
+         $gfilter->add_filter(23, 'Rating', 'startRating', true, array( FC_ADD_HAVING => 1 ) );
+         $gfilter->add_filter(24, 'Rating', 'endRating',   true, array( FC_ADD_HAVING => 1 ) );
+         $gfilter->add_filter(25, 'RatingDiff', 'log.RatingDiff', true);
+      }
+   }
+   if ( $observe or $all )
+   {
+      $gfilter->add_filter(17, 'Text',   'black.Name',   true);
+      $gfilter->add_filter(18, 'Text',   'black.Handle', true);
+      $gfilter->add_filter(19, 'Rating', 'black.Rating2', true);
+      $gfilter->add_filter(26, 'Rating', 'Games.Black_Start_Rating', true);
+      $gfilter->add_filter(20, 'Text',   'white.Name',   true);
+      $gfilter->add_filter(21, 'Text',   'white.Handle', true);
+      $gfilter->add_filter(22, 'Rating', 'white.Rating2', true);
+      $gfilter->add_filter(29, 'Rating', 'Games.White_Start_Rating', true);
+   }
+   $gfilter->init(); // parse current value from _GET
+
    $gtable = new Table( $tableid, $page, $column_set_name );
+   $gtable->register_filter( $gfilter );
    $gtable->set_default_sort( 'Lastchanged', 1, 'ID', 1);
    $gtable->add_or_del_column();
+
+   // attach external URL-parameters to table
+   $extparam = new RequestParameters();
+   if ( $observe )
+      $extparam->add_entry( 'observe', 1 );
+   else
+   {
+      $extparam->add_entry( 'uid', $uid );
+      if ( $finished )
+         $extparam->add_entry( 'finished', 1 );
+   }
+   $gtable->add_external_parameters( $extparam, true ); // also for hiddens
 
    $order = $gtable->current_order_string();
    $limit = $gtable->current_limit_string();
 
-   if( $observe )
-   {
-      $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
-         "IF(Rated='N','N','Y') as Rated, " .
-         "black.Name AS blackName, black.Handle AS blackHandle, " .
-         "white.Name AS whiteName, white.Handle AS whiteHandle, " .
-         "black.Rating2 AS blackRating, black.ID AS blackID, " .
-         "white.Rating2 AS whiteRating, white.ID AS whiteID, " .
-         "Games.Black_Start_Rating AS blackStartRating, " .
-         "Games.White_Start_Rating AS whiteStartRating " .
-         "FROM Observers, Games, Players AS white, Players AS black " .
-         "WHERE Observers.uid=" . $player_row["ID"] . " AND Games.ID=gid " .
-         "AND white.ID=White_ID AND black.ID=Black_ID " .
-         "ORDER BY $order $limit";
-   }
-   else if( $all )
-   {
-      $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
-         "IF(Rated='N','N','Y') as Rated, " .
-         "black.Name AS blackName, black.Handle AS blackHandle, " .
-         "white.Name AS whiteName, white.Handle AS whiteHandle, " .
-         "black.Rating2 AS blackRating, black.ID AS blackID, " .
-         "white.Rating2 AS whiteRating, white.ID AS whiteID, " .
-         "Games.Black_Start_Rating AS blackStartRating, " .
-         "Games.White_Start_Rating AS whiteStartRating " .
-         ( $finished
-           ? ", Black_End_Rating AS blackEndRating, White_End_Rating AS whiteEndRating, " .
-           "blog.RatingDiff AS blackDiff, wlog.RatingDiff AS whiteDiff " : '' ) .
-         "FROM (Games, Players AS white, Players AS black) " .
-         ( $finished ?
-           "LEFT JOIN Ratinglog AS blog ON blog.gid=Games.ID AND blog.uid=Black_ID ".
-           "LEFT JOIN Ratinglog AS wlog ON wlog.gid=Games.ID AND wlog.uid=White_ID " : '' ) .
-         "WHERE " . ( $finished
-                      ? "Status='FINISHED' "
-                      : "Status!='INVITED' AND Status!='FINISHED' " ) .
-         "AND white.ID=White_ID AND black.ID=Black_ID " .
-         "ORDER BY $order $limit";
-   }
-   else
-   {
-      $query = "SELECT Games.*, UNIX_TIMESTAMP(Lastchanged) AS Time, " .
-         "IF(Rated='N','N','Y') as Rated, " .
-         "Name, Handle, Players.ID as pid, " .
-         "Rating2 AS Rating, " .
-         "IF(Black_ID=$uid" .
-         ', Games.White_Start_Rating, Games.Black_Start_Rating) AS startRating, ' .
-         "UNIX_TIMESTAMP(Lastaccess) AS Lastaccess, " .
-         //extra bits of Color are for sorting purposes
-         "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color ";
+   # table-column-ID usage
+   #   views: OB=observe, FU=finished-user, FA=finished-all, RU=running-user, RA=running-all
+   #   note: '> ' indicates a column not common to all views, usage given for specific views
+   #
+   # no: description of displayed info
+   #  0: -
+   #  1: ID
+   #  2: sgf
+   #  3: >  FU + RU (Opponent-Name)
+   #  4: >  FU + RU (Opponent-Handle)
+   #  5: >  FU (User-Color-Graphic), RU (2-Colors-Graphic)
+   #  6: Size
+   #  7: Handicap
+   #  8: Komi
+   #  9: Moves
+   # 10: >  FU + FA (Score)
+   # 11: >  FU (User-Score-graphic)
+   # 12: >  FU + FA (Lastchanged as 'End date'), RU (Weekendclock)
+   # 13: >  OB + RU + RA (Lastchanged as 'Last move')
+   # 14: Rated
+   # 15: >  RU (Opponents-LastAccess)
+   # 16: >  FU + RU (User-Rating)
+   # 17: >  OB + FA + RA (Black-Name)
+   # 18: >  OB + FA + RA (Black-Handle)
+   # 19: >  OB + FA + RA (Black-Rating)
+   # 20: >  OB + FA + RA (White-Name)
+   # 21: >  OB + FA + RA (White-Handle)
+   # 22: >  OB + FA + RA (White-Rating)
+   # 23: >  FU + RU (User-StartRating)
+   # 24: >  FU (User-EndRating)
+   # 25: >  FU (User-RatingDiff)
+   # 26: >  OB + FA + RA (Black-StartRating)
+   # 27: >  FA (Black-EndRating)
+   # 28: >  FA (Black-EndRatingDiff)
+   # 29: >  OB + FA + RA (White-StartRating)
+   # 30: >  FA (White-EndRating)
+   # 31: >  FA (White-EndRatingDiff)
+   # 32: -
 
-      if( $finished )
-      {
-         $query .= ", SIGN(IF(Black_ID=$uid, -Score, Score)) AS Win " .
-                ", IF(Black_ID=$uid, -Score, Score) AS oScore " .
-           ", IF(Black_ID=$uid" .
-             ', Games.White_End_Rating, Games.Black_End_Rating) AS endRating, ' .
-           'log.RatingDiff AS ratingDiff '
-            ;
-      }
-
-      $query .= "FROM (Games,Players) " .
-         ( $finished ?
-           "LEFT JOIN Ratinglog AS log ON log.gid=Games.ID AND log.uid=$uid " : '' ) .
-         "WHERE " . ( $finished ? "Status='FINISHED' "
-                      : "Status!='INVITED' AND Status!='FINISHED' " ) .
-            //"AND (( Black_ID=$uid AND White_ID=Players.ID ) " .
-            //  "OR ( White_ID=$uid AND Black_ID=Players.ID )) " .
-            "AND (White_ID=$uid OR Black_ID=$uid) " .
-            "AND Players.ID=White_ID+Black_ID-$uid " .
-         "ORDER BY $order,Games.ID $limit";
-   }
-
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'show_games.find_games');
-
-   $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
-
-   if( $observe or $all)
-   {
-      $title1 = $title2 = ( $observe ? T_('Observed games') :
-                            ( $finished ? T_('Finished games') : T_('Running games') ) );
-   }
-   else
-   {
-      $games_for = ( $finished ? T_('Finished games for %s') : T_('Running games for %s') );
-      $title1 = sprintf(  $games_for, make_html_safe($user_row["Name"]) );
-      $title2 = sprintf(  $games_for, user_reference( REF_LINK, 1, '', $user_row) );
-   }
-
-
-   start_page( $title1, true, $logged_in, $player_row,
-               $gtable->button_style($player_row['Button']) );
-
-   echo "<h3 class=Header>$title2</h3>\n";
-
-      $gtable->add_tablehead( 0,
-         T_('ID'), 'ID', true, true, array( 'class' => 'Button') );
-
+   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
+   $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true, array( 'class' => 'Button') );
    $gtable->add_tablehead( 2, T_('sgf'));
 
    if( $observe )
@@ -283,15 +310,128 @@ require_once( "include/rating.php" );
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
       $gtable->add_tablehead(13, T_('Last Move'), 'Lastchanged', true);
       if( !$all )
-      {
          $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
-      }
       if( !$all ) //!$observe && !$finished
-      {
          $gtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
-      }
    }
 
+
+   // build SQL-query
+   $qsql = new QuerySQL();
+   $qsql->add_part( SQLP_FIELDS, // std-fields
+      'Games.*',
+      'UNIX_TIMESTAMP(Lastchanged) AS Time',
+      "IF(Rated='N','N','Y') as Rated" );
+
+   if( $observe )
+   {
+      $qsql->add_part( SQLP_FIELDS,
+         'black.Name AS blackName', 'black.Handle AS blackHandle',
+         'white.Name AS whiteName', 'white.Handle AS whiteHandle',
+         'black.Rating2 AS blackRating', 'black.ID AS blackID',
+         'white.Rating2 AS whiteRating', 'white.ID AS whiteID',
+         'Games.Black_Start_Rating AS blackStartRating',
+         'Games.White_Start_Rating AS whiteStartRating' );
+      $qsql->add_part( SQLP_FROM,
+         'Observers AS OB',
+         'JOIN Games ON Games.ID=OB.gid',
+         'JOIN Players AS white ON white.ID=White_ID',
+         'JOIN Players AS black ON black.ID=Black_ID' );
+      $qsql->add_part( SQLP_WHERE,
+         'OB.uid=' . $player_row['ID'] );
+   }
+   else if( $all )
+   {
+      $qsql->add_part( SQLP_FIELDS,
+         'black.Name AS blackName', 'black.Handle AS blackHandle',
+         'white.Name AS whiteName', 'white.Handle AS whiteHandle',
+         'black.Rating2 AS blackRating', 'black.ID AS blackID',
+         'white.Rating2 AS whiteRating', 'white.ID AS whiteID',
+         'Games.Black_Start_Rating AS blackStartRating',
+         'Games.White_Start_Rating AS whiteStartRating' );
+      $qsql->add_part( SQLP_FROM,
+         'Games',
+         'JOIN Players AS white ON white.ID=White_ID',
+         'JOIN Players AS black ON black.ID=Black_ID' );
+
+      if ( $finished )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            'Black_End_Rating AS blackEndRating',
+            'White_End_Rating AS whiteEndRating',
+            'blog.RatingDiff AS blackDiff',
+            'wlog.RatingDiff AS whiteDiff' );
+         $qsql->add_part( SQLP_FROM,
+            'LEFT JOIN Ratinglog AS blog ON blog.gid=Games.ID AND blog.uid=Black_ID',
+            'LEFT JOIN Ratinglog AS wlog ON wlog.gid=Games.ID AND wlog.uid=White_ID' );
+         $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
+      }
+      else
+         $qsql->add_part( SQLP_WHERE, "Status NOT IN ('INVITED','FINISHED')" );
+   }
+   else // user
+   {
+      $qsql->add_part( SQLP_FIELDS,
+         'Name',
+         'Handle',
+         'Players.ID as pid',
+         'Rating2 AS Rating',
+         "IF(Black_ID=$uid, Games.White_Start_Rating, Games.Black_Start_Rating) AS startRating",
+         'UNIX_TIMESTAMP(Lastaccess) AS Lastaccess',
+         "IF(Black_ID=$uid,1,0) AS iamBlack",
+         //extra bits of Color are for sorting purposes
+         "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color" );
+      $qsql->add_part( SQLP_FROM, 'Games', 'Players' );
+      if ( $finished )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            "SIGN(IF(Black_ID=$uid, -Score, Score)) AS Win",
+            "IF(Black_ID=$uid, -Score, Score) AS oScore",
+            "IF(Black_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS endRating",
+            'log.RatingDiff AS ratingDiff' );
+         $qsql->add_part( SQLP_FROM, "LEFT JOIN Ratinglog AS log ON log.gid=Games.ID AND log.uid=$uid" );
+         $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
+      }
+      else // running
+      {
+         $qsql->add_part( SQLP_WHERE, "Status NOT IN ('INVITED','FINISHED')" );
+      }
+
+      $qsql->add_part( SQLP_WHERE,
+         //"(( Black_ID=$uid AND White_ID=Players.ID ) OR
+         //( White_ID=$uid AND Black_ID=Players.ID ))"
+         "(White_ID=$uid OR Black_ID=$uid)",
+         "Players.ID=White_ID+Black_ID-$uid" );
+
+      $order .= ',Games.ID';
+   }
+
+   $qsql->merge( $gtable->get_query() );
+   $query = $qsql->get_select() . " ORDER BY $order $limit";
+
+   $result = mysql_query( $query )
+      or error('mysql_query_failed', 'show_games.find_games');
+
+   $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
+
+   if( $observe or $all)
+   {
+      $title1 = $title2 = ( $observe ? T_('Observed games') :
+                            ( $finished ? T_('Finished games') : T_('Running games') ) );
+   }
+   else
+   {
+      $games_for = ( $finished ? T_('Finished games for %s') : T_('Running games for %s') );
+      $title1 = sprintf( $games_for, make_html_safe($user_row["Name"]) );
+      $title2 = sprintf( $games_for, user_reference( REF_LINK, 1, '', $user_row) );
+   }
+
+
+   start_page( $title1, true, $logged_in, $player_row,
+               $gtable->button_style($player_row['Button']) );
+
+   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
+   echo "<h3 class=Header>$title2</h3>\n";
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
@@ -302,8 +442,8 @@ require_once( "include/rating.php" );
       extract($row);
 
       $grow_strings = array();
-      //if( $gtable->Is_Column_Displayed[0] )
-         $grow_strings[0] = $gtable->button_TD_anchor( "game.php?gid=$ID", $ID);
+      if( $gtable->Is_Column_Displayed[1] )
+         $grow_strings[1] = $gtable->button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
             "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";
@@ -394,13 +534,15 @@ require_once( "include/rating.php" );
             $grow_strings[10] = '<td>' . score2text($Score, false) . "</td>";
          if( !$all )
          {
-            $src = '"images/' .
-               ( $Win == 1 ? 'yes.gif" alt="' . T_('Yes') :
-                 ( $Win == -1 ? 'no.gif" alt="' . T_('No') :
-                   'dash.gif" alt="' . T_('jigo') )) . '"';
 
             if( $gtable->Is_Column_Displayed[11] )
+            {
+               $src = '"images/' .
+                  ( $Win == 1 ? 'yes.gif" alt="' . T_('Yes') :
+                     ( $Win == -1 ? 'no.gif" alt="' . T_('No') :
+                        'dash.gif" alt="' . T_('jigo') )) . '"';
                $grow_strings[11] = "<td align=center><img src=$src></td>";
+            }
          }
          if( $gtable->Is_Column_Displayed[14] )
             $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
@@ -426,31 +568,27 @@ require_once( "include/rating.php" );
 
    $menu_array = array();
 
+   $myID = $player_row["ID"];
    if( $observe )
-   {
-      $uid = $player_row["ID"];
-   }
+      $uid = $myID;
 
    if( !$all )
    {
-      $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
+      if ( $uid != $myID )
+         $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
 
       if( $uid != $player_row["ID"] and !$observe )
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$uid";
    }
 
+   $row_str = $gtable->current_rows_string();
+
    if( $finished or $observe )
-   {
-      $menu_array[T_('Show running games')] = "show_games.php?uid=$uid";
-   }
+      $menu_array[T_('Show running games')] = "show_games.php?uid=$uid".URI_AMP.$row_str;
    if( !$finished )
-   {
-      $menu_array[T_('Show finished games')] = "show_games.php?uid=$uid".URI_AMP."finished=1";
-   }
+      $menu_array[T_('Show finished games')] = "show_games.php?uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
    if( !$observe )
-   {
-      $menu_array[T_('Show observed games')] = "show_games.php?observe=1";
-   }
+      $menu_array[T_('Show observed games')] = "show_games.php?observe=1".URI_AMP.$row_str;
 
    end_page(@$menu_array);
 }
