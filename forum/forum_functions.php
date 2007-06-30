@@ -59,7 +59,8 @@ define('ALLOW_QUOTING', 0);
 define('FORUM_MAXIMUM_DEPTH', 15);
 
 
-function make_link_array($links)
+// param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
+function make_link_array($links, $ReqParam = null)
 {
    global $link_array_left, $link_array_right, $forum, $thread, $offset,
       $RowsPerPage, $SearchPostsPerPage, $search_terms, $player_row;
@@ -104,10 +105,14 @@ function make_link_array($links)
                make_url( "index.php", $get, false ) ) );
    }
 
+   $navi_url = '';
+   if ( !is_null($ReqParam) and ($links & LINKPAGE_SEARCH) and ($links & LINK_PREV_PAGE|LINK_NEXT_PAGE) )
+      $navi_url = URI_AMP . $ReqParam->get_url_parts();
+
    if( $links & LINK_PREV_PAGE )
    {
       if( $links & LINKPAGE_SEARCH )
-         $href = "search.php?search_terms=$search_terms"
+         $href = "search.php?search_terms={$search_terms}{$navi_url}"
                      . URI_AMP."offset=".($offset-$SearchPostsPerPage);
       else
          $href = "list.php?forum=$forum"
@@ -118,7 +123,7 @@ function make_link_array($links)
    if( $links & LINK_NEXT_PAGE )
    {
       if( $links & LINKPAGE_SEARCH )
-         $href = "search.php?search_terms=$search_terms"
+         $href = "search.php?search_terms={$search_terms}{$navi_url}"
                      . URI_AMP."offset=".($offset+$SearchPostsPerPage);
       else
          $href = "list.php?forum=$forum"
@@ -135,7 +140,8 @@ function print_moderation_note($is_moderator, $width)
       echo "<table width='$width'><tr><td align=right><font color=red>" . T_("Moderating") . "</font></td></tr></table>\n";
 }
 
-function forum_start_table( $table_id, &$headline, &$links, $cols)
+// param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
+function forum_start_table( $table_id, &$headline, &$links, $cols, $ReqParam = null)
 {
 /* $table_id could be: (begining by an uppercase letter because used as sub-ID name)
    'Index', 'List', 'Read', 'Search', 'Revision', 'Pending'
@@ -143,7 +149,7 @@ function forum_start_table( $table_id, &$headline, &$links, $cols)
 
    echo "<table id='forum$table_id' class=Forum>\n";
 
-   make_link_array( $links );
+   make_link_array( $links, $ReqParam );
 
    if( $links & LINK_MASKS )
       echo_links('T',$cols);
@@ -229,7 +235,9 @@ function get_new_string($Lastchangedstamp, $Lastread)
 }
 
 
-function draw_post($postClass, $my_post, $Subject='', $Text='', $GoDiagrams=null)
+// param Terms: optional array (or rx-terms) with terms that are to be highlighted in text
+function draw_post($postClass, $my_post, $Subject='', $Text='',
+                   $GoDiagrams=null, $Terms = null)
 {
 /* $postClass could be: (no '_' because used as sub-class name => CSS compliance)
    'Normal', 'Hidden', 'Reply', 'Preview', 'Edit', 'SearchResult'
@@ -237,12 +245,23 @@ function draw_post($postClass, $my_post, $Subject='', $Text='', $GoDiagrams=null
 
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
       $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
-      $ForumName, $Score, $Forum_ID, $Thread_ID, $bool, $PendingApproval;
+      $ForumName, $Score, $Forum_ID, $Thread_ID, $show_score, $PendingApproval;
 
    $post_reference = '';
    $cols = 2;
 
-   $sbj = make_html_safe( $Subject );
+   // highlight terms in Subject/Text (skipping XML-elements like tags & entities)
+   if ( !is_null($Terms) )
+   {
+      $rx_terms = (is_array($Terms) and count($Terms) > 0 ) ? implode("|", $Terms) : $Terms;
+      if ($rx_terms != '')
+      {
+         $is_xml = true;
+         $Subject = mark_terms( $Subject, $rx_terms, $is_xml );
+         $Text    = mark_terms( $Text,    $rx_terms, $is_xml );
+      }
+   }
+   $sbj = make_html_safe( $Subject, true );
    $txt = make_html_safe( $Text, true);
 //   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
@@ -273,12 +292,14 @@ function draw_post($postClass, $my_post, $Subject='', $Text='', $GoDiagrams=null
 
          echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
          echo '<a class=PostSubject href="read.php?forum=' . $Forum_ID .URI_AMP
-            . "thread=$Thread_ID#$ID\">$sbj</a>";
+            . "thread=$Thread_ID"
+            . ( (!is_null($Terms) and !empty($Terms)) ? URI_AMP . "markterms=" . urlencode($Terms) : '' )
+            . "#$ID\">$sbj</a>";
 
          echo ' <font size="+1" color="#FFFFFF">' . T_('found in forum')
             . '</font> <a href="list.php?forum=' .
             $Forum_ID . '" class=black>' . $ForumName . "</a>\n";
-         if( !$bool )
+         if( $show_score )
             echo ' <font color="#FFFFFF">' . T_('with') . '</font> ' . T_('Score')
                . ' <font color="#000000">' . $Score  . "</font>\n";
 
