@@ -21,12 +21,15 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
+require_once( "include/std_classes.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
+require_once( "include/countries.php" );
 
 {
+   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -35,54 +38,108 @@ require_once( "include/message_functions.php" );
       error("not_logged_in");
 
    //short descriptions for table
-   $handi_array = array( 'conv' => T_('Conventional'),
+   $handi_array = array( 'conv'   => T_('Conventional'),
                          'proper' => T_('Proper'),
                          'nigiri' => T_('Even game'),
                          'double' => T_('Double game') );
+
+   // config for handicap-filter
+   $handi_filter_array = array(
+         T_('All') => '',
+         T_('Suitable') => new QuerySQL(SQLP_HAVING, 'haverating') );
+   foreach( $handi_array as $fval => $fkey )
+      $handi_filter_array[$fkey] = "Handicaptype='$fval'";
 
    $my_id = $player_row['ID'];
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
-
-   $showall = (boolean)@$_GET['showall'];
    $idinfo = (int)@$_GET['info'];
    if( $idinfo < 0)
       $idinfo = 0;
 
    $page = "waiting_room.php?";
-   if( $showall )
-      $page.= 'showall=1' . URI_AMP;
    if( $idinfo )
       $page.= 'info='.$idinfo . URI_AMP;
 
+   // table filters
+   $wrfilter = new SearchFilter();
+   $wrfilter->add_filter( 1, 'Text',      'Players.Name', true);
+   $wrfilter->add_filter( 2, 'Text',      'Players.Handle', true);
+   $wrfilter->add_filter( 3, 'Rating',    'Players.Rating2', true);
+   $wrfilter->add_filter( 5, 'Selection', $handi_filter_array, true,
+         array( FC_FNAME => 'handi', FC_STATIC => 1, FC_DEFAULT => 1 ) );
+   $wrfilter->add_filter( 6, 'Numeric',   'Komi', true, array( FC_SIZE => 4 ));
+   $wrfilter->add_filter( 7, 'Numeric',   'Size', true, array( FC_SIZE => 4 ));
+   $wrfilter->add_filter( 8, 'Boolean',
+         new QuerySQL( SQLP_HAVING, 'goodrating' ),
+         true,
+         array( FC_FNAME => 'good', FC_LABEL => T_('Only suitable'), FC_STATIC => 1, FC_DEFAULT => 1 ));
+   $wrfilter->add_filter( 9, 'Selection',
+         array( T_('All') => '',
+                T_('Japanese') => "Byotype='JAP'",
+                T_('Canadian') => "Byotype='CAN'",
+                T_('Fisher') => "Byotype='FIS'" ),
+         true);
+   $wrfilter->add_filter(11, 'RatedSelect', 'Rated', true);
+   $wrfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
+   if( ENA_STDHANDICAP )
+      $wrfilter->add_filter(13, 'BoolSelect', 'StdHandicap', true);
+   $wrfilter->add_filter(15, 'Country', 'Players.Country', false);
+   $wrfilter->init();
+   $f_handi =& $wrfilter->get_filter(5);
+   $f_range =& $wrfilter->get_filter(8);
+
 
    $wrtable = new Table( 'waitingroom', $page, "WaitingroomColumns" );
-   $wrtable->set_default_sort( 'other_rating', 1, 'other_handle', 0);
+   $wrtable->register_filter( $wrfilter );
    $wrtable->add_or_del_column();
+   $wrtable->set_default_sort( 'other_rating', 1, 'other_handle', 0);
+
+   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
+   $wrtable->add_tablehead( 0, T_('Info'), NULL, false, true, array( 'class' => 'Button') );
+   $wrtable->add_tablehead( 1, T_('Name'), 'other_name', false);
+   $wrtable->add_tablehead( 2, T_('Userid'), 'other_handle', false);
+   $wrtable->add_tablehead(15, T_('Country'), 'other_country', false);
+   $wrtable->add_tablehead( 3, T_('Rating'), 'other_rating', true);
+   $wrtable->add_tablehead( 4, T_('Comment'));
+   $wrtable->add_tablehead( 7, T_('Size'), 'Size', true);
+   $wrtable->add_tablehead( 5, T_('Colors'), 'Handicaptype', false, true);
+   /** TODO: the handicap stones info may be merged in the Komi column
+    * with the standard placement... something like: "%d H + %d K (S)"
+    * where:
+    *   H=Tr$['Handicap stones#short']
+    *   K=Tr$['Komi#short']
+    *   S=Tr$['Standard placement#short']
+    **/
+   $wrtable->add_tablehead(14, T_('Handicap'), 'Handicap');
+   $wrtable->add_tablehead( 6, T_('Komi'), 'Komi', true);
+   $wrtable->add_tablehead( 8, T_('Rating range'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true, true);
+   $wrtable->add_tablehead( 9, T_('Time limit'));
+   $wrtable->add_tablehead(10, T_('#Games'), 'nrGames', true);
+   $wrtable->add_tablehead(11, T_('Rated'), 'Rated', true);
+   $wrtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
+   if( ENA_STDHANDICAP )
+      $wrtable->add_tablehead(13, T_('Standard placement'), 'StdHandicap', true);
 
    $order = $wrtable->current_order_string();
    $limit = $wrtable->current_limit_string();
 
-   $sortstring = $wrtable->current_sort_string();
+   $baseURLMenu = "waiting_room.php?"
+      . $wrtable->current_rows_string(1)
+      . $wrtable->current_sort_string();
+   $baseURL = $baseURLMenu . URI_AMP
+      . $wrtable->current_from_string();
 
-   $baseURL = "waiting_room.php?"
-      . $wrtable->current_from_string(1) . $sortstring;
-   if( $showall )
-   {
-      $baseURL.= URI_AMP.'showall=1';
-      $title = T_("All waiting games");
-   }
-   else
-   {
-      $title = T_("Suitable waiting games");
-   }
-
-   $query = "SELECT Waitingroom.*"
-         .",Players.ID AS other_id,Players.Handle AS other_handle"
-         .",Players.Name AS other_name,Players.Rating2 AS other_rating"
-         .",Players.RatingStatus AS other_ratingstatus"
-      ;
+   $qsql = new QuerySQL();
+   $qsql->add_part( SQLP_FIELDS,
+      'Waitingroom.*',
+      'Players.ID AS other_id',
+      'Players.Handle AS other_handle',
+      'Players.Name AS other_name',
+      'Players.Country AS other_country',
+      'Players.Rating2 AS other_rating',
+      'Players.RatingStatus AS other_ratingstatus' );
 
 // $calculated = ( $Handicaptype == 'conv' or $Handicaptype == 'proper' );
 // $haverating = ( !$calculated or is_numeric($my_rating) );
@@ -104,55 +161,43 @@ require_once( "include/message_functions.php" );
       $goodrating = "IF(MustBeRated='Y',0,1)";
    }
 
-   $query.= ",$calculated AS calculated"
-          . ",$haverating AS haverating"
-          . ",$goodrating AS goodrating"
-          . " FROM Waitingroom,Players"
-          . " WHERE Players.ID=Waitingroom.uid"
-          . ( $showall ? '' : " HAVING haverating AND goodrating" )
-          . " ORDER BY $order,ID $limit"
-          ;
+   $qsql->add_part( SQLP_FIELDS,
+      "$calculated AS calculated",
+      "$haverating AS haverating",
+      "$goodrating AS goodrating" );
+   $qsql->add_part( SQLP_FROM,
+      'Waitingroom', 'Players' );
+
+   $qsql->add_part( SQLP_WHERE, 'Players.ID=Waitingroom.uid' );
+   $qsql->add_part( SQLP_ORDER, $order, 'ID' );
+   $qsql->merge( $wrtable->get_query() );
+   $query = $qsql->get_select() . " $limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'waiting_room.find_waiters');
 
 
+   $arr_suitable = array();
+   if ( $f_handi->get_value() == 1 )
+      array_push( $arr_suitable, T_('Handicap') );
+   if ( $f_range->get_value() )
+      array_push( $arr_suitable, T_('Rating range') );
+   if ( count($arr_suitable) > 0 )
+      $title = T_("Suitable waiting games") . ' (' . implode(', ', $arr_suitable) . ')';
+   else
+      $title = T_("All waiting games");
+
    start_page($title, true, $logged_in, $player_row,
                $wrtable->button_style($player_row['Button']) );
 
+   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
    echo "<h3 class=Header>". $title . "</h3>\n";
 
 
    $show_rows = $wrtable->compute_show_rows(mysql_num_rows($result));
    $info_row = NULL;
-   if( $show_rows > 0 )
+   if ( $show_rows > 0 or $wrfilter->has_query() )
    {
-      $wrtable->add_tablehead(0,
-         T_('Info'), NULL, false, true, array( 'class' => 'Button') );
-
-      $wrtable->add_tablehead(1, T_('Name'), 'other_handle', false);
-      $wrtable->add_tablehead(2, T_('Userid'), 'other_handle', false);
-      $wrtable->add_tablehead(3, T_('Rating'), 'other_rating', true);
-      $wrtable->add_tablehead(4, T_('Comment'));
-      $wrtable->add_tablehead(7, T_('Size'), 'Size', true);
-      $wrtable->add_tablehead(5, T_('Colors'), 'Handicaptype', false);
-      /** TODO: the handicap stones info may be merged in the Komi column
-       * with the standard placement... something like: "%d H + %d K (S)"
-       * where:
-       *   H=Tr$['Handicap stones#short']
-       *   K=Tr$['Komi#short']
-       *   S=Tr$['Standard placement#short']
-       **/
-      $wrtable->add_tablehead(14, T_('Handicap'), 'Handicap');
-      $wrtable->add_tablehead(6, T_('Komi'), 'Komi');
-      $wrtable->add_tablehead(8, T_('Rating range'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true);
-      $wrtable->add_tablehead(9, T_('Time limit'));
-      $wrtable->add_tablehead(10, T_('#Games'), 'nrGames', true);
-      $wrtable->add_tablehead(11, T_('Rated'), 'Rated', true);
-      $wrtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
-      if( ENA_STDHANDICAP )
-         $wrtable->add_tablehead(13, T_('Standard placement'), 'StdHandicap', true);
-
       while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
          $other_rating = NULL;
@@ -172,6 +217,14 @@ require_once( "include/message_functions.php" );
          if( $wrtable->Is_Column_Displayed[2] )
             $wrow_strings[2] = "<td>" .
                user_reference( REF_LINK, 1, 'black', $other_id, $other_handle, '') . "</td>";
+         if( $wrtable->Is_Column_Displayed[15] )
+         {
+            $cntr = @$row['other_country'];
+            $cntrn = T_(@$COUNTRIES[$cntr]);
+            $cntrn = (empty($cntr) ? '' :
+               "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
+            $wrow_strings[15] = "<td>" . $cntrn . "</td>";
+         }
          if( $wrtable->Is_Column_Displayed[3] )
             $wrow_strings[3] = "<td>" . echo_rating($other_rating,true,$other_id) . "&nbsp;</td>";
          if( $wrtable->Is_Column_Displayed[4] )
@@ -212,7 +265,8 @@ require_once( "include/message_functions.php" );
          $wrtable->add_row( $wrow_strings );
       }
 
-      $wrtable->echo_table();
+      // print form with table
+      echo "<br>\n" . $wrtable->make_table();
    }
    else
       echo '<p></p>&nbsp;<p></p>' . T_('Seems to be empty at the moment.');
@@ -229,20 +283,10 @@ require_once( "include/message_functions.php" );
       add_new_game_form( $form_id, $iamrated); //==> ID='addgameForm'
 
 
-
-
-   $baseURL = "waiting_room.php?".$sortstring; //reset it to minimum
-   if( $showall )
-   {
-      $str = T_("Show only suitable games");
-   }
-   else
-   {
-      $baseURL.= URI_AMP.'showall=1';
-      $str = T_("Show all games");
-   }
-   $menu_array[ $str] = $baseURL ;
-
+   $menu_array[T_('Show all games')] =
+      $baseURLMenu.URI_AMP.'handi=0'.URI_AMP.'good=0';
+   $menu_array[T_('Show only suitable games')] =
+      $baseURLMenu.URI_AMP.'handi=1'.URI_AMP.'good=1';
 
    end_page(@$menu_array);
 }
