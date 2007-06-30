@@ -34,6 +34,7 @@ require_once( "forum_functions.php" );
 
    $Forumname = forum_name($forum, $moderated);
 
+   $show_rows = $RowsPerPage+1;
    $result = mysql_query("SELECT Posts.Subject, Posts.Thread_ID, " .
                          "Posts.User_ID, Posts.PostsInThread, Name, " .
                          "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
@@ -43,25 +44,25 @@ require_once( "forum_functions.php" );
                          "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
                          " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
                          "WHERE Posts.Forum_ID=$forum AND Posts.Parent_ID=0 " .
-                         "ORDER BY Posts.LastChanged desc LIMIT $offset,$MaxRowsPerPage")
+                         "ORDER BY Posts.LastChanged desc LIMIT $offset,$show_rows")
       or error('mysql_query_failed','forum_list.find');
 
-   $show_rows = $nr_rows = mysql_num_rows($result);
-
-   if( $show_rows > $RowsPerPage )
-      $show_rows = $RowsPerPage;
+   $show_rows = mysql_num_rows($result);
 
    $cols = 4;
    $links = LINKPAGE_LIST;
 
-   $headline = array(T_("Thread")=>"width=50%",T_("Author")=>"width=20%",
-                     T_("Posts")=>"width=10%  align=center",T_("Last post")=>"width=20%");
+   $headline = array(T_("Thread")=>"width='50%'",T_("Author")=>"width='20%'",
+                     T_("Posts")=>"width='10%'  align=center",T_("Last post")=>"width='20%'");
    $links |= LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
 
    if( $offset > 0 )
       $links |= LINK_PREV_PAGE;
-   if( $show_rows < $nr_rows )
+   if( $show_rows > $RowsPerPage )
+   {
+      $show_rows = $RowsPerPage;
       $links |= LINK_NEXT_PAGE;
+   }
 
    $is_moderator = false;
    if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
@@ -80,7 +81,7 @@ require_once( "forum_functions.php" );
    forum_start_table('List', $headline, $links, $cols);
 
    $odd = true;
-   while( $row = mysql_fetch_array( $result ) and $show_rows > 0)
+   while( ($row = mysql_fetch_array( $result)) && $show_rows-- > 0 )
    {
       $Name = '?';
       $Lastread = NULL;
@@ -98,7 +99,6 @@ require_once( "forum_functions.php" );
            . "</td><td align=center>" . $PostsInThread . "</td><td nowrap>"
            . date($date_fmt, $Lastchanged) . "</td></tr>\n";
          $odd = !$odd;
-         $show_rows--;
       }
    }
 

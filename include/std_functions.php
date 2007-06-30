@@ -28,7 +28,7 @@ require_once( "include/time_functions.php" );
 if (!isset($page_microtime))
 {
    $page_microtime = getmicrotime();
-   $admin_level = 0;
+   $admin_level = 0; //TODO: to be localized
    //std_functions.php must be called from the main dir
    $main_path = str_replace('\\', '/', getcwd()).'/';
    //$base_path is relative to the URL, not to the current dir
@@ -90,7 +90,6 @@ $sgf_color='"#d50047"';
 $max_links_in_main_menu=5;
 
 $RowsPerPage = 50;
-$MaxRowsPerPage = $RowsPerPage+1;
 define('LIST_ROWS_MODULO', 4);
 
 $SearchPostsPerPage = 20;
@@ -327,6 +326,7 @@ function array_bsearch($needle, &$haystack)
    return $h;
 } //array_bsearch
 
+
 function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $base_path, $encoding_used, $printable, $FRIENDLY_SHORT_NAME;
@@ -343,12 +343,12 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    //This full DOCTYPE make most of the browsers to leave the "quirks" mode.
    //This may be a disavantage with IE5-mac because its "conform" mode is worst.
-   echo '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-	           "http://www.w3.org/TR/html4/loose.dtd">';
+   echo '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"'
+         .' "http://www.w3.org/TR/html4/loose.dtd">';
 
    echo "\n<HTML>\n<HEAD>";
 
-   echo "\n <TITLE>$FRIENDLY_SHORT_NAME - $title </TITLE>";
+   echo "\n <TITLE>$FRIENDLY_SHORT_NAME - $title</TITLE>";
 
    echo "\n <META http-equiv=\"content-type\" content=\"text/html;charset=$encoding_used\">";
 
@@ -857,9 +857,12 @@ function generate_random_password()
 
 function verify_email( $debugmsg, $email)
 {
+   //RFC 2822 - 3.4.1. Addr-spec specification
+   //See http: //www.faqs.org/rfcs/rfc2822
+   //$regexp = ”^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,4}$”;
    $regexp = "^([-_a-z0-9]+)(\.[-_a-z0-9]+)*@([-a-z0-9]+)(\.[-a-z0-9]+)*(\.[a-z]{2,4})$";
    $res= eregi($regexp, $email);
-   if( $debugmsg!==false && !$res )
+   if( $debugmsg !== false && !$res )
       error('bad_mail_address', "$debugmsg=$email");
    return $res;
 }
@@ -1381,7 +1384,7 @@ function score2text($score, $verbose, $keep_english=false)
 // Makes url from a base page and an array of variable/value pairs
 // if $sep is true, a '?' or '&' is added
 // Example:
-// make_url('test.php', array('a'=> 1, 'b => 'foo'), false)  gives
+// make_url('test.php', array('a'=> 1, 'b' => 'foo'), false)  gives
 // 'test.php?a=1&b=foo'
 //Since PHP5, there is http_build_query() that do nearly the same thing
 function make_url($page, $args, $sep=false)
@@ -1524,7 +1527,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       $ActivityForHit, $NOW;
 
    $row = array();
-   $admin_level = 0;
+   $admin_level = 0; //TODO: to be localized, to be removed
 
    if( $hostname_jump and eregi_replace(":.*$","", @$_SERVER['HTTP_HOST']) != $HOSTNAME )
    {
