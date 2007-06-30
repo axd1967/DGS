@@ -11,7 +11,7 @@
 
 * <goban> in forums (and messages)
 
-* Searching: users/games/messages/docs etc.
+* Searching: FAQ
 
 * Rengo (team go)
 
@@ -25,12 +25,9 @@
 
 * Delete game when it's the opponents turn.
 
-* Bio: sort order.
-
 * Help system.
 
 * Invite/waitingroom:
         Make it possible to limit the number of handicap stones.
         Rated only if less than x handicap option.
 
-* Show observers of a game.
