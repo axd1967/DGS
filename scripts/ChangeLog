@@ -26,6 +26,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-02 juga
+
+   * show_games.php:
+   - added hover-text on colors-column for "my running games"
+
 2007-07-01 juga
 
    * include/std_functions.php:
