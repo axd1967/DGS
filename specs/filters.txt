@@ -366,7 +366,7 @@ current from-offset (1), the sort-fields and directions (2) must be
 preserved using hidden-form-elements.
 
 If correctly initialized, the filter-framework handles this automatically.
-Have a look to code_examples/filter_example.php and the DGS-standard
+Take a look to code_examples/filter_example.php and the DGS-standard
 pages referenced as example-pages above.
 
 However, for page-links you may need to manually build the URL.
@@ -400,7 +400,7 @@ variable passed via URL (e.g. show_games.php, users.php).
 
 To correctly handling this URL passing it on when submitting a form, you
 have to register it. It depends on what combination of table, form and
-filters you are using
+filters you are using.
 
 Example (from users.php):
    The page is showing users in a Table with filters.
@@ -434,11 +434,11 @@ The 'true' is important in the last statement add_external_parameters().
 # External-Form + Table + additional URL-var
 But if you want to have a page also with an external-form, the registering
 of additional URL-vars and the joining of the external-form with the table
-is different to avoid that some vars are inserted twice within the hidden-
-elements.
+is different to avoid that some vars are inserted twice within through the
+hidden-elements.
 
 For such a complex example using an external form, a table with filters and
-additional URL-vars you may have a look at "user_stats.php".
+additional URL-vars you may take a look at "user_stats.php".
 The basic order of instructions in that case is:
 
    # get URL-vars
@@ -528,7 +528,7 @@ that could be subject to change, if the order of filter-IDs is changed
 
 This section gives some insights when you need to develop a new type of
 filter, though it doesn't describe every detail. For that, you may take
-a look into in the sources.
+a look into the sources.
 
 Besides of thinking about adding a new filter, you may also want to add
 a new filter-config, a new syntax for numeric- and text-based filters
@@ -557,7 +557,7 @@ a new filter, best practice is to follow the following steps.
       configs that can be used to change the filters behaviour:
          see "include/filters.php", class Filter<Type>
 
-   4. Read the FAQ-section (5) in this file. Maybe there's somebody in,
+   4. Read the FAQ-section (5) in this file. Maybe there's something in,
       that can fulfill your needs.
 
    5. If no filter does match your needs, maybe a combination of existing
@@ -611,9 +611,9 @@ To develop a new filter, take the following basic steps:
 
 
 Changing one of the following classes is sensible work and shouldn't be done
-without my (juga) consultation; or you volunteer to write some unit-tests
-to assert the correct functionality of existing parsers and framework
-after your changes ;)
+without consultation; or you volunteer to write some unit-tests to assert
+the correct functionality of existing parsers and framework after
+your changes ;)
 
    - SearchFilter, Filter
    - BasicTokenizer, StringTokenizer
@@ -631,9 +631,11 @@ see section (2) Classes and Files.
 
 * What filter can be used to search for negative numeric values ?
 
-  Not possible at the moment when you still want to use the range-syntax.
-  The Numeric-Filter does not allow this, because the minus '-' is used as
-  special range-char.
+  Not directly possible at the moment when you still want to use the
+  range-syntax. The Numeric-Filter does not allow this, because the
+  minus '-' is used as special range-char.
+  But you can still enter a negative-value by quoting the '-'-char
+  of course.
 
   However, if you forbid range-syntax using filter-config FC_NO_RANGE,
   then the '-' is treated as minus-sign. But that also allows to specify
@@ -646,12 +648,15 @@ see section (2) Classes and Files.
 * Can I use SQL-queries using the OR-operator ?
 
   Yes, but it depends on the resulting query. Take a look on the
-  example-files searching for FC_SQL_TEMPLATE and FC_GROUP_SQL_OR and have
-  a look in "include/filters.php" at the documentation for those
+  example-files searching for FC_SQL_TEMPLATE and FC_GROUP_SQL_OR and
+  take a look in "include/filters.php" at the documentation for those
   filter-configs (where the constants are defined).
 
   If those filter-configs are not sufficient, you may use a complex
   query using the QuerySQL-class. For that check out the examples too.
+
+  If all those possibilities doesn't fit your needs, you have to build
+  the query manually.
 
 * How can the size or maximum length of the text-input-elements be changed ?
 
@@ -680,8 +685,9 @@ see section (2) Classes and Files.
   Use filter-config FC_SQL_SKIP. See also example-files and check out
   the possibilities you have with QuerySQL (see "include/std_classes.php"
   and "code_examples/query_sql.php").
-  Then the particular filter-query isn't merged in the SearchFilter-class
-  and you must handle the merge manually:
+
+  With FC_SQL_SKIP the particular filter-query isn't merged in the
+  SearchFilter-class and you must handle the merge manually:
 
     $qsql = $searchfilter->get_query();
     $f =& $searchfilter->get_filter(id);
@@ -701,13 +707,14 @@ see section (2) Classes and Files.
   the example-files. Be aware that this config is filter-specific, so take
   also a close look on the filter-specific documentation. Escpecially for
   the multi-element-filters this is important.
+  The "Reset search" will reset the filters to that defaults.
 
 * How can I use numeric-values on the SQL-fields that differ from the
   entered value by some factor ?
 
   Use Numeric-Filter with filter-config FC_NUM_FACTOR. See example-files.
 
-* Can I change the default used quoting-type used for text- and numeric-
+* Can I change the (default) used quoting-type used for text- and numeric-
   based filters ?
 
   Yes. See filter-config FC_QUOTETYPE and in example-files.
@@ -730,6 +737,8 @@ see section (2) Classes and Files.
 * How can I set filter-values via URL-vars ?
 
   There are two ways how to accomplish this:
+  Beware that a "Reset Search" may clear those values, if not defined
+  with FC_DEFAULT-config.
 
   1. Directly use the filters form-element-name to specify the value.
      It's recommended to use the filter-config FC_FNAME for this.
