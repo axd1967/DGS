@@ -433,6 +433,15 @@ require_once( "include/rating.php" );
    if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title2</h3>\n";
 
+   // hover-texts for colors-column
+   // (don't add 'w' and 'b', or else need to show in status.php too)
+   $arr_titles_colors = array(
+      'w_w' => T_('You have White, White to move'),
+      'w_b' => T_('You have White, Black to move'),
+      'b_w' => T_('You have Black, White to move'),
+      'b_b' => T_('You have Black, Black to move'),
+   );
+
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $Rating = $blackRating = $whiteRating = NULL;
@@ -515,7 +524,10 @@ require_once( "include/rating.php" );
                else
                   $colors.= '_b';
             }
-            $grow_strings[5] = "<td align=center><img src=\"17/$colors.gif\" alt=\"$colors\"></td>";
+            $hover_title = ( isset($arr_titles_colors[$colors]) )
+               ? "title=\"" . $arr_titles_colors[$colors] . "\"" : '';
+            $grow_strings[5] = "<td align=center><img src=\"17/$colors.gif\" "
+               . "alt=\"$colors\" $hover_title></td>";
          }
       }
 
