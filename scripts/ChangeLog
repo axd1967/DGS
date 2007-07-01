@@ -26,6 +26,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-01 juga
+
+   * include/std_functions.php:
+   - reverted changes to make_url-func to fix bug
+
 2007-06-30 juga
 
    * waiting_room.php:
