@@ -257,10 +257,10 @@ class SearchFilter
     * signature: Filter & add_filter(int id, string type, string dbfield, [bool active=false], [array config])
     * \param id numeric, if Table involved, id must match with the nr of the table-head from 'add_tablehead(nr,..)'
     * \param type what Filter to add, see on the specific Filters description as "SearchFilter-Type".
-    * \param dbfield string or array with db-field-specification (see specs/Filters.txt)
+    * \param dbfield string or array with db-field-specification (see specs/filters.txt)
     * \param active true, if filter should be active; if not active filter is not included to build the resulting query;
     *               within a table, an inactive filter is hidden with a '+'-sign.
-    * \param config array ( config_name => config_value ); filter-general and filter-specific configuration (see specs/Filters.txt)
+    * \param config array ( config_name => config_value ); filter-general and filter-specific configuration (see specs/filters.txt)
     */
    function &add_filter($id, $type, $dbfield, $active = false, $config = null)
    {
@@ -934,7 +934,7 @@ class Filter
    var $id;
    /*! \brief base-name used for form-element-names; default is 'PFX_FILTER$id'; can be overwritten with FC_FNAME-config. */
    var $name;
-   /*! \brief dbfield-specification used to build filter-query: dbfield, array, sql-template, QuerySQL (see specs/Filters.txt). */
+   /*! \brief dbfield-specification used to build filter-query: dbfield, array, sql-template, QuerySQL (see specs/filters.txt). */
    var $dbfield;
    /*! \brief array with additional URL-keys for multiple form-elements associated with filter; default is '$id' (e.g. see FilterRelativeDate). */
    var $elem_names;
