@@ -14,7 +14,7 @@ General instructions for developers:
    Actually, those names contain uppercase letters. That is not a problem
    until one does not insert an other object with the same name except the
    case (e.g. the two tables: Forum and forum).
-   In the other hand, the column, variable and alias names seem to be well
+   On the other hand, the column, variable and alias names seem to be well
    handled in a case sensitive way under the MS Windows systems.
 
 ----------------- PHP, Layout:
