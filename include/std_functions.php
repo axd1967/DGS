@@ -1468,7 +1468,7 @@ function build_maxrows_array( $maxrows )
    return $arr_maxrows;
 }
 
-// Makes url from a base page and an array of variable/value pairs
+// Makes URL from a base page and an array of variable/value pairs
 // if $sep is true, a '?' or '&' is added
 // NOTE: Since PHP5, there is http_build_query() that do nearly the same thing
 //
@@ -1479,37 +1479,34 @@ function build_maxrows_array( $maxrows )
 //    make_url('arr.php', array('a' => array( 44, 55 ))  gives  'arr.php?a[]=44&a[]=55'
 function make_url($page, $args, $sep=false)
 {
-   $url = '';
+   $url = $page;
+
+   $separator = ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
    if( is_array( $args) )
    {
-      $arr = array();
       foreach( $args as $var=>$value )
       {
          if( empty($value) || is_numeric($var) )
             continue;
-         if( is_array($value) )
+         if( !is_array($value) )
          {
-            $var .= '%5b%5d'; //encoded []
-            foreach( $value as $tmp )
-               array_push( $arr, $var . '=' . urlencode($tmp) );
+            $url .= $separator . $var . '=' . urlencode($value);
+            $separator = URI_AMP;
+            continue;
          }
-         else
-            array_push( $arr, $var . '=' . urlencode($value) );
+         $var .= '%5b%5d'; //encoded []
+         foreach( $value as $tmp )
+         {
+            $url .= $separator . $var . '=' . urlencode($tmp);
+            $separator = URI_AMP;
+         }
       }
-      $url = implode( URI_AMP, $arr );
    }
 
-   // has no '?' and want sep or has URL-vars
-   if ( !is_numeric(strpos($page, '?')) and ( $url != '' or $sep ) )
-      $page .= '?';
+   if( $sep )
+      $url .= $separator;
 
-   $page .= $url;
-
-   // add URI_AMP if wanted and not already has
-   if( $sep and substr($page, -strlen(URI_AMP)) != URI_AMP )
-      $page .= URI_AMP;
-
-   return $page;
+   return $url;
 }
 
 //see also the PHP parse_str() and parse_url()
