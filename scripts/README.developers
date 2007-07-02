@@ -114,6 +114,16 @@ General instructions for developers:
 
 ----------------- PHP:
 
+   [Source: http://www.php.net/manual/en/language.references.return.php]
+   If you try to return a reference from a function with the syntax:
+
+      return ($found_var);
+
+   this will not  work as you are attempting to return the result of an
+   expression, and not a variable, by reference. You can only return
+   variables by reference from a function - nothing else.
+
+   For example:
    Operator "(expr) ? A : B" returns a copy of A|B and not a reference
 
    $this->value{$pos} with var-pos DOES NOT WORK in all cases for
