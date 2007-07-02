@@ -104,7 +104,7 @@ if ( $fdemo == 1 )
          'DESCRIPTION', T_('Show Rows'),
          'SELECTBOX',   'maxrows', 1, build_maxrows_array($maxrows), $maxrows, false ));
 
-   $q1 = $qsql->clone();
+   $q1 = $qsql->duplicate();
    $q1->merge( $filter->get_query() );
    $form->echo_string();
    if ( $DEBUG_SQL ) echo "<br>QUERY: " . make_html_safe($q1->get_select()) . "<br>\n";
@@ -168,7 +168,7 @@ if ( $fdemo == 2 )
          'OWNHTML',     implode( '', $filter->get_submit_elements() ) ));
 
    // build SQL-query (for user-table)
-   $q2 = $qsql->clone();
+   $q2 = $qsql->duplicate();
    $q2->merge( $filter->get_query(GETFILTER_ALL) );
    $q2->merge( $table->get_query() );
 
@@ -220,7 +220,7 @@ if ( $fdemo == 3 )
    $table->add_tablehead( 2, 'Animal', 'Animal');
 
    // build SQL-query (for user-table)
-   $q3 = $qsql->clone();
+   $q3 = $qsql->duplicate();
    $q3->merge( $table->get_query() );
 
    // build table

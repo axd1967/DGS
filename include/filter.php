@@ -2624,7 +2624,7 @@ class FilterBoolSelect extends FilterSelection
 
       // use having to allow alias-FNAMES
       $parttype = (is_array($config) and @$config[FC_ADD_HAVING]) ? SQLP_HAVING : SQLP_WHERE;
-      $query_yes = $query->clone();
+      $query_yes = $query->duplicate();
       $query_yes->add_part( $parttype, "$field='Y'" );
       $query->add_part( $parttype, "$field='N'" );
 
@@ -2671,7 +2671,7 @@ class FilterRatedSelect extends FilterSelection
 
       // use having to allow alias-FNAMES
       $parttype = (is_array($config) and @$config[FC_ADD_HAVING]) ? SQLP_HAVING : SQLP_WHERE;
-      $query_yes = $query->clone();
+      $query_yes = $query->duplicate();
       $query_yes->add_part( $parttype, "$field IN ('Y','Done')" );
       $query->add_part( $parttype, "$field='N'" );
 

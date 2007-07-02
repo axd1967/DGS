@@ -504,7 +504,7 @@ class QuerySQL
    function merge_or( $qsql )
    {
       // normal merge into new one
-      $query = $this->clone();
+      $query = $this->duplicate();
       if ( !$query->merge($qsql) )
          return NULL;
 
@@ -525,7 +525,7 @@ class QuerySQL
    }
 
    /*! \brief Returns copy of this object */
-   function clone()
+   function duplicate()
    {
       $q = new QuerySQL();
       $q->merge($this);
