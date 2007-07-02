@@ -380,7 +380,8 @@ class SearchFilter
       if ( isset($this->Filters[$id]) ) {
          return $this->Filters[$id];
       } else {
-         return NULL;
+         $nullref = NULL;
+         return $nullref;
       }
    }
 
