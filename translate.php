@@ -25,6 +25,8 @@ require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
 define('ALLOW_PROFIL_CHARSET', 0);
+define('TRANSL_ALLOW_FILTER', 1);
+
 
 $info_box = '<CENTER>
 <table border="2">
@@ -62,13 +64,6 @@ $info_box = '<CENTER>
 <p></p>
 ';
 
-// SELECT * FROM 'TranslationGroups' 
-// + 'Untranslated phrases'
-$translation_groups =
-   array( 'Common', 'Start', 'Game', 'Messages', 'Users', 'Forum',
-          'Docs', 'FAQ', 'Admin', 'Error', 'Countries',
-          'Untranslated phrases' );
-
 {
 
    connect2mysql();
@@ -86,6 +81,10 @@ $translation_groups =
 
       $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
    }
+   $translation_groups =
+      array( 'Common', 'Start', 'Game', 'Messages', 'Users', 'Forum',
+             'Docs', 'FAQ', 'Admin', 'Error', 'Countries',
+             'Untranslated phrases' );
 
 
    $group = get_request_arg('group');
@@ -102,7 +101,15 @@ $translation_groups =
      $profil_charset = false;
 
    $alpha_order = (int)(bool)@$_REQUEST['alpha_order'];
-   $from_row = max(0,(int)@$_REQUEST['from_row']);
+   if( TRANSL_ALLOW_FILTER )
+      $filter_en = get_request_arg('filter_en');
+   else
+      $filter_en = '';
+   $whole_group = (int)(bool)@$_REQUEST['whole_group'];
+   if( $whole_group )
+      $from_row = -1;
+   else
+      $from_row = max(0,(int)@$_REQUEST['from_row']);
 
 
    if( count( $translator_array ) > 1 )
@@ -124,11 +131,11 @@ $translation_groups =
          error('not_correct_transl_language');
 
       $result = translations_query( $translate_lang, $untranslated, $group
-               , $alpha_order, $from_row)
+               , $from_row, $alpha_order, $filter_en)
          or error('mysql_query_failed','translate.translation_query');
 
       $show_rows = (int)@mysql_num_rows($result);
-      if( $show_rows <= 0 and !$untranslated )
+      if( !TRANSL_ALLOW_FILTER && $show_rows <= 0 && !$untranslated )
          error('translation_bad_language_or_group','translat1');
 
       $lang_string = '';
@@ -166,6 +173,8 @@ $translation_groups =
       $page_hiddens['profil_charset'] = 1;
    if( $alpha_order )
       $page_hiddens['alpha_order'] = 1;
+   if( $filter_en )
+      $page_hiddens['filter_en'] = $filter_en;
    if( $from_row > 0 )
       $page_hiddens['from_row'] = $from_row;
 
@@ -180,6 +189,7 @@ $translation_groups =
    if( $translate_lang )
    {
       $nbcol = 3;
+      { //$translate_form
       $translate_form = new Form( 'translateform', 'update_translation.php', FORM_POST );
       $translate_form->add_row( array('HEADER', 'Translate the following strings' ) );
 
@@ -187,7 +197,7 @@ $translation_groups =
 
       $table_links = '';
       $tmp = $page_hiddens;
-      if( $from_row > 0 )
+      if( !$whole_group && $show_rows > 0 && $from_row > 0 )
       {
          $tmp['from_row'] = max(0, $from_row-TRANS_ROW_PER_PAGE);
          if( $table_links )
@@ -195,7 +205,7 @@ $translation_groups =
          $table_links.= anchor( make_url($page, $tmp),
                T_('Prev Page'), '', array('accesskey' => '<'));
       }
-      if( $show_rows > TRANS_ROW_PER_PAGE )
+      if( !$whole_group && $show_rows > TRANS_ROW_PER_PAGE )
       {
          $show_rows = TRANS_ROW_PER_PAGE;
          $tmp['from_row'] = $from_row+TRANS_ROW_PER_PAGE;
@@ -257,29 +267,33 @@ $translation_groups =
       }
       mysql_free_result( $result);
 
-      if( $table_links )
+      if( $oid > 0 ) //empty table
       {
-         $translate_form->add_row( array( 'CELL', $nbcol
-               , 'align="right" bgcolor="#d0d0d0"', 'TEXT', $table_links ) );
+         if( $table_links )
+         {
+            $translate_form->add_row( array( 'CELL', $nbcol
+                  , 'align="right" bgcolor="#d0d0d0"', 'TEXT', $table_links ) );
+         }
+
+         $translate_form->add_row( array( 'SPACE' ) ); //$nbcol
+         $translate_form->add_row( array(
+            'CELL', $nbcol, 'align="center"',
+            'HIDDEN', 'translate_lang', $translate_lang,
+            'HIDDEN', 'profil_charset', $profil_charset,
+            'HIDDEN', 'group', $group,
+            'HIDDEN', 'alpha_order', $alpha_order,
+            'HIDDEN', 'filter_en', $filter_en,
+            'HIDDEN', 'from_row', $from_row,
+            'SUBMITBUTTONX', 'apply_changes', 'Apply translation changes to Dragon',
+               array('accesskey'=>'x'),
+            ) );
       }
-
-
-      $translate_form->add_row( array( 'SPACE' ) ); //$nbcol
-      $translate_form->add_row( array(
-         'CELL', $nbcol, 'align="center"',
-         'HIDDEN', 'translate_lang', $translate_lang,
-         'HIDDEN', 'profil_charset', $profil_charset,
-         'HIDDEN', 'group', $group,
-         'HIDDEN', 'alpha_order', $alpha_order,
-         'HIDDEN', 'from_row', $from_row,
-         'SUBMITBUTTON', 'apply_changes', 'Apply translation changes to Dragon',
-         ) );
-
 
       $translate_form->echo_string($tabindex);
       $tabindex= $translate_form->tabindex;
+      } //$translate_form
 
-      $nbcol = 2;
+      $nbcol = 1;
       $groupchoice_form = new Form( 'selectgroupform', $page, FORM_POST );
       $groupchoice_form->add_row( array(
          'HEADER', 'Groups',
@@ -293,9 +307,16 @@ $translation_groups =
          'HIDDEN', 'translate_lang', $translate_lang,
          'HIDDEN', 'profil_charset', $profil_charset,
          'HIDDEN', 'from_row', 0,
-         'SUBMITBUTTON', 'just_group', 'Just change group',
+         'SUBMITBUTTONX', 'just_group', 'Just change group',
+            array('accesskey'=>'w'),
          'CHECKBOX', 'alpha_order', 1, 'alpha order', $alpha_order,
          ) );
+      if( TRANSL_ALLOW_FILTER )
+         $groupchoice_form->add_row( array(
+            'CELL', $nbcol, 'align="center"',
+            'TEXT', 'English filter (_:any char, %:any number of chars, \:escape)',
+            'TEXTINPUT', 'filter_en', 20, 80, $filter_en,
+            ) );
 
       $groupchoice_form->echo_string($tabindex);
       $tabindex= $groupchoice_form->tabindex;
@@ -303,7 +324,7 @@ $translation_groups =
 
    if( $lang_choice )
    {
-      $nbcol = 2;
+      $nbcol = 1;
       $langchoice_form = new Form( 'selectlangform', $page, FORM_POST );
       $langchoice_form->add_row( array(
          'HEADER', 'Select language to translate to',
@@ -324,15 +345,16 @@ $translation_groups =
          'SELECTBOX', 'translate_lang', 1, $vals, $translate_lang, false,
          'HIDDEN', 'group', $group,
          'HIDDEN', 'alpha_order', $alpha_order,
+         'HIDDEN', 'filter_en', $filter_en,
          'HIDDEN', 'from_row', 0,
          'SUBMITBUTTON', 'cl', 'Select',
          ) );
 
       if( ALLOW_PROFIL_CHARSET )
-       $langchoice_form->add_row( array(
-         'CELL', $nbcol, 'align="center"',
-         'CHECKBOX', 'profil_charset', 'Y', 'use profile encoding', $profil_charset,
-         ) );
+         $langchoice_form->add_row( array(
+            'CELL', $nbcol, 'align="center"',
+            'CHECKBOX', 'profil_charset', 'Y', 'use profile encoding', $profil_charset,
+            ) );
 
       $langchoice_form->echo_string($tabindex);
    }

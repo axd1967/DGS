@@ -34,6 +34,7 @@ require_once( "include/make_translationfiles.php" );
    $profil_charset = @$_REQUEST['profil_charset'] ? 'Y' : '';
 
    $alpha_order = (int)(bool)@$_REQUEST['alpha_order'];
+   $filter_en = get_request_arg('filter_en');
    $from_row = max(0,(int)@$_REQUEST['from_row']);
 
    {
@@ -49,7 +50,7 @@ require_once( "include/make_translationfiles.php" );
    $untranslated = ($group === 'Untranslated phrases');
 
       $result = translations_query( $translate_lang, $untranslated, $group
-               , $alpha_order, $from_row)
+               , $from_row, $alpha_order, $filter_en)
          or error('mysql_query_failed','update_translation.translations_query');
 
       $show_rows = (int)@mysql_num_rows($result);
@@ -121,6 +122,7 @@ require_once( "include/make_translationfiles.php" );
          .URI_AMP."group=".urlencode($group)
          .($profil_charset ? URI_AMP."profil_charset=".$profil_charset : '')
          .($alpha_order ? URI_AMP."alpha_order=$alpha_order" : '')
+         .($filter_en ? URI_AMP."filter_en=".urlencode($filter_en) : '')
          .($from_row > 0 ? URI_AMP."from_row=$from_row" : '')
          );
 

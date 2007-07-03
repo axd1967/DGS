@@ -26,6 +26,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-03 rodival
+
+   * translate.php, update_translation.php,
+     include/make_translationfiles.php (translations_query):
+   - added a filter on the english part.
+     added the $filter_en argument to translations_query()
+
+
 2007-07-02 juga
 
    * show_games.php:

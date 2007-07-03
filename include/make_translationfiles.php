@@ -152,7 +152,7 @@ function make_include_files($language=null, $group=null) //must be called from m
 
 
 function translations_query( $translate_lang, $untranslated, $group
-               , $alpha_order=false, $from_row=0)
+               , $from_row=-1, $alpha_order=false, $filter_en='')
 {
 // See admin_faq.php to know the Translatable flag meaning.
 /* Translations.Text IS NOT NULL (but maybe empty if the 'same' box is checked)
@@ -176,41 +176,46 @@ function translations_query( $translate_lang, $untranslated, $group
       $order = ' ORDER BY Original,Original_ID';
    else
       $order = ' ORDER BY Original_ID';
-   if( $from_row > 0 )
+   if( $from_row >= 0 )
       $limit = " LIMIT $from_row,".(TRANS_ROW_PER_PAGE+1);
    else
-      $limit = ' LIMIT 0,'.(TRANS_ROW_PER_PAGE+1);
+      $limit = '';
 
-   $query = 
-     "SELECT Translations.Text," .
-            "TranslationTexts.ID AS Original_ID," .
-            "TranslationLanguages.ID AS Language_ID," .
-            "TranslationFoundInGroup.Group_ID," .
-            "TranslationTexts.Text AS Original," .
-            "TranslationTexts.Translatable " .
-     "FROM (TranslationTexts," .
-          "TranslationLanguages," .
-          "TranslationFoundInGroup," .
-          "TranslationGroups) " .
-     "LEFT JOIN Translations " .
-        "ON Translations.Original_ID=TranslationTexts.ID " .
-       "AND Translations.Language_ID=TranslationLanguages.ID " .
-     "WHERE TranslationLanguages.Language='$translate_lang' " .
-       "AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID " .
-       "AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID " .
-       "AND TranslationTexts.Text>'' " .
-       "AND TranslationTexts.Translatable!='N' " ;
+   $query = "SELECT Translations.Text"
+          . ",TranslationTexts.ID AS Original_ID"
+          . ",TranslationLanguages.ID AS Language_ID"
+          . ",TranslationFoundInGroup.Group_ID"
+          . ",TranslationTexts.Text AS Original"
+          . ",TranslationTexts.Translatable"
+   . " FROM (TranslationTexts"
+        . ",TranslationLanguages"
+        . ",TranslationFoundInGroup"
+        . ",TranslationGroups)"
+   . " LEFT JOIN Translations"
+       . " ON Translations.Original_ID=TranslationTexts.ID"
+      . " AND Translations.Language_ID=TranslationLanguages.ID"
+   . " WHERE TranslationLanguages.Language='$translate_lang'"
+      . " AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID"
+      . " AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID"
+      . " AND TranslationTexts.Text>''"
+      . " AND TranslationTexts.Translatable!='N'" ;
+   if( $filter_en )
+     $query .=
+         " AND TranslationTexts.Text LIKE '%$filter_en%'" ;
 
    if( !$untranslated )
      $query .= 
-       "AND TranslationGroups.Groupname='$group'" .
-       $order.$limit;
+         " AND TranslationGroups.Groupname='$group'"
+         . $order.$limit;
    else
      $query .=
-       "AND (Translations.Text IS NULL OR TranslationTexts.Translatable='Changed') " .
-       $order.$limit;
+       " AND (Translations.Text IS NULL OR TranslationTexts.Translatable='Changed')"
+       . $order.$limit;
 
-   return mysql_query($query);
+   $result = mysql_query( $query )
+      or error('mysql_query_failed','translations_query');
+
+   return $result;
 }
 
 
