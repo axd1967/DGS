@@ -5,11 +5,11 @@ Installation instructions
 Requirements:
 
 *) A webserver which can use php, e.g., apache <http://httpd.apache.org>
-*) php >= 4.1.0 <http://www.php.net>
-*) mysql >= 3.23 <http://www.mysql.com>
+*) PHP >= 4.1.0 <http://www.php.net>
+*) MySQL >= 3.23 <http://www.mysql.com>
 *) cvs client <http://www.cvshome.org>
 
-Last versions used:
+Last versions used by Dragon:
  Apache Version Apache/1.3.29 (Unix) PHP/4.3.4
  MySQL 4.0.15
 
@@ -151,5 +151,15 @@ By now, Dragon works with these PHP directives:
 
 
 
-6) Complain in the support forum at dragon <http://www.dragongoserver.net> if it doesn't
+6) Protect the scripts/ folder from outside access:
+   The scripts/ folder contains sensible tools reserved to the developers
+   or the admins team.
+   You have to protect it with an authentification process (using, for
+   example, the .htaccess AuthUserFile command) or at least move the
+   whole folder outside the server root tree when you have used it.
+
+
+
+
+7) Complain in the support forum at dragon <http://www.dragongoserver.net> if it doesn't
    work.
