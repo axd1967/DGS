@@ -33,6 +33,9 @@ Changelog
    - added a filter on the english part.
      added the $filter_en argument to translations_query()
 
+   * INSTALL
+   - added a step to protect the scripts/ folder.
+
 
 2007-07-02 juga
 
