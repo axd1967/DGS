@@ -48,8 +48,9 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
 
 
    $first = T_("Developer");
-   foreach( array( 'ragou' => 'Ragnar Ouchterlony',
-                  'rodival' => 'Rod Ival',
+   foreach( array('rodival' => 'Rod Ival',
+                  'JUG' => 'Jens-Uwe Gaspar',
+                  'ragou' => 'Ragnar Ouchterlony',
                   4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
                   ) as $uref => $name )
    {
