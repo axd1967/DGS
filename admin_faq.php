@@ -24,6 +24,27 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
+
+$info_box = '<CENTER>
+<table border="2">
+<tr><td>
+<ul>
+  <li> You may delete an entry by emptying its text-box(es)... while it had
+       not been translated. Then you will only be allowed to hide it, waiting
+       to re-use it later.
+  <li> You may toggle the \'translatable\' status of an entry with the right
+       side button. But as soon as one translator had translated it, this
+       button will disappear and you will have to use the inside check-box(es)
+       (\'Mark as changed for translators\') to signal to the translators
+       when your edition is finished and that they have some work to do again.
+       Please, avoid to check the box if you have just fixed a typo ;)
+</ul>
+</td></tr>
+</table>
+</CENTER>
+<p></p>
+';
+
 /* Translatable flag meaning - See also translate.php
   Value   : Meaning             : admin_toggle : admin_mark_box    : translator_page
  ---------:---------------------:--------------:-------------------:-------------------
@@ -264,7 +285,7 @@ require_once( "include/make_translationfiles.php" );
         }
 
         mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ", FAQID=$id, " .
-                    "Question=\"$question\", Answer=\"$answer\"")
+                    "Question=\"$question\", Answer=\"$answer\"") //+ Date= timestamp
            or error("mysql_query_failed",'admin_faq.do_edit.faqlog');
      }
 
@@ -365,7 +386,7 @@ require_once( "include/make_translationfiles.php" );
         $faq_id = mysql_insert_id();
         mysql_query("INSERT INTO FAQlog SET uid=" . $player_row["ID"] . ', ' .
                     "FAQID=$faq_id," .
-                    "Question=\"$question\", Answer=\"$answer\"")
+                    "Question=\"$question\", Answer=\"$answer\"") //+ Date= timestamp
            or error('mysql_query_failed','admin_faq.do_new.faqlog');
 
 
@@ -462,6 +483,10 @@ require_once( "include/make_translationfiles.php" );
   if( $show_list )
   {
      start_page(T_("FAQ Admin"), true, $logged_in, $player_row );
+
+     echo "<h3 class=Header>" . T_('FAQ Admin') . "</h3>\n";
+     echo $info_box;
+
      echo "<center>\n";
 
      echo "<table align=center width=\"85%\" border=0><tr><td>\n";
