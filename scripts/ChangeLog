@@ -26,6 +26,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-06 rodival
+
+   * admin_faq.php:
+   - hidden the info box and added an anchor to show it.
+   - adjusted some colspan= of the main table.
+   - allowed to edit an item even if hidden.
+   - inverted the icon of Hide and Show buttons.
+
+
 2007-07-05 rodival
 
    * translate.php, update_translation.php,
