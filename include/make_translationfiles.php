@@ -194,25 +194,31 @@ function translations_query( $translate_lang, $untranslated, $group
    . " LEFT JOIN Translations"
        . " ON Translations.Original_ID=TranslationTexts.ID"
       . " AND Translations.Language_ID=TranslationLanguages.ID"
-   . " WHERE TranslationLanguages.Language='$translate_lang'"
+   . " WHERE TranslationLanguages.Language='".mysql_addslashes($translate_lang)."'"
       . " AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID"
       . " AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID"
       . " AND TranslationTexts.Text>''"
       . " AND TranslationTexts.Translatable!='N'" ;
+
    if( $filter_en )
-     $query .=
-         " AND TranslationTexts.Text LIKE '%$filter_en%'" ;
+      $query .=
+         " AND TranslationTexts.Text LIKE '%".mysql_addslashes($filter_en)."%'" ;
 
-   if( !$untranslated )
-     $query .= 
-         " AND TranslationGroups.Groupname='$group'"
-         . $order.$limit;
-   else
-     $query .=
-       " AND (Translations.Text IS NULL OR TranslationTexts.Translatable='Changed')"
-       . $order.$limit;
+   if( $untranslated )
+      $query .=
+         " AND (Translations.Text IS NULL OR TranslationTexts.Translatable='Changed')";
 
-   $result = mysql_query( $query )
+   switch( $group )
+   {
+   default:
+      $query .=
+         " AND TranslationGroups.Groupname='".mysql_addslashes($group)."'";
+   case 'allgroups':
+      break;
+   }
+   $query .= $order.$limit;
+
+   $result = mysql_query( $query)
       or error('mysql_query_failed','translations_query');
 
    return $result;

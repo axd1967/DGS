@@ -27,27 +27,30 @@ require_once( "include/make_translationfiles.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
-
-   $group = get_request_arg('group');
-   $translate_lang = get_request_arg('translate_lang');
-   $profil_charset = @$_REQUEST['profil_charset'] ? 'Y' : '';
-
-   $alpha_order = (int)(bool)@$_REQUEST['alpha_order'];
-   $filter_en = get_request_arg('filter_en');
-   $from_row = max(0,(int)@$_REQUEST['from_row']);
+      error('not_logged_in');
 
    {
       $translator_set = @$player_row['Translator'];
       if( !$translator_set )
-        error("not_translator");
+        error('not_translator');
       $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
    }
 
+   $translate_lang = get_request_arg('translate_lang');
+   $profil_charset = (int)(bool)@$_REQUEST['profil_charset'];
+
+   $group = get_request_arg('group');
+   $untranslated = (int)(bool)@$_REQUEST['untranslated'];
+   $alpha_order = (int)(bool)@$_REQUEST['alpha_order'];
+   $filter_en = get_request_arg('filter_en');
+   $no_pages = (int)(bool)@$_REQUEST['no_pages'];
+   if( $no_pages )
+      $from_row = -1;
+   else
+      $from_row = max(0,(int)@$_REQUEST['from_row']);
+
    if( !in_array( $translate_lang, $translator_array ) )
       error('not_correct_transl_language', $translate_lang.':'.$translator_set.':'.implode("*", $translator_array));
-
-   $untranslated = ($group === 'Untranslated phrases');
 
       $result = translations_query( $translate_lang, $untranslated, $group
                , $from_row, $alpha_order, $filter_en)
@@ -119,8 +122,9 @@ require_once( "include/make_translationfiles.php" );
    make_include_files($translate_lang); //must be called from main dir
 
    jump_to("translate.php?translate_lang=".urlencode($translate_lang)
-         .URI_AMP."group=".urlencode($group)
          .($profil_charset ? URI_AMP."profil_charset=".$profil_charset : '')
+         .URI_AMP."group=".urlencode($group)
+         .($untranslated ? URI_AMP."untranslated=$untranslated" : '')
          .($alpha_order ? URI_AMP."alpha_order=$alpha_order" : '')
          .($filter_en ? URI_AMP."filter_en=".urlencode($filter_en) : '')
          .($from_row > 0 ? URI_AMP."from_row=$from_row" : '')

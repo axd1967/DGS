@@ -26,6 +26,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-05 rodival
+
+   * translate.php, update_translation.php,
+     include/make_translationfiles.php (translations_query):
+   - modified the 'Untranslated' option (may be applied on every group).
+     therefore, added a 'All groups' option.
+   - hidden the now big info box and added an anchor to show it.
+
+
 2007-07-03 rodival
 
    * translate.php, update_translation.php,
