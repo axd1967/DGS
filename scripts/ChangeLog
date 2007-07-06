@@ -13,10 +13,42 @@ quick INFO:
    I've reformatted the changelog file with last changes at top.
    I'm working on the bad centered alignement of FAQ, docs and other pages.
 
+-----
 2007-06-26 rodival
    I've executed the DGS player_consistency.php script to fix some
    (near 20) bugged players' infos (see "Running" in this day section)
    I've not found the reason of this bug. Keep an eye on it!
+\2007-07-06 rodival
+   2 new users with a bad "Running" count have appeared yesterday:
+   6415=random_penguin:82.108.171.178, 13628=guerrilla27:83.18.19.250
+ uid   cntfix last finished games        last accepted games        ucol
+ 13628 23=>22 295161 2007-07-05 15:05:05 330544 2007-07-05 15:15:29 W
+                                         330461 2007-07-05 11:22:15 W
+                                         330485 2007-07-05 10:46:05 W
+                                         330467 2007-07-05 08:36:04 W
+                                         330442 2007-07-05 04:03:51 W
+ 6415  14=>13 295161 2007-07-05 15:05:05 330544 2007-07-05 15:15:29 B
+   Both users share a finished and an accepted game. Both games accepted by
+   "invitation". No waitingroom. No double game. No timeout. Other counts Ok.
+   Either in send_message.php, Running=Running+2 instead of +1
+   or in confirm.php, a Running=Running-1 not executed => but those for
+    the normal ending games are associated with a Finished=Finished+1
+   or an invisible game deletion where Running=Running-1 is isolated.
+   Found those recent errors:
+ ID	Handle	Message	MysqlError	Debug	Date	IP
+ 3155508	afm	mysql_update_game		conf20(327771)	20070706092914	64.168.66.246
+ 3154151	Kaichan	mysql_update_game		conf20(322501)	20070706003502	217.230.149.80
+ 3153922	jalen	internal_error		confirm10	20070705235433	74.73.138.215
+ 3153353	bornfreerunfree	mysql_update_game		conf20(297448)	20070705203942	213.233.247.132
+ 3152914	Acnil	mysql_update_game		conf20(315438)	20070705172412	207.45.248.19
+ 3152886	jean-claude	mysql_update_game		conf20(330341)	20070705171139	194.78.196.244
+ 3152644	RuderiX	already_played		confirm11	20070705154342	193.238.131.253
+
+ 3152540	guerrilla27	receiver_not_found		message_selector.php	20070705150637	83.18.19.250
+ 3152538	guerrilla27	receiver_not_found		message_selector.php	20070705150605	83.18.19.250
+ 3148494	guerrilla27	not_your_turn		game.php?gid=298476	20070704102754	83.18.19.250
+ 0 errors for IP='82.108.171.178'
+-----
 
 
 quick TODO:
@@ -25,6 +57,13 @@ quick TODO:
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-07-06 rodival
+
+   * confirm.php, quick_play.php:
+   - moved the place where the GameNotes are deleted
+   - few minor debug messages adjustements (quick_play accordingly)
+
 
 2007-07-06 rodival
 

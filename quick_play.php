@@ -251,7 +251,7 @@ This is why:
          }
 
          if( strlen($prisoner_string) != $nr_prisoners*2 )
-            error("move_problem");
+            error('move_problem','quick_play.domove.prisoner');
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 

@@ -104,10 +104,11 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    //See *** HOT_SECTION *** below
    if( !isset($_REQUEST['move']) )
-      error("internal_error",'confirm10');
+      //error('internal_error','confirm10');
+      error('move_problem','confirm10')
    $qry_move = @$_REQUEST['move'];
    if( $qry_move != $Moves )
-      error("already_played",'confirm11');
+      error('already_played','confirm11');
 
 
 
@@ -234,7 +235,7 @@ This is why:
 
          if( strlen($prisoner_string) != $nr_prisoners*2 or
              ( $stonestring and $prisoner_string != $stonestring) )
-            error("move_problem");
+            error('move_problem','confirm.domove.prisoner');
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
@@ -383,9 +384,6 @@ This is why:
          $move_query = "DELETE FROM Moves WHERE gid=$gid";
          $message_query = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
          $game_query = "DELETE FROM Games" ; //See *** HOT_SECTION ***
-         
-         mysql_query("DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2")
-            or error('mysql_query_failed', "confirm.delete.gamenote.$gid");
 
          $game_finished = true;
       }
@@ -455,13 +453,13 @@ This is why:
       or error('mysql_query_failed','confirm.update_game');
 
    if( mysql_affected_rows() != 1 )
-      error("mysql_update_game","conf20($gid)");
+      error("mysql_update_game","confirm20($action,$gid)");
 
    $result = mysql_query( $move_query )
       or error('mysql_query_failed','confirm.update_moves');
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
-      error("mysql_insert_move","conf21($gid)");
+      error("mysql_insert_move","confirm21($action,$gid)");
 
 
 
@@ -471,7 +469,7 @@ This is why:
          or error('mysql_query_failed','confirm.message_query');
 
       if( mysql_affected_rows() < 1 and $action != 'delete' )
-         error("mysql_insert_move","conf22($gid)");
+         error("mysql_insert_move","confirm22($action,$gid)");
    }
 
 
@@ -502,9 +500,13 @@ This is why:
 
       if( $action == 'delete' )
       {
+         //TODO: HOT_SECTION ???
          mysql_query("UPDATE Players SET Running=Running-1 " .
                      "WHERE (ID=$Black_ID OR ID=$White_ID) LIMIT 2")
-            or error('mysql_query_failed','confirm.update_players_delete');
+            or error('mysql_query_failed',"confirm.update_players_delete($gid)");
+
+         mysql_query("DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2")
+            or error('mysql_query_failed', "confirm.delete.gamenote($gid)");
 
          $Subject = 'Game deleted';
          //reference: game is deleted => no link
@@ -516,6 +518,7 @@ This is why:
       }
       else
       {
+         //TODO: HOT_SECTION ???
 //         update_rating($gid);
          $rated_status = update_rating2($gid); //0=rated game
 
@@ -524,14 +527,14 @@ This is why:
                     ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
                    ) . " WHERE ID=$White_ID LIMIT 1" ;
          mysql_query( $query)
-            or error('mysql_query_failed','confirm.update_players_finished');
+            or error('mysql_query_failed',"confirm.update_players_finished.W($gid,$White_ID)");
 
          $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
                    ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                     ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                    ) . " WHERE ID=$Black_ID LIMIT 1" ;
          mysql_query($query)
-            or error('mysql_query_failed','confirm.delete');
+            or error('mysql_query_failed',"confirm.update_players_finished.B($gid,$Black_ID)");
 
          $Subject = 'Game result';
          $Text = "The result in the game:<center>"
@@ -606,10 +609,11 @@ This is why:
 
    // Notify opponent about move
 
-   mysql_query( "UPDATE Players SET Notify='NEXT' " .
-                "WHERE ID='$next_to_move_ID' AND SendEmail LIKE '%ON%' " .
-                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "' LIMIT 1")
-      or error('mysql_query_failed','confirm.notify_opponent');
+   if( $next_to_move_ID != $player_row['ID'] )
+      mysql_query( "UPDATE Players SET Notify='NEXT' " .
+                   "WHERE ID='$next_to_move_ID' AND Notify='NONE' " .
+                   "AND SendEmail LIKE '%ON%' LIMIT 1")
+         or error('mysql_query_failed','confirm.notify_opponent');
 
 
 
