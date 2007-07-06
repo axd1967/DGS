@@ -151,6 +151,7 @@ function grep_file($regexp, $file, &$matches)
 
    start_html('update_translation_pages', 0);
 
+//echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
    if( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
@@ -158,17 +159,18 @@ function grep_file($regexp, $file, &$matches)
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p>*** Fixes errors:</p>";
+      echo "<p>*** Fixes errors ***"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Just show it')
+         ."</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p>(just show queries needed)"
+      echo "<p>(just show needed queries)"
          ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
          ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
          ."</p>";
    }
-
 
 
    $query = "SELECT * FROM TranslationGroups";
@@ -222,26 +224,25 @@ function grep_file($regexp, $file, &$matches)
       if( !isset($translationpages_found[$row['Page']]) )
       {
          echo "<hr>Should be deleted: " . $row['Page'] . "<br>\n";
-         //TODO: could we drop the ID column of TranslationPages: it is used only here, isn't it?
+         //TODO: could we drop the ID column of TranslationPages: it is only used in this script, isn't it?
          dbg_query("DELETE FROM TranslationPages WHERE ID=" . $row['ID'] . " LIMIT 1");
       }
       else
       {
-         $p = $translationpages_found[$row['Page']];
-         if( $p[1] === true )
+         $ref = &$translationpages_found[$row['Page']];
+         if( $ref[1] === true )
+         {
             echo "<hr><font color=red>Error: Duplicate entry: " . $row['Page'] .
                "</font><br>\n";
-         else
+            continue;
+         }
+         $ref[1] = true;
+         if( $ref[0] !== $row['Group_ID'] )
          {
-            $translationpages_found[$row['Page']][1] = true;
-
-            if( $p[0] !== $row['Group_ID'] )
-            {
-               echo "<hr>Group changed: " . $row['Page'] .
-                  ": " . $row['Group_ID'] . " --> " . $p[0] . "<br>\n";
-               dbg_query("UPDATE TranslationPages SET Group_ID=" . $p[0] .
-                         " WHERE ID=" . $row['ID'] . " LIMIT 1");
-            }
+            echo "<hr>Group changed: " . $row['Page'] .
+               ": " . $row['Group_ID'] . " --> " . $ref[0] . "<br>\n";
+            dbg_query("UPDATE TranslationPages SET Group_ID=" . $ref[0] .
+                      " WHERE ID=" . $row['ID'] . " LIMIT 1");
          }
       }
    }
@@ -258,7 +259,6 @@ function grep_file($regexp, $file, &$matches)
    }
 
    echo "<hr>Done!!!\n";
-
    end_html();
 }
 

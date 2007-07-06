@@ -46,12 +46,12 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
    if( !$result or $numrows<=0 )
       return 0;
 
-   $c=2;
+   $c=0;
    $i=0;
-   echo "\n<table title='$numrows rows' class=tbl cellpadding=4 cellspacing=1>\n";
+   echo "\n<table title='$numrows rows' class=Table cellpadding=4 cellspacing=1>\n";
    while( $row = mysql_fetch_assoc( $result ) )
    {
-      $c=3-$c;
+      $c=($c % LIST_ROWS_MODULO)+1;
       $i++;
       if( $i==1 or ($rowhdr>1 && ($i%$rowhdr)==1) )
       {
@@ -62,7 +62,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
          }
          echo "\n</tr>";
       }
-      echo "<tr class=row$c ondblclick=\"row_click(this,'row$c')\">\n";
+      echo "<tr class=Row$c ondblclick=\"row_click(this,'Row$c')\">\n";
       foreach( $row as $key => $val )
       {
          //remove sensible fields from a query like "SELECT * FROM Players"
@@ -94,6 +94,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
 
    return $numrows;
 }
+
 function explain_query($s) { 
    if(DEBUG)
    {
@@ -211,36 +212,41 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 
    connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+      error("not_logged_in");
 
-  $player_level = (int)$player_row['admin_level'];
-  if( !($player_level & ADMIN_DATABASE) )
-    error("adminlevel_too_low");
+   $player_level = (int)$player_row['admin_level'];
+   if( !($player_level & ADMIN_DATABASE) )
+      error("adminlevel_too_low");
 
 
    start_html( 'player_consistency', 0, '',
-      "  table.tbl { border:0; background: #c0c0c0; }\n" .
-      "  tr.row1 { background: #ffffff; }\n" .
-      "  tr.row2 { background: #dddddd; }\n" .
+      "  table.Table { border:0; background: #c0c0c0; }\n" .
+      "  tr.Row1 { background: #ffffff; }\n" .
+      "  tr.Row2 { background: #dddddd; }\n" .
       "  tr.hil { background: #ffb010; }" );
 
-
+//echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
    if( $do_it=@$_REQUEST['do_it'] )
    {
-      function dbg_query($s) { 
+      function dbg_query($s) {
         if( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p></p>*** Fixes errors:<br>";
+      echo "<p>*** Fixes errors ***"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Just show it')
+         ."</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p></p>(just show queries needed):<br>";
+      echo "<p>(just show needed queries)"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
+         ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
+         ."</p>";
    }
 
 
@@ -255,6 +261,32 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 
    $is_rated = " AND Games.Rated!='N'" ;
    //$is_rated.= " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
+
+
+//-----------------
+
+   //First search for games with bad player ID
+   $query = "SELECT ID,White_ID,Black_ID"
+          . " FROM Games"
+          . " WHERE Status!='INVITED'"
+            . " AND (White_ID<=0 OR Black_ID<=0 OR White_ID=Black_ID)"
+          . " ORDER BY ID DESC"
+          ;
+   $result = explain_query( $query)
+      or die("pID.A: " . mysql_error());
+
+   $err = 0;
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      extract($row);
+      echo "\n<br>Game: $ID  White_ID: $White_ID  Black_ID: $Black_ID";
+      $err++;
+   }
+   if( $err )
+      echo "\n<br>--- $err error(s). Must be fixed by hand.";
+
+   mysql_free_result($result);
+   echo "\n<br>PlayerID Done.";
 
 
 //-----------------
@@ -400,6 +432,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "\n<br>Misc Done.";
 
 
+   echo "<hr>Done!!!\n";
    end_html();
 }
 ?>

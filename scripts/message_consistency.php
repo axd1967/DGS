@@ -41,19 +41,25 @@ require_once( "include/std_functions.php" );
 
    start_html( 'message_consistency', 0);
 
+//echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
    if( $do_it=@$_REQUEST['do_it'] )
    {
-      function dbg_query($s) { 
+      function dbg_query($s) {
         if( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p></p>*** Fixes errors:<br>";
+      echo "<p>*** Fixes errors ***"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Just show it')
+         ."</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p></p>(just show queries needed):<br>";
+      echo "<p>(just show needed queries)"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
+         ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
+         ."</p>";
    }
 
 
@@ -64,7 +70,7 @@ require_once( "include/std_functions.php" );
 
 
 
-   echo "<p></p>Lost replied:";
+   echo "<hr>Lost replied:";
 
    $query = "SELECT org.*, cor.Replied, cor.Sender, cor.ID as cid, rep.ID as rid"
      ." FROM Messages as rep, Messages as org, MessageCorrespondents AS cor, MessageCorrespondents AS cre"
@@ -84,6 +90,7 @@ require_once( "include/std_functions.php" );
    echo "<br>Lost replied done.\n";
 
 
+   echo "<hr>Done!!!\n";
    end_html();
 }
 
@@ -91,7 +98,7 @@ require_once( "include/std_functions.php" );
 //see also: message_list_query and message_list_table
 function check_myself_message( $user_id=false)
 {
-   echo "<p></p>Messages to myself:";
+   echo "<hr>Messages to myself:";
 
 //Find old way *messages to myself*, i.e. where sender and receiver are the same user.
    $query = "SELECT me.mid as mid, " .

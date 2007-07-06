@@ -58,6 +58,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-07 rodival
+
+   * update_translation_pages.php, generate_translation_texts.php,
+     message_consistency.php, player_consistency.php, recalculate_ratings2.php,
+     start_frozen_clocks.php, convert_posindex.php, convert_from_old_forum.php,
+     phpinfo.php:
+   - disabled some one shot scripts, enhanced the others
+
+
 2007-07-06 rodival
 
    * confirm.php, quick_play.php:

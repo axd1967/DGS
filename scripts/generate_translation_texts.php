@@ -38,6 +38,7 @@ chdir( 'scripts' );
 
    start_html('update_translation_pages', 0);
 
+//echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
    if( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
@@ -45,12 +46,14 @@ chdir( 'scripts' );
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p>*** Fixes errors:</p>";
+      echo "<p>*** Fixes errors ***"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Just show it')
+         ."</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p>(just show queries needed)"
+      echo "<p>(just show needed queries)"
          ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
          ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
          ."</p>";
@@ -77,24 +80,28 @@ chdir( 'scripts' );
       foreach( $matches[1] as $str )
       {
          unset($string);
-         eval( "\$string = $str;" );
+         //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE | E_PARSE));
+         eval( "\$string = trim($str);" );
+         //error_reporting($e);
          if( !isset($string) || $string == '' )
          {
-            echo "*** Error: something went wrong with [$str]<br>";
+            $tmp = textarea_safe($str);
+            echo "<br>*** Error: something went wrong with [$tmp]<br>";
             continue;
          }
          $tmp= add_text_to_translate('generate_translation_texts'
-               , $string, $Group_ID, $do_it);
-         if( $do_it && $tmp )
-            $tmp= '++ '.$string;
+               , $string, $Group_ID, $do_it); //$do_it => dbg_query
          if( $tmp )
+         {
+            if( $do_it )
+               $tmp= '++ '.$string;
             echo textarea_safe($tmp)."<br>";
+         }
       }
    }
    mysql_free_result($result);
 
    echo "<hr>Done!!!\n";
-
    end_html();
 }
 

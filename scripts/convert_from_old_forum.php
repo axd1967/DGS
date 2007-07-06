@@ -1,8 +1,46 @@
 <?php
-chdir("../forum/");
+/*
+Dragon Go Server
+Copyright (C) 2001-2006  Erik Ouchterlony, Rod Ival
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+chdir( '../' );
+require_once( "include/std_functions.php" );
+chdir("forum/");
 require_once("forum_functions.php");
+
 {
+   disable_cache();
+
    connect2mysql();
+
+   $logged_in = who_is_logged( $player_row);
+
+   if( !$logged_in )
+      error("not_logged_in");
+
+   $player_level = (int)$player_row['admin_level'];
+   if( !($player_level & ADMIN_DATABASE) )
+      error("adminlevel_too_low");
+
+   start_html('convert_from_old_forum', 0);
+
+echo ">>>> Should not be used now. Do not run it before a check. Caution: no 'do_it' option"; end_html(); exit;
+
 
    $res0 = mysql_query( "SELECT * from forums" ) or die(mysql_error());
    while( $row0 = mysql_fetch_array( $res0 ) )
@@ -121,6 +159,7 @@ require_once("forum_functions.php");
       echo "\n\nFinished $fname\n";
    }
 
-   echo "\n\n\nDone!!\n";
+   echo "<hr>Done!!!\n";
+   end_html();
 }
 ?>

@@ -28,17 +28,18 @@ require_once( "../forum/forum_functions.php" );
 
    connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+      error("not_logged_in");
 
-  $player_level = (int)$player_row['admin_level'];
-  if( !($player_level & ADMIN_DATABASE) )
-    error("adminlevel_too_low");
+   $player_level = (int)$player_row['admin_level'];
+   if( !($player_level & ADMIN_DATABASE) )
+      error("adminlevel_too_low");
 
    start_html('convert_posindex', 0);
 
+echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
    if( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
@@ -46,14 +47,18 @@ require_once( "../forum/forum_functions.php" );
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
-      echo "<p></p>*** Fixes errors:<br>";
+      echo "<p>*** Fixes errors ***"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Just show it')
+         ."</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
-      echo "<p></p>(just show queries needed):<br>";
+      echo "<p>(just show needed queries)"
+         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
+         ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
+         ."</p>";
    }
-
 
    $new_order_str = "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
