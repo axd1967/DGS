@@ -105,7 +105,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    //See *** HOT_SECTION *** below
    if( !isset($_REQUEST['move']) )
       //error('internal_error','confirm10');
-      error('move_problem','confirm10')
+      error('move_problem','confirm10');
    $qry_move = @$_REQUEST['move'];
    if( $qry_move != $Moves )
       error('already_played','confirm11');
