@@ -314,7 +314,7 @@ class QuerySQL
     *    add_part( SQLP_FIELDS,  'P.Name', 'P.Handle', 'P.ID' );
     *    add_part( SQLP_OPTS,    "DISTINCT" );
     *    add_part( SQLP_FROM,    "Games" );
-    *    add_part( SQLP_FROM,    "JOIN ..." );
+    *    add_part( SQLP_FROM,    "INNER JOIN ..." );
     *    add_part( SQLP_WHERE,   "G.ID=G2.ID AND G.Moves>10" ); // joined with 'AND'
     *    add_part( SQLP_GROUP,   "Games.To_MoveID" );
     *    add_part( SQLP_HAVING,  'haverating and goodrating' );

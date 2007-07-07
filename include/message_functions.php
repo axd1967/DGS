@@ -1009,7 +1009,7 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
       'otherP.Handle AS other_handle' );
    $qsql->add_part( SQLP_FROM,
       'Messages M ' .
-      'JOIN MessageCorrespondents AS me ON M.ID=me.mid',
+      'INNER JOIN MessageCorrespondents AS me ON M.ID=me.mid',
       'LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender',
       'LEFT JOIN Players otherP ON otherP.ID=other.uid',
       'LEFT JOIN MessageCorrespondents AS previous ON previous.mid=M.ReplyTo AND previous.uid=me.uid' );

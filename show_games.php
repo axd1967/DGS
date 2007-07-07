@@ -309,10 +309,11 @@ require_once( "include/rating.php" );
    {
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
       $gtable->add_tablehead(13, T_('Last Move'), 'Lastchanged', true);
-      if( !$all )
-         $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
       if( !$all ) //!$observe && !$finished
+      {
+         $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
          $gtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
+      }
    }
 
 
@@ -334,9 +335,9 @@ require_once( "include/rating.php" );
          'Games.White_Start_Rating AS whiteStartRating' );
       $qsql->add_part( SQLP_FROM,
          'Observers AS OB',
-         'JOIN Games ON Games.ID=OB.gid',
-         'JOIN Players AS white ON white.ID=White_ID',
-         'JOIN Players AS black ON black.ID=Black_ID' );
+         'INNER JOIN Games ON Games.ID=OB.gid',
+         'INNER JOIN Players AS white ON white.ID=White_ID',
+         'INNER JOIN Players AS black ON black.ID=Black_ID' );
       $qsql->add_part( SQLP_WHERE,
          'OB.uid=' . $player_row['ID'] );
    }
@@ -351,8 +352,8 @@ require_once( "include/rating.php" );
          'Games.White_Start_Rating AS whiteStartRating' );
       $qsql->add_part( SQLP_FROM,
          'Games',
-         'JOIN Players AS white ON white.ID=White_ID',
-         'JOIN Players AS black ON black.ID=Black_ID' );
+         'INNER JOIN Players AS white ON white.ID=White_ID',
+         'INNER JOIN Players AS black ON black.ID=Black_ID' );
 
       if ( $finished )
       {
@@ -525,9 +526,9 @@ require_once( "include/rating.php" );
                   $colors.= '_b';
             }
             $hover_title = ( isset($arr_titles_colors[$colors]) )
-               ? "title=\"" . $arr_titles_colors[$colors] . "\"" : '';
+               ? " title=\"" . $arr_titles_colors[$colors] . "\"" : '';
             $grow_strings[5] = "<td align=center><img src=\"17/$colors.gif\" "
-               . "alt=\"$colors\" $hover_title></td>";
+               . "alt=\"$colors\"$hover_title></td>";
          }
       }
 
@@ -546,7 +547,6 @@ require_once( "include/rating.php" );
             $grow_strings[10] = '<td>' . score2text($Score, false) . "</td>";
          if( !$all )
          {
-
             if( $gtable->Is_Column_Displayed[11] )
             {
                $src = '"images/' .
@@ -584,12 +584,10 @@ require_once( "include/rating.php" );
    if( $observe )
       $uid = $myID;
 
-   if( !$all )
+   if( !$all && $uid > 0 && $uid != $myID )
    {
-      if ( $uid != $myID )
          $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
-
-      if( $uid != $player_row["ID"] and !$observe )
+      if( !$observe )
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$uid";
    }
 
