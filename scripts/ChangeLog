@@ -60,6 +60,28 @@ Changelog
 
 2007-07-07 rodival
 
+   * include/std_functions.php (send_email, send_message, clean_url,
+      is_logged_in)
+   - added the send_email() and send_message() functions
+   - adjusted clean_url() to chop all the trailing '?' and '&' chars
+   - introduced the "fever vault" in is_logged_in(). May be adjusted
+     or disabled whith the FEVER_CNT constant. May be tunned for the
+     guest account which is a multiple account and so should have larger
+     limits.
+     The "fever vault" process had 3 main variables: if a user produces
+     more that FEVER_CNT page calls during "one hour", he will be
+     vaulted for one day (i.e. unable to log himself while receiving
+     an info message).
+-----------
+ALTER TABLE `Players`
+ CHANGE `Hits` `Hits` int(11) NOT NULL DEFAULT 0 ,
+ ADD `VaultTime` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `Registerdate` ,
+ ADD `VaultCnt` smallint(5) unsigned default 0 NOT NULL AFTER `Registerdate` ;
+-----------
+
+
+2007-07-07 rodival
+
    * include/connect2mysql.php (connect2mysql):
    - changed the returned value by connect2mysql(true): in case of
      error, it returns the error message now instead of false.
