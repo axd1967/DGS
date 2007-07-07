@@ -165,12 +165,12 @@ class Table
             if( !(substr( $this->Page, -1 ) == '?') and
                 !(substr( $this->Page, -strlen(URI_AMP) ) == URI_AMP) )
             {
-               $this->Page .= URI_AMP;
+               $this->Page .= URI_AMP; //end_sep
             }
          }
          else
          {
-            $this->Page .= '?';
+            $this->Page .= '?'; //end_sep
          }
 
          $this->Player_Column = $_player_column;
@@ -347,19 +347,20 @@ class Table
 
       // NOTE: avoid nested forms with other forms (because nested hiddens are not working)
 
-      $page_str = clean_url( $this->Page );
-      $table_form = $this->ExternalForm; // read-only
-      if ( !isset($this->ExternalForm) )
+      if ( isset($this->ExternalForm) )
+         $table_form = $this->ExternalForm; // read-only
+      else if ( $need_form or !$this->Static_Columns ) // need form for filter or add-column
       {
-         if ( $need_form or !$this->Static_Columns ) // need form for filter or add-column
-         {
-            $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
-               $page_str."#{$this->Prefix}TableFAC", FORM_GET, false, 'formTable');
-            $table_form->attach_table($this);
-         }
+         $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
+            clean_url( $this->Page)."#{$this->Prefix}TableFAC",
+            FORM_GET, false, 'formTable');
+         $table_form->attach_table($this);
       }
+      else
+         unset( $table_form);
 
-      if( !$this->Static_Columns or $need_form ) // add-col & filter-submits
+
+      if( $need_form or !$this->Static_Columns ) // add-col & filter-submits
       {
          $addcol_str = $this->make_add_column_form( $table_form);
          $string .= $addcol_str;
@@ -719,8 +720,8 @@ class Table
       return $str;
    }
 
-   /*! \brief Retrieve hidden part from table for form. */
-   function get_hiddens( &$hiddens )
+   /*! \brief Retrieve hidden part from table. */
+   function get_hiddens( &$hiddens)
    {
       if ($this->Sort1)
       {
@@ -819,7 +820,7 @@ class Table
 
       $common_url = $this->current_rows_string(true)
          . $this->current_filter_string(true)
-         . $this->current_extparams_string();
+         . $this->current_extparams_string(true); //end_sep
 
       // field-sort-link
       $title = $tablehead['Description'];
@@ -828,14 +829,15 @@ class Table
       $sortimg = '';
       if( $csort )
       {
-         $string .= "<a href=\"" . $this->Page;
+         $string .= "<a href=\"" . $this->Page; //end_sep
 
          if( $csort == $this->Sort1 )
          { //Click on main column: just toggle its order
             $string .= $this->make_sort_string( $this->Sort1,
                                                 !$this->Desc1,
                                                 $this->Sort2,
-                                                $this->Desc2 );
+                                                $this->Desc2,
+                                                true ); //end_sep
             $sortimg = '1'.($this->Desc1?'d':'a');
          }
          else
@@ -844,7 +846,8 @@ class Table
             $string .= $this->make_sort_string( $this->Sort2,
                                                 $this->Desc2,
                                                 $this->Sort1,
-                                                $this->Desc1 );
+                                                $this->Desc1,
+                                                true ); //end_sep
             $sortimg = '2'.($this->Desc2?'d':'a');
          }
          else
@@ -852,14 +855,15 @@ class Table
             $string .= $this->make_sort_string( $csort,
                                                 $tablehead['Desc_Default'],
                                                 $this->Sort1,
-                                                $this->Desc1);
+                                                $this->Desc1,
+                                                true ); //end_sep
          }
 
-         $string .= $common_url . URI_AMP;
-         $string .= $this->current_from_string();
+         $string .= $common_url; //end_sep
+         $string .= $this->current_from_string(true); //end_sep
 
-         $string .= "#$curColId\" title=" . attb_quote(T_('Sort')) . '>' .
-            $title . '</a>';
+         $string = clean_url($string) . "#$curColId\" title=" . attb_quote(T_('Sort')) . '>'
+            . $title . '</a>';
       }
       else
       {
@@ -869,9 +873,9 @@ class Table
       $query_del = !$tablehead['Undeletable'] && !$this->Static_Columns;
       if( $query_del )
       {
-         $query_del = $this->Page
+         $query_del = $this->Page //end_sep
             . $this->current_sort_string(true)
-            . $common_url;
+            . $common_url; //end_sep
 
          // add from_row, if filter-value is empty,
          //   or else has a value but has an error (then removing of filter or column doesn't change the page)
@@ -879,14 +883,13 @@ class Table
          {
             $filter = $this->Filters->get_filter($nr);
             if ( isset($filter) and ( $filter->is_empty() ^ $filter->has_error() ) )
-               $query_del .= URI_AMP . $this->current_from_string();
+               $query_del .= $this->current_from_string(true); //end_sep
          }
       }
-
       if( $query_del or $sortimg )
       {
          global $base_path;
-         if( $query_del )
+         if( $query_del ) //end_sep
             $tmp = anchor(
                  $query_del . "{$this->Prefix}del=$nr#{$this->PrevColId}"
                , image( $base_path.'images/remcol.gif', 'x', '', 'class="Hide"')
@@ -941,19 +944,20 @@ class Table
             . $this->current_sort_string(true)
             . $this->current_rows_string(true)
             . $this->current_filter_string(true)
-            . $this->current_extparams_string(true);
+            . $this->current_extparams_string(true); //end_sep
 
          // add from_row, if filter-value is empty, or else has a value but has an error
          //    (then removing of filter or column doesn't change the page)
          if ( $filter->is_empty() ^ $filter->has_error() )
-            $query .= URI_AMP . $this->current_from_string();
+            $query .= $this->current_from_string(true); //end_sep
 
+         $query = clean_url( $query);
          $fcolor_hide = ( $filter->errormsg() ) ? 'white' : 'red';
          $togglestr_show =
-            "<a href=\"{$query}\" title=\"" . attb_quote(T_('Show')) . '">' .
+            "<a href=\"$query\" title=\"" . attb_quote(T_('Show')) . '">' .
             "<font color=\"blue\">" . CHAR_SHOWFILTER ."</font></a>";
          $togglestr_hide =
-            "<sup><a href=\"{$query}\" title=\"" . attb_quote(T_('Hide')) . '">' .
+            "<sup><a href=\"$query\" title=\"" . attb_quote(T_('Hide')) . '">' .
             "<font size=\"-1\" color=\"{$fcolor_hide}\">x</font></a></sup>";
       }
 
@@ -1054,15 +1058,15 @@ class Table
       $string = 'align=bottom'; //'align=middle'
       $button = '';
 
-      $qstr = $this->Page
+      $qstr = $this->Page //end_sep
          . $this->current_sort_string(true)
          . $this->current_rows_string(true)
          . $this->current_filter_string(true)
-         . $this->current_extparams_string(true);
+         . $this->current_extparams_string(true); //end_sep
 
       if( $this->From_Row > 0 )
          $button.= anchor(
-              $qstr
+              $qstr //end_sep
               . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
             , image( 'images/prev.gif', '<=', '', $string)
             , T_("prev page")
@@ -1073,7 +1077,7 @@ class Table
 
       if( !$this->Last_Page )
          $button.= anchor(
-              $qstr
+              $qstr //end_sep
               . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
             , image( 'images/next.gif', '=>', '', $string)
             , T_("next page")
@@ -1101,16 +1105,16 @@ class Table
    }
 
    /*! \brief Make sort part of url. */
-   function make_sort_string( $sortA, $descA, $sortB, $descB, $add_sep=false )
+   function make_sort_string( $sort1, $desc1, $sort2='', $desc2=0, $add_sep=false )
    {
-      if( $sortA )
+      if( $sort1 )
       {
-         $sort_string = $this->Prefix . "sort1=$sortA" .
-            ( $descA ? URI_AMP . $this->Prefix . 'desc1=1' : '' );
-         if( $sortB )
+         $sort_string = $this->Prefix . "sort1=$sort1" .
+            ( $desc1 ? URI_AMP . $this->Prefix . 'desc1=1' : '' );
+         if( TABLE_ALLOW_DOUBLE_SORT && $sort2 )
          {
-            $sort_string .= URI_AMP . $this->Prefix . "sort2=$sortB" .
-               ( $descB ? URI_AMP . $this->Prefix . 'desc2=1' : '' );
+            $sort_string .= URI_AMP . $this->Prefix . "sort2=$sort2" .
+               ( $desc2 ? URI_AMP . $this->Prefix . 'desc2=1' : '' );
          }
          if ($add_sep)
             $sort_string .= URI_AMP ;
@@ -1126,7 +1130,7 @@ class Table
       $ac_string = '';
       if( !($this->Static_Columns or count($this->Removed_Columns) < 1 ) )
       {
-         split_url($this->Page,$page,$args);
+         split_url($this->Page, $page, $args);
          foreach( $args as $key => $value ) {
             $ac_form->add_hidden( $key, $value);
          }
