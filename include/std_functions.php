@@ -1970,7 +1970,6 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       }
       else //cool enought: reset counters for one period
       {
-//if( $hdl == 'oliv' ) $vaultcnt= 3; else //Rdvl
          $vaultcnt= FEVER_CNT; //less than x hits...
          $vaulttime= $NOW+3600; //... during one hour
          if( $hdl == 'guest' )
