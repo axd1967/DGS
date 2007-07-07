@@ -892,6 +892,200 @@ function verify_email( $debugmsg, $email)
    return $res;
 }
 
+function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params='')
+{
+   global $EMAIL_FROM, $FRIENDLY_LONG_NAME;
+
+   if( !$subject )
+      $subject= $FRIENDLY_LONG_NAME.' notification';
+   $subject= ereg_replace("[\x01-\x20]+", ' ', $subject);
+
+   /**
+    * How to break the lines of an email ? CRLF.
+    * http://cr.yp.to/docs/smtplf.html
+    * http://www.ietf.org/rfc/rfc0822.txt
+    * Any problems may be platform dependent. Maybe:
+    * switch( strtoupper(substr(PHP_OS, 0, 3)) ) {
+    *   case 'WIN': $eol= "\r\n"; break;
+    *   case 'MAC': $eol= "\r"; break;
+    *   default: $eol= "\n"; break;
+    * }
+    * $text= str_replace( nl2br("\n"), $eol, nl2br($text) );
+    **/
+   $eol= "\r\n"; //desired one for emails
+   
+   switch( $eol )
+   {
+    case "\n":
+      $rgx= array("%\r\n%","%\r%");
+      $rpl= array("\n"    ,"\n");
+    break;
+    case "\r":
+      $rgx= array("%\r\n%","%\n%");
+      $rpl= array("\r"    ,"\r");
+    break;
+    default:
+      $eol= "\r\n";
+      $rgx= array("%([^\r])\n%","%([^\r])\n%","%\r([^\n])%","%\r([^\n])%");
+      $rpl= array("\\1\r\n"    ,"\\1\r\n"    ,"\r\n\\1"    ,"\r\n\\1");
+    break;
+   }
+
+   $text= wordwrap(trim($text), 70, $eol, 1);
+   $text= preg_replace( $rgx, $rpl, trim($text)).$eol;
+
+   $rgx= array("%[\r\n]+%");
+   $rpl= array($eol);
+
+   $headers= trim($headers);
+   if( !$headers )
+      $headers = "From: $EMAIL_FROM";
+      //if HTML in mail allowed:
+      //$headers.= "\nMIME-Version: 1.0";
+      //$headers.= "\nContent-type: text/html; charset=iso-8859-1";
+   $headers= preg_replace( $rgx, $rpl, trim($headers)); //.$eol;
+
+   $params= trim($params);
+   if( $params )
+      $params= preg_replace( $rgx, $rpl, trim($params)); //.$eol;
+
+   if( function_exists('mail') )
+      $res= @mail( $email, $subject, $text, $headers, $params);
+   else
+      $res= false;
+
+   if( $debugmsg !== false && !$res )
+      error('mail_failure', "$debugmsg=$email - $subject");
+   return $res;
+}
+
+//$text and $subject must NOT be escaped by mysql_escape_string()
+//$to_ids and $to_handles have been splitted because, historically, some handles
+//may seems to be numeric (e.g. '00000') as their first char may be a digit.
+//In fact, both are treated like strings or arrays here.
+function send_message( $debugmsg, $text='', $subject=''
+            , $to_ids='', $to_handles='', $notify=true
+            , $from_id=0, $reply_to=0, $type='NORMAL', $gid=0
+            )
+{
+   global $NOW;
+
+   $debugmsg.= '.send_message';
+
+   $text = mysql_addslashes(trim($text));
+   $subject = mysql_addslashes(trim($subject));
+   if( $subject == '' )
+      $subject = '???'; //like in forum posts
+
+   if( !isset($type) or !is_string($type) or !$type )
+      $type = 'NORMAL';
+   if( !isset($gid) or !is_numeric($gid) or $gid<0 )
+      $gid = 0;
+   if( !isset($from_id) or !is_numeric($from_id) or $from_id<0 )
+      $from_id = 0; //i.e. server message
+   if( !isset($reply_to) or !is_numeric($reply_to) or $reply_to<0 )
+      $reply_to = 0;
+
+   $to_myself= false;
+   $receivers= array();
+   //if( eregi( 'mysql', get_resource_type($to_ids)) )
+   foreach( array( 'ID' => &$to_ids,
+                   'Handle' => &$to_handles,
+            ) as $field => $var )
+   {
+      if( !is_array($var) )
+         $var= preg_split('%[\s,]+%', $var);
+      $var= implode("','", array_map('mysql_addslashes', $var));
+      if( $var > '' )
+      {
+         $query= "SELECT ID,Notify,SendEmail"
+               ." FROM Players WHERE $field IN ('$var')";
+         $result = mysql_query( $query)
+            or error('mysql_query_failed',$debugmsg.".get$field($var)");
+         while( ($row=mysql_fetch_assoc($result)) )
+         {
+            $uid= $row['ID'];
+            if( $from_id > 0 && $uid == $from_id )
+               $to_myself= true;
+            else
+               $receivers[$uid]= $row;
+         }
+         mysql_free_result($result);
+      }
+   }
+   if( !$to_myself && count($receivers) <= 0 )
+      error('receiver_not_found',$debugmsg.'rec0');
+
+   /**
+    * Actually, only the messages from server can have multiple
+    * receivers because they are NOT read BY the server.
+    * The code to diplay a message can't manage more than one
+    * correspondent.
+    * See also: message.php
+    **/
+   if( $from_id > 0 && count($receivers)+($to_myself?1:0) > 1 )
+      error('receiver_not_found',$debugmsg.'rec1');
+
+   $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
+          .", Type='$type', ReplyTo=$reply_to, Game_ID=$gid"
+          .", Subject='$subject', Text='$text'" ;
+   mysql_query( $query)
+      or error('mysql_query_failed',$debugmsg.'.message');
+
+   if( mysql_affected_rows() != 1 )
+      error('mysql_insert_message',$debugmsg);
+
+   $mid = mysql_insert_id();
+   ksort($receivers);
+
+   $query= array();
+   if( $from_id > 0 )
+   {
+      if( $to_myself )
+         $query[]= "$mid,$from_id,'M','N',".FOLDER_NEW;
+      else
+         $query[]= "$mid,$from_id,'Y','N',".FOLDER_SENT;
+   }
+
+   $replied= ( $from_id > 0 && $type == 'INVITATION' ?'M' :'N' );
+
+   foreach( $receivers as $uid => $row )
+   {
+      $query[]= "$mid,$uid,'N','$replied',".FOLDER_NEW;
+   }
+
+   $cnt= count($query);
+   if( $cnt > 0 )
+   {
+      $query= "INSERT INTO MessageCorrespondents"
+             ." (mid,uid,Sender,Replied,Folder_nr) VALUES"
+             .' ('.implode('),(', $query).")";
+      mysql_query( $query)
+         or error('mysql_query_failed',$debugmsg.'.mess_corr');
+   }
+
+   if( $notify )
+   {
+      $query= array();
+      foreach( $receivers as $uid => $row )
+      {
+         if( $row['Notify'] == 'NONE'
+               && is_numeric(strpos($row['SendEmail'], 'ON')) )
+            $query[]= $uid;
+      }
+      $cnt= count($query);
+      if( $cnt > 0 )
+      {
+         $query= "UPDATE Players SET Notify='NEXT'"
+                .' WHERE ID IN ('.implode(',', $query).')'
+                ." AND Notify='NONE' AND SendEmail LIKE '%ON%' LIMIT $cnt";
+         mysql_query( $query)
+            or error('mysql_query_failed', $debugmsg.'.notify');
+      }
+   }
+   return ''; //no error
+}
+
 
 function safe_setcookie($name, $value='', $rel_expire=-3600)
 //should be: ($name, $value, $expire, $path, $domain, $secure)
@@ -979,7 +1173,8 @@ function add_line_breaks( $str)
 }
 
 // Some regular allowed html tags. Keep them lower case.
-// 'cell': tags that does not disturb a table cell.
+// 'cell': tags that does not disturb a table cell. Mostly decorations.
+// 'line': tags that does not disturb a line layout. Mostly 'cell' + <a> tag.
 // 'msg': tags allowed in messages
 // 'game': tags allowed in game messages
 // 'faq': tags allowed in the FAQ pages
@@ -988,6 +1183,7 @@ function add_line_breaks( $str)
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends:
 $html_code_closed['cell'] = '|b|i|u|strong|em|tt|color|';
+$html_code_closed['line'] = '|a'.$html_code_closed['cell'];
 $html_code_closed['msg'] = '|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|quote|home|term|';
 $html_code_closed['game'] = $html_code_closed['msg'].'h|hidden|c|comment|';
 //$html_code_closed['faq'] = '|'; //no closed check
@@ -996,6 +1192,7 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
 
   // ** no '|' at ends:
 $html_code['cell'] = 'b|i|u|strong|em|tt|color';
+$html_code['line'] = 'a|'.$html_code['cell'];
 $html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
    .'goban|mailto|https?|news|game_?|user_?|send_?';
 $html_code['game'] = 'br|/br|p|/p|li'.$html_code_closed['game']
@@ -1267,7 +1464,10 @@ $html_safe_preg = array(
 ); //$html_safe_preg
 
 
-//$some_html may be false, 'cell', 'faq', 'game', 'gameh' or 'msg'
+//$some_html may be:
+// false: no tags at all,
+// 'cell', 'line',  'msg', 'game' or 'faq': see $html_code[]
+// 'gameh': 'game' + show hidden sgf comments
 function make_html_safe( $msg, $some_html=false)
 {
 
@@ -1283,7 +1483,7 @@ function make_html_safe( $msg, $some_html=false)
          $some_html = 'game';
          break;
       default:
-         $some_html = 'msg';
+         $some_html = 'msg'; //historical default for $some_html == true
       case 'msg':
       case 'cell':
       case 'game':
@@ -1468,19 +1668,20 @@ function build_maxrows_array( $maxrows )
    return $arr_maxrows;
 }
 
-// Makes URL from a base page and an array of variable/value pairs
-// if $sep is true, a '?' or '&' is added
+// Makes URL from a base URL and an array of variable/value pairs
+// if $sep is true, a '?' or '&' is added at the end
+// this is somehow the split_url() mirror
 // NOTE: Since PHP5, there is http_build_query() that do nearly the same thing
 //
 // Example:
-//    make_url('test.php', array('a'=> 1, 'b => 'foo'), false)  gives  'test.php?a=1&b=foo'
-//
-// Example (also handle value-arrays):
+//    make_url('test.php', array('a'=> 1, 'b' => 'foo'), false)  gives  'test.php?a=1&b=foo'
+//    make_url('test.php?a=1', array('b' => 'foo'), false)  gives  'test.php?a=1&b=foo'
+// Also handle value-arrays:
 //    make_url('arr.php', array('a' => array( 44, 55 ))  gives  'arr.php?a[]=44&a[]=55'
-function make_url($page, $args, $sep=false)
+// TODO: next step could be to handle the '#' part of the url:
+//    make_url('test.php?a=1#id', array('b' => 'foo'), false)  gives  'test.php?a=1&b=foo#id'
+function make_url($url, $args, $sep=false)
 {
-   $url = $page;
-
    $separator = ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
    if( is_array( $args) )
    {
@@ -1539,13 +1740,17 @@ function split_url($url, &$page, &$args, $sep='')
    }
 }
 
-// chop off trailing URI_AMP and '?' from passed url/query
+// chop off all trailing URI_AMP and '?' from passed url/query
 function clean_url( $url )
 {
-   if( substr( $url, -strlen(URI_AMP) ) == URI_AMP ) // strip '&'
-      $url = substr( $url, 0, -strlen(URI_AMP) );
-   if( substr( $url, -1 ) == '?' ) // strip '?'
-      $url = substr( $url, 0, -1);
+   do
+   {
+      $stop=1;
+      while( substr( $url, -strlen(URI_AMP) ) == URI_AMP ) // strip '&'
+         $url = substr( $url, $stop=0, -strlen(URI_AMP) );
+      while( substr( $url, -1 ) == '?' ) // strip '?'
+         $url = substr( $url, $stop=0, -1);
+   } while( !$stop );
    return $url;
 }
 
@@ -1610,7 +1815,21 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
    }
 }
 
-function who_is_logged( &$row)
+//caution: some IP addresses have more that 50 accounts in DGS
+function get_accounts_from_ip( $ip, $player_field='Handle')
+{
+   $ret= array();
+   $query= 'SELECT '.$player_field
+          ." FROM Players WHERE IP='$ip' AND Handle!='guest'";
+   $result = mysql_query( $query )
+      or error('get_accounts_from_ip',"IP='$ip'");
+   while( ($row=mysql_fetch_row($result)) )
+      $ret[]= $row[0];
+   mysql_free_result($result);
+   return $ret;
+}
+
+function who_is_logged( &$player_row)
 {
    $handle = safe_getcookie('handle');
    $sessioncode = safe_getcookie('sessioncode');
@@ -1618,15 +1837,18 @@ function who_is_logged( &$row)
    global $main_path;
 // because of include_all_translate_groups() must be called from main dir
    chdir( $main_path);
-   $res = is_logged_in($handle, $sessioncode, $row);
+   $res = is_logged_in($handle, $sessioncode, $player_row);
    chdir( $curdir);
    return $res;
 }
 
+//vault limit: FEVER_CNT hits in one hour. 0 disable it.
+define('FEVER_CNT', 600);
+
 function is_logged_in($hdl, $scode, &$row) //must be called from main dir
 {
    global $HOSTNAME, $hostname_jump, $admin_level,
-      $ActivityForHit, $NOW;
+      $ActivityForHit, $NOW, $date_fmt, $dbcnx;
 
    $row = array();
    $admin_level = 0; //TODO: to be localized, to be removed
@@ -1636,64 +1858,157 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       jump_to( "http://" . $HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
 
-   if( !$hdl )
+   if( !$hdl or !$dbcnx )
    {
       include_all_translate_groups(); //must be called from main dir
       return false;
    }
 
-   $query = "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire, " .
-            "Adminlevel+0 as admin_level " .
-            "FROM Players WHERE Handle='".mysql_addslashes($hdl)."'";
+   $query= "SELECT *,UNIX_TIMESTAMP(Sessionexpire) AS Expire"
+          .",Adminlevel+0 as admin_level"
+          .(FEVER_CNT>1 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
+          ." FROM Players WHERE Handle='".mysql_addslashes($hdl)."'";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed','std_functions.is_logged_in.find_player');
 
 
-   if( @mysql_num_rows($result) != 1 )
+   if( !$result or @mysql_num_rows($result) != 1 )
    {
+      if( $result )
+         mysql_free_result($result);
       include_all_translate_groups(); //must be called from main dir
       return false;
    }
 
    $row = mysql_fetch_assoc($result);
+   mysql_free_result($result);
 
    include_all_translate_groups($row); //must be called from main dir
 
-   $query = "UPDATE Players SET " .
-      "Hits=Hits+1, " .
-      "Activity=Activity + $ActivityForHit, " .
-      "Lastaccess=FROM_UNIXTIME($NOW), " .
-      "Notify='NONE'";
+   $session_expired= ( $row["Sessioncode"] != $scode or $row["Expire"] < $NOW );
 
-   $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 100);
-   if( $row['Browser'] !== $browser )
-   {
-      $query .= ", Browser='".mysql_addslashes($browser)."'";
-      $row['Browser'] = $browser;
-   }
+   $query = "UPDATE Players SET"
+           ." Hits=Hits+1";
 
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
    if( $ip && $row['IP'] !== $ip )
    {
-      $query .= ", IP='$ip'";
+      $query.= ",IP='$ip'";
       $row['IP'] = $ip;
    }
 
-   if( $row["Sessioncode"] != $scode or $row["Expire"] < $NOW )
-      return false;
+   if( !$session_expired )
+   {
+      $query.= ",Activity=Activity + $ActivityForHit"
+              .",Lastaccess=FROM_UNIXTIME($NOW)"
+              .",Notify='NONE'";
 
-   $query .= " WHERE Handle='".mysql_addslashes($hdl)."' LIMIT 1";
+      $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 100);
+      if( $row['Browser'] !== $browser )
+      {
+         $query.= ",Browser='".mysql_addslashes($browser)."'";
+         $row['Browser'] = $browser;
+      }
+   }
 
+   $vaultcnt= true; //no vault for anonymous or if disabled
+   if( FEVER_CNT>1 && !$session_expired ) //exclude access deny from an other user
+   {
+      $vaultcnt= (int)@$row['VaultCnt'];
+      $vaulttime= @$row['VaultTime'];
+      //can be translated if desired (translations have just been set):
+      $vault_fmt= "The activity of the account '%s' grew to hight"
+                 ." and swallowed up our bandwidth and resources."
+                 ."\nPlease, correct this behaviour."
+                 ."\nThis account is blocked until %s."
+                 ;
+      if( !$vaultcnt ) //fever vault
+      {
+         if( $NOW > $vaulttime ) //time to quit the vault?
+         {
+            $vaultcnt= 1; //will be reseted next time
+            $query.= ",VaultCnt=$vaultcnt";
+         }
+      }
+      else if( $vaultcnt > 1 ) //measuring fever
+      {
+         $vaultcnt--;
+         $query.= ",VaultCnt=$vaultcnt";
+      }
+      //TODO: maybe exclude 'guest' because it is a multi_users account
+      else if( $NOW < $vaulttime ) //fever too hight
+      //to exclude guest, add: && $hdl != 'guest'
+      {
+         $vaultcnt= 0; //enter fever vault...
+         $vaulttime= $NOW+24*3600; //... for one day
+         if( $hdl == 'guest' )
+            $vaulttime= $NOW+2*3600; //this is a multi-users account
+         $query.= ",VaultCnt=$vaultcnt"
+                 .",VaultTime=FROM_UNIXTIME($vaulttime)";
+
+         err_log( $hdl, 'fever_vault');
+
+         //send notifications to owner
+         $subject= 'Temporary access restriction';
+         $text= 'On '.date($date_fmt, $NOW).":\n"
+               .sprintf($vault_fmt, $hdl, date($date_fmt,$vaulttime));
+
+         //caution: some IP addresses have more that 50 accounts in DGS
+         //$handles= get_accounts_from_ip($ip); //exclude guest
+         if( $hdl != 'guest' )
+            $handles[]= $hdl;
+         if( count($handles) > 0 )
+            send_message("fever_vault.msg($ip)", $text, $subject
+                        , '', $handles, false, 0);
+
+         global $FRIENDLY_LONG_NAME;
+         $email= $row['Email'];
+         if( $hdl != 'guest' && verify_email( false, $email) )
+            send_email("fever_vault.email($hdl)", $email, $text
+                      , $FRIENDLY_LONG_NAME.' - '.$subject);
+      }
+      else //cool enought: reset counters for one period
+      {
+//if( $hdl == 'oliv' ) $vaultcnt= 3; else //Rdvl
+         $vaultcnt= FEVER_CNT; //less than x hits...
+         $vaulttime= $NOW+3600; //... during one hour
+         if( $hdl == 'guest' )
+            $vaultcnt*= 10; //this is a multi-users account
+         $query.= ",VaultCnt=$vaultcnt"
+                 .",VaultTime=FROM_UNIXTIME($vaulttime)";
+      }
+   }
+
+   $query.= " WHERE Handle='".mysql_addslashes($hdl)."' LIMIT 1";
    $result = mysql_query( $query )
       or error('mysql_query_failed','std_functions.is_logged_in.update_player');
 
-   if( @mysql_affected_rows() != 1 )
+   if( !$vaultcnt ) //vault entered
+   {
+      global $SUB_PATH;
+      switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
+      {
+         case 'index.php':
+            $text= sprintf($vault_fmt, $hdl, date($date_fmt,$vaulttime));
+            $_REQUEST['sysmsg']= $text;
+            $session_expired= true; //fake disconnection
+         break;
+         default:
+            jump_to("index.php");
+         break;
+      }
+   }
+
+   if( !$result or @mysql_affected_rows() != 1 )
+      return false;
+
+   if( $session_expired )
       return false;
 
 
-   if( @$row["admin_level"] != 0 )
-      $admin_level = $row["admin_level"];
+   if( @$row['admin_level'] != 0 )
+      $admin_level = $row['admin_level'];
 
    get_cookie_prefs($row);
 
