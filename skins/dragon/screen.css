@@ -475,6 +475,27 @@ table.Table th sup {
    text-decoration: none;
 }
 
+table.Table th span.Tool {
+   text-align: left;
+   padding: 0px 0px 0px 2px;
+}
+
+table.Table th img.Hide {
+   width: 9px;
+   height: 9px;
+   border: 0px solid black;
+   vertical-align: top;
+   margin: 0px 0px 0px 0px;
+}
+
+table.Table th img.Sort {
+   width: 9px;
+   height: 9px;
+   border: 0px solid black;
+   vertical-align: bottom;
+   margin: 0px 0px 0px -9px;
+}
+
 table.Table tr.Head {
    background: #cccccc;
 }
@@ -847,7 +868,7 @@ table.GameInfos tr#whiteTime {
 
 
 /* board page - old moves table */
-
+/*
 table.moves {
    background: #66C17B;
    border-width: 2px;
@@ -882,7 +903,7 @@ table.moves a.b {
    font: bold 85% sans-serif;
    text-decoration: none;
 }
-
+*/
 
 /* ------------------------- */
 /* forums layout */

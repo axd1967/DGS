@@ -37,6 +37,7 @@ require_once( "include/filter.php" );
 
 //~(0) is negative (PHP) and database field is unsigned: INT(10) unsigned NOT NULL
 define('ALL_COLUMNS', 0x7fffffff); //=2147483647
+define('TABLE_ALLOW_DOUBLE_SORT', 1);
 
 define('CHAR_SHOWFILTER', '+');
 
@@ -189,14 +190,20 @@ class Table
 
          $this->Sort1 = (string) $this->get_arg('sort1');
          $this->Desc1 = (bool) $this->get_arg('desc1');
-         $this->Sort2 = (string) $this->get_arg('sort2');
-         $this->Desc2 = (bool) $this->get_arg('desc2');
-
          //Simply remove the mySQL disturbing chars (Sort? must be a column name)
          $tmp = array( '\\', '\'', '\"', ';');
          $this->Sort1 = str_replace( $tmp, '', $this->Sort1 );
-         $this->Sort2 = str_replace( $tmp, '', $this->Sort2 );
-
+         if( TABLE_ALLOW_DOUBLE_SORT )
+         {
+            $this->Sort2 = (string) $this->get_arg('sort2');
+            $this->Desc2 = (bool) $this->get_arg('desc2');
+            $this->Sort2 = str_replace( $tmp, '', $this->Sort2 );
+         }
+         else
+         {
+            $this->Sort2 = '';
+            $this->Desc2 = 0;
+         }
 
          //{ N.B.: only used for folder transparency but CSS incompatible
          global $table_row_color1, $table_row_color2;
@@ -614,12 +621,15 @@ class Table
       {
          $this->Sort1 = (string) $sort1;
          $this->Desc1 = (bool) $desc1;
-         $this->Sort2 = (string) $sort2;
-         $this->Desc2 = (bool) $desc2;
+         if( TABLE_ALLOW_DOUBLE_SORT )
+         {
+            $this->Sort2 = (string) $sort2;
+            $this->Desc2 = (bool) $desc2;
+         }
          return;
       }
 
-      if( !$this->Sort2 )
+      if( TABLE_ALLOW_DOUBLE_SORT && !$this->Sort2 )
       {
          if( strcasecmp( $this->Sort1, $sort1) )
          {
@@ -642,7 +652,7 @@ class Table
       $order = str_replace( URI_ORDER_CHAR
          , ( $this->Desc1 ? ' DESC,' : ',' )
          , $this->Sort1.URI_ORDER_CHAR);
-      if( $this->Sort2 )
+      if( TABLE_ALLOW_DOUBLE_SORT && $this->Sort2 )
       {
          $order.= str_replace( URI_ORDER_CHAR
             , ( $this->Desc2 ? ' DESC,' : ',' )
@@ -715,11 +725,11 @@ class Table
       if ($this->Sort1)
       {
          $hiddens[$this->Prefix . 'sort1'] = $this->Sort1;
-         if ($this->Desc1)
+         if ( $this->Desc1 )
             $hiddens[$this->Prefix . 'desc1'] = $this->Desc1;
-         if ($this->Sort2) {
+         if ( TABLE_ALLOW_DOUBLE_SORT && $this->Sort2 ) {
             $hiddens[$this->Prefix . 'sort2'] = $this->Sort2;
-            if ($this->Desc1)
+            if ( $this->Desc2 )
                $hiddens[$this->Prefix . 'desc2'] = $this->Desc2;
          }
       }
@@ -814,22 +824,35 @@ class Table
       // field-sort-link
       $title = $tablehead['Description'];
       $csort = $tablehead['Sort_String'];
+
+      $sortimg = '';
       if( $csort )
       {
          $string .= "<a href=\"" . $this->Page;
 
          if( $csort == $this->Sort1 )
          { //Click on main column: just toggle its order
-            $string .= $this->make_sort_string( $this->Sort1, !$this->Desc1, $this->Sort2, $this->Desc2, true );
+            $string .= $this->make_sort_string( $this->Sort1,
+                                                !$this->Desc1,
+                                                $this->Sort2,
+                                                $this->Desc2 );
+            $sortimg = '1'.($this->Desc1?'d':'a');
          }
          else
-         if( $csort == $this->Sort2 )
+         if( TABLE_ALLOW_DOUBLE_SORT && $csort == $this->Sort2 )
          { //Click on second column: just swap the columns
-            $string .= $this->make_sort_string( $this->Sort2, $this->Desc2, $this->Sort1, $this->Desc1, true );
+            $string .= $this->make_sort_string( $this->Sort2,
+                                                $this->Desc2,
+                                                $this->Sort1,
+                                                $this->Desc1 );
+            $sortimg = '2'.($this->Desc2?'d':'a');
          }
          else
          { //Click on a new column: just push it
-            $string .= $this->make_sort_string( $csort, $tablehead['Desc_Default'], $this->Sort1, $this->Desc1, true);
+            $string .= $this->make_sort_string( $csort,
+                                                $tablehead['Desc_Default'],
+                                                $this->Sort1,
+                                                $this->Desc1);
          }
 
          $string .= $common_url . URI_AMP;
@@ -843,7 +866,8 @@ class Table
          $string .= $title;
       }
 
-      if( !$tablehead['Undeletable'] && !$this->Static_Columns)
+      $query_del = !$tablehead['Undeletable'] && !$this->Static_Columns;
+      if( $query_del )
       {
          $query_del = $this->Page
             . $this->current_sort_string(true)
@@ -857,12 +881,27 @@ class Table
             if ( isset($filter) and ( $filter->is_empty() ^ $filter->has_error() ) )
                $query_del .= URI_AMP . $this->current_from_string();
          }
+      }
+
+      if( $query_del or $sortimg )
+      {
+         global $base_path;
+         if( $query_del )
+            $tmp = anchor(
+                 $query_del . "{$this->Prefix}del=$nr#{$this->PrevColId}"
+               , image( $base_path.'images/remcol.gif', 'x', '', 'class="Hide"')
+               , T_('Hide')
+               );
+         else
+            $tmp = image( $base_path.'images/dot.gif', '', '', 'class="Hide"');
+
+         if( $sortimg )
+            $tmp.= image( $base_path."images/sort$sortimg.gif", $sortimg, '', 'class="Sort"');
+         else
+            $tmp.= image( $base_path.'images/dot.gif', '', '', 'class="Sort"');
 
          $string .=
-            "<sup><a href=\"{$query_del}" . URI_AMP .
-            "{$this->Prefix}del=$nr#{$this->PrevColId}\"" .
-            " title=" . attb_quote(T_('Hide')) . '>' .
-            "x</a></sup>";
+            '<span class="Tool">' . $tmp . '</span>';
       }
 
       $string .= "</th>\n";
