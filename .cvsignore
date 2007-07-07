@@ -15,3 +15,5 @@ snapshot
 images
 ref-doc
 *.bak
+archive
+.project
