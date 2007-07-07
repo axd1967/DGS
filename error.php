@@ -38,8 +38,10 @@ require_once( "include/std_functions.php" );
    connect2mysql(true);
    if( $dbcnx )
    {
+      $tmp= $TheErrors->set_mode(ERROR_MODE_COLLECT);
       //may call error() again:
       $logged_in = who_is_logged( $player_row);
+      $TheErrors->set_mode($tmp);
    }
    else
    {
@@ -502,7 +504,7 @@ require_once( "include/std_functions.php" );
 
       case('admin_already_translated'):
       {
-         echo T_("Sorry, this entry is already translated, so I cannot make untranslatable.");
+         echo T_("Sorry, this entry is already translated, so I cannot make it untranslatable.");
       }
       break;
 
@@ -590,7 +592,7 @@ require_once( "include/std_functions.php" );
       }
       break;
 
-      default:
+      default: //'internal_error'
       {
          echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.")." ($err)";
       }

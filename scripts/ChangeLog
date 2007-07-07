@@ -60,6 +60,24 @@ Changelog
 
 2007-07-07 rodival
 
+   * include/connect2mysql.php (connect2mysql):
+   - changed the returned value by connect2mysql(true): in case of
+     error, it returns the error message now instead of false.
+   - added the mysql_single_col() function
+
+   * error.php,
+   * include/error_functions.php (set_mode, add_error, error):
+   - now set_mode() return the previous mode (to save and restore it)
+   - now add_error() and error() return false if the errors are not
+     fatal. This allow $result = mysql_query(...) or error(...);
+     to continue with $result === false
+   - finally, if an error occurs during the initialization of
+     error.php, it will no more recall error.php and thus not fall
+     in a recursive trap.
+
+
+2007-07-07 rodival
+
    * update_translation_pages.php, generate_translation_texts.php,
      message_consistency.php, player_consistency.php, recalculate_ratings2.php,
      start_frozen_clocks.php, convert_posindex.php, convert_from_old_forum.php,

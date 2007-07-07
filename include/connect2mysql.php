@@ -66,6 +66,7 @@ function disable_cache($stamp=NULL, $expire=NULL)
 
 
 
+/* TODO: a better fix for this problem:
 if( function_exists('mysql_real_escape_string') ) //PHP >= 4.3.0
 {
    function mysql_addslashes($str) {
@@ -85,6 +86,7 @@ if( function_exists('mysql_real_escape_string') ) //PHP >= 4.3.0
    }
 }
 else
+*/
 if( function_exists('mysql_escape_string') ) //PHP >= 4.0.3
 {
    function mysql_addslashes($str) { return mysql_escape_string($str); }
@@ -102,7 +104,7 @@ function admin_log( $uid, $handle, $err)
    $query = "INSERT INTO Adminlog SET uid='$uid'"
                   .", Handle='".mysql_addslashes($handle)."'"
                   .", Message='".mysql_addslashes($err)."'"
-                  .", IP='".mysql_addslashes($ip)."'" ;
+                  .", IP='".mysql_addslashes($ip)."'" ; //+ Date= timestamp
 
    return ( mysql_query( $query )
             or error('mysql_query_failed','connect2mysql.admin_log') );
@@ -132,6 +134,60 @@ function mysql_single_fetch( $debugmsg, $query, $type='assoc')
 }
 
 
+// if( !$keyed ) $result = array( $col[0],...);
+// else $result = array( $col[0] => $col[1],...);
+function mysql_single_col( $debugmsg, $query, $keyed=false)
+{
+   $result = mysql_query($query);
+   if( $result == false )
+   {
+      if( $debugmsg !== false )
+         error('mysql_query_failed', ((string)$debugmsg).'.single_col');
+      return false;
+   }
+   if( mysql_num_rows($result) < 1 )
+   {
+      mysql_free_result($result);
+      return false;
+   }
+   $column = array();
+   $row = mysql_fetch_row($result);
+   if( is_array($row) )
+   {
+      if( $keyed )
+      {
+         if( count($row) < 2 )
+         {
+            mysql_free_result($result);
+            return false;
+         }
+         while( $row )
+         {
+            $column[$row[0]] = $row[1];
+            $row = mysql_fetch_row($result);
+         }
+      }
+      else
+      {
+         if( count($row) < 1 )
+         {
+            mysql_free_result($result);
+            return false;
+         }
+         while( $row )
+         {
+            $column[] = $row[0];
+            $row = mysql_fetch_row($result);
+         }
+      }
+   }
+   mysql_free_result($result);
+   if( !count($column) )
+      return false; //at least one value
+   return $column;
+}
+
+
 function connect2mysql($no_errors=false)
 {
    global $dbcnx, $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
@@ -140,19 +196,21 @@ function connect2mysql($no_errors=false)
 
    if (!$dbcnx)
    {
-      if( $no_errors ) return false;
-      error("mysql_connect_failed");
+      $err= 'mysql_connect_failed';
+      if( $no_errors ) return $err;
+      error($err);
    }
 
    if (! @mysql_select_db($DB_NAME) )
    {
       mysql_close( $dbcnx);
       $dbcnx= 0;
-      if( $no_errors ) return false;
-      error("mysql_select_db_failed");
+      $err= 'mysql_select_db_failed';
+      if( $no_errors ) return $err;
+      error($err);
    }
 
-   return true;
+   return false;
 }
 
 
@@ -160,13 +218,13 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
    $given_passwd_encrypted =
       mysql_single_fetch( 'check_password',
-               "SELECT PASSWORD ('".mysql_addslashes($given_passwd)."')"
+               "SELECT PASSWORD('".mysql_addslashes($given_passwd)."')"
                ,'row')
          or error('mysql_query_failed','check_password.get_password');
 
    $given_passwd_encrypted = $given_passwd_encrypted[0];
 
-   if( $passwd != $given_passwd_encrypted )
+   if( empty($passwd) or $passwd != $given_passwd_encrypted )
    {
       // Check if there is a new password
       if( empty($new_passwd) or $new_passwd != $given_passwd_encrypted )
@@ -177,7 +235,7 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
    {
       mysql_query( 'UPDATE Players ' .
                    "SET Password='" . $given_passwd_encrypted . "', " .
-                   'Newpassword=NULL ' .
+                   "Newpassword='' " .
                    "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" )
          or error('mysql_query_failed','check_password.set_password');
    }

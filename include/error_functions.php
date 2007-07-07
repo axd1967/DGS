@@ -41,6 +41,7 @@ class Errors
 
       function set_mode($m)
       {
+         $p= $this->mode;
          switch( $m )
          {
          case ERROR_MODE_PRINT:
@@ -60,6 +61,7 @@ class Errors
             $this->log_errors = true;
             break;
          }
+         return $p;
       }
 
 
@@ -112,6 +114,7 @@ class Errors
 
          if( $this->errors_are_fatal and !$warn )
             exit;
+         return false;
       }
 
 }
@@ -125,7 +128,7 @@ if( !function_exists('error') )
    function error($err, $debugmsg=NULL)
    {
       global $TheErrors;
-      $TheErrors->add_error($err, $debugmsg);
+      return $TheErrors->add_error($err, $debugmsg);
    }
 }
 
@@ -134,7 +137,7 @@ if( !function_exists('warning') )
    function warning($err)
    {
       global $TheErrors;
-      $TheErrors->add_error($err, NULL, true);
+      return $TheErrors->add_error($err, NULL, true);
    }
 }
 
@@ -147,12 +150,14 @@ function err_log( $handle, $err, $debugmsg=NULL)
 
    global $dbcnx;
    if( !@$dbcnx )
-      connect2mysql( true);
+      connect2mysql(true);
 
    $uri = "error.php?err=" . urlencode($err);
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   $errorlog_query = "INSERT INTO Errorlog SET Handle='".mysql_addslashes($handle)."'"
-      .", Message='".mysql_addslashes($err)."', IP='".mysql_addslashes($ip)."'" ;
+   $errorlog_query = "INSERT INTO Errorlog SET"
+                     ." Handle='".mysql_addslashes($handle)."'"
+                    .", Message='".mysql_addslashes($err)."'"
+                    .", IP='".mysql_addslashes($ip)."'" ; //+ Date= timestamp
 
    if( !empty($mysqlerror) )
    {
@@ -172,7 +177,7 @@ function err_log( $handle, $err, $debugmsg=NULL)
    }
    if( !empty($debugmsg) )
    {
-      $errorlog_query .= ", Debug='" . mysql_addslashes( $debugmsg) . "'";
+      $errorlog_query .= ", Debug='".mysql_addslashes( $debugmsg)."'";
       //$err.= ' / '. $debugmsg; //Do not display this info!
    }
 
