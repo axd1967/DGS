@@ -85,7 +85,7 @@ require_once( "include/std_functions.php" );
 
    $msg= 
 "You (or possibly someone else) has requested a new password\n" .
-//" for the account: $pswduser\n" .
+" for the account: $pswduser\n" . //the handle of the requesting account
 " and it has been randomly chosen as: $newpasswd\n" .
 
 '
