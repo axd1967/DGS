@@ -892,6 +892,11 @@ function verify_email( $debugmsg, $email)
    return $res;
 }
 
+/**
+ * $subject default => $FRIENDLY_LONG_NAME.' notification';
+ * $headers default => "From: $EMAIL_FROM";
+ * no $params default.
+ **/
 function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params='')
 {
    global $EMAIL_FROM, $FRIENDLY_LONG_NAME;
@@ -1682,6 +1687,7 @@ function build_maxrows_array( $maxrows )
 //    make_url('test.php?a=1#id', array('b' => 'foo'), false)  gives  'test.php?a=1&b=foo#id'
 function make_url($url, $args, $sep=false)
 {
+   $url = clean_url($url);
    $separator = ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
    if( is_array( $args) )
    {
