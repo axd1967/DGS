@@ -61,6 +61,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-08 rodival
+
+   * halfhourly_cron.php, send_new_password.php,
+   * include/std_functions.php:
+   - enabled the new send_mail() function everywhere... with a rollback
+     possibility because I have no way to test the emails nor on my
+     private server either on the devel server. >>> should be tested.
+
+
 2007-07-08 juga
 
    * game.php:
@@ -70,6 +79,7 @@ Changelog
    * users.php, code_examples/query_sql.php, forum/search.php,
      include/message_functions.php:
    - added 'AS' for SQL-table aliases
+
 
 2007-07-07 rodival
 
@@ -109,7 +119,6 @@ ALTER TABLE `Players`
  ADD `VaultTime` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `Registerdate` ,
  ADD `VaultCnt` smallint(5) unsigned default 0 NOT NULL AFTER `Registerdate` ;
 -----------
-
 
 2007-07-07 rodival
 

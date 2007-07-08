@@ -95,16 +95,19 @@ rememberable.
 
 ' . $HOSTBASE;
 
-   $headers = "From: $EMAIL_FROM\n";
-
    verify_email( 'send_new_password', $Email);
+
+if(1){ //new
+   send_email("send_new_password Uid:$pswduser Text:$msg", $Email, $msg);
+}else{ //old
+   $headers = "From: $EMAIL_FROM\n";
    if( function_exists('mail') )
       $res= @mail( $Email, $FRIENDLY_LONG_NAME.' notification', $msg, $headers );
    else
       $res= false;
    if( !$res )
       error('mail_failure',"Uid:$pswduser Addr:$Email Text:$msg");
-
+} //new/old
 
    $msg = urlencode(T_("New password sent!"));
    if( $logged_in )

@@ -49,7 +49,12 @@ function mail_link( $nam, $lnk)
           && !is_numeric(strpos($lnk,'//'))
           && strtolower(substr($lnk,0,4)) != "www."
         )
+      {
+         //make it absolute to this server
+         while( substr($lnk,0,3) == '../' )
+            $lnk = substr($lnk,3);
          $lnk = $HOSTBASE.$lnk;
+      }
       $nam = ( $nam ? "$nam ($lnk)" : "$lnk" );
    }
    if( !$nam )
@@ -243,6 +248,9 @@ if( !$is_down )
 
       $msg .= str_pad('', 47, '-');
 
+if(1){ //new
+      send_email('halfhourly_cron', $Email, $msg);
+}else{ //old
       $headers = "From: $EMAIL_FROM\n";
       //if HTML in mail allowed:
       //$headers.= "MIME-Version: 1.0\n";
@@ -256,6 +264,7 @@ if( !$is_down )
          error('mail_failure', 'halfhourly_cron');
          break;
       }
+} //new/old
    } //notifications found
    mysql_free_result($result);
 
