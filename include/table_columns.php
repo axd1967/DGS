@@ -813,8 +813,7 @@ class Table
          }
       }
 
-      $string .= '>';
-
+      $string .= '>'; //<th> end bracket
       if( $width >= 0 )
          $string .= $this->button_TD_width_insert($width);
 
@@ -829,46 +828,47 @@ class Table
       $sortimg = '';
       if( $csort )
       {
-         $string .= "<a href=\"" . $this->Page; //end_sep
+         $hdr = '<a href="' . $this->Page; //end_sep
 
          if( $csort == $this->Sort1 )
          { //Click on main column: just toggle its order
-            $string .= $this->make_sort_string( $this->Sort1,
-                                                !$this->Desc1,
-                                                $this->Sort2,
-                                                $this->Desc2,
-                                                true ); //end_sep
+            $hdr .= $this->make_sort_string( $this->Sort1,
+                                             !$this->Desc1,
+                                             $this->Sort2,
+                                             $this->Desc2,
+                                             true ); //end_sep
             $sortimg = '1'.($this->Desc1?'d':'a');
          }
          else
          if( TABLE_ALLOW_DOUBLE_SORT && $csort == $this->Sort2 )
          { //Click on second column: just swap the columns
-            $string .= $this->make_sort_string( $this->Sort2,
-                                                $this->Desc2,
-                                                $this->Sort1,
-                                                $this->Desc1,
-                                                true ); //end_sep
+            $hdr .= $this->make_sort_string( $this->Sort2,
+                                             $this->Desc2,
+                                             $this->Sort1,
+                                             $this->Desc1,
+                                             true ); //end_sep
             $sortimg = '2'.($this->Desc2?'d':'a');
          }
          else
          { //Click on a new column: just push it
-            $string .= $this->make_sort_string( $csort,
-                                                $tablehead['Desc_Default'],
-                                                $this->Sort1,
-                                                $this->Desc1,
-                                                true ); //end_sep
+            $hdr .= $this->make_sort_string( $csort,
+                                             $tablehead['Desc_Default'],
+                                             $this->Sort1,
+                                             $this->Desc1,
+                                             true ); //end_sep
          }
 
-         $string .= $common_url; //end_sep
-         $string .= $this->current_from_string(true); //end_sep
+         $hdr .= $common_url; //end_sep
+         $hdr .= $this->current_from_string(true); //end_sep
 
-         $string = clean_url($string) . "#$curColId\" title=" . attb_quote(T_('Sort')) . '>'
-            . $title . '</a>';
+         $hdr = clean_url($hdr) . "#$curColId\" title="
+            . attb_quote(T_('Sort')) . ">$title</a>";
       }
       else
       {
-         $string .= $title;
+         $hdr = $title;
       }
+      $string .= '<span class="Header">' . $hdr . '</span>';
 
       $query_del = !$tablehead['Undeletable'] && !$this->Static_Columns;
       if( $query_del )
@@ -890,21 +890,20 @@ class Table
       {
          global $base_path;
          if( $query_del ) //end_sep
-            $tmp = anchor(
+            $tool = anchor(
                  $query_del . "{$this->Prefix}del=$nr#{$this->PrevColId}"
                , image( $base_path.'images/remcol.gif', 'x', '', 'class="Hide"')
                , T_('Hide')
                );
          else
-            $tmp = image( $base_path.'images/dot.gif', '', '', 'class="Hide"');
+            $tool = image( $base_path.'images/dot.gif', '', '', 'class="Hide"');
 
          if( $sortimg )
-            $tmp.= image( $base_path."images/sort$sortimg.gif", $sortimg, '', 'class="Sort"');
+            $tool.= image( $base_path."images/sort$sortimg.gif", $sortimg, '', 'class="Sort"');
          else
-            $tmp.= image( $base_path.'images/dot.gif', '', '', 'class="Sort"');
+            $tool.= image( $base_path.'images/dot.gif', '', '', 'class="Sort"');
 
-         $string .=
-            '<span class="Tool">' . $tmp . '</span>';
+         $string .= '<span class="Tool">' . $tool . "</span>";
       }
 
       $string .= "</th>\n";
