@@ -67,6 +67,10 @@ Changelog
    - added images (start/end, previous/next-moves) as links to navigate
      within game; used existing images start/backward/forward/end.gif
 
+   * users.php, code_examples/query_sql.php, forum/search.php,
+     include/message_functions.php:
+   - added 'AS' for SQL-table aliases
+
 2007-07-07 rodival
 
    * show_games.php, users.php, include/message_functions.php,
