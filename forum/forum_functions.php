@@ -252,19 +252,19 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
 
    // highlight terms in Subject/Text (skipping XML-elements like tags & entities)
    $sbj = make_html_safe( $Subject, false);
-   $txt = $Text;
+   $txt = make_html_safe( $Text, true); //remove the not allowed tags
    if ( !is_null($Terms) )
    {
       $rx_terms = (is_array($Terms) and count($Terms) > 0 )
                               ? implode("|", $Terms) : $Terms;
       if ($rx_terms != '')
       {
-         $sbj = mark_terms( $sbj, $rx_terms, true );
+         $sbj = mark_terms( $sbj, $rx_terms, false );
+         $sbj = make_html_safe( $sbj, true); //just called to apply the mark_terms modifications
          $txt = mark_terms( $txt, $rx_terms, true );
-         $sbj = make_html_safe( $sbj, true);
+         $txt = make_html_safe( $txt, true); //just called to apply the mark_terms modifications
       }
    }
-   $txt = make_html_safe( $txt, true);
 //   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
    if( strlen($txt) == 0 ) $txt = '&nbsp;';
