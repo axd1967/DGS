@@ -395,7 +395,7 @@ require_once( "include/rating.php" );
       }
       else // running
       {
-         $qsql->add_part( SQLP_WHERE, "Status NOT IN ('INVITED','FINISHED')" );
+         $qsql->add_part( SQLP_WHERE, "Status != 'INVITED' AND Status != 'FINISHED'" );
       }
 
       $qsql->add_part( SQLP_WHERE,
