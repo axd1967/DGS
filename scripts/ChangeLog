@@ -13,6 +13,9 @@ quick INFO:
    I've reformatted the changelog file with last changes at top.
    I'm working on the bad centered alignement of FAQ, docs and other pages.
 
+2007-07-08 juga
+   Currently working on known filter-bugs.
+
 -----
 2007-06-26 rodival
    I've executed the DGS player_consistency.php script to fix some
@@ -58,7 +61,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-08 juga
+
+   * game.php:
+   - added images (start/end, previous/next-moves) as links to navigate
+     within game; used existing images start/backward/forward/end.gif
+
 2007-07-07 rodival
+
+   * show_games.php, users.php, include/message_functions.php,
+     include/std_classes.php:
+   - default JOIN changed with INNER JOIN
 
    * include/table_columns.php (make_tablehead),
    * skins/dragon/screen.css:
@@ -68,14 +81,14 @@ Changelog
 
    * images/sort1a.gif, images/sort1d.gif,
      images/sort2a.gif, images/sort2d.gif, images/remcol.gif:
-   - new images added
+   - new images added used for table-sort-indicator
 -----------
 
 
 2007-07-07 rodival
 
    * include/std_functions.php (send_email, send_message, clean_url,
-      is_logged_in)
+     is_logged_in):
    - added the send_email() and send_message() functions
    - adjusted clean_url() to chop all the trailing '?' and '&' chars
    - introduced the "fever vault" in is_logged_in(). May be adjusted
@@ -153,7 +166,7 @@ ALTER TABLE `Players`
    - added a filter on the english part.
      added the $filter_en argument to translations_query()
 
-   * INSTALL
+   * INSTALL:
    - added a step to protect the scripts/ folder.
 
 
@@ -329,7 +342,7 @@ UPDATE `FAQlog` SET `Date` = '0' ;
 -----------
 
    * translate.php, include/translation_functions.php (language_exists,
-   *  T_, get_language_descriptions_translated):
+     T_, get_language_descriptions_translated):
    - case insensitive search of the language name in language_exists().
    - added an automatic cut of the #xxx part of the alternate english words
      in T_().
