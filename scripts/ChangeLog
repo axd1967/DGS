@@ -69,12 +69,12 @@ Changelog
      must not contain HTML tags. Some fixes around mark_term() are
      temporary and will be better handled soon.
 
+   * forum/search.php:
+   - default JOIN changed with INNER JOIN
+
    * edit_bio.php:
    - limitation of the cells size in an other way that cut_string()
      (not based on the text length but on the box size)
-
-
-2007-07-08 rodival
 
    * halfhourly_cron.php, send_new_password.php,
      include/std_functions.php:
