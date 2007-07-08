@@ -99,7 +99,7 @@ require_once( "forum_functions.php" );
    $ffilter->add_filter( 5, 'RelativeDate', 'Posts.Time', true,
          array( FC_SIZE => 12, FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL ) );
    #global $NOW;
-   #$ffilter->add_filter( 6, 'Boolean', new QuerySQL( SQLP_FIELDS, "(Posts.Time + INTERVAL ".DAYS_NEW_END." DAY > FROM_UNIXTIME($NOW) AND ISNULL(FR.Time) OR Posts.Time > FR.Time) AS NewPost", SQLP_FROM, "LEFT JOIN Forumreads FR ON FR.User_ID=$uid AND FR.Thread_ID=Posts.Thread_ID", SQLP_HAVING, "NewPost=1" ), true, array( FC_LABEL => T_('Restrict to new messages') ) ); //! \todo Handle New Forum-Posts
+   #$ffilter->add_filter( 6, 'Boolean', new QuerySQL( SQLP_FIELDS, "(Posts.Time + INTERVAL ".DAYS_NEW_END." DAY > FROM_UNIXTIME($NOW) AND ISNULL(FR.Time) OR Posts.Time > FR.Time) AS NewPost", SQLP_FROM, "LEFT JOIN Forumreads AS FR ON FR.User_ID=$uid AND FR.Thread_ID=Posts.Thread_ID", SQLP_HAVING, "NewPost=1" ), true, array( FC_LABEL => T_('Restrict to new messages') ) ); //! \todo Handle New Forum-Posts
    $ffilter->init(); // parse current value from _GET
    $filter2 =& $ffilter->get_filter(2);
 
@@ -173,7 +173,7 @@ require_once( "forum_functions.php" );
       $qsql->add_part( SQLP_FROM,
          'Forums',
          'JOIN Posts ON Forums.ID=Posts.Forum_ID ',
-         'JOIN Players P ON Posts.User_ID=P.ID ' );
+         'JOIN Players AS P ON Posts.User_ID=P.ID ' );
       $qsql->add_part( SQLP_WHERE,
          "Approved='Y'",
          "PosIndex>''" ); // '' == inactivated (edited)

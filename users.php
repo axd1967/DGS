@@ -132,7 +132,7 @@ require_once( "include/filter.php" );
    $qsql->add_part( SQLP_FROM, 'Players P' );
 
    if ( $observe_gid )
-      $qsql->add_part( SQLP_FROM, "INNER JOIN Observers OB ON P.ID=OB.uid AND OB.gid=$observe_gid" );
+      $qsql->add_part( SQLP_FROM, "INNER JOIN Observers AS OB ON P.ID=OB.uid AND OB.gid=$observe_gid" );
 
    $query_ufilter = $utable->get_query(); // clause-parts for filter
    $qsql->merge( $query_ufilter );

@@ -30,7 +30,7 @@ function error( $msg ) { echo "ERROR: $msg\n"; }
    // add variaous sql-parts for Q2
    $q2->add_part( SQLP_FIELDS, 'G.*' );
    $q2->add_part( SQLP_FROM, 'Games G' );
-   $q2->add_part( SQLP_FROM, 'join Forums ON F.ID=G.ID' );
+   $q2->add_part( SQLP_FROM, 'INNER JOIN Forums F ON F.ID=G.ID' );
    $q2->add_part( SQLP_WHERE, 'G.Moves > 10' );
    $q2->add_part( SQLP_LIMIT, '3,7' );
    $q2->add_part( SQLP_HAVING, 'goodrating' );

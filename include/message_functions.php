@@ -1011,7 +1011,7 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
       'Messages M ' .
       'INNER JOIN MessageCorrespondents AS me ON M.ID=me.mid',
       'LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender',
-      'LEFT JOIN Players otherP ON otherP.ID=other.uid',
+      'LEFT JOIN Players AS otherP ON otherP.ID=other.uid',
       'LEFT JOIN MessageCorrespondents AS previous ON previous.mid=M.ReplyTo AND previous.uid=me.uid' );
    $qsql->add_part( SQLP_WHERE, "me.uid=$my_id" );
    if ( $folderstring != "all" and $folderstring != '' )
