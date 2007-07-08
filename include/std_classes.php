@@ -418,9 +418,10 @@ class QuerySQL
       $result = array_shift($arr);
       foreach( $arr as $part )
       {
-         // valid JOIN-Syntax (mysql 4.0): STRAIGHT_JOIN, [INNER | CROSS] JOIN, [NATURAL] LEFT|RIGHT [OUTER] JOIN
+         // valid JOIN-Syntax (mysql 4.0):
+         //    STRAIGHT_JOIN, [INNER | CROSS] JOIN, [NATURAL] LEFT|RIGHT [OUTER] JOIN
          // NOTE about mysql5.0-compatibility for LEFT JOINs:
-         // - parentheses can be omitted if all other tables stands before LEFT-JOIN: "FROM (...) LEFT JOIN"
+         // - parentheses can be omitted if all other tables stands before JOIN: "FROM (...) JOIN"
          //   see also http://dev.mysql.com/doc/refman/5.0/en/join.html
          if ( !preg_match( "/^(STRAIGHT_JOIN|((INNER|CROSS)\s+)?JOIN|(NATURAL\s+)?(LEFT|RIGHT)\s+(OUTER\s+)?JOIN)\s/i", $part ) )
             $result .= ',';
