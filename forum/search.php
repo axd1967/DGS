@@ -172,8 +172,8 @@ require_once( "forum_functions.php" );
          'Forums.Name as ForumName' );
       $qsql->add_part( SQLP_FROM,
          'Forums',
-         'JOIN Posts ON Forums.ID=Posts.Forum_ID ',
-         'JOIN Players AS P ON Posts.User_ID=P.ID ' );
+         'INNER JOIN Posts ON Forums.ID=Posts.Forum_ID ',
+         'INNER JOIN Players AS P ON Posts.User_ID=P.ID ' );
       $qsql->add_part( SQLP_WHERE,
          "Approved='Y'",
          "PosIndex>''" ); // '' == inactivated (edited)
