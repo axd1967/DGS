@@ -69,6 +69,7 @@ function get_alt_arg( $n1, $n2)
 
    $message = get_request_arg( 'message');
 
+   $baseURL = "game.php?gid=$gid";
 
    connect2mysql();
 
@@ -208,7 +209,7 @@ function get_alt_arg( $n1, $n2)
    {
       case 'choose_move': //single input pass
       {
-         if( $Status != 'PLAY' && $Status != 'PASS' 
+         if( $Status != 'PLAY' && $Status != 'PASS'
           && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
            )
             error('invalid_action',"game.choose_move.$Status");
@@ -461,7 +462,7 @@ function get_alt_arg( $n1, $n2)
       $show_notes = false;
       $noteshide = 'Y';
    }
-     
+
    if( ENA_MOVENUMBERS )
    {
       $movenumbers= (int)@$player_row['MoveNumbers'];
@@ -649,20 +650,30 @@ function get_alt_arg( $n1, $n2)
 
 function draw_moves()
 {
-   global $TheBoard, $gid, $move, $Size;
-
-   echo '<SELECT name="gotomove" size="1">' . "\n";
+   global $TheBoard, $gid, $move, $Size, $baseURL;
 
    $trmov = T_('Move');
    $trpas = T_('Pass');
    $trsco = T_('Scoring');
    $trres = T_('Resign');
 
+   # init first and last move-num
+   $move_start = 1;
+   $move_end   = count($TheBoard->moves);
+   foreach( $TheBoard->moves as $MoveNr => $sub )
+   {  //list( $Stone, $PosX, $PosY) = $sub;
+      if( $sub[0] == BLACK or $sub[0] == WHITE ) {
+         $move_start = $MoveNr;
+         break;
+      }
+   }
+
    $str = '';
    foreach( $TheBoard->moves as $MoveNr => $sub )
    {
       list( $Stone, $PosX, $PosY) = $sub;
       if( $Stone != BLACK and $Stone != WHITE ) continue;
+      $move_end = $MoveNr;
 
       switch( $PosX )
       {
@@ -687,6 +698,30 @@ function draw_moves()
                  , $trmov, $MoveNr, $c)
           . $str;
    }
+
+   # add navigational links to show game-start, previous/next move, game-end: |<  <  >  >|
+   $navipage = $baseURL .URI_AMP. "movechange=1" .URI_AMP. "gotomove=";
+   echo "<a href=\"$navipage$move_start\">"
+      . image('images/start.gif', '', T_('show game start')) . "</a>"
+      . "&nbsp;&nbsp;";
+   if ( $move > 1 )
+      echo "<a href=\"$navipage" .($move - 1). "\">"
+         . image('images/backward.gif', '', T_('show previous move')) . "</a>";
+   else
+      echo image('images/dot.gif', '', '', '', -1, 18); # (<)
+   echo "&nbsp;&nbsp;&nbsp;&nbsp;";
+   if ( $move < $move_end )
+      echo "<a href=\"$navipage" .($move + 1). "\">"
+         . image('images/forward.gif', '', T_('show next move')) . "</a>";
+   else
+      echo image('images/dot.gif', '', '', '', -1, 18); # (>)
+   echo "&nbsp;&nbsp;"
+      . "<a href=\"$navipage$move_end\">"
+      . image('images/end.gif', '', T_('show game end')) . "</a>"
+      . "&nbsp;&nbsp;\n";
+
+   # add selectbox to show specifc move
+   echo '<SELECT name="gotomove" size="1">' . "\n";
    echo "$str</SELECT>\n";
    echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">\n";
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">\n";
