@@ -46,17 +46,25 @@ require_once( "include/form_functions.php" );
    if( !$sendit && !$From )
       $From= $EMAIL_FROM;
    $Subject= get_request_arg( 'subject', 'Mail test');
-   $Text= "This is a test\nLine 2\nLine 3\n";
+   $Text = 'Mail test from '.$FRIENDLY_LONG_NAME.' - ignore it';
+   $Text.= "\nLine 2\nLine 3\n";
+   $Text.= str_repeat("This is a test - ", 10);
+   $Text.= "\nLast line\n";
 
 
    start_html( 'mailtest', 0, '',
       "  pre { background: #c0c0c0; }" );
+
+   echo '&nbsp;<br>';
 
    $dform = new Form('dform', 'mailtest.php', FORM_POST, true );
 
    $dform->add_row( array(
       'DESCRIPTION', 'To',
       'TEXTINPUT', 'email', 80, 100, $Email,
+      'TEXT', textarea_safe(
+            'user@example.com, anotheruser@example.com'
+            ),
       ) );
    $dform->add_row( array(
       'DESCRIPTION', 'From',
@@ -86,11 +94,16 @@ require_once( "include/form_functions.php" );
    }
    else if( $sendit && $Email )
    {
-      if( !verify_email( false, $Email) )
+      $err = 0;
+      foreach( explode( ',', $Email) as $addr )
       {
-         echo "<br>bad mail address: ".html_safe($Email)."<br>";
+         if( !verify_email( false, $addr) )
+         {
+            echo "<br>bad mail address: ".textarea_safe($addr)."<br>";
+            $err = 1;
+         }
       }
-      else
+      if( !$err )
       {
          if( $From )
             $headers = "From: $From\n";
@@ -103,7 +116,8 @@ require_once( "include/form_functions.php" );
              "Subject: ".strip_tags( $Subject, '') . "\n\n" .
              strip_tags( $Text, '') . "\n";
 
-         $res= @mail( $Email, $FRIENDLY_LONG_NAME.' mail test', $msg, $headers );
+         $res= send_email( false, $Email, $msg
+                     , $FRIENDLY_LONG_NAME.' mail test', $headers);
          if( !$res )
          {
             echo "<br>mail() function failed.<br>";

@@ -61,6 +61,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-09 rodival
+
+   * include/std_functions.php, scripts/mailtest.php:
+   - adjustments to test a mass email post.
+
+
 2007-07-08 rodival
 
    * forum/list.php, forum/forum_functions.php,

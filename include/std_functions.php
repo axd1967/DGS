@@ -893,6 +893,12 @@ function verify_email( $debugmsg, $email)
 }
 
 /**
+ * $email may be:
+ * - user@example.com
+ * - user.com, anotheruser@example.com
+ * - User <user@example.com>
+ * - User <user@example.com>, Another User <anotheruser@example.com>
+ * or an array of those.
  * $subject default => $FRIENDLY_LONG_NAME.' notification';
  * $headers default => "From: $EMAIL_FROM";
  * no $params default.
@@ -904,6 +910,11 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
    if( !$subject )
       $subject= $FRIENDLY_LONG_NAME.' notification';
    $subject= ereg_replace("[\x01-\x20]+", ' ', $subject);
+
+   $rgx= array("%\r\n%","%\r%");
+   $rpl= array("\n","\n");
+   $text= preg_replace( $rgx, $rpl, $text);
+   $text= wordwrap( $text, 70, "\n", 1);
 
    /**
     * How to break the lines of an email ? CRLF.
@@ -921,23 +932,14 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
    
    switch( $eol )
    {
-    case "\n":
-      $rgx= array("%\r\n%","%\r%");
-      $rpl= array("\n"    ,"\n");
-    break;
-    case "\r":
-      $rgx= array("%\r\n%","%\n%");
-      $rpl= array("\r"    ,"\r");
-    break;
     default:
       $eol= "\r\n";
-      $rgx= array("%([^\r])\n%","%([^\r])\n%","%\r([^\n])%","%\r([^\n])%");
-      $rpl= array("\\1\r\n"    ,"\\1\r\n"    ,"\r\n\\1"    ,"\r\n\\1");
-    break;
+    case "\r":
+      $text= preg_replace( "%\n%", $eol, $text);
+    case "\n":
+      break;
    }
-
-   $text= wordwrap(trim($text), 70, $eol, 1);
-   $text= preg_replace( $rgx, $rpl, trim($text)).$eol;
+   $text= trim($text).$eol;
 
    $rgx= array("%[\r\n]+%");
    $rpl= array($eol);
@@ -953,6 +955,9 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
    $params= trim($params);
    if( $params )
       $params= preg_replace( $rgx, $rpl, trim($params)); //.$eol;
+
+   if( is_array($email) )
+      $email = implode( ',', $email);
 
    if( function_exists('mail') )
       $res= @mail( $email, $subject, $text, $headers, $params);
