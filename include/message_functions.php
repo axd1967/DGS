@@ -421,14 +421,18 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       "<td colspan=2>$name</td>" .
       "</tr>\n";
 
+   $subject = make_html_safe( $subject, false);
+   $text = make_html_safe( $text, true);
    if ($rx_terms != '')
    {
-      $subject = mark_terms( $subject, $rx_terms, true );
-      $text    = mark_terms( $text,    $rx_terms, true );
+      $subject = mark_terms( $subject, $rx_terms, false );
+      $subject = make_html_safe( $subject, true);
+      $text = mark_terms( $text, $rx_terms, true );
+      $text = make_html_safe( $text, true);
    }
 
    echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>" .
-      make_html_safe($subject, true) . "</td></tr>\n" .
+      $subject . "</td></tr>\n" .
       "<tr><td valign=\"top\">" ;
 
    echo "<b>" . T_('Message') . ":</b>" ;
@@ -456,7 +460,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
       "<td align=\"center\" colspan=2>\n" .
       "<table border=2 align=center><tr>" .
-      "<td width=475 align=left>" . make_html_safe($text, true) .
+      "<td width=475 align=left>" . $text .
       "</td></tr></table><BR></td></tr>\n";
 
    if( isset($folders) && $mid > 0 )
@@ -1101,7 +1105,7 @@ function message_list_table( &$mtable, $result, $show_rows
       if( empty($row["other_name"]) )
          $row["other_name"] = '-';
 
-      $str = make_html_safe($row["other_name"]) ;
+      $str = make_html_safe($row["other_name"]);
       //if( !$deleted )
          $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid{$url_terms}\">$str</A>";
       if( !$full_details and $row['Sender'] === 'Y' )
@@ -1109,9 +1113,13 @@ function message_list_table( &$mtable, $result, $show_rows
       $mrow_strings[2] = "<td>$str</td>";
 
       $subject = $row['Subject'];
+      $subject = make_html_safe( $subject, false);
       if ($terms != '')
-         $subject = mark_terms( $subject, $terms, false );
-      $mrow_strings[3] = "<td>" . make_html_safe($subject, true) . "&nbsp;</td>";
+      {
+         $subject = mark_terms( $subject, $rx_terms, false );
+         $subject = make_html_safe( $subject, true);
+      }
+      $mrow_strings[3] = "<td>" . $subject . "&nbsp;</td>";
 
       list($ico,$alt) = $msg_icones[$row['flow']];
       $str = image( "images/$ico.gif", $alt, $tits[$row['flow']]);

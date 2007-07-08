@@ -37,7 +37,7 @@ quick INFO:
    or in confirm.php, a Running=Running-1 not executed => but those for
     the normal ending games are associated with a Finished=Finished+1
    or an invisible game deletion where Running=Running-1 is isolated.
-   Found those recent errors:
+   Found those recent errors (TABs kept to show the empty fields):
  ID	Handle	Message	MysqlError	Debug	Date	IP
  3155508	afm	mysql_update_game		conf20(327771)	20070706092914	64.168.66.246
  3154151	Kaichan	mysql_update_game		conf20(322501)	20070706003502	217.230.149.80
@@ -63,8 +63,21 @@ Changelog
 
 2007-07-08 rodival
 
+   * forum/list.php, forum/forum_functions.php,
+     include/message_functions.php:
+   - emphasized the fact (and fixed some of buggy ones) that a Subject
+     must not contain HTML tags. Some fixes around mark_term() are
+     temporary and will be better handled soon.
+
+   * edit_bio.php:
+   - limitation of the cells size in an other way that cut_string()
+     (not based on the text length but on the box size)
+
+
+2007-07-08 rodival
+
    * halfhourly_cron.php, send_new_password.php,
-   * include/std_functions.php:
+     include/std_functions.php:
    - enabled the new send_mail() function everywhere... with a rollback
      possibility because I have no way to test the emails nor on my
      private server either on the devel server. >>> should be tested.
@@ -88,7 +101,7 @@ Changelog
    - default JOIN changed with INNER JOIN
 
    * include/table_columns.php (make_tablehead),
-   * skins/dragon/screen.css:
+     skins/dragon/screen.css:
    - added images in the header to show how the table columns are sorted.
      this implied to change the previous hidding red 'x' to an image too.
    - added a constant to disable the second level of sort.
@@ -128,7 +141,7 @@ ALTER TABLE `Players`
    - added the mysql_single_col() function
 
    * error.php,
-   * include/error_functions.php (set_mode, add_error, error):
+     include/error_functions.php (set_mode, add_error, error):
    - now set_mode() return the previous mode (to save and restore it)
    - now add_error() and error() return false if the errors are not
      fatal. This allow $result = mysql_query(...) or error(...);

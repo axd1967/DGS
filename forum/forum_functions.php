@@ -251,18 +251,20 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
    $cols = 2;
 
    // highlight terms in Subject/Text (skipping XML-elements like tags & entities)
+   $sbj = make_html_safe( $Subject, false);
+   $txt = make_html_safe( $Text, true);
    if ( !is_null($Terms) )
    {
-      $rx_terms = (is_array($Terms) and count($Terms) > 0 ) ? implode("|", $Terms) : $Terms;
+      $rx_terms = (is_array($Terms) and count($Terms) > 0 )
+                              ? implode("|", $Terms) : $Terms;
       if ($rx_terms != '')
       {
-         $is_xml = true;
-         $Subject = mark_terms( $Subject, $rx_terms, $is_xml );
-         $Text    = mark_terms( $Text,    $rx_terms, $is_xml );
+         $sbj = mark_terms( $sbj, $rx_terms, false );
+         $sbj = make_html_safe( $sbj, true);
+         $txt = mark_terms( $txt, $rx_terms, true );
+         $txt = make_html_safe( $txt, true);
       }
    }
-   $sbj = make_html_safe( $Subject, true );
-   $txt = make_html_safe( $Text, true);
 //   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
    if( strlen($txt) == 0 ) $txt = '&nbsp;';
@@ -598,7 +600,7 @@ function display_posts_pending_approval()
    {
       $color = ( $odd ? "" : " bgcolor=white" );
 
-      $Subject = make_html_safe( $row['Subject']);
+      $Subject = make_html_safe( $row['Subject'], false);
       echo "<tr$color><td>" . ($cols>3?$row['Forumname'] . "</td><td>" : '') .
          "<a href=\"forum/read.php?forum=" . $row['Forum_ID'] .
          URI_AMP . "thread=" . $row['Thread_ID'] . URI_AMP .
