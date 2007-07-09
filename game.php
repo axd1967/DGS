@@ -73,7 +73,7 @@ function get_alt_arg( $n1, $n2)
 
    connect2mysql();
 
-   if( !$gid )
+   if( $gid <= 0 )
       error('no_game_nr');
 
    $logged_in = who_is_logged( $player_row);
@@ -250,7 +250,7 @@ function get_alt_arg( $n1, $n2)
       }
       break;
 
-      case 'handicap': //multiple input pass + validation
+      case 'handicap': //multiple input step + validation
       {
          if( $Status != 'PLAY' or !( $Handicap>1 && $Moves==0 ) )
             error('invalid_action',"game.handicap.$Status");
@@ -501,7 +501,12 @@ function get_alt_arg( $n1, $n2)
    $TheBoard->draw_board( $may_play, $action, $stonestring);
 
    if( $extra_message ) //score messages
-      echo "<p></p><center>$extra_message</center>\n";
+   {
+      echo "<center><p>$extra_message";
+      if( $validation_step )
+         echo ' - ' . T_('Hit "Submit" to confirm');
+      echo "</p></center>\n";
+   }
    echo '<br>';
 
    $cols = 2;
