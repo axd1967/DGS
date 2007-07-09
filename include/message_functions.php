@@ -1037,7 +1037,7 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
 function message_list_table( &$mtable, $result, $show_rows
              , $current_folder, $my_folders
              , $no_sort=true, $no_mark=true, $toggle_marks=false
-             , $full_details=false, $only_tablehead=null, $terms=''
+             , $full_details=false, $only_tablehead=null, $rx_terms=''
              )
 {
  global $date_fmt, $msg_icones;
@@ -1083,7 +1083,7 @@ function message_list_table( &$mtable, $result, $show_rows
    $tits[            FLOW_ANSWERED] = $n ;
    $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p - $n" ;
 
-   $url_terms = ($terms != '') ? URI_AMP."terms=".urlencode($terms) : '';
+   $url_terms = ($rx_terms != '') ? URI_AMP."terms=".urlencode($rx_terms) : '';
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
@@ -1114,7 +1114,7 @@ function message_list_table( &$mtable, $result, $show_rows
 
       $subject = $row['Subject'];
       $subject = make_html_safe( $subject, false);
-      if ($terms != '')
+      if ($rx_terms != '')
       {
          $subject = mark_terms( $subject, $rx_terms, false );
          $subject = make_html_safe( $subject, true);
