@@ -426,9 +426,9 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    if ($rx_terms != '')
    {
       $subject = mark_terms( $subject, $rx_terms, false );
-      $subject = make_html_safe( $subject, true);
+      $subject = make_html_safe( $subject, true); // apply the marked-terms
       $text = mark_terms( $text, $rx_terms, true );
-      $text = make_html_safe( $text, true);
+      $text = make_html_safe( $text, true); // apply the marked-terms
    }
 
    echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>" .
@@ -1117,7 +1117,7 @@ function message_list_table( &$mtable, $result, $show_rows
       if ($rx_terms != '')
       {
          $subject = mark_terms( $subject, $rx_terms, false );
-         $subject = make_html_safe( $subject, true);
+         $subject = make_html_safe( $subject, true); // apply the marked-terms
       }
       $mrow_strings[3] = "<td>" . $subject . "&nbsp;</td>";
 
