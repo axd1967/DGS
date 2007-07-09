@@ -23,8 +23,8 @@ quick INFO:
    I've not found the reason of this bug. Keep an eye on it!
 \2007-07-06 rodival
    2 new users with a bad "Running" count have appeared yesterday:
-   6415=random_penguin:82.108.171.178, 13628=guerrilla27:83.18.19.250
- uid   cntfix last finished games        last accepted games        ucol
+   6415=random_penguin:82.108.171.178 | 13628=guerrilla27:83.18.19.250
+ uid   cntfix recent finished games      recent accepted games      ucol
  13628 23=>22 295161 2007-07-05 15:05:05 330544 2007-07-05 15:15:29 W
                                          330461 2007-07-05 11:22:15 W
                                          330485 2007-07-05 10:46:05 W
@@ -37,20 +37,36 @@ quick INFO:
    or in confirm.php, a Running=Running-1 not executed => but those for
     the normal ending games are associated with a Finished=Finished+1
    or an invisible game deletion where Running=Running-1 is isolated.
-   Found those recent errors (TABs kept to show the empty fields):
- ID	Handle	Message	MysqlError	Debug	Date	IP
- 3155508	afm	mysql_update_game		conf20(327771)	20070706092914	64.168.66.246
- 3154151	Kaichan	mysql_update_game		conf20(322501)	20070706003502	217.230.149.80
- 3153922	jalen	internal_error		confirm10	20070705235433	74.73.138.215
- 3153353	bornfreerunfree	mysql_update_game		conf20(297448)	20070705203942	213.233.247.132
- 3152914	Acnil	mysql_update_game		conf20(315438)	20070705172412	207.45.248.19
- 3152886	jean-claude	mysql_update_game		conf20(330341)	20070705171139	194.78.196.244
- 3152644	RuderiX	already_played		confirm11	20070705154342	193.238.131.253
+   Found those recent errors:
+ ID | Handle | Message | MysqlError | Debug | Date | IP
+ 3155508 | afm | mysql_update_game |  | conf20(327771) | 20070706092914 | 64.168.66.246
+ 3154151 | Kaichan | mysql_update_game |  | conf20(322501) | 20070706003502 | 217.230.149.80
+ 3153922 | jalen | internal_error |  | confirm10 | 20070705235433 | 74.73.138.215
+ 3153353 | bornfreerunfree | mysql_update_game |  | conf20(297448) | 20070705203942 | 213.233.247.132
+ 3152914 | Acnil | mysql_update_game |  | conf20(315438) | 20070705172412 | 207.45.248.19
+ 3152886 | jean-claude | mysql_update_game |  | conf20(330341) | 20070705171139 | 194.78.196.244
+ 3152644 | RuderiX | already_played |  | confirm11 | 20070705154342 | 193.238.131.253
+  (0 errors for IP='82.108.171.178')
+ 3152540 | guerrilla27 | receiver_not_found |  | message_selector.php | 20070705150637 | 83.18.19.250
+ 3152538 | guerrilla27 | receiver_not_found |  | message_selector.php | 20070705150605 | 83.18.19.250
+ 3148494 | guerrilla27 | not_your_turn |  | game.php?gid=298476 | 20070704102754 | 83.18.19.250
+\2007-07-09 rodival
+   2 new users with a bad "Running" count have appeared yesterday:
+   6461=Scottya21:199.46.199.237 | 27780=norm:193.61.197.65
+ uid   cntfix recent finished games      recent accepted games      ucol
+ 6461   5=> 4  (none since 3 years)      330845 2007-07-08 20:43:02 B
+ 27780 32=>31  (none since 1 month)      330845 2007-07-08 20:43:02 W
+Simple situation: since 2 days, both have only 1 game started and it is shared
+If we exclude the "deleted games (without traces)" possibility, this problem
+Seems to be caused by a Running=Running+2 instead of +1
+ in send_message.php or in join_waitingroom_game.php.
+So have they asked a double game and only one had been created
+ or have they asked a single game and the count had been incremented by 2?
+create_game() can't fail without a fatal error!
+ but there is 0 errors for both IP since 2 days in Errorlog.
+Maybe an other track: this was a 2 stones handicap game (but the previous 330544
+ game is without handicap).
 
- 3152540	guerrilla27	receiver_not_found		message_selector.php	20070705150637	83.18.19.250
- 3152538	guerrilla27	receiver_not_found		message_selector.php	20070705150605	83.18.19.250
- 3148494	guerrilla27	not_your_turn		game.php?gid=298476	20070704102754	83.18.19.250
- 0 errors for IP='82.108.171.178'
 -----
 
 
@@ -60,6 +76,19 @@ quick TODO:
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-07-09 rodival
+
+   * join_waitingroom_game.php, include/make_game.php (create_game(),
+     make_standard_placement_of_handicap_stones()),
+   - an other try to fix the bad Running count bug:
+     a small enhancement of the handicap management.
+     a rewrite of join_waitingroom_game.php to make easier the comparison
+     with the similar part (create game) of send_message.php.
+
+   * game.php:
+   - add of a message to invite the player to validate his action.
+
 
 2007-07-09 juga
 
