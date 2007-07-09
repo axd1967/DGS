@@ -657,6 +657,7 @@ function draw_moves()
    $trsco = T_('Scoring');
    $trres = T_('Resign');
 
+   /*
    # init first and last move-num
    $move_start = 1;
    $move_end   = count($TheBoard->moves);
@@ -667,13 +668,14 @@ function draw_moves()
          break;
       }
    }
+   */
 
    $str = '';
    foreach( $TheBoard->moves as $MoveNr => $sub )
    {
       list( $Stone, $PosX, $PosY) = $sub;
       if( $Stone != BLACK and $Stone != WHITE ) continue;
-      $move_end = $MoveNr;
+      //$move_end = $MoveNr;
 
       switch( $PosX )
       {
@@ -699,6 +701,7 @@ function draw_moves()
           . $str;
    }
 
+   /*
    # add navigational links to show game-start, previous/next move, game-end: |<  <  >  >|
    $navipage = $baseURL .URI_AMP. "movechange=1" .URI_AMP. "gotomove=";
    echo "<a href=\"$navipage$move_start\">"
@@ -719,6 +722,7 @@ function draw_moves()
       . "<a href=\"$navipage$move_end\">"
       . image('images/end.gif', '', T_('show game end')) . "</a>"
       . "&nbsp;&nbsp;\n";
+   */
 
    # add selectbox to show specifc move
    echo '<SELECT name="gotomove" size="1">' . "\n";
