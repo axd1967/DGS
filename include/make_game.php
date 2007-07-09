@@ -20,6 +20,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 //$TranslateGroups[] = "Game";
 
+
+//always return a valide game ID from the database, else call error()
 function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 {
    global $NOW;
@@ -197,18 +199,23 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 } //make_invite_game
 
 
-
-function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
+//always return a valide game ID from the database, else call error()
+function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 {
    global $NOW;
 
 //   var_dump($game_info_row);
 //   die();
-   if($gid > 0 and !( $game_info_row["Black_ID"] == $black_row['ID'] and
-                      $game_info_row["White_ID"] == $white_row['ID'] or
-                      $game_info_row["White_ID"] == $black_row['ID'] and
-                      $game_info_row["Black_ID"] == $white_row['ID'] ))
-      error('mysql_start_game','create_game.not_correct_players');
+   $gid = (int)$gid;
+   if( $gid > 0 )
+   {
+      if( !($game_info_row["Black_ID"] == $black_row['ID']
+         && $game_info_row["White_ID"] == $white_row['ID'] )
+       && !($game_info_row["White_ID"] == $black_row['ID']
+         && $game_info_row["Black_ID"] == $white_row['ID'] )
+         )
+         error('mysql_start_game','create_game.wrong_players');
+   }
 
    $rating_black = $black_row["Rating2"];
    $rating_white = $white_row["Rating2"];
@@ -232,11 +239,11 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
    $game_info_row['Rated'] = ( $rated ? 'Y' : 'N' );
 
    $stdhandicap = $game_info_row['StdHandicap'];
-   if( $stdhandicap != 'Y' or
-       !standard_handicap_is_possible($size, $game_info_row['Handicap'] ) )
+   $moves = $game_info_row['Handicap'];
+   if( $stdhandicap != 'Y' or !standard_handicap_is_possible($size, $moves ) )
       $stdhandicap = 'N';
 
-   if( ENA_STDHANDICAP&2 && $stdhandicap == 'Y' && $game_info_row['Handicap'] > 0 )
+   if( ENA_STDHANDICAP&2 && $stdhandicap == 'Y' && $moves > 1 )
       $skip_handicap_validation = true;
    else 
       $skip_handicap_validation = false; 
@@ -244,7 +251,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
 
    if( $skip_handicap_validation )
    {
-      $moves = $game_info_row['Handicap'];
+      //$moves = $moves;
       $tomove = $white_row['ID'];
       $clock_used = $clock_used_white;
    }
@@ -299,10 +306,16 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=null)
    if( $gid <= 0 )
       error('internal_error','create_game.gameID='.$gid);
 
+   //ENA_STDHANDICAP:
+   // both b1 and b2 set is not fully handled (error if incomplete pattern)
    if( $skip_handicap_validation )
-      if( !make_standard_placement_of_handicap_stones($size
-                                 , $game_info_row['Handicap'], $gid) )
-            error('internal_error','create_game.std_handicap.fail');
+      if( !make_standard_placement_of_handicap_stones(
+                        $size, $game_info_row['Handicap'], $gid) )
+      {
+         //error because it's too late to have a manual placement
+         //as the game is already initialized for the white play
+         error('internal_error','create_game.std_handicap.gameID='.$gid);
+      }
 
    return $gid;
 } //create_game
@@ -315,8 +328,17 @@ function standard_handicap_is_possible($size, $hcp)
 }
 
 if( ENA_STDHANDICAP&2 ) { //skip black validation
-function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
+//for get_handicap_pattern:
+require_once('include/sgf_parser.php');
+require_once('include/coords.php');
+
+//return false if no placement is done but is still possible
+function make_standard_placement_of_handicap_stones(
+            $size, $hcp, $gid, $allow_incomplete_pattern=false)
 {
+   if( $gid <= 0 )
+      error('no_game_nr','make_std_handicap');
+
    if( $hcp < 2 )
       return false;
 
@@ -324,33 +346,34 @@ function make_standard_placement_of_handicap_stones($size, $hcp, $gid)
       return false;
 
    $err = '';
-
-   require_once('include/sgf_parser.php');
-   require_once('include/coords.php');
    $stonestring = get_handicap_pattern( $size, $hcp, $err);
+   //if( $err ) return false;
 
-   if( $err )
-      return false;
+   $patlen = strlen( $stonestring );
+   if( $patlen > 2*$hcp or
+      ( $patlen < 2*$hcp && !$allow_incomplete_pattern ) )
+      error('internal_error','make_std_handicap.bad_pattern');
 
-   $l = strlen( $stonestring );
-   if( $l != 2*$hcp )
-      error('internal_error','bad stonestring std_handicap');
+   $patlen = min( 2*$hcp, $patlen);
 
    $query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
-   for( $i=0; $i < $l; $i += 2 )
+   for( $i=0; $i < $patlen; $i += 2 )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $size);
 
       if( !isset($rownr) or !isset($colnr) )
-         error("illegal_position",'std_handicap');
+         error('illegal_position','make_std_handicap');
 
       $query .= "($gid, " . ($i/2 + 1) . ", " . BLACK . ", $colnr, $rownr, 0)";
-      if( $i+2 < $l ) $query .= ", ";
+      if( $i+2 < $patlen ) $query .= ", ";
    }
 
    mysql_query( $query )
-      or error('mysql_query_failed','make_game.make_standard_placement_of_handicap_stones');
+      or error('mysql_query_failed','make_std_handicap');
+
+   if( $patlen != 2*$hcp )
+      return false;
 
    return true;
 }

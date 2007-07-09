@@ -39,37 +39,25 @@ require_once( "include/make_game.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
-   $id = @$_REQUEST['id'];
-   if( !is_numeric($id) or $id<0 )
-      $id=0;
+   $wr_id = @$_REQUEST['id'];
+   if( !is_numeric($wr_id) or $wr_id <= 0 )
+      error('waitingroom_game_not_found', 'join_waitingroom_game.bad_id');
 
-   $result = mysql_query("SELECT Waitingroom.* FROM Waitingroom WHERE ID=$id")
-      or error('mysql_query_failed', 'join_waitingroom_game.find_game');
+   $game_row = mysql_single_fetch('join_waitingroom_game.find_game',
+         "SELECT * FROM Waitingroom WHERE ID=$wr_id");
+   if( !$game_row )
+      error('waitingroom_game_not_found', 'join_waitingroom_game.find_game');
 
-   if( @mysql_num_rows($result) != 1)
-      error("waitingroom_game_not_found", 'join_waitingroom_game.find_game');
-
-   $game_info_row = mysql_fetch_array($result);
-   $uid = $game_info_row['uid'];
-
-   $result = mysql_query("SELECT ID,Name,Handle," .
-                         "Rating2,RatingStatus,ClockUsed,OnVacation " .
-                         "FROM Players WHERE ID=$uid")
-      or error('mysql_query_failed', 'join_waitingroom_game.find_players');
-
-   if( @mysql_num_rows($result) != 1)
-      error("waitingroom_game_not_found", 'join_waitingroom_game.find_players');
-
-   $opponent_row = mysql_fetch_array($result);
-
+   $my_id = $player_row['ID'];
+   $opponent_ID = $game_row['uid'];
 
 
    if( @$_REQUEST['delete'] == 't' )
    {
-      if( $player_row['ID'] !== $uid )
+      if( $my_id != $opponent_ID )
          error('waitingroom_delete_not_own');
 
-      mysql_query("DELETE FROM Waitingroom WHERE ID=$id LIMIT 1")
+      mysql_query("DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1")
          or error('mysql_query_failed', 'join_waitingroom_game.delete');
 
       $msg = urlencode(T_('Game deleted!'));
@@ -79,15 +67,23 @@ require_once( "include/make_game.php" );
 
 //else... joining game
 
-   if( $player_row['ID'] == $uid )
-      error("waitingroom_own_game");
+   $opponent_row = mysql_single_fetch('join_waitingroom_game.find_players',
+         "SELECT ID,Name,Handle," .
+         "Rating2,RatingStatus,ClockUsed,OnVacation " .
+         "FROM Players WHERE ID=$opponent_ID");
 
-   if( $game_info_row['MustBeRated'] == 'Y' and
-       !($player_row['Rating2'] >= $game_info_row['Ratingmin']
-         and $player_row['Rating2'] <= $game_info_row['Ratingmax']) )
-      error("waitingroom_not_in_rating_range");
+   if( !$opponent_row )
+      error('waitingroom_game_not_found', 'join_waitingroom_game.find_players');
 
-   $size = $game_info_row['Size'];
+   if( $my_id == $opponent_ID )
+      error('waitingroom_own_game');
+
+   if( $game_row['MustBeRated'] == 'Y' and
+       !($player_row['Rating2'] >= $game_row['Ratingmin']
+         and $player_row['Rating2'] <= $game_row['Ratingmax']) )
+      error('waitingroom_not_in_rating_range');
+
+   $size = $game_row['Size'];
 
    $my_rating = $player_row["Rating2"];
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
@@ -95,13 +91,13 @@ require_once( "include/make_game.php" );
    $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
 
    $double = false;
-   switch( $game_info_row['Handicaptype'] )
+   switch( $game_row['Handicaptype'] )
    {
       case 'conv':
       {
          if( !$iamrated or !$opprated )
             error('no_initial_rating');
-         list($game_info_row['Handicap'],$game_info_row['Komi'],$i_am_black) =
+         list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
             suggest_conventional( $my_rating, $opprating, $size);
       }
       break;
@@ -110,7 +106,7 @@ require_once( "include/make_game.php" );
       {
          if( !$iamrated or !$opprated )
             error('no_initial_rating');
-         list($game_info_row['Handicap'],$game_info_row['Komi'],$i_am_black) =
+         list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
             suggest_proper( $my_rating, $opprating, $size);
       }
       break;
@@ -130,10 +126,10 @@ require_once( "include/make_game.php" );
       break;
       */
       default: //always available even if waiting room or unrated
-         $game_info_row['Handicaptype'] = 'nigiri'; 
+         $game_row['Handicaptype'] = 'nigiri'; 
       case 'nigiri':
       {
-         $game_info_row['Handicap'] = 0;
+         $game_row['Handicap'] = 0;
          mt_srand ((double) microtime() * 1000000);
          $i_am_black = mt_rand(0,1);
       }
@@ -143,30 +139,30 @@ require_once( "include/make_game.php" );
    //TODO: HOT_SECTION ???
    $gids = array();
    if( $i_am_black or $double )
-      $gids[] = create_game($player_row, $opponent_row, $game_info_row);
+      $gids[] = create_game($player_row, $opponent_row, $game_row);
    else
-      $gids[] = create_game($opponent_row, $player_row, $game_info_row);
+      $gids[] = create_game($opponent_row, $player_row, $game_row);
    $gid = $gids[0];
    if( $double )
-      $gids[] = create_game($opponent_row, $player_row, $game_info_row);
+      $gids[] = create_game($opponent_row, $player_row, $game_row);
 
    //TODO: provide a link between the two paired "double" games
    $cnt = count($gids);
    mysql_query( "UPDATE Players SET Running=Running+$cnt" .
-                ( $game_info_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
-                " WHERE (ID=$uid OR ID=" . $player_row['ID'] . ") LIMIT 2" )
+                ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
+                " WHERE (ID=$my_id OR ID=$opponent_ID) LIMIT 2" )
       or error('mysql_query_failed', 'join_waitingroom_game.update_players');
 
 // Reduce number of games left in the waiting room
 
-   if( $game_info_row['nrGames'] <= 1 )
+   if( $game_row['nrGames'] <= 1 )
    {
-      mysql_query("DELETE FROM Waitingroom where ID=$id LIMIT 1")
+      mysql_query("DELETE FROM Waitingroom where ID=$wr_id LIMIT 1")
          or error('mysql_query_failed', 'join_waitingroom_game.reduce_delete');
    }
    else
    {
-      mysql_query("UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$id LIMIT 1")
+      mysql_query("UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$wr_id LIMIT 1")
          or error('mysql_query_failed', 'join_waitingroom_game.reduce');
    }
 
@@ -185,8 +181,8 @@ require_once( "include/make_game.php" );
    {
       $reply = user_reference( REF_LINK, 1, '', $player_row). " has joined your waiting room game.";
    }
-   if( !empty($game_info_row['Comment']) )
-      $reply = 'Comment: '.$game_info_row['Comment']."\n".$reply;
+   if( !empty($game_row['Comment']) )
+      $reply = 'Comment: '.$game_row['Comment']."\n".$reply;
 
    $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
       "Game_ID=$gid, " .
@@ -202,7 +198,7 @@ require_once( "include/make_game.php" );
    $mid = mysql_insert_id();
 
    mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-               "($uid, $mid, 'N', ".FOLDER_NEW.")")
+               "($opponent_ID, $mid, 'N', ".FOLDER_NEW.")")
       or error('mysql_query_failed', 'join_waitingroom_game.mess_corr');
 
 
