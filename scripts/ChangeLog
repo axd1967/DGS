@@ -66,10 +66,17 @@ Changelog
    * game.php:
    - deactivated prev/next game-navigation with images
 
+   * include/message_functions.php:
+   - fix last fix for highlighting terms in message-using correct var
+
+
 2007-07-09 rodival
 
    * include/std_functions.php, scripts/mailtest.php:
    - adjustments to test a mass email post.
+
+   * forum/forum_functions.php:
+   - reverted last fix
 
 
 2007-07-08 rodival
@@ -84,8 +91,9 @@ Changelog
    - default JOIN changed with INNER JOIN
 
    * edit_bio.php:
-   - limitation of the cells size in an other way that cut_string()
-     (not based on the text length but on the box size)
+   - limitation of the cells size in an other way than cut_string(),
+     not based on the text length but on the box size,
+     using disabled or readonly textarea
 
    * halfhourly_cron.php, send_new_password.php,
      include/std_functions.php:
