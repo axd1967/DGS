@@ -61,6 +61,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-09 juga
+
+   * game.php:
+   - deactivated prev/next game-navigation with images
+
 2007-07-09 rodival
 
    * include/std_functions.php, scripts/mailtest.php:
