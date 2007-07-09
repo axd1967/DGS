@@ -15,6 +15,8 @@
 
 require_once( "include/tokenizer.php" );
 
+function fnop() {}
+
 {
    // some xml-example-value
    $value = <<<END_DATA
