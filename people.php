@@ -152,7 +152,11 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
          $browsercode = strtolower(trim($browsercode));
          $charenc = strtolower(trim($charenc));
 
-         $langname = T_($known_languages[$browsercode][$charenc]);
+         $langname = (string)@$known_languages[$browsercode][$charenc];
+         if( $langname )
+            $langname = T_($langname);
+         else
+            $langname = $language;
 
          if( $extra_info )
          {
