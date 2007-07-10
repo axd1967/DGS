@@ -729,9 +729,15 @@ function draw_moves()
       . "&nbsp;&nbsp;\n";
    */
 
-   # add selectbox to show specifc move
-   echo '<SELECT name="gotomove" size="1">' . "\n";
-   echo "$str</SELECT>\n";
+   // add selectbox to show specifc move
+   echo '<SELECT name="gotomove" size="1"';
+   if( ALLOW_JSCRIPT )
+   {
+      //echo " onchange=\"javascript:alert('Index: ' + this.selectedIndex + ' Valeur: ' + this.options[this.selectedIndex].value );\"";
+      //echo " onchange=\"javascript:this.form.submit();\"";
+      echo " onchange=\"javascript:this.form['movechange'].click();\"";
+   }
+   echo ">\n$str</SELECT>\n";
    echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">\n";
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">\n";
 }
