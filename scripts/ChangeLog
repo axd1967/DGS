@@ -77,6 +77,16 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-10 rodival
+
+   * people.php:
+   - "language name not found" now display the language code
+
+
+   * include/translation_functions.php:
+   - better T_ #info cut
+
+
 2007-07-09 rodival
 
    * join_waitingroom_game.php, include/make_game.php (create_game(),
