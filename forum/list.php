@@ -36,11 +36,12 @@ require_once( "forum_functions.php" );
 
    $show_rows = $RowsPerPage+1;
    $result = mysql_query("SELECT Posts.Subject, Posts.Thread_ID, " .
-                         "Posts.User_ID, Posts.PostsInThread, Name, " .
+                         "Posts.User_ID, Posts.PostsInThread, Players.Name, " .
                          "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
                          "UNIX_TIMESTAMP(Posts.LastChanged) AS Lastchanged " .
-                         "FROM (Posts) LEFT JOIN Players ON Players.ID=Posts.User_ID " .
-                         "LEFT JOIN Posts as LPost ON Posts.LastPost=LPost.ID " .
+                         "FROM (Posts) " .
+                         "LEFT JOIN Players ON Players.ID=Posts.User_ID " .
+//useless???                "LEFT JOIN Posts as LPost ON Posts.LastPost=LPost.ID " .
                          "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
                          " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
                          "WHERE Posts.Forum_ID=$forum AND Posts.Parent_ID=0 " .
