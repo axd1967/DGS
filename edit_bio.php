@@ -122,7 +122,7 @@ function find_category_box_text($cat)
          {
             //$text = make_html_safe($row["Text"], false);
             $text = textarea_safe($row["Text"]);
-            $text = "<TEXTAREA disabled name=\"dtext".$row["ID"] //readonly disabled
+            $text = "<TEXTAREA readonly name=\"dtext".$row["ID"] //readonly disabled
                . "\" cols=\"$text_width\" rows=\"$text_height\">$text</TEXTAREA>";
 
             $bio_table->add_sinfo(
@@ -171,6 +171,7 @@ function find_category_box_text($cat)
       }
       else
       {
+         echo '<p>'.T_('change order only, no text-change possible here.').'</p>';
          $bio_table->echo_table();
       }
    }
