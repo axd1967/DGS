@@ -77,8 +77,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
-2007-07-11 rodival
+2007-07-11 juga
 
+   * include/filter.php:
+   - Mysql-match: renamed boolean-mode -> expert-mode,
+     simplify extracting of regex-terms
+
+
+2007-07-11 rodival
 
    * include/table_columns.php (make_tablehead),
      include/table_infos.php (make_tablerow),
@@ -111,7 +117,7 @@ Changelog
 2007-07-09 rodival
 
    * join_waitingroom_game.php, include/make_game.php (create_game(),
-     make_standard_placement_of_handicap_stones()),
+     make_standard_placement_of_handicap_stones()):
    - an other try to fix the bad Running count bug:
      a small enhancement of the handicap management.
      a rewrite of join_waitingroom_game.php to make easier the comparison
@@ -372,7 +378,7 @@ ALTER TABLE Messages     -- ca. +80% of data-size (biggest change)
 
    * waiting_room.php:
    - added Player-Country-column and Filter on it
-   - bugfix: used wrong SQL-field for table-column #1 (name)
+   - bugfix: used wrong SQL-field for table-column #1 (sort by name)
    - replaced URL-var 'showall' and page-bottom-link with two Table-Filters
      Suitable-Handicap and Suitable-Rating-Range
    - change page-title reflecting current "suitable"-state
