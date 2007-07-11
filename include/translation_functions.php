@@ -55,7 +55,7 @@ function T_($string)
 
    $s = @$Tr[$string];
    if( empty($s) )
-      return preg_replace('%(.)#[0-9a-z]+$%i', '\\1', $string);
+      return preg_replace('%([^\\s])#[0-9a-z]+$%i', '\\1', $string);
    else
       return $s;
 }

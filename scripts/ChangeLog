@@ -77,11 +77,22 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-11 rodival
+
+   * include/translation_functions.php:
+   - new try for T_ #info: cut if the char before '#' is not a space
+
+
 2007-07-10 rodival
+
+   * edit_bio.php:
+   - readonly+message instead of disabled
+
+   * game.php:
+   - onchange on gotomove select box
 
    * people.php:
    - "language name not found" now display the language code
-
 
    * include/translation_functions.php:
    - better T_ #info cut
