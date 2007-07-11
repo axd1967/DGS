@@ -79,6 +79,9 @@ Changelog
 
 2007-07-11 rodival
 
+   * include/std_functions.php:
+   - enable the javascript tools.
+
    * include/translation_functions.php:
    - new try for T_ #info: cut if the char before '#' is not a space
 

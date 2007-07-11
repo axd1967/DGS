@@ -62,7 +62,7 @@ else
    $GUESTPASS = 'guest';
 
 
-define('ALLOW_JSCRIPT', 0);
+define('ALLOW_JSCRIPT', 1);
 
 $DEBUG_SQL = false; // for debugging filter showing where-clause on page
 
