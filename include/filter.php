@@ -2888,7 +2888,7 @@ class FilterMysqlMatch extends Filter
       {
          $r .= "<BR>";
          $r .= $this->build_generic_checkbox_elem(
-            $prefix, $this->elem_boolmode, $this->values[$this->elem_boolmode], T_('Boolean mode') );
+            $prefix, $this->elem_boolmode, $this->values[$this->elem_boolmode], T_('Expert mode') );
       }
 
       return $r;
@@ -2926,8 +2926,10 @@ class FilterMysqlMatch extends Filter
    {
       // extract words, especially "quoted literals" using StringTokenizer
       // Syuntax: word: [a-z0-9'_]+   +must -mustnot opt >more-important <less-important (grouping) ~negate-relevance trunc* "literal phrase"
+      // note: treat following chars as word-separators to be removed in terms: +-<>~()
       $tokenizer = new StringTokenizer( QUOTETYPE_QUOTE | TOKENIZE_WORD_RX,
-         '\\w\'\\+\\-<>~\\(\\)\\*', '', '\\\\', '""');
+            '\\w\'\\*', '', '\\\\', '""');
+         
       if ( !$tokenizer->parse($terms) )
       {
          $this->errormsg = implode(", ", $tokenizer->errors());
@@ -2935,6 +2937,7 @@ class FilterMysqlMatch extends Filter
       }
 
       // remove special chars
+      // note (regex-chars): . \ + * ? [ ^ ] $ ( ) { } = ! < > | :
       $arr = array();
       $n = 0;
       foreach( $tokenizer->tokens() as $token )
