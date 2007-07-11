@@ -8,9 +8,9 @@
 /* ------------------------- */
 
 * {
-   margin: 0px;
-   padding: 0px;
 /*
+   margin: 2px;
+   padding: 0px;
    font-family: Times New Roman, Times, Geneva, serif, Arial, Helvetica, sans-serif, Verdana;
 */
 }
@@ -532,6 +532,15 @@ table.Table tr.Row4,
 table.Table tr.Row2 {
    background: #e0e8ed;
 }
+table.Table tr.Highlight,
+table.Table tr.HiRow3,
+table.Table tr.HiRow1 {
+   background: #ffdfbf; /* #ffd080 #ffdfbf */
+}
+table.Table tr.HiRow4,
+table.Table tr.HiRow2 {
+   background: #e7cdb1; /* #f0c476 #e7cdb1 */
+}
 table.Table tr.Row3 td.Warning,
 table.Table tr.Row1 td.Warning {
    color: black;
@@ -541,9 +550,6 @@ table.Table tr.Row4 td.Warning,
 table.Table tr.Row2 td.Warning {
    color: black;
    background: #e6b9bd;
-}
-table.Table tr.Highlight {
-   background: #ffd070;
 }
 
 table.Table td.Mark {

@@ -79,6 +79,13 @@ Changelog
 
 2007-07-11 rodival
 
+
+   * include/table_columns.php (make_tablehead),
+     include/table_infos.php (make_tablerow),
+     skins/dragon/screen.css:
+   - enhanced the row highlight display
+   - renamed 'remcol.gif' to the more general 'remove.gif'
+
    * include/std_functions.php:
    - enable the javascript tools.
 
@@ -179,7 +186,7 @@ Changelog
    - added a constant to disable the second level of sort.
 
    * images/sort1a.gif, images/sort1d.gif,
-     images/sort2a.gif, images/sort2d.gif, images/remcol.gif:
+     images/sort2a.gif, images/sort2d.gif, images/remove.gif:
    - new images added used for table-sort-indicator
 -----------
 

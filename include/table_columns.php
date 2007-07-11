@@ -892,7 +892,7 @@ class Table
          if( $query_del ) //end_sep
             $tool = anchor(
                  $query_del . "{$this->Prefix}del=$nr#{$this->PrevColId}"
-               , image( $base_path.'images/remcol.gif', 'x', '', 'class="Hide"')
+               , image( $base_path.'images/remove.gif', 'x', '', 'class="Hide"')
                , T_('Hide')
                );
          else
@@ -1014,7 +1014,8 @@ class Table
       $string = " <tr class=$rclass";
       if( ALLOW_JSCRIPT && !@$tablerow['noclick'] )
       { //onClick onmousedown ondblclick
-         $string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
+         //$string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
+         $string.= " ondblclick=\"javascript:this.className=((this.className=='$rclass')?'Hi$rclass':'$rclass');\"";
       }
       $string.= ">";
 

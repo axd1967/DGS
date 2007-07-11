@@ -190,7 +190,8 @@ class Table_info
       $string = " <tr$rattbs";
       if( ALLOW_JSCRIPT && $rclass )
       {
-         $string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
+         //$string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
+         $string.= " ondblclick=\"javascript:this.className=((this.className=='$rclass')?'Hi$rclass':'$rclass');\"";
       }
       $string.= ">\n  ";
 
