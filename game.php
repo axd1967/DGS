@@ -662,25 +662,11 @@ function draw_moves()
    $trsco = T_('Scoring');
    $trres = T_('Resign');
 
-   /*
-   # init first and last move-num
-   $move_start = 1;
-   $move_end   = count($TheBoard->moves);
-   foreach( $TheBoard->moves as $MoveNr => $sub )
-   {  //list( $Stone, $PosX, $PosY) = $sub;
-      if( $sub[0] == BLACK or $sub[0] == WHITE ) {
-         $move_start = $MoveNr;
-         break;
-      }
-   }
-   */
-
    $str = '';
    foreach( $TheBoard->moves as $MoveNr => $sub )
    {
       list( $Stone, $PosX, $PosY) = $sub;
       if( $Stone != BLACK and $Stone != WHITE ) continue;
-      //$move_end = $MoveNr;
 
       switch( $PosX )
       {
@@ -705,29 +691,6 @@ function draw_moves()
                  , $trmov, $MoveNr, $c)
           . $str;
    }
-
-   /*
-   # add navigational links to show game-start, previous/next move, game-end: |<  <  >  >|
-   $navipage = $baseURL .URI_AMP. "movechange=1" .URI_AMP. "gotomove=";
-   echo "<a href=\"$navipage$move_start\">"
-      . image('images/start.gif', '', T_('show game start')) . "</a>"
-      . "&nbsp;&nbsp;";
-   if ( $move > 1 )
-      echo "<a href=\"$navipage" .($move - 1). "\">"
-         . image('images/backward.gif', '', T_('show previous move')) . "</a>";
-   else
-      echo image('images/dot.gif', '', '', '', -1, 18); # (<)
-   echo "&nbsp;&nbsp;&nbsp;&nbsp;";
-   if ( $move < $move_end )
-      echo "<a href=\"$navipage" .($move + 1). "\">"
-         . image('images/forward.gif', '', T_('show next move')) . "</a>";
-   else
-      echo image('images/dot.gif', '', '', '', -1, 18); # (>)
-   echo "&nbsp;&nbsp;"
-      . "<a href=\"$navipage$move_end\">"
-      . image('images/end.gif', '', T_('show game end')) . "</a>"
-      . "&nbsp;&nbsp;\n";
-   */
 
    // add selectbox to show specifc move
    echo '<SELECT name="gotomove" size="1"';
