@@ -84,7 +84,7 @@ Changelog
      message_list_table),
    * forum/list.php, forum/forum_functions.php (draw_post,
      display_posts_pending_approval),
-     skins/dragon/screen.css, :
+     skins/dragon/screen.css:
    - moved the mark_terms feature into the make_html_safe process.
      added the $mark_terms argument to parse_html_safe() and make_html_safe()
      removed the <term> pseudo-tag previously used to mark the terms
@@ -92,7 +92,7 @@ Changelog
    - introduced the SUBJECT_HTML constant to highlight to common "style"
      of the subjects.
 
-   * forum/search.php, forum/forum_functions.php (make_link_array)
+   * forum/search.php, forum/forum_functions.php (make_link_array),
      include/filter.php:
    - changed the type of the search form to POST because a GET one plus
      a url #id part make the buttons inactive if no fields have changed.
@@ -738,7 +738,7 @@ ALTER TABLE `Posts`
    * waiting_room.php,
    * userinfo.php,
    * edit_bio.php,
-   * status.php,
+   * status.php:
    - using the new Table_infos class properties
 
    * skins/dragon/screen.css
