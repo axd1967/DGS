@@ -38,8 +38,6 @@ if (!isset($page_microtime))
 
 require_once( "include/translation_functions.php" );
 
-require_once( "include/tokenizer.php" );
-
 
 // Server birth date:
 define('BEGINYEAR', 2001);
@@ -1214,10 +1212,10 @@ $html_code['faq'] = '\w+|/\w+'; //all not empty words
 
 
 //** no reg_exp chars nor ampersand nor '%' (see also $html_safe_preg):
-define( 'ALLOWED_LT', "`anglstart`");
-define( 'ALLOWED_GT', "`anglend`");
-define( 'ALLOWED_QUOT', "`allowedquot`");
-define( 'ALLOWED_APOS', "`allowedapos`");
+define( 'ALLOWED_LT', "`a`n`g`l`");
+define( 'ALLOWED_GT', "`a`n`g`g`");
+define( 'ALLOWED_QUOT', "`q`u`o`t`");
+define( 'ALLOWED_APOS', "`a`p`o`s`");
 
 /* Simple syntax check of element's attributes up to the next '>'.
    Check for quote mismatches.
@@ -1328,7 +1326,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    while ( preg_match($reg, $trail, $matches) )
    {
       $marks = $matches[1] ;
-      if( $parse_mark_regex && PARSE_MARK_TERM )
+      if( $parse_mark_regex && PARSE_MARK_TERM && $marks )
          $marks = preg_replace( $parse_mark_regex, PARSE_MARK_TERM, $marks);
       $before.= $marks;
       $tag = strtolower($matches[2]) ; //Warning: same case as $html_code
@@ -1338,7 +1336,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
 
       $head = $tag . parse_atbs_safe( $trail, $bad) ;
       $marks = '';
-      if( $parse_mark_regex && PARSE_MARK_TAGTERM )
+      if( $parse_mark_regex && PARSE_MARK_TAGTERM && $head )
          if( preg_match_all( $parse_mark_regex, $head, $tmp) )
          {
             $marks = textarea_safe( implode('|', $tmp[1]), 'iso-8859-1'); //LANG_DEF_CHARSET);
@@ -1414,7 +1412,7 @@ function parse_html_safe( $msg, $some_html, $mark_terms='')
                $html_code[$some_html],
                $html_code_closed[$some_html],
                '') ;
-   if( $parse_mark_regex && PARSE_MARK_TERM )
+   if( $parse_mark_regex && PARSE_MARK_TERM && $msg )
       $msg = preg_replace( $parse_mark_regex, PARSE_MARK_TERM, $msg);
    $str.= $msg;
    $parse_mark_regex = '';
@@ -1764,13 +1762,15 @@ function split_url($url, &$page, &$args, $sep='')
 }
 
 // chop off all trailing URI_AMP and '?' from passed url/query
-function clean_url( $url )
+function clean_url( $url, $sep='' )
 {
+   if( !$sep ) $sep = URI_AMP;
+   $l = -strlen($sep);
    do
    {
       $stop=1;
-      while( substr( $url, -strlen(URI_AMP) ) == URI_AMP ) // strip '&'
-         $url = substr( $url, $stop=0, -strlen(URI_AMP) );
+      while( substr( $url, $l ) == $sep ) // strip '&'
+         $url = substr( $url, $stop=0, $l );
       while( substr( $url, -1 ) == '?' ) // strip '?'
          $url = substr( $url, $stop=0, -1);
    } while( !$stop );
@@ -2020,6 +2020,11 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
             jump_to("index.php");
          break;
       }
+/* options:
+      set_login_cookie("","", true);
+      error('fever_vault'); //log record
+      jump_to("error.php?err=fever_vault"); //no log record
+*/
    }
 
    if( !$updok or @mysql_affected_rows() != 1 )
