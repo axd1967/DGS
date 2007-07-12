@@ -421,15 +421,8 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       "<td colspan=2>$name</td>" .
       "</tr>\n";
 
-   $subject = make_html_safe( $subject, false);
-   $text = make_html_safe( $text, true);
-   if ($rx_terms != '')
-   {
-      $subject = mark_terms( $subject, $rx_terms, false );
-      $subject = make_html_safe( $subject, true); // apply the marked-terms
-      $text = mark_terms( $text, $rx_terms, true );
-      $text = make_html_safe( $text, true); // apply the marked-terms
-   }
+   $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_terms);
+   $text = make_html_safe( $text, true, $rx_terms);
 
    echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>" .
       $subject . "</td></tr>\n" .
@@ -714,7 +707,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          //if( empty($Comment) ) $Comment = '&nbsp;';
          $itable->add_row( array(
                   'sname' => T_('Comment'),
-                  'info' => $Comment,
+                  'info' => $Comment, //INFO_HTML
                   ) );
    }
 
@@ -758,6 +751,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             $colortxt = image( '17/w.gif', T_('White'), '', $colortxt);
          }
 
+         /** TODO; remove the "probable" vocable in case of
+          *  double games or nigiri games (i.e. keep it only for
+          *  computed games).
+          **/
          $itable->add_scaption(T_('Probable settings'));
 
          $itable->add_row( array(
@@ -1113,12 +1110,7 @@ function message_list_table( &$mtable, $result, $show_rows
       $mrow_strings[2] = "<td>$str</td>";
 
       $subject = $row['Subject'];
-      $subject = make_html_safe( $subject, false);
-      if ($rx_terms != '')
-      {
-         $subject = mark_terms( $subject, $rx_terms, false );
-         $subject = make_html_safe( $subject, true); // apply the marked-terms
-      }
+      $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_terms);
       $mrow_strings[3] = "<td>" . $subject . "&nbsp;</td>";
 
       list($ico,$alt) = $msg_icones[$row['flow']];

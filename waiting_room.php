@@ -206,7 +206,7 @@ require_once( "include/countries.php" );
          if( $idinfo == (int)$ID )
             $info_row = $row;
 
-         $Comment = make_html_safe($Comment, 'cell');
+         $Comment = make_html_safe($Comment, INFO_HTML);
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[0] )

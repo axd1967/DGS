@@ -93,21 +93,24 @@ function make_link_array($links, $ReqParam = null)
    if( $links & LINK_MARK_READ )
       $link_array_left["Mark All Read"] = "";
 
+   $navi_url = '';
+   if ( !is_null($ReqParam) and ($links & LINKPAGE_SEARCH) and ($links & (LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
+      $navi_url = URI_AMP . $ReqParam->get_url_parts();
+
    if( $links & LINK_TOGGLE_MODERATOR )
    {
-      $get = $_GET;
+      $get = array_merge( $_GET, $_POST);
       $get['moderator'] = ( safe_getcookie('forummoderator' . $player_row['ID']) == 'y'? 'n' : 'y' );
       $link_array_right[T_("Toggle forum moderator")] =
-         ($links & LINKPAGE_READ ?
-            make_url( "read.php", $get, false ) :
-            ($links & LINKPAGE_LIST ?
-               make_url( "list.php", $get, false ) :
-               make_url( "index.php", $get, false ) ) );
+         ($links & LINKPAGE_READ
+            ? make_url( "read.php", $get, false )
+            : ($links & LINKPAGE_LIST
+               ? make_url( "list.php", $get, false )
+               : ($links & LINKPAGE_SEARCH
+                  ? make_url( "search.php", $get, false )
+                  : make_url( "index.php", $get, false )
+         )));
    }
-
-   $navi_url = '';
-   if ( !is_null($ReqParam) and ($links & LINKPAGE_SEARCH) and ($links & LINK_PREV_PAGE|LINK_NEXT_PAGE) )
-      $navi_url = URI_AMP . $ReqParam->get_url_parts();
 
    if( $links & LINK_PREV_PAGE )
    {
@@ -251,25 +254,19 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
    $cols = 2;
 
    // highlight terms in Subject/Text (skipping XML-elements like tags & entities)
-   $sbj = make_html_safe( $Subject, false);
-   $txt = make_html_safe( $Text, true); //remove the not allowed tags
-   if ( !is_null($Terms) )
+   if ( is_null($Terms) )
+      $rx_terms = '';
+   else
    {
       $rx_terms = (is_array($Terms) and count($Terms) > 0 )
                               ? implode("|", $Terms) : $Terms;
-      if ($rx_terms != '')
-      {
-         $sbj = mark_terms( $sbj, $rx_terms, false );
-         $sbj = make_html_safe( $sbj, true); //just called to apply the mark_terms modifications
-         $txt = mark_terms( $txt, $rx_terms, true );
-         $txt = make_html_safe( $txt, true); //just called to apply the mark_terms modifications
-      }
    }
+   $sbj = make_html_safe( $Subject, SUBJECT_HTML, $rx_terms);
+   $txt = make_html_safe( $Text, true, $rx_terms);
 //   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
    if( strlen($txt) == 0 ) $txt = '&nbsp;';
 
-   $color = "ff0000"; //useful?? 
    $new = get_new_string($Timestamp, $Lastread);
 
 
@@ -328,7 +325,7 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
       }
 
       // second line of Subject header
-      echo "<tr class=postHead$postClass>\n <td colspan=$hdrcols>";
+      echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
 
       $post_reference = date($date_fmt, $Timestamp);
       echo T_('by') . " " . user_reference( REF_LINK, 1, 'black', $User_ID, $Name, $Handle) .
@@ -445,7 +442,7 @@ function forum_name($forum, &$moderated)
       error("unknown_forum");
 
    $result = mysql_query("SELECT Name AS Forumname, Moderated FROM Forums WHERE ID=$forum")
-      or error('mysql_query_failed','forum_functions.forum_name');
+      or error('mysql_query_failed','forum_name');
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_forum");
@@ -478,10 +475,10 @@ function approve_message($id, $thread, $forum, $approve=true,
 {
    if( $approve_reject_pending_approval )
    {
-      $row = mysql_single_fetch( 'forum_functions.approve_message.find_post',
+      $row = mysql_single_fetch( 'approve_message.find_post',
                "SELECT Approved FROM Posts " .
                "WHERE ID=$id AND Thread_ID=$thread LIMIT 1" )
-         or error('unknown_post','forum_functions.approve_message.find_post');
+         or error('unknown_post','approve_message.find_post');
 
       $Approved = ($row['Approved'] == 'Y');
 
@@ -490,7 +487,7 @@ function approve_message($id, $thread, $forum, $approve=true,
          mysql_query("UPDATE Posts SET PendingApproval='N' " .
                      "WHERE ID=$id AND Thread_ID=$thread " .
                      "AND PendingApproval='Y' LIMIT 1")
-            or error('mysql_query_failed','forum_functions.approve_message.pend_appr');
+            or error('mysql_query_failed','approve_message.pend_appr');
          return;
       }
    }
@@ -499,17 +496,17 @@ function approve_message($id, $thread, $forum, $approve=true,
                          "PendingApproval='N' " .
                          "WHERE ID=$id AND Thread_ID=$thread " .
                          "AND Approved='" . ( $approve ? 'N' : 'Y' ) . "' LIMIT 1")
-      or error('mysql_query_failed','forum_functions.approve_message.set_approved');
+      or error('mysql_query_failed','approve_message.set_approved');
 
    if( mysql_affected_rows() == 1 )
    {
       mysql_query("UPDATE Posts SET PostsInThread=PostsInThread" . ($approve ? '+1' : '-1') .
                   " WHERE ID=$thread LIMIT 1")
-         or error('mysql_query_failed','forum_functions.approve_message.set_postsinthread');
+         or error('mysql_query_failed','approve_message.set_postsinthread');
 
       mysql_query("UPDATE Forums SET PostsInForum=PostsInForum" . ($approve ? '+1' : '-1') .
                   " WHERE ID=$forum LIMIT 1")
-         or error('mysql_query_failed','forum_functions.approve_message.set_postsinforum');
+         or error('mysql_query_failed','approve_message.set_postsinforum');
 
 
       recalculate_lastpost($thread, $forum);
@@ -525,7 +522,7 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
                          "WHERE Thread_ID='$Thread_ID' AND Approved='Y' " .
                          "AND PosIndex>'' " . // '' == inactivated (edited)
                          "ORDER BY Time Desc LIMIT 1")
-      or error('mysql_query_failed','forum_functions.recalculate_lastpost.find');
+      or error('mysql_query_failed','recalculate_lastpost.find');
 
    if( @mysql_num_rows($result) == 1 )
    {
@@ -533,7 +530,7 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
       mysql_query("UPDATE Posts SET LastPost=" . $row[0] . ", " .
                   "LastChanged=FROM_UNIXTIME(" . $row[1] . ") " .
                   "WHERE ID=$Thread_ID LIMIT 1")
-         or error('mysql_query_failed','forum_functions.recalculate_lastpost.update');
+         or error('mysql_query_failed','recalculate_lastpost.update');
    }
 
 
@@ -542,13 +539,13 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
                          "WHERE Thread.LastPost=Last.ID AND " .
                          "Thread.Forum_ID=" . $Forum_ID . " AND Thread.Parent_ID=0 " .
                          "ORDER BY Last.Time DESC LIMIT 1")
-      or error('mysql_query_failed','forum_functions.recalculate_lastpost.lastid');
+      or error('mysql_query_failed','recalculate_lastpost.lastid');
 
    if( @mysql_num_rows($result) == 1 )
    {
       $row = mysql_fetch_row($result);
       mysql_query("UPDATE Forums SET LastPost=" . $row[0] . " WHERE ID=$Forum_ID LIMIT 1")
-         or error('mysql_query_failed','forum_functions.recalculate_lastpost.lastpost');
+         or error('mysql_query_failed','recalculate_lastpost.lastpost');
    }
 
 }
@@ -558,7 +555,7 @@ function recalculate_postsinforum($Forum_ID)
 {
    $result = mysql_query("SELECT COUNT(*), Thread_ID FROM Posts " .
                          "WHERE Forum_ID=$Forum_ID AND Approved='Y' GROUP BY Thread_ID")
-      or error('mysql_query_failed','forum_functions.recalculate_postsinforum.find');
+      or error('mysql_query_failed','recalculate_postsinforum.find');
 
    $sum = 0;
    while( $row = mysql_fetch_row( $result ) )
@@ -566,13 +563,13 @@ function recalculate_postsinforum($Forum_ID)
       $sum += $row[0];
 
       mysql_query("UPDATE Posts SET PostsInThread=" . $row[0] . " WHERE ID=" .$row[1])
-      or error('mysql_query_failed','forum_functions.recalculate_postsinforum.postsintrhead');
+      or error('mysql_query_failed','recalculate_postsinforum.postsintrhead');
 
       recalculate_lastpost($row[1], $Forum_ID);
    }
 
    mysql_query("UPDATE Forums SET PostsInForum=$sum WHERE ID=$Forum_ID")
-      or error('mysql_query_failed','forum_functions.recalculate_postsinforum.postsinofrum');
+      or error('mysql_query_failed','recalculate_postsinforum.postsinofrum');
 }
 
 function display_posts_pending_approval()
@@ -585,7 +582,7 @@ function display_posts_pending_approval()
                          "FROM (Posts,Players,Forums) " .
                          "WHERE PendingApproval='Y' AND Players.ID=User_ID AND Forums.ID=Forum_ID " .
                          "ORDER BY Time DESC")
-      or error('mysql_query_failed','forum_functions.display_posts_pending_approval.find');
+      or error('mysql_query_failed','display_posts_pending_approval.find');
 
    if( mysql_num_rows($result) == 0 )
       return;
@@ -600,7 +597,7 @@ function display_posts_pending_approval()
    {
       $color = ( $odd ? "" : " bgcolor=white" );
 
-      $Subject = make_html_safe( $row['Subject'], false);
+      $Subject = make_html_safe( $row['Subject'], SUBJECT_HTML);
       echo "<tr$color><td>" . ($cols>3?$row['Forumname'] . "</td><td>" : '') .
          "<a href=\"forum/read.php?forum=" . $row['Forum_ID'] .
          URI_AMP . "thread=" . $row['Thread_ID'] . URI_AMP .

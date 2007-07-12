@@ -147,7 +147,8 @@ $cookie_pref_rows = array(
 
 $vacation_min_days = 2;
 
-define('INFO_HTML', 'cell');
+define('INFO_HTML', 'cell'); //HTML parsing for texts like 'Rank info'
+define('SUBJECT_HTML', false); //HTML parsing for subjects of posts and messages
 
 define('DELETE_LIMIT', 10);
 
@@ -190,7 +191,7 @@ define('MAX_BOARD_SIZE',25);
 define('MAX_KOMI_RANGE',200);
 define('MAX_HANDICAP',21);
 // b0=standard placement, b1=with black validation skip, b2=all placements
-// both b1 and b2 set is not fully checked (error if unfinished pattern)
+// both b1 and b2 set is not fully handled (error if incomplete pattern)
 define('ENA_STDHANDICAP',0x3);
 define('ENA_MOVENUMBERS',1);
 define('MAX_MOVENUMBERS', 500);
@@ -1191,16 +1192,18 @@ function add_line_breaks( $str)
 //Warning: </br> was historically used in end game messages. It remains in database.
 
 // ** keep them lowercase and do not use parenthesis **
-  // ** keep a '|' at both ends:
+  // ** keep a '|' at both ends (or empty):
+$html_code_closed[''] = '';
 $html_code_closed['cell'] = '|b|i|u|strong|em|tt|color|';
-$html_code_closed['line'] = '|a'.$html_code_closed['cell'];
-$html_code_closed['msg'] = '|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|quote|home|term|';
+$html_code_closed['line'] = '|home|a'.$html_code_closed['cell'];
+$html_code_closed['msg'] = '|home|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|quote|';
 $html_code_closed['game'] = $html_code_closed['msg'].'h|hidden|c|comment|';
-//$html_code_closed['faq'] = '|'; //no closed check
+//$html_code_closed['faq'] = ''; //no closed check
 $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
   // more? '|/li|/p|/br|/ *br';
 
   // ** no '|' at ends:
+$html_code[''] = '';
 $html_code['cell'] = 'b|i|u|strong|em|tt|color';
 $html_code['line'] = 'a|'.$html_code['cell'];
 $html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
@@ -1297,15 +1300,26 @@ This part fix a security hole. One was able to execute a javascript code
    return $head;
 }
 
-/* Simple check of elements' attributes and inner text. Recursive.
-   If an element is allowed and correctly closed,
-    validate it by subtituing its '<' and '>' with ALLOWED_LT and ALLOWED_GT.
-   Check up to the <$stop > tag (supposed to be the closing tag).
-   If $stop=='', check up to the end of string $trail.
-*/
+
+/**
+ * Simple check of elements' attributes and inner text. Recursive.
+ * >>> Don't call it: use parse_html_safe()
+ * If an element is allowed and correctly closed,
+ *  validate it by subtituing its '<' and '>' with ALLOWED_LT and ALLOWED_GT.
+ * Check up to the <$stop > tag (supposed to be the closing tag).
+ * If $stop=='', check up to the end of string $trail.
+ **/
+$parse_mark_regex = '';
+define('PARSE_MARK_TERM', ALLOWED_LT.'span class=MarkTerm'
+                        .ALLOWED_GT.'\1'.ALLOWED_LT.'/span'.ALLOWED_GT);
+define('PARSE_MARK_TAGTERM', ALLOWED_LT.'span class=MarkTagTerm'
+                        .ALLOWED_GT.'&lt;\1&gt;'.ALLOWED_LT.'/span'.ALLOWED_GT);
 function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop)
 {
+   if( !$trail )
+      return '';
 
+   global $parse_mark_regex;
    $before = '';
    //$stop = preg_quote($stop, '%');
    //$reg = "%^(.*?)<(" . ( $stop ? "$stop|" : '' ) . "$html_code)([\\x01-\\x20>:].*)$%is";
@@ -1313,25 +1327,37 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
 
    while ( preg_match($reg, $trail, $matches) )
    {
-      $before.= $matches[1] ;
+      $marks = $matches[1] ;
+      if( $parse_mark_regex && PARSE_MARK_TERM )
+         $marks = preg_replace( $parse_mark_regex, PARSE_MARK_TERM, $marks);
+      $before.= $marks;
       $tag = strtolower($matches[2]) ; //Warning: same case as $html_code
          if( $tag == '/br' ) $tag = 'br' ; //historically used in end game messages.
       $trail = $matches[3] ;
       unset($matches);
+
       $head = $tag . parse_atbs_safe( $trail, $bad) ;
+      $marks = '';
+      if( $parse_mark_regex && PARSE_MARK_TAGTERM )
+         if( preg_match_all( $parse_mark_regex, $head, $tmp) )
+         {
+            $marks = textarea_safe( implode('|', $tmp[1]), 'iso-8859-1'); //LANG_DEF_CHARSET);
+            $marks = str_replace( '\1', $marks, PARSE_MARK_TAGTERM);
+         }
       if( $bad)
-         return $before .'<'. $head .'>' ;
+         return $before .$marks .'<'. $head .'>' ;
       $head = preg_replace('%[\\x01-\\x20]+%', ' ', $head);
 
       if( $stop == $tag )
-         return $before .ALLOWED_LT. $head .ALLOWED_GT ;
+         return $before .ALLOWED_LT. $head .ALLOWED_GT .$marks; //mark after
 
+      $before.= $marks; //mark before
       $to_be_closed = is_numeric(strpos($html_code_closed,'|'.$tag.'|')) ;
       if( $tag == 'code' )
       {
          // does not allow inside HTML
          $tmp= '/'.$tag;
-         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, $tmp) ;
+         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, $tmp);
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
          $inside = str_replace('&', '&amp;', $inside);
@@ -1342,7 +1368,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          // TT is mainly designed to be used when $some_html=='cell'
          // does not allow inside HTML and remove line breaks
          $tmp= '/'.$tag;
-         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, $tmp) ;
+         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, $tmp);
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
          //$inside = str_replace('&', '&amp;', $inside);
@@ -1352,7 +1378,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       else
       if( $to_be_closed )
       {
-         $inside = parse_tags_safe( $trail, $bad, $html_code, $html_code_closed, '/'.$tag) ;
+         $inside = parse_tags_safe( $trail, $bad, $html_code, $html_code_closed, '/'.$tag);
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
       }
@@ -1368,15 +1394,30 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    return $before ;
 }
 
-function parse_html_safe( $msg, $some_html)
+/**
+ * Simple check of elements' attributes and inner text.
+ * If an element is allowed and correctly closed,
+ *  validate it by subtituing its '<' and '>' with ALLOWED_LT and ALLOWED_GT.
+ * $mark_terms: regex-search-terms.
+ *  replace case-insensitive regex-terms in text with tags used to highlight search-texts.
+ *  terms separated by '|', e.g. word1|word2|word3;
+ *  can be also valid regex, but be cautious with .* (!)
+ **/
+function parse_html_safe( $msg, $some_html, $mark_terms='')
 {
- global $html_code, $html_code_closed;
+ global $html_code, $html_code_closed, $parse_mark_regex;
+
+   $parse_mark_regex = !$mark_terms ? ''
+         : '%('.str_replace('%','\%',$mark_terms).')%is';
    $bad = 0;
    $str = parse_tags_safe( $msg, $bad,
                $html_code[$some_html],
                $html_code_closed[$some_html],
                '') ;
+   if( $parse_mark_regex && PARSE_MARK_TERM )
+      $msg = preg_replace( $parse_mark_regex, PARSE_MARK_TERM, $msg);
    $str.= $msg;
+   $parse_mark_regex = '';
    return $str;
 }
 
@@ -1461,12 +1502,6 @@ $html_safe_preg = array(
  "%".ALLOWED_LT."/home *".ALLOWED_GT."%is"
   => ALLOWED_LT."/a".ALLOWED_GT,
 
-//<term>...</term> =>translated to <div class=term>..</div>
- "%".ALLOWED_LT."term([^`\n\t]*)".ALLOWED_GT."%is"
-  => ALLOWED_LT."font color=darkred".ALLOWED_GT.ALLOWED_LT."b".ALLOWED_GT,
- "%".ALLOWED_LT."/term *".ALLOWED_GT."%is"
-  => ALLOWED_LT."/b".ALLOWED_GT.ALLOWED_LT."/font".ALLOWED_GT,
-
 //reverse to bad the skiped (faulty) ones
  "%".ALLOWED_LT."(/?(home|quote|tt|code|color|user|send|game|mailto|http)[^`]*)"
     .ALLOWED_GT."%is"
@@ -1474,11 +1509,18 @@ $html_safe_preg = array(
 ); //$html_safe_preg
 
 
-//$some_html may be:
-// false: no tags at all,
-// 'cell', 'line',  'msg', 'game' or 'faq': see $html_code[]
-// 'gameh': 'game' + show hidden sgf comments
-function make_html_safe( $msg, $some_html=false)
+/**
+ * Caution: can't be called twice on the same string. For instance:
+ *  first pass: <quote> become <div ...>
+ *  second pass: <div ...> will be disabled
+ *
+ * $some_html may be:
+ *  false: no tags at all, except the marked terms
+ *  'cell', 'line', 'msg', 'game' or 'faq': see $html_code[]
+ *  'gameh': 'game' + show hidden sgf comments
+ * $mark_terms: see parse_html_safe().
+ **/
+function make_html_safe( $msg, $some_html=false, $mark_terms=false)
 {
 
    if( $some_html )
@@ -1503,7 +1545,7 @@ function make_html_safe( $msg, $some_html=false)
       }
 
       // regular (and extended) allowed html tags check
-      $msg = parse_html_safe( $msg, $some_html) ;
+      $msg = parse_html_safe( $msg, $some_html, $mark_terms) ;
 
 
       // formats legal html code
@@ -1534,27 +1576,31 @@ function make_html_safe( $msg, $some_html=false)
       $msg= preg_replace( array_keys($html_safe_preg), $html_safe_preg, $msg);
 
    }
+   else if( $mark_terms )
+   {
+      $msg = parse_html_safe( $msg, '', $mark_terms) ;
+   }
 
 
    // Filter out HTML code
 
    /*
-      $msg = str_replace('&', '&amp;', $msg);
+   $msg = str_replace('&', '&amp;', $msg);
    $msg = eregi_replace('&amp;((#[0-9]+|[A-Z][0-9A-Z]*);)', '&\\1', $msg);
    */
    $msg = preg_replace('%&(?!(#[0-9]+|[A-Z][0-9A-Z]*);)%si', '&amp;', $msg);
 
    $msg = basic_safe( $msg);
 
-   if( $some_html )
+   if( $some_html or $mark_terms )
    {
       // change back to <, > from ALLOWED_LT, ALLOWED_GT
       $msg= reverse_allowed( $msg);
-   }
 
-   if( $some_html && $some_html != 'cell' )
-   {
-      $msg = add_line_breaks($msg);
+      if( $some_html && $some_html != 'cell' && $some_html != 'line' )
+      {
+         $msg = add_line_breaks($msg);
+      }
    }
 
    return $msg;
@@ -1588,40 +1634,6 @@ function game_tag_filter( $msg)
    return trim($str);
 }
 
-// replace case-insensitive regex-terms in text with "<term>..</term>" used to highlight search-texts.
-//   take XML-tags in text into account if $is_xml=true
-// param $rx_terms: terms separated by '|', e.g. word1|word2|word3; can be also valid regex, but be cautious with .* (!)
-// param $is_xml: if true, text is treated as XML, class XmlTokenizer is used to parse the XML
-// NOTE: invalid XML-tags in text are not replaced, because then they also can't be
-//       displayed correctly -> so invalid tags matching the terms can also be highlighted.
-function mark_terms( $text, $rx_terms, $is_xml = true )
-{
-   if ( $rx_terms == '' )
-      return $text;
-
-   // don't handle text as xml
-   $regex = "/($rx_terms)/is";
-   if ( !$is_xml )
-      return preg_replace( $regex, "<term>\\1</term>", $text );
-
-   // parse XML
-   $tokenizer = new XmlTokenizer();
-   $success = $tokenizer->parse($text); // ignore errors
-   $tokens = $tokenizer->tokens();
-
-   // mark terms only in text-tokens
-   $arr_out = array();
-   foreach( $tokens as $tok )
-   {
-      if ( $tok->get_type() == TOK_TEXT )
-         $t = preg_replace( $regex, "<term>\\1</term>", $tok->get_token() );
-      else
-         $t = substr( $text, $tok->spos, $tok->get_endpos() - $tok->spos + 1 ); // copy other tokens
-
-      array_push( $arr_out, $t );
-   }
-   return implode('', $arr_out);
-}
 
 function yesno( $yes)
 {
@@ -1814,13 +1826,13 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
       {
 //default user = last referenced user
 //(ex: message.php from userinfo.php by menu link)
-         if( eregi("[?".URI_AMP_IN."]$uid_nam=([0-9]+)", $refer, $result) )
-           $uid = $result[1];
+         if( eregi("[?".URI_AMP_IN."]$uid_nam=([0-9]+)", $refer, $eres) )
+           $uid = $eres[1];
          if( !($uid > 0) )
          {
             $uid = 0;
-            if( eregi("[?".URI_AMP_IN."]".UHANDLE_NAME."=([".HANDLE_LEGAL_REGS."]+)", $refer, $result) )
-              $uhandle = $result[1];
+            if( eregi("[?".URI_AMP_IN."]".UHANDLE_NAME."=([".HANDLE_LEGAL_REGS."]+)", $refer, $eres) )
+              $uhandle = $eres[1];
          }
       }
    }
@@ -1881,8 +1893,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
           ." FROM Players WHERE Handle='".mysql_addslashes($hdl)."'";
 
    $result = mysql_query( $query )
-      or error('mysql_query_failed','std_functions.is_logged_in.find_player');
-
+      or error('mysql_query_failed','is_logged_in.find_player');
 
    if( !$result or @mysql_num_rows($result) != 1 )
    {
@@ -1991,8 +2002,9 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
    }
 
    $query.= " WHERE Handle='".mysql_addslashes($hdl)."' LIMIT 1";
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','std_functions.is_logged_in.update_player');
+   //$updok will be false if an error occurs and error() is set to 'no exit'
+   $updok = mysql_query( $query )
+      or error('mysql_query_failed','is_logged_in.update_player');
 
    if( !$vaultcnt ) //vault entered
    {
@@ -2010,7 +2022,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       }
    }
 
-   if( !$result or @mysql_affected_rows() != 1 )
+   if( !$updok or @mysql_affected_rows() != 1 )
       return false;
 
    if( $session_expired )
@@ -2082,7 +2094,7 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
               ' AND white.ID=Games.White_ID ' .
               ' AND black.ID=Games.Black_ID ' .
               'LIMIT 1' ;
-     if( $row=mysql_single_fetch( 'std_functions.game_reference', $query ) )
+     if( $row=mysql_single_fetch( 'game_reference', $query ) )
      {
        if( $whitename===false )
          $whitename = $row['whitename'];
@@ -2171,7 +2183,7 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
               'FROM Players ' .
               "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='$player_ref' " .
               'LIMIT 1' ;
-     if( $row=mysql_single_fetch( 'std_functions.user_reference', $query ) )
+     if( $row=mysql_single_fetch( 'user_reference', $query ) )
      {
        if( $player_name===false )
          $player_name = $row['Name'];
@@ -2230,26 +2242,34 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
 function is_on_observe_list( $gid, $uid )
 {
    $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid")
-      or error('mysql_query_failed','std_functions.is_on_observe_list');
-   return( @mysql_num_rows($result) > 0 );
+      or error('mysql_query_failed','is_on_observe_list');
+   if( !$result )
+      return false;
+   $res = ( @mysql_num_rows($result) > 0 );
+   mysql_free_result($result);
+   return $res;
 }
 
 // returns true, if there are observers for specified game
 function has_observers( $gid )
 {
    $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid LIMIT 1")
-      or error('mysql_query_failed','std_functions.has_observers');
-   return( @mysql_num_rows($result) > 0 );
+      or error('mysql_query_failed','has_observers');
+   if( !$result )
+      return false;
+   $res = ( @mysql_num_rows($result) > 0 );
+   mysql_free_result($result);
+   return $res;
 }
 
 function toggle_observe_list( $gid, $uid )
 {
    if( is_on_observe_list( $gid, $uid ) )
       mysql_query("DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1")
-         or error('mysql_query_failed','std_functions.toggle_observe_list.delete');
+         or error('mysql_query_failed','toggle_observe_list.delete');
    else
       mysql_query("INSERT INTO Observers SET gid=$gid, uid=$uid")
-         or error('mysql_query_failed','std_functions.toggle_observe_list.insert');
+         or error('mysql_query_failed','toggle_observe_list.insert');
 }
 
 //Text must be escaped by mysql_addslashes()
@@ -2261,7 +2281,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
    {
       $result = mysql_query("SELECT Observers.uid AS pid " .
                             "FROM Observers WHERE gid=$gid")
-         or error('mysql_query_failed','std_functions.delete_all_observers.find');
+         or error('mysql_query_failed','delete_all_observers.find');
 
       if( @mysql_num_rows($result) > 0 )
       {
@@ -2270,7 +2290,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                       "Game_ID=$gid, Subject='$Subject', Text='$Text'" )
-            or error('mysql_query_failed','std_functions.delete_all_observers.message');
+            or error('mysql_query_failed','delete_all_observers.message');
 
          if( mysql_affected_rows() == 1)
          {
@@ -2280,7 +2300,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
             {
                mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
                            "(" . $row['pid'] . ", $mid, 'N', ".FOLDER_NEW.")")
-                  or error('mysql_query_failed','std_functions.delete_all_observers.message');
+                  or error('mysql_query_failed','delete_all_observers.message');
             }
          }
 
@@ -2288,7 +2308,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
    }
 
    mysql_query("DELETE FROM Observers WHERE gid=$gid")
-      or error('mysql_query_failed','std_functions.delete_all_observers.delete');
+      or error('mysql_query_failed','delete_all_observers.delete');
 }
 
 function RGBA($r, $g, $b, $a=NULL)

@@ -69,7 +69,6 @@ function get_alt_arg( $n1, $n2)
 
    $message = get_request_arg( 'message');
 
-   $baseURL = "game.php?gid=$gid";
 
    connect2mysql();
 
@@ -655,7 +654,7 @@ function get_alt_arg( $n1, $n2)
 
 function draw_moves()
 {
-   global $TheBoard, $gid, $move, $Size, $baseURL;
+   global $TheBoard, $gid, $move, $Size;
 
    $trmov = T_('Move');
    $trpas = T_('Pass');

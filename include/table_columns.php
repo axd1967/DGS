@@ -1188,9 +1188,10 @@ class Table
       return arg_stripslashes(@$_GET[ $this->Prefix.$name ]);
    }
 
-/*
+/* Must do a reverse arg_stripslashes()
    function set_arg( $name, $value)
    {
+      //$_REQUEST[ $this->Prefix.$name ] = $value;
       $_GET[ $this->Prefix.$name ] = $value;
    }
 */

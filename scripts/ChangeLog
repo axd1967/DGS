@@ -77,6 +77,35 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-12 rodival
+
+   * include/std_functions.php (parse_tags_safe, parse_html_safe),
+     include/message_functions.php (message_info_table,
+     message_list_table),
+   * forum/list.php, forum/forum_functions.php (draw_post,
+     display_posts_pending_approval),
+     skins/dragon/screen.css, :
+   - moved the mark_terms feature into the make_html_safe process.
+     added the $mark_terms argument to parse_html_safe() and make_html_safe()
+     removed the <term> pseudo-tag previously used to mark the terms
+     removed the now obsolete mark_terms() function
+   - introduced the SUBJECT_HTML constant to highlight to common "style"
+     of the subjects.
+
+   * forum/search.php, forum/forum_functions.php (make_link_array)
+     include/filter.php:
+   - changed the type of the search form to POST because a GET one plus
+     a url #id part make the buttons inactive if no fields have changed.
+     added a 'x' accesskey to the main button of the search page
+     fixed some minor weakness.
+     a try to include a "moderator" search but this need to define a new
+     subclass in draw_post: added a comment and postponed it.
+
+   * include/table_columns.php, faq.php, waiting_room.php,
+     forum/read.php:
+   - minor changes on comments.
+
+
 2007-07-11 juga
 
    * include/filter.php:

@@ -94,7 +94,7 @@ require_once( "forum_functions.php" );
 
       if( $PostsInThread > 0 or $is_moderator )
       {
-         $Subject = make_html_safe( $Subject, false);
+         $Subject = make_html_safe( $Subject, SUBJECT_HTML);
          echo "<tr$color><td><a href=\"read.php?forum=$forum" . URI_AMP
            . "thread=$Thread_ID#new1\">$Subject</a>$new</td><td>" . make_html_safe($Name)
            . "</td><td align=center>" . $PostsInThread . "</td><td nowrap>"

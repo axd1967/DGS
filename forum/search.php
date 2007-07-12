@@ -28,6 +28,10 @@ require_once( "include/filter.php" );
 chdir("forum/");
 require_once( "forum_functions.php" );
 
+//does not work. Need at least a special SearchHidden class
+define('MODERATOR_SEARCH', 0);
+
+
 {
    #$DEBUG_SQL = true;
    connect2mysql();
@@ -37,18 +41,20 @@ require_once( "forum_functions.php" );
       error("not_logged_in");
 
    $uid = $player_row["ID"];
-   $page = "search.php?";
+   $page = "search.php";
    $is_moderator = false;
    $links = LINKPAGE_SEARCH;
 
-   if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
+   if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 && MODERATOR_SEARCH )
    {
       $links |= LINK_TOGGLE_MODERATOR;
 
-      if( @$_GET['show'] > 0 )
-         approve_message( @$_GET['show'], $thread, $forum, true );
-      else if( @$_GET['hide'] > 0 )
-         approve_message( @$_GET['hide'], $thread, $forum, false );
+/*
+      if( @$_REQUEST['show'] > 0 )
+         approve_message( @$_REQUEST['show'], $thread, $forum, true );
+      else if( @$_REQUEST['hide'] > 0 )
+         approve_message( @$_REQUEST['hide'], $thread, $forum, false );
+*/
 
       $is_moderator = set_moderator_cookie($player_row['ID']);
    }
@@ -56,10 +62,10 @@ require_once( "forum_functions.php" );
 
    $title = T_('Forum') . " - " . T_('Search');
    $prefix = '';
-   start_page($title, true, $logged_in, $player_row );
+   start_page($title, true, $logged_in, $player_row);
    echo "<h3 class=Header>$title</h3>\n";
 
-   if ( @$_GET[FFORM_RESET_ACTION] )
+   if ( @$_REQUEST[FFORM_RESET_ACTION] )
    {
       $offset = 0;
       $sql_order = '';
@@ -104,7 +110,8 @@ require_once( "forum_functions.php" );
    $filter2 =& $ffilter->get_filter(2);
 
    // form for static filters
-   $fform = new Form( 'tableFSF', "{$page}#TableFSF", FORM_GET );
+   //$fform = new Form( 'tableFSF', "{$page}#TableFSF", FORM_GET ); //make the result cached
+   $fform = new Form( 'tableFSF', "{$page}#forumSearch", FORM_POST );
    $fform->set_config( FEC_TR_ATTR, 'valign=top' );
    $fform->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );
    $fform->attach_table($ffilter); // add hiddens
@@ -143,15 +150,15 @@ require_once( "forum_functions.php" );
    $fform->add_row( array(
          'TAB',
          'CELL',        1, 'align=left',
-         'OWNHTML',     implode( '', $ffilter->get_submit_elements() ) ));
+         'OWNHTML',     implode( '', $ffilter->get_submit_elements('x') ) ));
 
    echo "<br><center>\n"
       . $fform->get_form_string()
-      . "</center><br><br>\n";
+      . "</center><br>\n";
 
    $query_filter = $ffilter->get_query(); // clause-parts for filter
    if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_filter->get_select()) . "<br>\n";
-   if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe( implode(' | ', $filter2->get_terms()) ) . "<br>\n";
+   if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe( implode('|', $filter2->get_terms()) ) . "<br>\n";
 
    if( $ffilter->has_query() )  // Display results
    {
@@ -174,8 +181,10 @@ require_once( "forum_functions.php" );
          'Forums',
          'INNER JOIN Posts ON Forums.ID=Posts.Forum_ID ',
          'INNER JOIN Players AS P ON Posts.User_ID=P.ID ' );
+      if( !MODERATOR_SEARCH )
+         $qsql->add_part( SQLP_WHERE,
+            "Approved='Y'" );
       $qsql->add_part( SQLP_WHERE,
-         "Approved='Y'",
          "PosIndex>''" ); // '' == inactivated (edited)
       $qsql->merge($query_filter);
 
@@ -209,14 +218,27 @@ require_once( "forum_functions.php" );
       $search_terms = implode('|', $filter2->get_terms() );
       $show_score = true; // used in draw_post per global-var
 
+      print_moderation_note($is_moderator, '99%');
+
       forum_start_table('Search', $headline, $links, $cols, $rp);
       echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
       while( $row = mysql_fetch_array( $result ) )
       {
-         extract($row);
-         draw_post('SearchResult', false, $row['Subject'], $row['Text'], null, $search_terms);
-         echo "<tr><td colspan=$cols></td></tr>\n";
+         extract($row); //needed for global vars of draw_post()
+
+         $hidden = ($Approved == 'N');
+
+         if( $hidden and !$is_moderator and $uid !== $player_row['ID'] )
+            continue;
+
+         $postClass = 'SearchResult';
+         if( $hidden )
+            $postClass = 'Hidden'; //need a special SearchHidden class
+
+         draw_post($postClass, $uid == $player_row['ID'], $row['Subject'], $row['Text'], null, $search_terms);
+
+         echo "<tr><td colspan=$cols></td></tr>\n"; //separator
       }
       echo "</table></td></tr>\n";
       forum_end_table($links, $cols);

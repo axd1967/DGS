@@ -68,7 +68,9 @@ require_once( "include/std_functions.php" );
               if( $first >= 0 )
                  echo "<hr><p></p>";
               $first = 1;
-              echo '<b><A href="faq.php">' . T_( $row['Q'] ) . "</A></b><p></p>\n";
+              echo '<b><A href="faq.php">'
+                  . make_html_safe( T_( $row['Q'] ), 'cell')
+                  . "</A></b><p></p>\n";
            }
            else
            {
@@ -77,7 +79,6 @@ require_once( "include/std_functions.php" );
               $first = 0;
               echo '<li><A name="Entry' . $row["ID"] . '"></a><b>' . T_( $row['Q'] ) .
                  "</b>\n<p></p>\n" 
-                 //. add_line_breaks( T_( $row['A'] ) ) 
                  . make_html_safe( T_( $row['A'] ) , 'faq') 
                  . "<br>&nbsp;<p></p></li>\n";
            }

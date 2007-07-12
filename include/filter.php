@@ -22,7 +22,6 @@ $TranslateGroups[] = "Common";
 
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
-require_once( "include/quick_common.php" );
 require_once( "include/countries.php" );
 require_once( "include/rating.php" );
 require_once( "include/filter_functions.php" );
@@ -249,7 +248,7 @@ class SearchFilter
    function get_arg( $name, $use_prefix = true )
    {
       $fname = ( $use_prefix ) ? $this->Prefix . $name : $name;
-      return arg_stripslashes( get_request_arg( $fname ) );
+      return get_request_arg( $fname);
    }
 
    /*!
@@ -861,10 +860,12 @@ class SearchFilter
    }
 
    /*! \brief Returns two form-elements with start-search and reset-search submits to be used with Table or External-Form. */
-   function get_submit_elements()
+   function get_submit_elements( $accesskey='')
    {
       $start_search = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_SEARCH_ACTION."\" value=\"" . T_('Start Search') . "\">";
+         . FFORM_SEARCH_ACTION."\" value=\"" . T_('Start Search') . '"'
+         . ( $accesskey ? ' accesskey='.attb_quote($accesskey) : '' )
+         . '>';
       $reset_search = "<input type=\"submit\" name=\"{$this->Prefix}"
          . FFORM_RESET_ACTION."\" value=\"" . T_('Reset Search') . "\">";
       return array( $start_search, $reset_search );
@@ -2961,7 +2962,7 @@ class FilterMysqlMatch extends Filter
     * \brief Returns array with regex-search-terms (from parsing-process).
     * <p>Mainly used to highlight text, though not exactly matching the same
     * terms using a regular-expression to mark the text.
-    * \see mark_terms() in std_functions.php
+    * \see parse_html_safe() in std_functions.php
     */
    function get_terms()
    {

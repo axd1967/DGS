@@ -1120,6 +1120,31 @@ table.Forum tr.PostButtons a.Highlight {
 }
 
 
+/* ------------------------- */
+/* Search and filter highlights */
+/* ------------------------- */
+
+span.MarkTerm {
+/*
+   color: darkred;
+   font-weight: bold;
+*/
+   background: lime;
+}
+
+a span.MarkTerm {
+   text-decoration: underline;
+}
+
+span.MarkTagTerm {
+   background: lime;
+   font-size: 0.5em;
+   margin: 0px 0px 0.5em 0px;
+/*   padding: 0px 0px 0.5em 0px; */
+   vertical-align: top;
+   vertical-align: super;
+}
+
 
 /* ------------------------- */
 /* message allowed tags */
