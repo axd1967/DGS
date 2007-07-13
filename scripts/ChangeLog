@@ -77,6 +77,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-13 juga
+
+   * include/filter.php:
+   - bugfix get_terms() for Mysql-match: filter shouldn't return terms if inactive
+   - renamed start-/reset-search -> apply/reset-filter
+   - comment for minimum mysql-version for fulltext-search:
+     4.0.1, 4.1.1 query-expansion
+
+
 2007-07-12 rodival
 
    * include/std_functions.php (parse_tags_safe, parse_html_safe),
