@@ -374,7 +374,7 @@ For this purpose, there are the following functions you can use to get
 this kind of information ( $table is the Table-object ):
 
    $table->current_from_string()    - current page-offset (1)
-   $table->current_sort_string()    - current sort­fields and directions (2)
+   $table->current_sort_string()    - current sort-fields and directions (2)
    $table->current_filter_string()  - visible and managing filter-values
    $table->current_rows_string()    - current max-rows
 
@@ -677,7 +677,7 @@ see section (2) Classes and Files.
 * Can I forbid the range-syntax to be used ?
 
   Yes. See filter-config FC_NO_RANGE.
-  The wildcard-char '-' then is treated as normal character.
+  The range-char '-' then is treated as normal character.
 
 * How can I build a complex query, but still using the filter-framework
   to input values for a filter ?
