@@ -85,7 +85,7 @@ define('FNAME_ACTIVE_SET', 'sf_act');  // fieldname active-set  (w/o sf-prefix)
 define('FNAME_HASHCODE',   'sf_hc');   // hashcode for active filter-values
 define('FFORM_TOGGLE_FID',    'togglefid'); // suffix to store add-col-form [ filter-id, 0, -1 ]
 define('FFORM_TOGGLE_ACTION', 'action_af'); // suffix for submit-action for add/del-filter
-define('FFORM_SEARCH_ACTION', 'search_f');  // suffix for start-search-submit-action for table-filter-controls
+define('FFORM_SEARCH_ACTION', 'search_f');  // suffix for apply-filter-submit-action for table-filter-controls
 define('FFORM_RESET_ACTION',  'reset_f');   // suffix for reset-submit-action for table-filter-controls
 
 
@@ -119,8 +119,8 @@ define('FC_START_WILD', 'start_wild');
 /*!
  * \brief for MysqlMatch-Filter: control usage of boolean-mode (checkbox and/or functionality).
  * values: MATCH_BOOLMODE_OFF don't show checkbox and don't use boolean-mode
- *         MATCH_BOOLMODE_SET don't show checkbox but use boolean-mode
- *         MATCH_QUERY_EXPANSION use query-extension (mutually exclusive to boolean-mode)
+ *         MATCH_BOOLMODE_SET don't show checkbox but use boolean-mode; since mysql 4.0.1(!)
+ *         MATCH_QUERY_EXPANSION use query-extension (mutually exclusive to boolean-mode); since mysql 4.1.1(!)
  *         '' (empty) -> show checkbox to control use of boolean-mode
  * default is to show boolean-mode-checkbox (like using ''-value for config)
  */
@@ -859,16 +859,16 @@ class SearchFilter
       return new RequestParameters( $arr_out );
    }
 
-   /*! \brief Returns two form-elements with start-search and reset-search submits to be used with Table or External-Form. */
+   /*! \brief Returns two form-elements with start-filter and reset-filter submits to be used with Table or External-Form. */
    function get_submit_elements( $accesskey='')
    {
-      $start_search = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_SEARCH_ACTION."\" value=\"" . T_('Start Search') . '"'
+      $apply_filter = "<input type=\"submit\" name=\"{$this->Prefix}"
+         . FFORM_SEARCH_ACTION."\" value=\"" . T_('Apply Filter') . '"'
          . ( $accesskey ? ' accesskey='.attb_quote($accesskey) : '' )
          . '>';
-      $reset_search = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_RESET_ACTION."\" value=\"" . T_('Reset Search') . "\">";
-      return array( $start_search, $reset_search );
+      $reset_filter = "<input type=\"submit\" name=\"{$this->Prefix}"
+         . FFORM_RESET_ACTION."\" value=\"" . T_('Reset Filter') . "\">";
+      return array( $apply_filter, $reset_filter );
    }
 
    /*! \brief Wrapper for get_filter(id)->get_input_element(prefix,attr); returns '' if filter not existing. */
@@ -2966,7 +2966,10 @@ class FilterMysqlMatch extends Filter
     */
    function get_terms()
    {
-      return $this->match_terms;
+      if ( $this->is_active() )
+         return $this->match_terms;
+      else
+         return array();
    }
 
    /*!
