@@ -134,11 +134,11 @@ require_once( "include/filter.php" );
    $mtable->add_external_parameters( $extparam );
 
    $smform->add_row( array(
-         'DESCRIPTION', T_('Select Folders'),
+         'DESCRIPTION', T_('Select folders'),
          'FILTER',      $smfilter, 1 ));
    $smform->add_empty_row();
    $smform->add_row( array(
-         'DESCRIPTION', T_('Message Scope'),
+         'DESCRIPTION', T_('Message scope'),
          'FILTER',      $smfilter, 2, // initial-msg
          'BR',
          'FILTER',      $smfilter, 4, // game-related
@@ -173,7 +173,7 @@ require_once( "include/filter.php" );
    if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe($terms) . "<br>\n";
    if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($rqsql->get_select()) . "<br>\n";
 
-   echo "<h3 class=Header>" . T_('Search Messages') . "</h3>\n";
+   echo "<h3 class=Header>" . T_('Message search') . "</h3>\n";
 
    message_list_table( $mtable, $result, $show_rows, FOLDER_NONE, $my_folders,
       false, true, false, // no-sort, no-mark, toggle-mark

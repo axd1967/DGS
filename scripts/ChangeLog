@@ -85,7 +85,8 @@ Changelog
    * status.php, users.php, user_stats.php:
    - managed the sort arguments the new way.
 
-   * include/message_functions.php:
+   * include/message_functions.php, include/filter.php, list_messages.php,
+     search_messages.php, site_map.php, forum/search.php:
    - adjusted some comments and T_() strings
 
    * include/filter.php (get_submit_elements),
@@ -94,7 +95,6 @@ Changelog
    - a proposition for the get_submit_elements() function: added a
      $filtertype argument to manage the buttons name.
      modified the other files accordingly.
-   - adjusted some comments and T_() strings
 
 
 2007-07-13 juga

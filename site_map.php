@@ -96,8 +96,8 @@ function item($text,$link,$working, $level,$last=false)
          item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
          item(T_('Message list'), "list_messages.php", true, 1, true);
          {
-            item(T_('Search messages'), "search_messages.php", true, 2);
-            item(T_('Edit message folders'), "edit_folders.php", true, 2, true);
+            item(T_('Message search'), "search_messages.php", true, 2);
+            item(T_('Edit folders'), "edit_folders.php", true, 2, true);
          }
       }
 
@@ -120,7 +120,7 @@ function item($text,$link,$working, $level,$last=false)
             item(T_('New topic'), "forum/post.php", false, 2, true);
          }
 
-         item(T_('Search topics'), "forum/search.php", true, 1, true);
+         item(T_('Forum search'), "forum/search.php", true, 1, true);
       }
 
       item(T_('Games'), "show_games.php?uid=all".URI_AMP."finished=1", true, 0);

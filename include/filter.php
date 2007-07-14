@@ -864,12 +864,12 @@ class SearchFilter
    {
       $start_search = "<input type=\"submit\" name=\"{$this->Prefix}"
          . FFORM_SEARCH_ACTION."\" value=\""
-         . ( $filtertype ? T_('Apply Filter') : T_('Start Search') ) . '"'
+         . ( $filtertype ? T_('Apply filters') : T_('Search') ) . '"'
          . ( $accesskey ? ' accesskey='.attb_quote($accesskey) : '' )
          . '>';
       $reset_search = "<input type=\"submit\" name=\"{$this->Prefix}"
          . FFORM_RESET_ACTION."\" value=\""
-         . ( $filtertype ? T_('Reset Filter') : T_('Reset Search') ) . '"'
+         . ( $filtertype ? T_('Reset filters') : T_('Reset search') ) . '"'
          . '>';
       return array( $start_search, $reset_search );
    }

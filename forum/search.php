@@ -60,7 +60,7 @@ define('MODERATOR_SEARCH', 0);
    }
 
 
-   $title = T_('Forum') . " - " . T_('Search');
+   $title = T_('Forum search');
    $prefix = '';
    start_page($title, true, $logged_in, $player_row);
    echo "<h3 class=Header>$title</h3>\n";
