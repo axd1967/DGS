@@ -266,7 +266,7 @@ require_once( "include/countries.php" );
       }
 
       // print form with table
-      echo "<br>\n" . $wrtable->make_table();
+      echo $wrtable->make_table();
    }
    else
       echo '<p></p>&nbsp;<p></p>' . T_('Seems to be empty at the moment.');
