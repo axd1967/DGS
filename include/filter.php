@@ -2228,8 +2228,8 @@ class FilterDate extends Filter
   *    for absolute date-mode: \see FilterDate (must select 'absolute'),
   *          need FRDTU_ABS-bit set in filter-config FC_TIME_UNITS
   *    for relative date-mode:
-  *      "30"  = search value from 30 days (or selected time-unit) ago until today
-  *      ">30" = search value before 30 days (or selected time-unit)
+  *      "30" or "<30" = search value from 30 days (or selected time-unit) ago until today
+  *      ">30"         = search value before 30 days (or selected time-unit)
   *      choices of time-units must be specified with FC_TIME_UNITS-config
   *
   * <p>supported common config (restrictions or defaults):
