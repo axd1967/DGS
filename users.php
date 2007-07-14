@@ -134,7 +134,7 @@ require_once( "include/filter.php" );
 
 
    if ( $f_active->get_value() )
-      $title = T_('Active Users');
+      $title = T_('Active users');
    else
       $title = T_('Users');
    if ( $observe_gid )
