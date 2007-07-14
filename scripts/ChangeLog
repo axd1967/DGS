@@ -77,6 +77,27 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-14 juga
+
+   * search_messages.php:
+   - layout-changes:
+     - use smaller padding (6 -> 4px) for folder-boxes
+     - compact form and page (reorder filters and less empty rows)
+
+   * user_stats.php, waiting_room.php:
+   - compact form and page (less empty rows)
+
+   * users.php:
+   - use proper upper/lower-case on title
+
+   * forum/search.php:
+   - removed anchor on table-search (filters can have errors)
+
+   * include/table_columns.php, skins/dragon/screen.css:
+   - compact table (less empty rows)
+   - right-align paging next-link
+
+
 2007-07-14 rodival
 
    * include/table_columns.php:
