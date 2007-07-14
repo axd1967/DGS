@@ -202,7 +202,6 @@ $ARR_DBFIELDKEYS = array(
          'DESCRIPTION', T_('Last changed'),
          'FILTER',      $usfilter, 3,
          'FILTERERROR', $usfilter, 3, "<br>$FERR1", $FERR2, true ));
-   $usform->add_empty_row();
    $usform->add_row( array(
          'TAB',
          'CELL',        1, 'align=left',
@@ -393,7 +392,7 @@ $ARR_DBFIELDKEYS = array(
       echo "<center>\n"
          . $usform->print_start_default()
          . "<br>\n"
-         . "<center><h3><font color=$h3_color>$title2</font></h3></center>\n<br>\n"
+         . "<center><h3><font color=$h3_color>$title2</font></h3></center>\n"
          . $usform->get_form_string() // static form
          . $usform->print_end()
          . "</center>\n";
@@ -401,7 +400,7 @@ $ARR_DBFIELDKEYS = array(
    else // no opp
    {
       // print static-filter, user-table
-      echo "<center><h3><font color=$h3_color>$title3</font></h3></center><br>\n"
+      echo "<center><h3><font color=$h3_color>$title3</font></h3></center>\n"
          . "<center>\n"
          . $usform->print_start_default()
          . $usform->get_form_string() // static form
