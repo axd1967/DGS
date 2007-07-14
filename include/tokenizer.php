@@ -810,8 +810,7 @@ class XmlTokenizer extends BasicTokenizer
    }
 
    // eat-up tag from current pos in parsing value, returning null on fatal-error.
-   //   parsing XML-tag: <tag [ attr=val|"val"|'val' ...]>  <tag/>   </tag>
-   //   parsing XML-http-tag: <http://www/abc>
+   //   parsing XML-tag: <tag [ attr=val|"val"|'val' ...]>  <tag/>
    // signature: Token(tagname,XmlTag)|null eat_tag();
    // note: also sets token-endpos
    function eat_tag()
@@ -831,7 +830,9 @@ class XmlTokenizer extends BasicTokenizer
          return $token;
       }
 
-      // check for special-tag <http://..>
+      /*
+      // non-XML(!): check for special-tag <http://..>
+      //   parsing XML-http-tag: <http://www/abc>
       if ( substr($this->value, $this->pos, 7) === "http://" )
       {
          $epos = strpos( $this->value, '>', $this->pos );
@@ -852,6 +853,7 @@ class XmlTokenizer extends BasicTokenizer
          $token->set_token($xmltag);
          return $token;
       }
+      */
 
       // check for: </endtag>
       if ( substr($this->value,$this->pos,1) == '/' )
