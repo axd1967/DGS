@@ -79,6 +79,10 @@ Changelog
 
 2007-07-14 juga
 
+   * include/std_classes.php:
+   - QuerySQL: assure mysql5.0-compatibility by replacing ','-join
+     with INNER JOIN
+
    * search_messages.php:
    - layout-changes:
      - use smaller padding (6 -> 4px) for folder-boxes
