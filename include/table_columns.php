@@ -384,7 +384,7 @@ class Table
       // build form for Filter + AddColumn
       if ( isset($table_form) and is_null($this->ExternalForm) )
       {
-         $string = "<br>\n"
+         $string = "\n"
             . $table_form->print_start_default()
             . $string // embed table
             . $table_form->print_end();
@@ -1112,7 +1112,7 @@ class Table
 
       $span = $this->Shown_Columns - $span;
       if( $span > 0 )
-         $string.= '  <td align=right'
+         $string.= '  <td class=PagingRight'
            . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
 
       if( $string )
