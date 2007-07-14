@@ -467,6 +467,10 @@ table.Table td {
    text-align: left;
 }
 
+table.Table td.PagingRight {
+   text-align: right;
+}
+
 table.Table th span.Header {
    color: black;
    font-weight: bold;
