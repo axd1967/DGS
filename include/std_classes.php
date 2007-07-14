@@ -420,11 +420,15 @@ class QuerySQL
       {
          // valid JOIN-Syntax (mysql 4.0):
          //    STRAIGHT_JOIN, [INNER | CROSS] JOIN, [NATURAL] LEFT|RIGHT [OUTER] JOIN
-         // NOTE about mysql5.0-compatibility for LEFT JOINs:
-         // - parentheses can be omitted if all other tables stands before JOIN: "FROM (...) JOIN"
+         // NOTE about mysql5.0-compatibility for JOINs:
+         // - parentheses can be omitted if all other tables stands before a JOIN
+         //   (whatever join you use): "FROM (...) JOIN",
          //   see also http://dev.mysql.com/doc/refman/5.0/en/join.html
+         // - fix: -> replace ','-join with 'INNER JOIN' (could also use CROSS JOIN),
+         //   because join has higher precedence than ','-join
+         //   see referenced URL above(!)
          if ( !preg_match( "/^(STRAIGHT_JOIN|((INNER|CROSS)\s+)?JOIN|(NATURAL\s+)?(LEFT|RIGHT)\s+(OUTER\s+)?JOIN)\s/i", $part ) )
-            $result .= ',';
+            $result .= ' INNER JOIN ';
          $result .= " $part";
       }
 
