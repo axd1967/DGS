@@ -188,10 +188,10 @@ class Table
                $this->Column_set = (int)@$player_row[ $this->Player_Column ];
          }
 
-         $this->Sort1 = (string) $this->get_arg('sort1');
-         $this->Desc1 = (bool) $this->get_arg('desc1');
          //Simply remove the mySQL disturbing chars (Sort? must be a column name)
          $tmp = array( '\\', '\'', '\"', ';');
+         $this->Sort1 = (string) $this->get_arg('sort1');
+         $this->Desc1 = (bool) $this->get_arg('desc1');
          $this->Sort1 = str_replace( $tmp, '', $this->Sort1 );
          if( TABLE_ALLOW_DOUBLE_SORT )
          {
@@ -615,7 +615,7 @@ class Table
       return $num_rows_result;
    }
 
-   /*! \brief Retrieve mySQL ORDER BY part from table. */
+   /*! \brief set the missing sort parameters */
    function set_default_sort( $sort1, $desc1, $sort2='', $desc2=0)
    {
       if( !$this->Sort1 )
@@ -627,10 +627,8 @@ class Table
             $this->Sort2 = (string) $sort2;
             $this->Desc2 = (bool) $desc2;
          }
-         return;
       }
-
-      if( TABLE_ALLOW_DOUBLE_SORT && !$this->Sort2 )
+      else if( TABLE_ALLOW_DOUBLE_SORT && !$this->Sort2 )
       {
          if( strcasecmp( $this->Sort1, $sort1) )
          {
@@ -643,6 +641,25 @@ class Table
             $this->Desc2 = (bool) $desc2;
          }
       }
+      return;
+   }
+
+   /*! \brief force the sort parameters */
+   function set_sort( $sort1, $desc1, $sort2='', $desc2=0)
+   {
+      $this->Sort1 = (string) $sort1;
+      $this->Desc1 = (bool) $desc1;
+      if( TABLE_ALLOW_DOUBLE_SORT )
+      {
+         $this->Sort2 = (string) $sort2;
+         $this->Desc2 = (bool) $desc2;
+      }
+      else
+      {
+         $this->Sort2 = '';
+         $this->Desc2 = 0;
+      }
+      return;
    }
 
    /*! \brief Retrieve mySQL ORDER BY part from table. */
@@ -1147,7 +1164,7 @@ class Table
       // add filter-submits in add-column-row if not in table-head and need form for filter
       $f_string = '';
       if ( $this->UseFilters and !$this->ConfigFilters[FCONF_EXTERNAL_SUBMITS] )
-         $f_string = implode( '', $this->Filters->get_submit_elements() );
+         $f_string = implode( '', $this->Filters->get_submit_elements(1) );
 
       // add show-rows elements in add-column-row
       $r_string = $this->make_show_rows( $ac_form );

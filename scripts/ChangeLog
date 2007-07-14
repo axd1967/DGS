@@ -77,6 +77,26 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-14 rodival
+
+   * include/table_columns.php:
+   - added the set_sort() function to force the table sort
+
+   * status.php, users.php, user_stats.php:
+   - managed the sort arguments the new way.
+
+   * include/message_functions.php:
+   - adjusted some comments and T_() strings
+
+   * include/filter.php (get_submit_elements),
+     include/table_columns.php (make_add_column_form),
+     forum/search.php:
+   - a proposition for the get_submit_elements() function: added a
+     $filtertype argument to manage the buttons name.
+     modified the other files accordingly.
+   - adjusted some comments and T_() strings
+
+
 2007-07-13 juga
 
    * include/filter.php:
@@ -744,10 +764,7 @@ ALTER TABLE `Posts`
      games info
    - changed syntax of row/column-description (properties)
 
-   * waiting_room.php,
-   * userinfo.php,
-   * edit_bio.php,
-   * status.php:
+   * waiting_room.php, userinfo.php, edit_bio.php, status.php:
    - using the new Table_infos class properties
 
    * skins/dragon/screen.css

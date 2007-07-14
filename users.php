@@ -41,18 +41,6 @@ require_once( "include/filter.php" );
    $user = $player_row["Handle"];
    $page = "users.php?";
 
-   if(!@$_GET['sort1'])
-   {
-      $_GET['sort1'] = 'P.ID';
-      $_GET['desc1'] = 0;
-   }
-
-   if(!@$_GET['sort2'])
-   {
-      $_GET['sort2'] = ($_GET['sort1'] != 'P.ID' ? 'P.ID' : 'P.Name');
-      $_GET['desc2'] = 0;
-   }
-
    // observers of game
    $observe_gid = (int)get_request_arg('observe');
 
@@ -63,9 +51,9 @@ require_once( "include/filter.php" );
          array( FC_FNAME => 'name', FC_SIZE => 12, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
    $ufilter->add_filter( 3, 'Text',    'P.Handle', true,
          array( FC_FNAME => 'user', FC_SIZE => 10, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
-   #$ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info
+   //$ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info
    $ufilter->add_filter( 5, 'Rating',  'P.Rating2', true);
-   #$ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches
+   //$ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches
    $ufilter->add_filter( 7, 'Numeric', 'Games', true,    # =P.Running+P.Finished
          array( FC_ADD_HAVING => 1 ));
    $ufilter->add_filter( 8, 'Numeric', 'P.Running', true);
@@ -84,6 +72,7 @@ require_once( "include/filter.php" );
    $f_active =& $ufilter->get_filter(13);
 
    $utable = new Table( 'user', $page, 'UsersColumns' );
+   $utable->set_default_sort( 'P.ID', 0);
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
@@ -160,7 +149,8 @@ require_once( "include/filter.php" );
    if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_ufilter->get_select()) ."<br>";
    if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
-   echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
+   echo "<h3 class=Header>$title</h3>\n";
+
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {

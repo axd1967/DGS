@@ -860,15 +860,18 @@ class SearchFilter
    }
 
    /*! \brief Returns two form-elements with start-filter and reset-filter submits to be used with Table or External-Form. */
-   function get_submit_elements( $accesskey='')
+   function get_submit_elements( $filtertype=false, $accesskey='')
    {
-      $apply_filter = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_SEARCH_ACTION."\" value=\"" . T_('Apply Filter') . '"'
+      $start_search = "<input type=\"submit\" name=\"{$this->Prefix}"
+         . FFORM_SEARCH_ACTION."\" value=\""
+         . ( $filtertype ? T_('Apply Filter') : T_('Start Search') ) . '"'
          . ( $accesskey ? ' accesskey='.attb_quote($accesskey) : '' )
          . '>';
-      $reset_filter = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_RESET_ACTION."\" value=\"" . T_('Reset Filter') . "\">";
-      return array( $apply_filter, $reset_filter );
+      $reset_search = "<input type=\"submit\" name=\"{$this->Prefix}"
+         . FFORM_RESET_ACTION."\" value=\""
+         . ( $filtertype ? T_('Reset Filter') : T_('Reset Search') ) . '"'
+         . '>';
+      return array( $start_search, $reset_search );
    }
 
    /*! \brief Wrapper for get_filter(id)->get_input_element(prefix,attr); returns '' if filter not existing. */

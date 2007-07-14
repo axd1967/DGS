@@ -87,9 +87,9 @@ define('MODERATOR_SEARCH', 0);
 
    // for order-form-element
    $arr_order = array(
-      'Score DESC, Time DESC'  => T_('Term Relevance'),
-      'Time DESC'              => T_('Message Created'),
-      'Posts.Lastchanged DESC' => T_('Message Last Changed'),
+      'Score DESC, Time DESC'  => T_('Term relevance'),
+      'Time DESC'              => T_('Creation date'),
+      'Posts.Lastchanged DESC' => T_('Modification date'),
    );
 
    // static filters
@@ -106,7 +106,7 @@ define('MODERATOR_SEARCH', 0);
          array( FC_SIZE => 12, FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL ) );
    #global $NOW;
    #$ffilter->add_filter( 6, 'Boolean', new QuerySQL( SQLP_FIELDS, "(Posts.Time + INTERVAL ".DAYS_NEW_END." DAY > FROM_UNIXTIME($NOW) AND ISNULL(FR.Time) OR Posts.Time > FR.Time) AS NewPost", SQLP_FROM, "LEFT JOIN Forumreads AS FR ON FR.User_ID=$uid AND FR.Thread_ID=Posts.Thread_ID", SQLP_HAVING, "NewPost=1" ), true, array( FC_LABEL => T_('Restrict to new messages') ) ); //! \todo Handle New Forum-Posts
-   $ffilter->init(); // parse current value from _GET
+   $ffilter->init(); // parse current value from $_REQUEST
    $filter2 =& $ffilter->get_filter(2);
 
    // form for static filters
@@ -120,7 +120,7 @@ define('MODERATOR_SEARCH', 0);
          'DESCRIPTION', T_('Forum'),
          'FILTER',      $ffilter, 1 ));
    $fform->add_row( array(
-         'DESCRIPTION', T_('Search Terms'),
+         'DESCRIPTION', T_('Search terms'),
          'CELL',        1, 'align=left width=500',
          'FILTER',      $ffilter, 2,
          'BR',
@@ -132,7 +132,7 @@ define('MODERATOR_SEARCH', 0);
          'FILTERERROR', $ffilter, 3, "<br>$FERR1", $FERR2, true,
          ));
    $fform->add_row( array(
-         'DESCRIPTION', T_('Message Scope'),
+         'DESCRIPTION', T_('Message scope'),
          'FILTER',      $ffilter, 4,
          'BR',
          #'FILTER',      $ffilter, 6,
@@ -150,7 +150,7 @@ define('MODERATOR_SEARCH', 0);
    $fform->add_row( array(
          'TAB',
          'CELL',        1, 'align=left',
-         'OWNHTML',     implode( '', $ffilter->get_submit_elements('x') ) ));
+         'OWNHTML',     implode( '', $ffilter->get_submit_elements( 0, 'x') ) ));
 
    echo "<br><center>\n"
       . $fform->get_form_string()

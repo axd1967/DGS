@@ -150,7 +150,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                  " AND (White_ID=$my_ID OR Black_ID=$my_ID)" .
                  " AND Players.ID=White_ID+Black_ID-$my_ID" .
                  " AND Status='INVITED'" ;
-      $game_row= mysql_single_fetch( 'message_functions.game_settings_form',
+      $game_row= mysql_single_fetch( 'game_settings_form',
                                      $query );
       if( !$game_row )
          error('unknown_game','game_settings_form');
@@ -836,7 +836,7 @@ function get_folders($uid, $remove_all_received=true)
    global $STANDARD_FOLDERS;
 
    $result = mysql_query("SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr")
-      or error('mysql_query_failed', 'message_functions.get_folders');
+      or error('mysql_query_failed', 'get_folders');
 
    $flds = $STANDARD_FOLDERS;
 
@@ -918,7 +918,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
                "AND NOT ISNULL(Folder_nr) " .
                "AND mid IN (" . implode(',', $message_ids) . ") " .
                "LIMIT " . count($message_ids) )
-      or error('mysql_query_failed','message_functions.change_folders');
+      or error('mysql_query_failed','change_folders');
 
    return mysql_affected_rows() ;
 }
@@ -958,7 +958,7 @@ function folder_is_empty($nr, $uid)
 {
    $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
                          "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1")
-      or error('mysql_query_failed','message_functions.folder_is_empty');
+      or error('mysql_query_failed','folder_is_empty');
 
    $nr = (@mysql_num_rows($result) === 0);
    mysql_free_result($result);
@@ -1022,26 +1022,27 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
    $query = $qsql->get_select() . " $limit";
 
    $result = mysql_query( $query )
-      or error('mysql_query_failed','message_functions.message_list_query');
+      or error('mysql_query_failed','message_list_query');
 
    return array( $result, $qsql );
 }
 
 // param full_details: if true, show additional fields for message-search
-// param only_tablehead: if null or true, only tableheads are added (needed for message-search);
-//                       if null, the workflow goes on (needed for list-messages)
-// param terms: rx with terms to be marked within text
+// param header_part: tri-states param (null, false, true)
+//    if null or true, tableheads are added (needed for message-search);
+//    then if null, the workflow goes on (needed for list-messages)
+// param rx_terms: rx with terms to be marked within text
 function message_list_table( &$mtable, $result, $show_rows
              , $current_folder, $my_folders
              , $no_sort=true, $no_mark=true, $toggle_marks=false
-             , $full_details=false, $only_tablehead=null, $rx_terms=''
+             , $full_details=false, $header_part=null, $rx_terms=''
              )
 {
  global $date_fmt, $msg_icones;
 
    $can_move_messages = false;
 
-   if ( is_null($only_tablehead) or $only_tablehead )
+   if ( is_null($header_part) or $header_part )
    {
       // add_tablehead($nr, $description, $sort_string = NULL, $desc_default = false, $undeletable = false, $width = NULL)
       $mtable->add_tablehead( 1, T_('Folder'),
@@ -1052,7 +1053,7 @@ function message_list_table( &$mtable, $result, $show_rows
          // additional fields for search-messages
          $mtable->add_tablehead( 6, T_('Type'), 'M.Type', false, true );
          $mtable->add_tablehead( 7, T_('Direction'), $no_sort ? NULL : 'Sender', false, false );
-         $mtable->add_tablehead( 2, T_('Message Partner'), $no_sort ? NULL : 'other_name', false, false );
+         $mtable->add_tablehead( 2, T_('Correspondent'), $no_sort ? NULL : 'other_name', false, false );
       }
       else
          $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
@@ -1066,8 +1067,8 @@ function message_list_table( &$mtable, $result, $show_rows
       if( !$no_mark )
          $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
 
-      // stop if not null
-      if ( !is_null($only_tablehead) )
+      // then stop if $header_part is true
+      if ( !is_null($header_part) )
          return $can_move_messages;
    }
 

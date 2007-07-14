@@ -39,8 +39,9 @@ require_once( "include/message_functions.php" );
 
 
    $gtable = new Table( 'game', "status.php", "GamesColumns" );
+   //can't be sorted until jump_to_next_game() adjusted to follow the sort
+   $gtable->set_sort( 'Games.Lastchanged', 0, 'Games.ID', 0);
    $gtable->use_show_rows(false);
-   $gtable->set_default_sort( 'Games.Lastchanged', 0, 'Games.ID', 0);
    $gtable->add_or_del_column();
 
    start_page(T_('Status'), true, $logged_in, $player_row,
@@ -95,11 +96,11 @@ require_once( "include/message_functions.php" );
 { // show messages
 
    $mtable = new Table( 'message', 'status.php', '', 'MSG' );
-   $mtable->set_default_sort( 'date', 0);
+   //sort must stay fixed because of the fixed LIMIT and no prev/next feature
+   $mtable->set_sort( 'date', 0);
    //$mtable->add_or_del_column();
 
-   $order = 'date';
-
+   $order = $mtable->current_order_string();
    $folderstring = $player_row['StatusFolders'] .
       (empty($player_row['StatusFolders']) ? '' : ',') . FOLDER_NEW . ',' . FOLDER_REPLY;
 
@@ -113,7 +114,7 @@ require_once( "include/message_functions.php" );
       message_list_table( $mtable, $result, 20
              , FOLDER_NONE /*FOLDER_ALL_RECEIVED*/, $my_folders
              , /*no_sort=*/true, true ) ;
-//no_sort must stay true because of the two tables in the same page
+   //no_sort must stay true because of the fixed LIMIT and no prev/next feature
 
       $mtable->echo_table();
    }
@@ -124,8 +125,8 @@ require_once( "include/message_functions.php" );
 { // show games
    $uid = $my_id;
 
-//can't be sorted until jump_to_next_game() adjusted to follow the sort
-   $order = "Games.LastChanged";
+   //can't be sorted until jump_to_next_game() adjusted to follow the sort
+   $order = $gtable->current_order_string();
 
    $query = "SELECT Games.*, UNIX_TIMESTAMP(Games.Lastchanged) AS Time, " .
       "IF(Rated='N','N','Y') as Rated, " .

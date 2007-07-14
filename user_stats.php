@@ -68,17 +68,6 @@ $ARR_DBFIELDKEYS = array(
 
    $page = "user_stats.php?";
 
-   if(!@$_GET['sort1'])
-   {
-      $_GET['sort1'] = 'P.ID';
-      $_GET['desc1'] = 0;
-   }
-   if(!@$_GET['sort2'])
-   {
-      $_GET['sort2'] = ($_GET['sort1'] != 'P.ID' ? 'P.ID' : 'P.Name');
-      $_GET['desc2'] = 0;
-   }
-
 
    // who are player (uid) and opponent (opp) ?
    $players = array(); // uid => ( Players.field => value )
@@ -105,7 +94,7 @@ $ARR_DBFIELDKEYS = array(
    $usfilter->add_filter(3, 'Date',         'G.Lastchanged', true );
    $usfilter->add_filter(4, 'Selection',
          array( T_('All games') => '',
-                T_('Running games')  => "G.Status IN ('PLAY','PASS','SCORE','SCORE2')",
+                T_('Running games')  => "G.Status NOT IN ('INVITED','FINISHED')",
                 T_('Finished games') => "G.Status='FINISHED'" ),
          true,
          array( FC_DEFAULT => 2 ) );
@@ -138,6 +127,7 @@ $ARR_DBFIELDKEYS = array(
    $ufilter->init(); // parse current value from _GET
 
    $utable = new Table( 'user', $page, 'UsersColumns' );
+   $utable->set_default_sort( 'P.ID', 0);
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
@@ -209,7 +199,7 @@ $ARR_DBFIELDKEYS = array(
          'FILTER',      $usfilter, 4,
          'TEXT',        ' (' . T_('full stats only for finished games') . ')' ));
    $usform->add_row( array(
-         'DESCRIPTION', T_('Last Changed'),
+         'DESCRIPTION', T_('Last changed'),
          'FILTER',      $usfilter, 3,
          'FILTERERROR', $usfilter, 3, "<br>$FERR1", $FERR2, true ));
    $usform->add_empty_row();
