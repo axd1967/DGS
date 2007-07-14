@@ -883,7 +883,7 @@ function verify_email( $debugmsg, $email)
 {
    //RFC 2822 - 3.4.1. Addr-spec specification
    //See http: //www.faqs.org/rfcs/rfc2822
-   //$regexp = ”^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,4}$”;
+   //$regexp = "^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,4}$";
    $regexp = "^([-_a-z0-9]+)(\.[-_a-z0-9]+)*@([-a-z0-9]+)(\.[-a-z0-9]+)*(\.[a-z]{2,4})$";
    $res= eregi($regexp, $email);
    if( $debugmsg !== false && !$res )

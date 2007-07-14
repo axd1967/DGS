@@ -462,7 +462,7 @@ The basic order of instructions in that case is:
    # URL-page-vars
    $page_vars = new RequestParameters();
    $page_vars->add_entry( 'uid', $uid );
-   $usform->attach_table( $page_vars ); # for page­vars as hiddens in form
+   $usform->attach_table( $page_vars ); # for page-vars as hiddens in form
 
 
 # ----- different filter-sets

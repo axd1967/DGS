@@ -602,7 +602,7 @@ class SearchFilter
     */
    function eval_condition( $condition )
    {
-      $aq = array(); // query­array: aq[fid] = !has_err and has_query
+      $aq = array(); // query-array: aq[fid] = !has_err and has_query
       $av = array(); // value-array: av[fid] = !has_err and get_val
       if ( preg_match_all( "/\b[QV](\d+)/", $condition, $out, PREG_PATTERN_ORDER) )
       {
@@ -2220,7 +2220,7 @@ class FilterDate extends Filter
   * \brief Filter for relative and absolute dates allowing exact value and
   *        range value for absolute date-spec; SearchFilter-Type: RelativeDate.
   * <p>GUI: text input-box +
-  *         selectbox to choose for absolute-mode or time­unit for relative-date
+  *         selectbox to choose for absolute-mode or time-unit for relative-date
   *
   * note: If only absolute-date filter wanted, use FilterDate instead.
   *
@@ -2375,7 +2375,7 @@ class FilterRelativeDate extends Filter
          if ( $this->values[$this->elem_tu] == FRDTU_ABS )
          { // absolute
             if ( is_null($this->filterdate) )
-               error("FilterRelativeDate: badly configured filter [{$this->id}] using absolute­date");
+               error("FilterRelativeDate: badly configured filter [{$this->id}] using absolute-date");
 
             // parse val using FilterDate-syntax
             $this->range_mode = FRD_RANGE_ABS;

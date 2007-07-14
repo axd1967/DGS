@@ -146,7 +146,7 @@ $ARR_DBFIELDKEYS = array(
    $page_vars->add_entry( 'uid', $uid );
    if ( $opp )
       $page_vars->add_entry( 'opp', $opp );
-   $usform->attach_table( $page_vars ); // for page­vars as hiddens in form
+   $usform->attach_table( $page_vars ); // for page-vars as hiddens in form
 
    // attach external URL-parameters from static filter and page-vars for table-links
    $utable->add_external_parameters( $usfilter->get_req_params() );
