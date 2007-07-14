@@ -2300,7 +2300,7 @@ class FilterRelativeDate extends Filter
       static $_default_config = array( FC_SIZE => 4, FC_TIME_UNITS => FRDTU_ALL );
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'RelativeDate';
-      $this->syntax_descr = "30, >30";
+      $this->syntax_descr = "30 (= <30), >30";
 
       // check & setup time-units
       $this->time_units = array();
@@ -2388,13 +2388,17 @@ class FilterRelativeDate extends Filter
          }
          else
          { // relative
-            // parse val: 30 >30
+            // parse val: 30 <30 >30
             $this->range_mode = FRD_RANGE_START;
 
             if ( substr($v, 0, 1) == ">" ) // >30
             {
                $v = substr($v, 1);
                $this->range_mode = FRD_RANGE_END;
+            }
+            else if ( substr($v, 0, 1) == "<" ) // <30 (same as '30')
+            {
+               $v = substr($v, 1);
             }
 
             if ( !is_numeric($v) )
@@ -2933,7 +2937,7 @@ class FilterMysqlMatch extends Filter
       // note: treat following chars as word-separators to be removed in terms: +-<>~()
       $tokenizer = new StringTokenizer( QUOTETYPE_QUOTE | TOKENIZE_WORD_RX,
             '\\w\'\\*', '', '\\\\', '""');
-         
+
       if ( !$tokenizer->parse($terms) )
       {
          $this->errormsg = implode(", ", $tokenizer->errors());
