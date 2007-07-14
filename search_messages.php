@@ -46,7 +46,7 @@ require_once( "include/filter.php" );
    $arr_chkfolders = array();
    foreach( $my_folders as $folder_id => $arr ) // arr=( Name, BGColor, FGColor )
    {
-      $folder_box = echo_folder_box( $my_folders, $folder_id, null, 'style="padding:6px;"', '%s&nbsp;', '' );
+      $folder_box = echo_folder_box( $my_folders, $folder_id, null, 'style="padding:4px;"', '%s&nbsp;', '' );
       $arr_chkfolders[$folder_box] = array( $folder_id, T_('Folder') . ' ' . $arr[0] );
    }
 
@@ -136,14 +136,13 @@ require_once( "include/filter.php" );
    $smform->add_row( array(
          'DESCRIPTION', T_('Select folders'),
          'FILTER',      $smfilter, 1 ));
-   $smform->add_empty_row();
    $smform->add_row( array(
          'DESCRIPTION', T_('Message scope'),
-         'FILTER',      $smfilter, 2, // initial-msg
-         'BR',
          'FILTER',      $smfilter, 4, // game-related
+         'BR',
+         'FILTER',      $smfilter, 2, // initial-msg
          ));
-   $smform->add_empty_row();
+   //$smform->add_empty_row();
    $smform->add_row( array(
          'TAB',
          'CELL',        1, 'align=left',
@@ -185,7 +184,7 @@ require_once( "include/filter.php" );
       . $smform->get_form_string() // static form
       . "</center>\n";
 
-   echo "<br>\n"
+   echo "\n"
       . $smform->print_start_default()
       . (( LAYOUT_FILTER_EXTFORM_HEAD )
             ? $extform_string . "<br>\n" . $mtable->make_table()
