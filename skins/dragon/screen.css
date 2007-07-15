@@ -530,13 +530,6 @@ table.Table tr.Filter td.ShowFilter {
    font-color: blue;
 }
 
-table.Table tr.Filter td sup a,
-table.Table tr.Filter td sup {
-   font-weight: bold;
-   font-size: 90%;
-   text-decoration: none;
-}
-
 table.Table tr.Row3,
 table.Table tr.Row1 {
    background: #ffffff;
