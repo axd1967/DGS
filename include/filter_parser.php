@@ -105,11 +105,11 @@ class TokenizerConfig
    var $config;
 
    /*!
-    * \brief Constructs TokenizerConfig( QUOTETYPE_..., [string separator-char='-'], [quote_chars='""'], [esc_chars='\\\\'] )
+    * \brief Constructs TokenizerConfig( QUOTETYPE_..., [string separator-char='-'], [quote_chars="''"], [esc_chars='\\\\'] )
     * \param $quotetype QUOTETYPE_..-const
     * \param $sep separator-char to represent range-syntax; if null, default is '-'
     * \param $wild wildcard-char; if null, default is '*'
-    * \param $quote_chars start- and end-quote-char; if null, default is '""' (double-quotes)
+    * \param $quote_chars start- and end-quote-char; if null, default is "''" (single-quotes)
     * \param $esc_chars escape-from- and escape-to-char; if null, default is \\ (backslash)
     */
    function TokenizerConfig( $quotetype, $sep = null, $wild = null, $quote_chars = null, $esc_chars = null )
@@ -117,7 +117,7 @@ class TokenizerConfig
       $this->quotetype = $quotetype;
       $this->sep       = (is_null($sep)) ? '-' : $sep;
       $this->wild      = (is_null($wild)) ? TEXT_WILD_M : $wild;
-      $this->quote_chars  = (is_null($quote_chars)) ? '""' : $quote_chars;
+      $this->quote_chars  = (is_null($quote_chars)) ? "''" : $quote_chars;
       $this->escape_chars = (is_null($esc_chars)) ? '\\\\' : $esc_chars;
       $this->config = array();
    }
@@ -374,7 +374,7 @@ class NumericParser extends BasicParser
   *
   * Supported Flags: PARSER_NOSWAP_REVERSE | TEXTPARSER_FORBID_RANGE |
   *                  TEXTPARSER_FORBID_WILD | TEXTPARSER_ALLOW_START_WILD |
-  *                  TEXTPARSER_END_INCL
+  *                  TEXTPARSER_END_INCL | TEXTPARSER_PRECEDENCE_SEP
   * Supported TokenizerConfig: TEXTPARSER_STARTWILD_MINCHARS = 1..
   *
   * note: wildcard supported: '*' (multi-char)
@@ -387,6 +387,7 @@ define('TEXT_WILD_M', '*'); // special char for wildcard (multi-char)
 
 define('TEXTPARSER_STARTWILD_MINCHARS', 'startwild_minchars');
 define('TEXTPARSER_CONF_RX_NO_SEP', 'txtpconf_rx_no_sep' ); // regex that overrules match for range-separator
+define('TEXTPARSER_PRECEDENCE_SEP', 'precedence_sep'); // flag to indicate, that separator has higher precedence than other special-chars (wildcard)
 
 define('STARTWILD_OPTMINCHARS', 4); // value for filter-config FC_START_WILD or above define (=no of chars to force when pattern starts with wildcard)
 
@@ -436,13 +437,27 @@ class TextParser extends BasicParser
          return false;
       }
 
+      // assure higher precedence of wildcard (over separator)
+      $arr_wild_replace = array( $this->tokconf->wild => '%' );
+      if ( $cnt != 1 and !$forbid_wild and !$this->is_flags_set(TEXTPARSER_PRECEDENCE_SEP) )
+      {
+         list( $v1, $v2 ) = extract_range( $arr );
+         list( $sql, $cnt_wild1 ) = sql_replace_wildcards( $v1, $arr_wild_replace );
+         list( $sql, $cnt_wild2 ) = sql_replace_wildcards( $v1, $arr_wild_replace );
+         if ( $cnt_wild1 + $cnt_wild2 > 0 )
+         {
+            $merged_token = new Token(TOK_TEXT, 0, $v1 . $arr[1]->get_token() . $v2 );
+            $arr = array( $merged_token );
+            $cnt = 1;
+         }
+      }
+
       if ( $cnt == 1 )
       { // exact syntax or wildcard
          $v = $arr[0]->get_token();
          if ($v == '')
             return true;
 
-         $arr_wild_replace = array();
          if ( $forbid_wild )
          {
             // wild can be treated as normal char, same goes for special-chars
@@ -477,7 +492,6 @@ class TextParser extends BasicParser
             }
 
             // safely replace wildcards with SQL-wildcards
-            $arr_wild_replace = array( $this->tokconf->wild => '%' );
             list( $valsql, $cnt_wild ) = sql_replace_wildcards( $v, $arr_wild_replace );
 
             $this->p_value = $valsql;
