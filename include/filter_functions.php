@@ -48,15 +48,14 @@ function filter_id2mask( $id )
 /*!
  * \brief Creates default TokenizerConfig taking global consts into account
  * \param $quotetype if null, default is used
- * note: defaults are: quote-type=QUOTETYPE_ESCAPE, separator=-, quote-chars="", escape-chars=\\
+ * note: defaults are: quote-type=QUOTETYPE_QUOTE, separator=-, quote-chars='', escape-chars=\\
  * \internal
  */
 function createTokenizerConfig( $quotetype = null )
 {
-   #global $player_row; \\! \todo may later read from player-settings
    if ( is_null($quotetype) )
-      $quotetype = QUOTETYPE_ESCAPE;
-   return new TokenizerConfig( $quotetype, '-', TEXT_WILD_M, '""', '\\\\' );
+      $quotetype = QUOTETYPE_QUOTE;
+   return new TokenizerConfig( $quotetype, '-', TEXT_WILD_M, "''", '\\\\' );
 }
 
 /*!
