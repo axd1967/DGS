@@ -103,7 +103,7 @@ if ( $fdemo == 1 )
    $title = array(
       'Numeric Filter',
       'allowed syntax: exact value, range-syntax (swap reverse-values, e.g. 4-1 -> 1-4)',
-      'quote special chars with \\, .e.g  \\-1  for -1',
+      "escape special chars with single-quotes, .e.g  '-'1  or  '-1'  for -1",
       'hover-text with a short syntax-help',
       'error is shown if invalid syntax entered',
    );
@@ -170,7 +170,7 @@ elseif ( $fdemo == 2 )
    $title = array(
       'Text Filter',
       'allowed syntax: exact value, wildcard (\'*\'), range-syntax (swap reverse-values, e.g. e-a -> a-e)',
-      'quote special chars with \\, .e.g  a\\-  for exact-value-text \'a-\' (not range)',
+      "escape special chars with single-quotes, .e.g  a'-'  or  'a-'  for exact-value-text \'a-\' (not range)",
       'hover-text with a short syntax-help',
       'error is shown if invalid syntax entered',
    );
@@ -271,7 +271,7 @@ elseif ( $fdemo == 6 )
 {
    $title = array(
       'RelativeDate Filter (relative with optional absolute date)',
-      'relative date-syntax: 30 (30x time-period ago until now), >30 (from ancient times ending at 30x time-periods ago)',
+      'relative date-syntax: 30 or <30 (30x time-period ago until now), >30 (from ancient times ending at 30x time-periods ago)',
       'absolute date-syntax: YYYY, YYYYMM, YYYYMMDD, YYYYMMDD hh, YYYYMMDD hhmm; \':\' allowed at any place',
       'allowed syntax for absolute date: exact value, range-syntax (swap reverse-values) - using FilterDate to parse',
       'hover-text with a short syntax-help',
@@ -454,6 +454,7 @@ elseif ( $fdemo == 11 )
    $title = array(
       'MysqlMatch Filter',
       'syntax for fulltext-search boolean-mode: word +word -word &lt;word &gt;word ~word (word-group) word* "literal"',
+      'note: uses double-quotes in boolean-mode to embrace literals, because it\'s a special syntax',
       'a word (search-term) consists of the chars  a-z0-9\'_  with a min-length of 4 chars; stopwords are ignored',
       'hover-text with a short syntax-help',
       'error is shown if invalid syntax entered',
@@ -725,12 +726,12 @@ elseif ( $fdemo == 17 )
       'Support for three different quote-types: ESCAPE, QUOTE, DOUBLE to escape '
          . "special-chars in filter-syntax like range-char [$s] or wildcard-char [$w]",
       "Syntax (ESCAPE): need escape-char, double to get escape-char; default is [\\]; Examples: no\\{$w}wild\\{$w}  fish\\{$s}head",
-      "Syntax (QUOTE):  need start- and end-quote, double to get escape-char; default [\"\"]; Examples: \"no{$w}wild$w\"  no\"$w\"wild\"$w\"  \"fish{$s}head\"  fish\"$s\"head",
+      "Syntax (QUOTE):  need start- and end-quote, double to get escape-char; default ['']; Examples: 'no{$w}wild$w'  no'$w'wild'$w'  'fish{$s}head'  fish'$s'head",
       "Syntax (DOUBLE): double char to quote; Examples: no$w{$w}wild$w$w  fish$s{$s}head",
    );
    $arr_layout = array(
       1 => array( 'label' => 'Quote #1', 'descr' => 'text-filter using ESCAPE-quoting [FC_QUOTETYPE=QUOTETYPE_ESCAPE]: prefix quote-char with backslash \'\\\'' ),
-      2 => array( 'label' => 'Quote #2', 'descr' => 'text-filter using QUOTE-quoting [FC_QUOTETYPE=QUOTETYPE_QUOTE]: enclose quoted chars with double-quotes ".."' ),
+      2 => array( 'label' => 'Quote #2', 'descr' => "text-filter using QUOTE-quoting [FC_QUOTETYPE=QUOTETYPE_QUOTE]: enclose quoted chars with single-quotes '..'" ),
       3 => array( 'label' => 'Quote #3', 'descr' => 'text-filter using DOUBLE-quoting [FC_QUOTETYPE=QUOTETYPE_DOUBLE]: double quote-char to quote' ),
    );
 
