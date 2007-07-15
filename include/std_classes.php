@@ -253,6 +253,7 @@ define('SQLP_LIMIT',     'limit'); // only once
 // note: be careful when merging 2 QuerySQLs
 define('SQLP_FNAMES',    'fieldnames'); // field-names used to build "real" SQLP_WHERE
 define('SQLP_WHERETMPL', 'where_tmpl'); // SQL-template used to build "real" SQLP_WHERE; only used to store templates along with other parts
+define('SQLP_UNION_WHERE', 'union_where');
 
 // sql-statements for part-types
 $ARR_SQL_STATEMENTS = array(
@@ -264,8 +265,9 @@ $ARR_SQL_STATEMENTS = array(
    SQLP_HAVING    => 'HAVING',
    SQLP_ORDER     => 'ORDER BY',
    SQLP_LIMIT     => 'LIMIT',
-   SQLP_WHERETMPL => NULL,
    SQLP_FNAMES    => NULL,
+   SQLP_WHERETMPL => NULL,
+   SQLP_UNION_WHERE => 'UNION',
 );
 
 class QuerySQL
@@ -321,6 +323,7 @@ class QuerySQL
     *    add_part( SQLP_ORDER,   'M.ID DESC' );
     *    add_part( SQLP_LIMIT,   '0,10' );
     *    add_part( SQLP_WHERETMPL, "(G.ID #OP #VAL OR G.ID2 #OP #VAL)" );
+    *    add_part( SQLP_UNION_WHERE, 'Black_ID=4711', 'White_ID=4711' );
     */
    function add_part( $type ) // var-args for parts
    {
@@ -400,6 +403,8 @@ class QuerySQL
          $part = implode(',', $arr);
       elseif ( $type === SQLP_OPTS )
          $part = implode(' ', $arr);
+      elseif ( $type === SQLP_UNION_WHERE )
+         $part = implode(' OR ', $arr);
 
       global $ARR_SQL_STATEMENTS;
       $prefix = ($incl_prefix) ? $ARR_SQL_STATEMENTS[$type] . ' ' : '';
@@ -428,7 +433,7 @@ class QuerySQL
          //   because join has higher precedence than ','-join
          //   see referenced URL above(!)
          if ( !preg_match( "/^(STRAIGHT_JOIN|((INNER|CROSS)\s+)?JOIN|(NATURAL\s+)?(LEFT|RIGHT)\s+(OUTER\s+)?JOIN)\s/i", $part ) )
-            $result .= ' INNER JOIN ';
+            $result .= ' INNER JOIN';
          $result .= " $part";
       }
 
@@ -438,8 +443,41 @@ class QuerySQL
    /*!
     * \brief Returns SQL-statement with current SQL-parts as one string.
     * output: "SELECT [options] fields FROM from [WHERE where] [GROUP BY group] [HAVING having] [ORDER BY order] [LIMIT limit]"
+    * output: "(SELECT ...) UNION (SELECT ...) [ORDER BY order] [LIMIT limit]" if UNION_WHERE-part set
     */
    function get_select()
+   {
+      if ( !$this->has_part(SQLP_UNION_WHERE) )
+         return $this->get_select_normal();
+
+      // handle UNION-syntax
+      $arr_union = array();
+      $union_parts = $this->get_parts(SQLP_UNION_WHERE);
+      for( $idx=0; $idx < count($union_parts); $idx++)
+      {
+         array_push( $arr_union, $this->get_select_normal($idx) );
+      }
+
+      $arrsql = array();
+      array_push( $arrsql, '(' . implode(') UNION (', $arr_union) . ')' );
+
+      if ( $this->has_part(SQLP_ORDER) )
+         array_push( $arrsql, $this->get_part(SQLP_ORDER, true) );
+      if ( $this->has_part(SQLP_LIMIT) )
+         array_push( $arrsql, $this->get_part(SQLP_LIMIT, true) );
+
+      $sql = implode(' ', $arrsql);
+      return $sql;
+   }
+
+   /*!
+    * \brief Returns SQL-statement with current SQL-parts as one string.
+    * \internal
+    * \param $union_part -1 (no union = default), 0..n = union-part to add;
+    *        then order + limit not added
+    * output: "SELECT [options] fields FROM from [WHERE where] [GROUP BY group] [HAVING having] [ORDER BY order] [LIMIT limit]"
+    */
+   function get_select_normal( $union_part = -1 )
    {
       $arrsql = array();
       $has_opts = $this->has_part(SQLP_OPTS);
@@ -449,16 +487,35 @@ class QuerySQL
          array_push( $arrsql, $this->get_part(SQLP_OPTS) );
       array_push( $arrsql, $this->get_part(SQLP_FIELDS) );
       array_push( $arrsql, $this->get_part(SQLP_FROM, true) );
-      if ( $this->has_part(SQLP_WHERE) )
-         array_push( $arrsql, $this->get_part(SQLP_WHERE, true) );
+
+      // handle UNION-WHERE and WHERE
+      if ( $union_part < 0 )
+      {
+         if ( $this->has_part(SQLP_WHERE) )
+            array_push( $arrsql, $this->get_part(SQLP_WHERE, true) );
+      }
+      else
+      {
+         $union_parts = $this->get_parts(SQLP_UNION_WHERE); // non-empty
+         array_push( $arrsql, 'WHERE ' . $union_parts[$union_part] );
+
+         if ( $this->has_part(SQLP_WHERE) )
+            array_push( $arrsql, 'AND ' . $this->get_part(SQLP_WHERE) );
+      }
+
       if ( $this->has_part(SQLP_GROUP) )
          array_push( $arrsql, $this->get_part(SQLP_GROUP, true) );
       if ( $this->has_part(SQLP_HAVING) )
          array_push( $arrsql, $this->get_part(SQLP_HAVING, true) );
-      if ( $this->has_part(SQLP_ORDER) )
-         array_push( $arrsql, $this->get_part(SQLP_ORDER, true) );
-      if ( $this->has_part(SQLP_LIMIT) )
-         array_push( $arrsql, $this->get_part(SQLP_LIMIT, true) );
+
+      // ORDER and LIMIT only for non-union-select
+      if ( $union_part < 0 )
+      {
+         if ( $this->has_part(SQLP_ORDER) )
+            array_push( $arrsql, $this->get_part(SQLP_ORDER, true) );
+         if ( $this->has_part(SQLP_LIMIT) )
+            array_push( $arrsql, $this->get_part(SQLP_LIMIT, true) );
+      }
 
       $sql = implode(' ', $arrsql);
       return $sql;
