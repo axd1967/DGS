@@ -52,7 +52,8 @@ require_once( "include/filter.php" );
    $ufilter->add_filter( 3, 'Text',    'P.Handle', true,
          array( FC_FNAME => 'user', FC_SIZE => 10, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
    //$ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info
-   $ufilter->add_filter( 5, 'Rating',  'P.Rating2', true);
+   $ufilter->add_filter( 5, 'Rating',  'P.Rating2', true,
+         array( FC_SIZE => 8 ));
    //$ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches
    $ufilter->add_filter( 7, 'Numeric', 'Games', true,    # =P.Running+P.Finished
          array( FC_ADD_HAVING => 1 ));
