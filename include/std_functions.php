@@ -754,9 +754,12 @@ function make_menu_vertical($menu_array)
    global $base_path, $menu_bg_color, $bg_color;
 
    //table for border line
+/*
    echo "\n<table class=NotPrintable border=0 cellspacing=0 cellpadding=1 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
+*/
+
 
    echo "\n<table id=\"pageMenu\" class=MenuVertical border=0 cellspacing=0 cellpadding=4 bgcolor=\"#F7F5FF\">"
       . "\n <tr>";
@@ -789,9 +792,11 @@ function make_menu_vertical($menu_array)
       . "\n </tr>"
       . "\n</table>";
 
+/*
    //table for border line
    echo "\n  </td>"
       . "\n </tr>\n</table>\n";
+*/
 }
 
 function make_tools( $array, $width=0)
