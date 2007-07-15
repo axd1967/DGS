@@ -77,6 +77,23 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-15 juga
+
+   * include/filter_functions.php (createTokenizerConfig),
+     include/filter_parser.php (TextParser.parse),
+     code_examples/filter_example2.php:
+   - changed default filter-quote-type: use quoting using single-quotes "'"
+   - fixed bug: wildcard '*' now has higher precedence over separator '-',
+     can be controlled using TEXTPARSER_PRECEDENCE_SEP-flag
+   - added '<days' syntax for RelativeDate-filter
+
+   * skins/dragon/screen.css:
+   - style for Filter <sup> not longer needed after using Filter-hide-image
+
+   * users.php:
+   - widened input-box-size for Rating-filter
+
+
 2007-07-15 rodival
 
    * include/filter.php (build_generic_selectbox_elem):
