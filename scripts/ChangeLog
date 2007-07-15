@@ -77,22 +77,26 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-16 juga
+
+   * include/std_classes.php, code_examples/query_sql.php:
+   - QuerySQL: added basic UNION-support allowing non-template-WHERE-clause,
+     specify with SQLP_UNION_WHERE; added example
+
 2007-07-15 juga
 
    * include/filter_functions.php (createTokenizerConfig),
-     include/filter_parser.php (TextParser.parse),
-     code_examples/filter_example2.php:
+     include/filter_parser.php (TextParser.parse):
    - changed default filter-quote-type: use quoting using single-quotes "'"
    - fixed bug: wildcard '*' now has higher precedence over separator '-',
      can be controlled using TEXTPARSER_PRECEDENCE_SEP-flag
-   - added '<days' syntax for RelativeDate-filter
 
    * skins/dragon/screen.css:
-   - style for Filter <sup> not longer needed after using Filter-hide-image
+   - removed no longer needed style for Filter <sup> after using
+     Filter-hide-image
 
    * users.php:
    - widened input-box-size for Rating-filter
-
 
 2007-07-15 rodival
 
@@ -108,8 +112,8 @@ Changelog
 
 2007-07-15 juga
 
-   * include/filter.php:
-   - allowed '<days' as additional syntax for FilterRelativeDate
+   * include/filter.php (parse_value), code_examples/filter_example2.php:
+   - FilterRelativeDate: allowed '<unit' as additional syntax
 
 2007-07-14 juga
 
@@ -135,7 +139,6 @@ Changelog
    - compact table (less empty rows)
    - right-align paging next-link
 
-
 2007-07-14 rodival
 
    * include/table_columns.php:
@@ -158,12 +161,12 @@ Changelog
 
 2007-07-13 juga
 
-   * include/filter.php:
-   - bugfix get_terms() for Mysql-match: filter shouldn't return terms if inactive
+   * include/filter.php (FilterMysqlMatch.get_terms, get_submit_elements):
+   - bugfix get_terms() for Mysql-match:
+     filter shouldn't return terms if inactive
    - renamed start-/reset-search -> apply/reset-filter
    - comment for minimum mysql-version for fulltext-search:
-     4.0.1, 4.1.1 query-expansion
-
+     mysql 4.0.1 (boolean-mode), 4.1.1 (query-expansion)
 
 2007-07-12 rodival
 
@@ -196,10 +199,9 @@ Changelog
 
 2007-07-11 juga
 
-   * include/filter.php:
-   - Mysql-match: renamed boolean-mode -> expert-mode,
-     simplify extracting of regex-terms
-
+   * include/filter.php (class FilterMysqlMatch, extract_match_terms):
+   - FilterMysqlMatch: renamed boolean-mode -> expert-mode,
+     simplified extracting of regex-terms
 
 2007-07-11 rodival
 
@@ -250,8 +252,7 @@ Changelog
    - deactivated prev/next game-navigation with images
 
    * include/message_functions.php:
-   - fix last fix for highlighting terms in message-using correct var
-
+   - fix last fix for highlighting terms in message: using correct var
 
 2007-07-09 rodival
 
@@ -290,11 +291,11 @@ Changelog
    * game.php:
    - added images (start/end, previous/next-moves) as links to navigate
      within game; used existing images start/backward/forward/end.gif
+     [later removed]
 
    * users.php, code_examples/query_sql.php, forum/search.php,
      include/message_functions.php:
    - added 'AS' for SQL-table aliases
-
 
 2007-07-07 rodival
 
@@ -412,7 +413,6 @@ ALTER TABLE `Players`
 
    * waiting_room.php:
    - changed bottom-link to 'Show all suitable games' to indicate it's a reset
-
 
 2007-06-30 juga
 
@@ -826,7 +826,7 @@ ALTER TABLE `Posts`
    * waiting_room.php, userinfo.php, edit_bio.php, status.php:
    - using the new Table_infos class properties
 
-   * skins/dragon/screen.css
+   * skins/dragon/screen.css:
    - to follow the Table_infos modifications
 
 
