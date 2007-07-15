@@ -972,9 +972,13 @@ class Table
          $togglestr_show =
             "<a href=\"$query\" title=\"" . attb_quote(T_('Show')) . '">' .
             "<font color=\"blue\">" . CHAR_SHOWFILTER ."</font></a>";
-         $togglestr_hide =
-            "<sup><a href=\"$query\" title=\"" . attb_quote(T_('Hide')) . '">' .
-            "<font size=\"-1\" color=\"{$fcolor_hide}\">x</font></a></sup>";
+         global $base_path;
+         $togglestr_hide = anchor(
+              $query
+            , image( $base_path.'images/remove.gif', 'x', '', 'class="Hide"')
+            , T_('Hide')
+            );
+         $togglestr_hide = '<span class="Tool">' . $togglestr_hide . "</span>";
       }
 
       $tdstr = "  <td valign=\"bottom\"";

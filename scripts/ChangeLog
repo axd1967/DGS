@@ -77,6 +77,18 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-15 rodival
+
+   * include/filter.php (build_generic_selectbox_elem):
+   - moved the "\n" before "</select>" to avoid a spacing effect after the
+     select box.
+
+   * include/table_columns.php (make_table_filter),
+     skins/dragon/screen.css:
+   - inserted the CSSed "hide" buttons for the filters, the same way those
+     from the column headers.
+
+
 2007-07-15 juga
 
    * include/filter.php:
@@ -302,8 +314,8 @@ Changelog
 -----------
 ALTER TABLE `Players`
  CHANGE `Hits` `Hits` int(11) NOT NULL DEFAULT 0 ,
- ADD `VaultTime` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `Registerdate` ,
- ADD `VaultCnt` smallint(5) unsigned default 0 NOT NULL AFTER `Registerdate` ;
+ ADD `VaultTime` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `Hits` ,
+ ADD `VaultCnt` smallint(5) unsigned default 0 NOT NULL AFTER `Hits` ;
 -----------
 
 2007-07-07 rodival
@@ -424,22 +436,22 @@ ALTER TABLE `Players`
    - added (recommended) new indexes to support new filters;
      needed space + reasons given as comment:
 -----------
-ALTER TABLE Games        -- +3 MB (for filter)
- ADD INDEX Handicap (Handicap) ;
-ALTER TABLE Games        -- +2 MB (for filter/sort)
- ADD INDEX Moves (Moves) ;
-ALTER TABLE Games        -- +3 MB (for filter/sort)
- ADD INDEX Score (Score) ;
+ALTER TABLE `Games`        -- +3 MB (for filter)
+ ADD INDEX `Handicap` (`Handicap`) ;
+ALTER TABLE `Games`        -- +2 MB (for filter/sort)
+ ADD INDEX `Moves` (`Moves`) ;
+ALTER TABLE `Games`        -- +3 MB (for filter/sort)
+ ADD INDEX `Score` (`Score`) ;
 
-ALTER TABLE Posts        -- +0.2 MB (for filter)
- ADD INDEX Parent_ID (Parent_ID) ;
-ALTER TABLE Posts        -- +0.2 MB (for filter/sort)
- ADD INDEX Time (Time) ;
+ALTER TABLE `Posts`        -- +0.2 MB (for filter)
+ ADD INDEX `Parent_ID` (`Parent_ID`) ;
+ALTER TABLE `Posts`        -- +0.2 MB (for filter/sort)
+ ADD INDEX `Time` (`Time`) ;
 
-ALTER TABLE Players      -- +0.2 MB (for filter)
- ADD INDEX Country (Country) ;
-ALTER TABLE Players      -- +0.4 MB (for filter/sort, often changed)
- ADD INDEX Lastaccess (Lastaccess) ;
+ALTER TABLE `Players`      -- +0.2 MB (for filter)
+ ADD INDEX `Country` (`Country`) ;
+ALTER TABLE `Players`      -- +0.4 MB (for filter/sort, often changed)
+ ADD INDEX `Lastaccess` (`Lastaccess`) ;
 -----------
 
    * search_messages.php, list_messages.php,
@@ -455,7 +467,7 @@ ALTER TABLE Players      -- +0.4 MB (for filter/sort, often changed)
      MessageCorrespondents
 -----------
 ALTER TABLE Messages     -- ca. +80% of data-size (biggest change)
- ADD FULLTEXT INDEX Subject (Subject,Text) ;
+ ADD FULLTEXT INDEX `Subject` (`Subject`,`Text`) ;
 -----------
 
    * users.php:

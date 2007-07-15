@@ -479,26 +479,35 @@ table.Table th span.Header {
    padding: 0px;
 }
 
+table.Table tr.Filter span.Tool,
 table.Table th span.Tool {
    text-align: left;
    margin: 0px 0px 0px 0px; /* */
    padding: 0px 0px 0px 0px;
 }
 
-table.Table th img.Hide {
-   width: 9px;
-   height: 9px;
-   border: 0px solid black;
-   vertical-align: top;
-   margin: 0px 0px 9px 2px; /* */
-}
-
 table.Table th img.Sort {
    width: 9px;
    height: 9px;
    border: 0px solid green;
-   vertical-align: top;
    margin: 9px 0px 0px -9px; /* */
+   vertical-align: top;
+}
+
+table.Table th img.Hide {
+   width: 9px;
+   height: 9px;
+   border: 0px solid black;
+   margin: 0px 0px 9px 2px; /* */
+   vertical-align: top;
+}
+
+table.Table tr.Filter img.Hide {
+   width: 9px;
+   height: 9px;
+   border: 0px solid black;
+   margin: 0px 0px 9px 2px; /* */
+   vertical-align: top;
 }
 
 table.Table tr.Head {

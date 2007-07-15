@@ -1682,7 +1682,7 @@ class Filter
       else
          error("Bad argument-type [$index_start_keys] for build_generic_selectbox_elem-function");
 
-      $elem .= "</select>\n";
+      $elem .= "\n</select>";
       return $elem;
    }
 
