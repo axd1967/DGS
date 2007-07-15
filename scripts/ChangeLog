@@ -77,6 +77,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-15 juga
+
+   * include/filter.php:
+   - allowed '<days' as additional syntax for FilterRelativeDate
+
 2007-07-14 juga
 
    * include/std_classes.php:
