@@ -47,5 +47,19 @@ function error( $msg ) { echo "ERROR: $msg\n"; }
    // debug String-representation of Q1
    echo "-------------\nQuerySQL #1 to_string():\n" . $q1->to_string() . "\n\n";
 
+   // construct
+   $q4 = new QuerySQL(
+      SQLP_FIELDS, 'G.*',
+      SQLP_FROM,   'Games G', 'Players P',
+      SQLP_UNION_WHERE,
+            'G.White_ID=4711 AND P.ID=G.Black_ID',
+            'G.Black_ID=4711 AND P.ID=G.White_ID',
+      SQLP_WHERE,  "G.Status IN ('PLAY','PASS','SCORE','SCORE2')",
+      SQLP_ORDER,  'Lastchanged DESC', 'ID'
+   );
+
+   // debug String-representation of Q4 using UNION
+   echo "-------------\nQuerySQL #4 (using UNION):\n" . $q4->get_select() . "\n\n";
+
 }
 ?>
