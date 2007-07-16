@@ -110,7 +110,7 @@ $ActiveLevel1 = 10.0;
 $ActiveLevel2 = 150.0;
 
 
-//This car will be a part of a URI query. From RFC 2396 unreserved
+//This char will be a part of a URI query. From RFC 2396 unreserved
 // marks are "-" | "_" | "." | "!" | "~" | "*" | "'" | "(" | ")"
 define('URI_ORDER_CHAR','-');
 
@@ -934,7 +934,7 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
     * $text= str_replace( nl2br("\n"), $eol, nl2br($text) );
     **/
    $eol= "\r\n"; //desired one for emails
-   
+
    switch( $eol )
    {
     default:
@@ -2320,6 +2320,23 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
    mysql_query("DELETE FROM Observers WHERE gid=$gid")
       or error('mysql_query_failed','delete_all_observers.delete');
+}
+
+function build_not_in_clausepart( $arr_enums, $arr_unwanted )
+{
+   $arr = array_diff( $arr_enums, $arr_unwanted );
+   $clause = (count($arr) > 0) ? "IN ('" . implode("','", $arr) . "')" : '';
+   return $clause;
+}
+
+$ENUMS_GAMES_STATUS = array( 'INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED' );
+
+// builds IN-SQL-part for some Games.Status-values not equal to passed (var-args) values
+function not_in_Games_Status()
+{
+   global $ENUMS_GAMES_STATUS;
+   $args = func_get_args();
+   return build_not_in_clausepart( $ENUMS_GAMES_STATUS, $args );
 }
 
 function RGBA($r, $g, $b, $a=NULL)
