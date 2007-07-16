@@ -98,14 +98,14 @@ Changelog
    * include/std_functions.php (build_not_in_clausepart, not_in_Games_Status):
    - added funcs to provide optimized SQL-part IN-clause using index,
      but allowing to express it with negated values,
-     e.g. not_in_Games_Status('INVITE') <=> Status != 'INVITE'
+     e.g. Status not_in_Games_Status('INVITE') <=> Status != 'INVITE'
      <=> Status NOT IN ('INVITE')
      !! all '!=' and 'NOT IN' SQL-parts should be replaced if the
      databases index cardinality on that field is >2 or at least if >3
 
 2007-07-16 rodival
 
-   * include/std_functions.php (send_message, delete_all_observers),
+   * include/std_functions.php (send_message, delete_all_observers):
    - ajusted the arguments of send_message() including the previous
      message modifications
      enabled the use of send_message()
