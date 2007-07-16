@@ -117,6 +117,7 @@ define('URI_ORDER_CHAR','-');
 
 define('MAX_START_RATING', 2600); //6 dan
 define('MIN_RATING', -900); //30 kyu
+define('OUT_OF_RATING', 9999); //ominous rating bounds: [-OUT_OF_RATING,OUT_OF_RATING]
 
 //Allow the "by number of games" graphic (as well as "by date of games").
 define('GRAPH_RATING_BY_NUM_ENA', true);

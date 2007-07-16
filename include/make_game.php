@@ -218,9 +218,13 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    }
 
    $rating_black = $black_row["Rating2"];
+   if( !is_numeric($rating_black) )
+      $rating_black = -OUT_OF_RATING;
    $rating_white = $white_row["Rating2"];
-   $black_rated = ( $black_row['RatingStatus'] && is_numeric($rating_black) && $rating_black >= MIN_RATING );
-   $white_rated = ( $white_row['RatingStatus'] && is_numeric($rating_white) && $rating_white >= MIN_RATING );
+   if( !is_numeric($rating_white) )
+      $rating_white = -OUT_OF_RATING;
+   $black_rated = ( $black_row['RatingStatus'] && $rating_black >= MIN_RATING );
+   $white_rated = ( $white_row['RatingStatus'] && $rating_white >= MIN_RATING );
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row["Size"]));
 
@@ -282,8 +286,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       "Byoperiods=" . $game_info_row["Byoperiods"] . ", " .
       "Black_Maintime=" . $game_info_row["Maintime"] . ", " .
       "White_Maintime=" . $game_info_row["Maintime"] . ", " .
-      (is_numeric($rating_black) ? "Black_Start_Rating=$rating_black, " : '' ) .
-      (is_numeric($rating_white) ? "White_Start_Rating=$rating_white, " : '' ) .
+      ($rating_black >= MIN_RATING ? "Black_Start_Rating=$rating_black, " : '' ) .
+      ($rating_white >= MIN_RATING ? "White_Start_Rating=$rating_white, " : '' ) .
       "WeekendClock='" . $game_info_row["WeekendClock"] . "', " .
       "StdHandicap='$stdhandicap', " .
       "Rated='" . $game_info_row["Rated"] . "'";

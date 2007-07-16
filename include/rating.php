@@ -158,17 +158,18 @@ function suggest_proper($rating_W, $rating_B, $size, $positive_komi=false)
    $H += 0.5; // advantage for playing first;
 
    $handicap = ( $positive_komi ? ceil($H) : round($H) );
+   // temporary, there is no 0 handicap stone game in this calculus. An equal
+   // game is a 1 stone game where black play its handicap stone where he want.
+   if( $handicap < 1 ) $handicap = 1;
 
    if( $rating_B == $rating_W )
       $swap = mt_rand(0,1);
    else
       $swap = ( $rating_B > $rating_W );
 
-   if( $handicap < 1 ) $handicap = 1;
+   $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2.0;
 
-   $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2;
-
-   if( $handicap == 1 ) $handicap = 0;
+   if( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
 
    return array($handicap, $komi, $swap);
 }
@@ -208,7 +209,7 @@ function update_rating($gid)
 
 
    $result = mysql_query( $query )
-      or error('mysql_query_failed','rating.update_rating.find_game');
+      or error('mysql_query_failed','update_rating.find_game');
 
    if( @mysql_num_rows($result) != 1 )
       return -1; //error or game not found (?or rate already done)
@@ -221,7 +222,7 @@ function update_rating($gid)
    if( $too_few_moves or $Rated == 'N' or $wRatingStatus!='RATED' or $bRatingStatus!='RATED' )
    {
       mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid")
-         or error('mysql_query_failed','rating.update_rating.set_rated_N');
+         or error('mysql_query_failed','update_rating.set_rated_N');
 
       if( $too_few_moves )
          return 1; //not rated game
@@ -239,18 +240,18 @@ function update_rating($gid)
    change_rating($wRating, $bRating, $game_result, $Size, $Komi, $Handicap);
 
    mysql_query( "UPDATE Games SET Rated='Done' WHERE ID=$gid" )
-      or error('mysql_query_failed','rating.update_rating.set_rated_Done');
+      or error('mysql_query_failed','update_rating.set_rated_Done');
 
    mysql_query( "UPDATE Players SET Rating=$bRating WHERE ID=$Black_ID" )
-      or error('mysql_query_failed','rating.update_rating.set_black_rating');
+      or error('mysql_query_failed','update_rating.set_black_rating');
 
    mysql_query( "UPDATE Players SET Rating=$wRating WHERE ID=$White_ID" )
-      or error('mysql_query_failed','rating.update_rating.set_white_rating');
+      or error('mysql_query_failed','update_rating.set_white_rating');
 
    mysql_query("INSERT INTO RatingChange (uid,gid,diff) VALUES " .
                "($Black_ID, $gid, " . ($bRating - $bOld) . "), " .
                "($White_ID, $gid, " . ($wRating - $wOld) . ")")
-      or error('mysql_query_failed','rating.update_rating.ratingchange');
+      or error('mysql_query_failed','update_rating.ratingchange');
 
    return 0; //rated game
 }
@@ -276,7 +277,7 @@ function update_rating2($gid, $check_done=true)
 
 
    $result = mysql_query( $query )
-      or error('mysql_query_failed','rating.update_rating2.find_game');
+      or error('mysql_query_failed','update_rating2.find_game');
 
    if( @mysql_num_rows($result) != 1 )
       return -1; //error or game not found or rate already done
@@ -291,7 +292,7 @@ function update_rating2($gid, $check_done=true)
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
                   " WHERE ID=$gid LIMIT 1")
-      or error('mysql_query_failed','rating.update_rating2.set_rated_N');
+      or error('mysql_query_failed','update_rating2.set_rated_N');
 
       if( $too_few_moves )
          return 1; //not rated game
@@ -306,7 +307,7 @@ function update_rating2($gid, $check_done=true)
    $bOld = $bRating;
    $wOld = $wRating;
 
-   // Calculate factor used to alter how much the the ratings are to be changed
+   // Calculate factor used to alter how much the ratings are to be changed
    /*
      with R = ($bRatingMax - $bRatingMin)/($wRatingMax - $wRatingMin);
      and logMF(x), the MAX_FACTOR based logarithm of x:
@@ -376,17 +377,17 @@ function update_rating2($gid, $check_done=true)
    mysql_query( "UPDATE Games SET Rated='Done', " .
                 "Black_End_Rating=$bRating, White_End_Rating=$wRating " .
                 "WHERE ID=$gid LIMIT 1" )
-      or error('mysql_query_failed','rating.update_rating2.set_rated_Done');
+      or error('mysql_query_failed','update_rating2.set_rated_Done');
 
    mysql_query( "UPDATE Players SET Rating2=$bRating, " .
                 "RatingMin=$bRatingMin, RatingMax=$bRatingMax " .
                 "WHERE ID=$Black_ID LIMIT 1" )
-      or error('mysql_query_failed','rating.update_rating2.set_black_rating');
+      or error('mysql_query_failed','update_rating2.set_black_rating');
 
    mysql_query( "UPDATE Players SET Rating2=$wRating, " .
                 "RatingMin=$wRatingMin, RatingMax=$wRatingMax " .
                 "WHERE ID=$White_ID LIMIT 1" )
-      or error('mysql_query_failed','rating.update_rating2.set_white_rating');
+      or error('mysql_query_failed','update_rating2.set_white_rating');
 
    mysql_query('INSERT INTO Ratinglog' .
                '(uid,gid,Rating,RatingMin,RatingMax,RatingDiff,Time) VALUES ' .
@@ -394,7 +395,7 @@ function update_rating2($gid, $check_done=true)
                ($bRating - $bOld) . ", '$Lastchanged'), " .
                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, " .
                ($wRating - $wOld) . ", '$Lastchanged') ")
-      or error('mysql_query_failed','rating.update_rating2.ratinglog');
+      or error('mysql_query_failed','update_rating2.ratinglog');
 
    return 0; //rated game
 }
@@ -428,7 +429,7 @@ function update_rating_glicko($gid, $check_done=true)
 
 
    $result = mysql_query( $query )
-      or error('mysql_query_failed','rating.update_rating_glicko.find_game');
+      or error('mysql_query_failed','update_rating_glicko.find_game');
 
    if( @mysql_num_rows($result) != 1 )
       return -1; //error or game not found or rate already done
@@ -553,12 +554,12 @@ function update_rating_glicko($gid, $check_done=true)
    mysql_query( "UPDATE Players SET RatingGlicko=$w_mu, " .
                 "RatingGlicko_Deviation=$w_phi, RatingGlicko_Volatility=$w_sigma " .
                 "WHERE ID=$White_ID LIMIT 1" )
-      or error('mysql_query_failed','rating.update_rating_glicko.update_white');
+      or error('mysql_query_failed','update_rating_glicko.update_white');
 
    mysql_query( "UPDATE Players SET RatingGlicko=$b_mu, " .
                 "RatingGlicko_Deviation=$b_phi, RatingGlicko_Volatility=$b_sigma " .
                 "WHERE ID=$Black_ID LIMIT 1" )
-      or error('mysql_query_failed','rating.update_rating_glicko.update_black');
+      or error('mysql_query_failed','update_rating_glicko.update_black');
 
    mysql_query('INSERT INTO RatinglogGlicko' .
                '(uid,gid,RatingGlicko,RatingGlicko_Deviation,RatingGlicko_Volatility,RatingDiff,Time) VALUES ' .
@@ -566,7 +567,7 @@ function update_rating_glicko($gid, $check_done=true)
                ($b_mu - $bRating) . ",'$Lastchanged'), " .
                "($White_ID, $gid, $w_mu, $w_phi, $w_sigma, " .
                ($w_mu - $wRating) . ", '$Lastchanged') ")
-      or error('mysql_query_failed','rating.update_rating_glicko.RatinglogGlicko');
+      or error('mysql_query_failed','update_rating_glicko.RatinglogGlicko');
 
    echo "<br>$gid: $White_ID - $Black_ID    $w_mu, $w_phi, $w_sigma - $b_mu, $b_phi, $b_sigma\n";
 
@@ -621,7 +622,7 @@ function read_rating($string)
    $pattern = "/^\s*([1-9][0-9]*)\s*(k|d|kyu|dan|gup)\s*(\(?\s*([+-]?[0-9]+\s*)%\s*\)?\s*)?$/";
 
    if( !preg_match($pattern, $string, $matches) )
-      return null;
+      return -OUT_OF_RATING;
 
    $kyu = ( $matches[2] == 'dan' || $matches[2] == 'd' ) ? 2 : 1;
 
@@ -630,8 +631,8 @@ function read_rating($string)
 
 function rank_to_rating($val, $kyu)
 {
-   if( empty($kyu) )
-      error("rank_not_rating", "val: $val  kyu: $kyu");
+   if( empty($kyu) ) //need 'kyu' or 'dan'
+      error('rank_not_rating', "val: $val  kyu: $kyu");
 
    $rating = $val*100;
 
@@ -646,32 +647,27 @@ function rank_to_rating($val, $kyu)
 
 function get_rating_at($uid, $date)
 {
-   $result = mysql_query( "SELECT Rating FROM Ratinglog " .
-                          "WHERE uid='$uid' AND Time<='$date' " .
-                          "ORDER BY Time DESC LIMIT 1" )
-      or error('mysql_query_failed','rating.get_rating_at.find_data');
+   $row = mysql_single_fetch( 'get_rating_at.find_data',
+               "SELECT Rating FROM Ratinglog " .
+               "WHERE uid='$uid' AND Time<='$date' " .
+               "ORDER BY Time DESC LIMIT 1" );
 
-   if( @mysql_num_rows($result) != 1 )
-   {
-      mysql_free_result($result);
-      $result = mysql_query( "SELECT InitialRating AS Rating FROM Players WHERE ID='$uid'" )
-         or error('mysql_query_failed','rating.get_rating_at.initial_rating');
-   }
-
-   $row = mysql_fetch_assoc( $result );
-   mysql_free_result($result);
+   if( !$row )
+      $row = mysql_query( 'get_rating_at.initial_rating',
+               "SELECT InitialRating AS Rating FROM Players WHERE ID='$uid'" );
 
    if( isset($row['Rating']) )
       return $row['Rating'];
-   return MIN_RATING-1;
+   return -OUT_OF_RATING; //not ranked
 }
 
 
 function convert_to_rating($string, $type)
 {
 
+   $rating = -OUT_OF_RATING;
    if( empty($string) )
-      return null;
+      return $rating;
 
    $string = strtolower($string);
    $string = str_replace(chr(160), ' ', $string); // change to normal space char.
@@ -679,11 +675,11 @@ function convert_to_rating($string, $type)
    $val = doubleval($string);
 
    if( strpos($string, 'k') > 0 or strpos($string, 'gup') > 0 )
-      $kyu = 1;
+      $kyu = 1; // kyu rank
    else if( strpos($string, 'd') > 0 )
-      $kyu = 2;
+      $kyu = 2; // dan rank
    else
-      $kyu = 0;
+      $kyu = 0; // no grad found => rating assumed
 
    $igs_table[0]['KEY'] = 200;
    $igs_table[0]['VAL'] = 500;
@@ -700,19 +696,19 @@ function convert_to_rating($string, $type)
 
    switch( $type )
    {
-      case 'dragonrating':
+      case 'dragonrating': //need 'kyu' or 'dan'
       {
          $rating = read_rating($string);
 
-         if( !is_numeric($rating) )
-            error("rank_not_rating", "type: $type  Rating: $rating  string: $string");
+         if( !is_numeric($rating) or $rating < MIN_RATING )
+            error('rank_not_rating', "type: $type  Rating: $rating  string: $string");
       }
       break;
 
       case 'eurorating':
       {
-         if( $kyu > 0 )
-            error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
+         if( $kyu > 0 ) //must not have 'kyu' or 'dan'
+            error('rating_not_rank', "type: $type  val: $val  kyu: $kyu");
 
          $rating = $val;
       }
@@ -735,8 +731,8 @@ function convert_to_rating($string, $type)
 
       case 'agarating':
       {
-         if( $kyu > 0 )
-            error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
+         if( $kyu > 0 ) //must not have 'kyu' or 'dan'
+            error('rating_not_rank', "type: $type  val: $val  kyu: $kyu");
 
          if( $val > 0 )
             $rating = $val*100 + 1950;
@@ -757,8 +753,8 @@ function convert_to_rating($string, $type)
 
 //       case 'igsrating':
 //       {
-//          if( $kyu > 0 )
-//             error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
+//          if( $kyu > 0 ) //must not have 'kyu' or 'dan'
+//             error('rating_not_rank', "type: $type  val: $val  kyu: $kyu");
 
 //          $rating = $val*100 - 1130 ;
 //          $rating = table_interpolate($rating, $igs_table, true);
@@ -776,11 +772,10 @@ function convert_to_rating($string, $type)
 
       case 'nngsrating':
       {
-         if( $kyu > 0 )
-            error("rating_not_rank", "type: $type  val: $val  kyu: $kyu");
+         if( $kyu > 0 ) //must not have 'kyu' or 'dan'
+            error('rating_not_rank', "type: $type  val: $val  kyu: $kyu");
 
          $rating = $val - 900;
-
       }
       break;
 
@@ -812,7 +807,7 @@ function convert_to_rating($string, $type)
 
       default:
       {
-         error("wrong_rank_type");
+         error('wrong_rank_type');
       }
    }
 
@@ -823,7 +818,7 @@ function convert_to_rating($string, $type)
       $rating = MIN_RATING;
 
    if( $rating > MAX_START_RATING or $rating < MIN_RATING )
-      error("rating_out_of_range");
+      error('rating_out_of_range');
 
    return $rating;
 }

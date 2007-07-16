@@ -1952,8 +1952,8 @@ class FilterRating extends Filter
    function convert_rank($rank)
    {
       $rating = read_rating($rank);
-      if ( is_null($rating) or $rating < MIN_RATING or $rating > 5000 )
-      { // min=30k (-900), max=5000 (ominous limit)
+      if ( is_null($rating) or $rating < MIN_RATING or $rating > OUT_OF_RATING )
+      { // min=30k (-900), max=9999 (ominous limit)
          $this->init_parse($this->value); // reset all parsed-vars
          $this->errormsg = "[$rank] " . T_('invalid rank');
       }

@@ -95,6 +95,11 @@ Changelog
 
 2007-07-16 rodival
 
+   * include/std_functions.php, include/make_game.php (create_game),
+     include/rating.php (get_rating_at, convert_to_rating, read_rating),
+     include/filter.php (convert_rank):
+   - introduced the OUT_OF_RATING constant (ominous limit for ratings)
+
    * skins/dragon/screen.css:
    - adjusted the size of the separations of the forum posts.
      added some comments
