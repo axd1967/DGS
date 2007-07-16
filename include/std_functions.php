@@ -1101,6 +1101,24 @@ function send_message( $debugmsg, $text='', $subject=''
          or error('mysql_query_failed', $debugmsg.'.game_message');
    }
 
+   if( $from_id > 0 && $prev_mid > 0 )
+   {
+      $query = "UPDATE MessageCorrespondents SET Replied='Y'";
+      if( $prev_folder > FOLDER_ALL_RECEIVED )
+         $query .= ", Folder_nr=$prev_folder";
+      $query.= " WHERE mid=$prev_mid AND uid=$from_id AND Sender!='Y' LIMIT 1";
+      mysql_query( $query )
+         or error('mysql_query_failed', $debugmsg.'.reply_correspondent');
+
+      if( $prev_type )
+      {
+         $query = "UPDATE Messages SET Type='$prev_type'" .
+                  " WHERE ID=$prev_mid LIMIT 1";
+         mysql_query( $query )
+            or error('mysql_query_failed', $debugmsg.'.reply_message');
+      }
+   }
+
    if( $notify )
    {
       $query= array();
@@ -2333,7 +2351,7 @@ function toggle_observe_list( $gid, $uid )
          or error('mysql_query_failed','toggle_observe_list.insert');
 }
 
-//Text must NOT be escaped by mysql_addslashes()
+//$Text must NOT be escaped by mysql_addslashes()
 function delete_all_observers( $gid, $notify, $Text='' )
 {
    global $NOW;
