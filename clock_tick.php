@@ -125,9 +125,10 @@ if( !$is_down )
 
       if( $time_is_up )
       {
-
+         //TODO: Delete games with too few moves ???
          $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
 
+         //TODO: HOT_SECTION ???
          $game_query = "UPDATE Games SET Status='FINISHED', " . //See *** HOT_SECTION ***
              "Last_X=".POSX_TIME.", " .
              "ToMove_ID=0, " .
@@ -153,10 +154,15 @@ if( !$is_down )
                . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
                . "</center>" ;
 
-         $Text = mysql_addslashes( $Text);
+if(ENA_SEND_MESSAGE){ //new
+         send_message( 'clock_tick', $Text, 'Game result'
+            ,array($Black_ID,$White_ID), '', true
+            , 0, 'RESULT', $gid);
+}else{ //old
+         $Textsql = mysql_addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                       "Type='RESULT'," .
-                      "Game_ID=$gid, Subject='Game result', Text='$Text'")
+                      "Game_ID=$gid, Subject='Game result', Text='$Textsql'")
                or error('mysql_query_failed',"clock_tick.timeup_message($gid)");
 
          if( mysql_affected_rows() == 1)
@@ -168,12 +174,14 @@ if( !$is_down )
                         "($White_ID, $mid, 'N', ".FOLDER_NEW.")")
                or error('mysql_query_failed',"clock_tick.timeup_mess_corr($gid)");
          }
+         unset($mid);
 
          // Notify players
          mysql_query( "UPDATE Players SET Notify='NEXT' " .
                       "WHERE (ID='$Black_ID' OR ID='$White_ID') " .
                       "AND SendEmail LIKE '%ON%' AND Notify='NONE' LIMIT 2")
                or error('mysql_query_failed',"clock_tick.timeup_notify($gid)");
+} //old/new
 
 //         update_rating($gid);
          $rated_status = update_rating2($gid); //0=rated game

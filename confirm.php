@@ -34,6 +34,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
             "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
                "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
                   "AND ID>$gid )) " .
+            //keep this order like the one in the status page
             "ORDER BY Lastchanged,ID " .
             "LIMIT 1" );
 
@@ -50,7 +51,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    $gid = @$_REQUEST['gid'] ;
    if( $gid <= 0 )
-      error("no_game_nr");
+      error('no_game_nr');
 
    if( @$_REQUEST['nextback'] )
       jump_to("game.php?gid=$gid");
@@ -170,7 +171,8 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
       error('internal_error', "confirm load_from_db $gid");
 
-   $message = mysql_addslashes(trim(get_request_arg('message')));
+   $message_raw = trim(get_request_arg('message'));
+   $message = mysql_addslashes($message_raw);
    $message_query = '';
 
    $game_finished = false;
@@ -565,24 +567,30 @@ This is why:
                . "</center>" ;
       }
 
-         $Text = mysql_addslashes( $Text);
-      if ( $message )
+      if ( $message_raw )
       {
          if( $message_from_server_way )
          {
             //A server message will only be read by this player
-            $Text .= "Your opponent wrote:<p></p>" . $message;
+            $Text .= "Your opponent wrote:<p></p>" . $message_raw;
          }
          else
          {
             //Because both players will read this message
-            $Text .= "The final message was:<p></p>" . $message;
+            $Text .= "The final message was:<p></p>" . $message_raw;
          }
       }
 
+if(ENA_SEND_MESSAGE){ //new
+      send_message( 'confirm', $Text, $Subject
+         ,$opponent_row['ID'], '', false //the move is always notified
+         ,( $message_from_server_way ? 0 : $player_row["ID"] )
+         , 'RESULT', $gid);
+}else{ //old
+      $Textsql = mysql_addslashes( $Text);
       mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
                    "Type='RESULT'," .
-                   "Game_ID=$gid, Subject='$Subject', Text='$Text'")
+                   "Game_ID=$gid, Subject='$Subject', Text='$Textsql'")
             or error('mysql_query_failed','confirm.messages');
 
       if( mysql_affected_rows() != 1)
@@ -603,17 +611,22 @@ This is why:
 
       mysql_query( $query)
          or error('mysql_query_failed','confirm.mess_corr');
-
+      unset($mid);
+} //old/new
    }
 
 
    // Notify opponent about move
 
-   if( $next_to_move_ID != $player_row['ID'] )
+   //if( $next_to_move_ID != $player_row['ID'] ) //always true
+if(1){ //new
+      notify( 'confirm', $next_to_move_ID);
+}else{ //old
       mysql_query( "UPDATE Players SET Notify='NEXT' " .
                    "WHERE ID='$next_to_move_ID' AND Notify='NONE' " .
                    "AND SendEmail LIKE '%ON%' LIMIT 1")
          or error('mysql_query_failed','confirm.notify_opponent');
+} //old/new
 
 
 

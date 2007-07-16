@@ -974,13 +974,19 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
    return $res;
 }
 
-//$text and $subject must NOT be escaped by mysql_escape_string()
-//$to_ids and $to_handles have been splitted because, historically, some handles
-//may seems to be numeric (e.g. '00000') as their first char may be a digit.
-//In fact, both are treated like strings or arrays here.
+define('ENA_SEND_MESSAGE', 1); //TODO: remove it and the associated code lines after a while
+/**
+ * $text and $subject must NOT be escaped by mysql_escape_string()
+ * $to_ids and $to_handles have been splitted because, historically, some handles
+ *  may seems to be numeric (e.g. '00000') as their first char may be a digit.
+ *  In fact, both are treated like strings or arrays here.
+ * if $prev_mid is >0, the previous (answered) message will be flaged as Replied,
+ *  set to the type $prev_type and moved to the folder $prev_folder.
+ **/
 function send_message( $debugmsg, $text='', $subject=''
             , $to_ids='', $to_handles='', $notify=true
-            , $from_id=0, $reply_to=0, $type='NORMAL', $gid=0
+            , $from_id=0, $type='NORMAL', $gid=0
+            , $prev_mid=0, $prev_type='', $prev_folder=FOLDER_NONE
             )
 {
    global $NOW;
@@ -996,10 +1002,10 @@ function send_message( $debugmsg, $text='', $subject=''
       $type = 'NORMAL';
    if( !isset($gid) or !is_numeric($gid) or $gid<0 )
       $gid = 0;
-   if( !isset($from_id) or !is_numeric($from_id) or $from_id<0 )
+   if( !isset($from_id) or !is_numeric($from_id) or $from_id<2 ) //exclude guest
       $from_id = 0; //i.e. server message
-   if( !isset($reply_to) or !is_numeric($reply_to) or $reply_to<0 )
-      $reply_to = 0;
+   if( !isset($prev_mid) or !is_numeric($prev_mid) or $prev_mid<0 )
+      $prev_mid = 0;
 
    $to_myself= false;
    $receivers= array();
@@ -1008,25 +1014,30 @@ function send_message( $debugmsg, $text='', $subject=''
                    'Handle' => &$to_handles,
             ) as $field => $var )
    {
-      if( !is_array($var) )
-         $var= preg_split('%[\s,]+%', $var);
-      $var= implode("','", array_map('mysql_addslashes', $var));
-      if( $var > '' )
+      if( is_array($var) )
+         $var= implode(',', $var);
+      $var= preg_split('%[\s,]+%', $var);
+      if( count($var) <= 0 )
+         continue;
+
+      $var= implode("','",
+         ( $field == 'ID' ? $var : array_map('mysql_addslashes', $var) ));
+      if( !$var )
+         continue;
+
+      $query= "SELECT ID,Notify,SendEmail"
+            ." FROM Players WHERE $field IN ('$var')";
+      $result = mysql_query( $query)
+         or error('mysql_query_failed',$debugmsg.".get$field($var)");
+      while( ($row=mysql_fetch_assoc($result)) )
       {
-         $query= "SELECT ID,Notify,SendEmail"
-               ." FROM Players WHERE $field IN ('$var')";
-         $result = mysql_query( $query)
-            or error('mysql_query_failed',$debugmsg.".get$field($var)");
-         while( ($row=mysql_fetch_assoc($result)) )
-         {
-            $uid= $row['ID'];
-            if( $from_id > 0 && $uid == $from_id )
-               $to_myself= true;
-            else
-               $receivers[$uid]= $row;
-         }
-         mysql_free_result($result);
+         $uid= $row['ID'];
+         if( $from_id > 0 && $uid == $from_id )
+            $to_myself= true;
+         else if( $uid > 1 ) //exclude guest
+            $receivers[$uid]= $row;
       }
+      mysql_free_result($result);
    }
    if( !$to_myself && count($receivers) <= 0 )
       error('receiver_not_found',$debugmsg.'rec0');
@@ -1042,13 +1053,13 @@ function send_message( $debugmsg, $text='', $subject=''
       error('receiver_not_found',$debugmsg.'rec1');
 
    $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
-          .", Type='$type', ReplyTo=$reply_to, Game_ID=$gid"
+          .", Type='$type', ReplyTo=$prev_mid, Game_ID=$gid"
           .", Subject='$subject', Text='$text'" ;
    mysql_query( $query)
       or error('mysql_query_failed',$debugmsg.'.message');
 
    if( mysql_affected_rows() != 1 )
-      error('mysql_insert_message',$debugmsg);
+      error('mysql_insert_message',$debugmsg.'.message');
 
    $mid = mysql_insert_id();
    ksort($receivers);
@@ -1062,11 +1073,11 @@ function send_message( $debugmsg, $text='', $subject=''
          $query[]= "$mid,$from_id,'Y','N',".FOLDER_SENT;
    }
 
-   $replied= ( $from_id > 0 && $type == 'INVITATION' ?'M' :'N' );
+   $need_reply= ( ($from_id > 0 && $type == 'INVITATION') ?'M' :'N' );
 
    foreach( $receivers as $uid => $row )
    {
-      $query[]= "$mid,$uid,'N','$replied',".FOLDER_NEW;
+      $query[]= "$mid,$uid,'N','$need_reply',".FOLDER_NEW;
    }
 
    $cnt= count($query);
@@ -1076,7 +1087,18 @@ function send_message( $debugmsg, $text='', $subject=''
              ." (mid,uid,Sender,Replied,Folder_nr) VALUES"
              .' ('.implode('),(', $query).")";
       mysql_query( $query)
-         or error('mysql_query_failed',$debugmsg.'.mess_corr');
+         or error('mysql_query_failed',$debugmsg.'.correspondent');
+
+      if( mysql_affected_rows() != $cnt )
+         error('mysql_insert_message',$debugmsg.'.correspondent');
+   }
+
+   //records the last message of the invitation/dispute sequence
+   //the type of the previous messages is changed to 'DISPUTED'
+   if( $gid > 0 && ( $type == "INVITATION" ) )
+   {
+      mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" )
+         or error('mysql_query_failed', $debugmsg.'.game_message');
    }
 
    if( $notify )
@@ -1093,11 +1115,39 @@ function send_message( $debugmsg, $text='', $subject=''
       {
          $query= "UPDATE Players SET Notify='NEXT'"
                 .' WHERE ID IN ('.implode(',', $query).')'
-                ." AND Notify='NONE' AND SendEmail LIKE '%ON%' LIMIT $cnt";
+                //." AND SendEmail LIKE '%ON%'"
+                ." AND Notify='NONE' LIMIT $cnt";
          mysql_query( $query)
-            or error('mysql_query_failed', $debugmsg.'.notify');
+            or error('mysql_query_failed', $debugmsg.'.mess_notify');
       }
    }
+
+   return $mid; //>0: no error
+}
+
+function notify( $debugmsg, $ids)
+{
+   if( !is_array($ids) )
+      $ids= array( $ids);
+   $query = array();
+   foreach( $ids as $cnt )
+      $query = array_merge( $query, explode(',', $cnt));
+   $ids = array();
+   foreach( $query as $cnt )
+      if( ($cnt=(int)$cnt) > 1 ) //exclude guest
+         $ids[$cnt] = $cnt;
+
+   $cnt= count($ids);
+   if( $cnt <= 0 )
+      return 'no IDs';
+
+   $query= "UPDATE Players SET Notify='NEXT'"
+          .' WHERE ID IN ('.implode(',', $ids).')'
+          ." AND SendEmail LIKE '%ON%'"
+          ." AND Notify='NONE' LIMIT $cnt";
+   mysql_query( $query)
+      or error('mysql_query_failed', $debugmsg.'.notify');
+
    return ''; //no error
 }
 
@@ -2283,7 +2333,7 @@ function toggle_observe_list( $gid, $uid )
          or error('mysql_query_failed','toggle_observe_list.insert');
 }
 
-//Text must be escaped by mysql_addslashes()
+//Text must NOT be escaped by mysql_addslashes()
 function delete_all_observers( $gid, $notify, $Text='' )
 {
    global $NOW;
@@ -2299,8 +2349,17 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
          $Subject = 'An observed game has finished';
 
+if(ENA_SEND_MESSAGE){ //new
+         $to_ids = array();
+         while( $row = mysql_fetch_array( $result ) )
+            $to_ids[] = $row['pid'];
+         send_message( 'delete_all_observers', $Text, $Subject
+            ,$to_ids, '', false
+            , 0, 'NORMAL', $gid);
+}else{ //old
+         $Textsql = mysql_addslashes( $Text);
          mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
-                      "Game_ID=$gid, Subject='$Subject', Text='$Text'" )
+                      "Game_ID=$gid, Subject='$Subject', Text='$Textsql'" )
             or error('mysql_query_failed','delete_all_observers.message');
 
          if( mysql_affected_rows() == 1)
@@ -2314,8 +2373,10 @@ function delete_all_observers( $gid, $notify, $Text='' )
                   or error('mysql_query_failed','delete_all_observers.message');
             }
          }
+} //old/new
 
       }
+      mysql_free_result($result);
    }
 
    mysql_query("DELETE FROM Observers WHERE gid=$gid")

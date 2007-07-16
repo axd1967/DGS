@@ -47,25 +47,24 @@ disable_cache();
    if( $tmp>0 && $my_id != $tmp )
       error('user_mismatch');
 
-   $message_id = @$_REQUEST['foldermove_mid'];
    $tohdl = get_request_arg('to');
-   $reply = @$_REQUEST['reply']; //ID of message replied. if set then (often?always?) == $message_id
    $subject = get_request_arg('subject');
    $message = get_request_arg('message');
    $type = @$_REQUEST['type'];
    if( !$type )
-      $type = "NORMAL";
-   $gid = @$_REQUEST['gid'];
+      $type = 'NORMAL';
+   $prev_mid = max( 0, (int)@$_REQUEST['reply']); //ID of message replied.
    $accepttype = isset($_REQUEST['send_accept']);
    $declinetype = isset($_REQUEST['send_decline']);
 
    $folders = get_folders($my_id);
    $new_folder = @$_REQUEST['folder'];
-   $current_folder = @$_REQUEST['current_folder'];
 
    if( isset($_REQUEST['foldermove']) )
    {
-      if( change_folders($my_id, $folders, array($message_id), $new_folder
+      $foldermove_mid = @$_REQUEST['foldermove_mid'];
+      $current_folder = @$_REQUEST['current_folder'];
+      if( change_folders($my_id, $folders, array($foldermove_mid), $new_folder
             , $current_folder, $type == 'INVITATION') <= 0 )
       {
          $new_folder = ( $current_folder ? $current_folder : FOLDER_ALL_RECEIVED ) ;
@@ -94,9 +93,9 @@ disable_cache();
 // find receiver of the message
 
    $opponent_row = mysql_single_fetch( 'send_message.find_receiver',
-                          "SELECT ID, SendEmail, Notify, ClockUsed, OnVacation, " .
-                          "Rating2, RatingStatus " .
-                          "FROM Players WHERE Handle='".mysql_addslashes($tohdl)."'" );
+                          "SELECT ID, ClockUsed, OnVacation, Rating2, RatingStatus" .
+                          (ENA_SEND_MESSAGE ?'' :", SendEmail, Notify") .
+                          " FROM Players WHERE Handle='".mysql_addslashes($tohdl)."'" );
 
    if( !$opponent_row )
       error('receiver_not_found');
@@ -126,6 +125,7 @@ disable_cache();
    }
    else if( $accepttype )
    {
+      $gid = (int)@$_REQUEST['gid'];
       $game_row = mysql_single_fetch( 'send_message.accept',
                              "SELECT Black_ID, White_ID, ToMove_ID, " .
                              "Size, Handicap, Komi, " .
@@ -134,7 +134,7 @@ disable_cache();
                              "FROM Games WHERE ID=$gid" );
 
       if( !$game_row )
-         error('mysql_start_game','send_message.accept');
+         error('mysql_start_game',"send_message.accept($gid)");
 
       //ToMove_ID hold handitype since INVITATION
       $handitype = $game_row["ToMove_ID"];
@@ -208,35 +208,49 @@ disable_cache();
    }
    else if( $declinetype )
    {
+      $gid = (int)@$_REQUEST['gid'];
       $result = mysql_query( "DELETE FROM Games WHERE ID=$gid AND Status='INVITED'" .
                              //" AND ( Black_ID=$my_id OR White_ID=$my_id ) " .
                              //" AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
                              " AND (White_ID=$my_id OR Black_ID=$my_id)" .
                              " AND $opponent_ID=White_ID+Black_ID-$my_id" .
                              " LIMIT 1")
-         or error('mysql_query_failed', 'send_message.decline');
+         or error('mysql_query_failed', "send_message.decline($gid)");
 
       if( mysql_affected_rows() != 1)
       {
-         error("mysql_delete_game_invitation");
+         error('mysql_delete_game_invitation', "send_message.decline($gid)");
          exit;
       }
 
+      $gid = -1; //deleted
       $subject = "Game invitation decline";
    }
+   else
+      $gid = 0;
 
 
 
 // Update database
 
+if(ENA_SEND_MESSAGE){ //new
+   send_message( 'send_message', $message, $subject
+      , $opponent_ID, '', true //$opponent_row['Notify'] == 'NONE'
+      , $my_id, $type, $type == 'INVITATION' ?$gid :0
+      , $prev_mid, $disputegid > 0 ?'DISPUTED' :''
+      , isset($folders[$new_folder]) ? $new_folder
+         : ( $accepttype or $declinetype or $disputegid > 0 ? FOLDER_MAIN
+            : FOLDER_NONE )
+      );
+}else{ //old
    $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
        "Type='$type', ";
 
    if( $type == 'INVITATION' )
       $query .= "Game_ID=$gid, ";
 
-   if( $reply > 0 )
-      $query .= "ReplyTo=$reply, ";
+   if( $prev_mid > 0 )
+      $query .= "ReplyTo=$prev_mid, ";
 
    $message = mysql_addslashes(trim($message));
    //not if invitation/dispute/decline:
@@ -269,9 +283,10 @@ disable_cache();
 
    if( $type == "INVITATION" )
       mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" )
-         or error('mysql_query_failed', 'send_message.invitation');
+         or error('mysql_query_failed', 'send_message.game_message');
+   unset($mid);
 
-   if( $reply > 0 )
+   if( $prev_mid > 0 )
    {
       $query = "UPDATE MessageCorrespondents SET Replied='Y'";
 
@@ -283,17 +298,16 @@ disable_cache();
          $query .= ", Folder_nr=$new_folder";
       }
 
-      $query .= " WHERE mid=$reply AND Sender!='Y' AND uid=$my_id LIMIT 1";
+      $query .= " WHERE mid=$prev_mid AND uid=$my_id AND Sender!='Y' LIMIT 1";
 
       mysql_query( $query )
          or error('mysql_query_failed', 'send_message.reply');
 
       if( $disputegid > 0 )
          mysql_query( "UPDATE Messages SET Type='DISPUTED' " .
-                      "WHERE ID=$reply LIMIT 1")
+                      "WHERE ID=$prev_mid LIMIT 1")
             or error('mysql_query_failed', 'send_message.dispute');
    }
-
 
 // Notify receiver about message
 
@@ -304,6 +318,8 @@ disable_cache();
                              "WHERE Handle='".mysql_addslashes($tohdl)."' LIMIT 1" )
          or error('mysql_query_failed', 'send_message.notify_receiver');
    }
+} //old/new
+
 
    $msg = urlencode(T_('Message sent!'));
 

@@ -105,10 +105,24 @@ Changelog
 
 2007-07-16 rodival
 
+   * include/std_functions.php (send_message, delete_all_observers),
+   - ajusted the arguments of send_message() including the previous
+     message modifications
+     enabled the use of send_message()
+     changed the escaped state of the Text argument of delete_all_observers()
+     now it should NOT be escaped before the call.
+
+   * send_message.php, join_waitingroom_game.php, clock_tick.php:
+   - enabled the use of send_message()
+
+   * confirm.php:
+   - enabled the use of send_message() and notify()
+
    * include/std_functions.php, include/make_game.php (create_game),
      include/rating.php (get_rating_at, convert_to_rating, read_rating),
      include/filter.php (convert_rank):
-   - introduced the OUT_OF_RATING constant (ominous limit for ratings)
+   - introduced the OUT_OF_RATING constant (ominous limit for ratings).
+     now read_rating() always return a numeric value.
 
    * skins/dragon/screen.css:
    - adjusted the size of the separations of the forum posts.
