@@ -94,7 +94,7 @@ $ARR_DBFIELDKEYS = array(
    $usfilter->add_filter(3, 'Date',         'G.Lastchanged', true );
    $usfilter->add_filter(4, 'Selection',
          array( T_('All games') => '',
-                T_('Running games')  => "G.Status NOT IN ('INVITED','FINISHED')",
+                T_('Running games')  => "G.Status IN ('PLAY','PASS','SCORE','SCORE2')", //NOT IN ('INVITED','FINISHED')
                 T_('Finished games') => "G.Status='FINISHED'" ),
          true,
          array( FC_DEFAULT => 2 ) );

@@ -368,7 +368,7 @@ require_once( "include/rating.php" );
          $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
       }
       else
-         $qsql->add_part( SQLP_WHERE, "Status NOT IN ('INVITED','FINISHED')" );
+         $qsql->add_part( SQLP_WHERE, "Status IN ('PLAY','PASS','SCORE','SCORE2')" ); //NOT IN ('INVITED','FINISHED')
    }
    else // user
    {
