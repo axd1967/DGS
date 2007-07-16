@@ -448,16 +448,11 @@ table.Table td {
    padding: 3px;
 }
 
-table.Table tr.Head th {
-   white-space: pre; /* normal, nowrap - pre: allow &#10; */
-   text-align: center;
-   vertical-align: bottom;
-}
-
 table.Table th a,
 table.Table th {
    color: black;
    font-weight: bold;
+   text-align: center;
 }
 
 table.Table td a,
@@ -467,11 +462,19 @@ table.Table td {
    text-align: left;
 }
 
-table.Table td.PagingRight {
-   text-align: right;
+/* row of the column headers */
+
+table.Table tr.Head {
+   background: #cccccc;
 }
 
-table.Table th span.Header {
+table.Table tr.Head th {
+   white-space: pre; /* normal, nowrap - pre: allow &#10; */
+   text-align: center;
+   vertical-align: bottom;
+}
+
+table.Table tr.Head th span.Header {
    color: black;
    font-weight: bold;
    text-align: center;
@@ -479,40 +482,10 @@ table.Table th span.Header {
    padding: 0px;
 }
 
-table.Table tr.Filter span.Tool,
-table.Table th span.Tool {
-   text-align: left;
-   margin: 0px 0px 0px 0px; /* */
-   padding: 0px 0px 0px 0px;
-}
-
-table.Table th img.Sort {
-   width: 9px;
-   height: 9px;
-   border: 0px solid green;
-   margin: 9px 0px 0px -9px; /* */
-   vertical-align: top;
-}
-
-table.Table th img.Hide {
-   width: 9px;
-   height: 9px;
-   border: 0px solid black;
-   margin: 0px 0px 9px 2px; /* */
-   vertical-align: top;
-}
-
-table.Table tr.Filter img.Hide {
-   width: 9px;
-   height: 9px;
-   border: 0px solid black;
-   margin: 0px 0px 9px 2px; /* */
-   vertical-align: top;
-}
-
-table.Table tr.Head {
-   background: #cccccc;
-}
+/*
+ row of the column filters
+ may be at the bottom of the table
+*/
 
 table.Table tr.Filter {
    background: #dddddd;
@@ -529,6 +502,8 @@ table.Table tr.Filter td.ShowFilter {
    text-align: center;
    font-color: blue;
 }
+
+/* rows of datas */
 
 table.Table tr.Row3,
 table.Table tr.Row1 {
@@ -558,16 +533,24 @@ table.Table tr.Row2 td.Warning {
    background: #e6b9bd;
 }
 
+
+/* special cells of various tables */
+
 table.Table td.Mark {
    text-align: center;
 }
 
+/* TODO: remove those three: */
 table.Table td.Right {
    text-align: right;
 }
 
 table.Table td.Center {
    text-align: center;
+}
+
+table.Table td.PagingRight {
+   text-align: right;
 }
 
 table.Table th.Button {
@@ -593,6 +576,39 @@ table.Table a.Button {
    font-weight: bold;
    text-align: center;
    white-space: nowrap;
+}
+
+/* cells tools */
+
+table.Table td span.Tool,
+table.Table th span.Tool {
+   text-align: left;
+   margin: 0px 0px 0px 0px; /* */
+   padding: 0px 0px 0px 0px;
+}
+
+table.Table th img.Hide {
+   width: 9px;
+   height: 9px;
+   border: 0px solid black;
+   margin: 0px 0px 9px 2px; /* */
+   vertical-align: top;
+}
+
+table.Table th img.Sort {
+   width: 9px;
+   height: 9px;
+   border: 0px solid green;
+   margin: 9px 0px 0px -9px; /* */
+   vertical-align: top;
+}
+
+table.Table td img.Hide {
+   width: 9px;
+   height: 9px;
+   border: 0px solid black;
+   margin: 0px 0px 9px 2px; /* */
+   vertical-align: top;
 }
 
 
@@ -1001,7 +1017,7 @@ table.Forum .Moderated {
 
 table.Forum td {
    border: 0px solid red;
-   padding: 3px;
+   padding: 2px 2px 0px 2px;
    margin: 0px;
    text-align: left;
    color: black;

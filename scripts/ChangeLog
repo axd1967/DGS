@@ -66,6 +66,22 @@ create_game() can't fail without a fatal error!
  but there is 0 errors for both IP since 2 days in Errorlog.
 Maybe an other track: this was a 2 stones handicap game (but the previous 330544
  game is without handicap).
+\2007-07-14 rodival
+   2 new users with a bad "Running" count have appeared yesterday:
+   12570=mamutik:212.80.81.50 | 27776=nananana:87.184.126.232
+ uid   cntfix recent finished games      recent accepted games      ucol
+ 12570 20=>19 328063 2007-07-13 09:22:59 329871 2007-07-13 13:13:21 W
+               (no more since 4 days)    332632 2007-07-13 13:13:20 B
+ 27776 13=>12 332594 2007-07-13 17:13:00 332657 2007-07-13 15:04:31 B
+              331803 2007-07-13 12:31:41 332658 2007-07-13 15:04:31 W
+              331802 2007-07-13 10:46:09 329871 2007-07-13 13:13:21 B
+              331054 2007-07-12 21:11:12 332632 2007-07-13 13:13:20 W
+              331053 2007-07-12 21:06:22 332593 2007-07-13 10:30:40 W
+              331450 2007-07-11 09:30:44  (no more since 4 days)
+ 0 errors for both IP since 4 days in Errorlog.
+So 2 common started games: 329871,332632
+maybe a double game (same size=7x7, same handicap=6.0+0, same byoyomi=JAP)
+and, if so, created from an invitation (large ID diff)
 
 -----
 
@@ -76,6 +92,16 @@ quick TODO:
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-07-16 rodival
+
+   * skins/dragon/screen.css:
+   - adjusted the size of the separations of the forum posts.
+     added some comments
+
+   * user_stats.php, show_games.php:
+   - reversed the "NOT IN ('INVITED','FINISHED')" clauses
+
 
 2007-07-16 juga
 
