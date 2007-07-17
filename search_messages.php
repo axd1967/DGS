@@ -94,9 +94,11 @@ require_once( "include/filter.php" );
    // table-filters
    $mfilter = new SearchFilter();
    $mfilter->add_filter( 2, 'Text',    //! \todo can't search for myself with this filter (because otherP maybe null and therefore removing rows from SQL-result)!!
-         '(other_name #OP #VAL OR other_Handle #OP #VAL)',
+         'other_Handle',
+         #'(other_name #OP #VAL OR other_Handle #OP #VAL)', // could use filter on both, but would need UNION to avoid 'OR'
          true,
-         array( FC_SIZE => 14, FC_ADD_HAVING => 1, FC_SQL_TEMPLATE => 1 ));
+         array( FC_SIZE => 14, FC_ADD_HAVING => 1,
+                FC_SYNTAX_HINT => array( FCV_SYNHINT_ADDINFO => T_('find Userid') ) ));
    $mfilter->add_filter( 3, 'MysqlMatch', 'M.Subject,M.Text', true,
          array( FC_MATCH_MODE => MATCH_BOOLMODE_SET ) );
    $mfilter->add_filter( 4, 'RelativeDate', 'M.Time', true);
@@ -193,7 +195,7 @@ require_once( "include/filter.php" );
 
 
    $menu_array = array();
-   $menu_array[ T_('Back to browsing folders') ] = "list_messages.php";
+   $menu_array[ T_('Browse folders') ] = "list_messages.php";
    $menu_array[ T_('Edit folders') ] = "edit_folders.php";
 
    end_page(@$menu_array);
