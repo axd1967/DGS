@@ -398,13 +398,22 @@ require_once( "include/rating.php" );
          $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
       }
 
-      $qsql->add_part( SQLP_WHERE,
-         //"(( Black_ID=$uid AND White_ID=Players.ID ) OR
-         //( White_ID=$uid AND Black_ID=Players.ID ))"
-         "(White_ID=$uid OR Black_ID=$uid)",
-         "Players.ID=White_ID+Black_ID-$uid" );
+      if ( ALLOW_SQL_UNION )
+      {
+         $qsql->add_part( SQLP_UNION_WHERE,
+            "White_ID=$uid AND Players.ID=Black_ID",
+            "Black_ID=$uid AND Players.ID=White_ID" );
+      }
+      else
+      {
+         $qsql->add_part( SQLP_WHERE,
+            //"(( Black_ID=$uid AND White_ID=Players.ID ) OR
+            //( White_ID=$uid AND Black_ID=Players.ID ))"
+            "(White_ID=$uid OR Black_ID=$uid)",
+            "Players.ID=White_ID+Black_ID-$uid" );
+      }
 
-      $order .= ',Games.ID';
+      $order .= ',ID';
    }
 
    $qsql->merge( $gtable->get_query() );
@@ -593,12 +602,36 @@ require_once( "include/rating.php" );
 
    $row_str = $gtable->current_rows_string();
 
+   // use more detailed link-texts to show where you are and where you can go
    if( $finished or $observe )
-      $menu_array[T_('Show running games')] = "show_games.php?uid=$uid".URI_AMP.$row_str;
+   {
+      // where am I ?
+      if ( $myID == $uid )
+         $menukey = T_('Show my running games');
+      elseif ( $all )
+         $menukey = T_('Show all running games');
+      else // other user
+         $menukey = T_('Show running games');
+      $menu_array[$menukey] = "show_games.php?uid=$uid".URI_AMP.$row_str;
+   }
    if( !$finished )
-      $menu_array[T_('Show finished games')] = "show_games.php?uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
-   if( !$observe )
-      $menu_array[T_('Show observed games')] = "show_games.php?observe=1".URI_AMP.$row_str;
+   {
+      // where am I ?
+      if ( $myID == $uid )
+         $menukey = T_('Show my finished games');
+      elseif ( $all )
+         $menukey = T_('Show all finished games');
+      else // other user
+         $menukey = T_('Show finished games');
+      $menu_array[$menukey] = "show_games.php?uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
+   }
+   if( $observe )
+   { // allow back navigation to all-games (with potentially shared URL-vars)
+      $menu_array[T_('Show all running games')]  = "show_games.php?uid=all".URI_AMP.$row_str;
+      $menu_array[T_('Show all finished games')] = "show_games.php?uid=all".URI_AMP."finished=1".URI_AMP.$row_str;
+   }
+   else
+      $menu_array[T_('Show my observed games')] = "show_games.php?observe=1".URI_AMP.$row_str;
 
    end_page(@$menu_array);
 }
