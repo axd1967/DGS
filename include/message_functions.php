@@ -1038,7 +1038,7 @@ function message_list_table( &$mtable, $result, $show_rows
              , $full_details=false, $header_part=null, $rx_terms=''
              )
 {
- global $date_fmt, $msg_icones;
+ global $date_fmt, $msg_icones, $player_row;
 
    $can_move_messages = false;
 
@@ -1103,21 +1103,46 @@ function message_list_table( &$mtable, $result, $show_rows
       if( empty($row["other_name"]) )
          $row["other_name"] = '-';
 
-      $str = make_html_safe($row["other_name"]);
-      //if( !$deleted )
-         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid{$url_terms}\">$str</A>";
-      if( !$full_details and $row['Sender'] === 'Y' )
-         $str = T_('To') . ': ' . $str;
-      $mrow_strings[2] = "<td>$str</td>";
+      // link to message
+      $showmsg_start = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid{$url_terms}\">";
+      $showmsg_end   = "</A>";
+
+      // link to user
+      if ( $full_details )
+      {
+         if( $row['Sender'] === 'M' ) //Message to myself
+            $user_str = user_reference( REF_LINK, 1, '',
+               array( 'ID'     => $player_row['ID'],
+                      'Name'   => $row["other_name"] . ' - ' . $player_row['Name'],
+                      'Handle' => $player_row['Handle'] ));
+         else if( $row["other_ID"] > 0 )
+            $user_str = user_reference( REF_LINK, 1, '',
+               $row['other_ID'], $row['other_name'], $row['other_handle'] );
+      }
+      else
+         $user_str = '';
+
+      if ( $full_details ) // user-link
+         $mrow_strings[2] = "<td>$user_str</td>";
+      else
+      { // msg-link
+         $str = $showmsg_start . make_html_safe($row["other_name"]) . $showmsg_end;
+         if( $row['Sender'] === 'Y' )
+            $str = T_('To') . ': ' . $str;
+         $mrow_strings[2] = "<td>$str</td>";
+      }
 
       $subject = $row['Subject'];
       $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_terms);
-      $mrow_strings[3] = "<td>" . $subject . "&nbsp;</td>";
+      if ( $full_details ) // link to msg
+         $str = $showmsg_start . $subject . $showmsg_end;
+      else // no-link
+         $str = $subject;
+      $mrow_strings[3] = "<td>$str&nbsp;</td>";
 
       list($ico,$alt) = $msg_icones[$row['flow']];
       $str = image( "images/$ico.gif", $alt, $tits[$row['flow']]);
-      //if( !$deleted )
-         $str = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid{$url_terms}\">$str</A>";
+      $str = $showmsg_start . $str . $showmsg_end;
       $mrow_strings[0] = "<td>$str</td>";
 
       $mrow_strings[4] = "<td>" . date($date_fmt, $row["Time"]) . "</td>";
