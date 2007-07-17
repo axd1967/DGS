@@ -127,7 +127,7 @@ $ARR_DBFIELDKEYS = array(
    $ufilter->init(); // parse current value from _GET
 
    $utable = new Table( 'user', $page, 'UsersColumns' );
-   $utable->set_default_sort( 'P.ID', 0);
+   $utable->set_default_sort( 'ID', 0);
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
@@ -153,23 +153,23 @@ $ARR_DBFIELDKEYS = array(
    $utable->add_external_parameters( $page_vars );
 
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $utable->add_tablehead( 1, T_('Opponent ID'), 'P.ID', false, true);
-   $utable->add_tablehead( 2, T_('Name'), 'P.Name');
-   $utable->add_tablehead( 3, T_('Userid'), 'P.Handle');
-   $utable->add_tablehead(16, T_('Country'), 'P.Country');
+   $utable->add_tablehead( 1, T_('Opponent ID'), 'ID', false, true);
+   $utable->add_tablehead( 2, T_('Name'), 'Name');
+   $utable->add_tablehead( 3, T_('Userid'), 'Handle');
+   $utable->add_tablehead(16, T_('Country'), 'Country');
    $utable->add_tablehead( 4, T_('Rank info'));
-   $utable->add_tablehead( 5, T_('Rating'), 'P.Rating2', true);
+   $utable->add_tablehead( 5, T_('Rating'), 'Rating2', true);
    $utable->add_tablehead( 6, T_('Open for matches?'));
    $utable->add_tablehead( 7, T_('Games'), 'Games', true);
-   $utable->add_tablehead( 8, T_('Running'), 'P.Running', true);
-   $utable->add_tablehead( 9, T_('Finished'), 'P.Finished', true);
-   $utable->add_tablehead(17, T_('Rated'), 'P.RatedGames', true);
-   $utable->add_tablehead(10, T_('Won'), 'P.Won', true);
-   $utable->add_tablehead(11, T_('Lost'), 'P.Lost', true);
+   $utable->add_tablehead( 8, T_('Running'), 'Running', true);
+   $utable->add_tablehead( 9, T_('Finished'), 'Finished', true);
+   $utable->add_tablehead(17, T_('Rated'), 'RatedGames', true);
+   $utable->add_tablehead(10, T_('Won'), 'Won', true);
+   $utable->add_tablehead(11, T_('Lost'), 'Lost', true);
    $utable->add_tablehead(12, T_('Percent'), 'Percent', true);
    $utable->add_tablehead(13, T_('Activity'), 'ActivityLevel', true, true);
-   $utable->add_tablehead(14, T_('Last access'), 'P.Lastaccess', true);
-   $utable->add_tablehead(15, T_('Last Moved'), 'P.Lastmove', true);
+   $utable->add_tablehead(14, T_('Last access'), 'Lastaccess', true);
+   $utable->add_tablehead(15, T_('Last Moved'), 'Lastmove', true);
 
 
    // form for static filters
@@ -219,8 +219,20 @@ $ARR_DBFIELDKEYS = array(
 
    $uqsql = new QuerySQL( // base-query is to show only opponents
       SQLP_OPTS, 'DISTINCT',
-      SQLP_FROM, 'Games G',
-      SQLP_WHERE, "(G.White_ID=$uid OR G.Black_ID=$uid)", "P.ID=G.White_ID+G.Black_ID-$uid" );
+      SQLP_FROM, 'Games G' );
+   if ( ALLOW_SQL_UNION )
+   {
+      $uqsql->add_part( SQLP_UNION_WHERE,
+         "G.White_ID=$uid AND P.ID=G.Black_ID",
+         "G.Black_ID=$uid AND P.ID=G.White_ID" );
+   }
+   else
+   {
+      $uqsql->add_part( SQLP_WHERE,
+         "(G.White_ID=$uid OR G.Black_ID=$uid)",
+         "P.ID=G.White_ID+G.Black_ID-$uid" );
+   }
+
    $uqsql->add_part( SQLP_FIELDS,
       'P.*', 'P.Rank AS Rankinfo',
       "(P.Activity>$ActiveLevel1)+(P.Activity>$ActiveLevel2) AS ActivityLevel",
