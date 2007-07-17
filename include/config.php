@@ -51,4 +51,7 @@ define('URI_AMP_IN','&'); //ini_get('arg_separator.input')
 //URI_AMP at '&amp;' work even if arg_separator.output is set to '&'
 define('URI_AMP','&amp;'); //ini_get('arg_separator.output')
 //define('URI_AMP','&'); //ini_get('arg_separator.output')
+
+define('ALLOW_SQL_UNION', 1); // 1 = UNION supported (needs min. mysql 4.0.X)
+
 ?>
