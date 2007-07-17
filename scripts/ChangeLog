@@ -93,6 +93,13 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-17 juga
+
+   * forum/search.php:
+   - changed Author-filter:
+     only filtering on Players.Handle, removed OR with Players.Name
+     adjusted Text by adding '(Userid)'
+
 2007-07-16 juga
 
    * include/std_functions.php (build_not_in_clausepart, not_in_Games_Status):
