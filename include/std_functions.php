@@ -2401,22 +2401,30 @@ if(ENA_SEND_MESSAGE){ //new
       or error('mysql_query_failed','delete_all_observers.delete');
 }
 
-function build_not_in_clausepart( $arr_enums, $arr_unwanted )
+
+// definitions and functions to help avoid '!=' or 'NOT IN' in SQL-where-clauses:
+
+$ENUM_GAMES_STATUS = array( 'INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED' );
+
+/*! SQL-clause-part applied for Games.Status to select all running games. */
+define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2') ");
+
+
+/*!
+ * Builds IN-SQL-part for some enum-array containing all possible values
+ * for a table-column.
+ * \param $arr_enum non-empty array with all possible values for a table-column
+ * \param var-args enum-values that shouldn't match on table-column;
+ *        must not contain all elements of enum(!)
+ * Example: 'Games.Status' . not_in_clause( $ENUM_GAMES_STATUS, 'FINISHED', ... )
+ */
+function not_in_clause( $arr_enum )
 {
-   $arr = array_diff( $arr_enums, $arr_unwanted );
-   $clause = (count($arr) > 0) ? "IN ('" . implode("','", $arr) . "')" : '';
-   return $clause;
+   $arr_not = func_get_args();
+   $arr = array_diff( $arr_enum, array_slice( $arr_not, 1 ) );
+   return " IN ('" . implode("','", $arr) . "') ";
 }
 
-$ENUMS_GAMES_STATUS = array( 'INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED' );
-
-// builds IN-SQL-part for some Games.Status-values not equal to passed (var-args) values
-function not_in_Games_Status()
-{
-   global $ENUMS_GAMES_STATUS;
-   $args = func_get_args();
-   return build_not_in_clausepart( $ENUMS_GAMES_STATUS, $args );
-}
 
 function RGBA($r, $g, $b, $a=NULL)
 {
