@@ -96,8 +96,8 @@ define('MODERATOR_SEARCH', 0);
    $ffilter = new SearchFilter();
    $ffilter->add_filter( 1, 'Selection', $arr_forum, true);
    $ffilter->add_filter( 2, 'MysqlMatch', 'Subject,Text', true);
-   $ffilter->add_filter( 3, 'Text', '(P.Handle #OP #VAL OR P.Name #OP #VAL)', true,
-         array( FC_SIZE => 16, FC_SQL_TEMPLATE => 1 ));
+   $ffilter->add_filter( 3, 'Text', 'P.Handle', true,
+         array( FC_SIZE => 16 ));
    $ffilter->add_filter( 4, 'Selection',     #! \todo Handle New Forum-Posts
          array( T_('All messages') => '',
                 T_('First messages') => 'Posts.Parent_ID=0' ),
@@ -127,7 +127,7 @@ define('MODERATOR_SEARCH', 0);
          'FILTERERROR', $ffilter, 2, $FERR1, $FERR2."<BR>", true,
          ));
    $fform->add_row( array(
-         'DESCRIPTION', T_('Author'),
+         'DESCRIPTION', T_('Author (Userid)'),
          'FILTER',      $ffilter, 3,
          'FILTERERROR', $ffilter, 3, "<br>$FERR1", $FERR2, true,
          ));
