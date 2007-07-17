@@ -211,6 +211,14 @@ define('FC_MULTIPLE', 'multiple');
  */
 define('FC_QUOTETYPE', 'quotetype');
 
+/*!
+ * \brief allows to adjust hover-text with syntax-description for filter.
+ * values: array( FCV_SYNHINT_ADDINFO => optional, additional text inserted right after 'Syntax (addinfo):' );
+ * default is not to use any additional hint in syntax-description.
+ */
+define('FC_SYNTAX_HINT', 'syntax_hint');
+define('FCV_SYNHINT_ADDINFO', 'fcv_synhint_addinfo');
+
 
 
  /*!
@@ -1309,13 +1317,27 @@ class Filter
    {
       if ( isset($this->syntax_descr) and !is_null($this->syntax_descr) )
       {
-         if ( $this->syntax_descr != '' )
-            return T_('Syntax') . ": " . $this->syntax_descr;
-         else
+         $addinfo = $this->get_syntax_hint(FCV_SYNHINT_ADDINFO, " (%s)" );
+         if ( $this->syntax_descr == '' and $addinfo == '' )
             return '';
+
+         $syntax = T_('Syntax') . $addinfo;
+         if ( $this->syntax_descr != '' )
+            $syntax .= ': ' . $this->syntax_descr;
+         return $syntax;
       }
       else
          error("ERROR: Filter-class for type [{$this->type}] is missing syntax-description");
+   }
+
+   /*! \brief Returns optional syntax-hint-text for $confkey and format with specified sprintf-format. */
+   function get_syntax_hint( $confkey, $format )
+   {
+      $arr = $this->get_config(FC_SYNTAX_HINT);
+      if ( is_array($arr) )
+         return sprintf( $format, $arr[$confkey] );
+      else
+         return '';
    }
 
    /*!
@@ -1755,7 +1777,7 @@ class Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SQL_TEMPLATE, FC_ADD_HAVING,
   *    FC_NO_RANGE, FC_DEFAULT (numeric value), FC_SIZE (5), FC_MAXLEN,
-  *    FC_QUOTETYPE
+  *    FC_QUOTETYPE, FC_SYNTAX_HINT
   *
   * <p>supported filter-specific config:
   *    FC_NUM_FACTOR
@@ -1826,7 +1848,7 @@ class FilterNumeric extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (8), FC_MAXLEN,
   *    FC_NO_RANGE, FC_DEFAULT (text-value), FC_SQL_TEMPLATE, FC_ADD_HAVING,
-  *    FC_QUOTETYPE
+  *    FC_QUOTETYPE, FC_SYNTAX_HINT
   *
   * <p>supported filter-specific config:
   *    FC_NO_WILD = if true, wildcard is forbidden (and treated as normal char)
@@ -1916,7 +1938,7 @@ class FilterText extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (6), FC_MAXLEN,
   *    FC_NO_RANGE, FC_DEFAULT (valid rank-text), FC_SQL_TEMPLATE,
-  *    FC_ADD_HAVING, FC_QUOTETYPE
+  *    FC_ADD_HAVING, FC_QUOTETYPE, FC_SYNTAX_HINT
   */
 class FilterRating extends Filter
 {
@@ -2115,7 +2137,7 @@ class FilterCountry extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (16), FC_MAXLEN,
   *    FC_NO_RANGE, FC_DEFAULT (date-text), FC_SQL_TEMPLATE, FC_ADD_HAVING,
-  *    FC_QUOTETYPE
+  *    FC_QUOTETYPE, FC_SYNTAX_HINT
   */
 class FilterDate extends Filter
 {
@@ -2234,7 +2256,7 @@ class FilterDate extends Filter
   *
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (4),
-  *    FC_SQL_TEMPLATE, FC_ADD_HAVING
+  *    FC_SQL_TEMPLATE, FC_ADD_HAVING, FC_SYNTAX_HINT
   *
   * <p>supported filter-specific config:
   *    FC_TIME_UNITS - bitmask specifying choice in selectbox for time-units; values: FRDTU_...
@@ -2782,7 +2804,7 @@ class FilterBoolean extends Filter
   *      "word word" -> literal phrase to be found
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE,
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE, FC_SYNTAX_HINT,
   *    FC_DEFAULT - match-term-value if scalar, or
   *                 array( '' => match-term-value, 'b' => 1=boolean-mode-ON or 0=OFF )
   *
@@ -3008,6 +3030,7 @@ class FilterMysqlMatch extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (for text-input),
   *    FC_MAXLEN (for text-input), FC_NO_RANGE, FC_ADD_HAVING, FC_QUOTETYPE,
+  *    FC_SYNTAX_HINT,
   *    FC_DEFAULT - score-mode (index) if scalar, or
   *                 array( '' => score-value, 'r' => score-mode-index );
   *       score-mode: FSCORE_ALL=show-all (default), FSCORE_RESIGN|TIME|SCORE,

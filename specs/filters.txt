@@ -771,6 +771,11 @@ see section (2) Classes and Files.
   escaped while still allowing to use range-syntax.
   However you may do escape it: "7k (-20%)" and "7k (\-20%)" are equivalent.
 
+* Can I extend the default syntax-hover-text-description of a filter ?
+
+  Yes. See filter-config FC_SYNTAX_HINT.
+  Example on Numeric-Filter #2 in "code_examples/filter_example2.php".
+
 
 #-------- (6) Possible Future Enhancements ------------------------------------
 # Priority (1=high, 5=low, ?=unknown) is added, e.g. Prio(1)
