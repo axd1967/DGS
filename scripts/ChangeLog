@@ -95,6 +95,24 @@ Changelog
 
 2007-07-17 juga
 
+   * search_messages.php:
+   - avoid SQL-'OR'-operator by reducing Correspondent-filter on Players.Handle,
+     may later be reverted by using UNION-based-query
+   - extended filters syntax-description with hint to what can be searched (Userid)
+   - changed bottom-link to 'Browse folders'
+
+   * include/message_functions.php:
+   - changed message-list for search-messages-page to show
+     full user-name with handle and link to userinfo,
+     added message-link on subject
+
+   * include/filter.php, specs/filters.txt,
+   * code_examples/filter_example2.php:
+   - added filter-config FC_SYNTAX_HINT allowing to extend a filters
+     hover-text-syntax-description
+   - added example for filter-config FC_SYNTAX_HINT
+
+
    * include/std_functions.php:
    - added constant SQL-clause-part IS_RUNNING_GAME to apply for Games.Status
      to optimize SQL getting rid of '!='-operator to use index
