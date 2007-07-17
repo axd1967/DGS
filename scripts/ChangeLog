@@ -95,6 +95,20 @@ Changelog
 
 2007-07-17 juga
 
+   * include/std_functions.php:
+   - added constant SQL-clause-part IS_RUNNING_GAME to apply for Games.Status
+     to optimize SQL getting rid of '!='-operator to use index
+   - changed func: build_not_in_clausepart(..) -> not_in_clause( enum-array, var-args )
+     to build optimized 'NOT IN'-surrogate with IN for any table-column
+   - removed func: not_in_Games_Status(), use not_in_clause( $ENUM_GAMES_STATUS, ...)
+
+   * clock_tick.php, confirm.php, daily_cron.php, edit_vacation.php,
+     halfhourly_cron.php, quick_status.php, show_games.php, status.php,
+     scripts/player_consistency.php, scripts/start_frozen_clocks.php,
+     rss/status.php, wap/status.php:
+   - optimized SQL getting rid of '!='-operator to use index on Games.Status,
+     replaced using SQL-clause-part IS_RUNNING_GAME
+
    * forum/search.php:
    - changed Author-filter:
      only filtering on Players.Handle, removed OR with Players.Name
