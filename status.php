@@ -136,7 +136,7 @@ require_once( "include/message_functions.php" );
       "Clock.Ticks " . //always my clock because always my turn (status page)
       "FROM (Games,Players AS opponent) " .
       "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed " .
-      "WHERE ToMove_ID=$uid AND Status!='INVITED' AND Status!='FINISHED' " .
+      "WHERE ToMove_ID=$uid AND Status" . IS_RUNNING_GAME .
       "AND opponent.ID=(Black_ID+White_ID-$uid) " .
       "ORDER BY $order,Games.ID";
 

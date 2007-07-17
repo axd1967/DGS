@@ -97,7 +97,7 @@ require_once( "include/form_functions.php" );
          // LastTicks will handle -(time spend) at the moment of the start of vacations
          $result = mysql_query("SELECT Games.ID as gid, LastTicks-Clock.Ticks AS ticks " .
                          "FROM Games, Clock " .
-                         "WHERE Status!='INVITED' AND Status!='FINISHED' " .
+                         "WHERE Status" . IS_RUNNING_GAME .
                          'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                          'AND Clock.ID=Games.ClockUsed ' .
                          "AND ToMove_ID='" . $player_row['ID'] . "'" )

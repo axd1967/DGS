@@ -368,7 +368,7 @@ require_once( "include/rating.php" );
          $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
       }
       else
-         $qsql->add_part( SQLP_WHERE, "Status IN ('PLAY','PASS','SCORE','SCORE2')" ); //NOT IN ('INVITED','FINISHED')
+         $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
    }
    else // user
    {
@@ -395,7 +395,7 @@ require_once( "include/rating.php" );
       }
       else // running
       {
-         $qsql->add_part( SQLP_WHERE, "Status != 'INVITED' AND Status != 'FINISHED'" );
+         $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
       }
 
       $qsql->add_part( SQLP_WHERE,
@@ -586,7 +586,7 @@ require_once( "include/rating.php" );
 
    if( !$all && $uid > 0 && $uid != $myID )
    {
-         $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
+      $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
       if( !$observe )
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$uid";
    }

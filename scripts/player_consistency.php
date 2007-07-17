@@ -292,7 +292,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 //-----------------
 
    $diff = cnt_diff( 'Run', 'Running'
-                   , "Status!='INVITED' AND Status!='FINISHED'"
+                   , 'Status' . IS_RUNNING_GAME
                    , "", "");
    foreach( $diff as $ID => $ary )
    {

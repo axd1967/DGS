@@ -137,7 +137,7 @@ else
        "UNIX_TIMESTAMP(LastChanged) as date, " .
        "opponent.Name, opponent.Handle, opponent.ID AS pid " .
        "FROM Games,Players AS opponent " .
-       "WHERE ToMove_ID=$my_id AND Status!='INVITED' AND Status!='FINISHED' " .
+       "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME .
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        "ORDER BY date DESC, Games.ID";
 

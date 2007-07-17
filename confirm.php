@@ -30,7 +30,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    $row = mysql_single_fetch( 'confirm.jump_to_next_game',
             "SELECT ID FROM Games " .
             "WHERE ToMove_ID=$uid "  .
-            "AND Status!='INVITED' AND Status!='FINISHED' " .
+            "AND Status" . IS_RUNNING_GAME .
             "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
                "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
                   "AND ID>$gid )) " .

@@ -154,7 +154,7 @@ if( !$is_down )
    $q_finished = "SELECT SUM(Moves) as MovesFinished, COUNT(*) as GamesFinished FROM Games " .
        "WHERE Status='FINISHED'";
    $q_running = "SELECT SUM(Moves) as MovesRunning, COUNT(*) as GamesRunning FROM Games " .
-       "WHERE Status!='FINISHED' AND Status!='INVITED'";
+       "WHERE Status" . IS_RUNNING_GAME;
    $q_users = "SELECT SUM(Hits) as Hits, Count(*) as Users, SUM(Activity) as Activity FROM Players";
 
    $result = mysql_query( $q_finished )
