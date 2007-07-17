@@ -93,7 +93,21 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
-2007-07-17 juga
+2007-07-18 juga
+
+   * show_games.php, user_stats.php:
+   - optimized SQL replacing 'OR'-operator with UNION-based SQL-query,
+     activated with global const ALLOW_SQL_UNION in "include/config.php",
+     needed to adjust sort-fieldnames (UNION forces to use fields from SELECT)
+   - used more detailed bottom link-texts for games-page to show
+     where you are and where you can go (showing my/all/other-users games,
+     without adding more links),
+     added additional links to show all games (preserving shared URL-vars)
+
+   * include/config.php:
+   - added ALLOW_SQL_UNION as on/off-switch to control UNION-support,
+     default now is to support UNION-queries
+
 
    * search_messages.php:
    - avoid SQL-'OR'-operator by reducing Correspondent-filter on Players.Handle,
@@ -107,11 +121,12 @@ Changelog
      added message-link on subject
 
    * include/filter.php, specs/filters.txt,
-   * code_examples/filter_example2.php:
+     code_examples/filter_example2.php:
    - added filter-config FC_SYNTAX_HINT allowing to extend a filters
      hover-text-syntax-description
    - added example for filter-config FC_SYNTAX_HINT
 
+2007-07-17 juga
 
    * include/std_functions.php:
    - added constant SQL-clause-part IS_RUNNING_GAME to apply for Games.Status
@@ -123,7 +138,7 @@ Changelog
    * clock_tick.php, confirm.php, daily_cron.php, edit_vacation.php,
      halfhourly_cron.php, quick_status.php, show_games.php, status.php,
      scripts/player_consistency.php, scripts/start_frozen_clocks.php,
-     rss/status.php, wap/status.php:
+     user_stats.php, rss/status.php, wap/status.php:
    - optimized SQL getting rid of '!='-operator to use index on Games.Status,
      replaced using SQL-clause-part IS_RUNNING_GAME
 
