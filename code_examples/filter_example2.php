@@ -109,7 +109,7 @@ if ( $fdemo == 1 )
    );
    $arr_layout = array(
       1 => array( 'label' => 'Numeric #1', 'descr' => 'standard filter allowing exact and range-syntax' ),
-      2 => array( 'label' => 'Numeric #2', 'descr' => 'OR\'grouping with filter #3 [FC_GROUP_SQL_OR]' ),
+      2 => array( 'label' => 'Numeric #2', 'descr' => 'OR\'grouping with filter #3 [FC_GROUP_SQL_OR], [FC_SYNTAX_HINT] for additional info in syntax-hover-text-description' ),
       3 => array( 'label' => 'Numeric #3', 'descr' => 'OR\'grouping with filter #2 [FC_GROUP_SQL_OR]' ),
       4 => array( 'label' => 'Numeric #4', 'descr' => 'use fix URL-fieldname NUM4 [FC_FNAME] (check in URL), using SQL-template as dbfield [FC_SQL_TEMPLATE]' ),
       5 => array( 'label' => 'Numeric #5', 'descr' => 'use complex query with QuerySQL (with template)' ),
@@ -123,7 +123,8 @@ if ( $fdemo == 1 )
 
    # OR'grouping filter 2+3
    $filter->add_filter( 2, 'Numeric', 'num2', true,
-         array( FC_GROUP_SQL_OR => '2,3' ));
+         array( FC_GROUP_SQL_OR => '2,3',
+                FC_SYNTAX_HINT => array( FCV_SYNHINT_ADDINFO => 'additional info' ) ));
 
    # OR'grouping filter 2+3, using QuerySQL with simple-fieldname just like simple dbfield (see filter #2)
    $filter->add_filter( 3, 'Numeric',
@@ -754,6 +755,7 @@ elseif ( $fdemo == 18 )
    $title = array(
       'Miscellaneous Filter-Config',
       'for [FC_STATIC], see <a href="filter_example.php">code_examples/filter_example.php</a>',
+      'use [FC_SYNTAX_HINT] to extend (text-based) filters default syntax-description with more text, for example see Numeric-Filter #2',
    );
 }
 
