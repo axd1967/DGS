@@ -122,6 +122,9 @@ Changelog
    * include/config.php:
    - moved a line closer to its friends.
 
+   * include/message_functions.php, include/countries.php, site_map.php:
+   - minor fixes.
+
 2007-07-18 juga
 
    * opponents.php, user_stats.php, site_map.php, userinfo.php, users.php,

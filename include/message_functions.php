@@ -1118,9 +1118,9 @@ function message_list_table( &$mtable, $result, $show_rows
          else if( $row["other_ID"] > 0 )
             $user_str = user_reference( REF_LINK, 1, '',
                $row['other_ID'], $row['other_name'], $row['other_handle'] );
+         else
+            $user_str = '';
       }
-      else
-         $user_str = '';
 
       if ( $full_details ) // user-link
          $mrow_strings[2] = "<td>$user_str</td>";
