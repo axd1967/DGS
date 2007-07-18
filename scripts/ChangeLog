@@ -99,6 +99,28 @@ Changelog
 
 2007-07-18 juga
 
+   * change_profile.php, edit_profile.php,
+     include/std_functions.php (get_maxrows, build_maxrows_array),
+     include/table_columns.php:
+   - added TableMaxRows (can be locally changed using cookie),
+     store table-max-rows in new column Players.TableMaxRows
+   - Table: URL-var 'maxrows' overrules user-prefs for max-rows
+   - added limits for profiled maxrows: MAXROWS_PER_PAGE_PROFILE
+   - added maxrows-default for get_maxrows(): MAXROWS_PER_PAGE_DEFAULT
+   - added default rows-limit for build_maxrows_array to restrict max-rows
+     in edit-profile to MAXROWS_PER_PAGE [50]
+-----------
+ALTER TABLE `Players`
+ ADD `TableMaxRows` smallint(5) unsigned default 20 NOT NULL;
+-----------
+
+   * list_messages.php:
+   - reverted bottom-link to verbal form: Search messages (according to site-map)
+
+   * include/filter.php (add_or_del_filter):
+   - removed todo to save filter (for now)
+
+
    * include/filter.php (is_static),
      code_examples/filter_example.php, code_examples/filter_example2.php:
    - added global const FILTER_CONF_FORCE_STATIC making all
@@ -123,6 +145,7 @@ Changelog
    - moved a line closer to its friends.
 
    * include/message_functions.php, include/countries.php, site_map.php:
+   - activated eu-flag
    - minor fixes.
 
 2007-07-18 juga
