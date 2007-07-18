@@ -84,6 +84,10 @@ require_once( "include/countries.php" );
 
    $skinname = get_request_arg('skinname');
 
+   $tablemaxrows = get_maxrows(
+      get_request_arg('tablemaxrows'),
+      MAXROWS_PER_PAGE_PROFILE, $RowsPerPage );
+
 
    $query = "UPDATE Players SET " .
       "Name='" . mysql_addslashes($name) . "', " .
@@ -116,6 +120,7 @@ require_once( "include/countries.php" );
       $cookie_prefs['NotesLargeMode'] = $noteslargemode;
       $cookie_prefs['NotesCutoff'] = (int)@$_GET['notescutoff'];
       $cookie_prefs['SkinName'] = $skinname;
+      $cookie_prefs['TableMaxRows'] = $tablemaxrows;
 
       set_cookie_prefs($player_row['ID']);
    }
@@ -136,7 +141,8 @@ require_once( "include/countries.php" );
          "NotesLargeWidth=" . (int)@$_GET['noteslargewidth'] . ", " .
          "NotesLargeMode='$noteslargemode', " .
          "NotesCutoff=" . (int)@$_GET['notescutoff'] . ", " .
-         "SkinName='" . mysql_addslashes($skinname) . "', ";
+         "SkinName='" . mysql_addslashes($skinname) . "', " .
+         "TableMaxRows=$tablemaxrows, ";
 
       set_cookie_prefs($player_row['ID'], true);
    }
@@ -149,7 +155,7 @@ require_once( "include/countries.php" );
 */
    $language = trim(get_request_arg('language'));
 
-   if( $language === 'C' or 
+   if( $language === 'C' or
          ( $language !== $player_row['Lang'] && language_exists( $language ) )
      )
    {

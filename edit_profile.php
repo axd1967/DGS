@@ -121,6 +121,8 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    include_once( 'skins/known_skins.php' );
 //   $known_skins = array('dragon' => 'Dragon Go Server original');
 
+   $tablemaxrows = build_maxrows_array(0, MAXROWS_PER_PAGE_PROFILE); // array( 10 => 10, ...)
+
 
 //------------
 
@@ -230,6 +232,11 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                'DESCRIPTION', T_('Game id button'),
                'TEXT', $button_code,
             ) );
+
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Table max rows'),
+                                  'SELECTBOX', 'tablemaxrows', 1, $tablemaxrows,
+                                  $player_row['TableMaxRows'], false,
+                                  'TEXT', '&nbsp;' . T_('choosing a lower value helps to reduce server-load and is recommended (see also FAQ)') ) );
 
 
 
