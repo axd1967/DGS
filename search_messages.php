@@ -86,7 +86,7 @@ require_once( "include/filter.php" );
    //NOT-USED: $smfilter->add_filter( 3, 'Boolean', array( true  => 'me.Folder_Nr IS NULL', false => 'me.Folder_Nr IS NOT NULL' ), true, array( FC_LABEL => T_('Show deleted messages') ) );
    $smfilter->add_filter( 4, 'Selection',
          array( T_('All') => '',
-                T_('Game-related')   => 'M.Game_ID<>0',
+                T_('Game-related')   => 'M.Game_ID>0', // <>0
                 T_('Game-unrelated') => 'M.Game_ID=0' ),
          true);
    $smfilter->init(); // parse current value from _GET
