@@ -95,8 +95,11 @@ $sgf_color='"#d50047"';
 
 $max_links_in_main_menu=5;
 
+define('MAXROWS_PER_PAGE_DEFAULT', 20);
+define('MAXROWS_PER_PAGE_PROFILE', 50);
 define('MAXROWS_PER_PAGE', 100);
-$RowsPerPage = 50;
+
+$RowsPerPage = 20;
 define('LIST_ROWS_MODULO', 4);
 
 $SearchPostsPerPage = 20;
@@ -138,6 +141,7 @@ $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 $cookie_pref_rows = array(
        'SkinName',
        'MenuDirection', 'Button',
+       'TableMaxRows',
        'Stonesize', 'Woodcolor', 'Boardcoords',
        'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff',
        'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
@@ -1742,21 +1746,25 @@ function score2text($score, $verbose, $keep_english=false)
 }
 
 // returns rows checked against min/max-limits; return default-rows if unset or exceeding limits
-function get_maxrows( $rows, $maxrows, $defrows )
+function get_maxrows( $rows, $maxrows, $defrows = MAXROWS_PER_PAGE_DEFAULT )
 {
    return ( is_numeric($rows) and $rows > 0 and $rows <= $maxrows ) ? $rows : $defrows;
 }
 
 // returns array with standard rows and with customized maxrows (added to standard list at the right place)
 // RETURN: array ( row_count => row_count, ...); ready to be used for selectbox
-function build_maxrows_array( $maxrows )
+// param $maxrows current value to add unorthodox value; 0 to get default
+function build_maxrows_array( $maxrows, $rows_limit = MAXROWS_PER_PAGE )
 {
    global $RowsPerPage;
 
-   $maxrows = get_maxrows( $maxrows, MAXROWS_PER_PAGE, $RowsPerPage );
+   $maxrows = get_maxrows( $maxrows, $rows_limit );
    $arr_maxrows = array();
    foreach( array( 5, 10, 15, 20, 25, 30, 40, 50, 75, 100 ) as $k)
-      $arr_maxrows[$k] = $k;
+   {
+      if ( $k <= $rows_limit )
+         $arr_maxrows[$k] = $k;
+   }
    $arr_maxrows[$maxrows] = $maxrows; // add manually added value
    ksort( $arr_maxrows, SORT_NUMERIC );
    return $arr_maxrows;
