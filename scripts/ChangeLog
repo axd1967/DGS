@@ -97,6 +97,22 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-18 juga
+
+   * include/filter.php,
+     code_examples/filter_example.php, code_examples/filter_example2.php:
+   - added global const FILTER_CONF_FORCE_STATIC making all
+     filter-elements static (no filter-hide),
+     added filter-config FC_HIDE to overrule that const
+   - use default size 8 for Rating-Filters
+
+   * opponents.php, users.php, waiting_room.php:
+   - added filter-config FC_HIDE on Country-filter
+   - use (default) size 8 for Rating-Filters
+
+   * search_messages.php:
+   - SQL-optimization: replaced 'Game_ID<>0' with 'Game_ID>0'
+
 2007-07-18 rodival
 
    * include/std_functions.php, include/quick_common.php:
