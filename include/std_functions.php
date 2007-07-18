@@ -1094,8 +1094,8 @@ function send_message( $debugmsg, $text='', $subject=''
    }
 
    //records the last message of the invitation/dispute sequence
-   //the type of the previous messages is changed to 'DISPUTED'
-   if( $gid > 0 && ( $type == "INVITATION" ) )
+   //the type of the previous messages will be changed to 'DISPUTED'
+   if( $gid > 0 && ( $type == 'INVITATION' ) )
    {
       mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" )
          or error('mysql_query_failed', $debugmsg.'.game_message');
@@ -2405,10 +2405,6 @@ if(ENA_SEND_MESSAGE){ //new
 // definitions and functions to help avoid '!=' or 'NOT IN' in SQL-where-clauses:
 
 $ENUM_GAMES_STATUS = array( 'INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED' );
-
-/*! SQL-clause-part applied for Games.Status to select all running games. */
-define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2') ");
-
 
 /*!
  * Builds IN-SQL-part for some enum-array containing all possible values

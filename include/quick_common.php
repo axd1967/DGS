@@ -58,11 +58,13 @@ $tick_frequency = 12; // ticks/hour
 //a $_REQUEST['handle'] will not overlap $_COOKIE['cookie_handle']
 define('COOKIE_PREFIX', 'cookie_');
 
-
 // don't set UHANDLE_NAME to 'userid' which is the handle of the
 // user currently browsing the site (associated to 'passwd').
 // This one, like 'uid', is an other user that the logged one. 
 define('UHANDLE_NAME', 'user'); //see quick_status.php and get_request_user()
+
+/*! SQL-clause-part applied for Games.Status to select all running games. */
+define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')");
 
 
 //used in quick_status.php and associated (wap, rss ...)

@@ -24,6 +24,8 @@ quick INFO:
 \2007-07-06 rodival
    2 new users with a bad "Running" count have appeared yesterday:
    6415=random_penguin:82.108.171.178 | 13628=guerrilla27:83.18.19.250
+   Their Running counts were 1 point too hight.
+   Other counts like Finished, Won or Lost were not corrupted.
  uid   cntfix recent finished games      recent accepted games      ucol
  13628 23=>22 295161 2007-07-05 15:05:05 330544 2007-07-05 15:15:29 W
                                          330461 2007-07-05 11:22:15 W
@@ -53,6 +55,7 @@ quick INFO:
 \2007-07-09 rodival
    2 new users with a bad "Running" count have appeared yesterday:
    6461=Scottya21:199.46.199.237 | 27780=norm:193.61.197.65
+   Again Running is 1 point too hight and other counts are correct.
  uid   cntfix recent finished games      recent accepted games      ucol
  6461   5=> 4  (none since 3 years)      330845 2007-07-08 20:43:02 B
  27780 32=>31  (none since 1 month)      330845 2007-07-08 20:43:02 W
@@ -69,6 +72,7 @@ Maybe an other track: this was a 2 stones handicap game (but the previous 330544
 \2007-07-14 rodival
    2 new users with a bad "Running" count have appeared yesterday:
    12570=mamutik:212.80.81.50 | 27776=nananana:87.184.126.232
+   Again Running is 1 point too hight and other counts are correct.
  uid   cntfix recent finished games      recent accepted games      ucol
  12570 20=>19 328063 2007-07-13 09:22:59 329871 2007-07-13 13:13:21 W
                (no more since 4 days)    332632 2007-07-13 13:13:20 B
@@ -92,6 +96,12 @@ quick TODO:
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-07-18 rodival
+
+   * include/std_functions.php, include/quick_common.php:
+   - moved the IS_RUNNING_GAME constant in quick_common.php to make it
+     usable by the rss and wap stuff and the 'quick_*' suite.
 
 2007-07-18 juga
 
