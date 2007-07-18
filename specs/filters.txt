@@ -727,6 +727,11 @@ see section (2) Classes and Files.
   Yes. See filter-config FC_STATIC and in example-file
   "code_examples/filter_example.php".
 
+  Actually it's the default now to show all filter-elements as static,
+  which can be controlled with the global const FILTER_CONF_FORCE_STATIC.
+  This can be overruled using the filter-config FC_HIDE,
+  see "code_examples/filter_example.php".
+
 * Can I use multiple-select elements for filters ?
 
   Yes. There are some predefined filters allowing to select more
@@ -847,8 +852,4 @@ be considered a feature ;)
 * Prio(E): If used without external-form, the submit-buttons "Start Search"
   and "Reset Search" may disappear, when no filter is active and is shown in
   Table-head.
-
-* Prio(3): The class XmlTokenizer may not able to correctly parse non-conform
-  XML like "<move, ...>".
-
 
