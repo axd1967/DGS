@@ -103,6 +103,9 @@ Changelog
    - moved the IS_RUNNING_GAME constant in quick_common.php to make it
      usable by the rss and wap stuff and the 'quick_*' suite.
 
+   * include/config.php:
+   - moved a line closer to its friends.
+
 2007-07-18 juga
 
    * opponents.php, user_stats.php, site_map.php, userinfo.php, users.php,
