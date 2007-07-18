@@ -110,10 +110,10 @@ class Table
    /*! \brief If we are on the last page.
     * \see make_next_prev_links() */
    var $Last_Page;
-   /*! \brief The number of rows to be displayed (normally) on one page.
+   /*! \brief The number of rows to be displayed (normally) on one page (read from player-row TableMaxRows).
     * \see make_next_prev_links() */
    var $Rows_Per_Page;
-   /*! \brief true, if number of rows to show should be configurable (otherwise use global RowsPerPage). */
+   /*! \brief true, if number of rows to show should be configurable (otherwise use Players.TableMaxRows). */
    var $Use_Show_Rows;
 
    /*!
@@ -147,7 +147,7 @@ class Table
    /*! \brief Constructor. Create a new table and initialize it. */
    function Table( $_tableid, $_page, $_player_column = '', $_prefix = '')
       {
-         global $RowsPerPage, $player_row;
+         global $player_row;
 
          $this->ExternalForm = NULL;
          $this->Removed_Columns = NULL;
@@ -214,8 +214,8 @@ class Table
          if( !is_numeric($this->From_Row) or $this->From_Row < 0 )
             $this->From_Row = 0;
          $this->Last_Page = true;
-         $this->Rows_Per_Page = $RowsPerPage;
          $this->Use_Show_Rows = true;
+         $this->Rows_Per_Page = $player_row['TableMaxRows'];
 
          // filter-stuff
          $this->ext_req_params = array();
@@ -364,21 +364,6 @@ class Table
       {
          $addcol_str = $this->make_add_column_form( $table_form);
          $string .= $addcol_str;
-
-         /*! \todo put into nested table to align add-column-table with main-table (OR use CSS somehow) OR leave it as it is */
-         /*
-         //if ( !$this->ExternalForm )
-         $string = " <br>\n"
-            //. '<div class=addcolout>'
-            //. '<table><tr><td>'
-            //. '<div class=addcolin>'
-            . $string
-            //. '</div>'
-            . $addcol_str
-            //. '</td></tr></table>'
-            //. '</div>'
-            ;
-         */
       }
 
       // build form for Filter + AddColumn
@@ -591,15 +576,16 @@ class Table
       }
    }
 
-   /*! \brief Sets Rows_Per_Page (according to changed Show-Rows-form-element). */
+   /*! \brief Sets Rows_Per_Page (according to changed Show-Rows-form-element or else cookie or players-row). */
    function handle_show_rows()
    {
-      if ( $this->Use_Show_Rows )
-      {
-         global $RowsPerPage;
-         $rows = (int) $this->get_arg(TFORM_VAL_SHOWROWS); // nr of rows
-         $this->Rows_Per_Page = get_maxrows( $rows, MAXROWS_PER_PAGE, $RowsPerPage );
-      }
+      if ( !$this->Use_Show_Rows )
+         return;
+
+      $rows = (int) $this->get_arg(TFORM_VAL_SHOWROWS); // nr of rows
+      if ( $rows > 0 )
+         $this->Rows_Per_Page =
+            get_maxrows( $rows, MAXROWS_PER_PAGE, MAXROWS_PER_PAGE_DEFAULT );
    }
 
    /*! \brief Compute the number of rows from mySQL result. */
