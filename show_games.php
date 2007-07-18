@@ -114,7 +114,8 @@ require_once( "include/rating.php" );
             true);
       $gfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
       $gfilter->add_filter(15, 'RelativeDate', 'Lastaccess', true);
-      $gfilter->add_filter(23, 'Rating', 'startRating', true, array( FC_ADD_HAVING => 1 ) );
+      $gfilter->add_filter(23, 'Rating', 'startRating', true,
+            array( FC_ADD_HAVING => 1 ));
    }
    if ( $finished )
    {
@@ -138,8 +139,10 @@ require_once( "include/rating.php" );
          $gfilter->add_filter( 5, 'Selection',
                array( T_('All') => '', 'B' => "Black_ID=$uid", 'W' => "White_ID=$uid" ),
                true);
-         $gfilter->add_filter(23, 'Rating', 'startRating', true, array( FC_ADD_HAVING => 1 ) );
-         $gfilter->add_filter(24, 'Rating', 'endRating',   true, array( FC_ADD_HAVING => 1 ) );
+         $gfilter->add_filter(23, 'Rating', 'startRating', true,
+               array( FC_ADD_HAVING => 1 ));
+         $gfilter->add_filter(24, 'Rating', 'endRating',   true,
+               array( FC_ADD_HAVING => 1 ));
          $gfilter->add_filter(25, 'RatingDiff', 'log.RatingDiff', true);
       }
    }
