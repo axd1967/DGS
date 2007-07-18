@@ -85,7 +85,8 @@ require_once( "include/countries.php" );
    $wrfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
    if( ENA_STDHANDICAP )
       $wrfilter->add_filter(13, 'BoolSelect', 'StdHandicap', true);
-   $wrfilter->add_filter(15, 'Country', 'Players.Country', false);
+   $wrfilter->add_filter(15, 'Country', 'Players.Country', false,
+         array( FC_HIDE => 1 ));
    $wrfilter->init();
    $f_handi =& $wrfilter->get_filter(5);
    $f_range =& $wrfilter->get_filter(8);

@@ -122,7 +122,8 @@ $ARR_DBFIELDKEYS = array(
    $ufilter->add_filter(14, 'RelativeDate', 'P.Lastaccess', true);
    $ufilter->add_filter(15, 'RelativeDate', 'P.Lastmove', true,
          array( FC_TIME_UNITS => FRDTU_DHM ));
-   $ufilter->add_filter(16, 'Country', 'P.Country', false);
+   $ufilter->add_filter(16, 'Country', 'P.Country', false,
+         array( FC_HIDE => 1 ));
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true);
    $ufilter->init(); // parse current value from _GET
 
