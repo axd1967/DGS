@@ -108,7 +108,7 @@ define('COOKIE_OLD_COMPATIBILITY', 1 && COOKIE_PREFIX>'');
 }
 
 // Returns value for passed varname $name or else $default if varname not set or if value is invalid
-//    (invalid = not an element of the optional list containg the valid values)
+//    (invalid = not an element of the optional list containing the valid values)
 function get_request_arg( $name, $def='', $list=NULL)
 {
    $val = (isset($_REQUEST[$name]) ? arg_stripslashes($_REQUEST[$name]) :
