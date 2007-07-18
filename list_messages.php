@@ -211,7 +211,7 @@ require_once( "include/filter.php" );
 
 
    $menu_array = array();
-   $menu_array[ T_('Message search') ] = "search_messages.php";
+   $menu_array[ T_('Search messages') ] = "search_messages.php";
 
    if( $find_answers > 0 )
       $menu_array[ T_('Back to message') ] = "message.php?mode=ShowMessage".URI_AMP."mid=$find_answers".URI_AMP."terms=".urlencode($terms);
