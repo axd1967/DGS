@@ -95,6 +95,12 @@ Changelog
 
 2007-07-18 juga
 
+   * opponents.php, user_stats.php, site_map.php, userinfo.php, users.php,
+     include/filter.php, code_examples/filter_example.php:
+   - "renamed" user_stats.php (removed) to opponents.php (added),
+     copied full CVS-log from user_stats.php on initial revision
+
+
    * show_games.php, user_stats.php:
    - optimized SQL replacing 'OR'-operator with UNION-based SQL-query,
      activated with global const ALLOW_SQL_UNION in "include/config.php",
