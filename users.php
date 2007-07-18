@@ -221,7 +221,7 @@ require_once( "include/filter.php" );
    // end of table
 
    $menu_array = array(
-      T_('Show my opponents') => "user_stats.php" );
+      T_('Show my opponents') => "opponents.php" );
 
    end_page(@$menu_array);
 }

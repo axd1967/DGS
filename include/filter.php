@@ -64,7 +64,7 @@ require_once( "include/filter_parser.php" );
   * \example filter_example.php
   *
   * Example of how to use the filter-framework.
-  * You may also have a look into 'user_stats.php',
+  * You may also have a look into 'opponents.php',
   * 'forum/search.php' or 'users.php'.
   */
 

@@ -107,9 +107,9 @@ function item($text,$link,$working, $level,$last=false)
       {
          item(T_('User info'), "userinfo.php", false, 1, false);
          {
-            item(T_('Show opponents'), "user_stats.php", false, 2, true);
+            item(T_('Show opponents'), "opponents.php", false, 2, true);
          }
-         item(T_('Show my opponents'), "user_stats.php", true, 1, true);
+         item(T_('Show my opponents'), "opponents.php", true, 1, true);
       }
 
       item(T_('Forum'), "forum/index.php", true, 0);

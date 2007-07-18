@@ -114,7 +114,7 @@ if ( $fdemo == 1 )
 
 
 /* -------------------- (2) External-Form + Table + Filters ----------------------  */
-// other example: see search_messages.php, user_stats.php
+// other example: see search_messages.php, opponents.php
 
 if ( $fdemo == 2 )
 {

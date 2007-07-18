@@ -234,7 +234,7 @@ require_once( "include/countries.php" );
                 T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
                 T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid",
                 T_('Show finished games') => $fin_link,
-                T_('Show opponents') => "user_stats.php?uid=$uid" );
+                T_('Show opponents') => "opponents.php?uid=$uid" );
    }
 
 
