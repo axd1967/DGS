@@ -105,6 +105,7 @@ Changelog
    - added TableMaxRows (can be locally changed using cookie),
      store table-max-rows in new column Players.TableMaxRows
    - Table: URL-var 'maxrows' overrules user-prefs for max-rows
+   - changed default for RowsPerPage: 50 -> 20
    - added limits for profiled maxrows: MAXROWS_PER_PAGE_PROFILE
    - added maxrows-default for get_maxrows(): MAXROWS_PER_PAGE_DEFAULT
    - added default rows-limit for build_maxrows_array to restrict max-rows
