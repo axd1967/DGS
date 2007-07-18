@@ -78,6 +78,9 @@ define('GETFILTER_ERROR',     5); // active filters with non-empty value and err
 define('GETFILTER_VISIBLE',   6); // visible filters
 define('GETFILTER_INVISIBLE', 7); // invisible filters
 
+// if true, forces all filter-elements to be static (overruled by filter-config FC_HIDE)
+define('FILTER_CONF_FORCE_STATIC', true);
+
 // form-element names
 define('PFX_FILTER', 'sf'); // prefix for search-filter
 define('FNAME_INIT',       'sf_init'); // initial state (unset if first launched)
@@ -101,6 +104,9 @@ define('FC_MAXLEN', 'maxlen');
 
 /*! \brief Filter is always shown if set (can't be changed to be inactive); values: bool; default is false. */
 define('FC_STATIC', 'static');
+
+/*! \brief Filter-element has hide-toggle (even if global FILTER_CONF_FORCE_STATIC is true); default is false. */
+define('FC_HIDE', 'hide');
 
 /*! \brief Used for text/numeric-based filters: allow no range-syntax like '3-9'; values: bool; default is false (range-allowed). */
 define('FC_NO_RANGE', 'no_range');
@@ -1276,7 +1282,11 @@ class Filter
    /*! \brief Returns true, if filter is declared to be static (always shown and used). */
    function is_static()
    {
-      return (bool) @$this->config[FC_STATIC];
+      // filter-config FC_HIDE overrules global static-force
+      if ( FILTER_CONF_FORCE_STATIC )
+         return !( (bool) @$this->config[FC_HIDE] );
+      else
+         return (bool) @$this->config[FC_STATIC];
    }
 
    /*! \brief Returns true, if filter is used to build query; always true for static filter. */
@@ -1777,7 +1787,7 @@ class Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SQL_TEMPLATE, FC_ADD_HAVING,
   *    FC_NO_RANGE, FC_DEFAULT (numeric value), FC_SIZE (5), FC_MAXLEN,
-  *    FC_QUOTETYPE, FC_SYNTAX_HINT
+  *    FC_QUOTETYPE, FC_SYNTAX_HINT, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_NUM_FACTOR
@@ -1848,7 +1858,7 @@ class FilterNumeric extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (8), FC_MAXLEN,
   *    FC_NO_RANGE, FC_DEFAULT (text-value), FC_SQL_TEMPLATE, FC_ADD_HAVING,
-  *    FC_QUOTETYPE, FC_SYNTAX_HINT
+  *    FC_QUOTETYPE, FC_SYNTAX_HINT, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_NO_WILD = if true, wildcard is forbidden (and treated as normal char)
@@ -1938,14 +1948,14 @@ class FilterText extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (6), FC_MAXLEN,
   *    FC_NO_RANGE, FC_DEFAULT (valid rank-text), FC_SQL_TEMPLATE,
-  *    FC_ADD_HAVING, FC_QUOTETYPE, FC_SYNTAX_HINT
+  *    FC_ADD_HAVING, FC_QUOTETYPE, FC_SYNTAX_HINT, FC_HIDE
   */
 class FilterRating extends Filter
 {
    /*! \brief Constructs Rating-Filter. */
    function FilterRating($name, $dbfield, $config)
    {
-      static $_default_config = array( FC_SIZE => 6 );
+      static $_default_config = array( FC_SIZE => 8 );
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'Rating';
       $this->tok_config = $this->create_TokenizerConfig();
@@ -2066,7 +2076,7 @@ class FilterRating extends Filter
   *
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_DEFAULT (country-code),
-  *    FC_SQL_TEMPLATE, FC_ADD_HAVING
+  *    FC_SQL_TEMPLATE, FC_ADD_HAVING, FC_HIDE
   */
 class FilterCountry extends Filter
 {
@@ -2137,7 +2147,7 @@ class FilterCountry extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (16), FC_MAXLEN,
   *    FC_NO_RANGE, FC_DEFAULT (date-text), FC_SQL_TEMPLATE, FC_ADD_HAVING,
-  *    FC_QUOTETYPE, FC_SYNTAX_HINT
+  *    FC_QUOTETYPE, FC_SYNTAX_HINT, FC_HIDE
   */
 class FilterDate extends Filter
 {
@@ -2256,7 +2266,7 @@ class FilterDate extends Filter
   *
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (4),
-  *    FC_SQL_TEMPLATE, FC_ADD_HAVING, FC_SYNTAX_HINT
+  *    FC_SQL_TEMPLATE, FC_ADD_HAVING, FC_SYNTAX_HINT, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_TIME_UNITS - bitmask specifying choice in selectbox for time-units; values: FRDTU_...
@@ -2521,7 +2531,7 @@ class FilterRelativeDate extends Filter
   *    array( choice-descr => sql-where_clause-part|QuerySQL )
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR,
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_HIDE
   *    FC_ADD_HAVING (makes no sense with dbfield = QuerySQL (could use SQLP_HAVING),
   *         dbfield should be where-clause instead)
   *
@@ -2636,7 +2646,8 @@ class FilterSelection extends Filter
   *    note: dbfield-value for comparison is 'Y' for yes-choice, 'N' for no-choice
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SQL_TEMPLATE, FC_ADD_HAVING
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SQL_TEMPLATE, FC_ADD_HAVING,
+  *    FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_DEFAULT - index 0=All, 1=Yes, 2=No
@@ -2683,7 +2694,7 @@ class FilterBoolSelect extends FilterSelection
   *    a) simple sql-field, or b) QuerySQL with one dbfield in SQLP_FNAMES
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_ADD_HAVING
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_ADD_HAVING, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_DEFAULT - index 0=All, 1=Yes, 2=No
@@ -2728,7 +2739,7 @@ class FilterRatedSelect extends FilterSelection
   *    array ( true|false => clause_string | QuerySQL)
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_LABEL   - unescaped text printed right to checkbox as description
@@ -2804,7 +2815,7 @@ class FilterBoolean extends Filter
   *      "word word" -> literal phrase to be found
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE, FC_SYNTAX_HINT,
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE, FC_SYNTAX_HINT, FC_HIDE,
   *    FC_DEFAULT - match-term-value if scalar, or
   *                 array( '' => match-term-value, 'b' => 1=boolean-mode-ON or 0=OFF )
   *
@@ -3030,7 +3041,7 @@ class FilterMysqlMatch extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (for text-input),
   *    FC_MAXLEN (for text-input), FC_NO_RANGE, FC_ADD_HAVING, FC_QUOTETYPE,
-  *    FC_SYNTAX_HINT,
+  *    FC_SYNTAX_HINT, FC_HIDE,
   *    FC_DEFAULT - score-mode (index) if scalar, or
   *                 array( '' => score-value, 'r' => score-mode-index );
   *       score-mode: FSCORE_ALL=show-all (default), FSCORE_RESIGN|TIME|SCORE,
@@ -3236,7 +3247,7 @@ class FilterRatingDiff extends FilterNumeric
   *
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC (makes not much sense), FC_GROUP_SQL_OR,
-  *    FC_ADD_HAVING
+  *    FC_ADD_HAVING, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_MULTIPLE - mandatory config,
