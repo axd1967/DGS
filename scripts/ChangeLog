@@ -598,7 +598,9 @@ ALTER TABLE `Players`      -- +0.4 MB (for filter/sort, often changed)
    - slight modifications of SQL using table-alias and join on
      MessageCorrespondents
 -----------
-ALTER TABLE Messages     -- ca. +80% of data-size (biggest change)
+ALTER TABLE `Messages`      -- +4 MB (for joins/filter)
+ ADD INDEX `ReplyTo` (`ReplyTo`) ;
+ALTER TABLE `Messages`     -- ca. +80% of data-size (biggest change)
  ADD FULLTEXT INDEX `Subject` (`Subject`,`Text`) ;
 -----------
 
