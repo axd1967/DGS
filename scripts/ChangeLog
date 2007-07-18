@@ -99,7 +99,7 @@ Changelog
 
 2007-07-18 juga
 
-   * include/filter.php,
+   * include/filter.php (is_static),
      code_examples/filter_example.php, code_examples/filter_example2.php:
    - added global const FILTER_CONF_FORCE_STATIC making all
      filter-elements static (no filter-hide),
@@ -220,10 +220,10 @@ Changelog
    * user_stats.php, show_games.php:
    - reversed the "NOT IN ('INVITED','FINISHED')" clauses
 
-
 2007-07-16 juga
 
-   * include/std_classes.php, code_examples/query_sql.php:
+   * include/std_classes.php (get_select, get_select_normal),
+     code_examples/query_sql.php:
    - QuerySQL: added basic UNION-support allowing non-template-WHERE-clause,
      specify with SQLP_UNION_WHERE; added example
 
@@ -253,7 +253,6 @@ Changelog
    - inserted the CSSed "hide" buttons for the filters, the same way those
      from the column headers.
 
-
 2007-07-15 juga
 
    * include/filter.php (parse_value), code_examples/filter_example2.php:
@@ -261,7 +260,7 @@ Changelog
 
 2007-07-14 juga
 
-   * include/std_classes.php:
+   * include/std_classes.php (merge_from_parts):
    - QuerySQL: assure mysql5.0-compatibility by replacing ','-join
      with INNER JOIN
 
@@ -302,7 +301,6 @@ Changelog
      $filtertype argument to manage the buttons name.
      modified the other files accordingly.
 
-
 2007-07-13 juga
 
    * include/filter.php (FilterMysqlMatch.get_terms, get_submit_elements):
@@ -340,7 +338,6 @@ Changelog
      forum/read.php:
    - minor changes on comments.
 
-
 2007-07-11 juga
 
    * include/filter.php (class FilterMysqlMatch, extract_match_terms):
@@ -361,7 +358,6 @@ Changelog
    * include/translation_functions.php:
    - new try for T_ #info: cut if the char before '#' is not a space
 
-
 2007-07-10 rodival
 
    * edit_bio.php:
@@ -376,7 +372,6 @@ Changelog
    * include/translation_functions.php:
    - better T_ #info cut
 
-
 2007-07-09 rodival
 
    * join_waitingroom_game.php, include/make_game.php (create_game(),
@@ -388,7 +383,6 @@ Changelog
 
    * game.php:
    - add of a message to invite the player to validate his action.
-
 
 2007-07-09 juga
 
@@ -405,7 +399,6 @@ Changelog
 
    * forum/forum_functions.php:
    - reverted last fix
-
 
 2007-07-08 rodival
 
@@ -428,7 +421,6 @@ Changelog
    - enabled the new send_mail() function everywhere... with a rollback
      possibility because I have no way to test the emails nor on my
      private server either on the devel server. >>> should be tested.
-
 
 2007-07-08 juga
 
@@ -457,7 +449,6 @@ Changelog
      images/sort2a.gif, images/sort2d.gif, images/remove.gif:
    - new images added used for table-sort-indicator
 -----------
-
 
 2007-07-07 rodival
 
@@ -497,7 +488,6 @@ ALTER TABLE `Players`
      error.php, it will no more recall error.php and thus not fall
      in a recursive trap.
 
-
 2007-07-07 rodival
 
    * update_translation_pages.php, generate_translation_texts.php,
@@ -506,13 +496,11 @@ ALTER TABLE `Players`
      phpinfo.php:
    - disabled some one shot scripts, enhanced the others
 
-
 2007-07-06 rodival
 
    * confirm.php, quick_play.php:
    - moved the place where the GameNotes are deleted
    - few minor debug messages adjustements (quick_play accordingly)
-
 
 2007-07-06 rodival
 
@@ -522,7 +510,6 @@ ALTER TABLE `Players`
    - allowed to edit an item even if hidden.
    - inverted the icon of Hide and Show buttons.
 
-
 2007-07-05 rodival
 
    * translate.php, update_translation.php,
@@ -530,7 +517,6 @@ ALTER TABLE `Players`
    - modified the 'Untranslated' option (may be applied on every group).
      therefore, added a 'All groups' option.
    - hidden the now big info box and added an anchor to show it.
-
 
 2007-07-03 rodival
 
@@ -542,7 +528,6 @@ ALTER TABLE `Players`
    * INSTALL:
    - added a step to protect the scripts/ folder.
 
-
 2007-07-02 juga
 
    * show_games.php:
@@ -550,7 +535,7 @@ ALTER TABLE `Players`
 
 2007-07-01 juga
 
-   * include/std_functions.php:
+   * include/std_functions.php (make_url):
    - reverted changes to make_url-func to fix bug
 
 2007-06-30 juga
@@ -576,15 +561,20 @@ ALTER TABLE `Players`
    - added some CSS for filters
    - added main-doc in specs/filters.txt
 
-   * include/table_columns.php:
+   * include/table_columns.php (Table.constructor, set_externalform,
+     set_rows_per_page, use_show_rows, current_filter_string,
+     add_or_del_column, handle_show_rows, current_rows_string,
+     get_displayed_tableheads, register_filter, get_query,
+     add_external_parameters, current_extparams_string):
    - added searching capabilities on table-columns using Filter-framework
      see specs/filters.txt and code_examples/form_example2.php
    - fixed paging-link-bug preserving form-values with links
    - added maxrows-selection to restrict row-size of table-list
 
-   * include/form_functions.php,
-     code_examples/form_example.php,
-     code_examples/form_example2.php:
+   * include/form_functions.php (set_config, get_config,
+     set_attr_form_element, set_layout, set_area, add_empty_row,
+     create_form_string, get_areaconf),
+     code_examples/form_example.php, code_examples/form_example2.php:
    - added Form-types 'FILTER' and 'FILTERERROR' for Filter-framework
    - added area-group layouting and some additional layout-config
      when used as External-Form with Table(-Filters)
@@ -616,7 +606,8 @@ ALTER TABLE `Players`      -- +0.4 MB (for filter/sort, often changed)
 -----------
 
    * search_messages.php, list_messages.php,
-     include/message_functions.php:
+     include/message_functions.php (init_standard_folders, echo_folder_box,
+     message_list_query, message_list_table):
    - added new page for searching messages using filters
    - signature-change of funcs to change layout or highlight search-terms:
      message_list_query/_list_table/_info_table, echo_folder_box
@@ -657,7 +648,9 @@ ALTER TABLE `Messages`     -- ca. +80% of data-size (biggest change)
    - fixed bug with relevance when using search-terms in boolean-mode
    - added const DAYS_NEW_END used for forum-reads
 
-   * include/std_functions.php:
+   * include/std_functions.php (DEBUG_SQL, map_to_string, mark_terms,
+     get_maxrows, build_maxrows_array, make_url, clean_url, has_observers,
+     blend_alpha_hex):
    - added some functions and consts to support Filter-framework:
      - support to handle maxrows of table-listing, added funcs
        get_maxrows, build_maxrows_array
@@ -690,7 +683,6 @@ ALTER TABLE `Messages`     -- ca. +80% of data-size (biggest change)
    - added categories and more hints about (surprising) PHP-behaviour
    - don't use filenames with upper-case
 
-
 2007-06-30 rodival
 
    * include/std_functions.php, list.php:
@@ -703,7 +695,6 @@ ALTER TABLE `Messages`     -- ca. +80% of data-size (biggest change)
 
    * scripts/README.translations:
    - documenting the "do_it" URL argument of generate_translation_texts.php
-
 
 2007-06-29 rodival
 
@@ -741,14 +732,12 @@ UPDATE `FAQlog` SET `Date` = '0' ;
      or from a missing row in the database. The default "do_it" action fix
      this last case.
 
-
 2007-06-28 rodival
 
    * statistics.php, graph.php, ratingpng.php, statisticspng.php:
    - added the statratingspng.php file which display stats on ratings.
      Minor adjustements of other files to handle it.
      Added the function patterncolor() to graph.php.
-
 
 2007-06-26 rodival
 
@@ -771,7 +760,6 @@ ALTER TABLE `Waitingroom`
      abort between two MySQL updates, I don't know.
      Other counts like Finished, Won or Lost were not corrupted.
 
-
 2007-06-25 rodival
 
    * scripts/data_report.php:
@@ -783,7 +771,6 @@ ALTER TABLE `Waitingroom`
    - including the translations tables export
      and hidding some minor variations.
 
-
 2007-06-24 rodival
 
    * scripts/game_consistency.php, include/move.php (check_move):
@@ -793,7 +780,6 @@ ALTER TABLE `Waitingroom`
 
    * people.php:
    - changed the info about translators' activity to "LastUpdate".
-
 
 2007-06-03 rodival
 
@@ -811,13 +797,11 @@ ALTER TABLE `Waitingroom`
    - changed the Percent calculus to 100*(Won+Jigo/2)/RatedGames instead
      of the previous 100*Won/RatedGames.
 
-
 2007-03-27 rodival
 
    * edit_vacation.php:
    - fixed the bug: adding 2.00 days to 0.25 days gave 2.00 days.
      In fact, when OnVacation was < 1, one can't add but just start vacations.
-
 
 2007-03-17 rodival
 
@@ -826,7 +810,6 @@ ALTER TABLE `Waitingroom`
 
    * admin_faq.php:
    - adjusting a 'NULL'.
-
 
 2007-03-01 rodival
 
@@ -839,7 +822,6 @@ ALTER TABLE `Waitingroom`
    * images/plus.gif, images/minus.gif, images/cross.gif:
    - added images
 -----------
-
 
 2007-02-04 rodival
 
@@ -876,7 +858,6 @@ ALTER TABLE `FAQ`
    * data_export.php:
    - Create_options management added and CSS adjusted.
 
-
 2007-02-03 rodival
 
    * include/graph.php, ratingpng.php, ratinggraph.php:
@@ -890,7 +871,6 @@ ALTER TABLE `FAQ`
 
    * include/rating.php, include/std_functions.php:
    - small modifications consequently
-
 
 2007-01-25 rodival
 
@@ -920,12 +900,10 @@ ALTER TABLE `FAQ`
    * NEWS, news.php, skins/dragon/screen.css:
    - adding NEWS file [initally built by JUG] with user-visible changes
 
-
 2007-01-21 rodival
 
    * scripts/README.developers, scripts/CHANGELOG.developers, CHANGELOG:
    - added info files
-
 
 2007-01-12 rodival
 
@@ -975,7 +953,6 @@ ALTER TABLE `Posts`
    * skins/dragon/screen.css:
    - to follow the Table_infos modifications
 
-
 2007-01-10 rodival
 
    * include/table_infos.php:
@@ -983,7 +960,6 @@ ALTER TABLE `Posts`
 
    * userinfo.php, edit_bio.php, status.php:
    - using class Table_infos
-
 
 2007-01-09 rodival
 
@@ -999,12 +975,10 @@ ALTER TABLE `Bio`
  CHANGE `Text` `Text` TEXT NOT NULL DEFAULT '' ;
 -----------
 
-
 2006-12-29 rodival
 
    * include/std_functions.php (verify_email) + all callers:
    - adjusted error signature and error behaviour
-
 
 2006-12-28 rodival
 
@@ -1034,7 +1008,6 @@ ALTER TABLE `MessageCorrespondents`
    * include/std_functions.php (mysql_single_fetch) + all callers:
    - force to use $debugmsg with mysql_single_fetch()
 
-
 2006-12-27 rodival
 
    * images/flags/__.gif:
@@ -1044,7 +1017,6 @@ ALTER TABLE `MessageCorrespondents`
    * images/flags/eu.gif:
    - added, though not enabled in countries.php
 -----------
-
 
 2006-12-23 rodival
 
@@ -1068,6 +1040,5 @@ ALTER TABLE `Players`
 
    * sgf.php:
    - score 0 for Jigo
-
 
 -----------
