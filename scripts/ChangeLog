@@ -146,8 +146,7 @@ ALTER TABLE `Players`
    - moved a line closer to its friends.
 
    * include/message_functions.php, include/countries.php, site_map.php:
-   - activated eu-flag
-   - minor fixes.
+   - minor fixes, comments and translated strings.
 
 2007-07-18 juga
 
