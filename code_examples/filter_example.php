@@ -131,12 +131,14 @@ if ( $fdemo == 2 )
    // table filters
    $tfilter = new SearchFilter('t2');
    $tfilter->add_filter( 1, 'Numeric', 'ID', true);
-   $tfilter->add_filter( 2, 'Text',    'Animal', true, array( FC_NO_WILD => 1 ));
+   $tfilter->add_filter( 2, 'Text',    'Animal', true,
+         array( FC_NO_WILD => 1, FC_HIDE => 1 ));
    $tfilter->init();
 
    $table = new Table( 'table2', $page, '' );
    $table->register_filter( $tfilter );
    $table->add_or_del_column();
+   $table->add_external_parameters( $rq, true ); // add fdemo-var
 
    // External-Form
    $form = new Form( 'table2', $page, FORM_GET, false );
@@ -204,7 +206,7 @@ if ( $fdemo == 3 )
    // table filters
    $tfilter = new SearchFilter('t3');
    $tfilter->add_filter( 1, 'RatedSelect', 'Rated', true,
-         array( FC_STATIC => 1, FC_ADD_HAVING => 1 ));
+         array( FC_STATIC => 1, FC_ADD_HAVING => 1, FC_HIDE => 1 ));
    $tfilter->add_filter( 2, 'Boolean', 'ActiveLevel>10', true,
          array( FC_LABEL => 'Activity', FC_STATIC => 1 ));
    $tfilter->init();

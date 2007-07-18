@@ -754,7 +754,8 @@ elseif ( $fdemo == 18 )
 {
    $title = array(
       'Miscellaneous Filter-Config',
-      'for [FC_STATIC], see <a href="filter_example.php">code_examples/filter_example.php</a>',
+      'for [FC_STATIC], see <a href="filter_example.php">code_examples/filter_example.php</a> - allows to make a filter-element static (with no hide-toggle), which makes only sense with FILTER_CONF_FORCE_STATIC = false',
+      'for [FC_HIDE], see <a href="filter_example.php">code_examples/filter_example.php</a> - allows to show a hide-toggle for a filter-element even if FILTER_CONF_FORCE_STATIC = true',
       'use [FC_SYNTAX_HINT] to extend (text-based) filters default syntax-description with more text, for example see Numeric-Filter #2',
    );
 }
