@@ -65,7 +65,7 @@ function item($text,$link,$working, $level,$last=false)
    $id = $player_row["ID"];
 
    echo "<table width=\"80%\" align=\"center\"><tr><td>\n";
-   echo "<center><h3><font color=$h3_color>" . T_('Site map') . "</font></h3></center>";
+   echo "<h3 class=Header>" . T_('Site map') . "</h3>";
    echo "<table cellspacing=0 cellpadding=0 border=0><tr><td colspan=3>" .
       "<a href=\"index.php\"><font color=0C41C9>" . T_('Welcome page') .
       "</font></a></td></tr>\n";
@@ -96,7 +96,7 @@ function item($text,$link,$working, $level,$last=false)
          item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
          item(T_('Message list'), "list_messages.php", true, 1, true);
          {
-            item(T_('Message search'), "search_messages.php", true, 2);
+            item(T_('Search messages'), "search_messages.php", true, 2);
             item(T_('Edit folders'), "edit_folders.php", true, 2, true);
          }
       }
@@ -120,7 +120,7 @@ function item($text,$link,$working, $level,$last=false)
             item(T_('New topic'), "forum/post.php", false, 2, true);
          }
 
-         item(T_('Forum search'), "forum/search.php", true, 1, true);
+         item(T_('Search forums'), "forum/search.php", true, 1, true);
       }
 
       item(T_('Games'), "show_games.php?uid=all".URI_AMP."finished=1", true, 0);
