@@ -110,7 +110,7 @@ Changelog
      without adding more links),
      added additional links to show all games (preserving shared URL-vars)
 
-   * include/config.php:
+   * include/config.php (ALLOW_SQL_UNION):
    - added ALLOW_SQL_UNION as on/off-switch to control UNION-support,
      default now is to support UNION-queries
 
@@ -121,20 +121,20 @@ Changelog
    - extended filters syntax-description with hint to what can be searched (Userid)
    - changed bottom-link to 'Browse folders'
 
-   * include/message_functions.php:
+   * include/message_functions.php (message_list_table):
    - changed message-list for search-messages-page to show
      full user-name with handle and link to userinfo,
      added message-link on subject
 
-   * include/filter.php, specs/filters.txt,
-     code_examples/filter_example2.php:
+   * include/filter.php (get_syntax_description, get_syntax_hint),
+     specs/filters.txt, code_examples/filter_example2.php:
    - added filter-config FC_SYNTAX_HINT allowing to extend a filters
      hover-text-syntax-description
    - added example for filter-config FC_SYNTAX_HINT
 
 2007-07-17 juga
 
-   * include/std_functions.php:
+   * include/std_functions.php (not_in_clause):
    - added constant SQL-clause-part IS_RUNNING_GAME to apply for Games.Status
      to optimize SQL getting rid of '!='-operator to use index
    - changed func: build_not_in_clausepart(..) -> not_in_clause( enum-array, var-args )
