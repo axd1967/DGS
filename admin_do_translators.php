@@ -48,8 +48,9 @@ function retry_admin( $msg)
 
    foreach( array(
          'langname',
-         'charenc',
          'browsercode',
+         'charenc',
+         'showlanguages',
          'transluser',
          'transladdlang',
          ) as $arg )
@@ -77,7 +78,6 @@ function retry_admin( $msg)
    if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
       error("adminlevel_too_low");
 
-   $addlanguage = @$_REQUEST['addlanguage'];
 /* Originally, the language code was a 2 letters code (like ISO 639-1).
    Because of language particularities within the same charset (like
    en-gb and en-us), the language code is now a "at least a 2 letters" code.
@@ -88,12 +88,16 @@ function retry_admin( $msg)
    $charenc = trim(get_request_arg('charenc'));
    $langname = trim(get_request_arg('langname'));
 
-   $showpriv = @$_REQUEST['showpriv'];
+   $showlanguages = @$_REQUEST['showlanguages'] ?'1' :'';
+   $addlanguage = @$_REQUEST['addlanguage'] ?'1' :'';
 
-   $transladd = @$_REQUEST['transladd'];
+   $transluser = get_request_arg('transluser');
+   $showpriv = @$_REQUEST['showpriv'] ?'1' :'';
+
+   $transladd = @$_REQUEST['transladd'] ?'1' :'';
    $transladdlang = trim(get_request_arg('transladdlang'));
 
-   $translpriv = @$_REQUEST['translpriv'];
+   $translpriv = @$_REQUEST['translpriv'] ?'1' :'';
    //transllang[] is a MULTIPLE select box
    $transllang = get_request_arg('transllang');
 
@@ -104,6 +108,9 @@ function retry_admin( $msg)
 
 
    $msg = '';
+
+   if( $showlanguages )
+      retry_admin('');
 
    if( $addlanguage )
    {
@@ -128,6 +135,7 @@ function retry_admin( $msg)
 
       make_known_languages(); //must be called from main dir
 
+      //insert the name of language to be translated
       $row = mysql_single_fetch( 'admin_do_translators.add.find_group',
             "SELECT ID FROM TranslationGroups WHERE Groupname='Users'")
          or error('internal_error','admin_do_translators.add.find_group');
@@ -146,7 +154,6 @@ function retry_admin( $msg)
    $old_langs = '';
    if( $showpriv or $transladd or $translpriv )
    {
-      $transluser = get_request_arg('transluser');
       if( empty($transluser) )
          retry_admin( T_("Sorry, you must specify a user."));
       $row = mysql_single_fetch( 'admin_do_translators.user.find',

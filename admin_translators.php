@@ -71,31 +71,47 @@ require_once( "include/form_functions.php" );
          $browsercode = trim(get_request_arg('twoletter'));
       $charenc = trim(get_request_arg('charenc'));
       $langname = trim(get_request_arg('langname'));
+      $showlanguages = @$_REQUEST['showlanguages'] ?'1' :'';
       $transluser = trim(get_request_arg('transluser'));
       $transladdlang = get_request_arg('transladdlang');
-
 
       if( !$charenc )
          $charenc = 'UTF-8';
 
-  start_page(T_('Translator admin'), true, $logged_in, $player_row);
+   start_page(T_('Translator admin'), true, $logged_in, $player_row);
 
-  echo "<center>";
+   echo "<center>";
 
-  $translator_form = new Form( 'translatorform', 'admin_do_translators.php', FORM_POST );
+   $translator_form = new Form( 'translatorform', 'admin_do_translators.php', FORM_POST );
 
-  /* Add language for translation */
-  $translator_form->add_row( array( 'HEADER', T_('Add language for translation') ) );
-  //$translator_form->add_row( array( 'DESCRIPTION', T_('Two-letter language code (see ISO 639-1)'),
-  $translator_form->add_row( array( 'DESCRIPTION', T_('Language code (e.g. XML meta-tags code)'),
-                                    'TEXTINPUT', 'browsercode', 30, 10, $browsercode ) );
-  $translator_form->add_row( array( 'DESCRIPTION', T_('English language name (i.e. French)'),
-                                    'TEXTINPUT', 'langname', 30, 50, $langname ) );
-  $translator_form->add_row( array( 'DESCRIPTION', T_("Character encoding (i.e. UTF-8)"),
-                                    'TEXTINPUT', 'charenc', 30, 50, $charenc ) );
-  $translator_form->add_row( array(
+   /* Add language for translation */
+   $translator_form->add_row( array( 'HEADER', T_('Add language for translation') ) );
+   //$translator_form->add_row( array( 'DESCRIPTION', T_('Two-letter language code (see ISO 639-1)'),
+   $translator_form->add_row( array( 'DESCRIPTION', T_('Language code (e.g. XML meta-tags code)'),
+                                     'TEXTINPUT', 'browsercode', 30, 10, $browsercode ) );
+   $translator_form->add_row( array( 'DESCRIPTION', T_('English language name (i.e. French)'),
+                                     'TEXTINPUT', 'langname', 30, 50, $langname ) );
+   $translator_form->add_row( array( 'DESCRIPTION', T_("Character encoding (i.e. UTF-8)"),
+                                     'TEXTINPUT', 'charenc', 30, 50, $charenc ) );
+   $translator_form->add_row( array(
+      'SUBMITBUTTON', 'showlanguages', T_('Known languages'),
       'SUBMITBUTTON', 'addlanguage', T_('Add language'),
       ) );
+   if( $showlanguages )
+   {
+      $str= '';
+      foreach( $known_languages as $bcod => $value )
+      {
+         foreach( $value as $cset => $lnam )
+         {
+            $str.= $lnam . ' (' . $bcod .'.'. $cset . ')<BR>';
+         }
+      }
+      $translator_form->add_row( array(
+         'DESCRIPTION', T_('Known languages'),
+         'TEXT', $str,
+         ) );
+   }
 
 
   /* Set translator privileges for user */
@@ -103,7 +119,6 @@ require_once( "include/form_functions.php" );
 
    $langs = get_language_descriptions_translated();
    asort($langs);
-
 
   /* Show the privileges of the user */
    $translator_form->add_row( array(
