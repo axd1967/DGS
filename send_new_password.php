@@ -34,37 +34,52 @@ require_once( "include/std_functions.php" );
 
    $pswduser = get_request_arg('pswduser');
 
-   if( $pswduser == "guest" )
-      error("not_allowed_for_guest");
+   if( $pswduser == 'guest' )
+      error('not_allowed_for_guest');
 
    $result = mysql_query( "SELECT ID, Newpassword, Email " .
                           "FROM Players WHERE Handle='".mysql_addslashes($pswduser)."'" )
       or error('mysql_query_failed', 'send_new_password.find_player');
 
    if( @mysql_num_rows($result) != 1 )
-      error("unknown_user");
+      error('unknown_user');
 
    $row = mysql_fetch_assoc($result);
 
-   if( $row['ID'] == 1 )
-      error("not_allowed_for_guest");
+   if( $row['ID'] < 2 )
+      error('not_allowed_for_guest');
 
    if( !empty($row['Newpassword']) )
-      error("newpassword_already_sent");
+   {
+      if( @$_POST['overnew'] )
+      {
+         // Could force email only if admin
+         if( !$logged_in )
+            error('not_logged_in');
+         if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
+            error('adminlevel_too_low');
+
+         $row['Newpassword'] = '';
+      }
+   }
+
+   if( !empty($row['Newpassword']) )
+      error('newpassword_already_sent');
 
    if( !empty($_POST['email']) )
    {
-     // Could force email only if admin
-     if( !$logged_in )
-       error("not_logged_in");
-     if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
-       error("adminlevel_too_low");
+      // Could force email only if admin
+      if( !$logged_in )
+         error('not_logged_in');
+      if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
+         error('adminlevel_too_low');
 
-     $row['Email'] = trim($_POST['email']);
+      $row['Email'] = trim($_POST['email']);
    }
 
    if( empty($row['Email']) )
       error('no_email');
+
 
 // Now generate new password:
 
@@ -87,11 +102,10 @@ require_once( "include/std_functions.php" );
 "You (or possibly someone else) has requested a new password\n" .
 " for the account: $pswduser\n" . //the handle of the requesting account
 " and it has been randomly chosen as: $newpasswd\n" .
-
 '
-Both the old and the new password will also be valid until your next
-login. Now please login and then change your password to something more
-rememberable.
+Both the old and the new password will also be valid until
+ your next login. Now please login and then change your
+ password to something more rememberable.
 
 ' . $HOSTBASE;
 

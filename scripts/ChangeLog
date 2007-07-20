@@ -99,6 +99,9 @@ Changelog
 
 2007-07-20 rodival
 
+   * admin_password.php, send_new_password.php, forgot.php:
+   - added a way to overwrite the current new password process for admins.
+
    * include/make_translationfiles.php, admin_faq.php, faq.php,
      translate.php, update_translation.php:
    - add of a better 'translated' flags management between the translators

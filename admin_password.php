@@ -52,6 +52,11 @@ require_once( "include/form_functions.php" );
                                  'TD',
                                  'TEXT', T_("to replace user's one"),
                                ) );
+   $passwd_form->add_row( array( 'DESCRIPTION', '',
+                                 'CELL', 2, 'align=left',
+                                 'CHECKBOX', 'overnew', 1,
+                                 T_('overwrite the current new password process'), 0,
+                               ) );
    $passwd_form->echo_string(1);
 
    echo "</center>\n";
