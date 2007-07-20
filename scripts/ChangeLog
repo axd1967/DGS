@@ -97,6 +97,22 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-20 rodival
+
+   * include/make_translationfiles.php, admin_faq.php, faq.php,
+     translate.php, update_translation.php:
+   - add of a better 'translated' flags management between the translators
+     and the FAQ admins.
+     now, the different languages may set their translated flag independently.
+-----------
+ALTER TABLE `Translations`
+ ADD `Translated` ENUM( 'Y', 'N') NOT NULL DEFAULT 'N' AFTER `Text` ;
+UPDATE `Translations` SET `Translated` = 'Y';
+-----------
+
+   * scripts/FAQtransl_consistency.php:
+   - added file (as a seed for more)
+
 2007-07-19 rodival
 
    * admin_translators.php, admin_do_translators.php:

@@ -114,6 +114,7 @@ if(0){//old
       $translation_groups[$row[0]] = $row[0];
    mysql_free_result( $result);
 }//old/new
+   ksort( $translation_groups);
    $translation_groups['allgroups'] = 'All groups';
 
    if( !$group or !array_key_exists( $group, $translation_groups) )
@@ -193,7 +194,7 @@ if(0){//old
 
    $tabindex= 1;
 
-   start_page(T_("Translate"), true, $logged_in, $player_row);
+   start_page(T_('Translate'), true, $logged_in, $player_row);
    echo "<CENTER>\n";
    $str = 'Read this before translating';
    if( (bool)@$_REQUEST['infos'] )
@@ -269,10 +270,9 @@ if(0){//old
          $translation = textarea_safe( $translation, $translate_encoding);
          $form_row = array( 'TEXT', nl2br( textarea_safe($string, LANG_DEF_CHARSET ) ),
                             'TD',
-                            'TEXTAREA', "transl" . $row['Original_ID'],
-                              $hsize, $vsize, $translation,
+                            'TEXTAREA', "transl$oid", $hsize, $vsize, $translation,
                             'CELL', 1, 'nowrap',
-                            'CHECKBOX', 'same' . $row['Original_ID'], 'Y',
+                            'CHECKBOX', "same$oid", 'Y',
                               'untranslated', $row['Text'] === '',
                            ) ;
          /*
@@ -280,11 +280,10 @@ if(0){//old
             a minor correction that does not involve a translation modification.
             Else one can't remove the entry from the untranslated group.
          */
-         if( $untranslated && !empty($translation))
+         if( $row['Translated'] === 'N' ) //exclude not yet translated items
             array_push( $form_row,
                             'BR',
-                            'CHECKBOX', 'unch' . $row['Original_ID'], 'Y',
-                              'unchanged', false ) ;
+                            'CHECKBOX', "unch$oid", 'Y', 'unchanged', false ) ;
 
          $translate_form->add_row( $form_row, -1, false ) ;
 
@@ -292,7 +291,7 @@ if(0){//old
       }
       mysql_free_result( $result);
 
-      if( $oid > 0 ) //empty table
+      if( $oid > 0 ) //not empty table
       {
          if( $table_links )
          {

@@ -51,27 +51,20 @@ $info_box = '<table border="2">
   Done    : already translated  : -            : change to Changed : -
   Changed : to be re-translated : -            : -                 : change to Done
 
- ---------:---------------------:--------------:-------------------:-------------------
-  N       : not translatable    : change to Y  : -                 : -
-  Y       : to be translated    : change to N  : -                 : change to Started
-  Started : some are translated : -            : change to Changed : change to Done
-  Done    : all  are translated : -            : change to Changed : -
-  Changed : to be re-translated : -            : -                 : change to Started
-
   When both Q & A (if any) are not translated (both Translatable == ('Y' or 'N'))
    - admin_toggle is enabled
+   - admin_mark_box is disabled
    - Answer.Translatable is always equal to Question.Translatable
   When one of them have already been translated (any Translatable(s) != ('Y' or 'N'))
    - admin_toggle is disabled
-   - Q & A are independently translated and reversed to *be re-translated*
+   - Q & A are independently translated
+     and reversed to *be re-translated* by the way of the admin_mark_box
+   - Answer.Translatable may be different of Question.Translatable
 
   When an admin change a Translatable flag to 'Changed'
-   - all *language* Translateit flags are set to 'Changed'
-  When a translator change a *language* Translateit flag to 'Done'
-   - if all *language* Translateit flags are 'Done'
-       the Translatable flag is set to 'Done' 
-     else
-       the Translatable flag is set to 'Started'
+   - all the *language* Translated flags are set to 'N'
+  As soon as one translator change a *language* Translated flag to 'Y'
+   - the Translatable flag is set to 'Done' 
 */
 
 {
@@ -85,167 +78,180 @@ $info_box = '<table border="2">
    if( !($player_row['admin_level'] & ADMIN_FAQ) )
       error('adminlevel_too_low');
 
-   $id = is_numeric(@$_GET["id"]) ? $_GET["id"] : 0;
+   $id = is_numeric(@$_GET['id']) ? max(0,$_GET['id']) : 0;
 
    $show_list = true;
    $page = 'admin_faq.php';
 
 
-  // ***********        Edit entry       ****************
+   // ***********        Edit entry       ****************
 
-  if( ($action=@$_GET["edit"]) == 'c' or  $action == 'e')
-  {
-     if( $action == 'c' )
-        start_page(T_("FAQ Admin").' - '.T_('Edit category'), true, $logged_in, $player_row );
-     else
-        start_page(T_("FAQ Admin").' - '.T_('Edit entry'), true, $logged_in, $player_row );
+   if( ($action=@$_GET['edit']) == 'c' or  $action == 'e')
+   {
+      if( $action == 'c' )
+         start_page(T_("FAQ Admin").' - '.T_('Edit category'), true, $logged_in, $player_row );
+      else
+         start_page(T_("FAQ Admin").' - '.T_('Edit entry'), true, $logged_in, $player_row );
 
-     $show_list = false;
+      $show_list = false;
 
-     echo "<center>\n";
+      echo "<center>\n";
 
-     $row = get_entry_row( $id );
+      $row = get_entry_row( $id );
+      $faqhide = ( @$row['Hidden'] == 'Y' );
+      $faq_edit_form = new Form( 'faqeditform', "$page?do_edit=t".URI_AMP."id=$id", FORM_POST );
 
-     $faqhide = ( @$row['Hidden'] == 'Y' );
-     $faq_edit_form = new Form( 'faqeditform', "$page?do_edit=t".URI_AMP."id=$id", FORM_POST );
-
-     if( $row["Level"] == 1 ) //i.e. Category
-     {
-        $faq_edit_form->add_row( array( 'HEADER', T_('Edit category') ) );
-        $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Category'),
-                                        'TEXTINPUT', 'question', 80, 80, $row["Q"] ) );
-        if( !$faqhide && $row['QTranslatable'] === 'Done' )
-        {
-           $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
-                                           'CHECKBOX', 'Qchanged', 'Y',
-                                           T_('Mark entry as changed for translators'), false) );
-        }
-     }
-     else //i.e. Question/Answer
-     {
-        $faq_edit_form->add_row( array( 'HEADER', T_('Edit FAQ entry') ) );
-        $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Question'),
-                                        'TEXTINPUT', 'question', 80, 80, $row["Q"] ) );
-        if( !$faqhide && $row['QTranslatable'] === 'Done' )
-        {
-           $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
-                                           'CHECKBOX', 'Qchanged', 'Y',
-                                           T_('Mark question as changed for translators'), false) );
-        }
-        $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
-                                        'TEXTAREA', 'answer', 80, 20, $row["A"] ) );
-        if( !$faqhide && $row['ATranslatable'] === 'Done' )
-        {
-           $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
-                                           'CHECKBOX', 'Achanged', 'Y',
-                                           T_('Mark answer as changed for translators'), false) );
-        }
-     }
+      if( $row["Level"] == 1 ) //i.e. Category
+      {
+         $faq_edit_form->add_row( array( 'HEADER', T_('Edit category') ) );
+         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Category'),
+                                         'TEXTINPUT', 'question', 80, 80, $row["Q"] ) );
+         if( !$faqhide && $row['QTranslatable'] === 'Done' )
+         {
+            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
+                                            'CHECKBOX', 'Qchanged', 'Y',
+                                            T_('Mark entry as changed for translators'), false) );
+         }
+      }
+      else //i.e. Question/Answer
+      {
+         $faq_edit_form->add_row( array( 'HEADER', T_('Edit FAQ entry') ) );
+         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Question'),
+                                         'TEXTINPUT', 'question', 80, 80, $row["Q"] ) );
+         if( !$faqhide && $row['QTranslatable'] === 'Done' )
+         {
+            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
+                                            'CHECKBOX', 'Qchanged', 'Y',
+                                            T_('Mark question as changed for translators'), false) );
+         }
+         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
+                                         'TEXTAREA', 'answer', 80, 20, $row["A"] ) );
+         if( !$faqhide && $row['ATranslatable'] === 'Done' )
+         {
+            $faq_edit_form->add_row( array( 'OWNHTML', '<td>',
+                                            'CHECKBOX', 'Achanged', 'Y',
+                                            T_('Mark answer as changed for translators'), false) );
+         }
+      }
 
       $faq_edit_form->add_row( array(
                            'SUBMITBUTTON', 'submit', T_('Submit'),
                            'TEXT', anchor( $page, T_('Back')),
                            ) );
       $faq_edit_form->echo_string();
-  }
+   } //edit
 
 
-  // ***********        Move entry       ****************
+   // ***********        Move entry       ****************
 
-  else if( ($action=@$_GET["move"]) == 'u' or $action == 'd' )
-  {
-     $row = mysql_single_fetch( 'admin_faq.move.find',
-               "SELECT * FROM FAQ WHERE ID=$id")
+   else if( ($action=@$_GET['move']) == 'u' or $action == 'd' )
+   {
+      $dir = isset($_GET['dir']) ? (int)$_GET['dir'] : 1;
+      $dir = $action == 'd' ? $dir : -$dir; //because ID top < ID bottom
+
+      $row = mysql_single_fetch( 'admin_faq.move.find',
+                "SELECT * FROM FAQ WHERE ID=$id")
+          or error('admin_no_such_entry',"admin_faq.move.$action.read($id)");
+      $parent = $row['Parent'];
+
+      $row2 = mysql_single_fetch( 'admin_faq.move.max',
+                "SELECT COUNT(*) as max FROM FAQ WHERE Parent=$parent")
+          or error('mysql_query_failed',"admin_faq.move.$action.max");
+      $max = $row2['max'];
+
+      $start = $row["SortOrder"];
+      $end = max( 1, min( $max, $start + $dir));
+      $cnt = abs($end - $start);
+      if( $cnt )
+      {
+         $dir = $dir>0 ? 1 : -1;
+         $start+= $dir;
+
+         //shift the neighbours backward, reference by SortOrder
+         mysql_query("UPDATE FAQ SET SortOrder=SortOrder-($dir)"
+                     . " WHERE Parent=$parent"
+                     . " AND SortOrder BETWEEN "
+                        .($start>$end?"$end AND $start":"$start AND $end")
+                     . " LIMIT $cnt" )
+            or error("mysql_query_failed",'admin_faq.move.update_sortorder1');
+
+         //move the entry forward, reference by ID
+         mysql_query("UPDATE FAQ SET SortOrder=$end"
+                     . " WHERE ID=$id LIMIT 1")
+            or error("mysql_query_failed",'admin_faq.move.update_sortorder2');
+      }
+      //jump_to($page); //clear URL
+   } //move
+
+
+
+   // ***********        Move entry to new category      ****************
+
+   else if( ($action=@$_GET['move']) == 'uu' or $action == 'dd' )
+   {
+      $query = "SELECT Entry.SortOrder,Entry.Parent,Parent.SortOrder AS ParentOrder"
+            . " FROM FAQ AS Entry,FAQ AS Parent"
+            . " WHERE Entry.ID=$id AND Parent.ID=Entry.Parent";
+
+      $row= mysql_single_fetch('admin_faq.bigmove.find', $query)
          or error('admin_no_such_entry',"admin_faq.move.$action.read($id)");
 
-     $row2 = mysql_single_fetch( 'admin_faq.move.max',
-               "SELECT MAX(SortOrder) as max FROM FAQ " .
-               "WHERE Parent=" . $row["Parent"])
-         or error('mysql_query_failed','admin_faq.move.max');
-     $max = $row2["max"];
+      $query = 'SELECT ID FROM FAQ'
+            . ' WHERE Level=1 AND SortOrder'
+            . ( $action == 'dd'
+               ? '>' . $row['ParentOrder'] . ' ORDER BY SortOrder'
+               : '<' . $row['ParentOrder'] . ' ORDER BY SortOrder DESC' )
+            . ' LIMIT 1';
 
-     if( ( $action != 'u' or $row["SortOrder"] > 1 ) and
-         ( $action != 'd' or $row["SortOrder"] < $max ) )
-     {
-        $dir = ($action == 'd' ? 1 : -1 );
+      if( $newparent=mysql_single_fetch('admin_faq.bigmove.newparent', $query) )
+      {
+         $newparent = $newparent['ID'];
 
-        mysql_query( "UPDATE FAQ SET SortOrder=SortOrder-($dir) " .
-                     'WHERE Parent=' . $row["Parent"] . ' ' .
-                     'AND SortOrder=' . ($row["SortOrder"]+$dir) . ' LIMIT 1' )
-           or error("mysql_query_failed",'admin_faq.move.update_sortorder1');
-        mysql_query( "UPDATE FAQ SET SortOrder=SortOrder+($dir) " .
-                     "WHERE ID=" . $row["ID"] . ' LIMIT 1')
-           or error("mysql_query_failed",'admin_faq.move.update_sortorder2');
-     }
-     jump_to($page);
-  }
+         if( $max=mysql_single_fetch( 'admin_faq.bigmove.max_sortorder',
+               "SELECT MAX(SortOrder)+1 as max FROM FAQ"
+               ." WHERE Parent=$newparent LIMIT 1") )
+         {
+            $max = $max['max'];
+            if( !is_numeric($max) or $max<1 ) $max = 1;
+         }
+         else
+            $max = 1;
 
+         //shift down the neighbours above
+         mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1"
+                  . " WHERE Parent=" . $row["Parent"]
+                  . " AND SortOrder>" . $row["SortOrder"])
+            or error("mysql_query_failed",'admin_faq.bigmove.update_sortorder1');
 
-
-  // ***********        Move entry to new category      ****************
-
-  else if( ($action=@$_GET["move"]) == 'uu' or $action == 'dd' )
-  {
-     $query = "SELECT Entry.SortOrder, Entry.Parent, Parent.SortOrder AS ParentOrder " .
-              " FROM FAQ AS Entry, FAQ AS Parent" .
-              " WHERE Entry.ID='$id' AND Parent.ID=Entry.Parent";
-
-     $row= mysql_single_fetch('admin_faq.bigmove.find', $query)
-        or error('admin_no_such_entry',"admin_faq.move.$action.read($id)");
-
-     $query = 'SELECT ID as NewParent FROM FAQ ' .
-        'WHERE Level=1 ' .
-        ( $action == 'dd' ?
-          'AND SortOrder > ' . $row['ParentOrder'] . ' ORDER BY SortOrder' :
-          'AND SortOrder < ' . $row['ParentOrder'] . ' ORDER BY SortOrder DESC' ) .
-        ' LIMIT 1';
-
-     if( $newparent_row=mysql_single_fetch('admin_faq.bigmove.newparent', $query) )
-     {
-        $newparent = $newparent_row["NewParent"];
-
-        if( $max_row=mysql_single_fetch( 'admin_faq.bigmove.max_sortorder',
-               "SELECT MAX(SortOrder) as max FROM FAQ" .
-               " WHERE Parent=$newparent LIMIT 1") )
-        {
-           $max = $max_row['max'];
-           if( !is_numeric($max) ) $max = 0;
-        }
-        else
-           $max = 0;
-
-
-        mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1 " .
-                    "WHERE Parent=" . $row["Parent"] . " AND SortOrder>" . $row["SortOrder"])
-           or error("mysql_query_failed",'admin_faq.bigmove.update_sortorder1');
-
-        mysql_query( "UPDATE FAQ SET Parent=$newparent, SortOrder=" . ($max+1) . ' ' .
-                     "WHERE ID='$id' LIMIT 1")
-           or error("mysql_query_failed",'admin_faq.bigmove.update_sortorder2');
-     }
-     jump_to($page);
-  }
+         //move the entry in the new category
+         mysql_query( "UPDATE FAQ SET Parent=$newparent, SortOrder=$max"
+                  . " WHERE ID=$id LIMIT 1")
+            or error("mysql_query_failed",'admin_faq.bigmove.update_sortorder2');
+      }
+      //jump_to($page); //clear URL
+   } //bigmove
 
 
 
-  // ***********        Save edited entry       ****************
+   // ***********        Save edited entry       ****************
 
-   else if( ($action=@$_GET["do_edit"]) == 't' )
+   else if( ($action=@$_GET['do_edit']) == 't' )
    {
-
       $row = get_entry_row( $id );
+      $transl = transl_toggle_state( $row);
 
-      if( !isset( $_POST["question"] ) )
+      if( !isset( $_POST['question'] ) )
          error('no_data','admin_faq.do_edit');
 
-      $question = trim( $_POST["question"] );
-      $answer = trim( @$_POST["answer"] );
+      $question = trim( @$_POST['question'] );
+      $answer = trim( @$_POST['answer'] );
+      $QID = $row['Question'];
+      $AID = $row['Answer'];
 
+      $log = 0;
       // Delete or update ?
-      if( empty($question) and empty($answer)
-         and $row["QTranslatable"] != 'Done'
-         and $row["ATranslatable"] != 'Done'
-         and ($row["Level"] > 1 or
+      if( empty($question) && empty($answer) && $transl
+         && ($row["Level"] > 1 or
             !mysql_single_fetch( 'admin_faq.do_edit.id',
                   "SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1") )
          )
@@ -258,41 +264,60 @@ $info_box = '<table border="2">
             or error("mysql_query_failed",'admin_faq.do_edit.update_sortorder');
 
          mysql_query("DELETE FROM TranslationFoundInGroup " .
-                     "WHERE Text_ID='" . $row['Question'] . "' " .
-                     "OR Text_ID='" . $row['Answer'] . "'")
+                     "WHERE Text_ID='$QID' " .
+                     "OR Text_ID='$AID'")
             or error("mysql_query_failed",'admin_faq.do_edit.delete_tranlsgrps');
          mysql_query("DELETE FROM TranslationTexts " .
-                     "WHERE ID='" . $row['Question'] . "' " .
-                     "OR ID='" . $row['Answer'] . "'")
+                     "WHERE ID='$QID' " .
+                     "OR ID='$AID'")
             or error("mysql_query_failed",'admin_faq.do_edit.delete_tranlstexts');
       }
       else //Update
       {
-         $log = 0;
-         if( $row['Q'] != $question )
+         $Qchanged = ( @$_POST['Qchanged'] === 'Y' //only if not hidden
+                     && $question && $row['QTranslatable'] === 'Done' );
+         if( $row['Q'] != $question or $Qchanged )
          {
-            $Qchanged = ( @$_POST['Qchanged'] === 'Y' && $row['QTranslatable'] === 'Done'
-                        && $question
-                        ) ? ", Translatable='Changed'" : '';
+            if( $Qchanged )
+            {
+               $Qchanged = ", Translatable='Changed'";
+               mysql_query( "UPDATE Translations SET Translated='N'"
+                     . " WHERE Original_ID=$QID")
+                  or error('mysql_query_failed','admin_faq.do_edit.update_Qflags');
+               $log|= 0x4;
+            }
+            else
+               $Qchanged = '';
+
             $Qsql = mysql_addslashes($question);
             mysql_query("UPDATE TranslationTexts SET Text='$Qsql'$Qchanged"
-                     . " WHERE ID=" . $row['Question'] . " LIMIT 1")
-               or error("mysql_query_failed",'admin_faq.do_edit.update_tranlsgrps');
-            $log|= 1;
+                     . " WHERE ID=$QID LIMIT 1")
+               or error("mysql_query_failed",'admin_faq.do_edit.update_Qtexts');
+            $log|= 0x1;
          }
          else
             $Qsql = '';
 
-         if( $row['Answer'] && $row['A'] != $answer )
+         $Achanged = ( @$_POST['Achanged'] === 'Y' //only if not hidden
+                     && $answer && $row['ATranslatable'] === 'Done' );
+         if( $AID>0 && ( $row['A'] != $answer or $Achanged ) )
          {
-            $Achanged = ( @$_POST['Achanged'] === 'Y' && $row['ATranslatable'] === 'Done'
-                        && $answer
-                        ) ? ", Translatable='Changed'" : '';
+            if( $Achanged )
+            {
+               $Achanged = ", Translatable='Changed'";
+               mysql_query( "UPDATE Translations SET Translated='N'"
+                     . " WHERE Original_ID=$AID")
+                  or error('mysql_query_failed','admin_faq.do_edit.update_Aflags');
+               $log|= 0x8;
+            }
+            else
+               $Achanged = '';
+
             $Asql = mysql_addslashes($answer);
             mysql_query("UPDATE TranslationTexts SET Text='$Asql'$Achanged"
-                     . " WHERE ID=" . $row['Answer'] . " LIMIT 1")
-               or error("mysql_query_failed",'admin_faq.do_edit.update_tranlstexts');
-            $log|= 2;
+                     . " WHERE ID=$AID LIMIT 1")
+               or error('mysql_query_failed','admin_faq.do_edit.update_Atexts');
+            $log|= 0x2;
          }
          else
             $Asql = '';
@@ -303,59 +328,60 @@ $info_box = '<table border="2">
                      . ", Question='$Qsql', Answer='$Asql'") //+ Date= timestamp
                or error("mysql_query_failed",'admin_faq.do_edit.faqlog');
          }
-     }
+      }
 
-     if( $row['QTranslatable'] !== 'N' 
-         || ( $row['Answer'] && $row['ATranslatable'] !== 'N' ) )
-        make_include_files(null, 'FAQ'); //must be called from main dir
+      if( $log ) //i.e. modified except deleted
+         if( $row['QTranslatable'] !== 'N'
+            || ( $AID>0 && $row['ATranslatable'] !== 'N' ) )
+            make_include_files(null, 'FAQ'); //must be called from main dir
 
-     jump_to($page);
-  }
+      jump_to($page); //clear URL
+   } //do_edit
 
 
 
-  // ***********        New entry       ****************
+   // ***********        New entry       ****************
 
-  else if( ($action=@$_GET["new"]) == 'e' or $action == 'c')
-  {
-     if( $action == 'c' )
-        start_page(T_("FAQ Admin").' - '.T_('New category'), true, $logged_in, $player_row );
-     else
-        start_page(T_("FAQ Admin").' - '.T_('New entry'), true, $logged_in, $player_row );
+   else if( ($action=@$_GET['new']) == 'e' or $action == 'c')
+   {
+      if( $action == 'c' )
+         start_page(T_("FAQ Admin").' - '.T_('New category'), true, $logged_in, $player_row );
+      else
+         start_page(T_("FAQ Admin").' - '.T_('New entry'), true, $logged_in, $player_row );
 
-     $show_list = false;
+      $show_list = false;
 
-     echo "<center>\n";
+      echo "<center>\n";
 
-     $faq_edit_form = new Form( 'faqnewform', "$page?do_new=" .
-                                $action . URI_AMP."id=$id", FORM_POST );
+      $faq_edit_form = new Form( 'faqnewform', "$page?do_new=" .
+                                 $action . URI_AMP."id=$id", FORM_POST );
 
-     if( $action == 'c' )
-     {
-        $faq_edit_form->add_row( array( 'HEADER', T_('New category') ) );
-        $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Category'),
-                                        'TEXTINPUT', 'question', 80, 80, '' ) );
-     }
-     else
-     {
-        $faq_edit_form->add_row( array( 'HEADER', T_('New entry') ) );
-        $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Question'),
-                                        'TEXTINPUT', 'question', 80, 80, '' ) );
-        $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
-                                        'TEXTAREA', 'answer', 80, 20, '' ) );
-     }
+      if( $action == 'c' )
+      {
+         $faq_edit_form->add_row( array( 'HEADER', T_('New category') ) );
+         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Category'),
+                                         'TEXTINPUT', 'question', 80, 80, '' ) );
+      }
+      else
+      {
+         $faq_edit_form->add_row( array( 'HEADER', T_('New entry') ) );
+         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Question'),
+                                         'TEXTINPUT', 'question', 80, 80, '' ) );
+         $faq_edit_form->add_row( array( 'DESCRIPTION', T_('Answer'),
+                                         'TEXTAREA', 'answer', 80, 20, '' ) );
+      }
 
       $faq_edit_form->add_row( array(
                            'SUBMITBUTTON', 'submit', T_('Submit'),
                            'TEXT', anchor( $page, T_('Back')),
                            ) );
       $faq_edit_form->echo_string();
-   }
+   } //new
 
 
    // ***********        Save new entry       ****************
 
-   else if( ($action=@$_GET["do_new"]) == 'c' or $action == 'e' )
+   else if( ($action=@$_GET['do_new']) == 'c' or $action == 'e' )
    {
       $query = "SELECT * FROM FAQ WHERE ID=$id";
       $row = mysql_single_fetch( 'admin_faq.do_new.find1', $query );
@@ -430,7 +456,7 @@ $info_box = '<table border="2">
          else
             $Asql = '';
 
-         mysql_query( "UPDATE FAQ SET Answer=$a_id, Question=$q_id WHERE ID=$faq_id LIMIT 1" )
+         mysql_query("UPDATE FAQ SET Answer=$a_id, Question=$q_id WHERE ID=$faq_id LIMIT 1" )
             or error('mysql_query_failed','admin_faq.do_new.update');
 
          mysql_query("INSERT INTO FAQlog SET FAQID=$id, uid=" . $player_row["ID"]
@@ -438,72 +464,72 @@ $info_box = '<table border="2">
             or error('mysql_query_failed','admin_faq.do_new.faqlog');
       }
 
-      jump_to($page);
-   }
+      jump_to($page); //clear URL
+   } //do_new
 
 
-  // ***********       Toggle hidden           ****************
+   // ***********       Toggle hidden           ****************
 
-  else if( ($action=@$_GET["hidden"]) === 't' )
-  {
-     $row = get_entry_row( $id );
+   else if( ($action=@$_GET['toggleH']) )
+   {
+      $row = get_entry_row( $id );
+      $faqhide = ( @$row['Hidden'] == 'Y' );
 
-     $faqhide = ( @$row['Hidden'] == 'Y' );
+      if( ($action=='Y') xor $faqhide )
+      {
+         $query = "UPDATE FAQ " .
+                  "SET Hidden='" . ( $faqhide ? 'N' : 'Y' ) . "' " .
+                  "WHERE ID=" . $row["ID"] . ' LIMIT 1';
 
-        $query = "UPDATE FAQ " .
-                    "SET Hidden='" . ($faqhide == 'Y' ? 'N' : 'Y' ) . "' " .
-                    "WHERE ID=" . $row["ID"] . ' LIMIT 1';
+         mysql_query( $query ) or error('mysql_query_failed','admin_faq.hidden_update');
 
-        mysql_query( $query ) or error('mysql_query_failed','admin_faq.hidden.update');
+         $transl = transl_toggle_state( $row);
+         if( $faqhide && $transl == 'Y' )
+         {
+            //remove it from translation. No need to adjust Translations.Translated
+            $query = "UPDATE TranslationTexts " .
+                     "SET Translatable='N' " .
+                     "WHERE ID=" . $row['Question'] .
+                     ( $row['Level'] == 1 ? ' LIMIT 1'
+                        : " OR ID=" . $row['Answer'] . " LIMIT 2" );
 
-     if( $faqhide && $row['QTranslatable'] == 'Y' )
-     {
-        $query = "UPDATE TranslationTexts " .
-                    "SET Translatable='N' " .
-                    "WHERE ID=" . $row['Question'] .
-           ( $row['Level'] == 1 ? ' LIMIT 1' : " OR ID=" . $row['Answer'] . " LIMIT 2" );
-
-        mysql_query( $query ) or error('mysql_query_failed','admin_faq.hidden.transl');
-     }
-
-  }
-
-
-  // ***********       Toggle translatable     ****************
-
-  else if( ($action=@$_GET["transl"]) === 't' )
-  {
-
-     $row = get_entry_row( $id );
-
-     //$FAQ_group = get_faq_group_id();
-
-//Warning: for toggle, Answer follow Question
-//         but they could be translated independently
-     if( $row['QTranslatable'] == 'Done' or $row['QTranslatable'] == 'Changed'
-         || ( $row['Answer'] && (
-           $row['ATranslatable'] == 'Done' or $row['ATranslatable'] == 'Changed' ) )
-       )
-        error('admin_already_translated','admin_faq.transl');
-     else
-     {
-        $query = "UPDATE TranslationTexts " .
-                    "SET Translatable='" . ($row['QTranslatable'] == 'Y' ? 'N' : 'Y' ) . "' " .
-                    "WHERE ID=" . $row['Question'] .
-           ( $row['Level'] == 1 ? ' LIMIT 1' : " OR ID=" . $row['Answer'] . " LIMIT 2" );
-
-        mysql_query( $query ) or error('mysql_query_failed','admin_faq.transl');
-     }
-
-     make_include_files(null, 'FAQ'); //must be called from main dir
-  }
+            mysql_query( $query ) or error('mysql_query_failed','admin_faq.hidden_flags');
+         }
+      }
+      //jump_to($page); //clear URL
+   } //toggleH
 
 
+   // ***********       Toggle translatable     ****************
 
-  // ***********       Show FAQ list       ****************
+   else if( ($action=@$_GET['toggleT']) )
+   {
+      $row = get_entry_row( $id );
+      $transl = transl_toggle_state( $row);
 
-  if( $show_list )
-  {
+      if( !$transl )
+         error('admin_already_translated','admin_faq.transl');
+      else if( ($action=='Y') xor ($transl == 'Y') )
+      {
+         //not yet translated: may toggle it. No need to adjust Translations.Translated
+         $query = "UPDATE TranslationTexts " .
+                  "SET Translatable='" . ($transl == 'Y' ? 'N' : 'Y' ) . "' " .
+                  "WHERE ID=" . $row['Question'] .
+                  ( $row['Level'] == 1 ? ' LIMIT 1'
+                     : " OR ID=" . $row['Answer'] . " LIMIT 2" );
+         mysql_query( $query ) or error('mysql_query_failed','admin_faq.transl');
+
+         make_include_files(null, 'FAQ'); //must be called from main dir
+      }
+      //jump_to($page); //clear URL
+   } //toggleT
+
+
+
+   // ***********       Show FAQ list       ****************
+
+   if( $show_list )
+   {
       start_page(T_("FAQ Admin"), true, $logged_in, $player_row );
       echo "<CENTER>\n";
       $str = 'Read this before editing';
@@ -518,104 +544,110 @@ $info_box = '<table border="2">
       }
 
 
-     echo "<table align=center width=\"85%\" border=0><tr><td>\n";
+      echo "<table align=center width=\"85%\" border=0><tr><td>\n";
 
-     echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
-        T_('FAQ Admin') . "</font></h3>\n";
-
-
-     $result = mysql_query(
-        "SELECT entry.*, Question.Text AS Q".
-        ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
-        ", IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
-        "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
-        "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
-        "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
-        "AND entry.Level<3 AND entry.Level>0 " .
-        "ORDER BY CatOrder,entry.Level,entry.SortOrder")
-        or error('mysql_query_failed','admin_faq.list');
+      echo "<h3 class=Header align=left><a name=\"general\">" .
+         T_('FAQ Admin') . "</a></h3>\n";
 
 
-     echo "<a name=\"general\"></a><table>\n";
-     $nbcol = 9;
+      $result = mysql_query(
+         "SELECT entry.*, Question.Text AS Q".
+         ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
+         ", IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
+         "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
+         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
+         "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
+         "AND entry.Level<3 AND entry.Level>0 " .
+         "ORDER BY CatOrder,entry.Level,entry.SortOrder")
+         or error('mysql_query_failed','admin_faq.list');
 
-     echo "<tr><td align=left colspan=$nbcol><a href=\"$page?new=c".URI_AMP."id=1"
-        . '"><img border=0 title="'. T_('Add new category')
-        . '" src="images/new.png" alt="N"></a></td></tr>';
 
-     while( $row = mysql_fetch_assoc( $result ) )
-     {
-        $question = (empty($row['Q']) ? '(empty)' : $row['Q']);
-        $faqhide = ( @$row['Hidden'] == 'Y' );
+      echo "<a name=\"general\"></a><table>\n";
+      $nbcol = 9;
 
-        if( $row['Level'] == 1 )
-        {
-           echo '<tr><td align=left colspan=2><a name="e'.$row['ID'].'"></a>';
-           $typechar = 'c'; //category
-        }
-        else
-        {
-           echo '<tr><td width=20>&nbsp;</td><td align=left><a name="e'.$row['ID'].'"></a>';
-           $typechar = 'e'; //entry
-        }
+      echo "<tr><td align=left colspan=$nbcol><a href=\"$page?new=c".URI_AMP."id=1"
+         . '"><img border=0 title="'. T_('Add new category')
+         . '" src="images/new.png" alt="N"></a></td></tr>';
+
+      while( $row = mysql_fetch_assoc( $result ) )
+      {
+         $question = (empty($row['Q']) ? '(empty)' : $row['Q']);
+         $faqhide = ( @$row['Hidden'] == 'Y' );
+         $transl = transl_toggle_state( $row);
+
+         if( $row['Level'] == 1 )
+         {
+            echo '<tr><td align=left colspan=2><a name="e'.$row['ID'].'"></a>';
+            $typechar = 'c'; //category
+         }
+         else
+         {
+            echo '<tr><td width=20>&nbsp;</td><td align=left><a name="e'.$row['ID'].'"></a>';
+            $typechar = 'e'; //entry
+         }
 
          if( $faqhide )
             echo "(hidden) ";
          echo "<A href=\"$page?edit=$typechar".URI_AMP."id=" . $row['ID'] .
               '" title="' . T_("Edit") . "\">$question</A>\n";
-        echo "</td>";
+         echo "</td>";
 
-        echo "<td width=40 align=right><a href=\"$page?move=u".URI_AMP.'id=' .
-           $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png" alt="u"></a></td>';
-        echo "<td><a href=\"$page?move=d".URI_AMP.'id=' .
-           $row['ID'] . '"><img border=0 title="' . T_("Move down") . '" src="images/down.png" alt="d"></a></td>';
+         echo "<td width=40 align=right><a href=\"$page?move=u".URI_AMP.'id=' .
+            $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png" alt="u"></a></td>';
+         echo "<td><a href=\"$page?move=d".URI_AMP.'id=' .
+            $row['ID'] . '"><img border=0 title="' . T_("Move down") . '" src="images/down.png" alt="d"></a></td>';
 
-        if( $row['Level'] > 1 )
-        {
-           echo "<td align=right><a href=\"$page?move=uu".URI_AMP.'id=' .
-              $row['ID'] . '"><img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png" alt="U"></a></td>';
-           echo "<td><a href=\"$page?move=dd".URI_AMP.'id=' .
-              $row['ID'] . '"><img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png" alt="D"></a></td>';
-        }
-        else
-           echo '<td colspan=2>&nbsp;</td>';
+         if( $row['Level'] > 1 )
+         {
+            echo "<td align=right><a href=\"$page?move=uu".URI_AMP.'id=' .
+               $row['ID'] . '"><img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png" alt="U"></a></td>';
+            echo "<td><a href=\"$page?move=dd".URI_AMP.'id=' .
+               $row['ID'] . '"><img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png" alt="D"></a></td>';
+         }
+         else
+            echo '<td colspan=2>&nbsp;</td>';
 
-        echo "<td><a href=\"$page?new=$typechar".URI_AMP."id=" . $row['ID'] .
-           '"><img border=0 title="' .
-           ($typechar == 'e' ? T_('Add new entry') : T_('Add new category')) .
-           '" src="images/new.png" alt="N"></a></td>';
+         echo "<td><a href=\"$page?new=$typechar".URI_AMP."id=" . $row['ID'] .
+            '"><img border=0 title="' .
+            ($typechar == 'e' ? T_('Add new entry') : T_('Add new category')) .
+            '" src="images/new.png" alt="N"></a></td>';
 
-        echo "<td><a href=\"$page?hidden=t".URI_AMP."id=" . $row['ID'] .
-           '"><img border=0 title="' .
-           ( $faqhide ? T_('Show') : T_('Hide') ) .
-           '" src="images/hide' . ( $faqhide ? '_no.png" alt="h' : '.png" alt="H' ) . '"></a></td>';
+         echo "<td><a href=\"$page?toggleH="
+            . ( $faqhide == 'Y' ? 'N' : 'Y' )
+            . URI_AMP."id=" . $row['ID']
+            . '"><img border=0 title="'
+            . ( $faqhide ? T_('Show') : T_('Hide') )
+            . '" src="images/hide'
+            . ( $faqhide ? '_no.png" alt="h' : '.png" alt="H' )
+            . '"></a></td>';
 
-        $transl = $row['ATranslatable'];
-        if( !$row['Answer'] or ( $transl !== 'Done' and $transl !== 'Changed') )
-            $transl = $row['QTranslatable'];
-        if( !$faqhide and $transl !== 'Done' and $transl !== 'Changed' )
-           echo "<td><a href=\"$page?transl=t".URI_AMP."id=" . $row['ID'] .
-           '"><img border=0 title="' .
-           ($transl == 'Y' ? T_('Make untranslatable') : T_('Make translatable')) .
-           '" src="images/transl' . ( $transl == 'Y' ? '.png" alt="T' : '_no.png" alt="t' ) . '"></a></td>';
-        else
-           echo '<td>&nbsp;</td>';
+         if( !$faqhide and $transl )
+            echo "<td><a href=\"$page?toggleT="
+               . ( $transl == 'Y' ? 'N' : 'Y' )
+               . URI_AMP."id=" . $row['ID']
+               . '"><img border=0 title="'
+               . ( $transl == 'Y' ? T_('Make untranslatable') : T_('Make translatable'))
+               . '" src="images/transl'
+               . ( $transl == 'Y' ? '.png" alt="T' : '_no.png" alt="t' )
+               . '"></a></td>';
+         else
+            echo '<td>&nbsp;</td>';
 
-        echo '</tr>';
+         echo '</tr>';
 
-        if( $row["Level"] == 1 )
-           echo "<tr><td width=20></td><td align=left colspan=".($nbcol-1)
-              . "><a href=\"$page?new=e".URI_AMP."id=" .
-              $row['ID'] . '"><img border=0 title="' . T_('Add new entry') .
-              '" src="images/new.png" alt="N"></a></td></tr>';
-     }
-     mysql_free_result($result);
+         if( $row["Level"] == 1 )
+            echo "<tr><td width=20></td><td align=left colspan=".($nbcol-1)
+               . "><a href=\"$page?new=e".URI_AMP."id=" .
+               $row['ID'] . '"><img border=0 title="' . T_('Add new entry') .
+               '" src="images/new.png" alt="N"></a></td></tr>';
+      }
+      mysql_free_result($result);
 
-     echo "</table></td></tr></table>\n";
-  }
+      echo "</table></td></tr></table>\n";
+   } //show_list
 
-  echo "</center>\n";
-  end_page();
+   echo "</center>\n";
+   end_page();
 }
 
 function get_faq_group_id()
@@ -639,6 +671,27 @@ function get_entry_row( $id )
       or error('internal_error','get_entry_row');
 
    return $row;
+}
+
+//$row = row from get_entry_row(), for example
+function transl_toggle_state( $row)
+{
+   //Warning: for toggle, Answer follow Question
+   //         but they could be translated independently
+   if( $row['Question']<=0 )
+      return ''; //can't be toggled
+   $transl = @$row['QTranslatable'];
+   if( $transl == 'Done' or $transl == 'Changed' )
+      return ''; //can't be toggled
+   if( $row['Answer']>0 )
+   {
+      $transl = @$row['ATranslatable'];
+      if( $transl == 'Done' or $transl == 'Changed' )
+         return ''; //can't be toggled
+   }
+   if( $transl === 'Y' or $transl === 'N' )
+      return $transl; //toggle state
+   return ''; //can't be toggled
 }
 
 ?>

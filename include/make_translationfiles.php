@@ -44,7 +44,7 @@ function make_known_languages() //must be called from main dir
    fwrite( $fd, "<?php\n\n"
 ."\$Translate" /* break */ . "Groups[] = \"Users\";\n"
 ."// The \$T_ are required for 'scripts/generate_translation_texts.php'.\n"
-."\$T_ = 'fnop';\n"
+."\$T_ = 'fnop';\n" //or 'trim'
 ."\n\$known_languages = array(\n" );
 
    $prev_lang = '';
@@ -154,13 +154,6 @@ function make_include_files($language=null, $group=null) //must be called from m
 function translations_query( $translate_lang, $untranslated, $group
                , $from_row=-1, $alpha_order=false, $filter_en='')
 {
-// See admin_faq.php to know the Translatable flag meaning.
-/* Translations.Text IS NOT NULL (but maybe empty if the 'same' box is checked)
-    and Translatable='Y' (instead of Done as for a FAQ message)
-    is the default status for a translated system message.
-   So, Translations.Text IS NULL means "never translated".
-*/
-
 /* Note: Some items appear two or more times within the untranslated set
     when from different groups. But we can't use:
        ( $untranslated ? "DISTINCT " : "")
@@ -187,6 +180,7 @@ function translations_query( $translate_lang, $untranslated, $group
           . ",TranslationFoundInGroup.Group_ID"
           . ",TranslationTexts.Text AS Original"
           . ",TranslationTexts.Translatable"
+          . ",Translations.Translated"
    . " FROM (TranslationTexts"
         . ",TranslationLanguages"
         . ",TranslationFoundInGroup"
@@ -206,7 +200,9 @@ function translations_query( $translate_lang, $untranslated, $group
 
    if( $untranslated )
       $query .=
-         " AND (Translations.Text IS NULL OR TranslationTexts.Translatable='Changed')";
+         " AND (Translations.Translated IS NULL OR Translations.Translated='N')";
+      // Translations.Translated IS NULL means "never translated" (LEFT JOIN fails).
+      // TODO: enhance the query around this 'OR' clause
 
    switch( $group )
    {
