@@ -190,6 +190,7 @@ function echo_links($id,$cols)
       else
          echo anchor( $link, $name);
    }
+   echo get_new_string('bottom', 0);
 
    $lcols = $cols-$lcols;
    $tmp = ( $lcols > 1 ? ' colspan='.$lcols : '' );
@@ -215,25 +216,36 @@ function echo_links($id,$cols)
 
 function get_new_string($Lastchangedstamp, $Lastread)
 {
-   global $NOW, $new_level1, $new_end;
+   global $NOW, $new_level1, $new_end, $new_count;
 
-   if( (empty($Lastread) or $Lastchangedstamp > $Lastread)
-       and $Lastchangedstamp + $new_end > $NOW )
+   $new = '';
+   if( $Lastchangedstamp == 'bottom' )
    {
-      if( $Lastchangedstamp + $new_level1 > $NOW )
-         $color = '#ff0000'; //recent 'new'
-      else
-         $color = '#ff7777'; //older 'new'
-      $new = '<font color="' . $color . '" size="-1">' . T_('new') .'</font>';
-
-      global $new_count;
-      $new_count++;
-      $new = "&nbsp;&nbsp;<a name=\"new$new_count\" href=\"#new"
-                        . ($new_count+1) . "\">$new</a>";
+      if( $new_count>0 )
+      {
+         $class = 'NewFlag';
+         $new = T_('first new');
+         $new = "<a name=\"new". ($new_count+1)
+                           . "\" href=\"#new1\">$new</a>";
+         $new = "<span class=\"$class\">$new</span>";
+      }
    }
    else
-      $new = '';
-
+   {
+      if( (empty($Lastread) or $Lastchangedstamp > $Lastread)
+            && $Lastchangedstamp + $new_end > $NOW )
+      {
+         $new_count++;
+         if( $Lastchangedstamp + $new_level1 > $NOW )
+            $class = 'NewFlag'; //recent 'new'
+         else
+            $class = 'OlderNewFlag'; //older 'new'
+         $new = T_('new');
+         $new = "<a name=\"new$new_count\" href=\"#new"
+                           . ($new_count+1) . "\">$new</a>";
+         $new = "<span class=\"$class\">$new</span>";
+      }
+   }
    return $new;
 }
 

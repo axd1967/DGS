@@ -99,6 +99,11 @@ Changelog
 
 2007-07-20 rodival
 
+   * forum/forum_functions.php, skins/dragon/screen.css
+   - added a "go back to first new" link at bottom of lists
+     CSSed the "new" links
+   - adjusted the MarkTerm colors
+
    * admin_password.php, send_new_password.php, forgot.php:
    - added a way to overwrite the current new password process for admins.
 

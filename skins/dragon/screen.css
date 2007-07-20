@@ -1141,6 +1141,25 @@ table.Forum tr.PostButtons a.Highlight {
    color: #ee6666;
 }
 
+table.Forum span.OlderNewFlag,
+table.Forum span.NewFlag {
+   margin: 0px 6px;
+}
+
+table.Forum span.OlderNewFlag a,
+table.Forum span.NewFlag a {
+   font-size: 80%;
+   text-decoration: none;
+}
+
+table.Forum span.NewFlag a {
+   color: #ff0000;
+}
+
+table.Forum span.OlderNewFlag a {
+   color: #ff7777;
+}
+
 
 /* ------------------------- */
 /* Search and filter highlights */
@@ -1151,7 +1170,7 @@ span.MarkTerm {
    color: darkred;
    font-weight: bold;
 */
-   background: lime;
+   background: #d0fcc0;
 }
 
 a span.MarkTerm {
@@ -1159,7 +1178,7 @@ a span.MarkTerm {
 }
 
 span.MarkTagTerm {
-   background: lime;
+   background: #fffca0;
    font-size: 0.5em;
    margin: 0px 0px 0.5em 0px;
 /*   padding: 0px 0px 0.5em 0px; */
