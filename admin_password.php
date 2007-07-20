@@ -52,7 +52,7 @@ require_once( "include/form_functions.php" );
                                  'TD',
                                  'TEXT', T_("to replace user's one"),
                                ) );
-   $passwd_form->add_row( array( 'DESCRIPTION', '',
+   $passwd_form->add_row( array( 'TAB',
                                  'CELL', 2, 'align=left',
                                  'CHECKBOX', 'overnew', 1,
                                  T_('overwrite the current new password process'), 0,
