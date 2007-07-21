@@ -166,7 +166,7 @@ $info_box = '<table border="2">
 
    // ***********        Move entry       ****************
 
-   // args: id, move=u|d, dir= ?
+   // args: id, move=u|d, dir=length of the move (int, pos or neg)
    else if( ($action=@$_GET['move']) == 'u' or $action == 'd' )
    {
       $dir = isset($_GET['dir']) ? (int)$_GET['dir'] : 1;

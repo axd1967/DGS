@@ -160,6 +160,13 @@ ALTER TABLE `Translations`
  ADD `Translated` ENUM( 'Y', 'N') NOT NULL DEFAULT 'N' AFTER `Text` ;
 UPDATE `Translations` SET `Translated` = 'Y';
 -----------
+   - changed the 'hidden' and 'translatable' buttons of admin_faq.php
+     from a toggle process to a set/reset process. Basicaly, they acts
+     the same way but a simple refresh of the page will not "toggle-back"
+     the option now.
+   - modified the "move" part of admin_faq.php to allow a move greater
+     than 1: admin_faq.php?move=u&dir=3 now move the item 3 steps highter.
+     alas, actualy, this is only usable my manualy modifying the URL.
 
    * scripts/FAQtransl_consistency.php:
    - added file (as a seed for more)

@@ -751,7 +751,7 @@ class Form
             $rootformstr .= $this->print_end();
 
          return $rootformstr;
-       }
+      }
 
    /*!
     * \brief Return form pressed into areas grouped as specified by layout (called recursively).
