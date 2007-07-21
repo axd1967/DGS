@@ -99,7 +99,7 @@ define('MAXROWS_PER_PAGE_DEFAULT', 20);
 define('MAXROWS_PER_PAGE_PROFILE', 50);
 define('MAXROWS_PER_PAGE', 100);
 
-$RowsPerPage = 20;
+$RowsPerPage = MAXROWS_PER_PAGE_DEFAULT;
 define('LIST_ROWS_MODULO', 4);
 
 $SearchPostsPerPage = 20;
@@ -224,6 +224,8 @@ define("ADMIN_TIME",0x10);
 define("ADMIN_ADD_ADMIN",0x20);
 define("ADMIN_PASSWORD",0x40);
 define('ADMIN_DATABASE',0x80);
+define('ADMIN_DEVELOPER',0x100);
+define('ADMIN_SKINNER',0x200);
 //-----
 
 

@@ -24,8 +24,8 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
-define('ALLOW_PROFIL_CHARSET', 0);
-define('TRANSL_ALLOW_FILTER', 1);
+define('ALLOW_PROFIL_CHARSET', 1); //allow the admins to overwrite the page encoding
+define('TRANSL_ALLOW_FILTER', 1); //allow a search on the english phrases
 
 
 $info_box = '<table border="2">
@@ -70,6 +70,12 @@ $info_box = '<table border="2">
       error('not_logged_in');
 
 
+   $lang_desc = get_language_descriptions_translated( true);
+   if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   {
+      $translator_array = array_keys( $lang_desc);
+   }
+   else
    {
       $translator_set = @$player_row['Translator'];
       if( !$translator_set )
@@ -79,7 +85,7 @@ $info_box = '<table border="2">
 
 
    $translate_lang = get_request_arg('translate_lang');
-   if( ALLOW_PROFIL_CHARSET && ($player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   if( ALLOW_PROFIL_CHARSET && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
      $profil_charset = (int)(bool)@$_REQUEST['profil_charset'];
    else
      $profil_charset = 0;
@@ -355,7 +361,6 @@ if(0){//old
          'HEADER', 'Select language to translate to',
          ) ); //$nbcol
 
-      $lang_desc = get_language_descriptions_translated( true);
       $vals = array();
       foreach( $lang_desc as $lang => $langname )
       {

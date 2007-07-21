@@ -95,7 +95,7 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    array_unshift($COUNTRIES, '');
    
    $langs = get_language_descriptions_translated();
-   arsort($langs);
+   arsort($langs); //will be reversed to place ahead the following:
    $langs['C'] = T_('Use browser settings');
 
    $notesheights = array();
@@ -198,9 +198,12 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 
    $profile_form->add_row( array( 'HEADER', T_('Appearences') ) );
 
+   if( (@$player_row['admin_level'] & ADMIN_SKINNER) )
    $profile_form->add_row( array( 'DESCRIPTION', T_('Skin'),
                                   'SELECTBOX', 'skinname', 1, $known_skins,
                                   $player_row['SkinName'], false ) );
+   else
+   $profile_form->add_row( array( 'HIDDEN', 'skinname', 'dragon'));
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Menu direction'),
                                   'RADIOBUTTONS', 'menudir', $menu_directions,

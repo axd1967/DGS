@@ -29,6 +29,13 @@ require_once( "include/make_translationfiles.php" );
    if( !$logged_in )
       error('not_logged_in');
 
+   if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   {
+      $lang_desc = get_language_descriptions_translated();
+      $translator_array = array_keys( $lang_desc);
+      unset($lang_desc);
+   }
+   else
    {
       $translator_set = @$player_row['Translator'];
       if( !$translator_set )

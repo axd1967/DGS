@@ -32,17 +32,19 @@ require_once( "include/table_columns.php" );
   if( !$logged_in )
     error("not_logged_in");
 
-  $player_level = (int)$player_row['admin_level'];
+  $player_level = (int)@$player_row['admin_level']; //local modifications
   if( !($player_level & ADMIN_ADMINS) )
     error("adminlevel_too_low");
 
   $admin_tasks = array(
-                        'ADMIN'  => array( ADMIN_ADMINS, T_('Admins')),
                         'AddAdm' => array( ADMIN_ADD_ADMIN, T_('New admin')),
-                        'Passwd' => array( ADMIN_PASSWORD, T_('New password')),
+                        'ADMIN'  => array( ADMIN_ADMINS, T_('Admins')),
+                        'Passwd' => array( ADMIN_PASSWORD, T_('Password')),
                         'TRANS'  => array( ADMIN_TRANSLATORS, T_('Translators')),
                         'Forum'  => array( ADMIN_FORUM, T_('Forum')),
                         'FAQ'    => array( ADMIN_FAQ, T_('FAQ')),
+                        'Skin'   => array( ADMIN_SKINNER, T_('Skin')),
+                        'Devel'  => array( ADMIN_DEVELOPER, T_('Developer')),
                         'Dbase'  => array( ADMIN_DATABASE, T_('Database')),
                         'TIME'   => array( ADMIN_TIME, T_('Time')),
                       );
@@ -120,17 +122,22 @@ require_once( "include/table_columns.php" );
   }
 
   $result = mysql_query("SELECT ID, Handle, Name, Adminlevel+0 AS admin_level FROM Players " .
-                        "WHERE Adminlevel != 0")
+                        "WHERE Adminlevel != 0 ORDER BY ID")
      or error('mysql_query_failed','admin_admins.find_admins2');
 
-  start_page(T_("Admin").' - '.T_('Edit admin staff'), true, $logged_in, $player_row );
-
-
-   echo "<center>&nbsp;<p></p><h3><font color=$h3_color><B>" . T_('Admins') . ":</B></font></h3>\n";
-
-   echo '<form name="admform" action="admin_admins.php?update=t" method="POST">'."\n";
 
    $atable = new Table( 'admin', '');
+
+
+   start_page(T_("Admin").' - '.T_('Edit admin staff'), true, $logged_in, $player_row );
+
+   echo "<h3 class=Header>" . T_('Admins') . "</h3>\n";
+
+
+   $marked_form = new Form('admin','admin_admins.php?update=t', FORM_POST, true, 'formTable');
+   $marked_form->attach_table( $atable);
+   $marked_form->set_tabindex(1);
+
 
    $atable->add_tablehead(1, T_('ID'), NULL, true, true);
    $atable->add_tablehead(2, T_('Userid'), NULL, true, true);
@@ -140,7 +147,7 @@ require_once( "include/table_columns.php" );
    foreach( $admin_tasks as $aid => $tmp )
    {
       list( $amask, $aname) = $tmp;
-      $atable->add_tablehead($col++, $aname, NULL, true, true, '10pc');
+      $atable->add_tablehead($col++, $aname, NULL, true, true);
    }
 
    $new_admin = ($player_level & ADMIN_ADD_ADMIN);
@@ -148,10 +155,11 @@ require_once( "include/table_columns.php" );
    {
       $arow_strings = array();
 
+      $col = 3;
       if( is_array($row) )
       {
          $id = $row["ID"];
-         $level = $row["admin_level"];
+         $level = $row['admin_level'];
          $arow_strings[1] = "<td><A href=\"userinfo.php?uid=$id\">$id</A></td>";
          $arow_strings[2] = "<td><A href=\"userinfo.php?uid=$id\">" . $row["Handle"] . "</A></td>";
          $arow_strings[3] = "<td><A href=\"userinfo.php?uid=$id\">" .
@@ -161,15 +169,14 @@ require_once( "include/table_columns.php" );
       {
          $new_admin = false;
          $id = 'new';
-         $level = 0;
-         $arow_strings[1] = "<td colspan=3 nowrap>" . T_('New admin') . ": " .
+         $arow_strings[1] = "<td colspan=$col class=nowrap>" . T_('New admin') . ": " .
              '<input type="text" name="newadmin"' .
              ' value="" size="16" maxlength="16"></td>';
-         $arow_strings[2] = "";
-         $arow_strings[3] = "";
+         for( $level=2; $level<=$col; $level++ )
+            $arow_strings[$level] = '';
+         $level = 0;
       }
 
-      $col = 4;
       foreach( $admin_tasks as $aid => $tmp )
       {
          list( $amask, $aname) = $tmp;
@@ -179,28 +186,28 @@ require_once( "include/table_columns.php" );
          else
             $tmp = ' disabled';
 
+         if( $amask == ADMIN_ADD_ADMIN
+            && !($level & ADMIN_ADMINS) )
+            $tmp = ' disabled';
+
          if( $amask & $level )
             $tmp.= ' checked';
 
          $tmp = "\n  <input type=\"checkbox\" name=\"${aid}_$id\" value=\"Y\"$tmp>";
 
-         $arow_strings[$col++] = "<td align=center>$tmp</td>";
+         $arow_strings[++$col] = "<td class=Mark>$tmp</td>";
       }
 
       $atable->add_row( $arow_strings );
    }
 
-   $atable->add_row(
-      array( 1 => '<td align=right colspan=99>' .
-             '<input type="submit" name="action" value="' . T_('Update changes') . "\">"
-           , 'BG_Color' => $bg_color ) );
-
    $atable->echo_table();
 
-   echo "\n</form>";
+   echo $marked_form->print_insert_submit_buttonx( 'action',
+            T_('Update changes'), array('accesskey'=>'x'));
 
-   echo "</center>\n";
+   echo $marked_form->print_end();
 
-  end_page();
+   end_page();
 }
 ?>

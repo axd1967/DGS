@@ -97,6 +97,22 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-21 rodival
+
+   * include/std_functions.php, admin_admins.php:
+   - introduced 2 new admins classes: developers and skinners
+-----------
+UPDATE `Players`
+ SET `Adminlevel`=-1 WHERE `ID`=2 LIMIT 1 ;
+-----------
+
+   * edit_profile.php:
+   - reduced the access to the skins (temporary)
+
+   * translate.php, update_translation.php,
+     include/make_translationfiles.php:
+   - gave an access to all languages to the ADMIN_TRANSLATORS
+
 2007-07-20 rodival
 
    * forum/forum_functions.php, skins/dragon/screen.css
