@@ -99,6 +99,11 @@ Changelog
 
 2007-07-21 juga
 
+   * admin_faq.php:
+   - mark "current" entry with green marker
+   - moved marker in front of entries (inbetween hard to see)
+   - added cookie-based move-distance for up-/down-move of entries
+
    * include/message_functions.php (message_list_table),
      search_messages.php:
    - abstracted details of types-filter to: Private, Game messages
