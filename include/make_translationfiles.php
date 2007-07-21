@@ -22,6 +22,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 // ln -s -d /tmp/persistent/dragongoserver/translations /home/groups/d/dr/dragongoserver/htdocs/translations
 
 define('TRANS_ROW_PER_PAGE', 30);
+define('TRANS_FULL_ADMIN', 1); //allow all languages access to ADMIN_TRANSLATORS
+
 
 function make_known_languages() //must be called from main dir
 {
