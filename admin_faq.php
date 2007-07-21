@@ -46,6 +46,10 @@ $info_box = '<table border="2">
        The new or changed text are saved regardless of the preview-checkbox.
   <li> For links homed at DGS, use not &lt;a href=".."&gt;, but the
        home-tag, e.g. &lt;home users.php&gt;Users&lt;/home&gt;
+  <li> Setting the move distance (for Q/A-entries) allows to control how
+       many lines an entry can be moved up or down. A saved value is
+       stored for one hour in a cookie. Invalid or 0 resets to the
+       default of 1.
   <li> About FAQ Search: Search finds text in Question or Answers of all
        categories and texts, also in the hidden ones. The search-term
        is implicitly prefixed and suffixed with a wildcard \'%\'-pattern,
@@ -100,8 +104,8 @@ $info_box = '<table border="2">
    $movedist = abs( (int) get_request_arg('movedist') );
    $c_movedist = safe_getcookie('admin_faq_movedist');
    if ( empty($movedist) )
-   { // handle default
-      if ( empty($c_movedist) )
+   { // handle default (reset if invalid or 0 or no cookie set)
+      if ( $movedist == '0' or $movedist < 0 or empty($c_movedist) )
          $movedist = 1;
       else
          $movedist = $c_movedist;
