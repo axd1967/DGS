@@ -46,19 +46,21 @@ require_once( "include/filter.php" );
    $arr_chkfolders = array();
    foreach( $my_folders as $folder_id => $arr ) // arr=( Name, BGColor, FGColor )
    {
-      $folder_box = echo_folder_box( $my_folders, $folder_id, null, 'style="padding:4px;"', '%s&nbsp;', '' );
+      $folder_box = echo_folder_box( $my_folders, $folder_id, null,
+            'align=left style="padding:4px;"', '%s&nbsp;', '' );
       $arr_chkfolders[$folder_box] = array( $folder_id, T_('Folder') . ' ' . $arr[0] );
    }
 
    // Types: NORMAL,INVITATION, ACCEPTED, DECLINED, DISPUTED, RESULT, DELETED
    $arr_types = array(
-      T_('All') => '',
-      T_('Normal')   => "M.Type='NORMAL'",
-      T_('Invites')  => "M.Type='INVITATION'",
-      T_('Accepted') => "M.Type='ACCEPTED'",
-      T_('Declined') => "M.Type='DECLINED'",
-      T_('Disputed') => "M.Type='DISPUTED'",
-      T_('Result')   => "M.Type='RESULT'",
+      T_('All#msgtype') => '',
+      T_('Private#msgtype') => "M.Type='NORMAL'",
+      T_('Game#msgtype')    => "M.Type IN ('INVITATION','ACCEPTED','DECLINED','DISPUTED','RESULT')",
+      //T_('Invites')  => "M.Type='INVITATION'",
+      //T_('Accepted') => "M.Type='ACCEPTED'",
+      //T_('Declined') => "M.Type='DECLINED'",
+      //T_('Disputed') => "M.Type='DISPUTED'",
+      //T_('Result')   => "M.Type='RESULT'",
    );
 
    /* SQL-statement-fields from message_list_query(), see below:
@@ -95,7 +97,8 @@ require_once( "include/filter.php" );
    $mfilter = new SearchFilter();
    $mfilter->add_filter( 2, 'Text',    //! \todo can't search for myself with this filter (because otherP maybe null and therefore removing rows from SQL-result)!!
          'other_Handle',
-         #'(other_name #OP #VAL OR other_Handle #OP #VAL)', // could use filter on both, but would need UNION to avoid 'OR'
+         // TODO: could use filter on both, but would need dynamic UNION to avoid 'OR':
+         //'(other_name #OP #VAL OR other_Handle #OP #VAL)',
          true,
          array( FC_SIZE => 14, FC_ADD_HAVING => 1,
                 FC_SYNTAX_HINT => array( FCV_SYNHINT_ADDINFO => T_('find Userid') ) ));
@@ -105,9 +108,9 @@ require_once( "include/filter.php" );
    $mfilter->add_filter( 6, 'Selection', $arr_types, true);
    $mfilter->add_filter( 7, 'Selection',
          array( T_('All') => '',
-                T_('Received') => "me.Sender IN ('N','M')",
-                T_('Sent')     => "me.Sender IN ('Y','M')",
-                T_('Myself')   => "me.Sender='M'" ),
+                T_('From')   => "me.Sender IN ('N','M')",
+                T_('To')     => "me.Sender IN ('Y','M')",
+                T_('Myself') => "me.Sender='M'" ),
          true);
    $mfilter->init(); // parse current value from _GET
    $sf3 =& $mfilter->get_filter(3);
@@ -194,10 +197,6 @@ require_once( "include/filter.php" );
       . $smform->print_end();
 
 
-   $menu_array = array();
-   $menu_array[ T_('Browse folders') ] = "list_messages.php";
-   $menu_array[ T_('Edit folders') ] = "edit_folders.php";
-
-   end_page(@$menu_array);
+   end_page();
 }
 ?>
