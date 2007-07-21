@@ -35,8 +35,7 @@ define('UNBUF_TIMOUT', 5); //x seconds limit
    if( !$logged_in )
       error('not_logged_in');
 
-   $player_level = (int)$player_row['admin_level'];
-   if( !($player_level & ADMIN_DATABASE) )
+   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low');
 
 

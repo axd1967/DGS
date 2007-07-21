@@ -113,6 +113,21 @@ UPDATE `Players`
      include/make_translationfiles.php:
    - gave an access to all languages to the ADMIN_TRANSLATORS
 
+   * include/std_functions.php, admin_do_translators.php, admin.php,
+     admin_faq.php, admin_password.php, admin_translators.php,
+     change_password.php, people.php, send_new_password.php, status.php,
+   * scripts/convert_from_old_forum.php, scripts/convert_posindex.php,
+     scripts/data_export.php, scripts/data_report.php,
+     scripts/FAQtransl_consistency.php, scripts/game_consistency.php,
+     scripts/generate_translation_texts.php, scripts/mailtest.php,
+     scripts/message_consistency.php, scripts/player_consistency.php,
+     scripts/recalculate_ratings2.php, scripts/start_frozen_clocks.php,
+     scripts/update_translation_pages.php,
+   * forum/admin.php, forum/index.php, forum/list.php, forum/read.php,
+     forum/search.php:
+   - removed the global $admin_level (use $player_row['admin_level'] instead)
+   - normalization of each places where $player_row['admin_level'] is used
+
 2007-07-20 rodival
 
    * forum/forum_functions.php, skins/dragon/screen.css

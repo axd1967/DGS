@@ -24,35 +24,36 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
 {
-  connect2mysql();
+   connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+      error('not_logged_in');
 
-  if( !$admin_level )
-    error("adminlevel_too_low");
+   $admin_level = (int)@$player_row['admin_level']; //local modifications
+   if( !$admin_level )
+      error('adminlevel_too_low');
 
-  start_page(T_('Admin'), true, $logged_in, $player_row);
+   start_page(T_('Admin'), true, $logged_in, $player_row);
 
-  echo "<table><tr><td>\n";
-  echo "<h3 class=header>" . T_('Administration') . "</h3>\n";
+   echo "<table><tr><td>\n";
+   echo "<h3 class=Header>" . T_('Administration') . "</h3>\n";
 
-  add_link_page_link('admin_password.php', T_('New password'),
+   add_link_page_link('admin_password.php', T_('New password'),
                      '', $admin_level & ADMIN_PASSWORD);
-  add_link_page_link('admin_translators.php', T_('Manage translators'),
+   add_link_page_link('admin_translators.php', T_('Manage translators'),
                      '', $admin_level & ADMIN_TRANSLATORS);
-  add_link_page_link('admin_faq.php', T_('Edit FAQ'), 
+   add_link_page_link('admin_faq.php', T_('Edit FAQ'),
                      '', $admin_level & ADMIN_FAQ);
-  add_link_page_link('forum/admin.php', T_('Admin forums'), 
+   add_link_page_link('forum/admin.php', T_('Admin forums'),
                      '', $admin_level & ADMIN_FORUM);
-  add_link_page_link('admin_admins.php', T_('Edit admin staff'),
+   add_link_page_link('admin_admins.php', T_('Edit admin staff'),
                      '', $admin_level & ADMIN_ADMINS);
-//  add_link_page_link('admin_requests.php', T_('Handle user requests'), '', false);
+//   add_link_page_link('admin_requests.php', T_('Handle user requests'), '', false);
 
-  echo "<br>&nbsp;\n</td></tr></table>\n";
+   echo "<br>&nbsp;\n</td></tr></table>\n";
 
-  end_page();
+   end_page();
 }
 ?>

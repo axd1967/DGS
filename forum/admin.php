@@ -21,21 +21,19 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 require_once( "forum_functions.php" );
 
 {
-  connect2mysql();
+   connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+     error('not_logged_in');
 
-  $adm = $player_row['admin_level'];
+   if( !(@$player_row['admin_level'] & ADMIN_FORUM) )
+      error('adminlevel_too_low');
 
-  if( !( $adm & ADMIN_FORUM ) )
-     error("adminlevel_too_low");
+   $id = @$_GET["id"]+0;
 
-  $id = @$_GET["id"]+0;
-
-  $show_list = true;
+   $show_list = true;
 
   // ***********        New forum       ****************
 
@@ -43,7 +41,7 @@ require_once( "forum_functions.php" );
   {
      $title = T_('Forum Admin').' - '.T_('New forum');
      start_page($title, true, $logged_in, $player_row );
-     echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
+     echo "<h3 class=Header>$title</h3>\n";
 
      $show_list = false;
      echo "<center>\n";
@@ -106,7 +104,7 @@ require_once( "forum_functions.php" );
   {
      $title = T_('Forum Admin').' - '.T_('Edit forum');
      start_page($title, true, $logged_in, $player_row );
-     echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
+     echo "<h3 class=Header>$title</h3>\n";
 
      $show_list = false;
      echo "<center>\n";
@@ -220,7 +218,6 @@ require_once( "forum_functions.php" );
   {
      $title = T_('Forum Admin');
      start_page($title, true, $logged_in, $player_row );
-     //echo "<center><h3><font color=$h3_color>$title</font></h3></center>\n";
      echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
         T_('Forum Admin') . "</font></h3>\n";
 

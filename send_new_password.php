@@ -56,7 +56,7 @@ require_once( "include/std_functions.php" );
          // Could force email only if admin
          if( !$logged_in )
             error('not_logged_in');
-         if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
+         if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
             error('adminlevel_too_low');
 
          $row['Newpassword'] = '';
@@ -71,7 +71,7 @@ require_once( "include/std_functions.php" );
       // Could force email only if admin
       if( !$logged_in )
          error('not_logged_in');
-      if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
+      if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
          error('adminlevel_too_low');
 
       $row['Email'] = trim($_POST['email']);

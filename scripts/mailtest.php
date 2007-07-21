@@ -28,14 +28,13 @@ require_once( "include/form_functions.php" );
 
    connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+      error('not_logged_in');
 
-  $player_level = (int)$player_row['admin_level'];
-  if( !($player_level & ADMIN_ADMINS) )
-    error("adminlevel_too_low");
+   if( !(@$player_row['admin_level'] & ADMIN_ADMINS) )
+      error('adminlevel_too_low');
 
 
    $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 UTF-8

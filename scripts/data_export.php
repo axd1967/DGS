@@ -304,7 +304,7 @@ function get_tables( $database)
          'Games',
          'GamesNotes',
          'Bio',
-         'RatingChange',
+         'RatingChange', //Not used?? except in update_rating()
          'Ratinglog',
          'Statistics',
          'Messages',
@@ -1020,11 +1020,10 @@ function freesql_dump( $database, $query)
    setTZ('GMT');
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   $player_level = (int)$player_row['admin_level'];
-   if( !($player_level & ADMIN_DATABASE) )
-      error("adminlevel_too_low");
+   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+      error('adminlevel_too_low');
 
    if( $player_row['Handle'] == 'rodival'
       )

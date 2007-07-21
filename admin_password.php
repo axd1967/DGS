@@ -29,10 +29,10 @@ require_once( "include/form_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
-      error("adminlevel_too_low");
+   if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
+      error('adminlevel_too_low');
 
    start_page(T_("Admin").' - '.T_('Send password'), true, $logged_in, $player_row );
 

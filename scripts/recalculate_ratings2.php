@@ -32,11 +32,10 @@ require_once( "include/rating.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   $player_level = (int)$player_row['admin_level'];
-   if( !($player_level & ADMIN_DATABASE) )
-      error("adminlevel_too_low");
+   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+      error('adminlevel_too_low');
 
    if( ($lim=@$_REQUEST['limit']) > '' )
       $limit = " LIMIT $lim";
@@ -83,10 +82,9 @@ require_once( "include/rating.php" );
    $query = "SELECT Games.ID as gid ".
        "FROM Games, Players as white, Players as black " .
        "WHERE Status='FINISHED' AND Rated!='N' " . //redo Rated='Done' and do missed Rated='Y' 
-       "AND white.ID=White_ID AND black.ID=Black_ID ".
-       "AND ( NOT ISNULL(white.RatingStatus) ) " .
-       "AND ( NOT ISNULL(black.RatingStatus) ) " .
-       "ORDER BY Lastchanged, gid $limit";
+       "AND white.ID=White_ID AND white.RatingStatus!='' " .
+       "AND black.ID=Black_ID AND black.RatingStatus!='' " .
+       "ORDER BY Lastchanged,gid $limit";
 
    $result = mysql_query( $query )
            or die("<BR>" . mysql_error() );

@@ -33,11 +33,10 @@ require_once( "include/move.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   $player_level = (int)$player_row['admin_level'];
-   if( !($player_level & ADMIN_DATABASE) )
-      error("adminlevel_too_low");
+   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+      error('adminlevel_too_low');
 
    start_html('start_frozen_clocks', 0);
 

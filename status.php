@@ -246,7 +246,7 @@ require_once( "include/message_functions.php" );
 
 
 { // show pending posts
-   if( $player_row['Adminlevel'] & ADMIN_FORUM )
+   if( (@$player_row['admin_level'] & ADMIN_FORUM) )
    {
       echo "<hr id=sect_pending><br>";
       chdir('forum');

@@ -27,15 +27,15 @@ require_once( "include/form_functions.php" );
 
 
 {
-  connect2mysql();
+   connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+     error('not_logged_in');
 
-  if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
-    error("adminlevel_too_low");
+   if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+     error('adminlevel_too_low');
 
 
 /*

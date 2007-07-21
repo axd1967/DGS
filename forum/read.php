@@ -176,7 +176,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    $links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
    $is_moderator = false;
 
-   if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 )
+   if( (@$player_row['admin_level'] & ADMIN_FORUM) )
    {
       //toggle moderator and preview does not work together.
       //(else add $_POST in the moderator link build)

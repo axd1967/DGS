@@ -45,7 +45,7 @@ define('MODERATOR_SEARCH', 0);
    $is_moderator = false;
    $links = LINKPAGE_SEARCH;
 
-   if( ($player_row['admin_level'] & ADMIN_FORUM) > 0 && MODERATOR_SEARCH )
+   if( MODERATOR_SEARCH && (@$player_row['admin_level'] & ADMIN_FORUM) )
    {
       $links |= LINK_TOGGLE_MODERATOR;
 
@@ -110,7 +110,6 @@ define('MODERATOR_SEARCH', 0);
    $filter2 =& $ffilter->get_filter(2);
 
    // form for static filters
-   //$fform = new Form( 'tableFSF', $page, FORM_GET ); //make the result cached
    $fform = new Form( 'tableFSF', $page, FORM_POST );
    $fform->set_config( FEC_TR_ATTR, 'valign=top' );
    $fform->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );

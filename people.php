@@ -64,7 +64,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
    echo "<h3 class=Header>" . T_("FAQ") . "</h3>\n";
    echo "</td></tr>\n";
 
-   $extra_info = $logged_in && $player_row['admin_level'] & ADMIN_ADMINS ;
+   $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_ADMINS);
    if( $extra_info )
       $FAQexclude = array();
    else
@@ -131,7 +131,7 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
    echo "<h3 class=Header>" . T_('Current translators') . "</h3>\n";
    echo "</td></tr>\n";
 
-   $extra_info = $logged_in && $player_row['admin_level'] & ADMIN_TRANSLATORS ;
+   $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
    $query_result = mysql_query( "SELECT ID,Handle,Name,Translator" .
             ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".

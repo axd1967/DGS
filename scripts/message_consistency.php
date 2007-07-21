@@ -29,14 +29,13 @@ require_once( "include/std_functions.php" );
    //init_standard_folders();
 
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+      error('not_logged_in');
 
-  $player_level = (int)$player_row['admin_level'];
-  if( !($player_level & ADMIN_DATABASE) )
-    error("adminlevel_too_low");
+   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+      error('adminlevel_too_low');
 
 
    start_html( 'message_consistency', 0);

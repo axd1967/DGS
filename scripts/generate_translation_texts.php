@@ -31,7 +31,7 @@ chdir( 'scripts' );
    if( !$logged_in )
       error('not_logged_in');
 
-   if( !($player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
       error('adminlevel_too_low');
 
    $TheErrors->set_mode(ERROR_MODE_PRINT);

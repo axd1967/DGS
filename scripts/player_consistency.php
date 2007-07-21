@@ -215,11 +215,10 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   $player_level = (int)$player_row['admin_level'];
-   if( !($player_level & ADMIN_DATABASE) )
-      error("adminlevel_too_low");
+   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+      error('adminlevel_too_low');
 
 
    start_html( 'player_consistency', 0, '',
@@ -404,7 +403,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
             "RatingStatus, Rating2, RatingMin, RatingMax " .
             "FROM Players " .
             "WHERE (" .
-              "(RatingStatus='RATED' AND (Rating2>=RatingMax OR Rating2<=RatingMin) ) " .
+              "(RatingStatus='RATED' AND (Rating2>RatingMax OR Rating2<RatingMin) ) " .
               "OR NOT((ClockUsed>=0 AND ClockUsed<24) " .
               // no WEEKEND_CLOCK in Players table
               //       "OR (ClockUsed>=".WEEKEND_CLOCK_OFFSET.

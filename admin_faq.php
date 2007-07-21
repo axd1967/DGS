@@ -75,7 +75,7 @@ $info_box = '<table border="2">
    if( !$logged_in )
       error('not_logged_in');
 
-   if( !($player_row['admin_level'] & ADMIN_FAQ) )
+   if( !(@$player_row['admin_level'] & ADMIN_FAQ) )
       error('adminlevel_too_low');
 
    $id = is_numeric(@$_GET['id']) ? max(0,$_GET['id']) : 0;

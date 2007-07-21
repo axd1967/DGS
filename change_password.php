@@ -31,22 +31,22 @@ require_once( "include/std_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   if( $player_row["Handle"] == "guest" )
-      error("not_allowed_for_guest");
+   if( $player_row['Handle'] == 'guest' )
+      error('not_allowed_for_guest');
 
    if( @$_REQUEST['guestpass'] )
    {
-      if( !($player_row['admin_level'] & ADMIN_PASSWORD) )
-         error("adminlevel_too_low");
+      if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
+         error('adminlevel_too_low');
 
       $passwd = $GUESTPASS;
       if( illegal_chars( $passwd, true ) )
-         error("password_illegal_chars");
+         error('password_illegal_chars');
 
       $query = "UPDATE Players SET " .
-          "Password=PASSWORD('$passwd') " .
+          "Password=PASSWORD('".mysql_addslashes($passwd)."') " .
           "WHERE Handle='guest' LIMIT 1";
    }
    else
@@ -66,7 +66,7 @@ require_once( "include/std_functions.php" );
          error("password_mismatch");
    
       $query = "UPDATE Players SET " .
-          "Password=PASSWORD('$passwd') " .
+          "Password=PASSWORD('".mysql_addslashes($passwd)."') " .
           "WHERE ID=" . $player_row['ID'] . " LIMIT 1";
    }
 

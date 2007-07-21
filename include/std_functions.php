@@ -28,7 +28,6 @@ require_once( "include/time_functions.php" );
 if (!isset($page_microtime))
 {
    $page_microtime = getmicrotime();
-   $admin_level = 0; //TODO: to be localized
    //std_functions.php must be called from the main dir
    $main_path = str_replace('\\', '/', getcwd()).'/';
    //$base_path is relative to the URL, not to the current dir
@@ -529,7 +528,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 function end_page( $menu_array=NULL )
 {
-   global $page_microtime, $admin_level, $base_path, $printable;
+   global $page_microtime, $player_row, $base_path, $printable;
 
    echo "\n\n&nbsp;<br>";
 
@@ -568,7 +567,7 @@ function end_page( $menu_array=NULL )
         . T_("Page time") . ' <span id="pageTime">' . date($date_fmt, $NOW)
         . "</span>";
 
-   if( $admin_level & ADMIN_TIME && !$printable )
+   if( (@$player_row['admin_level'] & ADMIN_TIME) && !$printable )
       echo "<br><span class=PageLapse>"
         . T_('Page created in') . ' <span id="pageLapse">'
         . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
@@ -581,7 +580,7 @@ function end_page( $menu_array=NULL )
 
    echo "\n  <td class=LoginBox>";
 
-   if( $admin_level & ~(ADMIN_TIME) && !$printable )
+   if( (@$player_row['admin_level'] & ~ADMIN_TIME) && !$printable )
       echo "<a href=\"{$base_path}admin.php\">"
         . T_('Admin') . "</a>&nbsp;&nbsp;&nbsp;";
 
@@ -1952,15 +1951,14 @@ function who_is_logged( &$player_row)
 //vault limit: FEVER_CNT hits in one hour. 0 disable it.
 define('FEVER_CNT', 600);
 
-function is_logged_in($hdl, $scode, &$row) //must be called from main dir
+function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
 {
-   global $HOSTNAME, $hostname_jump, $admin_level,
-      $ActivityForHit, $NOW, $date_fmt, $dbcnx;
+   global $HOSTNAME, $hostname_jump, $ActivityForHit, $NOW, $date_fmt, $dbcnx;
 
-   $row = array();
-   $admin_level = 0; //TODO: to be localized, to be removed
+   $player_row = array();
+   $player_row['logged_in'] = false;
 
-   if( $hostname_jump and eregi_replace(":.*$","", @$_SERVER['HTTP_HOST']) != $HOSTNAME )
+   if( $hostname_jump && eregi_replace(":.*$","", @$_SERVER['HTTP_HOST']) != $HOSTNAME )
    {
       jump_to( "http://" . $HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
@@ -1987,21 +1985,24 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
       return false;
    }
 
-   $row = mysql_fetch_assoc($result);
+   $player_row = mysql_fetch_assoc($result);
+   $player_row['logged_in'] = false;
    mysql_free_result($result);
+   unset($player_row['Adminlevel']);
 
-   include_all_translate_groups($row); //must be called from main dir
+   include_all_translate_groups($player_row); //must be called from main dir
 
-   $session_expired= ( $row["Sessioncode"] != $scode or $row["Expire"] < $NOW );
+   $session_expired= ( $player_row['Sessioncode'] != $scode
+                     or $player_row['Expire'] < $NOW );
 
    $query = "UPDATE Players SET"
            ." Hits=Hits+1";
 
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   if( $ip && $row['IP'] !== $ip )
+   if( $ip && $player_row['IP'] !== $ip )
    {
       $query.= ",IP='$ip'";
-      $row['IP'] = $ip;
+      $player_row['IP'] = $ip;
    }
 
    if( !$session_expired )
@@ -2011,18 +2012,18 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
               .",Notify='NONE'";
 
       $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 100);
-      if( $row['Browser'] !== $browser )
+      if( $player_row['Browser'] !== $browser )
       {
          $query.= ",Browser='".mysql_addslashes($browser)."'";
-         $row['Browser'] = $browser;
+         $player_row['Browser'] = $browser;
       }
    }
 
    $vaultcnt= true; //no vault for anonymous or if disabled
    if( FEVER_CNT>1 && !$session_expired ) //exclude access deny from an other user
    {
-      $vaultcnt= (int)@$row['VaultCnt'];
-      $vaulttime= @$row['VaultTime'];
+      $vaultcnt= (int)@$player_row['VaultCnt'];
+      $vaulttime= @$player_row['VaultTime'];
       //can be translated if desired (translations have just been set):
       $vault_fmt= "The activity of the account '%s' grew to hight"
                  ." and swallowed up our bandwidth and resources."
@@ -2069,7 +2070,7 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
                         , '', $handles, false, 0);
 
          global $FRIENDLY_LONG_NAME;
-         $email= $row['Email'];
+         $email= $player_row['Email'];
          if( $hdl != 'guest' && verify_email( false, $email) )
             send_email("fever_vault.email($hdl)", $email, $text
                       , $FRIENDLY_LONG_NAME.' - '.$subject);
@@ -2117,14 +2118,11 @@ function is_logged_in($hdl, $scode, &$row) //must be called from main dir
    if( $session_expired )
       return false;
 
+   get_cookie_prefs($player_row);
 
-   if( @$row['admin_level'] != 0 )
-      $admin_level = $row['admin_level'];
+   setTZ( $player_row['Timezone']);
 
-   get_cookie_prefs($row);
-
-   setTZ( $row['Timezone']);
-
+   $player_row['logged_in'] = true;
    return true;
 }
 
