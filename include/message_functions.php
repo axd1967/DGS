@@ -1111,10 +1111,7 @@ function message_list_table( &$mtable, $result, $show_rows
       if ( $full_details )
       {
          if( $row['Sender'] === 'M' ) //Message to myself
-            $user_str = user_reference( REF_LINK, 1, '',
-               array( 'ID'     => $player_row['ID'],
-                      'Name'   => $row["other_name"] . ' - ' . $player_row['Name'],
-                      'Handle' => $player_row['Handle'] ));
+            $user_str = user_reference( REF_LINK, 1, '', $player_row );
          else if( $row["other_ID"] > 0 )
             $user_str = user_reference( REF_LINK, 1, '',
                $row['other_ID'], $row['other_name'], $row['other_handle'] );
@@ -1153,8 +1150,13 @@ function message_list_table( &$mtable, $result, $show_rows
          $type = $row['Type'];
          $mrow_strings[6] = "<td>" . strtoupper($type{0}) . strtolower(substr($type,1)) . "</td>";
 
-         $msgdir = ( $row['Sender'] === 'Y' ) ? 'To' : 'From';
-         $mrow_strings[7] = "<td class=Right>$msgdir:&nbsp;&nbsp;</td>";
+         if ( $row['Sender'] === 'Y' )
+            $msgdir = T_('To#msgdir');
+         elseif ( $row['Sender'] === 'M' )
+            $msgdir = T_('Myself#msgdir');
+         else
+            $msgdir = T_('From#msgdir');
+         $mrow_strings[7] = "<td class=Right>$msgdir:&nbsp;</td>";
       }
 
       if( !$no_mark )
