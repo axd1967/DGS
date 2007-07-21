@@ -48,13 +48,16 @@ $info_box = '<table border="2">
        you can use the translator forum to get help.
   <li> If you want to change the html code in some way in the translation, keep in mind
        that the code shall conform to the standard layout of Dragon.
-  <li> If a word ends with #2, for example \'To#2\', this means a second word with the same
-       spelling, so just ignore the #2 part when translating. This is necessary since in some
-       languages \'to\' is translated differently depending on the context (e.g. \'bis\' or
-       \'an\' in german). Some words may end with #short. Often used in tables, they have to
-       be translated with the shorter abbreviation of the word. For example, \'days#short\'
-       and \'hours#short\' are translated in english by \'d\' and \'h\', as you can see them
-       in the \'Time remaining\' column of the status page (e.g. \'12d 8h\').
+  <li> If a word ends with #2 or #note (without space), for example \'To#2\' or \'All#msg\',
+       this means a second word with the same spelling, so just ignore the #2 part when
+       translating. This is necessary since in some languages \'to\' is translated differently
+       depending on the context (e.g. \'bis\' or \'an\' in german). Some words may end with #short.
+       Often used in tables, they have to be translated with the shorter abbreviation of the word.
+       For example, \'days#short\' and \'hours#short\' are translated in english by \'d\' and
+       \'h\', as you can see them in the \'Time remaining\' column of the status page
+       (e.g. \'12d 8h\').<br>
+       The other purpose is to provide a way to provide different wording or abbreviations
+       for the same words, e.g. for some title in tables.
 </ul>
 </td></tr>
 </table>
