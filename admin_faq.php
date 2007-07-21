@@ -210,6 +210,7 @@ $info_box = '<table border="2">
       $cnt = abs($end - $start);
       if( $cnt )
       {
+         $dir = $dir>0 ? 1 : -1;
          $start+= $dir;
 
          //shift the neighbours backward, reference by SortOrder
