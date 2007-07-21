@@ -1122,15 +1122,20 @@ class Form
     * \param $name          The field name that will be used as the variable name
     *                       in the GET or POST.
     * \param $size          The size of the text input box.
-    * \param $maxlength     How many characters it is allowed to enter.
+    * \param $maxlength     How many characters it is allowed to enter; not set if <0.
     * \param $initial_value Text that appears initially in the input box.
     */
    function print_insert_text_input( $name, $size, $maxlength, $initial_value )
       {
          if( $this->safe_text )
             $initial_value = textarea_safe($initial_value);
-         return "<INPUT type=\"text\" name=\"$name\" value=\"$initial_value\"" .
-            $this->get_input_attbs() . " size=\"$size\" maxlength=\"$maxlength\">";
+
+         $str = "<INPUT type=\"text\" name=\"$name\" value=\"$initial_value\""
+            . $this->get_input_attbs() . " size=\"$size\"";
+         if ( $maxlength >= 0 )
+            $str .= " maxlength=\"$maxlength\"";
+         $str .= ">";
+         return $str;
       }
 
    /*!
