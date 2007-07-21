@@ -99,6 +99,15 @@ Changelog
 
 2007-07-21 juga
 
+   * include/message_functions.php (message_list_table),
+     search_messages.php:
+   - abstracted details of types-filter to: Private, Game messages
+   - moved 'Myself' into direction-column as message with from & to
+     changed texts of direction-filter: Received/Sent -> From/To
+   - left-aligned text in colored folder-checkboxes
+   - removed bottom-links (Browser/Edit folders),
+     because redundant with main-menu-links
+
    * admin_faq.php:
    - added preview-option in new/edit-entry page
    - added search to find texts also in hidden entries
