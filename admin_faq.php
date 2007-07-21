@@ -37,6 +37,17 @@ $info_box = '<table border="2">
        (\'Mark as changed for translators\') to signal to the translators
        when your edition is finished and that they have some work to do again.
        Please, avoid to check the box if you have just fixed a typo ;)
+  <li> Hidden entries are not shown in the live-FAQ.
+  <li> When adding a new entry or editing an existing entry, select the
+       \'Preview\' checkbox to see how the FAQ-entry will look like.
+       The new or changed text are saved regardless of the preview-checkbox.
+  <li> For links homed at DGS, use not &lt;a href=".."&gt;, but the
+       home-tag, e.g. &lt;home users.php&gt;Users&lt;/home&gt;
+  <li> About FAQ Search: Search finds text in Question or Answers of all
+       categories and texts, also in the hidden ones. The search-term
+       is implicitly prefixed and suffixed with a wildcard \'%\'-pattern,
+       so is always a substring-search. Found entries will be marked with
+       a red star.
 </ul>
 </td></tr>
 </table>
@@ -64,7 +75,7 @@ $info_box = '<table border="2">
   When an admin change a Translatable flag to 'Changed'
    - all the *language* Translated flags are set to 'N'
   As soon as one translator change a *language* Translated flag to 'Y'
-   - the Translatable flag is set to 'Done' 
+   - the Translatable flag is set to 'Done'
 */
 
 {
@@ -79,13 +90,16 @@ $info_box = '<table border="2">
       error('adminlevel_too_low');
 
    $id = is_numeric(@$_GET['id']) ? max(0,$_GET['id']) : 0;
+   $term = get_request_arg('term', '');
 
    $show_list = true;
+   $show_preview = false;
    $page = 'admin_faq.php';
 
 
    // ***********        Edit entry       ****************
 
+   // args: id, edit=c|e
    if( ($action=@$_GET['edit']) == 'c' or  $action == 'e')
    {
       if( $action == 'c' )
@@ -94,6 +108,7 @@ $info_box = '<table border="2">
          start_page(T_("FAQ Admin").' - '.T_('Edit entry'), true, $logged_in, $player_row );
 
       $show_list = false;
+      $show_preview = true;
 
       echo "<center>\n";
 
@@ -134,16 +149,24 @@ $info_box = '<table border="2">
          }
       }
 
+      $faq_edit_form->add_empty_row();
       $faq_edit_form->add_row( array(
-                           'SUBMITBUTTON', 'submit', T_('Submit'),
-                           'TEXT', anchor( $page, T_('Back')),
-                           ) );
+            'TAB',
+            'CHECKBOX', 'preview', '1', T_('Preview (entry is saved regardless)'), false));
+      $faq_edit_form->add_hidden( 'type', $action );
+
+      $faq_edit_form->add_row( array(
+                           'TAB',
+                           'CELL', 1, 'align=left',
+                           'SUBMITBUTTON', 'submit', T_('Update entry'),
+                           'TEXT', anchor( "$page?fts=$NOW#e$id", T_('Back')) ));
       $faq_edit_form->echo_string();
    } //edit
 
 
    // ***********        Move entry       ****************
 
+   // args: id, move=u|d, dir= ?
    else if( ($action=@$_GET['move']) == 'u' or $action == 'd' )
    {
       $dir = isset($_GET['dir']) ? (int)$_GET['dir'] : 1;
@@ -187,6 +210,7 @@ $info_box = '<table border="2">
 
    // ***********        Move entry to new category      ****************
 
+   // args: id, move=uu|dd
    else if( ($action=@$_GET['move']) == 'uu' or $action == 'dd' )
    {
       $query = "SELECT Entry.SortOrder,Entry.Parent,Parent.SortOrder AS ParentOrder"
@@ -235,6 +259,7 @@ $info_box = '<table border="2">
 
    // ***********        Save edited entry       ****************
 
+   // args: id, do_edit=t, question, answer, [ preview=1, type=c|e ]
    else if( ($action=@$_GET['do_edit']) == 't' )
    {
       $row = get_entry_row( $id );
@@ -249,13 +274,15 @@ $info_box = '<table border="2">
       $AID = $row['Answer'];
 
       $log = 0;
+      $ref_id = $id; // anchor-ref
+      $is_delete = false;
       // Delete or update ?
       if( empty($question) && empty($answer) && $transl
          && ($row["Level"] > 1 or
             !mysql_single_fetch( 'admin_faq.do_edit.id',
                   "SELECT ID FROM FAQ WHERE Parent=$id LIMIT 1") )
          )
-      {
+      { // Delete
          mysql_query("DELETE FROM FAQ WHERE ID=$id LIMIT 1")
             or error("mysql_query_failed",'admin_faq.do_edit.delete');
          mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1 " .
@@ -271,6 +298,9 @@ $info_box = '<table border="2">
                      "WHERE ID='$QID' " .
                      "OR ID='$AID'")
             or error("mysql_query_failed",'admin_faq.do_edit.delete_tranlstexts');
+
+         $ref_id = $row['Parent']; // anchor-ref to former, parent category
+         $is_delete = true;
       }
       else //Update
       {
@@ -335,13 +365,24 @@ $info_box = '<table border="2">
             || ( $AID>0 && $row['ATranslatable'] !== 'N' ) )
             make_include_files(null, 'FAQ'); //must be called from main dir
 
-      jump_to($page); //clear URL
+      // jump to edit on preview, or return to overview
+      if ( !$is_delete and get_request_arg('preview') )
+      {
+         $action = get_request_arg('type');
+         jump_to( "$page?edit=$action".URI_AMP."id=$id" );
+      }
+      else
+      {
+         //clear URL (focus on edited entry or parent category if entry deleted)
+         jump_to( "$page#e$ref_id" );
+      }
    } //do_edit
 
 
 
    // ***********        New entry       ****************
 
+   // args: id, new=c|e
    else if( ($action=@$_GET['new']) == 'e' or $action == 'c')
    {
       if( $action == 'c' )
@@ -371,16 +412,24 @@ $info_box = '<table border="2">
                                          'TEXTAREA', 'answer', 80, 20, '' ) );
       }
 
+      $faq_edit_form->add_empty_row();
       $faq_edit_form->add_row( array(
-                           'SUBMITBUTTON', 'submit', T_('Submit'),
-                           'TEXT', anchor( $page, T_('Back')),
-                           ) );
+            'TAB',
+            'CHECKBOX', 'preview', '1', T_('Preview (entry is saved regardless)'), false));
+      $faq_edit_form->add_hidden( 'type', $action );
+
+      $faq_edit_form->add_row( array(
+                           'TAB',
+                           'CELL', 1, 'align=left',
+                           'SUBMITBUTTON', 'submit', T_('Add entry'),
+                           'TEXT', anchor( "$page?fts=$NOW#e$id", T_('Back')) ));
       $faq_edit_form->echo_string();
    } //new
 
 
    // ***********        Save new entry       ****************
 
+   // args: id, do_new=c|e, question, answer, [ preview=1, type=c|e ]
    else if( ($action=@$_GET['do_new']) == 'c' or $action == 'e' )
    {
       $query = "SELECT * FROM FAQ WHERE ID=$id";
@@ -415,6 +464,7 @@ $info_box = '<table border="2">
 
       $FAQ_group = get_faq_group_id();
 
+      $ref_id = $id; // anchor-ref
       if( !empty($question) )
       {
          mysql_query("UPDATE FAQ SET SortOrder=SortOrder+1 " .
@@ -429,6 +479,7 @@ $info_box = '<table border="2">
             or error('mysql_query_failed','admin_faq.do_new.insert');
 
          $faq_id = mysql_insert_id();
+         $ref_id = $faq_id;
 
          $Qsql = mysql_addslashes($question);
          mysql_query("INSERT INTO TranslationTexts SET Text='$Qsql'" .
@@ -464,12 +515,17 @@ $info_box = '<table border="2">
             or error('mysql_query_failed','admin_faq.do_new.faqlog');
       }
 
-      jump_to($page); //clear URL
+      // jump to edit if preview, or return to overview
+      if ( !empty($question) and get_request_arg('preview') )
+         jump_to( "$page?edit=$action".URI_AMP."id=$ref_id" );
+      else
+         jump_to( "$page#e$ref_id" ); //clear URL (focus on new entry)
    } //do_new
 
 
    // ***********       Toggle hidden           ****************
 
+   // args: id, toggleH=Y|N
    else if( ($action=@$_GET['toggleH']) )
    {
       $row = get_entry_row( $id );
@@ -502,6 +558,7 @@ $info_box = '<table border="2">
 
    // ***********       Toggle translatable     ****************
 
+   // args: id, toggleT=Y|N
    else if( ($action=@$_GET['toggleT']) )
    {
       $row = get_entry_row( $id );
@@ -550,15 +607,38 @@ $info_box = '<table border="2">
          T_('FAQ Admin') . "</a></h3>\n";
 
 
-      $result = mysql_query(
+      // FAQ-search
+      $faq_search_form = new Form( 'faqsearchform', $page, FORM_GET );
+      $faq_search_form->add_row( array(
+            'DESCRIPTION',  T_('Search Term'),
+            'TEXTINPUT',    'term', 30, -1, $term,
+            'SUBMITBUTTON', 'submit', T_('Search') ));
+      $faq_search_form->add_row( array(
+            'TAB',
+            'TEXT', T_('(_=any char, %=any number of chars; implicit starting and trailing \'%\' is used; finds also text in hidden entries)') ));
+      $faq_search_form->add_hidden( 'fts', $NOW );
+      echo "<center>" . $faq_search_form->get_form_string() . "</center>\n";
+
+
+      $qterm = ( $term != '' ) ? mysql_addslashes("%$term%") : ''; // implicit wildcards
+      $query = 
          "SELECT entry.*, Question.Text AS Q".
          ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
          ", IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
+         ( ($qterm != '')
+            ? ", IF(Question.Text LIKE '$qterm',1,0) AS MatchQuestion " .
+              ", IF(Answer.Text LIKE '$qterm',1,0) AS MatchAnswer "
+            : ", 0 AS MatchQuestion " .
+              ", 0 AS MatchAnswer "
+         ) .
          "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
          "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
          "WHERE entry.Parent = parent.ID AND Question.ID=entry.Question " .
          "AND entry.Level<3 AND entry.Level>0 " .
-         "ORDER BY CatOrder,entry.Level,entry.SortOrder")
+         "ORDER BY CatOrder,entry.Level,entry.SortOrder";
+
+      #echo "<br>QUERY: $query<br>\n"; // debug
+      $result = mysql_query($query)
          or error('mysql_query_failed','admin_faq.list');
 
 
@@ -569,62 +649,83 @@ $info_box = '<table border="2">
          . '"><img border=0 title="'. T_('Add new category')
          . '" src="images/new.png" alt="N"></a></td></tr>';
 
+      $cat_ref = ''; // parent category id
       while( $row = mysql_fetch_assoc( $result ) )
       {
          $question = (empty($row['Q']) ? '(empty)' : $row['Q']);
          $faqhide = ( @$row['Hidden'] == 'Y' );
          $transl = transl_toggle_state( $row);
 
+         // with fake-timestamp to avoid '#'-caching-effect and force page-reload
+         $entry_ref = URI_AMP."fts=$NOW#e{$row['ID']}";
+
+         $match_term = false;
          if( $row['Level'] == 1 )
          {
             echo '<tr><td align=left colspan=2><a name="e'.$row['ID'].'"></a>';
             $typechar = 'c'; //category
+            $cat_ref = $entry_ref; // last category
+            if ( $row['MatchQuestion'] )
+               $match_term = true;
          }
          else
          {
             echo '<tr><td width=20>&nbsp;</td><td align=left><a name="e'.$row['ID'].'"></a>';
             $typechar = 'e'; //entry
+            if ( $row['MatchQuestion'] || $row['MatchAnswer'] )
+               $match_term = true;
          }
 
          if( $faqhide )
             echo "(hidden) ";
          echo "<A href=\"$page?edit=$typechar".URI_AMP."id=" . $row['ID'] .
-              '" title="' . T_("Edit") . "\">$question</A>\n";
-         echo "</td>";
+              '" title="' . T_("Edit") . "\">$question</A>";
+         if ( $match_term )
+            echo '&nbsp;&nbsp;&nbsp;<font color="red">*</font>';
+         echo "\n</td>";
 
-         echo "<td width=40 align=right><a href=\"$page?move=u".URI_AMP.'id=' .
-            $row['ID'] . '"><img border=0 title="' . T_("Move up") . '" src="images/up.png" alt="u"></a></td>';
-         echo "<td><a href=\"$page?move=d".URI_AMP.'id=' .
-            $row['ID'] . '"><img border=0 title="' . T_("Move down") . '" src="images/down.png" alt="d"></a></td>';
+         // move entry up/down (focus parent category)
+         echo "<td width=40 align=right>"
+            . "<a href=\"$page?move=u".URI_AMP.'id=' . $row['ID'] . $cat_ref . '">'
+            . '<img border=0 title="' . T_("Move up") . '" src="images/up.png" alt="u"></a></td>';
+         echo "<td><a href=\"$page?move=d".URI_AMP.'id=' . $row['ID'] . $cat_ref . '">'
+            . '<img border=0 title="' . T_("Move down") . '" src="images/down.png" alt="d"></a></td>';
 
          if( $row['Level'] > 1 )
          {
-            echo "<td align=right><a href=\"$page?move=uu".URI_AMP.'id=' .
-               $row['ID'] . '"><img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png" alt="U"></a></td>';
-            echo "<td><a href=\"$page?move=dd".URI_AMP.'id=' .
-               $row['ID'] . '"><img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png" alt="D"></a></td>';
+            // move entry up/down to other category (focus current entry)
+            echo "<td align=right>"
+               . "<a href=\"$page?move=uu".URI_AMP.'id=' . $row['ID'] . $entry_ref . '">'
+               . '<img border=0 title="' . T_("Move to previous category") . '" src="images/up_up.png" alt="U"></a></td>';
+            echo "<td><a href=\"$page?move=dd".URI_AMP.'id=' . $row['ID'] . $entry_ref . '">'
+               . '<img border=0 title="' . T_("Move to next category") . '" src="images/down_down.png" alt="D"></a></td>';
          }
          else
             echo '<td colspan=2>&nbsp;</td>';
 
+         // new entry
          echo "<td><a href=\"$page?new=$typechar".URI_AMP."id=" . $row['ID'] .
             '"><img border=0 title="' .
             ($typechar == 'e' ? T_('Add new entry') : T_('Add new category')) .
             '" src="images/new.png" alt="N"></a></td>';
 
+         // hide (focus parent category)
          echo "<td><a href=\"$page?toggleH="
             . ( $faqhide == 'Y' ? 'N' : 'Y' )
             . URI_AMP."id=" . $row['ID']
+            . $cat_ref
             . '"><img border=0 title="'
             . ( $faqhide ? T_('Show') : T_('Hide') )
             . '" src="images/hide'
             . ( $faqhide ? '_no.png" alt="h' : '.png" alt="H' )
             . '"></a></td>';
 
+         // translatable (focus parent category)
          if( !$faqhide and $transl )
             echo "<td><a href=\"$page?toggleT="
                . ( $transl == 'Y' ? 'N' : 'Y' )
                . URI_AMP."id=" . $row['ID']
+               . $cat_ref
                . '"><img border=0 title="'
                . ( $transl == 'Y' ? T_('Make untranslatable') : T_('Make translatable'))
                . '" src="images/transl'
@@ -635,6 +736,7 @@ $info_box = '<table border="2">
 
          echo '</tr>';
 
+         // new category (below section-title)
          if( $row["Level"] == 1 )
             echo "<tr><td width=20></td><td align=left colspan=".($nbcol-1)
                . "><a href=\"$page?new=e".URI_AMP."id=" .
@@ -647,8 +749,13 @@ $info_box = '<table border="2">
    } //show_list
 
    echo "</center>\n";
+   
+   if ( $show_preview )
+      show_preview( $row );
+
    end_page();
 }
+
 
 function get_faq_group_id()
 {
@@ -692,6 +799,18 @@ function transl_toggle_state( $row)
    if( $transl === 'Y' or $transl === 'N' )
       return $transl; //toggle state
    return ''; //can't be toggled
+}
+
+function show_preview( $row )
+{
+   echo "<br><table><tr><td align=left>\n"
+      . "<b>Preview:</b>\n"
+      . "<ul>\n"
+      . '<li>' . make_html_safe( T_($row['Q']), 'cell');
+   if ( $row['Level'] > 1 )
+      echo "<p></p>\n" . make_html_safe( T_($row['A']), 'faq');
+   echo "</li>\n</ul>\n"
+      . "</td></tr></table>\n";
 }
 
 ?>
