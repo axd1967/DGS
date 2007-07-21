@@ -37,6 +37,7 @@ require_once( "include/std_functions.php" );
   add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
   add_link_page_link("people.php", T_("People"), T_("who contributes to Dragon"));
   add_link_page_link("links.php", T_('Links'));
+  add_link_page_link("news.php", T_('NEWS'), T_('Release notes'));
   add_link_page_link("todo.php", T_('To do list'), T_('plans for future improvements'));
   add_link_page_link("install.php", T_('Installation instructions'),
                      T_('if you want your own dragon'));
