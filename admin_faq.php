@@ -24,8 +24,6 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
-define('MOVEDIST_SUBMIT_SET', 'Set'); // text for submit-button
-
 
 $info_box = '<table border="2">
 <tr><td>
@@ -54,8 +52,8 @@ $info_box = '<table border="2">
        categories and texts, also in the hidden ones. The search-term
        is implicitly prefixed and suffixed with a wildcard \'%\'-pattern,
        so is always a substring-search. Found entries will be marked with
-       a red star.
-  <li> "Current" entry is marked with a green star.
+       a red \'%\'.
+  <li> The last used entry is marked with a blue \'&gt;\'.
 </ul>
 </td></tr>
 </table>
@@ -110,7 +108,7 @@ $info_box = '<table border="2">
       else
          $movedist = $c_movedist;
    }
-   if ( get_request_arg('submit') === MOVEDIST_SUBMIT_SET ) // write into cookie
+   if ( @$_REQUEST['setmovedist'] ) // write into cookie
       safe_setcookie( 'admin_faq_movedist', $movedist, 3600 ); // save for 1h
 
    $show_list = true;
@@ -180,7 +178,7 @@ $info_box = '<table border="2">
                            'TAB',
                            'CELL', 1, 'align=left',
                            'SUBMITBUTTON', 'submit', T_('Update entry'),
-                           'TEXT', anchor( "$page?id=$id".URI_AMP."fts=$NOW#e$id", T_('Back to overview')) ));
+                           'TEXT', anchor( "$page?id=$id#e$id", 'Back to overview') ));
       $faq_edit_form->echo_string();
    } //edit
 
@@ -190,9 +188,7 @@ $info_box = '<table border="2">
    // args: id, move=u|d, dir=length of the move (int, pos or neg)
    else if( ($action=@$_GET['move']) == 'u' or $action == 'd' )
    {
-      $dir = (int) @$_GET['dir'];
-      if ( empty($dir) or $dir < 0 ) // default=1 for 0 or if unset or invalid
-         $dir = 1;
+      $dir = isset($_GET['dir']) ? (int)$_GET['dir'] : 1;
       $dir = $action == 'd' ? $dir : -$dir; //because ID top < ID bottom
 
       $row = mysql_single_fetch( 'admin_faq.move.find',
@@ -226,7 +222,7 @@ $info_box = '<table border="2">
                      . " WHERE ID=$id LIMIT 1")
             or error("mysql_query_failed",'admin_faq.move.update_sortorder2');
       }
-      //jump_to($page); //clear URL
+      jump_to("$page?id=$id#e$id"); //clear URL
    } //move
 
 
@@ -275,7 +271,7 @@ $info_box = '<table border="2">
                   . " WHERE ID=$id LIMIT 1")
             or error("mysql_query_failed",'admin_faq.bigmove.update_sortorder2');
       }
-      //jump_to($page); //clear URL
+      jump_to("$page?id=$id#e$id"); //clear URL
    } //bigmove
 
 
@@ -445,7 +441,7 @@ $info_box = '<table border="2">
                            'TAB',
                            'CELL', 1, 'align=left',
                            'SUBMITBUTTON', 'submit', T_('Add entry'),
-                           'TEXT', anchor( "$page?id=$id".URI_AMP."fts=$NOW#e$id", T_('Back to overview')) ));
+                           'TEXT', anchor( "$page?id=$id#e$id", 'Back to overview') ));
       $faq_edit_form->echo_string();
    } //new
 
@@ -633,17 +629,16 @@ $info_box = '<table border="2">
       // FAQ-search
       $faq_search_form = new Form( 'faqsearchform', $page, FORM_GET );
       $faq_search_form->add_row( array(
-            'DESCRIPTION',  'Move distance (entry)',
-            'TEXTINPUT',    'movedist', 4, 2, $movedist,
-            'SUBMITBUTTON', 'submit', MOVEDIST_SUBMIT_SET ));
-      $faq_search_form->add_row( array(
             'DESCRIPTION',  'Search Term',
             'TEXTINPUT',    'term', 30, -1, $term,
             'SUBMITBUTTON', 'submit', 'Search' ));
       $faq_search_form->add_row( array(
             'TAB',
-            'TEXT', '(_=any char, %=any number of chars; implicit starting and trailing \'%\' is used)' ));
-      $faq_search_form->add_hidden( 'fts', $NOW );
+            'TEXT', '(_=any char, %=any number of chars, \=escape char)' ));
+      $faq_search_form->add_row( array(
+            'DESCRIPTION',  'Move distance (entry)',
+            'TEXTINPUT',    'movedist', 4, 2, $movedist,
+            'SUBMITBUTTON', 'setmovedist', 'Set move length' ));
       $faq_search_form->add_hidden( 'id',  $id ); // current entry
       echo "<center>" . $faq_search_form->get_form_string() . "</center>\n";
 
@@ -655,7 +650,7 @@ $info_box = '<table border="2">
          ", IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
          ( ($qterm != '')
             ? ", IF(Question.Text LIKE '$qterm',1,0) AS MatchQuestion " .
-              ", IF(Answer.Text LIKE '$qterm',1,0) AS MatchAnswer "
+              ", IF(entry.Level>1 AND Answer.Text LIKE '$qterm',1,0) AS MatchAnswer "
             : ", 0 AS MatchQuestion " .
               ", 0 AS MatchAnswer "
          ) .
@@ -688,20 +683,18 @@ $info_box = '<table border="2">
          $faqhide = ( @$row['Hidden'] == 'Y' );
          $transl = transl_toggle_state( $row);
 
-         // with fake-timestamp to avoid '#'-caching-effect and force page-reload
-         $entry_ref = URI_AMP."fts=$NOW#e{$row['ID']}";
+         $entry_ref = "#e{$row['ID']}";
 
          // mark 'current' entry and matched-terms (2 cols)
          echo '<tr><td with=10>';
-         echo ( $id == $row['ID'] )
-            ? '<font color="green">*</font>'
-            : '&nbsp;';
-         echo '</td><td with=10>';
-         if ( ( $row['Level'] == 1 and $row['MatchQuestion'] ) or
-              ( $row['Level'] >  1 and ( $row['MatchQuestion'] || $row['MatchAnswer'] ) ) )
-            echo '<font color="red">*</font>';
+         if ( $row['MatchQuestion'] || $row['MatchAnswer'] )
+            echo '<font color="red">%</font>';
          else
             echo '&nbsp;';
+         echo '</td><td with=10>';
+         echo ( $id == $row['ID'] )
+            ? '<font color="blue"><b>&gt;</b></font>'
+            : '&nbsp;';
          echo '</td>';
 
          // anchor-label + td-start for cat/entry
@@ -815,7 +808,7 @@ function get_entry_row( $id )
         "FROM (FAQ, TranslationTexts AS Question) " .
         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
         "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question" )
-      or error('internal_error','get_entry_row');
+      or error('internal_error','admin_faq.get_entry_row');
 
    return $row;
 }
