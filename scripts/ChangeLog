@@ -97,6 +97,18 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-21 juga
+
+   * admin_faq.php:
+   - added preview-option in new/edit-entry page
+   - added search to find texts also in hidden entries
+   - locate page roughly where recent working took place using anchors
+   - overworked instructions, some more comments
+   - minor layout-adjustments: submit-button, labels, alignment
+
+   * include/form_functions.php:
+   - allows to omit maxlength of INPUTBOX-element specifying as <0
+
 2007-07-21 rodival
 
    * include/std_functions.php, admin_admins.php:
@@ -130,7 +142,7 @@ UPDATE `Players`
 
 2007-07-20 rodival
 
-   * forum/forum_functions.php, skins/dragon/screen.css
+   * forum/forum_functions.php, skins/dragon/screen.css:
    - added a "go back to first new" link at bottom of lists
      CSSed the "new" links
    - adjusted the MarkTerm colors
