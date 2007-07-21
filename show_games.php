@@ -292,7 +292,7 @@ require_once( "include/rating.php" );
    if( $observe )
    {
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
-      $gtable->add_tablehead(13, T_('Last Move'), 'Lastchanged', true);
+      $gtable->add_tablehead(13, T_('Last move'), 'Lastchanged', true);
    }
    else if( $finished )
    {
@@ -311,7 +311,7 @@ require_once( "include/rating.php" );
    else //if( $running )
    {
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
-      $gtable->add_tablehead(13, T_('Last Move'), 'Lastchanged', true);
+      $gtable->add_tablehead(13, T_('Last move'), 'Lastchanged', true);
       if( !$all ) //!$observe && !$finished
       {
          $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
@@ -449,10 +449,10 @@ require_once( "include/rating.php" );
    // hover-texts for colors-column
    // (don't add 'w' and 'b', or else need to show in status.php too)
    $arr_titles_colors = array(
-      'w_w' => T_('You have White, White to move'),
-      'w_b' => T_('You have White, Black to move'),
-      'b_w' => T_('You have Black, White to move'),
-      'b_b' => T_('You have Black, Black to move'),
+      'w_w' => T_('You have White, White to move#hover'),
+      'w_b' => T_('You have White, Black to move#hover'),
+      'b_w' => T_('You have Black, White to move#hover'),
+      'b_b' => T_('You have Black, Black to move#hover'),
    );
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
@@ -564,7 +564,7 @@ require_once( "include/rating.php" );
                $src = '"images/' .
                   ( $Win == 1 ? 'yes.gif" alt="' . T_('Yes') :
                      ( $Win == -1 ? 'no.gif" alt="' . T_('No') :
-                        'dash.gif" alt="' . T_('jigo') )) . '"';
+                        'dash.gif" alt="' . T_('Jigo') )) . '"';
                $grow_strings[11] = "<td align=center><img src=$src></td>";
             }
          }

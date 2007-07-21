@@ -874,12 +874,12 @@ class SearchFilter
    {
       $start_search = "<input type=\"submit\" name=\"{$this->Prefix}"
          . FFORM_SEARCH_ACTION."\" value=\""
-         . ( $filtertype ? T_('Apply filters') : T_('Search') ) . '"'
+         . ( $filtertype ? T_('Apply filters#filter') : T_('Search#filter') ) . '"'
          . ( $accesskey ? ' accesskey='.attb_quote($accesskey) : '' )
          . '>';
       $reset_search = "<input type=\"submit\" name=\"{$this->Prefix}"
          . FFORM_RESET_ACTION."\" value=\""
-         . ( $filtertype ? T_('Reset filters') : T_('Reset search') ) . '"'
+         . ( $filtertype ? T_('Reset filters#filter') : T_('Reset search#filter') ) . '"'
          . '>';
       return array( $start_search, $reset_search );
    }
@@ -2099,12 +2099,12 @@ class FilterCountry extends Filter
 
       // make some shorter countries
       unset( $C['yu'] ); //obsolet
-      $C['va'] = T_('Vatican City');
-      $C['vc'] = T_('St. Vincent & Grenadines');
+      $C['va'] = T_('Vatican City#filter');
+      $C['vc'] = T_('St. Vincent & Grenadines#filter');
 
       asort($C);
       array_unshift( $C, '0');
-      $C['0'] = T_('All countries');
+      $C['0'] = T_('All countries#filter');
    }
 
    /*! \brief Handles index to select all or specific country. */
@@ -2284,13 +2284,13 @@ define('FRDTU_DHM',   FRDTU_DAY | FRDTU_HOUR | FRDTU_MIN); // time-unit: day/hou
 
 // choices-array for time-units (for select-box)
 $FRDTU_choices = array(
-   FRDTU_ABS   => T_('absolute'),
-   FRDTU_YEAR  => T_('years'),
-   FRDTU_MONTH => T_('months'),
-   FRDTU_WEEK  => T_('weeks'),
-   FRDTU_DAY   => T_('days'),
-   FRDTU_HOUR  => T_('hours'),
-   FRDTU_MIN   => T_('mins'),
+   FRDTU_ABS   => T_('absolute#reldate'),
+   FRDTU_YEAR  => T_('years#reldate'),
+   FRDTU_MONTH => T_('months#reldate'),
+   FRDTU_WEEK  => T_('weeks#reldate'),
+   FRDTU_DAY   => T_('days#reldate'),
+   FRDTU_HOUR  => T_('hours#reldate'),
+   FRDTU_MIN   => T_('mins#reldate'),
 );
 // array for SQL-interval-specification
 $FRDTU_interval_sql = array(
@@ -2351,7 +2351,7 @@ class FilterRelativeDate extends Filter
       if ( $fc_time_units & FRDTU_ABS )
       {
          $this->filterdate = new FilterDate( $name, $dbfield, $config );
-         $this->syntax_descr .= '; ' . T_('absolute') . ': ' . $this->filterdate->syntax_descr;
+         $this->syntax_descr .= '; ' . T_('absolute#filter') . ': ' . $this->filterdate->syntax_descr;
       }
 
       $this->elem_tu = "{$this->name}tu";
@@ -2433,7 +2433,7 @@ class FilterRelativeDate extends Filter
             {
                $this->errormsg = "[$v] " . T_('not numeric');
                if ( !is_null($this->filterdate) )
-                  $this->errormsg .= ' (' . T_('maybe you want to choose absolute') . ')';
+                  $this->errormsg .= ' (' . T_('maybe you want to choose absolute#reldate') . ')';
                return false;
             }
          }
@@ -3273,7 +3273,7 @@ class FilterCheckboxArray extends Filter
       static $_default_config = array( FC_SIZE => 1 ); // FC_SIZE is nr of cols per row
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'CheckboxArray';
-      $this->syntax_descr = T_('Select none, 1 or more elements');
+      $this->syntax_descr = T_('Select none, one or more elements');
 
       $this->check_forbid_sql_template( 1 );
       $this->idx_start = 1;

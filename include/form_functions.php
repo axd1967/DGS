@@ -1361,7 +1361,8 @@ class Form
       $syntax = $filter->get_syntax_description();
       if ( $with_syntax and $syntax != '' )
          $syntax = "; $syntax";
-      return $prefix . T_('Error') . ': ' . make_html_safe( $filter->errormsg() . $syntax ) . $suffix;
+      return $prefix . T_('Error#filter') . ': '
+         . make_html_safe( $filter->errormsg() . $syntax ) . $suffix;
    }
 
    /*!

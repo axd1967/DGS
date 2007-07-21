@@ -151,7 +151,7 @@ class Token
       return "{" . $this->get_type(true)
          . ": pos=[{$this->spos}" . (($this->epos >= 0) ? "..{$this->epos}" : "], endpos=[".$this->get_endpos()."]" ) . "], "
          . "[$v] "
-         . ($this->error != '' ? ":" . T_('Error') . " {$this->error}" : "") . "} ";
+         . ($this->error != '' ? ":" . T_('Error#filter') . " {$this->error}" : "") . "} ";
    }
 } // end of 'Token'
 

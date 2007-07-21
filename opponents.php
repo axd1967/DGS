@@ -170,7 +170,7 @@ $ARR_DBFIELDKEYS = array(
    $utable->add_tablehead(12, T_('Percent'), 'Percent', true);
    $utable->add_tablehead(13, T_('Activity'), 'ActivityLevel', true, true);
    $utable->add_tablehead(14, T_('Last access'), 'Lastaccess', true);
-   $utable->add_tablehead(15, T_('Last Moved'), 'Lastmove', true);
+   $utable->add_tablehead(15, T_('Last moved'), 'Lastmove', true);
 
 
    // form for static filters

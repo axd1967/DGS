@@ -76,9 +76,8 @@ define('MODERATOR_SEARCH', 0);
       $sql_order = get_request_arg( 'order', '' );
    }
 
-   // build forum-array for filter
-   //! \todo build statically somewhere, so it's only read once: arr( Name => Forum_ID )
-   $arr_forum = array( T_('All') => '' );
+   // build forum-array for filter: ( Name => Forum_ID )
+   $arr_forum = array( T_('All#forum') => '' );
    $query = "SELECT ID, Name FROM Forums ORDER BY SortOrder";
    $result = mysql_query($query)
       or error('mysql_query_failed','forum_name_search.find');
@@ -87,9 +86,9 @@ define('MODERATOR_SEARCH', 0);
 
    // for order-form-element
    $arr_order = array(
-      'Score DESC, Time DESC'  => T_('Term relevance'),
-      'Time DESC'              => T_('Creation date'),
-      'Posts.Lastchanged DESC' => T_('Modification date'),
+      'Score DESC, Time DESC'  => T_('Term relevance#forumsort'),
+      'Time DESC'              => T_('Creation date#forumsort'),
+      'Posts.Lastchanged DESC' => T_('Modification date#forumsort'),
    );
 
    // static filters
@@ -99,8 +98,8 @@ define('MODERATOR_SEARCH', 0);
    $ffilter->add_filter( 3, 'Text', 'P.Handle', true,
          array( FC_SIZE => 16 ));
    $ffilter->add_filter( 4, 'Selection',     #! \todo Handle New Forum-Posts
-         array( T_('All messages') => '',
-                T_('First messages') => 'Posts.Parent_ID=0' ),
+         array( T_('All messages#forum') => '',
+                T_('First messages#forum') => 'Posts.Parent_ID=0' ),
          true);
    $ffilter->add_filter( 5, 'RelativeDate', 'Posts.Time', true,
          array( FC_SIZE => 12, FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL ) );
@@ -119,7 +118,7 @@ define('MODERATOR_SEARCH', 0);
          'DESCRIPTION', T_('Forum'),
          'FILTER',      $ffilter, 1 ));
    $fform->add_row( array(
-         'DESCRIPTION', T_('Search terms'),
+         'DESCRIPTION', T_('Search terms#forum'),
          'CELL',        1, 'align=left width=500',
          'FILTER',      $ffilter, 2,
          'BR',
@@ -131,20 +130,20 @@ define('MODERATOR_SEARCH', 0);
          'FILTERERROR', $ffilter, 3, "<br>$FERR1", $FERR2, true,
          ));
    $fform->add_row( array(
-         'DESCRIPTION', T_('Message scope'),
+         'DESCRIPTION', T_('Message scope#forum'),
          'FILTER',      $ffilter, 4,
          'BR',
          #'FILTER',      $ffilter, 6,
          ));
    $fform->add_row( array(
-         'DESCRIPTION', T_('Date'),
+         'DESCRIPTION', T_('Date#forum'),
          'CELL',        1, 'align=left',
          'FILTER',      $ffilter, 5,
          'FILTERERROR', $ffilter, 5, "<br>$FERR1", $FERR2, true,
          ));
    $fform->add_empty_row();
    $fform->add_row( array(
-         'DESCRIPTION', T_('Order'),
+         'DESCRIPTION', T_('Order#forum'),
          'SELECTBOX',   'order', 1, $arr_order, $sql_order, false, ));
    $fform->add_row( array(
          'TAB',

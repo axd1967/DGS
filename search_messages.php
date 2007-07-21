@@ -56,11 +56,11 @@ require_once( "include/filter.php" );
       T_('All#msgtype') => '',
       T_('Private#msgtype') => "M.Type='NORMAL'",
       T_('Game#msgtype')    => "M.Type IN ('INVITATION','ACCEPTED','DECLINED','DISPUTED','RESULT')",
-      //T_('Invites')  => "M.Type='INVITATION'",
-      //T_('Accepted') => "M.Type='ACCEPTED'",
-      //T_('Declined') => "M.Type='DECLINED'",
-      //T_('Disputed') => "M.Type='DISPUTED'",
-      //T_('Result')   => "M.Type='RESULT'",
+      //T_('Invites#msgtype')  => "M.Type='INVITATION'",
+      //T_('Accepted#msgtype') => "M.Type='ACCEPTED'",
+      //T_('Declined#msgtype') => "M.Type='DECLINED'",
+      //T_('Disputed#msgtype') => "M.Type='DISPUTED'",
+      //T_('Result#msgtype')   => "M.Type='RESULT'",
    );
 
    /* SQL-statement-fields from message_list_query(), see below:
@@ -107,10 +107,10 @@ require_once( "include/filter.php" );
    $mfilter->add_filter( 4, 'RelativeDate', 'M.Time', true);
    $mfilter->add_filter( 6, 'Selection', $arr_types, true);
    $mfilter->add_filter( 7, 'Selection',
-         array( T_('All') => '',
-                T_('From')   => "me.Sender IN ('N','M')",
-                T_('To')     => "me.Sender IN ('Y','M')",
-                T_('Myself') => "me.Sender='M'" ),
+         array( T_('All#msgdir') => '',   // sync transl-texts with message_functions.php (message_list_table)
+                T_('From#msgdir')   => "me.Sender IN ('N','M')",
+                T_('To#msgdir')     => "me.Sender IN ('Y','M')",
+                T_('Myself#msgdir') => "me.Sender='M'" ),
          true);
    $mfilter->init(); // parse current value from _GET
    $sf3 =& $mfilter->get_filter(3);
@@ -142,7 +142,7 @@ require_once( "include/filter.php" );
          'DESCRIPTION', T_('Select folders'),
          'FILTER',      $smfilter, 1 ));
    $smform->add_row( array(
-         'DESCRIPTION', T_('Message scope'),
+         'DESCRIPTION', T_('Message scope#msg'),
          'FILTER',      $smfilter, 4, // game-related
          'BR',
          'FILTER',      $smfilter, 2, // initial-msg

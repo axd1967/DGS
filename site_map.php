@@ -86,7 +86,7 @@ function item($text,$link,$working, $level,$last=false)
 
          item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
          item(T_('Game'), "game.php", false, 1, false);
-         item(T_('SGF file of game'), "sgf.php", false, 1, true);
+         item(T_('SGF of game'), "sgf.php", false, 1, true);
       }
 
       item(T_('Messages'), "list_messages.php", false, 0);
