@@ -99,10 +99,23 @@ Changelog
 
 2007-07-21 juga
 
+   * forum/search.php, include/filter.php, include/form_functions.php,
+     include/tokenizer.php, opponents.php, search_messages.php,
+     show_games.php, site_map.php:
+   - corrected translated texts (typo, upper/lower-case,
+     use '#'-notation to avoid ambiguities and allow notes-like namespaces)
+
+   * docs.php:
+   - added NEWS as "Release notes"
+
+   * translate.php:
+   - more instructive text about '#'-notation
+
    * admin_faq.php:
    - mark "current" entry with green marker
    - moved marker in front of entries (inbetween hard to see)
    - added cookie-based move-distance for up-/down-move of entries
+     resettable with 0 to default 1
 
    * include/message_functions.php (message_list_table),
      search_messages.php:
