@@ -74,7 +74,7 @@ require_once( "include/std_functions.php" );
 
       case("guest_may_not_receive_messages"):
       {
-         echo T_("Error, guest may not recieve messages");
+         echo T_("Error, guest may not receive messages");
       }
       break;
 
@@ -317,7 +317,7 @@ require_once( "include/std_functions.php" );
 
       case("receiver_not_found"):
       {
-         echo T_("Sorry, couldn't find the reciever of your message. Make sure to use " .
+         echo T_("Sorry, couldn't find the receiver of your message. Make sure to use " .
                  "the userid, not the full name.");
       }
       break;
