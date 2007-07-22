@@ -23,6 +23,7 @@ $TranslateGroups[] = "Messages";
 require_once( "include/std_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/form_functions.php" );
+require_once( "include/game_functions.php" );
 
 
 {
@@ -41,15 +42,16 @@ require_once( "include/form_functions.php" );
       ShowMessage&mid=     : from message_list_table()
           &terms=             or message_info_table()
                               or list_messages
-                              or here 
+                              or here
       Invite               : from menu
                               (or site_map or introduction)
       Invite&uid=          : from user_info
                               or show_games
       Dispute&mid=         : from here
+      AddTime&gid=         : from game
    else if(message.php?...)
       mid=                 : from notifications
-                              or here 
+                              or here
                            => ShowMessage&mid=
    else if(message.php)(alone)
                            : from site_map
@@ -166,7 +168,7 @@ require_once( "include/form_functions.php" );
 
 /* Here, the line was:
       $can_reply = ( $To_ID == $my_id && $other_id && $other_handle);
-   but: 
+   but:
     - $my_id=me.uid and $Sender=me.Sender
     - $To_ID is always an ID associated with a *not sender*
    so the old ($To_ID == $my_id) is near of ($Sender != 'Y')
@@ -225,6 +227,28 @@ require_once( "include/form_functions.php" );
 
       }
 
+   }
+   elseif( $mode == 'AddTime' )
+   {
+      $gid = (int)get_request_arg('gid');
+      if( !$gid )
+         error("unknown_game");
+
+      $query = "SELECT Games.* from Games WHERE ID=$gid";
+      $game_row = mysql_single_fetch( 'message.find_game', $query);
+      if( !$game_row )
+         error('unknown_game');
+
+      if ( !allow_add_time_opponent( $game_row, $my_id ) )
+         error('not_allowed', "You are not allowed to add time for game [$gid]" );
+
+      // get opponent-id and handle
+      $opp = $game_row[ ( $game_row['Black_ID'] == $my_id ) ? 'White_ID' : 'Black_ID' ];
+      $query = "SELECT Handle from Players WHERE ID=$opp";
+      $opp_row = mysql_single_fetch( 'message.find_opponent', $query);
+      if( !$opp_row )
+         error('unknown_user');
+      $opp_handle = $opp_row['Handle'];
    }
 
    start_page("Message - $submode", true, $logged_in, $player_row );
@@ -423,6 +447,65 @@ require_once( "include/form_functions.php" );
                   'SUBMITBUTTONX', 'preview', T_('Preview'),
                               array('accesskey' => 'w'),
                ) );
+      }
+      break;
+
+      case 'AddTime':
+      {
+            // gid, my_id, game_row, opp_row
+            $arr_add_days = array();
+            for( $i=1; $i <= MAX_ADD_DAYS; $i++)
+               $arr_add_days[$i] = $i . ' ' . ($i==1 ? T_('day') : T_('days'));
+
+            // system-message for add-time
+            $add_days = get_request_arg( 'add_days', 1 );
+            $main_message =
+               sprintf( T_('Your opponent %1$s in game %2$s has granted you an additional amount of %3$s to your maintime.'),
+                  user_reference( REF_LINK, 1, '', $player_row ),
+                  game_reference( REF_LINK, 1, '', $gid, 0 ),
+                  $arr_add_days[$add_days] );
+
+            $message_form->add_row( array(
+                  'HEADER', T_('Add time message'),
+               ) );
+            $message_form->add_row( array(
+                  'TAB',
+                  'TEXT',
+                     sprintf( T_('Choose how many additional days you wish to give<br>your opponent %1$s<br>in game %2$s'),
+                        user_reference( REF_LINK, 1, '', $opp ),
+                        game_reference( REF_LINK, 1, '', $gid, 0)),
+               ) );
+            $message_form->add_empty_row();
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Days'),
+                  'SELECTBOX', 'add_days', 1, $arr_add_days, $add_days, false,
+                  'TEXT', '&nbsp;' . T_('added to maintime of your opponent.'),
+               ) );
+            $message_form->add_empty_row();
+            $message_form->add_row( array(
+                  'TAB',
+                  'TEXT', T_('You can provide some more text that will be appended<br>to the add-time message sent to inform your opponent.'),
+               ) );
+            $message_form->add_row( array(
+                  'DESCRIPTION', T_('Message'),
+                  'TEXTAREA', 'message', 50, 8, $default_message,
+               ) );
+
+            $message_form->add_row( array(
+                  'HIDDEN', 'subject', 'Add time',
+                  'HIDDEN', 'main_message', textarea_safe($main_message),
+                  'HIDDEN', 'type', 'ADDTIME',
+                  'HIDDEN', 'to', $opp_handle,
+                  'HIDDEN', 'gid', $gid,
+                  'TAB',
+                  'SUBMITBUTTONX', 'send_message', T_('Add time and send message'),
+                              array('accesskey' => 'x'),
+                  'SUBMITBUTTONX', 'preview', T_('Preview'),
+                              array('accesskey' => 'w'),
+               ) );
+
+            if ( $preview )
+               $default_message = $main_message . "\n\n" . $default_message;
       }
       break;
    }

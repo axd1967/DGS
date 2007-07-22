@@ -97,6 +97,20 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-22 juga
+
+   * game.php, message.php, search_messages.php, send_message.php,
+     include/game_functions.php (allow_add_time_opponent, add_time_opponent),
+     include/message_functions.php (message_list_table):
+   - added support to add time for opponent
+-----------
+ALTER TABLE `Messages`
+ CHANGE `Type` `Type` enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED','RESULT','ADDTIME') NOT NULL default 'NORMAL';
+-----------
+
+   * error.php:
+   - fixed typos
+
 2007-07-22 rodival
 
    * include/countries.php, include/filter.php:

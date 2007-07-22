@@ -32,6 +32,7 @@ if( @$_REQUEST['nextgame']
 $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
+require_once( "include/game_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( "include/rating.php" );
@@ -597,6 +598,10 @@ function get_alt_arg( $n1, $n2)
    {
       $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."nextskip=t";
    }
+
+   if ( allow_add_time_opponent( $game_row, $player_row['ID'] ) )
+      $menu_array[T_('Add time for opponent')] =
+         "message.php?mode=AddTime".URI_AMP."gid=$gid"; #.URI_AMP."uid=$opponent_ID";
 
    if( !$validation_step )
    {
