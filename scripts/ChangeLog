@@ -97,6 +97,13 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-22 juga
+
+   * links.php:
+   - removed invalid and corrected existing links and texts
+   - added IGF as mediator to most international go associations
+   - added OGS
+
 2007-07-21 juga
 
    * forum/search.php, include/filter.php, include/form_functions.php,
