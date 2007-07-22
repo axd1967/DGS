@@ -39,7 +39,7 @@ $info_box = '<table border="2">
        when your edition is finished and that they have some work to do again.
        This button is also not shown as long as the entry is hidden.
        Please, avoid to check the box if you have just fixed a typo ;)
-  <li> Hidden entries are not shown in the live-FAQ.
+  <li> Hidden entries - marked by \'(H)\' - are not shown in the live-FAQ.
   <li> When adding a new entry or editing an existing entry, select the
        \'Preview\' checkbox to see how the FAQ-entry will look like.
        The new or changed text are saved regardless of the preview-checkbox.
@@ -53,8 +53,8 @@ $info_box = '<table border="2">
        categories and texts, also in the hidden ones. The search-term
        is implicitly prefixed and suffixed with a wildcard \'%\'-pattern,
        so is always a substring-search. Found entries will be marked with
-       a red \'#\'.
-  <li> The last used entry is marked with a blue \'&gt;\'.
+       a red \'<font color="red">#</font>\'.
+  <li> The last used entry is marked with a blue \'<font color="blue">&gt;</font>\'.
 </ul>
 </td></tr>
 </table>
@@ -100,14 +100,14 @@ $info_box = '<table border="2">
    $term = get_request_arg('term', '');
 
    // read/write move-distance for entries using cookie
-   $movedist = abs( (int) get_request_arg('movedist') );
+   $movedist = (int) get_request_arg('movedist', -1); // negative to reset
    $c_movedist = safe_getcookie('admin_faq_movedist');
-   if ( empty($movedist) )
+   if ( empty($movedist) or $movedist < 0 )
    { // handle default (reset if invalid or 0 or no cookie set)
-      if ( $movedist == '0' or $movedist < 0 or empty($c_movedist) )
+      if ( $movedist == 0 or empty($c_movedist) )
          $movedist = 1;
       else
-         $movedist = $c_movedist;
+         $movedist = abs($c_movedist);
    }
    if ( @$_REQUEST['setmovedist'] ) // write into cookie
       safe_setcookie( 'admin_faq_movedist', $movedist, 3600 ); // save for 1h
