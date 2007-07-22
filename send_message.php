@@ -232,7 +232,7 @@ disable_cache();
       $gid = (int)@$_REQUEST['gid'];
       $add_days = (int)@$_REQUEST['add_days'];
 
-      $error = add_time_opponent( $gid, $my_id, 24 * $add_days );
+      $error = add_time_opponent( $gid, $my_id, 15 * $add_days );
       if ( $error )
          error('mysql_game_add_time',
             "send_message.addtime(game=$gid,uid=$my_id,$add_days days,opp=$opponent_ID): $error");
