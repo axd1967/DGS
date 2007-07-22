@@ -21,6 +21,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 $TranslateGroups[] = "FAQ";
 
 require_once( "include/std_functions.php" );
+require_once( "include/faq_functions.php" );
 
 {
    connect2mysql();
@@ -58,34 +59,17 @@ require_once( "include/std_functions.php" );
       {
          echo "<$blk><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
 
-         $first = -1;
-         while( $row = mysql_fetch_array( $result ) )
-         {
-            if( $row['Level'] == 1 )
-            {
-               if( !$first )
-                  echo "</ul>\n";
-               if( $first >= 0 )
-                  echo "<hr><p></p>";
-               $first = 1;
-               echo '<b><A href="faq.php">'
-                  . make_html_safe( T_( $row['Q'] ), 'cell')
-                  . "</A></b><p></p>\n";
-            }
-            else
-            {
-               if( $first )
-                  echo "<ul>\n";
-               $first = 0;
-               echo '<li><A name="Entry' . $row["ID"] . '"><b>'
-                  . make_html_safe( T_( $row['Q'] ), 'cell')
-                  . "</b></a>\n<p></p>\n"
-                  . make_html_safe( T_( $row['A'] ), 'faq')
-                  . "<br>&nbsp;<p></p></li>\n";
-            }
+         echo faq_item_html( 0);
+         while( $row = mysql_fetch_assoc( $result ) )
+         { //expand answers
+            echo faq_item_html( $row['Level'], $row['Q'], $row['A'],
+                           $row['Level'] == 1
+                              ? 'href="faq.php"'
+                              : "name=\"Entry{$row['ID']}\""
+                           );
          }
-         if( !$first )
-            echo "</ul>\n";
+         echo faq_item_html(-1);
+
          echo "</td></tr></table></$blk>\n";
       }
    }
@@ -105,8 +89,8 @@ require_once( "include/std_functions.php" );
          echo "<$blk><table width=\"93%\" border=0><tr><td>\n";
 
          $first = -1;
-         while( $row = mysql_fetch_array( $result ) )
-         {
+         while( $row = mysql_fetch_assoc( $result ) )
+         { //titles only
             $question = make_html_safe( T_( $row['Q'] ), 'cell');
             if( empty($question) ) $question = '???';
 
@@ -131,6 +115,7 @@ require_once( "include/std_functions.php" );
          }
          if( !$first )
            echo "</ul></td></tr></table>\n";
+
          echo "</td></tr></table></$blk>\n";
       }
    }
