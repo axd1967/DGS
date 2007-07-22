@@ -63,11 +63,11 @@ function allow_add_time_opponent( $game_row, $uid )
  * \param $gid game-id to add time for
  * \param $uid user giving time to his opponent
  * \param $add_hours amount of hours to add to maintime of opponent,
- *        allowed range is 1 .. 24*MAX_ADD_DAYS
+ *        allowed range is 1 .. 15*MAX_ADD_DAYS (15 b/c of sleep-time)
  */
 function add_time_opponent( $gid, $uid, $add_hours )
 {
-   if ( !is_numeric($add_hours) or $add_hours <= 0 or $add_hours > 24*MAX_ADD_DAYS )
+   if ( !is_numeric($add_hours) or $add_hours <= 0 or $add_hours > 15*MAX_ADD_DAYS )
       return sprintf( 'Invalid value for add_hours [%s]', $add_hours);
 
    $query = "SELECT Games.* from Games WHERE ID=$gid";
