@@ -601,7 +601,7 @@ function get_alt_arg( $n1, $n2)
 
    if ( allow_add_time_opponent( $game_row, $player_row['ID'] ) )
       $menu_array[T_('Add time for opponent')] =
-         "message.php?mode=AddTime".URI_AMP."gid=$gid"; #.URI_AMP."uid=$opponent_ID";
+         "message.php?mode=AddTime".URI_AMP."gid=$gid";
 
    if( !$validation_step )
    {
