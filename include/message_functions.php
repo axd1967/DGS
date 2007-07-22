@@ -1126,7 +1126,7 @@ function message_list_table( &$mtable, $result, $show_rows
             $user_str = user_reference( REF_LINK, 1, '',
                $row['other_ID'], $row['other_name'], $row['other_handle'] );
          else
-            $user_str = '';
+            $user_str = $row['other_name']; // server-msg or unknown
       }
 
       if ( $full_details ) // user-link
