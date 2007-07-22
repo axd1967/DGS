@@ -97,6 +97,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-22 rodival
+
+   * include/faq_functions.php, faq.php, admin_faq.php:
+   - enhanced the admin_faq preview.
+     added the file faq_functions.php for the common functions of the
+     faq scripts.
+     removed the T_() from admin_faq.php
+
+   * include/form_functions.php:
+   - removed useless include, added a comment
+
 2007-07-22 juga
 
    * include/message_functions.php (message_list_table):
