@@ -99,6 +99,9 @@ Changelog
 
 2007-07-22 juga
 
+   * include/message_functions.php (message_list_table):
+   - set correspondent for server-message or if unknown
+
    * game.php, message.php, search_messages.php, send_message.php,
      include/game_functions.php (allow_add_time_opponent, add_time_opponent),
      include/message_functions.php (message_list_table):
