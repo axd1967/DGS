@@ -18,8 +18,6 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-require_once( "include/std_functions.php" );
-
  /* The code in this file is written by Ragnar Ouchterlony */
 
  /*!
@@ -1112,7 +1110,7 @@ class Form
     */
    function print_description( $description )
       {
-         //! \todo no safe-text needed here ?
+         //no safe-text needed here because it come from translators' strings
          return "      <TD align=\"right\">$description:</TD>\n";
       }
 
