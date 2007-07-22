@@ -32,7 +32,7 @@ function allow_add_time_opponent( $game_row, $uid )
    //TODO on what conditions is this allowed ?
 
    // must be a running-game
-   if ( $game_row['Status'] == 'FINISHED' or $game_row['Status'] == 'INVITATION' )
+   if ( $game_row['Status'] == 'FINISHED' or $game_row['Status'] == 'INVITED' )
       return false;
 
    // must be one of my games
