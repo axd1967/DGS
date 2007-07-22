@@ -53,7 +53,7 @@ if( !$is_down )
       //if( !@$_REQUEST['forced'] )
          exit;
 
-   mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201")
+   mysql_query("UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201")
                or error('mysql_query_failed','clock_tick.set_lastchanged');
 
 
@@ -197,7 +197,7 @@ if(ENA_SEND_MESSAGE){ //new
                       ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                        ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                       ) . " WHERE ID=$Black_ID LIMIT 1" )
-               or error('mysql_query_failed',"clock_ticktimeup_update_black($gid)");
+               or error('mysql_query_failed',"clock_tick.timeup_update_black($gid)");
 
          delete_all_observers($gid, $rated_status!=1, $Text);
 
@@ -206,7 +206,9 @@ if(ENA_SEND_MESSAGE){ //new
    mysql_free_result($result);
    unset($ticks);
 
-   $TheErrors->echo_error_list();
+   mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=201")
+               or error('mysql_query_failed','clock_tick.reset_tick');
+   $TheErrors->echo_error_list('clock_tick');
 
 if( !@$chained ) exit;
 //the whole cron stuff in one cron job (else comments those 2 lines):

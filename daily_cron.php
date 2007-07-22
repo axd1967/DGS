@@ -52,7 +52,7 @@ if( !$is_down )
       //if( !@$_REQUEST['forced'] )
          exit;
 
-   mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203")
+   mysql_query("UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203")
                or error('mysql_query_failed','daily_cron.set_lastchanged');
 
    //$delete_messages = false;
@@ -124,7 +124,7 @@ if( !$is_down )
 
 // Update rating
 
-
+/* to be reviewed: the field *enum* 'READY' does not exist. */
 //    $query = "SELECT Games.ID as gid ".
 //        "FROM Games, Players as white, Players as black " .
 //        "WHERE Status='FINISHED' AND Rated='Y' " .
@@ -228,6 +228,8 @@ if( !$is_down )
    }
    mysql_free_result($result);
 
-   $TheErrors->echo_error_list();
+   mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=203")
+               or error('mysql_query_failed','daily_cron.reset_tick');
+   $TheErrors->echo_error_list('daily_cron');
 }
 ?>

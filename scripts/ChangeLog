@@ -97,6 +97,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-22 rodival
+
+   * include/error_functions.php (echo_error_list),
+     clock_tick.php, halfhourly_cron.php, daily_cron.php:
+   - enhanced a little the error handling of cron jobs
+     added an argument $prefix to echo_error_list()
+     added completion flags in the cron scripts (using the Ticks
+     field of their owned clock)
+
 2007-07-22 juga
 
    * links.php:

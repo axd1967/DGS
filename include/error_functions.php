@@ -65,7 +65,7 @@ class Errors
       }
 
 
-      function echo_error_list($html_mode=false)
+      function echo_error_list($prefix='', $html_mode=false)
       {
          $str = '';
 
@@ -73,13 +73,20 @@ class Errors
          while( list($key, $val) = each($this->error_list) )
          {
             list($err, $debugmsg) = $val;
-            $str .= "#Error: " . trim(ereg_replace( "[\x01-\x20]+", " ", $err)) ."\n";
+            $tmp = @trim(ereg_replace( "[\x01-\x20]+", " ", $err));
+            if( $tmp ) $err = $tmp;
+            if( $html_mode )
+            {
+               $tmp = @htmlspecialchars($debugmsg, ENT_QUOTES);
+               if( $tmp ) $debugmsg = $tmp;
+            }
+            $str .= "#Error: $err\n";
             if( $html_mode ) $str .= "<br>\n";
-            $str .= "debugmsg: " . $debugmsg . "\n";
+            $str .= "debugmsg: $prefix-$debugmsg\n";
             $str .= ( $html_mode ? "<hr>\n" :"\n");
          }
 
-         echo $str;
+         if( $str ) echo $str;
       }
 
 

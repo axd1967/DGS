@@ -121,7 +121,7 @@ if( !$is_down )
       //if( !@$_REQUEST['forced'] )
          exit;
 
-   mysql_query("UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202")
+   mysql_query("UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202")
                or error('mysql_query_failed','halfhourly_cron.set_lastchanged');
 
 
@@ -328,7 +328,9 @@ if(1){ //new
                "OnVacation=GREATEST(0, OnVacation - 1/(2*24))")
       or error('mysql_query_failed','halfhourly_cron.vacation_days');
 
-   $TheErrors->echo_error_list();
+   mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=202")
+               or error('mysql_query_failed','halfhourly_cron.reset_tick');
+   $TheErrors->echo_error_list('halfhourly_cron');
 
 }
 ?>
