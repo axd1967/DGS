@@ -29,6 +29,16 @@ define('INVITE_HANDI_PROPER',-2);
 define('INVITE_HANDI_NIGIRI',-3);
 define('INVITE_HANDI_DOUBLE',-4);
 
+$MSG_TYPES = array( // keep untranslated{!)
+   'NORMAL'     => 'Normal',
+   'INVITATION' => 'Invitation',
+   'ACCEPTED'   => 'Accept',
+   'DECLINED'   => 'Decline',
+   'DELETED'    => 'Delete',
+   'DISPUTED'   => 'Dispute',
+   'RESULT'     => 'Result',
+   'ADDTIME'    => 'Add Time',
+);
 
 function init_standard_folders()
 {
@@ -1147,8 +1157,8 @@ function message_list_table( &$mtable, $result, $show_rows
       // additional fields for search-messages
       if ( $full_details )
       {
-         $type = $row['Type'];
-         $mrow_strings[6] = "<td>" . strtoupper($type{0}) . strtolower(substr($type,1)) . "</td>";
+         global $MSG_TYPES;
+         $mrow_strings[6] = "<td>" . $MSG_TYPES[$row['Type']] . "</td>";
 
          if ( $row['Sender'] === 'Y' )
             $msgdir = T_('To#msgdir');
