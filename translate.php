@@ -56,8 +56,8 @@ $info_box = '<table border="2">
        For example, \'days#short\' and \'hours#short\' are translated in english by \'d\' and
        \'h\', as you can see them in the \'Time remaining\' column of the status page
        (e.g. \'12d 8h\').<br>
-       The other purpose is to provide a way to provide different wording or abbreviations
-       for the same words, e.g. for some title in tables.
+       The other purpose is to provide a way to manage different wording or abbreviations
+       for the same words, e.g. #header for some title in tables.
 </ul>
 </td></tr>
 </table>

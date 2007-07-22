@@ -56,11 +56,11 @@ require_once( "include/filter.php" );
       T_('All#msgtype') => '',
       T_('Private#msgtype') => "M.Type='NORMAL'",
       T_('Game#msgtype')    => "M.Type IN ('INVITATION','ACCEPTED','DECLINED','DISPUTED','RESULT')",
-      //T_('Invites#msgtype')  => "M.Type='INVITATION'",
-      //T_('Accepted#msgtype') => "M.Type='ACCEPTED'",
-      //T_('Declined#msgtype') => "M.Type='DECLINED'",
-      //T_('Disputed#msgtype') => "M.Type='DISPUTED'",
-      //T_('Result#msgtype')   => "M.Type='RESULT'",
+      //T_//('Invites#msgtype')  => "M.Type='INVITATION'",
+      //T_//('Accepted#msgtype') => "M.Type='ACCEPTED'",
+      //T_//('Declined#msgtype') => "M.Type='DECLINED'",
+      //T_//('Disputed#msgtype') => "M.Type='DISPUTED'",
+      //T_//('Result#msgtype')   => "M.Type='RESULT'",
    );
 
    /* SQL-statement-fields from message_list_query(), see below:
@@ -197,6 +197,10 @@ require_once( "include/filter.php" );
       . $smform->print_end();
 
 
-   end_page();
+   $menu_array = array();
+   $menu_array[ T_('Browse folders') ] = "list_messages.php";
+   $menu_array[ T_('Edit folders') ] = "edit_folders.php";
+
+   end_page(@$menu_array);
 }
 ?>

@@ -2098,7 +2098,6 @@ class FilterCountry extends Filter
       $C =& $this->Countries;
 
       // make some shorter countries
-      unset( $C['yu'] ); //obsolet
       $C['va'] = T_('Vatican City#filter');
       $C['vc'] = T_('St. Vincent & Grenadines#filter');
 
