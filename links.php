@@ -35,7 +35,6 @@ http://www.usgo.org
 http://linkexplorer.net/go/go.html
 http://news.world-go.org/
 Go News, Go Scene (2000-2003): http://www.kyoto.zaq.ne.jp/momoyama/index.html
-The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
 */
 
 
@@ -48,17 +47,17 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
                      T_('A collaboration web site. Read and contribute!'));
   add_link_page_link("http://gobase.org",
                      T_('Jan van der Steens Pages'), T_('Lots of info on go'));
-  add_link_page_link("http://www.gogod.demon.co.uk",
+  add_link_page_link("http://www.gogod.co.uk/",
                      T_('GoGoD database and encyclopaedia'), T_('A large database of professional games'));
   add_link_page_link("http://senseis.xmp.net/?RGGFAQ",
                      T_('Go FAQ'),
                      T_('Frequently asked questions about go for the rec.games.go newsgroup'));
+  add_link_page_link("http://www.intgofed.org/members.htm",
+                     'IGF',
+                     T_('International Go Federation. Find federations and associations in the world.'));
 //  add_link_page_link("http://www.msoworld.com/mindzine/news/orient/go/go.html",
 //                     T_('Mind Sport Zine'),
 //                     T_('An excellent, but unfortunately no longer updated site.'));
-//  add_link_page_link("http://home.san.rr.com/rafgo/go.html",
-//                     T_('Rafael\'s Go Page'),
-//                     T_('Another go site with lots of useful info.'));
   add_link_page_link("http://igo-kisen.hp.infoseek.co.jp/topics.html",
                      T_('Go News'), T_('News and games from the professional scene'));
   add_link_page_link("http://finance.baylor.edu/rich/go/goguild.html",
@@ -95,9 +94,6 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
   add_link_page_link("http://senseis.xmp.net/?EssentialGoTerms",
                      T_('Common Japanese Go Terms'),
                      T_('You have to know what other players are talking about.'));
-  add_link_page_link("http://www.gbgo.nu/GobanKen/palund/glossary/term_000.htm",
-                     T_('More Japanese Go Terms'),
-                     T_('Translated and explained.'));
 
 
   echo "<p>&nbsp;</p>\n";
@@ -131,9 +127,12 @@ The magic of Go: http://www.yomiuri.co.jp/dy/columns/0001/
   add_link_page_link("http://www.itsyourturn.com/",
                      'It\'s your turn',
                      T_('Also turn based. Has several other games.'));
-  add_link_page_link("http://kgs.kiseido.com",
-                     'Kiseido Go Server',
-                     T_('Server with java interface'));
+  add_link_page_link("http://www.online-go.com/",
+                     'OGS',
+                     T_('Another turn based. Focus on organised tournament play.'));
+  add_link_page_link("http://www.gokgs.com/",
+                     'KGS',
+                     T_('Kiseido Go Server with java interface'));
   add_link_page_link("http://www.pandanet.co.jp/English/",
                      'IGS', T_('A large server for realtime play'));
   add_link_page_link("http://senseis.xmp.net/?GoServers",
