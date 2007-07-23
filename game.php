@@ -366,7 +366,7 @@ function get_alt_arg( $n1, $n2)
 
 
 /*
- : Viewing of game messages while readed or downloaded (sgf):
+ : Viewing of game messages while read or downloaded (sgf):
  : Game  : Text ::         Viewed by         :: sgf+comments by : sgf only :
  : Ended : Tag  :: Writer : Oppon. : Others  :: Writer : Oppon. : any ones :
  : ----- : ---- :: ------ : ------ : ------- :: ------ : ------ : -------- :
@@ -513,18 +513,18 @@ function get_alt_arg( $n1, $n2)
    if( $show_notes && $noteshide != 'Y' )
    {
       if( $notesmode == 'BELOW' )
-         echo "</td></tr>\n<tr><td colspan=$cols align='center'>";
+         echo "</td></tr>\n<tr><td colspan=$cols class=GameNotesBelow>";
       else //default 'RIGHT'
       {
          $cols++;
-         echo "</td>\n<td align='left' valign='middle'>";
+         echo "</td>\n<td class=GameNotesRight>";
       }
       draw_notes( 'N', $notes, $notesheight, $noteswidth);
       $show_notes = false;
    }
 
    // colspan = captures+board column
-   echo "</td></tr>\n<tr><td colspan=$cols align='center'>";
+   echo "</td></tr>\n<tr><td colspan=$cols class=UnderBoard>";
 
    if( $validation_step )
    {
@@ -553,14 +553,14 @@ function get_alt_arg( $n1, $n2)
 
       //if( $my_game ) //sgf comments may be viewed by observers
       {
-         echo "\n<center>"
+         echo "\n<DIV class=Comments>"
             . anchor( "game_comments.php?gid=$gid"
                     , T_('Comments')
                     , ''
                     , array( 'accesskey' => 'c'
                            , 'target' => $FRIENDLY_SHORT_NAME.'_game_comments'
                     ) )
-            . "</center>\n";
+            . "</DIV>\n";
       }
 
    echo "</td></tr>\n</table>\n"; //board & associates table }--------
@@ -715,7 +715,7 @@ function draw_message_box(&$message)
    $tabindex=1;
    echo '
     <center>
-      <TABLE align="center">
+      <TABLE class=MessageInput>
         <TR>
           <TD align=right>' . T_('Message') . ':</TD>
           <TD align=left>
@@ -739,23 +739,27 @@ function draw_message_box(&$message)
 function draw_game_info(&$game_row)
 {
    echo '<table class=GameInfos>' . "\n";
+
+   $cols = 4;
+
+   //black rows
    echo '<tr id="blackInfo">' . "\n";
-   echo "<td><img class=InTextStone src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
-   echo '<td>' .
+   echo "<td class=Color><img class=InTextStone src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
+   echo '<td class=Name>' .
       user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'],
                       $game_row['Blackname'], $game_row['Blackhandle']) .
       ( $game_row['Blackwarning'] ?
         '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
       "</td>\n";
 
-   $rating = ( $game_row['Status']==='FINISHED' ?
-               $game_row['Black_Start_Rating'] : $game_row['Blackrating'] );
-
-   echo '<td class=center>' . echo_rating( $rating, true, $game_row['Black_ID'] ) . "</td>\n";
-   echo '<td class=center>' . T_('Prisoners') . ': ' . $game_row['Black_Prisoners'] . "</td>\n";
+   echo '<td class=Ratings>'
+      . echo_game_rating( $game_row['Black_ID']
+                     , $game_row['Black_Start_Rating']
+                     , $game_row['Status']==='FINISHED'
+                        ? $game_row['Black_End_Rating'] : $game_row['Blackrating'])
+      . "</td>\n";
+   echo '<td class=Prisoners>' . T_('Prisoners') . ': ' . $game_row['Black_Prisoners'] . "</td>\n";
    echo "</tr>\n";
-
-   $cols = 4;
 
    if( $game_row['Status'] != 'FINISHED' )
    {
@@ -768,20 +772,23 @@ function draw_game_info(&$game_row)
    }
 
 
+   //white rows
    echo '<tr id="whiteInfo">' . "\n";
-   echo "<td><img class=InTextStone src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
-   echo '<td>' .
+   echo "<td class=Color><img class=InTextStone src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
+   echo '<td class=Name>' .
       user_reference( REF_LINK, 1, 'black', $game_row['White_ID'],
                       $game_row['Whitename'], $game_row['Whitehandle']) .
       ( $game_row['Whitewarning'] ?
         '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
       "</td>\n";
 
-   $rating = ( $game_row['Status']==='FINISHED' ?
-               $game_row['White_Start_Rating'] : $game_row['Whiterating'] );
-
-   echo '<td class=center>' . echo_rating( $rating, true, $game_row['White_ID'] ) . "</td>\n";
-   echo '<td class=center>' . T_('Prisoners') . ': ' . $game_row['White_Prisoners'] . "</td>\n";
+   echo '<td class=Ratings>'
+      . echo_game_rating( $game_row['White_ID']
+                     , $game_row['White_Start_Rating']
+                     , $game_row['Status']==='FINISHED'
+                        ? $game_row['White_End_Rating'] : $game_row['Whiterating'])
+      . "</td>\n";
+   echo '<td class=Prisoners>' . T_('Prisoners') . ': ' . $game_row['White_Prisoners'] . "</td>\n";
    echo "</tr>\n";
 
 
@@ -795,6 +802,8 @@ function draw_game_info(&$game_row)
          "</td>\n</tr>\n";
    }
 
+
+   //game rows
    $sep = ',&nbsp;&nbsp;&nbsp;';
    echo '<tr id="gameRules">' . "\n";
    echo "<td colspan=\"" . $cols . "\">" . T_('Rules') . ': ';
@@ -811,8 +820,21 @@ function draw_game_info(&$game_row)
                   ,$game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
 
    echo "</tr>\n";
-   echo "</table>\n";
 
+   echo "</table>\n";
+}
+
+function echo_game_rating( $uid, $start_rating, $end_rating)
+{
+   return
+        "<span class=StartRating>"
+      . echo_rating( $start_rating, true, $uid )
+      . "</span>"
+      . "<span class=Separator>-</span>"
+      . "<span class=EndRating>"
+      . echo_rating( $end_rating, true, $uid )
+      . "</span>"
+      ;
 }
 
 

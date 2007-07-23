@@ -42,8 +42,10 @@ Changelog
    * edit_profile.php:
    - added the 'x' access key to the submit button
 
-   * skins/dragon/screen.css:
-   - Forum list CSS adjustment
+   * skins/dragon/screen.css, game.php, board.php:
+   - forum list and board page CSS adjustments
+   - players rating info fixed to CurrentRating/EndRating
+     added StartRating in a CSS hidden element
 
 2007-07-22 rodival
 

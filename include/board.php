@@ -280,7 +280,7 @@ class Board
          }
       }
 
-      echo "<table class=captures>\n";
+      echo "<table class=Captures>\n";
       echo "<tr>\n<th colspan=2>$caption</th>\n </tr>\n";
       echo "<tr>\n<td class=b>\n";
       if( count($bcap)>0 )
@@ -326,12 +326,18 @@ class Board
       $stone_size = $this->stone_size;
       $coord_width = floor($stone_size*31/25);
 
-      $tmp = "img.%s{ width:%dpx; height:%dpx; border-width:0px;}\n";
-      return sprintf( $tmp, 'brdx', $stone_size, $stone_size) //board stones
+      $tmp = "img.%s{ width:%dpx; height:%dpx;}\n";
+      $str = sprintf( $tmp, 'brdx', $stone_size, $stone_size) //board stones
            . sprintf( $tmp, 'brdl', $stone_size, $stone_size) //letter coords
            . sprintf( $tmp, 'brdn', $coord_width, $stone_size) //num coords
            . sprintf( $tmp, 'capt', $stone_size, $stone_size) //capture box
            ;
+      $tmp = "td.%s{ width:%dpx; height:%dpx;}\n";
+      $str.= sprintf( $tmp, 'brdx', $stone_size, $stone_size) //board stones
+           . sprintf( $tmp, 'brdl', $stone_size, $stone_size) //letter coords
+           . sprintf( $tmp, 'brdn', $coord_width, $stone_size) //num coords
+           ;
+      return $str;
    }
 
 
@@ -415,11 +421,11 @@ class Board
       $coord_end = "\"></td>\n";
       if( $this->coord_borders & (COORD_LEFT | COORD_RIGHT) )
       {
-         $coord_start_number = "<td><img class=brdn src=\"$stone_size/c";
+         $coord_start_number = "<td class=brdn><img class=brdn src=\"$stone_size/c";
       }
       if( $this->coord_borders & (COORD_UP | COORD_DOWN) )
       {
-         $coord_start_letter = "<td><img class=brdl src=\"$stone_size/c";
+         $coord_start_letter = "<td class=brdl><img class=brdl src=\"$stone_size/c";
 
          $s = ($this->coord_borders & COORD_LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
          if ( $s )
@@ -440,7 +446,7 @@ class Board
             $coord_right = '';
       }
 
-      $nomove_start = "<td><img class=brdx alt=\"";
+      $nomove_start = "<td class=brdx><img class=brdx alt=\"";
       $nomove_end = ".gif\"></td>\n";
       if( $may_play )
       {
@@ -449,7 +455,7 @@ class Board
             case 'handicap':
                $on_not_empty = false;
                $on_empty = true;
-               $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=handicap".URI_AMP."c=";
+               $move_start = "<td class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=handicap".URI_AMP."c=";
                $move_alt = "\"><img class=brdx alt=\"";
                if( $stonestring )
                   $move_alt = URI_AMP."s=$stonestring".$move_alt;
@@ -460,7 +466,7 @@ class Board
                   $on_empty = true;
                else
                   $on_empty = false;
-               $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=remove".URI_AMP."c=";
+               $move_start = "<td class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=remove".URI_AMP."c=";
                $move_alt = "\"><img class=brdx alt=\"";
                if( $stonestring )
                   $move_alt = URI_AMP."s=$stonestring".$move_alt;
@@ -468,7 +474,7 @@ class Board
             default:
                $on_not_empty = false;
                $on_empty = true;
-               $move_start = "<td><a href=\"game.php?g=$gid".URI_AMP."a=domove".URI_AMP."c=";
+               $move_start = "<td class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=domove".URI_AMP."c=";
                $move_alt = "\"><img class=brdx alt=\"";
                break;
          }
@@ -476,17 +482,18 @@ class Board
       }
 
       if( $this->movemsg )
-         echo "<table id=\"game_board\" border=2 cellpadding=3><tr>" . //align=center
+         echo "<table id=\"game_message\" class=MessageBox><tr>" . //align=center
             "<td width=\"" . $stone_size*19 . "\" align=left>$this->movemsg</td></tr></table><BR>\n";
 
+
+      { // goban
 
       if( $this->woodcolor > 10 )
          $woodstring = 'bgcolor="' . $woodbgcolors[$this->woodcolor - 10] . '"';
       else
          $woodstring = 'style="background-image:url(images/wood' . $this->woodcolor . '.gif);"';
 
-      echo '<table border=0 cellpadding=0 cellspacing=0 ' . 
-          $woodstring . ' align=center>';
+      echo '<table class=Goban ' . $woodstring . '><tbody>';
 
       if( $this->coord_borders & COORD_UP )
          $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
@@ -663,7 +670,8 @@ class Board
          $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
                            $coord_left, $coord_right );
 
-      echo "</table>\n";
+      echo "</tbody></table>\n";
+      } //goban
    } //draw_board
 
 
@@ -1064,7 +1072,7 @@ class Board
    } //toggle_marked_area
 
 
-   // If move update was interupted between thw mysql queries, there may
+   // If move update was interupted between two mysql queries, there may
    // be extra entries in the Moves and MoveMessages tables.
    function fix_corrupted_move_table( $gid)
    {
