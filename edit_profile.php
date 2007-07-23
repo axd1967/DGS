@@ -328,14 +328,17 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 
    $profile_form->add_row( array( 'TAB',
                                   'CHECKBOX', 'locally', 1,
-                                  T_('Change board graphics for this browser only'),
+                                  T_('Change appearences for this browser only'),
                                   safe_getcookie("prefs".$player_row['ID'])>'' ));
 
    $profile_form->add_row( array( 'HR' ) );
 
    $profile_form->add_row( array( 'SPACE' ) );
 
-   $profile_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change profile') ) );
+   $profile_form->add_row( array(
+                     'SUBMITBUTTONX', 'action', T_('Change profile'),
+                        array('accesskey'=>'x'),
+                     ) );
 
 
    $profile_form->echo_string(1);

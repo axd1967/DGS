@@ -39,6 +39,9 @@ Changelog
    * include/std_functions.php:
    - added an easier way to configure the vault parameters
 
+   * edit_profile.php:
+   - added the 'x' access key to the submit button
+
 2007-07-22 rodival
 
    * include/faq_functions.php, faq.php, admin_faq.php:
