@@ -44,7 +44,7 @@ require_once( "include/make_game.php" );
       error('waitingroom_game_not_found', 'join_waitingroom_game.bad_id');
 
    $game_row = mysql_single_fetch('join_waitingroom_game.find_game',
-         "SELECT * FROM Waitingroom WHERE ID=$wr_id");
+         "SELECT * FROM Waitingroom WHERE ID=$wr_id AND nrGames>0");
    if( !$game_row )
       error('waitingroom_game_not_found', 'join_waitingroom_game.find_game');
 
@@ -65,7 +65,7 @@ require_once( "include/make_game.php" );
       jump_to("waiting_room.php?sysmsg=$msg");
    }
 
-//else... joining game
+   //else... joining game
 
    $opponent_row = mysql_single_fetch('join_waitingroom_game.find_players',
          "SELECT ID,Name,Handle," .
@@ -143,6 +143,7 @@ require_once( "include/make_game.php" );
    else
       $gids[] = create_game($opponent_row, $player_row, $game_row);
    $gid = $gids[0];
+   //keep this after the regular one ($gid => consistency with send_message)
    if( $double )
       $gids[] = create_game($opponent_row, $player_row, $game_row);
 
@@ -153,17 +154,19 @@ require_once( "include/make_game.php" );
                 " WHERE (ID=$my_id OR ID=$opponent_ID) LIMIT 2" )
       or error('mysql_query_failed', 'join_waitingroom_game.update_players');
 
-// Reduce number of games left in the waiting room
 
-   if( $game_row['nrGames'] <= 1 )
+   // Reduce number of games left in the waiting room
+
+   if( $game_row['nrGames'] > 0 )
    {
-      mysql_query("DELETE FROM Waitingroom where ID=$wr_id LIMIT 1")
-         or error('mysql_query_failed', 'join_waitingroom_game.reduce_delete');
+      mysql_query("UPDATE Waitingroom SET nrGames=nrGames-1"
+                  ." WHERE ID=$wr_id AND nrGames>0 LIMIT 1")
+         or error('mysql_query_failed', 'join_waitingroom_game.reduce');
    }
    else
    {
-      mysql_query("UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$wr_id LIMIT 1")
-         or error('mysql_query_failed', 'join_waitingroom_game.reduce');
+      mysql_query("DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1")
+         or error('mysql_query_failed', 'join_waitingroom_game.reduce_delete');
    }
 
 

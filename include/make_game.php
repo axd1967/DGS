@@ -293,8 +293,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       "Rated='" . $game_info_row["Rated"] . "'";
 
    if( $gid > 0 )
-   {
-      mysql_query("UPDATE Games SET $set_query WHERE ID=$gid LIMIT 1")
+   { //game prepared by the invitation process
+      mysql_query("UPDATE Games SET $set_query WHERE ID=$gid AND Status='INVITED' LIMIT 1")
          or error('mysql_query_failed','create_game.update:'.$gid);
 
       if( mysql_affected_rows() != 1)

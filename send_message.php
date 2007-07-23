@@ -135,15 +135,17 @@ disable_cache();
                              "FROM Games WHERE ID=$gid" );
 
       if( !$game_row )
-         error('mysql_start_game',"send_message.accept($gid)");
+         error('invited_to_unknown_game',"send_message.accept($gid)");
+      if( $game_row['Status'] != 'INVITED' )
+         error('game_already_accepted',"send_message.accept($gid)");
 
       //ToMove_ID hold handitype since INVITATION
-      $handitype = $game_row["ToMove_ID"];
-      $size = $game_row["Size"];
+      $handitype = $game_row['ToMove_ID'];
+      $size = $game_row['Size'];
 
-      $my_rating = $player_row["Rating2"];
+      $my_rating = $player_row['Rating2'];
       $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
-      $opprating = $opponent_row["Rating2"];
+      $opprating = $opponent_row['Rating2'];
       $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
 
 
@@ -195,6 +197,7 @@ disable_cache();
          $gids[] = create_game($player_row, $opponent_row, $game_row, $gid);
       else
          $gids[] = create_game($opponent_row, $player_row, $game_row, $gid);
+      //always after the "already in database" one (after $gid had been checked)
       if( $double )
          $gids[] = create_game($opponent_row, $player_row, $game_row);
 
@@ -220,7 +223,7 @@ disable_cache();
 
       if( mysql_affected_rows() != 1)
       {
-         error('mysql_delete_game_invitation', "send_message.decline($gid)");
+         error('game_delete_invitation', "send_message.decline($gid)");
          exit;
       }
 

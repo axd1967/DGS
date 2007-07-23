@@ -126,6 +126,13 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-23 rodival
+
+   * include/make_game.php,
+     send_message.php, join_waitingroom_game.php, error.php:
+   - problem of "bad Running count" fix: more checks to find if the
+     game had already been accepted.
+
 2007-07-22 rodival
 
    * include/faq_functions.php, faq.php, admin_faq.php:

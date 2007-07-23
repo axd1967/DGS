@@ -102,6 +102,18 @@ require_once( "include/std_functions.php" );
       }
       break;
 
+      case("game_already_accepted"):
+      {
+         echo T_("Sorry, can't find the game you are invited to. Already accepted?");
+      }
+      break;
+
+      case("game_delete_invitation"):
+      {
+         echo T_("Delete game failed. This is problably not a problem.");
+      }
+      break;
+
       case("ko"):
       {
          echo T_("Sorry, you may not retake a stone which has just captured a stone, " .
@@ -130,12 +142,6 @@ require_once( "include/std_functions.php" );
       case("mysql_connect_failed"):
       {
          echo T_("Connection to database failed. Please wait a few minutes and test again.");
-      }
-      break;
-
-      case("mysql_delete_game_invitation"):
-      {
-         echo T_("Delete game failed. This is problably not a problem.");
       }
       break;
 
