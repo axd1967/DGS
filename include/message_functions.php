@@ -424,21 +424,20 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    else
      $name = $other_name; //i.e. T_("Server message"); or T_('Receiver not found');
 
-   echo "<table border=0>\n" .
-      "<tr><td><b>" . T_('Date') . ":</b></td>" .
-      "<td colspan=2>" . date($date_fmt, $date) . "</td></tr>\n" .
-      "<tr><td><b>" . ($to_me ? T_('From') : T_('To') ) . ":</b></td>\n" .
-      "<td colspan=2>$name</td>" .
+   $cols = 2;
+   echo "<table class=MessageInfos>\n" .
+      "<tr><td class=Rubric>" . T_('Date') . ":</td>" .
+      "<td colspan=$cols>" . date($date_fmt, $date) . "</td></tr>\n" .
+      "<tr><td class=Rubric>" . ($to_me ? T_('From') : T_('To') ) . ":</td>\n" .
+      "<td colspan=$cols>$name</td>" .
       "</tr>\n";
 
    $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_terms);
    $text = make_html_safe( $text, true, $rx_terms);
 
-   echo "<tr><td><b>" . T_('Subject') . ":</b></td><td colspan=2>" .
-      $subject . "</td></tr>\n" .
-      "<tr><td valign=\"top\">" ;
-
-   echo "<b>" . T_('Message') . ":</b>" ;
+   echo "<tr><td class=Rubric>" . T_('Subject') . ":</td>" .
+      "<td colspan=$cols>" . $subject . "</td></tr>\n" .
+      "<tr><td class=Rubric>" . T_('Message') . ":" ;
    $str = '';
    if( $flow & FLOW_ANSWER && $reply_mid > 0 )
    {
@@ -457,31 +456,36 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
              . "></a>&nbsp;" ;
    }
    if( $str )
-     echo "<center>$str</center>";
+     echo "<div class=MessageFlow>$str</div>";
 
-   echo "</td>\n" .
+   echo "</td>\n"
+      . "<td colspan=$cols>\n";
+      
+   echo "<table class=MessageBox><tr><td>"
+      . $text
+      . "</td></tr></table>";
 
-      "<td align=\"center\" colspan=2>\n" .
-      "<table border=2 align=center><tr>" .
-      "<td width=475 align=left>" . $text .
-      "</td></tr></table><BR></td></tr>\n";
+   echo "</td></tr>\n";
 
    if( isset($folders) && $mid > 0 )
    {
-      echo "<tr>\n<td><b>" . T_('Folder') . ":</b></td>\n<td><table cellpadding=3><tr>" .
-         echo_folder_box($folders, $folder_nr, substr($bg_color, 2, 6))
-          . "</tr></table></td>\n<td>";
+      echo "<tr>\n";
 
+      echo "<td class=Rubric>" . T_('Folder') . ":</td>\n"
+         . "<td><table class=FoldersTabs><tr>"
+         . echo_folder_box($folders, $folder_nr, substr($bg_color, 2, 6))
+         . "</tr></table></td>\n";
+
+      echo "<td>";
       $deleted = ( is_null($folder_nr) );
       if( !$deleted )
       {
-
-         $fld = array('' => '');
+         $fldrs = array('' => '');
          foreach( $folders as $key => $val )
             if( $key != $folder_nr and (!$to_me or $key != FOLDER_SENT) and $key != FOLDER_NEW )
-               $fld[$key] = $val[0];
+               $fldrs[$key] = $val[0];
 
-         echo $form->print_insert_select_box('folder', '1', $fld, '', '');
+         echo $form->print_insert_select_box('folder', '1', $fldrs, '', '');
          if( $delayed_move )
             echo T_('Move to folder when replying');
          else
@@ -493,7 +497,6 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
          }
          echo $form->print_insert_hidden_input('foldermove_mid', $mid) ;
       }
-
       echo "\n</td></tr>\n";
    }
 
@@ -848,20 +851,20 @@ function get_folders($uid, $remove_all_received=true)
    $result = mysql_query("SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr")
       or error('mysql_query_failed', 'get_folders');
 
-   $flds = $STANDARD_FOLDERS;
+   $fldrs = $STANDARD_FOLDERS;
 
    while( $row = mysql_fetch_array($result) )
    {
       if( empty($row['Name']))
          $row['Name'] = ( $row['Folder_nr'] < USER_FOLDERS ?
                           $STANDARD_FOLDERS[$row['Folder_nr']][0] : T_('Folder name') );
-      $flds[$row['Folder_nr']] = array($row['Name'], $row['BGColor'], $row['FGColor']);
+      $fldrs[$row['Folder_nr']] = array($row['Name'], $row['BGColor'], $row['FGColor']);
    }
 
    if( $remove_all_received )
-      unset($flds[FOLDER_ALL_RECEIVED]);
+      unset($fldrs[FOLDER_ALL_RECEIVED]);
 
-   return $flds;
+   return $fldrs;
 }
 
 function change_folders_for_marked_messages($uid, $folders)
@@ -937,42 +940,42 @@ function echo_folders($folders, $current_folder)
 {
    global $STANDARD_FOLDERS;
 
-   $string = '<table align=center border=0 cellpadding=0 cellspacing=7><tr>' . "\n" .
-      '<td><b>' . T_('Folder') . ":&nbsp;&nbsp;&nbsp;</b></td>\n";
+   $string = '<table class=FoldersTabs><tr>' . "\n" .
+      '<td class=Rubric>' . T_('Folder') . ":</td>\n";
 
    $folders[FOLDER_ALL_RECEIVED] = $STANDARD_FOLDERS[FOLDER_ALL_RECEIVED];
    ksort($folders);
 
+   $FOLDER_COLS_MODULO = 8; //waiting to be a global constant... maybe
    $i = 0;
    foreach( $folders as $nr => $val )
    {
-      if( $i > 0 && ($i % 8) == 0 )
-          $string .= "</tr>\n<tr><td>&nbsp;</td>";
+      if( $i > 0 && ($i % $FOLDER_COLS_MODULO) == 0 )
+          $string .= "</tr>\n<tr><td></td>"; //empty cell under title
       $i++;
 
+      //see also echo_folder_box()
       list($name, $color, $fcol) = $val;
       $name = "<font color=\"$fcol\">" . make_html_safe($name) . "</font>" ;
       $string .= '<td bgcolor="#' .blend_alpha_hex($color). '"' ;
       if( $nr == $current_folder)
-         $string .= " style=\"padding:4px;border-width:2px;border:solid;border-color:#6666ff;\">$name</td>\n";
+         $string.= " class=Selected>$name</td>\n";
       else
-         $string .= " style=\"padding:6px;\"><a href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
+         $string.= " class=Tab><a href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
+   }
+   $i = ($i % $FOLDER_COLS_MODULO);
+   if( $i > 0 ) //empty cells of last line
+   {
+      $i = $FOLDER_COLS_MODULO - $i;
+      if( $i > 1 )
+         $string .= "<td colspan=$i></td>\n";
+      else
+         $string .= "<td></td>\n";
    }
 
    $string .= '</tr></table>' . "\n";
 
    return $string;
-}
-
-function folder_is_empty($nr, $uid)
-{
-   $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
-                         "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1")
-      or error('mysql_query_failed','folder_is_empty');
-
-   $nr = (@mysql_num_rows($result) === 0);
-   mysql_free_result($result);
-   return $nr;
 }
 
 // param bgcolor: if null, fall back to default-val (in blend_alpha_hex-func)
@@ -1001,6 +1004,17 @@ function echo_folder_box( $folders, $folder_nr, $bgcolor, $attbs='', $prefix='',
           make_html_safe($foldername) .
           $suffix .
           "</font></td>";
+}
+
+function folder_is_empty($nr, $uid)
+{
+   $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
+                         "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1")
+      or error('mysql_query_failed','folder_is_empty');
+
+   $nr = (@mysql_num_rows($result) === 0);
+   mysql_free_result($result);
+   return $nr;
 }
 
 // param extra_querysql: QuerySQL-object to extend query

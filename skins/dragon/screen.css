@@ -425,8 +425,31 @@ table.Links a {
 
 
 /* ------------------------- */
-/* usual features */
+/* messages and folders features */
 /* ------------------------- */
+
+table.MessageInfos {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px auto;
+   width: auto; /* 100% */
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+}
+
+table.MessageInfos td {
+   color: black;
+   text-align: left;
+   padding: 2px;
+}
+
+table.MessageInfos td.Rubric {
+   color: black;
+   font-weight: bold;
+}
 
 table.MessageBox {
    border: 2px outset #F7F5E3; /* page background-color */
@@ -434,22 +457,59 @@ table.MessageBox {
    border-spacing: 2px;
    border-collapse: separate; /* collapse separate */
    margin: 0px auto;
-   width: auto;
+   width: 30em; /* 475px; */
    max-width: none;
    overflow: visible;
    empty-cells: hide;
-   text-align: left;
+   text-align: center;
 }
 
 table.MessageBox td {
    border: 1px inset #F7F5E3; /* page background-color */
    margin: 0px;
    padding: 3px;
+   text-align: left;
+}
+
+div.MessageFlow {
+   margin: 0px auto;
+   vertical-align: top;
+   text-align: center;
+}
+
+table.FoldersTabs {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 4px;
+   border-collapse: separate; /* separate collapse */
+   margin: 0px auto 0px 0px;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+}
+
+table.FoldersTabs td {
+   border: 4px solid #F7F5E3; /* page background-color */ /* or 'transparent' ? */
+   padding: 2px 6px;
+   text-align: center;
+}
+
+table.FoldersTabs td.Selected {
+   border: 4px solid #6666ff;
+}
+
+table.FoldersTabs td.Rubric {
+   /* background: none; /* or 'transparent' ? */
+   color: black;
+   font-weight: bold;
+   text-align: right;
+   padding: 2px 6px 2px 2px;
 }
 
 
 /* ------------------------- */
-/* usual tables */
+/* usual list-tables */
 /* ------------------------- */
 
 table.Table {

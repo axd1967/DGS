@@ -26,6 +26,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-24 rodival
+
+   * skins/dragon/screen.css, message_functions.php:
+   - messages and folders CSS adjustements
+
 2007-07-23 rodival
 
    * include/make_game.php,
