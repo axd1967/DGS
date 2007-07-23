@@ -33,6 +33,9 @@ Changelog
    - problem of "bad Running count" fix: more checks to find if the
      game had already been accepted.
 
+   * game.php:
+   - minor W3C compliance fix.
+
 2007-07-22 rodival
 
    * include/faq_functions.php, faq.php, admin_faq.php:

@@ -517,7 +517,7 @@ function get_alt_arg( $n1, $n2)
       else //default 'RIGHT'
       {
          $cols++;
-         echo "</td>\n<td align='left' valign='center'>";
+         echo "</td>\n<td align='left' valign='middle'>";
       }
       draw_notes( 'N', $notes, $notesheight, $noteswidth);
       $show_notes = false;
