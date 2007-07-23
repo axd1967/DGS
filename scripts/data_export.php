@@ -1148,9 +1148,9 @@ function freesql_dump( $database, $query)
       ) );
    $dform->add_row( array(
       'HIDDEN', 'charset', $encoding_used,
-      'SUBMITBUTTONX', 'show_it', 'Show it [&s]',
+      'SUBMITBUTTONX', 'show_it', 'Show it [&amp;s]',
                array('accesskey' => 's'),
-      'SUBMITBUTTONX', 'export_it', 'Download it [&d]',
+      'SUBMITBUTTONX', 'export_it', 'Download it [&amp;d]',
                array('accesskey' => 'd'),
       'CHECKBOX', 'new_style', 1, 'New style&nbsp;', $new_style,
       'CHECKBOX', 'defs_sort', 1, 'Defs sort&nbsp;', $defs_sort,

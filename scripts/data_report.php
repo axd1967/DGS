@@ -189,7 +189,7 @@ define('UNBUF_TIMOUT', 5); //x seconds limit
       'HIDDEN', 'oldquery', $query,
       'CELL', $formcol, 'align="center"',
       'CHECKBOX', 'unbuffered', 1, 'Unbuffered&nbsp;&nbsp;&nbsp;', $unbuffered,
-      'OWNHTML', '<INPUT type="submit" name="apply" accesskey="x" value="Apply [&x]">',
+      'OWNHTML', '<INPUT type="submit" name="apply" accesskey="x" value="Apply [&amp;x]">',
       'TEXT', '&nbsp;&nbsp;col size:&nbsp;',
       'TEXTINPUT', 'colsize', 3 , 3, $colsize,
       'RADIOBUTTONS', 'colwrap'
