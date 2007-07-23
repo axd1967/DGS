@@ -128,11 +128,12 @@ disable_cache();
    {
       $gid = (int)@$_REQUEST['gid'];
       $game_row = mysql_single_fetch( 'send_message.accept',
-                             "SELECT Black_ID, White_ID, ToMove_ID, " .
-                             "Size, Handicap, Komi, " .
-                             "Maintime, Byotype, Byotime, Byoperiods, " .
-                             "Rated, StdHandicap, WeekendClock " .
-                             "FROM Games WHERE ID=$gid" );
+                             "SELECT Status"
+                           . ",Black_ID,White_ID,ToMove_ID"
+                           . ",Size,Handicap,Komi"
+                           . ",Maintime,Byotype,Byotime,Byoperiods"
+                           . ",Rated,StdHandicap,WeekendClock"
+                           . " FROM Games WHERE ID=$gid" );
 
       if( !$game_row )
          error('invited_to_unknown_game',"send_message.accept($gid)");
