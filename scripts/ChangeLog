@@ -36,6 +36,9 @@ Changelog
    * game.php:
    - minor W3C compliance fix.
 
+   * include/std_functions.php:
+   - added an easier way to configure the vault parameters
+
 2007-07-22 rodival
 
    * include/faq_functions.php, faq.php, admin_faq.php:

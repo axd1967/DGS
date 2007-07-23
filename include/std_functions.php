@@ -1948,8 +1948,13 @@ function who_is_logged( &$player_row)
    return $res;
 }
 
-//vault limit: FEVER_CNT hits in one hour. 0 disable it.
-define('FEVER_CNT', 600);
+//fever-vault parameters: set VAULT_CNT to 0 to disable the process.
+define('VAULT_CNT', 1000); //an account with more than x hits...
+define('VAULT_DELAY', 3600); //... during y seconds ...
+define('VAULT_TIME', 24*3600); //... is vaulted for z seconds
+//two specific parameters for multi-users accounts, e.g. 'guest':
+define('VAULT_CNT_X', VAULT_CNT*10); //activity count
+define('VAULT_TIME_X', 2*3600); //vault duration
 
 function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
 {
@@ -1971,7 +1976,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
 
    $query= "SELECT *,UNIX_TIMESTAMP(Sessionexpire) AS Expire"
           .",Adminlevel+0 as admin_level"
-          .(FEVER_CNT>1 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
+          .(VAULT_CNT>1 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
           ." FROM Players WHERE Handle='".mysql_addslashes($hdl)."'";
 
    $result = mysql_query( $query )
@@ -2020,7 +2025,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
    }
 
    $vaultcnt= true; //no vault for anonymous or if disabled
-   if( FEVER_CNT>1 && !$session_expired ) //exclude access deny from an other user
+   if( VAULT_CNT>1 && !$session_expired ) //exclude access deny from an other user
    {
       $vaultcnt= (int)@$player_row['VaultCnt'];
       $vaulttime= @$player_row['VaultTime'];
@@ -2043,14 +2048,15 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
          $vaultcnt--;
          $query.= ",VaultCnt=$vaultcnt";
       }
-      //TODO: maybe exclude 'guest' because it is a multi_users account
+      //TODO: maybe exclude the multi-users accounts
       else if( $NOW < $vaulttime ) //fever too hight
       //to exclude guest, add: && $hdl != 'guest'
       {
          $vaultcnt= 0; //enter fever vault...
-         $vaulttime= $NOW+24*3600; //... for one day
-         if( $hdl == 'guest' )
-            $vaulttime= $NOW+2*3600; //this is a multi-users account
+         if( $hdl == 'guest' ) //multi-users accounts
+            $vaulttime= $NOW+VAULT_TIME_X;
+         else
+            $vaulttime= $NOW+VAULT_TIME; // vault exit date
          $query.= ",VaultCnt=$vaultcnt"
                  .",VaultTime=FROM_UNIXTIME($vaulttime)";
 
@@ -2077,10 +2083,11 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
       }
       else //cool enought: reset counters for one period
       {
-         $vaultcnt= FEVER_CNT; //less than x hits...
-         $vaulttime= $NOW+3600; //... during one hour
-         if( $hdl == 'guest' )
-            $vaultcnt*= 10; //this is a multi-users account
+         if( $hdl == 'guest' ) //multi-users accounts
+            $vaultcnt= VAULT_CNT_X;
+         else
+            $vaultcnt= VAULT_CNT; //less than x hits...
+         $vaulttime= $NOW+VAULT_DELAY; //... during y seconds
          $query.= ",VaultCnt=$vaultcnt"
                  .",VaultTime=FROM_UNIXTIME($vaulttime)";
       }
