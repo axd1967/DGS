@@ -34,13 +34,13 @@ require_once( "include/game_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-/* Actual GET calls used:
-   if(message.php?mode=...)
+/* Actual GET calls used (to identify the ways to handle them):
+   if(message.php?mode=...) //with mode
       NewMessage           : from menu
                               (or site_map)
       NewMessage&uid=      : from user info
       ShowMessage&mid=     : from message_list_table()
-          &terms=             or message_info_table()
+                              or message_info_table()
                               or list_messages
                               or here
       Invite               : from menu
@@ -49,11 +49,11 @@ require_once( "include/game_functions.php" );
                               or show_games
       Dispute&mid=         : from here
       AddTime&gid=         : from game
-   else if(message.php?...)
+   else if(message.php?...) //without mode
       mid=                 : from notifications
                               or here
                            => ShowMessage&mid=
-   else if(message.php)(alone)
+   else if(message.php) //alone
                            : from site_map
                            => NewMessage
 
