@@ -830,7 +830,7 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
    if( $width<15 ) $width= 15;
 
    echo " <table class=GameNotes>\n";
-   echo "  <tr><th>" . T_('Private game notes') . "</td></tr>\n";
+   echo "  <tr><th>" . T_('Private game notes') . "</th></tr>\n";
    echo "  <tr><td class=Notes>\n";
    echo "   <textarea name=\"gamenotes\" id=\"gameNotes\" cols=\"$width\" rows=\"$height\">"
             . textarea_safe( $notes) . "</textarea>\n";
