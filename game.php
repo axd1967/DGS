@@ -715,7 +715,7 @@ function draw_message_box(&$message)
    $tabindex=1;
    echo '
     <center>
-      <TABLE class=MessageInput>
+      <TABLE class=MessageForm>
         <TR>
           <TD align=right>' . T_('Message') . ':</TD>
           <TD align=left>

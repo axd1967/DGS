@@ -425,6 +425,30 @@ table.Links a {
 
 
 /* ------------------------- */
+/* usual features */
+/* ------------------------- */
+
+table.MessageBox {
+   border: 2px outset #F7F5E3; /* page background-color */
+   table-layout: auto;
+   border-spacing: 2px;
+   border-collapse: separate; /* collapse separate */
+   margin: 0px auto;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: left;
+}
+
+table.MessageBox td {
+   border: 1px inset #F7F5E3; /* page background-color */
+   margin: 0px;
+   padding: 3px;
+}
+
+
+/* ------------------------- */
 /* usual tables */
 /* ------------------------- */
 
@@ -844,6 +868,15 @@ table.Captures img {
 }
 
 
+td.GameNotesRight {
+   vertical-align: middle;
+   text-align: left;
+}
+
+td.GameNotesBelow {
+   text-align: center;
+}
+
 table.GameNotes {
    border-width: 0px;
    margin: 4px;
@@ -866,6 +899,9 @@ table.GameNotes td.Notes {
    margin: 0px;
 }
 
+td.UnderBoard {
+   text-align: center;
+}
 
 table.GameInfos {
    border: 0px solid #e0e8ed;
@@ -894,6 +930,36 @@ table.GameInfos tr#blackTime {
 table.GameInfos tr#whiteInfo,
 table.GameInfos tr#whiteTime {
    background: #ffffff;
+}
+
+table.GameInfos td.Color,
+table.GameInfos td.Name {
+   text-align: left;
+}
+
+table.GameInfos td.Prisoners {
+   text-align: right;
+}
+
+table.GameInfos td.Ratings {
+   border: 0px solid red;
+   text-align: center;
+}
+
+table.GameInfos td.Ratings span.StartRating {
+   display: none; /* none block inline */
+/*   visibility: hidden; /* visible hidden collapse(table) */
+}
+
+table.GameInfos td.Ratings span.Separator {
+   display: none; /* none block inline */
+/*   visibility: hidden; /* visible hidden collapse(table) */
+   padding: 0px 4px;
+}
+
+table.GameInfos td.Ratings span.EndRating {
+   display: inline; /* none block inline */
+/*   visibility: visible; /* visible hidden collapse(table) */
 }
 
 
