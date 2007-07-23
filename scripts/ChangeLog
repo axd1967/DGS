@@ -86,9 +86,38 @@ Maybe an other track: this was a 2 stones handicap game (but the previous 330544
 So 2 common started games: 329871,332632
 maybe a double game (same size=7x7, same handicap=6.0+0, same byoyomi=JAP)
 and, if so, created from an invitation (large ID diff)
-
+\2007-07-23 rodival
+   2 new users with a bad "Running" count have appeared yesterday:
+   9421=MatCauthon:24.210.66.86 | 20688=Tiger59:195.4.85.183
+=> This time Running is 2 points too hight and other counts are correct.
+ uid   cntfix recent finished games      recent accepted games      ucol
+ 9421  17=>15 303162 2007-07-19 23:49:21 334739 2007-07-23 00:33:26 B
+               (no more since 4 days)    334657 2007-07-22 20:31:55 W
+                                         334656 2007-07-22 15:15:37 W
+                                         334654 2007-07-22 13:38:49 B
+                                         334602 2007-07-22 13:21:34 B
+                                         334341 2007-07-20 16:06:58 B
+ 20688 10=> 8  (no game since 4 days)    334656 2007-07-22 15:15:37 B
+                                         334609 2007-07-22 13:01:42 B
+                                         331067 2007-07-21 02:37:54 W
+ ID | Handle | Message | MysqlError | Debug | Date | IP
+ 3201912 | MatCauthon  | not_logged_in |  | status.php | 20070722143837 | 24.210.66.86
+So 1 common started games (334656) for 2 Running points added
+Yep! A good clue! From the Message database, I can extract those messages between the 2 users:
+ Type       Subject                  Time                mid     Replied Sender folder other_ID mID     ReplyTo Game_ID Text
+ INVITATION Game invitation          2007-07-22 13:25:46 1081292 N       Y      5      20688    1081292         334656  Dragon Tourney game - good luck!
+ NORMAL     Game invitation accepted 2007-07-22 15:15:26 1081326 N       N      1      20688    1081326 1081292
+ NORMAL     Game invitation accepted 2007-07-22 15:15:30 1081327 N       N      1      20688    1081327 1081292
+ NORMAL     Game invitation accepted 2007-07-22 15:15:37 1081328 N       N      1      20688    1081328 1081292
+3 "invitation accepted" messages replying to the original "invitation" messages
+This is again caused by multiple clicks on the "accept" button.
+Same phenomenon for the previous couple (12570=mamutik | 27776=nananana):
+ Type       Subject                  Time                mid     Replied Sender folder other_ID mID     ReplyTo Game_ID Text
+ INVITATION Game invitation dispute  2007-07-12 12:39:58 1074136 Y       N      1      27776    1074136 1074130 329871  nananana is my account only for 7x7 :-)
+ NORMAL     Game invitation accepted 2007-07-13 13:13:20 1074887 N       Y      5      27776    1074887 1074136
+ NORMAL     Game invitation accepted 2007-07-13 13:13:21 1074888 N       Y      5      27776    1074888 1074136         all right
+I will check that
 -----
-
 
 quick TODO:
 ------------------------------------------------------------------
