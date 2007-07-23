@@ -42,6 +42,9 @@ Changelog
    * edit_profile.php:
    - added the 'x' access key to the submit button
 
+   * skins/dragon/screen.css:
+   - Forum list CSS adjustment
+
 2007-07-22 rodival
 
    * include/faq_functions.php, faq.php, admin_faq.php:

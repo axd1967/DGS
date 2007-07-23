@@ -578,6 +578,7 @@ table.Table a.Button {
    white-space: nowrap;
 }
 
+
 /* cells tools */
 
 table.Table td span.Tool,
@@ -967,26 +968,29 @@ table.Forum table {
    width: 100%;
 }
 
+table#forumIndex tr {
+   padding: 0px;
+   margin: 0px;
+}
+
 /* forum lists */
-table.Forum .Row3,
-table.Forum .Row1 {
+table.Forum tr.Row3,
+table.Forum tr.Row1 {
    background: #e0e8ed;
    color: black;
 }
-table.Forum .Row4,
-table.Forum .Row2 {
+table.Forum tr.Row4,
+table.Forum tr.Row2 {
    background: white;
    color: black;
 }
 
-table#forumIndex tr.Row2 td {
-   padding: 0px;
+table.Forum td {
+   border: 0px solid red;
+   padding: 2px 8px 2px 8px;
    margin: 0px;
-}
-
-table#forumIndex tr.Row2 {
-   padding: 0px;
-   margin: 0px;
+   text-align: left;
+   color: black;
 }
 
 /*
@@ -998,11 +1002,11 @@ table#forumIndex tr.Row2 dl {
 }
 
 
-table#forumIndex td.name {
+table#forumIndex td.Name {
    width: 60%;
-   padding: 3px 8px 3px 8px;
+   padding: 6px 8px;
 }
-table#forumIndex td.name a {
+table#forumIndex td.Name a {
    font-weight: bold;
 }
 table#forumIndex td.PostCnt,
@@ -1013,14 +1017,6 @@ table#forumIndex td.PostDate {
 
 table.Forum .Moderated {
    color: #ff4466;
-}
-
-table.Forum td {
-   border: 0px solid red;
-   padding: 2px 2px 0px 2px;
-   margin: 0px;
-   text-align: left;
-   color: black;
 }
 
 table.Forum td.Indent {
