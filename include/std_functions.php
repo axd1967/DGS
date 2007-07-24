@@ -1271,18 +1271,18 @@ function add_line_breaks( $str)
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends (or empty):
 $html_code_closed[''] = '';
-$html_code_closed['cell'] = '|b|i|u|strong|em|tt|color|';
+$html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|color|';
 $html_code_closed['line'] = '|home|a'.$html_code_closed['cell'];
-$html_code_closed['msg'] = '|home|a|b|i|u|strong|em|color|center|ul|ol|font|tt|pre|code|quote|';
-$html_code_closed['game'] = $html_code_closed['msg'].'h|hidden|c|comment|';
+$html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote'.$html_code_closed['line'];
+$html_code_closed['game'] = '|h|hidden|c|comment'.$html_code_closed['msg'];
 //$html_code_closed['faq'] = ''; //no closed check
 $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
   // more? '|/li|/p|/br|/ *br';
 
   // ** no '|' at ends:
 $html_code[''] = '';
-$html_code['cell'] = 'b|i|u|strong|em|tt|color';
-$html_code['line'] = 'a|'.$html_code['cell'];
+$html_code['cell'] = 'note|b|i|u|strong|em|tt|color';
+$html_code['line'] = 'home|a|'.$html_code['cell'];
 $html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
    .'goban|mailto|https?|news|game_?|user_?|send_?';
 $html_code['game'] = 'br|/br|p|/p|li'.$html_code_closed['game']
@@ -1521,6 +1521,11 @@ define('REF_LINK_BLANK', 0x4);
 
 //Note: some of those check for the '`' i.e. the first char of ALLOWED_* vars
 $html_safe_preg = array(
+
+//<note>...</note> =>removed from entry, seen only by editors
+ "%".ALLOWED_LT."note([^`\n\t]*)".ALLOWED_GT.".*?"
+    .ALLOWED_LT."/note([^`\n\t]*)".ALLOWED_GT."%is"
+  => '', // =>removed from entry
 
 //<mailto:...>
  "%".ALLOWED_LT."(mailto:)([^ `\n\t]+)".ALLOWED_GT."%is"

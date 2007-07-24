@@ -26,7 +26,7 @@ require_once( "include/make_translationfiles.php" );
 require_once( "include/faq_functions.php" );
 
 
-$info_box = '<table border="2">
+$info_box = '<table class=InfoBox>
 <tr><td>
 <ul>
   <li> You may delete an entry by emptying its text-box(es)... while it had
@@ -45,6 +45,8 @@ $info_box = '<table border="2">
        The new or changed text are saved regardless of the preview-checkbox.
   <li> For links homed at DGS, use not &lt;a href=".."&gt;, but the
        home-tag, e.g. &lt;home users.php&gt;Users&lt;/home&gt;
+       You may use the note-tag &lt;note&gt;(removed from entry)&lt;/note&gt;
+       to add some notes seen only by faq admins and translators.
   <li> Setting the move distance (for Q/A-entries) allows to control how
        many lines an entry can be moved up or down. A saved value is
        stored for one hour in a cookie. Invalid or 0 resets to the
@@ -54,7 +56,7 @@ $info_box = '<table border="2">
        is implicitly prefixed and suffixed with a wildcard \'%\'-pattern,
        so is always a substring-search. Found entries will be marked with
        a red \'<font color="red">#</font>\'.
-  <li> The last used entry is marked with a blue \'<font color="blue">&gt;</font>\'.
+  <li> The last used entry is marked with a blue \'<font color="blue"><b>&gt;</b></font>\'.
 </ul>
 </td></tr>
 </table>
@@ -100,15 +102,9 @@ $info_box = '<table border="2">
    $term = get_request_arg('term', '');
 
    // read/write move-distance for entries using cookie
-   $movedist = (int) get_request_arg('movedist', -1); // negative to reset
-   $c_movedist = safe_getcookie('admin_faq_movedist');
-   if ( empty($movedist) or $movedist < 0 )
-   { // handle default (reset if invalid or 0 or no cookie set)
-      if ( $movedist == 0 or empty($c_movedist) )
-         $movedist = 1;
-      else
-         $movedist = abs($c_movedist);
-   }
+   $movedist = (int)@$_REQUEST['movedist'];
+   if ( $movedist < 1 )
+      $movedist = max( 1, (int)safe_getcookie('admin_faq_movedist'));
    if ( @$_REQUEST['setmovedist'] ) // write into cookie
       safe_setcookie( 'admin_faq_movedist', $movedist, 3600 ); // save for 1h
 
@@ -220,6 +216,7 @@ $info_box = '<table border="2">
          start_page('FAQ Admin - Edit category', true, $logged_in, $player_row );
       else
          start_page('FAQ Admin - Edit entry', true, $logged_in, $player_row );
+      echo "<center>\n";
 
       $show_list = false;
 
@@ -235,8 +232,6 @@ $info_box = '<table border="2">
          $question = $row['Q'];
          $answer = $row['A'];
       }
-
-      echo "<center>\n";
 
       $faq_edit_form = new Form( 'faqeditform', "$page?id=$id#e$id", FORM_POST );
 
@@ -285,7 +280,7 @@ $info_box = '<table border="2">
                               array('accesskey'=>'w'),
                            'SUBMITBUTTON', 'back', 'Back to list',
                            ));
-      $faq_edit_form->echo_string();
+      $faq_edit_form->echo_string(1);
 
       show_preview( $row['Level'], $question, $answer);
    } //edit
@@ -418,6 +413,7 @@ $info_box = '<table border="2">
          start_page('FAQ Admin - New category', true, $logged_in, $player_row );
       else
          start_page('FAQ Admin - New entry', true, $logged_in, $player_row );
+      echo "<center>\n";
 
       $show_list = false;
 
@@ -431,8 +427,6 @@ $info_box = '<table border="2">
          $question = '';
          $answer = '';
       }
-
-      echo "<center>\n";
 
       $faq_edit_form = new Form( 'faqnewform', "$page?id=$id#e$id", FORM_POST );
 
@@ -463,7 +457,7 @@ $info_box = '<table border="2">
                               array('accesskey'=>'w'),
                            'SUBMITBUTTON', 'back', 'Back to list',
                            ));
-      $faq_edit_form->echo_string();
+      $faq_edit_form->echo_string(1);
 
       show_preview( $action=='c' ? 1 : 2, $question, $answer);
    } //new
@@ -625,7 +619,8 @@ $info_box = '<table border="2">
    if( $show_list )
    {
       start_page('FAQ Admin', true, $logged_in, $player_row );
-      echo "<CENTER>\n";
+      echo "<center>\n";
+
       $str = 'Read this before editing';
       if( (bool)@$_REQUEST['infos'] )
       {
@@ -660,7 +655,7 @@ $info_box = '<table border="2">
             'TEXTINPUT',    'movedist', 4, 2, $movedist,
             'SUBMITBUTTON', 'setmovedist', 'Set move length' ));
       $faq_search_form->add_hidden( 'id',  $id ); // current entry
-      echo "<center>" . $faq_search_form->get_form_string() . "</center>\n";
+      $faq_search_form->echo_string(1);
 
 
       $qterm = ( $term != '' ) ? mysql_addslashes("%$term%") : ''; // implicit wildcards
@@ -798,7 +793,6 @@ $info_box = '<table border="2">
    } //show_list
 
    echo "</center>\n";
-
    end_page();
 }
 
@@ -849,10 +843,12 @@ function transl_toggle_state( $row)
 
 function show_preview( $level, $question, $answer)
 {
+   echo "<table class=FAQ><tr><td class=FAQread>\n";
    echo faq_item_html( 0);
    echo faq_item_html( $level, $question, $answer,
                $level == 1 ? 'href="#preview"' : 'name="preview"');
    echo faq_item_html(-1);
+   echo "</td></tr></table>\n";
 }
 
 ?>

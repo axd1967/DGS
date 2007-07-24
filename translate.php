@@ -28,7 +28,7 @@ define('ALLOW_PROFIL_CHARSET', 1); //allow the admins to overwrite the page enco
 define('TRANSL_ALLOW_FILTER', 1); //allow a search on the english phrases
 
 
-$info_box = '<table border="2">
+$info_box = '<table class=InfoBox>
 <tr><td>
 &nbsp;When translating you should keep in mind the following things:
 <ul>
@@ -58,6 +58,11 @@ $info_box = '<table border="2">
        (e.g. \'12d 8h\').<br>
        The other purpose is to provide a way to manage different wording or abbreviations
        for the same words, e.g. #header for some title in tables.
+  <li> For links homed at DGS, use not &lt;a href=".."&gt;, but the
+       home-tag, e.g. &lt;home users.php&gt;Users&lt;/home&gt;
+       You may use the note-tag &lt;note&gt;(removed from entry)&lt;/note&gt;
+       to add some notes seen only by other translators. Some of them can come
+       from the faq admins.
 </ul>
 </td></tr>
 </table>

@@ -35,7 +35,7 @@ require_once( "include/faq_functions.php" );
    //$faqhide = "AND entry.Hidden='N' AND (entry.Level=1 OR parent.Hidden='N') ";
    $faqhide = " AND entry.Hidden='N' AND parent.Hidden='N'"; //need a viewable root
 
-   echo "<table align=center width=\"87%\" border=0><tr><td>\n";
+   echo "<table class=FAQ><tr><td>\n";
    echo "<h3 class=Header align=left><a name=\"general\">" .
          T_('Frequently Asked Questions') . "</a></h3>\n";
 
@@ -57,13 +57,14 @@ require_once( "include/faq_functions.php" );
 
       if( mysql_num_rows($result) > 0 )
       {
-         echo "<$blk><table width=\"93%\" cellpadding=2 cellspacing=0 border=0><tr><td>\n";
+         echo "</td></tr><tr><td class=FAQread>\n";
 
          echo faq_item_html( 0);
          while( $row = mysql_fetch_assoc( $result ) )
          { //expand answers
-            echo faq_item_html( $row['Level'], T_( $row['Q'] ), T_( $row['A'] ),
-                           $row['Level'] == 1
+            echo faq_item_html( $row['Level']
+                           , T_( $row['Q'] ), T_( $row['A'] )
+                           , $row['Level'] == 1
                               ? 'href="faq.php"'
                               : "name=\"Entry{$row['ID']}\""
                            );
@@ -86,37 +87,21 @@ require_once( "include/faq_functions.php" );
 
       if( mysql_num_rows($result) > 0 )
       {
-         echo "<$blk><table width=\"93%\" border=0><tr><td>\n";
+         echo "</td></tr><tr><td class=FAQindex>\n";
 
-         $first = -1;
+         echo faq_item_html( 0);
+         $tmp = 'href="faq.php?read=t'.URI_AMP.'cat=';
          while( $row = mysql_fetch_assoc( $result ) )
          { //titles only
-            $question = make_html_safe( T_( $row['Q'] ), 'cell');
-            if( empty($question) ) $question = '???';
-
-            if( $row['Level'] == 1 )
-            {
-               if( !$first )
-                  echo "</ul></td></tr></table>\n";
-               if( $first >= 0 )
-                  echo "<p></p>";
-               $first = 1;
-               echo '<b><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['ID']  .
-                  "\">$question</A></b>\n";
-            }
-            else
-            {
-               if( $first )
-                  echo "<table><tr><td><ul>\n";
-               $first = 0;
-               echo '<li><A href="faq.php?read=t'.URI_AMP.'cat=' . $row['Parent'] .
-                  '#Entry' . $row['ID'] . "\">$question</A></li>\n";
-            }
+            echo faq_item_html( $row['Level']
+                           , T_( $row['Q'] ), ''
+                           , $row['Level'] == 1
+                              ? $tmp.$row['ID'].'"'
+                              : $tmp.$row['Parent'].'#Entry'.$row['ID'].'"'
+                           );
          }
-         if( !$first )
-           echo "</ul></td></tr></table>\n";
+         echo faq_item_html(-1);
 
-         echo "</td></tr></table></$blk>\n";
       }
    }
    echo "</td></tr></table>\n";

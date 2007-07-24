@@ -29,10 +29,17 @@ Changelog
 2007-07-24 rodival
 
    * skins/dragon/screen.css, message_functions.php:
-   - messages and folders CSS adjustements
+   - messages and folders CSS adjustments
 
-   * include/faq_functions.php, faq.php, admin_faq.php:
+   * include/faq_functions.php, faq.php:
    - remove translations from the admin_faq preview.
+
+   * include/std_functions.php, include/faq_functions.php,
+     faq.php, admin_faq.php, translate.php,
+     skins/dragon/screen.css:
+   - full (and final?) CSS refund of the FAQ pages
+   - introduced the "note" pseudo-tag which is always removed from display.
+     this allow, for example, the faq admins to send infos to the translators.
 
 2007-07-23 rodival
 
@@ -90,7 +97,7 @@ ALTER TABLE `Messages`
      from countries list
 
    * search_messages.php, docs.php, translate.php:
-   - minor comments adjustements
+   - minor comments adjustments
 
    * include/error_functions.php (echo_error_list),
      clock_tick.php, halfhourly_cron.php, daily_cron.php:
@@ -641,7 +648,7 @@ ALTER TABLE `Players`
 
    * confirm.php, quick_play.php:
    - moved the place where the GameNotes are deleted
-   - few minor debug messages adjustements (quick_play accordingly)
+   - few minor debug messages adjustments (quick_play accordingly)
 
 2007-07-06 rodival
 
@@ -877,7 +884,7 @@ UPDATE `FAQlog` SET `Date` = '0' ;
 
    * statistics.php, graph.php, ratingpng.php, statisticspng.php:
    - added the statratingspng.php file which display stats on ratings.
-     Minor adjustements of other files to handle it.
+     Minor adjustments of other files to handle it.
      Added the function patterncolor() to graph.php.
 
 2007-06-26 rodival

@@ -570,7 +570,6 @@ table.Table tr.Head th span.Header {
  row of the column filters
  may be at the bottom of the table
 */
-
 table.Table tr.Filter {
    background: #dddddd;
    text-align: left;
@@ -587,8 +586,9 @@ table.Table tr.Filter td.ShowFilter {
    font-color: blue;
 }
 
-/* rows of datas */
-
+/*
+ rows of datas
+*/
 table.Table tr.Row3,
 table.Table tr.Row1 {
    background: #ffffff;
@@ -618,7 +618,9 @@ table.Table tr.Row2 td.Warning {
 }
 
 
-/* special cells of various tables */
+/*
+ special cells of various tables
+*/
 
 table.Table td.Mark {
    text-align: center;
@@ -663,8 +665,9 @@ table.Table a.Button {
 }
 
 
-/* cells tools */
-
+/*
+ cells tools
+*/
 table.Table td span.Tool,
 table.Table th span.Tool {
    text-align: left;
@@ -767,8 +770,9 @@ table.Infos .Highlight {
 }
 
 
-/* biographical infos:
-   must left the links in the right column natural
+/*
+ biographical infos:
+ must left the links in the right column natural
 */
 /*
 table#bioInfos a {
@@ -776,7 +780,8 @@ table#bioInfos a {
 }
 */
 
-/* biographical infos modifications:
+/*
+ biographical infos modifications:
 */
 form#bioformForm td {
    vertical-align: top;
@@ -797,6 +802,30 @@ table#biomoveInfos img {
    margin: 4px 4px 0px 4px;
    vertical-align: top;
 }
+
+/*
+ quick info boxes
+*/
+table.InfoBox {
+   border: 2px outset #F7F5E3; /* page background-color */
+   table-layout: auto;
+   border-spacing: 2px;
+   border-collapse: separate; /* collapse separate */
+   margin: 0px auto;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: left;
+}
+
+table.InfoBox td {
+   border: 1px inset #F7F5E3; /* page background-color */
+   margin: 0px;
+   padding: 3px;
+   text-align: left;
+}
+
 
 
 /* ------------------------- */
@@ -1306,6 +1335,70 @@ span.MarkTagTerm {
 /*   padding: 0px 0px 0.5em 0px; */
    vertical-align: top;
    vertical-align: super;
+}
+
+
+/* ------------------------- */
+/* FAQ pages */
+/* ------------------------- */
+
+table.FAQ {
+   color: black;
+   text-align: left;
+   border: 0px solid red;
+   border-collapse: collapse;
+   max-width: none;
+   overflow: visible;
+   width: 88%;
+   margin: 0px 6%;
+   margin: 0px auto;
+   border-spacing: 0px;
+   empty-cells: show;
+   text-indent: 0;
+}
+
+table.FAQ td {
+   border: 0px solid red;
+   padding: 2px 8px 2px 8px;
+   margin: 0px;
+   text-align: left;
+   color: black;
+}
+
+table.FAQ h3.Header {
+/*   margin: 0px; */
+   text-align: left;
+}
+
+table.FAQ div.FAQlevel1 {
+   margin: 0px 0px 0px 24px;
+}
+
+table.FAQ td.FAQindex div.FAQlevel1 hr {
+   visibility: hidden; /* visible hidden collapse(table) */
+}
+
+table.FAQ td.FAQindex ul.FAQlevel2 {
+   border: 0px solid red;
+   margin: 0px 0px 0px 0px;
+/*
+   padding: 0px 8px 0px 8px;
+*/
+}
+
+table.FAQ td.FAQindex ul.FAQlevel2 strong.Question {
+   font-weight: normal;
+}
+
+table.FAQ td.FAQread div.Answer {
+   border: 0px solid red;
+   padding-top: 1em;
+   padding-bottom: 2em;
+/*
+   margin-bottom: 2em;
+   margin: 0px 0px 0px 0px;
+   padding: 0px 8px 0px 8px;
+*/
 }
 
 
