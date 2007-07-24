@@ -1,181 +1,114 @@
 
-.header {
-   text-align: center;
+/* ------------------------- */
+/* global styles */
+/* ------------------------- */
+
+/* ------------------------- */
+/* same initial states for any browsers */
+/* ------------------------- */
+
+* {
+/*
+   margin: 2px;
+   padding: 0px;
+   font-family: Times New Roman, Times, Geneva, serif, Arial, Helvetica, sans-serif, Verdana;
+*/
 }
 
+html {
+   direction: rtl;
+}
 
-table.links {
-   width: 100%; 
-   border-width: 0px;
+img {
+   border: 0px solid black;
+/*
+  No vertical-align here, else Avant browser
+  will badly display the table.goban img:
+  enlarging the text display will increase the
+  height of the table cells too.
+   vertical-align: middle;
+*/
+   margin: 0px;
+}
+
+table { /* skeleton tables */
+   table-layout: auto;
+   border: 0px solid blue;
    border-spacing: 0px;
-   margin: 4px;
-   empty-cells: hide;
-}
-
-table.links td {
-   border-width: 0px;
-   padding: 8px;
+   border-collapse: collapse;
+   margin: 0px;
+/*
+   width: auto;
+*/
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
    text-align: center;
-   font-weight: bold;
+   text-indent: 0;
 }
 
-table.links a {
-   font-weight: bold;
+hr {
+   display: block;
+   width: 100%;
+   margin: 7px 0px;
+   height: 1px;
+   padding: 0px;
+   color: #808080;
+   background: #808080;
+   border: 0px;
 }
 
-
-table.infos {
-   border-width: 2px;
-   border-spacing: 2px;
-   margin: 4px;
-   empty-cells: hide;
-}
-
-table.infos td, table.infos th {
-   border-width: 1px;
-   padding: 3px;
+pre {
+   display: block;
+   width: 100%;
+   border: 0px;
+   margin: 0.5em;
+   padding: 0.5em;
    text-align: left;
 }
 
-table.infos a.hdr {
-   font-weight: bold;
-}
-
-
-table.moves {
-   border-width: 2px;
-   border-spacing: 0px;
-   margin: 4px;
-   empty-cells: hide;
-}
-
-table.moves td, table.moves th {
-   border-width: 1px;
-   padding: 1px;
-   text-align: center;
-}
-
-table.moves td.c {
-   font: bold 85% sans-serif;
-   text-decoration: none;
-}
-
-table.moves a.w {
-   font: bold 85% sans-serif;
-   text-decoration: none;
-}
-
-table.moves a.b {
-   font: bold 85% sans-serif;
-   text-decoration: none;
-}
-
-
-table.captures {
-   border-width: 0px;
-   border-bottom-width:1px;
-   border-bottom-style:solid;
-   margin: 4px;
-}
-
-table.captures th {
-   padding: 4px;
-}
-
-table.captures td.b {
-   vertical-align: top;
-   padding: 4px;
-   white-space: nowrap;
-}
-
-table.captures td.w {
-   vertical-align: top;
-   padding: 4px;
-   white-space: nowrap;
-}
-
-
-table.gamenotes {
-   border-width: 0px;
-   margin: 4px;
-}
-
-table.gamenotes th {
-   padding: 4px;
-}
-
-table.gamenotes td {
-   padding: 0px;
-   margin: 0px;
-}
-
-table.gamenotes td.notes {
-   background: #ddf0dd;
-   padding: 0px;
-   margin: 0px;
-}
-
-
-img.layoutstone {
-   width: 17px;
-   height: 17px;
-}
-
-/* OSOITZ */
-
-#pageHead,
-#pageFoot{
-   width:100%;
-   border:none;
-   }
-
-#pageHead td, #pageFoot td {
-padding:4px;
-}
-
-.serverName a {
-text-align:left;
-font-weight:bold;
-text-decoration:none;
-}
-
-#pageTime {text-align:center; font-size:smaller;}
-#pageTime span {font-size:smaller;}
-
-#loggedAs {font-weight:bold; text-decoration:none;}
-
-#status {
-   font-weight:bold;
-   font-size:bigger;
-   }
-   
-#container {
-   width:100%;
-   border:0;
-   }
-
-/*#container td {padding:5px;}*/
-
-/* COLORS */
-
 /*
-$sgf_color='"#d50047"';
-$bg_color='"#F7F5E3"';  // change in dragon.css too! Remove when css miration finished
+a:link {
+   color: blue;
+}
 
-$menu_bg_color='"#0C41C9"'; // Remove when css migration finished
-$menu_fg_color='"#FFFC70"';
+a:visited {
+   color: navy;
+}
+
+a:hover {
+   color: purple;
+}
+
+a:focus {
+   color: red;
+}
+
+a:active {
+   color: red;
+}
 */
 
 
-body {background: #FFF5E3;}
+/* ------------------------- */
+/* global properties */
+/* ------------------------- */
 
-#pageHead, #pageFoot{background:#0C41C9;}
+a[target] /*, a[target="new"], a[target="_blank"]*/
+{
+   color:olive;
+}
 
-.serverName a, #pageTime, #loggedAs  {color:#FFFC70;}
-
+.TextBrowsers {
+   display: none;
+}
 
 .black {
    color: black;
+}
+
+.white {
+   color: white;
 }
 
 .gray {
@@ -186,65 +119,1362 @@ body {background: #FFF5E3;}
    color: blue;
 }
 
-.header {
+.red {
+   color: red;
+}
+
+.green {
+   color: green;
+}
+
+.bold {
+   font-weight: bold;
+}
+
+.none {
+   text-decoration: none;
+   font-weight: normal;
+}
+
+.center {
+   text-align: center;
+}
+
+.nowrap
+{
+   white-space: nowrap;
+}
+
+.InlineWarning {
+   color: red;
+}
+
+a.rating {
+   color: black;
+}
+
+a.gameblack,
+a.sendblack,
+a.userblack {
+   color: black;
+}
+
+
+h3.Header {
    color: #800000;
+   text-align: center;
 }
 
-table.links a {
+.InlineHeader {
+   color: #800000;
+   font-weight: bold;
+}
+
+.Sysmsg {
+   color: green;
+   font-weight: bold;
+}
+
+img.InTextStone {
+   width: 17px;
+   height: 17px;
+   border: 0px solid black;
+   vertical-align: middle;
+}
+
+img.MinWidth {
+   border: 0px solid black;
+   visibility: hidden;
+}
+
+
+/* ------------------------- */
+/* common page layout */
+/* ------------------------- */
+
+body {
+   background: #F7F5E3;
+   color: black;
+   margin: 0px;
+}
+
+table#pageHead,
+table#pageFoot {
+   table-layout: auto;
+   background: #0C41C9;
+   color: #FFFC70;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   font-weight: bold;
+   text-align: center;
+}
+
+table#pageFoot th,
+table#pageFoot td,
+table#pageHead th,
+table#pageHead td {
+   border: 0px solid red;
+   padding: 4px;
+}
+
+/* alternate server particularity */
+body#dDGS table#pageFoot,
+body#dDGS table#pageHead {
+   background: #C9410C;
+}
+
+table#pageFoot a,
+table#pageHead a {
+   color: #FFFC70;
+   font-weight: bold;
+}
+
+table#pageFoot .ServerHome,
+table#pageHead .ServerHome {
+   text-align: left;
+}
+
+table#pageFoot .LoginBox,
+table#pageHead .LoginBox {
+   text-align: right;
+}
+
+table#pageFoot .PageTime {
+   text-align: center;
+   font-weight: normal;
+   font-size: 90%;
+}
+
+table#pageFoot .PageLapse {
+   font-weight: normal;
+   font-size: 80%;
+}
+
+table.HostedBy {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   vertical-align: top;
+   color: black;
+}
+
+td#hostedBy {
+   border: 0px solid red;
+   padding: 4px;
+   text-align: right;
+   font-size: 90%;
+}
+
+
+table#pageMenu {
+   background: #f7f5ff;
+   color: black;
+   border-color: #0C41C9;
+   border-style: solid;
+   table-layout: auto;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-align: left;
+}
+
+table.MenuHorizontal {
+   border-width: 0px 0px 1px 0px;
+   width: 100%;
+}
+
+table.MenuVertical {
+   border-width: 1px;
+   width: auto;
+/*
+   float: left;
+*/
+}
+
+/* alternate server particularity */
+body#dDGS table#pageMenu {
+   border-color: #C9410C;
+}
+
+table#pageMenu th,
+table#pageMenu td {
+   border: 0px solid red;
+   margin: 0px;
+   white-space: nowrap;
+   padding: 4px 4px;
+}
+
+table.MenuHorizontal th,
+table.MenuHorizontal td {
+   width: 16%; /* for 4 columns */
+   white-space: nowrap;
+   padding: 4px 4px;
+}
+
+table.MenuHorizontal td.Logo1 {
+   width: 21%;
+}
+
+table.MenuHorizontal td.Logo2 {
+   width: 15%;
+   text-align: right;
+}
+
+table.MenuHorizontal dl {
+	padding: 0px;
+	margin:  0.3em 0px 0.3em 0px;
+/*
+	list-style-type:none;
+*/
+}
+table.MenuHorizontal dt {
+	white-space: nowrap;
+	padding: 0.1em 0px;
+	height: 30%;
+/*
+	display: block;
+	line-height: 90%;
+*/
+}
+
+#pageBody {
+}
+table.MenuVertical th,
+table.MenuVertical td {
+   white-space: nowrap;
+   padding: 0px 4px;
+}
+
+table.MenuVertical td.Logo1 {
+   text-align: center;
+}
+
+table.MenuVertical td.Logo2 {
+   display: none;
+   text-align: center;
+}
+
+table.MenuVertical dl {
+   padding: 0px;
+   margin:  0.3em 0px 0.3em 0px;
+/*
+   list-style-type:none;
+*/
+}
+table.MenuVertical dt {
+   white-space: nowrap;
+   padding: 0.1em 0px;
+   height: 30%;
+/*
+   display: block;
+   line-height: 90%;
+*/
+}
+
+
+table#pageMenu a {
+   color: black;
+}
+
+table#pageMenu a.strong {
+   color: black;
+   font-weight: bold;
+   font-size: 110%;
+}
+
+/* links of bottom menu */
+table.Links {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 4px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: center;
+}
+
+table.Links td {
+   color: black;
+   border: 0px solid red;
+   padding: 8px;
+   text-align: center;
+   vertical-align: top;
+   font-weight: bold;
+}
+
+table.Links a {
    color: blue;
+   font-weight: bold;
 }
 
-table.links td {
+
+
+
+/* ------------------------- */
+/* messages and folders features */
+/* ------------------------- */
+
+table.MessageInfos {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px auto;
+   width: auto; /* 100% */
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+}
+
+table.MessageInfos td {
+   color: black;
+   text-align: left;
+   padding: 2px;
+}
+
+table.MessageInfos td.Rubric {
+   color: black;
+   font-weight: bold;
+}
+
+table.MessageBox {
+   border: 2px outset #F7F5E3; /* page background-color */
+   table-layout: auto;
+   border-spacing: 2px;
+   border-collapse: separate; /* collapse separate */
+   margin: 0px auto;
+   width: 30em; /* 475px; */
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: center;
+}
+
+table.MessageBox td {
+   border: 1px inset #F7F5E3; /* page background-color */
+   margin: 0px;
+   padding: 3px;
+   text-align: left;
+}
+
+div.MessageFlow {
+   margin: 0px auto;
+   vertical-align: top;
+   text-align: center;
+}
+
+table.FoldersTabs {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 4px;
+   border-collapse: separate; /* separate collapse */
+   margin: 0px auto 0px 0px;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+}
+
+table.FoldersTabs td {
+   border: 4px solid #F7F5E3; /* page background-color */ /* or 'transparent' ? */
+   padding: 2px 6px;
+   text-align: center;
+}
+
+table.FoldersTabs td.Selected {
+   border: 4px solid #6666ff;
+}
+
+table.FoldersTabs td.Rubric {
+   /* background: none; /* or 'transparent' ? */
+   color: black;
+   font-weight: bold;
+   text-align: right;
+   padding: 2px 6px 2px 2px;
+}
+
+
+/* ------------------------- */
+/* usual list-tables */
+/* ------------------------- */
+
+table.Table {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px auto;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-align: center;
+}
+
+table.Table th,
+table.Table td {
+   border: 0px solid red;
+   margin: 0px;
+   padding: 3px;
+}
+
+table.Table th a,
+table.Table th {
+   color: black;
+   font-weight: bold;
+   text-align: center;
+}
+
+table.Table td a,
+table.Table td {
+   white-space: nowrap;
+   color: black;
+   text-align: left;
+}
+
+/* row of the column headers */
+
+table.Table tr.Head {
+   background: #cccccc;
+}
+
+table.Table tr.Head th {
+   white-space: pre; /* normal, nowrap - pre: allow &#10; */
+   text-align: center;
+   vertical-align: bottom;
+}
+
+table.Table tr.Head th span.Header {
+   color: black;
+   font-weight: bold;
+   text-align: center;
+   margin: 0px 0px 0px 0px; /* */
+   padding: 0px;
+}
+
+/*
+ row of the column filters
+ may be at the bottom of the table
+*/
+table.Table tr.Filter {
+   background: #dddddd;
+   text-align: left;
+   white-space: nowrap;
+}
+
+table.Table tr.Filter td.Error {
+   background: #dd0080;
+   text-decoration: none;
+}
+
+table.Table tr.Filter td.ShowFilter {
+   text-align: center;
+   font-color: blue;
+}
+
+/*
+ rows of datas
+*/
+table.Table tr.Row3,
+table.Table tr.Row1 {
+   background: #ffffff;
+}
+table.Table tr.Row4,
+table.Table tr.Row2 {
+   background: #e0e8ed;
+}
+table.Table tr.Highlight,
+table.Table tr.HiRow3,
+table.Table tr.HiRow1 {
+   background: #ffdfbf; /* #ffd080 #ffdfbf */
+}
+table.Table tr.HiRow4,
+table.Table tr.HiRow2 {
+   background: #e7cdb1; /* #f0c476 #e7cdb1 */
+}
+table.Table tr.Row3 td.Warning,
+table.Table tr.Row1 td.Warning {
+   color: black;
+   background: #ffcccc;
+}
+table.Table tr.Row4 td.Warning,
+table.Table tr.Row2 td.Warning {
+   color: black;
+   background: #e6b9bd;
+}
+
+
+/*
+ special cells of various tables
+*/
+
+table.Table td.Mark {
+   text-align: center;
+}
+
+/* TODO: remove those three: */
+table.Table td.Right {
+   text-align: right;
+}
+
+table.Table td.Center {
+   text-align: center;
+}
+
+table.Table td.PagingRight {
+   text-align: right;
+}
+
+table.Table th.Button {
+   margin: 0px;
+   padding: 3px;
+   text-align: center;
+}
+
+table.Table td.Button {
+   background-repeat: no-repeat;
+   background-position: center;
+   margin: 0px;
+   padding: 3px;
+   text-align: center;
+   white-space: nowrap;
+}
+
+table.Table a.Button {
+   display: block;
+   margin: 0px;
+   padding: 0px;
+   text-decoration: none;
+   font-weight: bold;
+   text-align: center;
+   white-space: nowrap;
+}
+
+
+/*
+ cells tools
+*/
+table.Table td span.Tool,
+table.Table th span.Tool {
+   text-align: left;
+   margin: 0px 0px 0px 0px; /* */
+   padding: 0px 0px 0px 0px;
+}
+
+table.Table th img.Hide {
+   width: 9px;
+   height: 9px;
+   border: 0px solid black;
+   margin: 0px 0px 9px 2px; /* */
+   vertical-align: top;
+}
+
+table.Table th img.Sort {
+   width: 9px;
+   height: 9px;
+   border: 0px solid green;
+   margin: 9px 0px 0px -9px; /* */
+   vertical-align: top;
+}
+
+table.Table td img.Hide {
+   width: 9px;
+   height: 9px;
+   border: 0px solid black;
+   margin: 0px 0px 9px 2px; /* */
+   vertical-align: top;
+}
+
+
+/* ------------------------- */
+/* infos tables */
+/* ------------------------- */
+
+table.Infos {
+   border: 2px outset #F7F5E3; /* page background-color */
+   table-layout: auto;
+   border-spacing: 2px;
+   border-collapse: separate;
+   margin: 0px auto;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: left;
+}
+
+table.Infos th,
+table.Infos td {
+   border: 1px inset #F7F5E3; /* page background-color */
+   margin: 0px;
+   padding: 3px;
+}
+
+table.Infos th {
+   color: #800000;
+   text-align: center;
+   font-weight: bold;
+   font-size: larger;
+}
+
+table.Infos td {
+   color: black;
+   text-align: left;
+}
+
+table.Infos col.ColRubric,
+table.Infos td.Rubric a,
+table.Infos td.Rubric {
+   color: black;
+   font-weight: bold;
+   white-space: nowrap;
+}
+
+table.Infos .Warning {
+   background: #f8c4b8;
+}
+
+table.Infos td.RubricWarning a,
+table.Infos td.RubricWarning {
+   background: #f8c4b8; /* #ffcccc; */
+   color: black;
+   font-weight: bold;
+   white-space: nowrap;
+}
+
+table.Infos .RubricOnVacation a,
+table.Infos .RubricOnVacation,
+table.Infos .OnVacation a,
+table.Infos .OnVacation {
+   color: red;
+   font-weight: bold;
+   white-space: nowrap;
+}
+
+table.Infos .Highlight {
+   background: #ffd070;
+}
+
+
+/*
+ biographical infos:
+ must left the links in the right column natural
+*/
+/*
+table#bioInfos a {
+   color: default;
+}
+*/
+
+/*
+ biographical infos modifications:
+*/
+form#bioformForm td {
+   vertical-align: top;
+}
+
+table#biomoveInfos td {
+   vertical-align: top;
+}
+
+table#biomoveInfos div {
+   margin: 0px;
+}
+
+table#biomoveInfos img {
+   width: 12px;
+   height: 12px;
+   border: 0px solid black;
+   margin: 4px 4px 0px 4px;
+   vertical-align: top;
+}
+
+/*
+ quick info boxes
+*/
+table.InfoBox {
+   border: 2px outset #F7F5E3; /* page background-color */
+   table-layout: auto;
+   border-spacing: 2px;
+   border-collapse: separate; /* collapse separate */
+   margin: 0px auto;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: left;
+}
+
+table.InfoBox td {
+   border: 1px inset #F7F5E3; /* page background-color */
+   margin: 0px;
+   padding: 3px;
+   text-align: left;
+}
+
+
+
+/* ------------------------- */
+/* edit profile page */
+/* ------------------------- */
+
+table.EditProfilButtons {
+   table-layout: fixed;
+   width: 535px; /* 524px auto /* 4*button_width+7*other_cells_width) */
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px 0px;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: center;
+}
+
+table.EditProfilButtons td { /* radio button */
+   color: black;
+   width: 20px;
+   border: 0px solid red;
+   padding: 0px;
+   white-space: nowrap;
+   text-align: center;
+   vertical-align: middle;
+}
+
+table.EditProfilButtons td.button {
+   background-repeat: no-repeat;
+   background-position: center;
+   width: 96px;
+   height: 25px;
+/*
+   font: bold 100% sans-serif;
+*/
+   font-weight: bold;
+   font-size: 100%;
+   text-decoration: none;
+   text-align: center;
+   vertical-align: middle;
+}
+
+
+/* ------------------------- */
+/* board page */
+/* ------------------------- */
+
+table.Goban {
+   background-repeat: repeat;
+   background-position: top left; /*  0% 0% top left */
+   empty-cells: hide;
+   border-collapse: collapse !important;
+   border-spacing: 0px !important;
+}
+
+table.Goban,
+table.Goban img,
+table.Goban tr,
+table.Goban td {
+   margin: 0px !important;
+   padding: 0px !important;
+   line-height: 1px !important;
+   white-space: nowrap !important;
+   border: 0px solid red !important;
+/*
+  No vertical-align: here, else Avant browser
+  will badly display the table.goban img:
+  enlarging the text display will increase the
+  height of the table cells too.
+   vertical-align: top !important;
+*/
+}
+
+table.Goban td {
+   padding: 0px;
+   margin: 0px;
+   text-align: left;
    color: black;
 }
 
-table.infos td, table.infos th {
-   color: black;
+table.Goban img {
+   border: 0px solid black;
+   margin: 0px;
 }
 
-table.infos a {
-   color: black;
+
+
+table.Captures {
+   background: #f7f5ff;
+   border-width: 0px 0px 1px 0px;
+   border-bottom: 1px solid #0c41c9;
+   margin: 4px;
 }
 
-table.infos a.hdr {
-   color: black;
+table.Captures th {
+   background: #0c41c9;
+   color: #fffc70;
+   border: 0px solid gray;
+   padding: 4px;
 }
 
+table.Captures td.B {
+   border: 0px;
+   vertical-align: top;
+   padding: 4px;
+   white-space: nowrap;
+}
+
+table.Captures td.W {
+   border: 0px;
+   vertical-align: top;
+   padding: 4px;
+   white-space: nowrap;
+}
+
+table.Captures dl {
+   padding: 0px;
+   margin: 0px;
+}
+
+table.Captures dt {
+   padding: 0px;
+   margin: 0px;
+}
+
+table.Captures img {
+   vertical-align: middle;
+}
+
+
+td.GameNotesRight {
+   vertical-align: middle;
+   text-align: left;
+}
+
+td.GameNotesBelow {
+   text-align: center;
+}
+
+table.GameNotes {
+   border-width: 0px;
+   margin: 4px;
+}
+
+table.GameNotes th {
+   background: #7aa07a;
+   color: #fffc70;
+   padding: 4px;
+}
+
+table.GameNotes td {
+   padding: 0px;
+   margin: 0px;
+}
+
+table.GameNotes td.Notes {
+   background: #ddf0dd;
+   padding: 0px;
+   margin: 0px;
+}
+
+td.UnderBoard {
+   text-align: center;
+}
+
+table.GameInfos {
+   border: 0px solid #e0e8ed;
+   border-spacing: 0px;
+   margin: 0px;
+   text-align: left;
+   empty-cells: show;
+}
+
+table.GameInfos th,
+table.GameInfos td {
+   border: 0px solid #e0e8ed;
+   margin: 0px;
+   padding: 4px;
+}
+
+table.GameInfos tr {
+   background: #e0e8ed;
+}
+
+table.GameInfos tr#blackInfo,
+table.GameInfos tr#blackTime {
+   background: #dddddd;
+}
+
+table.GameInfos tr#whiteInfo,
+table.GameInfos tr#whiteTime {
+   background: #ffffff;
+}
+
+table.GameInfos td.Color,
+table.GameInfos td.Name {
+   text-align: left;
+}
+
+table.GameInfos td.Prisoners {
+   text-align: right;
+}
+
+table.GameInfos td.Ratings {
+   border: 0px solid red;
+   text-align: center;
+}
+
+table.GameInfos td.Ratings span.StartRating {
+   display: none; /* none block inline */
+/*   visibility: hidden; /* visible hidden collapse(table) */
+}
+
+table.GameInfos td.Ratings span.Separator {
+   display: none; /* none block inline */
+/*   visibility: hidden; /* visible hidden collapse(table) */
+   padding: 0px 4px;
+}
+
+table.GameInfos td.Ratings span.EndRating {
+   display: inline; /* none block inline */
+/*   visibility: visible; /* visible hidden collapse(table) */
+}
+
+
+/* board page - old moves table */
+/*
 table.moves {
    background: #66C17B;
+   border-width: 2px;
+   border-spacing: 0px;
+   margin: 4px;
+   empty-cells: hide;
 }
 
-table.moves td, table.moves th {
+table.moves th,
+table.moves td {
+   border-width: 1px;
+   padding: 1px;
    color: black;
+   text-align: center;
 }
 
 table.moves td.c {
    background: #F7F5E3;
    color: red;
+   font: bold 85% sans-serif;
+   text-decoration: none;
 }
 
 table.moves a.w {
    color: white;
+   font: bold 85% sans-serif;
+   text-decoration: none;
 }
 
 table.moves a.b {
    color: black;
+   font: bold 85% sans-serif;
+   text-decoration: none;
+}
+*/
+
+/* ------------------------- */
+/* forums layout */
+/* ------------------------- */
+
+table.Forum {
+   background: #e0e8ed;
+   color: black;
+   text-align: left;
+   border: 0px solid red;
+   border-collapse: collapse;
+   margin: 0px;
+   border-spacing: 0px;
+   empty-cells: show;
+   width: 99%;
 }
 
-table.captures th {
-   background: #0c41c9;
-   color: #fffc70;
+/* in status page */
+table#forumPending {
+   width: 90%;
 }
 
-table.gamenotes th {
-   background: #7aa07a;
-   color: #fffc70;
+table.Forum table {
+   background: #e0e8ed;
+   color: black;
+   text-align: left;
+   border: 0px solid black;
+   border-collapse: collapse;
+   margin: 0px;
+   border-spacing: 0px;
+   empty-cells: show;
+   width: 100%;
 }
 
-table.captures {
-   background: #f7f5ff;
+table#forumIndex tr {
+   padding: 0px;
+   margin: 0px;
 }
 
-table.captures {
-   border-bottom-color: #0c41c9;
+/* forum lists */
+table.Forum tr.Row3,
+table.Forum tr.Row1 {
+   background: #e0e8ed;
+   color: black;
 }
+table.Forum tr.Row4,
+table.Forum tr.Row2 {
+   background: white;
+   color: black;
+}
+
+table.Forum td {
+   border: 0px solid red;
+   padding: 2px 8px 2px 8px;
+   margin: 0px;
+   text-align: left;
+   color: black;
+}
+
+/*
+table#forumIndex tr.Row2 dd,
+table#forumIndex tr.Row2 dt,
+*/
+table#forumIndex tr.Row2 dl {
+   margin: 0px;
+}
+
+
+table#forumIndex td.Name {
+   width: 60%;
+   padding: 6px 8px;
+}
+table#forumIndex td.Name a {
+   font-weight: bold;
+}
+table#forumIndex td.PostCnt,
+table#forumIndex td.PostDate {
+   white-space: nowrap;
+}
+
+
+table.Forum .Moderated {
+   color: #ff4466;
+}
+
+table.Forum td.Indent {
+   width: 15px;
+   min-width: 15px;
+   padding: 0px;
+   margin: 0px;
+   border: 0px solid blue;
+/*
+   display: none;
+   visible: none;
+   display: none;
+*/
+}
+
+table.Forum td.Indent2 {
+   padding: 0px;
+   margin: 0px;
+   border: 0px solid red;
+}
+
+table.Forum tr.Caption td {
+   background: #000080;
+   color: white;
+   text-align: left;
+   padding: 3px 3px 3px 8px;
+}
+
+table.Forum tr.ForumLinksT td,
+table.Forum tr.ForumLinksB td {
+   background: #d0d0d0;
+   color: black;
+   padding: 3px 8px 3px 8px;
+   text-align: center;
+}
+
+
+table.Forum .LinksL {
+   background: #d0d0d0;
+   color: black;
+   border: 0px solid lime;
+   margin: 0px;
+   text-align: left;
+   float: left;
+   top: 0%;
+}
+
+table.Forum .LinksR {
+   background: #d0d0d0;
+   color: black;
+   border: 0px solid lime;
+   margin: 0px;
+   text-align: right;
+   float: right;
+   top: 0%;
+}
+
+table.Forum .LinksL a {
+   color: black;
+}
+
+table.Forum .LinksR a {
+   color: black;
+}
+
+/*
+  The headers of the posts have the class="PostHeadsubclass"
+   where subclass is one of:
+    Normal, Hidden, Reply, Preview, Edit, SearchResult
+*/
+table.Forum tr.PostHeadNormal {
+   background: #cccccc;
+   color: black;
+}
+table.Forum tr.PostHeadReply {
+   background: #cccccc;
+   color: black;
+}
+table.Forum tr.PostHeadPreview {
+   background: #cceecc;
+   color: black;
+}
+table.Forum tr.PostHeadEdit {
+   background: #eeeecc;
+   color: black;
+}
+table.Forum tr.PostHeadHidden {
+   background: #eecccc;
+   color: black;
+}
+table.Forum tr.PostHeadSearchResult {
+   background: #77bb88;
+   color: black;
+}
+
+table.Forum tr.PostHeadSearchResult .PostSubject,
+table.Forum tr.PostHeadEdit .PostSubject,
+table.Forum tr.PostHeadPreview .PostSubject,
+table.Forum tr.PostHeadReply .PostSubject,
+table.Forum tr.PostHeadHidden .PostSubject,
+table.Forum tr.PostHeadNormal .PostSubject {
+   color: black;
+   font-size: larger;
+   font-weight: bold;
+}
+
+table.Forum tr.PostBody {
+   background: white;
+   color: black;
+}
+
+table.Forum tr.PostButtons {
+   background: white;
+   color: black;
+}
+
+table.Forum tr.PostButtons a.Highlight {
+   color: #ee6666;
+}
+
+table.Forum span.OlderNewFlag,
+table.Forum span.NewFlag {
+   margin: 0px 6px;
+}
+
+table.Forum span.OlderNewFlag a,
+table.Forum span.NewFlag a {
+   font-size: 80%;
+   text-decoration: none;
+}
+
+table.Forum span.NewFlag a {
+   color: #ff0000;
+}
+
+table.Forum span.OlderNewFlag a {
+   color: #ff7777;
+}
+
+
+/* ------------------------- */
+/* Search and filter highlights */
+/* ------------------------- */
+
+span.MarkTerm {
+/*
+   color: darkred;
+   font-weight: bold;
+*/
+   background: #d0fcc0;
+}
+
+a span.MarkTerm {
+   text-decoration: underline;
+}
+
+span.MarkTagTerm {
+   background: #fffca0;
+   font-size: 0.5em;
+   margin: 0px 0px 0.5em 0px;
+/*   padding: 0px 0px 0.5em 0px; */
+   vertical-align: top;
+   vertical-align: super;
+}
+
+
+/* ------------------------- */
+/* FAQ pages */
+/* ------------------------- */
+
+table.FAQ {
+   color: black;
+   text-align: left;
+   border: 0px solid red;
+   border-collapse: collapse;
+   max-width: none;
+   overflow: visible;
+   width: 88%;
+   margin: 0px 6%;
+   margin: 0px auto;
+   border-spacing: 0px;
+   empty-cells: show;
+   text-indent: 0;
+}
+
+table.FAQ td {
+   border: 0px solid red;
+   padding: 2px 8px 2px 8px;
+   margin: 0px;
+   text-align: left;
+   color: black;
+}
+
+table.FAQ h3.Header {
+/*   margin: 0px; */
+   text-align: left;
+}
+
+table.FAQ div.FAQlevel1 {
+   margin: 0px 0px 0px 24px;
+}
+
+table.FAQ td.FAQindex div.FAQlevel1 hr {
+   visibility: hidden; /* visible hidden collapse(table) */
+}
+
+table.FAQ td.FAQindex ul.FAQlevel2 {
+   border: 0px solid red;
+   margin: 0px 0px 0px 0px;
+/*
+   padding: 0px 8px 0px 8px;
+*/
+}
+
+table.FAQ td.FAQindex ul.FAQlevel2 strong.Question {
+   font-weight: normal;
+}
+
+table.FAQ td.FAQread div.Answer {
+   border: 0px solid red;
+   padding-top: 1em;
+   padding-bottom: 2em;
+/*
+   margin-bottom: 2em;
+   margin: 0px 0px 0px 0px;
+   padding: 0px 8px 0px 8px;
+*/
+}
+
+
+/* ------------------------- */
+/* message allowed tags */
+/* ------------------------- */
+
+pre.code {
+   background: #dddddd;
+   margin: 0.3em 2px 0.3em 0.5em;
+   padding: 0.3em 0em 0.3em 0.5em;
+   width: auto;
+/*
+   padding: 8px;
+   margin-right: auto;
+*/
+}
+
+div.quote {
+   border: 1px solid #8cacbb;
+   margin: 0.3em 2px 0.3em 0.5em;
+   padding: 0.3em 0em 0.3em 0.5em;
+   width: auto;
+   font-style: italic;
+/*
+   line-height: 1.5em;
+*/
+}
+
+
+/* ------------------------- */
+.Rdvllime { background: lime !important; }
+#RdvlToolbar {
+   background: white;
+   table-layout: auto;
+   color: black;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-align: center;
+   vertical-align: top;
+}
+#RdvlToolbar form {
+   background: white;
+   display: inline;
+   vertical-align: top;
+}
+body#LdDGS table#pageMenu { /* Rdvl */
+   border-color: olive;
+   border-style: dashed;
+}
+body#LdDGS table#pageFoot,
+body#LdDGS table#pageHead { /* Rdvl */
+   background: olive;
+}
+/* Rdvl
+   font-weight: bold;
+   table-layout: auto; auto fixed
+   line-height: 50%;
+   position: relative; absolute relative
+   clip: rect (0px, 5px, 20px, 0px) ;
+   overflow: visible; hidden visible scroll auto
+   height: 50%;
+   display: none;
+   background: yellow;
+   float: right; left none inherit
+   max-width: none;
+* -moz-fixed => J:\FireFox\res\*.css
+* { font-family: Times New Roman, Times, Geneva, serif, Arial, Helvetica, sans-serif, Verdana;}
+Rdvl */
