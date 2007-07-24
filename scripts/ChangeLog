@@ -41,6 +41,11 @@ Changelog
    - introduced the "note" pseudo-tag which is always removed from display.
      this allow, for example, the faq admins to send infos to the translators.
 
+   * edit_folders.php:
+   - fix a bug disabling the possibility of renaming the STANDARD_FOLDERS
+   - now, one can use mysql slashed chars in the folders' names
+
+
 2007-07-23 rodival
 
    * include/make_game.php,

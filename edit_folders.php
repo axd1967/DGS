@@ -81,17 +81,18 @@ function make_folder_form_row(&$form, $name, $nr,
    if( !$logged_in )
       error("not_logged_in");
 
-   init_standard_folders();
-
    $my_id = $player_row['ID'];
 
+   init_standard_folders();
    $folders = get_folders($my_id);
    $max_folder = array_reduce(array_keys($folders), "max", USER_FOLDERS-1);
+
    $statusfolders = empty($player_row['StatusFolders']) ? array() :
       explode( ',', $player_row['StatusFolders'] );
    $old_statusfolders = $statusfolders;
 
    $sysmsg = '';
+
 
    // Update folders
 
@@ -112,7 +113,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
       $bgcolor = RGBA( $bgred, $bggreen, $bgblue, $bgalpha);
       $fgcolor = RGBA( $fgred, $fggreen, $fgblue);
-      $name = trim(@$_POST["folder$nr"]);
+      $name = trim(get_request_arg("folder$nr"));
 
       $onstatuspage = ( @$_POST["onstatuspage$nr"] == 't' );
 
@@ -123,13 +124,14 @@ function make_folder_form_row(&$form, $name, $nr,
          else
          {
             $i=array_search( $nr, $statusfolders);
-            if($i!==false)
+            if($i !== false)
                unset($statusfolders[$i]);
          }
       }
 
       if( empty($name) && $nr > $max_folder )
          continue;
+
 
       $newfolder = array($name, $bgcolor, $fgcolor);
       if( !isset($folders[$nr]) )
@@ -138,34 +140,33 @@ function make_folder_form_row(&$form, $name, $nr,
          $update = false;
          //else insert $newfolder
       }
-      else
+      else if( $folders[$nr] == $newfolder )
       {
-         if( $folders[$nr] === $newfolder )
-            continue;
-         if( $nr >= USER_FOLDERS )
-         {
-            if( !empty($name) )
-               $delete = false;
-            elseif( folder_is_empty($nr, $my_id) )
-               $delete = true;
-            else
-            {
-               $sysmsg = T_('A folder must be empty to be deleted!');
-               continue;
-            }
-            $update = !$delete;
-         }
+         continue;
+      }
+      else if( $nr >= USER_FOLDERS )
+      {
+         if( !empty($name) )
+            $delete = false;
+         elseif( folder_is_empty($nr, $my_id) )
+            $delete = true;
          else
          {
-            $delete = ( empty($name) or $STANDARD_FOLDERS[$nr] === $newfolder );
-            $update = !$delete;
+            $sysmsg = T_('A folder must be empty to be deleted!');
+            continue;
          }
+         $update = !$delete;
+      }
+      else //STANDARD_FOLDERS
+      {
+         $delete = ( empty($name) or $STANDARD_FOLDERS[$nr] == $newfolder );
+         $update = ( !$delete && $STANDARD_FOLDERS[$nr] != $folders[$nr] );
       }
 
 
       if( $delete )
       {
-         $query = "DELETE FROM Folders WHERE uid='$my_id' AND Folder_nr=$nr LIMIT 1";
+         $query = "DELETE FROM Folders WHERE uid=$my_id AND Folder_nr=$nr LIMIT 1";
       }
       else if( $update )
       {
@@ -173,22 +174,22 @@ function make_folder_form_row(&$form, $name, $nr,
 
          $query = "UPDATE Folders SET ";
          $updates = array();
-         if( $name !== $oldname ) array_push($updates, "Name='$name'");
-         if( $bgcolor !== $oldbgcolor ) array_push($updates, "BGColor='$bgcolor'");
-         if( $fgcolor !== $oldfgcolor ) array_push($updates, "FGColor='$fgcolor'");
+         if( $name != $oldname ) array_push($updates, "Name='".mysql_addslashes($name)."'");
+         if( $bgcolor != $oldbgcolor ) array_push($updates, "BGColor='$bgcolor'");
+         if( $fgcolor != $oldfgcolor ) array_push($updates, "FGColor='$fgcolor'");
 
          if( !(count($updates) > 0) )
             continue;
 
          $query .= implode(",", $updates);
-         $query .= " WHERE uid='$my_id' AND Folder_nr=$nr LIMIT 1";
+         $query .= " WHERE uid=$my_id AND Folder_nr=$nr LIMIT 1";
       }
       else
       {
          $query = "INSERT INTO Folders SET " .
-            "uid='$my_id', " .
+            "uid=$my_id, " .
             "Folder_nr=$nr, " .
-            "Name='$name', " .
+            "Name='".mysql_addslashes($name)."', " .
             "BGColor='$bgcolor', " .
             "FGColor='$fgcolor' ";
       }
@@ -198,7 +199,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
       if( !$sysmsg )
          $sysmsg = T_('Folders adjusted!');
-   }
+   } //foreach folders in $_POST
 
 
    asort($statusfolders);
@@ -213,11 +214,9 @@ function make_folder_form_row(&$form, $name, $nr,
    }
 
 
-
+   //reset folders infos
    $folders = get_folders($my_id);
    $max_folder = array_reduce(array_keys($folders), "max", USER_FOLDERS-1);
-
-
 
 
    start_page(T_("Edit message folders"), true, $logged_in, $player_row );
