@@ -45,7 +45,7 @@ $info_box = '<table class=InfoBox>
        The new or changed text are saved regardless of the preview-checkbox.
   <li> For links homed at DGS, use not &lt;a href=".."&gt;, but the
        home-tag, e.g. &lt;home users.php&gt;Users&lt;/home&gt;
-       You may use the note-tag &lt;note&gt;(removed from entry)&lt;/note&gt;
+  <li> You may use the note-tag &lt;note&gt;(removed from entry)&lt;/note&gt;
        to add some notes seen only by faq admins and translators.
   <li> Setting the move distance (for Q/A-entries) allows to control how
        many lines an entry can be moved up or down. A saved value is
