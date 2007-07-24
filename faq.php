@@ -62,7 +62,7 @@ require_once( "include/faq_functions.php" );
          echo faq_item_html( 0);
          while( $row = mysql_fetch_assoc( $result ) )
          { //expand answers
-            echo faq_item_html( $row['Level'], $row['Q'], $row['A'],
+            echo faq_item_html( $row['Level'], T_( $row['Q'] ), T_( $row['A'] ),
                            $row['Level'] == 1
                               ? 'href="faq.php"'
                               : "name=\"Entry{$row['ID']}\""

@@ -38,9 +38,9 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $args='')
          $first = -1;
       } break;
       case 1: {
-         $tmp = make_html_safe( T_( $Qtext ), 'cell');
-         if( $args )
-            $tmp = "<A $args>$tmp</A>";
+         $tmp = make_html_safe( $Qtext, 'cell');
+         if( $attbs )
+            $tmp = "<A $attbs>$tmp</A>";
          $str = "<strong>$tmp</strong><p></p>\n";
          if( $first >= 0 )
             $str = "<hr><p></p>".$str;
@@ -49,11 +49,12 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $args='')
          $first = 1;
       } break;
       default: {
-         $tmp = make_html_safe( T_( $Qtext ), 'cell');
-         if( $args )
-            $tmp = "<A $args>$tmp</A>";
+         $tmp = make_html_safe( $Qtext, 'cell');
+         if( $attbs )
+            $tmp = "<A $attbs>$tmp</A>";
          $str = "<strong>$tmp</strong><p></p>\n";
-         $tmp = make_html_safe( T_( $Atext ), 'faq');
+
+         $tmp = make_html_safe( $Atext, 'faq');
          $str.= "$tmp<br>&nbsp;<p></p>";
          $str = "<li>$str</li>\n";
          if( $first )

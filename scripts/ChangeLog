@@ -31,6 +31,9 @@ Changelog
    * skins/dragon/screen.css, message_functions.php:
    - messages and folders CSS adjustements
 
+   * include/faq_functions.php, faq.php, admin_faq.php:
+   - remove translations from the admin_faq preview.
+
 2007-07-23 rodival
 
    * include/make_game.php,
