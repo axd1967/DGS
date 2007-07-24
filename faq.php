@@ -29,6 +29,7 @@ require_once( "include/faq_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    start_page(T_("FAQ"), true, $logged_in, $player_row );
+   $menu_array = array();
 
    //$blk='ul';
    $blk='blockquote';
@@ -62,10 +63,12 @@ require_once( "include/faq_functions.php" );
          echo faq_item_html( 0);
          while( $row = mysql_fetch_assoc( $result ) )
          { //expand answers
+            if( $row['Level'] == 1 )
+               echo "<a name=\"Entry{$row['ID']}\"></a>\n";
             echo faq_item_html( $row['Level']
                            , T_( $row['Q'] ), T_( $row['A'] )
                            , $row['Level'] == 1
-                              ? 'href="faq.php"'
+                              ? "href=\"faq.php#Title{$row['ID']}\""
                               : "name=\"Entry{$row['ID']}\""
                            );
          }
@@ -73,6 +76,7 @@ require_once( "include/faq_functions.php" );
 
          echo "</td></tr></table></$blk>\n";
       }
+      $menu_array[T_('Go back to the FAQ index')]= "faq.php";
    }
    else
    { //titles only
@@ -93,10 +97,12 @@ require_once( "include/faq_functions.php" );
          $tmp = 'href="faq.php?read=t'.URI_AMP.'cat=';
          while( $row = mysql_fetch_assoc( $result ) )
          { //titles only
+            if( $row['Level'] == 1 )
+               echo "<a name=\"Title{$row['ID']}\"></a>\n";
             echo faq_item_html( $row['Level']
                            , T_( $row['Q'] ), ''
                            , $row['Level'] == 1
-                              ? $tmp.$row['ID'].'"'
+                              ? $tmp.$row['ID'].'#Entry'.$row['ID'].'"'
                               : $tmp.$row['Parent'].'#Entry'.$row['ID'].'"'
                            );
          }
@@ -107,7 +113,7 @@ require_once( "include/faq_functions.php" );
    echo "</td></tr></table>\n";
 
    if( $cat !== 'all' )
-      $menu_array = array( T_('Show the whole FAQ in one page') => "faq.php?read=t".URI_AMP."cat=all" );
+      $menu_array[T_('Show the whole FAQ in one page')]= "faq.php?read=t".URI_AMP."cat=all";
 
    end_page(@$menu_array);
 }
