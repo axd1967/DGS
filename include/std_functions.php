@@ -614,6 +614,9 @@ function end_html()
    ob_end_flush();
 }
 
+// supported formats in $menu_array:
+//    linktext  => URL
+//    dummytext => Form-object
 function make_menu($menu_array)
 {
    global $base_path, $max_links_in_main_menu;
@@ -640,13 +643,16 @@ function make_menu($menu_array)
       $cumw += $w;
       $width = round($cumw - $cumwidth);
 
-      echo "\n  <td width=\"$width%\">"
-         . anchor( "$base_path$link"
-                 , $text
-                 , ''
-                 , array( 'accesskey' => $i % 10 )
-                 )
-         . '</td>';
+      echo "\n  <td width=\"$width%\">";
+      if ( is_a($link, 'Form') )
+         echo $link->echo_string();
+      else
+         echo anchor( "$base_path$link"
+                    , $text
+                    , ''
+                    , array( 'accesskey' => $i % 10 )
+                    );
+      echo '</td>';
 
       $cumwidth += $width;
    }
