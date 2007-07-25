@@ -26,9 +26,18 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-25 juga
+
+   * game.php:
+   - experimental support for adding time for opponent
+   - added 3 alternative links for add-time for discussion
+
+   * include/std_functions.php (make_menu):
+   - support for allowing Form-object included in bottom-links
+
 2007-07-24 rodival
 
-   * skins/dragon/screen.css, message_functions.php:
+   * skins/dragon/screen.css, include/message_functions.php:
    - messages and folders CSS adjustments
 
    * include/faq_functions.php, faq.php:
