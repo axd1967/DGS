@@ -33,6 +33,7 @@ $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
 require_once( "include/game_functions.php" );
+require_once( "include/form_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( "include/rating.php" );
@@ -297,6 +298,16 @@ function get_alt_arg( $n1, $n2)
       }
       break;
 
+      case 'add_time': //add-time for opponent
+      {
+         // check for validity
+         if ( !allow_add_time_opponent( $game_row, $player_row['ID'] ) )
+            error('invalid_action', "game.add_time");
+
+         $validation_step = true;
+      }
+      break;
+
 
       case 'pass': //for validation
       {
@@ -533,7 +544,11 @@ function get_alt_arg( $n1, $n2)
          draw_notes('Y');
          $show_notes = false;
       }
-      draw_message_box( $message);
+
+      if ( $action == 'add_time' )
+         draw_add_time();
+      else
+         draw_message_box( $message);
    }
    else if( $Moves > 1 )
    {
@@ -599,9 +614,25 @@ function get_alt_arg( $n1, $n2)
       $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."nextskip=t";
    }
 
-   if ( allow_add_time_opponent( $game_row, $player_row['ID'] ) )
-      $menu_array[T_('Add time for opponent')] =
+   if ( $action != 'add_time' and allow_add_time_opponent( $game_row, $player_row['ID'] ) )
+   {
+      //TODO: experimental code
+      $arr_add_days = array();
+      for( $i=1; $i <= MAX_ADD_DAYS; $i++)
+         $arr_add_days[$i] = $i . ' ' . ($i==1 ? T_('day') : T_('days'));
+
+      $form_addtime = new Form( 'link_addtime', 'game.php', FORM_POST );
+      $form_addtime->add_hidden('gid', $gid);
+      $form_addtime->add_row( array(
+            'SELECTBOX', 'add_days', 1, $arr_add_days, 1, false,
+            'SUBMITBUTTONX', 'add_time', T_('Add time'), array('accesskey' => 'x') ));
+
+      $menu_array[T_('Add time for opponent (form)')] = $form_addtime;
+      $menu_array[T_('Add time for opponent (message)')] =
          "message.php?mode=AddTime".URI_AMP."gid=$gid";
+      $menu_array[T_('Add time for opponent (game)')] =
+         "game.php?gid=$gid".URI_AMP."a=add_time";
+   }
 
    if( !$validation_step )
    {
@@ -734,6 +765,42 @@ function draw_message_box(&$message)
     </CENTER>
 ';
 
+}
+
+function draw_add_time()
+{
+   $tabindex=1;
+   echo '
+    <a name="addtime">
+    <center>
+      <TABLE>
+        <TR>
+          <TD>' . T_('Choose how many additional days you wish to give your opponent') . ':</TD>
+        </TR>
+        <TR>
+          <TD align=left>
+           <SELECT name="add_days" size="1"  tabindex="{$tabindex++}">';
+
+   for( $i=1; $i <= MAX_ADD_DAYS; $i++)
+      echo
+         sprintf( "<OPTION value=\"%d\"%s>%s %s</OPTION>\n",
+            $i, ($i==1 ? ' selected' : ''),
+            $i, ($i==1 ? T_('day') : T_('days')) );
+
+   echo '  </SELECT>
+           &nbsp;' . T_('added to maintime of your opponent.') . '
+          </TD>
+        </TR>
+        <TR>
+          <TD align=left>
+<input type=submit name="addtime" tabindex="'.($tabindex++).'" value="' . T_('Add Time') . '">
+<input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' . T_('Cancel') . '">
+          </TD>
+        </TR>
+      </TABLE>
+      <p></p>
+    </CENTER>
+';
 }
 
 function draw_game_info(&$game_row)
