@@ -32,6 +32,22 @@ Changelog
      include/message_functions.php (interpret_time_limit_forms),
      send_message.php, game_functions.php, clock_tick.php:
    - introduced the time_convert_to_hours() function
+   
+   * include/quick_common.php (setTZ)
+     status.php, daily_cron.php, userinfo.php,
+     users.php, change_profile.php:
+   - moved (and fixed) the summertime changes check from daily_cron.php
+     to status.php in a "by user" basis.
+   - now setTZ() return the previous timezone (backup purpose)
+   - added a way to check the clock of a user in userinfo.php
+   - comments adjusted for the other files
+   
+   * scripts/message_consistency.php,
+     include/message_functions.php,
+     status.php, add_to_waitingroom.php, join_waitingroom_game.php,
+     list_messages.php, search_messages.php:
+   - checked and removed the useless init_standard_folders(). This function
+     could be merged into get_folders() as they are always used together.
 
 2007-07-25 juga
 
