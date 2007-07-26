@@ -33,7 +33,6 @@ require_once( "include/rating.php" );
 
    if( !$logged_in )
       error("not_logged_in");
-   //not used: init_standard_folders();
 
    if( $player_row["Handle"] == 'guest' )
       error('not_allowed_for_guest');

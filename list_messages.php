@@ -34,12 +34,12 @@ require_once( "include/filter.php" );
 
    if( !$logged_in )
       error("not_logged_in");
-   init_standard_folders();
 
    $my_id = $player_row["ID"];
 
    $find_answers = @$_GET['find_answers'] ;
 
+   init_standard_folders();
    $my_folders = get_folders($my_id);
 
 /*

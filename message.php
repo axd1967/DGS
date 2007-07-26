@@ -84,10 +84,11 @@ require_once( "include/game_functions.php" );
       unset($uid); unset($uhandle); //no more used
    }
 
-   init_standard_folders();
    $my_id = $player_row["ID"];
    $my_rating = $player_row["Rating2"];
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+
+   init_standard_folders();
    $folders = get_folders($my_id);
 
 

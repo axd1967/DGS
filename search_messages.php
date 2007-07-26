@@ -35,10 +35,11 @@ require_once( "include/filter.php" );
 
    if( !$logged_in )
       error("not_logged_in");
-   init_standard_folders();
 
    $page = 'search_messages.php?';
    $my_id = $player_row["ID"];
+
+   init_standard_folders();
    $my_folders = get_folders($my_id);
 
    $qsql = new QuerySQL(); // add extra-parts to SQL-statement

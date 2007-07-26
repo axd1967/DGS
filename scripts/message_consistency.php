@@ -26,9 +26,6 @@ require_once( "include/std_functions.php" );
 
    connect2mysql();
 
-   //init_standard_folders();
-
-
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
