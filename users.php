@@ -38,7 +38,7 @@ require_once( "include/filter.php" );
       error("not_logged_in");
 
    $uid = $player_row["ID"];
-   $user = $player_row["Handle"];
+   //$user = $player_row["Handle"];
    $page = "users.php?";
 
    // observers of game

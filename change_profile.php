@@ -165,11 +165,13 @@ require_once( "include/countries.php" );
 
    $ratingtype = get_request_arg('ratingtype') ;
    $newrating = convert_to_rating(get_request_arg('rating'), $ratingtype);
+   $oldrating = $player_row["Rating2"];
 
-   if( $player_row["RatingStatus"] != 'RATED' and
-       is_numeric($newrating) && $newrating >= MIN_RATING and
-       ( $ratingtype != 'dragonrating' or !is_numeric($player_row["Rating2"])
-         or abs($newrating - $player_row["Rating2"]) > 0.005 ) )
+   if( $player_row["RatingStatus"] != 'RATED'
+      && (is_numeric($newrating) && $newrating >= MIN_RATING)
+      && ( $ratingtype != 'dragonrating'
+         or !(is_numeric($oldrating) && $oldrating >= MIN_RATING)
+         or abs($newrating - $oldrating) > 0.005 ) )
    {
       $query .= "Rating=$newrating, " .
          "InitialRating=$newrating, " .
@@ -185,8 +187,8 @@ require_once( "include/countries.php" );
        $timezone != $player_row["Timezone"] )
    {
       $query .= "ClockChanged='Y', ";
-      // ClockUsed is uppdated only once a day to prevent eternal night...
-      // setTZ( $timezone);
+      // ClockUsed is updated only once a day to prevent eternal night...
+      // setTZ( $timezone); //for get_clock_used()
       // $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
    }
 

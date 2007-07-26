@@ -195,13 +195,32 @@ if( !$is_down )
 
 // Delete old forumreads
 
-
    mysql_query("DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time) + $new_end < $NOW")
       or error('mysql_query_failed','daily_cron.forumreads');
 
 
 // Apply recently changed night hours
 
+if(1){//new
+   $result = mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone " .
+                        "FROM Players WHERE ClockChanged='Y' ORDER BY ID")
+               or error('mysql_query_failed','daily_cron.night_hours');
+   //adjustments from/to summertime are checked in status.php
+
+   if( @mysql_num_rows( $result) > 0 )
+   {
+      while( $row = mysql_fetch_assoc($result) )
+      {
+         setTZ( $row['Timezone']); //for get_clock_used()
+         mysql_query("UPDATE Players " .
+                     "SET ClockChanged='N', " .
+                     "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
+                     "WHERE ID='" . $row['ID'] . "' LIMIT 1")
+            or error('mysql_query_failed','daily_cron.night_hours_update');
+      }
+   }
+   mysql_free_result($result);
+}else{//old
    $result = mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone " .
                          "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID")
                or error('mysql_query_failed','daily_cron.night_hours');
@@ -213,6 +232,7 @@ if( !$is_down )
 
       // Changed to/from summertime?
       if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )
+         //adjust the whole community
          $result =  mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone FROM Players")
                   or error('mysql_query_failed','daily_cron.summertime_check');
 
@@ -227,6 +247,7 @@ if( !$is_down )
       }
    }
    mysql_free_result($result);
+}//new/old
 
    mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=203")
                or error('mysql_query_failed','daily_cron.reset_tick');

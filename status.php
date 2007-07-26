@@ -33,9 +33,17 @@ require_once( "include/message_functions.php" );
 
    if( !$logged_in )
       error("not_logged_in");
-   init_standard_folders();
 
    $my_id = $player_row["ID"];
+
+   //check if the player's clock need an adjustment from/to summertime
+   if( $player_row['ClockChanged'] != 'Y' &&
+      $player_row['ClockUsed'] !== get_clock_used($player_row['Nightstart']) )
+   {
+      // ClockUsed is updated once a day...
+      mysql_query("UPDATE Players SET ClockChanged='Y' WHERE ID=$my_id LIMIT 1");
+         //or error('mysql_query_failed','status.summertime');
+   }
 
 
    $gtable = new Table( 'game', "status.php", "GamesColumns" );
@@ -107,6 +115,7 @@ require_once( "include/message_functions.php" );
    list( $result ) = message_list_query($my_id, $folderstring, $order, 'LIMIT 20');
    if( @mysql_num_rows($result) > 0 )
    {
+      init_standard_folders();
       $my_folders = get_folders($my_id);
 
       echo "<br><hr id=secMessage><h3 class=Header>" . T_('New messages') . ":</h3>\n";

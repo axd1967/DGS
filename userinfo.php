@@ -178,7 +178,25 @@ require_once( "include/countries.php" );
                'sname' => T_('Percent'),
                'sinfo' => $percent,
                ) );
-
+      if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
+      {//show player clock
+         $tmp= setTZ($row['Timezone']); //for get_clock_used() and local time
+         $itable->add_row( array(
+                  'rattb' => 'bgcolor="lime"',
+                  'sname' => 'time zone / local time ',
+                  'sinfo' => $row['Timezone']
+                        .' / '.date($date_fmt, time() + (int)$timeadjust) //see $NOW
+                  ) );
+         $itable->add_row( array(
+                  'rattb' => 'bgcolor="lime"',
+                  'sname' => 'night / used==used(night) ',
+                  'sinfo' => $row['Nightstart']
+                        .' / '.$row['ClockUsed']
+                        .'=='.get_clock_used($row['Nightstart'])
+                        .' ('.$row['ClockChanged'].')'
+                  ) );
+         setTZ($tmp);
+      }
       $itable->echo_table();
       unset($itable);
    } //User infos

@@ -29,15 +29,20 @@ $is_down_message = "Sorry, dragon is down for maintenance at the moment,"
 
 function setTZ( $tz='GMT')
 {
+   static $curtz;
+   if( !@$curtz ) $curtz='GMT'; //default
+   $res= $curtz;
    if( is_string( $tz) && !empty( $tz) )
    {
       if( !function_exists('date_default_timezone_set')
             or !date_default_timezone_set( $tz) )
       {
          putenv( 'TZ='.$tz);
-         //putenv('PHP_TZ='.$tz); //Does not seems to realize something
+         //putenv('PHP_TZ='.$tz); //Does not seem to realize something
       }
+      $curtz= $tz;
    }
+   return $res;
 }
 
 setTZ('GMT'); //default
