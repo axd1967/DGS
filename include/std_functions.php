@@ -1639,23 +1639,24 @@ function make_html_safe( $msg, $some_html=false, $mark_terms=false)
       // formats legal html code
       if( $some_html == 'game' )
       {
+         $tmp = "<\\1>"; // "<\\1>"=show tag, ""=hide tag, "\\0"=html error
          if( $gameh ) // show hidden sgf comments
          {
-            $msg = eregi_replace(ALLOWED_LT."h(idden)? *".ALLOWED_GT,
-                                 ALLOWED_LT."font color=red".ALLOWED_GT."\\0", $msg);
-            $msg = eregi_replace(ALLOWED_LT."/h(idden)? *".ALLOWED_GT,
-                                 "\\0".ALLOWED_LT."/font".ALLOWED_GT, $msg);
+            $msg = eregi_replace(ALLOWED_LT."(h(idden)?) *".ALLOWED_GT,
+                     ALLOWED_LT."span class=GameTagH".ALLOWED_GT.$tmp, $msg);
+            $msg = eregi_replace(ALLOWED_LT."(/h(idden)?) *".ALLOWED_GT,
+                                 $tmp.ALLOWED_LT."/span".ALLOWED_GT, $msg);
          }
          else // hide hidden sgf comments
             $msg = trim(preg_replace("%".ALLOWED_LT."h(idden)? *".ALLOWED_GT
-                                          ."(.*?)".ALLOWED_LT."/h(idden)? *"
-                                          .ALLOWED_GT."%is", "", $msg));
+                           ."(.*?)".ALLOWED_LT."/h(idden)? *".ALLOWED_GT."%is",
+                                 '', $msg));
 
 
-         $msg = eregi_replace(ALLOWED_LT."c(omment)? *".ALLOWED_GT,
-                              ALLOWED_LT."font color=blue".ALLOWED_GT."\\0", $msg);
-         $msg = eregi_replace(ALLOWED_LT."/c(omment)? *".ALLOWED_GT,
-                              "\\0".ALLOWED_LT."/font".ALLOWED_GT, $msg);
+         $msg = eregi_replace(ALLOWED_LT."(c(omment)?) *".ALLOWED_GT,
+                  ALLOWED_LT."span class=GameTagC".ALLOWED_GT.$tmp, $msg);
+         $msg = eregi_replace(ALLOWED_LT."(/c(omment)?) *".ALLOWED_GT,
+                              $tmp.ALLOWED_LT."/span".ALLOWED_GT, $msg);
 
          $some_html = 'msg';
       }

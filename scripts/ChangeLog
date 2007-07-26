@@ -26,6 +26,13 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-27 rodival
+
+   * skins/dragon/screen.css, include/std_functions.php,
+     game_comments.php:
+   - CSSed the game_comment page.
+   - fixed a bug leaving the <c> and <h> tags unchanged in the HTML.
+
 2007-07-26 rodival
 
    * include/time_functions.php (time_convert_to_hours),

@@ -69,23 +69,23 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
      $html_mode= 'game';
 
 
-   $result = mysql_query( "SELECT DISTINCT Moves.MoveNr,Moves.Stone,MoveMessages.Text " .
-                          "FROM Moves, MoveMessages " .
-                          "WHERE Moves.gid=$gid " .
-                           "AND MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
-                           "AND (Moves.Stone=".WHITE." OR Moves.Stone=".BLACK.") " .
-                          "ORDER BY Moves.MoveNr" )
+   $query= "SELECT DISTINCT Moves.MoveNr,Moves.Stone,MoveMessages.Text " .
+           "FROM Moves, MoveMessages " .
+           "WHERE Moves.gid=$gid " .
+            "AND MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
+            "AND (Moves.Stone=".WHITE." OR Moves.Stone=".BLACK.") " .
+           "ORDER BY Moves.MoveNr";
+   $result = mysql_query($query)
       or error('mysql_query_failed', 'game_comments.messages');
 
 
 
    start_html(T_('Comments'), true, @$player_row['SkinName']);
-   echo "<center>";
 
    $str = game_reference( 0, 1, '', 0, 0, $Whitename, $Blackname);
    $str.= " - #$gid";
    $str.= ' - '.( $Status == 'FINISHED' ? T_('Finished') : T_('Running'));
-   echo "<h3><font color=$h3_color>$str</font></h3>";
+   echo "<h3 class=Header>$str</h3>";
 
 
    $ctable = new Table( 'comment', '');
@@ -103,7 +103,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $Text = trim(make_html_safe( $Text, $row['Stone']==$my_color ? 'gameh' : $html_mode));
       if( empty($Text) ) continue;
 
-      $colortxt = " align='top'";
+      $colortxt = " class=InTextStone";
       if( $row['Stone'] == BLACK )
         $colortxt = "<img src='17/b.gif' alt=\"" . T_('Black') . "\"$colortxt>" ;
       else
@@ -111,15 +111,14 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
       $movetxt = (int)$row['MoveNr'];
 
-      $crow_strings[1] = "<TD align='right' valign='top'>$movetxt&nbsp;&nbsp;$colortxt</TD>";
-      $crow_strings[2] = "<TD>$Text</TD>";
+      $crow_strings[1] = "<TD class=Move>$movetxt&nbsp;$colortxt</TD>";
+      $crow_strings[2] = "<TD class=Comment>$Text</TD>";
 
       $ctable->add_row( $crow_strings );
    }
 
    $ctable->echo_table();
 
-   echo "</center>";
    end_html();
 }
 
