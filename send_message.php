@@ -36,8 +36,6 @@ disable_cache();
 
    if( !$logged_in )
       error("not_logged_in");
-   init_standard_folders();
-
 
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
@@ -58,6 +56,7 @@ disable_cache();
    $accepttype = isset($_REQUEST['send_accept']);
    $declinetype = isset($_REQUEST['send_decline']);
 
+   init_standard_folders();
    $folders = get_folders($my_id);
    $new_folder = @$_REQUEST['folder'];
 
@@ -192,7 +191,9 @@ disable_cache();
          break;
       }
 
-      //TODO: HOT_SECTION ???
+      //HOT_SECTION:
+      // create_game() must check the Status='INVITED' state of the game to avoid
+      // that multiple clicks lead to a bad Running count increase below.
       $gids = array();
       if( $i_am_black or $double )
          $gids[] = create_game($player_row, $opponent_row, $game_row, $gid);
@@ -236,7 +237,7 @@ disable_cache();
       $gid = (int)@$_REQUEST['gid'];
       $add_days = (int)@$_REQUEST['add_days'];
 
-      $error = add_time_opponent( $gid, $my_id, 15 * $add_days );
+      $error = add_time_opponent( $gid, $my_id, time_convert_to_hours( $add_days, 'days') );
       if ( $error )
          error('mysql_game_add_time',
             "send_message.addtime(game=$gid,uid=$my_id,$add_days days,opp=$opponent_ID): $error");

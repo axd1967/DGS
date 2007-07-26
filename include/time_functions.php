@@ -47,6 +47,7 @@ function unix_timestamp($date)
 }
 
 
+// >>> Caution: the result depends of the current timezone (see setTZ())
 function get_clock_used($nightstart)
 {
 /***
@@ -116,6 +117,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
      
       case("JAP"):
       {
+         //$main > 0 useless, may be removed if add_time need it
          if( $main > 0 or $byoper < 0 ) // entering byoyomi
          {
             $main = 0;
@@ -181,6 +183,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
 
       case("CAN"):
       {
+         //$main > 0 useless, may be removed if add_time need it
          if( $main > 0 or $byoper < 0 ) // entering byoyomi
          {
             $main = 0;
@@ -214,7 +217,7 @@ function echo_day( $days, $keep_english=false, $short=false)
    if( $short )
       return $days . ( abs($days) <= 1 ? $T_('day#short') : $T_('days#short') );
    return $days .'&nbsp;' . ( abs($days) <= 1 ? $T_('day') : $T_('days') );
-}
+} //echo_day
 
 function echo_hour( $hours, $keep_english=false, $short=false)
 {
@@ -224,7 +227,7 @@ function echo_hour( $hours, $keep_english=false, $short=false)
    if( $short )
       return $hours . ( abs($hours) <= 1 ? $T_('hour#short') : $T_('hours#short') );
    return $hours .'&nbsp;' . ( abs($hours) <= 1 ? $T_('hour') : $T_('hours') );
-}
+} //echo_hour
 
 function echo_time( $hours, $keep_english=false, $short=false)
 {
@@ -249,7 +252,7 @@ function echo_time( $hours, $keep_english=false, $short=false)
    }
 
    return $str;
-}
+} //echo_time
 
 function echo_byotype( $byotype, $keep_english=false, $short=false)
 {
@@ -269,7 +272,7 @@ function echo_byotype( $byotype, $keep_english=false, $short=false)
    }
 
    return '';
-}
+} //echo_byotype
 
 function echo_time_limit( $maintime, $byotype, $byotime, $byoper
                   , $keep_english=false, $short=false, $btype=true)
@@ -333,7 +336,7 @@ function echo_time_limit( $maintime, $byotype, $byotime, $byoper
    }
 
    return $str;
-}
+} //echo_time_limit
 
 
 function echo_time_remaining( $maintime, $byotype, $byotime, $byoper
@@ -371,8 +374,17 @@ function echo_time_remaining( $maintime, $byotype, $byotime, $byoper
    }
 
    return $str;
-}
+} //echo_time_remaining
 
+function time_convert_to_hours($time, $unit)
+{
+   $time = (int)$time;
+   if( $unit != 'hours' )
+      $time *= 15;
+   if( $unit == 'months' )
+      $time *= 30;
+   return $time;
+} //time_convert_to_hours
 
 function time_convert_to_longer_unit(&$time, &$unit)
 {

@@ -793,55 +793,42 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
                                     $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                     $byotimevalue_fis, $timeunit_fis)
 {
+   $max = time_convert_to_hours( 365, 'days');
 
-      $hours = (int)$timevalue;
-      if( $timeunit != 'hours' )
-         $hours *= 15;
-      if( $timeunit == 'months' )
-         $hours *= 30;
+   $mainhours = time_convert_to_hours($timevalue, $timeunit);
+   if( $mainhours > $max ) $mainhours = $max;
+   else if( $mainhours < 0 ) $mainhours = 0;
 
-      if( $hours > 5475 ) $hours = 5475; //365*15
-      else if( $hours < 0 ) $hours = 0;
+   if( $byoyomitype == 'JAP' )
+   {
+      $byohours = time_convert_to_hours($byotimevalue_jap, $timeunit_jap);
+      if( $byohours > $max ) $byohours = $max;
+      else if( $byohours < 0 ) $byohours = 0;
 
-      if( $byoyomitype == 'JAP' )
-      {
-         $byohours = (int)$byotimevalue_jap;
-         if( $timeunit_jap != 'hours' ) $byohours *= 15;
-         if( $timeunit_jap == 'months' ) $byohours *= 30;
+      $byoperiods = (int)$byoperiods_jap;
+      if( $byohours * $byoperiods > $max )
+         $byoperiods = floor($max/$byohours);
+   }
+   else if( $byoyomitype == 'CAN' )
+   {
+      $byohours = time_convert_to_hours($byotimevalue_can, $timeunit_can);
+      if( $byohours > $max ) $byohours = $max;
+      else if( $byohours < 0 ) $byohours = 0;
 
-         if( $byohours > 5475 ) $byohours = 5475;
-         else if( $byohours < 0 ) $byohours = 0;
+      $byoperiods = (int)$byoperiods_can;
+      if( $byoperiods < 1 ) $byoperiods = 1;
+   }
+   else // if( $byoyomitype == 'FIS' )
+   {
+      $byoyomitype = 'FIS';
+      $byohours = time_convert_to_hours($byotimevalue_fis, $timeunit_fis);
+      if( $byohours > $mainhours ) $byohours = $mainhours;
+      else if( $byohours < 0 ) $byohours = 0;
 
-         $byoperiods = (int)$byoperiods_jap;
-         if( $byohours * ($byoperiods+1) > 5475 )
-            $byoperiods = floor(5475/$byohours) - 1;
-      }
-      else if( $byoyomitype == 'CAN' )
-      {
-         $byohours = (int)$byotimevalue_can;
-         if( $timeunit_can != 'hours' ) $byohours *= 15;
-         if( $timeunit_can == 'months' ) $byohours *= 30;
+      $byoperiods = 0;
+   }
 
-         if( $byohours > 5475 ) $byohours = 5475;
-         else if( $byohours < 0 ) $byohours = 0;
-
-         $byoperiods = (int)$byoperiods_can;
-         if( $byoperiods < 1 ) $byoperiods = 1;
-      }
-      else // if( $byoyomitype == 'FIS' )
-      {
-         $byoyomitype = 'FIS';
-         $byohours = (int)$byotimevalue_fis;
-         if( $timeunit_fis != 'hours' ) $byohours *= 15;
-         if( $timeunit_fis == 'months' ) $byohours *= 30;
-
-         if( $byohours > $hours ) $byohours = $hours;
-         else if( $byohours < 0 ) $byohours = 0;
-
-         $byoperiods = 0;
-      }
-
-      return array($hours, $byohours, $byoperiods);
+   return array($mainhours, $byohours, $byoperiods);
 }
 
 function get_folders($uid, $remove_all_received=true)
@@ -853,7 +840,7 @@ function get_folders($uid, $remove_all_received=true)
 
    $fldrs = $STANDARD_FOLDERS;
 
-   while( $row = mysql_fetch_array($result) )
+   while( $row = mysql_fetch_assoc($result) )
    {
       if( empty($row['Name']))
          $row['Name'] = ( $row['Folder_nr'] < USER_FOLDERS ?

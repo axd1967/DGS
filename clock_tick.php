@@ -63,6 +63,7 @@ if( !$is_down )
 
    // Now increase clocks that are not sleeping
 
+   //15 hours day, 9 hours night
    $mid = 0;
    $query = "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) " .
              "WHERE (ID>=$mid AND (ID>$hour OR ID<". ($hour-8) . ') AND ID<'. ($hour+16) . ')';

@@ -67,7 +67,8 @@ function allow_add_time_opponent( $game_row, $uid )
  */
 function add_time_opponent( $gid, $uid, $add_hours )
 {
-   if ( !is_numeric($add_hours) or $add_hours <= 0 or $add_hours > 15*MAX_ADD_DAYS )
+   if ( !is_numeric($add_hours) or $add_hours <= 0
+         or $add_hours > time_convert_to_hours( MAX_ADD_DAYS, 'days'))
       return sprintf( 'Invalid value for add_hours [%s]', $add_hours);
 
    $query = "SELECT Games.* from Games WHERE ID=$gid";

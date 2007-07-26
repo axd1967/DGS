@@ -26,6 +26,13 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-26 rodival
+
+   * include/time_functions.php (time_convert_to_hours),
+     include/message_functions.php (interpret_time_limit_forms),
+     send_message.php, game_functions.php, clock_tick.php:
+   - introduced the time_convert_to_hours() function
+
 2007-07-25 juga
 
    * game.php:
