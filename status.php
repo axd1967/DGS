@@ -38,7 +38,7 @@ require_once( "include/message_functions.php" );
 
    //check if the player's clock need an adjustment from/to summertime
    if( $player_row['ClockChanged'] != 'Y' &&
-      $player_row['ClockUsed'] !== get_clock_used($player_row['Nightstart']) )
+      $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
    {
       // ClockUsed is updated once a day...
       mysql_query("UPDATE Players SET ClockChanged='Y' WHERE ID=$my_id LIMIT 1");
