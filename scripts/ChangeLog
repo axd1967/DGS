@@ -26,6 +26,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-27 juga
+
+   * game.php:
+   - add-time: reduced to one bottom-link to game-page for validation
+   - also show add-time for my games where it's the opponents to move next
+
+   * include/game_functions.php:
+   - removed some comments, added TODO for no-add-time option
+
 2007-07-27 rodival
 
    * skins/dragon/screen.css, include/std_functions.php,
@@ -39,7 +48,7 @@ Changelog
      include/message_functions.php (interpret_time_limit_forms),
      send_message.php, game_functions.php, clock_tick.php:
    - introduced the time_convert_to_hours() function
-   
+
    * include/quick_common.php (setTZ)
      status.php, daily_cron.php, userinfo.php,
      users.php, change_profile.php:
@@ -48,7 +57,7 @@ Changelog
    - now setTZ() return the previous timezone (backup purpose)
    - added a way to check the clock of a user in userinfo.php
    - comments adjusted for the other files
-   
+
    * scripts/message_consistency.php,
      include/message_functions.php,
      status.php, add_to_waitingroom.php, join_waitingroom_game.php,
