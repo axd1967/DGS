@@ -219,12 +219,6 @@ table#pageHead td {
    padding: 4px;
 }
 
-/* alternate server particularity */
-body#dDGS table#pageFoot,
-body#dDGS table#pageHead {
-   background: #C9410C;
-}
-
 table#pageFoot a,
 table#pageHead a {
    color: #FFFC70;
@@ -300,11 +294,6 @@ table.MenuVertical {
 /*
    float: left;
 */
-}
-
-/* alternate server particularity */
-body#dDGS table#pageMenu {
-   border-color: #C9410C;
 }
 
 table#pageMenu th,
@@ -583,7 +572,7 @@ table.Table tr.Filter td.Error {
 
 table.Table tr.Filter td.ShowFilter {
    text-align: center;
-   font-color: blue;
+   color: blue;
 }
 
 /*
@@ -1052,6 +1041,59 @@ table.GameInfos td.Ratings span.EndRating {
 }
 
 
+/* ------------------------- */
+/* game comments table (class=Table) */
+/* ------------------------- */
+
+/*
+table#commentTable {
+   border: 0px solid #e0e8ed;
+   border-spacing: 0px;
+   margin: 0px;
+   text-align: left;
+   empty-cells: show;
+}
+
+table.Comments th,
+table.Comments td {
+   border: 0px solid #e0e8ed;
+   margin: 0px;
+   padding: 4px;
+   vertical-align: top;
+}
+
+table.Comments tr {
+   background: #e0e8ed;
+}
+*/
+
+table#commentTable td.Comment {
+   white-space: normal; /* normal, nowrap - pre: allow &#10; */
+   vertical-align: top;
+   text-align: left;
+   color: black;
+}
+
+table#commentTable td.Move {
+   white-space: nowrap;
+   vertical-align: top;
+   text-align: right;
+   color: black;
+}
+
+table#commentTable img.InTextStone {
+   vertical-align: middle;
+}
+
+span.GameTagC {
+   color: blue;
+}
+
+span.GameTagH {
+   color: red;
+}
+
+
 /* board page - old moves table */
 /*
 table.moves {
@@ -1426,6 +1468,32 @@ div.quote {
 /*
    line-height: 1.5em;
 */
+}
+
+
+/* ------------------------- */
+/* alternate server particularity */
+/* ------------------------- */
+
+/* devel server */
+body#dDGS table#pageFoot,
+body#dDGS table#pageHead {
+   background: #C9410C;
+}
+
+body#dDGS table#pageMenu {
+   border-color: #C9410C;
+}
+
+
+/* JUG server */
+body#DGS_dev table#pageFoot,
+body#DGS_dev table#pageHead {
+   background: lime;
+}
+
+body#DGS_dev table#pageMenu {
+   border-color: lime;
 }
 
 
