@@ -29,8 +29,6 @@ define('MAX_ADD_DAYS', 7); // max. amount of days that can be added to game by u
  */
 function allow_add_time_opponent( $game_row, $uid )
 {
-   //TODO on what conditions is this allowed ?
-
    // must be a running-game
    if ( $game_row['Status'] == 'FINISHED' or $game_row['Status'] == 'INVITED' )
       return false;
@@ -43,16 +41,7 @@ function allow_add_time_opponent( $game_row, $uid )
    if ( $game_row['Tournament_ID'] != 0 )
       return false;
 
-   // more potential conditions: TODO
-   // - maintime of opponent <= 3 days and no byo-yomi
-   // - maintime of opponent == 0 days and in byo-yomi
-   /* TODO
-   if ( $game_row['Black_ID'] == $uid )
-      $opp_maintime = $game_row['White_Maintime'];
-   else
-      $opp_maintime = $game_row['Black_Maintime'];
-   */
-
+   // TODO: might be denied, if declared as forbidden in waiting-room (by option)
    return true;
 }
 
