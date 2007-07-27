@@ -151,6 +151,9 @@ function get_alt_arg( $n1, $n2)
    if( !$just_looking && $logged_in && $player_row["ID"] != $ToMove_ID )
       error('not_your_turn');
 
+   // allow validation
+   if ( $just_looking && $action == 'add_time' )
+      $just_looking = false;
 
    $my_game = ( $logged_in && ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID ) ) ;
 
@@ -615,24 +618,7 @@ function get_alt_arg( $n1, $n2)
    }
 
    if ( $action != 'add_time' and allow_add_time_opponent( $game_row, $player_row['ID'] ) )
-   {
-      //TODO: experimental code
-      $arr_add_days = array();
-      for( $i=1; $i <= MAX_ADD_DAYS; $i++)
-         $arr_add_days[$i] = $i . ' ' . ($i==1 ? T_('day') : T_('days'));
-
-      $form_addtime = new Form( 'link_addtime', 'game.php', FORM_POST );
-      $form_addtime->add_hidden('gid', $gid);
-      $form_addtime->add_row( array(
-            'SELECTBOX', 'add_days', 1, $arr_add_days, 1, false,
-            'SUBMITBUTTONX', 'add_time', T_('Add time'), array('accesskey' => 'x') ));
-
-      $menu_array[T_('Add time for opponent (form)')] = $form_addtime;
-      $menu_array[T_('Add time for opponent (message)')] =
-         "message.php?mode=AddTime".URI_AMP."gid=$gid";
-      $menu_array[T_('Add time for opponent (game)')] =
-         "game.php?gid=$gid".URI_AMP."a=add_time";
-   }
+      $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time";
 
    if( !$validation_step )
    {
