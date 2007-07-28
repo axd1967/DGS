@@ -86,8 +86,9 @@ function add_time_opponent( $game_row=null, $gid, $uid, $add_hours, $reset_byo=f
    else
       $oppcolor = 'Black';
 
-   if ( $reset_byo && $add_hours == 0 )
-      $add_hours = 1; // min. 1h to be able to reset byo-period with -1 (for next period)
+   // min. 1h to be able to reset byo-period with -1 (for next period)
+   if ( $reset_byo and $add_hours == 0 and $game_row["{$oppcolor}_Maintime"] <= 0 )
+      $add_hours = 1;
 
    // add maintime and eventually reset byo-time for opponent
    $upd_query =
