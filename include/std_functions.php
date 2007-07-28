@@ -182,6 +182,7 @@ define('POSX_PASS', -1);
 define('POSX_SCORE', -2);
 define('POSX_RESIGN', -3);
 define('POSX_TIME', -4);
+define('POSX_ADDTIME', -5); // Moves: y=0|1 (1=byo-yomi-reset), hours=add_hours
 
 define('SCORE_RESIGN', 1000);
 define('SCORE_TIME', 2000);

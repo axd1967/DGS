@@ -82,6 +82,12 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
    }
 
+   if( @$_REQUEST['nextaddtime'] )
+   {
+      do_add_time( $game_row );
+      jump_to("game.php?gid=$gid"); // back
+   }
+
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
    else if( $White_ID == $ToMove_ID )
@@ -381,6 +387,7 @@ This is why:
   But, the number of records of Moves could be greater than the number of moves if:
   - there are prisoners
   - a sequence like PASS/PASS/SCORE.../RESUME had already occured.
+  - time has been added to opponent
   So some garbage records could remains alone because of the LIMIT.
 */
          $move_query = "DELETE FROM Moves WHERE gid=$gid";
@@ -654,4 +661,28 @@ if(1){ //new
 
    jump_to("game.php?gid=$gid");
 }
+
+function do_add_time( $game_row )
+{
+   $gid = $game_row['ID'];
+   $my_id = $player_row['ID'];
+   $add_days  = (int) @$_REQUEST['add_days'];
+   $reset_byo = (bool) @$_REQUEST['reset_byoyomi'];
+
+   $error = add_time_opponent( $gid, $my_id, time_convert_to_hours( $add_days, 'days'), $reset_byo );
+   if ( !is_numeric($error) )
+      error('mysql_confirm_add_time',
+         "confirm.addtime(game=$gid,uid=$my_id,$add_days days,opp=$opponent_ID,reset_byo=$reset_byo): $error");
+   $add_hours = $error;
+
+   // insert entry in Moves-table
+   $Moves = $game_row['Moves'];
+   $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES "
+      . "($gid, $Moves, ".NONE.", ".POSX_ADDTIME.", ".($reset_byo ? 1 : 0).", $add_hours)";
+   $result = mysql_query( $move_query )
+      or error('mysql_query_failed','confirm.addtime_moves');
+
+   jump_to("game.php?gid=$gid".URI_AMP."sysmsg=" . urlencode(T_('Time added!')) );
+}
+
 ?>
