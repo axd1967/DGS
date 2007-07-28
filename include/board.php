@@ -115,6 +115,12 @@ class Board
 
          extract($row);
 
+         if ( $PosX == POSX_ADDTIME )
+         {
+            //TODO: Stone=time-adder, PosY=0|1 (1=byo-yomi-reset), Hours = hours added
+            continue;
+         }
+
          if( $Stone == BLACK or $Stone == WHITE )
          {
             $this->moves[$MoveNr] = array( $Stone, $PosX, $PosY);
@@ -130,13 +136,9 @@ class Board
             continue;
          }
 
-         if( $Stone == NONE and $PosX == POSX_ADDTIME)
+         if( $Stone <= WHITE ) //including NONE (prisoners)
          {
-            //TODO: PosY=0|1 (1=byo-yomi-reset), Hours = hours added
-         }
-         elseif( $Stone <= WHITE ) //including NONE (prisoners)
-         {
-            if( $PosX < 0 ) continue; //excluding PASS, RESIGN and SCORE
+            if( $PosX < 0 ) continue; //excluding PASS, RESIGN and SCORE, ADDTIME
 
             $this->array[$PosX][$PosY] = $Stone; //including DAME (prisoners)
 
@@ -162,7 +164,7 @@ class Board
             @$this->array[$x][$y] ^= OFFSET_MARKED;
          }
       }
-      
+
       if( isset($this->moves[$move]) )
       {
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
@@ -205,7 +207,7 @@ class Board
             return;
          $mark = '';
       }
-      else 
+      else
          return;
 
       $start = max( $start, 1);
@@ -239,7 +241,7 @@ class Board
                $this->captures[$n] = array( $s, $x, $y, $mrk);
             }
          }
-      }      
+      }
    }
 
 

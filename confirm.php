@@ -679,9 +679,10 @@ function do_add_time( $game_row )
    $add_hours = $error;
 
    // insert entry in Moves-table
+   $Stone = ( $game_row['Black_ID'] == $my_id ) ? BLACK : WHITE;
    $Moves = $game_row['Moves'];
    $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES "
-      . "($gid, $Moves, ".NONE.", ".POSX_ADDTIME.", ".($reset_byo ? 1 : 0).", $add_hours)";
+      . "($gid, $Moves, $Stone, ".POSX_ADDTIME.", ".($reset_byo ? 1 : 0).", $add_hours)";
    $result = mysql_query( $move_query )
       or error('mysql_query_failed','confirm.addtime_moves');
 

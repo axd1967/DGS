@@ -521,22 +521,20 @@ $array=array();
          }
 
          case NONE:
-         { 
-            if ( $PosX == POSX_ADDTIME )
-            {
-               //TODO: PosY=0|1 (1=byo-yomi-reset), Hours = hours added
-            }
-            else
-            {
-               //+prisoners
-               $array[$PosX][$PosY] = $Stone;
-            }
+         { //+prisoners
+            $array[$PosX][$PosY] = $Stone;
             break;
          }
 
          case WHITE:
          case BLACK:
          {
+            if ( $PosX == POSX_ADDTIME )
+            {
+               //TODO: Stone=time-adder, PosY=0|1 (1=byo-yomi-reset), Hours = hours added
+               break;
+            }
+
             $array[$PosX][$PosY] = $Stone;
 
             //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.

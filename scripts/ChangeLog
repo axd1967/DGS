@@ -30,18 +30,15 @@ Changelog
 
    * confirm.php (do_add_time), game.php,
      include/std_functions.php (POSX_ADDTIME),
-     include/game_functions.php (add_time_opponent):
+     include/game_functions.php (add_time_opponent),
+   * sgf.php, include/board.php, scripts/game_consistency.php:
    - game: write add-time into database,
      can choose to reset byo-yomi on add-time (not for Fisher-time),
      jump to add-time form if adding time
    - added support to add-time for opponent,
      adding hours to maintime and/or reset byoyomi,
-     adding ADDTIME-entry in Moves-table
-     (PosX=ADDTIME, PosY=BYO-RESET, Hours=added-hours)
-
-   * sgf.php, include/board.php, scripts/game_consistency.php:
-   - added add-time with new Moves-type:
-     PosX=ADDTIME, PosY=BYO-RESET, Hours=added-hours
+   - added add-time-entry into Moves-table:
+     PosX=POSX_ADDTIME, Stone=time-adder, PosY=BYO-RESET, Hours=added-hours
 
    * message.php, search_messages.php, send_message.php,
      include/message_functions.php, scripts/ChangeLog:
