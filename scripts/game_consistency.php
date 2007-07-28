@@ -198,7 +198,14 @@ function check_consistency( $gid)
       if( !($Stone == WHITE or $Stone == BLACK ) or $PosX<0 )
       {
          if( $Stone == NONE )
-            $nr_prisoners++;
+         {
+            if ( $PosX == POSX_ADDTIME )
+            {
+               //TODO: PosY=0|1 (1=byo-yomi-reset), Hours = hours added
+            }
+            else
+               $nr_prisoners++;
+         }
          elseif( $PosX < 0 )
          {
             if( $move_nr != $MoveNr )

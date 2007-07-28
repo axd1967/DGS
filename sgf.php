@@ -521,8 +521,16 @@ $array=array();
          }
 
          case NONE:
-         { //+prisoners
-            $array[$PosX][$PosY] = $Stone;
+         { 
+            if ( $PosX == POSX_ADDTIME )
+            {
+               //TODO: PosY=0|1 (1=byo-yomi-reset), Hours = hours added
+            }
+            else
+            {
+               //+prisoners
+               $array[$PosX][$PosY] = $Stone;
+            }
             break;
          }
 

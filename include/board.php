@@ -130,7 +130,11 @@ class Board
             continue;
          }
 
-         if( $Stone <= WHITE ) //including NONE (prisoners)
+         if( $Stone == NONE and $PosX == POSX_ADDTIME)
+         {
+            //TODO: PosY=0|1 (1=byo-yomi-reset), Hours = hours added
+         }
+         elseif( $Stone <= WHITE ) //including NONE (prisoners)
          {
             if( $PosX < 0 ) continue; //excluding PASS, RESIGN and SCORE
 
