@@ -26,6 +26,28 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-28 juga
+
+   * confirm.php (do_add_time), game.php,
+     include/std_functions.php (POSX_ADDTIME),
+     include/game_functions.php (add_time_opponent):
+   - game: write add-time into database,
+     can choose to reset byo-yomi on add-time (not for Fisher-time),
+     jump to add-time form if adding time
+   - added support to add-time for opponent,
+     adding hours to maintime and/or reset byoyomi,
+     adding ADDTIME-entry in Moves-table
+     (PosX=ADDTIME, PosY=BYO-RESET, Hours=added-hours)
+
+   * sgf.php, include/board.php, scripts/game_consistency.php:
+   - added add-time with new Moves-type:
+     PosX=ADDTIME, PosY=BYO-RESET, Hours=added-hours
+
+   * message.php, search_messages.php, send_message.php,
+     include/message_functions.php, scripts/ChangeLog:
+   - removed add-time-support (moved to game-page)
+   - reverted change to Message.Type enum: removed ADDTIME
+
 2007-07-27 juga
 
    * game.php:
@@ -132,13 +154,8 @@ Changelog
    - set correspondent for server-message or if unknown
 
    * game.php, message.php, search_messages.php, send_message.php,
-     include/game_functions.php (allow_add_time_opponent, add_time_opponent),
-     include/message_functions.php (message_list_table):
+     include/game_functions.php (allow_add_time_opponent, add_time_opponent):
    - added support to add time for opponent
------------
-ALTER TABLE `Messages`
- CHANGE `Type` `Type` enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED','RESULT','ADDTIME') NOT NULL default 'NORMAL';
------------
 
    * error.php:
    - fixed typos

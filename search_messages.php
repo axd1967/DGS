@@ -56,7 +56,7 @@ require_once( "include/filter.php" );
    $arr_types = array(
       T_('All#msgtype') => '',
       T_('Private#msgtype') => "M.Type='NORMAL'",
-      T_('Game#msgtype')    => "M.Type IN ('INVITATION','ACCEPTED','DECLINED','DISPUTED','RESULT','ADDTIME')",
+      T_('Game#msgtype')    => "M.Type IN ('INVITATION','ACCEPTED','DECLINED','DISPUTED','RESULT')",
    );
 
    /* SQL-statement-fields from message_list_query(), see below:

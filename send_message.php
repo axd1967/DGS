@@ -24,7 +24,6 @@ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/make_game.php" );
-require_once( "include/game_functions.php" );
 
 disable_cache();
 
@@ -232,21 +231,6 @@ disable_cache();
       $gid = -1; //deleted
       $subject = "Game invitation decline";
    }
-   else if( $type == 'ADDTIME' )
-   {
-      $gid = (int)@$_REQUEST['gid'];
-      $add_days = (int)@$_REQUEST['add_days'];
-
-      $error = add_time_opponent( $gid, $my_id, time_convert_to_hours( $add_days, 'days') );
-      if ( $error )
-         error('mysql_game_add_time',
-            "send_message.addtime(game=$gid,uid=$my_id,$add_days days,opp=$opponent_ID): $error");
-
-      $main_msg = (string)@$_REQUEST['main_message'];
-      if ( trim($message) != '' )
-         $main_msg .= "\n\n";
-      $message = $main_msg . $message;
-   }
    else
       $gid = 0;
 
@@ -256,7 +240,7 @@ disable_cache();
 
 if(ENA_SEND_MESSAGE){ //new
    $msg_gid = 0;
-   if ( $type == 'INVITATION' or $type == 'ADDTIME' )
+   if ( $type == 'INVITATION' )
       $msg_gid = $gid;
 
    send_message( 'send_message', $message, $subject
@@ -271,7 +255,7 @@ if(ENA_SEND_MESSAGE){ //new
    $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
        "Type='$type', ";
 
-   if( $type == 'INVITATION' or $type == 'ADDTIME' )
+   if( $type == 'INVITATION' )
       $query .= "Game_ID=$gid, ";
 
    if( $prev_mid > 0 )
@@ -348,10 +332,6 @@ if(ENA_SEND_MESSAGE){ //new
 
    $msg = urlencode(T_('Message sent!'));
 
-   if ( $type == 'ADDTIME' )
-      jump_to("game.php?gid=$gid".URI_AMP."sysmsg="
-         . urlencode(T_('Time added and message sent!')) );
-   else
-      jump_to("status.php?sysmsg=$msg");
+   jump_to("status.php?sysmsg=$msg");
 }
 ?>

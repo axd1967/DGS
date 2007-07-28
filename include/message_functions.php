@@ -37,7 +37,6 @@ $MSG_TYPES = array( // keep untranslated{!)
    'DELETED'    => 'Delete',
    'DISPUTED'   => 'Dispute',
    'RESULT'     => 'Result',
-   'ADDTIME'    => 'Add Time',
 );
 
 function init_standard_folders()
