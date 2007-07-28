@@ -46,43 +46,61 @@ function allow_add_time_opponent( $game_row, $uid )
 }
 
 /*!
- * \brief returns 0, if time (add_hours) has been successfully added
+ * \brief returns number of hours added (may be 0), if time has been successfully added
  *        for opponent of player (uid) in specified game (gid).
  *        Otherwise error-string is returned.
+ * \param $game_row optional pre-loaded game_row
  * \param $gid game-id to add time for
  * \param $uid user giving time to his opponent
  * \param $add_hours amount of hours to add to maintime of opponent,
  *        allowed range is 1 .. 15*MAX_ADD_DAYS (15 b/c of sleep-time)
+ * \param $reset_byo if true, also byo-yomi will be resetted (for JAP/CAN)
  */
-function add_time_opponent( $gid, $uid, $add_hours )
+function add_time_opponent( $game_row=null, $gid, $uid, $add_hours, $reset_byo=false )
 {
-   if ( !is_numeric($add_hours) or $add_hours <= 0
+   // init & checks
+   if ( !is_numeric($add_hours) or $add_hours < 0
          or $add_hours > time_convert_to_hours( MAX_ADD_DAYS, 'days'))
       return sprintf( 'Invalid value for add_hours [%s]', $add_hours);
 
-   $query = "SELECT Games.* from Games WHERE ID=$gid";
-   $game_row = mysql_single_fetch( 'message.find_game', $query);
-   if ( !$game_row )
-      return "Can\'t find game [$gid] to add time";
+   if ( is_null($game_row) )
+   {
+      $query = "SELECT Games.* from Games WHERE ID=$gid";
+      $game_row = mysql_single_fetch( 'message.find_game', $query);
+      if ( !$game_row )
+         return "Can\'t find game [$gid] to add time";
+   }
+   if ( $game_row['ID'] != $gid )
+      return "Game.ID [$gid] mismatch";
 
    if ( !allow_add_time_opponent( $game_row, $uid ) )
-      return 'Conditions are not met to allow to add time';
+      return "Conditions are not met to allow to add time for game [$gid]";
 
-   // get opponents column to update
+   if ( !$reset_byo and $add_hours == 0 )
+      return 0; // nothing to do (0 hours added, no error)
+
+
+   // get opponents columns to update
    if ( $game_row['Black_ID'] == $uid )
-      $oppcol = 'White_Maintime';
+      $oppcolor = 'White';
    else
-      $oppcol = 'Black_Maintime';
+      $oppcolor = 'Black';
 
-   // add time to opponent
+   if ( $reset_byo && $add_hours == 0 )
+      $add_hours = 1; // min. 1h to be able to reset byo-period with -1 (for next period)
+
+   // add maintime and eventually reset byo-time for opponent
    $upd_query =
-      "UPDATE Games SET $oppcol=$oppcol+$add_hours " .
-      "WHERE ID=$gid AND Status" . IS_RUNNING_GAME . " LIMIT 1";
+      "UPDATE Games SET {$oppcolor}_Maintime={$oppcolor}_Maintime+$add_hours";
+   if ( $reset_byo && $game_row['Byotype'] != 'FIS' )
+      $upd_query .= ", {$oppcolor}_Byoperiods=-1";
+
+   $upd_query .= " WHERE ID=$gid AND Status" . IS_RUNNING_GAME . " LIMIT 1";
    $result = mysql_query( $upd_query );
    if ( !$result or mysql_affected_rows() != 1 )
       return "Add time failed to write in database";
 
-   return 0; // success (no-error)
+   return $add_hours; // success (no-error)
 }
 
 ?>
