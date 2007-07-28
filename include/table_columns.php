@@ -414,7 +414,7 @@ class Table
                $syntax = $filter->get_syntax_description();
                array_push( $arr_err,
                   "<b>{$this->Tableheads[$id]['Description']}:</b> "
-                  . '<font color=darkred>' . T_('Error') . ': ' . $filter->errormsg() . '</font>'
+                  . '<font color=darkred>' . T_('Error#filter') . ': ' . $filter->errormsg() . '</font>'
                   . ( ($syntax != '') ? "; $syntax" : '') );
             }
             $errormessages = ( count($arr_err) > 0 ) ? implode( "<br>", $arr_err ) : "";
