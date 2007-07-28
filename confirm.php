@@ -19,6 +19,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
 require_once( "include/std_functions.php" );
+require_once( "include/game_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( "include/rating.php" );
@@ -664,15 +665,17 @@ if(1){ //new
 
 function do_add_time( $game_row )
 {
+   global $player_row;
+
    $gid = $game_row['ID'];
    $my_id = $player_row['ID'];
    $add_days  = (int) @$_REQUEST['add_days'];
    $reset_byo = (bool) @$_REQUEST['reset_byoyomi'];
 
-   $error = add_time_opponent( $gid, $my_id, time_convert_to_hours( $add_days, 'days'), $reset_byo );
+   $error = add_time_opponent( $game_row, $gid, $my_id, time_convert_to_hours( $add_days, 'days'), $reset_byo );
    if ( !is_numeric($error) )
       error('mysql_confirm_add_time',
-         "confirm.addtime(game=$gid,uid=$my_id,$add_days days,opp=$opponent_ID,reset_byo=$reset_byo): $error");
+         "confirm.addtime(game=$gid,uid=$my_id,add_days=$add_days,reset_byo=$reset_byo): $error");
    $add_hours = $error;
 
    // insert entry in Moves-table
@@ -682,7 +685,7 @@ function do_add_time( $game_row )
    $result = mysql_query( $move_query )
       or error('mysql_query_failed','confirm.addtime_moves');
 
-   jump_to("game.php?gid=$gid".URI_AMP."sysmsg=" . urlencode(T_('Time added!')) );
+   jump_to("game.php?gid=$gid" . ($add_hours > 0 ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '') );
 }
 
 ?>
