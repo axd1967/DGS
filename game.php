@@ -22,6 +22,7 @@ if( @$_REQUEST['nextgame']
       or @$_REQUEST['nextstatus']
       or @$_REQUEST['nextback']
       or @$_REQUEST['nextskip']
+      or @$_REQUEST['nextaddtime']
    )
 {
 //confirm use $_REQUEST: gid, move, action, coord, stonestring
@@ -549,7 +550,7 @@ function get_alt_arg( $n1, $n2)
       }
 
       if ( $action == 'add_time' )
-         draw_add_time();
+         draw_add_time( $game_row );
       else
          draw_message_box( $message);
    }
@@ -618,7 +619,7 @@ function get_alt_arg( $n1, $n2)
    }
 
    if ( $action != 'add_time' and allow_add_time_opponent( $game_row, $player_row['ID'] ) )
-      $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time";
+      $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";
 
    if( !$validation_step )
    {
@@ -753,7 +754,7 @@ function draw_message_box(&$message)
 
 }
 
-function draw_add_time()
+function draw_add_time( $game_row )
 {
    $tabindex=1;
    echo '
@@ -761,25 +762,37 @@ function draw_add_time()
     <center>
       <TABLE>
         <TR>
-          <TD>' . T_('Choose how many additional days you wish to give your opponent') . ':</TD>
+          <TD>' . T_('Choose how much time you wish to give your opponent') . ':</TD>
         </TR>
         <TR>
           <TD align=left>
            <SELECT name="add_days" size="1"  tabindex="{$tabindex++}">';
 
-   for( $i=1; $i <= MAX_ADD_DAYS; $i++)
+   for( $i=0; $i <= MAX_ADD_DAYS; $i++)
+   {
       echo
          sprintf( "<OPTION value=\"%d\"%s>%s %s</OPTION>\n",
             $i, ($i==1 ? ' selected' : ''),
             $i, ($i==1 ? T_('day') : T_('days')) );
-
+   }
    echo '  </SELECT>
            &nbsp;' . T_('added to maintime of your opponent.') . '
           </TD>
-        </TR>
-        <TR>
+        </TR>';
+
+   if ( $game_row['Byotype'] != 'FIS' )
+   {
+      echo '<TR>
+              <TD align=left>
+                <INPUT type="checkbox" name="reset_byoyomi" tabindex="'.($tabindex++).'"value="1" alt="'
+                  . T_('Add time: byo-yomi reset') . '">&nbsp;' . T_('Reset byo-yomi time and periods') . '
+              </TD>
+            </TR>';
+   }
+
+   echo '<TR>
           <TD align=left>
-<input type=submit name="addtime" tabindex="'.($tabindex++).'" value="' . T_('Add Time') . '">
+<input type=submit name="nextaddtime" tabindex="'.($tabindex++).'" value="' . T_('Add Time') . '">
 <input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' . T_('Cancel') . '">
           </TD>
         </TR>
