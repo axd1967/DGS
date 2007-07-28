@@ -618,9 +618,6 @@ function get_alt_arg( $n1, $n2)
       $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."nextskip=t";
    }
 
-   if ( $action != 'add_time' and allow_add_time_opponent( $game_row, $player_row['ID'] ) )
-      $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";
-
    if( !$validation_step )
    {
       if( $action == 'choose_move' )
@@ -652,6 +649,9 @@ function get_alt_arg( $n1, $n2)
          $menu_array[T_('Send message to user')] = "message.php?mode=NewMessage".URI_AMP."uid=$opponent_ID" ;
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$opponent_ID" ;
       }
+
+      if ( $action != 'add_time' and allow_add_time_opponent( $game_row, $player_row['ID'] ) )
+         $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";
 
       $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid");
 
