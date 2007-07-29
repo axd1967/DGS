@@ -493,7 +493,7 @@ class Table
       //dot.gif is a 1x1 transparent image.
       if( !is_numeric($width) )
          $width = $button_width;
-      return "<img class=MinWidth src='{$base_path}images/dot.gif' width=$width height=1 alt=''><br>";
+      return "<img class=MinWidth src='{$base_path}images/dot.gif' width=$width height=1 alt=''>";
    }
 
    /*!
