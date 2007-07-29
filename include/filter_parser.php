@@ -47,6 +47,7 @@ define('TEXTPARSER_FORBID_RANGE',     0x00001000); // for numeric/text/date-pars
 define('TEXTPARSER_FORBID_WILD',      0x00002000); // for text-parser: if set, forbid wildcards
 define('TEXTPARSER_ALLOW_START_WILD', 0x00004000); // for text-parser: if set, allow search-string to start with wildcard
 define('TEXTPARSER_END_INCL',         0x00008000); // for text-parser: if not set, make end-range exclusive in the search to build '>' <-> '>='
+define('TEXTPARSER_IMPLICIT_WILD',    0x00010000); // for text-parser: if set, implicit wildcards are added to start and end 'foo' -> '*foo*' (forces TEXTPARSER_FORBID_RANGE and TEXTPARSER_ALLOW_START_WILD)
 
 define('PFLAG_WILDCARD',   0x00000001); // if set, indicates that parsed value contained wildcard
 define('PFLAG_EXCL_START', 0x00000002); // if set, indicates that parsed start-value should use exclusive SQL-comparator
@@ -163,7 +164,7 @@ class BasicParser
    var $value;
    /*! \brief TokenizerConfig */
    var $tokconf;
-   /*! \brief Flags for parsing: PARSER_NOSWAP_REVERSE */
+   /*! \brief Flags for parsing, e.g.: PARSER_NOSWAP_REVERSE, TEXTPARSER_... */
    var $flags;
 
    // parsed values and flags
@@ -178,6 +179,8 @@ class BasicParser
    var $p_value;
    /*! \brief flags about parsed value: PFLAG_WILDCARD */
    var $p_flags;
+   /*! \brief non-null array with search-terms. */
+   var $p_terms;
 
    /*! \brief Constructs BasicParser for specified value, TokenizerConfig and flags. */
    function BasicParser( $value, $tokconf, $flags = 0 )
@@ -202,6 +205,7 @@ class BasicParser
       $this->p_end = '';
       $this->p_value = '';
       $this->p_flags = 0;
+      $this->p_terms = array();
    }
 
    /*!
@@ -374,20 +378,25 @@ class NumericParser extends BasicParser
   *
   * Supported Flags: PARSER_NOSWAP_REVERSE | TEXTPARSER_FORBID_RANGE |
   *                  TEXTPARSER_FORBID_WILD | TEXTPARSER_ALLOW_START_WILD |
-  *                  TEXTPARSER_END_INCL | TEXTPARSER_PRECEDENCE_SEP
-  * Supported TokenizerConfig: TEXTPARSER_STARTWILD_MINCHARS = 1..
+  *                  TEXTPARSER_END_INCL | TEXTPARSER_IMPLICIT_WILD
+  * Supported TokenizerConfig:
+  *                  TEXTPARSER_CONF_STARTWILD_MINCHARS = 1..
+  *                  TEXTPARSER_CONF_RX_NO_SEP = regex
+  *                  TEXTPARSER_CONF_PRECEDENCE_SEP = 0|1
   *
   * note: wildcard supported: '*' (multi-char)
   * note: performs additional check of consecutive chars when value starts with wildcard
+  *
+  * result: var $p_terms contains array with regex-search-terms when wildcard or exact-syntax.
   *
   * Parse-Syntax: x, -x, x-, x-y, x*, *x
   */
 
 define('TEXT_WILD_M', '*'); // special char for wildcard (multi-char)
 
-define('TEXTPARSER_STARTWILD_MINCHARS', 'startwild_minchars');
-define('TEXTPARSER_CONF_RX_NO_SEP', 'txtpconf_rx_no_sep' ); // regex that overrules match for range-separator
-define('TEXTPARSER_PRECEDENCE_SEP', 'precedence_sep'); // flag to indicate, that separator has higher precedence than other special-chars (wildcard)
+define('TEXTPARSER_CONF_STARTWILD_MINCHARS', 'startwild_minchars');
+define('TEXTPARSER_CONF_RX_NO_SEP',      'txtpconf_rx_no_sep' ); // regex that overrules match for range-separator
+define('TEXTPARSER_CONF_PRECEDENCE_SEP', 'precedence_sep'); // flag to indicate, that separator has higher precedence than other special-chars (wildcard)
 
 define('STARTWILD_OPTMINCHARS', 4); // value for filter-config FC_START_WILD or above define (=no of chars to force when pattern starts with wildcard)
 
@@ -395,8 +404,10 @@ class TextParser extends BasicParser
 {
    /*! \brief Constructs TextParser( string value, TokenizerConfig tok_config, int flags ). */
    function TextParser( $value, $tok_config, $flags = 0 ) {
+      if ( $flags & TEXTPARSER_IMPLICIT_WILD )
+         $flags |= TEXTPARSER_FORBID_RANGE | TEXTPARSER_ALLOW_START_WILD;
       parent::BasicParser( $value, $tok_config, $flags );
-      $this->parse($value, $flags);
+      $this->parse($value, $this->flags);
    }
 
    /*!
@@ -410,10 +421,10 @@ class TextParser extends BasicParser
 
       // init tokenizer
       $forbid_wild = $this->is_flags_set(TEXTPARSER_FORBID_WILD);
-      $wild_chars = $this->tokconf->wild;
+      $wild_char = $this->tokconf->wild;
       if ( $forbid_wild )
-         $wild_chars = '';
-      $tokenizer = create_StringTokenizer( $this->tokconf, $wild_chars, $this->flags);
+         $wild_char = '';
+      $tokenizer = create_StringTokenizer( $this->tokconf, $wild_char, $this->flags);
       $rx_no_sep = $this->tokconf->get_config( TEXTPARSER_CONF_RX_NO_SEP );
       if ( $rx_no_sep != '' )
          $tokenizer->add_config( STRTOK_CONF_RX_NO_SEP, $rx_no_sep );
@@ -439,7 +450,7 @@ class TextParser extends BasicParser
 
       // assure higher precedence of wildcard (over separator)
       $arr_wild_replace = array( $this->tokconf->wild => '%' );
-      if ( $cnt != 1 and !$forbid_wild and !$this->is_flags_set(TEXTPARSER_PRECEDENCE_SEP) )
+      if ( $cnt != 1 and !$forbid_wild and !$this->is_flags_set(TEXTPARSER_CONF_PRECEDENCE_SEP) )
       {
          list( $v1, $v2 ) = extract_range( $arr );
          list( $sql, $cnt_wild1 ) = sql_replace_wildcards( $v1, $arr_wild_replace );
@@ -462,31 +473,42 @@ class TextParser extends BasicParser
          {
             // wild can be treated as normal char, same goes for special-chars
             $this->p_value = $v;
+            $term = preg_replace( "/[^\\w'\\s]+/", '', $v );
+            array_push( $this->p_terms, $term );
          }
          else // allow-wild
          {
-            if ( (string)$wild_chars != '' )
-               if (substr_count($value, $wild_chars) == strlen($value)) // wildcards only (multi-char '*')
+            // add wild as prefix and suffix to build substring-search
+            if ( $this->is_flags_set(TEXTPARSER_IMPLICIT_WILD) )
+            {
+               if ( $v{0} != $wild_char )
+                  $v = $wild_char . $v;
+               if ( substr($v, -1) != $wild_char )
+                  $v .= $wild_char;
+            }
+
+            if ( (string)$wild_char != '' )
+               if (substr_count($v, $wild_char) == strlen($v)) // wildcards only (multi-char '*')
                   return true; // matching all (return '')
 
             // started with wildcard?
-            if ( $v{0} == $this->tokconf->wild )
+            if ( $v{0} == $wild_char )
             {
                if ( $this->is_flags_set(TEXTPARSER_ALLOW_START_WILD) ) // check min-chars
                {
-                  $minchars = $this->tokconf->get_config(TEXTPARSER_STARTWILD_MINCHARS, STARTWILD_OPTMINCHARS);
-                  $quote_wild = preg_quote( $this->tokconf->wild, '/' );
+                  $minchars = $this->tokconf->get_config(TEXTPARSER_CONF_STARTWILD_MINCHARS, STARTWILD_OPTMINCHARS);
+                  $quote_wild = preg_quote( $wild_char, '/' );
                   if ( $minchars > 1 and !(preg_match("/^[{$quote_wild}]+([^{$quote_wild}]{".$minchars.",})/", $v)) )
                   {
                      $this->errormsg =
                         sprintf( T_('need at least %1$s characters when using text with starting wildcard [%2$s]'),
-                           $minchars, $this->tokconf->wild );
+                           $minchars, $wild_char );
                      return false;
                   }
                }
                else
                { // forbid to start with wildcard
-                  $this->errormsg = '['.$this->tokconf->wild.'] ' . T_('not allowed as prefix');
+                  $this->errormsg = "[$wild_char] " . T_('not allowed as prefix');
                   return false;
                }
             }
@@ -497,6 +519,7 @@ class TextParser extends BasicParser
             $this->p_value = $valsql;
             if ( $cnt_wild > 0 )
                $this->p_flags |= PFLAG_WILDCARD;
+            $this->extract_terms( $valsql );
          }
       }
       else
@@ -512,6 +535,31 @@ class TextParser extends BasicParser
 
       return true;
    }
+
+   /*! \brief Extracts regex-terms from SQL-value into $p_terms. */
+   function extract_terms( $sql )
+   {
+      // \% -> %, \_ -> ., % -> .*?, _ -> ., others -> copy
+      $sql = preg_replace( "/(^%+|%+$)/", '', $sql );
+      $rxterm = '';
+      $len = strlen($sql);
+      for( $pos = 0; $pos < $len; $pos++)
+      {
+         if ( $sql{$pos} == '\\' )
+         {
+            $pos++;
+            $rxterm .= preg_quote($sql{$pos});
+         }
+         if ( $sql{$pos} == '%' )
+            $rxterm .= '.*?';
+         elseif ( $sql{$pos} == '_' )
+            $rxterm .= '.';
+         else
+            $rxterm .= preg_quote($sql{$pos});
+      }
+      if ( $rxterm != '' )
+         array_push( $this->p_terms, $rxterm );
+   }
 } // end of 'TextParser'
 
 
@@ -523,11 +571,6 @@ class TextParser extends BasicParser
   *
   * NOTE: tokenizing is done in FilterDate-class; \see FilterDate
   * NOTE: not extending from BasicParser
-  *
-  * Supported Flags: PARSER_NOSWAP_REVERSE | TEXTPARSER_FORBID_RANGE | TEXTPARSER_FORBID_WILD | TEXTPARSER_ALLOW_START_WILD | TEXTPARSER_END_INCL
-  * Supported TokenizerConfig: TEXTPARSER_STARTWILD_MINCHARS = 1..
-  *
-  * NOTE: wildcard supported: '*' (multi-char)
   *
   * Parse-Syntax: date = [ YYYY [ MM [ DD [ ' '? hh [ mm [ ss ] ] ] ] ] ]
   * Notes:
