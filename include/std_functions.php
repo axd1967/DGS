@@ -464,13 +464,15 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
          T_('Invite') => array(2,3, 'message.php?mode=Invite',array('accesskey'=>'i')),
 
          T_('Users') => array(3,1, 'users.php',array('accesskey'=>'u')),
-         T_('Games') => array(3,2, 'show_games.php?uid=all',array('accesskey'=>'g')),
-         T_('Translate') => array(3,3, 'translate.php',array('accesskey'=>'t')),
+         T_('Contacts') => array(3,2, 'list_contacts.php',array('accesskey'=>'c')),
+         T_('Games') => array(3,3, 'show_games.php?uid=all',array('accesskey'=>'g')),
 
          T_('Forums') => array(4,1, 'forum/index.php',array('accesskey'=>'f')),
          T_('FAQ') => array(4,2, 'faq.php',array('accesskey'=>'q')),
          //T_('Site map') => array(4,3, 'site_map.php'),
          T_('Docs') => array(4,3, 'docs.php',array('accesskey'=>'d')),
+
+         #T_('Translate') => array(5,1, 'translate.php',array('accesskey'=>'t')),
       );
 
       $tools_array = array();
@@ -584,6 +586,11 @@ function end_page( $menu_array=NULL )
    if( (@$player_row['admin_level'] & ~ADMIN_TIME) && !$printable )
       echo "<a href=\"{$base_path}admin.php\">"
         . T_('Admin') . "</a>&nbsp;&nbsp;&nbsp;";
+
+   if ( @$player_row['Translator'] && !$printable )
+      echo anchor( $base_path.'translate.php',
+                   T_('Translate'), '', array( 'accesskey' => 't' ))
+         . "&nbsp;&nbsp;&nbsp;";
 
    echo anchor( $base_path."index.php?logout=t"
               , T_("Logout")
