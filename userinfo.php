@@ -24,6 +24,7 @@ require_once( "include/std_functions.php" );
 require_once( 'include/table_infos.php' );
 require_once( "include/rating.php" );
 require_once( "include/countries.php" );
+require_once( "include/contacts.php" );
 
 {
    connect2mysql();
@@ -33,13 +34,14 @@ require_once( "include/countries.php" );
    if( !$logged_in )
       error("not_logged_in");
 
+   $myID = $player_row["ID"];
    get_request_user( $uid, $uhandle, true);
    if( $uhandle )
       $where = "Handle='".mysql_addslashes($uhandle)."'";
    elseif( $uid > 0 )
       $where = "ID=$uid";
    else
-      $where = "ID=" . $player_row["ID"];
+      $where = "ID=$myID";
 
    $result = mysql_query(
       "SELECT *," .
@@ -249,10 +251,16 @@ require_once( "include/countries.php" );
    {
       $menu_array =
          array( T_('Show running games') => $run_link,
-                T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
-                T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid",
                 T_('Show finished games') => $fin_link,
-                T_('Show opponents') => "opponents.php?uid=$uid" );
+                T_('Show opponents') => "opponents.php?uid=$uid",
+                T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
+                T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid" );
+
+      if ( $myID != $uid )
+      {
+         $cstr = ( Contact::has_contact($myID, $uid) ) ? T_('Edit contact') : T_('Add contact');
+         $menu_array[$cstr] = "edit_contact.php?cid=$uid";
+      }
    }
 
 
