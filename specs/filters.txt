@@ -669,6 +669,14 @@ see section (2) Classes and Files.
   Yes. See filter-config FC_START_WILD and see example-files for
   the possible values for this config.
 
+* Can I search for a substring without explicit use of a leading and
+  trailing wildcard ?
+
+  Yes. See filter-config FC_SUBSTRING.
+  Using this config implicitly forbids range-syntax.
+  Needs filter-config FC_START_WILD to be set.
+  Example on Text-Filter #6 in "code_examples/filter_example2.php".
+
 * Can I forbid wildcards to be used ?
 
   Yes. See filter-config FC_NO_WILD.
@@ -780,6 +788,11 @@ see section (2) Classes and Files.
 
   Yes. See filter-config FC_SYNTAX_HINT.
   Example on Numeric-Filter #2 in "code_examples/filter_example2.php".
+
+* Can I use checkboxes to build a bitmask to search for ?
+
+  Yes. See filter-config FC_BITMASK.
+  Example on CheckboxArray-Filter #3 in "code_examples/filter_example2.php".
 
 
 #-------- (6) Possible Future Enhancements ------------------------------------
