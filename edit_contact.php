@@ -87,9 +87,9 @@ require_once( "include/contacts.php" );
       $errormsg = '('.T_('unknown user').')';
 
    $contact = null;
-   if ( !$errormsg and $cid )
+   if ( !$errormsg and $cid ) #TODO: allow my_id==cid (no error)
       $contact = Contact::load_contact( $my_id, $cid ); // existing contact ?
-   if ( is_null($contact) )
+   if ( is_null($contact) ) #TODO: allow my_id==cid (no error)
       $contact = Contact::new_contact( $my_id, $cid ); // new contact
 
    if ( $cid and @$_REQUEST['contact_delete'] and @$_REQUEST['confirm'] and !$cancel_delete )
@@ -111,7 +111,10 @@ require_once( "include/contacts.php" );
 
 
    $page = "edit_contact.php";
-   $title = T_('Contact edit');
+   if ( @$_REQUEST['contact_delete'] and !$cancel_delete )
+      $title = T_('Contact removal');
+   else
+      $title = T_('Contact edit');
 
    $contact_form = new Form( 'contactform', $page, FORM_POST );
    $contact_form->set_layout( FLAYOUT_GLOBAL, ( $cid ? '1,(5|2|5|3),4' : '1' ) );
