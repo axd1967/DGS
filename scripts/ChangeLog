@@ -26,6 +26,22 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-29 rodival
+
+   * skins/dragon/screen.css,
+     include/table_columns.php (make_table, make_tablerow, make_next_prev_links),
+     include/form_functions.php (create_form_string),
+     forum/forum_functions.php (echo_links):
+   - added the 'ROW' form command
+   - various CSS adjustments
+
+   * translate.php:
+   - CSSed the page
+
+   * include/std_functions.php (start_page),
+     list_contacts.php:
+   - quick fix of some contacts stuff (remove center tags)
+
 2007-07-29 juga
 
    * waiting_room.php:

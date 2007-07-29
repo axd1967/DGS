@@ -469,10 +469,10 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
          T_('Forums') => array(4,1, 'forum/index.php',array('accesskey'=>'f')),
          T_('FAQ') => array(4,2, 'faq.php',array('accesskey'=>'q')),
-         //T_('Site map') => array(4,3, 'site_map.php'),
          T_('Docs') => array(4,3, 'docs.php',array('accesskey'=>'d')),
 
-         #T_('Translate') => array(5,1, 'translate.php',array('accesskey'=>'t')),
+         //T_//('Site map') => array(4,3, 'site_map.php'),
+         //T_//('Translate') => array(5,1, 'translate.php',array('accesskey'=>'t')),
       );
 
       $tools_array = array();
@@ -587,7 +587,7 @@ function end_page( $menu_array=NULL )
       echo "<a href=\"{$base_path}admin.php\">"
         . T_('Admin') . "</a>&nbsp;&nbsp;&nbsp;";
 
-   if ( @$player_row['Translator'] && !$printable )
+   if( @$player_row['Translator'] && !$printable )
       echo anchor( $base_path.'translate.php',
                    T_('Translate'), '', array( 'accesskey' => 't' ))
          . "&nbsp;&nbsp;&nbsp;";

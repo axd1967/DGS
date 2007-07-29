@@ -244,10 +244,7 @@ require_once( "include/contacts.php" );
    }
 
    // print form with table
-   $extform_string =
-      "<center>\n"
-      . $cform->get_form_string() // static form
-      . "</center>\n";
+   $extform_string = $cform->get_form_string(); // static form
 
    echo "\n"
       . $cform->print_start_default()

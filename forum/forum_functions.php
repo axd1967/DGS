@@ -178,7 +178,7 @@ function echo_links($id,$cols)
 
    $lcols = $cols; //1; $cols/2; $cols-1;
    $tmp = ( $lcols > 1 ? ' colspan='.$lcols : '' );
-   echo "<tr class=ForumLinks$id><td$tmp><div class=LinksL>";
+   echo "<tr class=Links$id><td$tmp><div class=TreeLinks>";
    $first=true;
    reset($link_array_left);
    foreach( $link_array_left as $name => $link )
@@ -195,9 +195,9 @@ function echo_links($id,$cols)
    $lcols = $cols-$lcols;
    $tmp = ( $lcols > 1 ? ' colspan='.$lcols : '' );
    if( $lcols > 0 )
-      echo "</div></td><td$tmp><div class=LinksR>";
+      echo "</div></td><td$tmp><div class=PageLinks>";
    else
-      echo "</div><div class=LinksR>";
+      echo "</div><div class=PageLinks>";
    $first=true;
    reset($link_array_right);
    foreach( $link_array_right as $name => $link )

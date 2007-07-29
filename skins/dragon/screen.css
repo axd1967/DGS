@@ -33,14 +33,23 @@ table { /* skeleton tables */
    border-spacing: 0px;
    border-collapse: collapse;
    margin: 0px;
+   margin: 0px auto;
 /*
    width: auto;
 */
    max-width: none;
-   overflow: visible;
+   overflow: visible; /* hidden visible scroll auto */
    empty-cells: show;
    text-align: center;
    text-indent: 0;
+}
+
+td {
+   border: 0px solid red;
+   margin: 0px;
+   padding: 4px;
+   width: auto;
+   vertical-align: middle;
 }
 
 hr {
@@ -61,6 +70,11 @@ pre {
    margin: 0.5em;
    padding: 0.5em;
    text-align: left;
+}
+
+input {
+   margin: 0px 2px;
+   padding: 0px;
 }
 
 /*
@@ -159,6 +173,7 @@ a.userblack {
 h3.Header {
    color: #800000;
    text-align: center;
+   padding: 1em 2px 2px 2px;
 }
 
 .InlineHeader {
@@ -171,6 +186,40 @@ h3.Header {
    font-weight: bold;
 }
 
+.DebugInfoBox {
+   width: auto;
+   height: auto;
+   border: 2px solid red;
+   background: lime;
+   overflow: visible; /* hidden visible scroll auto */
+   margin: 0px;
+   float: left;
+   top: 0px;
+   left: 0px;
+   position: absolute; /* absolute relative */
+}
+
+.DebugInfoBoxSmall {
+   width: 10px;
+   height: 10px;
+   border: 2px solid lime;
+   background: lime;
+   overflow: hidden; /* hidden visible scroll auto */
+   margin: 0px;
+/*
+   float: left;
+   top: 0px;
+   left: 0px;
+   position: absolute; /* absolute relative */
+}
+
+.DebugInfo {
+   border: 0px solid red;
+   background: lime;
+   margin: 0px;
+   padding: 0px;
+}
+
 img.InTextStone {
    width: 17px;
    height: 17px;
@@ -181,17 +230,19 @@ img.InTextStone {
 img.MinWidth {
    border: 0px solid black;
    visibility: hidden;
+   display: block;
 }
 
 
 /* ------------------------- */
-/* common page layout */
+/* main page layout */
 /* ------------------------- */
 
 body {
    background: #F7F5E3;
    color: black;
    margin: 0px;
+   padding: 8px;
 }
 
 table#pageHead,
@@ -268,6 +319,66 @@ td#hostedBy {
 }
 
 
+table#pageLayout {
+   width: 100%;
+/*
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px;
+   max-width: none;
+   empty-cells: show;
+   vertical-align: top;
+   color: black;
+   clip: rect(10px, 5px, 10px, 5px);
+*/
+/*   display: block;
+   overflow: visible; /* hidden visible scroll auto */
+}
+
+table#pageLayout tr {
+   width: 100%;
+/*   overflow: hidden; /* hidden visible scroll auto */
+}
+
+table#pageLayout tr.LayoutVertical td.Menu {
+   width: 10%;
+/*
+   width: auto;
+   border: 0px solid red;
+   margin: 0px;
+   padding: 4px;
+*/
+   text-align: left;
+   vertical-align: top;
+}
+
+table#pageLayout tr.LayoutVertical td#pageBody {
+   width: 99%;
+   text-align: center;
+   vertical-align: top;
+/*   display: block;
+   overflow: hidden; /* hidden visible scroll auto */
+}
+
+table#pageLayout tr.LayoutHorizontal td#pageBody {
+   width: 99%;
+   text-align: center;
+   vertical-align: top;
+/*   display: block;
+   overflow: hidden; /* hidden visible scroll auto */
+}
+
+table#pageTools {
+ background: white; /* Rdvl */
+   margin: 0px;
+}
+
+table#pageTools td {
+   padding: 4px 6px 4px 4px;
+}
+
 table#pageMenu {
    background: #f7f5ff;
    color: black;
@@ -291,6 +402,8 @@ table.MenuHorizontal {
 table.MenuVertical {
    border-width: 1px;
    width: auto;
+   margin: 4px;
+   margin-left: 0px;
 /*
    float: left;
 */
@@ -337,21 +450,19 @@ table.MenuHorizontal dt {
 */
 }
 
-#pageBody {
-}
 table.MenuVertical th,
 table.MenuVertical td {
    white-space: nowrap;
    padding: 0px 4px;
 }
 
+table.MenuVertical td.Logo2,
 table.MenuVertical td.Logo1 {
    text-align: center;
 }
 
-table.MenuVertical td.Logo2 {
+table.MenuVertical td.Logo2 img {
    display: none;
-   text-align: center;
 }
 
 table.MenuVertical dl {
@@ -456,7 +567,7 @@ table.MessageBox {
 table.MessageBox td {
    border: 1px inset #F7F5E3; /* page background-color */
    margin: 0px;
-   padding: 3px;
+   padding: 4px;
    text-align: left;
 }
 
@@ -510,6 +621,7 @@ table.Table {
    width: auto;
    max-width: none;
    overflow: visible;
+   position: relative; /* absolute relative */
    empty-cells: show;
    text-align: center;
 }
@@ -518,7 +630,7 @@ table.Table th,
 table.Table td {
    border: 0px solid red;
    margin: 0px;
-   padding: 3px;
+   padding: 4px;
 }
 
 table.Table th a,
@@ -575,6 +687,19 @@ table.Table tr.Filter td.ShowFilter {
    color: blue;
 }
 
+table.Table tr.LinksT td,
+table.Table tr.LinksB td {
+   color: black;
+   margin: 0px;
+   padding: 4px 8px 4px 8px;
+   text-align: left;
+}
+
+table.Table tr.LinksT td.PagingR,
+table.Table tr.LinksB td.PagingR {
+   text-align: right;
+}
+
 /*
  rows of datas
 */
@@ -606,6 +731,12 @@ table.Table tr.Row2 td.Warning {
    background: #e6b9bd;
 }
 
+table#contactTable tr.Row4,
+table#contactTable tr.Row3,
+table#contactTable tr.Row2,
+table#contactTable tr.Row1 {
+   vertical-align: top;
+}
 
 /*
  special cells of various tables
@@ -630,7 +761,7 @@ table.Table td.PagingRight {
 
 table.Table th.Button {
    margin: 0px;
-   padding: 3px;
+   padding: 4px;
    text-align: center;
 }
 
@@ -638,7 +769,7 @@ table.Table td.Button {
    background-repeat: no-repeat;
    background-position: center;
    margin: 0px;
-   padding: 3px;
+   padding: 4px;
    text-align: center;
    white-space: nowrap;
 }
@@ -710,7 +841,7 @@ table.Infos th,
 table.Infos td {
    border: 1px inset #F7F5E3; /* page background-color */
    margin: 0px;
-   padding: 3px;
+   padding: 4px;
 }
 
 table.Infos th {
@@ -793,7 +924,7 @@ table#biomoveInfos img {
 }
 
 /*
- quick info boxes
+ quick-info boxes
 */
 table.InfoBox {
    border: 2px outset #F7F5E3; /* page background-color */
@@ -811,10 +942,53 @@ table.InfoBox {
 table.InfoBox td {
    border: 1px inset #F7F5E3; /* page background-color */
    margin: 0px;
-   padding: 3px;
+   padding: 4px 8px;
    text-align: left;
 }
 
+table.InfoBox ul {
+   border: 0px solid red;
+   margin: 0.5em 0px;
+}
+
+
+/* ------------------------- */
+/* translations page */
+/* ------------------------- */
+
+form#translateForm table.FormClass tr.LinksT td,
+form#translateForm table.FormClass tr.LinksB td {
+   background: #d0d0d0;
+   color: black;
+   margin: 0px;
+   padding: 4px 8px 4px 8px;
+   vertical-align: top;
+}
+
+form#translateForm table.FormClass td.PageLinks {
+   border: 0px solid lime;
+   text-align: right;
+   white-space: nowrap;
+}
+
+form#translateForm table.FormClass td.PageLinks a {
+   color: black;
+}
+
+form#translateForm table.FormClass td.English {
+   width: 40%;
+   text-align: left;
+}
+
+form#translateForm table.FormClass td.Language {
+   width: 40%;
+   text-align: left;
+}
+
+form#translateForm table.FormClass td.Mark {
+   text-align: left;
+   white-space: nowrap;
+}
 
 
 /* ------------------------- */
@@ -984,7 +1158,7 @@ td.UnderBoard {
 table.GameInfos {
    border: 0px solid #e0e8ed;
    border-spacing: 0px;
-   margin: 0px;
+   margin: 0px auto;
    text-align: left;
    empty-cells: show;
 }
@@ -1038,6 +1212,47 @@ table.GameInfos td.Ratings span.Separator {
 table.GameInfos td.Ratings span.EndRating {
    display: inline; /* none block inline */
 /*   visibility: visible; /* visible hidden collapse(table) */
+}
+
+
+table.GameInfos tr#boardInfos {
+/*   background: #ffffff; */
+   border: 0px solid #808080;
+   border-width: 1px 0px 0px 0px;
+}
+
+div.BoardInfos {
+   border: 0px solid red;
+   margin: 0px 0px 0px 0px;
+   padding: 0px;
+   text-align: left;
+   color: green;
+}
+
+div.BoardInfos dl {
+   border: 0px solid green;
+   margin: 0px;
+   padding: 0px;
+   text-align: left;
+}
+
+div.BoardInfos dd {
+   margin: 0px 0px;
+   padding: 0px;
+   text-align: left;
+}
+
+
+table.AddtimeForm td {
+   text-align: left;
+}
+
+table.MessageForm td {
+   text-align: left;
+}
+
+table.MessageForm td.Rubric {
+   text-align: right;
 }
 
 
@@ -1239,19 +1454,18 @@ table.Forum tr.Caption td {
    background: #000080;
    color: white;
    text-align: left;
-   padding: 3px 3px 3px 8px;
+   padding: 4px 4px 4px 8px;
 }
 
-table.Forum tr.ForumLinksT td,
-table.Forum tr.ForumLinksB td {
+table.Forum tr.LinksT td,
+table.Forum tr.LinksB td {
    background: #d0d0d0;
    color: black;
-   padding: 3px 8px 3px 8px;
+   padding: 4px 8px 4px 8px;
    text-align: center;
 }
 
-
-table.Forum .LinksL {
+table.Forum .TreeLinks {
    background: #d0d0d0;
    color: black;
    border: 0px solid lime;
@@ -1261,7 +1475,7 @@ table.Forum .LinksL {
    top: 0%;
 }
 
-table.Forum .LinksR {
+table.Forum .PageLinks {
    background: #d0d0d0;
    color: black;
    border: 0px solid lime;
@@ -1271,11 +1485,11 @@ table.Forum .LinksR {
    top: 0%;
 }
 
-table.Forum .LinksL a {
+table.Forum .TreeLinks a {
    color: black;
 }
 
-table.Forum .LinksR a {
+table.Forum .PageLinks a {
    color: black;
 }
 

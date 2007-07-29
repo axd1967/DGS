@@ -69,6 +69,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   * <li> BR        -- Forces a linebreak within the row.
   * <li> TD        -- Forces a column change (TD end).
   * <li> CELL      -- Forces a new cell start with colspan and attributs specified.
+  * <li> ROW       -- Force the class specified for the row.
   * </ul>
   *
   * \todo Add more types (if necessary).
@@ -218,6 +219,7 @@ class Form
 
          $this->line_no_step = 10;
 
+         //TODO: for CSS, remove the 'Align' property
          //'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
          $this->form_elements = array(
             'DESCRIPTION'  => array( 'NumArgs' => 1,
@@ -342,6 +344,12 @@ class Form
                                      'Align'   => '' ),
             'CELL'         => array( 'NumArgs' => 2,
                                      'NewTD'   => true,
+                                     'StartTD' => false,
+                                     'EndTD'   => false,
+                                     'SpanAllColumns' => false,
+                                     'Align'   => '' ),
+            'ROW'          => array( 'NumArgs' => 1,
+                                     'NewTD'   => false,
                                      'StartTD' => false,
                                      'EndTD'   => false,
                                      'SpanAllColumns' => false,
@@ -635,107 +643,114 @@ class Form
             $area_rows[$area] = '';
 
          foreach( $this->rows as $row_args )
+         {
+            list( $this->safe_text, $row_args, $curr_area ) = $row_args;
+            $args = array_values( $row_args );
+            $formstr = "";
+
+            $current_arg = 0;
+            $this->nr_columns = 0;
+            $this->column_started = false;
+
+            $rowclass = '';
+            $result = '';
+            $element_counter = 0;
+
+            while( $current_arg < count($args) )
             {
-               list( $this->safe_text, $row_args, $curr_area ) = $row_args;
-               $args = array_values( $row_args );
-               $formstr = "";
+               //40 allow 10*(TEXT,TD,TEXTAREA,TD) in the row
+               if( $element_counter >= 40 )
+                  exit;
 
-               $current_arg = 0;
-               $this->nr_columns = 0;
-               $this->column_started = false;
+               $element_name = $args[ $current_arg ];
+               $current_arg++;
 
-               $result = '';
-               $element_counter = 0;
+               if( !array_key_exists( $element_name, $this->form_elements ) )
+                  continue;
 
-               while( $current_arg < count($args) )
+               $element_counter++;
+
+               $element_type = $this->form_elements[ $element_name ];
+
+               if( $current_arg + $element_type[ 'NumArgs' ] > count($args) )
+                  continue;
+
+               $element_args = array();
+
+               for( $i = 0; $i < $element_type[ 'NumArgs' ]; $i++ )
+                  $element_args[] = $args[ $current_arg + $i ];
+
+               $func_name = "create_string_func_" . strtolower( $element_name );
+
+               $current_arg += $element_type[ 'NumArgs' ];
+
+               if( $element_name == 'ROW' )
                {
-                  //40 allow 10*(TEXT,TD,TEXTAREA,TD) in the row
-                  if( $element_counter >= 40 )
-                     exit;
+                  $rowclass = ' class='.$element_args[ 0 ];
+               }
+               else if( $element_name == 'HIDDEN' || $element_name == 'ENABLE' )
+               {
+                  $this->$func_name( $result, $element_args );
+               }
+               else if( $element_type['SpanAllColumns'] )
+               {
 
-                  $element_name = $args[ $current_arg ];
-                  $current_arg++;
+                  if( !$this->column_started )
+                  $result .= $this->print_td_start( $element_type['Align'],
+                                                    max( $this->max_nr_columns -
+                                                         $this->nr_columns,
+                                                         1 ) )."\n";
 
-                  if( !array_key_exists( $element_name, $this->form_elements ) )
-                     continue;
+                  $result .= "        ";
+                  $this->$func_name( $result, $element_args );
+                  $result .= "\n";
 
-                  $element_counter++;
-
-                  $element_type = $this->form_elements[ $element_name ];
-
-                  if( count($args) - $current_arg >= $element_type[ 'NumArgs' ] )
+                  $this->nr_columns = $this->max_nr_columns;
+                  $this->column_started = true;
+               }
+               else
+               {
+                  if( $element_type['NewTD'] and $this->column_started )
                   {
-                     $element_args = array();
-
-                     for( $i = 0; $i < $element_type[ 'NumArgs' ]; $i++ )
-                        $element_args[] = $args[ $current_arg + $i ];
-
-                     $func_name = "create_string_func_" . strtolower( $element_name );
-
-                     $current_arg += $element_type[ 'NumArgs' ];
-
-                     if( $element_name == 'HIDDEN' || $element_name == 'ENABLE' )
-                     {
-                        $this->$func_name( $result, $element_args );
-                     }
-                     else if( $element_type['SpanAllColumns'] )
-                     {
-
-                        if( !$this->column_started )
-                        $result .= $this->print_td_start( $element_type['Align'],
-                                                          max( $this->max_nr_columns -
-                                                               $this->nr_columns,
-                                                               1 ) )."\n";
-
-                        $result .= "        ";
-                        $this->$func_name( $result, $element_args );
-                        $result .= "\n";
-
-                        $this->nr_columns = $this->max_nr_columns;
-                        $this->column_started = true;
-                     }
-                     else
-                     {
-                        if( $element_type['NewTD'] and $this->column_started )
-                        {
-                           $result .= $this->print_td_end();
-                           $this->column_started = false;
-                        }
-
-                        if( $element_type['StartTD'] and !$this->column_started )
-                        {
-                           $result .= $this->print_td_start( $element_type['Align'] )."\n";
-                           $this->column_started = true;
-                           $this->nr_columns++;
-                        }
-
-                        $result .= "        ";
-                        $this->$func_name( $result, $element_args );
-                        $result .= "\n";
-
-                        if( $element_type['EndTD'] and $this->column_started )
-                        {
-                           $result .= $this->print_td_end();
-                           $this->column_started = false;
-                        }
-                     }
+                     $result .= $this->print_td_end();
+                     $this->column_started = false;
                   }
 
-                  if( $this->nr_columns > $this->max_nr_columns )
-                     $this->max_nr_columns = $this->nr_columns;
-               }
-               if( $this->column_started )
-                  $result .= $this->print_td_end();
+                  if( $element_type['StartTD'] and !$this->column_started )
+                  {
+                     $result .= $this->print_td_start( $element_type['Align'] )."\n";
+                     $this->column_started = true;
+                     $this->nr_columns++;
+                  }
 
-               if( $result )
-               {
-                  $tr_attrs = $this->get_config(FEC_TR_ATTR);
-                  $formstr .= "    <TR";
-                  $formstr .= ( $tr_attrs != '') ? " $tr_attrs" : '';
-                  $formstr .= ">\n$result\n    </TR>\n";
-                  $area_rows[$curr_area] .= $formstr;
+                  $result .= "        ";
+                  $this->$func_name( $result, $element_args );
+                  $result .= "\n";
+
+                  if( $element_type['EndTD'] and $this->column_started )
+                  {
+                     $result .= $this->print_td_end();
+                     $this->column_started = false;
+                  }
                }
+               if( $this->nr_columns > $this->max_nr_columns )
+                  $this->max_nr_columns = $this->nr_columns;
+            } //while args
+            if( $this->column_started )
+               $result .= $this->print_td_end();
+
+            if( $result )
+            {
+               $tr_attrs = $this->get_config(FEC_TR_ATTR);
+               $formstr .= '    <TR';
+               if( $rowclass )
+                  $formstr .= $rowclass;
+               else if( $tr_attrs )
+                  $formstr .=  ' '.$tr_attrs;
+               $formstr .= ">\n$result\n    </TR>\n";
+               $area_rows[$curr_area] .= $formstr;
             }
+         }
 
          // build area-groups
          if ( $has_layout )
@@ -845,7 +860,7 @@ class Form
     */
    function create_string_func_header( &$result, $args )
       {
-         $result .= "&nbsp;<h3 class=Header>" . $args[0] . ":" . "</h3>";
+         $result .= "<h3 class=Header>" . $args[0] . ":" . "</h3>";
       }
 
    /*!
@@ -983,7 +998,6 @@ class Form
     */
    function create_string_func_tab( &$result, $args )
       {
-         //JUG: $result .= "&nbsp;";
          //equal: $result .= "<td></td>";
       }
 

@@ -324,10 +324,8 @@ class Table
 
       /* Build the table */
 
-      $next_prev_row= $this->make_next_prev_links();
-
       $string = "<table id='{$this->Id}Table' class=Table>\n";
-      $string .= $next_prev_row;
+      $string .= $this->make_next_prev_links('T');
       $string .= $head_row;
       if ( $this->ConfigFilters[FCONF_FILTER_TABLEHEAD] )
       { // filter at table-header
@@ -340,7 +338,7 @@ class Table
          $string .= $filter_row; // maybe empty
       }
       if( $table_rows )
-         $string .= $next_prev_row;
+         $string .= $this->make_next_prev_links('B');
       $string .= "</table>\n";
 
       /* Add filter + column form, embedding main-table into table-form */
@@ -353,7 +351,7 @@ class Table
       {
          $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
             clean_url( $this->Page)."#{$this->Prefix}TableFAC",
-            FORM_GET, false, 'formTable');
+            FORM_GET, false, 'FormTableFAC');
          $table_form->attach_table($this);
       }
       else
@@ -571,7 +569,7 @@ class Table
                " WHERE ID=" . $player_row["ID"];
 
             mysql_query($query)
-               or error('mysql_query_failed','table_columns.add_or_del_column');
+               or error('mysql_query_failed','add_or_del_column');
          }
       }
    }
@@ -1018,7 +1016,7 @@ class Table
          $rclass = $tablerow['class'];
       }
 
-      $string = " <tr valign=top class=$rclass";
+      $string = " <tr class=$rclass";
       if( ALLOW_JSCRIPT && !@$tablerow['noclick'] )
       { //onClick onmousedown ondblclick
          //$string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
@@ -1056,7 +1054,7 @@ class Table
       MySQL >= 4.0.0. Refs at:
        http://dev.mysql.com/doc/refman/4.1/en/information-functions.html
    */
-   function make_next_prev_links()
+   function make_next_prev_links($id)
    {
       if ( $this->Rows_Per_Page <= 0 or $this->Shown_Columns <= 0
             or !( $this->From_Row > 0 or !$this->Last_Page ) )
@@ -1097,16 +1095,16 @@ class Table
       $span = floor($this->Shown_Columns/2);
       if( $span < 2 ) $span = $this->Shown_Columns;
       if( $span > 0 )
-         $string.= '  <td align=left'
+         $string.= '  <td class=PagingL'
            . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
 
       $span = $this->Shown_Columns - $span;
       if( $span > 0 )
-         $string.= '  <td class=PagingRight'
+         $string.= '  <td class=PagingR'
            . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
 
       if( $string )
-         $string = " <tr>\n$string</tr>\n";
+         $string = " <tr class=Links$id>\n$string</tr>\n";
 
       return $string;
    }
@@ -1243,7 +1241,8 @@ class Table
       if ( is_object($rp) and method_exists($rp, 'get_hiddens') and method_exists($rp, 'get_url_parts') )
          array_push( $this->ext_req_params, $rp );
       else
-         error("ERROR: Table.add_external_parameters: expecting object-argument with interfaces get_hiddens() and get_url_parts()");
+         error('internal_error', 'add_external_parameters.bad_object');
+         //error("ERROR: Table.add_external_parameters: expecting object-argument with interfaces get_hiddens() and get_url_parts()");
       $this->ext_req_params_use_hidden = $use_hidden;
       $this->cache_curr_extparam = array();
    }
