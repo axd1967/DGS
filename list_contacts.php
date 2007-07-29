@@ -95,7 +95,7 @@ require_once( "include/contacts.php" );
    $ctable->add_tablehead( 5, T_('Last access'), 'P.Lastaccess', true);
    $ctable->add_tablehead( 6, T_('System categories'));
    $ctable->add_tablehead( 7, T_('User categories'));
-   $ctable->add_tablehead( 8, T_('Notes'), '', false, false, array( 'width' => 250 ));
+   $ctable->add_tablehead( 8, T_('Notes'), '', false, false);
    $ctable->add_tablehead(10, T_('Created'), 'C.Created', true);
    $ctable->add_tablehead(11, T_('Lastchanged'), 'C.Lastchanged', true);
 
