@@ -28,6 +28,10 @@ Changelog
 
 2007-07-29 juga
 
+   * waiting_room.php:
+   - implement Contacts system-flag "Deny game":
+     don't show games from players that "deny games" to current user
+
    * edit_contact.php, list_contacts.php, include/contacts.php:
    - added categorized contact-list for other users,
      support for system categories: deny game, etc.
