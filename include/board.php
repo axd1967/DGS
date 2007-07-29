@@ -42,6 +42,8 @@ class Board
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
    var $movemrkx, $movemrky, $movecol, $movemsg;
 
+   var $infos; //extra-infos collected
+
    var $dirx, $diry; //directions arrays
 
 
@@ -64,6 +66,7 @@ class Board
       $this->movemrkx = $this->movemrky = -1;
       $this->movecol = DAME;
       $this->movemsg = '';
+      $this->infos = array();
 
       $this->dirx = array( -1,0,1,0 );
       $this->diry = array( 0,-1,0,1 );
@@ -82,6 +85,7 @@ class Board
       $this->movemrkx = $this->movemrky = -1; // don't use as last move coord
       $this->movecol = DAME;
       $this->movemsg = '';
+      $this->infos = array();
 
       $gid = $game_row['ID'];
       if( $gid <= 0 )
@@ -95,7 +99,7 @@ class Board
          return TRUE;
 
       $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" )
-         or error('mysql_query_failed','board.load_from_db.find_moves');
+         or error('mysql_query_failed',"board.load_from_db.find_moves($gid)");
       if( !$result )
          return FALSE;
       if( @mysql_num_rows($result) <= 0 )
@@ -115,9 +119,13 @@ class Board
 
          extract($row);
 
-         if ( $PosX == POSX_ADDTIME )
+         if ( $PosX <= POSX_ADDTIME ) //configuration actions
          {
-            //TODO: Stone=time-adder, PosY=0|1 (1=byo-yomi-reset), Hours = hours added
+            if ( $PosX == POSX_ADDTIME )
+            {
+         //POSX_ADDTIME Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=hours added
+               $this->infos[] = array(POSX_ADDTIME, $MoveNr, $Stone, $Hours, $PosY);
+            }
             continue;
          }
 
@@ -488,7 +496,7 @@ class Board
       }
 
       if( $this->movemsg )
-         echo "<table id=\"game_message\" class=MessageBox><tr>" . //align=center
+         echo "<table id=\"gameMessage\" class=MessageBox><tr>" . //align=center
             "<td width=\"" . $stone_size*19 . "\" align=left>$this->movemsg</td></tr></table><BR>\n";
 
 
@@ -1085,13 +1093,13 @@ class Board
      $row= mysql_single_fetch( "board.fix_corrupted_move_table.moves: $gid",
               "SELECT Moves FROM Games WHERE ID=$gid" );
      if( !$row )
-        error('internal_error', "board.fix_corrupted_move_table.moves: $gid");
+        error('internal_error', "board.fix_corrupted_move_table.moves($gid)");
      $Moves= $row['Moves'];
 
      $row= mysql_single_fetch( "board.fix_corrupted_move_table.max: $gid",
               "SELECT MAX(MoveNr) AS max FROM Moves WHERE gid=$gid" );
      if( !$row )
-        error('internal_error', "board.fix_corrupted_move_table.max: $gid");
+        error('internal_error', "board.fix_corrupted_move_table.max($gid)");
      $max_movenr= $row['max'];
 
      if($max_movenr == $Moves)
@@ -1099,12 +1107,12 @@ class Board
 
      if($max_movenr != $Moves+1)
         error("mysql_data_corruption",
-              "board.fix_corrupted_move_table.unfixable: $gid"); // Can't handle this type of problem
+              "board.fix_corrupted_move_table.unfixable($gid)"); // Can't handle this type of problem
 
      mysql_query("DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr")
-        or error('mysql_query_failed','board.fix_corrupted_move_table.delete_moves');
+        or error('mysql_query_failed',"board.fix_corrupted_move_table.delete_moves($gid)");
      mysql_query("DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr")
-        or error('mysql_query_failed','board.fix_corrupted_move_table.delete_move_mess');
+        or error('mysql_query_failed',"board.fix_corrupted_move_table.delete_move_mess($gid)");
    }
 
 

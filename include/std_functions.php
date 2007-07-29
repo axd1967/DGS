@@ -157,6 +157,7 @@ define('DELETE_LIMIT', 10);
 define('MAX_SEKI_MARK', 2);
 
 //-----
+//Board array
 define("NONE", 0); //i.e. DAME
 define("BLACK", 1);
 define("WHITE", 2);
@@ -174,19 +175,25 @@ define("WHITE_DEAD", OFFSET_MARKED+WHITE);
 define("FLAG_NOCLICK", 0x10); //keep it a power of 2
 //-----
 
-//Database values:
+//-- Database values --
+
+//Moves table: particular Stone values
+//normal moves are BLACK or WHITE, prisoners are NONE
 define("MARKED_BY_WHITE", 7);
 define("MARKED_BY_BLACK", 8);
 
+//Moves table: particular PosX values
 define('POSX_PASS', -1);
-define('POSX_SCORE', -2);
+define('POSX_SCORE', -2); //scoring step by Stone, PosY=0
 define('POSX_RESIGN', -3);
-define('POSX_TIME', -4);
-define('POSX_ADDTIME', -5); // Moves: Stone=time-adder, y=0|1 (1=byo-yomi-reset), hours=add_hours
+define('POSX_TIME', -4); //timeout for Stone, PosY=0
+define('POSX_ADDTIME', -50); //Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=add_hours
 
+//Games table: particular Score values
 define('SCORE_RESIGN', 1000);
 define('SCORE_TIME', 2000);
 define('SCORE_MAX', min(SCORE_RESIGN,SCORE_TIME) - 1); // =min(SCORE_...) - 1
+
 
 define('STONE_VALUE',13); // 2 * conventional komi
 define('MIN_BOARD_SIZE',5);
@@ -490,7 +497,6 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    }
 
 
-   $body_width = '';
    if( !$logged_in or $is_down or $printable )
    {
       echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"

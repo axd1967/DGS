@@ -457,6 +457,7 @@ $array=array();
          $Score==0 ? '0' : score2text($Score, false, true)
          ) . "]";
 
+      //skip the ending moves where PosX <= $sgf_trim_level
       //-1= skip ending pass, -2= keep them ... -999= keep everything
       if ( abs($Score) < SCORE_RESIGN )
          $sgf_trim_level = POSX_PASS;
@@ -529,9 +530,9 @@ $array=array();
          case WHITE:
          case BLACK:
          {
-            if ( $PosX == POSX_ADDTIME )
+            if ( $PosX <= POSX_ADDTIME ) //configuration actions
             {
-               //TODO: Stone=time-adder, PosY=0|1 (1=byo-yomi-reset), Hours = hours added
+               //TODO: POSX_ADDTIME Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=hours added
                break;
             }
 
@@ -659,6 +660,7 @@ $array=array();
 
       $sgf_trim_nr--;
    }
+   mysql_free_result($result);
 
    if ( $Status == 'FINISHED')
    {

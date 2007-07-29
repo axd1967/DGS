@@ -62,8 +62,9 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
+   $my_id = $player_row['ID'];
 
    $game_row = mysql_single_fetch( 'confirm.find_game',
                  "SELECT Games.*, " .
@@ -80,12 +81,12 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    if( @$_REQUEST['nextskip'] )
    {
-      jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
+      jump_to_next_game( $my_id, $Lastchanged, $gid);
    }
 
    if( @$_REQUEST['nextaddtime'] )
    {
-      do_add_time( $game_row );
+      do_add_time( $game_row, $my_id);
       jump_to("game.php?gid=$gid"); // back
    }
 
@@ -96,7 +97,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    else
       error("database_corrupted");
 
-   if( $player_row["ID"] != $ToMove_ID )
+   if( $my_id != $ToMove_ID )
       error("not_your_turn");
 
    if( $Status == 'INVITED' )
@@ -463,13 +464,13 @@ This is why:
       or error('mysql_query_failed','confirm.update_game');
 
    if( mysql_affected_rows() != 1 )
-      error("mysql_update_game","confirm20($action,$gid)");
+      error('mysql_update_game',"confirm20($action,$gid)");
 
    $result = mysql_query( $move_query )
       or error('mysql_query_failed','confirm.update_moves');
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
-      error("mysql_insert_move","confirm21($action,$gid)");
+      error('mysql_insert_move',"confirm21($action,$gid)");
 
 
 
@@ -489,22 +490,22 @@ This is why:
 
       $opponent_row = mysql_single_fetch( 'confirm.find_opponent',
                         "SELECT * FROM Players WHERE ID=" .
-                           ($White_ID + $Black_ID - $player_row['ID']) )
+                           ($White_ID + $Black_ID - $my_id) )
          or error('opponent_not_found');
 
-      if( $player_row["ID"] == $Black_ID )
+      if( $my_id == $Black_ID )
       {
-         $blackname = $player_row["Name"];
-         $whitename = $opponent_row["Name"];
-         $blackhandle = $player_row["Handle"];
-         $whitehandle = $opponent_row["Handle"];
+         $blackname = $player_row['Name'];
+         $whitename = $opponent_row['Name'];
+         $blackhandle = $player_row['Handle'];
+         $whitehandle = $opponent_row['Handle'];
       }
       else
       {
-         $whitename = $player_row["Name"];
-         $blackname = $opponent_row["Name"];
-         $whitehandle = $player_row["Handle"];
-         $blackhandle = $opponent_row["Handle"];
+         $whitename = $player_row['Name'];
+         $blackname = $opponent_row['Name'];
+         $whitehandle = $player_row['Handle'];
+         $blackhandle = $opponent_row['Handle'];
       }
 
 
@@ -571,7 +572,7 @@ This is why:
          //The server messages does not allow a reply,
          // so add a *in message* reference to this player.
          $Text.= "Send a message to:<center>"
-               . send_reference( REF_LINK, 1, '', $player_row["ID"], $player_row["Name"], $player_row["Handle"])
+               . send_reference( REF_LINK, 1, '', $my_id, $player_row['Name'], $player_row['Handle'])
                . "</center>" ;
       }
 
@@ -592,7 +593,7 @@ This is why:
 if(ENA_SEND_MESSAGE){ //new
       send_message( 'confirm', $Text, $Subject
          ,$opponent_row['ID'], '', false //the move is always notified
-         ,( $message_from_server_way ? 0 : $player_row["ID"] )
+         ,( $message_from_server_way ? 0 : $my_id )
          , 'RESULT', $gid);
 }else{ //old
       $Textsql = mysql_addslashes( $Text);
@@ -613,7 +614,7 @@ if(ENA_SEND_MESSAGE){ //new
       {
          //This simulate a message sent by this player
          //This will allow a direct message reply but will fill his *sent* folder
-         $query.= ",(" . $player_row["ID"] . ", $mid, 'Y', ".FOLDER_SENT.")" ;
+         $query.= ",(" . $my_id . ", $mid, 'Y', ".FOLDER_SENT.")" ;
          //else we could force a NULL Folder_nr (trashed message)
       }
 
@@ -626,7 +627,7 @@ if(ENA_SEND_MESSAGE){ //new
 
    // Notify opponent about move
 
-   //if( $next_to_move_ID != $player_row['ID'] ) //always true
+   //if( $next_to_move_ID != $my_id ) //always true
 if(1){ //new
       notify( 'confirm', $next_to_move_ID);
 }else{ //old
@@ -644,7 +645,7 @@ if(1){ //new
                 "SET Activity=Activity + $ActivityForMove, " .
                 "Moves=Moves+1, " .
                 "LastMove=FROM_UNIXTIME($NOW) " .
-                "WHERE ID=" . $player_row["ID"] . " LIMIT 1" )
+                "WHERE ID=" . $my_id . " LIMIT 1" )
       or error('mysql_query_failed','confirm.activity');
 
 
@@ -657,36 +658,26 @@ if(1){ //new
    }
    else if( @$_REQUEST['nextgame'] )
    {
-      jump_to_next_game($player_row["ID"], $Lastchanged, $gid);
+      jump_to_next_game( $my_id, $Lastchanged, $gid);
    }
 
    jump_to("game.php?gid=$gid");
 }
 
-function do_add_time( $game_row )
+function do_add_time( $game_row, $my_id)
 {
-   global $player_row;
-
    $gid = $game_row['ID'];
-   $my_id = $player_row['ID'];
    $add_days  = (int) @$_REQUEST['add_days'];
    $reset_byo = (bool) @$_REQUEST['reset_byoyomi'];
 
-   $error = add_time_opponent( $game_row, $gid, $my_id, time_convert_to_hours( $add_days, 'days'), $reset_byo );
-   if ( !is_numeric($error) )
-      error('mysql_confirm_add_time',
-         "confirm.addtime(game=$gid,uid=$my_id,add_days=$add_days,reset_byo=$reset_byo): $error");
-   $add_hours = $error;
+   $add_hours = add_time_opponent( $game_row, $my_id,
+                  time_convert_to_hours( $add_days, 'days'), $reset_byo );
+   if ( !is_numeric($add_hours) )
+      error('confirm_add_time',
+         "do_add_time($gid,$my_id,$add_days,$reset_byo): $add_hours");
 
-   // insert entry in Moves-table
-   $Stone = ( $game_row['Black_ID'] == $my_id ) ? BLACK : WHITE;
-   $Moves = $game_row['Moves'];
-   $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES "
-      . "($gid, $Moves, $Stone, ".POSX_ADDTIME.", ".($reset_byo ? 1 : 0).", $add_hours)";
-   $result = mysql_query( $move_query )
-      or error('mysql_query_failed','confirm.addtime_moves');
-
-   jump_to("game.php?gid=$gid" . ($add_hours > 0 ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '') );
+   jump_to("game.php?gid=$gid" . ($add_hours > 0
+                  ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '') );
 }
 
 ?>

@@ -192,6 +192,7 @@ function get_alt_arg( $n1, $n2)
       }
    }
 
+   $may_add_time = $my_game && allow_add_time_opponent( $game_row, $my_id);
 
 
    $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or
@@ -310,7 +311,7 @@ function get_alt_arg( $n1, $n2)
       case 'add_time': //add-time for opponent
       {
          // check for validity
-         if ( !allow_add_time_opponent( $game_row, $player_row['ID'] ) )
+         if ( !$may_add_time )
             error('invalid_action', "game.add_time");
 
          $validation_step = true;
@@ -614,7 +615,8 @@ function get_alt_arg( $n1, $n2)
 
 
    echo "<HR>\n";
-   draw_game_info($game_row);
+   draw_game_info($game_row, $TheBoard);
+   //draw_board_info($TheBoard);
    echo "<HR>\n";
 
 
@@ -656,7 +658,7 @@ function get_alt_arg( $n1, $n2)
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$opponent_ID" ;
       }
 
-      if ( $action != 'add_time' and allow_add_time_opponent( $game_row, $player_row['ID'] ) )
+      if ( $action != 'add_time' && $may_add_time )
          $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";
 
       $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid");
@@ -708,6 +710,8 @@ function draw_moves()
             $c = $trres;
             break;
          default :
+            if( $PosX < 0)
+               continue;
             $c = number2board_coords($PosX, $PosY, $Size);
             break;
       }
@@ -802,7 +806,7 @@ function draw_add_time( $game_row )
 ';
 }
 
-function draw_game_info(&$game_row)
+function draw_game_info(&$game_row, &$board)
 {
    echo '<table class=GameInfos>' . "\n";
 
@@ -886,8 +890,62 @@ function draw_game_info(&$game_row)
                   ,$game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
 
    echo "</tr>\n";
+   
+   if( isset($board) )
+   {
+      echo "<tr id=\"boardInfos\"><td colspan=$cols>\n";
+      draw_board_info($board);
+      echo "</td></tr>\n";
+   }
 
    echo "</table>\n";
+}
+
+function draw_board_info($board)
+{
+   if( count($board->infos) <= 0 )
+      return;
+
+   $fmts= array(
+      //array(POSX_ADDTIME, $MoveNr, $Stone, $Hours, $PosY);
+      POSX_ADDTIME => array(
+         T_('%2$s had added %3$s to %5$s %4$s at move %1$d'),
+         array( 0, null),
+         array( 1, array( WHITE => T_('White'), BLACK => T_('Black'))),
+         array( 2, 'echo_time'),
+         array( 3, array( 0 => '', 1 => T_('and restarted byoyomi'))),
+         array( 1, array( BLACK => T_('White'), WHITE => T_('Black'))),
+      ),
+   );
+
+   echo "<div class=BoardInfos><dl>";
+   
+   foreach( $board->infos as $row )
+   {
+      $key = array_shift($row);
+      $sub = @$fmts[$key];
+      if( $sub )
+      {
+         //echo var_export($row, true);
+         $fmt = array_shift($sub);
+         $val = array();
+         for( $i=0; $i<count($sub); $i++ )
+         {
+            list($n, $fct) = $sub[$i];
+            //echo "$n => $tmp<br>";
+            if( is_array($fct) )
+               $val[$i] = $fct[$row[$n]];
+            else if( is_string($fct) )
+               $val[$i] = $fct($row[$n]);
+            else
+               $val[$i] = $row[$n];
+         }
+         //echo var_export($val, true);
+         $str= vsprintf($fmt, $val);
+         echo "<dd>$str</dd\n>";
+      }
+   }
+   echo "</dl></div>\n";
 }
 
 function echo_game_rating( $uid, $start_rating, $end_rating)

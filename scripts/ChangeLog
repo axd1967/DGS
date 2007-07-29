@@ -49,7 +49,21 @@ Changelog
 
    * userinfo.php:
    - CSS adjustment
-   - ajusted the link on the games list (using filters)
+   - ajusted the links on the games list (using filters)
+
+   * include/std_functions.php, include/board.php (load_from_db, draw_board),
+     include/game_functions.php, include/time_functions.php (time_remaining),
+     game.php (draw_game_info, draw_board_info), confirm.php (do_add_time),
+     sgf.php:
+   - checked the add_time stuff
+   - adjusted time_remaining() to handle the byoyomi settings reset
+   - changed POSX_ADDTIME from -5 to -50 (somehow enabling a "settings" section
+     far from the tremibating moves)
+   - added the add_time infos in game.php from board.php via the new function
+     draw_board_info()
+   - moved the database updates from do_add_time() to add_time_opponent()
+   - removed the $gid argument from add_time_opponent()
+   - normalized most of the error handlers of add_time_opponent() (few stay)
 
 2007-07-29 juga
 

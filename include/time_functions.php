@@ -117,8 +117,8 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
      
       case("JAP"):
       {
-         //$main > 0 useless, may be removed if add_time need it
-         if( $main > 0 or $byoper < 0 ) // entering byoyomi
+         //"$main > 0 or" useless, removed since add_time
+         if( $byoper < 0 ) // entering byoyomi
          {
             $main = 0;
             $byotime = $startbyotime;
@@ -183,8 +183,8 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
 
       case("CAN"):
       {
-         //$main > 0 useless, may be removed if add_time need it
-         if( $main > 0 or $byoper < 0 ) // entering byoyomi
+         //"$main > 0 or" useless, removed since add_time
+         if( $byoper < 0 ) // entering byoyomi
          {
             $main = 0;
             $byotime = $startbyotime;
