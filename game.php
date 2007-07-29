@@ -616,7 +616,7 @@ function get_alt_arg( $n1, $n2)
 
    echo "<HR>\n";
    draw_game_info($game_row, $TheBoard);
-   //draw_board_info($TheBoard);
+   //echo draw_board_info($TheBoard);
    echo "<HR>\n";
 
 
@@ -893,9 +893,9 @@ function draw_game_info(&$game_row, &$board)
    
    if( isset($board) )
    {
-      echo "<tr id=\"boardInfos\"><td colspan=$cols>\n";
-      draw_board_info($board);
-      echo "</td></tr>\n";
+      $txt= draw_board_info($board);
+      if( $txt )
+         echo "<tr id=\"boardInfos\"><td colspan=$cols\n>$txt</td></tr>\n";
    }
 
    echo "</table>\n";
@@ -904,7 +904,7 @@ function draw_game_info(&$game_row, &$board)
 function draw_board_info($board)
 {
    if( count($board->infos) <= 0 )
-      return;
+      return '';
 
    $fmts= array(
       //array(POSX_ADDTIME, $MoveNr, $Stone, $Hours, $PosY);
@@ -918,8 +918,7 @@ function draw_board_info($board)
       ),
    );
 
-   echo "<div class=BoardInfos><dl>";
-   
+   $txt= '';
    foreach( $board->infos as $row )
    {
       $key = array_shift($row);
@@ -942,10 +941,13 @@ function draw_board_info($board)
          }
          //echo var_export($val, true);
          $str= vsprintf($fmt, $val);
-         echo "<dd>$str</dd\n>";
+         if( $str )
+            $txt.= "<dd>$str</dd\n>";
       }
    }
-   echo "</dl></div>\n";
+   if( $txt )
+      $txt= "<div class=BoardInfos><dl>$txt</dl></div>\n";
+   return $txt;
 }
 
 function echo_game_rating( $uid, $start_rating, $end_rating)
