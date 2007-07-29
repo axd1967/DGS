@@ -495,29 +495,27 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
          . "\n <tr>";
-      $br = ( $printable ? '' : '<br>' );
    }
    else if( $player_row['MenuDirection'] == 'HORIZONTAL' )
    {
-      make_menu_horizontal($menu_array);
+      //echo "\n  <td class=Menu>\n";
+      make_menu_horizontal($menu_array); //outside layout
       make_tools( $tools_array, 0);
-      echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
-         . "\n <tr>";
-      $br = '';
+      //echo "\n  </td></tr><tr>";
+      echo "\n<table id='pageLayout'>" //layout
+         . "\n <tr class=LayoutHorizontal>";
    }
    else
    { // vertical
-      echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
-         . "\n <tr>"
-         . "\n  <td valign=top rowspan=2>\n";
-      make_menu_vertical($menu_array);
+      echo "\n<table id='pageLayout'>" //layout
+         . "\n <tr class=LayoutVertical>"
+         . "\n  <td class=Menu rowspan=2>\n";
+      make_menu_vertical($menu_array); //inside layout
       make_tools( $tools_array, 4);
       echo "\n  </td>";
-      $br = '<br>';
-      $body_width = 'width="90%"';
    }
    //this <table><tr><td> is left open until page end
-   echo "\n  <td $body_width id=\"pageBody\">$br\n\n";
+   echo "\n  <td id=\"pageBody\">\n\n";
 
    sysmsg(get_request_arg('sysmsg'));
 
@@ -533,14 +531,14 @@ function end_page( $menu_array=NULL )
 {
    global $page_microtime, $player_row, $base_path, $printable;
 
-   echo "\n\n&nbsp;<br>";
+   //echo "\n\n&nbsp;<br>";
 
    echo "\n  </td>";
 
    if( $menu_array && !$printable )
    {
-      echo "\n </tr><tr>"
-         . "\n  <td valign=bottom>";
+      echo "\n </tr><tr class=Links>"
+         . "\n  <td class=Links>";
       make_menu($menu_array);
       echo "\n  </td>";
    }
@@ -699,14 +697,17 @@ function cmp2($a, $b)
 
 function make_menu_horizontal($menu_array)
 {
-   global $base_path, $menu_bg_color, $bg_color;
+   global $base_path; //, $menu_bg_color;
 
+/*
    //table for bottom line
    echo "\n<table class=NotPrintable width=\"100%\" border=0 cellspacing=0 cellpadding=0 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
+*/
 
-   echo "\n<table id=\"pageMenu\" class=MenuHorizontal width=\"100%\" border=0 cellspacing=0 cellpadding=4 bgcolor=\"#F7F5FF\">"
+
+   echo "\n<table id=\"pageMenu\" class=MenuHorizontal>"
       . "\n <tr>";
 
    $cols = 4;
@@ -724,14 +725,14 @@ function make_menu_horizontal($menu_array)
             if( $i==0 )
             {
                $t1 = round($b);
-               $t1 = " width=\"$t1%\"";
+               $t1 = " width=\"$t1%\""; // class=Logo1
                $t2 = 'dragonlogo_bl.jpg';
                $width = "*";
             }
             else
             {
                $t1 = 100-$cumwidth;
-               $t1 = " width=\"$t1%\" align=right";
+               $t1 = " width=\"$t1%\" align=right"; // class=Logo2
                $t2 = 'dragonlogo_br.jpg';
                $width = "";
             }
@@ -762,29 +763,31 @@ function make_menu_horizontal($menu_array)
 
    echo "\n </tr>\n</table>\n";
 
+/*
    //table for bottom line
    echo "\n  </td>"
       . "\n </tr><tr>"
       . "\n  <td height=1><img src=\"{$base_path}images/dot.gif\" width=1 height=1 alt=\"\"></td>"
       . "\n </tr>\n</table>\n";
+*/
 }
 
 function make_menu_vertical($menu_array)
 {
-   global $base_path, $menu_bg_color, $bg_color;
+   global $base_path; //, $menu_bg_color;
 
-   //table for border line
 /*
+   //table for border line
    echo "\n<table class=NotPrintable border=0 cellspacing=0 cellpadding=1 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
 */
 
 
-   echo "\n<table id=\"pageMenu\" class=MenuVertical border=0 cellspacing=0 cellpadding=4 bgcolor=\"#F7F5FF\">"
+   echo "\n<table id=\"pageMenu\" class=MenuVertical>"
       . "\n <tr>";
 
-   echo "\n  <td align=center><img src=\"{$base_path}images/dragonlogo_bl.jpg\" alt=\"Dragon\"></td>"
+   echo "\n  <td class=Logo1><img src=\"{$base_path}images/dragonlogo_bl.jpg\" alt=\"Dragon\"></td>"
       . "\n </tr><tr>"
       . "\n  <td align=left nowrap>";
 
@@ -808,9 +811,9 @@ function make_menu_vertical($menu_array)
 
    echo "</td>"
       . "\n </tr><tr>"
-      . "\n  <td height=1><img height=1 src=\"{$base_path}images/dot.gif\" alt=\"\"></td>"
+      . "\n  <td class=Logo2><img src=\"{$base_path}images/dragonlogo_br.jpg\" alt=\"Dragon\"></td>"
       . "\n </tr>"
-      . "\n</table>";
+      . "\n</table>\n";
 
 /*
    //table for border line
@@ -2534,6 +2537,7 @@ function attb_quote( $str)
    return '"'.basic_safe(trim($str)).'"';
 }
 
+//return an array of the attributs $attbs
 function attb_parse( $attbs)
 {
    if( is_array($attbs) )
@@ -2559,6 +2563,7 @@ function attb_parse( $attbs)
    return $attbs;
 }
 
+//return a string of the attributs $attbs
 function attb_build( $attbs)
 {
    if( is_array($attbs) )
@@ -2579,18 +2584,20 @@ function attb_build( $attbs)
    return '';
 }
 
+//merge two arrays of attributs
+//$attb2 overwrite $attb1, special behaviour for the classes
 function attb_merge( $attb1, $attb2, $class_sep='')
 {
 /* must be done before call:
    $attb1 = attb_parse( $attb1);
    $attb2 = attb_parse( $attb2);
 */
-   if( is_string($class_sep)
-      && isset($attb1['class'])
-      && isset($attb2['class']) )
+   if( isset($attb1['class']) && isset($attb2['class']) )
    {
-      $attb1['class'] = $attb2['class'].$class_sep.$attb1['class'];
-      unset($attb2['class']);
+      if( is_string($class_sep) )
+         $attb2['class'] = $attb1['class'].$class_sep.$attb2['class'];
+         //as other CSS items, the priority is for the last.
+      unset($attb1['class']);
    }
    return array_merge($attb1, $attb2);
 }
