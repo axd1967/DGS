@@ -123,6 +123,12 @@ define('FC_NO_WILD', 'no_wild');
 define('FC_START_WILD', 'start_wild');
 
 /*!
+ * \brief for text-based filters: substring-search using implicit wildcards at start and
+ *        end of string (needs FC_START_WILD to be set); values: bool; default is false.
+ */
+define('FC_SUBSTRING', 'substring');
+
+/*!
  * \brief for MysqlMatch-Filter: control usage of boolean-mode (checkbox and/or functionality).
  * values: MATCH_BOOLMODE_OFF don't show checkbox and don't use boolean-mode
  *         MATCH_BOOLMODE_SET don't show checkbox but use boolean-mode; since mysql 4.0.1(!)
@@ -203,7 +209,7 @@ define('FC_ADD_HAVING', 'add_having');
 define('FC_NUM_FACTOR', 'num_factor');
 
 /*!
- * \brief for Selection-Filter: makes a multi-value selectbox.
+ * \brief for Selection-Filter and CheckboxArray-Filter: makes a multi-value selectbox.
  * note: URL-args are given as 'fname[]=val, ...'
  * values: array( choice-description => HTML-unquoted value to be combined into dbfield-based query ), see filter_example.php
  * default is false
@@ -224,6 +230,9 @@ define('FC_QUOTETYPE', 'quotetype');
  */
 define('FC_SYNTAX_HINT', 'syntax_hint');
 define('FCV_SYNHINT_ADDINFO', 'fcv_synhint_addinfo');
+
+/*! \brief for CheckboxArray-Filter: indicates to build a bitmask; values: bool; default is false. */
+define('FC_BITMASK', 'bitmask');
 
 
 
@@ -1000,6 +1009,8 @@ class Filter
    var $p_flags;
    /*! \brief QuerySQL or NULL (unset). */
    var $query;
+   /*! \brief non-null array with search-terms. */
+   var $match_terms;
 
 
    /*!
@@ -1064,6 +1075,21 @@ class Filter
          return $defvalue;
       else
          return '';
+   }
+
+   /*!
+    * \brief Returns non-null array with regex-search-terms (from parsing-process),
+    *        if filter supports it.
+    * <p>Mainly used to highlight text, though not exactly matching the same
+    * terms using a regular-expression to mark the text.
+    * \see parse_html_safe() in std_functions.php
+    */
+   function get_terms()
+   {
+      if ( $this->is_active() )
+         return $this->match_terms;
+      else
+         return array();
    }
 
    /*! \brief creates default TokenizerConfig with optional overruling by FC_QUOTETYPE-config. */
@@ -1458,6 +1484,7 @@ class Filter
          $this->p_value = '';
          $this->p_flags = 0;
          $this->query = NULL;
+         $this->match_terms = array();
       }
       elseif ( $name != '' ) // multi-element-filter
       {
@@ -1525,6 +1552,9 @@ class Filter
          return false;
       }
       $this->copy_parsed($tp);
+
+      if ( count($tp->p_terms) > 0 )
+         $this->match_terms = array_merge( $this->match_terms, $tp->p_terms );
       return true;
    }
 
@@ -1841,6 +1871,10 @@ class FilterNumeric extends Filter
   * \brief Filter for texts allowing exact value, range value and using
   *        wildcard; SearchFilter-Type: Text.
   * <p>GUI: text input-box
+  * <p>Additional interface functions:
+  * - \see get_terms() to return array with search-terms as regex.
+  *
+  * note: special quoting used according to MATCH-syntax of mysql,
   *
   * <p>Allowed Syntax:
   *    "foo"  = exact value
@@ -1861,6 +1895,9 @@ class FilterNumeric extends Filter
   *    FC_START_WILD = minimum number of consecutive non-wildcard-chars used in text-value
   *         (use STARTWILD_OPTMINCHARS as value (=4) -> that allows mysql to do some optimizations;
   *         that's because a search with a starting wildcard can't use an database-index)
+  *    FC_SUBSTRING = if true, substring-search with text using implicit wildcard at start
+  *         and end of string, needs FC_START_WILD to be set (default STARTWILD_OPTMINCHARS).
+  *         Outrules range-syntax (uses implicit FC_NO_RANGE).
   */
 class FilterText extends Filter
 {
@@ -1873,8 +1910,8 @@ class FilterText extends Filter
       $this->tok_config = $this->create_TokenizerConfig();
 
       $arr_syntax = array();
-      if ( $this->get_config(FC_NO_RANGE) )
-      {
+      if ( $this->get_config(FC_NO_RANGE) or $this->get_config(FC_SUBSTRING) )
+      { // substring forcing no-range
          array_push( $arr_syntax, 'foo' );
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
       }
@@ -1895,10 +1932,17 @@ class FilterText extends Filter
       {
          array_push( $arr_syntax, "*goo" . ($minchars > 1 ? " ($minchars)" : '') );
          $this->parser_flags |= TEXTPARSER_ALLOW_START_WILD;
-         $this->tok_config->add_config( TEXTPARSER_STARTWILD_MINCHARS, $minchars );
+         $this->tok_config->add_config( TEXTPARSER_CONF_STARTWILD_MINCHARS, $minchars );
       }
 
       $this->syntax_descr = implode(', ', $arr_syntax);
+      if ( $this->get_config(FC_SUBSTRING) )
+      {
+         if ( !$minchars )
+            error("ERROR: Text-filter-config FC_SUBSTRING is missing FC_START_WILD-config");
+         $this->parser_flags |= TEXTPARSER_IMPLICIT_WILD;
+         $this->syntax_descr = '['. T_('substring') . '] ' . $this->syntax_descr;
+      }
    }
 
    /*! \brief Parses text-value using TextParser with default TokenizerConfig. */
@@ -2785,8 +2829,7 @@ class FilterBoolean extends Filter
   * <p>Additional interface functions:
   * - \see get_match_query_part() to return match-SQL-query-part to be used
   *   as relevance-value in list of SQL-select fields.
-  * - \see get_terms() to return array with search-terms as regex (can be used
-  *   to highlight search-text in result.
+  * - \see get_terms() to return array with search-terms as regex.
   *
   * note: special quoting used according to MATCH-syntax of mysql,
   *       i.e. no quoting used as for the Text-/Numeric-based-Filters is used
@@ -2829,8 +2872,6 @@ class FilterMysqlMatch extends Filter
 {
    /*! \brief element-name for boolean-mode-checkbox. */
    var $elem_boolmode;
-   /*! \brief non-null array with search-terms. */
-   var $match_terms;
    /*! \brief clause-part containing MATCH-command. */
    var $match_query_part;
 
@@ -2854,13 +2895,12 @@ class FilterMysqlMatch extends Filter
       $this->values[$this->elem_boolmode] = ''; // default (unchecked)
 
       $this->build_sql_option(); // check match-mode
-      $this->match_terms = array();
       $this->match_query_part = '';
    }
 
    /*!
     * \brief Parses match-term-value and handle checkbox for boolean-mode (if used).
-    * <p>Also updates local var: match_terms
+    * <p>Also updates filter var: match_terms
     */
    function parse_value( $name, $val )
    {
@@ -2991,20 +3031,6 @@ class FilterMysqlMatch extends Filter
       }
 
       return $arr;
-   }
-
-   /*!
-    * \brief Returns array with regex-search-terms (from parsing-process).
-    * <p>Mainly used to highlight text, though not exactly matching the same
-    * terms using a regular-expression to mark the text.
-    * \see parse_html_safe() in std_functions.php
-    */
-   function get_terms()
-   {
-      if ( $this->is_active() )
-         return $this->match_terms;
-      else
-         return array();
    }
 
    /*!
@@ -3242,7 +3268,7 @@ class FilterRatingDiff extends FilterNumeric
   *
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC (makes not much sense), FC_GROUP_SQL_OR,
-  *    FC_ADD_HAVING, FC_HIDE
+  *    FC_ADD_HAVING, FC_HIDE, FC_BITMASK
   *
   * <p>supported filter-specific config:
   *    FC_MULTIPLE - mandatory config,
@@ -3286,6 +3312,7 @@ class FilterCheckboxArray extends Filter
 
       // init field-names
       $idx = 0;
+      $is_bitmask = $this->get_config(FC_BITMASK);
       foreach( $this->choices as $elemtd => $arr )
       {
          $idx++;
@@ -3296,6 +3323,9 @@ class FilterCheckboxArray extends Filter
          $this->add_element_name( $fname );
          $this->values[$fname] = 0; // init
          $this->clauses[$fname] = $arr[0];
+         if ( $is_bitmask and !is_numeric($arr[0]) )
+            error("ERROR: FilterCheckboxArray({$this->id}): "
+               . "FC_BITMASK-config forces integer-values for FC_MULTIPLE-array-values");
       }
 
       // handle FC_DEFAULT as index-array (keep in sync with build_fname-func)
@@ -3329,16 +3359,33 @@ class FilterCheckboxArray extends Filter
       $arrfn = $query->get_parts(SQLP_FNAMES);
       $field = $arrfn[0];
 
-      $arr_in = array();
-      foreach( $this->values as $fname => $val )
+      if ( $this->get_config(FC_BITMASK) )
       {
-         if ( $val and isset($this->clauses[$fname]) )
-            array_push( $arr_in, "'" . mysql_addslashes( $this->clauses[$fname] ) . "'" );
-      }
-      if ( count($arr_in) == 0 )
-         return;
+         $bitmask = 0;
+         foreach( $this->values as $fname => $val )
+         {
+            if ( $val and isset($this->clauses[$fname]) )
+               $bitmask |= (int) $this->clauses[$fname];
+         }
+         if ( $bitmask == 0 )
+            return;
 
-      $clause = "$field IN (" . implode(',', $arr_in) . ")";
+         $clause = "($field & $bitmask)<>0";
+      }
+      else {
+         // regular values to be joined with OR (respective IN-syntax)
+         $arr_in = array();
+         foreach( $this->values as $fname => $val )
+         {
+            if ( $val and isset($this->clauses[$fname]) )
+               array_push( $arr_in, "'" . mysql_addslashes( $this->clauses[$fname] ) . "'" );
+         }
+         if ( count($arr_in) == 0 )
+            return;
+
+         $clause = "$field IN (" . implode(',', $arr_in) . ")";
+      }
+
       $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
       $query->add_part( $parttype, $clause ); // use having to allow alias-FNAMES
       $this->query = $query;
