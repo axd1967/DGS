@@ -215,11 +215,19 @@ require_once( "include/contacts.php" );
       {
          # TODO: add marker + action-select !? preferred to use images for M/I/E/R
          $sep = str_repeat('&nbsp;', 3);
-         $links  = anchor( "message.php?mode=NewMessage&uid=$cid", 'M', T_('Send message') ) . $sep;
-         $links .= anchor( "message.php?mode=Invite&uid=$cid", 'I', T_('Invite') ) . $sep;
-         $links .= anchor( "edit_contact.php?cid=$cid", 'E', T_('Edit contact') ) . $sep;
-         $links .= anchor( "edit_contact.php?cid=$cid".URI_AMP."contact_delete=1", 'R', T_('Remove contact') ) . $sep;
-         $crow_strings[9] = "<td>$links</td>";
+         $links  = anchor( "message.php?mode=NewMessage&uid=$cid",
+               image( 'images/msg.gif', T_('Send message') ),
+               T_('Send message') ) . $sep;
+         $links .= anchor( "message.php?mode=Invite&uid=$cid",
+               image( 'images/favicon.ico', T_('Invite') ),
+               T_('Invite') ) . $sep;
+         $links .= anchor( "edit_contact.php?cid=$cid",
+               'E',
+               T_('Edit contact') ) . $sep;
+         $links .= anchor( "edit_contact.php?cid=$cid".URI_AMP."contact_delete=1",
+               image( 'images/trashcan.gif', T_('Remove contact') ),
+               T_('Remove contact') ) . $sep;
+         $crow_strings[9] = "<td>$sep$links</td>";
       }
       if( $ctable->Is_Column_Displayed[10] )
       {
