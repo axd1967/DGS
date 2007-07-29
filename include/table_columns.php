@@ -1018,7 +1018,7 @@ class Table
          $rclass = $tablerow['class'];
       }
 
-      $string = " <tr class=$rclass";
+      $string = " <tr valign=top class=$rclass";
       if( ALLOW_JSCRIPT && !@$tablerow['noclick'] )
       { //onClick onmousedown ondblclick
          //$string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
