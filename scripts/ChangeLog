@@ -47,6 +47,10 @@ Changelog
    - normalized the $my_id var.
    - comments fixed
 
+   * userinfo.php:
+   - CSS adjustment
+   - ajusted the link on the games list (using filters)
+
 2007-07-29 juga
 
    * waiting_room.php:

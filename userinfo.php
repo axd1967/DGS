@@ -32,9 +32,10 @@ require_once( "include/contacts.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   $my_id = $player_row["ID"];
+   $my_id = $player_row['ID'];
+
    get_request_user( $uid, $uhandle, true);
    if( $uhandle )
       $where = "Handle='".mysql_addslashes($uhandle)."'";
@@ -68,7 +69,7 @@ require_once( "include/contacts.php" );
       or error('mysql_query_failed', 'userinfo.bio');
 
 
-   $my_info = ( $player_row["ID"] == $uid );
+   $my_info = ( $my_id == $uid );
    $name_safe = make_html_safe($row['Name']);
    $handle_safe = $row['Handle'];
 
@@ -97,8 +98,10 @@ require_once( "include/contacts.php" );
 
       $run_link = "show_games.php?uid=$uid";
       $fin_link = $run_link.URI_AMP.'finished=1';
-      $rat_link = $fin_link.URI_AMP.'sort1=Rated'.URI_AMP.'desc1=1';
-      $los_link = $rat_link.URI_AMP.'sort2=Win';
+      $rat_link = $fin_link.URI_AMP.'fsf14=1'; //Rated=yes
+      $won_link = $rat_link.URI_AMP.'fsf11=1'; //Won?=Won
+      $los_link = $rat_link.URI_AMP.'fsf11=2'; //Won?=Lost
+
       $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
 
 
@@ -165,11 +168,11 @@ require_once( "include/contacts.php" );
                'sinfo' => $row['Finished'],
                ) );
       $itable->add_row( array(
-               'sname' => anchor( $rat_link.URI_AMP.'sort2=ID', T_('Rated games')),
+               'sname' => anchor( $rat_link, T_('Rated games')),
                'sinfo' => $row['RatedGames'],
                ) );
       $itable->add_row( array(
-               'sname' => anchor( $los_link.URI_AMP.'desc2=1', T_('Won games')),
+               'sname' => anchor( $won_link, T_('Won games')),
                'sinfo' => $row['Won'],
                ) );
       $itable->add_row( array(
@@ -184,13 +187,13 @@ require_once( "include/contacts.php" );
       {//show player clock
          $tmp= setTZ($row['Timezone']); //for get_clock_used() and local time
          $itable->add_row( array(
-                  'rattb' => 'bgcolor="lime"',
+                  'rattb' => 'class=DebugInfo',
                   'sname' => 'time zone / local time ',
                   'sinfo' => $row['Timezone']
                         .' / '.date($date_fmt, time() + (int)$timeadjust) //see $NOW
                   ) );
          $itable->add_row( array(
-                  'rattb' => 'bgcolor="lime"',
+                  'rattb' => 'class=DebugInfo',
                   'sname' => 'night / used==used(night) ',
                   'sinfo' => $row['Nightstart']
                         .' / '.$row['ClockUsed']
