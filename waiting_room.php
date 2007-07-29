@@ -27,6 +27,7 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/countries.php" );
+require_once( "include/contacts.php" );
 
 {
    #$DEBUG_SQL = true;
@@ -167,9 +168,17 @@ require_once( "include/countries.php" );
       "$haverating AS haverating",
       "$goodrating AS goodrating" );
    $qsql->add_part( SQLP_FROM,
-      'Waitingroom', 'Players' );
+      'Waitingroom',
+      'INNER JOIN Players ON Waitingroom.uid=Players.ID' );
 
-   $qsql->add_part( SQLP_WHERE, 'Players.ID=Waitingroom.uid' );
+   // Contacts: Deny games
+   $qsql->add_part( SQLP_FIELDS,
+      "IF(ISNULL(C.uid),0,C.SystemFlags & ".CSYSFLAG_DENY_GAME.") AS game_denied" );
+   $qsql->add_part( SQLP_FROM,
+      "LEFT JOIN Contacts AS C ON C.uid=Players.ID AND C.cid=$my_id" );
+   $qsql->add_part( SQLP_HAVING,
+      'game_denied=0' );
+
    $qsql->add_part( SQLP_ORDER, $order, 'ID' );
    $qsql->merge( $wrtable->get_query() );
    $query = $qsql->get_select() . " $limit";
