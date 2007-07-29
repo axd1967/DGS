@@ -26,6 +26,55 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-29 juga
+
+   * edit_contact.php, list_contacts.php, include/contacts.php:
+   - added categorized contact-list for other users,
+     support for system categories: deny game, etc.
+     support for user   categories: friend, student, etc.
+     allow free-text notes about contact, save created and lastchanged-date,
+     show some players-data (name, userid, country, rating, lastaccess)
+   - added Contacts table
+-----------
+CREATE TABLE Contacts (
+   uid int(11) NOT NULL default '0',
+   cid int(11) NOT NULL default '0',
+   SystemFlags smallint(5) unsigned NOT NULL default '0',
+   UserFlags int(10) unsigned NOT NULL default '0',
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   Note varchar(255) NOT NULL default '',
+   PRIMARY KEY Contact (uid,cid)
+) TYPE=MyISAM;
+
+ALTER TABLE `Players`
+ ADD `ContactColumns` int(10) unsigned NOT NULL default '225' AFTER `WaitingroomColumns`;
+-----------
+
+   * include/table_columns.php (make_tablerow):
+   - added top-vertical-alignment on table-rows (for contacts),
+     need some CSS-magic to fix that
+
+   * include/std_functions.php (start_page):
+   - main-menu: added Contacts-link
+   - main-menu: moved Translate-link into bottom-bar (show only for translators)
+
+   * userinfo.php:
+   - added bottom-link to add or edit user as contact
+
+
+   * include/filter.php (get_terms, FilterText, FilterCheckboxArray),
+     code_examples/filter_example2.php,
+     specs/filters.txt:
+   - added filter-config FC_SUBSTRING for Text-filter for auto-substring-search
+   - added filter-config FC_BITMASK for CheckboxArray-filter
+     to build sql-query using bitmask
+   - added extracting of regex-terms also for Text-Filter (when using wildcards)
+
+   * include/filter_parser.php (TextParser):
+   - added TEXTPARSER_IMPLICIT_WILD to support substring-search for filters
+   - added extracting of regex-terms (when using wildcards)
+
 2007-07-28 juga
 
    * confirm.php (do_add_time), game.php,
