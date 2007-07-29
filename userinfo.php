@@ -34,14 +34,14 @@ require_once( "include/contacts.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   $myID = $player_row["ID"];
+   $my_id = $player_row["ID"];
    get_request_user( $uid, $uhandle, true);
    if( $uhandle )
       $where = "Handle='".mysql_addslashes($uhandle)."'";
    elseif( $uid > 0 )
       $where = "ID=$uid";
    else
-      $where = "ID=$myID";
+      $where = "ID=$my_id";
 
    $result = mysql_query(
       "SELECT *," .
@@ -256,9 +256,9 @@ require_once( "include/contacts.php" );
                 T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
                 T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid" );
 
-      if ( $myID != $uid )
+      if ( $my_id != $uid )
       {
-         $cstr = ( Contact::has_contact($myID, $uid) ) ? T_('Edit contact') : T_('Add contact');
+         $cstr = ( Contact::has_contact($my_id, $uid) ) ? T_('Edit contact') : T_('Add contact');
          $menu_array[$cstr] = "edit_contact.php?cid=$uid";
       }
    }

@@ -26,9 +26,7 @@ require_once( "include/make_translationfiles.php" );
 require_once( "include/faq_functions.php" );
 
 
-$info_box = '<table class=InfoBox>
-<tr><td>
-<ul>
+$info_box = '<ul>
   <li> You may delete an entry by emptying its text-box(es)... while it had
        not been translated. Then you will only be allowed to hide it, waiting
        to re-use it later.
@@ -57,11 +55,7 @@ $info_box = '<table class=InfoBox>
        so is always a substring-search. Found entries will be marked with
        a red \'<font color="red">#</font>\'.
   <li> The last used entry is marked with a blue \'<font color="blue"><b>&gt;</b></font>\'.
-</ul>
-</td></tr>
-</table>
-<p></p>
-';
+</ul>';
 
 /* Translatable flag meaning - See also translate.php
   Value   : Meaning             : admin_toggle : admin_mark_box    : translator_page
@@ -624,12 +618,15 @@ $info_box = '<table class=InfoBox>
       $str = 'Read this before editing';
       if( (bool)@$_REQUEST['infos'] )
       {
-         echo '<h3 class=Header>' . $str . ':</h3>';
-         echo $info_box;
+         echo "<h3 class=Header>$str:</h3>\n"
+            . "<table class=InfoBox><tr><td>\n"
+            . $info_box
+            . "\n</td></tr></table>\n";
       }
       else
       {
-         echo '<h3 class=Header>' . anchor( $page.'?infos=1', $str) . '</h3>';
+         $tmp = anchor( $page.'?infos=1', $str);
+         echo "<h3 class=Header>$tmp</h3>\n";
       }
 
 

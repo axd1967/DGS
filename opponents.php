@@ -54,11 +54,11 @@ $ARR_DBFIELDKEYS = array(
     */
 
    // check vars
-   $myID = $player_row['ID'];
-   $uid = get_request_arg( 'uid', $myID );
+   $my_id = $player_row['ID'];
+   $uid = get_request_arg( 'uid');
    $opp = get_request_arg( 'opp' );
    if ( empty($uid) )
-      $uid = $myID;
+      $uid = $my_id;
    if ( $opp and ($opp === $uid) )
       error("Opponent must be distinct from uid [$uid]");
    if ( !is_numeric($uid) )
@@ -133,7 +133,7 @@ $ARR_DBFIELDKEYS = array(
    $utable->add_or_del_column();
 
    // External-Form
-   $usform = new Form( $utable->Prefix, $page, FORM_GET, false, 'formTable');
+   $usform = new Form( $utable->Prefix, $page, FORM_GET, false, 'FormTable');
    $usform->set_layout( FLAYOUT_GLOBAL, ( $opp ? '2,(1|4|3)' : '2' ) );
    $usform->set_layout( FLAYOUT_AREACONF, FAREA_ALL,
       array( FAC_ENVTABLE => 'align=center' ) );
@@ -428,10 +428,10 @@ $ARR_DBFIELDKEYS = array(
    if ( $opp )
       $menu_array[ T_('Show opponents') ] = "{$page}{$filterURL}uid=$uid";
 
-   if ( $uid !== $myID ) // others opponents
+   if ( $uid !== $my_id ) // others opponents
    {
       $menu_array[ T_('Show my opponents') ]   = "{$page}{$filterURL}";
-      $menu_array[ T_('Show me as opponent') ] = "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$myID";
+      $menu_array[ T_('Show me as opponent') ] = "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$my_id";
       $menu_array[ T_('Show as my opponent') ] = "{$page}{$filterURL}opp=$uid";
    }
 

@@ -34,11 +34,13 @@ require_once( "include/rating.php" );
    if( !$logged_in )
       error("not_logged_in");
 
+   $my_id = $player_row['ID'];
+
    $observe = isset($_GET['observe']);
    if( $observe )
    {
       $finished = false; //by definition
-      $uid = 0; //from $player_row["ID"] list
+      $uid = 0; //from $player_row['ID'] list
       $all = false;
    }
    else
@@ -51,22 +53,19 @@ require_once( "include/rating.php" );
          get_request_user( $uid, $uhandle, true);
          if( $uhandle )
             $where = "Handle='".mysql_addslashes($uhandle)."'";
-         elseif( $uid > 0 )
+         else if( $uid > 0 )
             $where = "ID=$uid";
          else
             error("no_uid");
 
-         $result = mysql_query( "SELECT ID, Name, Handle FROM Players WHERE $where" )
-            or error('mysql_query_failed', 'show_games.find_player');
+         $user_row = mysql_single_fetch('show_games.find_player',
+               "SELECT ID, Name, Handle FROM Players WHERE $where" )
+            or error('unknown_user', 'show_games.find_player');
 
-         if( @mysql_num_rows($result) != 1 )
-            error("unknown_user");
-
-         $user_row = mysql_fetch_assoc($result);
          $uid = $user_row['ID'];
       }
    }
-   $running = !$observe && !$finished; // 'and' don't work here, why? :(
+   $running = !$observe && !$finished;
 
    if( $observe )
    {
@@ -82,7 +81,7 @@ require_once( "include/rating.php" );
       $column_set_name = "FinishedGamesColumns";
       $fprefix = 'f';
    }
-   else
+   else if( $running )
    {
       $tableid = 'running';
       $page = "show_games.php?uid=$uid".URI_AMP;
@@ -92,6 +91,7 @@ require_once( "include/rating.php" );
 
    // table filters
    $gfilter = new SearchFilter( $fprefix );
+   //Filter & add_filter(int id, string type, string dbfield, [bool active=false], [array config])
    $gfilter->add_filter( 1, 'Numeric', 'Games.ID', true, array( FC_SIZE => 8 ) );
    $gfilter->add_filter( 6, 'Numeric', 'Games.Size', true);
    $gfilter->add_filter( 7, 'Numeric', 'Games.Handicap', true);
@@ -99,13 +99,13 @@ require_once( "include/rating.php" );
    $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true);
    $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true);
    $gfilter->add_filter(14, 'RatedSelect', 'Rated', true);
-   if ( !$observe and !$all )
+   if( !$observe and !$all )
    {
       $gfilter->add_filter( 3, 'Text',   'Name',   true);
       $gfilter->add_filter( 4, 'Text',   'Handle', true);
       $gfilter->add_filter(16, 'Rating', 'Rating2', true);
    }
-   if ( $running and !$all )
+   if( $running and !$all )
    {
       $gfilter->add_filter( 5, 'Selection',     # filter on my color (not on who-to-move)
             array( T_('All') => '',
@@ -117,7 +117,7 @@ require_once( "include/rating.php" );
       $gfilter->add_filter(23, 'Rating', 'startRating', true,
             array( FC_ADD_HAVING => 1 ));
    }
-   if ( $finished )
+   if( $finished )
    {
       $gfilter->add_filter(10, 'Score', 'Score', true);
       $gfilter->add_filter(11, 'Selection',
@@ -127,14 +127,14 @@ require_once( "include/rating.php" );
                    T_('Jigo') => 'Score=0' ),
             true);
       $gfilter->add_filter(12, 'RelativeDate', 'Lastchanged', true);
-      if ( $all )
+      if( $all )
       {
          $gfilter->add_filter(27, 'Rating', 'Black_End_Rating', true);
          $gfilter->add_filter(30, 'Rating', 'White_End_Rating', true);
          $gfilter->add_filter(28, 'RatingDiff', 'blog.RatingDiff', true);
          $gfilter->add_filter(31, 'RatingDiff', 'wlog.RatingDiff', true);
       }
-      else // user
+      else //if( !all )
       {
          $gfilter->add_filter( 5, 'Selection',
                array( T_('All') => '', 'B' => "Black_ID=$uid", 'W' => "White_ID=$uid" ),
@@ -146,7 +146,7 @@ require_once( "include/rating.php" );
          $gfilter->add_filter(25, 'RatingDiff', 'log.RatingDiff', true);
       }
    }
-   if ( $observe or $all )
+   if( $observe or $all )
    {
       $gfilter->add_filter(17, 'Text',   'black.Name',   true);
       $gfilter->add_filter(18, 'Text',   'black.Handle', true);
@@ -166,12 +166,12 @@ require_once( "include/rating.php" );
 
    // attach external URL-parameters to table
    $extparam = new RequestParameters();
-   if ( $observe )
+   if( $observe )
       $extparam->add_entry( 'observe', 1 );
    else
    {
       $extparam->add_entry( 'uid', $uid );
-      if ( $finished )
+      if( $finished )
          $extparam->add_entry( 'finished', 1 );
    }
    $gtable->add_external_parameters( $extparam, true ); // also for hiddens
@@ -179,45 +179,45 @@ require_once( "include/rating.php" );
    $order = $gtable->current_order_string();
    $limit = $gtable->current_limit_string();
 
-   # table-column-ID usage
-   #   views: OB=observe, FU=finished-user, FA=finished-all, RU=running-user, RA=running-all
-   #   note: '> ' indicates a column not common to all views, usage given for specific views
-   #
-   # no: description of displayed info
-   #  0: -
-   #  1: ID
-   #  2: sgf
-   #  3: >  FU + RU (Opponent-Name)
-   #  4: >  FU + RU (Opponent-Handle)
-   #  5: >  FU (User-Color-Graphic), RU (2-Colors-Graphic)
-   #  6: Size
-   #  7: Handicap
-   #  8: Komi
-   #  9: Moves
-   # 10: >  FU + FA (Score)
-   # 11: >  FU (User-Score-graphic)
-   # 12: >  FU + FA (Lastchanged as 'End date'), RU (Weekendclock)
-   # 13: >  OB + RU + RA (Lastchanged as 'Last move')
-   # 14: Rated
-   # 15: >  RU (Opponents-LastAccess)
-   # 16: >  FU + RU (User-Rating)
-   # 17: >  OB + FA + RA (Black-Name)
-   # 18: >  OB + FA + RA (Black-Handle)
-   # 19: >  OB + FA + RA (Black-Rating)
-   # 20: >  OB + FA + RA (White-Name)
-   # 21: >  OB + FA + RA (White-Handle)
-   # 22: >  OB + FA + RA (White-Rating)
-   # 23: >  FU + RU (User-StartRating)
-   # 24: >  FU (User-EndRating)
-   # 25: >  FU (User-RatingDiff)
-   # 26: >  OB + FA + RA (Black-StartRating)
-   # 27: >  FA (Black-EndRating)
-   # 28: >  FA (Black-EndRatingDiff)
-   # 29: >  OB + FA + RA (White-StartRating)
-   # 30: >  FA (White-EndRating)
-   # 31: >  FA (White-EndRatingDiff)
-   # 32: -
-
+/*****
+ * table-column-ID usage
+ *   views: OB=observe, FU=finished-user, FA=finished-all, RU=running-user, RA=running-all
+ *   note: '> ' indicates a column not common to all views, usage given for specific views
+ *
+ * no: description of displayed info
+ *  0: -
+ *  1: ID
+ *  2: sgf
+ *  3: >  FU + RU (Opponent-Name)
+ *  4: >  FU + RU (Opponent-Handle)
+ *  5: >  FU (User-Color-Graphic), RU (2-Colors-Graphic, who-to-move)
+ *  6: Size
+ *  7: Handicap
+ *  8: Komi
+ *  9: Moves
+ * 10: >  FU + FA (Score)
+ * 11: >  FU (User-Score-graphic)
+ * 12: >  FU + FA (Lastchanged as 'End date'), RU (Weekendclock)
+ * 13: >  OB + RU + RA (Lastchanged as 'Last move')
+ * 14: Rated
+ * 15: >  RU (Opponents-LastAccess)
+ * 16: >  FU + RU (User-Rating)
+ * 17: >  OB + FA + RA (Black-Name)
+ * 18: >  OB + FA + RA (Black-Handle)
+ * 19: >  OB + FA + RA (Black-Rating)
+ * 20: >  OB + FA + RA (White-Name)
+ * 21: >  OB + FA + RA (White-Handle)
+ * 22: >  OB + FA + RA (White-Rating)
+ * 23: >  FU + RU (User-StartRating)
+ * 24: >  FU (User-EndRating)
+ * 25: >  FU (User-RatingDiff)
+ * 26: >  OB + FA + RA (Black-StartRating)
+ * 27: >  FA (Black-EndRating)
+ * 28: >  FA (Black-EndRatingDiff)
+ * 29: >  OB + FA + RA (White-StartRating)
+ * 30: >  FA (White-EndRating)
+ * 31: >  FA (White-EndRatingDiff)
+ *****/
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
    $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true, array( 'class' => 'Button') );
    $gtable->add_tablehead( 2, T_('sgf'));
@@ -235,7 +235,7 @@ require_once( "include/rating.php" );
    }
    else if( $finished )
    {
-      if( $all)
+      if( $all )
       {
          $gtable->add_tablehead(17, T_('Black name'), 'blackName');
          $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
@@ -261,9 +261,9 @@ require_once( "include/rating.php" );
          $gtable->add_tablehead( 5, T_('Color'), 'Color');
       }
    }
-   else //if( $running )
+   else if( $running )
    {
-      if( $all)
+      if( $all )
       {
          $gtable->add_tablehead(17, T_('Black name'), 'blackName');
          $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
@@ -308,11 +308,11 @@ require_once( "include/rating.php" );
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
       $gtable->add_tablehead(12, T_('End date'), 'Lastchanged', true);
    }
-   else //if( $running )
+   else if( $running )
    {
       $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
       $gtable->add_tablehead(13, T_('Last move'), 'Lastchanged', true);
-      if( !$all ) //!$observe && !$finished
+      if( !$all )
       {
          $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
          $gtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
@@ -342,7 +342,7 @@ require_once( "include/rating.php" );
          'INNER JOIN Players AS white ON white.ID=White_ID',
          'INNER JOIN Players AS black ON black.ID=Black_ID' );
       $qsql->add_part( SQLP_WHERE,
-         'OB.uid=' . $player_row['ID'] );
+         'OB.uid=' . $my_id );
    }
    else if( $all )
    {
@@ -358,7 +358,7 @@ require_once( "include/rating.php" );
          'INNER JOIN Players AS white ON white.ID=White_ID',
          'INNER JOIN Players AS black ON black.ID=Black_ID' );
 
-      if ( $finished )
+      if( $finished )
       {
          $qsql->add_part( SQLP_FIELDS,
             'Black_End_Rating AS blackEndRating',
@@ -370,7 +370,7 @@ require_once( "include/rating.php" );
             'LEFT JOIN Ratinglog AS wlog ON wlog.gid=Games.ID AND wlog.uid=White_ID' );
          $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
       }
-      else
+      else if( $running )
          $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
    }
    else // user
@@ -386,7 +386,7 @@ require_once( "include/rating.php" );
          //extra bits of Color are for sorting purposes
          "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color" );
       $qsql->add_part( SQLP_FROM, 'Games', 'Players' );
-      if ( $finished )
+      if( $finished )
       {
          $qsql->add_part( SQLP_FIELDS,
             "SIGN(IF(Black_ID=$uid, -Score, Score)) AS Win",
@@ -396,12 +396,12 @@ require_once( "include/rating.php" );
          $qsql->add_part( SQLP_FROM, "LEFT JOIN Ratinglog AS log ON log.gid=Games.ID AND log.uid=$uid" );
          $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
       }
-      else // running
+      else if( $running )
       {
          $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
       }
 
-      if ( ALLOW_SQL_UNION )
+      if( ALLOW_SQL_UNION )
       {
          $qsql->add_part( SQLP_UNION_WHERE,
             "White_ID=$uid AND Players.ID=Black_ID",
@@ -443,7 +443,7 @@ require_once( "include/rating.php" );
    start_page( $title1, true, $logged_in, $player_row,
                $gtable->button_style($player_row['Button']) );
 
-   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
+   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title2</h3>\n";
 
    // hover-texts for colors-column
@@ -505,7 +505,7 @@ require_once( "include/rating.php" );
                (isset($whiteDiff) ? ($whiteDiff > 0 ? '+' : '') .
                 sprintf("%0.2f",$whiteDiff*0.01) : '&nbsp;' ) . "</td>";
       }
-      else
+      else //if( !$observe && !$all )
       {
          if( $gtable->Is_Column_Displayed[3] )
             $grow_strings[3] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
@@ -526,13 +526,13 @@ require_once( "include/rating.php" );
 
          if( $gtable->Is_Column_Displayed[5] )
          {
-            if( $Color & 2 ) //my color
+            if( $Color & 0x2 ) //my color
                $colors = 'w';
             else
                $colors = 'b';
             if( !($Color & 0x20) )
             {
-               if( $Color & 1 ) //to move color
+               if( $Color & 0x1 ) //to move color
                   $colors.= '_w';
                else
                   $colors.= '_b';
@@ -553,7 +553,7 @@ require_once( "include/rating.php" );
       if( $gtable->Is_Column_Displayed[9] )
          $grow_strings[9] = "<td>$Moves</td>";
 
-      if( $finished )
+      if( $finished ) // && !all
       {
          if( $gtable->Is_Column_Displayed[10] )
             $grow_strings[10] = '<td>' . score2text($Score, false) . "</td>";
@@ -573,7 +573,7 @@ require_once( "include/rating.php" );
          if( $gtable->Is_Column_Displayed[12] )
             $grow_strings[12] = '<td>' . date($date_fmt, $Time) . "</td>";
       }
-      else //if( !$finished or $observe )
+      else if( $running ) // && !all
       {
          if( !$observe and !$all and $gtable->Is_Column_Displayed[12] )
             $grow_strings[12] = "<td>" . ($WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td>";
@@ -587,16 +587,15 @@ require_once( "include/rating.php" );
 
       $gtable->add_row( $grow_strings );
    }
-
+   mysql_free_result($result);
    $gtable->echo_table();
 
    $menu_array = array();
 
-   $myID = $player_row["ID"];
    if( $observe )
-      $uid = $myID;
+      $uid = $my_id;
 
-   if( !$all && $uid > 0 && $uid != $myID )
+   if( !$all && $uid > 0 && $uid != $my_id )
    {
       $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
       if( !$observe )
@@ -609,9 +608,9 @@ require_once( "include/rating.php" );
    if( $finished or $observe )
    {
       // where am I ?
-      if ( $myID == $uid )
+      if( $my_id == $uid )
          $menukey = T_('Show my running games');
-      elseif ( $all )
+      else if( $all )
          $menukey = T_('Show all running games');
       else // other user
          $menukey = T_('Show running games');
@@ -620,9 +619,9 @@ require_once( "include/rating.php" );
    if( !$finished )
    {
       // where am I ?
-      if ( $myID == $uid )
+      if( $my_id == $uid )
          $menukey = T_('Show my finished games');
-      elseif ( $all )
+      else if( $all )
          $menukey = T_('Show all finished games');
       else // other user
          $menukey = T_('Show finished games');

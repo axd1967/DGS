@@ -122,7 +122,7 @@ require_once( "include/filter.php" );
       /*full-details*/ true, /*only-tablehead*/ true, /*terms*/ '' );
 
    // External-Search-Form
-   $smform = new Form( $mtable->Prefix, $page, FORM_GET, false, 'formTable' );
+   $smform = new Form( $mtable->Prefix, $page, FORM_GET, false, 'FormTable' );
    $smform->set_tabindex(1);
    $smform->set_config( FEC_TR_ATTR, 'valign=top' );
    $smform->set_config( FEC_EXTERNAL_FORM, true );

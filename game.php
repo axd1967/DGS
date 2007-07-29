@@ -83,8 +83,13 @@ function get_alt_arg( $n1, $n2)
 //    if( !$logged_in )
 //       error('not_logged_in');
 
+   if( $logged_in )
+      $my_id = $player_row['ID'];
+   else
+      $my_id = 0;
+
    if( $logged_in && @$_REQUEST['toggleobserve'] )
-      toggle_observe_list($gid, $player_row["ID"]);
+      toggle_observe_list($gid, $my_id);
 
 
    $query= "SELECT Games.*, " .
@@ -124,7 +129,7 @@ function get_alt_arg( $n1, $n2)
    }
    else
    {
-      $may_play = ( $logged_in and $player_row["ID"] == $ToMove_ID ) ;
+      $may_play = ( $logged_in and $my_id == $ToMove_ID ) ;
       $just_looking = !$may_play;
       if( $may_play )
       {
@@ -149,14 +154,14 @@ function get_alt_arg( $n1, $n2)
 
 
    // ??? no more useful:
-   if( !$just_looking && $logged_in && $player_row["ID"] != $ToMove_ID )
+   if( !$just_looking && $logged_in && $my_id != $ToMove_ID )
       error('not_your_turn');
 
    // allow validation
    if ( $just_looking && $action == 'add_time' )
       $just_looking = false;
 
-   $my_game = ( $logged_in && ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID ) ) ;
+   $my_game = ( $logged_in && ( $my_id == $Black_ID or $my_id == $White_ID ) ) ;
 
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
 
@@ -404,13 +409,13 @@ function get_alt_arg( $n1, $n2)
 
    if( $my_game )
    {
-      if( $player_row["ID"] == $Black_ID )
+      if( $my_id == $Black_ID )
       {
          $my_color= 'B';
          $opponent_ID= $White_ID;
          $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
       }
-      else //if( $player_row["ID"] == $White_ID )
+      else //if( $my_id == $White_ID )
       {
          $my_color= 'W';
          $opponent_ID= $Black_ID;
@@ -514,6 +519,7 @@ function get_alt_arg( $n1, $n2)
 
    $TheBoard->movemsg= $movemsg;
    $TheBoard->draw_board( $may_play, $action, $stonestring);
+   //TODO: javascript move buttons && numbers hide
 
    if( $extra_message ) //score messages
    {
@@ -602,7 +608,7 @@ function get_alt_arg( $n1, $n2)
 
    foreach( $page_hiddens as $key => $val )
    {
-      echo "<input type=\"hidden\" name=\"$key\" value=\"$val\">\n";
+      echo "<input type=\"hidden\" name=\"$key\" value=\"$val\">";
    }
    echo "</FORM>\n";
 
@@ -662,7 +668,7 @@ function get_alt_arg( $n1, $n2)
 
       if( ($Status != 'FINISHED') and !$my_game and $logged_in )
       {
-         if( is_on_observe_list( $gid, $player_row["ID"] ) )
+         if( is_on_observe_list( $gid, $my_id ) )
             $menu_array[T_('Remove from observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=t";
          else
             $menu_array[T_('Add to observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=t";
@@ -723,20 +729,18 @@ function draw_moves()
       echo " onchange=\"javascript:this.form['movechange'].click();\"";
    }
    echo ">\n$str</SELECT>\n";
-   echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">\n";
-   echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">\n";
+   echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">";
+   echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">";
 }
 
 function draw_message_box(&$message)
 {
-
    $tabindex=1;
    echo '
-    <center>
       <TABLE class=MessageForm>
         <TR>
-          <TD align=right>' . T_('Message') . ':</TD>
-          <TD align=left>
+          <TD class=Rubric>' . T_('Message') . ':</TD>
+          <TD>
             <textarea name="message" tabindex="'.($tabindex++).'" cols="50" rows="8">'
                . textarea_safe( $message) . '</textarea></TD>
         </TR>
@@ -749,24 +753,22 @@ function draw_message_box(&$message)
 <TR><TD align=right colspan=2><input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' .
       T_("Go back") . '"></TD></TR>
       </TABLE>
-    </CENTER>
 ';
 
 }
 
 function draw_add_time( $game_row )
 {
-   $tabindex=1;
+   $tabindex=10; //TODO: fix this start value
    echo '
-    <a name="addtime">
-    <center>
-      <TABLE>
+    <a name="addtime"></a>
+      <TABLE class=AddtimeForm>
         <TR>
           <TD>' . T_('Choose how much time you wish to give your opponent') . ':</TD>
         </TR>
         <TR>
-          <TD align=left>
-           <SELECT name="add_days" size="1"  tabindex="{$tabindex++}">';
+          <TD>
+           <SELECT name="add_days" size="1"  tabindex="'.($tabindex++).'">';
 
    for( $i=0; $i <= MAX_ADD_DAYS; $i++)
    {
@@ -783,22 +785,20 @@ function draw_add_time( $game_row )
    if ( $game_row['Byotype'] != 'FIS' )
    {
       echo '<TR>
-              <TD align=left>
-                <INPUT type="checkbox" name="reset_byoyomi" tabindex="'.($tabindex++).'"value="1" alt="'
-                  . T_('Add time: byo-yomi reset') . '">&nbsp;' . T_('Reset byo-yomi time and periods') . '
+              <TD>
+                <input type="checkbox" checked name="reset_byoyomi" tabindex="'.($tabindex++).'" value="1"'
+                   . '>&nbsp;' . T_('Reset byoyomi settings while re-entering') . '
               </TD>
             </TR>';
    }
 
    echo '<TR>
           <TD align=left>
-<input type=submit name="nextaddtime" tabindex="'.($tabindex++).'" value="' . T_('Add Time') . '">
-<input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' . T_('Cancel') . '">
-          </TD>
+<input type=submit name="nextaddtime" tabindex="'.($tabindex++).'" value="' . T_('Add Time') . '"
+><input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' . T_('Cancel') . '"
+></TD>
         </TR>
       </TABLE>
-      <p></p>
-    </CENTER>
 ';
 }
 
@@ -910,7 +910,7 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
    {
       //echo textarea_safe( $notes) . "\n";
       echo "  <input name=\"togglenotes\" type=\"submit\" value=\""
-               . T_('Show notes') . "\">\n";
+               . T_('Show notes') . "\">";
       return;
    }
 
@@ -924,16 +924,16 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
             . textarea_safe( $notes) . "</textarea>\n";
    echo "  </td></tr>\n";
    echo "  <tr><td><input name=\"savenotes\" type=\"submit\" value=\""
-            . T_('Save notes') . "\">\n";
+            . T_('Save notes') . "\">";
 
    if( $collapsed == 'N' )
    {
-   echo "  <input name=\"togglenotes\" type=\"submit\" value=\""
-            . T_('Hide notes') . "\">\n";
+   echo "<input name=\"togglenotes\" type=\"submit\" value=\""
+            . T_('Hide notes') . "\">";
    }
 
-   echo "  </td></tr>\n";
-   echo " </table>\n";
+   echo "</td></tr>\n";
+   echo "</table>\n";
 }
 
 ?>

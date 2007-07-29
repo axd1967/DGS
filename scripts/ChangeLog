@@ -31,16 +31,21 @@ Changelog
    * skins/dragon/screen.css,
      include/table_columns.php (make_table, make_tablerow, make_next_prev_links),
      include/form_functions.php (create_form_string),
-     forum/forum_functions.php (echo_links):
+     forum/forum_functions.php (echo_links),
+     search_messages.php, game.php, opponents.php:
    - added the 'ROW' form command
    - various CSS adjustments
 
-   * translate.php:
-   - CSSed the page
+   * translate.php, admin_faq.php:
+   - CSSed the pages (final?)
 
    * include/std_functions.php (start_page),
      list_contacts.php:
-   - quick fix of some contacts stuff (remove center tags)
+   - quick fix of some contacts stuff (remove center tags) (more to come!)
+
+   * opponents.php, userinfo.php, game.php, confirm.php, show_games.php:
+   - normalized the $my_id var.
+   - comments fixed
 
 2007-07-29 juga
 
