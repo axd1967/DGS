@@ -170,7 +170,7 @@ elseif ( $fdemo == 2 )
 {
    $title = array(
       'Text Filter',
-      'allowed syntax: exact value, wildcard (\'*\'), range-syntax (swap reverse-values, e.g. e-a -> a-e)',
+      'allowed syntax: exact value, wildcard (\'*\'), substring-search, range-syntax (swap reverse-values, e.g. e-a -> a-e)',
       "escape special chars with single-quotes, .e.g  a'-'  or  'a-'  for exact-value-text \'a-\' (not range)",
       'hover-text with a short syntax-help',
       'error is shown if invalid syntax entered',
@@ -181,6 +181,7 @@ elseif ( $fdemo == 2 )
       3 => array( 'label' => 'Text #3', 'descr' => 'no range allowed [FC_NO_RANGE] (\'-\'-char is no special char any more)' ),
       4 => array( 'label' => 'Text #4', 'descr' => 'starting wildcard allowed [FC_START_WILD=1] without restrictions' ),
       5 => array( 'label' => 'Text #5', 'descr' => 'starting wildcard allowed [FC_START_WILD=STARTWILD_OPTMINCHARS] with min-char restriction of 4 chars' ),
+      6 => array( 'label' => 'Text #6', 'descr' => 'substring-search using implicit wildcards at start and end of string, needs to set FC_START_WILD too [FC_SUBSTRING,FC_START_WILD=1]' ),
    );
 
    # standard filter
@@ -201,6 +202,10 @@ elseif ( $fdemo == 2 )
    # start-wildcard allowed (with optimization)
    $filter->add_filter( 5, 'Text', 'text5', true,
          array( FC_START_WILD => STARTWILD_OPTMINCHARS ));
+
+   # substring-search (using implicit wildcards at start and end of string), FC_START_WILD mandatory
+   $filter->add_filter( 6, 'Text', 'text6', true,
+         array( FC_SUBSTRING => 1, FC_START_WILD => 1 ));
 }
 
 /* -------------------- (3) Rating -----------------------------------------------  */
@@ -535,6 +540,7 @@ elseif ( $fdemo == 14 )
    $arr_layout = array(
       1 => array( 'label' => 'Checkbox-Array #1', 'descr' => 'standard filter allowing to select none, one or more choices [FC_MULTIPLE]' ),
       2 => array( 'label' => 'Checkbox-Array #2', 'descr' => 'filter allowing to select none, one or more choices showed in 3 columns [FC_MULTIPLE,FC_SIZE=3]' ),
+      3 => array( 'label' => 'Checkbox-Array #3', 'descr' => 'filter supporting bitmask-searching [FC_MULTIPLE,FC_BITMASK]' ),
    );
 
    # standard filter with mandatory FC_MULTIPLE
@@ -552,6 +558,14 @@ elseif ( $fdemo == 14 )
                    '<td>%s&nbsp;Row1-Col2</td>' => array( 'val2', 'alternative-text #2 for chkbox2' ),
                    '<td>%s&nbsp;Row1-Col3</td>' => array( 'val3', 'alternative-text #3 for chkbox2' ),
                    '<td>%s&nbsp;Row2-Col1</td>' => array( 'val4' ),
+                )));
+
+   # filter with bitmask FC_BITMASK
+   $filter->add_filter( 3, 'CheckboxArray', 'chkbox3', true,
+         array( FC_BITMASK => 1,
+                FC_MULTIPLE => array(
+                  '<td>%s&nbsp;Row1-Col1 0x07</td>' => array( 0x07, 'alternative-text #1 for chkbox3' ),
+                  '<td>%s&nbsp;Row2-Col1 0x20</td>' => array( 0x20, 'alternative-text #2 for chkbox3' ),
                 )));
 }
 
