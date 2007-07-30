@@ -946,7 +946,7 @@ function draw_board_info($board)
       }
    }
    if( $txt )
-      $txt= "<div class=BoardInfos><dl>$txt</dl></div>\n";
+      $txt= "<div id=\"boardInfos\" class=BoardInfos><dl>$txt</dl></div>\n";
    return $txt;
 }
 

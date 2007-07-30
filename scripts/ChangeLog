@@ -26,6 +26,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-07-31 rodival
+
+   * include/game_functions.php (add_time_opponent),
+     confirm.php, game.php:
+   - fixed the add_time error when nothing is changed in byoyomi settings
+
 2007-07-29 rodival
 
    * skins/dragon/screen.css,

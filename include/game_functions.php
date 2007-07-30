@@ -79,9 +79,6 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
    if( !allow_add_time_opponent( $game_row, $uid ) )
       return "Conditions are not met to allow to add time for game [$gid]";
 
-   if( $reset_byo && $game_row['Byotype'] == 'FIS' )
-      $reset_byo = 0;
-
    // get opponents columns to update
    if( $game_row['Black_ID'] == $uid )
    {
@@ -94,21 +91,40 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
       $Stone = WHITE;
    }
 
+   if( !isset($game_row["{$oppcolor}_Maintime"])
+      or !isset($game_row["{$oppcolor}_Byoperiods"])
+      )
+      error('internal_error',"add_time_opponent.incomplete_game_row($gid)");
+
+   if( $reset_byo && $game_row['Byotype'] == 'FIS' )
+      $reset_byo = 0;
+   if( $reset_byo && $game_row["{$oppcolor}_Byoperiods"] == -1 )
+      $reset_byo = 0;
+
+/*
    // min. 1h to be able to reset byo-period with -1 (for next period)
    if( $reset_byo && $add_hours <= 0 && $game_row["{$oppcolor}_Maintime"] <= 0 )
       $add_hours = 1;
+*/
 
    // add maintime and eventually reset byo-time for opponent
-   $game_query =
-      "UPDATE Games SET {$oppcolor}_Maintime={$oppcolor}_Maintime+$add_hours";
-   $game_row["{$oppcolor}_Maintime"] = (@$game_row["{$oppcolor}_Maintime"])+$add_hours;
+   $game_query = '';
+   if( $add_hours > 0 )
+   {
+      $game_query.= ",{$oppcolor}_Maintime={$oppcolor}_Maintime+$add_hours";
+      $game_row["{$oppcolor}_Maintime"]+= $add_hours;
+   }
    if( $reset_byo )
    {
-      $game_query .= ", {$oppcolor}_Byoperiods=-1";
+      $game_query.= ",{$oppcolor}_Byoperiods=-1";
       $game_row["{$oppcolor}_Byoperiods"] = -1;
    }
+   if( !$game_query )
+      return 0; //nothing to do
+
    //TODO: HOT_SECTION to avoid multiple-clicks
-   $game_query .= " WHERE ID=$gid AND Status" . IS_RUNNING_GAME . " LIMIT 1";
+   $game_query = "UPDATE Games SET ".substr($game_query,1)
+               . " WHERE ID=$gid AND Status" . IS_RUNNING_GAME . " LIMIT 1";
 
    // insert entry in Moves-table
    $Moves = $game_row['Moves'];
@@ -118,7 +134,7 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
    //see also confirm.php
    mysql_query( $game_query )
          or error('mysql_query_failed',"add_time_opponent.update($gid)");
-   if( mysql_affected_rows() != 1 )
+   if( mysql_affected_rows() != 1 ) //0 if it had done nothing
       error('mysql_update_game',"add_time_opponent.update($gid)");
 
    mysql_query( $move_query )

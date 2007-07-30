@@ -87,7 +87,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    if( @$_REQUEST['nextaddtime'] )
    {
       do_add_time( $game_row, $my_id);
-      jump_to("game.php?gid=$gid"); // back
+      //jump_to("game.php?gid=$gid"); // back
    }
 
    if( $Black_ID == $ToMove_ID )
@@ -677,7 +677,8 @@ function do_add_time( $game_row, $my_id)
          "do_add_time($gid,$my_id,$add_days,$reset_byo): $add_hours");
 
    jump_to("game.php?gid=$gid" . ($add_hours > 0
-                  ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '') );
+                  ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '')
+         . '#boardInfos');
 }
 
 ?>
