@@ -75,6 +75,17 @@ input {
    padding: 0px;
 }
 
+ul {
+/* IE,Avant: the <UL> have no top marge */
+/* FF;Opera: the <UL> have top marge (close to 1em) */
+/* IE,Avant: remove bullets
+   margin: 1em 0px 0px 0px;
+   margin: 1em auto auto auto;
+   margin-left: auto;
+*/
+   margin-top: 1em;
+}
+
 /*
 a:link {
    color: blue;
@@ -355,20 +366,21 @@ table#pageLayout tr.LayoutVertical td.Menu {
    vertical-align: top;
 }
 
-table#pageLayout tr.LayoutVertical td#pageBody {
-   width: 99%;
+table#pageLayout td#pageBody {
+   margin: 0px;
+   padding: 4px 4px 1em 4px;
    text-align: center;
    vertical-align: top;
 /*   display: block;
    overflow: hidden; /* hidden visible scroll auto */
 }
 
+table#pageLayout tr.LayoutVertical td#pageBody {
+   width: 99%;
+}
+
 table#pageLayout tr.LayoutHorizontal td#pageBody {
    width: 99%;
-   text-align: center;
-   vertical-align: top;
-/*   display: block;
-   overflow: hidden; /* hidden visible scroll auto */
 }
 
 table#pageTools {
@@ -965,13 +977,9 @@ table.InfoBox {
 table.InfoBox td {
    border: 1px inset #F7F5E3; /* page background-color */
    margin: 0px;
-   padding: 4px 8px;
+   padding: 0px 8px 0px 0px;
    text-align: left;
-}
-
-table.InfoBox ul {
-   border: 0px solid red;
-   margin: 0.5em 0px;
+   vertical-align: bottom;
 }
 
 
@@ -1659,10 +1667,7 @@ table.FAQ td.FAQindex div.FAQlevel1 hr {
 
 table.FAQ td.FAQindex ul.FAQlevel2 {
    border: 0px solid red;
-   margin: 0px 0px 0px 0px;
-/*
-   padding: 0px 8px 0px 8px;
-*/
+   margin: 0px 0px 0px 0px; /* remove the bullets */
 }
 
 table.FAQ td.FAQindex ul.FAQlevel2 strong.Question {
@@ -1680,6 +1685,49 @@ table.FAQ td.FAQread div.Answer {
 */
 }
 
+
+table.FAQadmin {
+   border: 0px solid red;
+   border-collapse: collapse;
+   border-spacing: 0px;
+   max-width: none;
+   width: 60%;
+/*
+   margin: 0px 6%;
+*/
+   margin: 0px auto;
+   overflow: visible;
+   empty-cells: show;
+   text-indent: 0;
+   text-align: left;
+   color: black;
+}
+
+table.FAQadmin td {
+   border: 0px solid red;
+   padding: 2px 4px;
+   text-align: left;
+   color: black;
+}
+
+table.FAQadmin h3.Header {
+/*   margin: 0px; */
+   text-align: left;
+}
+
+table.FAQadmin td.Button {
+   width: 1%;
+   padding: 2px 0px 0px 4px;
+   text-align: left;
+   color: black;
+}
+
+table.FAQadmin td.Indent,
+table.FAQadmin td.Category,
+table.FAQadmin td.Entry {
+   border: 0px solid #808080;
+   border-width: 0px 0px 0px 1px;
+}
 
 /* ------------------------- */
 /* message allowed tags */

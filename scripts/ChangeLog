@@ -32,6 +32,10 @@ Changelog
      confirm.php, game.php:
    - fixed the add_time error when nothing is changed in byoyomi settings
 
+   * skins/dragon/screen.css,
+     admin_faq.php:
+   - CSS adjusted (for IE, Opera and Avant), info box adjusted
+
 2007-07-29 rodival
 
    * skins/dragon/screen.css,

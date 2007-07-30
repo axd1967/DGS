@@ -27,21 +27,22 @@ require_once( "include/faq_functions.php" );
 
 
 $info_box = '<ul>
-  <li> You may delete an entry by emptying its text-box(es)... while it had
-       not been translated. Then you will only be allowed to hide it, waiting
-       to re-use it later.
+  <li> Hidden entries - marked by \'(H)\' - are not shown in the live-FAQ
+       and disappear from the translators\' lists.
   <li> You may toggle the \'translatable\' status of an entry with the right
        side button. But as soon as one translator had translated it, this
        button will disappear and you will have to use the inside check-box(es)
        (\'Mark as changed for translators\') to signal to the translators
        when your edition is finished and that they have some work to do again.
-       This button is also not shown as long as the entry is hidden.
        Please, avoid to check the box if you have just fixed a typo ;)
-  <li> Hidden entries - marked by \'(H)\' - are not shown in the live-FAQ.
-  <li> When adding a new entry or editing an existing entry, select the
-       \'Preview\' checkbox to see how the FAQ-entry will look like.
-       The new or changed text are saved regardless of the preview-checkbox.
-  <li> For links homed at DGS, use not &lt;a href=".."&gt;, but the
+       This button is also not shown as long as the entry is hidden.
+  <li> You may delete an entry by emptying its text-box(es)... while it had
+       not been translated. Then you will only be allowed to hide it, waiting
+       to re-use it later.
+  <li> When adding a new entry or editing an existing entry, hit the
+       \'Preview\' button to see how the FAQ-entry will look like
+       without saving it.
+  <li> For links homed at DGS, don\'t use &lt;a href=".."&gt;, but the
        home-tag, e.g. &lt;home users.php&gt;Users&lt;/home&gt;
   <li> You may use the note-tag &lt;note&gt;(removed from entry)&lt;/note&gt;
        to add some notes seen only by faq admins and translators.
@@ -49,7 +50,7 @@ $info_box = '<ul>
        many lines an entry can be moved up or down. A saved value is
        stored for one hour in a cookie. Invalid or 0 resets to the
        default of 1.
-  <li> About FAQ Search: Search finds text in Question or Answers of all
+  <li> The \'Search\' finds text in Question or Answers of all
        categories and texts, also in the hidden ones. The search-term
        is implicitly prefixed and suffixed with a wildcard \'%\'-pattern,
        so is always a substring-search. Found entries will be marked with
@@ -210,7 +211,6 @@ $info_box = '<ul>
          start_page('FAQ Admin - Edit category', true, $logged_in, $player_row );
       else
          start_page('FAQ Admin - Edit entry', true, $logged_in, $player_row );
-      echo "<center>\n";
 
       $show_list = false;
 
@@ -276,7 +276,7 @@ $info_box = '<ul>
                            ));
       $faq_edit_form->echo_string(1);
 
-      show_preview( $row['Level'], $question, $answer);
+      show_preview( $row['Level'], $question, $answer, "e$id");
    } //edit
 
 
@@ -407,7 +407,6 @@ $info_box = '<ul>
          start_page('FAQ Admin - New category', true, $logged_in, $player_row );
       else
          start_page('FAQ Admin - New entry', true, $logged_in, $player_row );
-      echo "<center>\n";
 
       $show_list = false;
 
@@ -453,7 +452,7 @@ $info_box = '<ul>
                            ));
       $faq_edit_form->echo_string(1);
 
-      show_preview( $action=='c' ? 1 : 2, $question, $answer);
+      show_preview( $action=='c' ? 1 : 2, $question, $answer, "e$id");
    } //new
 
 
@@ -613,7 +612,6 @@ $info_box = '<ul>
    if( $show_list )
    {
       start_page('FAQ Admin', true, $logged_in, $player_row );
-      echo "<center>\n";
 
       $str = 'Read this before editing';
       if( (bool)@$_REQUEST['infos'] )
@@ -628,12 +626,6 @@ $info_box = '<ul>
          $tmp = anchor( $page.'?infos=1', $str);
          echo "<h3 class=Header>$tmp</h3>\n";
       }
-
-
-      echo "<table align=center width=\"85%\" border=0><tr><td>\n";
-
-      echo "<h3 class=Header align=left><a name=\"general\">" .
-         'FAQ Admin' . "</a></h3>\n";
 
 
       // FAQ-search
@@ -677,16 +669,19 @@ $info_box = '<ul>
          or error('mysql_query_failed','admin_faq.list');
 
 
-      echo "<a name=\"general\"></a><table>\n";
+      echo "<h3 class=Header>" . 'FAQ Admin' . "</h3>\n";
+
+      $nbcol = 12;
+      echo "<a name=\"general\"></a><table class=FAQadmin>\n";
 
       // table-columns:
       // curr-entry | match-term | Q/New | A | move-up | ~down | cat-up | ~down | New | Hide | Transl
-      $nbcol = 11;
 
-      echo "<tr><td colspan=2>&nbsp;</td><td align=left colspan=".($nbcol-2).">"
-         . "<a href=\"$page?new=1".URI_AMP."type=c".URI_AMP."id=1"
-         . '"><img border=0 title="'. 'Add new category'
-         . '" src="images/new.png" alt="N"></a></td></tr>';
+      echo "<tr><td colspan=2></td>" //for marks
+         . TD_button( 'Add new category',
+               "$page?new=1".URI_AMP."type=c".URI_AMP."id=1",
+               'images/new.png', 'N')
+         . "<td colspan=".($nbcol-3).">(first category)</td></tr>";
 
       while( $row = mysql_fetch_assoc( $result ) )
       {
@@ -697,26 +692,24 @@ $info_box = '<ul>
          $entry_ref = "#e{$row['ID']}";
 
          // mark 'current' entry and matched-terms (2 cols)
-         echo '<tr><td with=10>';
-         if ( $row['MatchQuestion'] || $row['MatchAnswer'] )
+         echo '<tr><td>';
+         if( $row['MatchQuestion'] || $row['MatchAnswer'] )
             echo '<font color="red">#</font>';
-         else
-            echo '&nbsp;';
-         echo '</td><td with=10>';
-         echo ( $id == $row['ID'] )
-            ? '<font color="blue"><b>&gt;</b></font>'
-            : '&nbsp;';
+         echo '</td><td>';
+         if( $id == $row['ID'] )
+            echo '<font color="blue"><b>&gt;</b></font>';
          echo '</td>';
 
          // anchor-label + td-start for cat/entry
          if( $row['Level'] == 1 )
          {
-            echo '<td align=left colspan=2><a name="e'.$row['ID'].'"></a>';
+            echo '<td class=Category colspan=3><a name="e'.$row['ID'].'"></a>';
             $typechar = 'c'; //category
          }
          else
          {
-            echo '<td width=20>&nbsp;</td><td align=left><a name="e'.$row['ID'].'"></a>';
+            echo '<td class=Indent></td>'
+               . '<td class=Entry colspan=2><a name="e'.$row['ID'].'"></a>';
             $typechar = 'e'; //entry
          }
 
@@ -728,68 +721,72 @@ $info_box = '<ul>
          echo "\n</td>";
 
          // move entry up/down (focus parent category)
-         echo "<td width=40 align=right>"
-            . "<a href=\"$page?move=u".URI_AMP.'id=' . $row['ID'] . URI_AMP . "dir=$movedist" . "$entry_ref\">"
-            . '<img border=0 title="Move up" src="images/up.png" alt="u"></a></td>';
-         echo "<td><a href=\"$page?move=d".URI_AMP.'id=' . $row['ID'] . URI_AMP . "dir=$movedist" . "$entry_ref\">"
-            . '<img border=0 title="Move down" src="images/down.png" alt="d"></a></td>';
+         echo TD_button( 'Move up',
+               "$page?move=u".URI_AMP.'id='.$row['ID'].URI_AMP."dir={$movedist}$entry_ref",
+               'images/up.png', 'u');
+         echo TD_button( 'Move down',
+               "$page?move=d".URI_AMP.'id='.$row['ID'].URI_AMP."dir={$movedist}$entry_ref",
+               'images/down.png', 'd');
 
          if( $row['Level'] > 1 )
          {
             // move entry up/down to other category (focus current entry)
-            echo "<td align=right>"
-               . "<a href=\"$page?move=uu".URI_AMP.'id=' . $row['ID'] . "$entry_ref\">"
-               . '<img border=0 title="Move to previous category" src="images/up_up.png" alt="U"></a></td>';
-            echo "<td><a href=\"$page?move=dd".URI_AMP.'id=' . $row['ID'] . "$entry_ref\">"
-               . '<img border=0 title="Move to next category" src="images/down_down.png" alt="D"></a></td>';
+            echo TD_button( 'Move to previous category',
+                  "$page?move=uu".URI_AMP.'id='.$row['ID']."$entry_ref",
+                  'images/up_up.png', 'U');
+            echo TD_button( 'Move to next category',
+                  "$page?move=dd".URI_AMP.'id='.$row['ID']."$entry_ref",
+                  'images/down_down.png', 'D');
          }
          else
-            echo '<td colspan=2>&nbsp;</td>';
+            echo '<td colspan=2></td>';
 
          // new entry
-         echo "<td><a href=\"$page?new=1".URI_AMP."type=$typechar".URI_AMP."id=" . $row['ID'] .
-            '"><img border=0 title="' .
-            ($typechar == 'e' ? 'Add new entry' : 'Add new category') .
-            '" src="images/new.png" alt="N"></a></td>';
+         echo TD_button( ($typechar == 'e' ? 'Add new entry' : 'Add new category'),
+               "$page?new=1".URI_AMP."type=$typechar".URI_AMP."id=".$row['ID'],
+               'images/new.png', 'N');
 
          // hide (focus parent category)
-         echo "<td><a href=\"$page?toggleH="
-            . ( $faqhide == 'Y' ? 'N' : 'Y' )
-            . URI_AMP."id=" . $row['ID']
-            . "$entry_ref\"><img border=0 title=\""
-            . ( $faqhide ? 'Show' : 'Hide' )
-            . '" src="images/hide'
-            . ( $faqhide ? '_no.png" alt="h' : '.png" alt="H' )
-            . '"></a></td>';
+         if( $faqhide )
+            echo TD_button( 'Show',
+                  "$page?toggleH=N".URI_AMP."id=".$row['ID']."$entry_ref",
+                  'images/hide_no.png', 'h');
+         else
+            echo TD_button( 'Hide',
+                  "$page?toggleH=Y".URI_AMP."id=".$row['ID']."$entry_ref",
+                  'images/hide.png', 'H');
 
          // translatable (focus parent category)
-         if( !$faqhide and $transl )
-            echo "<td><a href=\"$page?toggleT="
-               . ( $transl == 'Y' ? 'N' : 'Y' )
-               . URI_AMP."id=" . $row['ID']
-               . "$entry_ref\"><img border=0 title=\""
-               . ( $transl == 'Y' ? 'Make untranslatable' : 'Make translatable')
-               . '" src="images/transl'
-               . ( $transl == 'Y' ? '.png" alt="T' : '_no.png" alt="t' )
-               . '"></a></td>';
+         if( !$faqhide && $transl )
+         {
+            if( $transl == 'Y' )
+               echo TD_button( 'Make untranslatable',
+                     "$page?toggleT=N".URI_AMP."id=".$row['ID']."$entry_ref",
+                     'images/transl.png', 'T');
+            else
+               echo TD_button( 'Make translatable',
+                     "$page?toggleT=Y".URI_AMP."id=".$row['ID']."$entry_ref",
+                     'images/transl_no.png', 't');
+         }
          else
-            echo '<td>&nbsp;</td>';
+            echo '<td></td>';
 
          echo '</tr>';
 
          // new category (below section-title)
          if( $row["Level"] == 1 )
-            echo "<tr><td colspan=2>&nbsp;</td><td width=20></td><td align=left colspan=".($nbcol-3)
-               . "><a href=\"$page?new=1".URI_AMP."type=e".URI_AMP."id=" .
-               $row['ID'] . '"><img border=0 title="Add new entry"' .
-               ' src="images/new.png" alt="N"></a></td></tr>';
+            echo "<tr><td colspan=2></td><td class=Indent></td>"
+               . TD_button( 'Add new entry',
+                  "$page?new=1".URI_AMP."type=e".URI_AMP."id=".$row['ID'],
+                  'images/new.png', 'N')
+               . "<td>(first entry)</td>"
+               . "<td colspan=".($nbcol-5)."></td></tr>";
       }
       mysql_free_result($result);
 
-      echo "</table></td></tr></table>\n";
+      echo "</table>\n";
    } //show_list
 
-   echo "</center>\n";
    end_page();
 }
 
@@ -838,14 +835,24 @@ function transl_toggle_state( $row)
    return ''; //can't be toggled
 }
 
-function show_preview( $level, $question, $answer)
+function show_preview( $level, $question, $answer, $id='preview')
 {
    echo "<table class=FAQ><tr><td class=FAQread>\n";
    echo faq_item_html( 0);
    echo faq_item_html( $level, $question, $answer,
-               $level == 1 ? 'href="#preview"' : 'name="preview"');
+               $level == 1 ? "href=\"#$id\"" : "name=\"$id\"");
    echo faq_item_html(-1);
    echo "</td></tr></table>\n";
+}
+
+function TD_button( $title, $href, $isrc, $ialt)
+{
+   //image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
+   $str = image( $isrc, $ialt, $title);
+   //anchor( $href, $text, $title='', $attbs='')
+   $str = anchor( $href, $str);
+   $str = "<td class=Button>$str</td>\n";
+   return $str;
 }
 
 ?>
