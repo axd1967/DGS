@@ -909,12 +909,12 @@ function draw_board_info($board)
    $fmts= array(
       //array(POSX_ADDTIME, $MoveNr, $Stone, $Hours, $PosY);
       POSX_ADDTIME => array(
-         T_('%2$s had added %3$s to %5$s %4$s at move %1$d'),
-         array( 0, null),
-         array( 1, array( WHITE => T_('White'), BLACK => T_('Black'))),
-         array( 2, 'echo_time'),
-         array( 3, array( 0 => '', 1 => T_('and restarted byoyomi'))),
-         array( 1, array( BLACK => T_('White'), WHITE => T_('Black'))),
+         T_('%2$s had added %4$s to %3$s %5$s at move %1$d'),
+         array( 0, null), //MoveNr
+         array( 1, array( WHITE => T_('White'), BLACK => T_('Black'))), //From
+         array( 1, array( BLACK => T_('White'), WHITE => T_('Black'))), //To
+         array( 2, 'echo_time'), //Hours
+         array( 3, array( 0 => '', 1 => T_('and restarted byoyomi'))), //Reset
       ),
    );
 

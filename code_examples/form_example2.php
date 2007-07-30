@@ -7,8 +7,8 @@
  */
 
 chdir("../");
-require_once("include/form_functions.php");
 require_once("include/quick_common.php");
+require_once("include/form_functions.php");
 chdir("code_examples/");
 
 /* init vars */

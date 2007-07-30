@@ -58,7 +58,7 @@ Changelog
    - checked the add_time stuff
    - adjusted time_remaining() to handle the byoyomi settings reset
    - changed POSX_ADDTIME from -5 to -50 (somehow enabling a "settings" section
-     far from the tremibating moves)
+     far from the terminating moves)
    - added the add_time infos in game.php from board.php via the new function
      draw_board_info()
    - moved the database updates from do_add_time() to add_time_opponent()

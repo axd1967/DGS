@@ -34,9 +34,7 @@ table { /* skeleton tables */
    border-collapse: collapse;
    margin: 0px;
    margin: 0px auto;
-/*
    width: auto;
-*/
    max-width: none;
    overflow: visible; /* hidden visible scroll auto */
    empty-cells: show;
@@ -231,6 +229,9 @@ img.MinWidth {
    border: 0px solid black;
    visibility: hidden;
    display: block;
+/*   float: right; /* bad in FF */
+/*   height: 1px; /* bad in Opera */
+   height: 0px;
 }
 
 
@@ -620,9 +621,9 @@ table.Table {
    width: auto;
    max-width: none;
    overflow: visible;
-   position: relative; /* absolute relative */
    empty-cells: show;
    text-align: center;
+   position: relative; /* absolute relative */
 }
 
 table.Table th,
@@ -662,8 +663,8 @@ table.Table tr.Head th span.Header {
    color: black;
    font-weight: bold;
    text-align: center;
-   margin: 0px 0px 0px 0px; /* */
    padding: 0px;
+   margin: 0px 0px 0px 0px; /* */
 }
 
 /*
@@ -682,8 +683,8 @@ table.Table tr.Filter td.Error {
 }
 
 table.Table tr.Filter td.ShowFilter {
-   text-align: center;
    color: blue;
+   text-align: center;
 }
 
 table.Table tr.LinksT td,
@@ -698,6 +699,7 @@ table.Table tr.LinksT td.PagingR,
 table.Table tr.LinksB td.PagingR {
    text-align: right;
 }
+
 
 /*
  rows of datas
@@ -730,12 +732,6 @@ table.Table tr.Row2 td.Warning {
    background: #e6b9bd;
 }
 
-table#contactTable tr.Row4,
-table#contactTable tr.Row3,
-table#contactTable tr.Row2,
-table#contactTable tr.Row1 {
-   vertical-align: top;
-}
 
 /*
  special cells of various tables
@@ -754,11 +750,18 @@ table.Table td.Center {
    text-align: center;
 }
 
+/*
 table.Table td.PagingRight {
    text-align: right;
 }
+*/
 
 table.Table th.Button {
+/* min-width problem, see MinWidth
+   min-width: 100px;
+   width: 100px;
+   white-space: nowrap;
+*/
    margin: 0px;
    padding: 4px;
    text-align: center;
@@ -771,6 +774,16 @@ table.Table td.Button {
    padding: 4px;
    text-align: center;
    white-space: nowrap;
+/* min-width problem, see MinWidth
+/* for FF: */
+/*
+   min-width: 100px;
+*/
+/* for IE: */
+/*
+   width: 100px;
+*/
+/* endfor */
 }
 
 table.Table a.Button {
@@ -781,6 +794,17 @@ table.Table a.Button {
    font-weight: bold;
    text-align: center;
    white-space: nowrap;
+/* min-width problem, see MinWidth
+/* for FF: */
+/*
+   min-width: 92px;
+   margin: 0px auto;
+*/
+/* for IE: */
+/*
+   width: 92px;
+*/
+/* endfor */
 }
 
 
