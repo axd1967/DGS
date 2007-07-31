@@ -11,11 +11,10 @@ release [2006-08-07] - DGS 1.0.12 - CVS-tag [DGS-stable-200608]
 quick INFO:
 
 2007-02-03 rodival
-   I've reformatted the changelog file with last changes at top.
    I'm working on the bad centered alignement of FAQ, docs and other pages.
 
-2007-07-08 juga
-   Currently working on known filter-bugs.
+2007-07-29 juga
+   Currently working on: minor filter-cleanup, add-time, contacts
 
 -----
 quick TODO:
@@ -25,6 +24,11 @@ quick TODO:
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-08-01 juga
+
+   * list_contacts.php:
+   - bugfix: show only own contacts
 
 2007-07-31 rodival
 
