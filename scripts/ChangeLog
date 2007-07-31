@@ -30,6 +30,9 @@ Changelog
    * list_contacts.php:
    - bugfix: show only own contacts
 
+   * admin_faq.php:
+   - fix to search case-insensitive on mysql-binary translation-texts
+
 2007-07-31 rodival
 
    * include/game_functions.php (add_time_opponent),
