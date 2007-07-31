@@ -38,7 +38,7 @@ require_once( "include/contacts.php" );
    if( !$logged_in )
       error("not_logged_in");
 
-   $uid = $player_row["ID"];
+   $my_id = $player_row["ID"];
    $page = "list_contacts.php?";
 
 
@@ -86,7 +86,6 @@ require_once( "include/contacts.php" );
    $ctable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   //TODO: sort-image reversed ? expect asc/desc vice versa !?
    $ctable->add_tablehead( 9, T_('Actions'), null, false, true); // static
    $ctable->add_tablehead( 1, T_('Name'), 'P.Name');
    $ctable->add_tablehead( 2, T_('Userid'), 'P.Handle', true, true); // static
@@ -139,6 +138,8 @@ require_once( "include/contacts.php" );
    $qsql->add_part( SQLP_FROM,
       'Contacts C',
       'INNER JOIN Players P ON C.cid = P.ID' );
+   $qsql->add_part( SQLP_WHERE,
+      "C.uid=$my_id" );
 
    $query_scfilter = $scfilter->get_query(GETFILTER_ALL); // clause-parts for static filter
    $query_cfilter  = $ctable->get_query(); // clause-parts for filter
@@ -213,7 +214,6 @@ require_once( "include/contacts.php" );
       }
       if( $ctable->Is_Column_Displayed[9] )
       {
-         # TODO: add marker + action-select !? preferred to use images for M/I/E/R
          $sep = str_repeat('&nbsp;', 3);
          $links  = anchor( "message.php?mode=NewMessage&uid=$cid",
                image( 'images/send.gif', 'M'),
