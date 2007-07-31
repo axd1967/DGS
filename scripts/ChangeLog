@@ -36,6 +36,11 @@ Changelog
      admin_faq.php:
    - CSS adjusted (for IE, Opera and Avant), info box adjusted
 
+   * /images/send.gif, /images/read.gif, /images/invite.gif, /images/edit.gif,
+     /images/trashcan.gif, list_contact.php:
+   - added or modified images for 16x16 buttons of list_contact.php
+-----------
+
 2007-07-29 rodival
 
    * skins/dragon/screen.css,
