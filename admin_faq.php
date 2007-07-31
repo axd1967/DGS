@@ -647,14 +647,14 @@ $info_box = '<ul>
       $faq_search_form->echo_string(1);
 
 
-      $qterm = ( $term != '' ) ? mysql_addslashes("%$term%") : ''; // implicit wildcards
+      $qterm = ( $term != '' ) ? strtolower( mysql_addslashes("%$term%") ) : ''; // implicit wildcards
       $query =
          "SELECT entry.*, Question.Text AS Q".
          ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".
          ", IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
          ( ($qterm != '')
-            ? ", IF(Question.Text LIKE '$qterm',1,0) AS MatchQuestion " .
-              ", IF(entry.Level>1 AND Answer.Text LIKE '$qterm',1,0) AS MatchAnswer "
+            ? ", IF(LOWER(Question.Text) LIKE '$qterm',1,0) AS MatchQuestion " .
+              ", IF(entry.Level>1 AND LOWER(Answer.Text) LIKE '$qterm',1,0) AS MatchAnswer "
             : ", 0 AS MatchQuestion " .
               ", 0 AS MatchAnswer "
          ) .
