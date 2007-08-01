@@ -1293,7 +1293,6 @@ function add_line_breaks( $str)
 
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends (or empty):
-$html_code_closed[''] = '';
 $html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|color|';
 $html_code_closed['line'] = '|home|a'.$html_code_closed['cell'];
 $html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote'.$html_code_closed['line'];
@@ -1303,7 +1302,6 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
   // more? '|/li|/p|/br|/ *br';
 
   // ** no '|' at ends:
-$html_code[''] = '';
 $html_code['cell'] = 'note|b|i|u|strong|em|tt|color';
 $html_code['line'] = 'home|a|'.$html_code['cell'];
 $html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
@@ -1423,7 +1421,10 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    $before = '';
    //$stop = preg_quote($stop, '%');
    //$reg = "%^(.*?)<(" . ( $stop ? "$stop|" : '' ) . "$html_code)([\\x01-\\x20>:].*)$%is";
-   $reg = "%^(.*?)<(" . ( $stop ? "$stop|" : '' ) . $html_code . ")\b(.*)$%is";
+   $reg = ( $stop ? "$stop|" : '' ) . $html_code;
+   if( !$reg )
+      return '';
+   $reg = "%^(.*?)<($reg)\b(.*)$%is";
 
    while ( preg_match($reg, $trail, $matches) )
    {
@@ -1448,8 +1449,19 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          return $before .$marks .'<'. $head .'>' ;
       $head = preg_replace('%[\\x01-\\x20]+%', ' ', $head);
 
+      if( in_array($tag, array(
+            //as a first set/choice of <div>-like tags
+            '/note','/quote','/code','/pre','/center',
+            '/div','/dl','/dt','/dd','/ul','/ol','/li'
+         )) )
+      { //remove the first newline of the following
+         $trail= ereg_replace( "^(\r\n|\r|\n)", '', $trail);
+      }
+
       if( $stop == $tag )
+      {
          return $before .ALLOWED_LT. $head .ALLOWED_GT .$marks; //mark after
+      }
 
       $before.= $marks; //mark before
       $to_be_closed = is_numeric(strpos($html_code_closed,'|'.$tag.'|')) ;
@@ -1510,10 +1522,13 @@ function parse_html_safe( $msg, $some_html, $mark_terms='')
    $parse_mark_regex = !$mark_terms ? ''
          : '%('.str_replace('%','\%',$mark_terms).')%is';
    $bad = 0;
-   $str = parse_tags_safe( $msg, $bad,
-               $html_code[$some_html],
-               $html_code_closed[$some_html],
-               '') ;
+   if( !$some_html )
+      $str = '';
+   else
+      $str = parse_tags_safe( $msg, $bad,
+                  $html_code[$some_html],
+                  $html_code_closed[$some_html],
+                  '') ;
    if( $parse_mark_regex && PARSE_MARK_TERM && $msg )
       $msg = preg_replace( $parse_mark_regex, PARSE_MARK_TERM, $msg);
    $str.= $msg;
