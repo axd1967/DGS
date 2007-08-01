@@ -207,7 +207,7 @@ else
 >>> See also confirm.php, quick_play.php and clock_tick.php
 Various dirty things (like duplicated moves) could append
 in case of multiple calls with the same move number. This could
-append in case of multi-players account with simultaneous logins
+happen in case of multi-players account with simultaneous logins
 or if one player hit twice the validation button during a net lag
 and/or if the opponent had already played between the two calls.
 
