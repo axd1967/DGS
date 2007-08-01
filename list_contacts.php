@@ -36,7 +36,10 @@ require_once( "include/contacts.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
+
+   if( $player_row['Handle'] == 'guest' )
+      error('not_allowed_for_guest');
 
    $my_id = $player_row["ID"];
    $page = "list_contacts.php?";

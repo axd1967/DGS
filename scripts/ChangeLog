@@ -48,6 +48,9 @@ Changelog
    * list_messages.php, edit_bio.php, admin_admins.php:
    - CSS adjustments
 
+   * list_contacts.php:
+   - disabled for guest
+
 2007-08-01 juga
 
    * list_contacts.php:
