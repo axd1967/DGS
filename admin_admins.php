@@ -134,7 +134,7 @@ require_once( "include/table_columns.php" );
    echo "<h3 class=Header>" . T_('Admins') . "</h3>\n";
 
 
-   $marked_form = new Form('admin','admin_admins.php?update=t', FORM_POST, true, 'formTable');
+   $marked_form = new Form('admin','admin_admins.php?update=t', FORM_POST, true, 'FormTable');
    $marked_form->attach_table( $atable);
    $marked_form->set_tabindex(1);
 

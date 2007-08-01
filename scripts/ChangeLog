@@ -41,6 +41,13 @@ Changelog
    - introduced the &language=N argument to disable any translation of the page
    - allowed more shortcuts to this argument: &language={browser_code}
 
+   * include/table_infos.php (make_tablerow):
+   - changed the priority of the class option of the rows
+   - removed row highlight for the info tables
+
+   * list_messages.php, edit_bio.php, admin_admins.php:
+   - CSS adjustments
+
 2007-08-01 juga
 
    * list_contacts.php:

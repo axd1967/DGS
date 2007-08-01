@@ -112,7 +112,7 @@ function find_category_box_text($cat)
                'BR',
                'TEXTINPUT', "other".$row["ID"], $cat_width, $cat_max
                           , ($cat == '' ? $row["Category"] : '' ),
-               'CELL', 0, 'class=info',
+               'CELL', 0, 'class=Info',
                'TEXTAREA', "text".$row["ID"], $text_width, $text_height, $row["Text"]
             );
 
@@ -151,13 +151,13 @@ function find_category_box_text($cat)
          for($i=1; $i <= USER_BIO_ADDENTRIES; $i++)
          {
             $bio_form->add_row( array(
-                  'CELL', 0, 'class=newheader',
+                  'CELL', 0, 'class=NewHeader',
                   'SELECTBOX', "newcategory" . $i, 1, $categories, '', false,
 
                   'BR',
                   'TEXTINPUT', "newother" . $i, $cat_width, $cat_max, "",
 
-                  'CELL', 0, 'class=newinfo',
+                  'CELL', 0, 'class=NewInfo',
                   'TEXTAREA', "newtext" . $i, $text_width, $text_height, "",
                ) );
          }

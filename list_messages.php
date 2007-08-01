@@ -132,7 +132,7 @@ require_once( "include/filter.php" );
    $mtable->set_default_sort( 'date', 1);
    //$mtable->add_or_del_column();
 
-   $marked_form = new Form('messageMove','list_messages.php#action', FORM_GET, true, 'formTable');
+   $marked_form = new Form('messageMove','list_messages.php#action', FORM_GET, true, 'FormTable');
    $marked_form->set_tabindex(1);
    $marked_form->attach_table( $mtable);
 

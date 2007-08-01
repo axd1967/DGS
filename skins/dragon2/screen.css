@@ -1204,8 +1204,8 @@ table.Forum tr.Caption td {
    padding: 3px 3px 3px 8px;
 }
 
-table.Forum tr.ForumLinksT td,
-table.Forum tr.ForumLinksB td {
+table.Forum tr.LinksT td,
+table.Forum tr.LinksB td {
    background: #d0d0d0;
    color: black;
    padding: 3px 8px 3px 8px;
@@ -1213,7 +1213,7 @@ table.Forum tr.ForumLinksB td {
 }
 
 
-table.Forum .LinksL {
+table.Forum .TreeLinks {
    background: #d0d0d0;
    color: black;
    border: 0px solid lime;
@@ -1223,7 +1223,7 @@ table.Forum .LinksL {
    top: 0%;
 }
 
-table.Forum .LinksR {
+table.Forum .PageLinks {
    background: #d0d0d0;
    color: black;
    border: 0px solid lime;
@@ -1233,11 +1233,11 @@ table.Forum .LinksR {
    top: 0%;
 }
 
-table.Forum .LinksL a {
+table.Forum .TreeLinks a {
    color: black;
 }
 
-table.Forum .LinksR a {
+table.Forum .PageLinks a {
    color: black;
 }
 

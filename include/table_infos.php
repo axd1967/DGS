@@ -184,15 +184,22 @@ class Table_info
    function make_tablerow( $tablerow, $rattbs='', $rclass='')
    {
       if( isset($tablerow['rattb']) )
-         $rattbs = $tablerow['rattb'];
+      {
+         //$rattbs = $tablerow['rattb']; //overwrite $rattbs
+         $rattbs = attb_merge( attb_parse($rattbs), attb_parse($tablerow['rattb']), false);
+         if( $rattbs['class'] != $rclass )
+            $rclass = '';
+      }
       $rattbs = attb_build($rattbs);
 
       $string = " <tr$rattbs";
+/*
       if( ALLOW_JSCRIPT && $rclass )
       {
          //$string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
          $string.= " ondblclick=\"javascript:this.className=((this.className=='$rclass')?'Hi$rclass':'$rclass');\"";
       }
+*/
       $string.= ">\n  ";
 
       if( isset($tablerow['caption'])
@@ -219,7 +226,7 @@ class Table_info
    {
       $attbs = @$tablerow[$attbs];
       if( isset($arymrg) )
-         $attbs = attb_merge( attb_parse($attbs), $arymrg);
+         $attbs = attb_merge( $arymrg, attb_parse($attbs));
       $attbs = attb_build( @$attbs);
 
       if( isset($tablerow[$unsafe]) )
