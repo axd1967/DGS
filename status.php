@@ -127,6 +127,7 @@ require_once( "include/message_functions.php" );
 
       $mtable->echo_table();
    }
+   //mysql_free_result($result);
    unset($mtable);
 } // show messages
 
@@ -250,6 +251,7 @@ require_once( "include/message_functions.php" );
 
       $gtable->echo_table();
    }
+   mysql_free_result($result);
    unset($gtable);
 } // show games
 

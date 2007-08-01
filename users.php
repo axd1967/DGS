@@ -215,7 +215,7 @@ require_once( "include/filter.php" );
 
       $utable->add_row( $urow_strings );
    }
-
+   mysql_free_result($result);
    $utable->echo_table();
 
    // end of table
