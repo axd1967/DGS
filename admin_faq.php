@@ -647,7 +647,7 @@ $info_box = '<ul>
       $faq_search_form->echo_string(1);
 
 
-      $qterm = ( $term != '' ) ? strtolower( mysql_addslashes("%$term%") ) : ''; // implicit wildcards
+      $qterm = ( $term ) ? mysql_addslashes( strtolower("%$term%") ) : ''; // implicit wildcards
       $query =
          "SELECT entry.*, Question.Text AS Q".
          ", Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable ".

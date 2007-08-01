@@ -261,6 +261,24 @@ if(0){//old
                 ) );
       }
 
+      if( $filter_en )
+      {
+         $filter_regex = preg_replace(
+            array(
+               "/([^\\\\])_/",
+               "/([^\\\\])%/",
+               "/\\\\\\\\(.)/",
+               ),
+            array(
+               "\\1.",
+               "\\1.*?",
+               "\\1",
+               ),
+            preg_quote($filter_en));
+      }
+      else
+         $filter_regex = '';
+
       $translate_form->add_row( array( 'HR' ) ); //$nbcol
 
       $oid= -1;
@@ -287,12 +305,14 @@ if(0){//old
                      substr_count( wordwrap( $string, $hsize, "\n", 1), "\n" )
                   )));
 
+         //$string = nl2br( textarea_safe($string, LANG_DEF_CHARSET));
+         $string = make_html_safe($string, false, $filter_regex);
+
          $translation = $row['Text'];
          $translation = textarea_safe( $translation, $translate_encoding);
          $form_row = array(
                   'CELL', 1, 'class=English',
-                  'TEXT', nl2br( textarea_safe($string, LANG_DEF_CHARSET))
-                           .$debuginfo,
+                  'TEXT', $string.$debuginfo,
                   'CELL', 1, 'class=Language',
                   'TEXTAREA', "transl$oid", $hsize, $vsize, $translation,
                   'CELL', 1, 'class=Mark',

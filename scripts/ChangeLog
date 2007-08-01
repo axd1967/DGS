@@ -25,6 +25,18 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-02 rodival
+
+   * include/make_translationfiles.php:
+   - fix to search case-insensitive on mysql-binary translation-texts
+   
+   * translate.php:
+   - highlighted the found terms.
+
+   * include/std_functions.php (parse_html_safe, parse_tags_safe)
+   - removed the first newline after div-like pseudo-tags
+   - fixed a bug in parse_html when $html_code is empty
+
 2007-08-01 juga
 
    * list_contacts.php:

@@ -198,7 +198,8 @@ function translations_query( $translate_lang, $untranslated, $group
 
    if( $filter_en )
       $query .=
-         " AND TranslationTexts.Text LIKE '%".mysql_addslashes($filter_en)."%'" ;
+         " AND LOWER(TranslationTexts.Text) LIKE '%"
+               .mysql_addslashes(strtolower($filter_en))."%'";
 
    if( $untranslated )
       $query .=
