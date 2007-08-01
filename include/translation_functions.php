@@ -45,8 +45,9 @@ if( file_exists( "translations/known_languages.php") )
 */
 define('LANG_TRANSL_CHAR', ','); //do not use '-'
 define('LANG_CHARSET_CHAR', '.'); //do not use '-'
-define('LANG_DEF_CHARSET', 'iso-8859-1');
-define('LANG_ENGLISH', 'en'.LANG_CHARSET_CHAR.LANG_DEF_CHARSET); //lowercase
+//define('LANG_DEF_CHARSET', 'iso-8859-1'); //lowercase
+define('LANG_DEF_CHARSET', 'utf-8'); //lowercase
+define('LANG_ENGLISH', 'en'.LANG_CHARSET_CHAR.'iso-8859-1'); //lowercase
 
 
 function T_($string)
@@ -54,10 +55,14 @@ function T_($string)
    global $Tr;
 
    $s = @$Tr[$string];
-   if( empty($s) )
-      return preg_replace('%([^\\s])#[0-9a-z]+$%i', '\\1', $string);
-   else
+   if( !empty($s) )
       return $s;
+
+   global $language_used;
+   if( $language_used == 'N' )
+      return $string;
+
+   return preg_replace('%([^\\s])#[0-9a-z]+$%i', '\\1', $string);
 }
 
 function include_all_translate_groups($player_row=null) //must be called from main dir
@@ -80,7 +85,7 @@ function include_all_translate_groups($player_row=null) //must be called from ma
 
 function include_translate_group($group, $player_row) //must be called from main dir
 {
-   global $language_used, $encoding_used, $Tr;
+   global $language_used, $encoding_used;
 
    if( !empty( $language_used ) ) //from a previous call
       $language = $language_used;
@@ -99,9 +104,24 @@ function include_translate_group($group, $player_row) //must be called from main
       if( empty($language) or $language == 'en' )
          $language = LANG_ENGLISH;
 
+      @list($browsercode,$encoding_used) = explode( LANG_CHARSET_CHAR, $language, 2);
+      if( @$browsercode && !@$encoding_used )
+      {
+         if( !isset($known_languages[$browsercode][LANG_DEF_CHARSET]) )
+            if( isset($known_languages[$browsercode]) )
+               $encoding_used = @key($known_languages[$browsercode]);
+         if( !@$encoding_used )
+            $encoding_used = LANG_DEF_CHARSET;
+         if( $language != 'N' )
+            $language = $browsercode.LANG_CHARSET_CHAR.$encoding_used;
+      }
       $language_used = $language;
-      @list(,$encoding_used) = explode( LANG_CHARSET_CHAR, $language, 2);
    }
+
+   if( $language == 'N' )
+      return;
+
+   global $Tr; //$Tr is modified by the include_once( $filename );
 
    //preload 'To#2' and 'From#2' if missing in the language
    if( strtolower($language) != LANG_ENGLISH )

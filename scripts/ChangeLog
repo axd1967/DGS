@@ -33,9 +33,13 @@ Changelog
    * translate.php:
    - highlighted the found terms.
 
-   * include/std_functions.php (parse_html_safe, parse_tags_safe)
+   * include/std_functions.php (parse_html_safe, parse_tags_safe):
    - removed the first newline after div-like pseudo-tags
    - fixed a bug in parse_html when $html_code is empty
+
+   * include/translation_functions.php (T_, include_translate_group):
+   - introduced the &language=N argument to disable any translation of the page
+   - allowed more shortcuts to this argument: &language={browser_code}
 
 2007-08-01 juga
 
