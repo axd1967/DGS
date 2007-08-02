@@ -1608,7 +1608,7 @@ span.MarkTerm {
    color: darkred;
    font-weight: bold;
 */
-   background: #d0fcc0;
+   background: #c0ffb0;
 }
 
 a span.MarkTerm {
@@ -1717,9 +1717,17 @@ table.FAQadmin h3.Header {
 
 table.FAQadmin td.Button {
    width: 1%;
-   padding: 2px 0px 0px 4px;
+   padding: 0px;
    text-align: left;
    color: black;
+}
+
+table.FAQadmin td.Button img {
+   width: 12px;
+   height: 12px;
+   border: 0px solid black;
+   margin: 2px 4px 0px 0px;
+   vertical-align: top;
 }
 
 table.FAQadmin td.Indent,
