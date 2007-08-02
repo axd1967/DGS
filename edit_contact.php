@@ -28,8 +28,12 @@ require_once( "include/contacts.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
+
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
+
+   if( $player_row['Handle'] == 'guest' )
+      error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
      (no args)             : add new contact
@@ -44,7 +48,7 @@ require_once( "include/contacts.php" );
 
    $my_id = $player_row['ID'];
    $cid = (int) @$_REQUEST['cid'];
-   $cuser = (string) @$_REQUEST['cuser'];
+   $cuser = get_request_arg('cuser');
 
    $cancel_delete = @$_REQUEST['contact_cancel'];
 
