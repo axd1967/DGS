@@ -48,8 +48,11 @@ Changelog
    * list_messages.php, edit_bio.php, admin_admins.php:
    - CSS adjustments
 
-   * list_contacts.php:
+   * list_contacts.php, edit_contact.php:
    - disabled for guest
+
+   * forum/list.php, forum/forum_functions.php (draw_post):
+   - fixed the wrong display of 'first new'
 
 2007-08-01 juga
 

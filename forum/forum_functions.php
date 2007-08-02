@@ -279,9 +279,6 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
 
    if( strlen($txt) == 0 ) $txt = '&nbsp;';
 
-   $new = get_new_string($Timestamp, $Lastread);
-
-
    // Subject header + post body
    if( $postClass == 'Preview' )
    {
@@ -318,6 +315,7 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
       }
       else
       {
+         $new = get_new_string($Timestamp, $Lastread);
          if( $postClass == 'Hidden' )
             $hdrcols = $cols-1; //because of the rowspan=2 in the second column
          else

@@ -88,12 +88,11 @@ require_once( "forum_functions.php" );
       $Lastread = NULL;
       extract($row);
 
-      $new = get_new_string($Lastchanged, $Lastread);
-
       $color = ( $odd ? "" : " bgcolor=white" );
 
       if( $PostsInThread > 0 or $is_moderator )
       {
+         $new = get_new_string($Lastchanged, $Lastread);
          $Subject = make_html_safe( $Subject, SUBJECT_HTML);
          echo "<tr$color><td><a href=\"read.php?forum=$forum" . URI_AMP
            . "thread=$Thread_ID#new1\">$Subject</a>$new</td><td>" . make_html_safe($Name)
