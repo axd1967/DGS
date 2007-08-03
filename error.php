@@ -274,7 +274,7 @@ require_once( "include/std_functions.php" );
 
       case('cookies_disabled'):
       {
-         echo T_("Sorry, you haven't enabled cookies in your browser.");         
+         echo T_("Sorry, you haven't enabled cookies in your browser.");
       }
       break;
 
@@ -402,6 +402,18 @@ require_once( "include/std_functions.php" );
       case("userid_too_short"):
       {
          echo T_("Sorry, userid must be at least 3 letters long.");
+      }
+      break;
+
+      case("invalid_user"): // Players.ID
+      {
+         echo T_("Sorry, invalid player id used.");
+      }
+      break;
+
+      case("invalid_opponent"): // Players.ID
+      {
+         echo T_("Sorry, invalid player id as opponent used.");
       }
       break;
 
@@ -595,6 +607,13 @@ require_once( "include/std_functions.php" );
       case("not_a_player"):
       {
          echo T_("Sorry, you're not a player in this game.");
+      }
+      break;
+
+
+      case("invalid_filter"):
+      {
+         echo T_("Sorry, there's a configuration problem with a search-filter.");
       }
       break;
 
