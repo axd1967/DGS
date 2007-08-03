@@ -82,8 +82,8 @@ class Contact
    /*! Constructs Contact-object with specified arguments: created and lastchanged are in UNIX-time. */
    function Contact( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
    {
-      if ( !is_numeric($uid) or !is_numeric($cid) or $uid == $cid )
-         error('invalid_args');
+      if ( !is_numeric($uid) or !is_numeric($cid) )
+         error('invalid_user', "contacts.Contact($uid,$cid)");
       $this->uid = (int) $uid;
       $this->cid = (int) $cid;
       $this->sysflags = (int) $sysflags;
@@ -112,12 +112,12 @@ class Contact
     */
    function load_contact( $uid, $cid )
    {
-      if ( !is_numeric($uid) or !is_numeric($cid) or $uid == $cid )
-         error('invalid_user', 'contact.load_contact');
+      if ( !is_numeric($uid) or !is_numeric($cid) )
+         error('invalid_user', "contact.load_contact($uid,$cid)");
 
       $result = mysql_query("SELECT * FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
       if ( !$result )
-         error('database-error', 'contact.load_contact');
+         error('mysql_query_failed', "contact.load_contact2($uid,$cid)");
       if ( mysql_affected_rows() != 1 )
          return null;
 
@@ -191,18 +191,15 @@ class Contact
    function update_contact()
    {
       if ( !is_numeric($this->uid) or !is_numeric($this->cid) or $this->uid == $this->cid )
-         error('invalid_user', 'contact.update_contact');
+         error('invalid_user', "contact.update_contact({$this->uid},{$this->cid})");
 
       global $NOW;
       $this->lastchanged = $NOW;
 
-      if ( $this->uid == $this->cid )
-         error('invalid');
-
       $result = mysql_query("SELECT ID FROM Players WHERE ID IN ('{$this->uid}','{$this->cid}') LIMIT 2")
          or error('mysql_query_failed','contact.find_user');
       if( !$result or mysql_num_rows($result) != 2 )
-         error('unknown_user');
+         error('unknown_user', "contact.find_user2({$this->uid},{$this->cid})");
       mysql_free_result($result);
 
       $update_query = 'REPLACE INTO Contacts SET'
@@ -222,7 +219,7 @@ class Contact
    function delete_contact()
    {
       if ( !is_numeric($this->uid) or !is_numeric($this->cid) or $this->uid == $this->cid )
-         error('invalid_user', 'contact.delete_contact');
+         error('invalid_user', "contact.delete_contact({$this->uid},{$this->cid})");
 
       $delete_query = "DELETE FROM Contacts "
          . "WHERE uid='{$this->uid}' AND cid='{$this->cid}' LIMIT 1";
