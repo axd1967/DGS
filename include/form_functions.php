@@ -797,7 +797,6 @@ if(1){//new
                   . "</TABLE></TD>\n";
          if( $TRlevel )
             $areastr = "<TR>$areastr</TR>";
-RdvlLog("Form.build_areas=[$areastr]");
       }
       else
       {
@@ -833,7 +832,6 @@ RdvlLog("Form.build_areas=[$areastr]");
             }
             if( $TRlevel )
                $areastr = "<TR>$areastr</TR>";
-RdvlLog("Form.build_areas.H=[$areastr]");
          }
          else
          { // vertical grouping
@@ -861,7 +859,6 @@ RdvlLog("Form.build_areas.H=[$areastr]");
             }
             if( $TRlevel )
                $areastr = "<TR>$areastr</TR>";
-RdvlLog("Form.build_areas.V=[$areastr]");
          }
       }
 
