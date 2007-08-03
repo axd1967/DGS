@@ -170,7 +170,7 @@ function get_alt_arg( $n1, $n2)
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
    else if( $ToMove_ID )
-      error("database_corrupted");
+      error("database_corrupted", "game.bad_ToMove_ID($gid)");
 
    if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0) )
    {

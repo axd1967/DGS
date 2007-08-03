@@ -60,11 +60,11 @@ $ARR_DBFIELDKEYS = array(
    if ( empty($uid) )
       $uid = $my_id;
    if ( $opp and ($opp === $uid) )
-      error("Opponent must be distinct from uid [$uid]");
+      error('invalid_opponent', "opponents.distinct_user($uid)"); // Opponent must be distinct from uid
    if ( !is_numeric($uid) )
-      error("Bad uid [$uid] used");
+      error('invalid_user', "opponents.bad_user($uid)");
    if ( $opp and !is_numeric($opp) )
-      error("Bad opponent uid [$opp] used");
+      error('invalid_opponent', "opponents.bad_opponent($opp)");
 
    $page = "opponents.php?";
 
@@ -82,9 +82,9 @@ $ARR_DBFIELDKEYS = array(
    while ( $row = mysql_fetch_assoc( $result ) )
       $players[ $row['ID'] ] = array_merge( array(), $row ); // copy arr
    if ( !isset($players[$uid]) )
-      error("Can't find user with uid [$uid]");
+      error('unknown_user', "opponents.load_user($uid)");
    if ( $opp and !isset($players[$opp]) )
-      error("Can't find opponent-user with uid [$opp]");
+      error('unknown_user', "opponents.load_opponent($opp)");
 
 
    // static filters

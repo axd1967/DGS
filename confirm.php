@@ -95,7 +95,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
    else
-      error("database_corrupted");
+      error("database_corrupted", "confirm.bad_ToMove_ID($gid)");
 
    if( $my_id != $ToMove_ID )
       error("not_your_turn");

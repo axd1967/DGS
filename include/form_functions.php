@@ -404,11 +404,11 @@ class Form
 
       $name = strtoupper($name);
       if ( !preg_match( $rx_attrs, $attrname ) )
-         error("ERROR: Form.set_attr_form_element: bad attribute-name [$attrname] used in set_attr_form_element for form-element [$name]");
+         error('internal_error', "form.set_attr_form_element.bad_attr_name($name,$attrname)");
       if ( @$ARR_FORMELEM_READONLY[$attrname] )
-         error("ERROR: Form.set_attr_form_element: attribute [$attrname] for form-element [$name] can't be altered");
+         error('internal_error', "form.set_attr_form_element.readonly_attr($name,$attrname)");
       if ( !isset($this->form_elements[$name]) )
-         error("ERROR: Form.set_attr_form_element: no form-element [$name] defined");
+         error('internal_error', "form.set_attr_form_element.miss_form_element($name)");
 
       $this->form_elements[$name][$attrname] = $value;
    }

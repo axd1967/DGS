@@ -289,15 +289,15 @@ class SearchFilter
       // checks: force unique filterid
       // note: don't force unique dbfields (so we are open to allow more filters on same field)
       if ( strlen($type) == 0 )
-         error("ERROR: SearchFilter.add_filter: bad type [$type] used for filter [$id]"); // type non-empty
+         error('invalid_filter', "filter.add_filter.bad_type($id,$type)"); // type non-empty
       if ( !is_numeric($id) )
-         error("ERROR: SearchFilter.add_filter: id [$id] must be numeric");
+         error('invalid_filter', "filter.add_filter.bad_filter_id($id)");
       if ( $id < 1 or $id > 32 )
-         error("ERROR: SearchFilter.add_filter: id [$id] out-of-range (1..32)");
+         error('invalid_filter', "filter.add_filter.filter_id_out_of_range($id)"); // 1..32
       if ( isset($this->Filters[$id]) )
-         error("ERROR: SearchFilter.add_filter: non unique id [$id] used");
+         error('invalid_filter', "filter.add_filter.unique_filter_id($id)");
       if ( count($this->Filters) == 32 )
-         error("ERROR: SearchFilter.add_filter: SearchFilter is full");
+         error('invalid_filter', "filter.add_filter.full");
 
       $filter_class = strtoupper($type[0]) . substr($type,1);
       eval( "\$filter = new Filter" . $filter_class . "( \$id, \$dbfield, \$config );" ); // error if unknown class
@@ -357,7 +357,7 @@ class SearchFilter
                      $qvalue = null;
 
                   if ( is_array($qvalue) and !$filter->get_config(FC_MULTIPLE) )
-                     error("ERROR: SearchFilter.init(): filter [$id] has no support for multiple-values [$fname]");
+                     error('invalid_filter', "filter.init.no_multi_value_support($id,$fname)");
                   $filter->parse_value( $fname, $qvalue ); // ignore all parsing-errors and fill filter-vars
                }
                if ( count($elems) > 1 and !$filter->has_error() ) // for multi-element-filters
@@ -599,7 +599,7 @@ class SearchFilter
                if ( $act === 'BQ' )
                   $f->build_query();
                else
-                  error("SearchFilter.handle_conditional_actions(): unknown post-action [$act] for filter [$fid]");
+                  error('invalid_filter', "filter.handle_conditional_actions.unknown_post_action($fid,$act)");
             }
          }
       }
@@ -671,11 +671,11 @@ class SearchFilter
          $fid = (is_numeric($out[1])) ? $out[1] : $id;
          $f =& $this->get_filter($fid);
          if ( is_null($f) )
-            error("SearchFilter.perform_conditional_action(): unknown filter-id [$fid] used for action [$action]");
+            error('invalid_filter', "filter.perform_conditional_action.unknown_filter($fid,$action)");
          $nid = (is_numeric($out[2])) ? $out[2] : 1;
          $elems = $f->get_element_names();
          if ( $nid < 1 or $nid > count($elems) )
-            error("SearchFilter.perform_conditional_action(): unknown name-num [$nid] used for action [$action]");
+            error('invalid_filter', "filter.perform_conditional_action.unknown_name_num($nid,$action)");
          $name = $elems[$nid - 1];
 
          $f->parse_value( $name, $out[3] ); // ignore all parsing-errors
@@ -691,7 +691,7 @@ class SearchFilter
          $fid = (is_numeric($out[2])) ? $out[2] : $id;
          $f =& $this->get_filter($fid);
          if ( is_null($f) )
-            error("SearchFilter.perform_conditional_action(): unknown filter-id [$fid] used for action [$action]");
+            error('invalid_filter', "filter.perform_conditional_action.unknown_filter2($fid,$action)");
          if ( $out[1] === 'ACT' )
             $f->set_active((bool)$out[3]);
          else
@@ -699,7 +699,7 @@ class SearchFilter
          return true;
       }
 
-      error("SearchFilter.perform_conditional_action(): unknown action [$action] for filter-id [$id]");
+      error('invalid_filter', "filter.perform_conditional_action.unknown_filter3($fid,$action)");
    }
 
    /*!
@@ -1168,20 +1168,17 @@ class Filter
    function check_forbid_sql_template( $max_fnames = -1 )
    {
       if ( $this->get_config(FC_SQL_TEMPLATE) )
-         error("ERROR: Filter.check_forbid_sql_template(): FC_SQL_TEMPLATE forbidden for filter [{$this->id}]");
+         error('invalid_filter', "filter.check_forbid_sql_template.forbid_FC_SQL_TEMPLATE({$this->id})");
       if ( is_a($this->dbfield, 'QuerySQL') )
       {
          if ( $this->dbfield->has_part(SQLP_WHERETMPL) )
-            error("ERROR: Filter.check_forbid_sql_template(): QuerySQL must not contain SQLP_WHERETMPL-part "
-               . "for filter [{$this->id}]");
+            error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL_no_SQLP_WHERETMPL({$this->id})");
 
          $cnt_fnames = count($this->dbfield->get_parts(SQLP_FNAMES));
          if ( $max_fnames >= 0 and $cnt_fnames > $max_fnames )
-            error("ERROR: Filter.check_forbid_sql_template(): QuerySQL must not contain more than "
-               . "$max_fnames SQLP_FNAMES-entries for filter [{$this->id}]");
+            error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL.max_num.SQLP_FNAMES({$this->id},$max_fnames)");
          if ( $cnt_fnames < 1 )
-            error("ERROR: Filter.check_forbid_sql_template(): QuerySQL must contain at least one "
-               . "SQLP_FNAMES-entry for filter [{$this->id}]");
+            error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL.min1.SQLP_FNAMES({$this->id})");
       }
    }
 
@@ -1359,7 +1356,7 @@ class Filter
          return $syntax;
       }
       else
-         error("ERROR: Filter-class for type [{$this->type}] is missing syntax-description");
+         error('invalid_filter', "filter.get_syntax_description.miss_syntax_descr({$this->type})");
    }
 
    /*! \brief Returns optional syntax-hint-text for $confkey and format with specified sprintf-format. */
@@ -1438,7 +1435,8 @@ class Filter
     */
    function parse_value( $name, $val )
    {
-      error("ERROR: Filter of type [{$this->type}] needs to implement this abstract method 'parse_value'");
+      // concrete filter needs to implement this abstract method
+      error('invalid_filter', "filter.parse_value.miss_implementation(".get_class($this).",{$this->type})");
    }
 
    /*!
@@ -1458,7 +1456,8 @@ class Filter
     */
    function get_input_element($prefix, $attr = array() )
    {
-      error("ERROR: Filter of type [{$this->type}] needs to implement this abstract method 'get_input_element'");
+      // concrete filter needs to implement this abstract method
+      error('invalid_filter', "filter.get_input_element.miss_implementation(".get_class($this).",{$this->type})");
    }
 
 
@@ -1738,7 +1737,7 @@ class Filter
          }
       }
       else
-         error("Bad argument-type [$index_start_keys] for build_generic_selectbox_elem-function");
+         error('invalid_filter', "filter.build_generic_selectbox_elem.invalid_arg.index_start_keys($index_start_keys)");
 
       $elem .= "\n</select>";
       return $elem;
@@ -1939,7 +1938,7 @@ class FilterText extends Filter
       if ( $this->get_config(FC_SUBSTRING) )
       {
          if ( !$minchars )
-            error("ERROR: Text-filter-config FC_SUBSTRING is missing FC_START_WILD-config");
+            error('invalid_filter', "filter.FilterText.bad_config.FC_SUBSTRING_miss_FC_START_WILD");
          $this->parser_flags |= TEXTPARSER_IMPLICIT_WILD;
          $this->syntax_descr = '['. T_('substring') . '] ' . $this->syntax_descr;
       }
@@ -2387,7 +2386,7 @@ class FilterRelativeDate extends Filter
          }
       }
       if ( count($this->time_units) == 0 )
-         error("ERROR: RelativeDate-Filter need at least one time-unit");
+         error('invalid_filter', "filter.FilterRelativeDate.miss_time_unit");
 
       // absolute filter
       $this->filterdate = NULL;
@@ -2446,7 +2445,7 @@ class FilterRelativeDate extends Filter
          if ( $this->values[$this->elem_tu] == FRDTU_ABS )
          { // absolute
             if ( is_null($this->filterdate) )
-               error("FilterRelativeDate: badly configured filter [{$this->id}] using absolute-date");
+               error('invalid_filter', "filter.FilterRelativeDate.bad_config_absolute_date({$this->id})");
 
             // parse val using FilterDate-syntax
             $this->range_mode = FRD_RANGE_ABS;
@@ -2491,7 +2490,7 @@ class FilterRelativeDate extends Filter
                ( $this->get_config(FC_TIME_UNITS) & FRDTU_DAY ) ? FRDTU_DAY : $this->time_units[0];
       }
       else
-         error("ERROR: RelativeDate-Filter parse_value($name,$val) called with unknown key");
+         error('invalid_filter', "filter.RelativeDate.parse_value.invalid_arg.name($name,$val)");
 
       return true;
    }
@@ -2614,7 +2613,7 @@ class FilterSelection extends Filter
       else
       {
          if ( !is_array($dbfield) )
-            error("ERROR: expect array as dbfield for Selection-Filter [$name]");
+            error('invalid_filter', "filter.FilterSelection.expect_dbfield_array($name)");
          $this->check_forbid_sql_template( 0 ); # no fieldnames
          $dbfield = $this->dbfield;
          $this->idx_start = 0;
@@ -2636,7 +2635,7 @@ class FilterSelection extends Filter
       if ( is_array($val) ) // multi-val
       {
          if ( !$this->get_config(FC_MULTIPLE) )
-            error("ERROR: FilterSelection.parse_value($name): filter [{$this->id}] has no support for multiple-values");
+            error('invalid_filter', "filter.FilterSelection.parse_value.no_multi_value_support({$this->id})");
 
          // build SQL
          $query = $this->build_base_query($this->dbfield, false, true); // query with set SQLP_FNAMES
@@ -2648,7 +2647,7 @@ class FilterSelection extends Filter
          {
             $idx = $v - $this->idx_start;
             if ( !isset($this->clauses[$idx]) )
-               error("ERROR: FilterSelection.parse_value($name): bad index-value [$v] used for filter [{$this->id}]");
+               error('invalid_filter', "ERROR: FilterSelection.parse_value($name): bad index-value [$v] used for filter [{$this->id}]");
             array_push( $arr_in, "'" . mysql_addslashes( $this->clauses[$idx] ) . "'" );
          }
          $clause = "$field IN (" . implode(',', $arr_in) . ")";
@@ -2919,7 +2918,7 @@ class FilterMysqlMatch extends Filter
       elseif ( $name === $this->elem_boolmode )
          ; // only var set in values[elem_boolmode]
       else
-         error("ERROR: MysqlMatch-Filter parse_value($name,$val) called with unknown key");
+         error('invalid_filter', "ERROR: MysqlMatch-Filter parse_value($name,$val) called with unknown key");
 
       return true;
    }
@@ -2988,7 +2987,7 @@ class FilterMysqlMatch extends Filter
       elseif ( $match_mode === MATCH_QUERY_EXPANSION )
          $sql_option = 'WITH QUERY EXPANSION';
       else
-         error("ERROR: FilterMysqlMatch.build_query(): unknown FC_MATCH_MODE [$match_mode] for filter [{$this->id}]");
+         error('invalid_filter', "ERROR: FilterMysqlMatch.build_query(): unknown FC_MATCH_MODE [$match_mode] for filter [{$this->id}]");
 
       return $sql_option;
    }
@@ -3153,7 +3152,7 @@ class FilterScore extends Filter
       elseif ( $name === $this->elem_result )
          ; // only var set in values[elem_result]
       else
-         error("ERROR: Score-Filter parse_value($name,$val) called with unknown key");
+         error('invalid_filter', "ERROR: Score-Filter parse_value($name,$val) called with unknown key");
 
       return true;
    }
@@ -3306,9 +3305,9 @@ class FilterCheckboxArray extends Filter
 
       $this->choices = $this->get_config(FC_MULTIPLE);
       if ( $this->choices == '' )
-         error("ERROR: FilterCheckboxArray({$this->id}): missing FC_MULTIPLE-arg");
+         error('invalid_filter', "filter.FilterCheckboxArray.miss_FC_MULTIPLE({$this->id})");
       if ( !is_array($this->choices) )
-         error("ERROR: FilterCheckboxArray({$this->id}): FC_MULTIPLE is an array-config");
+         error('invalid_filter', "filter.FilterCheckboxArray.expect_array_FC_MULTIPLE({$this->id})");
 
       // init field-names
       $idx = 0;
@@ -3317,15 +3316,19 @@ class FilterCheckboxArray extends Filter
       {
          $idx++;
          if ( !is_array($arr) )
-            error("ERROR: FilterCheckboxArray({$this->id}): FC_MULTIPLE-config-array #$idx "
-               . "expects an array with value and optional alt-title");
+         {
+            // FC_MULTIPLE-config-array #$idx expects an array with value and optional alt-title
+            error('invalid_filter', "filter.FilterCheckboxArray.bad_array_FC_MULTIPLE({$this->id},$idx)");
+         }
          $fname = $this->build_fname($idx);
          $this->add_element_name( $fname );
          $this->values[$fname] = 0; // init
          $this->clauses[$fname] = $arr[0];
          if ( $is_bitmask and !is_numeric($arr[0]) )
-            error("ERROR: FilterCheckboxArray({$this->id}): "
-               . "FC_BITMASK-config forces integer-values for FC_MULTIPLE-array-values");
+         {
+            // FC_BITMASK-config forces integer-values for FC_MULTIPLE-array-values
+            error('invalid_filter', "filter.FilterCheckboxArray.bad_array_FC_BITMASK({$this->id})");
+         }
       }
 
       // handle FC_DEFAULT as index-array (keep in sync with build_fname-func)

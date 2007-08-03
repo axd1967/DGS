@@ -570,7 +570,7 @@ class Table
                " WHERE ID=" . $player_row["ID"];
 
             mysql_query($query)
-               or error('mysql_query_failed','add_or_del_column');
+               or error('mysql_query_failed','Table.add_or_del_column');
          }
       }
    }
@@ -1242,8 +1242,10 @@ class Table
       if ( is_object($rp) and method_exists($rp, 'get_hiddens') and method_exists($rp, 'get_url_parts') )
          array_push( $this->ext_req_params, $rp );
       else
-         error('internal_error', 'add_external_parameters.bad_object');
-         //error("ERROR: Table.add_external_parameters: expecting object-argument with interfaces get_hiddens() and get_url_parts()");
+      {
+         // expecting object-argument with interfaces get_hiddens() and get_url_parts()
+         error('internal_error', 'Table.add_external_parameters.bad_object');
+      }
       $this->ext_req_params_use_hidden = $use_hidden;
       $this->cache_curr_extparam = array();
    }

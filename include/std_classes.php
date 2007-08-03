@@ -296,7 +296,7 @@ class QuerySQL
          else
          {
             if ( $type == '')
-               error("QuerySQL: missing part-type for part [$arg]");
+               error('assert', "QuerySQL.miss_type($arg)"); // missing part-type for part
             if ( $arg != '' )
                $this->parts[$type][] = $arg;
          }
@@ -329,13 +329,16 @@ class QuerySQL
    {
       // check
       if ( !isset($this->parts[$type]) )
-         error("QuerySQL.add_part($type): used unknown type [$type]");
+         error('assert', "QuerySQL.add_part.unknown_type($type)");
       if ( ($type === SQLP_GROUP or $type === SQLP_LIMIT) and $this->has_part($type) )
       {
          // allow only once, except same part-value
          $arg = ( func_num_args() > 1 ) ? func_get_arg(1) : null;
          if ( !is_null($arg) and !empty($arg) and $this->get_part($type) != $arg )
-            error("QuerySQL.add_part($type): type [$type] can only be set once (except the same value), part1=$arg");
+         {
+            // type can only be set once (except the same value), part1=$arg
+            error('assert', "QuerySQL.add_part.set_type_once($type,$arg)");
+         }
          return; // ignore same-value
       }
 
@@ -358,7 +361,7 @@ class QuerySQL
       foreach( $args as $type )
       {
          if ( !isset($this->parts[$type]) )
-            error("QuerySQL.clear_parts(): used unknown type [$type]");
+            error('assert', "QuerySQL.clear_parts.unknown_type($type)");
          if ( isset($this->parts[$type]) )
             $this->parts[$type] = array();
       }
@@ -368,7 +371,7 @@ class QuerySQL
    function has_part( $type )
    {
       if ( !isset($this->parts[$type]) )
-         error("QuerySQL.has_part($type): used unknown type");
+         error('assert', "QuerySQL.has_part.unknown_type($type)");
       return ( count($this->parts[$type]) > 0 );
    }
 
@@ -376,7 +379,7 @@ class QuerySQL
    function get_parts( $type )
    {
       if ( !isset($this->parts[$type]) )
-         error("QuerySQL.get_parts($type): used unknown type");
+         error('assert', "QuerySQL.get_parts.unknown_type($type)");
       return $this->parts[$type];
    }
 
@@ -536,7 +539,7 @@ class QuerySQL
 
       $errmsg = '';
       if ( !is_a($qsql, 'QuerySQL') )
-         $errmsg = "QuerySQL.merge(): specified argument is not a QuerySQL-object";
+         $errmsg = "QuerySQL.merge.expect_obj.QuerySQL";
       if ( $errmsg != '' )
       {
          error( $errmsg ); // error may be func that go-on

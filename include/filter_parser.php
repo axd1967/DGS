@@ -243,7 +243,8 @@ class BasicParser
     * signature: interface bool success = parse(string value, int flags)
     */
    function parse( $value, $flags = 0) {
-      error("ERROR: BasicParser-class is abstract");
+      // concrete parser needs to implement this abstract method
+      error('invalid_filter', "filter_parser.parse.miss_implementation(".get_class($this).")");
    }
 
 
@@ -620,7 +621,7 @@ class DateParser
    {
       // check args
       if ( $rangetype != RANGE_START && $rangetype != RANGE_END )
-         error("DateParser: unknown rangetype [$rangetype]");
+         error('invalid_filter', "filter_parser.DateParser.invalid_arg.rangetype($rangetype)");
 
       $this->origdate = $datestr;
       $this->rangetype = $rangetype;

@@ -272,7 +272,8 @@ class BasicTokenizer
     */
    function parse( $value )
    {
-      error("ERROR: BasicTokenizer-class is abstract");
+      // concrete tokenizer needs to implement this abstract method
+      error('invalid_filter', "tokenizer.parse.miss_implementation(".get_class($this).")");
    }
 } // end of 'BasicTokenizer'
 
@@ -391,7 +392,7 @@ class StringTokenizer extends BasicTokenizer
       elseif ( $this->quote_type == QUOTETYPE_ESCAPE )
          $success = $this->parse_quote_escape();
       else
-         error("Unknown quote-type [{$this->quote_type}]");
+         error('invalid_filter', "tokenizer.parse.unknown_quote_type({$this->quote_type})");
 
       return $success;
    }
