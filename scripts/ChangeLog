@@ -25,6 +25,23 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-04 juga
+
+   * error.php,
+     confirm.php, game.php, opponents.php, include/contacts.php,
+     include/filter.php, include/filter_parser.php,
+     include/form_functions.php, include/std_classes.php,
+     include/table_columns.php, include/tokenizer.php:
+   - added error-codes: invalid_user, invalid_opponent, invalid_filter
+   - fix error()-calls: adjusted errorcode and debug-message
+
+   * edit_contact.php, include/contacts.php:
+   - show user-error (not internal-error) for adding own user,
+     so no check for equal user- and contact-id in loading-funcs but update
+
+   * skins/dragon/screen.css:
+   - changed some styles for JUG-devel-server
+
 2007-08-03 rodival
 
    * include/form_functions.php (build_areas, create_form_string, get_merged_attbs),
@@ -40,7 +57,7 @@ Changelog
 
    * include/make_translationfiles.php:
    - fix to search case-insensitive on mysql-binary translation-texts
-   
+
    * translate.php:
    - highlighted the found terms.
 
