@@ -27,8 +27,8 @@ Changelog
 
 2007-08-04 juga
 
-   * error.php,
-     confirm.php, game.php, opponents.php, include/contacts.php,
+   * error.php, confirm.php, game.php, opponents.php,
+     include/contacts.php (Contact, load_contact),
      include/filter.php, include/filter_parser.php,
      include/form_functions.php, include/std_classes.php,
      include/table_columns.php, include/tokenizer.php:
