@@ -25,6 +25,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-03 rodival
+
+   * include/form_functions.php (build_areas, create_form_string, get_merged_attbs),
+     code_examples/form_example2.php:
+   - proposition for a new build_areas() layout managment
+   - removed some useless levels of tables nesting
+   - added the $TRlevel argument to build_areas() (default to previous behaviour)
+   - introduced the 'title' of the areas
+   - added the get_merged_attbs() function
+   - fixed some error messages
+
 2007-08-02 rodival
 
    * include/make_translationfiles.php:

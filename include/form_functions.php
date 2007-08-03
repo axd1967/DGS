@@ -114,6 +114,9 @@ define('FAREA_ALL', 'all'); // form-area get area-config for 'all' areas
 define('FAC_TABLE', 'table'); // form-area-context for a TABLE
 define('FAC_ENVTABLE', 'td_table'); // form-area-context for a TD before a group-TABLE
 
+define('FAREA_ALLV', FAREA_ALL); // form-area get area-config for 'all' V-areas
+define('FAREA_ALLH', FAREA_ALL); // form-area get area-config for 'all' H-areas
+
 // form-element-config
 define('FEC_TR_ATTR', 'tr_attr'); // additional attributes for <tr>-element
 define('FEC_EXTERNAL_FORM', 'form_external_form'); // true, if form start/end externally printed
@@ -144,7 +147,7 @@ class Form
    var $action;
    /*! \brief The method to send. should be FORM_GET or FORM_POST. */
    var $method;
-   /*! \brief The form class, default 'formClass'. */
+   /*! \brief The form class, default 'FormClass'. */
    var $fclass;
    /*! \brief Additional config for the form (with influence to layouting form-elements). */
    var $config;
@@ -370,8 +373,7 @@ class Form
 
          if( $echo_form_start_now )
             echo $this->print_start_default();
-
-      }
+   } //Form
 
 
    /*! \brief add additional form-config. */
@@ -383,7 +385,7 @@ class Form
    /*! \brief Returning additional non-null form-config, '' if unset. */
    function get_config( $name )
    {
-      if ( isset($this->config[$name]) )
+      if( isset($this->config[$name]) )
          return $this->config[$name];
       else
          return '';
@@ -425,7 +427,7 @@ class Form
       elseif ( $key === FLAYOUT_AREACONF )
          $this->parse_layout_areaconf( $value, $arr );
       else
-         error("ERROR: Form.set_layout(): unknown key [$key]");
+         error('internal_error', "Form.set_layout.unknown_key($key)");
    }
 
    /*!
@@ -444,7 +446,7 @@ class Form
 
       // syntax-checks: allowed chars, non-empty braces
       if ( !preg_match( "/(^[\d,|\(\)]+$|\(\))/", $layout ) )
-         error("ERROR: Form.parse_layout_global(): bad syntax for layout [$layout]");
+         error('internal_error', "Form.parse_layout_global.bad_syntax.1($layout)");
 
       $groups = array();
       $grcnt = 0;
@@ -457,7 +459,7 @@ class Form
          # found ')', search backwards to '(' -> group
          $spos = strrpos( substr($L, 0, $epos), '(' );
          if ( $spos === false )
-            error("ERROR: Form.parse_layout_global(): bracing-mismatch in layout [$layout]");
+            error('internal_error', "Form.parse_layout_global.bracing-mismatch.1($layout)");
 
          $group = substr( $L, $spos + 1, $epos - $spos - 1 ); // no '()' in group, only x or x, or x|
          $arr = array();
@@ -465,14 +467,14 @@ class Form
          foreach( $arr_horiz as $hgr )
          {
             if ( strlen($hgr) == 0 )
-               error("ERROR: Form.parse_layout_global(): missing area-num around a ',' [$layout]");
+               error('internal_error', "Form.parse_layout_global.missing_area-num.H($layout)"); // around a ','
             $arr_vert = explode( '|', $hgr );
             if ( count($arr_vert) == 1 )
             {
                if ( $hgr{0} == 'G' )
                   $hgr = $groups[ substr($hgr,1) ];
-               elseif ( $hgr == 0 )
-                  error("ERROR: Form.parse_layout_global(): area-num 0 is not allowed, start with 1");
+               else if( $hgr < 1 )
+                  error('internal_error', "Form.parse_layout_global.area-num.H<1");
                else
                   $this->areas[$hgr] = 1;
                array_push( $arr, $hgr );
@@ -483,11 +485,11 @@ class Form
                foreach( $arr_vert as $vgr )
                {
                   if ( strlen($vgr) == 0 )
-                     error("ERROR: Form.parse_layout_global(): missing area-num around a '|' [$layout]");
+                     error('internal_error', "Form.parse_layout_global.missing_area-num.V($layout)"); // around a '|'
                   if ( $vgr{0} == 'G' )
                      $vgr = $groups[ substr($vgr,1) ];
-                  elseif ( $vgr == 0 )
-                     error("ERROR: Form.parse_layout_global(): area-num 0 is not allowed, start with 1");
+                  else if( $vgr < 1 )
+                     error('internal_error', "Form.parse_layout_global.area-num.V<1");
                   else
                      $this->areas[$vgr] = 1;
                   array_push( $arrv, $vgr );
@@ -502,9 +504,9 @@ class Form
       }
 
       if ( !(strpos( $L, '(' ) === false) )
-         error("ERROR: Form.parse_layout_global(): bracing-mismatch in layout [$layout]");
+         error('internal_error', "Form.parse_layout_global.bracing-mismatch.2($layout)");
       if ( preg_match( "/[\|,]/", $L ) )
-         error("ERROR: Form.parse_layout_global(): bad syntax for layout [$layout] with one of '|,'");
+         error('internal_error', "Form.parse_layout_global.bad_syntax.2($layout)"); // with one of '|,'
 
       $result = $groups[$grcnt-1];
       while ( is_array($result) and count($result) == 1 )
@@ -519,9 +521,9 @@ class Form
    function parse_layout_areaconf( $area, $config )
    {
       if ( !preg_match( "/^(\d+|".FAREA_ALL.")$/", $area) )
-         error("ERROR: Form.parse_layout_areaconf(): bad area-num [$area] used");
+         error('assert', "Form.parse_layout_areaconf.area-num($area)");
       if ( !is_array( $config ) )
-         error("ERROR: Form.parse_layout_areaconf(): expected config-arg of type array");
+         error('assert', "Form.parse_layout_areaconf.config-arg()");
 
       // don't overwrite existing config
       if ( !isset($this->areaconf[$area]) )
@@ -549,9 +551,9 @@ class Form
    function set_area( $area )
    {
       if ( !isset($this->layout[FLAYOUT_GLOBAL]) )
-         error("ERROR: Form.set_area(): can only be used with set layout");
+         error('assert', "Form.set_area.unset_layout");
       if ( !isset($this->areas[$area]) )
-         error("ERROR: Form.set_area(): bad area [$area] used");
+         error('assert', "Form.set_area.bad_area($area)");
       $this->area = $area;
    }
 
@@ -583,7 +585,7 @@ class Form
          $this->updated = false;
 
          return $line_no;
-      }
+   } //add_row
 
    /*! \brief wrapper to add empty-row. */
    function add_empty_row()
@@ -633,7 +635,8 @@ class Form
             $rootformstr .= $this->print_start_default();
 
          $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
-         $rootformstr .= "  <TABLE $table_attbs class=FormClass>\n"; //form table
+      $table_attbs = $this->get_merged_attbs( $table_attbs);
+      $rootformstr .= "  <TABLE $table_attbs>\n"; //form table
 
          ksort($this->rows);
 
@@ -764,7 +767,7 @@ class Form
             $rootformstr .= $this->print_end();
 
          return $rootformstr;
-      }
+   } //create_form_string
 
    /*!
     * \brief Return form pressed into areas grouped as specified by layout (called recursively).
@@ -772,9 +775,97 @@ class Form
     * \param $AR AR[areanum] contains the tablerows as string for the different areas
     * \internal
     */
-   function build_areas( $L, $AR )
+   function build_areas( &$L, &$AR, $TRlevel=true )
    {
       $areastr = '';
+if(1){//new
+
+      if( is_numeric($L) )
+      {
+         $areastr = @$AR[$L]; //always TRlevel
+         if( !$areastr )
+            return '';
+         $table_attbs = $this->get_areaconf( $L, FAC_TABLE );
+         $tdtable_attbs = $this->get_areaconf( $L, FAC_ENVTABLE );
+         $table_attbs = $this->get_merged_attbs( $table_attbs, 'C');
+         $tdtable_attbs = $this->get_merged_attbs( $tdtable_attbs, 'C');
+         $title = (string)@$this->get_areaconf( $L, 'title' );
+         if( $title )
+            $title = "<span class=Rubric>$title</span>";
+         $areastr = "<TD$tdtable_attbs><!-- Area #$L -->$title<TABLE$table_attbs>\n"
+                  . $areastr
+                  . "</TABLE></TD>\n";
+         if( $TRlevel )
+            $areastr = "<TR>$areastr</TR>";
+RdvlLog("Form.build_areas=[$areastr]");
+      }
+      else
+      {
+         if( !is_array($L) )
+            error('assert', "Form.build_areas.bad-layout-type($L)");
+         if( count($L) == 0 )
+            error('assert', "Form.build_areas.empty-layout-array");
+
+         $table_attbs = $this->get_areaconf( FAREA_ALL, FAC_TABLE );
+         $cnt = 0;
+         if( $L[0] == 'H' )
+         { // horizontal grouping
+            for ($i=1; $i < count($L); $i++)
+            {
+               $area = $L[$i];
+               $str = $this->build_areas( $area, $AR, false);
+               if( !$str )
+                  continue;
+               $areastr.= $str;
+               $cnt++;
+            }
+            if( $cnt < 1 )
+               return '';
+            //if( $cnt > 1 ) //removed because it can induce mis-alignment of siblings
+            {
+               $table_attbs = $this->get_areaconf( FAREA_ALLH, FAC_TABLE );
+               $tdtable_attbs = $this->get_areaconf( FAREA_ALLH, FAC_ENVTABLE );
+               $table_attbs = $this->get_merged_attbs( $table_attbs, 'H');
+               $tdtable_attbs = $this->get_merged_attbs( $tdtable_attbs, 'H');
+               $areastr = "<TD$tdtable_attbs><TABLE$table_attbs>\n"
+                        . "<TR>" . $areastr . "</TR>"
+                        . "</TABLE></TD>\n";
+            }
+            if( $TRlevel )
+               $areastr = "<TR>$areastr</TR>";
+RdvlLog("Form.build_areas.H=[$areastr]");
+         }
+         else
+         { // vertical grouping
+            foreach( $L as $area )
+            {
+               $str = $this->build_areas( $area, $AR, false);
+               if( !$str )
+                  continue;
+               if( $areastr )
+                  $areastr .= "</TR><TR>";
+               $areastr .= $str;
+               $cnt++;
+            }
+            if( $cnt < 1 )
+               return '';
+            //if( $cnt > 1 ) //removed because it can induce mis-alignment of siblings
+            {
+               $table_attbs = $this->get_areaconf( FAREA_ALLV, FAC_TABLE );
+               $tdtable_attbs = $this->get_areaconf( FAREA_ALLV, FAC_ENVTABLE );
+               $table_attbs = $this->get_merged_attbs( $table_attbs, 'V');
+               $tdtable_attbs = $this->get_merged_attbs( $tdtable_attbs, 'V');
+               $areastr = "<TD$tdtable_attbs><TABLE$table_attbs>\n"
+                        . $areastr
+                        . "</TABLE></TD>\n";
+            }
+            if( $TRlevel )
+               $areastr = "<TR>$areastr</TR>";
+RdvlLog("Form.build_areas.V=[$areastr]");
+         }
+      }
+
+}else{//old
 
       if ( is_numeric($L) )
       {
@@ -788,9 +879,9 @@ class Form
       }
 
       if ( !is_array($L) )
-         error("ERROR: Form.build_areas(): processing-error with bad type for layout [$L]");
+         error('assert', "Form.build_areas.bad-layout-type($L)");
       if ( count($L) == 0 )
-         error("ERROR: Form.build_areas(): processing-error with empty-layout-array");
+         error('assert', "Form.build_areas.empty-layout-array");
 
       $table_attbs_all = $this->get_areaconf( FAREA_ALL, FAC_TABLE );
 
@@ -819,8 +910,9 @@ class Form
          $areastr .= "</TABLE></TD></TR>\n";
       }
 
+}//old/new
       return $areastr;
-   }
+   } //build_areas
 
    /*!
     * \brief Returns area-config for specified area-num (num|0|FAREA_ALL) for context given.
@@ -1402,6 +1494,14 @@ class Form
       return ($this->disabled ? ' disabled'
             : ($this->tabindex ? ' tabindex="'.($this->tabindex++).'"'
              : ''));
+   }
+
+   /*! \brief Get the merged attributs string of a form part. */
+   function get_merged_attbs( $attbs, $suffix='')
+   {
+      $attbs = attb_parse( $attbs);
+      $attbs = attb_merge( array('class'=>$this->fclass.$suffix), $attbs, ' ');
+      return attb_build( $attbs);
    }
 
    /* ******************************************************************** */
