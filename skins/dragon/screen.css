@@ -1779,14 +1779,15 @@ body#dDGS table#pageMenu {
 }
 
 
-/* JUG server */
-body#DGS_dev table#pageFoot,
-body#DGS_dev table#pageHead {
-   background: lime;
+/* JUG devel server */
+body#jDGS table#pageFoot,
+body#jDGS table#pageHead {
+   background: #683888;
+   color: #97c777;
 }
 
-body#DGS_dev table#pageMenu {
-   border-color: lime;
+body#jDGS table#pageMenu {
+   border-color: #683888;
 }
 
 
