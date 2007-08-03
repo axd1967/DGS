@@ -36,9 +36,9 @@ foreach( $arr_layouts as $idx => $arr )
    $form_layouts[$idx] = $arr['layout'] . "  ";
 
 $col1 = 'grey';
-$col2 = 'blue';
-$col3 = 'red';
-$col4 = 'green';
+$col2 = 'green';
+$col3 = 'blue';
+$col4 = 'red';
 $col5 = 'magenta';
 function ff( $col, $msg ) {
    return "<font color=\"$col\">$msg</font>";
@@ -74,8 +74,8 @@ td.FormClassC {padding: 6px 30px;}
 
 td.FormClassC span.Rubric {font-weight: bold;}
 
-#tblWarn1 {background: #c0c0ff;}
-table.TblWarn2 {background: #ffc0c0;}
+#tblWarn1 {background: #c0ffc0;}
+table.TblWarn2 {background: #c0c0ff;}
 ';
 if( !$border )
    $page_style.='
@@ -207,7 +207,7 @@ $the_form->add_row( array( 'TEXT', ff($col4, 'Area 4 - Row 2') ) );
 $the_form->set_layout( FLAYOUT_AREACONF, 4,
    array(
       'title' => ( $title ?'Title 4' :'' ),
-      FAC_TABLE => 'bgcolor="#c0ffc0"',
+      FAC_TABLE => 'bgcolor="#ffc0c0"',
    ) );
 
 if ( $layout ) $the_form->set_area( 5 );
