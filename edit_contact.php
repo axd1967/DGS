@@ -85,15 +85,19 @@ require_once( "include/contacts.php" );
       $cid = $other_row['ID'];
       $cuser = $other_row['Handle'];
       if ( $my_id == $cid )
+      {
+         $other_row = null;
+         $cid = 0;
          $errormsg = '('.T_('Can\'t add myself as contact').')';
+      }
    }
    else
       $errormsg = '('.T_('unknown user').')';
 
    $contact = null;
-   if ( !$errormsg and $cid ) #TODO: allow my_id==cid (no error)
+   if ( !$errormsg and $cid )
       $contact = Contact::load_contact( $my_id, $cid ); // existing contact ?
-   if ( is_null($contact) ) #TODO: allow my_id==cid (no error)
+   if ( is_null($contact) )
       $contact = Contact::new_contact( $my_id, $cid ); // new contact
 
    if ( $cid and @$_REQUEST['contact_delete'] and @$_REQUEST['confirm'] and !$cancel_delete )
