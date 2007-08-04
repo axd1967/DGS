@@ -610,14 +610,15 @@ require_once( "include/std_functions.php" );
       }
       break;
 
-
       case("invalid_filter"):
       {
          echo T_("Sorry, there's a configuration problem with a search-filter.");
       }
       break;
 
-      default: //'internal_error'
+      //case('assert'):
+      //case('internal_error'):
+      default:
       {
          echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.")." ($err)";
       }
