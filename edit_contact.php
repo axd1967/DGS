@@ -124,79 +124,96 @@ require_once( "include/contacts.php" );
    else
       $title = T_('Contact edit');
 
-   $contact_form = new Form( 'contactform', $page, FORM_POST );
-   $contact_form->set_layout( FLAYOUT_GLOBAL, ( $cid ? '1,(5|2|5|3),4' : '1' ) );
-   $contact_form->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );
 
-   $contact_form->set_area(1);
-   if ( $cid ) // edit contact (no change of contact-id allowed)
-      $contact_form->add_row( array(
-         'DESCRIPTION',  T_('Userid'),
-         'TEXT',         $cuser ));
-   else // ask for contact to add/edit
-      $contact_form->add_row( array(
+   $cform = new Form( 'contact', $page, FORM_POST );
+   $cform->set_layout( FLAYOUT_GLOBAL, ( $cid ? '1,2|3,4' : '1' ) );
+
+   $cform->set_area(1);
+   if ( $cid <= 0 ) // ask for contact to add/edit
+   {
+      $cform->add_row( array(
          'DESCRIPTION',  T_('Userid'),
          'TEXTINPUT',    'cuser', 16, 16, textarea_safe($cuser),
          'SUBMITBUTTON', 'contact_check', T_('Check contact') ));
-   $contact_form->add_row( array(
-         'DESCRIPTION', T_('Name'),
-         'TEXT', ( $other_row ? user_reference( REF_LINK, 1, '', $other_row ) : $errormsg )
-         ));
-
-   if ( $cid )
+   }
+   else // edit contact (no change of contact-id allowed)
    {
-      $contact_form->set_area(2);
-      $contact_form->add_row( array(
-            'DESCRIPTION', T_('System categories') )); // system-flags
-      $row_arr = array();
-      foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr )
-         array_push( $row_arr,
-            'BR', 'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_sysflag_set($sysflag) );
-      $contact_form->add_row( $row_arr );
-
-      $contact_form->set_area(3);
-      $contact_form->add_row( array(
-            'DESCRIPTION', T_('User categories') )); // user-flags
-      $row_arr = array();
-      foreach( $ARR_CONTACT_USERFLAGS as $userflag => $arr )
-         array_push( $row_arr,
-            'BR', 'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_userflag_set($userflag) );
-      $contact_form->add_row( $row_arr );
-
-      $contact_form->set_area(5);
-      $contact_form->add_row( array( 'TEXT', str_repeat('&nbsp', 10) ));
-
-      $contact_form->set_area(4);
-      $contact_form->add_row( array(
-            'DESCRIPTION', T_('Notes'),
-            'TEXTAREA', 'note', 60, 3, textarea_safe($contact->note),
-            'BR', 'TEXT', '(' . T_('keep notes short, max. 255 chars') . ')'
+      $cform->add_row( array(
+         'DESCRIPTION',  T_('Userid'),
+         'TEXT',         $cuser ));
+      $cform->add_row( array(
+            'DESCRIPTION', T_('Name'),
+            'TEXT', ( $other_row ? user_reference( REF_LINK, 1, '', $other_row ) : $errormsg )
             ));
 
-      if ( @$_REQUEST['contact_delete'] and !$cancel_delete )
+      if( $other_row )
       {
-         $contact_form->add_hidden( 'confirm', 1 );
-         $contact_form->add_row( array(
-            'TAB',
-            'CELL', 1, 'align=left',
-            'SUBMITBUTTON', 'contact_delete', T_('Remove contact'),
-            'SUBMITBUTTON', 'contact_cancel', T_('Cancel') ));
-      }
-      else
-         $contact_form->add_row( array(
-            'TAB',
-            'CELL', 1, 'align=left',
-            'SUBMITBUTTON', 'contact_save', T_('Save contact'),
-            ));
+         $cform->set_area(2);
+         $cform->add_row( array(
+               'DESCRIPTION', T_('System categories') )); // system-flags
+         $cform->set_layout( FLAYOUT_AREACONF, 2, array(
+               FAC_TABLE => 'class=EditOptions',
+            ) );
+         foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr )
+         {
+            $row_arr = array();
+            array_push( $row_arr,
+               'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_sysflag_set($sysflag) );
+            $cform->add_row( $row_arr );
+         }
 
-      $contact_form->add_hidden( 'cid', $cid );
+         $cform->set_area(3);
+         $cform->add_row( array(
+               'DESCRIPTION', T_('User categories') )); // user-flags
+         $cform->set_layout( FLAYOUT_AREACONF, 3, array(
+               FAC_TABLE => 'class=EditOptions',
+            ) );
+         reset($ARR_CONTACT_USERFLAGS);
+         while( list($userflag, $arr) = each($ARR_CONTACT_USERFLAGS) )
+         {
+            $row_arr = array();
+            array_push( $row_arr,
+               'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_userflag_set($userflag) );
+            if( list($userflag, $arr) = each($ARR_CONTACT_USERFLAGS) )
+               array_push( $row_arr, 'TD',
+                  'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_userflag_set($userflag) );
+            else
+               array_push( $row_arr, 'TAB');
+            $cform->add_row( $row_arr );
+         }
+
+         $cform->set_area(4);
+         $cform->add_row( array(
+               'DESCRIPTION', T_('Notes'),
+               'TEXTAREA', 'note', 60, 3, textarea_safe($contact->note),
+               'BR', 'TEXT', '(' . T_('keep notes short, max. 255 chars') . ')'
+               ));
+
+         if ( @$_REQUEST['contact_delete'] and !$cancel_delete )
+         {
+            $cform->add_hidden( 'confirm', 1 );
+            $cform->add_row( array(
+               'TAB',
+               'CELL', 1, 'align=left',
+               'SUBMITBUTTON', 'contact_delete', T_('Remove contact'),
+               'SUBMITBUTTON', 'contact_cancel', T_('Cancel') ));
+         }
+         else
+            $cform->add_row( array(
+               'TAB',
+               'CELL', 1, 'align=left',
+               'SUBMITBUTTON', 'contact_save', T_('Save contact'),
+               ));
+
+         $cform->add_hidden( 'cid', $cid );
+      }
    }
 
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
    echo "<CENTER>\n";
-   $contact_form->echo_string();
+   $cform->echo_string();
    echo "</CENTER><BR>\n";
 
    $menu_array = array(

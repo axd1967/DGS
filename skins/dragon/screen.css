@@ -856,6 +856,47 @@ table.Table td img.Hide {
 
 
 /* ------------------------- */
+/* form tables */
+/* ------------------------- */
+
+td.FormClassV,
+td.FormClassH,
+td.FormClassC,
+table.FormClass,
+table.FormClassV,
+table.FormClassH,
+table.FormClassC {
+   border: 0px solid red;
+}
+
+table.FormClass,
+table.FormClassV,
+table.FormClassH,
+table.FormClassC {
+   margin: 0px auto 0px auto;
+}
+
+td.FormClassV,
+td.FormClassH {
+   color: black;
+   padding: 0px;
+   vertical-align: top;
+   text-align: center;
+}
+
+td.FormClassC {
+   color: black;
+   padding: 0px 20px;
+   vertical-align: top;
+   text-align: center;
+}
+
+td.FormClassC span.Rubric {
+   font-weight: bold;
+}
+
+
+/* ------------------------- */
 /* infos tables */
 /* ------------------------- */
 
@@ -980,6 +1021,52 @@ table.InfoBox td {
    padding: 0px 8px 0px 0px;
    text-align: left;
    vertical-align: bottom;
+}
+
+
+/* ------------------------- */
+/* contacts page */
+/* ------------------------- */
+
+form#contactForm table.Table tr.Row4 td,
+form#contactForm table.Table tr.Row3 td,
+form#contactForm table.Table tr.Row2 td,
+form#contactForm table.Table tr.Row1 td {
+   vertical-align: top;
+}
+
+form#contactForm table.Table a.ButIcon {
+   margin: 0px 2px;
+   padding: 0px;
+}
+
+form#contactForm table.Table a.ButIcon img {
+   margin: 0px;
+   width: 16px;
+   height: 16px;
+}
+
+form#contactForm table.FormClassC {
+   border: 0px solid lime;
+   margin: 0px auto 0px 0px;
+}
+
+form#contactForm td.FormClassC {
+   border: 0px solid red;
+   color: black;
+   padding: 0px 30px;
+   vertical-align: top;
+   text-align: left;
+}
+
+form#contactForm table.EditOptions td,
+form#contactForm table.FilterOptions td {
+   text-align: left;
+}
+
+form#contactForm table.EditOptions {
+   margin-top: 1em;
+   margin-bottom: 1em;
 }
 
 

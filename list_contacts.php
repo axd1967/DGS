@@ -41,20 +41,20 @@ require_once( "include/contacts.php" );
    if( $player_row['Handle'] == 'guest' )
       error('not_allowed_for_guest');
 
-   $my_id = $player_row["ID"];
+   $my_id = $player_row['ID'];
    $page = "list_contacts.php?";
 
 
    $arr_chk_sysflags = array();
    foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr ) // arr=( form_elem_name, flag-text )
    {
-      $td_flagtext = "<td align=left>%s&nbsp;{$arr[1]}&nbsp;&nbsp;</td>";
+      $td_flagtext = "<td>%s{$arr[1]}</td>";
       $arr_chk_sysflags[$td_flagtext] = array( $sysflag, T_('System Category') . ': ' . $arr[1] );
    }
    $arr_chk_userflags = array();
    foreach( $ARR_CONTACT_USERFLAGS as $userflag => $arr ) // arr=( form_elem_name, flag-text )
    {
-      $td_flagtext = "<td align=left>%s&nbsp;{$arr[1]}&nbsp;&nbsp;</td>";
+      $td_flagtext = "<td>%s{$arr[1]}</td>";
       $arr_chk_userflags[$td_flagtext] = array( $userflag, T_('User Category') . ': ' . $arr[1] );
    }
 
@@ -76,14 +76,14 @@ require_once( "include/contacts.php" );
    $cfilter->add_filter( 4, 'Rating',  'P.Rating2', true);
    $cfilter->add_filter( 5, 'RelativeDate', 'P.Lastaccess', true);
    $filter_note =&
-   $cfilter->add_filter( 8, 'Text', 'C.Note', true,
+      $cfilter->add_filter( 8, 'Text', 'C.Notes', true,
          array( FC_SIZE => 20, FC_SUBSTRING => 1, FC_START_WILD => 1 ));
    $cfilter->add_filter(10, 'RelativeDate', 'C.Created', true);
    $cfilter->add_filter(11, 'RelativeDate', 'C.Lastchanged', false);
    $cfilter->init(); // parse current value from _GET
    $rxterms_note = implode(' | ', $filter_note->get_terms() );
 
-   $ctable = new Table( 'contact', $page, 'ContactColumns' );
+   $ctable = new Table( 'contact', $page, 'ContactColumns', 'contact' );
    $ctable->register_filter( $cfilter );
    $ctable->set_default_sort( 'C.Lastchanged', 1);
    $ctable->add_or_del_column();
@@ -102,8 +102,8 @@ require_once( "include/contacts.php" );
    $ctable->add_tablehead(11, T_('Lastchanged'), 'C.Lastchanged', true);
 
    // External-Search-Form
-   $cform = new Form( $ctable->Prefix, $page, FORM_GET, false, 'forctable' );
-   $cform->set_layout( FLAYOUT_GLOBAL, '(1|3|2)' );
+   $cform = new Form( 'contact', $page, FORM_GET, false);
+   $cform->set_layout( FLAYOUT_GLOBAL, '(1|2)' );
    $cform->set_tabindex(1);
    $cform->set_config( FEC_TR_ATTR, 'valign=top' );
    $cform->set_config( FEC_EXTERNAL_FORM, true );
@@ -115,31 +115,42 @@ require_once( "include/contacts.php" );
    $ctable->add_external_parameters( $extparam );
 
    $cform->set_area(1);
+/*
    $cform->add_row( array(
          'CELL', 1, 'align=left',
          'TEXT', '<b>' . T_('Search system categories') . ':</b>' )); // system-flags
+*/
    $cform->add_row( array(
          'FILTER',      $scfilter, 1 ));
+   $cform->set_layout( FLAYOUT_AREACONF, 1, array(
+         'title' => T_('System categories filter'),
+         FAC_TABLE => 'class=FilterOptions',
+      ) );
+
    $cform->set_area(2);
+/*
    $cform->add_row( array(
          'CELL', 1, 'align=left', // DESCRIPTION not wanted (centers header)
          'TEXT', '<b>' . T_('Search user categories') . ':</b>' )); // user-flags
+*/
    $cform->add_row( array(
          'FILTER',      $scfilter, 2 ));
-   $cform->set_area(3);
-   $cform->add_row( array( 'TEXT', str_repeat('&nbsp', 5) ));
+   $cform->set_layout( FLAYOUT_AREACONF, 2, array(
+         'title' => T_('User categories filter'),
+         FAC_TABLE => 'class=FilterOptions',
+      ) );
 
    // build SQL-query
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
       'P.Name', 'P.Handle', 'P.Country', 'P.Rating2',
       'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccess',
-      'C.cid', 'C.SystemFlags', 'C.UserFlags', 'C.Note',
+      'C.cid', 'C.SystemFlags', 'C.UserFlags', 'C.Notes',
       'C.Created', 'C.Lastchanged',
       'IFNULL(UNIX_TIMESTAMP(C.Created),0) AS created',
       'IFNULL(UNIX_TIMESTAMP(C.Lastchanged),0) AS lastchanged' );
    $qsql->add_part( SQLP_FROM,
-      'Contacts C',
+      'Contacts AS C',
       'INNER JOIN Players P ON C.cid = P.ID' );
    $qsql->add_part( SQLP_WHERE,
       "C.uid=$my_id" );
@@ -189,11 +200,11 @@ require_once( "include/contacts.php" );
          $crow_strings[3] = "<td>" . $cntrn . "</td>";
       }
       if( $ctable->Is_Column_Displayed[4] )
-         $crow_strings[4] = '<td>' . echo_rating(@$row['Rating2'],true,$cid) . '&nbsp;</td>';
+         $crow_strings[4] = '<td>' . echo_rating(@$row['Rating2'],true,$cid) . '</td>';
       if( $ctable->Is_Column_Displayed[5] )
       {
          $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
-         $crow_strings[5] = '<td>' . $lastaccess . '&nbsp;</td>';
+         $crow_strings[5] = '<td>' . $lastaccess . '</td>';
       }
       if( $ctable->Is_Column_Displayed[6] )
       {
@@ -211,36 +222,36 @@ require_once( "include/contacts.php" );
       }
       if( $ctable->Is_Column_Displayed[8] )
       {
-         $note = make_html_safe( $row['Note'], false, $rxterms_note );
-         $note = preg_replace( "/(\r\n|\n)/", '<br>', $note ); // LF -> <br>
+         $note = make_html_safe( $row['Notes'], false, $rxterms_note );
+         //reduce multiple LF to one <br>
+         $note = preg_replace( "/(\r\n|\n|\r)+/", '<br>', $note );
          $crow_strings[8] = "<td>$note</A></td>";
       }
       if( $ctable->Is_Column_Displayed[9] )
       {
-         $sep = str_repeat('&nbsp;', 3);
          $links  = anchor( "message.php?mode=NewMessage&uid=$cid",
                image( 'images/send.gif', 'M'),
-               T_('Send message') ) . $sep;
+               T_('Send message'), 'class=ButIcon');
          $links .= anchor( "message.php?mode=Invite&uid=$cid",
                image( 'images/invite.gif', 'I'),
-               T_('Invite') ) . $sep;
+               T_('Invite'), 'class=ButIcon');
          $links .= anchor( "edit_contact.php?cid=$cid",
                image( 'images/edit.gif', 'E'),
-               T_('Edit contact') ) . $sep;
+               T_('Edit contact'), 'class=ButIcon');
          $links .= anchor( "edit_contact.php?cid=$cid".URI_AMP."contact_delete=1",
                image( 'images/trashcan.gif', 'X'),
-               T_('Remove contact') ) . $sep;
-         $crow_strings[9] = "<td>$sep$links</td>";
+               T_('Remove contact'), 'class=ButIcon');
+         $crow_strings[9] = "<td>$links</td>";
       }
       if( $ctable->Is_Column_Displayed[10] )
       {
          $created = ($row['created'] > 0 ? date($date_fmt2, $row['created']) : NULL );
-         $crow_strings[10] = '<td>' . $created . '&nbsp;</td>';
+         $crow_strings[10] = "<td>$created</td>";
       }
       if( $ctable->Is_Column_Displayed[11] )
       {
          $lastchanged = ($row['lastchanged'] > 0 ? date($date_fmt2, $row['lastchanged']) : NULL );
-         $crow_strings[11] = '<td>' . $lastchanged . '&nbsp;</td>';
+         $crow_strings[11] = "<td>$lastchanged</td>";
       }
 
       $ctable->add_row( $crow_strings );

@@ -82,7 +82,9 @@ class Contact
    /*! Constructs Contact-object with specified arguments: created and lastchanged are in UNIX-time. */
    function Contact( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
    {
-      if ( !is_numeric($uid) or !is_numeric($cid) )
+      if ( !is_numeric($uid) or !is_numeric($cid)
+            or $uid <= 0 or $cid <= 0
+            or $uid == $cid )
          error('invalid_user', "contacts.Contact($uid,$cid)");
       $this->uid = (int) $uid;
       $this->cid = (int) $cid;
@@ -126,7 +128,7 @@ class Contact
             $row['uid'], $row['cid'],
             $row['SystemFlags'], $row['UserFlags'],
             $row['Created'], $row['Lastchanged'],
-            $row['Note'] );
+            $row['Notes'] );
       mysql_free_result($result);
 
       return $contact;
@@ -141,7 +143,7 @@ class Contact
       if ( is_null($note) )
          $this->note = '';
       else
-         $this->note = preg_replace( "/(\r\n|\n)+/s", "$1", trim($note) );
+         $this->note = preg_replace( "/(\r\n|\n|\r)+/s", "\n", trim($note) );
    }
 
    /*! \brief Returns true, if specified system flag is set. */
@@ -190,8 +192,10 @@ class Contact
     */
    function update_contact()
    {
-      if ( !is_numeric($this->uid) or !is_numeric($this->cid) or $this->uid == $this->cid )
-         error('invalid_user', "contact.update_contact({$this->uid},{$this->cid})");
+      if ( !is_numeric($this->uid) or !is_numeric($this->cid)
+            or $this->uid <= 0 or $this->cid <= 0
+            or $this->uid == $this->cid )
+         error('invalid_user', 'contact.update_contact');
 
       global $NOW;
       $this->lastchanged = $NOW;
@@ -209,7 +213,7 @@ class Contact
          . ', UserFlags=' . (int)$this->userflags
          . ', Created=FROM_UNIXTIME(' . $this->created .')'
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
-         . ", Note='" . mysql_addslashes($this->note) . "'"
+         . ", Notes='" . mysql_addslashes($this->note) . "'"
          ;
       $result = mysql_query( $update_query )
          or error('mysql_query_failed','contacts.update_contact');
@@ -218,7 +222,9 @@ class Contact
    /*! \brief Deletes current Contact from database. */
    function delete_contact()
    {
-      if ( !is_numeric($this->uid) or !is_numeric($this->cid) or $this->uid == $this->cid )
+      if ( !is_numeric($this->uid) or !is_numeric($this->cid)
+            or $this->uid <= 0 or $this->cid <= 0
+            or $this->uid == $this->cid )
          error('invalid_user', "contact.delete_contact({$this->uid},{$this->cid})");
 
       $delete_query = "DELETE FROM Contacts "
