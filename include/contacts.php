@@ -83,7 +83,7 @@ class Contact
    function Contact( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
    {
       if ( !is_numeric($uid) or !is_numeric($cid)
-            or $uid <= 0 or $cid <= 0
+            or $uid <= 0 or $cid < 0
             or $uid == $cid )
          error('invalid_user', "contacts.Contact($uid,$cid)");
       $this->uid = (int) $uid;
