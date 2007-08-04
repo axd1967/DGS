@@ -900,7 +900,7 @@ class SearchFilter
       return ( isset($filter) ) ? $filter->get_input_element( $prefix, $attr ) : '';
    }
 
-   /*! \brief Wrapper for QuerySQL|null get_filter(id)->get_query(); returns '' if filter not existing. */
+   /*! \brief Wrapper for QuerySQL|null get_filter(id)->get_query(); returns null if filter not existing. */
    function get_filter_query( $id )
    {
       $filter = $this->get_filter($id);
