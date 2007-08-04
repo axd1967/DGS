@@ -291,28 +291,25 @@ require_once( "include/rating.php" );
    $gtable->add_tablehead( 8, T_('Komi'), 'Komi');
    $gtable->add_tablehead( 9, T_('Moves'), 'Moves', true);
 
-   if( $observe )
-   {
-      $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
-      $gtable->add_tablehead(13, T_('Last move'), 'Lastchanged', true);
-   }
-   else if( $finished )
+   if( $finished )
    {
       if( $all )
-      {
          $gtable->add_tablehead(10, T_('Score'), 'Score', true);
-      }
       else
       {
          $gtable->add_tablehead(10, T_('Score'), 'oScore', true);
-         $gtable->add_tablehead(11, T_('Win?'), 'Win', true);
+         $gtable->add_tablehead(11, T_('Win?'), 'Win', true, true);
       }
-      $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
-      $gtable->add_tablehead(12, T_('End date'), 'Lastchanged', true);
    }
+
+   $gtable->add_tablehead(14, T_('Rated'), 'Rated', true, true);
+
+   if( $observe )
+      $gtable->add_tablehead(13, T_('Last move'), 'Lastchanged', true);
+   else if( $finished )
+      $gtable->add_tablehead(12, T_('End date'), 'Lastchanged', true);
    else if( $running )
    {
-      $gtable->add_tablehead(14, T_('Rated'), 'Rated', true);
       $gtable->add_tablehead(13, T_('Last move'), 'Lastchanged', true);
       if( !$all )
       {
