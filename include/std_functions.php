@@ -2286,6 +2286,25 @@ function send_reference( $link, $safe, $class, $player_ref, $player_name=false, 
    return user_reference( $link, $safe, $class, $player_ref, $player_name, $player_handle);
 }
 
+/**
+ * the reference generated depends of $link:
+ * : 0 or '' => no <A></A> tag added
+ * : >0 => a user-info reference
+ * : <0 => a send-message reference
+ * : string => $link will be the reference (must end with '?' or URI_AMP)
+ * if numeric, abs($link) may be a combination of:
+ * : REF_LINK to add a <A></A> tag
+ * : REF_LINK_BLANK to add a <A></A> tag with a target="_blank"
+ * : REF_LINK_ALLOWED the <A></A> tag added will pass the make_html_safe filter
+ *
+ * $player_ref may be:
+ * : an integer => the reference will use it as a user ID
+ * : a string => the reference will use it as a user Handle
+ * :   (if the first char is HANDLE_TAG_CHAR, it is removed)
+ * : an array => the reference will use its 'ID' field, and eventually, the
+ * :   'Handle' and 'Name' fields if $player_name or $player_handle are absent
+ * then the missing arguments will be retreived from the database if needed.
+ **/
 function user_reference( $link, $safe, $class, $player_ref, $player_name=false, $player_handle=false)
 {
  global $base_path;
@@ -2295,27 +2314,25 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
          $player_name = $player_ref['Name'];
       if( !$player_handle )
          $player_handle = $player_ref['Handle'];
-      $player_ref = $player_ref['ID'];
+      $player_ref = (int)$player_ref['ID'];
    }
-   $legal = 1;
-   if( !is_numeric($player_ref) || $player_ref{0}==HANDLE_TAG_CHAR )
+   $legal = ( substr($player_ref,0,1) == HANDLE_TAG_CHAR ); //temporary
+   if( !is_numeric($player_ref) || $legal )
    {
       $byid = 0;
-      if( $player_ref{0}==HANDLE_TAG_CHAR )
+      if( $legal )
          $player_ref = substr($player_ref,1);
       //because of old DGS users having a pure numeric Handle
-      //illegal_chars( $player_ref) had been replaced by !ereg() here
-      if( !$player_ref or !ereg( "^[".HANDLE_LEGAL_REGS."]+\$", $player_ref) )
-         $legal = 0;
+      //illegal_chars( $player_ref) had been replaced by this ereg() here
+      $legal = ( $player_ref && ereg( "^[".HANDLE_LEGAL_REGS."]+\$", $player_ref) );
    }
    else
    {
       $byid = 1;
       $player_ref = (int)$player_ref;
-      if( $player_ref<=0)
-         $legal = 0;
+      $legal = ( $player_ref > 0 );
    }
-   if( ($player_name===false or $player_handle===false) && $legal )
+   if( ($player_name===false || ( $player_handle===false) && $legal ) )
    {
      $query = 'SELECT Name, Handle ' .
               'FROM Players ' .
