@@ -27,6 +27,9 @@ Changelog
 
 2007-08-04 juga
 
+   * edit_contact.php:
+   - fix: show errormsg for invalid contact-user
+
    * list_contacts.php:
    - use case-insensitive filter-search on now binary Notes-column
    - removed alt-attrib in some filter-form-elements: changed FC_MULTIPLE-format

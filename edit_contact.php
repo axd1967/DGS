@@ -135,6 +135,9 @@ require_once( "include/contacts.php" );
          'DESCRIPTION',  T_('Userid'),
          'TEXTINPUT',    'cuser', 16, 16, textarea_safe($cuser),
          'SUBMITBUTTON', 'contact_check', T_('Check contact') ));
+      if ( !is_null($errormsg) )
+         $cform->add_row( array(
+            'TAB', 'TEXT', $errormsg ));
    }
    else // edit contact (no change of contact-id allowed)
    {
@@ -143,8 +146,7 @@ require_once( "include/contacts.php" );
          'TEXT',         $cuser ));
       $cform->add_row( array(
             'DESCRIPTION', T_('Name'),
-            'TEXT', ( $other_row ? user_reference( REF_LINK, 1, '', $other_row ) : $errormsg )
-            ));
+            'TEXT', user_reference( REF_LINK, 1, '', $other_row ) ));
 
       if( $other_row )
       {
@@ -156,10 +158,8 @@ require_once( "include/contacts.php" );
             ) );
          foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr )
          {
-            $row_arr = array();
-            array_push( $row_arr,
-               'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_sysflag_set($sysflag) );
-            $cform->add_row( $row_arr );
+            $cform->add_row( array(
+               'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_sysflag_set($sysflag) ));
          }
 
          $cform->set_area(3);
