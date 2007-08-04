@@ -24,6 +24,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 require_once( "include/faq_functions.php" );
+require_once( "include/filter_parser.php" );
 
 
 $info_box = '<ul>
@@ -95,6 +96,7 @@ $info_box = '<ul>
 
    $id = is_numeric(@$_REQUEST['id']) ? max(0,$_REQUEST['id']) : 0;
    $term = get_request_arg('term', '');
+   $urlterm = urlencode($term);
 
    // read/write move-distance for entries using cookie
    $movedist = (int)@$_REQUEST['movedist'];
@@ -202,7 +204,7 @@ $info_box = '<ul>
 
    // ***********        Edit entry       ****************
 
-   // args: id, edit=t type=c|e [ do_edit=?, preview=t ]
+   // args: id, edit=t type=c|e [ do_edit=?, preview=t, term=mark_term ]
    // keep it tested before 'do_edit' for the preview feature
    else if( @$_REQUEST['edit'] &&
       ( ($action=@$_REQUEST['type']) == 'c' or  $action == 'e' ) )
@@ -267,6 +269,7 @@ $info_box = '<ul>
                            'CELL', 1, 'align=left',
                            'HIDDEN', 'type', $action,
                            'HIDDEN', 'preview', 1,
+                           'HIDDEN', 'term', textarea_safe($term),
                            'SUBMITBUTTONX', 'do_edit', 'Update entry',
                               array('accesskey'=>'x'),
                            'SUBMITBUTTONX', 'edit', 'Preview',
@@ -275,13 +278,17 @@ $info_box = '<ul>
                            ));
       $faq_edit_form->echo_string(1);
 
-      show_preview( $row['Level'], $question, $answer, "e$id");
+      if( @$_REQUEST['preview'] )
+         $rxterm = '';
+      else
+         $rxterm = implode('|', sql_extract_terms( $term ));
+      show_preview( $row['Level'], $question, $answer, "e$id", $rxterm);
    } //edit
 
 
    // ***********        Save edited entry       ****************
 
-   // args: id, do_edit=t type=c|e, question, answer [ preview='' ]
+   // args: id, do_edit=t type=c|e, question, answer [ preview='', term=mark_terms ]
    // keep it tested after 'edit' for the preview feature
    else if( @$_REQUEST['do_edit'] &&
       ( ($action=@$_REQUEST['type']) == 'c' or  $action == 'e' ) )
@@ -390,7 +397,7 @@ $info_box = '<ul>
             make_include_files(null, 'FAQ'); //must be called from main dir
 
       //clean URL (focus on edited entry or parent category if entry deleted)
-      jump_to( "$page?id=$ref_id#e$ref_id" );
+      jump_to( "$page?id=$ref_id".URI_AMP."term=$uterm#e$ref_id" );
    } //do_edit
 
 
@@ -714,7 +721,7 @@ $info_box = '<ul>
          // question/answer (1 col)
          if( $faqhide )
             echo "(H) ";
-         echo "<A href=\"$page?edit=1".URI_AMP."type=$typechar".URI_AMP."id=" . $row['ID'] .
+         echo "<A href=\"$page?edit=1".URI_AMP."type=$typechar".URI_AMP."id=".$row['ID'].URI_AMP."term=$uterm" .
               "\" title=\"Edit\">$question</A>";
          echo "\n</td>";
 
@@ -833,12 +840,13 @@ function transl_toggle_state( $row)
    return ''; //can't be toggled
 }
 
-function show_preview( $level, $question, $answer, $id='preview')
+function show_preview( $level, $question, $answer, $id='preview', $mark_terms='' )
 {
    echo "<table class=FAQ><tr><td class=FAQread>\n";
    echo faq_item_html( 0);
    echo faq_item_html( $level, $question, $answer,
-               $level == 1 ? "href=\"#$id\"" : "name=\"$id\"");
+               $level == 1 ? "href=\"#$id\"" : "name=\"$id\"",
+               $mark_terms );
    echo faq_item_html(-1);
    echo "</td></tr></table>\n";
 }
