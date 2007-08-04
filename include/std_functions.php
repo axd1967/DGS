@@ -66,7 +66,7 @@ $DEBUG_SQL = false; // for debugging filter showing where-clause on page
 define('LAYOUT_FILTER_IN_TABLEHEAD', true); // default is to show filters within tablehead (not below rows)
 define('LAYOUT_FILTER_EXTFORM_HEAD', true); // default is to show external-filter-form above filter-table
 
-define('TD_EMPTY', "  <td>&nbsp;</td>\n");
+define('TD_EMPTY', "<td></td>");
 
 //----- { layout : change in dragon.css too!
 $bg_color='"#f7f5e3"';

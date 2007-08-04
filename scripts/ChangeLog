@@ -30,6 +30,9 @@ Changelog
    * skins/dragon/screen.css, include/table_columns.php (make_table_filter):
    - adjusted some CSS of filters
 
+   * include/std_functions.php:
+   - removed the &nbsp; of the TD_EMPTY definition
+
 2007-08-04 juga
 
    * admin_faq.php, include/faq_functions.php (faq_item_html):
