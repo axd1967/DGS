@@ -262,7 +262,6 @@ $info_box = '<ul>
          }
       }
 
-      $faq_edit_form->add_empty_row();
       $faq_edit_form->add_row( array(
                            'TAB',
                            'CELL', 1, 'align=left',
@@ -438,7 +437,6 @@ $info_box = '<ul>
                                          'TEXTAREA', 'answer', 80, 20, $answer ) );
       }
 
-      $faq_edit_form->add_empty_row();
       $faq_edit_form->add_row( array(
                            'TAB',
                            'CELL', 1, 'align=left',
