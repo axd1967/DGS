@@ -25,6 +25,21 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-04 juga
+
+   * list_contacts.php:
+   - use case-insensitive filter-search on now binary Notes-column
+   - removed alt-attrib in some filter-form-elements: changed FC_MULTIPLE-format
+
+   * include/filter.php (build_generic_input_text_elem, build_input_text_elem,
+     build_generic_checkbox_elem, FilterCheckboxArray),
+     code_examples/filter_example2.php, search_messages.php:
+   - cleanup: removed alt-attrib in some filter-form-elements,
+     changed FC_MULTIPLE-format
+
+   * show_games.php, userinfo.php:
+   - introduced named filter-columns for Rated/Won fields in show_games.php
+
 2007-08-04 rodival
 
    * include/contacts.php (update_contact, load_contact),
