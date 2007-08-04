@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 //$TranslateGroups[] = "Game";
 
-define('MAX_ADD_DAYS', 7); // max. amount of days that can be added to game by user
+define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by user
 
 
 /*!
@@ -39,6 +39,16 @@ function allow_add_time_opponent( $game_row, $uid )
 
    // must not be a tournament-game
    if( $game_row['Tournament_ID'] != 0 )
+      return false;
+
+   // get opponents columns
+   if( $game_row['Black_ID'] == $uid )
+      $oppcolor = 'White';
+   else
+      $oppcolor = 'Black';
+   // don't exceed 365 days maintime
+   if( $game_row["{$oppcolor}_Maintime"]
+         + time_convert_to_hours(MAX_ADD_DAYS,'days') > time_convert_to_hours(365,'days') )
       return false;
 
    // TODO: might be denied, if declared as forbidden in waiting-room (by option)
@@ -100,6 +110,8 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
       $reset_byo = 0;
    if( $reset_byo && $game_row["{$oppcolor}_Byoperiods"] == -1 )
       $reset_byo = 0;
+   if( $reset_byo && $game_row['Byotime'] == 0 && $game_row['Byoperiods'] == 0 )
+      $reset_byo = 0; // no byoyomi-reset if no byoyomi (no time and no periods)
 
 /*
    // min. 1h to be able to reset byo-period with -1 (for next period)
