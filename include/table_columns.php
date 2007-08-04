@@ -977,7 +977,7 @@ class Table
       $this->Shown_Filters++;
 
       // filter input-element
-      $result = "<td" . ( $filter->has_error() ? ' class=Error' : '' ) . '>';
+      $result = '<td class='.( $filter->has_error() ? 'Error' : 'Filter' ).'>';
       $result .= $filter->get_input_element( $this->Filters->Prefix, $thead );
       if( !$filter->is_static() )
          $result .= $togglestr_hide;
