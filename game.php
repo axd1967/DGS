@@ -787,7 +787,7 @@ function draw_add_time( $game_row )
         </TR>';
 
    if ( $game_row['Byotype'] != 'FIS'
-      or ($game_row['Byotime'] != 0 and $game_row['Byoperiods'] != 0) ) // no byoyomi-reset if no byoyomi
+      && $game_row['Byotime'] > 0 && $game_row['Byoperiods'] > 0 ) // no byoyomi-reset if no byoyomi
    {
       echo '<TR>
               <TD>

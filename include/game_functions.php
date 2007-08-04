@@ -110,8 +110,8 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
       $reset_byo = 0;
    if( $reset_byo && $game_row["{$oppcolor}_Byoperiods"] == -1 )
       $reset_byo = 0;
-   if( $reset_byo && $game_row['Byotime'] == 0 && $game_row['Byoperiods'] == 0 )
-      $reset_byo = 0; // no byoyomi-reset if no byoyomi (no time and no periods)
+   if( $reset_byo && ($game_row['Byotime'] <= 0 or $game_row['Byoperiods'] <= 0) )
+      $reset_byo = 0; // no byoyomi-reset if no byoyomi (no time or no periods)
 
 /*
    // min. 1h to be able to reset byo-period with -1 (for next period)

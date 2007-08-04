@@ -105,28 +105,29 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
       return;
    }
 
-   $elapsed -= $main;
+   if( $main > 0 )
+      $elapsed -= $main;
+   $main = 0;
 
    switch($byotype)
    {
       case("FIS"):
       {
-         $main = $byotime = $byoper = 0;  // time is up;
+         $byotime = $byoper = 0;  // time is up;
       }
       break;
      
       case("JAP"):
       {
-         //"$main > 0 or" useless, removed since add_time
+         if( $startbyotime <= 0 )
+         {
+            $byotime = $byoper = 0; // No byoyomi. time is up;
+            break;
+         }
+
          if( $byoper < 0 ) // entering byoyomi
          {
-            $main = 0;
             $byotime = $startbyotime;
-            if( $byotime == 0 )
-            {
-               $byoper = 0; // No byoyomi. time is up;
-               break;
-            }
             $byoper = $startbyoper-1;
          }
 
@@ -146,7 +147,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
             $byotime = $byoper = 0;  // time is up;
          else if( $has_moved )
             $byotime = $startbyotime;
-         else 
+         else
             $byotime-= $elapsed - $deltaper*$startbyotime;
          /***
           * previous formula:
@@ -183,10 +184,14 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
 
       case("CAN"):
       {
-         //"$main > 0 or" useless, removed since add_time
+         if( $startbyoper <= 0 )
+         {
+            $byotime = $byoper = 0; // No byoyomi. time is up;
+            break;
+         }
+
          if( $byoper < 0 ) // entering byoyomi
          {
-            $main = 0;
             $byotime = $startbyotime;
             $byoper = $startbyoper;
          }
