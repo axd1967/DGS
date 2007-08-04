@@ -259,19 +259,19 @@ class Table
                            $desc_default = false,
                            $undeletable = false,
                            $attbs = NULL )
-      {
-         $this->Tableheads[$nr] =
-            array( 'Nr' => $nr,
-                   'Description' => $description,
-                   'Sort_String' => $sort_string,
-                   'Desc_Default' => $desc_default,
-                   'Undeletable' => $undeletable,
-                   'attbs' => $attbs );
+   {
+      $this->Tableheads[$nr] =
+         array( 'Nr' => $nr,
+                'Description' => $description,
+                'Sort_String' => $sort_string,
+                'Desc_Default' => $desc_default,
+                'Undeletable' => $undeletable,
+                'attbs' => $attbs );
 
-         $visible = $this->Is_Column_Displayed[$nr] = $this->is_column_displayed( $nr);
-         if ( $this->UseFilters ) // fix filter-visibility (especially for static cols)
-            $this->Filters->set_visible($nr, $visible);
-      }
+      $visible = $this->Is_Column_Displayed[$nr] = $this->is_column_displayed( $nr);
+      if ( $this->UseFilters ) // fix filter-visibility (especially for static cols)
+         $this->Filters->set_visible($nr, $visible);
+   } //add_tablehead
 
    /*! \brief Check if column is displayed. */
    function is_column_displayed( $nr )
@@ -966,31 +966,21 @@ class Table
          $togglestr_hide = '<span class="Tool">' . $togglestr_hide . "</span>";
       }
 
-      $tdstr = "  <td valign=\"bottom\"";
-      if ( $filter->has_error() )
-         $tdstr .= " class=Error";
-      $tdstr .= '>';
-
-      $td_empty = TD_EMPTY;
-      if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] )
+      // check, if filter-field shown or hidden
+      if( !$filter->is_active() )
       {
-         // replace td-class-attr
-         $td = preg_replace( '/ class="?\w+"?/i', '', $tdstr, 1 );
-         $td = preg_replace( '/>$/', " class=ShowFilter>", $td, 1 ); // td.class
-         $td_empty = $td . $togglestr_show. "</td>\n";
+         if( $togglestr_show )
+            return '<td class=ShowFilter>' . $togglestr_show. "</td>\n";
+         return TD_EMPTY;
       }
 
-      // check, if filter-field shown or hidden
-      if ( !$filter->is_active() )
-         return $td_empty;
       $this->Shown_Filters++;
 
       // filter input-element
-      $result = $tdstr;
+      $result = "<td" . ( $filter->has_error() ? ' class=Error' : '' ) . '>';
       $result .= $filter->get_input_element( $this->Filters->Prefix, $thead );
-      if ( !$filter->is_static() and $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] )
+      if( !$filter->is_static() )
          $result .= $togglestr_hide;
-
       $result .= "</td>\n";
 
       return $result;

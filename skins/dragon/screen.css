@@ -689,6 +689,10 @@ table.Table tr.Filter {
    white-space: nowrap;
 }
 
+table.Table tr.Filter td {
+   vertical-align: bottom;
+}
+
 table.Table tr.Filter td.Error {
    background: #dd0080;
    text-decoration: none;
@@ -825,12 +829,17 @@ table.Table a.Button {
 */
 table.Table td span.Tool,
 table.Table th span.Tool {
-   text-align: left;
-   margin: 0px 0px 0px 0px; /* */
    padding: 0px 0px 0px 0px;
+   margin: 0px 0px 0px 0px; /* */
+/*   margin: 0px 0px 0.5em 0px; */
+   font-size: 0.5em;
+   color: red;
+   vertical-align: top;
+   vertical-align: super;
+   text-align: left;
 }
 
-table.Table th img.Hide {
+table.Table th img.Hide { /* headers row */
    width: 9px;
    height: 9px;
    border: 0px solid black;
@@ -838,7 +847,7 @@ table.Table th img.Hide {
    vertical-align: top;
 }
 
-table.Table th img.Sort {
+table.Table th img.Sort { /* headers row */
    width: 9px;
    height: 9px;
    border: 0px solid green;
@@ -846,7 +855,7 @@ table.Table th img.Sort {
    vertical-align: top;
 }
 
-table.Table td img.Hide {
+table.Table td img.Hide { /* filters row */
    width: 9px;
    height: 9px;
    border: 0px solid black;
