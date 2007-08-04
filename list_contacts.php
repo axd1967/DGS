@@ -49,13 +49,13 @@ require_once( "include/contacts.php" );
    foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr ) // arr=( form_elem_name, flag-text )
    {
       $td_flagtext = "<td>%s{$arr[1]}</td>";
-      $arr_chk_sysflags[$td_flagtext] = array( $sysflag, T_('System Category') . ': ' . $arr[1] );
+      $arr_chk_sysflags[$td_flagtext] = $sysflag;
    }
    $arr_chk_userflags = array();
    foreach( $ARR_CONTACT_USERFLAGS as $userflag => $arr ) // arr=( form_elem_name, flag-text )
    {
       $td_flagtext = "<td>%s{$arr[1]}</td>";
-      $arr_chk_userflags[$td_flagtext] = array( $userflag, T_('User Category') . ': ' . $arr[1] );
+      $arr_chk_userflags[$td_flagtext] = $userflag;
    }
 
    // static filters on flags
@@ -76,8 +76,8 @@ require_once( "include/contacts.php" );
    $cfilter->add_filter( 4, 'Rating',  'P.Rating2', true);
    $cfilter->add_filter( 5, 'RelativeDate', 'P.Lastaccess', true);
    $filter_note =&
-      $cfilter->add_filter( 8, 'Text', 'C.Notes', true,
-         array( FC_SIZE => 20, FC_SUBSTRING => 1, FC_START_WILD => 1 ));
+      $cfilter->add_filter( 8, 'Text', 'LOWER(C.Notes) #OP LOWER(#VAL)', true,
+         array( FC_SIZE => 20, FC_SUBSTRING => 1, FC_START_WILD => 1, FC_SQL_TEMPLATE => 1 ));
    $cfilter->add_filter(10, 'RelativeDate', 'C.Created', true);
    $cfilter->add_filter(11, 'RelativeDate', 'C.Lastchanged', false);
    $cfilter->init(); // parse current value from _GET
@@ -151,7 +151,7 @@ require_once( "include/contacts.php" );
       'IFNULL(UNIX_TIMESTAMP(C.Lastchanged),0) AS lastchanged' );
    $qsql->add_part( SQLP_FROM,
       'Contacts AS C',
-      'INNER JOIN Players P ON C.cid = P.ID' );
+      'INNER JOIN Players AS P ON C.cid = P.ID' );
    $qsql->add_part( SQLP_WHERE,
       "C.uid=$my_id" );
 
