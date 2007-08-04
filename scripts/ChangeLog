@@ -52,10 +52,13 @@ ALTER TABLE `Contacts`
      removed the "$alt" parameters from build_generic_checkbox_elem()
      and of the code calling it
 
+   * include/std_classes.php (merge):
+   - fixed an error() call
+
    * include/table_columns.php:
    - adjusted some id cases
 
-   * include/std_functions.php (user_reference):
+   * include/std_functions.php (user_reference), error.php:
    - added some comments and adjusted the code
 
    * admin_faq.php:
