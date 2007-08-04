@@ -73,6 +73,8 @@ pre {
 input {
    margin: 0px 2px;
    padding: 0px;
+/*   height: 2em; /* */
+   vertical-align: middle;
 }
 
 ul {
