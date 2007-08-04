@@ -768,7 +768,7 @@ function draw_add_time( $game_row )
     <a name="addtime"></a>
       <TABLE class=AddtimeForm>
         <TR>
-          <TD>' . T_('Choose how much time you wish to give your opponent') . ':</TD>
+          <TD>' . T_('Choose how much additional time you wish to give your opponent') . ':</TD>
         </TR>
         <TR>
           <TD>
@@ -786,12 +786,13 @@ function draw_add_time( $game_row )
           </TD>
         </TR>';
 
-   if ( $game_row['Byotype'] != 'FIS' )
+   if ( $game_row['Byotype'] != 'FIS'
+      or ($game_row['Byotime'] != 0 and $game_row['Byoperiods'] != 0) ) // no byoyomi-reset if no byoyomi
    {
       echo '<TR>
               <TD>
                 <input type="checkbox" checked name="reset_byoyomi" tabindex="'.($tabindex++).'" value="1"'
-                   . '>&nbsp;' . T_('Reset byoyomi settings while re-entering') . '
+                   . '>&nbsp;' . T_('Reset byoyomi settings when re-entering') . '
               </TD>
             </TR>';
    }
