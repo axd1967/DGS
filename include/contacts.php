@@ -79,7 +79,9 @@ class Contact
    /*! \brief User-customized note about contact (max 255 chars, linefeeds allowed). */
    var $note;
 
-   /*! Constructs Contact-object with specified arguments: created and lastchanged are in UNIX-time. */
+   /*! Constructs Contact-object with specified arguments: created and lastchanged are in UNIX-time.
+    *  $cid may be 0 to add a new contact
+    */
    function Contact( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
    {
       if ( !is_numeric($uid) or !is_numeric($cid)
@@ -117,19 +119,16 @@ class Contact
       if ( !is_numeric($uid) or !is_numeric($cid) )
          error('invalid_user', "contact.load_contact($uid,$cid)");
 
-      $result = mysql_query("SELECT * FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
-      if ( !$result )
-         error('mysql_query_failed', "contact.load_contact2($uid,$cid)");
-      if ( mysql_affected_rows() != 1 )
+      $row = mysql_single_fetch("contact.load_contact2($uid,$cid)",
+            "SELECT * FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
+      if( !$row )
          return null;
 
-      $row = mysql_fetch_assoc( $result );
       $contact = new Contact(
             $row['uid'], $row['cid'],
             $row['SystemFlags'], $row['UserFlags'],
             $row['Created'], $row['Lastchanged'],
             $row['Notes'] );
-      mysql_free_result($result);
 
       return $contact;
    }
