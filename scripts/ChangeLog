@@ -33,6 +33,14 @@ Changelog
    * include/std_functions.php:
    - removed the &nbsp; of the TD_EMPTY definition
 
+   * userinfo.php, include/table_columns.php (add_or_del_column):
+   - as a first try to enable the columns when a filter is requested...
+     but it actually fail to active the filters when the column is added.
+
+   * include/game_functions.php, include/time_functions.php (time_remaining),
+     game.php:
+   - adjusted the time check in case of byoyomi disabled
+
 2007-08-04 juga
 
    * game.php,

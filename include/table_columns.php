@@ -519,8 +519,6 @@ class Table
     */
    function add_or_del_column()
    {
-      global $player_row;
-
       // handle filter-visibility
       $this->Filters->add_or_del_filter();
 
@@ -528,52 +526,65 @@ class Table
       $this->handle_show_rows();
 
       // handle column-visibility (+ adjust filters)
-      $del = (int)$this->get_arg('del');
-      $add = (int)$this->get_arg('add');
+      $adds = $this->get_arg('add');
+      if( empty($adds) )
+         $adds = array();
+      else if( !is_array($adds) )
+         $adds = array($adds);
+      $dels = $this->get_arg('del');
+      if( empty($dels) )
+         $dels = array();
+      else if( !is_array($dels) )
+         $dels = array($dels);
 
-      if( $del or $add )
+      $newset = $this->Column_set;
+      foreach( $adds as $add )
       {
+         $add = (int)$add;
          if( $add > 0 ) // add col
          {
-            $this->Column_set |= (1 << ($add-1));
+            $newset |= (1 << ($add-1));
             $this->Filters->reset_filter($add);
             $this->Filters->set_active($add, true);
          }
          else if( $add < 0 ) // add all cols
          {
-            $this->Column_set = ALL_COLUMNS;
+            $newset = ALL_COLUMNS;
             $this->Filters->reset_filters( GETFILTER_ALL );
             $this->Filters->setall_active(true);
          }
-
+      }
+      foreach( $dels as $del )
+      {
+         $del = (int)$del;
          if( $del > 0 ) // del col
          {
-            $this->Column_set &= ~(1 << ($del-1));
+            $newset &= ~(1 << ($del-1));
             $this->Filters->reset_filter($del);
             $this->Filters->set_active($del, false);
          }
          else if( $del < 0 ) // del all cols
          {
-            $this->Column_set = 0;
+            $newset = 0;
             $this->Filters->reset_filters( GETFILTER_ALL );
             $this->Filters->setall_active(false);
          }
-
-         if( !empty($this->Player_Column)
-            && isset($player_row)
-            && isset($player_row["ID"])
-            && $player_row["ID"]>0
-            )
-         {
-            $query = "UPDATE Players" .
-               " SET " . $this->Player_Column . "=" . $this->Column_set .
-               " WHERE ID=" . $player_row["ID"];
-
-            mysql_query($query)
-               or error('mysql_query_failed','Table.add_or_del_column');
-         }
       }
-   }
+
+      global $player_row;
+      $uid = (int)@$player_row['ID'];
+      if( !empty($this->Player_Column) && $uid > 0
+         && $newset != $this->Column_set )
+      {
+         $this->Column_set = $newset;
+         $query = "UPDATE Players" .
+            " SET " . $this->Player_Column . "=" . $newset .
+            " WHERE ID=" . $uid;
+
+         mysql_query($query)
+            or error('mysql_query_failed','Table.add_or_del_column');
+      }
+   } //add_or_del_column
 
    /*! \brief Sets Rows_Per_Page (according to changed Show-Rows-form-element or else cookie or players-row). */
    function handle_show_rows()
