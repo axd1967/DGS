@@ -537,13 +537,9 @@ class QuerySQL
       if ( is_null($qsql) or empty($qsql) )
          return true;
 
-      $errmsg = '';
       if ( !is_a($qsql, 'QuerySQL') )
-         $errmsg = "QuerySQL.merge.expect_obj.QuerySQL";
-      if ( $errmsg != '' )
-      {
-         error( $errmsg ); // error may be func that go-on
-         return false;
+         error('assert', "QuerySQL.merge.expect_obj.QuerySQL" );
+         return false; // error may be func that go-on
       }
 
       // eventually add_part throws error
