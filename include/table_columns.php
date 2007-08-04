@@ -350,7 +350,7 @@ class Table
       else if ( $need_form or !$this->Static_Columns ) // need form for filter or add-column
       {
          $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
-            clean_url( $this->Page)."#{$this->Prefix}TableFAC",
+            clean_url( $this->Page)."#{$this->Prefix}tableFAC",
             FORM_GET, false, 'FormTableFAC');
          $table_form->attach_table($this);
       }
@@ -1166,7 +1166,7 @@ class Table
          if ( $r_string )  array_push($arr, $r_string);
          if ( $ac_string ) array_push($arr, $ac_string);
 
-         $string = "<div id='{$this->Prefix}TableFAC'>";
+         $string = "<div id='{$this->Prefix}tableFAC'>";
          $string .= implode( '&nbsp;&nbsp;&nbsp;', $arr );
          $string .= '</div>';
       }
