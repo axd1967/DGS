@@ -27,6 +27,13 @@ Changelog
 
 2007-08-04 juga
 
+   * admin_faq.php, include/faq_functions.php (faq_item_html):
+   - highlight terms for edit-FAQ and returning (except preview)
+
+   * include/filter_parser.php (TextParser.parse, TextParser.extract_terms),
+     include/filter_functions.php (sql_extract_terms):
+   - moved sql_extract_terms-func from filter_parser -> filter_functions
+
    * edit_contact.php:
    - fix: show errormsg for invalid contact-user
    - delete-cancel returns to contact-list
