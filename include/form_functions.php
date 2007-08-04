@@ -18,7 +18,6 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-//Rdvl: removed require_once( "include/std_functions.php" );
  /* The code in this file is written by Ragnar Ouchterlony */
 
  /*!
@@ -799,7 +798,6 @@ if(1){//new
                   . "</TABLE></TD>\n";
          if( $TRlevel )
             $areastr = "<TR>$areastr</TR>";
-//RdvlLog("Form.build_areas=[$areastr]");
       }
       else
       {
@@ -835,7 +833,6 @@ if(1){//new
             }
             if( $TRlevel )
                $areastr = "<TR>$areastr</TR>";
-//RdvlLog("Form.build_areas.H=[$areastr]");
          }
          else
          { // vertical grouping
@@ -863,7 +860,6 @@ if(1){//new
             }
             if( $TRlevel )
                $areastr = "<TR>$areastr</TR>";
-//RdvlLog("Form.build_areas.V=[$areastr]");
          }
       }
 
@@ -1163,7 +1159,6 @@ if(1){//new
       assert( $method == FORM_GET or $method == FORM_POST );
       $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
-RdvlLog("Form.print_start($name)");
       return "\n<FORM id=\"{$name}Form\" name=\"$name\" class=\"$class\"" .
          " action=\"$action_page\" method=\"" . $pg_arr[$method] . "\">\n";
    }
