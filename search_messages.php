@@ -49,7 +49,7 @@ require_once( "include/filter.php" );
    {
       $folder_box = echo_folder_box( $my_folders, $folder_id, null,
             'align=left style="padding:4px;"', '%s&nbsp;', '' );
-      $arr_chkfolders[$folder_box] = array( $folder_id, T_('Folder') . ' ' . $arr[0] );
+      $arr_chkfolders[$folder_box] = $folder_id;
    }
 
    // Types: NORMAL,INVITATION, ACCEPTED, DECLINED, DISPUTED, RESULT, DELETED

@@ -1659,12 +1659,10 @@ class Filter
    /*!
     * \brief Builds generic text-input form-element using passed arguments with
     *        optional hover-help (title).
-    * param attr array containing attributes for input-element,
-    *            key=Description used for alt-attribute
     * param maxlen may be 0 (no maxlen used)
     * note: element-name is built from 'prefix name' or FC_FNAME-config if set
     */
-   function build_generic_input_text_elem( $prefix, $name, $value, $title = '', $attr = array(), $maxlen = 0, $size = '' )
+   function build_generic_input_text_elem( $prefix, $name, $value, $title = '', $maxlen = 0, $size = '' )
    {
       $fname = ($this->get_config(FC_FNAME)) ? $name : $prefix . $name;
       $elem = "<input";
@@ -1675,10 +1673,6 @@ class Filter
       if ( $size )
          $elem .= " size=\"{$size}\"";
       $elem .= " value=\"" . textarea_safe($value) ."\"";
-      /*
-      if ( isset($attr['Description']) )
-         $elem .= " alt=\"" . T_('Filter') . ': ' . textarea_safe($attr['Description']) . "\"";
-      */
       if ( $title != '' )
          $elem .= " title=\"" . textarea_safe($title) . "\"";
       $elem .= ">";
@@ -1693,7 +1687,7 @@ class Filter
    function build_input_text_elem( $prefix, $attr = array(), $maxlen = 0, $size = '' )
    {
       return $this->build_generic_input_text_elem( $prefix, $this->name, $this->value,
-         $this->get_syntax_description(), $attr, $maxlen, $size);
+         $this->get_syntax_description(), $maxlen, $size);
    }
 
    /*!
@@ -1764,15 +1758,11 @@ class Filter
     *        optional hover-help (title).
     * note: element-name is built from 'prefix name' or FC_FNAME-config if set
     */
-   function build_generic_checkbox_elem( $prefix, $name, $value, $text, $title=''/*, $alt=''*/ )
+   function build_generic_checkbox_elem( $prefix, $name, $value, $text, $title='' )
    {
       $fname = ($this->get_config(FC_FNAME)) ? $name : $prefix . $name;
 
       $elem = "<input type=\"checkbox\" name=\"$fname\" value=\"1\"";
-      /*
-      $alt_text = (empty($alt)) ? $text : $alt;
-      $elem .= " alt=\"" . T_('Filter') . ': ' . textarea_safe($alt_text) . "\"";
-      */
       if ( !empty($title) )
          $elem .= " title=\"" . textarea_safe($title) . "\"";
       if ( $value )
@@ -3275,7 +3265,7 @@ class FilterRatingDiff extends FilterNumeric
   *
   * <p>supported filter-specific config:
   *    FC_MULTIPLE - mandatory config,
-  *         expecting array( td-values => array( value, [alt-text] ))),
+  *         expecting array( td-values => value ),
   *         td-values containing %s which is replaced with checkbox form-element
   *    FC_SIZE - number of checkboxes per rows in matrix; default is 1
   *    FC_DEFAULT - array ( index, ... ); index=1.. - selected index-numbers
@@ -3316,21 +3306,16 @@ class FilterCheckboxArray extends Filter
       // init field-names
       $idx = 0;
       $is_bitmask = $this->get_config(FC_BITMASK);
-      foreach( $this->choices as $elemtd => $arr )
+      foreach( $this->choices as $elemtd => $value )
       {
          $idx++;
-         if ( !is_array($arr) )
-         {
-            // FC_MULTIPLE-config-array #$idx expects an array with value and optional alt-title
-            error('invalid_filter', "filter.FilterCheckboxArray.bad_array_FC_MULTIPLE({$this->id},$idx)");
-         }
          $fname = $this->build_fname($idx);
          $this->add_element_name( $fname );
          $this->values[$fname] = 0; // init
-         $this->clauses[$fname] = $arr[0];
-         if ( $is_bitmask and !is_numeric($arr[0]) )
+         $this->clauses[$fname] = $value;
+         if ( $is_bitmask and !is_numeric($value) )
          {
-            // FC_BITMASK-config forces integer-values for FC_MULTIPLE-array-values
+            // FC_BITMASK-config forces integer-values for FC_MULTIPLE-values
             error('invalid_filter', "filter.FilterCheckboxArray.bad_array_FC_BITMASK({$this->id})");
          }
       }
@@ -3405,12 +3390,12 @@ class FilterCheckboxArray extends Filter
       $cols = array();
       $idx = 0;
       $cnt_cols = $this->get_config(FC_SIZE);
-      foreach( $this->choices as $elem_td => $arr )
+      foreach( $this->choices as $elem_td => $value )
       {
          $idx++;
          $fname = $this->build_fname( $idx );
          $elem_chkbox = $this->build_generic_checkbox_elem(
-            $prefix, $fname, $this->get_value($fname), '', $this->syntax_descr/*, @$arr[1]*/);
+            $prefix, $fname, $this->get_value($fname), '', $this->syntax_descr );
          $td = sprintf( $elem_td, $elem_chkbox );
          array_push( $cols, $td );
 

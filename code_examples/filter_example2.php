@@ -546,26 +546,26 @@ elseif ( $fdemo == 14 )
    # standard filter with mandatory FC_MULTIPLE
    $filter->add_filter( 1, 'CheckboxArray', 'chkbox1', true,
          array( FC_MULTIPLE => array(
-                  '<td>%s&nbsp;Row1-Col1</td>' => array( 'val1', 'alternative-text #1 for chkbox1' ),
-                  '<td>%s&nbsp;Row2-Col1</td>' => array( 'val2', 'alternative-text #2 for chkbox1' ),
+                  '<td>%s&nbsp;Row1-Col1</td>' => 'val1',
+                  '<td>%s&nbsp;Row2-Col1</td>' => 'val2',
                 )));
 
    # filter with 3 columns
    $filter->add_filter( 2, 'CheckboxArray', 'chkbox2', true,
          array( FC_SIZE => 3,
                 FC_MULTIPLE => array(
-                   '<td>%s&nbsp;Row1-Col1</td>' => array( 'val1', 'alternative-text #1 for chkbox2' ),
-                   '<td>%s&nbsp;Row1-Col2</td>' => array( 'val2', 'alternative-text #2 for chkbox2' ),
-                   '<td>%s&nbsp;Row1-Col3</td>' => array( 'val3', 'alternative-text #3 for chkbox2' ),
-                   '<td>%s&nbsp;Row2-Col1</td>' => array( 'val4' ),
+                   '<td>%s&nbsp;Row1-Col1</td>' => 'val1',
+                   '<td>%s&nbsp;Row1-Col2</td>' => 'val2',
+                   '<td>%s&nbsp;Row1-Col3</td>' => 'val3',
+                   '<td>%s&nbsp;Row2-Col1</td>' => 'val4',
                 )));
 
    # filter with bitmask FC_BITMASK
    $filter->add_filter( 3, 'CheckboxArray', 'chkbox3', true,
          array( FC_BITMASK => 1,
                 FC_MULTIPLE => array(
-                  '<td>%s&nbsp;Row1-Col1 0x07</td>' => array( 0x07, 'alternative-text #1 for chkbox3' ),
-                  '<td>%s&nbsp;Row2-Col1 0x20</td>' => array( 0x20, 'alternative-text #2 for chkbox3' ),
+                  '<td>%s&nbsp;Row1-Col1 0x07</td>' => 0x07,
+                  '<td>%s&nbsp;Row2-Col1 0x20</td>' => 0x20,
                 )));
 }
 
