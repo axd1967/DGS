@@ -85,7 +85,7 @@ require_once( "include/contacts.php" );
 
    $ctable = new Table( 'contact', $page, 'ContactColumns', 'contact' );
    $ctable->register_filter( $cfilter );
-   $ctable->set_default_sort( 'C.Lastchanged', 1);
+   $ctable->set_default_sort( 'P.Name', 0);
    $ctable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
