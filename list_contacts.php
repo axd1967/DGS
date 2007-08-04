@@ -38,8 +38,10 @@ require_once( "include/contacts.php" );
    if( !$logged_in )
       error('not_logged_in');
 
+/* allowed to list... an empty list
    if( $player_row['Handle'] == 'guest' )
       error('not_allowed_for_guest');
+*/
 
    $my_id = $player_row['ID'];
    $page = "list_contacts.php?";
@@ -103,7 +105,7 @@ require_once( "include/contacts.php" );
 
    // External-Search-Form
    $cform = new Form( 'contact', $page, FORM_GET, false);
-   $cform->set_layout( FLAYOUT_GLOBAL, '(1|2)' );
+   $cform->set_layout( FLAYOUT_GLOBAL, '1|2' );
    $cform->set_tabindex(1);
    $cform->set_config( FEC_TR_ATTR, 'valign=top' );
    $cform->set_config( FEC_EXTERNAL_FORM, true );
@@ -153,7 +155,7 @@ require_once( "include/contacts.php" );
       'Contacts AS C',
       'INNER JOIN Players AS P ON C.cid = P.ID' );
    $qsql->add_part( SQLP_WHERE,
-      "C.uid=$my_id" );
+      "C.uid=$my_id AND C.cid>1" ); //exclude guest
 
    $query_scfilter = $scfilter->get_query(GETFILTER_ALL); // clause-parts for static filter
    $query_cfilter  = $ctable->get_query(); // clause-parts for filter

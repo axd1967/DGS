@@ -51,7 +51,7 @@ require_once( "include/contacts.php" );
 
    $my_id = $player_row['ID'];
    $cid = (int) @$_REQUEST['cid'];
-   $cuser = get_request_arg('cuser');
+   $cuser = get_request_arg('cuser'); //Handle
 
    if ( $cid < 0 )
       $cid = 0;
@@ -61,6 +61,9 @@ require_once( "include/contacts.php" );
       $cid = 0;
       $cuser = '';
    }
+
+   if( $cuser == 'guest' or $cid == 1 )
+      error('not_allowed_for_guest');
 
    // identify cid from cid and cuser
    $other_row = null; // other-player (=contact to add/edit)

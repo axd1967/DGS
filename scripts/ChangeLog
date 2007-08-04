@@ -41,6 +41,9 @@ Changelog
      game.php:
    - adjusted the time check in case of byoyomi disabled
 
+   * userinfo.php, edit_contact.php, list_contacts.php:
+   - excluded guest from contacts features (edit and add... but not list)
+
 2007-08-04 juga
 
    * game.php,

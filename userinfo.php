@@ -259,7 +259,7 @@ require_once( "include/contacts.php" );
                 T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
                 T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid" );
 
-      if ( $my_id != $uid )
+      if ( $my_id != $uid && $uid > 1 ) //exclude guest
       {
          $cstr = ( Contact::has_contact($my_id, $uid) ) ? T_('Edit contact') : T_('Add contact');
          $menu_array[$cstr] = "edit_contact.php?cid=$uid";
