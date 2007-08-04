@@ -24,6 +24,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/make_game.php" );
+require_once( "include/contacts.php" );
 
 {
    disable_cache();
@@ -38,18 +39,24 @@ require_once( "include/make_game.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
+   $my_id = $player_row['ID'];
+
    $wr_id = @$_REQUEST['id'];
    if( !is_numeric($wr_id) or $wr_id <= 0 )
       error('waitingroom_game_not_found', 'join_waitingroom_game.bad_id');
 
-   $game_row = mysql_single_fetch('join_waitingroom_game.find_game',
-         "SELECT * FROM Waitingroom WHERE ID=$wr_id AND nrGames>0");
+   $query= "SELECT W.*"
+         . ",IF(ISNULL(C.uid),0,C.SystemFlags & ".CSYSFLAG_WAITINGROOM.") AS game_denied"
+         . " FROM Waitingroom AS W"
+         . " LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id"
+         . " WHERE W.ID=$wr_id AND W.nrGames>0"
+         . " HAVING game_denied=0"
+         ;
+   $game_row = mysql_single_fetch('join_waitingroom_game.find_game', $query);
    if( !$game_row )
       error('waitingroom_game_not_found', 'join_waitingroom_game.find_game');
 
-   $my_id = $player_row['ID'];
    $opponent_ID = $game_row['uid'];
-
 
    if( @$_REQUEST['delete'] == 't' )
    {

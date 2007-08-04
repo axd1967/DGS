@@ -43,6 +43,13 @@ Changelog
 
    * userinfo.php, edit_contact.php, list_contacts.php:
    - excluded guest from contacts features (edit and add... but not list)
+   - jump to list_contacts.php after a Contact had been saved
+
+   * include/contacts.php, include/message_functions.php,
+     join_waitingroom_game.php, waiting_room.php:
+   - denied the access to a waitingroom game protected by its owner
+   - renaming some column and row headers from 'Color' to 'Type' when they
+     contain datas like 'Double game', 'Proper handicap' or 'Even game'.
 
 2007-08-04 juga
 

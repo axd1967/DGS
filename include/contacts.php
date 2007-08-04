@@ -30,9 +30,9 @@ $TranslateGroups[] = "Users";
 
 // TODO: discuss system-flags with Erik(!), then implement actions defined for CSYSFLAGS !!
 // system-flags (bitmask for database): 16bit
-define('CSYSFLAG_DENY_GAME',      0x0001); // hide my games in waiting-room from contact
-define('CSYSFLAG_REJECT_MESSAGE', 0x0002); // don't accept message from contact
-define('CSYSFLAG_REJECT_INVITE',  0x0004); // don't accept invitation from contact
+define('CSYSFLAG_WAITINGROOM'    ,0x0001); // hide my games in waiting-room from contact
+define('CSYSFLAG_REJECT_MESSAGE' ,0x0002); // don't accept message from contact
+define('CSYSFLAG_REJECT_INVITE'  ,0x0004); // don't accept invitation from contact
 
 // user-flags (bitmask for database): 32bit
 define('CUSERFLAG_BUDDY',   0x00000001); // contact is good friend of mine
@@ -46,7 +46,7 @@ define('CUSERFLAG_MISC',    0x00000080); // miscellaneous relationship contact (
 
 // sysflag => ( form_elem_name, translation )
 $ARR_CONTACT_SYSFLAGS = array(
-   CSYSFLAG_DENY_GAME      => array( 'sfl_deny_game',      T_('Deny game') ),
+   CSYSFLAG_WAITINGROOM    => array( 'sfl_waitingroom',    T_('Protect waitingroom games') ),
    CSYSFLAG_REJECT_MESSAGE => array( 'sfl_reject_message', T_('Reject message') ),
    CSYSFLAG_REJECT_INVITE  => array( 'sfl_reject_invite',  T_('Reject invitation') ),
    );

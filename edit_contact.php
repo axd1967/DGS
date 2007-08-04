@@ -118,7 +118,8 @@ require_once( "include/contacts.php" );
       $contact->set_note( get_request_arg('note') );
 
       $contact->update_contact();
-      jump_to("edit_contact.php?cid=$cid".URI_AMP."sysmsg=". urlencode(T_('Contact saved!')) );
+      jump_to("list_contacts.php?sysmsg=". urlencode(T_('Contact saved!')) );
+      //jump_to("edit_contact.php?cid=$cid".URI_AMP."sysmsg=". urlencode(T_('Contact saved!')) );
    }
 
 

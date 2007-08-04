@@ -106,7 +106,7 @@ require_once( "include/contacts.php" );
    $wrtable->add_tablehead( 3, T_('Rating'), 'other_rating', true);
    $wrtable->add_tablehead( 4, T_('Comment'));
    $wrtable->add_tablehead( 7, T_('Size'), 'Size', true);
-   $wrtable->add_tablehead( 5, T_('Colors'), 'Handicaptype', false, true);
+   $wrtable->add_tablehead( 5, T_('Type'), 'Handicaptype', false, true);
    /** TODO: the handicap stones info may be merged in the Komi column
     * with the standard placement... something like: "%d H + %d K (S)"
     * where:
@@ -135,7 +135,7 @@ require_once( "include/contacts.php" );
 
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
-      'Waitingroom.*',
+      'W.*',
       'Players.ID AS other_id',
       'Players.Handle AS other_handle',
       'Players.Name AS other_name',
@@ -149,18 +149,18 @@ require_once( "include/contacts.php" );
 // else if( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$Ratingmin && $my_rating<=$Ratingmax );
 // else                              $goodrating = false;
 
-   $calculated = "(Handicaptype='conv' OR Handicaptype='proper')";
+   $calculated = "(W.Handicaptype='conv' OR W.Handicaptype='proper')";
    if( $iamrated )
    {
       $haverating = "1";
-      $goodrating = "IF(MustBeRated='Y' AND"
-                  . " ($my_rating<Waitingroom.Ratingmin OR $my_rating>Waitingroom.Ratingmax)"
+      $goodrating = "IF(W.MustBeRated='Y' AND"
+                  . " ($my_rating<W.Ratingmin OR $my_rating>W.Ratingmax)"
                   . ",0,1)";
    }
    else
    {
       $haverating = "NOT $calculated";
-      $goodrating = "IF(MustBeRated='Y',0,1)";
+      $goodrating = "IF(W.MustBeRated='Y',0,1)";
    }
 
    $qsql->add_part( SQLP_FIELDS,
@@ -168,14 +168,14 @@ require_once( "include/contacts.php" );
       "$haverating AS haverating",
       "$goodrating AS goodrating" );
    $qsql->add_part( SQLP_FROM,
-      'Waitingroom',
-      'INNER JOIN Players ON Waitingroom.uid=Players.ID' );
+      'Waitingroom AS W',
+      'INNER JOIN Players ON W.uid=Players.ID' );
 
    // Contacts: Deny games
    $qsql->add_part( SQLP_FIELDS,
-      "IF(ISNULL(C.uid),0,C.SystemFlags & ".CSYSFLAG_DENY_GAME.") AS game_denied" );
+      "IF(ISNULL(C.uid),0,C.SystemFlags & ".CSYSFLAG_WAITINGROOM.") AS game_denied" );
    $qsql->add_part( SQLP_FROM,
-      "LEFT JOIN Contacts AS C ON C.uid=Players.ID AND C.cid=$my_id" );
+      "LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id" );
    $qsql->add_part( SQLP_HAVING,
       'game_denied=0' );
 
@@ -305,7 +305,7 @@ require_once( "include/contacts.php" );
 function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax)
 {
    if( $MustBeRated != 'Y' )
-      return '-';
+      return '---';
 
    // +/-50 reverse the inflation from add_to_waitingroom.php
    $r1 = echo_rating($Ratingmin+50,false);

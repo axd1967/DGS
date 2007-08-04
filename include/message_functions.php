@@ -590,7 +590,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    {
       case 'conv': // Conventional handicap
          $itable->add_row( array(
-                  'sname' => T_('Handicap'),
+                  'sname' => T_('Type'),
                   'sinfo' => T_('Conventional handicap (komi 0.5 if not even)'),
                   'iattb' => ( $haverating ? ''
                     : $itable->warning_cell_attb( T_('No initial rating'))
@@ -600,7 +600,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
       case 'proper': // Proper handicap
          $itable->add_row( array(
-                  'sname' => T_('Handicap'),
+                  'sname' => T_('Type'),
                   'sinfo' => T_('Proper handicap'),
                   'iattb' => ( $haverating ? ''
                     : $itable->warning_cell_attb( T_('No initial rating'))
@@ -611,7 +611,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       case 'nigiri': // Nigiri
          //'nigiri' => T_('Even game with nigiri'),
          $itable->add_sinfo(
-                   T_('Colors')
+                   T_('Type')
                   , T_('Even game with nigiri') //T_('Nigiri')
                   );
          $itable->add_sinfo(
@@ -623,7 +623,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       case 'double': // Double game
          //'double' => T_('Double game') );
          $itable->add_sinfo(
-                   T_('Colors')
+                   T_('Type')
                   , T_('Double game')
                   );
          $itable->add_sinfo(
