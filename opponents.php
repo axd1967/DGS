@@ -45,7 +45,7 @@ $ARR_DBFIELDKEYS = array(
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
    /*
     * uid = player to show opponents for, if empty, use myself
@@ -55,16 +55,15 @@ $ARR_DBFIELDKEYS = array(
 
    // check vars
    $my_id = $player_row['ID'];
-   $uid = get_request_arg( 'uid');
-   $opp = get_request_arg( 'opp' );
+   $uid = (int)@$_REQUEST['uid'];
+   $opp = (int)@$_REQUEST['opp'];
    if ( empty($uid) )
       $uid = $my_id;
-   if ( $opp and ($opp === $uid) )
-      error('invalid_opponent', "opponents.distinct_user($uid)"); // Opponent must be distinct from uid
-   if ( !is_numeric($uid) )
+   if ( $uid <= 0 )
       error('invalid_user', "opponents.bad_user($uid)");
-   if ( $opp and !is_numeric($opp) )
-      error('invalid_opponent', "opponents.bad_opponent($opp)");
+   if ( $opp == $uid or $opp < 0 )
+      $opp = 0;
+      //error('invalid_opponent', "opponents.bad_opponent($opp)");
 
    $page = "opponents.php?";
 
@@ -76,11 +75,11 @@ $ARR_DBFIELDKEYS = array(
       . "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, "
       . "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastAccess, "
       . "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS lastMove "
-      . "FROM Players WHERE ID IN ('$uid','$opp')";
+      . "FROM Players WHERE ID".( $opp ?" IN('$uid','$opp')" :"='$uid'");
    $result = mysql_query( $query )
-      or error('mysql_query_failed', 'opponents.find_data_opponent');
+      or error('mysql_query_failed', "opponents.find_users($uid,$opp)");
    while ( $row = mysql_fetch_assoc( $result ) )
-      $players[ $row['ID'] ] = array_merge( array(), $row ); // copy arr
+      $players[ $row['ID'] ] = $row; //array_merge( array(), $row ); // copy arr
    if ( !isset($players[$uid]) )
       error('unknown_user', "opponents.load_user($uid)");
    if ( $opp and !isset($players[$opp]) )
@@ -135,8 +134,10 @@ $ARR_DBFIELDKEYS = array(
    // External-Form
    $usform = new Form( $utable->Prefix, $page, FORM_GET, false, 'FormTable');
    $usform->set_layout( FLAYOUT_GLOBAL, ( $opp ? '2,(1|4|3)' : '2' ) );
+/*
    $usform->set_layout( FLAYOUT_AREACONF, FAREA_ALL,
       array( FAC_ENVTABLE => 'align=center' ) );
+*/
    $usform->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );
    $usform->set_config( FEC_EXTERNAL_FORM, true );
    $utable->set_externalform( $usform ); // also attach offset, sort, manage-filter as hidden (table) to ext-form
@@ -154,7 +155,8 @@ $ARR_DBFIELDKEYS = array(
    $utable->add_external_parameters( $page_vars );
 
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $utable->add_tablehead( 1, T_('Opponent ID'), 'ID', false, true);
+   $utable->add_tablehead( 0, T_('Info'), NULL, false, true, array( 'class' => 'Button') );
+   $utable->add_tablehead( 1, T_('ID'), 'ID', false, true);
    $utable->add_tablehead( 2, T_('Name'), 'Name');
    $utable->add_tablehead( 3, T_('Userid'), 'Handle');
    $utable->add_tablehead(16, T_('Country'), 'Country');
@@ -182,7 +184,7 @@ $ARR_DBFIELDKEYS = array(
       $usform->add_empty_row();
 
       $usform->set_area( 4 );
-      $usform->add_row( array( 'TEXT', '&nbsp;&nbsp;&nbsp;' ));
+      $usform->add_empty_row();
    }
 
    $usform->set_area( 2 );
@@ -304,7 +306,7 @@ $ARR_DBFIELDKEYS = array(
 
    // query database for user-table
    $result = mysql_query( $query )
-      or error('mysql_query_failed', 'opponents.find_data');
+      or error('mysql_query_failed', "opponents.find_stats($uid,$opp)");
 
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
 
@@ -320,10 +322,12 @@ $ARR_DBFIELDKEYS = array(
    $stats_for = T_('Game statistics for player %s');
    $opp_for   = T_('Opponents of player %s');
    $title1 = sprintf( $stats_for, make_html_safe( $players[$uid]['Name']) );
-   $title2 = sprintf( $stats_for, user_reference( REF_LINK, 1, '', $players[$uid]) );
-   $title3 = sprintf( $opp_for,   user_reference( REF_LINK, 1, '', $players[$uid]) );
+   $tmp = user_reference( REF_LINK, 1, '', $players[$uid]);
+   $title2 = sprintf( $stats_for, $tmp );
+   $title3 = sprintf( $opp_for,   $tmp );
 
-   start_page( $title1, true, $logged_in, $player_row );
+   start_page( $title1, true, $logged_in, $player_row,
+               $utable->button_style($player_row['Button']) );
    if ( $DEBUG_SQL and isset($query_black) ) echo "QUERY-BLACK: " . make_html_safe($query_black) . "<br>\n";
    if ( $DEBUG_SQL and isset($query_white) ) echo "QUERY-WHITE: " . make_html_safe($query_white) . "<br>\n";
    if ( $DEBUG_SQL and !$opp) echo "QUERY: " . make_html_safe($query) . "<br>\n";
@@ -340,8 +344,10 @@ $ARR_DBFIELDKEYS = array(
       $ID = $row['ID'];
 
       $urow_strings = array();
+      if( $utable->Is_Column_Displayed[0] )
+         $urow_strings[0] = $utable->button_TD_anchor( "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID", T_('Info'));
       if( $utable->Is_Column_Displayed[1] )
-         $urow_strings[1] = "<td><A href=\"{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID\">$ID</A></td>";
+         $urow_strings[1] = "<td><A href=\"userinfo.php?uid=$ID\">$ID</A></td>";
       if( $utable->Is_Column_Displayed[2] )
          $urow_strings[2] = "<td><A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A></td>";
@@ -402,24 +408,21 @@ $ARR_DBFIELDKEYS = array(
    if ( $opp ) // has opp
    {
       // print static-filter, player-info, stats-table
-      echo "<center>\n"
+      echo "<h3 class=Header>$title2</h3>\n"
          . $usform->print_start_default()
-         . "<br>\n"
-         . "<center><h3><font color=$h3_color>$title2</font></h3></center>\n"
          . $usform->get_form_string() // static form
          . $usform->print_end()
-         . "</center>\n";
+         ;
    }
    else // no opp
    {
       // print static-filter, user-table
-      echo "<center><h3><font color=$h3_color>$title3</font></h3></center>\n"
-         . "<center>\n"
+      echo "<h3 class=Header>$title3</h3>\n"
          . $usform->print_start_default()
          . $usform->get_form_string() // static form
          . $utable->make_table()
          . $usform->print_end()
-         . "</center>\n";
+         ;
    }
 
    // end of table
@@ -428,11 +431,14 @@ $ARR_DBFIELDKEYS = array(
    if ( $opp )
       $menu_array[ T_('Show opponents') ] = "{$page}{$filterURL}uid=$uid";
 
-   if ( $uid !== $my_id ) // others opponents
+   if ( $uid != $my_id ) // others opponents
    {
-      $menu_array[ T_('Show my opponents') ]   = "{$page}{$filterURL}";
-      $menu_array[ T_('Show me as opponent') ] = "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$my_id";
-      $menu_array[ T_('Show as my opponent') ] = "{$page}{$filterURL}opp=$uid";
+      $menu_array[ T_('Show my opponents') ]   = "{$page}{$filterURL}uid=$my_id";
+      if ( $opp != $my_id )
+      {
+         $menu_array[ T_('Show me as opponent') ] = "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$my_id";
+         $menu_array[ T_('Show as my opponent') ] = "{$page}{$filterURL}uid=$my_id".URI_AMP."opp=$uid";
+      }
    }
 
    if ( $opp )
@@ -453,7 +459,7 @@ function extract_user_stats( $color, $query = null )
    if ( !is_null($query) )
    {
       $result = mysql_query( $query )
-         or error('mysql_query_failed', 'opponents.find_data_'.$color);
+         or error('mysql_query_failed', "extract_user_stats($color)");
 
       if ( $row = mysql_fetch_assoc( $result ) )
       {
@@ -542,7 +548,8 @@ function print_stats_table( $p, $B, $W, $uid, $opp, $fin )
    $rowpatt2  = "  <tr> <td nowrap=\"1\"><b>%s</b></td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  </tr>\n";
 
    $r = "<table id=userInfos class=Infos>\n";
-   $r .= "<colgroup><col class=ColRubric><col class=ColInfo><col class=ColInfo></colgroup>\n";
+   //TODO; review it:
+   //$r .= "<colgroup><col class=ColRubric><col class=ColInfo><col class=ColInfo></colgroup>\n";
 
    // header
    $r .= "  <tr>\n";
