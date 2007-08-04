@@ -1675,8 +1675,10 @@ class Filter
       if ( $size )
          $elem .= " size=\"{$size}\"";
       $elem .= " value=\"" . textarea_safe($value) ."\"";
+      /*
       if ( isset($attr['Description']) )
          $elem .= " alt=\"" . T_('Filter') . ': ' . textarea_safe($attr['Description']) . "\"";
+      */
       if ( $title != '' )
          $elem .= " title=\"" . textarea_safe($title) . "\"";
       $elem .= ">";
@@ -1762,13 +1764,15 @@ class Filter
     *        optional hover-help (title).
     * note: element-name is built from 'prefix name' or FC_FNAME-config if set
     */
-   function build_generic_checkbox_elem( $prefix, $name, $value, $text, $alt='', $title='' )
+   function build_generic_checkbox_elem( $prefix, $name, $value, $text, $title=''/*, $alt=''*/ )
    {
       $fname = ($this->get_config(FC_FNAME)) ? $name : $prefix . $name;
-      $alt_text = (empty($alt)) ? $text : $alt;
 
       $elem = "<input type=\"checkbox\" name=\"$fname\" value=\"1\"";
+      /*
+      $alt_text = (empty($alt)) ? $text : $alt;
       $elem .= " alt=\"" . T_('Filter') . ': ' . textarea_safe($alt_text) . "\"";
+      */
       if ( !empty($title) )
          $elem .= " title=\"" . textarea_safe($title) . "\"";
       if ( $value )
@@ -3406,7 +3410,7 @@ class FilterCheckboxArray extends Filter
          $idx++;
          $fname = $this->build_fname( $idx );
          $elem_chkbox = $this->build_generic_checkbox_elem(
-            $prefix, $fname, $this->get_value($fname), '', @$arr[1], $this->syntax_descr );
+            $prefix, $fname, $this->get_value($fname), '', $this->syntax_descr/*, @$arr[1]*/);
          $td = sprintf( $elem_td, $elem_chkbox );
          array_push( $cols, $td );
 
