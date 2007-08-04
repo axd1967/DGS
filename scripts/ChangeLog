@@ -25,6 +25,42 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-04 rodival
+
+   * include/contacts.php (update_contact, load_contact),
+     list_contacts.php, edit_contact.php:
+   - modified some $uid/$cid checks
+   - changed the Notes field of the Contacts table (including its name)
+-----------
+ALTER TABLE `Contacts`
+ CHANGE `Note` `Notes` varbinary(255) NOT NULL DEFAULT '' ;
+-----------
+   - CSSed the pages
+
+   * opponents.php:
+   - added buttons to have a more visible stat link column
+   - CSSed the page
+   - adjusted the appearence of some bottom-of-the-page links
+
+   * include/form_functions.php (add_empty_row):
+   - changed add_empty_row() to respect the colspan of the table
+   - others modifications are just TAB re-formats
+
+   * include/filter.php (build_generic_input_text_elem,
+     build_generic_checkbox_elem, get_input_element):
+   - removed the useless "alt=" of the "<input>" tags
+     removed the "$alt" parameters from build_generic_checkbox_elem()
+     and of the code calling it
+
+   * include/table_columns.php:
+   - adjusted some id cases
+
+   * include/std_functions.php (user_reference):
+   - added some comments and adjusted the code
+
+   * admin_faq.php:
+   - removed useless empty_row
+
 2007-08-04 juga
 
    * error.php, confirm.php, game.php, opponents.php,
@@ -49,7 +85,7 @@ Changelog
    - proposition for a new build_areas() layout managment
    - removed some useless levels of tables nesting
    - added the $TRlevel argument to build_areas() (default to previous behaviour)
-   - introduced the 'title' of the areas
+   - introduced the optional 'title' of the areas
    - added the get_merged_attbs() function
    - fixed some error messages
 
