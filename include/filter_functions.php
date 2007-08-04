@@ -132,4 +132,32 @@ function sql_replace_wildcards( $valsql, $arr_repl, $arr_allow = array() )
    return array( $sql, $cnt_wild );
 }
 
+/*! \brief Extracts regex-terms from SQL-value and return as terms-array. */
+function sql_extract_terms( $sql )
+{
+   // \% -> %, \_ -> ., % -> .*?, _ -> ., others -> copy
+   $sql = preg_replace( "/(^%+|%+$)/", '', $sql );
+   $rxterm = '';
+   $len = strlen($sql);
+   for( $pos = 0; $pos < $len; $pos++)
+   {
+      if ( $sql{$pos} == '\\' )
+      {
+         $pos++;
+         $rxterm .= preg_quote($sql{$pos});
+      }
+      if ( $sql{$pos} == '%' )
+         $rxterm .= '.*?';
+      elseif ( $sql{$pos} == '_' )
+         $rxterm .= '.';
+      else
+         $rxterm .= preg_quote($sql{$pos});
+   }
+
+   if ( $rxterm != '' )
+      return array( $rxterm );
+   else
+      return array();
+}
+
 ?>

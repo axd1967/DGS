@@ -520,7 +520,9 @@ class TextParser extends BasicParser
             $this->p_value = $valsql;
             if ( $cnt_wild > 0 )
                $this->p_flags |= PFLAG_WILDCARD;
-            $this->extract_terms( $valsql );
+            $arr_terms = sql_extract_terms( $valsql );
+            if ( count($arr_terms) > 0 )
+               $this->p_terms = array_merge( $this->p_terms, $arr_terms );
          }
       }
       else
@@ -535,31 +537,6 @@ class TextParser extends BasicParser
       }
 
       return true;
-   }
-
-   /*! \brief Extracts regex-terms from SQL-value into $p_terms. */
-   function extract_terms( $sql )
-   {
-      // \% -> %, \_ -> ., % -> .*?, _ -> ., others -> copy
-      $sql = preg_replace( "/(^%+|%+$)/", '', $sql );
-      $rxterm = '';
-      $len = strlen($sql);
-      for( $pos = 0; $pos < $len; $pos++)
-      {
-         if ( $sql{$pos} == '\\' )
-         {
-            $pos++;
-            $rxterm .= preg_quote($sql{$pos});
-         }
-         if ( $sql{$pos} == '%' )
-            $rxterm .= '.*?';
-         elseif ( $sql{$pos} == '_' )
-            $rxterm .= '.';
-         else
-            $rxterm .= preg_quote($sql{$pos});
-      }
-      if ( $rxterm != '' )
-         array_push( $this->p_terms, $rxterm );
    }
 } // end of 'TextParser'
 
