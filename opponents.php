@@ -79,7 +79,7 @@ $ARR_DBFIELDKEYS = array(
    $result = mysql_query( $query )
       or error('mysql_query_failed', "opponents.find_users($uid,$opp)");
    while ( $row = mysql_fetch_assoc( $result ) )
-      $players[ $row['ID'] ] = $row; //array_merge( array(), $row ); // copy arr
+      $players[ $row['ID'] ] = $row;
    if ( !isset($players[$uid]) )
       error('unknown_user', "opponents.load_user($uid)");
    if ( $opp and !isset($players[$opp]) )
@@ -100,7 +100,7 @@ $ARR_DBFIELDKEYS = array(
    $usfilter->init();
    $f_status =& $usfilter->get_filter(4);
 
-   // table filters
+   // table filters: use same table-IDs as in users.php(!)
    $ufilter = new SearchFilter();
    $ufilter->add_filter( 1, 'Numeric', 'P.ID', true);
    $ufilter->add_filter( 2, 'Text',    'P.Name', true,
@@ -155,6 +155,7 @@ $ARR_DBFIELDKEYS = array(
    $utable->add_external_parameters( $page_vars );
 
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
+   // table: use same table-IDs as in users.php(!)
    $utable->add_tablehead( 0, T_('Info'), NULL, false, true, array( 'class' => 'Button') );
    $utable->add_tablehead( 1, T_('ID'), 'ID', false, true);
    $utable->add_tablehead( 2, T_('Name'), 'Name');
@@ -459,7 +460,7 @@ function extract_user_stats( $color, $query = null )
    if ( !is_null($query) )
    {
       $result = mysql_query( $query )
-         or error('mysql_query_failed', "extract_user_stats($color)");
+         or error('mysql_query_failed', "opponents.extract_user_stats($color)");
 
       if ( $row = mysql_fetch_assoc( $result ) )
       {
