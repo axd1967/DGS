@@ -194,13 +194,13 @@ class Contact
       if ( !is_numeric($this->uid) or !is_numeric($this->cid)
             or $this->uid <= 0 or $this->cid <= 0
             or $this->uid == $this->cid )
-         error('invalid_user', 'contact.update_contact');
+         error('invalid_user', "contact.update_contact({$this->uid},{$this->cid})");
 
       global $NOW;
       $this->lastchanged = $NOW;
 
       $result = mysql_query("SELECT ID FROM Players WHERE ID IN ('{$this->uid}','{$this->cid}') LIMIT 2")
-         or error('mysql_query_failed','contact.find_user');
+         or error('mysql_query_failed', "contact.find_user({$this->uid},{$this->cid})");
       if( !$result or mysql_num_rows($result) != 2 )
          error('unknown_user', "contact.find_user2({$this->uid},{$this->cid})");
       mysql_free_result($result);
@@ -215,7 +215,7 @@ class Contact
          . ", Notes='" . mysql_addslashes($this->note) . "'"
          ;
       $result = mysql_query( $update_query )
-         or error('mysql_query_failed','contacts.update_contact');
+         or error('mysql_query_failed', "contact.update_contact2({$this->uid},{$this->cid})");
    }
 
    /*! \brief Deletes current Contact from database. */
