@@ -35,6 +35,19 @@ Changelog
 
 2007-08-04 juga
 
+   * game.php,
+     include/game_functions.php (allow_add_time_opponent, add_time_opponent):
+   - add-time: no byoyomi-reset if there is no byoyomi,
+     don't allow if maintime would exceed 365 days,
+     allow up to 14 days to add,
+     corrected some relating texts
+
+   * include/message_functions.php:
+   - added 'AS' in SQL
+
+   * include/table_columns.php (make_filter_row):
+   - removed useless arg 'thead'
+
    * admin_faq.php, include/faq_functions.php (faq_item_html):
    - highlight terms for edit-FAQ and returning (except preview)
 
