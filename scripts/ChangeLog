@@ -29,10 +29,13 @@ Changelog
 
    * edit_contact.php:
    - fix: show errormsg for invalid contact-user
+   - delete-cancel returns to contact-list
+   - delete is only confirm (don't show edit-elements)
 
    * list_contacts.php:
    - use case-insensitive filter-search on now binary Notes-column
    - removed alt-attrib in some filter-form-elements: changed FC_MULTIPLE-format
+   - default sort by name
 
    * include/filter.php (build_generic_input_text_elem, build_input_text_elem,
      build_generic_checkbox_elem, FilterCheckboxArray),
@@ -42,6 +45,8 @@ Changelog
 
    * show_games.php, userinfo.php:
    - introduced named filter-columns for Rated/Won fields in show_games.php
+   - make Rated (14) and Won (11) games-column static
+     to provide valid links from userinfo
 
 2007-08-04 rodival
 
