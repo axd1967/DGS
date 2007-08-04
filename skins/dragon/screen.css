@@ -1046,8 +1046,16 @@ form#contactForm table.Table a.ButIcon img {
    height: 16px;
 }
 
+form#contactForm table.FormClassV {
+   border: 0px solid green;
+   margin: 0px auto 0px 0px;
+}
+form#contactForm table.FormClassH {
+   border: 0px solid blue;
+   margin: 0px auto 0px 0px;
+}
 form#contactForm table.FormClassC {
-   border: 0px solid lime;
+   border: 0px solid orange;
    margin: 0px auto 0px 0px;
 }
 
