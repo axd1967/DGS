@@ -24,7 +24,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * $level=-1 print the end of the container
  * $attbs is the '<A $attbs></A>' arguments which will enclose the $Qtxt
  **/
-function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='')
+function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rxterm='' )
 {
    static $prevlevel;
 
@@ -41,7 +41,7 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='')
       case 0: {
       } break;
       case 1: {
-         $tmp = make_html_safe( $Qtext, 'cell');
+         $tmp = make_html_safe( $Qtext, 'cell', $rxterm );
          if( !$tmp )
             $tmp = '???';
          if( $attbs )
@@ -58,14 +58,14 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='')
          $str.= "\n$itm";
       } break;
       default: {
-         $tmp = make_html_safe( $Qtext, 'cell');
+         $tmp = make_html_safe( $Qtext, 'cell', $rxterm );
          if( !$tmp )
             $tmp = '???';
          if( $attbs )
             $tmp = "<A $attbs>$tmp</A>";
          $itm = "<strong class=Question>$tmp</strong>";
 
-         $tmp = make_html_safe( $Atext, 'faq');
+         $tmp = make_html_safe( $Atext, 'faq', $rxterm );
          if( $tmp )
          {
             $itm.= "<br>\n<div class=Answer>$tmp</div>";
