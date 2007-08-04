@@ -43,14 +43,15 @@ require_once( "include/contacts.php" );
      contact_save&cid=     : update (replace) contact in database
      contact_delete&cid=   : remove contact (need confirm)
      contact_delete&confirm=1&cid= : remove contact (confirmed)
-     contact_cancel&cid=   : cancel remove-confirmation
+     contact_cancel        : cancel remove-confirmation
 */
+
+   if ( @$_REQUEST['contact_cancel'] ) // cancel delete
+      jump_to("list_contacts.php");
 
    $my_id = $player_row['ID'];
    $cid = (int) @$_REQUEST['cid'];
    $cuser = get_request_arg('cuser');
-
-   $cancel_delete = @$_REQUEST['contact_cancel'];
 
    if ( $cid < 0 )
       $cid = 0;
@@ -100,7 +101,7 @@ require_once( "include/contacts.php" );
    if ( is_null($contact) )
       $contact = Contact::new_contact( $my_id, $cid ); // new contact
 
-   if ( $cid and @$_REQUEST['contact_delete'] and @$_REQUEST['confirm'] and !$cancel_delete )
+   if ( $cid and @$_REQUEST['contact_delete'] and @$_REQUEST['confirm'] )
    {
       $contact->delete_contact();
       jump_to("list_contacts.php?sysmsg=". urlencode(T_('Contact removed!')) );
@@ -119,7 +120,7 @@ require_once( "include/contacts.php" );
 
 
    $page = "edit_contact.php";
-   if ( @$_REQUEST['contact_delete'] and !$cancel_delete )
+   if ( @$_REQUEST['contact_delete'] )
       $title = T_('Contact removal');
    else
       $title = T_('Contact edit');
@@ -150,46 +151,7 @@ require_once( "include/contacts.php" );
 
       if( $other_row )
       {
-         $cform->set_area(2);
-         $cform->add_row( array(
-               'DESCRIPTION', T_('System categories') )); // system-flags
-         $cform->set_layout( FLAYOUT_AREACONF, 2, array(
-               FAC_TABLE => 'class=EditOptions',
-            ) );
-         foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr )
-         {
-            $cform->add_row( array(
-               'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_sysflag_set($sysflag) ));
-         }
-
-         $cform->set_area(3);
-         $cform->add_row( array(
-               'DESCRIPTION', T_('User categories') )); // user-flags
-         $cform->set_layout( FLAYOUT_AREACONF, 3, array(
-               FAC_TABLE => 'class=EditOptions',
-            ) );
-         reset($ARR_CONTACT_USERFLAGS);
-         while( list($userflag, $arr) = each($ARR_CONTACT_USERFLAGS) )
-         {
-            $row_arr = array();
-            array_push( $row_arr,
-               'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_userflag_set($userflag) );
-            if( list($userflag, $arr) = each($ARR_CONTACT_USERFLAGS) )
-               array_push( $row_arr, 'TD',
-                  'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_userflag_set($userflag) );
-            else
-               array_push( $row_arr, 'TAB');
-            $cform->add_row( $row_arr );
-         }
-
-         $cform->set_area(4);
-         $cform->add_row( array(
-               'DESCRIPTION', T_('Notes'),
-               'TEXTAREA', 'note', 60, 3, textarea_safe($contact->note),
-               'BR', 'TEXT', '(' . T_('keep notes short, max. 255 chars') . ')'
-               ));
-
-         if ( @$_REQUEST['contact_delete'] and !$cancel_delete )
+         if ( @$_REQUEST['contact_delete'] )
          {
             $cform->add_hidden( 'confirm', 1 );
             $cform->add_row( array(
@@ -199,11 +161,52 @@ require_once( "include/contacts.php" );
                'SUBMITBUTTON', 'contact_cancel', T_('Cancel') ));
          }
          else
+         {
+            $cform->set_area(2);
+            $cform->add_row( array(
+                  'DESCRIPTION', T_('System categories') )); // system-flags
+            $cform->set_layout( FLAYOUT_AREACONF, 2, array(
+                  FAC_TABLE => 'class=EditOptions',
+               ) );
+            foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr )
+            {
+               $cform->add_row( array(
+                  'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_sysflag_set($sysflag) ));
+            }
+
+            $cform->set_area(3);
+            $cform->add_row( array(
+                  'DESCRIPTION', T_('User categories') )); // user-flags
+            $cform->set_layout( FLAYOUT_AREACONF, 3, array(
+                  FAC_TABLE => 'class=EditOptions',
+               ) );
+            reset($ARR_CONTACT_USERFLAGS);
+            while( list($userflag, $arr) = each($ARR_CONTACT_USERFLAGS) )
+            {
+               $row_arr = array();
+               array_push( $row_arr,
+                  'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_userflag_set($userflag) );
+               if( list($userflag, $arr) = each($ARR_CONTACT_USERFLAGS) )
+                  array_push( $row_arr, 'TD',
+                     'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_userflag_set($userflag) );
+               else
+                  array_push( $row_arr, 'TAB');
+               $cform->add_row( $row_arr );
+            }
+
+            $cform->set_area(4);
+            $cform->add_row( array(
+                  'DESCRIPTION', T_('Notes'),
+                  'TEXTAREA', 'note', 60, 3, textarea_safe($contact->note),
+                  'BR', 'TEXT', '(' . T_('keep notes short, max. 255 chars') . ')'
+                  ));
+
             $cform->add_row( array(
                'TAB',
                'CELL', 1, 'align=left',
                'SUBMITBUTTON', 'contact_save', T_('Save contact'),
                ));
+         }
 
          $cform->add_hidden( 'cid', $cid );
       }
