@@ -307,7 +307,7 @@ class Table
       /* Make filter row */
 
       $filter_row = '';
-      $need_form = $this->make_filter_row( $thead, $filter_row );
+      $need_form = $this->make_filter_row( $filter_row );
 
       /* Make table rows */
 
@@ -385,9 +385,9 @@ class Table
 
    /*!
     * \brief Passes back filter_row per ref and return true, if form needed because of filters.
-    * signature: bool need_form = make_filter_row( tablehead, &filter_row)
+    * signature: bool need_form = make_filter_row( &filter_row)
     */
-   function make_filter_row( $thead, &$filter_row )
+   function make_filter_row( &$filter_row )
    {
       // make filter-row
       $this->Shown_Filters = 0;
