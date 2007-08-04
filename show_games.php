@@ -98,7 +98,8 @@ require_once( "include/rating.php" );
    $gfilter->add_filter( 8, 'Numeric', 'Games.Komi', true);
    $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true);
    $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true);
-   $gfilter->add_filter(14, 'RatedSelect', 'Rated', true);
+   $gfilter->add_filter(14, 'RatedSelect', 'Rated', true,
+         array( FC_FNAME => 'rated' ));
    if( !$observe and !$all )
    {
       $gfilter->add_filter( 3, 'Text',   'Name',   true);
@@ -125,7 +126,8 @@ require_once( "include/rating.php" );
                    T_('Won')  => new QuerySQL( SQLP_HAVING, 'Win=1' ),
                    T_('Lost') => new QuerySQL( SQLP_HAVING, 'Win=-1' ),
                    T_('Jigo') => 'Score=0' ),
-            true);
+            true,
+            array( FC_FNAME => 'won' ));
       $gfilter->add_filter(12, 'RelativeDate', 'Lastchanged', true);
       if( $all )
       {
@@ -196,10 +198,10 @@ require_once( "include/rating.php" );
  *  8: Komi
  *  9: Moves
  * 10: >  FU + FA (Score)
- * 11: >  FU (User-Score-graphic)
+ * 11: >  FU (User-Score-graphic)   -> fname=won
  * 12: >  FU + FA (Lastchanged as 'End date'), RU (Weekendclock)
  * 13: >  OB + RU + RA (Lastchanged as 'Last move')
- * 14: Rated
+ * 14: Rated   -> fname=rated
  * 15: >  RU (Opponents-LastAccess)
  * 16: >  FU + RU (User-Rating)
  * 17: >  OB + FA + RA (Black-Name)

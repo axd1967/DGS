@@ -98,9 +98,9 @@ require_once( "include/contacts.php" );
 
       $run_link = "show_games.php?uid=$uid";
       $fin_link = $run_link.URI_AMP.'finished=1';
-      $rat_link = $fin_link.URI_AMP.'fsf14=1'; //Rated=yes
-      $won_link = $rat_link.URI_AMP.'fsf11=1'; //Won?=Won
-      $los_link = $rat_link.URI_AMP.'fsf11=2'; //Won?=Lost
+      $rat_link = $fin_link.URI_AMP.'rated=1'; //Rated=yes
+      $won_link = $rat_link.URI_AMP.'won=1'; //Won?=Won
+      $los_link = $rat_link.URI_AMP.'won=2'; //Won?=Lost
 
       $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
 
