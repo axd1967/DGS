@@ -18,6 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+//Rdvl: removed require_once( "include/std_functions.php" );
  /* The code in this file is written by Ragnar Ouchterlony */
 
  /*!
@@ -195,184 +196,184 @@ class Form
    /*! \brief Constructor. Initializes various variables. */
    function Form( $name, $action_page, $method
          , $echo_form_start_now=false, $class='FormClass' )
-      {
-         $this->attached = array();
-         $this->hiddens_echoed = false;
-         $this->hiddens = array();
-         $this->tabindex = 0;
+   {
+      $this->attached = array();
+      $this->hiddens_echoed = false;
+      $this->hiddens = array();
+      $this->tabindex = 0;
 
-         $this->name = $name;
-         $this->action = $action_page;
-         $this->method = $method;
-         $this->fclass = $class;
-         $this->config = array();
-         $this->echo_form_start_now = $echo_form_start_now;
+      $this->name = $name;
+      $this->action = $action_page;
+      $this->method = $method;
+      $this->fclass = $class;
+      $this->config = array();
+      $this->echo_form_start_now = $echo_form_start_now;
 
-         $this->max_nr_columns = 2; //actually build on the fly, it is often inadequate for the top rows of the form
-         $this->rows = array();
+      $this->max_nr_columns = 2; //actually build on the fly, it is often inadequate for the top rows of the form
+      $this->rows = array();
 
-         $this->layout = array();
-         $this->areas = array( 1 => 1 );
-         $this->area = 1;
-         $this->areaconf = array();
+      $this->layout = array();
+      $this->areas = array( 1 => 1 );
+      $this->area = 1;
+      $this->areaconf = array();
 
-         $this->form_string = "";
+      $this->form_string = "";
 
-         $this->updated = false;
+      $this->updated = false;
 
-         $this->line_no_step = 10;
+      $this->line_no_step = 10;
 
-         //TODO: for CSS, remove the 'Align' property
-         //'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
-         $this->form_elements = array(
-            'DESCRIPTION'  => array( 'NumArgs' => 1,
-                                     'NewTD'   => true,
-                                     'StartTD' => true,
-                                     'EndTD'   => true,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'right' ),
-            'OWNHTML'      => array( 'NumArgs' => 1,
-                                     'NewTD'   => false,
-                                     'StartTD' => false,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => '' ),
-            'HEADER'       => array( 'NumArgs' => 1,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => true,
-                                     'SpanAllColumns' => true,
-                                     'Align'   => 'center' ),
-            'CHAPTER'      => array( 'NumArgs' => 1,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => true,
-                                     'SpanAllColumns' => true,
-                                     'Align'   => 'left' ),
-            'TEXT'         => array( 'NumArgs' => 1,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
-            'TEXTINPUT'    => array( 'NumArgs' => 4,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
-            'PASSWORD'     => array( 'NumArgs' => 3,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
-            'HIDDEN'       => array( 'NumArgs' => 2,
-                                     'NewTD'   => false,
-                                     'StartTD' => false,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => '' ),
-            'ENABLE'       => array( 'NumArgs' => 1,
-                                     'NewTD'   => false,
-                                     'StartTD' => false,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => '' ),
-            'TEXTAREA'     => array( 'NumArgs' => 4,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
-            'SELECTBOX'    => array( 'NumArgs' => 5,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
-            'RADIOBUTTONS' => array( 'NumArgs' => 3,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
-            'CHECKBOX'     => array( 'NumArgs' => 4,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
-            'SUBMITBUTTON' => array( 'NumArgs' => 2,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => true,
-                                     'Align'   => 'center' ),
-            'SUBMITBUTTONX' => array( 'NumArgs' => 3,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => true,
-                                     'Align'   => 'center' ),
-            'SPACE'        => array( 'NumArgs' => 0,
-                                     'NewTD'   => false,
-                                     'StartTD' => false,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => '' ),
-            'HR'           => array( 'NumArgs' => 0,
-                                     'NewTD'   => false,
-                                     'StartTD' => false,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => true,
-                                     'Align'   => '' ),
-            'TAB'          => array( 'NumArgs' => 0,
-                                     'NewTD'   => true,
-                                     'StartTD' => true,
-                                     'EndTD'   => true,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => '' ),
-            'BR'           => array( 'NumArgs' => 0,
-                                     'NewTD'   => false,
-                                     'StartTD' => false,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => '' ),
-            'TD'           => array( 'NumArgs' => 0,
-                                     'NewTD'   => false,
-                                     'StartTD' => false,
-                                     'EndTD'   => true,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => '' ),
-            'CELL'         => array( 'NumArgs' => 2,
-                                     'NewTD'   => true,
-                                     'StartTD' => false,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => '' ),
-            'ROW'          => array( 'NumArgs' => 1,
-                                     'NewTD'   => false,
-                                     'StartTD' => false,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => '' ),
-            'FILTER'       => array( 'NumArgs' => 2,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
-            'FILTERERROR'  => array( 'NumArgs' => 5,
-                                     'NewTD'   => false,
-                                     'StartTD' => true,
-                                     'EndTD'   => false,
-                                     'SpanAllColumns' => false,
-                                     'Align'   => 'left' ),
-         );
+      //TODO: for CSS, remove the 'Align' property
+      //'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
+      $this->form_elements = array(
+         'DESCRIPTION'  => array( 'NumArgs' => 1,
+                                  'NewTD'   => true,
+                                  'StartTD' => true,
+                                  'EndTD'   => true,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'right' ),
+         'OWNHTML'      => array( 'NumArgs' => 1,
+                                  'NewTD'   => false,
+                                  'StartTD' => false,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => '' ),
+         'HEADER'       => array( 'NumArgs' => 1,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => true,
+                                  'SpanAllColumns' => true,
+                                  'Align'   => 'center' ),
+         'CHAPTER'      => array( 'NumArgs' => 1,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => true,
+                                  'SpanAllColumns' => true,
+                                  'Align'   => 'left' ),
+         'TEXT'         => array( 'NumArgs' => 1,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'left' ),
+         'TEXTINPUT'    => array( 'NumArgs' => 4,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'left' ),
+         'PASSWORD'     => array( 'NumArgs' => 3,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'left' ),
+         'HIDDEN'       => array( 'NumArgs' => 2,
+                                  'NewTD'   => false,
+                                  'StartTD' => false,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => '' ),
+         'ENABLE'       => array( 'NumArgs' => 1,
+                                  'NewTD'   => false,
+                                  'StartTD' => false,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => '' ),
+         'TEXTAREA'     => array( 'NumArgs' => 4,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'left' ),
+         'SELECTBOX'    => array( 'NumArgs' => 5,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'left' ),
+         'RADIOBUTTONS' => array( 'NumArgs' => 3,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'left' ),
+         'CHECKBOX'     => array( 'NumArgs' => 4,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'left' ),
+         'SUBMITBUTTON' => array( 'NumArgs' => 2,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => true,
+                                  'Align'   => 'center' ),
+         'SUBMITBUTTONX' => array( 'NumArgs' => 3,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => true,
+                                  'Align'   => 'center' ),
+         'SPACE'        => array( 'NumArgs' => 0,
+                                  'NewTD'   => false,
+                                  'StartTD' => false,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => '' ),
+         'HR'           => array( 'NumArgs' => 0,
+                                  'NewTD'   => false,
+                                  'StartTD' => false,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => true,
+                                  'Align'   => '' ),
+         'TAB'          => array( 'NumArgs' => 0,
+                                  'NewTD'   => true,
+                                  'StartTD' => true,
+                                  'EndTD'   => true,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => '' ),
+         'BR'           => array( 'NumArgs' => 0,
+                                  'NewTD'   => false,
+                                  'StartTD' => false,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => '' ),
+         'TD'           => array( 'NumArgs' => 0,
+                                  'NewTD'   => false,
+                                  'StartTD' => false,
+                                  'EndTD'   => true,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => '' ),
+         'CELL'         => array( 'NumArgs' => 2,
+                                  'NewTD'   => true,
+                                  'StartTD' => false,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => '' ),
+         'ROW'          => array( 'NumArgs' => 1,
+                                  'NewTD'   => false,
+                                  'StartTD' => false,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => '' ),
+         'FILTER'       => array( 'NumArgs' => 2,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'left' ),
+         'FILTERERROR'  => array( 'NumArgs' => 5,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Align'   => 'left' ),
+      );
 
-         if( $echo_form_start_now )
-            echo $this->print_start_default();
+      if( $echo_form_start_now )
+         echo $this->print_start_default();
    } //Form
 
 
@@ -403,11 +404,11 @@ class Form
       $rx_attrs = "/^(" . implode('|', array_keys($ARR_FORMELEM_READONLY) ) . ")$/";
 
       $name = strtoupper($name);
-      if ( !preg_match( $rx_attrs, $attrname ) )
+      if( !preg_match( $rx_attrs, $attrname ) )
          error('internal_error', "form.set_attr_form_element.bad_attr_name($name,$attrname)");
-      if ( @$ARR_FORMELEM_READONLY[$attrname] )
+      if( @$ARR_FORMELEM_READONLY[$attrname] )
          error('internal_error', "form.set_attr_form_element.readonly_attr($name,$attrname)");
-      if ( !isset($this->form_elements[$name]) )
+      if( !isset($this->form_elements[$name]) )
          error('internal_error', "form.set_attr_form_element.miss_form_element($name)");
 
       $this->form_elements[$name][$attrname] = $value;
@@ -422,9 +423,9 @@ class Form
     */
    function set_layout( $key, $value, $arr=NULL )
    {
-      if ( $key === FLAYOUT_GLOBAL )
+      if( $key === FLAYOUT_GLOBAL )
          $this->parse_layout_global( $value );
-      elseif ( $key === FLAYOUT_AREACONF )
+      else if( $key === FLAYOUT_AREACONF )
          $this->parse_layout_areaconf( $value, $arr );
       else
          error('internal_error', "Form.set_layout.unknown_key($key)");
@@ -445,7 +446,7 @@ class Form
       $this->areas  = array();
 
       // syntax-checks: allowed chars, non-empty braces
-      if ( !preg_match( "/(^[\d,|\(\)]+$|\(\))/", $layout ) )
+      if( !preg_match( "/(^[\d,|\(\)]+$|\(\))/", $layout ) )
          error('internal_error', "Form.parse_layout_global.bad_syntax.1($layout)");
 
       $groups = array();
@@ -454,11 +455,11 @@ class Form
       while (true)
       {
          $epos = strpos( $L, ')' );
-         if ( $epos === false )
+         if( $epos === false )
             break;
          # found ')', search backwards to '(' -> group
          $spos = strrpos( substr($L, 0, $epos), '(' );
-         if ( $spos === false )
+         if( $spos === false )
             error('internal_error', "Form.parse_layout_global.bracing-mismatch.1($layout)");
 
          $group = substr( $L, $spos + 1, $epos - $spos - 1 ); // no '()' in group, only x or x, or x|
@@ -466,12 +467,12 @@ class Form
          $arr_horiz = explode( ',', $group );
          foreach( $arr_horiz as $hgr )
          {
-            if ( strlen($hgr) == 0 )
+            if( strlen($hgr) == 0 )
                error('internal_error', "Form.parse_layout_global.missing_area-num.H($layout)"); // around a ','
             $arr_vert = explode( '|', $hgr );
-            if ( count($arr_vert) == 1 )
+            if( count($arr_vert) == 1 )
             {
-               if ( $hgr{0} == 'G' )
+               if( $hgr{0} == 'G' )
                   $hgr = $groups[ substr($hgr,1) ];
                else if( $hgr < 1 )
                   error('internal_error', "Form.parse_layout_global.area-num.H<1");
@@ -484,9 +485,9 @@ class Form
                $arrv = array( 'H' );
                foreach( $arr_vert as $vgr )
                {
-                  if ( strlen($vgr) == 0 )
+                  if( strlen($vgr) == 0 )
                      error('internal_error', "Form.parse_layout_global.missing_area-num.V($layout)"); // around a '|'
-                  if ( $vgr{0} == 'G' )
+                  if( $vgr{0} == 'G' )
                      $vgr = $groups[ substr($vgr,1) ];
                   else if( $vgr < 1 )
                      error('internal_error', "Form.parse_layout_global.area-num.V<1");
@@ -503,9 +504,9 @@ class Form
          $grcnt++;
       }
 
-      if ( !(strpos( $L, '(' ) === false) )
+      if( !(strpos( $L, '(' ) === false) )
          error('internal_error', "Form.parse_layout_global.bracing-mismatch.2($layout)");
-      if ( preg_match( "/[\|,]/", $L ) )
+      if( preg_match( "/[\|,]/", $L ) )
          error('internal_error', "Form.parse_layout_global.bad_syntax.2($layout)"); // with one of '|,'
 
       $result = $groups[$grcnt-1];
@@ -520,13 +521,13 @@ class Form
     */
    function parse_layout_areaconf( $area, $config )
    {
-      if ( !preg_match( "/^(\d+|".FAREA_ALL.")$/", $area) )
+      if( !preg_match( "/^(\d+|".FAREA_ALL.")$/", $area) )
          error('assert', "Form.parse_layout_areaconf.area-num($area)");
-      if ( !is_array( $config ) )
+      if( !is_array( $config ) )
          error('assert', "Form.parse_layout_areaconf.config-arg()");
 
       // don't overwrite existing config
-      if ( !isset($this->areaconf[$area]) )
+      if( !isset($this->areaconf[$area]) )
          $this->areaconf[$area] = array();
       foreach( $config as $key => $val )
          $this->areaconf[$area][$key] = $val;
@@ -550,9 +551,9 @@ class Form
    /*! \brief Changes current area (area-num must exist in specified layout \see set_layout ). */
    function set_area( $area )
    {
-      if ( !isset($this->layout[FLAYOUT_GLOBAL]) )
+      if( !isset($this->layout[FLAYOUT_GLOBAL]) )
          error('assert', "Form.set_area.unset_layout");
-      if ( !isset($this->areas[$area]) )
+      if( !isset($this->areas[$area]) )
          error('assert', "Form.set_area.bad_area($area)");
       $this->area = $area;
    }
@@ -563,34 +564,35 @@ class Form
     * \return The line_number of the new row or -1 if failed.
     */
    function add_row( $row_array, $line_no = -1, $safe = true )
+   {
+      if( $line_no != -1 )
       {
-         if( $line_no != -1 )
+         if( array_key_exists( $line_no, $this->rows ) )
+            return -1;
+      }
+      else
+      {
+         if( empty($this->rows) )
          {
-            if( array_key_exists( $line_no, $this->rows ) )
-               return -1;
+            $line_no = $this->line_no_step;
          }
          else
          {
-            if( empty($this->rows) )
-            {
-               $line_no = $this->line_no_step;
-            }
-            else
-            {
-               $line_no = max( array_keys( $this->rows ) ) + $this->line_no_step;
-            }
+            $line_no = max( array_keys( $this->rows ) ) + $this->line_no_step;
          }
+      }
 
-         $this->rows[ $line_no ] = array( $safe, $row_array, $this->area );
-         $this->updated = false;
+      $this->rows[ $line_no ] = array( $safe, $row_array, $this->area );
+      $this->updated = false;
 
-         return $line_no;
+      return $line_no;
    } //add_row
 
    /*! \brief wrapper to add empty-row. */
    function add_empty_row()
    {
-      $this->add_row( array( 'TEXT', '&nbsp;' ));
+      //$this->add_row( array( 'TEXT', '&nbsp;' ));
+      $this->add_row( array( 'SPACE' )); //better for colspan
    }
 
    /*!
@@ -599,174 +601,174 @@ class Form
     * \todo Needs to be done.
     */
    function add_form( $other_form, $line_no )
-      {
-      }
+   {
+   }
 
    /*! \brief Set $line_no_step */
    function set_line_no_step( $step_size )
-      {
-         $this->line_no_step = $step_size;
-      }
+   {
+      $this->line_no_step = $step_size;
+   }
 
    /*! \brief Update $form_string with new $rows data. */
    function update_form_string()
-      {
-         if( $this->updated )
-            return;
+   {
+      if( $this->updated )
+         return;
 
-         $this->form_string = $this->create_form_string();
-         $this->updated = true;
-      }
+      $this->form_string = $this->create_form_string();
+      $this->updated = true;
+   }
 
    /*! \brief Create a string from the rows */
    function create_form_string()
+   {
+      $has_layout = isset($this->layout[FLAYOUT_GLOBAL]);
+      $rootformstr = "";
+
+      if( count($this->rows) <= 0 )
       {
-         $has_layout = isset($this->layout[FLAYOUT_GLOBAL]);
-         $rootformstr = "";
+         if( !$this->get_config(FEC_EXTERNAL_FORM) and $this->echo_form_start_now )
+            $rootformstr .= $this->print_end();
+         return $rootformstr;
+      }
 
-         if( count($this->rows) <= 0 )
-         {
-            if ( !$this->get_config(FEC_EXTERNAL_FORM) and $this->echo_form_start_now )
-               $rootformstr .= $this->print_end();
-            return $rootformstr;
-         }
+      if( !$this->get_config(FEC_EXTERNAL_FORM) and !$this->echo_form_start_now )
+         $rootformstr .= $this->print_start_default();
 
-         if ( !$this->get_config(FEC_EXTERNAL_FORM) and !$this->echo_form_start_now )
-            $rootformstr .= $this->print_start_default();
-
-         $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
+      $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
       $table_attbs = $this->get_merged_attbs( $table_attbs);
       $rootformstr .= "  <TABLE $table_attbs>\n"; //form table
 
-         ksort($this->rows);
+      ksort($this->rows);
 
-         // prepare area-grouping
-         $area_rows = array();
-         foreach( $this->areas as $area => $tmp )
-            $area_rows[$area] = '';
+      // prepare area-grouping
+      $area_rows = array();
+      foreach( $this->areas as $area => $tmp )
+         $area_rows[$area] = '';
 
-         foreach( $this->rows as $row_args )
+      foreach( $this->rows as $row_args )
+      {
+         list( $this->safe_text, $row_args, $curr_area ) = $row_args;
+         $args = array_values( $row_args );
+         $formstr = "";
+
+         $current_arg = 0;
+         $this->nr_columns = 0;
+         $this->column_started = false;
+
+         $rowclass = '';
+         $result = '';
+         $element_counter = 0;
+
+         while( $current_arg < count($args) )
          {
-            list( $this->safe_text, $row_args, $curr_area ) = $row_args;
-            $args = array_values( $row_args );
-            $formstr = "";
+            //40 allow 10*(TEXT,TD,TEXTAREA,TD) in the row
+            if( $element_counter >= 40 )
+               exit;
 
-            $current_arg = 0;
-            $this->nr_columns = 0;
-            $this->column_started = false;
+            $element_name = $args[ $current_arg ];
+            $current_arg++;
 
-            $rowclass = '';
-            $result = '';
-            $element_counter = 0;
+            if( !array_key_exists( $element_name, $this->form_elements ) )
+               continue;
 
-            while( $current_arg < count($args) )
+            $element_counter++;
+
+            $element_type = $this->form_elements[ $element_name ];
+
+            if( $current_arg + $element_type[ 'NumArgs' ] > count($args) )
+               continue;
+
+            $element_args = array();
+
+            for( $i = 0; $i < $element_type[ 'NumArgs' ]; $i++ )
+               $element_args[] = $args[ $current_arg + $i ];
+
+            $func_name = "create_string_func_" . strtolower( $element_name );
+
+            $current_arg += $element_type[ 'NumArgs' ];
+
+            if( $element_name == 'ROW' )
             {
-               //40 allow 10*(TEXT,TD,TEXTAREA,TD) in the row
-               if( $element_counter >= 40 )
-                  exit;
-
-               $element_name = $args[ $current_arg ];
-               $current_arg++;
-
-               if( !array_key_exists( $element_name, $this->form_elements ) )
-                  continue;
-
-               $element_counter++;
-
-               $element_type = $this->form_elements[ $element_name ];
-
-               if( $current_arg + $element_type[ 'NumArgs' ] > count($args) )
-                  continue;
-
-               $element_args = array();
-
-               for( $i = 0; $i < $element_type[ 'NumArgs' ]; $i++ )
-                  $element_args[] = $args[ $current_arg + $i ];
-
-               $func_name = "create_string_func_" . strtolower( $element_name );
-
-               $current_arg += $element_type[ 'NumArgs' ];
-
-               if( $element_name == 'ROW' )
-               {
-                  $rowclass = ' class='.$element_args[ 0 ];
-               }
-               else if( $element_name == 'HIDDEN' || $element_name == 'ENABLE' )
-               {
-                  $this->$func_name( $result, $element_args );
-               }
-               else if( $element_type['SpanAllColumns'] )
-               {
-
-                  if( !$this->column_started )
-                  $result .= $this->print_td_start( $element_type['Align'],
-                                                    max( $this->max_nr_columns -
-                                                         $this->nr_columns,
-                                                         1 ) )."\n";
-
-                  $result .= "        ";
-                  $this->$func_name( $result, $element_args );
-                  $result .= "\n";
-
-                  $this->nr_columns = $this->max_nr_columns;
-                  $this->column_started = true;
-               }
-               else
-               {
-                  if( $element_type['NewTD'] and $this->column_started )
-                  {
-                     $result .= $this->print_td_end();
-                     $this->column_started = false;
-                  }
-
-                  if( $element_type['StartTD'] and !$this->column_started )
-                  {
-                     $result .= $this->print_td_start( $element_type['Align'] )."\n";
-                     $this->column_started = true;
-                     $this->nr_columns++;
-                  }
-
-                  $result .= "        ";
-                  $this->$func_name( $result, $element_args );
-                  $result .= "\n";
-
-                  if( $element_type['EndTD'] and $this->column_started )
-                  {
-                     $result .= $this->print_td_end();
-                     $this->column_started = false;
-                  }
-               }
-               if( $this->nr_columns > $this->max_nr_columns )
-                  $this->max_nr_columns = $this->nr_columns;
-            } //while args
-            if( $this->column_started )
-               $result .= $this->print_td_end();
-
-            if( $result )
-            {
-               $tr_attrs = $this->get_config(FEC_TR_ATTR);
-               $formstr .= '    <TR';
-               if( $rowclass )
-                  $formstr .= $rowclass;
-               else if( $tr_attrs )
-                  $formstr .=  ' '.$tr_attrs;
-               $formstr .= ">\n$result\n    </TR>\n";
-               $area_rows[$curr_area] .= $formstr;
+               $rowclass = ' class='.$element_args[ 0 ];
             }
+            else if( $element_name == 'HIDDEN' || $element_name == 'ENABLE' )
+            {
+               $this->$func_name( $result, $element_args );
+            }
+            else if( $element_type['SpanAllColumns'] )
+            {
+
+               if( !$this->column_started )
+               $result .= $this->print_td_start( $element_type['Align'],
+                                                 max( $this->max_nr_columns -
+                                                      $this->nr_columns,
+                                                      1 ) )."\n";
+
+               $result .= "        ";
+               $this->$func_name( $result, $element_args );
+               $result .= "\n";
+
+               $this->nr_columns = $this->max_nr_columns;
+               $this->column_started = true;
+            }
+            else
+            {
+               if( $element_type['NewTD'] and $this->column_started )
+               {
+                  $result .= $this->print_td_end();
+                  $this->column_started = false;
+               }
+
+               if( $element_type['StartTD'] and !$this->column_started )
+               {
+                  $result .= $this->print_td_start( $element_type['Align'] )."\n";
+                  $this->column_started = true;
+                  $this->nr_columns++;
+               }
+
+               $result .= "        ";
+               $this->$func_name( $result, $element_args );
+               $result .= "\n";
+
+               if( $element_type['EndTD'] and $this->column_started )
+               {
+                  $result .= $this->print_td_end();
+                  $this->column_started = false;
+               }
+            }
+            if( $this->nr_columns > $this->max_nr_columns )
+               $this->max_nr_columns = $this->nr_columns;
+         } //while args
+         if( $this->column_started )
+            $result .= $this->print_td_end();
+
+         if( $result )
+         {
+            $tr_attrs = $this->get_config(FEC_TR_ATTR);
+            $formstr .= '    <TR';
+            if( $rowclass )
+               $formstr .= $rowclass;
+            else if( $tr_attrs )
+               $formstr .=  ' '.$tr_attrs;
+            $formstr .= ">\n$result\n    </TR>\n";
+            $area_rows[$curr_area] .= $formstr;
          }
+      }
 
-         // build area-groups
-         if ( $has_layout )
-            $rootformstr .= $this->build_areas( $this->layout[FLAYOUT_GLOBAL], $area_rows );
-         else
-            $rootformstr .= implode( "\n", $area_rows );
+      // build area-groups
+      if( $has_layout )
+         $rootformstr .= $this->build_areas( $this->layout[FLAYOUT_GLOBAL], $area_rows );
+      else
+         $rootformstr .= implode( "\n", $area_rows );
 
-         $rootformstr .= "  </TABLE>\n";
+      $rootformstr .= "  </TABLE>\n";
 
-         if ( !$this->get_config(FEC_EXTERNAL_FORM) )
-            $rootformstr .= $this->print_end();
+      if( !$this->get_config(FEC_EXTERNAL_FORM) )
+         $rootformstr .= $this->print_end();
 
-         return $rootformstr;
+      return $rootformstr;
    } //create_form_string
 
    /*!
@@ -797,6 +799,7 @@ if(1){//new
                   . "</TABLE></TD>\n";
          if( $TRlevel )
             $areastr = "<TR>$areastr</TR>";
+//RdvlLog("Form.build_areas=[$areastr]");
       }
       else
       {
@@ -832,6 +835,7 @@ if(1){//new
             }
             if( $TRlevel )
                $areastr = "<TR>$areastr</TR>";
+//RdvlLog("Form.build_areas.H=[$areastr]");
          }
          else
          { // vertical grouping
@@ -859,12 +863,13 @@ if(1){//new
             }
             if( $TRlevel )
                $areastr = "<TR>$areastr</TR>";
+//RdvlLog("Form.build_areas.V=[$areastr]");
          }
       }
 
 }else{//old
 
-      if ( is_numeric($L) )
+      if( is_numeric($L) )
       {
          $table_attbs = $this->get_areaconf( $L, FAC_TABLE );
          $tdtable_attbs = $this->get_areaconf( $L, FAC_ENVTABLE );
@@ -875,14 +880,14 @@ if(1){//new
          return $areastr;
       }
 
-      if ( !is_array($L) )
+      if( !is_array($L) )
          error('assert', "Form.build_areas.bad-layout-type($L)");
-      if ( count($L) == 0 )
+      if( count($L) == 0 )
          error('assert', "Form.build_areas.empty-layout-array");
 
       $table_attbs_all = $this->get_areaconf( FAREA_ALL, FAC_TABLE );
 
-      if ( $L[0] == 'H' )
+      if( $L[0] == 'H' )
       { // horizontal grouping
          $areastr .= "<TR valign=top><TD><TABLE $table_attbs_all class=FormClass><TR valign=top>\n";
          for ($i=1; $i < count($L); $i++)
@@ -917,10 +922,10 @@ if(1){//new
     */
    function get_areaconf( $area, $context )
    {
-      if ( isset($this->areaconf[$area][$context]) )
+      if( isset($this->areaconf[$area][$context]) )
          return $this->areaconf[$area][$context]; // special first
-      if ( $area !== FAREA_ALL ) // all already checked
-         if ( isset($this->areaconf[FAREA_ALL][$context]) )
+      if( $area !== FAREA_ALL ) // all already checked
+         if( isset($this->areaconf[FAREA_ALL][$context]) )
             return $this->areaconf[FAREA_ALL][$context]; // all
       return '';
    }
@@ -930,73 +935,73 @@ if(1){//new
     * \internal
     */
    function create_string_func_description( &$result, $args )
-      {
-         $result .= $args[ 0 ] . ':';
-      }
+   {
+      $result .= $args[ 0 ] . ':';
+   }
 
    /*!
     * \brief Function for making own html string in the standard form
     * \internal
     */
    function create_string_func_ownhtml( &$result, $args )
-      {
-         $result .= $args[0];
-      }
+   {
+      $result .= $args[0];
+   }
 
    /*!
     * \brief Function for making header string in the standard form
     * \internal
     */
    function create_string_func_header( &$result, $args )
-      {
-         $result .= "<h3 class=Header>" . $args[0] . ":" . "</h3>";
-      }
+   {
+      $result .= "<h3 class=Header>" . $args[0] . ":" . "</h3>";
+   }
 
    /*!
     * \brief Function for making chapter string in the standard form
     * \internal
     */
    function create_string_func_chapter( &$result, $args )
-      {
-         $result .= "<b>" . $args[0] . ":</b>";
-      }
+   {
+      $result .= "<b>" . $args[0] . ":</b>";
+   }
 
    /*!
     * \brief Function for making text string in the standard form
     * \internal
     */
    function create_string_func_text( &$result, $args )
-      {
-         $result .= $args[0];
-      }
+   {
+      $result .= $args[0];
+   }
 
    /*!
     * \brief Function for making textinput string in the standard form
     * \internal
     */
    function create_string_func_textinput( &$result, $args )
-      {
-         $result .= $this->print_insert_text_input( $args[0], $args[1], $args[2], $args[3] );
-      }
+   {
+      $result .= $this->print_insert_text_input( $args[0], $args[1], $args[2], $args[3] );
+   }
 
    /*!
     * \brief Function for making password string in the standard form
     * \internal
     */
    function create_string_func_password( &$result, $args )
-      {
-         $result .= $this->print_insert_password_input( $args[0], $args[1], $args[2] );
-      }
+   {
+      $result .= $this->print_insert_password_input( $args[0], $args[1], $args[2] );
+   }
 
    /*!
     * \brief Function for making hidden string in the standard form
     * \internal
     */
    function create_string_func_hidden( &$result, $args )
-      {
-         //hiddens are delayed to the end of form
-         $this->add_hidden( $args[0], $args[1] );
-      }
+   {
+      //hiddens are delayed to the end of form
+      $this->add_hidden( $args[0], $args[1] );
+   }
 
    /*!
     * \brief Function for enabling/disabling fields in the standard form
@@ -1012,116 +1017,116 @@ if(1){//new
     * \internal
     */
    function create_string_func_textarea( &$result, $args )
-      {
-         $result .= $this->print_insert_textarea( $args[0], $args[1], $args[2], $args[3] );
-      }
+   {
+      $result .= $this->print_insert_textarea( $args[0], $args[1], $args[2], $args[3] );
+   }
 
    /*!
     * \brief Function for making selectbox string in the standard form
     * \internal
     */
    function create_string_func_selectbox( &$result, $args )
-      {
-         $result .= $this->print_insert_select_box( $args[0], $args[1], $args[2],
-                                                    $args[3], $args[4] );
-      }
+   {
+      $result .= $this->print_insert_select_box( $args[0], $args[1], $args[2],
+                                                 $args[3], $args[4] );
+   }
 
    /*!
     * \brief Function for making radiobuttons string in the standard form
     * \internal
     */
    function create_string_func_radiobuttons( &$result, $args )
-      {
-         $result .= $this->print_insert_radio_buttons( $args[0], $args[1], $args[2] );
-      }
+   {
+      $result .= $this->print_insert_radio_buttons( $args[0], $args[1], $args[2] );
+   }
 
    /*!
     * \brief Function for making checkbox string in the standard form
     * \internal
     */
    function create_string_func_checkbox( &$result, $args )
-      {
-         $result .= $this->print_insert_checkbox( $args[0], $args[1], $args[2], $args[3] );
-      }
+   {
+      $result .= $this->print_insert_checkbox( $args[0], $args[1], $args[2], $args[3] );
+   }
 
    /*!
     * \brief Function for making submitbutton string in the standard form
     * \internal
     */
    function create_string_func_submitbutton( &$result, $args )
-      {
-         $result .= $this->print_insert_submit_button( $args[0], $args[1] );
-      }
+   {
+      $result .= $this->print_insert_submit_button( $args[0], $args[1] );
+   }
 
    /*!
     * \brief Function for making submitbuttonx string in the standard form
     * \internal
     */
    function create_string_func_submitbuttonx( &$result, $args )
-      {
-         $result .= $this->print_insert_submit_buttonx( $args[0], $args[1], $args[2] );
-      }
+   {
+      $result .= $this->print_insert_submit_buttonx( $args[0], $args[1], $args[2] );
+   }
 
    /*!
     * \brief Function for making vertical space string in the standard form
     * \internal
     */
    function create_string_func_space( &$result, $args )
-      {
-         $result .= "<td colspan=" .$this->max_nr_columns . " height=20></td>";
-         //$result .= "&nbsp;"; //if SPACE SpanAllColumns==true
-      }
+   {
+      $result .= "<td colspan=" .$this->max_nr_columns . " height=20></td>";
+      //$result .= "&nbsp;"; //if SPACE SpanAllColumns==true
+   }
 
    /*!
     * \brief Function for making vertical separator string in the standard form
     * \internal
     */
    function create_string_func_hr( &$result, $args )
-      {
-         $result .= "<HR>";
-      }
+   {
+      $result .= "<HR>";
+   }
 
    /*!
     * \brief Function for making horizontal space string in the standard form
     * \internal
     */
    function create_string_func_tab( &$result, $args )
-      {
-         //equal: $result .= "<td></td>";
-      }
+   {
+      //equal: $result .= "<td></td>";
+   }
 
    /*!
     * \brief Function for making break line string in the standard form
     * \internal
     */
    function create_string_func_br( &$result, $args )
-      {
-         $result .= "<br>";
-      }
+   {
+      $result .= "<br>";
+   }
 
    /*!
     * \brief Function for ending td string in the standard form
     * \internal
     */
    function create_string_func_td( &$result, $args )
-      {
-      }
+   {
+   }
 
    /*!
     * \brief Function for making new td string in the standard form
     * \internal
     */
    function create_string_func_cell( &$result, $args )
-      {
-         $colspan = $args[0]>1 ? $args[0] : 1 ;
-         $attribs = trim($args[1]) ;
-         $result .= "<TD" .
-            ($attribs ? " $attribs" : '') .
-            ($colspan>1 ? " colspan=\"$colspan\"" : '') .
-            ">";
-         $this->column_started = true;
-         $this->nr_columns+= $colspan;
-      }
+   {
+      $colspan = $args[0]>1 ? $args[0] : 1 ;
+      $attribs = trim($args[1]) ;
+      $result .= "<TD" .
+         ($attribs ? " $attribs" : '') .
+         ($colspan>1 ? " colspan=\"$colspan\"" : '') .
+         ">";
+      $this->column_started = true;
+      $this->nr_columns+= $colspan;
+   }
 
    /*!
     * \brief Function for making new filter-element string in the standard form
@@ -1158,6 +1163,7 @@ if(1){//new
       assert( $method == FORM_GET or $method == FORM_POST );
       $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
+RdvlLog("Form.print_start($name)");
       return "\n<FORM id=\"{$name}Form\" name=\"$name\" class=\"$class\"" .
          " action=\"$action_page\" method=\"" . $pg_arr[$method] . "\">\n";
    }
@@ -1173,7 +1179,7 @@ if(1){//new
    function print_end()
    {
       $formstr = '';
-      if (!$this->hiddens_echoed)
+      if(!$this->hiddens_echoed)
          $formstr .= $this->get_hiddens_string();
 
       return $formstr."</FORM>\n";
@@ -1189,11 +1195,11 @@ if(1){//new
     * \param $colspan   How many columns this table should span.
     */
    function print_td_start( $alignment = 'left', $colspan = 1 )
-      {
-         return "      <TD" .
-            ($alignment ? " align=\"$alignment\"" : '') .
-            ($colspan > 1 ? " colspan=\"$colspan\"" : '') . ">";
-      }
+   {
+      return "      <TD" .
+         ($alignment ? " align=\"$alignment\"" : '') .
+         ($colspan > 1 ? " colspan=\"$colspan\"" : '') . ">";
+   }
 
    /*!
     * \brief Prints out end of a table cell.
@@ -1203,19 +1209,19 @@ if(1){//new
     * \param $nospace True if it shouldn't print out extra space.
     */
    function print_td_end( $nospace = false )
-      {
-         return ( $nospace ? "</TD>\n" : "      </TD>\n" );
-      }
+   {
+      return ( $nospace ? "</TD>\n" : "      </TD>\n" );
+   }
 
    /*!
     * \brief Prints a description.
     * \param $description The description.
     */
    function print_description( $description )
-      {
-         //no safe-text needed here because it come from translators' strings
-         return "      <TD align=\"right\">$description:</TD>\n";
-      }
+   {
+      //no safe-text needed here because it come from translators' strings
+      return "      <TD align=\"right\">$description:</TD>\n";
+   }
 
    /*!
     * \brief This will insert a text input box in a standard form.
@@ -1227,17 +1233,17 @@ if(1){//new
     * \param $initial_value Text that appears initially in the input box.
     */
    function print_insert_text_input( $name, $size, $maxlength, $initial_value )
-      {
-         if( $this->safe_text )
-            $initial_value = textarea_safe($initial_value);
+   {
+      if( $this->safe_text )
+         $initial_value = textarea_safe($initial_value);
 
-         $str = "<INPUT type=\"text\" name=\"$name\" value=\"$initial_value\""
-            . $this->get_input_attbs() . " size=\"$size\"";
-         if ( $maxlength >= 0 )
-            $str .= " maxlength=\"$maxlength\"";
-         $str .= ">";
-         return $str;
-      }
+      $str = "<INPUT type=\"text\" name=\"$name\" value=\"$initial_value\""
+         . $this->get_input_attbs() . " size=\"$size\"";
+      if( $maxlength >= 0 )
+         $str .= " maxlength=\"$maxlength\"";
+      $str .= ">";
+      return $str;
+   }
 
    /*!
     * \brief This will insert a text input box for entering passwords in a standard form.
@@ -1251,10 +1257,10 @@ if(1){//new
     * \param $maxlength How many characters it is allowed to enter.
     */
    function print_insert_password_input( $name, $size, $maxlength )
-      {
-         return "<INPUT type=\"password\" name=\"$name\"" .
-            $this->get_input_attbs() . " size=\"$size\" maxlength=\"$maxlength\">";
-      }
+   {
+      return "<INPUT type=\"password\" name=\"$name\"" .
+         $this->get_input_attbs() . " size=\"$size\" maxlength=\"$maxlength\">";
+   }
 
    /*!
     * \brief This will just insert a value to the form, invisible to the user.
@@ -1264,9 +1270,9 @@ if(1){//new
     * \param $value The value of the hidden variable.
     */
    function print_insert_hidden_input( $name, $value )
-      {
-         return "<INPUT type=\"hidden\" name=\"$name\" value=\"$value\">";
-      }
+   {
+      return "<INPUT type=\"hidden\" name=\"$name\" value=\"$value\">";
+   }
 
    /*!
     * \brief This will insert a text inputarea in a standard form.
@@ -1278,12 +1284,12 @@ if(1){//new
     * \param $initial_text Text that appears initially in the textarea.
     */
    function print_insert_textarea( $name, $columns, $rows, $initial_text )
-      {
-         if( $this->safe_text )
-            $initial_text = textarea_safe($initial_text);
-         return "<TEXTAREA name=\"$name\" cols=\"$columns\"" .
-            $this->get_input_attbs() . " rows=\"$rows\">$initial_text</TEXTAREA>";
-      }
+   {
+      if( $this->safe_text )
+         $initial_text = textarea_safe($initial_text);
+      return "<TEXTAREA name=\"$name\" cols=\"$columns\"" .
+         $this->get_input_attbs() . " rows=\"$rows\">$initial_text</TEXTAREA>";
+   }
 
    /*!
     * \brief This will insert a select box in a standard form.
@@ -1302,30 +1308,30 @@ if(1){//new
     *                     value.
     */
    function print_insert_select_box( $name, $size, $value_array, $selected, $multiple )
-      {
-         $result = "  <SELECT name=\"$name\" size=\"$size\" ";
-         if( $multiple )
-            $result .= "multiple";
-         $result .= $this->get_input_attbs() . ">\n";
+   {
+      $result = "  <SELECT name=\"$name\" size=\"$size\" ";
+      if( $multiple )
+         $result .= "multiple";
+      $result .= $this->get_input_attbs() . ">\n";
 
-         foreach( $value_array as $value => $info )
-            {
-               $result .= "    <OPTION value=\"$value\"";
-               if( (! $multiple and $value == $selected) or
-                   ($multiple and array_key_exists($value,$selected)) )
-                  $result .= " selected";
+      foreach( $value_array as $value => $info )
+         {
+            $result .= "    <OPTION value=\"$value\"";
+            if( (! $multiple and $value == $selected) or
+                ($multiple and array_key_exists($value,$selected)) )
+               $result .= " selected";
 
-               // Filter out HTML code
-               $info = eregi_replace("<BR>"," ",$info); //allow 2 lines long headers
-               $info = str_replace("<", "&lt;", $info);
-               $info = str_replace(">", "&gt;", $info);
+            // Filter out HTML code
+            $info = eregi_replace("<BR>"," ",$info); //allow 2 lines long headers
+            $info = str_replace("<", "&lt;", $info);
+            $info = str_replace(">", "&gt;", $info);
 
-               $result .= ">".$info."</OPTION>\n";
-            }
-         $result .= "  </SELECT>\n";
+            $result .= ">".$info."</OPTION>\n";
+         }
+      $result .= "  </SELECT>\n";
 
-         return $result;
-      }
+      return $result;
+   }
 
    /*!
     * \brief This will insert some connected radio buttons in a standard form.
@@ -1341,19 +1347,19 @@ if(1){//new
     *                     of the selected value.
     */
    function print_insert_radio_buttons( $name, $value_array, $selected )
-      {
-         $result = '';
-         foreach( $value_array as $value => $info )
-            {
-               $result .= "\n<INPUT type=\"radio\" name=\"$name\" value=\"$value\"";
-               if($value == $selected)
-                  $result .= " checked";
+   {
+      $result = '';
+      foreach( $value_array as $value => $info )
+         {
+            $result .= "\n<INPUT type=\"radio\" name=\"$name\" value=\"$value\"";
+            if($value == $selected)
+               $result .= " checked";
 
-               $result .= $this->get_input_attbs() . "> $info";
-            }
+            $result .= $this->get_input_attbs() . "> $info";
+         }
 
-         return $result;
-      }
+      return $result;
+   }
 
    /*!
     * \brief This will insert some checkboxes.
@@ -1365,15 +1371,15 @@ if(1){//new
     * \param $selected    True if checked at beginning.
     */
    function print_insert_checkbox( $name, $value, $description, $selected )
-      {
-         $result = "<INPUT type=\"checkbox\" name=\"$name\" value=\"$value\"";
-         if($selected)
-            $result .= " checked";
+   {
+      $result = "<INPUT type=\"checkbox\" name=\"$name\" value=\"$value\"";
+      if($selected)
+         $result .= " checked";
 
-         $result .= $this->get_input_attbs() . "> $description";
+      $result .= $this->get_input_attbs() . "> $description";
 
-         return $result;
-      }
+      return $result;
+   }
 
    /*!
     * \brief This will insert a submit button in a standard form.
@@ -1438,7 +1444,7 @@ if(1){//new
    function print_insert_filter( $filters, $fid, $attr = array() )
    {
       $filter = $filters->get_filter($fid);
-      if ( isset($filter) )
+      if( isset($filter) )
          return $filter->get_input_element( $filters->Prefix, $attr );
       else
          return '';
@@ -1456,11 +1462,11 @@ if(1){//new
    function print_insert_filtererror( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = true )
    {
       $filter = $filters->get_filter($fid);
-      if ( !isset($filter) or !$filter->has_error() )
+      if( !isset($filter) or !$filter->has_error() )
          return '';
 
       $syntax = $filter->get_syntax_description();
-      if ( $with_syntax and $syntax != '' )
+      if( $with_syntax and $syntax != '' )
          $syntax = "; $syntax";
       return $prefix . T_('Error#filter') . ': '
          . make_html_safe( $filter->errormsg() . $syntax ) . $suffix;
@@ -1516,7 +1522,7 @@ if(1){//new
     */
    function attach_table( &$table)
    {
-      //if (isset($table))
+      //if(isset($table))
       array_push($this->attached, $table);
    }
 
