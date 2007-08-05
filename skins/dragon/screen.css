@@ -72,10 +72,12 @@ pre {
 
 /*, input[type="new"], input[type="_blank"]*/
 input {
+   vertical-align: middle;
+   margin-right: 4px;
+/*
    margin: 0px 2px;
    padding: 0px;
 /*   height: 2em; /* */
-   vertical-align: middle;
 }
 
 ul {
@@ -624,7 +626,12 @@ table.Table tr.Filter {
 }
 
 table.Table tr.Filter td {
-   vertical-align: bottom;
+   vertical-align: middle;
+}
+
+table.Table tr.Filter input {
+   vertical-align: middle;
+   margin-right: 0px;
 }
 
 table.Table tr.Filter td.Error {
