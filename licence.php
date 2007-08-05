@@ -22,14 +22,15 @@ $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
 
-connect2mysql();
+   connect2mysql();
 
-$logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-start_page(T_('General Public Licence'), true, $logged_in, $player_row );
+   start_page(T_('General Public Licence'), true, $logged_in, $player_row );
 
-echo "<table align=center><tr><td>\n";
-echo "<pre>\n";
+   section( 'Docs');
+
+   echo "<pre>\n";
 
    //readfile("COPYING");
    $file= implode('', file('COPYING'));
@@ -37,8 +38,7 @@ echo "<pre>\n";
    $file= @htmlentities($file, ENT_QUOTES);
    echo $file;
 
-echo "</pre>\n";
-echo "</td></tr></table>\n";
+   echo "</pre>\n";
 
-end_page();
+   end_page();
 ?>

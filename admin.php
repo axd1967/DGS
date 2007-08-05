@@ -37,8 +37,7 @@ require_once( "include/form_functions.php" );
 
    start_page(T_('Admin'), true, $logged_in, $player_row);
 
-   echo "<table><tr><td>\n";
-   echo "<h3 class=Header>" . T_('Administration') . "</h3>\n";
+   section( 'Admin', T_('Administration'));
 
    add_link_page_link('admin_password.php', T_('New password'),
                      '', $admin_level & ADMIN_PASSWORD);
@@ -52,7 +51,7 @@ require_once( "include/form_functions.php" );
                      '', $admin_level & ADMIN_ADMINS);
 //   add_link_page_link('admin_requests.php', T_('Handle user requests'), '', false);
 
-   echo "<br>&nbsp;\n</td></tr></table>\n";
+   add_link_page_link();
 
    end_page();
 }

@@ -193,10 +193,25 @@ a.userblack {
 }
 */
 
+table.Section { /* centered_container */
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px auto;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   vertical-align: top;
+}
+
+
 h3.Header {
    color: #800000;
    text-align: center;
-   padding: 1em 2px 2px 2px;
+   padding: 2px;
+   margin: 1em 0px;
 }
 
 .InlineHeader {
@@ -1123,6 +1138,128 @@ table#gameFilter {
 
 table#gameStats th.Rubric {
    text-align: right;
+}
+
+
+/* ------------------------- */
+/* docs pages */
+/* ------------------------- */
+
+dl.DocLink {
+/*
+   padding: 0px auto;
+   clear: none;
+   margin: 0px auto;
+   table-layout: auto;
+   text-align: center;
+   -moz-box-align: strech;
+   -moz-binding: none;
+   -moz-box-sizing: border-box;
+   display: table-row-group;
+   display: table;
+   display: inherit;
+*/
+   margin: 0px auto;
+   border: 0px solid lime;
+}
+
+dl.DocLink dd {
+   text-align: left;
+   margin: 0px auto 1em auto;
+}
+
+dl.DocLink a {
+   color: blue;
+}
+
+dl.DocLink span {
+   color: gray;
+}
+
+body.Links table#pageLayout td#pageBody .Section {
+   width: 85%;
+}
+
+body.Links table#pageLayout td#pageBody .Section h3.Header {
+   text-align: left;
+}
+
+body.People table#pageLayout td#pageBody .Section {
+   width: 90%;
+}
+
+body.People table#pageLayout td#pageBody .Section h3.Header {
+   text-align: left;
+}
+
+body.People table.People {
+   width: 100%;
+   margin: 0px 0px 0px 0px;
+}
+
+body.People table.People td.Rubric {
+   text-align: left;
+   text-decoration: none;
+   font-weight: normal;
+   color: black;
+   width: 40%;
+}
+
+body.People table.People td.People {
+   text-align: left;
+   font-weight: bold;
+   color: black;
+}
+
+body.People table.People td.People a {
+   text-decoration: underline;
+   color: black;
+}
+
+body.People table.People span {
+   text-align: left;
+   color: green;
+}
+
+body.SiteMap table#pageLayout td#pageBody .Section {
+   border: 0px solid red;
+   width: 85%;
+   text-align: left;
+}
+
+body.SiteMap table.SiteMap {
+   border: 0px solid red;
+   margin: 0px auto 1em 0px;
+}
+
+body.SiteMap table.SiteMap td {
+   border: 0px solid red;
+   text-align: left;
+   padding: 0px 4px;
+   color: black;
+}
+
+body.SiteMap table.SiteMap td a {
+   text-decoration: underline;
+   color: #0C41C9;
+}
+
+body.SiteMap table.SiteMap td.Indent {
+   width: 50px; /* img width time 2 */
+   text-align: right;
+   padding: 0px;
+}
+
+body.SiteMap table.SiteMap td.Indent img {
+   margin: 0px;
+   width: 25px;
+   height: 25px;
+}
+
+body.Intro table#pageLayout td#pageBody .Section {
+   border: 0px solid red;
+   width: 85%;
+   text-align: left;
 }
 
 

@@ -25,6 +25,20 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-06 rodival
+
+   * include/std_functions.php (section, start_html, end_page,
+     add_link_page_link):
+   - introduced the section() function which allow to split the page
+     in distinct sections
+   - introduced the $ThePage['class'] to temporary solve some CSS problems
+   - adjusted add_link_page_link() to fully handle the structure
+
+   * skins/dragon/screen.css,
+     docs.php, admin.php, links.php, people.php, site_map.php,
+     introduction.php, todo.php, news.php, licence.php, install.php:
+   - full CSS of the Docs pages
+
 2007-08-05 rodival
 
    * skins/dragon/screen.css,

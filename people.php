@@ -22,26 +22,44 @@ $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
 
-$cols = 2;
-function add_contributor( $text, $uref='', $name=false, $handle=false)
+function add_contributor( $text=false, $uref='', $name=false, $handle=false, $extra='')
 {
-   echo "<tr><td>$text</td>\n";
-   echo "<td><b>" .
-      user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, 'black', $uref, $name, $handle) .
-      "</b></td></tr>\n";
+   static $started = false;
+
+   if( $text === false )
+   {
+      if( $started )
+         echo "</table>\n";
+      $started = false;
+      return 0;
+   }
+
+   if( !$started )
+   {
+      echo "<table class=People>\n";
+      $started = true;
+   }
+
+   echo "<tr><td class=Rubric>$text</td>\n"
+      . "<td class=People>"
+      . user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, '', $uref, $name, $handle)
+      . "</td><td>"
+      . ( $extra ? "<span>[$extra]</span>" : '' )
+      . "</td></tr>\n";
 }
+
 
 {
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
 
-   start_page(T_("People"), true, $logged_in, $player_row );
+   $ThePage['class']= 'People'; //temporary solution to CSS problem
+   start_page(T_('People'), true, $logged_in, $player_row );
 
-   echo "<table align=center><tr><td colspan=$cols>\n";
-   echo "<h3 class=Header>" . T_('Contributors to Dragon') . "</h3>\n";
-   echo "</td></tr>\n";
 
+   //---------
+   section( 'Contributors', T_('Contributors to Dragon'));
 
    add_contributor( T_("Current maintainer and founder of Dragon")
                      , 2, 'Erik Ouchterlony' );
@@ -58,11 +76,10 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
       $first = '';
    }
 
-   //---------
+   add_contributor();
 
-   echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
-   echo "<h3 class=Header>" . T_("FAQ") . "</h3>\n";
-   echo "</td></tr>\n";
+   //---------
+   section( 'FAQ', T_('FAQ'));
 
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_ADMINS);
    if( $extra_info )
@@ -103,10 +120,9 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
    {
       $row = $FAQ_list[$FAQmainID];
       add_contributor( T_("FAQ editor"),
-                     $row['ID'],
+                     $row['ID'], $row['Name'], $row['Handle'],
          ( $extra_info && $row['LastUpdate']
-            ? '['.date($date_fmt2, $row['LastUpdate']).'] ' : '') .
-                     $row['Name'], $row['Handle']
+            ? date($date_fmt2, $row['LastUpdate']) : '')
                      );
       $FAQexclude[] = $FAQmain;
    } else $FAQmain='';
@@ -117,19 +133,17 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
       if( in_array( $row['Handle'], $FAQexclude) )
          continue;
       add_contributor( $first,
-                     $row['ID'],
+                     $row['ID'], $row['Name'], $row['Handle'],
          ( $extra_info && $row['LastUpdate']
-            ? '['.date($date_fmt2, $row['LastUpdate']).'] ' : '') .
-                     $row['Name'], $row['Handle']
+            ? date($date_fmt2, $row['LastUpdate']) : '')
                      );
       $first = '';
    }
 
-   //---------
+   add_contributor();
 
-   echo "<tr><td colspan=$cols><p>&nbsp;</p>\n";
-   echo "<h3 class=Header>" . T_('Current translators') . "</h3>\n";
-   echo "</td></tr>\n";
+   //---------
+   section( 'Translators', T_('Current translators'));
 
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
@@ -182,17 +196,16 @@ function add_contributor( $text, $uref='', $name=false, $handle=false)
       foreach( $translators as $row )
       {
          add_contributor( $first,
-                        $row['ID'],
+                        $row['ID'], $row['Name'], $row['Handle'],
             ( $extra_info && $row['LastUpdate']
-               ? '['.date($date_fmt2, $row['LastUpdate']).'] ' : '') .
-                        $row['Name'], $row['Handle']
+               ? date($date_fmt2, $row['LastUpdate']) : '')
                         );
          $first = '';
       }
    }
 
-   echo "</table>\n";
-   echo "<br>&nbsp;\n";
+   add_contributor();
+
 
    end_page();
 }

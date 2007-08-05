@@ -23,133 +23,142 @@ $TranslateGroups[] = "Docs";
 require_once( "include/std_functions.php" );
 
 
-function item($text,$link,$working, $level,$last=false)
+function item($text, $link='', $working=true, $last=false)
 {
-   global $f0, $f1, $f2, $f3;
+   global $item_nbcols, $item_level;
+   static $f = array();
 
-   $size=25;
+   $size = 25; //see CSS
+   $level = min( $item_level, $item_nbcols-1);
 
    echo "<tr>";
-
-   for($i=0; $i<$level; $i++)
+   for( $i=1; $i<$level; $i++ )
    {
-      echo "<td width=50 align=right>" .
-         ( ${"f$i"} ? "<img alt=\"&nbsp;|&nbsp;\" src=\"$size/du.gif\">" : "" ) . "</td>";
+      if( @$f[$i] )
+         echo "<td class=Indent>&nbsp;&nbsp;&nbsp;</td>";
+      else
+         echo "<td class=Indent><img alt=\"&nbsp;|&nbsp;\" src=\"$size/du.gif\"></td>";
+   }
+   if( $level > 0 )
+   {
+      $f[$level] = $last;
+      if( $last )
+         echo "<td class=Indent><img alt=\"&nbsp;`-\" src=\"$size/dl.gif\"></td>";
+      else
+         echo "<td class=Indent><img alt=\"&nbsp;|-\" src=\"$size/el.gif\"></td>";
    }
 
-   echo "<td width=50 align=right><img alt=\"" . ( $last ? "&nbsp;`-" : "&nbsp;|-" ) .
-      "\" src=\"$size/" . ( $last ? "dl" : "el" ) . ".gif\"></td>" .
-      "<td colspan=" . (4-$level) . ">&nbsp;";
-
-   if( $working )
-      echo "<a href=\"$link\"><font color=\"#0C41C9\">$text</font></a>";
+   $level = $item_nbcols-$level;
+   if( $level > 1 )
+      echo "<td colspan=$level>";
    else
-      echo "<font color=\"black\">$text</font>";
-
+      echo "<td>";
+   if( $working && $link )
+      echo "<a href=\"$link\">$text</a>";
+   else
+      echo "<span class=Inactive>$text</span>";
    echo "</td></tr>\n";
-
-   ${"f$level"} = !$last;
 }
+
 
 {
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
 
+   $ThePage['class']= 'SiteMap'; //temporary solution to CSS problem
    start_page(T_('Site map'), true, $logged_in, $player_row );
 
    if( !$logged_in )
       error("not_logged_in");
 
-   $f0=$f1=$f2=$f3=true;
    $id = $player_row["ID"];
 
-   echo "<table width=\"80%\" align=\"center\"><tr><td>\n";
-   echo "<h3 class=Header>" . T_('Site map') . "</h3>";
-   echo "<table cellspacing=0 cellpadding=0 border=0><tr><td colspan=3>" .
-      "<a href=\"index.php\"><font color=0C41C9>" . T_('Welcome page') .
-      "</font></a></td></tr>\n";
+   section( 'SiteMap', T_('Site map'));
 
-   {
-      item(T_('Status'), "status.php", true, 0);
-      {
-         item(T_('My user info'), "userinfo.php?uid=$id", true, 1);
-         {
-            item(T_('Edit profile'), "edit_profile.php", true, 2);
-            item(T_('Edit biographical info'), "edit_bio.php", true, 2);
-            item(T_('Change password'), "edit_password.php", true, 2);
-            item(T_('Edit vacation'), "edit_vacation.php", true, 2, true);
-         }
-         item(T_('Show running games'), "show_games.php?uid=$id", true, 1);
-         item(T_('Show finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true, 1);
-         item(T_('Show observed games'), "show_games.php?uid=$id".URI_AMP."observe=1", true, 1);
+   $item_nbcols = 5;
+   $item_level = 0;
+   echo "<table class=SiteMap>";
 
-         item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
-         item(T_('Game'), "game.php", false, 1, false);
-         item(T_('SGF of game'), "sgf.php", false, 1, true);
-      }
+   item(T_('Welcome page'), "index.php", true);
+   { $item_level++;
+      item(T_('Status'), "status.php", true);
+      { $item_level++;
+         item(T_('My user info'), "userinfo.php?uid=$id", true);
+         { $item_level++;
+            item(T_('Edit profile'), "edit_profile.php", true);
+            item(T_('Edit biographical info'), "edit_bio.php", true);
+            item(T_('Change password'), "edit_password.php", true);
+            item(T_('Edit vacation'), "edit_vacation.php", true, true);
+         } $item_level--;
+         item(T_('Show running games'), "show_games.php?uid=$id", true);
+         item(T_('Show finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
+         item(T_('Show observed games'), "show_games.php?uid=$id".URI_AMP."observe=1", true);
 
-      item(T_('Messages'), "list_messages.php", false, 0);
-      {
-         item(T_('Send a message'), "message.php?mode=NewMessage", true, 1);
-         item(T_('Invite'), "message.php?mode=Invite", true, 1);
-         item(T_('Show message'), "message.php?mode=ShowMessage", false, 1);
-         item(T_('Message list'), "list_messages.php", true, 1, true);
-         {
-            item(T_('Search messages'), "search_messages.php", true, 2);
-            item(T_('Edit folders'), "edit_folders.php", true, 2, true);
-         }
-      }
+         item(T_('Show message'), "message.php?mode=ShowMessage", false);
+         item(T_('Game'), "game.php", false);
+         item(T_('SGF of game'), "sgf.php", false, true);
+      } $item_level--;
 
-      item(T_('Waiting room'), "waiting_room.php", true, 0);
+      item(T_('Messages'), "list_messages.php", false);
+      { $item_level++;
+         item(T_('Send a message'), "message.php?mode=NewMessage", true);
+         item(T_('Invite'), "message.php?mode=Invite", true);
+         item(T_('Show message'), "message.php?mode=ShowMessage", false);
+         item(T_('Message list'), "list_messages.php", true, true);
+         { $item_level++;
+            item(T_('Search messages'), "search_messages.php", true);
+            item(T_('Edit folders'), "edit_folders.php", true, true);
+         } $item_level--;
+      } $item_level--;
 
-      item(T_('Users'), "users.php", true, 0);
-      {
-         item(T_('User info'), "userinfo.php", false, 1, false);
-         {
-            item(T_('Show opponents'), "opponents.php", false, 2, true);
-         }
-         item(T_('Show my opponents'), "opponents.php", true, 1, true);
-      }
+      item(T_('Waiting room'), "waiting_room.php", true);
 
-      item(T_('Forum'), "forum/index.php", true, 0);
-      {
-         item(T_('Thread list'), "forum/list.php", false, 1);
-         {
-            item(T_('Read forum'), "forum/read.php", false, 2);
-            item(T_('New topic'), "forum/post.php", false, 2, true);
-         }
+      item(T_('Users'), "users.php", true);
+      { $item_level++;
+         item(T_('User info'), "userinfo.php", false);
+         { $item_level++;
+            item(T_('Show opponents'), "opponents.php", false, true);
+         } $item_level--;
+         item(T_('Show my opponents'), "opponents.php", true, true);
+      } $item_level--;
 
-         item(T_('Search forums'), "forum/search.php", true, 1, true);
-      }
+      item(T_('Forum'), "forum/index.php", true);
+      { $item_level++;
+         item(T_('Thread list'), "forum/list.php", false);
+         { $item_level++;
+            item(T_('Read forum'), "forum/read.php", false);
+            item(T_('New topic'), "forum/post.php", false, true);
+         } $item_level--;
 
-      item(T_('Games'), "show_games.php?uid=all".URI_AMP."finished=1", true, 0);
-      {
-         item(T_('Show all running games'), "show_games.php?uid=all", true, 1);
-         item(T_('Show all finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true, 1);
-         item(T_('Show my running games'), "show_games.php?uid=$id", true, 1);
-         item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true, 1);
-         item(T_('Show my observed games'), "show_games.php?observe=1", true, 1, true);
-      }
+         item(T_('Search forums'), "forum/search.php", true, true);
+      } $item_level--;
 
-      item(T_('Translate'), "translate.php", true, 0);
+      item(T_('Games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
+      { $item_level++;
+         item(T_('Show all running games'), "show_games.php?uid=all", true);
+         item(T_('Show all finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
+         item(T_('Show my running games'), "show_games.php?uid=$id", true);
+         item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
+         item(T_('Show my observed games'), "show_games.php?observe=1", true, true);
+      } $item_level--;
 
-      item(T_('Documentation'), "docs.php", true, 0, true);
-      {
-         item(T_('Introduction'), "introduction.php", true, 1);
-         item(T_('Site map'), "site_map.php", true, 1);
-         item(T_('FAQ'), "faq.php", true, 1);
-         item(T_('Links'), "links.php", true, 1);
-         item(T_('Todo list'), "todo.php", true, 1);
-         item(T_('Licence'), "licence.php", true, 1, true);
-      }
-   }
+      item(T_('Translate'), "translate.php", true);
 
+      item(T_('Documentation'), "docs.php", true, true);
+      { $item_level++;
+         item(T_('Introduction'), "introduction.php", true);
+         item(T_('Site map'), "site_map.php", true);
+         item(T_('FAQ'), "faq.php", true);
+         item(T_('Links'), "links.php", true);
+         item(T_('Todo list'), "todo.php", true);
+         item(T_('Licence'), "licence.php", true, true);
+      } $item_level--;
+   } $item_level--;
+
+   echo "</table>\n";
+   echo T_('The black links require an argument to work, so they are not usable.');
+
+   end_page();
 }
-
-echo "</table>\n<p></p>";
-echo T_('The black links require an argument to work, so they are not usable.') . "\n";
-echo "</td></tr></table>\n";
-
-end_page();
 ?>

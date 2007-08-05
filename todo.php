@@ -18,26 +18,26 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-//$TranslateGroups[] = "Docs";
+$TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
 
-connect2mysql();
+   connect2mysql();
 
-$logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-start_page("To do", true, $logged_in, $player_row );
+   start_page('To do', true, $logged_in, $player_row );
 
-echo "<table align=center><tr><td>\n";
-echo "<pre>\n";
+   section( 'Todo', T_('To do list'));
+
+   echo "<pre>\n";
 
    //readfile("TODO");
    $file= implode('', file('TODO'));
    $file= @htmlentities($file, ENT_QUOTES);
    echo $file;
 
-echo "</pre>\n";
-echo "</td></tr></table>\n";
+   echo "</pre>\n";
 
-end_page();
+   end_page();
 ?>

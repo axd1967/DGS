@@ -23,35 +23,35 @@ $TranslateGroups[] = "Docs";
 require_once( "include/std_functions.php" );
 
 {
-  connect2mysql();
+   connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  start_page(T_("Docs"), true, $logged_in, $player_row );
+   $ThePage['class']= 'Docs'; //temporary solution to CSS problem
+   start_page(T_('Docs'), true, $logged_in, $player_row );
 
-  echo "<table align=center><tr><td>\n";
-  echo "<h3 class=Header>" . T_('Documentation') . "</h3>\n";
+   section( 'Docs', T_('Documentation'));
 
-  add_link_page_link('introduction.php', T_('Introduction to Dragon'));
-  add_link_page_link('site_map.php', T_('Site map'));
-  add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
-  add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
-  add_link_page_link("links.php", T_('Links'));
-  add_link_page_link("news.php", T_('NEWS'), T_('Release notes'));
-  add_link_page_link("todo.php", T_('To do list'), T_('plans for future improvements'));
-  add_link_page_link("install.php", T_('Installation instructions'),
+   add_link_page_link('introduction.php', T_('Introduction to Dragon'));
+   add_link_page_link('site_map.php', T_('Site map'));
+   add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
+   add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
+   add_link_page_link("links.php", T_('Links'));
+   add_link_page_link("news.php", T_('News'), T_('Release notes'));
+   add_link_page_link("todo.php", T_('To do list'), T_('plans for future improvements'));
+   add_link_page_link("install.php", T_('Installation instructions'),
                      T_('if you want your own dragon'));
-  add_link_page_link("snapshot", T_('Download dragon sources'),
+   add_link_page_link("snapshot", T_('Download dragon sources'),
                      T_('daily snapshot of the cvs'));
-  add_link_page_link("http://dragongoserver.cvs.sourceforge.net/dragongoserver/DragonGoServer/",
+   add_link_page_link("http://dragongoserver.cvs.sourceforge.net/dragongoserver/DragonGoServer/",
                      T_('Browse Dragon source code'));
-  add_link_page_link("http://sourceforge.net/projects/dragongoserver/",
+   add_link_page_link("http://sourceforge.net/projects/dragongoserver/",
                      T_('Dragon project page at sourceforge'));
-  add_link_page_link("licence.php", T_('Licence'), 'GPL');
+   add_link_page_link("licence.php", T_('Licence'), 'GPL');
 
-  echo "<br>&nbsp;\n</td></tr></table>\n";
+   add_link_page_link();
 
-  end_page();
+   end_page();
 }
 
 ?>

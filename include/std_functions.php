@@ -415,7 +415,11 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    if( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
 
-   echo "\n</HEAD>\n<BODY id=\"$FRIENDLY_SHORT_NAME\">\n";
+   global $ThePage;
+   $tmp = @$ThePage['class']; //may be multiple, i.e. 'Games Running'
+   if( $tmp )
+      $tmp = ' class='.attb_quote($tmp);
+   echo "\n</HEAD>\n<BODY id=\"$FRIENDLY_SHORT_NAME\"$tmp>\n";
 }
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,
@@ -527,7 +531,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( $is_down )
    {
-      echo $is_down_message . '<p></p>';
+      echo $is_down_message;
       end_page();
       exit;
    }
@@ -537,9 +541,9 @@ function end_page( $menu_array=NULL )
 {
    global $page_microtime, $player_row, $base_path, $printable;
 
-   //echo "\n\n&nbsp;<br>";
+   section(); //close if any
 
-   echo "\n  </td>";
+   echo "\n  </td>"; //close the pageBody
 
    if( $menu_array && !$printable )
    {
@@ -2188,17 +2192,49 @@ function write_to_file( $filename, $string_to_write )
   @chmod( $filename, 0666 );
 }
 
-function add_link_page_link($link, $linkdesc, $extra = '', $active = true)
+function section( $id='', $header='')
 {
-   if( $active )
-      echo "<p><a class=blue href=\"$link\">$linkdesc</a>";
-   else
-      echo "<p class=gray>$linkdesc";
+   static $section = '';
+//the container must be a centered one which cab be left or right aligned
+   if( $section )
+   { //section opened, close it
+      echo "</td></tr></table>\n";
+      $section = '';
+   }
+   if( $id )
+   { //section request, open it
+      $section = attb_quote('sect'.$id);
+      echo "\n<table id=$section class=Section><tr><td>";
+      if( $header )
+         echo "<h3 class=Header>$header</h3>";
+   }
+}
 
+function add_link_page_link( $link=false, $linkdesc='', $extra='', $active=true)
+{
+   static $started = false;
+
+   if( $link === false )
+   {
+      if( $started )
+         echo "</dl>\n";
+      $started = false;
+      return 0;
+   }
+
+   if( !$started )
+   {
+      echo "<dl class=DocLink>\n";
+      $started = true;
+   }
+
+   if( $active )
+      echo "<dd><a href=\"$link\">$linkdesc</a>";
+   else
+      echo "<dd class=Inactive><span>$linkdesc</span>";
    if( !empty($extra) )
       echo " --- $extra";
-
-   echo "</p>\n";
+   echo "</dd>\n";
 }
 
 function activity_string( $act_lvl)
@@ -2634,7 +2670,7 @@ function attb_merge( $attb1, $attb2, $class_sep='')
    {
       if( is_string($class_sep) )
          $attb2['class'] = $attb1['class'].$class_sep.$attb2['class'];
-         //as other CSS items, the priority is for the last.
+      //as other CSS items, the priority is for the last in the CSS file.
       unset($attb1['class']);
    }
    return array_merge($attb1, $attb2);
