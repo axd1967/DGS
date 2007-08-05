@@ -27,7 +27,8 @@ Changelog
 
 2007-08-05 rodival
 
-   * skins/dragon/screen.css, include/table_columns.php (make_table_filter):
+   * skins/dragon/screen.css,
+     include/table_columns.php (make_table_filter):
    - adjusted some CSS of filters
 
    * include/std_functions.php:
@@ -51,6 +52,11 @@ Changelog
    - rejection of messages or invitations to protected users
    - renaming some column and row headers from 'Color' to 'Type' when they
      contain datas like 'Double game', 'Proper handicap' or 'Even game'.
+
+   * skins/dragon/screen.css,
+     code_examples/form_example2.php,
+     opponents.php:
+   - CSS and layout bug fixes
 
 2007-08-04 juga
 

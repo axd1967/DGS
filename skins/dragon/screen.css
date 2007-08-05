@@ -1,7 +1,7 @@
 
-/* ------------------------- */
+/* ************************* */
 /* global styles */
-/* ------------------------- */
+/* ************************* */
 
 /* ------------------------- */
 /* same initial states for any browsers */
@@ -70,6 +70,7 @@ pre {
    text-align: left;
 }
 
+/*, input[type="new"], input[type="_blank"]*/
 input {
    margin: 0px 2px;
    padding: 0px;
@@ -80,7 +81,7 @@ input {
 ul {
 /* IE,Avant: the <UL> have no top marge */
 /* FF;Opera: the <UL> have top marge (close to 1em) */
-/* IE,Avant: remove bullets
+/* IE,Avant: those remove the bullets:
    margin: 1em 0px 0px 0px;
    margin: 1em auto auto auto;
    margin-left: auto;
@@ -140,12 +141,12 @@ a[target] /*, a[target="new"], a[target="_blank"]*/
    color: blue;
 }
 
-.red {
-   color: red;
-}
-
 .green {
    color: green;
+}
+
+.red {
+   color: red;
 }
 
 .bold {
@@ -161,6 +162,14 @@ a[target] /*, a[target="new"], a[target="_blank"]*/
    text-align: center;
 }
 
+.left {
+   text-align: left;
+}
+
+.right {
+   text-align: right;
+}
+
 .nowrap
 {
    white-space: nowrap;
@@ -170,6 +179,7 @@ a[target] /*, a[target="new"], a[target="_blank"]*/
    color: red;
 }
 
+/*
 a.rating {
    color: black;
 }
@@ -179,7 +189,7 @@ a.sendblack,
 a.userblack {
    color: black;
 }
-
+*/
 
 h3.Header {
    color: #800000;
@@ -248,9 +258,11 @@ img.MinWidth {
 }
 
 
-/* ------------------------- */
-/* main page layout */
-/* ------------------------- */
+
+/* ************************* */
+/* main page skeleton */
+/* ************************* */
+
 
 body {
    background: #F7F5E3;
@@ -537,89 +549,9 @@ table.Links a {
 
 
 
-
-/* ------------------------- */
-/* messages and folders features */
-/* ------------------------- */
-
-table.MessageInfos {
-   table-layout: auto;
-   border: 0px solid red;
-   border-spacing: 0px;
-   border-collapse: collapse;
-   margin: 0px auto;
-   width: auto; /* 100% */
-   max-width: none;
-   overflow: visible;
-   empty-cells: show;
-}
-
-table.MessageInfos td {
-   color: black;
-   text-align: left;
-   padding: 2px;
-}
-
-table.MessageInfos td.Rubric {
-   color: black;
-   font-weight: bold;
-}
-
-table.MessageBox {
-   border: 2px outset #F7F5E3; /* page background-color */
-   table-layout: auto;
-   border-spacing: 2px;
-   border-collapse: separate; /* collapse separate */
-   margin: 0px auto;
-   width: 30em; /* 475px; */
-   max-width: none;
-   overflow: visible;
-   empty-cells: hide;
-   text-align: center;
-}
-
-table.MessageBox td {
-   border: 1px inset #F7F5E3; /* page background-color */
-   margin: 0px;
-   padding: 4px;
-   text-align: left;
-}
-
-div.MessageFlow {
-   margin: 0px auto;
-   vertical-align: top;
-   text-align: center;
-}
-
-table.FoldersTabs {
-   table-layout: auto;
-   border: 0px solid red;
-   border-spacing: 4px;
-   border-collapse: separate; /* separate collapse */
-   margin: 0px auto 0px 0px;
-   width: auto;
-   max-width: none;
-   overflow: visible;
-   empty-cells: hide;
-}
-
-table.FoldersTabs td {
-   border: 4px solid #F7F5E3; /* page background-color */ /* or 'transparent' ? */
-   padding: 2px 6px;
-   text-align: center;
-}
-
-table.FoldersTabs td.Selected {
-   border: 4px solid #6666ff;
-}
-
-table.FoldersTabs td.Rubric {
-   /* background: none; /* or 'transparent' ? */
-   color: black;
-   font-weight: bold;
-   text-align: right;
-   padding: 2px 6px 2px 2px;
-}
+/* ************************* */
+/* general objects specifications */
+/* ************************* */
 
 
 /* ------------------------- */
@@ -752,7 +684,7 @@ table.Table tr.Row2 td.Warning {
 
 
 /*
- special cells of various tables
+ special cells of various list-tables
 */
 
 table.Table td.Mark {
@@ -867,47 +799,6 @@ table.Table td img.Hide { /* filters row */
 
 
 /* ------------------------- */
-/* form tables */
-/* ------------------------- */
-
-td.FormClassV,
-td.FormClassH,
-td.FormClassC,
-table.FormClass,
-table.FormClassV,
-table.FormClassH,
-table.FormClassC {
-   border: 0px solid red;
-}
-
-table.FormClass,
-table.FormClassV,
-table.FormClassH,
-table.FormClassC {
-   margin: 0px auto 0px auto;
-}
-
-td.FormClassV,
-td.FormClassH {
-   color: black;
-   padding: 0px;
-   vertical-align: top;
-   text-align: center;
-}
-
-td.FormClassC {
-   color: black;
-   padding: 0px 20px;
-   vertical-align: top;
-   text-align: center;
-}
-
-td.FormClassC span.Rubric {
-   font-weight: bold;
-}
-
-
-/* ------------------------- */
 /* infos tables */
 /* ------------------------- */
 
@@ -977,42 +868,120 @@ table.Infos .Highlight {
 }
 
 
-/*
- biographical infos:
- must left the links in the right column natural
-*/
-/*
-table#bioInfos a {
-   color: default;
-}
-*/
+/* ------------------------- */
+/* messages and folders features */
+/* ------------------------- */
 
-/*
- biographical infos modifications:
-*/
-form#bioformForm td {
-   vertical-align: top;
-}
-
-table#biomoveInfos td {
-   vertical-align: top;
+table.MessageInfos {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px auto;
+   width: auto; /* 100% */
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
 }
 
-table#biomoveInfos div {
+table.MessageInfos td {
+   color: black;
+   text-align: left;
+   padding: 2px;
+}
+
+table.MessageInfos td.Rubric {
+   color: black;
+   font-weight: bold;
+}
+
+table.MessageBox {
+   border: 2px outset #F7F5E3; /* page background-color */
+   table-layout: auto;
+   border-spacing: 2px;
+   border-collapse: separate; /* collapse separate */
+   margin: 0px auto;
+   width: 30em; /* 475px; */
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: center;
+}
+
+table.MessageBox td {
+   border: 1px inset #F7F5E3; /* page background-color */
    margin: 0px;
+   padding: 4px;
+   text-align: left;
 }
 
-table#biomoveInfos img {
-   width: 12px;
-   height: 12px;
-   border: 0px solid black;
-   margin: 4px 4px 0px 4px;
+div.MessageFlow {
+   margin: 0px auto;
    vertical-align: top;
+   text-align: center;
 }
 
+table.FoldersTabs {
+   table-layout: auto;
+   border: 0px solid red;
+   border-spacing: 4px;
+   border-collapse: separate; /* separate collapse */
+   margin: 0px auto 0px 0px;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+}
+
+table.FoldersTabs td {
+   border: 4px solid #F7F5E3; /* page background-color */ /* or 'transparent' ? */
+   padding: 2px 6px;
+   text-align: center;
+}
+
+table.FoldersTabs td.Selected {
+   border: 4px solid #6666ff;
+}
+
+table.FoldersTabs td.Rubric {
+   /* background: none; /* or 'transparent' ? */
+   color: black;
+   font-weight: bold;
+   text-align: right;
+   padding: 2px 6px 2px 2px;
+}
+
+
+/* ------------------------- */
+/* search and filter highlights */
+/* ------------------------- */
+
+span.MarkTerm {
 /*
- quick-info boxes
+   color: darkred;
+   font-weight: bold;
 */
+   background: #c0ffb0;
+}
+
+a span.MarkTerm {
+   text-decoration: underline;
+}
+
+span.MarkTagTerm {
+   background: #fffca0;
+   font-size: 0.5em;
+   margin: 0px 0px 0.5em 0px;
+/*   padding: 0px 0px 0.5em 0px; */
+   vertical-align: top;
+   vertical-align: super;
+}
+
+
+/* ------------------------- */
+/* quick-info boxes */
+/* ------------------------- */
+
 table.InfoBox {
    border: 2px outset #F7F5E3; /* page background-color */
    table-layout: auto;
@@ -1036,7 +1005,54 @@ table.InfoBox td {
 
 
 /* ------------------------- */
-/* contacts page */
+/* form and area tables */
+/* ------------------------- */
+
+td.FormClassV,
+td.FormClassH,
+td.FormClassC,
+table.FormClass,
+table.FormClassV,
+table.FormClassH,
+table.FormClassC {
+   border: 0px solid red;
+}
+
+table.FormClass,
+table.FormClassV,
+table.FormClassH,
+table.FormClassC {
+   margin: 0px auto 0px auto;
+}
+
+td.FormClassV,
+td.FormClassH {
+   color: black;
+   padding: 0px;
+   vertical-align: top;
+   text-align: center;
+}
+
+td.FormClassC {
+   color: black;
+   padding: 0px 20px;
+   vertical-align: top;
+   text-align: center;
+}
+
+td.FormClassC span.Rubric {
+   font-weight: bold;
+}
+
+
+
+/* ************************* */
+/* page level and local specifications */
+/* ************************* */
+
+
+/* ------------------------- */
+/* contacts pages */
 /* ------------------------- */
 
 form#contactForm table.Table tr.Row4 td,
@@ -1090,6 +1106,20 @@ form#contactForm table.EditOptions {
 
 
 /* ------------------------- */
+/* opponents pages */
+/* ------------------------- */
+
+table#gameFilter {
+   margin-bottom: 1em;
+}
+
+
+table#gameStats th.Rubric {
+   text-align: right;
+}
+
+
+/* ------------------------- */
 /* translations page */
 /* ------------------------- */
 
@@ -1125,48 +1155,6 @@ form#translateForm table.FormClass td.Language {
 form#translateForm table.FormClass td.Mark {
    text-align: left;
    white-space: nowrap;
-}
-
-
-/* ------------------------- */
-/* edit profile page */
-/* ------------------------- */
-
-table.EditProfilButtons {
-   table-layout: fixed;
-   width: 535px; /* 524px auto /* 4*button_width+7*other_cells_width) */
-   border: 0px solid red;
-   border-spacing: 0px;
-   border-collapse: collapse;
-   margin: 0px 0px;
-   overflow: visible;
-   empty-cells: hide;
-   text-align: center;
-}
-
-table.EditProfilButtons td { /* radio button */
-   color: black;
-   width: 20px;
-   border: 0px solid red;
-   padding: 0px;
-   white-space: nowrap;
-   text-align: center;
-   vertical-align: middle;
-}
-
-table.EditProfilButtons td.button {
-   background-repeat: no-repeat;
-   background-position: center;
-   width: 96px;
-   height: 25px;
-/*
-   font: bold 100% sans-serif;
-*/
-   font-weight: bold;
-   font-size: 100%;
-   text-decoration: none;
-   text-align: center;
-   vertical-align: middle;
 }
 
 
@@ -1211,7 +1199,6 @@ table.Goban img {
    border: 0px solid black;
    margin: 0px;
 }
-
 
 
 table.Captures {
@@ -1351,7 +1338,6 @@ table.GameInfos td.Ratings span.EndRating {
 /*   visibility: visible; /* visible hidden collapse(table) */
 }
 
-
 table.GameInfos tr#boardInfos {
 /*   background: #ffffff; */
    border: 0px solid #808080;
@@ -1483,6 +1469,7 @@ table.moves a.b {
    text-decoration: none;
 }
 */
+
 
 /* ------------------------- */
 /* forums layout */
@@ -1706,32 +1693,6 @@ table.Forum span.OlderNewFlag a {
 
 
 /* ------------------------- */
-/* Search and filter highlights */
-/* ------------------------- */
-
-span.MarkTerm {
-/*
-   color: darkred;
-   font-weight: bold;
-*/
-   background: #c0ffb0;
-}
-
-a span.MarkTerm {
-   text-decoration: underline;
-}
-
-span.MarkTagTerm {
-   background: #fffca0;
-   font-size: 0.5em;
-   margin: 0px 0px 0.5em 0px;
-/*   padding: 0px 0px 0.5em 0px; */
-   vertical-align: top;
-   vertical-align: super;
-}
-
-
-/* ------------------------- */
 /* FAQ pages */
 /* ------------------------- */
 
@@ -1844,6 +1805,83 @@ table.FAQadmin td.Entry {
 }
 
 /* ------------------------- */
+/* edit profile page */
+/* ------------------------- */
+
+table.EditProfilButtons {
+   table-layout: fixed;
+   width: 535px; /* 524px auto /* 4*button_width+7*other_cells_width) */
+   border: 0px solid red;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   margin: 0px 0px;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: center;
+}
+
+table.EditProfilButtons td { /* radio button */
+   color: black;
+   width: 20px;
+   border: 0px solid red;
+   padding: 0px;
+   white-space: nowrap;
+   text-align: center;
+   vertical-align: middle;
+}
+
+table.EditProfilButtons td.button {
+   background-repeat: no-repeat;
+   background-position: center;
+   width: 96px;
+   height: 25px;
+/*
+   font: bold 100% sans-serif;
+*/
+   font-weight: bold;
+   font-size: 100%;
+   text-decoration: none;
+   text-align: center;
+   vertical-align: middle;
+}
+
+
+/* ------------------------- */
+/* biographical infos */
+/* ------------------------- */
+
+/*
+ biographical infos:
+ must left the links in the right column natural
+*/
+/*
+table#bioInfos a {
+   color: default;
+}
+*/
+
+form#bioformForm td {
+   vertical-align: top;
+}
+
+table#biomoveInfos td {
+   vertical-align: top;
+}
+
+table#biomoveInfos div {
+   margin: 0px;
+}
+
+table#biomoveInfos img {
+   width: 12px;
+   height: 12px;
+   border: 0px solid black;
+   margin: 4px 4px 0px 4px;
+   vertical-align: top;
+}
+
+
+/* ------------------------- */
 /* message allowed tags */
 /* ------------------------- */
 
@@ -1870,11 +1908,43 @@ div.quote {
 }
 
 
-/* ------------------------- */
-/* alternate server particularity */
-/* ------------------------- */
+/* ************************* */
+/* debug overwriting tools */
+/* ************************* */
 
-/* devel server */
+/* begin form debug * /
+table.FormClassC table,
+table.FormClassC td,
+table.FormClass {
+ border-color: red;}
+td.FormClassV,
+table.FormClassV {
+ border-color: blue;}
+td.FormClassH,
+table.FormClassH {
+ border-color: orange;}
+td.FormClassC,
+table.FormClassC {
+ border-color: green;}
+table.FormClassC table,
+table.FormClass,
+table.FormClassV,
+table.FormClassH,
+table.FormClassC {border-style: dashed; border-width: 1px;
+ border-spacing: 4px; border-collapse: separate;}
+table.FormClassC td,
+td.FormClassV,
+td.FormClassH,
+td.FormClassC {border-style: solid; border-width: 1px;
+ padding: 8px; margin: 0px; vertical-align: top;}
+/* end form debug */
+
+
+/* ************************* */
+/* alternate server particularity */
+/* ************************* */
+
+/* DGS devel server */
 body#dDGS table#pageFoot,
 body#dDGS table#pageHead {
    background: #C9410C;
@@ -1882,18 +1952,6 @@ body#dDGS table#pageHead {
 
 body#dDGS table#pageMenu {
    border-color: #C9410C;
-}
-
-
-/* JUG devel server */
-body#jDGS table#pageFoot,
-body#jDGS table#pageHead {
-   background: #683888;
-   color: #97c777;
-}
-
-body#jDGS table#pageMenu {
-   border-color: #683888;
 }
 
 

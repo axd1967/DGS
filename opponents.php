@@ -133,7 +133,7 @@ $ARR_DBFIELDKEYS = array(
 
    // External-Form
    $usform = new Form( $utable->Prefix, $page, FORM_GET, false);
-   $usform->set_layout( FLAYOUT_GLOBAL, ( $opp ? '2,1|3' : '2' ) );
+   $usform->set_layout( FLAYOUT_GLOBAL, ( $opp ? '1,2|3' : '1' ) );
    $usform->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );
    $usform->set_config( FEC_EXTERNAL_FORM, true );
    $utable->set_externalform( $usform ); // also attach offset, sort, manage-filter as hidden (table) to ext-form
@@ -173,17 +173,12 @@ $ARR_DBFIELDKEYS = array(
 
 
    // form for static filters
-   if ( $opp )
-   {
-      $usform->set_area( 1 );
-      $usform->add_row( array(
-            'OWNHTML', print_players_table( $players, $uid, $opp ) ));
-      $usform->add_empty_row();
-   }
-
-   $usform->set_area( 2 );
-   $usform->add_row( array(
-         'CHAPTER',     T_('Restrictions on games with opponent') ));
+   $usform->set_area( 1 );
+   $usform->set_layout( FLAYOUT_AREACONF, 1,
+      array(
+         'title' => T_('Restrictions on games with opponent'),
+         FAC_TABLE => 'id=gameFilter',
+      ) );
    $usform->add_row( array(
          'DESCRIPTION', T_('Size'),
          'FILTER',      $usfilter, 1,
@@ -203,7 +198,6 @@ $ARR_DBFIELDKEYS = array(
          'TAB',
          'CELL',        1, 'align=left',
          'OWNHTML',     implode( '', $ufilter->get_submit_elements() ), ));
-   $usform->add_empty_row();
 
 
    // build SQL-query (for user-table)
@@ -306,10 +300,15 @@ $ARR_DBFIELDKEYS = array(
 
    if ( $opp )
    {
+      //players infos
+      $usform->set_area( 2 );
+      $usform->add_row( array(
+            'TEXT', print_players_table( $players, $uid, $opp ) ));
+
       // add stats-table into form (0-value-table if no opp)
       $usform->set_area( 3 );
       $usform->add_row( array(
-            'OWNHTML', print_stats_table( $players, $AB, $AW, $uid, $opp, $finished ) ));
+            'TEXT', print_stats_table( $players, $AB, $AW, $finished ) ));
    }
 
 
@@ -480,16 +479,17 @@ function print_players_table( $p, $uid, $opp )
 
    $p1 = $p[$uid];
    $p2 = ( $opp and isset($p[$opp]) ) ? $p[$opp] : null;
-   $SPC = '&nbsp;';
+   $SPC = ''; //'&nbsp;';
 
-   $rowpatt = "  <tr> <td><b>%s</b></td>  <td>%s</td>  <td>%s</td>  </tr>\n";
+   $rowpatt = "  <tr> <td class=Rubric>%s</td>  <td>%s</td>  <td>%s</td>  </tr>\n";
 
-   $r = "<table id=userInfos class=Infos>\n";
-   $r .= "<colgroup><col class=ColRubric><col class=ColInfo><col class=ColInfo></colgroup>\n";
+   $r = "<table id=playersInfos class=Infos>\n";
+   //TODO; review it:
+   //$r .= "<colgroup><col class=ColRubric><col class=ColInfo><col class=ColInfo></colgroup>\n";
 
    // header
    $r .= "  <tr>\n";
-   $r .= "    <th>&nbsp;</th>\n";
+   $r .= "    <th></th>\n";
    $r .= "    <th>Player</th>\n";
    $r .= "    <th>Opponent</th>\n";
    $r .= "  </tr>\n";
@@ -498,7 +498,9 @@ function print_players_table( $p, $uid, $opp )
    $r .= sprintf( $rowpatt, T_('Name'),
       "<A href=\"userinfo.php?uid=$uid\">" . make_html_safe( $p1['Name']) . "</A>",
       ( $p2 ? "<A href=\"userinfo.php?uid=$opp\">" . make_html_safe( $p2['Name']) . "</A>" : '---' ) );
-   $r .= sprintf( $rowpatt, T_('Userid'), $p1['Handle'], ($p2 ? $p2['Handle'] : $SPC) );
+   $r .= sprintf( $rowpatt, T_('Userid'),
+      $p1['Handle'],
+      ( $p2 ? $p2['Handle'] : $SPC) );
 
    // Country
    $c1 = $p1['Country'];
@@ -507,12 +509,14 @@ function print_players_table( $p, $uid, $opp )
    $cn2 = T_(@$COUNTRIES[$c2]);
    $c1 = (empty($c1) ? '' : "<img title=\"$cn1\" alt=\"$cn1\" src=\"images/flags/$c1.gif\">");
    $c2 = (empty($c2) ? '' : "<img title=\"$cn2\" alt=\"$cn2\" src=\"images/flags/$c2.gif\">");
-   $r .= sprintf( $rowpatt, T_('Country'), $c1, ( $p2 ? $c2 : $SPC ) );
+   $r .= sprintf( $rowpatt, T_('Country'),
+      $c1,
+      ( $p2 ? $c2 : $SPC ) );
 
    // Activity
    $r .= sprintf( $rowpatt, T_('Activity'),
-         activity_string( $p1['ActivityLevel'] ) . '&nbsp;',
-         ( $p2 ? activity_string( $p2['ActivityLevel'] ) . $SPC : $SPC ) );
+      activity_string( $p1['ActivityLevel'] ), // . '&nbsp;',
+      ( $p2 ? activity_string( $p2['ActivityLevel'] ) . $SPC : $SPC ) );
 
    // Rating2
    $r .= sprintf( $rowpatt, T_('Rating'),
@@ -521,10 +525,10 @@ function print_players_table( $p, $uid, $opp )
 
    // Last accessed, Last moved
    $r .= sprintf( $rowpatt, T_('Last access'),
-      ($p1['lastAccess'] > 0 ? date($date_fmt2, $p1['lastAccess']) : $SPC ),
+      ( $p1['lastAccess'] > 0 ? date($date_fmt2, $p1['lastAccess']) : $SPC ),
       ( $p2 && $p2['lastAccess'] > 0 ? date($date_fmt2, $p2['lastAccess']) : $SPC ) );
    $r .= sprintf( $rowpatt, T_('Last moved'),
-      ($p1['lastMove'] > 0 ? date($date_fmt2, $p1['lastMove']) : $SPC ),
+      ( $p1['lastMove'] > 0 ? date($date_fmt2, $p1['lastMove']) : $SPC ),
       ( $p2 && $p2['lastMove'] > 0 ? date($date_fmt2, $p2['lastMove']) : $SPC ) );
 
    $r .= '</table>';
@@ -534,20 +538,21 @@ function print_players_table( $p, $uid, $opp )
 // echo table with info about both players: uid and opponent
 // param p: players-array[$uid,$opp] = ( ID, Name, Handle, Rating2, Country )
 // param B|W: array with $ARR_DBFIELDKEYS for black and white
-function print_stats_table( $p, $B, $W, $uid, $opp, $fin )
+function print_stats_table( $p, $B, $W, $fin )
 {
-   $p1 = $p[$uid];
-   #$p2 = $p[$opp]; // $opp maybe not set or not existing
-   $rowpatt   = "  <tr> <td nowrap=\"1\"><b>%s</b></td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  </tr>\n";
-   $rowpatt2  = "  <tr> <td nowrap=\"1\"><b>%s</b></td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  </tr>\n";
 
-   $r = "<table id=userInfos class=Infos>\n";
+   $rowpatt   = "  <tr> <td class=Rubric>%s</td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  </tr>\n";
+   $rowpatt2  = "  <tr> <td class=Rubric>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  </tr>\n";
+   #$rowpatt   = "  <tr> <td nowrap=\"1\"><b>%s</b></td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  </tr>\n";
+   #$rowpatt2  = "  <tr> <td nowrap=\"1\"><b>%s</b></td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  </tr>\n";
+
+   $r = "<table id=gameStats class=Infos>\n";
    //TODO; review it:
    //$r .= "<colgroup><col class=ColRubric><col class=ColInfo><col class=ColInfo></colgroup>\n";
 
    // header
    $r .= "  <tr>\n";
-   $r .= "    <th>" . T_('Players color') .":</th>\n";
+   $r .= "    <th class=Rubric>" . T_('Players color') .":</th>\n";
    $r .= "    <th colspan=2><img src=\"17/b.gif\" alt=\"as-black\"></th>\n";
    $r .= "    <th colspan=2><img src=\"17/w.gif\" alt=\"as-white\"></th>\n";
    $r .= "    <th colspan=2>" . T_('Sum') . "</th>\n";
@@ -567,7 +572,10 @@ function print_stats_table( $p, $B, $W, $uid, $opp, $fin )
    }
 
    // stats: total games
-   $r .= sprintf( $rowpatt, T_('#Games'), $B['cntGames'], $W['cntGames'], $cnt_games );
+   $r .= sprintf( $rowpatt, T_('#Games'),
+      $B['cntGames'],
+      $W['cntGames'],
+      $cnt_games );
 
    if ( $fin )
    {
@@ -590,14 +598,20 @@ function print_stats_table( $p, $B, $W, $uid, $opp, $fin )
          ($B['cntWonTime'] + $W['cntWonTime']), ($B['cntLostTime'] + $W['cntLostTime']) );
 
       // stats: jigo
-      $r .= sprintf( $rowpatt, T_('#Games with Jigo'), $B['cntJigo'], $W['cntJigo'],
-         $B['cntJigo'] + $W['cntJigo']);
+      $r .= sprintf( $rowpatt, T_('#Games with Jigo'),
+         $B['cntJigo'],
+         $W['cntJigo'],
+         $B['cntJigo'] + $W['cntJigo'] );
    }
 
    // stats: handicap-games
-   $r .= sprintf( $rowpatt, T_('#Games with handicap'), $B['cntHandicap'], $W['cntHandicap'],
-      $B['cntHandicap'] + $W['cntHandicap']);
-   $r .= sprintf( $rowpatt, T_('Maximum handicap'), $B['maxHandicap'], $W['maxHandicap'],
+   $r .= sprintf( $rowpatt, T_('#Games with handicap'),
+      $B['cntHandicap'],
+      $W['cntHandicap'],
+      $B['cntHandicap'] + $W['cntHandicap'] );
+   $r .= sprintf( $rowpatt, T_('Maximum handicap'),
+      $B['maxHandicap'],
+      $W['maxHandicap'],
       max($B['maxHandicap'], $W['maxHandicap']) );
 
    $r .= '</table>';

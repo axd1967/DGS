@@ -58,17 +58,24 @@ $title = (bool)@$_REQUEST['title'];
 /* define local style */
 
 $page_style ='
-table.FormClass {border: 1px solid red;}
+table.FormClass {border-color: red;}
 td.FormClassV,
-table.FormClassV {border: 1px solid blue;}
+table.FormClassV {border-color: blue;}
 td.FormClassH,
-table.FormClassH {border: 1px solid orange;}
+table.FormClassH {border-color: orange;}
 td.FormClassC,
-table.FormClassC {border: 1px solid green;}
+table.FormClassC {border-color: green;}
+
+table.FormClass,
+table.FormClassV,
+table.FormClassH,
+table.FormClassC {border-style: dashed; border-width: 1px;
+ border-spacing: 4px; border-collapse: separate;}
 
 td.FormClassV,
 td.FormClassH,
-td.FormClassC {border-style: dashed; margin: 0px; padding: 6px; vertical-align: top;}
+td.FormClassC {border-style: solid; border-width: 1px;
+ padding: 8px; margin: 0px; vertical-align: top;}
 
 td.FormClassC {padding: 6px 30px;}
 
@@ -80,12 +87,13 @@ table.TblWarn2 {background: #c0c0ff;}
 if( !$border )
    $page_style.='
 table.FormClass,
-td.FormClassV,
 table.FormClassV,
-td.FormClassH,
 table.FormClassH,
-td.FormClassC,
-table.FormClassC {border-width: 0px;}
+table.FormClassC {border-width: 0px;
+ border-spacing: 0px; border-collapse: collapse;}
+td.FormClassV,
+td.FormClassH,
+td.FormClassC {border-width: 0px;}
 ';
 if( $align > 0 )
 { //right align
