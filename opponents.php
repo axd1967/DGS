@@ -132,12 +132,8 @@ $ARR_DBFIELDKEYS = array(
    $utable->add_or_del_column();
 
    // External-Form
-   $usform = new Form( $utable->Prefix, $page, FORM_GET, false, 'FormTable');
-   $usform->set_layout( FLAYOUT_GLOBAL, ( $opp ? '2,(1|4|3)' : '2' ) );
-/*
-   $usform->set_layout( FLAYOUT_AREACONF, FAREA_ALL,
-      array( FAC_ENVTABLE => 'align=center' ) );
-*/
+   $usform = new Form( $utable->Prefix, $page, FORM_GET, false);
+   $usform->set_layout( FLAYOUT_GLOBAL, ( $opp ? '2,1|3' : '2' ) );
    $usform->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );
    $usform->set_config( FEC_EXTERNAL_FORM, true );
    $utable->set_externalform( $usform ); // also attach offset, sort, manage-filter as hidden (table) to ext-form
@@ -182,9 +178,6 @@ $ARR_DBFIELDKEYS = array(
       $usform->set_area( 1 );
       $usform->add_row( array(
             'OWNHTML', print_players_table( $players, $uid, $opp ) ));
-      $usform->add_empty_row();
-
-      $usform->set_area( 4 );
       $usform->add_empty_row();
    }
 
