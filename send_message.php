@@ -24,6 +24,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/make_game.php" );
+require_once( "include/contacts.php" );
 
 disable_cache();
 
@@ -34,10 +35,10 @@ disable_cache();
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
    if( $player_row["Handle"] == "guest" )
-      error("not_allowed_for_guest");
+      error('not_allowed_for_guest');
 
 
    $my_id = $player_row['ID'];
@@ -77,36 +78,48 @@ disable_cache();
       }
 
       jump_to("list_messages.php?folder=$new_folder$page");
-/*
-      $msg = urlencode(T_('Message moved!'));
-
+      /*
+      $msg = urlencode(T_//('Message moved!'));
       jump_to("status.php?sysmsg=$msg");
-*/
+      */
    }
 
 
    if( $tohdl == "guest" )
-      error("guest_may_not_receive_messages");
+      error('guest_may_not_receive_messages');
 
 
-// find receiver of the message
+   // find receiver of the message
 
-   $opponent_row = mysql_single_fetch( 'send_message.find_receiver',
-                          "SELECT ID, ClockUsed, OnVacation, Rating2, RatingStatus" .
-                          (ENA_SEND_MESSAGE ?'' :", SendEmail, Notify") .
-                          " FROM Players WHERE Handle='".mysql_addslashes($tohdl)."'" );
-
+   $tmp= ( $type == 'INVITATION' ?CSYSFLAG_REJECT_INVITE :CSYSFLAG_REJECT_MESSAGE );
+   $query= "SELECT P.ID,P.ClockUsed,P.OnVacation,P.Rating2,P.RatingStatus"
+         . (ENA_SEND_MESSAGE ?'' :",P.SendEmail,P.Notify")
+         . ",IF(ISNULL(C.uid),0,C.SystemFlags & $tmp) AS C_denied"
+         . " FROM Players AS P"
+         . " LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$my_id"
+         . " WHERE P.Handle='".mysql_addslashes($tohdl)."'"
+         //. " HAVING C_denied=0"
+         ;
+   $opponent_row = mysql_single_fetch( 'send_message.find_receiver', $query);
    if( !$opponent_row )
       error('receiver_not_found');
+   if( $opponent_row['C_denied'] )
+   {
+      if( $type == 'INVITATION' )
+         $msg = T_('Invitation rejected!');
+      else
+         $msg = T_('Message rejected!');
+      $msg = urlencode($msg);
+      jump_to("status.php?sysmsg=$msg");
+   }
 
-
-   $opponent_ID = $opponent_row["ID"];
+   $opponent_ID = $opponent_row['ID'];
    $to_me = ( $my_id == $opponent_ID ); //Message to myself
-   if( $to_me and $type == 'INVITATION' )
-      error("invite_self");
+   if( $to_me && $type == 'INVITATION' )
+      error('invite_self');
 
 
-// Update database
+   // Update database
 
    $disputegid = -1;
    if( $type == "INVITATION" )
@@ -236,7 +249,7 @@ disable_cache();
 
 
 
-// Update database
+   // Update database
 
 if(ENA_SEND_MESSAGE){ //new
    $msg_gid = 0;
@@ -331,7 +344,6 @@ if(ENA_SEND_MESSAGE){ //new
 
 
    $msg = urlencode(T_('Message sent!'));
-
    jump_to("status.php?sysmsg=$msg");
 }
 ?>

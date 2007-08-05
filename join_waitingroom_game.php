@@ -45,12 +45,13 @@ require_once( "include/contacts.php" );
    if( !is_numeric($wr_id) or $wr_id <= 0 )
       error('waitingroom_game_not_found', 'join_waitingroom_game.bad_id');
 
+   $tmp= CSYSFLAG_WAITINGROOM;
    $query= "SELECT W.*"
-         . ",IF(ISNULL(C.uid),0,C.SystemFlags & ".CSYSFLAG_WAITINGROOM.") AS game_denied"
+         . ",IF(ISNULL(C.uid),0,C.SystemFlags & $tmp) AS C_denied"
          . " FROM Waitingroom AS W"
          . " LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id"
          . " WHERE W.ID=$wr_id AND W.nrGames>0"
-         . " HAVING game_denied=0"
+         . " HAVING C_denied=0"
          ;
    $game_row = mysql_single_fetch('join_waitingroom_game.find_game', $query);
    if( !$game_row )

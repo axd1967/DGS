@@ -171,13 +171,14 @@ require_once( "include/contacts.php" );
       'Waitingroom AS W',
       'INNER JOIN Players ON W.uid=Players.ID' );
 
-   // Contacts: Deny games
+   // Contacts: make invisible the protected waitingroom games
+   $tmp= CSYSFLAG_WAITINGROOM;
    $qsql->add_part( SQLP_FIELDS,
-      "IF(ISNULL(C.uid),0,C.SystemFlags & ".CSYSFLAG_WAITINGROOM.") AS game_denied" );
+      "IF(ISNULL(C.uid),0,C.SystemFlags & $tmp) AS C_denied" );
    $qsql->add_part( SQLP_FROM,
       "LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id" );
    $qsql->add_part( SQLP_HAVING,
-      'game_denied=0' );
+      'C_denied=0' );
 
    $qsql->add_part( SQLP_ORDER, $order, 'ID' );
    $qsql->merge( $wrtable->get_query() );

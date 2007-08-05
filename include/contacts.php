@@ -47,8 +47,8 @@ define('CUSERFLAG_MISC',    0x00000080); // miscellaneous relationship contact (
 // sysflag => ( form_elem_name, translation )
 $ARR_CONTACT_SYSFLAGS = array(
    CSYSFLAG_WAITINGROOM    => array( 'sfl_waitingroom',    T_('Protect waitingroom games') ),
-   CSYSFLAG_REJECT_MESSAGE => array( 'sfl_reject_message', T_('Reject message') ),
-   CSYSFLAG_REJECT_INVITE  => array( 'sfl_reject_invite',  T_('Reject invitation') ),
+   CSYSFLAG_REJECT_MESSAGE => array( 'sfl_reject_message', T_('Reject messages') ),
+   CSYSFLAG_REJECT_INVITE  => array( 'sfl_reject_invite',  T_('Reject invitations') ),
    );
 
 $ARR_CONTACT_USERFLAGS = array(

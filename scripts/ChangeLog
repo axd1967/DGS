@@ -25,7 +25,7 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
-2007-08-04 rodival
+2007-08-05 rodival
 
    * skins/dragon/screen.css, include/table_columns.php (make_table_filter):
    - adjusted some CSS of filters
@@ -46,8 +46,9 @@ Changelog
    - jump to list_contacts.php after a Contact had been saved
 
    * include/contacts.php, include/message_functions.php,
-     join_waitingroom_game.php, waiting_room.php:
+     send_message.php, join_waitingroom_game.php, waiting_room.php:
    - denied the access to a waitingroom game protected by its owner
+   - rejection of messages or invitations to protected users
    - renaming some column and row headers from 'Color' to 'Type' when they
      contain datas like 'Double game', 'Proper handicap' or 'Even game'.
 
