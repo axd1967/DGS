@@ -397,7 +397,7 @@ $info_box = '<ul>
             make_include_files(null, 'FAQ'); //must be called from main dir
 
       //clean URL (focus on edited entry or parent category if entry deleted)
-      jump_to( "$page?id=$ref_id".URI_AMP."term=$uterm#e$ref_id" );
+      jump_to( "$page?id=$ref_id".URI_AMP."term=$urlterm#e$ref_id" );
    } //do_edit
 
 
@@ -721,7 +721,7 @@ $info_box = '<ul>
          // question/answer (1 col)
          if( $faqhide )
             echo "(H) ";
-         echo "<A href=\"$page?edit=1".URI_AMP."type=$typechar".URI_AMP."id=".$row['ID'].URI_AMP."term=$uterm" .
+         echo "<A href=\"$page?edit=1".URI_AMP."type=$typechar".URI_AMP."id=".$row['ID'].URI_AMP."term=$urlterm" .
               "\" title=\"Edit\">$question</A>";
          echo "\n</td>";
 
