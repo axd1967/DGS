@@ -55,8 +55,8 @@ Go News, Go Scene (2000-2003): http://www.kyoto.zaq.ne.jp/momoyama/index.html
                      'IGF',
                      T_('International Go Federation. Find federations and associations in the world.'));
    //  add_link_page_link("http://www.msoworld.com/mindzine/news/orient/go/go.html",
-   //                     T_('Mind Sport Zine'),
-   //                     T_('An excellent, but unfortunately no longer updated site.'));
+   //                     T_//('Mind Sport Zine'),
+   //                     T_//('An excellent, but unfortunately no longer updated site.'));
    add_link_page_link("http://igo-kisen.hp.infoseek.co.jp/topics.html",
                      T_('Go News'), T_('News and games from the professional scene'));
    add_link_page_link("http://finance.baylor.edu/rich/go/goguild.html",

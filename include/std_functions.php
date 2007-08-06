@@ -866,7 +866,7 @@ function help($topic)
 function sysmsg($msg)
 {
    if( isset($msg) && ($msg=trim(make_html_safe($msg,'msg'))) )
-      echo "\n<p class=Sysmsg>$msg</p><hr>\n";
+      echo "\n<p class=Sysmsg>$msg</p><hr class=Sysmsg>\n";
 }
 
 
@@ -1454,11 +1454,19 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       $head = preg_replace('%[\\x01-\\x20]+%', ' ', $head);
 
       if( in_array($tag, array(
-            //as a first set/choice of <div>-like tags
-            '/note','/quote','/code','/pre','/center',
-            '/div','/dl','/dt','/dd','/ul','/ol','/li'
+            //as a first set/choice of <ul>-like tags
+            'quote','code','pre','center',
+            'dl','/dt','/dd','ul','ol','/li'
          )) )
-      { //remove the first newline of the following
+      { //remove all the following newlines (to avoid inserted <br>)
+         $trail= ereg_replace( "^[\r\n]+", '', $trail);
+      }
+      if( in_array($tag, array(
+            //as a first set/choice of </ul>-like tags
+            '/note','/quote','/code','/pre','/center',
+            '/div','/dl','/ul','/ol'
+         )) )
+      { //remove the first following newline
          $trail= ereg_replace( "^(\r\n|\r|\n)", '', $trail);
       }
 
@@ -2200,6 +2208,8 @@ function section( $id='', $header='')
    { //section opened, close it
       echo "</td></tr></table>\n";
       $section = '';
+      if( $id )
+         echo "<hr class=Section>\n";
    }
    if( $id )
    { //section request, open it
@@ -2207,6 +2217,8 @@ function section( $id='', $header='')
       echo "\n<table id=$section class=Section><tr><td>";
       if( $header )
          echo "<h3 class=Header>$header</h3>";
+      else
+         echo '<br class=Section>';
    }
 }
 

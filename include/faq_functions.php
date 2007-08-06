@@ -26,7 +26,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  **/
 function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rxterm='' )
 {
-   static $prevlevel;
+   static $prevlevel= 0;
 
    $str = '';
    switch( $level )

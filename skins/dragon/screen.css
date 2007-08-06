@@ -53,11 +53,11 @@ td {
 hr {
    display: block;
    width: 100%;
-   margin: 7px 0px;
    height: 1px;
+   margin: 7px 0px;
    padding: 0px;
    color: #808080;
-   background: #808080;
+/*   background: #808081; /* */
    border: 0px;
 }
 
@@ -193,6 +193,15 @@ a.userblack {
 }
 */
 
+
+h3.Header {
+   color: #800000;
+   text-align: center;
+   padding: 2px;
+   margin: 1em 0px;
+   font-weight: bold;
+}
+
 table.Section { /* centered_container */
    table-layout: auto;
    border: 0px solid red;
@@ -206,12 +215,13 @@ table.Section { /* centered_container */
    vertical-align: top;
 }
 
+hr.Section {
+   display: none; /* */
+   margin: 1em 0px 0px 0px;
+}
 
-h3.Header {
-   color: #800000;
-   text-align: center;
-   padding: 2px;
-   margin: 1em 0px;
+body.Status table#pageLayout td#pageBody hr.Section {
+   display: block;
 }
 
 .InlineHeader {
@@ -240,7 +250,7 @@ h3.Header {
 .DebugInfoBoxSmall {
    width: 10px;
    height: 10px;
-   border: 2px solid lime;
+   border: 2px solid #00ff00;
    background: lime;
    overflow: hidden; /* hidden visible scroll auto */
    margin: 0px;
@@ -685,12 +695,12 @@ table.Table tr.Row2 {
    background: #e0e8ed;
 }
 table.Table tr.Highlight,
-table.Table tr.HiRow3,
-table.Table tr.HiRow1 {
+table.Table tr.HilRow3,
+table.Table tr.HilRow1 {
    background: #ffdfbf; /* #ffd080 #ffdfbf */
 }
-table.Table tr.HiRow4,
-table.Table tr.HiRow2 {
+table.Table tr.HilRow4,
+table.Table tr.HilRow2 {
    background: #e7cdb1; /* #f0c476 #e7cdb1 */
 }
 table.Table tr.Row3 td.Warning,
@@ -1241,7 +1251,7 @@ body.SiteMap table.SiteMap td {
 
 body.SiteMap table.SiteMap td a {
    text-decoration: underline;
-   color: #0C41C9;
+   color: #0C41Ca;
 }
 
 body.SiteMap table.SiteMap td.Indent {
@@ -1661,7 +1671,7 @@ table.Forum tr.Row1 {
 }
 table.Forum tr.Row4,
 table.Forum tr.Row2 {
-   background: white;
+   background: #ffffff;
    color: black;
 }
 
@@ -1803,12 +1813,12 @@ table.Forum tr.PostHeadNormal .PostSubject {
 }
 
 table.Forum tr.PostBody {
-   background: white;
+   background: #ffffff;
    color: black;
 }
 
 table.Forum tr.PostButtons {
-   background: white;
+   background: #ffffff;
    color: black;
 }
 

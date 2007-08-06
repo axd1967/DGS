@@ -39,6 +39,17 @@ Changelog
      introduction.php, todo.php, news.php, licence.php, install.php:
    - full CSS of the Docs pages
 
+   * skins/dragon/screen.css,
+     include/std_functions.php (section, parse_tags_safe),
+     status.php, faq.php:
+   - added sections in the status page
+   - removed linefeeds causing insert of badly placed <br>
+   - checked and fixed the W3C compliance of the CSS sheet
+
+   * include/table_infos.php, include/table_columns.php,
+     links.php, edit_folders.php:
+   - minor fixes
+
 2007-08-05 rodival
 
    * skins/dragon/screen.css,
@@ -994,7 +1005,7 @@ ALTER TABLE `Players`
    - added the mysql_single_col() function
 
    * error.php,
-     include/error_functions.php (set_mode, add_error, error):
+   * include/error_functions.php (set_mode, add_error, error):
    - now set_mode() return the previous mode (to save and restore it)
    - now add_error() and error() return false if the errors are not
      fatal. This allow $result = mysql_query(...) or error(...);
@@ -1028,7 +1039,7 @@ ALTER TABLE `Players`
 2007-07-05 rodival
 
    * translate.php, update_translation.php,
-     include/make_translationfiles.php (translations_query):
+   * include/make_translationfiles.php (translations_query):
    - modified the 'Untranslated' option (may be applied on every group).
      therefore, added a 'All groups' option.
    - hidden the now big info box and added an anchor to show it.
@@ -1036,7 +1047,7 @@ ALTER TABLE `Players`
 2007-07-03 rodival
 
    * translate.php, update_translation.php,
-     include/make_translationfiles.php (translations_query):
+   * include/make_translationfiles.php (translations_query):
    - added a filter on the english part.
      added the $filter_en argument to translations_query()
 
@@ -1089,14 +1100,14 @@ ALTER TABLE `Players`
    * include/form_functions.php (set_config, get_config,
      set_attr_form_element, set_layout, set_area, add_empty_row,
      create_form_string, get_areaconf),
-     code_examples/form_example.php, code_examples/form_example2.php:
+   * code_examples/form_example.php, code_examples/form_example2.php:
    - added Form-types 'FILTER' and 'FILTERERROR' for Filter-framework
    - added area-group layouting and some additional layout-config
      when used as External-Form with Table(-Filters)
    - added example for area-layouting, allow examples to be opened in browser
 
-   * show_games.php, forum/search.php, users.php, waiting_room.php,
-     message.php, status.php:
+   * show_games.php, users.php, waiting_room.php, message.php, status.php,
+   * forum/search.php:
    - added or extended searching capabilities using filter-framework
    - adjustments for using filters
    - added (recommended) new indexes to support new filters;
@@ -1121,7 +1132,7 @@ ALTER TABLE `Players`      -- +0.4 MB (for filter/sort, often changed)
 -----------
 
    * search_messages.php, list_messages.php,
-     include/message_functions.php (init_standard_folders, echo_folder_box,
+   * include/message_functions.php (init_standard_folders, echo_folder_box,
      message_list_query, message_list_table):
    - added new page for searching messages using filters
    - signature-change of funcs to change layout or highlight search-terms:
@@ -1156,7 +1167,7 @@ ALTER TABLE `Messages`     -- ca. +80% of data-size (biggest change)
 
    * forum/read.php, forum/search.php,
      forum/forum_functions.php (make_link_array, forum_start_table),
-     include/quick_common.php:
+   * include/quick_common.php:
    - added order-selectbox in forum-search
    - added support to highlight search-terms in a post or message
    - fixed bug for paging to preserve form- and filter-values
@@ -1221,8 +1232,9 @@ ALTER TABLE `FAQlog`
 UPDATE `FAQlog` SET `Date` = '0' ;
 -----------
 
-   * translate.php, include/translation_functions.php (language_exists,
-     T_, get_language_descriptions_translated):
+   * include/translation_functions.php (language_exists,
+     T_, get_language_descriptions_translated),
+   * translate.php:
    - case insensitive search of the language name in language_exists().
    - added an automatic cut of the #xxx part of the alternate english words
      in T_().
@@ -1231,7 +1243,7 @@ UPDATE `FAQlog` SET `Date` = '0' ;
 
    * include/make_translationfiles.php (translations_query),
    * admin_translators.php, admin_do_translators.php,
-   * translate.php, update_translation.php,
+     translate.php, update_translation.php,
    * scripts/generate_translation_texts.php:
    - added the add_text_to_translate function.
    - added the insertion of the new language names in the translation process.
@@ -1266,8 +1278,9 @@ ALTER TABLE `Waitingroom`
  ADD `Handicap` Handicap int(11) NOT NULL default '0' AFTER `Komi` ;
 -----------
 
-   * include/message_functions.php (game_info_table), send_message.php,
-   * include/make_game.php:
+   * include/message_functions.php (game_info_table),
+     include/make_game.php,
+   * send_message.php:
    - adjusted to follow the "double game" handicap fix and its display.
    - and a try to fix the bad Running count bug:
      In the Players table, near 20 of the Running counts were 1 or 2
@@ -1333,8 +1346,8 @@ ALTER TABLE `Waitingroom`
 -----------
 
    * images/forward.gif, images/backward.gif,
-   * images/end.gif, images/start.gif,
-   * images/plus.gif, images/minus.gif, images/cross.gif:
+     images/end.gif, images/start.gif,
+     images/plus.gif, images/minus.gif, images/cross.gif:
    - added images
 -----------
 
@@ -1396,19 +1409,19 @@ ALTER TABLE `FAQ`
    - added funcs: set_default_sort(), get_arg()
 
    * include/std_functions.php (split_url, yesno, modf & more),
-   * include/message_functions.php:
+     include/message_functions.php:
    - added funcs
    - adaptations for enhanced Table_Info class, "button" columns and
      common to waitingroom and message
 
-   * edit_bio.php,
-   * list_messages.php,
-   * message.php,
-   * show_games.php,
    * skins/dragon/screen.css,
-   * status.php,
-   * userinfo.php,
-   * waiting_room.php:
+   * edit_bio.php,
+     list_messages.php,
+     message.php,
+     show_games.php,
+     status.php,
+     userinfo.php,
+     waiting_room.php:
    - using new Table_Info class properties, for games infos and
      common to waitingroom and message
 
@@ -1423,7 +1436,7 @@ ALTER TABLE `FAQ`
 2007-01-12 rodival
 
    * include/connect2mysql.php (mysql_addslashes) + most of the other
-   * files (used nearly everywhere):
+     files (used nearly everywhere):
    - generalization of the right MySQL addslashes feature,
      introducing function to properly escape value in SQL-statements
 
@@ -1543,11 +1556,11 @@ ALTER TABLE `Players`
 -----------
 
    * skins/,
-   * skins/index.php,
-   * skins/known_skins.php,
-   * skins/dragon/index.php,
-   * skins/dragon/screen.css,
-   * skins/dragon/print.css:
+     skins/index.php,
+     skins/known_skins.php,
+     skins/dragon/index.php,
+     skins/dragon/screen.css,
+     skins/dragon/print.css:
    - added CSS files for skins
 
    * include/std_functions.php (start_page) + all callers:

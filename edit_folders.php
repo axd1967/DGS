@@ -220,7 +220,6 @@ function make_folder_form_row(&$form, $name, $nr,
 
 
    start_page(T_("Edit message folders"), true, $logged_in, $player_row );
-   sysmsg( $sysmsg);
 
    echo "<center>\n";
 

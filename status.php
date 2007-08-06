@@ -52,12 +52,11 @@ require_once( "include/message_functions.php" );
    $gtable->use_show_rows(false);
    $gtable->add_or_del_column();
 
+   $ThePage['class']= 'Status'; //temporary solution to CSS problem
    start_page(T_('Status'), true, $logged_in, $player_row,
                $gtable->button_style($player_row['Button']) );
 
-   echo "<h3 class=Header>" . T_('Status') . "</h3>\n";
-
-
+   section( 'Status', T_('Status'));
 
 { // show user infos
    $itable= new Table_info('user');
@@ -118,7 +117,7 @@ require_once( "include/message_functions.php" );
       init_standard_folders();
       $my_folders = get_folders($my_id);
 
-      echo "<br><hr id=secMessage><h3 class=Header>" . T_('New messages') . ":</h3>\n";
+      section( 'Message', T_('New messages'));
 
       message_list_table( $mtable, $result, 20
              , FOLDER_NONE /*FOLDER_ALL_RECEIVED*/, $my_folders
@@ -153,12 +152,11 @@ require_once( "include/message_functions.php" );
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'status.find_games');
 
-   echo "<br><hr id=sect_game><h3 class=Header>" .
-         T_("Your turn to move in the following games:") . "</h3>\n";
+   section( 'Games', T_('Your turn to move in the following games:'));
 
    if( @mysql_num_rows($result) == 0 )
    {
-      echo T_("No games found");
+      echo T_('No games found');
    }
    else
    {
@@ -259,7 +257,7 @@ require_once( "include/message_functions.php" );
 { // show pending posts
    if( (@$player_row['admin_level'] & ADMIN_FORUM) )
    {
-      echo "<hr id=sect_pending><br>";
+      section( 'Approval', '');
       chdir('forum');
       require_once('forum_functions.php');
       display_posts_pending_approval();
