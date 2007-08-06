@@ -854,9 +854,9 @@ if(1){//new
                $tdtable_attbs = $this->get_areaconf( FAREA_ALLV, FAC_ENVTABLE );
                $table_attbs = $this->get_merged_attbs( $table_attbs, 'V');
                $tdtable_attbs = $this->get_merged_attbs( $tdtable_attbs, 'V');
-               $areastr = "<TD$tdtable_attbs><TABLE$table_attbs>\n"
+               $areastr = "<TD$tdtable_attbs><TABLE$table_attbs><TR>\n"
                         . $areastr
-                        . "</TABLE></TD>\n";
+                        . "</TR></TABLE></TD>\n";
             }
             if( $TRlevel )
                $areastr = "<TR>$areastr</TR>";

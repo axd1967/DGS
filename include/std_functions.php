@@ -1316,10 +1316,10 @@ $html_code['faq'] = '\w+|/\w+'; //all not empty words
 
 
 //** no reg_exp chars nor ampersand nor '%' (see also $html_safe_preg):
-define( 'ALLOWED_LT', "`a`n`g`l`");
-define( 'ALLOWED_GT', "`a`n`g`g`");
-define( 'ALLOWED_QUOT', "`q`u`o`t`");
-define( 'ALLOWED_APOS', "`a`p`o`s`");
+define( 'ALLOWED_LT', "``a`n`g`l``");
+define( 'ALLOWED_GT', "``a`n`g`g``");
+define( 'ALLOWED_QUOT', "``q`u`o`t``");
+define( 'ALLOWED_APOS', "``a`p`o`s``");
 
 /* Simple syntax check of element's attributes up to the next '>'.
    Check for quote mismatches.
@@ -1424,8 +1424,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    global $parse_mark_regex;
    $before = '';
    //$stop = preg_quote($stop, '%');
-   //$reg = "%^(.*?)<(" . ( $stop ? "$stop|" : '' ) . "$html_code)([\\x01-\\x20>:].*)$%is";
-   $reg = ( $stop ? "$stop|" : '' ) . $html_code;
+   $reg = ( $html_code ?( $stop ?"$stop|" :'' ).$html_code :$stop );
    if( !$reg )
       return '';
    $reg = "%^(.*?)<($reg)\b(.*)$%is";
@@ -1451,20 +1450,20 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          }
       if( $bad)
          return $before .$marks .'<'. $head .'>' ;
-      $head = preg_replace('%[\\x01-\\x20]+%', ' ', $head);
 
+      $head = preg_replace('%[\\x01-\\x20]+%', ' ', $head);
       if( in_array($tag, array(
             //as a first set/choice of <ul>-like tags
             'quote','code','pre','center',
-            'dl','/dt','/dd','ul','ol','/li'
+            'dl','/dt','/dd','ul','ol','/li',
          )) )
       { //remove all the following newlines (to avoid inserted <br>)
          $trail= ereg_replace( "^[\r\n]+", '', $trail);
       }
-      if( in_array($tag, array(
+      else if( in_array($tag, array(
             //as a first set/choice of </ul>-like tags
-            '/note','/quote','/code','/pre','/center',
-            '/div','/dl','/ul','/ol'
+            '/quote','/code','/pre','/center',
+            '/dl','/ul','/ol','/note','/div',
          )) )
       { //remove the first following newline
          $trail= ereg_replace( "^(\r\n|\r|\n)", '', $trail);
@@ -1480,8 +1479,8 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       if( $tag == 'code' )
       {
          // does not allow inside HTML
-         $tmp= '/'.$tag;
-         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, $tmp);
+         $tmp= '';
+         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, '/'.$tag);
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
          $inside = str_replace('&', '&amp;', $inside);
@@ -1491,13 +1490,15 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       {
          // TT is mainly designed to be used when $some_html=='cell'
          // does not allow inside HTML and remove line breaks
-         $tmp= '/'.$tag;
-         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, $tmp);
+         $tmp= '';
+         $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, '/'.$tag);
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
          //$inside = str_replace('&', '&amp;', $inside);
          $inside = preg_replace('%[\\x09\\x20]%', '&nbsp;', $inside);
          $inside = preg_replace('%[\\x01-\\x1F]*%', '', $inside);
+         //TODO: fix potentially corrupted marks... to be reviewed
+         $inside = preg_replace('%&nbsp;class=Mark%', ' class=Mark', $inside);
       }
       else
       if( $to_be_closed )

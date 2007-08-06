@@ -227,14 +227,14 @@ require_once( "include/contacts.php" );
          $note = make_html_safe( $row['Notes'], false, $rxterms_note );
          //reduce multiple LF to one <br>
          $note = preg_replace( "/(\r\n|\n|\r)+/", '<br>', $note );
-         $crow_strings[8] = "<td>$note</A></td>";
+         $crow_strings[8] = "<td>$note</td>";
       }
       if( $ctable->Is_Column_Displayed[9] )
       {
-         $links  = anchor( "message.php?mode=NewMessage&uid=$cid",
+         $links  = anchor( "message.php?mode=NewMessage".URI_AMP."uid=$cid",
                image( 'images/send.gif', 'M'),
                T_('Send message'), 'class=ButIcon');
-         $links .= anchor( "message.php?mode=Invite&uid=$cid",
+         $links .= anchor( "message.php?mode=Invite".URI_AMP."uid=$cid",
                image( 'images/invite.gif', 'I'),
                T_('Invite'), 'class=ButIcon');
          $links .= anchor( "edit_contact.php?cid=$cid",

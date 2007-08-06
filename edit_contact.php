@@ -223,10 +223,9 @@ require_once( "include/contacts.php" );
    $cform->echo_string();
    echo "</CENTER><BR>\n";
 
-   $menu_array = array(
-      T_('Show contacts') => "list_contacts.php",
-      T_('Add new contact') => $page,
-      );
+   $menu_array[T_('Show contacts')] = "list_contacts.php";
+   if( $cid > 0 )
+      $menu_array[T_('Add new contact')] = $page;
 
    end_page(@$menu_array);
 }

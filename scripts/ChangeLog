@@ -28,11 +28,12 @@ Changelog
 2007-08-06 rodival
 
    * include/std_functions.php (section, start_html, end_page,
-     add_link_page_link):
+     add_link_page_link, parse_tags_safe):
    - introduced the section() function which allow to split the page
      in distinct sections
    - introduced the $ThePage['class'] to temporary solve some CSS problems
    - adjusted add_link_page_link() to fully handle the structure
+   - fix potentially corrupted marks of TT tag in parse_tags_safe()... to be reviewed
 
    * skins/dragon/screen.css,
      docs.php, admin.php, links.php, people.php, site_map.php,
@@ -47,8 +48,9 @@ Changelog
    - checked and fixed the W3C compliance of the CSS sheet
 
    * include/table_infos.php, include/table_columns.php,
-     links.php, edit_folders.php:
-   - minor fixes
+     include/form_functions.php,
+     links.php, edit_folders.php, list_contacts.php:
+   - minor fixes around W3C compliance
 
 2007-08-05 rodival
 

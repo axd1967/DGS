@@ -644,6 +644,7 @@ table.Table tr.Head th span.Header {
  row of the column filters
  may be at the bottom of the table
 */
+table.Table tr.Error,
 table.Table tr.Filter {
    background: #dddddd;
    text-align: left;
@@ -660,8 +661,14 @@ table.Table tr.Filter input {
 }
 
 table.Table tr.Filter td.Error {
-   background: #dd0080;
+   background: #dd0080; /* #ff0066 #ddb0b0=#ffcccc*86% #dd4080 */
+}
+
+table.Table td.ErrMsg em {
+   color: darkred;
    text-decoration: none;
+   font-style: normal; /* normal italic oblique inherit(css 2) */
+   font-weight: none;
 }
 
 table.Table tr.Filter td.ShowFilter {

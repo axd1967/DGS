@@ -385,21 +385,21 @@ class Table
 
    /*!
     * \brief Passes back filter_row per ref and return true, if form needed because of filters.
-    * signature: bool need_form = make_filter_row( &filter_row)
+    * signature: bool need_form = make_filter_row( &$filter_rows)
     */
-   function make_filter_row( &$filter_row )
+   function make_filter_row( &$filter_rows )
    {
-      // make filter-row
+      // make filter-rows
       $this->Shown_Filters = 0;
       $need_form  = false;
-      $filter_row = '';
+      $filter_rows = '';
 
       if ( $this->UseFilters )
       {
          // make filters
-         $filter_cells = array( '' );
+         $row_cells['Filter'] = '';
          foreach( $this->Tableheads as $thead )
-             $filter_cells[0] .= $this->make_table_filter( $thead );
+            $row_cells['Filter'] .= $this->make_table_filter( $thead );
 
          // add error-messages for filters
          if ( $this->Shown_Filters > 0 )
@@ -411,15 +411,15 @@ class Table
                $filter = $this->Filters->get_filter($id);
                $syntax = $filter->get_syntax_description();
                array_push( $arr_err,
-                  "<b>{$this->Tableheads[$id]['Description']}:</b> "
-                  . '<font color=darkred>' . T_('Error#filter') . ': ' . $filter->errormsg() . '</font>'
+                  "<strong>{$this->Tableheads[$id]['Description']}:</strong> "
+                  . '<em>' . T_('Error#filter') . ': ' . $filter->errormsg() . '</em>'
                   . ( ($syntax != '') ? "; $syntax" : '') );
             }
-            $errormessages = ( count($arr_err) > 0 ) ? implode( "<br>", $arr_err ) : "";
+            $errormessages = implode( '<br>', $arr_err );
 
             if ( $errormessages != '' )
-               array_push( $filter_cells,
-                  "  <td colspan=($this->Shown_Columns) align=left>$errormessages</td>\n");
+               $row_cells['Error'] =
+                  "<td class=ErrMsg colspan={$this->Shown_Columns}>$errormessages</td>";
 
             $need_form = true;
          }
@@ -427,12 +427,14 @@ class Table
          // include row only, if there are filters
          if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] or $this->Shown_Filters > 0 )
          {
-            $tr_attbs = "id=\"{$this->Prefix}TableFilter\""; // only for 1st entry
-            foreach( $filter_cells as $cells )
+            $tr_attbs = " id=\"{$this->Prefix}TableFilter\""; // only for 1st entry
+            foreach( $row_cells as $class => $cells )
             {
-               $filter_row .= " <tr ${tr_attbs} class=Filter>\n";
-               $filter_row .= $cells;
-               $filter_row .= " </tr>\n";
+               if( !$cells )
+                  continue;
+               $filter_rows .= "<tr$tr_attbs class=$class>";
+               $filter_rows .= $cells;
+               $filter_rows .= "</tr>\n";
                $tr_attbs = '';
             }
          }
