@@ -1960,11 +1960,17 @@ table.FAQAdmin td.Button {
 
 table.ForumAdmin td.Button img,
 table.FAQAdmin td.Button img {
+   border: 0px solid black;
    width: 12px;
    height: 12px;
-   border: 0px solid black;
    margin: 2px 4px 0px 0px;
    vertical-align: top;
+}
+
+table.ForumAdmin td.Entry,
+table.FAQAdmin td.Category,
+table.FAQAdmin td.Entry {
+   padding: 2px 1em 2px 4px;
 }
 
 table.xxxForumAdmin td.Entry,
@@ -1973,12 +1979,7 @@ table.FAQAdmin td.Category,
 table.FAQAdmin td.Entry {
    border: 0px solid #808080;
    border-width: 0px 0px 0px 1px;
-}
-
-table.ForumAdmin td.Entry,
-table.FAQAdmin td.Category,
-table.FAQAdmin td.Entry {
-   padding: 2px 1em 2px 4px;
+/*   margin-left: 2px; /* */
 }
 
 /* ------------------------- */
