@@ -18,7 +18,10 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+$TranslateGroups[] = "Forum";
+
 require_once( "forum_functions.php" );
+require_once( "../include/faq_functions.php" ); //for TD_button()
 
 {
    connect2mysql();
@@ -26,239 +29,267 @@ require_once( "forum_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-     error('not_logged_in');
+      error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_FORUM) )
       error('adminlevel_too_low');
 
-   $id = @$_GET["id"]+0;
+   $fid = max(0,@$_REQUEST['id']);
 
    $show_list = true;
-
-  // ***********        New forum       ****************
-
-  if( @$_GET["new"] == 't' )
-  {
-     $title = T_('Forum Admin').' - '.T_('New forum');
-     start_page($title, true, $logged_in, $player_row );
-     echo "<h3 class=Header>$title</h3>\n";
-
-     $show_list = false;
-     echo "<center>\n";
-
-     $forum_edit_form = new Form( 'forumform', "admin.php?do_new=t".URI_AMP."id=$id", FORM_POST );
-
-     $forum_edit_form->add_row( array( 'HEADER', T_('New Forum') ) );
-     $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
-                                       'TEXTINPUT', 'name', 50, 80, '' ) );
-     $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
-                                       'TEXTAREA', 'description', 50, 4, '' ) );
-     $forum_edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
-                                       'CHECKBOX', 'moderated', 1, '', false));
-     $forum_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
-     $forum_edit_form->echo_string(1);
-  }
-
-  // ***********        Save new forum       ****************
-
-  else if( @$_GET["do_new"] == 't' )
-  {
-     $SortOrder = 0;
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=" . (@$_GET["id"]+0) )
-        or error("mysql_query_failed",'forum_admin.do_new.find_forums');
-
-     if( @mysql_num_rows($result) == 1 )
-     {
-        $row = mysql_fetch_array( $result );
-        $SortOrder = $row['SortOrder'];
-     }
-
-     $name = trim( @$_POST["name"] );
-     $description = trim( @$_POST["description"] );
-
-     if( !empty($name) )
-     {
-        mysql_query("UPDATE Forums SET SortOrder=SortOrder+1 " .
-                    'WHERE SortOrder>' . $SortOrder )
-        or error("mysql_query_failed",'forum_admin.update_sortorder');
-
-        mysql_query("INSERT INTO Forums SET " .
-                    "Name=\"$name\", " .
-                    "Description=\"$description\", " .
-                    "Moderated=" . (@$_POST["moderated"] ? '"Y"' : '"N"') . ", " .
-                    "SortOrder=" . ($SortOrder+1))
-           or error("mysql_query_failed",'forum_admin.insert');
-     }
-     else
-     {
-        $msg = urlencode('Error: A Forum name must be given');
-        jump_to("forum/admin.php?sysmsg=$msg");
-     }
-
-     jump_to("forum/admin.php");
-  }
-
-  // ***********        Edit forum       ****************
-
-  else if( @$_GET["edit"] == 't' )
-  {
-     $title = T_('Forum Admin').' - '.T_('Edit forum');
-     start_page($title, true, $logged_in, $player_row );
-     echo "<h3 class=Header>$title</h3>\n";
-
-     $show_list = false;
-     echo "<center>\n";
-
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" )
-           or error("mysql_query_failed",'forum_admin.edit.find_forums');
-
-     if( @mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry",'forum_admin.edit.find_forums');
-
-     $row = mysql_fetch_array( $result );
-
-     $forum_edit_form = new Form( 'forumform', "admin.php?do_edit=t".URI_AMP."id=$id", FORM_POST );
-
-     $forum_edit_form->add_row( array( 'HEADER', T_('Edit Forum') ) );
-     $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
-                                       'TEXTINPUT', 'name', 50, 80, $row['Name'] ) );
-     $forum_edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
-                                       'TEXTAREA', 'description', 50, 4, $row['Description'] ) );
-     $forum_edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
-                                       'CHECKBOX', 'moderated', 1, '', $row['Moderated'] == 'Y'));
-     $forum_edit_form->add_row( array( 'SUBMITBUTTON', 'submit', T_('Submit') ) );
-     $forum_edit_form->echo_string(1);
-  }
+   $page = 'admin.php';
+   $abspage = 'forum/'.$page;
+   $ThePage['class']= 'ForumAdmin'; //temporary solution to CSS problem
 
 
-  // ***********        Save edited forum       ****************
+   // ***********        Move entry       ****************
 
-  else if( @$_GET["do_edit"] == 't' )
-  {
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" )
-        or error("mysql_query_failed",'forum_admin.do_edit.find_forums');
+   // args: id, move=u|d, dir=length of the move (int, pos or neg)
+   if( ($action=@$_REQUEST['move']) == 'u' or $action == 'd' )
+   {
+      $dir = isset($_REQUEST['dir']) ? (int)$_REQUEST['dir'] : 1;
+      $dir = $action == 'd' ? $dir : -$dir; //because ID top < ID bottom
 
-     if( @mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry",'forum_admin.do_edit.find_forums');
+      $row = mysql_single_fetch( 'forum_admin.move.find',
+                "SELECT * FROM Forums WHERE ID=$fid")
+          or error('admin_no_such_entry',"forum_admin.move.$action.read($fid)");
 
-     $row = mysql_fetch_array( $result );
+      $row2 = mysql_single_fetch( 'forum_admin.move.max',
+                "SELECT COUNT(*) as max FROM Forums")
+          or error('mysql_query_failed',"forum_admin.move.$action.max");
+      $max = $row2['max'];
 
-     if( !isset( $_POST["name"] ) )
-        error("No data");
+      $start = $row['SortOrder'];
+      $end = max( 1, min( $max, $start + $dir));
+      $cnt = abs($end - $start);
+      if( $cnt )
+      {
+         $dir = $dir>0 ? 1 : -1;
+         $start+= $dir;
 
-     $name = trim( $_POST["name"] );
-     $description = trim( @$_POST["description"] );
+         //shift the neighbours backward, reference by SortOrder
+         mysql_query("UPDATE Forums SET SortOrder=SortOrder-($dir)"
+                     . " WHERE SortOrder BETWEEN "
+                        .($start>$end?"$end AND $start":"$start AND $end")
+                     . " LIMIT $cnt" )
+            or error('mysql_query_failed','forum_admin.move.update_sortorder1');
 
-
-     // Delete ?
-     if( empty($name) and empty($description) and
-         @mysql_num_rows(mysql_query("SELECT ID FROM Posts " .
-                                    "WHERE Forum_ID=" . $row["ID"] . " LIMIT 1")) == 0 )
-     {
-        mysql_query("DELETE FROM Forums WHERE ID=$id LIMIT 1")
-           or error("mysql_query_failed",'forum_admin.do_edit.delete');
-        mysql_query("UPDATE Forums SET SortOrder=SortOrder-1 " .
-                    "WHERE SortOrder>" . $row["SortOrder"])
-           or error("mysql_query_failed",'forum_admin.do_edit.update_sortorder');
-     }
-     else
-     {
-        mysql_query("UPDATE Forums SET ".
-                    "Name=\"$name\", " .
-                    "Description=\"$description\", " .
-                    "Moderated=" . (@$_POST['moderated'] ? '"Y"' : '"N"') . " " .
-                    "WHERE ID=" . $row['ID'] . " LIMIT 1")
-           or error("mysql_query_failed",'forum_admin.do_edit.update_forums');
-     }
-
-     jump_to("forum/admin.php");
-  }
+         //move the entry forward, reference by ID
+         mysql_query("UPDATE Forums SET SortOrder=$end"
+                     . " WHERE ID=$fid LIMIT 1")
+            or error('mysql_query_failed','forum_admin.move.update_sortorder2');
+      }
+      jump_to($abspage); //clean URL
+   } //move
 
 
+   // ***********        Edit entry       ****************
 
-  // ***********        Move forum       ****************
+   // args: id, edit=t [ do_edit=? ]
+   // keep it tested before 'do_edit'
+   else if( @$_REQUEST['edit'] )
+   {
+      $title = T_('Forum Admin').' - '.T_('Edit forum');
+      start_page($title, true, $logged_in, $player_row );
+      echo "<h3 class=Header>$title</h3>\n";
 
-  else if( @$_GET["move"] == 'u' or @$_GET["move"] == 'd' )
-  {
-     $result = mysql_query( "SELECT * FROM Forums WHERE ID=$id" )
-        or error('mysql_query_failed','forum_admin.move.find_forums');
+      $show_list = false;
 
-     if( @mysql_num_rows($result) != 1 )
-        error("admin_no_such_entry",'admin3');
+      $row = mysql_single_fetch( 'forum_admin.edit.find',
+                "SELECT * FROM Forums WHERE ID=$fid")
+          or error('admin_no_such_entry',"forum_admin.edit.find($fid)");
 
-     $row = mysql_fetch_array( $result );
+      $edit_form = new Form('forumeditform', "$page?id=$fid", FORM_POST );
 
-     $result = mysql_query( "SELECT MAX(SortOrder) as max FROM Forums")
-        or error('mysql_query_failed','forum_admin.move.max_sortorder');
-
-     $row2 = mysql_fetch_array( $result );
-     $max = $row2["max"];
-
-     if( ( @$_GET["move"] != 'u' or $row["SortOrder"] > 1 ) and
-         ( @$_GET["move"] != 'd' or $row["SortOrder"] < $max ) )
-     {
-        $dir = (@$_GET["move"] == 'd' ? 1 : -1 );
-
-        mysql_query( "UPDATE Forums SET SortOrder=SortOrder-($dir) " .
-                     'WHERE SortOrder=' . ($row["SortOrder"]+$dir) )
-           or error('mysql_query_failed','forum_admin.move.update_sortorder1');
-
-        mysql_query( "UPDATE Forums SET SortOrder=SortOrder+($dir) " .
-                     "WHERE ID=" . $row["ID"] . " LIMIT 1")
-           or error('mysql_query_failed','forum_admin.move.update_sortorder2');
-     }
-     jump_to("forum/admin.php");
-  }
+      //$edit_form->add_row( array( 'HEADER', T_//('Edit Forum') ) );
+      $edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
+                                  'TEXTINPUT', 'name', 50, 80, $row['Name'] ) );
+      $edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
+                                  'TEXTAREA', 'description', 50, 4, $row['Description'] ) );
+      $edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
+                                  'CHECKBOX', 'moderated', 1, '', $row['Moderated'] == 'Y'));
+      $edit_form->add_row( array(
+                           'SUBMITBUTTONX', 'do_edit', T_('Save entry'),
+                              array('accesskey'=>'x'),
+                           'SUBMITBUTTON', 'back', T_('Back to list'),
+                           ));
+      $edit_form->echo_string(1);
+   } //edit
 
 
+   // ***********        Save edited entry       ****************
 
-  // ***********       Show forum list       ****************
+   // args: id, do_edit=t
+   // keep it tested after 'edit'
+   else if( @$_REQUEST['do_edit'] )
+   {
+      $row = mysql_single_fetch( 'forum_admin.do_edit.find',
+                "SELECT * FROM Forums WHERE ID=$fid")
+          or error('admin_no_such_entry',"forum_admin.do_edit.find($fid)");
 
-  if( $show_list )
-  {
-     $title = T_('Forum Admin');
-     start_page($title, true, $logged_in, $player_row );
-     echo "<h3 align=left><a name=\"general\"></a><font color=$h3_color>" .
-        T_('Forum Admin') . "</font></h3>\n";
+      $name = trim( get_request_arg('name') );
+      $description = trim( get_request_arg('description') );
 
-     echo "<center>\n";
+      // Delete or update ?
+      if( !$name && !$description )
+      { // Delete
+         if( mysql_single_fetch( 'forum_admin.do_edit.empty',
+            "SELECT ID FROM Posts WHERE Forum_ID=".$row['ID']." LIMIT 1") )
+         {
+            $msg = urlencode('Error: forum not empty');
+            jump_to("$abspage?sysmsg=$msg");
+         }
 
-     echo "<table align=center width=\"85%\" border=0><tr><td>\n";
+         mysql_query("DELETE FROM Forums WHERE ID=$fid LIMIT 1")
+            or error('mysql_query_failed','forum_admin.do_edit.delete');
+         mysql_query("UPDATE Forums SET SortOrder=SortOrder-1 " .
+                     "WHERE SortOrder>" . $row["SortOrder"])
+            or error('mysql_query_failed','forum_admin.do_edit.update_sortorder');
+      }
+      else
+      { //Update
+         if( !$name )
+         {
+            $msg = urlencode('Error: an entry must be given');
+            jump_to("$abspage?sysmsg=$msg");
+         }
 
-     $result =
-        mysql_query("SELECT Forums.ID,Description,Name " .
-                    "FROM (Forums) LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID " .
-                    "GROUP BY Forums.ID " .
-                    "ORDER BY SortOrder")
-        or error('mysql_query_failed','forum_admin.list.find_forums');
+         mysql_query("UPDATE Forums SET"
+                  . " Name='".mysql_addslashes($name)."'"
+                  . ",Description='".mysql_addslashes($description)."'"
+                  . ",Moderated=" . (@$_REQUEST['moderated'] ? "'Y'" : "'N'")
+                  . " WHERE ID=" . $row['ID'] . " LIMIT 1")
+            or error('mysql_query_failed','forum_admin.do_edit.update_forums');
+      }
 
-     echo "<table>\n";
-
-
-     echo "<tr><td colspan=4 align=right><a href=\"admin.php?new=t".URI_AMP."id=0\">" .
-        '<img border=0 title="' . T_('Add new forum') . '" src="../images/new.png" alt="N"></a>';
-
-     while( $row = mysql_fetch_array( $result ) )
-     {
-        $name = (empty($row['Name']) ? '-' : $row['Name']);
-
-        echo '<tr><td>';
-        echo "<A href=\"admin.php?edit=t".URI_AMP."id=" . $row['ID'] .
-           '" title="' . T_("Edit") . "\">$name</A>\n";
-
-        echo '<td width=40 align=right><a href="admin.php?move=u'.URI_AMP.'id=' . $row['ID'] .
-           '"><img border=0 title="' . T_("Move up") . '" src="../images/up.png" alt="u"></a>';
-        echo '<td><a href="admin.php?move=d'.URI_AMP.'id=' . $row['ID'] .
-           '"><img border=0 title="' . T_("Move down") . '" src="../images/down.png" alt="d"></a>';
-        echo "<td><a href=\"admin.php?new=t".URI_AMP."id=" . $row['ID'] .
-           '"><img border=0 title="' . T_('Add new forum') . '" src="../images/new.png" alt="N"></a>';
-     }
+      jump_to($abspage); //clean URL
+   } //do_edit
 
 
-     echo "</table></table>\n";
-  }
+   // ***********        New entry       ****************
 
-  echo "</center>";
-  end_page();
+   // args: id, new=t
+   // keep it tested before 'do_new'
+   else if( @$_REQUEST['new'] )
+   {
+      $title = T_('Forum Admin').' - '.T_('New forum');
+      start_page($title, true, $logged_in, $player_row );
+      echo "<h3 class=Header>$title</h3>\n";
+
+      $show_list = false;
+
+      $edit_form = new Form('forumnewform', "$page?id=$fid", FORM_POST );
+
+      //$edit_form->add_row( array( 'HEADER', T_//('New Forum') ) );
+      $edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
+                                  'TEXTINPUT', 'name', 50, 80, '' ) );
+      $edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
+                                  'TEXTAREA', 'description', 50, 4, '' ) );
+      $edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
+                                  'CHECKBOX', 'moderated', 1, '', false));
+      $edit_form->add_row( array(
+                           'SUBMITBUTTONX', 'do_new', T_('Add entry'),
+                              array('accesskey'=>'x'),
+                           'SUBMITBUTTON', 'back', T_('Back to list'),
+                           ));
+      $edit_form->echo_string(1);
+   } //new
+
+
+    // ***********        Save new entry       ****************
+
+   // args: id, do_new=t (insert after entry #id, 0=first)
+   // keep it tested after 'new'
+   else if( @$_REQUEST['do_new'] )
+   {
+      $name = trim( get_request_arg('name') );
+      $description = trim( get_request_arg('description') );
+      if( !$name )
+      {
+         $msg = urlencode('Error: an entry must be given');
+         jump_to("$abspage?sysmsg=$msg");
+      }
+
+      $query = "SELECT * FROM Forums WHERE ID=$fid";
+      $row = mysql_single_fetch( 'forum_admin.do_new.find', $query );
+      if( $row )
+         $SortOrder = $row['SortOrder'];
+      else
+         $SortOrder = 0;
+
+      mysql_query("UPDATE Forums SET SortOrder=SortOrder+1 " .
+                  'WHERE SortOrder>' . $SortOrder )
+         or error('mysql_query_failed','forum_admin.update_sortorder');
+
+      mysql_query("INSERT INTO Forums SET"
+               . " Name='".mysql_addslashes($name)."'"
+               . ",Description='".mysql_addslashes($description)."'"
+               . ",Moderated=" . (@$_REQUEST['moderated'] ? "'Y'" : "'N'")
+               . ",SortOrder=" . ($SortOrder+1))
+         or error('mysql_query_failed','forum_admin.insert');
+
+      jump_to($abspage); //clean URL
+   } //do_new
+
+
+
+   // ***********       Show whole list       ****************
+
+   if( $show_list )
+   {
+      $title = T_('Forum Admin');
+      start_page($title, true, $logged_in, $player_row );
+
+      $query =
+         "SELECT Forums.ID,Description,Name"
+         . " FROM (Forums)"
+         //. " LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID"
+         . " GROUP BY Forums.ID"
+         . " ORDER BY SortOrder";
+
+      #echo "<br>QUERY: $query<br>\n"; // debug
+      $result = mysql_query($query)
+         or error('mysql_query_failed','forum_admin.list');
+
+      echo "<h3 class=Header>$title</h3>\n";
+
+      $nbcol = 5;
+      echo "<a name=\"general\"></a><table class=ForumAdmin>\n";
+
+      // table-columns:
+
+      echo "<tr>"
+         . TD_button( T_('Add new forum'),
+               "$page?new=1".URI_AMP."id=0",
+               '../images/new.png', 'N')
+         . '<td>(first entry)</td>'
+         . '<td colspan='.($nbcol-2).'></td></tr>';
+
+      while( $row = mysql_fetch_assoc( $result ) )
+      {
+         $name = (empty($row['Name']) ? '---' : $row['Name']);
+
+         echo '<tr>';
+         echo '<td colspan='.($nbcol-3).' class=Entry>'
+            ."<A href=\"$page?edit=1".URI_AMP."id=" . $row['ID']
+            .'" title="' . T_("Edit") . "\">$name</A></td>";
+
+         echo TD_button( T_('Move up'),
+               "$page?move=u".URI_AMP.'id=' . $row['ID'],
+               '../images/up.png', 'u');
+         echo TD_button( T_('Move down'),
+               "$page?move=d".URI_AMP.'id=' . $row['ID'],
+               '../images/down.png', 'd');
+         echo TD_button( T_('Add new forum'),
+               "$page?new=1".URI_AMP."id=" . $row['ID'],
+               '../images/new.png', 'N');
+         echo '</tr>';
+      }
+      mysql_free_result($result);
+
+      echo "</table>\n";
+   } //show_list
+
+   end_page();
 }
 ?>

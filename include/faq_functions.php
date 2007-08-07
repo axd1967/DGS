@@ -82,4 +82,14 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rxterm='' )
    return $str;
 }
 
+function TD_button( $title, $href, $isrc, $ialt)
+{
+   //image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
+   $str = image( $isrc, $ialt, $title);
+   //anchor( $href, $text, $title='', $attbs='')
+   $str = anchor( $href, $str);
+   $str = "<td class=Button>$str</td>\n";
+   return $str;
+}
+
 ?>

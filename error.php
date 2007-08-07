@@ -520,11 +520,13 @@ require_once( "include/std_functions.php" );
       }
       break;
 
+/*
       case('admin_already_translated'):
       {
-         echo T_("Sorry, this entry is already translated, so I cannot make it untranslatable.");
+         echo T_//("Sorry, this entry is already translated, so I cannot make it untranslatable.");
       }
       break;
+*/
 
       case("adminlevel_too_low"):
       {
