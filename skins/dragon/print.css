@@ -95,7 +95,7 @@ span.header,
    font-weight: bold;
 }
 
-.sysmsg {
+p.SysMsg {
    color: green;
    font-weight: bold;
 }

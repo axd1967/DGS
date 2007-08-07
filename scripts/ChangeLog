@@ -25,6 +25,29 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-07 rodival
+
+   * include/faq_functions.php,
+     forum/admin.php,
+     admin_faq.php, error.php:
+   - reviewed and CSSed forum/admin.php
+   - normalized forum/admin.php and admin_faq.php to have an easier comparison
+   - moved the TD_button() function to faq_functions.php to share it between
+     admin_faq.php and forum/admin.php
+   - removed the unused 'admin_already_translated' message
+
+   * include/filter_functions.php,
+     include/table_columns.php (make_table_filter),
+     include/form_functions.php (print_insert_filtererror),
+     forum/forum_functions.php,
+     game.php (draw_game_info, draw_board_info),
+     admin.php, search.php, post.php, index.php, login.php:
+   - CSS and W3C fixes
+   - minor translation related fixes
+
+   * userinfo.php:
+   - removed the 'forced column' part of the links to show_games.php
+
 2007-08-06 rodival
 
    * include/std_functions.php (section, start_html, end_page,

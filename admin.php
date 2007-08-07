@@ -35,6 +35,7 @@ require_once( "include/form_functions.php" );
    if( !$admin_level )
       error('adminlevel_too_low');
 
+   $ThePage['class']= 'Admin'; //temporary solution to CSS problem
    start_page(T_('Admin'), true, $logged_in, $player_row);
 
    section( 'Admin', T_('Administration'));
@@ -49,7 +50,7 @@ require_once( "include/form_functions.php" );
                      '', $admin_level & ADMIN_FORUM);
    add_link_page_link('admin_admins.php', T_('Edit admin staff'),
                      '', $admin_level & ADMIN_ADMINS);
-//   add_link_page_link('admin_requests.php', T_('Handle user requests'), '', false);
+   //add_link_page_link('admin_requests.php', T_//('Handle user requests'), '', false);
 
    add_link_page_link();
 

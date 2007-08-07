@@ -20,13 +20,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 $TranslateGroups[] = "Forum";
 
+require_once( "forum_functions.php" );
 chdir("../");
-require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
-require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
 chdir("forum/");
-require_once( "forum_functions.php" );
 
 //does not work. Need at least a special SearchHidden class
 define('MODERATOR_SEARCH', 0);

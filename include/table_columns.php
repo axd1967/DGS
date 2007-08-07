@@ -968,7 +968,7 @@ class Table
          $query = clean_url( $query);
          $fcolor_hide = ( $filter->errormsg() ) ? 'white' : 'red';
          $togglestr_show =
-            "<a href=\"$query\" title=\"" . attb_quote(T_('Show')) . '">' .
+            "<a href=\"$query\" title=" . attb_quote(T_('Show')) . '>' .
             "<font color=\"blue\">" . CHAR_SHOWFILTER ."</font></a>";
          global $base_path;
          $togglestr_hide = anchor(

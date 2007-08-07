@@ -1460,11 +1460,15 @@ if(1){//new
       if( !isset($filter) or !$filter->has_error() )
          return '';
 
-      $syntax = $filter->get_syntax_description();
-      if( $with_syntax and $syntax != '' )
-         $syntax = "; $syntax";
+      $msg = $filter->errormsg();
+      if( $with_syntax )
+      {
+         $syntax = $filter->get_syntax_description();
+         if( $syntax )
+            $msg.= "; $syntax";
+      }
       return $prefix . T_('Error#filter') . ': '
-         . make_html_safe( $filter->errormsg() . $syntax ) . $suffix;
+         . make_html_safe( $msg ) . $suffix;
    }
 
    /*!

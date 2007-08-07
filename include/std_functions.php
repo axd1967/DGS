@@ -866,7 +866,7 @@ function help($topic)
 function sysmsg($msg)
 {
    if( isset($msg) && ($msg=trim(make_html_safe($msg,'msg'))) )
-      echo "\n<p class=Sysmsg>$msg</p><hr class=Sysmsg>\n";
+      echo "\n<p class=SysMsg>$msg</p><hr class=SysMsg>\n";
 }
 
 

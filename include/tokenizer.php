@@ -138,6 +138,15 @@ class Token
          return $this->epos;
    }
 
+   /*! \brief Returns int the length of token as found in orig-text. */
+   function get_length()
+   {
+      if ( $this->epos < 0 )
+         return strlen($this->token);
+      else
+         return $this->epos - $this->spos + 1;
+   }
+
    /*! \brief Sets error-string for this token. */
    function set_error( $error )
    {

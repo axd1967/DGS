@@ -24,24 +24,24 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
 {
-  connect2mysql();
+   connect2mysql();
 
 
-  if( @$_GET['logout'] )
-    {
+   if( @$_GET['logout'] )
+   {
       set_login_cookie("","", true);
       jump_to("index.php");
-    }
+   }
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  $sysmsg= get_request_arg('sysmsg'); unset($_REQUEST['sysmsg']);
-  start_page(T_("Home"), true, $logged_in, $player_row );
+   $sysmsg= get_request_arg('sysmsg'); unset($_REQUEST['sysmsg']);
+   start_page(T_("Home"), true, $logged_in, $player_row );
 
 
-  echo "<center>\n";
-  echo '<IMG  width=666 height=172  border=0 alt="'.$FRIENDLY_LONG_NAME.'" SRC="images/dragon_logo.jpg">';
-  echo "\n<BR>&nbsp;";
+   echo "<center>\n";
+   echo '<IMG  width=666 height=172  border=0 alt="'.$FRIENDLY_LONG_NAME.'" SRC="images/dragon_logo.jpg">';
+   echo "\n<BR>&nbsp;";
 
 
 if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server

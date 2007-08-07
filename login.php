@@ -51,15 +51,15 @@ if( $quick_mode )
       error("wrong_userid");
 
 
-   $code = $row["Sessioncode"];
+   $code = @$row['Sessioncode'];
 
    if( !@$_REQUEST['cookie_check'] )
    {
-      if( !check_password( $uhandle, $row["Password"],
-                           $row["Newpassword"], $passwd ) )
+      if( !check_password( $uhandle, $row['Password'],
+                           $row['Newpassword'], $passwd ) )
          error("wrong_password");
 
-      if( !$code or $row["Expire"] < $NOW )
+      if( !$code or @$row['Expire'] < $NOW )
       {
          $code = make_session_code();
          mysql_query( "UPDATE Players SET " .

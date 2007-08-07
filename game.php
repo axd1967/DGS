@@ -616,7 +616,11 @@ function get_alt_arg( $n1, $n2)
 
    echo "<HR>\n";
    draw_game_info($game_row, $TheBoard);
-   //echo draw_board_info($TheBoard);
+/*
+   $txt= draw_board_info($TheBoard);
+   if( $txt )
+      echo "<div id=\"boardInfos\">$txt</div>\n";
+*/
    echo "<HR>\n";
 
 
@@ -896,7 +900,7 @@ function draw_game_info(&$game_row, &$board)
    {
       $txt= draw_board_info($board);
       if( $txt )
-         echo "<tr id=\"boardInfos\"><td colspan=$cols\n>$txt</td></tr>\n";
+         echo "<tr id=\"boardInfos\" class=BoardInfos><td colspan=$cols\n>$txt</td></tr>\n";
    }
 
    echo "</table>\n";
@@ -947,7 +951,7 @@ function draw_board_info($board)
       }
    }
    if( $txt )
-      $txt= "<div id=\"boardInfos\" class=BoardInfos><dl>$txt</dl></div>\n";
+      $txt= "<div class=BoardInfos><dl>$txt</dl></div>\n";
    return $txt;
 }
 
