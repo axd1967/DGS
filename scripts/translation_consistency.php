@@ -26,8 +26,9 @@ require_once( "include/std_functions.php" );
 
    connect2mysql();
 
+   disable_cache();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
       error('not_logged_in');
@@ -36,7 +37,7 @@ require_once( "include/std_functions.php" );
       error('adminlevel_too_low');
 
 
-   start_html( 'FAQtransl_consistency', 0);
+   start_html( 'translation_consistency', 0);
 
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
 echo ">>>> Most of them needs manual fixes.";
@@ -253,5 +254,4 @@ echo ">>>> Most of them needs manual fixes.";
    echo "<hr>Done!!!\n";
    end_html();
 }
-
 ?>
