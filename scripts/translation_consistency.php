@@ -85,6 +85,11 @@ echo ">>>> Most of them needs manual fixes.";
       $AID = (int)@$row['Answer'];
       if( $QID!=$TID && $AID!=$TID )
       {
+         if( $do_it )
+         {
+            echo "<br> >>> CAN'T BE FIXED\n";
+            break;
+         }
          echo "<br>Text.$TID =&gt; FAQ." . $row['Ref_ID']
             . " =&gt; Text.$QID + Text.$AID" ;
          /*
@@ -113,6 +118,11 @@ echo ">>>> Most of them needs manual fixes.";
       $RID = (int)@$row['Ref_ID'];
       if( $FID!=$RID )
       {
+         if( $do_it )
+         {
+            echo "<br> >>> CAN'T BE FIXED\n";
+            break;
+         }
          echo "<br>FAQ.$FID =&gt; QText.$QID =&gt; $RID";
          /*
          dbg_query("UPDATE TranslationTexts SET Ref_ID=0 " .
@@ -135,6 +145,11 @@ echo ">>>> Most of them needs manual fixes.";
       $RID = (int)@$row['Ref_ID'];
       if( $FID!=$RID )
       {
+         if( $do_it )
+         {
+            echo "<br> >>> CAN'T BE FIXED\n";
+            break;
+         }
          echo "<br>FAQ.$FID =&gt; AText.$AID =&gt; $RID";
          /*
          dbg_query("UPDATE TranslationTexts SET Ref_ID=0 " .
@@ -161,6 +176,11 @@ echo ">>>> Most of them needs manual fixes.";
       $GID = (int)@$row['Group_ID'];
       if( $GID<=0 )
       {
+         if( $do_it )
+         {
+            echo "<br> >>> CAN'T BE FIXED\n";
+            break;
+         }
          echo "<br>Text.$TID =&gt; InGroup.$GID";
          /*
          dbg_query("UPDATE TranslationTexts SET Ref_ID=0 " .
@@ -191,6 +211,11 @@ echo ">>>> Most of them needs manual fixes.";
       $nam = (string)@$row['Groupname'];
       if( $nam == '' )
       {
+         if( $do_it )
+         {
+            echo "<br> >>> CAN'T BE FIXED\n";
+            break;
+         }
          echo "<br>Text.$TID =&gt; InGroup.$GID =&gt; Group.$nam";
          /*
          dbg_query("UPDATE TranslationTexts SET Ref_ID=0 " .
