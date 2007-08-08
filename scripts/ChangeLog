@@ -34,6 +34,11 @@ Changelog
    * userinfo.php, opponents.php:
    - Rank and Open html_safe adds
 
+   * skins/dragon/screen.css,
+     include/std_functions.php (section),
+     status.php:
+   - CSS ajustments of PendingApproval section
+
 2007-08-07 rodival
 
    * include/faq_functions.php,

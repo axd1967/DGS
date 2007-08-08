@@ -215,6 +215,15 @@ table.Section { /* centered_container */
    vertical-align: top;
 }
 
+table.Section td.Section {
+   border: 0px solid red;
+   margin: 0px;
+   padding: 4px;
+   width: auto;
+   vertical-align: middle;
+   text-align: center;
+}
+
 hr.Section {
    display: none; /* */
    margin: 1em 0px 0px 0px;
@@ -1652,12 +1661,7 @@ table.Forum {
    margin: 0px;
    border-spacing: 0px;
    empty-cells: show;
-   width: 99%;
-}
-
-/* in status page */
-table#forumPending {
-   width: 90%;
+   width: 100%;
 }
 
 table.Forum table {
@@ -1670,6 +1674,12 @@ table.Forum table {
    border-spacing: 0px;
    empty-cells: show;
    width: 100%;
+}
+
+/* in status page */
+table#forumPending {
+   border: 0px solid red;
+   margin: 0px auto;
 }
 
 table#forumIndex tr {

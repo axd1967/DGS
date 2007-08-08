@@ -2215,11 +2215,10 @@ function section( $id='', $header='')
    if( $id )
    { //section request, open it
       $section = attb_quote('sect'.$id);
-      echo "\n<table id=$section class=Section><tr><td>";
+      echo "\n<table id=$section class=Section><tr><td class=Section>";
       if( $header )
          echo "<h3 class=Header>$header</h3>";
-      else
-         echo '<br class=Section>';
+      else echo '<br class=Section>';
    }
 }
 

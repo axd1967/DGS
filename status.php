@@ -257,7 +257,7 @@ require_once( "include/message_functions.php" );
 { // show pending posts
    if( (@$player_row['admin_level'] & ADMIN_FORUM) )
    {
-      section( 'Approval', '');
+      section( 'Pending', '');
       chdir('forum');
       require_once('forum_functions.php');
       display_posts_pending_approval();
