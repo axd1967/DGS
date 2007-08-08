@@ -31,6 +31,9 @@ Changelog
    - renamed scripts/FAQtransl_consistency.php
      to scripts/translation_consistency.php
 
+   * userinfo.php, opponents.php:
+   - Rank and Open html_safe adds
+
 2007-08-07 rodival
 
    * include/faq_functions.php,

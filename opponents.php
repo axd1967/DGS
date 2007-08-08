@@ -71,7 +71,7 @@ $ARR_DBFIELDKEYS = array(
    // who are player (uid) and opponent (opp) ?
    $players = array(); // uid => ( Players.field => value )
    $query = "SELECT "
-      . "ID,Handle,Name,Country,Rating2, "
+      . "ID,Handle,Name,Country,Open,Rank,Rating2, "
       . "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, "
       . "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastAccess, "
       . "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS lastMove "
@@ -356,42 +356,42 @@ $ARR_DBFIELDKEYS = array(
          $urow_strings[16] = "<td>" . $cntrn . "</td>";
       }
       if( $utable->Is_Column_Displayed[4] )
-         $urow_strings[4] = '<td>' . make_html_safe(@$row['Rankinfo'],INFO_HTML) . '&nbsp;</td>';
+         $urow_strings[4] = '<td>' . make_html_safe(@$row['Rankinfo'],INFO_HTML) . '</td>';
       if( $utable->Is_Column_Displayed[5] )
-         $urow_strings[5] = '<td>' . echo_rating(@$row['Rating2'],true,$ID) . '&nbsp;</td>';
+         $urow_strings[5] = '<td>' . echo_rating(@$row['Rating2'],true,$ID) . '</td>';
       if( $utable->Is_Column_Displayed[6] )
-         $urow_strings[6] = '<td>' . make_html_safe($row['Open'],INFO_HTML) . '&nbsp;</td>';
+         $urow_strings[6] = '<td>' . make_html_safe($row['Open'],INFO_HTML) . '</td>';
       if( $utable->Is_Column_Displayed[7] )
-         $urow_strings[7] = '<td>' . $row['Games'] . '&nbsp;</td>';
+         $urow_strings[7] = '<td>' . $row['Games'] . '</td>';
       if( $utable->Is_Column_Displayed[8] )
-         $urow_strings[8] = '<td>' . $row['Running'] . '&nbsp;</td>';
+         $urow_strings[8] = '<td>' . $row['Running'] . '</td>';
       if( $utable->Is_Column_Displayed[9] )
-         $urow_strings[9] = '<td>' . $row['Finished'] . '&nbsp;</td>';
+         $urow_strings[9] = '<td>' . $row['Finished'] . '</td>';
       if( $utable->Is_Column_Displayed[17] )
-         $urow_strings[17] = '<td>' . $row['RatedGames'] . '&nbsp;</td>';
+         $urow_strings[17] = '<td>' . $row['RatedGames'] . '</td>';
       if( $utable->Is_Column_Displayed[10] )
-         $urow_strings[10] = '<td>' . $row['Won'] . '&nbsp;</td>';
+         $urow_strings[10] = '<td>' . $row['Won'] . '</td>';
       if( $utable->Is_Column_Displayed[11] )
-         $urow_strings[11] = '<td>' . $row['Lost'] . '&nbsp;</td>';
+         $urow_strings[11] = '<td>' . $row['Lost'] . '</td>';
       if( $utable->Is_Column_Displayed[12] )
       {
          $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
-         $urow_strings[12] = '<td>' . $percent . '&nbsp;</td>';
+         $urow_strings[12] = '<td>' . $percent . '</td>';
       }
       if( $utable->Is_Column_Displayed[13] )
       {
          $activity = activity_string( $row['ActivityLevel']);
-         $urow_strings[13] = '<td>' . $activity . '&nbsp;</td>';
+         $urow_strings[13] = '<td>' . $activity . '</td>';
       }
       if( $utable->Is_Column_Displayed[14] )
       {
          $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
-         $urow_strings[14] = '<td>' . $lastaccess . '&nbsp;</td>';
+         $urow_strings[14] = '<td>' . $lastaccess . '</td>';
       }
       if( $utable->Is_Column_Displayed[15] )
       {
          $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
-         $urow_strings[15] = '<td>' . $lastmove . '&nbsp;</td>';
+         $urow_strings[15] = '<td>' . $lastmove . '</td>';
       }
 
       $utable->add_row( $urow_strings );
@@ -481,7 +481,8 @@ function print_players_table( $p, $uid, $opp )
    $p2 = ( $opp and isset($p[$opp]) ) ? $p[$opp] : null;
    $SPC = ''; //'&nbsp;';
 
-   $rowpatt = "  <tr> <td class=Rubric>%s</td>  <td>%s</td>  <td>%s</td>  </tr>\n";
+   $rowpatt = "  <tr><td class=Rubric>%s</td><td>%s</td><td>%s</td></tr>\n";
+   #$rowpatt = "  <tr> <td><b>%s</b></td>  <td>%s</td>  <td>%s</td>  </tr>\n";
 
    $r = "<table id=playersInfos class=Infos>\n";
    //TODO; review it:
@@ -513,10 +514,20 @@ function print_players_table( $p, $uid, $opp )
       $c1,
       ( $p2 ? $c2 : $SPC ) );
 
+   // Open for matches?
+   $r .= sprintf( $rowpatt, T_('Open for matches?'),
+      make_html_safe(@$p1['Open'],INFO_HTML),
+      $p2 ? make_html_safe(@$p2['Open'],INFO_HTML) : $SPC );
+
    // Activity
    $r .= sprintf( $rowpatt, T_('Activity'),
-      activity_string( $p1['ActivityLevel'] ), // . '&nbsp;',
-      ( $p2 ? activity_string( $p2['ActivityLevel'] ) . $SPC : $SPC ) );
+      activity_string( $p1['ActivityLevel'] ),
+      ( $p2 ? activity_string( $p2['ActivityLevel'] ) : $SPC ) );
+
+   // Rank info
+   $r .= sprintf( $rowpatt, T_('Rank info'),
+      make_html_safe(@$p1['Rank'],INFO_HTML),
+      $p2 ? make_html_safe(@$p2['Rank'],INFO_HTML) : $SPC );
 
    // Rating2
    $r .= sprintf( $rowpatt, T_('Rating'),

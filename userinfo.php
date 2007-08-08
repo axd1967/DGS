@@ -121,7 +121,7 @@ require_once( "include/contacts.php" );
                ) );
       $itable->add_row( array(
                'sname' => T_('Open for matches?'),
-               'info' => @$row['Open'],
+               'info' => make_html_safe(@$row['Open'],INFO_HTML),
                ) );
       $itable->add_row( array(
                'sname' => T_('Activity'),
@@ -133,7 +133,7 @@ require_once( "include/contacts.php" );
                ) );
       $itable->add_row( array(
                'sname' => T_('Rank info'),
-               'info' => @$row['Rank'],
+               'info' => make_html_safe(@$row['Rank'],INFO_HTML),
                ) );
       $itable->add_row( array(
                'sname' => T_('Registration date'),
