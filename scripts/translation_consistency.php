@@ -26,8 +26,6 @@ require_once( "include/std_functions.php" );
 
    connect2mysql();
 
-   disable_cache();
-
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
