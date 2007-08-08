@@ -524,15 +524,15 @@ function print_players_table( $p, $uid, $opp )
       activity_string( $p1['ActivityLevel'] ),
       ( $p2 ? activity_string( $p2['ActivityLevel'] ) : $SPC ) );
 
-   // Rank info
-   $r .= sprintf( $rowpatt, T_('Rank info'),
-      make_html_safe(@$p1['Rank'],INFO_HTML),
-      $p2 ? make_html_safe(@$p2['Rank'],INFO_HTML) : $SPC );
-
    // Rating2
    $r .= sprintf( $rowpatt, T_('Rating'),
       echo_rating( $p1['Rating2'], true, $uid ),
       ( $p2 ? echo_rating( $p2['Rating2'], true, $opp ) : $SPC ) );
+
+   // Rank info
+   $r .= sprintf( $rowpatt, T_('Rank info'),
+      make_html_safe(@$p1['Rank'],INFO_HTML),
+      $p2 ? make_html_safe(@$p2['Rank'],INFO_HTML) : $SPC );
 
    // Last accessed, Last moved
    $r .= sprintf( $rowpatt, T_('Last access'),
