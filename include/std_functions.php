@@ -2201,13 +2201,30 @@ function write_to_file( $filename, $string_to_write )
   @chmod( $filename, 0666 );
 }
 
+function centered_container( $open=true)
+{
+//the container must be a centered one which can be left or right aligned
+   static $opened = false;
+   if( $opened )
+   { //opened, close it
+      echo "</td></tr></table>\n";
+      $opened = false;
+   }
+   if( $open )
+   { //open a new one
+      echo "\n<table class=Container><tr><td class=Container>";
+      $opened = true;
+   }
+}
+
 function section( $id='', $header='')
 {
    static $section = '';
-//the container must be a centered one which cab be left or right aligned
+
+   centered_container( false);
    if( $section )
    { //section opened, close it
-      echo "</td></tr></table>\n";
+      echo "</div>\n";
       $section = '';
       if( $id )
          echo "<hr class=Section>\n";
@@ -2215,7 +2232,7 @@ function section( $id='', $header='')
    if( $id )
    { //section request, open it
       $section = attb_quote('sect'.$id);
-      echo "\n<table id=$section class=Section><tr><td class=Section>";
+      echo "\n<div id=$section class=Section>";
       if( $header )
          echo "<h3 class=Header>$header</h3>";
       else echo '<br class=Section>';

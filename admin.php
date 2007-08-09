@@ -39,6 +39,7 @@ require_once( "include/form_functions.php" );
    start_page(T_('Admin'), true, $logged_in, $player_row);
 
    section( 'Admin', T_('Administration'));
+   centered_container();
 
    add_link_page_link('admin_password.php', T_('New password'),
                      '', $admin_level & ADMIN_PASSWORD);

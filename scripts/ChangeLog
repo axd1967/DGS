@@ -25,6 +25,13 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-09 rodival
+
+   * skins/dragon/screen.css,
+     include/std_functions.php (section, centered_container),
+     docs.php, admin.php, licence.php:
+   - adjusted the problem of centered containers
+
 2007-08-08 rodival
 
    * scripts/FAQtransl_consistency.php, scripts/translation_consistency.php:

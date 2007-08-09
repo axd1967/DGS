@@ -202,26 +202,27 @@ h3.Header {
    font-weight: bold;
 }
 
-table.Section { /* centered_container */
-   table-layout: auto;
-   border: 0px solid red;
-   border-spacing: 0px;
-   border-collapse: collapse;
+div.Section { /* page section */
    margin: 0px auto;
    width: auto;
    max-width: none;
    overflow: visible;
-   empty-cells: show;
    vertical-align: top;
+   padding: 4px;
+   text-align: center;
 }
 
-table.Section td.Section {
+table.Container { /* centered_container */
+   table-layout: auto;
    border: 0px solid red;
-   margin: 0px;
-   padding: 4px;
+   border-spacing: 0px;
+   border-collapse: collapse;
+   empty-cells: show;
+   margin: 0px auto;
    width: auto;
-   vertical-align: middle;
-   text-align: center;
+   max-width: none;
+   overflow: visible;
+   vertical-align: top;
 }
 
 hr.Section {
@@ -406,11 +407,6 @@ table#pageLayout {
    overflow: visible; /* hidden visible scroll auto */
 }
 
-table#pageLayout tr {
-   width: 100%;
-/*   overflow: hidden; /* hidden visible scroll auto */
-}
-
 table#pageLayout tr.LayoutVertical td.Menu {
    width: 10%;
 /*
@@ -433,11 +429,11 @@ table#pageLayout td#pageBody {
 }
 
 table#pageLayout tr.LayoutVertical td#pageBody {
-   width: 99%;
+   width: 100%;
 }
 
 table#pageLayout tr.LayoutHorizontal td#pageBody {
-   width: 99%;
+   width: 100%;
 }
 
 table#pageTools {
@@ -1209,7 +1205,7 @@ dl.DocLink span {
    color: gray;
 }
 
-body.Links table#pageLayout td#pageBody .Section {
+body.Links table#pageLayout td#pageBody div.Section {
    width: 85%;
 }
 
@@ -1217,16 +1213,12 @@ body.Links table#pageLayout td#pageBody .Section h3.Header {
    text-align: left;
 }
 
-body.People table#pageLayout td#pageBody .Section {
+body.People table#pageLayout td#pageBody div.Section {
    width: 90%;
 }
 
-body.People table#pageLayout td#pageBody .Section h3.Header {
-   text-align: left;
-}
-
 body.People table.People {
-   width: 100%;
+   width: 90%;
    margin: 0px 0px 0px 0px;
 }
 
@@ -1254,8 +1246,7 @@ body.People table.People span {
    color: green;
 }
 
-body.SiteMap table#pageLayout td#pageBody .Section {
-   border: 0px solid red;
+body.SiteMap table#pageLayout td#pageBody div.Section {
    width: 85%;
    text-align: left;
 }
@@ -1289,8 +1280,7 @@ body.SiteMap table.SiteMap td.Indent img {
    height: 25px;
 }
 
-body.Intro table#pageLayout td#pageBody .Section {
-   border: 0px solid red;
+body.Intro table#pageLayout td#pageBody div.Section {
    width: 85%;
    text-align: left;
 }
@@ -1678,8 +1668,8 @@ table.Forum table {
 
 /* in status page */
 table#forumPending {
-   border: 0px solid red;
    margin: 0px auto;
+   width: auto;
 }
 
 table#forumIndex tr {

@@ -31,6 +31,7 @@ require_once( "include/std_functions.php" );
    start_page(T_('Docs'), true, $logged_in, $player_row );
 
    section( 'Docs', T_('Documentation'));
+   centered_container();
 
    add_link_page_link('introduction.php', T_('Introduction to Dragon'));
    add_link_page_link('site_map.php', T_('Site map'));

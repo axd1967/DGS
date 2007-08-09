@@ -30,6 +30,7 @@ require_once( "include/std_functions.php" );
    start_page($tmp, true, $logged_in, $player_row );
 
    section( 'Install', $tmp);
+
    echo "<pre>\n";
 
    $contents = join ('', file ('INSTALL'));

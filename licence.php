@@ -28,7 +28,8 @@ require_once( "include/std_functions.php" );
 
    start_page(T_('General Public Licence'), true, $logged_in, $player_row );
 
-   section( 'Docs');
+   //section( 'Docs');
+   centered_container();
 
    echo "<pre>\n";
 
