@@ -1,24 +1,128 @@
-DragonGoServer NEWS -- history of user-visible changes.  2001-06-26
-Copyright (C) 2001-2006  Erik Ouchterlony
+DragonGoServer NEWS -- Release Notes. History of user-visible changes.
+Copyright (C) 2001-2007  Erik Ouchterlony
 
 
-[2007-MM-DD] - DGS 1.0.13
+<b>[2007-MM-DD] - DGS 1.0.13</b>
 
-   * CSS
+   New features and Major changes:
 
-   * User Edit-Bio: allow to change order, return to user-page without change
+   * Use CSS throughout the site
 
-   * Searching Capabilities for pages:
-      - Waiting-Room
-      - Messages
-      - Users (show own opponents)
-      - Games
-      - Forum
+   * Searching capabilities   [FAQ: "Dragon searching"]
+      * Added search in waiting room, messages, users, games
+      * Improved search in forum, added ordering
 
-   * Show observers of game
+      * Highlight search terms within some texts for
+        messages, forum posts, contact notes
+
+   * Manage contact list with other users   [FAQ: "What are Contacts?"]
+      * Protect games in waiting room, Reject messages or Reject invitations
+      * User categorization
+      * Private notes for user
+
+   * Games:
+      * Show observers of a running game
+      * Can add time for opponent   [FAQ: "Can I add time for my opponent?"]
+      * Added hover-text on colors column for my running games
+      * Simplified view of a move by saving to select "View Move"-button
+        (needs JavaScript)
+
+   * Waiting room:
+      * added country of player, minor changes and fixes
+      * renamed some table columns
+
+   * User info:
+      * Order of bio entries can be changed
+      * Changed percent calculus to take jigo into account for rated games
+      * Changed links to show rated / won / lost games in games list
+
+      * Rating graph can now be displayed by time or by number of games
+      * Rating graph shows additional proportional pie chart for played games
+
+   * Users: show my opponents and game statistics for two players
+
+   * Table lists (waiting room, messages, users, opponents, games):
+      * Added user profile setting "Table max rows" to control how many rows
+        are shown in table lists per default for waiting room, messages, users,
+        opponents, games. Temporarily changeable on pages with lists.
+      * Added arrows in table headers indicating sort direction of columns
+
+
+   Code improvements:
+
+   * Optimized some database queries and added indexes:
+      * Better support new searching feature
+      * Speed up game selection: games list, skip to next game, status page
+      * Speed up following messages chain
+      * Speed up user seelection: experimental index on users Lastaccess
+
+   * Better error handling
+
+   * Improved consistency checks
+
+   * Prepared future walking of message chain
+   * Prepared future mass messages
+
+
+   Minor changes:
+
+   * Forum threads: Added link to return to first 'new'
+
+   * Cleanup of links page
+
+   * Updated flags: Lesotho, removed obsolete 'Serbia and Montenegro (Yugoslavia)'
+
+   * Added some <home goodies/>GreaseMonkey-scripts</home> for Firefox browsers:
+      * DGS Forum Indicator: add 'new' indicator to forums with new messages
+      * DGS Section Hide: hide/show some page sections
+      * DGS Toggle Numbering: add button to toggle the board stone numbering
+
+   * Added rating histogram on statistics page
+
+
+   Administrative changes:
+
+   * added <home news.php>Release notes</home>
+
+   * Solved problems with frozen clocks
+
+   * Changes for FAQ-editors and Translators:
+      * Moved Translate link into bottom bar, visible for translators only
+      * Improvements described on respective page in "instructions"
+      * Better handling of translations
+      * Use '&language=N' URL-argument to disable any translation on page
+
+   * Reject some registrations of account usurpers
+
+   * Introduced quota system to block users flooding the page with requests.
+     Needed because there were incidents on which DGS IT-provider complaigned
+     about using too much resources.
+
+     Keep a "normal" access profile and you won't be blocked.
+     If access quota is exceeded, the user is informed about it and is blocked
+     for a day.
+
+   * Changes for Admins:
+      * Added check for a users clock in respective user info page
+      * Can overwrite current new password and create new
+
+
+   Bug fixes:
+
+   * fixed display of japanese byoyomi when byoyomi reached
+   * fixed tag &lt;user =userid&gt;
+   * fixed edit vacation bug
+   * fixed bad running games count for some users
+   * fixed 'double game' handicap option in waitingroom
+   * fixed paging of table lists to preserve form values
+   * fixed search term score (relevance) for forum when using expert mode
+   * prevent to rename standard folders
+   * removed first newline after some layout tags in messages
+   * various other bugfixes
+
 
 [2006-08-07] - DGS 1.0.12
-   see also http://www.dragongoserver.net/faq.php?read=t&cat=160
+   see also <http://www.dragongoserver.net/faq.php?read=t&cat=160>
 
     * A new forum system.
 
@@ -130,7 +234,7 @@ Copyright (C) 2001-2006  Erik Ouchterlony
 
 [2001-11-11] - DGS 1.0.2
 
-   * own rating system. algorithm borrowed from the european rating system http://www.european-go.org/rating/gor.html,
+   * own rating system. algorithm borrowed from the european rating system <http://www.european-go.org/rating/gor.html>,
    and it's relative strength is also the same as the european, so that, e.g., the IYT go guild rank is one stone stronger.
 
 
@@ -142,7 +246,7 @@ Copyright (C) 2001-2006  Erik Ouchterlony
    This can be very useful in tournaments where you want to ensure the average playing tempo is fast enough.
 
 
-[2001-??-??] - DGS 1.0.0
+[2001-06-26] - DGS 1.0.0
 
    * First official release!
 

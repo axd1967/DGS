@@ -34,8 +34,9 @@ require_once( "include/std_functions.php" );
 
    $contents = join('', file ('NEWS'));
 
-   $contents = @htmlentities($contents, ENT_QUOTES);
-   $contents = preg_replace("%&lt;(http://.*?)&gt;%is", "(<a href=\"\\1\">\\1</a>)", $contents);
+   //$contents = @htmlentities($contents, ENT_QUOTES);
+   //$contents = preg_replace("%&lt;(http://.*?)&gt;%is", "(<a href=\"\\1\">\\1</a>)", $contents);
+   $contents = make_html_safe( $contents, true );
    echo $contents;
 
    echo "</pre>\n";
