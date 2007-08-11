@@ -14,7 +14,7 @@ quick INFO:
    I'm working on the bad centered alignement of FAQ, docs and other pages.
 
 2007-07-29 juga
-   Currently working on: minor filter-cleanup, add-time, contacts
+   Currently working on: message search, cleanup
 
 -----
 quick TODO:
@@ -24,6 +24,12 @@ quick TODO:
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-08-11 juga
+
+   * NEWS, news.php:
+   - added new features and changes since last release [2006-08-07]
+   - resolve DGS-tags in NEWS-page
 
 2007-08-09 rodival
 
