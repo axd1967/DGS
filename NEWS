@@ -54,7 +54,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Better support new searching feature
       * Speed up game selection: games list, skip to next game, status page
       * Speed up following messages chain
-      * Speed up user seelection: experimental index on users Lastaccess
+      * Speed up user selection: experimental index on users Lastaccess
 
    * Better error handling
 
