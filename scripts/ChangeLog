@@ -27,6 +27,10 @@ Changelog
 
 2007-08-12 juga
 
+   * NEWS, news.php skins/dragon/screen.css:
+   - make an emphasized release title with anchor
+     for reference in SL's DGSWishlist
+
    * NEWS:
    - added new features and changes of last release [2006-08-07]
 
