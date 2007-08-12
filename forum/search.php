@@ -146,7 +146,7 @@ define('MODERATOR_SEARCH', 0);
    $fform->add_row( array(
          'TAB',
          'CELL',        1, 'align=left',
-         'OWNHTML',     implode( '', $ffilter->get_submit_elements( 0, 'x') ) ));
+         'OWNHTML',     implode( '', $ffilter->get_submit_elements( 'x', 'e' ) ) ));
 
    echo "<br><center>\n"
       . $fform->get_form_string()

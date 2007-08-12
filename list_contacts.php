@@ -83,6 +83,7 @@ require_once( "include/contacts.php" );
    $cfilter->add_filter(10, 'RelativeDate', 'C.Created', true);
    $cfilter->add_filter(11, 'RelativeDate', 'C.Lastchanged', false);
    $cfilter->init(); // parse current value from _GET
+   $cfilter->set_accesskeys('x', 'e');
    $rxterms_note = implode(' | ', $filter_note->get_terms() );
 
    $ctable = new Table( 'contact', $page, 'ContactColumns', 'contact' );

@@ -160,6 +160,7 @@ require_once( "include/rating.php" );
       $gfilter->add_filter(29, 'Rating', 'Games.White_Start_Rating', true);
    }
    $gfilter->init(); // parse current value from _GET
+   $gfilter->set_accesskeys('x', 'e');
 
    $gtable = new Table( $tableid, $page, $column_set_name );
    $gtable->register_filter( $gfilter );

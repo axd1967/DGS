@@ -89,6 +89,7 @@ require_once( "include/contacts.php" );
    $wrfilter->add_filter(15, 'Country', 'Players.Country', false,
          array( FC_HIDE => 1 ));
    $wrfilter->init();
+   $wrfilter->set_accesskeys('x', 'e');
    $f_handi =& $wrfilter->get_filter(5);
    $f_range =& $wrfilter->get_filter(8);
 
