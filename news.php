@@ -26,6 +26,7 @@ require_once( "include/std_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
 
+   $ThePage['class']= 'News'; //temporary solution to CSS problem
    start_page('DragonGoServer NEWS', true, $logged_in, $player_row );
 
    section( 'News', T_('DragonGoServer NEWS'));
@@ -34,9 +35,11 @@ require_once( "include/std_functions.php" );
 
    $contents = join('', file ('NEWS'));
 
-   //$contents = @htmlentities($contents, ENT_QUOTES);
-   //$contents = preg_replace("%&lt;(http://.*?)&gt;%is", "(<a href=\"\\1\">\\1</a>)", $contents);
+   // format NEWS-page:
    $contents = make_html_safe( $contents, true );
+   // format: "#release anchor-name [release-date] - DGS-version"
+   $contents = preg_replace("/#release\\s+(\w+?)\\s+(.*?)<br>/is", "<a name=\"\\1\">\n<div class=\"ReleaseTitle\">\\2</div>", $contents);
+
    echo $contents;
 
    echo "</pre>\n";
