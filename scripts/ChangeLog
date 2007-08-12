@@ -27,6 +27,13 @@ Changelog
 
 2007-08-12 juga
 
+   * all files
+     except the following
+        init.mysql, translationdata.mysql, goodies/*.js, include/config.php,
+        scripts/README.developers, scripts/README.translations,
+        scripts/doxygenConfig:
+   - changed copyright notice and added where missing (-2007)
+
    * NEWS, news.php skins/dragon/screen.css:
    - make an emphasized release title with anchor
      for reference in SL's DGSWishlist
