@@ -33,6 +33,17 @@ Changelog
 
 2007-08-12 juga
 
+   * search_messages.php:
+   - removed filter on Message-type
+   - added checkbox to show pending invitations
+   - added Server as direction (Sender = 'S')
+-----------
+ALTER TABLE `MessageCorrespondents`
+ CHANGE `Sender` `Sender` enum('M','N','Y','S') NOT NULL DEFAULT 'Y' ;
+ALTER TABLE `MessageCorrespondents`      -- +2 MB (for filter/sort)
+ ADD INDEX `Sender` (`Sender`) ;
+-----------
+
    * all files
      except the following
         init.mysql, translationdata.mysql, goodies/*.js, include/config.php,
@@ -40,7 +51,7 @@ Changelog
         scripts/doxygenConfig:
    - changed copyright notice and added where missing (-2007)
 
-   * NEWS, news.php skins/dragon/screen.css:
+   * NEWS, news.php, skins/dragon/screen.css:
    - make an emphasized release title with anchor
      for reference in SL's DGSWishlist
 
