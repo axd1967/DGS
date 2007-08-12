@@ -468,8 +468,8 @@ CREATE TABLE Errorlog (
    Message text NOT NULL,
    MysqlError text NOT NULL,
    Debug text NOT NULL,
-   IP varchar(16) NOT NULL default '',
    Date timestamp(14) NOT NULL,
+   IP varchar(16) NOT NULL default '',
    PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
