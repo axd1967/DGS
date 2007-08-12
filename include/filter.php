@@ -1373,7 +1373,7 @@ class Filter
          if ( $this->syntax_descr == '' and $addinfo == '' )
             return '';
 
-         $syntax = T_('Syntax') . $addinfo;
+         $syntax = T_('Syntax#filter') . $addinfo;
          if ( $this->syntax_descr != '' )
             $syntax .= ': ' . $this->syntax_descr;
          return $syntax;
@@ -1957,7 +1957,7 @@ class FilterText extends Filter
          if ( !$minchars )
             error('invalid_filter', "filter.FilterText.bad_config.FC_SUBSTRING_miss_FC_START_WILD");
          $this->parser_flags |= TEXTPARSER_IMPLICIT_WILD;
-         $this->syntax_descr = '['. T_('substring') . '] ' . $this->syntax_descr;
+         $this->syntax_descr = '['. T_('substring#filter') . '] ' . $this->syntax_descr;
       }
    }
 
@@ -2563,7 +2563,6 @@ class FilterRelativeDate extends Filter
 
       // input-text for number of (time-units)
       $r = $this->build_input_text_elem( $prefix, $attr, @$this->config[FC_MAXLEN], @$this->config[FC_SIZE] );
-      $r .= "&nbsp;";
 
       // select-box for unit of time (or fix if no choice)
       if ( count($this->time_units) > 1 )
@@ -2726,9 +2725,9 @@ class FilterBoolSelect extends FilterSelection
       $query->add_part( $parttype, "$field='N'" );
 
       $choices = array(
-         T_('All') => '',
-         T_('Yes') => $query_yes,
-         T_('No')  => $query );
+         T_('All#boolsel') => '',
+         T_('Yes#boolsel') => $query_yes,
+         T_('No#boolsel')  => $query );
       parent::FilterSelection($name, $choices, $config);
       $this->type = 'BoolSelect';
       $this->syntax_descr = ''; // action: select from choices
@@ -2773,9 +2772,9 @@ class FilterRatedSelect extends FilterSelection
       $query->add_part( $parttype, "$field='N'" );
 
       $choices = array(
-         T_('All') => '',
-         T_('Yes') => $query_yes,
-         T_('No')  => $query );
+         T_('All#ratedsel') => '',
+         T_('Yes#ratedsel') => $query_yes,
+         T_('No#ratedsel')  => $query );
       parent::FilterSelection($name, $choices, $config);
       $this->type = 'RatedSelect';
       $this->syntax_descr = ''; // action: select from choices
@@ -2980,7 +2979,8 @@ class FilterMysqlMatch extends Filter
       {
          $r .= "<BR>";
          $r .= $this->build_generic_checkbox_elem(
-            $prefix, $this->elem_boolmode, $this->values[$this->elem_boolmode], T_('Expert mode') );
+            $prefix, $this->elem_boolmode, $this->values[$this->elem_boolmode],
+            T_('Expert mode#filter') );
       }
 
       return $r;
