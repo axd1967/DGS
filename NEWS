@@ -2,7 +2,7 @@ DragonGoServer NEWS -- Release Notes. History of user-visible changes.
 Copyright (C) 2001-2007  Erik Ouchterlony
 
 
-<b>[2007-MM-DD] - DGS 1.0.13</b>
+#release DGS_1_0_13 [2007-MM-DD] - DGS 1.0.13
 
    New features and Major changes:
 
@@ -121,7 +121,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * various other bugfixes
 
 
-[2006-08-07] - DGS 1.0.12
+#release DGS_1_0_12 [2006-08-07] - DGS 1.0.12
 
    New features and Major changes:
 
@@ -156,18 +156,18 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Enhanced folders display
 
    * Markup tags for forum posts and messages:
-      * <game gid[,move]> : show link to game
-      * <user uid> or <user =userid> : show link to user info
-      * <send uid> or <send =userid> : show link to send a message to user
-      * <home page>DGS-page</home> : show link to DGS-page without baseURL
-        (e.g. <home users.php>User list</home>)
+      * &lt;game gid[,move]> : show link to game
+      * &lt;user uid> or &lt;user =userid> : show link to user info
+      * &lt;send uid> or &lt;send =userid> : show link to send a message to user
+      * &lt;home page>DGS-page</home> : show link to DGS-page without baseURL
+        (e.g. &lt;home users.php>User list</home>)
 
-      * <color col>text</color> : change color for text:
+      * &lt;color col>text</color> : change color for text:
         'col' can be name (like red, green) or #rrggbb (hex code: #c07f43)
-      * <tt>text</tt> : format single-line in a fixed-width font
-      * <pre>text</pre> : format multi-line text with fixed-width font
+      * &lt;tt>text</tt> : format single-line in a fixed-width font
+      * &lt;pre>text</pre> : format multi-line text with fixed-width font
         (useful for diagrams)
-      * <code>text</code> : text may contain HTML chars (useful code fragments)
+      * &lt;code>text</code> : text may contain HTML chars (useful code fragments)
 
    * Added private game notes:
      Configure in user profile and show/hide on game page.
@@ -250,7 +250,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
      times. If you hit it a second time, the post has been sent a second time.
 
 
-[2003-07-15] - DGS 1.0.11
+#release DGS_1_0_11 [2003-07-15] - DGS 1.0.11
 
    * New messaging system, using folders to let you have better control over your messages.
 
@@ -263,7 +263,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Slightly changed ratings: lower rating limit at 30 kyu.
 
 
-[2002-10-26] - DGS 1.0.10
+#release DGS_1_0_10 [2002-10-26] - DGS 1.0.10
 
    * Rating graph: Click on the rating to see it.
 
@@ -275,7 +275,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    The FAQ forum will from now on be a FAQ discussion forum, where you can help Bjørn with filling the FAQ with content.
 
 
-[2002-06-10] - DGS 1.0.9
+#release DGS_1_0_9 [2002-06-10] - DGS 1.0.9
 
    * menu layout: vertical and horizontal menu, editable in edit-user-profile
 
@@ -286,12 +286,12 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Improved Waiting room (look & feel)
 
 
-[2002-05-10] - DGS 1.0.8
+#release DGS_1_0_8 [2002-05-10] - DGS 1.0.8
 
    * added waiting room to simplify finding suitable opponents.
 
 
-[2002-04-28] - DGS 1.0.7
+#release DGS_1_0_7 [2002-04-28] - DGS 1.0.7
 
    * Translations: Experimental support for translations.
    If you want to help translating, please write a message to the new 'Translations' forum.
@@ -304,7 +304,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * New message lists looking more like the game lists and the user list
 
 
-[2002-02-18] - DGS 1.0.6
+#release DGS_1_0_6 [2002-02-18] - DGS 1.0.6
 
    * new table looks
 
@@ -313,7 +313,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * game-list button graphics can be in Edit-UserProfile
 
 
-[2002-01-12] - DGS 1.0.5
+#release DGS_1_0_5 [2002-01-12] - DGS 1.0.5
 
    * Extended email notification: You can let dragon send messages and the game move or the full board instead of just notify.
    settings in Edit-UserProfile.
@@ -324,7 +324,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
         This can be useful when reviewing your game, without helping your opponent.
 
 
-[2001-12-08] - DGS 1.0.4
+#release DGS_1_0_4 [2001-12-08] - DGS 1.0.4
 
    * changed board graphics for faster load to get rid of a problem with strange looking boards on some browsers.
    drawback: coordinates are drawn as images, so first time may take a bit longer if you look at a board.
@@ -332,7 +332,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * edit profile page: change of wood color and coordinate placement
 
 
-[2001-12-01] - DGS 1.0.3
+#release DGS_1_0_3 [2001-12-01] - DGS 1.0.3
 
    * Biographical info: enter more info about yourself, see 'status->show/edit userinfo'
 
@@ -343,13 +343,13 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Docs->todo list is added so you can see my plans for the future.
 
 
-[2001-11-11] - DGS 1.0.2
+#release DGS_1_0_2 [2001-11-11] - DGS 1.0.2
 
    * own rating system. algorithm borrowed from the european rating system <http://www.european-go.org/rating/gor.html>,
    and it's relative strength is also the same as the european, so that, e.g., the IYT go guild rank is one stone stronger.
 
 
-[2001-10-14] - DGS 1.0.1
+#release DGS_1_0_1 [2001-10-14] - DGS 1.0.1
 
    * You can now delete a game the first couple of moves.
 
@@ -357,7 +357,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    This can be very useful in tournaments where you want to ensure the average playing tempo is fast enough.
 
 
-[2001-06-26] - DGS 1.0.0
+#release DGS_1_0_0 [2001-06-26] - DGS 1.0.0
 
    * First official release!
 
