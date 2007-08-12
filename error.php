@@ -413,7 +413,7 @@ require_once( "include/std_functions.php" );
 
       case("invalid_opponent"): // Players.ID
       {
-         echo T_("Sorry, invalid player id as opponent used.");
+         echo T_("Sorry, invalid player id used as opponent.");
       }
       break;
 
