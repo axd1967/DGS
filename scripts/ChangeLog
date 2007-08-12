@@ -33,6 +33,20 @@ Changelog
 
 2007-08-12 juga
 
+   * forum/search.php, list_contacts.php, opponents.php,
+     search_messages.php, show_games.php, users.php, waiting_room.php:
+   - added accesskey 'x' for search, 'e' for reset search
+   - removed second pair of filter-submits (if external-form)
+
+   * include/filter.php (set_accesskeys, get_submit_elements):
+   - added config for accesskeys for filter-submit elements search & reset
+   - replaced technical 'filter' term by user-friendly 'search' term
+
+   * include/table_columns.php (make_table, make_add_column_form):
+   - searching wants focus on table-data, not add-column-form
+   - replaced technical 'filter' term by user-friendly 'search' term
+     on filter-submit elements
+
    * search_messages.php:
    - removed filter on Message-type
    - added checkbox to show pending invitations
