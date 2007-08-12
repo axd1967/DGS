@@ -2087,7 +2087,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
       $vaultcnt= (int)@$player_row['VaultCnt'];
       $vaulttime= @$player_row['VaultTime'];
       //can be translated if desired (translations have just been set):
-      $vault_fmt= "The activity of the account '%s' grew to hight"
+      $vault_fmt= "The activity of the account '%s' grew to high"
                  ." and swallowed up our bandwidth and resources."
                  ."\nPlease, correct this behaviour."
                  ."\nThis account is blocked until %s."
@@ -2106,7 +2106,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
          $query.= ",VaultCnt=$vaultcnt";
       }
       //TODO: maybe exclude the multi-users accounts
-      else if( $NOW < $vaulttime ) //fever too hight
+      else if( $NOW < $vaulttime ) //fever too high
       //to exclude guest, add: && $hdl != 'guest'
       {
          $vaultcnt= 0; //enter fever vault...
