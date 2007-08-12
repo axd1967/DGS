@@ -161,20 +161,20 @@ require_once( "include/message_functions.php" );
    else
    {
       $gtable->add_tablehead( 0,
-         T_('ID'), NULL, false, true, array( 'class' => 'Button') );
+         T_('ID#header'), NULL, false, true, array( 'class' => 'Button') );
 
-      $gtable->add_tablehead( 2, T_('sgf'));
-      $gtable->add_tablehead( 3, T_('Opponent'));
-      $gtable->add_tablehead( 4, T_('Userid'));
-      $gtable->add_tablehead(16, T_('Rating'));
-      $gtable->add_tablehead( 5, T_('Color'));
-      $gtable->add_tablehead( 6, T_('Size'));
-      $gtable->add_tablehead( 7, T_('Handicap'));
-      $gtable->add_tablehead( 8, T_('Komi'));
-      $gtable->add_tablehead( 9, T_('Moves'));
-      $gtable->add_tablehead(14, T_('Rated'));
-      $gtable->add_tablehead(13, T_('Last Move'));
-      $gtable->add_tablehead(10, T_('Time remaining'));
+      $gtable->add_tablehead( 2, T_('sgf#header'));
+      $gtable->add_tablehead( 3, T_('Opponent#header'));
+      $gtable->add_tablehead( 4, T_('Userid#header'));
+      $gtable->add_tablehead(16, T_('Rating#header'));
+      $gtable->add_tablehead( 5, T_('Color#header'));
+      $gtable->add_tablehead( 6, T_('Size#header'));
+      $gtable->add_tablehead( 7, T_('Handicap#header'));
+      $gtable->add_tablehead( 8, T_('Komi#header'));
+      $gtable->add_tablehead( 9, T_('Moves#header'));
+      $gtable->add_tablehead(14, T_('Rated#header'));
+      $gtable->add_tablehead(13, T_('Last Move#header'));
+      $gtable->add_tablehead(10, T_('Time remaining#header'));
 
       while( $row = mysql_fetch_assoc( $result ) )
       {

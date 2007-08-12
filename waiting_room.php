@@ -100,14 +100,14 @@ require_once( "include/contacts.php" );
    $wrtable->set_default_sort( 'other_rating', 1, 'other_handle', 0);
 
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $wrtable->add_tablehead( 0, T_('Info'), NULL, false, true, array( 'class' => 'Button') );
-   $wrtable->add_tablehead( 1, T_('Name'), 'other_name', false);
-   $wrtable->add_tablehead( 2, T_('Userid'), 'other_handle', false);
-   $wrtable->add_tablehead(15, T_('Country'), 'other_country', false);
-   $wrtable->add_tablehead( 3, T_('Rating'), 'other_rating', true);
-   $wrtable->add_tablehead( 4, T_('Comment'));
-   $wrtable->add_tablehead( 7, T_('Size'), 'Size', true);
-   $wrtable->add_tablehead( 5, T_('Type'), 'Handicaptype', false, true);
+   $wrtable->add_tablehead( 0, T_('Info#header'), NULL, false, true, array( 'class' => 'Button') );
+   $wrtable->add_tablehead( 1, T_('Name#header'), 'other_name', false);
+   $wrtable->add_tablehead( 2, T_('Userid#header'), 'other_handle', false);
+   $wrtable->add_tablehead(15, T_('Country#header'), 'other_country', false);
+   $wrtable->add_tablehead( 3, T_('Rating#header'), 'other_rating', true);
+   $wrtable->add_tablehead( 4, T_('Comment#header'));
+   $wrtable->add_tablehead( 7, T_('Size#header'), 'Size', true);
+   $wrtable->add_tablehead( 5, T_('Type#headerwr'), 'Handicaptype', false, true);
    /** TODO: the handicap stones info may be merged in the Komi column
     * with the standard placement... something like: "%d H + %d K (S)"
     * where:
@@ -115,15 +115,15 @@ require_once( "include/contacts.php" );
     *   K=Tr$['Komi#short']
     *   S=Tr$['Standard placement#short']
     **/
-   $wrtable->add_tablehead(14, T_('Handicap'), 'Handicap');
-   $wrtable->add_tablehead( 6, T_('Komi'), 'Komi', true);
-   $wrtable->add_tablehead( 8, T_('Rating range'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true, true);
-   $wrtable->add_tablehead( 9, T_('Time limit'));
-   $wrtable->add_tablehead(10, T_('#Games'), 'nrGames', true);
-   $wrtable->add_tablehead(11, T_('Rated'), 'Rated', true);
-   $wrtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
+   $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Handicap');
+   $wrtable->add_tablehead( 6, T_('Komi#header'), 'Komi', true);
+   $wrtable->add_tablehead( 8, T_('Rating range#header'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true, true);
+   $wrtable->add_tablehead( 9, T_('Time limit#header'));
+   $wrtable->add_tablehead(10, T_('#Games#header'), 'nrGames', true);
+   $wrtable->add_tablehead(11, T_('Rated#header'), 'Rated', true);
+   $wrtable->add_tablehead(12, T_('Weekend Clock#header'), 'WeekendClock', true);
    if( ENA_STDHANDICAP )
-      $wrtable->add_tablehead(13, T_('Standard placement'), 'StdHandicap', true);
+      $wrtable->add_tablehead(13, T_('Standard placement#header'), 'StdHandicap', true);
 
    $order = $wrtable->current_order_string();
    $limit = $wrtable->current_limit_string();

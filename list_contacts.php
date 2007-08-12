@@ -92,17 +92,17 @@ require_once( "include/contacts.php" );
    $ctable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $ctable->add_tablehead( 9, T_('Actions'), null, false, true); // static
-   $ctable->add_tablehead( 1, T_('Name'), 'P.Name');
-   $ctable->add_tablehead( 2, T_('Userid'), 'P.Handle', true, true); // static
-   $ctable->add_tablehead( 3, T_('Country'), 'P.Country');
-   $ctable->add_tablehead( 4, T_('Rating'), 'P.Rating2', true);
-   $ctable->add_tablehead( 5, T_('Last access'), 'P.Lastaccess', true);
-   $ctable->add_tablehead( 6, T_('System categories'));
-   $ctable->add_tablehead( 7, T_('User categories'));
-   $ctable->add_tablehead( 8, T_('Notes'), '', false, false);
-   $ctable->add_tablehead(10, T_('Created'), 'C.Created', true);
-   $ctable->add_tablehead(11, T_('Lastchanged'), 'C.Lastchanged', true);
+   $ctable->add_tablehead( 9, T_('Actions#header'), null, false, true); // static
+   $ctable->add_tablehead( 1, T_('Name#header'), 'P.Name');
+   $ctable->add_tablehead( 2, T_('Userid#header'), 'P.Handle', true, true); // static
+   $ctable->add_tablehead( 3, T_('Country#header'), 'P.Country');
+   $ctable->add_tablehead( 4, T_('Rating#header'), 'P.Rating2', true);
+   $ctable->add_tablehead( 5, T_('Last access#header'), 'P.Lastaccess', true);
+   $ctable->add_tablehead( 6, T_('System categories#header'));
+   $ctable->add_tablehead( 7, T_('User categories#header'));
+   $ctable->add_tablehead( 8, T_('Notes#header'), '', false, false);
+   $ctable->add_tablehead(10, T_('Created#header'), 'C.Created', true);
+   $ctable->add_tablehead(11, T_('Lastchanged#header'), 'C.Lastchanged', true);
 
    // External-Search-Form
    $cform = new Form( 'contact', $page, FORM_GET, false);

@@ -1055,27 +1055,28 @@ function message_list_table( &$mtable, $result, $show_rows
    if ( is_null($header_part) or $header_part )
    {
       // add_tablehead($nr, $description, $sort_string = NULL, $desc_default = false, $undeletable = false, $width = NULL)
-      $mtable->add_tablehead( 1, T_('Folder'),
+      $mtable->add_tablehead( 1, T_('Folder#header'),
          ( $no_sort or $current_folder>FOLDER_ALL_RECEIVED ) ? NULL : 'folder', true, false );
 
       if ( $full_details )
       {
          // additional fields for search-messages
-         $mtable->add_tablehead( 6, T_('Type'), 'M.Type', false, true );
-         $mtable->add_tablehead( 7, T_('Direction'), $no_sort ? NULL : 'Sender', false, false );
-         $mtable->add_tablehead( 2, T_('Correspondent'), $no_sort ? NULL : 'other_name', false, false );
+         $mtable->add_tablehead( 6, T_('Type#header'), 'M.Type', false, true );
+         $mtable->add_tablehead( 7, T_('Direction#header'), $no_sort ? NULL : 'Sender', false, false );
+         $mtable->add_tablehead( 2, T_('Correspondent#header'), $no_sort ? NULL : 'other_name', false, false );
       }
       else
-         $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To') : T_('From') ),
+         $mtable->add_tablehead( 2,
+            ($current_folder == FOLDER_SENT ? T_('To#header') : T_('From#header') ),
             $no_sort ? NULL : 'other_name', false, false );
 
-      $mtable->add_tablehead( 3, T_('Subject'), $no_sort ? NULL : 'Subject', false, false );
+      $mtable->add_tablehead( 3, T_('Subject#header'), $no_sort ? NULL : 'Subject', false, false );
       list($ico,$alt) = $msg_icones[0];
       $mtable->add_tablehead( 0, image( "images/$ico.gif", $alt, T_('Messages')),
          $no_sort ? NULL : 'flow', false, true );
-      $mtable->add_tablehead( 4, T_('Date'), $no_sort ? NULL : 'date', true, false );
+      $mtable->add_tablehead( 4, T_('Date#header'), $no_sort ? NULL : 'date', true, false );
       if( !$no_mark )
-         $mtable->add_tablehead( 5, T_('Mark'), NULL, true, true );
+         $mtable->add_tablehead( 5, T_('Mark#header'), NULL, true, true );
 
       // then stop if $header_part is true
       if ( !is_null($header_part) )
