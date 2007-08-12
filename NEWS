@@ -15,21 +15,18 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Highlight search terms within some texts for
         messages, forum posts, contact notes
 
-   * Manage contact list with other users   [FAQ: "What are Contacts?"]
+   * Contact list of other users   [FAQ: "What are Contacts?"]
       * Protect games in waiting room, Reject messages or Reject invitations
       * User categorization
-      * Private notes for user
+      * Private notes on user
 
    * Games:
       * Show observers of a running game
-      * Can add time for opponent   [FAQ: "Can I add time for my opponent?"]
+      * Add time for opponent   [FAQ: "Can I add time for my opponent?"]
       * Added hover-text on colors column for my running games
-      * Simplified view of a move by saving to select "View Move"-button
-        (needs JavaScript)
+      * Viewing move with auto-select on combobox (need JavaScript)
 
-   * Waiting room:
-      * added country of player, minor changes and fixes
-      * renamed some table columns
+   * Waiting room: added country of player, minor changes and fixes
 
    * User info:
       * Order of bio entries can be changed
@@ -37,21 +34,22 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Changed links to show rated / won / lost games in games list
 
       * Rating graph can now be displayed by time or by number of games
-      * Rating graph shows additional proportional pie chart for played games
+      * Rating graph shows additional pie chart for played games
 
    * Users: show my opponents and game statistics for two players
 
    * Table lists (waiting room, messages, users, opponents, games):
       * Added user profile setting "Table max rows" to control how many rows
-        are shown in table lists per default for waiting room, messages, users,
-        opponents, games. Temporarily changeable on pages with lists.
+        are shown in table lists per default. Can temporarily be changed
+        on respective pages.
       * Added arrows in table headers indicating sort direction of columns
+        (1st sort = dark blue arrow, 2nd sort = light blue arrow)
 
 
    Code improvements:
 
    * Optimized some database queries and added indexes:
-      * Better support new searching feature
+      * Speed up searching
       * Speed up game selection: games list, skip to next game, status page
       * Speed up following messages chain
       * Speed up user selection: experimental index on users Lastaccess
@@ -82,23 +80,23 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    Administrative changes:
 
-   * added <home news.php>Release notes</home>
+   * added this news page with <home news.php>Release notes</home>
 
    * Solved problems with frozen clocks
 
    * Changes for FAQ-editors and Translators:
-      * Moved Translate link into bottom bar, visible for translators only
+      * Moved 'Translate' into bottom bar, visible for translators only
       * Improvements described on respective page in "instructions"
-      * Better handling of translations
       * Use '&language=N' URL-argument to disable any translation on page
+      * Better handling of translations
 
    * Reject some registrations of account usurpers
 
-   * Introduced quota system to block users flooding the page with requests.
+   * Introduced quota system to block users flooding DGS with requests.
      Needed because there were incidents on which DGS IT-provider complaigned
      about using too much resources.
-
      Keep a "normal" access profile and you won't be blocked.
+
      If access quota is exceeded, the user is informed about it and is blocked
      for a day.
 
