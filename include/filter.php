@@ -254,6 +254,9 @@ class SearchFilter
    /*! \brief true, if filter in reset-state */
    var $is_reset;
 
+   /*! \brief array with accesskeys used for filters: array( search, reset ); none set per default. */
+   var $accesskeys;
+
    /*! \brief Constructs SearchFilter with optional prefix to be able to use more than one. */
    function SearchFilter( $prefix = '')
    {
@@ -261,6 +264,7 @@ class SearchFilter
       $this->Prefix   = $prefix;
       $this->is_init  = false;
       $this->is_reset = false;
+      $this->accesskeys = array( '', '' );
    }
 
    /*!
@@ -365,6 +369,13 @@ class SearchFilter
             }
          }
       }
+   }
+
+   /*! \brief Set access keys for search and reset of filters: Normal would be 'x' for search and 'e' for reset. */
+   function set_accesskeys( $acckey_search='', $acckey_reset='' )
+   {
+      $this->accesskeys[0] = $acckey_search;
+      $this->accesskeys[1] = $acckey_reset;
    }
 
    /*! \brief Parses vars from _REQUEST to update activity-state of filters (used for Table). */
@@ -878,17 +889,29 @@ class SearchFilter
       return new RequestParameters( $arr_out );
    }
 
-   /*! \brief Returns two form-elements with start-filter and reset-filter submits to be used with Table or External-Form. */
-   function get_submit_elements( $filtertype=false, $accesskey='')
+   /*!
+    * \brief Returns two form-elements with start-filter and reset-filter submits
+    *        to be used with Table or External-Form.
+    * \param $acckey_search accesskey for search-button (normal would be 'x'),
+    *        if not set use key configured for SearchFilter
+    * \param $acckey_reset accesskey for reset-button (normal would be 'e'),
+    *        if not set use key configured for SearchFilter
+    * \see set_accesskeys()
+    */
+   function get_submit_elements( $acckey_search=null, $acckey_reset=null )
    {
+      if( is_null($acckey_search) )
+         $acckey_search = $this->accesskeys[0];
+      if( is_null($acckey_reset) )
+         $acckey_reset = $this->accesskeys[1];
+
       $start_search = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_SEARCH_ACTION."\" value=\""
-         . ( $filtertype ? T_('Apply filters#filter') : T_('Search#filter') ) . '"'
-         . ( $accesskey ? ' accesskey='.attb_quote($accesskey) : '' )
+         . FFORM_SEARCH_ACTION."\" value=\"" . T_('Search#filter') . '"'
+         . ( ($acckey_search != '') ? ' accesskey='.attb_quote($acckey_search) : '' )
          . '>';
       $reset_search = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_RESET_ACTION."\" value=\""
-         . ( $filtertype ? T_('Reset filters#filter') : T_('Reset search#filter') ) . '"'
+         . FFORM_RESET_ACTION."\" value=\"" . T_('Reset search#filter') . '"'
+         . ( ($acckey_reset != '') ? ' accesskey='.attb_quote($acckey_reset) : '' )
          . '>';
       return array( $start_search, $reset_search );
    }
