@@ -40,7 +40,7 @@ if(OLD_STYLE_DUMP){
   define('QUOTE_NAME', 1);
   define('CREATE_TIME', 1);
   define('IF_NOT_EXISTS', 1);
-  define('DEFINITION_SORT', 1 xor $defs_sort);
+  define('DEFINITION_SORT', 0 xor $defs_sort);
 } //OLD_STYLE_DUMP
 define('DROP_TABLE', 0);
 define('AUTO_INCREMENT', 0);
@@ -392,9 +392,12 @@ $defs_rep['*']['*']
    ['%\s+character\s+set\s+latin1\b%is'] = '';
 
 
+//$defs_{move}[{table}][{src}] = {dst};
 switch( $FRIENDLY_SHORT_NAME ) {
 case 'dDGS':{
 //$defs_aft['GoDiagrams']['Date'] = 'SGF';
+$defs_aft['Adminlog']['IP'] = 'Date';
+$defs_aft['Errorlog']['IP'] = 'Date';
 } break;
 case 'DGS':{
 //$defs_???['Messages']['To_ID'] = ''; //still exist in DGS

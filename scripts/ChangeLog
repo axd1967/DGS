@@ -25,6 +25,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-12 rodival
+
+   * init.mysql,
+     scripts/data_export.php:
+   - adjusted init.mysql to the current state of the devel server database
+
 2007-08-12 juga
 
    * all files

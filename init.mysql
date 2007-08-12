@@ -4,7 +4,7 @@
 # devel Dragon Go Server dump
 # Host: dragongoserver.sourceforge.net
 # Database: d29933_dragongoserver
-# Generation Time: 2007-02-04 23:41:04 GMT
+# Generation Time: 2007-08-12 12:54:29 GMT
 # Server version: Apache/1.3.33 (Unix) PHP/4.3.10
 # PHP version: 4.3.10
 # MySQL version: 4.1.21-standard-log
@@ -26,7 +26,9 @@ CREATE TABLE Players (
    Lastaccess datetime default NULL,
    LastMove datetime default NULL,
    Registerdate date default NULL,
-   Hits int(11) default '0',
+   Hits int(11) NOT NULL default '0',
+   VaultCnt smallint(5) unsigned NOT NULL default '0',
+   VaultTime datetime NOT NULL default '0000-00-00 00:00:00',
    Moves int(11) default '0',
    Activity double NOT NULL default '15',
    Name varchar(40) NOT NULL default '',
@@ -48,10 +50,10 @@ CREATE TABLE Players (
    RatingMax double default NULL,
    InitialRating double default NULL,
    RatingStatus enum('INIT','RATED') default NULL,
-   Open varchar(40) default NULL,
+   Open varchar(40) NOT NULL default '',
    Lang varchar(20) NOT NULL default 'C',
-   VacationDays double default '14',
-   OnVacation double default '0',
+   VacationDays double NOT NULL default '14',
+   OnVacation double NOT NULL default '0',
    Woodcolor int(11) NOT NULL default '1',
    Boardcoords int(11) NOT NULL default '31',
    MoveNumbers smallint(5) unsigned NOT NULL default '0',
@@ -64,6 +66,7 @@ CREATE TABLE Players (
    ObservedGamesColumns int(10) unsigned NOT NULL default '593910',
    TournamentsColumns int(10) unsigned NOT NULL default '62',
    WaitingroomColumns int(10) unsigned NOT NULL default '253',
+   ContactColumns int(10) unsigned NOT NULL default '225',
    StatusFolders varchar(40) NOT NULL default '',
    Running int(11) NOT NULL default '0',
    Finished int(11) NOT NULL default '0',
@@ -72,8 +75,8 @@ CREATE TABLE Players (
    Lost int(11) NOT NULL default '0',
    Translator varchar(80) NOT NULL default '',
    IP varchar(16) NOT NULL default '',
-   Browser varchar(100) default NULL,
-   Country char(2) default NULL,
+   Browser varchar(100) NOT NULL default '',
+   Country char(2) NOT NULL default '',
    NotesSmallHeight tinyint(3) unsigned NOT NULL default '25',
    NotesSmallWidth tinyint(3) unsigned NOT NULL default '30',
    NotesSmallMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
@@ -82,11 +85,12 @@ CREATE TABLE Players (
    NotesLargeMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
    NotesCutoff tinyint(3) unsigned NOT NULL default '13',
    SkinName varchar(32) NOT NULL default '',
-   PRIMARY KEY  (ID),
+   TableMaxRows smallint(5) unsigned NOT NULL default '20',
+   PRIMARY KEY (ID),
    UNIQUE KEY Handle (Handle),
-   KEY Rating2 (Rating2),
-   KEY Name (Name),
-   KEY Activity (Activity)
+   KEY Activity (Activity),
+   KEY Country (Country),
+   KEY Lastaccess (Lastaccess)
 ) TYPE=MyISAM;
 # }
 
@@ -96,9 +100,9 @@ CREATE TABLE Players (
 #
 
 INSERT INTO Players SET
-     Handle='guest',
-     Name='Guest',
-     Password=PASSWORD('guest');
+   Handle='guest',
+   Name='Guest',
+   Password=PASSWORD('guest');
 # }
 
 # {
@@ -146,7 +150,7 @@ CREATE TABLE Games (
    White_Start_Rating double NOT NULL default '-9999',
    Black_End_Rating double NOT NULL default '-9999',
    White_End_Rating double NOT NULL default '-9999',
-   PRIMARY KEY  (ID),
+   PRIMARY KEY (ID),
    KEY ToMove_ID (ToMove_ID),
    KEY Size (Size),
    KEY Lastchanged (Lastchanged),
@@ -170,7 +174,7 @@ CREATE TABLE GamesNotes (
    player enum('B','W') NOT NULL default 'B',
    Hidden enum('N','Y') NOT NULL default 'N',
    Notes text NOT NULL,
-   PRIMARY KEY  (gid,player),
+   PRIMARY KEY (gid,player),
    KEY ID (ID)
 ) TYPE=MyISAM;
 # }
@@ -186,7 +190,7 @@ CREATE TABLE Bio (
    Category varchar(40) NOT NULL default '',
    Text text NOT NULL,
    SortOrder int(11) NOT NULL default '0',
-   PRIMARY KEY  (ID),
+   PRIMARY KEY (ID),
    KEY uid (uid)
 ) TYPE=MyISAM;
 # }
@@ -201,7 +205,7 @@ CREATE TABLE RatingChange (
    uid int(11) NOT NULL default '0',
    gid int(11) NOT NULL default '0',
    diff double default NULL,
-   PRIMARY KEY  (ID),
+   PRIMARY KEY (ID),
    KEY uid (uid)
 ) TYPE=MyISAM;
 # }
@@ -220,7 +224,7 @@ CREATE TABLE Ratinglog (
    RatingMin double default NULL,
    RatingMax double default NULL,
    RatingDiff double default NULL,
-   PRIMARY KEY  (ID),
+   PRIMARY KEY (ID),
    KEY uid (uid),
    KEY gid (gid,uid)
 ) TYPE=MyISAM;
@@ -243,7 +247,7 @@ CREATE TABLE Statistics (
    GamesFinished int(11) default NULL,
    GamesRunning int(11) default NULL,
    Activity int(11) default NULL,
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -260,7 +264,9 @@ CREATE TABLE Messages (
    Time datetime NOT NULL default '0000-00-00 00:00:00',
    Subject varchar(80) NOT NULL default '',
    Text text NOT NULL,
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID),
+   KEY ReplyTo (ReplyTo),
+   FULLTEXT KEY Subject (Subject,Text)
 ) TYPE=MyISAM;
 # }
 
@@ -276,7 +282,7 @@ CREATE TABLE MessageCorrespondents (
    Folder_nr int(11) default NULL,
    Sender enum('M','N','Y') NOT NULL default 'Y',
    Replied enum('M','N','Y') NOT NULL default 'N',
-   PRIMARY KEY  (ID),
+   PRIMARY KEY (ID),
    KEY mid (mid),
    KEY uid (uid),
    KEY Folder_nr (Folder_nr,uid)
@@ -293,10 +299,11 @@ CREATE TABLE Folders (
    uid int(11) NOT NULL default '0',
    Folder_nr int(11) NOT NULL default '0',
    Name varchar(40) NOT NULL default '',
-   BGColor varchar(8) NOT NULL default 'f7f5e3FF', #skin compatibility: Ok, enought contrast
+   BGColor varchar(8) NOT NULL default 'f7f5e3FF',
    FGColor varchar(6) NOT NULL default '000000',
-   PRIMARY KEY  (uid,Folder_nr),
-   KEY ID (ID)
+   PRIMARY KEY (uid,Folder_nr),
+   KEY ID (ID),
+   KEY uid (uid,Folder_nr)
 ) TYPE=MyISAM;
 # }
 
@@ -313,7 +320,7 @@ CREATE TABLE Moves (
    PosX tinyint(4) NOT NULL default '-128',
    PosY tinyint(4) NOT NULL default '-128',
    Hours smallint(5) unsigned default NULL,
-   PRIMARY KEY  (ID),
+   PRIMARY KEY (ID),
    KEY gid (gid,ID)
 ) TYPE=MyISAM;
 # }
@@ -328,7 +335,7 @@ CREATE TABLE MoveMessages (
    gid int(11) NOT NULL default '0',
    MoveNr smallint(5) unsigned NOT NULL default '0',
    Text text,
-   PRIMARY KEY  (gid,MoveNr),
+   PRIMARY KEY (gid,MoveNr),
    KEY ID (ID)
 ) TYPE=MyISAM;
 # }
@@ -358,7 +365,7 @@ CREATE TABLE Waitingroom (
    Ratingmin double NOT NULL default '-9999',
    Ratingmax double NOT NULL default '-9999',
    Comment varchar(40) NOT NULL default '',
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -371,7 +378,7 @@ CREATE TABLE Observers (
    ID int(11) NOT NULL auto_increment,
    uid int(11) default NULL,
    gid int(11) default NULL,
-   PRIMARY KEY  (ID),
+   PRIMARY KEY (ID),
    KEY uid (uid),
    KEY gid (gid)
 ) TYPE=MyISAM;
@@ -396,7 +403,7 @@ CREATE TABLE Tournament (
    MaxParticipants int(11) default NULL,
    Rated enum('N','Y') NOT NULL default 'N',
    WeekendClock enum('N','Y') NOT NULL default 'Y',
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -418,7 +425,7 @@ CREATE TABLE TournamentRound (
    Byotime int(11) NOT NULL default '0',
    Byoperiods int(11) NOT NULL default '0',
    GamesPerpair int(11) NOT NULL default '1',
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -431,7 +438,7 @@ CREATE TABLE TournamentOrganizers (
    ID int(11) NOT NULL auto_increment,
    tid int(11) NOT NULL default '0',
    pid int(11) NOT NULL default '0',
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -446,7 +453,7 @@ CREATE TABLE TournamentParticipants (
    pid int(11) NOT NULL default '0',
    Seeding int(11) NOT NULL default '0',
    PlayerNumber int(11) default NULL,
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -463,7 +470,7 @@ CREATE TABLE Errorlog (
    Debug text NOT NULL,
    IP varchar(16) NOT NULL default '',
    Date timestamp(14) NOT NULL,
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -479,7 +486,7 @@ CREATE TABLE Adminlog (
    Message text NOT NULL,
    Date timestamp(14) NOT NULL,
    IP varchar(16) NOT NULL default '',
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -499,7 +506,7 @@ CREATE TABLE Translationlog (
    OldTranslation blob NOT NULL,
    Translation blob NOT NULL,
    Date timestamp(14) NOT NULL,
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -513,7 +520,7 @@ CREATE TABLE TranslationTexts (
    Text blob NOT NULL,
    Ref_ID int(11) default NULL,
    Translatable enum('Y','N','Done','Changed') NOT NULL default 'Y',
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -526,7 +533,8 @@ CREATE TABLE Translations (
    Original_ID int(11) NOT NULL default '0',
    Language_ID int(11) NOT NULL default '0',
    Text blob NOT NULL,
-   PRIMARY KEY  (Language_ID,Original_ID)
+   Translated enum('Y','N') NOT NULL default 'N',
+   PRIMARY KEY (Language_ID,Original_ID)
 ) TYPE=MyISAM;
 # }
 
@@ -539,7 +547,7 @@ CREATE TABLE TranslationLanguages (
    ID int(11) NOT NULL auto_increment,
    Language varchar(32) default NULL,
    Name varchar(32) default NULL,
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -551,7 +559,7 @@ CREATE TABLE TranslationLanguages (
 CREATE TABLE TranslationGroups (
    ID int(11) NOT NULL auto_increment,
    Groupname varchar(32) NOT NULL default '',
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -563,7 +571,7 @@ CREATE TABLE TranslationGroups (
 CREATE TABLE TranslationFoundInGroup (
    Text_ID int(11) NOT NULL default '0',
    Group_ID int(11) NOT NULL default '0',
-   PRIMARY KEY  (Text_ID,Group_ID)
+   PRIMARY KEY (Text_ID,Group_ID)
 ) TYPE=MyISAM;
 # }
 
@@ -576,7 +584,7 @@ CREATE TABLE TranslationPages (
    ID int(11) NOT NULL auto_increment,
    Page varchar(64) default NULL,
    Group_ID int(11) default NULL,
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -593,7 +601,7 @@ CREATE TABLE Forums (
    Moderated char(1) NOT NULL default 'N',
    LastPost int(11) default NULL,
    PostsInForum int(11) NOT NULL default '0',
-   PRIMARY KEY  (ID),
+   PRIMARY KEY (ID),
    KEY SortOrder (SortOrder)
 ) TYPE=MyISAM;
 # }
@@ -623,10 +631,12 @@ CREATE TABLE Posts (
    PostsInThread int(11) NOT NULL default '0',
    LastPost int(11) NOT NULL default '0',
    PendingApproval enum('Y','N') NOT NULL default 'N',
-   PRIMARY KEY  (ID),
+   PRIMARY KEY (ID),
    KEY Pos (Thread_ID,PosIndex),
-   KEY List (Forum_ID,Lastchanged),
-   KEY PendingApproval (PendingApproval,Time DESC),
+   KEY Forum_ID (Forum_ID,Lastchanged),
+   KEY PendingApproval (PendingApproval,Time),
+   KEY Parent_ID (Parent_ID),
+   KEY Time (Time),
    FULLTEXT KEY Subject (Subject,Text)
 ) TYPE=MyISAM;
 # }
@@ -640,7 +650,7 @@ CREATE TABLE Forumreads (
    User_ID int(11) NOT NULL default '0',
    Thread_ID int(11) NOT NULL default '0',
    Time datetime default NULL,
-   PRIMARY KEY  (User_ID,Thread_ID)
+   PRIMARY KEY (User_ID,Thread_ID)
 ) TYPE=MyISAM;
 # }
 
@@ -660,7 +670,7 @@ CREATE TABLE GoDiagrams (
    Saved enum('Y','N') NOT NULL default 'N',
    Data text NOT NULL,
    SGF text NOT NULL,
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -677,7 +687,7 @@ CREATE TABLE FAQ (
    Question int(11) NOT NULL default '0',
    Answer int(11) NOT NULL default '0',
    Hidden enum('N','Y') NOT NULL default 'N',
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -692,7 +702,8 @@ CREATE TABLE FAQlog (
    FAQID int(11) NOT NULL default '0',
    Question text,
    Answer text,
-   PRIMARY KEY  (ID)
+   Date timestamp NOT NULL,
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM;
 # }
 
@@ -705,7 +716,7 @@ CREATE TABLE Clock (
    ID int(11) NOT NULL default '0',
    Ticks int(11) default '0',
    Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
-   PRIMARY KEY  (ID)
+   PRIMARY KEY (ID)
 ) TYPE=MyISAM PACK_KEYS=1;
 # }
 
