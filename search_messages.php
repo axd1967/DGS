@@ -73,11 +73,11 @@ require_once( "include/filter.php" );
          array( FC_SIZE => 5, FC_MULTIPLE => $arr_chkfolders ) );
    $smfilter->add_filter( 2, 'Boolean',       'M.ReplyTo=0', true,
          array( FC_LABEL => T_('Show only initial-messages') ) );
-   //NOT-USED: $smfilter->add_filter( 3, 'Boolean', array( true  => 'me.Folder_Nr IS NULL', false => 'me.Folder_Nr IS NOT NULL' ), true, array( FC_LABEL => T_('Show deleted messages') ) );
+   //NOT-USED: $smfilter->add_filter( 3, 'Boolean', array( true  => 'me.Folder_Nr IS NULL', false => 'me.Folder_Nr IS NOT NULL' ), true, array( FC_LABEL => T_//('Show deleted messages') ) );
    $smfilter->add_filter( 4, 'Selection',
-         array( T_('All') => '',
-                T_('Game-related')   => 'M.Game_ID>0', // <>0
-                T_('Game-unrelated') => 'M.Game_ID=0' ),
+         array( T_('All#filtermsg') => '',
+                T_('Game-related#filtermsg')   => 'M.Game_ID>0', // <>0
+                T_('Game-unrelated#filtermsg') => 'M.Game_ID=0' ),
          true);
    $smfilter->add_filter( 5, 'Boolean',
          new QuerySQL(SQLP_FROM,  "LEFT JOIN Games AS G ON M.Game_ID=G.ID",
@@ -94,7 +94,7 @@ require_once( "include/filter.php" );
          //'(other_name #OP #VAL OR other_Handle #OP #VAL)',
          true,
          array( FC_SIZE => 14, FC_ADD_HAVING => 1,
-                FC_SYNTAX_HINT => array( FCV_SYNHINT_ADDINFO => T_('find Userid') ) ));
+                FC_SYNTAX_HINT => array( FCV_SYNHINT_ADDINFO => T_('find Userid#filtermsg') ) ));
    $mfilter->add_filter( 3, 'MysqlMatch', 'M.Subject,M.Text', true,
          array( FC_MATCH_MODE => MATCH_BOOLMODE_SET ) );
    $mfilter->add_filter( 4, 'RelativeDate', 'M.Time', true);
@@ -137,7 +137,7 @@ require_once( "include/filter.php" );
          'DESCRIPTION', T_('Select folders'),
          'FILTER',      $smfilter, 1 ));
    $smform->add_row( array(
-         'DESCRIPTION', T_('Message scope#msg'),
+         'DESCRIPTION', T_('Message scope#filtermsg'),
          'FILTER',      $smfilter, 4, // game-related
          'BR',
          'FILTER',      $smfilter, 2, // initial-msg

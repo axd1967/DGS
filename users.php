@@ -51,15 +51,19 @@ require_once( "include/filter.php" );
          array( FC_FNAME => 'name', FC_SIZE => 12, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
    $ufilter->add_filter( 3, 'Text',    'P.Handle', true,
          array( FC_FNAME => 'user', FC_SIZE => 10, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
-   //$ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info
+   //$ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info (don't use here, no index)
    $ufilter->add_filter( 5, 'Rating',  'P.Rating2', true);
-   //$ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches
+   //$ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches (don't use here, no index)
    $ufilter->add_filter( 7, 'Numeric', 'Games', true,    # =P.Running+P.Finished
-         array( FC_ADD_HAVING => 1 ));
-   $ufilter->add_filter( 8, 'Numeric', 'P.Running', true);
-   $ufilter->add_filter( 9, 'Numeric', 'P.Finished', true);
-   $ufilter->add_filter(10, 'Numeric', 'P.Won', true);
-   $ufilter->add_filter(11, 'Numeric', 'P.Lost', true);
+         array( FC_SIZE => 4, FC_ADD_HAVING => 1 ));
+   $ufilter->add_filter( 8, 'Numeric', 'P.Running', true,
+         array( FC_SIZE => 4 ));
+   $ufilter->add_filter( 9, 'Numeric', 'P.Finished', true,
+         array( FC_SIZE => 4 ));
+   $ufilter->add_filter(10, 'Numeric', 'P.Won', true,
+         array( FC_SIZE => 4 ));
+   $ufilter->add_filter(11, 'Numeric', 'P.Lost', true,
+         array( FC_SIZE => 4 ));
    $ufilter->add_filter(13, 'Boolean', "P.Activity>$ActiveLevel1", true,
          array( FC_FNAME => 'active', FC_LABEL => T_('Active'), FC_STATIC => 1,
                 FC_DEFAULT => ($observe_gid ? 0 : 1) ) );
@@ -68,7 +72,8 @@ require_once( "include/filter.php" );
          array( FC_TIME_UNITS => FRDTU_DHM ));
    $ufilter->add_filter(16, 'Country', 'P.Country', false,
          array( FC_HIDE => 1 ));
-   $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true);
+   $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,
+         array( FC_SIZE => 4 ));
    $ufilter->init(); // parse current value from _GET
    $ufilter->set_accesskeys('x', 'e');
    $f_active =& $ufilter->get_filter(13);
@@ -89,23 +94,23 @@ require_once( "include/filter.php" );
    $limit = $utable->current_limit_string();
 
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $utable->add_tablehead( 1, T_('ID'), 'P.ID', false, true);
-   $utable->add_tablehead( 2, T_('Name'), 'P.Name');
-   $utable->add_tablehead( 3, T_('Userid'), 'P.Handle');
-   $utable->add_tablehead(16, T_('Country'), 'P.Country');
-   $utable->add_tablehead( 4, T_('Rank info'));
-   $utable->add_tablehead( 5, T_('Rating'), 'P.Rating2', true);
-   $utable->add_tablehead( 6, T_('Open for matches?'));
-   $utable->add_tablehead( 7, T_('Games'), 'Games', true);
-   $utable->add_tablehead( 8, T_('Running'), 'P.Running', true);
-   $utable->add_tablehead( 9, T_('Finished'), 'P.Finished', true);
-   $utable->add_tablehead(17, T_('Rated'), 'P.RatedGames', true);
-   $utable->add_tablehead(10, T_('Won'), 'P.Won', true);
-   $utable->add_tablehead(11, T_('Lost'), 'P.Lost', true);
-   $utable->add_tablehead(12, T_('Percent'), 'Percent', true);
-   $utable->add_tablehead(13, T_('Activity'), 'ActivityLevel', true, true);
-   $utable->add_tablehead(14, T_('Last access'), 'P.Lastaccess', true);
-   $utable->add_tablehead(15, T_('Last Moved'), 'P.Lastmove', true);
+   $utable->add_tablehead( 1, T_('ID#header'), 'P.ID', false, true);
+   $utable->add_tablehead( 2, T_('Name#header'), 'P.Name');
+   $utable->add_tablehead( 3, T_('Userid#header'), 'P.Handle');
+   $utable->add_tablehead(16, T_('Country#header'), 'P.Country');
+   $utable->add_tablehead( 4, T_('Rank info#header'));
+   $utable->add_tablehead( 5, T_('Rating#header'), 'P.Rating2', true);
+   $utable->add_tablehead( 6, T_('Open for matches?#header'));
+   $utable->add_tablehead( 7, T_('#Games#header'), 'Games', true);
+   $utable->add_tablehead( 8, T_('Running#header'), 'P.Running', true);
+   $utable->add_tablehead( 9, T_('Finished#header'), 'P.Finished', true);
+   $utable->add_tablehead(17, T_('Rated#header'), 'P.RatedGames', true);
+   $utable->add_tablehead(10, T_('Won#header'), 'P.Won', true);
+   $utable->add_tablehead(11, T_('Lost#header'), 'P.Lost', true);
+   $utable->add_tablehead(12, T_('Percent#header'), 'Percent', true);
+   $utable->add_tablehead(13, T_('Activity#header'), 'ActivityLevel', true, true);
+   $utable->add_tablehead(14, T_('Last access#header'), 'P.Lastaccess', true);
+   $utable->add_tablehead(15, T_('Last moved#header'), 'P.Lastmove', true);
 
    // build SQL-query
    $qsql = new QuerySQL();

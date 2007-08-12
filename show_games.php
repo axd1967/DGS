@@ -93,10 +93,14 @@ require_once( "include/rating.php" );
    $gfilter = new SearchFilter( $fprefix );
    //Filter & add_filter(int id, string type, string dbfield, [bool active=false], [array config])
    $gfilter->add_filter( 1, 'Numeric', 'Games.ID', true, array( FC_SIZE => 8 ) );
-   $gfilter->add_filter( 6, 'Numeric', 'Games.Size', true);
-   $gfilter->add_filter( 7, 'Numeric', 'Games.Handicap', true);
-   $gfilter->add_filter( 8, 'Numeric', 'Games.Komi', true);
-   $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true);
+   $gfilter->add_filter( 6, 'Numeric', 'Games.Size', true,
+         array( FC_SIZE => 3 ));
+   $gfilter->add_filter( 7, 'Numeric', 'Games.Handicap', true,
+         array( FC_SIZE => 3 ));
+   $gfilter->add_filter( 8, 'Numeric', 'Games.Komi', true,
+         array( FC_SIZE => 3 ));
+   $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true,
+         array( FC_SIZE => 4 ));
    $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true);
    $gfilter->add_filter(14, 'RatedSelect', 'Rated', true,
          array( FC_FNAME => 'rated' ));
@@ -109,7 +113,7 @@ require_once( "include/rating.php" );
    if( $running and !$all )
    {
       $gfilter->add_filter( 5, 'Selection',     # filter on my color (not on who-to-move)
-            array( T_('All') => '',
+            array( T_('All#filter') => '',
                    'B' => new QuerySQL( SQLP_HAVING, 'iamBlack=1' ),
                    'W' => new QuerySQL( SQLP_HAVING, 'iamBlack=0' ) ),
             true);
@@ -120,9 +124,10 @@ require_once( "include/rating.php" );
    }
    if( $finished )
    {
-      $gfilter->add_filter(10, 'Score', 'Score', true);
+      $gfilter->add_filter(10, 'Score', 'Score', true,
+            array( FC_SIZE => 3 ));
       $gfilter->add_filter(11, 'Selection',
-            array( T_('All')  => '',
+            array( T_('All#filter')  => '',
                    T_('Won')  => new QuerySQL( SQLP_HAVING, 'Win=1' ),
                    T_('Lost') => new QuerySQL( SQLP_HAVING, 'Win=-1' ),
                    T_('Jigo') => 'Score=0' ),
@@ -139,7 +144,7 @@ require_once( "include/rating.php" );
       else //if( !all )
       {
          $gfilter->add_filter( 5, 'Selection',
-               array( T_('All') => '', 'B' => "Black_ID=$uid", 'W' => "White_ID=$uid" ),
+               array( T_('All#filter') => '', 'B' => "Black_ID=$uid", 'W' => "White_ID=$uid" ),
                true);
          $gfilter->add_filter(23, 'Rating', 'startRating', true,
                array( FC_ADD_HAVING => 1 ));
@@ -222,100 +227,100 @@ require_once( "include/rating.php" );
  * 31: >  FA (White-EndRatingDiff)
  *****/
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $gtable->add_tablehead( 1, T_('ID'), 'ID', true, true, array( 'class' => 'Button') );
-   $gtable->add_tablehead( 2, T_('sgf'));
+   $gtable->add_tablehead( 1, T_('ID#header'), 'ID', true, true, array( 'class' => 'Button') );
+   $gtable->add_tablehead( 2, T_('sgf#header'));
 
    if( $observe )
    {
-      $gtable->add_tablehead(17, T_('Black name'), 'blackName');
-      $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
-      $gtable->add_tablehead(26, T_('Black start rating'), 'blackStartRating', true);
-      $gtable->add_tablehead(19, T_('Black rating'), 'blackRating', true);
-      $gtable->add_tablehead(20, T_('White name'), 'whiteName');
-      $gtable->add_tablehead(21, T_('White userid'), 'whiteHandle');
-      $gtable->add_tablehead(29, T_('White start rating'), 'whiteStartRating', true);
-      $gtable->add_tablehead(22, T_('White rating'), 'whiteRating', true);
+      $gtable->add_tablehead(17, T_('Black name#header'), 'blackName');
+      $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle');
+      $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', true);
+      $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', true);
+      $gtable->add_tablehead(20, T_('White name#header'), 'whiteName');
+      $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle');
+      $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', true);
+      $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', true);
    }
    else if( $finished )
    {
       if( $all )
       {
-         $gtable->add_tablehead(17, T_('Black name'), 'blackName');
-         $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
-         $gtable->add_tablehead(26, T_('Black start rating'), 'blackStartRating', true);
-         $gtable->add_tablehead(27, T_('Black end rating'), 'blackEndRating', true);
-         $gtable->add_tablehead(19, T_('Black rating'), 'blackRating', true);
-         $gtable->add_tablehead(28, T_('Black rating diff'), 'blackDiff', true);
-         $gtable->add_tablehead(20, T_('White name'), 'whiteName');
-         $gtable->add_tablehead(21, T_('White userid'), 'whiteHandle');
-         $gtable->add_tablehead(29, T_('White start rating'), 'whiteStartRating', true);
-         $gtable->add_tablehead(30, T_('White end rating'), 'whiteEndRating', true);
-         $gtable->add_tablehead(22, T_('White rating'), 'whiteRating', true);
-         $gtable->add_tablehead(31, T_('White rating diff'), 'whiteDiff', true);
+         $gtable->add_tablehead(17, T_('Black name#header'), 'blackName');
+         $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle');
+         $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', true);
+         $gtable->add_tablehead(27, T_('Black end rating#header'), 'blackEndRating', true);
+         $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', true);
+         $gtable->add_tablehead(28, T_('Black rating diff#header'), 'blackDiff', true);
+         $gtable->add_tablehead(20, T_('White name#header'), 'whiteName');
+         $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle');
+         $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', true);
+         $gtable->add_tablehead(30, T_('White end rating#header'), 'whiteEndRating', true);
+         $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', true);
+         $gtable->add_tablehead(31, T_('White rating diff#header'), 'whiteDiff', true);
       }
       else
       {
-         $gtable->add_tablehead( 3, T_('Opponent'), 'Name');
-         $gtable->add_tablehead( 4, T_('Userid'), 'Handle');
-         $gtable->add_tablehead(23, T_('Start rating'), 'startRating', true);
-         $gtable->add_tablehead(24, T_('End rating'), 'endRating', true);
-         $gtable->add_tablehead(16, T_('Rating'), 'Rating', true);
-         $gtable->add_tablehead(25, T_('Rating diff'), 'ratingDiff', true);
-         $gtable->add_tablehead( 5, T_('Color'), 'Color');
+         $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name');
+         $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle');
+         $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', true);
+         $gtable->add_tablehead(24, T_('End rating#header'), 'endRating', true);
+         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', true);
+         $gtable->add_tablehead(25, T_('Rating diff#header'), 'ratingDiff', true);
+         $gtable->add_tablehead( 5, T_('Color#header'), 'Color');
       }
    }
    else if( $running )
    {
       if( $all )
       {
-         $gtable->add_tablehead(17, T_('Black name'), 'blackName');
-         $gtable->add_tablehead(18, T_('Black userid'), 'blackHandle');
-         $gtable->add_tablehead(26, T_('Black start rating'), 'blackStartRating', true);
-         $gtable->add_tablehead(19, T_('Black rating'), 'blackRating', true);
-         $gtable->add_tablehead(20, T_('White name'), 'whiteName');
-         $gtable->add_tablehead(21, T_('White userid'), 'whiteHandle');
-         $gtable->add_tablehead(29, T_('White start rating'), 'whiteStartRating', true);
-         $gtable->add_tablehead(22, T_('White rating'), 'whiteRating', true);
+         $gtable->add_tablehead(17, T_('Black name#header'), 'blackName');
+         $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle');
+         $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', true);
+         $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', true);
+         $gtable->add_tablehead(20, T_('White name#header'), 'whiteName');
+         $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle');
+         $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', true);
+         $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', true);
       }
       else
       {
-         $gtable->add_tablehead( 3, T_('Opponent'), 'Name');
-         $gtable->add_tablehead( 4, T_('Userid'), 'Handle');
-         $gtable->add_tablehead(23, T_('Start rating'), 'startRating', true);
-         $gtable->add_tablehead(16, T_('Rating'), 'Rating', true);
-         $gtable->add_tablehead( 5, T_('Colors'), 'Color');
+         $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name');
+         $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle');
+         $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', true);
+         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', true);
+         $gtable->add_tablehead( 5, T_('Colors#header'), 'Color');
       }
    }
 
-   $gtable->add_tablehead( 6, T_('Size'), 'Size', true);
-   $gtable->add_tablehead( 7, T_('Handicap'), 'Handicap');
-   $gtable->add_tablehead( 8, T_('Komi'), 'Komi');
-   $gtable->add_tablehead( 9, T_('Moves'), 'Moves', true);
+   $gtable->add_tablehead( 6, T_('Size#header'), 'Size', true);
+   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Handicap');
+   $gtable->add_tablehead( 8, T_('Komi#header'), 'Komi');
+   $gtable->add_tablehead( 9, T_('Moves#header'), 'Moves', true);
 
    if( $finished )
    {
       if( $all )
-         $gtable->add_tablehead(10, T_('Score'), 'Score', true);
+         $gtable->add_tablehead(10, T_('Score#header'), 'Score', true);
       else
       {
-         $gtable->add_tablehead(10, T_('Score'), 'oScore', true);
-         $gtable->add_tablehead(11, T_('Win?'), 'Win', true, true);
+         $gtable->add_tablehead(10, T_('Score#header'), 'oScore', true);
+         $gtable->add_tablehead(11, T_('Win?#header'), 'Win', true, true);
       }
    }
 
-   $gtable->add_tablehead(14, T_('Rated'), 'Rated', true, true);
+   $gtable->add_tablehead(14, T_('Rated#header'), 'Rated', true, true);
 
    if( $observe )
-      $gtable->add_tablehead(13, T_('Last move'), 'Lastchanged', true);
+      $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', true);
    else if( $finished )
-      $gtable->add_tablehead(12, T_('End date'), 'Lastchanged', true);
+      $gtable->add_tablehead(12, T_('End date#header'), 'Lastchanged', true);
    else if( $running )
    {
-      $gtable->add_tablehead(13, T_('Last move'), 'Lastchanged', true);
+      $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', true);
       if( !$all )
       {
-         $gtable->add_tablehead(15, T_('Opponents Last Access'), 'Lastaccess', true);
-         $gtable->add_tablehead(12, T_('Weekend Clock'), 'WeekendClock', true);
+         $gtable->add_tablehead(15, T_('Opponents Last Access#header'), 'Lastaccess', true);
+         $gtable->add_tablehead(12, T_('Weekend Clock#header'), 'WeekendClock', true);
       }
    }
 
