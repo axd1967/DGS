@@ -200,8 +200,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    * Provided alternative interfaces:
       * Robots interface: quick_status & quick_play suite [FAQ]
-      * <home wap/status.php>WAP status page</home>
-      * <home rss/status.php>RSS status feed</home>
+      * <home wap/status.php>WAP status page</home> : http://<dragonURL>/wap/status.php
+      * <home rss/status.php>RSS status feed</home> : http://<dragonURL>/rss/status.php
 
    * Pages should be W3C compliant now
 
@@ -221,7 +221,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    Administrative changes:
 
-   * Status page: Pending approvals for moderated forum posts
+   * Status page for forum admins:
+      * Pending approvals for moderated forum posts
 
    * Speed up some queries by adding more indexes
 
