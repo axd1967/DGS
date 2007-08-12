@@ -92,9 +92,9 @@ $ARR_DBFIELDKEYS = array(
    $usfilter->add_filter(2, 'RatedSelect',  'G.Rated', true );
    $usfilter->add_filter(3, 'Date',         'G.Lastchanged', true );
    $usfilter->add_filter(4, 'Selection',
-         array( T_('All games') => '',
-                T_('Running games')  => 'G.Status' . IS_RUNNING_GAME,
-                T_('Finished games') => "G.Status='FINISHED'" ),
+         array( T_('All games#filteropp') => '',
+                T_('Running games#filteropp')  => 'G.Status' . IS_RUNNING_GAME,
+                T_('Finished games#filteropp') => "G.Status='FINISHED'" ),
          true,
          array( FC_DEFAULT => 2 ) );
    $usfilter->init();
@@ -107,15 +107,19 @@ $ARR_DBFIELDKEYS = array(
          array( FC_SIZE => 12 ));
    $ufilter->add_filter( 3, 'Text',    'P.Handle', true,
          array( FC_SIZE => 12 ));
-   $ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info
+   //$ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info (don't use here, no index)
    $ufilter->add_filter( 5, 'Rating',  'P.Rating2', true);
-   $ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches
+   //$ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches (don't use here, no index)
    $ufilter->add_filter( 7, 'Numeric', 'Games', true,   # =P.Running+P.Finished
-         array( FC_ADD_HAVING => 1 ));
-   $ufilter->add_filter( 8, 'Numeric', 'P.Running', true);
-   $ufilter->add_filter( 9, 'Numeric', 'P.Finished', true);
-   $ufilter->add_filter(10, 'Numeric', 'P.Won', true);
-   $ufilter->add_filter(11, 'Numeric', 'P.Lost', true);
+         array( FC_SIZE => 4, FC_ADD_HAVING => 1 ));
+   $ufilter->add_filter( 8, 'Numeric', 'P.Running', true,
+         array( FC_SIZE => 4 ));
+   $ufilter->add_filter( 9, 'Numeric', 'P.Finished', true,
+         array( FC_SIZE => 4 ));
+   $ufilter->add_filter(10, 'Numeric', 'P.Won', true,
+         array( FC_SIZE => 4 ));
+   $ufilter->add_filter(11, 'Numeric', 'P.Lost', true,
+         array( FC_SIZE => 4 ));
    $ufilter->add_filter(13, 'Boolean', "P.Activity>$ActiveLevel1", true,
          array( FC_FNAME => 'active', FC_LABEL => T_('Active'), FC_STATIC => 1 ) );
    $ufilter->add_filter(14, 'RelativeDate', 'P.Lastaccess', true);
@@ -123,7 +127,8 @@ $ARR_DBFIELDKEYS = array(
          array( FC_TIME_UNITS => FRDTU_DHM ));
    $ufilter->add_filter(16, 'Country', 'P.Country', false,
          array( FC_HIDE => 1 ));
-   $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true);
+   $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,
+         array( FC_SIZE => 4 ));
    $ufilter->init(); // parse current value from _GET
    $ufilter->set_accesskeys('x', 'e');
 
@@ -153,24 +158,24 @@ $ARR_DBFIELDKEYS = array(
 
    // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
    // table: use same table-IDs as in users.php(!)
-   $utable->add_tablehead( 0, T_('Info'), NULL, false, true, array( 'class' => 'Button') );
-   $utable->add_tablehead( 1, T_('ID'), 'ID', false, true);
-   $utable->add_tablehead( 2, T_('Name'), 'Name');
-   $utable->add_tablehead( 3, T_('Userid'), 'Handle');
-   $utable->add_tablehead(16, T_('Country'), 'Country');
-   $utable->add_tablehead( 4, T_('Rank info'));
-   $utable->add_tablehead( 5, T_('Rating'), 'Rating2', true);
-   $utable->add_tablehead( 6, T_('Open for matches?'));
-   $utable->add_tablehead( 7, T_('Games'), 'Games', true);
-   $utable->add_tablehead( 8, T_('Running'), 'Running', true);
-   $utable->add_tablehead( 9, T_('Finished'), 'Finished', true);
-   $utable->add_tablehead(17, T_('Rated'), 'RatedGames', true);
-   $utable->add_tablehead(10, T_('Won'), 'Won', true);
-   $utable->add_tablehead(11, T_('Lost'), 'Lost', true);
-   $utable->add_tablehead(12, T_('Percent'), 'Percent', true);
-   $utable->add_tablehead(13, T_('Activity'), 'ActivityLevel', true, true);
-   $utable->add_tablehead(14, T_('Last access'), 'Lastaccess', true);
-   $utable->add_tablehead(15, T_('Last moved'), 'Lastmove', true);
+   $utable->add_tablehead( 0, T_('Info#header'), NULL, false, true, array( 'class' => 'Button') );
+   $utable->add_tablehead( 1, T_('ID#header'), 'ID', false, true);
+   $utable->add_tablehead( 2, T_('Name#header'), 'Name');
+   $utable->add_tablehead( 3, T_('Userid#header'), 'Handle');
+   $utable->add_tablehead(16, T_('Country#header'), 'Country');
+   $utable->add_tablehead( 4, T_('Rank info#header'));
+   $utable->add_tablehead( 5, T_('Rating#header'), 'Rating2', true);
+   $utable->add_tablehead( 6, T_('Open for matches?#header'));
+   $utable->add_tablehead( 7, T_('#Games#header'), 'Games', true);
+   $utable->add_tablehead( 8, T_('Running#header'), 'Running', true);
+   $utable->add_tablehead( 9, T_('Finished#header'), 'Finished', true);
+   $utable->add_tablehead(17, T_('Rated#header'), 'RatedGames', true);
+   $utable->add_tablehead(10, T_('Won#header'), 'Won', true);
+   $utable->add_tablehead(11, T_('Lost#header'), 'Lost', true);
+   $utable->add_tablehead(12, T_('Percent#header'), 'Percent', true);
+   $utable->add_tablehead(13, T_('Activity#header'), 'ActivityLevel', true, true);
+   $utable->add_tablehead(14, T_('Last access#header'), 'Lastaccess', true);
+   $utable->add_tablehead(15, T_('Last moved#header'), 'Lastmove', true);
 
 
    // form for static filters
