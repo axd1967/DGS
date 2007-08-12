@@ -107,6 +107,7 @@ require_once( "include/filter.php" );
                 T_('Server#msgdir') => "me.Sender='S'" ), // from server
          true);
    $mfilter->init(); // parse current value from _GET
+   $mfilter->set_accesskeys('x', 'e');
    $sf3 =& $mfilter->get_filter(3);
 
    $mtable = new Table( 'message', $page );
@@ -143,11 +144,6 @@ require_once( "include/filter.php" );
          'BR',
          'FILTER',      $smfilter, 5, // pending invitations
          ));
-   //$smform->add_empty_row();
-   $smform->add_row( array(
-         'TAB',
-         'CELL',        1, 'align=left',
-         'OWNHTML',     implode( '', $mfilter->get_submit_elements() ) ));
 
    // build SQL-query
    $query_smfilter = $smfilter->get_query(GETFILTER_ALL); // clause-parts for static filter

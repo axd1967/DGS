@@ -125,6 +125,7 @@ $ARR_DBFIELDKEYS = array(
          array( FC_HIDE => 1 ));
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true);
    $ufilter->init(); // parse current value from _GET
+   $ufilter->set_accesskeys('x', 'e');
 
    $utable = new Table( 'user', $page, 'UsersColumns' );
    $utable->set_default_sort( 'ID', 0);
@@ -194,10 +195,6 @@ $ARR_DBFIELDKEYS = array(
          'DESCRIPTION', T_('Last changed'),
          'FILTER',      $usfilter, 3,
          'FILTERERROR', $usfilter, 3, "<br>$FERR1", $FERR2, true ));
-   $usform->add_row( array(
-         'TAB',
-         'CELL',        1, 'align=left',
-         'OWNHTML',     implode( '', $ufilter->get_submit_elements() ), ));
 
 
    // build SQL-query (for user-table)
