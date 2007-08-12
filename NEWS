@@ -26,7 +26,9 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Added hover-text on colors column for my running games
       * Viewing move with auto-select on combobox (need JavaScript)
 
-   * Waiting room: added country of player, minor changes and fixes
+   * Waiting room:
+      * added country of player, minor changes and fixes
+      * changed some columns: renamed Handicap to Type, added Handicap
 
    * User info:
       * Order of bio entries can be changed
@@ -120,21 +122,132 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
 
 [2006-08-07] - DGS 1.0.12
-   see also <http://www.dragongoserver.net/faq.php?read=t&cat=160>
 
-    * A new forum system.
+   New features and Major changes:
 
-    * Game notes.
+   * New forum system
+      * Editable posts, Previewing, Moderation
+      * Search page
+      * Indication for new posts
 
-    * A slicker game page.
+   * Waiting room, Invitations:
+      * Standard handicap placement for various board sizes
+      * Show only suitable games (having a rating and match rating range)
+      * Switch between all and suitable games with page bottom links
+      * Show probable handicap calculus in the game info table
 
-    * Standard handicap placements.
+   * User info:
+      * Added numer of rated games, won rated and lost rated games.
+        Rated games = Won + Lost + Jigo.
+        Finished games = Rated + Unrated finished games.
+        Added links to game list using sort to show respective type at top.
+        Show also in users list.
+      * Changed Percentage calculus to depend on rated games
 
-    * WAP status page.
+      * Rating graph: Added line with "number of games"
 
-    * RSS feeds.
+      * Bio: added categories 'Native Language' and 'Language Competence'
 
-    * Many other improvements and bug fixed.
+   * Messages:
+      * Message preview
+      * Message chain: walking to previous and next message
+        (use envelope images with arrows to navigate)
+      * Added "Toggle all mark" feature
+      * Enhanced folders display
+
+   * Markup tags for forum posts and messages:
+      * <game gid[,move]> : show link to game
+      * <user uid> or <user =userid> : show link to user info
+      * <send uid> or <send =userid> : show link to send a message to user
+      * <home page>DGS-page</home> : show link to DGS-page without baseURL
+        (e.g. <home users.php>User list</home>)
+
+      * <color col>text</color> : change color for text:
+        'col' can be name (like red, green) or #rrggbb (hex code: #c07f43)
+      * <tt>text</tt> : format single-line in a fixed-width font
+      * <pre>text</pre> : format multi-line text with fixed-width font
+        (useful for diagrams)
+      * <code>text</code> : text may contain HTML chars (useful code fragments)
+
+   * Added private game notes:
+     Configure in user profile and show/hide on game page.
+     Don't forget to save note before leaving the game page.
+
+   * Game page (new design):
+      * Replaced ugly "green table" with smaller select box to view a move
+      * New look for game info box
+      * Show player on vacation in game info box
+      * Added more stone sizes (5, 7, 9, 11) to better support handheld devices
+
+      * Added stones numbering, configure in user profile
+      * Show all game comments in separate window ("Comments" link)
+      * Added page bottom link to "Download SGF with all comments"
+
+   * Status page:
+      * Added game columns: your color, rated, time remaining
+
+   * Games list:
+      * Save different sets of columns for running / finished / observed games
+      * Added score for finished games
+      * Added weekend clock for own running games
+      * Added your color for own finished games
+      * Added two colored stones for own running games
+        ("your color in the game" over "color to play")
+
+   * Added access keys for   [FAQ: "Are there any key shortcuts?"]
+      * Main menu items
+      * Some form buttons
+      * Page bottom links (1-9)
+
+   * Provided alternative interfaces:
+      * Robots interface: quick_status & quick_play suite [FAQ]
+      * <home wap/status.php>WAP status page</home>
+      * <home rss/status.php>RSS status feed</home>
+
+   * Pages should be W3C compliant now
+
+
+   Minor changes:
+
+   * Cleanup of links page, todo list, snapshot and more
+
+   * Added row highlight feature (needing JavaScript):
+     Double-click (not on a link) on a table row to trigger it.
+
+   * Reversing a page to english by adding URL-part '&language=en'.
+     Useful for translators or after an erroneously language selection.
+
+   * Various other code improvements and bug fixes
+
+
+   Administrative changes:
+
+   * Status page: Pending approvals for moderated forum posts
+
+   * Speed up some queries by adding more indexes
+
+   * Security enhancements against spy, worm and spam
+
+   * Changes for FAQ-editors and Translators:
+      * Can hide FAQ categories and entries
+      * Can mark changed FAQ entries
+
+   * Changes for Admins:
+      * Can create new password (accepting both old and new), if user forgot
+      * More admin roles
+      * Better cron handling, better error-handling (Adminlog)
+      * Various scripts for checks and administrators daily work
+
+
+   Bug fixes:
+
+   * fixed disappearance of sgf file before your viewer could open it
+   * fixed melted bio order when deleting an item
+   * fixed duplicated moves bug
+
+   * Known behaviour about "Duplicated messages" and "Duplicated posts":
+     Problems with these happen when user clicks the submit button twice or more
+     times. If you hit it a second time, the post has been sent a second time.
 
 
 [2003-07-15] - DGS 1.0.11
