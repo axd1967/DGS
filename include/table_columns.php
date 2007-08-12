@@ -350,7 +350,7 @@ class Table
       else if ( $need_form or !$this->Static_Columns ) // need form for filter or add-column
       {
          $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
-            clean_url( $this->Page)."#{$this->Prefix}tableFAC",
+            clean_url( $this->Page),
             FORM_GET, false, 'FormTableFAC');
          $table_form->attach_table($this);
       }
@@ -1156,7 +1156,7 @@ class Table
       // add filter-submits in add-column-row if not in table-head and need form for filter
       $f_string = '';
       if ( $this->UseFilters and !$this->ConfigFilters[FCONF_EXTERNAL_SUBMITS] )
-         $f_string = implode( '', $this->Filters->get_submit_elements(1) );
+         $f_string = implode( '', $this->Filters->get_submit_elements() );
 
       // add show-rows elements in add-column-row
       $r_string = $this->make_show_rows( $ac_form );
