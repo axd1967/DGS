@@ -52,13 +52,6 @@ require_once( "include/filter.php" );
       $arr_chkfolders[$folder_box] = $folder_id;
    }
 
-   // Types: NORMAL,INVITATION, ACCEPTED, DECLINED, DISPUTED, RESULT, DELETED
-   $arr_types = array(
-      T_('All#msgtype') => '',
-      T_('Private#msgtype') => "M.Type='NORMAL'",
-      T_('Game#msgtype')    => "M.Type IN ('INVITATION','ACCEPTED','DECLINED','DISPUTED','RESULT')",
-   );
-
    /* SQL-statement-fields from message_list_query(), see below:
       FROM:
          Messages M - the message to show
@@ -66,7 +59,6 @@ require_once( "include/filter.php" );
          MessageCorrespondents other - null for messages to myself
          Players otherP - other message-partner (null, if message to myself)
          MessageCorrespondents previous - may be null, if first message in a "thread"
-         Games G - according game of message (if related)
       FIELDS:
          M:       Type, Subject, Time, Game_ID
          me:      mid as date ??? (for sorting?),
@@ -87,11 +79,16 @@ require_once( "include/filter.php" );
                 T_('Game-related')   => 'M.Game_ID>0', // <>0
                 T_('Game-unrelated') => 'M.Game_ID=0' ),
          true);
+   $smfilter->add_filter( 5, 'Boolean',
+         new QuerySQL(SQLP_FROM,  "LEFT JOIN Games AS G ON M.Game_ID=G.ID",
+                      SQLP_WHERE, "G.Status='INVITED'"), // not in left-join(!)
+         true,
+         array( FC_LABEL => T_('Show only pending invitations (if message not deleted)') ));
    $smfilter->init(); // parse current value from _GET
 
    // table-filters
    $mfilter = new SearchFilter();
-   $mfilter->add_filter( 2, 'Text',    //! \todo can't search for myself with this filter (because otherP maybe null and therefore removing rows from SQL-result)!!
+   $mfilter->add_filter( 2, 'Text', // can't search for myself with this filter, because otherP maybe null and therefore removing rows from SQL-result(!)
          'other_Handle',
          // TODO: could use filter on both, but would need dynamic UNION to avoid 'OR':
          //'(other_name #OP #VAL OR other_Handle #OP #VAL)',
@@ -101,12 +98,13 @@ require_once( "include/filter.php" );
    $mfilter->add_filter( 3, 'MysqlMatch', 'M.Subject,M.Text', true,
          array( FC_MATCH_MODE => MATCH_BOOLMODE_SET ) );
    $mfilter->add_filter( 4, 'RelativeDate', 'M.Time', true);
-   $mfilter->add_filter( 6, 'Selection', $arr_types, true);
+   //NOT-USED: $mfilter->add_filter( 6, 'Selection', $arr_types, true);
    $mfilter->add_filter( 7, 'Selection',
-         array( T_('All#msgdir') => '',   // sync transl-texts with message_functions.php (message_list_table)
-                T_('From#msgdir')   => "me.Sender IN ('N','M')",
-                T_('To#msgdir')     => "me.Sender IN ('Y','M')",
-                T_('Myself#msgdir') => "me.Sender='M'" ),
+         array( T_('All#msgdir') => '',   // sync this transl-texts with: message_functions.php (message_list_table)
+                T_('From#msgdir')   => "me.Sender='N'", // from other user
+                T_('To#msgdir')     => "me.Sender='Y'", // to other user
+                T_('Myself#msgdir') => "me.Sender='M'", // from/to myself
+                T_('Server#msgdir') => "me.Sender='S'" ), // from server
          true);
    $mfilter->init(); // parse current value from _GET
    $sf3 =& $mfilter->get_filter(3);
@@ -142,6 +140,8 @@ require_once( "include/filter.php" );
          'FILTER',      $smfilter, 4, // game-related
          'BR',
          'FILTER',      $smfilter, 2, // initial-msg
+         'BR',
+         'FILTER',      $smfilter, 5, // pending invitations
          ));
    //$smform->add_empty_row();
    $smform->add_row( array(
