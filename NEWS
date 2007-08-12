@@ -45,7 +45,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
         on respective pages.
       * Added arrows in table headers indicating sort direction of columns
         (1st sort = dark blue arrow, 2nd sort = light blue arrow)
-
+      * Translators can choose shorter translations for separate table headers
+      * Use own set of texts for table headers to allow shorter translated texts
 
    Code improvements:
 
