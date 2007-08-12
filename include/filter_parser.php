@@ -329,7 +329,7 @@ class NumericParser extends BasicParser
 
       if ( $cnt > 3 )
       {
-         $this->errormsg = "[$value] " . T_('too many separators') . " [{$this->tokconf->sep}]";
+         $this->errormsg = "[$value] " . T_('too many separators#filter') . " [{$this->tokconf->sep}]";
          return false;
       }
 
@@ -445,7 +445,7 @@ class TextParser extends BasicParser
 
       if ( $cnt > 3 )
       {
-         $this->errormsg = "[$value] " . T_('too many separators') . " [{$this->tokconf->sep}]";
+         $this->errormsg = "[$value] " . T_('too many separators#filter') . " [{$this->tokconf->sep}]";
          return false;
       }
 
@@ -509,7 +509,7 @@ class TextParser extends BasicParser
                }
                else
                { // forbid to start with wildcard
-                  $this->errormsg = "[$wild_char] " . T_('not allowed as prefix');
+                  $this->errormsg = "[$wild_char] " . T_('not allowed as prefix#filter');
                   return false;
                }
             }
@@ -685,7 +685,7 @@ class DateParser
       $out = array();
       if ( preg_match($rxdate, $this->datestr, $out) == 0)
       {
-         $this->errormsg = "[$date] " . T_('invalid date-format');
+         $this->errormsg = "[$date] " . T_('invalid date-format#filter');
          return false;
       }
 
@@ -700,7 +700,7 @@ class DateParser
       if ( count($this->checkarr) > 0)
       {
          $err_datepart = implode( '', $this->checkarr);
-         $this->errormsg = "[$date] " . T_('has invalid date-part') . " [".$err_datepart."]";
+         $this->errormsg = "[$date] " . T_('has invalid date-part#filter') . " [".$err_datepart."]";
          return false;
       }
 
@@ -709,7 +709,7 @@ class DateParser
       $chk_month = ( (string)$this->month != '' ) ? $this->month : 1; // maybe empty
       if ( !checkdate( $chk_month, $chk_day, $this->year ) )
       {
-         $this->errormsg = "[$date] " . T_('invalid day');
+         $this->errormsg = "[$date] " . T_('invalid day#filter');
          return false;
       }
 

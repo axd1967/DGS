@@ -570,7 +570,7 @@ class StringTokenizer extends BasicTokenizer
 
       if ($quote_begin != 0)
       {
-         array_push( $this->errors, "[{$this->value}] " . T_('using bad quoting') );
+         array_push( $this->errors, "[{$this->value}] " . T_('using bad quoting#filter') );
          return false;
       }
 
