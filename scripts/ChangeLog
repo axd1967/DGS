@@ -33,6 +33,20 @@ Changelog
 
 2007-08-12 juga
 
+   * include/filter.php, include/filter_parser.php, include/tokenizer.php,
+     include/message_functions.php (message_list_table),
+     list_contacts.php, opponents.php, search_messages.php, show_games.php,
+     status.php, users.php, waiting_room.php:
+   - use different table headers and filter texts to allow saving space with
+     shorter translations and provide a clear context for text
+   - provide shorter filter input-elements to save column width space
+
+   * opponents.php:
+   - no filter on Rank-Info and Open-for-matches (no efficient search)
+
+   * include/filter.php (FilterRelativeDate.get_input_elements):
+   - save &nbsp; in RelativeDate-filter layout
+
    * forum/search.php, list_contacts.php, opponents.php,
      search_messages.php, show_games.php, users.php, waiting_room.php:
    - added accesskey 'x' for search, 'e' for reset search
