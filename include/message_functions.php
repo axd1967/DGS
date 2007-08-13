@@ -1163,7 +1163,7 @@ function message_list_table( &$mtable, $result, $show_rows
          if( $row['Sender'] === 'M' )
             $msgdir = T_('Myself#msgdir');
          else if( $row['Sender'] === 'S' )
-            $msgdir = T_('System#msgdir');
+            $msgdir = T_('Server#msgdir');
          else if( $row['Sender'] === 'Y' )
             $msgdir = T_('To#msgdir');
          else
