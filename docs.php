@@ -33,17 +33,21 @@ require_once( "include/std_functions.php" );
    section( 'Docs', T_('Documentation'));
    centered_container();
 
-   add_link_page_link('introduction.php', T_('Introduction to Dragon'));
-   add_link_page_link('site_map.php', T_('Site map'));
-   add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
-   add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
-   add_link_page_link("links.php", T_('Links'));
+   add_link_page_link('introduction.php', T_('Introduction to Dragon'), T_('Getting started'));
    add_link_page_link("news.php", T_('News'), T_('Release notes'));
-   add_link_page_link("todo.php", T_('To do list'), T_('plans for future improvements'));
+   add_link_page_link('site_map.php', T_('Site map'), T_('Page structure of site'));
+   add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
+   add_link_page_link("links.php", T_('Links'), T_('Link collection'));
+   add_link_page_link("goodies/index.php", T_('Goodies'),
+                     T_('Some useful GreaseMonkey scripts for DGS'));
+   add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
+   add_link_page_link("todo.php", T_('To do list'), T_('Plans for future improvements'));
+   add_link_page_link("http://senseis.xmp.net/?DGSWishlist", T_('DGS Wish list'),
+                     T_('Features and requests DGS users dream of'));
    add_link_page_link("install.php", T_('Installation instructions'),
-                     T_('if you want your own dragon'));
+                     T_('Wanting your own dragon'));
    add_link_page_link("snapshot", T_('Download dragon sources'),
-                     T_('daily snapshot of the cvs'));
+                     T_('Daily snapshot of the cvs'));
    add_link_page_link("http://dragongoserver.cvs.sourceforge.net/dragongoserver/DragonGoServer/",
                      T_('Browse Dragon source code'));
    add_link_page_link("http://sourceforge.net/projects/dragongoserver/",
