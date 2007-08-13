@@ -161,7 +161,7 @@ class Form
    var $areas;
    /*! \brief Current area (initial is 1). */
    var $area;
-   /*! \brief Config for group-layouting: ( area-num|0|FAREA_ALL => ( FAC_TABLE|TR|TD => attbs, )) */
+   /*! \brief Config for group-layouting: ( area-num|0|FAREA_ALL => ( FAC_TABLE|... => attbs, )) */
    var $areaconf;
 
    /*! \brief Holds the cached form of the form string. */
@@ -778,7 +778,6 @@ class Form
    function build_areas( &$L, &$AR, $TRlevel=true )
    {
       $areastr = '';
-if(1){//new
 
       if( is_numeric($L) )
       {
@@ -862,52 +861,6 @@ if(1){//new
          }
       }
 
-}else{//old
-
-      if( is_numeric($L) )
-      {
-         $table_attbs = $this->get_areaconf( $L, FAC_TABLE );
-         $tdtable_attbs = $this->get_areaconf( $L, FAC_ENVTABLE );
-         $areastr .= "<!-- Area #$L -->\n";
-         $areastr .= "<TR><TD $tdtable_attbs><TABLE $table_attbs class=FormClass>\n";
-         $areastr .= $AR[$L];
-         $areastr .= "</TABLE></TD></TR>\n";
-         return $areastr;
-      }
-
-      if( !is_array($L) )
-         error('assert', "Form.build_areas.bad-layout-type($L)");
-      if( count($L) == 0 )
-         error('assert', "Form.build_areas.empty-layout-array");
-
-      $table_attbs_all = $this->get_areaconf( FAREA_ALL, FAC_TABLE );
-
-      if( $L[0] == 'H' )
-      { // horizontal grouping
-         $areastr .= "<TR valign=top><TD><TABLE $table_attbs_all class=FormClass><TR valign=top>\n";
-         for ($i=1; $i < count($L); $i++)
-         {
-            $area = $L[$i];
-
-            $table_attbs = (is_numeric($area)) ? $this->get_areaconf( $area, FAC_TABLE ) : $table_attbs_all;
-            $tdtable_attbs = $this->get_areaconf( (is_numeric($area) ? $area : FAREA_ALL), FAC_ENVTABLE );
-            $areastr .= "<TD $tdtable_attbs><TABLE $table_attbs class=FormClass>\n";
-            $areastr .= $this->build_areas( $L[$i], $AR );
-            $areastr .= "</TABLE></TD>\n";
-         }
-         $areastr .= "</TR></TABLE></TD></TR>\n";
-      }
-      else
-      { // vertical grouping
-         $areastr .= "<TR valign=top><TD><TABLE $table_attbs_all class=FormClass>\n";
-         foreach( $L as $area )
-         {
-            $areastr .= $this->build_areas( $area, $AR );
-         }
-         $areastr .= "</TABLE></TD></TR>\n";
-      }
-
-}//old/new
       return $areastr;
    } //build_areas
 
