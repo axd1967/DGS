@@ -248,10 +248,6 @@ function check_result_message( $user_id=false)
    echo "<hr>Game result messages:";
 
 //Find old way *game result essages*, i.e. the last comment of a game.
-/* Rdvl: 'RESULT' rebuilt
- SELECT * FROM Messages WHERE Type not in('INVITATION','DISPUTED','RESULT')
-  and Game_ID>0 and Subject like'%esult%' and LEFT(Subject,3)!='RE:' ORDER BY ID asc LIMIT 10 ;
-*/
    $query = "SELECT M.ID as mid, M.Type, M.Game_ID as gid, M.Subject"
       .", me.uid as uid, me.ID as me_mcID"
       .", G.Status, G.Score"
