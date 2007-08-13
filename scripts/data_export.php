@@ -314,6 +314,7 @@ function get_tables( $database)
          'MoveMessages',
          'Waitingroom',
          'Observers',
+         'Contacts',
          'Tournament',
          'TournamentRound',
          //'Knockout',
