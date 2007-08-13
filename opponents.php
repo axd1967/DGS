@@ -140,7 +140,6 @@ $ARR_DBFIELDKEYS = array(
    // External-Form
    $usform = new Form( $utable->Prefix, $page, FORM_GET, false);
    $usform->set_layout( FLAYOUT_GLOBAL, ( $opp ? '1,2|3' : '1' ) );
-   $usform->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );
    $usform->set_config( FEC_EXTERNAL_FORM, true );
    $utable->set_externalform( $usform ); // also attach offset, sort, manage-filter as hidden (table) to ext-form
    $usform->attach_table( $usfilter ); // attach manage-filter as hiddens (static) to ext-form

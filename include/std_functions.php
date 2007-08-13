@@ -2678,20 +2678,17 @@ function attb_parse( $attbs)
 //return a string of the attributs $attbs
 function attb_build( $attbs)
 {
+   $attbs= attb_parse( $attbs);
    if( is_array($attbs) )
    {
       $str= '';
       foreach( $attbs as $key => $val )
       {
+         if( $key == 'colspan' && $val < 2 )
+            continue;
          $str.= ' '.$key.'='.attb_quote($val);
       }
       return $str;
-   }
-   if( is_string($attbs) )
-   {
-      $str= trim($attbs);
-      if( $str )
-         return ' '.$str;
    }
    return '';
 }

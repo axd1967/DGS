@@ -764,11 +764,9 @@ table.Table td.Mark {
 table.Table td.Right {
    text-align: right;
 }
-
 table.Table td.Center {
    text-align: center;
 }
-
 /*
 table.Table td.PagingRight {
    text-align: right;
@@ -938,6 +936,104 @@ table.Infos .Highlight {
 
 
 /* ------------------------- */
+/* search and filter highlights */
+/* ------------------------- */
+
+span.MarkTerm {
+/*
+   color: darkred;
+   font-weight: bold;
+*/
+   background: #c0ffb0;
+}
+
+a span.MarkTerm {
+   text-decoration: underline;
+}
+
+span.MarkTagTerm {
+   background: #fffca0;
+   font-size: 0.5em;
+   margin: 0px 0px 0.5em 0px;
+/*   padding: 0px 0px 0.5em 0px; */
+   vertical-align: top;
+   vertical-align: super;
+}
+
+
+/* ------------------------- */
+/* quick-info boxes */
+/* ------------------------- */
+
+table.InfoBox {
+   border: 2px outset #F7F5E3; /* page background-color */
+   table-layout: auto;
+   border-spacing: 2px;
+   border-collapse: separate; /* collapse separate */
+   margin: 0px auto;
+   width: 100%;
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+   text-align: left;
+}
+
+table.InfoBox td {
+   border: 1px inset #F7F5E3; /* page background-color */
+   margin: 0px;
+   padding: 0px 8px 0px 0px;
+   text-align: left;
+   vertical-align: bottom;
+}
+
+
+/* ------------------------- */
+/* form and area tables */
+/* ------------------------- */
+
+td.FormClassV,
+td.FormClassH,
+td.FormClassC,
+table.FormClass,
+table.FormClassV,
+table.FormClassH,
+table.FormClassC {
+   border: 0px solid red;
+}
+
+table.FormClass,
+table.FormClassV,
+table.FormClassH,
+table.FormClassC {
+   margin: 0px auto 0px auto;
+}
+
+td.Description {
+   text-align: right;
+}
+
+td.FormClassV,
+td.FormClassH {
+   color: black;
+   padding: 0px;
+   vertical-align: top;
+   text-align: center;
+}
+
+td.FormClassC {
+   color: black;
+   padding: 0px 20px;
+   vertical-align: top;
+   text-align: center;
+}
+
+td.FormClassC span.Rubric {
+   font-weight: bold;
+}
+
+
+
+/* ------------------------- */
 /* messages and folders features */
 /* ------------------------- */
 
@@ -1020,97 +1116,9 @@ table.FoldersTabs td.Rubric {
    padding: 2px 6px 2px 2px;
 }
 
-
-/* ------------------------- */
-/* search and filter highlights */
-/* ------------------------- */
-
-span.MarkTerm {
-/*
-   color: darkred;
-   font-weight: bold;
-*/
-   background: #c0ffb0;
-}
-
-a span.MarkTerm {
-   text-decoration: underline;
-}
-
-span.MarkTagTerm {
-   background: #fffca0;
-   font-size: 0.5em;
-   margin: 0px 0px 0.5em 0px;
-/*   padding: 0px 0px 0.5em 0px; */
-   vertical-align: top;
-   vertical-align: super;
-}
-
-
-/* ------------------------- */
-/* quick-info boxes */
-/* ------------------------- */
-
-table.InfoBox {
-   border: 2px outset #F7F5E3; /* page background-color */
-   table-layout: auto;
-   border-spacing: 2px;
-   border-collapse: separate; /* collapse separate */
-   margin: 0px auto;
-   width: 100%;
-   max-width: none;
-   overflow: visible;
-   empty-cells: hide;
+form#msgSearch td.Description {
    text-align: left;
-}
-
-table.InfoBox td {
-   border: 1px inset #F7F5E3; /* page background-color */
-   margin: 0px;
-   padding: 0px 8px 0px 0px;
-   text-align: left;
-   vertical-align: bottom;
-}
-
-
-/* ------------------------- */
-/* form and area tables */
-/* ------------------------- */
-
-td.FormClassV,
-td.FormClassH,
-td.FormClassC,
-table.FormClass,
-table.FormClassV,
-table.FormClassH,
-table.FormClassC {
-   border: 0px solid red;
-}
-
-table.FormClass,
-table.FormClassV,
-table.FormClassH,
-table.FormClassC {
-   margin: 0px auto 0px auto;
-}
-
-td.FormClassV,
-td.FormClassH {
-   color: black;
-   padding: 0px;
    vertical-align: top;
-   text-align: center;
-}
-
-td.FormClassC {
-   color: black;
-   padding: 0px 20px;
-   vertical-align: top;
-   text-align: center;
-}
-
-td.FormClassC span.Rubric {
-   font-weight: bold;
 }
 
 
@@ -1185,6 +1193,10 @@ table#gameFilter {
 
 table#gameStats th.Rubric {
    text-align: right;
+}
+
+table#gameFilter td.Description {
+   text-align: left;
 }
 
 
@@ -1882,6 +1894,10 @@ table.Forum span.NewFlag a {
 
 table.Forum span.OlderNewFlag a {
    color: #ff7777;
+}
+
+form#tableFSFForm td.Description {
+   text-align: left;
 }
 
 

@@ -111,7 +111,7 @@ require_once( "include/filter.php" );
    $mfilter->set_accesskeys('x', 'e');
    $sf3 =& $mfilter->get_filter(3);
 
-   $mtable = new Table( 'message', $page );
+   $mtable = new Table( 'message', $page, '', 'msgSearch');
    $mtable->register_filter( $mfilter );
    $mtable->set_default_sort( 'date', 1);
    $mtable->add_or_del_column();
@@ -126,7 +126,6 @@ require_once( "include/filter.php" );
    $smform->set_tabindex(1);
    $smform->set_config( FEC_TR_ATTR, 'valign=top' );
    $smform->set_config( FEC_EXTERNAL_FORM, true );
-   $smform->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );
    $mtable->set_externalform( $smform );
    $smform->attach_table($smfilter); // for hiddens
 

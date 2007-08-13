@@ -109,7 +109,6 @@ define('MODERATOR_SEARCH', 0);
    // form for static filters
    $fform = new Form( 'tableFSF', $page, FORM_POST );
    $fform->set_config( FEC_TR_ATTR, 'valign=top' );
-   $fform->set_attr_form_element( 'Description', FEA_ALIGN, 'left' );
    $fform->attach_table($ffilter); // add hiddens
 
    $fform->add_row( array(

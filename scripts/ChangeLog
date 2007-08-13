@@ -62,6 +62,17 @@ Changelog
      scripts/convert_posindex.php:
    - better url args handling
 
+   * skins/dragon/screen.css,
+     include/std_functions.php (attb_build),
+     include/form_functions.php (create_form_string),
+     opponents.php, search.php, search_messages.php,
+     code_examples/filter_example2.php:
+   - attb_build: remove useless colspan
+   - removed (partially) the Align property of the forms. Changed it to 'Attbs'
+     to allow to add 'class=???' arguments... a step to a full CSS management.
+   - changed FEA_ALIGN to FEA_ATTBS
+   - aligned the descriptions of search_message
+
 2007-08-12 rodival
 
    * init.mysql,

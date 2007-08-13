@@ -37,7 +37,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Rating graph can now be displayed by time or by number of games
       * Rating graph shows additional pie chart for played games ratio
 
-   * Users: show my opponents and game statistics for two players
+   * Users:
+      * show my opponents and game statistics for two players
 
    * Table lists (waiting room, messages, users, opponents, games):
       * Added user profile setting "Table max rows" to control how many rows

@@ -127,7 +127,7 @@ define('FEA_NEWTD',       'NewTD');
 define('FEA_ENDTD',       'EndTD');
 define('FEA_STARTTD',     'StartTD');
 define('FEA_SPANALLCOLS', 'SpanAllColumns');
-define('FEA_ALIGN',       'Align');
+define('FEA_ATTBS',       'Attbs');
 
 // known attribute-names for form-elements and read-only-state
 $ARR_FORMELEM_READONLY = array(
@@ -136,7 +136,7 @@ $ARR_FORMELEM_READONLY = array(
    FEA_ENDTD       => 0,
    FEA_STARTTD     => 0,
    FEA_SPANALLCOLS => 0,
-   FEA_ALIGN       => 0,
+   FEA_ATTBS       => 0,
 );
 
 class Form
@@ -222,7 +222,7 @@ class Form
 
       $this->line_no_step = 10;
 
-      //TODO: for CSS, remove the 'Align' property
+      //TODO: for CSS, remove the remaining 'align' properties
       //'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
       $this->form_elements = array(
          'DESCRIPTION'  => array( 'NumArgs' => 1,
@@ -230,145 +230,145 @@ class Form
                                   'StartTD' => true,
                                   'EndTD'   => true,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'right' ),
+                                  'Attbs'   => array('class'=>'Description') ),
          'OWNHTML'      => array( 'NumArgs' => 1,
                                   'NewTD'   => false,
                                   'StartTD' => false,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'HEADER'       => array( 'NumArgs' => 1,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => true,
                                   'SpanAllColumns' => true,
-                                  'Align'   => 'center' ),
+                                  'Attbs'   => array('align'=>'center') ),
          'CHAPTER'      => array( 'NumArgs' => 1,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => true,
                                   'SpanAllColumns' => true,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
          'TEXT'         => array( 'NumArgs' => 1,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
          'TEXTINPUT'    => array( 'NumArgs' => 4,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
          'PASSWORD'     => array( 'NumArgs' => 3,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
          'HIDDEN'       => array( 'NumArgs' => 2,
                                   'NewTD'   => false,
                                   'StartTD' => false,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'ENABLE'       => array( 'NumArgs' => 1,
                                   'NewTD'   => false,
                                   'StartTD' => false,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'TEXTAREA'     => array( 'NumArgs' => 4,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
          'SELECTBOX'    => array( 'NumArgs' => 5,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
          'RADIOBUTTONS' => array( 'NumArgs' => 3,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
          'CHECKBOX'     => array( 'NumArgs' => 4,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
          'SUBMITBUTTON' => array( 'NumArgs' => 2,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => true,
-                                  'Align'   => 'center' ),
+                                  'Attbs'   => array('align'=>'center') ),
          'SUBMITBUTTONX' => array( 'NumArgs' => 3,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => true,
-                                  'Align'   => 'center' ),
+                                  'Attbs'   => array('align'=>'center') ),
          'SPACE'        => array( 'NumArgs' => 0,
                                   'NewTD'   => false,
                                   'StartTD' => false,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'HR'           => array( 'NumArgs' => 0,
                                   'NewTD'   => false,
                                   'StartTD' => false,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => true,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'TAB'          => array( 'NumArgs' => 0,
                                   'NewTD'   => true,
                                   'StartTD' => true,
                                   'EndTD'   => true,
                                   'SpanAllColumns' => false,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'BR'           => array( 'NumArgs' => 0,
                                   'NewTD'   => false,
                                   'StartTD' => false,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'TD'           => array( 'NumArgs' => 0,
                                   'NewTD'   => false,
                                   'StartTD' => false,
                                   'EndTD'   => true,
                                   'SpanAllColumns' => false,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'CELL'         => array( 'NumArgs' => 2,
                                   'NewTD'   => true,
                                   'StartTD' => false,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'ROW'          => array( 'NumArgs' => 1,
                                   'NewTD'   => false,
                                   'StartTD' => false,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => '' ),
+                                  'Attbs'   => '' ),
          'FILTER'       => array( 'NumArgs' => 2,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
          'FILTERERROR'  => array( 'NumArgs' => 5,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Align'   => 'left' ),
+                                  'Attbs'   => array('align'=>'left') ),
       );
 
       if( $echo_form_start_now )
@@ -394,7 +394,7 @@ class Form
    /*!
     * \brief Allows to overwrite (reconfigure) form-element-config (not for read-only)
     * \param $name     form-element name, e.g. DESCRIPTION
-    * \param $attrname allowed attribute-names: FEA_STARTTD, FEA_NEWTD, FEA_ENDTD, FEA_SPANALLCOLS, FEA_ALIGN
+    * \param $attrname allowed attribute-names: FEA_STARTTD, FEA_NEWTD, FEA_ENDTD, FEA_SPANALLCOLS, FEA_ATTBS
     * \param $value    value for attribute
     */
    function set_attr_form_element( $name, $attrname, $value )
@@ -636,7 +636,7 @@ class Form
          $rootformstr .= $this->print_start_default();
 
       $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
-      $table_attbs = $this->get_merged_attbs( $table_attbs);
+      $table_attbs = $this->get_form_attbs( $table_attbs);
       $rootformstr .= "  <TABLE $table_attbs>\n"; //form table
 
       ksort($this->rows);
@@ -700,12 +700,11 @@ class Form
             {
 
                if( !$this->column_started )
-               $result .= $this->print_td_start( $element_type['Align'],
+               $result .= $this->print_td_start( $element_type['Attbs'],
                                                  max( $this->max_nr_columns -
                                                       $this->nr_columns,
-                                                      1 ) )."\n";
+                                                      1 ) );
 
-               $result .= "        ";
                $this->$func_name( $result, $element_args );
                $result .= "\n";
 
@@ -722,7 +721,7 @@ class Form
 
                if( $element_type['StartTD'] and !$this->column_started )
                {
-                  $result .= $this->print_td_start( $element_type['Align'] )."\n";
+                  $result .= $this->print_td_start( $element_type['Attbs'] );
                   $this->column_started = true;
                   $this->nr_columns++;
                }
@@ -788,8 +787,8 @@ if(1){//new
             return '';
          $table_attbs = $this->get_areaconf( $L, FAC_TABLE );
          $tdtable_attbs = $this->get_areaconf( $L, FAC_ENVTABLE );
-         $table_attbs = $this->get_merged_attbs( $table_attbs, 'C');
-         $tdtable_attbs = $this->get_merged_attbs( $tdtable_attbs, 'C');
+         $table_attbs = $this->get_form_attbs( $table_attbs, 'C');
+         $tdtable_attbs = $this->get_form_attbs( $tdtable_attbs, 'C');
          $title = (string)@$this->get_areaconf( $L, 'title' );
          if( $title )
             $title = "<span class=Rubric>$title</span>";
@@ -825,8 +824,8 @@ if(1){//new
             {
                $table_attbs = $this->get_areaconf( FAREA_ALLH, FAC_TABLE );
                $tdtable_attbs = $this->get_areaconf( FAREA_ALLH, FAC_ENVTABLE );
-               $table_attbs = $this->get_merged_attbs( $table_attbs, 'H');
-               $tdtable_attbs = $this->get_merged_attbs( $tdtable_attbs, 'H');
+               $table_attbs = $this->get_form_attbs( $table_attbs, 'H');
+               $tdtable_attbs = $this->get_form_attbs( $tdtable_attbs, 'H');
                $areastr = "<TD$tdtable_attbs><TABLE$table_attbs>\n"
                         . "<TR>" . $areastr . "</TR>"
                         . "</TABLE></TD>\n";
@@ -852,8 +851,8 @@ if(1){//new
             {
                $table_attbs = $this->get_areaconf( FAREA_ALLV, FAC_TABLE );
                $tdtable_attbs = $this->get_areaconf( FAREA_ALLV, FAC_ENVTABLE );
-               $table_attbs = $this->get_merged_attbs( $table_attbs, 'V');
-               $tdtable_attbs = $this->get_merged_attbs( $tdtable_attbs, 'V');
+               $table_attbs = $this->get_form_attbs( $table_attbs, 'V');
+               $tdtable_attbs = $this->get_form_attbs( $tdtable_attbs, 'V');
                $areastr = "<TD$tdtable_attbs><TABLE$table_attbs><TR>\n"
                         . $areastr
                         . "</TR></TABLE></TD>\n";
@@ -1186,14 +1185,13 @@ if(1){//new
     *
     * \internal
     *
-    * \param $alignment How the cell should be aligned.
-    * \param $colspan   How many columns this table should span.
+    * \param $attbs    The attributs of the cell.
+    * \param $colspan  How many columns this table should span.
     */
-   function print_td_start( $alignment = 'left', $colspan = 1 )
+   function print_td_start( $attbs = 'class=left', $colspan = 1 )
    {
-      return "      <TD" .
-         ($alignment ? " align=\"$alignment\"" : '') .
-         ($colspan > 1 ? " colspan=\"$colspan\"" : '') . ">";
+      $attbs= attb_merge( attb_parse($attbs), array('colspan'=>$colspan), false);
+      return "<TD" . attb_build( $attbs) . ">\n";
    }
 
    /*!
@@ -1215,7 +1213,7 @@ if(1){//new
    function print_description( $description )
    {
       //no safe-text needed here because it come from translators' strings
-      return "      <TD align=\"right\">$description:</TD>\n";
+      return "<TD class=Description>$description:</TD>\n";
    }
 
    /*!
@@ -1371,7 +1369,7 @@ if(1){//new
       if($selected)
          $result .= " checked";
 
-      $result .= $this->get_input_attbs() . "> $description";
+      $result .= $this->get_input_attbs() . ">$description";
 
       return $result;
    }
@@ -1499,7 +1497,7 @@ if(1){//new
    }
 
    /*! \brief Get the merged attributs string of a form part. */
-   function get_merged_attbs( $attbs, $suffix='')
+   function get_form_attbs( $attbs='', $suffix='')
    {
       $attbs = attb_parse( $attbs);
       $attbs = attb_merge( array('class'=>$this->fclass.$suffix), $attbs, ' ');
