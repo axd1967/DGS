@@ -25,6 +25,27 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-13 rodival
+
+   * include/message_functions.php (message_list_query, message_list_table),
+     include/std_functions.php (send_message),
+     scripts/message_consistency.php,
+     rss/status.php, wap/status.php,
+     quick_status.php, join_waitingroom_game.php, confirm.php, message.php,
+     halfhourly_cron.php, clock_tick.php:
+   - adjusted the use of the new MessageCorrespondents enum type 'S'
+   - added the recovery of 'S' type from old messages in message_consistency.php
+   - added the recovery of old 'result' messages in message_consistency.php
+
+   * list_messages.php:
+   - fixed a move-message bug
+
+   * scripts/update_translation_pages.php, scripts/translation_consistency.php,
+     scripts/start_frozen_clocks.php, scripts/start_frozen_clocks.php,
+     scripts/player_consistency.php, scripts/generate_translation_texts.php,
+     scripts/convert_posindex.php:
+   - better url args handling
+
 2007-08-12 rodival
 
    * init.mysql,

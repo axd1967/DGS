@@ -1012,6 +1012,8 @@ define('ENA_SEND_MESSAGE', 1); //TODO: remove it and the associated code lines a
  * $to_ids and $to_handles have been splitted because, historically, some handles
  *  may seems to be numeric (e.g. '00000') as their first char may be a digit.
  *  In fact, both are treated like strings or arrays here.
+ * if $from_id <= 0, the message will be a system message
+ * if $from_id is in the $to_ids list, the message will be a message to myself
  * if $prev_mid is >0, the previous (answered) message will be flaged as Replied,
  *  set to the type $prev_type and moved to the folder $prev_folder.
  **/
@@ -1077,12 +1079,16 @@ function send_message( $debugmsg, $text='', $subject=''
    /**
     * Actually, only the messages from server can have multiple
     * receivers because they are NOT read BY the server.
-    * The code to diplay a message can't manage more than one
+    * The code to display a message can't manage more than one
     * correspondent.
     * See also: message.php
     **/
    if( $from_id > 0 && count($receivers)+($to_myself?1:0) > 1 )
       error('receiver_not_found',$debugmsg.'rec1');
+
+   //actually not supported: sending a message to myself and other in the same pack
+   if( $to_myself && count($receivers) > 0 )
+      error('internal_error',$debugmsg.'rec2');
 
    $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
           .", Type='$type', ReplyTo=$prev_mid, Game_ID=$gid"
@@ -1097,7 +1103,7 @@ function send_message( $debugmsg, $text='', $subject=''
    ksort($receivers);
 
    $query= array();
-   if( $from_id > 0 )
+   if( $from_id > 0 ) //exclude system messages (no sender)
    {
       if( $to_myself )
          $query[]= "$mid,$from_id,'M','N',".FOLDER_NEW;
@@ -1107,9 +1113,12 @@ function send_message( $debugmsg, $text='', $subject=''
 
    $need_reply= ( ($from_id > 0 && $type == 'INVITATION') ?'M' :'N' );
 
-   foreach( $receivers as $uid => $row )
+   foreach( $receivers as $uid => $row ) //exclude to myself
    {
-      $query[]= "$mid,$uid,'N','$need_reply',".FOLDER_NEW;
+      if( $from_id > 0 )
+         $query[]= "$mid,$uid,'N','$need_reply',".FOLDER_NEW;
+      else //system messages
+         $query[]= "$mid,$uid,'S','N',".FOLDER_NEW;
    }
 
    $cnt= count($query);
@@ -1133,7 +1142,7 @@ function send_message( $debugmsg, $text='', $subject=''
          or error('mysql_query_failed', $debugmsg.'.game_message');
    }
 
-   if( $from_id > 0 && $prev_mid > 0 )
+   if( $from_id > 0 && $prev_mid > 0 ) //is this an answer?
    {
       $query = "UPDATE MessageCorrespondents SET Replied='Y'";
       if( $prev_folder > FOLDER_ALL_RECEIVED )
@@ -1173,7 +1182,7 @@ function send_message( $debugmsg, $text='', $subject=''
    }
 
    return $mid; //>0: no error
-}
+} //send_message
 
 function notify( $debugmsg, $ids)
 {
@@ -1199,7 +1208,7 @@ function notify( $debugmsg, $ids)
       or error('mysql_query_failed', $debugmsg.'.notify');
 
    return ''; //no error
-}
+} //notify
 
 
 function safe_setcookie($name, $value='', $rel_expire=-3600)
@@ -2528,7 +2537,7 @@ if(ENA_SEND_MESSAGE){ //new
             while( $row = mysql_fetch_array( $result ) )
             {
                mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                           "(" . $row['pid'] . ", $mid, 'N', ".FOLDER_NEW.")")
+                           "(" . $row['pid'] . ", $mid, 'S', ".FOLDER_NEW.")")
                   or error('mysql_query_failed','delete_all_observers.message');
             }
          }
@@ -2540,7 +2549,7 @@ if(ENA_SEND_MESSAGE){ //new
 
    mysql_query("DELETE FROM Observers WHERE gid=$gid")
       or error('mysql_query_failed','delete_all_observers.delete');
-}
+} //delete_all_observers
 
 
 // definitions and functions to help avoid '!=' or 'NOT IN' in SQL-where-clauses:

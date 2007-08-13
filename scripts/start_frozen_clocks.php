@@ -38,6 +38,9 @@ require_once( "include/move.php" );
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low');
 
+   $page = $_SERVER['PHP_SELF'];
+   $page_args = array();
+
    start_html('start_frozen_clocks', 0);
 
 echo ">>>> Should not be used now. Do not run it before a check."; end_html(); exit;
@@ -49,15 +52,16 @@ echo ">>>> Should not be used now. Do not run it before a check."; end_html(); e
         echo " --- fixed. ";
       }
       echo "<p>*** Fixes errors ***"
-         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Just show it')
+         ."<br>".anchor(make_url($page, $page_args), 'Just show it')
          ."</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
+      $tmp = array_merge($page_args,array('do_it' => 1));
       echo "<p>(just show needed queries)"
-         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
-         ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
+         ."<br>".anchor(make_url($page, $page_args), 'Show it again')
+         ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
          ."</p>";
    }
 

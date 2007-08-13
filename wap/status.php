@@ -343,7 +343,7 @@ else
       "LEFT JOIN Players ON Players.ID=other.uid " .
       "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
               "AND Messages.ID=me.mid " .
-              "AND me.Sender='N' " . //exclude message to myself
+              "AND me.Sender IN('N','S') " . //exclude message to myself
       "ORDER BY date, me.mid";
 
    $resultM = mysql_query( $query )

@@ -144,7 +144,7 @@ require_once( "include/form_functions.php" );
       extract($msg_row);
 
 
-      if( $Sender === 'M' ) //Message to myself
+      if( $Sender === 'M' ) //message to myself
       {
          $other_name = $player_row["Name"];
          $other_id = $my_id;
@@ -158,23 +158,15 @@ require_once( "include/form_functions.php" );
       }
       if( empty($other_name) )
       {
-         $other_name = '-';
+         $other_name = '---';
          $other_id = 0;
          $other_handle = '';
       }
 
       $other_name = make_html_safe($other_name);
 
-/* Here, the line was:
-      $can_reply = ( $To_ID == $my_id && $other_id && $other_handle);
-   but:
-    - $my_id=me.uid and $Sender=me.Sender
-    - $To_ID is always an ID associated with a *not sender*
-   so the old ($To_ID == $my_id) is near of ($Sender != 'Y')
-   or maybe ($Sender == 'N') or... check for new Sender types.
-*/
-      $can_reply = ( $Sender != 'Y' && $other_id>0 && $other_handle);
-      $to_me = ( $Sender != 'Y' );
+      $can_reply = ( $Sender != 'Y' && $other_id>0 && $other_handle); //exclude system messages
+      $to_me = ( $Sender != 'Y' ); //include system and myself messages
 
       if( $mode == 'ShowMessage' )
       {

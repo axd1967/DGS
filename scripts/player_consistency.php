@@ -220,6 +220,26 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low');
 
+   //uid could be '12,27' meaning from player=12 to player=27
+   @list( $uid1, $uid2) = explode( ',', @$_REQUEST['uid']);
+
+   //limit could be '55,10'
+   if( ($lim=@$_REQUEST['limit']) > '' )
+      $limit = " LIMIT $lim";
+   else
+      $limit = "";
+
+   $page = $_SERVER['PHP_SELF'];
+   $page_args = array();
+   if( $uid1 > '' )
+   {
+      if( $uid2 > '' )
+         $page_args['uid'] = $uid1.','.$uid2;
+      else
+         $page_args['uid'] = $uid1;
+   }
+   if( $lim > '' )
+      $page_args['limit'] = $lim;
 
    start_html( 'player_consistency', 0, '',
       "  table.Table { border:0; background: #c0c0c0; }\n" .
@@ -236,27 +256,18 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
         echo " --- fixed. ";
       }
       echo "<p>*** Fixes errors ***"
-         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Just show it')
+         ."<br>".anchor(make_url($page, $page_args), 'Just show it')
          ."</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
+      $tmp = array_merge($page_args,array('do_it' => 1));
       echo "<p>(just show needed queries)"
-         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
-         ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
+         ."<br>".anchor(make_url($page, $page_args), 'Show it again')
+         ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
          ."</p>";
    }
-
-
-   //uid could be '12,27' meaning from player=12 to player=27
-   @list( $uid1, $uid2) = explode( ',', @$_REQUEST['uid']);
-
-   //limit could be '55,10'
-   if( ($lim=@$_REQUEST['limit']) > '' )
-      $limit = " LIMIT $lim";
-   else
-      $limit = "";
 
    $is_rated = " AND Games.Rated!='N'" ;
    //$is_rated.= " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";

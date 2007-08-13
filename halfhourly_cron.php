@@ -217,7 +217,7 @@ if( !$is_down )
             "LEFT JOIN Players ON Players.ID=other.uid " .
             "WHERE me.uid=$uid AND Messages.ID=me.mid " .
               "AND me.Folder_nr IN ($folderstring) " .
-              "AND me.Sender='N' " . //exclude message to myself
+              "AND me.Sender IN('N','S') " . //exclude message to myself
               "AND UNIX_TIMESTAMP(Messages.Time) > UNIX_TIMESTAMP('$Lastaccess') " .
             "ORDER BY Time DESC";
 

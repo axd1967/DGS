@@ -855,7 +855,6 @@ function get_folders($uid, $remove_all_received=true)
 
 function change_folders_for_marked_messages($uid, $folders)
 {
-
    if( isset($_GET['move_marked']) )
    {
       if( !isset($_GET['folder']) )
@@ -896,9 +895,9 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
          error('folder_not_found');
 
       if( $new_folder == FOLDER_SENT )
-         $where_clause = "AND (Sender='Y' OR Sender='M') ";
+         $where_clause = "AND Sender IN('Y','M') ";
       else if( $new_folder == FOLDER_REPLY )
-         $where_clause = "AND (Sender='N' OR Sender='M') ";
+         $where_clause = "AND Sender IN('N','M','S') ";
       else
          $where_clause = '';
 
@@ -1015,7 +1014,7 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
       "IF(M.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
           "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
       'me.mid', 'me.Replied', 'me.Sender', 'me.Folder_nr AS folder',
-      "IF(me.sender='M',' ',otherP.Name) AS other_name", // the ' ' helps to sort
+      "IF(me.Sender='M',' ',otherP.Name) AS other_name", // the ' ' helps to sort
       'otherP.ID AS other_ID',
       'otherP.Handle AS other_handle' );
    $qsql->add_part( SQLP_FROM,
@@ -1112,7 +1111,7 @@ function message_list_table( &$mtable, $result, $show_rows
       else if( $row["other_ID"] <= 0 )
          $row["other_name"] = '[' . T_('Server message') . ']';
       if( empty($row["other_name"]) )
-         $row["other_name"] = '-';
+         $row["other_name"] = '---';
 
       // link to message
       $showmsg_start = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid{$url_terms}\">";
@@ -1161,10 +1160,12 @@ function message_list_table( &$mtable, $result, $show_rows
          global $MSG_TYPES;
          $mrow_strings[6] = "<td>" . $MSG_TYPES[$row['Type']] . "</td>";
 
-         if ( $row['Sender'] === 'Y' )
-            $msgdir = T_('To#msgdir');
-         elseif ( $row['Sender'] === 'M' )
+         if( $row['Sender'] === 'M' )
             $msgdir = T_('Myself#msgdir');
+         else if( $row['Sender'] === 'S' )
+            $msgdir = T_('System#msgdir');
+         else if( $row['Sender'] === 'Y' )
+            $msgdir = T_('To#msgdir');
          else
             $msgdir = T_('From#msgdir');
          $mrow_strings[7] = "<td class=Right>$msgdir:&nbsp;</td>";

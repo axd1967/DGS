@@ -200,7 +200,7 @@ require_once( "include/filter.php" );
                $fld[$key] = $val[0];
          }
 
-         echo $marked_form->print_insert_submit_buttonx( 'action',
+         echo $marked_form->print_insert_submit_buttonx( 'move_marked',
                   T_('Move marked messages to folder'),
                   array('id'=>'action','accesskey'=>'x'));
          echo $marked_form->print_insert_select_box( 'folder',

@@ -559,7 +559,7 @@ This is why:
                . "<br>"
                . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
                . "</center>" ;
-         delete_all_observers($gid, $rated_status!=1, mysql_addslashes( $tmp));
+         delete_all_observers($gid, $rated_status!=1, $tmp);
       }
 
       //Send a message to the opponent
@@ -607,15 +607,19 @@ if(ENA_SEND_MESSAGE){ //new
 
       $mid = mysql_insert_id();
 
-      $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                  "(" . $opponent_row['ID'] . ", $mid, 'N', ".FOLDER_NEW.")" ;
-
       if( !$message_from_server_way )
       {
          //This simulate a message sent by this player
          //This will allow a direct message reply but will fill his *sent* folder
-         $query.= ",(" . $my_id . ", $mid, 'Y', ".FOLDER_SENT.")" ;
+         $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+                     "(" . $opponent_row['ID'] . ", $mid, 'N', ".FOLDER_NEW.")"
+                  . ",(" . $my_id . ", $mid, 'Y', ".FOLDER_SENT.")" ;
          //else we could force a NULL Folder_nr (trashed message)
+      }
+      else
+      {
+         $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
+                     "(" . $opponent_row['ID'] . ", $mid, 'S', ".FOLDER_NEW.")" ;
       }
 
       mysql_query( $query)

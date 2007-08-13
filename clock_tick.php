@@ -171,8 +171,8 @@ if(ENA_SEND_MESSAGE){ //new
             $mid = mysql_insert_id();
 
             mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                        "($Black_ID, $mid, 'N', ".FOLDER_NEW."), " .
-                        "($White_ID, $mid, 'N', ".FOLDER_NEW.")")
+                        "($Black_ID, $mid, 'S', ".FOLDER_NEW."), " .
+                        "($White_ID, $mid, 'S', ".FOLDER_NEW.")")
                or error('mysql_query_failed',"clock_tick.timeup_mess_corr($gid)");
          }
          unset($mid);

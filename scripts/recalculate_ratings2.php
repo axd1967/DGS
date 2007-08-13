@@ -42,6 +42,10 @@ require_once( "include/rating.php" );
    else
       $limit = "";
 
+   $page = $_SERVER['PHP_SELF'];
+   $page_args = array();
+   if( $lim > '' )
+      $page_args['limit'] = $lim;
 
    start_html( 'recalculate_ratings2', 0);
 
@@ -54,15 +58,16 @@ require_once( "include/rating.php" );
         echo " --- fixed. ";
       }
       echo "<p>*** Fixes errors ***"
-         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Just show it')
+         ."<br>".anchor(make_url($page, $page_args), 'Just show it')
          ."</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
+      $tmp = array_merge($page_args,array('do_it' => 1));
       echo "<p>(just show needed queries)"
-         ."<br>".anchor($_SERVER['PHP_SELF']           , 'Show it again')
-         ."<br>".anchor($_SERVER['PHP_SELF'].'?do_it=1', '[Validate it]')
+         ."<br>".anchor(make_url($page, $page_args), 'Show it again')
+         ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
          ."</p>";
    }
 

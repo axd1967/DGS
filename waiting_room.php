@@ -248,9 +248,9 @@ require_once( "include/contacts.php" );
                . '>' . $handi_array[$Handicaptype] . "</td>";
          }
          if( $wrtable->Is_Column_Displayed[14] )
-            $wrow_strings[14] = '<td>' . ($calculated ? '-' : $Handicap) . "</td>";
+            $wrow_strings[14] = '<td>' . ($calculated ? '---' : $Handicap) . "</td>";
          if( $wrtable->Is_Column_Displayed[6] )
-            $wrow_strings[6] = '<td>' . ($calculated ? '-' : $Komi) . "</td>";
+            $wrow_strings[6] = '<td>' . ($calculated ? '---' : $Komi) . "</td>";
          if( $wrtable->Is_Column_Displayed[7] )
             $wrow_strings[7] = "<td>$Size</td>";
          if( $wrtable->Is_Column_Displayed[8] )

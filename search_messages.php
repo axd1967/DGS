@@ -104,7 +104,8 @@ require_once( "include/filter.php" );
                 T_('From#msgdir')   => "me.Sender='N'", // from other user
                 T_('To#msgdir')     => "me.Sender='Y'", // to other user
                 T_('Myself#msgdir') => "me.Sender='M'", // from/to myself
-                T_('Server#msgdir') => "me.Sender='S'" ), // from server
+                T_('Server#msgdir') => "me.Sender='S'", // from server
+            ),
          true);
    $mfilter->init(); // parse current value from _GET
    $mfilter->set_accesskeys('x', 'e');
