@@ -1988,6 +1988,13 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
 }
 
 //caution: some IP addresses have more that 50 accounts in DGS
+/* NOTE on db-query: the select "WHERE IP='$ip' AND Handle!='guest'"
+ * is fine, when $player_field === 'Handle', then still the
+ * index is used on Handle. But if $player_field is some other
+ * column from the Players-table, it's doing a table-scan.
+ * This is not a good idea. Be careful, when you use the function.
+ * In that case, it would be good to add an index on Players.IP.
+ */
 function get_accounts_from_ip( $ip, $player_field='Handle')
 {
    $ret= array();
