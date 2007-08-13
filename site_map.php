@@ -96,9 +96,15 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('Show observed games'), "show_games.php?uid=$id".URI_AMP."observe=1", true);
 
          item(T_('Show message'), "message.php?mode=ShowMessage", false);
-         item(T_('Game'), "game.php", false);
-         item(T_('SGF of game'), "sgf.php", false, true);
+         item(T_('Show game'), "game.php", false, true);
+         { $item_level++;
+            item(T_('Add time for opponent'), "game.php", false);
+            item(T_('Download SGF of game'), "sgf.php", false);
+            item(T_('Show observers'), "users.php", false, true);
+         } $item_level--;
       } $item_level--;
+
+      item(T_('Waiting room'), "waiting_room.php", true);
 
       item(T_('Messages'), "list_messages.php", false);
       { $item_level++;
@@ -112,26 +118,22 @@ function item($text, $link='', $working=true, $last=false)
          } $item_level--;
       } $item_level--;
 
-      item(T_('Waiting room'), "waiting_room.php", true);
-
       item(T_('Users'), "users.php", true);
       { $item_level++;
          item(T_('User info'), "userinfo.php", false);
          { $item_level++;
-            item(T_('Show opponents'), "opponents.php", false, true);
+            item(T_('Show opponents'), "opponents.php", true);
+            item(T_('Add/edit contact'), "edit_contact.php", true, true);
          } $item_level--;
          item(T_('Show my opponents'), "opponents.php", true, true);
+         { $item_level++;
+            item(T_('Show game statistics for two players'), "opponents.php", false, true);
+         } $item_level--;
       } $item_level--;
 
-      item(T_('Forum'), "forum/index.php", true);
+      item(T_('Contacts'), "list_contacts.php", true);
       { $item_level++;
-         item(T_('Thread list'), "forum/list.php", false);
-         { $item_level++;
-            item(T_('Read forum'), "forum/read.php", false);
-            item(T_('New topic'), "forum/post.php", false, true);
-         } $item_level--;
-
-         item(T_('Search forums'), "forum/search.php", true, true);
+         item(T_('Add contact'), "edit_contact.php", true, true);
       } $item_level--;
 
       item(T_('Games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
@@ -143,14 +145,28 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('Show my observed games'), "show_games.php?observe=1", true, true);
       } $item_level--;
 
-      item(T_('Translate'), "translate.php", true);
+      item(T_('Forum'), "forum/index.php", true);
+      { $item_level++;
+         item(T_('Thread list'), "forum/list.php", false);
+         { $item_level++;
+            item(T_('Read forum'), "forum/read.php", false);
+            item(T_('New topic'), "forum/post.php", false, true);
+         } $item_level--;
+         item(T_('Search forums'), "forum/search.php", true, true);
+      } $item_level--;
+
+      if( @$player_row['Translator'] )
+         item(T_('Translate'), "translate.php", true);
 
       item(T_('Documentation'), "docs.php", true, true);
       { $item_level++;
          item(T_('Introduction'), "introduction.php", true);
+         item(T_('News, Release notes'), "news.php", true);
          item(T_('Site map'), "site_map.php", true);
          item(T_('FAQ'), "faq.php", true);
+         item(T_('Goodies'), "goodies/index.php", true);
          item(T_('Links'), "links.php", true);
+         item(T_('People'), "people.php", true);
          item(T_('Todo list'), "todo.php", true);
          item(T_('Licence'), "licence.php", true, true);
       } $item_level--;
