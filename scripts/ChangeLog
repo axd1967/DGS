@@ -13,8 +13,8 @@ quick INFO:
 2007-02-03 rodival
    I'm working on the bad centered alignement of FAQ, docs and other pages.
 
-2007-07-29 juga
-   Currently working on: message search, cleanup
+2007-08-13 juga
+   Currently working on: cleanup, testing, debugging, fixing
 
 -----
 quick TODO:
@@ -24,6 +24,22 @@ quick TODO:
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-08-13 juga
+
+   * site_map.php:
+   - cleanup, adding new and missing pages:
+     contacts, opponents, add time, show observers, news, people, goodies
+   - order roughly oriented at main-menu
+
+   * docs.php:
+   - more descriptions for items, more logical order
+   - added Goodies, DGSWishlist on SL
+
+   * show_games.php:
+   - allow B/W to translate
+   - hide score filter (saving col-space)
+   - use absolute RelativeDate-Filter on end-date
 
 2007-08-13 rodival
 
