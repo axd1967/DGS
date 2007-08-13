@@ -138,7 +138,6 @@ define('MODERATOR_SEARCH', 0);
          'FILTER',      $ffilter, 5,
          'FILTERERROR', $ffilter, 5, "<br>$FERR1", $FERR2, true,
          ));
-   $fform->add_empty_row();
    $fform->add_row( array(
          'DESCRIPTION', T_('Order#forum'),
          'SELECTBOX',   'order', 1, $arr_order, $sql_order, false, ));
