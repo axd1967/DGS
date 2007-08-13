@@ -1116,7 +1116,7 @@ table.FoldersTabs td.Rubric {
    padding: 2px 6px 2px 2px;
 }
 
-form#msgSearch td.Description {
+form#msgSearchForm td.Description {
    text-align: left;
    vertical-align: top;
 }
