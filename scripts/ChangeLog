@@ -27,6 +27,15 @@ Changelog
 
 2007-08-13 juga
 
+   * list_contacts.php:
+   - avoid to show 'filter' term to users
+
+   * forum/search.php:
+   - removed empty row between search elements and order element
+
+   * include/form_functions.php:
+   - removed old build_areas() algorithm
+
    * site_map.php:
    - cleanup, adding new and missing pages:
      contacts, opponents, add time, show observers, news, people, goodies
