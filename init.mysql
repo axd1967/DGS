@@ -280,7 +280,7 @@ CREATE TABLE MessageCorrespondents (
    uid int(11) NOT NULL default '0',
    mid int(11) NOT NULL default '0',
    Folder_nr int(11) default NULL,
-   Sender enum('M','N','Y') NOT NULL default 'Y',
+   Sender enum('M','N','Y','S') NOT NULL default 'Y',
    Replied enum('M','N','Y') NOT NULL default 'N',
    PRIMARY KEY (ID),
    KEY mid (mid),
