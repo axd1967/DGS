@@ -126,7 +126,7 @@ require_once( "include/contacts.php" );
    $cform->add_row( array(
          'FILTER',      $scfilter, 1 ));
    $cform->set_layout( FLAYOUT_AREACONF, 1, array(
-         'title' => T_('System categories filter'),
+         'title' => T_('Search system categories'),
          FAC_TABLE => 'class=FilterOptions',
       ) );
 
@@ -139,7 +139,7 @@ require_once( "include/contacts.php" );
    $cform->add_row( array(
          'FILTER',      $scfilter, 2 ));
    $cform->set_layout( FLAYOUT_AREACONF, 2, array(
-         'title' => T_('User categories filter'),
+         'title' => T_('Search user categories'),
          FAC_TABLE => 'class=FilterOptions',
       ) );
 
