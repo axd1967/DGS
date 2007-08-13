@@ -82,6 +82,12 @@ Changelog
    - changed FEA_ALIGN to FEA_ATTBS
    - aligned the descriptions of search_message
 
+   * include/make_translationfiles.php,
+     generate_translation_texts.php,
+     forum/forum_functions.php, forum/post.php:
+   - re-added previously badly suppressed $TranslateGroups[]
+   - added small debug infos
+
 2007-08-12 rodival
 
    * init.mysql,

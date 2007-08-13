@@ -44,7 +44,7 @@ function make_known_languages() //must be called from main dir
    }
 
    fwrite( $fd, "<?php\n\n"
-."\$Translate" /* break */ . "Groups[] = \"Users\";\n"
+."\$TranslateGroups[] = \"Users\"; //local use\n"
 ."// The \$T_ are required for 'scripts/generate_translation_texts.php'.\n"
 ."\$T_ = 'fnop';\n" //or 'trim'
 ."\n\$known_languages = array(\n" );
