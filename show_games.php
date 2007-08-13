@@ -114,8 +114,8 @@ require_once( "include/rating.php" );
    {
       $gfilter->add_filter( 5, 'Selection',     # filter on my color (not on who-to-move)
             array( T_('All#filter') => '',
-                   'B' => new QuerySQL( SQLP_HAVING, 'iamBlack=1' ),
-                   'W' => new QuerySQL( SQLP_HAVING, 'iamBlack=0' ) ),
+                   T_('B#filter') => new QuerySQL( SQLP_HAVING, 'iamBlack=1' ),
+                   T_('W#filter') => new QuerySQL( SQLP_HAVING, 'iamBlack=0' ) ),
             true);
       $gfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
       $gfilter->add_filter(15, 'RelativeDate', 'Lastaccess', true);
@@ -124,8 +124,8 @@ require_once( "include/rating.php" );
    }
    if( $finished )
    {
-      $gfilter->add_filter(10, 'Score', 'Score', true,
-            array( FC_SIZE => 3 ));
+      $gfilter->add_filter(10, 'Score', 'Score', false,
+            array( FC_SIZE => 3, FC_HIDE => 1 ));
       $gfilter->add_filter(11, 'Selection',
             array( T_('All#filter')  => '',
                    T_('Won')  => new QuerySQL( SQLP_HAVING, 'Win=1' ),
@@ -133,7 +133,8 @@ require_once( "include/rating.php" );
                    T_('Jigo') => 'Score=0' ),
             true,
             array( FC_FNAME => 'won' ));
-      $gfilter->add_filter(12, 'RelativeDate', 'Lastchanged', true);
+      $gfilter->add_filter(12, 'RelativeDate', 'Lastchanged', true,
+            array( FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL ));
       if( $all )
       {
          $gfilter->add_filter(27, 'Rating', 'Black_End_Rating', true);
@@ -144,7 +145,9 @@ require_once( "include/rating.php" );
       else //if( !all )
       {
          $gfilter->add_filter( 5, 'Selection',
-               array( T_('All#filter') => '', 'B' => "Black_ID=$uid", 'W' => "White_ID=$uid" ),
+               array( T_('All#filter') => '',
+                      T_('B#filter')   => "Black_ID=$uid",
+                      T_('W#filter')   => "White_ID=$uid" ),
                true);
          $gfilter->add_filter(23, 'Rating', 'startRating', true,
                array( FC_ADD_HAVING => 1 ));
