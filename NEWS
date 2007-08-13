@@ -269,16 +269,18 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Rating graph: Click on the rating to see it.
 
    * Improved ratings: rating system slightly modified.
-   There is new an interval, the blue part of the rating grap, which says how accurate the rating is.
-   All ratings have been recalculated with new system (don't be surprised if your rating has changed a bit).
+     There is a new blue interval in the rating graph, which says how accurate the rating is.
+     All ratings have been recalculated with new system
+     (don't be surprised if your rating has changed a bit).
 
-   * introduced proper FAQ edited by Bjørn Ingmar Berg.
-   The FAQ forum will from now on be a FAQ discussion forum, where you can help Bjørn with filling the FAQ with content.
+   * Introduced proper FAQ edited by Bjørn Ingmar Berg.
+     The FAQ forum will from now on be a FAQ discussion forum,
+     where you can help Bjørn with filling the FAQ with content.
 
 
 #release DGS_1_0_9 [2002-06-10] - DGS 1.0.9
 
-   * menu layout: vertical and horizontal menu, editable in edit-user-profile
+   * Menu layout: vertical and horizontal menu, editable in user profile
 
    * Observing games on game page 'add to observe game' to add it to the list of observed games.
 
@@ -289,16 +291,16 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
 #release DGS_1_0_8 [2002-05-10] - DGS 1.0.8
 
-   * added waiting room to simplify finding suitable opponents.
+   * Added waiting room to simplify finding suitable opponents.
 
 
 #release DGS_1_0_7 [2002-04-28] - DGS 1.0.7
 
    * Translations: Experimental support for translations.
-   If you want to help translating, please write a message to the new 'Translations' forum.
+     If you want to help translating, please write a message to the new 'Translations' forum.
 
    * Improved invitation: Support for double games, nigiri and suggested handicaps.
-   You can also use 'dispute settings' if you want to play but don't agree on all settings.
+     You can also use 'dispute settings' if you want to play but don't agree on all settings.
 
    * Smooth board edges: Making the board look a bit better, see edit-user-profile
 
@@ -307,37 +309,38 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
 #release DGS_1_0_6 [2002-02-18] - DGS 1.0.6
 
-   * new table looks
+   * New table looks
 
-   * user and game tables editable to include/exclude table columns.
+   * User and game tables editable to include and exclude table columns.
 
-   * game-list button graphics can be in Edit-UserProfile
+   * Game list button graphics can be selected user profile
 
 
 #release DGS_1_0_5 [2002-01-12] - DGS 1.0.5
 
-   * Extended email notification: You can let dragon send messages and the game move or the full board instead of just notify.
-   settings in Edit-UserProfile.
+   * Extended email notification:
+     You can let dragon send messages and the game move or the full board instead of just notify.
+     Configurable in user profile.
 
    * SGF comments: game comments appear in sgf:
-      o <comment>text<comment> or <c>text</c> inserts text in the sgf file and is shown to the opponent.
-      o <hidden>text</hidden> or <h>text</h> make the text hidden until the game is finished.
+      * <comment>text<comment> or <c>text</c> inserts text in the sgf file and is shown to the opponent.
+      * <hidden>text</hidden> or <h>text</h> make the text hidden until the game is finished.
         This can be useful when reviewing your game, without helping your opponent.
 
 
 #release DGS_1_0_4 [2001-12-08] - DGS 1.0.4
 
-   * changed board graphics for faster load to get rid of a problem with strange looking boards on some browsers.
-   drawback: coordinates are drawn as images, so first time may take a bit longer if you look at a board.
+   * Changed board graphics for faster load to get rid of a problem with strange looking boards on some browsers.
+     Drawback: coordinates are drawn as images, so the first time may take a bit longer if you look at a board.
 
-   * edit profile page: change of wood color and coordinate placement
+   * Edit profile page: change of wood color and coordinate placement
 
 
 #release DGS_1_0_3 [2001-12-01] - DGS 1.0.3
 
    * Biographical info: enter more info about yourself, see 'status->show/edit userinfo'
 
-   * use some html code in messages (links, bold, italics and lists).
+   * Use some HTML code in messages (links, bold, italics and lists).
 
    * Docs->links is updated
 
@@ -346,8 +349,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
 #release DGS_1_0_2 [2001-11-11] - DGS 1.0.2
 
-   * own rating system. algorithm borrowed from the european rating system <http://www.european-go.org/rating/gor.html>,
-   and it's relative strength is also the same as the european, so that, e.g., the IYT go guild rank is one stone stronger.
+   * Own rating system: Algorithm borrowed from the european rating system <http://www.european-go.org/rating/gor.html>,
+     and it's relative strength is also the same as the european, so that, e.g. the IYT go guild rank is one stone stronger.
 
 
 #release DGS_1_0_1 [2001-10-14] - DGS 1.0.1
@@ -355,7 +358,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * You can now delete a game the first couple of moves.
 
    * New time mode: Fischer time, where you get a fixed amount of extra time each move.
-   This can be very useful in tournaments where you want to ensure the average playing tempo is fast enough.
+     This can be very useful in tournaments where you want to ensure the average playing tempo is fast enough.
 
 
 #release DGS_1_0_0 [2001-06-26] - DGS 1.0.0
