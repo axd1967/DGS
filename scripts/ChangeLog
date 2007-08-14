@@ -33,6 +33,10 @@ Changelog
    * skins/dragon/screen.css:
    - centered the folders tabs table
 
+   * include/message_functions.php (echo_folder_box),
+     search_messages.php:
+   - reduced the space betwwen the checkbox and the folder name
+
 2007-08-13 juga
 
    * list_contacts.php:

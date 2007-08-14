@@ -984,11 +984,13 @@ function echo_folder_box( $folders, $folder_nr, $bgcolor, $attbs='', $prefix='',
    if( empty($folderfgcolor) )
       $folderfgcolor = "000000" ;
 
-   return "<td bgcolor=\"#$folderbgcolor\" $attbs><font color=\"#$folderfgcolor\">".
-          $prefix .
-          make_html_safe($foldername) .
-          $suffix .
-          "</font></td>";
+   return "<td bgcolor=\"#$folderbgcolor\" $attbs>"
+         .$prefix
+         ."<font color=\"#$folderfgcolor\">"
+         .make_html_safe($foldername)
+         ."</font>"
+         .$suffix
+         ."</td>";
 }
 
 function folder_is_empty($nr, $uid)

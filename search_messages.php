@@ -48,7 +48,7 @@ require_once( "include/filter.php" );
    foreach( $my_folders as $folder_id => $arr ) // arr=( Name, BGColor, FGColor )
    {
       $folder_box = echo_folder_box( $my_folders, $folder_id, null,
-            'align=left style="padding:4px;"', '%s&nbsp;', '' );
+            'align=left style="padding:4px;"', '%s', '' );
       $arr_chkfolders[$folder_box] = $folder_id;
    }
 

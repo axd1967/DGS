@@ -1783,7 +1783,7 @@ class Filter
     */
    function build_generic_checkbox_elem( $prefix, $name, $value, $text, $title='' )
    {
-      $fname = ($this->get_config(FC_FNAME)) ? $name : $prefix . $name;
+      $fname = ($this->get_config(FC_FNAME)) ? $name : ($prefix . $name);
 
       $elem = "<input type=\"checkbox\" name=\"$fname\" value=\"1\"";
       if ( !empty($title) )
@@ -3438,11 +3438,9 @@ class FilterCheckboxArray extends Filter
       }
 
       // build checkbox-array
-      $r = "<table>\n";
-      $r .= "  <tr>\n";
-      $r .= implode( "  </tr>\n  <tr>\n", $rows );
-      $r .= "  </tr>\n";
-      $r .= '</table>';
+      $r = "<table><tr>\n";
+      $r .= implode( "</tr><tr>\n", $rows );
+      $r .= "</tr></table>\n";
       return $r;
    }
 
