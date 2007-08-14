@@ -1091,7 +1091,7 @@ table.FoldersTabs {
    border: 0px solid red;
    border-spacing: 4px;
    border-collapse: separate; /* separate collapse */
-   margin: 0px auto 0px 0px;
+   margin: 0px auto;
    width: auto;
    max-width: none;
    overflow: visible;

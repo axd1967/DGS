@@ -30,6 +30,9 @@ Changelog
    * userinfo.php:
    - fixed the "<color red>" display problem in Open and Rank infos
 
+   * skins/dragon/screen.css:
+   - centered the folders tabs table
+
 2007-08-13 juga
 
    * list_contacts.php:
