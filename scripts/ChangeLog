@@ -47,8 +47,8 @@ Changelog
      scripts/browser_stats.php,
      forum/index.php, forum/search.php, forum/list.php, forum/read.php:
    - added some mysql_free_result()
-     Note: with my new local server this induce some warning messages to be
-     added after the end our HTML code. Because of thoses and our
+     Note: with my new local server, omitting them induce some warning messages
+     to be added after the end our HTML code. Because of thoses and our
      ob_start('ob_gzhandler'), this make the IE5 browser unable to even display
      the page, reporting a "page not found" error message (in the best case!)
 
