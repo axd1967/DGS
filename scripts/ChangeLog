@@ -25,6 +25,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-14 rodival
+
+   * userinfo.php:
+   - fixed the "<color red>" display problem in Open and Rank infos
+
 2007-08-13 juga
 
    * list_contacts.php:
