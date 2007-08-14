@@ -54,11 +54,12 @@ require_once( "include/table_columns.php" );
                         "WHERE Adminlevel != 0")
      or error('mysql_query_failed','admin_admins.find_admins');
 
-  while( $row = mysql_fetch_array($result) )
-  {
-     $Admin[$row['ID']] = ~$player_level & (int)$row['admin_level'] ;
-     $AdminOldLevel[$row['ID']] = (int)$row['admin_level'];
-  }
+   while( $row = mysql_fetch_array($result) )
+   {
+      $Admin[$row['ID']] = ~$player_level & (int)$row['admin_level'] ;
+      $AdminOldLevel[$row['ID']] = (int)$row['admin_level'];
+   }
+   mysql_free_result($result);
 
 
   if( @$_GET['update'] == 't' && @$_POST['action'] )
@@ -93,6 +94,7 @@ require_once( "include/table_columns.php" );
            error("unknown_user");
 
         $row = mysql_fetch_array($result);
+        mysql_free_result($result);
         if( $row["admin_level"] != 0 )
            error("new_admin_already_admin");
 
@@ -200,6 +202,7 @@ require_once( "include/table_columns.php" );
 
       $atable->add_row( $arow_strings );
    }
+   mysql_free_result($result);
 
    $atable->echo_table();
 

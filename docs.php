@@ -38,12 +38,14 @@ require_once( "include/std_functions.php" );
    add_link_page_link('site_map.php', T_('Site map'), T_('Page structure of site'));
    add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
    add_link_page_link("links.php", T_('Links'), T_('Link collection'));
-   add_link_page_link("goodies/index.php", T_('Goodies'),
-                     T_('Some useful GreaseMonkey scripts for DGS'));
    add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
    add_link_page_link("todo.php", T_('To do list'), T_('Plans for future improvements'));
    add_link_page_link("http://senseis.xmp.net/?DGSWishlist", T_('DGS Wish list'),
                      T_('Features and requests DGS users dream of'));
+/*
+   add_link_page_link("goodies/index.php", T_('Goodies'),
+                     T_('Some useful GreaseMonkey scripts for DGS'));
+*/
    add_link_page_link("install.php", T_('Installation instructions'),
                      T_('Wanting your own dragon'));
    add_link_page_link("snapshot", T_('Download dragon sources'),

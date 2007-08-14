@@ -80,6 +80,7 @@ $ARR_DBFIELDKEYS = array(
       or error('mysql_query_failed', "opponents.find_users($uid,$opp)");
    while ( $row = mysql_fetch_assoc( $result ) )
       $players[ $row['ID'] ] = $row;
+   mysql_free_result($result);
    if ( !isset($players[$uid]) )
       error('unknown_user', "opponents.load_user($uid)");
    if ( $opp and !isset($players[$opp]) )
@@ -397,6 +398,7 @@ $ARR_DBFIELDKEYS = array(
 
       $utable->add_row( $urow_strings );
    }
+   mysql_free_result($result);
 
    // print form with user-table
    if ( $opp ) // has opp
@@ -460,6 +462,7 @@ function extract_user_stats( $color, $query = null )
          foreach( $ARR_DBFIELDKEYS as $key )
             $arr[$key] = $row[$key];
       }
+      mysql_free_result($result);
    }
 
    foreach( $ARR_DBFIELDKEYS as $key )

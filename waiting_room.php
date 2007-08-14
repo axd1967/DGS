@@ -277,11 +277,12 @@ require_once( "include/contacts.php" );
          $wrtable->add_row( $wrow_strings );
       }
 
-      // print form with table
+      // print table
       echo $wrtable->make_table();
    }
    else
       echo '<p></p>&nbsp;<p></p>' . T_('Seems to be empty at the moment.');
+   mysql_free_result($result);
 
 
    $form_id = 'addgame'; //==> ID='addgameForm'

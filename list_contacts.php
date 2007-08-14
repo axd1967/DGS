@@ -259,6 +259,7 @@ require_once( "include/contacts.php" );
 
       $ctable->add_row( $crow_strings );
    }
+   mysql_free_result($result);
 
    // print form with table
    $extform_string = $cform->get_form_string(); // static form

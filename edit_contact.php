@@ -73,6 +73,7 @@ require_once( "include/contacts.php" );
          or error('mysql_query_failed', 'edit_contact.find_user.id');
       if ( mysql_affected_rows() == 1 )
          $other_row = mysql_fetch_assoc( $result );
+      mysql_free_result($result);
    }
    if ( !$other_row and $cuser != '' ) // not identified yet
    { // load cid for userid
@@ -81,6 +82,7 @@ require_once( "include/contacts.php" );
          or error('mysql_query_failed', 'edit_contact.find_user.handle');
       if ( mysql_affected_rows() == 1 )
          $other_row = mysql_fetch_assoc( $result );
+      mysql_free_result($result);
    }
 
    $errormsg = null;

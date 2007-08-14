@@ -89,7 +89,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
    $FAQmain = 'Ingmar';
    $FAQmainID = 0;
 
-   $query_result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
+   $result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
             ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
             " FROM Players" .
             " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
@@ -97,7 +97,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       or error('mysql_query_failed', 'people.faq_admins');
 
    $FAQ_list = array();
-   while( $row = mysql_fetch_array( $query_result ) )
+   while( $row = mysql_fetch_array( $result ) )
    {
       $uid = $row['ID'];
       if( $extra_info )
@@ -115,6 +115,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       
       $FAQ_list[$uid] = $row;
    }
+   mysql_free_result($result);
 
    if( $FAQmainID > 0 )
    {
@@ -147,7 +148,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
 
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
-   $query_result = mysql_query( "SELECT ID,Handle,Name,Translator" .
+   $result = mysql_query( "SELECT ID,Handle,Name,Translator" .
             ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
             " FROM Players" .
             " WHERE LENGTH(Translator)>0" .
@@ -155,7 +156,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       or error('mysql_query_failed', 'people.translators');
 
    $translator_list = array();
-   while( $row = mysql_fetch_array( $query_result ) )
+   while( $row = mysql_fetch_array( $result ) )
    {
       $uid = $row['ID'];
       $languages = explode( LANG_TRANSL_CHAR, $row['Translator']);
@@ -186,6 +187,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
          $translator_list[$langname][$uid] = $row;
       }
    }
+   mysql_free_result($result);
 
    ksort($translator_list);
 

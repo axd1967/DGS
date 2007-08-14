@@ -101,6 +101,7 @@ require_once( "forum_functions.php" );
          $odd = !$odd;
       }
    }
+   mysql_free_result($result);
 
    forum_end_table($links, $cols);
 

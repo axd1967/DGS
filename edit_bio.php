@@ -144,6 +144,7 @@ function find_category_box_text($cat)
             );
          }
       } //while($row)
+      mysql_free_result($result);
 
       if ( !$editorder )
       {

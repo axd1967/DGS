@@ -62,6 +62,7 @@ require_once( "include/contacts.php" );
       error("unknown_user");
 
    $row = mysql_fetch_assoc( $result );
+   mysql_free_result($result);
    $uid = $row['ID'];
 
    $bio_result = mysql_query("SELECT * FROM Bio WHERE uid=" . $uid
@@ -79,8 +80,11 @@ require_once( "include/contacts.php" );
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
-   echo "<center>";
-
+   $run_link = "show_games.php?uid=$uid";
+   $fin_link = $run_link.URI_AMP.'finished=1';
+   $rat_link = $fin_link.URI_AMP.'rated=1'; //Rated=yes
+   $won_link = $rat_link.URI_AMP.'won=1'; //Won?=Won
+   $los_link = $rat_link.URI_AMP.'won=2'; //Won?=Lost
 
    { //User infos
       $activity = activity_string( $row['ActivityLevel']);
@@ -95,12 +99,6 @@ require_once( "include/contacts.php" );
       $cntrn = T_(@$COUNTRIES[$cntr]);
       $cntrn = (empty($cntr) ? '' :
                 "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
-
-      $run_link = "show_games.php?uid=$uid";
-      $fin_link = $run_link.URI_AMP.'finished=1';
-      $rat_link = $fin_link.URI_AMP.'rated=1'; //Rated=yes
-      $won_link = $rat_link.URI_AMP.'won=1'; //Won?=Won
-      $los_link = $rat_link.URI_AMP.'won=2'; //Won?=Lost
 
       $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
 
@@ -225,10 +223,8 @@ require_once( "include/contacts.php" );
       $itable->echo_table();
       unset($itable);
    }//Bio infos
+   mysql_free_result($bio_result);
 
-
-
-   echo "</center>\n";
 
    if( $my_info )
    {

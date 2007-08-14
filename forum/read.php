@@ -69,7 +69,7 @@ function revision_history($post_id)
       draw_post( 'Edit' , true, $row['Subject'], $row['Text'], null, $markterms );
       echo "<tr><td colspan=$cols height=2></td></tr>";
    }
-
+   mysql_free_result($result);
 
    change_depth( $cur_depth, -1, $cols);
    forum_end_table($links, $cols);
@@ -224,6 +224,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       extract( mysql_fetch_array( $result ) );
    else
       $Lastread = NULL;
+   mysql_free_result($result);
 
    $result = mysql_query("SELECT Posts.*, " .
                          "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
@@ -301,6 +302,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
          echo "</td></tr>\n";
       }
    } //posts loop
+   mysql_free_result($result);
 
    if( $preview and $preview_ID == 0 and !$is_moderator )
    {

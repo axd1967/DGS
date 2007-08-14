@@ -81,6 +81,7 @@ define('MODERATOR_SEARCH', 0);
       or error('mysql_query_failed','forum_name_search.find');
    while( $row = mysql_fetch_array( $result ) )
       $arr_forum[$row['Name']] = "Posts.Forum_ID=" . $row['ID'];
+   mysql_free_result($result);
 
    // for order-form-element
    $arr_order = array(
@@ -234,6 +235,8 @@ define('MODERATOR_SEARCH', 0);
 
          echo "<tr><td colspan=$cols></td></tr>\n"; //separator
       }
+      mysql_free_result($result);
+
       echo "</table></td></tr>\n";
       forum_end_table($links, $cols);
    }

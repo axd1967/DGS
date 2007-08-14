@@ -72,6 +72,8 @@ require_once( "include/faq_functions.php" );
          }
          echo faq_item_html(-1);
       }
+      mysql_free_result($result);
+
       $menu_array[T_('Go back to the FAQ index')]= "faq.php";
    }
    else
@@ -104,6 +106,7 @@ require_once( "include/faq_functions.php" );
          }
          echo faq_item_html(-1);
       }
+      mysql_free_result($result);
    }
    echo "</td></tr></table>\n";
 

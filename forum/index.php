@@ -106,6 +106,7 @@ require_once( "forum_functions.php" );
       echo '<tr class=Row2><td colspan=3><dl><dd>' . $Description .
          "</dl></td></tr>\n";
    }
+   mysql_free_result($result);
 
    forum_end_table($links, $cols);
 

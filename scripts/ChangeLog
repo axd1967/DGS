@@ -37,6 +37,19 @@ Changelog
      search_messages.php:
    - reduced the space betwwen the checkbox and the folder name
 
+   * userinfo.php, waiting_room.php, edit_bio.php, opponents.php,
+     list_contacts.php, edit_contact.php, faq.php, people.php,
+     admin_admins.php,
+     forum/index.php, forum/search.php, forum/list.php, forum/read.php:
+   - added some mysql_free_result()
+     Note: with my new local server this induce some warning messages to be
+     added after the end our HTML code. Because of thoses and our
+     ob_start('ob_gzhandler'), this make the IE5 browser unable to even display
+     the page, reporting a "page not found" error message (in the best case!)
+
+   * docs.php:
+   - removed the "goodies" link: this is NOT a DGS feature.
+
 2007-08-13 juga
 
    * list_contacts.php:
