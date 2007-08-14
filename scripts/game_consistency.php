@@ -168,10 +168,13 @@ function check_consistency( $gid)
    $result = mysql_query("SELECT * from Games where ID=$gid");
    if( @mysql_num_rows($result) != 1 )
    {
+      if( $result )
+         mysql_free_result($result);
       return "Doesn't exist?";
    }
 
    $game_row = mysql_fetch_assoc($result);
+   mysql_free_result($result);
    extract($game_row);
    $TheBoard = new Board( $gid, $Size, $Moves);
 
@@ -267,6 +270,7 @@ function check_consistency( $gid)
       if( $move_nr > $Handicap )
          $to_move = WHITE+BLACK-$to_move;
    }
+   mysql_free_result($result);
 
    $move_nr--;
    if( $Moves != $move_nr )

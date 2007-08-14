@@ -99,6 +99,7 @@ require_once( "include/std_functions.php" );
       dbg_query("UPDATE MessageCorrespondents SET Replied='Y' " .
                    "WHERE ID=".$row['cid']." LIMIT 1" );
    }
+   mysql_free_result($result);
 
    echo "<br>Lost replied done.\n";
 
@@ -127,6 +128,7 @@ require_once( "include/std_functions.php" );
                    "WHERE ID=".$row['cid']." LIMIT 1" );
       */
    }
+   mysql_free_result($result);
 
    echo "<br>Messages without correspondent done.\n";
 
@@ -155,6 +157,7 @@ require_once( "include/std_functions.php" );
                    "WHERE ID=".$row['cid']." LIMIT 1" );
       */
    }
+   mysql_free_result($result);
 
    echo "<br>Correspondents without message done.\n";
 
@@ -200,6 +203,7 @@ function check_myself_message( $user_id=false)
       $mcID = $row['other_mcID'];
       dbg_query("DELETE FROM MessageCorrespondents WHERE ID=$mcID LIMIT 1" );
    }
+   mysql_free_result($result);
 
    echo "<br>Messages to myself done.\n";
 } //check_myself_message
@@ -238,6 +242,7 @@ function check_system_message( $user_id=false)
       dbg_query("UPDATE MessageCorrespondents SET Sender='S', Folder_nr=$folder, Replied='$replied' " .
                    "WHERE ID=$mcID LIMIT 1" );
    }
+   mysql_free_result($result);
 
    echo "<br>Messages from system done.\n";
 } //check_system_message
@@ -271,6 +276,7 @@ function check_result_message( $user_id=false)
       dbg_query("UPDATE Messages SET Type='RESULT' " .
                    "WHERE ID=$mid LIMIT 1" );
    }
+   mysql_free_result($result);
 
    echo "<br>Game result messages done.\n";
 } //check_result_message

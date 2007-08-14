@@ -101,6 +101,7 @@ echo ">>>> Most of them needs manual fixes.";
          */
       }
    }
+   mysql_free_result($result);
 
    echo "<br>FAQ orphean texts done.\n";
 
@@ -133,6 +134,7 @@ echo ">>>> Most of them needs manual fixes.";
          */
       }
    }
+   mysql_free_result($result);
 
    $query = "SELECT FAQ.ID as FID,TranslationTexts.*,FAQ.*"
      ." FROM FAQ"
@@ -160,6 +162,7 @@ echo ">>>> Most of them needs manual fixes.";
          */
       }
    }
+   mysql_free_result($result);
 
    echo "<br>FAQ entries without translations done.\n";
 
@@ -191,6 +194,7 @@ echo ">>>> Most of them needs manual fixes.";
          */
       }
    }
+   mysql_free_result($result);
 
    echo "<br>Translation texts without foundingroup done.\n";
 
@@ -226,6 +230,7 @@ echo ">>>> Most of them needs manual fixes.";
          */
       }
    }
+   mysql_free_result($result);
 
    echo "<br>Translation texts without group done.\n";
 
@@ -252,6 +257,7 @@ echo ">>>> Most of them needs manual fixes.";
          dbg_query("REPLACE TranslationFoundInGroup SET Text_ID=$QID,Group_ID=$FAQ_group");
       }
    }
+   mysql_free_result($result);
 
    $query = "SELECT F.ID as FID,F.*,I.*,G.*"
      ." FROM (FAQ as F,TranslationTexts AS T)"
@@ -273,6 +279,7 @@ echo ">>>> Most of them needs manual fixes.";
          dbg_query("REPLACE TranslationFoundInGroup SET Text_ID=$AID,Group_ID=$FAQ_group");
       }
    }
+   mysql_free_result($result);
 
    echo "<br>FAQ entries without 'FAQ' group done.\n";
 

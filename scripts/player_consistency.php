@@ -42,9 +42,14 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
       return -1;
    }
 
-   $numrows = 0+@mysql_num_rows($result);
-   if( !$result or $numrows<=0 )
+   if( !$result  )
       return 0;
+   $numrows = 0+@mysql_num_rows($result);
+   if( $numrows<=0 )
+   {
+      mysql_free_result($result);
+      return 0;
+   }
 
    $c=0;
    $i=0;
@@ -90,6 +95,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
       }
       echo "\n</tr>";
    }
+   mysql_free_result($result);
    echo "\n</table><br>\n";
 
    return $numrows;
@@ -292,10 +298,10 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       echo "\n<br>Game: $ID  White_ID: $White_ID  Black_ID: $Black_ID";
       $err++;
    }
+   mysql_free_result($result);
    if( $err )
       echo "\n<br>--- $err error(s). Must be fixed by hand.";
 
-   mysql_free_result($result);
    echo "\n<br>PlayerID Done.";
 
 
@@ -402,10 +408,10 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       echo "\n<br>ID: $ID  Ratinglog: $Log  Should be: $RatedGames";
       $err++;
    }
+   mysql_free_result($result);
    if( $err )
       echo "\n<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
 
-   mysql_free_result($result);
    echo "\n<br>RatinLog Done.";
 
 
@@ -435,10 +441,10 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       echo "\n<br>ID: $ID  Misc: ClockUsed=$ClockUsed, $RatingMin &lt; $Rating2 &lt; $RatingMax.";
       $err++;
    }
+   mysql_free_result($result);
    if( $err )
       echo "\n<br>--- $err error(s). Must be fixed by hand.";
 
-   mysql_free_result($result);
    echo "\n<br>Misc Done.";
 
 

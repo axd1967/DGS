@@ -109,6 +109,7 @@ require_once( "include/rating.php" );
       }
       $tot++;
    }
+   mysql_free_result($result);
    echo "\n<p></p>Finished!<br>$count/$tot rated games.\n";
 
 

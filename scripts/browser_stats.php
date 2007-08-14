@@ -206,6 +206,7 @@ function echo_browsers(&$Browsers)
    echo_browsers($OSes);
 
 
+   mysql_free_result($result);
 
    echo '</pre>';
 }

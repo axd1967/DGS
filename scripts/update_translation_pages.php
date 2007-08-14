@@ -184,6 +184,7 @@ function grep_file($regexp, $file, &$matches)
    {
       $translationgroups[$row['Groupname']] = $row['ID'];
    }
+   mysql_free_result($result);
 
 
 // first search the php pages to find which should be translated.
@@ -249,6 +250,7 @@ function grep_file($regexp, $file, &$matches)
          }
       }
    }
+   mysql_free_result($result);
 
 
    foreach( $translationpages_found as $page => $val )

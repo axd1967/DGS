@@ -91,15 +91,18 @@ echo ">>>> Should not be used now. Do not run it before a check. Caution: no 'do
             if( mysql_num_rows($result) != 1 )
             {
                echo "Unknown parent post\n";   //die( "Unknown parent post" );
+               mysql_free_result($result);
                continue;
             }
             extract(mysql_fetch_array($result));
+            mysql_free_result($result);
 
             $result = mysql_query("SELECT MAX(AnswerNr) AS answer_nr " .
                                   "FROM Posts WHERE Parent_ID=$parent")
                or die(mysql_error());
 
             extract(mysql_fetch_array($result));
+            mysql_free_result($result);
 
             if( !($answer_nr > 0) ) $answer_nr=0;
          }
@@ -152,6 +155,7 @@ echo ">>>> Should not be used now. Do not run it before a check. Caution: no 'do
          }
 
       }
+      mysql_free_result($result_1);
 
       recalculate_postsinforum($new_forum_ID);
 

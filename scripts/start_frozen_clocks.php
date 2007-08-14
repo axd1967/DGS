@@ -90,6 +90,7 @@ echo ">>>> Should not be used now. Do not run it before a check."; end_html(); e
                 "SET LastTicks=" . $row['Ticks'] . " " .
                 "WHERE ID=" . $row['gid'] . " LIMIT 1");
    }
+   mysql_free_result($result);
 
    echo "<hr>Done!!!\n";
    end_html();

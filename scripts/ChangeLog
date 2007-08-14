@@ -40,6 +40,11 @@ Changelog
    * userinfo.php, waiting_room.php, edit_bio.php, opponents.php,
      list_contacts.php, edit_contact.php, faq.php, people.php,
      admin_admins.php,
+     scripts/update_translation_pages.php, scripts/translation_consistency.php,
+     scripts/start_frozen_clocks.php, scripts/recalculate_ratings2.php,
+     scripts/player_consistency.php, scripts/message_consistency.php,
+     scripts/game_consistency.php, scripts/convert_from_old_forum.php,
+     scripts/browser_stats.php,
      forum/index.php, forum/search.php, forum/list.php, forum/read.php:
    - added some mysql_free_result()
      Note: with my new local server this induce some warning messages to be
