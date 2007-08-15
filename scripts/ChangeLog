@@ -27,8 +27,12 @@ Changelog
 
 2007-08-15 juga
 
+   * NEWS:
+   - added info about bugfix: move numbering hover option
+
    * docs.php, site_map.php:
    - don't show goodies (Greasemonkey-scripts) as there are no DGS-features
+   - reverted minor translation changes
 
    * introduction.php:
    - added todo-note about wrong sentence
