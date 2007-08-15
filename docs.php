@@ -42,7 +42,7 @@ require_once( "include/std_functions.php" );
    add_link_page_link("todo.php", T_('To do list'), T_('Plans for future improvements'));
    add_link_page_link("http://senseis.xmp.net/?DGSWishlist", T_('DGS Wish list'),
                      T_('Features and requests DGS users dream of'));
-/*
+/* Note: Goodies are not part of DGS, but a user-to-user feature.
    add_link_page_link("goodies/index.php", T_('Goodies'),
                      T_('Some useful GreaseMonkey scripts for DGS'));
 */
