@@ -706,7 +706,6 @@ class Form
                                                       1 ) );
 
                $this->$func_name( $result, $element_args );
-               $result .= "\n";
 
                $this->nr_columns = $this->max_nr_columns;
                $this->column_started = true;
@@ -726,9 +725,7 @@ class Form
                   $this->nr_columns++;
                }
 
-               $result .= "        ";
                $this->$func_name( $result, $element_args );
-               $result .= "\n";
 
                if( $element_type['EndTD'] and $this->column_started )
                {
@@ -745,12 +742,12 @@ class Form
          if( $result )
          {
             $tr_attrs = $this->get_config(FEC_TR_ATTR);
-            $formstr .= '    <TR';
+            $formstr .= '<TR';
             if( $rowclass )
                $formstr .= $rowclass;
             else if( $tr_attrs )
                $formstr .=  ' '.$tr_attrs;
-            $formstr .= ">\n$result\n    </TR>\n";
+            $formstr .= ">$result</TR>\n";
             $area_rows[$curr_area] .= $formstr;
          }
       }
@@ -1144,7 +1141,7 @@ class Form
    function print_td_start( $attbs = 'class=left', $colspan = 1 )
    {
       $attbs= attb_merge( attb_parse($attbs), array('colspan'=>$colspan), false);
-      return "<TD" . attb_build( $attbs) . ">\n";
+      return "<TD" . attb_build( $attbs) . ">";
    }
 
    /*!

@@ -939,38 +939,37 @@ function echo_folders($folders, $current_folder)
           $string .= "</tr>\n<tr><td></td>"; //empty cell under title
       $i++;
 
-      //see also echo_folder_box()
-      list($name, $color, $fcol) = $val;
-      $name = "<font color=\"$fcol\">" . make_html_safe($name) . "</font>" ;
-      $string .= '<td bgcolor="#' .blend_alpha_hex($color). '"' ;
       if( $nr == $current_folder)
-         $string.= " class=Selected>$name</td>\n";
+         $string.= echo_folder_box( $folders, $val, null, 'class=Selected');
       else
-         $string.= " class=Tab><a href=\"list_messages.php?folder=$nr\">$name</a></td>\n";
+         $string.= echo_folder_box( $folders, $val, null, 'class=Tab'
+                        , "<a href=\"list_messages.php?folder=$nr\">%s</a>");
    }
    $i = ($i % $FOLDER_COLS_MODULO);
    if( $i > 0 ) //empty cells of last line
    {
       $i = $FOLDER_COLS_MODULO - $i;
       if( $i > 1 )
-         $string .= "<td colspan=$i></td>\n";
+         $string .= "<td colspan=$i></td>";
       else
-         $string .= "<td></td>\n";
+         $string .= "<td></td>";
    }
 
-   $string .= '</tr></table>' . "\n";
+   $string .= "</tr></table>\n";
 
    return $string;
 }
 
 // param bgcolor: if null, fall back to default-val (in blend_alpha_hex-func)
-// param attbs, prefix, suffix: optional text (needed for filters)
-function echo_folder_box( $folders, $folder_nr, $bgcolor, $attbs='', $prefix='', $suffix='' )
+// $folder_nr: id of the folders, may also be an array of the folder properties
+function echo_folder_box( $folders, $folder_nr, $bgcolor=null, $attbs='', $layout_fmt='')
 {
  global $STANDARD_FOLDERS;
 
-   if ( is_null($folder_nr) ) //case of $deleted messages
+   if( is_null($folder_nr) ) //case of $deleted messages
      list($foldername, $folderbgcolor, $folderfgcolor) = array('---',0,0);
+   else if( is_array($folder_nr) )
+     list($foldername, $folderbgcolor, $folderfgcolor) = $folder_nr;
    else
      list($foldername, $folderbgcolor, $folderfgcolor) = @$folders[$folder_nr];
 
@@ -984,13 +983,14 @@ function echo_folder_box( $folders, $folder_nr, $bgcolor, $attbs='', $prefix='',
    if( empty($folderfgcolor) )
       $folderfgcolor = "000000" ;
 
-   return "<td bgcolor=\"#$folderbgcolor\" $attbs>"
-         .$prefix
-         ."<font color=\"#$folderfgcolor\">"
-         .make_html_safe($foldername)
-         ."</font>"
-         .$suffix
-         ."</td>";
+   $foldername= "<font color=\"#$folderfgcolor\">" . make_html_safe($foldername) . "</font>";
+   if( $layout_fmt )
+      $foldername= sprintf( $layout_fmt, $foldername);
+
+   if( !$attbs )
+      $attbs = 'class=FolderBox';
+
+   return "<td bgcolor=\"#$folderbgcolor\" $attbs>$foldername</td>";
 }
 
 function folder_is_empty($nr, $uid)

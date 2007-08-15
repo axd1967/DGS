@@ -25,13 +25,13 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 /* same initial states for any browsers */
 /* ------------------------- */
 
-* {
 /*
+* {
    margin: 2px;
    padding: 0px;
    font-family: Times New Roman, Times, Geneva, serif, Arial, Helvetica, sans-serif, Verdana;
-*/
 }
+ */
 
 img {
    border: 0px solid black;
@@ -48,7 +48,7 @@ img {
 table { /* skeleton tables */
    table-layout: auto;
    border: 0px solid blue;
-   border-spacing: 0px;
+   border-spacing: 0px; /* not recognized by IE */
    border-collapse: collapse;
    margin: 0px;
    margin: 0px auto;
@@ -65,6 +65,7 @@ td {
    margin: 0px;
    padding: 4px;
    width: auto;
+   text-align: left;
    vertical-align: middle;
 }
 
@@ -876,7 +877,7 @@ table.Table td img.Hide { /* filters row */
 table.Infos {
    border: 2px outset #F7F5E3; /* page background-color */
    table-layout: auto;
-   border-spacing: 2px;
+   border-spacing: 2px; /* not recognized by IE */
    border-collapse: separate;
    margin: 0px auto;
    width: auto;
@@ -972,7 +973,7 @@ span.MarkTagTerm {
 table.InfoBox {
    border: 2px outset #F7F5E3; /* page background-color */
    table-layout: auto;
-   border-spacing: 2px;
+   border-spacing: 2px; /* not recognized by IE */
    border-collapse: separate; /* collapse separate */
    margin: 0px auto;
    width: 100%;
@@ -1067,7 +1068,7 @@ table.MessageInfos td.Rubric {
 table.MessageBox {
    border: 2px outset #F7F5E3; /* page background-color */
    table-layout: auto;
-   border-spacing: 2px;
+   border-spacing: 2px; /* not recognized by IE */
    border-collapse: separate; /* collapse separate */
    margin: 0px auto;
    width: 30em; /* 475px; */
@@ -1093,7 +1094,7 @@ div.MessageFlow {
 table.FoldersTabs {
    table-layout: auto;
    border: 0px solid red;
-   border-spacing: 4px;
+   border-spacing: 2px; /* not recognized by IE */
    border-collapse: separate; /* separate collapse */
    margin: 0px auto;
    width: auto;
@@ -1102,10 +1103,14 @@ table.FoldersTabs {
    empty-cells: hide;
 }
 
-table.FoldersTabs td {
+table.FoldersTabs td { /* including title cell */
    border: 4px solid #F7F5E3; /* page background-color */ /* or 'transparent' ? */
    padding: 2px 6px;
    text-align: center;
+}
+
+table.FoldersTabs td.Tab a font {
+   text-decoration: underline;
 }
 
 table.FoldersTabs td.Selected {
@@ -1121,8 +1126,40 @@ table.FoldersTabs td.Rubric {
 }
 
 form#msgSearchForm td.Description {
+   margin: 0px;
+   padding: 4px;
+   width: auto;
    text-align: left;
    vertical-align: top;
+}
+
+form#msgSearchForm tr.SelectFolders td {
+   padding: 2px 0px;
+}
+
+form#msgSearchForm tr.SelectFolders td.Description {
+   padding: 6px 4px;
+}
+
+form#msgSearchForm tr.SelectFolders table.CheckboxArray {
+   table-layout: auto;
+   border: 0px solid blue;
+   border-spacing: 0px; /* not recognized by IE */
+   border-collapse: collapse;
+   margin: 0px;
+   margin: 0px auto 0px 0px;
+   width: auto;
+   max-width: none;
+   overflow: visible;
+   empty-cells: show;
+   text-indent: 0;
+}
+
+form#msgSearchForm tr.SelectFolders table.CheckboxArray td {
+/*   border: 4px solid #F7F5E3; /* page background-color */ /* or 'transparent' ? */
+   padding: 4px;
+   text-align: left;
+   vertical-align: middle;
 }
 
 

@@ -34,7 +34,7 @@ require_once( "include/filter.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
    $page = 'search_messages.php?';
    $my_id = $player_row["ID"];
@@ -47,8 +47,7 @@ require_once( "include/filter.php" );
    $arr_chkfolders = array();
    foreach( $my_folders as $folder_id => $arr ) // arr=( Name, BGColor, FGColor )
    {
-      $folder_box = echo_folder_box( $my_folders, $folder_id, null,
-            'align=left style="padding:4px;"', '%s', '' );
+      $folder_box = echo_folder_box( $my_folders, $folder_id, null, '', "%%s%s");
       $arr_chkfolders[$folder_box] = $folder_id;
    }
 
@@ -134,7 +133,8 @@ require_once( "include/filter.php" );
    $mtable->add_external_parameters( $extparam );
 
    $smform->add_row( array(
-         'DESCRIPTION', T_('Select folders'),
+         'ROW', 'SelectFolders',
+         'DESCRIPTION', T_('Select folders#filtermsg'),
          'FILTER',      $smfilter, 1 ));
    $smform->add_row( array(
          'DESCRIPTION', T_('Message scope#filtermsg'),
@@ -163,23 +163,19 @@ require_once( "include/filter.php" );
    $show_rows = $mtable->compute_show_rows( $show_rows);
 
 
-   $title = T_('Message list');
-   start_page($title, true, $logged_in, $player_row,
-               $mtable->button_style($player_row['Button']) );
+   $title = T_('Message search');
+   start_page($title, true, $logged_in, $player_row);
    if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe($terms) . "<br>\n";
    if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($rqsql->get_select()) . "<br>\n";
 
-   echo "<h3 class=Header>" . T_('Message search') . "</h3>\n";
+   echo "<h3 class=Header>$title</h3>\n";
 
    message_list_table( $mtable, $result, $show_rows, FOLDER_NONE, $my_folders,
       false, true, false, // no-sort, no-mark, toggle-mark
       true, false, $terms ); // full-details, only-tablehead, terms
 
    // print form with table
-   $extform_string =
-      "<center>\n"
-      . $smform->get_form_string() // static form
-      . "</center>\n";
+   $extform_string = $smform->get_form_string(); // static form
 
    echo "\n"
       . $smform->print_start_default()

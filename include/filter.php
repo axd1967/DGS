@@ -3438,7 +3438,7 @@ class FilterCheckboxArray extends Filter
       }
 
       // build checkbox-array
-      $r = "<table><tr>\n";
+      $r = "<table class=CheckboxArray><tr>\n";
       $r .= implode( "</tr><tr>\n", $rows );
       $r .= "</tr></table>\n";
       return $r;

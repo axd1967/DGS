@@ -25,6 +25,19 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-16 rodival
+
+   * skins/dragon/screen.css,
+     include/message_functions.php (echo_folders, echo_folder_box),
+     include/filter.php (get_input_element),
+     include/form_functions.php (create_form_string),
+     search_messages.php:
+   - fixed the left alignement of the CheckboxArray of folders
+   - changed the signature:
+      echo_folder_box($folders, $folder_nr, $bgcolor=null, $attbs='', $layout_fmt='')
+     where $layout_fmt is a sprintf format string to replace the previous
+     $prefix and $suffix arguments.
+
 2007-08-15 juga
 
    * NEWS:
