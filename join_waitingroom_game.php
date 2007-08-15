@@ -164,7 +164,7 @@ require_once( "include/contacts.php" );
 
    // Reduce number of games left in the waiting room
 
-   if( $game_row['nrGames'] > 0 )
+   if( $game_row['nrGames'] > 1 )
    {
       mysql_query("UPDATE Waitingroom SET nrGames=nrGames-1"
                   ." WHERE ID=$wr_id AND nrGames>0 LIMIT 1")

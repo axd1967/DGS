@@ -55,6 +55,11 @@ Changelog
    * docs.php:
    - removed the "goodies" link: this is NOT a DGS feature.
 
+   * join_waitingroom_game.php, waiting_room.php:
+   - adjusted the join and delete forms
+   - cleaned some links
+   - fixed glued games (not deleted when count reach 0)
+
 2007-08-13 juga
 
    * list_contacts.php:

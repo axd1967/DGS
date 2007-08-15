@@ -130,9 +130,9 @@ require_once( "include/contacts.php" );
 
    $baseURLMenu = "waiting_room.php?"
       . $wrtable->current_rows_string(1)
-      . $wrtable->current_sort_string();
-   $baseURL = $baseURLMenu . URI_AMP
-      . $wrtable->current_from_string();
+      . $wrtable->current_sort_string(1); //end sep
+   $baseURL = $baseURLMenu
+      . $wrtable->current_from_string(1); //end sep
 
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
@@ -178,6 +178,8 @@ require_once( "include/contacts.php" );
       "IF(ISNULL(C.uid),0,C.SystemFlags & $tmp) AS C_denied" );
    $qsql->add_part( SQLP_FROM,
       "LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id" );
+   $qsql->add_part( SQLP_WHERE,
+      'W.nrGames>0' );
    $qsql->add_part( SQLP_HAVING,
       'C_denied=0' );
 
@@ -222,7 +224,7 @@ require_once( "include/contacts.php" );
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[0] )
-            $wrow_strings[0] = $wrtable->button_TD_anchor( $baseURL.URI_AMP."info=$ID#roomInfos", T_('Info'));
+            $wrow_strings[0] = $wrtable->button_TD_anchor( $baseURL."info=$ID#roomInfos", T_('Info'));
          if( $wrtable->Is_Column_Displayed[1] )
             $wrow_strings[1] = '<td>'.
                user_reference( REF_LINK, 1, 'black', $other_id, $other_name, '') . "</td>";
@@ -290,16 +292,16 @@ require_once( "include/contacts.php" );
    {
       add_old_game_form( 'joingame', $info_row, $iamrated);
 
-      $menu_array[T_('Add new game')] = $baseURL . '#'.$form_id.'Form' ;
+      $menu_array[T_('Add new game')] = clean_url($baseURL) . '#'.$form_id.'Form' ;
    }
    else
       add_new_game_form( $form_id, $iamrated); //==> ID='addgameForm'
 
 
    $menu_array[T_('Show all games')] =
-      $baseURLMenu.URI_AMP.'handi=0'.URI_AMP.'good=0';
+      $baseURLMenu.'handi=0'.URI_AMP.'good=0';
    $menu_array[T_('Show all suitable games')] =
-      $baseURLMenu.URI_AMP.'handi=1'.URI_AMP.'good=1';
+      $baseURLMenu.'handi=1'.URI_AMP.'good=1';
 
    end_page(@$menu_array);
 }
@@ -359,9 +361,8 @@ function add_new_game_form( $form_id, $iamrated)
    $addgame_form->add_row( array( 'SPACE' ) );
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Comment'),
                                   'TEXTINPUT', 'comment', 40, 40, "" ) );
+
    $addgame_form->add_row( array( 'SPACE' ) );
-
-
    $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
 
    $addgame_form->echo_string(1);
@@ -370,7 +371,6 @@ function add_new_game_form( $form_id, $iamrated)
 function add_old_game_form( $form_id, $game_row, $iamrated)
 {
    $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
-   $game_form->set_tabindex(1);
 
    global $player_row;
    game_info_table( 'waitingroom', $game_row, $player_row, $iamrated);
@@ -380,18 +380,24 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
    $game_form->add_hidden( 'id', $game_row['ID']);
    if( $mygame )
    {
-      $game_form->add_hidden( 'delete', 't');
-      echo $game_form->print_insert_submit_button(
-               'deletebut', T_('Delete'));
+      $game_form->add_row( array(
+            'HIDDEN', 'delete', 't',
+            'SUBMITBUTTON', 'deletebut', T_('Delete'),
+         ) );
    }
    else if( $game_row['haverating'] && $game_row['goodrating'] )
    {
-      echo T_('Reply');
-      echo $game_form->print_insert_textarea( 'reply', 50, 4, '');
-      echo $game_form->print_insert_submit_buttonx(
-               'join', T_('Join'), array('accesskey'=>'x'));
+      $game_form->add_row( array(
+            'DESCRIPTION', T_('Reply'),
+            'TEXTAREA', 'reply', 50, 4, '',
+         ) );
+      $game_form->add_row( array(
+            'TAB',
+            'SUBMITBUTTONX', 'join', T_('Join'),
+                        array('accesskey' => 'x'),
+         ) );
    }
-   echo $game_form->print_end();
+   $game_form->echo_string(1);
 }
 
 ?>
