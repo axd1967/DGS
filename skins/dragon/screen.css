@@ -582,8 +582,12 @@ table.Links {
    border: 0px solid red;
    border-spacing: 0px;
    border-collapse: collapse;
+/*
    margin: 4px;
    width: 100%;
+*/
+   margin: 4px auto 4px 4px;
+   width: auto;
    max-width: none;
    overflow: visible;
    empty-cells: hide;
@@ -593,7 +597,7 @@ table.Links {
 table.Links td {
    color: black;
    border: 0px solid red;
-   padding: 8px;
+   padding: 8px 24px;
    text-align: center;
    vertical-align: top;
    font-weight: bold;

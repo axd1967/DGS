@@ -32,6 +32,7 @@ Changelog
 
    * skins/dragon/screen.css:
    - centered the folders tabs table
+   - left aligned and narrowed the table of the bottom links
 
    * include/message_functions.php (echo_folder_box),
      search_messages.php:
