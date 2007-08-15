@@ -27,6 +27,12 @@ Changelog
 
 2007-08-15 juga
 
+   * docs.php, site_map.php:
+   - don't show goodies (Greasemonkey-scripts) as there are no DGS-features
+
+   * introduction.php:
+   - added todo-note about wrong sentence
+
    * site_map.php:
    - completed items for other user info
 
