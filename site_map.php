@@ -130,7 +130,12 @@ function item($text, $link='', $working=true, $last=false)
       { $item_level++;
          item(T_('Other user info'), "userinfo.php", false);
          { $item_level++;
+            item(T_('Show rating graph'), "ratinggraph.php", false);
+            item(T_('Show running games'), "show_games.php", false);
+            item(T_('Show finished games'), "show_games.php?finished=1", false);
             item(T_('Show opponents'), "opponents.php", false);
+            item(T_('Invite user'), "message.php?mode=Invite", false);
+            item(T_('Send message to user'), "message.php?mode=NewMessage", false);
             item(T_('Add/edit contact'), "edit_contact.php", false, true);
          } $item_level--;
          item(T_('Show my opponents'), "opponents.php", true, true);
