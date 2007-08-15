@@ -75,7 +75,7 @@ function include_all_translate_groups($player_row=null) //must be called from ma
       make_known_languages(); //must be called from main dir
       make_include_files(); //must be called from main dir
    }
-   include_once( "translations/known_languages.php" );
+   include( "translations/known_languages.php"); //reload it, not fatal
 
    $TranslateGroups = array_unique($TranslateGroups);
 
@@ -85,7 +85,7 @@ function include_all_translate_groups($player_row=null) //must be called from ma
 
 function include_translate_group($group, $player_row) //must be called from main dir
 {
-   global $language_used, $encoding_used;
+   global $language_used, $encoding_used, $known_languages;
 
    if( !empty( $language_used ) ) //from a previous call
       $language = $language_used;
