@@ -25,10 +25,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-15 juga
+
+   * site_map.php:
+   - completed items for other user info
+
 2007-08-15 rodival
 
-   * include/translation_functions.php
-   - fixed the "&language=de" shorcut
+   * include/translation_functions.php:
+   - fixed the "&language=de" shortcut
 
 2007-08-14 rodival
 
