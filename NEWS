@@ -110,6 +110,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    Bug fixes:
 
+   * fixed hover option with move numbering not to display on the stones
    * fixed display of japanese byoyomi when byoyomi reached
    * fixed tag &lt;user =userid&gt;
    * fixed edit vacation bug
