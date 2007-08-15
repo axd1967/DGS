@@ -104,7 +104,7 @@ function a_value($rating)
 
 // Using rating the EGF system:
 // http://www.european-go.org/rating/gor.html
-// http://www.ujf.cas.cz/~cieply/GO/gor.html
+// http://gemma.ujf.cas.cz/~cieply/GO/gor.html
 //
 // $result: 0 = black win, 1 = white win, 0.5 = jigo
 function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap, $factor=1)
