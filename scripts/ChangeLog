@@ -43,8 +43,7 @@ Changelog
    - introduced echo_onvacation() to have the vacations displayed on a hour basis
 
    * skins/dragon/screen.css,
-     include/table_columns.php (make_tablehead),
-     search_messages.php:
+     include/table_columns.php (make_tablehead, make_table_filter):
    - a try to fix the alignement of the headers and remove tools for JUG browser
 
 2007-08-15 juga

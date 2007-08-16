@@ -56,8 +56,7 @@ table { /* skeleton tables */
    max-width: none;
    overflow: visible; /* hidden visible scroll auto */
    empty-cells: show;
-   text-align: center;
-   text-indent: 0;
+   text-indent: 0px;
 }
 
 td {
@@ -65,7 +64,7 @@ td {
    margin: 0px;
    padding: 4px;
    width: auto;
-   text-align: left;
+   text-align: center;
    vertical-align: middle;
 }
 
@@ -679,6 +678,7 @@ table.Table tr.Head th div,
 table.Table tr.Head th {
    white-space: nowrap;
    text-align: center;
+   text-indent: 0px;
    vertical-align: bottom;
 }
 
@@ -710,6 +710,7 @@ table.Table tr.Filter td div,
 table.Table tr.Filter td {
    white-space: nowrap;
    text-align: left;
+   text-indent: 0px;
    vertical-align: middle;
 }
 
@@ -1184,7 +1185,7 @@ form#msgSearchForm tr.SelectFolders table.CheckboxArray {
    max-width: none;
    overflow: visible;
    empty-cells: show;
-   text-indent: 0;
+   text-indent: 0px;
 }
 
 form#msgSearchForm tr.SelectFolders table.CheckboxArray td {
@@ -1990,7 +1991,7 @@ table.FAQ {
    margin: 0px auto;
    border-spacing: 0px;
    empty-cells: show;
-   text-indent: 0;
+   text-indent: 0px;
 }
 
 table.FAQ td {
@@ -2048,7 +2049,7 @@ table.FAQAdmin {
    margin: 0px auto;
    overflow: visible;
    empty-cells: show;
-   text-indent: 0;
+   text-indent: 0px;
 }
 
 table.xxxFAQAdmin {
