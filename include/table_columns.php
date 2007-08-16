@@ -822,13 +822,15 @@ class Table
          }
          else
          {
+            //TODO: remove this old way to force the width
+            //TODO: then review the whole attbs management
             //$string .= " width=\"{$tablehead['attbs']}\"";
             $width = max($width, (int)$attbs);
             unset( $tablehead['attbs']);
          }
       }
+      $string .= '><div>'; //<th> end bracket
 
-      $string .= '>'; //<th> end bracket
       if( $width >= 0 )
          $string .= $this->button_TD_width_insert($width);
 
@@ -905,23 +907,33 @@ class Table
       {
          global $base_path;
          if( $query_del ) //end_sep
-            $tool = anchor(
+         {
+            $tool1 = image( $base_path.'images/remove.gif', 'x', '', 'class=Hide');
+            $tool1 = anchor(
                  $query_del . "{$this->Prefix}del=$nr#{$this->PrevColId}"
-               , image( $base_path.'images/remove.gif', 'x', '', 'class="Hide"')
-               , T_('Hide')
-               );
+               , $tool1, T_('Hide'));
+         }
          else
-            $tool = image( $base_path.'images/dot.gif', '', '', 'class="Hide"');
+         {
+            $tool1 = image( $base_path.'images/dot.gif', '', '', 'class=Hide');
+            $tool1 = "<span>$tool1</span>";
+         }
 
          if( $sortimg )
-            $tool.= image( $base_path."images/sort$sortimg.gif", $sortimg, '', 'class="Sort"');
+         {
+            $tool2 = image( $base_path."images/sort$sortimg.gif", $sortimg, '', 'class=Sort');
+            $tool2 = "<span>$tool2</span>";
+         }
          else
-            $tool.= image( $base_path.'images/dot.gif', '', '', 'class="Sort"');
+         {
+            $tool2 = image( $base_path.'images/dot.gif', '', '', 'class=Sort');
+            $tool2 = "<span>$tool2</span>";
+         }
 
-         $string .= '<span class="Tool">' . $tool . "</span>";
+         $string .= '<span class=Tool>' . $tool1.$tool2 . "</span>";
       }
 
-      $string .= "</th>\n";
+      $string .= "</div></th>\n";
 
       $this->PrevColId = $curColId;
       return $string;
@@ -971,12 +983,9 @@ class Table
             "<a href=\"$query\" title=" . attb_quote(T_('Show')) . '>' .
             "<font color=\"blue\">" . CHAR_SHOWFILTER ."</font></a>";
          global $base_path;
-         $togglestr_hide = anchor(
-              $query
-            , image( $base_path.'images/remove.gif', 'x', '', 'class="Hide"')
-            , T_('Hide')
-            );
-         $togglestr_hide = '<span class="Tool">' . $togglestr_hide . "</span>";
+         $togglestr_hide = image( $base_path.'images/remove.gif', 'x', '', 'class=Hide');
+         $togglestr_hide = anchor( $query, $togglestr_hide, T_('Hide'));
+         $togglestr_hide = '<span class=Tool>' . $togglestr_hide . "</span>";
       }
 
       // check, if filter-field shown or hidden
@@ -990,11 +999,11 @@ class Table
       $this->Shown_Filters++;
 
       // filter input-element
-      $result = '<td class='.( $filter->has_error() ? 'Error' : 'Filter' ).'>';
+      $result = '<td class='.( $filter->has_error() ? 'Error' : 'Filter' ).'><div>';
       $result .= $filter->get_input_element( $this->Filters->Prefix, $thead );
       if( !$filter->is_static() )
          $result .= $togglestr_hide;
-      $result .= "</td>\n";
+      $result .= "</div></td>\n";
 
       return $result;
    }

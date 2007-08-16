@@ -90,14 +90,24 @@ pre {
 }
 
 /*, input[type="new"], input[type="_blank"]*/
+select,
 input {
-   vertical-align: middle;
+   vertical-align: middle; /* */
    margin-right: 4px;
 /*
    margin: 0px 2px;
    padding: 0px;
 /*   height: 2em; /* */
 }
+
+/* FF does not properly adjust its height when one change
+  the text height (Ctrl+middle) until a refresh
+ */
+/*
+select {
+   height: 1.85em;
+}
+ */
 
 ul {
 /* IE,Avant: the <UL> have no top marge */
@@ -522,19 +532,19 @@ table.MenuHorizontal td.Logo2 {
 }
 
 table.MenuHorizontal dl {
-	padding: 0px;
-	margin:  0.3em 0px 0.3em 0px;
+   padding: 0px;
+   margin:  0.3em 0px 0.3em 0px;
 /*
-	list-style-type:none;
+   list-style-type:none;
 */
 }
 table.MenuHorizontal dt {
-	white-space: nowrap;
-	padding: 0.1em 0px;
-	height: 30%;
+   white-space: nowrap;
+   padding: 0.1em 0px;
+   height: 30%;
 /*
-	display: block;
-	line-height: 90%;
+   display: block;
+   line-height: 90%;
 */
 }
 
@@ -665,13 +675,21 @@ table.Table tr.Head {
    background: #cccccc;
 }
 
+table.Table tr.Head th div,
 table.Table tr.Head th {
-   white-space: pre; /* normal, nowrap - pre: allow &#10; */
+   white-space: nowrap;
    text-align: center;
    vertical-align: bottom;
 }
 
+/* FF5 does not respect the nowrap for header tools */
+table.Table tr.Head th div {
+   display: block; /* inline block */
+}
+
 table.Table tr.Head th span.Header {
+   white-space: normal;
+   white-space: pre; /* normal, nowrap - pre: allow &#10; */
    color: black;
    font-weight: bold;
    text-align: center;
@@ -686,16 +704,19 @@ table.Table tr.Head th span.Header {
 table.Table tr.Error,
 table.Table tr.Filter {
    background: #dddddd;
-   text-align: left;
-   white-space: nowrap;
 }
 
+table.Table tr.Filter td div,
 table.Table tr.Filter td {
+   white-space: nowrap;
+   text-align: left;
    vertical-align: middle;
 }
 
+table.Table tr.Filter select,
 table.Table tr.Filter input {
    vertical-align: middle;
+   white-space: nowrap;
    margin-right: 0px;
 }
 
@@ -710,7 +731,7 @@ table.Table td.ErrMsg em {
    font-weight: normal;
 }
 
-table.Table tr.Filter td.ShowFilter {
+table.Table tr.Filter td.ShowFilter { /* hidden filter cell */
    color: blue;
    text-align: center;
 }
@@ -837,40 +858,47 @@ table.Table a.Button {
 /*
  cells tools
 */
-table.Table td span.Tool,
-table.Table th span.Tool {
-   padding: 0px 0px 0px 0px;
+table.Table span.Tool {
+   padding: 0px 0px 0px 2px;
    margin: 0px 0px 0px 0px; /* */
-/*   margin: 0px 0px 0.5em 0px; */
    font-size: 0.5em;
+   line-height: 0.5em;
    color: red;
-   vertical-align: top;
-   vertical-align: super;
    text-align: left;
+   white-space: nowrap;
+   vertical-align: bottom; /* super */
 }
 
-table.Table th img.Hide { /* headers row */
+table.Table span.Tool a,
+table.Table span.Tool span {
+   padding: 0px 0px 0px 0px;
+   margin: 0px; /* */
+   font-size: 0.5em;
+   line-height: 0.5em;
+   text-align: left;
+   white-space: nowrap;
+   vertical-align: bottom; /* super */
+}
+
+table.Table tr.Filter td span.Tool img.Hide, /* filters row */
+table.Table tr.Head th span.Tool img.Sort, /* headers row */
+table.Table tr.Head th span.Tool img.Hide { /* headers row */
    width: 9px;
    height: 9px;
+   vertical-align: bottom;
+}
+
+table.Table tr.Filter td span.Tool img.Hide, /* filters row */
+table.Table tr.Head th span.Tool img.Hide { /* headers row */
    border: 0px solid black;
-   margin: 0px 0px 9px 2px; /* */
-   vertical-align: top;
+   margin: 0px 0px 10px 0px; /* */
+/*   margin: 0px 0px 9px 2px; /* */
 }
 
-table.Table th img.Sort { /* headers row */
-   width: 9px;
-   height: 9px;
+table.Table tr.Head th span.Tool img.Sort { /* headers row */
    border: 0px solid green;
-   margin: 9px 0px 0px -9px; /* */
-   vertical-align: top;
-}
-
-table.Table td img.Hide { /* filters row */
-   width: 9px;
-   height: 9px;
-   border: 0px solid black;
-   margin: 0px 0px 9px 2px; /* */
-   vertical-align: top;
+   margin: 10px 0px 0px -9px; /* */
+/*   margin: 9px 0px 0px -9px; /* */
 }
 
 
