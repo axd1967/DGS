@@ -259,6 +259,33 @@ function echo_time( $hours, $keep_english=false, $short=false)
    return $str;
 } //echo_time
 
+function echo_onvacation( $days, $keep_english=false, $short=false)
+{
+   //return echo_day(floor($days)).' '.T_('left#2');
+   $hours= round($days*24);
+   if( $hours <= 0 )
+      return '---';
+
+   $T_= ( $keep_english ? 'fnop' : 'T_' );
+
+   $h = $hours % 24;
+   $days = ($hours-$h) / 24;
+   if( $days > 0 )
+      $str = echo_day( $days, $keep_english, $short);
+   else
+      $str = '';
+
+   if( $h > 0 )
+   {
+      if( $str > '' )
+         $str.= ( $short ? '&nbsp;' : '&nbsp;' . $T_('and') . '&nbsp;');
+
+      $str.= echo_hour( $h, $keep_english, $short);
+   }
+
+   return $str.' '.$T_('left#2');
+} //echo_onvacation
+
 function echo_byotype( $byotype, $keep_english=false, $short=false)
 {
    if( $short )

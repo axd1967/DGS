@@ -32,9 +32,9 @@ require_once( "include/message_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   $my_id = $player_row["ID"];
+   $my_id = $player_row['ID'];
 
    //check if the player's clock need an adjustment from/to summertime
    if( $player_row['ClockChanged'] != 'Y' &&
@@ -91,7 +91,7 @@ require_once( "include/message_functions.php" );
          $itable->add_row( array(
                'nattb' => 'class=OnVacation',
                'sname' => anchor( "edit_vacation.php", T_('On vacation')),
-               'sinfo' => echo_day(floor($player_row['OnVacation'])).' '.T_('left#2'),
+               'sinfo' => echo_onvacation($player_row['OnVacation']),
                ) );
       }
 

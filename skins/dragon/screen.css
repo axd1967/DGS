@@ -110,6 +110,10 @@ ul {
    margin-top: 1em;
 }
 
+a * {
+   text-decoration: underline;
+}
+
 /*
 a:link {
    color: blue;

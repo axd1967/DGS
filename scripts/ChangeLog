@@ -38,6 +38,10 @@ Changelog
      where $layout_fmt is a sprintf format string to replace the previous
      $prefix and $suffix arguments.
 
+   * include/time_functions.php (echo_onvacation)
+     status.php, userinfo.php:
+   - introduced echo_onvacation() to have the vacations displayed on a hour basis
+
 2007-08-15 juga
 
    * NEWS:

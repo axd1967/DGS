@@ -154,7 +154,7 @@ require_once( "include/contacts.php" );
          $itable->add_row( array(
                   'nattb' => 'class=OnVacation',
                   'sname' => T_('On vacation'),
-                  'sinfo' => echo_day(floor($row['OnVacation'])).' '.T_('left#2'),
+                  'sinfo' => echo_onvacation($row['OnVacation']),
                   ) );
       }
       $itable->add_row( array(
