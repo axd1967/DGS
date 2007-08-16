@@ -64,7 +64,7 @@ td {
    margin: 0px;
    padding: 4px;
    width: auto;
-   text-align: center;
+   text-align: left;
    vertical-align: middle;
 }
 
@@ -1418,6 +1418,10 @@ form#translateForm table.FormClass td.PageLinks {
 
 form#translateForm table.FormClass td.PageLinks a {
    color: black;
+}
+
+form#translateForm table.FormClass td {
+   text-align: center;
 }
 
 form#translateForm table.FormClass td.English {

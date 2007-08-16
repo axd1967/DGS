@@ -172,11 +172,12 @@ if(0){//old
       else
          $lang_string = $translate_lang;
 
-      @list(,$translate_encoding) = explode( LANG_CHARSET_CHAR, $translate_lang, 2);
+      @list($browsercode,$translate_encoding) = explode( LANG_CHARSET_CHAR, $translate_lang, 2);
 
       if( !$profil_charset )
          $encoding_used = $translate_encoding; // before start_page()
 
+      $lang_string.= ' / ' . $browsercode;
       $lang_string.= ' / ' . $translate_encoding;
       if( ALLOW_PROFIL_CHARSET )
         $lang_string.=  ' / ' . $encoding_used;
