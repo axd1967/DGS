@@ -179,7 +179,7 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('News, Release notes'), "news.php", true);
          item(T_('Site map'), "site_map.php", true);
          item(T_('FAQ'), "faq.php", true);
-         //item(T_('Goodies'), "goodies/index.php", true); // not a DGS-feature
+         //item(T_//('Goodies'), "goodies/index.php", true); // not a DGS-feature
          item(T_('Links'), "links.php", true);
          item(T_('People'), "people.php", true);
          item(T_('Todo list'), "todo.php", true);
