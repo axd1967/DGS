@@ -25,6 +25,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-17 juga
+
+   * NEWS:
+   - added: on-vacation showing hours too, bottom-links left-alignment,
+     '&language=browsercode'
+   - removed goodies
+   - cleanup (FAQ-refs, double entries, better text)
+
+   * docs.php, site_map.php:
+   - "hide" unwanted translations for Goodies
+
 2007-08-16 rodival
 
    * skins/dragon/screen.css,
@@ -52,7 +63,7 @@ Changelog
    - added info about bugfix: move numbering hover option
 
    * docs.php, site_map.php:
-   - don't show goodies (Greasemonkey-scripts) as there are no DGS-features
+   - don't show goodies (Greasemonkey-scripts) as they are no DGS-features
    - reverted minor translation changes
 
    * introduction.php:
@@ -185,7 +196,7 @@ Changelog
    - no filter on Rank-Info and Open-for-matches (no efficient search)
 
    * include/filter.php (FilterRelativeDate.get_input_elements):
-   - save &nbsp; in RelativeDate-filter layout
+   - remove &nbsp; in RelativeDate-filter layout
 
    * forum/search.php, list_contacts.php, opponents.php,
      search_messages.php, show_games.php, users.php, waiting_room.php:
