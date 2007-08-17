@@ -7,21 +7,21 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    * Use CSS throughout the site
 
-   * Searching capabilities   [FAQ: "Dragon searching"]
+   * Searching capabilities
       * Added search in waiting room, messages, users, games
       * Improved search in forum, added ordering
 
       * Highlight search terms within some texts for
         messages, forum posts, contact notes
 
-   * Contact list of other users   [FAQ: "What are Contacts?"]
+   * Contact list of other users
       * Protect games in waiting room, Reject messages or Reject invitations
       * User categorization
       * Private notes on user
 
    * Games:
       * Show observers of a running game
-      * Add time for opponent   [FAQ: "Can I add time for my opponent?"]
+      * Add time for opponent
       * Added hover-text on colors column for my running games
       * Viewing move with auto-select on combobox (need JavaScript)
 
@@ -33,6 +33,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Order of bio entries can be changed
       * Changed percent calculus to take jigo into account for rated games
       * Changed links to show rated / won / lost games in games list
+      * On vacation shows days and hours left
 
       * Rating graph can now be displayed by time or by number of games
       * Rating graph shows additional pie chart for played games ratio
@@ -46,7 +47,6 @@ Copyright (C) 2001-2007  Erik Ouchterlony
         on respective pages.
       * Added arrows in table headers indicating sort direction of columns
         (1st sort = dark blue arrow, 2nd sort = light blue arrow)
-      * Translators can choose shorter translations for separate table headers
       * Use own set of texts for table headers to allow shorter translated texts
 
    Code improvements:
@@ -67,16 +67,13 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    Minor changes:
 
+   * Left align bottom links on each page
+
    * Forum threads: Added link to return to first 'new'
 
-   * Cleanup of links page
+   * Cleanup of links, site-map page
 
    * Updated flags: Lesotho, removed obsolete 'Serbia and Montenegro (Yugoslavia)'
-
-   * Added some <home goodies/>GreaseMonkey-scripts</home> for Firefox browsers:
-      * DGS Forum Indicator: add 'new' indicator to forums with new messages
-      * DGS Section Hide: hide/show some page sections
-      * DGS Toggle Numbering: add button to toggle the board stone numbering
 
    * Added rating histogram on statistics page
 
@@ -91,6 +88,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Moved 'Translate' into bottom bar, visible for translators only
       * Improvements described on respective page in "instructions"
       * Use '&language=N' URL-argument to disable any translation on page
+        Use '&language=browsercode' URL-argument to show page in specific language
       * Better handling of translations
 
    * Reject some registrations of account usurpers
@@ -110,7 +108,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    Bug fixes:
 
-   * fixed hover option with move numbering not to display on the stones
+   * fixed hover option with move numbering: don't display numbers on stones
    * fixed display of japanese byoyomi when byoyomi reached
    * fixed tag &lt;user =userid&gt;
    * fixed edit vacation bug
@@ -196,13 +194,13 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Added two colored stones for own running games
         ("your color in the game" over "color to play")
 
-   * Added access keys for   [FAQ: "Are there any key shortcuts?"]
+   * Added access keys for
       * Main menu items
       * Some form buttons
       * Page bottom links (1-9)
 
    * Provided alternative interfaces:
-      * Robots interface: quick_status & quick_play suite [FAQ]
+      * Robots interface: quick_status & quick_play suite
       * <home wap/status.php>WAP status page</home> : http://<dragonURL>/wap/status.php
       * <home rss/status.php>RSS status feed</home> : http://<dragonURL>/rss/status.php
 
