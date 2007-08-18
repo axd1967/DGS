@@ -338,7 +338,7 @@ require_once( "include/countries.php" );
 
    $profile_form->add_row( array( 'SPACE' ) );
 
-   $profile_form->add_row( array( 'TAB',
+   $profile_form->add_row( array(
                      'SUBMITBUTTONX', 'action', T_('Change profile'),
                         array('accesskey'=>'x'),
                      ) );

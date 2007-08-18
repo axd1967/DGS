@@ -224,7 +224,8 @@ require_once( "include/contacts.php" );
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[0] )
-            $wrow_strings[0] = $wrtable->button_TD_anchor( $baseURL."info=$ID#roomInfos", T_('Info'));
+            $wrow_strings[0] = $wrtable->button_TD_anchor(
+                                 $baseURL."info=$ID#joingameForm", T_('Info'));
          if( $wrtable->Is_Column_Displayed[1] )
             $wrow_strings[1] = '<td>'.
                user_reference( REF_LINK, 1, '', $other_id, $other_name, '') . "</td>";
@@ -290,7 +291,7 @@ require_once( "include/contacts.php" );
    $form_id = 'addgame'; //==> ID='addgameForm'
    if( $idinfo and is_array($info_row) )
    {
-      add_old_game_form( 'joingame', $info_row, $iamrated);
+      add_old_game_form( 'joingame', $info_row, $iamrated); //==> ID='joingameForm'
 
       $menu_array[T_('Add new game')] = clean_url($baseURL) . '#'.$form_id.'Form' ;
    }
@@ -363,8 +364,7 @@ function add_new_game_form( $form_id, $iamrated)
                                   'TEXTINPUT', 'comment', 40, 40, "" ) );
 
    $addgame_form->add_row( array( 'SPACE' ) );
-   $addgame_form->add_row( array( 'TAB',
-                                  'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
+   $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
 
    $addgame_form->echo_string(1);
 }
@@ -393,7 +393,6 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
             'TEXTAREA', 'reply', 50, 4, '',
          ) );
       $game_form->add_row( array(
-            'TAB',
             'SUBMITBUTTONX', 'join', T_('Join'),
                         array('accesskey' => 'x'),
          ) );

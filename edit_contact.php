@@ -161,8 +161,6 @@ require_once( "include/contacts.php" );
          {
             $cform->add_hidden( 'confirm', 1 );
             $cform->add_row( array(
-               'TAB',
-               'CELL', 1, 'align=left',
                'SUBMITBUTTON', 'contact_delete', T_('Remove contact'),
                'SUBMITBUTTON', 'contact_cancel', T_('Cancel') ));
          }
@@ -208,8 +206,6 @@ require_once( "include/contacts.php" );
                   ));
 
             $cform->add_row( array(
-               'TAB',
-               'CELL', 1, 'align=left',
                'SUBMITBUTTON', 'contact_save', T_('Save contact'),
                ));
          }

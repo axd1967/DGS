@@ -331,8 +331,6 @@ $info_box = '<ul>
       }
 
       $edit_form->add_row( array(
-                           'TAB',
-                           'CELL', 1, 'align=left',
                            'HIDDEN', 'type', $action,
                            'HIDDEN', 'preview', 1,
                            'HIDDEN', 'term', textarea_safe($term),
@@ -521,8 +519,6 @@ $info_box = '<ul>
       }
 
       $edit_form->add_row( array(
-                           'TAB',
-                           'CELL', 1, 'align=left',
                            'HIDDEN', 'type', $action,
                            'HIDDEN', 'preview', 1,
                            'SUBMITBUTTONX', 'do_new', 'Add entry',

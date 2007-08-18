@@ -436,7 +436,6 @@ function forum_message_box( $postClass, $id, $GoDiagrams=null, $Subject='', $Tex
    else
 */
       $form->add_row( array(
-                  'TAB',
                   'SUBMITBUTTONX', 'post', ' ' . T_('Post') . ' ',
                      array('accesskey' => 'x'),
                   'SUBMITBUTTONX', 'preview', ' ' . T_('Preview') . ' ',

@@ -57,6 +57,12 @@ UPDATE Bio SET Category=CONCAT('=',Category)
   OR LEFT(Category,1)='=')
 -----------
 
+   * skins/dragon/screen.css,
+     include/form_functions.php,
+     forum/forum_functions.php,
+     admin_faq.php, edit_contact.php, edit_profile.php, message.php, waiting_room.php:
+   - CSSed some other Form parts.
+
 2007-08-17 juga
 
    * NEWS:

@@ -273,7 +273,6 @@ require_once( "include/form_functions.php" );
             $message_form->add_row( array(
                   'HIDDEN', 'to', $other_handle,
                   'HIDDEN', 'reply', $mid,
-                  'TAB',
                   'SUBMITBUTTONX', 'send_message', T_('Send Reply'),
                               array('accesskey' => 'x'),
                   'SUBMITBUTTONX', 'preview', T_('Preview'),
@@ -301,7 +300,6 @@ require_once( "include/form_functions.php" );
                   'TEXTAREA', 'message', 50, 8, $default_message,
                ) );
             $message_form->add_row( array(
-                  'TAB',
                   'SUBMITBUTTONX', 'send_message', T_('Send Message'),
                               array('accesskey' => 'x'),
                   'SUBMITBUTTONX', 'preview', T_('Preview'),
@@ -325,7 +323,6 @@ require_once( "include/form_functions.php" );
          if( $can_reply )
          {
             $message_form->add_row( array(
-                  'TAB',
                   'SUBMITBUTTON', 'mode_dispute', T_('Dispute settings'),
                ) );
 
@@ -341,7 +338,6 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'reply', $mid,
                   'HIDDEN', 'subject', "Game invitation accepted (or declined)",
                   'HIDDEN', 'gid', $Game_ID,
-                  'TAB',
                   'SUBMITBUTTONX', 'send_accept', T_('Accept'),
                               array('accesskey' => 'x'),
                   'SUBMITBUTTON', 'send_decline', T_('Decline'),
@@ -379,7 +375,6 @@ require_once( "include/form_functions.php" );
                   'HIDDEN', 'subject', 'Game invitation dispute',
                   'HIDDEN', 'type', 'INVITATION',
                   'HIDDEN', 'disputegid', $Game_ID,
-                  'TAB',
                   'SUBMITBUTTONX', 'send_message', T_('Send Reply'),
                               array('accesskey' => 'x'),
                   'SUBMITBUTTONX', 'preview', T_('Preview'),
@@ -410,7 +405,6 @@ require_once( "include/form_functions.php" );
             $message_form->add_row( array(
                   'HIDDEN', 'subject', 'Game invitation',
                   'HIDDEN', 'type', 'INVITATION',
-                  'TAB',
                   'SUBMITBUTTONX', 'send_message', T_('Send Invitation'),
                               array('accesskey' => 'x'),
                   'SUBMITBUTTONX', 'preview', T_('Preview'),

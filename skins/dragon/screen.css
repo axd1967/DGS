@@ -1075,8 +1075,24 @@ table.FormClassC {
    margin: 0px auto 0px auto;
 }
 
-td.Description {
+table.FormClass td.FormDescription {
    text-align: right;
+}
+table.FormClass td.FormHeader,
+table.FormClass td.FormSubmitbutton {
+   text-align: center;
+}
+table.FormClass td.FormFiltererror,
+table.FormClass td.FormFilter,
+table.FormClass td.FormChapter,
+table.FormClass td.FormRadiobuttons,
+table.FormClass td.FormCheckbox,
+table.FormClass td.FormTextarea,
+table.FormClass td.FormSelectbox,
+table.FormClass td.FormPassword,
+table.FormClass td.FormTextinput,
+table.FormClass td.FormText {
+   text-align: left;
 }
 
 td.FormClassV,
@@ -1330,12 +1346,14 @@ dl.DocLink dd {
    margin: 0px auto 1em auto;
 }
 
-dl.DocLink a {
-   color: blue;
-}
-
 dl.DocLink span {
    color: gray;
+}
+
+dl.DocLink a *,
+dl.DocLink a span,
+dl.DocLink a {
+   color: blue;
 }
 
 body.Links table#pageLayout td#pageBody div.Section {
@@ -1972,6 +1990,11 @@ table.Forum tr.PostButtons {
 
 table.Forum tr.PostButtons a.Highlight {
    color: #ee6666;
+}
+
+table.Forum form.FormClass table.FormClass {
+   width: auto;
+   margin: 0px auto 0px 0px;
 }
 
 table.Forum span.OlderNewFlag,
