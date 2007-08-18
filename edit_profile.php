@@ -97,6 +97,8 @@ require_once( "include/countries.php" );
    
    $langs = get_language_descriptions_translated();
    arsort($langs); //will be reversed to place ahead the following:
+   if( @$player_row['Translator'] )
+      $langs['N'] = /*T_*/('Native texts');
    $langs['C'] = T_('Use browser settings');
 
    $notesheights = array();

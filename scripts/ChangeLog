@@ -33,8 +33,12 @@ Changelog
      waiting_room.php, game.php, forgot.php, index.php:
    - CSS and layout adjustments
 
-   * include/make_translationfiles.php:
-   - fixed glued translation files when they must be emptyed
+   * include/make_translationfiles.php,
+     include/translation_functions.php,
+     edit_profile.php, change_profile.php:
+   - fixed glued translation files when they must be emptied
+   - highlighted the NativeText for the ?language=N option
+   - allowed to set language=N in profile for translators
 
    * skins/dragon/screen.css,
      include/message_functions.php, include/form_functions.php (sptext)

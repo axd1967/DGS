@@ -156,6 +156,7 @@ require_once( "include/countries.php" );
    $language = trim(get_request_arg('language'));
 
    if( $language === 'C' or
+         ( $language === 'N' && @$player_row['Translator'] ) or
          ( $language !== $player_row['Lang'] && language_exists( $language ) )
      )
    {

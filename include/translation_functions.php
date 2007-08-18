@@ -60,7 +60,7 @@ function T_($string)
 
    global $language_used;
    if( $language_used == 'N' )
-      return $string;
+      return '<span class=NativeText>'.$string.'</span>';
 
    return preg_replace('%([^\\s])#[0-9a-z]+$%i', '\\1', $string);
 }
