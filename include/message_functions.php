@@ -418,10 +418,10 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
    if( $other_id > 0 )
    {
-     $name = user_reference( REF_LINK, 0, 'black', $other_id, $other_name, $other_handle) ;
+      $name = user_reference( REF_LINK, 0, '', $other_id, $other_name, $other_handle) ;
    }
    else
-     $name = $other_name; //i.e. T_("Server message"); or T_('Receiver not found');
+      $name = $other_name; //i.e. T_("Server message"); or T_('Receiver not found');
 
    $cols = 2;
    echo "<table class=MessageInfos>\n" .
@@ -571,7 +571,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
          $itable->add_row( array(
                   'sname' => T_('Player'),
-                  'sinfo' => user_reference( REF_LINK, 1, 'black', $other_id, $other_name, $other_handle),
+                  'sinfo' => user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle),
                   ) );
    }
 

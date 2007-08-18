@@ -62,7 +62,7 @@ table { /* skeleton tables */
 td {
    border: 0px solid red;
    margin: 0px;
-   padding: 4px;
+   padding: 2px 4px;
    width: auto;
    text-align: left;
    vertical-align: middle;
@@ -209,10 +209,6 @@ a[target] /*, a[target="new"], a[target="_blank"]*/
    white-space: nowrap;
 }
 
-.InlineWarning {
-   color: red;
-}
-
 /*
 a.rating {
    color: black;
@@ -226,12 +222,31 @@ a.userblack {
 */
 
 
+.InlineWarning {
+   color: red;
+}
+
+.Ref,
+.Send,
+.User,
+.Game,
+.Rating {
+   color: black;
+}
+
+h3.Header .Ref,
+h3.Header .Send,
+h3.Header .User,
+h3.Header .Game,
+h3.Header .Rating,
 h3.Header {
    color: #800000;
+   font-weight: bold;
+}
+h3.Header {
    text-align: center;
    padding: 2px;
    margin: 1em 0px;
-   font-weight: bold;
 }
 
 div.Section { /* page section */
@@ -600,7 +615,7 @@ table.Links {
    margin: 4px;
    width: 100%;
 */
-   margin: 4px auto 4px 4px;
+   margin: 4px auto;
    width: auto;
    max-width: none;
    overflow: visible;
@@ -611,7 +626,7 @@ table.Links {
 table.Links td {
    color: black;
    border: 0px solid red;
-   padding: 8px 24px;
+   padding: 8px 32px;
    text-align: center;
    vertical-align: top;
    font-weight: bold;
@@ -638,7 +653,7 @@ table.Table {
    border: 0px solid red;
    border-spacing: 0px;
    border-collapse: collapse;
-   margin: 0px auto;
+   margin: 0px auto 4px auto;
    width: auto;
    max-width: none;
    overflow: visible;
@@ -651,7 +666,7 @@ table.Table th,
 table.Table td {
    border: 0px solid red;
    margin: 0px;
-   padding: 4px;
+   padding: 2px 4px;
 }
 
 table.Table th a,
@@ -741,7 +756,7 @@ table.Table tr.LinksT td,
 table.Table tr.LinksB td {
    color: black;
    margin: 0px;
-   padding: 4px 8px 4px 8px;
+   padding: 2px 8px;
    text-align: left;
 }
 
@@ -811,7 +826,7 @@ table.Table th.Button {
    white-space: nowrap;
 */
    margin: 0px;
-   padding: 4px;
+   padding: 2px 4px;
    text-align: center;
 }
 
@@ -819,7 +834,7 @@ table.Table td.Button {
    background-repeat: no-repeat;
    background-position: center;
    margin: 0px;
-   padding: 4px;
+   padding: 2px 4px;
    text-align: center;
    white-space: nowrap;
 /* min-width problem, see MinWidth
@@ -872,7 +887,7 @@ table.Table span.Tool {
 
 table.Table span.Tool a,
 table.Table span.Tool span {
-   padding: 0px 0px 0px 0px;
+   padding: 0px;
    margin: 0px; /* */
    font-size: 0.5em;
    line-height: 0.5em;
@@ -1450,17 +1465,23 @@ table.Goban {
    empty-cells: hide;
    border-collapse: collapse !important;
    border-spacing: 0px !important;
+   margin: 0px auto !important;
 }
 
-table.Goban,
-table.Goban img,
-table.Goban tr,
-table.Goban td {
+table.Goban tr {
    margin: 0px !important;
+   padding: 0px !important;
+}
+
+table.Goban td {
    padding: 0px !important;
    line-height: 1px !important;
    white-space: nowrap !important;
-   border: 0px solid red !important;
+   text-align: left;
+   color: black;
+}
+
+table.Goban img {
 /*
   No vertical-align: here, else Avant browser
   will badly display the table.goban img:
@@ -1468,18 +1489,8 @@ table.Goban td {
   height of the table cells too.
    vertical-align: top !important;
 */
-}
-
-table.Goban td {
-   padding: 0px;
-   margin: 0px;
-   text-align: left;
-   color: black;
-}
-
-table.Goban img {
-   border: 0px solid black;
-   margin: 0px;
+   margin: 0px !important;
+   padding: 0px !important;
 }
 
 
@@ -1787,11 +1798,6 @@ table#forumPending {
    width: auto;
 }
 
-table#forumIndex tr {
-   padding: 0px;
-   margin: 0px;
-}
-
 /* forum lists */
 table.Forum tr.Row3,
 table.Forum tr.Row1 {
@@ -1806,7 +1812,7 @@ table.Forum tr.Row2 {
 
 table.Forum td {
    border: 0px solid red;
-   padding: 2px 8px 2px 8px;
+   padding: 3px 8px;
    margin: 0px;
    text-align: left;
    color: black;
@@ -1818,12 +1824,12 @@ table#forumIndex tr.Row2 dt,
 */
 table#forumIndex tr.Row2 dl {
    margin: 0px;
+   padding: 0px;
 }
 
 
 table#forumIndex td.Name {
    width: 60%;
-   padding: 6px 8px;
 }
 table#forumIndex td.Name a {
    font-weight: bold;
@@ -1847,7 +1853,6 @@ table.Forum td.Indent {
 /*
    display: none;
    visible: none;
-   display: none;
 */
 }
 
@@ -1868,7 +1873,7 @@ table.Forum tr.LinksT td,
 table.Forum tr.LinksB td {
    background: #d0d0d0;
    color: black;
-   padding: 4px 8px 4px 8px;
+   padding: 2px 8px 2px 8px;
    text-align: center;
 }
 

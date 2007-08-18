@@ -30,17 +30,15 @@ require_once( "include/form_functions.php" );
 
    start_page(T_('Forgot password?'), true, $logged_in, $player_row );
 
-   echo "<center>\n";
+   echo '<p></p>';
+   centered_container();
+   echo '<p></p>';
+   echo T_('If you have forgotten your password we can email a new one.
+<br>The new password will be randomly generated, but you can of course change it later from the edit profile page.
+<br>Until you change it, both new and old passwords will be operational.');
+   centered_container(0);
 
-   echo '<TABLE border=0 cellpadding=0 width="80%"><TR><TD align="left">&nbsp;<p></p>
-' . T_('If you have forgotten your password we can email a new one.
- The new password will be randomly generated, but you can of course change it later from the edit profile page.
- Until you change it, both new and old passwords will be operational.')
-. '
-</TD></TR>
-</TABLE>';
-
-   $passwd_form = new Form( 'newpasswdform', "send_new_password.php", FORM_POST );
+   $passwd_form = new Form( 'newpasswd', "send_new_password.php", FORM_POST );
 
    $passwd_form->add_row( array( 'HEADER', T_('New password') ) );
 
@@ -48,12 +46,11 @@ require_once( "include/form_functions.php" );
                                  'TEXTINPUT', 'pswduser', 16, 16, '',
                                  'SUBMITBUTTON', 'action', T_("Send password"),
                                ) );
-   $passwd_form->add_row( array( 'CELL', 2, 'align="right"',
+   $passwd_form->add_row( array( 'CELL', 2, "class=right",
                                  'SUBMITBUTTON', 'goback', T_("Go back"),
                                ) );
    $passwd_form->echo_string(1);
 
-   echo "</center>\n";
    end_page();
 }
 ?>

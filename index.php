@@ -39,7 +39,6 @@ require_once( "include/form_functions.php" );
    start_page(T_("Home"), true, $logged_in, $player_row );
 
 
-   echo "<center>\n";
    echo '<IMG  width=666 height=172  border=0 alt="'.$FRIENDLY_LONG_NAME.'" SRC="images/dragon_logo.jpg">';
    echo "\n<BR>&nbsp;";
 
@@ -75,16 +74,13 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
                                //'TD',
                                'CELL', 99, 'align="left"',
                                'SUBMITBUTTON', 'login', T_('Log in'),
-                               'TEXT',
-                               '<A href="forgot.php"><font size="-2">' .
-                               T_('Forgot password?') . '</font></A>',
                                //'HIDDEN', 'url', 'status.php',
                                ) );
 
   $login_form->echo_string(1);
-  echo "</center>\n";
 
-  $menu_array = array( T_("Register new account") => 'register.php' );
+  $menu_array[T_("Register new account")] = 'register.php';
+  $menu_array[T_("Forgot password?")] = 'forgot.php';
 
   end_page(@$menu_array);
 }

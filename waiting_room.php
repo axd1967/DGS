@@ -227,10 +227,10 @@ require_once( "include/contacts.php" );
             $wrow_strings[0] = $wrtable->button_TD_anchor( $baseURL."info=$ID#roomInfos", T_('Info'));
          if( $wrtable->Is_Column_Displayed[1] )
             $wrow_strings[1] = '<td>'.
-               user_reference( REF_LINK, 1, 'black', $other_id, $other_name, '') . "</td>";
+               user_reference( REF_LINK, 1, '', $other_id, $other_name, '') . "</td>";
          if( $wrtable->Is_Column_Displayed[2] )
             $wrow_strings[2] = "<td>" .
-               user_reference( REF_LINK, 1, 'black', $other_id, $other_handle, '') . "</td>";
+               user_reference( REF_LINK, 1, '', $other_id, $other_handle, '') . "</td>";
          if( $wrtable->Is_Column_Displayed[15] )
          {
             $cntr = @$row['other_country'];

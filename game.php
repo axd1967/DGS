@@ -527,9 +527,10 @@ function get_alt_arg( $n1, $n2)
       echo "<center><p>$extra_message";
       if( $validation_step )
          echo ' - ' . T_('Hit "Submit" to confirm');
-      echo "</p></center>\n";
+      echo "</p></center>";
    }
-   echo '<br>';
+   else
+      echo '<br>';
 
    $cols = 2;
    if( $show_notes && $noteshide != 'Y' )
@@ -821,7 +822,7 @@ function draw_game_info(&$game_row, &$board)
    echo '<tr id="blackInfo">' . "\n";
    echo "<td class=Color><img class=InTextStone src=\"17/b.gif\" alt=\"" . T_('Black') ."\"></td>\n";
    echo '<td class=Name>' .
-      user_reference( REF_LINK, 1, 'black', $game_row['Black_ID'],
+      user_reference( REF_LINK, 1, '', $game_row['Black_ID'],
                       $game_row['Blackname'], $game_row['Blackhandle']) .
       ( $game_row['Blackwarning'] ?
         '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
@@ -851,7 +852,7 @@ function draw_game_info(&$game_row, &$board)
    echo '<tr id="whiteInfo">' . "\n";
    echo "<td class=Color><img class=InTextStone src=\"17/w.gif\" alt=\"" . T_('White') ."\"></td>\n";
    echo '<td class=Name>' .
-      user_reference( REF_LINK, 1, 'black', $game_row['White_ID'],
+      user_reference( REF_LINK, 1, '', $game_row['White_ID'],
                       $game_row['Whitename'], $game_row['Whitehandle']) .
       ( $game_row['Whitewarning'] ?
         '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .

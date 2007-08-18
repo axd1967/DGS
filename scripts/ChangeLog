@@ -25,6 +25,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-18 rodival
+
+   * skins/dragon/screen.css,
+     include/form_functions.php, include/message_functions.php,
+     forum/search.php, forum/forum_functions.php,
+     waiting_room.php, game.php, forgot.php, index.php:
+   - CSS and layout adjustments
+
 2007-08-17 juga
 
    * NEWS:

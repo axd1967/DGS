@@ -125,7 +125,7 @@ define('MODERATOR_SEARCH', 0);
    $fform->add_row( array(
          'DESCRIPTION', T_('Author (Userid)'),
          'FILTER',      $ffilter, 3,
-         'FILTERERROR', $ffilter, 3, "<br>$FERR1", $FERR2, true,
+         'FILTERERROR', $ffilter, 3, "<BR>$FERR1", $FERR2, true,
          ));
    $fform->add_row( array(
          'DESCRIPTION', T_('Message scope#forum'),
@@ -137,7 +137,7 @@ define('MODERATOR_SEARCH', 0);
          'DESCRIPTION', T_('Date#forum'),
          'CELL',        1, 'align=left',
          'FILTER',      $ffilter, 5,
-         'FILTERERROR', $ffilter, 5, "<br>$FERR1", $FERR2, true,
+         'FILTERERROR', $ffilter, 5, "<BR>$FERR1", $FERR2, true,
          ));
    $fform->add_row( array(
          'DESCRIPTION', T_('Order#forum'),
@@ -147,9 +147,7 @@ define('MODERATOR_SEARCH', 0);
          'CELL',        1, 'align=left',
          'OWNHTML',     implode( '', $ffilter->get_submit_elements( 'x', 'e' ) ) ));
 
-   echo "<br><center>\n"
-      . $fform->get_form_string()
-      . "</center><br>\n";
+   echo $fform->get_form_string();
 
    $query_filter = $ffilter->get_query(); // clause-parts for filter
    if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_filter->get_select()) . "<br>\n";

@@ -747,7 +747,7 @@ class Form
                $formstr .= $rowclass;
             else if( $tr_attrs )
                $formstr .=  ' '.$tr_attrs;
-            $formstr .= ">$result</TR>\n";
+            $formstr .= ">$result</TR>";
             $area_rows[$curr_area] .= $formstr;
          }
       }
@@ -756,9 +756,9 @@ class Form
       if( $has_layout )
          $rootformstr .= $this->build_areas( $this->layout[FLAYOUT_GLOBAL], $area_rows );
       else
-         $rootformstr .= implode( "\n", $area_rows );
+         $rootformstr .= implode( "", $area_rows );
 
-      $rootformstr .= "  </TABLE>\n";
+      $rootformstr .= "  </TABLE>";
 
       if( !$this->get_config(FEC_EXTERNAL_FORM) )
          $rootformstr .= $this->print_end();
@@ -1018,7 +1018,7 @@ class Form
     */
    function create_string_func_space( &$result, $args )
    {
-      $result .= "<td colspan=" .$this->max_nr_columns . " height=20></td>";
+      $result .= "<td colspan=" .$this->max_nr_columns . " height=\"20px\"></td>";
       //$result .= "&nbsp;"; //if SPACE SpanAllColumns==true
    }
 
@@ -1109,7 +1109,7 @@ class Form
       $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
       return "\n<FORM id=\"{$name}Form\" name=\"$name\" class=\"$class\"" .
-         " action=\"$action_page\" method=\"" . $pg_arr[$method] . "\">\n";
+         " action=\"$action_page\" method=\"" . $pg_arr[$method] . "\">";
    }
    function print_start_default()
    {
@@ -1126,7 +1126,7 @@ class Form
       if(!$this->hiddens_echoed)
          $formstr .= $this->get_hiddens_string();
 
-      return $formstr."</FORM>\n";
+      return $formstr."\n</FORM>";
    }
 
 
@@ -1148,12 +1148,10 @@ class Form
     * \brief Prints out end of a table cell.
     *
     * \internal
-    *
-    * \param $nospace True if it shouldn't print out extra space.
     */
-   function print_td_end( $nospace = false )
+   function print_td_end()
    {
-      return ( $nospace ? "</TD>\n" : "      </TD>\n" );
+      return "</TD>";
    }
 
    /*!
@@ -1163,7 +1161,7 @@ class Form
    function print_description( $description )
    {
       //no safe-text needed here because it come from translators' strings
-      return "<TD class=Description>$description:</TD>\n";
+      return "<TD class=Description>$description:</TD>";
    }
 
    /*!
@@ -1252,26 +1250,26 @@ class Form
     */
    function print_insert_select_box( $name, $size, $value_array, $selected, $multiple )
    {
-      $result = "  <SELECT name=\"$name\" size=\"$size\" ";
+      $result = "<SELECT name=\"$name\" size=\"$size\" ";
       if( $multiple )
          $result .= "multiple";
       $result .= $this->get_input_attbs() . ">\n";
 
       foreach( $value_array as $value => $info )
-         {
-            $result .= "    <OPTION value=\"$value\"";
-            if( (! $multiple and $value == $selected) or
-                ($multiple and array_key_exists($value,$selected)) )
-               $result .= " selected";
+      {
+         $result .= "<OPTION value=\"$value\"";
+         if( (! $multiple and $value == $selected) or
+             ($multiple and array_key_exists($value,$selected)) )
+            $result .= " selected";
 
-            // Filter out HTML code
-            $info = eregi_replace("<BR>"," ",$info); //allow 2 lines long headers
-            $info = str_replace("<", "&lt;", $info);
-            $info = str_replace(">", "&gt;", $info);
+         // Filter out HTML code
+         $info = eregi_replace("<BR>"," ",$info); //allow 2 lines long headers
+         $info = str_replace("<", "&lt;", $info);
+         $info = str_replace(">", "&gt;", $info);
 
-            $result .= ">".$info."</OPTION>\n";
-         }
-      $result .= "  </SELECT>\n";
+         $result .= ">".$info."</OPTION>\n";
+      }
+      $result .= "</SELECT>";
 
       return $result;
    }
@@ -1293,13 +1291,13 @@ class Form
    {
       $result = '';
       foreach( $value_array as $value => $info )
-         {
-            $result .= "\n<INPUT type=\"radio\" name=\"$name\" value=\"$value\"";
-            if($value == $selected)
-               $result .= " checked";
+      {
+         $result .= "<INPUT type=\"radio\" name=\"$name\" value=\"$value\"";
+         if($value == $selected)
+            $result .= " checked";
 
-            $result .= $this->get_input_attbs() . "> $info";
-         }
+         $result .= $this->get_input_attbs() . "> $info";
+      }
 
       return $result;
    }
@@ -1334,7 +1332,7 @@ class Form
    function print_insert_submit_button( $name, $text )
    {
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
-         $this->get_input_attbs() . ">\n";
+         $this->get_input_attbs() . ">";
    }
 
    /*!
@@ -1374,7 +1372,7 @@ class Form
          $str.= attb_build($attbs);
       }
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
-         $this->get_input_attbs() . $str . ">\n";
+         $this->get_input_attbs() . $str . ">";
    }
 
    /*!
@@ -1497,7 +1495,7 @@ class Form
       $str = '';
       foreach ($hiddens as $key => $val)
       {
-         $str.= "<input type=\"hidden\" name=\"$key\" value=\"$val\">\n";
+         $str.= "<input type=\"hidden\" name=\"$key\" value=\"$val\">";
       }
       $this->hiddens_echoed = true;
       return $str;

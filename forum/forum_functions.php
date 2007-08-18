@@ -285,7 +285,7 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
       // one line Subject header
       echo "<tr class=PostHead$postClass>\n <td colspan=$cols" .
          "\"><a class=PostSubject name='preview'>$sbj</a><br> " .
-         T_('by')." " . user_reference( REF_LINK, 1, 'black', $player_row) .
+         T_('by')." " . user_reference( REF_LINK, 1, '', $player_row) .
          ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n";
 
       // post body
@@ -338,7 +338,7 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
       echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
 
       $post_reference = date($date_fmt, $Timestamp);
-      echo T_('by') . " " . user_reference( REF_LINK, 1, 'black', $User_ID, $Name, $Handle) .
+      echo T_('by') . " " . user_reference( REF_LINK, 1, '', $User_ID, $Name, $Handle) .
          " &nbsp;&nbsp;&nbsp;$post_reference";      
 
       if( $Lastedited > 0 )
