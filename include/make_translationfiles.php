@@ -92,7 +92,7 @@ function make_include_files($language=null, $group=null) //must be called from m
       "FROM Translations, TranslationTexts, TranslationLanguages, " .
       "TranslationFoundInGroup, TranslationGroups " .
       "WHERE Translations.Language_ID = TranslationLanguages.ID ".
-      "AND Translations.Text!='' " .
+      //"AND Translations.Text!='' " . //else a file containing only '' will not be reseted
       "AND TranslationTexts.ID=Translations.Original_ID " .
       "AND TranslationFoundInGroup.Text_ID=Translations.Original_ID " .
       "AND TranslationGroups.ID=TranslationFoundInGroup.Group_ID ";
@@ -138,7 +138,8 @@ function make_include_files($language=null, $group=null) //must be called from m
                  gmdate('Y-m-d H:i:s T', $NOW) . " */\n\n");
       }
 
-      fwrite( $fd, "\$Tr['" . slashed($row['Original']) . "'] = '" .
+      if( !empty($row['Text']) )
+         fwrite( $fd, "\$Tr['" . slashed($row['Original']) . "'] = '" .
               slashed($row['Text']) . "';\n" );
    }
 

@@ -33,6 +33,9 @@ Changelog
      waiting_room.php, game.php, forgot.php, index.php:
    - CSS and layout adjustments
 
+   * include/make_translationfiles.php:
+   - fixed glued translation files when they must be emptyed
+
 2007-08-17 juga
 
    * NEWS:
