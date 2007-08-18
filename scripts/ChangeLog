@@ -46,6 +46,17 @@ Changelog
    - CSSed the radio/check boxes of forms. Added sptext() to help. Temporary
      solution
 
+   * userinfo.php, edit_bio.php, change_bio.php:
+   - allowed to input a foreign category with the same spelling that one of
+     the default english categories without seeing it translated
+   - distinguished them in the database with a leading '=':
+-----------
+UPDATE Bio SET Category=CONCAT('=',Category)
+ WHERE !(Category IN('Country','City','State','Club','Homepage','Email','ICQ-number',
+   'Game preferences','Hobbies','Occupation','Native Language','Language Competence')
+  OR LEFT(Category,1)='=')
+-----------
+
 2007-08-17 juga
 
    * NEWS:

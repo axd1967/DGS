@@ -213,10 +213,20 @@ require_once( "include/contacts.php" );
 
       while( $row = mysql_fetch_assoc( $bio_result ) )
       {
-         $itable->add_sinfo(
-                   make_html_safe(T_($row["Category"]), INFO_HTML)
+         $cat = $row['Category'];
+         if( substr( $cat, 0, 1) == '=' )
+            $cat = make_html_safe(substr( $cat, 1), INFO_HTML);
+         else
+         {
+            $tmp = T_($cat);
+            if( $tmp == $cat )
+               $cat = make_html_safe($cat, INFO_HTML);
+            else
+               $cat = $tmp;
+         }
+         $itable->add_sinfo( $cat
                   //don't use add_info() to avoid the INFO_HTML here:
-                  ,make_html_safe($row["Text"], true)
+                  ,make_html_safe($row['Text'], true)
                   );
       }
 

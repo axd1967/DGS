@@ -43,11 +43,12 @@ function find_category_box_text($cat)
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
+   $my_id = $player_row['ID'];
    $editorder = isset($_REQUEST['editorder']);
 
-   $result = mysql_query("SELECT * FROM Bio where uid=" . $player_row["ID"]
+   $result = mysql_query("SELECT * FROM Bio where uid=$my_id"
                . " order by SortOrder, ID")
       or error('mysql_query_failed', 'edit_bio.find_bios');
    $row_cnt = @mysql_num_rows($result);
@@ -81,8 +82,6 @@ function find_category_box_text($cat)
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
-   echo "<CENTER>\n";
-
    {
       $cat_max = 40;
       $cat_width = 20;
@@ -102,43 +101,49 @@ function find_category_box_text($cat)
 
       while( $row = mysql_fetch_assoc( $result ) )
       {
-         $cat = find_category_box_text($row["Category"]);
+         $bid = $row['ID'];
+         $other = $row['Category'];
+         $cat = find_category_box_text($other);
+         if( $cat )
+            $other = '';
+         else
+         {
+            if( substr( $other, 0, 1) == '=' )
+               $other = substr( $other, 1);
+            $other = make_html_safe($other, INFO_HTML);
+         }
 
          if ( !$editorder )
-         {
+         { //edit bio fields
             $bio_row = array(
                'CELL', 0, 'class=Header',
-               'SELECTBOX', "category".$row["ID"], 1, $categories, $cat, false,
+               'SELECTBOX', "category$bid", 1, $categories, $cat, false,
                'BR',
-               'TEXTINPUT', "other".$row["ID"], $cat_width, $cat_max
-                          , ($cat == '' ? $row["Category"] : '' ),
+               'TEXTINPUT', "other$bid", $cat_width, $cat_max, $other,
                'CELL', 0, 'class=Info',
-               'TEXTAREA', "text".$row["ID"], $text_width, $text_height, $row["Text"]
+               'TEXTAREA', "text$bid", $text_width, $text_height, $row['Text']
             );
 
             $bio_form->add_row( $bio_row );
          }
          else
-         {
-            //$text = make_html_safe($row["Text"], false);
-            $text = textarea_safe($row["Text"]);
-            $text = "<TEXTAREA readonly name=\"dtext".$row["ID"] //readonly disabled
+         { //edit fields order
+            //$text = make_html_safe($row['Text'], false);
+            $text = textarea_safe($row['Text']);
+            $text = "<TEXTAREA readonly name=\"dtext$bid" //readonly disabled
                . "\" cols=\"$text_width\" rows=\"$text_height\">$text</TEXTAREA>";
 
             $bio_table->add_sinfo(
                '<div>'
-                     . make_html_safe($cat != '' ? $categories[$cat]
-                           :($row["Category"] ? $row["Category"] : '&nbsp;')
-                           , INFO_HTML)
-                     . "\n</div><div class=center>\n"
-                     . anchor($moveurl.'move'.$row['ID'].'=1'
+                     . ($cat ?$categories[$cat] :($other ?$other :'&nbsp;'))
+                     . "</div><div class=center>"
+                     . anchor($moveurl."move$bid=1"
                            , image( 'images/down.png', 'down')
                            , T_("Move down"))
-                     . "\n"
-                     . anchor($moveurl.'move'.$row['ID'].'=-1'
+                     . anchor($moveurl."move$bid=-1"
                            , image( 'images/up.png', 'up')
                            , T_("Move up"))
-                     . "\n</div>"
+                     . "</div>"
                //don't use add_info() to avoid the INFO_HTML here:
                ,$text
             );
@@ -176,9 +181,6 @@ function find_category_box_text($cat)
          $bio_table->echo_table();
       }
    }
-
-   echo "</CENTER><BR>\n";
-
 
    $menu_array[T_('Show/edit userinfo')] = 'userinfo.php';
 

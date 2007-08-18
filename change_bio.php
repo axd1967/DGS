@@ -35,11 +35,12 @@ require_once( "include/std_functions.php" );
    if( $player_row["Handle"] == "guest" )
       error("not_allowed_for_guest");
 
+   $my_id = $player_row['ID'];
    $change_it = isset($_REQUEST['action']);
 
 
    // use default sort-order: SortOrder & ID (fallback)
-   $result = mysql_query("SELECT * FROM Bio WHERE uid=" . $player_row["ID"]
+   $result = mysql_query("SELECT * FROM Bio WHERE uid=$my_id"
                . " order by SortOrder, ID")
       or error('mysql_query_failed','change_bio.find_bio');
 
@@ -47,17 +48,17 @@ require_once( "include/std_functions.php" );
    $idx = 0;
    while( $row = mysql_fetch_assoc( $result ) )
    {
-      $ID= $row['ID'];
+      $bid= $row['ID'];
 
       // delete entry
       if ( $change_it )
       {
-         $EnteredText = trim(get_request_arg("text$ID"));
+         $EnteredText = trim(get_request_arg("text$bid"));
          if( $EnteredText == "" )
          {
-            $query = "DELETE FROM Bio WHERE ID=$ID";
+            $query = "DELETE FROM Bio WHERE ID=$bid";
             mysql_query( $query )
-               or error('mysql_query_failed', "change_bio.delete_bio[$ID]");
+               or error('mysql_query_failed', "change_bio.delete_bio[$bid]");
             continue;
          }
       }
@@ -72,10 +73,10 @@ require_once( "include/std_functions.php" );
    if ( !$change_it )
    foreach( $bios as $idx => $row )
    {
-      $ID= $row['ID'];
+      $bid= $row['ID'];
 
       // check for bios movements
-      $pos = (int)@$_REQUEST['move'.$ID];
+      $pos = (int)@$_REQUEST['move'.$bid];
       if ( !$pos )
          continue;
 
@@ -94,14 +95,14 @@ require_once( "include/std_functions.php" );
 
    // update existing DB-entries
    foreach( $bios as $idx => $row ) {
-      $ID= $row['ID'];
+      $bid= $row['ID'];
 
       if ( $change_it )
       {
-         $EnteredText = trim(get_request_arg("text$ID"));
-         $EnteredCategory = trim(get_request_arg("category$ID"));
+         $EnteredText = trim(get_request_arg("text$bid"));
+         $EnteredCategory = trim(get_request_arg("category$bid"));
          if( $EnteredCategory == '' )
-            $EnteredCategory = trim(get_request_arg("other$ID"));
+            $EnteredCategory = '='.trim(get_request_arg("other$bid"));
 
          if( $EnteredText == $row['Text']
             && $EnteredCategory == $row['Category']
@@ -109,43 +110,43 @@ require_once( "include/std_functions.php" );
             )
             continue;
 
-         $query = "UPDATE Bio set uid=" . $player_row["ID"] .
+         $query = "UPDATE Bio set uid=$my_id" .
             ', Text="'.mysql_addslashes($EnteredText).'"' .
             ', Category="'.mysql_addslashes($EnteredCategory).'"' .
             ', SortOrder="'.$row['newpos'].'"' .
-            " WHERE ID=$ID";
+            " WHERE ID=$bid";
       }
       else
       {
          if( $row['SortOrder'] == $row['newpos'] )
             continue;
 
-         $query = "UPDATE Bio set uid=" . $player_row["ID"] .
+         $query = "UPDATE Bio set uid=$my_id" .
             //', Text="'.mysql_addslashes($row['Text']).'"' .
             //', Category="'.mysql_addslashes($row['Category']).'"' .
             ', SortOrder="'.$row['newpos'].'"' .
-            " WHERE ID=$ID";
+            " WHERE ID=$bid";
       }
 
       mysql_query( $query )
-         or error('mysql_query_failed', "change_bio.alter_bio[$ID]");
+         or error('mysql_query_failed', "change_bio.alter_bio[$bid]");
    }
 
    // add new entries
    $idx = get_request_arg("newcnt");
    if ( $change_it )
-   for( $ID=1; $ID <= $idx; $ID++ )
+   for( $bid=1; $bid <= $idx; $bid++ )
    {
-      $EnteredText = trim(get_request_arg("newtext$ID"));
-      $EnteredCategory = trim(get_request_arg("newcategory$ID"));
+      $EnteredText = trim(get_request_arg("newtext$bid"));
+      $EnteredCategory = trim(get_request_arg("newcategory$bid"));
 
       if( $EnteredCategory == '' )
-         $EnteredCategory = trim(get_request_arg("newother$ID"));
+         $EnteredCategory = '='.trim(get_request_arg("newother$bid"));
 
       if( $EnteredText == "" )
          continue;
 
-      $query = "INSERT INTO Bio set uid=" . $player_row["ID"] .
+      $query = "INSERT INTO Bio set uid=$my_id" .
             ', Text="'.mysql_addslashes($EnteredText).'"' .
             ', Category="'.mysql_addslashes($EnteredCategory).'"' .
             ', SortOrder="'.(++$max_pos).'"';
@@ -164,7 +165,7 @@ require_once( "include/std_functions.php" );
    $msg = urlencode(T_('Bio updated!'));
 
    jump_to("edit_bio.php?sysmsg=$msg");
-   //jump_to("userinfo.php?uid=" . $player_row["ID"] . URI_AMP."sysmsg=$msg");
+   //jump_to("userinfo.php?uid=$my_id" . URI_AMP."sysmsg=$msg");
 
 }
 ?>
