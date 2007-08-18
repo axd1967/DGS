@@ -363,7 +363,8 @@ function add_new_game_form( $form_id, $iamrated)
                                   'TEXTINPUT', 'comment', 40, 40, "" ) );
 
    $addgame_form->add_row( array( 'SPACE' ) );
-   $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
+   $addgame_form->add_row( array( 'TAB',
+                                  'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
 
    $addgame_form->echo_string(1);
 }
