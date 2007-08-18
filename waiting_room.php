@@ -240,7 +240,7 @@ require_once( "include/contacts.php" );
             $wrow_strings[15] = "<td>" . $cntrn . "</td>";
          }
          if( $wrtable->Is_Column_Displayed[3] )
-            $wrow_strings[3] = "<td>" . echo_rating($other_rating,true,$other_id) . "&nbsp;</td>";
+            $wrow_strings[3] = "<td>" . echo_rating($other_rating,true,$other_id) . "</td>";
          if( $wrtable->Is_Column_Displayed[4] )
             $wrow_strings[4] = "<td>" . $Comment . "</td>";
          if( $wrtable->Is_Column_Displayed[5] )
@@ -352,9 +352,9 @@ function add_new_game_form( $form_id, $iamrated)
 
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
                                   'CHECKBOX', 'must_be_rated', 'Y', "", false,
-                                  'TEXT', '&nbsp;&nbsp;&nbsp;' . T_('If yes, rating between'),
+                                  'TEXT', sptext(T_('If yes, rating between'),1),
                                   'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
-                                  'TEXT', T_('and'),
+                                  'TEXT', sptext(T_('and')),
                                   'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
 
 

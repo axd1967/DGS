@@ -249,6 +249,20 @@ h3.Header {
    margin: 1em 0px;
 }
 
+span.NativeText {
+   border: 1px solid black;
+   border-style: dashed;
+}
+
+span.BoxLabel3,
+span.BoxLabel2,
+span.BoxLabel1,
+span.BoxLabel0 {
+   padding-right: 6px;
+   vertical-align: middle;
+   text-align: left;
+}
+
 div.Section { /* page section */
    margin: 0px auto;
    width: auto;

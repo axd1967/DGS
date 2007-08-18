@@ -30,17 +30,15 @@ require_once( "include/countries.php" );
 // http://www.dragongoserver.net/edit_profile.php?language=C
 // http://www.dragongoserver.net/edit_profile.php?language=en
 
-define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
-
 {
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   $button_nr = $player_row["Button"];
+   $button_nr = $player_row['Button'];
 
    if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
       $button_nr = 0;
@@ -64,7 +62,8 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                          2 => T_('Moves and messages'),
                          3 => T_('Full board and messages') );
 
-   $menu_directions = array('VERTICAL' => T_('Vertical'), 'HORIZONTAL' => T_('Horizontal'));
+   $menu_directions = array('VERTICAL' => sptext(T_('Vertical'),2),
+                           'HORIZONTAL' => sptext(T_('Horizontal')) );
 
 
    $nightstart = array();
@@ -80,12 +79,14 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    $woodcolors = array();
    for($i=1; $i<16; $i++ )
    {
-      $woodcolors[$i] = "<img width=30 height=30 src=\"images/smallwood$i.gif\" alt=\"wood$i\">" . SMALL_SPACING;
+      $tmp = "<img width=30 height=30 src=\"images/smallwood$i.gif\" alt=\"wood$i\">";
       if( $i==5 ) 
       {
-         $woodcolors[$i].= '<BR>';
+         $woodcolors[$i] = sptext($tmp).'<BR>';
          $i = 10;
       }
+      else
+         $woodcolors[$i] = sptext($tmp,2);
    }
 
    foreach( $COUNTRIES as $code => $country )
@@ -101,21 +102,22 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    $notesheights = array();
    for($i=5; $i<26; $i++ )
    {
-     $notesheights[$i] = $i;
+      $notesheights[$i] = $i;
    }
    
    $noteswidths = array();
    for($i=15; $i<105; $i+=5 )
    {
-     $noteswidths[$i] = $i;
+      $noteswidths[$i] = $i;
    }
    
-   $notesmodes = array('RIGHT' => T_('Right'), 'BELOW' => T_('Below'));
+   $notesmodes = array('RIGHT' => sptext(T_('Right'),2),
+                     'BELOW' => sptext(T_('Below'),2));
 
    $notescutoffs = array();
    for($i=5; $i<26; $i++ )
    {
-     $notescutoffs[$i] = $i;
+      $notescutoffs[$i] = $i;
    }
 
    include_once( 'skins/known_skins.php' );
@@ -127,8 +129,6 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 //------------
 
    start_page(T_("Edit profile"), true, $logged_in, $player_row );
-
-   echo "<CENTER>\n";
 
    $profile_form = new Form( 'profileform', 'change_profile.php', FORM_GET );
 
@@ -210,26 +210,26 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
                                   $player_row["MenuDirection"] ) );
 
 
-   $button_code  = "<table class=EditProfilButtons>\n <tr>\n";
+   $button_code  = "\n<table class=EditProfilButtons><tr>";
    for($i=0; $i<=$button_max; $i++)
    {
       if( $i % 4 == 0 )
       {
          if( $i > 0 )
-            $button_code .= " </tr>\n <tr>\n";
+            $button_code .= "</tr>\n<tr>";
       }
       else
       {
-         $button_code .= "  <td></td>\n";
+         $button_code .= "<td></td>";
       }
       $button_style = 'color:' . $buttoncolors[$i] . ';' .
                   'background-image:url(images/' . $buttonfiles[$i] . ');';
       $button_code .=
-         "  <td><input type='radio' name='button' value=$i" .
-               ( $i == $button_nr ? ' checked' : '') . "></td>\n" .
-         "  <td class=button style='$button_style'>1348</td>\n";
+         "<td><input type='radio' name='button' value=$i" .
+               ( $i == $button_nr ? ' checked' : '') . "></td>" .
+         "<td class=button style='$button_style'>1348</td>";
    }
-   $button_code .= "</tr>\n</table>\n";
+   $button_code .= "</tr></table>\n";
 
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Game id button'),
@@ -239,7 +239,8 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    $profile_form->add_row( array( 'DESCRIPTION', T_('Table max rows'),
                                   'SELECTBOX', 'tablemaxrows', 1, $tablemaxrows,
                                   $player_row['TableMaxRows'], false,
-                                  'TEXT', '&nbsp;' . T_('choosing a lower value helps to reduce server-load and is recommended (see also FAQ)') ) );
+                                  'TEXT', sptext(T_('choosing a lower value helps the server (see also FAQ)')),
+                                 ) );
 
 
 
@@ -247,20 +248,20 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Stone size'),
                                   'SELECTBOX', 'stonesize', 1, $stonesizes,
-                                  $player_row["Stonesize"], false ) );
+                                    $player_row["Stonesize"], false ) );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Wood color'),
                                   'RADIOBUTTONS', 'woodcolor', $woodcolors,
-                                  $player_row["Woodcolor"] ) );
+                                    $player_row["Woodcolor"] ) );
 
    $s = $player_row["Boardcoords"];
    $profile_form->add_row( array( 'DESCRIPTION', T_('Coordinate sides'),
-                                  'CHECKBOX', 'coordsleft', 1, T_('Left'), ($s & COORD_LEFT),
-                                  'CHECKBOX', 'coordsup', 1, T_('Up'), ($s & COORD_UP),
-                                  'CHECKBOX', 'coordsright', 1, T_('Right'), ($s & COORD_RIGHT),
-                                  'CHECKBOX', 'coordsdown', 1, T_('Down'), ($s & COORD_DOWN),
-                                  'CHECKBOX', 'coordsover', 1, T_('Hover'), ($s & COORD_OVER),
-//                                  'CHECKBOX', 'coordssgfover', 1, T_*('Sgf over'), ($s & COORD_SGFOVER),
+                                  'CHECKBOX', 'coordsleft', 1, sptext(T_('Left'),2), ($s & COORD_LEFT),
+                                  'CHECKBOX', 'coordsup', 1, sptext(T_('Up'),2), ($s & COORD_UP),
+                                  'CHECKBOX', 'coordsright', 1, sptext(T_('Right'),2), ($s & COORD_RIGHT),
+                                  'CHECKBOX', 'coordsdown', 1, sptext(T_('Down'),2), ($s & COORD_DOWN),
+//                                  'CHECKBOX', 'coordssgfover', 1, sptext(T_//('Sgf over'),2), ($s & COORD_SGFOVER),
+                                  'CHECKBOX', 'coordsover', 1, sptext(T_('Hover')), ($s & COORD_OVER),
                                 ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
                                   'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
@@ -269,10 +270,10 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
    {
    $profile_form->add_row( array( 'DESCRIPTION', T_('Move numbering'),
                                   'TEXTINPUT', 'movenumbers', 4, 4, $player_row['MoveNumbers'],
-                                  'CHECKBOX', 'movemodulo', 100, T_('Don\'t use numbers above 100')
-                                  , ($player_row['MoveModulo']>0 ?1 :0),
-                                  'TEXT', SMALL_SPACING,
-                                  'CHECKBOX', 'numbersover', 1, T_('Hover'), ($s & NUMBER_OVER),
+                                  'CHECKBOX', 'movemodulo', 100,
+                                    sptext(T_('Don\'t use numbers above 100'),2),
+                                    ($player_row['MoveModulo']>0 ?1 :0),
+                                  'CHECKBOX', 'numbersover', 1, sptext(T_('Hover')), ($s & NUMBER_OVER),
                                 ) );
    }
 
@@ -305,16 +306,16 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Position'),
                'RADIOBUTTONS', "notes{$ltyp}mode", $notesmodes, $notesmode,
-               'TEXT', SMALL_SPACING,
-               'CHECKBOX', "notes{$ltyp}hide", 1, T_('Hidden'), $noteshide,
+               'TEXT', sptext('',1),
+               'CHECKBOX', "notes{$ltyp}hide", 1, sptext(T_('Hidden')), $noteshide,
             ) );
 
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Size'),
+               'TEXT', sptext(T_('Height')),
                'SELECTBOX', "notes{$ltyp}height", 1, $notesheights, $player_row["Notes{$typ}Height"], false,
-               'TEXT', T_('Height') . SMALL_SPACING,
+               'TEXT', sptext(T_('Width'),1),
                'SELECTBOX', "notes{$ltyp}width", 1, $noteswidths, $player_row["Notes{$typ}Width"], false,
-               'TEXT', T_('Width'),
             ) );
    }
 
@@ -328,21 +329,20 @@ define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 
    $profile_form->add_row( array( 'TAB',
                                   'CHECKBOX', 'locally', 1,
-                                  T_('Change appearences for this browser only'),
+                                  sptext(T_('Change appearences for this browser only')),
                                   safe_getcookie("prefs".$player_row['ID'])>'' ));
 
    $profile_form->add_row( array( 'HR' ) );
 
    $profile_form->add_row( array( 'SPACE' ) );
 
-   $profile_form->add_row( array(
+   $profile_form->add_row( array( 'TAB',
                      'SUBMITBUTTONX', 'action', T_('Change profile'),
                         array('accesskey'=>'x'),
                      ) );
 
 
    $profile_form->echo_string(1);
-   echo "</CENTER>\n";
 
    end_page();
 }

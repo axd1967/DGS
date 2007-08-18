@@ -53,9 +53,6 @@ function init_standard_folders()
 }
 
 
-if( !defined('SMALL_SPACING') )
-   define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
-
 // Prints game setting form used by message.php and waiting_room.php
 function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $gid=NULL)
 {
@@ -292,7 +289,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    else if( $formstyle=='dispute' && $Handitype=='conv' )
    {
       $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
-                              'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
+                              'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
                             ));
       $Handitype = 'manual';
       $allowed = false;
@@ -300,7 +297,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    else if( $formstyle=='dispute' && $Handitype=='proper' )
    {
       $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'), //T_('No initial rating')
-                              'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
+                              'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
                             ));
       $Handitype = 'manual';
       $allowed = false;
@@ -311,11 +308,11 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    {
       $mform->add_row( array( 'DESCRIPTION', T_('Manual setting'),
                               'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
-                              'TEXT', SMALL_SPACING . T_('My color'),
+                              'TEXT', sptext(T_('My color'),1),
                               'SELECTBOX', 'color', 1, $color_array, $myColor, false,
-                              'TEXT', SMALL_SPACING . T_('Handicap'),
+                              'TEXT', sptext(T_('Handicap'),1),
                               'SELECTBOX', 'handicap_m', 1, $handi_stones, $Handicap_m, false,
-                              'TEXT', SMALL_SPACING . T_('Komi'),
+                              'TEXT', sptext(T_('Komi'),1),
                               'TEXTINPUT', 'komi_m', 5, 5, $Komi_m ) );
    }
    else if( $Handitype=='manual' )
@@ -326,14 +323,14 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    $mform->add_row( array( 'DESCRIPTION', T_('Even game with nigiri'),
                            'RADIOBUTTONS', 'handicap_type', array('nigiri'=>''), $Handitype,
-                           'TEXT', SMALL_SPACING . T_('Komi'),
+                           'TEXT', sptext(T_('Komi'),1),
                            'TEXTINPUT', 'komi_n', 5, 5, $Komi_n ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Double game'),
                            'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
-                           'TEXT', SMALL_SPACING . T_('Handicap'),
+                           'TEXT', sptext(T_('Handicap'),1),
                            'SELECTBOX', 'handicap_d', 1, $handi_stones, $Handicap_d, false,
-                           'TEXT', SMALL_SPACING . T_('Komi'),
+                           'TEXT', sptext(T_('Komi'),1),
                            'TEXTINPUT', 'komi_d', 5, 5, $Komi_d ) );
 
    if( ENA_STDHANDICAP )
@@ -357,23 +354,26 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                            'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), $Byotype,
                            'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
                            'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
-                           'TEXT', T_('with') . '&nbsp;',
+                           'TEXT', sptext(T_('with')),
                            'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
-                           'TEXT', T_('extra periods') ) );
+                           'TEXT', sptext(T_('extra periods')),
+                           ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Canadian byoyomi'),
                            'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), $Byotype,
                            'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
                            'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
-                           'TEXT', T_('for') . '&nbsp;',
+                           'TEXT', sptext(T_('for')),
                            'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
-                           'TEXT', T_('stones') ) );
+                           'TEXT', sptext(T_('stones')),
+                           ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Fischer time'),
                            'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), $Byotype,
                            'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
                            'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
-                           'TEXT', T_('extra per move') ) );
+                           'TEXT', sptext(T_('extra per move')),
+                           ) );
 
    $mform->add_row( array( 'SPACE' ) );
 
@@ -388,7 +388,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    else if( $formstyle=='dispute' && $Rated )
    {
       $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
-                              'TEXT', SMALL_SPACING . '<font color="red">' . T_('Impossible') . '</font>',
+                              'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
                               //'HIDDEN', 'rated', '',
                             ));
       $allowed = false;

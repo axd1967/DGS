@@ -139,6 +139,21 @@ $ARR_FORMELEM_READONLY = array(
    FEA_ATTBS       => 0,
 );
 
+
+if( !defined('SMALL_SPACING') )
+   define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
+//format a text to be placed before/between input boxes
+//$seps: optionnaly add separations before=1 or after=2
+//&nbsp; are kept for text-only browsers
+function sptext( $text, $seps=0)
+{
+   return '<span class=BoxLabel'.($seps&3).'>'
+      . ($seps&1 ?SMALL_SPACING :'')
+      . $text
+      . ($seps&2 ?SMALL_SPACING :'')
+      . '</span>';
+}
+
 class Form
 {
    /*! \brief The form name (and ID prefix too). */

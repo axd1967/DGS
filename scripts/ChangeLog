@@ -36,6 +36,12 @@ Changelog
    * include/make_translationfiles.php:
    - fixed glued translation files when they must be emptyed
 
+   * skins/dragon/screen.css,
+     include/message_functions.php, include/form_functions.php (sptext)
+     edit_profile.php, waiting_room.php:
+   - CSSed the radio/check boxes of forms. Added sptext() to help. Temporary
+     solution
+
 2007-08-17 juga
 
    * NEWS:
