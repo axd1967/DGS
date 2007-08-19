@@ -29,9 +29,10 @@ Changelog
 
    * include/std_functions.php:
    - added the <image> pseudo tag
-   - must be completed by a "soft-link" from /images/board to /17
+   - must be completed by a "Linux soft-link" or an "Apache alias"
+     from /images/board to /17
 -----------
-for devel server:
+soft-link for devel server:
  ln -s -d /home/groups/d/dr/dragongoserver/htdocs/17 /home/groups/d/dr/dragongoserver/htdocs/images/board
 -----------
 
