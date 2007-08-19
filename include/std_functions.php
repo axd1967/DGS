@@ -430,7 +430,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( $is_down && $logged_in )
    {
-      //$is_down_allowed = array('ejlo','rodival');
+      //$is_down_allowed = array('ejlo','rodival','jug');
       if( isset($is_down_allowed) && is_array($is_down_allowed)
          && in_array( $player_row['Handle'], $is_down_allowed) )
       {
@@ -1318,9 +1318,9 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
 $html_code['cell'] = 'note|b|i|u|strong|em|tt|color';
 $html_code['line'] = 'home|a|'.$html_code['cell'];
 $html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
-   .'goban|mailto|https?|news|game_?|user_?|send_?';
+   .'goban|mailto|https?|news|game_?|user_?|send_?|image';
 $html_code['game'] = 'br|/br|p|/p|li'.$html_code_closed['game']
-   .'goban|mailto|https?|news|game_?|user_?|send_?';
+   .'goban|mailto|https?|news|ftp|game_?|user_?|send_?|image';
 $html_code['faq'] = '\w+|/\w+'; //all not empty words
 
 
@@ -1638,14 +1638,20 @@ $html_safe_preg = array(
  "%".ALLOWED_LT."/quote *".ALLOWED_GT."%is"
   => ALLOWED_LT."/div".ALLOWED_GT,
 
-//<home page>...</home> =>translated to <a href="$HOSTBASE$page">...</a>
- "%".ALLOWED_LT."home[\n\s]+([^`\n\s]*)".ALLOWED_GT."%is"
+//<home page>...</home> =>translated to <a href="{$HOSTBASE}$page">...</a>
+ "%".ALLOWED_LT."home[\n\s]+([^\.][^:`\n\s]*)".ALLOWED_GT."%is"
   => ALLOWED_LT."a href=".ALLOWED_QUOT.$HOSTBASE."\\1".ALLOWED_QUOT.ALLOWED_GT,
  "%".ALLOWED_LT."/home *".ALLOWED_GT."%is"
   => ALLOWED_LT."/a".ALLOWED_GT,
 
+//<image pict> =>translated to <img src="{$HOSTBASE}images/$pict">
+ "%".ALLOWED_LT."image[\n\s]+([^\.][^:`\n\s]*)".ALLOWED_GT."%is"
+  => ALLOWED_LT."img"." alt=".ALLOWED_QUOT."(img)".ALLOWED_QUOT
+      ." src=".ALLOWED_QUOT.$HOSTBASE."images/\\1".ALLOWED_QUOT.ALLOWED_GT,
+
 //reverse to bad the skiped (faulty) ones
- "%".ALLOWED_LT."(/?(home|quote|tt|code|color|user|send|game|mailto|http)[^`]*)"
+ "%".ALLOWED_LT."(/?(image|home|quote|tt|code|note|color|"
+      ."user|send|game|mailto|news|ftp|http)[^`]*)"
     .ALLOWED_GT."%is"
   => "&lt;\\1&gt;",
 ); //$html_safe_preg

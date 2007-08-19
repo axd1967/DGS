@@ -250,7 +250,7 @@ h3.Header {
 }
 
 span.NativeText {
-   border: 1px solid black;
+   border: 1px solid lime;
    border-style: dashed;
 }
 
@@ -289,10 +289,6 @@ table.Container { /* centered_container */
 hr.Section {
    display: none; /* */
    margin: 1em 0px 0px 0px;
-}
-
-body.Status table#pageLayout td#pageBody hr.Section {
-   display: block;
 }
 
 .InlineHeader {
@@ -375,6 +371,9 @@ body {
    margin: 0px;
    padding: 8px;
 }
+
+
+/* banners */
 
 table#pageHead,
 table#pageFoot {
@@ -468,42 +467,30 @@ table#pageLayout {
    overflow: visible; /* hidden visible scroll auto */
 }
 
-table#pageLayout tr.LayoutVertical td.Menu {
-   width: 10%;
+
 /*
-   width: auto;
-   border: 0px solid red;
-   margin: 0px;
-   padding: 4px;
-*/
-   text-align: left;
-   vertical-align: top;
-}
+ page menus
 
-table#pageLayout td#pageBody {
-   margin: 0px;
-   padding: 4px 4px 1em 4px;
-   text-align: center;
-   vertical-align: top;
-/*   display: block;
-   overflow: hidden; /* hidden visible scroll auto */
-}
+ Vertical tree:
+ body [
+   ...
+   table#pageLayout tr.LayoutVertical td.Menu [
+      (table#pageMenu or table.MenuVertical)
+      table#pageTools
+   }
+   table#pageLayout tr.LayoutVertical td#pageBody ...
+   ...
+ ]
 
-table#pageLayout tr.LayoutVertical td#pageBody {
-   width: 100%;
-}
-
-table#pageLayout tr.LayoutHorizontal td#pageBody {
-   width: 100%;
-}
-
-table#pageTools {
-   margin: 0px;
-}
-
-table#pageTools td {
-   padding: 4px 6px 4px 4px;
-}
+ Horizontal tree:
+ body [
+   ...
+   (table#pageMenu or table.MenuHorizontal)
+   table#pageTools
+   table#pageLayout tr.LayoutHorizontal td#pageBody ...
+   ...
+ }
+ */
 
 table#pageMenu {
    background: #f7f5ff;
@@ -523,22 +510,32 @@ table#pageMenu {
 table.MenuHorizontal {
    border-width: 0px 0px 1px 0px;
    width: 100%;
+   margin: 0px;
 }
 
 table.MenuVertical {
    border-width: 1px;
    width: auto;
-   margin: 4px;
-   margin-left: 0px;
+   margin: 0px; /* seems to not always work. See td.Menu padding */
 /*
    float: left;
 */
 }
 
+table#pageLayout tr.LayoutVertical td.Menu {
+/*
+   border: 0px solid red;
+   width: auto;
+*/
+   width: 10%;
+   text-align: left;
+   vertical-align: top;
+   padding: 4px 4px 4px 2px; /* */
+}
+
 table#pageMenu th,
 table#pageMenu td {
    border: 0px solid red;
-   margin: 0px;
    white-space: nowrap;
    padding: 4px 4px;
 }
@@ -559,23 +556,6 @@ table.MenuHorizontal td.Logo2 {
    text-align: right;
 }
 
-table.MenuHorizontal dl {
-   padding: 0px;
-   margin:  0.3em 0px 0.3em 0px;
-/*
-   list-style-type:none;
-*/
-}
-table.MenuHorizontal dt {
-   white-space: nowrap;
-   padding: 0.1em 0px;
-   height: 30%;
-/*
-   display: block;
-   line-height: 90%;
-*/
-}
-
 table.MenuVertical th,
 table.MenuVertical td {
    white-space: nowrap;
@@ -591,9 +571,27 @@ table.MenuVertical td.Logo2 img {
    display: none;
 }
 
-table.MenuVertical dl {
-   padding: 0px;
+
+table.MenuHorizontal dl {
    margin:  0.3em 0px 0.3em 0px;
+   padding: 0px;
+/*
+   list-style-type:none;
+*/
+}
+table.MenuHorizontal dt {
+   white-space: nowrap;
+   padding: 0.1em 0px;
+   height: 30%;
+/*
+   display: block;
+   line-height: 90%;
+*/
+}
+
+table.MenuVertical dl {
+   margin:  0.3em 0px 0.3em 0px;
+   padding: 0px;
 /*
    list-style-type:none;
 */
@@ -608,7 +606,6 @@ table.MenuVertical dt {
 */
 }
 
-
 table#pageMenu a {
    color: black;
 }
@@ -617,6 +614,36 @@ table#pageMenu a.strong {
    color: black;
    font-weight: bold;
    font-size: 110%;
+}
+
+
+/* page tools */
+
+table#pageTools {
+   margin: 0px;
+}
+
+table#pageTools td {
+   padding: 4px 6px 4px 4px;
+}
+
+/* page body */
+
+table#pageLayout td#pageBody {
+   margin: 0px;
+   padding: 4px 4px 1em 4px;
+   text-align: center;
+   vertical-align: top;
+/*   display: block;
+   overflow: hidden; /* hidden visible scroll auto */
+}
+
+table#pageLayout tr.LayoutVertical td#pageBody {
+   width: 100%;
+}
+
+table#pageLayout tr.LayoutHorizontal td#pageBody {
+   width: 100%;
 }
 
 /* links of bottom menu */
@@ -1245,6 +1272,15 @@ form#msgSearchForm tr.SelectFolders table.CheckboxArray td {
 /* ************************* */
 /* page level and local specifications */
 /* ************************* */
+
+
+/* ------------------------- */
+/* status page */
+/* ------------------------- */
+
+body.Status table#pageLayout td#pageBody hr.Section {
+   display: block;
+}
 
 
 /* ------------------------- */
