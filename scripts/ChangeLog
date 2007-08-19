@@ -25,6 +25,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-19 juga
+
+   * NEWS:
+   - added: bio-fix, new-window-links, language=N profile
+
+   * show_games.php:
+   - spare translators-work (reverted change): observed games are always mine
+
 2007-08-18 rodival
 
    * skins/dragon/screen.css,
@@ -47,7 +55,7 @@ Changelog
      solution
 
    * userinfo.php, edit_bio.php, change_bio.php:
-   - allowed to input a foreign category with the same spelling that one of
+   - allowed to input a foreign category with the same spelling as one of
      the default english categories without seeing it translated
    - distinguished them in the database with a leading '=':
 -----------
