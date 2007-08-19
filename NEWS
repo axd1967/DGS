@@ -49,6 +49,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
         (1st sort = dark blue arrow, 2nd sort = light blue arrow)
       * Use own set of texts for table headers to allow shorter translated texts
 
+
    Code improvements:
 
    * Optimized some database queries and added indexes:
@@ -69,6 +70,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    * Left align bottom links on each page
 
+   * Links opening in a new window are showed olive-colored
+
    * Forum threads: Added link to return to first 'new'
 
    * Cleanup of links, site-map page
@@ -88,7 +91,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Moved 'Translate' into bottom bar, visible for translators only
       * Improvements described on respective page in "instructions"
       * Use '&language=N' URL-argument to disable any translation on page
-        Use '&language=browsercode' URL-argument to show page in specific language
+        (can be set in user profile using 'Native texts'-language)
+      * Use '&language=browsercode' URL-argument to show page in specific language
       * Better handling of translations
 
    * Reject some registrations of account usurpers
@@ -116,6 +120,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * fixed 'double game' handicap option in waitingroom
    * fixed paging of table lists to preserve form values
    * fixed search term score (relevance) for forum when using expert mode
+   * predefined english bio categories can be used in other languages
    * prevent to rename standard folders
    * removed first newline after some layout tags in messages
    * various other bugfixes
