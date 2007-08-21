@@ -25,6 +25,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-21 juga
+
+    * INSTALL:
+    - hint about needing /images/board link
+
 2007-08-19 rodival
 
    * include/std_functions.php:
