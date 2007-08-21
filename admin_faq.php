@@ -907,7 +907,6 @@ function latin1_safe( $str )
       //"'[\\1]'",
       "'&#'.ord('\\1').';'",
       $str);
-RdvlLog("latin1_safe:[$str]=>[$res]");
    return $res;
 }
 
