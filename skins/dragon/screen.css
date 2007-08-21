@@ -342,6 +342,11 @@ p.SysMsg {
    padding: 0px;
 }
 
+img.InTextImage {
+   border: 0px solid black;
+   vertical-align: middle;
+}
+
 img.InTextStone {
    width: 17px;
    height: 17px;
@@ -542,17 +547,17 @@ table#pageMenu td {
 
 table.MenuHorizontal th,
 table.MenuHorizontal td {
-   width: 16%; /* for 4 columns */
+   width: 17%; /* 16% */ /* for 4 columns */
    white-space: nowrap;
    padding: 4px 4px;
 }
 
 table.MenuHorizontal td.Logo1 {
-   width: 21%;
+   width: 20%; /* 21% */
 }
 
 table.MenuHorizontal td.Logo2 {
-   width: 15%;
+   width: 12%; /* 15% */
    text-align: right;
 }
 
@@ -699,7 +704,6 @@ table.Table {
    max-width: none;
    overflow: visible;
    empty-cells: show;
-   text-align: center;
    position: relative; /* absolute relative */
 }
 
@@ -873,9 +877,9 @@ table.Table th.Button {
 
 table.Table td.Button {
    background-repeat: no-repeat;
-   background-position: center;
+   background-position: center center; /* V H: top left */
    margin: 0px;
-   padding: 2px 4px;
+   padding: 3px 4px 2px 4px;
    text-align: center;
    white-space: nowrap;
 /* min-width problem, see MinWidth

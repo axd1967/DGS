@@ -199,8 +199,12 @@ function translations_query( $translate_lang, $untranslated, $group
 
    if( $filter_en )
       $query .=
+/*
          " AND LOWER(TranslationTexts.Text) LIKE '%"
                .mysql_addslashes(strtolower($filter_en))."%'";
+/*/
+         " AND TranslationTexts.Text LIKE '%".mysql_addslashes($filter_en)."%'";
+#*/
 
    if( $untranslated )
       $query .=
@@ -227,9 +231,19 @@ function translations_query( $translate_lang, $untranslated, $group
 
 function add_text_to_translate( $debugmsg, $string, $Group_ID, $do_it=true)
 {
-   $string= mysql_addslashes(trim($string));
+   $string= trim($string);
    if( !$string || $Group_ID <= 0 )
       return false;
+
+   // see the explanations for the latin1_safe() function in admin_faq.php
+   {
+      $string= preg_replace(
+         "%([\\x80-\\xff])%ise",
+         "'&#'.ord('\\1').';'",
+         $string);
+   }
+
+   $string= mysql_addslashes($string);
 
    $res = mysql_query("SELECT ID FROM TranslationTexts WHERE Text='$string'")
       or error('mysql_query_failed', $debugmsg.'.find_transltext');

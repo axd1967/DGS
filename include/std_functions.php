@@ -735,14 +735,14 @@ function make_menu_horizontal($menu_array)
             if( $i==0 )
             {
                $t1 = round($b);
-               $t1 = " width=\"$t1%\""; // class=Logo1
+               $t1 = " width=\"$t1%\" class=Logo1"; // class=Logo1
                $t2 = 'dragonlogo_bl.jpg';
                $width = "*";
             }
             else
             {
                $t1 = 100-$cumwidth;
-               $t1 = " width=\"$t1%\" align=right"; // class=Logo2
+               $t1 = " width=\"$t1%\" class=Logo2"; // class=Logo2
                $t2 = 'dragonlogo_br.jpg';
                $width = "";
             }
@@ -1639,14 +1639,15 @@ $html_safe_preg = array(
   => ALLOWED_LT."/div".ALLOWED_GT,
 
 //<home page>...</home> =>translated to <a href="{$HOSTBASE}$page">...</a>
- "%".ALLOWED_LT."home[\n\s]+([^\.][^:`\n\s]*)".ALLOWED_GT."%is"
+ "%".ALLOWED_LT."home[\n\s]+([^\.:`\n\s][^:`\n\s]+)".ALLOWED_GT."%is"
   => ALLOWED_LT."a href=".ALLOWED_QUOT.$HOSTBASE."\\1".ALLOWED_QUOT.ALLOWED_GT,
  "%".ALLOWED_LT."/home *".ALLOWED_GT."%is"
   => ALLOWED_LT."/a".ALLOWED_GT,
 
 //<image pict> =>translated to <img src="{$HOSTBASE}images/$pict">
- "%".ALLOWED_LT."image[\n\s]+([^\.][^:`\n\s]*)".ALLOWED_GT."%is"
-  => ALLOWED_LT."img"." alt=".ALLOWED_QUOT."(img)".ALLOWED_QUOT
+ "%".ALLOWED_LT."image[\n\s]+([^\.:`\n\s][^:`\n\s]+)".ALLOWED_GT."%is"
+  => ALLOWED_LT."img class=InTextImage"
+      ." alt=".ALLOWED_QUOT."(img)".ALLOWED_QUOT
       ." src=".ALLOWED_QUOT.$HOSTBASE."images/\\1".ALLOWED_QUOT.ALLOWED_GT,
 
 //reverse to bad the skiped (faulty) ones

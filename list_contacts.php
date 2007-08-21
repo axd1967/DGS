@@ -78,8 +78,12 @@ require_once( "include/contacts.php" );
    $cfilter->add_filter( 4, 'Rating',  'P.Rating2', true);
    $cfilter->add_filter( 5, 'RelativeDate', 'P.Lastaccess', true);
    $filter_note =&
+      $cfilter->add_filter( 8, 'Text', 'C.Notes #OP #VAL', true,
+         array( FC_SIZE => 20, FC_SUBSTRING => 1, FC_START_WILD => 1, FC_SQL_TEMPLATE => 1 ));
+/* old try with a binary field:
       $cfilter->add_filter( 8, 'Text', 'LOWER(C.Notes) #OP LOWER(#VAL)', true,
          array( FC_SIZE => 20, FC_SUBSTRING => 1, FC_START_WILD => 1, FC_SQL_TEMPLATE => 1 ));
+*/
    $cfilter->add_filter(10, 'RelativeDate', 'C.Created', true);
    $cfilter->add_filter(11, 'RelativeDate', 'C.Lastchanged', false);
    $cfilter->init(); // parse current value from _GET
@@ -118,11 +122,6 @@ require_once( "include/contacts.php" );
    $ctable->add_external_parameters( $extparam );
 
    $cform->set_area(1);
-/*
-   $cform->add_row( array(
-         'CELL', 1, 'align=left',
-         'TEXT', '<b>' . T_('Search system categories') . ':</b>' )); // system-flags
-*/
    $cform->add_row( array(
          'FILTER',      $scfilter, 1 ));
    $cform->set_layout( FLAYOUT_AREACONF, 1, array(
@@ -131,11 +130,6 @@ require_once( "include/contacts.php" );
       ) );
 
    $cform->set_area(2);
-/*
-   $cform->add_row( array(
-         'CELL', 1, 'align=left', // DESCRIPTION not wanted (centers header)
-         'TEXT', '<b>' . T_('Search user categories') . ':</b>' )); // user-flags
-*/
    $cform->add_row( array(
          'FILTER',      $scfilter, 2 ));
    $cform->set_layout( FLAYOUT_AREACONF, 2, array(
@@ -234,7 +228,7 @@ require_once( "include/contacts.php" );
       {
          $links  = anchor( "message.php?mode=NewMessage".URI_AMP."uid=$cid",
                image( 'images/send.gif', 'M'),
-               T_('Send message'), 'class=ButIcon');
+               T_('Send a message'), 'class=ButIcon');
          $links .= anchor( "message.php?mode=Invite".URI_AMP."uid=$cid",
                image( 'images/invite.gif', 'I'),
                T_('Invite'), 'class=ButIcon');

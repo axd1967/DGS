@@ -25,6 +25,24 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-21 rodival
+
+   * include/std_functions.php,
+     include/make_translationfiles.php (add_text_to_translate),
+     admin_faq.php, admin_do_translators.php, list_contacts.php:
+   - removed the "LOWER(...) LIKE strtolower($pattern)" tricks.
+   - changed the TranslationTexts.Text field to latin1 as it should contain
+     only english phrases
+   - changed (reversed) the Contacts.Notes field to latin1
+-----------
+ALTER TABLE `TranslationTexts`
+ CHANGE `Text` `Text` text NOT NULL ;
+ALTER TABLE `Contacts`
+ CHANGE `Notes` `Notes` varchar(255) NOT NULL DEFAULT '' ;
+-----------
+   - added related latin1 checks in admin_faq.php and make_translationfiles.php
+   - removed the translated strings from admin_do_translators.php
+
 2007-08-21 juga
 
     * INSTALL:
@@ -37,7 +55,7 @@ Changelog
    - must be completed by a "Linux soft-link" (or an "Apache alias")
      from /images/board to /17
 -----------
-add soft-link on server: go to the dragon root-directory ('htdocs' properly)
+add soft-link on server: go to the dragon root-directory (e.g. 'htdocs' for the devel server)
  cd images
  ln -s ../17 board
 -----------

@@ -116,14 +116,14 @@ function retry_admin( $msg)
    {
       $tmp = lang_illegal( $browsercode.$langname.$charenc);
       if( $tmp )
-         retry_admin( T_("Sorry, there was an illegal character in a language field.") . " ($tmp)");
+         retry_admin( "Sorry, there was an illegal character in a language field ($tmp)");
 
       if( strlen( $browsercode ) < 2 || empty( $langname ) || empty( $charenc ) )
-        retry_admin( T_("Sorry, there was a missing or incorrect field when adding a language."));
+        retry_admin( "Sorry, there was a missing or incorrect field when adding a language.");
 
       $tmp= language_exists( $browsercode, $charenc, $langname );
       if( $tmp )
-        retry_admin( T_("Sorry, the language you tried to add already exists.")
+        retry_admin( "Sorry, the language you tried to add already exists."
                      ."\n" . $tmp);
 
 
@@ -144,7 +144,7 @@ function retry_admin( $msg)
 
       $tmp = add_text_to_translate('admin_do_translators.add', $langname, $Group_ID);
 
-      retry_admin( sprintf( T_("Added language %s with code %s and characterencoding %s.")
+      retry_admin( sprintf( "Added language %s with code %s and character-encoding %s."
                                  , $langname, $browsercode, $charenc ));
    }
 
@@ -155,12 +155,12 @@ function retry_admin( $msg)
    if( $showpriv or $transladd or $translpriv )
    {
       if( empty($transluser) )
-         retry_admin( T_("Sorry, you must specify a user."));
+         retry_admin( "Sorry, you must specify a user.");
       $row = mysql_single_fetch( 'admin_do_translators.user.find',
                     "SELECT Translator FROM Players"
                     ." WHERE Handle='".mysql_addslashes($transluser)."'" );
       if( !$row )
-         retry_admin( T_("Sorry, I couldn't find this user."));
+         retry_admin( "Sorry, I couldn't find this user.");
       if( !empty($row['Translator']) )
          $old_langs = $row['Translator'];
    }
@@ -176,18 +176,18 @@ function retry_admin( $msg)
          if( !language_exists( $transladdlang ) )
             $transladdlang = '';
       if( empty($transladdlang) )
-         retry_admin( T_("Sorry, you must specify existing languages."));
+         retry_admin( "Sorry, you must specify existing languages.");
 
       if( $old_langs )
          $translator_array = explode( LANG_TRANSL_CHAR, $old_langs );
 
       if( in_array( $transladdlang, $translator_array) )
-         retry_admin( sprintf( T_("User %s is already translator for language %s."),
+         retry_admin( sprintf( "User %s is already translator for language %s.",
                            $transluser, $transladdlang) );
       array_push( $translator_array, $transladdlang );
 
       $update_it = 'admin_t4';
-      $msg = sprintf( T_("Added user %s as translator for language %s.")
+      $msg = sprintf( "Added user %s as translator for language %s."
                            , $transluser, $transladdlang );
    }
    else if( $translpriv )
@@ -196,7 +196,7 @@ function retry_admin( $msg)
          $translator_array = $transllang;
 
       $update_it = 'admin_t5';
-      $msg = sprintf( T_("Changed translator privileges info for user %s.")
+      $msg = sprintf( "Changed translator privileges info for user %s."
                            , $transluser );
    }
 

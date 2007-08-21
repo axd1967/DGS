@@ -288,6 +288,8 @@ $info_box = '<ul>
       {
          $question = trim( get_request_arg('question') );
          $answer = trim( get_request_arg('answer') );
+         $question = latin1_safe($question);
+         $answer = latin1_safe($answer);
       }
       else
       {
@@ -423,7 +425,9 @@ $info_box = '<ul>
             else
                $Qchanged = '';
 
-            $Qsql = mysql_addslashes($question);
+            $Qsql = $question;
+            $Qsql = latin1_safe($Qsql);
+            $Qsql = mysql_addslashes($Qsql);
             mysql_query("UPDATE TranslationTexts SET Text='$Qsql'$Qchanged"
                      . " WHERE ID=$QID LIMIT 1")
                or error('mysql_query_failed','admin_faq.do_edit.update_Qtexts');
@@ -447,7 +451,9 @@ $info_box = '<ul>
             else
                $Achanged = '';
 
-            $Asql = mysql_addslashes($answer);
+            $Asql = $answer;
+            $Asql = latin1_safe($Asql);
+            $Asql = mysql_addslashes($Asql);
             mysql_query("UPDATE TranslationTexts SET Text='$Asql'$Achanged"
                      . " WHERE ID=$AID LIMIT 1")
                or error('mysql_query_failed','admin_faq.do_edit.update_Atexts');
@@ -494,6 +500,8 @@ $info_box = '<ul>
       {
          $question = trim( get_request_arg('question') );
          $answer = trim( get_request_arg('answer') );
+         $question = latin1_safe($question);
+         $answer = latin1_safe($answer);
       }
       else
       {
@@ -587,7 +595,9 @@ $info_box = '<ul>
          $faq_id = mysql_insert_id();
          $ref_id = $faq_id;
 
-         $Qsql = mysql_addslashes($question);
+         $Qsql = $question;
+         $Qsql = latin1_safe($Qsql);
+         $Qsql = mysql_addslashes($Qsql);
          mysql_query("INSERT INTO TranslationTexts SET Text='$Qsql'" .
                      ", Ref_ID=$faq_id, Translatable = 'N' " )
             or error('mysql_query_failed','admin_faq.do_new.transltexts1');
@@ -600,7 +610,9 @@ $info_box = '<ul>
          $a_id = 0;
          if( $row['Level'] > 1 )
          {
-            $Asql = mysql_addslashes($answer);
+            $Asql = $answer;
+            $Asql = latin1_safe($Asql);
+            $Asql = mysql_addslashes($Asql);
             mysql_query("INSERT INTO TranslationTexts SET Text='$Asql'" .
                         ", Ref_ID=$faq_id, Translatable = 'N' " )
                or error('mysql_query_failed','admin_faq.do_new.transltexts2');
@@ -667,14 +679,19 @@ $info_box = '<ul>
       $search_form->echo_string(1);
 
 
-      $qterm = ( $term ) ? mysql_addslashes( strtolower("%$term%") ) : ''; // implicit wildcards
+      //build comparison with implicit wildcards
+      $qterm = ( $term ) ? " LIKE '".mysql_addslashes("%$term%")."'" : '';
       $query =
          "SELECT entry.*, Question.Text AS Q"
          . ",Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable"
          . ",IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder"
-         . ( ($qterm != '')
-            ? ",IF(LOWER(Question.Text) LIKE '$qterm',1,0) AS MatchQuestion "
-            . ",IF(entry.Level>1 AND LOWER(Answer.Text) LIKE '$qterm',1,0) AS MatchAnswer"
+         . ( $qterm
+            ? ",IF(Question.Text$qterm,1,0) AS MatchQuestion "
+            . ",IF(entry.Level>1 AND Answer.Text$qterm,1,0) AS MatchAnswer"
+/* old try with a binary field:
+            ? ",IF(LOWER(Question.Text)$qterm,1,0) AS MatchQuestion "
+            . ",IF(entry.Level>1 AND LOWER(Answer.Text)$qterm,1,0) AS MatchAnswer"
+*/
             : ",0 AS MatchQuestion"
             . ",0 AS MatchAnswer"
            )
@@ -865,6 +882,33 @@ function show_preview( $level, $question, $answer, $id='preview', $mark_terms=''
                $mark_terms );
    echo faq_item_html(-1);
    echo "</td></tr></table>\n";
+}
+
+/**
+ * I've noticed that we can't know what is the encoding used at input time
+ * by a user. For instance, with my FireFox browser 1.0.7, I may force the
+ * encoding of the displayed page. Doing this, the same data in the same
+ * input field may be received in various way by PHP:
+ * -with ISO-8859-1 forced: "ü"(u-umlaut) is received as 1 byte (HEX:"\xFC")
+ * -with UTF-8 forced: the same "ü" is received as 2 bytes (HEX:"\xC3\xBC")
+ * Maybe this make sens, but, as I've not found any information which could
+ * say us what was the "encoding used at input time", this leave us with
+ * the unpleasant conclusion: we can't be sure to decode a string from
+ * $_RESQUEST[] in the right way.
+ * See also make_translationfiles.php
+ * At least, the following function will keep the string AscII7, just
+ * disturbing the display until the admin will enter a better HTML entity.
+ **/
+function latin1_safe( $str )
+{
+   //return $str;
+   $res= preg_replace(
+      "%([\\x80-\\xff])%ise",
+      //"'[\\1]'",
+      "'&#'.ord('\\1').';'",
+      $str);
+RdvlLog("latin1_safe:[$str]=>[$res]");
+   return $res;
 }
 
 ?>
