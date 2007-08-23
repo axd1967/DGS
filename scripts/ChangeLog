@@ -25,6 +25,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-23 juga
+
+   * search_messages.php:
+   - select folder form-element: use 8 columns to display folders
+
 2007-08-21 rodival
 
    * include/std_functions.php,
