@@ -1,0 +1,138 @@
+ALTER TABLE `Players`
+ ADD `SkinName` VARCHAR( 32 ) DEFAULT '' NOT NULL AFTER `OnVacation` ;
+
+ALTER TABLE `Messages`
+ CHANGE `Type` `Type` ENUM( 'NORMAL', 'INVITATION', 'ACCEPTED', 'DECLINED', 'DELETED', 'DISPUTED', 'RESULT' ) DEFAULT 'NORMAL' NOT NULL ,
+ CHANGE `ReplyTo` `ReplyTo` INT( 11 ) DEFAULT 0 NOT NULL ,
+ CHANGE `Game_ID` `Game_ID` INT( 11 ) DEFAULT 0 NOT NULL ,
+ CHANGE `Time` `Time` DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL ,
+ CHANGE `Subject` `Subject` VARCHAR( 80 ) DEFAULT '' NOT NULL ,
+ CHANGE `Text` `Text` TEXT NOT NULL ;
+
+ALTER TABLE `MessageCorrespondents`
+ CHANGE `uid` `uid` INT( 11 ) DEFAULT 0 NOT NULL ,
+ CHANGE `mid` `mid` INT( 11 ) DEFAULT 0 NOT NULL ;
+
+ALTER TABLE `Bio`
+ ADD `SortOrder` INT( 11 ) DEFAULT 0 NOT NULL AFTER `Text` ;
+
+ALTER TABLE `Bio`
+ CHANGE `Category` `Category` VARCHAR( 40 ) NOT NULL DEFAULT '' ,
+ CHANGE `Text` `Text` TEXT NOT NULL DEFAULT '' ;
+
+
+ALTER TABLE `Players`
+ CHANGE `IP` `IP` varchar(16) NOT NULL default '' ;
+
+ALTER TABLE `Posts`
+ CHANGE `Time` `Time` datetime NOT NULL default '0000-00-00 00:00:00' ,
+ CHANGE `Lastchanged` `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00' ,
+ CHANGE `Lastedited` `Lastedited` datetime NOT NULL default '0000-00-00 00:00:00' ,
+ CHANGE `LastPost` `LastPost` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `Subject` `Subject` varchar(80) NOT NULL default '' ,
+ CHANGE `Text` `Text` text NOT NULL ,
+ CHANGE `User_ID` `User_ID` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `Parent_ID` `Parent_ID` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `PostsInThread` `PostsInThread` int(11) NOT NULL DEFAULT 0 ,
+ CHANGE `old_ID` `old_ID` int(11) NOT NULL DEFAULT 0 ;
+
+ALTER TABLE `Posts`
+ CHANGE `PosIndex` `PosIndex` varchar(80) binary NOT NULL default '' ;
+
+ALTER TABLE `TournamentRound`
+ CHANGE `Handicaptype` `HandicapType` int(11) NOT NULL default '0' ;
+ALTER TABLE `TranslationGroups`
+ CHANGE `Groupname` `Groupname` varchar( 32 ) NOT NULL default '' ;
+ALTER TABLE `Translations`
+ CHANGE `Text` `Text` blob NOT NULL ;
+ALTER TABLE `Adminlog`
+ CHANGE `Handle` `Handle` varchar(16) NOT NULL default '' ,
+ CHANGE `Message` `Message` text NOT NULL ;
+-- ALTER TABLE `Adminlog`
+--  ADD `IP` varchar(16) NOT NULL default '' AFTER `Date` ;
+ALTER TABLE `FAQ`
+ CHANGE `Level` `Level` int(11) NOT NULL default '0' ,
+ CHANGE `Question` `Question` int(11) NOT NULL default '0' ,
+ CHANGE `Answer` `Answer` int(11) NOT NULL default '0' ;
+
+ALTER TABLE `Players`
+ CHANGE `Password` `Password` VARCHAR( 41 ) NOT NULL default '' ,
+ CHANGE `Newpassword` `Newpassword` VARCHAR( 41 ) NOT NULL default '' ,
+ CHANGE `Sessioncode` `Sessioncode` VARCHAR( 41 ) NOT NULL default '' ;
+
+ALTER TABLE `Waitingroom`
+ ADD `Handicap` int(11) NOT NULL default '0' AFTER `Komi` ;
+
+ALTER TABLE `FAQlog`
+ ADD `Date` timestamp(14) NOT NULL AFTER `Answer` ;
+UPDATE `FAQlog` SET `Date` = '0' ;
+
+ALTER TABLE `Messages`      -- +4 MB (for joins/filter)
+ ADD INDEX `ReplyTo` (`ReplyTo`) ;
+ALTER TABLE `Messages`     -- ca. +80% of data-size (biggest change)
+ ADD FULLTEXT INDEX `Subject` (`Subject`,`Text`) ;
+
+ALTER TABLE `Games`        -- +3 MB (for filter)
+ ADD INDEX `Handicap` (`Handicap`) ;
+ALTER TABLE `Games`        -- +2 MB (for filter/sort)
+ ADD INDEX `Moves` (`Moves`) ;
+ALTER TABLE `Games`        -- +3 MB (for filter/sort)
+ ADD INDEX `Score` (`Score`) ;
+
+ALTER TABLE `Posts`        -- +0.2 MB (for filter)
+ ADD INDEX `Parent_ID` (`Parent_ID`) ;
+ALTER TABLE `Posts`        -- +0.2 MB (for filter/sort)
+ ADD INDEX `Time` (`Time`) ;
+
+ALTER TABLE `Players`      -- +0.2 MB (for filter)
+ ADD INDEX `Country` (`Country`) ;
+ALTER TABLE `Players`      -- +0.4 MB (for filter/sort, often changed)
+ ADD INDEX `Lastaccess` (`Lastaccess`) ;
+
+ALTER TABLE `Players`
+ CHANGE `Hits` `Hits` int(11) NOT NULL DEFAULT 0 ,
+ ADD `VaultTime` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `Hits` ,
+ ADD `VaultCnt` smallint(5) unsigned default 0 NOT NULL AFTER `Hits` ;
+
+ALTER TABLE `Players`
+ ADD `TableMaxRows` smallint(5) unsigned default 20 NOT NULL;
+
+ALTER TABLE `Translations`
+ ADD `Translated` ENUM( 'Y', 'N') NOT NULL DEFAULT 'N' AFTER `Text` ;
+UPDATE `Translations` SET `Translated` = 'Y';
+
+UPDATE `Players`
+ SET `Adminlevel`=-1 WHERE `ID`=2 LIMIT 1 ;  -- Main admin privileges
+
+CREATE TABLE Contacts (
+   uid int(11) NOT NULL default '0',
+   cid int(11) NOT NULL default '0',
+   SystemFlags smallint(5) unsigned NOT NULL default '0',
+   UserFlags int(10) unsigned NOT NULL default '0',
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   Note varchar(255) NOT NULL default '',
+   PRIMARY KEY Contact (uid,cid)
+) TYPE=MyISAM;
+
+ALTER TABLE `Players`
+ ADD `ContactColumns` int(10) unsigned NOT NULL default '225' AFTER `WaitingroomColumns`;
+
+ALTER TABLE `Contacts`
+ CHANGE `Note` `Notes` varbinary(255) NOT NULL DEFAULT '' ;
+
+ALTER TABLE `MessageCorrespondents`
+ CHANGE `Sender` `Sender` enum('M','N','Y','S') NOT NULL DEFAULT 'Y' ;
+ALTER TABLE `MessageCorrespondents`      -- +2 MB (for filter/sort)
+ ADD INDEX `Sender` (`Sender`) ;
+
+UPDATE Bio SET Category=CONCAT('=',Category)
+ WHERE !(Category IN('Country','City','State','Club','Homepage','Email','ICQ-number',
+   'Game preferences','Hobbies','Occupation','Native Language','Language Competence')
+  OR LEFT(Category,1)='=') ;
+
+ALTER TABLE `TranslationTexts`
+ CHANGE `Text` `Text` text NOT NULL ;
+ALTER TABLE `Contacts`
+ CHANGE `Notes` `Notes` varchar(255) NOT NULL DEFAULT '' ;
+
