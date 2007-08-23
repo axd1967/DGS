@@ -69,7 +69,7 @@ require_once( "include/filter.php" );
    // static filters
    $smfilter = new SearchFilter('s');
    $smfilter->add_filter( 1, 'CheckboxArray', 'me.Folder_nr', true,
-         array( FC_SIZE => 5, FC_MULTIPLE => $arr_chkfolders ) );
+         array( FC_SIZE => 8, FC_MULTIPLE => $arr_chkfolders ) );
    $smfilter->add_filter( 2, 'Boolean',       'M.ReplyTo=0', true,
          array( FC_LABEL => T_('Show only initial-messages') ) );
    //NOT-USED: $smfilter->add_filter( 3, 'Boolean', array( true  => 'me.Folder_Nr IS NULL', false => 'me.Folder_Nr IS NOT NULL' ), true, array( FC_LABEL => T_//('Show deleted messages') ) );
