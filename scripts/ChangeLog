@@ -102,7 +102,7 @@ add soft-link on server: go to the dragon root-directory (e.g. 'htdocs' for the 
 UPDATE Bio SET Category=CONCAT('=',Category)
  WHERE !(Category IN('Country','City','State','Club','Homepage','Email','ICQ-number',
    'Game preferences','Hobbies','Occupation','Native Language','Language Competence')
-  OR LEFT(Category,1)='=')
+  OR LEFT(Category,1)='=') ;
 -----------
 
    * skins/dragon/screen.css,
@@ -1625,7 +1625,7 @@ UPDATE `FAQlog` SET `Date` = '0' ;
      of handicap stones.
 -----------
 ALTER TABLE `Waitingroom`
- ADD `Handicap` Handicap int(11) NOT NULL default '0' AFTER `Komi` ;
+ ADD `Handicap` int(11) NOT NULL default '0' AFTER `Komi` ;
 -----------
 
    * include/message_functions.php (game_info_table),
@@ -1725,8 +1725,8 @@ ALTER TABLE `Translations`
 ALTER TABLE `Adminlog`
  CHANGE `Handle` `Handle` varchar(16) NOT NULL default '' ,
  CHANGE `Message` `Message` text NOT NULL ;
-ALTER TABLE `Adminlog`
- ADD `IP` varchar(16) NOT NULL default '' AFTER `Date` ;
+-- ALTER TABLE `Adminlog`
+--  ADD `IP` varchar(16) NOT NULL default '' AFTER `Date` ;
 ALTER TABLE `FAQ`
  CHANGE `Level` `Level` int(11) NOT NULL default '0' ,
  CHANGE `Question` `Question` int(11) NOT NULL default '0' ,
