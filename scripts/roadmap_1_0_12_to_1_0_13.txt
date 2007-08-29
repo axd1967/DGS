@@ -1,0 +1,102 @@
+
+(1) Take Server offline.
+
+(2) Backup database.
+
+(3) Backup samurajdata.
+
+   (.) make clear and separate /snapshot entries (with adjusted descriptions) for:
+   - DGS-20060926.tar.gz
+   - images-20060926.tar.gz
+   - DGS-20070915.tar.gz
+   - images-20070915.tar.gz
+
+(4) Update code from cvs.
+
+  Run message_consistency.php (old one)
+  (optionnaly: player_consistency.php and game_consistency.php (the most
+time consumming))
+
+   (.) Give JUG an access+password to the /scripts folder
+
+(5) Update images.
+
+   - replace/add those images from devel server to live server:
+    images/send.gif,
+    images/read.gif,
+    images/invite.gif,
+    images/edit.gif,
+    images/trashcan.gif,
+    images/remove.gif,
+    images/sort1a.gif,
+    images/sort1d.gif,
+    images/sort2a.gif,
+    images/sort2d.gif,
+    images/forward.gif,
+    images/backward.gif,
+    images/end.gif,
+    images/start.gif,
+    images/plus.gif,
+    images/minus.gif,
+    images/cross.gif,
+
+   - replace the new Lesotho flag (old one kept in ls_old.gif)
+     and other adjusted flags:
+    images/flags/ls.gif,
+    images/flags/__.gif,
+    images/flags/eu.gif,
+
+   - (some of the wood*.* files are no more needed ?)
+
+
+(6) Transfer changes to samurajdata.
+
+(7) Update database with /scripts/database_changes_1_0_12_to_1_0_13.mysql
+
+(8) Apply changes from /scripts/other_changes_1_0_12_to_1_0_13.txt
+
+   * Run the new consistency tests:
+      -/scripts/message_consistency.php
+      -/scripts/player_consistency.php
+      -/scripts/game_consistency.php
+      -/scripts/recalculate_ratings2.php (long but needed: we have
+adjusted the EGF and the win/lost calculus)
+
+   * Regenerate new translation entries.
+      - check/translate the english #short entries
+
+   (.) Check if new admins flags are still correctly set
+   (.) Give JUG at least the same flags as Rodival.
+   (.) Enable both 3 of us as Skin+Developer (this is not yet fully effective but there are already some features)
+((
+Be aware that if you enable a "New admin" people (ADMIN_ADD_ADMIN flag), he
+will only be able to modify his own flags of the other users (a
+ADMIN_ADD_ADMIN+ADMIN_FORUM one can only grant ADMIN_FORUM people... or
+disable them... including himself). Only ADMIN_ADMINS can grant ADMIN_ADD_ADMIN
+people.
+For instance, Bjorn could be empowered to add/remove the FAQ co-editors by
+setting his flag to ADMIN_ADD_ADMIN+ADMIN_FAQ.
+))
+
+
+(9) Do tests:
+
+     (a) Messages. send + notify + search
+     (b) Start game
+     (c) Move
+     (d) Finish game
+     (e) Waiting room
+     (f) User opponents + search
+     (g) Registration
+     (h) Forum + search
+     (i) Contacts
+     (j) FAQ and translations admin
+     (k) Fever+Vault tests by temporary modifying its parameters
+     (l) More?
+
+
+
+(10) Start server.
+
+-- misc:
+
