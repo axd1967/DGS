@@ -25,10 +25,20 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-08-23 juga
+
+   * scripts/database_changes_1_0_12_to_1_0_13.mysql:
+   - consolidate changes on Contacts-table
+
+2007-08-29 rodival
+
+   * scripts/roadmap_1_0_12_to_1_0_13.txt:
+   - "how to" for next update
+
 2007-08-23 ejlo
 
    * scripts/database_changes_1_0_12_to_1_0_13.mysql,
-     scripts/other_changes_1_0_12_to_1_0_13.txt
+     scripts/other_changes_1_0_12_to_1_0_13.txt:
    - initial commit of two files containing a collection of changes
      for updating from v1.0.12 to v1.0.13.
 
