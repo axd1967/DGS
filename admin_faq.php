@@ -28,6 +28,8 @@ require_once( "include/filter_parser.php" );
 
 
 $info_box = '<ul>
+  <li> For the texts in FAQ only edit in charset iso-8859-1.
+       Characters in the range 0x80-FF will be replaced by HTML entities.
   <li> Hidden entries - marked by \'(H)\' - are not shown in the live-FAQ
        and disappear from the translators\' lists.
   <li> You may toggle the \'translatable\' status of an entry with the right
