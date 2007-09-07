@@ -111,15 +111,12 @@ CREATE TABLE Contacts (
    UserFlags int(10) unsigned NOT NULL default '0',
    Created datetime NOT NULL default '0000-00-00 00:00:00',
    Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
-   Note varchar(255) NOT NULL default '',
+   Notes varchar(255) NOT NULL default '',
    PRIMARY KEY Contact (uid,cid)
 ) TYPE=MyISAM;
 
 ALTER TABLE `Players`
  ADD `ContactColumns` int(10) unsigned NOT NULL default '225' AFTER `WaitingroomColumns`;
-
-ALTER TABLE `Contacts`
- CHANGE `Note` `Notes` varbinary(255) NOT NULL DEFAULT '' ;
 
 ALTER TABLE `MessageCorrespondents`
  CHANGE `Sender` `Sender` enum('M','N','Y','S') NOT NULL DEFAULT 'Y' ;
@@ -133,6 +130,4 @@ UPDATE Bio SET Category=CONCAT('=',Category)
 
 ALTER TABLE `TranslationTexts`
  CHANGE `Text` `Text` text NOT NULL ;
-ALTER TABLE `Contacts`
- CHANGE `Notes` `Notes` varchar(255) NOT NULL DEFAULT '' ;
 
