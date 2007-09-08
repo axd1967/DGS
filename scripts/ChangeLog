@@ -25,7 +25,7 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
-2007-08-23 juga
+2007-09-07 juga
 
    * scripts/database_changes_1_0_12_to_1_0_13.mysql:
    - consolidate changes on Contacts-table
