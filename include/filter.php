@@ -231,6 +231,13 @@ define('FC_QUOTETYPE', 'quotetype');
 define('FC_SYNTAX_HINT', 'syntax_hint');
 define('FCV_SYNHINT_ADDINFO', 'fcv_synhint_addinfo');
 
+/*!
+ * \brief allows to overwrite syntax-help-id in hover-text with syntax-description for filter.
+ * values: text inserted right after 'Syntax[HELP] (addinfo):'
+ * default is to use filters syntax-help-id.
+ */
+define('FC_SYNTAX_HELP', 'syntax_help');
+
 /*! \brief for CheckboxArray-Filter: indicates to build a bitmask; values: bool; default is false. */
 define('FC_BITMASK', 'bitmask');
 
@@ -991,6 +998,8 @@ class Filter
    var $type;
    /*! \brief (abstract) value containing syntax-description for specific filter. */
    var $syntax_descr;
+   /*! \brief (abstract) value containing syntax-help (showed in hover-text as help-id for FAQ). */
+   var $syntax_help;
    /*!
     * \brief array containing config of filter: array( config_key => value );
     * keys are those with FC_-prefix.
@@ -1059,6 +1068,7 @@ class Filter
       // abstract values:
       $this->type = null; // abstract: to be defined in sub-class
       $this->syntax_descr = null; // abstract: to be defined in sub-class
+      $this->syntax_help  = null; // abstract: to be defined in sub-class
       $this->tok_config = null; // abstract (may be used)
 
       $this->parser_flags = 0; // may be used
@@ -1373,7 +1383,7 @@ class Filter
          if ( $this->syntax_descr == '' and $addinfo == '' )
             return '';
 
-         $syntax = T_('Syntax#filter') . $addinfo;
+         $syntax = T_('Syntax#filter') . $this->get_syntax_help() . $addinfo;
          if ( $this->syntax_descr != '' )
             $syntax .= ': ' . $this->syntax_descr;
          return $syntax;
@@ -1388,6 +1398,18 @@ class Filter
       $arr = $this->get_config(FC_SYNTAX_HINT);
       if ( is_array($arr) )
          return sprintf( $format, $arr[$confkey] );
+      else
+         return '';
+   }
+
+   /*! \brief Returns syntax-help-type: [help] */
+   function get_syntax_help()
+   {
+      $help = $this->get_config(FC_SYNTAX_HELP);
+      if ( $help == '' )
+         $help = $this->syntax_help;
+      if ( $help != '' )
+         return "[$help]";
       else
          return '';
    }
@@ -1829,7 +1851,7 @@ class Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SQL_TEMPLATE, FC_ADD_HAVING,
   *    FC_NO_RANGE, FC_DEFAULT (numeric value), FC_SIZE (5), FC_MAXLEN,
-  *    FC_QUOTETYPE, FC_SYNTAX_HINT, FC_HIDE
+  *    FC_QUOTETYPE, FC_SYNTAX_HINT, FC_SYNTAX_HELP, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_NUM_FACTOR
@@ -1846,6 +1868,7 @@ class FilterNumeric extends Filter
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'Numeric';
       $this->tok_config = $this->create_TokenizerConfig();
+      $this->syntax_help = T_('NUM#filterhelp');
 
       $factor = $this->num_factor = $this->get_config(FC_NUM_FACTOR, 1);
 
@@ -1904,7 +1927,7 @@ class FilterNumeric extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (8), FC_MAXLEN,
   *    FC_NO_RANGE, FC_DEFAULT (text-value), FC_SQL_TEMPLATE, FC_ADD_HAVING,
-  *    FC_QUOTETYPE, FC_SYNTAX_HINT, FC_HIDE
+  *    FC_QUOTETYPE, FC_SYNTAX_HINT, FC_SYNTAX_HELP, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_NO_WILD = if true, wildcard is forbidden (and treated as normal char)
@@ -1924,6 +1947,7 @@ class FilterText extends Filter
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'Text';
       $this->tok_config = $this->create_TokenizerConfig();
+      $this->syntax_help = T_('TEXT#filterhelp');
 
       $arr_syntax = array();
       if ( $this->get_config(FC_NO_RANGE) or $this->get_config(FC_SUBSTRING) )
@@ -2004,7 +2028,7 @@ class FilterText extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (6), FC_MAXLEN,
   *    FC_NO_RANGE, FC_DEFAULT (valid rank-text), FC_SQL_TEMPLATE,
-  *    FC_ADD_HAVING, FC_QUOTETYPE, FC_SYNTAX_HINT, FC_HIDE
+  *    FC_ADD_HAVING, FC_QUOTETYPE, FC_SYNTAX_HINT, FC_SYNTAX_HELP, FC_HIDE
   */
 class FilterRating extends Filter
 {
@@ -2015,17 +2039,18 @@ class FilterRating extends Filter
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'Rating';
       $this->tok_config = $this->create_TokenizerConfig();
+      $this->syntax_help = T_('RATING#filterhelp');
 
       $arr_syntax = array();
       if ( $this->get_config(FC_NO_RANGE) )
       {
-         array_push( $arr_syntax, "2d, 8k (±28%), 4 gup±59%" ); // e
+         array_push( $arr_syntax, "2d, 8k (±28%), 4k±59%" ); // e
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
       }
       else
       {
          $s = $this->tok_config->sep;
-         array_push( $arr_syntax, "2d, {$s}7k, 18k{$s}, 28k{$s}1d; 8k (±28%), 4 gup±59%" ); // e
+         array_push( $arr_syntax, "2d, {$s}7k, 18k{$s}, 28k{$s}1d; 8k (±28%), 4k±59%" ); // e
 
          // regex considering -59% not as range-separator
          $this->tok_config->add_config( TEXTPARSER_CONF_RX_NO_SEP, '-\d+%' );
@@ -2144,6 +2169,7 @@ class FilterCountry extends Filter
    {
       parent::Filter($name, $dbfield, null, $config);
       $this->type = 'Country';
+      $this->syntax_help = T_('COUNTRY#filterhelp');
       $this->syntax_descr = ''; // action: select country
 
       $this->init_countries();
@@ -2202,7 +2228,7 @@ class FilterCountry extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (16), FC_MAXLEN,
   *    FC_NO_RANGE, FC_DEFAULT (date-text), FC_SQL_TEMPLATE, FC_ADD_HAVING,
-  *    FC_QUOTETYPE, FC_SYNTAX_HINT, FC_HIDE
+  *    FC_QUOTETYPE, FC_SYNTAX_HINT, FC_SYNTAX_HELP, FC_HIDE
   */
 class FilterDate extends Filter
 {
@@ -2214,6 +2240,7 @@ class FilterDate extends Filter
       $this->type = 'Date';
       $this->tok_config = $this->create_TokenizerConfig();
       $this->parser_flags |= TEXTPARSER_FORBID_WILD | TEXTPARSER_END_INCL;
+      $this->syntax_help = T_('DATE#filterhelp');
 
       if ( $this->get_config(FC_NO_RANGE) )
       {
@@ -2321,7 +2348,7 @@ class FilterDate extends Filter
   *
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (4),
-  *    FC_SQL_TEMPLATE, FC_ADD_HAVING, FC_SYNTAX_HINT, FC_HIDE
+  *    FC_SQL_TEMPLATE, FC_ADD_HAVING, FC_SYNTAX_HINT, FC_SYNTAX_HELP, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_TIME_UNITS - bitmask specifying choice in selectbox for time-units; values: FRDTU_...
@@ -2388,6 +2415,7 @@ class FilterRelativeDate extends Filter
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'RelativeDate';
       $this->syntax_descr = "30 (= <30), >30";
+      $this->syntax_help = T_('RELDATE#filterhelp');
 
       // check & setup time-units
       $this->time_units = array();
@@ -2585,7 +2613,7 @@ class FilterRelativeDate extends Filter
   *    array( choice-descr => sql-where_clause-part|QuerySQL )
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_HIDE
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SYNTAX_HELP, FC_HIDE
   *    FC_ADD_HAVING (makes no sense with dbfield = QuerySQL (could use SQLP_HAVING),
   *         dbfield should be where-clause instead)
   *
@@ -2611,6 +2639,7 @@ class FilterSelection extends Filter
       parent::Filter($name, $dbfield, null, $config);
       $this->type = 'Selection';
       $this->syntax_descr = ''; // action: select from choices
+      $this->syntax_help = '';
 
       if ( $this->get_config(FC_MULTIPLE) )
       {
@@ -2701,7 +2730,7 @@ class FilterSelection extends Filter
   *
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SQL_TEMPLATE, FC_ADD_HAVING,
-  *    FC_HIDE
+  *    FC_SYNTAX_HELP, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_DEFAULT - index 0=All, 1=Yes, 2=No
@@ -2748,7 +2777,8 @@ class FilterBoolSelect extends FilterSelection
   *    a) simple sql-field, or b) QuerySQL with one dbfield in SQLP_FNAMES
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_ADD_HAVING, FC_HIDE
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_ADD_HAVING, FC_SYNTAX_HELP,
+  *    FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_DEFAULT - index 0=All, 1=Yes, 2=No
@@ -2793,7 +2823,7 @@ class FilterRatedSelect extends FilterSelection
   *    array ( true|false => clause_string | QuerySQL)
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_HIDE
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SYNTAX_HELP, FC_HIDE
   *
   * <p>supported filter-specific config:
   *    FC_LABEL   - unescaped text printed right to checkbox as description
@@ -2807,7 +2837,8 @@ class FilterBoolean extends Filter
       static $_default_config = array( FC_DEFAULT => false ); // filter is ON or OFF (default)
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'Boolean';
-      $this->syntax_descr = ''; // action: select from choices
+      $this->syntax_descr = ''; // action: mark checkbox
+      $this->syntax_help = '';
    }
 
    /*! \brief Handles check for checkbox. */
@@ -2868,7 +2899,8 @@ class FilterBoolean extends Filter
   *      "word word" -> literal phrase to be found
   *
   * <p>supported common config (restrictions or defaults):
-  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE, FC_SYNTAX_HINT, FC_HIDE,
+  *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE, FC_SYNTAX_HINT,
+  *    FC_SYNTAX_HELP, FC_HIDE,
   *    FC_DEFAULT - match-term-value if scalar, or
   *                 array( '' => match-term-value, 'b' => 1=boolean-mode-ON or 0=OFF )
   *
@@ -2896,6 +2928,7 @@ class FilterMysqlMatch extends Filter
       static $_default_config = array( FC_SIZE => 30 );
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'MysqlMatch';
+      $this->syntax_help = T_('MATCHINDEX#filterhelp');
 
       $arr_syntax = array();
       array_push( $arr_syntax, 'word word' );
@@ -3078,7 +3111,7 @@ class FilterMysqlMatch extends Filter
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_SIZE (for text-input),
   *    FC_MAXLEN (for text-input), FC_NO_RANGE, FC_ADD_HAVING, FC_QUOTETYPE,
-  *    FC_SYNTAX_HINT, FC_HIDE,
+  *    FC_SYNTAX_HINT, FC_SYNTAX_HELP, FC_HIDE,
   *    FC_DEFAULT - score-mode (index) if scalar, or
   *                 array( '' => score-value, 'r' => score-mode-index );
   *       score-mode: FSCORE_ALL=show-all (default), FSCORE_RESIGN|TIME|SCORE,
@@ -3134,6 +3167,7 @@ class FilterScore extends Filter
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'Score';
       $this->tok_config = $this->create_TokenizerConfig();
+      $this->syntax_help = T_('SCORE#filterhelp');
 
       // checks
       $this->check_forbid_sql_template( 1 );
@@ -3284,7 +3318,7 @@ class FilterRatingDiff extends FilterNumeric
   *
   * <p>supported common config (restrictions or defaults):
   *    FC_FNAME, FC_STATIC (makes not much sense), FC_GROUP_SQL_OR,
-  *    FC_ADD_HAVING, FC_HIDE, FC_BITMASK
+  *    FC_ADD_HAVING, FC_HIDE, FC_BITMASK, FC_SYNTAX_HELP
   *
   * <p>supported filter-specific config:
   *    FC_MULTIPLE - mandatory config,
@@ -3315,6 +3349,7 @@ class FilterCheckboxArray extends Filter
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'CheckboxArray';
       $this->syntax_descr = T_('Select none, one or more elements');
+      $this->syntax_help = '';
 
       $this->check_forbid_sql_template( 1 );
       $this->idx_start = 1;
