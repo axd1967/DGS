@@ -27,6 +27,25 @@ Changelog
 
 2007-09-09 juga
 
+   * init.mysql, scripts/database_changes_1_0_12_to_1_0_13.mysql:
+   - split combined indexes (Forum_ID and Pos) into separate indexes
+     to speed up forum-search and forum-sort,
+     particularly on PosIndex and Lastchanged
+-----------
+ALTER TABLE `Posts`
+ DROP INDEX `Pos` ;
+ALTER TABLE `Posts`
+ ADD INDEX `Thread_ID` (`Thread_ID`) ;
+ALTER TABLE `Posts`
+ ADD INDEX `PosIndex` (`PosIndex`) ;
+ALTER TABLE `Posts`
+ DROP INDEX `Forum_ID` ;
+ALTER TABLE `Posts`
+ ADD INDEX `Forum_ID` (`Forum_ID`) ;
+ALTER TABLE `Posts`
+ ADD INDEX `Lastchanged` (`Lastchanged`) ;
+-----------
+
    * include/filter.php (FilterRating):
    - bugfix FilterRating: fix rank-conversion for rating with percentage
 
