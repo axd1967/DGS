@@ -128,7 +128,7 @@ if ( $fdemo == 1 )
    $arr_layout = array(
       1 => array( 'label' => 'Numeric #1', 'descr' => 'standard filter allowing exact and range-syntax' ),
       2 => array( 'label' => 'Numeric #2', 'descr' => 'OR\'grouping with filter #3 [FC_GROUP_SQL_OR], [FC_SYNTAX_HINT] for additional info in syntax-hover-text-description' ),
-      3 => array( 'label' => 'Numeric #3', 'descr' => 'OR\'grouping with filter #2 [FC_GROUP_SQL_OR]' ),
+      3 => array( 'label' => 'Numeric #3', 'descr' => 'OR\'grouping with filter #2 [FC_GROUP_SQL_OR], [FC_SYNTAX_HELP] for special help-id in syntax-hover-text-description' ),
       4 => array( 'label' => 'Numeric #4', 'descr' => 'use fix URL-fieldname NUM4 [FC_FNAME] (check in URL), using SQL-template as dbfield [FC_SQL_TEMPLATE]' ),
       5 => array( 'label' => 'Numeric #5', 'descr' => 'use complex query with QuerySQL (with template)' ),
       6 => array( 'label' => 'Numeric #6', 'descr' => 'use complex query with QuerySQL (no template)' ),
@@ -148,7 +148,8 @@ if ( $fdemo == 1 )
    $filter->add_filter( 3, 'Numeric',
          new QuerySQL( SQLP_FNAMES, 'num3'),
          true,
-         array( FC_GROUP_SQL_OR => '2,3' ));
+         array( FC_GROUP_SQL_OR => '2,3',
+                FC_SYNTAX_HELP => 'SpecialHelp' ));
 
    # using SQL-template, using fix URL-name
    $filter->add_filter( 4, 'Numeric', '(num3a #OP #VAL OR num3b #OP #VAL)', true,
