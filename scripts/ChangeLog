@@ -39,7 +39,7 @@ ALTER TABLE `Posts`
 ALTER TABLE `Posts`
  ADD INDEX `PosIndex` (`PosIndex`) ;
 ALTER TABLE `Posts`
- DROP INDEX `Forum_ID` ;
+ DROP INDEX `Forum_ID` ;  -- on some servers this is named 'List'
 ALTER TABLE `Posts`
  ADD INDEX `Forum_ID` (`Forum_ID`) ;
 ALTER TABLE `Posts`
