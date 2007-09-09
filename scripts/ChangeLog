@@ -25,6 +25,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-09-09 juga
+
+   * include/filter.php (FilterRating):
+   - bugfix FilterRating: fix rank-conversion for rating with percentage
+
+   * include/filter.php (all Filters), code_examples/filter_example2.php,
+     specs/filters.txt:
+   - added syntax-help-id in syntax-hover-text-description (for FAQ-reference),
+     added with #filterhelp-namespace to allow adjustment and translations
+   - added FC_SYNTAX_HELP-config to overwrite syntax-help-id
+
 2007-09-07 juga
 
    * scripts/database_changes_1_0_12_to_1_0_13.mysql:
