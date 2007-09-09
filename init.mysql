@@ -649,11 +649,13 @@ CREATE TABLE Posts (
    LastPost int(11) NOT NULL default '0',
    PendingApproval enum('Y','N') NOT NULL default 'N',
    PRIMARY KEY (ID),
-   KEY Pos (Thread_ID,PosIndex),
-   KEY Forum_ID (Forum_ID,Lastchanged),
-   KEY PendingApproval (PendingApproval,Time),
-   KEY Parent_ID (Parent_ID),
+   KEY Forum_ID (Forum_ID),
    KEY Time (Time),
+   KEY Lastchanged (Lastchanged),
+   KEY Parent_ID (Parent_ID),
+   KEY Thread_ID (Thread_ID),
+   KEY PosIndex (PosIndex),
+   KEY PendingApproval (PendingApproval,Time),
    FULLTEXT KEY Subject (Subject,Text)
 ) TYPE=MyISAM;
 # }

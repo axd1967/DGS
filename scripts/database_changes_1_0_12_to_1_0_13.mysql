@@ -35,6 +35,21 @@ ALTER TABLE `Posts`
  CHANGE `Parent_ID` `Parent_ID` int(11) NOT NULL DEFAULT 0 ,
  CHANGE `PostsInThread` `PostsInThread` int(11) NOT NULL DEFAULT 0 ,
  CHANGE `old_ID` `old_ID` int(11) NOT NULL DEFAULT 0 ;
+-- replace combined Pos-index: split into two indexes
+ALTER TABLE `Posts`
+ DROP INDEX `Pos` ;
+ALTER TABLE `Posts`
+ ADD INDEX `Thread_ID` (`Thread_ID`) ;
+ALTER TABLE `Posts`
+ ADD INDEX `PosIndex` (`PosIndex`) ;
+-- replace combined Forum_ID-index: split into two indexes
+-- NOTE: on some servers, the combined index is named 'List' instead of 'Forum_ID'
+ALTER TABLE `Posts`
+ DROP INDEX `Forum_ID` ;  -- on some servers: `List` is used as name
+ALTER TABLE `Posts`
+ ADD INDEX `Forum_ID` (`Forum_ID`) ;
+ALTER TABLE `Posts`
+ ADD INDEX `Lastchanged` (`Lastchanged`) ;
 
 ALTER TABLE `Posts`
  CHANGE `PosIndex` `PosIndex` varchar(80) binary NOT NULL default '' ;
