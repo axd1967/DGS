@@ -2130,9 +2130,9 @@ class FilterRating extends Filter
       if ( $need_range )
       {
          // adjust for rank-range: 9k = 9k(-50%) .. 9k(+49%)
-         if ( (string)$this->p_start != '' )
+         if ( (string)$this->p_start != '' and ($this->p_start % 100) == 0 )
             $this->p_start -= 50; // -50%
-         if ( (string)$this->p_end != '' )
+         if ( (string)$this->p_end != '' and ($this->p_end % 100) == 0 )
             $this->p_end += 49; // +49%
       }
 
