@@ -476,7 +476,7 @@ table#pageLayout {
 /*
  page menus
 
- Vertical tree:
+ Vertical menu tree:
  body [
    ...
    table#pageLayout tr.LayoutVertical td.Menu [
@@ -487,11 +487,18 @@ table#pageLayout {
    ...
  ]
 
- Horizontal tree:
+ Horizontal menu tree:
  body [
    ...
    (table#pageMenu or table.MenuHorizontal)
    table#pageTools
+   table#pageLayout tr.LayoutHorizontal td#pageBody ...
+   ...
+ }
+
+ Memo: "Not logged" or "Is down" tree (like horizontal with no menu):
+ body [
+   ...
    table#pageLayout tr.LayoutHorizontal td#pageBody ...
    ...
  }

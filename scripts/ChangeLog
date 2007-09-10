@@ -27,6 +27,14 @@ Changelog
 
 2007-09-10 rodival
 
+   * ratingpng.php:
+   - hidden the win/lost pie
+
+   * skins/dragon/screen.css,
+     include/std_functions.php:
+   - fixed the bad left-alignment of the "not logged" or "is down" pages
+   - adjusted some comments of the fever vault
+
    * game.php:
    - added the game ID and move number to the page title
 

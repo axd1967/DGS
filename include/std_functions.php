@@ -503,24 +503,26 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( !$logged_in or $is_down or $printable )
    {
-      echo "\n<table width=\"100%\" border=0 cellspacing=0 cellpadding=5>"
-         . "\n <tr>";
+      //layout like menu_horizontal without menu
+      $player_row['MenuDirection'] = 'HORIZONTAL';
+      echo "\n<table id='pageLayout'>" //layout table
+         . "\n <tr class=LayoutHorizontal>";
    }
    else if( $player_row['MenuDirection'] == 'HORIZONTAL' )
    {
       //echo "\n  <td class=Menu>\n";
-      make_menu_horizontal($menu_array); //outside layout
+      make_menu_horizontal($menu_array); //outside layout table
       make_tools( $tools_array, 0);
       //echo "\n  </td></tr><tr>";
-      echo "\n<table id='pageLayout'>" //layout
+      echo "\n<table id='pageLayout'>" //layout table
          . "\n <tr class=LayoutHorizontal>";
    }
    else
    { // vertical
-      echo "\n<table id='pageLayout'>" //layout
+      echo "\n<table id='pageLayout'>" //layout table
          . "\n <tr class=LayoutVertical>"
          . "\n  <td class=Menu rowspan=2>\n";
-      make_menu_vertical($menu_array); //inside layout
+      make_menu_vertical($menu_array); //inside layout table
       make_tools( $tools_array, 4);
       echo "\n  </td>";
    }
@@ -2030,13 +2032,21 @@ function who_is_logged( &$player_row)
    return $res;
 }
 
-//fever-vault parameters: set VAULT_CNT to 0 to disable the process.
+/**
+ * fever-vault parameters:
+ * set VAULT_DELAY to 0 to disable the whole process.
+ * setting VAULT_CNT or VAULT_CNT_X to 0 will nearly always let the accounts in the vault.
+ *   (one page allowed each VAULT_TIME* seconds)
+ * setting VAULT_CNT or VAULT_CNT_X big will nearly never let the accounts entering the vault.
+ *   (nearly no way to hit VAULT_CNT* pages during VAULT_DELAY seconds)
+ * Caution: VaultCnt is a SMALLINT in the database
+ **/
 define('VAULT_CNT', 1000); //an account with more than x hits...
 define('VAULT_DELAY', 3600); //... during y seconds ...
 define('VAULT_TIME', 24*3600); //... is vaulted for z seconds
 //two specific parameters for multi-users accounts, e.g. 'guest':
-define('VAULT_CNT_X', VAULT_CNT*10); //activity count
-define('VAULT_TIME_X', 2*3600); //vault duration
+define('VAULT_CNT_X', VAULT_CNT*10); //activity count (larger)
+define('VAULT_TIME_X', 2*3600); //vault duration (smaller)
 
 function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
 {
@@ -2058,7 +2068,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
 
    $query= "SELECT *,UNIX_TIMESTAMP(Sessionexpire) AS Expire"
           .",Adminlevel+0 as admin_level"
-          .(VAULT_CNT>1 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
+          .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
           ." FROM Players WHERE Handle='".mysql_addslashes($hdl)."'";
 
    $result = mysql_query( $query )
@@ -2107,7 +2117,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
    }
 
    $vaultcnt= true; //no vault for anonymous or if disabled
-   if( VAULT_CNT>1 && !$session_expired ) //exclude access deny from an other user
+   if( VAULT_DELAY>0 && !$session_expired ) //exclude access deny from an other user
    {
       $vaultcnt= (int)@$player_row['VaultCnt'];
       $vaulttime= @$player_row['VaultTime'];
@@ -2117,13 +2127,15 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
                  ."\nPlease, correct this behaviour."
                  ."\nThis account is blocked until %s."
                  ;
-      if( !$vaultcnt ) //fever vault
+      if( $vaultcnt <= 0 ) //inside fever vault
       {
          if( $NOW > $vaulttime ) //time to quit the vault?
          {
             $vaultcnt= 1; //will be reseted next time
             $query.= ",VaultCnt=$vaultcnt";
          }
+         else
+            $vaultcnt= 0; //stay in fever vault...
       }
       else if( $vaultcnt > 1 ) //measuring fever
       {
