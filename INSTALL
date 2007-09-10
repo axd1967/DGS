@@ -40,7 +40,6 @@ Those files have to be unzipped in the dragon root directory to obtain a tree li
          ...
          /images
             /flags
-            /board -> ../17
          /5
          /7
          ...
