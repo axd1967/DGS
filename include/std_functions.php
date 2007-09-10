@@ -1639,16 +1639,18 @@ $html_safe_preg = array(
   => ALLOWED_LT."/div".ALLOWED_GT,
 
 //<home page>...</home> =>translated to <a href="{$HOSTBASE}$page">...</a>
- "%".ALLOWED_LT."home[\n\s]+([^\.:`\n\s][^:`\n\s]+)".ALLOWED_GT."%is"
+ "%".ALLOWED_LT."home[\n\s]+((\.?[^\.:`\n\s])+)".ALLOWED_GT."%is"
   => ALLOWED_LT."a href=".ALLOWED_QUOT.$HOSTBASE."\\1".ALLOWED_QUOT.ALLOWED_GT,
  "%".ALLOWED_LT."/home *".ALLOWED_GT."%is"
   => ALLOWED_LT."/a".ALLOWED_GT,
 
 //<image pict> =>translated to <img src="{$HOSTBASE}images/$pict">
- "%".ALLOWED_LT."image[\n\s]+([^\.:`\n\s][^:`\n\s]+)".ALLOWED_GT."%is"
-  => ALLOWED_LT."img class=InTextImage"
+//<image board/pict> =>translated to <img src="{$HOSTBASE}17/$pict">
+ "%".ALLOWED_LT."image[\n\s]+(board/)?((\.?[^\.:`\n\s])+)".ALLOWED_GT."%ise"
+  => '"'.ALLOWED_LT."img class=InTextImage"
       ." alt=".ALLOWED_QUOT."(img)".ALLOWED_QUOT
-      ." src=".ALLOWED_QUOT.$HOSTBASE."images/\\1".ALLOWED_QUOT.ALLOWED_GT,
+      ." src=".ALLOWED_QUOT.$HOSTBASE
+      ."\".('\\1'?'17':'images').\"/\\2".ALLOWED_QUOT.ALLOWED_GT.'"',
 
 //reverse to bad the skiped (faulty) ones
  "%".ALLOWED_LT."(/?(image|home|quote|tt|code|note|color|"

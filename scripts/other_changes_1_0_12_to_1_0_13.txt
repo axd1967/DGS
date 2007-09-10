@@ -1,5 +1,6 @@
 -----------
-add soft-link on server: go to the dragon root-directory (e.g. 'htdocs' for the devel server)
- cd images
- ln -s ../17 board
+-- No more needed (done by the code... until a best solution):
+-- add soft-link on server: go to the dragon root-directory (e.g. 'htdocs' for the devel server)
+--  cd images
+--  ln -s ../17 board
 -----------

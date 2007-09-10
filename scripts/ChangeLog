@@ -25,6 +25,21 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-09-10 rodival
+
+   * game.php:
+   - added the game ID and move number to the page title
+
+   * scripts/other_changes_1_0_12_to_1_0_13.txt,
+     include/std_functions.php:
+   - hard-coded the re-direction of <image board/*> to /17/*
+-----------
+Caution: maybe not needed, this is a rollback of a previous modification
+remove the soft-link on server: go to the dragon root-directory (e.g. 'htdocs' for the devel server)
+ cd images
+ rm board
+-----------
+
 2007-09-09 juga
 
    * init.mysql, scripts/database_changes_1_0_12_to_1_0_13.mysql:
@@ -107,6 +122,7 @@ ALTER TABLE `Contacts`
    - must be completed by a "Linux soft-link" (or an "Apache alias")
      from /images/board to /17
 -----------
+Caution: no more needed (see rollback above)
 add soft-link on server: go to the dragon root-directory (e.g. 'htdocs' for the devel server)
  cd images
  ln -s ../17 board
