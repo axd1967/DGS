@@ -29,7 +29,7 @@ define('SHOW_NRGAMES', true);
 //Display the win/lost/unrated pie.
 define('ENA_WIN_PIE', true);
 //Default display of the win/lost/unrated pie.
-define('SHOW_WIN_PIE', true);
+define('SHOW_WIN_PIE', false);
 
 
 function interpolate($val1, $val3, $time1, $time2, $time3)
