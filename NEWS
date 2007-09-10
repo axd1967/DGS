@@ -1,7 +1,7 @@
 DragonGoServer NEWS -- Release Notes. History of user-visible changes.
 Copyright (C) 2001-2007  Erik Ouchterlony
 
-#release DGS_1_0_13 [2007-MM-DD] - DGS 1.0.13
+#release DGS_1_0_13 [2007-09-15] - DGS 1.0.13
 
    New features and Major changes:
 
@@ -25,19 +25,20 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Add time for opponent
       * Added hover-text on colors column for my running games
       * Viewing move with auto-select on combobox (need JavaScript)
+      * Show game-id and current move-number in page-title
 
    * Waiting room:
       * added country of player, minor changes and fixes
       * changed some columns: renamed Handicap to Type, added Handicap
 
    * User info:
-      * Order of bio entries can be changed
+      * Order of bio entries can be changed,
+        Used wider textarea-field for input
       * Changed percent calculus to take jigo into account for rated games
       * Changed links to show rated / won / lost games in games list
       * On vacation shows days and hours left
 
       * Rating graph can now be displayed by time or by number of games
-      * Rating graph shows additional pie chart for played games ratio
 
    * Users:
       * show my opponents and game statistics for two players
@@ -49,6 +50,11 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Added arrows in table headers indicating sort direction of columns
         (1st sort = dark blue arrow, 2nd sort = light blue arrow)
       * Use own set of texts for table headers to allow shorter translated texts
+
+   * Markup tags
+      * Added &lt;image source> : show image from Dragon webserver in images-dir.
+        Use &lt;image board/source> : show Dragon board-images.
+        Please use sparely as it's using bandwidth
 
 
    Code improvements:
@@ -69,7 +75,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    Minor changes:
 
-   * Left align bottom links on each page
+   * Narrowed bottom links centered on each page
 
    * Links opening in a new window are showed olive-colored
 
