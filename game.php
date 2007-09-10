@@ -497,7 +497,8 @@ function get_alt_arg( $n1, $n2)
       $TheBoard->set_style( $player_row);
 
 
-   start_page(T_("Game"), true, $logged_in, $player_row, $TheBoard->style_string());
+   $title = T_("Game") ." #$gid,$move";
+   start_page($title, true, $logged_in, $player_row, $TheBoard->style_string());
 
 
 
