@@ -251,15 +251,21 @@ class BasicParser
    // help-functions
 
    /*!
-    * \brief Swaps p_start and p_end if range reversed and flag PARSER_NOSWAP_REVERSE set.
+    * \brief Swaps p_start and p_end if range reversed and flag PARSER_NOSWAP_REVERSE set
+    *        and returns true, if swapped; false otherwise.
     * signature: void handle_reverse_range([bool force = false])
     */
    function handle_reverse_range( $force = false ) {
+      $swapped = false;
       if ( !$this->is_flags_set(PARSER_NOSWAP_REVERSE) or $force )
       {
          if ( $this->is_reverse_range() )
+         {
             $this->swap_range_start_end();
+            $swapped = true;
+         }
       }
+      return $swapped;
    }
 
    /*!
