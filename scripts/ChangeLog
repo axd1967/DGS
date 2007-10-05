@@ -25,6 +25,19 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-05 juga
+
+   * NEWS:
+   - changed final release date
+
+   * include/filter.php (FilterRating),
+     include/filter_parser.php (TextParser.handle_reverse_range):
+   - fix: FilterRating, correct range-search of percentaged rating
+   - fix: remove non-ASCII7-char
+
+   * include/message_functions.php:
+   - short description for 'Proper handicap'
+
 2007-09-11 juga
 
    * INSTALL:
