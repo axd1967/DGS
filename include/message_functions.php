@@ -283,7 +283,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
                               'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype ) );
 
-      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'),
+      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap (komi adjusted by system)'),
                               'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype ) );
    }
    else if( $formstyle=='dispute' && $Handitype=='conv' )
