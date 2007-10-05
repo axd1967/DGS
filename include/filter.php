@@ -2044,13 +2044,13 @@ class FilterRating extends Filter
       $arr_syntax = array();
       if ( $this->get_config(FC_NO_RANGE) )
       {
-         array_push( $arr_syntax, "2d, 8k (±28%), 4k±59%" ); // e
+         array_push( $arr_syntax, "2d, 8k (+28%), 4k-59%" ); // e
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
       }
       else
       {
          $s = $this->tok_config->sep;
-         array_push( $arr_syntax, "2d, {$s}7k, 18k{$s}, 28k{$s}1d; 8k (±28%), 4k±59%" ); // e
+         array_push( $arr_syntax, "2d, {$s}7k, 18k{$s}, 28k{$s}1d; 8k (+28%), 4k-59%" ); // e
 
          // regex considering -59% not as range-separator
          $this->tok_config->add_config( TEXTPARSER_CONF_RX_NO_SEP, '-\d+%' );
@@ -2081,7 +2081,7 @@ class FilterRating extends Filter
 
       // need textparser for conversion below
       $tp = new TextParser( $val, $this->tok_config,
-            $this->parser_flags | TEXTPARSER_FORBID_WILD | TEXTPARSER_END_INCL );
+            $this->parser_flags | TEXTPARSER_FORBID_WILD );
       if ( $tp->errormsg() )
       {
          $this->errormsg = $tp->errormsg();
@@ -2089,7 +2089,9 @@ class FilterRating extends Filter
       }
 
       // check kyu/dan-ranks (string) & convert into rating (int)
-      $orig_pval = $tp->p_value;
+      $orig_pval   = $tp->p_value;
+      $orig_pstart = $tp->p_start;
+      $orig_pend   = $tp->p_end;
       if ( (string)$tp->p_start != '' )
       {
          $rat_start = $this->convert_rank($tp->p_start);
@@ -2112,32 +2114,124 @@ class FilterRating extends Filter
          $tp->p_value = $rat_value;
       }
 
-      $tp->handle_reverse_range(true); // forced
+      if ( $tp->handle_reverse_range(true) ) // forced swap
+      { // swap orig start & end too
+         $tmp = $orig_pstart;
+         $orig_pstart = $orig_pend;
+         $orig_pend = $tmp;
+      }
       $this->copy_parsed($tp);
 
-      $need_range = true;
+      // adjust rank-range and used operations
       if ( (string)$this->p_value != '' )
       {
          // replace single value by start/end-search if not an accurate rank
-         if ( strpos($orig_pval, '%') === false )
-         {
-            $this->p_start = $this->p_end = $this->p_value;
-            $this->p_value = '';
-         }
-         else
-            $need_range = false;
+         $this->p_start = $this->p_end = $this->p_value;
+         $this->p_value = '';
+         $this->adjust_op_rating( true,  $orig_pval );
+         $this->adjust_op_rating( false, $orig_pval );
       }
-      if ( $need_range )
+      else
       {
-         // adjust for rank-range: 9k = 9k(-50%) .. 9k(+49%)
-         if ( (string)$this->p_start != '' and ($this->p_start % 100) == 0 )
-            $this->p_start -= 50; // -50%
-         if ( (string)$this->p_end != '' and ($this->p_end % 100) == 0 )
-            $this->p_end += 49; // +49%
+         $this->adjust_op_rating( true,  $orig_pstart );
+         $this->adjust_op_rating( false, $orig_pend );
       }
 
       $this->query = $this->build_query_numeric();
       return true;
+   }
+
+   /*! Sets p_start or p_end and according p_flags to adjust rating and operation for range-filtering. */
+   function adjust_op_rating( $is_start=true, $orig_val )
+   {
+      // something there to adjust?
+      if ( $is_start && (string)$this->p_start == '' )
+         return;
+      if ( !$is_start && (string)$this->p_end == '' )
+         return;
+
+      // full or percentaged rank?
+      $has_percent = !( strpos($orig_val, '%') === false );
+      // negative percentage?
+      $has_negperc = $has_percent && !( strpos($orig_val, '-') === false );
+
+      if ( $has_percent )
+         $adjust_range = 0.5; // percentaged rank: 9k+44% ->  >= 9k(+44%) and < 9k(+45%)
+      else
+         $adjust_range = 50;  // full rank: 9k ->  >= 9k(-50%) and < 9k(+50%)
+
+      // adjust (flags depends on sign because of rounding effects)
+      if ( $is_start )
+      {
+         $perc_is0 = false; // percentage is [+/-]0%
+         if ( $this->p_start % 100 == 0 ) // handle '-0%' as non-negative
+         {
+            $has_negperc = false;
+            $perc_is0 = true;
+         }
+
+         if ( $has_negperc && abs($this->p_start) % 100 == 50 ) // -50%
+            $adjust_range = 0;
+         $this->p_start -= $adjust_range; // -50 | -0.5
+         if ( $this->p_start < MIN_RATING )
+            $this->p_start = MIN_RATING;
+
+         $opexcl = true; // '>'-comparison, false -> '>='
+         if ( !$perc_is0 && !$has_negperc ) // perc > 0% (not 0 and no '-')
+            $opexcl = false;
+         if ( $this->p_start <= 0 )
+         {
+            if ( !$has_percent )
+               $opexcl = true;
+         }
+         else
+         {
+            if ( $adjust_range == 0 )
+               $opexcl = false;
+            if ( !$has_percent )
+               $opexcl = false;
+         }
+         if ( $this->p_start <= MIN_RATING )
+            $opexcl = false;
+         if ( $opexcl )
+            $this->p_flags |= PFLAG_EXCL_START;
+
+      }
+      else // is-end
+      {
+         $perc_is0 = false; // percentage is [+/-]0%
+         if ( $this->p_end % 100 == 0 ) // handle '-0%' as non-negative
+         {
+            $has_negperc = false;
+            $perc_is0 = true;
+         }
+
+         if ( !$has_negperc && abs($this->p_end) % 100 == 50 ) // +50%
+            $adjust_range = 0;
+         $this->p_end += $adjust_range; // +50 | +0.5
+         if ( $this->p_end < MIN_RATING )
+            $this->p_end = MIN_RATING;
+
+         $opexcl = false; // '<='-comparison, true -> '<'
+         if ( !$has_negperc ) // perc >= 0% (no '-')
+            $opexcl = true;
+         if ( $this->p_end < 0 )
+         {
+            if ( $adjust_range == 0 )
+               $opexcl = false;
+            if ( !$has_percent )
+               $opexcl = false;
+         }
+         else
+         {
+            if ( !$has_percent )
+               $opexcl = true;
+         }
+         if ( $this->p_end <= MIN_RATING )
+            $opexcl = false;
+         if ( $opexcl )
+            $this->p_flags |= PFLAG_EXCL_END;
+      }
    }
 
    /*! \brief Returns input-text form-element. */
