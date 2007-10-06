@@ -42,6 +42,9 @@ Changelog
    - adjusted the detections according to the args limitations
    - added some warning messages
 
+   * scripts/roadmap_1_0_12_to_1_0_13.txt:
+   - adjustments correlated to the previous commits
+
 2007-10-05 juga
 
    * NEWS:

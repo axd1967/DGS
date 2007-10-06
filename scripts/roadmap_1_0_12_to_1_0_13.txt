@@ -1,25 +1,32 @@
 
 (1) Take Server offline.
 
+
 (2) Backup database.
+
 
 (3) Backup samurajdata.
 
-   (.) make clear and separate /snapshot entries (with adjusted descriptions) for:
-   - DGS-20060926.tar.gz
-   - images-20060926.tar.gz
-   - DGS-20070915.tar.gz
-   - images-20070915.tar.gz
+   (.) make clear and separate the /snapshot entries (with adjusted descriptions)
+   for:
+      - DGS-20060926.tar.gz
+      - images-20060926.tar.gz
+      - DGS-20070915.tar.gz
+      - images-20070915.tar.gz
 
-(4) Update code from cvs.
 
-  Run message_consistency.php (old one)
-  (optionnaly: player_consistency.php and game_consistency.php (the most
-time consumming))
+(4) On samurajdata:
 
    (.) Give JUG an access+password to the /scripts folder
 
-(5) Update images.
+   * Run the old consistency tests:
+      -/scripts/message_consistency.php
+      -/scripts/player_consistency.php
+      (optionnaly: -/scripts/game_consistency.php (the most time consumming))
+     Fix the obvious detected bugs.
+
+
+(5) Update code from cvs. Update images.
 
    - replace/add those images from devel server to live server:
     images/send.gif,
@@ -51,7 +58,9 @@ time consumming))
 
 (6) Transfer changes to samurajdata.
 
+
 (7) Update database with /scripts/database_changes_1_0_12_to_1_0_13.mysql
+
 
 (8) Apply changes from /scripts/other_changes_1_0_12_to_1_0_13.txt
 
@@ -63,7 +72,11 @@ time consumming))
 adjusted the EGF and the win/lost calculus)
 
    * Regenerate new translation entries.
-      - check/translate the english #short entries
+      - check+translate the english #short entries
+
+   * Run the new consistency test:
+      -/scripts/translation_consistency.php
+      
 
    (.) Check if new admins flags are still correctly set
    (.) Give JUG at least the same flags as Rodival.
