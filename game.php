@@ -746,24 +746,25 @@ function draw_moves()
 function draw_message_box(&$message)
 {
    $tabindex=1;
-   echo '
-      <TABLE class=MessageForm>
-        <TR>
-          <TD class=Rubric>' . T_('Message') . ':</TD>
-          <TD>
-            <textarea name="message" tabindex="'.($tabindex++).'" cols="50" rows="8">'
-               . textarea_safe( $message) . '</textarea></TD>
-        </TR>
-      </TABLE>
-<TABLE align=center cellpadding=5>
-<TR><TD><input type=submit name="nextgame" tabindex="'.($tabindex++).'" value="' .
-      T_('Submit and go to next game') . '"></TD>
-    <TD><input type=submit name="nextstatus" tabindex="'.($tabindex++).'" value="' .
-      T_("Submit and go to status") . '"></TD></TR>
-<TR><TD align=right colspan=2><input type=submit name="nextback" tabindex="'.($tabindex++).'" value="' .
-      T_("Go back") . '"></TD></TR>
-      </TABLE>
-';
+   echo "<TABLE class=MessageForm>"
+      . "<TR class=Message>"
+      . "<TD class=Rubric>" . T_('Message') . ":</TD>"
+      . '<TD><textarea name="message" tabindex="'.($tabindex++)
+         . '" cols="50" rows="8">'.textarea_safe( $message).'</textarea></TD>'
+      . "</TR>"
+      . "<TR class=Submit>"
+      . "<TD></TD>"
+      . '<TD><input type=submit name="nextgame" tabindex="'.($tabindex++)
+         .'" value="'.T_('Submit and go to next game').'">'
+         .'<input type=submit name="nextstatus" tabindex="'.($tabindex++)
+         .'" value="'.T_("Submit and go to status").'"></TD>'
+      . "</TR>"
+      . "<TR class=Back>"
+      . '<TD colspan=2><input type=submit name="nextback" tabindex="'.($tabindex++)
+         .'" value="'.T_("Go back").'"></TD>'
+      . "</TR>"
+      . "</TABLE>"
+      ;
 
 }
 

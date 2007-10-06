@@ -296,7 +296,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    }
    else if( $formstyle=='dispute' && $Handitype=='proper' )
    {
-      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap'), //T_('No initial rating')
+      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap (komi adjusted by system)'), //T_//('No initial rating')
                               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
                             ));
       $Handitype = 'manual';

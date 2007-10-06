@@ -1750,6 +1750,14 @@ table.MessageForm td.Rubric {
    text-align: right;
 }
 
+table.MessageForm tr.Submit td {
+   text-align: left;
+}
+
+table.MessageForm tr.Back td {
+   text-align: right;
+}
+
 
 /* ------------------------- */
 /* game comments table (class=Table) */

@@ -25,6 +25,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-06 rodival
+
+   * skins/dragon/screen.css,
+     game.php:
+   - adjustment of the "Go back" button placement in the game page.
+
+   * include/message_functions.php:
+   - description for 'Proper handicap' completion
+
 2007-10-05 juga
 
    * NEWS:
