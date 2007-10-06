@@ -34,8 +34,13 @@ Changelog
    * include/message_functions.php:
    - description for 'Proper handicap' completion
 
-   * scripts/translation_consistency.php
+   * scripts/translation_consistency.php:
    - adjusting the detection of the "FAQ entries without 'FAQ' group"
+
+   * scripts/game_consistency.php:
+   - removed an extract($row)
+   - adjusted the detections according to the args limitations
+   - added some warning messages
 
 2007-10-05 juga
 

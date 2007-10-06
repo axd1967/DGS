@@ -39,95 +39,170 @@ require_once( "include/move.php" );
       error('adminlevel_too_low');
 
 
-   start_html( 'game_consistency', 0);
+   $page = $_SERVER['PHP_SELF'];
+   $page_args = array();
 
-      echo "<p></p>--- Report only:<br>";
-
-   if( ($gid=@$_REQUEST['gid']) > 0 )
-      $where = " AND Games.ID>=$gid";
+   //gid could be '12' meaning for game>=12
+   // or '12,27' meaning from game=12 to game=27
+   @list( $gid1, $gid2) = explode( ',', @$_REQUEST['gid']);
+   $gid1= (int)$gid1; $gid2= (int)$gid2;
+   if( $gid1 > 0 )
+   {
+      if( $gid2 > 0 )
+      {
+         $page_args['gid'] = $gid1.','.$gid2;
+         $where = " AND (Games.ID>=$gid1 AND Games.ID<=$gid2)";
+      }
+      else
+      {
+         $page_args['gid'] = $gid1;
+         $where = " AND (Games.ID>=$gid1)";
+      }
+   }
    else
       $where = "";
 
-   if( ($lim=@$_REQUEST['limit']) > 0 )
+   //limit could be '10' or '55,10'
+   if( ($lim=@$_REQUEST['limit']) > '' )
+   {
+      $page_args['limit'] = $lim;
       $limit = " LIMIT $lim";
+   }
    else
       $limit = "";
 
-   //$since may be: "2 DAY", "12 MONTH", ...
-   if( ($since=@$_REQUEST['since']) )
+   //since could be "2 DAY", "12 MONTH", ...
+   if( ($since=@$_REQUEST['since']) > '' )
+   {
+      $page_args['since'] = $since;
       $where.= " AND DATE_ADD(Games.Lastchanged,INTERVAL $since) > FROM_UNIXTIME($NOW)";
+   }
+
+   start_html( 'game_consistency', 0);
+
+//echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
+echo ">>>> Most of them needs manual fixes.";
+   if( $do_it=@$_REQUEST['do_it'] )
+   {
+      function dbg_query($s) {
+        if( !mysql_query( $s) )
+           die("<BR>$s;<BR>" . mysql_error() );
+        echo " --- fixed. ";
+      }
+      echo "<p>*** Fixes errors ***"
+         ."<br>".anchor(make_url($page, $page_args), 'Just show it')
+         ."</p>";
+   }
+   else
+   {
+      function dbg_query($s) { echo " --- query:<BR>$s; ";}
+      $tmp = array_merge($page_args,array('do_it' => 1));
+      echo "<p>(just show needed queries)"
+         ."<br>".anchor(make_url($page, $page_args), 'Show it again')
+         ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
+         ."</p>";
+   }
+
 
 //---------
-if( 1 ) {
+   echo "\n<hr>check_consistency() on all running and finished games.\n";
 
-   $query = "SELECT ID"
-      . " FROM Games WHERE Status!='INVITED'$where ORDER BY ID$limit";
-
-   echo "\n<p></p>query: $query;\n";
-   $result = mysql_query($query);
-
-   $n= (int)@mysql_num_rows($result);
-   echo "\n<br>=&gt; result: $n rows<p></p>\n";
-
-   if( $n > 0 )
-   while( $row = mysql_fetch_assoc( $result ) )
+   if( $do_it )
    {
-      //echo ' ' . $row['ID'];
-      $gid = $row['ID'];
-      if( ($err=check_consistency($gid)) )
-      {
-         echo "Game $gid: "
-            . str_replace("\n","<br>\n&nbsp;- ",trim($err))."<br>\n";
-      }
-      //else echo "Game $gid: Ok<br>\n";
+      echo "<br> >>> CAN'T BE FIXED\n";
    }
-   mysql_free_result($result);
+   else if( 1 ) //long... could be skipped to check the others
+   {
+      $query = "SELECT ID"
+         . " FROM Games WHERE Status!='INVITED'"
+         . "$where ORDER BY Games.ID$limit";
 
-} //0/1
-   echo "\n---------<br>\n";
+      echo "\n<br>query: $query;\n";
+      $result = mysql_query($query)
+          or die('<BR>' . mysql_error());
+
+      $n= (int)@mysql_num_rows($result);
+      echo "\n<br>=&gt; result: $n rows\n";
+
+      if( $n > 0 )
+      while( $row = mysql_fetch_assoc( $result ) )
+      {
+         //echo ' ' . $row['ID'];
+         $gid = $row['ID'];
+         if( ($err=check_consistency($gid)) )
+         {
+            echo "<br>Game $gid: "
+               . str_replace("\n","<br>\n&nbsp;- ",trim($err))."\n";
+         }
+         //else echo "Game $gid: Ok<br>\n";
+      }
+      mysql_free_result($result);
+
+   } //do_it
+
+
+//---------
+   echo "\n<hr>Games start ratings check:";
 
    $query = "SELECT ID,Black_Start_Rating,White_Start_Rating"
       . " FROM Games WHERE"
       . " (  (Black_Start_Rating<".MIN_RATING." AND Black_Start_Rating!=-9999)"
       . " OR (White_Start_Rating<".MIN_RATING." AND White_Start_Rating!=-9999) )"
-      . "$where ORDER BY ID$limit";
+      . "$where ORDER BY Games.ID$limit";
 
-   echo "\n<p></p>query: $query;\n";
-   $result = mysql_query($query);
+   echo "\n<br>query: $query;\n";
+   $result = mysql_query($query)
+       or die('<BR>' . mysql_error());
 
    $n= (int)@mysql_num_rows($result);
-   echo "\n<br>=&gt; result: $n rows<p></p>\n";
+   echo "\n<br>=&gt; result: $n rows\n";
 
    if( $n > 0 )
    while( $row = mysql_fetch_assoc( $result ) )
    {
-      echo "Game ".$row['ID'].": Wrong start rating!<br>\n";
-      echo "&nbsp;- B=".$row['Black_Start_Rating']." / W=".$row['White_Start_Rating']."<br>\n";
+      if( $do_it )
+      {
+         echo "<br> >>> CAN'T BE FIXED\n";
+         break;
+      }
+      $GID= $row['ID'];
+      echo "<br>Game $GID: Wrong start rating!\n";
+      echo "<br>&nbsp;- B=".$row['Black_Start_Rating']." / W=".$row['White_Start_Rating']."\n";
    }
    mysql_free_result($result);
 
-   echo "\n---------<br>\n";
+
+//---------
+   echo "\n<hr>Games start dates check:";
 
    $query = "SELECT ID,Starttime,Lastchanged"
       //. ",DATE_SUB(Lastchanged,INTERVAL '1 MONTH') as FakeStart"
       . " FROM Games WHERE Status!='INVITED' AND Starttime>Lastchanged"
-      . "$where ORDER BY ID$limit";
+      . "$where ORDER BY Games.ID$limit";
 
-   echo "\n<p></p>query: $query;\n";
-   $result = mysql_query($query);
+   echo "\n<br>query: $query;\n";
+   $result = mysql_query($query)
+       or die('<BR>' . mysql_error());
 
    $n= (int)@mysql_num_rows($result);
-   echo "\n<br>=&gt; result: $n rows<p></p>\n";
+   echo "\n<br>=&gt; result: $n rows\n";
 
    if( $n > 0 )
    while( $row = mysql_fetch_assoc( $result ) )
    {
-      echo "Game ".$row['ID'].": Wrong start/end dates!<br>\n";
-      echo "&nbsp;- ".$row['Starttime']." >= ".$row['Lastchanged']."<br>\n";
+      $GID= $row['ID'];
+      $date= $row['Starttime'];
+      $dend= $row['Lastchanged'];
+      echo "<br>Game $GID: Wrong start/end dates!\n";
+      echo "<br>&nbsp;- $date >= $dend<br>\n";
+      $date = substr($dend,0,11).'00:00:00';
+      dbg_query("UPDATE Games SET Starttime=$date WHERE ID=$GID LIMIT 1");
    }
    mysql_free_result($result);
 
-   echo "\n---------<br>\n";
+
+//---------
+   echo "\n<hr>Ratinglog end dates check:";
 
    $query = "SELECT Games.ID,Games.Lastchanged,B.Time as Black_Time,W.Time as White_Time"
       . " FROM (Games,Ratinglog as B,Ratinglog as W)"
@@ -137,22 +212,29 @@ if( 1 ) {
       . " AND (Games.Lastchanged!=B.Time OR Games.Lastchanged!=W.Time)"
       . "$where ORDER BY Games.ID$limit";
 
-   echo "\n<p></p>query: $query;\n";
-   $result = mysql_query($query);
+   echo "\n<br>query: $query;\n";
+   $result = mysql_query($query)
+       or die('<BR>' . mysql_error());
 
    $n= (int)@mysql_num_rows($result);
-   echo "\n<br>=&gt; result: $n rows<p></p>\n";
+   echo "\n<br>=&gt; result: $n rows\n";
 
    if( $n > 0 )
    while( $row = mysql_fetch_assoc( $result ) )
    {
-      echo "Game ".$row['ID'].": Wrong Ratinglog end dates!<br>\n";
-      echo "&nbsp;- (".$row['Lastchanged'].",".$row['Black_Time'].",".$row['White_Time'].")<br>\n";
+      if( $do_it )
+      {
+         echo "<br> >>> CAN'T BE FIXED\n";
+         break;
+      }
+      $GID= $row['ID'];
+      echo "<br>Game $GID: Wrong Ratinglog end dates!\n";
+      echo "<br>&nbsp;- (".$row['Lastchanged'].",".$row['Black_Time'].",".$row['White_Time'].")\n";
    }
    mysql_free_result($result);
 
 //---------
-
+   echo "\n<hr>Done!!!\n";
    end_html();
 }
 
@@ -188,15 +270,34 @@ function check_consistency( $gid)
    $games_Last_Move = $Last_Move;
    $games_Flags = ( $Flags ? KO : 0 );
 
-   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
+   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" )
+       or die('<BR>' . mysql_error());
 
    $Last_Move=''; $Last_X= $Last_Y= -1;
    $move_nr = 1; $to_move = BLACK; $GameFlags = 0;
    $Black_Prisoners = $White_Prisoners = $nr_prisoners = 0;
    $moves_Black_Prisoners = $moves_White_Prisoners = 0;
+   $ID = 0;
    while( $row = mysql_fetch_assoc($result) )
    {
-      extract($row);
+      if( !isset($row['ID']) )
+         return "'ID' absent after ID=$ID!";
+      $ID = $row['ID'];
+      if( !isset($row['MoveNr']) )
+         return "'MoveNr' absent at ID=$ID!";
+      $MoveNr = $row['MoveNr'];
+      if( !isset($row['Stone']) )
+         return "'Stone' absent at ID=$ID!";
+      $Stone = $row['Stone'];
+      if( !isset($row['PosX']) )
+         return "'PosX' absent at ID=$ID!";
+      $PosX = $row['PosX'];
+      if( !isset($row['PosY']) )
+         return "'PosY' absent at ID=$ID!";
+      $PosY = $row['PosY'];
+      if( !isset($row['Hours']) )
+         return "'Hours' absent at ID=$ID!";
+      $Hours = $row['Hours'];
 
       if( !($Stone == WHITE or $Stone == BLACK ) or $PosX<0 )
       {
@@ -319,7 +420,7 @@ function check_consistency( $gid)
    }
    else //$Status=='FINISHED'
    {
-/*
+/* TODO?
       $few_moves = DELETE_LIMIT+$Handicap;
       if( $Moves < $few_moves )
       {
