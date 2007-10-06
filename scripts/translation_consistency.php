@@ -72,6 +72,7 @@ echo ">>>> Most of them needs manual fixes.";
 
 
 
+//---------
    echo "<hr>FAQ orphean texts (TranslationTexts=>FAQ but FAQ!=>TranslationTexts):";
 
    $query = "SELECT TranslationTexts.ID as TID,TranslationTexts.*,FAQ.*"
@@ -106,6 +107,7 @@ echo ">>>> Most of them needs manual fixes.";
    echo "<br>FAQ orphean texts done.\n";
 
 
+//---------
    echo "<hr>FAQ entries without translations:";
 
    $query = "SELECT FAQ.ID as FID,TranslationTexts.*,FAQ.*"
@@ -167,6 +169,7 @@ echo ">>>> Most of them needs manual fixes.";
    echo "<br>FAQ entries without translations done.\n";
 
 
+//---------
    echo "<hr>Translation texts without foundingroup:";
 
    $query = "SELECT T.ID as TID, T.*, I.*"
@@ -202,6 +205,7 @@ echo ">>>> Most of them needs manual fixes.";
 //SELECT COUNT(*) as cnt,Text_ID FROM TranslationFoundInGroup GROUP BY Text_ID ORDER BY cnt desc LIMIT 100;
 
 
+//---------
    echo "<hr>Translation texts without group:";
 
    $query = "SELECT T.ID as TID, T.*, I.*, G.*"
@@ -235,55 +239,43 @@ echo ">>>> Most of them needs manual fixes.";
    echo "<br>Translation texts without group done.\n";
 
 
+//---------
    echo "<hr>FAQ entries without 'FAQ' group:";
 
-   $query = "SELECT F.ID as FID,F.*,I.*,G.*"
-     ." FROM (FAQ as F,TranslationTexts AS T)"
-     ." LEFT JOIN TranslationFoundInGroup AS I ON I.Text_ID=F.Question"
-     ." LEFT JOIN TranslationGroups AS G ON I.Group_ID=G.ID"
-     ." WHERE F.ID>0 AND F.Question>0 AND T.ID=F.Question AND T.Text>''"
-     ." ORDER BY FID";
-   $result = mysql_query( $query ) or die(mysql_error());
-
-   while( ($row = mysql_fetch_assoc( $result )) )
+   foreach( array('Question','Answer') as $type )
    {
-      $FID = (int)@$row['FID'];
-      $QID = (int)@$row['Question'];
-      $GID = (int)@$row['Group_ID'];
-      $nam = (string)@$row['Groupname'];
-      if( $GID!=$FAQ_group or $nam!='FAQ' )
-      {
-         echo "<br>FAQ.$FID =&gt; QText.$QID =&gt; InGroup.$GID =&gt; Group.$nam";
-         dbg_query("REPLACE TranslationFoundInGroup SET Text_ID=$QID,Group_ID=$FAQ_group");
-      }
-   }
-   mysql_free_result($result);
+      echo "<br>- FAQ $type:\n";
 
-   $query = "SELECT F.ID as FID,F.*,I.*,G.*"
-     ." FROM (FAQ as F,TranslationTexts AS T)"
-     ." LEFT JOIN TranslationFoundInGroup AS I ON I.Text_ID=F.Answer"
-     ." LEFT JOIN TranslationGroups AS G ON I.Group_ID=G.ID"
-     ." WHERE F.ID>0 AND F.Answer>0 AND T.ID=F.Answer AND T.Text>''"
-     ." ORDER BY FID";
-   $result = mysql_query( $query ) or die(mysql_error());
+      $query = "SELECT F.ID as FID,F.*,I.*,G.*"
+        ." FROM (FAQ as F,TranslationTexts AS T)"
+        ." LEFT JOIN TranslationFoundInGroup AS I ON I.Text_ID=F.$type"
+            ." AND I.Group_ID=$FAQ_group" //see HAVING clause
+        ." LEFT JOIN TranslationGroups AS G ON I.Group_ID=G.ID"
+        ." WHERE F.ID>0 AND F.$type>0 AND T.ID=F.$type AND T.Text>''"
+        ." HAVING G.Groupname IS NULL"
+        ." ORDER BY FID";
+      $result = mysql_query( $query ) or die(mysql_error());
 
-   while( ($row = mysql_fetch_assoc( $result )) )
-   {
-      $FID = (int)@$row['FID'];
-      $AID = (int)@$row['Answer'];
-      $GID = (int)@$row['Group_ID'];
-      $nam = (string)@$row['Groupname'];
-      if( $GID!=$FAQ_group or $nam!='FAQ' )
+      while( ($row = mysql_fetch_assoc( $result )) )
       {
-         echo "<br>FAQ.$FID =&gt; AText.$AID =&gt; InGroup.$GID =&gt; Group.$nam";
-         dbg_query("REPLACE TranslationFoundInGroup SET Text_ID=$AID,Group_ID=$FAQ_group");
+         $FID = (int)@$row['FID'];
+         $QID = (int)@$row[$type];
+         $GID = (int)@$row['Group_ID'];
+         $nam = (string)@$row['Groupname'];
+         if( $GID!=$FAQ_group or $nam!='FAQ' )
+         {
+            echo "<br>FAQ.$FID =&gt; Text.$QID =&gt; InGroup.$GID =&gt; Group.$nam";
+            //will add the FAQ group even if another group is already associated:
+            dbg_query("REPLACE INTO TranslationFoundInGroup SET Text_ID=$QID,Group_ID=$FAQ_group");
+         }
       }
+      mysql_free_result($result);
    }
-   mysql_free_result($result);
 
    echo "<br>FAQ entries without 'FAQ' group done.\n";
 
 
+//---------
    echo "<hr>Done!!!\n";
    end_html();
 }

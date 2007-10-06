@@ -34,6 +34,9 @@ Changelog
    * include/message_functions.php:
    - description for 'Proper handicap' completion
 
+   * scripts/translation_consistency.php
+   - adjusting the detection of the "FAQ entries without 'FAQ' group"
+
 2007-10-05 juga
 
    * NEWS:
