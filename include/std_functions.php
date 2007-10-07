@@ -226,7 +226,7 @@ define('NUMBER_OVER',0x80);
 define("ADMIN_TRANSLATORS",0x01);
 define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
-define("ADMIN_ADMINS",0x08);
+define("ADMIN_SUPERADMIN",0x08);
 define("ADMIN_TIME",0x10);
 define("ADMIN_ADD_ADMIN",0x20);
 define("ADMIN_PASSWORD",0x40);

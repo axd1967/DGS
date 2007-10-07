@@ -33,7 +33,7 @@ require_once( "include/form_functions.php" );
    if( !$logged_in )
       error('not_logged_in');
 
-   if( !(@$player_row['admin_level'] & ADMIN_ADMINS) )
+   if( !(@$player_row['admin_level'] & ADMIN_SUPERADMIN) )
       error('adminlevel_too_low');
 
 

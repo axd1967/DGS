@@ -33,12 +33,12 @@ require_once( "include/table_columns.php" );
     error("not_logged_in");
 
   $player_level = (int)@$player_row['admin_level']; //local modifications
-  if( !($player_level & ADMIN_ADMINS) )
+  if( !($player_level & ADMIN_SUPERADMIN) )
     error("adminlevel_too_low");
 
   $admin_tasks = array(
                         'AddAdm' => array( ADMIN_ADD_ADMIN, T_('New admin')),
-                        'ADMIN'  => array( ADMIN_ADMINS, T_('Admins')),
+                        'ADMIN'  => array( ADMIN_SUPERADMIN, T_('Admins')),
                         'Passwd' => array( ADMIN_PASSWORD, T_('Password')),
                         'TRANS'  => array( ADMIN_TRANSLATORS, T_('Translators')),
                         'Forum'  => array( ADMIN_FORUM, T_('Forum')),
@@ -75,12 +75,12 @@ require_once( "include/table_columns.php" );
         $val = $player_level & (int)$admin_tasks[$type][0];
 
         if( !($id > 0 or $id=='new') or !$val)
-           error("bad_data");
+           error('bad_data');
 
         $Admin[$id] |= $val;
      }
 
-     if( !($Admin[$player_row["ID"]] & ADMIN_ADMINS) )
+     if( !($Admin[$player_row["ID"]] & ADMIN_SUPERADMIN) )
         error("admin_no_longer_admin_admin");
 
      $newadmin= get_request_arg('newadmin');
@@ -106,7 +106,8 @@ require_once( "include/table_columns.php" );
      foreach( $Admin as $id => $adm_level )
      {
         $adm_level = (int)$adm_level;
-        if( !($adm_level & ADMIN_ADMINS) )
+        //remove the capacity to add an admin if not already an ADMIN_SUPERADMIN
+        if( !($adm_level & ADMIN_SUPERADMIN) )
            $adm_level &= ~ADMIN_ADD_ADMIN;
         $Admin[$id] = $adm_level;
 
@@ -152,6 +153,7 @@ require_once( "include/table_columns.php" );
       $atable->add_tablehead($col++, $aname, NULL, true, true);
    }
 
+   //can't add an admin if had not the privlege
    $new_admin = ($player_level & ADMIN_ADD_ADMIN);
    while( $row = mysql_fetch_assoc( $result ) or $new_admin )
    {
@@ -188,8 +190,9 @@ require_once( "include/table_columns.php" );
          else
             $tmp = ' disabled';
 
+         //only ADMIN_SUPERADMIN can grant ADMIN_ADD_ADMIN
          if( $amask == ADMIN_ADD_ADMIN
-            && !($player_level & ADMIN_ADMINS) )
+            && !($player_level & ADMIN_SUPERADMIN) )
             $tmp = ' disabled';
 
          if( $amask & $level )

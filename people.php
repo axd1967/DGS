@@ -81,7 +81,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
    //---------
    section( 'FAQ', T_('FAQ'));
 
-   $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_ADMINS);
+   $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_SUPERADMIN);
    if( $extra_info )
       $FAQexclude = array();
    else
