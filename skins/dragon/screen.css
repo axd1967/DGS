@@ -1519,18 +1519,21 @@ form#translateForm table.FormClass td {
 }
 
 form#translateForm table.FormClass td.English {
-   width: 40%;
+   width: 30%;
    text-align: left;
+   vertical-align: top;
 }
 
 form#translateForm table.FormClass td.Language {
-   width: 40%;
+   width: 30%;
    text-align: left;
+   vertical-align: top;
 }
 
-form#translateForm table.FormClass td.Mark {
-   text-align: left;
+form#translateForm table.FormClass td.Sample {
    white-space: nowrap;
+   text-align: left;
+   vertical-align: top;
 }
 
 
