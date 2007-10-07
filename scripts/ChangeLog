@@ -25,6 +25,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-07 juga
+
+   * opponents.php:
+   - show form-submits for opponents-info game-stats-view
+
 2007-10-07 rodival
 
    * include/std_functions.php, scripts/mailtest.php,
