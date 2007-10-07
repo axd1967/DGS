@@ -200,6 +200,13 @@ $ARR_DBFIELDKEYS = array(
          'DESCRIPTION', T_('Last changed'),
          'FILTER',      $usfilter, 3,
          'FILTERERROR', $usfilter, 3, "<br>$FERR1", $FERR2, true ));
+   if ( $opp )
+   {
+      $usform->add_row( array(
+            'TAB',
+            'CELL',     1, 'align=left',
+            'OWNHTML',  implode( '', $ufilter->get_submit_elements() ), ));
+   }
 
 
    // build SQL-query (for user-table)
