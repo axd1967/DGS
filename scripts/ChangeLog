@@ -27,6 +27,9 @@ Changelog
 
 2007-10-07 juga
 
+   * include/filter.php (FilterRating.parse_value):
+   - fix handling of range-search using '-' with upper limit
+
    * opponents.php:
    - show form-submits for opponents-info game-stats-view
 
