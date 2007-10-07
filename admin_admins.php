@@ -189,7 +189,7 @@ require_once( "include/table_columns.php" );
             $tmp = ' disabled';
 
          if( $amask == ADMIN_ADD_ADMIN
-            && !($level & ADMIN_ADMINS) )
+            && !($player_level & ADMIN_ADMINS) )
             $tmp = ' disabled';
 
          if( $amask & $level )
