@@ -42,6 +42,9 @@ Changelog
    * include/std_functions.php:
    - re-enabled the <TT> pseudo tag
 
+   * forum/index.php:
+   - minor CSS fix
+
 2007-10-06 rodival
 
    * skins/dragon/screen.css,

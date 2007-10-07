@@ -98,9 +98,9 @@ require_once( "forum_functions.php" );
          . ( $Moderated == 'Y'
             ? ' &nbsp;&nbsp;<span class=Moderated>[' . T_('Moderated') . ']</span>'
             : '') .'</td>' .
-         '<td class=Postcnt>'.T_('Posts').': <strong>'
+         '<td class=PostCnt>'.T_('Posts').': <strong>'
                . $PostsInForum . '</strong></td>' .
-         '<td class=Postdate>'.T_('Last post').': <strong>'
+         '<td class=PostDate>'.T_('Last post').': <strong>'
                . $date . "</strong></td></tr>\n";
 
       echo '<tr class=Row2><td colspan=3><dl><dd>' . $Description .
