@@ -1655,7 +1655,7 @@ $html_safe_preg = array(
       ."\".('\\1'?'17':'images').\"/\\2".ALLOWED_QUOT.ALLOWED_GT.'"',
 
 //reverse to bad the skiped (faulty) ones
- "%".ALLOWED_LT."(/?(image|home|quote|tt|code|note|color|"
+ "%".ALLOWED_LT."(/?(image|home|quote|code|note|color|" //|tt
       ."user|send|game|mailto|news|ftp|http)[^`]*)"
     .ALLOWED_GT."%is"
   => "&lt;\\1&gt;",

@@ -25,6 +25,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-07 rodival
+
+   * include/std_functions.php, scripts/mailtest.php,
+     admin.php, admin_admins.php, people.php:
+   - Changed the ADMIN_ADMINS constant name to a more obvious one (ADMIN_SUPERADMIN)
+
+   * include/std_functions.php:
+   - re-enabled the <TT> pseudo tag
+
 2007-10-06 rodival
 
    * skins/dragon/screen.css,
