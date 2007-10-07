@@ -306,17 +306,23 @@ if(0){//old
                      substr_count( wordwrap( $string, $hsize, "\n", 1), "\n" )
                   )));
 
+         $sample = make_html_safe($string, 'faq', $filter_regex);
          //$string = nl2br( textarea_safe($string, LANG_DEF_CHARSET));
-         $string = make_html_safe($string, false, $filter_regex);
+         //$string = make_html_safe($string, false, $filter_regex);
+         $string = textarea_safe($string, LANG_DEF_CHARSET);
 
          $translation = $row['Text'];
+         //$translation = textarea_safe( $translation, $translate_encoding);
+         //$translation = make_html_safe($translation, false, false);
          $translation = textarea_safe( $translation, $translate_encoding);
          $form_row = array(
                   'CELL', 1, 'class=English',
-                  'TEXT', $string.$debuginfo,
+                  'OWNHTML', "<TEXTAREA readonly name=\"orgen$oid" //readonly disabled
+                     . "\" cols=\"$hsize\" rows=\"$vsize\">"
+                     . $string."</TEXTAREA>".$debuginfo,
                   'CELL', 1, 'class=Language',
                   'TEXTAREA', "transl$oid", $hsize, $vsize, $translation,
-                  'CELL', 1, 'class=Mark',
+                  'BR',
                   'CHECKBOX', "same$oid", 'Y',
                            'untranslated', $row['Text'] === '',
                   ) ;
@@ -327,8 +333,13 @@ if(0){//old
          */
          if( $row['Translated'] === 'N' ) //exclude not yet translated items
             array_push( $form_row,
-                   'BR',
-                   'CHECKBOX', "unch$oid", 'Y', 'unchanged', false ) ;
+                  'CHECKBOX', "unch$oid", 'Y', 'unchanged', false
+                  ) ;
+
+         array_push( $form_row,
+                  'CELL', 1, 'class=Sample',
+                  'TEXT', $sample
+                  ) ;
 
          $translate_form->add_row( $form_row, -1, false ) ;
 
