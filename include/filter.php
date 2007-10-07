@@ -2081,7 +2081,7 @@ class FilterRating extends Filter
 
       // need textparser for conversion below
       $tp = new TextParser( $val, $this->tok_config,
-            $this->parser_flags | TEXTPARSER_FORBID_WILD );
+            $this->parser_flags | TEXTPARSER_FORBID_WILD | TEXTPARSER_END_INCL );
       if ( $tp->errormsg() )
       {
          $this->errormsg = $tp->errormsg();
