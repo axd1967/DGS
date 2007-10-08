@@ -76,7 +76,7 @@ else
                           "black.OnVacation AS Blackonvacation, " .
                           "white.OnVacation AS Whiteonvacation " .
                           "FROM Games, Players AS black, Players AS white " .
-                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID",
+                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
                           );
 
    if( !$game_row )
