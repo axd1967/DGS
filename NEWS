@@ -53,8 +53,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    * Markup tags
       * Added &lt;image source> : show image from Dragon webserver in images-dir.
-        Use &lt;image board/source> : show Dragon board-images.
-        Please use sparely as it's using bandwidth
+        Use &lt;image board/source> : show Dragon board-images (link to dir '/17').
+        Meant to be used for FAQ.
 
 
    Code improvements:
