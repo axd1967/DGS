@@ -10,11 +10,11 @@ release [2006-08-07] - DGS 1.0.12 - CVS-tag [DGS-stable-200608]
 -----
 quick INFO:
 
-2007-02-03 rodival
-   I'm working on the bad centered alignement of FAQ, docs and other pages.
+2007-10-08 rodival
+   Debugging for release 1.0.13
 
-2007-08-13 juga
-   Currently working on: cleanup, testing, debugging, fixing
+2007-10-08 juga
+   Debugging for release 1.0.13
 
 -----
 quick TODO:
@@ -25,6 +25,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-08 juga
+
+   * NEWS:
+   - adjusted text about <image>-tag (release 1.0.13)
+
+   * quick_play.php:
+   - fix: mismatch of an empty argument
+
 2007-10-07 juga
 
    * include/filter.php (FilterRating.parse_value):
@@ -34,6 +42,9 @@ Changelog
    - show form-submits for opponents-info game-stats-view
 
 2007-10-07 rodival
+
+   * translate.php, skins/dragon/screen.css:
+   - better display of found term vs raw code
 
    * include/std_functions.php, scripts/mailtest.php,
      admin.php, admin_admins.php, people.php:
