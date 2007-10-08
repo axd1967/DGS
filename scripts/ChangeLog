@@ -25,6 +25,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-08 rodival
+
+   * opponents.php, waiting_room.php:
+   - Adding and adjusting strings to translation
+
 2007-10-08 juga
 
    * NEWS:

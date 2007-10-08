@@ -115,7 +115,7 @@ require_once( "include/contacts.php" );
     *   K=Tr$['Komi#short']
     *   S=Tr$['Standard placement#short']
     **/
-   $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Handicap');
+   $wrtable->add_tablehead(14, T_('Handicap#header'), 'Handicap');
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Komi', true);
    $wrtable->add_tablehead( 8, T_('Rating range#header'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true, true);
    $wrtable->add_tablehead( 9, T_('Time limit#header'));

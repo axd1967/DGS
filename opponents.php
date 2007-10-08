@@ -502,8 +502,8 @@ function print_players_table( $p, $uid, $opp )
    // header
    $r .= "  <tr>\n";
    $r .= "    <th></th>\n";
-   $r .= "    <th>Player</th>\n";
-   $r .= "    <th>Opponent</th>\n";
+   $r .= "    <th>".T_('Player')."</th>\n";
+   $r .= "    <th>".T_('Opponent')."</th>\n";
    $r .= "  </tr>\n";
 
    // Name, Handle
@@ -534,11 +534,13 @@ function print_players_table( $p, $uid, $opp )
    $r .= sprintf( $rowpatt, T_('Activity'),
       activity_string( $p1['ActivityLevel'] ),
       ( $p2 ? activity_string( $p2['ActivityLevel'] ) : $SPC ) );
+//RdvlLog("activity=",activity_string( $p2['ActivityLevel'] ));
 
    // Rating2
    $r .= sprintf( $rowpatt, T_('Rating'),
       echo_rating( $p1['Rating2'], true, $uid ),
       ( $p2 ? echo_rating( $p2['Rating2'], true, $opp ) : $SPC ) );
+//RdvlLog("rating=",echo_rating( $p2['Rating2'], true, $opp ));
 
    // Rank info
    $r .= sprintf( $rowpatt, T_('Rank info'),
