@@ -278,17 +278,19 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    $mform->add_row( array( 'SPACE' ) );
 
+   $trc = T_('Conventional handicap (komi 0.5 if not even)');
+   $trp = T_('Proper handicap (komi adjusted by system)');
    if( $iamrated )
    {
-      $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
+      $mform->add_row( array( 'DESCRIPTION', $trc,
                               'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype ) );
 
-      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap (komi adjusted by system)'),
+      $mform->add_row( array( 'DESCRIPTION', $trp,
                               'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype ) );
    }
    else if( $formstyle=='dispute' && $Handitype=='conv' )
    {
-      $mform->add_row( array( 'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
+      $mform->add_row( array( 'DESCRIPTION', $trc,
                               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
                             ));
       $Handitype = 'manual';
@@ -296,7 +298,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    }
    else if( $formstyle=='dispute' && $Handitype=='proper' )
    {
-      $mform->add_row( array( 'DESCRIPTION', T_('Proper handicap (komi adjusted by system)'), //T_//('No initial rating')
+      $mform->add_row( array( 'DESCRIPTION', $trp, //T_//('No initial rating')
                               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
                             ));
       $Handitype = 'manual';
