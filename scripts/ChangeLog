@@ -27,7 +27,8 @@ Changelog
 
 2007-10-08 rodival
 
-   * status.php, opponents.php, waiting_room.php, message_functions.php:
+   * scripts/generate_translation_texts.php,
+     status.php, opponents.php, waiting_room.php, message_functions.php:
    - Adjusting and adding strings to translation
 
 2007-10-08 juga

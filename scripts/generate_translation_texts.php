@@ -39,7 +39,7 @@ chdir( 'scripts' );
 
    $TheErrors->set_mode(ERROR_MODE_PRINT);
 
-   start_html('update_translation_pages', 0);
+   start_html('generate_translation_texts', 0);
 
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
    if( $do_it=@$_REQUEST['do_it'] )

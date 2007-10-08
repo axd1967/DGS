@@ -107,15 +107,19 @@ require_once( "include/contacts.php" );
    $wrtable->add_tablehead( 3, T_('Rating#header'), 'other_rating', true);
    $wrtable->add_tablehead( 4, T_('Comment#header'));
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Size', true);
+   /**
+    * keep the Type#headerwr and Handicap#headerwr to allow the
+    * translators to solve a local language ambiguity.
+    **/
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), 'Handicaptype', false, true);
-   /** TODO: the handicap stones info may be merged in the Komi column
+   $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Handicap');
+   /** TODO: the handicap stones info could be merged in the Komi column
     * with the standard placement... something like: "%d H + %d K (S)"
     * where:
     *   H=Tr$['Handicap stones#short']
     *   K=Tr$['Komi#short']
     *   S=Tr$['Standard placement#short']
     **/
-   $wrtable->add_tablehead(14, T_('Handicap#header'), 'Handicap');
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Komi', true);
    $wrtable->add_tablehead( 8, T_('Rating range#header'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true, true);
    $wrtable->add_tablehead( 9, T_('Time limit#header'));
