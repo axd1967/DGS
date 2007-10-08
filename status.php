@@ -173,7 +173,7 @@ require_once( "include/message_functions.php" );
       $gtable->add_tablehead( 8, T_('Komi#header'));
       $gtable->add_tablehead( 9, T_('Moves#header'));
       $gtable->add_tablehead(14, T_('Rated#header'));
-      $gtable->add_tablehead(13, T_('Last Move#header'));
+      $gtable->add_tablehead(13, T_('Last move#header'));
       $gtable->add_tablehead(10, T_('Time remaining#header'));
 
       while( $row = mysql_fetch_assoc( $result ) )
