@@ -25,6 +25,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-09 juga
+
+   * show_games.php:
+   - bugfix: show values Rated & Last moved for observed games
+
 2007-10-08 rodival
 
    * scripts/generate_translation_texts.php,
