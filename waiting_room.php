@@ -136,6 +136,7 @@ require_once( "include/contacts.php" );
       . $wrtable->current_rows_string(1)
       . $wrtable->current_sort_string(1); //end sep
    $baseURL = $baseURLMenu
+      . $wrtable->current_filter_string(1)
       . $wrtable->current_from_string(1); //end sep
 
    $qsql = new QuerySQL();
