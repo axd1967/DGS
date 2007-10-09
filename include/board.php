@@ -510,7 +510,7 @@ class Board
       //meanwhile background="..." is not W3C compliant
       //so, for those old browsers, use the bgcolor="..." option
 
-   $PocketPC = get_request_arg('PocketPC', 0);
+   $PocketPC = get_request_arg('PocketPC', 0); if($PocketPC) echo $PocketPC;
    if( !($PocketPC&1) )
       echo '<table class=Goban ' . $woodstring . '>';
    else
