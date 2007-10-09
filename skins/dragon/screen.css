@@ -1576,22 +1576,31 @@ table.Goban {
    background-repeat: repeat;
    background-position: top left; /*  0% 0% top left */
    empty-cells: hide;
+   /* Maybe the PocketPC IE does not understand the !important - temporary test */
+   border-collapse: collapse;
+   border-spacing: 0px;
+   margin: 0px auto;
    border-collapse: collapse !important;
    border-spacing: 0px !important;
    margin: 0px auto !important;
 }
 
 table.Goban tr {
+   margin: 0px;
+   padding: 0px;
    margin: 0px !important;
    padding: 0px !important;
 }
 
 table.Goban td {
+   text-align: left;
+   color: black;
+   padding: 0px;
+   line-height: 1px;
+   white-space: nowrap;
    padding: 0px !important;
    line-height: 1px !important;
    white-space: nowrap !important;
-   text-align: left;
-   color: black;
 }
 
 table.Goban img {
@@ -1602,6 +1611,8 @@ table.Goban img {
   height of the table cells too.
    vertical-align: top !important;
 */
+   margin: 0px;
+   padding: 0px;
    margin: 0px !important;
    padding: 0px !important;
 }

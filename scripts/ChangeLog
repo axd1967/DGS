@@ -31,6 +31,11 @@ Changelog
      translate.php:
    - A midway page re-format to simplify the translators work
 
+   * skins/dragon/screen.css,
+     include/board.php:
+   - A try to analyze the [Go Ban Joe (Banjo)] PocketPC IE problem
+     around the board display.
+
 2007-10-09 juga
 
    * show_games.php:

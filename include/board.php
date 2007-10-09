@@ -506,8 +506,18 @@ class Board
          $woodstring = 'bgcolor="' . $woodbgcolors[$this->woodcolor - 10] . '"';
       else
          $woodstring = 'style="background-image:url(images/wood' . $this->woodcolor . '.gif);"';
+      //style="background-image..." is not understood by old browsers like Netscape Navigator 4.0
+      //meanwhile background="..." is not W3C compliant
+      //so, for those old browsers, use the bgcolor="..." option
 
-      echo '<table class=Goban ' . $woodstring . '><tbody>';
+   $PocketPC = get_request_arg('PocketPC', 0);
+   if( !($PocketPC&1) )
+      echo '<table class=Goban ' . $woodstring . '>';
+   else
+      echo '<table class=Goban ' . $woodstring . ' border=0 cellspacing=0 cellpadding=0>';
+
+   if( !($PocketPC&2) )
+      echo '<tbody>';
 
       if( $this->coord_borders & COORD_UP )
          $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
@@ -684,7 +694,9 @@ class Board
          $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
                            $coord_left, $coord_right );
 
-      echo "</tbody></table>\n";
+   if( !($PocketPC&2) )
+      echo '</tbody>';
+      echo "</table>\n";
       } //goban
    } //draw_board
 
