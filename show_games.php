@@ -581,7 +581,7 @@ require_once( "include/rating.php" );
          if( $gtable->Is_Column_Displayed[12] )
             $grow_strings[12] = '<td>' . date($date_fmt, $Time) . "</td>";
       }
-      else if( $running ) // && !all
+      else // if( !$finished or $observe )
       {
          if( !$observe and !$all and $gtable->Is_Column_Displayed[12] )
             $grow_strings[12] = "<td>" . ($WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td>";
