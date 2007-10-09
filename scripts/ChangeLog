@@ -38,6 +38,10 @@ Changelog
 
 2007-10-09 juga
 
+   * waiting_room.php:
+   - preserve filter-values for links:
+     Info-button, bottom-link to add new game
+
    * show_games.php:
    - bugfix: show values Rated & Last moved for observed games
 
