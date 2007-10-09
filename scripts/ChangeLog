@@ -25,6 +25,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-09 rodival
+
+   * skins/dragon/screen.css,
+     translate.php:
+   - A midway page re-format to simplify the translators work
+
 2007-10-09 juga
 
    * show_games.php:

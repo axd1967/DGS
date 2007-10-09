@@ -30,6 +30,14 @@ define('TRANSL_ALLOW_FILTER', 1); //allow a search on the english phrases
 
 $info_box = 'When translating you should keep in mind the following things:
 <ul>
+  <li> You must enter your translation in the second column boxes.
+       <br>
+       The first column displays the english original phrases in a similar way
+       but is read-only.
+       <br>
+       The third column displays the english original phrases in the HTML way as a
+       display example. Caution: this example may sometime differs from the effective
+       display in the normal page because of additional constraints of the normal page.
   <li> If a translated word is the same as in english, leave it blank and click
        the \'untranslated\' box to the right.
   <li> In some places there is a percent-character followed by some characters.
@@ -203,6 +211,7 @@ if(0){//old
 
    $tabindex= 1;
 
+   $ThePage['class']= 'Translate'; //temporary solution to CSS problem
    start_page('Translate', true, $logged_in, $player_row);
    $str = 'Read this before translating';
    if( (bool)@$_REQUEST['infos'] )
@@ -257,7 +266,9 @@ if(0){//old
       if( $table_links )
       {
          $translate_form->add_row( array( 'ROW', 'LinksT',
-               'CELL', $nbcol, 'class=PageLinks',
+               'CELL', $nbcol-1, 'class=PageLinksL',
+               'TEXT', $table_links,
+               'CELL', 1, 'class=PageLinksR',
                'TEXT', $table_links,
                 ) );
       }
@@ -333,6 +344,7 @@ if(0){//old
          */
          if( $row['Translated'] === 'N' ) //exclude not yet translated items
             array_push( $form_row,
+                  'TEXT', '&nbsp;&nbsp;',
                   'CHECKBOX', "unch$oid", 'Y', 'unchanged', false
                   ) ;
 
@@ -350,7 +362,9 @@ if(0){//old
       if( $table_links )
       {
          $translate_form->add_row( array( 'ROW', 'LinksB',
-               'CELL', $nbcol, 'class=PageLinks',
+               'CELL', $nbcol-1, 'class=PageLinksL',
+               'TEXT', $table_links,
+               'CELL', 1, 'class=PageLinksR',
                'TEXT', $table_links,
                 ) );
       }
@@ -358,7 +372,7 @@ if(0){//old
       if( $oid > 0 ) //not empty table
       {
          $translate_form->add_row( array( 'SPACE' ) ); //$nbcol
-         $translate_form->add_row( array(
+         $translate_form->add_row( array( 'ROW', 'SubmitTransl',
             'CELL', $nbcol, '',
             'HIDDEN', 'translate_lang', $translate_lang,
             'HIDDEN', 'profil_charset', $profil_charset,
@@ -377,7 +391,7 @@ if(0){//old
       } //$translate_form
 
       $nbcol = 1;
-      $groupchoice_form = new Form( 'selectgroupform', $page, FORM_POST );
+      $groupchoice_form = new Form( 'selectgroup', $page, FORM_POST );
       $groupchoice_form->add_row( array(
          'HEADER', 'Groups',
          ) ); //$nbcol
@@ -385,7 +399,7 @@ if(0){//old
       if( TRANSL_ALLOW_FILTER )
          $groupchoice_form->add_row( array(
             'CELL', $nbcol, '',
-            'TEXT', 'English filter (_:any char, %:any number of chars, \:escape)',
+            'TEXT', 'English filter (_:any char, %:any number of chars, \:escape)&nbsp;',
             'TEXTINPUT', 'filter_en', 20, 80, $filter_en,
             ) );
       $groupchoice_form->add_row( array(
@@ -408,7 +422,7 @@ if(0){//old
    if( $lang_choice )
    {
       $nbcol = 1;
-      $langchoice_form = new Form( 'selectlangform', $page, FORM_POST );
+      $langchoice_form = new Form( 'selectlang', $page, FORM_POST );
       $langchoice_form->add_row( array(
          'HEADER', 'Select language to translate to',
          ) ); //$nbcol

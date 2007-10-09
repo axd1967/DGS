@@ -1500,13 +1500,20 @@ form#translateForm table.FormClass tr.LinksB td {
    background: #d0d0d0;
    color: black;
    margin: 0px;
-   padding: 4px 8px 4px 8px;
    vertical-align: top;
 }
 
-form#translateForm table.FormClass td.PageLinks {
+form#translateForm table.FormClass td.PageLinksR {
    border: 0px solid lime;
+   padding: 4px 8px 4px 8px;
    text-align: right;
+   white-space: nowrap;
+}
+
+form#translateForm table.FormClass td.PageLinksL {
+   border: 0px solid lime;
+   padding: 4px 8px 4px 8px;
+   text-align: left;
    white-space: nowrap;
 }
 
@@ -1534,6 +1541,30 @@ form#translateForm table.FormClass td.Sample {
    white-space: nowrap;
    text-align: left;
    vertical-align: top;
+}
+
+/*
+body.Translate table#pageLayout td#pageBody {
+   text-align: left;
+}
+*/
+
+form#translateForm table.FormClass tr.SubmitTransl td {
+   border: 0px solid lime;
+   padding-left: 10em;
+   text-align: left;
+}
+
+form#selectlangForm table.FormClass,
+form#selectgroupForm table.FormClass {
+   border: 0px solid lime;
+   margin-left: 10em;
+}
+
+form#selectlangForm table.FormClass td.FormHeader h3.Header,
+form#selectgroupForm table.FormClass td.FormHeader h3.Header {
+   border: 0px solid red;
+   text-align: left;
 }
 
 
