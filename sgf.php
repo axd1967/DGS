@@ -413,7 +413,8 @@ $array=array();
 
    header( 'Content-Type: application/x-go-sgf' );
    $filename= "$Whitehandle-$Blackhandle-$gid-" . date('Ymd', $timestamp) ;
-   header( "Content-Disposition: inline; filename=\"$filename.sgf\"" );
+   //before 2007-10-10: header( "Content-Disposition: inline; filename=\"$filename.sgf\"" );
+   header( "Content-Disposition: attachment; filename=\"$filename.sgf\"" );
    header( "Content-Description: PHP Generated Data" );
 
    //to allow some mime applications to find it in the cache

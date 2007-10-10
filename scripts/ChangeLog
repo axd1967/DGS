@@ -25,6 +25,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-10 rodival
+
+   * sgf.php:
+   - Changed the header Content-Disposition: inline; to attachment;
+
 2007-10-09 rodival
 
    * skins/dragon/screen.css,
