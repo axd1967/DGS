@@ -507,7 +507,7 @@ table#pageLayout {
 table#pageMenu {
    background: #f7f5ff;
    color: black;
-   border-width: 0px;
+   border-width: 1px;
    border-color: #0C41C9;
    border-style: solid;
    table-layout: auto;
