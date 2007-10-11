@@ -33,6 +33,10 @@ Changelog
    * translate.php:
    - just adjusted the profile-encoding for the translators' ADMINS only
 
+   * include/std_functions.php:
+   - enabling the <home_ ...> pseudo-tags
+   - enhanced the $html_safe_preg by the way
+
 2007-10-10 rodival
 
    * sgf.php:

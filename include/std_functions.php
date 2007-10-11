@@ -1585,30 +1585,30 @@ define('REF_LINK_BLANK', 0x4);
 $html_safe_preg = array(
 
 //<note>...</note> =>removed from entry, seen only by editors
- "%".ALLOWED_LT."note([^`\n\t]*)".ALLOWED_GT.".*?"
-    .ALLOWED_LT."/note([^`\n\t]*)".ALLOWED_GT."%is"
+ "%".ALLOWED_LT."note([^`\\n\\t]*)".ALLOWED_GT.".*?"
+    .ALLOWED_LT."/note([^`\\n\\t]*)".ALLOWED_GT."%is"
   => '', // =>removed from entry
 
 //<mailto:...>
- "%".ALLOWED_LT."(mailto:)([^ `\n\t]+)".ALLOWED_GT."%is"
+ "%".ALLOWED_LT."(mailto:)([^`\\n\\s]+)".ALLOWED_GT."%is"
   => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT
                         ."\\2".ALLOWED_LT."/a".ALLOWED_GT,
 
 //<http://...>, <https://...>, <news://...>, <ftp://...>
- "%".ALLOWED_LT."((http:|https:|news:|ftp:)//[^ `\n\t]+)".ALLOWED_GT."%is"
+ "%".ALLOWED_LT."((http:|https:|news:|ftp:)//[^`\\n\\s]+)".ALLOWED_GT."%is"
   => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT
                         ."\\1".ALLOWED_LT."/a".ALLOWED_GT,
 
 //<game gid[,move]> =>show game
  "%".ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *".ALLOWED_GT."%ise"
-  => "game_reference(('\\1'=='_'?".REF_LINK_BLANK.":0)+"
+  => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+"
                         .REF_LINK_ALLOWED.",1,'',\\2,\\4+0)",
 
 //<user uid> or <user =uhandle> =>show user info
 //<send uid> or <send =uhandle> =>send a message to user
  "%".ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR
                         ."?[".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT."%ise"
-  => "\\1_reference(('\\2'=='_'?".REF_LINK_BLANK.":0)+"
+  => "\\1_reference(('\\2'?".REF_LINK_BLANK.":0)+"
                         .REF_LINK_ALLOWED.",1,'','\\3')",
 // because of HANDLE_LEGAL_REGS, no need of ...,str_replace('\"','"','\\3')...
 
@@ -1618,44 +1618,46 @@ $html_safe_preg = array(
  "%".ALLOWED_LT."/color *".ALLOWED_GT."%is"
   => ALLOWED_LT."/font".ALLOWED_GT,
 
-//<tt>...</tt> =>translated to <pre>...</pre>
-// see also parse_tags_safe() for the suppression of inner html code
-/*
- "%".ALLOWED_LT."tt([^`\n\t]*)".ALLOWED_GT
-  => ALLOWED_LT."pre\\1".ALLOWED_GT,
- "%".ALLOWED_LT."/tt *".ALLOWED_GT
-  => ALLOWED_LT."/pre".ALLOWED_GT,
-*/
-
 //<code>...</code> =>translated to <pre class=code>...</pre>
 // see also parse_tags_safe() for the suppression of inner html codes
- "%".ALLOWED_LT."code([^`\n\t]*)".ALLOWED_GT."%is"
+ "%".ALLOWED_LT."code([^`\\n\\t]*)".ALLOWED_GT."%is"
   => ALLOWED_LT."pre class=code \\1".ALLOWED_GT,
  "%".ALLOWED_LT."/code *".ALLOWED_GT."%is"
   => ALLOWED_LT."/pre".ALLOWED_GT,
 
 //<quote>...</quote> =>translated to <div class=quote>...</div>
- "%".ALLOWED_LT."quote([^`\n\t]*)".ALLOWED_GT."%is"
+ "%".ALLOWED_LT."quote([^`\\n\\t]*)".ALLOWED_GT."%is"
   => ALLOWED_LT."div class=quote \\1".ALLOWED_GT,
  "%".ALLOWED_LT."/quote *".ALLOWED_GT."%is"
   => ALLOWED_LT."/div".ALLOWED_GT,
 
 //<home page>...</home> =>translated to <a href="{$HOSTBASE}$page">...</a>
- "%".ALLOWED_LT."home[\n\s]+((\.?[^\.:`\n\s])+)".ALLOWED_GT."%is"
-  => ALLOWED_LT."a href=".ALLOWED_QUOT.$HOSTBASE."\\1".ALLOWED_QUOT.ALLOWED_GT,
+ "%".ALLOWED_LT."home(_)?[\\n\\s]+((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT."%ise"
+  => '"'.ALLOWED_LT."a href=".ALLOWED_QUOT.$HOSTBASE."\\2".ALLOWED_QUOT
+      ."\".('\\1'?' target=".ALLOWED_QUOT.'_blank'.ALLOWED_QUOT."':'').\""
+      .ALLOWED_GT.'"',
  "%".ALLOWED_LT."/home *".ALLOWED_GT."%is"
   => ALLOWED_LT."/a".ALLOWED_GT,
 
 //<image pict> =>translated to <img src="{$HOSTBASE}images/$pict">
 //<image board/pict> =>translated to <img src="{$HOSTBASE}17/$pict">
- "%".ALLOWED_LT."image[\n\s]+(board/)?((\.?[^\.:`\n\s])+)".ALLOWED_GT."%ise"
+ "%".ALLOWED_LT."image[\\n\\s]+(board/)?((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT."%ise"
   => '"'.ALLOWED_LT."img class=InTextImage"
       ." alt=".ALLOWED_QUOT."(img)".ALLOWED_QUOT
       ." src=".ALLOWED_QUOT.$HOSTBASE
       ."\".('\\1'?'17':'images').\"/\\2".ALLOWED_QUOT.ALLOWED_GT.'"',
 
+//<tt>...</tt> =>translated to <pre>...</pre>
+// see also parse_tags_safe() for the suppression of inner html code
+/*
+ "%".ALLOWED_LT."tt([^`\\n\\t]*)".ALLOWED_GT
+  => ALLOWED_LT."pre\\1".ALLOWED_GT,
+ "%".ALLOWED_LT."/tt *".ALLOWED_GT
+  => ALLOWED_LT."/pre".ALLOWED_GT,
+*/
+
 //reverse to bad the skiped (faulty) ones
- "%".ALLOWED_LT."(/?(image|home|quote|code|note|color|" //|tt
+ "%".ALLOWED_LT."(/?(image|home|quote|code|note|color|" //|tt if <tt> above
       ."user|send|game|mailto|news|ftp|http)[^`]*)"
     .ALLOWED_GT."%is"
   => "&lt;\\1&gt;",
