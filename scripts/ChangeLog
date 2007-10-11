@@ -30,6 +30,9 @@ Changelog
    * include/filter.php:
    - minor HTML args enhancement
 
+   * translate.php:
+   - just adjusted the profile-encoding for the translators' ADMINS only
+
 2007-10-10 rodival
 
    * sgf.php:

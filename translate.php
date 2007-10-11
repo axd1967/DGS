@@ -81,7 +81,9 @@ $info_box = 'When translating you should keep in mind the following things:
 
 
    $lang_desc = get_language_descriptions_translated( true);
-   if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   if( TRANS_FULL_ADMIN
+      && (@$player_row['admin_level'] & ADMIN_TRANSLATORS)
+      )
    {
       $translator_array = array_keys( $lang_desc);
    }
@@ -95,7 +97,9 @@ $info_box = 'When translating you should keep in mind the following things:
 
 
    $translate_lang = get_request_arg('translate_lang');
-   if( ALLOW_PROFIL_CHARSET && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   if( ALLOW_PROFIL_CHARSET
+      && (@$player_row['admin_level'] & ADMIN_TRANSLATORS)
+      )
      $profil_charset = (int)(bool)@$_REQUEST['profil_charset'];
    else
      $profil_charset = 0;
@@ -447,8 +451,10 @@ if(0){//old
          'SUBMITBUTTON', 'cl', 'Select',
          ) );
 
-      if( ALLOW_PROFIL_CHARSET )
-         $langchoice_form->add_row( array(
+      if( ALLOW_PROFIL_CHARSET
+         && (@$player_row['admin_level'] & ADMIN_TRANSLATORS)
+         )
+         $langchoice_form->add_row( array( 'ROW', 'DebugInfo',
             'CELL', $nbcol, '',
             'CHECKBOX', 'profil_charset', 1, 'use profile encoding', $profil_charset,
             ) );
