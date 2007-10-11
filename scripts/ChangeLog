@@ -37,6 +37,10 @@ Changelog
    - enabling the <home_ ...> pseudo-tags
    - enhanced the $html_safe_preg by the way
 
+   * skins/dragon/screen.css,
+     include/board.php:
+   - An other try to analyze the board display problems.
+
 2007-10-10 rodival
 
    * sgf.php:

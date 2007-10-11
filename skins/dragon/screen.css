@@ -76,13 +76,13 @@ hr {
    padding: 0px;
    color: #808081; /* */
    background: #808080;
-   border: 0px;
+   border-width: 0px;
 }
 
 pre {
    display: block;
    width: 100%;
-   border: 0px;
+   border-width: 0px;
    margin: 0.5em;
    padding: 0.5em;
    text-align: left;
@@ -507,6 +507,7 @@ table#pageLayout {
 table#pageMenu {
    background: #f7f5ff;
    color: black;
+   border-width: 0px;
    border-color: #0C41C9;
    border-style: solid;
    table-layout: auto;
@@ -975,6 +976,7 @@ table.Table tr.Head th span.Tool img.Sort { /* headers row */
 /* ------------------------- */
 
 table.Infos {
+   border: 1px solid #808080; /* for the old browsers which don't understand the following */
    border: 2px outset #F7F5E3; /* page background-color */
    table-layout: auto;
    border-spacing: 2px; /* not recognized by IE */
@@ -989,6 +991,7 @@ table.Infos {
 
 table.Infos th,
 table.Infos td {
+   border: 1px solid #808080; /* for the old browsers which don't understand the following */
    border: 1px inset #F7F5E3; /* page background-color */
    margin: 0px;
    padding: 4px;
@@ -1603,6 +1606,19 @@ table.Goban td {
    white-space: nowrap !important;
 }
 
+table.Goban a {
+/*
+  Netscape6.2.3 under Win95 seems to oversize the cells
+  when they contain a link (move step)
+*/
+   border-width: 0px;
+   margin: 0px;
+   padding: 0px;
+   margin: 0px !important;
+   padding: 0px !important;
+}
+
+table.Goban a img,
 table.Goban img {
 /*
   No vertical-align: here, else Avant browser
@@ -1611,6 +1627,7 @@ table.Goban img {
   height of the table cells too.
    vertical-align: top !important;
 */
+   border-width: 0px;
    margin: 0px;
    padding: 0px;
    margin: 0px !important;
@@ -1633,7 +1650,7 @@ table.Captures th {
 }
 
 table.Captures td.B {
-   border: 0px;
+   border-width: 0px;
    vertical-align: top;
    padding: 4px;
    white-space: nowrap;

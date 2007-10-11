@@ -510,13 +510,27 @@ class Board
       //meanwhile background="..." is not W3C compliant
       //so, for those old browsers, use the bgcolor="..." option
 
-   $PocketPC = get_request_arg('PocketPC', 0); if($PocketPC) echo $PocketPC;
-   if( !($PocketPC&1) )
+   $PocketPC = get_request_arg('PocketPC', 0); if($PocketPC) echo 'PocketPC test: '.$PocketPC;
+   if( $PocketPC <= 0 )
       echo '<table class=Goban ' . $woodstring . '>';
    else
-      echo '<table class=Goban ' . $woodstring . ' border=0 cellspacing=0 cellpadding=0>';
+   {
+      echo '<table class=Goban ' . $woodstring;
+      if( $PocketPC < 4 )
+         echo ' border=0 cellspacing=0 cellpadding=0';
+      else
+      {
+         switch( $PocketPC )
+         {
+         case 4: echo ' cellpadding=0'; break;
+         case 5: echo ' cellspacing=0'; break;
+         case 6: echo ' border=0'; break;
+         }
+      }
+      echo '>';
+   }
 
-   if( !($PocketPC&2) )
+   if( $PocketPC > 3 or !($PocketPC&2) )
       echo '<tbody>';
 
       if( $this->coord_borders & COORD_UP )
@@ -694,7 +708,7 @@ class Board
          $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
                            $coord_left, $coord_right );
 
-   if( !($PocketPC&2) )
+   if( $PocketPC > 3 or !($PocketPC&2) )
       echo '</tbody>';
       echo "</table>\n";
       } //goban
