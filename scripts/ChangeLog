@@ -25,6 +25,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-11 rodival
+
+   * include/filter.php:
+   - minor HTML args enhancement
+
 2007-10-10 rodival
 
    * sgf.php:

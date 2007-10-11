@@ -1717,9 +1717,9 @@ class Filter
          $elem .= " maxlength=\"{$maxlen}\"";
       if ( $size )
          $elem .= " size=\"{$size}\"";
-      $elem .= " value=\"" . textarea_safe($value) ."\"";
+      $elem .= " value=" . attb_quote($value);
       if ( $title != '' )
-         $elem .= " title=\"" . textarea_safe($title) . "\"";
+         $elem .= " title=" . attb_quote($title);
       $elem .= ">";
       return $elem;
    }
@@ -1809,7 +1809,7 @@ class Filter
 
       $elem = "<input type=\"checkbox\" name=\"$fname\" value=\"1\"";
       if ( !empty($title) )
-         $elem .= " title=\"" . textarea_safe($title) . "\"";
+         $elem .= " title=" . attb_quote($title);
       if ( $value )
          $elem .= " checked";
       $elem .= ">";
