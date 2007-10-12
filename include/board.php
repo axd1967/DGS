@@ -522,9 +522,11 @@ class Board
       {
          switch( $PocketPC )
          {
-         case 4: echo ' cellpadding=0'; break;
+         case 4: echo ' cellpadding=0'; break; //this one the bigger part of the defect, just leaving 1 pixel oversize
          case 5: echo ' cellspacing=0'; break;
          case 6: echo ' border=0'; break;
+         case 7: echo ' cellpadding=0 cellspacing=0'; break;
+         case 8: echo ' cellpadding=0 border=0'; break;
          }
       }
       echo '>';
