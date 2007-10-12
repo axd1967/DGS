@@ -502,17 +502,29 @@ class Board
 
       { // goban
 
+      /**
+       * style="background-image..." is not understood by old browsers like Netscape Navigator 4.0
+       * meanwhile background="..." is not W3C compliant
+       * so, for those old browsers, use the bgcolor="..." option
+       **/
       if( $this->woodcolor > 10 )
          $woodstring = 'bgcolor="' . $woodbgcolors[$this->woodcolor - 10] . '"';
       else
          $woodstring = 'style="background-image:url(images/wood' . $this->woodcolor . '.gif);"';
-      //style="background-image..." is not understood by old browsers like Netscape Navigator 4.0
-      //meanwhile background="..." is not W3C compliant
-      //so, for those old browsers, use the bgcolor="..." option
+
+      /**
+       * Some simple browsers (like Pocket PC IE or PALM ones) poorly
+       * manage the CSS commands related to cellspacing and cellpadding.
+       * Most of the time, this results in a 1 or 2 pixels added to the
+       * cells size and is not so disturbing. But this is really annoying
+       * for the board cells.
+       * So we keep the HTML commands here, even if deprecated.
+       **/
+      $cell_size_fix = ' border=0 cellspacing=0 cellpadding=0';
 
    $PocketPC = get_request_arg('PocketPC', 0); if($PocketPC) echo 'PocketPC test: '.$PocketPC;
    if( $PocketPC <= 0 )
-      echo '<table class=Goban ' . $woodstring . '>';
+      echo '<table class=Goban ' . $woodstring . $cell_size_fix . '>';
    else
    {
       echo '<table class=Goban ' . $woodstring;
@@ -525,7 +537,7 @@ class Board
          case 4: echo ' cellpadding=0'; break; //this one the bigger part of the defect, just leaving 1 pixel oversize
          case 5: echo ' cellspacing=0'; break;
          case 6: echo ' border=0'; break;
-         case 7: echo ' cellpadding=0 cellspacing=0'; break;
+         case 7: echo ' cellpadding=0 cellspacing=0'; break; //this one remove the last pixel gap
          case 8: echo ' cellpadding=0 border=0'; break;
          }
       }

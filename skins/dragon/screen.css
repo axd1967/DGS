@@ -976,7 +976,8 @@ table.Table tr.Head th span.Tool img.Sort { /* headers row */
 /* ------------------------- */
 
 table.Infos {
-   border: 2px solid #FF0000; /* for the old browsers which don't understand the following */
+/*   border: 2px solid #FF0000; /* starting step common with PocketPC and other browsers */
+   border: 2px outset #FF0000; /* for the old browsers which don't understand the following */
 /*   border: 2px outset #F7F5E3; /* page background-color */
 /*
    border-width: 2px;
@@ -995,7 +996,8 @@ table.Infos {
 
 table.Infos th,
 table.Infos td {
-   border: 2px solid #0000FF; /* for the old browsers which don't understand the following */
+/*   border: 2px solid #0000FF; /* starting step common with PocketPC and other browsers */
+   border: 2px inset #0000FF; /* for the old browsers which don't understand the following */
 /*   border: 1px inset #F7F5E3; /* page background-color */
 /*
    border-width: 1px;
