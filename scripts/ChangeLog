@@ -27,8 +27,12 @@ Changelog
 
 2007-10-13 juga
 
+   * NEWS:
+   - added <home_ page>... opening new window
+
    * skins/dragon/screen.css, translate.php:
    - JUG's dream of page-layout for translate-page
+   - fix extracting of highlight-regex term (leading & trailing %, 0)
 
 2007-10-13 rodival
 
