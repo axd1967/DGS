@@ -278,7 +278,7 @@ if(0){//old
                 ) );
       }
 
-      if( $filter_en )
+      if( $filter_en != '' )
       {
          $arr = sql_extract_terms( $filter_en );
          $filter_regex = $arr[0];
