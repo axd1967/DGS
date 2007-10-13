@@ -28,7 +28,7 @@ define('ALLOW_PROFIL_CHARSET', 1); //allow the admins to overwrite the page enco
 define('TRANSL_ALLOW_FILTER', 1); //allow a search on the english phrases
 
 
-$info_box = 'When translating you should keep in mind the following things:
+$info_box = '<br>When translating you should keep in mind the following things:
 <ul>
   <li> You must enter your translation in the second column boxes.
        <br>

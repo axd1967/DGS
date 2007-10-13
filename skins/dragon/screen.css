@@ -972,20 +972,65 @@ table.Table tr.Head th span.Tool img.Sort { /* headers row */
 
 
 /* ------------------------- */
-/* infos tables */
+/* embossed tables */
 /* ------------------------- */
-
+/*
+ Our wanted instructions was:
+   border: 2px outset #F7F5E3; //for the TABLEs
+   border: 1px inset #F7F5E3; //for the TDs and THs
+   //#F7F5E3 = page background-color (giving shadows with #FFF8F0 & #8F8078)
+ but some browsers which does not understand 'outset' and/or 'inset', evaluate
+ it to 'solid', leading to a border of the background color, and so, invisible.
+ Our solution is to re-build the shadow effect by our own.
+ But NS<6 does not understand border-color with more than 1 parameter,
+ so we use partial border-???-color instructions to leave at least
+ non background solid borders if they are not understood.
+*/
+table.MessageBox,
+table.InfoBox,
 table.Infos {
-/*   border: 2px solid #FF0000; /* starting step common with PocketPC and other browsers */
-   border: 2px outset #FF0000; /* for the old browsers which don't understand the following */
-/*   border: 2px outset #F7F5E3; /* page background-color */
+   table-layout: auto;
+   border-spacing: 2px; /* not recognized by IE */
+   border-collapse: separate; /* collapse separate */
+/*   border: 2px solid #FF0000; /* starting common step with PocketPC and other browsers */
+/*   border: 2px outset #FF0000; /* second step for PocketPC: is displayed as 'solid' */
+   /* for the old browsers which don't understand the outset/inset style */
+   border: 2px solid #8F8078;
+   border-top-color: #FFFFFF;
+   border-left-color: #FFFFFF;
+/*   border: 2px outset #F7F5E3; /* page background-color (=>#FFF8F0 #8F8078) */
 /*
    border-width: 2px;
    border-style: outset;
    border-color: #F7F5E3; /* page background-color */
-   table-layout: auto;
-   border-collapse: separate;
-   border-spacing: 2px; /* not recognized by IE */
+}
+
+table.MessageBox th,
+table.MessageBox td,
+table.InfoBox th,
+table.InfoBox td,
+table.Infos th,
+table.Infos td {
+/*   border: 2px solid #0000FF; /* starting common step with PocketPC and other browsers */
+/*   border: 2px inset #0000FF; /* second step for PocketPC: is displayed as 'solid' */
+   /* for the old browsers which don't understand the outset/inset style */
+   border: 1px solid #8F8078;
+   border-bottom-color: #FFFFFF;
+   border-right-color: #FFFFFF;
+/*   border: 1px inset #F7F5E3; /* page background-color */
+/*
+   border-width: 1px;
+   border-style: inset;
+   border-color: #F7F5E3; /* page background-color */
+}
+
+
+/* ------------------------- */
+/* infos tables */
+/* ------------------------- */
+
+/* see also: embossed tables */
+table.Infos {
    margin: 0px auto;
    width: auto;
    max-width: none;
@@ -996,13 +1041,6 @@ table.Infos {
 
 table.Infos th,
 table.Infos td {
-/*   border: 2px solid #0000FF; /* starting step common with PocketPC and other browsers */
-   border: 2px inset #0000FF; /* for the old browsers which don't understand the following */
-/*   border: 1px inset #F7F5E3; /* page background-color */
-/*
-   border-width: 1px;
-   border-style: inset;
-   border-color: #F7F5E3; /* page background-color */
    margin: 0px;
    padding: 4px;
 }
@@ -1083,11 +1121,8 @@ span.MarkTagTerm {
 /* quick-info boxes */
 /* ------------------------- */
 
+/* see also: embossed tables */
 table.InfoBox {
-   border: 2px outset #F7F5E3; /* page background-color */
-   table-layout: auto;
-   border-spacing: 2px; /* not recognized by IE */
-   border-collapse: separate; /* collapse separate */
    margin: 0px auto;
    width: 100%;
    max-width: none;
@@ -1097,9 +1132,8 @@ table.InfoBox {
 }
 
 table.InfoBox td {
-   border: 1px inset #F7F5E3; /* page background-color */
    margin: 0px;
-   padding: 0px 8px 0px 0px;
+   padding: 0px 8px 0px 4px;
    text-align: left;
    vertical-align: bottom;
 }
@@ -1194,11 +1228,8 @@ table.MessageInfos td.Rubric {
    font-weight: bold;
 }
 
+/* see also: embossed tables */
 table.MessageBox {
-   border: 2px outset #F7F5E3; /* page background-color */
-   table-layout: auto;
-   border-spacing: 2px; /* not recognized by IE */
-   border-collapse: separate; /* collapse separate */
    margin: 0px auto;
    width: 30em; /* 475px; */
    max-width: none;
@@ -1208,7 +1239,6 @@ table.MessageBox {
 }
 
 table.MessageBox td {
-   border: 1px inset #F7F5E3; /* page background-color */
    margin: 0px;
    padding: 4px;
    text-align: left;
@@ -1585,12 +1615,21 @@ form#selectgroupForm table.FormClass td.FormHeader h3.Header {
 /* board page */
 /* ------------------------- */
 
+/*
+ Some simple browsers (like Pocket PC IE or PALM ones) poorly
+ manage the CSS commands related to cellspacing and cellpadding.
+ Most of the time, this results in a 1 or 2 pixels added to the
+ cells size and is not so disturbing. But this is really annoying
+ for the board cells.
+ So we have been forced to keep the:
+   <table border=0 cellspacing=0 cellpadding=0>
+ in our PHP code for the board table (i.e. table.Goban).
+*/
 table.Goban {
    border: 0px solid red;
    background-repeat: repeat;
    background-position: top left; /* 0% 0% - top left */
    empty-cells: hide;
-   /* Maybe the PocketPC IE does not understand the !important - temporary test */
    border-collapse: collapse;
    border-spacing: 0px;
    margin: 0px auto;
@@ -1627,8 +1666,8 @@ table.Goban td {
 
 table.Goban a {
 /*
-  Netscape6.2.3 under Win95 seems to oversize the cells
-  when they contain a link (move step)
+  Netscape6.2.3 under Win95 seems to oversize the cells when
+  they contain a link (within the board of the "play" step)
 */
    border-width: 0px;
    margin: 0px;
