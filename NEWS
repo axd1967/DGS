@@ -55,6 +55,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Added &lt;image source> : show image from Dragon webserver in images-dir.
         Use &lt;image board/source> : show Dragon board-images (link to dir '/17').
         Meant to be used for FAQ.
+      * &lt;home_ page>DGS-page&lt;/home> : show link to DGS-page without baseURL
+        in new window
 
 
    Code improvements:
