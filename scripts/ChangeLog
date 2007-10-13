@@ -25,10 +25,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-13 juga
+
+   * skins/dragon/screen.css, translate.php:
+   - JUG's dream of page-layout for translate-page
+
 2007-10-13 rodival
 
-   * skins/dragon/screen.css,
-     include/translate.php:
+   * skins/dragon/screen.css, translate.php:
    - Fix the embossed tables display for the browsers not understanding 'outset'.
 
 2007-10-12 rodival
