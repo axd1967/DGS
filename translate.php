@@ -22,6 +22,7 @@ $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
+require_once( "include/filter_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
 define('ALLOW_PROFIL_CHARSET', 1); //allow the admins to overwrite the page encoding
@@ -279,18 +280,8 @@ if(0){//old
 
       if( $filter_en )
       {
-         $filter_regex = preg_replace(
-            array(
-               "/([^\\\\])_/",
-               "/([^\\\\])%/",
-               "/\\\\\\\\(.)/",
-               ),
-            array(
-               "\\1.",
-               "\\1.*?",
-               "\\1",
-               ),
-            preg_quote($filter_en));
+         $arr = sql_extract_terms( $filter_en );
+         $filter_regex = $arr[0];
       }
       else
          $filter_regex = '';
