@@ -1581,7 +1581,6 @@ form#translateForm table.FormClass td.Language {
 }
 
 form#translateForm table.FormClass td.Sample {
-   white-space: nowrap;
    text-align: left;
    vertical-align: top;
 }

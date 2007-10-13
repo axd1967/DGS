@@ -352,12 +352,15 @@ if(0){//old
                   'CHECKBOX', "unch$oid", 'Y', 'unchanged', false
                   ) ;
 
-         array_push( $form_row,
-                  'CELL', 1, 'class=Sample',
-                  'TEXT', $sample
-                  ) ;
+         // allow some space on the right
+         array_push( $form_row, 'TD', 'TEXT', '' );
 
          $translate_form->add_row( $form_row, -1, false ) ;
+
+         $translate_form->add_row( array(
+                  'CELL', 1, 'class=Sample colspan=3',
+                  'TEXT', $sample
+                  ) );
 
          $translate_form->add_row( array( 'HR' ) ); //$nbcol
       }
