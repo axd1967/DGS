@@ -522,29 +522,8 @@ class Board
        **/
       $cell_size_fix = ' border=0 cellspacing=0 cellpadding=0';
 
-   $PocketPC = get_request_arg('PocketPC', 0); if($PocketPC) echo 'PocketPC test: '.$PocketPC;
-   if( $PocketPC <= 0 )
       echo '<table class=Goban ' . $woodstring . $cell_size_fix . '>';
-   else
-   {
-      echo '<table class=Goban ' . $woodstring;
-      if( $PocketPC < 4 )
-         echo ' border=0 cellspacing=0 cellpadding=0';
-      else
-      {
-         switch( $PocketPC )
-         {
-         case 4: echo ' cellpadding=0'; break; //this one the bigger part of the defect, just leaving 1 pixel oversize
-         case 5: echo ' cellspacing=0'; break;
-         case 6: echo ' border=0'; break;
-         case 7: echo ' cellpadding=0 cellspacing=0'; break; //this one remove the last pixel gap
-         case 8: echo ' cellpadding=0 border=0'; break;
-         }
-      }
-      echo '>';
-   }
 
-   if( $PocketPC > 3 or !($PocketPC&2) )
       echo '<tbody>';
 
       if( $this->coord_borders & COORD_UP )
@@ -722,7 +701,6 @@ class Board
          $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
                            $coord_left, $coord_right );
 
-   if( $PocketPC > 3 or !($PocketPC&2) )
       echo '</tbody>';
       echo "</table>\n";
       } //goban

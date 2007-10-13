@@ -33,7 +33,11 @@ Changelog
 2007-10-13 rodival
 
    * skins/dragon/screen.css, translate.php:
-   - Fix the embossed tables display for the browsers not understanding 'outset'.
+   - fix the embossed tables display for the browsers not understanding
+     the 'outset' and/or 'inset' border style of CSS.
+
+   * include/board.php:
+   - closing the board display problems.
 
 2007-10-12 rodival
 
