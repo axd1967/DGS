@@ -121,6 +121,9 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    Bug fixes:
 
+   * fixed problems downloading SGF for some browsers (namely PDA devices):
+     (replaced header 'Content-Disposition' from 'inline' to 'attachment',
+     so download now always open dialog)
    * fixed hover option with move numbering: don't display numbers on stones
    * fixed display of japanese byoyomi when byoyomi reached
    * fixed tag &lt;user =userid&gt;
