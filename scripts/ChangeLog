@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-16 juga
+
+   * clock_tick.php:
+   - fix slow-query hopefully returning former query for running games
+
 2007-10-16 rodival
 
    * skins/dragon/screen.css, skins/dragon/print.css:
