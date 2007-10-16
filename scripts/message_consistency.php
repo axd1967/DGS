@@ -152,6 +152,7 @@ require_once( "include/std_functions.php" );
          break;
       }
       echo '<br>corr.ID='.$row['me_mcID'] .' -&gt;'.$row['mid'];
+   /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
       /*
       dbg_query("UPDATE MessageCorrespondents SET $$$ " .
                    "WHERE ID=".$row['cid']." LIMIT 1" );

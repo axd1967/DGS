@@ -41,6 +41,18 @@ Changelog
    * scripts/data_report.php:
    - disable the unbuffered feature
 
+   * scripts/message_consistency.php,
+     include/message_functions.php,
+     message.php:
+   - On 2007-10-15, we have found, in the DGS database,
+     30 records of MessageCorrespondents with .mid == 0
+     all between "2004-06-03 09:25:17" and "2006-08-10 20:40:31".
+     While this should not have occured, those "lost" records can disturb
+     some queries where, for instance, .mid is compared to .ReplyTo which
+     may be 0 (meaning "no reply").
+     We have strengthened those queries but also manually changed the faulty
+     .mid from 0 to -9999 (directly in the database) to move them apart.
+
 2007-10-15 juga
 
    * NEWS:

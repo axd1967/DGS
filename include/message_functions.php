@@ -1014,12 +1014,22 @@ function folder_is_empty($nr, $uid)
 // return array( result, merged-QuerySQL )
 function message_list_query($my_id, $folderstring='all', $order='date', $limit='', $extra_querysql=null)
 {
+/**
+ * N.B.: On 2007-10-15, we have found, in the DGS database,
+ *  30 records of MessageCorrespondents with .mid == 0
+ *  all between "2004-06-03 09:25:17" and "2006-08-10 20:40:31".
+ * While this should not have occured, those "lost" records can disturb
+ *  some queries like this one where .mid is compared to .ReplyTo which
+ *  may be 0 (meaning "no reply").
+ * We have strengthened this query but also manually changed the faulty
+ *  .mid from 0 to -9999 (directly in the database) to move them apart.
+ **/
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
       'M.Type', 'M.Subject', 'M.Game_ID',
       'UNIX_TIMESTAMP(M.Time) AS Time',
       'me.mid as date',
-      "IF(M.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
+      "IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
           "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
       'me.mid', 'me.Replied', 'me.Sender', 'me.Folder_nr AS folder',
       "IF(me.Sender='M',' ',otherP.Name) AS other_name", // the ' ' helps to sort
@@ -1030,7 +1040,7 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
       'INNER JOIN MessageCorrespondents AS me ON M.ID=me.mid',
       'LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender',
       'LEFT JOIN Players AS otherP ON otherP.ID=other.uid',
-      'LEFT JOIN MessageCorrespondents AS previous ON previous.mid=M.ReplyTo AND previous.uid=me.uid' );
+      'LEFT JOIN MessageCorrespondents AS previous ON M.ReplyTo>0 AND previous.mid=M.ReplyTo AND previous.uid='.$my_id );
    $qsql->add_part( SQLP_WHERE, "me.uid=$my_id" );
    if ( $folderstring != "all" and $folderstring != '' )
       $qsql->add_part( SQLP_WHERE, "me.Folder_nr IN ($folderstring)" );

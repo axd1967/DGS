@@ -114,9 +114,10 @@ require_once( "include/form_functions.php" );
       if( !($mid > 0) )
          error("unknown_message");
 
+   /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
       $query = "SELECT Messages.*"
          .",UNIX_TIMESTAMP(Messages.Time) AS date"
-         .",IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)"
+         .",IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)"
          . "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow"
          .",me.Replied, me.Sender, me.Folder_nr"
          .",Players.ID AS other_id,Players.Handle AS other_handle"
@@ -132,7 +133,7 @@ require_once( "include/form_functions.php" );
           "LEFT JOIN Players ON Players.ID=other.uid " .
           "LEFT JOIN Games ON Games.ID=Game_ID " .
           "LEFT JOIN MessageCorrespondents AS previous " .
-            "ON previous.mid=Messages.ReplyTo AND previous.uid=$my_id " .
+            "ON Messages.ReplyTo>0 AND previous.mid=Messages.ReplyTo AND previous.uid=$my_id " .
           "WHERE Messages.ID=$mid AND me.mid=$mid AND me.uid=$my_id " .
 //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
           "ORDER BY Sender" ;
