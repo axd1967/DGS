@@ -38,6 +38,9 @@ Changelog
    * include/std_functions.php:
    - translation of the vault message
 
+   * scripts/data_report.php:
+   - disable the unbuffered feature
+
 2007-10-15 juga
 
    * NEWS:

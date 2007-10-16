@@ -23,7 +23,9 @@ require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 
-define('UNBUF_TIMOUT', 5); //x seconds limit
+// DGS seems to not allow "unbeffered" queries...
+// meanwhile, not very useful, see below.
+define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
 
 {
    disable_cache();
@@ -46,7 +48,10 @@ define('UNBUF_TIMOUT', 5); //x seconds limit
    $colwrap= get_request_arg( 'colwrap', 'cut');
 
    $oldquery= get_request_arg( 'oldquery', '');
-   $unbuffered= (int)(bool)get_request_arg( 'unbuffered', '');
+   if( UNBUF_TIMOUT > 0 )
+      $unbuffered= (int)(bool)get_request_arg( 'unbuffered', '');
+   else
+      $unbuffered= 0;
 
    $apply= (int)(bool)@$_REQUEST['apply'];
 
@@ -121,8 +126,10 @@ define('UNBUF_TIMOUT', 5); //x seconds limit
             break;
          }
          $row = mysql_fetch_assoc( $result);
-         $dbtimout= (float)@$row['Value']-1;
+         $tmp = (float)@$row['Value']-1;
          mysql_free_result( $result);
+         if( $tmp>0 && $tmp<$dbtimout )
+            $dbtimout= $tmp;
 
          //if( echo_query( 'SHOW VARIABLES', 'query_svar', 0, 0, 0, 0) < 0 ) break;
          //long_query_time is in second
@@ -142,7 +149,7 @@ define('UNBUF_TIMOUT', 5); //x seconds limit
          mysql_close( $dbcnx);
          error('mysql_connect_failed', 'data_report.dbcnxctl');
       }
-   }
+   } //$unbuffered
    //echo_query('SHOW PROCESSLIST', 'query_spro', 0, 0, 0, 0) < 0 );
 
 
@@ -184,17 +191,26 @@ define('UNBUF_TIMOUT', 5); //x seconds limit
    else
       $execute = 0;
 
-   $dform->add_row( array(
+   $row = array(
       'HIDDEN', 'charset', $encoding_used,
       'HIDDEN', 'oldquery', $query,
-      'CELL', $formcol, 'align="center"',
-      'CHECKBOX', 'unbuffered', 1, 'Unbuffered&nbsp;&nbsp;&nbsp;', $unbuffered,
+      'TAB', 'CELL', $formcol-1, '',
       'OWNHTML', '<INPUT type="submit" name="apply" accesskey="x" value="Apply [&amp;x]">',
       'TEXT', '&nbsp;&nbsp;col size:&nbsp;',
       'TEXTINPUT', 'colsize', 3 , 3, $colsize,
       'RADIOBUTTONS', 'colwrap'
          , array('cut'=>'cut','wrap'=>'wrap',''=>'none',), $colwrap,
-      ) );
+      );
+   if( UNBUF_TIMOUT > 0 )
+      array_push( $row,
+         'TEXT', '&nbsp;&nbsp;&nbsp;',
+         'CHECKBOX', 'unbuffered', 1, 'Unbuffered', $unbuffered
+         );
+   else
+      array_push( $row,
+         'HIDDEN', 'unbuffered', 0
+         );
+   $dform->add_row( $row);
 
    $dform->echo_string(1);
    echo "<p>&nbsp;</p>\n";
@@ -229,7 +245,8 @@ define('UNBUF_TIMOUT', 5); //x seconds limit
          $s= $dbtimout*1e3;
          $s= "SELECT '$n' as 'Rows'"
             . ($qrytime<0 ? '' :",'${qrytime}ms' as 'Duration'")
-            . ",'${s}ms' as 'Time out'"
+            . ($qryunbuf ? ",'${s}ms' as 'Time out'" : '')
+            //. ",'${s}ms' as 'Time out'"
             . ",NOW() as 'Mysql time'"
             . ",FROM_UNIXTIME($NOW) as 'Server time'"
             . ",'" . date('Y-m-d H:i:s', $NOW) . "' as 'Local time'"
@@ -241,7 +258,7 @@ define('UNBUF_TIMOUT', 5); //x seconds limit
       }
       else
       {
-         echo "<span>Just EXPLAIN</span>";
+         echo "<span>>>> Just EXPLAIN</span>";
       }
 
       if( echo_query( 'EXPLAIN '.$query, 'query_explain', 0, 0, 0, 0) < 0 ) break;
@@ -315,7 +332,7 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
       if( $numrows<=0 )
          return array(0,$qrytime);
    }
-   else
+   else //buffered
    {
       $result = mysql_query( $query, $dbcnx);
       $qrytime = round((getmicrotime() - $qrytime) * 1e3, 2);
