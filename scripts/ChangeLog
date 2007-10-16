@@ -4,6 +4,8 @@ General infos
 changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
+last server update start: 2006-10-06
+
 previous server update: 2006-09
 release [2006-08-07] - DGS 1.0.12 - CVS-tag [DGS-stable-200608]
 
@@ -32,6 +34,9 @@ Changelog
 
    * include/message_functions.php:
    - CSSed the MessageBox rows
+
+   * include/std_functions.php:
+   - translation of the vault message
 
 2007-10-15 juga
 

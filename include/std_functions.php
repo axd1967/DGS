@@ -2124,11 +2124,10 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
       $vaultcnt= (int)@$player_row['VaultCnt'];
       $vaulttime= @$player_row['VaultTime'];
       //can be translated if desired (translations have just been set):
-      $vault_fmt= "The activity of the account '%s' grew to high"
+      $vault_fmt= T_("The activity of the account '%s' grew to high"
                  ." and swallowed up our bandwidth and resources."
-                 ."\nPlease, correct this behaviour."
-                 ."\nThis account is blocked until %s."
-                 ;
+                 ."<br>Please, correct this behaviour."
+                 ."<br>This account is blocked until %s.");
       if( $vaultcnt <= 0 ) //inside fever vault
       {
          if( $NOW > $vaulttime ) //time to quit the vault?
