@@ -152,7 +152,7 @@ a:active {
 
 a[target] /*, a[target="new"], a[target="_blank"]*/
 {
-   color:olive;
+   color: olive;
 }
 
 .TextBrowsers {
@@ -311,7 +311,7 @@ p.SysMsg {
 .DebugInfoBox {
    width: auto;
    height: auto;
-   border: 2px solid red;
+   border: 2px solid #ff0000;
    background: lime;
    overflow: visible; /* hidden visible scroll auto */
    margin: 0px;
@@ -336,7 +336,7 @@ p.SysMsg {
 }
 
 .DebugInfo {
-   border: 0px solid red;
+   border: 0px solid #ff0000;
    background: lime;
    margin: 0px;
    padding: 0px;
@@ -474,7 +474,7 @@ table#pageLayout {
 
 
 /*
- page menus
+ Reminder of the different page/menu layouts
 
  Vertical menu tree:
  body [
@@ -1228,6 +1228,10 @@ table.MessageInfos td.Rubric {
    font-weight: bold;
 }
 
+table.MessageInfos tr.Message td.Rubric {
+   vertical-align: top;
+}
+
 /* see also: embossed tables */
 table.MessageBox {
    margin: 0px auto;
@@ -1671,6 +1675,8 @@ table.Goban a {
    border-width: 0px;
    margin: 0px;
    padding: 0px;
+   text-decoration: none;
+   font-weight: normal;
    line-height: 0px;
 /* removed on 2007-10-12
    margin: 0px !important;
@@ -1702,6 +1708,7 @@ table.Captures {
    background: #f7f5ff;
    border-width: 0px 0px 1px 0px;
    border-bottom: 1px solid #0c41c9;
+   border-spacing: 0px;
    margin: 4px;
 }
 

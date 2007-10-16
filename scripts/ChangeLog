@@ -25,6 +25,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-16 rodival
+
+   * skins/dragon/screen.css, skins/dragon/print.css:
+   - updated the CSS printer part
+
 2007-10-15 juga
 
    * NEWS:
