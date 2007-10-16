@@ -427,18 +427,22 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
    $cols = 2;
    echo "<table class=MessageInfos>\n" .
-      "<tr><td class=Rubric>" . T_('Date') . ":</td>" .
+      "<tr class=Date>" .
+      "<td class=Rubric>" . T_('Date') . ":</td>" .
       "<td colspan=$cols>" . date($date_fmt, $date) . "</td></tr>\n" .
-      "<tr><td class=Rubric>" . ($to_me ? T_('From') : T_('To') ) . ":</td>\n" .
+      "<tr class=Correspondent>" .
+      "<td class=Rubric>" . ($to_me ? T_('From') : T_('To') ) . ":</td>\n" .
       "<td colspan=$cols>$name</td>" .
       "</tr>\n";
 
    $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_terms);
    $text = make_html_safe( $text, true, $rx_terms);
 
-   echo "<tr><td class=Rubric>" . T_('Subject') . ":</td>" .
+   echo "<tr class=Subject>" .
+      "<td class=Rubric>" . T_('Subject') . ":</td>" .
       "<td colspan=$cols>" . $subject . "</td></tr>\n" .
-      "<tr><td class=Rubric>" . T_('Message') . ":" ;
+      "<tr class=Message>" .
+      "<td class=Rubric>" . T_('Message') . ":" ;
    $str = '';
    if( $flow & FLOW_ANSWER && $reply_mid > 0 )
    {
@@ -470,7 +474,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
    if( isset($folders) && $mid > 0 )
    {
-      echo "<tr>\n";
+      echo "<tr class=Folder>\n";
 
       echo "<td class=Rubric>" . T_('Folder') . ":</td>\n"
          . "<td><table class=FoldersTabs><tr>"
