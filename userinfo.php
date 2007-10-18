@@ -241,7 +241,8 @@ require_once( "include/contacts.php" );
       $menu_array = array( T_('Edit profile') => 'edit_profile.php',
                            T_('Change password') => 'edit_password.php',
                            T_('Edit bio') => 'edit_bio.php',
-                           T_('Edit message folders') => 'edit_folders.php' );
+                           T_('Edit message folders') => 'edit_folders.php',
+                           T_('Show my opponents') => 'opponents.php' );
 
       $days_left = floor($player_row['VacationDays']);
       $minimum_days = 7 - floor($player_row['OnVacation']);
