@@ -111,7 +111,8 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('Edit profile'), "edit_profile.php", true);
          item(T_('Edit biographical info'), "edit_bio.php", true);
          item(T_('Change password'), "edit_password.php", true);
-         item(T_('Edit vacation'), "edit_vacation.php", true, true);
+         item(T_('Edit vacation'), "edit_vacation.php", true);
+         item(T_('Show my opponents'), "opponents.php", true, true);
       } $item_level--;
 
       item(T_('Messages'), "list_messages.php", false);
