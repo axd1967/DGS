@@ -41,7 +41,8 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Rating graph can now be displayed by time or by number of games
 
    * Users:
-      * show my opponents and game statistics for two players
+      * show my opponents and game statistics for two players,
+        link on userinfo and users page
 
    * Table lists (waiting room, messages, users, opponents, games):
       * Added user profile setting "Table max rows" to control how many rows
