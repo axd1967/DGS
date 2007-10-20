@@ -27,6 +27,16 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-20 juga
+
+   * scripts/player_consistency.php (cnt_diff):
+   - minimize duration of read-locks on tables
+   - added SQL_BUFFER_RESULT for selects (default),
+     added arg 'buffer=no' to deactivate it
+   - GROUP BY already sorts result, do additional sorting in PHP
+   - added times needed
+   - replaced SQL-operator '!=' on Games.Rated
+
 2007-10-18 juga
 
     * userinfo.php, site_map.php, NEWS:
