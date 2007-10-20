@@ -213,10 +213,11 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    else
       $limit = "";
 
-   if( @$_REQUEST['buffered'] > '' )
-      $sqlbuf = "SQL_BUFFER_RESULT";
-   else
+   
+   if( @$_REQUEST['buffer'] == 'no' )
       $sqlbuf = "";
+   else
+      $sqlbuf = "SQL_BUFFER_RESULT";
 
 
    $page = $_SERVER['PHP_SELF'];
@@ -230,8 +231,8 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    }
    if( $lim > '' )
       $page_args['limit'] = $lim;
-   if( $sqlbuf != '' )
-      $page_args['buffered'] = 1;
+   if( $sqlbuf == '' )
+      $page_args['buffer'] = 'no';
 
    start_html( 'player_consistency', 0, '',
       "  table.Table { border:0; background: #c0c0c0; }\n" .
@@ -258,7 +259,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       echo "<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
          ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
-         ."<br>use arg buffered=1 to force SQL_BUFFER_RESULT in selects"
+         ."<br>use arg buffer=no to deactivate SQL_BUFFER_RESULT in selects"
          ."</p>";
    }
 
