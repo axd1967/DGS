@@ -74,7 +74,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
          switch( $key )
          {
             case 'Password':
-            case 'Sessioncode':                  
+            case 'Sessioncode':
             case 'Email':
                if ($val) $val= '***';
                break;
@@ -101,7 +101,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
    return $numrows;
 }
 
-function explain_query($s) { 
+function explain_query($s) {
    if(DEBUG)
    {
      echo "<BR>EXPLAIN $s;<BR>";
@@ -134,86 +134,64 @@ function uid_clause( $fld, $oper)
 
 function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 {
+   $tstart = getmicrotime();
    $diff = array();
 
-   global $limit;
-   $query = "SELECT ID as idP, $pfld as cntP"
-          . " FROM Players".uid_clause( 'ID', 'WHERE')
-          . " ORDER BY ID DESC$limit"
-          ;
-   $resP = explain_query( $query)
-      or die( $nam.".P: " . mysql_error());
+   global $limit, $sqlbuf;
 
-   $query = "SELECT Black_ID as idB, COUNT(*) as cntB"
+   $query = "SELECT $sqlbuf Black_ID as idB, COUNT(*) as cntB"
           . " FROM Games"
           . " WHERE ".$gwhr.$gwhrB.uid_clause( 'Black_ID', 'AND')
           . " GROUP BY Black_ID"
-          . " ORDER BY Black_ID DESC"
           ;
    $resB = explain_query( $query)
       or die( $nam.".B: " . mysql_error());
 
-   $query = "SELECT White_ID as idW, COUNT(*) as cntW"
+   $plB = array();
+   while( $rowB = mysql_fetch_assoc($resB) )
+   {
+      $plB[$rowB['idB']] = $rowB['cntB'];
+   }
+   mysql_free_result($resB);
+
+
+   $query = "SELECT $sqlbuf White_ID as idW, COUNT(*) as cntW"
           . " FROM Games"
           . " WHERE ".$gwhr.$gwhrW.uid_clause( 'White_ID', 'AND')
           . " GROUP BY White_ID"
-          . " ORDER BY White_ID DESC"
           ;
    $resW = explain_query( $query)
       or die( $nam.".W: " . mysql_error());
 
+   $plW = array();
+   while( $rowW = mysql_fetch_assoc($resW) )
+   {
+      $plW[$rowW['idW']] = $rowW['cntW'];
+   }
+   mysql_free_result($resW);
 
-   $rowB = mysql_fetch_assoc($resB);
-   if( $rowB )
-      extract($rowB);
-   else
-      $idB = -1;
 
-   $rowW = mysql_fetch_assoc($resW);
-   if( $rowW )
-      extract($rowW);
-   else
-      $idW = -1;
+   $query = "SELECT $sqlbuf ID as idP, $pfld as cntP"
+          . " FROM Players".uid_clause( 'ID', 'WHERE');
+   $resP = explain_query( $query)
+      or die( $name.".P: " . mysql_error());
 
    while( $rowP = mysql_fetch_assoc($resP) )
    {
       extract($rowP);
-
-      while( $idB > $idP )
-      {
-         $rowB = mysql_fetch_assoc($resB);
-         if( $rowB )
-            extract($rowB);
-         else
-            $idB = -1;
-      }
-
-      while( $idW > $idP )
-      {
-         $rowW = mysql_fetch_assoc($resW);
-         if( $rowW )
-            extract($rowW);
-         else
-            $idW = -1;
-      }
-
-      $sum = ( $idB == $idP ? $cntB : 0 ) + ( $idW == $idP ? $cntW : 0 );
-
-      if(DEBUG)
-         echo "\n<br>P:$idP/$cntP/$sum  B:$idB/".@$cntB." W:$idW/".@$cntW;
-      if( $cntP != $sum )
-      {
+      $sum = @$plB[$idP] + @$plW[$idP];
+      if ( $cntP != $sum )
          $diff[$idP] = array( $cntP, $sum);
-      }
    }
-   mysql_free_result($resB);
-   mysql_free_result($resW);
-   mysql_free_result($resP);
+   krsort($diff, SORT_NUMERIC);
+
+   echo "\n<br>Needed ($nam): " . sprintf("%1.3fs", (getmicrotime() - $tstart));
    return $diff;
 }
 
 
 {
+   $beginall = getmicrotime();
    disable_cache();
 
    connect2mysql();
@@ -235,6 +213,12 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    else
       $limit = "";
 
+   if( @$_REQUEST['buffered'] > '' )
+      $sqlbuf = "SQL_BUFFER_RESULT";
+   else
+      $sqlbuf = "";
+
+
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();
    if( $uid1 > '' )
@@ -246,6 +230,8 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    }
    if( $lim > '' )
       $page_args['limit'] = $lim;
+   if( $sqlbuf != '' )
+      $page_args['buffered'] = 1;
 
    start_html( 'player_consistency', 0, '',
       "  table.Table { border:0; background: #c0c0c0; }\n" .
@@ -272,17 +258,20 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       echo "<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
          ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
+         ."<br>use arg buffered=1 to force SQL_BUFFER_RESULT in selects"
          ."</p>";
    }
 
-   $is_rated = " AND Games.Rated!='N'" ;
+   $is_rated = " AND Games.Rated IN ('Y','Done')" ;
+   //$is_rated = " AND Games.Rated!='N'" ;
    //$is_rated.= " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
 
 
 //-----------------
 
+   $begin = getmicrotime();
    //First search for games with bad player ID
-   $query = "SELECT ID,White_ID,Black_ID"
+   $query = "SELECT $sqlbuf ID,White_ID,Black_ID"
           . " FROM Games"
           . " WHERE Status!='INVITED'"
             . " AND (White_ID<=0 OR Black_ID<=0 OR White_ID=Black_ID)"
@@ -302,6 +291,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    if( $err )
       echo "\n<br>--- $err error(s). Must be fixed by hand.";
 
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
    echo "\n<br>PlayerID Done.";
 
 
@@ -392,12 +382,14 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 //-----------------
 
 
+   $begin = getmicrotime();
    //RatedGames && Ratinglog consistency
-   $query = "SELECT Players.ID, count(Ratinglog.ID) AS Log, RatedGames FROM (Players) " .
+   $query = "SELECT $sqlbuf " .
+            "Players.ID, count(Ratinglog.ID) AS Log, RatedGames FROM (Players) " .
             "LEFT JOIN Ratinglog ON uid=Players.ID " .
             "GROUP BY Players.ID HAVING Log!=RatedGames"
             .uid_clause( 'Players.ID', 'AND')
-            ." ORDER BY Players.ID$limit";
+            ." $limit";
    $result = explain_query( $query)
       or die("Log.A: " . mysql_error());
 
@@ -412,12 +404,14 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    if( $err )
       echo "\n<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
 
-   echo "\n<br>RatinLog Done.";
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
+   echo "\n<br>RatingLog Done.";
 
 
+   $begin = getmicrotime();
    //Various checks
-   $query = "SELECT Players.ID, ClockUsed, " .
-            "RatingStatus, Rating2, RatingMin, RatingMax " .
+   $query = "SELECT $sqlbuf " .
+            "Players.ID, ClockUsed, RatingStatus, Rating2, RatingMin, RatingMax " .
             "FROM Players " .
             "WHERE (" .
               "(RatingStatus='RATED' AND (Rating2>RatingMax OR Rating2<RatingMin) ) " .
@@ -445,9 +439,11 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    if( $err )
       echo "\n<br>--- $err error(s). Must be fixed by hand.";
 
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
    echo "\n<br>Misc Done.";
 
 
+   echo "\n<br>Needed (all): " . sprintf("%1.3fs", (getmicrotime() - $beginall));
    echo "<hr>Done!!!\n";
    end_html();
 }
