@@ -35,7 +35,8 @@ Changelog
 2007-10-16 juga
 
    * clock_tick.php:
-   - fix slow-query hopefully returning former query for running games
+   - fix slow-query by returning to former query (for running games)
+     using index-optimization
 
 2007-10-16 rodival
 
