@@ -88,6 +88,7 @@ if( !$is_down )
                          'black.Handle as blackhandle, white.Handle as whitehandle, ' .
                          'black.Name as blackname, white.Name as whitename ' .
                          'FROM Games, Clock ,Players as white, Players as black ' .
+                         //slower: "WHERE Status" . IS_RUNNING_GAME .
                          "WHERE Status!='INVITED' AND Status!='FINISHED' " .
                          'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                          'AND Clock.ID=Games.ClockUsed ' .

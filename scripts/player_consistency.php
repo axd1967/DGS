@@ -174,15 +174,18 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    $query = "SELECT $sqlbuf ID as idP, $pfld as cntP"
           . " FROM Players".uid_clause( 'ID', 'WHERE');
    $resP = explain_query( $query)
-      or die( $name.".P: " . mysql_error());
+      or die( $nam.".P: " . mysql_error());
 
    while( $rowP = mysql_fetch_assoc($resP) )
    {
       extract($rowP);
       $sum = @$plB[$idP] + @$plW[$idP];
-      if ( $cntP != $sum )
+      if(DEBUG)
+         echo "\n<br>P:$idP/$cntP/$sum  B:$idB/".@$cntB." W:$idW/".@$cntW;
+      if( $cntP != $sum )
          $diff[$idP] = array( $cntP, $sum);
    }
+   mysql_free_result($resP);
    krsort($diff, SORT_NUMERIC);
 
    echo "\n<br>Needed ($nam): " . sprintf("%1.3fs", (getmicrotime() - $tstart));
