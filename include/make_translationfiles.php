@@ -53,16 +53,18 @@ function make_known_languages() //must be called from main dir
    $first = true;
    while( $row = mysql_fetch_array($result) )
    {
-      @list($lang,$charenc) = explode( LANG_CHARSET_CHAR, $row['Language'], 2);
+      @list($browsercode,$charenc) = explode( LANG_CHARSET_CHAR, $row['Language'], 2);
+      $browsercode = strtolower(trim($browsercode));
+      $charenc = strtolower(trim($charenc));
 
       $tmp = slashed($row['Name']);
-      if( $lang === $prev_lang )
+      if( $browsercode === $prev_lang )
          fwrite( $fd, ",\n                 '$charenc' => \$T_('$tmp')");
       else
          fwrite( $fd, ( $first ? '' : " ),\n" ) .
-                      "  '$lang' => array( '$charenc' => \$T_('$tmp')");
+                      "  '$browsercode' => array( '$charenc' => \$T_('$tmp')");
 
-      $prev_lang = $lang;
+      $prev_lang = $browsercode;
       $first = false;
    }
    mysql_free_result($result);

@@ -25,13 +25,24 @@ require_once( "include/std_functions.php" );
 function add_contributor( $text=false, $uref='', $name=false, $handle=false, $extra='')
 {
    static $started = false;
+   static $c = 0;
 
    if( $text === false )
    {
       if( $started )
          echo "</table>\n";
       $started = false;
-      return 0;
+      return -1;
+   }
+   if( $text )
+   {
+      $c = 0;
+      $class = 'First';
+   }
+   else
+   {
+      $c=($c % LIST_ROWS_MODULO)+1;
+      $class = 'Row'.$c;
    }
 
    if( !$started )
@@ -40,12 +51,14 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       $started = true;
    }
 
-   echo "<tr><td class=Rubric>$text</td>\n"
+   echo "<tr class=$class><td class=Rubric>$text</td>\n"
       . "<td class=People>"
       . user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, '', $uref, $name, $handle)
-      . "</td><td>"
+      . "</td><td class=Extra>"
       . ( $extra ? "<span>[$extra]</span>" : '' )
       . "</td></tr>\n";
+
+   return $c;
 }
 
 

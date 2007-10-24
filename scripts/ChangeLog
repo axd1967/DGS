@@ -33,6 +33,13 @@ Changelog
      clock_tick.php:
    - minor fixes and comment adds
 
+   * skins/dragon/screen.css,
+     include/make_translationfiles.php,
+     people.php:
+   - fix a bad translation of languages (with uppercase letters) in the people
+     page
+   - adjusted CSS for the people page
+
 2007-10-20 juga
 
    * scripts/player_consistency.php (cnt_diff):

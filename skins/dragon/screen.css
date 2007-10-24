@@ -1463,12 +1463,21 @@ body.People table#pageLayout td#pageBody div.Section {
 }
 
 body.People table.People {
-   width: 90%;
-   margin: 0px 0px 0px 0px;
+   width: 100%;
+   border-bottom: 1px solid gray;
+   margin: 0px 0px 1em 0px;
+}
+
+body.People table.People tr.First {
+   border-top: 1px solid gray;
+}
+
+body.People table.People td {
+   vertical-align: top;
+   text-align: left;
 }
 
 body.People table.People td.Rubric {
-   text-align: left;
    text-decoration: none;
    font-weight: normal;
    color: black;
@@ -1476,7 +1485,6 @@ body.People table.People td.Rubric {
 }
 
 body.People table.People td.People {
-   text-align: left;
    font-weight: bold;
    color: black;
 }
@@ -1487,7 +1495,6 @@ body.People table.People td.People a {
 }
 
 body.People table.People span {
-   text-align: left;
    color: green;
 }
 
