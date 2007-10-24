@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-25 rodival
+
+   * scripts/player_consistency.php (cnt_diff):
+   - correct echo for DEBUG-mode
+
 2007-10-24 rodival
 
    * scripts/player_consistency.php,
