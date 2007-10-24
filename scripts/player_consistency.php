@@ -181,7 +181,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       extract($rowP);
       $sum = @$plB[$idP] + @$plW[$idP];
       if(DEBUG)
-         echo "\n<br>P:$idP/$cntP/$sum  B:$idB/".@$cntB." W:$idW/".@$cntW;
+         echo "\n<br>P:$idP/$cntP/$sum  B:".@$plB[$idP]." W:".@$plW[$idP];
       if( $cntP != $sum )
          $diff[$idP] = array( $cntP, $sum);
    }
