@@ -34,6 +34,10 @@ Changelog
      contact flags are "messages reject" and "invite accept"
    - also allow to continue an already started invitation
 
+   * skins\dragon\print.css,
+     opponents.php, send_message.php:
+   - comments adds and garbages
+
 2007-10-25 juga
 
    * scripts/player_consistency.php (cnt_diff):

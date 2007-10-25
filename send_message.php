@@ -96,12 +96,18 @@ disable_cache();
       if( !is_numeric( $disputegid) )
          $disputegid = 0;
    }
+   //some problems with "or" instead of "||" here:
    $invitation_step = ( $accepttype || $declinetype || ($disputegid > 0)
                //not needed: || ($type == "INVITATION")
                ? true : false );
 
+
    // find receiver of the message
 
+   /**
+    * CSYSFLAG_REJECT_INVITE only blocks the invitations at starting point
+    * CSYSFLAG_REJECT_MESSAGE blocks the messages except those from the invitation sequence
+    **/
    $tmp= ( $type == 'INVITATION' ? CSYSFLAG_REJECT_INVITE
             : ( $invitation_step ? 0 : CSYSFLAG_REJECT_MESSAGE ));
    $query= "SELECT P.ID,P.ClockUsed,P.OnVacation,P.Rating2,P.RatingStatus"
