@@ -38,6 +38,9 @@ Changelog
      opponents.php, send_message.php:
    - comments adds and garbages
 
+   * init.mysql:
+   - adjustments to release
+
 2007-10-25 juga
 
    * scripts/player_consistency.php (cnt_diff):
