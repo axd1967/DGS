@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-26 juga
+
+   * INSTALL:
+   - adjust CVS-hostname on SourceForge
+
 2007-10-25 rodival
 
    * send_message.php:

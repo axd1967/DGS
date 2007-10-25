@@ -23,8 +23,8 @@ Either from cvs:
    You must register yourself. Read the SourceForge documentations. ))
 
 > cd /path/to/the/directory/where/you/want/dragon/to/be
-> cvs -d:pserver:anonymous@cvs.dragongoserver.sourceforge.net:/cvsroot/dragongoserver login
-> cvs -z3 -d:pserver:anonymous@cvs.dragongoserver.sourceforge.net:/cvsroot/dragongoserver co DragonGoServer
+> cvs -d:pserver:anonymous@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver login
+> cvs -z3 -d:pserver:anonymous@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver co DragonGoServer
 > mv DragonGoServer/* DragonGoServer/.[a-z]* .
 > rmdir DragonGoServer
 
