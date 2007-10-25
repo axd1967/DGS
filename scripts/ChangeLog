@@ -29,6 +29,13 @@ Changelog
 
 2007-10-25 rodival
 
+   * send_message.php:
+   - don't reject the messages of an invitation discussion when the
+     contact flags are "messages reject" and "invite accept"
+   - also allow to continue an already started invitation
+
+2007-10-25 juga
+
    * scripts/player_consistency.php (cnt_diff):
    - correct echo for DEBUG-mode
 

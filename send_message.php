@@ -52,9 +52,6 @@ disable_cache();
    $type = @$_REQUEST['type'];
    if( !$type )
       $type = 'NORMAL';
-   $prev_mid = max( 0, (int)@$_REQUEST['reply']); //ID of message replied.
-   $accepttype = isset($_REQUEST['send_accept']);
-   $declinetype = isset($_REQUEST['send_decline']);
 
    init_standard_folders();
    $folders = get_folders($my_id);
@@ -89,9 +86,24 @@ disable_cache();
       error('guest_may_not_receive_messages');
 
 
+   $prev_mid = max( 0, (int)@$_REQUEST['reply']); //ID of message replied.
+   $accepttype = isset($_REQUEST['send_accept']);
+   $declinetype = isset($_REQUEST['send_decline']);
+   $disputegid = -1;
+   if( $type == "INVITATION" )
+   {
+      $disputegid = @$_REQUEST['disputegid'];
+      if( !is_numeric( $disputegid) )
+         $disputegid = 0;
+   }
+   $invitation_step = ( $accepttype || $declinetype || ($disputegid > 0)
+               //not needed: || ($type == "INVITATION")
+               ? true : false );
+
    // find receiver of the message
 
-   $tmp= ( $type == 'INVITATION' ?CSYSFLAG_REJECT_INVITE :CSYSFLAG_REJECT_MESSAGE );
+   $tmp= ( $type == 'INVITATION' ? CSYSFLAG_REJECT_INVITE
+            : ( $invitation_step ? 0 : CSYSFLAG_REJECT_MESSAGE ));
    $query= "SELECT P.ID,P.ClockUsed,P.OnVacation,P.Rating2,P.RatingStatus"
          . (ENA_SEND_MESSAGE ?'' :",P.SendEmail,P.Notify")
          . ",IF(ISNULL(C.uid),0,C.SystemFlags & $tmp) AS C_denied"
@@ -121,13 +133,8 @@ disable_cache();
 
    // Update database
 
-   $disputegid = -1;
    if( $type == "INVITATION" )
    {
-      $disputegid = @$_REQUEST['disputegid'];
-      if( !is_numeric( $disputegid) )
-         $disputegid = 0;
-
       $gid = make_invite_game($player_row, $opponent_row, $disputegid);
 
       if( $disputegid > 0 )
@@ -261,8 +268,7 @@ if(ENA_SEND_MESSAGE){ //new
       , $my_id, $type, $msg_gid
       , $prev_mid, $disputegid > 0 ?'DISPUTED' :''
       , isset($folders[$new_folder]) ? $new_folder
-         : ( $accepttype or $declinetype or $disputegid > 0 ? FOLDER_MAIN
-            : FOLDER_NONE )
+         : ( $invitation_step ? FOLDER_MAIN : FOLDER_NONE )
       );
 }else{ //old
    $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
@@ -312,7 +318,7 @@ if(ENA_SEND_MESSAGE){ //new
    {
       $query = "UPDATE MessageCorrespondents SET Replied='Y'";
 
-      if( $accepttype or $declinetype or ($disputegid > 0) or
+      if( $invitation_step or
           (isset($new_folder) and isset($folders[$new_folder])) )
       {
          if( !isset($new_folder) or !isset($folders[$new_folder]) )
