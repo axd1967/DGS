@@ -39,7 +39,10 @@ require_once( "include/std_functions.php" );
 
    add_link_page_link('snapshot/images.tar.gz', 'images.tar.gz', T_('The colletion of images used on the server'));
 
+   add_link_page_link();
+
    section( 'Older versions', T_('Older versions'));
+   centered_container();
 
    if ($handle = @opendir('snapshot/archive'))
    {
