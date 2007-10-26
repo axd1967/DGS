@@ -48,7 +48,7 @@ require_once( "include/std_functions.php" );
 */
    add_link_page_link("install.php", T_('Installation instructions'),
                      T_('if you want your own dragon'));
-   add_link_page_link("snapshot", T_('Download dragon sources'),
+   add_link_page_link("snapshot.php", T_('Download dragon sources'),
                      T_('daily snapshot of the cvs'));
    add_link_page_link("http://dragongoserver.cvs.sourceforge.net/dragongoserver/DragonGoServer/",
                      T_('Browse Dragon source code'));
