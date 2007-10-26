@@ -29,6 +29,9 @@ Changelog
 
 2007-10-26 juga
 
+   * people.php:
+   - switched role of FAQ-maintainer/editor of Ingmar <-> jug
+
    * INSTALL:
    - adjust CVS-hostname on SourceForge
 
