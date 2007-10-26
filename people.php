@@ -99,7 +99,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       $FAQexclude = array();
    else
       $FAQexclude = array( 'ejlo', 'rodival');
-   $FAQmain = 'Ingmar';
+   $FAQmain = 'jug';
    $FAQmainID = 0;
 
    $result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
