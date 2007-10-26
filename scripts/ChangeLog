@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-26 ejlo
+
+   * docs.php, snapshot.php:
+   - added snapshot-page
+
 2007-10-26 juga
 
    * people.php:
