@@ -33,17 +33,21 @@ chdir("code_examples/");
    echo "<html><body>\n";
 
    echo "<pre>URL-args:<br>\n" .
-        "  l - number of series (default 10)\n" .
-        "  b - number of boards (default 20)\n" .
+        "  l - number of series (default 10, max. 100)\n" .
+        "  b - number of boards (default 20, max. 100)\n" .
         "\n\n\n";
 
    $loop = get_request_arg('l');
    if ( empty($loop) || $loop <= 0 )
       $loop = 10;
+   if ( $loop > 100 )
+      $loop = 100;
 
    $bcnt = get_request_arg('b');
    if ( empty($bcnt) || $bcnt <= 0 )
       $bcnt = 20;
+   if ( $bcnt > 100 )
+      $bcnt = 100;
 
    for( $j=1; $j <= $loop; $j++)
    {
