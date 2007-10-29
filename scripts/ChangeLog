@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-29 rodival
+
+   * translate.php:
+   - adjusted the boxes size to the max of original and translated strings.
+
 2007-10-26 ejlo
 
    * docs.php, snapshot.php:

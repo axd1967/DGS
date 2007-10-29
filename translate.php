@@ -36,7 +36,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
        The first column displays the english original phrases in a similar way
        but is read-only.
        <br>
-       The third column displays the english original phrases in the HTML way as a
+       The third part displays the english original phrases in the HTML way as a
        display example. Caution: this example may sometime differs from the effective
        display in the normal page because of additional constraints of the normal page.
   <li> If a translated word is the same as in english, leave it blank and click
@@ -298,6 +298,7 @@ if(0){//old
          $oid = $row['Original_ID'];
 
          $string = $row['Original'];
+         $translation = $row['Text'];
 
          if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
             $debuginfo = "<br><span class=DebugInfo>"
@@ -309,6 +310,7 @@ if(0){//old
 
          $hsize = 60;
          $vsize = intval( floor( max( 2,
+                     substr_count( wordwrap( $translation, $hsize, "\n", 1), "\n" ),
                      substr_count( wordwrap( $string, $hsize, "\n", 1), "\n" )
                   )));
 
@@ -317,7 +319,6 @@ if(0){//old
          //$string = make_html_safe($string, false, $filter_regex);
          $string = textarea_safe($string, LANG_DEF_CHARSET);
 
-         $translation = $row['Text'];
          //$translation = textarea_safe( $translation, $translate_encoding);
          //$translation = make_html_safe($translation, false, false);
          $translation = textarea_safe( $translation, $translate_encoding);
