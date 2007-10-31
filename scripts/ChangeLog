@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-10-31 rodival
+
+   * statratingspng.php:
+   - adjusted the relative scales of graphs.
+
 2007-10-29 rodival
 
    * translate.php:

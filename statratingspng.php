@@ -212,23 +212,10 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
    $Ymin = 0;
    $Ymax = 0;
    
-   $row = mysql_single_fetch( 'statratingspng.get_ratings_data.Ratinglog.cnt',
-         "SELECT COUNT(*) as cnt FROM Ratinglog")
-      or error('internal_error','statratingspng.get_ratings_data.Ratinglog.cnt');
-   $rscale = $row['cnt'];
-   $row = mysql_single_fetch( 'statratingspng.get_ratings_data.Players.cnt',
-         "SELECT COUNT(*) as cnt FROM Players")
-      or error('internal_error','statratingspng.get_ratings_data.Players.cnt');
-   $tmp = $row['cnt'];
-   if( $tmp > 0 )
-      $rscale/= $tmp;
-   else
-      $rscale = 1;
-   $rscale = max( 1, pow(10, round(log10($rscale))));
-
-   for( $i=0; $i<3 ;$i++ )
+   $Ymaxmin = $Ymin;
+   for( $g=0; $g<3 ;$g++ )
    {
-      switch( $i )
+      switch( $g )
       {
       case 0:
          $name = $T_('Active users');
@@ -248,9 +235,9 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
          $color = array( 255,   0, 200);
          break;
       case 2:
-         $name = $T_('Rated games') . ($rscale>1 ? " / $rscale" : '');
+         $name = $T_('Rated games');
          $query =
-            "SELECT ROUND(Rating/100)-(".MIN_RANK.") as rank,COUNT(*)/$rscale as cnt"
+            "SELECT ROUND(Rating/100)-(".MIN_RANK.") as rank,COUNT(*) as cnt"
             . " FROM Ratinglog WHERE Rating>=".MIN_RATING
             . " GROUP BY rank ORDER BY rank;" ;
          $color = array(   0, 180, 200);
@@ -264,27 +251,58 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
       if( $query )
       {
          $result = mysql_query( $query)
-            or error('mysql_query_failed', 'statratingspng.query'.$i);
+            or error('mysql_query_failed', 'statratingspng.query'.$g);
 
-         $tmp = count($graphs);
-         $graphs[] = array();
-         $graphs[$tmp]['name'] = $name;
-         $graphs[$tmp]['c'] = $color;
-         $graphs[$tmp]['y'] = array();
-         $graph= &$graphs[$tmp]['y'];
+         $i = count($graphs); //new graph index
+         $graphs[$i] = array();
+         $graphs[$i]['name'] = $name;
+         $graphs[$i]['c'] = $color;
+         $graphs[$i]['y'] = array();
+         $graph= &$graphs[$i]['y'];
+         $gmax = $Ymin;
          while( $row = mysql_fetch_assoc($result) )
          {
             $rank = (int)@$row['rank'];
             $cnt = (int)@$row['cnt'];
-            if( $cnt > $Ymax )
-               $Ymax = $cnt;
+            if( $cnt > $gmax && $rank > 0 ) //exclude 30kyu from "max"
+               $gmax = $cnt;
             $graph[$rank] = $cnt;
             $tmp = (int)@$Xaxis[$rank];
             $Xaxis[$rank] = $tmp + $cnt;
          }
          mysql_free_result($result);
+         $graphs[$i]['max'] = $gmax;
+         if( $i == 0 )
+            $Ymaxmin = $gmax;
+         else if( $Ymaxmin > $gmax )
+            $Ymaxmin = $gmax;
+      } //$query
+   } //$graphs
+   $nbg = count($graphs);
+
+   //try to fit the graph drawings in similar spaces
+   $Ymaxmin = max( $Ymaxmin, 10);
+   $Ymax = $Ymin;
+   for( $i=0; $i<$nbg; $i++ )
+   {
+      $gmax = $graphs[$i]['max'];
+      if( $gmax > $Ymaxmin )
+         $tmp = round(log10( $gmax/$Ymaxmin ));
+      else
+         $tmp = 0;
+      if( $tmp > 0 )
+      {
+         $rscale = pow(10,$tmp);
+         $graphs[$i]['name'] .= ' / '.($tmp>3 ? "1e$tmp" : $rscale);
+         $graph= &$graphs[$i]['y'];
+         $graph = array_map(create_function('$n', 'return $n/'.$rscale.';'), $graph);
+         $graphs[$i]['max'] /= $rscale;
+         $gmax = $graphs[$i]['max'];
       }
-   }
+      if( $Ymax < $gmax )
+         $Ymax = $gmax;
+   } //$graphs
+
 
    ksort( $Xaxis);
    $Xmax = $Xmin;
@@ -295,14 +313,14 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
    }
    while( $rank > $Xmax )
    {
-      for( $i=count($graphs)-1 ; $i>=0 ; $i-- )
+      for( $i=$nbg-1 ; $i>=0 ; $i-- )
          unset($graphs[$i]['y'][$rank]);
       unset($Xaxis[$rank]);
       $rank--;
    }
    for( $rank=$Xmin ; $rank<=$Xmax ; $rank++ )
    {
-      for( $i=count($graphs)-1 ; $i>=0 ; $i-- )
+      for( $i=$nbg-1 ; $i>=0 ; $i-- )
       {
          $graph= &$graphs[$i]['y'];
          if( !isset($graph[$rank]) )
@@ -312,7 +330,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
    }
 
    ksort( $Xaxis);
-   for( $i=count($graphs)-1 ; $i>=0 ; $i-- )
+   for( $i=$nbg-1 ; $i>=0 ; $i-- )
       ksort($graphs[$i]['y']);
 
    $xlims = array('MIN'=>$Xmin, 'MAX'=>$Xmax);
