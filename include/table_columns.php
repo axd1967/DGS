@@ -963,10 +963,11 @@ class Table
       $togglestr_hide = '';
       if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] )
       {
+         $fprefix = $this->Filters->Prefix;
          $query =
             make_url( $this->Page, array(
-                  $this->Prefix . FFORM_TOGGLE_ACTION => 1,
-                  $this->Prefix . FFORM_TOGGLE_FID    => $fid ), true)
+                  $fprefix . FFORM_TOGGLE_ACTION => 1,
+                  $fprefix . FFORM_TOGGLE_FID    => $fid ), true)
             . $this->current_sort_string(true)
             . $this->current_rows_string(true)
             . $this->current_filter_string(true)
