@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-04 juga
+
+   * include/table_columns.php:
+   - bugfix: use filter-prefix (not table-prefix) for filter-toggles
+
 2007-10-31 rodival
 
    * statratingspng.php:
