@@ -30,8 +30,9 @@ Changelog
 2007-11-07 rodival
 
    * translate.php:
-   - adjusted the text of the quick-info box.
-   - removed the 3rd useless column.
+   - adjusted the text of the quick-info box, mainly about the use of
+     our pseudo-html tags.
+   - removed the useless 3rd column.
 
 2007-11-07 juga
 
