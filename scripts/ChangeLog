@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-07 juga
+
+   * robots.txt:
+   - disallow all pages to web-crawlers for now
+
 2007-11-04 juga
 
    * include/table_columns.php:
