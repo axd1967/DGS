@@ -50,26 +50,45 @@ $info_box = '<br>When translating you should keep in mind the following things:
        sure that you get the first argument and \'%2$s\' for the second etc.
        <br>
        <a href="http://www.php.net/manual/en/function.sprintf.php">You can read more here</a>
-  <li> In some strings there are html code. If you don\'t know how to use html code,
-       just copy the original code and change the real language. If you are unsure
-       you can use the translator forum to get help.
+  <li> In some strings there are html tags (enclosed by \'&lt;\' and \'&gt;\')
+       or entities (starting with a \'&amp;\', ended by a \';\').
+       If you don\'t know how to use html code, just copy the original code and
+       change the real language. If you are unsure, you can use the translator
+       forum to get help.
   <li> If you want to change the html code in some way in the translation, keep in mind
        that the code shall conform to the standard layout of Dragon.
+       <br>
+       To not introduce unwanted html elements, use
+       &amp;lt; instead of &lt;, &amp;gt; instead of &gt; and &amp;amp; instead of &amp;,
+       if you need to display those characters in your translated string.
+  <li> Inside your messages, posts and some other places of DGS, you may use our private
+       pseudo-html tags. Those pseudo-tags (like &lt;home ...&gt;, &lt;color ...&gt;)
+       need a special decoding step from our own code to work, and so, they are,
+       most of the time, unusable in the translated strings.
+       <br>
+       For facilities, we have added the decoding step of our pseudo-tags to the FAQ
+       entries (caution: this is not the whole FAQ translation group).
+       So you can use them here (or copy thoses used by the FAQ maintainers).
+       For instance, for links homed at DGS, use not &lt;a href="..."&gt;, but the
+       home-tag, i.e. &lt;home users.php&gt;Users&lt;/home&gt;: this will make the
+       FAQ entries portable to an other site.
+       <br>
+       The FAQ maintainers also have the possibility to use the note-tag
+       &lt;note&gt;(removed from entry)&lt;/note&gt; to add some notes seen only
+       by them and by the translators. Read these notes then... copy them to or remove
+       them from your translated string... they will not be displayed in the FAQ pages.
   <li> If a word ends with #2 or #note (without space), for example \'To#2\' or \'All#msg\',
        this means a second word with the same spelling, so just ignore the #2 part when
        translating. This is necessary since in some languages \'to\' is translated differently
-       depending on the context (e.g. \'bis\' or \'an\' in german). Some words may end with #short.
-       Often used in tables, they have to be translated with the shorter abbreviation of the word.
+       depending on the context (e.g. \'bis\' or \'an\' in german).
+       Some words may end with #short. Often used in tables, they have to be translated
+       with the shorter abbreviation of the word.
        For example, \'days#short\' and \'hours#short\' are translated in english by \'d\' and
        \'h\', as you can see them in the \'Time remaining\' column of the status page
-       (e.g. \'12d 8h\').<br>
+       (e.g. \'12d 8h\').
+       <br>
        The other purpose is to provide a way to manage different wording or abbreviations
        for the same words, e.g. #header for some title in tables.
-  <li> For links homed at DGS, use not &lt;a href=".."&gt;, but the
-       home-tag, e.g. &lt;home users.php&gt;Users&lt;/home&gt;
-       You may use the note-tag &lt;note&gt;(removed from entry)&lt;/note&gt;
-       to add some notes seen only by other translators. Some of them can come
-       from the faq admins.
 </ul>';
 
 {
@@ -237,7 +256,7 @@ if(0){//old
 
    if( $translate_lang )
    {
-      $nbcol = 3;
+      $nbcol = 2;
       { //$translate_form
       $translate_form = new Form( 'translate', 'update_translation.php', FORM_POST );
       $translate_form->add_row( array(
@@ -343,9 +362,6 @@ if(0){//old
                   'TEXT', '&nbsp;&nbsp;',
                   'CHECKBOX', "unch$oid", 'Y', 'unchanged', false
                   ) ;
-
-         // allow some space on the right
-         array_push( $form_row, 'TD', 'TEXT', '' );
 
          $translate_form->add_row( $form_row, -1, false ) ;
 
