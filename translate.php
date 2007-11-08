@@ -256,7 +256,7 @@ if(0){//old
 
    if( $translate_lang )
    {
-      $nbcol = 2;
+      $nbcol = 3;
       { //$translate_form
       $translate_form = new Form( 'translate', 'update_translation.php', FORM_POST );
       $translate_form->add_row( array(
@@ -363,10 +363,14 @@ if(0){//old
                   'CHECKBOX', "unch$oid", 'Y', 'unchanged', false
                   ) ;
 
-         $translate_form->add_row( $form_row, -1, false ) ;
+         // allow some space on the right
+         if( $nbcol > 2 )
+            array_push( $form_row, 'CELL', $nbcol-2, '');
+
+         $translate_form->add_row( $form_row) ;
 
          $translate_form->add_row( array(
-                  'CELL', 1, 'class=Sample colspan=3',
+                  'CELL', $nbcol, 'class=Sample',
                   'TEXT', $sample
                   ) );
 

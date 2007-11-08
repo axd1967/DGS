@@ -27,6 +27,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-08 rodival
+
+   * translate.php:
+   - re-added the fake empty 3rd column.
+     It may be useful in case of a very long unbreakable word in some
+     browsers, while not disturbing other browsers.
+
+   * skins/dragon/screen.css,
+     statistics.php, snapshot.php, news.php:
+   - some W3C compliance fixes.
+
 2007-11-07 rodival
 
    * translate.php:
