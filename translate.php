@@ -367,7 +367,8 @@ if(0){//old
          if( $nbcol > 2 )
             array_push( $form_row, 'CELL', $nbcol-2, '');
 
-         $translate_form->add_row( $form_row) ;
+         //$safe=false because of textarea_safe(..., various_encoding)
+         $translate_form->add_row( $form_row, -1, false);
 
          $translate_form->add_row( array(
                   'CELL', $nbcol, 'class=Sample',
