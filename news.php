@@ -31,14 +31,16 @@ require_once( "include/std_functions.php" );
 
    section( 'News', T_('DragonGoServer NEWS'));
 
-   echo "<pre>\n";
+   echo "<pre>\n"; //caution: no <div> allowed inside
 
    $contents = join('', file ('NEWS'));
 
    // format NEWS-page:
    $contents = make_html_safe( $contents, true );
    // format: "#release anchor-name [release-date] - DGS-version"
-   $contents = preg_replace("/#release\\s+(\w+?)\\s+(.*?)<br>/is", "<a name=\"\\1\">\n<div class=\"ReleaseTitle\">\\2</div>", $contents);
+   $contents = preg_replace("/#release\\s+(\w+?)\\s+(.*?)<br>/is",
+      "\n<a name=\"\\1\"></a><span class=\"ReleaseTitle\">\\2</span>\n",
+      $contents);
 
    echo $contents;
 

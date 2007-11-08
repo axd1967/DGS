@@ -40,7 +40,7 @@ require_once( "include/std_functions.php" );
    $result = mysql_query( $q1 );
 
    echo '<table border=1>
-<tr><th>Status</th><th>Moves</th><th>Games</th><tr>
+<tr><th>Status</th><th>Moves</th><th>Games</th></tr>
 ';
 
    while( $row = mysql_fetch_array( $result ) )

@@ -30,7 +30,7 @@ require_once( "include/std_functions.php" );
    $ThePage['class']= 'Docs'; //temporary solution to CSS problem
    start_page(T_('Snapshot'), true, $logged_in, $player_row );
 
-   section( 'Docs', T_('Snapshots of the source code'));
+   section( 'current', T_('Snapshots of the source code'));
    centered_container();
 
    add_link_page_link('snapshot/DragonGoServer_cvs.tar.gz', 'DragonGoServer_cvs.tar.gz', T_('The latest version of the source code, directly from the cvs'));
@@ -41,7 +41,7 @@ require_once( "include/std_functions.php" );
 
    add_link_page_link();
 
-   section( 'Older versions', T_('Older versions'));
+   section( 'oldies', T_('Older versions'));
    centered_container();
 
    if ($handle = @opendir('snapshot/archive'))

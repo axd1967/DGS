@@ -1537,7 +1537,7 @@ body.Intro table#pageLayout td#pageBody div.Section {
    text-align: left;
 }
 
-body.News table#pageLayout td#pageBody div.ReleaseTitle {
+body.News table#pageLayout td#pageBody span.ReleaseTitle {
    text-align: left;
    font-size: larger;
    font-weight: bold;
