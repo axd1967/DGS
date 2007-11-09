@@ -290,9 +290,9 @@ if(0){//old
       if( $table_links )
       {
          $translate_form->add_row( array( 'ROW', 'LinksT',
-               'CELL', $nbcol-1, 'class=PageLinksL',
+               'CELL', 1, 'class=PageLinksL',
                'TEXT', $table_links,
-               'CELL', 1, 'class=PageLinksR',
+               'CELL', $nbcol-1, 'class=PageLinksR',
                'TEXT', $table_links,
                 ) );
       }
@@ -382,9 +382,9 @@ if(0){//old
       if( $table_links )
       {
          $translate_form->add_row( array( 'ROW', 'LinksB',
-               'CELL', $nbcol-1, 'class=PageLinksL',
+               'CELL', 1, 'class=PageLinksL',
                'TEXT', $table_links,
-               'CELL', 1, 'class=PageLinksR',
+               'CELL', $nbcol-1, 'class=PageLinksR',
                'TEXT', $table_links,
                 ) );
       }

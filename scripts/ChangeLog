@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-09 rodival
+
+   * translate.php:
+   - better handling of the rows of prev/next with the empty 3rd column.
+
 2007-11-08 rodival
 
    * translate.php:
