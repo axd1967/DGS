@@ -32,6 +32,9 @@ Changelog
    * translate.php:
    - better handling of the rows of prev/next with the empty 3rd column.
 
+   * skins/dragon/print.css:
+   - typo
+
 2007-11-08 rodival
 
    * translate.php:

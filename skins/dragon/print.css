@@ -734,9 +734,10 @@ table.Table td {
 
 /* row of the column headers */
 
+table.Table tr.Head a,
 table.Table tr.Head {
    background: gray;
-   decoration: none;
+   text-decoration: none;
 }
 
 table.Table tr.Head th div,
