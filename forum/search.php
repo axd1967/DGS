@@ -89,6 +89,8 @@ define('MODERATOR_SEARCH', 0);
       'Time DESC'              => T_('Creation date#forumsort'),
       'Posts.Lastchanged DESC' => T_('Modification date#forumsort'),
    );
+   if( !isset($sql_order) || !isset($arr_order[$sql_order]) )
+      $sql_order = array_shift(array_keys($arr_order));
 
    // static filters
    $ffilter = new SearchFilter();

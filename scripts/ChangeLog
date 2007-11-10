@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-10 19:37:27
+
+   * forum/search.php
+   - one protection from an incoming injection to a MySQL query...
+
 2007-11-09 rodival
 
    * translate.php:
