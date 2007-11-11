@@ -29,8 +29,11 @@ Changelog
 
 2007-11-10 19:37:27
 
-   * forum/search.php
+   * forum/search.php:
    - one protection from an incoming injection to a MySQL query...
+
+   * scripts/test.php:
+   - one test to debug the Mac Safari/Camino problem of url-decoding
 
 2007-11-09 rodival
 
