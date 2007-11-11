@@ -28,18 +28,41 @@ pre { background: #dddddd; padding: 8px;}
 
   <BODY bgcolor="#F7F5E3">
 <?php
-  echo "Hello";
+   echo "Hello. ";
 
-   $str= '!"$%()*+,-.:;<=>?@[\]^_{|}~';
-   $url= urlencode($str);
-   $arg= get_request_arg( 'arg', '' );
-   echo '<pre>Results:';
-   echo '<br>str='.htmlentities( $str, ENT_QUOTES);
-   echo '<br>url='.htmlentities( $url, ENT_QUOTES);
-   echo '<br>arg='.htmlentities( $arg, ENT_QUOTES);
-   echo '<br>htm='.htmlentities( htmlentities( $arg, ENT_QUOTES), ENT_QUOTES);
-   echo '</pre>';
-   echo '<a href="test.php?arg='.$url.'">Test it</a>';
+   $arg_ary = array(
+      'v0' => 'Score DESC, Time DESC',
+      'v1' => 'Score DESC,Time DESC',
+      'v2' => 'Score DESC,Time',
+      'v3' => 'Score, Time DESC',
+      'v4' => 'Score,Time DESC',
+      'v5' => 'Score,Time',
+      );
+
+   echo '<FORM action="test.php" method="post" name="ftest">';
+   foreach( $arg_ary as $key => $str )
+   {
+      echo '<input name="'.$key.'" value="'.$str.'" type="hidden">';
+   }
+   echo '<br>First, ';
+   echo '<input name="stest" value="Hit me" type="submit">';
+   echo '</form>';
+
+   $arg= get_request_arg( 'stest', '' );
+   if( $arg )
+   {
+      echo 'Then cut & paste:<pre>&lt;code>';
+      foreach( $arg_ary as $key => $str )
+      {
+         $arg= get_request_arg( $key, '' );
+         echo sprintf('<br>%s: "%s" => "%s"'
+            ,$key
+            ,htmlentities( $str, ENT_QUOTES)
+            ,htmlentities( $arg, ENT_QUOTES)
+            );
+      }
+      echo '<br>&lt;/code></pre>';
+   }
 ?>
   </BODY>
 

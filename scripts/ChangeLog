@@ -27,7 +27,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
-2007-11-10 19:37:27
+2007-11-12 rodival
+
+   * scripts/test.php:
+   - a second test to debug the Mac Safari/Camino problem of url-decoding
+
+2007-11-10 rodival
 
    * forum/search.php:
    - one protection from an incoming injection to a MySQL query...
