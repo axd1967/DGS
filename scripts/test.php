@@ -28,7 +28,9 @@ pre { background: #dddddd; padding: 8px;}
 
   <BODY bgcolor="#F7F5E3">
 <?php
-   echo "Hello. ";
+   echo "Hello.<br>";
+
+   $tid= get_request_arg( 'test', '1' );
 
    $arg_ary = array(
       'v0' => 'Score DESC, Time DESC',
@@ -39,19 +41,36 @@ pre { background: #dddddd; padding: 8px;}
       'v5' => 'Score,Time',
       );
 
-   echo '<FORM action="test.php" method="post" name="ftest">';
-   foreach( $arg_ary as $key => $str )
+   $res= get_request_arg( 'stest', '' );
+   if( !$res )
    {
-      echo '<input name="'.$key.'" value="'.$str.'" type="hidden">';
+      echo '<FORM action="test.php" method="post" name="ftest">';
+      echo '<input name="test" value="'.$tid.'" type="hidden">';
+      switch( $tid )
+      {
+      case 2:
+         echo '<input name="term" value="FAQ" type="hidden">';
+         break;
+      default:
+         echo '<input name="term" value="FAQ|topics" type="hidden">';
+         break;
+      }
+      foreach( $arg_ary as $key => $str )
+      {
+         echo '<input name="'.$key.'" value="'.$str.'" type="hidden">';
+      }
+      echo 'First, ';
+      echo '<input name="stest" value="Hit me" type="submit">';
+      echo '</form>';
    }
-   echo '<br>First, ';
-   echo '<input name="stest" value="Hit me" type="submit">';
-   echo '</form>';
-
-   $arg= get_request_arg( 'stest', '' );
-   if( $arg )
+   else
    {
       echo 'Then cut & paste:<pre>&lt;code>';
+      $arg= get_request_arg( 'term', '' );
+      echo sprintf('<br>t%s: term => "%s"'
+            ,$tid
+            ,htmlentities( $arg, ENT_QUOTES)
+            );
       foreach( $arg_ary as $key => $str )
       {
          $arg= get_request_arg( $key, '' );
@@ -62,6 +81,7 @@ pre { background: #dddddd; padding: 8px;}
             );
       }
       echo '<br>&lt;/code></pre>';
+      echo '<a href="test.php?test='.$tid.'">Redo</a>';
    }
 ?>
   </BODY>
