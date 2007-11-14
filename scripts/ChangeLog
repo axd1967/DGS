@@ -27,6 +27,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-14 juga
+
+   * forum/forum_functions.php:
+   - optimize-fix: remove search-terms (not needed, are extracted from filter)
+
+   * forum/search.php:
+   - fix: prevent SQL-injection on ordering (map order values)
+   - added ascending ordering for creation and modification date
+
 2007-11-12 rodival
 
    * scripts/test.php:
