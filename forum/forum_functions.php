@@ -95,7 +95,7 @@ function make_link_array($links, $ReqParam = null)
 
    $navi_url = '';
    if ( !is_null($ReqParam) and ($links & LINKPAGE_SEARCH) and ($links & (LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
-      $navi_url = URI_AMP . $ReqParam->get_url_parts();
+      $navi_url = $ReqParam->get_url_parts();
 
    if( $links & LINK_TOGGLE_MODERATOR )
    {
@@ -115,7 +115,7 @@ function make_link_array($links, $ReqParam = null)
    if( $links & LINK_PREV_PAGE )
    {
       if( $links & LINKPAGE_SEARCH )
-         $href = "search.php?search_terms={$search_terms}{$navi_url}"
+         $href = "search.php?{$navi_url}"
                      . URI_AMP."offset=".($offset-$SearchPostsPerPage);
       else
          $href = "list.php?forum=$forum"
@@ -126,7 +126,7 @@ function make_link_array($links, $ReqParam = null)
    if( $links & LINK_NEXT_PAGE )
    {
       if( $links & LINKPAGE_SEARCH )
-         $href = "search.php?search_terms={$search_terms}{$navi_url}"
+         $href = "search.php?{$navi_url}"
                      . URI_AMP."offset=".($offset+$SearchPostsPerPage);
       else
          $href = "list.php?forum=$forum"
