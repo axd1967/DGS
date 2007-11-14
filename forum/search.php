@@ -66,12 +66,12 @@ define('MODERATOR_SEARCH', 0);
    if ( @$_REQUEST[FFORM_RESET_ACTION] )
    {
       $offset = 0;
-      $sql_order = '';
+      $order = 0;
    }
    else
    {
       $offset = max(0,(int)@$_REQUEST['offset']);
-      $sql_order = get_request_arg( 'order', '' );
+      $order = get_request_arg( 'order', 0 );
    }
 
    // build forum-array for filter: ( Name => Forum_ID )
@@ -85,12 +85,22 @@ define('MODERATOR_SEARCH', 0);
 
    // for order-form-element
    $arr_order = array(
-      'Score DESC, Time DESC'  => T_('Term relevance#forumsort'),
-      'Time DESC'              => T_('Creation date#forumsort'),
-      'Posts.Lastchanged DESC' => T_('Modification date#forumsort'),
+      0 => T_('Term relevance#forumsort'), // default: time-sort for no-term-search
+      1 => T_('Creation date (new first)#forumsort'),
+      2 => T_('Creation date (old first)#forumsort'),
+      3 => T_('Modification date (new first)#forumsort'),
+      4 => T_('Modification date (old first)#forumsort'),
    );
-   if( !isset($sql_order) || !isset($arr_order[$sql_order]) )
-      $sql_order = array_shift(array_keys($arr_order));
+   $arr_sql_order = array( // index=arr_order[order]
+      'Score DESC, Time DESC',
+      'Time DESC',
+      'Time ASC',
+      'Posts.Lastchanged DESC',
+      'Posts.Lastchanged ASC',
+   );
+   if ( !is_numeric($order) || $order < 0 || $order >= count($arr_order) )
+      $order = 0;
+   $sql_order = $arr_sql_order[$order];
 
    // static filters
    $ffilter = new SearchFilter();
@@ -143,7 +153,7 @@ define('MODERATOR_SEARCH', 0);
          ));
    $fform->add_row( array(
          'DESCRIPTION', T_('Order#forum'),
-         'SELECTBOX',   'order', 1, $arr_order, $sql_order, false, ));
+         'SELECTBOX',   'order', 1, $arr_order, $order, false, ));
    $fform->add_row( array(
          'TAB',
          'CELL',        1, 'align=left',
@@ -207,7 +217,7 @@ define('MODERATOR_SEARCH', 0);
       // build navi-URL for paging
       $rp = $ffilter->get_req_params();
       #$rp->add_entry( 'offset', $offset ); set in forum_start_table-func
-      $rp->add_entry( 'order',  $sql_order );
+      $rp->add_entry( 'order',  $order );
 
       // show resultset of search
       $search_terms = implode('|', $filter2->get_terms() );
