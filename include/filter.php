@@ -1117,7 +1117,7 @@ class Filter
     * terms using a regular-expression to mark the text.
     * \see parse_html_safe() in std_functions.php
     */
-   function get_terms()
+   function get_rx_terms()
    {
       if ( $this->is_active() )
          return $this->match_terms;
@@ -1911,7 +1911,7 @@ class FilterNumeric extends Filter
   *        wildcard; SearchFilter-Type: Text.
   * <p>GUI: text input-box
   * <p>Additional interface functions:
-  * - \see get_terms() to return array with search-terms as regex.
+  * - \see get_rx_terms() to return array with search-terms as regex.
   *
   * note: special quoting used according to MATCH-syntax of mysql,
   *
@@ -2969,7 +2969,7 @@ class FilterBoolean extends Filter
   * <p>Additional interface functions:
   * - \see get_match_query_part() to return match-SQL-query-part to be used
   *   as relevance-value in list of SQL-select fields.
-  * - \see get_terms() to return array with search-terms as regex.
+  * - \see get_rx_terms() to return array with search-terms as regex.
   *
   * note: special quoting used according to MATCH-syntax of mysql,
   *       i.e. no quoting used as for the Text-/Numeric-based-Filters is used

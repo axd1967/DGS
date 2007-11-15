@@ -97,11 +97,11 @@ $info_box = '<ul>
       error('adminlevel_too_low');
 
    $fid = max(0,@$_REQUEST['id']);
-   $term = get_request_arg('term', '');
-   if( $term )
-      $urlterm = URI_AMP.'term='.urlencode($term);
+   $sql_term = get_request_arg('qterm', '');
+   if( $sql_term )
+      $url_term = URI_AMP.'qterm='.urlencode($sql_term);
    else
-      $urlterm = '';
+      $url_term = '';
 
    // read/write move-distance for entries using cookie
    $movedist = (int)@$_REQUEST['movedist'];
@@ -270,7 +270,7 @@ $info_box = '<ul>
 
    // ***********        Edit entry       ****************
 
-   // args: id, edit=t type=c|e [ do_edit=?, preview=t, term=mark_term ]
+   // args: id, edit=t type=c|e [ do_edit=?, preview=t, qterm=sql_term ]
    // keep it tested before 'do_edit' for the preview feature
    else if( @$_REQUEST['edit'] &&
       ( ($action=@$_REQUEST['type']) == 'c' or  $action == 'e' ) )
@@ -337,7 +337,7 @@ $info_box = '<ul>
       $edit_form->add_row( array(
                            'HIDDEN', 'type', $action,
                            'HIDDEN', 'preview', 1,
-                           'HIDDEN', 'term', textarea_safe($term),
+                           'HIDDEN', 'qterm', textarea_safe($sql_term),
                            'SUBMITBUTTONX', 'do_edit', 'Save entry',
                               array('accesskey'=>'x'),
                            'SUBMITBUTTONX', 'edit', 'Preview',
@@ -347,16 +347,16 @@ $info_box = '<ul>
       $edit_form->echo_string(1);
 
       if( @$_REQUEST['preview'] )
-         $rxterm = '';
+         $rx_term = '';
       else
-         $rxterm = implode('|', sql_extract_terms( $term ));
-      show_preview( $row['Level'], $question, $answer, "e$fid", $rxterm);
+         $rx_term = implode('|', sql_extract_terms( $sql_term ));
+      show_preview( $row['Level'], $question, $answer, "e$fid", $rx_term);
    } //edit
 
 
    // ***********        Save edited entry       ****************
 
-   // args: id, do_edit=t type=c|e, question, answer [ preview='', term=mark_terms ]
+   // args: id, do_edit=t type=c|e, question, answer [ preview='', qterm=sql_term ]
    // keep it tested after 'edit' for the preview feature
    else if( @$_REQUEST['do_edit'] &&
       ( ($action=@$_REQUEST['type']) == 'c' or  $action == 'e' ) )
@@ -478,7 +478,7 @@ $info_box = '<ul>
             make_include_files(null, 'FAQ'); //must be called from main dir
 
       //clean URL (focus on edited entry or parent category if entry deleted)
-      jump_to( "$page?id=$ref_id"."$urlterm#e$ref_id" );
+      jump_to( "$page?id=$ref_id"."$url_term#e$ref_id" );
    } //do_edit
 
 
@@ -666,7 +666,7 @@ $info_box = '<ul>
       $search_form = new Form('faqsearchform', $page, FORM_POST );
       $search_form->add_row( array(
             'DESCRIPTION',  'Search Term',
-            'TEXTINPUT',    'term', 30, -1, $term,
+            'TEXTINPUT',    'qterm', 30, -1, $sql_term,
             'SUBMITBUTTONX', 'search', 'Search',
                         array('accesskey'=>'x'),
             ));
@@ -682,17 +682,17 @@ $info_box = '<ul>
 
 
       //build comparison with implicit wildcards
-      $qterm = ( $term ) ? " LIKE '".mysql_addslashes("%$term%")."'" : '';
+      $like = ( $sql_term ) ? " LIKE '".mysql_addslashes("%$sql_term%")."'" : '';
       $query =
          "SELECT entry.*, Question.Text AS Q"
          . ",Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable"
          . ",IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder"
-         . ( $qterm
-            ? ",IF(Question.Text$qterm,1,0) AS MatchQuestion "
-            . ",IF(entry.Level>1 AND Answer.Text$qterm,1,0) AS MatchAnswer"
+         . ( $like
+            ? ",IF(Question.Text$like,1,0) AS MatchQuestion "
+            . ",IF(entry.Level>1 AND Answer.Text$like,1,0) AS MatchAnswer"
 /* old try with a binary field:
-            ? ",IF(LOWER(Question.Text)$qterm,1,0) AS MatchQuestion "
-            . ",IF(entry.Level>1 AND LOWER(Answer.Text)$qterm,1,0) AS MatchAnswer"
+            ? ",IF(LOWER(Question.Text)$like,1,0) AS MatchQuestion "
+            . ",IF(entry.Level>1 AND LOWER(Answer.Text)$like,1,0) AS MatchAnswer"
 */
             : ",0 AS MatchQuestion"
             . ",0 AS MatchAnswer"
@@ -757,7 +757,7 @@ $info_box = '<ul>
          if( $faqhide )
             echo "(H) ";
          echo "<A href=\"$page?edit=1".URI_AMP."type=$typechar".URI_AMP."id=".$row['ID']
-                  ."$urlterm\" title=\"Edit\">$question</A>";
+                  ."$url_term\" title=\"Edit\">$question</A>";
          echo "\n</td>";
 
          // move entry up/down (focus parent category)
@@ -875,13 +875,13 @@ function transl_toggle_state( $row)
    return ''; //can't be toggled
 }
 
-function show_preview( $level, $question, $answer, $id='preview', $mark_terms='' )
+function show_preview( $level, $question, $answer, $id='preview', $rx_term='' )
 {
    echo "<table class=FAQ><tr><td class=FAQread>\n";
    echo faq_item_html( 0);
    echo faq_item_html( $level, $question, $answer,
                $level == 1 ? "href=\"#$id\"" : "name=\"$id\"",
-               $mark_terms );
+               $rx_term);
    echo faq_item_html(-1);
    echo "</td></tr></table>\n";
 }

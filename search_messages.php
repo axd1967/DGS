@@ -118,7 +118,7 @@ require_once( "include/filter.php" );
    // only add tableheads
    message_list_table( $mtable, null, 0, FOLDER_NONE, $my_folders,
       /*no-sort*/ false, /*no-mark*/ true, /*toggle-mark*/ false,
-      /*full-details*/ true, /*only-tablehead*/ true, /*terms*/ '' );
+      /*full-details*/ true, /*only-tablehead*/ true, /*rx_terms*/ '' );
 
    // External-Search-Form
    $smform = new Form( $mtable->Prefix, $page, FORM_GET, false, 'FormTable' );
@@ -148,7 +148,7 @@ require_once( "include/filter.php" );
    // build SQL-query
    $query_smfilter = $smfilter->get_query(GETFILTER_ALL); // clause-parts for static filter
    $query_mfilter  = $mtable->get_query(); // clause-parts for filter
-   $terms = implode('|', $sf3->get_terms() );
+   $rx_term = implode('|', $sf3->get_rx_terms() );
    $order = $mtable->current_order_string();
    $limit = $mtable->current_limit_string();
 
@@ -165,14 +165,14 @@ require_once( "include/filter.php" );
 
    $title = T_('Message search');
    start_page($title, true, $logged_in, $player_row);
-   if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe($terms) . "<br>\n";
+   if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe($rx_term) . "<br>\n";
    if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($rqsql->get_select()) . "<br>\n";
 
    echo "<h3 class=Header>$title</h3>\n";
 
    message_list_table( $mtable, $result, $show_rows, FOLDER_NONE, $my_folders,
       false, true, false, // no-sort, no-mark, toggle-mark
-      true, false, $terms ); // full-details, only-tablehead, terms
+      true, false, $rx_term); // full-details, only-tablehead, terms
 
    // print form with table
    $extform_string = $smform->get_form_string(); // static form

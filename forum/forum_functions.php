@@ -63,7 +63,7 @@ define('FORUM_MAXIMUM_DEPTH', 15);
 function make_link_array($links, $ReqParam = null)
 {
    global $link_array_left, $link_array_right, $forum, $thread, $offset,
-      $RowsPerPage, $SearchPostsPerPage, $search_terms, $player_row;
+      $RowsPerPage, $SearchPostsPerPage, $player_row;
 
    $link_array_left = $link_array_right = array();
 
@@ -134,7 +134,6 @@ function make_link_array($links, $ReqParam = null)
       $link_array_right[T_("Next Page")] = array(
          $href, '', array('accesskey' => '>') );
    }
-
 }
 
 function print_moderation_note($is_moderator, $width)
@@ -250,13 +249,14 @@ function get_new_string($Lastchangedstamp, $Lastread)
 }
 
 
-// param Terms: optional array (or rx-terms) with terms that are to be highlighted in text
-function draw_post($postClass, $my_post, $Subject='', $Text='',
-                   $GoDiagrams=null, $Terms = null)
-{
-/* $postClass could be: (no '_' because used as sub-class name => CSS compliance)
+/*
+ $postClass could be: (no '_' because used as sub-class name => CSS compliance)
    'Normal', 'Hidden', 'Reply', 'Preview', 'Edit', 'SearchResult'
+ $rx_term: rx-terms (optionally array) that are to be highlighted in text
 */
+function draw_post($postClass, $my_post, $Subject='', $Text='',
+                   $GoDiagrams=null, $rx_term='')
+{
 
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
       $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
@@ -266,15 +266,13 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
    $cols = 2;
 
    // highlight terms in Subject/Text (skipping XML-elements like tags & entities)
-   if ( is_null($Terms) )
-      $rx_terms = '';
-   else
-   {
-      $rx_terms = (is_array($Terms) and count($Terms) > 0 )
-                              ? implode("|", $Terms) : $Terms;
-   }
-   $sbj = make_html_safe( $Subject, SUBJECT_HTML, $rx_terms);
-   $txt = make_html_safe( $Text, true, $rx_terms);
+   if( is_array($rx_term) && count($rx_term) > 0 )
+      $rx_term = implode('|', $rx_term);
+   else if( !is_string($rx_term) )
+      $rx_term = '';
+
+   $sbj = make_html_safe( $Subject, SUBJECT_HTML, $rx_term);
+   $txt = make_html_safe( $Text, true, $rx_term);
 //   $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
    if( strlen($txt) == 0 ) $txt = '&nbsp;';
@@ -301,7 +299,7 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
          echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
          echo '<a class=PostSubject href="read.php?forum=' . $Forum_ID .URI_AMP
             . "thread=$Thread_ID"
-            . ( (!is_null($Terms) and !empty($Terms)) ? URI_AMP . "markterms=" . urlencode($Terms) : '' )
+            . ( empty($rx_term) ? '' : URI_AMP."xterm=".urlencode($rx_term) )
             . "#$ID\">$sbj</a>";
 
          echo ' <font size="+1" color="#FFFFFF">' . T_('found in forum')

@@ -299,11 +299,10 @@ if(0){//old
 
       if( $filter_en != '' )
       {
-         $arr = sql_extract_terms( $filter_en );
-         $filter_regex = $arr[0];
+         $rx_term = implode('|', sql_extract_terms( $filter_en ));
       }
       else
-         $filter_regex = '';
+         $rx_term = '';
 
       $translate_form->add_row( array( 'HR' ) ); //$nbcol
 
@@ -333,9 +332,9 @@ if(0){//old
                      substr_count( wordwrap( $string, $hsize, "\n", 1), "\n" )
                   )));
 
-         $sample = make_html_safe($string, 'faq', $filter_regex);
+         $sample = make_html_safe($string, 'faq', $rx_term);
          //$string = nl2br( textarea_safe($string, LANG_DEF_CHARSET));
-         //$string = make_html_safe($string, false, $filter_regex);
+         //$string = make_html_safe($string, false, $rx_term);
          $string = textarea_safe($string, LANG_DEF_CHARSET);
 
          //$translation = textarea_safe( $translation, $translate_encoding);

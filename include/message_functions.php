@@ -414,7 +414,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
                             $subject, $text, //must NOT be html_safe
                             $reply_mid=0, $flow=0,
                             $folders=null, $folder_nr=null, $form=null, $delayed_move=false,
-                            $rx_terms='')
+                            $rx_term='')
 {
    global $date_fmt, $msg_icones, $bg_color;
 
@@ -435,8 +435,8 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       "<td colspan=$cols>$name</td>" .
       "</tr>\n";
 
-   $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_terms);
-   $text = make_html_safe( $text, true, $rx_terms);
+   $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
+   $text = make_html_safe( $text, true, $rx_term);
 
    echo "<tr class=Subject>" .
       "<td class=Rubric>" . T_('Subject') . ":</td>" .
@@ -1062,7 +1062,7 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
 function message_list_table( &$mtable, $result, $show_rows
              , $current_folder, $my_folders
              , $no_sort=true, $no_mark=true, $toggle_marks=false
-             , $full_details=false, $header_part=null, $rx_terms=''
+             , $full_details=false, $header_part=null, $rx_term=''
              )
 {
  global $date_fmt, $msg_icones, $player_row;
@@ -1109,7 +1109,7 @@ function message_list_table( &$mtable, $result, $show_rows
    $tits[            FLOW_ANSWERED] = $n ;
    $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p - $n" ;
 
-   $url_terms = ($rx_terms != '') ? URI_AMP."terms=".urlencode($rx_terms) : '';
+   $url_terms = ($rx_term != '') ? URI_AMP."xterm=".urlencode($rx_term) : '';
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
@@ -1158,7 +1158,7 @@ function message_list_table( &$mtable, $result, $show_rows
       }
 
       $subject = $row['Subject'];
-      $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_terms);
+      $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
       if ( $full_details ) // link to msg
          $str = $showmsg_start . $subject . $showmsg_end;
       else // no-link

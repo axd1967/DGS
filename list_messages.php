@@ -126,7 +126,7 @@ require_once( "include/filter.php" );
 
    start_page($title, true, $logged_in, $player_row );
 
-   $terms = get_request_arg('terms');
+   $rx_term = get_request_arg('xterm');
 
    $mtable = new Table( 'message', 'list_messages.php' . $page );
    $mtable->set_default_sort( 'date', 1);
@@ -147,7 +147,7 @@ require_once( "include/filter.php" );
    {
       $row = mysql_fetch_assoc( $result);
       $mid = $row["mid"];
-      jump_to( "message.php?mode=ShowMessage".URI_AMP."mid=$mid".URI_AMP."terms=".urlencode($terms) );
+      jump_to( "message.php?mode=ShowMessage".URI_AMP."mid=$mid".URI_AMP."xterm=".urlencode($rx_term) );
    }
 
    $show_rows = $mtable->compute_show_rows( $show_rows);
@@ -161,7 +161,7 @@ require_once( "include/filter.php" );
      message_list_table( $mtable, $result, $show_rows
              , $current_folder, $my_folders
              , /*sort*/false, $current_folder == FOLDER_NEW, $toggle_marks
-             , /*full-details*/false, /*only-TH*/null, $terms);
+             , /*full-details*/false, /*only-TH*/null, $rx_term);
    //mysql_free_result($result); //already free
 
    $mtable->echo_table();
@@ -214,7 +214,7 @@ require_once( "include/filter.php" );
    $menu_array[ T_('Search messages') ] = "search_messages.php";
 
    if( $find_answers > 0 )
-      $menu_array[ T_('Back to message') ] = "message.php?mode=ShowMessage".URI_AMP."mid=$find_answers".URI_AMP."terms=".urlencode($terms);
+      $menu_array[ T_('Back to message') ] = "message.php?mode=ShowMessage".URI_AMP."mid=$find_answers".URI_AMP."xterm=".urlencode($rx_term);
    else
       $menu_array[ T_('Edit folders') ] = "edit_folders.php";
 

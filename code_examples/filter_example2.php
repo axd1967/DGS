@@ -880,7 +880,7 @@ if ( $fdemo == 11 ) // mysql-match
    {
       $fref =& $filter->get_filter($fid);
       echo "<br>Filter #{$fid}: get_match_query_part() = [" . $fref->get_match_query_part() . "]\n"
-         . "<br>Filter #{$fid}: get_terms = [" . implode(' | ', $fref->get_terms() ) . "]<br>\n";
+         . "<br>Filter #{$fid}: get_rx_term = [" . implode('|', $fref->get_rx_terms() ) . "]<br>\n";
    }
    echo "</font>\n";
 }

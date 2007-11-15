@@ -88,7 +88,7 @@ require_once( "include/contacts.php" );
    $cfilter->add_filter(11, 'RelativeDate', 'C.Lastchanged', false);
    $cfilter->init(); // parse current value from _GET
    $cfilter->set_accesskeys('x', 'e');
-   $rxterms_note = implode(' | ', $filter_note->get_terms() );
+   $rx_term = implode('|', $filter_note->get_rx_terms() );
 
    $ctable = new Table( 'contact', $page, 'ContactColumns', 'contact' );
    $ctable->register_filter( $cfilter );
@@ -172,7 +172,7 @@ require_once( "include/contacts.php" );
 
    start_page( $title, true, $logged_in, $player_row );
    if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) . "<br>\n";
-   if ( $DEBUG_SQL ) echo "TERMS: " . $rxterms_note . "<br>\n";
+   if ( $DEBUG_SQL ) echo "TERMS: " . $rx_term . "<br>\n";
 
    echo "<h3 class=Header>$title</h3>\n";
 
@@ -219,7 +219,7 @@ require_once( "include/contacts.php" );
       }
       if( $ctable->Is_Column_Displayed[8] )
       {
-         $note = make_html_safe( $row['Notes'], false, $rxterms_note );
+         $note = make_html_safe( $row['Notes'], false, $rx_term);
          //reduce multiple LF to one <br>
          $note = preg_replace( "/(\r\n|\n|\r)+/", '<br>', $note );
          $crow_strings[8] = "<td>$note</td>";

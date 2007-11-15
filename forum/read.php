@@ -24,10 +24,10 @@ require_once( "forum_functions.php" );
 require_once( "post.php" );
 
 
-function revision_history($post_id)
+function revision_history($post_id, $rx_term='')
 {
    global $links, $cols, $Name, $Handle, $User_ID,
-      $Lasteditedstamp, $Timestamp, $Lastread, $NOW, $markterms;
+      $Lasteditedstamp, $Timestamp, $Lastread, $NOW;
 
 
    $headline = array(T_("Revision history") => "colspan=$cols");
@@ -53,7 +53,7 @@ function revision_history($post_id)
 
    extract($row);
    change_depth( $cur_depth, 1, $cols);
-   draw_post( 'Reply', true, $row['Subject'], $row['Text'], null, $markterms );
+   draw_post( 'Reply', true, $row['Subject'], $row['Text'], null, $rx_term);
    echo "<tr><td colspan=$cols height=2></td></tr>";
    change_depth( $cur_depth, 2, $cols);
 
@@ -66,7 +66,7 @@ function revision_history($post_id)
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
-      draw_post( 'Edit' , true, $row['Subject'], $row['Text'], null, $markterms );
+      draw_post( 'Edit' , true, $row['Subject'], $row['Text'], null, $rx_term);
       echo "<tr><td colspan=$cols height=2></td></tr>";
    }
    mysql_free_result($result);
@@ -143,7 +143,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    $forum = @$_REQUEST['forum']+0;
    $thread = @$_REQUEST['thread']+0;
    $edit = @$_REQUEST['edit']+0;
-   $markterms = get_request_arg('markterms', null);
+   $rx_term = get_request_arg('xterm', '');
 
    $Forumname = forum_name($forum, $moderated);
 
@@ -203,7 +203,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
    if( @$_GET['revision_history'] > 0 )
    {
-      revision_history(@$_GET['revision_history']); //set $Lastread
+      revision_history(@$_GET['revision_history'], $rx_term); //set $Lastread
       exit; //done in revision_history
    }
 
@@ -274,7 +274,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 //      $GoDiagrams = find_godiagrams($Text);
 
       $post_reference =
-         draw_post($postClass, $uid == $player_row['ID'], $Subject, $Text, NULL /*$GoDiagrams*/, $markterms );
+         draw_post($postClass, $uid == $player_row['ID'], $Subject, $Text, NULL /*$GoDiagrams*/, $rx_term);
 
       if( $preview and $preview_ID == $ID )
       {
@@ -282,7 +282,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
          $Subject = $preview_Subject;
          $Text = $preview_Text;
 //         $GoDiagrams = $preview_GoDiagrams;
-         draw_post('Preview', false, $Subject, $Text, NULL /*$GoDiagrams*/, $markterms );
+         draw_post('Preview', false, $Subject, $Text, NULL /*$GoDiagrams*/, $rx_term);
       }
 
       if( $postClass != 'Normal' and $postClass != 'Hidden' and !$is_moderator )
@@ -310,7 +310,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       $Subject = $preview_Subject;
       $Text = $preview_Text;
 //      $GoDiagrams = $preview_GoDiagrams;
-      draw_post('Preview', false, $Subject, $Text, NULL /*$GoDiagrams*/, $markterms );
+      draw_post('Preview', false, $Subject, $Text, NULL /*$GoDiagrams*/, $rx_term);
       echo "<tr><td colspan=$cols align=center>\n";
       forum_message_box('Preview', $thread, NULL /*$GoDiagrams*/, $Subject, $Text);
       echo "</td></tr>\n";

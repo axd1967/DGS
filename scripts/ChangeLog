@@ -27,6 +27,31 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-15 rodival
+
+   * include/faq_functions.php, include/message_functions.php,
+     include/filter.php, include/filter_functions.php,
+     code_examples/filter_example2.php,
+     forum/read.php, forum/search.php, forum/forum_functions.php,
+     translate.php, search_messages.php, message.php, list_messages.php,
+     list_contacts.php, admin_faq.php:
+   - searching some missing urlencode() around the search terms like in
+     the Mac Safari/Camino problem
+   - to trace the previous inconsistancy and clearly separate what
+     is "reg_exp" and "sql_like" terms, a bunch of vars renaming.
+   - moved the $rx_term variable (old name: $markterms) used in
+     revision_history() from the global array to the arguments list
+     (like for the draw_post() function)
+   - changed the URL-var name from "terms" to "xterm" (reg_exp)
+     in message.php, list_messages.php, include/message_functions.php
+   - changed the URL-var name from "markterms" to "xterm" (reg_exp)
+     in forum/read.php, forum/forum_functions.php
+   - changed the URL-var name from "term" to "qterm" (sql_like)
+     in admin_faq.php
+   - renamed the get_terms() function to get_rx_terms() to avoid ambiguities
+     in include/filter.php, code_examples/filter_example2.php, forum/search.php,
+     search_messages.php, list_contacts.php
+
 2007-11-14 juga
 
    * forum/forum_functions.php:

@@ -92,13 +92,13 @@ define('MODERATOR_SEARCH', 0);
       4 => T_('Modification date (old first)#forumsort'),
    );
    $arr_sql_order = array( // index=arr_order[order]
-      'Score DESC, Time DESC',
-      'Time DESC',
-      'Time ASC',
-      'Posts.Lastchanged DESC',
-      'Posts.Lastchanged ASC',
+      0 => 'Score DESC, Time DESC',
+      1 => 'Time DESC',
+      2 => 'Time ASC',
+      3 => 'Posts.Lastchanged DESC',
+      4 => 'Posts.Lastchanged ASC',
    );
-   if ( !is_numeric($order) || $order < 0 || $order >= count($arr_order) )
+   if( !is_numeric($order) || $order < 0 || $order >= count($arr_order) )
       $order = 0;
    $sql_order = $arr_sql_order[$order];
 
@@ -163,7 +163,7 @@ define('MODERATOR_SEARCH', 0);
 
    $query_filter = $ffilter->get_query(); // clause-parts for filter
    if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_filter->get_select()) . "<br>\n";
-   if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe( implode('|', $filter2->get_terms()) ) . "<br>\n";
+   if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe( implode('|', $filter2->get_rx_terms()) ) . "<br>\n";
 
    if( $ffilter->has_query() )  // Display results
    {
@@ -220,7 +220,7 @@ define('MODERATOR_SEARCH', 0);
       $rp->add_entry( 'order',  $order );
 
       // show resultset of search
-      $search_terms = implode('|', $filter2->get_terms() );
+      $rx_term = implode('|', $filter2->get_rx_terms() );
       $show_score = true; // used in draw_post per global-var
 
       print_moderation_note($is_moderator, '99%');
@@ -241,7 +241,7 @@ define('MODERATOR_SEARCH', 0);
          if( $hidden )
             $postClass = 'Hidden'; //need a special SearchHidden class
 
-         draw_post($postClass, $uid == $player_row['ID'], $row['Subject'], $row['Text'], null, $search_terms);
+         draw_post($postClass, $uid == $player_row['ID'], $row['Subject'], $row['Text'], null, $rx_term);
 
          echo "<tr><td colspan=$cols></td></tr>\n"; //separator
       }

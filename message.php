@@ -60,7 +60,7 @@ require_once( "include/form_functions.php" );
 */
 
    $preview = @$_REQUEST['preview'];
-   $terms = get_request_arg('terms'); // rx-terms: abc|def|...
+   $rx_term = get_request_arg('xterm'); // rx-terms: abc|def|...
 
    $default_uhandle = get_request_arg('to');
    if( !$default_uhandle )
@@ -242,7 +242,7 @@ require_once( "include/form_functions.php" );
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
                             $ReplyTo, $flow,
-                            $folders, $Folder_nr, $message_form, $Replied=='M', $terms);
+                            $folders, $Folder_nr, $message_form, $Replied=='M', $rx_term);
 
          if( $submode == 'AlreadyAccepted' )
          {
@@ -317,7 +317,7 @@ require_once( "include/form_functions.php" );
                             $Subject, $Text,
                             $ReplyTo, $flow,
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' or $Replied=='M'),
-                            $terms);
+                            $rx_term);
 
          game_info_table( 'invite', $msg_row, $player_row, $iamrated);
 
@@ -355,7 +355,7 @@ require_once( "include/form_functions.php" );
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
                             $ReplyTo, $flow, //no folders, so no move
-                            null, null, null, false, $terms);
+                            null, null, null, false, $rx_term);
 
          if( $preview )
             game_settings_form($message_form, 'dispute', $iamrated, 'redraw', @$_POST);
