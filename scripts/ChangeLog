@@ -31,6 +31,9 @@ Changelog
 
    * include/filter_functions.php (sql_extract_terms):
    - don't remove a trailing "\%" from the sql_term
+   
+   * include/filter_parser.php (parse):
+   - typo ($v1 => $v2)
 
 2007-11-16 juga
 

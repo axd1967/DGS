@@ -179,7 +179,7 @@ class BasicParser
    var $p_value;
    /*! \brief flags about parsed value: PFLAG_WILDCARD */
    var $p_flags;
-   /*! \brief non-null array with search-terms. */
+   /*! \brief non-null array with search rx_terms. */
    var $p_terms;
 
    /*! \brief Constructs BasicParser for specified value, TokenizerConfig and flags. */
@@ -394,7 +394,7 @@ class NumericParser extends BasicParser
   * note: wildcard supported: '*' (multi-char)
   * note: performs additional check of consecutive chars when value starts with wildcard
   *
-  * result: var $p_terms contains array with regex-search-terms when wildcard or exact-syntax.
+  * result: var $p_terms contains array with search rx_terms when wildcard or exact-syntax.
   *
   * Parse-Syntax: x, -x, x-, x-y, x*, *x
   */
@@ -461,7 +461,7 @@ class TextParser extends BasicParser
       {
          list( $v1, $v2 ) = extract_range( $arr );
          list( $sql, $cnt_wild1 ) = sql_replace_wildcards( $v1, $arr_wild_replace );
-         list( $sql, $cnt_wild2 ) = sql_replace_wildcards( $v1, $arr_wild_replace );
+         list( $sql, $cnt_wild2 ) = sql_replace_wildcards( $v2, $arr_wild_replace );
          if ( $cnt_wild1 + $cnt_wild2 > 0 )
          {
             $merged_token = new Token(TOK_TEXT, 0, $v1 . $arr[1]->get_token() . $v2 );
