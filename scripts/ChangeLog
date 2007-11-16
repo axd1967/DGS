@@ -27,12 +27,20 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-16 juga
+
+   * forum/forum_functions.php (draw_post):
+   - allow '0' as regex-term (replace empty-check)
+
 2007-11-15 rodival
 
-   * include/faq_functions.php, include/message_functions.php,
-     include/filter.php, include/filter_functions.php,
+   * include/faq_functions.php (faq_item_html),
+     include/message_functions.php (message_info_table, message_list_table),
+     include/filter.php (get_terms -> get_rx_terms),
+     include/filter_functions.php (sql_extract_terms),
      code_examples/filter_example2.php,
-     forum/read.php, forum/search.php, forum/forum_functions.php,
+     forum/read.php (revision_history), forum/search.php,
+     forum/forum_functions.php (make_link_array, draw_post),
      translate.php, search_messages.php, message.php, list_messages.php,
      list_contacts.php, admin_faq.php:
    - searching some missing urlencode() around the search terms like in
