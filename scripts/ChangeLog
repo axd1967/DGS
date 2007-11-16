@@ -27,11 +27,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-16 juga
+
+   * include/filter_functions.php (sql_extract_terms):
+   - fixes: if handling of trailing (un-)escaped '%' and avoid dublette,
+     add regex-delimiter to escape and escape '\' correctly
+
 2007-11-16 rodival
 
    * include/filter_functions.php (sql_extract_terms):
    - don't remove a trailing "\%" from the sql_term
-   
+
    * include/filter_parser.php (parse):
    - typo ($v1 => $v2)
 
