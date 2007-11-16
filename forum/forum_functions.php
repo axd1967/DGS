@@ -299,7 +299,7 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
          echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
          echo '<a class=PostSubject href="read.php?forum=' . $Forum_ID .URI_AMP
             . "thread=$Thread_ID"
-            . ( empty($rx_term) ? '' : URI_AMP."xterm=".urlencode($rx_term) )
+            . ( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
             . "#$ID\">$sbj</a>";
 
          echo ' <font size="+1" color="#FFFFFF">' . T_('found in forum')
