@@ -74,7 +74,7 @@ function make_text_end_exclusive( $v ) {
   * signature: (string sql, int cnt_wild) = replace_wildcards(
   *             string val, array( src_char => dest_char ),
   *             array( allow_char-despite-being-forbidden => 1 ))
-  * note: imcompatible (doing more) than mysql_escape_string()-func because of special-chars
+  * note: incompatible (doing more) than mysql_escape_string()-func because of special-chars
   * note: because of SQL-injection, dest_char must never be one of: ' " \
   * note: use with caution!! allow-char-array allows forbidden dest_chars
   * note: also handle, if wildcar_char is '%' using correct escaping
@@ -132,27 +132,39 @@ function sql_replace_wildcards( $valsql, $arr_repl, $arr_allow = array() )
    return array( $sql, $cnt_wild );
 }
 
-/*! \brief Extracts regex-terms from SQL-value and return as terms-array. */
-function sql_extract_terms( $sql )
+/*! \brief Extracts regex-terms from SQL-pattern/value and return as terms-array. */
+function sql_extract_terms( $sql, $rx_delimiter='%' )
 {
    $sql = preg_replace( "/^%+/", '', $sql ); //remove heading "%"
-   $sql = preg_replace( "/([^%\\\\]|\\\\%)%+$/", "\\1", $sql ); //keep a trailing "\%"
-   // \% -> %, \_ -> _, % -> .*?, _ -> ., others -> copy and preg-escape
-   $rxterm = '';
    $len = strlen($sql);
+
+   // find potential endpos to skip trailing '%' to handle e.g. a\\%% a\%% a\%
+   $arr_match = array();
+   $endpos = (preg_match( "/^(.*?[^%])%+$/", $sql, $arr_match))
+      ? strlen($arr_match[1]) : $len;
+
+   // \\ -> \\, \% -> %, \_ -> _, % -> .*?, _ -> ., others -> copy and preg-escape
+   $rxterm = '';
    for( $pos = 0; $pos < $len; $pos++)
    {
       if ( $sql{$pos} == '\\' )
       {
          $pos++;
-         $rxterm .= preg_quote($sql{$pos});
+         if ( $pos < $len )
+            $rxterm .= preg_quote($sql{$pos}, $rx_delimiter);
       }
       elseif ( $sql{$pos} == '%' )
+      {
+         if ( $pos >= $endpos ) // skip trailing '%'
+            break;
+         while ( $pos <= $len && substr($sql, $pos+1, 1) == '%' ) // skip double '%'
+            $pos++;
          $rxterm .= '.*?';
+      }
       elseif ( $sql{$pos} == '_' )
          $rxterm .= '.';
       else
-         $rxterm .= preg_quote($sql{$pos});
+         $rxterm .= preg_quote($sql{$pos}, $rx_delimiter);
    }
 
    if ( $rxterm != '' )
