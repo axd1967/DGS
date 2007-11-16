@@ -132,7 +132,10 @@ function sql_replace_wildcards( $valsql, $arr_repl, $arr_allow = array() )
    return array( $sql, $cnt_wild );
 }
 
-/*! \brief Extracts regex-terms from SQL-pattern/value and return as terms-array. */
+/*!
+ * \brief Extracts regex-terms from SQL-pattern/value and return as terms-array.
+ * \param $rx_delimiter see include/std_functions.php (parse_html_safe) for default ('%')
+ */
 function sql_extract_terms( $sql, $rx_delimiter='%' )
 {
    $sql = preg_replace( "/^%+/", '', $sql ); //remove heading "%"
