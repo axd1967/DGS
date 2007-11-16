@@ -135,8 +135,9 @@ function sql_replace_wildcards( $valsql, $arr_repl, $arr_allow = array() )
 /*! \brief Extracts regex-terms from SQL-value and return as terms-array. */
 function sql_extract_terms( $sql )
 {
-   // \% -> %, \_ -> _, % -> .*?, _ -> ., others -> copy
-   $sql = preg_replace( "/(^%+|%+$)/", '', $sql ); //remove both ends '%'
+   $sql = preg_replace( "/^%+/", '', $sql ); //remove heading "%"
+   $sql = preg_replace( "/([^%\\\\]|\\\\%)%+$/", "\\1", $sql ); //keep a trailing "\%"
+   // \% -> %, \_ -> _, % -> .*?, _ -> ., others -> copy and preg-escape
    $rxterm = '';
    $len = strlen($sql);
    for( $pos = 0; $pos < $len; $pos++)
