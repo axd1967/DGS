@@ -852,6 +852,7 @@ function get_folders($uid, $remove_all_received=true)
                           $STANDARD_FOLDERS[$row['Folder_nr']][0] : T_('Folder name') );
       $fldrs[$row['Folder_nr']] = array($row['Name'], $row['BGColor'], $row['FGColor']);
    }
+   mysql_free_result($result);
 
    if( $remove_all_received )
       unset($fldrs[FOLDER_ALL_RECEIVED]);
@@ -937,11 +938,10 @@ function echo_folders($folders, $current_folder)
    $folders[FOLDER_ALL_RECEIVED] = $STANDARD_FOLDERS[FOLDER_ALL_RECEIVED];
    ksort($folders);
 
-   $FOLDER_COLS_MODULO = 8; //waiting to be a global constant... maybe
    $i = 0;
    foreach( $folders as $nr => $val )
    {
-      if( $i > 0 && ($i % $FOLDER_COLS_MODULO) == 0 )
+      if( $i > 0 && ($i % FOLDER_COLS_MODULO) == 0 )
           $string .= "</tr>\n<tr><td></td>"; //empty cell under title
       $i++;
 
@@ -951,10 +951,10 @@ function echo_folders($folders, $current_folder)
          $string.= echo_folder_box( $folders, $val, null, 'class=Tab'
                         , "<a href=\"list_messages.php?folder=$nr\">%s</a>");
    }
-   $i = ($i % $FOLDER_COLS_MODULO);
+   $i = ($i % FOLDER_COLS_MODULO);
    if( $i > 0 ) //empty cells of last line
    {
-      $i = $FOLDER_COLS_MODULO - $i;
+      $i = FOLDER_COLS_MODULO - $i;
       if( $i > 1 )
          $string .= "<td colspan=$i></td>";
       else
