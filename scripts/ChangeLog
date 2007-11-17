@@ -30,11 +30,14 @@ Changelog
 2007-11-17 juga
 
    * include/filter.php (FilterMysqlMatch.extract_match_terms),
-   * include/tokenizer.php (Token, StringTokenizer.parse_quote_quote):
+     include/tokenizer.php (Token, StringTokenizer.parse_quote_quote):
    - Filter: special handling for "quoted-text" in mysql-match search-pattern
    - Tokenizer: mark quoted token-text using added Token.flags
 
 2007-11-16 rodival
+
+   * include/std_functions.php (delete_all_observers):
+   - exclude guest from message notifications for observers
 
    * include/std_functions.php (parse_html_safe),
      include/filter_functions.php (sql_extract_terms):

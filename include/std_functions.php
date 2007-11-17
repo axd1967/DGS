@@ -1077,7 +1077,7 @@ function send_message( $debugmsg, $text='', $subject=''
       mysql_free_result($result);
    }
    if( !$to_myself && count($receivers) <= 0 )
-      error('receiver_not_found',$debugmsg.'rec0');
+      error('receiver_not_found',$debugmsg."rec0($from_id,$subject)");
 
    /**
     * Actually, only the messages from server can have multiple
@@ -1087,11 +1087,11 @@ function send_message( $debugmsg, $text='', $subject=''
     * See also: message.php
     **/
    if( $from_id > 0 && count($receivers)+($to_myself?1:0) > 1 )
-      error('receiver_not_found',$debugmsg.'rec1');
+      error('receiver_not_found',$debugmsg."rec1($from_id,$subject)");
 
    //actually not supported: sending a message to myself and other in the same pack
    if( $to_myself && count($receivers) > 0 )
-      error('internal_error',$debugmsg.'rec2');
+      error('internal_error',$debugmsg."rec2($from_id,$subject)");
 
    $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
           .", Type='$type', ReplyTo=$prev_mid, Game_ID=$gid"
@@ -1684,7 +1684,7 @@ $html_safe_preg = array(
  *  'gameh': 'game' + show hidden sgf comments
  * $mark_terms: see parse_html_safe().
  **/
-function make_html_safe( $msg, $some_html=false, $mark_terms=false)
+function make_html_safe( $msg, $some_html=false, $mark_terms='')
 {
 
    if( $some_html )
@@ -2547,7 +2547,9 @@ function delete_all_observers( $gid, $notify, $Text='' )
    if( $notify )
    {
       $result = mysql_query("SELECT Observers.uid AS pid " .
-                            "FROM Observers WHERE gid=$gid")
+                            "FROM Observers " .
+                            "WHERE gid=$gid AND Observers.uid>1" //exclude guest
+                           )
          or error('mysql_query_failed','delete_all_observers.find');
 
       if( @mysql_num_rows($result) > 0 )
