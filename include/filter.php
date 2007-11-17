@@ -3144,7 +3144,7 @@ class FilterMysqlMatch extends Filter
    function extract_match_terms( $terms )
    {
       // extract words, especially "quoted literals" using StringTokenizer
-      // Syuntax: word: [a-z0-9'_]+   +must -mustnot opt >more-important <less-important (grouping) ~negate-relevance trunc* "literal phrase"
+      // Syntax: word: [a-z0-9'_]+   +must -mustnot opt >more-important <less-important (grouping) ~negate-relevance trunc* "literal phrase"
       // note: treat following chars as word-separators to be removed in terms: +-<>~()
       $tokenizer = new StringTokenizer( QUOTETYPE_QUOTE | TOKENIZE_WORD_RX,
             '\\w\'\\*', '', '\\\\', '""');
@@ -3157,16 +3157,26 @@ class FilterMysqlMatch extends Filter
 
       // remove special chars
       // note (regex-chars): . \ + * ? [ ^ ] $ ( ) { } = ! < > | :
+      $wordchars = "\\w'"; // chars building a mysql-match-word
       $arr = array();
       $n = 0;
       foreach( $tokenizer->tokens() as $token )
       {
          if ( $token->get_type() == TOK_TEXT )
          {
-            $val = preg_replace(
-               array( "/[^\\w'\*\\s]+/i", "/\*/", "/\\s+/" ), // match-rx
-               array( " ",                ".*?",  " " ),      // corresponding replacement
-               $token->get_token() );
+            if ( $token->get_flags() & TOKFLAG_QUOTED ) // quoted-text "text"
+            {
+               $val = preg_quote( $token->get_token() );
+               $val = preg_replace( "/\\s+/", "\\s+", $val );
+            }
+            else // unquoted-text
+            {
+               $val = preg_replace(
+                  array( "/[^$wordchars\*\\s]+/i", "/\*/", "/\\s+/" ), // match-rx
+                  array( " ",                      ".*?",  "\\s+" ),   // corresponding replacement
+                  $token->get_token() );
+            }
+
             $val = trim( $val );
             if ( (string)$val != '' )
                array_push( $arr, $val );
