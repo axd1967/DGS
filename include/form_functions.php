@@ -785,6 +785,7 @@ class Form
     * \brief Return form pressed into areas grouped as specified by layout (called recursively).
     * \param $L layout-array: is-arr(vert|horiz) OR is-num(=area)
     * \param $AR AR[areanum] contains the tablerows as string for the different areas
+    * \param $TRlevel if true, put area into table-tr-element
     * \internal
     */
    function build_areas( &$L, &$AR, $TRlevel=true )

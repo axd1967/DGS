@@ -2598,7 +2598,7 @@ $ENUM_GAMES_STATUS = array( 'INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED' 
  * Builds IN-SQL-part for some enum-array containing all possible values
  * for a table-column.
  * \param $arr_enum non-empty array with all possible values for a table-column
- * \param var-args enum-values that shouldn't match on table-column;
+ * var-args params enum-values that shouldn't match on table-column;
  *        must not contain all elements of enum(!)
  * Example: 'Games.Status' . not_in_clause( $ENUM_GAMES_STATUS, 'FINISHED', ... )
  */
