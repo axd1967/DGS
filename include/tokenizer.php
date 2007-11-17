@@ -50,6 +50,8 @@ $TOKEN_TYPES = array(
    TOK_XMLENTITY  => 'XMLENT',
 );
 
+define('TOKFLAG_QUOTED', 0x01); // token representing quoted-text
+
  /*!
   * \class Token
   *
@@ -72,15 +74,18 @@ class Token
    var $epos;
    /*! \brief optional error detected while parsing token */
    var $error;
+   /*! \brief flags indicating special type/state of token */
+   var $flags;
 
    /*! \brief Constructing Token( TOK_... type, int spos, string|object token) with specified $type, starting pos and token-value. */
-   function Token( $type, $spos, $token = '' )
+   function Token( $type, $spos, $token = '', $flags = 0 )
    {
       $this->type  = $type;
       $this->token = $token;
       $this->spos  = $spos;
       $this->epos  = -1;
       $this->error = '';
+      $this->flags = $flags;
    }
 
    /*!
@@ -147,6 +152,18 @@ class Token
          return $this->epos - $this->spos + 1;
    }
 
+   /*! \brief Gets flags for this token. */
+   function get_flags()
+   {
+      return $this->flags;
+   }
+
+   /*! \brief Adds flag for this token. */
+   function add_flags( $flags )
+   {
+      $this->flags |= $flags;
+   }
+
    /*! \brief Sets error-string for this token. */
    function set_error( $error )
    {
@@ -159,6 +176,7 @@ class Token
       $v = (method_exists($this->token, 'to_string')) ? $this->token->to_string() : $this->token;
       return "{" . $this->get_type(true)
          . ": pos=[{$this->spos}" . (($this->epos >= 0) ? "..{$this->epos}" : "], endpos=[".$this->get_endpos()."]" ) . "], "
+         . sprintf("flags=[0x%x], ", $this->flags)
          . "[$v] "
          . ($this->error != '' ? ":" . T_('Error#filter') . " {$this->error}" : "") . "} ";
    }
@@ -515,6 +533,7 @@ class StringTokenizer extends BasicTokenizer
       $tok = ''; // current token
       $len = strlen($this->value);
       $quote_begin = 0;
+      $tokflags = 0;
 
       for( $pos=0; $pos < $len; $pos++)
       {
@@ -531,6 +550,7 @@ class StringTokenizer extends BasicTokenizer
          if ( $quote_begin == 0 and $char == $quote_start )
          {
             $quote_begin++;
+            $tokflags = TOKFLAG_QUOTED;
             continue;
          }
          elseif ($quote_begin == 1 and $char == $quote_end )
@@ -556,7 +576,8 @@ class StringTokenizer extends BasicTokenizer
             else
             { // unquoted
                if ( (string)$tok != '' )
-                  array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok) );
+                  array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok, $tokflags) );
+               $tokflags = 0;
                $spos = $pos;
                $tok = '';
                array_push( $this->tokens, new Token(TOK_SEPARATOR, $spos, $char) );
@@ -566,7 +587,7 @@ class StringTokenizer extends BasicTokenizer
          }
       }
       if ( (string)$tok != '' )
-         array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok) );
+         array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok, $tokflags) );
 
       if ($quote_begin != 0)
       {
