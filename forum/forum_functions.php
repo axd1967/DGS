@@ -257,13 +257,13 @@ function get_new_string($Lastchangedstamp, $Lastread)
 function draw_post($postClass, $my_post, $Subject='', $Text='',
                    $GoDiagrams=null, $rx_term='')
 {
-
+   //TODO: remove those globals!
    global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
       $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
       $ForumName, $Score, $Forum_ID, $Thread_ID, $show_score, $PendingApproval;
 
    $post_reference = '';
-   $cols = 2;
+   $cols = 2; //one for the subject header, one for the possible approved/hidden state
 
    // highlight terms in Subject/Text (skipping XML-elements like tags & entities)
    if( is_array($rx_term) && count($rx_term) > 0 )
@@ -297,8 +297,22 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
          $hdrcols = $cols;
 
          echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
-         echo '<a class=PostSubject href="read.php?forum=' . $Forum_ID .URI_AMP
-            . "thread=$Thread_ID"
+if(1){ //new
+         echo ' <font size="+1" color="#FFFFFF">' . T_('found in forum')
+            . '</font> <a href="list.php?forum=' .
+            $Forum_ID . '" class=black>' . $ForumName . "</a>\n";
+         if( $show_score )
+            echo ' <font color="#FFFFFF">' . T_('with') . '</font> ' . T_('Score')
+               . ' <font color="#000000">' . $Score  . "</font>\n";
+         echo '<br>';
+         echo '<a class=PostSubject href="read.php?forum=' . $Forum_ID
+            . URI_AMP."thread=$Thread_ID"
+            . ( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
+            . "#$ID\">$sbj</a>";
+
+}else{ //old
+         echo '<a class=PostSubject href="read.php?forum=' . $Forum_ID
+            . URI_AMP."thread=$Thread_ID"
             . ( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
             . "#$ID\">$sbj</a>";
 
@@ -308,26 +322,25 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
          if( $show_score )
             echo ' <font color="#FFFFFF">' . T_('with') . '</font> ' . T_('Score')
                . ' <font color="#000000">' . $Score  . "</font>\n";
+} //new/old
 
          echo "</td></tr>\n";
       }
       else
       {
-         $new = get_new_string($Timestamp, $Lastread);
          if( $postClass == 'Hidden' )
             $hdrcols = $cols-1; //because of the rowspan=2 in the second column
          else
             $hdrcols = $cols;
+         $new = get_new_string($Timestamp, $Lastread);
 
          echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
          echo "<a class=PostSubject name=\"$ID\">$sbj</a>$new";
 
          if( $hdrcols != $cols )
          {
-            echo "</td>\n <td rowspan=2 align=right>";
-            echo '<b><font color="#990000">' .
-               ( $PendingApproval == 'Y' ? T_('Awaiting<br>approval') : T_('Hidden') ) .
-               '</font></b>';
+            echo "</td>\n <td rowspan=2 class=PostStatus>";
+            echo ( $PendingApproval == 'Y' ? T_('Awaiting<br>approval') : T_('Hidden') );
          }
          echo "</td></tr>\n";
       }
@@ -392,9 +405,6 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
                ."[ " . T_('Reject') . " ]</a>";
       }
       echo "</td></tr>\n";
-      
-      //vertical space
-      echo "<tr><td colspan=$cols height=2></td></tr>\n";
    }
    
    return $post_reference;

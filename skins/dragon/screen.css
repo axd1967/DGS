@@ -119,6 +119,7 @@ ul {
    margin-top: 1em;
 }
 
+a,
 a * {
    text-decoration: underline;
 }
@@ -2132,8 +2133,8 @@ table.Forum .PageLinks a {
 }
 
 /*
-  The headers of the posts have the class="PostHeadsubclass"
-   where subclass is one of:
+  The headers of the posts have the class="PostHeadSubclass"
+   where Subclass is one of:
     Normal, Hidden, Reply, Preview, Edit, SearchResult
 */
 table.Forum tr.PostHeadNormal {
@@ -2170,6 +2171,19 @@ table.Forum tr.PostHeadNormal .PostSubject {
    color: black;
    font-size: larger;
    font-weight: bold;
+}
+
+table.Forum tr.PostHeadSearchResult td.PostStatus,
+table.Forum tr.PostHeadEdit td.PostStatus,
+table.Forum tr.PostHeadPreview td.PostStatus,
+table.Forum tr.PostHeadReply td.PostStatus,
+table.Forum tr.PostHeadHidden td.PostStatus,
+table.Forum tr.PostHeadNormal td.PostStatus {
+   color: #990000;
+   font-weight: bold;
+   text-align: right; /* */
+/*   width: 1%;
+   text-align: center; /* */
 }
 
 table.Forum tr.PostBody {

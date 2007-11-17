@@ -45,6 +45,11 @@ Changelog
    - changed the links of the Correspondent and Subject columns to make
      them more intuitive and like thoses of the search-message table
 
+   * skins/dragon/screen.css, skins/dragon/print.css,
+     forum/forum_functions.php (draw_post):
+   - fixed the layout of the approved/hidden status cell
+   - moved the "found in forum" part above the subject line in the search page
+
 2007-11-16 juga
 
    * include/filter_functions.php (sql_extract_terms):
