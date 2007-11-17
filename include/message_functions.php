@@ -39,6 +39,8 @@ $MSG_TYPES = array( // keep untranslated{!)
    'RESULT'     => 'Result',
 );
 
+define('FOLDER_COLS_MODULO', 8); //number of columns of "tab" layouts
+
 function init_standard_folders()
 {
    global $STANDARD_FOLDERS;

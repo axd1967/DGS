@@ -33,6 +33,10 @@ Changelog
      include/filter_functions.php (sql_extract_terms):
    - set the $parse_mark_regex delimiter to a more natural '/'
 
+   * include/message_functions.php (echo_folders),
+     search_messages.php:
+   - introduced the FOLDER_COLS_MODULO constant
+
 2007-11-16 juga
 
    * include/filter_functions.php (sql_extract_terms):
