@@ -1534,17 +1534,18 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
  * Simple check of elements' attributes and inner text.
  * If an element is allowed and correctly closed,
  *  validate it by subtituing its '<' and '>' with ALLOWED_LT and ALLOWED_GT.
- * $mark_terms: regex-search-terms.
- *  replace case-insensitive regex-terms in text with tags used to highlight search-texts.
- *  terms separated by '|', e.g. word1|word2|word3;
- *  can be also valid regex, but be cautious with .* (!)
+ * $mark_terms: search rx_terms.
+ *  replace case-insensitive regex-terms in text with tags used to highlight found-texts.
+ *  must be a valid regex (escaped for the '/' delimiter), but be cautious with .* (!)
+ *  e.g. terms separated by '|' like word1|word2|word3;
  **/
 function parse_html_safe( $msg, $some_html, $mark_terms='')
 {
  global $html_code, $html_code_closed, $parse_mark_regex;
 
-   $parse_mark_regex = !$mark_terms ? ''
-         : '%('.str_replace('%','\%',$mark_terms).')%is';
+   //set the regexp (escaped for the '/' delimiter) to the first match level (parenthesis)
+   $parse_mark_regex = !$mark_terms ? '' : "/($mark_terms)/is";
+         //: '%('.str_replace('%','\%',$mark_terms).')%is';
    $bad = 0;
    if( !$some_html )
       $str = '';

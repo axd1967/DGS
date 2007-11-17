@@ -27,6 +27,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-16 rodival
+
+   * include/std_functions.php (parse_html_safe),
+     include/filter_functions.php (sql_extract_terms):
+   - set the $parse_mark_regex delimiter to a more natural '/'
+
 2007-11-16 juga
 
    * include/filter_functions.php (sql_extract_terms):
