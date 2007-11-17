@@ -36,6 +36,10 @@ Changelog
    * include/message_functions.php (echo_folders),
      search_messages.php:
    - introduced the FOLDER_COLS_MODULO constant
+   
+   * include/message_functions.php (message_list_table):
+   - changed the links of the Correspondent and Subject columns to make
+     them more intuitive and like thoses of the search-message table
 
 2007-11-16 juga
 

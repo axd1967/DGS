@@ -1138,33 +1138,28 @@ function message_list_table( &$mtable, $result, $show_rows
       $showmsg_end   = "</A>";
 
       // link to user
-      if ( $full_details )
+      if( $row['Sender'] === 'M' ) //Message to myself
       {
-         if( $row['Sender'] === 'M' ) //Message to myself
+         if( $full_details )
             $user_str = user_reference( REF_LINK, 1, '', $player_row );
-         else if( $row["other_ID"] > 0 )
-            $user_str = user_reference( REF_LINK, 1, '',
-               $row['other_ID'], $row['other_name'], $row['other_handle'] );
          else
-            $user_str = $row['other_name']; // server-msg or unknown
+            $user_str = $row['other_name'];
       }
-
-      if ( $full_details ) // user-link
-         $mrow_strings[2] = "<td>$user_str</td>";
+      else if( $row["other_ID"] > 0 )
+         $user_str = user_reference( REF_LINK, 1, '',
+            $row['other_ID'], $row['other_name'], $row['other_handle'] );
       else
-      { // msg-link
-         $str = $showmsg_start . make_html_safe($row["other_name"]) . $showmsg_end;
+         $user_str = $row['other_name']; // server-msg or unknown
+
+      $str = $user_str;
+      if ( !$full_details )
          if( $row['Sender'] === 'Y' )
             $str = T_('To') . ': ' . $str;
-         $mrow_strings[2] = "<td>$str</td>";
-      }
+      $mrow_strings[2] = "<td>$str</td>";
 
       $subject = $row['Subject'];
       $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
-      if ( $full_details ) // link to msg
-         $str = $showmsg_start . $subject . $showmsg_end;
-      else // no-link
-         $str = $subject;
+      $str = $showmsg_start . $subject . $showmsg_end;
       $mrow_strings[3] = "<td>$str&nbsp;</td>";
 
       list($ico,$alt) = $msg_icones[$row['flow']];
