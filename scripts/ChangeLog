@@ -33,6 +33,10 @@ Changelog
      include/filter_functions.php (sql_extract_terms):
    - set the $parse_mark_regex delimiter to a more natural '/'
 
+   * include/std_functions.php (parse_tags_safe):
+   - fixed a bad marking of the search-term of the </code> tag
+   - ajusted some comments
+
    * include/message_functions.php (echo_folders),
      search_messages.php:
    - introduced the FOLDER_COLS_MODULO constant

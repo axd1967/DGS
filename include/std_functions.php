@@ -245,6 +245,7 @@ define("FOLDER_MAIN", 1);
 define("FOLDER_REPLY", 3);
 define("FOLDER_DELETED", 4);
 define("FOLDER_SENT", 5);
+//User folders must be >= USER_FOLDERS
 define("USER_FOLDERS", 6);
 //-----
 
@@ -1421,12 +1422,13 @@ This part fix a security hole. One was able to execute a javascript code
  *  validate it by subtituing its '<' and '>' with ALLOWED_LT and ALLOWED_GT.
  * Check up to the <$stop > tag (supposed to be the closing tag).
  * If $stop=='', check up to the end of string $trail.
+ * The global $parse_mark_regex must be the well-formed preg-exp of the marked terms.
  **/
-$parse_mark_regex = '';
+$parse_mark_regex = ''; //global because parse_tags_safe() is recursive
 define('PARSE_MARK_TERM', ALLOWED_LT.'span class=MarkTerm'
-                        .ALLOWED_GT.'\1'.ALLOWED_LT.'/span'.ALLOWED_GT);
+                        .ALLOWED_GT.'\\1'.ALLOWED_LT.'/span'.ALLOWED_GT);
 define('PARSE_MARK_TAGTERM', ALLOWED_LT.'span class=MarkTagTerm'
-                        .ALLOWED_GT.'&lt;\1&gt;'.ALLOWED_LT.'/span'.ALLOWED_GT);
+                        .ALLOWED_GT.'&lt;\\1&gt;'.ALLOWED_LT.'/span'.ALLOWED_GT);
 function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop)
 {
    if( !$trail )
@@ -1438,7 +1440,8 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    $reg = ( $html_code ?( $stop ?"$stop|" :'' ).$html_code :$stop );
    if( !$reg )
       return '';
-   $reg = "%^(.*?)<($reg)\b(.*)$%is";
+   $reg = "%^(.*?)<($reg)\\b(.*)$%is";
+//RdvlLog("parse_tags_safe.0.2:[$reg] [$html_code] [$html_code_closed]");
 
    while ( preg_match($reg, $trail, $matches) )
    {
@@ -1454,11 +1457,13 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       $head = $tag . parse_atbs_safe( $trail, $bad) ;
       $marks = '';
       if( $parse_mark_regex && PARSE_MARK_TAGTERM && $head )
+      {
          if( preg_match_all( $parse_mark_regex, $head, $tmp) )
          {
             $marks = textarea_safe( implode('|', $tmp[1]), 'iso-8859-1'); //LANG_DEF_CHARSET);
-            $marks = str_replace( '\1', $marks, PARSE_MARK_TAGTERM);
+            $marks = str_replace( '\\1', $marks, PARSE_MARK_TAGTERM);
          }
+      }
       if( $bad)
          return $before .$marks .'<'. $head .'>' ;
 
@@ -1495,9 +1500,13 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
          $inside = str_replace('&', '&amp;', $inside);
+         //TODO: fix possible corrupted marks... to be reviewed
+         $inside = preg_replace(
+            '%(class=Mark[^`]*'.ALLOWED_GT.')&amp;(lt;[^&]*)&amp;(gt;)%',
+            '\\1&\\2&\\3',
+            $inside);
       }
-      else
-      if( $tag == 'tt' )
+      else if( $tag == 'tt' )
       {
          // TT is mainly designed to be used when $some_html=='cell'
          // does not allow inside HTML and remove line breaks
@@ -1508,11 +1517,10 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          //$inside = str_replace('&', '&amp;', $inside);
          $inside = preg_replace('%[\\x09\\x20]%', '&nbsp;', $inside);
          $inside = preg_replace('%[\\x01-\\x1F]*%', '', $inside);
-         //TODO: fix potentially corrupted marks... to be reviewed
+         //TODO: fix possible corrupted marks... to be reviewed
          $inside = preg_replace('%&nbsp;class=Mark%', ' class=Mark', $inside);
       }
-      else
-      if( $to_be_closed )
+      else if( $to_be_closed )
       {
          $inside = parse_tags_safe( $trail, $bad, $html_code, $html_code_closed, '/'.$tag);
          if( $bad)
@@ -2634,7 +2642,7 @@ function split_RGBA($color, $alpha=NULL)
 function blend_alpha_hex($color, $bgcolor=null)
 {
    if ( is_null($bgcolor) )
-      $bgcolor = "f7f5e3";
+      $bgcolor = "f7f5e3"; //$bg_color value (#f7f5e3)
    list($r,$g,$b,$a)= split_RGBA($color, 0);
    list($br,$bg,$bb,$ba)= split_RGBA($bgcolor);
    return blend_alpha($r,$g,$b,$a,$br,$bg,$bb);
