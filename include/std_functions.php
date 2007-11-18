@@ -1441,7 +1441,6 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    if( !$reg )
       return '';
    $reg = "%^(.*?)<($reg)\\b(.*)$%is";
-//RdvlLog("parse_tags_safe.0.2:[$reg] [$html_code] [$html_code_closed]");
 
    while ( preg_match($reg, $trail, $matches) )
    {
