@@ -262,6 +262,9 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
       $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
       $ForumName, $Score, $Forum_ID, $Thread_ID, $show_score, $PendingApproval;
 
+   $thread_url = 'read.php?forum=' . $Forum_ID
+         . URI_AMP."thread=$Thread_ID"; //post_url ended by "#$ID"
+
    $post_reference = '';
    $cols = 2; //one for the subject header, one for the possible approved/hidden state
 
@@ -305,14 +308,12 @@ if(1){ //new
             echo ' <font color="#FFFFFF">' . T_('with') . '</font> ' . T_('Score')
                . ' <font color="#000000">' . $Score  . "</font>\n";
          echo '<br>';
-         echo '<a class=PostSubject href="read.php?forum=' . $Forum_ID
-            . URI_AMP."thread=$Thread_ID"
+         echo '<a class=PostSubject href="'.$thread_url
             . ( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
             . "#$ID\">$sbj</a>";
 
 }else{ //old
-         echo '<a class=PostSubject href="read.php?forum=' . $Forum_ID
-            . URI_AMP."thread=$Thread_ID"
+         echo '<a class=PostSubject href="'.$thread_url
             . ( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
             . "#$ID\">$sbj</a>";
 
@@ -335,7 +336,8 @@ if(1){ //new
          $new = get_new_string($Timestamp, $Lastread);
 
          echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
-         echo "<a class=PostSubject name=\"$ID\">$sbj</a>$new";
+         echo '<a class=PostSubject href="'.$thread_url
+            ."#$ID\" name=\"$ID\">$sbj</a>$new";
 
          if( $hdrcols != $cols )
          {
@@ -355,7 +357,8 @@ if(1){ //new
       if( $Lastedited > 0 )
       {
          $post_reference = date($date_fmt, $Lasteditedstamp);
-         echo "&nbsp;&nbsp;&nbsp;(<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread".URI_AMP."revision_history=$ID\">"
+         echo '&nbsp;&nbsp;&nbsp;(<a href="'.$thread_url
+            . URI_AMP."revision_history=$ID\">"
             . T_('edited') . "</a> $post_reference)";
       }
 
@@ -375,40 +378,40 @@ if(1){ //new
 
       if( $postClass == 'Normal' and !$is_moderator ) // reply link
       {
-         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
+         echo '<a href="'.$thread_url
             .URI_AMP."reply=$ID#$ID\">[ " .
             T_('reply') . " ]</a>&nbsp;&nbsp;";
          if( ALLOW_QUOTING )
-         echo "<a href=\"read.php?forum=$forum".URI_AMP."thread=$thread"
+         echo '<a href="'.$thread_url
             .URI_AMP."reply=$ID".URI_AMP."quote=1#$ID\">[ " .
             T_('quote') . " ]</a>&nbsp;&nbsp;";
       }
-      if( $my_post and !$is_moderator ) // edit link
+      if( $my_post && !$is_moderator ) // edit link
       {
-         echo "<a class=Highlight href=\"read.php?forum=$forum".URI_AMP
-            ."thread=$thread".URI_AMP."edit=$ID#$ID\">"
+         echo '<a class=Highlight href="'.$thread_url
+            .URI_AMP."edit=$ID#$ID\">"
             ."[ " . T_('edit') . " ]</a>&nbsp;&nbsp;";
       }
 
       if( $is_moderator ) // hide/show link
       {
          if( $PendingApproval !== 'Y' )
-            echo "<a class=Highlight href=\"read.php?forum=$forum".URI_AMP
-               ."thread=$thread".URI_AMP . ($hidden ?'show' :'hide') . "=$ID#$ID\">"
+            echo '<a class=Highlight href="'.$thread_url
+               .URI_AMP . ($hidden ?'show' :'hide') . "=$ID#$ID\">"
                ."[ " . ($hidden ?T_('show') :T_('hide')) . " ]</a>";
          else
-            echo "<a class=Highlight href=\"read.php?forum=$forum".URI_AMP
-               ."thread=$thread".URI_AMP."approve=$ID#$ID\">"
+            echo '<a class=Highlight href="'.$thread_url
+               .URI_AMP."approve=$ID#$ID\">"
                ."[ " . T_('Approve') . " ]</a>&nbsp;&nbsp;"
-               ."<a class=Highlight href=\"read.php?forum=$forum".URI_AMP
-               ."thread=$thread".URI_AMP."reject=$ID#$ID\">"
+               .'<a class=Highlight href="'.$thread_url
+               .URI_AMP."reject=$ID#$ID\">"
                ."[ " . T_('Reject') . " ]</a>";
       }
       echo "</td></tr>\n";
    }
    
    return $post_reference;
-}
+} //draw_post
 
 
 function forum_message_box( $postClass, $id, $GoDiagrams=null, $Subject='', $Text='')
