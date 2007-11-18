@@ -32,6 +32,12 @@ Changelog
    * forum/forum_functions.php (draw_post):
    - added an auto-reference link to posts (to allow its address copy&paste)
 
+   * skins/dragon/screen.css,
+     forum/read.php (revision_history),
+     forum/forum_functions.php (draw_post):
+   - adjusted some links problems
+   - added some missing (ugly) globals... waiting better!
+
 2007-11-17 juga
 
    * include/filter.php (FilterMysqlMatch.extract_match_terms),

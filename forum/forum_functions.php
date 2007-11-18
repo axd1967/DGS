@@ -257,10 +257,12 @@ function get_new_string($Lastchangedstamp, $Lastread)
 function draw_post($postClass, $my_post, $Subject='', $Text='',
                    $GoDiagrams=null, $rx_term='')
 {
-   //TODO: remove those globals!
-   global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
-      $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
+   global $date_fmt, $NOW, $player_row;
+   //TODO: remove those globals! ...with a $post_row[] for instance
+   global $ID/*post_ID*/, $User_ID, $Name, $Handle, $Lasteditedstamp, $Lastedited,
+      $Timestamp, $Lastread, $is_moderator,
       $ForumName, $Score, $Forum_ID, $Thread_ID, $show_score, $PendingApproval;
+   //global $forum, $thread;
 
    $thread_url = 'read.php?forum=' . $Forum_ID
          . URI_AMP."thread=$Thread_ID"; //post_url ended by "#$ID"
@@ -336,8 +338,14 @@ if(1){ //new
          $new = get_new_string($Timestamp, $Lastread);
 
          echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
-         echo '<a class=PostSubject href="'.$thread_url
-            ."#$ID\" name=\"$ID\">$sbj</a>$new";
+
+         //from revision_history or because, when edited, the link will be obsolet
+         if( $postClass == 'Edit'
+            || $Thread_ID <= 0 )
+            echo "<a class=PostSubject name=\"$ID\">$sbj</a>";
+         else
+            echo '<a class=PostSubject href="'.$thread_url
+               ."#$ID\" name=\"$ID\">$sbj</a>$new";
 
          if( $hdrcols != $cols )
          {
@@ -383,7 +391,8 @@ if(1){ //new
             T_('reply') . " ]</a>&nbsp;&nbsp;";
          if( ALLOW_QUOTING )
          echo '<a href="'.$thread_url
-            .URI_AMP."reply=$ID".URI_AMP."quote=1#$ID\">[ " .
+            .URI_AMP."quote=1"
+            .URI_AMP."reply=$ID#$ID\">[ " .
             T_('quote') . " ]</a>&nbsp;&nbsp;";
       }
       if( $my_post && !$is_moderator ) // edit link
@@ -416,6 +425,7 @@ if(1){ //new
 
 function forum_message_box( $postClass, $id, $GoDiagrams=null, $Subject='', $Text='')
 {
+   //TODO: remove those globals!
    global $forum, $thread;
 
    if( $postClass != 'Edit' and $postClass != 'Preview' and strlen($Subject) > 0 and

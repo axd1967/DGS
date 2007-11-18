@@ -26,8 +26,15 @@ require_once( "post.php" );
 
 function revision_history($post_id, $rx_term='')
 {
-   global $links, $cols, $Name, $Handle, $User_ID,
-      $Lasteditedstamp, $Timestamp, $Lastread, $NOW;
+   global $NOW;
+/* Those globals are used by draw_post():
+   global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
+      $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
+      $ForumName, $Score, $Forum_ID, $Thread_ID, $show_score, $PendingApproval;
+*/
+   //TODO: remove those globals!
+   global $links, $cols, $Name, $Handle, $ID, $User_ID,
+      $Lasteditedstamp, $Timestamp, $Lastread, $Forum_ID, $Thread_ID;
 
 
    $headline = array(T_("Revision history") => "colspan=$cols");
@@ -66,6 +73,7 @@ function revision_history($post_id, $rx_term='')
    while( $row = mysql_fetch_array( $result ) )
    {
       extract($row);
+      $Thread_ID=0; //already so in database... used in draw_post() to remove the subject link
       draw_post( 'Edit' , true, $row['Subject'], $row['Text'], null, $rx_term);
       echo "<tr><td colspan=$cols height=2></td></tr>";
    }
@@ -298,6 +306,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 //            $GoDiagrams = null;
          }
          echo "<tr><td colspan=$cols align=center>\n";
+         //used by forum_message_box(): global $forum, $thread;
          forum_message_box($postClass, $ID, NULL /*$GoDiagrams*/, $Subject, $Text);
          echo "</td></tr>\n";
       }
@@ -312,6 +321,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 //      $GoDiagrams = $preview_GoDiagrams;
       draw_post('Preview', false, $Subject, $Text, NULL /*$GoDiagrams*/, $rx_term);
       echo "<tr><td colspan=$cols align=center>\n";
+      //used by forum_message_box(): global $forum, $thread;
       forum_message_box('Preview', $thread, NULL /*$GoDiagrams*/, $Subject, $Text);
       echo "</td></tr>\n";
    }
@@ -322,6 +332,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       echo "<tr><td colspan=$cols align=center>\n";
       if( $thread > 0 )
          echo '<hr>';
+      //used by forum_message_box(): global $forum, $thread;
       forum_message_box('Normal', $thread, null, $thread_Subject);
       echo "</td></tr>\n";
    }
