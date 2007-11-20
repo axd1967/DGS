@@ -385,7 +385,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    echo "\n<HTML>\n<HEAD>";
 
-   echo "\n <TITLE>$FRIENDLY_SHORT_NAME - $title</TITLE>";
+   echo "\n <TITLE>".basic_safe("$FRIENDLY_SHORT_NAME - $title")."</TITLE>";
 
    echo "\n <META http-equiv=\"content-type\" content=\"text/html;charset=$encoding_used\">";
 

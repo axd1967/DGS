@@ -43,6 +43,9 @@ Changelog
    - fixed the sql query in case of empty clause (parse_value)
    - changed an eval() to a more conventional call (add_filter)
 
+   * include/std_functions.php (start_html):
+   - fixed safe HTML inside <TITLE></TITLE>
+
 2007-11-18 rodival
 
    * forum/forum_functions.php (draw_post):
