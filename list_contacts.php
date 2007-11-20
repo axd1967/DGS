@@ -43,9 +43,10 @@ require_once( "include/contacts.php" );
       error('not_allowed_for_guest');
 */
 
+   Contact::load_globals();
+
    $my_id = $player_row['ID'];
    $page = "list_contacts.php?";
-
 
    $arr_chk_sysflags = array();
    foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr ) // arr=( form_elem_name, flag-text )

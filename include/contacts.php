@@ -44,23 +44,6 @@ define('CUSERFLAG_DGS',     0x00000020); // contact is member of DGS-crew
 define('CUSERFLAG_TROLL',   0x00000040); // contact is a troll
 define('CUSERFLAG_MISC',    0x00000080); // miscellaneous relationship contact (allow special search on notes)
 
-// sysflag => ( form_elem_name, translation )
-$ARR_CONTACT_SYSFLAGS = array(
-   CSYSFLAG_WAITINGROOM    => array( 'sfl_waitingroom',    T_('Protect waitingroom games') ),
-   CSYSFLAG_REJECT_MESSAGE => array( 'sfl_reject_message', T_('Reject messages') ),
-   CSYSFLAG_REJECT_INVITE  => array( 'sfl_reject_invite',  T_('Reject invitations') ),
-   );
-
-$ARR_CONTACT_USERFLAGS = array(
-   CUSERFLAG_BUDDY   => array( 'ufl_buddy',   T_('Buddy') ),
-   CUSERFLAG_FRIEND  => array( 'ufl_friend',  T_('Friend') ),
-   CUSERFLAG_STUDENT => array( 'ufl_student', T_('Student') ),
-   CUSERFLAG_TEACHER => array( 'ufl_teacher', T_('Teacher') ),
-   CUSERFLAG_FAN     => array( 'ufl_fan',     T_('Fan') ),
-   CUSERFLAG_TROLL   => array( 'ufl_troll',   T_('Troll') ),
-   CUSERFLAG_DGS     => array( 'ufl_dgs',     T_('DGS-Crew') ),
-   CUSERFLAG_MISC    => array( 'ufl_misc',    T_('Miscellaneous') ),
-   );
 
 class Contact
 {
@@ -95,6 +78,37 @@ class Contact
       $this->created = (int) $created;
       $this->lastchanged = (int) $lastchanged;
       $this->set_note( $note );
+   }
+
+   /*!
+    * \brief Load globals used by the class
+    *        must be called only one time
+    *        delayed because translations need to be already loaded
+    *        (and save some time if not used)
+    */
+   function load_globals()
+   {
+      global $ARR_CONTACT_USERFLAGS;
+      if( isset($ARR_CONTACT_USERFLAGS) )
+         return;
+      $ARR_CONTACT_USERFLAGS = array(
+         CUSERFLAG_BUDDY   => array( 'ufl_buddy',   T_('Buddy') ),
+         CUSERFLAG_FRIEND  => array( 'ufl_friend',  T_('Friend') ),
+         CUSERFLAG_STUDENT => array( 'ufl_student', T_('Student') ),
+         CUSERFLAG_TEACHER => array( 'ufl_teacher', T_('Teacher') ),
+         CUSERFLAG_FAN     => array( 'ufl_fan',     T_('Fan') ),
+         CUSERFLAG_TROLL   => array( 'ufl_troll',   T_('Troll') ),
+         CUSERFLAG_DGS     => array( 'ufl_dgs',     T_('DGS-Crew') ),
+         CUSERFLAG_MISC    => array( 'ufl_misc',    T_('Miscellaneous') ),
+         );
+
+      // sysflag => ( form_elem_name, translation )
+      global $ARR_CONTACT_SYSFLAGS;
+      $ARR_CONTACT_SYSFLAGS = array(
+         CSYSFLAG_WAITINGROOM    => array( 'sfl_waitingroom',    T_('Protect waitingroom games') ),
+         CSYSFLAG_REJECT_MESSAGE => array( 'sfl_reject_message', T_('Reject messages') ),
+         CSYSFLAG_REJECT_INVITE  => array( 'sfl_reject_invite',  T_('Reject invitations') ),
+         );
    }
 
    /*!

@@ -2462,16 +2462,6 @@ define('FRDTU_ALL',   FRDTU_YEAR | FRDTU_MONTH | FRDTU_WEEK | FRDTU_DAY | FRDTU_
 define('FRDTU_YMWD',  FRDTU_YEAR | FRDTU_MONTH | FRDTU_WEEK | FRDTU_DAY ); // time-unit: year/month/week/day
 define('FRDTU_DHM',   FRDTU_DAY | FRDTU_HOUR | FRDTU_MIN); // time-unit: day/hour/min
 
-// choices-array for time-units (for select-box)
-$FRDTU_choices = array(
-   FRDTU_ABS   => T_('absolute#reldate'),
-   FRDTU_YEAR  => T_('years#reldate'),
-   FRDTU_MONTH => T_('months#reldate'),
-   FRDTU_WEEK  => T_('weeks#reldate'),
-   FRDTU_DAY   => T_('days#reldate'),
-   FRDTU_HOUR  => T_('hours#reldate'),
-   FRDTU_MIN   => T_('mins#reldate'),
-);
 // array for SQL-interval-specification
 $FRDTU_interval_sql = array(
    FRDTU_YEAR  => 'YEAR',
@@ -2504,8 +2494,24 @@ class FilterRelativeDate extends Filter
    /*! \brief Constructs RelativeDate-Filter. */
    function FilterRelativeDate($name, $dbfield, $config)
    {
-      global $FRDTU_choices;
       static $_default_config = array( FC_SIZE => 4, FC_TIME_UNITS => FRDTU_ALL );
+
+      global $FRDTU_choices;
+      if( !isset($FRDTU_choices) )
+      {
+         // choices-array for time-units (for select-box)
+         // here because translations are now loaded (and save some time if not used)
+         $FRDTU_choices = array(
+            FRDTU_ABS   => T_('absolute#reldate'),
+            FRDTU_YEAR  => T_('years#reldate'),
+            FRDTU_MONTH => T_('months#reldate'),
+            FRDTU_WEEK  => T_('weeks#reldate'),
+            FRDTU_DAY   => T_('days#reldate'),
+            FRDTU_HOUR  => T_('hours#reldate'),
+            FRDTU_MIN   => T_('minutes#reldate'),
+         );
+      }
+
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'RelativeDate';
       $this->syntax_descr = "30 (= <30), >30";
