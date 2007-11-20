@@ -237,7 +237,6 @@ class Form
 
       $this->line_no_step = 10;
 
-      //TODO: for CSS, remove the remaining 'align' properties
       //'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
       $this->form_elements = array(
          'DESCRIPTION'  => array( 'NumArgs' => 1,
@@ -1274,15 +1273,13 @@ class Form
       foreach( $value_array as $value => $info )
       {
          $result .= "<OPTION value=\"$value\"";
-         if( (! $multiple and $value == $selected) or
-             ($multiple and array_key_exists($value,$selected)) )
+         if( ($multiple ? array_key_exists($value,$selected)
+                        : ($value == $selected) ) )
             $result .= " selected";
 
          // Filter out HTML code
-         $info = eregi_replace("<BR>"," ",$info); //allow 2 lines long headers
-         $info = str_replace("<", "&lt;", $info);
-         $info = str_replace(">", "&gt;", $info);
-
+         $info = preg_replace("/\\s*<BR>\\s*/i",' ',$info); //allow 2 lines long headers
+         $info = basic_safe($info); //basic_safe() because inside <option></option>
          $result .= ">".$info."</OPTION>\n";
       }
       $result .= "</SELECT>";

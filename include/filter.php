@@ -310,8 +310,8 @@ class SearchFilter
       if ( count($this->Filters) == 32 )
          error('invalid_filter', "filter.add_filter.full");
 
-      $filter_class = strtoupper($type[0]) . substr($type,1);
-      eval( "\$filter = new Filter" . $filter_class . "( \$id, \$dbfield, \$config );" ); // error if unknown class
+      $filter_class = 'Filter' . $type;
+      $filter = new $filter_class($id, $dbfield, $config); // error if unknown class
       $filter->SearchFilter = $this;
       $this->Filters[$id] =& $filter; // need ref
 
@@ -1760,6 +1760,7 @@ class Filter
          foreach( $index_start_keys as $optval => $descr )
          {
             $selected = ($value == $optval) ? ' selected' : '';
+            $descr = basic_safe($descr); //basic_safe() because inside <option></option>
             $elem .= "  <option value=\"$optval\"$selected>$descr</option>\n";
          }
       }
@@ -1774,7 +1775,8 @@ class Filter
                $selected = (in_array($optval, $value)) ? ' selected' : ''; # optval(idx) found in val-arr
             else
                $selected = ($value == $optval) ? ' selected' : '';
-            $elem .= "  <option value=\"$optval\"$selected>{$values[$i]}</option>\n";
+            $descr = basic_safe($values[$i]); //basic_safe() because inside <option></option>
+            $elem .= "  <option value=\"$optval\"$selected>$descr</option>\n";
          }
       }
       else
@@ -1782,7 +1784,7 @@ class Filter
 
       $elem .= "\n</select>";
       return $elem;
-   }
+   } //build_generic_selectbox_elem
 
    /*!
     * \brief Help-function to build filter-typical selectbox form-element.
@@ -2466,7 +2468,9 @@ define('FRDTU_DHM',   FRDTU_DAY | FRDTU_HOUR | FRDTU_MIN); // time-unit: day/hou
 $FRDTU_interval_sql = array(
    FRDTU_YEAR  => 'YEAR',
    FRDTU_MONTH => 'MONTH',
-   #FRDTU_WEEK  => 'WEEK', # supported since mysql5.0.0 (see DATE_ADD-func)
+   # no week-date-interval until mysql5 -> convert to days locally
+   #FRDTU_WEEK  => 'WEEK', # supported since mysql5.0.0
+   #FRDTU_WEEK  => '*7 DAY', # alternative (with appropriate parenthesis in formula)
    FRDTU_DAY   => 'DAY',
    FRDTU_HOUR  => 'HOUR',
    FRDTU_MIN   => 'MINUTE',
@@ -2672,8 +2676,8 @@ class FilterRelativeDate extends Filter
          $query = $this->build_base_query($this->dbfield, false);
          $sql_templ = $query->get_part(SQLP_WHERETMPL);
          $sql_op = ( $this->range_mode == FRD_RANGE_END ) ? "<=" : ">=";
-         $sql_date = "FROM_UNIXTIME($NOW) - INTERVAL "
-            . ( $unit_factor * $this->p_value ) . " {$FRDTU_interval_sql[$tu]}";
+         $sql_date = "FROM_UNIXTIME($NOW) - INTERVAL("
+            . ( $unit_factor * $this->p_value ) . "){$FRDTU_interval_sql[$tu]}";
          $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
          $query->add_part( $parttype, fill_sql_template( $sql_templ, $sql_op, $sql_date ) );
       }
@@ -2795,10 +2799,14 @@ class FilterSelection extends Filter
                error('invalid_filter', "ERROR: FilterSelection.parse_value($name): bad index-value [$v] used for filter [{$this->id}]");
             array_push( $arr_in, "'" . mysql_addslashes( $this->clauses[$idx] ) . "'" );
          }
-         $clause = "$field IN (" . implode(',', $arr_in) . ")";
 
-         $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
-         $query->add_part( $parttype, $clause ); // use having to allow alias-FNAMES
+         if( count($arr_in) > 0 )
+         {
+            $clause = "$field IN (" . implode(',', $arr_in) . ")";
+
+            $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
+            $query->add_part( $parttype, $clause ); // use having to allow alias-FNAMES
+         }
          $this->query = $query;
       }
       else if ( is_numeric($val) ) // single-val

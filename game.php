@@ -693,10 +693,11 @@ function draw_moves()
 {
    global $TheBoard, $gid, $move, $Size;
 
-   $trmov = T_('Move');
-   $trpas = T_('Pass');
-   $trsco = T_('Scoring');
-   $trres = T_('Resign');
+   //basic_safe() because inside <option></option>
+   $trmov = basic_safe(T_('Move'));
+   $trpas = basic_safe(T_('Pass'));
+   $trsco = basic_safe(T_('Scoring'));
+   $trres = basic_safe(T_('Resign'));
 
    $str = '';
    foreach( $TheBoard->moves as $MoveNr => $sub )
@@ -781,12 +782,15 @@ function draw_add_time( $game_row )
           <TD>
            <SELECT name="add_days" size="1"  tabindex="'.($tabindex++).'">';
 
+   //basic_safe() because inside <option></option>
+   $trday = basic_safe(T_('day'));
+   $trdays = basic_safe(T_('days'));
    for( $i=0; $i <= MAX_ADD_DAYS; $i++)
    {
       echo
          sprintf( "<OPTION value=\"%d\"%s>%s %s</OPTION>\n",
             $i, ($i==1 ? ' selected' : ''),
-            $i, ($i==1 ? T_('day') : T_('days')) );
+            $i, ($i>1 ? $trdays : $trday) );
    }
    echo '  </SELECT>
            &nbsp;' . T_('added to maintime of your opponent.') . '
@@ -898,7 +902,7 @@ function draw_game_info(&$game_row, &$board)
                   ,$game_row['Byotime'], $game_row['Byoperiods']) . "</td>\n";
 
    echo "</tr>\n";
-   
+
    if( isset($board) )
    {
       $txt= draw_board_info($board);
