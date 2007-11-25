@@ -34,12 +34,12 @@ Changelog
      edit_contact.php, list_contacts.php:
    - delayed the load of the globals containing translations
 
-   * include/filter.php (build_generic_selectbox_elem),
+   * include/filter.php (Filter.build_generic_selectbox_elem),
      include/form_functions.php (print_insert_select_box),
      game.php (draw_moves, draw_add_time):
    - fixed safe HTML inside <OPTION></OPTION>
 
-   * include/filter.php (parse_value, add_filter):
+   * include/filter.php (FilterSelection.parse_value, SearchFilter.add_filter):
    - fixed the sql query in case of empty clause (parse_value)
    - changed an eval() to a more conventional call (add_filter)
 
