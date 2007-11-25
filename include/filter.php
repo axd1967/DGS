@@ -3173,7 +3173,7 @@ class FilterMysqlMatch extends Filter
          {
             if ( $token->get_flags() & TOKFLAG_QUOTED ) // quoted-text "text"
             {
-               $val = preg_quote( $token->get_token() );
+               $val = preg_quote( $token->get_token(), '/' );
                $val = preg_replace( "/\\s+/", "\\s+", $val );
             }
             else // unquoted-text
