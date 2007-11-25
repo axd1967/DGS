@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-11-25 juga
+
+   * include/filter.php (FilterRelativeDate.build_query):
+   - implement suggested alternative to build query (WEEK=7*DAY)
+
 2007-11-20 rodival
 
    * include/filter.php (FilterRelativeDate),
