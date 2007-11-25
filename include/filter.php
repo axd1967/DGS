@@ -2470,7 +2470,7 @@ $FRDTU_interval_sql = array(
    FRDTU_MONTH => 'MONTH',
    # no week-date-interval until mysql5 -> convert to days locally
    #FRDTU_WEEK  => 'WEEK', # supported since mysql5.0.0
-   #FRDTU_WEEK  => '*7 DAY', # alternative (with appropriate parenthesis in formula)
+   FRDTU_WEEK  => '*7 DAY',
    FRDTU_DAY   => 'DAY',
    FRDTU_HOUR  => 'HOUR',
    FRDTU_MIN   => 'MINUTE',
@@ -2664,20 +2664,13 @@ class FilterRelativeDate extends Filter
 
          // handle weeks (no week-date-interval until mysql5) -> use days
          $tu = $this->values[$this->elem_tu];
-         $unit_factor = 1;
-         if ($tu == FRDTU_WEEK)
-         {
-            $unit_factor = 7;
-            $tu = FRDTU_DAY;
-         }
 
          // build SQL
          global $NOW;
          $query = $this->build_base_query($this->dbfield, false);
          $sql_templ = $query->get_part(SQLP_WHERETMPL);
          $sql_op = ( $this->range_mode == FRD_RANGE_END ) ? "<=" : ">=";
-         $sql_date = "FROM_UNIXTIME($NOW) - INTERVAL("
-            . ( $unit_factor * $this->p_value ) . "){$FRDTU_interval_sql[$tu]}";
+         $sql_date = "FROM_UNIXTIME($NOW) - INTERVAL (" . $this->p_value . "){$FRDTU_interval_sql[$tu]}";
          $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
          $query->add_part( $parttype, fill_sql_template( $sql_templ, $sql_op, $sql_date ) );
       }
