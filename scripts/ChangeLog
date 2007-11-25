@@ -29,6 +29,9 @@ Changelog
 
 2007-11-25 juga
 
+   * include/filter.php (FilterMysqlMatch.extract_match_terms):
+   - fix for escaping of regex-delimiter '/'
+
    * include/filter.php (FilterRelativeDate.build_query):
    - implement suggested alternative to build query (WEEK=7*DAY)
 
