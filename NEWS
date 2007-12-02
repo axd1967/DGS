@@ -84,6 +84,9 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    * Forum threads: Added link to return to first 'new'
 
+   * Forum search: Added selection for number of hits to show
+     (not using saved TableMaxRows)
+
    * Cleanup of links, site-map page
 
    * Updated flags: Lesotho, removed obsolete 'Serbia and Montenegro (Yugoslavia)'

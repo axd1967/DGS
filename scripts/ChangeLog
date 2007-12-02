@@ -33,7 +33,7 @@ Changelog
    - fix typo of 'Fischer'-time
 
    * forum/forum_functions.php (make_link_array, forum_start_table),
-     forum/search.php:
+     forum/search.php, NEWS:
    - added max-rows for forum-search (don't use TableMaxRows from player)
    - only show max number of rows (instead of +1)
 
