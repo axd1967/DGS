@@ -80,7 +80,7 @@ require_once( "include/contacts.php" );
          array( T_('All') => '',
                 T_('Japanese') => "Byotype='JAP'",
                 T_('Canadian') => "Byotype='CAN'",
-                T_('Fisher') => "Byotype='FIS'" ),
+                T_('Fischer')  => "Byotype='FIS'" ),
          true);
    $wrfilter->add_filter(11, 'RatedSelect', 'Rated', true);
    $wrfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
