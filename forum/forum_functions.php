@@ -60,10 +60,10 @@ define('FORUM_MAXIMUM_DEPTH', 15);
 
 
 // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
-function make_link_array($links, $ReqParam = null)
+function make_link_array($links, $max_rows, $ReqParam = null)
 {
    global $link_array_left, $link_array_right, $forum, $thread, $offset,
-      $RowsPerPage, $SearchPostsPerPage, $player_row;
+      $RowsPerPage, $player_row;
 
    $link_array_left = $link_array_right = array();
 
@@ -116,7 +116,7 @@ function make_link_array($links, $ReqParam = null)
    {
       if( $links & LINKPAGE_SEARCH )
          $href = "search.php?{$navi_url}"
-                     . URI_AMP."offset=".($offset-$SearchPostsPerPage);
+                     . URI_AMP."offset=".($offset-$max_rows);
       else
          $href = "list.php?forum=$forum"
                      . URI_AMP."offset=".($offset-$RowsPerPage);
@@ -127,7 +127,7 @@ function make_link_array($links, $ReqParam = null)
    {
       if( $links & LINKPAGE_SEARCH )
          $href = "search.php?{$navi_url}"
-                     . URI_AMP."offset=".($offset+$SearchPostsPerPage);
+                     . URI_AMP."offset=".($offset+$max_rows);
       else
          $href = "list.php?forum=$forum"
                      . URI_AMP."offset=".($offset+$RowsPerPage);
@@ -143,7 +143,8 @@ function print_moderation_note($is_moderator, $width)
 }
 
 // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
-function forum_start_table( $table_id, &$headline, &$links, $cols, $ReqParam = null)
+function forum_start_table( $table_id, &$headline, &$links, $cols,
+                            $max_rows=MAXROWS_PER_PAGE_DEFAULT, $ReqParam = null)
 {
 /* $table_id could be: (begining by an uppercase letter because used as sub-ID name)
    'Index', 'List', 'Read', 'Search', 'Revision', 'Pending'
@@ -151,7 +152,7 @@ function forum_start_table( $table_id, &$headline, &$links, $cols, $ReqParam = n
 
    echo "<table id='forum$table_id' class=Forum>\n";
 
-   make_link_array( $links, $ReqParam );
+   make_link_array( $links, $max_rows, $ReqParam );
 
    if( $links & LINK_MASKS )
       echo_links('T',$cols);
