@@ -102,6 +102,11 @@ define('MODERATOR_SEARCH', 0);
       $order = 0;
    $sql_order = $arr_sql_order[$order];
 
+   // show max-rows
+   $maxrows = (int)@$_REQUEST['maxrows'];
+   $maxrows = get_maxrows( $maxrows, MAXROWS_PER_PAGE_FORUM, MAXROWS_PER_PAGE_DEFAULT );
+   $arr_maxrows = build_maxrows_array( $maxrows, MAXROWS_PER_PAGE_FORUM );
+
    // static filters
    $ffilter = new SearchFilter();
    $ffilter->add_filter( 1, 'Selection', $arr_forum, true);
@@ -155,6 +160,9 @@ define('MODERATOR_SEARCH', 0);
          'DESCRIPTION', T_('Order#forum'),
          'SELECTBOX',   'order', 1, $arr_order, $order, false, ));
    $fform->add_row( array(
+         'DESCRIPTION', T_('Number of hits#forum'),
+         'SELECTBOX',   'maxrows', 1, $arr_maxrows, $maxrows, false, ));
+   $fform->add_row( array(
          'TAB',
          'CELL',        1, 'align=left',
          'OWNHTML',     implode( '', $ffilter->get_submit_elements( 'x', 'e' ) ) ));
@@ -195,7 +203,7 @@ define('MODERATOR_SEARCH', 0);
 
       if ( $sql_order)
          $qsql->add_part( SQLP_ORDER, $sql_order );
-      $qsql->add_part( SQLP_LIMIT, "$offset,$MaxSearchPostsPerPage" );
+      $qsql->add_part( SQLP_LIMIT, "$offset," . ($maxrows+1) ); // +1 for next-page detection
       $query = $qsql->get_select();
 
       if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) . "<br>\n";
@@ -203,21 +211,20 @@ define('MODERATOR_SEARCH', 0);
       $result = mysql_query($query)
          or error("mysql_query_failed",'forum_search.find');
 
-      $show_rows = $nr_rows = mysql_num_rows($result);
-      if( $show_rows > $SearchPostsPerPage )
-         $show_rows = $SearchPostsPerPage;
+      $nr_rows = mysql_num_rows($result);
 
       $cols=2;
       $headline = array(T_("Search result") => "colspan=$cols");
 
       $links |= LINK_FORUMS;
       if( $offset > 0 ) $links |= LINK_PREV_PAGE;
-      if( $show_rows < $nr_rows ) $links |= LINK_NEXT_PAGE;
+      if( $nr_rows > $maxrows ) $links |= LINK_NEXT_PAGE;
 
       // build navi-URL for paging
       $rp = $ffilter->get_req_params();
-      #$rp->add_entry( 'offset', $offset ); set in forum_start_table-func
+      #$rp->add_entry( 'offset', $offset ); //set in forum_start_table/make_link_array-func
       $rp->add_entry( 'order',  $order );
+      $rp->add_entry( 'maxrows', $maxrows );
 
       // show resultset of search
       $rx_term = implode('|', $filter2->get_rx_terms() );
@@ -225,10 +232,11 @@ define('MODERATOR_SEARCH', 0);
 
       print_moderation_note($is_moderator, '99%');
 
-      forum_start_table('Search', $headline, $links, $cols, $rp);
+      forum_start_table('Search', $headline, $links, $cols, $maxrows, $rp);
       echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
-      while( $row = mysql_fetch_array( $result ) )
+      $cnt_rows = $maxrows;
+      while( ($row = mysql_fetch_array( $result )) && $cnt_rows-- > 0 )
       {
          extract($row); //needed for global vars of draw_post()
 
