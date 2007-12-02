@@ -96,13 +96,11 @@ $max_links_in_main_menu=5;
 
 define('MAXROWS_PER_PAGE_DEFAULT', 20);
 define('MAXROWS_PER_PAGE_PROFILE', 50);
+define('MAXROWS_PER_PAGE_FORUM',   50);
 define('MAXROWS_PER_PAGE', 100);
 
 $RowsPerPage = MAXROWS_PER_PAGE_DEFAULT;
 define('LIST_ROWS_MODULO', 4);
-
-$SearchPostsPerPage = 20;
-$MaxSearchPostsPerPage = $SearchPostsPerPage+1;
 
 $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
 $ActivityForHit = 1.0;
@@ -1844,8 +1842,6 @@ function get_maxrows( $rows, $maxrows, $defrows = MAXROWS_PER_PAGE_DEFAULT )
 // param $maxrows current value to add unorthodox value; 0 to get default
 function build_maxrows_array( $maxrows, $rows_limit = MAXROWS_PER_PAGE )
 {
-   global $RowsPerPage;
-
    $maxrows = get_maxrows( $maxrows, $rows_limit );
    $arr_maxrows = array();
    foreach( array( 5, 10, 15, 20, 25, 30, 40, 50, 75, 100 ) as $k)
