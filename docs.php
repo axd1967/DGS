@@ -54,7 +54,7 @@ require_once( "include/std_functions.php" );
                      T_('Browse Dragon source code'));
    add_link_page_link("http://sourceforge.net/projects/dragongoserver/",
                      T_('Dragon project page at sourceforge'));
-   add_link_page_link("licence.php", T_('Licence'), 'GPL');
+   add_link_page_link("licence.php", T_('License'), 'AGPL');
 
    add_link_page_link();
 

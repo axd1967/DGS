@@ -184,7 +184,7 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('Links'), "links.php", true);
          item(T_('People'), "people.php", true);
          item(T_('Todo list'), "todo.php", true);
-         item(T_('Licence'), "licence.php", true, true);
+         item(T_('License'), "licence.php", true, true);
       } $item_level--;
    } $item_level--;
 

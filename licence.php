@@ -26,7 +26,7 @@ require_once( "include/std_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
 
-   start_page(T_('General Public Licence'), true, $logged_in, $player_row );
+   start_page(T_('Affero General Public License'), true, $logged_in, $player_row );
 
    //section( 'Docs');
    centered_container();
