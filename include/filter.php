@@ -2500,6 +2500,7 @@ class FilterRelativeDate extends Filter
    {
       static $_default_config = array( FC_SIZE => 4, FC_TIME_UNITS => FRDTU_ALL );
 
+      //TODO: init at a proper place
       global $FRDTU_choices;
       if( !isset($FRDTU_choices) )
       {

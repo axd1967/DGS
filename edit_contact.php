@@ -49,6 +49,7 @@ require_once( "include/contacts.php" );
    if ( @$_REQUEST['contact_cancel'] ) // cancel delete
       jump_to("list_contacts.php");
 
+   //TODO: init in Contact-class
    Contact::load_globals();
 
    $my_id = $player_row['ID'];

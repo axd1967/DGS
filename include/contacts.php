@@ -80,6 +80,7 @@ class Contact
       $this->set_note( $note );
    }
 
+   //TODO: error-prone, CHANGE: must be called from within class (not in client)
    /*!
     * \brief Load globals used by the class
     *        must be called only one time
@@ -88,6 +89,7 @@ class Contact
     */
    function load_globals()
    {
+      //TODO
       global $ARR_CONTACT_USERFLAGS;
       if( isset($ARR_CONTACT_USERFLAGS) )
          return;

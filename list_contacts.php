@@ -43,6 +43,7 @@ require_once( "include/contacts.php" );
       error('not_allowed_for_guest');
 */
 
+   //TODO: init in Contact-class
    Contact::load_globals();
 
    $my_id = $player_row['ID'];
