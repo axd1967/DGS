@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-12-18 juga
+
+   * forum/forum_functions.php (draw_post):
+   - forum-search: use former 2-line-header, postpone 3-line-header
+
 2007-12-02 juga
 
    * waiting_room.php:
