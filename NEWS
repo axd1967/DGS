@@ -96,7 +96,9 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    Administrative changes:
 
-   * added this news page with <home news.php>Release notes</home>
+   * Replaced license: GPLv2 to Affero GPLv3 (19-Nov-2007)
+
+   * Added this news page with <home news.php>Release notes</home>
 
    * Solved problems with frozen clocks
 
