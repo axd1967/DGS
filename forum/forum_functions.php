@@ -303,14 +303,15 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
          $hdrcols = $cols;
 
          echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
-if(1){ //new
-         echo ' <font size="+1" color="#FFFFFF">' . T_('found in forum')
+//TODO: CSS the if-true-part aiming for 3 lines header (1st line smaller with small vert-space)
+if(0){ //new
+         echo ' <font size="-1"><font color="#FFFFFF">' . T_('found in forum')
             . '</font> <a href="list.php?forum=' .
             $Forum_ID . '" class=black>' . $ForumName . "</a>\n";
          if( $show_score )
             echo ' <font color="#FFFFFF">' . T_('with') . '</font> ' . T_('Score')
                . ' <font color="#000000">' . $Score  . "</font>\n";
-         echo '<br>';
+         echo '</font><br>';
          echo '<a class=PostSubject href="'.$thread_url
             . ( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
             . "#$ID\">$sbj</a>";
