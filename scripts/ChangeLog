@@ -29,6 +29,9 @@ Changelog
 
 2007-12-19 juga
 
+   * all files containing license preamble:
+   - replaced preamble for license-change: GPLv2 -> Affero GPLv3
+
    * NEWS:
    - document changes since last bug-update at 26-Oct-2007
 
