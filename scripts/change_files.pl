@@ -78,6 +78,7 @@ foreach my $file (@files) {
    close IN;
 
    # apply change for file on $buf
+   print STDERR "Processing file [$file] ...\n";
    #--------------------------------------------------------
    # replace old preamble with new one
    $buf =~ s/This program is free software.*?Suite 330, Boston, MA 02111-1307, USA\.\n/$PREAMBLE/s;
