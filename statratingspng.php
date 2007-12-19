@@ -293,8 +293,9 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
       {
          $rscale = pow(10,$tmp);
          $graphs[$i]['name'] .= ' / '.($tmp>3 ? "1e$tmp" : $rscale);
-         $graph= &$graphs[$i]['y'];
-         $graph = array_map(create_function('$n', 'return $n/'.$rscale.';'), $graph);
+         $graphs[$i]['y'] = array_map(
+            create_function('$n', 'return $n/'.$rscale.';'),
+            $graphs[$i]['y']);
          $graphs[$i]['max'] /= $rscale;
          $gmax = $graphs[$i]['max'];
       }
