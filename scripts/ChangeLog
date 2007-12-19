@@ -27,6 +27,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2007-12-19 juga
+
+   * show_games.php:
+   - extend color-filter for my running games: filter on my color / my move
+
 2007-12-18 juga
 
    * COPYING, licence.php, docs.php, site_map.php, NEWS:
