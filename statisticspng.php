@@ -253,6 +253,7 @@ function get_stat_data()
 
    $max_row = mysql_fetch_assoc($result);
    extract($max_row);
+   mysql_free_result($result);
 
    $result = mysql_query("SELECT *,UNIX_TIMESTAMP(Time) as times" .
                          " FROM Statistics ORDER BY Time")
@@ -270,6 +271,7 @@ function get_stat_data()
       array_push($tGames, $row['Games']);
       array_push($tGameR, $row['GamesRunning']);
    }
+   mysql_free_result($result);
 }
 
 ?>

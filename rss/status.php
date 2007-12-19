@@ -212,7 +212,7 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACH
 If you're seeing this, you've clicked on the link 
 for $FRIENDLY_LONG_NAME Quick RSS feed.  
 This file is not meant to be read by a web 
-browser directly.  Instead you're meant to copy 
+browser directly. Instead you're meant to copy
 the URL for the file, which is:
 
   {$HOSTBASE}rss/status.php

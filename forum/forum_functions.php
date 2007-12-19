@@ -303,7 +303,7 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
 
          echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
 //TODO: CSS the if-true-part aiming for 3 lines header (1st line smaller with small vert-space)
-if(0){ //new
+if(1){ //new
          echo ' <font size="-1"><font color="#FFFFFF">' . T_('found in forum')
             . '</font> <a href="list.php?forum=' .
             $Forum_ID . '" class=black>' . $ForumName . "</a>\n";

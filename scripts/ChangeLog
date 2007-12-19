@@ -5,6 +5,9 @@ changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
 last server update start: 2006-10-06
+2007-10-06: bug fix update
+2007-11-07: bug fix update
+2007-12-19: bug fix update
 
 previous server update: 2006-09
 Release [2006-08-07] - DGS 1.0.12 - CVS-tag [DGS-stable-200608]
@@ -26,6 +29,14 @@ quick TODO:
 ------------------------------------------------------------------
 Changelog
 ------------------------------------------------------------------
+
+2007-12-19 rodival
+
+   * statisticspng.php:
+   - added missing mysql_free_result()
+
+   * forum/forum_functions.php (draw_post):
+   - forum-search: use new 3-line-header, postpone 3-<TR>-header
 
 2007-12-19 juga
 
