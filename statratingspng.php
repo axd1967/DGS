@@ -219,26 +219,26 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
       case 0:
          $name = $T_('Active users');
          $query =
-            "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as rank,COUNT(*) as cnt"
+            "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
             . " FROM Players WHERE Rating2>=".MIN_RATING
                . " AND Activity>$ActiveLevel1"
-            . " GROUP BY rank ORDER BY rank;" ;
+            . " GROUP BY p_rank ORDER BY p_rank;" ;
          $color = array( 255,   0,   0);
        break;
       case 1:
          $name = $T_('Users');
          $query =
-            "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as rank,COUNT(*) as cnt"
+            "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
             . " FROM Players WHERE Rating2>=".MIN_RATING
-            . " GROUP BY rank ORDER BY rank;" ;
+            . " GROUP BY p_rank ORDER BY p_rank;" ;
          $color = array( 255,   0, 200);
          break;
       case 2:
          $name = $T_('Rated games');
          $query =
-            "SELECT ROUND(Rating/100)-(".MIN_RANK.") as rank,COUNT(*) as cnt"
+            "SELECT ROUND(Rating/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
             . " FROM Ratinglog WHERE Rating>=".MIN_RATING
-            . " GROUP BY rank ORDER BY rank;" ;
+            . " GROUP BY p_rank ORDER BY p_rank;" ;
          $color = array(   0, 180, 200);
          break;
       default:
@@ -261,7 +261,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
          $gmax = $Ymin;
          while( $row = mysql_fetch_assoc($result) )
          {
-            $rank = (int)@$row['rank'];
+            $rank = (int)@$row['p_rank'];
             $cnt = (int)@$row['cnt'];
             if( $cnt > $gmax && $rank > 0 ) //exclude 30kyu from "max"
                $gmax = $cnt;
