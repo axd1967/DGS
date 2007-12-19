@@ -112,10 +112,12 @@ require_once( "include/rating.php" );
    }
    if( $running and !$all )
    {
-      $gfilter->add_filter( 5, 'Selection',     # filter on my color (not on who-to-move)
+      $gfilter->add_filter( 5, 'Selection',     # filter on my color / my move
             array( T_('All#filter') => '',
-                   T_('B#filter') => new QuerySQL( SQLP_HAVING, 'iamBlack=1' ),
-                   T_('W#filter') => new QuerySQL( SQLP_HAVING, 'iamBlack=0' ) ),
+                   T_('I\'m B#filtercol')      => new QuerySQL( SQLP_HAVING, 'iamBlack=1' ),
+                   T_('I\'m W#filtercol')      => new QuerySQL( SQLP_HAVING, 'iamBlack=0' ),
+                   T_('My move#filtercol') => "ToMove_ID=$uid",
+                   T_('Op move#filtercol') => "ToMove_ID<>$uid" ), // <- no idx used
             true);
       $gfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
       $gfilter->add_filter(15, 'RelativeDate', 'Lastaccess', true);
