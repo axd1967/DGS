@@ -32,6 +32,9 @@ Changelog
    * all files containing license preamble:
    - replaced preamble for license-change: GPLv2 -> Affero GPLv3
 
+   * scripts/change_files.pl:
+   - helping script to replace license-preamble
+
    * NEWS:
    - document changes since last bug-update at 26-Oct-2007
 
