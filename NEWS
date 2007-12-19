@@ -82,10 +82,15 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
    * Links opening in a new window are showed olive-colored
 
-   * Forum threads: Added link to return to first 'new'
+   * Provided links to user and message on messages page
+     like on search messages page
 
-   * Forum search: Added selection for number of hits to show
-     (not using saved TableMaxRows)
+   * Forum pages:
+      * Forum threads: Added link to return to first 'new'
+      * Forum search: Added selection for number of hits to show
+        (not using saved TableMaxRows)
+      * Forum posts: Subject shown as link for easier copy&paste
+        of a post-reference
 
    * Cleanup of links, site-map page
 
