@@ -211,7 +211,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
    $Ymin = 0;
    $Ymax = 0;
    
-   $Ymaxmin = $Ymin;
+   $Ymaxmin = 1;
    for( $g=0; $g<3 ;$g++ )
    {
       switch( $g )

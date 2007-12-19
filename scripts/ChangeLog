@@ -35,6 +35,9 @@ Release [2006-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
 
 2007-12-19 rodival
 
+   * statratingspng.php:
+   - fixing a new MySQL5 bug: renaming the temporary field "rank" to "p_rank"
+
    * statisticspng.php:
    - added missing mysql_free_result()
 
