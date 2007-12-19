@@ -29,6 +29,9 @@ Changelog
 
 2007-12-19 juga
 
+   * NEWS:
+   - document changes since last bug-update at 26-Oct-2007
+
    * show_games.php:
    - extend color-filter for my running games: filter on my color / my move
 
