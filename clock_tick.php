@@ -84,17 +84,15 @@ if( !$is_down )
    // Check if any game has timed out
 
    $result = mysql_query('SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
-                         'black.Handle as blackhandle, white.Handle as whitehandle, ' .
-                         'black.Name as blackname, white.Name as whitename ' .
-                         'FROM Games, Clock ,Players as white, Players as black ' .
+                         'FROM Games, Clock ' .
+                         "WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
+                         'AND Clock.ID>=0 ' . // not VACATION_CLOCK
+                         'AND Games.ClockUsed=Clock.ID ' .
                          //slower: "WHERE Status" . IS_RUNNING_GAME .
-                         "WHERE Status!='INVITED' AND Status!='FINISHED' " .
-                         'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
-                         'AND Clock.ID=Games.ClockUsed ' .
-                         "AND Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
+                         "AND Games.Status!='INVITED' AND Games.Status!='FINISHED' " .
                          //if both are <=0, the game will never finish by time:
                          //'AND ( Maintime>0 OR Byotime>0 ) ' .
-                         'AND white.ID=White_ID AND black.ID=Black_ID' )
+                         )
                or error('mysql_query_failed','clock_tick.find_timeout_games');
 
    while($row = mysql_fetch_assoc($result))
@@ -128,6 +126,13 @@ if( !$is_down )
       {
          //TODO: Delete games with too few moves ???
          $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
+         $prow = mysql_single_fetch( 'clock_tick.find_timeout_players',
+               'SELECT black.Handle as blackhandle, white.Handle as whitehandle' .
+                     ', black.Name as blackname, white.Name as whitename' .
+               ' FROM Players as white, Players as black' .
+               " WHERE white.ID=$White_ID AND black.ID=$Black_ID" )
+            or error('mysql_query_failed','clock_tick.find_timeout_players');
+         extract($prow);
 
          //TODO: HOT_SECTION ???
          $game_query = "UPDATE Games SET Status='FINISHED', " . //See *** HOT_SECTION ***
