@@ -83,17 +83,18 @@ if( !$is_down )
 
    // Check if any game has timed out
 
-   $result = mysql_query('SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
-                         'FROM Games, Clock ' .
-                         "WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
-                         'AND Clock.ID>=0 ' . // not VACATION_CLOCK
-                         'AND Games.ClockUsed=Clock.ID ' .
-                         //if both are <=0, the game will never finish by time:
-                         //'AND ( Maintime>0 OR Byotime>0 ) ' .
-                         //slower: "AND Status" . IS_RUNNING_GAME
-                         "AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
-                         )
-               or error('mysql_query_failed','clock_tick.find_timeout_games');
+   $result = mysql_query(
+            'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks'
+            . ' FROM Games, Clock'
+            . " WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW)"
+            . ' AND Clock.ID>=0' // not VACATION_CLOCK
+            . ' AND Games.ClockUsed=Clock.ID'
+            //if both are <=0, the game will never finish by time:
+            //. ' AND ( Maintime>0 OR Byotime>0 )'
+            //slower: "AND Status" . IS_RUNNING_GAME
+            . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
+            )
+         or error('mysql_query_failed','clock_tick.find_timeout_games');
 
    while($row = mysql_fetch_assoc($result))
    {
