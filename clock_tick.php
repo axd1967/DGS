@@ -88,10 +88,10 @@ if( !$is_down )
                          "WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
                          'AND Clock.ID>=0 ' . // not VACATION_CLOCK
                          'AND Games.ClockUsed=Clock.ID ' .
-                         //slower: "WHERE Status" . IS_RUNNING_GAME .
-                         "AND Games.Status!='INVITED' AND Games.Status!='FINISHED' " .
                          //if both are <=0, the game will never finish by time:
                          //'AND ( Maintime>0 OR Byotime>0 ) ' .
+                         //slower: "AND Status" . IS_RUNNING_GAME
+                         "AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
                          )
                or error('mysql_query_failed','clock_tick.find_timeout_games');
 
