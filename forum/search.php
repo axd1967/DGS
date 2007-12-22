@@ -119,7 +119,7 @@ define('MODERATOR_SEARCH', 0);
    $ffilter->add_filter( 5, 'RelativeDate', 'Posts.Time', true,
          array( FC_SIZE => 12, FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL ) );
    #global $NOW;
-   #$ffilter->add_filter( 6, 'Boolean', new QuerySQL( SQLP_FIELDS, "((Posts.Time + INTERVAL ".DAYS_NEW_END." DAY > FROM_UNIXTIME($NOW) AND ISNULL(FR.Time)) OR Posts.Time > FR.Time) AS NewPost", SQLP_FROM, "LEFT JOIN Forumreads AS FR ON FR.User_ID=$uid AND FR.Thread_ID=Posts.Thread_ID", SQLP_HAVING, "NewPost>0" ), true, array( FC_LABEL => T_('Restrict to new messages') ) ); //! \todo Handle New Forum-Posts
+   #$ffilter->add_filter( 6, 'Boolean', new QuerySQL( SQLP_FIELDS, "((Posts.Time + INTERVAL ".DAYS_NEW_END." DAY > FROM_UNIXTIME($NOW) AND ISNULL(FR.Time)) OR Posts.Time > FR.Time) AS NewPost", SQLP_FROM, "LEFT JOIN Forumreads AS FR ON FR.User_ID=$uid AND FR.Thread_ID=Posts.Thread_ID", SQLP_HAVING, "NewPost>0" ), true, array( FC_LABEL => T_//('Restrict to new messages') ) ); //! \todo Handle New Forum-Posts
    $ffilter->init(); // parse current value from $_REQUEST
    $filter2 =& $ffilter->get_filter(2);
 

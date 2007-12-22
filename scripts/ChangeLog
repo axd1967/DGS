@@ -33,6 +33,11 @@ Changelog
 ==================================================================
 Release [2006-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
 
+2007-12-22 rodival
+
+   * forum/search.php:
+   - remove a T_() detection while commented
+
 2007-12-19 rodival
 
    * statratingspng.php:
