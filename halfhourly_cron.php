@@ -247,23 +247,7 @@ if( !$is_down )
 
       $msg .= str_pad('', 47, '-');
 
-if(1){ //new
       send_email('halfhourly_cron', $Email, $msg);
-}else{ //old
-      $headers = "From: $EMAIL_FROM\n";
-      //if HTML in mail allowed:
-      //$headers.= "MIME-Version: 1.0\n";
-      //$headers.= "Content-type: text/html; charset=iso-8859-1\n";
-
-      if( !function_exists('mail')
-         or !@mail( $Email, $FRIENDLY_LONG_NAME.' notification', $msg, $headers )
-        )
-      {
-         //can't connect mail feature
-         error('mail_failure', 'halfhourly_cron');
-         break;
-      }
-} //new/old
    } //notifications found
    mysql_free_result($result);
 

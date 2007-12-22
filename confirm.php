@@ -589,42 +589,10 @@ This is why:
          }
       }
 
-if(ENA_SEND_MESSAGE){ //new
       send_message( 'confirm', $Text, $Subject
          ,$opponent_row['ID'], '', false //the move is always notified
          ,( $message_from_server_way ? 0 : $my_id )
          , 'RESULT', $gid);
-}else{ //old
-      $Textsql = mysql_addslashes( $Text);
-      mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
-                   "Type='RESULT'," .
-                   "Game_ID=$gid, Subject='$Subject', Text='$Textsql'")
-            or error('mysql_query_failed','confirm.messages');
-
-      if( mysql_affected_rows() != 1)
-         error("mysql_insert_message");
-
-      $mid = mysql_insert_id();
-
-      if( !$message_from_server_way )
-      {
-         //This simulate a message sent by this player
-         //This will allow a direct message reply but will fill his *sent* folder
-         $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                     "(" . $opponent_row['ID'] . ", $mid, 'N', ".FOLDER_NEW.")"
-                  . ",(" . $my_id . ", $mid, 'Y', ".FOLDER_SENT.")" ;
-         //else we could force a NULL Folder_nr (trashed message)
-      }
-      else
-      {
-         $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                     "(" . $opponent_row['ID'] . ", $mid, 'S', ".FOLDER_NEW.")" ;
-      }
-
-      mysql_query( $query)
-         or error('mysql_query_failed','confirm.mess_corr');
-      unset($mid);
-} //old/new
    }
 
 

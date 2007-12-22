@@ -193,28 +193,9 @@ require_once( "include/contacts.php" );
    if( !empty($game_row['Comment']) )
       $reply = 'Comment: '.$game_row['Comment']."\n".$reply;
 
-if(ENA_SEND_MESSAGE){ //new
    send_message( 'join_waitingroom_game', $reply, $subject
       , $opponent_ID, '', true
       , 0, 'NORMAL', $gid);
-}else{ //old
-   $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
-      "Game_ID=$gid, " .
-      "Subject='$subject', " .
-      "Text='".mysql_addslashes($reply)."'";
-
-   mysql_query( $query )
-      or error('mysql_query_failed', 'join_waitingroom_game.message');
-
-      if( mysql_affected_rows() != 1)
-         error("mysql_insert_message");
-
-   $mid = mysql_insert_id();
-
-   mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-               "($opponent_ID, $mid, 'S', ".FOLDER_NEW.")")
-      or error('mysql_query_failed', 'join_waitingroom_game.mess_corr');
-} //old/new
 
 
    $msg = urlencode(T_('Game joined!'));

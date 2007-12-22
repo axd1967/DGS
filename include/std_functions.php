@@ -382,9 +382,9 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    echo "\n<HTML>\n<HEAD>";
 
-   echo "\n <TITLE>".basic_safe("$FRIENDLY_SHORT_NAME - $title")."</TITLE>";
-
    echo "\n <META http-equiv=\"content-type\" content=\"text/html;charset=$encoding_used\">";
+
+   echo "\n <TITLE>".basic_safe("$FRIENDLY_SHORT_NAME - $title")."</TITLE>";
 
    echo "\n <META NAME=\"DESCRIPTION\" CONTENT=\"To play go on a turn by turn basis.\">";
 
@@ -1006,7 +1006,6 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
    return $res;
 }
 
-define('ENA_SEND_MESSAGE', 1); //TODO: remove it and the associated code lines after a while
 /**
  * $text and $subject must NOT be escaped by mysql_escape_string()
  * $to_ids and $to_handles have been splitted because, historically, some handles
@@ -2551,32 +2550,13 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
          $Subject = 'An observed game has finished';
 
-if(ENA_SEND_MESSAGE){ //new
          $to_ids = array();
          while( $row = mysql_fetch_array( $result ) )
             $to_ids[] = $row['pid'];
+
          send_message( 'delete_all_observers', $Text, $Subject
             ,$to_ids, '', false
             , 0, 'NORMAL', $gid);
-}else{ //old
-         $Textsql = mysql_addslashes( $Text);
-         mysql_query( "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
-                      "Game_ID=$gid, Subject='$Subject', Text='$Textsql'" )
-            or error('mysql_query_failed','delete_all_observers.message');
-
-         if( mysql_affected_rows() == 1)
-         {
-            $mid = mysql_insert_id();
-
-            while( $row = mysql_fetch_array( $result ) )
-            {
-               mysql_query("INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-                           "(" . $row['pid'] . ", $mid, 'S', ".FOLDER_NEW.")")
-                  or error('mysql_query_failed','delete_all_observers.message');
-            }
-         }
-} //old/new
-
       }
       mysql_free_result($result);
    }
@@ -2779,43 +2759,6 @@ function anchor( $href, $text, $title='', $attbs='')
       $str.= ' title='.attb_quote($title);
    $str.= attb_build($attbs);
    return $str.">$text</a>";
-}
-
-function str_TD_class_button( $href, $text='')
-{
-   $text= (string)$text;
-   return "<td class=button>" .
-      "<a class=button href=\"$href\">" .
-      "&nbsp;&nbsp;$text&nbsp;&nbsp;" .
-      "</a>" .
-      "</td>";
-}
-
-function button_style( $button_nr=0)
-{
-   global $buttoncolors, $buttonfiles, $button_max, $button_width;
-
-   if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
-      $button_nr = 0;
-
-   return
-     "a.button {" .
-       " display: block;" .
-       " min-width: ".($button_width-4)."px;" .
-//       " width: ".($button_width-4)."px;" .
-       " color: {$buttoncolors[$button_nr]};" .
-       " font: bold 100% sans-serif;" .
-       " text-decoration: none;" .
-     "}\n" .
-     "td.button {" .
-       " background-image: url(images/{$buttonfiles[$button_nr]});" .
-       " background-repeat: no-repeat;" .
-       " background-position: center;" .
-       " padding: 0px 2px 0px 2px;" .
-       " min-width: {$button_width}px;" .
-       " width: {$button_width}px;" .
-       " text-align: center;" .
-     "}";
 }
 
 ?>

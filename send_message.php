@@ -110,7 +110,6 @@ disable_cache();
    $tmp= ( $type == 'INVITATION' ? CSYSFLAG_REJECT_INVITE
             : ( $invitation_step ? 0 : CSYSFLAG_REJECT_MESSAGE ));
    $query= "SELECT P.ID,P.ClockUsed,P.OnVacation,P.Rating2,P.RatingStatus"
-         . (ENA_SEND_MESSAGE ?'' :",P.SendEmail,P.Notify")
          . ",IF(ISNULL(C.uid),0,C.SystemFlags & $tmp) AS C_denied"
          . " FROM Players AS P"
          . " LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$my_id"
@@ -263,7 +262,6 @@ disable_cache();
 
    // Update database
 
-if(ENA_SEND_MESSAGE){ //new
    $msg_gid = 0;
    if ( $type == 'INVITATION' )
       $msg_gid = $gid;
@@ -275,83 +273,6 @@ if(ENA_SEND_MESSAGE){ //new
       , isset($folders[$new_folder]) ? $new_folder
          : ( $invitation_step ? FOLDER_MAIN : FOLDER_NONE )
       );
-}else{ //old
-   $query = "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW), " .
-       "Type='$type', ";
-
-   if( $type == 'INVITATION' )
-      $query .= "Game_ID=$gid, ";
-
-   if( $prev_mid > 0 )
-      $query .= "ReplyTo=$prev_mid, ";
-
-   $message = mysql_addslashes(trim($message));
-   //not if invitation/dispute/decline:
-   //if( !$message ) error('empty_message');
-   $subject = mysql_addslashes(trim($subject));
-   $query .= "Subject=\"$subject\", Text=\"$message\"";
-
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'send_message.insert_message');
-
-   if( mysql_affected_rows() != 1)
-      error("mysql_insert_message",'send1');
-
-   $mid = mysql_insert_id();
-   if( $to_me ) //Message to myself
-   {
-      $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr) VALUES " .
-         "($my_id, $mid, 'M', ".FOLDER_NEW.")";
-   }
-   else
-   {
-      $query = "INSERT INTO MessageCorrespondents (uid,mid,Sender,Folder_nr,Replied) VALUES " .
-         "($my_id, $mid, 'Y', ".FOLDER_SENT.",'N'), " .
-         "($opponent_ID, $mid, 'N', ".FOLDER_NEW.",".($type == 'INVITATION' ? "'M'" : "'N'").")";
-   }
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'send_message.insert_mess_corr');
-   if( mysql_affected_rows() != ( $to_me ? 1 : 2) )
-      error("mysql_insert_message",'send2');
-
-   if( $type == "INVITATION" )
-      mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" )
-         or error('mysql_query_failed', 'send_message.game_message');
-   unset($mid);
-
-   if( $prev_mid > 0 )
-   {
-      $query = "UPDATE MessageCorrespondents SET Replied='Y'";
-
-      if( $invitation_step or
-          (isset($new_folder) and isset($folders[$new_folder])) )
-      {
-         if( !isset($new_folder) or !isset($folders[$new_folder]) )
-            $new_folder = FOLDER_MAIN;
-         $query .= ", Folder_nr=$new_folder";
-      }
-
-      $query .= " WHERE mid=$prev_mid AND uid=$my_id AND Sender!='Y' LIMIT 1";
-
-      mysql_query( $query )
-         or error('mysql_query_failed', 'send_message.reply');
-
-      if( $disputegid > 0 )
-         mysql_query( "UPDATE Messages SET Type='DISPUTED' " .
-                      "WHERE ID=$prev_mid LIMIT 1")
-            or error('mysql_query_failed', 'send_message.dispute');
-   }
-
-// Notify receiver about message
-
-   if( !$to_me and !(strpos($opponent_row["SendEmail"], 'ON') === false)
-       and $opponent_row["Notify"] == 'NONE')
-   {
-      $result = mysql_query( "UPDATE Players SET Notify='NEXT' " .
-                             "WHERE Handle='".mysql_addslashes($tohdl)."' LIMIT 1" )
-         or error('mysql_query_failed', 'send_message.notify_receiver');
-   }
-} //old/new
 
 
    $msg = urlencode(T_('Message sent!'));
