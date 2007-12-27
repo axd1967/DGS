@@ -32,6 +32,9 @@ Changelog
 
 2007-12-27 juga
 
+   * code_examples/test_clock_tick.php:
+   - test for checking better query-time of clock-tick
+
    * NEWS:
    - prepare for new release 1.0.14
 
