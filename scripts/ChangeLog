@@ -9,17 +9,17 @@ last server update start: 2006-10-06
 2007-11-07: bug fix update
 2007-12-19: bug fix update
 
-previous server update: 2006-09
-Release [2006-08-07] - DGS 1.0.12 - CVS-tag [DGS-stable-200608]
+previous server update:
+Release [2007-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
 
 -----
 quick INFO:
 
-2007-10-08 rodival
-   Debugging for release 1.0.13
+2007-12-23 rodival
+   New features for release 1.0.14
 
-2007-10-08 juga
-   Debugging for release 1.0.13
+2007-12-27 juga
+   New features for release 1.0.14
 
 -----
 quick TODO:
@@ -30,8 +30,25 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
-==================================================================
-Release [2006-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
+2007-12-27 juga
+
+   * NEWS:
+   - prepare for new release 1.0.14
+
+   * scripts/README.developers:
+   - hints about using translations with T_() in classes
+
+   * updates/,
+     updates/database_changes_1_0_12_to_1_0_13.mysql,
+     updates/other_changes_1_0_12_to_1_0_13.txt,
+     updates/roadmap_1_0_12_to_1_0_13.txt:
+   - moved text-files for server-updates into new updates-dir
+
+   * translationdata.mysql, INSTALL:
+   - synced with changes in release-branch DGS-stable-200712
+   - removed translation-data from distribution
+   - downloads from snapshot-page
+   - info about GD & FreeType and refs to scripts-READMEs
 
 2007-12-22 rodival
 
@@ -46,6 +63,17 @@ Release [2006-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
 
    * forum/search.php:
    - remove a T_() detection while commented
+
+
+==================================================================
+Release [2006-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
+
+2007-12-27 juga
+
+   * translationdata.mysql, INSTALL:
+   - removed translation-data from distribution
+   - downloads from snapshot-page
+   - info about GD & FreeType and refs to scripts-READMEs
 
 2007-12-19 rodival
 
