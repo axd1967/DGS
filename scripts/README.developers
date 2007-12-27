@@ -195,5 +195,16 @@ General instructions for developers:
 
       ( (string)$value != '' )
 
+----------------- PHP, Using translations in libraries/classes:
+
+   For using translated text with  T_('some text')  first the current
+   player_row has to be loaded to determine the players language-setting.
+   That allows the  T_(..)  only to be used during execution time when
+   the player-information has been loaded.
+
+   That may need lazy-initialization for some translated texts.
+   Also keep in mind, that applying the T_()-func later does not work
+   as then the text is not included in the database for translation!
+
 -----------------
 
