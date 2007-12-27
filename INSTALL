@@ -9,6 +9,9 @@ Requirements:
 *) MySQL >= 4.0.1 <http://www.mysql.com>
 *) cvs client <http://www.cvshome.org>
 
+*) GD to draw rating graph <http://www.boutell.com/gd/>
+*) FreeType for optional fonts in rating graph <http://www.freetype.org>
+
 Last versions used by Dragon:
  Apache Version Apache/1.3.29 (Unix) PHP/4.3.4
  MySQL 4.0.15
@@ -28,10 +31,11 @@ Either from cvs:
 > mv DragonGoServer/* DragonGoServer/.[a-z]* .
 > rmdir DragonGoServer
 
-or download a cvs snapshot from <http://www.dragongoserver.net/snapshot>
+or download a cvs snapshot from <http://www.dragongoserver.net/snapshot.php>
 
 
-For both methods also download the images from <http://www.dragongoserver.net/snapshot>
+For both methods also download the images and translation-data
+from <http://www.dragongoserver.net/snapshot.php>
 
 Those files have to be unzipped in the dragon root directory to obtain a tree like:
       /root
@@ -66,9 +70,12 @@ mysql> GRANT select, insert, update, delete ON dragondb.* TO dragon@localhost ID
 > mysql -D dragondb -h mysqlhost -u username -p password < init.mysql
 ))
 
-and add some translations:
+and add some translations (the data file can be downloaded
+from <http://www.dragongoserver.net/snapshot.php>
+and then unzipped ):
 
-> mysql -D dragondb < translationdata.mysql
+> gunzip Translationdata.mysql.gz
+> mysql -D dragondb < Translationdata.mysql
 
 
 (( This could be delayed until you need it:
@@ -85,7 +92,9 @@ Then, this user will be able to manage the other admins.
 
 
 
-4) Edit permissions for include/config.php and translations/:
+4) Adjust config of software and adjust file permissions:
+
+* Edit permissions for include/config.php and directory translations/:
 
 Find which group your webserver is using (e.g. www-data).
 > su -c 'chgrp www-data include/config.php translations'
@@ -93,8 +102,18 @@ Find which group your webserver is using (e.g. www-data).
 > chmod 775 translations/
 
 
-Adjust include/config.php to your environment.
+* To create translations take a sidestep and read
+  scripts/README.translations
 
+
+* If you want to adjust the source-code, please have a look to the
+  notes in scripts/README.developers
+
+
+* Adjust include/config.php to your environment.
+
+
+* PHP config:
 
 By now, Dragon works with these PHP directives:
  allow_call_time_pass_reference = Off ;Unused
@@ -118,7 +137,7 @@ By now, Dragon works with these PHP directives:
  post_max_size = 8M ;greater than upload_max_filesize if used
  precision = 14
  register_argc_argv = Off ;Unused
- register_globals = Off ;Don't care 
+ register_globals = Off ;Don't care
  safe_mode = Off ;else safe_mode_allowed_env_vars= must allow putenv() to modify 'TZ'
 ;set sendmail_* options to your needs
  short_open_tag = Off ;Unused
@@ -131,6 +150,15 @@ By now, Dragon works with these PHP directives:
  mysql.default_user = ;Unused
  mysql.default_password = ;Unused
  mysql.max_links = -1 ;Unused
+
+
+
+* OPTIONAL: for using FreeType-font drawing rating graphs:
+
+Check and adjust defines in 'include/graph.php':
+- TTF_PATH
+- TTF_NAME
+- TTF_HEIGHT
 
 
 
@@ -163,3 +191,4 @@ By now, Dragon works with these PHP directives:
 
 7) Complain in the support forum at dragon <http://www.dragongoserver.net> if it doesn't
    work.
+
