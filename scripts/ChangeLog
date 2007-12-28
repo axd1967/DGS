@@ -64,6 +64,9 @@ Changelog
      confirm.php, join_waitingroom_game.php:
    - remove the backup lines of ENA_SEND_MESSAGE and send_email
 
+   * include/std_functions.php (str_TD_class_button, button_style):
+   - removed funcs
+
    * forum/search.php:
    - remove a T_() detection while commented
 
