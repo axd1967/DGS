@@ -217,7 +217,7 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
    $given_passwd_encrypted =
       mysql_single_fetch( 'check_password',
-               "SELECT PASSWORD('".mysql_addslashes($given_passwd)."')"
+               "SELECT ".PASSWORD_ENCRYPT."('".mysql_addslashes($given_passwd)."')"
                ,'row')
          or error('mysql_query_failed','check_password.get_password');
 

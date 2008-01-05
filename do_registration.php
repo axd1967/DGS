@@ -82,7 +82,7 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
    $result = mysql_query( "INSERT INTO Players SET " .
                           "Handle='".mysql_addslashes($uhandle)."', " .
                           "Name='".mysql_addslashes($name)."', " .
-                          "Password=PASSWORD('".mysql_addslashes($passwd)."'), " .
+                          "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."'), " .
                           "Registerdate=FROM_UNIXTIME($NOW), " .
                           "Sessioncode='$code', " .
                           "Sessionexpire=FROM_UNIXTIME(".($NOW+$session_duration).")" )

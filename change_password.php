@@ -45,7 +45,7 @@ require_once( "include/std_functions.php" );
          error('password_illegal_chars');
 
       $query = "UPDATE Players SET " .
-          "Password=PASSWORD('".mysql_addslashes($passwd)."') " .
+          "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."') " .
           "WHERE Handle='guest' LIMIT 1";
    }
    else
@@ -65,7 +65,7 @@ require_once( "include/std_functions.php" );
          error("password_mismatch");
    
       $query = "UPDATE Players SET " .
-          "Password=PASSWORD('".mysql_addslashes($passwd)."') " .
+          "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."') " .
           "WHERE ID=" . $player_row['ID'] . " LIMIT 1";
    }
 

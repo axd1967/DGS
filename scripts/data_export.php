@@ -255,7 +255,7 @@ function after_table( $table)
          global $GUESTPASS;
          $str = insert_set( 'Players'
             , "SELECT Handle,Name"
-//              .",\"PASSWORD('$GUESTPASS')\" as Password"
+//              .",\"".PASSWORD_ENCRYPT."('$GUESTPASS')\" as Password"
               .",Password"
             ." FROM Players"
             ." WHERE Handle='guest'"
@@ -267,7 +267,7 @@ function after_table( $table)
             .CR."INSERT INTO Players SET"
             .CRINDENT."Handle=".safe_value('guest').","
             .CRINDENT."Name=".safe_value('Guest').","
-            .CRINDENT."Password=PASSWORD(".safe_value($GUESTPASS).");"
+            .CRINDENT."Password=".PASSWORD_ENCRYPT."(".safe_value($GUESTPASS).");"
             .CR;
          break;
       case 'Clock':

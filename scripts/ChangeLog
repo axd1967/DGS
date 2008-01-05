@@ -32,6 +32,12 @@ Changelog
 
 2008-01-05 rodival
 
+   * include/config.php,
+     connect2mysql.php (check_password),
+     do_registration.php, change_password.php, send_new_password.php,
+     scripts/data_export.php:
+   - define the encryption function used for passwords in config.php
+
    * scripts/browser_stats.php:
    - add of new browser types
 

@@ -44,10 +44,19 @@ $MYSQLUSER = "dragongoserver";
 $MYSQLPASSWORD = "";
 $DB_NAME = "dragongoserver";
 
+
+// Dependent of your mysql version:
+
 define('ALLOW_SQL_UNION', 1); // 1 = UNION supported (needs min. mysql 4.0.X)
 
+//MySQL encryption function used for passwords
+//could be 'PASSWORD', 'OLD_PASSWORD', 'MD5'...
+//see also http://dev.mysql.com/doc/refman/5.0/en/old-client.html
+//also change the default "guest" password into init.mysql
+define('PASSWORD_ENCRYPT', 'PASSWORD');
 
-// Dependent  of the configuration of your server:
+
+// Dependent of the configuration of your server:
 
 define('URI_AMP_IN','&'); //ini_get('arg_separator.input')
 //URI_AMP at '&amp;' work even if arg_separator.output is set to '&'

@@ -92,7 +92,7 @@ require_once( "include/std_functions.php" );
 // Save password in database
 
    $result = mysql_query( "UPDATE Players " .
-                          "SET Newpassword=PASSWORD('$newpasswd') " .
+                          "SET Newpassword=".PASSWORD_ENCRYPT."('$newpasswd') " .
                           "WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" )
       or error('mysql_query_failed', 'send_new_password.update');
 
