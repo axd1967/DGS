@@ -58,10 +58,10 @@ function search_browsers($result, &$Browsers)
             if( $nr == 1 )
                continue 2;
 
-            echo "No Browser Found: {$Browser} <br>\n";
+            echo "No Browser Found ($Count): {$Browser}<br>\n";
          }
 
-      echo "No Family Found:{$Browser}<br>\n";
+      echo "No Family Found ($Count): {$Browser}<br>\n";
    }
 }
 
@@ -93,6 +93,12 @@ function echo_browsers(&$Browsers)
 
    echo '<pre>';
 
+   $result = mysql_query("SELECT count(*) AS Count, Browser FROM Players " .
+                         "WHERE Browser IS NOT NULL AND Browser!='' AND Activity > 0.1 " .
+                         "GROUP BY Browser")
+      or die(mysql_error());
+
+
    $Browsers = array(array('Opera' => array('opera',0),
                            'Opera 5' => array('opera.5',0),
                            'Opera 6' => array('opera.6',0),
@@ -104,19 +110,6 @@ function echo_browsers(&$Browsers)
                            'Konqueror 2' => array('konqueror.?2',0),
                            'Konqueror 3' => array('konqueror.?3',0),
                            'Safari' => array('safari',0)),
-
-                     array('AntFresco' => array('antfresco',0)),
-                     array('OmniWeb' => array('omniweb',0)),
-                     array('Links' => array('links',0)),
-                     array('Lynx' => array('lynx',0)),
-                     array('curl' => array('url',0)),
-                     array('Jakarta' => array('jakarta',0)),
-                     array('w3m' => array('w3m',0)),
-                     array('R1ED Browser' => array('r1ed',0)),
-                     array('libwww-perl' => array('libwww-perl',0)),
-                     array('GameWatch' => array('gamewatch',0)),
-                     array('RTGO Client' => array('rtgo client',0)),
-                     array('Indy Library' => array('indy library',0)),
 
                      array('MSIE' => array('msie',0),
                            'MSIE <4' => array('msie [23]',0),
@@ -137,25 +130,39 @@ function echo_browsers(&$Browsers)
                            'Netscape Other' => array('netscape',0),
                            'Phoenix' => array('phoenix',0),
                            'Camino' => array('chimera|camino',0),
-                           'Gecko Other' => array('gecko|mozilla',0)));
+                           'Gecko Other' => array('gecko|mozilla',0)),
 
+                     array('AntFresco' => array('antfresco',0)),
+                     array('OmniWeb' => array('omniweb',0)),
+                     array('Links' => array('links',0)),
+                     array('Lynx' => array('lynx',0)),
+                     array('curl' => array('url',0)),
+                     array('Jakarta' => array('jakarta',0)),
+                     array('w3m' => array('w3m',0)),
+                     array('R1ED Browser' => array('r1ed',0)),
+                     array('libwww-perl' => array('libwww-perl',0)),
+                     array('GameWatch' => array('gamewatch',0)),
+                     array('RTGO Client' => array('rtgo client',0)),
+                     array('Indy Library' => array('indy library',0)),
 
-//                     array('Other' => array('.',0)));
+                     array('BlackBerry' => array('blackberry',0)),
+                     array('Java' => array('java',0)), //Java/1.6.0_03
+                     array('Picsel' => array('picsel',0)), //Picsel/1.0 (Windows NT 5.1; U)
 
+//                     array('Other' => array('.',0)),
+         );
 
-
-
-
-   $result = mysql_query("SELECT count(*) AS Count, Browser FROM Players " .
-                         "WHERE Browser IS NOT NULL AND Browser!='' AND Activity > 0.1 " .
-                         "GROUP BY Browser")
-      or die(mysql_error());
 
    search_browsers($result, $Browsers);
 
    echo_browsers($Browsers);
 
    echo "\n\nTotal: $total";
+
+
+   echo "\n\n\n========================================================\n\n";
+
+   mysql_data_seek($result, 0);
 
 
    $OSes = array(array('Linux' => array('linux',0),
@@ -193,12 +200,9 @@ function echo_browsers(&$Browsers)
                        '2000' => array('(win|windows).?2000',0)),
 
 
-                 array('Other' => array('.',0)));
+                 array('Other' => array('.',0)),
+         );
 
-
-   mysql_data_seek($result, 0);
-
-   echo "\n\n\n========================================================\n\n";
 
    search_browsers($result, $OSes);
 

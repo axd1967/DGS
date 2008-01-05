@@ -30,6 +30,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-01-05 rodival
+
+   * scripts/browser_stats.php:
+   - add of new browser types
+
 2007-12-27 juga
 
    * code_examples/test_clock_tick.php:
