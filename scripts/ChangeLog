@@ -30,12 +30,16 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-01-06 rodival
+
+   * skins/dragon/screen.css:
+   - add a red OnVacation in game infos table
+
 2008-01-05 rodival
 
-   * include/config.php,
-     connect2mysql.php (check_password),
+   * include/config.php, include/connect2mysql.php (check_password),
      do_registration.php, change_password.php, send_new_password.php,
-     scripts/data_export.php:
+     scripts/data_export.php (after_table):
    - define the encryption function used for passwords in config.php
 
    * scripts/browser_stats.php:

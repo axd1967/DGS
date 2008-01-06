@@ -1848,6 +1848,12 @@ table.GameInfos td.Ratings span.EndRating {
 /*   visibility: visible; /* visible hidden collapse(table) */
 }
 
+table.GameInfos span.OnVacation {
+   color: red;
+   font-weight: bold;
+   white-space: nowrap;
+}
+
 table.GameInfos tr.BoardInfos {
 /*   background: #ffffff; */
    border: 0px solid #808080;
