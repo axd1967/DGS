@@ -30,6 +30,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-01-09 rodival
+
+   * include/connect2mysql.php (check_password):
+   - revert the bad PASSWORD() stored (because of the new MySQL version)
+     to their OLD_PASWORD() value.
+     Today, there are 448 users with a corrupted password and no Email address
+     and this number grow. So, the previous "define the encryption function"
+     fix should be useful too.
+
 2008-01-06 rodival
 
    * skins/dragon/screen.css:

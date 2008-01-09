@@ -215,6 +215,19 @@ function connect2mysql($no_errors=false)
 
 function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
+   // these 2 "bugfix" sections should be removed after a while
+   $bugfix = 0; //[ start bugfix part 1
+   global $FRIENDLY_SHORT_NAME;
+   if( PASSWORD_ENCRYPT == 'OLD_PASSWORD' && $FRIENDLY_SHORT_NAME == "DGS"
+      && strlen( $passwd) > 16 && substr( $passwd, 0, 1) == '*' )
+   {
+      $bugfix = 1;
+      $given_passwd_encrypted =
+         mysql_single_fetch( 'check_password_bugfix',
+                  "SELECT PASSWORD('".mysql_addslashes($given_passwd)."')"
+                  ,'row')
+            or error('mysql_query_failed','check_password_bugfix.get_password');
+   } else //] end bugfix part 1
    $given_passwd_encrypted =
       mysql_single_fetch( 'check_password',
                "SELECT ".PASSWORD_ENCRYPT."('".mysql_addslashes($given_passwd)."')"
@@ -230,6 +243,14 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
          return false;
    }
 
+   if( $bugfix > 0 ) //[ start bugfix part 2
+   {
+      mysql_query( 'UPDATE Players ' .
+                   "SET Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($given_passwd)."'), " .
+                   "Newpassword='' " .
+                   "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" )
+         or error('mysql_query_failed','check_password_bugfix.set_password');
+   } else //] end bugfix part 2
    if( !empty($new_passwd) )
    {
       mysql_query( 'UPDATE Players ' .
