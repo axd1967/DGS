@@ -42,11 +42,6 @@ if( file_exists( "translations/known_languages.php") )
 *    "zh-cn.utf-8" => "Chinese (Simplified)",
 *    "jp.utf-8" => "Japanese" );
 */
-define('LANG_TRANSL_CHAR', ','); //do not use '-'
-define('LANG_CHARSET_CHAR', '.'); //do not use '-'
-//define('LANG_DEF_CHARSET', 'iso-8859-1'); //lowercase
-define('LANG_DEF_CHARSET', 'utf-8'); //lowercase
-define('LANG_ENGLISH', 'en'.LANG_CHARSET_CHAR.'iso-8859-1'); //lowercase
 
 
 function T_($string)
@@ -61,7 +56,7 @@ function T_($string)
    if( $language_used == 'N' )
       return '<span class=NativeText>'.$string.'</span>';
 
-   return preg_replace('%([^\\s])#[0-9a-z]+$%i', '\\1', $string);
+   return preg_replace('%([^\\s])#[_0-9a-z]+$%i', '\\1', $string);
 }
 
 function include_all_translate_groups($player_row=null) //must be called from main dir
@@ -84,38 +79,7 @@ function include_all_translate_groups($player_row=null) //must be called from ma
 
 function include_translate_group($group, $player_row) //must be called from main dir
 {
-   global $language_used, $encoding_used, $known_languages;
-
-   if( !empty( $language_used ) ) //from a previous call
-      $language = $language_used;
-   else //first call
-   {
-      if( !empty($_GET['language']) )
-         $language = (string)$_GET['language'];
-      else if( !empty($player_row['Lang']) )
-         $language = (string)$player_row['Lang'];
-      else
-         $language = 'C';
-
-      if( $language == 'C' )
-         $language = get_preferred_browser_language();
-
-      if( empty($language) or $language == 'en' )
-         $language = LANG_ENGLISH;
-
-      @list($browsercode,$encoding_used) = explode( LANG_CHARSET_CHAR, $language, 2);
-      if( @$browsercode && !@$encoding_used )
-      {
-         if( !isset($known_languages[$browsercode][LANG_DEF_CHARSET]) )
-            if( isset($known_languages[$browsercode]) )
-               $encoding_used = @key($known_languages[$browsercode]);
-         if( !@$encoding_used )
-            $encoding_used = LANG_DEF_CHARSET;
-         if( $language != 'N' )
-            $language = $browsercode.LANG_CHARSET_CHAR.$encoding_used;
-      }
-      $language_used = $language;
-   }
+   $language = recover_language( $player_row);
 
    if( $language == 'N' )
       return;
@@ -123,9 +87,9 @@ function include_translate_group($group, $player_row) //must be called from main
    global $Tr; //$Tr is modified by the include_once( $filename );
 
    //preload 'To#2' and 'From#2' if missing in the language
-   if( strtolower($language) != LANG_ENGLISH )
+   if( strtolower($language) != LANG_DEF_LOAD )
    {
-      $filename = "translations/".LANG_ENGLISH."_${group}.php";
+      $filename = "translations/".LANG_DEF_LOAD."_${group}.php";
 
       if( file_exists( $filename ) )
       {
@@ -144,71 +108,6 @@ function include_translate_group($group, $player_row) //must be called from main
    }
 }
 
-
-function get_preferred_browser_language()
-{
-   global $known_languages;
-
-   $accept_langcodes = explode( ',', @$_SERVER['HTTP_ACCEPT_LANGUAGE'] );
-   $accept_charset = strtolower(trim(@$_SERVER['HTTP_ACCEPT_CHARSET']));
-
-   $current_q_val = -100;
-   $return_val = NULL;
-
-   foreach( $accept_langcodes as $lang )
-   {
-      @list($browsercode, $q_val) = explode( ';', trim($lang));
-
-      $q_val = preg_replace( '/q=/i', '', trim($q_val));
-      if( empty($q_val) or !is_numeric($q_val) )
-         $q_val = 1.0;
-      if( $current_q_val >= $q_val )
-         continue;
-
-      // Normalization for the array_key_exists() matchings
-      $browsercode = strtolower(trim($browsercode));
-      while( $browsercode && !array_key_exists($browsercode, $known_languages))
-      {
-         $tmp = strrpos( $browsercode, '-');
-         if( !is_numeric($tmp)  or $tmp < 2 )
-         {
-            $browsercode = '';
-            break;
-         }
-         $browsercode = substr( $browsercode, 0, $tmp);
-         $q_val-= 1.0;
-      }
-      if( !$browsercode )
-         continue;
-
-      if( $current_q_val >= $q_val )
-         continue;
-
-      $found = false;
-      if( $accept_charset )
-      {
-         foreach( $known_languages[$browsercode] as $charenc => $langname )
-         {
-            //$charenc = strtolower($charenc); // Normalization
-            if( strpos( $accept_charset, $charenc) !== false )
-            {
-               $found = true;
-               break;
-            }
-         }
-      }
-      if( !$found )
-      {  // No supporting encoding found. Take the first one anyway.
-         reset($known_languages[$browsercode]);
-         $charenc = key($known_languages[$browsercode]);
-      }
-
-      $return_val = $browsercode . LANG_CHARSET_CHAR . $charenc;
-      $current_q_val = $q_val;
-   }
-
-   return $return_val;
-}
 
 function get_language_descriptions_translated( $keep_english=false)
 {

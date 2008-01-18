@@ -30,7 +30,20 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
-2008-01-18 02:45:16
+2008-01-18 rodival
+
+   * include/quick_common.php (fnop, get_preferred_browser_language,
+     recover_language),
+     include/std_functions.php, include/translation_functions.php:
+   - to allow the managment of the encoding in quick_status.php
+   - moved get_preferred_browser_language() and the LANG_* constants
+     from translation_functions.php to quick_common.php
+   - moved fnop() from std_functions.php to quick_common.php
+   - added recover_language() to set the language-related globals without
+     loading the translations datas.
+
+   * quick_status.php (loc_start_page, loc_end_page):
+   - enable encoding managment
 
    * include/config.php,
      include/connect2mysql.php (check_passwd_method, check_passwd):

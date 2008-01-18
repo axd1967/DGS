@@ -22,14 +22,46 @@ require_once( "include/connect2mysql.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
+
 function slashed($string)
 {
    return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
 }
 
 
+function loc_start_page()
+{
+   global $encoding_used, $NOW;
+   ob_start("ob_gzhandler");
+
+   //see also include_translate_group() for regular recovery of $encoding_used
+   if( empty($encoding_used) )
+      $encoding_used = 'utf-8'; //LANG_DEF_CHARSET;
+
+   header('Content-Type: text/plain;charset='.$encoding_used);
+   // this one open the text/plain in the browser by default
+   // this one exist and put a costume of binary on the text
+   //header( 'Content-type: application/octet-stream' );
+
+   //header( "Content-Disposition: inline; filename=\"$filename\"" );
+   //header( "Content-Disposition: attachment; filename=\"$filename\"" );
+   header( "Content-Description: PHP Generated Data" );
+
+   header('Expires: ' . gmdate('D, d M Y H:i:s',$NOW+5*60) . ' GMT');
+   header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$NOW) . ' GMT');
+
+}
+
+function loc_end_page()
+{
+   ob_end_flush();
+}
+
+
 if( $is_down )
 {
+   recover_language(); //set $language_used and $encoding_used
+   loc_start_page();
    warning($is_down_message);
 }
 else
@@ -39,13 +71,13 @@ else
    connect2mysql();
 
    $uhandle = '';  
-   $uid = @$_REQUEST['uid'];
+   $uid = (int)@$_REQUEST['uid'];
    if( $uid > 0 )
       $idmode= 'uid';
    else
    {
       $uid = 0;
-      $uhandle = @$_REQUEST[UHANDLE_NAME];
+      $uhandle = trim(@$_REQUEST[UHANDLE_NAME]);
       if( $uhandle )
          $idmode= 'handle';
       else
@@ -64,7 +96,7 @@ else
                   "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
                   "FROM Players WHERE " .
                   ( $idmode=='uid'
-                        ? "ID=".$uid
+                        ? "ID=".((int)$uid)
                         : "Handle='".mysql_addslashes($uhandle)."'"
                   ) );
 
@@ -72,14 +104,16 @@ else
    {
       error('unknown_user','quick_status.find_player');
    }
+   recover_language( $player_row); //set $language_used and $encoding_used
+   loc_start_page();
 
-
+   //TODO: fever vault check
    if( $idmode == 'cookie' )
    {
       if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
           or $player_row["Expire"] < $NOW )
       {
-         error("not_logged_in",'quick_status.expired');
+         error('not_logged_in','quick_status.expired');
       }
       $logged_in = true;
       setTZ( $player_row['Timezone']);
@@ -99,7 +133,7 @@ else
    if( $logged_in )
    {
       // New messages?
-   
+
       $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
          "Messages.Subject, Players.Name AS sender " .
          "FROM (Messages, MessageCorrespondents AS me) " .
@@ -155,5 +189,7 @@ else
     
    if( $nothing_found )
       warning('empty lists');
+
+   loc_end_page();
 }
 ?>

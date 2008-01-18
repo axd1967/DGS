@@ -247,11 +247,6 @@ define("USER_FOLDERS", 6);
 //-----
 
 
-function fnop( $a)
-{
-   return $a;
-}
-
 /****
  * get rid of the negative results of ($k % $m)
  * ( remember: ((-$k) % $m) == -($k % $m) )
@@ -384,9 +379,9 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    echo "\n <META http-equiv=\"content-type\" content=\"text/html;charset=$encoding_used\">";
 
-   echo "\n <TITLE>".basic_safe("$FRIENDLY_SHORT_NAME - $title")."</TITLE>";
-
    echo "\n <META NAME=\"DESCRIPTION\" CONTENT=\"To play go on a turn by turn basis.\">";
+
+   echo "\n <TITLE>".basic_safe("$FRIENDLY_SHORT_NAME - $title")."</TITLE>";
 
    echo "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
 
@@ -484,7 +479,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
          //T_//('Translate') => array(5,1, 'translate.php',array('accesskey'=>'t')),
       );
 
-      $tools_array = array();
+      $tools_array = array(); //$url => array($img,$alt,$title)
       global $SUB_PATH, $FRIENDLY_SHORT_NAME;
       switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
       {
