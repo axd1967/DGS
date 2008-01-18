@@ -47,12 +47,20 @@ $DB_NAME = "dragongoserver";
 
 // Dependent of your mysql version:
 
+define('MYSQL_VERSION', '3.23.49');
+//devel-server is '3.23.49'
+//live-server is '5.0.22'
+
 define('ALLOW_SQL_UNION', 1); // 1 = UNION supported (needs min. mysql 4.0.X)
 
-//MySQL encryption function used for passwords
-//could be 'PASSWORD', 'OLD_PASSWORD', 'MD5'...
-//see also http://dev.mysql.com/doc/refman/5.0/en/old-client.html
-//also change the default "guest" password into init.mysql
+/**
+ * MySQL encryption function used for passwords
+ * May be 'PASSWORD', 'OLD_PASSWORD', 'MD5'...
+ * See also: http://dev.mysql.com/doc/refman/5.0/en/old-client.html
+ *  and: http://dev.mysql.com/doc/refman/5.0/en/encryption-functions.html
+ * Also adjust the default "guest" password into init.mysql
+ *  and the type or size of the Password and Newpassword fields.
+ **/
 define('PASSWORD_ENCRYPT', 'PASSWORD');
 
 

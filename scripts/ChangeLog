@@ -30,6 +30,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-01-18 02:45:16
+
+   * include/config.php,
+     include/connect2mysql.php (check_passwd_method, check_passwd):
+   - added check_passwd_method() to allow a password check
+     free from encryption method.
+   - added the MYSQL_VERSION constant into config.php
+
 2008-01-09 rodival
 
    * include/connect2mysql.php (check_password):
