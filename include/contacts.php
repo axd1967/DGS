@@ -39,7 +39,7 @@ define('CUSERFLAG_FRIEND',  0x00000002); // friend-like relation with contact
 define('CUSERFLAG_STUDENT', 0x00000004); // contact is my student
 define('CUSERFLAG_TEACHER', 0x00000008); // contact is my teacher
 define('CUSERFLAG_FAN',     0x00000010); // í'm a fan of contact
-define('CUSERFLAG_DGS',     0x00000020); // contact is member of DGS-crew
+define('CUSERFLAG_ADMIN',   0x00000020); // contact is member of admin-crew
 define('CUSERFLAG_TROLL',   0x00000040); // contact is a troll
 define('CUSERFLAG_MISC',    0x00000080); // miscellaneous relationship contact (allow special search on notes)
 
@@ -92,6 +92,8 @@ class Contact
       global $ARR_CONTACT_USERFLAGS;
       if( isset($ARR_CONTACT_USERFLAGS) )
          return;
+
+      // userflag => ( form_elem_name, translation )
       $ARR_CONTACT_USERFLAGS = array(
          CUSERFLAG_BUDDY   => array( 'ufl_buddy',   T_('Buddy') ),
          CUSERFLAG_FRIEND  => array( 'ufl_friend',  T_('Friend') ),
@@ -99,7 +101,7 @@ class Contact
          CUSERFLAG_TEACHER => array( 'ufl_teacher', T_('Teacher') ),
          CUSERFLAG_FAN     => array( 'ufl_fan',     T_('Fan') ),
          CUSERFLAG_TROLL   => array( 'ufl_troll',   T_('Troll') ),
-         CUSERFLAG_DGS     => array( 'ufl_dgs',     T_('DGS-Crew') ),
+         CUSERFLAG_ADMIN   => array( 'ufl_admin',   T_('Admin-crew') ),
          CUSERFLAG_MISC    => array( 'ufl_misc',    T_('Miscellaneous') ),
          );
 

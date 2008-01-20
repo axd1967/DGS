@@ -30,6 +30,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-01-20  rodival
+
+   * include/contacts.php,
+   - free the CUSERFLAG_ADMIN flag (and its translations) from a reference to DGS
+
 2008-01-18 rodival
 
    * include/quick_common.php (fnop, get_preferred_browser_language,
