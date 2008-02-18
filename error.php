@@ -30,7 +30,7 @@ require_once( "include/std_functions.php" );
       error( $err, "$redir ".@$_SERVER['REDIRECT_STATUS']
                  .': '.@$_SERVER['REDIRECT_URL']
                  .': '.@$_SERVER['REDIRECT_ERROR_NOTES']
-                 .' / '.getcwd());
+                 .': '.getcwd());
       //exit;
    }
 
@@ -73,7 +73,7 @@ require_once( "include/std_functions.php" );
 
       case("guest_may_not_receive_messages"):
       {
-         echo T_("Error, guest may not receive messages");
+         echo T_("Impossible, guest may not receive messages");
       }
       break;
 
@@ -628,7 +628,13 @@ require_once( "include/std_functions.php" );
 
    $mysqlerror = get_request_arg('mysqlerror'); //@$_GET['mysqlerror'];
    if( $mysqlerror )
+   {
+      $mysqlerror = str_replace(
+         array( $MYSQLHOST, $DB_NAME, $MYSQLUSER, $MYSQLPASSWORD),
+         array( '[*h*]', '[*d*]', '[*u*]', '[*p*]'),
+         $mysqlerror);
       echo "<p>Mysql error: ".textarea_safe($mysqlerror)."</p>";
+   }
 
    echo '<p></p>';
    end_page();

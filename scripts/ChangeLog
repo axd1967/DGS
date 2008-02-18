@@ -30,9 +30,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
-2008-01-20  rodival
+2008-02-18 rodival
 
-   * include/contacts.php,
+   * error.php:
+   - hide the sensible infos from the Mysql errors displayed to users.
+
+2008-01-20 rodival
+
+   * include/contacts.php:
    - free the CUSERFLAG_ADMIN flag (and its translations) from a reference to DGS
 
 2008-01-18 rodival
