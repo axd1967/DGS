@@ -30,6 +30,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-02-20 rodival
+
+   * sgf.php:
+   - minor mysqlerror handling enhancement
+
 2008-02-18 rodival
 
    * error.php:
