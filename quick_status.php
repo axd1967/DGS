@@ -135,7 +135,8 @@ else
       // New messages?
 
       $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
-         "Messages.Subject, Players.Name AS sender " .
+         "Messages.Subject, Players.Handle AS sender " .
+         //"Messages.Subject, Players.Name AS sender " .
          "FROM (Messages, MessageCorrespondents AS me) " .
          "LEFT JOIN MessageCorrespondents AS other " .
            "ON other.mid=me.mid AND other.Sender!=me.Sender " .
@@ -152,6 +153,8 @@ else
       {
          $nothing_found = false;
          if( !@$row['sender'] ) $row['sender']='[Server message]';
+         //Message.ID, correspondent.Handle, message.subject, message.date
+         //N.B.: Subject is still in the correspondent's encoding.
          echo "'M', {$row['mid']}, '".slashed(@$row['sender'])."', '" .
             slashed(@$row['Subject']) . "', '" .
             date($datfmt, @$row['date']) . "'\n";
