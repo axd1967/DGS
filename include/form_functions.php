@@ -203,8 +203,9 @@ class Form
    var $column_started;
    var $nr_columns;
    var $max_nr_columns;
-   var $safe_text;
-
+   //The texts of the row are raw. They must be converted if used in HTML parts.
+   var $make_texts_safe; //boolean, default is true
+   
 
    /*! \brief Constructor. Initializes various variables. */
    function Form( $name, $action_page, $method
@@ -237,6 +238,7 @@ class Form
       $this->line_no_step = 10;
 
       //'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
+      //'Attbs' are the attributs of the <TD> if one is opened for the element
       $this->form_elements = array(
          'DESCRIPTION'  => array( 'NumArgs' => 1,
                                   'NewTD'   => true,
@@ -573,9 +575,12 @@ class Form
    /*!
     * \brief Add a new row to the form.
     *
+    * \param $make_texts_safe if false, the texts of the row will be kept "as is"
+    *    else they will be textarea_safe'ed
+    *
     * \return The line_number of the new row or -1 if failed.
     */
-   function add_row( $row_array, $line_no = -1, $safe = true )
+   function add_row( $row_array, $line_no = -1, $make_texts_safe = true )
    {
       if( $line_no != -1 )
       {
@@ -594,7 +599,7 @@ class Form
          }
       }
 
-      $this->rows[ $line_no ] = array( $safe, $row_array, $this->area );
+      $this->rows[ $line_no ] = array( $make_texts_safe, $row_array, $this->area );
       $this->updated = false;
 
       return $line_no;
@@ -650,7 +655,7 @@ class Form
 
       $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
       $table_attbs = $this->get_form_attbs( $table_attbs);
-      $rootformstr .= "  <TABLE $table_attbs>\n"; //form table
+      $rootformstr .= "<TABLE $table_attbs>\n"; //form table
 
       ksort($this->rows);
 
@@ -661,8 +666,9 @@ class Form
 
       foreach( $this->rows as $row_args )
       {
-         list( $this->safe_text, $row_args, $curr_area ) = $row_args;
-         $args = array_values( $row_args );
+         list( $tmp, $args, $curr_area ) = $row_args;
+         $this->make_texts_safe = $tmp;
+         $args = array_values( $args );
          $formstr = "";
 
          $current_arg = 0;
@@ -760,7 +766,7 @@ class Form
                $formstr .= $rowclass;
             else if( $tr_attrs )
                $formstr .=  ' '.$tr_attrs;
-            $formstr .= ">$result</TR>";
+            $formstr .= ">$result</TR>\n";
             $area_rows[$curr_area] .= $formstr;
          }
       }
@@ -771,7 +777,7 @@ class Form
       else
          $rootformstr .= implode( "", $area_rows );
 
-      $rootformstr .= "  </TABLE>";
+      $rootformstr .= "</TABLE>";
 
       if( !$this->get_config(FEC_EXTERNAL_FORM) )
          $rootformstr .= $this->print_end();
@@ -806,7 +812,7 @@ class Form
                   . $areastr
                   . "</TABLE></TD>\n";
          if( $TRlevel )
-            $areastr = "<TR>$areastr</TR>";
+            $areastr = "<TR>$areastr</TR>\n";
       }
       else
       {
@@ -837,11 +843,11 @@ class Form
                $table_attbs = $this->get_form_attbs( $table_attbs, 'H');
                $tdtable_attbs = $this->get_form_attbs( $tdtable_attbs, 'H');
                $areastr = "<TD$tdtable_attbs><TABLE$table_attbs>\n"
-                        . "<TR>" . $areastr . "</TR>"
+                        . "<TR>$areastr</TR>\n"
                         . "</TABLE></TD>\n";
             }
             if( $TRlevel )
-               $areastr = "<TR>$areastr</TR>";
+               $areastr = "<TR>$areastr</TR>\n";
          }
          else
          { // vertical grouping
@@ -851,7 +857,7 @@ class Form
                if( !$str )
                   continue;
                if( $areastr )
-                  $areastr .= "</TR><TR>";
+                  $areastr .= "</TR>\n<TR>";
                $areastr .= $str;
                $cnt++;
             }
@@ -863,12 +869,12 @@ class Form
                $tdtable_attbs = $this->get_areaconf( FAREA_ALLV, FAC_ENVTABLE );
                $table_attbs = $this->get_form_attbs( $table_attbs, 'V');
                $tdtable_attbs = $this->get_form_attbs( $tdtable_attbs, 'V');
-               $areastr = "<TD$tdtable_attbs><TABLE$table_attbs><TR>\n"
+               $areastr = "<TD$tdtable_attbs><TABLE$table_attbs>\n<TR>"
                         . $areastr
-                        . "</TR></TABLE></TD>\n";
+                        . "</TR>\n</TABLE></TD>\n";
             }
             if( $TRlevel )
-               $areastr = "<TR>$areastr</TR>";
+               $areastr = "<TR>$areastr</TR>\n";
          }
       }
 
@@ -1189,7 +1195,7 @@ class Form
     */
    function print_insert_text_input( $name, $size, $maxlength, $initial_value )
    {
-      if( $this->safe_text )
+      if( $this->make_texts_safe )
          $initial_value = textarea_safe($initial_value);
 
       $str = "<INPUT type=\"text\" name=\"$name\" value=\"$initial_value\""
@@ -1240,7 +1246,7 @@ class Form
     */
    function print_insert_textarea( $name, $columns, $rows, $initial_text )
    {
-      if( $this->safe_text )
+      if( $this->make_texts_safe )
          $initial_text = textarea_safe($initial_text);
       return "<TEXTAREA name=\"$name\" cols=\"$columns\"" .
          $this->get_input_attbs() . " rows=\"$rows\">$initial_text</TEXTAREA>";
