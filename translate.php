@@ -317,6 +317,7 @@ if(0){//old
          $string = $row['Original'];
          $translation = $row['Text'];
 
+         //$debuginfo must be html_safe.
          if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
             $debuginfo = "<br><span class=DebugInfo>"
                . "L=".$row['Language_ID'].",G=".$row['Group_ID']
@@ -331,23 +332,25 @@ if(0){//old
                      substr_count( wordwrap( $string, $hsize, "\n", 1), "\n" )
                   )));
 
+         //insert the rx_term highlights as if it was 'faq' (lose) item
          $sample = make_html_safe($string, 'faq', $rx_term);
-         //$string = nl2br( textarea_safe($string, LANG_DEF_CHARSET));
-         //$string = make_html_safe($string, false, $rx_term);
-         $string = textarea_safe($string, LANG_DEF_CHARSET);
 
-         //$translation = textarea_safe( $translation, $translate_encoding);
-         //$translation = make_html_safe($translation, false, false);
+         //execute the textarea_safe() here because of the various_encoding
+         $string = textarea_safe($string, 'iso-8859-1'); //LANG_DEF_CHARSET);
          $translation = textarea_safe( $translation, $translate_encoding);
+
+         //both textareas in OWNHTML because of previous textarea_safe()
          $form_row = array(
                   'CELL', 1, 'class=English',
-                  'OWNHTML', "<TEXTAREA readonly name=\"orgen$oid" //readonly disabled
-                     . "\" cols=\"$hsize\" rows=\"$vsize\">"
-                     . $string."</TEXTAREA>".$debuginfo,
+                  'OWNHTML', "<textarea name=\"orgen$oid\" readonly" //readonly disabled
+                     . " cols=\"$hsize\" rows=\"$vsize\">"
+                     . $string."</textarea>"
+                     . $debuginfo, //already html_safe, maybe empty
                   'CELL', 1, 'class=Language',
-                  'TEXTAREA', "transl$oid", $hsize, $vsize, $translation,
-                  'BR',
-                  'CHECKBOX', "same$oid", 'Y',
+                  'OWNHTML', "<textarea name=\"transl$oid\""
+                     . " cols=\"$hsize\" rows=\"$vsize\">"
+                     . $translation."</textarea>",
+                  'BR', 'CHECKBOX', "same$oid", 'Y',
                            'untranslated', $row['Text'] === '',
                   ) ;
          /*
@@ -365,12 +368,11 @@ if(0){//old
          if( $nbcol > 2 )
             array_push( $form_row, 'CELL', $nbcol-2, '');
 
-         //$safe=false because of textarea_safe(..., various_encoding)
-         $translate_form->add_row( $form_row, -1, false);
+         $translate_form->add_row( $form_row);
 
          $translate_form->add_row( array(
                   'CELL', $nbcol, 'class=Sample',
-                  'TEXT', $sample
+                  'TEXT', $sample //already html_safe
                   ) );
 
          $translate_form->add_row( array( 'HR' ) ); //$nbcol
