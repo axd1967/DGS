@@ -30,6 +30,26 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-03-17 rodival
+
+   * include/form_functions.php (create_form_string,
+     print_insert_text_input, print_insert_textarea):
+   - fixed the textarea_safe() problem in the forms
+     (because of the new PHP5) (fix located in create_form_string())
+   - changed the not obvious $safe_text var-name to $make_texts_safe
+
+   * translate.php:
+   - added comments to clarify the translation process
+   - modified the various encodings management - both with OWNHTML now
+
+   * statratingspng.php:
+   - removed some trailing ';'s in mysql queries
+   
+   * quick_status.php:
+   - substitued opponent.Handle to opponent.Name in the returned infos
+     to avoid charsets mismatches (the names are independently recorded
+     within the opponent charset, handles are all ascii compatible)
+
 2008-02-20 rodival
 
    * sgf.php:
