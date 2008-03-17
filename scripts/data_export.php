@@ -216,10 +216,10 @@ INSERT INTO TranslationTexts
 function multi_insert_values( $tables, $title=false, $rowmod=0)
 {
    $text = '';
-   foreach( $tables as $table => $fields )
+   foreach( $tables as $table => $clauses )
    {
       $rowmod = ($rowmod % LIST_ROWS_MODULO)+1;
-      @list($fields, $where, $order) = $fields;
+      @list($fields, $where, $order) = $clauses;
       if( $where )
          $where = ' WHERE '.$where;
       else

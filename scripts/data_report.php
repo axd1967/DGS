@@ -237,7 +237,10 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
             break;
 
          if( is_array($n) )
-            list( $n,$qrytime) = $n;
+         {
+            list( $tmp,$qrytime) = $n;
+            $n = $tmp;
+         }
          else
             $qrytime=-1;
 

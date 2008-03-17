@@ -247,8 +247,9 @@ function get_alt_arg( $n1, $n2)
 
          $stonestring = '';
          reset($prisoners);
-         while( list($dummy, list($x,$y)) = each($prisoners) )
+         while( list($dummy, $tmp) = each($prisoners) )
          {
+            list($x,$y) = $tmp;
             $stonestring .= number2sgf_coords($x, $y, $Size);
          }
 

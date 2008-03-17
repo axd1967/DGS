@@ -61,6 +61,7 @@ else
       error("not_logged_in",'qp2');
    }
 
+   //TODO: fever vault check ???
 /*
    setTZ( $player_row['Timezone']);
 */
@@ -243,8 +244,9 @@ This is why:
 
          $prisoner_string = '';
          reset($prisoners);
-         while( list($dummy, list($x,$y)) = each($prisoners) )
+         while( list($dummy, $tmp) = each($prisoners) )
          {
+            list($x,$y) = $tmp;
             $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
             $prisoner_string .= number2sgf_coords($x, $y, $Size);
          }

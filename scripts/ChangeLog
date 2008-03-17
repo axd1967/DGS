@@ -38,6 +38,12 @@ Changelog
      (because of the new PHP5) (fix located in create_form_string())
    - changed the not obvious $safe_text var-name to $make_texts_safe
 
+   * scripts/data_report.php, scripts/data_export.php,
+     include/graph.php, include/move.php,
+     confirm.php, game.php, quick_play.php:
+   - following the previous fix, ajusted some ambiguous uses of the
+     list() operator along the code.
+
    * translate.php:
    - added comments to clarify the translation process
    - modified the various encodings management - both with OWNHTML now

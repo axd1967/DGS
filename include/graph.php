@@ -203,7 +203,8 @@ function colortoRGB($r, $g=NULL, $b=NULL)
 {
    if( is_array($r) )
    {
-      @list($r,$g,$b) = $r;
+      $tmp = $r;
+      @list($r,$g,$b) = $tmp;
    }
    if( is_string($r) ) // i.e. 'ff802a'
    {
