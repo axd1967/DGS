@@ -64,6 +64,10 @@ Changelog
    - replacing them with the new "$ThePage = new Page(...)"
    - the start_html() is adjusted handle the presence of this new class
 
+   * show_games.php:
+   - fix some bugs around query (filter and sort)
+     reduced a little the db connection time.
+
 2008-03-17 rodival
 
    * include/form_functions.php (create_form_string,
