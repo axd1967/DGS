@@ -30,6 +30,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-04-04 rodival
+
+   * include/filter.php, include/filter_parser.php,
+     include/std_classes.php, include/table_columns.php,
+     users.php, opponents.php:
+   - some mysql-'AS' adds, minor fixes and comments
+
+   * message.php:
+   - change a section title to emphasize the fact that only the
+     message is previewed, not the game settings (as far as now)
+
 2008-03-17 rodival
 
    * include/form_functions.php (create_form_string,
