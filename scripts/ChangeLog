@@ -41,6 +41,14 @@ Changelog
    - change a section title to emphasize the fact that only the
      message is previewed, not the game settings (as far as now)
 
+   * include/connect2mysql.php (mysql_addslashes, db_close, db_query,
+     versioncmp, check_passwd_method, connect2mysql):
+   - because of a deprecated mysql_escape_string(), force the use
+     of mysql_real_escape_string() if exists
+   - introduce 2 new functions: db_close and db_query
+   - enhance the password recovery: SHA1 instead of SHA and add versioncmp()
+   - add a retry feature for the database connection in connect2mysql()
+
 2008-03-17 rodival
 
    * include/form_functions.php (create_form_string,

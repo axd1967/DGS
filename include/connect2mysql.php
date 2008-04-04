@@ -65,30 +65,36 @@ function disable_cache($stamp=NULL, $expire=NULL)
 
 
 
-/* TODO: a better fix for this problem:
+//Because of mysql_real_escape_string(), mysql_addslashes()
+// can't be used without a valide connection to mysql
 if( function_exists('mysql_real_escape_string') ) //PHP >= 4.3.0
 {
    function mysql_addslashes($str) {
-      global $dbcnx;
-      if( @$dbcnx )
+      //If no connection is found, an E_WARNING level warning is generated.
+      //Warning: Can't connect to MySQL server on '...' in ... on line ...
+      //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
+      $res= mysql_real_escape_string($str);
+      if( $res === false )
       {
-         //If no connection is found, an E_WARNING level warning is generated.
-         //Warning: Can't connect to MySQL server on '...' in ... on line ...
-         $e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
-         $res= mysql_real_escape_string($str, $dbcnx);
-         error_reporting($e);
-         if( $res !== false )
-            return $res;
          //error('mysql_query_failed','mysql_addslashes');
+         $res= mysql_escape_string($str);
       }
-      return mysql_escape_string($str);
+      //error_reporting($e);
+      return $res;
    }
 }
 else
-*/
 if( function_exists('mysql_escape_string') ) //PHP >= 4.0.3
 {
-   function mysql_addslashes($str) { return mysql_escape_string($str); }
+   function mysql_addslashes($str)
+   {
+      //mysql_escape_string() is deprecated since version 4.3.0
+      //It's use generate an E_WARNING level message
+      //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
+      $res= mysql_escape_string($str);
+      //error_reporting($e);
+      return $res;
+   }
 }
 else
 {
@@ -109,16 +115,66 @@ function admin_log( $uid, $handle, $err)
             or error('mysql_query_failed','connect2mysql.admin_log') );
 }
 
+function db_close()
+{
+   global $dbcnx;
+   if( $dbcnx ) // $dbcnx is a resource
+      @mysql_close( $dbcnx);
+   $dbcnx= 0;
+}
+
+function connect2mysql($no_errors=false)
+{
+   global $dbcnx, $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
+
+   $i = 6; //retry count
+   do
+   {
+      $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
+      if( $dbcnx )
+         break;
+      //max_user_connections: Error: 1203 SQLSTATE: 42000 (ER_TOO_MANY_USER_CONNECTIONS)
+      if( mysql_errno() != 1203 )
+         break;
+      usleep(500000); //delay useconds
+   } while(--$i >= 0);
+
+   if( !$dbcnx )
+   {
+      $err= 'mysql_connect_failed';
+      if( $no_errors ) return $err;
+      //TODO: error() with no err_log()
+      error($err);
+   }
+
+   if( !@mysql_select_db($DB_NAME) )
+   {
+      @mysql_close( $dbcnx);
+      $dbcnx= 0;
+      $err= 'mysql_select_db_failed';
+      if( $no_errors ) return $err;
+      //TODO: error() with no err_log()
+      error($err);
+   }
+
+   return false;
+}
+
+function db_query( $debugmsg, $query)
+{
+   //echo $debugmsg.'.db_query='.$query.'<br>';
+   $result = mysql_query($query);
+   if( $result )
+      return $result;
+   if( !is_string($debugmsg) )
+      return false;
+   error('mysql_query_failed', $debugmsg.'='.$query);
+}
 
 function mysql_single_fetch( $debugmsg, $query, $type='assoc')
 {
-   $result = mysql_query($query);
-   if( $result == false )
-   {
-      if( $debugmsg !== false )
-         error('mysql_query_failed', ((string)$debugmsg).'.single_fetch');
-      return false;
-   }
+   $result = db_query( !is_string($debugmsg) ?false
+      :$debugmsg.'.single_fetch', $query);
    if( mysql_num_rows($result) != 1 )
    {
       mysql_free_result($result);
@@ -132,18 +188,12 @@ function mysql_single_fetch( $debugmsg, $query, $type='assoc')
    return $row;
 }
 
-
 // if( !$keyed ) $result = array( $col[0],...);
 // else $result = array( $col[0] => $col[1],...);
 function mysql_single_col( $debugmsg, $query, $keyed=false)
 {
-   $result = mysql_query($query);
-   if( $result == false )
-   {
-      if( $debugmsg !== false )
-         error('mysql_query_failed', ((string)$debugmsg).'.single_col');
-      return false;
-   }
+   $result = db_query( !is_string($debugmsg) ?false
+      :$debugmsg.'.single_col', $query);
    if( mysql_num_rows($result) < 1 )
    {
       mysql_free_result($result);
@@ -151,65 +201,46 @@ function mysql_single_col( $debugmsg, $query, $keyed=false)
    }
    $column = array();
    $row = mysql_fetch_row($result);
-   if( is_array($row) )
+   if( $keyed )
    {
-      if( $keyed )
+      while( is_array($row) && count($row) >= 2 )
       {
-         if( count($row) < 2 )
-         {
-            mysql_free_result($result);
-            return false;
-         }
-         while( $row )
-         {
-            $column[$row[0]] = $row[1];
-            $row = mysql_fetch_row($result);
-         }
+         $column[$row[0]] = $row[1];
+         $row = mysql_fetch_row($result);
       }
-      else
+   }
+   else
+   {
+      while( is_array($row) && count($row) >= 1 )
       {
-         if( count($row) < 1 )
-         {
-            mysql_free_result($result);
-            return false;
-         }
-         while( $row )
-         {
-            $column[] = $row[0];
-            $row = mysql_fetch_row($result);
-         }
+         $column[] = $row[0];
+         $row = mysql_fetch_row($result);
       }
    }
    mysql_free_result($result);
-   if( !count($column) )
-      return false; //at least one value
-   return $column;
+   if( count($column) > 0 ) //at least one value
+      return $column;
+   return false;
 }
 
 
-function connect2mysql($no_errors=false)
+// <0 if v1 is less than v2, >0 if v1 is greater than v2, 0 if they are equal.
+function versioncmp( $v1, $v2)
 {
-   global $dbcnx, $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
-
-   $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
-
-   if (!$dbcnx)
+   if( !is_array($v1) )
+      $v1 = explode('.', (string)$v1);
+   if( !is_array($v2) )
+      $v2 = explode('.', (string)$v2);
+   $n = max( count($v1), count($v2));
+   $v1 = array_pad($v1, $n, 0);
+   $v2 = array_pad($v2, $n, 0);
+   foreach( $v1 as $n )
    {
-      $err= 'mysql_connect_failed';
-      if( $no_errors ) return $err;
-      error($err);
+      $n = ((int)$n) - ((int)array_shift($v2));
+      if( $n )
+         return $n;
    }
-
-   if (! @mysql_select_db($DB_NAME) )
-   {
-      mysql_close( $dbcnx);
-      $dbcnx= 0;
-      $err= 'mysql_select_db_failed';
-      if( $no_errors ) return $err;
-      error($err);
-   }
-
-   return false;
+   return 0;
 }
 
 
@@ -220,15 +251,15 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
       - OLD_PASSWORD() is 16
       - (new_)PASSWORD() is 41
       - MD5() is 32
-      - SHA() is 40
+      - SHA1() is 40
       - others?
    */
    switch( strlen( $passwd_encrypted ) )
    {
       case 41: $method='PASSWORD'; break;
-      case 40: $method='SHA'; break;
+      case 40: $method='SHA1'; break;
       case 32: $method='MD5'; break;
-      default: $method=(MYSQL_VERSION < '4.1' ?'PASSWORD' :'OLD_PASSWORD'); break;
+      default: $method=(versioncmp( MYSQL_VERSION, '4.1')<0 ?'PASSWORD' :'OLD_PASSWORD'); break;
    }
    $given_passwd_encrypted =
       mysql_single_fetch( 'check_password',
@@ -250,11 +281,11 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
    }
    if( !empty($new_passwd) || $method != PASSWORD_ENCRYPT )
    {
-      mysql_query( 'UPDATE Players ' .
-                   "SET Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($given_passwd)."'), " .
-                   "Newpassword='' " .
-                   "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" )
-         or error('mysql_query_failed','check_password_bugfix.set_password');
+      db_query( 'check_password.set_password',
+           'UPDATE Players'
+         . " SET Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($given_passwd)."')"
+            . ",Newpassword=''"
+         . " WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
    }
    return true;
 }
