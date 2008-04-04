@@ -80,6 +80,7 @@ require_once( "include/make_translationfiles.php" );
        */
       if( $oid == $row['Original_ID'] ) continue;
       $oid = $row['Original_ID'];
+      $tlangID = (int)@$row['Language_ID'];
 
       $translation = trim(get_request_arg("transl$oid"));
       $same = ( @$_POST["same$oid"] === 'Y' );
@@ -96,7 +97,7 @@ require_once( "include/make_translationfiles.php" );
          else $translation = mysql_addslashes($translation);
 
          //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated)
-         $replace_set .= ",($oid," . $row['Language_ID'] . ",'$translation','Y')";
+         $replace_set .= ",($oid,$tlangID,'$translation','Y')";
 
          //no $log_set
       }
@@ -111,11 +112,10 @@ require_once( "include/make_translationfiles.php" );
          else $translation = mysql_addslashes($translation);
 
          //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated)
-         $replace_set .= ",($oid," . $row['Language_ID'] . ",'$translation','Y')";
+         $replace_set .= ",($oid,$tlangID,'$translation','Y')";
 
          //INSERT INTO Translationlog (Player_ID,Original_ID,Language_ID,Translation)
-         $log_set .= ',(' . $player_row['ID'] . ",$oid,"
-                  . $row['Language_ID'] . ",'$translation')";
+         $log_set .= ',(' . $player_row['ID'] . ",$oid,$tlangID,'$translation')";
       }
    } //foreach translation phrases
 
