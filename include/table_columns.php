@@ -954,7 +954,7 @@ class Table
       if ( !$col_displayed )
          return '';
       if ( !$filter )
-         return TD_EMPTY;
+         return '<td></td>';
       // now: $filter valid
 
       // prepare strings for toggle-filter (if filter existing for field)
@@ -993,7 +993,7 @@ class Table
       {
          if( $togglestr_show )
             return '<td class=ShowFilter>' . $togglestr_show. "</td>\n";
-         return TD_EMPTY;
+         return '<td></td>';
       }
 
       $this->Shown_Filters++;
@@ -1271,7 +1271,7 @@ class Table
          foreach( $this->ext_req_params as $rp )
          {
             $url_str .= $rp->get_url_parts();
-            if ( $url_str != '' and $add_sep )
+            if ( $url_str != '' && $add_sep )
                $url_str .= URI_AMP ;
          }
          $this->cache_curr_extparam[$add_sep] = $url_str;

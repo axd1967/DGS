@@ -75,7 +75,7 @@ class WhereClause
    /*! \internal */
    function make_operator( $operator )
    {
-      return ' ' . strtoupper($operator) . ' ';
+      return ' ' . strtoupper(trim($operator)) . ' ';
    }
 
    /*!

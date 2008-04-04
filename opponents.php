@@ -218,7 +218,7 @@ $ARR_DBFIELDKEYS = array(
 
    $uqsql = new QuerySQL( // base-query is to show only opponents
       SQLP_OPTS, 'DISTINCT',
-      SQLP_FROM, 'Games G' );
+      SQLP_FROM, 'Games AS G' );
    if ( ALLOW_SQL_UNION )
    {
       $uqsql->add_part( SQLP_UNION_WHERE,
@@ -239,7 +239,7 @@ $ARR_DBFIELDKEYS = array(
       "ROUND(100*P.Won/P.RatedGames) AS Percent",
       'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccess',
       'IFNULL(UNIX_TIMESTAMP(P.LastMove),0) AS Lastmove' );
-   $uqsql->add_part( SQLP_FROM, 'Players P' );
+   $uqsql->add_part( SQLP_FROM, 'Players AS P' );
    $uqsql->merge( $query_usfilter );
    $uqsql->merge( $query_ufilter );
    $query = $uqsql->get_select() . " ORDER BY $order $limit";
@@ -252,7 +252,7 @@ $ARR_DBFIELDKEYS = array(
       'SUM(IF(G.Handicap>0,1,0)) as cntHandicap',
       'MAX(G.Handicap) as maxHandicap',
       'SUM(IF(G.Score=0,1,0)) as cntJigo' );
-   $qsql->add_part( SQLP_FROM, 'Games G' );
+   $qsql->add_part( SQLP_FROM, 'Games AS G' );
    $qsql->merge ( $query_usfilter ); // clause-parts for filter
 
    if ( $opp )

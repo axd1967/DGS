@@ -124,7 +124,7 @@ require_once( "include/filter.php" );
       //'IFNULL(ROUND(100*Won/Finished),-0.01) AS Percent',
       'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccess',
       'IFNULL(UNIX_TIMESTAMP(P.LastMove),0) AS Lastmove' );
-   $qsql->add_part( SQLP_FROM, 'Players P' );
+   $qsql->add_part( SQLP_FROM, 'Players AS P' );
 
    if ( $observe_gid )
       $qsql->add_part( SQLP_FROM, "INNER JOIN Observers AS OB ON P.ID=OB.uid AND OB.gid=$observe_gid" );

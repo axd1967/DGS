@@ -608,7 +608,8 @@ class DateParser
       $this->origdate = $datestr;
       $this->rangetype = $rangetype;
       $this->errormsg = '';
-      $this->now = getdate();
+      global $NOW;
+      $this->now = getdate($NOW);
 
       if ( $this->parse($this->origdate) )
          $this->complete_date();

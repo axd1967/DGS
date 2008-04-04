@@ -2328,6 +2328,7 @@ class FilterCountry extends Filter
 class FilterDate extends Filter
 {
    /*! \brief Constructs Date-Filter. */
+   /* dbfield must be a SQL-date-field, not a UNIX_TIMESTAMP(SQL-date-field) */
    function FilterDate($name, $dbfield, $config)
    {
       static $_default_config = array( FC_SIZE => 16 );
@@ -2467,9 +2468,9 @@ define('FRDTU_DHM',   FRDTU_DAY | FRDTU_HOUR | FRDTU_MIN); // time-unit: day/hou
 $FRDTU_interval_sql = array(
    FRDTU_YEAR  => 'YEAR',
    FRDTU_MONTH => 'MONTH',
-   # no week-date-interval until mysql5 -> convert to days locally
+   # no week-date-interval until mysql5 -> convert to days
    #FRDTU_WEEK  => 'WEEK', # supported since mysql5.0.0
-   FRDTU_WEEK  => '*7 DAY',
+   FRDTU_WEEK  => '*7 DAY', //Note: need appropriate parenthesis in formulas
    FRDTU_DAY   => 'DAY',
    FRDTU_HOUR  => 'HOUR',
    FRDTU_MIN   => 'MINUTE',
@@ -2495,6 +2496,7 @@ class FilterRelativeDate extends Filter
    var $range_mode;
 
    /*! \brief Constructs RelativeDate-Filter. */
+   /* dbfield must be a SQL-date-field, not a UNIX_TIMESTAMP(SQL-date-field) */
    function FilterRelativeDate($name, $dbfield, $config)
    {
       static $_default_config = array( FC_SIZE => 4, FC_TIME_UNITS => FRDTU_ALL );
@@ -3146,6 +3148,7 @@ class FilterMysqlMatch extends Filter
    /*!
     * \brief Returns array with words to search for in mysql-match search-terms;
     * return null on error (errormsg set).
+    * elements are well-formed for a (p)reg_exp using '/' as delimiter
     * \internal
     */
    function extract_match_terms( $terms )
@@ -3162,7 +3165,7 @@ class FilterMysqlMatch extends Filter
          return null;
       }
 
-      // remove special chars
+      // remove the regex special chars (including the '/' delimiter)
       // note (regex-chars): . \ + * ? [ ^ ] $ ( ) { } = ! < > | :
       $wordchars = "\\w'"; // chars building a mysql-match-word
       $arr = array();
@@ -3173,7 +3176,7 @@ class FilterMysqlMatch extends Filter
          {
             if ( $token->get_flags() & TOKFLAG_QUOTED ) // quoted-text "text"
             {
-               $val = preg_quote( $token->get_token(), '/' );
+               $val = preg_quote( $token->get_token(), '/' ); //regex delimiter
                $val = preg_replace( "/\\s+/", "\\s+", $val );
             }
             else // unquoted-text
@@ -3579,7 +3582,7 @@ class FilterCheckboxArray extends Filter
 
       if ( count($cols) > 0 )
       {
-         $cols = array_pad( $cols, $this->get_config(FC_SIZE), TD_EMPTY );
+         $cols = array_pad( $cols, $this->get_config(FC_SIZE), '<td></td>');
          array_push( $rows, implode( '', $cols ) );
       }
 
