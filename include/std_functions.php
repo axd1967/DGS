@@ -364,9 +364,8 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    if( $no_cache )
       disable_cache($last_modified_stamp);
 
-   ob_start("ob_gzhandler");
    global $ThePage;
-   if( !isset($ThePage) ) //!is_a($ThePage, 'HTMLPage') )
+   if( !is_a($ThePage, 'HTMLPage') )
       ob_start('ob_gzhandler');
 
    if( empty($encoding_used) )
@@ -412,20 +411,13 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    if( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
 
-   if( isset($ThePage) ) //is_a($ThePage, 'HTMLPage') )
+   if( is_a($ThePage, 'HTMLPage') )
       $tmp = $ThePage->getCSSclass(); //may be multiple, i.e. 'Games Running'
    else
       $tmp='';
    if( $tmp )
       $tmp = ' class='.attb_quote($tmp);
    echo "\n</HEAD>\n<BODY id=\"$FRIENDLY_SHORT_NAME\"$tmp>\n";
-   if( 1|| (@$player_row['admin_level'] & ADMIN_DEVELOPER) )
-   {
-      echo '<div class=DebugInfo>isset'.((string)(int)isset($ThePage));
-      echo '<br>is_ah'.((string)(int)is_a($ThePage, 'HTMLPage'));
-      echo '<br>is_ap'.((string)(int)is_a($ThePage, 'Page'));
-      echo '</div>';
-   }
 }
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,
