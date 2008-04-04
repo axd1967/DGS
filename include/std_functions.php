@@ -34,6 +34,8 @@ if (!isset($page_microtime))
    $printable = (bool)@$_REQUEST['printable'];
 }
 
+require_once( "include/page_functions.php" );
+
 require_once( "include/translation_functions.php" );
 
 
@@ -65,7 +67,6 @@ $DEBUG_SQL = false; // for debugging filter showing where-clause on page
 define('LAYOUT_FILTER_IN_TABLEHEAD', true); // default is to show filters within tablehead (not below rows)
 define('LAYOUT_FILTER_EXTFORM_HEAD', true); // default is to show external-filter-form above filter-table
 
-define('TD_EMPTY', "<td></td>");
 
 //----- { layout : change in dragon.css too!
 $bg_color='"#f7f5e3"';
@@ -364,6 +365,9 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       disable_cache($last_modified_stamp);
 
    ob_start("ob_gzhandler");
+   global $ThePage;
+   if( !is_a($ThePage, 'HTMLPage') )
+      ob_start("ob_gzhandler");
 
    if( empty($encoding_used) )
       $encoding_used = LANG_DEF_CHARSET;
@@ -408,8 +412,10 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    if( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
 
-   global $ThePage;
-   $tmp = @$ThePage['class']; //may be multiple, i.e. 'Games Running'
+   if( is_a($ThePage, 'HTMLPage') )
+      $tmp = $ThePage->getCSSclass(); //may be multiple, i.e. 'Games Running'
+   else
+      $tmp='';
    if( $tmp )
       $tmp = ' class='.attb_quote($tmp);
    echo "\n</HEAD>\n<BODY id=\"$FRIENDLY_SHORT_NAME\"$tmp>\n";
@@ -912,6 +918,12 @@ function generate_random_password()
    return $return;
 }
 
+/* TODO:
+ An email address validity function should never be treated as definitive.
+ In more simple terms, if a user-supplied email address fails a validity check,
+  don't tell the users the email address they entered is invalid
+  but just force them to enter something different.
+*/
 function verify_email( $debugmsg, $email)
 {
    //RFC 2822 - 3.4.1. Addr-spec specification
@@ -919,7 +931,7 @@ function verify_email( $debugmsg, $email)
    //$regexp = "^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,4}$";
    $regexp = "^([-_a-z0-9]+)(\.[-_a-z0-9]+)*@([-a-z0-9]+)(\.[-a-z0-9]+)*(\.[a-z]{2,4})$";
    $res= eregi($regexp, $email);
-   if( $debugmsg !== false && !$res )
+   if( is_string($debugmsg) && !$res )
       error('bad_mail_address', "$debugmsg=$email");
    return $res;
 }
@@ -996,7 +1008,7 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
    else
       $res= false;
 
-   if( $debugmsg !== false && !$res )
+   if( is_string($debugmsg) && !$res )
       error('mail_failure', "$debugmsg=$email - $subject");
    return $res;
 }
@@ -1019,7 +1031,8 @@ function send_message( $debugmsg, $text='', $subject=''
 {
    global $NOW;
 
-   $debugmsg.= '.send_message';
+   if( is_string($debugmsg) )
+      $debugmsg.= '.send_message';
 
    $text = mysql_addslashes(trim($text));
    $subject = mysql_addslashes(trim($subject));

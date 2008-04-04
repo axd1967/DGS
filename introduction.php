@@ -20,13 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Start";
 
 require_once( "include/std_functions.php" );
+$ThePage = new Page('Intro');
 
 {
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
 
-   $ThePage['class']= 'Intro'; //temporary solution to CSS problem
    start_page(T_('Introduction'), true, $logged_in, $player_row );
 
    section( 'Intro', T_('Introduction to Dragon'));

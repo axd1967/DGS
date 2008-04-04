@@ -24,6 +24,7 @@ require_once( "include/rating.php" );
 require_once( 'include/table_infos.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/message_functions.php" );
+$ThePage = new Page('Status');
 
 {
    connect2mysql();
@@ -51,7 +52,6 @@ require_once( "include/message_functions.php" );
    $gtable->use_show_rows(false);
    $gtable->add_or_del_column();
 
-   $ThePage['class']= 'Status'; //temporary solution to CSS problem
    start_page(T_('Status'), true, $logged_in, $player_row,
                $gtable->button_style($player_row['Button']) );
 
@@ -139,7 +139,8 @@ require_once( "include/message_functions.php" );
    $query = "SELECT Games.*, UNIX_TIMESTAMP(Games.Lastchanged) AS Time, " .
       "IF(Rated='N','N','Y') as Rated, " .
       "opponent.Name, opponent.Handle, opponent.Rating2 AS Rating, opponent.ID AS pid, " .
-         //extra bits of Color are for sorting purposes
+      //extra bits of Color are for sorting purposes
+      //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
       "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color, " .
       "Clock.Ticks " . //always my clock because always my turn (status page)
       "FROM (Games,Players AS opponent) " .

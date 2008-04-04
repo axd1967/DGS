@@ -21,6 +21,7 @@ $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
+$ThePage = new Page('Admin');
 
 {
    connect2mysql();
@@ -34,7 +35,6 @@ require_once( "include/form_functions.php" );
    if( !$admin_level )
       error('adminlevel_too_low');
 
-   $ThePage['class']= 'Admin'; //temporary solution to CSS problem
    start_page(T_('Admin'), true, $logged_in, $player_row);
 
    section( 'Admin', T_('Administration'));

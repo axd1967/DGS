@@ -24,6 +24,7 @@ require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 require_once( "include/faq_functions.php" );
 require_once( "include/filter_parser.php" );
+$ThePage = new Page('FAQAdmin');
 
 
 $info_box = '<ul>
@@ -111,7 +112,6 @@ $info_box = '<ul>
 
    $show_list = true;
    $page = 'admin_faq.php';
-   $ThePage['class']= 'FAQAdmin'; //temporary solution to CSS problem
 
 
    // ***********        Move entry       ****************

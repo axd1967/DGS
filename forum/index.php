@@ -41,6 +41,7 @@ LastChanged: Time of the last post in the thread.
 $TranslateGroups[] = "Forum";
 
 require_once( "forum_functions.php" );
+$ThePage = new Page('ForumsList');
 
 {
    connect2mysql();

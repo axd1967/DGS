@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
+$ThePage = new Page('People');
 
 function add_contributor( $text=false, $uref='', $name=false, $handle=false, $extra='')
 {
@@ -66,7 +67,6 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
 
    $logged_in = who_is_logged( $player_row);
 
-   $ThePage['class']= 'People'; //temporary solution to CSS problem
    start_page(T_('People'), true, $logged_in, $player_row );
 
 
@@ -98,6 +98,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       $FAQexclude = array();
    else
       $FAQexclude = array( 'ejlo', 'rodival');
+   //$FAQmain = 'Ingmar';
    $FAQmain = 'jug';
    $FAQmainID = 0;
 

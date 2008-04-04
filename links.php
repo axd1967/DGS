@@ -20,13 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
+$ThePage = new Page('Links');
 
 {
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
 
-   $ThePage['class']= 'Links'; //temporary solution to CSS problem
    start_page(T_('Links'), true, $logged_in, $player_row
       , "a.blue:visited{color:purple;}" );
 

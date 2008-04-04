@@ -23,6 +23,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/filter_functions.php" );
 require_once( "include/make_translationfiles.php" );
+$ThePage = new Page('Translate');
 
 define('ALLOW_PROFIL_CHARSET', 1); //allow the admins to overwrite the page encoding
 define('TRANSL_ALLOW_FILTER', 1); //allow a search on the english phrases
@@ -234,7 +235,6 @@ if(0){//old
 
    $tabindex= 1;
 
-   $ThePage['class']= 'Translate'; //temporary solution to CSS problem
    start_page('Translate', true, $logged_in, $player_row);
    $str = 'Read this before translating';
    if( (bool)@$_REQUEST['infos'] )

@@ -52,6 +52,18 @@ Changelog
    * include/config.php:
    - set the default password encryption to SHA1
 
+   * include/page_functions.php, include/std_functions.php (start_html),
+     admin_faq.php, admin.php, userinfo.php, translate.php, status.php,
+     snapshot.php, site_map.php, people.php, news.php, links.php,
+     introduction.php, docs.php, show_games.php,
+     forum/index.php, forum/admin.php:
+   - introducing the pages classes. Right now, it mainly helps the CSS stuff
+     and solves some E_WARNING messages disturbing the header() outputs
+     (more to come)
+   - removing all the (old and temporary) "$ThePage['class']=..." lines
+   - replacing them with the new "$ThePage = new Page(...)"
+   - the start_html() is adjusted handle the presence of this new class
+
 2008-03-17 rodival
 
    * include/form_functions.php (create_form_string,

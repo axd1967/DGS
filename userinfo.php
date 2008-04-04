@@ -24,6 +24,7 @@ require_once( 'include/table_infos.php' );
 require_once( "include/rating.php" );
 require_once( "include/countries.php" );
 require_once( "include/contacts.php" );
+$ThePage = new Page('UserInfo');
 
 {
    connect2mysql();

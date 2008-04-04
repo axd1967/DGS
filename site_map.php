@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
+$ThePage = new Page('SiteMap');
 
 
 function item($text, $link='', $working=true, $last=false)
@@ -65,7 +66,6 @@ function item($text, $link='', $working=true, $last=false)
 
    $logged_in = who_is_logged( $player_row);
 
-   $ThePage['class']= 'SiteMap'; //temporary solution to CSS problem
    start_page(T_('Site map'), true, $logged_in, $player_row );
 
    if( !$logged_in )

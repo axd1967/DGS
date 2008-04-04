@@ -20,12 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
+$ThePage = new Page('News');
 
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
 
-   $ThePage['class']= 'News'; //temporary solution to CSS problem
    start_page('DragonGoServer NEWS', true, $logged_in, $player_row );
 
    section( 'News', T_('DragonGoServer NEWS'));

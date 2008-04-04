@@ -21,6 +21,7 @@ $TranslateGroups[] = "Forum";
 
 require_once( "forum_functions.php" );
 require_once( "../include/faq_functions.php" ); //for TD_button()
+$ThePage = new Page('ForumAdmin');
 
 {
    connect2mysql();
@@ -38,7 +39,6 @@ require_once( "../include/faq_functions.php" ); //for TD_button()
    $show_list = true;
    $page = 'admin.php';
    $abspage = 'forum/'.$page;
-   $ThePage['class']= 'ForumAdmin'; //temporary solution to CSS problem
 
 
    // ***********        Move entry       ****************
