@@ -49,6 +49,9 @@ Changelog
    - enhance the password recovery: SHA1 instead of SHA and add versioncmp()
    - add a retry feature for the database connection in connect2mysql()
 
+   * include/config.php:
+   - set the default password encryption to SHA1
+
 2008-03-17 rodival
 
    * include/form_functions.php (create_form_string,
