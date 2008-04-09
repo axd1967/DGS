@@ -164,8 +164,8 @@ function item($text, $link='', $working=true, $last=false)
       { $item_level++;
          item(T_('Thread list'), "forum/list.php", false);
          { $item_level++;
-            item(T_('Read forum'), "forum/read.php", false);
-            item(T_('New topic'), "forum/post.php", false, true);
+            item(T_('Read forum'), "forum/read.php", false); //?forum=fid&thread=tid
+            item(T_('New topic'), "forum/read.php", false, true); //?forum=fid without threadid
          } $item_level--;
          item(T_('Search forums'), "forum/search.php", true, true);
       } $item_level--;
@@ -188,7 +188,7 @@ function item($text, $link='', $working=true, $last=false)
    } $item_level--;
 
    echo "</table>\n";
-   echo T_('The black links require an argument to work, so they are not usable.');
+   echo T_('The black links require an argument to work, so they are not usable here.');
 
    end_page();
 }

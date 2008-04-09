@@ -30,6 +30,16 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-04-09 rodival
+
+   * site_map.php:
+   - fix an unvalide link
+
+   * error.php:
+   - better handling (Errorlog recording) of the htaccess errors
+   - temporary hide an unsolved DGS problem (numerous 404 on /favicon.ico
+     and /phorum/post.php)... waiting better
+
 2008-04-04 rodival
 
    * include/filter.php, include/filter_parser.php,

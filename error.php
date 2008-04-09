@@ -17,23 +17,13 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 $TranslateGroups[] = "Error";
 
 require_once( "include/std_functions.php" );
 
 
 {
-   $err = get_request_arg('err');
-   $redir = get_request_arg('redir');
-   if( $redir /* && @$_SERVER['REDIRECT_STATUS'] == 401 */ )
-   {
-      error( $err, "$redir ".@$_SERVER['REDIRECT_STATUS']
-                 .': '.@$_SERVER['REDIRECT_URL']
-                 .': '.@$_SERVER['REDIRECT_ERROR_NOTES']
-                 .': '.getcwd());
-      //exit;
-   }
-
    connect2mysql(true);
    if( $dbcnx )
    {
@@ -47,6 +37,46 @@ require_once( "include/std_functions.php" );
       $logged_in = false;
       $player_row = NULL;
    }
+
+   $err = get_request_arg('err');
+
+/*
+Within the .htaccess file of the server root:
+(where /DragonGoServer/ is $SUB_PATH)
+# 401: Authorization required (must be local URL)
+ErrorDocument 401 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
+# 403: Access denied
+ErrorDocument 403 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
+# 404: Not Found
+ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
+# 500: Server Error.
+*/
+
+   $redir = get_request_arg('redir');
+   if( $dbcnx && $redir /* && @$_SERVER['REDIRECT_STATUS'] != 401 */ )
+   { //need to be recorded
+      //temporary hide an unsolved DGS problem, waiting better:
+      if(!( @$_SERVER['REDIRECT_STATUS'] == 404
+            && in_array(
+               substr( @$_SERVER['REDIRECT_URL'], strlen($SUB_PATH)),
+               array('phorum/post.php','favicon.ico'))
+         ))
+      {
+         if( isset($player_row) && isset($player_row['Handle']) )
+            $handle = $player_row['Handle'];
+         else
+            $handle = safe_getcookie('handle');
+         $debugmsg= $redir  # htaccess
+            .' 1='.@$_SERVER['REDIRECT_STATUS']  # 404
+            .' 2='.@$_SERVER['REDIRECT_URL']  # /phorum/post.php (from domain root)
+            .' 3='.@$_SERVER['REDIRECT_ERROR_NOTES']  # /
+            .' 4='.@$_SERVER['HTTP_REFERER']
+            //.' 5='.getcwd()  # the root folder
+            ;
+         err_log( $handle, $err, $debugmsg);
+      }
+   }
+   db_close();
 
    start_page("Error", true, $logged_in, $player_row );
    echo '&nbsp;<br>';
@@ -222,7 +252,8 @@ require_once( "include/std_functions.php" );
 
       case('bad_mail_address'):
       {
-         echo T_("Sorry, the email given is not a valid address.");
+         //an email address validity function should never be treated as definitive
+         echo T_("Sorry, the email given does not seem to be a valid address. Please, verify your spelling or try another one.");
       }
       break;
 
@@ -626,14 +657,14 @@ require_once( "include/std_functions.php" );
       break;
    }
 
-   $mysqlerror = get_request_arg('mysqlerror'); //@$_GET['mysqlerror'];
+   $mysqlerror = get_request_arg('mysqlerror');
    if( $mysqlerror )
    {
       $mysqlerror = str_replace(
          array( $MYSQLHOST, $DB_NAME, $MYSQLUSER, $MYSQLPASSWORD),
          array( '[*h*]', '[*d*]', '[*u*]', '[*p*]'),
          $mysqlerror);
-      echo "<p>Mysql error: ".textarea_safe($mysqlerror)."</p>";
+      echo "<p>MySQL error: ".basic_safe($mysqlerror)."</p>";
    }
 
    echo '<p></p>';
