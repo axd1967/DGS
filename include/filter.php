@@ -387,8 +387,8 @@ class SearchFilter
    /*! \brief Parses vars from _REQUEST to update activity-state of filters (used for Table). */
    function add_or_del_filter()
    {
-      $act = (string) $this->get_arg(FFORM_TOGGLE_ACTION, false); // set if show-/hide-action needed
-      $fid = (string) $this->get_arg(FFORM_TOGGLE_FID, false); // if act set: >0=Nr for thead[Nr], 0=hide-all, -1=show-all
+      $act = (string) $this->get_arg(FFORM_TOGGLE_ACTION, true); // set if show-/hide-action needed
+      $fid = (string) $this->get_arg(FFORM_TOGGLE_FID, true); // if act set: >0=Nr for thead[Nr], 0=hide-all, -1=show-all
       if ( $act and (string)$fid != '' )
       {
          if ( $fid > 0 ) // show or hide single filter
