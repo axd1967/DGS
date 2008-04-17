@@ -21,10 +21,10 @@ $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
+require_once( "include/countries.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
-require_once( "include/countries.php" );
 require_once( "include/filter.php" );
 require_once( "include/contacts.php" );
 
@@ -42,6 +42,7 @@ require_once( "include/contacts.php" );
       error('not_allowed_for_guest');
 */
 
+   init_countries();
    //TODO: init in Contact-class
    Contact::load_globals();
 
@@ -192,7 +193,7 @@ require_once( "include/contacts.php" );
       if( $ctable->Is_Column_Displayed[3] )
       {
          $cntr = @$row['Country'];
-         $cntrn = T_(@$COUNTRIES[$cntr]);
+         $cntrn = basic_safe(@$COUNTRIES[$cntr]);
          $cntrn = (empty($cntr) ? '' :
              "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
          $crow_strings[3] = "<td>" . $cntrn . "</td>";

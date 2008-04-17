@@ -21,9 +21,9 @@ $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 require_once( "include/timezones.php" );
+require_once( "include/countries.php" );
 require_once( "include/rating.php" );
 require_once( "include/form_functions.php" );
-require_once( "include/countries.php" );
 
 // Reminder: to friendly reset the language:
 // http://www.dragongoserver.net/edit_profile.php?language=C
@@ -88,9 +88,7 @@ require_once( "include/countries.php" );
          $woodcolors[$i] = sptext($tmp,2);
    }
 
-   foreach( $COUNTRIES as $code => $country )
-      $COUNTRIES[$code] = T_($country);
-
+   init_countries();
    asort($COUNTRIES);
    array_unshift($COUNTRIES, '');
    

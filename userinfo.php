@@ -44,7 +44,7 @@ $ThePage = new Page('UserInfo');
    else
       $where = "ID=$my_id";
 
-   $result = mysql_query(
+   $row = mysql_single_fetch( 'userinfo.find',
       "SELECT *," .
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       "ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent, " .
@@ -55,20 +55,21 @@ $ThePage = new Page('UserInfo');
       "IFNULL(UNIX_TIMESTAMP(Registerdate),0) AS Registerdate, " .
       "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
       "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
-      "FROM Players WHERE $where" )
-      or error('mysql_query_failed', 'userinfo.find');
+      "FROM Players WHERE $where" );
 
-   if( mysql_affected_rows() != 1 )
-      error("unknown_user");
+   if( !$row )
+      error('unknown_user');
+   $uid = (int)$row['ID'];
 
-   $row = mysql_fetch_assoc( $result );
-   mysql_free_result($result);
-   $uid = $row['ID'];
+   $bio_result = db_query('userinfo.bio',
+      "SELECT * FROM Bio WHERE uid=$uid order by SortOrder, ID");
 
-   $bio_result = mysql_query("SELECT * FROM Bio WHERE uid=" . $uid
-               . " order by SortOrder, ID")
-      or error('mysql_query_failed', 'userinfo.bio');
+   $has_contact= Contact::has_contact($my_id, $uid);
 
+   //db_close(); //not yet: the bio may contain <user>-like tags
+
+
+   init_countries();
 
    $my_info = ( $my_id == $uid );
    $name_safe = make_html_safe($row['Name']);
@@ -96,7 +97,7 @@ $ThePage = new Page('UserInfo');
                         ? date($date_fmt2, $row['Lastmove']) : '' );
 
       $cntr = @$row['Country'];
-      $cntrn = T_(@$COUNTRIES[$cntr]);
+      $cntrn = basic_safe(@$COUNTRIES[$cntr]);
       $cntrn = (empty($cntr) ? '' :
                 "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
 
@@ -233,6 +234,7 @@ $ThePage = new Page('UserInfo');
       $itable->echo_table();
       unset($itable);
    }//Bio infos
+   db_close();
    mysql_free_result($bio_result);
 
 
@@ -267,9 +269,9 @@ $ThePage = new Page('UserInfo');
                 T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
                 T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid" );
 
-      if ( $my_id != $uid && $uid > 1 ) //exclude guest
+      if( $has_contact >= 0 )
       {
-         $cstr = ( Contact::has_contact($my_id, $uid) ) ? T_('Edit contact') : T_('Add contact');
+         $cstr = ( $has_contact ) ? T_('Edit contact') : T_('Add contact');
          $menu_array[$cstr] = "edit_contact.php?cid=$uid";
       }
    }

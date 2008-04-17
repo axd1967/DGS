@@ -21,10 +21,10 @@ $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
+require_once( "include/countries.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
-require_once( "include/countries.php" );
 require_once( "include/filter.php" );
 
 
@@ -64,8 +64,6 @@ $ARR_DBFIELDKEYS = array(
       $opp = 0;
       //error('invalid_opponent', "opponents.bad_opponent($opp)");
 
-   $page = "opponents.php?";
-
 
    // who are player (uid) and opponent (opp) ?
    $players = array(); // uid => ( Players.field => value )
@@ -80,11 +78,15 @@ $ARR_DBFIELDKEYS = array(
    while ( $row = mysql_fetch_assoc( $result ) )
       $players[ $row['ID'] ] = $row;
    mysql_free_result($result);
-   if ( !isset($players[$uid]) )
+
+   if( !isset($players[$uid]) )
       error('unknown_user', "opponents.load_user($uid)");
-   if ( $opp and !isset($players[$opp]) )
+   if( $opp && !isset($players[$opp]) )
       error('unknown_user', "opponents.load_opponent($opp)");
 
+
+   init_countries();
+   $page = "opponents.php?";
 
    // static filters
    $usfilter = new SearchFilter('s');
@@ -358,7 +360,7 @@ $ARR_DBFIELDKEYS = array(
       if( $utable->Is_Column_Displayed[16] )
       {
          $cntr = @$row['Country'];
-         $cntrn = T_(@$COUNTRIES[$cntr]);
+         $cntrn = basic_safe(@$COUNTRIES[$cntr]);
          $cntrn = (empty($cntr) ? '' :
              "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
          $urow_strings[16] = "<td>" . $cntrn . "</td>";
@@ -516,8 +518,8 @@ function print_players_table( $p, $uid, $opp )
    // Country
    $c1 = $p1['Country'];
    $c2 = ($p2 ? $p2['Country'] : '');
-   $cn1 = T_(@$COUNTRIES[$c1]);
-   $cn2 = T_(@$COUNTRIES[$c2]);
+   $cn1 = basic_safe(@$COUNTRIES[$c1]);
+   $cn2 = basic_safe(@$COUNTRIES[$c2]);
    $c1 = (empty($c1) ? '' : "<img title=\"$cn1\" alt=\"$cn1\" src=\"images/flags/$c1.gif\">");
    $c2 = (empty($c2) ? '' : "<img title=\"$cn2\" alt=\"$cn2\" src=\"images/flags/$c2.gif\">");
    $r .= sprintf( $rowpatt, T_('Country'),

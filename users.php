@@ -21,10 +21,10 @@ $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
+require_once( "include/countries.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
-require_once( "include/countries.php" );
 require_once( "include/filter.php" );
 
 {
@@ -38,6 +38,8 @@ require_once( "include/filter.php" );
 
    $uid = $player_row["ID"];
    //$user = $player_row["Handle"];
+
+   init_countries();
    $page = "users.php?";
 
    // observers of game
@@ -174,7 +176,7 @@ require_once( "include/filter.php" );
       if( $utable->Is_Column_Displayed[16] )
       {
          $cntr = @$row['Country'];
-         $cntrn = T_(@$COUNTRIES[$cntr]);
+         $cntrn = basic_safe(@$COUNTRIES[$cntr]);
          $cntrn = (empty($cntr) ? '' :
              "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
          $urow_strings[16] = "<td>" . $cntrn . "</td>";

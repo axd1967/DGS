@@ -21,11 +21,11 @@ $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
+require_once( "include/countries.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
-require_once( "include/countries.php" );
 require_once( "include/contacts.php" );
 
 {
@@ -35,7 +35,7 @@ require_once( "include/contacts.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
    //short descriptions for table
    $handi_array = array( 'conv'   => T_('Conventional'),
@@ -49,6 +49,8 @@ require_once( "include/contacts.php" );
          T_('Suitable') => new QuerySQL(SQLP_HAVING, 'haverating') );
    foreach( $handi_array as $fval => $fkey )
       $handi_filter_array[$fkey] = "Handicaptype='$fval'";
+
+   init_countries();
 
    $my_id = $player_row['ID'];
    $my_rating = $player_row['Rating2'];
@@ -239,7 +241,7 @@ require_once( "include/contacts.php" );
          if( $wrtable->Is_Column_Displayed[15] )
          {
             $cntr = @$row['other_country'];
-            $cntrn = T_(@$COUNTRIES[$cntr]);
+            $cntrn = basic_safe(@$COUNTRIES[$cntr]);
             $cntrn = (empty($cntr) ? '' :
                "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
             $wrow_strings[15] = "<td>" . $cntrn . "</td>";

@@ -21,8 +21,6 @@ $TranslateGroups[] = "Common";
 
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
-require_once( "include/countries.php" );
-require_once( "include/rating.php" );
 require_once( "include/filter_functions.php" );
 require_once( "include/filter_parser.php" );
 
@@ -1745,7 +1743,7 @@ class Filter
     */
    function build_generic_selectbox_elem( $prefix, $name, $value, $index_start_keys, $values = null, $size = 1 )
    {
-      $fname = ($this->get_config(FC_FNAME)) ? $name : $prefix . $name;
+      $fname = ($this->get_config(FC_FNAME)) ? $name : ($prefix . $name);
       if ( !is_numeric($size) )
          $size = 1;
       $is_multi = $this->get_config(FC_MULTIPLE);

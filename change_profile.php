@@ -20,8 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
-require_once( "include/rating.php" );
 require_once( "include/countries.php" );
+require_once( "include/rating.php" );
 
 {
    disable_cache();
@@ -31,14 +31,14 @@ require_once( "include/countries.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   if( $player_row["Handle"] == "guest" )
-      error("not_allowed_for_guest");
+   if( $player_row['Handle'] == "guest" )
+      error('not_allowed_for_guest');
 
    $name = trim(get_request_arg('name')) ;
    if( strlen( $name ) < 1 )
-      error("name_not_given");
+      error('name_not_given');
 
    $email = trim(get_request_arg('email'));
    if( $email )
@@ -56,6 +56,8 @@ require_once( "include/countries.php" );
             $sendemail .= ',BOARD';
       }
    }
+
+   //init_countries(); //useless here
 
    $boardcoords = ( @$_GET['coordsleft'] ? COORD_LEFT : 0 )
                 + ( @$_GET['coordsup'] ? COORD_UP : 0 )
@@ -99,7 +101,7 @@ require_once( "include/countries.php" );
    if( isset($COUNTRIES[$country]) )
       $query .= "Country='" . mysql_addslashes($country) . "', ";
    else if( empty($country) )
-      $query .= "Country=NULL, ";
+      $query .= "Country='', ";
 
    if( @$_GET['locally'] == 1 )
    {
@@ -147,16 +149,17 @@ require_once( "include/countries.php" );
    }
 
 
-/* $_GET['language']: see also include_translate_group()
-   keeping them identical allow the sysmsg (see below, displayed in the next page)
-   to be translated in the right futur language ...
+/* Because $_REQUEST['language'] is chosen prior $player_row['Lang']
+   by include_translate_group(), this page use it for its translations
+   (see the sysmsg below, displayed in the next page)
+   This allow sysmsg to be translated in the right *futur* language ...
    ... and some debug with a temporary page translation via the URL.
 */
    $language = trim(get_request_arg('language'));
 
-   if( $language === 'C' or
-         ( $language === 'N' && @$player_row['Translator'] ) or
-         ( $language !== $player_row['Lang'] && language_exists( $language ) )
+   if( $language === 'C'
+      || ( $language === 'N' && @$player_row['Translator'] )
+      || ( $language !== $player_row['Lang'] && language_exists( $language ) )
      )
    {
        $query .= "Lang='" . $language . "', ";
@@ -170,8 +173,8 @@ require_once( "include/countries.php" );
    if( $player_row["RatingStatus"] != 'RATED'
       && (is_numeric($newrating) && $newrating >= MIN_RATING)
       && ( $ratingtype != 'dragonrating'
-         or !(is_numeric($oldrating) && $oldrating >= MIN_RATING)
-         or abs($newrating - $oldrating) > 0.005 ) )
+         || !(is_numeric($oldrating) && $oldrating >= MIN_RATING)
+         || abs($newrating - $oldrating) > 0.005 ) )
    {
       $query .= "Rating=$newrating, " .
          "InitialRating=$newrating, " .
@@ -201,6 +204,6 @@ require_once( "include/countries.php" );
 
    $msg = urlencode(T_('Profile updated!'));
 
-   jump_to("userinfo.php?uid=" . $player_row["ID"] .URI_AMP."sysmsg=$msg");
+   jump_to("userinfo.php?uid=" . $player_row['ID'] .URI_AMP."sysmsg=$msg");
 }
 ?>
