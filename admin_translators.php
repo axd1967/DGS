@@ -52,6 +52,8 @@ require_once( "include/form_functions.php" );
   or servers. The main problem is with get_preferred_browser_language().
 
  More readings:
+    Available language codes:
+     http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
     W3C languages, charsets and encodings index:
      http://www.w3.org/International/resource-index
     Language tags in XTML (XML meta-tags code)
@@ -177,11 +179,8 @@ require_once( "include/form_functions.php" );
   /* Define the full set of languages of the user */
    $translator_form->add_row( array(
       'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
-//Warning: These chars must not be a part of a URI query. From RFC 2396 unwise
-//      unwise = "{" | "}" | "|" | "\" | "^" | "[" | "]" | "`"
-//   Here, transllang[] force a FORM_POST method. (or, maybe, 'transllang%5b%5d')
-      'SELECTBOX', 'transllang[]', 7, //transllang[] is a MULTIPLE select box
-                  $langs, $transluser_langs, true,
+      //transllang[] is a MULTIPLE select box
+      'SELECTBOX', 'transllang', 7, $langs, $transluser_langs, true,
       ) );
    $translator_form->add_row( array(
       'SUBMITBUTTON', 'translpriv', T_('Set user privileges'),

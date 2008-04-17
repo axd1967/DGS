@@ -1266,14 +1266,14 @@ class Form
     *                     that should be selected from start else the value
     *                     of the selected value.
     * \param $multiple    If it should be possible to select more than one
-    *                     value.
+    *                     value. $name will be extended to "$name[]"
     */
-   function print_insert_select_box( $name, $size, $value_array, $selected, $multiple )
+   function print_insert_select_box( $name, $size, $value_array, $selected, $multiple=0 )
    {
-      $result = "<SELECT name=\"$name\" size=\"$size\" ";
-      if( $multiple )
-         $result .= "multiple";
-      $result .= $this->get_input_attbs() . ">\n";
+      $result = "<SELECT size=\"$size\" name=\"$name";
+      //[] works for either GET or POST forms (else try %5b%5d ?)
+      $result.= $multiple ? '[]" multiple' : '"';
+      $result.= $this->get_input_attbs() . ">\n";
 
       foreach( $value_array as $value => $info )
       {
