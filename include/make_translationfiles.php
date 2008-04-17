@@ -42,10 +42,15 @@ function make_known_languages() //must be called from main dir
       error("couldnt_open_transl_file", $Filename);
    }
 
+   $group= 'Common';
+   global $TranslateGroups, $known_languages;
+   $TranslateGroups[]= $group;
+   $known_languages = array();
+
    fwrite( $fd, "<?php\n\n"
-."\$TranslateGroups[] = \"Users\"; //local use\n"
+."\$TranslateGroups[] = \"$group\"; //local use\n"
 ."// The \$T_ are required for 'scripts/generate_translation_texts.php'.\n"
-."\$T_ = 'fnop';\n" //or 'trim'
+."\$T_ = 'fnop';\n" //or 'trim'... never translated in known_languages.php
 ."\n\$known_languages = array(\n" );
 
    $prev_lang = '';
@@ -63,6 +68,7 @@ function make_known_languages() //must be called from main dir
          fwrite( $fd, ( $first ? '' : " ),\n" ) .
                       "  '$browsercode' => array( '$charenc' => \$T_('$tmp')");
 
+      $known_languages[$browsercode][$charenc] = $row['Name']; //not translated here
       $prev_lang = $browsercode;
       $first = false;
    }
@@ -200,12 +206,7 @@ function translations_query( $translate_lang, $untranslated, $group
 
    if( $filter_en )
       $query .=
-/*
-         " AND LOWER(TranslationTexts.Text) LIKE '%"
-               .mysql_addslashes(strtolower($filter_en))."%'";
-/*/
          " AND TranslationTexts.Text LIKE '%".mysql_addslashes($filter_en)."%'";
-#*/
 
    if( $untranslated )
       $query .=
