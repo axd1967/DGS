@@ -26,8 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     only called by is_logged_in() ...
     so very soon.
 */
-if( file_exists( "translations/known_languages.php") )
-   include_once( "translations/known_languages.php" );
+if( !isset($known_languages) )
+   if( file_exists( "translations/known_languages.php") )
+      include_once( "translations/known_languages.php" );
 
 
 /* examples:
@@ -59,31 +60,35 @@ function T_($string)
    return preg_replace('%([^\\s])#[_0-9a-z]+$%i', '\\1', $string);
 }
 
+//if $player_row is absent, use the browser default settings
+//called by is_logged_in()
 function include_all_translate_groups($player_row=null) //must be called from main dir
 {
    global $TranslateGroups, $known_languages;
 
-   if( !file_exists( "translations/known_languages.php") )
-   {
-      require_once( "include/make_translationfiles.php" );
-      make_known_languages(); //must be called from main dir
-      make_include_files(); //must be called from main dir
-   }
-   include( "translations/known_languages.php"); //reload it, not fatal
+   if( !isset($known_languages) )
+      if( !file_exists( "translations/known_languages.php") )
+      {
+         require_once( "include/make_translationfiles.php" );
+         make_known_languages(); //must be called from main dir
+         //reload the globals, but already done by make_known_languages()
+         //include( "translations/known_languages.php");
+         make_include_files(); //must be called from main dir
+      }
 
    $TranslateGroups = array_unique($TranslateGroups);
 
-   foreach( $TranslateGroups as $i => $group )
-      include_translate_group($group, $player_row); //must be called from main dir
-}
-
-function include_translate_group($group, $player_row) //must be called from main dir
-{
-   $language = recover_language( $player_row);
-
+   $language = recover_language( $player_row); //must be called from main dir
    if( $language == 'N' )
       return;
 
+   foreach( $TranslateGroups as $group )
+      include_translate_group($group, $language); //must be called from main dir
+}
+
+//called by include_all_translate_groups()
+function include_translate_group($group, $language='') //must be called from main dir
+{
    global $Tr; //$Tr is modified by the include_once( $filename );
 
    //preload 'To#2' and 'From#2' if missing in the language
