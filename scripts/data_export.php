@@ -788,7 +788,7 @@ function dump_header( $database)
    $str.= "Generation Time: ".fdate( $NOW).chr(10);
    $str.= "Server version: ".@$_SERVER['SERVER_SOFTWARE'].chr(10);
    $str.= "PHP version: ".@phpversion().chr(10);
-   $str.= "MySQL version: ".MYSQL_VERSION.chr(10);
+   $str.= sprintf("MySQL version: %s (%s)",READ_MYSQL_VERSION,MYSQL_VERSION).chr(10);
    
    if( 0 && @$GLOBALS['Super_admin'] )
    {
@@ -1038,16 +1038,16 @@ function freesql_dump( $database, $query)
 
    if( $row=mysql_single_fetch( false, 'SELECT VERSION() AS version') )
    {
-      define('MYSQL_VERSION', $row['version']);
+      define('READ_MYSQL_VERSION', $row['version']);
 /*
-      $row = explode('.', MYSQL_VERSION);
-      define('MYSQL_VERSION_INT', (int)sprintf('%d%02d%02d'
+      $row = explode('.', READ_MYSQL_VERSION);
+      define('READ_MYSQL_VERSION_INT', (int)sprintf('%d%02d%02d'
                   , $row[0], $row[1], intval($row[2])));
 */
    } else {
-      define('MYSQL_VERSION', '3.23.32');
+      define('READ_MYSQL_VERSION', '3.23.32');
 /*
-      define('MYSQL_VERSION_INT', 32332);
+      define('READ_MYSQL_VERSION_INT', 32332);
 */
    }
 

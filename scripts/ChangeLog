@@ -79,6 +79,9 @@ Changelog
    * quick_status.php:
    - removed the profile language detection. no-translation => forced utf-8.
 
+   * scripts/data_export.php:
+   - changed MYSQL_VERSION to READ_MYSQL_VERSION
+
 2008-04-16 rodival
 
    * include/filter.php (add_or_del_filter):
