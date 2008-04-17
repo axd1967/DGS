@@ -285,8 +285,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       "Byoperiods=" . $game_info_row["Byoperiods"] . ", " .
       "Black_Maintime=" . $game_info_row["Maintime"] . ", " .
       "White_Maintime=" . $game_info_row["Maintime"] . ", " .
-      ($rating_black >= MIN_RATING ? "Black_Start_Rating=$rating_black, " : '' ) .
-      ($rating_white >= MIN_RATING ? "White_Start_Rating=$rating_white, " : '' ) .
+      ($black_rated ? "Black_Start_Rating=$rating_black, " : '' ) .
+      ($white_rated ? "White_Start_Rating=$rating_white, " : '' ) .
       "WeekendClock='" . $game_info_row["WeekendClock"] . "', " .
       "StdHandicap='$stdhandicap', " .
       "Rated='" . $game_info_row["Rated"] . "'";

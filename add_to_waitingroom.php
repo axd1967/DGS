@@ -22,6 +22,7 @@ $TranslateGroups[] = "Game";
 require_once( "include/std_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/rating.php" );
+//Useless: $ThePage = new Page('...');
 
 {
    disable_cache();
@@ -31,7 +32,7 @@ require_once( "include/rating.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
    if( $player_row["Handle"] == 'guest' )
       error('not_allowed_for_guest');
@@ -86,10 +87,10 @@ require_once( "include/rating.php" );
    }
 
    if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )
-      error("komi_range");
+      error('komi_range');
 
    if( !($handicap <= MAX_HANDICAP and $handicap >= 0) )
-      error("handicap_range");
+      error('handicap_range');
 
    $nrGames = max( 1, (int)@$_POST['nrGames']);
 
@@ -132,16 +133,20 @@ require_once( "include/rating.php" );
    if( ($weekendclock=@$_POST['weekendclock']) != 'Y' )
       $weekendclock = 'N';
 
-   if( ($MustBeRated=@$_POST['must_be_rated']) != 'Y' )
+   if( @$_POST['must_be_rated'] != 'Y' )
    {
       $MustBeRated = 'N';
       //to keep a good column sorting:
-      $rating1 = $rating2 = read_rating('99 kyu', 'dragonrating');
+      $rating1 = $rating2 = OUT_OF_RATING;
    }
    else
    {
-      $rating1 = read_rating(@$_POST['rating1'], 'dragonrating');
-      $rating2 = read_rating(@$_POST['rating2'], 'dragonrating');
+      $MustBeRated = 'Y';
+      $rating1 = read_rating(@$_POST['rating1']);
+      $rating2 = read_rating(@$_POST['rating2']);
+
+      if( $rating1 == -OUT_OF_RATING || $rating2 == -OUT_OF_RATING )
+         error('rank_not_rating');
 
       if( $rating2 < $rating1 )
       {
@@ -172,8 +177,8 @@ require_once( "include/rating.php" );
       "Ratingmax=$rating2, " .
       "Comment=\"" . mysql_addslashes(trim(get_request_arg('comment'))) . "\"";
 
-   mysql_query( $query )
-     or error('mysql_query_failed','add_to_waitingroom.insert');
+   db_query( 'add_to_waitingroom.insert', $query );
+   db_close();
 
    $msg = urlencode(T_('Game added!'));
 
