@@ -261,14 +261,20 @@ class Contact
 
    // ---------- Static Class functions ----------------------------
 
-   /*! \brief Static function returning true, if there is a defined contact for specified user. */
+   /*! \brief Static function returning
+    *   1: $cid is a defined contact of $uid.
+    *   0: $cid is not yet a contact of $uid, but he may become.
+    *  -1: $cid and $uid can't have contacts.
+    */
    function has_contact( $uid, $cid )
    {
-      $result = mysql_query("SELECT cid FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1")
-         or error('mysql_query_failed','contact.has_contact');
+      if ( $uid == $cid || $cid <= 1 || $uid <= 1 ) //exclude guest
+         return -1;
+      $result = db_query( 'contact.has_contact',
+         "SELECT cid FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
       if( !$result )
-         return false;
-      $res = ( @mysql_num_rows($result) > 0 );
+         return 0;
+      $res = (int)( @mysql_num_rows($result) > 0 );
       mysql_free_result($result);
       return $res;
    }
