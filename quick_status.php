@@ -22,6 +22,10 @@ require_once( "include/connect2mysql.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
+//force $language_used and $encoding_used
+//see also recover_language() for regular recovery of $encoding_used
+$encoding_used = 'utf-8'; //LANG_DEF_CHARSET;
+$language_used = 'en'.LANG_CHARSET_CHAR.$encoding_used; //lowercase
 
 function slashed($string)
 {
@@ -33,10 +37,6 @@ function loc_start_page()
 {
    global $encoding_used, $NOW;
    ob_start("ob_gzhandler");
-
-   //see also include_translate_group() for regular recovery of $encoding_used
-   if( empty($encoding_used) )
-      $encoding_used = 'utf-8'; //LANG_DEF_CHARSET;
 
    header('Content-Type: text/plain;charset='.$encoding_used);
    // this one open the text/plain in the browser by default
@@ -60,7 +60,7 @@ function loc_end_page()
 
 if( $is_down )
 {
-   recover_language(); //set $language_used and $encoding_used
+   //recover_language(); //set $language_used and $encoding_used
    loc_start_page();
    warning($is_down_message);
 }
@@ -104,7 +104,7 @@ else
    {
       error('unknown_user','quick_status.find_player');
    }
-   recover_language( $player_row); //set $language_used and $encoding_used
+   //recover_language( $player_row); //set $language_used and $encoding_used
    loc_start_page();
 
    //TODO: fever vault check
