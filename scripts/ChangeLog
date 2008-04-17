@@ -30,6 +30,55 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-04-17 rodival
+
+   * include/countries.php (init_countries), include/filter.php,
+     list_contacts.php, userinfo.php, users.php, waiting_room.php,
+     opponents.php, edit_profile.php, change_profile.php:
+   - modified the load of the $COUNTRIES array to have it translated
+     at once (and so, fixing untranslated country-filters).
+   - doing so, introduced the init_countries() to be used once the
+     translations are already loaded.
+   - removed the includes of countries.php and rating.php from
+     filter.php. Now, they must be included by the calling script
+     only when a "country" or "rating" column is used.
+
+   * include/rating.php (read_rating, rank_to_rating, convert_to_rating,
+     handicapfactor):
+   - removed some calls to error() in the rating-decoding functions
+     to avoid the rating-filters to rise a nasty jump_to error.php,
+     returning instead the -OUT_OF_RATING value.
+   - adjusted accordingly some other functions
+   - introduced the handicapfactor() function to centralize this shared
+     part of some calculus
+
+   * include/make_game.php, add_to_waitingroom.php:
+   - minor adjustement around ratings
+
+   * include/contacts.php (has_contact), userinfo.php:
+   - slightly modified the return value of has_contact() to include
+     the case where the 2 users can't have contacts.
+
+   * include/translation_functions.php (include_all_translate_groups,
+     include_translate_group), include/quick_common.php
+     (get_preferred_browser_language, recover_language),
+     include/make_translationfiles.php (make_known_languages):
+   - adjusted the including/reconstruction of known_languages.php
+     to try to avoid some of its loads
+     (nearly loaded twice as needed, from the APC stats)
+   - allowed the 'N'=Native pseudo-language to be selected from the
+     browser settings.
+   - changed the $TranslateGroups of known_languages.php to "Common"
+     to avoid to load the "Users" group when not needed
+
+   * include/form_functions.php (print_insert_select_box),
+     admin_translators.php:
+   - changed the behaviour of the 'SELECTBOX' operator of the form build.
+     When multiple is enabled the right "[]" is appended to the name.
+
+   * quick_status.php:
+   - removed the profile language detection. no-translation => forced utf-8.
+
 2008-04-16 rodival
 
    * include/filter.php (add_or_del_filter):
