@@ -938,6 +938,10 @@ table.Table td.Button {
 /* endfor */
 }
 
+table.Table tr.Filter td.Button {
+   background-image: none;
+}
+
 table.Table a.Button {
    display: block;
    margin: 0px;
