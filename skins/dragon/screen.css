@@ -307,6 +307,10 @@ p.SysMsg {
    font-weight: normal;
 }
 
+span.FormWarning {
+   color: red;
+}
+
 .DebugInfoBox {
    width: auto;
    height: auto;
@@ -788,6 +792,16 @@ table.Table tr.Filter input {
    margin-right: 0px;
 }
 
+table.Table tr.Filter td.Number div {
+   text-align: right; /* left */
+}
+
+table.Table tr.Filter td.Number select
+table.Table tr.Filter td.Number input {
+   margin-left: auto;
+   margin-right: 0px;
+}
+
 table.Table tr.Filter td.Error {
    background: #dd0080; /* #ff0066 #ddb0b0=#ffcccc*86% #dd4080 */
 }
@@ -799,6 +813,7 @@ table.Table td.ErrMsg em {
    font-weight: normal;
 }
 
+table.Table tr.Filter td.ShowFilter a,
 table.Table tr.Filter td.ShowFilter { /* hidden filter cell */
    color: blue;
    text-align: center;
@@ -853,6 +868,28 @@ table.Table tr.Row2 td.Warning {
 /*
  special cells of various list-tables
 */
+
+table.Table td.Sgf a {
+   color: #d50047;
+}
+
+/* table.Table td.ID, */
+table.Table td.Number {
+   text-align: right; /* left */
+}
+
+table.Table td.Image {
+   text-align: center;
+}
+
+table.Table td.MsgDir {
+   text-align: right;
+}
+
+table.Table td.Enum {
+   text-align: left;
+   font-size: smaller;
+}
 
 table.Table td.Mark {
    text-align: center;
@@ -1709,6 +1746,31 @@ table.Goban img {
 */
 }
 
+/* infos on action, just below the board */
+dl.ExtraInfos {
+   margin: 0px;
+   padding: 0px;
+   text-align: center;
+}
+
+dl.ExtraInfos dd {
+   margin: 0px;
+   padding: 0px;
+   text-align: center;
+}
+
+dl.ExtraInfos dd.Guidance,
+dl.ExtraInfos dd.Info {
+   color: green;
+}
+
+dl.ExtraInfos dd.Score {
+   color: blue;
+}
+
+dl.ExtraInfos dd.Important {
+   color: red;
+}
 
 table.Captures {
    background: #f7f5ff;
@@ -1860,6 +1922,7 @@ table.GameInfos tr.BoardInfos {
    border-width: 1px 0px 0px 0px;
 }
 
+/*
 div.BoardInfos {
    border: 0px solid red;
    margin: 0px 0px 0px 0px;
@@ -1867,6 +1930,7 @@ div.BoardInfos {
    text-align: left;
    color: green;
 }
+*/
 
 div.BoardInfos dl {
    border: 0px solid green;
@@ -1879,6 +1943,7 @@ div.BoardInfos dd {
    margin: 0px 0px;
    padding: 0px;
    text-align: left;
+   color: green;
 }
 
 
@@ -2395,7 +2460,6 @@ table.EditProfilButtons td.button {
    text-align: center;
    vertical-align: middle;
 }
-
 
 /* ------------------------- */
 /* biographical infos */

@@ -147,6 +147,9 @@ $cookie_pref_rows = array(
 
 $vacation_min_days = 2;
 
+define('NO_VALUE', '---');
+define('UNKNOWN_VALUE', '???');
+
 define('INFO_HTML', 'cell'); //HTML parsing for texts like 'Rank info'
 define('SUBJECT_HTML', false); //HTML parsing for subjects of posts and messages
 

@@ -89,7 +89,7 @@ require_once( "include/contacts.php" );
    $cfilter->add_filter(10, 'RelativeDate', 'C.Created', true);
    $cfilter->add_filter(11, 'RelativeDate', 'C.Lastchanged', false);
    $cfilter->init(); // parse current value from _GET
-   $cfilter->set_accesskeys('x', 'e');
+   //$cfilter->set_accesskeys('x', 'z');
    $rx_term = implode('|', $filter_note->get_rx_terms() );
 
    $ctable = new Table( 'contact', $page, 'ContactColumns', 'contact' );
@@ -97,18 +97,18 @@ require_once( "include/contacts.php" );
    $ctable->set_default_sort( 'P.Name', 0);
    $ctable->add_or_del_column();
 
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $ctable->add_tablehead( 9, T_('Actions#header'), null, false, true); // static
-   $ctable->add_tablehead( 1, T_('Name#header'), 'P.Name');
-   $ctable->add_tablehead( 2, T_('Userid#header'), 'P.Handle', true, true); // static
-   $ctable->add_tablehead( 3, T_('Country#header'), 'P.Country');
-   $ctable->add_tablehead( 4, T_('Rating#header'), 'P.Rating2', true);
-   $ctable->add_tablehead( 5, T_('Last access#header'), 'P.Lastaccess', true);
-   $ctable->add_tablehead( 6, T_('System categories#header'));
-   $ctable->add_tablehead( 7, T_('User categories#header'));
-   $ctable->add_tablehead( 8, T_('Notes#header'), '', false, false);
-   $ctable->add_tablehead(10, T_('Created#header'), 'C.Created', true);
-   $ctable->add_tablehead(11, T_('Lastchanged#header'), 'C.Lastchanged', true);
+   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
+   $ctable->add_tablehead( 0, T_('Actions#header'), null, 0, 1, 'Image'); // static
+   $ctable->add_tablehead( 1, T_('Name#header'), 'P.Name', 0, 0, 'User');
+   $ctable->add_tablehead( 2, T_('Userid#header'), 'P.Handle', 0, 1, 'User'); // static
+   $ctable->add_tablehead( 3, T_('Country#header'), 'P.Country', 0, 0, 'Image');
+   $ctable->add_tablehead( 4, T_('Rating#header'), 'P.Rating2', 1, 0, 'Rating');
+   $ctable->add_tablehead( 5, T_('Last access#header'), 'P.Lastaccess', 1, 0, 'Date');
+   $ctable->add_tablehead( 6, T_('System categories#header'), 'C.SystemFlags', 0, 0, 'Enum');
+   $ctable->add_tablehead( 7, T_('User categories#header'), 'C.UserFlags', 0, 0, 'Enum');
+   $ctable->add_tablehead( 8, T_('Notes#header'), '', 0, 0);
+   $ctable->add_tablehead(10, T_('Created#header'), 'C.Created', 1, 0, 'Date');
+   $ctable->add_tablehead(11, T_('Modified#header'), 'C.Lastchanged', 1, 0, 'Date');
 
    // External-Search-Form
    $cform = new Form( 'contact', $page, FORM_GET, false);
@@ -143,11 +143,11 @@ require_once( "include/contacts.php" );
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
       'P.Name', 'P.Handle', 'P.Country', 'P.Rating2',
-      'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccess',
+      'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccessU',
       'C.cid', 'C.SystemFlags', 'C.UserFlags', 'C.Notes',
       'C.Created', 'C.Lastchanged',
-      'IFNULL(UNIX_TIMESTAMP(C.Created),0) AS created',
-      'IFNULL(UNIX_TIMESTAMP(C.Lastchanged),0) AS lastchanged' );
+      'IFNULL(UNIX_TIMESTAMP(C.Created),0) AS createdU',
+      'IFNULL(UNIX_TIMESTAMP(C.Lastchanged),0) AS lastchangedU' );
    $qsql->add_part( SQLP_FROM,
       'Contacts AS C',
       'INNER JOIN Players AS P ON C.cid = P.ID' );
@@ -184,49 +184,7 @@ require_once( "include/contacts.php" );
       $crow_strings = array();
       $cid = $row['cid'];
 
-      if( $ctable->Is_Column_Displayed[1] )
-         $crow_strings[1] = "<td><A href=\"userinfo.php?uid=$cid\">" .
-            make_html_safe($row['Name']) . "</A></td>";
-      if( $ctable->Is_Column_Displayed[2] )
-         $crow_strings[2] = "<td><A href=\"userinfo.php?uid=$cid\">" .
-            $row['Handle'] . "</A></td>";
-      if( $ctable->Is_Column_Displayed[3] )
-      {
-         $cntr = @$row['Country'];
-         $cntrn = basic_safe(@$COUNTRIES[$cntr]);
-         $cntrn = (empty($cntr) ? '' :
-             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
-         $crow_strings[3] = "<td>" . $cntrn . "</td>";
-      }
-      if( $ctable->Is_Column_Displayed[4] )
-         $crow_strings[4] = '<td>' . echo_rating(@$row['Rating2'],true,$cid) . '</td>';
-      if( $ctable->Is_Column_Displayed[5] )
-      {
-         $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
-         $crow_strings[5] = '<td>' . $lastaccess . '</td>';
-      }
-      if( $ctable->Is_Column_Displayed[6] )
-      {
-         $str = Contact::format_system_flags($row['SystemFlags'], ',<br>');
-         if ( $str == '' )
-            $str = '---';
-         $crow_strings[6] = "<td><font size=\"-1\">$str</font></td>";
-      }
-      if( $ctable->Is_Column_Displayed[7] )
-      {
-         $str = Contact::format_user_flags($row['UserFlags'], ',<br>');
-         if ( $str == '' )
-            $str = '---';
-         $crow_strings[7] = "<td><font size=\"-1\">$str</font></td>";
-      }
-      if( $ctable->Is_Column_Displayed[8] )
-      {
-         $note = make_html_safe( $row['Notes'], false, $rx_term);
-         //reduce multiple LF to one <br>
-         $note = preg_replace( "/(\r\n|\n|\r)+/", '<br>', $note );
-         $crow_strings[8] = "<td>$note</td>";
-      }
-      if( $ctable->Is_Column_Displayed[9] )
+      if( $ctable->Is_Column_Displayed[0] )
       {
          $links  = anchor( "message.php?mode=NewMessage".URI_AMP."uid=$cid",
                image( 'images/send.gif', 'M'),
@@ -240,17 +198,55 @@ require_once( "include/contacts.php" );
          $links .= anchor( "edit_contact.php?cid=$cid".URI_AMP."contact_delete=1",
                image( 'images/trashcan.gif', 'X'),
                T_('Remove contact'), 'class=ButIcon');
-         $crow_strings[9] = "<td>$links</td>";
+         $crow_strings[0] = $links;
+      }
+      if( $ctable->Is_Column_Displayed[1] )
+         $crow_strings[1] = "<A href=\"userinfo.php?uid=$cid\">" .
+            make_html_safe($row['Name']) . "</A>";
+      if( $ctable->Is_Column_Displayed[2] )
+         $crow_strings[2] = "<A href=\"userinfo.php?uid=$cid\">" .
+            $row['Handle'] . "</A>";
+      if( $ctable->Is_Column_Displayed[3] )
+      {
+         $cntr = @$row['Country'];
+         $cntrn = basic_safe(@$COUNTRIES[$cntr]);
+         $cntrn = (empty($cntr) ? '' :
+             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
+         $crow_strings[3] = $cntrn;
+      }
+      if( $ctable->Is_Column_Displayed[4] )
+         $crow_strings[4] = echo_rating(@$row['Rating2'],true,$cid);
+      if( $ctable->Is_Column_Displayed[5] )
+      {
+         $crow_strings[5] =
+            ($row['lastaccessU']>0 ? date($date_fmt2, $row['lastaccessU']) : '');
+      }
+      if( $ctable->Is_Column_Displayed[6] )
+      {
+         $str = Contact::format_system_flags($row['SystemFlags'], ',<br>');
+         $crow_strings[6] = ($str == '' ? NO_VALUE : $str);
+      }
+      if( $ctable->Is_Column_Displayed[7] )
+      {
+         $str = Contact::format_user_flags($row['UserFlags'], ',<br>');
+         $crow_strings[7] = ($str == '' ? NO_VALUE : $str);
+      }
+      if( $ctable->Is_Column_Displayed[8] )
+      {
+         $note = make_html_safe( $row['Notes'], false, $rx_term);
+         //reduce multiple LF to one <br>
+         $note = preg_replace( "/[\r\n]+/", '<br>', $note );
+         $crow_strings[8] = $note;
       }
       if( $ctable->Is_Column_Displayed[10] )
       {
-         $created = ($row['created'] > 0 ? date($date_fmt2, $row['created']) : NULL );
-         $crow_strings[10] = "<td>$created</td>";
+         $crow_strings[10] =
+            ($row['createdU']>0 ? date($date_fmt2, $row['createdU']) : '');
       }
       if( $ctable->Is_Column_Displayed[11] )
       {
-         $lastchanged = ($row['lastchanged'] > 0 ? date($date_fmt2, $row['lastchanged']) : NULL );
-         $crow_strings[11] = "<td>$lastchanged</td>";
+         $crow_strings[11] =
+            ($row['lastchangedU']>0 ? date($date_fmt2, $row['lastchangedU']) : '');
       }
 
       $ctable->add_row( $crow_strings );

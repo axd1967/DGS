@@ -89,13 +89,24 @@ class Table
    /*!
     * \brief Array describing all tableheads:
     *        [ Nr, Description, Sort_String, Desc_Default, Undeletable, attbs(Width) ]
+    * attbs is either:
+    * - an array of (attribut_name => attribut_value) for the column
+    * - a string supposed to be the class of the column
     */
    var $Tableheads;
 
    /*! \brief Array of rows to be diplayed.
     * Each row should consist of an array like this:
-    * array( $column_nr1 => "Rowstring1",
-    *        $column_nr2 => "Rowstring2" );
+    * array( $column_nr1 => $column_elem1,
+    *        $column_nr2 => $column_elem2 );
+    * Each $column_elem is either:
+    * - a string which will be the inner text of the cell
+    *   (this text will be enclosed by the appropriate <td...></td> tags)
+    * - an array with one or more of those named values:
+    *   'owntd' => the complete "<td...>text</td>" tag for the cell
+    *      (if 'owntd' is present, the rest of the array is ignored)
+    *   'text' => the inner text for the cell
+    *   'attbs' => the local attributs for the <td...>text</td> tag
     */
    var $Tablerows;
 
@@ -251,14 +262,23 @@ class Table
       $this->Use_Show_Rows = (bool)$use;
    }
 
-   /*! \brief Add a tablehead. */
+   /*! \brief Add a tablehead.
+    * param $attbs must be an array of attributs or a class-name for the column
+    */
    function add_tablehead( $nr,
                            $description,
-                           $sort_string = NULL,
+                           $sort_string = '',
                            $desc_default = false,
                            $undeletable = false,
-                           $attbs = NULL )
+                           $attbs = null )
    {
+      if( !is_array($attbs) )
+      {
+         if( is_string($attbs) )
+            $attbs= array( 'class' => $attbs);
+         else
+            $attbs= null;
+      }
       $this->Tableheads[$nr] =
          array( 'Nr' => $nr,
                 'Description' => $description,
@@ -275,8 +295,8 @@ class Table
    /*! \brief Check if column is displayed. */
    function is_column_displayed( $nr )
    {
-      return $this->Static_Columns or
-             $this->Tableheads[$nr]['Undeletable'] or
+      return $this->Static_Columns ||
+             $this->Tableheads[$nr]['Undeletable'] ||
              ( $nr < 1 ? 1 : (1 << ($nr-1)) & $this->Column_set );
    }
 
@@ -296,12 +316,12 @@ class Table
 
       $this->Shown_Columns = 0;
       $this->PrevColId = $this->Prefix.'TableHead';
-      $head_row = " <tr id=\"{$this->PrevColId}\" class=Head>\n";
+      $head_row = "\n <tr id=\"{$this->PrevColId}\" class=Head>";
       foreach( $this->Tableheads as $thead )
       {
          $head_row .= $this->make_tablehead( $thead );
       }
-      $head_row .= " </tr>\n";
+      $head_row .= "\n </tr>";
 
       /* Make filter row */
 
@@ -323,7 +343,7 @@ class Table
 
       /* Build the table */
 
-      $string = "<table id='{$this->Id}Table' class=Table>\n";
+      $string = "\n<table id='{$this->Id}Table' class=Table>";
       $string .= $this->make_next_prev_links('T');
       $string .= $head_row;
       if ( $this->ConfigFilters[FCONF_FILTER_TABLEHEAD] )
@@ -338,15 +358,15 @@ class Table
       }
       if( $table_rows )
          $string .= $this->make_next_prev_links('B');
-      $string .= "</table>\n";
+      $string .= "\n</table>\n";
 
       /* Add filter + column form, embedding main-table into table-form */
 
       // NOTE: avoid nested forms with other forms (because nested hiddens are not working)
 
-      if ( isset($this->ExternalForm) )
+      if( isset($this->ExternalForm) )
          $table_form = $this->ExternalForm; // read-only
-      else if ( $need_form or !$this->Static_Columns ) // need form for filter or add-column
+      else if( $need_form || !$this->Static_Columns ) // need form for filter or add-column
       {
          $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
             clean_url( $this->Page),
@@ -366,21 +386,20 @@ class Table
       // build form for Filter + AddColumn
       if ( isset($table_form) and is_null($this->ExternalForm) )
       {
-         $string = "\n"
-            . $table_form->print_start_default()
+         $string = $table_form->print_start_default()
             . $string // embed table
             . $table_form->print_end();
       }
       unset($table_form);
 
       return $string;
-   }
+   } //make_table
 
    /*! \brief Echo the string of the table. */
    function echo_table()
    {
       echo $this->make_table();
-   }
+   } //echo_table
 
    /*!
     * \brief Passes back filter_row per ref and return true, if form needed because of filters.
@@ -418,7 +437,7 @@ class Table
 
             if ( $errormessages != '' )
                $row_cells['Error'] =
-                  "<td class=ErrMsg colspan={$this->Shown_Columns}>$errormessages</td>";
+                  "\n  <td class=ErrMsg colspan={$this->Shown_Columns}>$errormessages</td>";
 
             $need_form = true;
          }
@@ -431,22 +450,30 @@ class Table
             {
                if( !$cells )
                   continue;
-               $filter_rows .= "<tr$tr_attbs class=$class>";
+               $filter_rows .= "\n <tr$tr_attbs class=\"$class\">";
                $filter_rows .= $cells;
-               $filter_rows .= "</tr>\n";
+               $filter_rows .= "\n </tr>";
                $tr_attbs = '';
             }
          }
       }
 
       return $need_form;
-   }
+   } //make_filter_row
 
    /*! \brief Return the attributs of a warning cellule. */
-   function warning_cell_attb( $title='')
+   function warning_cell_attb( $title='', $array=false)
    {
-      $str= ' class=Warning';
-      if( $title ) $str.= ' title=' . attb_quote($title);
+      if( $array )
+      {
+         $str= array('class' => 'Warning');
+         if( $title ) $str['title']= $title;
+      }
+      else
+      {
+         $str= ' class=Warning';
+         if( $title ) $str.= ' title=' . attb_quote($title);
+      }
       return $str;
    }
 
@@ -470,15 +497,11 @@ class Table
 
    /*!
     * \brief Return the cell part of a button with anchor.
-    * param $use_link if false, no link is included into the td-field (used for search-messages)
     */
-   function button_TD_anchor( $href, $text='', $use_link=true)
+   function button_TD_anchor( $href, $text='')
    {
-      //$text= (string)$text;
-      if ( $use_link )
-         return "<td class=Button><a class=Button href=\"$href\">$text</a></td>";
-      else
-         return "<td class=Center># $text</td>";
+      //return "\n  <td class=Button><a class=Button href=\"$href\">$text</a></td>";
+      return "<a class=Button href=\"$href\">$text</a>";
    }
 
    /*!
@@ -487,11 +510,11 @@ class Table
     */
    function button_TD_width_insert( $width=false)
    {
-      global $base_path, $button_width;
       //a stratagem to force a minimal column width.
       //must be changed when, a day, the CSS min-width
       // command will work fine with every browser.
       //dot.gif is a 1x1 transparent image.
+      global $base_path, $button_width;
       if( !is_numeric($width) )
          $width = $button_width;
       //the following "height=0" is useful for Avant browser, others are managed with CSS
@@ -777,7 +800,7 @@ class Table
       foreach( $this->Tableheads as $thead )
       {
          $nr = $thead['Nr'];
-         if ( $this->Is_Column_Displayed[$nr] ) $arr_displayed[$nr] = $thead['Description'];
+         if( $this->Is_Column_Displayed[$nr] ) $arr_displayed[$nr] = $thead['Description'];
       }
       return $arr_displayed;
    }
@@ -798,7 +821,7 @@ class Table
       $this->Shown_Columns++;
 
       $curColId = $this->Prefix.'Col'.$nr;
-      $string = "  <th id=\"$curColId\" scope=col";
+      $string = "\n  <th id=\"$curColId\" scope=col";
 
       $width = -1;
       if( isset($tablehead['attbs']) )
@@ -818,14 +841,6 @@ class Table
                $width = max($width, (int)$attbs['width']);
                unset( $attbs['width']);
             }
-         }
-         else
-         {
-            //TODO: remove this old way to force the width
-            //TODO: then review the whole attbs management
-            //$string .= " width=\"{$tablehead['attbs']}\"";
-            $width = max($width, (int)$attbs);
-            unset( $tablehead['attbs']);
          }
       }
       $string .= '><div>'; //<th> end bracket
@@ -932,7 +947,7 @@ class Table
          $string .= '<span class=Tool>' . $tool1.$tool2 . "</span>";
       }
 
-      $string .= "</div></th>\n";
+      $string .= "</div></th>";
 
       $this->PrevColId = $curColId;
       return $string;
@@ -954,7 +969,7 @@ class Table
       if ( !$col_displayed )
          return '';
       if ( !$filter )
-         return '<td></td>';
+         return "\n  <td></td>";
       // now: $filter valid
 
       // prepare strings for toggle-filter (if filter existing for field)
@@ -980,8 +995,8 @@ class Table
          $query = clean_url( $query);
          $fcolor_hide = ( $filter->errormsg() ) ? 'white' : 'red';
          $togglestr_show =
-            "<a href=\"$query\" title=" . attb_quote(T_('Show')) . '>' .
-            "<font color=\"blue\">" . CHAR_SHOWFILTER ."</font></a>";
+            "<a href=\"$query\" title=" . attb_quote(T_('Show')) . '>'
+            . CHAR_SHOWFILTER ."</a>";
          global $base_path;
          $togglestr_hide = image( $base_path.'images/remove.gif', 'x', '', 'class=Hide');
          $togglestr_hide = anchor( $query, $togglestr_hide, T_('Hide'));
@@ -992,21 +1007,25 @@ class Table
       if( !$filter->is_active() )
       {
          if( $togglestr_show )
-            return '<td class=ShowFilter>' . $togglestr_show. "</td>\n";
-         return '<td></td>';
+            return "\n  <td class=ShowFilter>$togglestr_show</td>";
+         return "\n  <td></td>";
       }
 
       $this->Shown_Filters++;
 
       // filter input-element
-      $result = '<td class='.( $filter->has_error() ? 'Error' : 'Filter' ).'><div>';
+      $class= trim(@$thead['attbs']['class']
+         . ( $filter->has_error() ? ' Error' : '' ));
+      if( $class )
+         $class= " class=\"$class\"";
+      $result = "\n  <td$class><div>";
       $result .= $filter->get_input_element( $this->Filters->Prefix, $thead );
       if( !$filter->is_static() )
          $result .= $togglestr_hide;
-      $result .= "</div></td>\n";
+      $result .= "</div></td>";
 
       return $result;
-   }
+   } //make_table_filter
 
 
    //{ N.B.: only used for folder transparency but CSS incompatible
@@ -1029,7 +1048,7 @@ class Table
          $rclass = $tablerow['class'];
       }
 
-      $string = " <tr class=$rclass";
+      $string = "\n <tr class=\"$rclass\"";
       if( ALLOW_JSCRIPT && !@$tablerow['noclick'] )
       { //onClick onmousedown ondblclick
          //$string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
@@ -1037,16 +1056,40 @@ class Table
       }
       $string.= ">";
 
-      foreach( $this->Tableheads as $th )
+      $colspan= 0;
+      foreach( $this->Tableheads as $thead )
       {
-         if( $this->Is_Column_Displayed[ $th['Nr'] ] )
+         $nr = $thead['Nr'];
+         if( $this->Is_Column_Displayed[$nr] && --$colspan<=0 )
          {
-            if( ($tmp=@$tablerow[ $th['Nr'] ]) )
-               $string .= "\n  ".$tmp;
+            $cell= @$tablerow[$nr];
+            if( is_array($cell) )
+            {
+               $text= (string)@$cell['owntd'];
+               if( $text )
+               {
+                  $string.= $text;
+                  continue;
+               }
+               $text= (string)@$cell['text'];
+               $attbs= @$cell['attbs'];
+               if( !is_array($attbs) )
+                  $attbs= array();
+            }
+            else
+            {
+               $text= (string)@$cell;
+               $attbs= array();
+            }
+            $colspan= $attbs['colspan']= max(1,@$attbs['colspan']);
+            $class= $attbs['class']= trim(@$thead['attbs']['class'].' '.@$attbs['class']);
+            if( !$class ) unset($attbs['class']);
+            $string.= "\n  <td".attb_build($attbs).">";
+            $string.= $text."</td>";
          }
       }
 
-      $string .= "\n </tr>\n";
+      $string .= "\n </tr>";
 
       return $string;
    }
@@ -1108,16 +1151,16 @@ class Table
       $span = floor($this->Shown_Columns/2);
       if( $span < 2 ) $span = $this->Shown_Columns;
       if( $span > 0 )
-         $string.= '  <td class=PagingL'
-           . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
+         $string.= "\n  <td class=PagingL"
+           . ($span>1 ? " colspan=$span" : '') . ">$button</td>";
 
       $span = $this->Shown_Columns - $span;
       if( $span > 0 )
-         $string.= '  <td class=PagingR'
-           . ($span>1 ? " colspan=$span" : '') . ">$button</td>\n";
+         $string.= "\n  <td class=PagingR"
+           . ($span>1 ? " colspan=$span" : '') . ">$button</td>";
 
       if( $string )
-         $string = " <tr class=Links$id>\n$string</tr>\n";
+         $string = "\n <tr class=Links$id>\n$string\n </tr>";
 
       return $string;
    }

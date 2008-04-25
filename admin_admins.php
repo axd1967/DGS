@@ -73,7 +73,7 @@ require_once( "include/table_columns.php" );
 
         $val = $player_level & (int)$admin_tasks[$type][0];
 
-        if( !($id > 0 or $id=='new') or !$val)
+        if( !($id > 0 || $id=='new') || !$val)
            error('bad_data');
 
         $Admin[$id] |= $val;
@@ -83,7 +83,7 @@ require_once( "include/table_columns.php" );
         error("admin_no_longer_admin_admin");
 
      $newadmin= get_request_arg('newadmin');
-     if( $Admin['new'] != 0 and !empty($newadmin))
+     if( $Admin['new'] != 0 && !empty($newadmin))
      {
         $result = mysql_query("SELECT ID,Adminlevel+0 AS admin_level FROM Players " .
                               "WHERE Handle='".mysql_addslashes($newadmin)."'")
@@ -140,21 +140,21 @@ require_once( "include/table_columns.php" );
    $marked_form->attach_table( $atable);
    $marked_form->set_tabindex(1);
 
-
-   $atable->add_tablehead(1, T_('ID'), NULL, true, true);
-   $atable->add_tablehead(2, T_('Userid'), NULL, true, true);
-   $atable->add_tablehead(3, T_('Name'), NULL, true, true);
+   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
+   $atable->add_tablehead(1, T_('##header'), '', 0, 1, 'ID');
+   $atable->add_tablehead(2, T_('Userid#header'), '', 0, 1, 'User');
+   $atable->add_tablehead(3, T_('Name#header'), '', 0, 1, 'User');
 
    $col = 4;
    foreach( $admin_tasks as $aid => $tmp )
    {
       list( $amask, $aname) = $tmp;
-      $atable->add_tablehead($col++, $aname, NULL, true, true);
+      $atable->add_tablehead($col++, $aname, '', 0, 1, 'Mark');
    }
 
    //can't add an admin if had not the privlege
    $new_admin = ($player_level & ADMIN_ADD_ADMIN);
-   while( $row = mysql_fetch_assoc( $result ) or $new_admin )
+   while( ($row=mysql_fetch_assoc( $result )) or $new_admin )
    {
       $arow_strings = array();
 
@@ -163,20 +163,21 @@ require_once( "include/table_columns.php" );
       {
          $id = $row["ID"];
          $level = $row['admin_level'];
-         $arow_strings[1] = "<td><A href=\"userinfo.php?uid=$id\">$id</A></td>";
-         $arow_strings[2] = "<td><A href=\"userinfo.php?uid=$id\">" . $row["Handle"] . "</A></td>";
-         $arow_strings[3] = "<td><A href=\"userinfo.php?uid=$id\">" .
-            make_html_safe($row["Name"]) . "</A></td>";
+         $arow_strings[1]= "<A href=\"userinfo.php?uid=$id\">$id</A>";
+         $arow_strings[2]= "<A href=\"userinfo.php?uid=$id\">" . $row["Handle"] . "</A>";
+         $arow_strings[3]= "<A href=\"userinfo.php?uid=$id\">" .
+            make_html_safe($row["Name"]) . "</A>";
       }
       else
       {
          $new_admin = false;
          $id = 'new';
-         $arow_strings[1] = "<td colspan=$col class=nowrap>" . T_('New admin') . ": " .
-             '<input type="text" name="newadmin"' .
-             ' value="" size="16" maxlength="16"></td>';
-         for( $level=2; $level<=$col; $level++ )
-            $arow_strings[$level] = '';
+         $arow_strings[1]= array(
+            'attbs' => array( 'colspan' => $col, 'class'=>'nowrap'),
+            'text' => T_('New admin') . ": "
+               . '<input type="text" name="newadmin"'
+               . ' value="" size="16" maxlength="16">',
+            );
          $level = 0;
       }
 
@@ -199,7 +200,7 @@ require_once( "include/table_columns.php" );
 
          $tmp = "\n  <input type=\"checkbox\" name=\"${aid}_$id\" value=\"Y\"$tmp>";
 
-         $arow_strings[++$col] = "<td class=Mark>$tmp</td>";
+         $arow_strings[++$col]= $tmp;
       }
 
       $atable->add_row( $arow_strings );

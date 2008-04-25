@@ -30,7 +30,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
    $gid = (int)@$_GET['gid'];
    if( $gid <= 0 )
@@ -39,7 +39,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
          $gid = $result[1];
    }
    if( $gid <= 0 )
-      error("unknown_game");
+      error('unknown_game');
 
    $result = mysql_query(
       'SELECT Games.*, ' .
@@ -50,7 +50,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       or error('mysql_query_failed', 'game_comments.find_game');
 
    if( @mysql_num_rows($result) != 1 )
-      error("unknown_game");
+      error('unknown_game');
 
    $row = mysql_fetch_array($result);
    extract($row);
@@ -89,8 +89,8 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    $ctable = new Table( 'comment', '');
 
-   $ctable->add_tablehead(1, T_('Moves'), NULL, true, true);
-   $ctable->add_tablehead(2, T_('Comments'), NULL, true, true);
+   $ctable->add_tablehead(1, T_('Moves'), '', 0, 1, 'Move');
+   $ctable->add_tablehead(2, T_('Comments'), '', 0, 1, 'Comment');
 
 
    while( $row = mysql_fetch_assoc($result) )
@@ -110,8 +110,8 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
       $movetxt = (int)$row['MoveNr'];
 
-      $crow_strings[1] = "<TD class=Move>$movetxt&nbsp;$colortxt</TD>";
-      $crow_strings[2] = "<TD class=Comment>$Text</TD>";
+      $crow_strings[1] = "$movetxt&nbsp;$colortxt";
+      $crow_strings[2] = $Text;
 
       $ctable->add_row( $crow_strings );
    }

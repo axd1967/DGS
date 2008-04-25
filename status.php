@@ -160,21 +160,21 @@ $ThePage = new Page('Status');
    }
    else
    {
-      $gtable->add_tablehead( 0,
-         T_('ID#header'), NULL, false, true, array( 'class' => 'Button') );
+      // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
+      $gtable->add_tablehead( 0, T_('##header'), '', 0, 1, 'Button');
 
-      $gtable->add_tablehead( 2, T_('sgf#header'));
-      $gtable->add_tablehead( 3, T_('Opponent#header'));
-      $gtable->add_tablehead( 4, T_('Userid#header'));
-      $gtable->add_tablehead(16, T_('Rating#header'));
-      $gtable->add_tablehead( 5, T_('Color#header'));
-      $gtable->add_tablehead( 6, T_('Size#header'));
-      $gtable->add_tablehead( 7, T_('Handicap#header'));
-      $gtable->add_tablehead( 8, T_('Komi#header'));
-      $gtable->add_tablehead( 9, T_('Moves#header'));
-      $gtable->add_tablehead(14, T_('Rated#header'));
-      $gtable->add_tablehead(13, T_('Last move#header'));
-      $gtable->add_tablehead(10, T_('Time remaining#header'));
+      $gtable->add_tablehead( 2, T_('sgf#header'), '', 0, 0, 'Sgf');
+      $gtable->add_tablehead( 3, T_('Opponent#header'), '', 0, 0, 'User');
+      $gtable->add_tablehead( 4, T_('Userid#header'), '', 0, 0, 'User');
+      $gtable->add_tablehead(16, T_('Rating#header'), '', 1, 0, 'Rating');
+      $gtable->add_tablehead( 5, T_('Color#header'), '', 0, 0, 'Image');
+      $gtable->add_tablehead( 6, T_('Size#header'), '', 1, 0, 'Number');
+      $gtable->add_tablehead( 7, T_('Handicap#header'), '', 0, 0, 'Number');
+      $gtable->add_tablehead( 8, T_('Komi#header'), '', 1, 0, 'Number');
+      $gtable->add_tablehead( 9, T_('Moves#header'), '', 1, 0, 'Number');
+      $gtable->add_tablehead(14, T_('Rated#header'), '', 1);
+      $gtable->add_tablehead(13, T_('Last move#header'), '', 1, 0, 'Date');
+      $gtable->add_tablehead(10, T_('Time remaining#header'), '', 0);
 
       while( $row = mysql_fetch_assoc( $result ) )
       {
@@ -186,16 +186,15 @@ $ThePage = new Page('Status');
          //if( $gtable->Is_Column_Displayed[0] )
             $grow_strings[0] = $gtable->button_TD_anchor( "game.php?gid=$ID", $ID);
          if( $gtable->Is_Column_Displayed[2] )
-            $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
-               "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";
+            $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
          if( $gtable->Is_Column_Displayed[3] )
-            $grow_strings[3] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Name) . "</font></a></td>";
+            $grow_strings[3] = "<A href=\"userinfo.php?uid=$pid\">" .
+               make_html_safe($Name) . "</a>";
          if( $gtable->Is_Column_Displayed[4] )
-            $grow_strings[4] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               $Handle . "</font></a></td>";
+            $grow_strings[4] = "<A href=\"userinfo.php?uid=$pid\">" .
+               $Handle . "</a>";
          if( $gtable->Is_Column_Displayed[16] )
-            $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
+            $grow_strings[16] = echo_rating($Rating,true,$pid);
          if( $gtable->Is_Column_Displayed[5] )
          {
             if( $Color & 2 ) //my color
@@ -211,23 +210,22 @@ $ThePage = new Page('Status');
                   $colors.= '_b';
             }
       */
-            $grow_strings[5] = "<td align=center><img src=\"17/$colors.gif\" alt=\"$colors\"></td>";
+            $grow_strings[5] = "<img src=\"17/$colors.gif\" alt=\"$colors\">";
          }
          if( $gtable->Is_Column_Displayed[6] )
-            $grow_strings[6] = "<td>$Size</td>";
+            $grow_strings[6] = $Size;
          if( $gtable->Is_Column_Displayed[7] )
-            $grow_strings[7] = "<td>$Handicap</td>";
+            $grow_strings[7] = $Handicap;
          if( $gtable->Is_Column_Displayed[8] )
-            $grow_strings[8] = "<td>$Komi</td>";
+            $grow_strings[8] = $Komi;
          if( $gtable->Is_Column_Displayed[9] )
-            $grow_strings[9] = "<td>$Moves</td>";
+            $grow_strings[9] = $Moves;
          if( $gtable->Is_Column_Displayed[14] )
-            $grow_strings[14] = "<td>" . ($Rated == 'N' ? T_('No') : T_('Yes') ) . "</td>";
+            $grow_strings[14] = ($Rated == 'N' ? T_('No') : T_('Yes') );
          if( $gtable->Is_Column_Displayed[13] )
-            $grow_strings[13] = '<td>' . date($date_fmt, $Time) . "</td>";
+            $grow_strings[13] = date($date_fmt, $Time);
          if( $gtable->Is_Column_Displayed[10] )
          {
-            $grow_strings[10] = '<td align=center>';
             $my_Maintime = ( ($Color & 2) ? $White_Maintime : $Black_Maintime );
             $my_Byotime = ( ($Color & 2)  ? $White_Byotime : $Black_Byotime );
             $my_Byoperiods = ( ($Color & 2) ? $White_Byoperiods : $Black_Byoperiods );
@@ -238,10 +236,8 @@ $ThePage = new Page('Status');
             time_remaining($hours, $my_Maintime, $my_Byotime, $my_Byoperiods,
                            $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
-            $grow_strings[10] .=
-               echo_time_remaining( $my_Maintime, $Byotype, $my_Byotime,
-                           $my_Byoperiods, $Byotime, false, true, true);
-            $grow_strings[10] .= "</td>";
+            $grow_strings[10] = echo_time_remaining( $my_Maintime, $Byotype,
+                  $my_Byotime, $my_Byoperiods, $Byotime, false, true, true);
          }
 
          $gtable->add_row( $grow_strings );

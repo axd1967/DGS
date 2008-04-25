@@ -34,10 +34,10 @@ require_once( "include/filter.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   $uid = $player_row["ID"];
-   //$user = $player_row["Handle"];
+   $uid = $player_row['ID'];
+   //$user = $player_row['Handle'];
 
    init_countries();
    $page = "users.php?";
@@ -76,11 +76,11 @@ require_once( "include/filter.php" );
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,
          array( FC_SIZE => 4 ));
    $ufilter->init(); // parse current value from _GET
-   $ufilter->set_accesskeys('x', 'e');
+   //$ufilter->set_accesskeys('x', 'z');
    $f_active =& $ufilter->get_filter(13);
 
    $utable = new Table( 'user', $page, 'UsersColumns' );
-   $utable->set_default_sort( 'P.ID', 0);
+   $utable->set_default_sort( 'ID', 0);
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
@@ -94,24 +94,25 @@ require_once( "include/filter.php" );
    $order = $utable->current_order_string();
    $limit = $utable->current_limit_string();
 
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $utable->add_tablehead( 1, T_('ID#header'), 'P.ID', false, true);
-   $utable->add_tablehead( 2, T_('Name#header'), 'P.Name');
-   $utable->add_tablehead( 3, T_('Userid#header'), 'P.Handle');
-   $utable->add_tablehead(16, T_('Country#header'), 'P.Country');
+   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
+   // table: use same table-IDs as in opponents.php(!)
+   $utable->add_tablehead( 1, T_('##header'), 'ID', 0, 1, 'ID');
+   $utable->add_tablehead( 2, T_('Name#header'), 'Name', 0, 0, 'User');
+   $utable->add_tablehead( 3, T_('Userid#header'), 'Handle', 0, 0, 'User');
+   $utable->add_tablehead(16, T_('Country#header'), 'Country', 0, 0, 'Image');
    $utable->add_tablehead( 4, T_('Rank info#header'));
-   $utable->add_tablehead( 5, T_('Rating#header'), 'P.Rating2', true);
+   $utable->add_tablehead( 5, T_('Rating#header'), 'Rating2', 1, 0, 'Rating');
    $utable->add_tablehead( 6, T_('Open for matches?#header'));
-   $utable->add_tablehead( 7, T_('#Games#header'), 'Games', true);
-   $utable->add_tablehead( 8, T_('Running#header'), 'P.Running', true);
-   $utable->add_tablehead( 9, T_('Finished#header'), 'P.Finished', true);
-   $utable->add_tablehead(17, T_('Rated#header'), 'P.RatedGames', true);
-   $utable->add_tablehead(10, T_('Won#header'), 'P.Won', true);
-   $utable->add_tablehead(11, T_('Lost#header'), 'P.Lost', true);
-   $utable->add_tablehead(12, T_('Percent#header'), 'Percent', true);
-   $utable->add_tablehead(13, T_('Activity#header'), 'ActivityLevel', true, true);
-   $utable->add_tablehead(14, T_('Last access#header'), 'P.Lastaccess', true);
-   $utable->add_tablehead(15, T_('Last moved#header'), 'P.Lastmove', true);
+   $utable->add_tablehead( 7, T_('#Games#header'), 'Games', 1, 0, 'Number');
+   $utable->add_tablehead( 8, T_('Running#header'), 'Running', 1, 0, 'Number');
+   $utable->add_tablehead( 9, T_('Finished#header'), 'Finished', 1, 0, 'Number');
+   $utable->add_tablehead(17, T_('Rated#header'), 'RatedGames', 1, 0, 'Number');
+   $utable->add_tablehead(10, T_('Won#header'), 'Won', 1, 0, 'Number');
+   $utable->add_tablehead(11, T_('Lost#header'), 'Lost', 1, 0, 'Number');
+   $utable->add_tablehead(12, T_('Percent#header'), 'Percent', 1, 0, 'Number');
+   $utable->add_tablehead(13, T_('Activity#header'), 'ActivityLevel', 1, 1, 'Image');
+   $utable->add_tablehead(14, T_('Last access#header'), 'Lastaccess', 1, 0, 'Date');
+   $utable->add_tablehead(15, T_('Last move#header'), 'Lastmove', 1, 0, 'Date');
 
    // build SQL-query
    $qsql = new QuerySQL();
@@ -121,11 +122,8 @@ require_once( "include/filter.php" );
       'P.Running+P.Finished AS Games',
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',
-      //oldies:
-      //'ROUND(100*P.Won/P.RatedGames) AS Percent',
-      //'IFNULL(ROUND(100*Won/Finished),-0.01) AS Percent',
-      'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccess',
-      'IFNULL(UNIX_TIMESTAMP(P.LastMove),0) AS Lastmove' );
+      'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS LastaccessU',
+      'IFNULL(UNIX_TIMESTAMP(P.LastMove),0) AS LastMoveU' );
    $qsql->add_part( SQLP_FROM, 'Players AS P' );
 
    if ( $observe_gid )
@@ -166,58 +164,58 @@ require_once( "include/filter.php" );
 
       $urow_strings = array();
       if( $utable->Is_Column_Displayed[1] )
-         $urow_strings[1] = "<td><A href=\"userinfo.php?uid=$ID\">$ID</A></td>";
+         $urow_strings[1] = "<A href=\"userinfo.php?uid=$ID\">$ID</A>";
       if( $utable->Is_Column_Displayed[2] )
-         $urow_strings[2] = "<td><A href=\"userinfo.php?uid=$ID\">" .
-            make_html_safe($row['Name']) . "</A></td>";
+         $urow_strings[2] = "<A href=\"userinfo.php?uid=$ID\">" .
+            make_html_safe($row['Name']) . "</A>";
       if( $utable->Is_Column_Displayed[3] )
-         $urow_strings[3] = "<td><A href=\"userinfo.php?uid=$ID\">" .
-            $row['Handle'] . "</A></td>";
+         $urow_strings[3] = "<A href=\"userinfo.php?uid=$ID\">" .
+            $row['Handle'] . "</A>";
       if( $utable->Is_Column_Displayed[16] )
       {
          $cntr = @$row['Country'];
          $cntrn = basic_safe(@$COUNTRIES[$cntr]);
          $cntrn = (empty($cntr) ? '' :
              "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
-         $urow_strings[16] = "<td>" . $cntrn . "</td>";
+         $urow_strings[16] = $cntrn;
       }
       if( $utable->Is_Column_Displayed[4] )
-         $urow_strings[4] = '<td>' . make_html_safe(@$row['Rankinfo'],INFO_HTML) . '&nbsp;</td>';
+         $urow_strings[4] = make_html_safe(@$row['Rankinfo'],INFO_HTML);
       if( $utable->Is_Column_Displayed[5] )
-         $urow_strings[5] = '<td>' . echo_rating(@$row['Rating2'],true,$ID) . '&nbsp;</td>';
+         $urow_strings[5] = echo_rating(@$row['Rating2'],true,$ID);
       if( $utable->Is_Column_Displayed[6] )
-         $urow_strings[6] = '<td>' . make_html_safe($row['Open'],INFO_HTML) . '&nbsp;</td>';
+         $urow_strings[6] = make_html_safe($row['Open'],INFO_HTML);
       if( $utable->Is_Column_Displayed[7] )
-         $urow_strings[7] = '<td>' . $row['Games'] . '&nbsp;</td>';
+         $urow_strings[7] = $row['Games'];
       if( $utable->Is_Column_Displayed[8] )
-         $urow_strings[8] = '<td>' . $row['Running'] . '&nbsp;</td>';
+         $urow_strings[8] = $row['Running'];
       if( $utable->Is_Column_Displayed[9] )
-         $urow_strings[9] = '<td>' . $row['Finished'] . '&nbsp;</td>';
+         $urow_strings[9] = $row['Finished'];
       if( $utable->Is_Column_Displayed[17] )
-         $urow_strings[17] = '<td>' . $row['RatedGames'] . '&nbsp;</td>';
+         $urow_strings[17] = $row['RatedGames'];
       if( $utable->Is_Column_Displayed[10] )
-         $urow_strings[10] = '<td>' . $row['Won'] . '&nbsp;</td>';
+         $urow_strings[10] = $row['Won'];
       if( $utable->Is_Column_Displayed[11] )
-         $urow_strings[11] = '<td>' . $row['Lost'] . '&nbsp;</td>';
+         $urow_strings[11] = $row['Lost'];
       if( $utable->Is_Column_Displayed[12] )
       {
          $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
-         $urow_strings[12] = '<td>' . $percent . '&nbsp;</td>';
+         $urow_strings[12] = $percent;
       }
       if( $utable->Is_Column_Displayed[13] )
       {
          $activity = activity_string( $row['ActivityLevel']);
-         $urow_strings[13] = '<td>' . $activity . '&nbsp;</td>';
+         $urow_strings[13] = $activity;
       }
       if( $utable->Is_Column_Displayed[14] )
       {
-         $lastaccess = ($row["lastaccess"] > 0 ? date($date_fmt2, $row["lastaccess"]) : NULL );
-         $urow_strings[14] = '<td>' . $lastaccess . '&nbsp;</td>';
+         $lastaccess = ($row['LastaccessU'] > 0 ? date($date_fmt2, $row['LastaccessU']) : '' );
+         $urow_strings[14] = $lastaccess;
       }
       if( $utable->Is_Column_Displayed[15] )
       {
-         $lastmove = ($row["Lastmove"] > 0 ? date($date_fmt2, $row["Lastmove"]) : NULL );
-         $urow_strings[15] = '<td>' . $lastmove . '&nbsp;</td>';
+         $lastmove = ($row['LastMoveU'] > 0 ? date($date_fmt2, $row['LastMoveU']) : '' );
+         $urow_strings[15] = $lastmove;
       }
 
       $utable->add_row( $urow_strings );

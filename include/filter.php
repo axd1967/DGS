@@ -268,7 +268,7 @@ class SearchFilter
       $this->Prefix   = $prefix;
       $this->is_init  = false;
       $this->is_reset = false;
-      $this->accesskeys = array( '', '' );
+      $this->accesskeys = array( 0=>'x', 1=>'z');
    }
 
    /*!
@@ -1748,9 +1748,9 @@ class Filter
          $size = 1;
       $is_multi = $this->get_config(FC_MULTIPLE);
 
-      $elem = "<select name=\"$fname";
+      $elem = "\n <select name=\"$fname";
       $elem .= ( $is_multi ) ? '[]" multiple' : '"';
-      $elem .= " size=\"$size\">\n";
+      $elem .= " size=\"$size\">";
 
       if ( is_array($index_start_keys) ) // key-value-array (not multi)
       {
@@ -1758,7 +1758,7 @@ class Filter
          {
             $selected = ($value == $optval) ? ' selected' : '';
             $descr = basic_safe($descr); //basic_safe() because inside <option></option>
-            $elem .= "  <option value=\"$optval\"$selected>$descr</option>\n";
+            $elem .= "\n  <option value=\"$optval\"$selected>$descr</option>";
          }
       }
       elseif ( is_numeric($index_start_keys) )
@@ -1773,13 +1773,13 @@ class Filter
             else
                $selected = ($value == $optval) ? ' selected' : '';
             $descr = basic_safe($values[$i]); //basic_safe() because inside <option></option>
-            $elem .= "  <option value=\"$optval\"$selected>$descr</option>\n";
+            $elem .= "\n  <option value=\"$optval\"$selected>$descr</option>";
          }
       }
       else
          error('invalid_filter', "filter.build_generic_selectbox_elem.invalid_arg.index_start_keys($index_start_keys)");
 
-      $elem .= "\n</select>";
+      $elem .= "\n </select>";
       return $elem;
    } //build_generic_selectbox_elem
 

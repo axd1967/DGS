@@ -106,7 +106,7 @@ require_once( "include/filter.php" );
             ),
          true);
    $mfilter->init(); // parse current value from _GET
-   $mfilter->set_accesskeys('x', 'e');
+   //$mfilter->set_accesskeys('x', 'z');
    $sf3 =& $mfilter->get_filter(3);
 
    $mtable = new Table( 'message', $page, '', 'msgSearch');

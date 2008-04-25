@@ -28,7 +28,7 @@ define('INVITE_HANDI_PROPER',-2);
 define('INVITE_HANDI_NIGIRI',-3);
 define('INVITE_HANDI_DOUBLE',-4);
 
-$MSG_TYPES = array( // keep untranslated{!)
+$MSG_TYPES = array( // keep them untranslated{!)
    'NORMAL'     => 'Normal',
    'INVITATION' => 'Invitation',
    'ACCEPTED'   => 'Accept',
@@ -404,10 +404,10 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 define('FLOW_ANSWER'  ,0x1);
 define('FLOW_ANSWERED',0x2);
    $msg_icones = array(
-  0                         => array('msg'   ,'&nbsp;-&nbsp;'),
-  FLOW_ANSWER               => array('msg_lr','&gt;-&nbsp;'), //is an answer
-              FLOW_ANSWERED => array('msg_rr','&nbsp;-&gt;'), //is answered
-  FLOW_ANSWER|FLOW_ANSWERED => array('msg_2r','&gt;-&gt;'),
+      0                         => array('images/msg.gif'   ,'&nbsp;-&nbsp;'),
+      FLOW_ANSWER               => array('images/msg_lr.gif','&gt;-&nbsp;'), //is an answer
+                  FLOW_ANSWERED => array('images/msg_rr.gif','&nbsp;-&gt;'), //is answered
+      FLOW_ANSWER|FLOW_ANSWERED => array('images/msg_2r.gif','&gt;-&gt;'),
       );
 
 function message_info_table($mid, $date, $to_me, //$mid==0 means preview
@@ -449,7 +449,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWER];
       $str.= "<a href=\"message.php?mode=ShowMessage".URI_AMP."mid=$reply_mid\">" .
-             "<img border=0 alt='$alt' src='images/$ico.gif'"
+             "<img border=0 alt='$alt' src='$ico'"
              . ' title="' . T_("Previous message") . '"'
              . "></a>&nbsp;" ;
    }
@@ -457,7 +457,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWERED];
       $str.= "<a href=\"list_messages.php?find_answers=$mid\">" .
-             "<img border=0 alt='$alt' src='images/$ico.gif'"
+             "<img border=0 alt='$alt' src='$ico'"
              . ' title="' . T_("Next messages") . '"'
              . "></a>&nbsp;" ;
    }
@@ -488,7 +488,8 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       {
          $fldrs = array('' => '');
          foreach( $folders as $key => $val )
-            if( $key != $folder_nr and (!$to_me or $key != FOLDER_SENT) and $key != FOLDER_NEW )
+            if( $key != $folder_nr && $key != FOLDER_NEW
+               && (!$to_me || $key != FOLDER_SENT) )
                $fldrs[$key] = $val[0];
 
          echo $form->print_insert_select_box('folder', '1', $fldrs, '', '');
@@ -974,7 +975,7 @@ function echo_folder_box( $folders, $folder_nr, $bgcolor=null, $attbs='', $layou
  global $STANDARD_FOLDERS;
 
    if( is_null($folder_nr) ) //case of $deleted messages
-     list($foldername, $folderbgcolor, $folderfgcolor) = array('---',0,0);
+     list($foldername, $folderbgcolor, $folderfgcolor) = array(NO_VALUE,0,0);
    else if( is_array($folder_nr) )
      list($foldername, $folderbgcolor, $folderfgcolor) = $folder_nr;
    else
@@ -1072,29 +1073,29 @@ function message_list_table( &$mtable, $result, $show_rows
 
    if ( is_null($header_part) or $header_part )
    {
-      // add_tablehead($nr, $description, $sort_string = NULL, $desc_default = false, $undeletable = false, $width = NULL)
+      // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
       $mtable->add_tablehead( 1, T_('Folder#header'),
-         ( $no_sort or $current_folder>FOLDER_ALL_RECEIVED ) ? NULL : 'folder', true, false );
+         ( $no_sort || $current_folder>FOLDER_ALL_RECEIVED ) ? '' : 'folder', 1, 0, 'Folder');
 
       if ( $full_details )
       {
          // additional fields for search-messages
-         $mtable->add_tablehead( 6, T_('Type#header'), 'M.Type', false, true );
-         $mtable->add_tablehead( 7, T_('Direction#header'), $no_sort ? NULL : 'Sender', false, false );
-         $mtable->add_tablehead( 2, T_('Correspondent#header'), $no_sort ? NULL : 'other_name', false, false );
+         $mtable->add_tablehead( 6, T_('Type#header'), 'M.Type', 0, 1);
+         $mtable->add_tablehead( 7, T_('Direction#header'), $no_sort ? '' : 'Sender', 0, 0, 'MsgDir');
+         $mtable->add_tablehead( 2, T_('Correspondent#header'), $no_sort ? '' : 'other_name',  0, 0, 'User');
       }
       else
          $mtable->add_tablehead( 2,
             ($current_folder == FOLDER_SENT ? T_('To#header') : T_('From#header') ),
-            $no_sort ? NULL : 'other_name', false, false );
+            $no_sort ? '' : 'other_name', 0, 0, 'User');
 
-      $mtable->add_tablehead( 3, T_('Subject#header'), $no_sort ? NULL : 'Subject', false, false );
+      $mtable->add_tablehead( 3, T_('Subject#header'), $no_sort ? '' : 'Subject', 0, 0);
       list($ico,$alt) = $msg_icones[0];
-      $mtable->add_tablehead( 0, image( "images/$ico.gif", $alt, T_('Messages')),
-         $no_sort ? NULL : 'flow', false, true );
-      $mtable->add_tablehead( 4, T_('Date#header'), $no_sort ? NULL : 'date', true, false );
+      $mtable->add_tablehead( 0, image( $ico, $alt, T_('Messages')),
+         $no_sort ? '' : 'flow', 0, 1, 'Image');
+      $mtable->add_tablehead( 4, T_('Date#header'), $no_sort ? '' : 'date', 1, 0, 'Date');
       if( !$no_mark )
-         $mtable->add_tablehead( 5, T_('Mark#header'), NULL, true, true );
+         $mtable->add_tablehead( 5, T_('Mark#header'), '', 0, 1, 'Mark');
 
       // then stop if $header_part is true
       if ( !is_null($header_part) )
@@ -1105,10 +1106,19 @@ function message_list_table( &$mtable, $result, $show_rows
 
    $p = T_('Answer');
    $n = T_('Replied');
-   $tits[0                        ] = T_('Message');
-   $tits[FLOW_ANSWER              ] = $p ;
-   $tits[            FLOW_ANSWERED] = $n ;
-   $tits[FLOW_ANSWER|FLOW_ANSWERED] = "$p - $n" ;
+   $tits = array(
+      0                         => T_('Message'),
+      FLOW_ANSWER               => $p ,
+                  FLOW_ANSWERED => $n ,
+      FLOW_ANSWER|FLOW_ANSWERED => "$p - $n" ,
+      );
+
+   $dirs = array(
+      'M' => T_('Myself#msgdir'),
+      'S' => T_('Server#msgdir'),
+      'Y' => T_('To#msgdir'),
+      'N' => T_('From#msgdir'),
+      );
 
    $url_terms = ($rx_term != '') ? URI_AMP."xterm=".urlencode($rx_term) : '';
 
@@ -1121,7 +1131,8 @@ function message_list_table( &$mtable, $result, $show_rows
       $deleted = ( is_null($folder_nr) );
       $bgcolor = $mtable->blend_next_row_color_hex();
 
-      $mrow_strings[1] = echo_folder_box($my_folders, $folder_nr, $bgcolor);
+      $mrow_strings[1] = array(
+         'owntd' => echo_folder_box($my_folders, $folder_nr, $bgcolor) );
 
       if( $row['Sender'] === 'M' ) //Message to myself
       {
@@ -1130,7 +1141,7 @@ function message_list_table( &$mtable, $result, $show_rows
       else if( $row["other_ID"] <= 0 )
          $row["other_name"] = '[' . T_('Server message') . ']';
       if( empty($row["other_name"]) )
-         $row["other_name"] = '---';
+         $row["other_name"] = NO_VALUE;
 
       // link to message
       $showmsg_start = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid{$url_terms}\">";
@@ -1154,55 +1165,45 @@ function message_list_table( &$mtable, $result, $show_rows
       if ( !$full_details )
          if( $row['Sender'] === 'Y' )
             $str = T_('To') . ': ' . $str;
-      $mrow_strings[2] = "<td>$str</td>";
+      $mrow_strings[2] = $str;
 
       $subject = $row['Subject'];
       $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
       $str = $showmsg_start . $subject . $showmsg_end;
-      $mrow_strings[3] = "<td>$str&nbsp;</td>";
+      $mrow_strings[3] = $str;
 
       list($ico,$alt) = $msg_icones[$row['flow']];
-      $str = image( "images/$ico.gif", $alt, $tits[$row['flow']]);
+      $str = image( $ico, $alt, $tits[$row['flow']]);
       $str = $showmsg_start . $str . $showmsg_end;
-      $mrow_strings[0] = "<td>$str</td>";
+      $mrow_strings[0] = $str;
 
-      $mrow_strings[4] = "<td>" . date($date_fmt, $row["Time"]) . "</td>";
+      $mrow_strings[4] = date($date_fmt, $row["Time"]);
 
       // additional fields for search-messages
       if ( $full_details )
       {
          global $MSG_TYPES;
-         $mrow_strings[6] = "<td>" . $MSG_TYPES[$row['Type']] . "</td>";
+         $mrow_strings[6] = $MSG_TYPES[$row['Type']];
 
-         if( $row['Sender'] === 'M' )
-            $msgdir = T_('Myself#msgdir');
-         else if( $row['Sender'] === 'S' )
-            $msgdir = T_('Server#msgdir');
-         else if( $row['Sender'] === 'Y' )
-            $msgdir = T_('To#msgdir');
-         else
-            $msgdir = T_('From#msgdir');
-         $mrow_strings[7] = "<td class=Right>$msgdir:&nbsp;</td>";
+         $mrow_strings[7] = $dirs[$row['Sender']];
       }
 
       if( !$no_mark )
       {
-         if( $folder_nr == FOLDER_NEW or $row['Replied'] == 'M'
-           or ( $folder_nr == FOLDER_REPLY and $row['Type'] == 'INVITATION'
-              and $row['Replied'] != 'Y' )
-           or $deleted )
-            $mrow_strings[5] = '<td>&nbsp;</td>';
+         if( $folder_nr == FOLDER_NEW || $row['Replied'] == 'M'
+           || ( $folder_nr == FOLDER_REPLY && $row['Type'] == 'INVITATION'
+              && $row['Replied'] != 'Y' )
+           || $deleted )
+            $mrow_strings[5] = '';
          else
          {
             $can_move_messages = true;
             $n = $mtable->Prefix."mark$mid";
             $checked = ((@$_REQUEST[$n]=='Y') xor $toggle_marks);
             if( $checked )
-               $page.= "$n=Y".URI_AMP ;
-            $mrow_strings[5] = "<td class=Mark>"  .
-               "<input type='checkbox' name='$n' value='Y'".
-               ($checked ? ' checked' : '') .
-               '></td>';
+               $page.= "$n=Y".URI_AMP;
+            $mrow_strings[5] = "<input type='checkbox' name='$n' value='Y'"
+               . ($checked ? ' checked' : '') . '>';
          }
       }
       $mtable->add_row( $mrow_strings );

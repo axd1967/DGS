@@ -196,9 +196,9 @@ if ( $fdemo == 2 )
    {
       $arr_row = array();
       if( $table->Is_Column_Displayed[1] )
-         $arr_row[1] = "<td>$id</td>";
+         $arr_row[1] = $id;
       if( $table->Is_Column_Displayed[2] )
-         $arr_row[2] = "<td>$animal</td>";
+         $arr_row[2] = $animal;
       $table->add_row( $arr_row );
    }
 
@@ -247,9 +247,9 @@ if ( $fdemo == 3 )
    {
       $arr_row = array();
       if( $table->Is_Column_Displayed[1] )
-         $arr_row[1] = "<td>$id</td>";
+         $arr_row[1] = $id;
       if( $table->Is_Column_Displayed[2] )
-         $arr_row[2] = "<td>$animal</td>";
+         $arr_row[2] = $animal;
       $table->add_row( $arr_row );
    }
 

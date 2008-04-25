@@ -90,7 +90,7 @@ require_once( "include/contacts.php" );
    $wrfilter->add_filter(15, 'Country', 'Players.Country', false,
          array( FC_HIDE => 1 ));
    $wrfilter->init();
-   $wrfilter->set_accesskeys('x', 'e');
+   //$wrfilter->set_accesskeys('x', 'z');
    $f_handi =& $wrfilter->get_filter(5);
    $f_range =& $wrfilter->get_filter(8);
 
@@ -100,20 +100,20 @@ require_once( "include/contacts.php" );
    $wrtable->add_or_del_column();
    $wrtable->set_default_sort( 'other_rating', 1, 'other_handle', 0);
 
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $wrtable->add_tablehead( 0, T_('Info#header'), NULL, false, true, array( 'class' => 'Button') );
-   $wrtable->add_tablehead( 1, T_('Name#header'), 'other_name', false);
-   $wrtable->add_tablehead( 2, T_('Userid#header'), 'other_handle', false);
-   $wrtable->add_tablehead(15, T_('Country#header'), 'other_country', false);
-   $wrtable->add_tablehead( 3, T_('Rating#header'), 'other_rating', true);
+   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
+   $wrtable->add_tablehead( 0, T_('Info#header'), '', 0, 1, 'Button');
+   $wrtable->add_tablehead( 1, T_('Name#header'), 'other_name', 0, 0, 'User');
+   $wrtable->add_tablehead( 2, T_('Userid#header'), 'other_handle', 0, 0, 'User');
+   $wrtable->add_tablehead(15, T_('Country#header'), 'other_country', 0, 0, 'Image');
+   $wrtable->add_tablehead( 3, T_('Rating#header'), 'other_rating', 1, 0, 'Rating');
    $wrtable->add_tablehead( 4, T_('Comment#header'));
-   $wrtable->add_tablehead( 7, T_('Size#header'), 'Size', true);
+   $wrtable->add_tablehead( 7, T_('Size#header'), 'Size', 1, 0, 'Number');
    /**
     * keep the Type#headerwr and Handicap#headerwr to allow the
     * translators to solve a local language ambiguity.
     **/
-   $wrtable->add_tablehead( 5, T_('Type#headerwr'), 'Handicaptype', false, true);
-   $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Handicap');
+   $wrtable->add_tablehead( 5, T_('Type#headerwr'), 'Handicaptype', 0, 1);
+   $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Handicap', 0, 0, 'Number');
    /** TODO: the handicap stones info could be merged in the Komi column
     * with the standard placement... something like: "%d H + %d K (S)"
     * where:
@@ -121,14 +121,14 @@ require_once( "include/contacts.php" );
     *   K=Tr$['Komi#short']
     *   S=Tr$['Standard placement#short']
     **/
-   $wrtable->add_tablehead( 6, T_('Komi#header'), 'Komi', true);
-   $wrtable->add_tablehead( 8, T_('Rating range#header'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", true, true);
+   $wrtable->add_tablehead( 6, T_('Komi#header'), 'Komi', 1, 0, 'Number');
+   $wrtable->add_tablehead( 8, T_('Rating range#header'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", 1, 1);
    $wrtable->add_tablehead( 9, T_('Time limit#header'));
-   $wrtable->add_tablehead(10, T_('#Games#header'), 'nrGames', true);
-   $wrtable->add_tablehead(11, T_('Rated#header'), 'Rated', true);
-   $wrtable->add_tablehead(12, T_('Weekend Clock#header'), 'WeekendClock', true);
+   $wrtable->add_tablehead(10, T_('#Games#header'), 'nrGames', 0, 0, 'Number');
+   $wrtable->add_tablehead(11, T_('Rated#header'), 'Rated', 1);
+   $wrtable->add_tablehead(12, T_('Weekend Clock#header'), 'WeekendClock', 1);
    if( ENA_STDHANDICAP )
-      $wrtable->add_tablehead(13, T_('Standard placement#header'), 'StdHandicap', true);
+      $wrtable->add_tablehead(13, T_('Standard placement#header'), 'StdHandicap', 1);
 
    $order = $wrtable->current_order_string();
    $limit = $wrtable->current_limit_string();
@@ -233,55 +233,54 @@ require_once( "include/contacts.php" );
             $wrow_strings[0] = $wrtable->button_TD_anchor(
                                  $baseURL."info=$ID#joingameForm", T_('Info'));
          if( $wrtable->Is_Column_Displayed[1] )
-            $wrow_strings[1] = '<td>'.
-               user_reference( REF_LINK, 1, '', $other_id, $other_name, '') . "</td>";
+            $wrow_strings[1] = user_reference( REF_LINK, 1, '', $other_id, $other_name, '');
          if( $wrtable->Is_Column_Displayed[2] )
-            $wrow_strings[2] = "<td>" .
-               user_reference( REF_LINK, 1, '', $other_id, $other_handle, '') . "</td>";
+            $wrow_strings[2] = user_reference( REF_LINK, 1, '', $other_id, $other_handle, '');
          if( $wrtable->Is_Column_Displayed[15] )
          {
             $cntr = @$row['other_country'];
             $cntrn = basic_safe(@$COUNTRIES[$cntr]);
-            $cntrn = (empty($cntr) ? '' :
-               "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
-            $wrow_strings[15] = "<td>" . $cntrn . "</td>";
+            $cntrn = empty($cntr) ? '' :
+               "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">";
+            $wrow_strings[15] = $cntrn;
          }
          if( $wrtable->Is_Column_Displayed[3] )
-            $wrow_strings[3] = "<td>" . echo_rating($other_rating,true,$other_id) . "</td>";
+            $wrow_strings[3] = echo_rating($other_rating,true,$other_id);
          if( $wrtable->Is_Column_Displayed[4] )
-            $wrow_strings[4] = "<td>" . $Comment . "</td>";
+            $wrow_strings[4] = $Comment;
          if( $wrtable->Is_Column_Displayed[5] )
          {
-            $wrow_strings[5] = '<td' .
-               ( $haverating ? '' : $wrtable->warning_cell_attb(  T_('No initial rating') ) )
-               . '>' . $handi_array[$Handicaptype] . "</td>";
+            $wrow_strings[5] = array('text' => $handi_array[$Handicaptype]);
+            if( !$haverating )
+               $wrow_strings[5]['attbs']=
+                  $wrtable->warning_cell_attb( T_('No initial rating'), 1);
          }
          if( $wrtable->Is_Column_Displayed[14] )
-            $wrow_strings[14] = '<td>' . ($calculated ? '---' : $Handicap) . "</td>";
+            $wrow_strings[14] = ($calculated ? NO_VALUE : $Handicap);
          if( $wrtable->Is_Column_Displayed[6] )
-            $wrow_strings[6] = '<td>' . ($calculated ? '---' : $Komi) . "</td>";
+            $wrow_strings[6] = ($calculated ? NO_VALUE : $Komi);
          if( $wrtable->Is_Column_Displayed[7] )
-            $wrow_strings[7] = "<td>$Size</td>";
+            $wrow_strings[7] = $Size;
          if( $wrtable->Is_Column_Displayed[8] )
          {
-            $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax);
-            $wrow_strings[8] = '<td' .
-               ( $goodrating ? '' : $wrtable->warning_cell_attb(  T_('Out of range') ) )
-               . '>' . $Ratinglimit . "</td>";
+            $wrow_strings[8] = array('text' =>
+               echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) );
+            if( !$goodrating )
+               $wrow_strings[8]['attbs']=
+                  $wrtable->warning_cell_attb( T_('Out of range'), 1);
          }
          if( $wrtable->Is_Column_Displayed[9] )
-            $wrow_strings[9] = '<td>' .
-               echo_time_limit( $Maintime, $Byotype, $Byotime, $Byoperiods, 0, 1) .
-               "</td>";
+            $wrow_strings[9] =
+               echo_time_limit( $Maintime, $Byotype, $Byotime, $Byoperiods, 0, 1);
          if( $wrtable->Is_Column_Displayed[10] )
-            $wrow_strings[10] = "<td>$nrGames</td>";
+            $wrow_strings[10] = $nrGames;
          if( $wrtable->Is_Column_Displayed[11] )
-            $wrow_strings[11] = "<td>".yesno( $Rated)."</td>";
+            $wrow_strings[11] = yesno( $Rated);
          if( $wrtable->Is_Column_Displayed[12] )
-            $wrow_strings[12] = "<td>".yesno( $WeekendClock)."</td>";
+            $wrow_strings[12] = yesno( $WeekendClock);
          if( ENA_STDHANDICAP )
             if( $wrtable->Is_Column_Displayed[13] )
-               $wrow_strings[13] = "<td>".yesno( $StdHandicap)."</td>";
+               $wrow_strings[13] = yesno( $StdHandicap);
 
          $wrtable->add_row( $wrow_strings );
       }
@@ -317,7 +316,7 @@ require_once( "include/contacts.php" );
 function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax)
 {
    if( $MustBeRated != 'Y' )
-      return '---';
+      return NO_VALUE;
 
    // +/-50 reverse the inflation from add_to_waitingroom.php
    $r1 = echo_rating($Ratingmin+50,false);

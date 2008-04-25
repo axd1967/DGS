@@ -43,12 +43,19 @@ require_once( "include/tournament.php" );
    start_page(T_("Tournaments"), true, $logged_in, $player_row,
                $table->button_style($player_row['Button']) );
 
-      $table->add_tablehead( 0,
-         T_('ID'), 'ID', false, true, array( 'class' => 'Button') );
-   $table->add_tablehead( 2, T_('State'), 'State', false, true );
-   $table->add_tablehead( 3, T_('Name'), 'Name', false, true );
-   $table->add_tablehead( 4, T_('Organizer'), null, false, true );
-   $table->add_tablehead( 5, T_('Participant'), null, false, true );
+   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
+   $table->add_tablehead( 0, T_('ID'), 'ID', 0, 1, 'Button');
+   $table->add_tablehead( 2, T_('State'), 'State', 0, 1);
+   $table->add_tablehead( 3, T_('Name'), 'Name', 0, 1);
+   $table->add_tablehead( 4, T_('Organizer'), '', 0, 1, 'Image');
+   $table->add_tablehead( 5, T_('Participant'), '', 0, 1, 'Image');
+
+   $state_colors = array(
+      TOUR_STATE_INACTIVE          => "#cccccc",
+      TOUR_STATE_APPLICATIONPERIOD => "#FFEE00",
+      TOUR_STATE_RUNNING           => "#00F464",
+      TOUR_STATE_FINISHED          => "#FFA27A",
+      );
 
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -68,16 +75,12 @@ require_once( "include/tournament.php" );
          while( $partrow = mysql_fetch_array( $partresult ) )
             array_push( $participants, $partrow['pid'] );
 
-         $state_colors = array(
-            TOUR_STATE_INACTIVE          => "",
-            TOUR_STATE_APPLICATIONPERIOD => " bgcolor=\"FFEE00\"",
-            TOUR_STATE_RUNNING           => " bgcolor=\"00F464\"",
-            TOUR_STATE_FINISHED          => " bgcolor=\"FFA27A\"" );
-
          $row_strings[0] = $table->button_TD_anchor( "show_tournament.php?tid=$ID", $ID);
-         $row_strings[2] = "<td" . $state_colors[ $State ] . ">" .
-            $TourState_Strings[ $State ] . "</td>";
-         $row_strings[3] = "<td nowrap>$Name</td>";
+         $row_strings[2] = array(
+            'attbs' => array( 'bgcolor' => $state_colors[ $State ]),
+            'text' => $TourState_Strings[ $State ]
+            );
+         $row_strings[3] = $Name;
          $orgsrc = '"images/' .
             (in_array( $player_row['ID'], $organizers ) ?
              'yes.gif" alt="' . T_('Yes') . '"' :
@@ -86,8 +89,8 @@ require_once( "include/tournament.php" );
             (in_array( $player_row['ID'], $participants ) ?
              'yes.gif" alt="' . T_('Yes') . '"' :
              'no.gif" alt="' . T_('NO') . '"');
-         $row_strings[4] = "<td align=\"center\"><img src=$orgsrc></td>";
-         $row_strings[5] = "<td align=\"center\"><img src=$partsrc></td>";
+         $row_strings[4] = "<img src=$orgsrc>";
+         $row_strings[5] = "<img src=$partsrc>";
 
          $table->add_row($row_strings);
       }

@@ -30,6 +30,24 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-04-25 rodival
+
+   * include/message_functions.php (message_list_table),
+     include/table_columns.php (add_tablehead, make_tablerow,
+       make_table_filter, warning_cell_attb, button_TD_anchor),
+     include/filter.php,
+     status.php, users.php, show_games.php, game_comments.php,
+     waiting_room.php, list_contacts.php, list_tournaments.php,
+     opponents.php, admin_admins.php,
+     skins/dragon/screen.css,
+     code_examples/filter_example.php:
+   - introducing a "by column" class in the list-tables
+   - add_tablehead() now fully handle the last 'attbs' argument
+   - the table_row array supplied to add_row() no more have to include
+     the "<td></td>" tag: it will be added with the right attributs
+   - also adjusted the filter-row build to handle the column-classes
+   - adjusted all the pages using a list-tables
+
 2008-04-17 rodival
 
    * include/countries.php (init_countries), include/filter.php,

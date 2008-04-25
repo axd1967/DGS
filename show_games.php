@@ -168,7 +168,7 @@ $ThePage = new Page('GamesList');
       $gfilter->add_filter(29, 'Rating', 'Games.White_Start_Rating', true);
    }
    $gfilter->init(); // parse current value from _GET
-   $gfilter->set_accesskeys('x', 'e');
+   //$gfilter->set_accesskeys('x', 'z');
 
    $gtable = new Table( $tableid, /*$page*/'show_games.php?', $column_set_name );
    $gtable->register_filter( $gfilter );
@@ -246,101 +246,101 @@ $ThePage = new Page('GamesList');
  * 30: >  FA (White-EndRating)
  * 31: >  FA (White-EndRatingDiff)
  *****/
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $gtable->add_tablehead( 1, T_('ID#header'), 'ID', true, true, array( 'class' => 'Button') );
-   $gtable->add_tablehead( 2, T_('sgf#header'));
+   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
+   $gtable->add_tablehead( 1, T_('##header'), 'ID', 0, 1, 'Button');
+   $gtable->add_tablehead( 2, T_('sgf#header'), '', 0, 0, 'Sgf');
 
    if( $observe )
    {
-      $gtable->add_tablehead(17, T_('Black name#header'), 'blackName');
-      $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle');
-      $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', true);
-      $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', true);
-      $gtable->add_tablehead(20, T_('White name#header'), 'whiteName');
-      $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle');
-      $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', true);
-      $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', true);
+      $gtable->add_tablehead(17, T_('Black name#header'), 'blackName', 0, 0, 'User');
+      $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle', 0, 0, 'User');
+      $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', 1, 0, 'Rating');
+      $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', 1, 0, 'Rating');
+      $gtable->add_tablehead(20, T_('White name#header'), 'whiteName', 0, 0, 'User');
+      $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle', 0, 0, 'User');
+      $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', 1, 0, 'Rating');
+      $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', 1, 0, 'Rating');
    }
    else if( $finished ) //FU+FA
    {
       if( $all ) //FA
       {
-         $gtable->add_tablehead(17, T_('Black name#header'), 'blackName');
-         $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle');
-         $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', true);
-         $gtable->add_tablehead(27, T_('Black end rating#header'), 'blackEndRating', true);
-         $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', true);
-         $gtable->add_tablehead(28, T_('Black rating diff#header'), 'blackDiff', true);
-         $gtable->add_tablehead(20, T_('White name#header'), 'whiteName');
-         $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle');
-         $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', true);
-         $gtable->add_tablehead(30, T_('White end rating#header'), 'whiteEndRating', true);
-         $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', true);
-         $gtable->add_tablehead(31, T_('White rating diff#header'), 'whiteDiff', true);
+         $gtable->add_tablehead(17, T_('Black name#header'), 'blackName', 0, 0, 'User');
+         $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle', 0, 0, 'User');
+         $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(27, T_('Black end rating#header'), 'blackEndRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(28, T_('Black rating diff#header'), 'blackDiff', 1, 0, 'Number');
+         $gtable->add_tablehead(20, T_('White name#header'), 'whiteName', 0, 0, 'User');
+         $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle', 0, 0, 'User');
+         $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(30, T_('White end rating#header'), 'whiteEndRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(31, T_('White rating diff#header'), 'whiteDiff', 1, 0, 'Number');
       }
       else //FU
       {
-         $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name');
-         $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle');
-         $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', true);
-         $gtable->add_tablehead(24, T_('End rating#header'), 'endRating', true);
-         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', true);
-         $gtable->add_tablehead(25, T_('Rating diff#header'), 'ratingDiff', true);
-         $gtable->add_tablehead( 5, T_('Color#header'), 'Color');
+         $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name', 0, 0, 'User');
+         $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle', 0, 0, 'User');
+         $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(24, T_('End rating#header'), 'endRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 1, 0, 'Rating');
+         $gtable->add_tablehead(25, T_('Rating diff#header'), 'ratingDiff', 1, 0, 'Number');
+         $gtable->add_tablehead( 5, T_('Color#header'), 'Color', 0, 0, 'Image');
       }
    }
    else if( $running ) //RU+RA
    {
       if( $all ) //RA
       {
-         $gtable->add_tablehead(17, T_('Black name#header'), 'blackName');
-         $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle');
-         $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', true);
-         $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', true);
-         $gtable->add_tablehead(20, T_('White name#header'), 'whiteName');
-         $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle');
-         $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', true);
-         $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', true);
+         $gtable->add_tablehead(17, T_('Black name#header'), 'blackName', 0, 0, 'User');
+         $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle', 0, 0, 'User');
+         $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(20, T_('White name#header'), 'whiteName', 0, 0, 'User');
+         $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle', 0, 0, 'User');
+         $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', 1, 0, 'Rating');
       }
       else //RU
       {
-         $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name');
-         $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle');
-         $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', true);
-         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', true);
-         $gtable->add_tablehead( 5, T_('Colors#header'), 'Color');
+         $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name', 0, 0, 'User');
+         $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle', 0, 0, 'User');
+         $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 1, 0, 'Rating');
+         $gtable->add_tablehead( 5, T_('Colors#header'), 'Color', 0, 0, 'Image');
       }
    }
 
-   $gtable->add_tablehead( 6, T_('Size#header'), 'Size', true);
-   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Handicap');
-   $gtable->add_tablehead( 8, T_('Komi#header'), 'Komi');
-   $gtable->add_tablehead( 9, T_('Moves#header'), 'Moves', true);
+   $gtable->add_tablehead( 6, T_('Size#header'), 'Size', 1, 0, 'Number');
+   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Handicap', 0, 0, 'Number');
+   $gtable->add_tablehead( 8, T_('Komi#header'), 'Komi', 1, 0, 'Number');
+   $gtable->add_tablehead( 9, T_('Moves#header'), 'Moves', 1, 0, 'Number');
 
    if( $finished ) //FU+FA
    {
       if( $all ) //FA
-         $gtable->add_tablehead(10, T_('Score#header'), 'Score', true);
+         $gtable->add_tablehead(10, T_('Score#header'), 'Score', 1);
       else //FU
       {
-         $gtable->add_tablehead(10, T_('Score#header'), 'oScore', true);
-         $gtable->add_tablehead(11, T_('Win?#header'), 'Win', true, true);
+         $gtable->add_tablehead(10, T_('Score#header'), 'oScore', 1);
+         $gtable->add_tablehead(11, T_('Win?#header'), 'Win', 1, 1, 'Image');
       }
    }
 
-   $gtable->add_tablehead(14, T_('Rated#header'), 'RatedX', true, true);
+   $gtable->add_tablehead(14, T_('Rated#header'), 'RatedX', 1, 1);
 
    if( $observe ) //OB
-      $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', true);
+      $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', 1, 0, 'Date');
    else if( $finished ) //FU+FA
-      $gtable->add_tablehead(13, T_('End date#header'), 'Lastchanged', true);
+      $gtable->add_tablehead(13, T_('End date#header'), 'Lastchanged', 1, 0, 'Date');
    else if( $running ) //RU+RA
    {
-      $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', true);
+      $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', 1, 0, 'Date');
       if( !$all ) //RU
       {
-         $gtable->add_tablehead(15, T_('Opponents Last Access#header'), 'Lastaccess', true);
-         $gtable->add_tablehead(12, T_('Weekend Clock#header'), 'WeekendClock', true);
+         $gtable->add_tablehead(15, T_('Opponents Last Access#header'), 'Lastaccess', 1, 0, 'Date');
+         $gtable->add_tablehead(12, T_('Weekend Clock#header'), 'WeekendClock', 1, 0, 'Date');
       }
    }
 
@@ -494,62 +494,62 @@ $ThePage = new Page('GamesList');
       if( $gtable->Is_Column_Displayed[1] )
          $grow_strings[1] = $gtable->button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[2] )
-         $grow_strings[2] = "<td><A href=\"sgf.php?gid=$ID\">" .
-            "<font color=$sgf_color>" . T_('sgf') . "</font></A></td>";
+         $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">"
+            . T_('sgf') . "</A>";
 
       if( $observe || $all ) //OB+FA+RA
       {
          if( $gtable->Is_Column_Displayed[17] )
-            $grow_strings[17] = "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
-               make_html_safe($blackName) . "</font></a></td>";
+            $grow_strings[17] = "<A href=\"userinfo.php?uid=$blackID\">" .
+               make_html_safe($blackName) . "</a>";
          if( $gtable->Is_Column_Displayed[18] )
-            $grow_strings[18] = "<td><A href=\"userinfo.php?uid=$blackID\"><font color=black>" .
-               $blackHandle . "</font></a></td>";
+            $grow_strings[18] = "<A href=\"userinfo.php?uid=$blackID\">" .
+               $blackHandle . "</a>";
          if( $gtable->Is_Column_Displayed[26] )
-            $grow_strings[26] = "<td>" . echo_rating($blackStartRating,true,$blackID) . "&nbsp;</td>";
-         if( $finished and $gtable->Is_Column_Displayed[27] )
-            $grow_strings[27] = "<td>" . echo_rating($blackEndRating,true,$blackID) . "&nbsp;</td>";
+            $grow_strings[26] = echo_rating($blackStartRating,true,$blackID);
+         if( $finished && $gtable->Is_Column_Displayed[27] )
+            $grow_strings[27] = echo_rating($blackEndRating,true,$blackID);
          if( $gtable->Is_Column_Displayed[19] )
-            $grow_strings[19] = "<td>" . echo_rating($blackRating,true,$blackID) . "&nbsp;</td>";
-         if( $finished and $gtable->Is_Column_Displayed[28] )
-            $grow_strings[28] = "<td>" .
-               (isset($blackDiff) ? ($blackDiff > 0 ? '+' : '') .
-                sprintf("%0.2f",$blackDiff*0.01) : '&nbsp;' ) . "</td>";
+            $grow_strings[19] = echo_rating($blackRating,true,$blackID);
+         if( $finished && $gtable->Is_Column_Displayed[28] )
+            $grow_strings[28] =
+               (isset($blackDiff) ? ($blackDiff > 0 ?'+' :'') .
+                sprintf("%0.2f",$blackDiff*0.01) : '' );
          if( $gtable->Is_Column_Displayed[20] )
-            $grow_strings[20] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
-               make_html_safe($whiteName) . "</font></a></td>";
+            $grow_strings[20] = "<A href=\"userinfo.php?uid=$whiteID\">" .
+               make_html_safe($whiteName) . "</a>";
          if( $gtable->Is_Column_Displayed[21] )
-            $grow_strings[21] = "<td><A href=\"userinfo.php?uid=$whiteID\"><font color=black>" .
-               $whiteHandle . "</font></a></td>";
+            $grow_strings[21] = "<A href=\"userinfo.php?uid=$whiteID\">" .
+               $whiteHandle . "</a>";
          if( $gtable->Is_Column_Displayed[29] )
-            $grow_strings[29] = "<td>" . echo_rating($whiteStartRating,true,$whiteID) . "&nbsp;</td>";
-         if( $finished and $gtable->Is_Column_Displayed[30] )
-            $grow_strings[30] = "<td>" . echo_rating($whiteEndRating,true,$whiteID) . "&nbsp;</td>";
+            $grow_strings[29] = echo_rating($whiteStartRating,true,$whiteID);
+         if( $finished && $gtable->Is_Column_Displayed[30] )
+            $grow_strings[30] = echo_rating($whiteEndRating,true,$whiteID);
          if( $gtable->Is_Column_Displayed[22] )
-            $grow_strings[22] = "<td>" . echo_rating($whiteRating,true,$whiteID) . "&nbsp;</td>";
-         if( $finished and $gtable->Is_Column_Displayed[31] )
-            $grow_strings[31] = "<td>" .
-               (isset($whiteDiff) ? ($whiteDiff > 0 ? '+' : '') .
-                sprintf("%0.2f",$whiteDiff*0.01) : '&nbsp;' ) . "</td>";
+            $grow_strings[22] = echo_rating($whiteRating,true,$whiteID);
+         if( $finished && $gtable->Is_Column_Displayed[31] )
+            $grow_strings[31] =
+               (isset($whiteDiff) ? ($whiteDiff > 0 ?'+' :'') .
+                sprintf("%0.2f",$whiteDiff*0.01) : '' );
       }
       else //FU+RU
       {
          if( $gtable->Is_Column_Displayed[3] )
-            $grow_strings[3] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               make_html_safe($Name) . "</font></a></td>";
+            $grow_strings[3] = "<A href=\"userinfo.php?uid=$pid\">" .
+               make_html_safe($Name) . "</a>";
          if( $gtable->Is_Column_Displayed[4] )
-            $grow_strings[4] = "<td><A href=\"userinfo.php?uid=$pid\"><font color=black>" .
-               $Handle . "</font></a></td>";
+            $grow_strings[4] = "<A href=\"userinfo.php?uid=$pid\">" .
+               $Handle . "</a>";
          if( $gtable->Is_Column_Displayed[23] )
-            $grow_strings[23] = "<td>" . echo_rating($startRating,true,$pid) . "&nbsp;</td>";
-         if( $finished and $gtable->Is_Column_Displayed[24] )
-            $grow_strings[24] = "<td>" . echo_rating($endRating,true,$pid) . "&nbsp;</td>";
+            $grow_strings[23] = echo_rating($startRating,true,$pid);
+         if( $finished && $gtable->Is_Column_Displayed[24] )
+            $grow_strings[24] = echo_rating($endRating,true,$pid);
          if( $gtable->Is_Column_Displayed[16] )
-            $grow_strings[16] = "<td>" . echo_rating($Rating,true,$pid) . "&nbsp;</td>";
-         if( $finished and $gtable->Is_Column_Displayed[25] )
-            $grow_strings[25] = "<td>" .
-               (isset($ratingDiff) ? ($ratingDiff > 0 ? '+' : '') .
-                sprintf("%0.2f",$ratingDiff*0.01) : '&nbsp;' ) . "</td>";
+            $grow_strings[16] = echo_rating($Rating,true,$pid);
+         if( $finished && $gtable->Is_Column_Displayed[25] )
+            $grow_strings[25] =
+               (isset($ratingDiff) ? ($ratingDiff > 0 ?'+' :'') .
+                sprintf("%0.2f",$ratingDiff*0.01) : '' );
 
          if( $gtable->Is_Column_Displayed[5] )
          {
@@ -566,28 +566,28 @@ $ThePage = new Page('GamesList');
             }
             $hover_title = ( isset($arr_titles_colors[$colors]) )
                ? " title=\"" . $arr_titles_colors[$colors] . "\"" : '';
-            $grow_strings[5] = "<td align=center><img src=\"17/$colors.gif\" "
-               . "alt=\"$colors\"$hover_title></td>";
+            $grow_strings[5] = "<img src=\"17/$colors.gif\" "
+               . "alt=\"$colors\"$hover_title>";
          }
       }
 
       if( $gtable->Is_Column_Displayed[6] )
-         $grow_strings[6] = "<td>$Size</td>";
+         $grow_strings[6] = $Size;
       if( $gtable->Is_Column_Displayed[7] )
-         $grow_strings[7] = "<td>$Handicap</td>";
+         $grow_strings[7] = $Handicap;
       if( $gtable->Is_Column_Displayed[8] )
-         $grow_strings[8] = "<td>$Komi</td>";
+         $grow_strings[8] = $Komi;
       if( $gtable->Is_Column_Displayed[9] )
-         $grow_strings[9] = "<td>$Moves</td>";
+         $grow_strings[9] = $Moves;
       if( $gtable->Is_Column_Displayed[13] )
-         $grow_strings[13] = '<td>' . date($date_fmt, $LastchangedU) . "</td>";
+         $grow_strings[13] = date($date_fmt, $LastchangedU);
       if( $gtable->Is_Column_Displayed[14] )
-         $grow_strings[14] = "<td>" . ($RatedX == 'N' ? T_('No') : T_('Yes') ) . "</td>";
+         $grow_strings[14] = ($RatedX == 'N' ? T_('No') : T_('Yes') );
 
       if( $finished ) //FU+FA
       {
          if( $gtable->Is_Column_Displayed[10] )
-            $grow_strings[10] = '<td>' . score2text($Score, false) . "</td>";
+            $grow_strings[10] = score2text($Score, false);
          if( !$all ) //FU
          {
             if( $gtable->Is_Column_Displayed[11] )
@@ -596,16 +596,16 @@ $ThePage = new Page('GamesList');
                   ( $Win == 1 ? 'yes.gif" alt="' . T_('Yes') :
                      ( $Win == -1 ? 'no.gif" alt="' . T_('No') :
                         'dash.gif" alt="' . T_('Jigo') )) . '"';
-               $grow_strings[11] = "<td align=center><img src=$src></td>";
+               $grow_strings[11] = "<img src=$src>";
             }
          }
       }
       else if( $running && !$all ) //RU
       {
          if( $gtable->Is_Column_Displayed[12] )
-            $grow_strings[12] = "<td>" . ($WeekendClock == 'Y' ? T_('Yes') : T_('No') ) . "</td>";
+            $grow_strings[12] = ($WeekendClock == 'Y' ? T_('Yes') : T_('No'));
          if( $gtable->Is_Column_Displayed[15] )
-            $grow_strings[15] = '<td>' . date($date_fmt, $LastaccessU) . "</td>";
+            $grow_strings[15] = date($date_fmt, $LastaccessU);
       }
 
       $gtable->add_row( $grow_strings );
