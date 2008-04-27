@@ -72,8 +72,12 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
             .' 3='.@$_SERVER['REDIRECT_ERROR_NOTES']  # /
             .' 4='.@$_SERVER['HTTP_REFERER']
             //.' 5='.getcwd()  # the root folder
+            //.' 6='.@$_SERVER['REQUEST_URI']  #
             ;
-         err_log( $handle, $err, $debugmsg);
+         list( $err, $uri)= err_log( $handle, $err, $debugmsg);
+         db_close();
+         //must restart from the root else $base_path is not properly set
+         jump_to($uri,0);
       }
    }
    db_close();
@@ -366,8 +370,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("rating_not_rank"):
       {
-         echo T_("Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' " .
-                 "for this ratingtype");
+         echo T_("Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' for this ratingtype");
       }
       break;
 

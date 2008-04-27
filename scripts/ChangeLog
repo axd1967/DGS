@@ -25,6 +25,9 @@ Changelog
 
 2008-04-27 rodival
 
+   * error.php:
+   - adjusting the "404 not found" error handling
+
    * skins/dragon/screen.css,
      edit_profile.php:
    - added warning messages for empty rating or email
