@@ -938,7 +938,8 @@ table.Table td.Button {
 /* endfor */
 }
 
-table.Table tr.Filter td.Button {
+table.Table tr.Filter td.Button, /* especially this one */
+table.Table tr.Filter td {
    background-image: none;
 }
 
@@ -2092,13 +2093,6 @@ table.Forum table {
    width: 100%;
 }
 
-/* in status page */
-table#forumPending {
-   margin: 0px auto;
-   width: auto;
-}
-
-/* forum lists */
 table.Forum tr.Row3,
 table.Forum tr.Row1 {
    background: #e0e8ed;
@@ -2118,15 +2112,22 @@ table.Forum td {
    color: black;
 }
 
-/*
-table#forumIndex tr.Row2 dd,
-table#forumIndex tr.Row2 dt,
-*/
+table.Forum .Moderated {
+   color: #ff4466;
+}
+
+
+/* in status page */
+table#forumPending {
+   margin: 0px auto;
+   width: auto;
+}
+
+/* forum lists */
 table#forumIndex tr.Row2 dl {
    margin: 0px;
    padding: 0px;
 }
-
 
 table#forumIndex td.Name {
    width: 50%;
@@ -2139,11 +2140,25 @@ table#forumIndex td.PostDate {
    white-space: nowrap;
 }
 
-
-table.Forum .Moderated {
-   color: #ff4466;
+/* threads list */
+table#forumList td.Subject {
+   width: 40%;
 }
 
+table#forumList td.Name {
+   width: 20%;
+}
+
+table#forumList td.PostCnt {
+   text-align: right;
+   white-space: nowrap;
+}
+
+table#forumList td.PostDate {
+   white-space: nowrap;
+}
+
+/* posts view */
 table.Forum td.Indent {
    width: 15px;
    min-width: 15px;

@@ -52,8 +52,11 @@ require_once( "forum_functions.php" );
    $cols = 4;
    $links = LINKPAGE_LIST;
 
-   $headline = array(T_("Thread")=>"width='50%'",T_("Author")=>"width='20%'",
-                     T_("Posts")=>"width='10%'  align=center",T_("Last post")=>"width='20%'");
+   $headline = array(
+            T_('Thread') => 'class=Subject', //"width='50%'",
+            T_('Author') => 'class=Name', //"width='20%'",
+            T_('Posts') => 'class=PostCnt', //"width='10%'  align=center",// align=center
+            T_('Last post') => 'class=PostDate'); //"width='20%'nowrap");
    $links |= LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
 
    if( $offset > 0 )
@@ -80,24 +83,26 @@ require_once( "forum_functions.php" );
 
    forum_start_table('List', $headline, $links, $cols);
 
-   $odd = true;
+   $c=0;
    while( ($row = mysql_fetch_array( $result)) && $show_rows-- > 0 )
    {
-      $Name = '?';
+      $Name = '';
       $Lastread = NULL;
       extract($row);
 
-      $color = ( $odd ? "" : " bgcolor=white" );
-
-      if( $PostsInThread > 0 or $is_moderator )
+      if( $PostsInThread > 0 || $is_moderator )
       {
+         $c=($c % LIST_ROWS_MODULO)+1;
          $new = get_new_string($Lastchanged, $Lastread);
+         if( empty($Name) ) $Name= UNKNOWN_VALUE;
          $Subject = make_html_safe( $Subject, SUBJECT_HTML);
-         echo "<tr$color><td><a href=\"read.php?forum=$forum" . URI_AMP
-           . "thread=$Thread_ID#new1\">$Subject</a>$new</td><td>" . make_html_safe($Name)
-           . "</td><td align=center>" . $PostsInThread . "</td><td nowrap>"
-           . date($date_fmt, $Lastchanged) . "</td></tr>\n";
-         $odd = !$odd;
+         echo "<tr class=Row$c>"
+            . "<td class=Subject><a href=\"read.php?forum=$forum" . URI_AMP
+               . "thread=$Thread_ID#new1\">$Subject</a>$new</td>"
+            . "<td class=Name>" . make_html_safe($Name) . "</td>"
+            . "<td class=PostCnt>" . $PostsInThread . "</td>"
+            . "<td class=PostDate>" . date($date_fmt, $Lastchanged)
+               . "</td></tr>\n";
       }
    }
    mysql_free_result($result);

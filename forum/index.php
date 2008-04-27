@@ -61,7 +61,7 @@ $ThePage = new Page('ForumsList');
       or error("mysql_query_failed",'forum_index1');
 
    $cols = 4;
-   $headline   = array(T_("Forums") => "colspan=$cols");
+   $headline = array(T_('Forums') => "colspan=$cols");
    $links |= LINK_SEARCH;
 
    $is_moderator = false;
@@ -78,7 +78,7 @@ $ThePage = new Page('ForumsList');
    print_moderation_note($is_moderator, '98%');
 
 
-   forum_start_table('Index',$headline, $links, $cols);
+   forum_start_table('Index', $headline, $links, $cols);
 
 
    while( $row = mysql_fetch_array( $result ) )
@@ -86,15 +86,16 @@ $ThePage = new Page('ForumsList');
       extract($row);
       if( empty($row['Timestamp']) )
       {
-         $date='&nbsp;&nbsp;-';
-         $Count = 0;
+         $date= NO_VALUE;
+         $Count= 0;
       }
       else
          $date = date($date_fmt, $Timestamp);
 
       //incompatible with: $c=($c % LIST_ROWS_MODULO)+1;
       echo "<tr class=Row1><td class=Name>" .
-         '<a href="list.php?forum=' . $ID . '">' . $Name . '</a>'
+         '<a href="list.php?forum=' . $ID . '">'
+            . make_html_safe( $Name, 'cell') . '</a>'
          . ( $Moderated == 'Y'
             ? ' &nbsp;&nbsp;<span class=Moderated>[' . T_('Moderated') . ']</span>'
             : '') .'</td>' .
@@ -103,8 +104,9 @@ $ThePage = new Page('ForumsList');
          '<td class=PostDate>'.T_('Last post').': <strong>'
                . $date . "</strong></td></tr>\n";
 
-      echo '<tr class=Row2><td colspan=3><dl><dd>' . $Description .
-         "</dl></td></tr>\n";
+      echo '<tr class=Row2><td colspan=3><dl><dd>'
+            . make_html_safe( $Description, 'faq')
+         . "</dd></dl></td></tr>\n";
    }
    mysql_free_result($result);
 

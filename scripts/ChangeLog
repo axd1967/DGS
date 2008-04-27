@@ -32,6 +32,10 @@ Changelog
      edit_profile.php:
    - added warning messages for empty rating or email
 
+   * skins/dragon/screen.css,
+     forum/index.php, forum/list.php:
+   - more CSS-ing including column-classes
+
 2008-04-25 rodival
 
    * include/message_functions.php (message_list_table),
