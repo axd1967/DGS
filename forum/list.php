@@ -35,7 +35,8 @@ require_once( "forum_functions.php" );
 
    $show_rows = $RowsPerPage+1;
    $result = mysql_query("SELECT Posts.Subject, Posts.Thread_ID, " .
-                         "Posts.User_ID, Posts.PostsInThread, Players.Name, " .
+                         "Posts.User_ID, Posts.PostsInThread, " .
+                         "Players.Handle, Players.Name, " .
                          "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
                          "UNIX_TIMESTAMP(Posts.LastChanged) AS Lastchanged " .
                          "FROM (Posts) " .
@@ -86,6 +87,7 @@ require_once( "forum_functions.php" );
    $c=0;
    while( ($row = mysql_fetch_array( $result)) && $show_rows-- > 0 )
    {
+      $Handle = '';
       $Name = '';
       $Lastread = NULL;
       extract($row);
@@ -94,13 +96,17 @@ require_once( "forum_functions.php" );
       {
          $c=($c % LIST_ROWS_MODULO)+1;
          $new = get_new_string($Lastchanged, $Lastread);
+         //Posts.User_ID, Players.Handle, Players.Name
+         if( empty($Handle) ) $Handle= UNKNOWN_VALUE;
          if( empty($Name) ) $Name= UNKNOWN_VALUE;
+         $author= user_reference( REF_LINK, 0, '', $User_ID,
+               make_html_safe($Name), $Handle);
          $Subject = make_html_safe( $Subject, SUBJECT_HTML);
          echo "<tr class=Row$c>"
             . "<td class=Subject><a href=\"read.php?forum=$forum" . URI_AMP
                . "thread=$Thread_ID#new1\">$Subject</a>$new</td>"
-            . "<td class=Name>" . make_html_safe($Name) . "</td>"
-            . "<td class=PostCnt>" . $PostsInThread . "</td>"
+            . "<td class=Name>$author</td>"
+            . "<td class=PostCnt>$PostsInThread</td>"
             . "<td class=PostDate>" . date($date_fmt, $Lastchanged)
                . "</td></tr>\n";
       }

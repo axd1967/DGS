@@ -68,6 +68,9 @@ Changelog
    * include/rating.php (update_rating):
    - commented the not used update_rating() function
 
+   * forum/list.php:
+   - add a full user_reference to the thread list
+
 2008-04-25 rodival
 
    * include/message_functions.php (message_list_table),
