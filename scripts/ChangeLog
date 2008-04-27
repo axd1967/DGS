@@ -4,11 +4,6 @@ General infos
 changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
-last server update start: 2006-10-06
-2007-10-06: bug fix update
-2007-11-07: bug fix update
-2007-12-19: bug fix update
-
 previous server update:
 Release [2007-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
 
@@ -18,13 +13,11 @@ quick INFO:
 2007-12-23 rodival
    New features for release 1.0.14
 
-2007-12-27 juga
-   New features for release 1.0.14
+2008-01-01 juga
+   Code cleanup, new features
 
 -----
 quick TODO:
-
-------------------------------------------------------------------
 
 ------------------------------------------------------------------
 Changelog
@@ -282,7 +275,13 @@ Changelog
 
 
 ==================================================================
-Release [2006-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
+Release [2007-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
+
+History:
+2007-10-06: first big update of DGS 1.0.13
+2007-11-07: bug fix update
+2007-12-19: bug fix update + release
+
 
 2007-12-27 juga
 
