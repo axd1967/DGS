@@ -207,6 +207,7 @@ function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
    return array($handicap, $komi, $swap);
 }
 
+/* obsolet
 function update_rating($gid)
 {
    $query = "SELECT Games.*, ".
@@ -266,6 +267,7 @@ function update_rating($gid)
 
    return 0; //rated game
 } //update_rating
+obsolet */
 
 //
 // EGF rating, see above URIs for documentation
@@ -585,19 +587,12 @@ function update_rating_glicko($gid, $check_done=true)
    return 0; //rated game
 } //update_rating_glicko
 
-// To avoid too many translations
-//WARNING: the translation database must be available when this file is included.
-//$dan = T_('dan');
-//$kyu = T_('kyu');
-$dan = 'dan';
-$kyu = 'kyu';
 
 function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false)
 {
-   $T_= ( $keep_english ? 'fnop' : 'T_' );
-   //global $dan, $kyu;
-
    if( !isset($rating) or !is_numeric($rating) or $rating < MIN_RATING ) return '';
+
+   $T_= ( $keep_english ? 'fnop' : 'T_' );
 
    $spc = ( $show_percent === true ? '&nbsp;' : ' ' );
 
@@ -615,8 +610,8 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
 
    if( $show_percent )
    {
-      $percent = round($rating - $rank_val*100.0);
-      $string .= $spc . '('. ( ($rating - $rank_val*100.0 > 0) ? '+' : '') . $percent . '%)';
+      $percent = $rating - $rank_val*100.0;
+      $string .= $spc . '('. ($percent > 0 ?'+' :'') . round($percent) . '%)';
    }
 
    if( $graph_uid > 0 )

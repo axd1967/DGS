@@ -48,12 +48,12 @@ Changelog
      admin_translators.php, admin_do_translators.php, translate.php,
      forum/admin.php:
    - removing translations for the "admin" pages.
-     Some of them have already been removed in a previous commit,
-     for them I just removed the now useless $TranslateGroups[] line.
+     Some of them have already been removed during a previous commit,
+     so for those, I just removed the now useless $TranslateGroups[] line.
 
    * skins/dragon/screen.css,
      game.php (draw_moves), include/board.php:
-   - a try to make the "goto move" selection box smaller
+   - a try to make the HTML-code of the "goto move" selection box smaller
      by offering only a sub-set of the options
      (previously "230 moves" was meaning "230 option lines")
      Maybe this was causing the "Game page truncated" bug with some
@@ -64,6 +64,9 @@ Changelog
 
    * show_games.php:
    - an other query adjustment (maybe a go-back fix)
+
+   * include/rating.php (update_rating):
+   - commented the not used update_rating() function
 
 2008-04-25 rodival
 
