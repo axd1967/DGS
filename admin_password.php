@@ -17,7 +17,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Start";
+// translations removed for this page: $TranslateGroups[] = "Start";
+// may be changed to:
+// translations removed for this page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
@@ -33,28 +35,28 @@ require_once( "include/form_functions.php" );
    if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
       error('adminlevel_too_low');
 
-   start_page(T_("Admin").' - '.T_('Send password'), true, $logged_in, $player_row );
+   start_page(/*T_*/('Admin').' - './*T_*/('Send password'), true, $logged_in, $player_row );
 
    echo "<center>\n";
 
    $passwd_form = new Form( 'adminnewpasswdform', "send_new_password.php", FORM_POST );
 
-   $passwd_form->add_row( array( 'HEADER', T_('New password') ) );
+   $passwd_form->add_row( array( 'HEADER', /*T_*/('New password') ) );
 
-   $passwd_form->add_row( array( 'DESCRIPTION', T_('Userid'),
+   $passwd_form->add_row( array( 'DESCRIPTION', /*T_*/('Userid'),
                                  'TEXTINPUT', 'pswduser', 16, 16, '',
                                  'TD',
-                                 'SUBMITBUTTON', 'action', T_("Send password"),
+                                 'SUBMITBUTTON', 'action', /*T_*/('Send password'),
                                ) );
-   $passwd_form->add_row( array( 'DESCRIPTION', T_('Email'),
+   $passwd_form->add_row( array( 'DESCRIPTION', /*T_*/('Email'),
                                  'TEXTINPUT', 'email', 32, 80, '',
                                  'TD',
-                                 'TEXT', T_("to replace user's one"),
+                                 'TEXT', /*T_*/('to replace the user\'s one'),
                                ) );
    $passwd_form->add_row( array( 'TAB',
                                  'CELL', 2, 'align=left',
                                  'CHECKBOX', 'overnew', 1,
-                                 T_('overwrite the current new password process'), 0,
+                                 /*T_*/('overwrite the current new password process'), 0,
                                ) );
    $passwd_form->echo_string(1);
 

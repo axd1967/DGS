@@ -17,7 +17,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Forum";
+// translations removed for this page: $TranslateGroups[] = "Forum";
+// may be changed to:
+// translations removed for this page: $TranslateGroups[] = "Admin";
 
 require_once( "forum_functions.php" );
 require_once( "../include/faq_functions.php" ); //for TD_button()
@@ -88,7 +90,7 @@ $ThePage = new Page('ForumAdmin');
    // keep it tested before 'do_edit'
    else if( @$_REQUEST['edit'] )
    {
-      $title = T_('Forum Admin').' - '.T_('Edit forum');
+      $title = /*T_*/('Forum Admin').' - './*T_*/('Edit forum');
       start_page($title, true, $logged_in, $player_row );
       echo "<h3 class=Header>$title</h3>\n";
 
@@ -100,17 +102,17 @@ $ThePage = new Page('ForumAdmin');
 
       $edit_form = new Form('forumeditform', "$page?id=$fid", FORM_POST );
 
-      //$edit_form->add_row( array( 'HEADER', T_//('Edit Forum') ) );
-      $edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
+      //$edit_form->add_row( array( 'HEADER', /*T_*///('Edit Forum') ) );
+      $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Name'),
                                   'TEXTINPUT', 'name', 50, 80, $row['Name'] ) );
-      $edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
+      $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Description'),
                                   'TEXTAREA', 'description', 50, 4, $row['Description'] ) );
-      $edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
+      $edit_form->add_row( array( 'DESCRIPTION' , /*T_*/('Moderated'),
                                   'CHECKBOX', 'moderated', 1, '', $row['Moderated'] == 'Y'));
       $edit_form->add_row( array(
-                           'SUBMITBUTTONX', 'do_edit', T_('Save entry'),
+                           'SUBMITBUTTONX', 'do_edit', /*T_*/('Save entry'),
                               array('accesskey'=>'x'),
-                           'SUBMITBUTTON', 'back', T_('Back to list'),
+                           'SUBMITBUTTON', 'back', /*T_*/('Back to list'),
                            ));
       $edit_form->echo_string(1);
    } //edit
@@ -171,7 +173,7 @@ $ThePage = new Page('ForumAdmin');
    // keep it tested before 'do_new'
    else if( @$_REQUEST['new'] )
    {
-      $title = T_('Forum Admin').' - '.T_('New forum');
+      $title = /*T_*/('Forum Admin').' - './*T_*/('New forum');
       start_page($title, true, $logged_in, $player_row );
       echo "<h3 class=Header>$title</h3>\n";
 
@@ -179,17 +181,17 @@ $ThePage = new Page('ForumAdmin');
 
       $edit_form = new Form('forumnewform', "$page?id=$fid", FORM_POST );
 
-      //$edit_form->add_row( array( 'HEADER', T_//('New Forum') ) );
-      $edit_form->add_row( array( 'DESCRIPTION', T_('Name'),
+      //$edit_form->add_row( array( 'HEADER', /*T_*///('New Forum') ) );
+      $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Name'),
                                   'TEXTINPUT', 'name', 50, 80, '' ) );
-      $edit_form->add_row( array( 'DESCRIPTION', T_('Description'),
+      $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Description'),
                                   'TEXTAREA', 'description', 50, 4, '' ) );
-      $edit_form->add_row( array( 'DESCRIPTION' , T_('Moderated'),
+      $edit_form->add_row( array( 'DESCRIPTION' , /*T_*/('Moderated'),
                                   'CHECKBOX', 'moderated', 1, '', false));
       $edit_form->add_row( array(
-                           'SUBMITBUTTONX', 'do_new', T_('Add entry'),
+                           'SUBMITBUTTONX', 'do_new', /*T_*/('Add entry'),
                               array('accesskey'=>'x'),
-                           'SUBMITBUTTON', 'back', T_('Back to list'),
+                           'SUBMITBUTTON', 'back', /*T_*/('Back to list'),
                            ));
       $edit_form->echo_string(1);
    } //new
@@ -236,7 +238,7 @@ $ThePage = new Page('ForumAdmin');
 
    if( $show_list )
    {
-      $title = T_('Forum Admin');
+      $title = /*T_*/('Forum Admin');
       start_page($title, true, $logged_in, $player_row );
 
       $query =
@@ -258,7 +260,7 @@ $ThePage = new Page('ForumAdmin');
       // table-columns:
 
       echo "<tr>"
-         . TD_button( T_('Add new forum'),
+         . TD_button( /*T_*/('Add new forum'),
                "$page?new=1".URI_AMP."id=0",
                '../images/new.png', 'N')
          . '<td>(first entry)</td>'
@@ -266,20 +268,20 @@ $ThePage = new Page('ForumAdmin');
 
       while( $row = mysql_fetch_assoc( $result ) )
       {
-         $name = (empty($row['Name']) ? '---' : $row['Name']);
+         $name = (empty($row['Name']) ? NO_VALUE : $row['Name']);
 
          echo '<tr>';
          echo '<td colspan='.($nbcol-3).' class=Entry>'
             ."<A href=\"$page?edit=1".URI_AMP."id=" . $row['ID']
-            .'" title="' . T_("Edit") . "\">$name</A></td>";
+            .'" title="' . /*T_*/('Edit') . "\">$name</A></td>";
 
-         echo TD_button( T_('Move up'),
+         echo TD_button( /*T_*/('Move up'),
                "$page?move=u".URI_AMP.'id=' . $row['ID'],
                '../images/up.png', 'u');
-         echo TD_button( T_('Move down'),
+         echo TD_button( /*T_*/('Move down'),
                "$page?move=d".URI_AMP.'id=' . $row['ID'],
                '../images/down.png', 'd');
-         echo TD_button( T_('Add new forum'),
+         echo TD_button( /*T_*/('Add new forum'),
                "$page?new=1".URI_AMP."id=" . $row['ID'],
                '../images/new.png', 'N');
          echo '</tr>';

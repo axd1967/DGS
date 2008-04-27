@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Admin";
+// translations removed for this page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
@@ -29,23 +29,23 @@ require_once( "include/table_columns.php" );
   $logged_in = who_is_logged( $player_row);
 
   if( !$logged_in )
-    error("not_logged_in");
+    error('not_logged_in');
 
   $player_level = (int)@$player_row['admin_level']; //local modifications
   if( !($player_level & ADMIN_SUPERADMIN) )
-    error("adminlevel_too_low");
+    error('adminlevel_too_low');
 
   $admin_tasks = array(
-                        'AddAdm' => array( ADMIN_ADD_ADMIN, T_('New admin')),
-                        'ADMIN'  => array( ADMIN_SUPERADMIN, T_('Admins')),
-                        'Passwd' => array( ADMIN_PASSWORD, T_('Password')),
-                        'TRANS'  => array( ADMIN_TRANSLATORS, T_('Translators')),
-                        'Forum'  => array( ADMIN_FORUM, T_('Forum')),
-                        'FAQ'    => array( ADMIN_FAQ, T_('FAQ')),
-                        'Skin'   => array( ADMIN_SKINNER, T_('Skin')),
-                        'Devel'  => array( ADMIN_DEVELOPER, T_('Developer')),
-                        'Dbase'  => array( ADMIN_DATABASE, T_('Database')),
-                        'TIME'   => array( ADMIN_TIME, T_('Time')),
+                        'AddAdm' => array( ADMIN_ADD_ADMIN, /*T_*/('New admin#header')),
+                        'ADMIN'  => array( ADMIN_SUPERADMIN, /*T_*/('Admins#header')),
+                        'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password#header')),
+                        'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators#header')),
+                        'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum#header')),
+                        'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ#header')),
+                        'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin#header')),
+                        'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer#header')),
+                        'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database#header')),
+                        'TIME'   => array( ADMIN_TIME, /*T_*/('Time#header')),
                       );
 
 // Make sure all previous admins gets into the Admin array
@@ -80,7 +80,7 @@ require_once( "include/table_columns.php" );
      }
 
      if( !($Admin[$player_row["ID"]] & ADMIN_SUPERADMIN) )
-        error("admin_no_longer_admin_admin");
+        error('admin_no_longer_admin_admin');
 
      $newadmin= get_request_arg('newadmin');
      if( $Admin['new'] != 0 && !empty($newadmin))
@@ -90,12 +90,12 @@ require_once( "include/table_columns.php" );
            or error('mysql_query_failed','admin_admins.find_new_admin');
 
         if( @mysql_num_rows($result) != 1 )
-           error("unknown_user");
+           error('unknown_user');
 
         $row = mysql_fetch_array($result);
         mysql_free_result($result);
         if( $row["admin_level"] != 0 )
-           error("new_admin_already_admin");
+           error('new_admin_already_admin');
 
         $Admin[$row['ID']] = $Admin['new'];
         $AdminOldLevel[$row['ID']] = 0;
@@ -131,9 +131,9 @@ require_once( "include/table_columns.php" );
    $atable = new Table( 'admin', '');
 
 
-   start_page(T_("Admin").' - '.T_('Edit admin staff'), true, $logged_in, $player_row );
+   start_page(/*T_*/("Admin").' - './*T_*/('Edit admin staff'), true, $logged_in, $player_row );
 
-   echo "<h3 class=Header>" . T_('Admins') . "</h3>\n";
+   echo "<h3 class=Header>" . /*T_*/('Admins') . "</h3>\n";
 
 
    $marked_form = new Form('admin','admin_admins.php?update=t', FORM_POST, true, 'FormTable');
@@ -141,9 +141,9 @@ require_once( "include/table_columns.php" );
    $marked_form->set_tabindex(1);
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $atable->add_tablehead(1, T_('##header'), '', 0, 1, 'ID');
-   $atable->add_tablehead(2, T_('Userid#header'), '', 0, 1, 'User');
-   $atable->add_tablehead(3, T_('Name#header'), '', 0, 1, 'User');
+   $atable->add_tablehead(1, /*T_*/('##header'), '', 0, 1, 'ID');
+   $atable->add_tablehead(2, /*T_*/('Userid#header'), '', 0, 1, 'User');
+   $atable->add_tablehead(3, /*T_*/('Name#header'), '', 0, 1, 'User');
 
    $col = 4;
    foreach( $admin_tasks as $aid => $tmp )
@@ -174,7 +174,7 @@ require_once( "include/table_columns.php" );
          $id = 'new';
          $arow_strings[1]= array(
             'attbs' => array( 'colspan' => $col, 'class'=>'nowrap'),
-            'text' => T_('New admin') . ": "
+            'text' => /*T_*/('New admin') . ": "
                . '<input type="text" name="newadmin"'
                . ' value="" size="16" maxlength="16">',
             );
@@ -210,7 +210,7 @@ require_once( "include/table_columns.php" );
    $atable->echo_table();
 
    echo $marked_form->print_insert_submit_buttonx( 'action',
-            T_('Update changes'), array('accesskey'=>'x'));
+            /*T_*/('Update changes'), array('accesskey'=>'x'));
 
    echo $marked_form->print_end();
 

@@ -44,6 +44,13 @@ Changelog
    - adjusted the '#'suffix removing function
      now, if you need a '#' which is removed, end the string with a '#'
 
+   * admin.php, admin_admins.php, admin_password.php, admin_faq.php,
+     admin_translators.php, admin_do_translators.php, translate.php,
+     forum/admin.php:
+   - removing translations for the "admin" pages.
+     Some of them have already been removed in a previous commit,
+     for them I just removed the now useless $TranslateGroups[] line.
+
 2008-04-25 rodival
 
    * include/message_functions.php (message_list_table),

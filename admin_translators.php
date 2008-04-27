@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* The code in this file is written by Ragnar Ouchterlony */
 
-$TranslateGroups[] = "Admin";
+// translations removed for this page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
@@ -79,24 +79,24 @@ require_once( "include/form_functions.php" );
       if( !$charenc )
          $charenc = 'UTF-8';
 
-   start_page(T_('Translator admin'), true, $logged_in, $player_row);
+   start_page(/*T_*/('Translator admin'), true, $logged_in, $player_row);
 
    echo "<center>";
 
    $translator_form = new Form( 'translatorform', 'admin_do_translators.php', FORM_POST );
 
    /* Add language for translation */
-   $translator_form->add_row( array( 'HEADER', T_('Add language for translation') ) );
-   //$translator_form->add_row( array( 'DESCRIPTION', T_('Two-letter language code (see ISO 639-1)'),
-   $translator_form->add_row( array( 'DESCRIPTION', T_('Language code (e.g. XML meta-tags code)'),
+   $translator_form->add_row( array( 'HEADER', /*T_*/('Add language for translation') ) );
+   //$translator_form->add_row( array( 'DESCRIPTION', /*T_*///('Two-letter language code (see ISO 639-1)'),
+   $translator_form->add_row( array( 'DESCRIPTION', /*T_*/('Language code (i.e. XML meta-tags code, e.g. zh-cn)'),
                                      'TEXTINPUT', 'browsercode', 30, 10, $browsercode ) );
-   $translator_form->add_row( array( 'DESCRIPTION', T_('English language name (i.e. French)'),
+   $translator_form->add_row( array( 'DESCRIPTION', /*T_*/('English language name (e.g. French)'),
                                      'TEXTINPUT', 'langname', 30, 50, $langname ) );
-   $translator_form->add_row( array( 'DESCRIPTION', T_("Character encoding (i.e. UTF-8)"),
+   $translator_form->add_row( array( 'DESCRIPTION', /*T_*/('Character encoding (e.g. utf-8)'),
                                      'TEXTINPUT', 'charenc', 30, 50, $charenc ) );
    $translator_form->add_row( array(
-      'SUBMITBUTTON', 'showlanguages', T_('Known languages'),
-      'SUBMITBUTTON', 'addlanguage', T_('Add language'),
+      'SUBMITBUTTON', 'showlanguages', /*T_*/('Known languages'),
+      'SUBMITBUTTON', 'addlanguage', /*T_*/('Add language'),
       ) );
    if( $showlanguages )
    {
@@ -109,21 +109,21 @@ require_once( "include/form_functions.php" );
          }
       }
       $translator_form->add_row( array(
-         'DESCRIPTION', T_('Known languages'),
+         'DESCRIPTION', /*T_*/('Known languages'),
          'TEXT', $str,
          ) );
    }
 
 
   /* Set translator privileges for user */
-   $translator_form->add_row( array( 'HEADER', T_('Set translator privileges for user') ) );
+   $translator_form->add_row( array( 'HEADER', /*T_*/('Set translator privileges for user') ) );
 
    $langs = get_language_descriptions_translated();
    asort($langs);
 
   /* Show the privileges of the user */
    $translator_form->add_row( array(
-      'DESCRIPTION', T_('User to set privileges for (use the userid)'),
+      'DESCRIPTION', /*T_*/('User to set privileges for (use the userid)'),
       'TEXTINPUT', 'transluser', 30, 80, $transluser,
       ) );
 
@@ -152,7 +152,7 @@ require_once( "include/form_functions.php" );
             $str.= $langname . ' (' . $value . ')<BR>';
          }
          $translator_form->add_row( array(
-            'DESCRIPTION', T_('Allowed to translate'),
+            'DESCRIPTION', /*T_*/('Allowed to translate'),
             'TEXT', $str,
             ) );
       }
@@ -160,30 +160,30 @@ require_once( "include/form_functions.php" );
    //else
    {
       $translator_form->add_row( array(
-         'SUBMITBUTTON', 'showpriv', T_('Show actual user privileges'),
+         'SUBMITBUTTON', 'showpriv', /*T_*/('Show actual user privileges'),
          ) );
    }
 
 
   /* Add a single language to the user */
    $translator_form->add_row( array(
-      'DESCRIPTION', T_('Select language to make user translator for that language.'),
+      'DESCRIPTION', /*T_*/('Select language to make user translator for that language.'),
       'SELECTBOX', 'transladdlang', 1, $langs, array( $transladdlang), false,
       ) );
    $translator_form->add_row( array(
-      'SUBMITBUTTON', 'transladd', T_('Add language for translator'),
+      'SUBMITBUTTON', 'transladd', /*T_*/('Add language for translator'),
       ) );
 
 
 
   /* Define the full set of languages of the user */
    $translator_form->add_row( array(
-      'DESCRIPTION', T_('Select the languages the user should be allowed to translate'),
+      'DESCRIPTION', /*T_*/('Select the languages the user should be allowed to translate'),
       //transllang[] is a MULTIPLE select box
       'SELECTBOX', 'transllang', 7, $langs, $transluser_langs, true,
       ) );
    $translator_form->add_row( array(
-      'SUBMITBUTTON', 'translpriv', T_('Set user privileges'),
+      'SUBMITBUTTON', 'translpriv', /*T_*/('Set user privileges'),
       ) );
 
 
