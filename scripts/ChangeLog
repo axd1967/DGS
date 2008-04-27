@@ -36,6 +36,14 @@ Changelog
      forum/index.php, forum/list.php:
    - more CSS-ing including column-classes
 
+   * scripts/update_translation_pages.php,
+     scripts/generate_translation_texts.php:
+   - displaying the group-names
+
+   * include/translation_functions.php:
+   - adjusted the '#'suffix removing function
+     now, if you need a '#' which is removed, end the string with a '#'
+
 2008-04-25 rodival
 
    * include/message_functions.php (message_list_table),

@@ -132,7 +132,11 @@ function grep_file($regexp, $file, &$matches)
    return preg_match($regexp.'m', $contents, $matches);
 }
 
-
+function group_string( $id)
+{
+   global $translationgroups;
+   return var_export( array_search($id, $translationgroups), true)."($id)";
+}
 
 {
    disable_cache();
@@ -196,18 +200,18 @@ function grep_file($regexp, $file, &$matches)
       //TODO: is this wanted?
       if( grep_file('/^\$TranslateGroups\[\] = \"(\w+)\";/', $file, $matches) )
       {
-         $tmp = $matches[1];
-         //echo $file . " " . $tmp . ", " . $translationgroups[$tmp] . "<br>\n";
-         if( !isset($translationgroups[$tmp]) )
+         $group_found = $matches[1];
+         //echo $file . " " . $group_found . ", " . $translationgroups[$group_found] . "<br>\n";
+         if( !isset($translationgroups[$group_found]) )
          {
-            echo "<hr>Should be adjusted NOW: '$tmp' from $file ... OR be added:<br>\n";
+            echo "<hr>Should be adjusted NOW: '$group_found' from $file ... OR be added:<br>\n";
             dbg_query("INSERT INTO TranslationGroups"
-               ." SET Groupname='" . mysql_addslashes($tmp) . "'");
+               ." SET Groupname='" . mysql_addslashes($group_found) . "'");
             echo "<hr>Fatal error: re-run the script!!!\n";
             end_html();
             exit;
          }
-         $translationpages_found[$file] = array($translationgroups[$tmp], false);
+         $translationpages_found[$file] = array($translationgroups[$group_found], false);
       }
    }
 
@@ -242,8 +246,9 @@ function grep_file($regexp, $file, &$matches)
          $ref[1] = true;
          if( $ref[0] !== $row['Group_ID'] )
          {
-            echo "<hr>Group changed: " . $row['Page'] .
-               ": " . $row['Group_ID'] . " --> " . $ref[0] . "<br>\n";
+            echo "<hr>Group changed: " . $row['Page']
+               . ": " . group_string( $row['Group_ID'])
+               . " --> " . group_string( $ref[0]) . "<br>\n";
             dbg_query("UPDATE TranslationPages SET Group_ID=" . $ref[0] .
                       " WHERE ID=" . $row['ID'] . " LIMIT 1");
          }
@@ -256,7 +261,8 @@ function grep_file($regexp, $file, &$matches)
    {
       if( $val[1] === false )
       {
-         echo "<hr>To be added: " . $page . "<br>\n";
+         echo "<hr>To be added: " . $page
+               . " --> " . group_string( $val[0]) . "<br>\n";
          dbg_query("INSERT INTO TranslationPages " .
             "SET Page='" . mysql_addslashes($page) . "', Group_ID=" . $val[0]);
       }

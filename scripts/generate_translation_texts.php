@@ -23,6 +23,8 @@ require_once( "include/make_translationfiles.php" );
 chdir( 'scripts' );
 
 {
+   disable_cache();
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -64,7 +66,7 @@ chdir( 'scripts' );
 
 
    $result = mysql_query(
-         "SELECT *,TranslationGroups.Groupname"
+         "SELECT TranslationPages.*,TranslationGroups.Groupname"
          ." FROM TranslationPages"
          ." LEFT JOIN TranslationGroups"
             ." ON TranslationGroups.ID=TranslationPages.Group_ID"
@@ -76,7 +78,7 @@ chdir( 'scripts' );
       $Group_ID = $row['Group_ID'];
       $GroupName = @$row['Groupname'];
 
-      echo "<hr><p>$Filename $Group_ID [$GroupName]</p><hr>\n";
+      echo "<hr><p>$Filename - Group $Group_ID [$GroupName]</p><hr>\n";
 
       $fd = fopen( $main_path . $Filename, 'r' )
          or error( 'couldnt_open_file' );
