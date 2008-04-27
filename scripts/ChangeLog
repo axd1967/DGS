@@ -23,6 +23,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-04-27 rodival
+
+   * skins/dragon/screen.css,
+     edit_profile.php:
+   - added warning messages for empty rating or email
+
 2008-04-25 rodival
 
    * include/message_functions.php (message_list_table),

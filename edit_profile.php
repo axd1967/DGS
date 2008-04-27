@@ -95,7 +95,7 @@ require_once( "include/form_functions.php" );
    $langs = get_language_descriptions_translated();
    arsort($langs); //will be reversed to place ahead the following:
    if( @$player_row['Translator'] )
-      $langs['N'] = /*T_*/('Native texts');
+      $langs['N'] = /**T_**/('Native texts');
    $langs['C'] = T_('Use browser settings');
 
    $notesheights = array();
@@ -140,13 +140,20 @@ require_once( "include/form_functions.php" );
                                   'TEXTINPUT', 'name', 32, 40,
                                   $player_row["Name"] ) );
 
-   if( $player_row["RatingStatus"] != 'RATED' )
+   if( $player_row['RatingStatus'] != 'RATED' )
    {
-      $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
-                                     'TEXTINPUT', 'rating', 16, 16,
-                                     echo_rating($player_row["Rating2"],2,0,1),
-                                     'SELECTBOX', 'ratingtype', 1, $ratings,
-                                     'dragonrating', false ) );
+      $row= array('DESCRIPTION', T_('Rating'),
+                  'TEXTINPUT', 'rating', 16, 16,
+                  echo_rating($player_row['Rating2'],2,0,1),
+                  'SELECTBOX', 'ratingtype', 1, $ratings,
+                  'dragonrating', false,
+                  );
+      if( !@$player_row['RatingStatus'] )
+         array_push( $row,
+                  'TEXT', '<span class="FormWarning">'
+                  .T_('Must be filled to start a rated game').'</span>'
+                  );
+      $profile_form->add_row( $row);
    }
    else
    {
@@ -167,9 +174,16 @@ require_once( "include/form_functions.php" );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Email notifications'),
                                   'SELECTBOX', 'emailnotify', 1, $notify_mess, $s, false ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Email'),
-                                  'TEXTINPUT', 'email', 32, 80,
-                                  $player_row["Email"] ) );
+   $row= array('DESCRIPTION', T_('Email'),
+               'TEXTINPUT', 'email', 32, 80,
+               $player_row['Email'],
+               );
+   if( !trim($player_row['Email']) )
+      array_push( $row,
+               'TEXT', '<span class="FormWarning">'
+                  .T_('Must be filled to receive a new password or a notification').'</span>'
+               );
+   $profile_form->add_row( $row);
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Country'),
                                   'SELECTBOX', 'country', 1, $COUNTRIES,

@@ -308,7 +308,7 @@ p.SysMsg {
 }
 
 span.FormWarning {
-   color: red;
+   color: darkred;
 }
 
 .DebugInfoBox {
