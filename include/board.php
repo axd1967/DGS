@@ -107,7 +107,7 @@ class Board
          return FALSE;
       }
 
-      if( $move<=0 or $move>$this->max_moves )
+      if( $move<=0 || $move>$this->max_moves )
          $move = $this->max_moves;
 
       $marked_dead = array();
@@ -116,7 +116,7 @@ class Board
       while( $row = mysql_fetch_assoc($result) )
       {
 
-         extract($row);
+         extract($row); //$MoveNr, $Stone, $PosX, $PosY, $Hours
 
          if ( $PosX <= POSX_ADDTIME ) //configuration actions
          {
@@ -128,7 +128,7 @@ class Board
             continue;
          }
 
-         if( $Stone == BLACK or $Stone == WHITE )
+         if( $Stone == BLACK || $Stone == WHITE )
          {
             $this->moves[$MoveNr] = array( $Stone, $PosX, $PosY);
          }
@@ -151,7 +151,7 @@ class Board
 
             $removed_dead = FALSE; // restart removal
          }
-         else if( $Stone == MARKED_BY_WHITE or $Stone == MARKED_BY_BLACK)
+         else if( $Stone == MARKED_BY_WHITE || $Stone == MARKED_BY_BLACK)
          {
             if( !$removed_dead )
             {
@@ -163,7 +163,7 @@ class Board
       }
       mysql_free_result($result);
 
-      if( !$no_marked_dead and $removed_dead )
+      if( !$no_marked_dead && $removed_dead )
       {
          foreach( $marked_dead as $sub )
          {
@@ -297,11 +297,11 @@ class Board
       echo "<tr>\n<th colspan=2>$caption</th>\n </tr>\n";
       echo "<tr>\n<td class=b>\n";
       if( count($bcap)>0 )
-         echo '<dl><dt>'.implode("\n<dt>", $bcap)."</dl>";
+         echo '<dl><dt>'.implode("</dt\n><dt>", $bcap)."</dt\n></dl>";
          //echo implode("<br>\n", $bcap);
       echo "</td>\n<td class=w>\n";
       if( count($wcap)>0 )
-         echo '<dl><dt>'.implode("\n<dt>", $wcap)."</dl>";
+         echo '<dl><dt>'.implode("</dt\n><dt>", $wcap)."</dt\n></dl>";
          //echo implode("<br>\n", $wcap);
       echo "</td>\n</tr>\n";
       echo "</table>\n";
@@ -460,6 +460,7 @@ class Board
       }
 
       $nomove_start = "<td class=brdx><img class=brdx alt=\"";
+      $nomove_src = "\" src=\"$stone_size/";
       $nomove_end = ".gif\"></td>\n";
       if( $may_play )
       {
@@ -491,6 +492,7 @@ class Board
                $move_alt = "\"><img class=brdx alt=\"";
                break;
          }
+         $move_src = "\" src=\"$stone_size/";
          $move_end = ".gif\"></a></td>\n";
       }
 
@@ -507,21 +509,21 @@ class Board
        * so, for those old browsers, use the bgcolor="..." option
        **/
       if( $this->woodcolor > 10 )
-         $woodstring = 'bgcolor="' . $woodbgcolors[$this->woodcolor - 10] . '"';
+         $woodstring = ' bgcolor="' . $woodbgcolors[$this->woodcolor - 10] . '"';
       else
-         $woodstring = 'style="background-image:url(images/wood' . $this->woodcolor . '.gif);"';
+         $woodstring = ' style="background-image:url(images/wood' . $this->woodcolor . '.gif);"';
 
       /**
        * Some simple browsers (like Pocket PC IE or PALM ones) poorly
        * manage the CSS commands related to cellspacing and cellpadding.
        * Most of the time, this results in a 1 or 2 pixels added to the
-       * cells size and is not so disturbing. But this is really annoying
-       * for the board cells.
+       * cells size and is not so disturbing into normal tables.
+       * But this is really annoying for the board cells.
        * So we keep the HTML commands here, even if deprecated.
        **/
       $cell_size_fix = ' border=0 cellspacing=0 cellpadding=0';
 
-      echo '<table class=Goban ' . $woodstring . $cell_size_fix . '>';
+      echo '<table class=Goban' . $woodstring . $cell_size_fix . '>';
 
       echo '<tbody>';
 
@@ -674,9 +676,9 @@ class Board
 
             if( $may_play and !$no_click and
                 ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
-               echo "$move_start$letter_c$letter_r$move_alt$alt\" src=\"$stone_size/$type$move_end";
+               echo "$move_start$letter_c$letter_r$move_alt$alt$move_src$type$move_end";
             else
-               echo "$nomove_start$alt\" src=\"$stone_size/$type$nomove_end";
+               echo "$nomove_start$alt$nomove_src$type$nomove_end";
 
             $letter_c++;
             $letter++; if( $letter == 'i' ) $letter++;

@@ -99,10 +99,10 @@ $ThePage = new Page('GamesList');
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 8, 'Numeric', 'Komi', true,
          array( FC_SIZE => 3 ));
-   $gfilter->add_filter( 9, 'Numeric', 'Moves', true,
+   $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true,
          array( FC_SIZE => 4 ));
    $gfilter->add_filter(13, 'RelativeDate', 'Lastchanged', true);
-   $gfilter->add_filter(14, 'RatedSelect', 'Rated', true,
+   $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
    if( !$observe && !$all ) //FU+RU
    {
@@ -350,7 +350,7 @@ $ThePage = new Page('GamesList');
    $qsql->add_part( SQLP_FIELDS, // std-fields
       'Games.*',
       'UNIX_TIMESTAMP(Lastchanged) AS LastchangedU',
-      "IF(Rated='N','N','Y') AS RatedX" );
+      "IF(Games.Rated='N','N','Y') AS RatedX" );
 
    if( $observe )
    {

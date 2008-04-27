@@ -1937,14 +1937,14 @@ div.BoardInfos {
 }
 */
 
-div.BoardInfos dl {
+dl.BoardInfos {
    border: 0px solid green;
    margin: 0px;
    padding: 0px;
    text-align: left;
 }
 
-div.BoardInfos dd {
+dl.BoardInfos dd {
    margin: 0px 0px;
    padding: 0px;
    text-align: left;

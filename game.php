@@ -18,10 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 if( @$_REQUEST['nextgame']
-      or @$_REQUEST['nextstatus']
-      or @$_REQUEST['nextback']
-      or @$_REQUEST['nextskip']
-      or @$_REQUEST['nextaddtime']
+      || @$_REQUEST['nextstatus']
+      || @$_REQUEST['nextback']
+      || @$_REQUEST['nextskip']
+      || @$_REQUEST['nextaddtime']
    )
 {
 //confirm use $_REQUEST: gid, move, action, coord, stonestring
@@ -71,6 +71,7 @@ function get_alt_arg( $n1, $n2)
 
    $message = get_request_arg( 'message');
 
+   disable_cache();
 
    connect2mysql();
 
@@ -86,9 +87,6 @@ function get_alt_arg( $n1, $n2)
       $my_id = $player_row['ID'];
    else
       $my_id = 0;
-
-   if( $logged_in && @$_REQUEST['toggleobserve'] )
-      toggle_observe_list($gid, $my_id);
 
 
    $query= "SELECT Games.*, " .
@@ -121,14 +119,14 @@ function get_alt_arg( $n1, $n2)
       $move = (int)@$_REQUEST['gotomove'];
    if( $move<=0 )
       $move = $Moves;
-   if( $Status == 'FINISHED' or $move < $Moves )
+   if( $Status == 'FINISHED' || $move < $Moves )
    {
       $may_play = false;
       $just_looking = true;
    }
    else
    {
-      $may_play = ( $logged_in and $my_id == $ToMove_ID ) ;
+      $may_play = ( $logged_in && $my_id == $ToMove_ID ) ;
       $just_looking = !$may_play;
       if( $may_play )
       {
@@ -145,22 +143,37 @@ function get_alt_arg( $n1, $n2)
             {
                $action = 'choose_move';
             }
-            else if( $Status == 'SCORE' or $Status == 'SCORE2' )
+            else if( $Status == 'SCORE' || $Status == 'SCORE2' )
                $action = 'remove';
          }
       }
    }
 
 
-   // ??? no more useful:
-   if( !$just_looking && $logged_in && $my_id != $ToMove_ID )
+   // ??? no more useful: equ (!$just_looking && !$may_play) which is nearly ($may_play && !$may_play)
+   if( !$just_looking && !($logged_in && $my_id == $ToMove_ID) )
       error('not_your_turn');
 
    // allow validation
    if ( $just_looking && $action == 'add_time' )
       $just_looking = false;
 
-   $my_game = ( $logged_in && ( $my_id == $Black_ID or $my_id == $White_ID ) ) ;
+   $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) ) ;
+
+   if( !$logged_in || $my_game || ($Status == 'FINISHED') )
+      $my_observe = null;
+   else
+   {
+      $my_observe = is_on_observe_list( $gid, $my_id);
+      if( @$_REQUEST['toggleobserve'] == ($my_observe ?'N' :'Y') )
+      {
+         //TODO: weakness: toggle_observe_list() recall is_on_observe_list()!
+         toggle_observe_list($gid, $my_id);
+         $my_observe = !$my_observe;
+      }
+   }
+   $has_observers = has_observers( $gid);
+
 
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
 
@@ -169,9 +182,9 @@ function get_alt_arg( $n1, $n2)
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
    else if( $ToMove_ID )
-      error("database_corrupted", "game.bad_ToMove_ID($gid)");
+      error('database_corrupted', "game.bad_ToMove_ID($gid)");
 
-   if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0) )
+   if( $Status != 'FINISHED' && ($Maintime > 0 || $Byotime > 0) )
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
       $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
@@ -194,17 +207,17 @@ function get_alt_arg( $n1, $n2)
    $may_add_time = $my_game && allow_add_time_opponent( $game_row, $my_id);
 
 
-   $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or
-                       $action == 'choose_move' or $action == 'domove' );
+   $no_marked_dead = ( $Status == 'PLAY' || $Status == 'PASS' ||
+                       $action == 'choose_move' || $action == 'domove' );
 
    $TheBoard = new Board( );
    if( !$TheBoard->load_from_db( $game_row, $move, $no_marked_dead) )
-      error('internal_error', "game load_from_db $gid");
+      error('internal_error', "game.load_from_db($gid)");
    $movecol= $TheBoard->movecol;
    $movemsg= $TheBoard->movemsg;
 
 
-   $extra_message = false;
+   $extra_infos = array();
 
    if( $just_looking ) //no process except 'movechange'
    {
@@ -212,7 +225,7 @@ function get_alt_arg( $n1, $n2)
       $may_play = false;
       if( $Status == 'FINISHED' )
       {
-         $extra_message = "<font color=\"blue\">" . score2text($Score, true) . "</font>";
+         $extra_infos[score2text($Score, true)] = 'Score';
       }
    }
    else switch( $action )
@@ -246,8 +259,7 @@ function get_alt_arg( $n1, $n2)
          $game_row['White_Prisoners'] = $White_Prisoners;
 
          $stonestring = '';
-         reset($prisoners);
-         while( list($dummy, $tmp) = each($prisoners) )
+         foreach($prisoners as $tmp)
          {
             list($x,$y) = $tmp;
             $stonestring .= number2sgf_coords($x, $y, $Size);
@@ -263,18 +275,17 @@ function get_alt_arg( $n1, $n2)
 
       case 'handicap': //multiple input step + validation
       {
-         if( $Status != 'PLAY' or !( $Handicap>1 && $Moves==0 ) )
+         if( $Status != 'PLAY' || !( $Handicap>1 && $Moves==0 ) )
             error('invalid_action',"game.handicap.$Status");
 
          $paterr = '';
          $patdone = 0;
          if( ENA_STDHANDICAP && !$stonestring && !$coord
-            && ( $StdHandicap=='Y' or @$_REQUEST['stdhandicap'] ) )
+            && ( $StdHandicap=='Y' || @$_REQUEST['stdhandicap'] ) )
          {
             $stonestring = get_handicap_pattern( $Size, $Handicap, $paterr);
-            $extra_message = "<font color=\"green\">"
-              . T_('A standard placement of handicap stones has been requested.')
-              . "</font>";
+            $extra_infos[T_('A standard placement of handicap stones has been requested.')]
+               = 'Info';
             //$coord = ''; // $coord is incoherent with the following
             $patdone = 1;
          }
@@ -283,20 +294,21 @@ function get_alt_arg( $n1, $n2)
          if( (strlen($stonestring)/2) < $Handicap )
          {
             $validation_step = false;
-            $extra_message = "<font color=\"green\">" .
-              T_('Place your handicap stones, please!') . "</font>";
+            $extra_infos[T_('Place your handicap stones, please!')]
+               = 'Info';
             if( ENA_STDHANDICAP && !$patdone && strlen($stonestring)<2 )
             {
-               $extra_message.= "<br><a href=\"game.php?gid=$gid".URI_AMP."stdhandicap=t\">"
-                 . T_('Standard placement') . "</a>";
+               $extra_infos[
+                     "<a href=\"game.php?gid=$gid".URI_AMP."stdhandicap=t\">"
+                     . T_('Standard placement') . "</a>"
+                  ] = '';
             }
          }
          else
             $validation_step = true;
 
          if( $paterr )
-            $extra_message = "<font color=\"red\">" . $paterr .
-                              "</font><br>" . $extra_message;
+            $extra_infos[$paterr] = 'Important';
          $coord = ''; // already processed/stored in $stonestring
       }
       break;
@@ -304,7 +316,7 @@ function get_alt_arg( $n1, $n2)
       case 'resign': //for validation
       {
          $validation_step = true;
-         $extra_message = "<font color=\"red\">" . T_('Resigning') . "</font>";
+         $extra_infos[T_('Resigning')] = 'Important';
       }
       break;
 
@@ -321,29 +333,29 @@ function get_alt_arg( $n1, $n2)
 
       case 'pass': //for validation
       {
-         if( $Status != 'PLAY' and $Status != 'PASS' )
+         if( $Status != 'PLAY' && $Status != 'PASS' )
             error('invalid_action',"game.pass.$Status");
 
          $validation_step = true;
-         $extra_message = "<font color=\"green\">" . T_('Passing') . "</font>";
+         $extra_infos[T_('Passing')] = 'Info';
       }
       break;
 
       case 'delete': //for validation
       {
-         if( !$too_few_moves or
-           !($Status='PLAY' or $Status='PASS' or $Status='SCORE' or $Status='SCORE2')
+         if( !$too_few_moves ||
+           !($Status='PLAY' || $Status='PASS' || $Status='SCORE' || $Status='SCORE2')
             )
             error('invalid_action',"game.delete.$Status");
 
          $validation_step = true;
-         $extra_message = "<font color=\"red\">" . T_('Deleting game') . "</font>";
+         $extra_infos[T_('Deleting game')] = 'Important';
       }
       break;
 
       case 'remove': //multiple input step
       {
-         if( $Status != 'SCORE' and $Status != 'SCORE2' )
+         if( $Status != 'SCORE' && $Status != 'SCORE2' )
             error('invalid_action',"game.remove.$Status");
 
          $validation_step = false;
@@ -353,28 +365,25 @@ function get_alt_arg( $n1, $n2)
          $done_url = "game.php?gid=$gid".URI_AMP."a=done"
             . ( $stonestring ? URI_AMP."stonestring=$stonestring" : '' );
 
-         $extra_message = "<font color=\"blue\">" . T_('Score') . ": " .
-             score2text($score, true) . "</font>";
-         $extra_message.= "<P>";
-         $extra_message.= "<font color=\"green\">"
-            . sprintf( T_("Please mark dead stones and click %s'done'%s when finished."),
-                        "<a href=\"$done_url\">", '</a>' )
-            . "</font>";
+         $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
+         $extra_infos[
+               sprintf( T_("Please mark dead stones and click %s'done'%s when finished."),
+                        "<a href=\"$done_url\">", '</a>')
+            ] = 'Info';
          $coord = ''; // already processed/stored in $stonestring
       }
       break;
 
       case 'done': //for validation after 'remove'
       {
-         if( $Status != 'SCORE' and $Status != 'SCORE2' )
+         if( $Status != 'SCORE' && $Status != 'SCORE2' )
             error('invalid_action',"game.done.$Status");
 
          $validation_step = true;
          check_remove( $TheBoard);
 //ajusted globals by check_remove(): $score, $stonestring;
 
-         $extra_message = "<font color=\"blue\">" . T_('Score') . ": " .
-             score2text($score, true) . "</font>";
+         $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
       }
       break;
 
@@ -453,7 +462,7 @@ function get_alt_arg( $n1, $n2)
          unset( $tmp);
       }
 
-      if( @$_REQUEST['savenotes'] or @$_REQUEST['togglenotes'] )
+      if( @$_REQUEST['savenotes'] || @$_REQUEST['togglenotes'] )
       {
          if( @$_REQUEST['togglenotes'] )
             $noteshide = ($noteshide == 'Y' ? 'N' : 'Y' );
@@ -462,11 +471,10 @@ function get_alt_arg( $n1, $n2)
             $notes = rtrim(get_request_arg('gamenotes'));
 
          // note: PRIMARY KEY (gid,player) is needed for:
-         mysql_query(
+         db_query( 'game.replace_gamenote',
                  "REPLACE INTO GamesNotes (gid,player,Hidden,Notes)"
                . " VALUES ($gid,'$my_color','$noteshide','"
-                  . mysql_addslashes($notes) . "')")
-            or error('mysql_query_failed', 'game.replace_gamenote');
+                  . mysql_addslashes($notes) . "')" );
       }
 /*
       else if( $show_notes && @$_REQUEST['movechange'] )
@@ -483,6 +491,7 @@ function get_alt_arg( $n1, $n2)
       $show_notes = false;
       $noteshide = 'Y';
    }
+   db_close();
 
    if( ENA_MOVENUMBERS )
    {
@@ -498,7 +507,7 @@ function get_alt_arg( $n1, $n2)
 
 
    $title = T_("Game") ." #$gid,$move";
-   start_page($title, true, $logged_in, $player_row, $TheBoard->style_string());
+   start_page($title, 0, $logged_in, $player_row, $TheBoard->style_string());
 
 
 
@@ -523,15 +532,19 @@ function get_alt_arg( $n1, $n2)
    $TheBoard->draw_board( $may_play, $action, $stonestring);
    //TODO: javascript move buttons && numbers hide
 
-   if( $extra_message ) //score messages
+   //messages about actions
+   if( $validation_step )
+      $extra_infos[T_('Hit "Submit" to confirm')] = 'Guidance';
+
+   if( count($extra_infos) )
    {
-      echo "<center><p>$extra_message";
-      if( $validation_step )
-         echo ' - ' . T_('Hit "Submit" to confirm');
-      echo "</p></center>";
+      echo "\n<dl class=ExtraInfos>";
+      foreach($extra_infos as $txt => $class)
+         echo "<dd".($class ?" class=\"$class\"" :'').">$txt</dd>";
+      echo "</dl>";
    }
    else
-      echo '<br>';
+      echo "\n<br>";
 
    $cols = 2;
    if( $show_notes && $noteshide != 'Y' )
@@ -565,7 +578,7 @@ function get_alt_arg( $n1, $n2)
    }
    else if( $Moves > 1 )
    {
-      draw_moves();
+      draw_moves( $gid, $move);
       if( $show_notes )
       {
          draw_notes('Y');
@@ -579,14 +592,14 @@ function get_alt_arg( $n1, $n2)
          $show_notes = false;
       }
 
-      //if( $my_game ) //sgf comments may be viewed by observers
+      //if( $my_game ) //anyway, the observers may view the comments in the sgf files
       {
          echo "\n<DIV class=Comments>"
             . anchor( "game_comments.php?gid=$gid"
                     , T_('Comments')
                     , ''
-                    , array( 'accesskey' => 'c'
-                           , 'target' => $FRIENDLY_SHORT_NAME.'_game_comments'
+                    , array( //'accesskey' => 'c', //already used for "Contacts"
+                           'target' => $FRIENDLY_SHORT_NAME.'_game_comments'
                     ) )
             . "</DIV>\n";
       }
@@ -611,7 +624,8 @@ function get_alt_arg( $n1, $n2)
 
    foreach( $page_hiddens as $key => $val )
    {
-      echo "<input type=\"hidden\" name=\"$key\" value=\"$val\">";
+      $val = attb_quote($val);
+      echo "<input type=\"hidden\" name=\"$key\" value=$val>";
    }
    echo "</FORM>\n";
 
@@ -627,7 +641,7 @@ function get_alt_arg( $n1, $n2)
 
 
 
-   if( $may_play or $validation_step ) //should be "from status page" as the nextgame option
+   if( $may_play || $validation_step ) //should be "from status page" as the nextgame option
    {
       $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."nextskip=t";
    }
@@ -674,24 +688,27 @@ function get_alt_arg( $n1, $n2)
          $menu_array[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
       }
 
-      if( ($Status != 'FINISHED') and !$my_game and $logged_in )
+      if( isset($my_observe) )
       {
-         if( is_on_observe_list( $gid, $my_id ) )
-            $menu_array[T_('Remove from observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=t";
+         if( $my_observe )
+            $menu_array[T_('Remove from observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=N";
          else
-            $menu_array[T_('Add to observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=t";
+            $menu_array[T_('Add to observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=Y";
       }
 
-      if ( has_observers( $gid ) )
+      if( $has_observers )
          $menu_array[T_('Show observers')] = "users.php?observe=$gid";
    }
 
    end_page(@$menu_array);
 }
 
-function draw_moves()
+function draw_moves( $gid, $move)
 {
-   global $TheBoard, $gid, $move, $Size;
+   global $TheBoard;
+
+   $Size= $TheBoard->size;
+   $Moves= $TheBoard->max_moves;
 
    //basic_safe() because inside <option></option>
    $trmov = basic_safe(T_('Move'));
@@ -699,47 +716,80 @@ function draw_moves()
    $trsco = basic_safe(T_('Scoring'));
    $trres = basic_safe(T_('Resign'));
 
-   $str = '';
-   foreach( $TheBoard->moves as $MoveNr => $sub )
+   $ctab = '&nbsp;';
+   $wtab = str_repeat($ctab, 8);
+   $ofmt = "<OPTION value=\"%d\"%s>%s$ctab%s:$ctab$ctab%s</OPTION>\n";
+
+   $str= '';
+
+/**
+  make the <OPTION> list smaller:
+  e.g.: 100 moves, move #50 selected, step=sqrt(100)=10
+   => option lines provided, relative to the move selected:
+  +50 ... +40 ... +30 ... +20 ... +10 +9 +8 +7 +6 +5 +4 +3 +2 +1
+  selected -1 -2 -3 -4 -5 -6 -7 -8 -9 -10 ... -20 ... -30 ... -40 ... -50
+  Near (2*step+1) + (step-2) option lines => 2*step < nb_lines < 3*step
+ **/
+   $step= 5 * max( 1, round(sqrt($Moves)/5) );
+   if( $move <= $step )
+      $i= 0;
+   else
+      $i= ($move-1) % $step;
+   while( $i++ < $Moves )
    {
-      list( $Stone, $PosX, $PosY) = $sub;
-      if( $Stone != BLACK and $Stone != WHITE ) continue;
-
-      switch( $PosX )
+      $dlt= abs($move-$i);
+      if( $i == $Moves || $dlt < $step || ($dlt % $step) == 0 )
       {
-         case POSX_PASS :
-            $c = $trpas;
-            break;
-         case POSX_SCORE :
-            $c = $trsco;
-            break;
-         case POSX_RESIGN :
-            $c = $trres;
-            break;
-         default :
-            if( $PosX < 0)
-               continue;
-            $c = number2board_coords($PosX, $PosY, $Size);
-            break;
-      }
+         list( $Stone, $PosX, $PosY)= @$TheBoard->moves[$i];
+         if( $Stone != BLACK && $Stone != WHITE )
+            continue;
 
-      if( $Stone == WHITE ) $c = str_repeat('&nbsp;', 12) . $c;
-      if( $MoveNr < 10 ) $c = '&nbsp;'.$c;
-      $str = sprintf('<OPTION value="%d" %s>%s&nbsp;%s:&nbsp;&nbsp;%s</OPTION>' . "\n"
-                 , $MoveNr, ($MoveNr == $move ? ' selected' : '')
-                 , $trmov, $MoveNr, $c)
-          . $str;
+         switch( $PosX )
+         {
+            case POSX_PASS :
+               $c = $trpas;
+               break;
+            case POSX_SCORE :
+               $c = $trsco;
+               break;
+            case POSX_RESIGN :
+               $c = $trres;
+               break;
+            default :
+               if( $PosX < 0)
+                  continue;
+               $c = number2board_coords($PosX, $PosY, $Size);
+               break;
+         }
+
+         $c= str_repeat($ctab, strlen($Moves)-strlen($i)).$c;
+         if( $Stone == WHITE ) $c= $wtab.$c;
+         $c= sprintf( $ofmt
+                    , $i, ($i == $move ? ' selected' : '')
+                    , $trmov, $i, $c);
+      }
+      else
+      {
+         //$c= "<OPTION value=\"$move\">---</OPTION>\n";
+         //$c= "<OPTION>---</OPTION>\n";
+         $c= "<OPTION value=\"$move\" disabled>---</OPTION>\n";
+         //here $step is >1 because of $dlt%$step==0
+         $i+= $step-2;
+         if( $i >= $Moves ) $i= $Moves-1;
+      }
+      //first move at bottom:
+      $str= $c.$str;
    }
 
-   // add selectbox to show specifc move
-   echo '<SELECT name="gotomove" size="1"';
+   // add selectbox to show specific move
+   echo "\n<SELECT name=\"gotomove\" size=\"1\"";
    if( ALLOW_JSCRIPT )
    {
       //echo " onchange=\"javascript:alert('Index: ' + this.selectedIndex + ' Valeur: ' + this.options[this.selectedIndex].value );\"";
       //echo " onchange=\"javascript:this.form.submit();\"";
       echo " onchange=\"javascript:this.form['movechange'].click();\"";
    }
-   echo ">\n$str</SELECT>\n";
+   echo ">\n$str</SELECT>";
    echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">";
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">";
 }
@@ -958,7 +1008,7 @@ function draw_board_info($board)
       }
    }
    if( $txt )
-      $txt= "<div class=BoardInfos><dl>$txt</dl></div>\n";
+      $txt= "<dl class=BoardInfos>$txt</dl>\n";
    return $txt;
 }
 
