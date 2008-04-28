@@ -23,6 +23,13 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-04-28 rodival
+
+   * include/std_functions.php (user_reference, make_tools):
+   - user_reference: fix a badly matched parenthesis
+   - make_tools: complete the last row with enough empty cells
+   - else minor fixes
+
 2008-04-27 rodival
 
    * error.php:

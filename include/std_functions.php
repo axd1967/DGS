@@ -839,19 +839,29 @@ function make_tools( $array, $width=0)
 {
    if( !is_array($array) or count($array)==0 )
       return;
-   echo "<table class=NotPrintable id='pageTools' border=0 cellspacing=0 cellpadding=6>\n<tr>\n";
-   $i= 0;
+   echo "<table class=NotPrintable id='pageTools'>\n<tr>\n";
+   $c= 0;
+   $r= 1;
    foreach( $array as $lnk => $sub )
    {
       list( $src, $alt, $tit) = $sub;
-      if( $width>0 && $i==$width )
+      if( $width>0 && $c>=$width )
       {
          echo "</tr><tr>\n";
-         $i= 1;
+         $c= 1;
+         $r++;
       }
       else
-         $i++;
+         $c++;
       echo '<td>'.anchor( $lnk, image( $src, $alt, $tit))."</td>\n";
+   }
+   $c= $width-$c;
+   if( $r>1 && $c>0 )
+   {
+      if( $c>1 )
+         echo "<td colspan=$c></td>\n";
+      else
+         echo "<td></td>\n";
    }
    echo "</tr>\n</table>\n";
 }
@@ -1039,7 +1049,7 @@ function send_message( $debugmsg, $text='', $subject=''
    $text = mysql_addslashes(trim($text));
    $subject = mysql_addslashes(trim($subject));
    if( $subject == '' )
-      $subject = '???'; //like in forum posts
+      $subject = UNKNOWN_VALUE; //like in forum posts
 
    if( !isset($type) or !is_string($type) or !$type )
       $type = 'NORMAL';
@@ -1866,6 +1876,9 @@ function build_maxrows_array( $maxrows, $rows_limit = MAXROWS_PER_PAGE )
 // if $sep is true, a '?' or '&' is added at the end
 // this is somehow the split_url() mirror
 // NOTE: Since PHP5, there is http_build_query() that do nearly the same thing
+// Warning: These chars must not be a part of a URI query. From RFC 2396
+//      unwise = "{" | "}" | "|" | "\" | "^" | "[" | "]" | "`"
+//    Instead of 'varname[]' use 'varname%5b%5d'
 //
 // Example:
 //    make_url('test.php', array('a'=> 1, 'b' => 'foo'), false)  gives  'test.php?a=1&b=foo'
@@ -1880,9 +1893,9 @@ function make_url($url, $args, $sep=false)
    $separator = ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
    if( is_array( $args) )
    {
-      foreach( $args as $var=>$value )
+      foreach( $args as $var => $value )
       {
-         if( empty($value) || is_numeric($var) )
+         if( empty($value) || !is_string($var) )
             continue;
          if( !is_array($value) )
          {
@@ -1890,10 +1903,10 @@ function make_url($url, $args, $sep=false)
             $separator = URI_AMP;
             continue;
          }
-         $var .= '%5b%5d'; //encoded []
+         $var .= '%5b%5d='; //encoded []
          foreach( $value as $tmp )
          {
-            $url .= $separator . $var . '=' . urlencode($tmp);
+            $url .= $separator . $var . urlencode($tmp);
             $separator = URI_AMP;
          }
       }
@@ -2333,13 +2346,13 @@ function nsq_addslashes( $str )
   return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $str );
 }
 
-function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, $blackname=false)
+function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=false, $blackname=false)
 {
  global $base_path;
 
    $gid = (int)$gid;
    $legal = ( $gid<=0 ? 0 : 1 );
-   if( ($whitename===false or $blackname===false) && $legal )
+   if( $legal && ($whitename===false || $blackname===false) )
    {
      $query = 'SELECT black.Name as blackname, white.Name as whitename ' .
               'FROM Games, Players as white, Players as black ' .
@@ -2353,7 +2366,7 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
          $whitename = $row['whitename'];
        if( $blackname===false )
          $blackname = $row['blackname'];
-       $safe = true;
+       $safe_it = true;
      }
      else
        $legal = 0;
@@ -2370,7 +2383,7 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
       $whitename = "$whitename vs. $blackname" ;
    else
       $whitename = "$whitename$blackname" ;
-   if( $safe )
+   if( $safe_it )
       $whitename = make_html_safe($whitename) ;
    if( $move>0 )
       $whitename.= " #$move";
@@ -2394,11 +2407,11 @@ function game_reference( $link, $safe, $class, $gid, $move=0, $whitename=false, 
    return $whitename;
 }
 
-function send_reference( $link, $safe, $class, $player_ref, $player_name=false, $player_handle=false)
+function send_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
    if( is_numeric($link) ) //not owned reference
       $link= -$link; //make it a send_reference
-   return user_reference( $link, $safe, $class, $player_ref, $player_name, $player_handle);
+   return user_reference( $link, $safe_it, $class, $player_ref, $player_name, $player_handle);
 }
 
 /**
@@ -2416,11 +2429,11 @@ function send_reference( $link, $safe, $class, $player_ref, $player_name=false, 
  * : an integer => the reference will use it as a user ID
  * : a string => the reference will use it as a user Handle
  * :   (if the first char is HANDLE_TAG_CHAR, it is removed)
- * : an array => the reference will use its 'ID' field, and eventually, the
+ * : an array => the reference will use its 'ID' field, and if possible, the
  * :   'Handle' and 'Name' fields if $player_name or $player_handle are absent
  * then the missing arguments will be retreived from the database if needed.
  **/
-function user_reference( $link, $safe, $class, $player_ref, $player_name=false, $player_handle=false)
+function user_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
  global $base_path;
    if( is_array($player_ref) ) //i.e. $player_row
@@ -2430,9 +2443,15 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
       if( !$player_handle )
          $player_handle = $player_ref['Handle'];
       $player_ref = (int)$player_ref['ID'];
+      $byid = 1;
+      $legal = 0; //temporary
    }
-   $legal = ( substr($player_ref,0,1) == HANDLE_TAG_CHAR ); //temporary
-   if( !is_numeric($player_ref) || $legal )
+   else
+   {
+      $byid = is_numeric($player_ref);
+      $legal = ( substr($player_ref,0,1) == HANDLE_TAG_CHAR );
+   }
+   if( !$byid || $legal )
    {
       $byid = 0;
       if( $legal )
@@ -2447,7 +2466,7 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
       $player_ref = (int)$player_ref;
       $legal = ( $player_ref > 0 );
    }
-   if( ($player_name===false || ( $player_handle===false) && $legal ) )
+   if( $legal && ($player_name===false || $player_handle===false) )
    {
      $query = 'SELECT Name, Handle ' .
               'FROM Players ' .
@@ -2459,7 +2478,7 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
          $player_name = $row['Name'];
        if( $player_handle===false )
          $player_handle = $row['Handle'];
-       $safe = true;
+       $safe_it = true;
      }
      else
        $legal = 0;
@@ -2470,7 +2489,7 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
       $player_name = "User#$player_ref";
    if( $player_handle )
       $player_name.= " ($player_handle)" ;
-   if( $safe )
+   if( $safe_it )
       $player_name = make_html_safe($player_name) ;
    if( $link && $legal )
    {
@@ -2495,7 +2514,7 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
                  : UHANDLE_NAME."=".str_replace('+','%2B',$player_ref) );
       $url = 'A href="' . $base_path. $url . '"';
       if( $class )
-        $url.= " class=$class";
+        $url.= " class=\"$class\"";
       if( $link & REF_LINK_BLANK )
         $url.= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
@@ -2509,10 +2528,11 @@ function user_reference( $link, $safe, $class, $player_ref, $player_name=false, 
    return $player_name ;
 }
 
-function is_on_observe_list( $gid, $uid )
+// returns true, if there are observers for specified game
+function has_observers( $gid )
 {
-   $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid")
-      or error('mysql_query_failed','is_on_observe_list');
+   $result = db_query( 'has_observers',
+         "SELECT ID FROM Observers WHERE gid=$gid LIMIT 1");
    if( !$result )
       return false;
    $res = ( @mysql_num_rows($result) > 0 );
@@ -2520,11 +2540,10 @@ function is_on_observe_list( $gid, $uid )
    return $res;
 }
 
-// returns true, if there are observers for specified game
-function has_observers( $gid )
+function is_on_observe_list( $gid, $uid )
 {
-   $result = mysql_query("SELECT ID FROM Observers WHERE gid=$gid LIMIT 1")
-      or error('mysql_query_failed','has_observers');
+   $result = db_query( 'is_on_observe_list',
+         "SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid");
    if( !$result )
       return false;
    $res = ( @mysql_num_rows($result) > 0 );
@@ -2534,12 +2553,14 @@ function has_observers( $gid )
 
 function toggle_observe_list( $gid, $uid )
 {
-   if( is_on_observe_list( $gid, $uid ) )
-      mysql_query("DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1")
-         or error('mysql_query_failed','toggle_observe_list.delete');
+   $res = is_on_observe_list( $gid, $uid );
+   if( $res )
+      db_query( 'toggle_observe_list.delete',
+         "DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
    else
-      mysql_query("INSERT INTO Observers SET gid=$gid, uid=$uid")
-         or error('mysql_query_failed','toggle_observe_list.insert');
+      db_query( 'toggle_observe_list.insert',
+         "INSERT INTO Observers SET gid=$gid, uid=$uid");
+   return !$res;
 }
 
 //$Text must NOT be escaped by mysql_addslashes()
