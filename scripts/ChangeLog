@@ -23,6 +23,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-04-29 rodival
+
+   * include/form_functions.php:
+   - handled forbidden chars in hiddens
+
+   * scripts/data_report.php:
+   - fixed a possible W3C compliance problem
+
 2008-04-28 rodival
 
    * include/std_functions.php (user_reference, make_tools):

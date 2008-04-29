@@ -46,7 +46,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    $colsize= get_request_arg( 'colsize', 40);
    $colwrap= get_request_arg( 'colwrap', 'cut');
 
-   $oldquery= get_request_arg( 'oldquery', '');
+   $oldquery= urldecode(get_request_arg( 'oldquery', ''));
    if( UNBUF_TIMOUT > 0 )
       $unbuffered= (int)(bool)get_request_arg( 'unbuffered', '');
    else
@@ -137,7 +137,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       }
       if( !$dbthread )
       {
-         mysql_close( $dbcnx);
+         @mysql_close( $dbcnx);
          error('mysql_connect_failed', "data_report.dbthread($dbthread)");
       }
 
@@ -145,7 +145,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       $dbcnxctl = mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD, true );
       if( !$dbcnxctl )
       {
-         mysql_close( $dbcnx);
+         @mysql_close( $dbcnx);
          error('mysql_connect_failed', 'data_report.dbcnxctl');
       }
    } //$unbuffered
@@ -182,7 +182,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
 
    if( $apply )
    {
-      if( $query && $query === $oldquery )
+      if( $query && $query == $oldquery )
          $execute = 1;
       else
          $execute = 0;
@@ -192,7 +192,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
 
    $row = array(
       'HIDDEN', 'charset', $encoding_used,
-      'HIDDEN', 'oldquery', $query,
+      'HIDDEN', 'oldquery', urlencode($query),
       'TAB', 'CELL', $formcol-1, '',
       'OWNHTML', '<INPUT type="submit" name="apply" accesskey="x" value="Apply [&amp;x]">',
       'TEXT', '&nbsp;&nbsp;col size:&nbsp;',

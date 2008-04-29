@@ -1494,6 +1494,7 @@ class Form
       $this->hiddens[$key] = $val;
    }
 
+   // \brief return the array of hiddens merged with owneds and attachments' ones
    function get_hiddens( &$hiddens)
    {
       $hiddens = array_merge( (array)$hiddens, $this->hiddens);
@@ -1503,6 +1504,7 @@ class Form
       }
    }
 
+   // \brief return the form-string of hiddens merged with owneds and attachments' ones
    function get_hiddens_string()
    {
       $hiddens = $this->hiddens;
@@ -1513,7 +1515,8 @@ class Form
       $str = '';
       foreach ($hiddens as $key => $val)
       {
-         $str.= "<input type=\"hidden\" name=\"$key\" value=\"$val\">";
+         $val= attb_quote($val);
+         $str.= "<input type=\"hidden\" name=\"$key\" value=$val>";
       }
       $this->hiddens_echoed = true;
       return $str;
