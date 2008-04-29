@@ -198,7 +198,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       'TEXT', '&nbsp;&nbsp;col size:&nbsp;',
       'TEXTINPUT', 'colsize', 3 , 3, $colsize,
       'RADIOBUTTONS', 'colwrap'
-         , array('cut'=>'cut','wrap'=>'wrap',''=>'none',), $colwrap,
+         , array('cut'=>'cut','wrap'=>'wrap','none'=>'none',), $colwrap,
       );
    if( UNBUF_TIMOUT > 0 )
       array_push( $row,
