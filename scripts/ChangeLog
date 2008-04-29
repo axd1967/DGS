@@ -25,7 +25,8 @@ Changelog
 
 2008-04-29 rodival
 
-   * include/form_functions.php:
+   * include/form_functions.php (get_hiddens_string),
+     include/table_columns.php (get_hiddens_string):
    - handled forbidden chars in hiddens
 
    * scripts/data_report.php:

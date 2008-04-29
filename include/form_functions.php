@@ -1504,7 +1504,7 @@ class Form
       }
    }
 
-   // \brief return the form-string of hiddens merged with owneds and attachments' ones
+   // \brief return the form-string of owned hiddens merged with attachments' ones
    function get_hiddens_string()
    {
       $hiddens = $this->hiddens;

@@ -752,7 +752,8 @@ class Table
       $str = '';
       foreach( $hiddens as $key => $val )
       {
-         $str.= "<input type=\"hidden\" name=\"$key\" value=\"$val\">\n";
+         $val= attb_quote($val);
+         $str.= "<input type=\"hidden\" name=\"$key\" value=$val>\n";
       }
       return $str;
    }
