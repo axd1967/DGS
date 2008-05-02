@@ -115,10 +115,10 @@ class GoDiagram
          if( is_hoshi($x, $y, $sz) )
             $fig = 'h';
          else {
-         if( $y == 0 ) $fig = 'u';
+            if( $y == 0 ) $fig = 'u';
             else if( $y == $sz-1 ) $fig = 'd';
             else $fig = 'e';
-         if( $x == 0 ) $fig .= 'l';
+            if( $x == 0 ) $fig .= 'l';
             else if( $x == $sz-1 ) $fig .= 'r';
          }
          return $fig;
@@ -148,8 +148,8 @@ class GoDiagram
             for( $x = $this->Left-1; $x < $this->Right; $x++)
             {
                $str = $row[$x-$this->Left+1];
-               if( $str{0} === 'e' )
-                  if( strlen($str)>2 && $str{1} === 'l' ) //empty+letter
+               if( $str[0] === 'e' )
+                  if( strlen($str)>2 && $str[1] === 'l' ) //empty+letter
                      $str = substr($str, 1);
                   else
                      $str = $this->get_empty_image($x, $y, $this->Size) . substr($str, 1);

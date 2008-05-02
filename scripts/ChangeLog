@@ -23,6 +23,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-02 rodival
+
+   * include/std_functions.php (limit),
+     include/coords.php (sgf2number_coords, board2number_coords),
+     include/filter_parser.php (parse),
+     include/form_functions.php (parse_layout_global),
+     include/tokenizer.php (parse_quote_double, parse_quote_quote,
+      parse_quote_escape),
+     include/GoDiagram.php (echo_board):
+   - replacing the string indexes using the deprecated '{}' by '[]'
+
 2008-04-29 rodival
 
    * include/form_functions.php (get_hiddens_string),

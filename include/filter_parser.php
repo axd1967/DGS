@@ -487,7 +487,7 @@ class TextParser extends BasicParser
             // add wild as prefix and suffix to build substring-search
             if ( $this->is_flags_set(TEXTPARSER_IMPLICIT_WILD) )
             {
-               if ( $v{0} != $wild_char )
+               if ( $v[0] != $wild_char )
                   $v = $wild_char . $v;
                if ( substr($v, -1) != $wild_char )
                   $v .= $wild_char;
@@ -498,7 +498,7 @@ class TextParser extends BasicParser
                   return true; // matching all (return '')
 
             // started with wildcard?
-            if ( $v{0} == $wild_char )
+            if ( $v[0] == $wild_char )
             {
                if ( $this->is_flags_set(TEXTPARSER_ALLOW_START_WILD) ) // check min-chars
                {

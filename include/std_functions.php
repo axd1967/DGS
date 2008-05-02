@@ -2674,7 +2674,7 @@ function limit($val, $minimum, $maximum, $default)
                && is_numeric($maximum)
                )
             $val = ($maximum-$minimum)*(substr($val,0,-1)/100.) + $minimum;
-         elseif( is_numeric(strpos('hHxX#$',$val{0})) )
+         elseif( is_numeric(strpos('hHxX#$',$val[0])) )
             $val = base_convert( substr($val,1), 16, 10);
       }
    }

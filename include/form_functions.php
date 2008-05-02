@@ -486,7 +486,7 @@ class Form
             $arr_vert = explode( '|', $hgr );
             if( count($arr_vert) == 1 )
             {
-               if( $hgr{0} == 'G' )
+               if( $hgr[0] == 'G' )
                   $hgr = $groups[ substr($hgr,1) ];
                else if( $hgr < 1 )
                   error('internal_error', "Form.parse_layout_global.area-num.H<1");
@@ -501,7 +501,7 @@ class Form
                {
                   if( strlen($vgr) == 0 )
                      error('internal_error', "Form.parse_layout_global.missing_area-num.V($layout)"); // around a '|'
-                  if( $vgr{0} == 'G' )
+                  if( $vgr[0] == 'G' )
                      $vgr = $groups[ substr($vgr,1) ];
                   else if( $vgr < 1 )
                      error('internal_error', "Form.parse_layout_global.area-num.V<1");

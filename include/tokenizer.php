@@ -500,7 +500,7 @@ class StringTokenizer extends BasicTokenizer
          {
             if ( ($pos + 1 < $len) and (substr($this->value,$pos+1,1) == $char) ) // need escape
             {
-               $tok .= $this->escape_chars{1} . $char;
+               $tok .= $this->escape_chars[1] . $char;
                $pos++;
                continue;
             }
@@ -526,8 +526,8 @@ class StringTokenizer extends BasicTokenizer
     */
    function parse_quote_quote()
    {
-      $quote_start = $this->quote_chars{0};
-      $quote_end = (strlen($this->quote_chars) > 1) ? $this->quote_chars{1} : $quote_start;
+      $quote_start = $this->quote_chars[0];
+      $quote_end = (strlen($this->quote_chars) > 1) ? $this->quote_chars[1] : $quote_start;
       $spos = 0; // orig-start-pos
       $tok = ''; // current token
       $len = strlen($this->value);
@@ -561,7 +561,7 @@ class StringTokenizer extends BasicTokenizer
          if ( strpos($this->spec_chars, $char) !== false ) // special-char found
          {
             if ( $quote_begin > 0 ) // quoted
-               $tok .= $this->escape_chars{1};
+               $tok .= $this->escape_chars[1];
             $tok .= $char;
             continue;
          }
@@ -608,7 +608,7 @@ class StringTokenizer extends BasicTokenizer
     */
    function parse_quote_escape()
    {
-      $esc_char = $this->escape_chars{0};
+      $esc_char = $this->escape_chars[0];
       $spos = 0; // orig-start-pos
       $tok = ''; // current token
       $len = strlen($this->value);
@@ -623,7 +623,7 @@ class StringTokenizer extends BasicTokenizer
             {
                $next_char = substr($this->value, $pos+1, 1);
                if ( $next_char == $esc_char or ( strpos($this->spec_chars, $next_char) !== false ) )
-                  $tok .= $this->escape_chars{1}; // special-char
+                  $tok .= $this->escape_chars[1]; // special-char
                $tok .= $next_char;
                $pos++;
                continue;
