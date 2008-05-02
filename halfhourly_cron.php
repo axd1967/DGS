@@ -282,7 +282,19 @@ if( !$is_down )
       $uid = $prow['ID'];
       $ClockUsed = $prow['ClockUsed'];
 
-      // LastTicks may handle -(time spend) at the moment of the start of vacations
+      // LastTicks handle -(time spend) at the moment of the start of vacations
+      // inserts this spend time into the (possibly new) ClockUsed by the player
+if(1){//new
+            mysql_query("UPDATE Games"
+                     . " INNER JOIN Clock ON Clock.ID=$ClockUsed"
+                     . " SET Games.ClockUsed=$ClockUsed"
+                        . ", Games.LastTicks=Games.LastTicks+Clock.Ticks"
+                     . " WHERE Games.Status" . IS_RUNNING_GAME
+                     . " AND Games.ToMove_ID=$uid"
+                     . ' AND Games.ClockUsed<0' // VACATION_CLOCK
+                     )
+            or error('mysql_query_failed', 'edit_vacation.update_games');
+}else{//old
       $gres = mysql_query("SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
                          "FROM Games, Clock " .
                          "WHERE Status" . IS_RUNNING_GAME .
@@ -299,6 +311,7 @@ if( !$is_down )
                or error('mysql_query_failed','halfhourly_cron.update_vacation_games');
       }
       mysql_free_result($gres); unset($game_row);
+}//new/old
    }
    mysql_free_result($result); unset($prow);
 

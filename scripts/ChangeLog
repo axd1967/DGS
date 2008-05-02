@@ -34,6 +34,9 @@ Changelog
      include/GoDiagram.php (echo_board):
    - replacing the string indexes using the deprecated '{}' by '[]'
 
+   * edit_vacation.php, halfhourly_cron.php:
+   - optimization of "vacations" queries on the Games table
+
 2008-04-29 rodival
 
    * include/form_functions.php (get_hiddens_string),

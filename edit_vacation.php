@@ -33,6 +33,7 @@ require_once( "include/form_functions.php" );
 
 
 
+   $my_id= $player_row['ID'];
    $days_left = floor($player_row['VacationDays']);
    $floor_onvacation = floor($player_row['OnVacation']);
    $minimum_days = $vacation_min_days - $floor_onvacation;
@@ -94,6 +95,18 @@ require_once( "include/form_functions.php" );
          $vacationlength >= $vacation_min_days and $vacationlength <= $days_left )
       {
          // LastTicks will handle -(time spend) at the moment of the start of vacations
+         // in the reference of the ClockUsed by the game
+if(1){//new
+            mysql_query("UPDATE Games"
+                     . ' INNER JOIN Clock ON Clock.ID=Games.ClockUsed'
+                     . " SET Games.ClockUsed=" .VACATION_CLOCK
+                        . ", Games.LastTicks=Games.LastTicks-Clock.Ticks"
+                     . " WHERE Games.Status" . IS_RUNNING_GAME
+                     . " AND Games.ToMove_ID=$my_id"
+                     . ' AND Games.ClockUsed>=0' // not VACATION_CLOCK
+                     )
+            or error('mysql_query_failed', 'edit_vacation.update_games');
+}else{//old
          $result = mysql_query("SELECT Games.ID as gid, LastTicks-Clock.Ticks AS ticks " .
                          "FROM Games, Clock " .
                          "WHERE Status" . IS_RUNNING_GAME .
@@ -109,6 +122,7 @@ require_once( "include/form_functions.php" );
                       . " WHERE ID=" . $game_row['gid'] . " LIMIT 1" )
             or error('mysql_query_failed', 'edit_vacation.update_games');
          }
+}//new/old
 
          mysql_query("UPDATE Players SET VacationDays=VacationDays-$vacationlength, " .
                      "OnVacation=$vacationlength " .
