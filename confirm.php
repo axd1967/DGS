@@ -49,9 +49,9 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 {
    disable_cache();
 
-   $gid = @$_REQUEST['gid'] ;
+   $gid = (int)@$_REQUEST['gid'] ;
    if( $gid <= 0 )
-      error('no_game_nr');
+      error('unknown_game');
 
    if( @$_REQUEST['nextback'] )
       jump_to("game.php?gid=$gid");
@@ -65,7 +65,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    $my_id = $player_row['ID'];
 
-   $game_row = mysql_single_fetch( 'confirm.find_game',
+   $game_row = mysql_single_fetch( "confirm.find_game($gid)",
                  "SELECT Games.*, " .
                  "Games.Flags+0 AS GameFlags, " . //used by check_move
                  "black.ClockUsed AS Blackclock, " .
@@ -74,7 +74,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
                  "white.OnVacation AS Whiteonvacation " .
                  "FROM Games, Players AS black, Players AS white " .
                  "WHERE Games.ID=$gid AND black.ID=Black_ID AND white.ID=White_ID" )
-      or error('unknown_game');
+      or error('unknown_game', "confirm.find_game($gid)");
 
    extract($game_row);
 
@@ -89,25 +89,24 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       //jump_to("game.php?gid=$gid"); // back
    }
 
+   if( $Status == 'INVITED' )
+      error('game_not_started');
+   else if( $Status == 'FINISHED' )
+      error('game_finished');
+
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
+/*
+   else if( !$ToMove_ID ) //=0 if INVITED or FINISHED
+      error('not_your_turn', "confirm.bad_ToMove_ID($gid)");
+*/
    else
-      error("database_corrupted", "confirm.bad_ToMove_ID($gid)");
+      error('database_corrupted', "confirm.bad_ToMove_ID($gid)");
 
    if( $my_id != $ToMove_ID )
-      error("not_your_turn");
-
-   if( $Status == 'INVITED' )
-   {
-      error("game_not_started");
-   }
-   else if( $Status == 'FINISHED' )
-   {
-      error("game_finished");
-   }
-
+      error('not_your_turn');
 
 
    //See *** HOT_SECTION *** below
@@ -130,9 +129,10 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
 // Update clock
 
-   if( $Maintime > 0 or $Byotime > 0)
+   if( $Maintime > 0 || $Byotime > 0)
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
+      // time since start of move in the reference of the ClockUsed by the game
       $hours = ticks_to_hours(get_clock_ticks($ClockUsed) - $LastTicks);
 
       if( $to_move == BLACK )
@@ -154,7 +154,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
       if( ($next_to_move == BLACK ? $Blackonvacation : $Whiteonvacation) > 0 )
       {
-         $next_clockused = VACATION_CLOCK;
+         $next_clockused = VACATION_CLOCK; //and LastTicks=0, see below
       }
       else
       {
@@ -163,8 +163,8 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
             $next_clockused += WEEKEND_CLOCK_OFFSET;
       }
 
-      $time_query .= "LastTicks=" . get_clock_ticks($next_clockused) . ", " .
-          "ClockUsed=$next_clockused, ";
+      $time_query .= "LastTicks=" . get_clock_ticks($next_clockused)
+         . ", ClockUsed=$next_clockused, ";
    }
    else
    {
@@ -234,8 +234,7 @@ This is why:
          $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
          $prisoner_string = '';
-         reset($prisoners);
-         while( list($dummy, $tmp) = each($prisoners) )
+         foreach($prisoners as $tmp)
          {
             list($x,$y) = $tmp;
             $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
@@ -278,7 +277,7 @@ This is why:
       case 'pass':
       {
          if( $Moves < $Handicap )
-            error("early_pass");
+            error('early_pass');
 
 
          if( $Status == 'PLAY' )
@@ -318,7 +317,7 @@ This is why:
          check_handicap( $TheBoard); //adjust $stonestring
 
          if( strlen( $stonestring ) != 2 * $Handicap )
-            error("wrong_number_of_handicap_stone");
+            error('wrong_number_of_handicap_stone');
 
 
          $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
@@ -328,7 +327,7 @@ This is why:
             list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i*2-2, 2), $Size);
 
             if( !isset($rownr) or !isset($colnr) )
-               error("illegal_position");
+               error('illegal_position');
 
             $move_query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
                ($i == $Handicap ? "$hours)" : "0), " );
@@ -480,7 +479,7 @@ This is why:
          or error('mysql_query_failed','confirm.message_query');
 
       if( mysql_affected_rows() < 1 and $action != 'delete' )
-         error("mysql_insert_move","confirm22($action,$gid)");
+         error('mysql_insert_move',"confirm22($action,$gid)");
    }
 
 

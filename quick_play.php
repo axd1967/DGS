@@ -33,9 +33,9 @@ else
 {
    disable_cache();
 
-   $gid = @$_REQUEST['gid'] ;
+   $gid = (int)@$_REQUEST['gid'] ;
    if( $gid <= 0 )
-      error("no_game_nr");
+      error('unknown_game');
 
 
    connect2mysql();
@@ -85,25 +85,26 @@ else
    $Last_X = $Last_Y = -1;
    extract($game_row);
 
+   if( $Status == 'INVITED' )
+      error('game_not_started');
+   else if( $Status == 'FINISHED' )
+      error('game_finished');
+
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
+/*
+   else if( !$ToMove_ID ) //=0 if INVITED or FINISHED
+      error('not_your_turn', "confirm.bad_ToMove_ID($gid)");
+*/
    else
-      error("database_corrupted");
+      error('database_corrupted');
 
    if( $my_id != $ToMove_ID )
-      error("not_your_turn",'qp9');
+      error('not_your_turn','qp9');
 
-   if( $Status == 'INVITED' )
-   {
-      error("game_not_started");
-   }
-   else if( $Status == 'FINISHED' )
-   {
-      error("game_finished");
-   }
-   else if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
+   if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
       or !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
       or ($Handicap>1 && $Moves<=$Handicap) //exclude first white move after handicap stones
      )
@@ -243,8 +244,7 @@ This is why:
          $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
          $prisoner_string = '';
-         reset($prisoners);
-         while( list($dummy, $tmp) = each($prisoners) )
+         foreach($prisoners as $tmp)
          {
             list($x,$y) = $tmp;
             $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
