@@ -27,7 +27,7 @@ require_once( "include/std_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
 
    start_page("Statistics", true, $logged_in, $player_row );
@@ -60,31 +60,34 @@ require_once( "include/std_functions.php" );
    $row = mysql_single_fetch( 'statistics.q3', $q3 );
    if( $row )
    {
-      echo '<p></p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players';
-      echo '<p></p>Activity: ' . round($row['activity']) . "\n";
+      echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players</p>';
+      echo '<p>Activity: ' . round($row['activity']) . "</p>\n";
    }
 
    //echo '<p></p>Loadavg: ' . `cat /proc/loadavg`; //only under Linux like systems and with safe_mode=off
-   $tmp = '/proc/loadavg';
-   if( @is_readable( $tmp ) )
+   if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
    {
-      $tmp = trim(implode('', file($tmp)));
-      echo '<p></p>Loadavg: ' . $tmp;
+      $tmp = '/proc/loadavg';
+      if( @is_readable( $tmp ) )
+      {
+         $tmp = trim(implode('', file($tmp)));
+         echo '<p><span class=DebugInfo>Loadavg: ' . $tmp . '</span></p>';
+      }
    }
 
-   $forcecache = floor($NOW/86400); //to force the caches (daily)
-   
+   $args= array();
+   $args['show_time']= @$_REQUEST['show_time'];
+   $args['activity']= @$_REQUEST['activity'];
+   $args['date']= floor($NOW/86400); //to force the caches (daily)
+   $args= make_url('?', $args);
+
    $title = T_('Statistics graph');
    echo "<h3 class=Header>$title</h3>\n";
-   echo "<img src=\"statisticspng.php?date=$forcecache" .
-        (@$_REQUEST['show_time'] == 'y' ? URI_AMP.'show_time=y' : '') .
-        "\" alt=\"$title\">\n";
+   echo "<img src=\"statisticspng.php$args\" alt=\"$title\">\n";
 
    $title = T_('Rating histogram');
    echo "<h3 class=Header>$title</h3>\n";
-   echo "<img src=\"statratingspng.php?date=$forcecache" .
-        (@$_REQUEST['show_time'] == 'y' ? URI_AMP.'show_time=y' : '') .
-        "\" alt=\"$title\">\n";
+   echo "<img src=\"statratingspng.php$args\" alt=\"$title\">\n";
 
    end_page();
 }

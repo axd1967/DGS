@@ -63,6 +63,7 @@ require_once( "include/graph.php" );
    //fetch and prepare datas
 
    get_stat_data();
+   db_close();
    $nr_points = count($tTime);
 
    $graphs[]= array(
@@ -96,6 +97,15 @@ require_once( "include/graph.php" );
       'max' => $maxUsers,
       'min' => $minUsers,
       'c' => $gr->getcolor(   0, 200,   0),
+   );
+   if( @$_REQUEST['activity'] )
+   $graphs[]= array(
+      'name' => $T_('Activity'),
+      'x' => &$tTime,
+      'y' => &$tActiv,
+      'max' => $maxActiv,
+      'min' => $minActiv,
+      'c' => $gr->getcolor(   0,   0, 200),
    );
 
 
@@ -218,7 +228,7 @@ require_once( "include/graph.php" );
 
    //misc drawings
 
-   if( @$_GET['show_time'] == 'y')
+   if( @$_REQUEST['show_time'] )
       $gr->label( 0, 0,
                  sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
@@ -228,15 +238,19 @@ require_once( "include/graph.php" );
 
 function get_stat_data()
 {
- global $tTime, $tUsers, $tMoves, $tGames, $tGameR;
- global $minTime, $minUsers, $minMoves, $minGames, $minGameR;
- global $maxTime, $maxUsers, $maxMoves, $maxGames, $maxGameR;
+ global $tTime, $minTime, $maxTime;
+ global $tUsers, $minUsers, $maxUsers;
+ global $tMoves, $minMoves, $maxMoves;
+ global $tGames, $minGames, $maxGames;
+ global $tGameR, $minGameR, $maxGameR;
+ global $tActiv, $minActiv, $maxActiv;
 
    $tTime = array();
    $tUsers = array();
    $tMoves = array();
    $tGames = array();
    $tGameR = array();
+   $tActiv = array();
 
    $result = mysql_query(
                "SELECT MAX(UNIX_TIMESTAMP(Time)) AS maxTime" .
@@ -245,6 +259,7 @@ function get_stat_data()
                ",MIN(Moves) AS minMoves,MAX(Moves) AS maxMoves" .
                ",MIN(Games) AS minGames,MAX(Games) AS maxGames" .
                ",MIN(GamesRunning) AS minGameR,MAX(GamesRunning) AS maxGameR" .
+               ",MIN(Activity) AS minActiv,MAX(Activity) AS maxActiv" .
                " FROM Statistics")
       or error('mysql_query_failed', 'statisticspng.min_max');
 
@@ -270,6 +285,7 @@ function get_stat_data()
       array_push($tMoves, $row['Moves']);
       array_push($tGames, $row['Games']);
       array_push($tGameR, $row['GamesRunning']);
+      array_push($tActiv, $row['Activity']);
    }
    mysql_free_result($result);
 }

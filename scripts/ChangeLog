@@ -27,7 +27,11 @@ Changelog
 
    * status.php, show_games.php, site_map.php,
      edit_bio.php, edit_folders.php:
-   - various ajustment of the texts of the bottom links
+   - various ajustments of the texts or urls of the bottom links
+
+   * statistics.php, statisticspng.php:
+   - removing the 'loadavg' stats from the end-users view
+   - added the 'Activity' curve in the graph (activated in the URL)
 
 2008-05-02 rodival
 
