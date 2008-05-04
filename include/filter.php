@@ -909,14 +909,26 @@ class SearchFilter
       if( is_null($acckey_reset) )
          $acckey_reset = $this->accesskeys[1];
 
+      $xkey = trim($acckey_search);
+      if( $xkey )
+      {
+         $xkey = $xkey[0];
+         $xkey = ' accesskey='.attb_quote($xkey)
+               . ' title='.attb_quote("[&amp;$xkey]");
+      }
       $start_search = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_SEARCH_ACTION."\" value=\"" . T_('Search#filter') . '"'
-         . ( ($acckey_search != '') ? ' accesskey='.attb_quote($acckey_search) : '' )
-         . '>';
+         . FFORM_SEARCH_ACTION."\" value=\"" . T_('Search#filter')
+         . "\"$xkey>";
+      $xkey = trim($acckey_reset);
+      if( $xkey )
+      {
+         $xkey = $xkey[0];
+         $xkey = ' accesskey='.attb_quote($xkey)
+               . ' title='.attb_quote("[&amp;$xkey]");
+      }
       $reset_search = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_RESET_ACTION."\" value=\"" . T_('Reset search#filter') . '"'
-         . ( ($acckey_reset != '') ? ' accesskey='.attb_quote($acckey_reset) : '' )
-         . '>';
+         . FFORM_RESET_ACTION."\" value=\"" . T_('Reset search#filter')
+         . "\"$xkey>";
       return array( $start_search, $reset_search );
    }
 
@@ -2897,7 +2909,7 @@ class FilterRatedSelect extends FilterSelection
       $field = $arrfn[0];
 
       // use having to allow alias-FNAMES
-      $parttype = (is_array($config) and @$config[FC_ADD_HAVING]) ? SQLP_HAVING : SQLP_WHERE;
+      $parttype = (is_array($config) && @$config[FC_ADD_HAVING]) ? SQLP_HAVING : SQLP_WHERE;
       $query_yes = $query->duplicate();
       $query_yes->add_part( $parttype, "$field IN ('Y','Done')" );
       $query->add_part( $parttype, "$field='N'" );

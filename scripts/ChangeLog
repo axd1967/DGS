@@ -48,6 +48,9 @@ Changelog
    * confirm.php, quick_play.php:
    - handled in the right order the game.Status and ToMove_ID errors
 
+   * include/filter.php (get_submit_elements):
+   - added the tooltips to the buttons of the search filters
+
 2008-05-02 rodival
 
    * include/std_functions.php (limit),
