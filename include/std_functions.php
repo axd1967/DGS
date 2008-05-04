@@ -81,13 +81,12 @@ else
 $table_row_color1='"#FFFFFF"';
 $table_row_color2='"#E0E8ED"';
 //}
+// obsolete since CSS
 //$table_head_color='"#CCCCCC"';
 //$table_row_color_del1='"#FFCFCF"';
 //$table_row_color_del2='"#F0B8BD"';
-
-$h3_color='"#800000"';
-
-$sgf_color='"#d50047"';
+//$h3_color='"#800000"';
+//$sgf_color='"#d50047"';
 
 //----- } layout : change in dragon.css too!
 
@@ -629,6 +628,9 @@ function end_page( $menu_array=NULL )
 
 function end_html()
 {
+   if( isset($TheErrors) )
+      if( $TheErrors->error_count() )
+         echo $TheErrors->list_string('garbage', 1);
    echo "\n</BODY>\n</HTML>";
    ob_end_flush();
 }
@@ -1852,7 +1854,7 @@ function score2text($score, $verbose, $keep_english=false)
 // returns rows checked against min/max-limits; return default-rows if unset or exceeding limits
 function get_maxrows( $rows, $maxrows, $defrows = MAXROWS_PER_PAGE_DEFAULT )
 {
-   return ( is_numeric($rows) and $rows > 0 and $rows <= $maxrows ) ? $rows : $defrows;
+   return ( is_numeric($rows) && $rows > 0 && $rows <= $maxrows ) ? $rows : $defrows;
 }
 
 // returns array with standard rows and with customized maxrows (added to standard list at the right place)
@@ -2027,24 +2029,26 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
 
 //caution: some IP addresses have more that 50 accounts in DGS
 /* NOTE on db-query: the select "WHERE IP='$ip' AND Handle!='guest'"
- * is fine, when $player_field === 'Handle', then still the
+ * is fine, when $field == 'Handle', then still the
  * index is used on Handle. But if $player_field is some other
  * column from the Players-table, it's doing a table-scan.
  * This is not a good idea. Be careful, when you use the function.
  * In that case, it would be good to add an index on Players.IP.
  */
-function get_accounts_from_ip( $ip, $player_field='Handle')
+/*
+function get_players_field( $where, $field='Handle')
 {
    $ret= array();
-   $query= 'SELECT '.$player_field
-          ." FROM Players WHERE IP='$ip' AND Handle!='guest'";
+   $query= 'SELECT '.$field
+          ." FROM Players WHERE ID>1 AND ($where)"; //exclude guest
    $result = mysql_query( $query )
-      or error('get_accounts_from_ip',"IP='$ip'");
+      or error('get_players_field',$where);
    while( ($row=mysql_fetch_row($result)) )
       $ret[]= $row[0];
    mysql_free_result($result);
    return $ret;
 }
+*/
 
 function who_is_logged( &$player_row)
 {
@@ -2188,7 +2192,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
                .sprintf($vault_fmt, $hdl, date($date_fmt,$vaulttime));
 
          //caution: some IP addresses have more that 50 accounts in DGS
-         //$handles= get_accounts_from_ip($ip); //exclude guest
+         //$handles= get_players_field("IP='$ip'"); //exclude guest
          if( $hdl != 'guest' )
             $handles[]= $hdl;
          if( count($handles) > 0 )

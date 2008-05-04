@@ -111,17 +111,19 @@ if( !$is_down )
 
    $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
                           "FROM Clock WHERE ID=202 LIMIT 1")
-               or error('mysql_query_failed','halfhourly_cron.check_frequency');
+               or error('mysql_query_failed','halfhourly_cron.check_frequency')
+               or $TheErrors->dump_exit('halfhourly_cron');
 
    $row = mysql_fetch_array( $result );
    mysql_free_result($result);
 
    if( $row['timediff'] < $half_diff )
       //if( !@$_REQUEST['forced'] )
-         exit;
+         $TheErrors->dump_exit('halfhourly_cron');
 
    mysql_query("UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202")
-               or error('mysql_query_failed','halfhourly_cron.set_lastchanged');
+               or error('mysql_query_failed','halfhourly_cron.set_lastchanged')
+               or $TheErrors->dump_exit('halfhourly_cron');
 
 
 // Send notifications
@@ -265,9 +267,13 @@ if( !$is_down )
 
 // Update activities
 
+   //close to 0.9964 for a four days halving time (in minutes)
    $factor = exp( -M_LN2 * 30 / $ActivityHalvingTime );
 
-   mysql_query("UPDATE Players SET Activity=Activity * $factor")
+   //the WHERE is just added here to avoid to update the *whole* table each time
+   //the GREATEST also helps the re-construction of the index of the column
+   mysql_query("UPDATE Players SET Activity=GREATEST(1,$factor*Activity)"
+         ." WHERE Activity>1") //with $ActivityForHit>=1
       or error('mysql_query_failed','halfhourly_cron.activity');
 
 
@@ -277,7 +283,7 @@ if( !$is_down )
                          "WHERE OnVacation>0 AND OnVacation <= 1/(2*24)")
       or error('mysql_query_failed','halfhourly_cron.onvacation');
 
-   while( $prow = mysql_fetch_array( $result ) )
+   while( $prow = mysql_fetch_assoc( $result ) )
    {
       $uid = $prow['ID'];
       $ClockUsed = $prow['ClockUsed'];
@@ -326,7 +332,8 @@ if(1){//new
 
    mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=202")
                or error('mysql_query_failed','halfhourly_cron.reset_tick');
-   $TheErrors->echo_error_list('halfhourly_cron');
-
+if( !@$chained ) $TheErrors->dump_exit('halfhourly_cron');
+//the whole cron stuff in one cron job (else comments this line):
+include_once( "daily_cron.php" );
 }
 ?>

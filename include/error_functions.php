@@ -64,53 +64,71 @@ class Errors
       }
 
 
-      function echo_error_list($prefix='', $html_mode=false)
+      function list_string($prefix='', $html_mode=false)
       {
          $str = '';
-
-         reset($this->error_list);
-         while( list($key, $val) = each($this->error_list) )
+         foreach( $this->error_list as $ary )
          {
-            list($err, $debugmsg) = $val;
-            $tmp = @trim(ereg_replace( "[\x01-\x20]+", " ", $err));
-            if( $tmp ) $err = $tmp;
+            list($err, $debugmsg, $warn) = $ary;
+            $warn= ($warn ?'Warning' :'Error' );
             if( $html_mode )
             {
                $tmp = @htmlspecialchars($debugmsg, ENT_QUOTES);
                if( $tmp ) $debugmsg = $tmp;
+               $str.= "\n<dt class=$warn>#$warn: $err</dt>"
+                  . "\n<dd>debugmsg: $prefix-$debugmsg</dd>";
             }
-            $str .= "#Error: $err\n";
-            if( $html_mode ) $str .= "<br>\n";
-            $str .= "debugmsg: $prefix-$debugmsg\n";
-            $str .= ( $html_mode ? "<hr>\n" :"\n");
+            else
+            {
+               $str.= "#$warn: $err\ndebugmsg: $prefix-$debugmsg\n\n";
+            }
          }
+         if( $str && $html_mode )
+            $str= "\n<dl class=ErrorList>$str\n</dl>";
+         return $str;
+      } //list_string
 
-         if( $str ) echo $str;
+      function error_count()
+      {
+         return count($this->error_list);
       }
+
+      function error_clear()
+      {
+         $this->error_list = array();
+      }
+
+      function dump_exit($prefix='', $html_mode=false)
+      {
+         echo $this->list_string($prefix, $html_mode);
+         $this->error_list = array();
+         if( $html_mode )
+            echo "\n</BODY></HTML>\n"; // at least
+         exit;
+      } //dump_exit
 
 
       function add_error($err, $debugmsg=NULL, $warn=false)
       {
          global $player_row;
-         if( isset($player_row) and isset($player_row['Handle']))
+         if( isset($player_row) && isset($player_row['Handle']) )
             $handle = $player_row['Handle'];
          else
             $handle = safe_getcookie('handle');
 
-         if( $this->log_errors and !$warn )
+         $err= trim(ereg_replace( "[\x01-\x20\x80-\xff&<>_]+", "_", $err));
+         if( $this->log_errors && !$warn )
             list( $err, $uri)= err_log( $handle, $err, $debugmsg);
          else
             $uri = "error.php?err=" . urlencode($err);
 
-
          if( $this->mode == ERROR_MODE_COLLECT )
          {
-            $this->error_list[] = array($err, $debugmsg);
+            $this->error_list[] = array($err, $debugmsg, $warn);
          }
-         else if( $this->mode == ERROR_MODE_PRINT or $warn )
+         else if( $this->mode == ERROR_MODE_PRINT || $warn )
          {
-            echo ( $warn ? "#Warning: " : "#Error: " ) .
-               trim(ereg_replace( "[\x01-\x20]+", " ", $err))."\n";
+            echo ( $warn ?"#Warning" :"#Error" ) . ": $err\n";
          }
          else // case ERROR_MODE_JUMP:
          {
@@ -118,7 +136,7 @@ class Errors
             jump_to( $uri );
          }
 
-         if( $this->errors_are_fatal and !$warn )
+         if( $this->errors_are_fatal && !$warn )
             exit;
          return false;
       }
@@ -172,7 +190,7 @@ function err_log( $handle, $err, $debugmsg=NULL)
       $err.= ' / '. $mysqlerror;
    }
 
-   if( empty($debugmsg) )
+   if( !is_string($debugmsg) )
    {
     global $SUB_PATH;
 //CAUTION: sometime, REQUEST_URI != PHP_SELF+args
@@ -181,7 +199,7 @@ function err_log( $handle, $err, $debugmsg=NULL)
       //$debugmsg = str_replace( $SUB_PATH, '', $debugmsg);
       $debugmsg = substr( $debugmsg, strlen($SUB_PATH));
    }
-   if( !empty($debugmsg) )
+   if( is_string($debugmsg) )
    {
       $errorlog_query .= ", Debug='".mysql_addslashes( $debugmsg)."'";
       //$err.= ' / '. $debugmsg; //Do not display this info!

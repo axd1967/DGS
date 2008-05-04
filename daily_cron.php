@@ -42,17 +42,19 @@ if( !$is_down )
 
    $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
                           "FROM Clock WHERE ID=203 LIMIT 1")
-               or error('mysql_query_failed','daily_cron.check_frequency');
+               or error('mysql_query_failed','daily_cron.check_frequency')
+               or $TheErrors->dump_exit('daily_cron');
 
    $row = mysql_fetch_assoc( $result );
    mysql_free_result($result);
 
    if( $row['timediff'] < $daily_diff )
       //if( !@$_REQUEST['forced'] )
-         exit;
+         $TheErrors->dump_exit('daily_cron');
 
    mysql_query("UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203")
-               or error('mysql_query_failed','daily_cron.set_lastchanged');
+               or error('mysql_query_failed','daily_cron.set_lastchanged')
+               or $TheErrors->dump_exit('daily_cron');
 
    //$delete_messages = false;
    //$delete_invitations = false;
@@ -178,7 +180,7 @@ if( !$is_down )
 
 
    mysql_query( "INSERT INTO Statistics SET"
-               ." Time=FROM_UNIXTIME($NOW)"
+               ." Time=FROM_UNIXTIME($NOW)" //could become a Date= timestamp field
                .",Hits=" . (int)$Hits
                .",Users=" . (int)$Users
                .",Moves=" . (int)($MovesFinished+$MovesRunning)
@@ -201,37 +203,41 @@ if( !$is_down )
 // Apply recently changed night hours
 
 if(1){//new
-   $result = mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone " .
-                        "FROM Players WHERE ClockChanged='Y' ORDER BY ID")
+   $result = mysql_query("SELECT ID, Timezone, Nightstart, ClockUsed"
+                     . " FROM Players WHERE ClockChanged='Y'")
                or error('mysql_query_failed','daily_cron.night_hours');
    //adjustments from/to summertime are checked in status.php
 
    if( @mysql_num_rows( $result) > 0 )
    {
+      $otz= setTZ(); //reset to default
       while( $row = mysql_fetch_assoc($result) )
       {
          setTZ( $row['Timezone']); //for get_clock_used()
+         $newclock= get_clock_used( $row['Nightstart']);
          mysql_query("UPDATE Players " .
                      "SET ClockChanged='N', " .
-                     "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
-                     "WHERE ID='" . $row['ID'] . "' LIMIT 1")
-            or error('mysql_query_failed','daily_cron.night_hours_update');
+                     "ClockUsed=$newclock " .
+                     "WHERE ID=" . $row['ID'] . " LIMIT 1")
+            or error('mysql_query_failed','daily_cron.night_hours.update');
       }
+      setTZ($otz); //reset to previous
    }
    mysql_free_result($result);
-}else{//old
+}else{//older and bugged
    $result = mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone " .
                          "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID")
                or error('mysql_query_failed','daily_cron.night_hours');
+   //$result always contains guest(first!) and the other ClockChanged='Y'
 
    if( @mysql_num_rows( $result) > 0 )
    {
-      $row = mysql_fetch_assoc($result); //is "guest" and skipped else summertime changes
+      $row = mysql_fetch_assoc($result); //always "guest"
       setTZ( $row['Timezone']); //always GMT (guest default)
 
       // Changed to/from summertime?
       if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )
-         //adjust the whole community
+         //adjust the whole community (ClockChanged='Y' or not)
          $result =  mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone FROM Players")
                   or error('mysql_query_failed','daily_cron.summertime_check');
 
@@ -250,6 +256,7 @@ if(1){//new
 
    mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=203")
                or error('mysql_query_failed','daily_cron.reset_tick');
-   $TheErrors->echo_error_list('daily_cron');
+//if( !@$chained ) $TheErrors->dump_exit('daily_cron');
+$TheErrors->dump_exit('daily_cron');
 }
 ?>

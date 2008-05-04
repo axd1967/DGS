@@ -43,18 +43,19 @@ if( !$is_down )
 
    $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
                           "FROM Clock WHERE ID=201 LIMIT 1")
-               or error('mysql_query_failed','clock_tick.check_frequency');
+               or error('mysql_query_failed','clock_tick.check_frequency')
+               or $TheErrors->dump_exit('clock_tick');
 
    $row = mysql_fetch_array( $result );
    mysql_free_result($result);
 
    if( $row['timediff'] < $tick_diff )
       //if( !@$_REQUEST['forced'] )
-         exit;
+         $TheErrors->dump_exit('clock_tick');
 
    mysql_query("UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201")
-               or error('mysql_query_failed','clock_tick.set_lastchanged');
-
+               or error('mysql_query_failed','clock_tick.set_lastchanged')
+               or $TheErrors->dump_exit('clock_tick');
 
 
    $hour = gmdate('G', $NOW);
@@ -85,7 +86,7 @@ if( !$is_down )
 
    $result = mysql_query(
             'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks'
-            . ' FROM Games, Clock'
+            . ' FROM (Games, Clock)'
             . " WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW)"
             . ' AND Clock.ID>=0' // not VACATION_CLOCK
             . ' AND Games.ClockUsed=Clock.ID'
@@ -110,17 +111,17 @@ if( !$is_down )
          time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
             $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
-         $time_is_up = ( $Black_Maintime == 0 and $Black_Byotime == 0 );
+         $time_is_up = ( $Black_Maintime == 0 && $Black_Byotime == 0 );
       }
       else if( $ToMove_ID == $White_ID )
       {
          time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
             $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
-         $time_is_up = ( $White_Maintime == 0 and $White_Byotime == 0 );
+         $time_is_up = ( $White_Maintime == 0 && $White_Byotime == 0 );
       }
       else
-         continue;
+         continue; //$ToMove_ID ==0 if INVITED or FINISHED
 
 
       if( $time_is_up )
@@ -146,8 +147,11 @@ if( !$is_down )
          mysql_query( $game_query . $game_clause)
                or error('mysql_query_failed',"clock_tick.time_is_up($gid)");
 
-         if( mysql_affected_rows() != 1)
+         if( @mysql_affected_rows() != 1)
+         {
             error('mysql_update_game',"clock_tick.time_is_up($gid)");
+            continue;
+         }
 
          // Send messages to the players
          $Text = "The result in the game:<center>"
@@ -190,11 +194,8 @@ if( !$is_down )
 
    mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=201")
                or error('mysql_query_failed','clock_tick.reset_tick');
-   $TheErrors->echo_error_list('clock_tick');
-
-if( !@$chained ) exit;
-//the whole cron stuff in one cron job (else comments those 2 lines):
+if( !@$chained ) $TheErrors->dump_exit('clock_tick');
+//the whole cron stuff in one cron job (else comments this line):
 include_once( "halfhourly_cron.php" );
-include_once( "daily_cron.php" );
-}
+} //$is_down
 ?>

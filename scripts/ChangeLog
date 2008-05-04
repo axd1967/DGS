@@ -33,6 +33,18 @@ Changelog
    - removing the 'loadavg' stats from the end-users view
    - added the 'Activity' curve in the graph (activated in the URL)
 
+   * clock_tick.php, halfhourly_cron.php, daily_cron.php,
+     include/std_functions.php (end_html, get_accounts_from_ip),
+     include/error_functions.php (echo_error_list, list_string,
+      dump_exit):
+   - better handling of the errors during cron jobs
+   - a small optimization of the (often slow) 'Activity' level query
+     in halfhourly_cron.php
+   - changed echo_error_list to list_string which no more "echo" the string
+   - added dump_exit which echo the pending errors and exit
+   - added an automatic dump of pending errors at the end of pages
+   - removed the not so good get_accounts_from_ip function
+
    * confirm.php, quick_play.php:
    - handled in the right order the game.Status and ToMove_ID errors
 
