@@ -84,9 +84,9 @@ function item($text, $link='', $working=true, $last=false)
       item(T_('Status'), "status.php", true);
       { $item_level++;
          item(T_('My user info'), "userinfo.php?uid=$id", true);
-         item(T_('Show running games'), "show_games.php?uid=$id", true);
-         item(T_('Show finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
-         item(T_('Show observed games'), "show_games.php?uid=$id".URI_AMP."observe=1", true);
+         item(T_('Show my running games'), "show_games.php?uid=$id", true);
+         item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
+         item(T_('Show my observed games'), "show_games.php?uid=$id".URI_AMP."observe=1", true);
 
          item(T_('Show message'), "message.php?mode=ShowMessage", false);
          item(T_('Show game (follow id)'), "game.php", false, true);

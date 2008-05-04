@@ -78,7 +78,7 @@ function make_folder_form_row(&$form, $name, $nr,
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
    $my_id = $player_row['ID'];
 
@@ -262,7 +262,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
    $menu_array = array(
          T_('Message list') => 'list_messages.php',
-         T_('Show/edit userinfo') => 'userinfo.php',
+         T_('Show/edit userinfo') => "userinfo.php?uid=$my_id",
       );
 
    end_page(@$menu_array);

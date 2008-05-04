@@ -264,9 +264,9 @@ $ThePage = new Page('Status');
 
 
    $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$my_id",
-                        T_('Show running games') => "show_games.php?uid=$my_id",
-                        T_('Show finished games') => "show_games.php?uid=$my_id".URI_AMP."finished=1",
-                        T_('Show observed games') => "show_games.php?observe=1" );
+                        T_('Show my running games') => "show_games.php?uid=$my_id",
+                        T_('Show my finished games') => "show_games.php?uid=$my_id".URI_AMP."finished=1",
+                        T_('Show my observed games') => "show_games.php?observe=1" );
 
    end_page(@$menu_array);
 

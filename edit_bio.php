@@ -30,7 +30,7 @@ function find_category_box_text($cat)
 {
    global $categories;
 
-   if( in_array($cat, array_keys($categories)) )
+   if( array_key_exists($cat, $categories) )
       return $cat;
    else
       return '';
@@ -181,7 +181,7 @@ function find_category_box_text($cat)
       }
    }
 
-   $menu_array[T_('Show/edit userinfo')] = 'userinfo.php';
+   $menu_array[T_('Show/edit userinfo')] = "userinfo.php?uid=$my_id";
 
    if ( !$editorder )
    {

@@ -23,6 +23,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-04 rodival
+
+   * status.php, show_games.php, site_map.php,
+     edit_bio.php, edit_folders.php:
+   - various ajustment of the texts of the bottom links
+
 2008-05-02 rodival
 
    * include/std_functions.php (limit),
@@ -35,7 +41,7 @@ Changelog
    - replacing the string indexes using the deprecated '{}' by '[]'
 
    * edit_vacation.php, halfhourly_cron.php:
-   - optimization of "vacations" queries on the Games table
+   - optimization of "vacations start/end" queries on the Games table
 
 2008-04-29 rodival
 
