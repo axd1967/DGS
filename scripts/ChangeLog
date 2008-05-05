@@ -23,6 +23,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-05 rodival
+
+   * status.php, show_games.php, site_map.php:
+   - replacing "Show my observed games" by "Show games I'm observing"
+
+   * admin_translators.php:
+   - removing missed translations in this page
+
 2008-05-04 rodival
 
    * status.php, show_games.php, site_map.php,

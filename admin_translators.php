@@ -118,7 +118,8 @@ require_once( "include/form_functions.php" );
   /* Set translator privileges for user */
    $translator_form->add_row( array( 'HEADER', /*T_*/('Set translator privileges for user') ) );
 
-   $langs = get_language_descriptions_translated();
+   $langs = get_language_descriptions_translated(/*T_*/true);
+   //it's not obvious that this sort on /*T_*/"translated" strings will always give a good result:
    asort($langs);
 
   /* Show the privileges of the user */
