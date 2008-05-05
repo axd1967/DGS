@@ -86,7 +86,7 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('My user info'), "userinfo.php?uid=$id", true);
          item(T_('Show my running games'), "show_games.php?uid=$id", true);
          item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
-         item(T_('Show my observed games'), "show_games.php?uid=$id".URI_AMP."observe=1", true);
+         item(T_('Show games I\'m observing'), "show_games.php?uid=$id".URI_AMP."observe=1", true);
 
          item(T_('Show message'), "message.php?mode=ShowMessage", false);
          item(T_('Show game (follow id)'), "game.php", false, true);
@@ -157,7 +157,7 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('Show all finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
          item(T_('Show my running games'), "show_games.php?uid=$id", true);
          item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
-         item(T_('Show my observed games'), "show_games.php?observe=1", true, true);
+         item(T_('Show games I\'m observing'), "show_games.php?observe=1", true, true);
       } $item_level--;
 
       item(T_('Forum'), "forum/index.php", true);

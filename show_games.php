@@ -652,7 +652,7 @@ $ThePage = new Page('GamesList');
       $menu_array[T_('Show all finished games')] = "show_games.php?uid=all".URI_AMP."finished=1".URI_AMP.$row_str;
    }
    else //FU+RU+FA+RA
-      $menu_array[T_('Show my observed games')] = "show_games.php?observe=1".URI_AMP.$row_str;
+      $menu_array[T_('Show games I\'m observing')] = "show_games.php?observe=1".URI_AMP.$row_str;
 
    end_page(@$menu_array);
 }
