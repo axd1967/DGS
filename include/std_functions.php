@@ -887,9 +887,10 @@ function sysmsg($msg)
 
 
 //must never allow quotes, ampersand, < , > and URI reserved chars
-define('HANDLE_LEGAL_REGS', '-_a-zA-Z0-9');
+//to be used in a preg_exp enclosed by [] and possibly by ()
+define('HANDLE_LEGAL_REGS', '\\-_a-zA-Z0-9');
 define('HANDLE_TAG_CHAR', '='); //not in: HANDLE_LEGAL_REGS or < or >
-define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'+.,:;?!%*');
+define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'\\.\\?\\*\\+,;:!%');
 
 function illegal_chars( $string, $punctuation=false )
 {
@@ -898,7 +899,7 @@ function illegal_chars( $string, $punctuation=false )
    else
       $regs = 'a-zA-Z]['.HANDLE_LEGAL_REGS; //begins with a letter
 
-   return !ereg( "^[$regs]+\$", $string);
+   return !preg_match( "/^[$regs]+\$/", $string);
 }
 
 function make_session_code()
@@ -943,8 +944,8 @@ function verify_email( $debugmsg, $email)
    //RFC 2822 - 3.4.1. Addr-spec specification
    //See http: //www.faqs.org/rfcs/rfc2822
    //$regexp = "^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,4}$";
-   $regexp = "^([-_a-z0-9]+)(\.[-_a-z0-9]+)*@([-a-z0-9]+)(\.[-a-z0-9]+)*(\.[a-z]{2,4})$";
-   $res= eregi($regexp, $email);
+   $regexp = "%^([-_a-z0-9]+)(\\.[-_a-z0-9]+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[a-z]{2,4})\$%i";
+   $res= preg_match($regexp, $email);
    if( is_string($debugmsg) && !$res )
       error('bad_mail_address', "$debugmsg=$email");
    return $res;
@@ -967,7 +968,7 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
 
    if( !$subject )
       $subject= $FRIENDLY_LONG_NAME.' notification';
-   $subject= ereg_replace("[\x01-\x20]+", ' ', $subject);
+   $subject= preg_replace("%[\\x01-\\x20]+%", ' ', $subject);
 
    $rgx= array("%\r\n%","%\r%");
    $rpl= array("\n","\n");
@@ -1491,7 +1492,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
             'dl','/dt','/dd','ul','ol','/li',
          )) )
       { //remove all the following newlines (to avoid inserted <br>)
-         $trail= ereg_replace( "^[\r\n]+", '', $trail);
+         $trail= preg_replace( "%^[\\r\\n]+%", '', $trail);
       }
       else if( in_array($tag, array(
             //as a first set/choice of </ul>-like tags
@@ -1499,7 +1500,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
             '/dl','/ul','/ol','/note','/div',
          )) )
       { //remove the first following newline
-         $trail= ereg_replace( "^(\r\n|\r|\n)", '', $trail);
+         $trail= preg_replace( "%^(\\r\\n|\\r|\\n)%", '', $trail);
       }
 
       if( $stop == $tag )
@@ -1632,11 +1633,12 @@ $html_safe_preg = array(
 
 //<user uid> or <user =uhandle> =>show user info
 //<send uid> or <send =uhandle> =>send a message to user
- "%".ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR
-                        ."?[".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT."%ise"
+ "/".ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR
+                        ."?[+".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT."/ise"
   => "\\1_reference(('\\2'?".REF_LINK_BLANK.":0)+"
                         .REF_LINK_ALLOWED.",1,'','\\3')",
-// because of HANDLE_LEGAL_REGS, no need of ...,str_replace('\"','"','\\3')...
+//adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
+//because of HANDLE_LEGAL_REGS, no need of ...,str_replace('\"','"','\\3')...
 
 //<color col>...</color> =>translated to <font color="col">...</font>
  "%".ALLOWED_LT."color +([#0-9a-zA-Z]+) *".ALLOWED_GT."%is"
@@ -1735,21 +1737,21 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
          $tmp = "<\\1>"; // "<\\1>"=show tag, ""=hide tag, "\\0"=html error
          if( $gameh ) // show hidden sgf comments
          {
-            $msg = eregi_replace(ALLOWED_LT."(h(idden)?) *".ALLOWED_GT,
+            $msg = preg_replace('%'.ALLOWED_LT.'(h(idden)?) *'.ALLOWED_GT.'%i',
                      ALLOWED_LT."span class=GameTagH".ALLOWED_GT.$tmp, $msg);
-            $msg = eregi_replace(ALLOWED_LT."(/h(idden)?) *".ALLOWED_GT,
+            $msg = preg_replace('%'.ALLOWED_LT.'(/h(idden)?) *'.ALLOWED_GT.'%i',
                                  $tmp.ALLOWED_LT."/span".ALLOWED_GT, $msg);
          }
          else // hide hidden sgf comments
-            $msg = trim(preg_replace("%".ALLOWED_LT."h(idden)? *".ALLOWED_GT
-                           ."(.*?)".ALLOWED_LT."/h(idden)? *".ALLOWED_GT."%is",
+            $msg = trim(preg_replace('%'.ALLOWED_LT.'h(idden)? *'.ALLOWED_GT
+                           .'(.*?)'.ALLOWED_LT.'/h(idden)? *'.ALLOWED_GT.'%is',
                                  '', $msg));
 
 
-         $msg = eregi_replace(ALLOWED_LT."(c(omment)?) *".ALLOWED_GT,
-                  ALLOWED_LT."span class=GameTagC".ALLOWED_GT.$tmp, $msg);
-         $msg = eregi_replace(ALLOWED_LT."(/c(omment)?) *".ALLOWED_GT,
-                              $tmp.ALLOWED_LT."/span".ALLOWED_GT, $msg);
+         $msg = preg_replace('%'.ALLOWED_LT.'(c(omment)?) *'.ALLOWED_GT.'%i',
+                  ALLOWED_LT.'span class=GameTagC'.ALLOWED_GT.$tmp, $msg);
+         $msg = preg_replace('%'.ALLOWED_LT.'(/c(omment)?) *'.ALLOWED_GT.'%i',
+                              $tmp.ALLOWED_LT.'/span'.ALLOWED_GT, $msg);
 
          $some_html = 'msg';
       }
@@ -1770,7 +1772,7 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
    $msg = str_replace('&', '&amp;', $msg);
    $msg = eregi_replace('&amp;((#[0-9]+|[A-Z][0-9A-Z]*);)', '&\\1', $msg);
    */
-   $msg = preg_replace('%&(?!(#[0-9]+|[A-Z][0-9A-Z]*);)%si', '&amp;', $msg);
+   $msg = preg_replace('%&(?!(#[0-9]+|[A-Z][0-9A-Z]*);)%is', '&amp;', $msg);
 
    $msg = basic_safe( $msg);
 
@@ -2004,8 +2006,8 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
 {
 //Priorities: URI(id) > URI(handle) > REFERER(id) > REFERER(handle)
 //Warning: + (an URI reserved char) must be substitued with %2B in 'handle'.
-   $uid_nam = 'uid';
-   $uid = @$_REQUEST[$uid_nam];
+   $uid_name = 'uid';
+   $uid = @$_REQUEST[$uid_name];
    $uhandle = '';
    if( !($uid > 0) )
    {
@@ -2015,12 +2017,15 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
       {
 //default user = last referenced user
 //(ex: message.php from userinfo.php by menu link)
-         if( eregi("[?".URI_AMP_IN."]$uid_nam=([0-9]+)", $refer, $eres) )
+         if( preg_match('/[?'.URI_AMP_IN.']'
+               .$uid_name.'=([0-9]+)/i', $refer, $eres) )
            $uid = $eres[1];
          if( !($uid > 0) )
          {
             $uid = 0;
-            if( eregi("[?".URI_AMP_IN."]".UHANDLE_NAME."=([".HANDLE_LEGAL_REGS."]+)", $refer, $eres) )
+//adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
+            if( preg_match('/[?'.URI_AMP_IN.']'
+                  .UHANDLE_NAME.'=([+'.HANDLE_LEGAL_REGS.']+)/i', $refer, $eres) )
               $uhandle = $eres[1];
          }
       }
@@ -2086,9 +2091,9 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
    $player_row = array();
    $player_row['logged_in'] = false;
 
-   if( $hostname_jump && eregi_replace(":.*$","", @$_SERVER['HTTP_HOST']) != $HOSTNAME )
+   if( $hostname_jump && preg_replace("/:.*\$/",'', @$_SERVER['HTTP_HOST']) != $HOSTNAME )
    {
-      jump_to( "http://" . $HOSTNAME . $_SERVER['PHP_SELF'], true );
+      jump_to( 'http://' . $HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
 
    if( !$hdl or !$dbcnx )
@@ -2460,9 +2465,10 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
       $byid = 0;
       if( $legal )
          $player_ref = substr($player_ref,1);
-      //because of old DGS users having a pure numeric Handle
-      //illegal_chars( $player_ref) had been replaced by this ereg() here
-      $legal = ( $player_ref && ereg( "^[".HANDLE_LEGAL_REGS."]+\$", $player_ref) );
+//because of old DGS users having a pure numeric Handle
+//illegal_chars( $player_ref) had been replaced by this reg_exp here
+//adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
+      $legal = ( $player_ref && preg_match( '/^[+'.HANDLE_LEGAL_REGS."]+\$/", $player_ref) );
    }
    else
    {
@@ -2514,6 +2520,7 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
          $url = "userinfo.php?";
          $class = 'User'.$class;
       }
+//encoding '+' to £2B because of old DGS users having it in their Handle
       $url.= ( $byid ? "uid=$player_ref"
                  : UHANDLE_NAME."=".str_replace('+','%2B',$player_ref) );
       $url = 'A href="' . $base_path. $url . '"';

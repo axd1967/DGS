@@ -23,6 +23,16 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-09 rodival
+
+   * include/std_functions.php (send_email, verify_email,
+      parse_tags_safe, make_html_safe, illegal_chars, is_logged_in,
+      get_request_user, user_reference),
+     include/error_functions.php (add_error),
+     sgf.php (sgf_simpletext):
+   - changing some bad ereg_* to preg_*... maybe, in the way to
+     replace all the ereg* fonctions by there preg* equivalent!
+
 2008-05-05 rodival
 
    * status.php, show_games.php, site_map.php:

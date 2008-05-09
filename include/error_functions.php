@@ -116,7 +116,7 @@ class Errors
          else
             $handle = safe_getcookie('handle');
 
-         $err= trim(ereg_replace( "[\x01-\x20\x80-\xff&<>_]+", "_", $err));
+         $err= trim(preg_replace( "%[\\x1-\\x20\\x80-\\xff<&>_]+%", "_", $err));
          if( $this->log_errors && !$warn )
             list( $err, $uri)= err_log( $handle, $err, $debugmsg);
          else

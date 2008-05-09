@@ -89,7 +89,7 @@ function sgf_echo_prop( $prop )
 function sgf_simpletext( $str )
 {
    return str_replace("]","\\]", str_replace("\\","\\\\",
-         ereg_replace("[\x01-\x20]+", " ", reverse_htmlentities( $str )
+         preg_replace("/[\\x1-\\x20]+/", ' ', reverse_htmlentities( $str )
       ) ) );
 }
 
@@ -365,7 +365,7 @@ $array=array();
    else
       $field_owned = '';
 
-   $result = mysql_query(
+   $result = db_query( 'sgf.find',
       'SELECT Games.*, ' .
       'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' .
       'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
@@ -377,8 +377,8 @@ $array=array();
       'white.Handle AS Whitehandle, ' .
       "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
       'FROM Games, Players AS black, Players AS white ' .
-      "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
-      or error('mysql_query_failed', "sgf.find($gid)");
+      "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
+      );
 
    if( @mysql_num_rows($result) != 1 )
       error('unknown_game');
@@ -405,11 +405,12 @@ $array=array();
 
    $node_com = "";
 
-   $result = mysql_query( "SELECT Moves.*,MoveMessages.Text " .
-                          "FROM (Moves) LEFT JOIN MoveMessages " .
-                          "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
-                          "WHERE Moves.gid=$gid ORDER BY Moves.ID" )
-      or error('mysql_query_failed', "sgf.moves($gid)");
+   $result = db_query( 'sgf.moves',
+      "SELECT Moves.*,MoveMessages.Text " .
+      "FROM (Moves) LEFT JOIN MoveMessages " .
+      "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
+      "WHERE Moves.gid=$gid ORDER BY Moves.ID"
+      );
 
    header( 'Content-Type: application/x-go-sgf' );
    $filename= "$Whitehandle-$Blackhandle-$gid-" . date('Ymd', $timestamp) ;
