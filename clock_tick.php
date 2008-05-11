@@ -58,24 +58,44 @@ if( !$is_down )
                or $TheErrors->dump_exit('clock_tick');
 
 
+   //setTZ('GMT');
    $hour = gmdate('G', $NOW);
    $day_of_week = gmdate('w', $NOW);
 
    // Now increase clocks that are not sleeping
 
-   //15 hours day, 9 hours night
-   $mid = 0;
-   $query = "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) " .
-             "WHERE (ID>=$mid AND (ID>$hour OR ID<". ($hour-8) . ') AND ID<'. ($hour+16) . ')';
-       //WHERE ID>=0 AND ID<39 AND ((ID-$hour+23)%24)<15 //ID from 24 to 38 does not exist
+   /* NIGHT_LEN hours night
+    * Nightstart= N means night in [N,(N+NIGHT_LEN)%24[ (see edit_profile.php)
+    * if Timezone=='GMT', ClockUsed is always equal to Nightstart
+    * if Timezone=='GMT+x'(ou UTC+x), ClockUsed is ( Nightstart+24-x )%24
+    *  ClockUsed is the GMT hour on which the user night start
+    * When the GMT hour is 22, clock_modified= [23]U[00,13], thus:
+    *  UserTZ UserTime UserNight UserClockUsed UserClockModified
+    *  GMT    22       [22,07[   22            -
+    *  GMT+9  07       [22,07[   13            Y
+    *  GMT+2  00       [22,07[   20            -
+    *  GMT-2  20       [22,07[   00            Y
+    *  GMT-9  13       [22,07[   07            Y
+    *  GMT+2  00       [20,05[   18            -
+    *  GMT+2  00       [22,07[   20            -
+    *  GMT+2  00       [02,11[   00            Y
+    *  GMT-2  20       [20,05[   22            -
+    *  GMT-2  20       [22,07[   00            Y
+    *  GMT-2  20       [02,11[   04            Y
+    */
+   $cid = 0;
+   $clock_modified = "((ID>$hour OR ID<".($hour-NIGHT_LEN+1).') AND ID<'.($hour+25-NIGHT_LEN)
+                     ." AND ID>=$cid AND ID<=".($cid+23).')';
 
-   $mid+= WEEKEND_CLOCK_OFFSET;
-   $hour+= WEEKEND_CLOCK_OFFSET;
-   if( $day_of_week > 0 and $day_of_week < 6 )
-      $query.= " OR (ID>=$mid AND (ID>$hour OR ID<". ($hour-8) . ') AND ID<'. ($hour+16) . ')';
-       //WHERE ID>=100 AND ID<139 AND ((ID-100-$hour+23)%24)<15 //ID from 124 to 138 does not exist
+   $cid= WEEKEND_CLOCK_OFFSET;
+   $hour+= $cid;
+   if( $day_of_week > 0 && $day_of_week < 6 )
+      $clock_modified.= " OR ((ID>$hour OR ID<".($hour-NIGHT_LEN+1).') AND ID<'.($hour+25-NIGHT_LEN)
+                        ." AND ID>=$cid AND ID<=".($cid+23).')';
 
 
+   $query = "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW)"
+            .' WHERE '.$clock_modified;
    mysql_query( $query)
       or error('mysql_query_failed','clock_tick.increase_clocks');
 
@@ -84,8 +104,37 @@ if( !$is_down )
 
    // Check if any game has timed out
 
-   $result = mysql_query(
-            'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks'
+if(1){//new
+/*
+ In a first approximation, as $has_moved==false (see time_remaining()),
+  $main>$hours will just produce $main-=$hours which will never
+  activate $time_is_up and so, will produce nothing here...
+ So the "find_timeout_games" query may be restricted with:
+ - given IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime) AS ToMove_Maintime
+ - WHERE ToMove_Maintime <= $hours
+ because $hours is always < $ticks/$tick_frequency (see ticks_to_hours())
+ - given ((ticks-LastTicks) / $tick_frequency) AS Upper_Ellapsed
+ - WHERE ToMove_Maintime < Upper_Ellapsed
+ which is:
+ - WHERE IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)
+      < ((Clock.Ticks-Games.LastTicks) / $tick_frequency)
+ During a test, this lowered the number of returned rows from 10,960 to 675
+*/
+   $query= 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks'
+         . ' FROM (Games, Clock)'
+         . " WHERE Games.ClockUsed=Clock.ID"
+         . ' AND '. str_replace('ID', 'Clock.ID', $clock_modified)
+         . " AND Clock.Ticks - Games.LastTicks > $tick_frequency *"
+            . ' IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)'
+         . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
+         ;
+}else{//old
+/* TODO:
+This query is sometime slow and may return more than 10000 rows!
+It (and the following UPDATE) should be optimized, splited in smaller chunk?
+use TEMPORARY TABLEs for generated UPDATEs ???
+*/
+   $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks'
             . ' FROM (Games, Clock)'
             . " WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW)"
             . ' AND Clock.ID>=0' // not VACATION_CLOCK
@@ -94,7 +143,9 @@ if( !$is_down )
             //. ' AND ( Maintime>0 OR Byotime>0 )'
             //slower: "AND Status" . IS_RUNNING_GAME
             . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
-            )
+            ;
+}//new/old
+   $result = mysql_query( $query)
          or error('mysql_query_failed','clock_tick.find_timeout_games');
 
    while($row = mysql_fetch_assoc($result))

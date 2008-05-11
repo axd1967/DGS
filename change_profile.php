@@ -185,7 +185,7 @@ require_once( "include/rating.php" );
    }
 
    $timezone = get_request_arg('timezone') ;
-   $nightstart = (int)@$_GET['nightstart'] ;
+   $nightstart = mod( (int)@$_REQUEST['nightstart'], 24) ;
    if( $nightstart != $player_row["Nightstart"] ||
        $timezone != $player_row["Timezone"] )
    {

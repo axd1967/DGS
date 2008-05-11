@@ -22,6 +22,7 @@ $TranslateGroups[] = "Common";
 $date_fmt = 'Y-m-d H:i';
 $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 
+define('NIGHT_LEN', 9); //from 0 to 24 hours
 define('WEEKEND_CLOCK_OFFSET', 100);
 define('VACATION_CLOCK', -1-WEEKEND_CLOCK_OFFSET); // stay < 0 over weekend
 
@@ -67,7 +68,7 @@ function get_clock_used($nightstart)
       $n= gmdate('G', $n); //hour without leading zeros. 0..23
       if( $n === $o ) break;
    }
-   return ((($n % 24) + 24) % 24); //ALWAYS integer 0..23
+   return (max(0, (int)$n) % 24); //ALWAYS integer 0..23
 }
 
 function get_clock_ticks($clock_used)
@@ -85,7 +86,7 @@ function get_clock_ticks($clock_used)
 function ticks_to_hours($ticks)
 {
    global $tick_frequency;
-   //always return an integer
+   //returns the greatest integer within [0 , $ticks/$tick_frequency[
    return ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
 }
 
@@ -98,7 +99,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
    {
       $main -= $elapsed;
 
-      if( $has_moved and $byotype == 'FIS' )
+      if( $has_moved && $byotype == 'FIS' )
          $main = min($startmaintime, $main + $startbyotime);
 
       return;
@@ -236,7 +237,7 @@ function echo_hour( $hours, $keep_english=false, $short=false)
 function echo_time( $hours, $keep_english=false, $short=false)
 {
    if( $hours <= 0 )
-      return '---';
+      return NO_VALUE;
 
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 
@@ -263,7 +264,7 @@ function echo_onvacation( $days, $keep_english=false, $short=false)
    //return echo_day(floor($days)).' '.T_('left#2');
    $hours= round($days*24);
    if( $hours <= 0 )
-      return '---';
+      return NO_VALUE;
 
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 
@@ -387,7 +388,7 @@ function echo_time_remaining( $maintime, $byotype, $byotime, $byoper
    else if( $byotype == 'FIS' or $byotime <= 0 )
    {
       if( $short )
-         $str.= '---';
+         $str.= NO_VALUE;
       else
          $str.= $T_('The time is up');
    }

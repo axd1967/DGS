@@ -235,6 +235,11 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
          break;
       case 2:
          $name = $T_('Rated games');
+         /* Here, the sum of all cnt will be 2 times the number of rated games
+          * because there are two players by game but is kept "as is"
+          * to avoid to have some x.5 values in the graph
+          * see also $cnt = (int)... below
+          */
          $query =
             "SELECT ROUND(Rating/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
             . " FROM Ratinglog WHERE Rating>=".MIN_RATING

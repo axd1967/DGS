@@ -68,7 +68,7 @@ require_once( "include/form_functions.php" );
    $nightstart = array();
    for($i=0; $i<24; $i++)
    {
-      $nightstart[$i] = sprintf('%02d-%02d',$i,($i+9)%24);
+      $nightstart[$i] = sprintf('%02d-%02d',$i,($i+NIGHT_LEN)%24);
    }
 
    $stonesizes = array( 5 => 5, 7 => 7, 9 => 9, 11 => 11,
@@ -93,6 +93,7 @@ require_once( "include/form_functions.php" );
    array_unshift($COUNTRIES, '');
    
    $langs = get_language_descriptions_translated();
+   //it's not obvious that this sort on "translated" strings will always give a good result:
    arsort($langs); //will be reversed to place ahead the following:
    if( @$player_row['Translator'] )
       $langs['N'] = /**T_**/('Native texts');
@@ -195,10 +196,12 @@ require_once( "include/form_functions.php" );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Timezone'),
                                   'SELECTBOX', 'timezone', 1,
                                   get_timezone_array(), $player_row['Timezone'], false ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Nighttime'),
-                                  'SELECTBOX', 'nightstart', 1,
-                                  $nightstart, $player_row["Nightstart"], false ) );
-
+   if( NIGHT_LEN % 24 )
+      $profile_form->add_row( array( 'DESCRIPTION', T_('Nighttime'),
+                                     'SELECTBOX', 'nightstart', 1,
+                                     $nightstart, $player_row['Nightstart'], false ) );
+   else
+      $profile_form->add_row( array( 'HIDDEN', 'nightstart', $player_row['Nightstart'] ) );
 
 
    //--- Followings may be browser settings ---

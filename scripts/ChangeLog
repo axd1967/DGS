@@ -23,6 +23,18 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-11 rodival
+
+   * include/time_functions.php, clock_tick.php,
+     edit_profile.php, change_profile.php:
+   - limitation of the number of rows returned by the
+      "find_timeout_games" query in clock_tick.php
+   - NIGHT_LEN constant added
+   - various comments around "night" clocks management
+
+   * statratingspng.php:
+   - just a comment added
+
 2008-05-09 rodival
 
    * include/std_functions.php (send_email, verify_email,
