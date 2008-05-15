@@ -23,6 +23,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-15 rodival
+
+   * skins/dragon/screen.css,
+     forum/forum_functions.php (draw_post),
+     forum/post.php (post_message):
+   - added an anchor to retreive the replied post in the forums
+   - CSS'ed the 3 rows post headers
+
 2008-05-11 rodival
 
    * include/time_functions.php, clock_tick.php,

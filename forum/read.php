@@ -82,14 +82,14 @@ function revision_history($post_id, $rx_term='')
    forum_end_table($links, $cols);
    end_page();
    exit;
-}
+} //revision_history
 
 
 function change_depth( &$cur_depth, $new_depth, $cols)
 {
    if( $new_depth < 1 && $cur_depth < 1 )
    {
-      return;      
+      return;
    }
 
    if( $cur_depth >= 1 ) //this means that a cell table is already opened
@@ -112,10 +112,10 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    // then build the indenting row
    $cur_depth = $new_depth;
    echo "<tr>";
-   $i= min( $cur_depth, FORUM_MAXIMUM_DEPTH);
-   $c= FORUM_MAXIMUM_DEPTH+1 - $i;
+   $i= min( $cur_depth, FORUM_MAX_INDENT);
+   $c= FORUM_MAX_INDENT+1 - $i;
    $indent= "<td class=Indent>&nbsp;</td>";
-   switch( $i )
+   switch( (int)$i )
    {
       case 1:
       break;
@@ -260,11 +260,11 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
       $hidden = ($Approved == 'N');
 
-      if( $hidden and !$is_moderator and $uid !== $player_row['ID'] )
+      if( $hidden && !$is_moderator && $uid !== $player_row['ID'] )
          continue;
 
 
-      change_depth( $cur_depth, $Depth, $cols);
+      change_depth( $cur_depth, $Depth, $cols); //Depth from the database
 
 
       $postClass = 'Normal';
@@ -283,7 +283,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       $post_reference =
          draw_post($postClass, $uid == $player_row['ID'], $Subject, $Text, NULL /*$GoDiagrams*/, $rx_term);
 
-      if( $preview and $preview_ID == $ID )
+      if( $preview && $preview_ID == $ID )
       {
          change_depth( $cur_depth, $cur_depth + 1, $cols);
          $Subject = $preview_Subject;
@@ -292,9 +292,9 @@ function change_depth( &$cur_depth, $new_depth, $cols)
          draw_post('Preview', false, $Subject, $Text, NULL /*$GoDiagrams*/, $rx_term);
       }
 
-      if( $postClass != 'Normal' and $postClass != 'Hidden' and !$is_moderator )
+      if( $postClass != 'Normal' && $postClass != 'Hidden' && !$is_moderator )
       {
-         if( $postClass == 'Reply' and !($preview and $preview_ID == $ID) )
+         if( $postClass == 'Reply' && !($preview && $preview_ID == $ID) )
          {
             if( @$_REQUEST['quote'] )
             {
@@ -312,7 +312,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    } //posts loop
    mysql_free_result($result);
 
-   if( $preview and $preview_ID == 0 and !$is_moderator )
+   if( $preview && $preview_ID == 0 && !$is_moderator )
    {
       change_depth( $cur_depth, $cur_depth + 1, $cols);
       $Subject = $preview_Subject;
@@ -325,7 +325,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
       echo "</td></tr>\n";
    }
 
-   if( !($reply > 0) and !$preview and !($edit>0) and !$is_moderator )
+   if( !($reply > 0) && !$preview && !($edit>0) && !$is_moderator )
    {
       change_depth( $cur_depth, 1, $cols);
       echo "<tr><td colspan=$cols align=center>\n";
@@ -342,7 +342,7 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
 // Update Forumreads to remove the 'new' flag
 
-   if( !$Lastread or $Lastread < $Lastchangedthread )
+   if( !$Lastread || $Lastread < $Lastchangedthread )
    {
       mysql_query( "REPLACE INTO Forumreads SET " .
                    "User_ID=" . $player_row["ID"] . ", " .

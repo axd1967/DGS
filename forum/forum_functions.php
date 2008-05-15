@@ -27,12 +27,14 @@ chdir("forum/");
 
 
 //$new_end =  4*7*24*3600;  // four weeks //moved to quick_common.php
-
 $new_level1 = 2*7*24*3600;  // two weeks
 $new_count = 0;
 
-// must follow the "ORDER BY PosIndex" order: 
+//must follow the "ORDER BY PosIndex" order and have at least 64 chars:
 $order_str = "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+define('FORUM_MAX_DEPTH', 40); //half the length of the Posts.PosIndex field
+define('FORUM_MAX_INDENT', 15); //at the display time
+
 
 define("LINK_FORUMS", 1 << 0);
 define("LINK_THREADS", 1 << 1);
@@ -49,13 +51,11 @@ define("LINKPAGE_SEARCH", 1 << 11);
 define("LINK_TOGGLE_MODERATOR", 1 << 12);
 define("LINKPAGE_STATUS", 1 << 13);
 
-
 define("LINK_MASKS", ~(LINKPAGE_READ | LINKPAGE_LIST | LINKPAGE_INDEX
           | LINKPAGE_SEARCH | LINKPAGE_STATUS) );
 
 
 define('ALLOW_QUOTING', 0);
-define('FORUM_MAXIMUM_DEPTH', 15);
 
 
 // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
@@ -157,7 +157,7 @@ function forum_start_table( $table_id, &$headline, &$links, $cols,
       echo_links('T',$cols);
 
    echo "<tr class=Caption>";
-   while( list($name, $attbs) = each($headline) )
+   foreach( $headline as $name => $attbs )
    {
       echo "<td $attbs>$name</td>";
    }
@@ -218,7 +218,7 @@ function get_new_string($Lastchangedstamp, $Lastread)
    global $NOW, $new_level1, $new_end, $new_count;
 
    $new = '';
-   if( $Lastchangedstamp == 'bottom' )
+   if( $Lastchangedstamp === 'bottom' )
    {
       if( $new_count>0 )
       {
@@ -282,86 +282,79 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
 
    if( strlen($txt) == 0 ) $txt = '&nbsp;';
 
-   // Subject header + post body
+   // post header
+   $hdrclass = 'PostHead'.$postClass;
    if( $postClass == 'Preview' )
    {
-      // one line Subject header
-      echo "<tr class=PostHead$postClass>\n <td colspan=$cols" .
-         "\"><a class=PostSubject name='preview'>$sbj</a><br> " .
-         T_('by')." " . user_reference( REF_LINK, 1, '', $player_row) .
-         ' &nbsp;&nbsp;&nbsp;' . date($date_fmt, $NOW) . "</td></tr>\n";
+      $hdrrows = 2;
+      $hdrcols = $cols;
 
-      // post body
-      echo "<tr class=PostBody>\n <td colspan=$cols>$txt</td></tr>";
+      echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>"
+         ,"<a class=PostSubject name='preview'>$sbj</a></td></tr> "
+         ,"\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>"
+         ,T_('by'),' ' ,user_reference( REF_LINK, 1, '', $player_row)
+         ,' &nbsp;&nbsp;&nbsp;' ,date($date_fmt, $NOW)
+         ,"</td></tr>";
    }
    else
    {
-      // first line of Subject header
+      global $Parent_ID;
+      if( $Parent_ID>0 )
+         $parent_ref= "<span class=Parent><a href=\"#$Parent_ID\">^</a></span>";
+      else
+         $parent_ref= '';
+
       if( $postClass == 'SearchResult' )
       {
+         $hdrrows = 3;
          $hdrcols = $cols;
 
-         echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
-//TODO: CSS the if-true-part aiming for 3 lines header (1st line smaller with small vert-space)
-if(1){ //new
-         echo ' <font size="-1"><font color="#FFFFFF">' . T_('found in forum')
-            . '</font> <a href="list.php?forum=' .
-            $Forum_ID . '" class=black>' . $ForumName . "</a>\n";
+         echo "\n<tr class=\"$hdrclass FoundForum\"><td class=FoundForum colspan=$hdrcols>";
+         echo '<span class=FoundForum>' ,T_('found in forum')
+            ,' <a href="list.php?forum='
+            ,$Forum_ID ,'">' ,$ForumName ,"</a></span>\n";
          if( $show_score )
-            echo ' <font color="#FFFFFF">' . T_('with') . '</font> ' . T_('Score')
-               . ' <font color="#000000">' . $Score  . "</font>\n";
-         echo '</font><br>';
-         echo '<a class=PostSubject href="'.$thread_url
-            . ( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
-            . "#$ID\">$sbj</a>";
-
-}else{ //old
-         echo '<a class=PostSubject href="'.$thread_url
-            . ( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
-            . "#$ID\">$sbj</a>";
-
-         echo ' <font size="+1" color="#FFFFFF">' . T_('found in forum')
-            . '</font> <a href="list.php?forum=' .
-            $Forum_ID . '" class=black>' . $ForumName . "</a>\n";
-         if( $show_score )
-            echo ' <font color="#FFFFFF">' . T_('with') . '</font> ' . T_('Score')
-               . ' <font color="#000000">' . $Score  . "</font>\n";
-} //new/old
-
-         echo "</td></tr>\n";
+            echo ' <span class=FoundScore>' ,T_('with')
+               ,' <span>' ,T_('Score') ,' ' ,$Score ,"</span></span>\n";
+         echo '</td></tr>';
+         echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
+         echo '<a class=PostSubject href="',$thread_url
+            ,( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
+            , "#$ID\">$sbj</a>";
+         echo "</td></tr>";
       }
       else
       {
+         $hdrrows = 2;
          if( $postClass == 'Hidden' )
-            $hdrcols = $cols-1; //because of the rowspan=2 in the second column
+            $hdrcols = $cols-1; //because of the rowspan=$hdrrows in the second column
          else
             $hdrcols = $cols;
          $new = get_new_string($Timestamp, $Lastread);
 
-         echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
+         echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
 
-         //from revision_history or because, when edited, the link will be obsolet
+         //from revision_history or because, when edited, the link will be obsolete
          if( $postClass == 'Edit'
             || $Thread_ID <= 0 )
             echo "<a class=PostSubject name=\"$ID\">$sbj</a>";
          else
-            echo '<a class=PostSubject href="'.$thread_url
-               ."#$ID\" name=\"$ID\">$sbj</a>$new";
+            echo $parent_ref,'<a class=PostSubject href="',$thread_url
+               ,"#$ID\" name=\"$ID\">$sbj</a>$new";
 
          if( $hdrcols != $cols )
          {
-            echo "</td>\n <td rowspan=2 class=PostStatus>";
+            echo "</td>\n <td rowspan=$hdrrows class=PostStatus>";
             echo ( $PendingApproval == 'Y' ? T_('Awaiting<br>approval') : T_('Hidden') );
          }
-         echo "</td></tr>\n";
+         echo "</td></tr>";
       }
 
-      // second line of Subject header
-      echo "<tr class=PostHead$postClass>\n <td colspan=$hdrcols>";
+      echo "\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>";
 
       $post_reference = date($date_fmt, $Timestamp);
-      echo T_('by') . " " . user_reference( REF_LINK, 1, '', $User_ID, $Name, $Handle) .
-         " &nbsp;&nbsp;&nbsp;$post_reference";      
+      echo T_('by') ,' ' ,user_reference( REF_LINK, 1, '', $User_ID, $Name, $Handle)
+         ," &nbsp;&nbsp;&nbsp;" ,$post_reference;
 
       if( $Lastedited > 0 )
       {
@@ -375,15 +368,16 @@ if(1){ //new
 
       $post_reference = "<user $User_ID> ($post_reference):";
 
-      // post body
-      echo "<tr class=PostBody>\n <td colspan=$cols>$txt</td></tr>";
    }
+
+   // post body
+   echo "\n<tr class=PostBody><td colspan=$cols>$txt</td></tr>";
 
    // bottom line (footer)
    if( $postClass == 'Normal' or $postClass == 'Hidden' )
    {
       $hidden = $postClass == 'Hidden';
-      echo "<tr class=PostButtons>\n <td colspan=$cols>";
+      echo "\n<tr class=PostButtons><td colspan=$cols>";
 
       if( $postClass == 'Normal' and !$is_moderator ) // reply link
       {
@@ -429,9 +423,10 @@ function forum_message_box( $postClass, $id, $GoDiagrams=null, $Subject='', $Tex
    //TODO: remove those globals!
    global $forum, $thread;
 
-   if( $postClass != 'Edit' and $postClass != 'Preview' and strlen($Subject) > 0 and
-       strcasecmp(substr($Subject,0,3), "re:") != 0 )
-      $Subject = "RE: " . $Subject;
+   if( $postClass != 'Edit' && $postClass != 'Preview'
+      && strlen($Subject) > 0 && strcasecmp(substr($Subject,0,3), "re:") != 0
+      )
+         $Subject = "RE: " . $Subject;
 
    $form = new Form( 'messageform', "read.php#preview", FORM_POST );
 
@@ -531,12 +526,12 @@ function approve_message($id, $thread, $forum, $approve=true,
 
    if( mysql_affected_rows() == 1 )
    {
-      mysql_query("UPDATE Posts SET PostsInThread=PostsInThread" . ($approve ? '+1' : '-1') .
-                  " WHERE ID=$thread LIMIT 1")
+      mysql_query("UPDATE Posts SET PostsInThread=GREATEST(0,PostsInThread" . ($approve ? '+1' : '-1') .
+                  ") WHERE ID=$thread LIMIT 1")
          or error('mysql_query_failed','approve_message.set_postsinthread');
 
-      mysql_query("UPDATE Forums SET PostsInForum=PostsInForum" . ($approve ? '+1' : '-1') .
-                  " WHERE ID=$forum LIMIT 1")
+      mysql_query("UPDATE Forums SET PostsInForum=GREATEST(0,PostsInForum" . ($approve ? '+1' : '-1') .
+                  ") WHERE ID=$forum LIMIT 1")
          or error('mysql_query_failed','approve_message.set_postsinforum');
 
 
@@ -578,7 +573,6 @@ function recalculate_lastpost($Thread_ID, $Forum_ID)
       mysql_query("UPDATE Forums SET LastPost=" . $row[0] . " WHERE ID=$Forum_ID LIMIT 1")
          or error('mysql_query_failed','recalculate_lastpost.lastpost');
    }
-
 }
 
 
@@ -642,6 +636,5 @@ function display_posts_pending_approval()
    }
    forum_end_table($links, $cols);
 }
-
 
 ?>

@@ -2312,6 +2312,38 @@ table.Forum span.OlderNewFlag a {
    color: #ff7777;
 }
 
+table.Forum span.Parent {
+   margin: 0px 4px 0px 0px;
+}
+
+table.Forum span.Parent a {
+   color: blue;
+   /*
+   font-size: 80%;
+   */
+   font-weight: bold;
+   text-decoration: none;
+}
+
+table.Forum td.FoundForum {
+   padding: 3px 8px 0px 8px;
+   margin: 0px;
+   text-align: left;
+   font-size: 80%;
+   color: white;
+}
+
+table.Forum span.FoundScore,
+table.Forum span.FoundForum {
+   margin: 0px 0px;
+}
+
+table.Forum span.FoundScore span,
+table.Forum span.FoundForum a {
+   color: black;
+}
+
+
 form#tableFSFForm td.Description {
    text-align: left;
 }

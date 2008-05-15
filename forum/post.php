@@ -35,13 +35,13 @@ function post_message($player_row, $moderated_forum, &$thread)
       return '';
    $Subject = trim(get_request_arg('Subject'));
    if( $Subject == '' )
-      $Subject = '???';
+      $Subject = UNKNOWN_VALUE;
 //   $GoDiagrams = create_godiagrams($Text);
    $Subject = mysql_addslashes( $Subject);
    $Text = mysql_addslashes( $Text);
 
 
-   $moderated = ($moderated_forum or $player_row['MayPostOnForum'] == 'M');
+   $moderated = ($moderated_forum || $player_row['MayPostOnForum'] == 'M');
 
    // -------   Edit old post  ----------
 
@@ -124,13 +124,12 @@ function post_message($player_row, $moderated_forum, &$thread)
       // -------   Update database   -------
 
       if( $answer_nr >= 64*64 )
-         error("internal_error", "AnswerNr too large: $answer_nr" );
+         error('internal_error', "AnswerNr too large: $answer_nr" );
+
+      if( ++$Depth >= FORUM_MAX_DEPTH ) //see also the length of Posts.PosIndex
+         error('internal_error', "Depth too large: $Depth" );
 
       $PosIndex .= $order_str[$answer_nr/64] . $order_str[$answer_nr%64];
-      $Depth++;
-
-      if( $Depth >= 40 )
-         error("internal_error", "Depth too large: $Depth" );
 
       $query = "INSERT INTO Posts SET " .
          "Forum_ID=$forum, " .
@@ -156,7 +155,7 @@ function post_message($player_row, $moderated_forum, &$thread)
 
       $New_ID = mysql_insert_id();
 
-      if( !($parent > 0) )
+      if( !($parent > 0) ) //New thread, also $Thread_ID = -1
       {
          mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID LIMIT 1" )
             or error('mysql_query_failed','forum_post.new_thread');
@@ -184,11 +183,11 @@ function post_message($player_row, $moderated_forum, &$thread)
          mysql_query("UPDATE Forums " .
                      "SET PostsInForum=PostsInForum+1, LastPost=$New_ID " .
                      "WHERE ID=$forum LIMIT 1" )
-          or error('mysql_query_failed','forum_post.moderated.postsinforum');
+            or error('mysql_query_failed','forum_post.moderated.postsinforum');
 
          return T_('Message sent!');
       }
    }
-}
+} //post_message
 
 ?>
