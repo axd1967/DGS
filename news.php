@@ -32,7 +32,8 @@ $ThePage = new Page('News');
 
    echo "<pre>\n"; //caution: no <div> allowed inside
 
-   $contents = join('', file ('NEWS'));
+   //$contents = implode('', file ('NEWS'));
+   $contents= @read_from_file('NEWS');
 
    // format NEWS-page:
    $contents = make_html_safe( $contents, true );

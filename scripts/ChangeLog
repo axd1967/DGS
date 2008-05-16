@@ -32,7 +32,7 @@ Changelog
      statistics.php, statisticspng.php, statratingspng.php,
      ratinggraph.php, ratingpng.php:
    - introduction of a cache management for the stats graphics
-   - enabled/disbled with the CACHE_FOLDER constant in config.php
+   - enabled/disabled with the CACHE_FOLDER constant in config.php
 -----------
 // see also CACHE_FOLDER in config.php
 // The Sourceforge devel server need a soft link: (where temp is CACHE_FOLDER)

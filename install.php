@@ -32,8 +32,8 @@ require_once( "include/std_functions.php" );
 
    echo "<pre>\n";
 
-   $contents = join ('', file ('INSTALL'));
-
+   //$contents = implode('', file ('INSTALL'));
+   $contents= @read_from_file('INSTALL');
    $contents = @htmlentities($contents, ENT_QUOTES);
    $contents = preg_replace("%&lt;(http://.*?)&gt;%is", "(<a href=\"\\1\">\\1</a>)", $contents);
    echo $contents;

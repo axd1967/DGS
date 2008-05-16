@@ -33,10 +33,11 @@ require_once( "include/std_functions.php" );
    echo "<pre>\n";
 
    //readfile("COPYING");
-   $file= implode('', file('COPYING'));
-   $file= str_replace("\x0c", "\n\n", $file);
-   $file= @htmlentities($file, ENT_QUOTES);
-   echo $file;
+   //$contents= implode('', file('COPYING'));
+   $contents= @read_from_file('COPYING');
+   $contents= str_replace("\x0c", "\n\n", $contents);
+   $contents= @htmlentities($contents, ENT_QUOTES);
+   echo $contents;
 
    echo "</pre>\n";
 

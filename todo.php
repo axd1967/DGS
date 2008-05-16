@@ -32,9 +32,10 @@ require_once( "include/std_functions.php" );
    echo "<pre>\n";
 
    //readfile("TODO");
-   $file= implode('', file('TODO'));
-   $file= @htmlentities($file, ENT_QUOTES);
-   echo $file;
+   //$contents= implode('', file('TODO'));
+   $contents= @read_from_file('TODO');
+   $contents= @htmlentities($contents, ENT_QUOTES);
+   echo $contents;
 
    echo "</pre>\n";
 
