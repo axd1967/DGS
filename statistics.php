@@ -68,17 +68,16 @@ require_once( "include/std_functions.php" );
    if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
    {
       $tmp = '/proc/loadavg';
-      if( @is_readable( $tmp ) )
+      if( ($tmp=trim(@read_from_file($tmp))) )
       {
-         $tmp = trim(implode('', file($tmp)));
          echo '<p><span class=DebugInfo>Loadavg: ' . $tmp . '</span></p>';
       }
    }
 
    $args= array();
-   $args['show_time']= @$_REQUEST['show_time'];
-   $args['activity']= @$_REQUEST['activity'];
-   $args['date']= floor($NOW/86400); //to force the caches (daily)
+   $args['show_time']= (int)(bool)@$_REQUEST['show_time'];
+   $args['activity']= (int)(bool)@$_REQUEST['activity'];
+   $args['dyna']= floor($NOW/CACHE_EXPIRE_GRAPH); //force caches refresh
    $args= make_url('?', $args);
 
    $title = T_('Statistics graph');

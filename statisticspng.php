@@ -49,9 +49,28 @@ require_once( "include/graph.php" );
    }
 
 
+   $activity= (int)(bool)@$_REQUEST['activity'];
+   $show_time= (int)(bool)@$_REQUEST['show_time'];
+   $SizeX= ( @$_REQUEST['size'] > 0 ? $_REQUEST['size'] : 640 );
+   $SizeX= min( 2048, max( 256, $SizeX ));
+   $cache_it= ( CACHE_FOLDER>'' && $SizeX==640 && !$show_time );
+
+   if( $cache_it )
+   {
+      $cache_name= CACHE_FOLDER.'cache_statisticspng'.$activity;
+      clearstatcache();
+      $tmp= ((int)@filemtime($cache_name)) + CACHE_EXPIRE_GRAPH;
+      if( $tmp >= $NOW )
+      {
+         if( image_passthru($cache_name, $NOW, $tmp) )
+         {
+            exit;
+         }
+      }
+   }
+
    //prepare the graph
 
-   $SizeX = max( 200, @$_GET['size'] > 0 ? $_GET['size'] : 640 );
    $SizeY = $SizeX * 3 / 4;
 
    $gr = new Graph($SizeX, $SizeY, substr($bg_color, 1, -1));
@@ -98,16 +117,25 @@ require_once( "include/graph.php" );
       'min' => $minUsers,
       'c' => $gr->getcolor(   0, 200,   0),
    );
-   if( @$_REQUEST['activity'] )
-   $graphs[]= array(
-      'name' => $T_('Activity'),
-      'x' => &$tTime,
-      'y' => &$tActiv,
-      'max' => $maxActiv,
-      'min' => $minActiv,
-      'c' => $gr->getcolor(   0,   0, 200),
-   );
-
+   if( $activity )
+   {
+      $graphs[]= array(
+         'name' => $T_('Activity'),
+         'x' => &$tTime,
+         'y' => &$tActiv,
+         'max' => $maxActiv,
+         'min' => $minActiv,
+         'c' => $gr->getcolor(   0,   0, 200),
+      );
+      $graphs[]= array(
+         'name' => $T_('Hits'),
+         'x' => &$tTime,
+         'y' => &$tHits,
+         'max' => $maxHits,
+         'min' => $minHits,
+         'c' => $gr->getcolor( 100,   0,   0),
+      );
+   }
 
    //start by drawing the headers to find the graph position
 
@@ -228,11 +256,15 @@ require_once( "include/graph.php" );
 
    //misc drawings
 
-   if( @$_REQUEST['show_time'] )
+   if( $show_time )
       $gr->label( 0, 0,
-                 sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
+         sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
+   if( $cache_it )
+      grab_output_start();
    $gr->imagesend();
+   if( $cache_it )
+      grab_output_end( $cache_name);
 }
 
 
@@ -244,6 +276,7 @@ function get_stat_data()
  global $tGames, $minGames, $maxGames;
  global $tGameR, $minGameR, $maxGameR;
  global $tActiv, $minActiv, $maxActiv;
+ global $tHits, $minHits, $maxHits;
 
    $tTime = array();
    $tUsers = array();
@@ -251,6 +284,7 @@ function get_stat_data()
    $tGames = array();
    $tGameR = array();
    $tActiv = array();
+   $tHits = array();
 
    $result = mysql_query(
                "SELECT MAX(UNIX_TIMESTAMP(Time)) AS maxTime" .
@@ -260,6 +294,7 @@ function get_stat_data()
                ",MIN(Games) AS minGames,MAX(Games) AS maxGames" .
                ",MIN(GamesRunning) AS minGameR,MAX(GamesRunning) AS maxGameR" .
                ",MIN(Activity) AS minActiv,MAX(Activity) AS maxActiv" .
+               ",MIN(Hits) AS minHits,MAX(Hits) AS maxHits" .
                " FROM Statistics")
       or error('mysql_query_failed', 'statisticspng.min_max');
 
@@ -280,12 +315,13 @@ function get_stat_data()
 
    while( $row = mysql_fetch_assoc($result) )
    {
-      array_push($tTime, $row['times']);
-      array_push($tUsers, $row['Users']);
-      array_push($tMoves, $row['Moves']);
-      array_push($tGames, $row['Games']);
-      array_push($tGameR, $row['GamesRunning']);
-      array_push($tActiv, $row['Activity']);
+      $tTime[]= $row['times'];
+      $tUsers[]= $row['Users'];
+      $tMoves[]= $row['Moves'];
+      $tGames[]= $row['Games'];
+      $tGameR[]= $row['GamesRunning'];
+      $tActiv[]= $row['Activity'];
+      $tHits[]= $row['Hits'];
    }
    mysql_free_result($result);
 }

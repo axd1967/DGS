@@ -54,9 +54,27 @@ define('MIN_RANK', round(MIN_RATING/100.));
          'return (string)$x;' );
 
 
+   $show_time= (int)(bool)@$_REQUEST['show_time'];
+   $SizeX= ( @$_REQUEST['size'] > 0 ? $_REQUEST['size'] : 640 );
+   $SizeX= min( 2048, max( 256, $SizeX ));
+   $cache_it= ( CACHE_FOLDER>'' && $SizeX==640 && !$show_time );
+
+   if( $cache_it )
+   {
+      $cache_name= CACHE_FOLDER.'cache_statratingspng';
+      clearstatcache();
+      $tmp= ((int)@filemtime($cache_name)) + CACHE_EXPIRE_GRAPH;
+      if( $tmp >= $NOW )
+      {
+         if( image_passthru($cache_name, $NOW, $tmp) )
+         {
+            exit;
+         }
+      }
+   }
+
    //prepare the graph
 
-   $SizeX = max( 200, @$_GET['size'] > 0 ? $_GET['size'] : 640 );
    $SizeY = $SizeX * 3 / 4;
 
    $gr = new Graph($SizeX, $SizeY, substr($bg_color, 1, -1));
@@ -181,12 +199,15 @@ define('MIN_RANK', round(MIN_RATING/100.));
 
    //misc drawings
 
-   if( @$_GET['show_time'] == 'y')
-      $gr->label($gr->offsetX, 0,
-                 sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
+   if( $show_time )
+      $gr->label( 0, 0,
+         sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
-
+   if( $cache_it )
+      grab_output_start();
    $gr->imagesend();
+   if( $cache_it )
+      grab_output_end( $cache_name);
 }
 
 

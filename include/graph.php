@@ -241,6 +241,45 @@ function patterncolor($n)
    return array( $r&255, $g&255, $b&255);
 } //patterncolor
 
+function get_image_type( $filename)
+{
+   $type= @getimagesize($filename);
+   if( !is_array($type) )
+      return false;
+   $type=(int)$type[2];
+   switch( $type )
+   {
+      case IMAGETYPE_GIF: $mime= 'image/gif'; break;
+      case IMAGETYPE_JPEG: $mime= 'image/jpeg'; break;
+      case IMAGETYPE_PNG: $mime= 'image/png'; break;
+      case IMAGETYPE_BMP: $mime= 'image/bmp'; break;
+      case IMAGETYPE_WBMP: $mime= 'image/vnd.wap.wbmp'; break;
+      default: return false;
+   }
+   return array($type, $mime);
+}
+
+//writes an image file to the output buffer adding adjusted headers
+function image_passthru( $filename, $modified=null, $expire=null)
+{
+   $type= get_image_type($filename);
+   if( is_array($type) )
+   {
+      $img= @read_from_file($filename);
+      if( $img )
+      {
+         if( isset($modified) )
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$modified) . ' GMT');
+         if( isset($expire) )
+            header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
+         header('Content-type: '.$type[1]);
+         header('Content-Length: '.strlen($img));
+         echo $img;
+         return $type; //done
+      }
+   }
+   return false; //error
+}
 
 /*!
  * \class Graph
@@ -446,6 +485,7 @@ class Graph
       if( function_exists("imagepng") )
       {
          header("Content-type: image/png");
+         //header('Content-Length: ' . strlen($img));
          imagepng($this->im);
       } else
       if( function_exists("imagegif") )
@@ -459,16 +499,16 @@ class Graph
          imagejpeg($this->im, '', 0.5);
       } else
       if( function_exists("imagewbmp") )
-      {
+      { //for wap devices
          header("Content-type: image/vnd.wap.wbmp");
          imagewbmp($this->im);
       } else
       {
-         imagedestroy($this->im);
+         //imagedestroy($this->im);
          die("No PHP graphic support on this server");
       }
-      imagedestroy($this->im);
-      unset($this->im);
+      //imagedestroy($this->im);
+      //unset($this->im);
    } //imagesend
 
 

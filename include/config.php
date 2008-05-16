@@ -48,11 +48,9 @@ $DB_NAME = "dragongoserver";
 // Dependent of your mysql version:
 
 define('MYSQL_VERSION', '3.23.49');
-//found with SELECT VERSION(),PASSWORD('foo'),OLD_PASSWORD('foo');
-//devel-server is '4.1.20-log' (client '3.23.49') old_exist but new_=old_
-//live-server is '5.0.22-log' (client '5.0.22') new_<>old_
-
-define('ALLOW_SQL_UNION', 1); // 1 = UNION supported (needs min. mysql 4.0.X)
+//may be found with SELECT VERSION(),PASSWORD('foo'),OLD_PASSWORD('foo');
+//devel-server is '4.1.20-log' (client '3.23.49') old_exist but new_==old_
+//live-server is '5.0.22-log' (client '5.0.22') and new_<>old_
 
 /**
  * MySQL encryption function used for passwords
@@ -65,11 +63,19 @@ define('ALLOW_SQL_UNION', 1); // 1 = UNION supported (needs min. mysql 4.0.X)
  **/
 define('PASSWORD_ENCRYPT', 'SHA1');
 
+define('ALLOW_SQL_UNION', 1); // 1 = UNION supported (needs min. mysql 4.0.X)
+
 
 // Dependent of the configuration of your server:
 
-define('URI_AMP_IN','&'); //ini_get('arg_separator.input')
+define('URI_AMP_IN','&'); //see ini_get('arg_separator.input')
 //URI_AMP at '&amp;' work even if arg_separator.output is set to '&'
-define('URI_AMP','&amp;'); //ini_get('arg_separator.output')
-//define('URI_AMP','&'); //ini_get('arg_separator.output')
+define('URI_AMP','&amp;'); //see ini_get('arg_separator.output')
+
+// A folder where can be saved some elements which don't need a complete
+// rebuilt each time a page is called (for example, the statistics graphs)
+// Must be relative to the root folder and ended by a '/'
+// Set it to '' (empty string) to disable the cache features
+define('CACHE_FOLDER', 'temp/');
+
 ?>

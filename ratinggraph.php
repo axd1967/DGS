@@ -52,35 +52,39 @@ require_once( "include/form_functions.php" );
    $CURRENTYEAR = date('Y', $CURRENTMONTH);
    $CURRENTMONTH = date('n', $CURRENTMONTH);
 
-   $startyear = ( @$_REQUEST['startyear'] > 0 ? $_REQUEST['startyear'] : BEGINYEAR );
-   $startmonth = ( @$_REQUEST['startmonth'] > 0 ? $_REQUEST['startmonth'] : BEGINMONTH );
-   $endyear = ( @$_REQUEST['endyear'] > 0 ? $_REQUEST['endyear'] : $CURRENTYEAR );
-   $endmonth = ( @$_REQUEST['endmonth'] > 0 ? $_REQUEST['endmonth'] : $CURRENTMONTH );
+   $startyear = (int)get_request_arg( 'startyear', BEGINYEAR );
+   $startmonth = (int)get_request_arg( 'startmonth', BEGINMONTH );
+   $endyear = (int)get_request_arg( 'endyear', $CURRENTYEAR );
+   $endmonth = (int)get_request_arg( 'endmonth', $CURRENTMONTH );
 
-   if( $startyear < BEGINYEAR or ( $startyear == BEGINYEAR and $startmonth < BEGINMONTH ))
+   if( $startyear < BEGINYEAR
+      || ( $startyear == BEGINYEAR && $startmonth < BEGINMONTH ) )
    {
       $startmonth = BEGINMONTH;
       $startyear = BEGINYEAR;
    }
-   else if( $startyear > $CURRENTYEAR or
-            ( $startyear == $CURRENTYEAR and $startmonth > $CURRENTMONTH ))
+   else if( $startyear > $CURRENTYEAR
+      || ( $startyear == $CURRENTYEAR && $startmonth > $CURRENTMONTH ) )
    {
       $startmonth = $CURRENTMONTH;
       $startyear = $CURRENTYEAR;
    }
 
-   if( $endyear > $CURRENTYEAR or ( $endyear == $CURRENTYEAR and $endmonth > $CURRENTMONTH ))
+   if( $endyear > $CURRENTYEAR
+      || ( $endyear == $CURRENTYEAR && $endmonth > $CURRENTMONTH ) )
    {
       $endmonth = $CURRENTMONTH;
       $endyear = $CURRENTYEAR;
    }
-   else if( $endyear < BEGINYEAR or ( $endyear == BEGINYEAR and $endmonth < BEGINMONTH ))
+   else if( $endyear < BEGINYEAR
+      || ( $endyear == BEGINYEAR && $endmonth < BEGINMONTH ) )
    {
       $endmonth = BEGINMONTH;
       $endyear = BEGINYEAR;
    }
 
-   if( $endyear < $startyear or ( $endyear == $startyear and $endmonth < $startmonth ))
+   if( $endyear < $startyear
+      || ( $endyear == $startyear && $endmonth < $startmonth ) )
    {
       swap($startmonth, $endmonth);
       swap($startyear, $endyear);
@@ -90,8 +94,6 @@ require_once( "include/form_functions.php" );
    start_page(T_('Rating graph for') . ' ' . make_html_safe($user_row['Name'])
             , true, $logged_in, $player_row );
 
-   echo '<center>';
-
    echo "<h3 class=Header>" . T_('Rating graph for') . ' ' .
             user_reference( REF_LINK, 1, '', $user_row) . "</h3>\n" ;
 
@@ -99,20 +101,24 @@ require_once( "include/form_functions.php" );
       or error('mysql_query_failed', 'ratinggraph.find_rating_data');
 
    if( @mysql_num_rows($result) < 1 )
-      echo T_("Sorry, too few rated games to draw a graph") . "\n";
+      echo T_("Sorry, too few rated games to draw a graph") ,"\n";
    else
    {
-      $show_time = @$_REQUEST['show_time'] == 'y';
+      $show_time = (int)(bool)@$_REQUEST['show_time'];
+      $dyna= floor($NOW/(3600/$tick_frequency));
       $winpie = (bool)@$_REQUEST['winpie'];
       $bynumber = (bool)@$_REQUEST['bynumber'];
-      echo '<img src="ratingpng.php?uid='.$uid .
-         ($show_time ? URI_AMP.'show_time=y' : '') .
-         ($winpie ? URI_AMP.'winpie=1' : '') .
-         ($bynumber ? URI_AMP.'bynumber=1' : '') .
-         URI_AMP."date=$NOW" . //force cache refresh
-         URI_AMP."startyear=$startyear".URI_AMP."startmonth=$startmonth" .
-         URI_AMP."endmonth=$endmonth".URI_AMP."endyear=$endyear\"" .
-         " alt=\"" . T_('Rating graph') . "\">\n";
+
+      echo "\n<img src=\"ratingpng.php?uid=$uid"
+         ,($show_time ? URI_AMP.'show_time=1' : '')
+         ,($winpie ? URI_AMP.'winpie=1' : '')
+         ,(GRAPH_RATING_BY_NUM_ENA && $bynumber ? URI_AMP.'bynumber=1' : '')
+         ,URI_AMP,"dyna=$dyna" //force caches refresh
+         ,URI_AMP,"startyear=$startyear"
+         ,URI_AMP,"startmonth=$startmonth"
+         ,URI_AMP,"endyear=$endyear"
+         ,URI_AMP,"endmonth=$endmonth"
+         ,"\" alt=\"" ,T_('Rating graph') ,"\">";
       echo "<p></p>\n";
 
       $form = new Form( 'date_form', 'ratinggraph.php?uid='.$uid, FORM_POST );
@@ -147,8 +153,6 @@ require_once( "include/form_functions.php" );
 
       $form->echo_string(1);
    }
-
-   echo '</center>';
 
    $menu_array =
       array( T_('Show finished games') => "show_games.php?uid=$uid".URI_AMP."finished=1" );

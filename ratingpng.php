@@ -300,7 +300,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       $gr->pie( $datas, $cx, $cy, $sx, $sy, $sz, $color);
    }
 
-   if( @$_GET['show_time'] == 'y')
+   if( @$_REQUEST['show_time'] )
       $gr->label($gr->offsetX, 0,
                  sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
@@ -398,14 +398,14 @@ function get_rating_data($uid)
          if( is_array($tmp) && $tmp['seconds'] < $starttime )
          {
             //interpolate the first curves points
-            array_push($ratings, interpolate($tmp['Rating'], $row['Rating'],
-                                        $tmp['seconds'], $starttime, $row['seconds']));
-            array_push($ratingmin, interpolate($tmp['RatingMin'], $row['RatingMin'],
-                                          $tmp['seconds'], $starttime, $row['seconds']));
-            array_push($ratingmax, interpolate($tmp['RatingMax'], $row['RatingMax'],
-                                          $tmp['seconds'], $starttime, $row['seconds']));
-            array_push($time, $starttime);
-            array_push($number, $numbercount+.4); //mark the interpolation
+            $ratings[]= interpolate($tmp['Rating'], $row['Rating'],
+                              $tmp['seconds'], $starttime, $row['seconds']);
+            $ratingmin[]= interpolate($tmp['RatingMin'], $row['RatingMin'],
+                              $tmp['seconds'], $starttime, $row['seconds']);
+            $ratingmax[]= interpolate($tmp['RatingMax'], $row['RatingMax'],
+                              $tmp['seconds'], $starttime, $row['seconds']);
+            $time[]= $starttime;
+            $number[]= $numbercount+.4; //mark the interpolation
          }
          $first = false;
       }
@@ -415,24 +415,24 @@ function get_rating_data($uid)
          //interpolate the last curves points
          if( is_array($tmp) && $tmp['seconds'] <= $endtime )
          {
-            array_push($ratings, interpolate($tmp['Rating'], $row['Rating'],
-                                        $tmp['seconds'], $endtime, $row['seconds']));
-            array_push($ratingmin, interpolate($tmp['RatingMin'], $row['RatingMin'],
-                                          $tmp['seconds'], $endtime, $row['seconds']));
-            array_push($ratingmax, interpolate($tmp['RatingMax'], $row['RatingMax'],
-                                          $tmp['seconds'], $endtime, $row['seconds']));
-            array_push($time, $endtime);
-            array_push($number, $numbercount+.6); //mark the interpolation
+            $ratings[]= interpolate($tmp['Rating'], $row['Rating'],
+                              $tmp['seconds'], $endtime, $row['seconds']);
+            $ratingmin[]= interpolate($tmp['RatingMin'], $row['RatingMin'],
+                              $tmp['seconds'], $endtime, $row['seconds']);
+            $ratingmax[]= interpolate($tmp['RatingMax'], $row['RatingMax'],
+                              $tmp['seconds'], $endtime, $row['seconds']);
+            $time[]= $endtime;
+            $number[]= $numbercount+.6; //mark the interpolation
          }
          break;
       }
 
-      array_push($ratings, $row['Rating']);
-      array_push($ratingmin, $row['RatingMin']);
-      array_push($ratingmax, $row['RatingMax']);
-      array_push($time, $row['seconds']);
+      $ratings[]= $row['Rating'];
+      $ratingmin[]= $row['RatingMin'];
+      $ratingmax[]= $row['RatingMax'];
+      $time[]= $row['seconds'];
       $numbercount++;
-      array_push($number, $numbercount);
+      $number[]= $numbercount;
 
       $tmp = $row;
    } while( $row = mysql_fetch_assoc($result) ) ;

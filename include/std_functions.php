@@ -121,6 +121,8 @@ define('OUT_OF_RATING', 9999); //ominous rating bounds: [-OUT_OF_RATING,OUT_OF_R
 //Allow the "by number of games" graphic (as well as "by date of games").
 define('GRAPH_RATING_BY_NUM_ENA', true);
 define('GRAPH_RATING_MIN_INTERVAL', 2*31*24*3600);
+// see also CACHE_FOLDER in config.php
+define('CACHE_EXPIRE_GRAPH', 24*3600); //1 day
 
 
 $button_max = 11;
@@ -331,7 +333,7 @@ function map_to_string( $map, $sep = ', ' )
 
    $arr = array();
    foreach( $map as $key => $val )
-      array_push( $arr, "$key=[$val]" );
+      $arr[]= "$key=[$val]";
 
    return implode( $sep, $arr );
 }
@@ -436,7 +438,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       {
          $is_down = false;
       }
-      unset( $is_down_allowed);
+      //unset( $is_down_allowed);
    }
 
    start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp);
@@ -453,7 +455,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    echo "\n  <td class=LoginBox>";
 
-   if ($logged_in and !$is_down)
+   if( $logged_in && !$is_down )
       echo T_("Logged in as") . ": <A id='loggedId' href=\"{$base_path}status.php\">"
            . $player_row["Handle"] . "</A>";
    else
@@ -624,7 +626,7 @@ function end_page( $menu_array=NULL )
       . "\n</table>";
 
    end_html();
-}
+} //end_page
 
 function end_html()
 {
@@ -633,7 +635,28 @@ function end_html()
          echo $TheErrors->list_string('garbage', 1);
    echo "\n</BODY>\n</HTML>";
    ob_end_flush();
+} //end_html
+
+//push a level in the output stack
+function grab_output_start( $compressed=0)
+{
+   if( $compressed )
+      return ob_start('ob_gzhandler');
+   else
+      return ob_start();
 }
+
+//grab the output buffer into a file
+//also copy it in the previous level of the output stack
+function grab_output_end( $filename='')
+{
+   $tmp= ob_get_contents();//grab it
+   ob_end_flush(); //also copy it
+   if( !$filename )
+      return false;
+   return write_to_file( $filename, $tmp);
+}
+
 
 // supported formats in $menu_array:
 //    linktext  => URL
@@ -944,7 +967,7 @@ function verify_email( $debugmsg, $email)
    //RFC 2822 - 3.4.1. Addr-spec specification
    //See http: //www.faqs.org/rfcs/rfc2822
    //$regexp = "^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,4}$";
-   $regexp = "%^([-_a-z0-9]+)(\\.[-_a-z0-9]+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[a-z]{2,4})\$%i";
+   $regexp = "/^([-_a-z0-9]+)(\\.[-_a-z0-9]+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[a-z]{2,4})\$/i";
    $res= preg_match($regexp, $email);
    if( is_string($debugmsg) && !$res )
       error('bad_mail_address', "$debugmsg=$email");
@@ -968,9 +991,9 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
 
    if( !$subject )
       $subject= $FRIENDLY_LONG_NAME.' notification';
-   $subject= preg_replace("%[\\x01-\\x20]+%", ' ', $subject);
+   $subject= preg_replace("/[\\x01-\\x20]+/", ' ', $subject);
 
-   $rgx= array("%\r\n%","%\r%");
+   $rgx= array("/\r\n/","/\r/");
    $rpl= array("\n","\n");
    $text= preg_replace( $rgx, $rpl, $text);
    $text= wordwrap( $text, 70, "\n", 1);
@@ -989,18 +1012,18 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
     **/
    $eol= "\r\n"; //desired one for emails
 
-   switch( $eol )
+   switch( (string)$eol )
    {
     default:
       $eol= "\r\n";
     case "\r":
-      $text= preg_replace( "%\n%", $eol, $text);
+      $text= preg_replace( "/\n/", $eol, $text);
     case "\n":
       break;
    }
    $text= trim($text).$eol;
 
-   $rgx= array("%[\r\n]+%");
+   $rgx= array("/[\r\n]+/");
    $rpl= array($eol);
 
    $headers= trim($headers);
@@ -1072,8 +1095,9 @@ function send_message( $debugmsg, $text='', $subject=''
    {
       if( is_array($var) )
          $var= implode(',', $var);
-      $var= preg_split('%[\s,]+%', $var);
-      if( count($var) <= 0 )
+      $var= preg_split('/[\s,]+/', $var);
+      $varcnt= count($var);
+      if( $varcnt <= 0 )
          continue;
 
       $var= implode("','",
@@ -1082,7 +1106,7 @@ function send_message( $debugmsg, $text='', $subject=''
          continue;
 
       $query= "SELECT ID,Notify,SendEmail"
-            ." FROM Players WHERE $field IN ('$var')";
+            ." FROM Players WHERE $field IN ('$var') LIMIT $varcnt";
       $result = mysql_query( $query)
          or error('mysql_query_failed',$debugmsg.".get$field($var)");
       while( ($row=mysql_fetch_assoc($result)) )
@@ -1095,7 +1119,9 @@ function send_message( $debugmsg, $text='', $subject=''
       }
       mysql_free_result($result);
    }
-   if( !$to_myself && count($receivers) <= 0 )
+   $reccnt= count($receivers);
+   //TODO: handle $reccnt != $varcnt ???
+   if( !$to_myself && $reccnt <= 0 )
       error('receiver_not_found',$debugmsg."rec0($from_id,$subject)");
 
    /**
@@ -1105,11 +1131,11 @@ function send_message( $debugmsg, $text='', $subject=''
     * correspondent.
     * See also: message.php
     **/
-   if( $from_id > 0 && count($receivers)+($to_myself?1:0) > 1 )
+   if( $from_id > 0 && $reccnt+($to_myself?1:0) > 1 )
       error('receiver_not_found',$debugmsg."rec1($from_id,$subject)");
 
    //actually not supported: sending a message to myself and other in the same pack
-   if( $to_myself && count($receivers) > 0 )
+   if( $to_myself && $reccnt > 0 )
       error('internal_error',$debugmsg."rec2($from_id,$subject)");
 
    $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
@@ -1248,7 +1274,6 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
    $name= COOKIE_PREFIX.$name;
 
    //remove duplicated cookies sometime occuring with some browsers
-   //global $HTTP_SERVER_VARS; old == new $_SERVER
    if( $tmp= @$_SERVER['HTTP_COOKIE'] )
       $n= preg_match_all(';'.$name.'[\\x01-\\x20]*=;i', $tmp, $dummy);
    else
@@ -1309,7 +1334,7 @@ function add_line_breaks( $str)
    $str = trim($str);
 
    // Strip out carriage returns
-  $str=preg_replace('%[\\x01-\\x09\\x0B-\\x20]*\\x0A%','<BR>', $str);
+  $str=preg_replace('/[\\x01-\\x09\\x0B-\\x20]*\\x0A/','<BR>', $str);
 
    // Handle collapsed vertical white spaces
   for( $i=0; $i<2; $i++)
@@ -1421,7 +1446,7 @@ This part fix a security hole. One was able to execute a javascript code
          .'|\\bstyle\\s*='       //disabling style= is not bad too
          ;
       if ( /*$quote &&*/  preg_match( "%($quote)%i",
-            preg_replace( "%[\\x01-\\x1f]+%", '', $head)) ) {
+            preg_replace( "/[\\x01-\\x1f]+/", '', $head)) ) {
          $bad = 2;
       }
    }
@@ -1459,6 +1484,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    $reg = ( $html_code ?( $stop ?"$stop|" :'' ).$html_code :$stop );
    if( !$reg )
       return '';
+   //enclosed by '%' because $html_code may contain '/'
    $reg = "%^(.*?)<($reg)\\b(.*)$%is";
 
    while ( preg_match($reg, $trail, $matches) )
@@ -1485,14 +1511,14 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       if( $bad)
          return $before .$marks .'<'. $head .'>' ;
 
-      $head = preg_replace('%[\\x01-\\x20]+%', ' ', $head);
+      $head = preg_replace('/[\\x01-\\x20]+/', ' ', $head);
       if( in_array($tag, array(
             //as a first set/choice of <ul>-like tags
             'quote','code','pre','center',
             'dl','/dt','/dd','ul','ol','/li',
          )) )
       { //remove all the following newlines (to avoid inserted <br>)
-         $trail= preg_replace( "%^[\\r\\n]+%", '', $trail);
+         $trail= preg_replace( "/^[\\r\\n]+/", '', $trail);
       }
       else if( in_array($tag, array(
             //as a first set/choice of </ul>-like tags
@@ -1500,7 +1526,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
             '/dl','/ul','/ol','/note','/div',
          )) )
       { //remove the first following newline
-         $trail= preg_replace( "%^(\\r\\n|\\r|\\n)%", '', $trail);
+         $trail= preg_replace( "/^(\\r\\n|\\r|\\n)/", '', $trail);
       }
 
       if( $stop == $tag )
@@ -1533,10 +1559,10 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
          //$inside = str_replace('&', '&amp;', $inside);
-         $inside = preg_replace('%[\\x09\\x20]%', '&nbsp;', $inside);
-         $inside = preg_replace('%[\\x01-\\x1F]*%', '', $inside);
+         $inside = preg_replace('/[\\x09\\x20]/', '&nbsp;', $inside);
+         $inside = preg_replace('/[\\x01-\\x1F]*/', '', $inside);
          //TODO: fix possible corrupted marks... to be reviewed
-         $inside = preg_replace('%&nbsp;class=Mark%', ' class=Mark', $inside);
+         $inside = preg_replace('/&nbsp;class=Mark/', ' class=Mark', $inside);
       }
       else if( $to_be_closed )
       {
@@ -1612,64 +1638,64 @@ define('REF_LINK_BLANK', 0x4);
 $html_safe_preg = array(
 
 //<note>...</note> =>removed from entry, seen only by editors
- "%".ALLOWED_LT."note([^`\\n\\t]*)".ALLOWED_GT.".*?"
-    .ALLOWED_LT."/note([^`\\n\\t]*)".ALLOWED_GT."%is"
+ '%'.ALLOWED_LT."note([^`\\n\\t]*)".ALLOWED_GT.".*?"
+    .ALLOWED_LT."/note([^`\\n\\t]*)".ALLOWED_GT.'%is'
   => '', // =>removed from entry
 
 //<mailto:...>
- "%".ALLOWED_LT."(mailto:)([^`\\n\\s]+)".ALLOWED_GT."%is"
+ '/'.ALLOWED_LT."(mailto:)([^`\\n\\s]+)".ALLOWED_GT.'/is'
   => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT
                         ."\\2".ALLOWED_LT."/a".ALLOWED_GT,
 
 //<http://...>, <https://...>, <news://...>, <ftp://...>
- "%".ALLOWED_LT."((http:|https:|news:|ftp:)//[^`\\n\\s]+)".ALLOWED_GT."%is"
+ '%'.ALLOWED_LT."((http:|https:|news:|ftp:)//[^`\\n\\s]+)".ALLOWED_GT.'%is'
   => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT
                         ."\\1".ALLOWED_LT."/a".ALLOWED_GT,
 
 //<game gid[,move]> =>show game
- "%".ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *".ALLOWED_GT."%ise"
+ '/'.ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *".ALLOWED_GT.'/ise'
   => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+"
                         .REF_LINK_ALLOWED.",1,'',\\2,\\4+0)",
 
 //<user uid> or <user =uhandle> =>show user info
 //<send uid> or <send =uhandle> =>send a message to user
- "/".ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR
-                        ."?[+".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT."/ise"
+ '/'.ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR
+                        ."?[+".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT.'/ise'
   => "\\1_reference(('\\2'?".REF_LINK_BLANK.":0)+"
                         .REF_LINK_ALLOWED.",1,'','\\3')",
 //adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
 //because of HANDLE_LEGAL_REGS, no need of ...,str_replace('\"','"','\\3')...
 
 //<color col>...</color> =>translated to <font color="col">...</font>
- "%".ALLOWED_LT."color +([#0-9a-zA-Z]+) *".ALLOWED_GT."%is"
+ '%'.ALLOWED_LT."color +([#0-9a-zA-Z]+) *".ALLOWED_GT.'%is'
   => ALLOWED_LT."font color=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT,
- "%".ALLOWED_LT."/color *".ALLOWED_GT."%is"
+ '%'.ALLOWED_LT."/color *".ALLOWED_GT.'%is'
   => ALLOWED_LT."/font".ALLOWED_GT,
 
 //<code>...</code> =>translated to <pre class=code>...</pre>
 // see also parse_tags_safe() for the suppression of inner html codes
- "%".ALLOWED_LT."code([^`\\n\\t]*)".ALLOWED_GT."%is"
+ '%'.ALLOWED_LT."code([^`\\n\\t]*)".ALLOWED_GT.'%is'
   => ALLOWED_LT."pre class=code \\1".ALLOWED_GT,
- "%".ALLOWED_LT."/code *".ALLOWED_GT."%is"
+ '%'.ALLOWED_LT."/code *".ALLOWED_GT.'%is'
   => ALLOWED_LT."/pre".ALLOWED_GT,
 
 //<quote>...</quote> =>translated to <div class=quote>...</div>
- "%".ALLOWED_LT."quote([^`\\n\\t]*)".ALLOWED_GT."%is"
+ '%'.ALLOWED_LT."quote([^`\\n\\t]*)".ALLOWED_GT.'%is'
   => ALLOWED_LT."div class=quote \\1".ALLOWED_GT,
- "%".ALLOWED_LT."/quote *".ALLOWED_GT."%is"
+ '%'.ALLOWED_LT."/quote *".ALLOWED_GT.'%is'
   => ALLOWED_LT."/div".ALLOWED_GT,
 
 //<home page>...</home> =>translated to <a href="{$HOSTBASE}$page">...</a>
- "%".ALLOWED_LT."home(_)?[\\n\\s]+((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT."%ise"
+ '%'.ALLOWED_LT."home(_)?[\\n\\s]+((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT.'%ise'
   => '"'.ALLOWED_LT."a href=".ALLOWED_QUOT.$HOSTBASE."\\2".ALLOWED_QUOT
       ."\".('\\1'?' target=".ALLOWED_QUOT.'_blank'.ALLOWED_QUOT."':'').\""
       .ALLOWED_GT.'"',
- "%".ALLOWED_LT."/home *".ALLOWED_GT."%is"
+ '%'.ALLOWED_LT."/home *".ALLOWED_GT.'%is'
   => ALLOWED_LT."/a".ALLOWED_GT,
 
 //<image pict> =>translated to <img src="{$HOSTBASE}images/$pict">
 //<image board/pict> =>translated to <img src="{$HOSTBASE}17/$pict">
- "%".ALLOWED_LT."image[\\n\\s]+(board/)?((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT."%ise"
+ '%'.ALLOWED_LT."image[\\n\\s]+(board/)?((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT.'%ise'
   => '"'.ALLOWED_LT."img class=InTextImage"
       ." alt=".ALLOWED_QUOT."(img)".ALLOWED_QUOT
       ." src=".ALLOWED_QUOT.$HOSTBASE
@@ -1685,9 +1711,9 @@ $html_safe_preg = array(
 */
 
 //reverse to bad the skiped (faulty) ones
- "%".ALLOWED_LT."(/?(image|home|quote|code|note|color|" //|tt if <tt> above
+ '%'.ALLOWED_LT."(/?(image|home|quote|code|note|color|" //|tt if <tt> above
       ."user|send|game|mailto|news|ftp|http)[^`]*)"
-    .ALLOWED_GT."%is"
+    .ALLOWED_GT.'%is'
   => "&lt;\\1&gt;",
 ); //$html_safe_preg
 
@@ -1772,7 +1798,7 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
    $msg = str_replace('&', '&amp;', $msg);
    $msg = eregi_replace('&amp;((#[0-9]+|[A-Z][0-9A-Z]*);)', '&\\1', $msg);
    */
-   $msg = preg_replace('%&(?!(#[0-9]+|[A-Z][0-9A-Z]*);)%is', '&amp;', $msg);
+   $msg = preg_replace('/&(?!(#[0-9]+|[A-Z][0-9A-Z]*);)/is', '&amp;', $msg);
 
    $msg = basic_safe( $msg);
 
@@ -2096,7 +2122,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
       jump_to( 'http://' . $HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
 
-   if( !$hdl or !$dbcnx )
+   if( !$hdl || !$dbcnx )
    {
       include_all_translate_groups(); //must be called from main dir
       return false;
@@ -2105,7 +2131,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
    $query= "SELECT *,UNIX_TIMESTAMP(Sessionexpire) AS Expire"
           .",Adminlevel+0 as admin_level"
           .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
-          ." FROM Players WHERE Handle='".mysql_addslashes($hdl)."'";
+          ." FROM Players WHERE Handle='".mysql_addslashes($hdl)."' LIMIT 1";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed','is_logged_in.find_player');
@@ -2264,14 +2290,49 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
 
 function write_to_file( $filename, $string_to_write )
 {
-  $fp = fopen( $filename, 'w' )
-    or error( "couldnt_open_file", $filename );
+   $fp = fopen( $filename, 'wb' )
+      or error( 'couldnt_open_file', $filename );
 
-  fwrite( $fp, $string_to_write );
-  fclose( $fp );
+   fwrite( $fp, $string_to_write );
+   fclose( $fp );
 
-  @chmod( $filename, 0666 );
+   @chmod( $filename, 0666 );
 }
+
+if( function_exists('file_get_contents') )
+{
+   function read_from_file($filename, $incpath=false)
+   {
+      return file_get_contents($filename, $incpath);
+   }
+}
+else
+{
+   function read_from_file($filename, $incpath=false)
+   {
+      $fp = fopen($filename, 'rb', $incpath);
+      if( !$fp )
+      {
+         trigger_error('read_from_file() failed to open stream: No such file or directory', E_USER_WARNING);
+         return false;
+      }
+
+      clearstatcache();
+      if( ($fsize=@filesize($filename)) )
+      {
+         $data = fread($fp, $fsize);
+      }
+      else
+      {
+         $data = '';
+         while( !feof($fp) )
+            $data.= fread($fp, 8192);
+      }
+
+      fclose($fp);
+      return $data;
+   }
+} //read_from_file
 
 function centered_container( $open=true)
 {
