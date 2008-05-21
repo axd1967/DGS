@@ -25,6 +25,11 @@ Changelog
 
 2008-05-21 rodival
 
+   * game.php:
+   - typo
+
+2008-05-21 rodival
+
    * include/std_functions.php (make_url, build_url, build_hidden,
       write_to_file, read_from_file),
      include/filter.php, include.std_classes.php,

@@ -614,8 +614,8 @@ function get_alt_arg( $n1, $n2)
       $page_hiddens['coord'] = $coord;
    if( @$stonestring )
       $page_hiddens['stonestring'] = $stonestring;
-   $page_hiddens['movenumbers'] = $_REQUEST['movenumbers'];
-   $page_hiddens['notesmode'] = $_REQUEST['notesmode'];
+   $page_hiddens['movenumbers'] = @$_REQUEST['movenumbers'];
+   $page_hiddens['notesmode'] = @$_REQUEST['notesmode'];
 
    echo build_hidden( $page_hiddens);
    echo "\n</FORM>";
