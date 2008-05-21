@@ -2063,35 +2063,43 @@ function get_request_url( $absolute=false)
 }
 
 
+//Priorities: URI(id) > URI(handle) > REFERER(id) > REFERER(handle)
+//returns what is found: b0=uid, b1=uhandle, b2=...from referer
+//Warning: the '+' (an URI reserved char) must be substitued with %2B in 'handle'.
 function get_request_user( &$uid, &$uhandle, $from_referer=false)
 {
-//Priorities: URI(id) > URI(handle) > REFERER(id) > REFERER(handle)
-//Warning: + (an URI reserved char) must be substitued with %2B in 'handle'.
    $uid_name = 'uid';
-   $uid = @$_REQUEST[$uid_name];
+   $uid = (int)@$_REQUEST[$uid_name];
    $uhandle = '';
-   if( !($uid > 0) )
+   if( $uid > 0 )
+      return 1;
+   $uid = 0;
+   $uhandle = (string)@$_REQUEST[UHANDLE_NAME];
+   if( $uhandle )
+      return 2;
+   if( $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
    {
-      $uid = 0;
-      $uhandle = @$_REQUEST[UHANDLE_NAME];
-      if( !$uhandle && $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
-      {
 //default user = last referenced user
 //(ex: message.php from userinfo.php by menu link)
-         if( preg_match('/[?'.URI_AMP_IN.']'
-               .$uid_name.'=([0-9]+)/i', $refer, $eres) )
-           $uid = $eres[1];
-         if( !($uid > 0) )
-         {
-            $uid = 0;
+      if( preg_match('/[?'.URI_AMP_IN.']'
+            .$uid_name.'=([0-9]+)/i', $refer, $eres) )
+      {
+         $uid = (int)$eres[1];
+         if( $uid > 0 )
+            return 5;
+      }
+      $uid = 0;
 //adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
-            if( preg_match('/[?'.URI_AMP_IN.']'
-                  .UHANDLE_NAME.'=([+'.HANDLE_LEGAL_REGS.']+)/i', $refer, $eres) )
-              $uhandle = $eres[1];
-         }
+      if( preg_match('/[?'.URI_AMP_IN.']'
+            .UHANDLE_NAME.'=([+'.HANDLE_LEGAL_REGS.']+)/i', $refer, $eres) )
+      {
+         $uhandle = (string)$eres[1];
+         if( $uhandle )
+            return 6;
       }
    }
-}
+   return 0; //not found
+} //get_request_user
 
 //caution: some IP addresses have more that 50 accounts in DGS
 /* NOTE on db-query: the select "WHERE IP='$ip' AND Handle!='guest'"

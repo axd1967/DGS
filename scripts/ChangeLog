@@ -43,6 +43,13 @@ Changelog
      pattern/make_handicap_pattern.php:
    - use of read_from_file and write_to_file
 
+   * include/std_functions.php (get_request_user), show_games.php:
+   - get_request_user now return 0 if it had found nothing or
+     the type of what it had found
+   - slightly modified the columns in show_games.php to free
+     some of them
+   - use of the get_request_user returned info
+
 2008-05-16 rodival
 
    * skins/dragon/screen.css, include/config.php,

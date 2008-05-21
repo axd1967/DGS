@@ -50,19 +50,26 @@ $ThePage = new Page('GamesList');
       $all = ($uid == 'all');
       if( !$all ) //FU+RU
       {
-         get_request_user( $uid, $uhandle, true);
-         if( $uhandle )
-            $where = "Handle='".mysql_addslashes($uhandle)."'";
-         else if( $uid > 0 )
-            $where = "ID=$uid";
+         if( !get_request_user( $uid, $uhandle) )
+         {
+            $uid= $my_id;
+            $user_row=& $player_row;
+         }
          else
-            error('no_uid');
+         {
+            if( $uhandle )
+               $where = "Handle='".mysql_addslashes($uhandle)."'";
+            else if( $uid > 0 )
+               $where = "ID=$uid";
+            else
+               error('no_uid');
 
-         $user_row = mysql_single_fetch('show_games.find_player',
-               "SELECT ID, Name, Handle FROM Players WHERE $where" )
-            or error('unknown_user', 'show_games.find_player');
+            $user_row = mysql_single_fetch('show_games.find_player',
+                  "SELECT ID, Name, Handle FROM Players WHERE $where" )
+               or error('unknown_user', 'show_games.find_player');
 
-         $uid = $user_row['ID'];
+            $uid = $user_row['ID'];
+         }
       }
    }
    $running = !$observe && !$finished;
@@ -112,29 +119,22 @@ $ThePage = new Page('GamesList');
    }
    if( $running && !$all ) //RU
    {
-      $gfilter->add_filter( 5, 'Selection',     # filter on my color / my move
+      $gfilter->add_filter( 5, 'Selection',   // filter on my color / my move
             array( T_('All#filter') => '',
-                   T_('I\'m B#filtercol')      => new QuerySQL( SQLP_HAVING, 'iamBlack=1' ),
-                   T_('I\'m W#filtercol')      => new QuerySQL( SQLP_HAVING, 'iamBlack=0' ),
+                   T_('I\'m B#filtercol')  => new QuerySQL( SQLP_HAVING, '!(X_Color&2)' ),
+                   T_('I\'m W#filtercol')  => new QuerySQL( SQLP_HAVING, '(X_Color&2)' ),
                    T_('My move#filtercol') => "ToMove_ID=$uid",
                    T_('Op move#filtercol') => "ToMove_ID<>$uid" ), // <- no idx used
             true);
-      $gfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
-      $gfilter->add_filter(15, 'RelativeDate', 'Players.Lastaccess', true);
       $gfilter->add_filter(23, 'Rating', 'startRating', true,
             array( FC_ADD_HAVING => 1 ));
+      $gfilter->add_filter(24, 'BoolSelect', 'Weekendclock', true);
+      $gfilter->add_filter(25, 'RelativeDate', 'Players.Lastaccess', true);
    }
    if( $finished ) //FU+FA
    {
       $gfilter->add_filter(10, 'Score', 'Score', false,
             array( FC_SIZE => 3, FC_HIDE => 1 ));
-      $gfilter->add_filter(11, 'Selection',
-            array( T_('All#filter')  => '',
-                   T_('Won')  => new QuerySQL( SQLP_HAVING, 'Win=1' ),
-                   T_('Lost') => new QuerySQL( SQLP_HAVING, 'Win=-1' ),
-                   T_('Jigo') => 'Score=0' ),
-            true,
-            array( FC_FNAME => 'won' ));
       if( $all ) //FA
       {
          $gfilter->add_filter(27, 'Rating', 'Black_End_Rating', true);
@@ -149,6 +149,13 @@ $ThePage = new Page('GamesList');
                       T_('B#filter')   => "Black_ID=$uid",
                       T_('W#filter')   => "White_ID=$uid" ),
                true);
+         $gfilter->add_filter(11, 'Selection',
+               array( T_('All#filter')  => '',
+                      T_('Won')  => new QuerySQL( SQLP_HAVING, 'X_Score>0' ),
+                      T_('Lost') => new QuerySQL( SQLP_HAVING, 'X_Score<0' ),
+                      T_('Jigo') => 'Score=0' ),
+               true,
+               array( FC_FNAME => 'won' ));
          $gfilter->add_filter(23, 'Rating', 'startRating', true,
                array( FC_ADD_HAVING => 1 ));
          $gfilter->add_filter(24, 'Rating', 'endRating',   true,
@@ -194,13 +201,20 @@ $ThePage = new Page('GamesList');
  *Views-pages identification:
  *   views: OB=observe, FU=finished-user, FA=finished-all, RU=running-user, RA=running-all
  *   note: '> ' indicates a column not common to all views, usage given for specific views
+ *  When a column number is shared between two fields, they must be displayed
+ *    inside different (not intersecting) "hide/show columns" groups i.e.:
+ *    - (OB) => ObservedGamesColumns
+ *    - (FU+FA) => FinishedGamesColumns
+ *    - (RU+RA) => RunningGamesColumns
  *
  *****
  *Database-columns FROM:
  *  N.B. Rating is common to Players and Ratinglog but only Players.Rating2 is SELECTed here
- *    Games is SELECTed in a whole and don't need the Games. prefix
- *    Other tables are partially SELECTed and their fields may need the tablename. prefix
- *    The filters may use the prefix. The sorts can't (must use alias) because of the possible UNION
+ *    Games is SELECTed in a whole and don't need the 'Games.' prefix
+ *    Other tables are partially SELECTed and their fields may need the 'tablename.' prefix
+ *    The filters may use the 'tablename.' prefix.
+ *    The sorts can't use the 'tablename.' prefix (must use alias) because of the possible UNION
+ *    Actually (FU+RU) may use the ?UNION
  * Games (OB+FU+RU+FA+RA) AS Games:
  *   ID, Starttime, Lastchanged, mid, Black_ID, White_ID, ToMove_ID, Size, Komi, Handicap, Status, Moves, Black_Prisoners, White_Prisoners, Last_X, Last_Y, Last_Move, Flags, Score, Maintime, Byotype, Byotime, Byoperiods, Black_Maintime, White_Maintime, Black_Byotime, White_Byotime, Black_Byoperiods, White_Byoperiods, LastTicks, ClockUsed, Rated, StdHandicap, WeekendClock, Black_Start_Rating, White_Start_Rating, Black_End_Rating, White_End_Rating
  * Players (OB+FA+RA) AS white, AS black - (FU+RU) AS Players(+UNION):
@@ -223,13 +237,11 @@ $ThePage = new Page('GamesList');
  *  7: Handicap
  *  8: Komi
  *  9: Moves
- * 10: >  FU+FA (Score)
- * 11: >  FU (User-Score-graphic)   -> fname=won
- * 12: >  RU (Weekendclock)
- * 13:    FU+FA (Lastchanged as 'End date'), OB+RU+RA (Lastchanged as 'Last move')
- * 14: Rated as RatedX   -> fname=rated
- * 15: >  RU (Opponents-LastAccess)
- * 16: >  FU+RU (User-Rating)
+ * 10: >  FU+FA [Score] (Score)
+ * 11: >  FU [User-Score AS X_Score] (Win-graphic) -> fname=won
+ * 13:    FU+FA [Lastchanged] (End date), OB+RU+RA [Lastchanged] (Last move)
+ * 14:    [Rated AS X_Rated] (Rated) -> fname=rated
+ * 16: >  FU+RU [Rating AS X_Rating] (User-Rating)
  * 17: >  OB+FA+RA (Black-Name)
  * 18: >  OB+FA+RA (Black-Handle)
  * 19: >  OB+FA+RA (Black-Rating)
@@ -237,14 +249,14 @@ $ThePage = new Page('GamesList');
  * 21: >  OB+FA+RA (White-Handle)
  * 22: >  OB+FA+RA (White-Rating)
  * 23: >  FU+RU (User-StartRating)
- * 24: >  FU (User-EndRating)
- * 25: >  FU (User-RatingDiff)
+ * 24: >  FU (User-EndRating), RU (Weekendclock)
+ * 25: >  FU (User-RatingDiff), RU (Opponents-LastAccess)
  * 26: >  OB+FA+RA (Black-StartRating)
  * 27: >  FA (Black-EndRating)
- * 28: >  FA (Black-EndRatingDiff)
+ * 28: >  FA (Black-RatingDiff)
  * 29: >  OB+FA+RA (White-StartRating)
  * 30: >  FA (White-EndRating)
- * 31: >  FA (White-EndRatingDiff)
+ * 31: >  FA (White-RatingDiff)
  *****/
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
    $gtable->add_tablehead( 1, T_('##header'), 'ID', 0, 1, 'Button');
@@ -261,7 +273,7 @@ $ThePage = new Page('GamesList');
       $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', 1, 0, 'Rating');
       $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', 1, 0, 'Rating');
    }
-   else if( $finished ) //FU+FA
+   else if( $finished ) //FU+FA ?UNION
    {
       if( $all ) //FA
       {
@@ -278,18 +290,18 @@ $ThePage = new Page('GamesList');
          $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', 1, 0, 'Rating');
          $gtable->add_tablehead(31, T_('White rating diff#header'), 'whiteDiff', 1, 0, 'Number');
       }
-      else //FU
+      else //FU ?UNION
       {
          $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name', 0, 0, 'User');
          $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle', 0, 0, 'User');
          $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', 1, 0, 'Rating');
          $gtable->add_tablehead(24, T_('End rating#header'), 'endRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 1, 0, 'Rating');
+         $gtable->add_tablehead(16, T_('Rating#header'), 'X_Rating', 1, 0, 'Rating');
          $gtable->add_tablehead(25, T_('Rating diff#header'), 'ratingDiff', 1, 0, 'Number');
-         $gtable->add_tablehead( 5, T_('Color#header'), 'Color', 0, 0, 'Image');
+         $gtable->add_tablehead( 5, T_('Color#header'), 'X_Color', 0, 0, 'Image');
       }
    }
-   else if( $running ) //RU+RA
+   else if( $running ) //RU+RA ?UNION
    {
       if( $all ) //RA
       {
@@ -302,13 +314,13 @@ $ThePage = new Page('GamesList');
          $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', 1, 0, 'Rating');
          $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', 1, 0, 'Rating');
       }
-      else //RU
+      else //RU ?UNION
       {
          $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name', 0, 0, 'User');
          $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle', 0, 0, 'User');
          $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 1, 0, 'Rating');
-         $gtable->add_tablehead( 5, T_('Colors#header'), 'Color', 0, 0, 'Image');
+         $gtable->add_tablehead(16, T_('Rating#header'), 'X_Rating', 1, 0, 'Rating');
+         $gtable->add_tablehead( 5, T_('Colors#header'), 'X_Color', 0, 0, 'Image');
       }
    }
 
@@ -320,27 +332,27 @@ $ThePage = new Page('GamesList');
    if( $finished ) //FU+FA
    {
       if( $all ) //FA
-         $gtable->add_tablehead(10, T_('Score#header'), 'Score', 1);
-      else //FU
+         $gtable->add_tablehead(10, T_('Score#header'), 'Score', 1); //no UNION
+      else //FU ?UNION
       {
-         $gtable->add_tablehead(10, T_('Score#header'), 'oScore', 1);
-         $gtable->add_tablehead(11, T_('Win?#header'), 'Win', 1, 1, 'Image');
+         $gtable->add_tablehead(10, T_('Score#header'), 'Score', 1); //despite ?UNION else X_Score
+         $gtable->add_tablehead(11, T_('Win?#header'), 'X_Score', 1, 1, 'Image');
       }
    }
 
-   $gtable->add_tablehead(14, T_('Rated#header'), 'RatedX', 1, 1);
+   $gtable->add_tablehead(14, T_('Rated#header'), 'X_Rated', 1, 1);
 
    if( $observe ) //OB
       $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', 1, 0, 'Date');
-   else if( $finished ) //FU+FA
+   else if( $finished ) //FU+FA ?UNION
       $gtable->add_tablehead(13, T_('End date#header'), 'Lastchanged', 1, 0, 'Date');
-   else if( $running ) //RU+RA
+   else if( $running ) //RU+RA ?UNION
    {
       $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', 1, 0, 'Date');
-      if( !$all ) //RU
+      if( !$all ) //RU ?UNION
       {
-         $gtable->add_tablehead(15, T_('Opponents Last Access#header'), 'Lastaccess', 1, 0, 'Date');
-         $gtable->add_tablehead(12, T_('Weekend Clock#header'), 'WeekendClock', 1, 0, 'Date');
+         $gtable->add_tablehead(25, T_('Opponents Last Access#header'), 'Lastaccess', 1, 0, 'Date');
+         $gtable->add_tablehead(24, T_('Weekend Clock#header'), 'WeekendClock', 1, 0, 'Date');
       }
    }
 
@@ -349,10 +361,10 @@ $ThePage = new Page('GamesList');
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS, // std-fields
       'Games.*',
-      'UNIX_TIMESTAMP(Lastchanged) AS LastchangedU',
-      "IF(Games.Rated='N','N','Y') AS RatedX" );
+      'UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged',
+      "IF(Games.Rated='N','N','Y') AS X_Rated" );
 
-   if( $observe )
+   if( $observe ) //OB
    {
       $qsql->add_part( SQLP_FIELDS,
          'black.Name AS blackName', 'black.Handle AS blackHandle',
@@ -398,36 +410,35 @@ $ThePage = new Page('GamesList');
       else if( $running ) //RA
          $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
    }
-   else //FU+RU
+   else //FU+RU ?UNION
    {
       $qsql->add_part( SQLP_FIELDS,
          'Name',
          'Handle',
          'Players.ID AS pid',
-         'Players.Rating2 AS Rating',
+         'Players.Rating2 AS X_Rating',
          "IF(Black_ID=$uid, Games.White_Start_Rating, Games.Black_Start_Rating) AS startRating",
-         'UNIX_TIMESTAMP(Players.Lastaccess) AS LastaccessU',
-         "IF(Black_ID=$uid,1,0) AS iamBlack",
+         'UNIX_TIMESTAMP(Players.Lastaccess) AS X_Lastaccess',
          //extra bits of Color are for sorting purposes
          //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
-         "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS Color" );
+         "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color" );
       $qsql->add_part( SQLP_FROM, 'Games', 'Players' );
-      if( $finished ) //FU
+
+      if( $finished ) //FU ?UNION
       {
          $qsql->add_part( SQLP_FIELDS,
-            "SIGN(IF(Black_ID=$uid, -Score, Score)) AS Win",
-            "IF(Black_ID=$uid, -Score, Score) AS oScore",
+            "IF(Black_ID=$uid, -Score, Score) AS X_Score",
             "IF(Black_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS endRating",
             'log.RatingDiff AS ratingDiff' );
          $qsql->add_part( SQLP_FROM, "LEFT JOIN Ratinglog AS log ON log.gid=Games.ID AND log.uid=$uid" );
          $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
       }
-      else if( $running ) //RU
+      else if( $running ) //RU ?UNION
       {
          $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
       }
 
-      if( ALLOW_SQL_UNION ) //FU+RU
+      if( ALLOW_SQL_UNION ) //FU+RU ?UNION
       {
          $qsql->add_part( SQLP_UNION_WHERE,
             "White_ID=$uid AND Players.ID=Black_ID",
@@ -484,7 +495,7 @@ $ThePage = new Page('GamesList');
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
-      $Rating = $blackRating = $whiteRating = NULL;
+      $X_Rating = $blackRating = $whiteRating = NULL;
       $startRating = $blackStartRating = $whiteStartRating = NULL;
       $endRating = $blackEndRating = $whiteEndRating = NULL;
       $blackDiff = $whiteDiff = $ratingDiff = NULL;
@@ -532,7 +543,7 @@ $ThePage = new Page('GamesList');
                (isset($whiteDiff) ? ($whiteDiff > 0 ?'+' :'') .
                 sprintf("%0.2f",$whiteDiff*0.01) : '' );
       }
-      else //FU+RU
+      else //FU+RU ?UNION
       {
          if( $gtable->Is_Column_Displayed[3] )
             $grow_strings[3] = "<A href=\"userinfo.php?uid=$pid\">" .
@@ -540,26 +551,15 @@ $ThePage = new Page('GamesList');
          if( $gtable->Is_Column_Displayed[4] )
             $grow_strings[4] = "<A href=\"userinfo.php?uid=$pid\">" .
                $Handle . "</a>";
-         if( $gtable->Is_Column_Displayed[23] )
-            $grow_strings[23] = echo_rating($startRating,true,$pid);
-         if( $finished && $gtable->Is_Column_Displayed[24] )
-            $grow_strings[24] = echo_rating($endRating,true,$pid);
-         if( $gtable->Is_Column_Displayed[16] )
-            $grow_strings[16] = echo_rating($Rating,true,$pid);
-         if( $finished && $gtable->Is_Column_Displayed[25] )
-            $grow_strings[25] =
-               (isset($ratingDiff) ? ($ratingDiff > 0 ?'+' :'') .
-                sprintf("%0.2f",$ratingDiff*0.01) : '' );
-
          if( $gtable->Is_Column_Displayed[5] )
          {
-            if( $Color & 0x2 ) //my color
+            if( $X_Color & 0x2 ) //my color
                $colors = 'w';
             else
                $colors = 'b';
-            if( !($Color & 0x20) )
+            if( !($X_Color & 0x20) )
             {
-               if( $Color & 0x1 ) //to move color
+               if( $X_Color & 0x1 ) //to move color
                   $colors.= '_w';
                else
                   $colors.= '_b';
@@ -568,6 +568,35 @@ $ThePage = new Page('GamesList');
                ? " title=\"" . $arr_titles_colors[$colors] . "\"" : '';
             $grow_strings[5] = "<img src=\"17/$colors.gif\" "
                . "alt=\"$colors\"$hover_title>";
+         }
+         if( $gtable->Is_Column_Displayed[23] )
+            $grow_strings[23] = echo_rating($startRating,true,$pid);
+         if( $gtable->Is_Column_Displayed[16] )
+            $grow_strings[16] = echo_rating($X_Rating,true,$pid);
+
+         if( $finished ) //FU
+         {
+            if( $gtable->Is_Column_Displayed[11] )
+            {
+               $src = '"images/' .
+                  ( $X_Score > 0 ? 'yes.gif" alt="' . T_('Yes') :
+                     ( $X_Score < 0 ? 'no.gif" alt="' . T_('No') :
+                        'dash.gif" alt="' . T_('Jigo') )) . '"';
+               $grow_strings[11] = "<img src=$src>";
+            }
+            if( $gtable->Is_Column_Displayed[24] )
+               $grow_strings[24] = echo_rating($endRating,true,$pid);
+            if( $gtable->Is_Column_Displayed[25] )
+               $grow_strings[25] =
+                  (isset($ratingDiff) ? ($ratingDiff > 0 ?'+' :'') .
+                   sprintf("%0.2f",$ratingDiff*0.01) : '' );
+         }
+         else //RU
+         {
+            if( $gtable->Is_Column_Displayed[24] )
+               $grow_strings[24] = ($WeekendClock == 'Y' ? T_('Yes') : T_('No'));
+            if( $gtable->Is_Column_Displayed[25] )
+               $grow_strings[25] = date($date_fmt, $X_Lastaccess);
          }
       }
 
@@ -580,32 +609,14 @@ $ThePage = new Page('GamesList');
       if( $gtable->Is_Column_Displayed[9] )
          $grow_strings[9] = $Moves;
       if( $gtable->Is_Column_Displayed[13] )
-         $grow_strings[13] = date($date_fmt, $LastchangedU);
+         $grow_strings[13] = date($date_fmt, $X_Lastchanged);
       if( $gtable->Is_Column_Displayed[14] )
-         $grow_strings[14] = ($RatedX == 'N' ? T_('No') : T_('Yes') );
+         $grow_strings[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
 
       if( $finished ) //FU+FA
       {
          if( $gtable->Is_Column_Displayed[10] )
             $grow_strings[10] = score2text($Score, false);
-         if( !$all ) //FU
-         {
-            if( $gtable->Is_Column_Displayed[11] )
-            {
-               $src = '"images/' .
-                  ( $Win == 1 ? 'yes.gif" alt="' . T_('Yes') :
-                     ( $Win == -1 ? 'no.gif" alt="' . T_('No') :
-                        'dash.gif" alt="' . T_('Jigo') )) . '"';
-               $grow_strings[11] = "<img src=$src>";
-            }
-         }
-      }
-      else if( $running && !$all ) //RU
-      {
-         if( $gtable->Is_Column_Displayed[12] )
-            $grow_strings[12] = ($WeekendClock == 'Y' ? T_('Yes') : T_('No'));
-         if( $gtable->Is_Column_Displayed[15] )
-            $grow_strings[15] = date($date_fmt, $LastaccessU);
       }
 
       $gtable->add_row( $grow_strings );
