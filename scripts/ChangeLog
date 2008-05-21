@@ -23,6 +23,21 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-21 rodival
+
+   * include/std_functions.php (make_url, build_url, build_hidden,
+      write_to_file, read_from_file),
+     include/filter.php, include.std_classes.php,
+     include/form_functions.php,
+     game.php:
+   - split of the make_url function into make_url(unchanged behaviour)
+     and build_url which build the query part of an URL from an array
+   - add of build_hidden which build the 'hidden' lines of a form from
+     an array
+   - others are various use of build_hidden and build_url,
+     and replacement of some calls to the array_push function
+     by the quicker and equivalent "[]=" array operator
+
 2008-05-16 rodival
 
    * skins/dragon/screen.css, include/config.php,

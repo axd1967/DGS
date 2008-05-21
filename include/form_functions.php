@@ -492,7 +492,7 @@ class Form
                   error('internal_error', "Form.parse_layout_global.area-num.H<1");
                else
                   $this->areas[$hgr] = 1;
-               array_push( $arr, $hgr );
+               $arr[]= $hgr;
             }
             else
             {
@@ -507,9 +507,9 @@ class Form
                      error('internal_error', "Form.parse_layout_global.area-num.V<1");
                   else
                      $this->areas[$vgr] = 1;
-                  array_push( $arrv, $vgr );
+                  $arrv[]= $vgr;
                }
-               array_push( $arr, $arrv );
+               $arr[]= $arrv;
             }
          }
 
@@ -1125,12 +1125,13 @@ class Form
     */
    function print_start( $name, $action_page, $method, $class='FormClass' )
    {
-      assert( $method == FORM_GET or $method == FORM_POST );
+      assert( $method == FORM_GET || $method == FORM_POST );
       $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
       return "\n<FORM id=\"{$name}Form\" name=\"$name\" class=\"$class\"" .
          " action=\"$action_page\" method=\"" . $pg_arr[$method] . "\">";
    }
+
    function print_start_default()
    {
       return $this->print_start( $this->name, $this->action
@@ -1486,7 +1487,7 @@ class Form
    function attach_table( &$table)
    {
       //if(isset($table))
-      array_push($this->attached, $table);
+      $this->attached[]= $table;
    }
 
    function add_hidden( $key, $val)
@@ -1497,7 +1498,10 @@ class Form
    // \brief return the array of hiddens merged with owneds and attachments' ones
    function get_hiddens( &$hiddens)
    {
-      $hiddens = array_merge( (array)$hiddens, $this->hiddens);
+      if( is_array($hiddens) )
+         $hiddens = array_merge( $hiddens, $this->hiddens);
+      else
+         $hiddens = $this->hiddens;
       foreach ($this->attached as $attach)
       {
          $attach->get_hiddens( $hiddens);
@@ -1512,14 +1516,8 @@ class Form
       {
          $attach->get_hiddens( $hiddens);
       }
-      $str = '';
-      foreach ($hiddens as $key => $val)
-      {
-         $val= attb_quote($val);
-         $str.= "<input type=\"hidden\" name=\"$key\" value=$val>";
-      }
       $this->hiddens_echoed = true;
-      return $str;
+      return build_hidden( $hiddens);
    }
 
 }

@@ -76,7 +76,7 @@ function get_alt_arg( $n1, $n2)
    connect2mysql();
 
    if( $gid <= 0 )
-      error('no_game_nr');
+      error('unknown_game');
 
    $logged_in = who_is_logged( $player_row);
 
@@ -187,8 +187,7 @@ function get_alt_arg( $n1, $n2)
    if( $Status != 'FINISHED' && ($Maintime > 0 || $Byotime > 0) )
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
-      $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
-      $hours = ticks_to_hours($ticks);
+      $hours = ticks_to_hours(get_clock_ticks($ClockUsed) - $LastTicks);
 
       if( $to_move == BLACK )
       {
@@ -228,7 +227,7 @@ function get_alt_arg( $n1, $n2)
          $extra_infos[score2text($Score, true)] = 'Score';
       }
    }
-   else switch( $action )
+   else switch( (string)$action )
    {
       case 'choose_move': //single input pass
       {
@@ -283,9 +282,11 @@ function get_alt_arg( $n1, $n2)
          if( ENA_STDHANDICAP && !$stonestring && !$coord
             && ( $StdHandicap=='Y' || @$_REQUEST['stdhandicap'] ) )
          {
-            $stonestring = get_handicap_pattern( $Size, $Handicap, $paterr);
             $extra_infos[T_('A standard placement of handicap stones has been requested.')]
                = 'Info';
+            $stonestring = get_handicap_pattern( $Size, $Handicap, $paterr);
+            if( $paterr )
+               $extra_infos[$paterr] = 'Important';
             //$coord = ''; // $coord is incoherent with the following
             $patdone = 1;
          }
@@ -306,9 +307,6 @@ function get_alt_arg( $n1, $n2)
          }
          else
             $validation_step = true;
-
-         if( $paterr )
-            $extra_infos[$paterr] = 'Important';
          $coord = ''; // already processed/stored in $stonestring
       }
       break;
@@ -470,7 +468,7 @@ function get_alt_arg( $n1, $n2)
          if( @$_REQUEST['savenotes'] )
             $notes = rtrim(get_request_arg('gamenotes'));
 
-         // note: PRIMARY KEY (gid,player) is needed for:
+         // note: GamesNotes needs PRIMARY KEY (gid,player):
          db_query( 'game.replace_gamenote',
                  "REPLACE INTO GamesNotes (gid,player,Hidden,Notes)"
                . " VALUES ($gid,'$my_color','$noteshide','"
@@ -511,11 +509,11 @@ function get_alt_arg( $n1, $n2)
 
 
 
-   echo "<FORM name=\"game_form\" action=\"game.php?gid=$gid\" method=\"POST\">\n";
+   echo "\n<FORM name=\"game_form\" action=\"game.php?gid=$gid\" method=\"POST\">";
    $page_hiddens = array();
    // [ game_form start
 
-   echo "<table align=center>\n<tr><td>"; //board & associates table {--------
+   echo "\n<table align=center>\n<tr><td>"; //board & associates table {--------
 
    if( $movenumbers>0 )
    {
@@ -526,7 +524,7 @@ function get_alt_arg( $n1, $n2)
          $TheBoard->draw_captures_box( T_('Captures'));
       }
    }
-   echo "</td><td>\n";
+   echo "</td><td>";
 
    $TheBoard->movemsg= $movemsg;
    $TheBoard->draw_board( $may_play, $action, $stonestring);
@@ -601,10 +599,10 @@ function get_alt_arg( $n1, $n2)
                     , array( //'accesskey' => 'c', //already used for "Contacts"
                            'target' => $FRIENDLY_SHORT_NAME.'_game_comments'
                     ) )
-            . "</DIV>\n";
+            . "</DIV>";
       }
 
-   echo "</td></tr>\n</table>\n"; //board & associates table }--------
+   echo "\n</td></tr>\n</table>"; //board & associates table }--------
 
 
    // ] game_form end
@@ -616,21 +614,13 @@ function get_alt_arg( $n1, $n2)
       $page_hiddens['coord'] = $coord;
    if( @$stonestring )
       $page_hiddens['stonestring'] = $stonestring;
+   $page_hiddens['movenumbers'] = $_REQUEST['movenumbers'];
+   $page_hiddens['notesmode'] = $_REQUEST['notesmode'];
 
-   if( @$_REQUEST['movenumbers'] )
-      $page_hiddens['movenumbers'] = $_REQUEST['movenumbers'];
-   if( @$_REQUEST['notesmode'] )
-      $page_hiddens['notesmode'] = $_REQUEST['notesmode'];
+   echo build_hidden( $page_hiddens);
+   echo "\n</FORM>";
 
-   foreach( $page_hiddens as $key => $val )
-   {
-      $val = attb_quote($val);
-      echo "<input type=\"hidden\" name=\"$key\" value=$val>";
-   }
-   echo "</FORM>\n";
-
-
-   echo "<HR>\n";
+   echo "\n<HR>";
    draw_game_info($game_row, $TheBoard);
 /*
    $txt= draw_board_info($TheBoard);
@@ -744,7 +734,7 @@ function draw_moves( $gid, $move)
          if( $Stone != BLACK && $Stone != WHITE )
             continue;
 
-         switch( $PosX )
+         switch( (int)$PosX )
          {
             case POSX_PASS :
                $c = $trpas;

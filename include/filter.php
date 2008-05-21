@@ -462,7 +462,7 @@ class SearchFilter
                continue; // only active and with non-empty value and with error-message
          } // else: all
 
-         array_push( $arr, $id );
+         $arr[]= $id;
       }
       return $arr;
    }
@@ -497,7 +497,7 @@ class SearchFilter
       {
          $filter = $this->get_filter($id);
          foreach( $filter->get_element_names() as $name )
-            array_push( $arrhash, "$name=". $filter->get_value($name) );
+            $arrhash[]= "$name=". $filter->get_value($name);
       }
       $hashstr = implode( ',', $arrhash );
       $hashcode = crc32($hashstr);
@@ -547,7 +547,7 @@ class SearchFilter
          $groupname = $filter->get_config(FC_GROUP_SQL_OR);
          if ( $groupname == '' )
          { // collect queries without OR-grouping
-            array_push( $arr_query, $fquery );
+            $arr_query[]= $fquery;
          }
          else
          { // merge queries to-be-grouped by OR'ing them together
@@ -559,7 +559,7 @@ class SearchFilter
 
       // handling OR'ed queries
       foreach( $arr_groupquery as $group => $query )
-         array_push( $arr_query, $query );
+         $arr_query[]= $query;
 
       // AND'ing all queries
       $result_query = new QuerySQL();
@@ -689,7 +689,7 @@ class SearchFilter
             error('invalid_filter', "filter.perform_conditional_action.unknown_filter($fid,$action)");
          $nid = (is_numeric($out[2])) ? $out[2] : 1;
          $elems = $f->get_element_names();
-         if ( $nid < 1 or $nid > count($elems) )
+         if( $nid < 1 || $nid > count($elems) )
             error('invalid_filter', "filter.perform_conditional_action.unknown_name_num($nid,$action)");
          $name = $elems[$nid - 1];
 
@@ -824,13 +824,13 @@ class SearchFilter
       $arr_parts = array(); // 'key' => val, key with(!) Prefix (except filters with FC_FNAME)
       foreach( $arr_keys as $id )
       {
-         if ( is_array($arr_exclude) && isset($arr_exclude[$id]) )
+         if( is_array($arr_exclude) && isset($arr_exclude[$id]) )
             continue; // exclude id
 
          $filter = $this->get_filter($id);
          $qstr = $filter->get_url_parts( $this->Prefix, $arr_parts );
          if ( $qstr != '' )
-            array_push( $arr_url, $qstr ); // qstr may contain >1 URL-parts
+            $arr_url[]= $qstr; // qstr may contain >1 URL-parts
       }
 
       // add other vars
@@ -844,11 +844,11 @@ class SearchFilter
          $pval = urlencode($value);
 
          $arr_parts[$pkey] = $pval;
-         array_push( $arr_url, "$pkey=$pval" );
+         $arr_url[]= "$pkey=$pval";
       }
 
       // return arr-out per call-by-ref
-      if ( is_array($arr_out) )
+      if( is_array($arr_out) )
       {
          foreach( $arr_parts as $key => $value )
             $arr_out[$key] = $value;
@@ -867,22 +867,15 @@ class SearchFilter
     * \brief Returns string with hidden-input strings for specified filter-choice and exclusions.
     * same args as for get_url_parts-func
     */
-   function get_filter_hiddens( &$arr_hiddens, $choice = GETFILTER_ACTIVE, $arr_exclude = null)
+   function get_filter_hiddens( &$hiddens, $choice = GETFILTER_ACTIVE, $arr_exclude = null)
    {
-      $arr_str = array();
       $arr_parts = array();
-
       $this->get_url_parts( $arr_parts, $choice, $arr_exclude );
-
-      foreach( $arr_parts as $key => $value )
-      {
-         if ( is_array($arr_hiddens) )
-            $arr_hiddens[$key] = $value;
-
-         array_push( $arr_str, "  <input type=\"hidden\" name=\"{$key}\" value=\"{$value}\">\n" );
-      }
-
-      return implode( '', $arr_str );
+      if( is_array($hiddens) )
+         $hiddens = array_merge( $hiddens, $arr_parts);
+      else
+         $hiddens = $arr_parts;
+      return build_hidden( $arr_parts);
    }
 
    /*! \brief Returns RequestParameters for specified filter-choice and exclusions. */
@@ -1228,7 +1221,7 @@ class Filter
    function add_element_name( $name )
    {
       if ( $name != '' )
-         array_push( $this->elem_names, $name );
+         $this->elem_names[]= $name;
    }
 
    /*! \brief Returns string-array with element_names of multi-element-filter; names (without Prefix) for form-elements and URL-keys. */
@@ -1442,7 +1435,7 @@ class Filter
     * \brief Returns encoded URL-string for filter prefixing vars with given prefix.
     * \param prefix URL-varnames are prefixed with that except FC_FNAME-config used on filter
     * \param arr_out return URL-vars with values additionally in this array
-    * note: filter can contain also contain more than one element
+    * note: filter can also contain more than one element
     * note: multi-values are saved as array-value in arr_out and as 'field[]=..' in URL
     */
    function get_url_parts( $prefix, &$arr_out )
@@ -1452,7 +1445,8 @@ class Filter
       foreach( $this->get_element_names() as $name )
       {
          $val = $this->get_value( $name );
-         if ( (string)$val != '' )
+         //if ( (string)$val != '' )
+         if ( !empty($val) )
          {
             $fname = ($this->get_config(FC_FNAME)) ? $name : $prefix . $name;
             if ( is_array($arr_out) )
@@ -1462,10 +1456,10 @@ class Filter
             {
                $akey = $fname . '%5b%5d='; //encoded []
                foreach( $val as $v )
-                  array_push( $arr_url, $akey . urlencode($v) );
+                  $arr_url[]= $akey . urlencode($v);
             }
             else
-               array_push( $arr_url, $fname . '=' . urlencode($val) );
+               $arr_url[]= $fname . '=' . urlencode($val);
          }
       }
 
@@ -1650,12 +1644,12 @@ class Filter
          if ( (string)$this->p_start != '' )
          {
             $op = ($this->is_flag_set(PFLAG_EXCL_START) ? '>' : '>=');
-            array_push( $arr, fill_sql_template( $sql_templ, $op, "'" . ( $num_factor * $this->p_start ) . "'" ) );
+            $arr[]= fill_sql_template( $sql_templ, $op, "'" . ( $num_factor * $this->p_start ) . "'" );
          }
          if ( (string)$this->p_end != '' )
          {
             $op = ($this->is_flag_set(PFLAG_EXCL_END) ? '<' : '<=');
-            array_push( $arr, fill_sql_template( $sql_templ, $op, "'" . ( $num_factor * $this->p_end ) . "'" ) );
+            $arr[]= fill_sql_template( $sql_templ, $op, "'" . ( $num_factor * $this->p_end ) . "'" );
          }
 
          if ( count($arr) > 0 )
@@ -1697,9 +1691,9 @@ class Filter
       { // range-search
          $arr = array();
          if ( (string)$this->p_start != '' )
-            array_push( $arr, fill_sql_template( $sql_templ, '>=', "'" . mysql_addslashes($this->p_start) . "'" ) );
+            $arr[]= fill_sql_template( $sql_templ, '>=', "'" . mysql_addslashes($this->p_start) . "'" );
          if ( (string)$this->p_end != '' )
-            array_push( $arr, fill_sql_template( $sql_templ, '<', "'" . mysql_addslashes($this->p_end) . "'" ) );
+            $arr[]= fill_sql_template( $sql_templ, '<', "'" . mysql_addslashes($this->p_end) . "'" );
          if ( count($arr) > 0 )
             $query->add_part( $parttype, implode(" AND ", $arr) );
          else
@@ -1963,25 +1957,25 @@ class FilterText extends Filter
       $arr_syntax = array();
       if ( $this->get_config(FC_NO_RANGE) or $this->get_config(FC_SUBSTRING) )
       { // substring forcing no-range
-         array_push( $arr_syntax, 'foo' );
+         $arr_syntax[]= 'foo';
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
       }
       else
       {
          $s = $this->tok_config->sep;
-         array_push( $arr_syntax, "foo, {$s}bar, baz{$s}, boo{$s}far" );
+         $arr_syntax[]= "foo, {$s}bar, baz{$s}, boo{$s}far";
       }
 
       $allow_wild = !$this->get_config(FC_NO_WILD);
       if ( $allow_wild )
-         array_push( $arr_syntax, 'fa*z*' );
+         $arr_syntax[]= 'fa*z*';
       else
          $this->parser_flags |= TEXTPARSER_FORBID_WILD;
 
       $minchars = (int) $this->get_config(FC_START_WILD);
       if ( $allow_wild and $minchars )
       {
-         array_push( $arr_syntax, "*goo" . ($minchars > 1 ? " ($minchars)" : '') );
+         $arr_syntax[]= "*goo" . ($minchars > 1 ? " ($minchars)" : '');
          $this->parser_flags |= TEXTPARSER_ALLOW_START_WILD;
          $this->tok_config->add_config( TEXTPARSER_CONF_STARTWILD_MINCHARS, $minchars );
       }
@@ -2055,13 +2049,13 @@ class FilterRating extends Filter
       $arr_syntax = array();
       if ( $this->get_config(FC_NO_RANGE) )
       {
-         array_push( $arr_syntax, "2d, 8k (+28%), 4k-59%" ); // e
+         $arr_syntax[]= "2d, 8k (+28%), 4k-59%"; // e
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
       }
       else
       {
          $s = $this->tok_config->sep;
-         array_push( $arr_syntax, "2d, {$s}7k, 18k{$s}, 28k{$s}1d; 8k (+28%), 4k-59%" ); // e
+         $arr_syntax[]= "2d, {$s}7k, 18k{$s}, 28k{$s}1d; 8k (+28%), 4k-59%"; // e
 
          // regex considering -59% not as range-separator
          $this->tok_config->add_config( TEXTPARSER_CONF_RX_NO_SEP, '-\d+%' );
@@ -2383,7 +2377,7 @@ class FilterDate extends Filter
       {
          $dp_start = new DateParser($this->p_start, RANGE_START);
          if ( $dp_start->errormsg() )
-            array_push( $arr_err, $dp_start->errormsg );
+            $arr_err[]= $dp_start->errormsg;
          else
             $this->p_start = $dp_start->get_completed_date();
       }
@@ -2392,7 +2386,7 @@ class FilterDate extends Filter
       {
          $dp_end = new DateParser($this->p_end, RANGE_END);
          if ( $dp_end->errormsg() )
-            array_push( $arr_err, $dp_end->errormsg );
+            $arr_err[]= $dp_end->errormsg;
          else
             $this->p_end = $dp_end->get_completed_date();
       }
@@ -2542,7 +2536,7 @@ class FilterRelativeDate extends Filter
          if ( $fc_time_units & $tu )
          {
             if ( $tu != FRDTU_ABS ) // skip for absolute
-               array_push( $this->time_units, $tu );
+               $this->time_units[]= $tu;
             $this->choices_tu[$tu] = $descr;
          }
       }
@@ -2802,7 +2796,7 @@ class FilterSelection extends Filter
             $idx = $v - $this->idx_start;
             if ( !isset($this->clauses[$idx]) )
                error('invalid_filter', "ERROR: FilterSelection.parse_value($name): bad index-value [$v] used for filter [{$this->id}]");
-            array_push( $arr_in, "'" . mysql_addslashes( $this->clauses[$idx] ) . "'" );
+            $arr_in[]= "'" . mysql_addslashes( $this->clauses[$idx] ) . "'";
          }
 
          if( count($arr_in) > 0 )
@@ -3044,10 +3038,10 @@ class FilterMysqlMatch extends Filter
       $this->syntax_help = T_('MATCHINDEX#filterhelp');
 
       $arr_syntax = array();
-      array_push( $arr_syntax, 'word word' );
+      $arr_syntax[]= 'word word';
       $match_mode = $this->get_config(FC_MATCH_MODE);
       if ( empty($match_mode) or $match_mode === MATCH_BOOLMODE_SET )
-         array_push( $arr_syntax, '+w -w <w >w ~w (wgroup) w* "literals"' );
+         $arr_syntax[]= '+w -w <w >w ~w (wgroup) w* "literals"';
       $this->syntax_descr = implode(', ', $arr_syntax);
 
       // setup bool-mode (check-box)
@@ -3198,8 +3192,8 @@ class FilterMysqlMatch extends Filter
             }
 
             $val = trim( $val );
-            if ( (string)$val != '' )
-               array_push( $arr, $val );
+            if ( $val )
+               $arr[]= $val;
          }
       }
 
@@ -3495,7 +3489,7 @@ class FilterCheckboxArray extends Filter
          $this->add_element_name( $fname );
          $this->values[$fname] = 0; // init
          $this->clauses[$fname] = $value;
-         if ( $is_bitmask and !is_numeric($value) )
+         if( $is_bitmask && !is_numeric($value) )
          {
             // FC_BITMASK-config forces integer-values for FC_MULTIPLE-values
             error('invalid_filter', "filter.FilterCheckboxArray.bad_array_FC_BITMASK({$this->id})");
@@ -3538,7 +3532,7 @@ class FilterCheckboxArray extends Filter
          $bitmask = 0;
          foreach( $this->values as $fname => $val )
          {
-            if ( $val and isset($this->clauses[$fname]) )
+            if( $val && isset($this->clauses[$fname]) )
                $bitmask |= (int) $this->clauses[$fname];
          }
          if ( $bitmask == 0 )
@@ -3551,8 +3545,8 @@ class FilterCheckboxArray extends Filter
          $arr_in = array();
          foreach( $this->values as $fname => $val )
          {
-            if ( $val and isset($this->clauses[$fname]) )
-               array_push( $arr_in, "'" . mysql_addslashes( $this->clauses[$fname] ) . "'" );
+            if( $val && isset($this->clauses[$fname]) )
+               $arr_in[]= "'" . mysql_addslashes( $this->clauses[$fname] ) . "'";
          }
          if ( count($arr_in) == 0 )
             return;
@@ -3579,12 +3573,12 @@ class FilterCheckboxArray extends Filter
          $elem_chkbox = $this->build_generic_checkbox_elem(
             $prefix, $fname, $this->get_value($fname), '', $this->syntax_descr );
          $td = sprintf( $elem_td, $elem_chkbox );
-         array_push( $cols, $td );
+         $cols[]= $td;
 
          $cnt_cols--;
          if ( $cnt_cols == 0 )
          {
-            array_push( $rows, implode( '', $cols ) );
+            $rows[]= implode( '', $cols );
             $cnt_cols = $this->get_config(FC_SIZE);
             $cols = array();
          }
@@ -3593,7 +3587,7 @@ class FilterCheckboxArray extends Filter
       if ( count($cols) > 0 )
       {
          $cols = array_pad( $cols, $this->get_config(FC_SIZE), '<td></td>');
-         array_push( $rows, implode( '', $cols ) );
+         $rows[]= implode( '', $cols );
       }
 
       // build checkbox-array

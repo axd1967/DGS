@@ -650,10 +650,13 @@ function grab_output_start( $compressed=0)
 //also copy it in the previous level of the output stack
 function grab_output_end( $filename='')
 {
+   if( !$filename )
+   {
+      ob_end_flush(); //also copy it
+      return false;
+   }
    $tmp= ob_get_contents();//grab it
    ob_end_flush(); //also copy it
-   if( !$filename )
-      return false;
    return write_to_file( $filename, $tmp);
 }
 
@@ -1917,36 +1920,68 @@ function build_maxrows_array( $maxrows, $rows_limit = MAXROWS_PER_PAGE )
 //    make_url('arr.php', array('a' => array( 44, 55 ))  gives  'arr.php?a[]=44&a[]=55'
 // TODO: next step could be to handle the '#' part of the url:
 //    make_url('test.php?a=1#id', array('b' => 'foo'), false)  gives  'test.php?a=1&b=foo#id'
-function make_url($url, $args, $sep=false)
+function make_url( $url, $args, $end_sep=false)
 {
-   $url = clean_url($url);
-   $separator = ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
-   if( is_array( $args) )
+   $url= clean_url($url);
+   $sep= ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
+   $args= build_url( $args, $end_sep);
+   if( $args || $end_sep )
+      $url.= $sep . $args;
+   return $url;
+} //make_url
+
+function build_url( $args, $end_sep=false)
+{
+   if( !is_array( $args) )
+      return '';
+   $arr_str = array();
+   foreach( $args as $key => $value )
    {
-      foreach( $args as $var => $value )
+      if( empty($value) || !is_string($key) || empty($key) )
+         continue;
+      if( !is_array($value) )
       {
-         if( empty($value) || !is_string($var) )
-            continue;
-         if( !is_array($value) )
-         {
-            $url .= $separator . $var . '=' . urlencode($value);
-            $separator = URI_AMP;
-            continue;
-         }
-         $var .= '%5b%5d='; //encoded []
-         foreach( $value as $tmp )
-         {
-            $url .= $separator . $var . urlencode($tmp);
-            $separator = URI_AMP;
-         }
+         $arr_str[]= $key . '=' . urlencode($value);
+         continue;
+      }
+      $key.= '%5b%5d='; //encoded []
+      foreach( $value as $val )
+      {
+         if( !empty($val) )
+            $arr_str[]= $key . urlencode($val);
       }
    }
+   if( count($arr_str) )
+      return implode( URI_AMP, $arr_str) . ( $end_sep ? URI_AMP : '' );
+   return '';
+} //build_url
 
-   if( $sep )
-      $url .= $separator;
-
-   return $url;
-}
+function build_hidden( $args)
+{
+   if( !is_array( $args) )
+      return '';
+   $arr_str = array();
+   foreach( $args as $key => $value )
+   {
+      if( empty($value) || !is_string($key) || empty($key) )
+         continue;
+      if( !is_array($value) )
+      {
+         $arr_str[]= "name=\"$key\" value=" . attb_quote($value);
+         continue;
+      }
+      $key.= '[]'; //%5b%5d encoded []
+      foreach( $value as $val )
+      {
+         if( !empty($val) )
+            $arr_str[]=  "name=\"$key\" value=" . attb_quote($val);
+      }
+   }
+   if( count($arr_str) )
+      return "\n<input type=\"hidden\" "
+         .implode( ">\n<input type=\"hidden\" ", $arr_str) .">";
+   return '';
+} //build_hidden
 
 //see also the PHP parse_str() and parse_url()
 //this one use URI_AMP by default to be the make_url() mirror
@@ -2286,51 +2321,90 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
 
    $player_row['logged_in'] = true;
    return true;
-}
+} //is_logged_in
 
-function write_to_file( $filename, $string_to_write )
+// Caution: can cause concurrency problems
+if( function_exists('file_put_contents') )
 {
-   $fp = fopen( $filename, 'wb' )
-      or error( 'couldnt_open_file', $filename );
-
-   fwrite( $fp, $string_to_write );
-   fclose( $fp );
-
-   @chmod( $filename, 0666 );
-}
-
-if( function_exists('file_get_contents') )
-{
-   function read_from_file($filename, $incpath=false)
+   function write_to_file($filename, $data, $quit_on_error=true )
    {
-      return file_get_contents($filename, $incpath);
+      $num= @file_put_contents($filename, $data);
+      if( is_int($num) )
+      {
+         @chmod( $filename, 0666);
+         return $num;
+      }
+      if( $quit_on_error )
+         error( 'couldnt_open_file', 'write_to_file:'.$filename);
+      trigger_error("write_to_file() failed to write stream", E_USER_WARNING);
+      return false;
    }
 }
 else
 {
-   function read_from_file($filename, $incpath=false)
+   function write_to_file( $filename, $data, $quit_on_error=true )
    {
-      $fp = fopen($filename, 'rb', $incpath);
-      if( !$fp )
+      $fh = @fopen($filename, 'wb');
+      if( $fh )
       {
-         trigger_error('read_from_file() failed to open stream: No such file or directory', E_USER_WARNING);
-         return false;
+         flock($fh, LOCK_EX);
+         $num= @fwrite($fh, $data);
+         fclose( $fh );
+         if( is_int($num) )
+         {
+            @chmod( $filename, 0666);
+            return $num;
+         }
       }
+      if( $quit_on_error )
+         error( 'couldnt_open_file', 'write_to_file:'.$filename);
+      trigger_error("write_to_file() failed to write stream", E_USER_WARNING);
+      return false;
+   }
+} //write_to_file
 
-      clearstatcache();
-      if( ($fsize=@filesize($filename)) )
+if( function_exists('file_get_contents') )
+{
+   function read_from_file($filename, $quit_on_error=true, $incpath=false)
+   {
+      $data= @file_get_contents($filename, $incpath);
+      if( is_string($data) )
       {
-         $data = fread($fp, $fsize);
+         return $data;
       }
-      else
+      if( $quit_on_error )
+         error( 'couldnt_open_file', 'read_from_file:'.$filename);
+      trigger_error('read_from_file() failed to open stream', E_USER_WARNING);
+      return false;
+   }
+}
+else
+{
+   function read_from_file($filename, $quit_on_error=true, $incpath=false)
+   {
+      $fh = @fopen($filename, 'rb', $incpath);
+      if( $fh )
       {
-         $data = '';
-         while( !feof($fp) )
-            $data.= fread($fp, 8192);
+         flock($fh, LOCK_SH);
+         clearstatcache();
+         if( ($fsize=@filesize($filename)) )
+         {
+            $data = @fread($fh, $fsize);
+         }
+         else
+         {
+            $data = '';
+            while( !feof($fh) )
+               $data.= @fread($fh, 8192);
+         }
+         fclose($fh);
+         if( is_string($data) )
+            return $data;
       }
-
-      fclose($fp);
-      return $data;
+      if( $quit_on_error )
+         error( 'couldnt_open_file', 'read_from_file:'.$filename);
+      trigger_error('read_from_file() failed to open stream', E_USER_WARNING);
+      return false;
    }
 } //read_from_file
 

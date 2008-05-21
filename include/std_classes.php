@@ -99,8 +99,8 @@ class WhereClause
       { // append clause-part
          $op = ( is_null($operator) ) ? $this->operator : $this->make_operator( $operator );
          if ( $this->has_clause() )
-            array_push( $this->parts, $op );
-         array_push( $this->parts, $clause );
+            $this->parts[]= $op;
+         $this->parts[]= $clause;
       }
    }
 
@@ -173,15 +173,11 @@ class RequestParameters
     */
    function get_hiddens( &$hiddens )
    {
-      $arr_str = array();
-      foreach( $this->values as $key => $val )
-      {
-         if ( is_array($hiddens) )
-            $hiddens[$key] = $val;
-         array_push( $arr_str, "  <input type=\"hidden\" name=\"{$key}\" value=\"{$val}\">\n" );
-      }
-
-      return implode( '', $arr_str );
+      if( is_array($hiddens) )
+         $hiddens = array_merge( $hiddens, $this->values);
+      else
+         $hiddens = $this->values;
+      return build_hidden( $this->values);
    }
 
    /*!
@@ -190,21 +186,9 @@ class RequestParameters
     * note: used as interface for Form- or Table-class
     * note: also handle multi-values using 'varname[]'-notation
     */
-   function get_url_parts()
+   function get_url_parts( $end_sep=false)
    {
-      $arr_url = array(); // for URL: arr( 'key=val' )
-      foreach( $this->values as $key => $val )
-      {
-         if ( is_array($val) )
-         {
-            $akey = $key . '%5b%5d='; //encoded []
-            foreach( $val as $v )
-               array_push( $arr_url, $akey . urlencode($v) );
-         }
-         else
-            array_push( $arr_url, $key . '=' . urlencode($val) );
-      }
-      return implode( URI_AMP, $arr_url );
+      return build_url( $this->values, $end_sep);
    }
 } // end of 'RequestParameters'
 
@@ -457,16 +441,16 @@ class QuerySQL
       $union_parts = $this->get_parts(SQLP_UNION_WHERE);
       for( $idx=0; $idx < count($union_parts); $idx++)
       {
-         array_push( $arr_union, $this->get_select_normal($idx) );
+         $arr_union[]= $this->get_select_normal($idx);
       }
 
       $arrsql = array();
-      array_push( $arrsql, '(' . implode(') UNION (', $arr_union) . ')' );
+      $arrsql[]= '(' . implode(') UNION (', $arr_union) . ')';
 
       if ( $this->has_part(SQLP_ORDER) )
-         array_push( $arrsql, $this->get_part(SQLP_ORDER, true) );
+         $arrsql[]= $this->get_part(SQLP_ORDER, true);
       if ( $this->has_part(SQLP_LIMIT) )
-         array_push( $arrsql, $this->get_part(SQLP_LIMIT, true) );
+         $arrsql[]= $this->get_part(SQLP_LIMIT, true);
 
       $sql = implode(' ', $arrsql);
       return $sql;
@@ -484,39 +468,39 @@ class QuerySQL
       $arrsql = array();
       $has_opts = $this->has_part(SQLP_OPTS);
       if ( $this->has_part(SQLP_FIELDS) or $has_opts )
-         array_push( $arrsql, 'SELECT' );
+         $arrsql[]= 'SELECT';
       if ( $has_opts )
-         array_push( $arrsql, $this->get_part(SQLP_OPTS) );
-      array_push( $arrsql, $this->get_part(SQLP_FIELDS) );
-      array_push( $arrsql, $this->get_part(SQLP_FROM, true) );
+         $arrsql[]= $this->get_part(SQLP_OPTS);
+      $arrsql[]= $this->get_part(SQLP_FIELDS);
+      $arrsql[]= $this->get_part(SQLP_FROM, true);
 
       // handle UNION-WHERE and WHERE
       if ( $union_part < 0 )
       {
          if ( $this->has_part(SQLP_WHERE) )
-            array_push( $arrsql, $this->get_part(SQLP_WHERE, true) );
+            $arrsql[]= $this->get_part(SQLP_WHERE, true);
       }
       else
       {
          $union_parts = $this->get_parts(SQLP_UNION_WHERE); // non-empty
-         array_push( $arrsql, 'WHERE ' . $union_parts[$union_part] );
+         $arrsql[]= 'WHERE ' . $union_parts[$union_part];
 
          if ( $this->has_part(SQLP_WHERE) )
-            array_push( $arrsql, 'AND ' . $this->get_part(SQLP_WHERE) );
+            $arrsql[]= 'AND ' . $this->get_part(SQLP_WHERE);
       }
 
       if ( $this->has_part(SQLP_GROUP) )
-         array_push( $arrsql, $this->get_part(SQLP_GROUP, true) );
+         $arrsql[]= $this->get_part(SQLP_GROUP, true);
       if ( $this->has_part(SQLP_HAVING) )
-         array_push( $arrsql, $this->get_part(SQLP_HAVING, true) );
+         $arrsql[]= $this->get_part(SQLP_HAVING, true);
 
       // ORDER and LIMIT only for non-union-select
       if ( $union_part < 0 )
       {
          if ( $this->has_part(SQLP_ORDER) )
-            array_push( $arrsql, $this->get_part(SQLP_ORDER, true) );
+            $arrsql[]= $this->get_part(SQLP_ORDER, true);
          if ( $this->has_part(SQLP_LIMIT) )
-            array_push( $arrsql, $this->get_part(SQLP_LIMIT, true) );
+            $arrsql[]= $this->get_part(SQLP_LIMIT, true);
       }
 
       $sql = implode(' ', $arrsql);
@@ -575,9 +559,9 @@ class QuerySQL
       {
          $arr = array();
          if ( $this->has_part($type) )
-            array_push( $arr, $this->get_part($type) );
+            $arr[]= $this->get_part($type);
          if ( $qsql->has_part($type) )
-            array_push( $arr, $qsql->get_part($type) );
+            $arr[]= $qsql->get_part($type);
          if ( count($arr) > 0 )
             $query->add_part( $type, '(' . implode(') OR (', $arr) . ')' );
       }
@@ -600,7 +584,7 @@ class QuerySQL
       foreach( array_keys($this->parts) as $type )
       {
          if ( $this->has_part($type) )
-            array_push( $arr, "$type={[" . implode( '], [', $this->parts[$type] ) . "]}" );
+            $arr[]= "$type={[" . implode( '], [', $this->parts[$type] ) . "]}";
       }
       return "QuerySQL: " . implode(', ', $arr);
    }
