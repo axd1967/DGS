@@ -38,6 +38,11 @@ Changelog
      and replacement of some calls to the array_push function
      by the quicker and equivalent "[]=" array operator
 
+   * include/sgf_parser.php,
+     scripts/update_translation_pages.php,
+     pattern/make_handicap_pattern.php:
+   - use of read_from_file and write_to_file
+
 2008-05-16 rodival
 
    * skins/dragon/screen.css, include/config.php,

@@ -31,14 +31,14 @@ define('MAX_PATTERN_SIZE',51);
 
    connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-  if( !$logged_in )
-    error("not_logged_in");
+   if( !$logged_in )
+      error("not_logged_in");
 
-  $player_level = (int)$player_row['admin_level'];
-  if( !($player_level & ADMIN_DATABASE) )
-    error("adminlevel_too_low");
+   $player_level = (int)$player_row['admin_level'];
+   if( !($player_level & ADMIN_DATABASE) )
+      error("adminlevel_too_low");
 
 
    start_html( 'handicap_pattern', 0 );
@@ -300,6 +300,7 @@ C[$comment]',
   );//}$step_s7
 
 
+  $ok= 1;
   for( $size=5 ; $size<=MAX_BOARD_SIZE ; $size++ ) {
     $dst = "standard_handicap_$size";
     echo "<br>\n".$dst;
@@ -358,24 +359,15 @@ GN[$dst]";
     while( $npar-- >0 )
       $sgf.= '
 )';
-    putFile($dst.".sgf",$sgf);
+    $ok=write_to_file($dst.".sgf", $sgf, 0);
+    if( !$ok )
+      break;
   }
-
-   echo "\n<br>Done.";
+   if( !$ok )
+      echo "\n<br>Can't write ",$dst;
+   else
+      echo "\n<br>Done.";
 
    end_html();
 }
-
-
-function putFile($dst,$str,$mod='b') {
-  $fp = @fopen($dst, "w".$mod);
-  if (!$fp) {
-    echo "Cant write: ".$dst."\r\n";
-    return FALSE;
-  }
-  fputs($fp, $str);
-  fclose($fp);
-  return TRUE;
-} //putFile
-
 ?>

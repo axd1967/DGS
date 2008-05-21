@@ -123,12 +123,7 @@ function find_php_files( )
 
 function grep_file($regexp, $file, &$matches)
 {
-   $fd = fopen($file, 'r');
-
-   $contents = fread($fd, filesize($file));
-   
-   fclose($fd);
-
+   $contents = read_from_file($file, 0);
    return preg_match($regexp.'m', $contents, $matches);
 }
 

@@ -136,7 +136,7 @@ function sgf_parser( $sgf, &$games)
 
       while( !$err && $ivar>=0 && $c=sgf_skip_space( $sgf, $i, $sgf_len) )
       {
-         switch( $c )
+         switch( (string)$c )
          {
             case SGF_VAR_END:
                $ivar--; $i++;
@@ -343,12 +343,9 @@ function get_handicap_pattern( $size, $handicap, &$err)
    $game= array();
 
    $filename = "pattern/standard_handicap_$size.sgf";
-   if( file_exists( $filename ) )
+   $sgf = @read_from_file( $filename, 0);
+   if( is_string($sgf) )
    {
-      $handle = fopen($filename, "r");
-      $sgf = fread($handle, filesize($filename));
-      fclose($handle);
-
       $err = sgf_parser( $sgf, $game);
    }
    else
