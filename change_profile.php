@@ -57,7 +57,7 @@ require_once( "include/rating.php" );
       }
    }
 
-   //init_countries(); //useless here
+   init_countries();
 
    $boardcoords = ( @$_GET['coordsleft'] ? COORD_LEFT : 0 )
                 + ( @$_GET['coordsup'] ? COORD_UP : 0 )
@@ -98,10 +98,10 @@ require_once( "include/rating.php" );
       "SendEmail='$sendemail', ";
 
    $country = trim(get_request_arg('country')) ;
-   if( isset($COUNTRIES[$country]) )
-      $query .= "Country='" . mysql_addslashes($country) . "', ";
-   else if( empty($country) )
+   if( empty($country) )
       $query .= "Country='', ";
+   else if( isset($COUNTRIES[$country]) )
+      $query .= "Country='" . mysql_addslashes($country) . "', ";
 
    if( @$_GET['locally'] == 1 )
    {
