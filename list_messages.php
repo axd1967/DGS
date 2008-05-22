@@ -32,11 +32,11 @@ require_once( "include/filter.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   $my_id = $player_row["ID"];
+   $my_id = $player_row['ID'];
 
-   $find_answers = @$_GET['find_answers'] ;
+   $find_answers = (int)@$_REQUEST['find_answers'] ;
 
    init_standard_folders();
    $my_folders = get_folders($my_id);
@@ -93,7 +93,7 @@ require_once( "include/filter.php" );
    if( $find_answers > 0 )
    {
       $title = T_('Answers list');
-      $page.= URI_AMP.'find_answers=' . $find_answers ;
+      $page.= URI_AMP.'find_answers='.$find_answers ;
       $qsql->add_part( SQLP_WHERE, "M.ReplyTo=$find_answers" );
       $current_folder = FOLDER_NONE;
       $folderstring = 'all';
@@ -101,14 +101,13 @@ require_once( "include/filter.php" );
    else
    {
       $title = T_('Message list');
-
       if( $current_folder == FOLDER_ALL_RECEIVED )
       {
          $fldrs = $my_folders;
          unset($fldrs[FOLDER_SENT]);
          unset($fldrs[FOLDER_DELETED]);
-         $folderstring =implode(',', array_keys($fldrs));
-         unset($fldrs);
+         $folderstring = implode(',', array_keys($fldrs));
+         //unset($fldrs);
       }
       else
       {
@@ -127,14 +126,17 @@ require_once( "include/filter.php" );
 
    $rx_term = get_request_arg('xterm');
 
-   $mtable = new Table( 'message', 'list_messages.php' . $page );
-   $mtable->set_default_sort( 'date', 1);
+   $mtable = new Table( 'message', 'list_messages.php'.$page, '', '', TABLE_NO_HIDE );
    //$mtable->add_or_del_column();
 
    $marked_form = new Form('messageMove','list_messages.php#action', FORM_GET, true, 'FormTable');
    $marked_form->set_tabindex(1);
    $marked_form->attach_table( $mtable);
 
+   message_list_head( $mtable, $current_folder
+          , /*no_sort*/false, /*no_mark*/$current_folder == FOLDER_NEW
+          , /*full_details*/false);
+   $mtable->set_default_sort( 4); //on date
    $order = $mtable->current_order_string();
    $limit = $mtable->current_limit_string();
 
@@ -157,10 +159,8 @@ require_once( "include/filter.php" );
    echo "<h3 class=Header>$title</h3>\n";
 
    $can_move_messages =
-     message_list_table( $mtable, $result, $show_rows
-             , $current_folder, $my_folders
-             , /*sort*/false, $current_folder == FOLDER_NEW, $toggle_marks
-             , /*full-details*/false, /*only-TH*/null, $rx_term);
+      message_list_body( $mtable, $result, $show_rows, $my_folders
+             , $toggle_marks, $rx_term);
    //mysql_free_result($result); //already free
 
    $mtable->echo_table();
@@ -173,7 +173,7 @@ require_once( "include/filter.php" );
        *      but sort, page move and add/del column destroy marks.
        * (unless a double *toggle marks* that transfert marks in URL)
        * (but then, the URL limited length may not be enought)
-       * See message_list_table() to re-insert the marks in the URL
+       * See message_list_head/body() to re-insert the marks in the URL
        ****/
 
       if( $find_answers > 0 )

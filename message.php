@@ -37,7 +37,7 @@ require_once( "include/form_functions.php" );
       NewMessage           : from menu
                               (or site_map)
       NewMessage&uid=      : from user info
-      ShowMessage&mid=     : from message_list_table()
+      ShowMessage&mid=     : from message_list_body()
                               or message_info_table()
                               or list_messages
                               or here
@@ -88,7 +88,6 @@ require_once( "include/form_functions.php" );
    init_standard_folders();
    $folders = get_folders($my_id);
 
-
    $default_subject = get_request_arg('subject');
    $default_message = get_request_arg('message');
 
@@ -137,6 +136,14 @@ require_once( "include/form_functions.php" );
 //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
           "ORDER BY Sender" ;
 
+      /**
+       * TODO:
+       * Actually, this query and the following code does not support
+       * multiple receivers (i.e. more than one "other" LEFT JOINed row).
+       * Multiple receivers are just allowed when it is a message from
+       * the server (ID=0) because the message is not read BY the server.
+       * See also: send_message
+       **/
       $msg_row = mysql_single_fetch( 'message.find', $query);
       if( !$msg_row )
          error('unknown_message');
@@ -158,7 +165,7 @@ require_once( "include/form_functions.php" );
       }
       if( empty($other_name) )
       {
-         $other_name = '---';
+         $other_name = NO_VALUE;
          $other_id = 0;
          $other_handle = '';
       }
@@ -230,7 +237,7 @@ require_once( "include/form_functions.php" );
    $message_form->add_hidden( 'mid', $mid);
    $message_form->add_hidden( 'senderid', $my_id);
 
-   switch( $submode )
+   switch( (string)$submode )
    {
       case 'ShowMessage':
       case 'AlreadyDeclined':

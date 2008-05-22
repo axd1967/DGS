@@ -167,7 +167,7 @@ require_once( "include/std_functions.php" );
 }
 
 // Try to find myself messages
-//see also: message_list_query and message_list_table
+//see also: message_list_query and message_list_head/body
 function check_myself_message( $user_id=false)
 {
    echo "<hr>Messages to myself:";
@@ -209,7 +209,7 @@ function check_myself_message( $user_id=false)
 } //check_myself_message
 
 // Try to find system messages
-//see also: message_list_query and message_list_table
+//see also: message_list_query and message_list_head/body
 function check_system_message( $user_id=false)
 {
    echo "<hr>Messages from system:";

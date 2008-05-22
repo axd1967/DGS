@@ -34,8 +34,7 @@ require_once( "include/tournament.php" );
 
    $my_id = $player_row["ID"];
 
-   $table = new Table( 'tournament', 'list_tournaments.php'); //, '', 'TRN' );
-   $table->set_default_sort( 'Name', 0, 'ID', 1);
+   $table = new Table( 'tournament', 'list_tournaments.php'); //, '', 'TRN', TABLE_NO_SORT );
    //$table->add_or_del_column();
 
    $result = mysql_query( "SELECT ID, State, Name FROM Tournament" );
@@ -44,11 +43,12 @@ require_once( "include/tournament.php" );
                $table->button_style($player_row['Button']) );
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $table->add_tablehead( 0, T_('ID'), 'ID', 0, 1, 'Button');
+   $table->add_tablehead( 1, T_('ID'), 'ID', 0, 1, 'Button');
    $table->add_tablehead( 2, T_('State'), 'State', 0, 1);
    $table->add_tablehead( 3, T_('Name'), 'Name', 0, 1);
    $table->add_tablehead( 4, T_('Organizer'), '', 0, 1, 'Image');
    $table->add_tablehead( 5, T_('Participant'), '', 0, 1, 'Image');
+   $table->set_default_sort( 3, 1); //on Name,ID
 
    $state_colors = array(
       TOUR_STATE_INACTIVE          => "#cccccc",
@@ -65,7 +65,7 @@ require_once( "include/tournament.php" );
       $orgresult = mysql_query( "SELECT tid, pid FROM TournamentOrganizers " .
                                 "WHERE tid='$ID'" );
       while( $orgrow = mysql_fetch_array( $orgresult ) )
-         array_push( $organizers, $orgrow['pid'] );
+         $organizers[]= $orgrow['pid'];
 
       if( in_array( $player_row['ID'], $organizers ) or $row['State'] > 0 )
       {
@@ -73,7 +73,7 @@ require_once( "include/tournament.php" );
          $partresult = mysql_query( "SELECT tid, pid FROM TournamentParticipants " .
                                     "WHERE tid='$ID'" );
          while( $partrow = mysql_fetch_array( $partresult ) )
-            array_push( $participants, $partrow['pid'] );
+            $participants[]= $partrow['pid'];
 
          $row_strings[0] = $table->button_TD_anchor( "show_tournament.php?tid=$ID", $ID);
          $row_strings[2] = array(

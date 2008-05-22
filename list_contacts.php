@@ -94,11 +94,10 @@ require_once( "include/contacts.php" );
 
    $ctable = new Table( 'contact', $page, 'ContactColumns', 'contact' );
    $ctable->register_filter( $cfilter );
-   $ctable->set_default_sort( 'P.Name', 0);
    $ctable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $ctable->add_tablehead( 0, T_('Actions#header'), null, 0, 1, 'Image'); // static
+   $ctable->add_tablehead( 0, T_('Actions#header'), '', 0, 1, 'Image'); // static
    $ctable->add_tablehead( 1, T_('Name#header'), 'P.Name', 0, 0, 'User');
    $ctable->add_tablehead( 2, T_('Userid#header'), 'P.Handle', 0, 1, 'User'); // static
    $ctable->add_tablehead( 3, T_('Country#header'), 'P.Country', 0, 0, 'Image');
@@ -109,6 +108,8 @@ require_once( "include/contacts.php" );
    $ctable->add_tablehead( 8, T_('Notes#header'), '', 0, 0);
    $ctable->add_tablehead(10, T_('Created#header'), 'C.Created', 1, 0, 'Date');
    $ctable->add_tablehead(11, T_('Modified#header'), 'C.Lastchanged', 1, 0, 'Date');
+
+   $ctable->set_default_sort( 1); //on P.Name
 
    // External-Search-Form
    $cform = new Form( 'contact', $page, FORM_GET, false);
@@ -162,7 +163,7 @@ require_once( "include/contacts.php" );
    $qsql->merge( $query_scfilter );
    $qsql->merge( $query_cfilter );
 
-   $query = $qsql->get_select() . " ORDER BY $order $limit";
+   $query = $qsql->get_select() . "$order$limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'list_contacts.find_data');

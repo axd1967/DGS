@@ -36,7 +36,14 @@ require_once( "include/filter.php" );
 
 //~(0) is negative (PHP) and database field is unsigned: INT(10) unsigned NOT NULL
 define('ALL_COLUMNS', 0x7fffffff); //=2147483647
-define('TABLE_ALLOW_DOUBLE_SORT', 1);
+
+//caution: provide enought "images/sort$i$c.gif" images $i:[1..n] $c:[a,d]
+define('TABLE_MAX_SORT', 2); // 0 to disable the table sorts
+
+define('TABLE_NO_SORT', 0x01); //disable the sort options (except set_default_sort)
+define('TABLE_NO_HIDE', 0x02); //disable the add_or_del_column options
+define('TABLE_NO_PAGE', 0x04); //disable next_prev_links options
+define('TABLE_NO_SIZE', 0x08); //disable the re-sizing (static number of rows) (see use_show_rows)
 
 define('CHAR_SHOWFILTER', '+');
 
@@ -58,14 +65,9 @@ class Table
    /*! \brief already opened Form class to be used by add_column and filters */
    var $ExternalForm;
 
-   /*! \brief The primary column to sort on. */
-   var $Sort1;
-   /*! \brief Whether to search descending or ascending for the primary sort. */
-   var $Desc1;
-   /*! \brief The secondary column to sort on. */
-   var $Sort2;
-   /*! \brief Whether to search descending or ascending for the secondary sort. */
-   var $Desc2;
+   /*! \brief Array of the columns to sort on (>0=ascending, <0=descending) */
+   var $Sort;
+   var $Sortimg;
 
    /*! \brief Which columns in the set that is visible. */
    var $Column_set;
@@ -94,6 +96,10 @@ class Table
     * - a string supposed to be the class of the column
     */
    var $Tableheads;
+   var $Head_closed;
+   var $Mode; //optional features of the table
+   /*! \brief a place to store some external infos (array) */
+   var $ExtMode;
 
    /*! \brief Array of rows to be diplayed.
     * Each row should consist of an array like this:
@@ -155,93 +161,82 @@ class Table
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
-   function Table( $_tableid, $_page, $_player_column = '', $_prefix = '')
+   function Table( $_tableid, $_page, $_player_column=''
+                  , $_prefix='', $_mode=0)
+   {
+      global $player_row;
+
+      $this->ExternalForm = NULL;
+      $this->ExtMode = array();
+      $this->Removed_Columns = NULL;
+      $this->Shown_Columns = 0;
+      $this->Tableheads = array();
+      $this->Head_closed = 0;
+      $this->Tablerows = array();
+      $this->Sort = array();
+      $this->Sortimg = array();
+
+      $this->Id = $_tableid;
+      $this->Prefix = $_prefix;
+      $this->Mode = $_mode;
+
+      // prepare for appending URL-parts (ends with either '?' or URI_AMP)
+      $this->Page = $_page;
+      if( strstr( $this->Page, '?' ) )
       {
-         global $player_row;
-
-         $this->ExternalForm = NULL;
-         $this->Removed_Columns = NULL;
-         $this->Shown_Columns = 0;
-         $this->Tableheads = array();
-         $this->Tablerows = array();
-
-         $this->Id = $_tableid;
-         $this->Prefix = $_prefix;
-
-         // prepare for appending URL-parts (ends with either '?' or URI_AMP)
-         $this->Page = $_page;
-         if( strstr( $this->Page, '?' ) )
+         if( !(substr( $this->Page, -1 ) == '?') and
+             !(substr( $this->Page, -strlen(URI_AMP) ) == URI_AMP) )
          {
-            if( !(substr( $this->Page, -1 ) == '?') and
-                !(substr( $this->Page, -strlen(URI_AMP) ) == URI_AMP) )
-            {
-               $this->Page .= URI_AMP; //end_sep
-            }
+            $this->Page .= URI_AMP; //end_sep
          }
-         else
-         {
-            $this->Page .= '?'; //end_sep
-         }
-
-         $this->Player_Column = $_player_column;
-         if( empty($this->Player_Column) )
-         {
-            $this->Static_Columns = true;
-            $this->Column_set = ALL_COLUMNS;
-         }
-         else
-         {
-            $this->Static_Columns = false;
-            if( !isset($player_row[ $this->Player_Column ]) )
-               $this->Column_set = ALL_COLUMNS;
-            else
-               $this->Column_set = (int)@$player_row[ $this->Player_Column ];
-         }
-
-         //Simply remove the mySQL disturbing chars (Sort? must be a column name)
-         $tmp = array( '\\', '\'', '\"', ';');
-         $this->Sort1 = (string) $this->get_arg('sort1');
-         $this->Desc1 = (bool) $this->get_arg('desc1');
-         $this->Sort1 = str_replace( $tmp, '', $this->Sort1 );
-         if( TABLE_ALLOW_DOUBLE_SORT )
-         {
-            $this->Sort2 = (string) $this->get_arg('sort2');
-            $this->Desc2 = (bool) $this->get_arg('desc2');
-            $this->Sort2 = str_replace( $tmp, '', $this->Sort2 );
-         }
-         else
-         {
-            $this->Sort2 = '';
-            $this->Desc2 = 0;
-         }
-
-         //{ N.B.: only used for folder transparency but CSS incompatible
-         global $table_row_color1, $table_row_color2;
-         $this->Row_Colors = array( $table_row_color1, $table_row_color2 );
-         //}
-
-         $this->From_Row = (int)$this->get_arg('from_row');
-         if( !is_numeric($this->From_Row) or $this->From_Row < 0 )
-            $this->From_Row = 0;
-         $this->Last_Page = true;
-         $this->Use_Show_Rows = true;
-         $this->Rows_Per_Page = $player_row['TableMaxRows'];
-
-         // filter-stuff
-         $this->ext_req_params = array();
-         $this->ext_req_params_use_hidden = false;
-         $this->cache_curr_extparam = array();
-
-         $this->Filters = new SearchFilter();
-         $this->UseFilters    = false;
-         $this->Shown_Filters = 0;
-         $this->ConfigFilters = array( // set defaults
-            FCONF_SHOW_TOGGLE_FILTER => true,
-            FCONF_FILTER_TABLEHEAD   => LAYOUT_FILTER_IN_TABLEHEAD,
-            FCONF_EXTERNAL_SUBMITS   => false,
-         );
-         $this->cache_curr_filter = array();
       }
+      else
+      {
+         $this->Page .= '?'; //end_sep
+      }
+
+      $this->Player_Column = $_player_column;
+      if( empty($this->Player_Column) )
+      {
+         $this->Static_Columns = true;
+         $this->Column_set = ALL_COLUMNS;
+      }
+      else
+      {
+         $this->Static_Columns = false;
+         if( !isset($player_row[ $this->Player_Column ]) )
+            $this->Column_set = ALL_COLUMNS;
+         else
+            $this->Column_set = (int)@$player_row[ $this->Player_Column ];
+      }
+
+      //{ N.B.: only used for folder transparency but CSS incompatible
+      global $table_row_color1, $table_row_color2;
+      $this->Row_Colors = array( $table_row_color1, $table_row_color2 );
+      //}
+
+      $this->From_Row = (int)$this->get_arg('from_row');
+      if( !is_numeric($this->From_Row) or $this->From_Row < 0 )
+         $this->From_Row = 0;
+      $this->Last_Page = true;
+      $this->Use_Show_Rows = true;
+      $this->Rows_Per_Page = $player_row['TableMaxRows'];
+
+      // filter-stuff
+      $this->ext_req_params = array();
+      $this->ext_req_params_use_hidden = false;
+      $this->cache_curr_extparam = array();
+
+      $this->Filters = new SearchFilter();
+      $this->UseFilters    = false;
+      $this->Shown_Filters = 0;
+      $this->ConfigFilters = array( // set defaults
+         FCONF_SHOW_TOGGLE_FILTER => true,
+         FCONF_FILTER_TABLEHEAD   => LAYOUT_FILTER_IN_TABLEHEAD,
+         FCONF_EXTERNAL_SUBMITS   => false,
+      );
+      $this->cache_curr_filter = array();
+   }
 
    /*! \brief Sets external form for this table, $form is passed as reference */
    function set_externalform( &$form )
@@ -257,13 +252,13 @@ class Table
    }
 
    /*! \brief if false, rows-selection is not shown (table using static number of maxrows); default is true. */
-   function use_show_rows( $use )
+   function use_show_rows( $use=true )
    {
       $this->Use_Show_Rows = (bool)$use;
    }
 
    /*! \brief Add a tablehead.
-    * param $attbs must be an array of attributs or a class-name for the column
+    * \param $attbs must be an array of attributs or a class-name for the column
     */
    function add_tablehead( $nr,
                            $description,
@@ -272,6 +267,8 @@ class Table
                            $undeletable = false,
                            $attbs = null )
    {
+      if( $this->Head_closed )
+         error('assert', "Table.add_tablehead.closed($nr)");
       if( !is_array($attbs) )
       {
          if( is_string($attbs) )
@@ -279,11 +276,14 @@ class Table
          else
             $attbs= null;
       }
+      $sort_string= trim($sort_string);
+      if( $sort_string
+         && !is_numeric(strpos('+-',substr($sort_string,-1))) )
+         $sort_string.= ($desc_default ? '-' : '+');
       $this->Tableheads[$nr] =
          array( 'Nr' => $nr,
                 'Description' => $description,
                 'Sort_String' => $sort_string,
-                'Desc_Default' => $desc_default,
                 'Undeletable' => $undeletable,
                 'attbs' => $attbs );
 
@@ -291,6 +291,42 @@ class Table
       if ( $this->UseFilters ) // fix filter-visibility (especially for static cols)
          $this->Filters->set_visible($nr, $visible);
    } //add_tablehead
+
+   /*! \brief records the default order of the table
+    *   by the way, close and compute the headers definitions
+    *  \param $default_sorts are +/- $colnum_nbr
+    *  works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
+    *    (allowing a current_order_string() default usage)
+    */
+   function set_default_sort( /* {$default_sort1 {,$default_sort2 [,...]}} */)
+   {
+      if( $this->Head_closed )
+         error('assert', "Table.set_default_sort.closed({$this->Head_closed})");
+      $this->Head_closed= 1;
+      //if( TABLE_MAX_SORT<=0 || $this->Mode&TABLE_NO_SORT ) return;
+      $s= array();
+      //for( $i=min(func_num_args(),TABLE_MAX_SORT); $i>0; )
+      for( $i=func_num_args(); $i>0; )
+      {
+         --$i;
+         $sd= func_get_arg($i);
+         if( is_string($sd) )
+            error('assert', "Table.set_default_sort.old_way($sd)");
+         if( $sd=(int)$sd )
+            $s= array(abs($sd)=>$sd) + $s;
+      }
+      if( TABLE_MAX_SORT>0 && !($this->Mode&TABLE_NO_SORT) )
+      {
+         //get the sort parameters from URL
+         for( $i=TABLE_MAX_SORT; $i>0; )
+         {
+            if( $sd=(int)$this->get_arg("sort$i") )
+               $s= array(abs($sd)=>$sd) + $s;
+            --$i;
+         }
+      }
+      $this->Sort= $s;
+   } //set_default_sort
 
    /*! \brief Check if column is displayed. */
    function is_column_displayed( $nr )
@@ -306,12 +342,15 @@ class Table
     */
    function add_row( $row_array )
    {
-      array_push( $this->Tablerows, $row_array );
+      $this->Tablerows[]= $row_array;
    }
 
    /*! \brief Create a string of the table. */
    function make_table()
    {
+      if( !$this->Head_closed )
+         error('assert', "Table.make_table.!closed({$this->Head_closed})");
+
       /* Make tablehead */
 
       $this->Shown_Columns = 0;
@@ -428,10 +467,10 @@ class Table
             foreach ($arr as $id) {
                $filter = $this->Filters->get_filter($id);
                $syntax = $filter->get_syntax_description();
-               array_push( $arr_err,
+               $arr_err[]=
                   "<strong>{$this->Tableheads[$id]['Description']}:</strong> "
                   . '<em>' . T_('Error#filter') . ': ' . $filter->errormsg() . '</em>'
-                  . ( ($syntax != '') ? "; $syntax" : '') );
+                  . ( ($syntax != '') ? "; $syntax" : '');
             }
             $errormessages = implode( '<br>', $arr_err );
 
@@ -525,15 +564,15 @@ class Table
     * \brief Returns (locally cached) URL-parts for all filters (even if not used).
     * signature: string querystring = current_filter_string ([ choice = GETFILTER_ALL ])
     */
-   function current_filter_string( $add_sep = false, $filter_choice = GETFILTER_ALL ) {
-      if ( !isset($this->cache_curr_filter[$filter_choice]) )
+   function current_filter_string( $end_sep=false, $filter_choice=GETFILTER_ALL ) {
+      if( !isset($this->cache_curr_filter[$filter_choice]) )
       {
          $trash = null;
          $this->cache_curr_filter[$filter_choice] = $this->Filters->get_url_parts( $trash, $filter_choice );
       }
       $url = $this->cache_curr_filter[$filter_choice];
-      if ( $url != '' and $add_sep )
-         $url .= URI_AMP ;
+      if( $url && $end_sep )
+         $url.= URI_AMP;
       return $url;
    }
 
@@ -543,6 +582,9 @@ class Table
     */
    function add_or_del_column()
    {
+      if( ($i=count($this->Tableheads)) )
+         error('assert', "Table.add_or_del_column.past_head_start($i)");
+
       // handle filter-visibility
       $this->Filters->add_or_del_filter();
 
@@ -616,7 +658,7 @@ class Table
       if ( !$this->Use_Show_Rows )
          return;
 
-      $rows = (int) $this->get_arg(TFORM_VAL_SHOWROWS); // nr of rows
+      $rows = (int)$this->get_arg(TFORM_VAL_SHOWROWS); // nr of rows
       if ( $rows > 0 )
          $this->Rows_Per_Page =
             get_maxrows( $rows, MAXROWS_PER_PAGE, MAXROWS_PER_PAGE_DEFAULT );
@@ -633,115 +675,95 @@ class Table
       else
          $this->Last_Page = true;
       return $num_rows_result;
-   }
+   } //compute_show_rows
 
-   /*! \brief set the missing sort parameters */
-   function set_default_sort( $sort1, $desc1, $sort2='', $desc2=0)
+   /*! \brief Retrieve MySQL ORDER BY part from table.
+    *   $final_field is an extended-field-name
+    *      (ended by a '-+' like in add_tablehead())
+    *  works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
+    *    (computing the set_default_sort() datas)
+    */
+   function current_order_string( $final_field='')
    {
-      if( !$this->Sort1 )
+      if( !$this->Head_closed )
+         error('assert', "Table.current_order_string.!closed({$this->Head_closed})");
+      //if( TABLE_MAX_SORT<=0 || $this->Mode&TABLE_NO_SORT ) return;
+
+      //$this->Sortimg = array();
+      $str = ''; $i=0;
+      foreach( $this->Sort as $sd )
       {
-         $this->Sort1 = (string) $sort1;
-         $this->Desc1 = (bool) $desc1;
-         if( TABLE_ALLOW_DOUBLE_SORT )
-         {
-            $this->Sort2 = (string) $sort2;
-            $this->Desc2 = (bool) $desc2;
-         }
+         if( $i >= TABLE_MAX_SORT )
+            break;
+         if( !$sd )
+            continue;
+         $sk= abs($sd);
+         $field= (string)@$this->Tableheads[$sk]['Sort_String'];
+         if( !$field )
+            continue;
+         ++$i;
+         if( $sd<0 )
+            $str.= strtr( $field, '+-', '-+');
+         else
+            $str.= $field;
+         $c= (substr($str, -1) == '+' ? 'a' : 'd' );
+         //alt-attb and part of "images/sort$i$c.gif" $i:[1..n] $c:[a,d]
+         $this->Sortimg[$sk]= "$i$c";
       }
-      else if( TABLE_ALLOW_DOUBLE_SORT && !$this->Sort2 )
+      if( $final_field )
       {
-         if( strcasecmp( $this->Sort1, $sort1) )
+         if( $str )
          {
-            $this->Sort2 = (string) $sort1; //shifted
-            $this->Desc2 = (bool) $desc1;
+            $c= preg_replace( "/[-+]+/", "[-+]", trim( $final_field, "-+ ") );
+            if( !preg_match( "/\\b{$c}[-+]/i", $str) )
+               $str.= $final_field;
          }
          else
-         {
-            $this->Sort2 = (string) $sort2;
-            $this->Desc2 = (bool) $desc2;
-         }
+            $str= $final_field;
       }
-      return;
-   }
-
-   /*! \brief force the sort parameters */
-   function set_sort( $sort1, $desc1, $sort2='', $desc2=0)
-   {
-      $this->Sort1 = (string) $sort1;
-      $this->Desc1 = (bool) $desc1;
-      if( TABLE_ALLOW_DOUBLE_SORT )
-      {
-         $this->Sort2 = (string) $sort2;
-         $this->Desc2 = (bool) $desc2;
-      }
-      else
-      {
-         $this->Sort2 = '';
-         $this->Desc2 = 0;
-      }
-      return;
-   }
-
-   /*! \brief Retrieve mySQL ORDER BY part from table. */
-   function current_order_string()
-   {
-      if(!$this->Sort1 )
+      if( !$str )
          return '';
-      $order = str_replace( URI_ORDER_CHAR
-         , ( $this->Desc1 ? ' DESC,' : ',' )
-         , $this->Sort1.URI_ORDER_CHAR);
-      if( TABLE_ALLOW_DOUBLE_SORT && $this->Sort2 )
-      {
-         $order.= str_replace( URI_ORDER_CHAR
-            , ( $this->Desc2 ? ' DESC,' : ',' )
-            , $this->Sort2.URI_ORDER_CHAR);
-      }
-      $order= substr($order,0,-1);
-      //could do also: $order= 'ORDER BY '.$order;
-      return $order;
-   }
+      $str= str_replace( array('-','+'), array(' DESC,',','), $str);
+      return ' ORDER BY '.substr($str,0,-1);
+   } //current_order_string
 
    /*! \brief Retrieve mySQL LIMIT part from table. */
    function current_limit_string()
    {
       if ( $this->Rows_Per_Page <= 0 )
          return '';
-      return "LIMIT " . $this->From_Row . "," . ($this->Rows_Per_Page+1) ;
+      return ' LIMIT ' . $this->From_Row . ',' . ($this->Rows_Per_Page+1) ;
    }
 
    /*! \brief Retrieve from part of url from table. */
-   function current_from_string( $add_sep=false )
+   function current_from_string( $end_sep=false )
    {
-      if( $this->From_Row>0 )
+      if( $this->From_Row > 0 )
       {
          $str = $this->Prefix . 'from_row=' . $this->From_Row;
-         if ($add_sep)
-            $str .= URI_AMP ;
+         if( $end_sep )
+            $str.= URI_AMP;
          return $str;
       }
       return '';
    }
 
    /*! \brief Retrieves maxrows URL-part. */
-   function current_rows_string( $add_sep=false )
+   function current_rows_string( $end_sep=false )
    {
       if( !$this->Use_Show_Rows )
          return '';
 
       $str = $this->Prefix . TFORM_VAL_SHOWROWS . '=' . $this->Rows_Per_Page;
-      if ($add_sep)
-         $str .= URI_AMP;
+      if( $end_sep )
+         $str.= URI_AMP;
       return $str;
    }
 
    /*! \brief Retrieve sort part of url from table. */
-   function current_sort_string( $add_sep=false )
+   function current_sort_string( $end_sep=false)
    {
-      return $this->make_sort_string( $this->Sort1,
-                                      $this->Desc1,
-                                      $this->Sort2,
-                                      $this->Desc2,
-                                      $add_sep );
+      return $this->make_sort_string( 0, $end_sep);
    }
 
    /*! \brief Retrieve hidden part from table as a form string. */
@@ -749,27 +771,23 @@ class Table
    {
       $hiddens= array();
       $this->get_hiddens( $hiddens, $filter_choice );
-      $str = '';
-      foreach( $hiddens as $key => $val )
-      {
-         $val= attb_quote($val);
-         $str.= "<input type=\"hidden\" name=\"$key\" value=$val>\n";
-      }
-      return $str;
+      return build_hidden( $hiddens);
    }
 
    /*! \brief Retrieve hidden part from table. */
    function get_hiddens( &$hiddens)
    {
-      if ($this->Sort1)
+      $i=0;
+      if( TABLE_MAX_SORT>0 && !($this->Mode&TABLE_NO_SORT) )
       {
-         $hiddens[$this->Prefix . 'sort1'] = $this->Sort1;
-         if ( $this->Desc1 )
-            $hiddens[$this->Prefix . 'desc1'] = $this->Desc1;
-         if ( TABLE_ALLOW_DOUBLE_SORT && $this->Sort2 ) {
-            $hiddens[$this->Prefix . 'sort2'] = $this->Sort2;
-            if ( $this->Desc2 )
-               $hiddens[$this->Prefix . 'desc2'] = $this->Desc2;
+         foreach( $this->Sort as $sd )
+         {
+            if( $i >= TABLE_MAX_SORT )
+               break;
+            if( !$sd )
+               continue;
+            ++$i;
+            $hiddens[$this->Prefix . "sort$i"] = $sd;
          }
       }
 
@@ -849,50 +867,23 @@ class Table
       if( $width >= 0 )
          $string .= $this->button_TD_width_insert($width);
 
-      $common_url = $this->current_rows_string(true)
+      $common_url =
+         $this->current_extparams_string(true)
+         . $this->current_rows_string(true)
          . $this->current_filter_string(true)
-         . $this->current_extparams_string(true); //end_sep
+         ; //end_sep
 
       // field-sort-link
-      $title = $tablehead['Description'];
-      $csort = $tablehead['Sort_String'];
+      $title = (string)@$tablehead['Description'];
+      $field = (string)@$tablehead['Sort_String'];
+      $sortimg= (string)@$this->Sortimg[$nr];
 
-      $sortimg = '';
-      if( $csort )
+      if( $field && !($this->Mode&TABLE_NO_SORT) )
       {
          $hdr = '<a href="' . $this->Page; //end_sep
-
-         if( $csort == $this->Sort1 )
-         { //Click on main column: just toggle its order
-            $hdr .= $this->make_sort_string( $this->Sort1,
-                                             !$this->Desc1,
-                                             $this->Sort2,
-                                             $this->Desc2,
-                                             true ); //end_sep
-            $sortimg = '1'.($this->Desc1?'d':'a');
-         }
-         else
-         if( TABLE_ALLOW_DOUBLE_SORT && $csort == $this->Sort2 )
-         { //Click on second column: just swap the columns
-            $hdr .= $this->make_sort_string( $this->Sort2,
-                                             $this->Desc2,
-                                             $this->Sort1,
-                                             $this->Desc1,
-                                             true ); //end_sep
-            $sortimg = '2'.($this->Desc2?'d':'a');
-         }
-         else
-         { //Click on a new column: just push it
-            $hdr .= $this->make_sort_string( $csort,
-                                             $tablehead['Desc_Default'],
-                                             $this->Sort1,
-                                             $this->Desc1,
-                                             true ); //end_sep
-         }
-
+         $hdr .= $this->make_sort_string( $nr, true ); //end_sep
+         $hdr .= $this->current_from_string( true); //end_sep
          $hdr .= $common_url; //end_sep
-         $hdr .= $this->current_from_string(true); //end_sep
-
          $hdr = clean_url($hdr) . "#$curColId\" title="
             . attb_quote(T_('Sort')) . ">$title</a>";
       }
@@ -911,14 +902,14 @@ class Table
 
          // add from_row, if filter-value is empty,
          //   or else has a value but has an error (then removing of filter or column doesn't change the page)
-         if ( $this->UseFilters )
+         if( $this->UseFilters )
          {
             $filter = $this->Filters->get_filter($nr);
-            if ( isset($filter) and ( $filter->is_empty() ^ $filter->has_error() ) )
+            if( isset($filter) && ( $filter->is_empty() ^ $filter->has_error() ) )
                $query_del .= $this->current_from_string(true); //end_sep
          }
       }
-      if( $query_del or $sortimg )
+      if( $query_del || $sortimg )
       {
          global $base_path;
          if( $query_del ) //end_sep
@@ -936,6 +927,7 @@ class Table
 
          if( $sortimg )
          {
+            //$sortimg: "$i$c" $i:[1..n] $c:[a,d]
             $tool2 = image( $base_path."images/sort$sortimg.gif", $sortimg, '', 'class=Sort');
             $tool2 = "<span>$tool2</span>";
          }
@@ -983,10 +975,11 @@ class Table
             make_url( $this->Page, array(
                   $fprefix . FFORM_TOGGLE_ACTION => 1,
                   $fprefix . FFORM_TOGGLE_FID    => $fid ), true)
+            . $this->current_extparams_string(true)
             . $this->current_sort_string(true)
             . $this->current_rows_string(true)
             . $this->current_filter_string(true)
-            . $this->current_extparams_string(true); //end_sep
+            ; //end_sep
 
          // add from_row, if filter-value is empty, or else has a value but has an error
          //    (then removing of filter or column doesn't change the page)
@@ -1121,10 +1114,11 @@ class Table
       $button = '';
 
       $qstr = $this->Page //end_sep
+         . $this->current_extparams_string(true)
          . $this->current_sort_string(true)
          . $this->current_rows_string(true)
          . $this->current_filter_string(true)
-         . $this->current_extparams_string(true); //end_sep
+         ; //end_sep
 
       if( $this->From_Row > 0 )
          $button.= anchor(
@@ -1166,23 +1160,42 @@ class Table
       return $string;
    }
 
-   /*! \brief Make sort part of url. */
-   function make_sort_string( $sort1, $desc1, $sort2='', $desc2=0, $add_sep=false )
+   /*! \brief Make sort part of URL */
+   function make_sort_string( $add_sort=0, $end_sep=false )
    {
-      if( $sort1 )
+      if( TABLE_MAX_SORT<=0 || $this->Mode&TABLE_NO_SORT ) return '';
+      $s= $this->Sort;
+      if( $add_sort )
       {
-         $sort_string = $this->Prefix . "sort1=$sort1" .
-            ( $desc1 ? URI_AMP . $this->Prefix . 'desc1=1' : '' );
-         if( TABLE_ALLOW_DOUBLE_SORT && $sort2 )
+         $key= abs($add_sort);
+         if( isset($s[$key]) ) //if it is in list...
          {
-            $sort_string .= URI_AMP . $this->Prefix . "sort2=$sort2" .
-               ( $desc2 ? URI_AMP . $this->Prefix . 'desc2=1' : '' );
+            //reset($s);
+            list($sk,$sd)= each($s);
+            if( $key == $sk ) //if it is main sort...
+               $add_sort= -$sd; //toggle sort sens
+            else
+               $add_sort= $s[$key]; //move it on main place
          }
-         if ($add_sep)
-            $sort_string .= URI_AMP ;
-         return $sort_string;
+         //unset($s[$key]);
+         $s= array($key=>$add_sort) + $s;
       }
-      return '';
+      $str = ''; $i=0;
+      foreach( $s as $sd )
+      {
+         if( $i >= TABLE_MAX_SORT )
+            break;
+         if( !$sd )
+            continue;
+         ++$i;
+         if( $str )
+            $str.= URI_AMP.$this->Prefix . "sort$i=$sd";
+         else
+            $str= $this->Prefix . "sort$i=$sd";
+      }
+      if( $str && $end_sep )
+         $str.= URI_AMP;
+      return $str;
    }
 
    /*! \brief Adds a form for adding columns. */
@@ -1218,9 +1231,9 @@ class Table
       if ( $ac_string or $f_string or $r_string )
       {
          $arr = array();
-         if ( $f_string )  array_push($arr, $f_string);
-         if ( $r_string )  array_push($arr, $r_string);
-         if ( $ac_string ) array_push($arr, $ac_string);
+         if ( $f_string )  $arr[]= $f_string;
+         if ( $r_string )  $arr[]= $r_string;
+         if ( $ac_string ) $arr[]= $ac_string;
 
          $string = "<div id='{$this->Prefix}tableFAC'>";
          $string .= implode( '&nbsp;&nbsp;&nbsp;', $arr );
@@ -1244,10 +1257,10 @@ class Table
       return $elems;
    }
 
-   function get_arg( $name)
+   function get_arg( $name, $def='')
    {
-      //return get_request_arg( $this->Prefix.$name);
-      return arg_stripslashes(@$_GET[ $this->Prefix.$name ]);
+      return get_request_arg( $this->Prefix.$name, $def);
+      //return arg_stripslashes(@$_GET[ $this->Prefix.$name ]);
    }
 
 /* Must do a reverse arg_stripslashes()
@@ -1295,8 +1308,8 @@ class Table
     */
    function add_external_parameters( $rp, $use_hidden = false )
    {
-      if ( is_object($rp) and method_exists($rp, 'get_hiddens') and method_exists($rp, 'get_url_parts') )
-         array_push( $this->ext_req_params, $rp );
+      if( is_object($rp) && method_exists($rp, 'get_hiddens') && method_exists($rp, 'get_url_parts') )
+         $this->ext_req_params[]= $rp;
       else
       {
          // expecting object-argument with interfaces get_hiddens() and get_url_parts()
@@ -1307,20 +1320,20 @@ class Table
    }
 
    /*! \brief Retrieves additional / external URL-part for table. */
-   function current_extparams_string( $add_sep = false )
+   function current_extparams_string( $end_sep=false )
    {
-      if ( !isset($this->cache_curr_extparam[$add_sep]) )
+      if( !isset($this->cache_curr_extparam[$end_sep]) )
       {
          $url_str = '';
          foreach( $this->ext_req_params as $rp )
          {
             $url_str .= $rp->get_url_parts();
-            if ( $url_str != '' && $add_sep )
-               $url_str .= URI_AMP ;
+            if ( $url_str != '' && $end_sep )
+               $url_str.= URI_AMP;
          }
-         $this->cache_curr_extparam[$add_sep] = $url_str;
+         $this->cache_curr_extparam[$end_sep] = $url_str;
       }
-      return $this->cache_curr_extparam[$add_sep];
+      return $this->cache_curr_extparam[$end_sep];
    }
 
 } // end of 'Table'

@@ -51,7 +51,7 @@ require_once( "include/filter.php" );
    $ufilter->add_filter( 2, 'Text',    'P.Name', true,
          array( FC_FNAME => 'name', FC_SIZE => 12, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
    $ufilter->add_filter( 3, 'Text',    'P.Handle', true,
-         array( FC_FNAME => 'user', FC_SIZE => 10, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
+         array( FC_FNAME => 'user', FC_SIZE => 12, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
    //$ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info (don't use here, no index)
    $ufilter->add_filter( 5, 'Rating',  'P.Rating2', true);
    //$ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches (don't use here, no index)
@@ -80,7 +80,6 @@ require_once( "include/filter.php" );
    $f_active =& $ufilter->get_filter(13);
 
    $utable = new Table( 'user', $page, 'UsersColumns' );
-   $utable->set_default_sort( 'ID', 0);
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
@@ -90,9 +89,6 @@ require_once( "include/filter.php" );
       $rp->add_entry( 'observe', $observe_gid );
       $utable->add_external_parameters( $rp, true );
    }
-
-   $order = $utable->current_order_string();
-   $limit = $utable->current_limit_string();
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
    // table: use same table-IDs as in opponents.php(!)
@@ -114,6 +110,10 @@ require_once( "include/filter.php" );
    $utable->add_tablehead(14, T_('Last access#header'), 'Lastaccess', 1, 0, 'Date');
    $utable->add_tablehead(15, T_('Last move#header'), 'Lastmove', 1, 0, 'Date');
 
+   $utable->set_default_sort( 1); //on ID
+   $order = $utable->current_order_string();
+   $limit = $utable->current_limit_string();
+
    // build SQL-query
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
@@ -131,7 +131,7 @@ require_once( "include/filter.php" );
 
    $query_ufilter = $utable->get_query(); // clause-parts for filter
    $qsql->merge( $query_ufilter );
-   $query = $qsql->get_select() . " ORDER BY $order $limit";
+   $query = $qsql->get_select() . "$order$limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'users.find_data');

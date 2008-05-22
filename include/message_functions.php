@@ -169,7 +169,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $WeekendClock = ( $game_row['WeekendClock'] == 'Y' );
 
       //ToMove_ID hold handitype since INVITATION
-      switch( $game_row['ToMove_ID'] )
+      switch( (int)$game_row['ToMove_ID'] )
       {
          case INVITE_HANDI_CONV:
          {
@@ -215,7 +215,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       time_convert_to_longer_unit($game_row['Byotime'], $game_row['ByotimeUnit']);
 
       $Byotype = $game_row['Byotype'];
-      switch( $Byotype )
+      switch( (string)$Byotype )
       {
          case 'JAP':
          {
@@ -247,7 +247,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    // Now, compute datas
 
-   switch( $Handitype )
+   switch( (string)$Handitype )
    {
       case 'conv':
       case 'proper':
@@ -517,7 +517,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
    if( $tablestyle == 'waitingroom' )
    {
-      switch( $Handicaptype )
+      switch( (string)$Handicaptype )
       {
          case 'conv':
          case 'proper':
@@ -535,7 +535,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    {
       $tablestyle = 'invite';
       //ToMove_ID hold handitype since INVITATION
-      switch( $game_row['ToMove_ID'] )
+      switch( (int)$game_row['ToMove_ID'] )
       {
          case INVITE_HANDI_CONV:
             $Handitype = 'conv';
@@ -594,7 +594,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
                   , $Size
                   );
 
-   switch( $Handitype )
+   switch( (string)$Handitype )
    {
       case 'conv': // Conventional handicap
          $itable->add_row( array(
@@ -881,7 +881,7 @@ function change_folders_for_marked_messages($uid, $folders)
    foreach( $_GET as $key => $val )
    {
       if( preg_match("/^mark(\d+)$/", $key, $matches) )
-         array_push($message_ids, $matches[1]);
+         $message_ids[]= $matches[1];
    }
 
    return change_folders($uid, $folders, $message_ids, $new_folder, @$_GET['current_folder']);
@@ -1014,7 +1014,7 @@ function folder_is_empty($nr, $uid)
 
 // param extra_querysql: QuerySQL-object to extend query
 // return array( result, merged-QuerySQL )
-function message_list_query($my_id, $folderstring='all', $order='date', $limit='', $extra_querysql=null)
+function message_list_query($my_id, $folderstring='all', $order=' ORDER BY date', $limit='', $extra_querysql=null)
 {
 /**
  * N.B.: On 2007-10-15, we have found, in the DGS database,
@@ -1044,11 +1044,10 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
       'LEFT JOIN Players AS otherP ON otherP.ID=other.uid',
       'LEFT JOIN MessageCorrespondents AS previous ON M.ReplyTo>0 AND previous.mid=M.ReplyTo AND previous.uid='.$my_id );
    $qsql->add_part( SQLP_WHERE, "me.uid=$my_id" );
-   if ( $folderstring != "all" and $folderstring != '' )
+   if( $folderstring != "all" && $folderstring != '' )
       $qsql->add_part( SQLP_WHERE, "me.Folder_nr IN ($folderstring)" );
-   $qsql->add_part( SQLP_ORDER, $order );
    $qsql->merge( $extra_querysql );
-   $query = $qsql->get_select() . " $limit";
+   $query = $qsql->get_select() . "$order$limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed','message_list_query');
@@ -1057,52 +1056,58 @@ function message_list_query($my_id, $folderstring='all', $order='date', $limit='
 }
 
 // param full_details: if true, show additional fields for message-search
-// param header_part: tri-states param (null, false, true)
-//    if null or true, tableheads are added (needed for message-search);
-//    then if null, the workflow goes on (needed for list-messages)
+function message_list_head( &$mtable, $current_folder
+             , $no_sort=true, $no_mark=true, $full_details=false
+             )
+{
+ global $msg_icones;
+
+   $mtable->ExtMode['no_sort']= $no_sort;
+   $mtable->ExtMode['no_mark']= $no_mark;
+   $mtable->ExtMode['full_details']= $full_details;
+   $mtable->ExtMode['current_folder']= $current_folder;
+
+   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
+   $mtable->add_tablehead( 1, T_('Folder#header'),
+      ( $no_sort || $current_folder>FOLDER_ALL_RECEIVED ) ? '' : 'folder', 1, 0, 'Folder');
+
+   if ( $full_details )
+   {
+      // additional fields for search-messages
+      $mtable->add_tablehead( 6, T_('Type#header'), 'M.Type', 0, 1);
+      $mtable->add_tablehead( 7, T_('Direction#header'), $no_sort ? '' : 'Sender', 0, 0, 'MsgDir');
+      $mtable->add_tablehead( 2, T_('Correspondent#header'), $no_sort ? '' : 'other_name',  0, 0, 'User');
+   }
+   else
+      $mtable->add_tablehead( 2,
+         ($current_folder == FOLDER_SENT ? T_('To#header') : T_('From#header') ),
+         $no_sort ? '' : 'other_name', 0, 0, 'User');
+
+   $mtable->add_tablehead( 3, T_('Subject#header'), $no_sort ? '' : 'Subject', 0, 0);
+   list($ico,$alt) = $msg_icones[0];
+   $mtable->add_tablehead( 0, image( $ico, $alt, T_('Messages')),
+      $no_sort ? '' : 'flow', 0, 1, 'Image');
+   $mtable->add_tablehead( 4, T_('Date#header'), $no_sort ? '' : 'date', 1, 0, 'Date');
+   if( !$no_mark )
+      $mtable->add_tablehead( 5, T_('Mark#header'), '', 0, 1, 'Mark');
+
+} //message_list_head
+
+// param result: typically coming from message_list_query()
 // param rx_terms: rx with terms to be marked within text
-function message_list_table( &$mtable, $result, $show_rows
-             , $current_folder, $my_folders
-             , $no_sort=true, $no_mark=true, $toggle_marks=false
-             , $full_details=false, $header_part=null, $rx_term=''
+function message_list_body( &$mtable, $result, $show_rows
+             , $my_folders, $toggle_marks=false, $rx_term=''
              )
 {
  global $date_fmt, $msg_icones, $player_row;
 
+   //$no_sort= @$mtable->ExtMode['no_sort'];
+   $no_mark= @$mtable->ExtMode['no_mark'];
+   $full_details= @$mtable->ExtMode['full_details'];
+   //$current_folder= @$mtable->ExtMode['current_folder'];
+
    $can_move_messages = false;
-
-   if ( is_null($header_part) or $header_part )
-   {
-      // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-      $mtable->add_tablehead( 1, T_('Folder#header'),
-         ( $no_sort || $current_folder>FOLDER_ALL_RECEIVED ) ? '' : 'folder', 1, 0, 'Folder');
-
-      if ( $full_details )
-      {
-         // additional fields for search-messages
-         $mtable->add_tablehead( 6, T_('Type#header'), 'M.Type', 0, 1);
-         $mtable->add_tablehead( 7, T_('Direction#header'), $no_sort ? '' : 'Sender', 0, 0, 'MsgDir');
-         $mtable->add_tablehead( 2, T_('Correspondent#header'), $no_sort ? '' : 'other_name',  0, 0, 'User');
-      }
-      else
-         $mtable->add_tablehead( 2,
-            ($current_folder == FOLDER_SENT ? T_('To#header') : T_('From#header') ),
-            $no_sort ? '' : 'other_name', 0, 0, 'User');
-
-      $mtable->add_tablehead( 3, T_('Subject#header'), $no_sort ? '' : 'Subject', 0, 0);
-      list($ico,$alt) = $msg_icones[0];
-      $mtable->add_tablehead( 0, image( $ico, $alt, T_('Messages')),
-         $no_sort ? '' : 'flow', 0, 1, 'Image');
-      $mtable->add_tablehead( 4, T_('Date#header'), $no_sort ? '' : 'date', 1, 0, 'Date');
-      if( !$no_mark )
-         $mtable->add_tablehead( 5, T_('Mark#header'), '', 0, 1, 'Mark');
-
-      // then stop if $header_part is true
-      if ( !is_null($header_part) )
-         return $can_move_messages;
-   }
-
-   $page = '';
+   //$page = ''; //not used, see below
 
    $p = T_('Answer');
    $n = T_('Replied');
@@ -1113,6 +1118,7 @@ function message_list_table( &$mtable, $result, $show_rows
       FLOW_ANSWER|FLOW_ANSWERED => "$p - $n" ,
       );
 
+   // synchronize those translations with search_messages.php
    $dirs = array(
       'M' => T_('Myself#msgdir'),
       'S' => T_('Server#msgdir'),
@@ -1199,17 +1205,15 @@ function message_list_table( &$mtable, $result, $show_rows
          {
             $can_move_messages = true;
             $n = $mtable->Prefix."mark$mid";
-            $checked = ((@$_REQUEST[$n]=='Y') xor $toggle_marks);
-            if( $checked )
-               $page.= "$n=Y".URI_AMP;
+            $checked = (('Y'==(string)@$_REQUEST[$n]) xor (bool)$toggle_marks);
+            //if( $checked ) $page.= "$n=Y".URI_AMP;
             $mrow_strings[5] = "<input type='checkbox' name='$n' value='Y'"
                . ($checked ? ' checked' : '') . '>';
          }
       }
       $mtable->add_row( $mrow_strings );
-
    }
-   mysql_free_result($result);
+   //mysql_free_result($result);
 
    //insertion of the marks in the URL of sort, page move and add/del column.
    //it's useless to add marks to the URLs while they are only used with actions
@@ -1217,6 +1221,6 @@ function message_list_table( &$mtable, $result, $show_rows
    //$mtable->Page.= $page ;
 
    return $can_move_messages ;
-}
+} //message_list_body
 
 ?>

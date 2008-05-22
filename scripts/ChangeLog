@@ -23,10 +23,41 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
-2008-05-21 rodival
+2008-05-22 rodival
 
    * game.php:
    - typo
+
+   * include/table_columns.php (Table, set_default_sort, set_sort,
+      current_order_string, make_sort_string, add_or_del_columnn,
+      make_tablehead, current_filter_string),
+     status.php (show games part), show_games.php,
+     users.php, opponents.php, list_contacts.php,
+     list_tournaments.php, waiting_room.php:
+   - removing the risk of mysql injection using the sort? arguments
+      now, the sort arguments of the URL mentions the column number
+      instead of the raw MySQL field (or alias).
+   - also replaced the TABLE_ALLOW_DOUBLE_SORT constant by
+      TABLE_MAX_SORT and the cluster of $Sort?+$Desc? variables by
+      a single array
+   - added some asserts to clearly force the use of some functions
+      before or after the table_head definitions
+   - Table(): added a mode parameter to manage the global behaviour
+      of the table (not yet fully implemented, coming soon)
+   - removed set_sort() which is now dispatched into other functions
+   - set_default_sort(), make_sort_string(): the arguments became
+      (+/-)column numbers instead of mysql fields + desc_flags
+
+   * include/message_functions.php (message_list_table,
+      message_list_head, message_list_body),
+     status.php (show messages part), list_messages.php, search_messages.php:
+   - separated message_list_table($which_part) into two clear functions
+      message_list_head and message_list_body with dispatched arguments
+
+   * include/filter.php (get_url_parts),
+     scripts/message_consistency.php, message.php:
+   - filtering empty url parts
+   - minor adjustements and comments
 
 2008-05-21 rodival
 

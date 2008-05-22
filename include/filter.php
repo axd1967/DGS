@@ -326,8 +326,8 @@ class SearchFilter
       $act_set  = (int) $this->get_arg(FNAME_ACTIVE_SET);
 
       // prefix-independent init & reset
-      $this->is_init  = (bool)( $is_init  or $this->get_arg(FNAME_INIT, false) );
-      $this->is_reset = (bool)( $is_reset or $this->get_arg(FFORM_RESET_ACTION, false) != '' );
+      $this->is_init  = (bool)( $is_init  || $this->get_arg(FNAME_INIT, false) );
+      $this->is_reset = (bool)( $is_reset || $this->get_arg(FFORM_RESET_ACTION, false) != '' );
 
       $this->HashCode = ($this->is_init) ? $this->get_arg(FNAME_HASHCODE) : $this->hashcode();
 
@@ -361,14 +361,14 @@ class SearchFilter
                      $qvalue = $this->get_arg( $fname, $use_prefix ); // string | array
 
                   // reset to default, if no value and in init-state
-                  if ( $qvalue == '' and !$this->is_init )
+                  if ( $qvalue == '' && !$this->is_init )
                      $qvalue = null;
 
-                  if ( is_array($qvalue) and !$filter->get_config(FC_MULTIPLE) )
+                  if ( is_array($qvalue) && !$filter->get_config(FC_MULTIPLE) )
                      error('invalid_filter', "filter.init.no_multi_value_support($id,$fname)");
                   $filter->parse_value( $fname, $qvalue ); // ignore all parsing-errors and fill filter-vars
                }
-               if ( count($elems) > 1 and !$filter->has_error() ) // for multi-element-filters
+               if ( count($elems) > 1 && !$filter->has_error() ) // for multi-element-filters
                   $filter->build_query();
             }
          }
@@ -840,6 +840,8 @@ class SearchFilter
       $arr[FNAME_HASHCODE] = $this->hashcode(); // to check, if filter-values have changed
       foreach( $arr as $key => $value )
       {
+         if( empty($value) || !is_string($key) || empty($key) )
+            continue;
          $pkey = $this->Prefix . $key; // no prefix PFX_FILTER to avoid clashes with non-numeric keys
          $pval = urlencode($value);
 

@@ -98,7 +98,6 @@ require_once( "include/contacts.php" );
    $wrtable = new Table( 'waitingroom', $page, "WaitingroomColumns" );
    $wrtable->register_filter( $wrfilter );
    $wrtable->add_or_del_column();
-   $wrtable->set_default_sort( 'other_rating', 1, 'other_handle', 0);
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
    $wrtable->add_tablehead( 0, T_('Info#header'), '', 0, 1, 'Button');
@@ -122,7 +121,7 @@ require_once( "include/contacts.php" );
     *   S=Tr$['Standard placement#short']
     **/
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Komi', 1, 0, 'Number');
-   $wrtable->add_tablehead( 8, T_('Rating range#header'), "Ratingmin".URI_ORDER_CHAR."Ratingmax", 1, 1);
+   $wrtable->add_tablehead( 8, T_('Rating range#header'), "Ratingmin-Ratingmax", 1, 1);
    $wrtable->add_tablehead( 9, T_('Time limit#header'));
    $wrtable->add_tablehead(10, T_('#Games#header'), 'nrGames', 0, 0, 'Number');
    $wrtable->add_tablehead(11, T_('Rated#header'), 'Rated', 1);
@@ -130,7 +129,8 @@ require_once( "include/contacts.php" );
    if( ENA_STDHANDICAP )
       $wrtable->add_tablehead(13, T_('Standard placement#header'), 'StdHandicap', 1);
 
-   $order = $wrtable->current_order_string();
+   $wrtable->set_default_sort( 3, 2); //on other_rating,other_handle
+   $order = $wrtable->current_order_string('ID+');
    $limit = $wrtable->current_limit_string();
 
    $baseURLMenu = "waiting_room.php?"
@@ -189,9 +189,8 @@ require_once( "include/contacts.php" );
    $qsql->add_part( SQLP_HAVING,
       'C_denied=0' );
 
-   $qsql->add_part( SQLP_ORDER, $order, 'ID' );
    $qsql->merge( $wrtable->get_query() );
-   $query = $qsql->get_select() . " $limit";
+   $query = $qsql->get_select() . "$order$limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'waiting_room.find_waiters');
@@ -199,9 +198,9 @@ require_once( "include/contacts.php" );
 
    $arr_suitable = array();
    if ( $f_handi->get_value() == 1 )
-      array_push( $arr_suitable, T_('Handicap') );
+      $arr_suitable[]= T_('Handicap');
    if ( $f_range->get_value() )
-      array_push( $arr_suitable, T_('Rating range') );
+      $arr_suitable[]= T_('Rating range');
    if ( count($arr_suitable) > 0 )
       $title = T_("Suitable waiting games") . ' (' . implode(', ', $arr_suitable) . ')';
    else

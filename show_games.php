@@ -179,7 +179,6 @@ $ThePage = new Page('GamesList');
 
    $gtable = new Table( $tableid, /*$page*/'show_games.php?', $column_set_name );
    $gtable->register_filter( $gfilter );
-   $gtable->set_default_sort( 'Lastchanged', 1, 'ID', 1);
    $gtable->add_or_del_column();
 
    // attach external URL-parameters to table
@@ -193,9 +192,6 @@ $ThePage = new Page('GamesList');
          $extparam->add_entry( 'finished', 1 );
    }
    $gtable->add_external_parameters( $extparam, true ); // also for hiddens
-
-   $order = $gtable->current_order_string();
-   $limit = $gtable->current_limit_string();
 
 /*****
  *Views-pages identification:
@@ -223,6 +219,8 @@ $ThePage = new Page('GamesList');
  *   ID, uid, gid
  * Ratinglog (FA) AS blog, AS wlog - (FU) AS log:
  *   ID, uid, gid, Time, Rating, RatingMin, RatingMax, RatingDiff
+ * GamesNotes (FU+RU) AS Gnt:
+ *   ID, gid, player, Hidden, Notes
  *
  *****
  *Views-columns usage:
@@ -259,7 +257,7 @@ $ThePage = new Page('GamesList');
  * 31: >  FA (White-RatingDiff)
  *****/
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $gtable->add_tablehead( 1, T_('##header'), 'ID', 0, 1, 'Button');
+   $gtable->add_tablehead( 1, T_('##header'), 'ID', 1, 1, 'Button');
    $gtable->add_tablehead( 2, T_('sgf#header'), '', 0, 0, 'Sgf');
 
    if( $observe )
@@ -355,7 +353,9 @@ $ThePage = new Page('GamesList');
          $gtable->add_tablehead(24, T_('Weekend Clock#header'), 'WeekendClock', 1, 0, 'Date');
       }
    }
-
+   $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
+   $order = $gtable->current_order_string('ID-');
+   $limit = $gtable->current_limit_string();
 
    // build SQL-query
    $qsql = new QuerySQL();
@@ -455,10 +455,8 @@ $ThePage = new Page('GamesList');
 
    }
 
-   //TODO?: review this add if ID is already a sort?
-   $order .= ',ID';
    $qsql->merge( $gtable->get_query() );
-   $query = $qsql->get_select() . " ORDER BY $order $limit";
+   $query = $qsql->get_select() . "$order$limit";
 
    $result = db_query( 'show_games.find_games', $query);
    db_close();

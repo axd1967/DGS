@@ -96,28 +96,28 @@ require_once( "include/filter.php" );
    $mfilter->add_filter( 3, 'MysqlMatch', 'M.Subject,M.Text', true,
          array( FC_MATCH_MODE => MATCH_BOOLMODE_SET ) );
    $mfilter->add_filter( 4, 'RelativeDate', 'M.Time', true);
-   //NOT-USED: $mfilter->add_filter( 6, 'Selection', $arr_types, true);
+
+   // synchronize those translations with message_functions.php (message_list_body)
    $mfilter->add_filter( 7, 'Selection',
-         array( T_('All#msgdir') => '',   // sync this transl-texts with: message_functions.php (message_list_table)
+         array( T_('All#msgdir')    => '',
                 T_('From#msgdir')   => "me.Sender='N'", // from other user
                 T_('To#msgdir')     => "me.Sender='Y'", // to other user
                 T_('Myself#msgdir') => "me.Sender='M'", // from/to myself
                 T_('Server#msgdir') => "me.Sender='S'", // from server
             ),
          true);
+
    $mfilter->init(); // parse current value from _GET
    //$mfilter->set_accesskeys('x', 'z');
    $sf3 =& $mfilter->get_filter(3);
 
    $mtable = new Table( 'message', $page, '', 'msgSearch');
    $mtable->register_filter( $mfilter );
-   $mtable->set_default_sort( 'date', 1);
    $mtable->add_or_del_column();
 
-   // only add tableheads
-   message_list_table( $mtable, null, 0, FOLDER_NONE, $my_folders,
-      /*no-sort*/ false, /*no-mark*/ true, /*toggle-mark*/ false,
-      /*full-details*/ true, /*only-tablehead*/ true, /*rx_terms*/ '' );
+   message_list_head( $mtable, FOLDER_NONE
+      , /*no_sort*/ false, /*no_mark*/ true, /*full-details*/ true );
+   $mtable->set_default_sort( 4); //on 'date'
 
    // External-Search-Form
    $smform = new Form( $mtable->Prefix, $page, FORM_GET, false, 'FormTable' );
@@ -169,9 +169,8 @@ require_once( "include/filter.php" );
 
    echo "<h3 class=Header>$title</h3>\n";
 
-   message_list_table( $mtable, $result, $show_rows, FOLDER_NONE, $my_folders,
-      false, true, false, // no-sort, no-mark, toggle-mark
-      true, false, $rx_term); // full-details, only-tablehead, terms
+   message_list_body( $mtable, $result, $show_rows, $my_folders
+      , /*toggle_marks*/false, $rx_term);
 
    // print form with table
    $extform_string = $smform->get_form_string(); // static form

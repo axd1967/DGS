@@ -135,7 +135,6 @@ $ARR_DBFIELDKEYS = array(
    //$ufilter->set_accesskeys('x', 'z');
 
    $utable = new Table( 'user', $page, 'UsersColumns' );
-   $utable->set_default_sort( 'ID', 0);
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
@@ -159,7 +158,7 @@ $ARR_DBFIELDKEYS = array(
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
    // table: use same table-IDs as in users.php(!)
-   $utable->add_tablehead( 0, T_('Info#header'), NULL, 0, 1, 'Button');
+   $utable->add_tablehead( 0, T_('Info#header'), '', 0, 1, 'Button');
    $utable->add_tablehead( 1, T_('##header'), 'ID', 0, 1, 'ID');
    $utable->add_tablehead( 2, T_('Name#header'), 'Name', 0, 0, 'User');
    $utable->add_tablehead( 3, T_('Userid#header'), 'Handle', 0, 0, 'User');
@@ -177,6 +176,10 @@ $ARR_DBFIELDKEYS = array(
    $utable->add_tablehead(13, T_('Activity#header'), 'ActivityLevel', 1, 1, 'Image');
    $utable->add_tablehead(14, T_('Last access#header'), 'Lastaccess', 1, 0, 'Date');
    $utable->add_tablehead(15, T_('Last move#header'), 'Lastmove', 1, 0, 'Date');
+
+   $utable->set_default_sort( 1); //on ID
+   $order = $utable->current_order_string();
+   $limit = $utable->current_limit_string();
 
 
    // form for static filters
@@ -215,9 +218,6 @@ $ARR_DBFIELDKEYS = array(
    $query_ufilter  = $utable->get_query(); // clause-parts for filter
    $finished = ( $f_status->get_value() == 2);
 
-   $order = $utable->current_order_string();
-   $limit = $utable->current_limit_string();
-
    $uqsql = new QuerySQL( // base-query is to show only opponents
       SQLP_OPTS, 'DISTINCT',
       SQLP_FROM, 'Games AS G' );
@@ -245,7 +245,7 @@ $ARR_DBFIELDKEYS = array(
    $uqsql->add_part( SQLP_FROM, 'Players AS P' );
    $uqsql->merge( $query_usfilter );
    $uqsql->merge( $query_ufilter );
-   $query = $uqsql->get_select() . " ORDER BY $order $limit";
+   $query = $uqsql->get_select() . "$order$limit";
 
 
    // build SQL-query (for stats-fields)
