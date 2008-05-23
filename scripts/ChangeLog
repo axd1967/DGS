@@ -23,6 +23,14 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-23 rodival
+
+   * include/std_functions.php (start_html), INSTALL:
+   - because of old browsers favicon.ico should be in the root folder
+-----------
+copy /images/favicon.ico into the root folder
+-----------
+
 2008-05-22 rodival
 
    * game.php:

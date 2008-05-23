@@ -109,11 +109,6 @@ $ActiveLevel1 = 10.0;
 $ActiveLevel2 = 150.0;
 
 
-//This char will be a part of a URI query. From RFC 2396 unreserved
-// marks are "-" | "_" | "." | "!" | "~" | "*" | "'" | "(" | ")"
-define('URI_ORDER_CHAR','-');
-
-
 define('MAX_START_RATING', 2600); //6 dan
 define('MIN_RATING', -900); //30 kyu
 define('OUT_OF_RATING', 9999); //ominous rating bounds: [-OUT_OF_RATING,OUT_OF_RATING]
@@ -390,7 +385,8 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    echo "\n <TITLE>".basic_safe("$FRIENDLY_SHORT_NAME - $title")."</TITLE>";
 
-   echo "\n <LINK REL=\"shortcut icon\" HREF=\"{$base_path}images/favicon.ico\" TYPE=\"image/x-icon\">";
+   //because of old browsers favicon.ico should always stay in the root folder
+   echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"{$base_path}favicon.ico\">";
 
    global $main_path;
    if( !isset($skinname) or !$skinname )

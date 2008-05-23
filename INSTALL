@@ -52,6 +52,9 @@ Those files have to be unzipped in the dragon root directory to obtain a tree li
          status.php
          ...
 
+Copy /images/favicon.ico into the root folder (or place your own favicon.ico
+in the root folder).
+
 
 
 
