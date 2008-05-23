@@ -60,9 +60,9 @@ $ThePage = new Page('Intro');
           "you are also encouraged to submit them in one of the " .
           "<home forum/index.php>forums</home>.") . "\n";
    */
-   echo T_("More information can be found in the " .
-          "<a href=\"faq.php\">FAQ forum</a> where you are " .
-          "also encouraged to submit your own questions.") . "\n";
+   echo T_('More information can be found in the <a href="/faq.php">FAQ</a>.'
+      .' When you have questions you are also encouraged to submit them in one'
+      .' of the <a href="/forum/index.php">forums</a>.');
 
    echo "<p></p>\n";
 

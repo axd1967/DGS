@@ -35,7 +35,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $gid = (int)@$_GET['gid'];
    if( $gid <= 0 )
    {
-      if( eregi("game([0-9]+)", @$_SERVER['REQUEST_URI'], $result) )
+      if( preg_match('/game([0-9]+)/i', @$_SERVER['REQUEST_URI'], $result) )
          $gid = $result[1];
    }
    if( $gid <= 0 )

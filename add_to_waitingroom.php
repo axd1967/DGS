@@ -41,7 +41,7 @@ require_once( "include/rating.php" );
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $handicap_type = @$_POST['handicap_type'];
-   switch( $handicap_type )
+   switch( (string)$handicap_type )
    {
       case 'conv':
       {
@@ -121,7 +121,7 @@ require_once( "include/rating.php" );
       error('time_limit_too_small');
 
 
-   if( ($rated=@$_POST['rated']) != 'Y' or !$player_row["RatingStatus"] )
+   if( ($rated=@$_POST['rated']) != 'Y' || !$player_row['RatingStatus'] )
       $rated = 'N';
 
    if( ENA_STDHANDICAP )

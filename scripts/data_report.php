@@ -391,7 +391,7 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
       {
          //remove sensible fields from a query like "SELECT * FROM Players"
          if( !@$GLOBALS['Super_admin'] )
-         switch( $key )
+         switch( (string)$key )
          {
             case 'Newpassword':
             case 'Password':

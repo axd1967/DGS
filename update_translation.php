@@ -30,15 +30,15 @@ require_once( "include/make_translationfiles.php" );
 
    if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
    {
-      $lang_desc = get_language_descriptions_translated();
+      $lang_desc = get_language_descriptions_translated( true);
       $translator_array = array_keys( $lang_desc);
-      unset($lang_desc);
+      //unset($lang_desc);
    }
    else
    {
       $translator_set = @$player_row['Translator'];
       if( !$translator_set )
-        error('not_translator');
+         error('not_translator');
       $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
    }
 
@@ -120,6 +120,7 @@ require_once( "include/make_translationfiles.php" );
    } //foreach translation phrases
 
    if( $replace_set )
+      // note: Translations needs PRIMARY KEY (Language_ID,Original_ID):
       mysql_query( "REPLACE INTO Translations " .
                    "(Original_ID,Language_ID,Text,Translated) VALUES " .
                    substr($replace_set,1) )

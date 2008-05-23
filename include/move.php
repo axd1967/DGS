@@ -79,8 +79,7 @@ function check_move( &$board, $coord, $to_move, $error_exit=true)
 
       // Check for ko
 
-      list($dummy, $tmp) = each($prisoners);
-      list($x,$y) = $tmp;
+      list($x,$y) = $prisoners[0];
 
       if( $Last_Move == number2sgf_coords( $x, $y, $Size) )
       {

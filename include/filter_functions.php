@@ -146,14 +146,14 @@ function sql_extract_terms( $sql, $rx_delimiter='/' )
       ? strlen($arr_match[1]) : $len;
 
    // \\ -> \\, \% -> %, \_ -> _, % -> .*?, _ -> ., others -> copy and preg-escape
-   $rxterm = '';
+   $rx_term = '';
    for( $pos = 0; $pos < $len; $pos++)
    {
       if ( $sql{$pos} == '\\' )
       {
          $pos++;
          if ( $pos < $len )
-            $rxterm .= preg_quote($sql{$pos}, $rx_delimiter);
+            $rx_term .= preg_quote($sql{$pos}, $rx_delimiter);
       }
       elseif ( $sql{$pos} == '%' )
       {
@@ -161,16 +161,16 @@ function sql_extract_terms( $sql, $rx_delimiter='/' )
             break;
          while ( $pos <= $len && substr($sql, $pos+1, 1) == '%' ) // skip double '%'
             $pos++;
-         $rxterm .= '.*?';
+         $rx_term .= '.*?';
       }
       elseif ( $sql{$pos} == '_' )
-         $rxterm .= '.';
+         $rx_term .= '.';
       else
-         $rxterm .= preg_quote($sql{$pos}, $rx_delimiter);
+         $rx_term .= preg_quote($sql{$pos}, $rx_delimiter);
    }
 
-   if ( $rxterm != '' )
-      return array( $rxterm );
+   if( $rx_term )
+      return array( $rx_term );
    else
       return array();
 }

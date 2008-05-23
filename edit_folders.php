@@ -116,10 +116,10 @@ function make_folder_form_row(&$form, $name, $nr,
 
       $onstatuspage = ( @$_POST["onstatuspage$nr"] == 't' );
 
-      if( $nr >= USER_FOLDERS and ( in_array($nr, $statusfolders) xor $onstatuspage ) )
+      if( $nr >= USER_FOLDERS && ( in_array($nr, $statusfolders) xor $onstatuspage ) )
       {
          if( $onstatuspage )
-            array_push($statusfolders, $nr);
+            $statusfolders[]= $nr;
          else
          {
             $i=array_search( $nr, $statusfolders);
@@ -173,9 +173,9 @@ function make_folder_form_row(&$form, $name, $nr,
 
          $query = "UPDATE Folders SET ";
          $updates = array();
-         if( $name != $oldname ) array_push($updates, "Name='".mysql_addslashes($name)."'");
-         if( $bgcolor != $oldbgcolor ) array_push($updates, "BGColor='$bgcolor'");
-         if( $fgcolor != $oldfgcolor ) array_push($updates, "FGColor='$fgcolor'");
+         if( $name != $oldname ) $updates[]= "Name='".mysql_addslashes($name)."'";
+         if( $bgcolor != $oldbgcolor ) $updates[]= "BGColor='$bgcolor'";
+         if( $fgcolor != $oldfgcolor ) $updates[]= "FGColor='$fgcolor'";
 
          if( !(count($updates) > 0) )
             continue;

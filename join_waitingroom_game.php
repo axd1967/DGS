@@ -97,7 +97,7 @@ require_once( "include/contacts.php" );
    $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
 
    $double = false;
-   switch( $game_row['Handicaptype'] )
+   switch( (string)$game_row['Handicaptype'] )
    {
       case 'conv':
       {

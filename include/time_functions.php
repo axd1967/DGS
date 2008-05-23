@@ -109,7 +109,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
       $elapsed -= $main;
    $main = 0;
 
-   switch($byotype)
+   switch((string)$byotype)
    {
       case("FIS"):
       {
@@ -293,7 +293,7 @@ function echo_byotype( $byotype, $keep_english=false, $short=false)
       
    $T_= ( $keep_english ? 'fnop' : 'T_' );
    
-   switch( $byotype )
+   switch( (string)$byotype )
    {
       case 'JAP':
          return $T_('Japanese byoyomi');

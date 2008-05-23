@@ -48,9 +48,9 @@ define('MODERATOR_SEARCH', 0);
 
 /*
       if( @$_REQUEST['show'] > 0 )
-         approve_message( @$_REQUEST['show'], $thread, $forum, true );
+         approve_message( (int)@$_REQUEST['show'], $thread, $forum, true );
       else if( @$_REQUEST['hide'] > 0 )
-         approve_message( @$_REQUEST['hide'], $thread, $forum, false );
+         approve_message( (int)@$_REQUEST['hide'], $thread, $forum, false );
 */
 
       $is_moderator = set_moderator_cookie($player_row['ID']);
@@ -213,7 +213,7 @@ define('MODERATOR_SEARCH', 0);
       $nr_rows = mysql_num_rows($result);
 
       $cols=2;
-      $headline = array(T_("Search result") => "colspan=$cols");
+      $headline = array(T_('Search result') => "colspan=$cols");
 
       $links |= LINK_FORUMS;
       if( $offset > 0 ) $links |= LINK_PREV_PAGE;

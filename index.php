@@ -71,7 +71,7 @@ if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
   $login_form->add_row( array( 'DESCRIPTION', T_('Password'),
                                'PASSWORD', 'passwd',16,16,
                                //'TD',
-                               'CELL', 99, 'align="left"',
+                               'CELL', 99, 'align="left"', //TODO: change the 99
                                'SUBMITBUTTON', 'login', T_('Log in'),
                                //'HIDDEN', 'url', 'status.php',
                                ) );

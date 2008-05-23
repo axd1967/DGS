@@ -283,7 +283,7 @@ class BasicTokenizer
    {
       $arrtok = array();
       foreach( $this->tokens as $tok )
-         array_push( $arrtok, $tok->to_string() );
+         $arrtok[]= $tok->to_string();
       return get_class($this) .
          $this->to_string_local() . " " .
          "value=[{$this->value}], errors=[" . implode('; ', $this->errors) . "],\n" .
@@ -488,10 +488,10 @@ class StringTokenizer extends BasicTokenizer
             }
 
             if ( (string)$tok != '' )
-               array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok) );
+               $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
             $spos = $pos;
             $tok = '';
-            array_push( $this->tokens, new Token(TOK_SEPARATOR, $spos, $char) );
+            $this->tokens[]= new Token(TOK_SEPARATOR, $spos, $char);
             continue;
          }
 
@@ -510,7 +510,7 @@ class StringTokenizer extends BasicTokenizer
       }
 
       if ( (string)$tok != '' )
-         array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok) );
+         $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
       return true;
    }
 
@@ -575,22 +575,22 @@ class StringTokenizer extends BasicTokenizer
             else
             { // unquoted
                if ( (string)$tok != '' )
-                  array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok, $tokflags) );
+                  $this->tokens[]= new Token(TOK_TEXT, $spos, $tok, $tokflags);
                $tokflags = 0;
                $spos = $pos;
                $tok = '';
-               array_push( $this->tokens, new Token(TOK_SEPARATOR, $spos, $char) );
+               $this->tokens[]= new Token(TOK_SEPARATOR, $spos, $char);
             }
          } else {
             $tok .= $char;
          }
       }
       if ( (string)$tok != '' )
-         array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok, $tokflags) );
+         $this->tokens[]= new Token(TOK_TEXT, $spos, $tok, $tokflags);
 
       if ($quote_begin != 0)
       {
-         array_push( $this->errors, "[{$this->value}] " . T_('using bad quoting#filter') );
+         $this->errors[]= "[{$this->value}] " . T_('using bad quoting#filter');
          return false;
       }
 
@@ -633,17 +633,17 @@ class StringTokenizer extends BasicTokenizer
          if ( $this->is_split_char( $char, substr( $this->value, $pos ) ) ) // separator found
          {
             if ( (string)$tok != '' )
-               array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok) );
+               $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
             $spos = $pos;
             $tok = '';
-            array_push( $this->tokens, new Token(TOK_SEPARATOR, $spos, $char) );
+            $this->tokens[]= new Token(TOK_SEPARATOR, $spos, $char);
          }
          else
             $tok .= $char;
       }
 
       if ( (string)$tok != '' )
-         array_push( $this->tokens, new Token(TOK_TEXT, $spos, $tok) );
+         $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
       return true;
    }
 } // end of 'StringTokenizer'
@@ -692,7 +692,7 @@ class XmlTag
    {
       $arr_attr = array();
       foreach( $this->attributes as $k => $v )
-         array_push( $arr_attr, "$k=[$v]" );
+         $arr_attr[]= "$k=[$v]";
       return "XmlTag(name={$this->name}, is_start/end={$this->is_start}/{$this->is_end}, attributes=\{" . implode(", ", $arr_attr). "}) ";
    }
 } // end of 'XmlTag'
@@ -774,10 +774,10 @@ class XmlTokenizer extends BasicTokenizer
             else
             {
                if ( (string)$this->tok != '' )
-                  array_push( $this->tokens, new Token(TOK_TEXT, $this->spos, $this->tok) );
+                  $this->tokens[]= new Token(TOK_TEXT, $this->spos, $this->tok);
                $this->spos = $this->pos;
                $this->tok = '';
-               array_push( $this->tokens, $token_xml_tag );
+               $this->tokens[]= $token_xml_tag;
                continue;
             }
          }
@@ -791,10 +791,10 @@ class XmlTokenizer extends BasicTokenizer
             else
             {
                if ( (string)$this->tok != '' )
-                  array_push( $this->tokens, new Token(TOK_TEXT, $this->spos, $this->tok) );
+                  $this->tokens[]= new Token(TOK_TEXT, $this->spos, $this->tok);
                $this->spos = $this->pos;
                $this->tok = '';
-               array_push( $this->tokens, $token_xml_ent );
+               $this->tokens[]= $token_xml_ent;
                continue;
             }
          }
@@ -804,7 +804,7 @@ class XmlTokenizer extends BasicTokenizer
          $this->pos++;
       }
       if ( (string)$this->tok != '' )
-         array_push( $this->tokens, new Token(TOK_TEXT, $this->spos, $this->tok) );
+         $this->tokens[]= new Token(TOK_TEXT, $this->spos, $this->tok);
 
       // encountered errors
       if ( count($this->errors) > 0 )
@@ -827,7 +827,7 @@ class XmlTokenizer extends BasicTokenizer
       {
          $token->set_error("[" . substr($val, 0, 10) . "]: " .
             T_('invalid XML-entity at position #') . ($this->pos+1) );
-         array_push( $this->errors, $token->get_error() );
+         $this->errors[]= $token->get_error();
          $token->set_token( $val );
          $this->pos++; // just skip '&'
       }
@@ -855,7 +855,7 @@ class XmlTokenizer extends BasicTokenizer
       if ( $this->pos >= $this->len )
       {
          $token->set_error( "[<]: " . T_('invalid XML-tag at position #') . ($spos+1) );
-         array_push( $this->errors, $token->get_error() );
+         $this->errors[]= $token->get_error();
          $token->set_token($xmltag);
          return $token;
       }
@@ -870,7 +870,7 @@ class XmlTokenizer extends BasicTokenizer
          {
             $token->set_error( "[" . substr($this->value, $spos, $this->pos - $spos + 15) . "]: "
                . T_('invalid http-XML-tag at position #') . ($spos+1) );
-            array_push( $this->errors, $token->get_error() );
+            $this->errors[]= $token->get_error();
          }
          else
          {
@@ -894,7 +894,7 @@ class XmlTokenizer extends BasicTokenizer
          if ( $this->pos >= $this->len )
          {
             $token->set_error( "[</]: " . T_('invalid XML-tag at position #') . ($spos+1) );
-            array_push( $this->errors, $token->get_error() );
+            $this->errors[]= $token->get_error();
             $token->set_token($xmltag);
             return $token;
          }
@@ -932,7 +932,7 @@ class XmlTokenizer extends BasicTokenizer
                $token->set_error(
                   "[" . substr($this->value, $spos, $this->pos - $spos + 10) . "]: " .
                   T_('invalid XML-end-tag at position #') . ($spos+1) );
-               array_push( $this->errors, $token->get_error() );
+               $this->errors[]= $token->get_error();
                $token->set_token($xmltag);
                return $token;
             }
@@ -955,7 +955,7 @@ class XmlTokenizer extends BasicTokenizer
          $token->set_error(
             "[" . substr($this->value, $spos, $this->pos - $spos + 10) . "]: " .
             T_('invalid XML-tag at position #') . ($spos+1) );
-         array_push( $this->errors, $token->get_error() );
+         $this->errors[]= $token->get_error();
       }
 
       $token->set_endpos( $this->pos - 1 );
@@ -984,7 +984,7 @@ class XmlTokenizer extends BasicTokenizer
             "[" . substr($this->value, $spos, $this->pos - $spos + 10) . "]: " .
             T_('invalid XML-tag-attribute at position #') . ($spos+1);
          $token->set_error( (($token->get_error() != '') ? $token->get_error() . "; " : "") . $errormsg); // append error
-         array_push( $this->errors, $errormsg );
+         $this->errors[]= $errormsg;
          return false;
       }
 

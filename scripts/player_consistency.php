@@ -70,7 +70,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
       foreach( $row as $key => $val )
       {
          //remove sensible fields from a query like "SELECT * FROM Players"
-         switch( $key )
+         switch( (string)$key )
          {
             case 'Password':
             case 'Sessioncode':

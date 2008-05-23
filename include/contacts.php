@@ -309,7 +309,7 @@ class Contact
       $out = array();
       foreach( $flags_array as $flag => $arr )
          if ( $flagmask & $flag )
-            array_push( $out, $arr[1] );
+            $out[]= $arr[1];
       return implode($sep, $out);
    }
 

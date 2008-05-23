@@ -57,7 +57,7 @@ require_once( "include/rating.php" );
       }
    }
 
-   init_countries();
+   init_countries(); //translations useless here but init needed for the keys
 
    $boardcoords = ( @$_GET['coordsleft'] ? COORD_LEFT : 0 )
                 + ( @$_GET['coordsup'] ? COORD_UP : 0 )
@@ -197,7 +197,7 @@ require_once( "include/rating.php" );
 
    $query .= "Timezone='" . $timezone . "', " .
        "Nightstart=" . $nightstart .
-       " WHERE ID=" . $player_row['ID'];
+       " WHERE ID=" . $player_row['ID'] . " LIMIT 1";
 
    mysql_query( $query )
       or error('mysql_query_failed','change_profile');

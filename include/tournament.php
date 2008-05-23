@@ -209,7 +209,7 @@ class Tournament
          $this->Rounds = array();
          if( isset($row['FirstRound']) )
          {
-            array_push($this->Rounds, $row['FirstRound']);
+            $this->Rounds[]= $row['FirstRound'];
          }
 
          $this->StartOfApplicationPeriod = $row['SOAP_Unix'];
@@ -224,7 +224,7 @@ class Tournament
          $orgresult = mysql_query( "SELECT * FROM TournamentOrganizers " .
                                    "WHERE tid='$this->ID'" );
          while( $row = mysql_fetch_array( $orgresult ) )
-           array_push( $this->ListOfOrganizers, $row['pid'] );
+            $this->ListOfOrganizers[]= $row['pid'];
       }
    /*!
     * Returns a round from the round-list.

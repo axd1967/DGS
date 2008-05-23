@@ -65,6 +65,10 @@ Adding a CSS StyleSheet to your RSS Feed
 Some examples:
 - http://mondaybynoon.com/feed
 - http://www.tlc.ac.uk/xml/news-atom.xml
+
+Basis:
+- http://purl.org/rss/1.0/
+- http://www.mnot.net/rss/tutorial/
 */
 
 
@@ -103,7 +107,7 @@ $xmltrans['$'] = '\$';
 */
 //$xmltrans['\''] = '&#'.ord('\'').';';
       
-switch( CHARSET_MODE )
+switch( (string)CHARSET_MODE )
 {
    case 'iso':
    {
@@ -115,7 +119,7 @@ switch( CHARSET_MODE )
    break;
    case 'utf':
    {
-      $encoding_used = 'UTF-8';
+      $encoding_used = 'utf-8';
 
       for ( $i=0x80; $i<0x100 ; $i++ )
          $xmltrans[chr($i)] = "&#$i;";

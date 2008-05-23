@@ -41,6 +41,7 @@ class Errors
       function set_mode($m)
       {
          $p= $this->mode;
+         $m= (int)$m;
          switch( $m )
          {
          case ERROR_MODE_PRINT:
@@ -128,7 +129,7 @@ class Errors
          }
          else if( $this->mode == ERROR_MODE_PRINT || $warn )
          {
-            echo ( $warn ?"#Warning" :"#Error" ) . ": $err\n";
+            echo ( $warn ?"#Warning" :"#Error" ), ": $err\n";
          }
          else // case ERROR_MODE_JUMP:
          {
@@ -139,7 +140,7 @@ class Errors
          if( $this->errors_are_fatal && !$warn )
             exit;
          return false;
-      }
+      } //add_error
 
 }
 

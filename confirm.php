@@ -212,7 +212,7 @@ This is why:
 
 
 
-   switch( $action )
+   switch( (string)$action )
    {
       case 'domove': //stonestring is the list of prisoners
       {

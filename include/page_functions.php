@@ -55,10 +55,14 @@ class HTMLPage
       if( !is_string($_pageid) )
          $_pageid= substr( $this->BaseName, 0, strrpos($this->BaseName,'.'));
       //make it CSS compatible, just allowing the space (see getCSSclass())
-      $this->Id= ereg_replace('[^ a-zA-Z0-9]+', '-', $_pageid);
+      $this->Id= preg_replace('%[^ a-zA-Z0-9]+%', '-', $_pageid);
 
-      //a soon bufferization seems to prevent a possible E_WARNING message
-      //to disturb later header() functions
+      /*
+      * a soon bufferization seems to prevent a possible E_WARNING message
+      * to disturb later header() functions
+      * else we should have to set output_buffering and and output_handler
+      * in the php.ini file (and adjust our INSTALL file accordingly)
+      */
       ob_start('ob_gzhandler');
    }
 

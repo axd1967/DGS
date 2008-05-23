@@ -81,7 +81,7 @@ class Table_info
     */
    function add_row( $row_array )
    {
-      array_push( $this->Tablerows, $row_array );
+      $this->Tablerows[]= $row_array;
    }
 
    /*! \brief Add an caption row to be displayed.
@@ -90,10 +90,10 @@ class Table_info
     */
    function add_caption( $capt)
    {
-      array_push( $this->Tablerows, array(
+      $this->Tablerows[]= array(
             'caption' => $capt,
             'cattb' => 'class=Caption'
-            ) );
+            );
    }
 
    /*! \brief Add an caption row to be displayed.
@@ -102,10 +102,10 @@ class Table_info
     */
    function add_scaption( $scapt='')
    {
-      array_push( $this->Tablerows, array(
+      $this->Tablerows[]= array(
             'scaption' => $scapt,
             'cattb' => 'class=Caption'
-            ) );
+            );
    }
 
    /*! \brief Add an info row to be displayed.
@@ -114,12 +114,12 @@ class Table_info
     */
    function add_info( $name='', $info='', $warningtitle='')
    {
-      array_push( $this->Tablerows, array(
+      $this->Tablerows[]= array(
             'name' => $name,
             'info' => $info,
             'iattb' => ( !$warningtitle ? '' :
                   $this->warning_cell_attb( $warningtitle) )
-            ) );
+            );
    }
 
    /*! \brief Add an info row to be displayed.
@@ -128,12 +128,12 @@ class Table_info
     */
    function add_sinfo( $sname='', $sinfo='', $warningtitle='')
    {
-      array_push( $this->Tablerows, array(
+      $this->Tablerows[]= array(
             'sname' => $sname,
             'sinfo' => $sinfo,
             'iattb' => ( !$warningtitle ? '' :
                   $this->warning_cell_attb( $warningtitle) )
-            ) );
+            );
    }
 
    /*! \brief Create a string of the table. */

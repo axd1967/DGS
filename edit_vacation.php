@@ -29,44 +29,42 @@ require_once( "include/form_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
-
-
+      error('not_logged_in');
 
    $my_id= $player_row['ID'];
    $days_left = floor($player_row['VacationDays']);
    $floor_onvacation = floor($player_row['OnVacation']);
    $minimum_days = $vacation_min_days - $floor_onvacation;
-   $vacationdiff = round(@$_POST['vacationdiff']);
-   $vacationlength = round(@$_POST['vacationlength']);
 
    $str = '';
 
-   if( $player_row['OnVacation'] > 0 )
+   if( $player_row['OnVacation'] > 0 ) //already on vacation
    {
-      if( $minimum_days > $days_left or
-          ( $minimum_days == $days_left and $minimum_days == 0 ) )
+      $vacationdiff = round(@$_POST['vacationdiff']);
+      if( $minimum_days > $days_left
+         || ( $minimum_days == $days_left && $minimum_days == 0 ) )
       {
+         db_close();
          $str .= T_("Sorry, you can't change the vacation length at the moment.");
       }
-      else if( isset($_POST['change_vacation']) and
-            $vacationdiff >= $minimum_days and $vacationdiff <= $days_left )
+      else if( isset($_POST['change_vacation']) &&
+            $vacationdiff >= $minimum_days && $vacationdiff <= $days_left )
       {
          if( $vacationdiff == 0 )
             jump_to("status.php");
 
-         mysql_query("UPDATE Players SET VacationDays=VacationDays-($vacationdiff), " .
-                     "OnVacation=OnVacation+($vacationdiff) " .
-                     "WHERE ID=" . $player_row['ID'] . " " .
-                     "AND VacationDays >= ($vacationdiff) LIMIT 1" )
+         mysql_query("UPDATE Players SET VacationDays=VacationDays-($vacationdiff)"
+                  . ",OnVacation=OnVacation+($vacationdiff)"
+                  . " WHERE ID=$my_id"
+                     . " AND VacationDays >= ($vacationdiff) LIMIT 1" )
             or error('mysql_query_failed', 'edit_vacation.change_vacation');
 
          $msg = urlencode(T_('Vacation length changed!'));
-
          jump_to("status.php?sysmsg=$msg");
       }
       else
       {
+         db_close();
          $vacation_form = new Form( 'vacationform', 'edit_vacation.php', FORM_POST );
 
          $days = array();
@@ -81,18 +79,18 @@ require_once( "include/form_functions.php" );
                   'DESCRIPTION', echo_day($floor_onvacation),
                   'SELECTBOX', 'vacationdiff', 1, $days, 0, false,
                   'SUBMITBUTTON', 'change_vacation', T_('Change vacation length') ) );
-
-         $str .= $vacation_form->get_form_string(1);
       }
    }
-   else
+   else //not yet on vacation
    {
+      $vacationlength = round(@$_POST['vacationlength']);
       if( $days_left < $vacation_min_days )
       {
+         db_close();
          $str .= sprintf(T_("Sorry, you need at least %d vacation days to be able to start a vacation period."), $vacation_min_days);
       }
-      else if( isset($_POST['start_vacation']) and
-         $vacationlength >= $vacation_min_days and $vacationlength <= $days_left )
+      else if( isset($_POST['start_vacation']) &&
+         $vacationlength >= $vacation_min_days && $vacationlength <= $days_left )
       {
          // LastTicks will handle -(time spend) at the moment of the start of vacations
          // in the reference of the ClockUsed by the game
@@ -112,9 +110,10 @@ if(1){//new
                          "WHERE Status" . IS_RUNNING_GAME .
                          'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                          'AND Clock.ID=Games.ClockUsed ' .
-                         "AND ToMove_ID='" . $player_row['ID'] . "'" )
+                         "AND ToMove_ID='$my_id'" )
             or error('mysql_query_failed', 'edit_vacation.find_games');
 
+         //TODO: *** HOT_SECTION *** ???
          while( $game_row = mysql_fetch_array( $result ) )
          {
             mysql_query("UPDATE Games SET ClockUsed=" .VACATION_CLOCK
@@ -124,18 +123,18 @@ if(1){//new
          }
 }//new/old
 
-         mysql_query("UPDATE Players SET VacationDays=VacationDays-$vacationlength, " .
-                     "OnVacation=$vacationlength " .
-                     "WHERE ID=" . $player_row['ID'] . " " .
-                     "AND VacationDays >= ($vacationlength) LIMIT 1" )
+         mysql_query("UPDATE Players SET VacationDays=VacationDays-($vacationlength)"
+                  . ", OnVacation=$vacationlength"
+                  . " WHERE ID=$my_id"
+                     . " AND VacationDays >= ($vacationlength) LIMIT 1" )
             or error('mysql_query_failed', 'edit_vacation.update_player');
 
          $msg = urlencode(T_('Have a nice vacation!'));
-
          jump_to("status.php?sysmsg=$msg");
       }
       else
       {
+         db_close();
          $vacation_form = new Form( 'vacationform', 'edit_vacation.php', FORM_POST );
 
          $days = array();
@@ -150,19 +149,16 @@ if(1){//new
                   'SELECTBOX', 'vacationlength', 1, $days, $vacation_min_days, false,
                   'SUBMITBUTTON', 'start_vacation', T_('Start vacation') ) );
 
-         $str .= $vacation_form->get_form_string(1);
       }
-
    }
 
-   start_page(T_("Vacation"), true, $logged_in, $player_row );
+   start_page(T_('Vacation'), true, $logged_in, $player_row );
 
-   echo "<CENTER>\n";
    echo $str;
-   echo "</CENTER>\n";
+   if( isset($vacation_form) )
+      echo $vacation_form->get_form_string(1);
 
    end_page();
 
 }
-
 ?>

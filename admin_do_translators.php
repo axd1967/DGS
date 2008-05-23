@@ -183,7 +183,7 @@ function retry_admin( $msg)
       if( in_array( $transladdlang, $translator_array) )
          retry_admin( sprintf( "User %s is already translator for language %s.",
                            $transluser, $transladdlang) );
-      array_push( $translator_array, $transladdlang );
+      $translator_array[]= $transladdlang;
 
       $update_it = 'admin_t4';
       $msg = sprintf( "Added user %s as translator for language %s."
@@ -207,7 +207,7 @@ function retry_admin( $msg)
          retry_admin( $msg);
 
       mysql_query( "UPDATE Players SET Translator='$new_langs'"
-                  ." WHERE Handle='".mysql_addslashes($transluser)."'" )
+                  ." WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" )
          or error('mysql_query_failed','admin_do_translators.user.update');
 
       if( mysql_affected_rows() != 1 )
@@ -228,7 +228,7 @@ function retry_admin( $msg)
 
       // Something went wrong. Restore to old set then error
       mysql_query( "UPDATE Players SET Translator='$old_langs'"
-                  ." WHERE Handle='".mysql_addslashes($transluser)."'" )
+                  ." WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" )
          or error('mysql_query_failed','admin_do_translators.user.revert');
 
       error('couldnt_update_translation', $update_it);

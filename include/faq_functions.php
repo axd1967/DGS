@@ -42,7 +42,7 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
       case 1: {
          $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
          if( !$tmp )
-            $tmp = '???';
+            $tmp = UNKNOWN_VALUE;
          if( $attbs )
             $tmp = "<A $attbs>$tmp</A>";
          $itm = "<strong class=Rubric>$tmp</strong>";
@@ -59,7 +59,7 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
       default: {
          $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
          if( !$tmp )
-            $tmp = '???';
+            $tmp = UNKNOWN_VALUE;
          if( $attbs )
             $tmp = "<A $attbs>$tmp</A>";
          $itm = "<strong class=Question>$tmp</strong>";

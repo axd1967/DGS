@@ -207,7 +207,7 @@ function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
    return array($handicap, $komi, $swap);
 }
 
-/* obsolet
+/* obsolete
 function update_rating($gid)
 {
    $query = "SELECT Games.*, ".
@@ -254,10 +254,10 @@ function update_rating($gid)
    mysql_query( "UPDATE Games SET Rated='Done' WHERE ID=$gid" )
       or error('mysql_query_failed','update_rating.set_rated_Done');
 
-   mysql_query( "UPDATE Players SET Rating=$bRating WHERE ID=$Black_ID" )
+   mysql_query( "UPDATE Players SET Rating=$bRating WHERE ID=$Black_ID LIMIT 1" )
       or error('mysql_query_failed','update_rating.set_black_rating');
 
-   mysql_query( "UPDATE Players SET Rating=$wRating WHERE ID=$White_ID" )
+   mysql_query( "UPDATE Players SET Rating=$wRating WHERE ID=$White_ID LIMIT 1" )
       or error('mysql_query_failed','update_rating.set_white_rating');
 
    mysql_query("INSERT INTO RatingChange (uid,gid,diff) VALUES " .
@@ -267,7 +267,7 @@ function update_rating($gid)
 
    return 0; //rated game
 } //update_rating
-obsolet */
+obsolete */
 
 //
 // EGF rating, see above URIs for documentation
@@ -699,7 +699,7 @@ function convert_to_rating($string, $type)
    $igs_table[3]['VAL'] = 2400;
 
 
-   switch( $type )
+   switch( (string)$type )
    {
       case 'dragonrating':
       {

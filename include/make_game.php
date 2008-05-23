@@ -70,7 +70,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 
 
    //ToMove_ID=$tomove will hold handitype until ACCEPTED
-   switch( $handicap_type )
+   switch( (string)$handicap_type )
    {
       case 'conv':
       {
@@ -340,7 +340,7 @@ function make_standard_placement_of_handicap_stones(
             $size, $hcp, $gid, $allow_incomplete_pattern=false)
 {
    if( $gid <= 0 )
-      error('no_game_nr','make_std_handicap');
+      error('unknown_game','make_std_handicap');
 
    if( $hcp < 2 )
       return false;

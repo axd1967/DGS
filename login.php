@@ -28,7 +28,10 @@ if( $quick_mode )
    {
       set_login_cookie("","", true);
       if( $quick_mode )
+      {
+         echo "\nOk";
          exit;
+      }
       jump_to("index.php");
    }
 
@@ -47,7 +50,7 @@ if( $quick_mode )
                   "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                   "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
    if( !$row )
-      error("wrong_userid");
+      error('wrong_userid');
 
 
    $code = @$row['Sessioncode'];
@@ -56,7 +59,7 @@ if( $quick_mode )
    {
       if( !check_password( $uhandle, $row['Password'],
                            $row['Newpassword'], $passwd ) )
-         error("wrong_password");
+         error('wrong_password');
 
       if( !$code or @$row['Expire'] < $NOW )
       {

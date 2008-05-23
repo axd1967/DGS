@@ -309,7 +309,7 @@ function find_godiagrams($text)
    foreach( $matches[1] as $ID )
       {
          if( $ID > 0 )
-            array_push($diagram_IDs, $ID);
+            $diagram_IDs[]= $ID;
       }
 
    $result = mysql_query("SELECT * FROM GoDiagrams " .
@@ -351,7 +351,7 @@ function save_diagrams($GoDiagrams)
    $IDs = array();
    foreach( $GoDiagrams as $ID => $diagram )
       if( $ID > 0 )
-         array_push($IDs, $ID);
+         $IDs[]= $ID;
 
    if( count($IDs) > 0 )
       mysql_query("UPDATE GoDiagrams SET Saved='Y' WHERE ID IN (" . implode(',', $IDs) . ")")

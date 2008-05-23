@@ -81,7 +81,7 @@ chdir( 'scripts' );
       echo "<hr><p>$Filename - Group $Group_ID [$GroupName]</p><hr>\n";
 
       $fd = fopen( $main_path . $Filename, 'r' )
-         or error( 'couldnt_open_file' );
+         or error( 'couldnt_open_file', 'generate_translation_texts:'.$Filename);
 
       $contents = fread($fd, filesize ($main_path . $Filename));
 

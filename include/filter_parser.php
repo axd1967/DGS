@@ -480,7 +480,7 @@ class TextParser extends BasicParser
             // wild can be treated as normal char, same goes for special-chars
             $this->p_value = $v;
             $term = preg_replace( "/[^\\w'\\s]+/", '', $v );
-            array_push( $this->p_terms, $term );
+            $this->p_terms[]= $term;
          }
          else // allow-wild
          {
@@ -667,7 +667,7 @@ class DateParser
       if ( $dpart > $end )
          $error++;
       if ( $error )
-         array_push( $this->checkarr, $typepart);
+         $this->checkarr[]= $typepart;
       return (boolean)$error;
    }
 

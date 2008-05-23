@@ -245,10 +245,10 @@ function after_table( $table)
  global $dumptype;
    $str = '';
 
-   switch($dumptype)
+   switch((string)$dumptype)
    {
    case 'init':
-      switch($table)
+      switch((string)$table)
       {
       case 'Players': //'Statistics':
 /*
@@ -476,10 +476,10 @@ function definitions_fix( $table, $keys)
       $row = def_split($str);
       $name = $row[0];
 
-      switch($table)
+      switch((string)$table)
       {
       case('Posts'):
-         switch($name)
+         switch((string)$name)
          {
          case('KEY'): //can't have this option with older versions
             if( $row[1] == 'PendingApproval' )
@@ -561,7 +561,7 @@ function echoTR( $typ, $str)
    if( $export_it )
       return BLOCKBEG. trim($str) .BLOCKEND;
 
-   switch($typ)
+   switch((string)$typ)
    {
    case 'th':
    case 'td':
@@ -1087,7 +1087,7 @@ function freesql_dump( $database, $query)
       $dumptype = 'freeSQL';
       $export_file= 'db_export.mysql';
    } else
-   switch( $row[0] )
+   switch( (string)$row[0] )
    {
    case 'init': {
       $text = init_dump( $DB_NAME);

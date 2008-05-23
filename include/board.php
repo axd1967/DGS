@@ -464,7 +464,7 @@ class Board
       $nomove_end = ".gif\"></td>\n";
       if( $may_play )
       {
-         switch( $action )
+         switch( (string)$action )
          {
             case 'handicap':
                $on_not_empty = false;
@@ -855,7 +855,7 @@ class Board
                   {
                      foreach( $sub as $y => $val )
                      {
-                        array_push($prisoners, array($x,$y));
+                        $prisoners[]= array($x,$y);
                         unset($this->array[$x][$y]);
                      }
                   }
@@ -1011,7 +1011,7 @@ class Board
       {
          for( $y=0; $y<$this->size; $y++)
          {
-            switch( @$this->array[$x][$y] & ~FLAG_NOCLICK)
+            switch( @$this->array[$x][$y] & ~FLAG_NOCLICK )
             {
                case BLACK_TERRITORY:
                   $score --;
@@ -1065,7 +1065,7 @@ class Board
                   foreach( $sub as $y => $val )
                   {
                      if ($c == @$this->array[$x][$y]) {
-                        array_push($marked, array($x,$y));
+                        $marked[]= array($x,$y);
                         @$this->array[$x][$y] ^= OFFSET_MARKED;
                      }
                   }

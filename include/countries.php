@@ -193,7 +193,7 @@ $COUNTRIES = array(
    'st' => T_('Sao Tome and Principe'),
    'sa' => T_('Saudi Arabia'),
    'sn' => T_('Senegal'),
-   //'yu' => T_//('Serbia and Montenegro (Yugoslavia)'),//obsolet
+   //'yu' => T_//('Serbia and Montenegro (Yugoslavia)'),//obsolete
    'rs' => T_('Serbia'),
    'sc' => T_('Seychelles'),
    'sl' => T_('Sierra Leone'),
@@ -238,5 +238,5 @@ $COUNTRIES = array(
    'zw' => T_('Zimbabwe'),
    '__' => T_('Earth'),
   );
-}
+} //init_countries
 ?>

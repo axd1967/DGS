@@ -31,15 +31,15 @@ function make_known_languages() //must be called from main dir
 
    $Filename = 'translations/known_languages.php'; //must be called from main dir
 
-   $e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
-   $fd = fopen( $Filename, 'w');
-   error_reporting($e);
+   //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
+   $fd = @fopen( $Filename, 'w');
+   //error_reporting($e);
    if( !$fd )
    {
-      //echo "couldnt_open_transl_file ". $Filename; exit;
+      //echo "couldnt_open_file ". $Filename; exit;
       global $TheErrors;
       $TheErrors->set_mode(ERROR_MODE_PRINT);
-      error("couldnt_open_transl_file", $Filename);
+      error('couldnt_open_file', 'make_known_languages:'.$Filename);
    }
 
    $group= 'Common';
@@ -118,7 +118,7 @@ function make_include_files($language=null, $group=null) //must be called from m
    $lang = '';
    while( $row = mysql_fetch_array($result) )
    {
-      if( $row['Groupname'] !== $grp or $row['Language'] !== $lang )
+      if( $row['Groupname'] !== $grp || $row['Language'] !== $lang )
       {
          $grp = $row['Groupname'];
          $lang = $row['Language'];
@@ -133,12 +133,12 @@ function make_include_files($language=null, $group=null) //must be called from m
 
          $Filename = $lang . '_' . $grp . '.php';
 
-         $e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
-         $fd = fopen( $Filename, 'w');
-         error_reporting($e);
+         //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
+         $fd = @fopen( $Filename, 'w');
+         //error_reporting($e);
          if( !$fd )
          {
-            error("couldnt_open_transl_file", $Filename);
+            error('couldnt_open_file', 'make_include_files:'.$Filename);
          }
 
          fwrite( $fd, "<?php\n\n/* Automatically generated at " .
@@ -214,7 +214,7 @@ function translations_query( $translate_lang, $untranslated, $group
       // Translations.Translated IS NULL means "never translated" (LEFT JOIN fails).
       // TODO: enhance the query around this 'OR' clause
 
-   switch( $group )
+   switch( (string)$group )
    {
    default:
       $query .=

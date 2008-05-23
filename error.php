@@ -85,7 +85,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    start_page("Error", true, $logged_in, $player_row );
    echo '&nbsp;<br>';
 
-   switch( $err )
+   switch( (string)$err )
    {
       case("early_pass"):
       {

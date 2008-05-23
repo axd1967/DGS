@@ -31,6 +31,22 @@ Changelog
 copy /images/favicon.ico into the root folder
 -----------
 
+   * include/move.php, include/faq_functions.php, include/countries.php,
+     include/tournament.php, include/tokenizer.php, include/table_infos.php,
+     include/GoDiagram.php, include/contacts.php ,include/filter_parser.php,
+     include/page_functions.php, include/time_functions.php,
+     include/make_game.php, include/board.php, include/filter_functions.php,
+     include/make_translationfiles.php, include/error_functions.php,
+     include/rating.php,
+     scripts/player_consistency.php, scripts/data_report.php,
+     scripts/data_export.php, scripts/generate_translation_texts.php,
+     rss/status.php, forum/search.php,
+     index.php, edit_vacation.php, update_translation.php,
+     translate.php, introduction.php, game_comments.php, login.php,
+     join_waitingroom_game.php, error.php, confirm.php, add_to_waitingroom.php,
+     edit_folders.php, change_profile.php, admin_do_translators.php:
+   - a bunch of pending minor adjustements or comments
+
 2008-05-22 rodival
 
    * game.php:
