@@ -34,8 +34,8 @@ require_once( "include/filter.php" );
  * \brief Class to ease the creation of standard tables.
  */
 
-//~(0) is negative (PHP) and database field is unsigned: INT(10) unsigned NOT NULL
-define('ALL_COLUMNS', 0x7fffffff); //=2147483647
+//0x80000000 is negative in PHP. So the database field holding the Column_sets must be signed: INT(11) NOT NULL
+define('ALL_COLUMNS', 0xffffffff); //=4294967295 = full 32 bits integer
 
 //caution: provide enought "images/sort$i$c.gif" images $i:[1..n] $c:[a,d]
 define('TABLE_MAX_SORT', 2); // 0 to disable the table sorts
@@ -69,13 +69,13 @@ class Table
    var $Sort;
    var $Sortimg;
 
-   /*! \brief Which columns in the set that is visible. */
-   var $Column_set;
    /*! \brief The page used in links within this table. */
    var $Page;
+   /*! \brief Which columns in the set that is visible. */
+   var $Column_set;
    /*! \brief The column of the Player table in the database to use as column_set.
     * \see $Column_set */
-   var $Player_Column;
+   var $Player_Column_set_field;
    /*! \brief If true, the table will not be able to add or delete columns. */
    var $Static_Columns;
    /*! \brief The columns that has been removed. */
@@ -161,7 +161,7 @@ class Table
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
-   function Table( $_tableid, $_page, $_player_column=''
+   function Table( $_tableid, $_page, $_player_column_set_field=''
                   , $_prefix='', $_mode=0)
    {
       global $player_row;
@@ -181,33 +181,28 @@ class Table
       $this->Mode = $_mode;
 
       // prepare for appending URL-parts (ends with either '?' or URI_AMP)
-      $this->Page = $_page;
-      if( strstr( $this->Page, '?' ) )
-      {
-         if( !(substr( $this->Page, -1 ) == '?') and
-             !(substr( $this->Page, -strlen(URI_AMP) ) == URI_AMP) )
-         {
-            $this->Page .= URI_AMP; //end_sep
-         }
-      }
+      if( !is_numeric( strpos( $_page, '?')) )
+         $this->Page = $_page . '?'; //end_sep
+      else if( substr( $_page, -1 ) == '?'
+            || substr( $_page, -strlen(URI_AMP) ) == URI_AMP )
+         $this->Page = $_page; //end_sep
       else
-      {
-         $this->Page .= '?'; //end_sep
-      }
+         $this->Page = $_page . URI_AMP; //end_sep
 
-      $this->Player_Column = $_player_column;
-      if( empty($this->Player_Column) )
-      {
-         $this->Static_Columns = true;
-         $this->Column_set = ALL_COLUMNS;
-      }
-      else
+      if( !empty($_player_column_set_field)
+         && is_string($_player_column_set_field) )
       {
          $this->Static_Columns = false;
-         if( !isset($player_row[ $this->Player_Column ]) )
-            $this->Column_set = ALL_COLUMNS;
-         else
-            $this->Column_set = (int)@$player_row[ $this->Player_Column ];
+         $this->Player_Column_set_field = $_player_column_set_field;
+         $this->Column_set = ALL_COLUMNS;
+         if( isset($player_row[ $_player_column_set_field ]) )
+            $this->Column_set &= $player_row[ $_player_column_set_field ];
+      }
+      else
+      {
+         $this->Static_Columns = true;
+         $this->Player_Column_set_field = '';
+         $this->Column_set = ALL_COLUMNS;
       }
 
       //{ N.B.: only used for folder transparency but CSS incompatible
@@ -258,6 +253,7 @@ class Table
    }
 
    /*! \brief Add a tablehead.
+    * \param $nr must be >0 but if highter than 32, the column will be static
     * \param $attbs must be an array of attributs or a class-name for the column
     */
    function add_tablehead( $nr,
@@ -269,6 +265,8 @@ class Table
    {
       if( $this->Head_closed )
          error('assert', "Table.add_tablehead.closed($nr)");
+      if( $nr <= 0 )
+         error('assert', "Table.add_tablehead.bad_col_nr($nr)");
       if( !is_array($attbs) )
       {
          if( is_string($attbs) )
@@ -639,13 +637,23 @@ class Table
 
       global $player_row;
       $uid = (int)@$player_row['ID'];
-      if( !empty($this->Player_Column) && $uid > 0
-         && $newset != $this->Column_set )
+      /*
+       * Here, depending of the previous calculus, either $newset or
+       *  $this->Column_set can be signed (int) or signed (float)
+       *  and so covering the whole [-0x80000000,0xffffffff] interval.
+       * Cares are needed especially for the write in the database
+       *  as a value>0x7fffffff can't be recorded in a SIGNED INT field
+       *  while a value<0 can't be recorded in an UNSIGNED INT field
+       */
+      $newset &= ALL_COLUMNS; //and reset it to the (signed) integer type
+      if( $uid > 0 && !empty($this->Player_Column_set_field)
+         && (($newset ^ $this->Column_set) & ALL_COLUMNS ) )
       {
+         $player_row[ $this->Player_Column_set_field ] =
          $this->Column_set = $newset;
-         $query = "UPDATE Players" .
-            " SET " . $this->Player_Column . "=" . $newset .
-            " WHERE ID=" . $uid;
+         //note: the column field must be a SIGNED INT
+         $query = "UPDATE Players SET " . $this->Player_Column_set_field
+            ."=$newset WHERE ID=$uid LIMIT 1";
 
          mysql_query($query)
             or error('mysql_query_failed','Table.add_or_del_column');
@@ -829,6 +837,8 @@ class Table
 
    function make_tablehead( $tablehead )
    {
+      if( !$this->Head_closed )
+         error('assert', "Table.make_tablehead.!closed({$this->Head_closed})");
       $nr = $tablehead['Nr'];
 
       if( !$this->Is_Column_Displayed[$nr] )

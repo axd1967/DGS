@@ -97,7 +97,7 @@ require_once( "include/contacts.php" );
    $ctable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $ctable->add_tablehead( 0, T_('Actions#header'), '', 0, 1, 'Image'); // static
+   $ctable->add_tablehead(33, T_('Actions#header'), '', 0, 1, 'Image'); // static
    $ctable->add_tablehead( 1, T_('Name#header'), 'P.Name', 0, 0, 'User');
    $ctable->add_tablehead( 2, T_('Userid#header'), 'P.Handle', 0, 1, 'User'); // static
    $ctable->add_tablehead( 3, T_('Country#header'), 'P.Country', 0, 0, 'Image');
@@ -185,7 +185,7 @@ require_once( "include/contacts.php" );
       $crow_strings = array();
       $cid = $row['cid'];
 
-      if( $ctable->Is_Column_Displayed[0] )
+      if( $ctable->Is_Column_Displayed[33] )
       {
          $links  = anchor( "message.php?mode=NewMessage".URI_AMP."uid=$cid",
                image( 'images/send.gif', 'M'),
@@ -199,45 +199,45 @@ require_once( "include/contacts.php" );
          $links .= anchor( "edit_contact.php?cid=$cid".URI_AMP."contact_delete=1",
                image( 'images/trashcan.gif', 'X'),
                T_('Remove contact'), 'class=ButIcon');
-         $crow_strings[0] = $links;
+         $crow_strings[33] = $links;
       }
-      if( $ctable->Is_Column_Displayed[1] )
-         $crow_strings[1] = "<A href=\"userinfo.php?uid=$cid\">" .
+      if( $ctable->Is_Column_Displayed[ 1] )
+         $crow_strings[ 1] = "<A href=\"userinfo.php?uid=$cid\">" .
             make_html_safe($row['Name']) . "</A>";
-      if( $ctable->Is_Column_Displayed[2] )
-         $crow_strings[2] = "<A href=\"userinfo.php?uid=$cid\">" .
+      if( $ctable->Is_Column_Displayed[ 2] )
+         $crow_strings[ 2] = "<A href=\"userinfo.php?uid=$cid\">" .
             $row['Handle'] . "</A>";
-      if( $ctable->Is_Column_Displayed[3] )
+      if( $ctable->Is_Column_Displayed[ 3] )
       {
          $cntr = @$row['Country'];
          $cntrn = basic_safe(@$COUNTRIES[$cntr]);
          $cntrn = (empty($cntr) ? '' :
              "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
-         $crow_strings[3] = $cntrn;
+         $crow_strings[ 3] = $cntrn;
       }
-      if( $ctable->Is_Column_Displayed[4] )
-         $crow_strings[4] = echo_rating(@$row['Rating2'],true,$cid);
-      if( $ctable->Is_Column_Displayed[5] )
+      if( $ctable->Is_Column_Displayed[ 4] )
+         $crow_strings[ 4] = echo_rating(@$row['Rating2'],true,$cid);
+      if( $ctable->Is_Column_Displayed[ 5] )
       {
-         $crow_strings[5] =
+         $crow_strings[ 5] =
             ($row['lastaccessU']>0 ? date($date_fmt2, $row['lastaccessU']) : '');
       }
-      if( $ctable->Is_Column_Displayed[6] )
+      if( $ctable->Is_Column_Displayed[ 6] )
       {
          $str = Contact::format_system_flags($row['SystemFlags'], ',<br>');
-         $crow_strings[6] = ($str == '' ? NO_VALUE : $str);
+         $crow_strings[ 6] = ($str == '' ? NO_VALUE : $str);
       }
-      if( $ctable->Is_Column_Displayed[7] )
+      if( $ctable->Is_Column_Displayed[ 7] )
       {
          $str = Contact::format_user_flags($row['UserFlags'], ',<br>');
-         $crow_strings[7] = ($str == '' ? NO_VALUE : $str);
+         $crow_strings[ 7] = ($str == '' ? NO_VALUE : $str);
       }
-      if( $ctable->Is_Column_Displayed[8] )
+      if( $ctable->Is_Column_Displayed[ 8] )
       {
          $note = make_html_safe( $row['Notes'], false, $rx_term);
          //reduce multiple LF to one <br>
          $note = preg_replace( "/[\r\n]+/", '<br>', $note );
-         $crow_strings[8] = $note;
+         $crow_strings[ 8] = $note;
       }
       if( $ctable->Is_Column_Displayed[10] )
       {

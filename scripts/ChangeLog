@@ -23,6 +23,28 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-24 rodival
+
+   * include/table_columns.php, include/message_functions.php,
+     list_contacts.php, opponents.php, waiting_room.php:
+   - a full set of 32 columns which can be shown or hidden in the
+      table-list (id from 1 to 32)
+     the ids > 32 are static by definition
+     the ids <= 0 are no more allowed (replaced the few existing
+      ones by id 33)
+   - the database fields of the Column_set must be reseted to SIGNED INT:
+-----------
+ALTER TABLE Players
+ CHANGE UsersColumns UsersColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE GamesColumns GamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE RunningGamesColumns RunningGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE FinishedGamesColumns FinishedGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE ObservedGamesColumns ObservedGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE WaitingroomColumns WaitingroomColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE TournamentsColumns TournamentsColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE ContactColumns ContactColumns INT( 11 ) DEFAULT '-1' NOT NULL ;
+-----------
+
 2008-05-23 rodival
 
    * include/std_functions.php (start_html), INSTALL:

@@ -1085,7 +1085,7 @@ function message_list_head( &$mtable, $current_folder
 
    $mtable->add_tablehead( 3, T_('Subject#header'), $no_sort ? '' : 'Subject', 0, 0);
    list($ico,$alt) = $msg_icones[0];
-   $mtable->add_tablehead( 0, image( $ico, $alt, T_('Messages')),
+   $mtable->add_tablehead(33, image( $ico, $alt, T_('Messages')),
       $no_sort ? '' : 'flow', 0, 1, 'Image');
    $mtable->add_tablehead( 4, T_('Date#header'), $no_sort ? '' : 'date', 1, 0, 'Date');
    if( !$no_mark )
@@ -1137,7 +1137,7 @@ function message_list_body( &$mtable, $result, $show_rows
       $deleted = ( is_null($folder_nr) );
       $bgcolor = $mtable->blend_next_row_color_hex();
 
-      $mrow_strings[1] = array(
+      $mrow_strings[ 1] = array(
          'owntd' => echo_folder_box($my_folders, $folder_nr, $bgcolor) );
 
       if( $row['Sender'] === 'M' ) //Message to myself
@@ -1171,27 +1171,25 @@ function message_list_body( &$mtable, $result, $show_rows
       if ( !$full_details )
          if( $row['Sender'] === 'Y' )
             $str = T_('To') . ': ' . $str;
-      $mrow_strings[2] = $str;
+      $mrow_strings[ 2] = $str;
 
       $subject = $row['Subject'];
       $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
-      $str = $showmsg_start . $subject . $showmsg_end;
-      $mrow_strings[3] = $str;
+      $mrow_strings[ 3] = "$showmsg_start$subject$showmsg_end";
 
       list($ico,$alt) = $msg_icones[$row['flow']];
       $str = image( $ico, $alt, $tits[$row['flow']]);
-      $str = $showmsg_start . $str . $showmsg_end;
-      $mrow_strings[0] = $str;
+      $mrow_strings[33] = "$showmsg_start$str$showmsg_end";
 
-      $mrow_strings[4] = date($date_fmt, $row["Time"]);
+      $mrow_strings[ 4] = date($date_fmt, $row["Time"]);
 
       // additional fields for search-messages
       if ( $full_details )
       {
          global $MSG_TYPES;
-         $mrow_strings[6] = $MSG_TYPES[$row['Type']];
+         $mrow_strings[ 6] = $MSG_TYPES[$row['Type']];
 
-         $mrow_strings[7] = $dirs[$row['Sender']];
+         $mrow_strings[ 7] = $dirs[$row['Sender']];
       }
 
       if( !$no_mark )
@@ -1200,14 +1198,14 @@ function message_list_body( &$mtable, $result, $show_rows
            || ( $folder_nr == FOLDER_REPLY && $row['Type'] == 'INVITATION'
               && $row['Replied'] != 'Y' )
            || $deleted )
-            $mrow_strings[5] = '';
+            $mrow_strings[ 5] = '';
          else
          {
             $can_move_messages = true;
             $n = $mtable->Prefix."mark$mid";
             $checked = (('Y'==(string)@$_REQUEST[$n]) xor (bool)$toggle_marks);
             //if( $checked ) $page.= "$n=Y".URI_AMP;
-            $mrow_strings[5] = "<input type='checkbox' name='$n' value='Y'"
+            $mrow_strings[ 5] = "<input type='checkbox' name='$n' value='Y'"
                . ($checked ? ' checked' : '') . '>';
          }
       }

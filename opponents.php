@@ -60,7 +60,7 @@ $ARR_DBFIELDKEYS = array(
       $uid = $my_id;
    if ( $uid <= 0 )
       error('invalid_user', "opponents.bad_user($uid)");
-   if ( $opp == $uid or $opp < 0 )
+   if ( $opp < 0 || $opp == $uid )
       $opp = 0;
       //error('invalid_opponent', "opponents.bad_opponent($opp)");
 
@@ -75,7 +75,7 @@ $ARR_DBFIELDKEYS = array(
       . "FROM Players WHERE ID".( $opp ?" IN('$uid','$opp')" :"='$uid'");
    $result = mysql_query( $query )
       or error('mysql_query_failed', "opponents.find_users($uid,$opp)");
-   while ( $row = mysql_fetch_assoc( $result ) )
+   while( $row = mysql_fetch_assoc( $result ) )
       $players[ $row['ID'] ] = $row;
    mysql_free_result($result);
 
@@ -90,10 +90,10 @@ $ARR_DBFIELDKEYS = array(
 
    // static filters
    $usfilter = new SearchFilter('s');
-   $usfilter->add_filter(1, 'Numeric',      'G.Size', true );
-   $usfilter->add_filter(2, 'RatedSelect',  'G.Rated', true );
-   $usfilter->add_filter(3, 'Date',         'G.Lastchanged', true );
-   $usfilter->add_filter(4, 'Selection',
+   $usfilter->add_filter( 1, 'Numeric',      'G.Size', true );
+   $usfilter->add_filter( 2, 'RatedSelect',  'G.Rated', true );
+   $usfilter->add_filter( 3, 'Date',         'G.Lastchanged', true );
+   $usfilter->add_filter( 4, 'Selection',
          array( T_('All games#filteropp') => '',
                 T_('Running games#filteropp')  => 'G.Status' . IS_RUNNING_GAME,
                 T_('Finished games#filteropp') => "G.Status='FINISHED'" ),
@@ -158,7 +158,7 @@ $ARR_DBFIELDKEYS = array(
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
    // table: use same table-IDs as in users.php(!)
-   $utable->add_tablehead( 0, T_('Info#header'), '', 0, 1, 'Button');
+   $utable->add_tablehead(33, T_('Info#header'), '', 0, 1, 'Button');
    $utable->add_tablehead( 1, T_('##header'), 'ID', 0, 1, 'ID');
    $utable->add_tablehead( 2, T_('Name#header'), 'Name', 0, 0, 'User');
    $utable->add_tablehead( 3, T_('Userid#header'), 'Handle', 0, 0, 'User');
@@ -348,16 +348,16 @@ $ARR_DBFIELDKEYS = array(
       $ID = $row['ID'];
 
       $urow_strings = array();
-      if( $utable->Is_Column_Displayed[0] )
-         $urow_strings[0] = $utable->button_TD_anchor(
+      if( $utable->Is_Column_Displayed[33] )
+         $urow_strings[33] = $utable->button_TD_anchor(
             "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID", T_('Info'));
-      if( $utable->Is_Column_Displayed[1] )
-         $urow_strings[1] = "<A href=\"userinfo.php?uid=$ID\">$ID</A>";
-      if( $utable->Is_Column_Displayed[2] )
-         $urow_strings[2] = "<A href=\"userinfo.php?uid=$ID\">" .
+      if( $utable->Is_Column_Displayed[ 1] )
+         $urow_strings[ 1] = "<A href=\"userinfo.php?uid=$ID\">$ID</A>";
+      if( $utable->Is_Column_Displayed[ 2] )
+         $urow_strings[ 2] = "<A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A>";
-      if( $utable->Is_Column_Displayed[3] )
-         $urow_strings[3] = "<A href=\"userinfo.php?uid=$ID\">" .
+      if( $utable->Is_Column_Displayed[ 3] )
+         $urow_strings[ 3] = "<A href=\"userinfo.php?uid=$ID\">" .
             $row['Handle'] . "</A>";
       if( $utable->Is_Column_Displayed[16] )
       {
@@ -367,18 +367,18 @@ $ARR_DBFIELDKEYS = array(
              "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
          $urow_strings[16] = $cntrn;
       }
-      if( $utable->Is_Column_Displayed[4] )
-         $urow_strings[4] = make_html_safe(@$row['Rankinfo'],INFO_HTML);
-      if( $utable->Is_Column_Displayed[5] )
-         $urow_strings[5] = echo_rating(@$row['Rating2'],true,$ID);
-      if( $utable->Is_Column_Displayed[6] )
-         $urow_strings[6] = make_html_safe($row['Open'],INFO_HTML);
-      if( $utable->Is_Column_Displayed[7] )
-         $urow_strings[7] = $row['Games'];
-      if( $utable->Is_Column_Displayed[8] )
-         $urow_strings[8] = $row['Running'];
-      if( $utable->Is_Column_Displayed[9] )
-         $urow_strings[9] = $row['Finished'];
+      if( $utable->Is_Column_Displayed[ 4] )
+         $urow_strings[ 4] = make_html_safe(@$row['Rankinfo'],INFO_HTML);
+      if( $utable->Is_Column_Displayed[ 5] )
+         $urow_strings[ 5] = echo_rating(@$row['Rating2'],true,$ID);
+      if( $utable->Is_Column_Displayed[ 6] )
+         $urow_strings[ 6] = make_html_safe($row['Open'],INFO_HTML);
+      if( $utable->Is_Column_Displayed[ 7] )
+         $urow_strings[ 7] = $row['Games'];
+      if( $utable->Is_Column_Displayed[ 8] )
+         $urow_strings[ 8] = $row['Running'];
+      if( $utable->Is_Column_Displayed[ 9] )
+         $urow_strings[ 9] = $row['Finished'];
       if( $utable->Is_Column_Displayed[17] )
          $urow_strings[17] = $row['RatedGames'];
       if( $utable->Is_Column_Displayed[10] )

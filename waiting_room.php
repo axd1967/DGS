@@ -100,7 +100,7 @@ require_once( "include/contacts.php" );
    $wrtable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $wrtable->add_tablehead( 0, T_('Info#header'), '', 0, 1, 'Button');
+   $wrtable->add_tablehead(33, T_('Info#header'), '', 0, 1, 'Button');
    $wrtable->add_tablehead( 1, T_('Name#header'), 'other_name', 0, 0, 'User');
    $wrtable->add_tablehead( 2, T_('Userid#header'), 'other_handle', 0, 0, 'User');
    $wrtable->add_tablehead(15, T_('Country#header'), 'other_country', 0, 0, 'Image');
@@ -215,7 +215,7 @@ require_once( "include/contacts.php" );
 
    $show_rows = $wrtable->compute_show_rows(mysql_num_rows($result));
    $info_row = NULL;
-   if ( $show_rows > 0 or $wrfilter->has_query() )
+   if( $show_rows > 0 || $wrfilter->has_query() )
    {
       while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
@@ -228,13 +228,13 @@ require_once( "include/contacts.php" );
          $Comment = make_html_safe($Comment, INFO_HTML);
 
          $wrow_strings = array();
-         if( $wrtable->Is_Column_Displayed[0] )
-            $wrow_strings[0] = $wrtable->button_TD_anchor(
+         if( $wrtable->Is_Column_Displayed[33] )
+            $wrow_strings[33] = $wrtable->button_TD_anchor(
                                  $baseURL."info=$ID#joingameForm", T_('Info'));
-         if( $wrtable->Is_Column_Displayed[1] )
-            $wrow_strings[1] = user_reference( REF_LINK, 1, '', $other_id, $other_name, '');
-         if( $wrtable->Is_Column_Displayed[2] )
-            $wrow_strings[2] = user_reference( REF_LINK, 1, '', $other_id, $other_handle, '');
+         if( $wrtable->Is_Column_Displayed[ 1] )
+            $wrow_strings[ 1] = user_reference( REF_LINK, 1, '', $other_id, $other_name, '');
+         if( $wrtable->Is_Column_Displayed[ 2] )
+            $wrow_strings[ 2] = user_reference( REF_LINK, 1, '', $other_id, $other_handle, '');
          if( $wrtable->Is_Column_Displayed[15] )
          {
             $cntr = @$row['other_country'];
@@ -243,33 +243,33 @@ require_once( "include/contacts.php" );
                "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">";
             $wrow_strings[15] = $cntrn;
          }
-         if( $wrtable->Is_Column_Displayed[3] )
-            $wrow_strings[3] = echo_rating($other_rating,true,$other_id);
-         if( $wrtable->Is_Column_Displayed[4] )
-            $wrow_strings[4] = $Comment;
-         if( $wrtable->Is_Column_Displayed[5] )
+         if( $wrtable->Is_Column_Displayed[ 3] )
+            $wrow_strings[ 3] = echo_rating($other_rating,true,$other_id);
+         if( $wrtable->Is_Column_Displayed[ 4] )
+            $wrow_strings[ 4] = $Comment;
+         if( $wrtable->Is_Column_Displayed[ 5] )
          {
-            $wrow_strings[5] = array('text' => $handi_array[$Handicaptype]);
+            $wrow_strings[ 5] = array('text' => $handi_array[$Handicaptype]);
             if( !$haverating )
-               $wrow_strings[5]['attbs']=
+               $wrow_strings[ 5]['attbs']=
                   $wrtable->warning_cell_attb( T_('No initial rating'), 1);
          }
          if( $wrtable->Is_Column_Displayed[14] )
             $wrow_strings[14] = ($calculated ? NO_VALUE : $Handicap);
-         if( $wrtable->Is_Column_Displayed[6] )
-            $wrow_strings[6] = ($calculated ? NO_VALUE : $Komi);
-         if( $wrtable->Is_Column_Displayed[7] )
-            $wrow_strings[7] = $Size;
-         if( $wrtable->Is_Column_Displayed[8] )
+         if( $wrtable->Is_Column_Displayed[ 6] )
+            $wrow_strings[ 6] = ($calculated ? NO_VALUE : $Komi);
+         if( $wrtable->Is_Column_Displayed[ 7] )
+            $wrow_strings[ 7] = $Size;
+         if( $wrtable->Is_Column_Displayed[ 8] )
          {
-            $wrow_strings[8] = array('text' =>
+            $wrow_strings[ 8] = array('text' =>
                echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) );
             if( !$goodrating )
-               $wrow_strings[8]['attbs']=
+               $wrow_strings[ 8]['attbs']=
                   $wrtable->warning_cell_attb( T_('Out of range'), 1);
          }
-         if( $wrtable->Is_Column_Displayed[9] )
-            $wrow_strings[9] =
+         if( $wrtable->Is_Column_Displayed[ 9] )
+            $wrow_strings[ 9] =
                echo_time_limit( $Maintime, $Byotype, $Byotime, $Byoperiods, 0, 1);
          if( $wrtable->Is_Column_Displayed[10] )
             $wrow_strings[10] = $nrGames;
@@ -351,7 +351,7 @@ function add_new_game_form( $form_id, $iamrated)
       $rating_array["$i dan"] = $i . $s;
 
    $s = ' ' . T_('kyu');
-   for($i=1; $i<=30; $i++)
+   for($i=1; $i<=30; $i++) //30 = (2100-MIN_RATING)/100
       $rating_array["$i kyu"] = $i . $s;
 
 
