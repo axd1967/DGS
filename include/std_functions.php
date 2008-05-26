@@ -52,13 +52,15 @@ $hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
 $has_sgf_alias = false;
 
 
-// when modified, run $HOSTBASE."change_password.php?guestpass=1"
-// with ADMIN_PASSWORD privileges
+/* when $GUESTPASS is modified,
+ * run $HOSTBASE."change_password.php?guestpass=".GUEST_ID
+ * with ADMIN_PASSWORD privileges
+ */
 if( $FRIENDLY_SHORT_NAME == 'DGS' )
    $GUESTPASS = 'guest'.'pass';
 else
    $GUESTPASS = 'guest';
-
+define('GUESTS_ID_MAX', 1); //minimum 1 because hard-coded in init.mysql
 
 define('ALLOW_JSCRIPT', 1);
 
@@ -1076,13 +1078,13 @@ function send_message( $debugmsg, $text='', $subject=''
    if( $subject == '' )
       $subject = UNKNOWN_VALUE; //like in forum posts
 
-   if( !isset($type) or !is_string($type) or !$type )
+   if( !isset($type) || !is_string($type) || !$type )
       $type = 'NORMAL';
-   if( !isset($gid) or !is_numeric($gid) or $gid<0 )
+   if( !isset($gid) || !is_numeric($gid) || $gid<0 )
       $gid = 0;
-   if( !isset($from_id) or !is_numeric($from_id) or $from_id<2 ) //exclude guest
+   if( !isset($from_id) || !is_numeric($from_id) || $from_id <= GUESTS_ID_MAX ) //exclude guest
       $from_id = 0; //i.e. server message
-   if( !isset($prev_mid) or !is_numeric($prev_mid) or $prev_mid<0 )
+   if( !isset($prev_mid) || !is_numeric($prev_mid) || $prev_mid < 0 )
       $prev_mid = 0;
 
    $to_myself= false;
@@ -1113,7 +1115,7 @@ function send_message( $debugmsg, $text='', $subject=''
          $uid= $row['ID'];
          if( $from_id > 0 && $uid == $from_id )
             $to_myself= true;
-         else if( $uid > 1 ) //exclude guest
+         else if( $uid > GUESTS_ID_MAX ) //exclude guest
             $receivers[$uid]= $row;
       }
       mysql_free_result($result);
@@ -1240,7 +1242,7 @@ function notify( $debugmsg, $ids)
       $query = array_merge( $query, explode(',', $cnt));
    $ids = array();
    foreach( $query as $cnt )
-      if( ($cnt=(int)$cnt) > 1 ) //exclude guest
+      if( ($cnt=(int)$cnt) > GUESTS_ID_MAX ) //exclude guest
          $ids[$cnt] = $cnt;
 
    $cnt= count($ids);
@@ -2110,7 +2112,7 @@ function get_players_field( $where, $field='Handle')
 {
    $ret= array();
    $query= 'SELECT '.$field
-          ." FROM Players WHERE ID>1 AND ($where)"; //exclude guest
+          ." FROM Players WHERE ID>".GUESTS_ID_MAX." AND ($where)"; //exclude guest
    $result = mysql_query( $query )
       or error('get_players_field',$where);
    while( ($row=mysql_fetch_row($result)) )
@@ -2128,9 +2130,9 @@ function who_is_logged( &$player_row)
    global $main_path;
 // because of include_all_translate_groups() must be called from main dir
    chdir( $main_path);
-   $res = is_logged_in($handle, $sessioncode, $player_row);
+   $player_id = is_logged_in($handle, $sessioncode, $player_row);
    chdir( $curdir);
-   return $res;
+   return $player_id;
 }
 
 /**
@@ -2149,52 +2151,59 @@ define('VAULT_TIME', 24*3600); //... is vaulted for z seconds
 define('VAULT_CNT_X', VAULT_CNT*10); //activity count (larger)
 define('VAULT_TIME_X', 2*3600); //vault duration (smaller)
 
-function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
+/**
+ * Check if the player $handle can be logged in
+ * returns 0 if $handle can't be logged in
+ * else fill the $player_row array with its characteristics,
+ * load the player language definitions, set his timezone
+ * and finally returns his ID (i.e. >0)
+ **/
+function is_logged_in($handle, $scode, &$player_row) //must be called from main dir
 {
    global $HOSTNAME, $hostname_jump, $ActivityForHit, $NOW, $date_fmt, $dbcnx;
 
-   $player_row = array();
-   $player_row['logged_in'] = false;
+   $player_row = array( 'ID' => 0 );
 
    if( $hostname_jump && preg_replace("/:.*\$/",'', @$_SERVER['HTTP_HOST']) != $HOSTNAME )
    {
       jump_to( 'http://' . $HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
 
-   if( !$hdl || !$dbcnx )
+   if( empty($handle) || empty($dbcnx) )
    {
       include_all_translate_groups(); //must be called from main dir
-      return false;
+      return 0;
    }
 
    $query= "SELECT *,UNIX_TIMESTAMP(Sessionexpire) AS Expire"
-          .",Adminlevel+0 as admin_level"
+          .",Adminlevel+0 AS admin_level"
           .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
-          ." FROM Players WHERE Handle='".mysql_addslashes($hdl)."' LIMIT 1";
+          ." FROM Players WHERE Handle='".mysql_addslashes($handle)."' LIMIT 1";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed','is_logged_in.find_player');
 
-   if( !$result or @mysql_num_rows($result) != 1 )
+   if( $result && @mysql_num_rows($result) == 1 )
    {
-      if( $result )
-         mysql_free_result($result);
-      include_all_translate_groups(); //must be called from main dir
-      return false;
+      $player_row = mysql_fetch_assoc($result);
+      unset($player_row['Adminlevel']);
    }
+   if( $result )
+      mysql_free_result($result);
 
-   $player_row = mysql_fetch_assoc($result);
-   $player_row['logged_in'] = false;
-   mysql_free_result($result);
-   unset($player_row['Adminlevel']);
-
+   $uid = (int)@$player_row['ID'];
+   if( $uid <= 0 )
+   {
+      include_all_translate_groups(); //must be called from main dir
+      $player_row['ID'] = 0;
+      return 0;
+   }
    include_all_translate_groups($player_row); //must be called from main dir
 
    $session_expired= ( $player_row['Sessioncode'] != $scode
-                     or $player_row['Expire'] < $NOW );
+                     || $player_row['Expire'] < $NOW );
 
-   $query = "UPDATE Players SET"
-           ." Hits=Hits+1";
+   $query = "UPDATE Players SET Hits=Hits+1";
 
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
    if( $ip && $player_row['IP'] !== $ip )
@@ -2244,40 +2253,40 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
       }
       //TODO: maybe exclude the multi-users accounts
       else if( $NOW < $vaulttime ) //fever too high
-      //to exclude guest, add: && $hdl != 'guest'
+      //to exclude guest, add: && $uid > GUESTS_ID_MAX
       {
          $vaultcnt= 0; //enter fever vault...
-         if( $hdl == 'guest' ) //multi-users accounts
+         if( $uid <= GUESTS_ID_MAX ) //multi-users accounts
             $vaulttime= $NOW+VAULT_TIME_X;
          else
             $vaulttime= $NOW+VAULT_TIME; // vault exit date
          $query.= ",VaultCnt=$vaultcnt"
                  .",VaultTime=FROM_UNIXTIME($vaulttime)";
 
-         err_log( $hdl, 'fever_vault');
+         err_log( $handle, 'fever_vault');
 
          //send notifications to owner
          $subject= 'Temporary access restriction';
          $text= 'On '.date($date_fmt, $NOW).":\n"
-               .sprintf($vault_fmt, $hdl, date($date_fmt,$vaulttime));
+               .sprintf($vault_fmt, $handle, date($date_fmt,$vaulttime));
 
          //caution: some IP addresses have more that 50 accounts in DGS
          //$handles= get_players_field("IP='$ip'"); //exclude guest
-         if( $hdl != 'guest' )
-            $handles[]= $hdl;
+         if( $uid > GUESTS_ID_MAX )
+            $handles[]= $handle;
          if( count($handles) > 0 )
             send_message("fever_vault.msg($ip)", $text, $subject
                         , '', $handles, false, 0);
 
          global $FRIENDLY_LONG_NAME;
          $email= $player_row['Email'];
-         if( $hdl != 'guest' && verify_email( false, $email) )
-            send_email("fever_vault.email($hdl)", $email, $text
+         if( $uid > GUESTS_ID_MAX && verify_email( false, $email) )
+            send_email("fever_vault.email($handle)", $email, $text
                       , $FRIENDLY_LONG_NAME.' - '.$subject);
       }
       else //cool enought: reset counters for one period
       {
-         if( $hdl == 'guest' ) //multi-users accounts
+         if( $uid <= GUESTS_ID_MAX ) //multi-users accounts
             $vaultcnt= VAULT_CNT_X;
          else
             $vaultcnt= VAULT_CNT; //less than x hits...
@@ -2287,7 +2296,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
       }
    }
 
-   $query.= " WHERE Handle='".mysql_addslashes($hdl)."' LIMIT 1";
+   $query.= " WHERE ID=$uid LIMIT 1";
    //$updok will be false if an error occurs and error() is set to 'no exit'
    $updok = mysql_query( $query )
       or error('mysql_query_failed','is_logged_in.update_player');
@@ -2298,7 +2307,7 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
       switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
       {
          case 'index.php':
-            $text= sprintf($vault_fmt, $hdl, date($date_fmt,$vaulttime));
+            $text= sprintf($vault_fmt, $handle, date($date_fmt,$vaulttime));
             $_REQUEST['sysmsg']= $text;
             $session_expired= true; //fake disconnection
          break;
@@ -2313,18 +2322,17 @@ function is_logged_in($hdl, $scode, &$player_row) //must be called from main dir
 */
    }
 
-   if( !$updok or @mysql_affected_rows() != 1 )
-      return false;
-
-   if( $session_expired )
-      return false;
+   if( $session_expired || !$updok || @mysql_affected_rows() != 1 )
+   {
+      $player_row['ID'] = 0;
+      return 0;
+   }
 
    get_cookie_prefs($player_row);
 
    setTZ( $player_row['Timezone']);
 
-   $player_row['logged_in'] = true;
-   return true;
+   return $uid;
 } //is_logged_in
 
 // Caution: can cause concurrency problems
@@ -2722,7 +2730,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
    {
       $result = mysql_query("SELECT Observers.uid AS pid " .
                             "FROM Observers " .
-                            "WHERE gid=$gid AND Observers.uid>1" //exclude guest
+                            "WHERE gid=$gid AND Observers.uid>".GUESTS_ID_MAX //exclude guest
                            )
          or error('mysql_query_failed','delete_all_observers.find');
 

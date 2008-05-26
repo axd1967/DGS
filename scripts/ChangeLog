@@ -34,6 +34,17 @@ Changelog
    - removed the now useless Static_Columns variable
    - removed the now useless $no_sort argument of message_list_head()
 
+   * include/std_functions.php (is_logged_in, send_message, notify),
+     send_new_password.php, admin_admins.php, send_message.php,
+     list_contacts.php, join_waitingroom_game.php, edit_contact.php,
+     change_profile.php, change_bio.php, add_to_waitingroom.php,
+     contacts.php, change_password.php:
+   - minor fixes around the 'guest' account particularity
+   - at least, it highlight where the guest id is used in our code
+   - now, is_logged_in returns the id (id>0) of the player who is logged in
+     (instead of the previous simple true)
+   - various LIMIT added on MySQL queries
+
 2008-05-24 rodival
 
    * include/table_columns.php, include/message_functions.php,

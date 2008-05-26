@@ -31,7 +31,7 @@ require_once( "include/contacts.php" );
    if( !$logged_in )
       error('not_logged_in');
 
-   if( $player_row['Handle'] == 'guest' )
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
@@ -64,7 +64,7 @@ require_once( "include/contacts.php" );
       $cuser = '';
    }
 
-   if( $cuser == 'guest' or $cid == 1 )
+   if( $cid <= GUESTS_ID_MAX || strtolower($cuser) == 'guest' )
       error('not_allowed_for_guest');
 
    // identify cid from cid and cuser

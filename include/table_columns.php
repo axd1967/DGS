@@ -354,8 +354,8 @@ class Table
    /*! \brief Create a string of the table. */
    function make_table()
    {
-      if( !$this->Head_closed )
-         error('assert', "Table.make_table.!closed({$this->Head_closed})");
+      //if( !$this->Head_closed )
+      //   error('assert', "Table.make_table.!closed({$this->Head_closed})");
 
       /* Make tablehead */
 
@@ -845,8 +845,8 @@ class Table
 
    function make_tablehead( $tablehead )
    {
-      if( !$this->Head_closed )
-         error('assert', "Table.make_tablehead.!closed({$this->Head_closed})");
+      //if( !$this->Head_closed )
+      //   error('assert', "Table.make_tablehead.!closed({$this->Head_closed})");
       $nr = (int)@$tablehead['Nr'];
       if( $nr < 1 )
          return '';

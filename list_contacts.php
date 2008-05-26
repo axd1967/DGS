@@ -37,8 +37,9 @@ require_once( "include/contacts.php" );
    if( !$logged_in )
       error('not_logged_in');
 
+   $my_id = (int)@$player_row['ID'];
 /* allowed to list... an empty list
-   if( $player_row['Handle'] == 'guest' )
+   if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 */
 
@@ -46,7 +47,6 @@ require_once( "include/contacts.php" );
    //TODO: init in Contact-class
    Contact::load_globals();
 
-   $my_id = $player_row['ID'];
    $page = "list_contacts.php?";
 
    $arr_chk_sysflags = array();
@@ -153,7 +153,7 @@ require_once( "include/contacts.php" );
       'Contacts AS C',
       'INNER JOIN Players AS P ON C.cid = P.ID' );
    $qsql->add_part( SQLP_WHERE,
-      "C.uid=$my_id AND C.cid>1" ); //exclude guest
+      "C.uid=$my_id AND C.cid>".GUESTS_ID_MAX ); //exclude guest
 
    $query_scfilter = $scfilter->get_query(GETFILTER_ALL); // clause-parts for static filter
    $query_cfilter  = $ctable->get_query(); // clause-parts for filter

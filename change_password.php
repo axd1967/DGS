@@ -32,10 +32,11 @@ require_once( "include/std_functions.php" );
    if( !$logged_in )
       error('not_logged_in');
 
-   if( $player_row['Handle'] == 'guest' )
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
-   if( @$_REQUEST['guestpass'] )
+   $guest_id= (int)@$_REQUEST['guestpass']:
+   if( $guest_id > 0 && $guest_id <= GUESTS_ID_MAX )
    {
       if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
          error('adminlevel_too_low');
@@ -46,7 +47,7 @@ require_once( "include/std_functions.php" );
 
       $query = "UPDATE Players SET " .
           "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."') " .
-          "WHERE Handle='guest' LIMIT 1";
+          "WHERE ID=$guest_id LIMIT 1";
    }
    else
    {

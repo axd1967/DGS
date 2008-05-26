@@ -36,12 +36,12 @@ disable_cache();
    if( !$logged_in )
       error('not_logged_in');
 
-   if( $player_row["Handle"] == "guest" )
+   $my_id = (int)@$player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
 
-   $my_id = $player_row['ID'];
-   $tmp = @$_REQUEST['senderid'];
+   $tmp = (int)@$_REQUEST['senderid'];
    if( $tmp>0 && $my_id != $tmp )
       error('user_mismatch');
 
@@ -81,7 +81,7 @@ disable_cache();
    }
 
 
-   if( $tohdl == "guest" )
+   if( strtolower($tohdl) == 'guest' )
       error('guest_may_not_receive_messages');
 
 

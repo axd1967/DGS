@@ -33,12 +33,11 @@ require_once( "include/contacts.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   if( $player_row["Handle"] == "guest" )
-      error("not_allowed_for_guest");
-
-   $my_id = $player_row['ID'];
+   $my_id = (int)@$player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest');
 
    $wr_id = @$_REQUEST['id'];
    if( !is_numeric($wr_id) or $wr_id <= 0 )

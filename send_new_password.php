@@ -33,11 +33,11 @@ require_once( "include/std_functions.php" );
 
    $pswduser = get_request_arg('pswduser');
 
-   if( $pswduser == 'guest' )
+   if( strtolower($pswduser) == 'guest' )
       error('not_allowed_for_guest');
 
    $result = mysql_query( "SELECT ID, Newpassword, Email " .
-                          "FROM Players WHERE Handle='".mysql_addslashes($pswduser)."'" )
+         "FROM Players WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" )
       or error('mysql_query_failed', 'send_new_password.find_player');
 
    if( @mysql_num_rows($result) != 1 )
@@ -45,7 +45,7 @@ require_once( "include/std_functions.php" );
 
    $row = mysql_fetch_assoc($result);
 
-   if( $row['ID'] < 2 )
+   if( $row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
    if( !empty($row['Newpassword']) )

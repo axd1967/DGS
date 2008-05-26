@@ -34,7 +34,7 @@ require_once( "include/rating.php" );
    if( !$logged_in )
       error('not_logged_in');
 
-   if( $player_row["Handle"] == 'guest' )
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
    $my_rating = $player_row['Rating2'];

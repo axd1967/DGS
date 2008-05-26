@@ -73,20 +73,20 @@ require_once( "include/table_columns.php" );
 
         $val = $player_level & (int)$admin_tasks[$type][0];
 
-        if( !($id > 0 || $id=='new') || !$val)
+        if( !($id > 0 || $id==='new') || !$val)
            error('bad_data');
 
         $Admin[$id] |= $val;
      }
 
-     if( !($Admin[$player_row["ID"]] & ADMIN_SUPERADMIN) )
+     if( !($Admin[$player_row['ID']] & ADMIN_SUPERADMIN) )
         error('admin_no_longer_admin_admin');
 
      $newadmin= get_request_arg('newadmin');
      if( $Admin['new'] != 0 && !empty($newadmin))
      {
         $result = mysql_query("SELECT ID,Adminlevel+0 AS admin_level FROM Players " .
-                              "WHERE Handle='".mysql_addslashes($newadmin)."'")
+                  "WHERE Handle='".mysql_addslashes($newadmin)."' LIMIT 1")
            or error('mysql_query_failed','admin_admins.find_new_admin');
 
         if( @mysql_num_rows($result) != 1 )
@@ -120,7 +120,7 @@ require_once( "include/table_columns.php" );
         }
      }
 
-     $player_level = (int)$Admin[$player_row["ID"]];
+     $player_level = (int)$Admin[$player_row['ID']];
   }
 
   $result = mysql_query("SELECT ID, Handle, Name, Adminlevel+0 AS admin_level FROM Players " .
@@ -151,6 +151,7 @@ require_once( "include/table_columns.php" );
       list( $amask, $aname) = $tmp;
       $atable->add_tablehead($col++, $aname, '', 0, 1, 'Mark');
    }
+   $atable->set_default_sort( 1); //on ID
 
    //can't add an admin if had not the privlege
    $new_admin = ($player_level & ADMIN_ADD_ADMIN);
@@ -161,7 +162,7 @@ require_once( "include/table_columns.php" );
       $col = 3;
       if( is_array($row) )
       {
-         $id = $row["ID"];
+         $id = $row['ID'];
          $level = $row['admin_level'];
          $arow_strings[1]= "<A href=\"userinfo.php?uid=$id\">$id</A>";
          $arow_strings[2]= "<A href=\"userinfo.php?uid=$id\">" . $row["Handle"] . "</A>";

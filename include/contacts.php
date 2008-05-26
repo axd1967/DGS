@@ -268,7 +268,7 @@ class Contact
     */
    function has_contact( $uid, $cid )
    {
-      if ( $uid == $cid || $cid <= 1 || $uid <= 1 ) //exclude guest
+      if ( $uid == $cid || $cid <= GUESTS_ID_MAX || $uid <= GUESTS_ID_MAX ) //exclude guest
          return -1;
       $result = db_query( 'contact.has_contact',
          "SELECT cid FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");

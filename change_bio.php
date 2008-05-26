@@ -29,12 +29,12 @@ require_once( "include/std_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
-   if( $player_row["Handle"] == "guest" )
-      error("not_allowed_for_guest");
+   $my_id = (int)@$player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest');
 
-   $my_id = $player_row['ID'];
    $change_it = isset($_REQUEST['action']);
 
 
