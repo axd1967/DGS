@@ -65,7 +65,12 @@ class Table
    /*! \brief already opened Form class to be used by add_column and filters */
    var $ExternalForm;
 
-   /*! \brief Array of the columns to sort on (>0=ascending, <0=descending) */
+   /*! \brief Array of the columns to sort on
+    *  $Sort= array( nr1 => +/-nr1, nr2 => +/-nr2, ...);
+    *  => +nr : sort the column nr with its default sort order
+    *  => -nr : sort the column nr with the reverse order of its default
+    *  nr1 will be the main sort, nr2 the second one... up to TABLE_MAX_SORT
+    */
    var $Sort;
    var $Sortimg;
 
@@ -75,9 +80,7 @@ class Table
    var $Column_set;
    /*! \brief The column of the Player table in the database to use as column_set.
     * \see $Column_set */
-   var $Player_Column_set_field;
-   /*! \brief If true, the table will not be able to add or delete columns. */
-   var $Static_Columns;
+   var $Player_Column_set_name;
    /*! \brief The columns that has been removed. */
    var $Removed_Columns;
    /*! \brief The number of columns displayed, known after make_tablehead() */
@@ -161,7 +164,7 @@ class Table
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
-   function Table( $_tableid, $_page, $_player_column_set_field=''
+   function Table( $_tableid, $_page, $_player_column_set_name=''
                   , $_prefix='', $_mode=0)
    {
       global $player_row;
@@ -176,9 +179,9 @@ class Table
       $this->Sort = array();
       $this->Sortimg = array();
 
-      $this->Id = $_tableid;
-      $this->Prefix = $_prefix;
-      $this->Mode = $_mode;
+      $this->Id = (string)$_tableid;
+      $this->Prefix = (string)$_prefix;
+      $this->Mode = (int)$_mode;
 
       // prepare for appending URL-parts (ends with either '?' or URI_AMP)
       if( !is_numeric( strpos( $_page, '?')) )
@@ -189,19 +192,19 @@ class Table
       else
          $this->Page = $_page . URI_AMP; //end_sep
 
-      if( !empty($_player_column_set_field)
-         && is_string($_player_column_set_field) )
+      if( !empty($_player_column_set_name)
+         && is_string($_player_column_set_name)
+         && !($this->Mode&TABLE_NO_HIDE) )
       {
-         $this->Static_Columns = false;
-         $this->Player_Column_set_field = $_player_column_set_field;
+         $this->Player_Column_set_name = $_player_column_set_name;
          $this->Column_set = ALL_COLUMNS;
-         if( isset($player_row[ $_player_column_set_field ]) )
-            $this->Column_set &= $player_row[ $_player_column_set_field ];
+         if( isset($player_row[ $_player_column_set_name ]) )
+            $this->Column_set &= $player_row[ $_player_column_set_name ];
       }
       else
       {
-         $this->Static_Columns = true;
-         $this->Player_Column_set_field = '';
+         $this->Mode|= TABLE_NO_HIDE;
+         $this->Player_Column_set_name = '';
          $this->Column_set = ALL_COLUMNS;
       }
 
@@ -231,7 +234,7 @@ class Table
          FCONF_EXTERNAL_SUBMITS   => false,
       );
       $this->cache_curr_filter = array();
-   }
+   } //Table
 
    /*! \brief Sets external form for this table, $form is passed as reference */
    function set_externalform( &$form )
@@ -274,15 +277,18 @@ class Table
          else
             $attbs= null;
       }
-      $sort_string= trim($sort_string);
-      if( $sort_string
-         && !is_numeric(strpos('+-',substr($sort_string,-1))) )
-         $sort_string.= ($desc_default ? '-' : '+');
+      //adjust old style parameters to new ones
+      $mode = ($undeletable ? TABLE_NO_HIDE : 0) | $this->Mode;
+      $sort_extnd= trim($sort_string);
+      if( !$sort_extnd )
+         $mode|= TABLE_NO_SORT;
+      else if( !is_numeric(strpos('+-',substr($sort_extnd,-1))) )
+         $sort_extnd.= ($desc_default ? '-' : '+');
       $this->Tableheads[$nr] =
          array( 'Nr' => $nr,
                 'Description' => $description,
-                'Sort_String' => $sort_string,
-                'Undeletable' => $undeletable,
+                'Sort_String' => $sort_extnd,
+                'Mode' => $mode,
                 'attbs' => $attbs );
 
       $visible = $this->Is_Column_Displayed[$nr] = $this->is_column_displayed( $nr);
@@ -292,7 +298,7 @@ class Table
 
    /*! \brief records the default order of the table
     *   by the way, close and compute the headers definitions
-    *  \param $default_sorts are +/- $colnum_nbr
+    *  \param $default_sorts are +/- $column_nbr
     *  works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
     *    (allowing a current_order_string() default usage)
     */
@@ -301,9 +307,8 @@ class Table
       if( $this->Head_closed )
          error('assert', "Table.set_default_sort.closed({$this->Head_closed})");
       $this->Head_closed= 1;
-      //if( TABLE_MAX_SORT<=0 || $this->Mode&TABLE_NO_SORT ) return;
       $s= array();
-      //for( $i=min(func_num_args(),TABLE_MAX_SORT); $i>0; )
+      //even if TABLE_NO_SORT or TABLE_MAX_SORT==0:
       for( $i=func_num_args(); $i>0; )
       {
          --$i;
@@ -329,9 +334,12 @@ class Table
    /*! \brief Check if column is displayed. */
    function is_column_displayed( $nr )
    {
-      return $this->Static_Columns ||
-             $this->Tableheads[$nr]['Undeletable'] ||
-             ( $nr < 1 ? 1 : (1 << ($nr-1)) & $this->Column_set );
+      if( $nr < 1 ) return 0;
+      if( $nr > 32 ) return 1;
+      $mask = (1 << ($nr-1));
+      if( !($mask&ALL_COLUMNS) ) return 1;
+      if( (TABLE_NO_HIDE&@$this->Tableheads[$nr]['Mode']) ) return 1;
+      return ($mask&$this->Column_set);
    }
 
    /*!
@@ -403,7 +411,7 @@ class Table
 
       if( isset($this->ExternalForm) )
          $table_form = $this->ExternalForm; // read-only
-      else if( $need_form || !$this->Static_Columns ) // need form for filter or add-column
+      else if( $need_form || !($this->Mode&TABLE_NO_HIDE) ) // need form for filter or add-column
       {
          $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
             clean_url( $this->Page),
@@ -414,14 +422,14 @@ class Table
          unset( $table_form);
 
 
-      if( $need_form or !$this->Static_Columns ) // add-col & filter-submits
+      if( $need_form || !($this->Mode&TABLE_NO_HIDE) ) // add-col & filter-submits
       {
          $addcol_str = $this->make_add_column_form( $table_form);
          $string .= $addcol_str;
       }
 
       // build form for Filter + AddColumn
-      if ( isset($table_form) and is_null($this->ExternalForm) )
+      if ( isset($table_form) && is_null($this->ExternalForm) )
       {
          $string = $table_form->print_start_default()
             . $string // embed table
@@ -605,7 +613,7 @@ class Table
       foreach( $adds as $add )
       {
          $add = (int)$add;
-         if( $add > 0 ) // add col
+         if( $add > 0 && $add <= 32 ) // add col
          {
             $newset |= (1 << ($add-1));
             $this->Filters->reset_filter($add);
@@ -621,7 +629,7 @@ class Table
       foreach( $dels as $del )
       {
          $del = (int)$del;
-         if( $del > 0 ) // del col
+         if( $del > 0 && $del <= 32 ) // del col
          {
             $newset &= ~(1 << ($del-1));
             $this->Filters->reset_filter($del);
@@ -646,13 +654,13 @@ class Table
        *  while a value<0 can't be recorded in an UNSIGNED INT field
        */
       $newset &= ALL_COLUMNS; //and reset it to the (signed) integer type
-      if( $uid > 0 && !empty($this->Player_Column_set_field)
+      if( $uid > 0 && !empty($this->Player_Column_set_name)
          && (($newset ^ $this->Column_set) & ALL_COLUMNS ) )
       {
-         $player_row[ $this->Player_Column_set_field ] =
+         $player_row[ $this->Player_Column_set_name ] =
          $this->Column_set = $newset;
          //note: the column field must be a SIGNED INT
-         $query = "UPDATE Players SET " . $this->Player_Column_set_field
+         $query = "UPDATE Players SET " . $this->Player_Column_set_name
             ."=$newset WHERE ID=$uid LIMIT 1";
 
          mysql_query($query)
@@ -839,7 +847,9 @@ class Table
    {
       if( !$this->Head_closed )
          error('assert', "Table.make_tablehead.!closed({$this->Head_closed})");
-      $nr = $tablehead['Nr'];
+      $nr = (int)@$tablehead['Nr'];
+      if( $nr < 1 )
+         return '';
 
       if( !$this->Is_Column_Displayed[$nr] )
       {
@@ -848,6 +858,7 @@ class Table
       }
 
       $this->Shown_Columns++;
+      $mode = $this->Mode | (int)@$tablehead['Mode'];
 
       $curColId = $this->Prefix.'Col'.$nr;
       $string = "\n  <th id=\"$curColId\" scope=col";
@@ -888,7 +899,7 @@ class Table
       $field = (string)@$tablehead['Sort_String'];
       $sortimg= (string)@$this->Sortimg[$nr];
 
-      if( $field && !($this->Mode&TABLE_NO_SORT) )
+      if( $field && !($mode&TABLE_NO_SORT) )
       {
          $hdr = '<a href="' . $this->Page; //end_sep
          $hdr .= $this->make_sort_string( $nr, true ); //end_sep
@@ -903,7 +914,7 @@ class Table
       }
       $string .= '<span class="Header">' . $hdr . '</span>';
 
-      $query_del = !$tablehead['Undeletable'] && !$this->Static_Columns;
+      $query_del = !($mode&TABLE_NO_HIDE);
       if( $query_del )
       {
          $query_del = $this->Page //end_sep
@@ -1168,7 +1179,7 @@ class Table
          $string = "\n <tr class=Links$id>\n$string\n </tr>";
 
       return $string;
-   }
+   } //make_next_prev_links
 
    /*! \brief Make sort part of URL */
    function make_sort_string( $add_sort=0, $end_sep=false )
@@ -1183,7 +1194,7 @@ class Table
             //reset($s);
             list($sk,$sd)= each($s);
             if( $key == $sk ) //if it is main sort...
-               $add_sort= -$sd; //toggle sort sens
+               $add_sort= -$sd; //toggle sort order
             else
                $add_sort= $s[$key]; //move it on main place
          }
@@ -1206,20 +1217,20 @@ class Table
       if( $str && $end_sep )
          $str.= URI_AMP;
       return $str;
-   }
+   } //make_sort_string
 
    /*! \brief Adds a form for adding columns. */
    function make_add_column_form( &$ac_form)
    {
       // add-column-elements
       $ac_string = '';
-      if( !($this->Static_Columns or count($this->Removed_Columns) < 1 ) )
+      if( !($this->Mode&TABLE_NO_HIDE) && count($this->Removed_Columns) > 0 )
       {
          split_url($this->Page, $page, $args);
          foreach( $args as $key => $value ) {
             $ac_form->add_hidden( $key, $value);
          }
-
+         //Note: asort on translated strings
          asort($this->Removed_Columns);
          $this->Removed_Columns[ 0 ] = '';
          $this->Removed_Columns[ -1 ] = T_('All columns');
@@ -1231,7 +1242,7 @@ class Table
 
       // add filter-submits in add-column-row if not in table-head and need form for filter
       $f_string = '';
-      if ( $this->UseFilters and !$this->ConfigFilters[FCONF_EXTERNAL_SUBMITS] )
+      if( $this->UseFilters && !$this->ConfigFilters[FCONF_EXTERNAL_SUBMITS] )
          $f_string = implode( '', $this->Filters->get_submit_elements() );
 
       // add show-rows elements in add-column-row

@@ -1057,37 +1057,36 @@ function message_list_query($my_id, $folderstring='all', $order=' ORDER BY date'
 
 // param full_details: if true, show additional fields for message-search
 function message_list_head( &$mtable, $current_folder
-             , $no_sort=true, $no_mark=true, $full_details=false
+             , $no_mark=true, $full_details=false
              )
 {
  global $msg_icones;
 
-   $mtable->ExtMode['no_sort']= $no_sort;
    $mtable->ExtMode['no_mark']= $no_mark;
    $mtable->ExtMode['full_details']= $full_details;
    $mtable->ExtMode['current_folder']= $current_folder;
 
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
    $mtable->add_tablehead( 1, T_('Folder#header'),
-      ( $no_sort || $current_folder>FOLDER_ALL_RECEIVED ) ? '' : 'folder', 1, 0, 'Folder');
+      ( $current_folder>FOLDER_ALL_RECEIVED ) ? '' : 'folder', 1, 0, 'Folder');
 
    if ( $full_details )
    {
       // additional fields for search-messages
       $mtable->add_tablehead( 6, T_('Type#header'), 'M.Type', 0, 1);
-      $mtable->add_tablehead( 7, T_('Direction#header'), $no_sort ? '' : 'Sender', 0, 0, 'MsgDir');
-      $mtable->add_tablehead( 2, T_('Correspondent#header'), $no_sort ? '' : 'other_name',  0, 0, 'User');
+      $mtable->add_tablehead( 7, T_('Direction#header'), 'Sender', 0, 0, 'MsgDir');
+      $mtable->add_tablehead( 2, T_('Correspondent#header'), 'other_name',  0, 0, 'User');
    }
    else
       $mtable->add_tablehead( 2,
          ($current_folder == FOLDER_SENT ? T_('To#header') : T_('From#header') ),
-         $no_sort ? '' : 'other_name', 0, 0, 'User');
+         'other_name', 0, 0, 'User');
 
-   $mtable->add_tablehead( 3, T_('Subject#header'), $no_sort ? '' : 'Subject', 0, 0);
+   $mtable->add_tablehead( 3, T_('Subject#header'), 'Subject', 0, 0);
    list($ico,$alt) = $msg_icones[0];
-   $mtable->add_tablehead(33, image( $ico, $alt, T_('Messages')),
-      $no_sort ? '' : 'flow', 0, 1, 'Image');
-   $mtable->add_tablehead( 4, T_('Date#header'), $no_sort ? '' : 'date', 1, 0, 'Date');
+   $mtable->add_tablehead(33, image( $ico, '*-*' /*$alt , T_('Sort')*/),
+      'flow', 0, 1, 'Image');
+   $mtable->add_tablehead( 4, T_('Date#header'), 'date', 1, 0, 'Date');
    if( !$no_mark )
       $mtable->add_tablehead( 5, T_('Mark#header'), '', 0, 1, 'Mark');
 
@@ -1101,7 +1100,6 @@ function message_list_body( &$mtable, $result, $show_rows
 {
  global $date_fmt, $msg_icones, $player_row;
 
-   //$no_sort= @$mtable->ExtMode['no_sort'];
    $no_mark= @$mtable->ExtMode['no_mark'];
    $full_details= @$mtable->ExtMode['full_details'];
    //$current_folder= @$mtable->ExtMode['current_folder'];

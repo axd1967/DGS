@@ -111,12 +111,12 @@ require_once( "include/filter.php" );
    //$mfilter->set_accesskeys('x', 'z');
    $sf3 =& $mfilter->get_filter(3);
 
-   $mtable = new Table( 'message', $page, '', 'msgSearch');
+   $mtable = new Table( 'message', $page, '', 'msgSearch', TABLE_NO_HIDE);
    $mtable->register_filter( $mfilter );
    $mtable->add_or_del_column();
 
    message_list_head( $mtable, FOLDER_NONE
-      , /*no_sort*/ false, /*no_mark*/ true, /*full-details*/ true );
+      , /*no_mark*/ true, /*full-details*/ true );
    $mtable->set_default_sort( 4); //on 'date'
 
    // External-Search-Form

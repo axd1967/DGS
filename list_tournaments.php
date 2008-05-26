@@ -75,7 +75,7 @@ require_once( "include/tournament.php" );
          while( $partrow = mysql_fetch_array( $partresult ) )
             $participants[]= $partrow['pid'];
 
-         $row_strings[0] = $table->button_TD_anchor( "show_tournament.php?tid=$ID", $ID);
+         $row_strings[1] = $table->button_TD_anchor( "show_tournament.php?tid=$ID", $ID);
          $row_strings[2] = array(
             'attbs' => array( 'bgcolor' => $state_colors[ $State ]),
             'text' => $TourState_Strings[ $State ]

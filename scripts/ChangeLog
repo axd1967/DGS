@@ -23,6 +23,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-26 rodival
+
+   * include/table_columns.php (Table, add_tablehead, make_table,
+      is_column_displayed),
+     include/message_functions.php (message_list_head, message_list_body),
+     list_messages.php, search_messages.php, list_tournaments.php:
+   - enhanced (and finished) the management of the TABLE_NO_SORT
+     and TABLE_NO_HIDE options.
+   - removed the now useless Static_Columns variable
+   - removed the now useless $no_sort argument of message_list_head()
+
 2008-05-24 rodival
 
    * include/table_columns.php, include/message_functions.php,
