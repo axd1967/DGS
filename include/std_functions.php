@@ -1287,7 +1287,7 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
    setcookie( $name, $value, $NOW+$rel_expire, $SUB_PATH );
    //for current session:
    $_COOKIE[$name] = $value; //??? add magic_quotes_gpc like slashes?
-}
+} //safe_setcookie
 
 function set_login_cookie($handl, $code, $delete=false)
 {
@@ -1303,32 +1303,80 @@ function set_login_cookie($handl, $code, $delete=false)
       safe_setcookie('handle', $handl, $session_duration*5);
       safe_setcookie('sessioncode', $code, $session_duration);
    }
-}
+} //set_login_cookie
 
-function set_cookie_prefs($id, $delete=false)
+function set_cookie_prefs(&$player_row, $delete=false)
 {
- global $cookie_prefs, $session_duration;
+   $uid = (int)@$player_row['ID'];
+   //assert('$uid>0');
+   if( $uid <= 0 ) return;
+
+   global $cookie_prefs/*, $session_duration*/;
 
    if( $delete )
-      safe_setcookie("prefs$id");
+      safe_setcookie("prefs$uid");
    else
-      safe_setcookie("prefs$id", serialize($cookie_prefs), 3600*12*61*12*5); //5 years
-}
+      safe_setcookie("prefs$uid", serialize($cookie_prefs), 3600*12*61*12*5); //5 years
+} //set_cookie_prefs
 
 function get_cookie_prefs(&$player_row)
 {
+   $uid = (int)@$player_row['ID'];
+   //assert('$uid>0');
+   if( $uid <= 0 ) return;
+
    global $cookie_prefs, $cookie_pref_rows;
 
-   $cookie_prefs = unserialize( safe_getcookie("prefs{$player_row['ID']}") );
+   $cookie_prefs = unserialize( safe_getcookie("prefs$uid") );
    if( !is_array( $cookie_prefs ) )
       $cookie_prefs = array();
 
    foreach( $cookie_prefs as $key => $value )
-      {
-         if( in_array($key, $cookie_pref_rows) )
-            $player_row[$key] = $value;
-      }
-}
+   {
+      if( in_array($key, $cookie_pref_rows) )
+         $player_row[$key] = $value;
+   }
+} //get_cookie_prefs
+
+function switch_admin_status(&$player_row, $mask=0, $cmd='')
+{
+   $uid = (int)@$player_row['ID'];
+   //assert('$uid>0');
+   if( $uid <= 0 ) return -3;
+
+   $cookie = "status$uid";
+   $level = (int)@$player_row['admin_level'];
+   if( !$mask )
+   {
+      $status = $level & (int)safe_getcookie($cookie);
+      $player_row['admin_status'] = $status;
+      return -2;
+   }
+   if( ($level & $mask) == 0 )
+      return -1; //not granted
+
+   $status = $level & (int)@$player_row['admin_status'];
+   $old = $status;
+   switch( strtolower($cmd) )
+   {
+      case 'y': case '+': $status |= $mask; break; //set
+      case 'n': case '-': $status &=~$mask; break; //unset
+      case 'x': case '*': $status ^= $mask; break; //toggle
+      //default: break; //just return status
+   }
+   if( $old != $status )
+   {
+      if( $status )
+         safe_setcookie( $cookie, $status, 3600);
+      else
+         safe_setcookie( $cookie);
+      $player_row['admin_status'] = $status;
+   }
+   if( ($status & $mask) == $mask )
+      return 1; //active
+   return 0; //granted but inactive
+} //switch_admin_status
+
 
 function add_line_breaks( $str)
 {
@@ -1924,7 +1972,7 @@ function make_url( $url, $args, $end_sep=false)
    $sep= ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
    $args= build_url( $args, $end_sep);
    if( $args || $end_sep )
-      $url.= $sep . $args;
+      return $url . $sep . $args;
    return $url;
 } //make_url
 
@@ -2329,6 +2377,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
    }
 
    get_cookie_prefs($player_row);
+   switch_admin_status($player_row); //get default admin_status
 
    setTZ( $player_row['Timezone']);
 

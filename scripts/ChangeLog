@@ -45,6 +45,15 @@ Changelog
      (instead of the previous simple true)
    - various LIMIT added on MySQL queries
 
+   * include/std_functions.php (switch_admin_status, set_cookie_prefs),
+     forum/search.php, forum/read.php, forum/index.php, forum/list.php,
+     forum/forum_functions.php (set_moderator_cookie),
+     change_profile.php:
+   - generalized way to handle the moderator status
+   - set_moderator_cookie() is replaced by switch_admin_status()
+   - set_cookie_prefs() now had the player_row as parameter
+     like get_cookie_prefs()
+
 2008-05-24 rodival
 
    * include/table_columns.php, include/message_functions.php,

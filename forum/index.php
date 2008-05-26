@@ -64,11 +64,12 @@ $ThePage = new Page('ForumsList');
    $headline = array(T_('Forums') => "colspan=$cols");
    $links |= LINK_SEARCH;
 
-   $is_moderator = false;
-   if( (@$player_row['admin_level'] & ADMIN_FORUM) )
+   $is_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
+   if( $is_moderator < 0 )
+      $is_moderator = 0;
+   else
    {
       $links |= LINK_TOGGLE_MODERATOR;
-      $is_moderator = set_moderator_cookie($player_row['ID']);
    }
 
    $title = T_('Forum list');

@@ -123,7 +123,7 @@ require_once( "include/rating.php" );
       $cookie_prefs['SkinName'] = $skinname;
       $cookie_prefs['TableMaxRows'] = $tablemaxrows;
 
-      set_cookie_prefs($player_row['ID']);
+      set_cookie_prefs($player_row);
    }
    else
    {
@@ -145,7 +145,7 @@ require_once( "include/rating.php" );
          "SkinName='" . mysql_addslashes($skinname) . "', " .
          "TableMaxRows=$tablemaxrows, ";
 
-      set_cookie_prefs($player_row['ID'], true);
+      set_cookie_prefs($player_row, true);
    }
 
 

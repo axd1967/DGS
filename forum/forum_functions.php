@@ -98,8 +98,9 @@ function make_link_array($links, $max_rows, $ReqParam = null)
 
    if( $links & LINK_TOGGLE_MODERATOR )
    {
+      global $is_moderator;
       $get = array_merge( $_GET, $_POST);
-      $get['moderator'] = ( safe_getcookie('forummoderator' . $player_row['ID']) == 'y'? 'n' : 'y' );
+      $get['moderator'] = ( empty($is_moderator) ? 'y' : 'n' );
       $link_array_right[T_("Toggle forum moderator")] =
          ($links & LINKPAGE_READ
             ? make_url( "read.php", $get, false )
@@ -479,22 +480,6 @@ function forum_name($forum, &$moderated)
    return $row["Forumname"];
 }
 
-function set_moderator_cookie($id)
-{
-   $moderator = @$_GET['moderator'];
-   $cookie = safe_getcookie("forummoderator$id");
-   if( $moderator === 'n' && $cookie !== '' )
-   {
-      $cookie = '';
-      safe_setcookie( "forummoderator$id");
-   }
-   else if( $moderator === 'y' && $cookie !== 'y' )
-   {
-      $cookie = 'y';
-      safe_setcookie( "forummoderator$id", $cookie, 3600);
-   }
-   return $cookie === 'y';
-}
 
 function approve_message($id, $thread, $forum, $approve=true,
                          $approve_reject_pending_approval=false)

@@ -181,17 +181,15 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 
    $headline = array(T_("Reading thread") => "colspan=$cols");
    $links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
-   $is_moderator = false;
 
-   if( (@$player_row['admin_level'] & ADMIN_FORUM) )
+   $is_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
+   //toggle moderator and preview does not work together.
+   //(else add $_POST in the moderator link build)
+   if( $preview || $is_moderator < 0 )
+      $is_moderator = 0;
+   else
    {
-      //toggle moderator and preview does not work together.
-      //(else add $_POST in the moderator link build)
-      if( !$preview )
-         $links |= LINK_TOGGLE_MODERATOR;
-
-      $is_moderator = set_moderator_cookie($player_row['ID']);
-
+      $links |= LINK_TOGGLE_MODERATOR;
       if( (int)@$_GET['show'] > 0 )
          approve_message( (int)@$_GET['show'], $thread, $forum, true );
       else if( (int)@$_GET['hide'] > 0 )

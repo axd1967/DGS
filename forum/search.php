@@ -39,30 +39,28 @@ define('MODERATOR_SEARCH', 0);
 
    $uid = $player_row["ID"];
    $page = "search.php";
-   $is_moderator = false;
    $links = LINKPAGE_SEARCH;
 
-   if( MODERATOR_SEARCH && (@$player_row['admin_level'] & ADMIN_FORUM) )
+   $is_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
+   if( !MODERATOR_SEARCH || $is_moderator < 0 )
+      $is_moderator = 0;
+   else
    {
       $links |= LINK_TOGGLE_MODERATOR;
-
 /*
       if( @$_REQUEST['show'] > 0 )
          approve_message( (int)@$_REQUEST['show'], $thread, $forum, true );
       else if( @$_REQUEST['hide'] > 0 )
          approve_message( (int)@$_REQUEST['hide'], $thread, $forum, false );
 */
-
-      $is_moderator = set_moderator_cookie($player_row['ID']);
    }
-
 
    $title = T_('Forum search');
    $prefix = '';
    start_page($title, true, $logged_in, $player_row);
    echo "<h3 class=Header>$title</h3>\n";
 
-   if ( @$_REQUEST[FFORM_RESET_ACTION] )
+   if( @$_REQUEST[FFORM_RESET_ACTION] )
    {
       $offset = 0;
       $order = 0;
