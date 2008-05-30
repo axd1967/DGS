@@ -23,6 +23,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-30 rodival
+
+   * halfhourly_cron.php:
+   - optimization of the update-vacations query
+
 2008-05-26 rodival
 
    * include/table_columns.php (Table, add_tablehead, make_table,

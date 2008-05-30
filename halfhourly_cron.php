@@ -62,21 +62,21 @@ function mail_link( $nam, $lnk)
    return "[ $nam ]";
 }
 
-//see also make_html_safe()
+//to be used as preg_exp. see also make_html_safe()
 $tmp = '[\\x1-\\x20]*=[\\x1-\\x20]*(\"|\'|)([^>\\x1-\\x20]*?)';
 $strip_html_table = array(
     "%&nbsp;%si" => " ",
     "%<A([\\x1-\\x20]+((href$tmp\\4)|(\w+$tmp\\7)|(\w+)))*[\\x1-\\x20]*>(.*?)</A>%sie"
        => "mail_link('\\10','\\5')",
-    "%</?(UL|BR)[\\x1-\\x20]*/?>%si"
+    "%</?(UL|BR)[\\x1-\\x20]*/?\>%si"
        => "\n",
-    "%</CENTER[\\x1-\\x20]*/?>\n?%si"
+    "%</CENTER[\\x1-\\x20]*/?\>\n?%si"
        => "\n",
-    "%\n?<CENTER[\\x1-\\x20]*/?>%si"
+    "%\n?<CENTER[\\x1-\\x20]*/?\>%si"
        => "\n",
-    "%</?P[\\x1-\\x20]*/?>%si"
+    "%</?P[\\x1-\\x20]*/?\>%si"
        => "\n\n",
-    "%[\\x1-\\x20]*<LI[\\x1-\\x20]*/?>[\\x1-\\x20]*%si"
+    "%[\\x1-\\x20]*<LI[\\x1-\\x20]*/?\>[\\x1-\\x20]*%si"
        => "\n - ",
    );
 function mail_strip_html( $str)
@@ -255,12 +255,12 @@ if( !$is_down )
 
 
    //Setting Notify to 'DONE' stop notifications until the player's visite
-   mysql_query( "UPDATE Players SET Notify='DONE' " .
-                "WHERE SendEmail LIKE '%ON%' AND Notify='NOW' " )
+   mysql_query( "UPDATE Players SET Notify='DONE'"
+              ." WHERE SendEmail LIKE '%ON%' AND Notify='NOW'" ) // LIMIT ?
       or error('mysql_query_failed','halfhourly_cron.update_players_notify_Done');
 
-   mysql_query( "UPDATE Players SET Notify='NOW' " .
-                "WHERE SendEmail LIKE '%ON%' AND Notify='NEXT' " )
+   mysql_query( "UPDATE Players SET Notify='NOW'"
+              ." WHERE SendEmail LIKE '%ON%' AND Notify='NEXT'" ) // LIMIT ?
       or error('mysql_query_failed','halfhourly_cron.update_players_notify_Now');
 
 
@@ -324,14 +324,16 @@ if(1){//new
 
 
 // Change vacation days
+   $max_vacations = '(365.24/12)';
+   db_query( 'halfhourly_cron.vacation_days',
+         "UPDATE Players SET"
+         ." VacationDays=LEAST($max_vacations, VacationDays + 1/(12*2*24))"
+         .",OnVacation=GREATEST(0, OnVacation - 1/(2*24))"
+         ." WHERE VacationDays<$max_vacations OR OnVacation>0" // LIMIT ???
+         );
 
-   mysql_query("UPDATE Players SET " .
-               "VacationDays=LEAST(365.24/12, VacationDays + 1/(12*2*24)), " .
-               "OnVacation=GREATEST(0, OnVacation - 1/(2*24))")
-      or error('mysql_query_failed','halfhourly_cron.vacation_days');
-
-   mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=202")
-               or error('mysql_query_failed','halfhourly_cron.reset_tick');
+   db_query( 'halfhourly_cron.reset_tick',
+         "UPDATE Clock SET Ticks=0 WHERE ID=202" );
 if( !@$chained ) $TheErrors->dump_exit('halfhourly_cron');
 //the whole cron stuff in one cron job (else comments this line):
 include_once( "daily_cron.php" );
