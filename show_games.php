@@ -95,6 +95,8 @@ $ThePage = new Page('GamesList');
       $column_set_name = "RunningGamesColumns";
       $fprefix = 'r';
    }
+   $show_notes= (LIST_GAMENOTE_LEN>0
+         && !$observe && !$all && $uid==$my_id); //FU+RU subset
 
    // table filters
    $gfilter = new SearchFilter( $fprefix );
@@ -225,7 +227,6 @@ $ThePage = new Page('GamesList');
  *****
  *Views-columns usage:
  * no: description of displayed info
- *  0: -
  *  1: ID
  *  2: sgf
  *  3: >  FU+RU (Opponent-Name)
@@ -239,6 +240,7 @@ $ThePage = new Page('GamesList');
  * 11: >  FU [User-Score AS X_Score] (Win-graphic) -> fname=won
  * 13:    FU+FA [Lastchanged] (End date), OB+RU+RA [Lastchanged] (Last move)
  * 14:    [Rated AS X_Rated] (Rated) -> fname=rated
+ * 32: >  FU+RU [Notes AS X_Note] (Notes)
  * 16: >  FU+RU [Rating AS X_Rating] (User-Rating)
  * 17: >  OB+FA+RA (Black-Name)
  * 18: >  OB+FA+RA (Black-Handle)
@@ -259,6 +261,11 @@ $ThePage = new Page('GamesList');
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
    $gtable->add_tablehead( 1, T_('##header'), 'ID', 1, 1, 'Button');
    $gtable->add_tablehead( 2, T_('sgf#header'), '', 0, 0, 'Sgf');
+   if( !$observe && !$all ) //FU+RU ?UNION
+   {
+      if( $show_notes )
+         $gtable->add_tablehead(32, T_('Notes#header'), 'X_Note', 1, 0, '');
+   }
 
    if( $observe )
    {
@@ -424,6 +431,14 @@ $ThePage = new Page('GamesList');
          "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color" );
       $qsql->add_part( SQLP_FROM, 'Games', 'Players' );
 
+      if( $show_notes ) //FU+RU ?UNION
+      {
+         $qsql->add_part( SQLP_FIELDS, "Gnt.Notes AS X_Note" );
+         $qsql->add_part( SQLP_FROM,
+            "LEFT JOIN GamesNotes AS Gnt ON Gnt.gid=Games.ID"
+               ." AND Gnt.player=IF(White_ID=$my_id,'W','B')" );
+      }
+
       if( $finished ) //FU ?UNION
       {
          $qsql->add_part( SQLP_FIELDS,
@@ -543,6 +558,13 @@ $ThePage = new Page('GamesList');
       }
       else //FU+RU ?UNION
       {
+         if( $show_notes && $gtable->Is_Column_Displayed[32] )
+         { //keep the first line up to LIST_GAMENOTE_LEN chars
+            $X_Note= trim( substr(
+               preg_replace("/[\\x00-\\x1f].*\$/s",'',$X_Note)
+               , 0, LIST_GAMENOTE_LEN) );
+            $grow_strings[32] = make_html_safe($X_Note);
+         }
          if( $gtable->Is_Column_Displayed[3] )
             $grow_strings[3] = "<A href=\"userinfo.php?uid=$pid\">" .
                make_html_safe($Name) . "</a>";

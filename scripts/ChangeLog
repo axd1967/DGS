@@ -28,6 +28,14 @@ Changelog
    * halfhourly_cron.php:
    - optimization of the update-vacations query
 
+   * include/std_functions.php,
+     status.php, show_games.php:
+   - add of a "Notes" column in the Status and Games list-tables owned
+     by the reader
+   - this column had been added with the number 32 to also test this
+     newly deletable column which use the sign bit
+   - also modified the favicon href to "/favicon.ico"... as a new try
+
 2008-05-26 rodival
 
    * include/table_columns.php (Table, add_tablehead, make_table,

@@ -127,7 +127,7 @@ $ThePage = new Page('Status');
 
       $mtable->echo_table();
    }
-   //mysql_free_result($result);
+   mysql_free_result($result);
    //unset($mtable);
 } // show messages
 
@@ -135,11 +135,15 @@ $ThePage = new Page('Status');
 { // show games
    $uid = $my_id;
 
+   $show_notes= (LIST_GAMENOTE_LEN>0);
+
    $gtable->add_or_del_column();
    // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
    $gtable->add_tablehead( 1, T_('##header'), 'ID', 1, 1, 'Button');
 
    $gtable->add_tablehead( 2, T_('sgf#header'), '', 0, 0, 'Sgf');
+   if( $show_notes )
+   $gtable->add_tablehead(32, T_('Notes#header'), '', 1, 0, '');
    $gtable->add_tablehead( 3, T_('Opponent#header'), '', 0, 0, 'User');
    $gtable->add_tablehead( 4, T_('Userid#header'), '', 0, 0, 'User');
    $gtable->add_tablehead(16, T_('Rating#header'), '', 1, 0, 'Rating');
@@ -153,7 +157,6 @@ $ThePage = new Page('Status');
    $gtable->add_tablehead(10, T_('Time remaining#header'), '', 0);
 
    $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
-   //TODO?: review this add if ID is already a sort?
    $order = $gtable->current_order_string('ID-');
    $limit = ''; //$gtable->current_limit_string();
    $gtable->use_show_rows(false);
@@ -166,7 +169,10 @@ $ThePage = new Page('Status');
       //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
       .",IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color"
       .",Clock.Ticks" //always my clock because always my turn (status page)
+      .(!$show_notes ?'': ",Gnt.Notes AS X_Note" )
       ." FROM (Games,Players AS opponent)"
+      .(!$show_notes ?'': " LEFT JOIN GamesNotes AS Gnt ON Gnt.gid=Games.ID"
+         ." AND Gnt.player=IF(White_ID=$uid,'W','B')" )
       ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
       ." WHERE ToMove_ID=$uid AND Status".IS_RUNNING_GAME
       ." AND opponent.ID=(Black_ID+White_ID-$uid)"
@@ -200,6 +206,13 @@ $ThePage = new Page('Status');
          if( $gtable->Is_Column_Displayed[4] )
             $grow_strings[ 4] = "<A href=\"userinfo.php?uid=$pid\">" .
                $Handle . "</a>";
+         if( $show_notes && $gtable->Is_Column_Displayed[32] )
+         { //keep the first line up to LIST_GAMENOTE_LEN chars
+            $X_Note= trim( substr(
+               preg_replace("/[\\x00-\\x1f].*\$/s",'',$X_Note)
+               , 0, LIST_GAMENOTE_LEN) );
+            $grow_strings[32] = make_html_safe($X_Note);
+         }
          if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = echo_rating($Rating,true,$pid);
          if( $gtable->Is_Column_Displayed[5] )

@@ -95,13 +95,17 @@ $table_row_color2='"#E0E8ED"';
 
 $max_links_in_main_menu=5;
 
+//-----
+//Tables - lists
+define('LIST_ROWS_MODULO', 4); //at least 1
+define('LIST_GAMENOTE_LEN', 20); //set 0 to disable => impact the show_game page
+
 define('MAXROWS_PER_PAGE_DEFAULT', 20);
 define('MAXROWS_PER_PAGE_PROFILE', 50);
 define('MAXROWS_PER_PAGE_FORUM',   50);
 define('MAXROWS_PER_PAGE', 100);
-
 $RowsPerPage = MAXROWS_PER_PAGE_DEFAULT;
-define('LIST_ROWS_MODULO', 4);
+//-----
 
 $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
 $ActivityForHit = 1.0;
@@ -388,7 +392,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    echo "\n <TITLE>".basic_safe("$FRIENDLY_SHORT_NAME - $title")."</TITLE>";
 
    //because of old browsers favicon.ico should always stay in the root folder
-   echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"{$base_path}favicon.ico\">";
+   echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"/favicon.ico\">";
 
    global $main_path;
    if( !isset($skinname) or !$skinname )
