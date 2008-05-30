@@ -36,6 +36,11 @@ Changelog
      newly deletable column which use the sign bit
    - also modified the favicon href to "/favicon.ico"... as a new try
 
+   * include/connect2mysql.php (connect2mysql, db_query, versioncmp):
+   - adjusted db_query() when error() is not a "die" function
+   - removed versioncmp() using version_compare() instead
+   - a different way to manage the ignore_user_abort setting
+
 2008-05-26 rodival
 
    * include/table_columns.php (Table, add_tablehead, make_table,

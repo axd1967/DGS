@@ -22,7 +22,7 @@ require_once( "include/config.php" );
 
 //because we will use MySQL, this will help to
 //complete the *multiple queries* transactions.
-@ignore_user_abort(true);
+//@ignore_user_abort(true); //see connect2mysql
 
 
 //At least needed when connect2mysql.php is used alone (as in quick_status.php):
@@ -56,7 +56,7 @@ function disable_cache($stamp=NULL, $expire=NULL)
    //header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
    header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
    header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
-   if( !$expire or $expire<=$NOW )
+   if( !$expire || $expire<=$NOW )
    {
       header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0'); // HTTP/1.1
       header('Pragma: no-cache');                                              // HTTP/1.0
@@ -89,7 +89,7 @@ if( function_exists('mysql_escape_string') ) //PHP >= 4.0.3
    function mysql_addslashes($str)
    {
       //mysql_escape_string() is deprecated since version 4.3.0
-      //It's use generate an E_WARNING level message
+      //Its use generate an E_WARNING level message
       //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
       $res= mysql_escape_string($str);
       //error_reporting($e);
@@ -127,6 +127,8 @@ function connect2mysql($no_errors=false)
 {
    global $dbcnx, $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
 
+   //$oiua= ignore_user_abort(false);
+   @ignore_user_abort(false);
    $i = 6; //retry count
    do
    {
@@ -136,7 +138,7 @@ function connect2mysql($no_errors=false)
       //max_user_connections: Error: 1203 SQLSTATE: 42000 (ER_TOO_MANY_USER_CONNECTIONS)
       if( mysql_errno() != 1203 )
          break;
-      usleep(500000); //delay useconds
+      usleep(1000000); //delay useconds
    } while(--$i >= 0);
 
    if( !$dbcnx )
@@ -156,6 +158,8 @@ function connect2mysql($no_errors=false)
       //TODO: error() with no err_log()
       error($err);
    }
+   //ignore_user_abort($oiua);
+   @ignore_user_abort(true);
 
    return false;
 }
@@ -166,9 +170,9 @@ function db_query( $debugmsg, $query)
    $result = mysql_query($query);
    if( $result )
       return $result;
-   if( !is_string($debugmsg) )
-      return false;
-   error('mysql_query_failed', $debugmsg.'='.$query);
+   if( is_string($debugmsg) )
+      error('mysql_query_failed', $debugmsg.'='.$query);
+   return false;
 }
 
 function mysql_single_fetch( $debugmsg, $query, $type='assoc')
@@ -224,26 +228,6 @@ function mysql_single_col( $debugmsg, $query, $keyed=false)
 }
 
 
-// <0 if v1 is less than v2, >0 if v1 is greater than v2, 0 if they are equal.
-function versioncmp( $v1, $v2)
-{
-   if( !is_array($v1) )
-      $v1 = explode('.', (string)$v1);
-   if( !is_array($v2) )
-      $v2 = explode('.', (string)$v2);
-   $n = max( count($v1), count($v2));
-   $v1 = array_pad($v1, $n, 0);
-   $v2 = array_pad($v2, $n, 0);
-   foreach( $v1 as $n )
-   {
-      $n = ((int)$n) - ((int)array_shift($v2));
-      if( $n )
-         return $n;
-   }
-   return 0;
-}
-
-
 function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
 {
    /*
@@ -259,7 +243,7 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
       case 41: $method='PASSWORD'; break;
       case 40: $method='SHA1'; break;
       case 32: $method='MD5'; break;
-      default: $method=(versioncmp( MYSQL_VERSION, '4.1')<0 ?'PASSWORD' :'OLD_PASSWORD'); break;
+      default: $method=(version_compare( MYSQL_VERSION, '4.1')<0 ?'PASSWORD' :'OLD_PASSWORD'); break;
    }
    $given_passwd_encrypted =
       mysql_single_fetch( 'check_password',
