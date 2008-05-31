@@ -29,6 +29,9 @@ Changelog
      halfhourly_cron.php, confirm.php, quick_play.php:
    - introduced the FIND_IN_SET function in notification queries
 
+   * include/std_functions.php (start_html):
+   - now set the favicon href with the full absolute path
+
 2008-05-30 rodival
 
    * halfhourly_cron.php:

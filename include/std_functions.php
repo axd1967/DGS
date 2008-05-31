@@ -392,7 +392,10 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    echo "\n <TITLE>".basic_safe("$FRIENDLY_SHORT_NAME - $title")."</TITLE>";
 
    //because of old browsers favicon.ico should always stay in the root folder
-   echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"/favicon.ico\">";
+   //echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"{$base_path}favicon.ico\">";
+   //echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"/favicon.ico\">";
+   global $HOSTBASE;
+   echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"{$HOSTBASE}favicon.ico\">";
 
    global $main_path;
    if( !isset($skinname) or !$skinname )
