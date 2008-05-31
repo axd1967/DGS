@@ -1112,8 +1112,7 @@ function send_message( $debugmsg, $text='', $subject=''
 
       $query= "SELECT ID,Notify,SendEmail"
             ." FROM Players WHERE $field IN ('$var') LIMIT $varcnt";
-      $result = mysql_query( $query)
-         or error('mysql_query_failed',$debugmsg.".get$field($var)");
+      $result = db_query( "$debugmsg.get$field($var)", $query);
       while( ($row=mysql_fetch_assoc($result)) )
       {
          $uid= $row['ID'];
@@ -1127,7 +1126,7 @@ function send_message( $debugmsg, $text='', $subject=''
    $reccnt= count($receivers);
    //TODO: handle $reccnt != $varcnt ???
    if( !$to_myself && $reccnt <= 0 )
-      error('receiver_not_found',$debugmsg."rec0($from_id,$subject)");
+      error('receiver_not_found', "$debugmsg.rec0($from_id,$subject)");
 
    /**
     * Actually, only the messages from server can have multiple
@@ -1137,20 +1136,19 @@ function send_message( $debugmsg, $text='', $subject=''
     * See also: message.php
     **/
    if( $from_id > 0 && $reccnt+($to_myself?1:0) > 1 )
-      error('receiver_not_found',$debugmsg."rec1($from_id,$subject)");
+      error('receiver_not_found', "$debugmsg.rec1($from_id,$subject)");
 
    //actually not supported: sending a message to myself and other in the same pack
    if( $to_myself && $reccnt > 0 )
-      error('internal_error',$debugmsg."rec2($from_id,$subject)");
+      error('internal_error', "$debugmsg.rec2($from_id,$subject)");
 
    $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
           .", Type='$type', ReplyTo=$prev_mid, Game_ID=$gid"
           .", Subject='$subject', Text='$text'" ;
-   mysql_query( $query)
-      or error('mysql_query_failed',$debugmsg.'.message');
+   db_query( "$debugmsg.message", $query);
 
    if( mysql_affected_rows() != 1 )
-      error('mysql_insert_message',$debugmsg.'.message');
+      error('mysql_insert_message', "$debugmsg.message");
 
    $mid = mysql_insert_id();
    ksort($receivers);
@@ -1180,19 +1178,18 @@ function send_message( $debugmsg, $text='', $subject=''
       $query= "INSERT INTO MessageCorrespondents"
              ." (mid,uid,Sender,Replied,Folder_nr) VALUES"
              .' ('.implode('),(', $query).")";
-      mysql_query( $query)
-         or error('mysql_query_failed',$debugmsg.'.correspondent');
+      db_query( "$debugmsg.correspondent", $query );
 
       if( mysql_affected_rows() != $cnt )
-         error('mysql_insert_message',$debugmsg.'.correspondent');
+         error('mysql_insert_message', "$debugmsg.correspondent");
    }
 
    //records the last message of the invitation/dispute sequence
    //the type of the previous messages will be changed to 'DISPUTED'
    if( $gid > 0 && ( $type == 'INVITATION' ) )
    {
-      mysql_query( "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" )
-         or error('mysql_query_failed', $debugmsg.'.game_message');
+      db_query( "$debugmsg.game_message",
+         "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" );
    }
 
    if( $from_id > 0 && $prev_mid > 0 ) //is this an answer?
@@ -1201,43 +1198,47 @@ function send_message( $debugmsg, $text='', $subject=''
       if( $prev_folder > FOLDER_ALL_RECEIVED )
          $query .= ", Folder_nr=$prev_folder";
       $query.= " WHERE mid=$prev_mid AND uid=$from_id AND Sender!='Y' LIMIT 1";
-      mysql_query( $query )
-         or error('mysql_query_failed', $debugmsg.'.reply_correspondent');
+      db_query( "$debugmsg.reply_correspondent", $query );
 
       if( $prev_type )
       {
-         $query = "UPDATE Messages SET Type='$prev_type'" .
-                  " WHERE ID=$prev_mid LIMIT 1";
-         mysql_query( $query )
-            or error('mysql_query_failed', $debugmsg.'.reply_message');
+         db_query( "$debugmsg.reply_message",
+            "UPDATE Messages SET Type='$prev_type' WHERE ID=$prev_mid LIMIT 1" );
       }
    }
 
-   if( $notify )
+   if( $notify ) //about message!
    {
-      $query= array();
+      $ids= array();
       foreach( $receivers as $uid => $row )
       {
          if( $row['Notify'] == 'NONE'
-               && is_numeric(strpos($row['SendEmail'], 'ON')) )
-            $query[]= $uid;
+               && is_numeric(strpos($row['SendEmail'], 'ON'))
+               //&& is_numeric(strpos($row['SendEmail'], 'MESSAGE'))
+               )
+            $ids[]= $uid;
       }
-      $cnt= count($query);
+      $cnt= count($ids);
       if( $cnt > 0 )
       {
-         $query= "UPDATE Players SET Notify='NEXT'"
-                .' WHERE ID IN ('.implode(',', $query).')'
-                //." AND SendEmail LIKE '%ON%'"
-                ." AND Notify='NONE' LIMIT $cnt";
-         mysql_query( $query)
-            or error('mysql_query_failed', $debugmsg.'.mess_notify');
+         $ids= implode(',', $ids);
+         db_query( "$debugmsg.mess_notify",
+            "UPDATE Players SET Notify='NEXT'"
+            ." WHERE ID IN ($ids) AND Notify='NONE'"
+            ." AND FIND_IN_SET('ON',SendEmail)"
+            //." AND FIND_IN_SET('MESSAGE',SendEmail)"
+            //." AND SendEmail LIKE '%ON%'"
+            // LIMIT $cnt
+            );
       }
    }
 
    return $mid; //>0: no error
 } //send_message
 
-function notify( $debugmsg, $ids)
+//$type is one element of the SET of SendEmail ('MOVE','MESSAGE' ...)
+//start the notification process for thoses from $ids having $type set.
+function notify( $debugmsg, $ids, $type='')
 {
    if( !is_array($ids) )
       $ids= array( $ids);
@@ -1253,12 +1254,15 @@ function notify( $debugmsg, $ids)
    if( $cnt <= 0 )
       return 'no IDs';
 
-   $query= "UPDATE Players SET Notify='NEXT'"
-          .' WHERE ID IN ('.implode(',', $ids).')'
-          ." AND SendEmail LIKE '%ON%'"
-          ." AND Notify='NONE' LIMIT $cnt";
-   mysql_query( $query)
-      or error('mysql_query_failed', $debugmsg.'.notify');
+   $ids= implode(',', $ids);
+   db_query( "$debugmsg.notify",
+      "UPDATE Players SET Notify='NEXT'"
+      ." WHERE ID IN ($ids) AND Notify='NONE'"
+      ." AND FIND_IN_SET('ON',SendEmail)"
+      .($type ? " AND FIND_IN_SET('$type',SendEmail)" : '')
+      //." AND SendEmail LIKE '%ON%'"
+      // LIMIT $cnt
+      );
 
    return ''; //no error
 } //notify
@@ -2328,7 +2332,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
             $handles[]= $handle;
          if( count($handles) > 0 )
             send_message("fever_vault.msg($ip)", $text, $subject
-                        , '', $handles, false, 0);
+                        , '', $handles, /*notify*/false, 0);
 
          global $FRIENDLY_LONG_NAME;
          $email= $player_row['Email'];
@@ -2797,7 +2801,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
             $to_ids[] = $row['pid'];
 
          send_message( 'delete_all_observers', $Text, $Subject
-            ,$to_ids, '', false
+            ,$to_ids, '', /*notify*/false
             , 0, 'NORMAL', $gid);
       }
       mysql_free_result($result);

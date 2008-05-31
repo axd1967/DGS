@@ -299,10 +299,13 @@ This is why:
 
 // Notify opponent about move
 
-   mysql_query( "UPDATE Players SET Notify='NEXT' " .
-                "WHERE ID='$next_to_move_ID' AND SendEmail LIKE '%ON%' " .
-                "AND Notify='NONE' AND ID!='" .$player_row["ID"] . "' LIMIT 1")
-      or error('mysql_query_failed', 'quick_play.notify_opponent');
+   db_query( 'quick_play.notify_opponent',
+         "UPDATE Players SET Notify='NEXT'"
+         ." WHERE ID=$next_to_move_ID AND ID!=$my_id"
+         ." AND FIND_IN_SET('ON',SendEmail)"
+         //." AND FIND_IN_SET('MOVE',SendEmail)"
+         //." AND SendEmail LIKE '%ON%'"
+         ." AND Notify='NONE' LIMIT 1" );
 
 
 

@@ -590,7 +590,8 @@ This is why:
       }
 
       send_message( 'confirm', $Text, $Subject
-         ,$opponent_row['ID'], '', false //the move is always notified
+         ,$opponent_row['ID'], ''
+         , /*notify*/false //the move itself is always notified, see below
          ,( $message_from_server_way ? 0 : $my_id )
          , 'RESULT', $gid);
    }
@@ -604,7 +605,8 @@ if(1){ //new
 }else{ //old
       mysql_query( "UPDATE Players SET Notify='NEXT' " .
                    "WHERE ID='$next_to_move_ID' AND Notify='NONE' " .
-                   "AND SendEmail LIKE '%ON%' LIMIT 1")
+                   "AND FIND_IN_SET('ON',SendEmail) LIMIT 1")
+                   //"AND SendEmail LIKE '%ON%' LIMIT 1")
          or error('mysql_query_failed','confirm.notify_opponent');
 } //old/new
 

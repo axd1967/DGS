@@ -23,6 +23,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-05-31 rodival
+
+   * include/std_functions.php (send_message, notify),
+     halfhourly_cron.php, confirm.php, quick_play.php:
+   - introduced the FIND_IN_SET function in notification queries
+
 2008-05-30 rodival
 
    * halfhourly_cron.php:

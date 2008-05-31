@@ -127,11 +127,13 @@ if( !$is_down )
 
 
 // Send notifications
+// Email notification if the SendEmail 'ON' flag is set
+// more infos if other SendEmail flags are set
 
-
-   $result = mysql_query( "SELECT ID as uid, Email, SendEmail, Lastaccess FROM Players " .
-                          "WHERE SendEmail LIKE '%ON%' AND Notify='NOW'" )
-               or error('mysql_query_failed','halfhourly_cron.find_notifications');
+   $result = db_query( 'halfhourly_cron.find_notifications',
+            "SELECT ID as uid, Email, SendEmail, Lastaccess FROM Players"
+            ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)");
+            //." WHERE SendEmail LIKE '%ON%' AND Notify='NOW'");
 
 
    while( $row = mysql_fetch_assoc( $result ) )
@@ -151,7 +153,7 @@ if( !$is_down )
 
       // Find games
 
-      if( !(strpos($SendEmail, 'MOVE') === false) )
+      if( is_numeric(strpos($SendEmail, 'MOVE')) )
       {
          $query = "SELECT Games.*, " .
              "black.Name AS Blackname, " .
@@ -187,7 +189,7 @@ if( !$is_down )
                if( empty($tmp) ) $tmp = 'lead to '.$game_row['Status'].' step';
                $msg .= 'Move '.$game_row['Moves'].": $tmp\n";
 
-               if( !(strpos($SendEmail, 'BOARD') === false) )
+               if( is_numeric(strpos($SendEmail, 'BOARD')) )
                {
                   //remove all sgf tags
                   $movemsg = trim(preg_replace(
@@ -206,7 +208,7 @@ if( !$is_down )
 
       // Find new messages
 
-      if( !(strpos($SendEmail, 'MESSAGE') === false) )
+      if( is_numeric(strpos($SendEmail, 'MESSAGE')) )
       {
          $folderstring = FOLDER_NEW;
          $query = "SELECT Messages.ID,Subject,Text, " .
@@ -255,13 +257,15 @@ if( !$is_down )
 
 
    //Setting Notify to 'DONE' stop notifications until the player's visite
-   mysql_query( "UPDATE Players SET Notify='DONE'"
-              ." WHERE SendEmail LIKE '%ON%' AND Notify='NOW'" ) // LIMIT ?
-      or error('mysql_query_failed','halfhourly_cron.update_players_notify_Done');
+   db_query( 'halfhourly_cron.update_players_notify_Done',
+         "UPDATE Players SET Notify='DONE'"
+         ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)"); // LIMIT ?
+         //." WHERE SendEmail LIKE '%ON%' AND Notify='NOW'" ); // LIMIT ?
 
-   mysql_query( "UPDATE Players SET Notify='NOW'"
-              ." WHERE SendEmail LIKE '%ON%' AND Notify='NEXT'" ) // LIMIT ?
-      or error('mysql_query_failed','halfhourly_cron.update_players_notify_Now');
+   db_query( 'halfhourly_cron.update_players_notify_Now',
+         "UPDATE Players SET Notify='NOW'"
+         ." WHERE Notify='NEXT' AND FIND_IN_SET('ON',SendEmail)"); // LIMIT ?
+         //." WHERE SendEmail LIKE '%ON%' AND Notify='NEXT'" ); // LIMIT ?
 
 
 
