@@ -32,9 +32,9 @@ require_once( "include/std_functions.php" );
 
    start_page("Statistics", true, $logged_in, $player_row );
 
-   $q1 = "SELECT Status,SUM(Moves) as moves, COUNT(*) as count FROM Games GROUP BY Status";
-   $q2 = "SELECT SUM(Moves) as moves, COUNT(*) as count FROM Games";
-   $q3 = "SELECT SUM(Hits) as hits, Count(*) as count, sum(Activity) as activity FROM Players";
+   $q1 = "SELECT Status,SUM(Moves) AS moves, COUNT(*) AS count FROM Games GROUP BY Status";
+   $q2 = "SELECT SUM(Moves) AS moves, COUNT(*) AS count FROM Games";
+   $q3 = "SELECT SUM(Hits) AS hits, COUNT(*) AS count, SUM(Activity)/$ActivityForHit AS activity FROM Players";
 
    $result = mysql_query( $q1 );
 

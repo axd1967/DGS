@@ -50,15 +50,15 @@ else
 
    if( @mysql_num_rows($result) != 1 )
    {
-      error("not_logged_in",'qp1');
+      error('not_logged_in','qp1');
    }
 
    $player_row = mysql_fetch_assoc($result);
 
    if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
-       or $player_row["Expire"] < $NOW )
+       || $player_row['Expire'] < $NOW )
    {
-      error("not_logged_in",'qp2');
+      error('not_logged_in','qp2');
    }
 
    //TODO: fever vault check ???
@@ -80,7 +80,7 @@ else
                           );
 
    if( !$game_row )
-      error("unknown_game");
+      error('unknown_game');
 
    $Last_X = $Last_Y = -1;
    extract($game_row);
@@ -109,7 +109,7 @@ else
       or ($Handicap>1 && $Moves<=$Handicap) //exclude first white move after handicap stones
      )
    {
-      error("invalid_action");
+      error('invalid_action');
    }
 
 
@@ -123,7 +123,7 @@ else
       list( $query_X, $query_Y) = array( NULL, NULL);
 
    if( is_null($query_X) or is_null($query_Y) )
-      error("illegal_position",'qp3');
+      error('illegal_position','qp3');
 
    if( isset($_REQUEST['sgf_prev']) )
       list( $prev_X, $prev_Y) = sgf2number_coords($_REQUEST['sgf_prev'], $Size);
@@ -133,14 +133,14 @@ else
       list( $prev_X, $prev_Y) = array( NULL, NULL);
 
    if( is_null($prev_X) or is_null($prev_Y) )
-      error("illegal_position",'qp4');
+      error('illegal_position','qp4');
 
    if( $prev_X != $Last_X or $prev_Y != $Last_Y )
-      error("already_played",'qp5');
+      error('already_played','qp5');
 
    $move_color = strtoupper( @$_REQUEST['color']);
    if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
-      error("not_your_turn",'qp8');
+      error('not_your_turn','qp8');
 
    //$action = always 'domove'
 
@@ -285,13 +285,13 @@ This is why:
       or error('mysql_query_failed', 'quick_play.update_game');
 
    if( mysql_affected_rows() != 1 )
-      error("mysql_update_game","qp20($gid)");
+      error('mysql_update_game',"qp20($gid)");
 
    $result = mysql_query( $move_query )
       or error('mysql_query_failed', 'quick_play.update_moves');
 
    if( mysql_affected_rows() < 1 and $action != 'delete' )
-      error("mysql_insert_move","qp21($gid)");
+      error('mysql_insert_move',"qp21($gid)");
 
 
 
@@ -311,12 +311,11 @@ This is why:
 
 // Increase moves and activity
 
-   mysql_query( "UPDATE Players " .
-                "SET Activity=Activity + $ActivityForMove, " .
-                "Moves=Moves+1, " .
-                "LastMove=FROM_UNIXTIME($NOW) " .
-                "WHERE ID=" . $player_row["ID"] . " LIMIT 1" )
-      or error('mysql_query_failed', 'quick_play.update_player');
+   db_query( 'quick_play.update_player',
+         "UPDATE Players SET Moves=Moves+1"
+         .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
+         .",LastMove=FROM_UNIXTIME($NOW)"
+         ." WHERE ID=$my_id LIMIT 1" );
 
 
 

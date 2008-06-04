@@ -30,9 +30,10 @@ require_once( "include/graph.php" );
    $logged_in = who_is_logged( $player_row);
 
 //   if( !$logged_in )
-//      error("not_logged_in");
+//      error('not_logged_in');
 
 
+//smaller kyu rank (used as offset for the curves)
 define('MIN_RANK', round(MIN_RATING/100.));
 
    //disable translations in graph if not latin
@@ -213,16 +214,6 @@ define('MIN_RANK', round(MIN_RATING/100.));
 
 function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
 {
-/*****
- * An idea (p_rank: -30=<29kyu, -29=29kyu, -1=1kyu, 0=1dan, 6=7dan):
- * SELECT ROUND(Rating/100)-21 as p_rank,COUNT(*) as cnt FROM Ratinglog GROUP BY p_rank ORDER BY p_rank desc;
- * i.e. based on number of finished games
- * More conventional:
- * SELECT ROUND(Rating2/100)-21 as p_rank,COUNT(*) as cnt FROM Players GROUP BY p_rank ORDER BY p_rank desc;
- * active players:
- * SELECT ROUND(Rating2/100)-21 as p_rank,COUNT(*) as cnt FROM Players WHERE Players.Activity>$ActiveLevel1 GROUP BY p_rank ORDER BY p_rank desc;
- *****/
-
    global $ActiveLevel1, $T_;
 
    $Xaxis = array();

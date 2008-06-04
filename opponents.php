@@ -67,12 +67,11 @@ $ARR_DBFIELDKEYS = array(
 
    // who are player (uid) and opponent (opp) ?
    $players = array(); // uid => ( Players.field => value )
-   $query = "SELECT "
-      . "ID,Handle,Name,Country,Open,Rank,Rating2, "
-      . "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, "
-      . "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS LastaccessU, "
-      . "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS LastMoveU "
-      . "FROM Players WHERE ID".( $opp ?" IN('$uid','$opp')" :"='$uid'");
+   $query = "SELECT ID,Handle,Name,Country,Open,Rank,Rating2"
+      . ",IF(Activity>$ActiveLevel2,2+(Activity>$ActiveLevel3),Activity>$ActiveLevel1) AS ActivityLevel"
+      . ",IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS LastaccessU"
+      . ",IFNULL(UNIX_TIMESTAMP(LastMove),0) AS LastMoveU"
+      . " FROM Players WHERE ID".( $opp ?" IN('$uid','$opp')" :"='$uid'");
    $result = mysql_query( $query )
       or error('mysql_query_failed', "opponents.find_users($uid,$opp)");
    while( $row = mysql_fetch_assoc( $result ) )
@@ -236,7 +235,7 @@ $ARR_DBFIELDKEYS = array(
 
    $uqsql->add_part( SQLP_FIELDS,
       'P.*', 'P.Rank AS Rankinfo',
-      "(P.Activity>$ActiveLevel1)+(P.Activity>$ActiveLevel2) AS ActivityLevel",
+      "IF(P.Activity>$ActiveLevel2,2+(P.Activity>$ActiveLevel3),P.Activity>$ActiveLevel1) AS ActivityLevel",
       'P.Running+P.Finished AS Games',
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',
@@ -492,7 +491,7 @@ function print_players_table( $p, $uid, $opp )
    global $COUNTRIES, $date_fmt2;
 
    $p1 = $p[$uid];
-   $p2 = ( $opp and isset($p[$opp]) ) ? $p[$opp] : null;
+   $p2 = ( $opp && isset($p[$opp]) ) ? $p[$opp] : null;
    $SPC = ''; //'&nbsp;';
 
    $rowpatt = "  <tr><td class=Rubric>%s</td><td>%s</td><td>%s</td></tr>\n";

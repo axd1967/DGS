@@ -107,13 +107,14 @@ define('MAXROWS_PER_PAGE', 100);
 $RowsPerPage = MAXROWS_PER_PAGE_DEFAULT;
 //-----
 
-$ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time;
-$ActivityForHit = 1.0;
-$ActivityForMove = 10.0;
+$ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time
+$ActivityForHit = 1000.0; //it is the base unit for all the Activity calculus
+$ActivityForMove = 10*$ActivityForHit;
 
-$ActiveLevel1 = 10.0;
-$ActiveLevel2 = 150.0;
-
+$ActiveLevel1 = $ActivityForMove + 2*$ActivityForHit; //a "move sequence" value
+$ActiveLevel2 = 15*$ActiveLevel1;
+$ActiveLevel3 = 50*$ActiveLevel2;
+$ActivityMax = 0x7FFF0000-$ActivityForMove;
 
 define('MAX_START_RATING', 2600); //6 dan
 define('MIN_RATING', -900); //30 kyu
@@ -2219,13 +2220,16 @@ define('VAULT_TIME_X', 2*3600); //vault duration (smaller)
  **/
 function is_logged_in($handle, $scode, &$player_row) //must be called from main dir
 {
-   global $HOSTNAME, $hostname_jump, $ActivityForHit, $NOW, $date_fmt, $dbcnx;
+   global $HOSTNAME, $hostname_jump, $NOW, $date_fmt, $dbcnx;
+   global $ActivityForHit, $ActivityMax;
 
    $player_row = array( 'ID' => 0 );
 
    if( $hostname_jump && preg_replace("/:.*\$/",'', @$_SERVER['HTTP_HOST']) != $HOSTNAME )
    {
-      jump_to( 'http://' . $HOSTNAME . $_SERVER['PHP_SELF'], true );
+      global $HOSTBASE;
+      list($protocol) = explode($HOSTNAME, $HOSTBASE);
+      jump_to( $protocol . $HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
 
    if( empty($handle) || empty($dbcnx) )
@@ -2273,7 +2277,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
 
    if( !$session_expired )
    {
-      $query.= ",Activity=Activity + $ActivityForHit"
+      $query.= ",Activity=LEAST($ActivityMax,$ActivityForHit+Activity)"
               .",Lastaccess=FROM_UNIXTIME($NOW)"
               .",Notify='NONE'";
 
@@ -2547,13 +2551,16 @@ function add_link_page_link( $link=false, $linkdesc='', $extra='', $active=true)
 
 function activity_string( $act_lvl)
 {
- global $base_path;
-   return ( $act_lvl == 0 ? '&nbsp;' :
-           ( $act_lvl == 1
-             ? '<img align=middle alt="*" src="'.$base_path.'images/star2.gif">'
-             : '<img align=middle alt="*" src="'.$base_path.'images/star.gif">'
-              .'<img align=middle alt="*" src="'.$base_path.'images/star.gif">'
-             ) );
+   switch( (int)$act_lvl )
+   {
+      case 1: $img= 'star2.gif'; break;
+      case 2: $img= 'star.gif'; break;
+      case 3: $img= 'star3.gif'; break;
+      default: return '&nbsp;';
+   }
+   global $base_path;
+   $img= "<img class=InTextImage alt='*' src=\"{$base_path}images/$img\">";
+   return str_repeat( $img, $act_lvl);
 }
 
 

@@ -152,11 +152,61 @@ if( !$is_down )
 
 // Update statistics
 
+if(1){//new
+/*
+TODO: add infos from mysql_stat() which returns an array:
+[0] => Uptime: 5380
+[1] => Threads: 2
+[2] => Questions: 1321299
+[3] => Slow queries: 0
+[4] => Opens: 26
+[5] => Flush tables: 1
+[6] => Open tables: 17
+[7] => Queries per second avg: 245.595
+ (or its equivalent with SHOW STATUS)
+and maybe send an email to admin(s)? in case of daily_delta too hight
+SELECT * FROM Statistics ORDER BY ID DESC LIMIT 2
+if num_rows==2 {compute differences and checks}
+*/
+
+   $today_stats= array();
+   foreach( array(
+      'finished' =>
+       "SELECT SUM(Moves) AS MovesFinished, COUNT(*) AS GamesFinished"
+         ." FROM Games WHERE Status='FINISHED'",
+      'running' =>
+       "SELECT SUM(Moves) AS MovesRunning, COUNT(*) AS GamesRunning"
+         ." FROM Games WHERE Status" . IS_RUNNING_GAME,
+      'users' =>
+       "SELECT SUM(Hits) AS Hits, Count(*) AS Users, SUM(Activity)/$ActivityForHit AS Activity"
+         ." FROM Players",
+      ) as $key => $query )
+   {
+      $row = mysql_single_fetch( "daily_cron.statistics.$key", $query);
+      if( $row )
+         $today_stats= array_merge( $today_stats, $row);
+   }
+
+   $row= array(
+      "Moves=({$today_stats['MovesFinished']}+{$today_stats['MovesRunning']})",
+      "Games=({$today_stats['GamesFinished']}+{$today_stats['GamesRunning']})",
+      "Time=FROM_UNIXTIME($NOW)"
+      );
+   foreach( $today_stats as $key => $query )
+   {
+      $row[]= "$key=$query";
+   }
+   $query= implode(',', $row);
+
+   db_query( 'daily_cron.statistics_insert',
+      "INSERT INTO Statistics SET $query" );
+
+}else{//old
    $q_finished = "SELECT SUM(Moves) as MovesFinished, COUNT(*) as GamesFinished FROM Games " .
        "WHERE Status='FINISHED'";
    $q_running = "SELECT SUM(Moves) as MovesRunning, COUNT(*) as GamesRunning FROM Games " .
        "WHERE Status" . IS_RUNNING_GAME;
-   $q_users = "SELECT SUM(Hits) as Hits, Count(*) as Users, SUM(Activity) as Activity FROM Players";
+   $q_users = "SELECT SUM(Hits) as Hits, Count(*) as Users, SUM(Activity)/$ActivityForHit as Activity FROM Players";
 
    $result = mysql_query( $q_finished )
       or error('mysql_query_failed','daily_cron.statistics_moves_finished');
@@ -178,7 +228,6 @@ if( !$is_down )
       extract( mysql_fetch_assoc($result));
    mysql_free_result($result);
 
-
    mysql_query( "INSERT INTO Statistics SET"
                ." Time=FROM_UNIXTIME($NOW)" //could become a Date= timestamp field
                .",Hits=" . (int)$Hits
@@ -191,6 +240,8 @@ if( !$is_down )
                .",GamesRunning=" . (int)$GamesRunning
                .",Activity=" . (int)$Activity )
       or error('mysql_query_failed','daily_cron.statistics_insert');
+
+}//new/old
 
 
 

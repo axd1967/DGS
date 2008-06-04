@@ -45,23 +45,20 @@ $ThePage = new Page('UserInfo');
       $where = "ID=$my_id";
 
    $row = mysql_single_fetch( 'userinfo.find',
-      "SELECT *," .
+      "SELECT *"
+      .",IF(Activity>$ActiveLevel2,2+(Activity>$ActiveLevel3),Activity>$ActiveLevel1) AS ActivityLevel"
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
-      "ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent, " .
-      //oldies:
-      //"ROUND(100*Won/RatedGames) AS Percent, " .
-      //"IFNULL(ROUND(100*Won/Finished),-0.01) AS Percent, " .
-      "(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel, " .
-      "IFNULL(UNIX_TIMESTAMP(Registerdate),0) AS Registerdate, " .
-      "IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS lastaccess, " .
-      "IFNULL(UNIX_TIMESTAMP(LastMove),0) AS Lastmove " .
-      "FROM Players WHERE $where" );
+      .",ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent"
+      .",IFNULL(UNIX_TIMESTAMP(Registerdate),0) AS X_Registerdate"
+      .",IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS X_Lastaccess"
+      .",IFNULL(UNIX_TIMESTAMP(LastMove),0) AS X_LastMove"
+      ." FROM Players WHERE $where" );
 
    if( !$row )
       error('unknown_user');
    $uid = (int)$row['ID'];
 
-   $bio_result = db_query('userinfo.bio',
+   $bio_result = db_query( 'userinfo.bio',
       "SELECT * FROM Bio WHERE uid=$uid order by SortOrder, ID");
 
    $has_contact= Contact::has_contact($my_id, $uid);
@@ -89,12 +86,12 @@ $ThePage = new Page('UserInfo');
 
    { //User infos
       $activity = activity_string( $row['ActivityLevel']);
-      $registerdate = (@$row['Registerdate'] > 0
-                        ? date('Y-m-d', $row['Registerdate']) : '' );
-      $lastaccess = (@$row['lastaccess'] > 0
-                        ? date($date_fmt2, $row['lastaccess']) : '' );
-      $lastmove = (@$row['Lastmove'] > 0
-                        ? date($date_fmt2, $row['Lastmove']) : '' );
+      $registerdate = (@$row['X_Registerdate'] > 0
+                        ? date('Y-m-d', $row['X_Registerdate']) : '' );
+      $lastaccess = (@$row['X_Lastaccess'] > 0
+                        ? date($date_fmt2, $row['X_Lastaccess']) : '' );
+      $lastmove = (@$row['X_LastMove'] > 0
+                        ? date($date_fmt2, $row['X_LastMove']) : '' );
 
       $cntr = @$row['Country'];
       $cntrn = basic_safe(@$COUNTRIES[$cntr]);

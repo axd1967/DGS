@@ -23,6 +23,25 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-06-04 rodival
+
+   * include/std_functions.php (is_logged_in, activity_string),
+     halfhourly_cron.php, daily_cron.php, confirm.php, quick_play.php,
+     users.php, userinfo.php, opponents.php,
+     statistics.php, statratingspng.php,
+     scripts/browser_stats.php:
+   - changed the type of the Activity column of the Players table
+     from DOUBLE to INT to speed up the rebuilds of the table index.
+   - also managed the Activity values as a fixed decimal number
+     to preserve enought precision (Activity column= $activity * 1000)
+   - added a third ActiveLevel which should help to distinguish
+     the robots (overheated activity)
+-----------
+copy /images/star3.gif
+UPDATE Players SET Activity=FLOOR(1000*Activity) WHERE Activity>0;
+ALTER TABLE Players CHANGE Activity Activity INT(11) NOT NULL DEFAULT '15000';
+-----------
+
 2008-05-31 rodival
 
    * include/std_functions.php (send_message, notify),

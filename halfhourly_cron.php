@@ -109,22 +109,21 @@ if( !$is_down )
 
    // Check that updates are not too frequent
 
-   $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
-                          "FROM Clock WHERE ID=202 LIMIT 1")
-               or error('mysql_query_failed','halfhourly_cron.check_frequency')
-               or $TheErrors->dump_exit('halfhourly_cron');
-
-   $row = mysql_fetch_array( $result );
-   mysql_free_result($result);
+   $row = mysql_single_fetch( 'halfhourly_cron.check_frequency',
+      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
+      ." FROM Clock WHERE ID=202 LIMIT 1" );
+   if( !$row ) $TheErrors->dump_exit('halfhourly_cron');
 
    if( $row['timediff'] < $half_diff )
       //if( !@$_REQUEST['forced'] )
          $TheErrors->dump_exit('halfhourly_cron');
 
-   mysql_query("UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202")
-               or error('mysql_query_failed','halfhourly_cron.set_lastchanged')
-               or $TheErrors->dump_exit('halfhourly_cron');
+   db_query( 'halfhourly_cron.set_lastchanged',
+      "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202 LIMIT 1" )
+      or $TheErrors->dump_exit('halfhourly_cron');
 
+
+   $this_ticks_per_day = 2*24;
 
 // Send notifications
 // Email notification if the SendEmail 'ON' flag is set
@@ -164,8 +163,7 @@ if( !$is_down )
              "WHERE ToMove_ID=$uid AND Black_ID=black.ID AND White_ID=white.ID" .
              " AND UNIX_TIMESTAMP(Lastchanged) >= UNIX_TIMESTAMP('$Lastaccess')";
 
-         $gres = mysql_query( $query )
-               or error('mysql_query_failed','halfhourly_cron.find_games');
+         $gres = db_query( 'halfhourly_cron.find_games', $query );
 
          if( @mysql_num_rows($gres) > 0 )
          {
@@ -224,8 +222,7 @@ if( !$is_down )
               "AND UNIX_TIMESTAMP(Messages.Time) > UNIX_TIMESTAMP('$Lastaccess') " .
             "ORDER BY Time DESC";
 
-         $res3 = mysql_query( $query )
-               or error('mysql_query_failed','halfhourly_cron.find_new_messages');
+         $res3 = db_query( 'halfhourly_cron.find_new_messages', $query );
          if( @mysql_num_rows($res3) > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  New messages:\n";
@@ -275,17 +272,15 @@ if( !$is_down )
    $factor = exp( -M_LN2 * 30 / $ActivityHalvingTime );
 
    //the WHERE is just added here to avoid to update the *whole* table each time
-   //the GREATEST also helps the re-construction of the index of the column
-   mysql_query("UPDATE Players SET Activity=GREATEST(1,$factor*Activity)"
-         ." WHERE Activity>1") //with $ActivityForHit>=1
-      or error('mysql_query_failed','halfhourly_cron.activity');
+   //the FLOOR and integer type also help the re-construction of the index of the column
+   db_query( 'halfhourly_cron.activity',
+      "UPDATE Players SET Activity=FLOOR($factor*Activity) WHERE Activity>0" );
 
 
-// Check end of vacations
+// Check end of vacations and reset associated game clocks
 
-   $result = mysql_query("SELECT ID, ClockUsed FROM Players " .
-                         "WHERE OnVacation>0 AND OnVacation <= 1/(2*24)")
-      or error('mysql_query_failed','halfhourly_cron.onvacation');
+   $result = db_query( 'halfhourly_cron.onvacation',
+      "SELECT ID, ClockUsed FROM Players WHERE OnVacation>0 AND OnVacation<=1/($this_ticks_per_day)" );
 
    while( $prow = mysql_fetch_assoc( $result ) )
    {
@@ -295,15 +290,15 @@ if( !$is_down )
       // LastTicks handle -(time spend) at the moment of the start of vacations
       // inserts this spend time into the (possibly new) ClockUsed by the player
 if(1){//new
-            mysql_query("UPDATE Games"
-                     . " INNER JOIN Clock ON Clock.ID=$ClockUsed"
-                     . " SET Games.ClockUsed=$ClockUsed"
-                        . ", Games.LastTicks=Games.LastTicks+Clock.Ticks"
-                     . " WHERE Games.Status" . IS_RUNNING_GAME
-                     . " AND Games.ToMove_ID=$uid"
-                     . ' AND Games.ClockUsed<0' // VACATION_CLOCK
-                     )
-            or error('mysql_query_failed', 'edit_vacation.update_games');
+      db_query( 'edit_vacation.update_games',
+         "UPDATE Games"
+         ." INNER JOIN Clock ON Clock.ID=$ClockUsed"
+         ." SET Games.ClockUsed=$ClockUsed"
+            .", Games.LastTicks=Games.LastTicks+Clock.Ticks"
+         ." WHERE Games.Status" . IS_RUNNING_GAME
+         ." AND Games.ToMove_ID=$uid"
+         ." AND Games.ClockUsed<0" // VACATION_CLOCK
+         );
 }else{//old
       $gres = mysql_query("SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
                          "FROM Games, Clock " .
@@ -313,31 +308,31 @@ if(1){//new
                          "AND ToMove_ID='$uid'" )
          or error('mysql_query_failed','halfhourly_cron.find_vacation_games');
 
-      while( $game_row = mysql_fetch_array( $gres ) )
+      while( $game_row = mysql_fetch_assoc( $gres ) )
       {
             mysql_query("UPDATE Games SET ClockUsed=$ClockUsed"
                       . ", LastTicks='" . $game_row['ticks'] . "'"
                       . " WHERE ID='" . $game_row['gid'] . "' LIMIT 1")
                or error('mysql_query_failed','halfhourly_cron.update_vacation_games');
       }
-      mysql_free_result($gres); unset($game_row);
+      mysql_free_result($gres); //unset($game_row);
 }//new/old
    }
-   mysql_free_result($result); unset($prow);
+   mysql_free_result($result); //unset($prow);
 
 
 
 // Change vacation days
-   $max_vacations = '(365.24/12)';
+
+   $max_vacations = 365.24/12; //1 month
    db_query( 'halfhourly_cron.vacation_days',
-         "UPDATE Players SET"
-         ." VacationDays=LEAST($max_vacations, VacationDays + 1/(12*2*24))"
-         .",OnVacation=GREATEST(0, OnVacation - 1/(2*24))"
-         ." WHERE VacationDays<$max_vacations OR OnVacation>0" // LIMIT ???
-         );
+      "UPDATE Players SET OnVacation=GREATEST(0, OnVacation - 1/($this_ticks_per_day))" //1 day after 1 day
+      .",VacationDays=LEAST($max_vacations, VacationDays + 1/(12*$this_ticks_per_day))" //1 day after 12 days
+      ." WHERE VacationDays<$max_vacations OR OnVacation>0" // LIMIT ???
+      );
 
    db_query( 'halfhourly_cron.reset_tick',
-         "UPDATE Clock SET Ticks=0 WHERE ID=202" );
+         "UPDATE Clock SET Ticks=0 WHERE ID=202 LIMIT 1" );
 if( !@$chained ) $TheErrors->dump_exit('halfhourly_cron');
 //the whole cron stuff in one cron job (else comments this line):
 include_once( "daily_cron.php" );

@@ -224,7 +224,7 @@ if ( $fdemo == 3 )
    $tfilter = new SearchFilter('t3');
    $tfilter->add_filter( 1, 'RatedSelect', 'Rated', true,
          array( FC_STATIC => 1, FC_ADD_HAVING => 1, FC_HIDE => 1 ));
-   $tfilter->add_filter( 2, 'Boolean', 'ActiveLevel>10', true,
+   $tfilter->add_filter( 2, 'Boolean', "ActiveLevel>$ActiveLevel1", true,
          array( FC_LABEL => 'Activity', FC_STATIC => 1 ));
    $tfilter->init();
 

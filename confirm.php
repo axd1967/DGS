@@ -468,7 +468,7 @@ This is why:
    $result = mysql_query( $move_query )
       or error('mysql_query_failed','confirm.update_moves');
 
-   if( mysql_affected_rows() < 1 and $action != 'delete' )
+   if( mysql_affected_rows() < 1 && $action != 'delete' )
       error('mysql_insert_move',"confirm21($action,$gid)");
 
 
@@ -614,12 +614,11 @@ if(1){ //new
 
    // Increase moves and activity
 
-   mysql_query( "UPDATE Players " .
-                "SET Activity=Activity + $ActivityForMove, " .
-                "Moves=Moves+1, " .
-                "LastMove=FROM_UNIXTIME($NOW) " .
-                "WHERE ID=" . $my_id . " LIMIT 1" )
-      or error('mysql_query_failed','confirm.activity');
+   db_query( 'confirm.activity',
+         "UPDATE Players SET Moves=Moves+1"
+         .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
+         .",LastMove=FROM_UNIXTIME($NOW)"
+         ." WHERE ID=$my_id LIMIT 1" );
 
 
 

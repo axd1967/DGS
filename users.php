@@ -69,7 +69,7 @@ require_once( "include/filter.php" );
          array( FC_FNAME => 'active', FC_LABEL => T_('Active'), FC_STATIC => 1,
                 FC_DEFAULT => ($observe_gid ? 0 : 1) ) );
    $ufilter->add_filter(14, 'RelativeDate', 'P.Lastaccess', true);
-   $ufilter->add_filter(15, 'RelativeDate', 'P.Lastmove', true,
+   $ufilter->add_filter(15, 'RelativeDate', 'P.LastMove', true,
          array( FC_TIME_UNITS => FRDTU_DHM ));
    $ufilter->add_filter(16, 'Country', 'P.Country', false,
          array( FC_HIDE => 1 ));
@@ -108,7 +108,7 @@ require_once( "include/filter.php" );
    $utable->add_tablehead(12, T_('Percent#header'), 'Percent', 1, 0, 'Number');
    $utable->add_tablehead(13, T_('Activity#header'), 'ActivityLevel', 1, 1, 'Image');
    $utable->add_tablehead(14, T_('Last access#header'), 'Lastaccess', 1, 0, 'Date');
-   $utable->add_tablehead(15, T_('Last move#header'), 'Lastmove', 1, 0, 'Date');
+   $utable->add_tablehead(15, T_('Last move#header'), 'LastMove', 1, 0, 'Date');
 
    $utable->set_default_sort( 1); //on ID
    $order = $utable->current_order_string();
@@ -118,7 +118,7 @@ require_once( "include/filter.php" );
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
       'P.*', 'P.Rank AS Rankinfo',
-      "(P.Activity>$ActiveLevel1)+(P.Activity>$ActiveLevel2) AS ActivityLevel",
+      "IF(P.Activity>$ActiveLevel2,2+(P.Activity>$ActiveLevel3),P.Activity>$ActiveLevel1) AS ActivityLevel",
       'P.Running+P.Finished AS Games',
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',
