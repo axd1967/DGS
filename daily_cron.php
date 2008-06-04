@@ -40,21 +40,19 @@ if( !$is_down )
 
    // Check that updates are not too frequent
 
-   $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
-                          "FROM Clock WHERE ID=203 LIMIT 1")
-               or error('mysql_query_failed','daily_cron.check_frequency')
-               or $TheErrors->dump_exit('daily_cron');
-
-   $row = mysql_fetch_assoc( $result );
-   mysql_free_result($result);
+   $row = mysql_single_fetch( 'daily_cron.check_frequency',
+      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
+      ." FROM Clock WHERE ID=203 LIMIT 1" );
+   if( !$row ) $TheErrors->dump_exit('daily_cron');
 
    if( $row['timediff'] < $daily_diff )
       //if( !@$_REQUEST['forced'] )
          $TheErrors->dump_exit('daily_cron');
 
-   mysql_query("UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203")
-               or error('mysql_query_failed','daily_cron.set_lastchanged')
-               or $TheErrors->dump_exit('daily_cron');
+   db_query( 'daily_cron.set_lastchanged',
+      "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203 LIMIT 1" )
+      or $TheErrors->dump_exit('daily_cron');
+
 
    //$delete_messages = false;
    //$delete_invitations = false;
@@ -113,11 +111,8 @@ if( !$is_down )
    {
       // Delete old waitingroom list entries
       $timelimit = $NOW - $waitingroom_timelimit*24*3600;
-      $query = "DELETE FROM Waitingroom " .
-         "WHERE UNIX_TIMESTAMP(Time) < $timelimit";
-
-      mysql_query( $query )
-         or error('mysql_query_failed','daily_cron.waitingroom');
+      db_query( 'daily_cron.waitingroom',
+         "DELETE FROM Waitingroom WHERE UNIX_TIMESTAMP(Time)<$timelimit" );
    }
 
 
@@ -247,8 +242,8 @@ if num_rows==2 {compute differences and checks}
 
 // Delete old forumreads
 
-   mysql_query("DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time) + $new_end < $NOW")
-      or error('mysql_query_failed','daily_cron.forumreads');
+   db_query( 'daily_cron.forumreads',
+      "DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time)+$new_end < $NOW" );
 
 
 // Apply recently changed night hours
@@ -266,10 +261,9 @@ if(1){//new
       {
          setTZ( $row['Timezone']); //for get_clock_used()
          $newclock= get_clock_used( $row['Nightstart']);
-         mysql_query("UPDATE Players " .
-                     "SET ClockChanged='N', " .
-                     "ClockUsed=$newclock " .
-                     "WHERE ID=" . $row['ID'] . " LIMIT 1")
+         db_query( 'daily_cron.night_hours.update',
+               "UPDATE Players SET ClockChanged='N',ClockUsed=$newclock"
+               . " WHERE ID=" . $row['ID'] . " LIMIT 1")
             or error('mysql_query_failed','daily_cron.night_hours.update');
       }
       setTZ($otz); //reset to previous
@@ -305,8 +299,8 @@ if(1){//new
    mysql_free_result($result);
 }//new/old
 
-   mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=203")
-               or error('mysql_query_failed','daily_cron.reset_tick');
+   db_query( 'daily_cron.reset_tick',
+         "UPDATE Clock SET Ticks=0 WHERE ID=203 LIMIT 1" );
 //if( !@$chained ) $TheErrors->dump_exit('daily_cron');
 $TheErrors->dump_exit('daily_cron');
 }

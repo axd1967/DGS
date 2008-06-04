@@ -42,6 +42,15 @@ UPDATE Players SET Activity=FLOOR(1000*Activity) WHERE Activity>0;
 ALTER TABLE Players CHANGE Activity Activity INT(11) NOT NULL DEFAULT '15000';
 -----------
 
+   * include/time_functions.php, include/quick_common.php,
+     include/connect2mysql.php (disable_cache),
+     clock_tick.php, daily_cron.php, sgf.php, quick_status.php, graph.php,
+     scripts/make_handicap_pattern.php:
+   - added $gmtdate_fmt, updated the headers using GMT dates
+   - moved $date_fmt to quick_common.php
+   - minor MySQL query enhancements and comment adjustments
+   - moved make_handicap_pattern.php from /pattern folder to /scripts folder
+
 2008-05-31 rodival
 
    * include/std_functions.php (send_message, notify),

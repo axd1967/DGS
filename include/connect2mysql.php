@@ -47,15 +47,15 @@ function jump_to($uri, $absolute=false)
 
 function disable_cache($stamp=NULL, $expire=NULL)
 {
-   global $NOW;
+   global $NOW, $gmdate_fmt;
    if( !$stamp )
       $stamp = $NOW;  // Always modified
    if( !$expire )
       $expire = $stamp-3600;  // Force revalidation
 
    //header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-   header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
-   header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$stamp) . ' GMT');
+   header('Expires: ' . gmdate($gmdate_fmt, $expire));
+   header('Last-Modified: ' . gmdate($gmdate_fmt, $stamp));
    if( !$expire || $expire<=$NOW )
    {
       header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0'); // HTTP/1.1

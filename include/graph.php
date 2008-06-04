@@ -268,10 +268,11 @@ function image_passthru( $filename, $modified=null, $expire=null)
       $img= @read_from_file($filename);
       if( $img )
       {
+         global $gmdate_fmt;
          if( isset($modified) )
-            header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$modified) . ' GMT');
+            header('Last-Modified: ' . gmdate($gmdate_fmt, $modified));
          if( isset($expire) )
-            header('Expires: ' . gmdate('D, d M Y H:i:s',$expire) . ' GMT');
+            header('Expires: ' . gmdate($gmdate_fmt, $expire));
          header('Content-type: '.$type[1]);
          header('Content-Length: '.strlen($img));
          echo $img;

@@ -19,12 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-$date_fmt = 'Y-m-d H:i';
-$date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
-
-define('NIGHT_LEN', 9); //from 0 to 24 hours
+define('NIGHT_LEN', 9); //may be from 0 to 24 hours
 define('WEEKEND_CLOCK_OFFSET', 100);
-define('VACATION_CLOCK', -1-WEEKEND_CLOCK_OFFSET); // stay < 0 over weekend
+define('VACATION_CLOCK', -1); // keep it < 0
 
 function getmicrotime()
 {
@@ -113,7 +110,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
    {
       case("FIS"):
       {
-         $byotime = $byoper = 0;  // time is up;
+         $byotime = $byoper = 0;  // time is up
       }
       break;
      
@@ -121,7 +118,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
       {
          if( $startbyotime <= 0 )
          {
-            $byotime = $byoper = 0; // No byoyomi. time is up;
+            $byotime = $byoper = 0; // no byoyomi, time is up
             break;
          }
 
@@ -132,53 +129,35 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
          }
 
          /***
-          * previous formula:
-          *  $byoper -= (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
-          * only BECAUSE $elapsed>=0 and ($startbyotime - $byotime)>=0,
-          * the (int)x cast is a floor(x) and this is equal to:
-          *  $byoper -= floor(($elapsed - $byotime)/$startbyotime) +1;
-          *  $byoper += ceil(($byotime - $elapsed)/$startbyotime) -1;
-          * so don't make the (int) cast works on a negative number
+          * with B=$byotime, P=$byoper, S=$startbyotime, E=$elapsed
+          *  and b=new byotime, p=new byoper
+          * we have:
+          *  A = B + P*S   //old amount of time (0 < B <= S)
+          *  a = b + p*S   //new amount of time (0 < b <= S)
+          *  a = A - E
+          * then:
+          *  a = A - E = B + P*S - E
+          *  p = (a - b)/S = (B + P*S - E - b)/S
+          * p must be big enought to keep (0 < b <= S)
+          *  p = ceil((B + P*S - E)/S) -1 = ceil((B - E)/S) + P -1
+          *  d = P-p = -ceil((B - E)/S) +1 = floor((E - B)/S) +1
+          *  b = a - p*S = B + P*S - E - p*S = B - E + d*S
+          * finally:
+          *  d = floor((S + E - B)/S)
+          *  $byoper-= d
+          *  $byotime-= E - d*S
+          * because E and (S-B) are positive integers, the (int) cast
+          *  (which rounds towards zero) may be used instead of floor()
           ***/
          $deltaper = (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
          $byoper -= $deltaper;
 
          if( $byoper < 0 )
-            $byotime = $byoper = 0;  // time is up;
+            $byotime = $byoper = 0;  // time is up
          else if( $has_moved )
             $byotime = $startbyotime;
          else
             $byotime-= $elapsed - $deltaper*$startbyotime;
-         /***
-          * previous formula:
-          *  $byotime = mod($byotime-$elapsed-1, $startbyotime)+1;
-          * initially, the amount of time was:
-          *  A = B + P * S    //B=$byotime, P=$byoper, S=$startbyotime)
-          * now, we have:     //E=$elapsed
-          *  a = b + p * S
-          *  a = (B-E-1)-S*floor((B-E-1)/S)+1 + S*(P-floor((E-B)/S)-1)
-          *  a = (B-E-1)+1 +S*(P -floor((E-B)/S)-1 -floor((B-E-1)/S))
-          *  a = B -E +S*(P -floor((E-B)/S) -floor((B-E-1)/S) -1)
-          *  E = A - a
-          *  E = B + S*P -B +E -S*(P -floor((E-B)/S) -floor((B-E-1)/S) -1)
-          *  E = E -S*(-floor((E-B)/S) -floor((B-E-1)/S) -1)
-          *  => (-floor((E-B)/S) -floor((B-E-1)/S) -1) = 0
-          *  => floor(-K/S) +floor((K-1)/S) = -1        //eq#1
-          *  a) if K/S integer then
-          *     floor(-K/S) = -K/S
-          *     floor((K-1)/S) = K/S + floor(-1/S) = K/S -1
-          *     eq#1 verified
-          *  b) because we have only integers, if S don't divide K then
-          *     floor(-K/S) = ceil(-K/S) -1 = -floor(K/S) -1
-          *     floor((K-1)/S) = floor(K/S)
-          *     eq#1 verified
-          * the b calculus could have been:
-          *  b = a -S*p = A -E -S*p = B +S*P -E -S*p = B -E +S*(P-p)
-          *  p = P -(P-p)
-          * i.e:         *
-          *  $p-= (P-p)
-          *  $b-= E-S*(P-p)
-          ***/
       }
       break;
 
@@ -186,7 +165,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
       {
          if( $startbyoper <= 0 )
          {
-            $byotime = $byoper = 0; // No byoyomi. time is up;
+            $byotime = $byoper = 0; // no byoyomi, time is up
             break;
          }
 
@@ -199,11 +178,11 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
          $byotime -= $elapsed;
 
          if( $byotime <= 0 )
-            $byotime = $byoper = 0;  // time is up;
+            $byotime = $byoper = 0;  // time is up
          else if( $has_moved )
          {
-            $byoper--; // byo stones;
-            if( $byoper <= 0 ) // get new stones;
+            $byoper--; // byo stones
+            if( $byoper <= 0 ) // get new stones
             {
                $byotime = $startbyotime;
                $byoper = $startbyoper;

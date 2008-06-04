@@ -41,21 +41,18 @@ if( !$is_down )
 
    // Check that ticks are not too frequent
 
-   $result = mysql_query( "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff " .
-                          "FROM Clock WHERE ID=201 LIMIT 1")
-               or error('mysql_query_failed','clock_tick.check_frequency')
-               or $TheErrors->dump_exit('clock_tick');
-
-   $row = mysql_fetch_array( $result );
-   mysql_free_result($result);
+   $row = mysql_single_fetch( 'clock_tick.check_frequency',
+      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
+      ." FROM Clock WHERE ID=201 LIMIT 1" );
+   if( !$row ) $TheErrors->dump_exit('clock_tick');
 
    if( $row['timediff'] < $tick_diff )
       //if( !@$_REQUEST['forced'] )
          $TheErrors->dump_exit('clock_tick');
 
-   mysql_query("UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201")
-               or error('mysql_query_failed','clock_tick.set_lastchanged')
-               or $TheErrors->dump_exit('clock_tick');
+   db_query( 'clock_tick.set_lastchanged',
+      "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201 LIMIT 1" )
+      or $TheErrors->dump_exit('clock_tick');
 
 
    //setTZ('GMT');
@@ -83,22 +80,30 @@ if( !$is_down )
     *  GMT-2  20       [22,07[   00            Y
     *  GMT-2  20       [02,11[   04            Y
     */
-   $cid = 0;
-   $clock_modified = "((ID>$hour OR ID<".($hour-NIGHT_LEN+1).') AND ID<'.($hour+25-NIGHT_LEN)
-                     ." AND ID>=$cid AND ID<=".($cid+23).')';
 
-   $cid= WEEKEND_CLOCK_OFFSET;
-   $hour+= $cid;
+   //build a range query for the field $n
+   //from $s to $e on a 24 clocks basis with the offset $o
+   function clkrng( $n, $s, $e, $o=0)
+   {
+      if( $s>23 ) $s-= 24;
+      if( $e>23 ) $e-= 24;
+      if( $s>$e )
+         return clkrng($n,0,$e,$o)." OR ".clkrng($n,$s,23,$o);
+      $s+= $o; $e+= $o;
+      if( $s==$e )
+         return "$n=$s";
+      return "($n>=$s AND $n<=$e)";
+   }
+
+   $clock_modified = clkrng( 'Clock.ID', $hour+1, $hour+24-NIGHT_LEN);
+
    if( $day_of_week > 0 && $day_of_week < 6 )
-      $clock_modified.= " OR ((ID>$hour OR ID<".($hour-NIGHT_LEN+1).') AND ID<'.($hour+25-NIGHT_LEN)
-                        ." AND ID>=$cid AND ID<=".($cid+23).')';
+      $clock_modified.= " OR ".
+         clkrng( 'Clock.ID', $hour+1, $hour+24-NIGHT_LEN, WEEKEND_CLOCK_OFFSET);
 
 
-   $query = "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW)"
-            .' WHERE '.$clock_modified;
-   mysql_query( $query)
-      or error('mysql_query_failed','clock_tick.increase_clocks');
-
+   db_query( 'clock_tick.increase_clocks',
+      "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) WHERE $clock_modified" );
 
 
 
@@ -120,14 +125,13 @@ if(1){//new
       < ((Clock.Ticks-Games.LastTicks) / $tick_frequency)
  During a test, this lowered the number of returned rows from 10,960 to 675
 */
-   $query= 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks'
-         . ' FROM (Games, Clock)'
-         . " WHERE Games.ClockUsed=Clock.ID"
-         . ' AND '. str_replace('ID', 'Clock.ID', $clock_modified)
-         . " AND Clock.Ticks - Games.LastTicks > $tick_frequency *"
-            . ' IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)'
-         . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
-         ;
+   $result = db_query( 'clock_tick.find_timeout_games',
+      "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks"
+      ." FROM Games"
+      ." INNER JOIN Clock ON Clock.ID=Games.ClockUsed AND ($clock_modified)"
+      ." WHERE Clock.Ticks - Games.LastTicks > $tick_frequency"
+         ." * IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)"
+      ." AND Games.Status!='INVITED' AND Games.Status!='FINISHED'" );
 }else{//old
 /* TODO:
 This query is sometime slow and may return more than 10000 rows!
@@ -144,9 +148,9 @@ use TEMPORARY TABLEs for generated UPDATEs ???
             //slower: "AND Status" . IS_RUNNING_GAME
             . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
             ;
-}//new/old
    $result = mysql_query( $query)
          or error('mysql_query_failed','clock_tick.find_timeout_games');
+}//new/old
 
    while($row = mysql_fetch_assoc($result))
    {
@@ -180,11 +184,12 @@ use TEMPORARY TABLEs for generated UPDATEs ???
          //TODO: Delete games with too few moves ???
          $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
          $prow = mysql_single_fetch( 'clock_tick.find_timeout_players',
-               'SELECT black.Handle as blackhandle, white.Handle as whitehandle' .
-                     ', black.Name as blackname, white.Name as whitename' .
-               ' FROM Players as white, Players as black' .
-               " WHERE white.ID=$White_ID AND black.ID=$Black_ID" )
-            or error('mysql_query_failed','clock_tick.find_timeout_players');
+            'SELECT black.Handle as blackhandle, white.Handle as whitehandle'
+               .', black.Name as blackname, white.Name as whitename'
+            .' FROM Players as white, Players as black'
+            ." WHERE white.ID=$White_ID AND black.ID=$Black_ID" );
+         if( !$prow )
+            error('unknown_user', 'clock_tick.find_timeout_players');
          extract($prow);
 
          //TODO: HOT_SECTION ???
@@ -195,14 +200,26 @@ use TEMPORARY TABLEs for generated UPDATEs ???
              //"Flags=0, " . //Not useful
              "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
-         mysql_query( $game_query . $game_clause)
-               or error('mysql_query_failed',"clock_tick.time_is_up($gid)");
+         db_query( "clock_tick.time_is_up($gid)", $game_query.$game_clause );
 
          if( @mysql_affected_rows() != 1)
          {
             error('mysql_update_game',"clock_tick.time_is_up($gid)");
             continue;
          }
+
+/* To store the last $hours info (never used, to be checked)
+         $to_move= ( $ToMove_ID == $Black_ID ? BLACK : WHITE );
+         db_query( "clock_tick.update_moves($gid)",
+            "INSERT INTO Moves SET " .
+             "gid=$gid, " .
+             "MoveNr=$Moves+1, " . //CAUTION: problem it's > Games.Moves
+             "Stone=$to_move, " .
+             "PosX=".POSX_TIME.", PosY=0, " .
+             "Hours=$hours" );
+         if( mysql_affected_rows() < 1 )
+            error('mysql_insert_move', "clock_tick.update_moves($gid)");
+*/
 
          // Send messages to the players
          $Text = "The result in the game:<center>"
@@ -217,34 +234,33 @@ use TEMPORARY TABLEs for generated UPDATEs ???
                . "</center>" ;
 
          send_message( 'clock_tick', $Text, 'Game result'
-            ,array($Black_ID,$White_ID), '', true
+            ,array($Black_ID,$White_ID), '', /*notify*/true
             , 0, 'RESULT', $gid);
 
-//         update_rating($gid);
          $rated_status = update_rating2($gid); //0=rated game
 
          // Change some stats
-         mysql_query( "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                       ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
-                      ) . " WHERE ID=$White_ID LIMIT 1" )
-               or error('mysql_query_failed',"clock_tick.timeup_update_white($gid)");
+         db_query( "clock_tick.timeup_update_white($gid)",
+            "UPDATE Players SET Running=Running-1, Finished=Finished+1"
+            .($rated_status ? '' : ", RatedGames=RatedGames+1"
+               .($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
+             ). " WHERE ID=$White_ID LIMIT 1" );
 
-         mysql_query( "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                       ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
-                      ) . " WHERE ID=$Black_ID LIMIT 1" )
-               or error('mysql_query_failed',"clock_tick.timeup_update_black($gid)");
+         db_query( "clock_tick.timeup_update_black($gid)",
+            "UPDATE Players SET Running=Running-1, Finished=Finished+1"
+            .($rated_status ? '' : ", RatedGames=RatedGames+1"
+               .($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
+             ). " WHERE ID=$Black_ID LIMIT 1" );
 
          delete_all_observers($gid, $rated_status!=1, $Text);
 
       }
    }
    mysql_free_result($result);
-   unset($ticks);
+   //unset($ticks);
 
-   mysql_query("UPDATE Clock SET Ticks=0 WHERE ID=201")
-               or error('mysql_query_failed','clock_tick.reset_tick');
+   db_query( 'clock_tick.reset_tick',
+         "UPDATE Clock SET Ticks=0 WHERE ID=201 LIMIT 1" );
 if( !@$chained ) $TheErrors->dump_exit('clock_tick');
 //the whole cron stuff in one cron job (else comments this line):
 include_once( "halfhourly_cron.php" );

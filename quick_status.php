@@ -35,8 +35,8 @@ function slashed($string)
 
 function loc_start_page()
 {
-   global $encoding_used, $NOW;
-   ob_start("ob_gzhandler");
+   global $encoding_used, $NOW, $gmdate_fmt;
+   ob_start('ob_gzhandler');
 
    header('Content-Type: text/plain;charset='.$encoding_used);
    // this one open the text/plain in the browser by default
@@ -47,8 +47,8 @@ function loc_start_page()
    //header( "Content-Disposition: attachment; filename=\"$filename\"" );
    header( "Content-Description: PHP Generated Data" );
 
-   header('Expires: ' . gmdate('D, d M Y H:i:s',$NOW+5*60) . ' GMT');
-   header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$NOW) . ' GMT');
+   header('Expires: ' . gmdate($gmdate_fmt, $NOW+5*60));
+   header('Last-Modified: ' . gmdate($gmdate_fmt, $NOW));
 
 }
 
@@ -63,10 +63,12 @@ if( $is_down )
    //recover_language(); //set $language_used and $encoding_used
    loc_start_page();
    warning($is_down_message);
+   loc_end_page();
 }
 else
 {
-   disable_cache();
+   loc_start_page();
+   //disable_cache();
 
    connect2mysql();
 
@@ -104,8 +106,6 @@ else
    {
       error('unknown_user','quick_status.find_player');
    }
-   //recover_language( $player_row); //set $language_used and $encoding_used
-   loc_start_page();
 
    //TODO: fever vault check
    if( $idmode == 'cookie' )

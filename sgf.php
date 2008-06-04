@@ -377,7 +377,7 @@ $array=array();
       'white.Handle AS Whitehandle, ' .
       "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
       'FROM Games, Players AS black, Players AS white ' .
-      "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
+      "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1"
       );
 
    if( @mysql_num_rows($result) != 1 )
@@ -419,8 +419,8 @@ $array=array();
    header( "Content-Description: PHP Generated Data" );
 
    //to allow some mime applications to find it in the cache
-   header('Expires: ' . gmdate('D, d M Y H:i:s',$NOW+5*60) . ' GMT');
-   header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$NOW) . ' GMT');
+   header('Expires: ' . gmdate($gmdate_fmt, $NOW+5*60));
+   header('Last-Modified: ' . gmdate($gmdate_fmt, $NOW));
 
 
    echo "(\n;FF[$sgf_version]GM[1]" . ( $charset ? "CA[$charset]" : '' )
