@@ -300,13 +300,15 @@ C[$comment]',
   );//}$step_s7
 
 
+IF(RDVL) $HOSTBASE = "http://www.dragongoserver.net/";
+IF(RDVL) $FRIENDLY_LONG_NAME = "Dragon Go Server";
   $ok= 1;
   for( $size=5 ; $size<=MAX_BOARD_SIZE ; $size++ ) {
     $dst = "standard_handicap_$size";
     echo "<br>\n".$dst;
 
     $sgf= "(;FF[4]GM[1]
-PC[Dragon Go Server: http://www.dragongoserver.net]
+PC[$FRIENDLY_LONG_NAME: $HOSTBASE]
 SZ[$size]
 GC[Standard handicap patterns]
 GN[$dst]";
