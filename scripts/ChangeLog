@@ -23,6 +23,13 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-06-05 rodival
+
+   * game.php:
+   - change the simple toggle notes feature to a true switch on/off one
+      (avoid a toggle back when refreshing the page)
+   - enhance the private notes management to avoid some database updates
+
 2008-06-04 rodival
 
    * include/std_functions.php (is_logged_in, activity_string),

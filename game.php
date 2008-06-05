@@ -443,7 +443,7 @@ function get_alt_arg( $n1, $n2)
         $notesmode = $player_row["NotesSmallMode"];
       }
       if( isset($_REQUEST['notesmode']) )
-         $notesmode= strtoupper((string)$_REQUEST['notesmode']);
+         $notesmode= strtoupper($_REQUEST['notesmode']);
 
       $show_notes = true;
       $notes = '';
@@ -457,29 +457,35 @@ function get_alt_arg( $n1, $n2)
       {
          $notes = $tmp['Notes'];
          $noteshide = $tmp['Hidden'];
-         unset( $tmp);
       }
 
-      if( @$_REQUEST['savenotes'] || @$_REQUEST['togglenotes'] )
+      $savenotes = false;
+      if( @$_REQUEST['togglenotes'] )
       {
-         if( @$_REQUEST['togglenotes'] )
-            $noteshide = ($noteshide == 'Y' ? 'N' : 'Y' );
-
-         if( @$_REQUEST['savenotes'] )
-            $notes = rtrim(get_request_arg('gamenotes'));
-
+         $tmp = (@$_REQUEST['hidenotes'] == 'N' ? 'N' : 'Y' );
+         if( $tmp != $noteshide )
+         {
+            $noteshide = $tmp;
+            $savenotes = true;
+         }
+      }
+      if( @$_REQUEST['savenotes'] )
+      {
+         $tmp = rtrim(get_request_arg('gamenotes'));
+         if( $tmp != $notes )
+         {
+            $notes = $tmp;
+            $savenotes = true;
+         }
+      }
+      if( $savenotes )
+      {
          // note: GamesNotes needs PRIMARY KEY (gid,player):
          db_query( 'game.replace_gamenote',
                  "REPLACE INTO GamesNotes (gid,player,Hidden,Notes)"
                . " VALUES ($gid,'$my_color','$noteshide','"
                   . mysql_addslashes($notes) . "')" );
       }
-/*
-      else if( $show_notes && @$_REQUEST['movechange'] )
-      {
-         $notes = rtrim(get_request_arg('gamenotes'));
-      }
-*/
    }
    else // !$my_game
    {
@@ -1021,6 +1027,7 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
    if( $collapsed == 'Y' )
    {
       //echo textarea_safe( $notes) . "\n";
+      echo '<INPUT type="HIDDEN" name="hidenotes" value="N">';
       echo "  <input name=\"togglenotes\" type=\"submit\" value=\""
                . T_('Show notes') . "\">";
       return;
@@ -1040,6 +1047,7 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
 
    if( $collapsed == 'N' )
    {
+   echo '<INPUT type="HIDDEN" name="hidenotes" value="Y">';
    echo "<input name=\"togglenotes\" type=\"submit\" value=\""
             . T_('Hide notes') . "\">";
    }
