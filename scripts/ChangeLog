@@ -51,6 +51,10 @@ ALTER TABLE Players CHANGE Activity Activity INT(11) NOT NULL DEFAULT '15000';
    - minor MySQL query enhancements and comment adjustments
    - moved make_handicap_pattern.php from /pattern folder to /scripts folder
 
+   * include/std_functions.php (game_reference), game_comments.php:
+   - fix a bug since ADDTIME feature update (duplicated rows if ADDTIME)
+   - changed the char used for the moves number in the games references
+
 2008-05-31 rodival
 
    * include/std_functions.php (send_message, notify),

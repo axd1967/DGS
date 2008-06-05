@@ -187,10 +187,13 @@ define("MARKED_BY_WHITE", 7);
 define("MARKED_BY_BLACK", 8);
 
 //Moves table: particular PosX values
+//regular PosX and PosY are from 0 to size-1
+// game steps
 define('POSX_PASS', -1);
 define('POSX_SCORE', -2); //scoring step by Stone, PosY=0
 define('POSX_RESIGN', -3);
 define('POSX_TIME', -4); //timeout for Stone, PosY=0
+// game commands
 define('POSX_ADDTIME', -50); //Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=add_hours
 
 //Games table: particular Score values
@@ -572,7 +575,7 @@ function end_page( $menu_array=NULL )
 
       if( $HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
          $hostlink= '<A href="http://sourceforge.net" target="_blank"><IMG src="http://sourceforge.net/sflogo.php?group_id=29933&amp;type=1" alt="SourceForge.net Logo" width=88 height=31 border=0 align=middle></A>';
-      else //for devel server
+      else //for live server
          $hostlink= '<a href="http://www.samurajdata.se" target="_blank"><img src="'.$base_path.'images/samurajlogo.gif" alt="Samuraj Logo" width=160 height=20 border=0 align=middle></a>';
 
    } //hostlink build
@@ -2609,7 +2612,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
    if( $safe_it )
       $whitename = make_html_safe($whitename) ;
    if( $move>0 )
-      $whitename.= " #$move";
+      $whitename.= " ,$move";
    if( $link && $legal )
    {
       $url = "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "");

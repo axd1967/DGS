@@ -41,49 +41,42 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    if( $gid <= 0 )
       error('unknown_game');
 
-   $result = mysql_query(
-      'SELECT Games.*, ' .
-      "black.Name AS Blackname, " .
-      "white.Name AS Whitename " .
-      'FROM Games, Players AS black, Players AS white ' .
-      "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID" )
-      or error('mysql_query_failed', 'game_comments.find_game');
-
-   if( @mysql_num_rows($result) != 1 )
+   $game = mysql_single_fetch( 'game_comments.find_game',
+      "SELECT Games.Status, Games.Black_ID, Games.White_ID" .
+      ", black.Name AS Blackname, white.Name AS Whitename" .
+      " FROM Games, Players AS black, Players AS white" .
+      " WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1"
+      );
+   if( !$game )
       error('unknown_game');
 
-   $row = mysql_fetch_array($result);
-   extract($row);
 
-
-   $my_game = ( $logged_in and ( $player_row["ID"] == $Black_ID or $player_row["ID"] == $White_ID ) ) ;
+   $my_game = ( $logged_in && ( $player_row['ID'] == $game['Black_ID'] || $player_row['ID'] == $game['White_ID'] ) ) ;
    if( !$my_game )
       $my_color = DAME ;
    else
-      $my_color = $player_row["ID"] == $Black_ID ? BLACK : WHITE ;
+      $my_color = $player_row['ID'] == $game['Black_ID'] ? BLACK : WHITE ;
 
-   if( $Status == 'FINISHED' )
+   if( $game['Status'] == 'FINISHED' )
      $html_mode= 'gameh';
    else
      $html_mode= 'game';
 
 
-   $query= "SELECT DISTINCT Moves.MoveNr,Moves.Stone,MoveMessages.Text " .
-           "FROM Moves, MoveMessages " .
-           "WHERE Moves.gid=$gid " .
-            "AND MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
-            "AND (Moves.Stone=".WHITE." OR Moves.Stone=".BLACK.") " .
-           "ORDER BY Moves.MoveNr";
-   $result = mysql_query($query)
-      or error('mysql_query_failed', 'game_comments.messages');
-
+   $result = db_query( 'game_comments.messages',
+      "SELECT DISTINCT Moves.MoveNr,Moves.Stone,MoveMessages.Text"
+      ." FROM MoveMessages"
+      ." INNER JOIN Moves ON Moves.gid=$gid AND Moves.MoveNr=MoveMessages.MoveNr"
+      ." WHERE MoveMessages.gid=$gid AND Moves.PosX>=0"
+         ." AND (Moves.Stone=".WHITE." OR Moves.Stone=".BLACK.")"
+      ." ORDER BY Moves.MoveNr" );
 
 
    start_html(T_('Comments'), true, @$player_row['SkinName']);
 
-   $str = game_reference( 0, 1, '', 0, 0, $Whitename, $Blackname);
+   $str = game_reference( 0, 1, '', 0, 0, $game['Whitename'], $game['Blackname']);
    $str.= " - #$gid";
-   $str.= ' - '.( $Status == 'FINISHED' ? T_('Finished') : T_('Running'));
+   $str.= ' - '.( $game['Status'] == 'FINISHED' ? T_('Finished') : T_('Running'));
    echo "<h3 class=Header>$str</h3>";
 
 
