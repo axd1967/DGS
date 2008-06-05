@@ -96,18 +96,18 @@ require_once( "include/contacts.php" );
    $ctable->register_filter( $cfilter );
    $ctable->add_or_del_column();
 
-   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $ctable->add_tablehead(33, T_('Actions#header'), '', 0, 1, 'Image'); // static
-   $ctable->add_tablehead( 1, T_('Name#header'), 'P.Name', 0, 0, 'User');
-   $ctable->add_tablehead( 2, T_('Userid#header'), 'P.Handle', 0, 1, 'User'); // static
-   $ctable->add_tablehead( 3, T_('Country#header'), 'P.Country', 0, 0, 'Image');
-   $ctable->add_tablehead( 4, T_('Rating#header'), 'P.Rating2', 1, 0, 'Rating');
-   $ctable->add_tablehead( 5, T_('Last access#header'), 'P.Lastaccess', 1, 0, 'Date');
-   $ctable->add_tablehead( 6, T_('System categories#header'), 'C.SystemFlags', 0, 0, 'Enum');
-   $ctable->add_tablehead( 7, T_('User categories#header'), 'C.UserFlags', 0, 0, 'Enum');
-   $ctable->add_tablehead( 8, T_('Notes#header'), '', 0, 0);
-   $ctable->add_tablehead(10, T_('Created#header'), 'C.Created', 1, 0, 'Date');
-   $ctable->add_tablehead(11, T_('Modified#header'), 'C.Lastchanged', 1, 0, 'Date');
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $ctable->add_tablehead(33, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
+   $ctable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'P.Name+');
+   $ctable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'P.Handle+');
+   $ctable->add_tablehead( 3, T_('Country#header'), 'Image', 0, 'P.Country+');
+   $ctable->add_tablehead( 4, T_('Rating#header'), 'Rating', 0, 'P.Rating2-');
+   $ctable->add_tablehead( 5, T_('Last access#header'), 'Date', 0, 'P.Lastaccess-');
+   $ctable->add_tablehead( 6, T_('System categories#header'), 'Enum', 0, 'C.SystemFlags+');
+   $ctable->add_tablehead( 7, T_('User categories#header'), 'Enum', 0, 'C.UserFlags+');
+   $ctable->add_tablehead( 8, T_('Notes#header'), '', TABLE_NO_SORT);
+   $ctable->add_tablehead(10, T_('Created#header'), 'Date', 0, 'C.Created-');
+   $ctable->add_tablehead(11, T_('Modified#header'), 'Date', 0, 'C.Lastchanged-');
 
    $ctable->set_default_sort( 1); //on P.Name
 

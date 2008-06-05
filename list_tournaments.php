@@ -34,7 +34,7 @@ require_once( "include/tournament.php" );
 
    $my_id = $player_row["ID"];
 
-   $table = new Table( 'tournament', 'list_tournaments.php'); //, '', 'TRN', TABLE_NO_SORT );
+   $table = new Table( 'tournament', 'list_tournaments.php', '', '', TABLE_NO_HIDE);
    //$table->add_or_del_column();
 
    $result = mysql_query( "SELECT ID, State, Name FROM Tournament" );
@@ -42,12 +42,12 @@ require_once( "include/tournament.php" );
    start_page(T_("Tournaments"), true, $logged_in, $player_row,
                $table->button_style($player_row['Button']) );
 
-   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $table->add_tablehead( 1, T_('ID'), 'ID', 0, 1, 'Button');
-   $table->add_tablehead( 2, T_('State'), 'State', 0, 1);
-   $table->add_tablehead( 3, T_('Name'), 'Name', 0, 1);
-   $table->add_tablehead( 4, T_('Organizer'), '', 0, 1, 'Image');
-   $table->add_tablehead( 5, T_('Participant'), '', 0, 1, 'Image');
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $table->add_tablehead( 1, T_('ID'), 'Button', 0, 'ID+');
+   $table->add_tablehead( 2, T_('State'), '', 0, 'State+');
+   $table->add_tablehead( 3, T_('Name'), '', 0, 'Name+');
+   $table->add_tablehead( 4, T_('Organizer'), 'Image');
+   $table->add_tablehead( 5, T_('Participant'), 'Image');
    $table->set_default_sort( 3, 1); //on Name,ID
 
    $state_colors = array(

@@ -124,7 +124,7 @@ $ARR_DBFIELDKEYS = array(
    $ufilter->add_filter(13, 'Boolean', "P.Activity>$ActiveLevel1", true,
          array( FC_FNAME => 'active', FC_LABEL => T_('Active'), FC_STATIC => 1 ) );
    $ufilter->add_filter(14, 'RelativeDate', 'P.Lastaccess', true);
-   $ufilter->add_filter(15, 'RelativeDate', 'P.Lastmove', true,
+   $ufilter->add_filter(15, 'RelativeDate', 'P.LastMove', true,
          array( FC_TIME_UNITS => FRDTU_DHM ));
    $ufilter->add_filter(16, 'Country', 'P.Country', false,
          array( FC_HIDE => 1 ));
@@ -155,26 +155,26 @@ $ARR_DBFIELDKEYS = array(
    $utable->add_external_parameters( $usfilter->get_req_params() );
    $utable->add_external_parameters( $page_vars );
 
-   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // table: use same table-IDs as in users.php(!)
-   $utable->add_tablehead(33, T_('Info#header'), '', 0, 1, 'Button');
-   $utable->add_tablehead( 1, T_('##header'), 'ID', 0, 1, 'ID');
-   $utable->add_tablehead( 2, T_('Name#header'), 'Name', 0, 0, 'User');
-   $utable->add_tablehead( 3, T_('Userid#header'), 'Handle', 0, 0, 'User');
-   $utable->add_tablehead(16, T_('Country#header'), 'Country', 0, 0, 'Image');
+   $utable->add_tablehead(33, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
+   $utable->add_tablehead( 1, T_('##header'), 'ID', TABLE_NO_HIDE, 'ID+');
+   $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
+   $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
+   $utable->add_tablehead(16, T_('Country#header'), 'Image', 0, 'Country+');
    $utable->add_tablehead( 4, T_('Rank info#header'));
-   $utable->add_tablehead( 5, T_('Rating#header'), 'Rating2', 1, 0, 'Rating');
+   $utable->add_tablehead( 5, T_('Rating#header'), 'Rating', 0, 'Rating2-');
    $utable->add_tablehead( 6, T_('Open for matches?#header'));
-   $utable->add_tablehead( 7, T_('#Games#header'), 'Games', 1, 0, 'Number');
-   $utable->add_tablehead( 8, T_('Running#header'), 'Running', 1, 0, 'Number');
-   $utable->add_tablehead( 9, T_('Finished#header'), 'Finished', 1, 0, 'Number');
-   $utable->add_tablehead(17, T_('Rated#header'), 'RatedGames', 1, 0, 'Number');
-   $utable->add_tablehead(10, T_('Won#header'), 'Won', 1, 0, 'Number');
-   $utable->add_tablehead(11, T_('Lost#header'), 'Lost', 1, 0, 'Number');
-   $utable->add_tablehead(12, T_('Percent#header'), 'Percent', 1, 0, 'Number');
-   $utable->add_tablehead(13, T_('Activity#header'), 'ActivityLevel', 1, 1, 'Image');
-   $utable->add_tablehead(14, T_('Last access#header'), 'Lastaccess', 1, 0, 'Date');
-   $utable->add_tablehead(15, T_('Last move#header'), 'Lastmove', 1, 0, 'Date');
+   $utable->add_tablehead( 7, T_('#Games#header'), 'Number', 0, 'Games-');
+   $utable->add_tablehead( 8, T_('Running#header'), 'Number', 0, 'Running-');
+   $utable->add_tablehead( 9, T_('Finished#header'), 'Number', 0, 'Finished-');
+   $utable->add_tablehead(17, T_('Rated#header'), 'Number', 0, 'RatedGames-');
+   $utable->add_tablehead(10, T_('Won#header'), 'Number', 0, 'Won-');
+   $utable->add_tablehead(11, T_('Lost#header'), 'Number', 0, 'Lost-');
+   $utable->add_tablehead(12, T_('Percent#header'), 'Number', 0, 'Percent-');
+   $utable->add_tablehead(13, T_('Activity#header'), 'Image', TABLE_NO_HIDE, 'ActivityLevel-');
+   $utable->add_tablehead(14, T_('Last access#header'), 'Date', 0, 'Lastaccess-');
+   $utable->add_tablehead(15, T_('Last move#header'), 'Date', 0, 'LastMove-');
 
    $utable->set_default_sort( 1); //on ID
    $order = $utable->current_order_string();

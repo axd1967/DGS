@@ -82,8 +82,9 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    $ctable = new Table( 'comment', '');
 
-   $ctable->add_tablehead(1, T_('Moves'), '', 0, 1, 'Move');
-   $ctable->add_tablehead(2, T_('Comments'), '', 0, 1, 'Comment');
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $ctable->add_tablehead(1, T_('Moves'), 'Move');
+   $ctable->add_tablehead(2, T_('Comments'), 'Comment');
 
 
    while( $row = mysql_fetch_assoc($result) )

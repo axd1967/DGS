@@ -1066,29 +1066,27 @@ function message_list_head( &$mtable, $current_folder
    $mtable->ExtMode['full_details']= $full_details;
    $mtable->ExtMode['current_folder']= $current_folder;
 
-   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $mtable->add_tablehead( 1, T_('Folder#header'),
-      ( $current_folder>FOLDER_ALL_RECEIVED ) ? '' : 'folder', 1, 0, 'Folder');
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $mtable->add_tablehead( 1, T_('Folder#header'), 'Folder',
+      ($current_folder>FOLDER_ALL_RECEIVED ? TABLE_NO_SORT : 0), 'folder-');
 
    if ( $full_details )
    {
       // additional fields for search-messages
-      $mtable->add_tablehead( 6, T_('Type#header'), 'M.Type', 0, 1);
-      $mtable->add_tablehead( 7, T_('Direction#header'), 'Sender', 0, 0, 'MsgDir');
-      $mtable->add_tablehead( 2, T_('Correspondent#header'), 'other_name',  0, 0, 'User');
+      $mtable->add_tablehead( 6, T_('Type#header'), '', TABLE_NO_HIDE, 'M.Type+');
+      $mtable->add_tablehead( 7, T_('Direction#header'), 'MsgDir', 0, 'Sender+');
+      $mtable->add_tablehead( 2, T_('Correspondent#header'), 'User', 0, 'other_name+');
    }
    else
-      $mtable->add_tablehead( 2,
-         ($current_folder == FOLDER_SENT ? T_('To#header') : T_('From#header') ),
-         'other_name', 0, 0, 'User');
+      $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To#header')
+                  : T_('From#header')), 'User', 0, 'other_name+');
 
-   $mtable->add_tablehead( 3, T_('Subject#header'), 'Subject', 0, 0);
+   $mtable->add_tablehead( 3, T_('Subject#header'), '', 0, 'Subject+');
    list($ico,$alt) = $msg_icones[0];
-   $mtable->add_tablehead(33, image( $ico, '*-*' /*$alt , T_('Sort')*/),
-      'flow', 0, 1, 'Image');
-   $mtable->add_tablehead( 4, T_('Date#header'), 'date', 1, 0, 'Date');
+   $mtable->add_tablehead(33, image( $ico, '*-*'), 'Image', TABLE_NO_HIDE, 'flow+');
+   $mtable->add_tablehead( 4, T_('Date#header'), 'Date', 0, 'date-');
    if( !$no_mark )
-      $mtable->add_tablehead( 5, T_('Mark#header'), '', 0, 1, 'Mark');
+      $mtable->add_tablehead( 5, T_('Mark#header'), 'Mark', TABLE_NO_HIDE|TABLE_NO_SORT);
 
 } //message_list_head
 

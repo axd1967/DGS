@@ -164,9 +164,9 @@ if ( $fdemo == 2 )
    $form->attach_table( $filter ); // attach manage-filter as hiddens (static) to ext-form
    $form->attach_table( $rq ); // add fdemo-var
 
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $table->add_tablehead( 1, 'ID', 'ID', false, true);
-   $table->add_tablehead( 2, 'Animal', 'Animal');
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $table->add_tablehead( 1, 'ID', TABLE_NO_HIDE, 'ID+');
+   $table->add_tablehead( 2, 'Animal', 0, 'Animal+');
 
    // form for static filters
    $form->add_row( array(
@@ -234,9 +234,9 @@ if ( $fdemo == 3 )
    $table->add_or_del_column();
    $table->add_external_parameters( $rq, true ); // add fdemo-var
 
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $table->add_tablehead( 1, 'ID', 'ID', false, true);
-   $table->add_tablehead( 2, 'Animal', 'Animal');
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $table->add_tablehead( 1, 'ID', TABLE_NO_HIDE, 'ID+');
+   $table->add_tablehead( 2, 'Animal', 0, 'Animal+');
 
    // build SQL-query (for user-table)
    $q3 = $qsql->duplicate();

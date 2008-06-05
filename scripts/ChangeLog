@@ -30,6 +30,15 @@ Changelog
       (avoid a toggle back when refreshing the page)
    - enhance the private notes management to avoid some database updates
 
+   * include/table_columns.php (add_tablehead),
+     include/message_functions.php (message_list_head),
+     admin_admins.php, game_comments.php, list_contacts.php,
+     list_tournaments.php, opponents.php, show_games.php, status.php,
+     users.php, waiting_room.php,
+     code_examples/filter_example.php:
+   - adjusted the parameters of the add_tablehead() function
+      this should be the last step of the "tablehead" modifications
+
 2008-06-04 rodival
 
    * include/std_functions.php (is_logged_in, activity_string),

@@ -258,106 +258,106 @@ $ThePage = new Page('GamesList');
  * 30: >  FA (White-EndRating)
  * 31: >  FA (White-RatingDiff)
  *****/
-   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $gtable->add_tablehead( 1, T_('##header'), 'ID', 1, 1, 'Button');
-   $gtable->add_tablehead( 2, T_('sgf#header'), '', 0, 0, 'Sgf');
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $gtable->add_tablehead( 1, T_('##header'), 'Button', TABLE_NO_HIDE, 'ID-');
+   $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if( !$observe && !$all ) //FU+RU ?UNION
    {
       if( $show_notes )
-         $gtable->add_tablehead(32, T_('Notes#header'), 'X_Note', 1, 0, '');
+         $gtable->add_tablehead(32, T_('Notes#header'), '', 0, 'X_Note-');
    }
 
    if( $observe )
    {
-      $gtable->add_tablehead(17, T_('Black name#header'), 'blackName', 0, 0, 'User');
-      $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle', 0, 0, 'User');
-      $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', 1, 0, 'Rating');
-      $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', 1, 0, 'Rating');
-      $gtable->add_tablehead(20, T_('White name#header'), 'whiteName', 0, 0, 'User');
-      $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle', 0, 0, 'User');
-      $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', 1, 0, 'Rating');
-      $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', 1, 0, 'Rating');
+      $gtable->add_tablehead(17, T_('Black name#header'), 'User', 0, 'blackName+');
+      $gtable->add_tablehead(18, T_('Black userid#header'), 'User', 0, 'blackHandle+');
+      $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'blackStartRating-');
+      $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating-');
+      $gtable->add_tablehead(20, T_('White name#header'), 'User', 0, 'whiteName+');
+      $gtable->add_tablehead(21, T_('White userid#header'), 'User', 0, 'whiteHandle+');
+      $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'whiteStartRating-');
+      $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating-');
    }
    else if( $finished ) //FU+FA ?UNION
    {
       if( $all ) //FA
       {
-         $gtable->add_tablehead(17, T_('Black name#header'), 'blackName', 0, 0, 'User');
-         $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle', 0, 0, 'User');
-         $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(27, T_('Black end rating#header'), 'blackEndRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(28, T_('Black rating diff#header'), 'blackDiff', 1, 0, 'Number');
-         $gtable->add_tablehead(20, T_('White name#header'), 'whiteName', 0, 0, 'User');
-         $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle', 0, 0, 'User');
-         $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(30, T_('White end rating#header'), 'whiteEndRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(31, T_('White rating diff#header'), 'whiteDiff', 1, 0, 'Number');
+         $gtable->add_tablehead(17, T_('Black name#header'), 'User', 0, 'blackName+');
+         $gtable->add_tablehead(18, T_('Black userid#header'), 'User', 0, 'blackHandle+');
+         $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'blackStartRating-');
+         $gtable->add_tablehead(27, T_('Black end rating#header'), 'Rating', 0, 'blackEndRating-');
+         $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating-');
+         $gtable->add_tablehead(28, T_('Black rating diff#header'), 'Number', 0, 'blackDiff-');
+         $gtable->add_tablehead(20, T_('White name#header'), 'User', 0, 'whiteName+');
+         $gtable->add_tablehead(21, T_('White userid#header'), 'User', 0, 'whiteHandle+');
+         $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'whiteStartRating-');
+         $gtable->add_tablehead(30, T_('White end rating#header'), 'Rating', 0, 'whiteEndRating-');
+         $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating-');
+         $gtable->add_tablehead(31, T_('White rating diff#header'), 'Number', 0, 'whiteDiff-');
       }
       else //FU ?UNION
       {
-         $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name', 0, 0, 'User');
-         $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle', 0, 0, 'User');
-         $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(24, T_('End rating#header'), 'endRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(16, T_('Rating#header'), 'X_Rating', 1, 0, 'Rating');
-         $gtable->add_tablehead(25, T_('Rating diff#header'), 'ratingDiff', 1, 0, 'Number');
-         $gtable->add_tablehead( 5, T_('Color#header'), 'X_Color', 0, 0, 'Image');
+         $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
+         $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
+         $gtable->add_tablehead(23, T_('Start rating#header'), 'Rating', 0, 'startRating-');
+         $gtable->add_tablehead(24, T_('End rating#header'), 'Rating', 0, 'endRating-');
+         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'X_Rating-');
+         $gtable->add_tablehead(25, T_('Rating diff#header'), 'Number', 0, 'ratingDiff-');
+         $gtable->add_tablehead( 5, T_('Color#header'), 'Image', 0, 'X_Color+');
       }
    }
    else if( $running ) //RU+RA ?UNION
    {
       if( $all ) //RA
       {
-         $gtable->add_tablehead(17, T_('Black name#header'), 'blackName', 0, 0, 'User');
-         $gtable->add_tablehead(18, T_('Black userid#header'), 'blackHandle', 0, 0, 'User');
-         $gtable->add_tablehead(26, T_('Black start rating#header'), 'blackStartRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(19, T_('Black rating#header'), 'blackRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(20, T_('White name#header'), 'whiteName', 0, 0, 'User');
-         $gtable->add_tablehead(21, T_('White userid#header'), 'whiteHandle', 0, 0, 'User');
-         $gtable->add_tablehead(29, T_('White start rating#header'), 'whiteStartRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(22, T_('White rating#header'), 'whiteRating', 1, 0, 'Rating');
+         $gtable->add_tablehead(17, T_('Black name#header'), 'User', 0, 'blackName+');
+         $gtable->add_tablehead(18, T_('Black userid#header'), 'User', 0, 'blackHandle+');
+         $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'blackStartRating-');
+         $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating-');
+         $gtable->add_tablehead(20, T_('White name#header'), 'User', 0, 'whiteName+');
+         $gtable->add_tablehead(21, T_('White userid#header'), 'User', 0, 'whiteHandle+');
+         $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'whiteStartRating-');
+         $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating-');
       }
       else //RU ?UNION
       {
-         $gtable->add_tablehead( 3, T_('Opponent#header'), 'Name', 0, 0, 'User');
-         $gtable->add_tablehead( 4, T_('Userid#header'), 'Handle', 0, 0, 'User');
-         $gtable->add_tablehead(23, T_('Start rating#header'), 'startRating', 1, 0, 'Rating');
-         $gtable->add_tablehead(16, T_('Rating#header'), 'X_Rating', 1, 0, 'Rating');
-         $gtable->add_tablehead( 5, T_('Colors#header'), 'X_Color', 0, 0, 'Image');
+         $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
+         $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
+         $gtable->add_tablehead(23, T_('Start rating#header'), 'Rating', 0, 'startRating-');
+         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'X_Rating-');
+         $gtable->add_tablehead( 5, T_('Colors#header'), 'Image', 0, 'X_Color+');
       }
    }
 
-   $gtable->add_tablehead( 6, T_('Size#header'), 'Size', 1, 0, 'Number');
-   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Handicap', 0, 0, 'Number');
-   $gtable->add_tablehead( 8, T_('Komi#header'), 'Komi', 1, 0, 'Number');
-   $gtable->add_tablehead( 9, T_('Moves#header'), 'Moves', 1, 0, 'Number');
+   $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
+   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
+   $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
+   $gtable->add_tablehead( 9, T_('Moves#header'), 'Number', 0, 'Moves-');
 
    if( $finished ) //FU+FA
    {
       if( $all ) //FA
-         $gtable->add_tablehead(10, T_('Score#header'), 'Score', 1); //no UNION
+         $gtable->add_tablehead(10, T_('Score#header'), '', 0, 'Score-'); //no UNION
       else //FU ?UNION
       {
-         $gtable->add_tablehead(10, T_('Score#header'), 'Score', 1); //despite ?UNION else X_Score
-         $gtable->add_tablehead(11, T_('Win?#header'), 'X_Score', 1, 1, 'Image');
+         $gtable->add_tablehead(10, T_('Score#header'), '', 0, 'Score-'); //despite ?UNION else X_Score
+         $gtable->add_tablehead(11, T_('Win?#header'), 'Image', TABLE_NO_HIDE, 'X_Score-');
       }
    }
 
-   $gtable->add_tablehead(14, T_('Rated#header'), 'X_Rated', 1, 1);
+   $gtable->add_tablehead(14, T_('Rated#header'), '', TABLE_NO_HIDE, 'X_Rated-');
 
    if( $observe ) //OB
-      $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', 1, 0, 'Date');
+      $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged-');
    else if( $finished ) //FU+FA ?UNION
-      $gtable->add_tablehead(13, T_('End date#header'), 'Lastchanged', 1, 0, 'Date');
+      $gtable->add_tablehead(13, T_('End date#header'), 'Date', 0, 'Lastchanged-');
    else if( $running ) //RU+RA ?UNION
    {
-      $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', 1, 0, 'Date');
+      $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged-');
       if( !$all ) //RU ?UNION
       {
-         $gtable->add_tablehead(25, T_('Opponents Last Access#header'), 'Lastaccess', 1, 0, 'Date');
-         $gtable->add_tablehead(24, T_('Weekend Clock#header'), 'WeekendClock', 1, 0, 'Date');
+         $gtable->add_tablehead(25, T_('Opponents Last Access#header'), 'Date', 0, 'Lastaccess-');
+         $gtable->add_tablehead(24, T_('Weekend Clock#header'), 'Date', 0, 'WeekendClock-');
       }
    }
    $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID

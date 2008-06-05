@@ -138,23 +138,22 @@ $ThePage = new Page('Status');
    $show_notes= (LIST_GAMENOTE_LEN>0);
 
    $gtable->add_or_del_column();
-   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $gtable->add_tablehead( 1, T_('##header'), 'ID', 1, 1, 'Button');
-
-   $gtable->add_tablehead( 2, T_('sgf#header'), '', 0, 0, 'Sgf');
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $gtable->add_tablehead( 1, T_('##header'), 'Button', TABLE_NO_HIDE, 'ID-');
+   $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf');
    if( $show_notes )
-   $gtable->add_tablehead(32, T_('Notes#header'), '', 1, 0, '');
-   $gtable->add_tablehead( 3, T_('Opponent#header'), '', 0, 0, 'User');
-   $gtable->add_tablehead( 4, T_('Userid#header'), '', 0, 0, 'User');
-   $gtable->add_tablehead(16, T_('Rating#header'), '', 1, 0, 'Rating');
-   $gtable->add_tablehead( 5, T_('Color#header'), '', 0, 0, 'Image');
-   $gtable->add_tablehead( 6, T_('Size#header'), '', 1, 0, 'Number');
-   $gtable->add_tablehead( 7, T_('Handicap#header'), '', 0, 0, 'Number');
-   $gtable->add_tablehead( 8, T_('Komi#header'), '', 1, 0, 'Number');
-   $gtable->add_tablehead( 9, T_('Moves#header'), '', 1, 0, 'Number');
-   $gtable->add_tablehead(14, T_('Rated#header'), '', 1);
-   $gtable->add_tablehead(13, T_('Last move#header'), 'Lastchanged', 1, 0, 'Date');
-   $gtable->add_tablehead(10, T_('Time remaining#header'), '', 0);
+   $gtable->add_tablehead(32, T_('Notes#header'), '', 0, 'X_Note-');
+   $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
+   $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
+   $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'Rating2-');
+   $gtable->add_tablehead( 5, T_('Color#header'), 'Image', 0, 'X_Color+');
+   $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
+   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
+   $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
+   $gtable->add_tablehead( 9, T_('Moves#header'), 'Number', 0, 'Moves-');
+   $gtable->add_tablehead(14, T_('Rated#header'), '', 0, 'X_Rated-');
+   $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged-');
+   $gtable->add_tablehead(10, T_('Time remaining#header'), '', TABLE_NO_SORT);
 
    $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
    $order = $gtable->current_order_string('ID-');

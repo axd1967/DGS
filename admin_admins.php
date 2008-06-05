@@ -140,16 +140,16 @@ require_once( "include/table_columns.php" );
    $marked_form->attach_table( $atable);
    $marked_form->set_tabindex(1);
 
-   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $atable->add_tablehead(1, /*T_*/('##header'), '', 0, 1, 'ID');
-   $atable->add_tablehead(2, /*T_*/('Userid#header'), '', 0, 1, 'User');
-   $atable->add_tablehead(3, /*T_*/('Name#header'), '', 0, 1, 'User');
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $atable->add_tablehead(1, /*T_*/('##header'), 'ID');
+   $atable->add_tablehead(2, /*T_*/('Userid#header'), 'User');
+   $atable->add_tablehead(3, /*T_*/('Name#header'), 'User');
 
    $col = 4;
    foreach( $admin_tasks as $aid => $tmp )
    {
       list( $amask, $aname) = $tmp;
-      $atable->add_tablehead($col++, $aname, '', 0, 1, 'Mark');
+      $atable->add_tablehead($col++, $aname, 'Mark');
    }
    $atable->set_default_sort( 1); //on ID
 

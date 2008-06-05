@@ -255,16 +255,21 @@ class Table
       $this->Use_Show_Rows = (bool)$use;
    }
 
-   /*! \brief Add a tablehead.
-    * \param $nr must be >0 but if highter than 32, the column will be static
-    * \param $attbs must be an array of attributs or a class-name for the column
+   /*!@brief Add a tablehead.
+    * @param $nr must be >0 but if highter than 32, the column will be static
+    * @param $attbs must be an array of attributs or a class-name for the column
+    *  default: no attributs or class (i.e. class "Text" left-aligned)
+    * @param $mode is a combination of TABLE_NO_HIDE and TABLE_NO_SORT
+    *  default: TABLE_NO_HIDE|TABLE_NO_SORT
+    * @param $sort_xtend is the alias used as default to sort the column
+    *  ended by a '+' to sort it in the asc order or a '-' to sort it in the desc order
+    *  default: no sort
     */
    function add_tablehead( $nr,
                            $description,
-                           $sort_string = '',
-                           $desc_default = false,
-                           $undeletable = false,
-                           $attbs = null )
+                           $attbs = null,
+                           $mode = null,
+                           $sort_xtend = '' )
    {
       if( $this->Head_closed )
          error('assert', "Table.add_tablehead.closed($nr)");
@@ -272,22 +277,22 @@ class Table
          error('assert', "Table.add_tablehead.bad_col_nr($nr)");
       if( !is_array($attbs) )
       {
-         if( is_string($attbs) )
+         if( is_string($attbs) && !empty($attbs) )
             $attbs= array( 'class' => $attbs);
          else
             $attbs= null;
       }
-      //adjust old style parameters to new ones
-      $mode = ($undeletable ? TABLE_NO_HIDE : 0) | $this->Mode;
-      $sort_extnd= trim($sort_string);
-      if( !$sort_extnd )
+      if( !isset($mode) )
+         $mode= TABLE_NO_HIDE|TABLE_NO_SORT;
+      $sort_xtend= trim($sort_xtend);
+      if( !$sort_xtend )
          $mode|= TABLE_NO_SORT;
-      else if( !is_numeric(strpos('+-',substr($sort_extnd,-1))) )
-         $sort_extnd.= ($desc_default ? '-' : '+');
+      else if( !is_numeric(strpos('+-',substr($sort_xtend,-1))) )
+         $sort_xtend.= '+';
       $this->Tableheads[$nr] =
          array( 'Nr' => $nr,
                 'Description' => $description,
-                'Sort_String' => $sort_extnd,
+                'Sort_String' => $sort_xtend,
                 'Mode' => $mode,
                 'attbs' => $attbs );
 
@@ -296,11 +301,11 @@ class Table
          $this->Filters->set_visible($nr, $visible);
    } //add_tablehead
 
-   /*! \brief records the default order of the table
-    *   by the way, close and compute the headers definitions
-    *  \param $default_sorts are +/- $column_nbr
-    *  works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
-    *    (allowing a current_order_string() default usage)
+   /*!@brief records the default order of the table
+    *  by the way, close and compute the headers definitions
+    * @param $default_sorts are +/- $column_nbr
+    * works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
+    *  (allowing a current_order_string() default usage)
     */
    function set_default_sort( /* {$default_sort1 {,$default_sort2 [,...]}} */)
    {
@@ -693,13 +698,14 @@ class Table
       return $num_rows_result;
    } //compute_show_rows
 
-   /*! \brief Retrieve MySQL ORDER BY part from table.
-    *   $final_field is an extended-field-name
-    *      (ended by a '-+' like in add_tablehead())
-    *  works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
-    *    (computing the set_default_sort() datas)
+   /*!@brief Retrieve MySQL ORDER BY part from table.
+    * @param $sort_xtend is an extended-alias-name
+    *  (ended by a '+' or '-' like in add_tablehead())
+    *  added to the current sort list
+    * works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
+    *   (computing the set_default_sort() datas)
     */
-   function current_order_string( $final_field='')
+   function current_order_string( $sort_xtend='')
    {
       if( !$this->Head_closed )
          error('assert', "Table.current_order_string.!closed({$this->Head_closed})");
@@ -726,16 +732,16 @@ class Table
          //alt-attb and part of "images/sort$i$c.gif" $i:[1..n] $c:[a,d]
          $this->Sortimg[$sk]= "$i$c";
       }
-      if( $final_field )
+      if( $sort_xtend )
       {
          if( $str )
          {
-            $c= preg_replace( "/[-+]+/", "[-+]", trim( $final_field, "-+ ") );
+            $c= preg_replace( "/[-+]+/", "[-+]", trim( $sort_xtend, "-+ ") );
             if( !preg_match( "/\\b{$c}[-+]/i", $str) )
-               $str.= $final_field;
+               $str.= $sort_xtend;
          }
          else
-            $str= $final_field;
+            $str= $sort_xtend;
       }
       if( !$str )
          return '';
