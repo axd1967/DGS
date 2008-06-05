@@ -218,14 +218,15 @@ define('MAX_MOVENUMBERS', 500);
 define("KO", 0x01);
 
 //-----
-define('COORD_LEFT',0x01);
-define('COORD_UP',0x02);
-define('COORD_RIGHT',0x04);
-define('COORD_DOWN',0x08);
-define('SMOOTH_EDGE',0x10);
-define('COORD_OVER',0x20);
-define('COORD_SGFOVER',0x40);
-define('NUMBER_OVER',0x80);
+define('COORD_LEFT',0x001);
+define('COORD_UP',0x002);
+define('COORD_RIGHT',0x004);
+define('COORD_DOWN',0x008);
+define('SMOOTH_EDGE',0x010);
+define('COORD_OVER',0x020);
+define('COORD_SGFOVER',0x040);
+define('NUMBER_OVER',0x080);
+define('JSCRIPT_ENA',0x100);
 //-----
 
 
@@ -417,12 +418,16 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       case 'status.php':
          // RSS Autodiscovery:
          echo "\n <link rel=\"alternate\" type=\"application/rss+xml\""
-             ." title=\"$FRIENDLY_SHORT_NAME Status RSS Feed\" href=\"/rss/status.php\">";
+             ," title=\"$FRIENDLY_SHORT_NAME Status RSS Feed\" href=\"/rss/status.php\">";
       break;
    }
 
    if( $style_string )
-      echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
+      echo "\n <STYLE TYPE=\"text/css\">\n",$style_string,"\n </STYLE>";
+
+   global $player_row;
+   if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JSCRIPT_ENA) )
+      echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
 
    if( is_a($ThePage, 'HTMLPage') )
       $tmp = $ThePage->getCSSclass(); //may be multiple, i.e. 'Games Running'

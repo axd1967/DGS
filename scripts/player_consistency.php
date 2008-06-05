@@ -66,7 +66,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
          }
          echo "\n</tr>";
       }
-      echo "<tr class=Row$c ondblclick=\"row_click(this,'Row$c')\">\n";
+      echo "<tr class=\"Row$c\" ondblclick=\"toggle_class(this,'Row$c','HilRow$c')\">\n"
       foreach( $row as $key => $val )
       {
          //remove sensible fields from a query like "SELECT * FROM Players"
@@ -269,6 +269,8 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    //$is_rated = " AND Games.Rated!='N'" ;
    //$is_rated.= " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
 
+
+   echo "<br>On ", gmtdate($date_fmt, $NOW), ' GMT<br>';
 
 //-----------------
 

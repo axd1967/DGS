@@ -26,8 +26,8 @@ require_once( "include/rating.php" );
 require_once( "include/form_functions.php" );
 
 // Reminder: to friendly reset the language:
-// http://www.dragongoserver.net/edit_profile.php?language=C
-// http://www.dragongoserver.net/edit_profile.php?language=en
+// {$HOSTBASE}edit_profile.php?language=C
+// {$HOSTBASE}edit_profile.php?language=en
 
 {
    connect2mysql();
@@ -203,6 +203,7 @@ require_once( "include/form_functions.php" );
    else
       $profile_form->add_row( array( 'HIDDEN', 'nightstart', $player_row['Nightstart'] ) );
 
+   $boardcoords = (int)$player_row['Boardcoords'];
 
    //--- Followings may be browser settings ---
 
@@ -258,6 +259,10 @@ require_once( "include/form_functions.php" );
                                   'TEXT', sptext(T_('choosing a lower value helps the server (see also FAQ)')),
                                  ) );
 
+   if( ALLOW_JSCRIPT )
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Allow JScript'),
+                                  'CHECKBOX', 'jsenable', 1, '', ($boardcoords & JSCRIPT_ENA) ) );
+
 
 
    $profile_form->add_row( array( 'HEADER', T_('Board graphics') ) );
@@ -270,17 +275,18 @@ require_once( "include/form_functions.php" );
                                   'RADIOBUTTONS', 'woodcolor', $woodcolors,
                                     $player_row["Woodcolor"] ) );
 
-   $s = $player_row["Boardcoords"];
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Coordinate sides'),
-                                  'CHECKBOX', 'coordsleft', 1, sptext(T_('Left'),2), ($s & COORD_LEFT),
-                                  'CHECKBOX', 'coordsup', 1, sptext(T_('Up'),2), ($s & COORD_UP),
-                                  'CHECKBOX', 'coordsright', 1, sptext(T_('Right'),2), ($s & COORD_RIGHT),
-                                  'CHECKBOX', 'coordsdown', 1, sptext(T_('Down'),2), ($s & COORD_DOWN),
-//                                  'CHECKBOX', 'coordssgfover', 1, sptext(T_//('Sgf over'),2), ($s & COORD_SGFOVER),
-                                  'CHECKBOX', 'coordsover', 1, sptext(T_('Hover')), ($s & COORD_OVER),
-                                ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
-                                  'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
+   $row= array( 'DESCRIPTION', T_('Coordinate sides'),
+         'CHECKBOX', 'coordsleft', 1, sptext(T_('Left'),2), ($boardcoords & COORD_LEFT),
+         'CHECKBOX', 'coordsup', 1, sptext(T_('Up'),2), ($boardcoords & COORD_UP),
+         'CHECKBOX', 'coordsright', 1, sptext(T_('Right'),2), ($boardcoords & COORD_RIGHT),
+         'CHECKBOX', 'coordsdown', 1, sptext(T_('Down'),2), ($boardcoords & COORD_DOWN),
+         'CHECKBOX', 'coordsover', 1, sptext(T_('Hover'),2), ($boardcoords & COORD_OVER),
+      );
+   if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) )
+      array_push( $row,
+         'CHECKBOX', 'coordssgfover', 1, sptext(T_('Sgf over')), ($boardcoords & COORD_SGFOVER)
+      );
+   $profile_form->add_row( $row);
 
    if( ENA_MOVENUMBERS )
    {
@@ -289,7 +295,7 @@ require_once( "include/form_functions.php" );
                                   'CHECKBOX', 'movemodulo', 100,
                                     sptext(T_('Don\'t use numbers above 100'),2),
                                     ($player_row['MoveModulo']>0 ?1 :0),
-                                  'CHECKBOX', 'numbersover', 1, sptext(T_('Hover')), ($s & NUMBER_OVER),
+                                  'CHECKBOX', 'numbersover', 1, sptext(T_('Hover')), ($boardcoords & NUMBER_OVER),
                                 ) );
    }
 
@@ -334,6 +340,7 @@ require_once( "include/form_functions.php" );
                'SELECTBOX', "notes{$ltyp}width", 1, $noteswidths, $player_row["Notes{$typ}Width"], false,
             ) );
    }
+
 
    //--- End of browser settings ---
 

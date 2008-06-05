@@ -80,12 +80,6 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       "  tr.hil { background: #ffb010; }\n" .
       "  td.Null { background: #ffc0c0; }" );
 
-   echo " <SCRIPT language=\"JavaScript\" type=\"text/javascript\"><!-- \n";
-   echo "   function row_click(row,rcl) {
-     row.className=((row.className=='hil')?rcl:'hil');
-   }\n";
-   echo "\n//-->\n</SCRIPT>\n";
-
    /*
       The mysql_unbuffered_query() implementation was a test. It is useless
       to control the MySQL queries resulting in a too long run time.
@@ -173,7 +167,8 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    $query= trim($query);
    if( $select && $query )
    {
-      $uri= 'http://' . $HOSTNAME . @$_SERVER['PHP_SELF'] . '?' . $uri;
+      list($protocol) = explode($HOSTNAME, $HOSTBASE);
+      $uri= $protocol . $HOSTNAME . @$_SERVER['PHP_SELF'] . '?' . $uri;
       $ary= array();
       $dform->get_hiddens( $ary);
       $uri= make_url($uri, $ary, 1);
@@ -386,7 +381,10 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
          }
          echo "\n</tr>";
       }
-      echo "<tr class=Row$c ondblclick=\"row_click(this,'Row$c')\">\n";
+      if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JSCRIPT_ENA) )
+         echo "<tr class=Row$c ondblclick=\"toggle_class(this,'Row$c','HilRow$c')\">\n";
+      else
+         echo "<tr class=Row$c>\n";
       foreach( $row as $key => $val )
       {
          //remove sensible fields from a query like "SELECT * FROM Players"

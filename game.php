@@ -701,7 +701,7 @@ function get_alt_arg( $n1, $n2)
 
 function draw_moves( $gid, $move)
 {
-   global $TheBoard;
+   global $TheBoard, $player_row;
 
    $Size= $TheBoard->size;
    $Moves= $TheBoard->max_moves;
@@ -779,7 +779,7 @@ function draw_moves( $gid, $move)
 
    // add selectbox to show specific move
    echo "\n<SELECT name=\"gotomove\" size=\"1\"";
-   if( ALLOW_JSCRIPT )
+   if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JSCRIPT_ENA) )
    {
       //echo " onchange=\"javascript:alert('Index: ' + this.selectedIndex + ' Valeur: ' + this.options[this.selectedIndex].value );\"";
       //echo " onchange=\"javascript:this.form.submit();\"";
@@ -788,7 +788,7 @@ function draw_moves( $gid, $move)
    echo ">\n$str</SELECT>";
    echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">";
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">";
-}
+} //draw_moves
 
 function draw_message_box(&$message)
 {
@@ -813,7 +813,7 @@ function draw_message_box(&$message)
       . "</TABLE>"
       ;
 
-}
+} //draw_message_box
 
 function draw_add_time( $game_row )
 {
@@ -862,7 +862,7 @@ function draw_add_time( $game_row )
         </TR>
       </TABLE>
 ';
-}
+} //draw_add_time
 
 function draw_game_info(&$game_row, &$board)
 {
@@ -957,7 +957,7 @@ function draw_game_info(&$game_row, &$board)
    }
 
    echo "</table>\n";
-}
+} //draw_game_info
 
 function draw_board_info($board)
 {
@@ -1006,7 +1006,7 @@ function draw_board_info($board)
    if( $txt )
       $txt= "<dl class=BoardInfos>$txt</dl>\n";
    return $txt;
-}
+} //draw_board_info
 
 function echo_game_rating( $uid, $start_rating, $end_rating)
 {
@@ -1019,7 +1019,7 @@ function echo_game_rating( $uid, $start_rating, $end_rating)
       . echo_rating( $end_rating, true, $uid )
       . "</span>"
       ;
-}
+} //echo_game_rating
 
 
 function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
@@ -1054,6 +1054,6 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
 
    echo "</td></tr>\n";
    echo "</table>\n";
-}
+} //draw_notes
 
 ?>

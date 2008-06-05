@@ -134,6 +134,8 @@ class Table
    var $Rows_Per_Page;
    /*! \brief true, if number of rows to show should be configurable (otherwise use Players.TableMaxRows). */
    var $Use_Show_Rows;
+   /*! \brief true to use JScript features. */
+   var $Jscript;
 
    /*!
     * \brief array of objects with external request-parameters,
@@ -219,6 +221,8 @@ class Table
       $this->Last_Page = true;
       $this->Use_Show_Rows = true;
       $this->Rows_Per_Page = $player_row['TableMaxRows'];
+      $this->Jscript =
+         ( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JSCRIPT_ENA) );
 
       // filter-stuff
       $this->ext_req_params = array();
@@ -369,7 +373,7 @@ class Table
       $head_row = "\n <tr id=\"{$this->PrevColId}\" class=Head>";
       foreach( $this->Tableheads as $thead )
       {
-         $head_row .= $this->make_tablehead( $thead );
+         $head_row .= $this->make_tablehead( $thead ); //compute Shown_Columns
       }
       $head_row .= "\n </tr>";
 
@@ -1069,13 +1073,10 @@ class Table
          $rclass = $tablerow['class'];
       }
 
-      $string = "\n <tr class=\"$rclass\"";
-      if( ALLOW_JSCRIPT && !@$tablerow['noclick'] )
-      { //onClick onmousedown ondblclick
-         //$string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
-         $string.= " ondblclick=\"javascript:this.className=((this.className=='$rclass')?'Hil$rclass':'$rclass');\"";
-      }
-      $string.= ">";
+      if( $this->Jscript )
+         $string = "\n <tr class=\"$rclass\" ondblclick=\"toggle_class(this,'$rclass','Hil$rclass')\">";
+      else
+         $string = "\n <tr class=\"$rclass\">";
 
       $colspan= 0;
       foreach( $this->Tableheads as $thead )

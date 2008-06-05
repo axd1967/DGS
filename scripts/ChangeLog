@@ -23,6 +23,19 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-06-06 rodival
+
+   * include/std_functions.php (start_html),
+     include/table_columns.php (make_tablerow),
+     scripts/data_export.php, scripts/data_report.php,
+     scripts/player_consistency.php, js/common.js,
+     game.php, edit_profile.php, change_profile.php:
+   - introducing the JScript tools and their management (profile setting)
+-----------
+//enable JScript usage for old players (as actually):
+UPDATE Players SET Boardcoords=Boardcoords|0x100;
+-----------
+
 2008-06-05 rodival
 
    * game.php:

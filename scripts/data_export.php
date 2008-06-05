@@ -576,7 +576,7 @@ function echoTR( $typ, $str)
          $str= "<pre>\n" . dump2html( $str) . "\n</pre>";
       else
          $str= "<br>\n" . dump2html( $str) . "\n<br>";
-      $str= "<tr class=\"$typ\" ondblclick=\"row_click(this,'$typ')\">\n"
+      $str= "<tr class=\"$typ\" ondblclick=\"toggle_class(this,'$typ','Hil$typ')\">\n"
          . "<td nowrap>" . $str . "</td>\n</tr>\n";
       break;
    }
@@ -1117,8 +1117,8 @@ function freesql_dump( $database, $query)
       header( "Content-Description: PHP Generated Data" );
    
       //to allow some mime applications to find it in the cache
-      header('Expires: ' . gmdate('D, d M Y H:i:s',$NOW+5*60) . ' GMT');
-      header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$NOW) . ' GMT');
+      header('Expires: ' . gmdate($gmdate_fmt, $NOW+5*60));
+      header('Last-Modified: ' . gmdate($gmdate_fmt, $NOW));
 
       echo $text;
       exit;
@@ -1131,15 +1131,10 @@ function freesql_dump( $database, $query)
       "  table.Table { border:0; background:#c0c0c0; text-align:left;\n" .
       "   border-spacing:1px; border-collapse:separate; margin:0.5em 2px; }\n" .
       "  table.Table td, table.Table th { padding:4px; }\n" .
+      "  tr.Row2 { background: #e0e8ed; }\n" .
       "  tr.Row1 { background: #ffffff; }\n" .
-      "  tr.Row2 { background: #dddddd; }\n" .
-      "  tr.hil { background: #ffb010; }" );
-
-   echo " <SCRIPT language=\"JavaScript\" type=\"text/javascript\"><!-- \n";
-   echo "   function row_click(row,rcl) {
-     row.className=((row.className=='hil')?rcl:'hil');
-   }\n";
-   echo "\n//-->\n</SCRIPT>\n";
+      "  tr.HilRow2 { background: #e7cdb1; }\n" .
+      "  tr.HilRow1 { background: #ffdfbf; }" );
 
 
    $dform = new Form('dform', 'data_export.php#result', FORM_POST, true );
