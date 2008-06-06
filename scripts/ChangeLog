@@ -36,6 +36,9 @@ Changelog
 UPDATE Players SET Boardcoords=Boardcoords|0x100;
 -----------
 
+   * statisticspng.php, statratingspng.php:
+   - managed to disable the image-cache feature from the url
+
 2008-06-05 rodival
 
    * game.php:
