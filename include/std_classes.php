@@ -290,7 +290,7 @@ class QuerySQL
     * \brief Adds SQL-part
     * signature: add_part( part_type, part1, part2, ...); var-args for one part-type
     * param $type sql-part-type to add to QuerySQL: one of SQLP_...-consts
-    * param $parts allow variable number of parts (1..n)
+    * param $parts allow variable number of parts (1..n); if part is an array its items are merged as if being parts
     *
     * note: empty parts are skipped
     * NOTE: Best practice is to use only ONE SQL-varname per SQLP_FIELDS-part
@@ -325,12 +325,30 @@ class QuerySQL
          return; // ignore same-value
       }
 
+
       // skip arg #0=type-arg to add var-args: parts
       for( $i=1; $i < func_num_args(); $i++)
       {
          $part = trim(func_get_arg($i));
          if ( $part != '' )
             $this->parts[$type][] = $part;
+      }
+   }
+
+   /*!
+    * \brief Adds SQL-part, only for SQLP_FIELDS
+    * signature: add_part_array( part_type, array( part1, part2, ...) );
+    * param $part_arr parts (1..n)
+    *
+    * see also func add_part(type, ...)
+    */
+   function add_part_fields( $part_arr )
+   {
+      foreach( $part_arr as $part )
+      {
+         $part = trim($part);
+         if ( $part != '' )
+            $this->parts[SQLP_FIELDS][] = $part;
       }
    }
 
