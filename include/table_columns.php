@@ -37,7 +37,7 @@ require_once( "include/filter.php" );
 //0x80000000 is negative in PHP. So the database field holding the Column_sets must be signed: INT(11) NOT NULL
 define('ALL_COLUMNS', 0xffffffff); //=4294967295 = full 32 bits integer
 
-//caution: provide enought "images/sort$i$c.gif" images $i:[1..n] $c:[a,d]
+//caution: provide enough "images/sort$i$c.gif" images $i:[1..n] $c:[a,d]
 define('TABLE_MAX_SORT', 2); // 0 to disable the table sorts
 
 define('TABLE_NO_SORT', 0x01); //disable the sort options (except set_default_sort)
@@ -99,8 +99,13 @@ class Table
     * - a string supposed to be the class of the column
     */
    var $Tableheads;
+   /*!
+    * \brief var to make some asserts to clearly force the use of some functions
+    *        before or after the table_head definitions.
+    */
    var $Head_closed;
-   var $Mode; //optional features of the table
+   /*! \brief optional features of the table. */
+   var $Mode;
    /*! \brief a place to store some external infos (array) */
    var $ExtMode;
 
@@ -196,7 +201,7 @@ class Table
 
       if( !empty($_player_column_set_name)
          && is_string($_player_column_set_name)
-         && !($this->Mode&TABLE_NO_HIDE) )
+         && !($this->Mode & TABLE_NO_HIDE) )
       {
          $this->Player_Column_set_name = $_player_column_set_name;
          $this->Column_set = ALL_COLUMNS;
@@ -315,29 +320,28 @@ class Table
    {
       if( $this->Head_closed )
          error('assert', "Table.set_default_sort.closed({$this->Head_closed})");
-      $this->Head_closed= 1;
-      $s= array();
-      //even if TABLE_NO_SORT or TABLE_MAX_SORT==0:
+      $this->Head_closed = 1;
+      $s = array();
+      //even if TABLE_NO_SORT or TABLE_MAX_SORT == 0:
       for( $i=func_num_args(); $i>0; )
       {
          --$i;
-         $sd= func_get_arg($i);
+         $sd = func_get_arg($i);
          if( is_string($sd) )
             error('assert', "Table.set_default_sort.old_way($sd)");
-         if( $sd=(int)$sd )
-            $s= array(abs($sd)=>$sd) + $s;
+         if( $sd = (int)$sd )
+            $s = array( abs($sd) => $sd ) + $s; // put new key first in array
       }
-      if( TABLE_MAX_SORT>0 && !($this->Mode&TABLE_NO_SORT) )
+      if( TABLE_MAX_SORT > 0 && !($this->Mode & TABLE_NO_SORT) )
       {
          //get the sort parameters from URL
-         for( $i=TABLE_MAX_SORT; $i>0; )
+         for( $i=TABLE_MAX_SORT; $i>0; $i--)
          {
-            if( $sd=(int)$this->get_arg("sort$i") )
-               $s= array(abs($sd)=>$sd) + $s;
-            --$i;
+            if( $sd = (int)$this->get_arg("sort$i") )
+               $s = array( abs($sd) => $sd ) + $s; // put new key first in array
          }
       }
-      $this->Sort= $s;
+      $this->Sort = $s;
    } //set_default_sort
 
    /*! \brief Check if column is displayed. */
@@ -346,9 +350,9 @@ class Table
       if( $nr < 1 ) return 0;
       if( $nr > 32 ) return 1;
       $mask = (1 << ($nr-1));
-      if( !($mask&ALL_COLUMNS) ) return 1;
-      if( (TABLE_NO_HIDE&@$this->Tableheads[$nr]['Mode']) ) return 1;
-      return ($mask&$this->Column_set);
+      if( !($mask & ALL_COLUMNS) ) return 1;
+      if( (TABLE_NO_HIDE & @$this->Tableheads[$nr]['Mode']) ) return 1;
+      return ($mask & $this->Column_set);
    }
 
    /*!
@@ -420,7 +424,7 @@ class Table
 
       if( isset($this->ExternalForm) )
          $table_form = $this->ExternalForm; // read-only
-      else if( $need_form || !($this->Mode&TABLE_NO_HIDE) ) // need form for filter or add-column
+      else if( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // need form for filter or add-column
       {
          $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
             clean_url( $this->Page),
@@ -431,7 +435,7 @@ class Table
          unset( $table_form);
 
 
-      if( $need_form || !($this->Mode&TABLE_NO_HIDE) ) // add-col & filter-submits
+      if( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // add-col & filter-submits
       {
          $addcol_str = $this->make_add_column_form( $table_form);
          $string .= $addcol_str;
@@ -597,7 +601,7 @@ class Table
     */
    function add_or_del_column()
    {
-      if( ($i=count($this->Tableheads)) )
+      if( ($i = count($this->Tableheads)) )
          error('assert', "Table.add_or_del_column.past_head_start($i)");
 
       // handle filter-visibility
@@ -702,7 +706,7 @@ class Table
       return $num_rows_result;
    } //compute_show_rows
 
-   /*!@brief Retrieve MySQL ORDER BY part from table.
+   /*! @brief Retrieve MySQL ORDER BY part from table.
     * @param $sort_xtend is an extended-alias-name
     *  (ended by a '+' or '-' like in add_tablehead())
     *  added to the current sort list
@@ -713,44 +717,46 @@ class Table
    {
       if( !$this->Head_closed )
          error('assert', "Table.current_order_string.!closed({$this->Head_closed})");
-      //if( TABLE_MAX_SORT<=0 || $this->Mode&TABLE_NO_SORT ) return;
+      //if( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT ) return;
 
       //$this->Sortimg = array();
-      $str = ''; $i=0;
+      $str = '';
+      $i=0;
       foreach( $this->Sort as $sd )
       {
          if( $i >= TABLE_MAX_SORT )
             break;
-         if( !$sd )
+         if( !$sd ) // ±num
             continue;
-         $sk= abs($sd);
-         $field= (string)@$this->Tableheads[$sk]['Sort_String'];
+         $sk = abs($sd);
+         $field = (string)@$this->Tableheads[$sk]['Sort_String'];
          if( !$field )
             continue;
          ++$i;
-         if( $sd<0 )
-            $str.= strtr( $field, '+-', '-+');
+         if( $sd < 0 )
+            $str .= strtr( $field, '+-', '-+');
          else
-            $str.= $field;
-         $c= (substr($str, -1) == '+' ? 'a' : 'd' );
-         //alt-attb and part of "images/sort$i$c.gif" $i:[1..n] $c:[a,d]
-         $this->Sortimg[$sk]= "$i$c";
+            $str .= $field;
+         $c = (substr($str, -1) == '+' ? 'a' : 'd' );
+         //alt-attb and part of "images/sort$i$c.gif" $i:[1..n] $c:[a,d] (a=ascending, d=descending)
+         $this->Sortimg[$sk] = "$i$c";
       }
       if( $sort_xtend )
       {
          if( $str )
          {
-            $c= preg_replace( "/[-+]+/", "[-+]", trim( $sort_xtend, "-+ ") );
+            //FIXME: Q: is replacement in next line correct ?
+            $c = preg_replace( "/[-+]+/", "[-+]", trim( $sort_xtend, "-+ ") );
             if( !preg_match( "/\\b{$c}[-+]/i", $str) )
-               $str.= $sort_xtend;
+               $str .= $sort_xtend;
          }
          else
-            $str= $sort_xtend;
+            $str = $sort_xtend;
       }
       if( !$str )
          return '';
-      $str= str_replace( array('-','+'), array(' DESC,',','), $str);
-      return ' ORDER BY '.substr($str,0,-1);
+      $str = str_replace( array('-','+'), array(' DESC',''), $str);
+      return ' ORDER BY '.$str;
    } //current_order_string
 
    /*! \brief Retrieve mySQL LIMIT part from table. */
@@ -804,16 +810,17 @@ class Table
    function get_hiddens( &$hiddens)
    {
       $i=0;
-      if( TABLE_MAX_SORT>0 && !($this->Mode&TABLE_NO_SORT) )
+      if( TABLE_MAX_SORT > 0 && !($this->Mode & TABLE_NO_SORT) )
       {
          foreach( $this->Sort as $sd )
          {
             if( $i >= TABLE_MAX_SORT )
                break;
-            if( !$sd )
-               continue;
-            ++$i;
-            $hiddens[$this->Prefix . "sort$i"] = $sd;
+            if( $sd ) // ±num
+            {
+               ++$i;
+               $hiddens[$this->Prefix . "sort$i"] = $sd;
+            }
          }
       }
 
@@ -909,7 +916,7 @@ class Table
       $field = (string)@$tablehead['Sort_String'];
       $sortimg= (string)@$this->Sortimg[$nr];
 
-      if( $field && !($mode&TABLE_NO_SORT) )
+      if( $field && !($mode & TABLE_NO_SORT) )
       {
          $hdr = '<a href="' . $this->Page; //end_sep
          $hdr .= $this->make_sort_string( $nr, true ); //end_sep
@@ -924,7 +931,7 @@ class Table
       }
       $string .= '<span class="Header">' . $hdr . '</span>';
 
-      $query_del = !($mode&TABLE_NO_HIDE);
+      $query_del = !($mode & TABLE_NO_HIDE);
       if( $query_del )
       {
          $query_del = $this->Page //end_sep
@@ -1191,24 +1198,25 @@ class Table
    /*! \brief Make sort part of URL */
    function make_sort_string( $add_sort=0, $end_sep=false )
    {
-      if( TABLE_MAX_SORT<=0 || $this->Mode&TABLE_NO_SORT ) return '';
-      $s= $this->Sort;
+      if( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT ) return '';
+      $s = $this->Sort;
       if( $add_sort )
       {
-         $key= abs($add_sort);
+         $key = abs($add_sort);
          if( isset($s[$key]) ) //if it is in list...
          {
             //reset($s);
-            list($sk,$sd)= each($s);
+            list($sk,$sd) = each($s);
             if( $key == $sk ) //if it is main sort...
-               $add_sort= -$sd; //toggle sort order
+               $add_sort = -$sd; //toggle sort order
             else
-               $add_sort= $s[$key]; //move it on main place
+               $add_sort = $s[$key]; //move it on main place
          }
          //unset($s[$key]);
-         $s= array($key=>$add_sort) + $s;
+         $s = array($key=>$add_sort) + $s; // put new key first in array
       }
-      $str = ''; $i=0;
+      $str = '';
+      $i=0;
       foreach( $s as $sd )
       {
          if( $i >= TABLE_MAX_SORT )
@@ -1217,12 +1225,12 @@ class Table
             continue;
          ++$i;
          if( $str )
-            $str.= URI_AMP.$this->Prefix . "sort$i=$sd";
+            $str .= URI_AMP.$this->Prefix . "sort$i=$sd";
          else
-            $str= $this->Prefix . "sort$i=$sd";
+            $str = $this->Prefix . "sort$i=$sd";
       }
       if( $str && $end_sep )
-         $str.= URI_AMP;
+         $str .= URI_AMP;
       return $str;
    } //make_sort_string
 
@@ -1231,7 +1239,7 @@ class Table
    {
       // add-column-elements
       $ac_string = '';
-      if( !($this->Mode&TABLE_NO_HIDE) && count($this->Removed_Columns) > 0 )
+      if( !($this->Mode & TABLE_NO_HIDE) && count($this->Removed_Columns) > 0 )
       {
          split_url($this->Page, $page, $args);
          foreach( $args as $key => $value ) {
