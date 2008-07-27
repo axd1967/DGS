@@ -25,6 +25,9 @@ Changelog
 
 2008-07-28 juga
 
+   * include/config.php:
+   - adjusted comment
+
    * features/vote,
      features/vote/edit_feature.php,
      features/vote/lib_votes.php,
