@@ -72,7 +72,7 @@ define('URI_AMP_IN','&'); //see ini_get('arg_separator.input')
 //URI_AMP at '&amp;' work even if arg_separator.output is set to '&'
 define('URI_AMP','&amp;'); //see ini_get('arg_separator.output')
 
-// A folder where can be saved some elements which don't need a complete
+// A folder where some elements can be saved which don't need a complete
 // rebuilt each time a page is called (for example, the statistics graphs)
 // Must be relative to the root folder and ended by a '/'
 // Set it to '' (empty string) to disable the cache features
