@@ -55,7 +55,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * changed some columns: renamed Handicap to Type, added Handicap
 
    * User info:
-      * Order of bio entries can be changed,
+      * Order of bio infos can be changed,
         Used wider textarea-field for input
       * Changed percent calculus to take jigo into account for rated games
       * Changed links to show rated / won / lost games in games list
