@@ -755,8 +755,8 @@ class Table
       }
       if( !$str )
          return '';
-      $str = str_replace( array('-','+'), array(' DESC',''), $str);
-      return ' ORDER BY '.$str;
+      $str = str_replace( array('-','+'), array(' DESC,',','), $str); // replace all occurences
+      return ' ORDER BY '.substr($str,0,-1); // remove trailing ','
    } //current_order_string
 
    /*! \brief Retrieve mySQL LIMIT part from table. */

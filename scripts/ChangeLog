@@ -71,9 +71,7 @@ CREATE TABLE FeatureVote (
 
    * include/table_columns.php (current_order_string):
    - overall more white-spaces, more doc, typos
-   - current_order_string():
-     - added FIXME with question (preg_replace usage?)
-     - removed trailing ',', which is stripped away anyway
+   - current_order_string(): added FIXME with question (preg_replace usage?)
 
 2008-06-06 rodival
 
