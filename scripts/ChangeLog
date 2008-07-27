@@ -23,6 +23,26 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-07-28 juga
+
+   * include/std_classes.php (add_part, add_part_fields):
+   - added add_part_fields() to add SQL-part (for SQLP_FIELDS only)
+   - added comments
+
+   * include/filter.php (read_defaults):
+   - fixed bug in read_defaults(): selectbox default failed
+
+   * include/filter.php (SearchFilter.get_url_parts,
+      Filter.get_url_parts, FilterMysqlMatch.extract_match_terms),
+   * include/std_functions.php (build_hidden, build_url):
+   - undo empty()-value-check, because some clients (e.g. filters) need ''<>0
+
+   * include/table_columns.php (current_order_string):
+   - overall more white-spaces, more doc, typos
+   - current_order_string():
+     - added FIXME with question (preg_replace usage?)
+     - removed trailing ',', which is stripped away anyway
+
 2008-06-06 rodival
 
    * include/std_functions.php (start_html),
@@ -52,8 +72,8 @@ UPDATE Players SET Boardcoords=Boardcoords|0x100;
      list_tournaments.php, opponents.php, show_games.php, status.php,
      users.php, waiting_room.php,
      code_examples/filter_example.php:
-   - adjusted the parameters of the add_tablehead() function
-      this should be the last step of the "tablehead" modifications
+   - adjusted the parameters of the add_tablehead() function.
+     this should be the last step of the "tablehead" modifications
 
 2008-06-04 rodival
 
@@ -65,7 +85,7 @@ UPDATE Players SET Boardcoords=Boardcoords|0x100;
    - changed the type of the Activity column of the Players table
      from DOUBLE to INT to speed up the rebuilds of the table index.
    - also managed the Activity values as a fixed decimal number
-     to preserve enought precision (Activity column= $activity * 1000)
+     to preserve enough precision (Activity column= $activity * 1000)
    - added a third ActiveLevel which should help to distinguish
      the robots (overheated activity)
 -----------
@@ -203,15 +223,15 @@ copy /images/favicon.ico into the root folder
      users.php, opponents.php, list_contacts.php,
      list_tournaments.php, waiting_room.php:
    - removing the risk of mysql injection using the sort? arguments
-      now, the sort arguments of the URL mentions the column number
-      instead of the raw MySQL field (or alias).
+     now, the sort arguments of the URL mentions the column number
+     instead of the raw MySQL field (or alias).
    - also replaced the TABLE_ALLOW_DOUBLE_SORT constant by
-      TABLE_MAX_SORT and the cluster of $Sort?+$Desc? variables by
-      a single array
+     TABLE_MAX_SORT and the cluster of $Sort?+$Desc? variables by
+     a single array
    - added some asserts to clearly force the use of some functions
-      before or after the table_head definitions
+     before or after the table_head definitions
    - Table(): added a mode parameter to manage the global behaviour
-      of the table (not yet fully implemented, coming soon)
+     of the table (not yet fully implemented, coming soon)
    - removed set_sort() which is now dispatched into other functions
    - set_default_sort(), make_sort_string(): the arguments became
       (+/-)column numbers instead of mysql fields + desc_flags
@@ -220,7 +240,7 @@ copy /images/favicon.ico into the root folder
       message_list_head, message_list_body),
      status.php (show messages part), list_messages.php, search_messages.php:
    - separated message_list_table($which_part) into two clear functions
-      message_list_head and message_list_body with dispatched arguments
+     message_list_head and message_list_body with dispatched arguments
 
    * include/filter.php (get_url_parts),
      scripts/message_consistency.php, message.php:
@@ -291,7 +311,7 @@ copy /images/favicon.ico into the root folder
    * include/time_functions.php, clock_tick.php,
      edit_profile.php, change_profile.php:
    - limitation of the number of rows returned by the
-      "find_timeout_games" query in clock_tick.php
+     "find_timeout_games" query in clock_tick.php
    - NIGHT_LEN constant added
    - various comments around "night" clocks management
 
@@ -405,11 +425,11 @@ copy /images/favicon.ico into the root folder
    * skins/dragon/screen.css,
      game.php (draw_moves), include/board.php:
    - a try to make the HTML-code of the "goto move" selection box smaller
-     by offering only a sub-set of the options
-     (previously "230 moves" was meaning "230 option lines")
+     by offering only a sub-set of the options;
+     previously "230 moves" was meaning "230 option lines".
      Maybe this was causing the "Game page truncated" bug with some
      browsers on 25x25 boards.
-   - modified the URI &toggleobserve= behaviour to avoid that 
+   - modified the URI &toggleobserve= behaviour to avoid that
      a refresh of the page toggle back the game status.
    - adjusted some minor CSS
 
@@ -566,7 +586,7 @@ copy /images/favicon.ico into the root folder
 
    * statratingspng.php:
    - removed some trailing ';'s in mysql queries
-   
+
    * quick_status.php:
    - substitued opponent.Handle to opponent.Name in the returned infos
      to avoid charsets mismatches (the names are independently recorded
@@ -2149,7 +2169,7 @@ UPDATE `Translations` SET `Translated` = 'Y';
      the same way but a simple refresh of the page will not "toggle-back"
      the option now.
    - modified the "move" part of admin_faq.php to allow a move greater
-     than 1: admin_faq.php?move=u&dir=3 now move the item 3 steps highter.
+     than 1: admin_faq.php?move=u&dir=3 now move the item 3 steps higher.
      alas, actualy, this is only usable my manualy modifying the URL.
 
    * scripts/FAQtransl_consistency.php:
@@ -2847,7 +2867,7 @@ ALTER TABLE `Waitingroom`
    - adjusted to follow the "double game" handicap fix and its display.
    - and a try to fix the bad Running count bug:
      In the Players table, near 20 of the Running counts were 1 or 2
-     points too hight. I've not found why this occured. Maybe a script
+     points too high. I've not found why this occured. Maybe a script
      abort between two MySQL updates, I don't know.
      Other counts like Finished, Won or Lost were not corrupted.
 
