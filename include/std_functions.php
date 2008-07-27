@@ -2003,7 +2003,8 @@ function build_url( $args, $end_sep=false)
    $arr_str = array();
    foreach( $args as $key => $value )
    {
-      if( empty($value) || !is_string($key) || empty($key) )
+      // some clients need ''<>0, so don't use empty(val)
+      if( (string)$value == '' || !is_string($key) || empty($key) )
          continue;
       if( !is_array($value) )
       {
@@ -2013,7 +2014,8 @@ function build_url( $args, $end_sep=false)
       $key.= '%5b%5d='; //encoded []
       foreach( $value as $val )
       {
-         if( !empty($val) )
+         // some clients need ''<>0, so don't use empty(val)
+         if( (string)$val != '' )
             $arr_str[]= $key . urlencode($val);
       }
    }
@@ -2029,7 +2031,8 @@ function build_hidden( $args)
    $arr_str = array();
    foreach( $args as $key => $value )
    {
-      if( empty($value) || !is_string($key) || empty($key) )
+      // some clients need ''<>0, so don't use empty(val)
+      if( (string)$value == '' || !is_string($key) || empty($key) )
          continue;
       if( !is_array($value) )
       {
@@ -2039,7 +2042,8 @@ function build_hidden( $args)
       $key.= '[]'; //%5b%5d encoded []
       foreach( $value as $val )
       {
-         if( !empty($val) )
+         // some clients need ''<>0, so don't use empty(val)
+         if( (string)$val != '' )
             $arr_str[]=  "name=\"$key\" value=" . attb_quote($val);
       }
    }
