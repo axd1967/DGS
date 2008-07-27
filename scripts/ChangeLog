@@ -25,6 +25,38 @@ Changelog
 
 2008-07-28 juga
 
+   * features/vote,
+     features/vote/edit_feature.php,
+     features/vote/lib_votes.php,
+     features/vote/list_features.php,
+     features/vote/list_votes.php,
+     features/vote/vote_feature.php:
+   - added feature-voting (feature list, voting on feature)
+   - start-page is list_features.php
+-----------
+CREATE TABLE FeatureList (
+   ID int(11) NOT NULL auto_increment,
+   Status enum('NEW','NACK','ACK','WORK','DONE') NOT NULL default 'NEW',
+   Subject varchar(120) NOT NULL,
+   Description text NOT NULL,
+   Editor_ID int(11) NOT NULL default '0',
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (ID),
+   KEY Status (Status),
+   KEY Editor_ID (Editor_ID)
+) TYPE=MyISAM;
+
+CREATE TABLE FeatureVote (
+   fid int(11) NOT NULL,
+   Voter_ID int(11) NOT NULL default '0',
+   Points int(11) NOT NULL default '0',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (fid,Voter_ID),
+   KEY Voter_ID (Voter_ID)
+) TYPE=MyISAM;
+-----------
+
    * include/std_classes.php (add_part, add_part_fields):
    - added add_part_fields() to add SQL-part (for SQLP_FIELDS only)
    - added comments
