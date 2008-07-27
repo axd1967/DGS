@@ -815,6 +815,7 @@ class SearchFilter
     * \param arr_out return URL-vars with values additionally in this array
     * \param choice filter-choice to get URL-parts for
     * \param arr_exclude array of filter-ids to exclude (skip filter-IDs in this array)
+    * note: Func for SearchFilter-class.
     */
    function get_url_parts( &$arr_out, $choice = GETFILTER_ACTIVE, $arr_exclude = null )
    {
@@ -840,7 +841,8 @@ class SearchFilter
       $arr[FNAME_HASHCODE] = $this->hashcode(); // to check, if filter-values have changed
       foreach( $arr as $key => $value )
       {
-         if( empty($value) || !is_string($key) || empty($key) )
+         // filters need ''<>0, so don't use empty(val)
+         if( (string)$value == '' || !is_string($key) || empty($key) )
             continue;
          $pkey = $this->Prefix . $key; // no prefix PFX_FILTER to avoid clashes with non-numeric keys
          $pval = urlencode($value);
@@ -1242,10 +1244,10 @@ class Filter
    function read_defaults( $conf, $arr_is_map = true )
    {
       $this->defvalues = array();
-      if ( $conf == '' )
+      if ( !is_array($conf) && (string)$conf == '' )
          return;
 
-      if ( $arr_is_map and is_array($conf) )
+      if ( $arr_is_map && is_array($conf) )
       {
          foreach( $conf as $k => $val )
             $this->defvalues["{$this->name}$k"] = $val;
@@ -1439,6 +1441,7 @@ class Filter
     * \param arr_out return URL-vars with values additionally in this array
     * note: filter can also contain more than one element
     * note: multi-values are saved as array-value in arr_out and as 'field[]=..' in URL
+    * note: Func for Filter-class
     */
    function get_url_parts( $prefix, &$arr_out )
    {
@@ -1447,8 +1450,7 @@ class Filter
       foreach( $this->get_element_names() as $name )
       {
          $val = $this->get_value( $name );
-         //if ( (string)$val != '' )
-         if ( !empty($val) )
+         if ( (string)$val != '' ) // val can be 0(!), filters need ''<>0, so don't use empty(val)
          {
             $fname = ($this->get_config(FC_FNAME)) ? $name : $prefix . $name;
             if ( is_array($arr_out) )
@@ -3194,7 +3196,7 @@ class FilterMysqlMatch extends Filter
             }
 
             $val = trim( $val );
-            if ( $val )
+            if ( (string)$val != '' ) // need ''<>0, so don't use empty(val)
                $arr[]= $val;
          }
       }
