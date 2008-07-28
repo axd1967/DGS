@@ -20,7 +20,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
-$ThePage = new Page('News');
+
+function build_TOC( $text )
+{
+   $lines = explode("\n", $text);
+   $headers = preg_grep("/^#release/i", $lines);
+   foreach( $headers as $header )
+   {
+      $toc_entries[] = preg_replace( "/^#release\\s+(\w+?)\\s+(.*?)\\s*$/i",
+         "<li><a href=\"#\\1\">\\2</a>",
+         $header);
+   }
+   if ( count($toc_entries) > 0 )
+      return '<h4>' . T_('Table of contents') . '</h4>' . "<ul>".implode("\n", $toc_entries)."</ul>";
+   else
+      return '';
+} //build_TOC
+
+{
+   $ThePage = new Page('News');
 
    connect2mysql();
 
@@ -33,18 +51,24 @@ $ThePage = new Page('News');
    echo "<pre>\n"; //caution: no <div> allowed inside
 
    //$contents = implode('', file ('NEWS'));
-   $contents= @read_from_file('NEWS');
+   $contents = @read_from_file('NEWS');
+   $toc = build_TOC( $contents );
 
    // format NEWS-page:
    $contents = make_html_safe( $contents, true );
+
    // format: "#release anchor-name [release-date] - DGS-version"
    $contents = preg_replace("/#release\\s+(\w+?)\\s+(.*?)<br>/is",
       "\n<a name=\"\\1\"></a><span class=\"ReleaseTitle\">\\2</span>\n",
       $contents);
+
+   // add TOC
+   $contents = preg_replace("/%TOC%<br>/is", $toc, $contents);
 
    echo $contents;
 
    echo "</pre>\n";
 
    end_page();
+}
 ?>
