@@ -38,7 +38,7 @@ $ThePage = new Page('Docs');
 
    add_link_page_link('snapshot/DragonGoServer-stable-200608.tar.gz', 'DragonGoServer-stable-200608.tar.gz', T_('The previous version'));
 
-   add_link_page_link('snapshot/images.tar.gz', 'images.tar.gz', T_('The colletion of images used on the server'));
+   add_link_page_link('snapshot/images.tar.gz', 'images.tar.gz', T_('The collection of images used on the server'));
 
    add_link_page_link('snapshot/Translationdata.mysql.gz', 'Translationdata.mysql.gz', T_('The translation data'));
 
