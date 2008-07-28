@@ -25,6 +25,10 @@ Changelog
 
 2008-07-28 juga
 
+   * .cvsignore:
+   - ignore temp-dir (CACHE_FOLDER)
+   - ignore favicon.ico
+
    * NEWS, news.php:
    - added %TOC% (table of contents) parsed from NEWS-file
    - added main changes for all releases
