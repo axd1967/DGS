@@ -25,6 +25,10 @@ Changelog
 
 2008-07-28 juga
 
+   * NEWS, news.php:
+   - added %TOC% (table of contents) parsed from NEWS-file
+   - added main changes for all releases
+
    * include/config.php:
    - adjusted comment
 
