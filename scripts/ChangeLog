@@ -23,6 +23,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-01 juga
+
+   * features/vote/edit_feature.php, features/vote/lib_votes.php,
+     features/vote/list_features.php, features/vote/list_votes.php,
+     features/vote/vote_feature.php:
+     - adjusted to Table-signature changes (new add_tablehead, default-sort)
+     - use standardized GUESTS_ID_MAX-check for guest-user
+     - used table-id 33 for static column (Actions)
+
 2008-07-28 juga
 
    * .cvsignore:
