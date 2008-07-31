@@ -28,12 +28,14 @@ require_once( "features/vote/lib_votes.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
 
-   if( $player_row['Handle'] == 'guest' )
+   $my_id = (int)@$player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
+
+   $is_admin = Feature::is_admin();
 
 /* Actual REQUEST calls used:
      (no args)             : add new feature
@@ -46,9 +48,6 @@ require_once( "features/vote/lib_votes.php" );
 
    if ( @$_REQUEST['feature_cancel'] ) // cancel delete
       jump_to("features/vote/list_features.php");
-
-   $my_id = $player_row['ID'];
-   $is_admin = Feature::is_admin();
 
    $fid = get_request_arg('fid'); //feature-ID
    if ( $fid < 0 )
