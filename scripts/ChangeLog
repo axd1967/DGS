@@ -23,14 +23,51 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-02 juga
+
+   * add_to_waitingroom.php, admin_admins.php,
+     admin_do_translators.php, admin_faq.php,
+     code_examples/filter_example2.php, code_examples/test_clock_tick.php,
+     confirm.php, daily_cron.php, edit_contact.php, edit_folders.php,
+     edit_profile.php, features/vote/lib_votes.php, forum/admin.php,
+     forum/forum_functions.php, forum/post.php, forum/search.php,
+     halfhourly_cron.php, include/GoDiagram.php, include/board.php,
+     include/contacts.php, include/coords.php, include/filter.php,
+     include/filter_functions.php, include/filter_parser.php,
+     include/form_functions.php, include/game_functions.php,
+     include/make_game.php, include/message_functions.php, include/move.php,
+     include/page_functions.php, include/quick_common.php, include/rating.php,
+     include/std_classes.php, include/std_functions.php,
+     include/table_columns.php, include/time_functions.php,
+     include/tokenizer.php, include/tournament.php, join_waitingroom_game.php,
+     list_messages.php, list_tournaments.php, login.php, message.php,
+     message_selector.php, opponents.php, quick_play.php, quick_status.php,
+     scripts/data_export.php, scripts/game_consistency.php,
+     scripts/make_handicap_pattern.php, scripts/message_consistency.php,
+     scripts/player_consistency.php, send_message.php, sgf.php,
+     show_tournament.php, translate.php, update_translation.php,
+     userinfo.php, waiting_room.php,
+     scripts/ChangeLog:
+   - replace and/or with &&/|| in logical expressions
+     because of =-precendence; see README.developers
+   - fix cast, layouting of 'or error()', correct typos
+
+   * scripts/README.developers:
+     - added texts about:
+       - translation-texts
+       - using and/or/xor <-> &&/||, logical expression vs. and/or-command
+       - usage of list(), don't reuse varnames
+       - DGS-conventions for SQL-aliases
+       - string constants
+
 2008-08-01 juga
 
    * features/vote/edit_feature.php, features/vote/lib_votes.php,
      features/vote/list_features.php, features/vote/list_votes.php,
      features/vote/vote_feature.php:
-     - adjusted to Table-signature changes (new add_tablehead, default-sort)
-     - use standardized GUESTS_ID_MAX-check for guest-user
-     - used table-id 33 for static column (Actions)
+   - adjusted to Table-signature changes (new add_tablehead, default-sort)
+   - use standardized GUESTS_ID_MAX-check for guest-user
+   - used table-id 33 for static column (Actions)
 
 2008-07-28 juga
 
