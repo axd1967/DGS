@@ -77,7 +77,7 @@ require_once( "include/contacts.php" );
          $other_row = mysql_fetch_assoc( $result );
       mysql_free_result($result);
    }
-   if ( !$other_row and $cuser != '' ) // not identified yet
+   if ( !$other_row && $cuser != '' ) // not identified yet
    { // load cid for userid
       $qhandle = mysql_addslashes($cuser);
       $result = mysql_query("SELECT ID, Name, Handle FROM Players WHERE Handle='$qhandle'")
@@ -103,19 +103,19 @@ require_once( "include/contacts.php" );
       $errormsg = '('.T_('unknown user').')';
 
    $contact = null;
-   if ( !$errormsg and $cid )
+   if ( !$errormsg && $cid )
       $contact = Contact::load_contact( $my_id, $cid ); // existing contact ?
    if ( is_null($contact) )
       $contact = Contact::new_contact( $my_id, $cid ); // new contact
 
-   if ( $cid and @$_REQUEST['contact_delete'] and @$_REQUEST['confirm'] )
+   if ( $cid && @$_REQUEST['contact_delete'] && @$_REQUEST['confirm'] )
    {
       $contact->delete_contact();
       jump_to("list_contacts.php?sysmsg=". urlencode(T_('Contact removed!')) );
    }
 
    // update contact-object with values from edit-form
-   if ( $cid and @$_REQUEST['contact_save'] )
+   if ( $cid && @$_REQUEST['contact_save'] )
    {
       $contact->parse_system_flags(); // read sfl_...
       $contact->parse_user_flags(); // read ufl_...

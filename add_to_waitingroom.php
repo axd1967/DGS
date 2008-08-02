@@ -86,10 +86,10 @@ require_once( "include/rating.php" );
       break;
    }
 
-   if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )
+   if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
       error('komi_range');
 
-   if( !($handicap <= MAX_HANDICAP and $handicap >= 0) )
+   if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
       error('handicap_range');
 
    $nrGames = max( 1, (int)@$_POST['nrGames']);
@@ -117,7 +117,7 @@ require_once( "include/rating.php" );
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
-   if( $hours<1 and ($byohours<1 or $byoyomitype == 'FIS') )
+   if( $hours<1 && ($byohours<1 || $byoyomitype == 'FIS') )
       error('time_limit_too_small');
 
 

@@ -111,12 +111,12 @@ function sql_replace_wildcards( $valsql, $arr_repl, $arr_allow = array() )
          if ( isset($arr_repl[$char]) )
          {
             $repl = $arr_repl[$char];
-            if ($repl == '%' or $repl == '_')
+            if ($repl == '%' || $repl == '_')
                $cnt_wild++;
 
             // SQL-injection-error: dest_char must never be one of: ' " \ -> so catch it by escaping
             if ( !isset($arr_allow[$char]) ) // allow forbidden (BUT use with caution)
-               if ( $repl == "'" or $repl == '"' or $repl == '\\' )
+               if ( $repl == "'" || $repl == '"' || $repl == '\\' )
                   $sql .= '\\';
          }
          elseif ( !(strpos($sql_spec, $char) === false) ) // SQL-special -> escape

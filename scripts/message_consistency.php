@@ -194,7 +194,7 @@ function check_myself_message( $user_id=false)
       if( !isset($folder) ) $folder = FOLDER_MAIN; /* or simply "NULL" */
 
       $replied = @$row['replied'];
-      if( !isset($replied) or $replied=='N' ) $replied = @$row['other_replied'];
+      if( !isset($replied) || $replied=='N' ) $replied = @$row['other_replied'];
       if( !isset($replied) ) $replied = 'N';
 
       $mcID = $row['me_mcID'];
@@ -226,7 +226,8 @@ function check_system_message( $user_id=false)
         ( $user_id>0 ? "AND me.uid=$user_id " : "" ) .
       "ORDER BY me.uid, me.mid";
 
-   $result = mysql_query( $query ) or die(mysql_error());
+   $result = mysql_query( $query )
+      or die(mysql_error());
 
    while( ($row = mysql_fetch_assoc( $result )) )
    {
@@ -265,7 +266,8 @@ function check_result_message( $user_id=false)
          .( $user_id>0 ? " AND me.uid=$user_id" : "" )
       ." ORDER BY me.uid, M.ID";
 
-   $result = mysql_query( $query ) or die(mysql_error());
+   $result = mysql_query( $query )
+      or die(mysql_error());
 
    while( ($row = mysql_fetch_assoc( $result )) )
    {

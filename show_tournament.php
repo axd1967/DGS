@@ -42,7 +42,7 @@ function make_applicationperiod_string( $app_p, $soap )
 {
    global $NOW, $date_fmt2;
 
-   if( is_null( $app_p ) or is_null( $soap ) )
+   if( is_null( $app_p ) || is_null( $soap ) )
    {
       return T_("Applicationperiod has not yet been decided");
    }
@@ -58,7 +58,7 @@ function make_applicationperiod_string( $app_p, $soap )
          sprintf( T_("The application period will start %1\$s, and end %2\$s"),
                   $start_string, $end_string );
    }
-   elseif( $NOW >= $soap and $NOW < $eoap )
+   elseif( $NOW >= $soap && $NOW < $eoap )
    {
       $resultstring =
          sprintf( T_("The application period started %1\$s, and will end %2\$s"),
@@ -89,8 +89,8 @@ function make_applicationperiod_string( $app_p, $soap )
 
    $t = new Tournament( $_GET['tid'] );
 
-   if( isset( $_GET['update'] ) and
-       $_GET['update'] == 't' and
+   if( isset( $_GET['update'] ) &&
+       $_GET['update'] == 't' &&
        in_array( $player_row['ID'], $t->ListOfOrganizers ) )
    {
       $t->Name = trim( $_POST['name'] );
@@ -101,13 +101,13 @@ function make_applicationperiod_string( $app_p, $soap )
          "Description='" . $t->Description . "', ";
 
 
-      if( isset( $_POST['minpart'] ) and is_numeric( $_POST['minpart'] ) )
+      if( isset( $_POST['minpart'] ) && is_numeric( $_POST['minpart'] ) )
       {
          $t->MinParticipants = $_POST['minpart'];
          $query .= "MinParticipants=" . $t->MinParticipants . ", ";
       }
 
-      if( isset( $_POST['maxpart'] ) and is_numeric( $_POST['maxpart'] ) )
+      if( isset( $_POST['maxpart'] ) && is_numeric( $_POST['maxpart'] ) )
       {
          $t->MaxParticipants = $_POST['maxpart'];
          $query .= "MaxParticipants=" . $t->MaxParticipants . ", ";
@@ -119,19 +119,19 @@ function make_applicationperiod_string( $app_p, $soap )
       }
 
       $current_time = getdate( $NOW );
-      if( isset( $_POST['ap_start_day'] ) and
-          is_numeric( $_POST['ap_start_day'] ) and
-          $_POST['ap_start_day'] >= 1 and
-          $_POST['ap_start_day'] <= 31 and
+      if( isset( $_POST['ap_start_day'] ) &&
+          is_numeric( $_POST['ap_start_day'] ) &&
+          $_POST['ap_start_day'] >= 1 &&
+          $_POST['ap_start_day'] <= 31 &&
 
-          isset( $_POST['ap_start_month'] ) and
-          is_numeric( $_POST['ap_start_month'] ) and
-          $_POST['ap_start_month'] >= 1 and
-          $_POST['ap_start_month'] <= 12 and
+          isset( $_POST['ap_start_month'] ) &&
+          is_numeric( $_POST['ap_start_month'] ) &&
+          $_POST['ap_start_month'] >= 1 &&
+          $_POST['ap_start_month'] <= 12 &&
 
-          isset( $_POST['ap_start_year'] ) and
-          is_numeric( $_POST['ap_start_year'] ) and
-          $_POST['ap_start_year'] >= $current_time['year'] and
+          isset( $_POST['ap_start_year'] ) &&
+          is_numeric( $_POST['ap_start_year'] ) &&
+          $_POST['ap_start_year'] >= $current_time['year'] &&
           $_POST['ap_start_year'] <= $current_time['year']+2 )
       {
          $t->StartOfApplicationPeriod = 
@@ -143,7 +143,7 @@ function make_applicationperiod_string( $app_p, $soap )
             $t->StartOfApplicationPeriod . "), ";
       }
 
-      if( isset( $_POST['ap_length'] ) and is_numeric( $_POST['ap_length'] ) )
+      if( isset( $_POST['ap_length'] ) && is_numeric( $_POST['ap_length'] ) )
       {
          $t->ApplicationPeriod = $_POST['ap_length'];
          $query .= "ApplicationPeriod=" . $t->ApplicationPeriod . ", ";
@@ -175,8 +175,8 @@ function make_applicationperiod_string( $app_p, $soap )
 
    start_page(T_("Show tournament"), true, $logged_in, $player_row );
 
-   if( isset( $_GET['modify'] ) and
-       $_GET['modify'] == 't' and
+   if( isset( $_GET['modify'] ) &&
+       $_GET['modify'] == 't' &&
        in_array( $player_row['ID'], $t->ListOfOrganizers ) )
    {
       echo "<center>\n";

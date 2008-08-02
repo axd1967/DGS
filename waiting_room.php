@@ -150,8 +150,8 @@ require_once( "include/contacts.php" );
       'Players.Rating2 AS other_rating',
       'Players.RatingStatus AS other_ratingstatus' );
 
-// $calculated = ( $Handicaptype == 'conv' or $Handicaptype == 'proper' );
-// $haverating = ( !$calculated or is_numeric($my_rating) );
+// $calculated = ( $Handicaptype == 'conv' || $Handicaptype == 'proper' );
+// $haverating = ( !$calculated || is_numeric($my_rating) );
 // if( $MustBeRated != 'Y' )         $goodrating = true;
 // else if( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$Ratingmin && $my_rating<=$Ratingmax );
 // else                              $goodrating = false;
@@ -293,7 +293,7 @@ require_once( "include/contacts.php" );
 
 
    $form_id = 'addgame'; //==> ID='addgameForm'
-   if( $idinfo and is_array($info_row) )
+   if( $idinfo && is_array($info_row) )
    {
       add_old_game_form( 'joingame', $info_row, $iamrated); //==> ID='joingameForm'
 

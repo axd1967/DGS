@@ -240,8 +240,8 @@ function create_godiagrams(&$text)
          }
 
 
-         if( !($ID > 0) or empty($row['Saved']) or
-             ($row['Saved']=='Y' and (!preg_match('/^\s*id=\d+\s*$/i', $m) or $altered=='Y')))
+         if( !($ID > 0) || empty($row['Saved']) ||
+             ($row['Saved']=='Y' && (!preg_match('/^\s*id=\d+\s*$/i', $m) || $altered=='Y')))
          {
             if( $ID > 0 )
             {

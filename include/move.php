@@ -31,7 +31,7 @@ function check_move( &$board, $coord, $to_move, $error_exit=true)
 
    list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
-   if( !isset($rownr) or !isset($colnr) or @$array[$colnr][$rownr] != NONE )
+   if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
    {
       if( $error_exit )
          error('illegal_position','move1');
@@ -74,7 +74,7 @@ function check_move( &$board, $coord, $to_move, $error_exit=true)
 
    global $Last_Move, $GameFlags; //input only
 
-   if( $nr_prisoners == 1 and $GameFlags & KO )
+   if( $nr_prisoners == 1 && ($GameFlags & KO) )
    {
 
       // Check for ko
@@ -122,7 +122,7 @@ function check_handicap( &$board, $coord=false)
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
 
-      if( !isset($rownr) or !isset($colnr) or @$array[$colnr][$rownr] != NONE )
+      if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
          error("illegal_position",'move2');
 
       $array[$colnr][$rownr] = BLACK;
@@ -132,7 +132,7 @@ function check_handicap( &$board, $coord=false)
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
-      if( !isset($rownr) or !isset($colnr) or @$array[$colnr][$rownr] != NONE )
+      if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
          error("illegal_position",'move3');
 
       $array[$colnr][$rownr] = BLACK;
@@ -162,13 +162,13 @@ function check_remove( &$board, $coord=false )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
 
-      if( !isset($rownr) or !isset($colnr) )
+      if( !isset($rownr) || !isset($colnr) )
          error("illegal_position",'move4');
 
       $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
-      if( $stone == BLACK or $stone == WHITE or $stone == NONE ) //NONE for MARKED_DAME
+      if( $stone == BLACK || $stone == WHITE || $stone == NONE ) //NONE for MARKED_DAME
          $array[$colnr][$rownr] = $stone + OFFSET_MARKED;
-      else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD or $stone == MARKED_DAME )
+      else if( $stone == BLACK_DEAD || $stone == WHITE_DEAD || $stone == MARKED_DAME )
          $array[$colnr][$rownr] = $stone - OFFSET_MARKED;
 
       if( !isset( $stonearray[$colnr][$rownr] ) )
@@ -181,13 +181,13 @@ function check_remove( &$board, $coord=false )
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
 
-      if( !isset($rownr) or !isset($colnr) )
+      if( !isset($rownr) || !isset($colnr) )
          error("illegal_position",'move5');
 
       $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
-      if ( MAX_SEKI_MARK<=0 or ($stone!=NONE and $stone!=MARKED_DAME) )
+      if ( MAX_SEKI_MARK<=0 || ($stone!=NONE && $stone!=MARKED_DAME) )
       {
-         if( $stone!=BLACK and $stone!=WHITE and $stone!=BLACK_DEAD and $stone!=WHITE_DEAD )
+         if( $stone!=BLACK && $stone!=WHITE && $stone!=BLACK_DEAD && $stone!=WHITE_DEAD )
             error("illegal_position",'move6');
       }
 

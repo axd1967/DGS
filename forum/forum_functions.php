@@ -93,7 +93,7 @@ function make_link_array($links, $max_rows, $ReqParam = null)
       $link_array_left["Mark All Read"] = "";
 
    $navi_url = '';
-   if ( !is_null($ReqParam) and ($links & LINKPAGE_SEARCH) and ($links & (LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
+   if ( !is_null($ReqParam) && ($links & LINKPAGE_SEARCH) && ($links & (LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
       $navi_url = $ReqParam->get_url_parts();
 
    if( $links & LINK_TOGGLE_MODERATOR )
@@ -232,7 +232,7 @@ function get_new_string($Lastchangedstamp, $Lastread)
    }
    else
    {
-      if( (empty($Lastread) or $Lastchangedstamp > $Lastread)
+      if( (empty($Lastread) || $Lastchangedstamp > $Lastread)
             && $Lastchangedstamp + $new_end > $NOW )
       {
          $new_count++;
@@ -375,12 +375,12 @@ function draw_post($postClass, $my_post, $Subject='', $Text='',
    echo "\n<tr class=PostBody><td colspan=$cols>$txt</td></tr>";
 
    // bottom line (footer)
-   if( $postClass == 'Normal' or $postClass == 'Hidden' )
+   if( $postClass == 'Normal' || $postClass == 'Hidden' )
    {
       $hidden = $postClass == 'Hidden';
       echo "\n<tr class=PostButtons><td colspan=$cols>";
 
-      if( $postClass == 'Normal' and !$is_moderator ) // reply link
+      if( $postClass == 'Normal' && !$is_moderator ) // reply link
       {
          echo '<a href="'.$thread_url
             .URI_AMP."reply=$ID#$ID\">[ " .

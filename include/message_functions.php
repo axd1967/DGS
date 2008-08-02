@@ -733,7 +733,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
    if( $calculated && $haverating && $goodrating &&
        ( $game_row['other_id'] != $player_row['ID'] //not my game
-       or $tablestyle != 'waitingroom'
+       || $tablestyle != 'waitingroom'
        ) )
    {
          // compute the 'Probable settings'
@@ -757,7 +757,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
                       . image( '17/b.gif', T_('Black'), '', $colortxt);
          }
          else if( $Handitype == 'nigiri'
-                  or ($Handitype == 'conv'
+                  || ($Handitype == 'conv'
                         && $infoHandicap == 0 && $infoKomi == 6.5) )
          {
             $colortxt = image( '17/y.gif', T_('Nigiri'), T_('Nigiri'), $colortxt);
@@ -899,8 +899,8 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
    }
    else
    {
-      if( !isset($new_folder) or !isset($folders[$new_folder])
-        or $new_folder == FOLDER_NEW or $new_folder == FOLDER_ALL_RECEIVED )
+      if( !isset($new_folder) || !isset($folders[$new_folder])
+        || $new_folder == FOLDER_NEW || $new_folder == FOLDER_ALL_RECEIVED )
          error('folder_not_found');
 
       if( $new_folder == FOLDER_SENT )

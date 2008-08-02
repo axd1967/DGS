@@ -39,7 +39,7 @@ require_once( "include/form_functions.php" );
 
    $button_nr = $player_row['Button'];
 
-   if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
+   if ( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
       $button_nr = 0;
 
    $ratings = array( 'dragonrating' => 'dragonrating',

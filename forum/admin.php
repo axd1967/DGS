@@ -46,7 +46,7 @@ $ThePage = new Page('ForumAdmin');
    // ***********        Move entry       ****************
 
    // args: id, move=u|d, dir=length of the move (int, pos or neg)
-   if( ($action=@$_REQUEST['move']) == 'u' or $action == 'd' )
+   if( ($action=@$_REQUEST['move']) == 'u' || $action == 'd' )
    {
       $dir = isset($_REQUEST['dir']) ? (int)$_REQUEST['dir'] : 1;
       $dir = $action == 'd' ? $dir : -$dir; //because ID top < ID bottom

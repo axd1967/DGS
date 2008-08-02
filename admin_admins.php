@@ -155,7 +155,7 @@ require_once( "include/table_columns.php" );
 
    //can't add an admin if had not the privlege
    $new_admin = ($player_level & ADMIN_ADD_ADMIN);
-   while( ($row=mysql_fetch_assoc( $result )) or $new_admin )
+   while( ($row=mysql_fetch_assoc( $result )) || $new_admin )
    {
       $arow_strings = array();
 

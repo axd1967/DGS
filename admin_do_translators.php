@@ -55,7 +55,7 @@ function retry_admin( $msg)
          ) as $arg )
    {
       global $$arg;
-      if( isset($$arg) && (!is_string($$arg) or $$arg>'') )
+      if( isset($$arg) && (!is_string($$arg) || $$arg>'') )
       {
          $tmp.= $sep.$arg."=".urlencode($$arg);
          $sep = URI_AMP;
@@ -151,7 +151,7 @@ function retry_admin( $msg)
 // Queries with a user:
 
    $old_langs = '';
-   if( $showpriv or $transladd or $translpriv )
+   if( $showpriv || $transladd || $translpriv )
    {
       if( empty($transluser) )
          retry_admin( "Sorry, you must specify a user.");

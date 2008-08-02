@@ -197,9 +197,9 @@ class Tournament
          $row = mysql_fetch_array( $result );
          foreach( $row as $key => $value )
             {
-               if( is_string( $key ) and
-                   $key != "FirstRound" and
-                   $key != "StartOfApplicationPeriod" and
+               if( is_string( $key ) &&
+                   $key != "FirstRound" &&
+                   $key != "StartOfApplicationPeriod" &&
                    $key != "SOAP_Unix" )
                {
                   $this->$key = $value;

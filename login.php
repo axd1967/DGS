@@ -61,7 +61,7 @@ if( $quick_mode )
                            $row['Newpassword'], $passwd ) )
          error('wrong_password');
 
-      if( !$code or @$row['Expire'] < $NOW )
+      if( !$code || @$row['Expire'] < $NOW )
       {
          $code = make_session_code();
          mysql_query( "UPDATE Players SET " .

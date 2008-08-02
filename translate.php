@@ -157,7 +157,7 @@ if(0){//old
    ksort( $translation_groups);
    $translation_groups['allgroups'] = 'All groups';
 
-   if( !$group or !array_key_exists( $group, $translation_groups) )
+   if( !$group || !array_key_exists( $group, $translation_groups) )
    {
       $group = 'allgroups';
       $untranslated = 1;
@@ -454,7 +454,7 @@ if(0){//old
       foreach( $lang_desc as $lang => $langname )
       {
            @list( $browsercode, $charenc) = explode( LANG_CHARSET_CHAR, $lang, 2);
-           if( in_array( $lang, $translator_array ) or
+           if( in_array( $lang, $translator_array ) ||
                in_array( $browsercode, $translator_array ) )
               $vals[$lang] = $langname;
       }

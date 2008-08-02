@@ -224,7 +224,7 @@ class Board
          if( isset($this->moves[$n]) )
          {
             list( $s, $x, $y) = $this->moves[$n];
-            //if( $s != BLACK and $s != WHITE ) continue;
+            //if( $s != BLACK && $s != WHITE ) continue;
             $sgfc = number2sgf_coords( $x, $y, $this->size);
             if( $sgfc )
             {
@@ -236,7 +236,7 @@ class Board
                if( !isset($this->marks[$sgfc]) )
                {
                   $b = @$this->array[$x][$y];
-                  if( ($b % OFFSET_MARKED) == $s ) // or $s==($b^OFFSET_MARKED)
+                  if( ($b % OFFSET_MARKED) == $s ) // || $s==($b^OFFSET_MARKED)
                   {
                      if( $mrk > '' )
                         $this->marks[$sgfc] = $mrk;
@@ -326,8 +326,8 @@ class Board
          $this->stone_size = 25;
 
       if( isset($player_row['Woodcolor']) &&
-           ( $player_row['Woodcolor'] >= 1 and $player_row['Woodcolor'] <= 5
-          or $player_row['Woodcolor'] >= 11 and $player_row['Woodcolor'] <= 15 ) )
+           ( $player_row['Woodcolor'] >= 1 && $player_row['Woodcolor'] <= 5
+          || $player_row['Woodcolor'] >= 11 && $player_row['Woodcolor'] <= 15 ) )
          $this->woodcolor = $player_row['Woodcolor'];
       else
          $this->woodcolor = 1;
@@ -415,7 +415,7 @@ class Board
       $stone_size = $this->stone_size;
       $coord_width = floor($stone_size*31/25);
 
-      $smooth_edge = ( ($this->coord_borders & SMOOTH_EDGE) and ($this->woodcolor < 10) );
+      $smooth_edge = ( ($this->coord_borders & SMOOTH_EDGE) && ($this->woodcolor < 10) );
 
       if( $smooth_edge )
       {
@@ -644,7 +644,7 @@ class Board
 
             if( !$marked )
             {
-               if( !$empty && ( $stone == BLACK or $stone == WHITE )
+               if( !$empty && ( $stone == BLACK || $stone == WHITE )
                    && $this->movemrkx == $colnr
                    && $this->movemrky == $this->size-$rownr )
                { //last move mark
@@ -674,8 +674,8 @@ class Board
             if( $tit )
                $alt.= "\" title=\"$tit";
 
-            if( $may_play and !$no_click and
-                ( ($empty and $on_empty) or (!$empty and $on_not_empty) ) )
+            if( $may_play && !$no_click &&
+                ( ($empty && $on_empty) || (!$empty && $on_not_empty) ) )
                echo "$move_start$letter_c$letter_r$move_alt$alt$move_src$type$move_end";
             else
                echo "$nomove_start$alt$nomove_src$type$nomove_end";
@@ -789,7 +789,7 @@ class Board
                $out .= ")$type";
                $pre_mark = false;
             }
-            else if( !$empty && ( $stone == BLACK or $stone == WHITE )
+            else if( !$empty && ( $stone == BLACK || $stone == WHITE )
                    && $this->movemrkx == $colnr
                    && $this->movemrky == $this->size-$rownr )
             {
@@ -876,12 +876,12 @@ class Board
 
             $new_color = @$this->array[$nx][$ny];
 
-            if( (!$new_color or $new_color == NONE ) and
-                ($nx >= 0) and ($nx < $this->size) and
-                ($ny >= 0) and ($ny < $this->size) )
+            if( (!$new_color || $new_color == NONE ) &&
+                ($nx >= 0) && ($nx < $this->size) &&
+                ($ny >= 0) && ($ny < $this->size) )
                return true; // found liberty
 
-            if( $new_color == $c and !@$index[$nx][$ny])
+            if( $new_color == $c && !@$index[$nx][$ny])
             {
                $x = $nx;  // Go to the neighbour
                $y = $ny;
@@ -956,13 +956,13 @@ class Board
             $nx = $x+$this->dirx[$dir];
             $ny = $y+$this->diry[$dir];
 
-            if( ( $nx < 0 ) or ($nx >= $this->size) or ($ny < 0) or ($ny >= $this->size) or
+            if( ( $nx < 0 ) || ($nx >= $this->size) || ($ny < 0) || ($ny >= $this->size) ||
                 isset($index[$nx][$ny]) )
                continue;
 
             $new_color = @$this->array[$nx][$ny];
 
-            if( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD )
+            if( !$new_color || $new_color == NONE || $new_color >= BLACK_DEAD )
             {
                $x = $nx;  // Go to the neighbour
                $y = $ny;
@@ -996,7 +996,7 @@ class Board
       {
          for( $y=0; $y<$this->size; $y++)
          {
-            if( !@$this->array[$x][$y] or $this->array[$x][$y] == NONE )
+            if( !@$this->array[$x][$y] || $this->array[$x][$y] == NONE )
             {
                $this->mark_territory( $x, $y);
             }
@@ -1045,7 +1045,7 @@ class Board
       opposite color to reverse to not dead, but this does not work properly if
       $companion_groups is not true, as both groups may be not touching themself.
    */
-      if( $companion_groups and ($c == BLACK or $c == WHITE) )
+      if( $companion_groups && ($c == BLACK || $c == WHITE) )
          $opposite_dead = WHITE+BLACK_DEAD-$c ;
       else
          $opposite_dead = -1 ;
@@ -1084,13 +1084,13 @@ class Board
             $nx = $x+$this->dirx[$dir];
             $ny = $y+$this->diry[$dir];
 
-            if( ( $nx < 0 ) or ($nx >= $this->size) or ($ny < 0) or ($ny >= $this->size) or
+            if( ( $nx < 0 ) || ($nx >= $this->size) || ($ny < 0) || ($ny >= $this->size) ||
                @$index[$nx][$ny] )
                continue;
 
             $new_color = @$this->array[$nx][$ny];
 
-            if( $new_color == $c or ( $companion_groups and $new_color == NONE ) )
+            if( $new_color == $c || ( $companion_groups && $new_color == NONE ) )
             {
                $x = $nx;  // Go to the neighbour
                $y = $ny;

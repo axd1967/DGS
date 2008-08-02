@@ -40,7 +40,7 @@ require_once( "include/contacts.php" );
       error('not_allowed_for_guest');
 
    $wr_id = @$_REQUEST['id'];
-   if( !is_numeric($wr_id) or $wr_id <= 0 )
+   if( !is_numeric($wr_id) || $wr_id <= 0 )
       error('waitingroom_game_not_found', 'join_waitingroom_game.bad_id');
 
    $tmp= CSYSFLAG_WAITINGROOM;
@@ -83,9 +83,9 @@ require_once( "include/contacts.php" );
    if( $my_id == $opponent_ID )
       error('waitingroom_own_game');
 
-   if( $game_row['MustBeRated'] == 'Y' and
+   if( $game_row['MustBeRated'] == 'Y' &&
        !($player_row['Rating2'] >= $game_row['Ratingmin']
-         and $player_row['Rating2'] <= $game_row['Ratingmax']) )
+         && $player_row['Rating2'] <= $game_row['Ratingmax']) )
       error('waitingroom_not_in_rating_range');
 
    $size = $game_row['Size'];
@@ -100,7 +100,7 @@ require_once( "include/contacts.php" );
    {
       case 'conv':
       {
-         if( !$iamrated or !$opprated )
+         if( !$iamrated || !$opprated )
             error('no_initial_rating');
          list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
             suggest_conventional( $my_rating, $opprating, $size);
@@ -109,7 +109,7 @@ require_once( "include/contacts.php" );
 
       case 'proper':
       {
-         if( !$iamrated or !$opprated )
+         if( !$iamrated || !$opprated )
             error('no_initial_rating');
          list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
             suggest_proper( $my_rating, $opprating, $size);
@@ -143,7 +143,7 @@ require_once( "include/contacts.php" );
    
    //TODO: HOT_SECTION ???
    $gids = array();
-   if( $i_am_black or $double )
+   if( $i_am_black || $double )
       $gids[] = create_game($player_row, $opponent_row, $game_row);
    else
       $gids[] = create_game($opponent_row, $player_row, $game_row);

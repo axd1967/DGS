@@ -55,7 +55,7 @@ function post_message($player_row, $moderated_forum, &$thread)
       $oldSubject = mysql_addslashes( trim($row['Subject']));
       $oldText = mysql_addslashes( trim($row['Text']));
 
-      if( $oldSubject != $Subject or $oldText != $Text )
+      if( $oldSubject != $Subject || $oldText != $Text )
       {
          //Update old record with new text
          mysql_query("UPDATE Posts SET " .

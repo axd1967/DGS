@@ -105,8 +105,8 @@ else
       error('not_your_turn','qp9');
 
    if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
-      or !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
-      or ($Handicap>1 && $Moves<=$Handicap) //exclude first white move after handicap stones
+      || !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
+      || ($Handicap>1 && $Moves<=$Handicap) //exclude first white move after handicap stones
      )
    {
       error('invalid_action');
@@ -122,7 +122,7 @@ else
    else
       list( $query_X, $query_Y) = array( NULL, NULL);
 
-   if( is_null($query_X) or is_null($query_Y) )
+   if( is_null($query_X) || is_null($query_Y) )
       error('illegal_position','qp3');
 
    if( isset($_REQUEST['sgf_prev']) )
@@ -132,10 +132,10 @@ else
    else
       list( $prev_X, $prev_Y) = array( NULL, NULL);
 
-   if( is_null($prev_X) or is_null($prev_Y) )
+   if( is_null($prev_X) || is_null($prev_Y) )
       error('illegal_position','qp4');
 
-   if( $prev_X != $Last_X or $prev_Y != $Last_Y )
+   if( $prev_X != $Last_X || $prev_Y != $Last_Y )
       error('already_played','qp5');
 
    $move_color = strtoupper( @$_REQUEST['color']);
@@ -151,7 +151,7 @@ else
 
 // Update clock
 
-   if( $Maintime > 0 or $Byotime > 0)
+   if( $Maintime > 0 || $Byotime > 0)
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
       $hours = ticks_to_hours(get_clock_ticks($ClockUsed) - $LastTicks);
@@ -193,7 +193,7 @@ else
       $time_query = '';
    }
 
-   $no_marked_dead = true; //( $Status == 'PLAY' or $Status == 'PASS' or $action == 'move' );
+   $no_marked_dead = true; //( $Status == 'PLAY' || $Status == 'PASS' || $action == 'move' );
 
    $TheBoard = new Board( );
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
@@ -290,7 +290,7 @@ This is why:
    $result = mysql_query( $move_query )
       or error('mysql_query_failed', 'quick_play.update_moves');
 
-   if( mysql_affected_rows() < 1 and $action != 'delete' )
+   if( mysql_affected_rows() < 1 && $action != 'delete' )
       error('mysql_insert_move',"qp21($gid)");
 
 

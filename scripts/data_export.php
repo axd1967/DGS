@@ -507,7 +507,7 @@ function quoteit( $mixed, $quote='`')
          $result[$key] = quoteit( $val);
       return $result;
    }
-   if( !empty($mixed) or is_numeric($mixed) )
+   if( !empty($mixed) || is_numeric($mixed) )
       return $quote . trim($mixed, " '`$quote") . $quote;
    return $mixed;
 } //quoteit

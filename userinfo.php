@@ -247,8 +247,8 @@ $ThePage = new Page('UserInfo');
 
       if( $player_row['OnVacation'] > 0 )
       {
-         if(!( $minimum_days > $days_left or
-               ( $minimum_days == $days_left and $minimum_days == 0 )))
+         if(!( $minimum_days > $days_left ||
+               ( $minimum_days == $days_left && $minimum_days == 0 )))
             $menu_array[T_('Change vacation length')] = 'edit_vacation.php';
       }
       else

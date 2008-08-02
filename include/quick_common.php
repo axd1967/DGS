@@ -34,7 +34,7 @@ function setTZ( $tz='GMT')
    if( is_string( $tz) && !empty( $tz) )
    {
       if( !function_exists('date_default_timezone_set')
-            or !date_default_timezone_set( $tz) )
+            || !date_default_timezone_set( $tz) )
       {
          putenv( 'TZ='.$tz);
          //putenv('PHP_TZ='.$tz); //Does not seem to realize something
@@ -107,7 +107,7 @@ function safe_getcookie($name)
 define('COOKIE_OLD_COMPATIBILITY', 1 && COOKIE_PREFIX>'');
    if( COOKIE_OLD_COMPATIBILITY && !$cookie )
    {
-      if( $name=='handle' or $name=='sessioncode' or substr($name,0,5)=='prefs' )
+      if( $name=='handle' || $name=='sessioncode' || substr($name,0,5)=='prefs' )
          $cookie = arg_stripslashes((string)@$_COOKIE[$name]);
    }
 */
@@ -161,7 +161,7 @@ function get_preferred_browser_language()
       @list($browsercode, $q_val) = explode( ';', $lang);
 
       $q_val = trim(preg_replace( '/q=/i', '', $q_val));
-      if( empty($q_val) or !is_numeric($q_val) )
+      if( empty($q_val) || !is_numeric($q_val) )
          $q_val = 1.0;
       if( $current_q_val >= $q_val )
          continue;
@@ -241,10 +241,10 @@ function recover_language( $player_row=null) //must be called from main dir
    else
       $language = 'C';
 
-   if( empty($language) or $language == 'C' )
+   if( empty($language) || $language == 'C' )
       $language = get_preferred_browser_language();
 
-   if( empty($language) or $language == 'en' )
+   if( empty($language) || $language == 'en' )
       $language = LANG_DEF_LOAD;
 
    @list($browsercode,$encoding_used) = explode( LANG_CHARSET_CHAR, $language, 2);

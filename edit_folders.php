@@ -158,7 +158,7 @@ function make_folder_form_row(&$form, $name, $nr,
       }
       else //STANDARD_FOLDERS
       {
-         $delete = ( empty($name) or $STANDARD_FOLDERS[$nr] == $newfolder );
+         $delete = ( empty($name) || $STANDARD_FOLDERS[$nr] == $newfolder );
          $update = ( !$delete && $STANDARD_FOLDERS[$nr] != $folders[$nr] );
       }
 

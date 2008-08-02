@@ -443,7 +443,7 @@ class StringTokenizer extends BasicTokenizer
          $is_splitter = preg_match($this->rxsep, $char);
       else
          $is_splitter = !(strpos($this->split_chars, $char) === false);
-      return (bool) ( $is_splitter and !$this->match_rx_no_sep( $substr ) );
+      return (bool) ( $is_splitter && !$this->match_rx_no_sep( $substr ) );
    }
 
    /*!
@@ -454,7 +454,7 @@ class StringTokenizer extends BasicTokenizer
    function match_rx_no_sep( $str )
    {
       $rx = $this->get_config(STRTOK_CONF_RX_NO_SEP);
-      return (bool) ( (string)$rx != '' and preg_match( "/^($rx)/i", $str ) );
+      return (bool) ( (string)$rx != '' && preg_match( "/^($rx)/i", $str ) );
    }
 
    /*!
@@ -480,7 +480,7 @@ class StringTokenizer extends BasicTokenizer
          // check for separator
          if ( $this->is_split_char( $char, substr( $this->value, $pos ) ) ) // separator found
          {
-            if ( ($pos + 1 < $len) and (substr($this->value,$pos+1,1) == $char) ) // need escape
+            if ( ($pos + 1 < $len) && (substr($this->value,$pos+1,1) == $char) ) // need escape
             {
                $tok .= $char;
                $pos++;
@@ -498,7 +498,7 @@ class StringTokenizer extends BasicTokenizer
          // check for double special-char
          if ( !(strpos($this->spec_chars, $char) === false) )
          {
-            if ( ($pos + 1 < $len) and (substr($this->value,$pos+1,1) == $char) ) // need escape
+            if ( ($pos + 1 < $len) && (substr($this->value,$pos+1,1) == $char) ) // need escape
             {
                $tok .= $this->escape_chars[1] . $char;
                $pos++;
@@ -539,20 +539,20 @@ class StringTokenizer extends BasicTokenizer
          // note: $this->value{pos} works only with const-pos
          $char = substr( $this->value, $pos, 1 );
 
-         if ( $char == $quote_start and ($pos+1 < $len) and substr($this->value,$pos+1,1) == $quote_start ) // double-quote
+         if ( $char == $quote_start && ($pos+1 < $len) && substr($this->value,$pos+1,1) == $quote_start ) // double-quote
          {
             $tok .= $quote_start;
             $pos++;
             continue;
          }
 
-         if ( $quote_begin == 0 and $char == $quote_start )
+         if ( $quote_begin == 0 && $char == $quote_start )
          {
             $quote_begin++;
             $tokflags = TOKFLAG_QUOTED;
             continue;
          }
-         elseif ($quote_begin == 1 and $char == $quote_end )
+         elseif ($quote_begin == 1 && $char == $quote_end )
          {
             $quote_begin--;
             continue;
@@ -622,7 +622,7 @@ class StringTokenizer extends BasicTokenizer
             if ( $pos + 1 < $len ) // need escape
             {
                $next_char = substr($this->value, $pos+1, 1);
-               if ( $next_char == $esc_char or ( strpos($this->spec_chars, $next_char) !== false ) )
+               if ( $next_char == $esc_char || ( strpos($this->spec_chars, $next_char) !== false ) )
                   $tok .= $this->escape_chars[1]; // special-char
                $tok .= $next_char;
                $pos++;

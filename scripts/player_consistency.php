@@ -57,7 +57,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
    {
       $c=($c % LIST_ROWS_MODULO)+1;
       $i++;
-      if( $i==1 or ($rowhdr>1 && ($i%$rowhdr)==1) )
+      if( $i==1 || ($rowhdr>1 && ($i%$rowhdr)==1) )
       {
          echo "<tr>\n";
          foreach( $row as $key => $val )

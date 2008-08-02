@@ -524,7 +524,7 @@ class Form
          error('internal_error', "Form.parse_layout_global.bad_syntax.2($layout)"); // with one of '|,'
 
       $result = $groups[$grcnt-1];
-      while ( is_array($result) and count($result) == 1 )
+      while ( is_array($result) && count($result) == 1 )
          $result = array_shift($result);
       $this->layout[FLAYOUT_GLOBAL] = $result;
    }
@@ -645,12 +645,12 @@ class Form
 
       if( count($this->rows) <= 0 )
       {
-         if( !$this->get_config(FEC_EXTERNAL_FORM) and $this->echo_form_start_now )
+         if( !$this->get_config(FEC_EXTERNAL_FORM) && $this->echo_form_start_now )
             $rootformstr .= $this->print_end();
          return $rootformstr;
       }
 
-      if( !$this->get_config(FEC_EXTERNAL_FORM) and !$this->echo_form_start_now )
+      if( !$this->get_config(FEC_EXTERNAL_FORM) && !$this->echo_form_start_now )
          $rootformstr .= $this->print_start_default();
 
       $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
@@ -731,13 +731,13 @@ class Form
             }
             else
             {
-               if( $element_type['NewTD'] and $this->column_started )
+               if( $element_type['NewTD'] && $this->column_started )
                {
                   $result .= $this->print_td_end();
                   $this->column_started = false;
                }
 
-               if( $element_type['StartTD'] and !$this->column_started )
+               if( $element_type['StartTD'] && !$this->column_started )
                {
                   $result .= $this->print_td_start( $element_type['Attbs'] );
                   $this->column_started = true;
@@ -746,7 +746,7 @@ class Form
 
                $this->$func_name( $result, $element_args );
 
-               if( $element_type['EndTD'] and $this->column_started )
+               if( $element_type['EndTD'] && $this->column_started )
                {
                   $result .= $this->print_td_end();
                   $this->column_started = false;
@@ -1422,7 +1422,7 @@ class Form
    function print_insert_filtererror( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = true )
    {
       $filter = $filters->get_filter($fid);
-      if( !isset($filter) or !$filter->has_error() )
+      if( !isset($filter) || !$filter->has_error() )
          return '';
 
       $msg = $filter->errormsg();

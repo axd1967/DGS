@@ -172,7 +172,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       $time_query = '';
    }
 
-   $no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or $action == 'domove' );
+   $no_marked_dead = ( $Status == 'PLAY' || $Status == 'PASS' || $action == 'domove' );
 
    $TheBoard = new Board( );
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
@@ -242,8 +242,8 @@ This is why:
          }
 
 
-         if( strlen($prisoner_string) != $nr_prisoners*2 or
-             ( $stonestring and $prisoner_string != $stonestring) )
+         if( strlen($prisoner_string) != $nr_prisoners*2 ||
+             ( $stonestring && $prisoner_string != $stonestring) )
             error('move_problem','confirm.domove.prisoner');
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
@@ -310,7 +310,7 @@ This is why:
 
       case 'handicap': //stonestring is the list of handicap stones
       {
-         if( $Status != 'PLAY' or !( $Handicap>1 && $Moves==1 ) )
+         if( $Status != 'PLAY' || !( $Handicap>1 && $Moves==1 ) )
             error('invalid_action',"confirm.handicap.$Status");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
@@ -326,7 +326,7 @@ This is why:
          {
             list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i*2-2, 2), $Size);
 
-            if( !isset($rownr) or !isset($colnr) )
+            if( !isset($rownr) || !isset($colnr) )
                error('illegal_position');
 
             $move_query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
@@ -377,8 +377,8 @@ This is why:
 
       case 'delete':
       {
-         if( !$too_few_moves or
-           !($Status='PLAY' or $Status='PASS' or $Status='SCORE' or $Status='SCORE2')
+         if( !$too_few_moves ||
+           !($Status='PLAY' || $Status='PASS' || $Status='SCORE' || $Status='SCORE2')
             )
             error('invalid_action',"confirm.delete.$Status");
 
@@ -401,7 +401,7 @@ This is why:
 
       case 'done': //stonestring is the list of toggled points
       {
-         if( $Status != 'SCORE' and $Status != 'SCORE2' )
+         if( $Status != 'SCORE' && $Status != 'SCORE2' )
             error('invalid_action',"confirm.done.$Status");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
@@ -411,7 +411,7 @@ This is why:
          $l = strlen( $stonestring );
 
          $next_status = 'SCORE2';
-         if( $Status == 'SCORE2' and  $l < 2 )
+         if( $Status == 'SCORE2' &&  $l < 2 )
          {
             $next_status = 'FINISHED';
             $game_finished = true;
@@ -478,7 +478,7 @@ This is why:
       $result = mysql_query( $message_query )
          or error('mysql_query_failed','confirm.message_query');
 
-      if( mysql_affected_rows() < 1 and $action != 'delete' )
+      if( mysql_affected_rows() < 1 && $action != 'delete' )
          error('mysql_insert_move',"confirm22($action,$gid)");
    }
 

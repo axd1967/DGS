@@ -29,11 +29,11 @@ define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by 
 function allow_add_time_opponent( $game_row, $uid )
 {
    // must be a running-game
-   if( $game_row['Status'] == 'FINISHED' or $game_row['Status'] == 'INVITED' )
+   if( $game_row['Status'] == 'FINISHED' || $game_row['Status'] == 'INVITED' )
       return false;
 
    // must be one of my games
-   if( $game_row['White_ID'] != $uid and $game_row['Black_ID'] != $uid )
+   if( $game_row['White_ID'] != $uid && $game_row['Black_ID'] != $uid )
       return false;
 
    // must not be a tournament-game
@@ -67,11 +67,11 @@ function allow_add_time_opponent( $game_row, $uid )
  */
 function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
 {
-   if( !is_numeric($add_hours) or $add_hours < 0
-         or $add_hours > time_convert_to_hours( MAX_ADD_DAYS, 'days'))
+   if( !is_numeric($add_hours) || $add_hours < 0
+         || $add_hours > time_convert_to_hours( MAX_ADD_DAYS, 'days'))
       return sprintf( 'Invalid value for add_hours [%s]', $add_hours);
 
-   if ( !$reset_byo and $add_hours == 0 )
+   if ( !$reset_byo && $add_hours == 0 )
       return 0; // nothing to do (0 hours added, no error)
 
    if( is_numeric($game_row) )
@@ -101,7 +101,7 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
    }
 
    if( !isset($game_row["{$oppcolor}_Maintime"])
-      or !isset($game_row["{$oppcolor}_Byoperiods"])
+      || !isset($game_row["{$oppcolor}_Byoperiods"])
       )
       error('internal_error',"add_time_opponent.incomplete_game_row($gid)");
 
@@ -109,7 +109,7 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
       $reset_byo = 0;
    if( $reset_byo && $game_row["{$oppcolor}_Byoperiods"] == -1 )
       $reset_byo = 0;
-   if( $reset_byo && ($game_row['Byotime'] <= 0 or $game_row['Byoperiods'] <= 0) )
+   if( $reset_byo && ($game_row['Byotime'] <= 0 || $game_row['Byoperiods'] <= 0) )
       $reset_byo = 0; // no byoyomi-reset if no byoyomi (no time or no periods)
 
 /*

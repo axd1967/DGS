@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
    $send_message = ( @$_REQUEST['send_message']
-                  or @$_REQUEST['send_accept']
-                  or @$_REQUEST['send_decline']
-                  or @$_REQUEST['foldermove']
+                  || @$_REQUEST['send_accept']
+                  || @$_REQUEST['send_decline']
+                  || @$_REQUEST['foldermove']
                   ) ;
 
    $preview = @$_REQUEST['preview'];

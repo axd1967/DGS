@@ -177,7 +177,7 @@ disable_cache();
       {
          case INVITE_HANDI_CONV:
          {
-            if( !$iamrated or !$opprated )
+            if( !$iamrated || !$opprated )
                error('no_initial_rating');
             list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
                suggest_conventional( $my_rating, $opprating, $size);
@@ -186,7 +186,7 @@ disable_cache();
 
          case INVITE_HANDI_PROPER:
          {
-            if( !$iamrated or !$opprated )
+            if( !$iamrated || !$opprated )
                error('no_initial_rating');
             list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
                suggest_proper( $my_rating, $opprating, $size);
@@ -218,7 +218,7 @@ disable_cache();
       // create_game() must check the Status='INVITED' state of the game to avoid
       // that multiple clicks lead to a bad Running count increase below.
       $gids = array();
-      if( $i_am_black or $double )
+      if( $i_am_black || $double )
          $gids[] = create_game($player_row, $opponent_row, $game_row, $gid);
       else
          $gids[] = create_game($opponent_row, $player_row, $game_row, $gid);

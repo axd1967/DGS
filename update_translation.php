@@ -63,7 +63,7 @@ require_once( "include/make_translationfiles.php" );
       or error('mysql_query_failed','update_translation.translations_query');
 
    $show_rows = (int)@mysql_num_rows($result);
-   if( $show_rows <= 0 and !$untranslated )
+   if( $show_rows <= 0 && !$untranslated )
       error('translation_bad_language_or_group','uptranslat1');
    if( $show_rows > TRANS_ROW_PER_PAGE )
       $show_rows = TRANS_ROW_PER_PAGE;
@@ -102,7 +102,7 @@ require_once( "include/make_translationfiles.php" );
          //no $log_set
       }
       else if( ( $same && $row['Text'] !== '' )
-            or ( !empty($translation) && $row['Text'] !== $translation ) )
+            || ( !empty($translation) && $row['Text'] !== $translation ) )
       { //same or modified item
          //UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN
          if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )

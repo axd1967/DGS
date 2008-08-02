@@ -300,7 +300,7 @@ class SearchFilter
          error('invalid_filter', "filter.add_filter.bad_type($id,$type)"); // type non-empty
       if ( !is_numeric($id) )
          error('invalid_filter', "filter.add_filter.bad_filter_id($id)");
-      if ( $id < 1 or $id > 32 )
+      if ( $id < 1 || $id > 32 )
          error('invalid_filter', "filter.add_filter.filter_id_out_of_range($id)"); // 1..32
       if ( isset($this->Filters[$id]) )
          error('invalid_filter', "filter.add_filter.unique_filter_id($id)");
@@ -348,7 +348,7 @@ class SearchFilter
             // parse values if active and not a reset
             if ( $filter->is_active() )
             {
-               if ( $this->is_reset or !$this->is_init )
+               if ( $this->is_reset || !$this->is_init )
                   $filter->reset();
 
                $use_prefix = !((bool) $filter->get_config(FC_FNAME));
@@ -387,7 +387,7 @@ class SearchFilter
    {
       $act = (string) $this->get_arg(FFORM_TOGGLE_ACTION, true); // set if show-/hide-action needed
       $fid = (string) $this->get_arg(FFORM_TOGGLE_FID, true); // if act set: >0=Nr for thead[Nr], 0=hide-all, -1=show-all
-      if ( $act and (string)$fid != '' )
+      if ( $act && (string)$fid != '' )
       {
          if ( $fid > 0 ) // show or hide single filter
          {
@@ -453,12 +453,12 @@ class SearchFilter
          }
          elseif ( $choice == GETFILTER_USED )
          {
-            if ( !$filter->is_active() or $filter->is_empty() )
+            if ( !$filter->is_active() || $filter->is_empty() )
                continue; // only active and with non-empty value
          }
          elseif ( $choice == GETFILTER_ERROR )
          {
-            if ( !$filter->is_active() or $filter->is_empty() or !$filter->has_error() )
+            if ( !$filter->is_active() || $filter->is_empty() || !$filter->has_error() )
                continue; // only active and with non-empty value and with error-message
          } // else: all
 
@@ -694,7 +694,7 @@ class SearchFilter
          $name = $elems[$nid - 1];
 
          $f->parse_value( $name, $out[3] ); // ignore all parsing-errors
-         if ( count($elems) > 1 and !$f->has_error() ) // for multi-element-filters
+         if ( count($elems) > 1 && !$f->has_error() ) // for multi-element-filters
             return array( 'BQ', $fid );
          else
             return true;
@@ -726,7 +726,7 @@ class SearchFilter
     */
    function has_query( $choice = null )
    {
-      if ( is_null($choice) or ( is_array($choice) and count($choice) == 0 ) )
+      if ( is_null($choice) || ( is_array($choice) && count($choice) == 0 ) )
          $choice = GETFILTER_ACTIVE;
       if ( is_array($choice) )
          $arr_id = $choice;
@@ -736,7 +736,7 @@ class SearchFilter
       foreach( $arr_id as $id )
       {
          $filter = $this->get_filter($id);
-         if ( isset($filter) and !is_null($filter->get_query()) )
+         if ( isset($filter) && !is_null($filter->get_query()) )
             return true;
       }
       return false;
@@ -951,7 +951,7 @@ class SearchFilter
    function get_filter_errormsg( $id, $prefix = '', $suffix = '', $with_syntax = true )
    {
       $filter = $this->get_filter($id);
-      if ( !isset($filter) or !$filter->has_error() )
+      if ( !isset($filter) || !$filter->has_error() )
          return '';
 
       $syntax = ( $with_syntax ) ? "; " . $filter->get_syntax_description() : '';
@@ -966,7 +966,7 @@ class SearchFilter
       foreach( $arr_keys as $id )
       {
          $filter = $this->get_filter($id);
-         if ( isset($filter) and $filter->has_error() )
+         if ( isset($filter) && $filter->has_error() )
             $arr_errors[$id] = $filter->errormsg();
       }
       return $arr_errors;
@@ -1160,13 +1160,13 @@ class Filter
     */
    function build_base_query( $obj, $is_clause, $use_tmpl = true )
    {
-      if ( is_array($obj) or empty($obj) )
+      if ( is_array($obj) || empty($obj) )
          return NULL;
 
       if ( is_a($obj, 'QuerySQL') )
       {
          $query = $obj;
-         if ( $use_tmpl and $query->has_part(SQLP_FNAMES) )
+         if ( $use_tmpl && $query->has_part(SQLP_FNAMES) )
          {
             $query->clear_parts(SQLP_WHERETMPL); // overwrite template
             $query->add_part( SQLP_WHERETMPL,
@@ -1214,7 +1214,7 @@ class Filter
             error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL_no_SQLP_WHERETMPL({$this->id})");
 
          $cnt_fnames = count($this->dbfield->get_parts(SQLP_FNAMES));
-         if ( $max_fnames >= 0 and $cnt_fnames > $max_fnames )
+         if ( $max_fnames >= 0 && $cnt_fnames > $max_fnames )
             error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL.max_num.SQLP_FNAMES({$this->id},$max_fnames)");
          if ( $cnt_fnames < 1 )
             error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL.min1.SQLP_FNAMES({$this->id})");
@@ -1325,7 +1325,7 @@ class Filter
     * note: name may be prefixed with PFX_FILTER if no FC_FNAME set
     */
    function get_value( $name = '' ) {
-      if ( $name == '' or $name === $this->name or $name === $this->id )
+      if ( $name == '' || $name === $this->name || $name === $this->id )
          return $this->value;
       else
          return @$this->values[$name];
@@ -1333,7 +1333,7 @@ class Filter
 
    /*! \brief Returns true, if value empty or null. */
    function is_empty() {
-      return (is_null($this->value) or $this->value == '');
+      return (is_null($this->value) || $this->value == '');
    }
 
 
@@ -1383,10 +1383,10 @@ class Filter
    /*! \brief Returns syntax-description for filter (maybe empty for some filters). */
    function get_syntax_description()
    {
-      if ( isset($this->syntax_descr) and !is_null($this->syntax_descr) )
+      if ( isset($this->syntax_descr) && !is_null($this->syntax_descr) )
       {
          $addinfo = $this->get_syntax_hint(FCV_SYNHINT_ADDINFO, " (%s)" );
-         if ( $this->syntax_descr == '' and $addinfo == '' )
+         if ( $this->syntax_descr == '' && $addinfo == '' )
             return '';
 
          $syntax = T_('Syntax#filter') . $this->get_syntax_help() . $addinfo;
@@ -1429,7 +1429,7 @@ class Filter
    {
       if ( $this->errormsg )
          return NULL; // invalid input
-      else if ( $force or $this->is_visible() )
+      else if ( $force || $this->is_visible() )
          return $this->query;
       else
          return NULL;
@@ -1525,7 +1525,7 @@ class Filter
     */
    function init_parse( $val, $name = '' )
    {
-      if ( $name == '' or $name === $this->name or $name == $this->id )
+      if ( $name == '' || $name === $this->name || $name == $this->id )
       {
          $this->value = $val;
          $this->errormsg = '';
@@ -1773,7 +1773,7 @@ class Filter
       }
       elseif ( is_numeric($index_start_keys) )
       {
-         if ( $is_multi and !is_array($value) )
+         if ( $is_multi && !is_array($value) )
             $value = array();
          for( $i=0; $i < count($values); $i++)
          {
@@ -1959,7 +1959,7 @@ class FilterText extends Filter
       $this->syntax_help = T_('TEXT#filterhelp');
 
       $arr_syntax = array();
-      if ( $this->get_config(FC_NO_RANGE) or $this->get_config(FC_SUBSTRING) )
+      if ( $this->get_config(FC_NO_RANGE) || $this->get_config(FC_SUBSTRING) )
       { // substring forcing no-range
          $arr_syntax[]= 'foo';
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
@@ -1977,7 +1977,7 @@ class FilterText extends Filter
          $this->parser_flags |= TEXTPARSER_FORBID_WILD;
 
       $minchars = (int) $this->get_config(FC_START_WILD);
-      if ( $allow_wild and $minchars )
+      if ( $allow_wild && $minchars )
       {
          $arr_syntax[]= "*goo" . ($minchars > 1 ? " ($minchars)" : '');
          $this->parser_flags |= TEXTPARSER_ALLOW_START_WILD;
@@ -2074,7 +2074,7 @@ class FilterRating extends Filter
    function convert_rank($rank)
    {
       $rating = read_rating($rank);
-      if ( is_null($rating) or $rating < MIN_RATING or $rating > OUT_OF_RATING )
+      if ( is_null($rating) || $rating < MIN_RATING || $rating > OUT_OF_RATING )
       { // min=30k (-900), max=9999 (ominous limit)
          $this->init_parse($this->value); // reset all parsed-vars
          $this->errormsg = "[$rank] " . T_('invalid rank');
@@ -2404,7 +2404,7 @@ class FilterDate extends Filter
       }
 
       // handle reverse-range (only if both start+end used)
-      if ( (string)$this->p_end != '' and is_object($dp_start) )
+      if ( (string)$this->p_end != '' && is_object($dp_start) )
       {
          if ( $dp_start->rawdate > $dp_end->rawdate )
          {
@@ -2756,7 +2756,7 @@ class FilterSelection extends Filter
 
          // check FC_SIZE
          $fc_size = $this->get_config(FC_SIZE);
-         if ( empty($fc_size) or $fc_size <= 1 )
+         if ( empty($fc_size) || $fc_size <= 1 )
             $this->set_config( FC_SIZE, 2 ); // default FC_SIZE for multi-val
 
          // handle FC_DEFAULT as index-array
@@ -2859,7 +2859,7 @@ class FilterBoolSelect extends FilterSelection
       $field = $arrfn[0];
 
       // use having to allow alias-FNAMES
-      $parttype = (is_array($config) and @$config[FC_ADD_HAVING]) ? SQLP_HAVING : SQLP_WHERE;
+      $parttype = (is_array($config) && @$config[FC_ADD_HAVING]) ? SQLP_HAVING : SQLP_WHERE;
       $query_yes = $query->duplicate();
       $query_yes->add_part( $parttype, "$field='Y'" );
       $query->add_part( $parttype, "$field='N'" );
@@ -3044,7 +3044,7 @@ class FilterMysqlMatch extends Filter
       $arr_syntax = array();
       $arr_syntax[]= 'word word';
       $match_mode = $this->get_config(FC_MATCH_MODE);
-      if ( empty($match_mode) or $match_mode === MATCH_BOOLMODE_SET )
+      if ( empty($match_mode) || $match_mode === MATCH_BOOLMODE_SET )
          $arr_syntax[]= '+w -w <w >w ~w (wgroup) w* "literals"';
       $this->syntax_descr = implode(', ', $arr_syntax);
 
@@ -3345,9 +3345,9 @@ class FilterScore extends Filter
       $idx = $this->values[$this->elem_result];
       if ( $idx == FSCORE_ALL )
          return;
-      if ( $idx >= FSCORE_SCORE and $idx <= FSCORE_W_SCORE )
+      if ( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
       {
-         if ( $this->p_value == '' and $this->p_start == '' and $this->p_end == '' )
+         if ( $this->p_value == '' && $this->p_start == '' && $this->p_end == '' )
          {
             // use default to search for scoring without time + resignation
             $this->p_flags |= PFLAG_EXCL_START | PFLAG_EXCL_END;
@@ -3363,7 +3363,7 @@ class FilterScore extends Filter
 
       global $FSCORE_BUILD_SQL;
       $clause = sprintf( $FSCORE_BUILD_SQL[$idx], $field );
-      if ( $idx >= FSCORE_SCORE and $idx <= FSCORE_W_SCORE )
+      if ( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
       {
          // here $clause is field-part
          $q = $this->build_query_numeric(

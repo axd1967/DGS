@@ -239,7 +239,7 @@ define('MODERATOR_SEARCH', 0);
 
          $hidden = ($Approved == 'N');
 
-         if( $hidden and !$is_moderator and $uid !== $player_row['ID'] )
+         if( $hidden && !$is_moderator && $uid !== $player_row['ID'] )
             continue;
 
          $postClass = 'SearchResult';

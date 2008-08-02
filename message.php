@@ -65,7 +65,7 @@ require_once( "include/form_functions.php" );
    if( !$default_uhandle )
    {
       get_request_user( $uid, $uhandle, true);
-      if( !$uhandle and $uid > 0 )
+      if( !$uhandle && $uid > 0 )
       {
          if( $uid == $player_row["ID"] )
             $uhandle = $player_row['Handle'];
@@ -107,7 +107,7 @@ require_once( "include/form_functions.php" );
 
 
    $submode = $mode;
-   if( $mode == 'ShowMessage' or $mode == 'Dispute' )
+   if( $mode == 'ShowMessage' || $mode == 'Dispute' )
    {
       if( !($mid > 0) )
          error("unknown_message");
@@ -202,7 +202,7 @@ require_once( "include/form_functions.php" );
 
          if( $Type == 'INVITATION' )
          {
-            if( $Status=='INVITED' and ($Replied != 'Y') )
+            if( $Status=='INVITED' && ($Replied != 'Y') )
             {
                if( $to_me )
                   $submode = 'ShowInvite';

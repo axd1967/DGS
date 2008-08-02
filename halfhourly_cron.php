@@ -139,7 +139,7 @@ if( !$is_down )
    {
       extract($row);
       $Email= trim($Email);
-      if( !$Email or !verify_email( false, $Email) )
+      if( !$Email || !verify_email( false, $Email) )
       {
          //error('bad_mail_address', "halfhourly_cron=$Email");
          continue;

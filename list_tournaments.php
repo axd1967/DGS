@@ -67,7 +67,7 @@ require_once( "include/tournament.php" );
       while( $orgrow = mysql_fetch_array( $orgresult ) )
          $organizers[]= $orgrow['pid'];
 
-      if( in_array( $player_row['ID'], $organizers ) or $row['State'] > 0 )
+      if( in_array( $player_row['ID'], $organizers ) || $row['State'] > 0 )
       {
          $participants = array();
          $partresult = mysql_query( "SELECT tid, pid FROM TournamentParticipants " .

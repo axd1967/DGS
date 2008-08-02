@@ -298,7 +298,7 @@ function check_consistency( $gid)
          return "'Hours' absent at ID=$ID!";
       $Hours = $row['Hours'];
 
-      if( !($Stone == WHITE or $Stone == BLACK ) or $PosX<0 )
+      if( !($Stone == WHITE || $Stone == BLACK ) || $PosX<0 )
       {
          if ( $PosX == POSX_ADDTIME )
          {
@@ -378,7 +378,7 @@ function check_consistency( $gid)
       return "Wrong number of moves!";
    }
 
-   if( $Black_Prisoners != $games_Black_Prisoners or
+   if( $Black_Prisoners != $games_Black_Prisoners ||
        $White_Prisoners != $games_White_Prisoners )
    {
       return "Wrong number of prisoners in Games table!"
@@ -386,7 +386,7 @@ function check_consistency( $gid)
          . "\nWhite: $games_White_Prisoners should be $White_Prisoners";
    }
 
-   if( $Black_Prisoners != $moves_Black_Prisoners or
+   if( $Black_Prisoners != $moves_Black_Prisoners ||
        $White_Prisoners != $moves_White_Prisoners )
    {
       return "Wrong number of prisoners removed!";
@@ -395,7 +395,7 @@ function check_consistency( $gid)
    if( $Status!='FINISHED' )
    {
       $handinr = ($Handicap < 2 ? 1 : $Handicap );
-      $black_to_move = (($Moves < $handinr) or ($Moves-$handinr)%2 == 1 );
+      $black_to_move = (($Moves < $handinr) || ($Moves-$handinr)%2 == 1 );
       $to_move = ( $black_to_move ? $Black_ID : $White_ID );
       if( $ToMove_ID!=$to_move )
       {
@@ -403,7 +403,7 @@ function check_consistency( $gid)
       }
 
       if( $games_Flags!=$GameFlags 
-        or ( $GameFlags & KO && $games_Last_Move!=$Last_Move ) )
+        || ( ($GameFlags & KO) && $games_Last_Move!=$Last_Move ) )
       {
          return "Wrong Ko status!"
             . "\nLast_Move: [$games_Last_Move] should be [$Last_Move]"
@@ -412,7 +412,7 @@ function check_consistency( $gid)
 
       if(  !($ClockUsed>=0 && $ClockUsed<24)
         && !($ClockUsed>=0+WEEKEND_CLOCK_OFFSET && $ClockUsed<24+WEEKEND_CLOCK_OFFSET)
-        && !($ClockUsed==VACATION_CLOCK or $ClockUsed==VACATION_CLOCK+WEEKEND_CLOCK_OFFSET) )
+        && !($ClockUsed==VACATION_CLOCK || $ClockUsed==VACATION_CLOCK+WEEKEND_CLOCK_OFFSET) )
       {
          return "Wrong ClockUsed! Can't be $ClockUsed.";
       }

@@ -588,7 +588,7 @@ elseif ( $fdemo == 14 )
 }
 
 /* -------------------- (15) Defaults / (19) Without Defaults --------------------  */
-elseif ( $fdemo == 15 or $fdemo == 19 )
+elseif ( $fdemo == 15 || $fdemo == 19 )
 {
    $with_def = ( $fdemo == 15 ); # show defaults
    $title = array(

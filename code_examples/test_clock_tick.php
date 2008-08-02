@@ -86,14 +86,14 @@ function test( $qver, $nr, $print=true )
          time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
             $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
-         $time_is_up = ( $Black_Maintime == 0 and $Black_Byotime == 0 );
+         $time_is_up = ( $Black_Maintime == 0 && $Black_Byotime == 0 );
       }
       else if( $ToMove_ID == $White_ID )
       {
          time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
             $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
-         $time_is_up = ( $White_Maintime == 0 and $White_Byotime == 0 );
+         $time_is_up = ( $White_Maintime == 0 && $White_Byotime == 0 );
       }
    }
    $end = gettimeofday();

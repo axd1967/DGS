@@ -331,9 +331,9 @@ $ARR_DBFIELDKEYS = array(
 
    start_page( $title1, true, $logged_in, $player_row,
                $utable->button_style($player_row['Button']) );
-   if ( $DEBUG_SQL and isset($query_black) ) echo "QUERY-BLACK: " . make_html_safe($query_black) . "<br>\n";
-   if ( $DEBUG_SQL and isset($query_white) ) echo "QUERY-WHITE: " . make_html_safe($query_white) . "<br>\n";
-   if ( $DEBUG_SQL and !$opp) echo "QUERY: " . make_html_safe($query) . "<br>\n";
+   if ( $DEBUG_SQL && isset($query_black) ) echo "QUERY-BLACK: " . make_html_safe($query_black) . "<br>\n";
+   if ( $DEBUG_SQL && isset($query_white) ) echo "QUERY-WHITE: " . make_html_safe($query_white) . "<br>\n";
+   if ( $DEBUG_SQL && !$opp) echo "QUERY: " . make_html_safe($query) . "<br>\n";
 
    // static filter-values
    $arrtmp = array();

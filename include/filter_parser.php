@@ -256,7 +256,7 @@ class BasicParser
     */
    function handle_reverse_range( $force = false ) {
       $swapped = false;
-      if ( !$this->is_flags_set(PARSER_NOSWAP_REVERSE) or $force )
+      if ( !$this->is_flags_set(PARSER_NOSWAP_REVERSE) || $force )
       {
          if ( $this->is_reverse_range() )
          {
@@ -341,7 +341,7 @@ class NumericParser extends BasicParser
       if ( $cnt == 1 )
       { // exact syntax
          $v = $arr[0]->get_token();
-         if ( empty($v) or is_numeric($v) )
+         if ( empty($v) || is_numeric($v) )
             $this->p_value = $v;
          else
          {
@@ -352,12 +352,12 @@ class NumericParser extends BasicParser
       else
       { // range syntax
          list( $v1, $v2 ) = extract_range( $arr );
-         if ( !empty($v1) and !is_numeric($v1) )
+         if ( !empty($v1) && !is_numeric($v1) )
          {
             $this->errormsg = "[$v1] " . T_('not numeric');
             return false;
          }
-         elseif ( !empty($v2) and !is_numeric($v2) )
+         elseif ( !empty($v2) && !is_numeric($v2) )
          {
             $this->errormsg = "[$v2] " . T_('not numeric');
             return false;
@@ -456,7 +456,7 @@ class TextParser extends BasicParser
 
       // assure higher precedence of wildcard (over separator)
       $arr_wild_replace = array( $this->tokconf->wild => '%' );
-      if ( $cnt != 1 and !$forbid_wild and !$this->is_flags_set(TEXTPARSER_CONF_PRECEDENCE_SEP) )
+      if ( $cnt != 1 && !$forbid_wild && !$this->is_flags_set(TEXTPARSER_CONF_PRECEDENCE_SEP) )
       {
          list( $v1, $v2 ) = extract_range( $arr );
          list( $sql, $cnt_wild1 ) = sql_replace_wildcards( $v1, $arr_wild_replace );
@@ -504,7 +504,7 @@ class TextParser extends BasicParser
                {
                   $minchars = $this->tokconf->get_config(TEXTPARSER_CONF_STARTWILD_MINCHARS, STARTWILD_OPTMINCHARS);
                   $quote_wild = preg_quote( $wild_char, '/' );
-                  if ( $minchars > 1 and !(preg_match("/^[{$quote_wild}]+([^{$quote_wild}]{".$minchars.",})/", $v)) )
+                  if ( $minchars > 1 && !(preg_match("/^[{$quote_wild}]+([^{$quote_wild}]{".$minchars.",})/", $v)) )
                   {
                      $this->errormsg =
                         sprintf( T_('need at least %1$s characters when using text with starting wildcard [%2$s]'),
@@ -537,7 +537,7 @@ class TextParser extends BasicParser
          $this->p_end   = $v2;
          $this->handle_reverse_range();
 
-         if ( (string)$this->p_end != '' and !$this->is_flags_set(TEXTPARSER_END_INCL) )
+         if ( (string)$this->p_end != '' && !$this->is_flags_set(TEXTPARSER_END_INCL) )
             $this->p_end = make_text_end_exclusive( $this->p_end );
       }
 

@@ -74,7 +74,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    {
       case 'conv':
       {
-         if( !$iamrated or !$opprated )
+         if( !$iamrated || !$opprated )
             error('no_initial_rating','make_invite_game.conv');
          $tomove = INVITE_HANDI_CONV;
          $handicap = 0; //further computing
@@ -84,7 +84,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 
       case 'proper':
       {
-         if( !$iamrated or !$opprated )
+         if( !$iamrated || !$opprated )
             error('no_initial_rating','make_invite_game.proper');
          $tomove = INVITE_HANDI_PROPER;
          $handicap = 0; //further computing
@@ -119,10 +119,10 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       break;
    }
 
-   if( !($komi <= MAX_KOMI_RANGE and $komi >= -MAX_KOMI_RANGE) )
+   if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
       error('komi_range','make_invite_game');
 
-   if( !($handicap <= MAX_HANDICAP and $handicap >= 0) )
+   if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
       error('handicap_range','make_invite_game');
 
    list($hours, $byohours, $byoperiods) =
@@ -131,14 +131,14 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
-   if( $hours<1 and ($byohours<1 or $byoyomitype == 'FIS') )
+   if( $hours<1 && ($byohours<1 || $byoyomitype == 'FIS') )
       error('time_limit_too_small','make_invite_game');
 
 
-   if( $rated != 'Y' or $Black_ID == $White_ID )
+   if( $rated != 'Y' || $Black_ID == $White_ID )
       $rated = 'N';
 
-   if( $stdhandicap != 'Y' or
+   if( $stdhandicap != 'Y' ||
        !standard_handicap_is_possible($size, $handicap) )
       $stdhandicap = 'N';
 
@@ -170,8 +170,8 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
                     ." WHERE ID=$disputegid AND Status='INVITED'" );
       if( !$row )
          error('unknown_game','make_invite_game.1');
-      if( ( $row['Black_ID']!=$player_row['ID'] or $row['White_ID']!=$opponent_row['ID'] )
-       && ( $row['White_ID']!=$player_row['ID'] or $row['Black_ID']!=$opponent_row['ID'] )
+      if( ( $row['Black_ID']!=$player_row['ID'] || $row['White_ID']!=$opponent_row['ID'] )
+       && ( $row['White_ID']!=$player_row['ID'] || $row['Black_ID']!=$opponent_row['ID'] )
         )
          error('unknown_game','make_invite_game.2');
 
@@ -243,7 +243,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
    $stdhandicap = $game_info_row['StdHandicap'];
    $moves = $game_info_row['Handicap'];
-   if( $stdhandicap != 'Y' or !standard_handicap_is_possible($size, $moves ) )
+   if( $stdhandicap != 'Y' || !standard_handicap_is_possible($size, $moves ) )
       $stdhandicap = 'N';
 
    if( ENA_STDHANDICAP&2 && $stdhandicap == 'Y' && $moves > 1 )
@@ -327,7 +327,7 @@ function standard_handicap_is_possible($size, $hcp)
 {
    if( ENA_STDHANDICAP&4 ) //allow everything
       return true;
-   return( $size == 19 or $hcp <= 4 or ($hcp <= 9 and $size%2 == 1 and $size>=9) );
+   return( $size == 19 || $hcp <= 4 || ($hcp <= 9 && $size%2 == 1 && $size>=9) );
 }
 
 if( ENA_STDHANDICAP&2 ) { //skip black validation
@@ -353,7 +353,7 @@ function make_standard_placement_of_handicap_stones(
    //if( $err ) return false;
 
    $patlen = strlen( $stonestring );
-   if( $patlen > 2*$hcp or
+   if( $patlen > 2*$hcp ||
       ( $patlen < 2*$hcp && !$allow_incomplete_pattern ) )
       error('internal_error','make_std_handicap.bad_pattern');
 
@@ -365,7 +365,7 @@ function make_standard_placement_of_handicap_stones(
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $size);
 
-      if( !isset($rownr) or !isset($colnr) )
+      if( !isset($rownr) || !isset($colnr) )
          error('illegal_position','make_std_handicap');
 
       $query .= "($gid, " . ($i/2 + 1) . ", " . BLACK . ", $colnr, $rownr, 0)";

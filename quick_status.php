@@ -111,7 +111,7 @@ else
    if( $idmode == 'cookie' )
    {
       if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
-          or $player_row["Expire"] < $NOW )
+          || $player_row["Expire"] < $NOW )
       {
          error('not_logged_in','quick_status.expired');
       }

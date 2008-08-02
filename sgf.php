@@ -194,13 +194,13 @@ function mark_territory( $x, $y, $size, &$array )
          $nx = $x+$dirx[$dir];
          $ny = $y+$diry[$dir];
 
-         if( ( $nx < 0 ) or ($nx >= $size) or ($ny < 0) or ($ny >= $size) or
+         if( ( $nx < 0 ) || ($nx >= $size) || ($ny < 0) || ($ny >= $size) ||
              isset($index[$nx][$ny]) )
             continue;
 
          $new_color = @$array[$nx][$ny];
 
-         if( !$new_color or $new_color == NONE or $new_color >= BLACK_DEAD )
+         if( !$new_color || $new_color == NONE || $new_color >= BLACK_DEAD )
          {
             $x = $nx;  // Go to the neighbour
             $y = $ny;
@@ -239,7 +239,7 @@ function sgf_create_territories( $size, &$array,
    {
       for( $y=0; $y<$size; $y++)
       {
-         if( !@$array[$x][$y] or $array[$x][$y] == NONE )
+         if( !@$array[$x][$y] || $array[$x][$y] == NONE )
          {
             mark_territory( $x, $y, $size, $array );
          }
@@ -431,7 +431,7 @@ $array=array();
       . "\nPB[" . sgf_simpletext("$Blackname ($Blackhandle)") . "]"
       . "\nPW[" . sgf_simpletext("$Whitename ($Whitehandle)") . "]";
 
-   if( isset($Blackrating) or isset($Whiterating) )
+   if( isset($Blackrating) || isset($Whiterating) )
    {
       echo "\nBR[" . ( isset($Blackrating) ? echo_rating($Blackrating, 0,0,1) : '?' ) . "]" .
            "\nWR[" . ( isset($Whiterating) ? echo_rating($Whiterating, 0,0,1) : '?' ) . "]";
@@ -475,7 +475,7 @@ $array=array();
          if (!$row = mysql_fetch_array($result))
             break;
          if( $row["PosX"] > $sgf_trim_level
-            && ($row["Stone"] == WHITE or $row["Stone"] == BLACK) )
+            && ($row["Stone"] == WHITE || $row["Stone"] == BLACK) )
             break;
          $sgf_trim_nr-- ;
       }
@@ -541,7 +541,7 @@ $array=array();
             $array[$PosX][$PosY] = $Stone;
 
             //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
-            if( $owned_comments == BLACK or $owned_comments == WHITE )
+            if( $owned_comments == BLACK || $owned_comments == WHITE )
             {
                if( $Status != 'FINISHED' && $owned_comments != $Stone )
                   $Text = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text));
