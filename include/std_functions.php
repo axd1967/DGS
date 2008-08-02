@@ -482,26 +482,26 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    if( !$printable )
    {
       $menu_array = array(
-         T_('Status') => array(1,1, 'status.php',array('accesskey'=>'s','class'=>'strong')),
-         T_('Waiting room') => array(1,2, 'waiting_room.php',array('accesskey'=>'r')),
-         T_('User info') => array(1,3, 'userinfo.php',array('accesskey'=>'p')),
+         T_('Status')       => array(1,1, 'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )),
+         T_('Waiting room') => array(1,2, 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )),
+         T_('User info')    => array(1,3, 'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )),
 
-         T_('Messages') => array(2,1, 'list_messages.php',array('accesskey'=>'b')),
-         T_('Send a message') => array(2,2, 'message.php?mode=NewMessage',array('accesskey'=>'m')),
-         T_('Invite') => array(2,3, 'message.php?mode=Invite',array('accesskey'=>'i')),
+         T_('Messages')     => array(2,1, 'list_messages.php',           array( 'accesskey' => ACCKEY_MENU_MESSAGES )),
+         T_('Send message') => array(2,2, 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )),
+         T_('Invite')       => array(2,3, 'message.php?mode=Invite',     array( 'accesskey' => ACCKEY_MENU_INVITE )),
 
-         T_('Users') => array(3,1, 'users.php',array('accesskey'=>'u')),
-         T_('Contacts') => array(3,2, 'list_contacts.php',array('accesskey'=>'c')),
-         T_('Games') => array(3,3, 'show_games.php?uid=all',array('accesskey'=>'g')),
+         T_('Users')    => array(3,1, 'users.php',              array( 'accesskey' => ACCKEY_MENU_USERS )),
+         T_('Contacts') => array(3,2, 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )),
+         T_('Games')    => array(3,3, 'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )),
 
-         T_('Forums') => array(4,1, 'forum/index.php',array('accesskey'=>'f')),
-         T_('FAQ') => array(4,2, 'faq.php',array('accesskey'=>'q')),
-         T_('Docs') => array(4,3, 'docs.php',array('accesskey'=>'d')),
+         T_('Forums') => array(4,1, 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )),
+         T_('FAQ')    => array(4,2, 'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )),
+         T_('Docs')   => array(4,3, 'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )),
 
          //T_//('Site map') => array(4,3, 'site_map.php'),
-         //T_//('Translate') => array(5,1, 'translate.php',array('accesskey'=>'t')),
+         //T_//('Translate') => array(5,1, 'translate.php', array( 'accesskey' => ACCKEY_MENU_TRANSLATE )),
 
-         T_('Vote') => array(5,1, 'features/vote/list_features.php',array('accesskey'=>'v')),
+         T_('Vote') => array(5,1, 'features/vote/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )),
       );
 
       $tools_array = array(); //$url => array($img,$alt,$title)
@@ -617,13 +617,13 @@ function end_page( $menu_array=NULL )
 
    if( @$player_row['Translator'] && !$printable )
       echo anchor( $base_path.'translate.php',
-                   T_('Translate'), '', array( 'accesskey' => 't' ))
+                   T_('Translate'), '', array( 'accesskey' => ACCKEY_MENU_TRANSLATE ))
          . "&nbsp;&nbsp;&nbsp;";
 
    echo anchor( $base_path."index.php?logout=t"
               , T_("Logout")
               , ''
-              , array( 'accesskey' => 'o' )
+              , array( 'accesskey' => ACCKEY_MENU_LOGOUT )
               );
 
    echo "</td>"
@@ -3017,7 +3017,7 @@ function anchor( $href, $text, $title='', $attbs='')
       {
          $xkey = trim($attbs['accesskey']);
          unset($attbs['accesskey']);
-         if( $xkey )
+         if( (string)$xkey != '' ) // can be '0'
          {
             $xkey = substr($xkey,0,1);
             $title.= " [&amp;$xkey]";
