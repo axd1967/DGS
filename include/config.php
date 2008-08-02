@@ -8,20 +8,20 @@ $FRIENDLY_LONG_NAME = "Dragon Go Server";
 $FRIENDLY_SHORT_NAME = "DGS";
 
 
-// This is the main url. If the main page is, e.g., 
+// This is the main url. If the main page is, e.g.,
 // http://www.some_domain.com/~my_dir/index.php
 // set $HOSTBASE = "http://www.some_domain.com/~my_dir/";
 
 $HOSTBASE = "http://localhost/";
 
-// This is the server name. If the main page is, e.g., 
+// This is the server name. If the main page is, e.g.,
 // http://www.some_domain.com/~my_dir/index.php
 // http://www.some_domain.com/index.php
 // set $HOSTNAME = "www.some_domain.com";
 
 $HOSTNAME = "localhost";
 
-// This is used for cookies. If the main page is, e.g., 
+// This is used for cookies. If the main page is, e.g.,
 // http://www.some_domain.com/~my_dir/index.php
 // http://localhost/~my_dir/index.php
 // http://127.0.0.1/~my_dir/index.php
@@ -77,5 +77,38 @@ define('URI_AMP','&amp;'); //see ini_get('arg_separator.output')
 // Must be relative to the root folder and ended by a '/'
 // Set it to '' (empty string) to disable the cache features
 define('CACHE_FOLDER', 'temp/');
+
+
+// Define access keys
+// - keep empty with value '' to define no access key
+// - keys 0..9 are reserved for bottom page-links
+
+// access keys always visible in menus
+define('ACCKEY_MENU_STATUS',     's');
+define('ACCKEY_MENU_WAITROOM',   'r');
+define('ACCKEY_MENU_USERINFO',   'p');
+define('ACCKEY_MENU_MESSAGES',   'b');
+define('ACCKEY_MENU_SENDMSG',    'm');
+define('ACCKEY_MENU_INVITE',     'i');
+define('ACCKEY_MENU_USERS',      'u');
+define('ACCKEY_MENU_CONTACTS',   'c');
+define('ACCKEY_MENU_GAMES',      'g');
+define('ACCKEY_MENU_FORUMS',     'f');
+define('ACCKEY_MENU_FAQ',        'q');
+define('ACCKEY_MENU_DOCS',       'd');
+define('ACCKEY_MENU_VOTE',       'v');
+define('ACCKEY_MENU_TRANSLATE',  't');
+define('ACCKEY_MENU_LOGOUT',     'o');
+
+// access keys for general actions
+define('ACCKEY_ACT_EXECUTE',     'x');
+define('ACCKEY_ACT_PREVIEW',     'w');
+define('ACCKEY_ACT_PREV',        '<');
+define('ACCKEY_ACT_NEXT',        '>');
+define('ACCKEY_ACT_FILT_SEARCH', 'e');
+define('ACCKEY_ACT_FILT_RESET',  'z');
+
+// access keys for specific pages
+define('ACCKEYP_GAME_COMMENT',   '');
 
 ?>
