@@ -90,7 +90,6 @@ require_once( "include/contacts.php" );
    $wrfilter->add_filter(15, 'Country', 'Players.Country', false,
          array( FC_HIDE => 1 ));
    $wrfilter->init();
-   //$wrfilter->set_accesskeys('x', 'z');
    $f_handi =& $wrfilter->get_filter(5);
    $f_range =& $wrfilter->get_filter(8);
 
@@ -398,7 +397,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
          ) );
       $game_form->add_row( array(
             'SUBMITBUTTONX', 'join', T_('Join'),
-                        array('accesskey' => 'x'),
+                        array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
          ) );
    }
    $game_form->echo_string(1);

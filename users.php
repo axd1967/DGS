@@ -76,7 +76,6 @@ require_once( "include/filter.php" );
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,
          array( FC_SIZE => 4 ));
    $ufilter->init(); // parse current value from _GET
-   //$ufilter->set_accesskeys('x', 'z');
    $f_active =& $ufilter->get_filter(13);
 
    $utable = new Table( 'user', $page, 'UsersColumns' );

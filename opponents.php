@@ -131,7 +131,6 @@ $ARR_DBFIELDKEYS = array(
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,
          array( FC_SIZE => 4 ));
    $ufilter->init(); // parse current value from _GET
-   //$ufilter->set_accesskeys('x', 'z');
 
    $utable = new Table( 'user', $page, 'UsersColumns' );
    $utable->register_filter( $ufilter );

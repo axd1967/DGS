@@ -177,7 +177,6 @@ $ThePage = new Page('GamesList');
       $gfilter->add_filter(29, 'Rating', 'Games.White_Start_Rating', true);
    }
    $gfilter->init(); // parse current value from _GET
-   //$gfilter->set_accesskeys('x', 'z');
 
    $gtable = new Table( $tableid, /*$page*/'show_games.php?', $column_set_name );
    $gtable->register_filter( $gfilter );
