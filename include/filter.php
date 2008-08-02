@@ -261,14 +261,17 @@ class SearchFilter
    /*! \brief array with accesskeys used for filters: array( search, reset ); none set per default. */
    var $accesskeys;
 
-   /*! \brief Constructs SearchFilter with optional prefix to be able to use more than one. */
+   /*!
+    * \brief Constructs SearchFilter with optional prefix to be able to use more than one.
+    *        Sets default accesskeys.
+    */
    function SearchFilter( $prefix = '')
    {
       $this->Filters  = array();
       $this->Prefix   = $prefix;
       $this->is_init  = false;
       $this->is_reset = false;
-      $this->accesskeys = array( 0=>'x', 1=>'z');
+      $this->set_accesskeys( ACCKEY_ACT_FILT_SEARCH, ACCKEY_ACT_FILT_RESET );
    }
 
    /*!
@@ -375,7 +378,10 @@ class SearchFilter
       }
    }
 
-   /*! \brief Set access keys for search and reset of filters: Normal would be 'x' for search and 'e' for reset. */
+   /*!
+    * \brief Set access keys for search and reset of filters:
+    * Normal would be ACCKEY_ACT_FILT_SEARCH for search and ACCKEY_ACT_FILT_RESET for reset.
+    */
    function set_accesskeys( $acckey_search='', $acckey_reset='' )
    {
       $this->accesskeys[0] = $acckey_search;
@@ -907,7 +913,7 @@ class SearchFilter
          $acckey_reset = $this->accesskeys[1];
 
       $xkey = trim($acckey_search);
-      if( $xkey )
+      if( (string)$xkey != '' ) // can be '0'
       {
          $xkey = $xkey[0];
          $xkey = ' accesskey='.attb_quote($xkey)
@@ -917,7 +923,7 @@ class SearchFilter
          . FFORM_SEARCH_ACTION."\" value=\"" . T_('Search#filter')
          . "\"$xkey>";
       $xkey = trim($acckey_reset);
-      if( $xkey )
+      if( (string)$xkey != '' ) // can be '0'
       {
          $xkey = $xkey[0];
          $xkey = ' accesskey='.attb_quote($xkey)
