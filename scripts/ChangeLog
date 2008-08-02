@@ -25,6 +25,16 @@ Changelog
 
 2008-08-02 juga
 
+   * admin_admins.php, opponents.php, users.php:
+   - reverted '#'-header to clearer 'ID',
+     '#' has too many interpretations (id, number, count)
+     and already is used as count-representation in wait-room
+   * show_games.php, status.php:
+   - changed '#'-header (former 'ID') to clearer 'Game ID'
+
+   * features/vote/list_votes.php:
+   - changed Type-header -> Status
+
    * add_to_waitingroom.php, admin_admins.php,
      admin_do_translators.php, admin_faq.php,
      code_examples/filter_example2.php, code_examples/test_clock_tick.php,
