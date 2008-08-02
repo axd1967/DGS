@@ -41,7 +41,6 @@ require_once( "forum_functions.php" );
                          "UNIX_TIMESTAMP(Posts.LastChanged) AS Lastchanged " .
                          "FROM (Posts) " .
                          "LEFT JOIN Players ON Players.ID=Posts.User_ID " .
-//useless???                "LEFT JOIN Posts as LPost ON Posts.LastPost=LPost.ID " .
                          "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
                          " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
                          "WHERE Posts.Forum_ID=$forum AND Posts.Parent_ID=0 " .
@@ -56,7 +55,7 @@ require_once( "forum_functions.php" );
    $headline = array(
             T_('Thread') => 'class=Subject', //"width='50%'",
             T_('Author') => 'class=Name', //"width='20%'",
-            T_('Posts') => 'class=PostCnt', //"width='10%'  align=center",// align=center
+            T_('Posts') => 'class=PostCnt', //"width='10%'  align=center",
             T_('Last post') => 'class=PostDate'); //"width='20%'nowrap");
    $links |= LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
 
