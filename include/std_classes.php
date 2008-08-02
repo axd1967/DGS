@@ -313,11 +313,11 @@ class QuerySQL
       // check
       if ( !isset($this->parts[$type]) )
          error('assert', "QuerySQL.add_part.unknown_type($type)");
-      if ( ($type === SQLP_GROUP or $type === SQLP_LIMIT) and $this->has_part($type) )
+      if ( ($type === SQLP_GROUP || $type === SQLP_LIMIT) && $this->has_part($type) )
       {
          // allow only once, except same part-value
          $arg = ( func_num_args() > 1 ) ? func_get_arg(1) : null;
-         if ( !is_null($arg) and !empty($arg) and $this->get_part($type) != $arg )
+         if ( !is_null($arg) && !empty($arg) && $this->get_part($type) != $arg )
          {
             // type can only be set once (except the same value), part1=$arg
             error('assert', "QuerySQL.add_part.set_type_once($type,$arg)");
@@ -330,7 +330,7 @@ class QuerySQL
       for( $i=1; $i < func_num_args(); $i++)
       {
          $part = trim(func_get_arg($i));
-         if ( $part != '' )
+         if ( (string)$part != '' )
             $this->parts[$type][] = $part;
       }
    }
@@ -395,9 +395,9 @@ class QuerySQL
 
       // make unique: SQLP_FIELDS|OPTS|FROM|WHERE|HAVING|ORDER
       $arr = array_unique( $this->parts[$type] );
-      if ( $type === SQLP_FIELDS or $type === SQLP_ORDER or $type === SQLP_GROUP )
+      if ( $type === SQLP_FIELDS || $type === SQLP_ORDER || $type === SQLP_GROUP )
          $part = implode(', ', $arr);
-      elseif ( $type === SQLP_WHERE or $type === SQLP_HAVING or $type === SQLP_WHERETMPL )
+      elseif ( $type === SQLP_WHERE || $type === SQLP_HAVING || $type === SQLP_WHERETMPL )
          $part = implode(' AND ', $arr);
       elseif ( $type === SQLP_FROM )
          $part = $this->merge_from_parts( $arr );
@@ -485,7 +485,7 @@ class QuerySQL
    {
       $arrsql = array();
       $has_opts = $this->has_part(SQLP_OPTS);
-      if ( $this->has_part(SQLP_FIELDS) or $has_opts )
+      if ( $this->has_part(SQLP_FIELDS) || $has_opts )
          $arrsql[]= 'SELECT';
       if ( $has_opts )
          $arrsql[]= $this->get_part(SQLP_OPTS);
@@ -535,7 +535,7 @@ class QuerySQL
    function merge( $qsql )
    {
       // checks
-      if ( is_null($qsql) or empty($qsql) )
+      if ( is_null($qsql) || empty($qsql) )
          return true;
 
       if ( !is_a($qsql, 'QuerySQL') )
@@ -551,7 +551,7 @@ class QuerySQL
       foreach( array_keys( $this->parts ) as $type )
       {
          if ( $qsql->has_part($type) )
-            if ( $type != SQLP_GROUP and $type != SQLP_LIMIT )
+            if ( $type != SQLP_GROUP && $type != SQLP_LIMIT )
                $this->parts[$type] = array_merge( $this->parts[$type], $qsql->get_parts($type) );
       }
 
