@@ -66,7 +66,7 @@ class HTMLPage
       ob_start('ob_gzhandler');
    }
 
-   /*! \brief retreive the CSS class.
+   /*! \brief retrieve the CSS class.
     * may be multiple, i.e. 'Games Running'
     */
    function getCSSclass( )

@@ -353,7 +353,7 @@ copy /images/favicon.ico into the root folder
    * skins/dragon/screen.css,
      forum/forum_functions.php (draw_post),
      forum/post.php (post_message):
-   - added an anchor to retreive the replied post in the forums
+   - added an anchor to retrieve the replied post in the forums
    - CSS'ed the 3 rows post headers
 
 2008-05-11 rodival
@@ -2148,7 +2148,7 @@ ALTER TABLE `Players`
      search_messages.php:
    - abstracted details of types-filter to: Private, Game messages
    - moved 'Myself' into direction-column as message with from & to
-     changed texts of direction-filter: Received/Sent -> From/To
+     changed texts of direction-filter: Recieved/Sent -> From/To
    - left-aligned text in colored folder-checkboxes
    - removed bottom-links (Browser/Edit folders),
      because redundant with main-menu-links

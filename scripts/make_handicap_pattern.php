@@ -48,7 +48,7 @@ define('MAX_PATTERN_SIZE',51);
 
 $comment= "Standard handicap patterns don't take care about colors.
 They just use the moves coordinates and their succession.
-If the current variation does not held enought moves, the next variation is used (so, keep the variations in the order from shortest to longest).
+If the current variation does not held enough moves, the next variation is used (so, keep the variations in the order from shortest to longest).
 For instance, on a 19x19 board:
 - a 5 stones handicap will stay in the main branch,
 - but a 6 stones handicap will switch to the variation of move #5 to find the 5th and 6th stones coordinates.

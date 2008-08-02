@@ -159,7 +159,7 @@ TODO: add infos from mysql_stat() which returns an array:
 [6] => Open tables: 17
 [7] => Queries per second avg: 245.595
  (or its equivalent with SHOW STATUS)
-and maybe send an email to admin(s)? in case of daily_delta too hight
+and maybe send an email to admin(s)? in case of daily_delta too high
 SELECT * FROM Statistics ORDER BY ID DESC LIMIT 2
 if num_rows==2 {compute differences and checks}
 */
