@@ -117,7 +117,7 @@ $info_box = '<ul>
    // ***********        Move entry       ****************
 
    // args: id, move=u|d, dir=length of the move (int, pos or neg)
-   if( ($action=@$_REQUEST['move']) == 'u' or $action == 'd' )
+   if( ($action=@$_REQUEST['move']) == 'u' || $action == 'd' )
    {
       $dir = isset($_REQUEST['dir']) ? (int)$_REQUEST['dir'] : 1;
       $dir = $action == 'd' ? $dir : -$dir; //because ID top < ID bottom
@@ -160,7 +160,7 @@ $info_box = '<ul>
    // ***********        Move entry to new category      ****************
 
    // args: id, move=uu|dd
-   else if( ($action=@$_REQUEST['move']) == 'uu' or $action == 'dd' )
+   else if( ($action=@$_REQUEST['move']) == 'uu' || $action == 'dd' )
    {
       $query = "SELECT Entry.SortOrder,Entry.Parent,Parent.SortOrder AS ParentOrder"
             . " FROM FAQ AS Entry,FAQ AS Parent"
@@ -185,7 +185,7 @@ $info_box = '<ul>
                ." WHERE Parent=$newparent LIMIT 1") )
          {
             $max = $max['max'];
-            if( !is_numeric($max) or $max<1 ) $max = 1;
+            if( !is_numeric($max) || $max<1 ) $max = 1;
          }
          else
             $max = 1;
@@ -219,7 +219,8 @@ $info_box = '<ul>
                   "SET Hidden='" . ( $faqhide ? 'N' : 'Y' ) . "' " .
                   "WHERE ID=" . $row['ID'] . ' LIMIT 1';
 
-         mysql_query( $query ) or error('mysql_query_failed','admin_faq.hidden_update');
+         mysql_query( $query )
+            or error('mysql_query_failed','admin_faq.hidden_update');
 
          $transl = transl_toggle_state( $row);
          if( $faqhide && $transl == 'Y' )
@@ -231,7 +232,8 @@ $info_box = '<ul>
                      ( $row['Level'] == 1 ? ' LIMIT 1'
                         : " OR ID=" . $row['Answer'] . " LIMIT 2" );
 
-            mysql_query( $query ) or error('mysql_query_failed','admin_faq.hidden_flags');
+            mysql_query( $query )
+               or error('mysql_query_failed','admin_faq.hidden_flags');
          }
       }
       //jump_to($page); //clean URL
@@ -259,7 +261,8 @@ $info_box = '<ul>
                   "WHERE ID=" . $row['Question'] .
                   ( $row['Level'] == 1 ? ' LIMIT 1'
                      : " OR ID=" . $row['Answer'] . " LIMIT 2" );
-         mysql_query( $query ) or error('mysql_query_failed','admin_faq.transl');
+         mysql_query( $query )
+            or error('mysql_query_failed','admin_faq.transl');
 
          make_include_files(null, 'FAQ'); //must be called from main dir
       }
@@ -272,7 +275,7 @@ $info_box = '<ul>
    // args: id, edit=t type=c|e [ do_edit=?, preview=t, qterm=sql_term ]
    // keep it tested before 'do_edit' for the preview feature
    else if( @$_REQUEST['edit'] &&
-      ( ($action=@$_REQUEST['type']) == 'c' or  $action == 'e' ) )
+      ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       if( $action == 'c' )
          $title = 'FAQ Admin - Edit category';
@@ -358,7 +361,7 @@ $info_box = '<ul>
    // args: id, do_edit=t type=c|e, question, answer [ preview='', qterm=sql_term ]
    // keep it tested after 'edit' for the preview feature
    else if( @$_REQUEST['do_edit'] &&
-      ( ($action=@$_REQUEST['type']) == 'c' or  $action == 'e' ) )
+      ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $row = get_entry_row( $fid );
       $QID = $row['Question'];
@@ -413,7 +416,7 @@ $info_box = '<ul>
 
          $Qchanged = ( @$_REQUEST['Qchanged'] === 'Y' //only if not hidden
                      && $question && $row['QTranslatable'] === 'Done' );
-         if( $row['Q'] != $question or $Qchanged )
+         if( $row['Q'] != $question || $Qchanged )
          {
             if( $Qchanged )
             {
@@ -439,7 +442,7 @@ $info_box = '<ul>
 
          $Achanged = ( @$_REQUEST['Achanged'] === 'Y' //only if not hidden
                      && $answer && $row['ATranslatable'] === 'Done' );
-         if( $AID>0 && ( $row['A'] != $answer or $Achanged ) )
+         if( $AID>0 && ( $row['A'] != $answer || $Achanged ) )
          {
             if( $Achanged )
             {
@@ -486,7 +489,7 @@ $info_box = '<ul>
    // args: id, new=t type=c|e [ do_new=?, preview=t ]
    // keep it tested before 'do_new' for the preview feature
    else if( @$_REQUEST['new'] &&
-      ( ($action=@$_REQUEST['type']) == 'c' or  $action == 'e' ) )
+      ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       if( $action == 'c' )
          $title = 'FAQ Admin - New category';
@@ -547,7 +550,7 @@ $info_box = '<ul>
    // args: id, do_new=t type=c|e, question, answer, [ preview='' ]
    // keep it tested after 'new' for the preview feature
    else if( @$_REQUEST['do_new'] &&
-      ( ($action=@$_REQUEST['type']) == 'c' or  $action == 'e' ) )
+      ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $question = trim( get_request_arg('question') );
       $answer = trim( get_request_arg('answer') );
@@ -559,7 +562,7 @@ $info_box = '<ul>
 
       $query = "SELECT * FROM FAQ WHERE ID=$fid";
       $row = mysql_single_fetch( 'admin_faq.do_new.find1', $query );
-      if( $fid==1 && (!$row or $row['Hidden']=='Y') )
+      if( $fid==1 && (!$row || $row['Hidden']=='Y') )
       {
          //adjust the seed. must be Hidden='N' even if invisible
          mysql_query(
@@ -574,7 +577,7 @@ $info_box = '<ul>
 
       if( $row['Level'] == 0 ) // First category
          $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 1);
-      else if( $row['Level'] == 1 and $action == 'e' ) // First entry
+      else if( $row['Level'] == 1 && $action == 'e' ) // First entry
          $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 2);
 
       $FAQ_group = get_faq_group_id();
@@ -861,15 +864,15 @@ function transl_toggle_state( $row)
    if( $row['Question'] <= 0 )
       return ''; //can't be toggled
    $transl = @$row['QTranslatable'];
-   if( $transl == 'Done' or $transl == 'Changed' )
+   if( $transl == 'Done' || $transl == 'Changed' )
       return ''; //can't be toggled
    if( $row['Answer']>0 )
    {
       $transl = @$row['ATranslatable'];
-      if( $transl == 'Done' or $transl == 'Changed' )
+      if( $transl == 'Done' || $transl == 'Changed' )
          return ''; //can't be toggled
    }
-   if( $transl === 'Y' or $transl === 'N' )
+   if( $transl === 'Y' || $transl === 'N' )
       return $transl; //toggle state
    return ''; //can't be toggled
 }
