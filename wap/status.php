@@ -147,6 +147,7 @@ function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='
 {
    $str = card_open( $cardid, $head);
 
+   //FIXME: use ACCKEY-consts !? (keep static acckeys for now)
    if( $previd )
       $str.= " <a accesskey=\"p\" href=\"#$previd\">[&lt;Prev]</a>";
 
@@ -376,6 +377,7 @@ else
    $cardid= 'login';
    $card = card_open( $cardid, "Status");
 
+   //FIXME: use ACCKEY-consts !? (keep static acckeys for now)
    $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status of</a>: " .wap_safe($my_name). "</p>";
    if( $countM>0 )
    {

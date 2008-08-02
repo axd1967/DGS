@@ -189,7 +189,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       'HIDDEN', 'charset', $encoding_used,
       'HIDDEN', 'oldquery', urlencode($query),
       'TAB', 'CELL', $formcol-1, '',
-      'OWNHTML', '<INPUT type="submit" name="apply" accesskey="x" value="Apply [&amp;x]">',
+      'OWNHTML', '<INPUT type="submit" name="apply" accesskey="x" value="Apply [&amp;x]">', // keep static acckey
       'TEXT', '&nbsp;&nbsp;col size:&nbsp;',
       'TEXTINPUT', 'colsize', 3 , 3, $colsize,
       'RADIOBUTTONS', 'colwrap'

@@ -1147,9 +1147,9 @@ function freesql_dump( $database, $query)
    $dform->add_row( array(
       'HIDDEN', 'charset', $encoding_used,
       'SUBMITBUTTONX', 'show_it', 'Show it [&amp;s]',
-               array('accesskey' => 's'),
+               array('accesskey' => 's'),  // keep static acckey
       'SUBMITBUTTONX', 'export_it', 'Download it [&amp;d]',
-               array('accesskey' => 'd'),
+               array('accesskey' => 'd'),  // keep static acckey
       'CHECKBOX', 'new_style', 1, 'New style&nbsp;', $new_style,
       'CHECKBOX', 'defs_sort', 1, 'Defs sort&nbsp;', $defs_sort,
       'CHECKBOX', 'defs_orig', 1, 'original&nbsp;', $defs_orig,
@@ -1181,7 +1181,7 @@ function freesql_dump( $database, $query)
       $download_uri = make_url( "data_export.php?export_it=1", $hiddens);
  
       echo "<br>" . anchor( $download_uri, "[ Download it ]"
-         , '', array( 'accesskey' => 'd' ) ) . "<br>";
+         , '', array( 'accesskey' => 'd' ) ) . "<br>";  // keep static acckey
    }
 
    end_html();
