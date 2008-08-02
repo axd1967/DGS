@@ -141,7 +141,7 @@ require_once( "include/table_columns.php" );
    $marked_form->set_tabindex(1);
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $atable->add_tablehead(1, /*T_*/('##header'), 'ID');
+   $atable->add_tablehead(1, /*T_*/('ID#header'), 'ID');
    $atable->add_tablehead(2, /*T_*/('Userid#header'), 'User');
    $atable->add_tablehead(3, /*T_*/('Name#header'), 'User');
 

@@ -158,7 +158,7 @@ $ARR_DBFIELDKEYS = array(
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // table: use same table-IDs as in users.php(!)
    $utable->add_tablehead(33, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
-   $utable->add_tablehead( 1, T_('##header'), 'ID', TABLE_NO_HIDE, 'ID+');
+   $utable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'ID+');
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
    $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
    $utable->add_tablehead(16, T_('Country#header'), 'Image', 0, 'Country+');
