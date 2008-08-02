@@ -1378,7 +1378,7 @@ class Form
          {
             $xkey = trim($attbs['accesskey']);
             unset($attbs['accesskey']);
-            if( $xkey )
+            if( (string)$xkey != '' ) // can be '0'
             {
                $xkey = substr($xkey,0,1);
                $title.= " [&amp;$xkey]";
