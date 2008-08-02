@@ -348,8 +348,8 @@ function map_to_string( $map, $sep = ', ' )
  * Quick search in a sorted array. $haystack must be sorted.
  * will return:
  *  the index where $needle was found (the lower doublon if duplicates).
- *  the index of the next highter if not found (where it must be inserted).
- *  count($haystack) if no highter ($needle must be appended).
+ *  the index of the next higher if not found (where it must be inserted).
+ *  count($haystack) if no higher ($needle must be appended).
  **/
 function array_bsearch($needle, &$haystack)
 {
@@ -403,7 +403,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"{$HOSTBASE}favicon.ico\">";
 
    global $main_path;
-   if( !isset($skinname) or !$skinname )
+   if( !isset($skinname) || !$skinname )
       $skinname = 'dragon';
    if( !file_exists("{$main_path}skins/$skinname/screen.css") )
       $skinname = 'dragon';
@@ -500,6 +500,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
          //T_//('Site map') => array(4,3, 'site_map.php'),
          //T_//('Translate') => array(5,1, 'translate.php',array('accesskey'=>'t')),
+
+         T_('Vote') => array(5,1, 'features/vote/list_features.php',array('accesskey'=>'v')),
       );
 
       $tools_array = array(); //$url => array($img,$alt,$title)
@@ -517,7 +519,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    }
 
 
-   if( !$logged_in or $is_down or $printable )
+   if( !$logged_in || $is_down || $printable )
    {
       //layout like menu_horizontal without menu
       $player_row['MenuDirection'] = 'HORIZONTAL';
@@ -850,7 +852,7 @@ function make_menu_vertical($menu_array)
    //  uasort($menu_array, "cmp1");
    foreach( $menu_array as $text => $tmp )
    {
-      if( $i % 3 == 0 and $i > 0 )
+      if( $i % 3 == 0 && $i > 0 )
           echo "</td>"
              . "\n </tr><tr>"
              . "\n  <td height=1><img height=1 src=\"{$base_path}images/dot.gif\" alt=\"\"></td>"
@@ -879,7 +881,7 @@ function make_menu_vertical($menu_array)
 
 function make_tools( $array, $width=0)
 {
-   if( !is_array($array) or count($array)==0 )
+   if( !is_array($array) || count($array)==0 )
       return;
    echo "<table class=NotPrintable id='pageTools'>\n<tr>\n";
    $c= 0;
@@ -1313,7 +1315,7 @@ function set_login_cookie($handl, $code, $delete=false)
 {
  global $session_duration;
 
-   if( $delete or !$handl or !$code)
+   if( $delete || !$handl || !$code)
    {
       safe_setcookie('handle');
       safe_setcookie('sessioncode');
@@ -1871,7 +1873,7 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
 
    $msg = basic_safe( $msg);
 
-   if( $some_html or $mark_terms )
+   if( $some_html || $mark_terms )
    {
       // change back to <, > from ALLOWED_LT, ALLOWED_GT
       $msg= reverse_allowed( $msg);
@@ -2359,7 +2361,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
             send_email("fever_vault.email($handle)", $email, $text
                       , $FRIENDLY_LONG_NAME.' - '.$subject);
       }
-      else //cool enought: reset counters for one period
+      else //cool enough: reset counters for one period
       {
          if( $uid <= GUESTS_ID_MAX ) //multi-users accounts
             $vaultcnt= VAULT_CNT_X;
@@ -2666,7 +2668,7 @@ function send_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
  * :   (if the first char is HANDLE_TAG_CHAR, it is removed)
  * : an array => the reference will use its 'ID' field, and if possible, the
  * :   'Handle' and 'Name' fields if $player_name or $player_handle are absent
- * then the missing arguments will be retreived from the database if needed.
+ * then the missing arguments will be retrieved from the database if needed.
  **/
 function user_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
@@ -2918,9 +2920,9 @@ function limit($val, $minimum, $maximum, $default)
 
    if( !is_numeric($val) )
       return (isset($default) ? $default : $val );
-   else if( is_numeric($minimum) and $val < $minimum )
+   else if( is_numeric($minimum) && $val < $minimum )
       return $minimum;
-   else if( is_numeric($maximum) and $val > $maximum )
+   else if( is_numeric($maximum) && $val > $maximum )
       return $maximum;
 
    return $val;

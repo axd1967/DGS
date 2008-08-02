@@ -78,7 +78,7 @@ function con_value($rating)
    $con_table[6]['KEY'] = 2700;
    $con_table[6]['VAL'] = 10;
 
-   //highter, should be constant
+   //higher, should be constant
    $con_table[7]['KEY'] = 10000;
    $con_table[7]['VAL'] = 10;
 
@@ -93,7 +93,7 @@ function a_value($rating)
    $a_table[1]['KEY'] = 2700;
    $a_table[1]['VAL'] = 70;
 
-   //highter, should be constant
+   //higher, should be constant
    $a_table[1]['KEY'] = 10000;
    $a_table[1]['VAL'] = 70;
 
@@ -231,7 +231,7 @@ function update_rating($gid)
 
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
    // here $Rated=='N' is always false. See rating2 to update
-   if( $too_few_moves or $Rated == 'N' or $wRatingStatus!='RATED' or $bRatingStatus!='RATED' )
+   if( $too_few_moves || $Rated == 'N' || $wRatingStatus!='RATED' || $bRatingStatus!='RATED' )
    {
       mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid")
          or error('mysql_query_failed','update_rating.set_rated_N');
@@ -299,13 +299,13 @@ function update_rating2($gid, $check_done=true)
    extract($row);
 
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-   if( $too_few_moves or $Rated == 'N' or $wRatingStatus!='RATED' or $bRatingStatus!='RATED' )
+   if( $too_few_moves || $Rated == 'N' || $wRatingStatus!='RATED' || $bRatingStatus!='RATED' )
    {
       mysql_query("UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
                   " WHERE ID=$gid LIMIT 1")
-      or error('mysql_query_failed','update_rating2.set_rated_N');
+         or error('mysql_query_failed','update_rating2.set_rated_N');
 
       if( $too_few_moves )
          return 1; //not rated game, deletable
@@ -451,7 +451,7 @@ function update_rating_glicko($gid, $check_done=true)
    extract($row);
 
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-   if( $too_few_moves or $Rated == 'N' or $wRatingStatus!='RATED' or $bRatingStatus!='RATED' )
+   if( $too_few_moves || $Rated == 'N' || $wRatingStatus!='RATED' || $bRatingStatus!='RATED' )
    {
       mysql_query("UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
@@ -590,7 +590,7 @@ function update_rating_glicko($gid, $check_done=true)
 
 function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false)
 {
-   if( !isset($rating) or !is_numeric($rating) or $rating < MIN_RATING ) return '';
+   if( !isset($rating) || !is_numeric($rating) || $rating < MIN_RATING ) return '';
 
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 

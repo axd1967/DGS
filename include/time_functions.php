@@ -34,7 +34,7 @@ function unix_timestamp($date)
    $pattern = "/(19|20)(\d{2})-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2})/";
    $m = preg_match ($pattern, $date, $matches);
 
-   if(empty($date) or $date == "0000-00-00" or !$m)
+   if(empty($date) || $date == "0000-00-00" || !$m)
    {
       return NULL;
    }
@@ -138,7 +138,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
           * then:
           *  a = A - E = B + P*S - E
           *  p = (a - b)/S = (B + P*S - E - b)/S
-          * p must be big enought to keep (0 < b <= S)
+          * p must be big enough to keep (0 < b <= S)
           *  p = ceil((B + P*S - E)/S) -1 = ceil((B - E)/S) + P -1
           *  d = P-p = -ceil((B - E)/S) +1 = floor((E - B)/S) +1
           *  b = a - p*S = B + P*S - E - p*S = B - E + d*S
@@ -364,7 +364,7 @@ function echo_time_remaining( $maintime, $byotype, $byotime, $byoper
    {
       $str.= echo_time( $maintime, $keep_english, $short);
    }
-   else if( $byotype == 'FIS' or $byotime <= 0 )
+   else if( $byotype == 'FIS' || $byotime <= 0 )
    {
       if( $short )
          $str.= NO_VALUE;
@@ -399,13 +399,13 @@ function time_convert_to_hours($time, $unit)
 
 function time_convert_to_longer_unit(&$time, &$unit)
 {
-   if( $unit == 'hours' and $time % 15 == 0 )
+   if( $unit == 'hours' && $time % 15 == 0 )
    {
       $unit = 'days';
       $time /= 15;
    }
 
-   if( $unit == 'days' and $time % 30 == 0 )
+   if( $unit == 'days' && $time % 30 == 0 )
    {
       $unit = 'months';
       $time /= 30;

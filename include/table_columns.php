@@ -221,7 +221,7 @@ class Table
       //}
 
       $this->From_Row = (int)$this->get_arg('from_row');
-      if( !is_numeric($this->From_Row) or $this->From_Row < 0 )
+      if( !is_numeric($this->From_Row) || $this->From_Row < 0 )
          $this->From_Row = 0;
       $this->Last_Page = true;
       $this->Use_Show_Rows = true;
@@ -265,7 +265,7 @@ class Table
    }
 
    /*!@brief Add a tablehead.
-    * @param $nr must be >0 but if highter than 32, the column will be static
+    * @param $nr must be >0 but if higher than 32, the column will be static
     * @param $attbs must be an array of attributs or a class-name for the column
     *  default: no attributs or class (i.e. class "Text" left-aligned)
     * @param $mode is a combination of TABLE_NO_HIDE and TABLE_NO_SORT
@@ -501,7 +501,7 @@ class Table
          }
 
          // include row only, if there are filters
-         if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] or $this->Shown_Filters > 0 )
+         if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] || $this->Shown_Filters > 0 )
          {
             $tr_attbs = " id=\"{$this->Prefix}TableFilter\""; // only for 1st entry
             foreach( $row_cells as $class => $cells )
@@ -541,7 +541,7 @@ class Table
       global $button_max, $buttoncolors, $buttonfiles;
       //global $button_width;
 
-      if ( !is_numeric($button_nr) or $button_nr < 0 or $button_nr > $button_max  )
+      if ( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
          $button_nr = 0;
 
       return
@@ -1141,8 +1141,8 @@ class Table
    */
    function make_next_prev_links($id)
    {
-      if ( $this->Rows_Per_Page <= 0 or $this->Shown_Columns <= 0
-            or !( $this->From_Row > 0 or !$this->Last_Page ) )
+      if ( $this->Rows_Per_Page <= 0 || $this->Shown_Columns <= 0
+            || !( $this->From_Row > 0 || !$this->Last_Page ) )
          return '';
 
       $string = 'align=bottom'; //'align=middle'
@@ -1264,7 +1264,7 @@ class Table
       $r_string = $this->make_show_rows( $ac_form );
 
       $string = false;
-      if ( $ac_string or $f_string or $r_string )
+      if ( $ac_string || $f_string || $r_string )
       {
          $arr = array();
          if ( $f_string )  $arr[]= $f_string;
@@ -1323,7 +1323,7 @@ class Table
       }
 
       // reset from-row if filters have changed
-      if ( $this->UseFilters and ($this->Filters->HashCode != $this->Filters->hashcode()) )
+      if ( $this->UseFilters && ($this->Filters->HashCode != $this->Filters->hashcode()) )
          $this->From_Row = 0;
    }
 

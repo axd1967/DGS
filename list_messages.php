@@ -60,7 +60,7 @@ require_once( "include/filter.php" );
        kept if != $current_folder
 */
    $folder = @$_GET['folder'];
-   if( !isset($folder) or $folder < FOLDER_ALL_RECEIVED )
+   if( !isset($folder) || $folder < FOLDER_ALL_RECEIVED )
       $folder = FOLDER_ALL_RECEIVED; //ineffective for move
    $current_folder = @$_GET['current_folder'];
    if( !isset($current_folder) )
@@ -172,7 +172,7 @@ require_once( "include/filter.php" );
        *      Actually, toggle marks does not destroy sort
        *      but sort, page move and add/del column destroy marks.
        * (unless a double *toggle marks* that transfert marks in URL)
-       * (but then, the URL limited length may not be enought)
+       * (but then, the URL limited length may not be enough)
        * See message_list_head/body() to re-insert the marks in the URL
        ****/
 
@@ -194,8 +194,8 @@ require_once( "include/filter.php" );
          $fld = array('' => '');
          foreach( $my_folders as $key => $val )
          {
-            if( $key != $current_folder and $key != FOLDER_NEW and
-                !($current_folder == FOLDER_SENT and $key == FOLDER_REPLY ) )
+            if( $key != $current_folder && $key != FOLDER_NEW &&
+                !($current_folder == FOLDER_SENT && $key == FOLDER_REPLY ) )
                $fld[$key] = $val[0];
          }
 
