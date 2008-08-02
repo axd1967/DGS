@@ -17,6 +17,7 @@ General instructions for developers:
    On the other hand, the column, variable and alias names seem to be well
    handled in a case sensitive way under the MS Windows systems.
 
+
 ----------------- PHP, Layout:
 
    Try to keep an homogeneous code presentation.
@@ -43,6 +44,7 @@ General instructions for developers:
          ...
       }
 
+
 ----------------- PHP, Database:
 
    Try to avoid the extract($row) function. Or just use it inside a
@@ -58,6 +60,7 @@ General instructions for developers:
    Feel free to replace in such way any extract() that you find.
 
    This is a query issued from some bad experiences.
+
 
 ----------------- PHP, URL:
 
@@ -83,6 +86,7 @@ General instructions for developers:
    if $page is already a well formed URL and is safer because it use
    an urlencode().
 
+
 ----------------- PHP, DGS, Translations:
 
    Take care of the T_() function and tranlation features.
@@ -104,6 +108,7 @@ General instructions for developers:
    Maybe this is not the better way to do the translations but
    it is hard to modify it. Any suggestion?
 
+
 ----------------- PHP, Database:
 
    Even if $num is numeric, think to use the quoted syntaxe to set it
@@ -111,6 +116,7 @@ General instructions for developers:
    If $num is not set and if the Num column is numeric, Num='', will set
    it to the default while Num=, will return a MySQL syntaxe error.
    That's an alternative that must be known.
+
 
 ----------------- PHP:
 
@@ -129,6 +135,7 @@ General instructions for developers:
    $this->value{$pos} with var-pos DOES NOT WORK in all cases for
    unknown reason! For example, it doesn't work when filter resetted or
    not initialized yet !! ok with const so far!
+
 
 ----------------- PHP, URL:
 
@@ -183,6 +190,7 @@ General instructions for developers:
       implicitly use it as an integer.
       So a preventive cast each time you use a $_GET is a good thing too.
 
+
 ----------------- PHP:
 
    Depending on the context the following expression does fail to work as
@@ -195,6 +203,7 @@ General instructions for developers:
 
       ( (string)$value != '' )
 
+
 ----------------- PHP, Using translations in libraries/classes:
 
    For using translated text with  T_('some text')  first the current
@@ -203,8 +212,78 @@ General instructions for developers:
    the player-information has been loaded.
 
    That may need lazy-initialization for some translated texts.
-   Also keep in mind, that applying the T_()-func later does not work
+   Also keep in mind, that applying the T_()-func later does not work,
    as then the text is not included in the database for translation!
 
+   That means, that you can't dynamically create a string within
+   the T_(string)-func. To accomplish that, you have to use
+   a sprintf-like-string, for example:
+
+      T_("Take $cnt apples")    // does NOT work
+
+      sprintf( T_('Take %d apples'), $cnt)  // use THIS instead
+
+
+----------------- PHP: About using 'and/or' vs. '&&/||'
+
+   In logical expressions, always use '&&' and '||' instead
+   of 'and' and 'or'. That's because in combination with
+   assignments, the '=' has higher precedence than the
+   logical operator, which often ends in a wrong result.
+
+      $res = $a && $b && $c;   // USE THIS
+      $res = $a and $b and $c; // do NOT use this
+
+   PHP-Docs:
+   http://de2.php.net/manual/en/language.operators.php#language.operators.precedence
+
+   The 'and' and '&&' does not have the same precedence facing
+   the assignment operator(s) and the '?:' operator.
+
+      $res = true and false;  <=>  $res = true) and (false);
+
+   so $res results in true (not in false as you might have expected).
+
+      $res = true && false;   <=>  $res = (true && false);
+
+   The above shows the correct behaviour and will return $res == false.
+
+   The literal 'and/or' are to be used when combined with a command
+   like in the following cases (depending on the expression result):
+
+      $res = $expr and die();   // die()   is executed if expression is false
+
+      $res = $expr or error();  // error() is executed if expression is true
+
+
+----------------- PHP: list( ...) = $array
+
+   Never reuse variables as source and destination in the same command line.
+   One example is:
+
+      list( $var1, $varAGAIN, $var3 ) = $varAGAIN;
+
+   To the nature of the list()-func, this will fail.
+   See PHP-Docs (Notes with red-boxed Warning):
+      http://de2.php.net/manual/en/function.list.php
+
+
+----------------- DGS-convention, SQL-aliases
+
+   DGS-convention:
+   When using field-aliases in SQL-statements applying some formula
+   on the field use an alias with the prefix 'X_'.
+
+   Example:
+      SELECT Moves, Moves/2 AS X_HalfMoves FROM Games
+
+
+----------------- PHP: Constant Strings
+
+   Constant strings should be written as  'string'  instead of  "string".
+   This can be processed faster by PHP.
+
+
 -----------------
+
 
