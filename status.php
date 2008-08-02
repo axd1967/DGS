@@ -139,7 +139,7 @@ $ThePage = new Page('Status');
 
    $gtable->add_or_del_column();
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $gtable->add_tablehead( 1, T_('##header'), 'Button', TABLE_NO_HIDE, 'ID-');
+   $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf');
    if( $show_notes )
    $gtable->add_tablehead(32, T_('Notes#header'), '', 0, 'X_Note-');

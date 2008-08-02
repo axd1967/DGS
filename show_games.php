@@ -259,7 +259,7 @@ $ThePage = new Page('GamesList');
  * 31: >  FA (White-RatingDiff)
  *****/
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $gtable->add_tablehead( 1, T_('##header'), 'Button', TABLE_NO_HIDE, 'ID-');
+   $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if( !$observe && !$all ) //FU+RU ?UNION
    {
