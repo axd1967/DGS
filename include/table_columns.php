@@ -1161,7 +1161,7 @@ class Table
               . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
             , image( 'images/prev.gif', '<=', '', $string)
             , T_("prev page")
-            , array('accesskey' => '<')
+            , array( 'accesskey' => ACCKEY_ACT_PREV )
             );
 
       $button.= '&nbsp;'.round($this->From_Row/$this->Rows_Per_Page+1).'&nbsp;';
@@ -1172,7 +1172,7 @@ class Table
               . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
             , image( 'images/next.gif', '=>', '', $string)
             , T_("next page")
-            , array('accesskey' => '>')
+            , array( 'accesskey' => ACCKEY_ACT_NEXT )
             );
 
 

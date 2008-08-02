@@ -361,7 +361,7 @@ require_once( "include/form_functions.php" );
 
    $profile_form->add_row( array(
                      'SUBMITBUTTONX', 'action', T_('Change profile'),
-                        array('accesskey'=>'x'),
+                        array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                      ) );
 
 

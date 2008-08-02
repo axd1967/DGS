@@ -274,7 +274,7 @@ if(0){//old
          if( $table_links )
             $table_links.= '&nbsp;|&nbsp;';
          $table_links.= anchor( make_url($page, $tmp),
-               /*T_*/('Prev Page'), '', array('accesskey' => '<'));
+               /*T_*/('Prev Page'), '', array( 'accesskey' => ACCKEY_ACT_PREV ));
       }
       if( !$no_pages && $show_rows > TRANS_ROW_PER_PAGE )
       {
@@ -283,7 +283,7 @@ if(0){//old
          if( $table_links )
             $table_links.= '&nbsp;|&nbsp;';
          $table_links.= anchor( make_url($page, $tmp),
-               /*T_*/('Next Page'), '', array('accesskey' => '>'));
+               /*T_*/('Next Page'), '', array( 'accesskey' => ACCKEY_ACT_NEXT ));
       }
 
       if( $table_links )
@@ -403,7 +403,7 @@ if(0){//old
             'HIDDEN', 'from_row', $from_row,
             'SUBMITBUTTONX', 'apply_changes',
                /*T_*/('Apply translation changes to Dragon'),
-               array('accesskey'=>'x'),
+               array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
             ) );
       }
 
@@ -431,7 +431,7 @@ if(0){//old
          'HIDDEN', 'profil_charset', $profil_charset,
          'HIDDEN', 'from_row', 0,
          'SUBMITBUTTONX', 'just_group', /*T_*/('Just change group'),
-            array('accesskey'=>'w'),
+            array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
          'CHECKBOX', 'untranslated', 1,
             /*T_*/('untranslated'), $untranslated,
          'CHECKBOX', 'alpha_order', 1,

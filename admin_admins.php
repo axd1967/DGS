@@ -211,7 +211,7 @@ require_once( "include/table_columns.php" );
    $atable->echo_table();
 
    echo $marked_form->print_insert_submit_buttonx( 'action',
-            /*T_*/('Update changes'), array('accesskey'=>'x'));
+            /*T_*/('Update changes'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ));
 
    echo $marked_form->print_end();
 

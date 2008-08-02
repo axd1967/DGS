@@ -340,10 +340,10 @@ $info_box = '<ul>
                            'HIDDEN', 'type', $action,
                            'HIDDEN', 'preview', 1,
                            'HIDDEN', 'qterm', textarea_safe($sql_term),
-                           'SUBMITBUTTONX', 'do_edit', 'Save entry',
-                              array('accesskey'=>'x'),
+                           'SUBMITBUTTONX', 'do_edit', 'Save entry', 
+                              array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                            'SUBMITBUTTONX', 'edit', 'Preview',
-                              array('accesskey'=>'w'),
+                              array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
                            'SUBMITBUTTON', 'back', 'Back to list',
                            ));
       $edit_form->echo_string(1);
@@ -534,9 +534,9 @@ $info_box = '<ul>
                            'HIDDEN', 'type', $action,
                            'HIDDEN', 'preview', 1,
                            'SUBMITBUTTONX', 'do_new', 'Add entry',
-                              array('accesskey'=>'x'),
+                              array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                            'SUBMITBUTTONX', 'new', 'Preview',
-                              array('accesskey'=>'w'),
+                              array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
                            'SUBMITBUTTON', 'back', 'Back to list',
                            ));
       $edit_form->echo_string(1);
@@ -670,7 +670,7 @@ $info_box = '<ul>
             'DESCRIPTION',  'Search Term',
             'TEXTINPUT',    'qterm', 30, -1, $sql_term,
             'SUBMITBUTTONX', 'search', 'Search',
-                        array('accesskey'=>'x'),
+                        array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
             ));
       $search_form->add_row( array(
             'TAB',

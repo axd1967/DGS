@@ -121,7 +121,7 @@ function make_link_array($links, $max_rows, $ReqParam = null)
          $href = "list.php?forum=$forum"
                      . URI_AMP."offset=".($offset-$RowsPerPage);
       $link_array_right[T_("Prev Page")] = array(
-         $href, '', array('accesskey' => '<') );
+         $href, '', array( 'accesskey' => ACCKEY_ACT_PREV ) );
    }
    if( $links & LINK_NEXT_PAGE )
    {
@@ -132,7 +132,7 @@ function make_link_array($links, $max_rows, $ReqParam = null)
          $href = "list.php?forum=$forum"
                      . URI_AMP."offset=".($offset+$RowsPerPage);
       $link_array_right[T_("Next Page")] = array(
-         $href, '', array('accesskey' => '>') );
+         $href, '', array( 'accesskey' => ACCKEY_ACT_NEXT ) );
    }
 }
 
@@ -447,17 +447,17 @@ function forum_message_box( $postClass, $id, $GoDiagrams=null, $Subject='', $Tex
       $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str . '</td>'));
       $form->add_row( array( 'OWNHTML', '<td colspan=2 align="center">' .
 //review accesskey: 
-                             '<input type="submit" name="post" accesskey="x" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . " \">\n" .
-                             '<input type="submit" name="preview" accesskey="w" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \">\n" .
+                             '<input type="submit" name="post" accesskey="'.ACCKEY_ACT_EXECUTE.'" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . " \">\n" .
+                             '<input type="submit" name="preview" accesskey="'.ACCKEY_ACT_PREVIEW.'" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \">\n" .
                              "</td>\n" ));
    }
    else
 */
       $form->add_row( array(
                   'SUBMITBUTTONX', 'post', ' ' . T_('Post') . ' ',
-                     array('accesskey' => 'x'),
+                     array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                   'SUBMITBUTTONX', 'preview', ' ' . T_('Preview') . ' ',
-                     array('accesskey' => 'w'),
+                     array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
                   ) );
 
    $form->echo_string(1);

@@ -182,7 +182,7 @@ require_once( "include/filter.php" );
          $marked_form->add_hidden( 'current_folder', $current_folder);
 
       echo $marked_form->print_insert_submit_buttonx( 'toggle_marks',
-               T_('Marks toggle'), array('accesskey'=>'w'));
+               T_('Marks toggle'), array( 'accesskey' => ACCKEY_ACT_PREVIEW ));
 
       if( $current_folder == FOLDER_DELETED )
       {
@@ -201,7 +201,7 @@ require_once( "include/filter.php" );
 
          echo $marked_form->print_insert_submit_buttonx( 'move_marked',
                   T_('Move marked messages to folder'),
-                  array('id'=>'action','accesskey'=>'x'));
+                  array('id'=>'action', 'accesskey' => ACCKEY_ACT_EXECUTE ));
          echo $marked_form->print_insert_select_box( 'folder',
                   '1', $fld, $folder, '');
       }

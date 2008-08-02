@@ -169,8 +169,8 @@ function find_category_box_text($cat)
 
          $bio_form->add_row( array(
                   'HIDDEN', 'newcnt', USER_BIO_ADDENTRIES,
-                  'SUBMITBUTTONX', 'action', T_('Change bio')
-                     ,array('accesskey'=>'x')
+                  'SUBMITBUTTONX', 'action', T_('Change bio'),
+                     array( 'accesskey' => ACCKEY_ACT_EXECUTE )
                ) );
          $bio_form->echo_string(1);
       }

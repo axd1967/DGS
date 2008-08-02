@@ -602,8 +602,8 @@ function get_alt_arg( $n1, $n2)
             . anchor( "game_comments.php?gid=$gid"
                     , T_('Comments')
                     , ''
-                    , array( //'accesskey' => 'c', //already used for "Contacts"
-                           'target' => $FRIENDLY_SHORT_NAME.'_game_comments'
+                    , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
+                             'target' => $FRIENDLY_SHORT_NAME.'_game_comments'
                     ) )
             . "</DIV>";
       }

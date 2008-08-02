@@ -111,7 +111,7 @@ $ThePage = new Page('ForumAdmin');
                                   'CHECKBOX', 'moderated', 1, '', $row['Moderated'] == 'Y'));
       $edit_form->add_row( array(
                            'SUBMITBUTTONX', 'do_edit', /*T_*/('Save entry'),
-                              array('accesskey'=>'x'),
+                              array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                            'SUBMITBUTTON', 'back', /*T_*/('Back to list'),
                            ));
       $edit_form->echo_string(1);
@@ -190,7 +190,7 @@ $ThePage = new Page('ForumAdmin');
                                   'CHECKBOX', 'moderated', 1, '', false));
       $edit_form->add_row( array(
                            'SUBMITBUTTONX', 'do_new', /*T_*/('Add entry'),
-                              array('accesskey'=>'x'),
+                              array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                            'SUBMITBUTTON', 'back', /*T_*/('Back to list'),
                            ));
       $edit_form->echo_string(1);
