@@ -25,6 +25,22 @@ Changelog
 
 2008-08-02 juga
 
+   * include/config.php, include/filter.php,
+     admin_admins.php, admin_faq.php, edit_bio.php, edit_folders.php,
+     edit_profile.php, forum/admin.php, forum/forum_functions.php,
+     game.php, include/form_functions.php, include/std_functions.php,
+     include/table_columns.php, list_contacts.php, list_messages.php,
+     message.php, opponents.php, search_messages.php, show_games.php,
+     translate.php, users.php, waiting_room.php:
+   - introduced constants for accesskeys,
+     especially easier for configuration of DGS-clones
+   - changed accesskeys for filter-search: x -> e, z stays =reset
+   - fixes to allow '0' as accesskey
+
+   * forum/list.php:
+   - removed unused SQL-join (LastPost)
+   - cleanup double comment
+
    * admin_admins.php, opponents.php, users.php:
    - reverted '#'-header to clearer 'ID',
      '#' has too many interpretations (id, number, count)
