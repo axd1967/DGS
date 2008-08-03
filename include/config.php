@@ -48,9 +48,11 @@ $DB_NAME = "dragongoserver";
 // Dependent of your mysql version:
 
 define('MYSQL_VERSION', '3.23.49');
-//may be found with SELECT VERSION(),PASSWORD('foo'),OLD_PASSWORD('foo');
-//devel-server is '4.1.20-log' (client '3.23.49') old_exist but new_==old_
-//live-server is '5.0.22-log' (client '5.0.22') and new_<>old_
+// may be found with SELECT VERSION(),PASSWORD('foo'),OLD_PASSWORD('foo');
+// devel-server is '4.1.20-log' (client '3.23.49') old_exist but new_==old_
+// live-server is '5.0.22-log' (client '5.0.22') and new_<>old_
+// Note: use version-number, that is supported by PHPs version_compare()-function
+//       see http://de2.php.net/manual/en/function.version-compare.php
 
 /**
  * MySQL encryption function used for passwords
