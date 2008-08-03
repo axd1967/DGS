@@ -23,6 +23,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-03 juga
+
+   * scripts/ChangeLog:
+   - detailed and corrected some older logs since Jan-2008 by Rod,
+     added performed changes for easier creation of NEWS-file,
+     especially for further actions needed for release and
+     documentation about changes visible to DGS-users
+   - fixed typos
+
 2008-08-02 juga
 
    * include/config.php, include/filter.php,
@@ -163,9 +172,10 @@ CREATE TABLE FeatureVote (
      scripts/data_export.php, scripts/data_report.php,
      scripts/player_consistency.php, js/common.js,
      game.php, edit_profile.php, change_profile.php:
-   - introducing the JScript tools and their management (profile setting)
+   - introducing the JavaScript tools and their management (profile setting)
 -----------
-//enable JScript usage for old players (as actually):
+// enable JavaScript usage for old players (as actually):
+// perform this only, if your DGS-server wants to support JavaScript
 UPDATE Players SET Boardcoords=Boardcoords|0x100;
 -----------
 
@@ -342,12 +352,14 @@ copy /images/favicon.ico into the root folder
      TABLE_MAX_SORT and the cluster of $Sort?+$Desc? variables by
      a single array
    - added some asserts to clearly force the use of some functions
-     before or after the table_head definitions
+     before or after the table_head definitions (using Head_closed-var)
    - Table(): added a mode parameter to manage the global behaviour
      of the table (not yet fully implemented, coming soon)
    - removed set_sort() which is now dispatched into other functions
    - set_default_sort(), make_sort_string(): the arguments became
-      (+/-)column numbers instead of mysql fields + desc_flags
+     +/- column numbers instead of mysql fields + desc_flags
+   - show_games.php and status.php:
+     changed default sort-direction for ID (descending)
 
    * include/message_functions.php (message_list_table,
       message_list_head, message_list_body),
@@ -381,14 +393,20 @@ copy /images/favicon.ico into the root folder
    * include/sgf_parser.php,
      scripts/update_translation_pages.php,
      pattern/make_handicap_pattern.php:
-   - use of read_from_file and write_to_file
+   - use of funcs: read_from_file, write_to_file
 
    * include/std_functions.php (get_request_user), show_games.php:
-   - get_request_user now return 0 if it had found nothing or
+   - get_request_user() now return 0 if it had found nothing or
      the type of what it had found
    - slightly modified the columns in show_games.php to free
-     some of them
-   - use of the get_request_user returned info
+     some of them; needs migration of bitmasks in DB;
+     changed table-field-numbers of
+     - Games.Weekendclock: #12 -> #24
+     - Players.LastAccess: #15 -> #25
+   - changed position of handling for RU-section (user running games)
+   - use of the get_request_user() returned info
+   - table-field #11 and others had been put into FU-section only,
+     FU=user finished games
 
 2008-05-16 rodival
 
@@ -402,7 +420,8 @@ copy /images/favicon.ico into the root folder
    - enabled/disabled with the CACHE_FOLDER constant in config.php
 -----------
 // see also CACHE_FOLDER in config.php
-// The Sourceforge devel server need a soft link: (where temp is CACHE_FOLDER)
+// The Sourceforge devel server needs a soft link: (where temp is CACHE_FOLDER)
+// This is an example for the devel-server only
  mkdir /tmp/persistent/dragongoserver/temp/
  chmod 775 /tmp/persistent/dragongoserver/temp/
  ln -s -d /tmp/persistent/dragongoserver/temp /home/groups/d/dr/dragongoserver/htdocs/temp
@@ -411,6 +430,11 @@ copy /images/favicon.ico into the root folder
    * install.php, licence.php, news.php, todo.php:
    - using the new read_from_file function
 
+   * include/std_functions:
+   - many changes like:
+     - preg % -> /
+     - use  " -> '  in html_safe_preg-array
+
 2008-05-15 rodival
 
    * skins/dragon/screen.css,
@@ -418,6 +442,7 @@ copy /images/favicon.ico into the root folder
      forum/post.php (post_message):
    - added an anchor to retrieve the replied post in the forums
    - CSS'ed the 3 rows post headers
+   - replaced logical operators: and/or -> &&/||
 
 2008-05-11 rodival
 
@@ -439,7 +464,7 @@ copy /images/favicon.ico into the root folder
      include/error_functions.php (add_error),
      sgf.php (sgf_simpletext):
    - changing some bad ereg_* to preg_*... maybe, in the way to
-     replace all the ereg* fonctions by there preg* equivalent!
+     replace all the ereg* functions by their preg* equivalent!
 
 2008-05-05 rodival
 
@@ -454,6 +479,7 @@ copy /images/favicon.ico into the root folder
    * status.php, show_games.php, site_map.php,
      edit_bio.php, edit_folders.php:
    - various ajustments of the texts or urls of the bottom links
+   - changed text: games -> my games
 
    * statistics.php, statisticspng.php:
    - removing the 'loadavg' stats from the end-users view
@@ -476,6 +502,9 @@ copy /images/favicon.ico into the root folder
 
    * include/filter.php (get_submit_elements):
    - added the tooltips to the buttons of the search filters
+
+   * include/std_functions.php (get_accounts_from_ip, get_players_field):
+   - replaced get_accounts_from_ip()-func by more general get_players_field()
 
 2008-05-02 rodival
 
@@ -544,6 +573,8 @@ copy /images/favicon.ico into the root folder
      browsers on 25x25 boards.
    - modified the URI &toggleobserve= behaviour to avoid that
      a refresh of the page toggle back the game status.
+     Former value '1' to toggle has been changed to y&n, which needs
+     FAQ-adjustment for observing own-games-trick
    - adjusted some minor CSS
 
    * show_games.php:
@@ -572,6 +603,9 @@ copy /images/favicon.ico into the root folder
      the "<td></td>" tag: it will be added with the right attributs
    - also adjusted the filter-row build to handle the column-classes
    - adjusted all the pages using a list-tables
+
+   * include/std_functions.php:
+   - added consts NO_VALUE, UNKNOWN_VALUE
 
 2008-04-17 rodival
 
@@ -607,12 +641,13 @@ copy /images/favicon.ico into the root folder
      (get_preferred_browser_language, recover_language),
      include/make_translationfiles.php (make_known_languages):
    - adjusted the including/reconstruction of known_languages.php
-     to try to avoid some of its loads
-     (nearly loaded twice as needed, from the APC stats)
+     to try to avoid some of its loads (according to APC-stats
+     nearly loaded twice as needed)
    - allowed the 'N'=Native pseudo-language to be selected from the
      browser settings.
    - changed the $TranslateGroups of known_languages.php to "Common"
      to avoid to load the "Users" group when not needed
+   - allowed '_' as alternate-text in T_('text#alternate')
 
    * include/form_functions.php (print_insert_select_box),
      admin_translators.php:
@@ -629,12 +664,17 @@ copy /images/favicon.ico into the root folder
 
    * include/filter.php (add_or_del_filter):
    - added the prefix to the "toggle filter" actions (else remove them
-     into include/table_columns.php (make_table_filter))
+     into include/table_columns.php (make_table_filter)).
+     Bugfix [http://www.dragongoserver.net/forum/read.php?forum=4&thread=18318]
+     and each class/table using SearchFilter with prefix like:
+       search_messages.php, show_games.php, opponents.php, list_contacts.php,
+     though was only a problem for show_games.php because there are different
+     filter-prefixes in use
 
 2008-04-09 rodival
 
    * site_map.php:
-   - fix an unvalide link
+   - fix an invalid link
 
    * error.php:
    - better handling (Errorlog recording) of the htaccess errors
@@ -669,10 +709,10 @@ copy /images/favicon.ico into the root folder
      introduction.php, docs.php, show_games.php,
      forum/index.php, forum/admin.php:
    - introducing the pages classes. Right now, it mainly helps the CSS stuff
-     and solves some E_WARNING messages disturbing the header() outputs
-     (more to come)
-   - removing all the (old and temporary) "$ThePage['class']=..." lines
-   - replacing them with the new "$ThePage = new Page(...)"
+     and solves some E_WARNING messages disturbing the header() outputs,
+     more to come
+   - removing all the (old and temporary) "$ThePage['class']=..." lines,
+     replacing them with the new "$ThePage = new Page(...)"
    - the start_html() is adjusted handle the presence of this new class
 
    * show_games.php:
@@ -691,7 +731,7 @@ copy /images/favicon.ico into the root folder
      include/graph.php, include/move.php,
      confirm.php, game.php, quick_play.php:
    - following the previous fix, ajusted some ambiguous uses of the
-     list() operator along the code.
+     list() operator along the code (see scripts/README.developers).
 
    * translate.php:
    - added comments to clarify the translation process
@@ -701,7 +741,7 @@ copy /images/favicon.ico into the root folder
    - removed some trailing ';'s in mysql queries
 
    * quick_status.php:
-   - substitued opponent.Handle to opponent.Name in the returned infos
+   - substituted opponent.Name to opponent.Handle in the returned infos
      to avoid charsets mismatches (the names are independently recorded
      within the opponent charset, handles are all ascii compatible)
 
