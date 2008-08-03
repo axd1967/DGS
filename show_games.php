@@ -74,24 +74,22 @@ $ThePage = new Page('GamesList');
    }
    $running = !$observe && !$finished;
 
+   $page = 'show_games.php?';
    if( $observe )
    {
       $tableid = 'observed';
-      $page = 'show_games.php?observe=1'.URI_AMP;
       $column_set_name = "ObservedGamesColumns";
       $fprefix = 'o';
    }
    else if( $finished )
    {
       $tableid = 'finished';
-      $page = "show_games.php?uid=$uid".URI_AMP."finished=1".URI_AMP;
       $column_set_name = "FinishedGamesColumns";
       $fprefix = 'f';
    }
    else if( $running )
    {
       $tableid = 'running';
-      $page = "show_games.php?uid=$uid".URI_AMP;
       $column_set_name = "RunningGamesColumns";
       $fprefix = 'r';
    }
@@ -110,7 +108,7 @@ $ThePage = new Page('GamesList');
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true,
          array( FC_SIZE => 4 ));
-   $gfilter->add_filter(13, 'RelativeDate', 'Lastchanged', true);
+   $gfilter->add_filter(13, 'RelativeDate', 'Lastchanged', true); // Games
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
    if( !$observe && !$all ) //FU+RU
@@ -131,7 +129,7 @@ $ThePage = new Page('GamesList');
       $gfilter->add_filter(23, 'Rating', 'startRating', true,
             array( FC_ADD_HAVING => 1 ));
       $gfilter->add_filter(24, 'BoolSelect', 'Weekendclock', true);
-      $gfilter->add_filter(25, 'RelativeDate', 'Players.Lastaccess', true);
+      $gfilter->add_filter(25, 'RelativeDate', 'Players.Lastaccess', true); // Players
    }
    if( $finished ) //FU+FA
    {
@@ -178,7 +176,7 @@ $ThePage = new Page('GamesList');
    }
    $gfilter->init(); // parse current value from _GET
 
-   $gtable = new Table( $tableid, /*$page*/'show_games.php?', $column_set_name );
+   $gtable = new Table( $tableid, $page, $column_set_name );
    $gtable->register_filter( $gfilter );
    $gtable->add_or_del_column();
 
@@ -195,36 +193,61 @@ $ThePage = new Page('GamesList');
    $gtable->add_external_parameters( $extparam, true ); // also for hiddens
 
 /*****
- *Views-pages identification:
+ * Views-pages identification:
  *   views: OB=observe, FU=finished-user, FA=finished-all, RU=running-user, RA=running-all
- *   note: '> ' indicates a column not common to all views, usage given for specific views
- *  When a column number is shared between two fields, they must be displayed
- *    inside different (not intersecting) "hide/show columns" groups i.e.:
- *    - (OB) => ObservedGamesColumns
- *    - (FU+FA) => FinishedGamesColumns
- *    - (RU+RA) => RunningGamesColumns
  *
  *****
- *Database-columns FROM:
- *  N.B. Rating is common to Players and Ratinglog but only Players.Rating2 is SELECTed here
- *    Games is SELECTed in a whole and don't need the 'Games.' prefix
- *    Other tables are partially SELECTed and their fields may need the 'tablename.' prefix
- *    The filters may use the 'tablename.' prefix.
- *    The sorts can't use the 'tablename.' prefix (must use alias) because of the possible UNION
- *    Actually (FU+RU) may use the ?UNION
+ * Database-columns FROM:
+ * Notes:
+ * - Games fields are all SELECTed and the from should stay without table prefix!
+ * - Table prefix for the fields is needed when the SELECTed fields have a naming-clash.
+ *   Then a prefix is needed in the FROM-clause and the field needs an alias, which is
+ *   unique amongst all selected fields.
+ * - Rating is common to Players and Ratinglog but only Players.Rating2 is SELECTed
+ *
+ * - The filters may use the 'tablename.' prefix.
+ * - The sorts can't use the 'tablename.' prefix (must use alias), because of the possible UNION.
+ *   Actually (FU+RU) may use the ?UNION
+ *
  * Games (OB+FU+RU+FA+RA) AS Games:
- *   ID, Starttime, Lastchanged, mid, Black_ID, White_ID, ToMove_ID, Size, Komi, Handicap, Status, Moves, Black_Prisoners, White_Prisoners, Last_X, Last_Y, Last_Move, Flags, Score, Maintime, Byotype, Byotime, Byoperiods, Black_Maintime, White_Maintime, Black_Byotime, White_Byotime, Black_Byoperiods, White_Byoperiods, LastTicks, ClockUsed, Rated, StdHandicap, WeekendClock, Black_Start_Rating, White_Start_Rating, Black_End_Rating, White_End_Rating
+ *   ID, Starttime, Lastchanged, mid, Black_ID, White_ID, ToMove_ID, Size, Komi, Handicap,
+ *   Status, Moves, Black_Prisoners, White_Prisoners, Last_X, Last_Y, Last_Move, Flags, Score,
+ *   Maintime, Byotype, Byotime, Byoperiods, Black_Maintime, White_Maintime,
+ *   Black_Byotime, White_Byotime, Black_Byoperiods, White_Byoperiods, LastTicks, ClockUsed,
+ *   Rated, StdHandicap, WeekendClock, Black_Start_Rating, White_Start_Rating,
+ *   Black_End_Rating, White_End_Rating
+ *
  * Players (OB+FA+RA) AS white, AS black - (FU+RU) AS Players(+UNION):
- *   ID, Handle, Password, Newpassword, Sessioncode, Sessionexpire, Lastaccess, LastMove, Registerdate, Hits, VaultCnt, VaultTime, Moves, Activity, Name, Email, Rank, Stonesize, SendEmail, Notify, MenuDirection, Adminlevel, Timezone, Nightstart, ClockUsed, ClockChanged, Rating, RatingMin, RatingMax, Rating2, InitialRating, RatingStatus, Open, Lang, VacationDays, OnVacation, SkinName, Woodcolor, Boardcoords, MoveNumbers, MoveModulo, Button, UsersColumns, GamesColumns, RunningGamesColumns, FinishedGamesColumns, ObservedGamesColumns, TournamentsColumns, WaitingroomColumns,  ContactColumns, Running, Finished, RatedGames, Won, Lost, Translator, StatusFolders, IP, Browser, Country, NotesSmallHeight, NotesSmallWidth, NotesSmallMode, NotesLargeHeight, NotesLargeWidth, NotesLargeMode, NotesCutoff, MayPostOnForum, TableMaxRows
+ *   ID, Handle, Password, Newpassword, Sessioncode, Sessionexpire, Lastaccess, LastMove,
+ *   Registerdate, Hits, VaultCnt, VaultTime, Moves, Activity, Name, Email, Rank, Stonesize,
+ *   SendEmail, Notify, MenuDirection, Adminlevel, Timezone, Nightstart, ClockUsed, ClockChanged,
+ *   Rating, RatingMin, RatingMax, Rating2, InitialRating, RatingStatus, Open, Lang,
+ *   VacationDays, OnVacation, SkinName, Woodcolor, Boardcoords, MoveNumbers, MoveModulo, Button,
+ *   UsersColumns, GamesColumns, RunningGamesColumns, FinishedGamesColumns, ObservedGamesColumns,
+ *   TournamentsColumns, WaitingroomColumns,  ContactColumns, Running, Finished, RatedGames,
+ *   Won, Lost, Translator, StatusFolders, IP, Browser, Country, NotesSmallHeight, NotesSmallWidth,
+ *   NotesSmallMode, NotesLargeHeight, NotesLargeWidth, NotesLargeMode, NotesCutoff,
+ *   MayPostOnForum, TableMaxRows
+ *
  * Observers (OB) AS Obs:
  *   ID, uid, gid
+ *
  * Ratinglog (FA) AS blog, AS wlog - (FU) AS log:
  *   ID, uid, gid, Time, Rating, RatingMin, RatingMax, RatingDiff
+ *
  * GamesNotes (FU+RU) AS Gnt:
  *   ID, gid, player, Hidden, Notes
  *
  *****
- *Views-columns usage:
+ * Views-columns usage:
+ * Notes:
+ * - '> ' indicates a column not common to all views, usage given for specific views
+ * - When a column number is shared between two fields, they must be displayed
+ *   inside different (not intersecting) "hide/show columns" groups i.e.:
+ *   - (OB)    => ObservedGamesColumns
+ *   - (FU+FA) => FinishedGamesColumns
+ *   - (RU+RA) => RunningGamesColumns
+ *
  * no: description of displayed info
  *  1: ID
  *  2: sgf
@@ -257,6 +280,7 @@ $ThePage = new Page('GamesList');
  * 30: >  FA (White-EndRating)
  * 31: >  FA (White-RatingDiff)
  *****/
+
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
@@ -535,9 +559,10 @@ $ThePage = new Page('GamesList');
          if( $gtable->Is_Column_Displayed[19] )
             $grow_strings[19] = echo_rating($blackRating,true,$blackID);
          if( $finished && $gtable->Is_Column_Displayed[28] )
-            $grow_strings[28] =
-               (isset($blackDiff) ? ($blackDiff > 0 ?'+' :'') .
-                sprintf("%0.2f",$blackDiff*0.01) : '' );
+         {
+            if( isset($blackDiff) )
+               $grow_strings[28] = ( $blackDiff > 0 ? '+' : '' ) . sprintf( "%0.2f", $blackDiff / 100 );
+         }
          if( $gtable->Is_Column_Displayed[20] )
             $grow_strings[20] = "<A href=\"userinfo.php?uid=$whiteID\">" .
                make_html_safe($whiteName) . "</a>";
@@ -551,9 +576,10 @@ $ThePage = new Page('GamesList');
          if( $gtable->Is_Column_Displayed[22] )
             $grow_strings[22] = echo_rating($whiteRating,true,$whiteID);
          if( $finished && $gtable->Is_Column_Displayed[31] )
-            $grow_strings[31] =
-               (isset($whiteDiff) ? ($whiteDiff > 0 ?'+' :'') .
-                sprintf("%0.2f",$whiteDiff*0.01) : '' );
+         {
+            if( isset($whiteDiff) )
+               $grow_strings[31] = ( $whiteDiff > 0 ? '+' : '' ) . sprintf( "%0.2f", $whiteDiff / 100 );
+         }
       }
       else //FU+RU ?UNION
       {
@@ -597,18 +623,21 @@ $ThePage = new Page('GamesList');
          {
             if( $gtable->Is_Column_Displayed[11] )
             {
-               $src = '"images/' .
-                  ( $X_Score > 0 ? 'yes.gif" alt="' . T_('Yes') :
-                     ( $X_Score < 0 ? 'no.gif" alt="' . T_('No') :
-                        'dash.gif" alt="' . T_('Jigo') )) . '"';
-               $grow_strings[11] = "<img src=$src>";
+               if( $X_Score > 0 )
+                  $attrstr = 'yes.gif" alt="' . T_('Yes');
+               elseif( $X_Score < 0 )
+                  $attrstr = 'no.gif" alt="' . T_('No');
+               else
+                  $attrstr = 'dash.gif" alt="' . T_('Jigo');
+               $grow_strings[11] = "<img src=\"images/$attrstr\">";
             }
             if( $gtable->Is_Column_Displayed[24] )
                $grow_strings[24] = echo_rating($endRating,true,$pid);
             if( $gtable->Is_Column_Displayed[25] )
-               $grow_strings[25] =
-                  (isset($ratingDiff) ? ($ratingDiff > 0 ?'+' :'') .
-                   sprintf("%0.2f",$ratingDiff*0.01) : '' );
+            {
+               if( isset($ratingDiff) )
+                  $grow_strings[25] = ( $ratingDiff > 0 ? '+' : '' ) . sprintf( "%0.2f", $ratingDiff / 100 );
+            }
          }
          else //RU
          {
@@ -663,7 +692,7 @@ $ThePage = new Page('GamesList');
          $menukey = T_('Show all running games');
       else //FU (other user)
          $menukey = T_('Show running games');
-      $menu_array[$menukey] = "show_games.php?uid=$uid".URI_AMP.$row_str;
+      $menu_array[$menukey] = $page."uid=$uid".URI_AMP.$row_str;
    }
    if( !$finished ) //OB+RU+RA
    {
@@ -674,15 +703,15 @@ $ThePage = new Page('GamesList');
          $menukey = T_('Show all finished games');
       else //RU (other user)
          $menukey = T_('Show finished games');
-      $menu_array[$menukey] = "show_games.php?uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
+      $menu_array[$menukey] = $page."uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
    }
    if( $observe ) //OB
    { // allow back navigation to all-games (with potentially shared URL-vars)
-      $menu_array[T_('Show all running games')]  = "show_games.php?uid=all".URI_AMP.$row_str;
-      $menu_array[T_('Show all finished games')] = "show_games.php?uid=all".URI_AMP."finished=1".URI_AMP.$row_str;
+      $menu_array[T_('Show all running games')]  = $page."uid=all".URI_AMP.$row_str;
+      $menu_array[T_('Show all finished games')] = $page."uid=all".URI_AMP."finished=1".URI_AMP.$row_str;
    }
    else //FU+RU+FA+RA
-      $menu_array[T_('Show games I\'m observing')] = "show_games.php?observe=1".URI_AMP.$row_str;
+      $menu_array[T_('Show games I\'m observing')] = $page."observe=1".URI_AMP.$row_str;
 
    end_page(@$menu_array);
 }
