@@ -436,7 +436,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    if( $tmp )
       $tmp = ' class='.attb_quote($tmp);
    echo "\n</HEAD>\n<BODY id=\"$FRIENDLY_SHORT_NAME\"$tmp>\n";
-}
+} //start_html
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
@@ -462,12 +462,12 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( !$printable )
    {
-   echo "\n\n<table id='pageHead'>"
-      . "\n <tr>"
+   echo '\n\n<table id="pageHead">'
+      . '\n <tr>'
       . "\n  <td class=ServerHome><A id='homeId' href=\"{$HOSTBASE}index.php\">"
         . "$FRIENDLY_LONG_NAME</A></td>";
 
-   echo "\n  <td class=LoginBox>";
+   echo '\n  <td class="LoginBox">';
 
    if( $logged_in && !$is_down )
       echo T_("Logged in as") . ": <A id='loggedId' href=\"{$base_path}status.php\">"
@@ -555,7 +555,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       end_page();
       exit;
    }
-}
+} //start_page
 
 function end_page( $menu_array=NULL )
 {
@@ -2457,6 +2457,7 @@ if( function_exists('file_get_contents') )
 {
    function read_from_file($filename, $quit_on_error=true, $incpath=false)
    {
+      //FIXME: PHP-func file_get_contents() has different args since PHP6 (bool->int)
       $data= @file_get_contents($filename, $incpath);
       if( is_string($data) )
       {
@@ -2748,7 +2749,7 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
          $url = "userinfo.php?";
          $class = 'User'.$class;
       }
-//encoding '+' to £2B because of old DGS users having it in their Handle
+//encoding '+' to %2B because of old DGS users having it in their Handle
       $url.= ( $byid ? "uid=$player_ref"
                  : UHANDLE_NAME."=".str_replace('+','%2B',$player_ref) );
       $url = 'A href="' . $base_path. $url . '"';
