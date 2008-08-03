@@ -165,7 +165,7 @@ function get_alt_arg( $n1, $n2)
    else
    {
       $my_observe = is_on_observe_list( $gid, $my_id);
-      if( @$_REQUEST['toggleobserve'] == ($my_observe ?'N' :'Y') )
+      if( @$_REQUEST['toggleobserve'] == ($my_observe ? 'N' : 'Y') )
       {
          //TODO: weakness: toggle_observe_list() recall is_on_observe_list()!
          toggle_observe_list($gid, $my_id);
@@ -421,13 +421,13 @@ function get_alt_arg( $n1, $n2)
       {
          $my_color= 'B';
          $opponent_ID= $White_ID;
-         $movemsg = make_html_safe($movemsg, $movecol==BLACK ? 'gameh' : $html_mode );
+         $movemsg = make_html_safe($movemsg, ($movecol==BLACK) ? 'gameh' : $html_mode );
       }
       else //if( $my_id == $White_ID )
       {
          $my_color= 'W';
          $opponent_ID= $Black_ID;
-         $movemsg = make_html_safe($movemsg, $movecol==WHITE ? 'gameh' : $html_mode );
+         $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
       }
 
       if ($Size >= $player_row["NotesCutoff"])
@@ -447,7 +447,7 @@ function get_alt_arg( $n1, $n2)
 
       $show_notes = true;
       $notes = '';
-      $noteshide = ( substr( $notesmode, -3) == 'OFF' ? 'Y' : 'N' );
+      $noteshide = (substr( $notesmode, -3) == 'OFF') ? 'Y' : 'N';
       if( $noteshide == 'Y' )
          $notesmode = substr( $notesmode, 0, -3);
 
@@ -462,7 +462,7 @@ function get_alt_arg( $n1, $n2)
       $savenotes = false;
       if( @$_REQUEST['togglenotes'] )
       {
-         $tmp = (@$_REQUEST['hidenotes'] == 'N' ? 'N' : 'Y' );
+         $tmp = ( (@$_REQUEST['hidenotes'] == 'N') ? 'N' : 'Y' );
          if( $tmp != $noteshide )
          {
             $noteshide = $tmp;
@@ -544,7 +544,7 @@ function get_alt_arg( $n1, $n2)
    {
       echo "\n<dl class=ExtraInfos>";
       foreach($extra_infos as $txt => $class)
-         echo "<dd".($class ?" class=\"$class\"" :'').">$txt</dd>";
+         echo "<dd".($class ? " class=\"$class\"" : '').">$txt</dd>";
       echo "</dl>";
    }
    else
@@ -677,7 +677,7 @@ function get_alt_arg( $n1, $n2)
       if ( $action != 'add_time' && $may_add_time )
          $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";
 
-      $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid");
+      $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid" );
 
       if( $my_game && $Moves>0 && !$has_sgf_alias )
       {
@@ -714,6 +714,7 @@ function draw_moves( $gid, $move)
 
    $ctab = '&nbsp;';
    $wtab = str_repeat($ctab, 8);
+   // args: movenr, 'selected'; 'Move'-text (translated), movenr, move
    $ofmt = "<OPTION value=\"%d\"%s>%s$ctab%s:$ctab$ctab%s</OPTION>\n";
 
    $str= '';
@@ -761,8 +762,9 @@ function draw_moves( $gid, $move)
          $c= str_repeat($ctab, strlen($Moves)-strlen($i)).$c;
          if( $Stone == WHITE ) $c= $wtab.$c;
          $c= sprintf( $ofmt
-                    , $i, ($i == $move ? ' selected' : '')
-                    , $trmov, $i, $c);
+                    , $i, ( ($i == $move) ? ' selected' : '' )
+                    , $trmov // keep to prevent mixup, if $trmov contains '%'-sprintf-fmttext
+                    , $i, $c);
       }
       else
       {
@@ -835,8 +837,8 @@ function draw_add_time( $game_row )
    {
       echo
          sprintf( "<OPTION value=\"%d\"%s>%s %s</OPTION>\n",
-            $i, ($i==1 ? ' selected' : ''),
-            $i, ($i>1 ? $trdays : $trday) );
+            $i, ( ($i==1) ? ' selected' : '' ),
+            $i, ( ($i>1)  ? $trdays : $trday ) );
    }
    echo '  </SELECT>
            &nbsp;' . T_('added to maintime of your opponent.') . '
@@ -877,14 +879,14 @@ function draw_game_info(&$game_row, &$board)
       user_reference( REF_LINK, 1, '', $game_row['Black_ID'],
                       $game_row['Blackname'], $game_row['Blackhandle']) .
       ( $game_row['Blackwarning'] ?
-        '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
+            '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
       "</td>\n";
 
    echo '<td class=Ratings>'
       . echo_game_rating( $game_row['Black_ID']
                      , $game_row['Black_Start_Rating']
-                     , $game_row['Status']==='FINISHED'
-                        ? $game_row['Black_End_Rating'] : $game_row['Blackrating'])
+                     , ($game_row['Status']==='FINISHED')
+                           ? $game_row['Black_End_Rating'] : $game_row['Blackrating'])
       . "</td>\n";
    echo '<td class=Prisoners>' . T_('Prisoners') . ': ' . $game_row['Black_Prisoners'] . "</td>\n";
    echo "</tr>\n";
@@ -907,14 +909,14 @@ function draw_game_info(&$game_row, &$board)
       user_reference( REF_LINK, 1, '', $game_row['White_ID'],
                       $game_row['Whitename'], $game_row['Whitehandle']) .
       ( $game_row['Whitewarning'] ?
-        '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
+            '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
       "</td>\n";
 
    echo '<td class=Ratings>'
       . echo_game_rating( $game_row['White_ID']
                      , $game_row['White_Start_Rating']
-                     , $game_row['Status']==='FINISHED'
-                        ? $game_row['White_End_Rating'] : $game_row['Whiterating'])
+                     , ($game_row['Status']==='FINISHED')
+                           ? $game_row['White_End_Rating'] : $game_row['Whiterating'])
       . "</td>\n";
    echo '<td class=Prisoners>' . T_('Prisoners') . ': ' . $game_row['White_Prisoners'] . "</td>\n";
    echo "</tr>\n";
@@ -938,7 +940,7 @@ function draw_game_info(&$game_row, &$board)
    echo T_('Komi') . ': ' . $game_row['Komi'] ;
    echo $sep . T_('Handicap') . ': ' . $game_row['Handicap'];
    echo $sep . T_('Rated game') . ': ' .
-      ( $game_row['Rated'] == 'N' ? T_('No') : T_('Yes') ) . "</td>\n";
+      ( ($game_row['Rated'] == 'N') ? T_('No') : T_('Yes') ) . "</td>\n";
 
    echo "</tr>\n";
 
