@@ -102,7 +102,7 @@ class Errors
       function dump_exit($prefix='', $html_mode=false)
       {
          echo $this->list_string($prefix, $html_mode);
-         $this->error_list = array();
+         $this->error_clear();
          if( $html_mode )
             echo "\n</BODY></HTML>\n"; // at least
          exit;
