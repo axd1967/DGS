@@ -24,6 +24,12 @@ require_once( "include/config.php" );
 //complete the *multiple queries* transactions.
 //@ignore_user_abort(true); //see connect2mysql
 
+// fetch-types for mysql_single_fetch-function
+//   PHP has funcs: mysql_fetch_(array|assoc|field|lengths|object|row)
+define('FETCHTYPE_ARRAY', 'array');
+define('FETCHTYPE_ASSOC', 'assoc');
+define('FETCHTYPE_ROW',   'row');
+
 
 //At least needed when connect2mysql.php is used alone (as in quick_status.php):
 function jump_to($uri, $absolute=false)
@@ -175,17 +181,18 @@ function db_query( $debugmsg, $query)
    return false;
 }
 
-function mysql_single_fetch( $debugmsg, $query, $type='assoc')
+// arg: fetch_type (FETCHTYPE_...) controls which method to call: mysql_fetch_{$fetch_type}
+function mysql_single_fetch( $debugmsg, $query, $fetch_type=FETCHTYPE_ASSOC )
 {
-   $result = db_query( !is_string($debugmsg) ?false
-      :$debugmsg.'.single_fetch', $query);
+   $dbg_str = ( !is_string($debugmsg) ) ? false : $debugmsg.'.single_fetch';
+   $result = db_query( $dbg_str, $query);
    if( mysql_num_rows($result) != 1 )
    {
       mysql_free_result($result);
       return false;
    }
-   $type = 'mysql_fetch_'.$type;
-   $row = $type($result);
+   $fetch_func = 'mysql_fetch_'.$fetch_type;
+   $row = $fetch_func($result);
    mysql_free_result($result);
    if( !is_array($row) )
       return false;
@@ -196,8 +203,8 @@ function mysql_single_fetch( $debugmsg, $query, $type='assoc')
 // else $result = array( $col[0] => $col[1],...);
 function mysql_single_col( $debugmsg, $query, $keyed=false)
 {
-   $result = db_query( !is_string($debugmsg) ?false
-      :$debugmsg.'.single_col', $query);
+   $dbg_str = ( !is_string($debugmsg) ) ? false : $debugmsg.'.single_col';
+   $result = db_query( $dbg_str, $query);
    if( mysql_num_rows($result) < 1 )
    {
       mysql_free_result($result);
@@ -227,7 +234,9 @@ function mysql_single_col( $debugmsg, $query, $keyed=false)
    return false;
 }
 
-
+// Returns true, if encrypted passwords matches the given_passwd
+// Returns SQL-encryption-func in method-var used to encrypt password:
+//    PASSWORD, OLD_PASSWORD, SHA1, MD5
 function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
 {
    /*
@@ -243,17 +252,18 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
       case 41: $method='PASSWORD'; break;
       case 40: $method='SHA1'; break;
       case 32: $method='MD5'; break;
-      default: $method=(version_compare( MYSQL_VERSION, '4.1')<0 ?'PASSWORD' :'OLD_PASSWORD'); break;
+      default: $method= (version_compare(MYSQL_VERSION, '4.1', '<') ? 'PASSWORD' : 'OLD_PASSWORD'); break;
    }
    $given_passwd_encrypted =
       mysql_single_fetch( 'check_password',
                "SELECT $method('".mysql_addslashes($given_passwd)."')"
-               ,'row')
+               ,FETCHTYPE_ROW)
          or error('mysql_query_failed','check_password.get_password');
 
    return ($passwd_encrypted == $given_passwd_encrypted[0]);
 }
 
+// Checks and eventually fixes (old-format) password
 function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
    if( !check_passwd_method( $passwd, $given_passwd, $method) )
