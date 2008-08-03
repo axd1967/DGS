@@ -46,60 +46,43 @@ $ThePage = new Page('Status');
    }
 
 
+   // NOTE: game-list can't allow TABLE-SORT until jump_to_next_game() adjusted to follow the sort
    $table_mode= TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE; //|TABLE_NO_HIDE
-   //can't be sorted until jump_to_next_game() adjusted to follow the sort
    $gtable = new Table( 'game', "status.php", "GamesColumns", '', $table_mode );
 
    start_page(T_('Status'), true, $logged_in, $player_row,
                $gtable->button_style($player_row['Button']) );
 
-   section( 'Status', T_('Status'));
+   section( 'Status',
+      sprintf( T_('Status for %1$s: %2$s'),
+         user_reference( 0, 1, '', $player_row ),
+         echo_rating( @$player_row["Rating2"], true, $my_id )
+      ));
 
 { // show user infos
-   $itable= new Table_info('user');
+   if( $player_row['OnVacation'] > 0 )
+   {
+      $itable= new Table_info('user');
 
-      $itable->add_row( array(
-            'sname' => T_('Name'),
-            'info' => $player_row["Name"],
-            ) );
-      $itable->add_row( array(
-            'sname' => T_('Userid'),
-            'sinfo' => $player_row["Handle"],
-            ) );
-      $itable->add_row( array(
-            'sname' => T_('Open for matches?'),
-            'info' => @$player_row["Open"],
-            ) );
-      $itable->add_row( array(
-            'sname' => T_('Rating'),
-            'sinfo' => echo_rating(@$player_row["Rating2"],true,$player_row['ID']),
-            ) );
-      $itable->add_row( array(
-            'sname' => T_('Rank info'),
-            'info' => @$player_row["Rank"],
-            ) );
       $itable->add_row( array(
             'sname' => anchor( "edit_vacation.php", T_('Vacation days left')),
             'sinfo' => echo_day(floor($player_row["VacationDays"])),
             ) );
+      $itable->add_row( array(
+            'nattb' => 'class=OnVacation',
+            'sname' => anchor( "edit_vacation.php", T_('On vacation')),
+            'sinfo' => echo_onvacation($player_row['OnVacation']),
+            ) );
 
-      if( $player_row['OnVacation'] > 0 )
-      {
-         $itable->add_row( array(
-               'nattb' => 'class=OnVacation',
-               'sname' => anchor( "edit_vacation.php", T_('On vacation')),
-               'sinfo' => echo_onvacation($player_row['OnVacation']),
-               ) );
-      }
-
-   $itable->echo_table();
-   unset($itable);
+      $itable->echo_table();
+      unset($itable);
+   }
 } // show user infos
 
 
 { // show messages
 
-   //can't be sorted because of the fixed LIMIT and no prev/next feature
+   // NOTE: msg-list can't allow TABLE-SORT, because of the fixed LIMIT and no prev/next feature
    $mtable = new Table( 'message', 'status.php', '', 'MSG', $table_mode|TABLE_NO_HIDE );
 
    //$mtable->add_or_del_column();
@@ -142,7 +125,7 @@ $ThePage = new Page('Status');
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf');
    if( $show_notes )
-   $gtable->add_tablehead(32, T_('Notes#header'), '', 0, 'X_Note-');
+      $gtable->add_tablehead(32, T_('Notes#header'), '', 0, 'X_Note-');
    $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
    $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
    $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'Rating2-');
