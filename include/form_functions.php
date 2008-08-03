@@ -203,9 +203,12 @@ class Form
    var $column_started;
    var $nr_columns;
    var $max_nr_columns;
-   //The texts of the row are raw. They must be converted if used in HTML parts.
-   var $make_texts_safe; //boolean, default is true
-   
+   /*!
+    * \brief texts of the row are raw. They must be converted if used in HTML parts.
+    * boolean, default is true.
+    */
+   var $make_texts_safe;
+
 
    /*! \brief Constructor. Initializes various variables. */
    function Form( $name, $action_page, $method
