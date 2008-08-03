@@ -611,7 +611,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    if( $show_percent )
    {
       $percent = $rating - $rank_val*100.0;
-      $string .= $spc . '('. ($percent > 0 ?'+' :'') . round($percent) . '%)';
+      $string .= $spc . '('. ($percent > 0 ? '+' :'') . round($percent) . '%)';
    }
 
    if( $graph_uid > 0 )
@@ -622,14 +622,17 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    return $string;
 }
 
-//Must not rise an error because used into filter.php
-//decode "21k", "1KYU", "1 dan", "1 kyu ( +15% )", "1gup-15%",...
+
+// decode "21k", "1KYU", "1 dan", "1 kyu ( +15% )", "1gup-15%", ...
+define('RATING_PATTERN', '/^\s*([1-9][0-9]*)\s*(k|d|kyu|dan|gup)\s*(\(?\s*([-+]?[0-9]+\s*)%\s*\)?\s*)?$/');
+
+// Must not rise an error because used in filter.php
+// check RATING_PATTERN for syntax, this func must be kept synchron with convert_to_rating-func
 function read_rating($string)
 {
    $string = strtolower($string);
-   $pattern = "/^\s*([1-9][0-9]*)\s*(k|d|kyu|dan|gup)\s*(\(?\s*([-+]?[0-9]+\s*)%\s*\)?\s*)?$/";
 
-   if( !preg_match($pattern, $string, $matches) )
+   if( !preg_match(RATING_PATTERN, $string, $matches) )
       return -OUT_OF_RATING;
 
    $kyu = ( $matches[2] == 'dan' || $matches[2] == 'd' ) ? 2 : 1;
@@ -668,6 +671,7 @@ function get_rating_at($uid, $date)
 
 
 //May rise an error
+// check RATING_PATTERN for syntax, this func must be kept synchron with read_rating-func
 function convert_to_rating($string, $type)
 {
    $rating = -OUT_OF_RATING;
@@ -703,7 +707,8 @@ function convert_to_rating($string, $type)
    {
       case 'dragonrating':
       {
-         $needkyu = 1; if( $kyu <= 0 ) break;
+         $needrank = 1;
+         if( $kyu <= 0 ) break;
 
          $rating = read_rating($string);
       }
@@ -711,7 +716,8 @@ function convert_to_rating($string, $type)
 
       case 'eurorating':
       {
-         $needkyu = 0; if( $kyu > 0 ) break;
+         $needrank = 0;
+         if( $kyu > 0 ) break;
 
          $rating = $val;
       }
@@ -719,7 +725,8 @@ function convert_to_rating($string, $type)
 
       case 'eurorank':
       {
-         $needkyu = 1; if( $kyu <= 0 ) break;
+         $needrank = 1;
+         if( $kyu <= 0 ) break;
 
          $rating = rank_to_rating($val, $kyu);
       }
@@ -727,7 +734,8 @@ function convert_to_rating($string, $type)
 
       case 'aga':
       {
-         $needkyu = 1; if( $kyu <= 0 ) break;
+         $needrank = 1;
+         if( $kyu <= 0 ) break;
 
          $rating = rank_to_rating($val, $kyu);
          if( $rating != -OUT_OF_RATING )
@@ -738,7 +746,8 @@ function convert_to_rating($string, $type)
 
       case 'agarating':
       {
-         $needkyu = 0; if( $kyu > 0 ) break;
+         $needrank = 0;
+         if( $kyu > 0 ) break;
 
          if( $val > 0 )
             $rating = $val*100 + 1950;
@@ -752,7 +761,8 @@ function convert_to_rating($string, $type)
 
       case 'igs':
       {
-         $needkyu = 1; if( $kyu <= 0 ) break;
+         $needrank = 1;
+         if( $kyu <= 0 ) break;
 
          $rating = rank_to_rating($val, $kyu);
          if( $rating != -OUT_OF_RATING )
@@ -762,7 +772,8 @@ function convert_to_rating($string, $type)
 
 //      case 'igsrating':
 //      {
-//         $needkyu = 0; if( $kyu > 0 ) break;
+//         $needrank = 0;
+//         if( $kyu > 0 ) break;
 
 //         $rating = $val*100 - 1130 ;
 //         $rating = table_interpolate($rating, $igs_table, true);
@@ -772,7 +783,8 @@ function convert_to_rating($string, $type)
       case 'iytgg':
       case 'nngs':
       {
-         $needkyu = 1; if( $kyu <= 0 ) break;
+         $needrank = 1;
+         if( $kyu <= 0 ) break;
 
          $rating = rank_to_rating($val, $kyu);
          if( $rating != -OUT_OF_RATING )
@@ -782,7 +794,8 @@ function convert_to_rating($string, $type)
 
       case 'nngsrating':
       {
-         $needkyu = 0; if( $kyu > 0 ) break;
+         $needrank = 0;
+         if( $kyu > 0 ) break;
 
          $rating = $val - 900;
       }
@@ -790,7 +803,8 @@ function convert_to_rating($string, $type)
 
       case 'japan':
       {
-         $needkyu = 1; if( $kyu <= 0 ) break;
+         $needrank = 1;
+         if( $kyu <= 0 ) break;
 
          $rating = rank_to_rating($val, $kyu);
          if( $rating != -OUT_OF_RATING )
@@ -801,7 +815,8 @@ function convert_to_rating($string, $type)
 
       case 'china':
       {
-         $needkyu = 1; if( $kyu <= 0 ) break;
+         $needrank = 1;
+         if( $kyu <= 0 ) break;
 
          $rating = rank_to_rating($val, $kyu);
          if( $rating != -OUT_OF_RATING )
@@ -812,7 +827,8 @@ function convert_to_rating($string, $type)
 
       case 'korea':
       {
-         $needkyu = 1; if( $kyu <= 0 ) break;
+         $needrank = 1;
+         if( $kyu <= 0 ) break;
 
          $rating = rank_to_rating($val, $kyu); //need 'kyu' or 'dan'
          if( $rating != -OUT_OF_RATING )
@@ -828,7 +844,7 @@ function convert_to_rating($string, $type)
    }
    if( $rating == -OUT_OF_RATING )
    {
-      error($needkyu ? 'rank_not_rating' : 'rating_not_rank'
+      error($needrank ? 'rank_not_rating' : 'rating_not_rank'
             , "type:$type str:$string val:$val kyu:$kyu");
    }
 
