@@ -47,22 +47,22 @@ class HTMLPage
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new page and initialize it. */
-   function Page( $_pageid=false)
+   function HTMLPage( $_pageid=false)
    {
       global $SUB_PATH;
-      $this->BaseName= substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH));
+      $this->BaseName = substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH));
 
       if( !is_string($_pageid) )
-         $_pageid= substr( $this->BaseName, 0, strrpos($this->BaseName,'.'));
+         $_pageid = substr( $this->BaseName, 0, strrpos($this->BaseName,'.'));
       //make it CSS compatible, just allowing the space (see getCSSclass())
-      $this->Id= preg_replace('%[^ a-zA-Z0-9]+%', '-', $_pageid);
+      $this->Id = preg_replace('%[^ a-zA-Z0-9]+%', '-', $_pageid);
 
       /*
-      * a soon bufferization seems to prevent a possible E_WARNING message
-      * to disturb later header() functions
-      * else we should have to set output_buffering and and output_handler
-      * in the php.ini file (and adjust our INSTALL file accordingly)
-      */
+       * a soon bufferization seems to prevent a possible E_WARNING message
+       * to disturb later header() functions
+       * else we should have to set output_buffering and output_handler
+       * in the php.ini file (and adjust our INSTALL file accordingly)
+       */
       ob_start('ob_gzhandler');
    }
 
@@ -80,11 +80,15 @@ class HTMLPage
 /*!
  * \class Page
  *
- * \brief Class to ease the creation of complet Dragon pages.
+ * \brief Class to ease the creation of complete Dragon pages.
  */
 
 class Page extends HTMLPage
 {
+   function Page( $_pageid=false )
+   {
+      parent::HTMLPage( $_pageid );
+   }
 } //class Page
 
 ?>
