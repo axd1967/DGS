@@ -46,7 +46,7 @@ echo ">>>> Should not be used now. Do not run it before a check. Caution: no 'do
       $fname = $row0['table_name'];
 
       $r = mysql_single_fetch( 'conv_forum',
-                  "SELECT MAX(SortOrder) FROM Forums", 'row' );
+                  "SELECT MAX(SortOrder) FROM Forums", FETCHTYPE_ROW );
       $SortOrder = $r[0] + 1;
 
       mysql_query("INSERT INTO Forums SET " .

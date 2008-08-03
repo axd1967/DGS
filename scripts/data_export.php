@@ -715,7 +715,7 @@ class dbTable
       $body = '';
       if( $row=mysql_single_fetch( false,
              'SHOW CREATE TABLE ' . $this->qpath
-           , 'array') )
+           , FETCHTYPE_ARRAY) )
       {
          if( !($str=@$row['Create Table']) )
             $str = @$row[1];
