@@ -462,15 +462,15 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( !$printable )
    {
-   echo '\n\n<table id="pageHead">'
-      . '\n <tr>'
-      . "\n  <td class=ServerHome><A id='homeId' href=\"{$HOSTBASE}index.php\">"
+   echo "\n\n<table id=\"pageHead\">"
+      . "\n <tr>"
+      . "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"{$HOSTBASE}index.php\">"
         . "$FRIENDLY_LONG_NAME</A></td>";
 
-   echo '\n  <td class="LoginBox">';
+   echo "\n  <td class='LoginBox'>";
 
    if( $logged_in && !$is_down )
-      echo T_("Logged in as") . ": <A id='loggedId' href=\"{$base_path}status.php\">"
+      echo T_("Logged in as") . ": <A id=\"loggedId\" href=\"{$base_path}status.php\">"
            . $player_row["Handle"] . "</A>";
    else
       echo T_("Not logged in");
@@ -2533,7 +2533,8 @@ function section( $id='', $header='')
       echo "\n<div id=$section class=Section>";
       if( $header )
          echo "<h3 class=Header>$header</h3>";
-      else echo '<br class=Section>';
+      else
+         echo '<br class=Section>';
    }
 }
 
