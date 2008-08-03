@@ -67,6 +67,7 @@ require_once( "include/std_functions.php" );
    //echo '<p></p>Loadavg: ' . `cat /proc/loadavg`; //only under Linux like systems and with safe_mode=off
    if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
    {
+      //FIXME: Only working for Linux ?
       $tmp = '/proc/loadavg';
       if( ($tmp=trim(@read_from_file($tmp))) )
       {
