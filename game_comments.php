@@ -64,12 +64,12 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
 
    $result = db_query( 'game_comments.messages',
-      "SELECT DISTINCT Moves.MoveNr,Moves.Stone,MoveMessages.Text"
-      ." FROM MoveMessages"
+      'SELECT DISTINCT Moves.MoveNr,Moves.Stone,MoveMessages.Text'
+      .' FROM MoveMessages'
       ." INNER JOIN Moves ON Moves.gid=$gid AND Moves.MoveNr=MoveMessages.MoveNr"
-      ." WHERE MoveMessages.gid=$gid AND Moves.PosX>=0"
-         ." AND (Moves.Stone=".WHITE." OR Moves.Stone=".BLACK.")"
-      ." ORDER BY Moves.MoveNr" );
+      ." WHERE MoveMessages.gid=$gid"
+            .' AND Moves.PosX>=0 AND Moves.Stone IN ('.WHITE.','.BLACK.')'
+      .' ORDER BY Moves.MoveNr' );
 
 
    start_html(T_('Comments'), true, @$player_row['SkinName']);
