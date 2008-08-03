@@ -173,6 +173,8 @@ function item($text, $link='', $working=true, $last=false)
       if( @$player_row['Translator'] )
          item(T_('Translate'), "translate.php", true);
 
+      item(T_('Statistics'), "statistics.php", true);
+
       item(T_('Documentation'), "docs.php", true, true);
       { $item_level++;
          item(T_('Introduction'), "introduction.php", true);
