@@ -519,20 +519,24 @@ class Table
       return $need_form;
    } //make_filter_row
 
-   /*! \brief Return the attributs of a warning cellule. */
-   function warning_cell_attb( $title='', $array=false)
+   /*!
+    * \brief Return the attributes of a warning cellule with class and title-attributes:
+    *        - return as map with keys 'class' and 'title', if return_array-arg is true
+    *        - otherwise return as string.
+    */
+   function warning_cell_attb( $title='', $return_array=false)
    {
-      if( $array )
+      if( $return_array )
       {
-         $str= array('class' => 'Warning');
-         if( $title ) $str['title']= $title;
+         $result = array('class' => 'Warning');
+         if( $title ) $result['title'] = $title;
       }
       else
       {
-         $str= ' class=Warning';
-         if( $title ) $str.= ' title=' . attb_quote($title);
+         $result = ' class=Warning';
+         if( $title ) $result .= ' title=' . attb_quote($title);
       }
-      return $str;
+      return $result;
    }
 
    /*! \brief Return the global style part of a table with buttons. */
