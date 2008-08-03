@@ -547,7 +547,7 @@ function print_players_table( $p, $uid, $opp )
       make_html_safe(@$p1['Rank'],INFO_HTML),
       $p2 ? make_html_safe(@$p2['Rank'],INFO_HTML) : $SPC );
 
-   // Last accessed, Last moved
+   // Last accessed, Last move
    $r .= sprintf( $rowpatt, T_('Last access'),
       ( $p1['LastaccessU'] > 0 ? date($date_fmt2, $p1['LastaccessU']) : $SPC ),
       ( $p2 && $p2['LastaccessU'] > 0 ? date($date_fmt2, $p2['LastaccessU']) : $SPC ) );
