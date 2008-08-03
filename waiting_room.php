@@ -251,7 +251,7 @@ require_once( "include/contacts.php" );
             $wrow_strings[ 5] = array('text' => $handi_array[$Handicaptype]);
             if( !$haverating )
                $wrow_strings[ 5]['attbs']=
-                  $wrtable->warning_cell_attb( T_('No initial rating'), 1);
+                  $wrtable->warning_cell_attb( T_('No initial rating'), true);
          }
          if( $wrtable->Is_Column_Displayed[14] )
             $wrow_strings[14] = ($calculated ? NO_VALUE : $Handicap);
@@ -265,7 +265,7 @@ require_once( "include/contacts.php" );
                echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) );
             if( !$goodrating )
                $wrow_strings[ 8]['attbs']=
-                  $wrtable->warning_cell_attb( T_('Out of range'), 1);
+                  $wrtable->warning_cell_attb( T_('Out of range'), true);
          }
          if( $wrtable->Is_Column_Displayed[ 9] )
             $wrow_strings[ 9] =
