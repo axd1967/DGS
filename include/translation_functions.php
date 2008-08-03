@@ -57,7 +57,7 @@ function T_($string)
       return '<span class=NativeText>'.$string.'</span>';
 
    //if you need a '#' which is removed, end the string with a '#'
-   return preg_replace('%(.)#[_0-9A-Za-z]*$%', '\\1', $string);
+   return preg_replace('%(.)#[_0-9A-Za-z]*$%', '\\1', $string); // \w (=_0-9a-z) is locale-dependent
 }
 
 //if $player_row is absent, use the browser default settings
