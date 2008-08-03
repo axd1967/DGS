@@ -405,7 +405,7 @@ $array=array();
 
    $node_com = "";
 
-   $result = db_query( 'sgf.moves',
+   $result = db_query( "sgf.moves($gid)",
       "SELECT Moves.*,MoveMessages.Text " .
       "FROM (Moves) LEFT JOIN MoveMessages " .
       "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
