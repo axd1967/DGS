@@ -42,9 +42,9 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       error('unknown_game');
 
    $game = mysql_single_fetch( 'game_comments.find_game',
-      "SELECT Games.Status, Games.Black_ID, Games.White_ID" .
-      ", black.Name AS Blackname, white.Name AS Whitename" .
-      " FROM Games, Players AS black, Players AS white" .
+      'SELECT Games.Status, Games.Black_ID, Games.White_ID' .
+      ', black.Name AS Blackname, white.Name AS Whitename' .
+      ' FROM Games, Players AS black, Players AS white' .
       " WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1"
       );
    if( !$game )
@@ -96,11 +96,11 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $Text = trim(make_html_safe( $Text, $row['Stone']==$my_color ? 'gameh' : $html_mode));
       if( empty($Text) ) continue;
 
-      $colortxt = " class=InTextStone";
+      $colortxt = ' class=InTextStone';
       if( $row['Stone'] == BLACK )
-        $colortxt = "<img src='17/b.gif' alt=\"" . T_('Black') . "\"$colortxt>" ;
+        $colortxt = '<img src="17/b.gif" alt="' . T_('Black') . "\"$colortxt>" ;
       else
-        $colortxt = "<img src='17/w.gif' alt=\"" . T_('White') . "\"$colortxt>" ;
+        $colortxt = '<img src="17/w.gif" alt="' . T_('White') . "\"$colortxt>" ;
 
       $movetxt = (int)$row['MoveNr'];
 
