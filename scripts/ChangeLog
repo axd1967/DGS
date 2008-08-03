@@ -25,6 +25,67 @@ Changelog
 
 2008-08-03 juga
 
+   * INSTALL:
+   - added description for CACHE_FOLDER
+
+   * game.php, opponents.php sgf.php:
+   - layout (spacing around '?'-op)
+   - added comments, fixed typos, fixed debug-msg
+
+   * game_comments.php:
+   - changed SQL: Moves.Stone= OR Moves.Stone= -> using IN-operator
+   - using '-strings for some constant-strings
+
+   * show_games.php:
+   - uses $page-var
+   - clearer comments for views & others
+   - avoid double use of '?'-operator
+
+   * site_map.php:
+   - added statistics-page in site-map
+   * statistics.php:
+   - added FIXME (only for Linux)
+
+   * include/config.php:
+   - added note for MYSQL-version (refer to PHP-version_compare-function)
+
+   * include/connect2mysql.php (mysql_single_fetch),
+     scripts/convert_from_old_forum.php, scripts/data_export.php:
+   - defined and used fetch-types FETCHTYPE_ARRAY/ASSOC/ROW
+     for mysql_single_fetch(),
+     renamed some local vars making usage clearer
+   - replaced some strange-layouted use of '?'-operator
+   - added doc for functions: check_passwd_method, check_password
+
+   * include/contacts.php (load_globals):
+   - changed userflag-text: Admin-crew -> Admin Crew
+
+   * include/error_functions.php (dump_exit):
+   - used local function to clear array
+
+   * include/form_functions.php (Form):
+   - clearer doc for make_texts_safe-var
+
+   * include/page_functions.php (HTMLPage, Page):
+   - renamed/fixed constructor of HTMLPage: Page -> HTMLPage,
+     added constructor for Page-class
+   - minor layout changes, fix typos
+
+   * include/rating.php (read_rating, convert_to_rating):
+   - put rating-pattern in constant
+   - added more doc for functions: read_rating, convert_to_rating
+   - renamed local var: needkyu -> needrank
+   - minor layout changes
+
+   * include/std_functions.php (read_from_file):
+   - added some comments, fixed typos
+   - read_from_file: added FIXME (PHP6 has different signature)
+   - using ' for some constant-strings and " for HTML-attributes
+
+   * include/table_columns.php (warning_cell_attb), waiting_room.php:
+   - warning_cell_attb-signature has bool-arg (clearer usage than int)
+   - used clearer doc and vars for warning_cell_attb-function
+
    * scripts/ChangeLog:
    - detailed and corrected some older logs since Jan-2008 by Rod,
      added performed changes for easier creation of NEWS-file,
