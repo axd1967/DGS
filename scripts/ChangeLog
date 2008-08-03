@@ -25,6 +25,13 @@ Changelog
 
 2008-08-03 juga
 
+   * status.php:
+   - reduced User-Info on status-page to most important values
+     to have more space for games-list:
+     - moved user-name/handle/rank into section-title
+     - show vacation-info only if on vacation
+     - all other info removed, can be viewed on user-info-page
+
    * INSTALL:
    - added description for CACHE_FOLDER
 
@@ -77,7 +84,7 @@ Changelog
    - renamed local var: needkyu -> needrank
    - minor layout changes
 
-   * include/std_functions.php (read_from_file):
+   * include/std_functions.php (read_from_file), game_comments.php:
    - added some comments, fixed typos
    - read_from_file: added FIXME (PHP6 has different signature)
    - using ' for some constant-strings and " for HTML-attributes
