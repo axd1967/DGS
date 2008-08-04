@@ -79,7 +79,7 @@ require_once( "include/form_functions.php" );
    for($i=1; $i<16; $i++ )
    {
       $tmp = "<img width=30 height=30 src=\"images/smallwood$i.gif\" alt=\"wood$i\">";
-      if( $i==5 ) 
+      if( $i==5 )
       {
          $woodcolors[$i] = sptext($tmp).'<BR>';
          $i = 10;
@@ -88,10 +88,10 @@ require_once( "include/form_functions.php" );
          $woodcolors[$i] = sptext($tmp,2);
    }
 
-   init_countries();
    asort($COUNTRIES);
-   array_unshift($COUNTRIES, '');
-   
+   $countries = $COUNTRIES;
+   array_unshift($countries, '');
+
    $langs = get_language_descriptions_translated();
    //it's not obvious that this sort on "translated" strings will always give a good result:
    arsort($langs); //will be reversed to place ahead the following:
@@ -104,13 +104,13 @@ require_once( "include/form_functions.php" );
    {
       $notesheights[$i] = $i;
    }
-   
+
    $noteswidths = array();
    for($i=15; $i<105; $i+=5 )
    {
       $noteswidths[$i] = $i;
    }
-   
+
    $notesmodes = array('RIGHT' => sptext(T_('Right'),2),
                      'BELOW' => sptext(T_('Below'),2));
 
