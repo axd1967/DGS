@@ -66,8 +66,6 @@ $ThePage = new Page('UserInfo');
    //db_close(); //not yet: the bio may contain <user>-like tags
 
 
-   init_countries();
-
    $my_info = ( $my_id == $uid );
    $name_safe = make_html_safe($row['Name']);
    $handle_safe = $row['Handle'];
