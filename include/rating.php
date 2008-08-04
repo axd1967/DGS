@@ -19,6 +19,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
+
+// table for interpolating rating
+$IGS_TABLE = array(
+   array( 'KEY' =>  200, 'VAL' =>  500 ),
+   array( 'KEY' =>  900, 'VAL' => 1000 ),
+   array( 'KEY' => 1500, 'VAL' => 1500 ),
+   array( 'KEY' => 2400, 'VAL' => 2400 ),
+);
+
+$A_TABLE = array(
+   array( 'KEY' =>   100, 'VAL' =>  200 ),
+   array( 'KEY' =>  2700, 'VAL' =>   70 ),
+   array( 'KEY' => 10000, 'VAL' =>   70 ),   //higher, should be constant
+);
+
+$CON_TABLE = array(
+   array( 'KEY' =>   100, 'VAL' => 116 ),
+   array( 'KEY' =>   200, 'VAL' => 110 ),
+   array( 'KEY' =>  1300, 'VAL' =>  55 ),
+   array( 'KEY' =>  2000, 'VAL' =>  27 ),
+   array( 'KEY' =>  2400, 'VAL' =>  15 ),
+   array( 'KEY' =>  2600, 'VAL' =>  11 ),
+   array( 'KEY' =>  2700, 'VAL' =>  10 ),
+   array( 'KEY' => 10000, 'VAL' =>  10 ),   //higher, should be constant
+);
+
+
 function table_interpolate($value, $table, $extrapolate=false)
 {
    foreach ( $table as $x )
@@ -57,47 +84,14 @@ function table_interpolate($value, $table, $extrapolate=false)
 
 function con_value($rating)
 {
-   $con_table[0]['KEY'] = 100;
-   $con_table[0]['VAL'] = 116;
-
-   $con_table[1]['KEY'] = 200;
-   $con_table[1]['VAL'] = 110;
-
-   $con_table[2]['KEY'] = 1300;
-   $con_table[2]['VAL'] = 55;
-
-   $con_table[3]['KEY'] = 2000;
-   $con_table[3]['VAL'] = 27;
-
-   $con_table[4]['KEY'] = 2400;
-   $con_table[4]['VAL'] = 15;
-
-   $con_table[5]['KEY'] = 2600;
-   $con_table[5]['VAL'] = 11;
-
-   $con_table[6]['KEY'] = 2700;
-   $con_table[6]['VAL'] = 10;
-
-   //higher, should be constant
-   $con_table[7]['KEY'] = 10000;
-   $con_table[7]['VAL'] = 10;
-
-   return table_interpolate($rating, $con_table, true);
+   global $CON_TABLE;
+   return table_interpolate($rating, $CON_TABLE, true);
 }
 
 function a_value($rating)
 {
-   $a_table[0]['KEY'] = 100;
-   $a_table[0]['VAL'] = 200;
-
-   $a_table[1]['KEY'] = 2700;
-   $a_table[1]['VAL'] = 70;
-
-   //higher, should be constant
-   $a_table[1]['KEY'] = 10000;
-   $a_table[1]['VAL'] = 70;
-
-   return table_interpolate($rating, $a_table, true);
+   global $A_TABLE;
+   return table_interpolate($rating, $A_TABLE, true);
 }
 
 
@@ -683,6 +677,7 @@ function convert_to_rating($string, $type)
 
    $val = doubleval($string);
 
+   // check, if input is rank (with some dan/kyu/gup-grade) or rating (nums only)
    if( strpos($string, 'k') > 0 || strpos($string, 'gup') > 0 )
       $kyu = 1; // kyu rank
    else if( strpos($string, 'd') > 0 )
@@ -690,158 +685,116 @@ function convert_to_rating($string, $type)
    else
       $kyu = 0; // no grad found => rating assumed
 
-   $igs_table[0]['KEY'] = 200;
-   $igs_table[0]['VAL'] = 500;
-
-   $igs_table[1]['KEY'] = 900;
-   $igs_table[1]['VAL'] = 1000;
-
-   $igs_table[2]['KEY'] = 1500;
-   $igs_table[2]['VAL'] = 1500;
-
-   $igs_table[3]['KEY'] = 2400;
-   $igs_table[3]['VAL'] = 2400;
-
-
+   // determine rating from input
+   $needrank = true; // true if rating-type needs rank; false=need-rating
    switch( (string)$type )
    {
       case 'dragonrating':
-      {
-         $needrank = 1;
-         if( $kyu <= 0 ) break;
-
-         $rating = read_rating($string);
-      }
+         if( $kyu > 0 )
+            $rating = read_rating($string);
       break;
 
       case 'eurorating':
-      {
-         $needrank = 0;
-         if( $kyu > 0 ) break;
-
-         $rating = $val;
-      }
+         $needrank = false;
+         if( $kyu <= 0 )
+            $rating = $val;
       break;
 
       case 'eurorank':
-      {
-         $needrank = 1;
-         if( $kyu <= 0 ) break;
-
-         $rating = rank_to_rating($val, $kyu);
-      }
+         if( $kyu > 0 )
+            $rating = rank_to_rating($val, $kyu);
       break;
 
       case 'aga':
-      {
-         $needrank = 1;
-         if( $kyu <= 0 ) break;
-
-         $rating = rank_to_rating($val, $kyu);
-         if( $rating != -OUT_OF_RATING )
-            $rating -= 200.0;  // aga two stones weaker ?
-      }
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != -OUT_OF_RATING )
+               $rating -= 200.0;  // aga two stones weaker ?
+         }
       break;
-
 
       case 'agarating':
-      {
-         $needrank = 0;
-         if( $kyu > 0 ) break;
-
-         if( $val > 0 )
-            $rating = $val*100 + 1950;
-         else
-            $rating = $val*100 + 2150;
-
-         $rating -= 200.0;  // aga two stones weaker ?
-      }
+         $needrank = false;
+         if( $kyu <= 0 )
+         {
+            $rating = $val*100 + ( $val > 0 ? 1950 : 2150 );
+            $rating -= 200.0;  // aga two stones weaker ?
+         }
       break;
-
 
       case 'igs':
-      {
-         $needrank = 1;
-         if( $kyu <= 0 ) break;
-
-         $rating = rank_to_rating($val, $kyu);
-         if( $rating != -OUT_OF_RATING )
-            $rating = table_interpolate($rating, $igs_table, true);
-      }
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != -OUT_OF_RATING )
+            {
+               global $IGS_TABLE;
+               $rating = table_interpolate($rating, $IGS_TABLE, true);
+            }
+         }
       break;
 
-//      case 'igsrating':
-//      {
-//         $needrank = 0;
-//         if( $kyu > 0 ) break;
+      /*
+      case 'igsrating':
+         $needrank = 0;
+         if( $kyu <= 0 )
+         {
+             global $IGS_TABLE;
+             $rating = $val*100 - 1130 ;
+             $rating = table_interpolate($rating, $IGS_TABLE, true);
+         }
+      break;
+      */
 
-//         $rating = $val*100 - 1130 ;
-//         $rating = table_interpolate($rating, $igs_table, true);
-//      }
-//      break;
-
-      case 'iytgg':
+      case 'iytgg':  // walk through
       case 'nngs':
-      {
-         $needrank = 1;
-         if( $kyu <= 0 ) break;
-
-         $rating = rank_to_rating($val, $kyu);
-         if( $rating != -OUT_OF_RATING )
-            $rating += 100;  // one stone stronger
-      }
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != -OUT_OF_RATING )
+               $rating += 100;  // one stone stronger
+         }
       break;
 
       case 'nngsrating':
-      {
-         $needrank = 0;
-         if( $kyu > 0 ) break;
-
-         $rating = $val - 900;
-      }
+         $needrank = false;
+         if( $kyu <= 0 )
+            $rating = $val - 900;
       break;
 
       case 'japan':
-      {
-         $needrank = 1;
-         if( $kyu <= 0 ) break;
-
-         $rating = rank_to_rating($val, $kyu);
-         if( $rating != -OUT_OF_RATING )
-            $rating -= 300;  // three stones weaker
-      }
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != -OUT_OF_RATING )
+               $rating -= 300;  // three stones weaker
+         }
       break;
-
 
       case 'china':
-      {
-         $needrank = 1;
-         if( $kyu <= 0 ) break;
-
-         $rating = rank_to_rating($val, $kyu);
-         if( $rating != -OUT_OF_RATING )
-            $rating += 100;  // one stone stronger
-      }
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != -OUT_OF_RATING )
+               $rating += 100;  // one stone stronger
+         }
       break;
 
-
       case 'korea':
-      {
-         $needrank = 1;
-         if( $kyu <= 0 ) break;
-
-         $rating = rank_to_rating($val, $kyu); //need 'kyu' or 'dan'
-         if( $rating != -OUT_OF_RATING )
-            $rating += 400;  // four stones stronger
-      }
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != -OUT_OF_RATING )
+               $rating += 400;  // four stones stronger
+         }
       break;
 
       default:
-      {
          error('wrong_rank_type');
-      }
       break;
    }
+
    if( $rating == -OUT_OF_RATING )
    {
       error($needrank ? 'rank_not_rating' : 'rating_not_rank'
