@@ -23,6 +23,7 @@ require_once( "forum_functions.php" );
 chdir("../");
 require_once( "include/std_classes.php" );
 require_once( "include/filter.php" );
+require_once( "include/filterlib_mysqlmatch.php" );
 chdir("forum/");
 
 //does not work. Need at least a special SearchHidden class

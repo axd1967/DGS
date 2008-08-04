@@ -26,6 +26,7 @@ require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
+require_once( "include/filterlib_country.php" );
 require_once( "include/contacts.php" );
 
 {
@@ -43,7 +44,6 @@ require_once( "include/contacts.php" );
       error('not_allowed_for_guest');
 */
 
-   init_countries();
    //TODO: init in Contact-class
    Contact::load_globals();
 

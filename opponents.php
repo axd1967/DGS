@@ -26,6 +26,7 @@ require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
+require_once( "include/filterlib_country.php" );
 
 
 $ARR_DBFIELDKEYS = array(
@@ -84,7 +85,6 @@ $ARR_DBFIELDKEYS = array(
       error('unknown_user', "opponents.load_opponent($opp)");
 
 
-   init_countries();
    $page = "opponents.php?";
 
    // static filters

@@ -27,6 +27,8 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/contacts.php" );
+require_once( "include/filter.php" );
+require_once( "include/filterlib_country.php" );
 
 {
    #$DEBUG_SQL = true;
@@ -49,8 +51,6 @@ require_once( "include/contacts.php" );
          T_('Suitable') => new QuerySQL(SQLP_HAVING, 'haverating') );
    foreach( $handi_array as $fval => $fkey )
       $handi_filter_array[$fkey] = "Handicaptype='$fval'";
-
-   init_countries();
 
    $my_id = $player_row['ID'];
    $my_rating = $player_row['Rating2'];

@@ -26,6 +26,7 @@ require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
+require_once( "include/filterlib_country.php" );
 
 {
    #$DEBUG_SQL = true;
@@ -39,7 +40,6 @@ require_once( "include/filter.php" );
    $uid = $player_row['ID'];
    //$user = $player_row['Handle'];
 
-   init_countries();
    $page = "users.php?";
 
    // observers of game

@@ -25,6 +25,7 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/filter.php" );
+require_once( "include/filterlib_mysqlmatch.php" );
 
 {
    #$DEBUG_SQL = true;
