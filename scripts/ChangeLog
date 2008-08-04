@@ -23,6 +23,26 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-05 juga
+
+   * include/filter.php (FilterCountry, FilterMysqlMatch),
+     include/filterlib_country.php (FilterCountry),
+     include/filterlib_mysqlmatch.php (FilterMysqlMatch),
+     code_examples/filter_example2.php, forum/search.php, list_contacts.php,
+     opponents.php, search_messages.php, users.php, waiting_room.php:
+   - moved FilterCountry & FilterMysqlMatch into separate class-files
+     include/filterlib_country.php, include/filterlib_mysqlmatch.php
+   - moved init-countries into include/countries.php
+
+   * include/countries.php (init_countries),
+     change_profile.php, edit_profile.php, userinfo.php:
+   - moved init-countries into include/countries.php (revert change),
+     if countries-map is used, it must be initialized (require_once)
+
+   * include/rating.php (con_value, a_value, çonvert_to_rating):
+   - init consts-table as global vars: IGS_TABLE, A_TABLE, CON_TABLE
+   - shorten case-statements (using less breaks, assuming needrank-default)
+
 2008-08-03 juga
 
    * status.php:
