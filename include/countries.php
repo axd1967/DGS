@@ -29,7 +29,11 @@ $TranslateGroups[] = "Countries";
 // http://www.oasis-open.org/cover/iso639a.html
 // http://www.loc.gov/standards/iso639-2/langcodes.html
 
-function init_countries()
+
+// NOTES:
+// - if this file is included, countries should be used!
+// - statically init countries (file should be only included by require_cone())
+// - like this only one pass
 {
    global $COUNTRIES;
 $COUNTRIES = array(
@@ -238,5 +242,6 @@ $COUNTRIES = array(
    'zw' => T_('Zimbabwe'),
    '__' => T_('Earth'),
   );
-} //init_countries
+}
+
 ?>

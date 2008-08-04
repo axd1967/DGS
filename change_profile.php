@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
-require_once( "include/countries.php" );
+require_once( "include/countries.php" );  //translations useless here, but init needed for the keys
 require_once( "include/rating.php" );
 
 {
@@ -56,8 +56,6 @@ require_once( "include/rating.php" );
             $sendemail .= ',BOARD';
       }
    }
-
-   init_countries(); //translations useless here but init needed for the keys
 
    $boardcoords = ( @$_GET['coordsleft'] ? COORD_LEFT : 0 )
                 + ( @$_GET['coordsup'] ? COORD_UP : 0 )
