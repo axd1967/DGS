@@ -42,16 +42,19 @@ define('MATRIX_NUM_ENTRIES', 'numEntries');
   */
 class Matrix
 {
-   /*! \brief array of arrays with object-entries. */
-   var $entries;
+   /*! \brief array of arrays with object-entries (first array on x-axis). */
+   var $entries_x;
+   /*! \brief array of arrays with object-entries (first array on y-axis). */
+   var $entries_y;
    /*! \brief array with infos about matrix-characteristics. */
    var $infos;
 
    /*! \brief Constructs Matrix. */
    function Matrix()
    {
-      $this->entries = array();
-      $this->infos   = array(
+      $this->entries_x = array();
+      $this->entries_y = array();
+      $this->infos = array(
          MATRIX_NUM_ENTRIES => 0,
       );
    }
@@ -65,7 +68,8 @@ class Matrix
       if ( is_null($this->get_entry($x,$y)) )
          $this->infos[MATRIX_NUM_ENTRIES]++;
 
-      $this->entries[$x][$y] = $obj;
+      $this->entries_x[$x][$y] = $obj;
+      $this->entries_y[$y][$x] = $obj;
 
       if ( !isset($this->infos[MATRIX_MIN_X]) || $x < @$this->infos[MATRIX_MIN_X] )
          $this->infos[MATRIX_MIN_X] = $x;
@@ -80,13 +84,49 @@ class Matrix
    /*! \brief Returns added entry at specific position or NULL otherwise. */
    function get_entry( $x, $y )
    {
-      return ( isset($this->entries[$x][$y]) ) ? $this->entries[$x][$y] : NULL;
+      return ( isset($this->entries_x[$x][$y]) ) ? $this->entries_x[$x][$y] : NULL;
    }
 
-   /*! \brief Returns entries for specified x-coordinate as non-null array. */
-   function get_entries_y( $x )
+   /*! \brief Returns array with all x-coordinates. */
+   function get_x_axis()
    {
-      return ( isset($this->entries[$x]) ) ? $this->entries[$x] : array();
+      return $this->entries_x;
+   }
+
+   /*! \brief Returns array with all y-coordinates. */
+   function get_y_axis()
+   {
+      return $this->entries_y;
+   }
+
+   /*!
+    * \brief Returns entries for specified x-coordinate as non-null array.
+    * param sortflag 0 to keep original order;
+    *       otherwise sortflag like for PHP sort()-func: SORT_REGULAR, SORT_NUMERIC, SORT_STRING
+    */
+   function get_y_entries( $x, $sortflag=0 )
+   {
+      if ( !isset($this->entries_x[$x]) )
+         return array();
+      $result = $this->entries_x[$x];
+      if ( $sortflag )
+         sort($result, $sortflag);
+      return $result;
+   }
+
+   /*!
+    * \brief Returns entries for specified y-coordinate as non-null array.
+    * param sortflag 0 to keep original order;
+    *       otherwise sortflag like for PHP sort()-func: SORT_REGULAR, SORT_NUMERIC, SORT_STRING
+    */
+   function get_x_entries( $y, $sortflag=0 )
+   {
+      if ( !isset($this->entries_y[$y]) )
+         return array();
+      $result = $this->entries_y[$y];
+      if ( $sortflag )
+         sort($result, $sortflag);
+      return $result;
    }
 
    /*! \brief Returns infos-array (some keys may be unset, so use @$arr[key] to check values). */
