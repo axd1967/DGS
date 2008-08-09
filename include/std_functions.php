@@ -482,7 +482,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( !$printable )
    {
-      $menu = new Matrix();
+      $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
       // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
       $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
       $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
@@ -812,7 +812,7 @@ function make_menu_vertical($menu)
              . "\n </tr><tr>"
              . "\n  <td align=left nowrap>";
 
-      $menuitems = $menu->get_entries_y( $x );
+      $menuitems = $menu->get_y_entries( $x );
       foreach( $menuitems as $menuitem )
       {
          // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
