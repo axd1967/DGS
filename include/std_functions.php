@@ -37,6 +37,7 @@ if (!isset($page_microtime))
 require_once( "include/page_functions.php" );
 
 require_once( "include/translation_functions.php" );
+require_once( "include/classlib_matrix.php" );
 
 
 // Server birth date:
@@ -481,28 +482,26 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( !$printable )
    {
-      $menu_array = array(
-         T_('Status')       => array(1,1, 'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )),
-         T_('Waiting room') => array(1,2, 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )),
-         T_('User info')    => array(1,3, 'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )),
+      $menu = new Matrix();
+      // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
+      $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
+      $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
+      $menu->add( 1,3, array( T_('User info'),    'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )));
 
-         T_('Messages')     => array(2,1, 'list_messages.php',           array( 'accesskey' => ACCKEY_MENU_MESSAGES )),
-         T_('Send message') => array(2,2, 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )),
-         T_('Invite')       => array(2,3, 'message.php?mode=Invite',     array( 'accesskey' => ACCKEY_MENU_INVITE )),
+      $menu->add( 2,1, array( T_('Messages'),     'list_messages.php',           array( 'accesskey' => ACCKEY_MENU_MESSAGES )));
+      $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
+      $menu->add( 2,3, array( T_('Invite'),       'message.php?mode=Invite',     array( 'accesskey' => ACCKEY_MENU_INVITE )));
 
-         T_('Users')    => array(3,1, 'users.php',              array( 'accesskey' => ACCKEY_MENU_USERS )),
-         T_('Contacts') => array(3,2, 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )),
-         T_('Games')    => array(3,3, 'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )),
+      $menu->add( 3,1, array( T_('Users'),    'users.php',              array( 'accesskey' => ACCKEY_MENU_USERS )));
+      $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
+      $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )));
 
-         T_('Forums') => array(4,1, 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )),
-         T_('FAQ')    => array(4,2, 'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )),
-         T_('Docs')   => array(4,3, 'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )),
+      $menu->add( 4,1, array( T_('Forums'),   'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )));
+      $menu->add( 4,2, array( T_('FAQ'),      'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
+      $menu->add( 4,3, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
+      //$menu->add( 4,4, array( T_('Site map'), 'site_map.php',    array()));
 
-         //T_//('Site map') => array(4,3, 'site_map.php'),
-         //T_//('Translate') => array(5,1, 'translate.php', array( 'accesskey' => ACCKEY_MENU_TRANSLATE )),
-
-         T_('Vote') => array(5,1, 'features/vote/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )),
-      );
+      $menu->add( 5,1, array( T_('Vote'), 'features/vote/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
 
       $tools_array = array(); //$url => array($img,$alt,$title)
       global $SUB_PATH, $FRIENDLY_SHORT_NAME;
@@ -529,7 +528,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    else if( $player_row['MenuDirection'] == 'HORIZONTAL' )
    {
       //echo "\n  <td class=Menu>\n";
-      make_menu_horizontal($menu_array); //outside layout table
+      make_menu_horizontal($menu); //outside layout table
       make_tools( $tools_array, 0);
       //echo "\n  </td></tr><tr>";
       echo "\n<table id='pageLayout'>" //layout table
@@ -540,7 +539,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       echo "\n<table id='pageLayout'>" //layout table
          . "\n <tr class=LayoutVertical>"
          . "\n  <td class=Menu rowspan=2>\n";
-      make_menu_vertical($menu_array); //inside layout table
+      make_menu_vertical($menu); //inside layout table
       make_tools( $tools_array, 4);
       echo "\n  </td>";
    }
@@ -677,7 +676,8 @@ function grab_output_end( $filename='')
 }
 
 
-// supported formats in $menu_array:
+// make bottom page-links
+//   supported formats in $menu_array:
 //    linktext  => URL
 //    dummytext => Form-object
 function make_menu($menu_array)
@@ -723,41 +723,12 @@ function make_menu($menu_array)
    echo "\n </tr>\n</table>\n";
 }
 
-function cmp1($a, $b)
-{
-   list($a1,$a2,$d) = $a;
-   list($b1,$b2,$d) = $b;
-
-   if ($a1 != $b1)
-      return ( $a1 > $b1 ? 1 : -1 );
-
-   if( $a2 == $b2 )
-      return 0;
-   else
-      return ( $a2 > $b2 ? 1 : -1 );
-}
-
-function cmp2($a, $b)
-{
-   list($a1,$a2,$d) = $a;
-   list($b1,$b2,$d) = $b;
-
-   if ($a2 != $b2)
-      return ( $a2 > $b2 ? 1 : -1 );
-
-   if( $a1 == $b1 )
-      return 0;
-   else
-      return ( $a1 > $b1 ? 1 : -1 );
-}
-
-
-function make_menu_horizontal($menu_array)
+function make_menu_horizontal($menu)
 {
    global $base_path; //, $menu_bg_color;
 
 /*
-   //table for bottom line
+   //table for top line
    echo "\n<table class=NotPrintable width=\"100%\" border=0 cellspacing=0 cellpadding=0 bgcolor=$menu_bg_color>"
       . "\n <tr>"
       . "\n  <td>";
@@ -767,55 +738,38 @@ function make_menu_horizontal($menu_array)
    echo "\n<table id=\"pageMenu\" class=MenuHorizontal>"
       . "\n <tr>";
 
-   $cols = 4;
-   $b = $w = 100/($cols+2); //two icons
-   $w = floor($w); $b = 100-$w*($cols+1);
+   $cols = $menu->get_info(MATRIX_MAX_X);
+   $rows = $menu->get_info(MATRIX_MAX_Y);
+   $b = $w = 100/($cols+2); //two icons + col-num = 100% width
+   $w = floor($w); // width% for col #2..n
+   $b = 100-$w*($cols+1); // width% for first col
 
-   $i = 0;
-   uasort($menu_array, "cmp2");
-   foreach( $menu_array as $text => $tmp )
+   // left logo
+   $logo_line =
+      "\n  <td width=\"%d%%\" class=\"%s\" rowspan=\"%d\"><img src=\"{$base_path}images/%s\" alt=\"Dragon\"></td>";
+   echo sprintf( $logo_line, $b, 'Logo1', $rows, 'dragonlogo_bl.jpg');
+
+   for ($row=1; $row <= $rows; $row++)
    {
-      if( $i % $cols == 0 )
+      for ($col=1; $col <= $cols; $col++)
       {
-         if( $i<=$cols )
+         // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
+         $menuitem = $menu->get_entry( $col, $row );
+         if ( !is_null($menuitem) )
          {
-            if( $i==0 )
-            {
-               $t1 = round($b);
-               $t1 = " width=\"$t1%\" class=Logo1"; // class=Logo1
-               $t2 = 'dragonlogo_bl.jpg';
-               $width = "*";
-            }
-            else
-            {
-               $t1 = 100-$cumwidth;
-               $t1 = " width=\"$t1%\" class=Logo2"; // class=Logo2
-               $t2 = 'dragonlogo_br.jpg';
-               $width = "";
-            }
-            echo "\n  <td$t1 rowspan=3>"
-               . "<img src=\"{$base_path}images/$t2\" alt=\"Dragon\"></td>";
+            @list( $text, $link, $attbs ) = $menuitem;
+            $content = anchor( $base_path.$link, $text, '', $attbs);
          }
-         if( $i>0 )
-            echo "\n </tr><tr>";
-         $cumw = $b;
-         $cumwidth = round($cumw);
-      }
-      $i++;
-
-      $attbs= '';
-      @list($t1,$t2,$link,$attbs) = $tmp;
-      if( $width )
-      {
-         $cumw += $w;
-         $width = round($cumw - $cumwidth);
-         $cumwidth += $width;
-         $width = " width=\"$width%\"";
+         else
+            $content = '';
+         echo "\n  <td width=\"$w%\">$content</td>";
       }
 
-      echo "\n  <td$width>";
-      echo anchor( $base_path.$link, $text, '', $attbs);
-      echo "</td>";
+      // right logo
+      if ( $row == 1 )
+         echo sprintf( $logo_line, $w, 'Logo2', $rows, 'dragonlogo_br.jpg');
+      if ( $row < $rows )
+         echo "\n </tr><tr>";
    }
 
    echo "\n </tr>\n</table>\n";
@@ -829,7 +783,7 @@ function make_menu_horizontal($menu_array)
 */
 }
 
-function make_menu_vertical($menu_array)
+function make_menu_vertical($menu)
 {
    global $base_path; //, $menu_bg_color;
 
@@ -848,25 +802,27 @@ function make_menu_vertical($menu_array)
       . "\n </tr><tr>"
       . "\n  <td align=left nowrap>";
 
-   $i = 0;
-   //  uasort($menu_array, "cmp1");
-   foreach( $menu_array as $text => $tmp )
+   $cntX = $menu->get_info(MATRIX_MAX_X);
+   for ($x=1; $x <= $cntX; $x++)
    {
-      if( $i % 3 == 0 && $i > 0 )
-          echo "</td>"
+      if( $x > 1 )
+          echo '</td>'
              . "\n </tr><tr>"
              . "\n  <td height=1><img height=1 src=\"{$base_path}images/dot.gif\" alt=\"\"></td>"
              . "\n </tr><tr>"
              . "\n  <td align=left nowrap>";
-      $i++;
 
-      $attbs= '';
-      @list($t1,$t2,$link,$attbs) = $tmp;
-      echo anchor( $base_path.$link, $text, '', $attbs);
-      echo "<br>";
+      $menuitems = $menu->get_entries_y( $x );
+      foreach( $menuitems as $menuitem )
+      {
+         // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
+         @list( $text, $link, $attbs ) = $menuitem;
+         echo anchor( $base_path.$link, $text, '', $attbs);
+         echo '<br>';
+      }
    }
 
-   echo "</td>"
+   echo '</td>'
       . "\n </tr><tr>"
       . "\n  <td class=Logo2><img src=\"{$base_path}images/dragonlogo_br.jpg\" alt=\"Dragon\"></td>"
       . "\n </tr>"
