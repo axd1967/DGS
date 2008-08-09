@@ -23,6 +23,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-09 juga
+
+   * include/std_functions.php (start_page, make_menu_horizontal,
+       make_menu_vertical, cmp1, cmp2),
+     include/classlib_matrix.php:
+   - use Matrix-class to draw vertical and horizontal dragon-menu
+     with any x/y-layout,
+   - removed cmp1/cmp2-funcs involved in old dragon-menu drawings
+
 2008-08-05 juga
 
    * include/filter.php (FilterCountry, FilterMysqlMatch),
@@ -39,7 +48,7 @@ Changelog
    - moved init-countries into include/countries.php (revert change),
      if countries-map is used, it must be initialized (require_once)
 
-   * include/rating.php (con_value, a_value, çonvert_to_rating):
+   * include/rating.php (con_value, a_value, convert_to_rating):
    - init consts-table as global vars: IGS_TABLE, A_TABLE, CON_TABLE
    - shorten case-statements (using less breaks, assuming needrank-default)
 
@@ -205,11 +214,8 @@ Changelog
    * include/config.php:
    - adjusted comment
 
-   * features/vote,
-     features/vote/edit_feature.php,
-     features/vote/lib_votes.php,
-     features/vote/list_features.php,
-     features/vote/list_votes.php,
+   * features/vote/edit_feature.php, features/vote/lib_votes.php,
+     features/vote/list_features.php, features/vote/list_votes.php,
      features/vote/vote_feature.php:
    - added feature-voting (feature list, voting on feature)
    - start-page is list_features.php
@@ -273,8 +279,8 @@ UPDATE Players SET Boardcoords=Boardcoords|0x100;
 2008-06-05 rodival
 
    * game.php:
-   - change the simple toggle notes feature to a true switch on/off one
-      (avoid a toggle back when refreshing the page)
+   - change the simple toggle notes feature to a true switch on/off one;
+     to avoid a toggle back when refreshing the page
    - enhance the private notes management to avoid some database updates
 
    * include/table_columns.php (add_tablehead),
@@ -348,7 +354,7 @@ ALTER TABLE Players CHANGE Activity Activity INT(11) NOT NULL DEFAULT '15000';
 2008-05-26 rodival
 
    * include/table_columns.php (Table, add_tablehead, make_table,
-      is_column_displayed),
+       is_column_displayed),
      include/message_functions.php (message_list_head, message_list_body),
      list_messages.php, search_messages.php, list_tournaments.php:
    - enhanced (and finished) the management of the TABLE_NO_SORT
@@ -381,10 +387,9 @@ ALTER TABLE Players CHANGE Activity Activity INT(11) NOT NULL DEFAULT '15000';
    * include/table_columns.php, include/message_functions.php,
      list_contacts.php, opponents.php, waiting_room.php:
    - a full set of 32 columns which can be shown or hidden in the
-      table-list (id from 1 to 32)
-     the ids > 32 are static by definition
-     the ids <= 0 are no more allowed (replaced the few existing
-      ones by id 33)
+     table-list (id from 1 to 32)
+     - ids > 32 are static by definition
+     - ids <= 0 are no longer allowed: replaced the few existing ones by id 33
    - the database fields of the Column_set must be reseted to SIGNED INT:
 -----------
 ALTER TABLE Players
@@ -428,8 +433,8 @@ copy /images/favicon.ico into the root folder
    - typo
 
    * include/table_columns.php (Table, set_default_sort, set_sort,
-      current_order_string, make_sort_string, add_or_del_columnn,
-      make_tablehead, current_filter_string),
+       current_order_string, make_sort_string, add_or_del_columnn,
+       make_tablehead, current_filter_string),
      status.php (show games part), show_games.php,
      users.php, opponents.php, list_contacts.php,
      list_tournaments.php, waiting_room.php:
@@ -450,7 +455,7 @@ copy /images/favicon.ico into the root folder
      changed default sort-direction for ID (descending)
 
    * include/message_functions.php (message_list_table,
-      message_list_head, message_list_body),
+       message_list_head, message_list_body),
      status.php (show messages part), list_messages.php, search_messages.php:
    - separated message_list_table($which_part) into two clear functions
      message_list_head and message_list_body with dispatched arguments
@@ -466,7 +471,7 @@ copy /images/favicon.ico into the root folder
 2008-05-21 rodival
 
    * include/std_functions.php (make_url, build_url, build_hidden,
-      write_to_file, read_from_file),
+       write_to_file, read_from_file),
      include/filter.php, include.std_classes.php,
      include/form_functions.php,
      game.php:
@@ -501,7 +506,7 @@ copy /images/favicon.ico into the root folder
    * skins/dragon/screen.css, include/config.php,
      include/graph.php (get_image_type, image_passthru),
      include/std_functions.php (grab_output_start, grab_output_end,
-      read_from_file),
+       read_from_file),
      statistics.php, statisticspng.php, statratingspng.php,
      ratinggraph.php, ratingpng.php:
    - introduction of a cache management for the stats graphics
@@ -547,8 +552,8 @@ copy /images/favicon.ico into the root folder
 2008-05-09 rodival
 
    * include/std_functions.php (send_email, verify_email,
-      parse_tags_safe, make_html_safe, illegal_chars, is_logged_in,
-      get_request_user, user_reference),
+       parse_tags_safe, make_html_safe, illegal_chars, is_logged_in,
+       get_request_user, user_reference),
      include/error_functions.php (add_error),
      sgf.php (sgf_simpletext):
    - changing some bad ereg_* to preg_*... maybe, in the way to
@@ -575,8 +580,7 @@ copy /images/favicon.ico into the root folder
 
    * clock_tick.php, halfhourly_cron.php, daily_cron.php,
      include/std_functions.php (end_html, get_accounts_from_ip),
-     include/error_functions.php (echo_error_list, list_string,
-      dump_exit):
+     include/error_functions.php (echo_error_list, list_string, dump_exit):
    - better handling of the errors during cron jobs
    - a small optimization of the (often slow) 'Activity' level query
      in halfhourly_cron.php
@@ -601,7 +605,7 @@ copy /images/favicon.ico into the root folder
      include/filter_parser.php (parse),
      include/form_functions.php (parse_layout_global),
      include/tokenizer.php (parse_quote_double, parse_quote_quote,
-      parse_quote_escape),
+       parse_quote_escape),
      include/GoDiagram.php (echo_board):
    - replacing the string indexes using the deprecated '{}' by '[]'
 
@@ -725,8 +729,8 @@ copy /images/favicon.ico into the root folder
      the case where the 2 users can't have contacts.
 
    * include/translation_functions.php (include_all_translate_groups,
-     include_translate_group), include/quick_common.php
-     (get_preferred_browser_language, recover_language),
+       include_translate_group),
+     include/quick_common.php (get_preferred_browser_language, recover_language),
      include/make_translationfiles.php (make_known_languages):
    - adjusted the including/reconstruction of known_languages.php
      to try to avoid some of its loads (according to APC-stats
@@ -851,7 +855,7 @@ copy /images/favicon.ico into the root folder
 2008-01-18 rodival
 
    * include/quick_common.php (fnop, get_preferred_browser_language,
-     recover_language),
+       recover_language),
      include/std_functions.php, include/translation_functions.php:
    - to allow the managment of the encoding in quick_status.php
    - moved get_preferred_browser_language() and the LANG_* constants
