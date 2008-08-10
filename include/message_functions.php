@@ -90,7 +90,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $Byotime_fis = 1;
    $ByotimeUnit_fis = 'days';
    $WeekendClock = true;
-   $StdHandicap = false;
+   $StdHandicap = true;
    $Rated = true;
 
    if( $my_ID==='redraw' && is_array($gid) )
