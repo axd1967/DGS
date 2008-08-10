@@ -35,6 +35,7 @@ $ThePage = new Page('UserInfo');
       error('not_logged_in');
 
    $my_id = $player_row['ID'];
+   $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
 
    get_request_user( $uid, $uhandle, true);
    if( $uhandle )
@@ -82,6 +83,12 @@ $ThePage = new Page('UserInfo');
    $won_link = $rat_link.URI_AMP.'won=1'; //Won?=Won
    $los_link = $rat_link.URI_AMP.'won=2'; //Won?=Lost
 
+   // get player clock
+   $tmpTZ = setTZ($row['Timezone']); //for get_clock_used() and local time
+   $user_localtime = date($date_fmt, time() + (int)$timeadjust); //see $NOW
+   $user_clockused = get_clock_used($row['Nightstart']);
+   setTZ($tmpTZ);
+
    { //User infos
       $activity = activity_string( $row['ActivityLevel']);
       $registerdate = (@$row['X_Registerdate'] > 0
@@ -112,6 +119,18 @@ $ThePage = new Page('UserInfo');
       $itable->add_row( array(
                'sname' => T_('Country'),
                'sinfo' => $cntrn,
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Time zone'),
+               'sinfo' => $row['Timezone'],
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('User local time'),
+               'sinfo' => $user_localtime
+               ) );
+      $itable->add_row( array(
+               'sname' => T_('Night Start'),
+               'sinfo' => sprintf('%02d:00', $row['Nightstart']),
                ) );
       $itable->add_row( array(
                'sname' => T_('Open for matches?'),
@@ -177,24 +196,14 @@ $ThePage = new Page('UserInfo');
                'sname' => T_('Percent'),
                'sinfo' => $percent,
                ) );
-      if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
-      {//show player clock
-         $tmp= setTZ($row['Timezone']); //for get_clock_used() and local time
-         $itable->add_row( array(
-                  'rattb' => 'class=DebugInfo',
-                  'sname' => 'time zone / local time ',
-                  'sinfo' => $row['Timezone']
-                        .' / '.date($date_fmt, time() + (int)$timeadjust) //see $NOW
-                  ) );
+      if ( $is_admin )
+      { // show player clock
          $itable->add_row( array(
                   'rattb' => 'class=DebugInfo',
                   'sname' => 'night / used==used(night) ',
-                  'sinfo' => $row['Nightstart']
-                        .' / '.$row['ClockUsed']
-                        .'=='.get_clock_used($row['Nightstart'])
-                        .' ('.$row['ClockChanged'].')'
+                  'sinfo' => $row['Nightstart'] .' / '.$row['ClockUsed']
+                        .'=='.$user_clockused .' ('.$row['ClockChanged'].')'
                   ) );
-         setTZ($tmp);
       }
       $itable->echo_table();
       unset($itable);
