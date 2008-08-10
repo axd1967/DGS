@@ -85,8 +85,10 @@ $ThePage = new Page('UserInfo');
 
    // get player clock
    $tmpTZ = setTZ($row['Timezone']); //for get_clock_used() and local time
-   $user_localtime = date($date_fmt, time() + (int)$timeadjust); //see $NOW
-   $user_clockused = get_clock_used($row['Nightstart']);
+   $user_time = time() + (int)$timeadjust; //see #NOW
+   $user_gmt_offset = date('O', $user_time);
+   $user_localtime  = date($date_fmt . ' T', $user_time); // +timezone-name
+   $user_clockused  = get_clock_used($row['Nightstart']);
    setTZ($tmpTZ);
 
    { //User infos
@@ -122,7 +124,7 @@ $ThePage = new Page('UserInfo');
                ) );
       $itable->add_row( array(
                'sname' => T_('Time zone'),
-               'sinfo' => $row['Timezone'],
+               'sinfo' => $row['Timezone'] . " [GMT$user_gmt_offset]",
                ) );
       $itable->add_row( array(
                'sname' => T_('User local time'),
