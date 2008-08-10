@@ -42,9 +42,9 @@ define('MATRIX_NUM_ENTRIES', 'numEntries');
   */
 class Matrix
 {
-   /*! \brief array of arrays with object-entries (first array on x-axis). */
+   /*! \brief array of arrays with object-entries (first is array on x-axis). */
    var $entries_x;
-   /*! \brief array of arrays with object-entries (first array on y-axis). */
+   /*! \brief array of arrays with value '1' (first is array on y-axis). */
    var $entries_y;
    /*! \brief array with infos about matrix-characteristics. */
    var $infos;
@@ -69,7 +69,7 @@ class Matrix
          $this->infos[MATRIX_NUM_ENTRIES]++;
 
       $this->entries_x[$x][$y] = $obj;
-      $this->entries_y[$y][$x] = $obj;
+      $this->entries_y[$y][$x] = 1;
 
       if ( !isset($this->infos[MATRIX_MIN_X]) || $x < @$this->infos[MATRIX_MIN_X] )
          $this->infos[MATRIX_MIN_X] = $x;
@@ -90,13 +90,13 @@ class Matrix
    /*! \brief Returns array with all x-coordinates. */
    function get_x_axis()
    {
-      return $this->entries_x;
+      return array_keys( $this->entries_x );
    }
 
    /*! \brief Returns array with all y-coordinates. */
    function get_y_axis()
    {
-      return $this->entries_y;
+      return array_keys( $this->entries_y );
    }
 
    /*!
