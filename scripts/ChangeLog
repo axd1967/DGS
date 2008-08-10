@@ -25,6 +25,9 @@ Changelog
 
 2008-08-10 juga
 
+   * include/message_functions.php (game_settings_form):
+   - set default for Standard-Handicap to on
+
    * userinfo.php:
    - show users timezone, local time and night-start;
      { from release-talk 26-Oct-2007 allowed by Erik }
