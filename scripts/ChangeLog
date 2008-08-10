@@ -23,6 +23,15 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-10 juga
+
+   * userinfo.php:
+   - show users timezone, local time and night-start;
+     { from release-talk 26-Oct-2007 allowed by Erik }
+
+   * include/classlib_matrix.php (get_x_axis, get_y_axis):
+   - fixed get_x/y_axis returning only keys
+
 2008-08-09 juga
 
    * include/std_functions.php (start_page, make_menu_horizontal,
