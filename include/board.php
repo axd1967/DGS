@@ -497,8 +497,7 @@ class Board
       }
 
       if( $this->movemsg )
-         echo "<table id=\"gameMessage\" class=MessageBox><tr>" . //align=center
-            "<td width=\"" . $stone_size*19 . "\" align=left>$this->movemsg</td></tr></table><BR>\n";
+         $this->draw_move_message( $this->movemsg );
 
 
       { // goban
@@ -832,6 +831,12 @@ class Board
 
       return $out;
    } //draw_ascii_board
+
+   function draw_move_message( $msg )
+   {
+      echo "<table id=\"gameMessage\" class=MessageBox><tr>" . //align=center
+           "<td width=\"" . $this->stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
+   }
 
 
    function has_liberty_check( $x, $y, &$prisoners, $remove )
