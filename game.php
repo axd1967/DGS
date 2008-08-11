@@ -69,6 +69,7 @@ function get_alt_arg( $n1, $n2)
    $move = (int)get_alt_arg( 'move', 'm'); //move number
    $coord = (string)get_alt_arg( 'coord', 'c');
    $stonestring = (string)get_alt_arg( 'stonestring', 's');
+   $preview = (bool)@$_REQUEST['preview'];
 
    $message = get_request_arg( 'message');
 
@@ -517,7 +518,8 @@ function get_alt_arg( $n1, $n2)
 
 
 
-   echo "\n<FORM name=\"game_form\" action=\"game.php?gid=$gid\" method=\"POST\">";
+   $jumpanchor = ( $validation_step ) ? '#msgbox' : '';
+   echo "\n<FORM name=\"game_form\" action=\"game.php?gid=$gid$jumpanchor\" method=\"POST\">";
    $page_hiddens = array();
    // [ game_form start
 
@@ -580,7 +582,15 @@ function get_alt_arg( $n1, $n2)
       if ( $action == 'add_time' )
          draw_add_time( $game_row );
       else
+      {
          draw_message_box( $message);
+
+         if ( $preview )
+         {
+            $prevmsg = make_html_safe( $message, 'gameh' );
+            $TheBoard->draw_move_message( $prevmsg );
+         }
+      }
    }
    else if( $Moves > 1 )
    {
@@ -794,24 +804,31 @@ function draw_moves( $gid, $move)
 function draw_message_box(&$message)
 {
    $tabindex=1;
-   echo "<TABLE class=MessageForm>"
-      . "<TR class=Message>"
-      . "<TD class=Rubric>" . T_('Message') . ":</TD>"
+   echo '<a name="msgbox"></a>'
+      . '<TABLE class=MessageForm>'
+      . '<TR class=Message>'
+      . '<TD class=Rubric>' . T_('Message') . ':</TD>'
       . '<TD><textarea name="message" tabindex="'.($tabindex++)
          . '" cols="50" rows="8">'.textarea_safe( $message).'</textarea></TD>'
-      . "</TR>"
-      . "<TR class=Submit>"
-      . "<TD></TD>"
-      . '<TD><input type=submit name="nextgame" tabindex="'.($tabindex++)
-         .'" value="'.T_('Submit and go to next game').'">'
-         .'<input type=submit name="nextstatus" tabindex="'.($tabindex++)
-         .'" value="'.T_("Submit and go to status").'"></TD>'
-      . "</TR>"
-      . "<TR class=Back>"
+      . '</TR>'
+      . '<TR class=Submit>'
+      . '<TD></TD>'
+      . '<TD>'
+         .'<input type="submit" name="nextgame" tabindex="'.($tabindex++)
+            .'" value="'.T_('Submit and go to next game')
+            .'" accesskey="'.ACCKEY_ACT_EXECUTE.'" title="[&amp;'.ACCKEY_ACT_EXECUTE.']">'
+         .'<input type="submit" name="nextstatus" tabindex="'.($tabindex++)
+            .'" value="'.T_("Submit and go to status").'">'
+         .'<input type="submit" name="preview" tabindex="'.($tabindex++)
+            .'" value="'.T_('Preview')
+            .'" accesskey="'.ACCKEY_ACT_PREVIEW.'" title="[&amp;'.ACCKEY_ACT_PREVIEW.']">'
+      . '</TD>'
+      . '</TR>'
+      . '<TR class=Back>'
       . '<TD colspan=2><input type=submit name="nextback" tabindex="'.($tabindex++)
          .'" value="'.T_("Go back").'"></TD>'
-      . "</TR>"
-      . "</TABLE>"
+      . '</TR>'
+      . '</TABLE>'
       ;
 
 } //draw_message_box
