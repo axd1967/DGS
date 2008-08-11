@@ -107,11 +107,22 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    $action = @$_REQUEST['action'];
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
 
-   $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = ( $action == 'delete' ) && $my_game && $too_few_moves
-      && ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
+   $is_running_game = ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
 
-   if( $my_id != $ToMove_ID && !$may_del_game )
+   $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
+   $may_del_game  = $my_game && $too_few_moves && $is_running_game;
+
+   $may_resign_game = $my_game && $is_running_game;
+   if ( $action == 'resign' )
+   {
+      if ( !$may_resign_game )
+         error('invalid_action', "confirm.resign($gid,$Status,$my_id)");
+
+      if ( $my_id != $ToMove_ID )
+         $to_move = WHITE+BLACK-$to_move;
+   }
+
+   if( $my_id != $ToMove_ID && !$may_del_game && !$may_resign_game )
       error('not_your_turn');
 
 
@@ -215,9 +226,7 @@ This is why:
    {
       case 'domove': //stonestring is the list of prisoners
       {
-         if( $Status != 'PLAY' && $Status != 'PASS'
-          && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
-           )
+         if( !$is_running_game ) //after resume
             error('invalid_action',"confirm.domove.$Status");
 
          $coord = @$_REQUEST['coord'];
