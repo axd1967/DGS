@@ -17,6 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// jump to confirm.php (=form-submits)
 if( @$_REQUEST['nextgame']
       || @$_REQUEST['nextstatus']
       || @$_REQUEST['nextback']
@@ -155,7 +156,7 @@ function get_alt_arg( $n1, $n2)
       error('not_your_turn');
 
    // allow validation
-   if ( $just_looking && $action == 'add_time' )
+   if ( $just_looking && ( $action == 'add_time' || $action == 'delete' ) )
       $just_looking = false;
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) ) ;
@@ -175,7 +176,9 @@ function get_alt_arg( $n1, $n2)
    $has_observers = has_observers( $gid);
 
 
-   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
+   $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
+   $may_del_game  = $my_game && $too_few_moves
+      && ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -341,10 +344,9 @@ function get_alt_arg( $n1, $n2)
 
       case 'delete': //for validation
       {
-         if( !$too_few_moves ||
-           !($Status='PLAY' || $Status='PASS' || $Status='SCORE' || $Status='SCORE2')
-            )
-            error('invalid_action',"game.delete.$Status");
+         // check for validity
+         if ( !$may_add_time )
+            error('invalid_action',"game.delete($Status,$my_id)");
 
          $validation_step = true;
          $extra_infos[T_('Deleting game')] = 'Important';
@@ -590,23 +592,23 @@ function get_alt_arg( $n1, $n2)
       }
    }
 
-      if( $show_notes )
-      {
-         draw_notes('Y');
-         $show_notes = false;
-      }
+   if( $show_notes )
+   {
+      draw_notes('Y');
+      $show_notes = false;
+   }
 
-      //if( $my_game ) //anyway, the observers may view the comments in the sgf files
-      {
-         echo "\n<DIV class=Comments>"
-            . anchor( "game_comments.php?gid=$gid"
-                    , T_('Comments')
-                    , ''
-                    , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
-                             'target' => $FRIENDLY_SHORT_NAME.'_game_comments'
-                    ) )
-            . "</DIV>";
-      }
+   //if( $my_game ) //anyway, the observers may view the comments in the sgf files
+   {
+      echo "\n<DIV class=Comments>"
+         . anchor( "game_comments.php?gid=$gid"
+                 , T_('Comments')
+                 , ''
+                 , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
+                          'target' => $FRIENDLY_SHORT_NAME.'_game_comments'
+                 ) )
+         . "</DIV>";
+   }
 
    echo "\n</td></tr>\n</table>"; //board & associates table }--------
 
@@ -650,9 +652,6 @@ function get_alt_arg( $n1, $n2)
             $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."a=pass";
 
          $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=resign";
-
-         if( $too_few_moves )
-            $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
       }
       else if( $action == 'remove' )
       {
@@ -660,19 +659,19 @@ function get_alt_arg( $n1, $n2)
             $menu_array[T_('Done')] = $done_url;
 
          $menu_array[T_('Resume playing')] = "game.php?gid=$gid".URI_AMP."a=choose_move";
-
-         if( $too_few_moves )
-            $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
       }
       else if( $action == 'handicap' )
       {
-         $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
+         // none (at the moment)
       }
       else if( $Status == 'FINISHED' && $my_game && $opponent_ID > 0) //&& $just_looking
       {
          $menu_array[T_('Send message to user')] = "message.php?mode=NewMessage".URI_AMP."uid=$opponent_ID" ;
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$opponent_ID" ;
       }
+
+      if ( $may_del_game )
+         $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
 
       if ( $action != 'add_time' && $may_add_time )
          $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";

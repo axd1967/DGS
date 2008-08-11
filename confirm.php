@@ -85,8 +85,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    if( @$_REQUEST['nextaddtime'] )
    {
-      do_add_time( $game_row, $my_id);
-      //jump_to("game.php?gid=$gid"); // back
+      do_add_time( $game_row, $my_id); // jump back
    }
 
    if( $Status == 'INVITED' )
@@ -105,7 +104,14 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    else
       error('database_corrupted', "confirm.bad_ToMove_ID($gid)");
 
-   if( $my_id != $ToMove_ID )
+   $action = @$_REQUEST['action'];
+   $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
+
+   $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
+   $may_del_game  = ( $action == 'delete' ) && $my_game && $too_few_moves
+      && ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
+
+   if( $my_id != $ToMove_ID && !$may_del_game )
       error('not_your_turn');
 
 
@@ -117,13 +123,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    if( $qry_move != $Moves )
       error('already_played','confirm11');
 
-
-
-   $action = @$_REQUEST['action'];
-
    $next_to_move = WHITE+BLACK-$to_move;
-
-
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
 
@@ -184,14 +184,13 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    $game_finished = false;
 
-   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
 
 
 
 /* **********************
 *** HOT_SECTION ***
 >>> See also confirm.php, quick_play.php and clock_tick.php
-Various dirty things (like duplicated moves) could append
+Various dirty things (like duplicated moves) could appear
 in case of multiple calls with the same move number. This could
 happen in case of multi-players account with simultaneous logins
 or if one player hit twice the validation button during a net lag
@@ -377,10 +376,8 @@ This is why:
 
       case 'delete':
       {
-         if( !$too_few_moves ||
-           !($Status='PLAY' || $Status='PASS' || $Status='SCORE' || $Status='SCORE2')
-            )
-            error('invalid_action',"confirm.delete.$Status");
+         if( !$may_del_game )
+            error('invalid_action',"confirm.delete($Status,$my_id)");
 
 /*
   Here, the previous line was:
