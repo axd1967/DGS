@@ -23,6 +23,11 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-11 juga
+
+   * confirm.php, game.php:
+   - allow deleting game on opponents turn
+
 2008-08-10 juga
 
    * include/message_functions.php (game_settings_form):
