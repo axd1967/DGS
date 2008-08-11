@@ -23,6 +23,12 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-12 juga
+
+   * confirm.php, game.php:
+   - allow resign during opponents turn
+   - share common Status-checks using var
+
 2008-08-11 juga
 
    * game.php:
@@ -44,7 +50,7 @@ Changelog
 
    * userinfo.php:
    - show users timezone, local time and night-start;
-     { from release-talk 26-Oct-2007 allowed by Erik }
+     { from 26-Oct-2007 release-talk allowed by Erik }
 
    * include/classlib_matrix.php (get_x_axis, get_y_axis):
    - fixed get_x/y_axis returning only keys
@@ -90,7 +96,7 @@ Changelog
    * INSTALL:
    - added description for CACHE_FOLDER
 
-   * game.php, opponents.php sgf.php:
+   * game.php, opponents.php, sgf.php:
    - layout (spacing around '?'-op)
    - added comments, fixed typos, fixed debug-msg
 
