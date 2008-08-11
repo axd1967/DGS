@@ -121,6 +121,7 @@ function get_alt_arg( $n1, $n2)
       $move = (int)@$_REQUEST['gotomove'];
    if( $move<=0 )
       $move = $Moves;
+
    if( $Status == 'FINISHED' || $move < $Moves )
    {
       $may_play = false;
@@ -151,16 +152,15 @@ function get_alt_arg( $n1, $n2)
       }
    }
 
-
    // ??? no more useful: equ (!$just_looking && !$may_play) which is nearly ($may_play && !$may_play)
    if( !$just_looking && !($logged_in && $my_id == $ToMove_ID) )
       error('not_your_turn');
 
    // allow validation
-   if ( $just_looking && ( $action == 'add_time' || $action == 'delete' ) )
+   if ( $just_looking && ( $action == 'add_time' || $action == 'delete' || $action == 'resign' ) )
       $just_looking = false;
 
-   $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) ) ;
+   $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
 
    if( !$logged_in || $my_game || ($Status == 'FINISHED') )
       $my_observe = null;
@@ -177,9 +177,12 @@ function get_alt_arg( $n1, $n2)
    $has_observers = has_observers( $gid);
 
 
+   $is_running_game = ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
+
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = $my_game && $too_few_moves
-      && ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
+   $may_del_game  = $my_game && $too_few_moves && $is_running_game;
+
+   $may_resign_game = ( $action == 'choose_move') || ( $my_game && $is_running_game && ( $action == '' || $action == 'resign' ) );
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -235,9 +238,7 @@ function get_alt_arg( $n1, $n2)
    {
       case 'choose_move': //single input pass
       {
-         if( $Status != 'PLAY' && $Status != 'PASS'
-          && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
-           )
+         if( !$is_running_game ) //after resume
             error('invalid_action',"game.choose_move.$Status");
 
          $validation_step = false;
@@ -246,9 +247,7 @@ function get_alt_arg( $n1, $n2)
 
       case 'domove': //for validation after 'choose_move'
       {
-         if( $Status != 'PLAY' && $Status != 'PASS'
-          && $Status != 'SCORE' && $Status != 'SCORE2' //after resume
-           )
+         if( !$is_running_game ) //after resume
             error('invalid_action',"game.domove.$Status");
 
          $validation_step = true;
@@ -317,6 +316,9 @@ function get_alt_arg( $n1, $n2)
 
       case 'resign': //for validation
       {
+         if ( !$may_resign_game )
+            error('invalid_action',"game.resign($Status,$my_id)");
+
          $validation_step = true;
          $extra_infos[T_('Resigning')] = 'Important';
       }
@@ -324,7 +326,6 @@ function get_alt_arg( $n1, $n2)
 
       case 'add_time': //add-time for opponent
       {
-         // check for validity
          if ( !$may_add_time )
             error('invalid_action', "game.add_time");
 
@@ -345,7 +346,6 @@ function get_alt_arg( $n1, $n2)
 
       case 'delete': //for validation
       {
-         // check for validity
          if ( !$may_add_time )
             error('invalid_action',"game.delete($Status,$my_id)");
 
@@ -660,8 +660,6 @@ function get_alt_arg( $n1, $n2)
       {
          if( $Status != 'SCORE' && $Status != 'SCORE2' )
             $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."a=pass";
-
-         $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=resign";
       }
       else if( $action == 'remove' )
       {
@@ -679,6 +677,9 @@ function get_alt_arg( $n1, $n2)
          $menu_array[T_('Send message to user')] = "message.php?mode=NewMessage".URI_AMP."uid=$opponent_ID" ;
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$opponent_ID" ;
       }
+
+      if ( $may_resign_game )
+         $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=resign";
 
       if ( $may_del_game )
          $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
