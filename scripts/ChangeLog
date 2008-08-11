@@ -25,6 +25,15 @@ Changelog
 
 2008-08-11 juga
 
+   * game.php:
+   - added preview of move-submit-message
+   - added accesskeys for next-game-submit and preview
+   - jump to message-box-anchor in validation-step
+   - replaced some "-strings by '-strings
+
+   * include/board.php (draw_board, draw_move_message):
+   - added draw_move_message-func to draw and preview move-message
+
    * confirm.php, game.php:
    - allow deleting game on opponents turn
 
