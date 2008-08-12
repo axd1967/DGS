@@ -32,7 +32,9 @@ function build_TOC( $text )
          $header);
    }
    if ( count($toc_entries) > 0 )
-      return '<h4>' . T_('Table of contents') . '</h4>' . "<ul>".implode("\n", $toc_entries)."</ul>";
+      return '<div class="ReleaseTOC"><h2>' . T_('Table of contents') . '</h2>'
+         . "<ul>\n" . implode("\n", $toc_entries) . "</ul></div>\n"
+         . '<hr noshade="1" size="1">';
    else
       return '';
 } //build_TOC
@@ -44,17 +46,10 @@ function build_TOC( $text )
 
    $logged_in = who_is_logged( $player_row);
 
-   start_page('DragonGoServer NEWS', true, $logged_in, $player_row );
-
-   section( 'News', T_('DragonGoServer NEWS'));
-
-   echo "<pre>\n"; //caution: no <div> allowed inside
-
-   //$contents = implode('', file ('NEWS'));
+   // read & format NEWS-page
    $contents = @read_from_file('NEWS');
    $toc = build_TOC( $contents );
 
-   // format NEWS-page:
    $contents = make_html_safe( $contents, true );
 
    // format: "#release anchor-name [release-date] - DGS-version"
@@ -63,7 +58,13 @@ function build_TOC( $text )
       $contents);
 
    // add TOC
-   $contents = preg_replace("/%TOC%<br>/is", $toc, $contents);
+   $contents = preg_replace("/%TOC%(<br>)?/is", $toc, $contents);
+
+   start_page('DragonGoServer NEWS', true, $logged_in, $player_row );
+
+   section( 'News', T_('DragonGoServer NEWS'));
+
+   echo "<pre>\n"; //caution: no <div> allowed inside
 
    echo $contents;
 

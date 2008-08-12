@@ -1578,6 +1578,17 @@ body.Intro table#pageLayout td#pageBody div.Section {
    text-align: left;
 }
 
+body.News table#pageLayout td#pageBody div.ReleaseTOC * {
+   color: darkblue;
+   text-decoration: none;
+}
+
+/* a:hover does not work in all browsers */
+body.News table#pageLayout td#pageBody div.ReleaseTOC a:hover {
+   color: darkblue;
+   text-decoration: underline;
+}
+
 body.News table#pageLayout td#pageBody span.ReleaseTitle {
    text-align: left;
    font-size: larger;
