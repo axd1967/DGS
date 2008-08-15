@@ -25,6 +25,9 @@ Changelog
 
 2008-08-15 juga
 
+   * include/message_functions.php (game_settings_form):
+   - changed time defaults of new game: from [JAP: 90d + 10x1d] to [Fischer: 30d + 1d]
+
    * forum/search.php,
      code_examples/filter_example2.php:
    - show potential filter-warnings for mysql-match-search
