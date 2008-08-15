@@ -190,7 +190,7 @@ $ARR_DBFIELDKEYS = array(
    $usform->add_row( array(
          'DESCRIPTION', T_('Size'),
          'FILTER',      $usfilter, 1,
-         'FILTERERROR', $usfilter, 1, "<br>$FERR1", $FERR2, true ));
+         'FILTERERROR', $usfilter, 1, '<br>'.$FERR1, $FERR2, true ));
    $usform->add_row( array(
          'DESCRIPTION', T_('Rated'),
          'FILTER',      $usfilter, 2 ));
@@ -201,7 +201,7 @@ $ARR_DBFIELDKEYS = array(
    $usform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'FILTER',      $usfilter, 3,
-         'FILTERERROR', $usfilter, 3, "<br>$FERR1", $FERR2, true ));
+         'FILTERERROR', $usfilter, 3, '<br>'.$FERR1, $FERR2, true ));
    if ( $opp )
    {
       $usform->add_row( array(
