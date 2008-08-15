@@ -75,6 +75,7 @@ define('GETFILTER_USED',      4); // active filters with non-empty value
 define('GETFILTER_ERROR',     5); // active filters with non-empty value and error
 define('GETFILTER_VISIBLE',   6); // visible filters
 define('GETFILTER_INVISIBLE', 7); // invisible filters
+define('GETFILTER_WARNING',   8); // active filters with non-empty value and warning
 
 // if true, forces all filter-elements to be static (overruled by filter-config FC_HIDE)
 define('FILTER_CONF_FORCE_STATIC', true);
@@ -457,6 +458,11 @@ class SearchFilter
          {
             if ( !$filter->is_active() || $filter->is_empty() || !$filter->has_error() )
                continue; // only active and with non-empty value and with error-message
+         }
+         elseif ( $choice == GETFILTER_WARNING )
+         {
+            if ( !$filter->is_active() || $filter->is_empty() || !$filter->has_warn() )
+               continue; // only active and with non-empty value and with warng-message
          } // else: all
 
          $arr[]= $id;
@@ -1031,6 +1037,8 @@ class Filter
    var $values;
    /*! \brief last parse error-msg; filter must be error-free to build query. */
    var $errormsg;
+   /*! \brief last parse warning-msg; filter can show warnings, but still build query. */
+   var $warnmsg;
 
    // p_start, p_end, p_value containing safe SQL-values (against SQL-injection used mysql-escaping)
 
@@ -1281,7 +1289,7 @@ class Filter
       return "Filter{$this->type}={ id=[{$this->id}], name=[{$this->name}], dbf=[{$this->dbfield}], "
          . "active=[{$this->active}], visible=[{$this->visible}], "
          . "defvalues={" . map_to_string($this->defvalues) . "}}, "
-         . "value=[{$this->value}], errmsg=[{$this->errormsg}], "
+         . "value=[{$this->value}], errmsg=[{$this->errormsg}], warnmsg=[{$this->warnmsg}]"
          . "parsed p_start=[{$this->p_start}] p_end=[{$this->p_end}] p_value=[{$this->p_value}], "
          . "values={" . map_to_string($this->values) . "}}, "
          . "parser-flags=[{$this->parser_flags}], "
@@ -1304,7 +1312,7 @@ class Filter
       return $this->name;
    }
 
-   /*! \brief Returns error-meessage for last parsing of value; default is '' (no-error). */
+   /*! \brief Returns error-message for last parsing of value; default is '' (no-error). */
    function errormsg()
    {
       return $this->errormsg;
@@ -1313,7 +1321,22 @@ class Filter
    /*! \brief Returns true, if error occured during parsing of filter-value. */
    function has_error()
    {
-      return ( $this->errormsg != '' );
+      return ( (string)$this->errormsg != '' );
+   }
+
+   /*!
+    * \brief Returns warning-message for last parsing of value; default is '' (no-warning).
+    *        At the moment solely set by MySQLMatch-filter.
+    */
+   function warnmsg()
+   {
+      return $this->warnmsg;
+   }
+
+   /*! \brief Returns true, if warning occured during parsing of filter-value. */
+   function has_warn()
+   {
+      return ( (string)$this->warnmsg != '' );
    }
 
    /*!
@@ -1526,6 +1549,7 @@ class Filter
       {
          $this->value = $val;
          $this->errormsg = '';
+         $this->warnmsg = '';
 
          $this->p_start = '';
          $this->p_end = '';
