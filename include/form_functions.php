@@ -57,6 +57,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   *                  specified by the user.
   * <li> Filter  --- Include Filter-form-elements; args: SearchFilters, filter-id
   * <li> FilterError --- args: SearchFilters, filter-id, msg-prefix, msg-suffix, bool with_syntax
+  * <li> FilterWarn  --- args: SearchFilters, filter-id, msg-prefix, msg-suffix, bool with_syntax
   * </ul>
   *
   * <b>Other things you could have in a row.</b>
@@ -386,7 +387,13 @@ class Form
                                   'StartTD' => true,
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
-                                  'Attbs'   => array('class'=>'FormFiltererror') ),
+                                  'Attbs'   => array('class'=>'FormFilterError') ),
+         'FILTERWARN'   => array( 'NumArgs' => 5,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Attbs'   => array('class'=>'FormFilterWarning') ),
       );
 
       if( $echo_form_start_now )
@@ -1117,6 +1124,16 @@ class Form
       $result .= $this->print_insert_filtererror( $args[0], $args[1], $args[2], $args[3], $args[4] );
    }
 
+   /*!
+    * \brief Function to include filter-warn-string in the standard form if filter has warning, return '' otherwise
+    * \internal
+    */
+   function create_string_func_filterwarn( &$result, $args )
+   {
+      // args: SearchFilters, filter-id, prefix, suffix, with_syntax
+      $result .= $this->print_insert_filterwarn( $args[0], $args[1], $args[2], $args[3], $args[4] );
+   }
+
 
    /*!
     * \brief This will start a standard form.
@@ -1436,6 +1453,32 @@ class Form
             $msg.= "; $syntax";
       }
       return $prefix . T_('Error#filter') . ': '
+         . make_html_safe( $msg ) . $suffix;
+   }
+
+   /*!
+    * \brief This will insert filter-warning if filter has a warning.
+    *
+    * \param $filters   SearchFilters-object
+    * \param $fid       filter-id
+    * \param $prefix    warn-msg prefixed with, default ''
+    * \param $suffix    warn-msg suffixed with, default ''
+    * \param $with_syntax syntax-description appended to warn-msg, default false
+    */
+   function print_insert_filterwarn( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = false )
+   {
+      $filter = $filters->get_filter($fid);
+      if( !isset($filter) || !$filter->has_warn() )
+         return '';
+
+      $msg = $filter->warnmsg();
+      if( $with_syntax )
+      {
+         $syntax = $filter->get_syntax_description();
+         if( $syntax )
+            $msg.= "; $syntax";
+      }
+      return $prefix . T_('Warning#filter') . ': '
          . make_html_safe( $msg ) . $suffix;
    }
 
