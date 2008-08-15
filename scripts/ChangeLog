@@ -23,6 +23,32 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-15 juga
+
+   * forum/search.php,
+     code_examples/filter_example2.php:
+   - show potential filter-warnings for mysql-match-search
+   - replaced some " -> '-strings
+
+   * include/filter.php (class Filter: to_string, get_filter_keys, warnmsg, has_warn, init_parse),
+     include/filter_functions.php,
+     include/filterlib_mysqlmatch.php (class FilterMysqlMatch: parse_value, extract_match_terms):
+   - added warning-message (used for stopwords-warning of mysql-match-search)
+   - added prefix/suffix format for filter-warnings
+   - added english stopwords
+
+   * include/form_functions.php (create_string_func_filterwarn, print_insert_filterwarn):
+   - added FILTERWARN-element to show potential filter-warnings
+
+   * include/table_columns.php (make_filter_row, make_table_filter):
+   - show potential filter-warnings in filter-row
+
+   * skins/dragon/screen.css:
+   - added formats for showing filter-warnings (color teal=darkcyan)
+
+   * opponents.php:
+   - replaced some " -> '-strings
+
 2008-08-13 juga
 
    * news.php, skins/dragon/screen.css:
