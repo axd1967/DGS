@@ -78,9 +78,9 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $Komi_m = 6.5;
    $Komi_n = 6.5;
    $Komi_d = 6.5;
-   $Maintime = 3;
+   $Maintime = 1;
    $MaintimeUnit = 'months';
-   $Byotype = 'JAP';
+   $Byotype = 'FIS';
    $Byotime_jap = 1;
    $ByotimeUnit_jap = 'days';
    $Byoperiods_jap = 10;
