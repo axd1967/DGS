@@ -135,12 +135,13 @@ define('MODERATOR_SEARCH', 0);
          'CELL',        1, 'align=left width=500',
          'FILTER',      $ffilter, 2,
          'BR',
-         'FILTERERROR', $ffilter, 2, $FERR1, $FERR2."<BR>", true,
+         'FILTERWARN',  $ffilter, 2, $FWRN1, $FWRN2.'<BR>', false,
+         'FILTERERROR', $ffilter, 2, $FERR1, $FERR2.'<BR>', true,
          ));
    $fform->add_row( array(
          'DESCRIPTION', T_('Author (Userid)'),
          'FILTER',      $ffilter, 3,
-         'FILTERERROR', $ffilter, 3, "<BR>$FERR1", $FERR2, true,
+         'FILTERERROR', $ffilter, 3, '<BR>'.$FERR1, $FERR2, true,
          ));
    $fform->add_row( array(
          'DESCRIPTION', T_('Message scope#forum'),

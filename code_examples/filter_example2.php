@@ -834,6 +834,7 @@ foreach( $arr_layout as $fid => $felem )
    {
       $arr = array(
          'TAB', 'CELL', 2, 'align=left',
+         'FILTERWARN',  $filter, $fid, $FWRN1, $FWRN2."<BR>", true );
          'FILTERERROR', $filter, $fid, $FERR1, $FERR2."<BR>", true );
       $form->add_row( $arr );
    }
