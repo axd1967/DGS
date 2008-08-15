@@ -33,6 +33,15 @@ require_once( "include/filter.php" );
 define('FC_MATCH_MODE', 'match_mode');
 
 
+define('MATCH_BOOLMODE_OFF',    'bool_mode_off'); // mysql match: boolean-mode isn't used (ctrl not shown)
+define('MATCH_BOOLMODE_SET',    'bool_mode_set'); // mysql match: boolean-mode is used implicitly (ctrl not shown)
+define('MATCH_QUERY_EXPANSION', 'query_exp');     // mysql match: using query-expansion (exclusive to bool-mode)
+
+// MySQL (regex for english stopwords): see http://dev.mysql.com/doc/refman/4.1/en/fulltext-stopwords.html
+// will be marked as error for mysql-match-filter
+define('MYSQL_MATCH_STOPWORDS', "a's|able|about|above|according|accordingly|across|actually|after|afterwards|again|against|ain't|all|allow|allows|almost|alone|along|already|also|although|always|am|among|amongst|an|and|another|any|anybody|anyhow|anyone|anything|anyway|anyways|anywhere|apart|appear|appreciate|appropriate|are|aren't|around|as|aside|ask|asking|associated|at|available|away|awfully|be|became|because|become|becomes|becoming|been|before|beforehand|behind|being|believe|below|beside|besides|best|better|between|beyond|both|brief|but|by|c'mon|c's|came|can|can't|cannot|cant|cause|causes|certain|certainly|changes|clearly|co|com|come|comes|concerning|consequently|consider|considering|contain|containing|contains|corresponding|could|couldn't|course|currently|definitely|described|despite|did|didn't|different|do|does|doesn't|doing|don't|done|down|downwards|during|each|edu|eg|eight|either|else|elsewhere|enough|entirely|especially|et|etc|even|ever|every|everybody|everyone|everything|everywhere|ex|exactly|example|except|far|few|fifth|first|five|followed|following|follows|for|former|formerly|forth|four|from|further|furthermore|get|gets|getting|given|gives|go|goes|going|gone|got|gotten|greetings|had|hadn't|happens|hardly|has|hasn't|have|haven't|having|he|he's|hello|help|hence|her|here|here's|hereafter|hereby|herein|hereupon|hers|herself|hi|him|himself|his|hither|hopefully|how|howbeit|however|i'd|i'll|i'm|i've|ie|if|ignored|immediate|in|inasmuch|inc|indeed|indicate|indicated|indicates|inner|insofar|instead|into|inward|is|isn't|it|it'd|it'll|it's|its|itself|just|keep|keeps|kept|know|knows|known|last|lately|later|latter|latterly|least|less|lest|let|let's|like|liked|likely|little|look|looking|looks|ltd|mainly|many|may|maybe|me|mean|meanwhile|merely|might|more|moreover|most|mostly|much|must|my|myself|name|namely|nd|near|nearly|necessary|need|needs|neither|never|nevertheless|new|next|nine|no|nobody|non|none|noone|nor|normally|not|nothing|novel|now|nowhere|obviously|of|off|often|oh|ok|okay|old|on|once|one|ones|only|onto|or|other|others|otherwise|ought|our|ours|ourselves|out|outside|over|overall|own|particular|particularly|per|perhaps|placed|please|plus|possible|presumably|probably|provides|que|quite|qv|rather|rd|re|really|reasonably|regarding|regardless|regards|relatively|respectively|right|said|same|saw|say|saying|says|second|secondly|see|seeing|seem|seemed|seeming|seems|seen|self|selves|sensible|sent|serious|seriously|seven|several|shall|she|should|shouldn't|since|six|so|some|somebody|somehow|someone|something|sometime|sometimes|somewhat|somewhere|soon|sorry|specified|specify|specifying|still|sub|such|sup|sure|t's|take|taken|tell|tends|th|than|thank|thanks|thanx|that|that's|thats|the|their|theirs|them|themselves|then|thence|there|there's|thereafter|thereby|therefore|therein|theres|thereupon|these|they|they'd|they'll|they're|they've|think|third|this|thorough|thoroughly|those|though|three|through|throughout|thru|thus|to|together|too|took|toward|towards|tried|tries|truly|try|trying|twice|two|un|under|unfortunately|unless|unlikely|until|unto|up|upon|us|use|used|useful|uses|using|usually|value|various|very|via|viz|vs|want|wants|was|wasn't|way|we|we'd|we'll|we're|we've|welcome|well|went|were|weren't|what|what's|whatever|when|whence|whenever|where|where's|whereafter|whereas|whereby|wherein|whereupon|wherever|whether|which|while|whither|who|who's|whoever|whole|whom|whose|why|will|willing|wish|with|within|without|won't|wonder|would|would|wouldn't|yes|yet|you|you'd|you'll|you're|you've|your|yours|yourself|yourselves|zero");
+
+
  /*!
   * \class FilterMysqlMatch
   * \brief Filter for using the MySQL 'match'-command with all available options;
@@ -45,6 +54,8 @@ define('FC_MATCH_MODE', 'match_mode');
   *
   * note: special quoting used according to MATCH-syntax of mysql,
   *       i.e. no quoting used as for the Text-/Numeric-based-Filters is used
+  *
+  * note: stopwords are reported as filter->warnmsg()
   *
   * <p>Allowed Syntax:
   *    general fulltext-search for mysql: \see http://dev.mysql.com/doc/refman/4.1/en/fulltext-search.html
@@ -76,11 +87,6 @@ define('FC_MATCH_MODE', 'match_mode');
   *                  =MATCH_BOOLMODE_SET (use bool-mode but no checkbox),
   *                  =MATCH_QUERY_EXPANSION (using query-expansion)
   */
-
-define('MATCH_BOOLMODE_OFF',    'bool_mode_off'); // mysql match: boolean-mode isn't used (ctrl not shown)
-define('MATCH_BOOLMODE_SET',    'bool_mode_set'); // mysql match: boolean-mode is used implicitly (ctrl not shown)
-define('MATCH_QUERY_EXPANSION', 'query_exp');     // mysql match: using query-expansion (exclusive to bool-mode)
-
 class FilterMysqlMatch extends Filter
 {
    /*! \brief element-name for boolean-mode-checkbox. */
@@ -123,9 +129,18 @@ class FilterMysqlMatch extends Filter
 
       if ( $name === $this->name )
       { // parse terms
-         $arr_terms = $this->extract_match_terms( $this->value );
+         list( $arr_terms, $arr_stopwords ) =
+            $this->extract_match_terms( $this->value );
          if ( is_null($arr_terms) )
             return false; // no terms or error
+
+         // check for stopwords (but continue without error)
+         if ( count($arr_stopwords) > 0 )
+         {
+            $this->warnmsg =
+               sprintf( T_('Can\'t search for stopwords [%s]!'),
+                        implode(', ', $arr_stopwords) );
+         }
 
          $this->match_terms = $arr_terms;
          $this->p_value = $this->value;
@@ -209,7 +224,8 @@ class FilterMysqlMatch extends Filter
    }
 
    /*!
-    * \brief Returns array with words to search for in mysql-match search-terms;
+    * \brief Returns arrays with words to search for in mysql-match search-terms,
+    *        and another array with potential stopwords;
     * return null on error (errormsg set).
     * elements are well-formed for a (p)reg_exp using '/' as delimiter
     * \internal
@@ -232,6 +248,7 @@ class FilterMysqlMatch extends Filter
       // note (regex-chars): . \ + * ? [ ^ ] $ ( ) { } = ! < > | :
       $wordchars = "\\w'"; // chars building a mysql-match-word
       $arr = array();
+      $stopwords = array();
       $n = 0;
       foreach( $tokenizer->tokens() as $token )
       {
@@ -253,10 +270,14 @@ class FilterMysqlMatch extends Filter
             $val = trim( $val );
             if ( (string)$val != '' ) // need ''<>0, so don't use empty(val)
                $arr[]= $val;
+
+            // check for stopwords
+            if ( preg_match( "/\\b(".MYSQL_MATCH_STOPWORDS.")\\b/i", $val, $out ) )
+               $stopwords[] = $out[1];
          }
       }
 
-      return $arr;
+      return array( $arr, $stopwords );
    }
 
    /*!
