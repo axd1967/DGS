@@ -492,10 +492,23 @@ class Table
                   . ( ($syntax != '') ? "; $syntax" : '');
             }
             $errormessages = implode( '<br>', $arr_err );
-
             if ( $errormessages != '' )
                $row_cells['Error'] =
                   "\n  <td class=ErrMsg colspan={$this->Shown_Columns}>$errormessages</td>";
+
+            // build warn-messages
+            $arr = $this->Filters->get_filter_keys(GETFILTER_WARNING);
+            $arr_warn = array();
+            foreach ($arr as $id) {
+               $filter = $this->Filters->get_filter($id);
+               $arr_warn[]=
+                  "<strong>{$this->Tableheads[$id]['Description']}:</strong> "
+                  . '<em>' . T_('Warning#filter') . ': ' . $filter->warnmsg() . '</em>';
+            }
+            $warnmessages = implode( '<br>', $arr_warn );
+            if ( $warnmessages != '' )
+               $row_cells['Warning'] =
+                  "\n  <td class=WarnMsg colspan={$this->Shown_Columns}>$warnmessages</td>";
 
             $need_form = true;
          }
@@ -1050,8 +1063,13 @@ class Table
       $this->Shown_Filters++;
 
       // filter input-element
-      $class= trim(@$thead['attbs']['class']
-         . ( $filter->has_error() ? ' Error' : '' ));
+      if ( $filter->has_error() )
+         $subclass = ' Error';
+      else if ( $filter->has_warn() )
+         $subclass = ' Warning';
+      else
+         $subclass = '';
+      $class = trim( @$thead['attbs']['class'] . $subclass );
       if( $class )
          $class= " class=\"$class\"";
       $result = "\n  <td$class><div>";
