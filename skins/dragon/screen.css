@@ -307,6 +307,13 @@ p.SysMsg {
    font-weight: normal;
 }
 
+.WarnMsg {
+   color: teal;
+   text-decoration: none;
+   font-style: normal;
+   font-weight: normal;
+}
+
 span.FormWarning {
    color: darkred;
 }
@@ -773,6 +780,7 @@ table.Table tr.Head th span.Header {
  may be at the bottom of the table
 */
 table.Table tr.Error,
+table.Table tr.Warning,
 table.Table tr.Filter {
    background: #dddddd;
 }
@@ -806,8 +814,19 @@ table.Table tr.Filter td.Error {
    background: #dd0080; /* #ff0066 #ddb0b0=#ffcccc*86% #dd4080 */
 }
 
+table.Table tr.Filter td.Warning {
+   background: teal; /* #ff0066 #ddb0b0=#ffcccc*86% #dd4080 */
+}
+
 table.Table td.ErrMsg em {
    color: darkred;
+   text-decoration: none;
+   font-style: normal;
+   font-weight: normal;
+}
+
+table.Table td.WarnMsg em {
+   color: teal;
    text-decoration: none;
    font-style: normal;
    font-weight: normal;
@@ -1208,7 +1227,8 @@ table.FormClass td.FormHeader,
 table.FormClass td.FormSubmitbutton {
    text-align: center;
 }
-table.FormClass td.FormFiltererror,
+table.FormClass td.FormFilterError,
+table.FormClass td.FormFilterWarning,
 table.FormClass td.FormFilter,
 table.FormClass td.FormChapter,
 table.FormClass td.FormRadiobuttons,
