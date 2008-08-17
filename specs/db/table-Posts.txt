@@ -1,0 +1,60 @@
+###
+### Description of mysql table:  Posts
+###
+
+A thread of various is organized as tree. The root is the thread starter post.
+Replying posts are represented as tree nodes to a parent post.
+
+Example:
+  ID   Parent_ID  Thread_ID  Depth   AnswerNr   Subject
+  100      0        100        1        1       Post A
+  101    100        100        2        1       Post A.A
+  102    101        100        3        1       Post A.A.A
+  103    102        100        4        1       Post A.A.A.A
+  104    101        100        3        2       Post A.A.B
+  107    100        100        2        2       Post A.B
+  108    107        100        3        1       Post A.B.A
+
+-------------------------------------------------
+## Fields:
+
+* Parent_ID : int (FK id)
+  - Posts.ID, the current post replies to
+  - 0 for initial thread-post
+
+* Thread_ID : int (FK id)
+  - Posts.ID, which started the thread
+  - appears in all Posts of the same thread
+
+* Depth : int
+  - Thread starter post has depth=1
+  - Depth in the thread-tree, which is number of generations
+
+* AnswerNr : int
+  - Positional number starting with 1 (each child-tree-node starts with 1)
+  - Number-position of siblings in the thread-tree with the same depth,
+    i.e. posts to a parent post
+
+* PosIndex : string
+  - A string used to sort the posts in the thread using the database
+  - The string is composed of the PosIndex of the parent post plus
+    two letters, which encodes the AnswerNr in base 64, where the letters
+    are given by $order_str (see forum/forum_functions.php).
+    Any PosIndex will begin by '**' (2 times the first char of $order_str)
+  - If PosIndex is empty, the post has been edited and is not active
+
+
+The following 3 fields are only used for the thread starter post:
+
+* PostsInThread : int
+  - Total number of approved posts in the thread
+  - set only for thread starter post
+
+* LastPost : int (FK id)
+  - Posts.ID of the last post in the thread
+  - set only for thread starter post
+
+* LastChanged : date
+  - Time of the last post in the thread
+  - set only for thread starter post
+
