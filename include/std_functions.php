@@ -1316,6 +1316,15 @@ function get_cookie_prefs(&$player_row)
    }
 } //get_cookie_prefs
 
+/*! \brief Changes admin-status for player and specified admin-mask: set/unset/toggle status.
+ * param cmd command to set/unset/toggle status: y/Y/+ (=sets status), n/N/- (=unsets status), x/X/* (=toggle status)
+ * \return  1 (=admin-status granted and active),
+ *          0 (=admin-status granted, but inactive),
+ *         -1 (=status not granted, admin-level not sufficient)
+ *         -2 (=get and admin-status from cookies, but at most grant players set admin-level)
+ *         -3 (=invalid player specified)
+ */
+// can return -3(=invalid user-id), -2(?), -1(not-allowed), 0(=granted, but inactive), 1(=granted and active)
 function switch_admin_status(&$player_row, $mask=0, $cmd='')
 {
    $uid = (int)@$player_row['ID'];
