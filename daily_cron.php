@@ -243,7 +243,7 @@ if num_rows==2 {compute differences and checks}
 // Delete old forumreads
 
    db_query( 'daily_cron.forumreads',
-      "DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time)+$new_end < $NOW" );
+      "DELETE FROM Forumreads WHERE UNIX_TIMESTAMP(Time)+".SECS_NEW_END." < $NOW" );
 
 
 // Apply recently changed night hours

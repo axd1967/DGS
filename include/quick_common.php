@@ -54,6 +54,7 @@ if( !is_numeric($timeadjust) )
 
 $NOW = time() + (int)$timeadjust;
 
+//TODO: define as consts
 $date_fmt = 'Y-m-d H:i';
 $date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
 $gmdate_fmt = 'D, d M Y H:i:s \G\M\T';
@@ -67,7 +68,7 @@ define('COOKIE_PREFIX', 'cookie_');
 
 // don't set UHANDLE_NAME to 'userid' which is the handle of the
 // user currently browsing the site (associated to 'passwd').
-// This one, like 'uid', is an other user that the logged one. 
+// This one, like 'uid', is an other user that the logged one.
 define('UHANDLE_NAME', 'user'); //see quick_status.php and get_request_user()
 
 /*! SQL-clause-part applied for Games.Status to select all running games. */
@@ -77,9 +78,9 @@ define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')");
 //used in quick_status.php and associated (wap, rss ...)
 define('FOLDER_NEW', 2);
 
-//used in daily_cron.php
+//used in daily_cron.php & others
 define('DAYS_NEW_END', 4*7); // four weeks [days]
-$new_end = DAYS_NEW_END *24*3600;  // four weeks [secs]
+define('SECS_NEW_END', DAYS_NEW_END *24*3600); // four weeks [secs]
 
 
 if ( get_magic_quotes_gpc() )
