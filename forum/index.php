@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -17,30 +17,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-
-Description of mysql table Posts:
-
-Parent_ID: The post this post replies to.
-Thread_ID: The post which started the thread.
-AnswerNr: The number of siblings (i.e. posts to the parent post) when it was posted.
-Depth: The number of generations, the tread starter has depth 0.
-
-PosIndex: A string used to sort the posts in the thread. The string is composed of the
-          PosIndex of the parent plus two letters which encodes the AnswerNr in base 64,
-          where the letters are given by $order_str (see forum_functions.php).
-          Any PosIndex will begin by '**' (2 times the first char of $order_str)
-          If PosIndex is empty, the post has been edited and is not active.
-
-The following three pieces of data are only used for the first post of the thread.
-PostsInThread: Total number of approved posts in the thread.
-LastPost: Id of the last post in the thread.
-LastChanged: Time of the last post in the thread.
-*/
-
 $TranslateGroups[] = "Forum";
 
-require_once( "forum_functions.php" );
+chdir('..');
+require_once( 'forum/forum_functions.php' );
+
 $ThePage = new Page('ForumsList');
 
 {
@@ -48,70 +29,62 @@ $ThePage = new Page('ForumsList');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
+   $my_id = $player_row['ID'];
 
-   $links = LINKPAGE_INDEX;
+   $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
+   $is_moderator = ($switch_moderator == 1);
 
+   $forum_list = Forum::load_forum_list( $my_id );
+   // end of DB-stuff
 
+   $disp_forum = new DisplayForum( $my_id, $is_moderator );
+   $disp_forum->cols = 4;
 
-   $result = mysql_query("SELECT Forums.ID,Description,Name,Moderated, PostsInForum, " .
-                         "UNIX_TIMESTAMP(Posts.Time) AS Timestamp " .
-                         "FROM (Forums) LEFT JOIN Posts ON Forums.LastPost=Posts.ID " .
-                         "ORDER BY SortOrder")
-      or error("mysql_query_failed",'forum_index1');
+   $disp_forum->links = LINKPAGE_INDEX;
+   $disp_forum->links |= LINK_SEARCH;
+   if( $switch_moderator >=0 )
+      $disp_forum->links |= LINK_TOGGLE_MODERATOR;
 
-   $cols = 4;
-   $headline = array(T_('Forums') => "colspan=$cols");
-   $links |= LINK_SEARCH;
-
-   $is_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
-   if( $is_moderator < 0 )
-      $is_moderator = 0;
-   else
-   {
-      $links |= LINK_TOGGLE_MODERATOR;
-   }
+   $disp_forum->headline = array(
+      T_('Forums')    => '',
+      T_('Threads')   => 'class="HeaderThreadCnt"',
+      T_('Posts')     => 'class="HeaderPostCnt"',
+      T_('Last post') => 'class="LastPost"',
+   );
 
    $title = T_('Forum list');
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
-   print_moderation_note($is_moderator, '98%');
+   $disp_forum->print_moderation_note('98%');
+   $disp_forum->forum_start_table('Index');
 
-
-   forum_start_table('Index', $headline, $links, $cols);
-
-
-   while( $row = mysql_fetch_array( $result ) )
+   foreach( $forum_list as $forum )
    {
-      extract($row);
-      if( empty($row['Timestamp']) )
-      {
-         $date= NO_VALUE;
-         $Count= 0;
-      }
-      else
-         $date = date($date_fmt, $Timestamp);
+      $lpost = $forum->last_post;
+      $lpost_date   = $lpost->build_link_postdate( $lpost->created, 'class=LastPost' );
+      $lpost_author = ( $lpost->author->is_set() )
+         ? sprintf( ' <span class=PostUser>%s %s</span>', T_('by'), $lpost->author->user_reference())
+         : '';
 
       //incompatible with: $c=($c % LIST_ROWS_MODULO)+1;
-      echo "<tr class=Row1><td class=Name>" .
-         '<a href="list.php?forum=' . $ID . '">'
-            . make_html_safe( $Name, 'cell') . '</a>'
-         . ( $Moderated == 'Y'
+      echo '<tr class=Row1><td class=Name>'
+         . '<a href="list.php?forum=' . $forum->id . '">' . make_html_safe( $forum->name, 'cell') . '</a>'
+         . ( $forum->is_moderated()
             ? ' &nbsp;&nbsp;<span class=Moderated>[' . T_('Moderated') . ']</span>'
-            : '') .'</td>' .
-         '<td class=PostCnt>'.T_('Posts').': <strong>'
-               . $PostsInForum . '</strong></td>' .
-         '<td class=PostDate>'.T_('Last post').': <strong>'
-               . $date . "</strong></td></tr>\n";
+            : '') . '</td>'
+         . '<td class=ThreadCnt>' . $forum->count_threads . '</td>'
+         . '<td class=PostCnt>' . $forum->count_posts . '</td>'
+         . "<td class=LastPost><span class=PostDate>$lpost_date</span>$lpost_author</td>"
+         . "</tr>\n";
 
-      echo '<tr class=Row2><td colspan=3><dl><dd>'
-            . make_html_safe( $Description, 'faq')
-         . "</dd></dl></td></tr>\n";
+      echo '<tr class=Row2>'
+         . '<td colspan=4><dl><dd>' . make_html_safe( $forum->description, 'faq') . '</dd></dl></td>'
+         . "</tr>\n";
    }
-   mysql_free_result($result);
 
-   forum_end_table($links, $cols);
+   $disp_forum->forum_end_table();
 
    end_page();
 }
