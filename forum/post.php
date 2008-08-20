@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 $TranslateGroups[] = "Forum"; //local use
+
+// to increase thread-hits to show thread-"activity"
+// should be called on view & save-post
+function hit_thread( $thread )
+{
+   if ( is_numeric($thread) && $thread > 0 )
+   {
+      db_query( 'forum.hit_thread',
+         "UPDATE Posts SET Hits=Hits+1 WHERE ID='$thread' LIMIT 1" );
+   }
+}
 
 function post_message($player_row, $moderated_forum, &$thread)
 {
@@ -40,7 +51,6 @@ function post_message($player_row, $moderated_forum, &$thread)
    $Subject = mysql_addslashes( $Subject);
    $Text = mysql_addslashes( $Text);
 
-
    $moderated = ($moderated_forum || $player_row['MayPostOnForum'] == 'M');
 
    // -------   Edit old post  ----------
@@ -48,12 +58,13 @@ function post_message($player_row, $moderated_forum, &$thread)
    if( $edit > 0 )
    {
       $row = mysql_single_fetch( 'forum_post.post_message.edit.find',
-               "SELECT Subject,Text,Forum_ID,GREATEST(Time,Lastedited) AS Time ".
+               "SELECT Forum_ID,Thread_ID,Subject,Text,GREATEST(Time,Lastedited) AS Time ".
                "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'] )
          or error('unknown_parent_post', 'forum_post.post_message.edit.find');
 
       $oldSubject = mysql_addslashes( trim($row['Subject']));
       $oldText = mysql_addslashes( trim($row['Text']));
+      $thread = @$row['Thread_ID'];
 
       if( $oldSubject != $Subject || $oldText != $Text )
       {
@@ -76,6 +87,8 @@ function post_message($player_row, $moderated_forum, &$thread)
                      "Text='$oldText'" )
             or error('mysql_query_failed','forum_post.post_message.edit.insert');
       }
+
+      hit_thread( $thread );
       return $edit;
    }
    else
@@ -117,7 +130,6 @@ function post_message($player_row, $moderated_forum, &$thread)
          $Thread_ID = -1;
          $lastchanged_string = "LastChanged=FROM_UNIXTIME($NOW), ";
       }
-
 
 
 
@@ -164,6 +176,10 @@ function post_message($player_row, $moderated_forum, &$thread)
             error("mysql_insert_post", 'forum_post.new_thread');
 
          $thread = $Thread_ID = $New_ID;
+      }
+      else
+      {
+         hit_thread( $Thread_ID );
       }
 
 //   save_diagrams($GoDiagrams);
