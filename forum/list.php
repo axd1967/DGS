@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Forum";
 
-require_once( "forum_functions.php" );
+chdir('..');
+require_once( 'forum/forum_functions.php' );
 
 {
    connect2mysql();
@@ -27,93 +28,74 @@ require_once( "forum_functions.php" );
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error("not_logged_in");
+   $my_id = $player_row['ID'];
 
-   $forum = max(0,(int)@$_GET['forum']);
+   $forum_id = max(0,(int)@$_GET['forum']);
    $offset = max(0,(int)@$_GET['offset']);
 
-   $Forumname = forum_name($forum, $moderated);
+   $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
+   $is_moderator = ($switch_moderator == 1);
 
-   $show_rows = $RowsPerPage+1;
-   $result = mysql_query("SELECT Posts.Subject, Posts.Thread_ID, " .
-                         "Posts.User_ID, Posts.PostsInThread, " .
-                         "Players.Handle, Players.Name, " .
-                         "UNIX_TIMESTAMP(Forumreads.Time) AS Lastread, " .
-                         "UNIX_TIMESTAMP(Posts.LastChanged) AS Lastchanged " .
-                         "FROM (Posts) " .
-                         "LEFT JOIN Players ON Players.ID=Posts.User_ID " .
-                         "LEFT JOIN Forumreads ON (Forumreads.User_ID=" . $player_row["ID"] .
-                         " AND Forumreads.Thread_ID=Posts.Thread_ID) " .
-                         "WHERE Posts.Forum_ID=$forum AND Posts.Parent_ID=0 " .
-                         "ORDER BY Posts.LastChanged desc LIMIT $offset,$show_rows")
-      or error('mysql_query_failed','forum_list.find');
+   $forum = Forum::load_forum( $forum_id );
+   $show_rows = $forum->load_threads( $my_id, $is_moderator, $RowsPerPage, $offset );
+   // end of DB-stuff
 
-   $show_rows = mysql_num_rows($result);
+   $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id );
+   $disp_forum->offset = $offset;
+   $disp_forum->page_rows = $RowsPerPage;
 
-   $cols = 4;
-   $links = LINKPAGE_LIST;
-
-   $headline = array(
-            T_('Thread') => 'class=Subject', //"width='50%'",
-            T_('Author') => 'class=Name', //"width='20%'",
-            T_('Posts') => 'class=PostCnt', //"width='10%'  align=center",
-            T_('Last post') => 'class=PostDate'); //"width='20%'nowrap");
-   $links |= LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
-
+   $disp_forum->cols = 5;
+   $disp_forum->links = LINKPAGE_LIST;
+   $disp_forum->links |= LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
    if( $offset > 0 )
-      $links |= LINK_PREV_PAGE;
-   if( $show_rows > $RowsPerPage )
-   {
-      $show_rows = $RowsPerPage;
-      $links |= LINK_NEXT_PAGE;
-   }
+      $disp_forum->links |= LINK_PREV_PAGE;
+   if( $forum->has_more_threads() )
+      $disp_forum->links |= LINK_NEXT_PAGE;
+   if( $switch_moderator >= 0 )
+      $disp_forum->links |= LINK_TOGGLE_MODERATOR;
+   $disp_forum->headline = array(
+      T_('Thread') => 'class=Subject',
+      T_('Author') => 'class=Name',
+      T_('Hits') => 'class=HitCnt',
+      T_('Posts') => 'class=PostCnt',
+      T_('Last post') => 'class=LastPost',
+   );
 
-   $is_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
-   if( $is_moderator < 0 )
-      $is_moderator = 0;
-   else
-   {
-      $links |= LINK_TOGGLE_MODERATOR;
-   }
-
-
-   $title = T_('Forum').' - '.$Forumname;
+   $title = sprintf( '%s - %s', T_('Forum'), $forum->name );
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
-   print_moderation_note($is_moderator, '98%');
-
-   forum_start_table('List', $headline, $links, $cols);
+   $disp_forum->print_moderation_note('98%');
+   $disp_forum->forum_start_table('List');
 
    $c=0;
-   while( ($row = mysql_fetch_array( $result)) && $show_rows-- > 0 )
+   foreach( $forum->threads as $thread )
    {
-      $Handle = '';
-      $Name = '';
-      $Lastread = NULL;
-      extract($row);
-
-      if( $PostsInThread > 0 || $is_moderator )
+      if( $thread->count_posts > 0 || $is_moderator )
       {
          $c=($c % LIST_ROWS_MODULO)+1;
-         $new = get_new_string($Lastchanged, $Lastread);
-         //Posts.User_ID, Players.Handle, Players.Name
-         if( empty($Handle) ) $Handle= UNKNOWN_VALUE;
-         if( empty($Name) ) $Name= UNKNOWN_VALUE;
-         $author= user_reference( REF_LINK, 0, '', $User_ID,
-               make_html_safe($Name), $Handle);
-         $Subject = make_html_safe( $Subject, SUBJECT_HTML);
+         $lpost = $thread->last_post;
+
+         $new = $disp_forum->get_new_string( $thread->last_changed, $thread->last_read );
+         $subject = make_html_safe( $thread->subject, SUBJECT_HTML);
+         $author = $thread->author->user_reference();
+
+         $lpost_date   = $lpost->build_link_postdate( $thread->last_changed, 'class=LastPost' );
+         $lpost_author = ( $lpost->author->is_set() )
+            ? sprintf( ' <span class=PostUser>%s %s</span>', T_('by'), $lpost->author->user_reference())
+            : '';
+
          echo "<tr class=Row$c>"
-            . "<td class=Subject><a href=\"read.php?forum=$forum" . URI_AMP
-               . "thread=$Thread_ID#new1\">$Subject</a>$new</td>"
+            . '<td class=Subject>' . anchor( $thread->build_url_post('new1'), $subject ) . $new . '</td>'
             . "<td class=Name>$author</td>"
-            . "<td class=PostCnt>$PostsInThread</td>"
-            . "<td class=PostDate>" . date($date_fmt, $Lastchanged)
-               . "</td></tr>\n";
+            . "<td class=HitCnt>{$thread->count_hits}</td>"
+            . "<td class=PostCnt>{$thread->count_posts}</td>"
+            . "<td class=LastPost><span class=PostDate>$lpost_date</span>$lpost_author</td>"
+            . "</tr>\n";
       }
    }
-   mysql_free_result($result);
 
-   forum_end_table($links, $cols);
+   $disp_forum->forum_end_table();
 
    end_page();
 }
