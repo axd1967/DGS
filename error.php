@@ -85,6 +85,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    start_page("Error", true, $logged_in, $player_row );
    echo '&nbsp;<br>';
 
+   //TODO: also output label-string with error-msg !? at least for admins ...
    switch( (string)$err )
    {
       case("early_pass"):
@@ -648,6 +649,12 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       case("invalid_filter"):
       {
          echo T_("Sorry, there's a configuration problem with a search-filter.");
+      }
+      break;
+
+      case("invalid_args"):
+      {
+         echo T_("Sorry, invalid arguments used.");
       }
       break;
 
