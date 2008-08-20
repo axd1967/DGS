@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,122 +19,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Forum";
 
-require_once( "forum_functions.php" );
-require_once( "post.php" );
+chdir('..');
+require_once( 'forum/forum_functions.php' );
+require_once( 'forum/post.php' );
 
 
-function revision_history($post_id, $rx_term='')
+function revision_history( $display_forum, $post_id, $rx_term='')
 {
-   global $NOW;
-/* Those globals are used by draw_post():
-   global $ID, $User_ID, $HOSTBASE, $forum, $Name, $Handle, $Lasteditedstamp, $Lastedited,
-      $thread, $Timestamp, $date_fmt, $Lastread, $is_moderator, $NOW, $player_row,
-      $ForumName, $Score, $Forum_ID, $Thread_ID, $show_score, $PendingApproval;
-*/
-   //TODO: remove those globals!
-   global $links, $cols, $Name, $Handle, $ID, $User_ID,
-      $Lasteditedstamp, $Timestamp, $Lastread, $Forum_ID, $Thread_ID;
+   $revhist_thread = new ForumThread();
+   $revhist_thread->load_revision_history( $post_id );
+   $revhist_thread->thread_post->last_edited = 0; // don't show last-edit
+   // end of DB-stuff
 
+   $display_forum->headline = array(
+      T_('Revision history') => "colspan={$display_forum->cols}",
+   );
+   $display_forum->back_post_id = $post_id;
+   $display_forum->links |= LINK_BACK_TO_THREAD;
 
-   $headline = array(T_("Revision history") => "colspan=$cols");
-   global $back_post_id;
-   $back_post_id = $post_id;
-   $links |= LINK_BACK_TO_THREAD;
-   $Lastread = $NOW;
+   $display_forum->forum_start_table('Revision');
+   $display_forum->change_depth( 1 );
+   $display_forum->draw_post( 'Reply', $revhist_thread->thread_post, null, $rx_term );
 
-   forum_start_table('Revision', $headline, $links, $cols);
-   $cur_depth= -1;
-
-
-   $query_select = "SELECT Posts.*, " .
-      "Players.ID AS User_ID, Players.Name, Players.Handle, " .
-      "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
-      "UNIX_TIMESTAMP(GREATEST(Posts.Time,Posts.Lastedited)) AS Timestamp " .
-      "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID ";
-
-
-   $row = mysql_single_fetch( 'forum_read.revision_history.find_post',
-            $query_select . "WHERE Posts.ID='$post_id'" )
-      or error('unknown_post');
-
-   extract($row);
-   change_depth( $cur_depth, 1, $cols);
-   draw_post( 'Reply', true, $row['Subject'], $row['Text'], null, $rx_term);
-   echo "<tr><td colspan=$cols height=2></td></tr>";
-   change_depth( $cur_depth, 2, $cols);
-
-   $result = mysql_query( $query_select .
-           "WHERE Parent_ID='$post_id' AND PosIndex='' " . // '' == inactivated (edited)
-           "ORDER BY Timestamp DESC")
-      or error('mysql_query_failed','forum_read.revision_history.find_edits');
-
-
-   while( $row = mysql_fetch_array( $result ) )
+   echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
+   $display_forum->change_depth( 2 );
+   foreach( $revhist_thread->posts as $post )
    {
-      extract($row);
-      $Thread_ID=0; //already so in database... used in draw_post() to remove the subject link
-      draw_post( 'Edit' , true, $row['Subject'], $row['Text'], null, $rx_term);
-      echo "<tr><td colspan=$cols height=2></td></tr>";
+      $display_forum->draw_post( 'Edit' , $post, true, null, $rx_term);
+      echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
    }
-   mysql_free_result($result);
 
-   change_depth( $cur_depth, -1, $cols);
-   forum_end_table($links, $cols);
-   end_page();
-   exit;
+   $display_forum->change_depth( -1 );
+   $display_forum->forum_end_table();
 } //revision_history
-
-
-function change_depth( &$cur_depth, $new_depth, $cols)
-{
-   if( $new_depth < 1 && $cur_depth < 1 )
-   {
-      return;
-   }
-
-   if( $cur_depth >= 1 ) //this means that a cell table is already opened
-   {
-      echo "</table></td></tr>";
-   }
-
-   if( $new_depth < 1 ) //this means close it
-   {
-      echo "</table></td></tr>";
-      $cur_depth = -1;
-      return;
-   }
-
-   if( $cur_depth < 1 ) //this means opened it
-   {
-      echo "<tr><td colspan=$cols><table width=\"100%\" border=0 cellspacing=0 cellpadding=0>";
-   }
-
-   // then build the indenting row
-   $cur_depth = $new_depth;
-   echo "<tr>";
-   $i= min( $cur_depth, FORUM_MAX_INDENT);
-   $c= FORUM_MAX_INDENT+1 - $i;
-   $indent= "<td class=Indent>&nbsp;</td>";
-   switch( (int)$i )
-   {
-      case 1:
-      break;
-      case 2:
-         echo "$indent";
-      break;
-      case 3:
-         echo "<td class=Indent2></td>$indent";
-      break;
-      default:
-         echo "<td class=Indent2 colspan=".($i-2)."></td>$indent";
-      break;
-   }
-
-   // finally, open the cell table
-   echo "<td colspan=$c><table width=\"100%\" border=0 cellspacing=0 cellpadding=3>";
-}
-
-
 
 
 
@@ -144,24 +61,27 @@ function change_depth( &$cur_depth, $new_depth, $cols)
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error("not_logged_in");
+   $my_id = $player_row['ID'];
 
    $reply = @$_REQUEST['reply']+0;
-
-   $forum = @$_REQUEST['forum']+0;
+   $forum_id = @$_REQUEST['forum']+0;
    $thread = @$_REQUEST['thread']+0;
    $edit = @$_REQUEST['edit']+0;
    $rx_term = get_request_arg('xterm', '');
 
-   $Forumname = forum_name($forum, $moderated);
+   $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
+   $is_moderator = ($switch_moderator == 1);
+
+   $forum = Forum::load_forum( $forum_id );
 
    if( isset($_POST['post']) )
    {
-      $msg = post_message($player_row, $moderated, $thread);
+      $msg = post_message($player_row, $forum->is_moderated(), $thread);
       if( is_numeric( $msg) && $msg>0 )
-         jump_to("forum/read.php?forum=$forum".URI_AMP."thread=$thread"
+         jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
             . "#$msg");
       else
-         jump_to("forum/read.php?forum=$forum".URI_AMP."thread=$thread"
+         jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
             . URI_AMP."sysmsg=".urlencode($msg)."#new1");
    }
 
@@ -176,178 +96,181 @@ function change_depth( &$cur_depth, $new_depth, $cols)
 //      $preview_GoDiagrams = create_godiagrams($preview_Text);
    }
 
-   $cols= 2;
-   $links = LINKPAGE_READ;
+   $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id, $thread );
+   $disp_forum->cols = 2;
+   $disp_forum->links = LINKPAGE_READ;
+   $disp_forum->links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
+   $disp_forum->headline = array(
+      T_('Reading thread') => "colspan={$disp_forum->cols}"
+   );
 
-   $headline = array(T_("Reading thread") => "colspan=$cols");
-   $links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
-
-   $is_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
    //toggle moderator and preview does not work together.
    //(else add $_POST in the moderator link build)
-   if( $preview || $is_moderator < 0 )
+   if( $preview || $switch_moderator < 0 )
       $is_moderator = 0;
    else
    {
-      $links |= LINK_TOGGLE_MODERATOR;
+      $disp_forum->links |= LINK_TOGGLE_MODERATOR;
       if( (int)@$_GET['show'] > 0 )
-         approve_message( (int)@$_GET['show'], $thread, $forum, true );
+         approve_message( (int)@$_GET['show'], $thread, $forum_id, true );
       else if( (int)@$_GET['hide'] > 0 )
-         approve_message( (int)@$_GET['hide'], $thread, $forum, false );
+         approve_message( (int)@$_GET['hide'], $thread, $forum_id, false );
       else if( (int)@$_GET['approve'] > 0 )
-         approve_message( (int)@$_GET['approve'], $thread, $forum, true, true );
+         approve_message( (int)@$_GET['approve'], $thread, $forum_id, true, true );
       else if( (int)@$_GET['reject'] > 0 )
-         approve_message( (int)@$_GET['reject'], $thread, $forum, false, true );
+         approve_message( (int)@$_GET['reject'], $thread, $forum_id, false, true );
    }
 
-   $title = T_('Forum').' - '.$Forumname;
+   $title = sprintf( '%s - %s', T_('Forum'), $forum->name );
    start_page($title, true, $logged_in, $player_row);
    echo "<h3 class=Header>$title</h3>\n";
 
-   print_moderation_note($is_moderator, '99%');
+   $disp_forum->print_moderation_note('99%');
 
    if( @$_GET['revision_history'] > 0 )
    {
-      revision_history(@$_GET['revision_history'], $rx_term); //set $Lastread
-      exit; //done in revision_history
+      revision_history( $disp_forum, @$_GET['revision_history'], $rx_term ); //set $Lastread
+      end_page();
+      hit_thread( $thread );
+      exit;
    }
 
-// The table structure of the list:
-// level 1: the header, body and footer TABLE of the list
-// level 2: the boby of the list: one row per post managing its indent
-// level 3: the post cell TABLE
+   $disp_forum->forum_start_table('Read');
 
-   forum_start_table('Read', $headline, $links, $cols);
-   $cur_depth= -1;
+   // set var: Lastread
+   $Lastread = load_thread_last_read( $my_id, $thread );
 
-
-   $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) AS Lastread FROM Forumreads " .
-                         "WHERE User_ID=" . $player_row["ID"] . " AND Thread_ID=$thread")
-      or error('mysql_query_failed','forum_read.forumreads');
-
-   if( @mysql_num_rows($result) == 1 )
-      extract( mysql_fetch_array( $result ) );
-   else
-      $Lastread = NULL;
-   mysql_free_result($result);
-
-   $result = mysql_query("SELECT Posts.*, " .
-                         "UNIX_TIMESTAMP(Posts.Lastedited) AS Lasteditedstamp, " .
-                         "UNIX_TIMESTAMP(Posts.Lastchanged) AS Lastchangedstamp, " .
-                         "UNIX_TIMESTAMP(Posts.Time) AS Timestamp, " .
-                         "Players.ID AS uid, Players.Name, Players.Handle " .
-                         "FROM (Posts) LEFT JOIN Players ON Posts.User_ID=Players.ID " .
-                         "WHERE Forum_ID=$forum AND Thread_ID=$thread " .
-                         "AND PosIndex>'' " . // '' == inactivated (edited)
-                         "ORDER BY PosIndex")
-      or error('mysql_query_failed','forum_read.find_posts');
+   // select all posts of current thread
+   $qsql = new QuerySQL();
+   $qsql->add_part( SQLP_WHERE,
+      "P.Forum_ID=$forum_id",
+      "P.Thread_ID=$thread",
+      "P.PosIndex>''" ); // '' == inactivated (edited)
+   $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
+   $fthread = new ForumThread();
+   $fthread->load_posts( $qsql );
+   // end of DB-stuff
 
 
-   $thread_Subject = '';
-   $Lastchangedthread = 0 ;
-   while( $row = mysql_fetch_array( $result ) )
+   // initial post of the thread
+   $post0 = $fthread->thread_post();
+   if ( is_null($post0) )
    {
-      $Name = '?';
-      extract($row);
+      $thread_Subject = '';
+      $Lastchangedthread = 0 ;
+   }
+   else
+   {
+      $thread_Subject = $post0->subject;
+      $Lastchangedthread = $post0->last_changed;
+   }
 
-      if( $thread == $ID ) //Initial post of the thread
-      {
-         $thread_Subject = $Subject;
-         $Lastchangedthread = $Lastchangedstamp;
-      }
+   // draw posts
+   $all_my_posts = true;
+   foreach( $fthread->posts as $post )
+   {
+      $post->last_read = $Lastread;
+      $pid = $post->id;
+      $uid = $post->author->id;
+      $is_my_post = ($uid == $my_id);
+      if ( !$is_my_post ) $all_my_posts = false;
 
-      $hidden = ($Approved == 'N');
-
-      if( $hidden && !$is_moderator && $uid !== $player_row['ID'] )
+      $hidden = !$post->approved;
+      if( $hidden && !$disp_forum->is_moderator && !$is_my_post )
          continue;
 
+      $disp_forum->change_depth( $post->depth );
 
-      change_depth( $cur_depth, $Depth, $cols); //Depth from the database
-
-
-      $postClass = 'Normal';
-
-      if( $hidden )
-         $postClass = 'Hidden';
-
-      if( $reply == $ID )
-         $postClass = 'Reply';
-
-      if( $edit == $ID )
+      // TODO: refactor (don't control logic with style-var), also see draw_post-func & forum-search (moderator-stuff)
+      if( $edit == $pid )
          $postClass = 'Edit';
+      else if( $reply == $pid )
+         $postClass = 'Reply';
+      else if( $hidden )
+         $postClass = 'Hidden';
+      else
+         $postClass = 'Normal';
 
 //      $GoDiagrams = find_godiagrams($Text);
 
+      // draw current post
       $post_reference =
-         draw_post($postClass, $uid == $player_row['ID'], $Subject, $Text, NULL /*$GoDiagrams*/, $rx_term);
+         $disp_forum->draw_post($postClass, $post, $is_my_post, NULL /*$GoDiagrams*/, $rx_term);
 
-      if( $preview && $preview_ID == $ID )
+      // preview of new or existing post (within existing thread)
+      $pvw_post = $post; // copy for preview/edit
+      if( $preview && $preview_ID == $pid )
       {
-         change_depth( $cur_depth, $cur_depth + 1, $cols);
-         $Subject = $preview_Subject;
-         $Text = $preview_Text;
+         $disp_forum->change_depth( $disp_forum->cur_depth + 1 );
+
+         $pvw_post->subject = $preview_Subject;
+         $pvw_post->text = $preview_Text;
 //         $GoDiagrams = $preview_GoDiagrams;
-         draw_post('Preview', false, $Subject, $Text, NULL /*$GoDiagrams*/, $rx_term);
+         $disp_forum->draw_post('Preview', $pvw_post, false, NULL /*$GoDiagrams*/, $rx_term);
       }
 
-      if( $postClass != 'Normal' && $postClass != 'Hidden' && !$is_moderator )
+      // input-form for reply/edit-post
+      if( $postClass != 'Normal' && $postClass != 'Hidden' && !$disp_forum->is_moderator )
       {
-         if( $postClass == 'Reply' && !($preview && $preview_ID == $ID) )
+         $pvw_post_text = $pvw_post->text;
+         if( $postClass == 'Reply' && !($preview && $preview_ID == $pid) )
          {
-            if( @$_REQUEST['quote'] )
-            {
-               $Text = "<quote>$post_reference\n\n$Text</quote>\n";
-            }
+            if( ALLOW_QUOTING && @$_REQUEST['quote'] )
+               $pvw_post_text = "<quote>$post_reference\n\n$pvw_post_text</quote>\n";
             else
-               $Text = '';
+               $pvw_post_text = '';
 //            $GoDiagrams = null;
          }
-         echo "<tr><td colspan=$cols align=center>\n";
-         //used by forum_message_box(): global $forum, $thread;
-         forum_message_box($postClass, $ID, NULL /*$GoDiagrams*/, $Subject, $Text);
+         echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
+         $disp_forum->forum_message_box($postClass, $pid, NULL /*$GoDiagrams*/,
+            $pvw_post->subject, $pvw_post_text);
          echo "</td></tr>\n";
       }
    } //posts loop
-   mysql_free_result($result);
 
-   if( $preview && $preview_ID == 0 && !$is_moderator )
+
+   // preview of new thread
+   if( $preview && $preview_ID == 0 && !$disp_forum->is_moderator )
    {
-      change_depth( $cur_depth, $cur_depth + 1, $cols);
-      $Subject = $preview_Subject;
-      $Text = $preview_Text;
+      $disp_forum->change_depth( $disp_forum->cur_depth + 1 );
+      $post = new ForumPost( 0, $forum_id, 0, null, 0, 0, 0, $preview_Subject, $preview_Text );
 //      $GoDiagrams = $preview_GoDiagrams;
-      draw_post('Preview', false, $Subject, $Text, NULL /*$GoDiagrams*/, $rx_term);
-      echo "<tr><td colspan=$cols align=center>\n";
-      //used by forum_message_box(): global $forum, $thread;
-      forum_message_box('Preview', $thread, NULL /*$GoDiagrams*/, $Subject, $Text);
+      $disp_forum->draw_post('Preview', $post, false, NULL /*$GoDiagrams*/, $rx_term);
+
+      echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
+      $disp_forum->forum_message_box('Preview', $thread, NULL /*$GoDiagrams*/,
+         $post->subject, $post->text );
       echo "</td></tr>\n";
    }
 
-   if( !($reply > 0) && !$preview && !($edit>0) && !$is_moderator )
+   // footer: reply-form (for new or existing thread)
+   if( !($reply > 0) && !$preview && !($edit>0) && !$disp_forum->is_moderator )
    {
-      change_depth( $cur_depth, 1, $cols);
-      echo "<tr><td colspan=$cols align=center>\n";
+      $disp_forum->change_depth( 1 );
+      echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
       if( $thread > 0 )
          echo '<hr>';
-      //used by forum_message_box(): global $forum, $thread;
-      forum_message_box('Normal', $thread, null, $thread_Subject);
+      $disp_forum->forum_message_box('Normal', $thread, null, $thread_Subject);
       echo "</td></tr>\n";
    }
 
-   change_depth( $cur_depth, -1, $cols);
-   forum_end_table($links, $cols);
+   $disp_forum->change_depth( -1 );
+   $disp_forum->forum_end_table();
 
 
-// Update Forumreads to remove the 'new' flag
-
+   // Update Forumreads to remove the 'new' flag
    if( !$Lastread || $Lastread < $Lastchangedthread )
    {
       mysql_query( "REPLACE INTO Forumreads SET " .
-                   "User_ID=" . $player_row["ID"] . ", " .
+                   "User_ID=$my_id, " .
                    "Thread_ID=$thread, " .
                    "Time=FROM_UNIXTIME($NOW)" )
          or error('mysql_query_failed','forum_read.replace_forumreads');
    }
+
+   // increase thread-hits on "view" (& post-save) to show thread-"activity"
+   if ( !($reply > 0) && !$preview && !($edit > 0) && !$all_my_posts )
+      hit_thread( $thread );
 
    end_page();
 }
