@@ -23,6 +23,109 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-20 juga
+
+   * forum/forum_functions.php (
+       class DisplayForum, Forum, ForumThread, ForumPost, ForumUser;
+       change_depth, display_posts_pending_approval, draw_post, echo_links,
+       forum_end_table, forum_message_box, forum_start_table, get_new_string,
+       load_forum_names, load_revision_history, load_thread_last_read,
+       make_link_array, print_moderation_note),
+     forum/admin.php, forum/index.php, forum/list.php, forum/old_links_redirect.php,
+     forum/post.php (hit_thread), skins/dragon/screen.css,
+     status.php:
+     - big (unfinished) refactoring
+       - separated application logic and presentational layer (GUI & layout)
+           from database operations using classes.
+         introduced container-classes used as database-objects with additional
+           data used in application-logic.
+         get rid of extract($row) and global vars using container-classes
+           to pass data into funcs.
+         - class ForumDisplay serving as general container to help in displaying
+           forum content
+         - class Forum representing a forum-object
+         - class ForumThread helping in loading list of posts of a thread
+         - class ForumPost representing a Post with all its fields
+         - class ForumUser temporary representation of a user for creating
+           user-references
+       - moved funcs needing global data into classes serving as "global" container,
+         adjusted function-signatures accordingly moving most args into container
+         ready for more refactoring
+
+       - bugfix: setting page-offset and page-rows in DisplayForum-container
+         for navigating forum-pages
+       - simplified has-more-pages handling for page-navigation
+       - moved load_forum_names-func to load forum-names from forum/search.php
+       - moved change_depth-func and globals vars from forum/read.php
+       - moved loading of post revision history data from forum/read.php
+       - added func: hit_thread to increase thread-hit-activity
+       - used shared appearance of user-reference
+       - used QuerySQL in order to share common parts
+
+       - optimized and cleaned up code
+         - replaced var $new_level1 with const NEW_LEVEL1
+         - using convenience funcs for mysql-access
+         - replaced nested ternary-operators with if-clause
+         - position of code has changed due to refactoring
+         - clearer naming of some vars (switching admin-status and more)
+         - added comments & TODOs
+
+       - adjusted chdir-bracing to include forum_functions.php (always expect root-dir)
+       - moved ALLOW_QUOTING into config.php
+
+     - changed thread-navigation for parent post '^' on left of subject
+       into footer of post with full navigation to top/bottom, prev/next parent/post
+       using existing icons;
+       left to do is
+       - position of 'navigation'
+       - used icons
+       - implementation of full navigation
+
+   * forum/index.php:
+   - added header-row with column-titles
+   - added column "number of threads" per forum
+   - added author with user-reference for last-post
+   - added link from last-post-date to view post
+   - adjusted CSS
+
+   - moved and enhanced db-table description (Posts) from forum/index.php
+
+   * forum/list.php:
+   - added column hits representing "activity" in a thread
+   - added author with user-reference for last-post
+   - added link from last-post-date to view post
+   - adjusted CSS
+
+   * forum/read.php (revision_history, change_depth):
+   - increased thread-hits representing thread-"activity"
+   - moved loading of revision history data of a post from forum/read.php
+
+   * forum/search.php:
+   - bugfix: setting page-offset and page-rows in DisplayForum-container for navigating
+   - simplified has-more-pages handling for page-navigation
+   - bugfix: using standard access-keys for filters
+   - optimized SQL-query (removing not needed join with Forums-table)
+
+   * error.php:
+   - added error-code 'invalid_args'
+   - adjusted chdir-bracing to include forum_functions.php (always expect root-dir)
+
+   * skins/dragon/screen.css:
+   - forum-index: added header, column post-count, linked last-post-date
+   - forum-thread-list: added column hits, linked last-post-date
+   - added debug-CSS for table-working (commented out)
+
+   * include/config.php:
+   - moved global feature ALLOW_QUOTING from forum/forum_functions.php
+
+   * daily_cron.php, include/quick_common.php:
+   - replaced var $new_end with const SECS_NEW_END
+
+2008-08-16 juga
+
+   * specs/db/table-Posts.txt:
+   - moved and enhanced db-table description (Posts) from forum/index.php
+
 2008-08-15 juga
 
    * include/message_functions.php (game_settings_form):
