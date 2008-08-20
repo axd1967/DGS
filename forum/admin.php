@@ -21,8 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // may be changed to:
 // translations removed for this page: $TranslateGroups[] = "Admin";
 
-require_once( "forum_functions.php" );
-require_once( "../include/faq_functions.php" ); //for TD_button()
+chdir('..');
+require_once( "forum/forum_functions.php" );
+require_once( "include/faq_functions.php" ); //for TD_button()
+
 $ThePage = new Page('ForumAdmin');
 
 {

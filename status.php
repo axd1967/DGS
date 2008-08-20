@@ -264,10 +264,8 @@ $ThePage = new Page('Status');
    if( (@$player_row['admin_level'] & ADMIN_FORUM) )
    {
       section( 'Pending', '');
-      chdir('forum');
-      require_once('forum_functions.php');
+      require_once('forum/forum_functions.php'); // NOTE: always included, but only executed here !!
       display_posts_pending_approval();
-      chdir('..');
    }
 } // show pending posts
 

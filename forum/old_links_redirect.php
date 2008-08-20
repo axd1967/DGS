@@ -1,8 +1,7 @@
 <?php
 
-chdir("../");
+chdir('..');
 require_once( "include/quick_common.php" );
-chdir("forum/");
 
 connect2mysql();
 
@@ -19,3 +18,4 @@ $row = mysql_single_fetch('forum_old_links_redirect',
 
 header("Location: ../forum/read.php?forum=" . $row['Forum_ID'] .
        "&thread=" . $row['Thread_ID'] . "#" . $row['ID']);
+?>
