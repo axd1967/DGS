@@ -2159,34 +2159,60 @@ table#forumIndex tr.Row2 dl {
    margin: 0px;
    padding: 0px;
 }
-
 table#forumIndex td.Name {
    width: 50%;
 }
 table#forumIndex td.Name a {
    font-weight: bold;
 }
-table#forumIndex td.PostCnt,
-table#forumIndex td.PostDate {
+table#forumIndex td.HeaderThreadCnt,
+table#forumIndex td.HeaderPostCnt {
+   text-align: right;
+}
+table#forumIndex td.ThreadCnt {
+   text-align: right;
+}
+table#forumIndex td.PostCnt {
+   text-align: right;
+}
+table#forumIndex td.LastPost span.PostDate {
    white-space: nowrap;
+   font-weight: bold;
+}
+table#forumIndex td.LastPost span.PostUser {
+   white-space: nowrap;
+}
+table#forumIndex td.LastPost a.LastPost {
+   color: black;
+   text-decoration: none;
+}
+table#forumIndex td.LastPost a:hover.LastPost {
+   text-decoration: underline;
 }
 
 /* threads list */
 table#forumList td.Subject {
    width: 40%;
 }
-
 table#forumList td.Name {
    width: 20%;
 }
-
+table#forumList td.HitCnt,
 table#forumList td.PostCnt {
    text-align: right;
+}
+table#forumList td.LastPost span.PostDate {
    white-space: nowrap;
 }
-
-table#forumList td.PostDate {
+table#forumList td.LastPost span.PostUser {
    white-space: nowrap;
+}
+table#forumList td.LastPost a.LastPost {
+   color: black;
+   text-decoration: none;
+}
+table#forumList td.LastPost a:hover.LastPost {
+   text-decoration: underline;
 }
 
 /* posts view */
@@ -2653,3 +2679,9 @@ body#dDGS table#pageMenu {
 
 
 /* ------------------------- */
+/* for debugging
+table.Forum td {
+   border: 2px dotted red;
+}
+*/
+
