@@ -113,4 +113,9 @@ define('ACCKEY_ACT_FILT_RESET',  'z');
 // access keys for specific pages
 define('ACCKEYP_GAME_COMMENT',   '');
 
+
+// Global Config for Features on DGS
+define('ALLOW_QUOTING', 0);
+
+
 ?>
