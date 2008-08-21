@@ -49,8 +49,7 @@ class HTMLPage
    /*! \brief Constructor. Create a new page and initialize it. */
    function HTMLPage( $_pageid=false)
    {
-      global $SUB_PATH;
-      $this->BaseName = substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH));
+      $this->BaseName = substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
 
       if( !is_string($_pageid) )
          $_pageid = substr( $this->BaseName, 0, strrpos($this->BaseName,'.'));
