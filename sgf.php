@@ -25,7 +25,7 @@ $quick_mode = (boolean)@$_REQUEST['quick_mode'];
 if( $quick_mode )
    $TheErrors->set_mode(ERROR_MODE_PRINT);
 
-// can't use html_entity_decode() because of the '&nbsp;' below: 
+// can't use html_entity_decode() because of the '&nbsp;' below:
 $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES); //HTML_SPECIALCHARS or HTML_ENTITIES
 $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
 $reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_entity_decode()
@@ -357,7 +357,7 @@ $array=array();
 
    $owned_comments = @$_GET['owned_comments'];
    if ( $owned_comments )
-      $field_owned = 
+      $field_owned =
          'black.Sessioncode AS Blackscode, ' .
          'white.Sessioncode AS Whitescode, ' .
          'UNIX_TIMESTAMP(black.Sessionexpire) AS Blackexpire, ' .
@@ -419,15 +419,15 @@ $array=array();
    header( "Content-Description: PHP Generated Data" );
 
    //to allow some mime applications to find it in the cache
-   header('Expires: ' . gmdate($gmdate_fmt, $NOW+5*60));
-   header('Last-Modified: ' . gmdate($gmdate_fmt, $NOW));
+   header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
+   header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
 
 
    echo "(\n;FF[$sgf_version]GM[1]" . ( $charset ? "CA[$charset]" : '' )
-      . "\nPC[$FRIENDLY_LONG_NAME: $HOSTBASE]"
+      . "\nPC[".FRIENDLY_LONG_NAME.": ".HOSTBASE."]"
       . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
       . "\nGN[" . sgf_simpletext($filename) . "]"
-      . "\nGC[Game ID: $gid".($Rated=='N'?'':', rated')."]"   //({$HOSTBASE}game.php?gid=$gid)
+      . "\nGC[Game ID: $gid".($Rated=='N'?'':', rated')."]"   //({HOSTBASE}game.php?gid=$gid)
       . "\nPB[" . sgf_simpletext("$Blackname ($Blackhandle)") . "]"
       . "\nPW[" . sgf_simpletext("$Whitename ($Whitehandle)") . "]";
 
