@@ -47,19 +47,19 @@ unset( $xmltrans["\t"]);
 unset( $xmltrans["\n"]);
 
 // XML only supports these entities: &amp; &lt; &gt; &quot;
-//  but they must be used in text fields 
+//  but they must be used in text fields
 // see also <![CDATA[#]]> for particular cases.
 $xmltrans['&'] = '&amp;';
 $xmltrans['<'] = '&lt;';
 $xmltrans['>'] = '&gt;';
 $xmltrans['"'] = '&quot;';
-      
+
 for ( $i=0x80; $i<0x100 ; $i++ )
    $xmltrans[chr($i)] = "&#$i;";
 
 
 // can't use html_entity_decode() because of the '&nbsp;' below:
-//HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES 
+//HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES
 $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
 $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
 $reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_entity_decode()
@@ -103,7 +103,7 @@ function wap_id()
 $wap_opened= false;
 function wap_open( $title)
 {
-   global $encoding_used, $HOSTBASE, $NOW;
+   global $encoding_used, $NOW;
 
    ob_start("ob_gzhandler");
    global $wap_opened;
@@ -131,8 +131,7 @@ function wap_close( )
 
 function card_open( $cardid, $head)
 {
-   global $FRIENDLY_SHORT_NAME;
-   $head = addslashes($FRIENDLY_SHORT_NAME).' - '.addslashes($head);
+   $head = addslashes(FRIENDLY_SHORT_NAME).' - '.addslashes($head);
    return "<card id=\"$cardid\" title=\"$head\">";
 }
 
@@ -183,10 +182,7 @@ function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='
 function wap_error( $str, $title='', $link='')
 {
    if( !$link )
-   {
-      global $HOSTBASE;
-      $link= $HOSTBASE;
-   }
+      $link= HOSTBASE;
    if( !$title )
       $title= 'ERROR';
 
@@ -197,10 +193,7 @@ function wap_error( $str, $title='', $link='')
 function wap_warning( $str, $title='', $link='')
 {
    if( !$link )
-   {
-      global $HOSTBASE;
-      $link= $HOSTBASE;
-   }
+      $link= HOSTBASE;
    if( !$title )
       $title= 'WARNING';
 
@@ -371,7 +364,7 @@ else
    $wap_sep = "\n<br/>";
 
    $tit= "Status of $my_name";
-   $lnk= $HOSTBASE.'status.php';
+   $lnk= HOSTBASE.'status.php';
    wap_open( $tit);
 
    $cardid= 'login';
@@ -417,7 +410,7 @@ else
 
       $hdr= "Message $i";
       $tit= "From: $sendname";
-      $lnk= $HOSTBASE.'message.php?mid='.$mid;
+      $lnk= HOSTBASE.'message.php?mid='.$mid;
       $dat= @$row['date'];
       $dsc= //"Message: $mid" . $wap_sep .
             //"Folder: ".FOLDER_NEW . $wap_sep .
@@ -444,7 +437,7 @@ else
 
       $hdr= "Game $i";
       $tit= "Opponent: $opponame";
-      $lnk= $HOSTBASE.'game.php?gid='.$gid;
+      $lnk= HOSTBASE.'game.php?gid='.$gid;
       $dat= @$row['date'];
       $dsc= //"Game: $gid" . $wap_sep .
             //"Opponent: $opponame" . $wap_sep .
@@ -458,7 +451,7 @@ else
 
       wap_item( $cardid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
    }
-   
+
    wap_close();
 }
 ?>
