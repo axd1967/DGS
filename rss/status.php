@@ -25,11 +25,11 @@ define('ALLOW_AUTH', true);
 // Allowed characters are not obvious with our RSS Feeder
 // - because XML restrictions are strong
 // - because our RSS can be read over the world
-// - because it could have to send any original DGS charsets (within user names) 
+// - because it could have to send any original DGS charsets (within user names)
 // There are two ways left (to be tested). Shortly:
 // - 'iso': iso-8859-1 charsset + chars [^\x20-\x7f] escaped
 // - 'utf': UTF-8 charsset + chars [\x00-\x1f] escaped
-define('CHARSET_MODE', 'utf'); //'iso' or 'utf' 
+define('CHARSET_MODE', 'utf'); //'iso' or 'utf'
 
 define('CACHE_MIN', 10);
 
@@ -90,8 +90,8 @@ unset( $xmltrans["\t"]);
 unset( $xmltrans["\n"]);
 
 // XML only supports these entities: &amp; &lt; &gt; &quot;
-//  but they must be used in text fields 
-// see also <![CDATA[#]]> for particular cases. 
+//  but they must be used in text fields
+// see also <![CDATA[#]]> for particular cases.
 $xmltrans['&'] = '&amp;';
 $xmltrans['<'] = '&lt;';
 $xmltrans['>'] = '&gt;';
@@ -106,7 +106,7 @@ $xmltrans['\''] = '\\\'';
 $xmltrans['$'] = '\$';
 */
 //$xmltrans['\''] = '&#'.ord('\'').';';
-      
+
 switch( (string)CHARSET_MODE )
 {
    case 'iso':
@@ -131,7 +131,7 @@ switch( (string)CHARSET_MODE )
 
 
 // can't use html_entity_decode() because of the '&nbsp;' below:
-//HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES 
+//HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES
 $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
 $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
 $reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_entity_decode()
@@ -149,7 +149,7 @@ function rss_safe( $str)
    $str = reverse_htmlentities( $str);
  global $xmltrans;
    //XML seems to not like some chars sequances (like "'$$'")
-   return '<![CDATA[' . strtr($str, $xmltrans) . ']]>'; 
+   return '<![CDATA[' . strtr($str, $xmltrans) . ']]>';
    //return strtr($str, $xmltrans);
 /*
    //XML only supports these entities: &amp; &lt; &gt; &quot;
@@ -164,7 +164,7 @@ function rss_safe( $str)
 function rss_link( $lnk)
 {
    //XML does not support some URL chars (like '#')
-   return '<![CDATA[' . $lnk . ']]>'; 
+   return '<![CDATA[' . $lnk . ']]>';
 }
 
 
@@ -188,7 +188,7 @@ function rss_tag( $tag, $str)
 $rss_opened= false;
 function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACHE_MIN)
 {
-   global $encoding_used, $HOSTBASE, $FRIENDLY_LONG_NAME, $NOW;
+   global $encoding_used, $NOW;
 
    ob_start("ob_gzhandler");
    global $rss_opened;
@@ -201,7 +201,7 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACH
       //$encoding_used = 'iso-8859-1';
 
    if( empty($html_clone) )
-      $html_clone = $HOSTBASE;
+      $html_clone = HOSTBASE;
 
    if( empty($description) )
       $description = $title;
@@ -213,33 +213,33 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACH
         . " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
    echo "<!--
 
-If you're seeing this, you've clicked on the link 
-for $FRIENDLY_LONG_NAME Quick RSS feed.  
-This file is not meant to be read by a web 
+If you're seeing this, you've clicked on the link
+for ".FRIENDLY_LONG_NAME." Quick RSS feed.
+This file is not meant to be read by a web
 browser directly. Instead you're meant to copy
 the URL for the file, which is:
 
-  {$HOSTBASE}rss/status.php
+  {".HOSTBASE."}rss/status.php
 
 and paste it into your RSS reader or podcast program.
 
 -->\n";
 
 /*
-If you need to know more about how to do this, 
-please go to the following web pages to learn 
+If you need to know more about how to do this,
+please go to the following web pages to learn
 about RSS services.
 */
 
-   $title = $FRIENDLY_LONG_NAME.' - '.$title;
+   $title = FRIENDLY_LONG_NAME.' - '.$title;
    echo " <channel>\n"
-      . '  '.rss_tag( 'title', rss_safe( $title)) 
-      . '  '.rss_tag( 'link', rss_link( $html_clone)) 
-      . '  '.rss_tag( 'pubDate', rss_date( $last_modified_stamp)) 
+      . '  '.rss_tag( 'title', rss_safe( $title))
+      . '  '.rss_tag( 'link', rss_link( $html_clone))
+      . '  '.rss_tag( 'pubDate', rss_date( $last_modified_stamp))
       . ( is_numeric( $cache_minutes)
             ? '  '.rss_tag( 'ttl', $cache_minutes) : '')
-      . '  '.rss_tag( 'language', 'en-us') 
-      . '  '.rss_tag( 'description', rss_safe( $description)) 
+      . '  '.rss_tag( 'language', 'en-us')
+      . '  '.rss_tag( 'description', rss_safe( $description))
       ;
 }
 
@@ -278,10 +278,7 @@ function rss_item( $title, $link, $description='', $pubDate='', $category='', $g
 function rss_error( $str, $title='', $link='')
 {
    if( !$link )
-   {
-      global $HOSTBASE;
-      $link= $HOSTBASE;
-   }
+      $link= HOSTBASE;
    if( !$title )
       $title= 'ERROR';
    else
@@ -294,10 +291,7 @@ function rss_error( $str, $title='', $link='')
 function rss_warning( $str, $title='', $link='')
 {
    if( !$link )
-   {
-      global $HOSTBASE;
-      $link= $HOSTBASE;
-   }
+      $link= HOSTBASE;
    if( !$title )
       $title= 'Warning';
    else
@@ -313,10 +307,9 @@ function rss_warning( $str, $title='', $link='')
 */
 function rss_auth( $cancel_str, $uhandle='')
 {
-   global $FRIENDLY_LONG_NAME;
    //if( $uhandle ) $uhandle= ' - '.$uhandle; else
       $uhandle= '';
-   $uhandle= $FRIENDLY_LONG_NAME . $uhandle;
+   $uhandle= FRIENDLY_LONG_NAME . $uhandle;
 
    header("WWW-Authenticate: Basic realm=\"$uhandle\"");
    header('HTTP/1.0 401 Unauthorized');
@@ -434,7 +427,7 @@ else
    $rss_sep = "\n - ";
 
    $tit= "Status of $my_name";
-   $lnk= $HOSTBASE.'status.php';
+   $lnk= HOSTBASE.'status.php';
    $dsc= "Messages and Games for $my_name";
    rss_open( $tit, $dsc, $lnk);
 
@@ -470,7 +463,7 @@ else
       $mid = (int)@$row['mid'];
 
       $tit= "Message from $sendname";
-      $lnk= $HOSTBASE.'message.php?mid='.$mid;
+      $lnk= HOSTBASE.'message.php?mid='.$mid;
       $dat= @$row['date'];
       $dsc= "Message: $mid" . $rss_sep .
             //"Folder: ".FOLDER_NEW . $rss_sep .
@@ -504,7 +497,7 @@ else
       $move = (int)@$row['Moves'];
 
       $tit= "Game with $opponame";
-      $lnk= $HOSTBASE.'game.php?gid='.$gid;
+      $lnk= HOSTBASE.'game.php?gid='.$gid;
       $mov= $lnk.URI_AMP.'move='.$move;
       $dat= @$row['date'];
       $dsc= "Game: $gid" . $rss_sep .
@@ -514,12 +507,12 @@ else
       rss_item( $tit, $lnk, $dsc, $dat, $cat, $mov);
    }
 
-    
+
    if( $nothing_found )
    {
-      //rss_warning('empty lists', 'empty lists', $HOSTBASE.'status.php');
+      //rss_warning('empty lists', 'empty lists', HOSTBASE.'status.php');
       $tit= "Empty lists";
-      $lnk= $HOSTBASE.'status.php';
+      $lnk= HOSTBASE.'status.php';
       $dsc= "No awaiting games" . $rss_sep .
             "No awaiting messages";
       rss_item( $tit, $lnk, $dsc);

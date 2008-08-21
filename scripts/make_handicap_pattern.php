@@ -306,13 +306,13 @@ C[$comment]',
     echo "<br>\n".$dst;
 
     $sgf= "(;FF[4]GM[1]
-PC[$FRIENDLY_LONG_NAME: $HOSTBASE]
+PC[".FRIENDLY_LONG_NAME.": ".HOSTBASE."]
 SZ[$size]
 GC[Standard handicap patterns]
 GN[$dst]";
 
     $npar=1;
-    
+
     if( $size == 7 )
       $step=&$step_s7;
     else if( $size & 1 )
@@ -325,9 +325,9 @@ GN[$dst]";
     $dm= ceil($ds/2);
     $dn= floor(($dl+$dm)/2);
     $db= min(ceil($dl/2),$dl-1);
-    
+
     $cnt=1;
-    for( $ha=1 ; $ha<=MAX_PATTERN_SIZE ; $ha++ ) {    
+    for( $ha=1 ; $ha<=MAX_PATTERN_SIZE ; $ha++ ) {
       if( $size<=6 ) {
         if( $cnt>8 ) break;
 /*
@@ -342,12 +342,12 @@ GN[$dst]";
         //if( $cnt>29 ) break;
         if( $ha>=10 && $ha<=13 && $dn==$dl+1 ) continue;
       }
-    
-      $cnt++;  
+
+      $cnt++;
       $str=@$step[$ha];
       if( !$str ) continue;
       $npar+= count(explode('(',$str))-count(explode(')',$str));
-      
+
       $str=str_replace('{','".number2sgf_coords(',$str);
       $str=str_replace('}',',$size)."',$str);
       $str='$str="'.$str.'";';
@@ -355,7 +355,7 @@ GN[$dst]";
       eval($str);
       $sgf.= $str;
     }
-    
+
     while( $npar-- >0 )
       $sgf.= '
 )';
