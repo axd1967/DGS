@@ -615,7 +615,7 @@ function get_alt_arg( $n1, $n2)
                  , T_('Comments')
                  , ''
                  , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
-                          'target' => $FRIENDLY_SHORT_NAME.'_game_comments'
+                          'target' => FRIENDLY_SHORT_NAME.'_game_comments'
                  ) )
          . "</DIV>";
    }
