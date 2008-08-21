@@ -42,7 +42,7 @@ require_once( "include/std_functions.php" );
 
 /*
 Within the .htaccess file of the server root:
-(where /DragonGoServer/ is $SUB_PATH)
+(where /DragonGoServer/ is SUB_PATH)
 # 401: Authorization required (must be local URL)
 ErrorDocument 401 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 # 403: Access denied
@@ -58,7 +58,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       //temporary hide an unsolved DGS problem, waiting better:
       if(!( @$_SERVER['REDIRECT_STATUS'] == 404
             && in_array(
-               substr( @$_SERVER['REDIRECT_URL'], strlen($SUB_PATH)),
+               substr( @$_SERVER['REDIRECT_URL'], strlen(SUB_PATH)),
                array('phorum/post.php','favicon.ico'))
          ))
       {
@@ -303,7 +303,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
                    "<li> Your cookies have expired. This happens once a month.\n" .
                    "<li> You haven't enabled cookies in your browser.\n" .
                    "</ul>"),
-                $HOSTBASE );
+                HOSTBASE );
       }
       break;
 
@@ -671,7 +671,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    if( $mysqlerror )
    {
       $mysqlerror = str_replace(
-         array( $MYSQLHOST, $DB_NAME, $MYSQLUSER, $MYSQLPASSWORD),
+         array( MYSQLHOST, DB_NAME, MYSQLUSER, MYSQLPASSWORD),
          array( '[*h*]', '[*d*]', '[*u*]', '[*p*]'),
          $mysqlerror);
       echo "<p>MySQL error: ".basic_safe($mysqlerror)."</p>";
