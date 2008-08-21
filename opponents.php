@@ -395,12 +395,12 @@ $ARR_DBFIELDKEYS = array(
       }
       if( $utable->Is_Column_Displayed[14] )
       {
-         $lastaccess = ($row['LastaccessU'] > 0 ? date($date_fmt2, $row['LastaccessU']) : '' );
+         $lastaccess = ($row['LastaccessU'] > 0 ? date(DATE_FMT2, $row['LastaccessU']) : '' );
          $urow_strings[14] = $lastaccess;
       }
       if( $utable->Is_Column_Displayed[15] )
       {
-         $lastmove = ($row['LastMoveU'] > 0 ? date($date_fmt2, $row['LastMoveU']) : '' );
+         $lastmove = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
          $urow_strings[15] = $lastmove;
       }
 
@@ -487,7 +487,7 @@ function extract_user_stats( $color, $query = null )
 // param opp: maybe 0|empty
 function print_players_table( $p, $uid, $opp )
 {
-   global $COUNTRIES, $date_fmt2;
+   global $COUNTRIES;
 
    $p1 = $p[$uid];
    $p2 = ( $opp && isset($p[$opp]) ) ? $p[$opp] : null;
@@ -549,11 +549,11 @@ function print_players_table( $p, $uid, $opp )
 
    // Last accessed, Last move
    $r .= sprintf( $rowpatt, T_('Last access'),
-      ( $p1['LastaccessU'] > 0 ? date($date_fmt2, $p1['LastaccessU']) : $SPC ),
-      ( $p2 && $p2['LastaccessU'] > 0 ? date($date_fmt2, $p2['LastaccessU']) : $SPC ) );
+      ( $p1['LastaccessU'] > 0 ? date(DATE_FMT2, $p1['LastaccessU']) : $SPC ),
+      ( $p2 && $p2['LastaccessU'] > 0 ? date(DATE_FMT2, $p2['LastaccessU']) : $SPC ) );
    $r .= sprintf( $rowpatt, T_('Last move'),
-      ( $p1['LastMoveU'] > 0 ? date($date_fmt2, $p1['LastMoveU']) : $SPC ),
-      ( $p2 && $p2['LastMoveU'] > 0 ? date($date_fmt2, $p2['LastMoveU']) : $SPC ) );
+      ( $p1['LastMoveU'] > 0 ? date(DATE_FMT2, $p1['LastMoveU']) : $SPC ),
+      ( $p2 && $p2['LastMoveU'] > 0 ? date(DATE_FMT2, $p2['LastMoveU']) : $SPC ) );
 
    $r .= '</table>';
    return $r;

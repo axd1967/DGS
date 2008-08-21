@@ -125,7 +125,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
 
       if( $row['Handle'] == $FAQmain )
          $FAQmainID = $uid;
-      
+
       $FAQ_list[$uid] = $row;
    }
    mysql_free_result($result);
@@ -136,7 +136,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       add_contributor( T_("FAQ editor"),
                      $row['ID'], $row['Name'], $row['Handle'],
          ( $extra_info && $row['LastUpdate']
-            ? date($date_fmt2, $row['LastUpdate']) : '')
+            ? date(DATE_FMT2, $row['LastUpdate']) : '')
                      );
       $FAQexclude[] = $FAQmain;
    } else $FAQmain='';
@@ -149,7 +149,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       add_contributor( $first,
                      $row['ID'], $row['Name'], $row['Handle'],
          ( $extra_info && $row['LastUpdate']
-            ? date($date_fmt2, $row['LastUpdate']) : '')
+            ? date(DATE_FMT2, $row['LastUpdate']) : '')
                      );
       $first = '';
    }
@@ -213,7 +213,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
          add_contributor( $first,
                         $row['ID'], $row['Name'], $row['Handle'],
             ( $extra_info && $row['LastUpdate']
-               ? date($date_fmt2, $row['LastUpdate']) : '')
+               ? date(DATE_FMT2, $row['LastUpdate']) : '')
                         );
          $first = '';
       }

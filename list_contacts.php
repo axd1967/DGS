@@ -219,7 +219,7 @@ require_once( "include/contacts.php" );
       if( $ctable->Is_Column_Displayed[ 5] )
       {
          $crow_strings[ 5] =
-            ($row['lastaccessU']>0 ? date($date_fmt2, $row['lastaccessU']) : '');
+            ($row['lastaccessU']>0 ? date(DATE_FMT2, $row['lastaccessU']) : '');
       }
       if( $ctable->Is_Column_Displayed[ 6] )
       {
@@ -241,12 +241,12 @@ require_once( "include/contacts.php" );
       if( $ctable->Is_Column_Displayed[10] )
       {
          $crow_strings[10] =
-            ($row['createdU']>0 ? date($date_fmt2, $row['createdU']) : '');
+            ($row['createdU']>0 ? date(DATE_FMT2, $row['createdU']) : '');
       }
       if( $ctable->Is_Column_Displayed[11] )
       {
          $crow_strings[11] =
-            ($row['lastchangedU']>0 ? date($date_fmt2, $row['lastchangedU']) : '');
+            ($row['lastchangedU']>0 ? date(DATE_FMT2, $row['lastchangedU']) : '');
       }
 
       $ctable->add_row( $crow_strings );

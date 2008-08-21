@@ -40,7 +40,7 @@ function make_max_min_participants_string( $min, $max )
 
 function make_applicationperiod_string( $app_p, $soap )
 {
-   global $NOW, $date_fmt2;
+   global $NOW;
 
    if( is_null( $app_p ) || is_null( $soap ) )
    {
@@ -48,8 +48,8 @@ function make_applicationperiod_string( $app_p, $soap )
    }
 
    $eoap = strtotime( "+$app_p days", $soap );
-   $start_string = date($date_fmt2, $soap);
-   $end_string = date($date_fmt2, $eoap);
+   $start_string = date(DATE_FMT2, $soap);
+   $end_string = date(DATE_FMT2, $eoap);
 
    $resultstring = "";
    if( $NOW < $soap )
@@ -134,7 +134,7 @@ function make_applicationperiod_string( $app_p, $soap )
           $_POST['ap_start_year'] >= $current_time['year'] &&
           $_POST['ap_start_year'] <= $current_time['year']+2 )
       {
-         $t->StartOfApplicationPeriod = 
+         $t->StartOfApplicationPeriod =
             mktime( 0, 0, 0,
                     $_POST['ap_start_month'],
                     $_POST['ap_start_day'],

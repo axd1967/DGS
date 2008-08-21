@@ -208,12 +208,12 @@ require_once( "include/filterlib_country.php" );
       }
       if( $utable->Is_Column_Displayed[14] )
       {
-         $lastaccess = ($row['LastaccessU'] > 0 ? date($date_fmt2, $row['LastaccessU']) : '' );
+         $lastaccess = ($row['LastaccessU'] > 0 ? date(DATE_FMT2, $row['LastaccessU']) : '' );
          $urow_strings[14] = $lastaccess;
       }
       if( $utable->Is_Column_Displayed[15] )
       {
-         $lastmove = ($row['LastMoveU'] > 0 ? date($date_fmt2, $row['LastMoveU']) : '' );
+         $lastmove = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
          $urow_strings[15] = $lastmove;
       }
 

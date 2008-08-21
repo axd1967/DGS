@@ -168,7 +168,7 @@ require_once( "features/vote/lib_votes.php" );
          if( $ftable->Is_Column_Displayed[7] )
             $frow_strings[7] = $fvote->points;
          if( $ftable->Is_Column_Displayed[8] )
-            $frow_strings[8] = ($fvote->lastchanged > 0 ? date($date_fmt2, $fvote->lastchanged) : '' );
+            $frow_strings[8] = ($fvote->lastchanged > 0 ? date(DATE_FMT2, $fvote->lastchanged) : '' );
       }
 
       $ftable->add_row( $frow_strings );
