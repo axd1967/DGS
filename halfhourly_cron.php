@@ -38,13 +38,11 @@ if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.
 
 function mail_link( $nam, $lnk)
 {
-  global $HOSTBASE;
-
    $nam = trim($nam);
    $lnk = trim($lnk);
    if( $lnk )
    {
-      if( strcspn($lnk,":?#") == strcspn($lnk,"?#") 
+      if( strcspn($lnk,":?#") == strcspn($lnk,"?#")
           && !is_numeric(strpos($lnk,'//'))
           && strtolower(substr($lnk,0,4)) != "www."
         )
@@ -52,7 +50,7 @@ function mail_link( $nam, $lnk)
          //make it absolute to this server
          while( substr($lnk,0,3) == '../' )
             $lnk = substr($lnk,3);
-         $lnk = $HOSTBASE.$lnk;
+         $lnk = HOSTBASE.$lnk;
       }
       $nam = ( $nam ? "$nam ($lnk)" : "$lnk" );
    }
@@ -237,7 +235,7 @@ if( !$is_down )
 
                $msg .= str_pad('', 47, '-') . "\n" .
                    "Message: ".mail_link('','message.php?mid='.$msg_row['ID']) . "\n" .
-                   "Date: ".date($date_fmt, $msg_row['date']) . "\n" .
+                   "Date: ".date(DATE_FMT, $msg_row['date']) . "\n" .
                    "From: $From\n" .
                    "Subject: ".mail_strip_html($msg_row['Subject']) . "\n\n" .
                    wordwrap(mail_strip_html($msg_row['Text']),47) . "\n";
