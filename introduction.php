@@ -33,7 +33,7 @@ $ThePage = new Page('Intro');
 
    echo sprintf( T_("Welcome to %s, a %sfree%s " .
           "server for playing %sgo%s, where the games tends to 'drag on'.")
-          , $FRIENDLY_LONG_NAME, '<a href="licence.php">', '</a>'
+          , FRIENDLY_LONG_NAME, '<a href="licence.php">', '</a>'
           , '<a href="links.php">', '</a>' ) . "\n";
 
    echo "<p></p>\n";
