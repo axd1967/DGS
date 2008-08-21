@@ -34,8 +34,6 @@ define('FETCHTYPE_ROW',   'row');
 //At least needed when connect2mysql.php is used alone (as in quick_status.php):
 function jump_to($uri, $absolute=false)
 {
-   global $HOSTBASE;
-
    $uri= str_replace( URI_AMP, URI_AMP_IN, $uri);
    session_write_close();
    @ignore_user_abort(false);
@@ -45,23 +43,23 @@ function jump_to($uri, $absolute=false)
    if( $absolute )
       header( "Location: " . $uri );
    else
-      header( "Location: " . $HOSTBASE . $uri );
+      header( "Location: " . HOSTBASE . $uri );
    header('Status: 303');
-   //header('Connection: close'); 
+   //header('Connection: close');
    exit;
 }
 
 function disable_cache($stamp=NULL, $expire=NULL)
 {
-   global $NOW, $gmdate_fmt;
+   global $NOW;
    if( !$stamp )
       $stamp = $NOW;  // Always modified
    if( !$expire )
       $expire = $stamp-3600;  // Force revalidation
 
    //header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-   header('Expires: ' . gmdate($gmdate_fmt, $expire));
-   header('Last-Modified: ' . gmdate($gmdate_fmt, $stamp));
+   header('Expires: ' . gmdate(GMDATE_FMT, $expire));
+   header('Last-Modified: ' . gmdate(GMDATE_FMT, $stamp));
    if( !$expire || $expire<=$NOW )
    {
       header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0'); // HTTP/1.1
@@ -131,14 +129,14 @@ function db_close()
 
 function connect2mysql($no_errors=false)
 {
-   global $dbcnx, $MYSQLUSER, $MYSQLHOST, $MYSQLPASSWORD, $DB_NAME;
+   global $dbcnx;
 
    //$oiua= ignore_user_abort(false);
    @ignore_user_abort(false);
    $i = 6; //retry count
    do
    {
-      $dbcnx = @mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD);
+      $dbcnx = @mysql_connect( MYSQLHOST, MYSQLUSER, MYSQLPASSWORD);
       if( $dbcnx )
          break;
       //max_user_connections: Error: 1203 SQLSTATE: 42000 (ER_TOO_MANY_USER_CONNECTIONS)
@@ -155,7 +153,7 @@ function connect2mysql($no_errors=false)
       error($err);
    }
 
-   if( !@mysql_select_db($DB_NAME) )
+   if( !@mysql_select_db(DB_NAME) )
    {
       @mysql_close( $dbcnx);
       $dbcnx= 0;
