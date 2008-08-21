@@ -87,7 +87,7 @@ $ThePage = new Page('UserInfo');
    $tmpTZ = setTZ($row['Timezone']); //for get_clock_used() and local time
    $user_time = time() + (int)$timeadjust; //see #NOW
    $user_gmt_offset = date('O', $user_time);
-   $user_localtime  = date($date_fmt . ' T', $user_time); // +timezone-name
+   $user_localtime  = date(DATE_FMT . ' T', $user_time); // +timezone-name
    $user_clockused  = get_clock_used($row['Nightstart']);
    setTZ($tmpTZ);
 
@@ -96,9 +96,9 @@ $ThePage = new Page('UserInfo');
       $registerdate = (@$row['X_Registerdate'] > 0
                         ? date('Y-m-d', $row['X_Registerdate']) : '' );
       $lastaccess = (@$row['X_Lastaccess'] > 0
-                        ? date($date_fmt2, $row['X_Lastaccess']) : '' );
+                        ? date(DATE_FMT2, $row['X_Lastaccess']) : '' );
       $lastmove = (@$row['X_LastMove'] > 0
-                        ? date($date_fmt2, $row['X_LastMove']) : '' );
+                        ? date(DATE_FMT2, $row['X_LastMove']) : '' );
 
       $cntr = @$row['Country'];
       $cntrn = basic_safe(@$COUNTRIES[$cntr]);
