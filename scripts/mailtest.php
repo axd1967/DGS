@@ -42,9 +42,9 @@ require_once( "include/form_functions.php" );
    $Email= trim(get_request_arg( 'email', ''));
    $From= get_request_arg( 'from', '');
    if( !$sendit && !$From )
-      $From= $EMAIL_FROM;
+      $From= EMAIL_FROM;
    $Subject= get_request_arg( 'subject', 'Mail test');
-   $Text = 'Mail test from '.$FRIENDLY_LONG_NAME.' - ignore it';
+   $Text = 'Mail test from '.FRIENDLY_LONG_NAME.' - ignore it';
    $Text.= "\nLine 2\nLine 3\n";
    $Text.= str_repeat("This is a test - ", 10);
    $Text.= "\nLast line\n";
@@ -109,13 +109,13 @@ require_once( "include/form_functions.php" );
             $headers = "";
 
          $msg = str_pad('', 47, '-') . "\n" .
-             "Date: ".date($date_fmt, $NOW) . "\n" .
-             "From: $FRIENDLY_LONG_NAME admin staff\n" .
+             "Date: ".date(DATE_FMT, $NOW) . "\n" .
+             "From: ".FRIENDLY_LONG_NAME." admin staff\n" .
              "Subject: ".strip_tags( $Subject, '') . "\n\n" .
              strip_tags( $Text, '') . "\n";
 
          $res= send_email( false, $Email, $msg
-                     , $FRIENDLY_LONG_NAME.' mail test', $headers);
+                     , FRIENDLY_LONG_NAME.' mail test', $headers);
          if( !$res )
          {
             echo "<br>mail() function failed.<br>";
