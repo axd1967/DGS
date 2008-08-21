@@ -225,7 +225,7 @@ $ThePage = new Page('Status');
          if( $gtable->Is_Column_Displayed[14] )
             $grow_strings[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
          if( $gtable->Is_Column_Displayed[13] )
-            $grow_strings[13] = date($date_fmt, $Time);
+            $grow_strings[13] = date(DATE_FMT, $Time);
          if( $gtable->Is_Column_Displayed[10] )
          {
             if( $X_Color & 2 )

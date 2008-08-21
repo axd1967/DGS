@@ -176,8 +176,6 @@ function recalculate_postsinforum($Forum_ID)
 //TODO
 function display_posts_pending_approval()
 {
-   global $date_fmt;
-
    $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) as Time,Subject,Forum_ID,Thread_ID, " .
                          "Posts.ID as Post_ID,Forums.Name AS Forumname," .
                          "User_ID,Players.Name as User_Name,Handle " .
@@ -208,7 +206,7 @@ function display_posts_pending_approval()
          . '<td>' . ( $cols > 3 ? $row['Forumname'] . '</td><td>' : '' )
          . "<a href=\"$post_href\">$Subject</a></td><td>"
          . user_reference( REF_LINK, 1, '', $row['User_ID'], $row['User_Name'], $row['Handle'] )
-         . '</td><td nowrap align=right>' . date($date_fmt, $row['Time']) . "</td></tr>\n";
+         . '</td><td nowrap align=right>' . date(DATE_FMT, $row['Time']) . "</td></tr>\n";
    }
    mysql_free_result($result);
    $disp_forum->forum_end_table();
@@ -547,7 +545,7 @@ class DisplayForum
    // param rx_term: rx-terms (optionally array) that are to be highlighted in text
    function draw_post($postClass, $post, $is_my_post, $GoDiagrams=null, $rx_term='')
    {
-      global $date_fmt, $NOW, $player_row;
+      global $NOW, $player_row;
 
       // post-vars needed:
       //    id, forum_id, thread_id, parent_id, subject, text, author(id,name,handle),
@@ -583,7 +581,7 @@ class DisplayForum
             ,"<a class=PostSubject name='preview'>$sbj</a></td></tr> "
             ,"\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>"
             ,T_('by'),' ' ,user_reference( REF_LINK, 1, '', $player_row)
-            ,' &nbsp;&nbsp;&nbsp;' ,date($date_fmt, $NOW)
+            ,' &nbsp;&nbsp;&nbsp;' ,date(DATE_FMT, $NOW)
             ,"</td></tr>";
       }
       else
@@ -635,13 +633,13 @@ class DisplayForum
 
          echo "\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>";
 
-         $post_reference = date($date_fmt, $post->last_updated);
+         $post_reference = date(DATE_FMT, $post->last_updated);
          echo T_('by') ,' ' , $post->author->user_reference()
             ," &nbsp;&nbsp;&nbsp;" ,$post_reference;
 
          if( $post->last_edited > 0 )
          {
-            $post_reference = date($date_fmt, $post->last_edited);
+            $post_reference = date(DATE_FMT, $post->last_edited);
             echo '&nbsp;&nbsp;&nbsp;(<a href="'.$thread_url
                . URI_AMP."revision_history=$pid\">"
                . T_('edited') . "</a> $post_reference)";
@@ -1219,8 +1217,7 @@ class ForumPost
      if ( empty($date) )
          return NO_VALUE;
 
-     global $date_fmt;
-     $datestr = date( $date_fmt, $date );
+     $datestr = date( DATE_FMT, $date );
      return anchor( $this->build_url_post(), $datestr, '', $attbs );
    }
 

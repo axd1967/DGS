@@ -417,7 +417,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
                             $folders=null, $folder_nr=null, $form=null, $delayed_move=false,
                             $rx_term='')
 {
-   global $date_fmt, $msg_icones, $bg_color;
+   global $msg_icones, $bg_color;
 
    if( $other_id > 0 )
    {
@@ -430,7 +430,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    echo "<table class=MessageInfos>\n" .
       "<tr class=Date>" .
       "<td class=Rubric>" . T_('Date') . ":</td>" .
-      "<td colspan=$cols>" . date($date_fmt, $date) . "</td></tr>\n" .
+      "<td colspan=$cols>" . date(DATE_FMT, $date) . "</td></tr>\n" .
       "<tr class=Correspondent>" .
       "<td class=Rubric>" . ($to_me ? T_('From') : T_('To') ) . ":</td>\n" .
       "<td colspan=$cols>$name</td>" .
@@ -466,7 +466,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
    echo "</td>\n"
       . "<td colspan=$cols>\n";
-      
+
    echo "<table class=MessageBox><tr><td>"
       . $text
       . "</td></tr></table>";
@@ -1096,7 +1096,7 @@ function message_list_body( &$mtable, $result, $show_rows
              , $my_folders, $toggle_marks=false, $rx_term=''
              )
 {
- global $date_fmt, $msg_icones, $player_row;
+ global $msg_icones, $player_row;
 
    $no_mark= @$mtable->ExtMode['no_mark'];
    $full_details= @$mtable->ExtMode['full_details'];
@@ -1177,7 +1177,7 @@ function message_list_body( &$mtable, $result, $show_rows
       $str = image( $ico, $alt, $tits[$row['flow']]);
       $mrow_strings[33] = "$showmsg_start$str$showmsg_end";
 
-      $mrow_strings[ 4] = date($date_fmt, $row["Time"]);
+      $mrow_strings[ 4] = date(DATE_FMT, $row["Time"]);
 
       // additional fields for search-messages
       if ( $full_details )

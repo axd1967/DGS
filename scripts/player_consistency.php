@@ -215,7 +215,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    else
       $limit = "";
 
-   
+
    if( @$_REQUEST['buffer'] == 'no' )
       $sqlbuf = "";
    else
@@ -270,7 +270,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    //$is_rated.= " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
 
 
-   echo "<br>On ", gmtdate($date_fmt, $NOW), ' GMT<br>';
+   echo "<br>On ", gmtdate(DATE_FMT, $NOW), ' GMT<br>';
 
 //-----------------
 

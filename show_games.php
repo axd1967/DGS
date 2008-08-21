@@ -644,7 +644,7 @@ $ThePage = new Page('GamesList');
             if( $gtable->Is_Column_Displayed[24] )
                $grow_strings[24] = ($WeekendClock == 'Y' ? T_('Yes') : T_('No'));
             if( $gtable->Is_Column_Displayed[25] )
-               $grow_strings[25] = date($date_fmt, $X_Lastaccess);
+               $grow_strings[25] = date(DATE_FMT, $X_Lastaccess);
          }
       }
 
@@ -657,7 +657,7 @@ $ThePage = new Page('GamesList');
       if( $gtable->Is_Column_Displayed[9] )
          $grow_strings[9] = $Moves;
       if( $gtable->Is_Column_Displayed[13] )
-         $grow_strings[13] = date($date_fmt, $X_Lastchanged);
+         $grow_strings[13] = date(DATE_FMT, $X_Lastchanged);
       if( $gtable->Is_Column_Displayed[14] )
          $grow_strings[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
 
