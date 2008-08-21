@@ -107,7 +107,7 @@ function insert_set( $table, $query, $title=false)
    while( $row = mysql_fetch_assoc( $result ) )
    {
       $str = '';
-      $sep = ''; 
+      $sep = '';
       foreach( $row as $key => $val )
       {
          $str.= $sep.$key.'='.safe_value($val);
@@ -119,7 +119,7 @@ function insert_set( $table, $query, $title=false)
             . " SET $str;" .CR;
    }
    mysql_free_result($result);
-   
+
    if( $title !== false )
       $text = comment_block( $title).CR.$text;
 
@@ -179,12 +179,12 @@ function insert_values( $table, $names, $query, $title=false)
    while( $row = mysql_fetch_assoc( $result ) )
    {
       $str = '';
-      $sep = ''; 
+      $sep = '';
       foreach( $hdrs as $key )
       {
          $str.= $sep.safe_value(@$row[$key]);
          $sep = ',';
-      }      
+      }
       if( $str )
       {
          $text.= $rowbeg.$str.$rowend;
@@ -206,7 +206,7 @@ INSERT INTO TranslationTexts
             . CRINDENT."($names) VALUES"
             . substr( $text, 0, -1) .";";
    } //OLD_STYLE_DUMP
-   
+
    if( $title !== false )
       $text = comment_block( $title).$text.CR;
 
@@ -287,7 +287,7 @@ function after_table( $table)
          break;
       } //switch($table)
    } //switch($dumptype)
-   
+
    return $str;
 } //after_table
 
@@ -393,7 +393,7 @@ $defs_rep['*']['*']
 
 
 //$defs_{move}[{table}][{src}] = {dst};
-switch( $FRIENDLY_SHORT_NAME ) {
+switch( FRIENDLY_SHORT_NAME ) {
 case 'dDGS':{
 //$defs_aft['GoDiagrams']['Date'] = 'SGF';
 $defs_aft['Adminlog']['IP'] = 'Date';
@@ -407,7 +407,7 @@ $defs_aft['Players']['Rating2'] = 'Rating';
 $defs_bef['Players']['StatusFolders'] = 'Running';
 $defs_aft['Waitingroom']['Handicap'] = 'Komi';
 } break;
-} //$FRIENDLY_SHORT_NAME
+} //FRIENDLY_SHORT_NAME
 //$defs_aft['GamesNotes']['Notes'] = 'Hidden';
 $defs_bef['GamesNotes']['Notes'] = 'PRIMARY';
 
@@ -516,8 +516,8 @@ function adj_eol( $str, $cr=CR, $trim=' ')
 {
    //if( $cr===false ) $cr = CR;
    return ereg_replace(
-         "[$trim\x01-\x1f]*[\x0a\x0d]+[$trim\x01-\x1f]*", 
-         $cr, 
+         "[$trim\x01-\x1f]*[\x0a\x0d]+[$trim\x01-\x1f]*",
+         $cr,
          $str );
 } //adj_eol
 
@@ -529,7 +529,7 @@ function def_split( $str)
 function fdate( $sdat)
 {
    $fmt= 'Y-m-d H:i:s \G\M\T'; //O e
-   
+
    if( is_string( $sdat) )
       $sdat = strtotime($sdat);
    return date( $fmt, $sdat); //date gmdate
@@ -554,7 +554,7 @@ function dump2html( $str)
 function echoTR( $typ, $str)
 {
  global $export_it;
- 
+
    if( !$str)
       return $str;
 
@@ -780,16 +780,16 @@ class dbTable
 
 function dump_header( $database)
 {
- global $FRIENDLY_LONG_NAME, $NOW;
+   global $NOW;
 
-   $str = "$FRIENDLY_LONG_NAME dump".chr(10);
+   $str = FRIENDLY_LONG_NAME." dump".chr(10);
    $str.= "Host: ".@$_SERVER['HTTP_HOST'].chr(10);
    $str.= "Database: ".$database.chr(10);
    $str.= "Generation Time: ".fdate( $NOW).chr(10);
    $str.= "Server version: ".@$_SERVER['SERVER_SOFTWARE'].chr(10);
    $str.= "PHP version: ".@phpversion().chr(10);
    $str.= sprintf("MySQL version: %s (%s)",READ_MYSQL_VERSION,MYSQL_VERSION).chr(10);
-   
+
    if( 0 && @$GLOBALS['Super_admin'] )
    {
       $str.= "MYSQLUSER: ".@$GLOBALS['MYSQLUSER'].chr(10);
@@ -1082,7 +1082,7 @@ function freesql_dump( $database, $query)
    $text = '';
    if( @$GLOBALS['Super_admin'] && $freesql_it && $freesql )
    {
-      $text = freesql_dump( $DB_NAME, $freesql);
+      $text = freesql_dump( DB_NAME, $freesql);
       $show_it = true;
       $dumptype = 'freeSQL';
       $export_file= 'db_export.mysql';
@@ -1090,13 +1090,13 @@ function freesql_dump( $database, $query)
    switch( (string)$row[0] )
    {
    case 'init': {
-      $text = init_dump( $DB_NAME);
+      $text = init_dump( DB_NAME);
       } break; //'init'
    case 'transl': {
-      $text = transl_dump( $DB_NAME);
+      $text = transl_dump( DB_NAME);
       } break; //'transl'
    case 'lang': {
-      $text = language_dump( $DB_NAME, $row[1]);
+      $text = language_dump( DB_NAME, $row[1]);
       } break; //'lang'
    } //switch($dumptype)
 
@@ -1105,20 +1105,20 @@ function freesql_dump( $database, $query)
 
    if( $export_it && $text && $export_file )
    {
-      $export_file= $FRIENDLY_SHORT_NAME.'-'.$export_file;
+      $export_file= FRIENDLY_SHORT_NAME.'-'.$export_file;
 
       // this one open the text/plain in the browser by default
       //header( 'Content-type: text/plain' ); //; charset=iso-8859-1' ); //$encoding_used
-      // this one exist and put a costume of binary on the text 
+      // this one exist and put a costume of binary on the text
       //header( 'Content-type: application/octet-stream' );
       // this last does not exist but it force the "record to disk"
       header( 'Content-type: application/x-mysql' );
       header( "Content-Disposition: inline; filename=\"$export_file\"" );
       header( "Content-Description: PHP Generated Data" );
-   
+
       //to allow some mime applications to find it in the cache
-      header('Expires: ' . gmdate($gmdate_fmt, $NOW+5*60));
-      header('Last-Modified: ' . gmdate($gmdate_fmt, $NOW));
+      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
+      header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
 
       echo $text;
       exit;
@@ -1179,7 +1179,7 @@ function freesql_dump( $database, $query)
       $hiddens = array( 'dumptype' => $dumptype);
       $dform->get_hiddens( $hiddens);
       $download_uri = make_url( "data_export.php?export_it=1", $hiddens);
- 
+
       echo "<br>" . anchor( $download_uri, "[ Download it ]"
          , '', array( 'accesskey' => 'd' ) ) . "<br>";  // keep static acckey
    }
