@@ -32,7 +32,7 @@ $TranslateGroups[] = "Countries";
 
 // NOTES:
 // - if this file is included, countries should be used!
-// - statically init countries (file should be only included by require_cone())
+// - statically init countries (file should be only included by require_once())
 // - like this only one pass
 {
    global $COUNTRIES;
