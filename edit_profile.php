@@ -26,8 +26,8 @@ require_once( "include/rating.php" );
 require_once( "include/form_functions.php" );
 
 // Reminder: to friendly reset the language:
-// {$HOSTBASE}edit_profile.php?language=C
-// {$HOSTBASE}edit_profile.php?language=en
+// {HOSTBASE}edit_profile.php?language=C
+// {HOSTBASE}edit_profile.php?language=en
 
 {
    connect2mysql();

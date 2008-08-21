@@ -97,7 +97,7 @@ require_once( "include/std_functions.php" );
       or error('mysql_query_failed', 'send_new_password.update');
 
 
-   $msg= 
+   $msg=
 "You (or possibly someone else) has requested a new password\n" .
 " for the account: $pswduser\n" . //the handle of the requesting account
 " and it has been randomly chosen as: $newpasswd\n" .
@@ -106,7 +106,7 @@ Both the old and the new password will also be valid until
  your next login. Now please login and then change your
  password to something more rememberable.
 
-' . $HOSTBASE;
+' . HOSTBASE;
 
    verify_email( 'send_new_password', $Email);
 
