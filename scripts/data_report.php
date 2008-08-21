@@ -136,7 +136,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       }
 
       //add a controller link
-      $dbcnxctl = mysql_connect( $MYSQLHOST, $MYSQLUSER, $MYSQLPASSWORD, true );
+      $dbcnxctl = mysql_connect( MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, true );
       if( !$dbcnxctl )
       {
          @mysql_close( $dbcnx);
@@ -167,8 +167,8 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    $query= trim($query);
    if( $select && $query )
    {
-      list($protocol) = explode($HOSTNAME, $HOSTBASE);
-      $uri= $protocol . $HOSTNAME . @$_SERVER['PHP_SELF'] . '?' . $uri;
+      list($protocol) = explode(HOSTNAME, HOSTBASE);
+      $uri= $protocol . HOSTNAME . @$_SERVER['PHP_SELF'] . '?' . $uri;
       $ary= array();
       $dform->get_hiddens( $ary);
       $uri= make_url($uri, $ary, 1);
