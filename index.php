@@ -38,20 +38,20 @@ require_once( "include/form_functions.php" );
    start_page(T_("Home"), true, $logged_in, $player_row );
 
 
-   echo '<IMG  width=666 height=172  border=0 alt="'.$FRIENDLY_LONG_NAME.'" SRC="images/dragon_logo.jpg">';
+   echo '<IMG  width=666 height=172  border=0 alt="'.FRIENDLY_LONG_NAME.'" SRC="images/dragon_logo.jpg">';
    echo "\n<BR>&nbsp;";
 
 
-if( $HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
+if( HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
   echo "<p></p><font color=green>\n" .
-     T_("Welcome to the development version of the Dragon Go Server!") . 
-     '<br>&nbsp;<br>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") . 
+     T_("Welcome to the development version of the Dragon Go Server!") .
+     '<br>&nbsp;<br>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") .
      '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
-     '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") . 
+     '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") .
      "</font><HR>\n";
 }else{ //for devel server
   echo "<p></p><font color=green>\n" .
-     sprintf( T_('Welcome to the %s!'), $FRIENDLY_LONG_NAME) .
+     sprintf( T_('Welcome to the %s!'), FRIENDLY_LONG_NAME) .
      '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
      "</font><HR>\n";
 } //for devel server
