@@ -54,13 +54,12 @@ if( !is_numeric($timeadjust) )
 
 $NOW = time() + (int)$timeadjust;
 
-//TODO: define as consts
-$date_fmt = 'Y-m-d H:i';
-$date_fmt2 = 'Y-m-d&\n\b\s\p;H:i';
-$gmdate_fmt = 'D, d M Y H:i:s \G\M\T';
+define('DATE_FMT', 'Y-m-d H:i');
+define('DATE_FMT2', 'Y-m-d&\n\b\s\p;H:i');
+define('GMDATE_FMT', 'D, d M Y H:i:s \G\M\T');
 
-$session_duration = 3600*12*61; // 1 month
-$tick_frequency = 12; // ticks/hour (every 5 minutes)
+define('SESSION_DURATION', 3600*12*61); // 1 month
+define('TICK_FREQUENCY', 12); // ticks/hour (every 5 minutes)
 
 
 //a $_REQUEST['handle'] will not overlap $_COOKIE['cookie_handle']
