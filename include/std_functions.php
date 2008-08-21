@@ -46,7 +46,7 @@ define('BEGINMONTH', 8);
 
 
 // because of the cookies host, $hostname_jump = true is nearly mandatory
-$hostname_jump = true;  // ensure $HTTP_HOST is same as $HOSTNAME
+$hostname_jump = true;  // ensure $HTTP_HOST is same as HOSTNAME
 
 // If using apache add this row to your virtual host to make this work:
 // AliasMatch game([0-9]+)\.sgf /path/to/sgf.php
@@ -54,10 +54,10 @@ $has_sgf_alias = false;
 
 
 /* when $GUESTPASS is modified,
- * run $HOSTBASE."change_password.php?guestpass=".GUEST_ID
+ * run HOSTBASE."change_password.php?guestpass=".GUEST_ID
  * with ADMIN_PASSWORD privileges
  */
-if( $FRIENDLY_SHORT_NAME == 'DGS' )
+if( FRIENDLY_SHORT_NAME == 'DGS' )
    $GUESTPASS = 'guest'.'pass';
 else
    $GUESTPASS = 'guest';
@@ -75,7 +75,7 @@ define('LAYOUT_FILTER_EXTFORM_HEAD', true); // default is to show external-filte
 $bg_color='"#f7f5e3"';
 
 //$menu_fg_color='"#FFFC70"';
-if( $FRIENDLY_SHORT_NAME == 'DGS' )
+if( FRIENDLY_SHORT_NAME == 'DGS' )
    $menu_bg_color='"#0C41C9"'; //live server
 else
    $menu_bg_color='"#C9410C"'; //devel server
@@ -370,7 +370,7 @@ function array_bsearch($needle, &$haystack)
 
 function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $encoding_used, $printable, $FRIENDLY_SHORT_NAME;
+   global $base_path, $encoding_used, $printable;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -395,13 +395,12 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    echo "\n <META NAME=\"DESCRIPTION\" CONTENT=\"To play go on a turn by turn basis.\">";
 
-   echo "\n <TITLE>".basic_safe("$FRIENDLY_SHORT_NAME - $title")."</TITLE>";
+   echo "\n <TITLE>".basic_safe(FRIENDLY_SHORT_NAME." - $title")."</TITLE>";
 
    //because of old browsers favicon.ico should always stay in the root folder
    //echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"{$base_path}favicon.ico\">";
    //echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"/favicon.ico\">";
-   global $HOSTBASE;
-   echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"{$HOSTBASE}favicon.ico\">";
+   echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"".HOSTBASE."favicon.ico\">";
 
    global $main_path;
    if( !isset($skinname) || !$skinname )
@@ -413,13 +412,12 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       $skinname = 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skinname/print.css\">";
 
-   global $SUB_PATH;
-   switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
+   switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
    {
       case 'status.php':
          // RSS Autodiscovery:
          echo "\n <link rel=\"alternate\" type=\"application/rss+xml\""
-             ," title=\"$FRIENDLY_SHORT_NAME Status RSS Feed\" href=\"/rss/status.php\">";
+             ," title=\"".FRIENDLY_SHORT_NAME." Status RSS Feed\" href=\"/rss/status.php\">";
       break;
    }
 
@@ -436,14 +434,13 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       $tmp='';
    if( $tmp )
       $tmp = ' class='.attb_quote($tmp);
-   echo "\n</HEAD>\n<BODY id=\"$FRIENDLY_SHORT_NAME\"$tmp>\n";
+   echo "\n</HEAD>\n<BODY id=\"".FRIENDLY_SHORT_NAME."\"$tmp>\n";
 } //start_html
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $is_down, $is_down_message, $printable,
-      $FRIENDLY_LONG_NAME, $HOSTBASE;
+   global $base_path, $is_down, $is_down_message, $printable;
 
    if( $is_down && $logged_in )
    {
@@ -465,8 +462,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
    echo "\n\n<table id=\"pageHead\">"
       . "\n <tr>"
-      . "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"{$HOSTBASE}index.php\">"
-        . "$FRIENDLY_LONG_NAME</A></td>";
+      . "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\">"
+        . FRIENDLY_LONG_NAME."</A></td>";
 
    echo "\n  <td class='LoginBox'>";
 
@@ -504,14 +501,13 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 5,1, array( T_('Vote'), 'features/vote/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
 
       $tools_array = array(); //$url => array($img,$alt,$title)
-      global $SUB_PATH, $FRIENDLY_SHORT_NAME;
-      switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
+      switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
       {
          case 'status.php':
             $tools_array['rss/status.php'] =
                array( $base_path.'images/rss-icon.png',
                       'RSS',
-                      $FRIENDLY_SHORT_NAME . ' ' . T_("Status RSS Feed")
+                      FRIENDLY_SHORT_NAME . ' ' . T_("Status RSS Feed")
                      );
          break;
       }
@@ -577,9 +573,7 @@ function end_page( $menu_array=NULL )
 
    { //hostlink build
 
-      global $HOSTNAME;
-
-      if( $HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
+      if( HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
          $hostlink= '<A href="http://sourceforge.net" target="_blank"><IMG src="http://sourceforge.net/sflogo.php?group_id=29933&amp;type=1" alt="SourceForge.net Logo" width=88 height=31 border=0 align=middle></A>';
       else //for live server
          $hostlink= '<a href="http://www.samurajdata.se" target="_blank"><img src="'.$base_path.'images/samurajlogo.gif" alt="Samuraj Logo" width=160 height=20 border=0 align=middle></a>';
@@ -587,14 +581,14 @@ function end_page( $menu_array=NULL )
    } //hostlink build
 
 
-   global $NOW, $date_fmt, $FRIENDLY_LONG_NAME;
+   global $NOW;
    echo "\n<table id='pageFoot'>"
       . "\n <tr>"
       . "\n  <td class=ServerHome><A href=\"{$base_path}index.php\">"
-        . "$FRIENDLY_LONG_NAME</A></td>";
+        . FRIENDLY_LONG_NAME."</A></td>";
 
    echo "\n  <td class=PageTime>"
-        . T_("Page time") . ' <span id="pageTime">' . date($date_fmt, $NOW)
+        . T_("Page time") . ' <span id="pageTime">' . date(DATE_FMT, $NOW)
         . "</span>";
 
    if( (@$player_row['admin_level'] & ADMIN_TIME) && !$printable )
@@ -956,16 +950,14 @@ function verify_email( $debugmsg, $email)
  * - User <user@example.com>
  * - User <user@example.com>, Another User <anotheruser@example.com>
  * or an array of those.
- * $subject default => $FRIENDLY_LONG_NAME.' notification';
- * $headers default => "From: $EMAIL_FROM";
+ * $subject default => FRIENDLY_LONG_NAME.' notification';
+ * $headers default => 'From: '.EMAIL_FROM;
  * no $params default.
  **/
 function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params='')
 {
-   global $EMAIL_FROM, $FRIENDLY_LONG_NAME;
-
    if( !$subject )
-      $subject= $FRIENDLY_LONG_NAME.' notification';
+      $subject = FRIENDLY_LONG_NAME.' notification';
    $subject= preg_replace("/[\\x01-\\x20]+/", ' ', $subject);
 
    $rgx= array("/\r\n/","/\r/");
@@ -1003,7 +995,7 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
 
    $headers= trim($headers);
    if( !$headers )
-      $headers = "From: $EMAIL_FROM";
+      $headers = 'From: '.EMAIL_FROM;
       //if HTML in mail allowed:
       //$headers.= "\nMIME-Version: 1.0";
       //$headers.= "\nContent-type: text/html; charset=iso-8859-1";
@@ -1241,12 +1233,12 @@ function notify( $debugmsg, $ids, $type='')
 function safe_setcookie($name, $value='', $rel_expire=-3600)
 //should be: ($name, $value, $expire, $path, $domain, $secure)
 {
-   global $SUB_PATH, $NOW;
+   global $NOW;
 
 /*
    if( COOKIE_OLD_COMPATIBILITY )
    {
-      setcookie( $name, '', $NOW-3600, $SUB_PATH);
+      setcookie( $name, '', $NOW-3600, SUB_PATH);
    }
 */
 
@@ -1259,18 +1251,16 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
       $n= 0;
 
    while ($n>1) {
-      setcookie( $name, '', $NOW-3600, $SUB_PATH);
+      setcookie( $name, '', $NOW-3600, SUB_PATH);
       $n--;
    }
-   setcookie( $name, $value, $NOW+$rel_expire, $SUB_PATH );
+   setcookie( $name, $value, $NOW+$rel_expire, SUB_PATH );
    //for current session:
    $_COOKIE[$name] = $value; //??? add magic_quotes_gpc like slashes?
 } //safe_setcookie
 
 function set_login_cookie($handl, $code, $delete=false)
 {
- global $session_duration;
-
    if( $delete || !$handl || !$code)
    {
       safe_setcookie('handle');
@@ -1278,8 +1268,8 @@ function set_login_cookie($handl, $code, $delete=false)
    }
    else
    {
-      safe_setcookie('handle', $handl, $session_duration*5);
-      safe_setcookie('sessioncode', $code, $session_duration);
+      safe_setcookie('handle', $handl, 5 * SESSION_DURATION);
+      safe_setcookie('sessioncode', $code, SESSION_DURATION);
    }
 } //set_login_cookie
 
@@ -1289,7 +1279,7 @@ function set_cookie_prefs(&$player_row, $delete=false)
    //assert('$uid>0');
    if( $uid <= 0 ) return;
 
-   global $cookie_prefs/*, $session_duration*/;
+   global $cookie_prefs;
 
    if( $delete )
       safe_setcookie("prefs$uid");
@@ -1721,20 +1711,20 @@ $html_safe_preg = array(
  '%'.ALLOWED_LT."/quote *".ALLOWED_GT.'%is'
   => ALLOWED_LT."/div".ALLOWED_GT,
 
-//<home page>...</home> =>translated to <a href="{$HOSTBASE}$page">...</a>
+//<home page>...</home> =>translated to <a href="{HOSTBASE}$page">...</a>
  '%'.ALLOWED_LT."home(_)?[\\n\\s]+((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT.'%ise'
-  => '"'.ALLOWED_LT."a href=".ALLOWED_QUOT.$HOSTBASE."\\2".ALLOWED_QUOT
+  => '"'.ALLOWED_LT."a href=".ALLOWED_QUOT.HOSTBASE."\\2".ALLOWED_QUOT
       ."\".('\\1'?' target=".ALLOWED_QUOT.'_blank'.ALLOWED_QUOT."':'').\""
       .ALLOWED_GT.'"',
  '%'.ALLOWED_LT."/home *".ALLOWED_GT.'%is'
   => ALLOWED_LT."/a".ALLOWED_GT,
 
-//<image pict> =>translated to <img src="{$HOSTBASE}images/$pict">
-//<image board/pict> =>translated to <img src="{$HOSTBASE}17/$pict">
+//<image pict> =>translated to <img src="{HOSTBASE}images/$pict">
+//<image board/pict> =>translated to <img src="{HOSTBASE}17/$pict">
  '%'.ALLOWED_LT."image[\\n\\s]+(board/)?((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT.'%ise'
   => '"'.ALLOWED_LT."img class=InTextImage"
       ." alt=".ALLOWED_QUOT."(img)".ALLOWED_QUOT
-      ." src=".ALLOWED_QUOT.$HOSTBASE
+      ." src=".ALLOWED_QUOT.HOSTBASE
       ."\".('\\1'?'17':'images').\"/\\2".ALLOWED_QUOT.ALLOWED_GT.'"',
 
 //<tt>...</tt> =>translated to <pre>...</pre>
@@ -2069,14 +2059,12 @@ function clean_url( $url, $sep='' )
 // relative to the calling URL, not to the current dir
 function rel_base_dir()
 {
-   global $SUB_PATH;
-
    $dir = str_replace('\\','/',$_SERVER['PHP_SELF']);
    $rel = '';
    while( $i=strrpos($dir,'/') )
    {
       $dir= substr($dir,0,$i);
-      if( !strcasecmp( $dir.'/' , $SUB_PATH ) )
+      if( !strcasecmp( $dir.'/' , SUB_PATH ) )
          break;
       $rel.= '../';
    }
@@ -2085,17 +2073,15 @@ function rel_base_dir()
 
 function get_request_url( $absolute=false)
 {
- global $SUB_PATH, $HOSTBASE;
-
 //CAUTION: sometime, REQUEST_URI != PHP_SELF+args
 //if there is a redirection, _URI==requested, while _SELF==reached (running one)
    $url = str_replace('\\','/',@$_SERVER['REQUEST_URI']); //contains URI_AMP_IN and still urlencoded
-   $len = strlen($SUB_PATH);
-   if (!strcasecmp( $SUB_PATH, substr($url,0,$len) ))
+   $len = strlen(SUB_PATH);
+   if (!strcasecmp( SUB_PATH, substr($url,0,$len) ))
       $url = substr($url,$len);
    $url = str_replace( URI_AMP_IN, URI_AMP, $url);
    if( $absolute )
-      $url = $HOSTBASE . $url;
+      $url = HOSTBASE . $url;
    return $url;
 }
 
@@ -2199,16 +2185,15 @@ define('VAULT_TIME_X', 2*3600); //vault duration (smaller)
  **/
 function is_logged_in($handle, $scode, &$player_row) //must be called from main dir
 {
-   global $HOSTNAME, $hostname_jump, $NOW, $date_fmt, $dbcnx;
+   global $hostname_jump, $NOW, $dbcnx;
    global $ActivityForHit, $ActivityMax;
 
    $player_row = array( 'ID' => 0 );
 
-   if( $hostname_jump && preg_replace("/:.*\$/",'', @$_SERVER['HTTP_HOST']) != $HOSTNAME )
+   if( $hostname_jump && preg_replace("/:.*\$/",'', @$_SERVER['HTTP_HOST']) != HOSTNAME )
    {
-      global $HOSTBASE;
-      list($protocol) = explode($HOSTNAME, $HOSTBASE);
-      jump_to( $protocol . $HOSTNAME . $_SERVER['PHP_SELF'], true );
+      list($protocol) = explode(HOSTNAME, HOSTBASE);
+      jump_to( $protocol . HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
 
    if( empty($handle) || empty($dbcnx) )
@@ -2309,8 +2294,8 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
 
          //send notifications to owner
          $subject= 'Temporary access restriction';
-         $text= 'On '.date($date_fmt, $NOW).":\n"
-               .sprintf($vault_fmt, $handle, date($date_fmt,$vaulttime));
+         $text= 'On '.date(DATE_FMT, $NOW).":\n"
+               .sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));
 
          //caution: some IP addresses have more that 50 accounts in DGS
          //$handles= get_players_field("IP='$ip'"); //exclude guest
@@ -2320,11 +2305,10 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
             send_message("fever_vault.msg($ip)", $text, $subject
                         , '', $handles, /*notify*/false, 0);
 
-         global $FRIENDLY_LONG_NAME;
          $email= $player_row['Email'];
          if( $uid > GUESTS_ID_MAX && verify_email( false, $email) )
             send_email("fever_vault.email($handle)", $email, $text
-                      , $FRIENDLY_LONG_NAME.' - '.$subject);
+                      , FRIENDLY_LONG_NAME.' - '.$subject);
       }
       else //cool enough: reset counters for one period
       {
@@ -2345,11 +2329,10 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
 
    if( !$vaultcnt ) //vault entered
    {
-      global $SUB_PATH;
-      switch( substr( @$_SERVER['PHP_SELF'], strlen($SUB_PATH)) )
+      switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
       {
          case 'index.php':
-            $text= sprintf($vault_fmt, $handle, date($date_fmt,$vaulttime));
+            $text= sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));
             $_REQUEST['sysmsg']= $text;
             $session_expired= true; //fake disconnection
          break;
