@@ -28,13 +28,13 @@ if( !$is_down )
    $chained = @$_REQUEST['chained'];
    if( @$chained ) //to be chained to other cron jobs (see at EOF)
    {
-      $i = floor(3600/$tick_frequency);
+      $i = floor(3600/TICK_FREQUENCY);
       $tick_diff = $i - 10;
       $chained = $i;
    }
    else
    {
-      $tick_diff = floor(3600/$tick_frequency) - 10;
+      $tick_diff = floor(3600/TICK_FREQUENCY) - 10;
    }
    connect2mysql();
 
@@ -117,19 +117,19 @@ if(1){//new
  So the "find_timeout_games" query may be restricted with:
  - given IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime) AS ToMove_Maintime
  - WHERE ToMove_Maintime <= $hours
- because $hours is always < $ticks/$tick_frequency (see ticks_to_hours())
- - given ((ticks-LastTicks) / $tick_frequency) AS Upper_Ellapsed
+ because $hours is always < $ticks/TICK_FREQUENCY (see ticks_to_hours())
+ - given ((ticks-LastTicks) / TICK_FREQUENCY) AS Upper_Ellapsed
  - WHERE ToMove_Maintime < Upper_Ellapsed
  which is:
  - WHERE IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)
-      < ((Clock.Ticks-Games.LastTicks) / $tick_frequency)
+      < ((Clock.Ticks-Games.LastTicks) / TICK_FREQUENCY)
  During a test, this lowered the number of returned rows from 10,960 to 675
 */
    $result = db_query( 'clock_tick.find_timeout_games',
       "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks"
       ." FROM Games"
       ." INNER JOIN Clock ON Clock.ID=Games.ClockUsed AND ($clock_modified)"
-      ." WHERE Clock.Ticks - Games.LastTicks > $tick_frequency"
+      .' WHERE Clock.Ticks - Games.LastTicks > '.TICK_FREQUENCY
          ." * IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)"
       ." AND Games.Status!='INVITED' AND Games.Status!='FINISHED'" );
 }else{//old

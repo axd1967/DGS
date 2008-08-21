@@ -82,9 +82,8 @@ function get_clock_ticks($clock_used)
 
 function ticks_to_hours($ticks)
 {
-   global $tick_frequency;
-   //returns the greatest integer within [0 , $ticks/$tick_frequency[
-   return ( $ticks > $tick_frequency ? floor(($ticks-1) / $tick_frequency) : 0 );
+   //returns the greatest integer within [0 , $ticks/TICK_FREQUENCY[
+   return ( $ticks > TICK_FREQUENCY ? floor(($ticks-1) / TICK_FREQUENCY) : 0 );
 }
 
 function time_remaining( $hours, &$main, &$byotime, &$byoper

@@ -105,7 +105,7 @@ require_once( "include/form_functions.php" );
    else
    {
       $show_time = (int)(bool)@$_REQUEST['show_time'];
-      $dyna= floor($NOW/(3600/$tick_frequency));
+      $dyna= floor($NOW/(3600/TICK_FREQUENCY));
       $winpie = (bool)@$_REQUEST['winpie'];
       $bynumber = (bool)@$_REQUEST['bynumber'];
 
