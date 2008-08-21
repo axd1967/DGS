@@ -85,7 +85,7 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
                           "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."'), " .
                           "Registerdate=FROM_UNIXTIME($NOW), " .
                           "Sessioncode='$code', " .
-                          "Sessionexpire=FROM_UNIXTIME(".($NOW+$session_duration).")" )
+                          "Sessionexpire=FROM_UNIXTIME(".($NOW+SESSION_DURATION).")" )
       or error('mysql_query_failed', 'do_registration.insert_player');
 
    $new_id = mysql_insert_id();
