@@ -35,7 +35,7 @@ function slashed($string)
 
 function loc_start_page()
 {
-   global $encoding_used, $NOW, $gmdate_fmt;
+   global $encoding_used, $NOW;
    ob_start('ob_gzhandler');
 
    header('Content-Type: text/plain;charset='.$encoding_used);
@@ -47,8 +47,8 @@ function loc_start_page()
    //header( "Content-Disposition: attachment; filename=\"$filename\"" );
    header( "Content-Description: PHP Generated Data" );
 
-   header('Expires: ' . gmdate($gmdate_fmt, $NOW+5*60));
-   header('Last-Modified: ' . gmdate($gmdate_fmt, $NOW));
+   header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
+   header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
 
 }
 
@@ -72,7 +72,7 @@ else
 
    connect2mysql();
 
-   $uhandle = '';  
+   $uhandle = '';
    $uid = (int)@$_REQUEST['uid'];
    if( $uid > 0 )
       $idmode= 'uid';
@@ -85,13 +85,13 @@ else
       else
       {
          $uhandle= safe_getcookie('handle');
-         if( $uhandle ) 
+         if( $uhandle )
             $idmode= 'cookie';
          else
             error('no_uid','quick_status');
       }
    }
-   
+
 
    $player_row = mysql_single_fetch( 'quick_status.find_player',
                   "SELECT ID, Timezone, " .
@@ -145,10 +145,10 @@ else
                  "AND Messages.ID=me.mid " .
                  "AND me.Sender IN('N','S') " . //exclude message to myself
          "ORDER BY date DESC";
-   
+
       $result = mysql_query( $query )
          or error('mysql_query_failed','quick_status.find_messages');
-   
+
       while( $row = mysql_fetch_assoc($result) )
       {
          $nothing_found = false;
@@ -191,7 +191,7 @@ else
          date($datfmt, @$row['date']) . "'\n";
    }
 
-    
+
    if( $nothing_found )
       warning('empty lists');
 
