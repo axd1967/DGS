@@ -667,12 +667,26 @@ class DisplayForum
          $img_next_parent = image( $base_path.'images/forward.gif',  T_('Next parent'), T_('Next parent') );
          $img_bottom      = image( $base_path.'images/end.gif',      T_('Bottom'), T_('Bottom') );
 
-#TODO new navi (BEGIN)
+         //TODO: very strange: insert_width() does not work, resulting in line-breaks :(
+         $prev_parent = ( is_null($post->prev_parent_post) )
+            ? '&nbsp;&nbsp;' //insert_width(18)
+            : anchor( $post->prev_parent_post->build_url_post(), $img_prev_parent );
+         $next_parent = ( is_null($post->next_parent_post) )
+            ? '&nbsp;&nbsp;' //insert_width(18)
+            : anchor( $post->next_parent_post->build_url_post(), $img_next_parent );
+         $prev_answer = ( is_null($post->prev_post) )
+            ? '&nbsp;&nbsp;' //insert_width(13)
+            : anchor( $post->prev_post->build_url_post(), $img_prev_answer );
+         $next_answer = ( is_null($post->next_post) )
+            ? '&nbsp;&nbsp;' //insert_width(13)
+            : anchor( $post->next_post->build_url_post(), $img_next_answer );
+
+         // BEGIN Navi (top/prev-parent/prev-answer)
          echo anchor( $thread_url, $img_top )
             . '&nbsp;'
-            . anchor( "$thread_url#{$post->parent_id}", $img_prev_parent )
+            . $prev_parent
             . '&nbsp;'
-            . anchor( $thread_url, $img_prev_answer )
+            . $prev_answer
             . '&nbsp;&nbsp;';
 
          if( $postClass == 'Normal' && !$this->is_moderator ) // reply link
@@ -693,13 +707,13 @@ class DisplayForum
                ."[ " . T_('edit') . " ]</a>&nbsp;&nbsp;";
          }
 
-         echo anchor( $thread_url, $img_next_answer )
+         // END Navi (next-answer/next-parent/bottom)
+         echo $next_answer
             . '&nbsp;'
-            . anchor( $thread_url, $img_next_parent )
+            . $next_parent
             . '&nbsp;'
             . anchor( "$thread_url#fbottom", $img_bottom )
             . '&nbsp;&nbsp;';
-#TODO new navi (END)
 
          if( $this->is_moderator ) // hide/show link
          {
@@ -975,7 +989,7 @@ class Forum
   */
 class ForumThread
 {
-   /*! \brief array of posts in this thread. */
+   /*! \brief array of posts in this thread: [ post->id => ForumPost ]. */
    var $posts;
    /*! \brief Thread starter post [default=null]; null, if none found. */
    var $thread_post;
@@ -983,7 +997,7 @@ class ForumThread
    function ForumThread()
    {
       $this->posts = array();
-      $thread_post = null;
+      $this->thread_post = null;
    }
 
 
@@ -1005,7 +1019,7 @@ class ForumThread
          $post = ForumPost::new_from_row( $row );
          if ( $post->parent_id == 0 )
             $this->thread_post = $post;
-         $this->posts[] = $post;
+         $this->posts[$post->id] = $post;
       }
       mysql_free_result($result);
    }
@@ -1045,7 +1059,7 @@ class ForumThread
          $post = ForumPost::new_from_row($row);
          $post->thread_no_link = true; // display-opt
          $post->last_read = $NOW;
-         $this->posts[] = $post;
+         $this->posts[$post->id] = $post;
       }
       mysql_free_result($result);
    }
@@ -1062,11 +1076,75 @@ class ForumThread
       $cnt = 0;
       $size = count($this->posts);
       $result = "ForumThread:\n";
-      foreach( $this->posts as $post )
-         $result .= sprintf( "[%d/%d]. {%s}\n", ++$cnt, $size, $post->to_string() );
+      foreach( $this->posts as $post_id => $post )
+         $result .= sprintf( "[%d/%d]. pid=[%s]: {%s}\n", ++$cnt, $size, $post_id, $post->to_string() );
       return $result;
    }
 
+   /**
+    * \brief Builds data-structure for navigation within post-list.
+    * param $set_in_posts if true, set navigation-links in ForumPosts in this object
+    *
+    * navtree[post_id] = map with keys: value=post-id or 0 (=no according node)
+    *   prevP, nextP - prev/next-parent post
+    *   prevA, nextA - prev/next-answer post for "parent"-thread
+    * NOTE: order of post_id's in navtree is same as in posts of this ForumThread
+    */
+   function create_navigation_tree( $set_in_posts=true )
+   {
+      $navtree = array();
+      $last_parent_posts = array(); // [ parent_id => last_post_id in parent-thread ]
+      $parent_children = array(); // [ parent_id => [ post_id1, post_id2, ... ] ]
+      foreach( $this->posts as $post_id => $post )
+      {
+         $parent_id = $post->parent_id;
+         $navmap = array();
+         $navmap['prevP'] = $parent_id;
+         $navmap['nextP'] = 0;
+         $navmap['prevA'] = 0;
+         $navmap['nextA'] = 0;
+
+         $last_post_id = @$last_parent_posts[$parent_id];
+         if ( $last_post_id )
+         {
+            $navmap['prevA'] = $last_post_id;
+            $navtree[$last_post_id]['nextA'] = $post_id;
+         }
+
+         if ( $parent_id )
+         {
+            $last_parent_posts[$parent_id] = $post_id;
+            $parent_children[$parent_id][] = $post_id;
+         }
+         $navtree[$post_id] = $navmap;
+      }
+
+      foreach( $parent_children as $parent_id => $children )
+      {
+         foreach( $children as $post_id )
+         {
+            $navtree[$post_id]['nextP'] =
+               ( isset($navtree[$parent_id]) )
+                  ? $navtree[$parent_id]['nextA']
+                  : 0;
+         }
+      }
+
+      if ( $set_in_posts )
+      {
+         foreach( $navtree as $post_id => $navmap )
+         {
+            $this->posts[$post_id]->set_navigation(
+               ( $navmap['prevP'] ) ? $this->posts[$navmap['prevP']] : NULL,
+               ( $navmap['nextP'] ) ? $this->posts[$navmap['nextP']] : NULL,
+               ( $navmap['prevA'] ) ? $this->posts[$navmap['prevA']] : NULL,
+               ( $navmap['nextA'] ) ? $this->posts[$navmap['nextA']] : NULL
+            );
+         }
+      }
+
+      $this->navtree = $navtree;
+   }
 
    // ---------- Static Class functions ----------------------------
 
@@ -1148,6 +1226,13 @@ class ForumPost
    /*! \brief for forum-search: score */
    var $score;
 
+   // tree-navigation (set by ForumThread::create_navigation_tree-func), NULL=not-set
+
+   var $prev_parent_post;
+   var $next_parent_post;
+   var $prev_post;
+   var $next_post;
+
 
    /*! \brief Constructs ForumPost-object with specified arguments: dates are in UNIX-time. */
    function ForumPost( $id=0, $forum_id=0, $thread_id=0, $author=null, $last_post_id=0,
@@ -1195,6 +1280,15 @@ class ForumPost
       $this->pending_approval = ( is_string($val) ? ( (string)$val === 'Y' ) : (bool)$val );
    }
 
+   /*! \brief Sets tree-navigation vars for this post (NULL=not-set). */
+   function set_navigation( $prev_parent_post, $next_parent_post, $prev_post, $next_post )
+   {
+      $this->prev_parent_post = $prev_parent_post;
+      $this->next_parent_post = $next_parent_post;
+      $this->prev_post = $prev_post;
+      $this->next_post = $next_post;
+   }
+
    /*!
     * \brief Builds URL for forum-thread-post (without subdir-prefix) with specified anchor.
     * param anchor anchorname to link to; if null use current post-id
@@ -1206,6 +1300,7 @@ class ForumPost
       else if ( (string)$anchor != '' )
          $anchor = '#' . ((string)$anchor);
       // else: anchor=''
+
       $url = sprintf( 'read.php?forum=%d'.URI_AMP.'thread=%d%s',
          $this->forum_id, $this->thread_id, $anchor );
       return $url;

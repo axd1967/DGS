@@ -149,6 +149,7 @@ function revision_history( $display_forum, $post_id, $rx_term='')
    $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
    $fthread = new ForumThread();
    $fthread->load_posts( $qsql );
+   $fthread->create_navigation_tree();
    // end of DB-stuff
 
 
