@@ -556,7 +556,6 @@ class Table
    function button_style( $button_nr=0)
    {
       global $button_max, $buttoncolors, $buttonfiles;
-      //global $button_width;
 
       if ( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
          $button_nr = 0;
@@ -585,15 +584,9 @@ class Table
     */
    function button_TD_width_insert( $width=false)
    {
-      //a stratagem to force a minimal column width.
-      //must be changed when, a day, the CSS min-width
-      // command will work fine with every browser.
-      //dot.gif is a 1x1 transparent image.
-      global $base_path, $button_width;
       if( !is_numeric($width) )
-         $width = $button_width;
-      //the following "height=0" is useful for Avant browser, others are managed with CSS
-      return "<img class=MinWidth src='{$base_path}images/dot.gif' width=$width height=0 alt=''>";
+         $width = BUTTON_WIDTH;
+      return insert_width( $width );
    }
 
    /*!
@@ -907,8 +900,7 @@ class Table
 
             if( is_numeric( strpos((string)@$attbs['class'],'Button')) )
             {
-               global $button_width;
-               $width = max($width, $button_width);
+               $width = max($width, BUTTON_WIDTH);
             }
             if( isset($attbs['width']) )
             {

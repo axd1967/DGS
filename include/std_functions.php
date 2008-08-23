@@ -128,8 +128,8 @@ define('GRAPH_RATING_MIN_INTERVAL', 2*31*24*3600);
 define('CACHE_EXPIRE_GRAPH', 24*3600); //1 day
 
 
+define('BUTTON_WIDTH', 96);
 $button_max = 11;
-$button_width = 96;
 $buttonfiles = array('button0.gif','button1.gif','button2.gif','button3.gif',
                      'button4.gif','button5.gif','button6.gif','button7.gif',
                      'button8.png','button9.png','button10.png','button10.png');
@@ -2979,6 +2979,24 @@ function anchor( $href, $text, $title='', $attbs='')
       $str.= ' title='.attb_quote($title);
    $str.= attb_build($attbs);
    return $str.">$text</a>";
+}
+
+/*!
+ * \brief Return a stratagem to force a minimal column width.
+ * param $height default=0 is useful for Avant browser, others are managed with CSS
+ *
+ * NOTE: must be changed when, a day, the CSS min-width command
+ *       will work fine with every browser.
+ *       dot.gif is a 1x1 transparent image.
+ */
+function insert_width( $width=1, $height=0 )
+{
+   global $base_path;
+   if( !is_numeric($width) )
+      $width = 1;
+   if( !is_numeric($height) )
+      $height = 0;
+   return "<img class=MinWidth src='{$base_path}images/dot.gif' width=$width height=$height alt=''>";
 }
 
 ?>
