@@ -25,6 +25,27 @@ Changelog
 
 2008-08-23 juga
 
+   * forum/list.php:
+   - removed link to first-new, because of introduced thread-tree-overview
+     showing all new's
+
+   * forum/forum_functions.php (DisplayForum.draw_overview, set_rx_term,
+       forum_start_table, print_headline, get_new_string, draw_post,
+       get_post_edited_string, build_url_post),
+     forum/read.php, forum/search.php,
+     skins/dragon/screen.css:
+   - added thread-tree-overview at top (with own anchors for new entries)
+     - added func DisplayForum.draw_overview
+     - added separate headline (thread overview & thread read posts),
+       moved headline-printing into func print_headline
+     - moved handling of rx-terms into DisplayForum,
+       added func DisplayForum.set_rx_term (moved passing in as arg)
+   - added more anchors (ftop/fbottom) and full url (with rx-term-url-part)
+     for navigating to avoid page-reload on jumping
+   - added func get_post_edited_string to return edited date-string for post
+   - added CSS for thread-tree-overview
+   - bugfix draw_post: use post-created date replacing last-updated date
+
    * forum/forum_functions.php (DisplayForum.draw_post;
        ForumThread.create_navigation_tree, load_posts, load_revision_history;
        ForumPost.set_navigation),
