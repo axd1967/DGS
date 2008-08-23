@@ -241,6 +241,8 @@ class DisplayForum
    var $back_post_id;
    var $cur_depth;
    var $show_score; // used for forum-search
+   /*! \brief rx-terms (optionally array) that are to be highlighted in text. */
+   var $rx_term;
 
    // consts
    var $page_rows;
@@ -265,12 +267,24 @@ class DisplayForum
       $this->back_post_id = 0;
       $this->cur_depth = -1; // also set in forum_start_table-func
       $this->show_score = false;
+      $this->rx_term = '';
 
       $this->page_rows = $RowsPerPage;
       $this->offset = 0;
-      $this->fmt_new = '<span class="%s"><a name="new%d" href="#new%d">%s</a></span>';
+      $this->fmt_new = '<span class="%s"><a name="%s%d" href="#new%d">%s</a></span>';
    }
 
+   /*! \brief Setting rx-term (can be array or string). */
+   function set_rx_term( $rx_term='' )
+   {
+      // highlight terms (skipping XML-elements like tags & entities)
+      if( is_array($rx_term) && count($rx_term) > 0 )
+         $this->rx_term = implode('|', $rx_term);
+      else if( !is_string($rx_term) )
+         $this->rx_term = '';
+      else
+         $this->rx_term = $rx_term;
+   }
 
    function print_moderation_note( $width )
    {
@@ -285,18 +299,27 @@ class DisplayForum
    // note: sets cur_depth=-1
    function forum_start_table( $table_id, $max_rows=MAXROWS_PER_PAGE_DEFAULT, $ReqParam = null)
    {
-      echo "<table id='forum$table_id' class=Forum>\n";
+      echo "<a name=\"ftop\">\n",
+           "<table id='forum$table_id' class=Forum>\n";
       $this->make_link_array( $max_rows, $ReqParam );
 
       if( $this->links & LINK_MASKS )
          $this->echo_links('T');
 
-      echo "<tr class=Caption>";
-      foreach( $this->headline as $name => $attbs )
-         echo "<td $attbs>$name</td>";
-      echo "</tr>\n";
+      $this->print_headline();
 
       $this->cur_depth = -1;
+   }
+
+   function print_headline( $headline=NULL )
+   {
+      if ( is_null($headline) )
+         $headline = $this->headline;
+
+      echo "<tr class=Caption>";
+      foreach( $headline as $name => $attbs )
+         echo "<td $attbs>$name</td>";
+      echo "</tr>\n";
    }
 
    function forum_end_table()
@@ -420,13 +443,14 @@ class DisplayForum
 
    // param: Lastchangedstamp : date or 'bottom'
    // param: Lastread : date or empty
-   function get_new_string( $Lastchangedstamp, $Lastread )
+   function get_new_string( $Lastchangedstamp, $Lastread, $anchor_prefix='new' )
    {
       $new = '';
       if( $Lastchangedstamp === 'bottom' )
       {
          if( $this->new_count > 0 )
-            $new = sprintf( $this->fmt_new, 'NewFlag', $this->new_count + 1, 1, T_('first new') );
+            $new = sprintf( $this->fmt_new, 'NewFlag', $anchor_prefix,
+               $this->new_count + 1, 1, T_('first new') );
       }
       else
       {
@@ -439,7 +463,8 @@ class DisplayForum
                $class = 'NewFlag'; //recent 'new'
             else
                $class = 'OlderNewFlag'; //older 'new'
-            $new = sprintf( $this->fmt_new, $class, $this->new_count, $this->new_count + 1, T_('new') );
+            $new = sprintf( $this->fmt_new, $class, $anchor_prefix,
+               $this->new_count, $this->new_count + 1, T_('new') );
          }
       }
       return $new;
@@ -542,8 +567,7 @@ class DisplayForum
    // param postClass: no '_' because used as sub-class name => CSS compliance,
    //                  values: 'Normal', 'Hidden', 'Reply', 'Preview', 'Edit', 'SearchResult'
    // param post: ForumPost-object to draw
-   // param rx_term: rx-terms (optionally array) that are to be highlighted in text
-   function draw_post($postClass, $post, $is_my_post, $GoDiagrams=null, $rx_term='')
+   function draw_post($postClass, $post, $is_my_post, $GoDiagrams=null )
    {
       global $NOW, $player_row;
 
@@ -554,18 +578,14 @@ class DisplayForum
 
       $pid = $post->id;
       $thread_url = $post->build_url_post(''); //post_url ended by #$pid
+      $term_url = ( $this->rx_term != '' ) ? URI_AMP."xterm=".urlencode($this->rx_term) : '';
 
       $post_reference = '';
       $cols = 2; //one for the subject header, one for the possible approved/hidden state
 
-      // highlight terms in Subject/Text (skipping XML-elements like tags & entities)
-      if( is_array($rx_term) && count($rx_term) > 0 )
-         $rx_term = implode('|', $rx_term);
-      else if( !is_string($rx_term) )
-         $rx_term = '';
-
-      $sbj = make_html_safe( $post->subject, SUBJECT_HTML, $rx_term );
-      $txt = make_html_safe( $post->text, true, $rx_term );
+      // highlight terms in Subject/Text
+      $sbj = make_html_safe( $post->subject, SUBJECT_HTML, $this->rx_term );
+      $txt = make_html_safe( $post->text, true, $this->rx_term );
 //      $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
 
       if( strlen($txt) == 0 ) $txt = '&nbsp;';
@@ -600,9 +620,7 @@ class DisplayForum
                   ,' <span>' ,T_('Score') ,' ' ,$post->score ,"</span></span>\n";
             echo '</td></tr>';
             echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
-            echo '<a class=PostSubject href="',$thread_url
-               ,( $rx_term == '' ? '' : URI_AMP."xterm=".urlencode($rx_term) )
-               , "#$pid\">$sbj</a>";
+            echo '<a class=PostSubject href="', $thread_url, $term_url, "#$pid\">$sbj</a>";
             echo "</td></tr>";
          }
          else
@@ -620,7 +638,7 @@ class DisplayForum
             if( $postClass == 'Edit' || $post->thread_no_link )
                echo "<a class=PostSubject name=\"$pid\">$sbj</a>";
             else
-               echo '<a class=PostSubject href="',$thread_url
+               echo '<a class=PostSubject href="', $thread_url, $term_url
                   ,"#$pid\" name=\"$pid\">$sbj</a>$new";
 
             if( $hdrcols != $cols )
@@ -633,17 +651,13 @@ class DisplayForum
 
          echo "\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>";
 
-         $post_reference = date(DATE_FMT, $post->last_updated);
+         $post_reference = date(DATE_FMT, $post->created);
          echo T_('by') ,' ' , $post->author->user_reference()
             ," &nbsp;&nbsp;&nbsp;" ,$post_reference;
 
+         echo $this->get_post_edited_string( $post );
          if( $post->last_edited > 0 )
-         {
             $post_reference = date(DATE_FMT, $post->last_edited);
-            echo '&nbsp;&nbsp;&nbsp;(<a href="'.$thread_url
-               . URI_AMP."revision_history=$pid\">"
-               . T_('edited') . "</a> $post_reference)";
-         }
 
          echo "</td></tr>\n";
 
@@ -670,19 +684,19 @@ class DisplayForum
          //TODO: very strange: insert_width() does not work, resulting in line-breaks :(
          $prev_parent = ( is_null($post->prev_parent_post) )
             ? '&nbsp;&nbsp;' //insert_width(18)
-            : anchor( $post->prev_parent_post->build_url_post(), $img_prev_parent );
+            : anchor( $post->prev_parent_post->build_url_post( null, $term_url ), $img_prev_parent );
          $next_parent = ( is_null($post->next_parent_post) )
             ? '&nbsp;&nbsp;' //insert_width(18)
-            : anchor( $post->next_parent_post->build_url_post(), $img_next_parent );
+            : anchor( $post->next_parent_post->build_url_post( null, $term_url ), $img_next_parent );
          $prev_answer = ( is_null($post->prev_post) )
             ? '&nbsp;&nbsp;' //insert_width(13)
-            : anchor( $post->prev_post->build_url_post(), $img_prev_answer );
+            : anchor( $post->prev_post->build_url_post( null, $term_url ), $img_prev_answer );
          $next_answer = ( is_null($post->next_post) )
             ? '&nbsp;&nbsp;' //insert_width(13)
-            : anchor( $post->next_post->build_url_post(), $img_next_answer );
+            : anchor( $post->next_post->build_url_post( null, $term_url ), $img_next_answer );
 
          // BEGIN Navi (top/prev-parent/prev-answer)
-         echo anchor( $thread_url, $img_top )
+         echo anchor( "$thread_url$term_url#ftop", $img_top )
             . '&nbsp;'
             . $prev_parent
             . '&nbsp;'
@@ -712,7 +726,7 @@ class DisplayForum
             . '&nbsp;'
             . $next_parent
             . '&nbsp;'
-            . anchor( "$thread_url#fbottom", $img_bottom )
+            . anchor( "$thread_url$term_url#fbottom", $img_bottom )
             . '&nbsp;&nbsp;';
 
          if( $this->is_moderator ) // hide/show link
@@ -734,6 +748,47 @@ class DisplayForum
 
       return $post_reference;
    } //draw_post
+
+   /*! \brief Draw tree-overview for this thread. */
+   function draw_overview( $fthread, $last_read )
+   {
+      global $base_path;
+      $this->new_count = 0;
+      $this->change_depth( 1 );
+
+      // draw for post: subject, author, date
+      foreach( $fthread->posts as $pid => $post )
+      {
+         $sbj = make_html_safe( $post->subject, SUBJECT_HTML, $this->rx_term );
+         $hdrcols = 1; //TODO handle moderator-state
+
+         echo "\n<tr class=\"TreePostNormal\"><td class=TreePostRow colspan=$hdrcols>",
+            str_repeat( '&nbsp;', 3*($post->depth - 1) ),
+            anchor( $post->build_url_post(), $sbj, '', 'class=PostSubject' ),
+            sprintf( ' <span class=PostUser>%s %s</span>',
+               T_('by'), $post->author->user_reference() ),
+            sprintf( '<span class=PostDate>, %s%s</span>',
+               date( DATE_FMT, $post->created ),
+               $this->get_post_edited_string( $post ) ),
+            $this->get_new_string( $post->created, $last_read, 'treenew' ),
+            "</td></tr>";
+      }
+
+      $this->new_count = 0;
+      $this->change_depth( -1 );
+   } //draw_overview
+
+   function get_post_edited_string( $post )
+   {
+      if( $post->last_edited > 0 )
+         $result = sprintf( '&nbsp;&nbsp;&nbsp;(<a href="%s">%s</a> %s)',
+            $post->build_url_post( '', URI_AMP.'revision_history='.$post->id ),
+            T_('edited'),
+            date( DATE_FMT, $post->last_edited ) );
+      else
+         $result = '';
+      return $result;
+   }
 
 } // end of 'DisplayForum'
 
@@ -1081,7 +1136,7 @@ class ForumThread
       return $result;
    }
 
-   /**
+   /*!
     * \brief Builds data-structure for navigation within post-list.
     * param $set_in_posts if true, set navigation-links in ForumPosts in this object
     *
@@ -1293,7 +1348,7 @@ class ForumPost
     * \brief Builds URL for forum-thread-post (without subdir-prefix) with specified anchor.
     * param anchor anchorname to link to; if null use current post-id
     */
-   function build_url_post( $anchor=null )
+   function build_url_post( $anchor=null, $url_suffix='' )
    {
       if ( is_null($anchor) )
          $anchor = '#' . ((int)$this->id);
@@ -1301,8 +1356,8 @@ class ForumPost
          $anchor = '#' . ((string)$anchor);
       // else: anchor=''
 
-      $url = sprintf( 'read.php?forum=%d'.URI_AMP.'thread=%d%s',
-         $this->forum_id, $this->thread_id, $anchor );
+      $url = sprintf( 'read.php?forum=%d'.URI_AMP.'thread=%d%s%s',
+         $this->forum_id, $this->thread_id, $url_suffix, $anchor );
       return $url;
    }
 
