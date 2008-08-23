@@ -86,7 +86,7 @@ require_once( 'forum/forum_functions.php' );
             : '';
 
          echo "<tr class=Row$c>"
-            . '<td class=Subject>' . anchor( $thread->build_url_post('new1'), $subject ) . $new . '</td>'
+            . '<td class=Subject>' . anchor( $thread->build_url_post(''), $subject ) . $new . '</td>'
             . "<td class=Name>$author</td>"
             . "<td class=HitCnt>{$thread->count_hits}</td>"
             . "<td class=PostCnt>{$thread->count_posts}</td>"
