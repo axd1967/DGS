@@ -24,7 +24,7 @@ require_once( 'forum/forum_functions.php' );
 require_once( 'forum/post.php' );
 
 
-function revision_history( $display_forum, $post_id, $rx_term='')
+function revision_history( $display_forum, $post_id )
 {
    $revhist_thread = new ForumThread();
    $revhist_thread->load_revision_history( $post_id );
@@ -39,13 +39,13 @@ function revision_history( $display_forum, $post_id, $rx_term='')
 
    $display_forum->forum_start_table('Revision');
    $display_forum->change_depth( 1 );
-   $display_forum->draw_post( 'Reply', $revhist_thread->thread_post, null, $rx_term );
+   $display_forum->draw_post( 'Reply', $revhist_thread->thread_post, null );
 
    echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
    $display_forum->change_depth( 2 );
    foreach( $revhist_thread->posts as $post )
    {
-      $display_forum->draw_post( 'Edit' , $post, true, null, $rx_term);
+      $display_forum->draw_post( 'Edit' , $post, true, null );
       echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
    }
 
@@ -97,11 +97,15 @@ function revision_history( $display_forum, $post_id, $rx_term='')
    }
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id, $thread );
+   $disp_forum->set_rx_term( $rx_term );
    $disp_forum->cols = 2;
    $disp_forum->links = LINKPAGE_READ;
    $disp_forum->links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
    $disp_forum->headline = array(
-      T_('Reading thread') => "colspan={$disp_forum->cols}"
+      T_('Reading thread (overview)') => "colspan={$disp_forum->cols}"
+   );
+   $headline2 = array(
+      T_('Reading thread (posts)') => "colspan={$disp_forum->cols}"
    );
 
    //toggle moderator and preview does not work together.
@@ -129,7 +133,7 @@ function revision_history( $display_forum, $post_id, $rx_term='')
 
    if( @$_GET['revision_history'] > 0 )
    {
-      revision_history( $disp_forum, @$_GET['revision_history'], $rx_term ); //set $Lastread
+      revision_history( $disp_forum, @$_GET['revision_history'] ); //set $Lastread
       end_page();
       hit_thread( $thread );
       exit;
@@ -152,6 +156,9 @@ function revision_history( $display_forum, $post_id, $rx_term='')
    $fthread->create_navigation_tree();
    // end of DB-stuff
 
+   // draw tree-overview
+   $disp_forum->draw_overview( $fthread, $Lastread );
+   $disp_forum->print_headline( $headline2 );
 
    // initial post of the thread
    $post0 = $fthread->thread_post();
@@ -196,7 +203,7 @@ function revision_history( $display_forum, $post_id, $rx_term='')
 
       // draw current post
       $post_reference =
-         $disp_forum->draw_post($postClass, $post, $is_my_post, NULL /*$GoDiagrams*/, $rx_term);
+         $disp_forum->draw_post($postClass, $post, $is_my_post, NULL /*$GoDiagrams*/ );
 
       // preview of new or existing post (within existing thread)
       $pvw_post = $post; // copy for preview/edit
@@ -207,7 +214,7 @@ function revision_history( $display_forum, $post_id, $rx_term='')
          $pvw_post->subject = $preview_Subject;
          $pvw_post->text = $preview_Text;
 //         $GoDiagrams = $preview_GoDiagrams;
-         $disp_forum->draw_post('Preview', $pvw_post, false, NULL /*$GoDiagrams*/, $rx_term);
+         $disp_forum->draw_post('Preview', $pvw_post, false, NULL /*$GoDiagrams*/ );
       }
 
       // input-form for reply/edit-post
@@ -236,7 +243,7 @@ function revision_history( $display_forum, $post_id, $rx_term='')
       $disp_forum->change_depth( $disp_forum->cur_depth + 1 );
       $post = new ForumPost( 0, $forum_id, 0, null, 0, 0, 0, $preview_Subject, $preview_Text );
 //      $GoDiagrams = $preview_GoDiagrams;
-      $disp_forum->draw_post('Preview', $post, false, NULL /*$GoDiagrams*/, $rx_term);
+      $disp_forum->draw_post('Preview', $post, false, NULL /*$GoDiagrams*/ );
 
       echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
       $disp_forum->forum_message_box('Preview', $thread, NULL /*$GoDiagrams*/,
