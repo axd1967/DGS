@@ -23,6 +23,25 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-23 juga
+
+   * forum/forum_functions.php (DisplayForum.draw_post;
+       ForumThread.create_navigation_tree, load_posts, load_revision_history;
+       ForumPost.set_navigation),
+     forum/read.php:
+   - fixed navigation in tree-thread-view:
+     - DisplayForum.draw_post:
+       go to top/bottom, prev/next-parent, prev/next-answer
+     - added funcs to create and set navigation:
+       ForumThread.create_navigation_tree, ForumPost.set_navigation
+     - adjusted funcs to support navigation:
+       ForumThread.load_posts/load_revision_history using post_id as key
+
+   * include/std_functions.php (insert_width),
+     include/table_columns.php (button_TD_width_insert):
+   - replaced var $button_width with const BUTTON_WIDTH
+   - compiled func insert_width from table_columns.ph to draw transparent widthed-image
+
 2008-08-21 juga
 
    * clock_tick.php, do_registration.php, edit_profile.php, error.php,
@@ -58,7 +77,7 @@ Changelog
      status.php:
    - big (unfinished) refactoring
      - separated application logic and presentational layer (GUI & layout)
-         from database operations using classes.
+         from database operations by using classes.
        introduced container-classes used as database-objects with additional
          data used in application-logic.
        get rid of extract($row) and global vars using container-classes
