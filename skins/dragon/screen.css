@@ -2277,6 +2277,19 @@ table.Forum .PageLinks a {
    color: black;
 }
 
+/* thread tree-overview: Subject, Author, Date */
+table.Forum tr.TreePostNormal {
+   background: #cccccc;
+}
+
+table.Forum tr.TreePostNormal td.TreePostRow {
+   padding: 1px;
+}
+
+table.Forum tr.TreePostNormal td.TreePostRow span.PostUser, span.PostDate {
+   font-size: small;
+}
+
 /*
   The headers of the posts have the class="PostHeadSubclass"
    where Subclass is one of:
@@ -2326,9 +2339,9 @@ table.Forum tr.PostHeadHidden td.PostStatus,
 table.Forum tr.PostHeadNormal td.PostStatus {
    color: #990000;
    font-weight: bold;
-   text-align: right; /* */
+   text-align: right;
 /*   width: 1%;
-   text-align: center; /* */
+   text-align: center; */
 }
 
 table.Forum tr.PostBody {
