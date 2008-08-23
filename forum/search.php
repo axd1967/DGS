@@ -229,6 +229,7 @@ define('MODERATOR_SEARCH', 0);
       // show resultset of search
       $rx_term = implode('|', $filter2->get_rx_terms() );
       $disp_forum->show_score = true; // for draw_post
+      $disp_forum->set_rx_term( $rx_term );
 
       $disp_forum->print_moderation_note('99%');
       $disp_forum->forum_start_table('Search', $maxrows, $rp);
@@ -245,7 +246,7 @@ define('MODERATOR_SEARCH', 0);
          if( $hidden )
             $postClass = 'Hidden'; //need a special SearchHidden class
 
-         $disp_forum->draw_post($postClass, $post, $is_my_post, null, $rx_term);
+         $disp_forum->draw_post($postClass, $post, $is_my_post, null );
 
          echo "<tr><td colspan=$cols></td></tr>\n"; //separator
       }
