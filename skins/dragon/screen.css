@@ -2279,15 +2279,38 @@ table.Forum .PageLinks a {
 
 /* thread tree-overview: Subject, Author, Date */
 table.Forum tr.TreePostNormal {
-   background: #cccccc;
+   background: #aaaaaa;
+}
+table.Forum tr.TreePostNormal td {
+   padding: 2px;
+}
+table.ForumTreeOverview tr.Row1 {
+   background: #ececec;
+}
+table.ForumTreeOverview tr.Row2 {
+   background: #d8d8d8;
 }
 
-table.Forum tr.TreePostNormal td.TreePostRow {
+table.ForumTreeOverview {
+   table-layout: fixed;
+}
+
+table.ForumTreeOverview tr.TreePostNormal td {
    padding: 1px;
 }
 
-table.Forum tr.TreePostNormal td.TreePostRow span.PostUser, span.PostDate {
+table.ForumTreeOverview tr.TreePostNormal span.PostUser, span.PostDate {
    font-size: small;
+}
+table.ForumTreeOverview tr.TreePostNormal .MyPost {
+   font-weight: bold;
+}
+
+table.ForumTreeOverview tr.TreePostNormal a {
+   text-decoration: none;
+}
+table.ForumTreeOverview tr.TreePostNormal a:hover {
+   text-decoration: underline;
 }
 
 /*
