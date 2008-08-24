@@ -352,7 +352,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("password_too_short"):
       {
-         echo T_("Sorry, the password must be at least six letters.");
+         echo T_("Sorry, the password must be at least six characters long.");
       }
       break;
 
@@ -435,7 +435,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("userid_too_short"):
       {
-         echo T_("Sorry, userid must be at least 3 letters long.");
+         echo T_("Sorry, userid must be at least 3 characters long.");
       }
       break;
 
