@@ -21,6 +21,7 @@ $TranslateGroups[] = "Forum";
 
 chdir('..');
 require_once( 'forum/forum_functions.php' );
+require_once( 'include/form_functions.php' );
 
 {
    connect2mysql();
@@ -30,19 +31,25 @@ require_once( 'forum/forum_functions.php' );
       error("not_logged_in");
    $my_id = $player_row['ID'];
 
-   $forum_id = max(0,(int)@$_GET['forum']);
-   $offset = max(0,(int)@$_GET['offset']);
+   $forum_id = max(0, (int)get_request_arg('forum'));
+   $offset = max(0, (int)get_request_arg('offset'));
+   unset( $_GET['forum_showrows'] );
+
+   // show max-rows
+   $maxrows = (int)@$_REQUEST['maxrows'];
+   $maxrows = get_maxrows( $maxrows, MAXROWS_PER_PAGE, MAXROWS_PER_PAGE_DEFAULT );
+   $arr_maxrows = build_maxrows_array( $maxrows, MAXROWS_PER_PAGE);
 
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
 
    $forum = Forum::load_forum( $forum_id );
-   $show_rows = $forum->load_threads( $my_id, $is_moderator, $RowsPerPage, $offset );
+   $show_rows = $forum->load_threads( $my_id, $is_moderator, $maxrows, $offset );
    // end of DB-stuff
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id );
    $disp_forum->offset = $offset;
-   $disp_forum->page_rows = $RowsPerPage;
+   $disp_forum->max_rows = $maxrows;
 
    $disp_forum->cols = 5;
    $disp_forum->links = LINKPAGE_LIST;
@@ -96,6 +103,23 @@ require_once( 'forum/forum_functions.php' );
    }
 
    $disp_forum->forum_end_table();
+
+   // form for thread-list
+   $form = new Form( 'tableFTL', 'list.php', FORM_GET );
+   $form->set_config( FEC_TR_ATTR, 'valign=top' );
+   $xkey = ACCKEY_ACT_FILT_SEARCH;
+
+   $form->add_row( array(
+        'DESCRIPTION', T_('Number of threads#forum'),
+        'SELECTBOX',   'maxrows', 1, $arr_maxrows, $maxrows, false ));
+   $form->add_row( array(
+        'TAB',
+        'CELL',        1, 'align=left',
+        'OWNHTML',     '<input type="submit" name="forum_showrows" value="' . T_('Show Rows#forum')
+                        . '" accesskey=' . attb_quote($xkey) . ' title=' . attb_quote("[&amp;$xkey]") . '>' ));
+   $form->add_hidden('forum', $forum_id);
+   $form->add_hidden('offset', $offset);
+   echo $form->get_form_string();
 
    end_page();
 }
