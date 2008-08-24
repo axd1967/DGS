@@ -101,7 +101,7 @@ function revision_history( $display_forum, $post_id )
    $disp_forum->cols = 2;
    $disp_forum->links = LINKPAGE_READ;
    $disp_forum->links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
-   $disp_forum->headline = array(
+   $headline1 = array(
       T_('Reading thread (overview)') => "colspan={$disp_forum->cols}"
    );
    $headline2 = array(
@@ -139,8 +139,6 @@ function revision_history( $display_forum, $post_id )
       exit;
    }
 
-   $disp_forum->forum_start_table('Read');
-
    // set var: Lastread
    $Lastread = load_thread_last_read( $my_id, $thread );
 
@@ -156,21 +154,28 @@ function revision_history( $display_forum, $post_id )
    $fthread->create_navigation_tree();
    // end of DB-stuff
 
-   // draw tree-overview
-   $disp_forum->draw_overview( $fthread, $Lastread );
-   $disp_forum->print_headline( $headline2 );
-
-   // initial post of the thread
-   $post0 = $fthread->thread_post();
-   if ( is_null($post0) )
+   $post0 = $fthread->thread_post(); // initial post of the thread
+   $is_empty_thread = is_null($post0);
+   if( $is_empty_thread )
    {
       $thread_Subject = '';
       $Lastchangedthread = 0 ;
+      $disp_forum->headline = $headline2; // no thread tree-overview
    }
    else
    {
       $thread_Subject = $post0->subject;
       $Lastchangedthread = $post0->last_changed;
+      $disp_forum->headline = $headline1;
+   }
+
+   $disp_forum->forum_start_table('Read');
+
+   if( !$is_empty_thread )
+   {
+      // draw tree-overview
+      $disp_forum->draw_overview( $fthread, $Lastread );
+      $disp_forum->print_headline( $headline2 );
    }
 
    // draw posts
@@ -251,8 +256,8 @@ function revision_history( $display_forum, $post_id )
       echo "</td></tr>\n";
    }
 
-   // footer: reply-form (for new or existing thread)
-   if( !($reply > 0) && !$preview && !($edit>0) && !$disp_forum->is_moderator )
+   // footer: reply-form (only for a new thread)
+   if( $is_empty_thread && !$preview && !$disp_forum->is_moderator )
    {
       $disp_forum->change_depth( 1 );
       echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
