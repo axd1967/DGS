@@ -68,7 +68,7 @@ function load_thread_last_read( $user_id, $thread_id )
 
 
 //GLOBAL
-//TODO (message -> rename to approve_post)
+//TODO (message -> rename to approve_postmessage)
 function approve_message($id, $thread, $forum, $approve=true,
                          $approve_reject_pending_approval=false)
 {
@@ -763,21 +763,23 @@ class DisplayForum
       foreach( $fthread->posts as $pid => $post )
       {
          $c = 3 - $c;
-         $sbj = make_html_safe( $post->subject, SUBJECT_HTML, $this->rx_term );
+         $subj_part = substr( $post->subject, 0, 40 )
+            . ( (strlen($post->subject) > 40) ? ' ...' : '' );
+         $sbj = make_html_safe( $subj_part, SUBJECT_HTML, $this->rx_term );
 
-         $mypostclass = ( $post->author->id == $player_row['ID'] ) ? ' MyPost' : '';
+         $mypostclass = ( $post->author->id == $player_row['ID'] ) ? ' class=MyPost' : '';
          echo "\n<tr class=\"TreePostNormal Row{$c}{$mypostclass}\">",
-            "<td class=\"$mypostclass\">",
+            "<td$mypostclass>",
             str_repeat( '&nbsp;', 3*($post->depth - 1) ),
             anchor( '#'.$post->id, $sbj, '', 'class=PostSubject' ),
             $this->get_new_string( $post->created, $last_read, 'treenew' ),
+            //TODO add/handle moderator-state
             "</td><td>",
             sprintf( '<span class=PostUser>%s</span>', $post->author->user_reference() ),
             "</td><td>",
             sprintf( '<span class=PostDate>%s%s</span>',
                date( DATE_FMT, $post->created ),
                $this->get_post_edited_string( $post ) ),
-            '</td><td>', //TODO add/handle moderator-state
             '</td></tr>';
       }
 
