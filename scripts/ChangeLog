@@ -25,6 +25,18 @@ Changelog
 
 2008-08-24 juga
 
+   * forum/forum_functions.php (draw_overview):
+   - thread-tree-overview: show only first 40 chars of subject
+     to prevent wrapping (in most cases)
+
+   * forum/read.php:
+   - show reply-form only for new-topic and when replying or editing,
+     this enforces a user to explicitly choosing a post to reply to
+   - omit thread-tree-overview if there are no posts in thread to show
+
+   * skins/dragon/screen.css:
+   - removed fixed table-layout for thread-tree-overview
+
    * edit_profile.php, include/rating.php (convert_to_rating):
    - removed converting of NNGS-rank/rating (not longer existing server)
 
