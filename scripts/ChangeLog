@@ -25,6 +25,21 @@ Changelog
 
 2008-08-24 juga
 
+   * forum/forum_functions.php (draw_post, create_navigation_tree, set_navigation;
+       forum_start_table, make_link_array),
+     forum/list.php, forum/search.php,
+     change_profile.php, include/std_functions.php:
+   - thread view: added post navi link to first answer
+   - forum-thread-list: added configurable max-rows with selectbox
+     - cleaned up usage for max-rows, set by DisplayForum.max_rows (was page_rows)
+     - correctly include offset/maxrows in navigational links
+     - replaced var $RowsPerPage with const MAXROWS_PER_PAGE_DEFAULT cause not longer needed
+   - minor code-cleanup ("->', removed default-args)
+
+   * include/std_classes.php (RequestParameters.get_entries):
+   - added func get_entries to return entries to build-url with array
+
+
    * forum/forum_functions.php (draw_overview):
    - thread-tree-overview: show only first 40 chars of subject
      to prevent wrapping (in most cases)
@@ -42,6 +57,7 @@ Changelog
 
    * error.php:
    - fixed wording for errors: userid_too_short, password_illegal_chars
+
 
    * forum/forum_functions.php (draw_post, draw_overview),
      skins/dragon/screen.css:
@@ -75,6 +91,7 @@ Changelog
    - added func get_post_edited_string to return edited date-string for post
    - added CSS for thread-tree-overview
    - bugfix draw_post: use post-created date replacing last-updated date
+
 
    * forum/forum_functions.php (DisplayForum.draw_post;
        ForumThread.create_navigation_tree, load_posts, load_revision_history;
