@@ -684,19 +684,19 @@ class DisplayForum
          //TODO: very strange: insert_width() does not work, resulting in line-breaks :(
          $prev_parent = ( is_null($post->prev_parent_post) )
             ? '&nbsp;&nbsp;' //insert_width(18)
-            : anchor( $post->prev_parent_post->build_url_post( null, $term_url ), $img_prev_parent );
+            : anchor( '#'.$post->prev_parent_post->id, $img_prev_parent );
          $next_parent = ( is_null($post->next_parent_post) )
             ? '&nbsp;&nbsp;' //insert_width(18)
-            : anchor( $post->next_parent_post->build_url_post( null, $term_url ), $img_next_parent );
+            : anchor( '#'.$post->next_parent_post->id, $img_next_parent );
          $prev_answer = ( is_null($post->prev_post) )
             ? '&nbsp;&nbsp;' //insert_width(13)
-            : anchor( $post->prev_post->build_url_post( null, $term_url ), $img_prev_answer );
+            : anchor( '#'.$post->prev_post->id, $img_prev_answer );
          $next_answer = ( is_null($post->next_post) )
             ? '&nbsp;&nbsp;' //insert_width(13)
-            : anchor( $post->next_post->build_url_post( null, $term_url ), $img_next_answer );
+            : anchor( '#'.$post->next_post->id, $img_next_answer );
 
          // BEGIN Navi (top/prev-parent/prev-answer)
-         echo anchor( "$thread_url$term_url#ftop", $img_top )
+         echo anchor( '#ftop', $img_top )
             . '&nbsp;'
             . $prev_parent
             . '&nbsp;'
@@ -726,7 +726,7 @@ class DisplayForum
             . '&nbsp;'
             . $next_parent
             . '&nbsp;'
-            . anchor( "$thread_url$term_url#fbottom", $img_bottom )
+            . anchor( '#fbottom', $img_bottom )
             . '&nbsp;&nbsp;';
 
          if( $this->is_moderator ) // hide/show link
@@ -752,27 +752,36 @@ class DisplayForum
    /*! \brief Draw tree-overview for this thread. */
    function draw_overview( $fthread, $last_read )
    {
-      global $base_path;
+      global $base_path, $player_row;
       $this->new_count = 0;
       $this->change_depth( 1 );
 
+      echo "\n<tr class=TreePostNormal><td><table class=ForumTreeOverview>\n";
+
       // draw for post: subject, author, date
+      $c=2;
       foreach( $fthread->posts as $pid => $post )
       {
+         $c = 3 - $c;
          $sbj = make_html_safe( $post->subject, SUBJECT_HTML, $this->rx_term );
-         $hdrcols = 1; //TODO handle moderator-state
 
-         echo "\n<tr class=\"TreePostNormal\"><td class=TreePostRow colspan=$hdrcols>",
+         $mypostclass = ( $post->author->id == $player_row['ID'] ) ? ' MyPost' : '';
+         echo "\n<tr class=\"TreePostNormal Row{$c}{$mypostclass}\">",
+            "<td class=\"$mypostclass\">",
             str_repeat( '&nbsp;', 3*($post->depth - 1) ),
-            anchor( $post->build_url_post(), $sbj, '', 'class=PostSubject' ),
-            sprintf( ' <span class=PostUser>%s %s</span>',
-               T_('by'), $post->author->user_reference() ),
-            sprintf( '<span class=PostDate>, %s%s</span>',
+            anchor( '#'.$post->id, $sbj, '', 'class=PostSubject' ),
+            $this->get_new_string( $post->created, $last_read, 'treenew' ),
+            "</td><td>",
+            sprintf( '<span class=PostUser>%s</span>', $post->author->user_reference() ),
+            "</td><td>",
+            sprintf( '<span class=PostDate>%s%s</span>',
                date( DATE_FMT, $post->created ),
                $this->get_post_edited_string( $post ) ),
-            $this->get_new_string( $post->created, $last_read, 'treenew' ),
-            "</td></tr>";
+            '</td><td>', //TODO add/handle moderator-state
+            '</td></tr>';
       }
+
+      echo "\n</table></td></tr>\n";
 
       $this->new_count = 0;
       $this->change_depth( -1 );
