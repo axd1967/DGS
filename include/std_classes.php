@@ -190,6 +190,13 @@ class RequestParameters
    {
       return build_url( $this->values, $end_sep);
    }
+
+   /*! \brief Return entries as key-value array. */
+   function get_entries()
+   {
+      return $this->values;
+   }
+
 } // end of 'RequestParameters'
 
 
