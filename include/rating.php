@@ -686,6 +686,7 @@ function convert_to_rating($string, $type)
       $kyu = 0; // no grad found => rating assumed
 
    // determine rating from input
+   // also see http://senseis.xmp.net/?RankWorldwideComparison
    $needrank = true; // true if rating-type needs rank; false=need-rating
    switch( (string)$type )
    {
@@ -747,20 +748,13 @@ function convert_to_rating($string, $type)
       break;
       */
 
-      case 'iytgg':  // walk through
-      case 'nngs':
+      case 'iytgg':
          if( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
             if( $rating != -OUT_OF_RATING )
                $rating += 100;  // one stone stronger
          }
-      break;
-
-      case 'nngsrating':
-         $needrank = false;
-         if( $kyu <= 0 )
-            $rating = $val - 900;
       break;
 
       case 'japan':

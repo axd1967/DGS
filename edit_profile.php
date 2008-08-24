@@ -50,8 +50,6 @@ require_once( "include/form_functions.php" );
                      'igs' => 'igs',
 //                  'igsrating' => 'igsrating',
                      'iytgg' => 'iytgg',
-                     'nngs' => 'nngs',
-                     'nngsrating' => 'nngsrating',
                      'japan' => 'japan',
                      'china' => 'china',
                      'korea' => 'korea' );
