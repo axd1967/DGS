@@ -105,7 +105,7 @@ define('MODERATOR_SEARCH', 0);
    $maxrows = (int)@$_REQUEST['maxrows'];
    $maxrows = get_maxrows( $maxrows, MAXROWS_PER_PAGE_FORUM, MAXROWS_PER_PAGE_DEFAULT );
    $arr_maxrows = build_maxrows_array( $maxrows, MAXROWS_PER_PAGE_FORUM );
-   $disp_forum->page_rows = $maxrows;
+   $disp_forum->max_rows = $maxrows;
 
    // static filters
    $ffilter = new SearchFilter();
@@ -220,11 +220,9 @@ define('MODERATOR_SEARCH', 0);
       if( $nr_rows > $maxrows )
          $disp_forum->links |= LINK_NEXT_PAGE;
 
-      // build navi-URL for paging
+      // build navi-URL for paging (offset/maxrows set in forum_start_table/make_link_array-func)
       $rp = $ffilter->get_req_params();
-      #$rp->add_entry( 'offset', $offset ); //set in forum_start_table/make_link_array-func
       $rp->add_entry( 'order',  $order );
-      $rp->add_entry( 'maxrows', $maxrows );
 
       // show resultset of search
       $rx_term = implode('|', $filter2->get_rx_terms() );
@@ -232,7 +230,7 @@ define('MODERATOR_SEARCH', 0);
       $disp_forum->set_rx_term( $rx_term );
 
       $disp_forum->print_moderation_note('99%');
-      $disp_forum->forum_start_table('Search', $maxrows, $rp);
+      $disp_forum->forum_start_table('Search', $rp);
       echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
       foreach( $findposts as $post )
