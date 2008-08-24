@@ -87,7 +87,7 @@ require_once( "include/rating.php" );
 
    $tablemaxrows = get_maxrows(
       get_request_arg('tablemaxrows'),
-      MAXROWS_PER_PAGE_PROFILE, $RowsPerPage );
+      MAXROWS_PER_PAGE_PROFILE, MAXROWS_PER_PAGE_DEFAULT );
 
 
    $query = "UPDATE Players SET " .

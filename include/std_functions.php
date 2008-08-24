@@ -103,9 +103,8 @@ define('LIST_GAMENOTE_LEN', 20); //set 0 to disable => impact the show_game page
 
 define('MAXROWS_PER_PAGE_DEFAULT', 20);
 define('MAXROWS_PER_PAGE_PROFILE', 50);
-define('MAXROWS_PER_PAGE_FORUM',   50);
+define('MAXROWS_PER_PAGE_FORUM',   50); // max for forum-search
 define('MAXROWS_PER_PAGE', 100);
-$RowsPerPage = MAXROWS_PER_PAGE_DEFAULT;
 //-----
 
 $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time
