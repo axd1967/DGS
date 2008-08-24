@@ -23,6 +23,24 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-08-24 juga
+
+   * edit_profile.php, include/rating.php (convert_to_rating):
+   - removed converting of NNGS-rank/rating (not longer existing server)
+
+   * error.php:
+   - fixed wording for errors: userid_too_short, password_illegal_chars
+
+   * forum/forum_functions.php (draw_post, draw_overview),
+     skins/dragon/screen.css:
+   - fixed page-local navigation: used only '#target' to navigate,
+     because URL can vary (moderator, search-term, etc)
+   - Thread tree-overview:
+     - put subject, author, date in separate table-columns
+     - mark own posts with bold font
+     - use 2-rows-colored background for overview-list: don't use RowX
+       standard because of existing background)
+
 2008-08-23 juga
 
    * forum/list.php:
