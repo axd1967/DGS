@@ -245,14 +245,13 @@ class DisplayForum
    var $rx_term;
 
    // consts
-   var $page_rows;
+   var $max_rows;
    var $offset;
    var $fmt_new;
 
    /*! \brief Constructs display handler for forum-pages. */
    function DisplayForum( $user_id, $is_moderator, $forum_id=0, $thread_id=0 )
    {
-      global $RowsPerPage;
       $this->user_id = $user_id;
       $this->is_moderator = $is_moderator;
       $this->forum_id = $forum_id;
@@ -265,11 +264,11 @@ class DisplayForum
       $this->link_array_right = array();
       $this->new_count = 0;
       $this->back_post_id = 0;
-      $this->cur_depth = -1; // also set in forum_start_table-func
+      $this->cur_depth = -1;
       $this->show_score = false;
       $this->rx_term = '';
 
-      $this->page_rows = $RowsPerPage;
+      $this->max_rows = MAXROWS_PER_PAGE_DEFAULT;
       $this->offset = 0;
       $this->fmt_new = '<span class="%s"><a name="%s%d" href="#new%d">%s</a></span>';
    }
@@ -297,11 +296,11 @@ class DisplayForum
    //                 values: 'Index', 'List', 'Read', 'Search', 'Revision', 'Pending'
    // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
    // note: sets cur_depth=-1
-   function forum_start_table( $table_id, $max_rows=MAXROWS_PER_PAGE_DEFAULT, $ReqParam = null)
+   function forum_start_table( $table_id, $ReqParam = null)
    {
       echo "<a name=\"ftop\">\n",
            "<table id='forum$table_id' class=Forum>\n";
-      $this->make_link_array( $max_rows, $ReqParam );
+      $this->make_link_array( $ReqParam );
 
       if( $this->links & LINK_MASKS )
          $this->echo_links('T');
@@ -330,7 +329,7 @@ class DisplayForum
    }
 
    // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
-   function make_link_array( $max_rows, $ReqParam = null )
+   function make_link_array( $ReqParam = null )
    {
       $links = $this->links;
       $fid = $this->forum_id;
@@ -350,7 +349,6 @@ class DisplayForum
                .( ( $this->back_post_id ) ? '#'.$this->back_post_id : '' );
       }
 
-
       if( $links & LINK_NEW_TOPIC )
          $this->link_array_left[T_('New Topic')] = "read.php?forum=$fid";
       if( $links & LINK_SEARCH )
@@ -359,42 +357,45 @@ class DisplayForum
       if( $links & LINK_MARK_READ )
          $this->link_array_left[T_('Mark All Read')] = ''; //TODO
 
-      $navi_url = '';
-      if ( !is_null($ReqParam) && ($links & (LINKPAGE_SEARCH|LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
-         $navi_url = $ReqParam->get_url_parts();
-
       if( $links & LINK_TOGGLE_MODERATOR )
       {
+         // preserve all page-args on moderator switch
          $get = array_merge( $_GET, $_POST);
          $get['moderator'] = ( empty($this->is_moderator) ? 'y' : 'n' );
          if( $links & LINKPAGE_READ )
-            $url = make_url( "read.php", $get, false );
+            $url = make_url( 'read.php', $get );
          else if ( $links & LINKPAGE_LIST )
-            $url = make_url( "list.php", $get, false );
+            $url = make_url( 'list.php', $get );
          else if ( $links & LINKPAGE_SEARCH )
-            $url = make_url( "search.php", $get, false );
+            $url = make_url( 'search.php', $get );
          else
-            $url = make_url( "index.php", $get, false );
+            $url = make_url( 'index.php', $get );
          $this->link_array_right[T_("Toggle forum moderator")] = $url;
       }
 
+      $navi = array( 'maxrows' => $this->max_rows );
+      if ( !is_null($ReqParam) && ($links & (LINKPAGE_SEARCH|LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
+         $navi = array_merge( $navi, $ReqParam->get_entries() );
+
       if( $links & LINK_PREV_PAGE )
       {
+         $navi['offset'] = $this->offset - $this->max_rows;
          if( $links & LINKPAGE_SEARCH )
-            $href = "search.php?{$navi_url}".URI_AMP."offset=".($this->offset - $max_rows);
+            $href = 'search.php?';
          else
-            $href = "list.php?forum=$fid".URI_AMP."offset=".($this->offset - $this->page_rows);
+            $href = 'list.php?forum=' . $fid;
          $this->link_array_right[T_("Prev Page")] =
-            array( $href, '', array( 'accesskey' => ACCKEY_ACT_PREV ) );
+            array( make_url( $href, $navi ), '', array( 'accesskey' => ACCKEY_ACT_PREV ) );
       }
       if( $links & LINK_NEXT_PAGE )
       {
+         $navi['offset'] = $this->offset + $this->max_rows;
          if( $links & LINKPAGE_SEARCH )
-            $href = "search.php?{$navi_url}".URI_AMP."offset=".($this->offset + $max_rows);
+            $href = 'search.php?';
          else
-            $href = "list.php?forum=$fid".URI_AMP."offset=".($this->offset + $this->page_rows);
+            $href = 'list.php?forum=' . $fid;
          $this->link_array_right[T_("Next Page")] =
-            array( $href, '', array( 'accesskey' => ACCKEY_ACT_NEXT ) );
+            array( make_url( $href, $navi ), '', array( 'accesskey' => ACCKEY_ACT_NEXT ) );
       }
    }
 
@@ -680,6 +681,8 @@ class DisplayForum
          $img_next_answer = image( $base_path.'images/next.gif',     T_('Next answer'), T_('Next answer') );
          $img_next_parent = image( $base_path.'images/forward.gif',  T_('Next parent'), T_('Next parent') );
          $img_bottom      = image( $base_path.'images/end.gif',      T_('Bottom'), T_('Bottom') );
+         //TODO: need another icon for first-answer (at the moment is same as next-answer)
+         $img_first_answer = image( $base_path.'images/next.gif',    T_('First answer'), T_('First answer') );
 
          //TODO: very strange: insert_width() does not work, resulting in line-breaks :(
          $prev_parent = ( is_null($post->prev_parent_post) )
@@ -694,6 +697,9 @@ class DisplayForum
          $next_answer = ( is_null($post->next_post) )
             ? '&nbsp;&nbsp;' //insert_width(13)
             : anchor( '#'.$post->next_post->id, $img_next_answer );
+         $first_answer = ( is_null($post->first_child_post) )
+            ? '&nbsp;&nbsp;' //insert_width(13)
+            : anchor( '#'.$post->first_child_post->id, $img_first_answer );
 
          // BEGIN Navi (top/prev-parent/prev-answer)
          echo anchor( '#ftop', $img_top )
@@ -727,6 +733,8 @@ class DisplayForum
             . $next_parent
             . '&nbsp;'
             . anchor( '#fbottom', $img_bottom )
+            . '&nbsp;&nbsp;'
+            . $first_answer
             . '&nbsp;&nbsp;';
 
          if( $this->is_moderator ) // hide/show link
@@ -1154,7 +1162,9 @@ class ForumThread
     * navtree[post_id] = map with keys: value=post-id or 0 (=no according node)
     *   prevP, nextP - prev/next-parent post
     *   prevA, nextA - prev/next-answer post for "parent"-thread
-    * NOTE: order of post_id's in navtree is same as in posts of this ForumThread
+    *   child        - first-answer post
+    * NOTE: order of post_id's in navtree is same as in posts of this ForumThread,
+    *       but is expecting tree-sort by PosIndex
     */
    function create_navigation_tree( $set_in_posts=true )
    {
@@ -1169,6 +1179,7 @@ class ForumThread
          $navmap['nextP'] = 0;
          $navmap['prevA'] = 0;
          $navmap['nextA'] = 0;
+         $navmap['child'] = 0;
 
          $last_post_id = @$last_parent_posts[$parent_id];
          if ( $last_post_id )
@@ -1187,12 +1198,11 @@ class ForumThread
 
       foreach( $parent_children as $parent_id => $children )
       {
-         foreach( $children as $post_id )
+         if( isset($navtree[$parent_id]) )
          {
-            $navtree[$post_id]['nextP'] =
-               ( isset($navtree[$parent_id]) )
-                  ? $navtree[$parent_id]['nextA']
-                  : 0;
+            $navtree[$parent_id]['child'] = $children[0]; // children non-empty
+            foreach( $children as $post_id )
+               $navtree[$post_id]['nextP'] = $navtree[$parent_id]['nextA'];
          }
       }
 
@@ -1204,7 +1214,8 @@ class ForumThread
                ( $navmap['prevP'] ) ? $this->posts[$navmap['prevP']] : NULL,
                ( $navmap['nextP'] ) ? $this->posts[$navmap['nextP']] : NULL,
                ( $navmap['prevA'] ) ? $this->posts[$navmap['prevA']] : NULL,
-               ( $navmap['nextA'] ) ? $this->posts[$navmap['nextA']] : NULL
+               ( $navmap['nextA'] ) ? $this->posts[$navmap['nextA']] : NULL,
+               ( $navmap['child'] ) ? $this->posts[$navmap['child']] : NULL
             );
          }
       }
@@ -1298,6 +1309,7 @@ class ForumPost
    var $next_parent_post;
    var $prev_post;
    var $next_post;
+   var $first_child_post;
 
 
    /*! \brief Constructs ForumPost-object with specified arguments: dates are in UNIX-time. */
@@ -1347,12 +1359,13 @@ class ForumPost
    }
 
    /*! \brief Sets tree-navigation vars for this post (NULL=not-set). */
-   function set_navigation( $prev_parent_post, $next_parent_post, $prev_post, $next_post )
+   function set_navigation( $prev_parent_post, $next_parent_post, $prev_post, $next_post, $first_child_post )
    {
       $this->prev_parent_post = $prev_parent_post;
       $this->next_parent_post = $next_parent_post;
       $this->prev_post = $prev_post;
       $this->next_post = $next_post;
+      $this->first_child_post = $first_child_post;
    }
 
    /*!
