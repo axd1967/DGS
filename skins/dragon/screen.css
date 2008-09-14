@@ -2190,6 +2190,12 @@ table#forumIndex td.LastPost a:hover.LastPost {
    text-decoration: underline;
 }
 
+table#forumIndex tr.Caption span.HeaderToggle a,
+table#forumList  tr.Caption span.HeaderToggle a {
+   color: white;
+   font-size: 80%;
+}
+
 /* threads list */
 table#forumList td.Subject {
    width: 40%;
