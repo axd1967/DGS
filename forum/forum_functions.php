@@ -52,6 +52,17 @@ define("LINK_MASKS", ~(LINKPAGE_READ | LINKPAGE_LIST | LINKPAGE_INDEX
           | LINKPAGE_SEARCH | LINKPAGE_STATUS) );
 
 
+// returns 1 if toggle was needed; 0 otherwise
+function toggle_forum_flags( $uid, $flag )
+{
+   if( $flag > 0 && $flag < 0x10 )
+   {
+      db_query( "toggle_forum_flags.toggle_flag($uid,$flag)",
+         "UPDATE Players SET ForumFlags=ForumFlags ^ $flag WHERE ID='$uid' LIMIT 1" );
+      return 1;
+   }
+   return 0;
+}
 
 // show list with posts on pending-approval (used on status-page)
 // returns number of pending-approval posts
@@ -841,7 +852,7 @@ class Forum
          'FR.NewCount AS FR_NewCount' );
       $qsql->add_part( SQLP_FROM,
          'LEFT JOIN Posts AS LP ON LP.ID=P.LastPost',  // LastPost
-            'INNER JOIN Players AS LPAuthor ON LPAuthor.ID=LP.User_ID', // LastPost-Author
+         'LEFT JOIN Players AS LPAuthor ON LPAuthor.ID=LP.User_ID', // LastPost-Author
          "LEFT JOIN ForumRead AS FR ON FR.User_ID='$user_id' AND FR.Forum_ID=$forum_id "
             . 'AND FR.Thread_ID=P.Thread_ID AND FR.Post_ID=0' );
       $qsql->add_part( SQLP_WHERE,
