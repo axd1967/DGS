@@ -64,7 +64,7 @@ td {
    padding: 2px 4px;
    width: auto;
    text-align: left;
-   vertical-align: middle;
+   vertical-align: top;
 }
 
 hr {
@@ -2385,6 +2385,16 @@ table.Forum form.FormClass table.FormClass {
 table.Forum span.OlderNewFlag,
 table.Forum span.NewFlag {
    margin: 0px 6px;
+}
+
+table.Forum span.OlderNewFlag {
+   font-size: 80%;
+   color: #ff7777;
+}
+
+table.Forum span.NewFlag {
+   font-size: 80%;
+   color: #ff0000;
 }
 
 table.Forum span.OlderNewFlag a,
