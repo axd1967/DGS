@@ -95,7 +95,7 @@ $query = new QuerySQL(
 // form for static filters
 $page = 'filter_example2.php';
 $form = new Form( 'table', $page, FORM_GET );
-$form->set_config( FEC_TR_ATTR, 'valign=top' );
+//$form->set_config( FEC_TR_ATTR, 'valign=top' ); // not needed if CSS contains: td { vertical-align: top }
 $form->set_attr_form_element( 'Description', FEA_ATTBS, array('align'=>'left') );
 
 $area_layout = '';

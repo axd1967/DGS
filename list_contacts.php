@@ -114,7 +114,6 @@ require_once( "include/contacts.php" );
    $cform = new Form( 'contact', $page, FORM_GET, false);
    $cform->set_layout( FLAYOUT_GLOBAL, '1|2' );
    $cform->set_tabindex(1);
-   $cform->set_config( FEC_TR_ATTR, 'valign=top' );
    $cform->set_config( FEC_EXTERNAL_FORM, true );
    $ctable->set_externalform( $cform );
    $cform->attach_table($scfilter); // for hiddens

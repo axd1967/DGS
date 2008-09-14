@@ -122,7 +122,6 @@ require_once( "include/filterlib_mysqlmatch.php" );
    // External-Search-Form
    $smform = new Form( $mtable->Prefix, $page, FORM_GET, false, 'FormTable' );
    $smform->set_tabindex(1);
-   $smform->set_config( FEC_TR_ATTR, 'valign=top' );
    $smform->set_config( FEC_EXTERNAL_FORM, true );
    $mtable->set_externalform( $smform );
    $smform->attach_table($smfilter); // for hiddens
