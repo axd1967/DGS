@@ -66,7 +66,7 @@ if( $quick_mode )
          $code = make_session_code();
          mysql_query( "UPDATE Players SET " .
                       "Sessioncode='$code', " .
-                      "Sessionexpire=FROM_UNIXTIME($NOW + SESSION_DURATION) " .
+                      'Sessionexpire=FROM_UNIXTIME(' . ($NOW + SESSION_DURATION) . ') ' .
                       "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" )
             or error('mysql_query_failed', 'login.update_player');
       }
