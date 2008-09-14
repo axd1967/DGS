@@ -25,7 +25,7 @@ require_once( "include/form_functions.php" );
 //require_once( "include/GoDiagram.php" );
 
 
-define('NEW_LEVEL1', 2*7*24*3600);  // two weeks (also see SECS_NEW_END)
+define('NEW_LEVEL1', 4*7 *24*3600);  // four weeks (also see SECS_NEW_END)
 
 //must follow the "ORDER BY PosIndex" order and have at least 64 chars:
 $order_str = "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -46,175 +46,63 @@ define("LINKPAGE_LIST", 1 << 9);
 define("LINKPAGE_INDEX", 1 << 10);
 define("LINKPAGE_SEARCH", 1 << 11);
 define("LINK_TOGGLE_MODERATOR", 1 << 12);
-define("LINKPAGE_STATUS", 1 << 13);
+define("LINKPAGE_STATUS", 1 << 13); // used for status-page
 
 define("LINK_MASKS", ~(LINKPAGE_READ | LINKPAGE_LIST | LINKPAGE_INDEX
           | LINKPAGE_SEARCH | LINKPAGE_STATUS) );
 
 
 
-/*!
- * \brief Returns UNIX-time of last-read date for specified user and thread;
- *        NULL, if user hadn't read thread so far.
- */
-function load_thread_last_read( $user_id, $thread_id )
-{
-   $arr = mysql_single_col(
-      "Forum.load_last_read_thread($user_id,$thread_id)",
-      'SELECT UNIX_TIMESTAMP(Time) AS Lastread FROM Forumreads '
-         . "WHERE User_ID='$user_id' AND Thread_ID='$thread_id' LIMIT 1" );
-   return ( is_array($arr) && count($arr) > 0 ) ? $arr[0] : NULL;
-}
-
-
-//GLOBAL
-//TODO (message -> rename to approve_postmessage)
-function approve_message($id, $thread, $forum, $approve=true,
-                         $approve_reject_pending_approval=false)
-{
-   if( $approve_reject_pending_approval )
-   {
-      $row = mysql_single_fetch( 'approve_message.find_post',
-               "SELECT Approved FROM Posts " .
-               "WHERE ID=$id AND Thread_ID=$thread LIMIT 1" )
-         or error('unknown_post','approve_message.find_post');
-
-      $Approved = ($row['Approved'] == 'Y');
-
-      if( $Approved === $approve )
-      {
-         mysql_query("UPDATE Posts SET PendingApproval='N' " .
-                     "WHERE ID=$id AND Thread_ID=$thread " .
-                     "AND PendingApproval='Y' LIMIT 1")
-            or error('mysql_query_failed','approve_message.pend_appr');
-         return;
-      }
-   }
-
-   $result = mysql_query("UPDATE Posts SET Approved='" . ( $approve ? 'Y' : 'N' ) . "', " .
-                         "PendingApproval='N' " .
-                         "WHERE ID=$id AND Thread_ID=$thread " .
-                         "AND Approved='" . ( $approve ? 'N' : 'Y' ) . "' LIMIT 1")
-      or error('mysql_query_failed','approve_message.set_approved');
-
-   if( mysql_affected_rows() == 1 )
-   {
-      mysql_query("UPDATE Posts SET PostsInThread=GREATEST(0,PostsInThread" . ($approve ? '+1' : '-1') .
-                  ") WHERE ID=$thread LIMIT 1")
-         or error('mysql_query_failed','approve_message.set_postsinthread');
-
-      mysql_query("UPDATE Forums SET PostsInForum=GREATEST(0,PostsInForum" . ($approve ? '+1' : '-1') .
-                  ") WHERE ID=$forum LIMIT 1")
-         or error('mysql_query_failed','approve_message.set_postsinforum');
-
-
-      recalculate_lastpost($thread, $forum);
-   }
-}
-
-
-//GLOBAL
-//TODO
-function recalculate_lastpost($Thread_ID, $Forum_ID)
-{
-   $result = mysql_query("SELECT ID, UNIX_TIMESTAMP(Time) AS Timestamp FROM Posts " .
-                         "WHERE Thread_ID='$Thread_ID' AND Approved='Y' " .
-                         "AND PosIndex>'' " . // '' == inactivated (edited)
-                         "ORDER BY Time Desc LIMIT 1")
-      or error('mysql_query_failed','recalculate_lastpost.find');
-
-   if( @mysql_num_rows($result) == 1 )
-   {
-      $row = mysql_fetch_row($result);
-      mysql_query("UPDATE Posts SET LastPost=" . $row[0] . ", " .
-                  "LastChanged=FROM_UNIXTIME(" . $row[1] . ") " .
-                  "WHERE ID=$Thread_ID LIMIT 1")
-         or error('mysql_query_failed','recalculate_lastpost.update');
-   }
-
-
-   $result = mysql_query("SELECT Last.ID " .
-                         "FROM Posts as Thread, Posts as Last " .
-                         "WHERE Thread.LastPost=Last.ID AND " .
-                         "Thread.Forum_ID=" . $Forum_ID . " AND Thread.Parent_ID=0 " .
-                         "ORDER BY Last.Time DESC LIMIT 1")
-      or error('mysql_query_failed','recalculate_lastpost.lastid');
-
-   if( @mysql_num_rows($result) == 1 )
-   {
-      $row = mysql_fetch_row($result);
-      mysql_query("UPDATE Forums SET LastPost=" . $row[0] . " WHERE ID=$Forum_ID LIMIT 1")
-         or error('mysql_query_failed','recalculate_lastpost.lastpost');
-   }
-}
-
-
-//GLOBAL
-//TODO
-function recalculate_postsinforum($Forum_ID)
-{
-   $result = mysql_query("SELECT COUNT(*), Thread_ID FROM Posts " .
-                         "WHERE Forum_ID=$Forum_ID AND Approved='Y' GROUP BY Thread_ID")
-      or error('mysql_query_failed','recalculate_postsinforum.find');
-
-   $sum = 0;
-   while( $row = mysql_fetch_row( $result ) )
-   {
-      $sum += $row[0];
-
-      mysql_query("UPDATE Posts SET PostsInThread=" . $row[0] . " WHERE ID=" .$row[1])
-      or error('mysql_query_failed','recalculate_postsinforum.postsintrhead');
-
-      recalculate_lastpost($row[1], $Forum_ID);
-   }
-
-   mysql_query("UPDATE Forums SET PostsInForum=$sum WHERE ID=$Forum_ID")
-      or error('mysql_query_failed','recalculate_postsinforum.postsinofrum');
-}
-
-//GLOBAL
-//TODO
+// show list with posts on pending-approval (used on status-page)
+// returns number of pending-approval posts
 function display_posts_pending_approval()
 {
-   $result = mysql_query("SELECT UNIX_TIMESTAMP(Time) as Time,Subject,Forum_ID,Thread_ID, " .
-                         "Posts.ID as Post_ID,Forums.Name AS Forumname," .
-                         "User_ID,Players.Name as User_Name,Handle " .
-                         "FROM (Posts,Players,Forums) " .
-                         "WHERE PendingApproval='Y' AND Players.ID=User_ID AND Forums.ID=Forum_ID " .
-                         "ORDER BY Time DESC")
-      or error('mysql_query_failed','display_posts_pending_approval.find');
+   $result = // fields matching ForumPost::new_from_row
+      db_query( 'display_posts_pending_approval.find',
+         'SELECT Posts.ID, Forum_ID, Thread_ID, Subject, UNIX_TIMESTAMP(Time) as X_Time, '
+            . 'User_ID, PAuthor.Name AS Author_Name, PAuthor.Handle AS Author_Handle, '
+            . 'Forums.Name AS X_Forumname '
+         . 'FROM Posts '
+            . 'INNER JOIN Players AS PAuthor ON PAuthor.ID=Posts.User_ID '
+            . 'INNER JOIN Forums ON Forums.ID=Posts.Forum_ID '
+         . "WHERE PendingApproval='Y' ORDER BY Time" );
 
-   if( mysql_num_rows($result) == 0 )
-      return;
-
-   $disp_forum = new DisplayForum( 0, false );
-   $disp_forum->cols = $cols = 4;
-   $disp_forum->headline = array( T_('Posts pending approval') => "colspan=$cols" );
-   $disp_forum->links = LINKPAGE_STATUS;
-   $disp_forum->forum_start_table('Pending');
-
-   $odd = true;
-   while( $row = mysql_fetch_array( $result ) )
+   $cnt = 0;
+   if( mysql_num_rows($result) > 0 )
    {
-      $color = ( $odd ? "" : " bgcolor=white" );
-      $odd = !$odd;
+      $disp_forum = new DisplayForum( 0, false );
+      $disp_forum->cols = $cols = 4;
+      $disp_forum->headline = array( T_('Posts pending approval') => "colspan=$cols" );
+      $disp_forum->links = LINKPAGE_STATUS;
+      $disp_forum->forum_start_table('Pending');
 
-      $Subject = make_html_safe( $row['Subject'], SUBJECT_HTML);
-      $post_href = 'forum/read.php?forum='.$row['Forum_ID'].URI_AMP.'thread='.$row['Thread_ID'].URI_AMP.'moderator=y#'.$row['Post_ID'];
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $post = ForumPost::new_from_row($row);
+         $forum_name = $row['X_Forumname'];
 
-      echo "<tr$color>"
-         . '<td>' . ( $cols > 3 ? $row['Forumname'] . '</td><td>' : '' )
-         . "<a href=\"$post_href\">$Subject</a></td><td>"
-         . user_reference( REF_LINK, 1, '', $row['User_ID'], $row['User_Name'], $row['Handle'] )
-         . '</td><td nowrap align=right>' . date(DATE_FMT, $row['Time']) . "</td></tr>\n";
+         $Subject = make_html_safe( $post->subject, SUBJECT_HTML);
+         $post_href = $post->build_url_post( null, 'moderator=y' );
+
+         $color = ( ($cnt++ % 2) ? "" : " bgcolor=white" );
+         echo "<tr$color>"
+            . '<td>' . ( $cols > 3 ? $forum_name . '</td><td>' : '' )
+            . "<a href=\"forum/$post_href\">$Subject</a></td><td>"
+            . $post->author->user_reference()
+            . '</td><td nowrap align=right>' . date(DATE_FMT, $post->created) . "</td></tr>\n";
+      }
+      $disp_forum->forum_end_table();
    }
+
    mysql_free_result($result);
-   $disp_forum->forum_end_table();
+   return $cnt;
 }
 
 
-
-
+// mode-bitmask for get_new_string
+define('NEWMODE_BOTTOM',   0x1);
+define('NEWMODE_OVERVIEW', 0x2);
+define('NEWMODE_NEWCOUNT', 0x4);
 
  /*!
   * \class DisplayForum
@@ -248,6 +136,7 @@ class DisplayForum
    var $max_rows;
    var $offset;
    var $fmt_new;
+   var $navi_img;
 
    /*! \brief Constructs display handler for forum-pages. */
    function DisplayForum( $user_id, $is_moderator, $forum_id=0, $thread_id=0 )
@@ -271,6 +160,7 @@ class DisplayForum
       $this->max_rows = MAXROWS_PER_PAGE_DEFAULT;
       $this->offset = 0;
       $this->fmt_new = '<span class="%s"><a name="%s%d" href="#new%d">%s</a></span>';
+      $this->navi_img = null;
    }
 
    /*! \brief Setting rx-term (can be array or string). */
@@ -331,6 +221,7 @@ class DisplayForum
    // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
    function make_link_array( $ReqParam = null )
    {
+      global $NOW;
       $links = $this->links;
       $fid = $this->forum_id;
       if( !( $links & LINK_MASKS ) )
@@ -355,7 +246,9 @@ class DisplayForum
          $this->link_array_left[T_('Search')] = "search.php";
 
       if( $links & LINK_MARK_READ )
-         $this->link_array_left[T_('Mark All Read')] = ''; //TODO
+         $this->link_array_left[T_('Mark All Read')] = "read.php?forum=$fid"
+            .URI_AMP."thread={$this->thread_id}"
+            .URI_AMP.'markread=pall.'.$NOW; // pall=all thread-posts
 
       if( $links & LINK_TOGGLE_MODERATOR )
       {
@@ -417,7 +310,7 @@ class DisplayForum
          else
             echo anchor( $link, $name);
       }
-      echo $this->get_new_string('bottom', 0);
+      echo $this->get_new_string( NEWMODE_BOTTOM );
 
       $lcols = $this->cols - $lcols;
       $tmp = ( $lcols > 1 ? ' colspan='.$lcols : '' );
@@ -442,31 +335,42 @@ class DisplayForum
       echo "</div></td></tr>\n";
    }
 
-   // param: Lastchangedstamp : date or 'bottom'
-   // param: Lastread : date or empty
-   function get_new_string( $Lastchangedstamp, $Lastread, $anchor_prefix='new' )
+   /*!
+    * \brief Increase global new counter, builds and returns current new-string.
+    * param $mode bitmask of NEWMODE_BOTTOM; NEWMODE_OVERVIEW, NEWMODE_NEWCOUNT
+    * param $cnt_new number of new entries to show, add '(count)' if NEWMODE_NEWCOUNT set
+    * param $newdate used to decide which CSS-class to use for display new-string
+    *       (NewFlag=default, OlderNewFlag)
+    */
+   function get_new_string( $mode, $cnt_new=0, $newdate=0 )
    {
       $new = '';
-      if( $Lastchangedstamp === 'bottom' )
+      $anchor_prefix = 'new';
+      if ( $mode & NEWMODE_BOTTOM )
       {
          if( $this->new_count > 0 )
             $new = sprintf( $this->fmt_new, 'NewFlag', $anchor_prefix,
                $this->new_count + 1, 1, T_('first new') );
       }
-      else
+      else if ( $cnt_new > 0 )
       {
          global $NOW;
-         if( (empty($Lastread) || $Lastchangedstamp > $Lastread)
-               && $Lastchangedstamp + SECS_NEW_END > $NOW )
+         $newclass = ( $newdate == 0 || $newdate + NEW_LEVEL1 > $NOW )
+            ? 'NewFlag'       // recent 'new'
+            : 'OlderNewFlag'; // older 'new'
+
+         if ( $mode & NEWMODE_OVERVIEW )
          {
-            $this->new_count++;
-            if( $Lastchangedstamp + NEW_LEVEL1 > $NOW )
-               $class = 'NewFlag'; //recent 'new'
-            else
-               $class = 'OlderNewFlag'; //older 'new'
-            $new = sprintf( $this->fmt_new, $class, $anchor_prefix,
-               $this->new_count, $this->new_count + 1, T_('new') );
+            $anchor_prefix = 'treenew';
+            $addnew = 0;
          }
+         else
+            $addnew = 1;
+
+         $this->new_count++;
+         $new = sprintf( $this->fmt_new, $newclass, $anchor_prefix,
+            $this->new_count, $this->new_count + $addnew,
+            T_('new') . ( ($mode & NEWMODE_NEWCOUNT) ? " ($cnt_new)" : '' ) );
       }
       return $new;
    }
@@ -563,6 +467,32 @@ class DisplayForum
       echo "<td colspan=$c><table width=\"100%\" border=0 cellspacing=0 cellpadding=3>";
    }
 
+   /*! \brief Inits and returns navigational images for draw_post if not initialized yet. */
+   function init_navi_images()
+   {
+      if ( !is_array($this->navi_img) )
+      {
+         global $base_path;
+         $this->navi_img = array(
+            'top'          => image( $base_path.'images/f_top.png',
+                                     T_('Top'), T_('Top') ),
+            'prev_parent'  => image( $base_path.'images/f_prevparent.png',
+                                     T_('Previous parent'), T_('Previous parent') ),
+            'prev_answer'  => image( $base_path.'images/f_prevanswer.png',
+                                     T_('Previous answer'), T_('Previous answer') ),
+            'next_answer'  => image( $base_path.'images/f_nextanswer.png',
+                                     T_('Next answer'), T_('Next answer') ),
+            'next_parent'  => image( $base_path.'images/f_nextparent.png',
+                                     T_('Next parent'), T_('Next parent') ),
+            'bottom'       => image( $base_path.'images/f_bottom.png',
+                                     T_('Bottom'), T_('Bottom') ),
+            'first_answer' => image( $base_path.'images/f_firstanswer.png',
+                                     T_('First answer'), T_('First answer') ),
+         );
+      }
+      return $this->navi_img;
+   }
+
 
    //TODO: refactor (don't control logic with style-var), also see forum/read.php & forum-search (moderator-stuff)
    // param postClass: no '_' because used as sub-class name => CSS compliance,
@@ -631,7 +561,7 @@ class DisplayForum
                $hdrcols = $cols-1; //because of the rowspan=$hdrrows in the second column
             else
                $hdrcols = $cols;
-            $new = $this->get_new_string($post->created, $post->last_read);
+            $newstr = $this->get_new_string( 0, $post->count_new, $post->created );
 
             echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
 
@@ -639,8 +569,8 @@ class DisplayForum
             if( $postClass == 'Edit' || $post->thread_no_link )
                echo "<a class=PostSubject name=\"$pid\">$sbj</a>";
             else
-               echo '<a class=PostSubject href="', $thread_url, $term_url
-                  ,"#$pid\" name=\"$pid\">$sbj</a>$new";
+               echo '<a class=PostSubject href="', $thread_url, $term_url,
+                  "#$pid\" name=\"$pid\">$sbj</a>", $newstr;
 
             if( $hdrcols != $cols )
             {
@@ -674,35 +604,26 @@ class DisplayForum
          $hidden = $postClass == 'Hidden';
          echo "\n<tr class=PostButtons><td colspan=$cols>";
 
-         global $base_path;
-         $img_top         = image( $base_path.'images/start.gif',    T_('Top'), T_('Top') );
-         $img_prev_parent = image( $base_path.'images/backward.gif', T_('Previous parent'), T_('Previous parent') );
-         $img_prev_answer = image( $base_path.'images/prev.gif',     T_('Previous answer'), T_('Previous answer') );
-         $img_next_answer = image( $base_path.'images/next.gif',     T_('Next answer'), T_('Next answer') );
-         $img_next_parent = image( $base_path.'images/forward.gif',  T_('Next parent'), T_('Next parent') );
-         $img_bottom      = image( $base_path.'images/end.gif',      T_('Bottom'), T_('Bottom') );
-         //TODO: need another icon for first-answer (at the moment is same as next-answer)
-         $img_first_answer = image( $base_path.'images/next.gif',    T_('First answer'), T_('First answer') );
-
-         //TODO: very strange: insert_width() does not work, resulting in line-breaks :(
+         // very strange: insert_width(12) does not work, resulting in line-breaks :(
+         $imgarr = $this->init_navi_images();
          $prev_parent = ( is_null($post->prev_parent_post) )
-            ? '&nbsp;&nbsp;' //insert_width(18)
-            : anchor( '#'.$post->prev_parent_post->id, $img_prev_parent );
+            ? '&nbsp;&nbsp;'
+            : anchor( '#'.$post->prev_parent_post->id, $imgarr['prev_parent'] );
          $next_parent = ( is_null($post->next_parent_post) )
-            ? '&nbsp;&nbsp;' //insert_width(18)
-            : anchor( '#'.$post->next_parent_post->id, $img_next_parent );
+            ? '&nbsp;&nbsp;'
+            : anchor( '#'.$post->next_parent_post->id, $imgarr['next_parent'] );
          $prev_answer = ( is_null($post->prev_post) )
-            ? '&nbsp;&nbsp;' //insert_width(13)
-            : anchor( '#'.$post->prev_post->id, $img_prev_answer );
+            ? '&nbsp;&nbsp;'
+            : anchor( '#'.$post->prev_post->id, $imgarr['prev_answer'] );
          $next_answer = ( is_null($post->next_post) )
-            ? '&nbsp;&nbsp;' //insert_width(13)
-            : anchor( '#'.$post->next_post->id, $img_next_answer );
+            ? '&nbsp;&nbsp;'
+            : anchor( '#'.$post->next_post->id, $imgarr['next_answer'] );
          $first_answer = ( is_null($post->first_child_post) )
-            ? '&nbsp;&nbsp;' //insert_width(13)
-            : anchor( '#'.$post->first_child_post->id, $img_first_answer );
+            ? '&nbsp;&nbsp;'
+            : anchor( '#'.$post->first_child_post->id, $imgarr['first_answer'] );
 
          // BEGIN Navi (top/prev-parent/prev-answer)
-         echo anchor( '#ftop', $img_top )
+         echo anchor( '#ftop', $imgarr['top'] )
             . '&nbsp;'
             . $prev_parent
             . '&nbsp;'
@@ -726,13 +647,19 @@ class DisplayForum
                .URI_AMP."edit=$pid#$pid\">"
                ."[ " . T_('edit') . " ]</a>&nbsp;&nbsp;";
          }
+         if ( $post->count_new > 0 && !$this->is_moderator ) // mark read link
+         {
+            $readmark = ( $post->read_mark != '' ) ? $post->read_mark : "p$pid.$NOW";
+            echo '<a href="', $thread_url, URI_AMP, "markread=$readmark#$pid\">", // mark post
+               "[ ", T_('mark read'), " ]</a>&nbsp;&nbsp;";
+         }
 
          // END Navi (next-answer/next-parent/bottom)
          echo $next_answer
             . '&nbsp;'
             . $next_parent
             . '&nbsp;'
-            . anchor( '#fbottom', $img_bottom )
+            . anchor( '#fbottom', $imgarr['bottom'] )
             . '&nbsp;&nbsp;'
             . $first_answer
             . '&nbsp;&nbsp;';
@@ -741,8 +668,8 @@ class DisplayForum
          {
             if( !$post->pending_approval )
                echo '<a class=Highlight href="'.$thread_url
-                  .URI_AMP . ($hidden ?'show' :'hide') . "=$pid#$pid\">"
-                  ."[ " . ($hidden ?T_('show') :T_('hide')) . " ]</a>";
+                  .URI_AMP . ($hidden ? 'show' : 'hide') . "=$pid#$pid\">"
+                  ."[ " . ($hidden ? T_('show') : T_('hide')) . " ]</a>";
             else
                echo '<a class=Highlight href="'.$thread_url
                   .URI_AMP."approve=$pid#$pid\">"
@@ -758,13 +685,16 @@ class DisplayForum
    } //draw_post
 
    /*! \brief Draw tree-overview for this thread. */
-   function draw_overview( $fthread, $last_read )
+   function draw_overview( $fthread )
    {
       global $base_path, $player_row;
       $this->new_count = 0;
       $this->change_depth( 1 );
 
-      echo "\n<tr class=TreePostNormal><td><table class=ForumTreeOverview>\n";
+      echo "\n<tr class=TreePostNormal><td><table class=ForumTreeOverview>",
+         "\n<tr class=\"TreePostNormal Header\">",
+         sprintf( '<th>%s</th><th>%s</th><th>%s</th></tr>',
+            T_('Subject'), T_('Author'), T_('Last changed') );
 
       // draw for post: subject, author, date
       $c=2;
@@ -780,14 +710,13 @@ class DisplayForum
             "<td$mypostclass>",
             str_repeat( '&nbsp;', 3*($post->depth - 1) ),
             anchor( '#'.$post->id, $sbj, '', 'class=PostSubject' ),
-            $this->get_new_string( $post->created, $last_read, 'treenew' ),
+            $this->get_new_string( NEWMODE_OVERVIEW, $post->count_new, $post->created ),
             //TODO add/handle moderator-state
             "</td><td>",
             sprintf( '<span class=PostUser>%s</span>', $post->author->user_reference() ),
             "</td><td>",
-            sprintf( '<span class=PostDate>%s%s</span>',
-               date( DATE_FMT, $post->created ),
-               $this->get_post_edited_string( $post ) ),
+            sprintf( '<span class=PostDate>%s</span>',
+               date( DATE_FMT, max($post->created, $post->last_edited) ) ),
             '</td></tr>';
       }
 
@@ -845,6 +774,11 @@ class Forum
    /*! \brief true, if there are more threads to page-navigate. */
    var $navi_more_threads;
 
+   // non-db vars
+
+   /*! \brief Count of new entries for this forum. */
+   var $count_new;
+
 
    /*! \brief Constructs Forum with specified args. */
    function Forum( $id=0, $name='', $description='', $last_post_id=0,
@@ -861,6 +795,7 @@ class Forum
       // non-db
       $this->last_post = null;
       $this->threads = null;
+      $this->count_new = -1; // unknown count
    }
 
    /*! \brief Returns true, if forum is moderated. */
@@ -894,21 +829,23 @@ class Forum
       if ( !is_numeric($show_rows) || !is_numeric($offset) )
          error('invalid_args', "Forum.load_threads(show_rows=$show_rows,offset=$offset)");
 
-      if ( !is_numeric($this->id) )
-         error('unknown_forum', "Forum.load_threads(forum_id={$this->id})");
+      $forum_id = $this->id;
+      if ( !is_numeric($forum_id) )
+         error('unknown_forum', "Forum.load_threads(forum_id={$forum_id})");
 
       $qsql = ForumPost::build_query_sql();
       $qsql->add_part( SQLP_FIELDS,
          'LPAuthor.ID AS LPAuthor_ID',
             'LPAuthor.Name AS LPAuthor_Name',
             'LPAuthor.Handle AS LPAuthor_Handle',
-         'UNIX_TIMESTAMP(FR.Time) AS Lastread' );
+         'FR.NewCount AS FR_NewCount' );
       $qsql->add_part( SQLP_FROM,
          'LEFT JOIN Posts AS LP ON LP.ID=P.LastPost',  // LastPost
             'INNER JOIN Players AS LPAuthor ON LPAuthor.ID=LP.User_ID', // LastPost-Author
-         'LEFT JOIN Forumreads FR ON FR.User_ID=' . $user_id . ' AND FR.Thread_ID=P.Thread_ID' );
+         "LEFT JOIN ForumRead AS FR ON FR.User_ID='$user_id' AND FR.Forum_ID=$forum_id "
+            . 'AND FR.Thread_ID=P.Thread_ID AND FR.Post_ID=0' );
       $qsql->add_part( SQLP_WHERE,
-         "P.Forum_ID='" . (int)$this->id. "'",
+         "P.Forum_ID='$forum_id'",
          'P.Parent_ID=0' );
       if ( !$is_moderator )
          $qsql->add_part( SQLP_WHERE, 'P.PostsInThread>0' );
@@ -928,7 +865,7 @@ class Forum
          $thread->last_post =
             new ForumPost( $thread->last_post_id, $this->id, $thread->thread_id,
                new ForumUser( $row['LPAuthor_ID'], $row['LPAuthor_Name'], $row['LPAuthor_Handle'] ) );
-         $thread->last_read = $row['Lastread'];
+         $thread->count_new = @$row['FR_NewCount'] + 0;
 
          $thlist[] = $thread;
       }
@@ -1016,11 +953,14 @@ class Forum
          'UNIX_TIMESTAMP(LP.Time) AS LP_Time',
          'LP.User_ID AS LP_User_ID',
          'P.Name AS LP_Name',
-         'P.Handle AS LP_Handle' );
+         'P.Handle AS LP_Handle',
+         'FR.NewCount AS FR_NewCount' );
       $qsql->add_part( SQLP_FROM,
          'Forums',
          'LEFT JOIN Posts AS LP ON Forums.LastPost=LP.ID',
-         'LEFT JOIN Players AS P ON P.ID=LP.User_ID' );
+         'LEFT JOIN Players AS P ON P.ID=LP.User_ID',
+         "LEFT JOIN ForumRead AS FR ON FR.User_ID='$user_id' "
+            . 'AND FR.Forum_ID=Forums.ID AND FR.Thread_ID=0' );
       $qsql->add_part( SQLP_ORDER, 'SortOrder' );
 
       $query = $qsql->get_select();
@@ -1035,6 +975,7 @@ class Forum
                new ForumUser( $row['LP_User_ID'], $row['LP_Name'], $row['LP_Handle'] ) );
          $post->created = $row['LP_Time'];
          $forum->last_post = $post;
+         $forum->count_new = @$row['FR_NewCount'] + 0;
 
          $flist[] = $forum;
       }
@@ -1068,19 +1009,28 @@ class ForumThread
    /*! \brief Thread starter post [default=null]; null, if none found. */
    var $thread_post;
 
-   function ForumThread()
+   /*! \brief ForumRead-object to be used to mark posts as read. */
+   var $forum_read;
+   /*! \brief Number of unread posts. */
+   var $count_new;
+
+   function ForumThread( $forum_read=null )
    {
       $this->posts = array();
       $this->thread_post = null;
+      $this->forum_read = $forum_read;
+      $this->count_new = 0;
    }
 
 
    /*!
     * \brief Loads and adds posts (to posts-arr): query fields and FROM set,
     *        needs WHERE and ORDER in qsql2-arg QuerySQL; Needs fresh object-instance.
+    * NOTE: Needs var forum_read set in this object!
     */
    function load_posts( $qsql2=null )
    {
+      global $NOW;
       $qsql = ForumPost::build_query_sql();
       $qsql->merge( $qsql2 );
 
@@ -1093,6 +1043,14 @@ class ForumThread
          $post = ForumPost::new_from_row( $row );
          if ( $post->parent_id == 0 )
             $this->thread_post = $post;
+
+         $post->count_new = ( $this->forum_read->is_read_post($post) ) ? 0 : 1;
+         if ( $post->count_new > 0 )
+         {
+            $this->count_new++;
+            $post->read_mark = "p{$post->id}.$NOW";
+         }
+
          $this->posts[$post->id] = $post;
       }
       mysql_free_result($result);
@@ -1115,7 +1073,6 @@ class ForumThread
          or error('unknown_post', "ForumThread.load_revision_history.find_post2($post_id)");
 
       $post = ForumPost::new_from_row($row);
-      $post->last_read = $NOW;
       $this->thread_post = $post;
 
       // select all inactive history posts
@@ -1132,7 +1089,6 @@ class ForumThread
       {
          $post = ForumPost::new_from_row($row);
          $post->thread_no_link = true; // display-opt
-         $post->last_read = $NOW;
          $this->posts[$post->id] = $post;
       }
       mysql_free_result($result);
@@ -1293,10 +1249,13 @@ class ForumPost
 
    /*! \brief max of (created,last_edited) = GREATEST(Posts.Time,Posts.Lastedited); date of last-change of current post */
    var $last_updated;
-   /*! \brief last-read of user of this post [default=0] */
-   var $last_read;
    /*! \brief true, if for thread no link should be drawn (used in draw_post-func) [default=false] */
    var $thread_no_link;
+
+   /*! \brief Count of new entries for a thread */
+   var $count_new;
+   /*! \brief command-arg to be used to mark post as read */
+   var $read_mark;
 
    /*! \brief for forum-search: forum-name */
    var $forum_name;
@@ -1340,8 +1299,9 @@ class ForumPost
       $this->old_id = (int) $old_id;
       // non-db
       $this->last_updated = max( $this->created, $this->last_edited );
-      $this->last_read = 0;
       $this->thread_no_link = false;
+      $this->count_new = -1; // unknown count
+      $this->read_mark = '';
       $this->score = 0;
    }
 
@@ -1379,6 +1339,9 @@ class ForumPost
       else if ( (string)$anchor != '' )
          $anchor = '#' . ((string)$anchor);
       // else: anchor=''
+
+      if( $url_suffix != '' && $url_suffix[0] != URI_AMP )
+         $url_suffix = URI_AMP . $url_suffix;
 
       $url = sprintf( 'read.php?forum=%d'.URI_AMP.'thread=%d%s%s',
          $this->forum_id, $this->thread_id, $url_suffix, $anchor );
@@ -1419,7 +1382,6 @@ class ForumPost
          . "crc32=[{$this->crc32}], "
          . "old_id=[{$this->old_id}], "
          . "last_updated=[{$this->last_updated}], "
-         . "last_read=[{$this->last_read}], "
          . "forum_name=[{$this->forum_name}], "
          . "score=[{$this->score}]";
    }
@@ -1476,6 +1438,7 @@ class ForumPost
 
 } // end of 'ForumPost'
 
+
  /*!
   * \brief Intermediate convenience class to represent user with User_ID, Name, Handle.
   * At the moment used as container to hold data to be able to create user-reference.
@@ -1518,5 +1481,232 @@ class ForumUser
    }
 
 } // end of 'ForumUser'
+
+
+
+
+// internal array-struct for ForumRead-entities
+define('FR_TIME',  0);
+define('FR_COUNT', 1);
+
+// thread post-id for thread-new-count / thread-posts read-date
+define('THPID_NEWCOUNT', 0);
+define('THPID_READDATE', -1);
+
+ /*!
+  * \class ForumRead
+  *
+  * \brief Class to help with handling forum-reads and cope with 'new'-flag.
+  * NOTE: Dates are stored in UNIX-time
+  * NOTE: expected row-fields: Forum_ID, Thread_ID, Post_ID, FR_Count, FR_X_Time
+  * NOTE: need combined index on IDs for correct working of update-funcs
+  */
+class ForumRead
+{
+   var $uid;
+   var $fid;
+   var $tid;
+   var $reads; // key=fid,tid,pid => [ unix-time, count ]
+   var $min_date; // older posts than min_date are considered as read
+
+   /*! \brief Constructs a ForumUser with specified args. */
+   function ForumRead( $user_id, $forum_id=0, $thread_id=0 )
+   {
+      $this->uid = $user_id;
+      $this->fid = $forum_id;
+      $this->tid = $thread_id;
+      $this->reads = array();
+      $this->min_date = ForumRead::get_min_date();
+   }
+
+   /*! \brief Sets read-date and count for specified forum, thread and post. */
+   function set_read( $forum_id, $thread_id, $post_id, $date, $count=1 )
+   {
+      $this->reads["$forum_id,$thread_id,$post_id"] =
+         array( FR_TIME => $date, FR_COUNT => $count );
+   }
+
+   /*!
+    * \brief Returns true, if specified check-date is older than read-date
+    *        stored for specified forum, thread and post.
+    *        So is a read (and no "new") post.
+    */
+   function has_newer_read_date( $chkdate, $forum_id, $thread_id, $post_id )
+   {
+      $arr = @$this->reads["$forum_id,$thread_id,$post_id"];
+      $result = ( is_array($arr) && $arr[FR_TIME] >= $chkdate );
+      return $result;
+   }
+
+   /*! \brief Builds basic QuerySQL to load forum-reads. */
+   function build_query_sql()
+   {
+      // ForumRead: User_ID, Forum_ID, Thread_ID, Post_ID, NewCount, Time
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS, 'FR.*', 'UNIX_TIMESTAMP(FR.Time) AS X_Time' );
+      $qsql->add_part( SQLP_FROM, 'ForumRead AS FR' );
+      $qsql->add_part( SQLP_WHERE, "FR.User_ID='{$this->uid}'" );
+      return $qsql;
+   }
+
+   /*!
+    * \brief Loads forum-reads for thread-post view into this ForumRead-object.
+    */
+   function load_reads_post()
+   {
+      $qsql = $this->build_query_sql();
+      $qsql->add_part( SQLP_WHERE,
+         'Forum_ID='.$this->fid,
+         'Thread_ID='.$this->tid );
+      $query = $qsql->get_select();
+      $result = db_query( "ForumRead.load_reads_post({$this->uid},{$this->fid},{$this->tid})", $query );
+
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $this->set_read( $row['Forum_ID'], $row['Thread_ID'], $row['Post_ID'],
+            $row['X_Time'], $row['NewCount']);
+      }
+      mysql_free_result($result);
+   }
+
+   /*! \brief Returns true, if user has read specified ForumPost. */
+   function is_read_post( $post )
+   {
+      // own posts are always read
+      if ( $post->author->id == $this->uid )
+         return true;
+
+      $chkdate = $post->created; // check against post creation-date
+      // read, if date passed global read-date
+      if ( $this->min_date >= $chkdate )
+         return true;
+
+      // read, if date passed thread read-date
+      if ( $this->has_newer_read_date( $chkdate, $this->fid, $this->tid, THPID_READDATE ) )
+         return true;
+
+      // read, if date passed post read-date
+      if ( $this->has_newer_read_date( $chkdate, $this->fid, $this->tid, $post->id ) )
+         return true;
+
+      return false; // unread = new
+   }
+
+   /*!
+    * \brief Replaces ForumRead-db-entry with time for specified fid/tid/pid-key,
+    * and returns true on success.
+    */
+   function replace_row_forumread( $dbgmsg, $fid, $tid, $pid, $time )
+   {
+      // NOTE: a REPLACE is shorter, but not faster as it's a DELETE + INSERT !
+      //TODO use 'INSERT .. ON DUPLICATE UPDATE', but this has some drawbacks too
+      $argstr = "{$this->uid},$fid,$tid,$pid";
+      db_query( "{$dbgmsg}($argstr)",
+         "UPDATE ForumRead SET Time=FROM_UNIXTIME($time) "
+            . "WHERE User_ID='{$this->uid}' AND Forum_ID='$fid' AND "
+            . "Thread_ID='$tid' AND Post_ID='$pid' LIMIT 1" );
+      $result = ( mysql_affected_rows() > 0 );
+      if ( !$result ) // insert if not existing
+      {
+         db_query( "{$dbgmsg}2($argstr)",
+            "INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,Time) "
+               . "VALUES ('{$this->uid}','$fid','$tid','$pid',FROM_UNIXTIME($time))" );
+         $result = ( mysql_affected_rows() > 0 );
+      }
+      return $result;
+   }
+
+   /*!
+    * \brief Marks forum/thread/posts as read and returns true on success.
+    * param mark Syntax:
+    *   p123.time - mark post id=123 with NOW/time
+    *   pall.time - mark all thread-posts with NOW/time
+    */
+   function mark_read( $mark )
+   {
+      $out = array();
+      if ( !preg_match( "/^(p)(all|\d+)\.(\d+)$/", $mark, $out ) )
+         error( 'invalid_args', "ForumRead.mark_read($mark)" );
+      $type = $out[1];
+      $id = $out[2];
+      $time = $out[3];
+
+      $result = false;
+      if ( $type === 'p' )
+      {
+         if ( $id === 'all' )
+            $result = $this->mark_thread_read( $this->tid, $time );
+         else
+            $result = $this->mark_post_read( $id, $time );
+      }
+
+      return $result;
+   }
+
+   /*!
+    * \brief Marks post as read with specified time and returns true, if insert was successful.
+    * \see specs/forums.txt (use-case U10)
+    */
+   function mark_post_read( $post_id, $time )
+   {
+      $result = $this->replace_row_forumread( "ForumRead.mark_post_read",
+         $this->fid, $this->tid, $post_id, $time );
+      $this->trigger_recalc_thread( $this->tid, $time );
+      $this->trigger_recalc_forum( $this->fid, $time );
+      return $result;
+   }
+
+   /*!
+    * \brief Marks all posts in thread as read with specified time and
+    *        returns true, if insert was successful.
+    * \see specs/forums.txt (use-case U11)
+    */
+   function mark_thread_read( $thread_id, $time )
+   {
+      $result = $this->replace_row_forumread( "ForumRead.mark_thread_read",
+         $this->fid, $thread_id, THPID_READDATE, $time );
+      $this->trigger_recalc_thread( $thread_id, $time );
+      $this->trigger_recalc_forum( $this->fid, $time );
+      return $result;
+   }
+
+   /*! \brief Triggers recalc of thread new-count and returns true, if action was successful. */
+   function trigger_recalc_thread( $thread_id, $time )
+   {
+      db_query( "ForumRead.trigger_recalc_thread({$this->uid},{$this->fid},$thread_id)",
+         "UPDATE Posts SET Updated=GREATEST(Updated,FROM_UNIXTIME($time)) "
+            . "WHERE ID='$thread_id' AND Parent_ID=0 LIMIT 1" );
+      return ( mysql_affected_rows() > 0 );
+   }
+
+   /*! \brief Triggers recalc of forum new-count and returns true, if action was successful. */
+   function trigger_recalc_forum( $forum_id, $time )
+   {
+      db_query( "ForumRead.trigger_recalc_forum({$this->uid},{$this->fid})",
+         "UPDATE Forums SET Updated=GREATEST(Updated,FROM_UNIXTIME($time)) "
+            . "WHERE ID='$forum_id' LIMIT 1" );
+      return ( mysql_affected_rows() > 0 );
+   }
+
+   /*! \brief Returns string-representation of this object (for debugging purposes). */
+   function to_string()
+   {
+      $reads = '';
+      foreach( $this->reads as $k => $arr )
+         $reads .= "\n{ [$k]=[".$arr[FR_COUNT].','.$arr[FR_TIME]."] },";
+      return "ForumRead(uid={$this->uid},fid={$this->fid},tid={$this->tid}): "
+         . "min_date=[{$this->min_date}], "
+         . $reads;
+   }
+
+   // ---------- Static Class functions ----------------------------
+
+   function get_min_date()
+   {
+      global $NOW;
+      return $NOW - SECS_NEW_END;
+   }
+
+} // end of 'ForumRead'
 
 ?>
