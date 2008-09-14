@@ -156,6 +156,7 @@ echo ">>>> Should not be used now. Do not run it before a check. Caution: no 'do
       }
       mysql_free_result($result_1);
 
+      //TODO: needs to be re-implemented if needed
       recalculate_postsinforum($new_forum_ID);
 
       echo "\n\nFinished $fname\n";
