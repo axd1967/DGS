@@ -2,6 +2,9 @@
 ### Description of mysql table:  Posts
 ###
 
+Here you'll find some infos about the tree-structure of posts.
+For full description of fields for Posts-TABLE, see "specs/forums.txt"
+
 A thread of various is organized as tree. The root is the thread starter post.
 Replying posts are represented as tree nodes to a parent post.
 
@@ -42,19 +45,4 @@ Example:
     are given by $order_str (see forum/forum_functions.php).
     Any PosIndex will begin by '**' (2 times the first char of $order_str)
   - If PosIndex is empty, the post has been edited and is not active
-
-
-The following 3 fields are only used for the thread starter post:
-
-* PostsInThread : int
-  - Total number of approved posts in the thread
-  - set only for thread starter post
-
-* LastPost : int (FK id)
-  - Posts.ID of the last post in the thread
-  - set only for thread starter post
-
-* LastChanged : date
-  - Time of the last post in the thread
-  - set only for thread starter post
 
