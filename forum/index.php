@@ -35,6 +35,8 @@ $ThePage = new Page('ForumsList');
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
    $is_moderator = ($switch_moderator == 1);
 
+   //TODO: recalc NEWs
+
    $forum_list = Forum::load_forum_list( $my_id );
    // end of DB-stuff
 
@@ -67,13 +69,18 @@ $ThePage = new Page('ForumsList');
       $lpost_author = ( $lpost->author->is_set() )
          ? sprintf( ' <span class=PostUser>%s %s</span>', T_('by'), $lpost->author->user_reference())
          : '';
+      $new_str = ( $forum->count_new > 0 )
+         ? $new_str = sprintf( '<span class="NewFlag">%s (%s)</span>', T_('new'), $forum->count_new )
+         : '';
 
       //incompatible with: $c=($c % LIST_ROWS_MODULO)+1;
       echo '<tr class=Row1><td class=Name>'
          . '<a href="list.php?forum=' . $forum->id . '">' . make_html_safe( $forum->name, 'cell') . '</a>'
          . ( $forum->is_moderated()
             ? ' &nbsp;&nbsp;<span class=Moderated>[' . T_('Moderated') . ']</span>'
-            : '') . '</td>'
+            : '')
+         . $new_str
+         . '</td>'
          . '<td class=ThreadCnt>' . $forum->count_threads . '</td>'
          . '<td class=PostCnt>' . $forum->count_posts . '</td>'
          . "<td class=LastPost><span class=PostDate>$lpost_date</span>$lpost_author</td>"
