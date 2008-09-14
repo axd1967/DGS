@@ -43,6 +43,8 @@ require_once( 'include/form_functions.php' );
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
 
+   //TODO: recalc NEWs
+
    $forum = Forum::load_forum( $forum_id );
    $show_rows = $forum->load_threads( $my_id, $is_moderator, $maxrows, $offset );
    // end of DB-stuff
@@ -83,17 +85,17 @@ require_once( 'include/form_functions.php' );
          $c=($c % LIST_ROWS_MODULO)+1;
          $lpost = $thread->last_post;
 
-         $new = $disp_forum->get_new_string( $thread->last_changed, $thread->last_read );
+         $newstr = $disp_forum->get_new_string( NEWMODE_NEWCOUNT, $thread->count_new );
          $subject = make_html_safe( $thread->subject, SUBJECT_HTML);
          $author = $thread->author->user_reference();
 
          $lpost_date   = $lpost->build_link_postdate( $thread->last_changed, 'class=LastPost' );
          $lpost_author = ( $lpost->author->is_set() )
-            ? sprintf( ' <span class=PostUser>%s %s</span>', T_('by'), $lpost->author->user_reference())
+            ? sprintf(' <span class=PostUser>%s %s</span>', T_('by'), $lpost->author->user_reference())
             : '';
 
          echo "<tr class=Row$c>"
-            . '<td class=Subject>' . anchor( $thread->build_url_post(''), $subject ) . $new . '</td>'
+            . '<td class=Subject>' . anchor( $thread->build_url_post(''), $subject ) . $newstr . '</td>'
             . "<td class=Name>$author</td>"
             . "<td class=HitCnt>{$thread->count_hits}</td>"
             . "<td class=PostCnt>{$thread->count_posts}</td>"
@@ -106,7 +108,6 @@ require_once( 'include/form_functions.php' );
 
    // form for thread-list
    $form = new Form( 'tableFTL', 'list.php', FORM_GET );
-   $form->set_config( FEC_TR_ATTR, 'valign=top' );
    $xkey = ACCKEY_ACT_FILT_SEARCH;
 
    $form->add_row( array(
