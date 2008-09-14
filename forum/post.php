@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Forum"; //local use
 
+require_once( 'forum/forum_functions.php' );
+
+
 // to increase thread-hits to show thread-"activity"
-// should be called on view & save-post
 function hit_thread( $thread )
 {
    if ( is_numeric($thread) && $thread > 0 )
@@ -30,6 +32,10 @@ function hit_thread( $thread )
    }
 }
 
+/*!
+ * \brief Saves post-message for use-cases U06/U07/U08/U09
+ * \see specs/forums.txt
+ */
 function post_message($player_row, $moderated_forum, &$thread)
 {
    global $NOW, $order_str;
@@ -44,6 +50,7 @@ function post_message($player_row, $moderated_forum, &$thread)
    $Text = trim(get_request_arg('Text'));
    if( $Text == '' )
       return '';
+   // TODO return on empty subject (subject & text are mandatory)
    $Subject = trim(get_request_arg('Subject'));
    if( $Subject == '' )
       $Subject = UNKNOWN_VALUE;
@@ -53,7 +60,7 @@ function post_message($player_row, $moderated_forum, &$thread)
 
    $moderated = ($moderated_forum || $player_row['MayPostOnForum'] == 'M');
 
-   // -------   Edit old post  ----------
+   // -------   Edit old post  ---------- (use-case U07)
 
    if( $edit > 0 )
    {
@@ -96,16 +103,17 @@ function post_message($player_row, $moderated_forum, &$thread)
    // -------   Else add post  ----------
 
 
-   // -------   Reply  ----------
+   // -------   Reply / Quote  ---------- (use-case U08/U09)
 
       if( $parent > 0 )
       {
+         $is_newthread = false;
          $row = mysql_single_fetch( 'forum_post.reply.find',
                         "SELECT PosIndex,Depth,Thread_ID FROM Posts " .
                         "WHERE ID=$parent AND Forum_ID=$forum" )
             or error('unknown_parent_post', 'forum_post.reply.find');
 
-         extract( $row);
+         extract( $row); // $PosIndex, $Depth, $Thread_ID
 
          $row = mysql_single_fetch( 'forum_post.reply.max',
                         "SELECT MAX(AnswerNr) AS answer_nr " .
@@ -113,19 +121,20 @@ function post_message($player_row, $moderated_forum, &$thread)
             or error('unknown_parent_post', 'forum_post.reply.max');
          $answer_nr = $row['answer_nr'];
 
-         $lastchanged_string = '';
+         $lastchanged_string = ''; //TODO: why not set as for new-thread ?
 
          if( $answer_nr <= 0 ) $answer_nr=0;
       }
 
 
-      // -------   New thread  ----------
+      // -------   New thread  ---------- (use-case U06)
 
       else
       {
          // New thread
+         $is_newthread = true;
          $answer_nr = 0;
-         $PosIndex = ''; //just right now...
+         $PosIndex = ''; //just right now... (adjusted below)
          $Depth = 0;
          $Thread_ID = -1;
          $lastchanged_string = "LastChanged=FROM_UNIXTIME($NOW), ";
@@ -133,7 +142,7 @@ function post_message($player_row, $moderated_forum, &$thread)
 
 
 
-      // -------   Update database   -------
+      // -------   Update database   ------- (use-case U06, U08/U09)
 
       if( $answer_nr >= 64*64 )
          error('internal_error', "AnswerNr too large: $answer_nr" );
@@ -167,17 +176,19 @@ function post_message($player_row, $moderated_forum, &$thread)
 
       $New_ID = mysql_insert_id();
 
-      if( !($parent > 0) ) //New thread, also $Thread_ID = -1
+      if( $is_newthread ) // U06 (New thread), also $Thread_ID = -1
       {
-         mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$New_ID LIMIT 1" )
-            or error('mysql_query_failed','forum_post.new_thread');
+         db_query( 'forum_post.new_thread',
+            'UPDATE Posts SET Thread_ID=ID, LastPost=ID, '
+            . 'PostsInThread=' . ($moderated ? '0' : '1')
+            . "WHERE ID=$New_ID LIMIT 1" );
 
          if( mysql_affected_rows() != 1)
             error("mysql_insert_post", 'forum_post.new_thread');
 
          $thread = $Thread_ID = $New_ID;
       }
-      else
+      else // U08/U09 (reply/quote)
       {
          hit_thread( $Thread_ID );
       }
@@ -190,20 +201,255 @@ function post_message($player_row, $moderated_forum, &$thread)
       }
       else
       {
-         mysql_query("UPDATE Posts " .
-                     "SET PostsInThread=PostsInThread+1, " .
-                     "LastPost=$New_ID, LastChanged=FROM_UNIXTIME($NOW) " .
-                     "WHERE ID=$Thread_ID LIMIT 1" )
-            or error('mysql_query_failed','forum_post.moderated.postsinthread');
+         // thread-trigger
+         if( !$is_newthread ) // reply/quote
+         {
+            db_query( "forum_post.thread_trigger($Thread_ID)",
+               'UPDATE Posts SET '
+               . 'PostsInThread=PostsInThread+1, '
+               . "LastPost=GREATEST(LastPost,$New_ID), "
+               . "Lastchanged=IF(LastPost>$New_ID,Lastchanged,FROM_UNIXTIME($NOW)), "
+               . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)), "
+               . "WHERE ID='$Thread_ID' LIMIT 1" );
+         }
 
-         mysql_query("UPDATE Forums " .
-                     "SET PostsInForum=PostsInForum+1, LastPost=$New_ID " .
-                     "WHERE ID=$forum LIMIT 1" )
-            or error('mysql_query_failed','forum_post.moderated.postsinforum');
+         // forum-trigger (reply/quote, new-thread)
+         db_query( "forum_post.forum_trigger($forum)",
+            'UPDATE Forums SET '
+            . 'PostsInForum=PostsInForum+1, '
+            . ( ($is_newthread)
+               ? 'ThreadsInForum=ThreadsInForum+1, '
+               : "LastPost=GREATEST(LastPost,$New_ID), " )
+            . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)), "
+            . "WHERE ID='$forum' LIMIT 1" );
 
          return T_('Message sent!');
       }
    }
 } //post_message
+
+
+// use-case A04 (approve post on pending-approval)
+function approve_post( $fid, $tid, $pid )
+{
+   $row =
+      mysql_single_fetch( "approve_post.find_post($pid)",
+         "SELECT UNIX_TIMESTAMP(Time) AS X_Time FROM Posts "
+         . "WHERE ID=$pid AND Thread_ID=$tid LIMIT 1" )
+      or error('unknown_post', "approve_post.find_post($pid)");
+   $post_created = $row['X_Time'];
+
+   $row =
+      mysql_single_fetch( "approve_post.find_thread($tid)",
+         "SELECT UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged FROM Posts "
+         . "WHERE ID=$tid AND Thread_ID=$tid LIMIT 1" )
+      or error('unknown_post', "approve_post.find_thread($tid)");
+   $thread_lastchanged = $row['X_Lastchanged'];
+
+   // approve post
+   db_query( "approve_post.update_post($pid)",
+      "UPDATE Posts SET PendingApproval='N', Approved='Y' WHERE ID=$pid LIMIT 1" );
+
+   // thread-trigger
+   db_query( "approve_post.trigger_thread($tid,$pid)",
+      'UPDATE Posts SET '
+      . ( ($post_created > $thread_lastchanged)
+         ? "LastPost=$pid, "
+           . "Lastchanged=FROM_UNIXTIME($post_created), "
+           . "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
+         : '' )
+      . 'PostsInThread=PostsInThread+1 '
+      . "WHERE ID=$tid LIMIT 1" );
+
+   // forum-trigger
+   db_query( "approve_post.trigger_forum($fid,$pid)",
+      'UPDATE Forums SET '
+      . 'PostsInForum=PostsInForum+1, '
+      . ( ($pid == $tid) ? 'ThreadsInForum=ThreadsInForum+1, ' : '' )
+      . ( ($post_created > $thread_lastchanged)
+         ? "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
+         : '' )
+      . "LastPost=GREATEST(LastPost,$pid) "
+      . "WHERE ID=$fid LIMIT 1" );
+}
+
+// use-case A05 (reject post on pending-approval)
+function reject_post( $fid, $tid, $pid )
+{
+   db_query( "reject_post.update_post($pid)",
+      "UPDATE Posts SET PendingApproval='N', Approved='N' WHERE ID=$pid LIMIT 1" );
+}
+
+// use-case A06 (hide shown post)
+function hide_post( $fid, $tid, $pid )
+{
+   global $NOW;
+   $row =
+      mysql_single_fetch( "hide_post.find_thread($tid)",
+         "SELECT LastPost, PostsInThread FROM Posts "
+         . "WHERE ID=$tid AND Thread_ID=$tid LIMIT 1" )
+      or error('unknown_post', "hide_post.find_thread($tid)");
+   $thread_lastpost = $row['LastPost'];
+   $thread_cntposts = $row['PostsInThread'];
+
+   $row =
+      mysql_single_fetch( "hide_post.find_forum($tid)",
+         "SELECT LastPost FROM Forums WHERE ID=$fid LIMIT 1" )
+      or error('unknown_forum', "hide_post.find_forum($fid)");
+   $forum_lastpost = $row['LastPost'];
+
+   // hide post
+   db_query( "hide_post.update_post($pid)",
+      "UPDATE Posts SET Approved='N' WHERE ID=$pid LIMIT 1" );
+
+   // thread-trigger
+   db_query( "approve_post.trigger_thread($tid,$pid)",
+      'UPDATE Posts SET '
+      . ( ($pid == $thread_lastpost && $thread_cntposts == 0) ? 'LastPost=0, ' : '' )
+      . 'PostsInThread=PostsInThread-1, '
+      . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) " // post could be a NEW one
+      . "WHERE ID=$tid LIMIT 1" );
+
+   // forum-trigger
+   db_query( "approve_post.trigger_forum($fid,$pid)",
+      'UPDATE Forums SET '
+      . ( ($pid == $tid) ? 'ThreadsInForum=ThreadsInForum-1, ' : '' )
+      . 'PostsInForum=PostsInForum-1, '
+      . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) " // post could be a NEW one
+      . "WHERE ID=$fid LIMIT 1" );
+
+   if( $pid == $thread_lastpost && $thread_cntposts > 0 )
+      recalc_thread_lastpost($tid);
+
+   if( $pid == $forum_lastpost )
+      recalc_forum_lastpost($fid);
+}
+
+// use-case A07 (show hidden post)
+function show_post( $fid, $tid, $pid )
+{
+   $row =
+      mysql_single_fetch( "show_post.find_post($pid)",
+         "SELECT UNIX_TIMESTAMP(Time) AS X_Time FROM Posts "
+         . "WHERE ID=$pid AND Thread_ID=$tid LIMIT 1" )
+      or error('unknown_post', "show_post.find_post($pid)");
+   $post_created = $row['X_Time'];
+
+   $row =
+      mysql_single_fetch( "show_post.find_thread($tid)",
+         'SELECT PostsInThread, LastPost, UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged '
+         . "FROM Posts WHERE ID=$tid AND Thread_ID=$tid LIMIT 1" )
+      or error('unknown_post', "show_post.find_thread($tid)");
+   $thread_lastchanged = $row['X_Lastchanged'];
+   $thread_lastpost = $row['LastPost'];
+   $thread_cntposts = $row['PostsInThread'];
+
+   // show post
+   db_query( "show_post.update_post($pid)",
+      "UPDATE Posts SET Approved='Y' WHERE ID=$pid LIMIT 1" );
+
+   // thread-trigger
+   db_query( "show_post.trigger_thread($tid,$pid)",
+      'UPDATE Posts SET '
+      . ( ($post_created > $thread_lastchanged)
+         ? "LastPost=$pid, "
+           . "Lastchanged=FROM_UNIXTIME($post_created), "
+           . "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
+         : '' )
+      . 'PostsInThread=PostsInThread+1 '
+      . "WHERE ID=$tid LIMIT 1" );
+
+   // forum-trigger
+   db_query( "show_post.trigger_forum($fid,$pid)",
+      'UPDATE Forums SET '
+      . ( ($thread_cntposts == 1) ? 'ThreadsInForum=ThreadsInForum+1, ' : '' )
+      . ( ($post_created > $thread_lastchanged)
+         ? "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
+           . ( ($thread_lastpost == $forum_lastpost)
+               ? "LastPost=GREATEST(LastPost,$pid), "
+               : '' )
+         : '' )
+      . 'PostsInForum=PostsInForum+1 '
+      . "WHERE ID=$fid LIMIT 1" );
+}
+
+
+function recalc_thread_lastpost( $tid )
+{
+   $row =
+      mysql_single_fetch( "recalc_thread_lastpost.find_lastpost($tid)",
+         "SELECT ID, UNIX_TIMESTAMP(Time) AS X_Time FROM Posts "
+         . "WHERE Thread_ID='$tid' AND Approved='Y' "
+         . "AND PosIndex>'' " // ''=inactivated (edited)
+         . "ORDER BY Time DESC LIMIT 1" )
+      or error('unknown_post', "recalc_thread_lastpost.find_lastpost($tid)");
+   $lastpost = $row['ID'];
+   $lastchanged = $row['X_Time'];
+
+   db_query( "recalc_thread_lastpost.update_lastpost($tid)",
+      'UPDATE Posts SET '
+      . "LastPost=$lastpost, Lastchanged=FROM_UNIXTIME($lastchanged) "
+      . "WHERE ID='$tid' LIMIT 1" );
+}
+
+function recalc_forum_lastpost( $fid )
+{
+   $row =
+      mysql_single_fetch( "recalc_forum_lastpost.find_lastpost($tid)",
+         "SELECT ID FROM Posts "
+         . "WHERE Forum_ID='$fid' AND Thread_ID>0 AND Approved='Y' "
+         . "AND PosIndex>'' " // ''=inactivated (edited)
+         . "ORDER BY Time DESC LIMIT 1" )
+      or error('unknown_post', "recalc_forum_lastpost.find_lastpost($tid)");
+   $lastpost = $row['ID'];
+
+   db_query( "recalc_forum_lastpost.update_lastpost($fid)",
+      "UPDATE Forums SET LastPost=$lastpost WHERE ID='$tid' LIMIT 1" );
+}
+
+// recalculate Thread.PostsInThread for all threads in specific forum
+function recalc_thread_counts( $fid )
+{
+   $result =
+      db_query( "recalc_thread_counts.find_counts($fid)",
+         "SELECT Thread_ID, COUNT(*) AS X_CountPosts FROM Posts "
+         . "WHERE Thread_ID>0 AND Approved='Y' "
+         . "AND PosIndex>'' " // ''=inactivated (edited)
+         . ( ($fid > 0) ? "Forum_ID='$fid' " : '' )
+         . "GROUP BY Thread_ID" );
+
+   $cnt_threads = 0;
+   $sum_posts = 0;
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      $tid = $row['Thread_Id'];
+      $cnt = $row['X_CountPosts'];
+      $cnt_threads++;
+      $sum_posts += $cnt;
+
+      // update thread-count
+      db_query( "recalc_thread_counts.update_thread_counts($tid)",
+         "UPDATE Posts SET PostsInThread=$cnt WHERE ID='$tid' LIMIT 1" );
+   }
+
+   // update forum-counts
+   db_query( "recalc_thread_counts.update_forum_counts($fid)",
+      "UPDATE Forums SET ThreadsInForum=$cnt_threads, PostsInForum=$sum_posts "
+      . "WHERE ID='$fid' LIMIT 1" );
+}
+
+// use-case A11 (cleanup)
+function cleanup_forum_read()
+{
+   $min_date = ForumRead::get_min_date();
+
+   db_query( 'cleanup_forum_read.delete_post_reads',
+      'DELETE FROM ForumRead WHERE Thread_ID>0 AND Post_ID<>0 AND '
+      . "Time < FROM_UNIXTIME($min_date)" );
+
+   db_query( 'cleanup_forum_read.delete_old_thread_newcnt',
+      'DELETE FROM ForumRead WHERE Thread_ID>0 AND Post_ID=0 AND NewCount=0 AND '
+      . "Time < FROM_UNIXTIME($min_date)" );
+}
 
 ?>
