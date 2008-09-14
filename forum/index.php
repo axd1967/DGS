@@ -32,6 +32,15 @@ $ThePage = new Page('ForumsList');
       error('not_logged_in');
    $my_id = $player_row['ID'];
 
+   // toggle forumflag
+   $toggleflag = @$_REQUEST['toggleflag'] + 0;
+   $toggle_baseurl = 'index.php';
+   if( toggle_forum_flags($my_id, $toggleflag) )
+   {
+      jump_to( 'forum/'.$toggle_baseurl );
+   }
+   $show_lp_author = ( $player_row['ForumFlags'] & FORUMFLAG_FORUM_SHOWAUTHOR );
+
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
    $is_moderator = ($switch_moderator == 1);
 
@@ -48,11 +57,15 @@ $ThePage = new Page('ForumsList');
    if( $switch_moderator >=0 )
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
 
+   $head_lastpost = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
+      T_('Last post'),
+      $toggle_baseurl . '?toggleflag='.FORUMFLAG_FORUM_SHOWAUTHOR,
+      ( ($show_lp_author) ? T_('Hide author') : T_('Show author') ));
    $disp_forum->headline = array(
       T_('Forums')    => '',
       T_('Threads')   => 'class="HeaderThreadCnt"',
       T_('Posts')     => 'class="HeaderPostCnt"',
-      T_('Last post') => 'class="LastPost"',
+      $head_lastpost  => 'class="HeaderLastPost"',
    );
 
    $title = T_('Forum list');
@@ -66,7 +79,7 @@ $ThePage = new Page('ForumsList');
    {
       $lpost = $forum->last_post;
       $lpost_date   = $lpost->build_link_postdate( $lpost->created, 'class=LastPost' );
-      $lpost_author = ( $lpost->author->is_set() )
+      $lpost_author = ( $show_lp_author && $lpost->author->is_set() )
          ? sprintf( ' <span class=PostUser>%s %s</span>', T_('by'), $lpost->author->user_reference())
          : '';
       $new_str = ( $forum->count_new > 0 )
