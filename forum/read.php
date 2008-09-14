@@ -24,6 +24,7 @@ require_once( 'forum/forum_functions.php' );
 require_once( 'forum/post.php' );
 
 
+// use-case U04
 function revision_history( $display_forum, $post_id )
 {
    $revhist_thread = new ForumThread();
@@ -67,6 +68,7 @@ function revision_history( $display_forum, $post_id )
    $forum_id = @$_REQUEST['forum']+0;
    $thread = @$_REQUEST['thread']+0;
    $edit = @$_REQUEST['edit']+0;
+   $markread = get_request_arg('markread', ''); // syntax of ForumRead::mark_read
    $rx_term = get_request_arg('xterm', '');
 
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
@@ -81,9 +83,15 @@ function revision_history( $display_forum, $post_id )
          jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
             . "#$msg");
       else
+         //TODO: jump to inserted post (not to new, there might be more and not the first one)
          jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
             . URI_AMP."sysmsg=".urlencode($msg)."#new1");
    }
+
+   // prepare users forum-reads
+   $FR = new ForumRead( $my_id, $forum_id, $thread );
+   if ( $markread != '' )
+      $FR->mark_read( $markread );
 
    $preview = isset($_POST['preview']);
    $preview_ID = ($edit > 0 ? $edit : @$_REQUEST['parent']+0 );
@@ -91,7 +99,7 @@ function revision_history( $display_forum, $post_id )
    {
       $preview_Subject = trim(get_request_arg('Subject'));
       $preview_Text = trim(get_request_arg('Text'));
-      if( !$edit > 0 )
+      if( !($edit > 0) )
          $reply = @$_REQUEST['parent']+0;
 //      $preview_GoDiagrams = create_godiagrams($preview_Text);
    }
@@ -116,13 +124,13 @@ function revision_history( $display_forum, $post_id )
    {
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
       if( (int)@$_GET['show'] > 0 )
-         approve_message( (int)@$_GET['show'], $thread, $forum_id, true );
+         show_post( $forum_id, $thread, (int)@$_GET['show'] );
       else if( (int)@$_GET['hide'] > 0 )
-         approve_message( (int)@$_GET['hide'], $thread, $forum_id, false );
+         hide_post( $forum_id, $thread, (int)@$_GET['hide'] );
       else if( (int)@$_GET['approve'] > 0 )
-         approve_message( (int)@$_GET['approve'], $thread, $forum_id, true, true );
+         approve_post( $forum_id, $thread, (int)@$_GET['approve'] );
       else if( (int)@$_GET['reject'] > 0 )
-         approve_message( (int)@$_GET['reject'], $thread, $forum_id, false, true );
+         reject_post( $forum_id, $thread, (int)@$_GET['reject'] );
    }
 
    $title = sprintf( '%s - %s', T_('Forum'), $forum->name );
@@ -133,14 +141,15 @@ function revision_history( $display_forum, $post_id )
 
    if( @$_GET['revision_history'] > 0 )
    {
-      revision_history( $disp_forum, @$_GET['revision_history'] ); //set $Lastread
+      revision_history( $disp_forum, @$_GET['revision_history'] );
       end_page();
-      hit_thread( $thread );
+      hit_thread( $thread ); // use-case U04
       exit;
    }
 
-   // set var: Lastread
-   $Lastread = load_thread_last_read( $my_id, $thread );
+
+   // load users forum-reads
+   $FR->load_reads_post();
 
    // select all posts of current thread
    $qsql = new QuerySQL();
@@ -149,7 +158,7 @@ function revision_history( $display_forum, $post_id )
       "P.Thread_ID=$thread",
       "P.PosIndex>''" ); // '' == inactivated (edited)
    $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
-   $fthread = new ForumThread();
+   $fthread = new ForumThread( $FR );
    $fthread->load_posts( $qsql );
    $fthread->create_navigation_tree();
    // end of DB-stuff
@@ -160,21 +169,25 @@ function revision_history( $display_forum, $post_id )
    {
       $thread_Subject = '';
       $Lastchangedthread = 0 ;
+      $cnt_replies = 0;
       $disp_forum->headline = $headline2; // no thread tree-overview
    }
    else
    {
       $thread_Subject = $post0->subject;
       $Lastchangedthread = $post0->last_changed;
+      $cnt_replies = $post0->count_posts;
       $disp_forum->headline = $headline1;
    }
 
+   if ( $fthread->count_new > 0 )
+      $disp_forum->links |= LINK_MARK_READ;
    $disp_forum->forum_start_table('Read');
 
    if( !$is_empty_thread )
    {
       // draw tree-overview
-      $disp_forum->draw_overview( $fthread, $Lastread );
+      $disp_forum->draw_overview( $fthread );
       $disp_forum->print_headline( $headline2 );
    }
 
@@ -182,7 +195,7 @@ function revision_history( $display_forum, $post_id )
    $all_my_posts = true;
    foreach( $fthread->posts as $post )
    {
-      $post->last_read = $Lastread;
+      $post->count_new = ( $FR->is_read_post( $post ) ) ? 0 : 1;
       $pid = $post->id;
       $uid = $post->author->id;
       $is_my_post = ($uid == $my_id);
@@ -256,8 +269,8 @@ function revision_history( $display_forum, $post_id )
       echo "</td></tr>\n";
    }
 
-   // footer: reply-form (only for a new thread)
-   if( $is_empty_thread && !$preview && !$disp_forum->is_moderator )
+   // footer: reply-form (only for a NEW THREAD or if ONE post existing)
+   if( ($is_empty_thread || $cnt_replies == 1) && !$preview && !$disp_forum->is_moderator )
    {
       $disp_forum->change_depth( 1 );
       echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
@@ -271,17 +284,7 @@ function revision_history( $display_forum, $post_id )
    $disp_forum->forum_end_table();
 
 
-   // Update Forumreads to remove the 'new' flag
-   if( !$Lastread || $Lastread < $Lastchangedthread )
-   {
-      mysql_query( "REPLACE INTO Forumreads SET " .
-                   "User_ID=$my_id, " .
-                   "Thread_ID=$thread, " .
-                   "Time=FROM_UNIXTIME($NOW)" )
-         or error('mysql_query_failed','forum_read.replace_forumreads');
-   }
-
-   // increase thread-hits on "view" (& post-save) to show thread-"activity"
+   // use-cases U03: increase thread-hits show thread-"activity"
    if ( !($reply > 0) && !$preview && !($edit > 0) && !$all_my_posts )
       hit_thread( $thread );
 
