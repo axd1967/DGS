@@ -25,6 +25,67 @@ Changelog
 
 2008-09-14 juga
 
+   * scripts/convert_from_old_forum.php:
+   - comment about recalculate_postsinforum-func not longer existing
+
+   * forum/list.php:
+   - changed valign-style using CSS for multiline-table-cells: middle -> top
+
+   * forum/forum_functions.php (all classes & functions),
+     forum/post.php (post_message, approve_post, reject_post, show_post,
+       hide_post, recalc_thread_lastpost, recalc_forum_lastpost,
+       recalc_thread_counts, cleanup_forum_read),
+     forum/index.php, forum/list.php, forum/read.php:
+   - changes to post view (forum/read.php):
+     - viewing thread-posts now doesn't mark thread as read
+     - user can mark single posts as read ('mark read'-link for unread post)
+     - user can mark all posts as read ('mark all read'-link in top/bottom-bar)
+     - force-reply: reply-form only shown for new thread or if only one post exists,
+       so user has explicitly to choose post to reply to
+     - added new set for thread-posts navigation: f_*.png (see below)
+   - changed time-range for an old NEW (shown in lighter red): 2 -> 4 weeks
+   - avoided some RACE-conditions on updating LastPost/Lastchanged-fields
+     by using GREATEST(..): newer db-IDs or dates are always greater,
+     so can take maximum in sql-updates
+   - preparations for NEW-handling in forum- and thread-list
+     - added class and db-table ForumRead for handling thread/post-read
+       and forum/thread-new-count
+   - moved and changed db-writing functions to forum/post.php
+     resembling the documented and adjusted use-cases in specs/forums.txt
+   - minor bugfixes and optimizations on db-operations
+-----------
+// add Posts.Updated for NEW-handling
+ALTER TABLE `Posts`
+   ADD `Updated` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `Lastedited`;
+UPDATE Posts SET Updated=Lastchanged WHERE Parent_ID=0;
+
+// add Forums.Updated for NEW-handling
+ALTER TABLE `Forums`
+   ADD `Updated` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `LastPost`;
+UPDATE Forums, Posts SET Forums.Updated=Posts.Time WHERE Forums.LastPost>0 AND Posts.ID=Forums.LastPost;
+
+// add Table ForumRead for NEW-handling (replacing Forumreads-table)
+CREATE TABLE ForumRead (
+   User_ID int(11) NOT NULL default '0',
+   Forum_ID int(11) NOT NULL default '0',
+   Thread_ID int(11) NOT NULL default '0',
+   Post_ID int(11) NOT NULL default '0',
+   NewCount int(11) NOT NULL default '-1',
+   Time datetime NOT NULL default '0000-00-00 00:00:00',
+   UNIQUE KEY FR_Uniq (Thread_ID,Post_ID,Forum_ID,User_ID),
+   KEY Time (Time)
+) TYPE=MyISAM;
+
+// added images for thread-post-list navigation
+copy images/f_bottom.png
+copy images/f_firstanswer.png
+copy images/f_nextanswer.png
+copy images/f_nextparent.png
+copy images/f_prevanswer.png
+copy images/f_prevparent.png
+copy images/f_top.png
+-----------
+
    * specs/forums.txt:
    - added some specs and docu for forums
 
