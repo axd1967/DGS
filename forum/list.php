@@ -40,6 +40,18 @@ require_once( 'include/form_functions.php' );
    $maxrows = get_maxrows( $maxrows, MAXROWS_PER_PAGE, MAXROWS_PER_PAGE_DEFAULT );
    $arr_maxrows = build_maxrows_array( $maxrows, MAXROWS_PER_PAGE);
 
+   // toggle forumflag
+   $toggleflag = @$_REQUEST['toggleflag'] + 0;
+   $toggle_baseurl = "list.php?forum=$forum_id"
+      . ( $maxrows>0 ? URI_AMP."maxrows=$maxrows" : '' )
+      . ( $offset>0 ? URI_AMP."offset=$offset" : '');
+   if( toggle_forum_flags($my_id, $toggleflag) )
+   {
+      jump_to( 'forum/'.$toggle_baseurl );
+   }
+   $show_lp_author = ( $player_row['ForumFlags'] & FORUMFLAG_THREAD_SHOWAUTHOR );
+
+
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
 
@@ -62,12 +74,17 @@ require_once( 'include/form_functions.php' );
       $disp_forum->links |= LINK_NEXT_PAGE;
    if( $switch_moderator >= 0 )
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
+
+   $head_lastpost = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
+      T_('Last post'),
+      $toggle_baseurl .URI_AMP.'toggleflag='.FORUMFLAG_THREAD_SHOWAUTHOR,
+      ( ($show_lp_author) ? T_('Hide author') : T_('Show author') ));
    $disp_forum->headline = array(
       T_('Thread') => 'class=Subject',
       T_('Author') => 'class=Name',
       T_('Hits') => 'class=HitCnt',
       T_('Posts') => 'class=PostCnt',
-      T_('Last post') => 'class=LastPost',
+      $head_lastpost => 'class=LastPost',
    );
 
    $title = sprintf( '%s - %s', T_('Forum'), $forum->name );
@@ -90,7 +107,7 @@ require_once( 'include/form_functions.php' );
          $author = $thread->author->user_reference();
 
          $lpost_date   = $lpost->build_link_postdate( $thread->last_changed, 'class=LastPost' );
-         $lpost_author = ( $lpost->author->is_set() )
+         $lpost_author = ( $show_lp_author && $lpost->author->is_set() )
             ? sprintf(' <span class=PostUser>%s %s</span>', T_('by'), $lpost->author->user_reference())
             : '';
 
@@ -112,9 +129,7 @@ require_once( 'include/form_functions.php' );
 
    $form->add_row( array(
         'DESCRIPTION', T_('Number of threads#forum'),
-        'SELECTBOX',   'maxrows', 1, $arr_maxrows, $maxrows, false ));
-   $form->add_row( array(
-        'TAB',
+        'SELECTBOX',   'maxrows', 1, $arr_maxrows, $maxrows, false,
         'CELL',        1, 'align=left',
         'OWNHTML',     '<input type="submit" name="forum_showrows" value="' . T_('Show Rows#forum')
                         . '" accesskey=' . attb_quote($xkey) . ' title=' . attb_quote("[&amp;$xkey]") . '>' ));
