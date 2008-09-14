@@ -23,6 +23,27 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-09-14 juga
+
+   * specs/forums.txt:
+   - added some specs and docu for forums
+
+   * specs/filters.txt:
+   - updated to recent changes (country, mysqlmatch, UNION, examples)
+
+   * edit_contact.php:
+   - bugfix:
+     - check for adding guest-contact also denied adding new contact
+     - guest can be added as contact (why not?)
+
+   * skins/dragon/screen.css:
+   - changed valign-style using CSS for multiline-table-cells: middle -> top
+   - added some CSS for forum-NEW-flag
+
+   * list_contacts.php, search_messages.php, forum/search.php,
+     code_examples/filter_example2.php:
+   - changed table-cell valign to top using CSS
+
 2008-08-24 juga
 
    * forum/forum_functions.php (draw_post, create_navigation_tree, set_navigation;
@@ -67,7 +88,7 @@ Changelog
      - put subject, author, date in separate table-columns
      - mark own posts with bold font
      - use 2-rows-colored background for overview-list: don't use RowX
-       standard because of existing background)
+       standard because of existing background
 
 2008-08-23 juga
 
