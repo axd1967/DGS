@@ -64,9 +64,6 @@ require_once( "include/contacts.php" );
       $cuser = '';
    }
 
-   if( $cid <= GUESTS_ID_MAX || strtolower($cuser) == 'guest' )
-      error('not_allowed_for_guest');
-
    // identify cid from cid and cuser
    $other_row = null; // other-player (=contact to add/edit)
    if ( $cid )
