@@ -1,0 +1,791 @@
+################################################################################
+# Topic: Forums
+# Description: Forum capabilities for DGS
+# Author: Erik, Rod, JUG
+
+## /*
+## Dragon Go Server
+## Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU Affero General Public License as
+## published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU Affero General Public License for more details.
+##
+## You should have received a copy of the GNU Affero General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## */
+
+
+Topics:
+
+   1. Introduction and GUI
+   2. Classes and Files (comprising and supporting forum)
+   3. Development Guide (data model)
+   4. FAQ
+   5. Future Enhancements
+   6. Known Bugs
+
+#-------- (1) Introduction and GUI --------------------------------------------
+
+# Legend:
+#   forum        = forum identified by Forums.ID
+#   forum-list   = list of all forums
+#   thread       = list of posts of one thread identified by
+#                  Posts.ID[Parent_ID=0 or ID=Thread_ID]
+#   thread-list  = list of threads of a specific forum
+#   initial-post = thread starter post = initial post of a thread
+#   thread-posts = post-list = list of all posts of a specific thread
+#   shown post   = post with Posts[Approved=Y]
+#   hidden post  = moderated post with Posts[Approved<>Y]
+#   { fields }   = database fields, for which new data can be entered
+#
+#   PK           = primary key
+#   user         = normal user (non-admin, non-moderator)
+#   shown posts  = non-hidden post, that has been approved and is not hidden
+#
+#   calculated field = value can be calculated from other fields in SAME table
+#   triggered field  = value can be calculated from data from OTHER tables,
+#                      or is triggered on certain use case,
+#                      field needs to be updated if source tables changes
+
+Forum view, shown by "forum/index.php":
+   - show list of all forums ordered by Forums.SortOrder
+   - each forum is described by forum-name and forum-description
+     - name is linked to corresponding thread-list
+   - each forum shows a moderated-state
+   - each forum shows the number of (non-hidden) threads and posts
+   - each forum shows the date and author of the last post in that forum
+     - the date is linked to the according last-post
+     - the author is linked to the according user-info
+
+Thread list view (for single forum-id), shown by "forum/list.php":
+   - show navi-list of threads ordered by last-changed threads
+   - each thread shows the thread-subject, the author of the initial-thread-post,
+     the number of hits and posts in the thread
+     - subject is linked to corresponding thread-post-list
+   - each thread shows the date and author of the last post in that thread
+     - the date is linked to the according last-post
+     - the author is linked to the according user-info
+
+Thread post view (for single thread-id), shown by "forum/read.php":
+   - thread-tree overview shows subject, author and last-change of each thread-post
+     - subject is linked to full post-data on same page
+   - thread-post-list shows subject, author, creation-date,
+     last-edit-date if edited, and the post-text
+     - subject is linked to post itself to have the URL to be used as reference
+     - edited is linked to show post revision history
+     - author is linked to according user-info
+
+Post Revision History, shown by "forum/read.php":
+   - show all previous versions of an own post
+
+Forum search, shown by "forum/search.php":
+   - search in forum, subject, text-body, for author,
+     message-scope (all / first), creation-date
+   - matching entries sortable by search terms (subject/text),
+     creation or modification date
+   - show matching post-entries in list with link to post-thread
+   - textual search terms are highlighted in subject and text-body
+   - term relevance shown
+
+
+Navigation
+   - navigation between views:
+     forum list - thread list - thread-post-list - search
+   - paging:
+     - forum list: show all
+     - thread list: show max-rows (configurable)
+     - thread-post list: show all
+     - revision history: show all
+
+
+#TODO moderation (approve/reject, show/hide)
+#TODO editing (reply/quote-reply/edit), mark read
+#TODO NEW-handling
+
+
+#-------- Use-Cases
+
+Lists use-cases, that need to be taken into account to uphold the forums
+structural integrity; especially when introducing new features.
+
+# User tasks
+(U01) Read list of forums
+(U02) Read list of threads of forum $fid
+(U03) Read thread-posts of thread $tid
+(U04) Read revision history of a single post $pid
+(U05) Forum Search
+(U06) Add new thread in forum $fid: (a) by myself, (b) by other -> new post $ntid
+(U07) Edit (own) post $pid of thread $tid with saving history -> new post $npid { Subject, Text }
+(U08) Reply to post $pid -> new post $npid
+(U09) Quote-Reply to post $pist -> new post $npid
+(U10) Mark (other) post $pid as read
+(U11) Mark all posts in thread $tid as read
+(U12) Mark checked threads $tidX as read
+
+# Admin tasks
+(A01) Admin-Add new forum -> new forum $nfid
+(A02) Admin-Edit forum $fid { Name, Description, Moderated, SortOrder }
+(A03) Admin-Move thread $tid from forum $sfid to forum $dfid
+(A04) Moderate-Approve (pending-approval) post $pid
+(A05) Moderate-Reject (pending-approval) post $pid
+(A06) Moderate-Hide post $pid
+(A07) Moderate-Show (=unhide) post $pid
+(A08) Moderate-Edit (own & other) post $pid without saving history { Subject, Text }
+(A09) Recalc forum-fields
+(A10) Recalc thread-fields
+(A11) Cleanup
+
+
+#-------- (2) Classes and Files -----------------------------------------------
+
+This section shortly describes the classes and files for the forum.
+For more details you may also check the source-code documentation
+of the classes, their variables and functions.
+
+   - forum/forum_functions.php:
+     This file contains most of the classes and helper methods to
+     support the forum loading and rendering.
+
+   - forum/index.php:
+     Show forums list.
+
+   - forum/list.php:
+     Show thread list.
+
+   - forum/old_links_redirect.php:
+     Redirect old (before 2007) external links to the converted DGS-forum-post.
+       Example of old URL:
+         http://www.dragongoserver.net/phorum/read.php?f=4&i=4354&t=4354&v=t
+         f = old forum-id
+         t = old thread-id
+         i = old post-id
+
+     IMPORTANT NOTE: The i-arg is NOT unique, only UNIQUE(f,i).
+     This needs to be taken into account when implementing new forum-features.
+
+   - forum/post.php:
+     Contains only supporting functions to handle the creation/replying of posts.
+
+   - forum/read.php:
+     Show/edit post, show revision history, Moderate post.
+
+   - forum/search.php:
+     Forum search.
+
+   - forum/admin.php:
+     Administrative functions and page to add/edit forums.
+
+There was a big refactoring in Aug/Sep-2008, which was an attempt to separate
+application logic and the presentational layer (GUI & layout) from database
+operations. This was accomplished by the introduction of classes serving
+as containers and objects with behaviour supporting the application logic
+and/or GUI. Another advantage was to be able to get rid of passing data
+into functions using global vars and extract($row) statements.
+
+Refactoring needs to be done in small baby steps to make it easier only
+to change the implementation without changing the functionality. Normally,
+refactorings are done writing unit-tests to secure the functionality
+before making changes. But with the current code (mid 2008) it's difficult
+to write unit-tests, because there are often not well defined, separated
+interfaces, but the database and business logic is mixed. That makes it very
+difficult to write unit-tests in an acceptable amount of time.
+
+The refactoring to the following classes is far from perfect, but was a first
+step from less OO-oriented code (mostly function-call-sequences passing
+global vars) to concentrate object-behaviour in classes with the goals
+explained above.
+
+#TODO add more details on classes
+   class ForumDisplay
+      Serving as general container to help in displaying forum content
+
+   class Forum
+      Representing a forum-object
+
+   class ForumThread
+      Helping in loading list of posts of a thread
+
+   class ForumPost
+      Representing a Post with all its fields
+
+   class ForumUser
+      Temporary representation of a user for creating user-references
+
+   class ForumRead
+      Help with handling forum-reads and cope with 'new'-flag
+
+
+#-------- (3) Development Guide (data model) ----------------------------------
+
+This section contains the database scheme with a description of all fields
+and all the uses-cases, that can happen in the forums. A further sub-section
+contains the mapping between data model and database schema.
+It's also described what "triggers" are needed to keep the structural
+integrity of the forum data.
+
+There are container-classes, that could be used to map to the according
+entitities (=database tables), but at the moment (Sep-2008) those are not
+used as pure entities, but more like enhanced DAOs (data access objects)
+within the code; (could be a future refactoring step).
+
+#-------- Database Schema
+
+# Lists forum-related database tables with important field to keep structural
+# integrity of forum data.
+#
+# NOTE: fields are functionally grouped (not like in DDL)
+# NOTE: DDL available in init.sql
+
+#----- TABLE Forums
+
+# Representation of a forum with name, description and moderating­status
+TABLE Forums
+   ID             - auto-inserted PK forum-id referred as $fid
+   LastPost       - Posts.ID of last changed post for this forum
+   Updated        - last-updated-date for forum (indicator to recalculate
+                    NEW-count for threads and forums)
+   PostsInForum   - number of shown posts for this forum
+   ThreadsInForum - number of shown threads for this forum
+
+   Name           - forum-name
+   Description    - forum-description
+   SortOrder      - sort-order for forums
+   Moderated(Y,N) - if 'Y', posts in forums need approval by moderator before
+                    being shown to users
+
+   # entered data
+   Name, Description, SortOrder, Moderated
+
+   # triggered fields
+   ID; LastPost, Updated, PostsInForum, ThreadsInForum
+
+
+#----- TABLE Posts
+
+# Representation of a thread and post
+TABLE Posts
+   ID             - auto-inserted PK post-id referred as $pid, or
+                    thread-id[ID=Thread_ID or Parent_ID=0] referred as $tid
+   Forum_ID       - post of forum Forums.ID
+   Thread_ID      - thread-id, Posts.ID $tid of a post, see { ID }
+   LastPost       - Posts.ID of last changed post for this thread,
+                    0 for normal post
+   Lastchanged    - last-changed-date for thread (not for single post)
+   PostsInThread  - number of shown threads for this thread { Thread_ID },
+                    0 for normal post
+   Hits           - number of hits (reads/action on thread-posts)
+   Updated        - last-updated-date for thread (indicator to recalculate
+                    NEW-count for threads and forums)
+
+   User_ID        - Players.ID, author of post
+   Parent_ID      - Posts.ID of answered/replied post (to build thread-tree)
+   AnswerNr       - reply-number for parent-post starting with 1,
+                    consecutive number (sort-order) within post-list for
+                    replied post with post-id Posts.Parent_ID
+   Depth          - depth of this post within thread-tree, starting with 1,
+                    >1 for normal post
+   PosIndex(80)   - sort-string used to correctly display thread-tree
+   Time           - creation-date of post
+   Lastedited     - last-edited-date of post
+   Approved       - hidden-state of post: 'Y'=shown post, 'N'=hidden post
+   PendingApproval - 'Y'=post needs moderation decision (approve/reject),
+                     'N'=moderator had decided for post-approval/rejection
+
+   Subject(80)    - subject of post
+   Text           - text-body of post
+   crc32          - checksum of text of this post, crc32 := crc32(Text)
+   old_ID         - referring to old database-scheme of DGS, used to redirect
+                    some OLD external links to DGS-forums to converted posts,
+                    see forum/old_links_redirect.php
+
+   # entered data
+   Forum_ID, Thread_ID, Updated, User_ID, Parent_ID, AnswerNr, Depth, PosIndex,
+   Time, Lastedited, Approved, PendingApproval, Subject, Text, crc32, (old_ID)
+
+   # calculated fields
+   PosIndex (from Parent_ID, Depth, AnswerNr), crc32 (from Text)
+
+   # triggered fields
+   ID; LastPost, Lastchanged, PostsInThread, Hits, Updated;
+   PosIndex, Lastedited, Approved, PendingApproval
+
+
+#----- TABLE Forumreads
+
+# Representation of a thread-read-date
+TABLE Forumreads  - old table, replaced by ForumRead
+   User_ID        - Players.ID
+   Thread_ID      - Posts.ID of thread
+   Time datetime  - last read-date of thread
+
+   # triggered fields
+   Time
+
+
+#----- TABLE ForumRead
+
+# Representation of forum-read information
+# - last read-date of post/thread
+# - new-thread counter for forum
+# - new-post counter for thread
+TABLE ForumRead
+   User_ID        - Players.ID
+   Forum_ID       - Forums.ID
+   Thread_ID      - Posts.ID of thread
+   Post_ID        - Posts.ID of post
+   NewCount       - number of NEW threads or NEW posts for a forum or
+                    thread respectively
+   Time           - last read-date for a post or thread,
+                    last NEW-update-date for forum/thread-list
+
+   # (a) Last read-date for single post $pid in thread $tid, stored as:
+   #     NOTE: Time is used, but shows no effect (but code is prepared for
+   #           future to mark edited posts as unread)
+   Forum_ID := $fid, Thread_ID := $tid, Post_ID := $pid
+   NewCount := -1 (db-default), but is irrelevant
+   Time := post read-date
+
+   # (b) Last read-date for all posts in thread $tid, stored as:
+   Forum_ID := $fid, Thread_ID := $tid, Post_ID := -1
+   NewCount := -1 (db-default), but is irrelevant
+   Time := thread read-date
+
+   # (c) Count of NEW shown posts for thread $tid, stored as:
+   Forum_ID := $fid, Thread_ID := $tid, Post_ID := 0
+   NewCount := number of NEW shown posts of single thread
+   Time := creation-date for current entry (used as date-trigger with Posts.Updated)
+
+   # (d) Count of NEW shown posts for thread $tid, stored as:
+   Forum_ID := $fid, Thread_ID := 0, Post_ID := 0
+   NewCount := number of NEW shown threads of single forum
+   Time := creation-date for current entry (used as date-trigger with Posts.Updated)
+
+   # NOTES:
+   - Forum_ID and Thread_ID for (a)-(d) are set for easier/faster calculation
+     of forum/thread-NEW-counts
+
+   # triggered fields
+   NewCount, Time
+
+
+#-------- Calculated datebase fields
+
+#----- Forum (stored in Forums-TABLE)
+# label: recalc_forum
+
+# Calculate fields for all forums
+Forums():
+   # calculate with combined select for ALL forums, if threads are up-to-date
+   PostsInForum   := X_CountPosts,
+   ThreadsInForum := X_CountThreads :
+      SELECT Forum_ID, SUM(PostsInThread) AS X_CountPosts, COUNT(*) AS X_CountThreads
+      FROM Posts WHERE Approved='Y' AND Thread_ID>0 AND Parent_ID=0 GROUP BY Forum_ID
+
+# Calculate fields for single forum $fid
+Forums($fid):
+   # calculate
+   LastPost := X_LastPost :
+      SELECT ID AS X_LastPost FROM Posts
+      WHERE Forum_ID=$fid AND Thread_ID>0 AND Approved='Y' AND PosIndex>''
+      ORDER BY Time DESC LIMIT 1
+
+   # combined calculate, if threads are up-to-date
+   PostsInForum   := X_CountPosts,
+   ThreadsInForum := X_CountThreads :
+      SELECT SUM(PostsInThread) AS X_CountPosts, COUNT(*) AS X_CountThreads
+      FROM Posts WHERE Forum_ID=$fid AND Thread_ID>0 AND Approved='Y' AND Parent_ID=0
+
+   # calculate
+   PostsInForum := X_Count :
+      SELECT COUNT(*) AS X_Count FROM Posts
+      WHERE Forum_ID=$fid AND Thread_ID>0 AND Approved='Y' AND PosIndex>''
+
+   # calculate, if threads are up-to-date
+   PostsInForum := X_Count :
+      SELECT SUM(PostsInThread) AS X_Count FROM Posts
+      WHERE Forum_ID=$fid AND Approved='Y' AND Parent_ID=0
+
+   # calculate
+   ThreadsInForum := X_Count
+      SELECT COUNT(*) AS X_Count FROM Posts
+      WHERE Forum_ID=$fid AND Approved='Y' AND Parent_ID=0
+
+
+#----- Thread (stored in Posts-TABLE)
+# label: recalc_thread
+
+# Calculate fields for all threads
+   # calculate
+   PostsInThread := as X_CountPosts :
+      SELECT Thread_ID, COUNT(*) AS X_CountPosts FROM Posts
+      WHERE Thread_ID>0 AND Approved='Y' AND PosIndex>'' GROUP BY Thread_ID
+
+# Calculate fields for single thread $tid
+Posts($fid,$tid):
+   # combined calculate
+   LastPost := X_LastPost,
+   Lastchanged := X_Lastchanged :
+      SELECT ID AS X_LastPost, Time AS X_Lastchanged FROM Posts
+      WHERE Thread_ID=$tid AND Approved='Y' AND PosIndex>''
+      ORDER BY Time DESC LIMIT 1
+
+   # calculate
+   PostsInThread := as X_CountPosts :
+      SELECT COUNT(*) AS X_CountPosts FROM Posts
+      WHERE Thread_ID=$tid AND Approved='Y' AND PosIndex>''
+
+
+#----- Forum-read / New-Counter (stored in ForumRead-TABLE)
+# label: recalc_forum_read
+
+#--- ForumRead (c): thread NEW-post-counter
+
+# check, if recalculation is needed:
+recalc needed, ...
+   (1) if Posts[ID=$tid,Parent_ID=0].Updated > ForumRead.Time; or
+   (2) if ForumRead.NewCount < 0 (reserved for future use)
+
+   # identify threads, that need recalc
+   # - NOTE: can be optimized while loading threads, before displaying them
+   SELECT IF(ISNULL(FR.Thread_ID),P.ID,0) AS X_Thread_ID
+   FROM Posts AS P
+      -- calculated thread
+      LEFT JOIN ForumRead AS FR ON FR.User_ID=$uid AND FR.Forum_ID=$fid
+         AND FR.Thread_ID=P.ID AND FR.Post_ID=0 AND FR.Time >= P.Updated
+   WHERE P.Forum_ID=$fid AND P.Parent_ID=0
+      AND P.Lastchanged > FROM_UNIXTIME($min_readdate)
+   HAVING X_Thread_ID > 0
+
+# Calculate fields for single thread $tid
+ForumRead($uid,$fid,$tid,Post_ID=0,Time=NOW):
+   NewCount := X_NewCount :
+      SELECT SUM(ISNULL(FRT.Thread_ID) & ISNULL(FRP.Post_ID)) AS X_NewCount
+      FROM Posts AS P
+         -- thread read-date
+         LEFT JOIN ForumRead AS FRT ON FRT.User_ID=$uid AND FRT.Forum_ID=$fid
+            AND FRT.Thread_ID=$tid AND FRT.Post_ID=-1 AND FRT.Time >= P.Time
+         -- post read
+         LEFT JOIN ForumRead AS FRP ON FRP.User_ID=$uid AND FRP.Forum_ID=$fid
+            AND FRP.Thread_ID=$tid AND FRP.Post_ID=P.ID AND FRP.Time >= P.Time
+      WHERE P.Forum_ID=$fid AND P.Thread_ID=$tid
+         AND P.Time > FROM_UNIXTIME($read_mindate) AND P.User_ID<>$uid
+
+
+#--- ForumRead (d): forum NEW-thread-counter
+
+# check, if recalculation is needed:
+recalc needed, ...
+   (1) if exists Posts[Forum_ID=$fid,Parent_ID=0].Updated > ForumRead.Time; or
+   (2) if (c) is up-to-date for forum $fid,
+       then if ForumRead[$uid,$fid,$tid,$pid=0].Time > ForumRead.Time; or
+   (3) if ForumRead.NewCount < 0 (reserved for future use)
+
+   # check & identify forum, that needs recalc
+   # - NOTE: after thread-recalc !!
+   # - NOTE: can be optimized while loading forums, before displaying them
+   SELECT IF(ISNULL(FRT.Forum_ID),FRF.Forum_ID,0) AS X_Forum_ID
+   FROM ForumRead as FRF
+      -- calculated forum
+      LEFT JOIN ForumRead AS FRT ON FRT.User_ID=$uid AND FRT.Forum_ID=FRF.Forum_ID
+         AND FRT.Thread_ID>0 AND FRT.Post_ID=0 AND FRT.Time >= FRF.Time
+   WHERE FRF.User_ID=$uid AND FRF.Forum_ID=$fid AND FRF.Thread_ID=0 AND FRF.Post_ID=0
+   HAVING X_Forum_ID > 0
+
+# Calculate fields for single forum $fid
+ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
+   NewCount := X_NewCount :
+      SELECT SUM(FR.NewCount) AS X_NewCount FROM ForumRead AS FR
+      WHERE FR.User_ID=$uid AND FR.Forum_ID=$fid AND FRT.Post_ID=0
+
+
+#-------- Update-"Trigger" for use-cases
+# Trigger-fields:
+# - Forums: ID; LastPost, Updated, PostsInForum, ThreadsInForum
+# - Thread/Post: ID; LastPost, Lastchanged, PostsInThread, Hits, Updated;
+#   PosIndex, Lastedited, Approved, PendingApproval
+# - ForumRead: NewCount, Time
+
+#----- U01: read forum-list
+
+* recalc all threads, then recalc forum
+
+#TODO: if needed, recalc ForumRead(d) + update
+
+#----- U02: read thread-list
+
+* recalc only, what is needed to display current thread-page
+
+#TODO: if needed, recalc ForumRead(c) + update
+
+* before showing thread-list -> recalc thread-reads
+   if not exists ForumRead -> recalc
+   if Thread.lastchanged > ForumRead.Time -> recalc
+   if ForumRead.NewCount < 0 -> recalc
+
+#----- U03: read thread-post-list
+
+* Thread($tid).Hits++
+
+#----- U04: read post revision history
+
+* Thread($tid).Hits++
+
+#----- U05: search forum
+
+* no change
+
+#----- U06: add new thread
+
+* insert Posts:
+  - Forum_ID=$fid, Parent_ID=0, Thread_ID=$ntid (update after insert),
+    Hits=0, Time=$NOW, Lastchanged=Time, Updated=$NOW, Depth=1, AnswerNr=1,
+    crc32=crc32(Text)
+
+  - moderated ($uid==guest or forum.Moderated):
+    LastPost=0, PostsInThread=0, Approved='N', PendingApproval='Y'
+
+  - not moderated:
+    LastPost=$ntid, PostsInThread=1, Approved='Y', PendingApproval='N'
+
+* if not moderated:
+  - Forums($fid).ThreadsInForum++
+  - Forums($fid).PostsInForum++
+  - Forums($fid).Updated=GREATEST(Updated,$NOW)
+
+#----- U07: edit own post
+# ID of post must stay the same (for LastPost-fields in other tables)
+
+* update Posts($pid).Lastedited
+* insert Posts (with old subject/text):
+  Time=$NOW, Parent_ID=$pid, Forum_ID=$fid, User_ID=$uid, PosIndex=''
+
+* Thread($tid).Hits++
+
+#----- U08: reply post
+# reply to post $spid
+
+* insert Posts:
+  - Forum_ID=$fid, Thread_ID=$tid, Parent_ID=$spid, Time=$NOW,
+    Depth=Posts[ID=$spid].Depth+1, AnswerNr=max[Parent_ID=$spid](Posts.AnswerNr) + 1,
+    PosIndex=CALC, crc32=crc32(Text)
+
+  - moderated ($uid==guest or forum.Moderated):
+    Approved='N', PendingApproval='Y'
+
+  - not moderated:
+    Approved='Y', PendingApproval='N'
+
+* if not moderated:
+  - Thread($tid).PostsInThread++
+  - Thread($tid).LastPost=GREATEST(LastPost,$npid)
+  - Thread($tid).Lastchanged=IF(LastPost>$npid,Lastchanged,$npid.Time)
+  - Thread($tid).Updated=GREATEST(Updated,$NOW)
+
+* if not moderated:
+  - Forums($fid).PostsInForum++
+  - Forums($fid).LastPost=GREATEST(LastPost,$npid)
+  - Forums($fid).Updated=GREATEST(Updated,$NOW)
+
+* Thread($tid).Hits++
+
+#----- U09: quote-reply post
+
+* same as U08
+
+#----- U10: mark post as read
+
+* insert ForumRead:
+  User_ID=$uid, Forum_ID=$fid, Thread_ID=$tid, Post_ID=$pid, Time=$NOW
+
+* Thread($tid).Updated=GREATEST(Updated,$NOW)
+* Forums($fid).Updated=GREATEST(Updated,$NOW)
+
+#----- U11: mark all thread-posts as read
+
+* insert ForumRead:
+  User_ID=$uid, Forum_ID=$fid, Thread_ID=$tid, Post_ID=-1, Time=$NOW
+
+* Thread($tid).Updated=GREATEST(Updated,$NOW)
+* Forums($fid).Updated=GREATEST(Updated,$NOW)
+
+#----- U12: mark checked threads as read
+
+* foreach checked thread $ctid:
+  - insert ForumRead:
+    User_ID=$uid, Forum_ID=$fid, Thread_ID=$ctid, Post_ID=-1, Time=$NOW
+  - Thread($ctid).Updated=GREATEST(Updated,$NOW)
+
+* Forums($fid).Updated=GREATEST(Updated,$NOW)
+
+#----- A01: add new forum
+
+* insert Forums with name, description, order, moderated=Y|N
+  (insert with defaults)
+
+#----- A02: edit forum
+
+* update Forums($fid) on name, description, order, moderated
+
+#----- A03: move thread
+# move thread $tid from forum $sfid to forum $nfid
+#TODO new feature, not implemented yet
+
+* move thread-posts:
+  - $tupd := Thread($tid).Updated
+  - Posts[Thread_ID=$tid].Forum_ID=$nfid
+
+* move forum-reads:
+  - ForumRead[Thread_ID=$tid].Forum_ID=$nfid
+
+* update source-forum (Forum_ID=$sfid):
+  - Forums.ThreadsInForum--
+  - Forums.PostsInForum -= Thread($tid).PostsInThread
+  - Forums.Updated=GREATEST(Updated,$tupd)
+
+  - recalc Forums.LastPost
+
+* update target-forum (Forum_ID=$nfid):
+  - Forums.LastPost=GREATEST(LastPost,Threads($tid).LastPost)
+  - Forums.ThreadsInForum++
+  - Forums.PostsInForum += Thread($tid).PostsInThread
+  - Forums.Updated=GREATEST(Updated,$tupd)
+
+* if admin chooses: send READ-ONCE message to all Thread($tid).User_ID
+  informing about thread-move
+
+#TODO need URLs, updated independently from forum_id (only on thread_id) !!
+#TODO need old_ID be independent from forum_id -> recalc old_ID
+#TODO need READ-ONCE message feature (=NOTIFY-message deleting itself if marked as read)
+
+#----- A04: approve post
+
+* update Posts($pid):
+  - $dpid := Posts($pid).Time
+  - PendingApproval='N', Approved='Y'
+
+* Thread($tid).PostsInThread++
+
+* if $pid==$tid: Forums($fid).ThreadsInForum++
+* Forums($fid).PostsInForum++
+* Forums($fid).LastPost=GREATEST(LastPost,$pid)
+
+* if $dpid > Thread($pid).Lastchanged:
+  - Thread($pid).LastPost = $pid
+  - Thread($pid).Lastchanged = $dpid
+  - Thread($pid).Updated = $dpid
+
+  - Forums($fid).Updated=GREATEST(Updated,$dpid)
+
+#----- A05: reject post
+
+* update Posts($pid):
+  - $dpid := Posts($pid).Time
+  - PendingApproval='N', Approved='N'
+
+#----- A06: hide post
+
+* update Posts($pid).Approved='N'
+
+* Thread($tid).PostsInThread--
+* Thread($tid).Updated=$NOW (post could be a NEW one)
+
+* if $pid == Thread($tid).LastPost:
+  - if Thread($tid).PostsInThread>0: recalc Thread($tid).LastPost, Lastchanged
+    else: Thread($tid).LastPost=0
+
+* Forums($fid).PostsInForum--
+* Forums($fid).Updated=$NOW (post could be a NEW one)
+* if $pid == $tid: Forums($fid).ThreadsInForum--
+* if $pid == Forums($fid).LastPost:
+  - recalc Forums($fid).LastPost
+
+#----- A07: show post
+
+* update Posts($pid).Approved='Y'
+  - $dpid := Posts($pid).Time
+
+* Thread($tid).PostsInThread++
+  - $ptid := Thread($tid).PostsInThread
+  - $ltid := Thread($tid).LastPost
+
+* if $dpid > Thread($pid).Lastchanged:
+  - Thread($tid).LastPost=$pid
+  - Thread($tid).Lastchanged=$dpid
+  - Thread($pid).Updated = $dpid
+
+  - Forums($fid).Updated=GREATEST(Updated,$dpid)
+  - if $ltid == Forums($fid).LastPost:
+    - Forums($fid).LastPost=$pid
+
+* Forums($fid).PostsInForum++
+* if $ptid==1:
+  - Forums($fid).ThreadsInForum++
+
+#----- A08: edit post
+
+* no trigger changes
+
+#----- A09: recalc forum
+
+* see label recalc_forum and recalc_forum_read
+
+#----- A10: recalc thread
+
+* see label recalc_thread and recalc_forum_read
+
+#----- A11: cleanup
+
+* delete old ForumRead-entries, to be placed in daily or weekly cron:
+  - DELETE FROM ForumRead WHERE
+    Time < $GLOBAL_MIN_READDATE AND Thread_ID>0 AND Post_ID<>0
+
+  - DELETE FROM ForumRead WHERE
+    Time < $GLOBAL_MIN_READDATE AND Thread_ID>0 AND Post_ID=0 AND NewCount=0
+
+
+#-------- (4) FAQ -------------------------------------------------------------
+
+This section contains some questions regarding the usage of forums for
+developers of DGS. More documentation you will also find in the sources.
+
+* Q ?
+
+  A.
+
+
+#-------- (5) Possible Future Enhancements ------------------------------------
+# Priority (1=high, 5=low, ?=unknown) is added, e.g. Prio(1)
+
+This section outlines some ideas regarding the forums, but are not necessarily
+going to be implemented. Just wanted to write them down somewhere.
+
+* Prio(1): refactor "saves" for forum, check recalcs
+
+* Prio(1): handle/fix/create/recalc triggers for forum/thread/posts
+
+* Prio(2): implement use case A03 (move thread to other forum)
+
+* Prio(3): replace PendingApproval
+  - replace PendingApproval with new Approved-enum('P')
+  - index on Approved, delete index/column PendingApproval
+  - for forum-search + recalc
+
+
+#-------- (6) Known Bugs ------------------------------------------------------
+# Priority (1=high, 3=low, E=enhancement/feature) is added, e.g. Prio(1)
+
+The listed problems in this section doesn't disturb the basic functioning
+of the forum, but are identified as bugs, though some could also
+be considered a feature ;)
+
+* Prio(3): approved and shown (once hidden) posts could be left unseen to the
+  readers when in the meantime the post-thread has a younger read of a user.
+  The post then "appears" in the shadows and remain undetected.
+
