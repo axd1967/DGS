@@ -601,7 +601,7 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 
 #----- U10: mark post as read
 
-* insert ForumRead:
+* insert/update ForumRead:
   User_ID=$uid, Forum_ID=$fid, Thread_ID=$tid, Post_ID=$pid, Time=$NOW
 
 * Thread($tid).Updated=GREATEST(Updated,$NOW)
@@ -609,7 +609,7 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 
 #----- U11: mark all thread-posts as read
 
-* insert ForumRead:
+* insert/update ForumRead:
   User_ID=$uid, Forum_ID=$fid, Thread_ID=$tid, Post_ID=-1, Time=$NOW
 
 * Thread($tid).Updated=GREATEST(Updated,$NOW)
