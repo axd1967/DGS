@@ -25,6 +25,20 @@ Changelog
 
 2008-09-14 juga
 
+   * forum/forum_functions.php (toggle_forum_flags, load_threads),
+     forum/index.php, forum/list.php, include/std_functions.php,
+     skins/dragon/screen.css:
+   - added toggle to show/hide last-post author in forum/thread-list,
+     - store current show-state in new Players.ForumFlags-field
+     - defined bitmask-constants for flags
+   - thread-list:
+     - placed show-maxrows submit button on same line as rows-selectbox
+     - bugfix loading threads with wrong LastPost
+-----------
+ALTER TABLE `Players`
+ ADD `ForumFlags` tinyint unsigned NOT NULL default '8' AFTER `MayPostOnForum`;
+-----------
+
    * scripts/convert_from_old_forum.php:
    - comment about recalculate_postsinforum-func not longer existing
 
