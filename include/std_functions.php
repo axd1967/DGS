@@ -258,6 +258,15 @@ define("USER_FOLDERS", 6);
 //-----
 
 
+//-----
+// sync with legal-check in toggle_forum_flags-func
+define('FORUMFLAG_FORUM_SHOWAUTHOR',  0x01); // last-post author
+define('FORUMFLAG_THREAD_SHOWAUTHOR', 0x02);
+define('FORUMFLAG_POSTVIEW_AUTOREAD', 0x04); // viewing marks thread as read
+define('FORUMFLAG_POSTVIEW_OVERVIEW', 0x08); // show overview
+//-----
+
+
 /****
  * get rid of the negative results of ($k % $m)
  * ( remember: ((-$k) % $m) == -($k % $m) )
