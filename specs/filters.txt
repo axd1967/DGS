@@ -1,7 +1,7 @@
 # Topic: Filters
 # Description: Seaching-capabilities for DGS (Filter-Framework)
 # URL: http://dragongoserver.sourceforge.net/forum/read.php?forum=1&thread=338
-# Author: Jens-Uwe Gaspar, DGS 'jug'
+# Author: Jens-Uwe Gaspar, DGS 'juga'
 
 ## /*
 ## Dragon Go Server
@@ -67,6 +67,12 @@ their variables and functions.
      filters and various predefined filters { Filter } specialized on some
      DGS-table-columns.
 
+     - include/filterlib_country.php:
+       Contains filter-class for filter on countries.
+
+     - include/filterlib_mysqlmatch.php:
+       Contains filter-class for filter handling the mysql-match fulltext-operation.
+
    - include/filter_functions.php:
      internal helping functions used for filters
 
@@ -93,8 +99,9 @@ their variables and functions.
      different table-columns.
 
    - include/form_functions.php:
-     Added two new elements 'FILTER' and 'FILTERERROR' to be used with the
-     class { Form } adding filters and its error-messages within an form.
+     Added three new elements 'FILTER', 'FILTERERROR' and 'FILTERWARNING'
+     to be used with the class { Form } adding filters and its error-messages
+     within an form.
 
 
    - code_examples/filter_example.php:
@@ -224,14 +231,15 @@ Examples to escape the range-char '-':
    * escape by quote-chars: 'a-e'  or  a'-'e  or  a'-e'
    * escape by doubling:    a--e
 
-However, so  far there is no way to obtain the following within a single
+However, so far there is no way to obtain the following within a single
 filter (the first three are also potential inefficient queries, that should
 be avoided if possible):
 
    * <>value
    * <de OR >do
    * =v1 OR =v2   => a future enhancement may allow this using lists: v1,v2
-   * complex SQL, using UNIONs (that must be built manually)
+   * complex SQL, using UNIONs (that must be built manually), though some
+     UNION-operations are supported
 
 # ----- create a filter
 
@@ -239,12 +247,13 @@ To add a filter to the SearchFilter-container use the following class-function:
 
    add_filter( $id, $type, $dbfield, $active = false, $config = null );
 
-Each filter is identified with a numerical id in range 1..32. When used with
-the Table-class, the identifiers of the filter must match with the respective
-table-column-id.
+Each filter is identified with a numerical id normally in range 1..32.
+When used with the Table-class, the identifiers of the filter must match
+with the respective table-column-id.
 
 Type $type is a string specifying which filter you want to use on your
-SQL-field (see class-documentation in include/filters.php).
+SQL-field (see class-documentation in include/filters.php or in the
+respective include/filterlib_*.php).
 
 For example with the following instructions a numeric-Filter
 is used. Values that are entered in the input-form-element are transformed
@@ -277,10 +286,11 @@ the query-parts of all added filters are merged automatically:
 The underlying global query must be merged with the filter-restrictions.
 For that purpose, the QuerySQL-class (see include/std_classes.php) has been
 introduced. It allows to build (rather complex) SQL-queries by adding
-separate SQL-parts or merging it with other query-parts. Not every possible
-SQL-query can be created with this class, but the standard cases pose
+separate SQL-parts or merging it with other query-parts. Not all possible
+SQL-queries can be created with this class, but the standard cases pose
 no problem (use of AND, some simple ORs, JOINs). More complex queries
-like using UNIONs are not supported yet.
+like using UNIONs are not supported yet, though some simple UNIONs are
+supported.
 
 When using filters, an existing global SQL-query must be written using
 a QuerySQL-object. If your query is too complex to be built using the
@@ -288,7 +298,7 @@ QuerySQL-class, that step can also be done manually, but then you have
 to do the merging with the filters by yourself.
 
 However the $dbfield is not only restricted to simple SQL-fields.
-You may only associate more complex queries with a filter.
+You may also associate more complex queries with a filter.
 This often occurs with static external forms, when a filter needs some
 more tables to be joined into the main-query.
 
@@ -359,8 +369,8 @@ commented out). If set to true, the resulting query is shown on the page.
 
 There is an inherent problem when combining links with form-elements.
 Links can be prepared to contain the values the page was initially shown
-with, but freshly changed values are lost if following the link. So it's
-best to avoid to many links on pages when used together with related
+with, but freshly changed values in a form are lost if following the link.
+So it's best to avoid too many links on pages when used together with related
 form-elements. However, it's not always useful and not everything can
 be done using form-elements alone.
 
@@ -397,7 +407,7 @@ this kind of information ( $table is the Table-object ):
    $table->current_filter_string()  - visible and managing filter-values
    $table->current_rows_string()    - current max-rows
 
-The page "user_stats.php" is a good example for this.
+The page "waiting_room.php" is a good example for this.
 
 Values for the filters are not only consist of the shown form-elements
 but also of some filter-managing variables that need to be included too.
@@ -453,11 +463,11 @@ The 'true' is important in the last statement add_external_parameters().
 # External-Form + Table + additional URL-var
 But if you want to have a page also with an external-form, the registering
 of additional URL-vars and the joining of the external-form with the table
-is different to avoid that some vars are inserted twice within through the
+is different to avoid that some vars are inserted twice through the
 hidden-elements.
 
 For such a complex example using an external form, a table with filters and
-additional URL-vars you may take a look at "user_stats.php".
+additional URL-vars you may take a look at "opponents.php".
 The basic order of instructions in that case is:
 
    # get URL-vars
@@ -529,7 +539,7 @@ in the previous subsection, two SearchFilters are defined:
    # define table-filters
    $ufilter = new SearchFilter();
 
-one with prefix and one without to have different namespaces.
+One with prefix and one without to have different namespaces.
 With that mechanism you can also define more than 32 filters, though only
 32 filters applied on a single table and its corresponding filters.
 
@@ -576,7 +586,7 @@ a new filter, best practice is to follow the following steps.
       configs that can be used to change the filters behaviour:
          see "include/filters.php", class Filter<Type>
 
-   4. Read the FAQ-section (5) in this file. Maybe there's something in,
+   4. Read the FAQ-section (5) in this file. Maybe there's something,
       that can fulfill your needs.
 
    5. If no filter does match your needs, maybe a combination of existing
@@ -591,15 +601,24 @@ be implemented.
 
 To develop a new filter, take the following basic steps:
 
-   1. Think of a type (name) for your filter.
+   1. Think of a type (name) for your filter and about a place where to put it.
 
-   2. Copy one of the existing Filter-classes, e.g. FilterNumeric to your new
-      filter-class 'Filter<type>' and adjust it to your needs.
-      For a multi-element-filter, you may use the FilterScore-class to copy.
       It is preferred to add filters in "include/filters.php", so that isn't
       an absolute requirement. However, the SearchFilter-class must be able
       to find the new class, so during runtime, the file containing your new
       filter should be included once.
+
+      Depending on the implementation of your new filter, you may choose
+      to create a new class in a separate include-file, like the following:
+
+         "include/filterlib_country.php"  - for the Country-Filter
+
+      Only consider to put it in "include/filters.php", if your new filter
+      will be used very often.
+
+   2. Copy one of the existing Filter-classes, e.g. FilterNumeric to your new
+      filter-class 'Filter<type>' and adjust it to your needs.
+      For a multi-element-filter, you may use the FilterScore-class to copy.
 
    3. Change the constructor:
 
@@ -643,7 +662,7 @@ your changes ;)
 #-------- (5) FAQ -------------------------------------------------------------
 
 This section contains some questions regarding the usage of filters for
-developers of DGS. When reffering to "see examples", the example-files
+developers of DGS. When refering to "see examples", the example-files
 "code_examples/filter_example.php" and "code_examples/filter_example.php2"
 are meant. More documentation you will also find in the sources,
 see section (2) Classes and Files.
@@ -844,14 +863,12 @@ write them down somewhere.
   - corresponding SQL: field IN (val1, val2, ...)
   - list-syntax mutually exclusive to range-syntax or wildcard-syntax
 
-* Prio(?): add support for UNION-SQL-syntax in QuerySQL-class to be able to
-  optimize queries (instead of using OR)
-
 * Prio(?): Perform global checks on Filters before building query to be able
   to avoid costly queries. Possible global restrictions could be:
   - minimum set of used filter-values in fields (to be able to optimize search)
 
 * Prio(?): new filter-config for text-based filters:
+  - see also FC_SUBSTRING
   - FC_IMPLICIT_WILDCARD: 0(default) | 1
   - filter on 'abc' -> would implicitly search for 'abc*'
 
@@ -870,7 +887,6 @@ write them down somewhere.
 
   Cool feature to quickly restrict a search to what you want, but may need
   some deep changes:
-  - get rid of <TD> in table-rows or use a parser to add additional link-code
   - could be a table-feature, adding the <td> by Table-class (but then
     need way to specify attributes to <td>)
   - could be configured only for selected filters -> FC_LINK_VALUE-config
