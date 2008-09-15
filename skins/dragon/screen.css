@@ -2307,8 +2307,11 @@ table.ForumTreeOverview tr.TreePostNormal span.PostUser, span.PostDate {
 table.ForumTreeOverview tr.TreePostNormal .MyPost {
    font-weight: bold;
 }
-
+table.ForumTreeOverview tr.TreePostNormal td.MyPost a {
+   color: darkblue;
+}
 table.ForumTreeOverview tr.TreePostNormal a {
+   color: black;
    text-decoration: none;
 }
 table.ForumTreeOverview tr.TreePostNormal a:hover {
