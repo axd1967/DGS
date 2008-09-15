@@ -717,7 +717,7 @@ class DisplayForum
          $sbj = make_html_safe( $subj_part, SUBJECT_HTML, $this->rx_term );
 
          $mypostclass = ( $post->author->id == $player_row['ID'] ) ? ' class=MyPost' : '';
-         echo "\n<tr class=\"TreePostNormal Row{$c}{$mypostclass}\">",
+         echo "\n<tr class=\"TreePostNormal Row{$c}". ($mypostclass != '' ? ' MyPost' : '') ."\">",
             "<td$mypostclass>",
             str_repeat( '&nbsp;', 3*($post->depth - 1) ),
             anchor( '#'.$post->id, $sbj, '', 'class=PostSubject' ),
@@ -1603,28 +1603,25 @@ class ForumRead
       return false; // unread = new
    }
 
-   /*!
-    * \brief Replaces ForumRead-db-entry with time for specified fid/tid/pid-key,
-    * and returns true on success.
-    */
+   /*! \brief Replaces ForumRead-db-entry with time for specified fid/tid/pid-key. */
    function replace_row_forumread( $dbgmsg, $fid, $tid, $pid, $time )
    {
-      // NOTE: a REPLACE is shorter, but not faster as it's a DELETE + INSERT !
-      //TODO use 'INSERT .. ON DUPLICATE UPDATE', but this has some drawbacks too
+      //TODO use 'INSERT .. ON DUPLICATE UPDATE', need 4.1.x and 5.0.38 for replication-bugfix
+      // NOTE:
+      // - REPLACE is shorter, but not faster as it's a DELETE + INSERT !
+      // - affected-rows can be also 0, if old/new-values for update are the same
+      //   => use insert-IGNORE-option
       $argstr = "{$this->uid},$fid,$tid,$pid";
       db_query( "{$dbgmsg}($argstr)",
          "UPDATE ForumRead SET Time=FROM_UNIXTIME($time) "
             . "WHERE User_ID='{$this->uid}' AND Forum_ID='$fid' AND "
             . "Thread_ID='$tid' AND Post_ID='$pid' LIMIT 1" );
-      $result = ( mysql_affected_rows() > 0 );
-      if ( !$result ) // insert if not existing
+      if ( mysql_affected_rows() <= 0 ) // insert if not existing
       {
          db_query( "{$dbgmsg}2($argstr)",
-            "INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,Time) "
+            "INSERT INTO IGNORE ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,Time) "
                . "VALUES ('{$this->uid}','$fid','$tid','$pid',FROM_UNIXTIME($time))" );
-         $result = ( mysql_affected_rows() > 0 );
       }
-      return $result;
    }
 
    /*!
@@ -1655,48 +1652,43 @@ class ForumRead
    }
 
    /*!
-    * \brief Marks post as read with specified time and returns true, if insert was successful.
+    * \brief Marks post as read with specified time.
     * \see specs/forums.txt (use-case U10)
     */
    function mark_post_read( $post_id, $time )
    {
-      $result = $this->replace_row_forumread( "ForumRead.mark_post_read",
+      $this->replace_row_forumread( "ForumRead.mark_post_read",
          $this->fid, $this->tid, $post_id, $time );
       $this->trigger_recalc_thread( $this->tid, $time );
       $this->trigger_recalc_forum( $this->fid, $time );
-      return $result;
    }
 
    /*!
-    * \brief Marks all posts in thread as read with specified time and
-    *        returns true, if insert was successful.
+    * \brief Marks all posts in thread as read with specified time.
     * \see specs/forums.txt (use-case U11)
     */
    function mark_thread_read( $thread_id, $time )
    {
-      $result = $this->replace_row_forumread( "ForumRead.mark_thread_read",
+      $this->replace_row_forumread( "ForumRead.mark_thread_read",
          $this->fid, $thread_id, THPID_READDATE, $time );
       $this->trigger_recalc_thread( $thread_id, $time );
       $this->trigger_recalc_forum( $this->fid, $time );
-      return $result;
    }
 
-   /*! \brief Triggers recalc of thread new-count and returns true, if action was successful. */
+   /*! \brief Triggers recalc of thread new-count. */
    function trigger_recalc_thread( $thread_id, $time )
    {
       db_query( "ForumRead.trigger_recalc_thread({$this->uid},{$this->fid},$thread_id)",
          "UPDATE Posts SET Updated=GREATEST(Updated,FROM_UNIXTIME($time)) "
             . "WHERE ID='$thread_id' AND Parent_ID=0 LIMIT 1" );
-      return ( mysql_affected_rows() > 0 );
    }
 
-   /*! \brief Triggers recalc of forum new-count and returns true, if action was successful. */
+   /*! \brief Triggers recalc of forum new-count. */
    function trigger_recalc_forum( $forum_id, $time )
    {
       db_query( "ForumRead.trigger_recalc_forum({$this->uid},{$this->fid})",
          "UPDATE Forums SET Updated=GREATEST(Updated,FROM_UNIXTIME($time)) "
             . "WHERE ID='$forum_id' LIMIT 1" );
-      return ( mysql_affected_rows() > 0 );
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
