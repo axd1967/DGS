@@ -23,6 +23,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-09-15 juga
+
+   * forum/forum_functions.php (replace_row_forumread):
+   - fix use CSS-class MyPost
+   - fix UPDATE non-affected-rows using insert-IGNORE to avoid duplicate-key-violation,
+     removed unnecessary return-values in mark-read-funcs
+
+   * skins/dragon/screen.css:
+   - posts overview: use darkblue for own-posts, black for overview-posts
+     to achieve fix link-colors sight (URL is changing through page-args)
+
 2008-09-14 juga
 
    * forum/forum_functions.php (toggle_forum_flags, load_threads),
