@@ -2190,12 +2190,6 @@ table#forumIndex td.LastPost a:hover.LastPost {
    text-decoration: underline;
 }
 
-table#forumIndex tr.Caption span.HeaderToggle a,
-table#forumList  tr.Caption span.HeaderToggle a {
-   color: white;
-   font-size: 80%;
-}
-
 /* threads list */
 table#forumList td.Subject {
    width: 40%;
@@ -2219,6 +2213,13 @@ table#forumList td.LastPost a.LastPost {
 }
 table#forumList td.LastPost a:hover.LastPost {
    text-decoration: underline;
+}
+
+table#forumIndex tr.Caption span.HeaderToggle a,
+table#forumList  tr.Caption span.HeaderToggle a,
+table#forumRead  tr.Caption span.HeaderToggle a {
+   color: white;
+   font-size: 80%;
 }
 
 /* posts view */
@@ -2714,6 +2715,14 @@ td.FormClassC {border-style: solid; border-width: 1px;
 /* end form debug */
 
 
+/* forum debug begin * /
+table.Forum td {
+   border: 2px dotted red;
+}
+/* forum debug end */
+
+
+
 /* ************************* */
 /* alternate server particularity */
 /* ************************* */
@@ -2727,12 +2736,4 @@ body#dDGS table#pageHead {
 body#dDGS table#pageMenu {
    border-color: #C9410C;
 }
-
-
-/* ------------------------- */
-/* for debugging
-table.Forum td {
-   border: 2px dotted red;
-}
-*/
 
