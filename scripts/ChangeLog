@@ -23,6 +23,46 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-09-28 juga
+
+   * daily_cron.php:
+   - replace forumreads-cleanup: Forumreads -> ForumRead-table
+
+   * forum/forum_functions.php (draw_post, load_threads, load_forum_list; ForumPost;
+       ForumRead.replace_row_forumread, recalc_forum_reads, recalc_thread_reads),
+     forum/post.php (recalc_forum_counts, cleanup_forum_read),
+     forum/index.php, forum/list.php, forum/read.php:
+   - calculate and show number of NEW unhidden (approved) posts in
+     - forum-list (NEW feature), thread-list and post-list
+     - NEW-update is trigger if Forum/Thread.Updated date is newer than last
+       recalculation of corresponding ForumRead-entry
+       - ForumPost: added field for Posts.Updated for NEW-handling
+       - adjust ForumRead-methods to handle count for NEW entries
+       - added methods to recalculate forum/thread-list NEW-reads
+     - only approved posts are counted as NEW entries, also in moderator-mode
+
+   - post-list: use tighter layout of navigation-images (less spacing)
+   - added some safety-fixes on retrieving db-data
+   - added methods to recalculate forum-counts (Threads/PostsInForum)
+   - moved ForumRead-cleanup into daily_cron.php
+   - used workaround to compensate for INSERT-IGNORE (mysql4.1-feature)
+
+   * forum/read.php:
+   - add toggle to switch post-tree-overview on/off, saved in Players.ForumFlags
+
+   * include/config.php, include/quick_common.php:
+   - defined number of weeks ending NEW-scope of older forum-entries:
+     FORUM_WEEKS_NEW_END replacing DAYS/SECS_NEW_END
+     - increased min read-date for forum: 4 -> 12 weeks
+     - moved initial config for forum-old-entries from quick_common.php
+       to config.php as FORUM_WEEKS_NEW_END
+
+   * skins/dragon/screen.css:
+   - added white-header font for all forum-views
+
+   * specs/forums.txt:
+   - fix some queries to recalculate forum/thread-NEW count
+
 2008-09-15 juga
 
    * forum/forum_functions.php (replace_row_forumread):
