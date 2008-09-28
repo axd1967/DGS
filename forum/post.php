@@ -121,7 +121,7 @@ function post_message($player_row, $moderated_forum, &$thread)
             or error('unknown_parent_post', 'forum_post.reply.max');
          $answer_nr = $row['answer_nr'];
 
-         $lastchanged_string = ''; //TODO: why not set as for new-thread ?
+         $lastchanged_string = ''; //TODO: why not set as for new-thread in DB ?
 
          if( $answer_nr <= 0 ) $answer_nr=0;
       }
@@ -208,7 +208,7 @@ function post_message($player_row, $moderated_forum, &$thread)
                . 'PostsInThread=PostsInThread+1, '
                . "LastPost=GREATEST(LastPost,$New_ID), "
                . "Lastchanged=IF(LastPost>$New_ID,Lastchanged,FROM_UNIXTIME($NOW)), "
-               . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)), "
+               . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
                . "WHERE ID='$Thread_ID' LIMIT 1" );
          }
 
@@ -219,7 +219,7 @@ function post_message($player_row, $moderated_forum, &$thread)
             . ( ($is_newthread)
                ? 'ThreadsInForum=ThreadsInForum+1, '
                : "LastPost=GREATEST(LastPost,$New_ID), " )
-            . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)), "
+            . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
             . "WHERE ID='$forum' LIMIT 1" );
 
          return T_('Message sent!');
