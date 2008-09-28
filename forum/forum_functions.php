@@ -114,6 +114,7 @@ function display_posts_pending_approval()
 define('NEWMODE_BOTTOM',   0x1);
 define('NEWMODE_OVERVIEW', 0x2);
 define('NEWMODE_NEWCOUNT', 0x4);
+define('NEWMODE_NO_LINK',  0x8);
 
  /*!
   * \class DisplayForum
@@ -170,7 +171,7 @@ class DisplayForum
 
       $this->max_rows = MAXROWS_PER_PAGE_DEFAULT;
       $this->offset = 0;
-      $this->fmt_new = '<span class="%s"><a name="%s%d" href="#new%d">%s</a></span>';
+      $this->fmt_new = '<span class="%s"><a name="%s%d"%s>%s</a></span>';
       $this->navi_img = null;
    }
 
@@ -359,9 +360,10 @@ class DisplayForum
       $anchor_prefix = 'new';
       if ( $mode & NEWMODE_BOTTOM )
       {
+         $link = ($mode & NEWMODE_NO_LINK) ? '' : ' href="#new1"';
          if( $this->new_count > 0 )
             $new = sprintf( $this->fmt_new, 'NewFlag', $anchor_prefix,
-               $this->new_count + 1, 1, T_('first new') );
+               $this->new_count + 1, $link, T_('first new') );
       }
       else if ( $cnt_new > 0 )
       {
@@ -378,9 +380,12 @@ class DisplayForum
          else
             $addnew = 1;
 
+         $link = ($mode & NEWMODE_NO_LINK)
+            ? '' : sprintf(' href="#new%d"', $this->new_count + $addnew );
+
          $this->new_count++;
-         $new = sprintf( $this->fmt_new, $newclass, $anchor_prefix,
-            $this->new_count, $this->new_count + $addnew,
+         $new = sprintf( $this->fmt_new,
+            $newclass, $anchor_prefix, $this->new_count, $link,
             T_('new') . ( ($mode & NEWMODE_NEWCOUNT) ? " ($cnt_new)" : '' ) );
       }
       return $new;

@@ -104,7 +104,8 @@ require_once( 'include/form_functions.php' );
          $c=($c % LIST_ROWS_MODULO)+1;
          $lpost = $thread->last_post;
 
-         $newstr = $disp_forum->get_new_string( NEWMODE_NEWCOUNT, $thread->count_new );
+         $newstr = $disp_forum->get_new_string( NEWMODE_NEWCOUNT | NEWMODE_NO_LINK,
+            $thread->count_new );
          $subject = make_html_safe( $thread->subject, SUBJECT_HTML);
          $author = $thread->author->user_reference();
 
