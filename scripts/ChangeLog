@@ -25,6 +25,12 @@ Changelog
 
 2008-09-28 juga
 
+   * forum/forum_functions.php (get_new_string), forum/list.php:
+   - thread-list: remove link from NEW-text
+
+   * forum/post.php:
+   - bugfix (SQL)
+
    * forum/forum_functions.php (set_approved, set_pending_approval,
        is_approved, is_pending_approval),
      forum/post.php (post_message, approve_post, reject_post),
