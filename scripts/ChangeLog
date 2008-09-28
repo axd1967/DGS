@@ -25,6 +25,21 @@ Changelog
 
 2008-09-28 juga
 
+   * forum/forum_functions.php (set_approved, set_pending_approval,
+       is_approved, is_pending_approval),
+     forum/post.php (post_message, approve_post, reject_post),
+     forum/read.php, forum/search.php, scripts/data_export.php:
+   - replaced Posts.PendingApproval with new 'P'-enum-value in Posts.Approved
+-----------
+ALTER TABLE `Posts`
+   CHANGE COLUMN Approved Approved enum('Y','N','P') NOT NULL DEFAULT 'Y';
+UPDATE Posts SET Approved='P' WHERE PendingApproval='Y';
+
+-- after update above, the "old" column can be dropped
+ALTER TABLE `Posts`
+   DROP COLUMN PendingApproval;
+-----------
+
    * daily_cron.php:
    - replace forumreads-cleanup: Forumreads -> ForumRead-table
 
