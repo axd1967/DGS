@@ -457,7 +457,7 @@ recalc needed, ...
    SELECT IF(ISNULL(FR.Thread_ID),P.ID,0) AS X_Thread_ID
    FROM Posts AS P
       -- calculated thread
-      LEFT JOIN ForumRead AS FR ON FR.User_ID=$uid AND FR.Forum_ID=$fid
+      LEFT JOIN ForumRead AS FR ON FR.User_ID=$uid AND FR.Forum_ID=P.Forum_ID
          AND FR.Thread_ID=P.ID AND FR.Post_ID=0 AND FR.Time >= P.Updated
    WHERE P.Forum_ID=$fid AND P.Parent_ID=0
       AND P.Lastchanged > FROM_UNIXTIME($min_readdate)
@@ -475,6 +475,7 @@ ForumRead($uid,$fid,$tid,Post_ID=0,Time=NOW):
          LEFT JOIN ForumRead AS FRP ON FRP.User_ID=$uid AND FRP.Forum_ID=$fid
             AND FRP.Thread_ID=$tid AND FRP.Post_ID=P.ID AND FRP.Time >= P.Time
       WHERE P.Forum_ID=$fid AND P.Thread_ID=$tid
+         AND P.Approved='Y'
          AND P.Time > FROM_UNIXTIME($read_mindate) AND P.User_ID<>$uid
 
 
@@ -502,7 +503,8 @@ recalc needed, ...
 ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
    NewCount := X_NewCount :
       SELECT SUM(FR.NewCount) AS X_NewCount FROM ForumRead AS FR
-      WHERE FR.User_ID=$uid AND FR.Forum_ID=$fid AND FRT.Post_ID=0
+      WHERE FR.User_ID=$uid AND FR.Forum_ID=$fid
+         AND FR.Thread_ID>0 AND FR.Post_ID=0 AND FR.NewCount>0
 
 
 #-------- Update-"Trigger" for use-cases
