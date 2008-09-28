@@ -569,10 +569,15 @@ class DisplayForum
          {
             $hdrrows = 2;
             if( $postClass == 'Hidden' )
+            {
                $hdrcols = $cols-1; //because of the rowspan=$hdrrows in the second column
+               $newstr = '';
+            }
             else
+            {
                $hdrcols = $cols;
-            $newstr = $this->get_new_string( 0, $post->count_new, $post->created );
+               $newstr = $this->get_new_string( 0, $post->count_new, $post->created );
+            }
 
             echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
 
@@ -615,31 +620,30 @@ class DisplayForum
          $hidden = $postClass == 'Hidden';
          echo "\n<tr class=PostButtons><td colspan=$cols>";
 
-         // very strange: insert_width(12) does not work, resulting in line-breaks :(
+         // NOTE: very strange: insert_width(12) does not work, resulting in line-breaks :(
          $imgarr = $this->init_navi_images();
          $prev_parent = ( is_null($post->prev_parent_post) )
-            ? '&nbsp;&nbsp;'
-            : anchor( '#'.$post->prev_parent_post->id, $imgarr['prev_parent'] );
+            ? ''
+            : anchor( '#'.$post->prev_parent_post->id, $imgarr['prev_parent'] ) . '&nbsp;';
          $next_parent = ( is_null($post->next_parent_post) )
-            ? '&nbsp;&nbsp;'
-            : anchor( '#'.$post->next_parent_post->id, $imgarr['next_parent'] );
+            ? ''
+            : anchor( '#'.$post->next_parent_post->id, $imgarr['next_parent'] ) . '&nbsp;';
          $prev_answer = ( is_null($post->prev_post) )
-            ? '&nbsp;&nbsp;'
-            : anchor( '#'.$post->prev_post->id, $imgarr['prev_answer'] );
+            ? ''
+            : anchor( '#'.$post->prev_post->id, $imgarr['prev_answer'] ) . '&nbsp;';
          $next_answer = ( is_null($post->next_post) )
-            ? '&nbsp;&nbsp;'
-            : anchor( '#'.$post->next_post->id, $imgarr['next_answer'] );
+            ? ''
+            : anchor( '#'.$post->next_post->id, $imgarr['next_answer'] ) . '&nbsp;';
          $first_answer = ( is_null($post->first_child_post) )
-            ? '&nbsp;&nbsp;'
-            : anchor( '#'.$post->first_child_post->id, $imgarr['first_answer'] );
+            ? ''
+            : anchor( '#'.$post->first_child_post->id, $imgarr['first_answer'] ) . '&nbsp;';
 
          // BEGIN Navi (top/prev-parent/prev-answer)
-         echo anchor( '#ftop', $imgarr['top'] )
-            . '&nbsp;'
-            . $prev_parent
-            . '&nbsp;'
-            . $prev_answer
-            . '&nbsp;&nbsp;';
+         echo anchor( '#ftop', $imgarr['top'] ),
+            '&nbsp;',
+            $prev_parent,
+            $prev_answer,
+            '&nbsp;';
 
          if( $postClass == 'Normal' && !$this->is_moderator ) // reply link
          {
@@ -666,14 +670,12 @@ class DisplayForum
          }
 
          // END Navi (next-answer/next-parent/bottom)
-         echo $next_answer
-            . '&nbsp;'
-            . $next_parent
-            . '&nbsp;'
-            . anchor( '#fbottom', $imgarr['bottom'] )
-            . '&nbsp;&nbsp;'
-            . $first_answer
-            . '&nbsp;&nbsp;';
+         echo $next_answer,
+            $next_parent,
+            anchor( '#fbottom', $imgarr['bottom'] ),
+            '&nbsp;',
+            $first_answer,
+            '&nbsp;';
 
          if( $this->is_moderator ) // hide/show link
          {
@@ -715,13 +717,15 @@ class DisplayForum
          $subj_part = substr( $post->subject, 0, 40 )
             . ( (strlen($post->subject) > 40) ? ' ...' : '' );
          $sbj = make_html_safe( $subj_part, SUBJECT_HTML, $this->rx_term );
+         $newstr = ($post->approved)
+            ? $this->get_new_string( NEWMODE_OVERVIEW, $post->count_new, $post->created ) : '';
 
          $mypostclass = ( $post->author->id == $player_row['ID'] ) ? ' class=MyPost' : '';
          echo "\n<tr class=\"TreePostNormal Row{$c}". ($mypostclass != '' ? ' MyPost' : '') ."\">",
             "<td$mypostclass>",
             str_repeat( '&nbsp;', 3*($post->depth - 1) ),
             anchor( '#'.$post->id, $sbj, '', 'class=PostSubject' ),
-            $this->get_new_string( NEWMODE_OVERVIEW, $post->count_new, $post->created ),
+            $newstr,
             //TODO add/handle moderator-state
             "</td><td>",
             sprintf( '<span class=PostUser>%s</span>', $post->author->user_reference() ),
@@ -787,7 +791,7 @@ class Forum
 
    // non-db vars
 
-   /*! \brief Count of new entries for this forum. */
+   /*! \brief Count of new entries for this forum; -1=update needed. */
    var $count_new;
 
 
@@ -830,7 +834,7 @@ class Forum
    }
 
    /*!
-    * \brief Loads threads for current forum into this object.
+    * \brief Loads threads for current forum into this object (threads-var).
     * \return count of loaded rows
     */
    function load_threads( $user_id, $is_moderator, $show_rows, $offset=0 )
@@ -844,19 +848,22 @@ class Forum
       if ( !is_numeric($forum_id) )
          error('unknown_forum', "Forum.load_threads(forum_id={$forum_id})");
 
+      $mindate = ForumRead::get_min_date();
       $qsql = ForumPost::build_query_sql();
       $qsql->add_part( SQLP_FIELDS,
          'LPAuthor.ID AS LPAuthor_ID',
             'LPAuthor.Name AS LPAuthor_Name',
             'LPAuthor.Handle AS LPAuthor_Handle',
-         'FR.NewCount AS FR_NewCount' );
+         'FR.NewCount AS FR_NewCount',
+         "IF(ISNULL(FR.User_ID),(P.Updated > FROM_UNIXTIME($mindate)),"
+            . "(FR.NewCount<0 OR P.Updated > FR.Time)) AS FR_NeedUpdate" );
       $qsql->add_part( SQLP_FROM,
          'LEFT JOIN Posts AS LP ON LP.ID=P.LastPost',  // LastPost
          'LEFT JOIN Players AS LPAuthor ON LPAuthor.ID=LP.User_ID', // LastPost-Author
-         "LEFT JOIN ForumRead AS FR ON FR.User_ID='$user_id' AND FR.Forum_ID=$forum_id "
-            . 'AND FR.Thread_ID=P.Thread_ID AND FR.Post_ID=0' );
+         "LEFT JOIN ForumRead AS FR ON FR.User_ID='$user_id' AND FR.Forum_ID=P.Forum_ID "
+            . 'AND FR.Thread_ID=P.Thread_ID AND FR.Post_ID='.THPID_NEWCOUNT );
       $qsql->add_part( SQLP_WHERE,
-         "P.Forum_ID='$forum_id'",
+         "P.Forum_ID=$forum_id",
          'P.Parent_ID=0' );
       if ( !$is_moderator )
          $qsql->add_part( SQLP_WHERE, 'P.PostsInThread>0' );
@@ -872,11 +879,10 @@ class Forum
       while( $row = mysql_fetch_array( $result ) )
       {
          $thread = ForumPost::new_from_row( $row ); // Post
-         $thread->forum_id = $this->id;
          $thread->last_post =
             new ForumPost( $thread->last_post_id, $this->id, $thread->thread_id,
                new ForumUser( $row['LPAuthor_ID'], $row['LPAuthor_Name'], $row['LPAuthor_Handle'] ) );
-         $thread->count_new = @$row['FR_NewCount'] + 0;
+         $thread->count_new = ($row['FR_NeedUpdate']) ? -1 : @$row['FR_NewCount'] + 0;
 
          $thlist[] = $thread;
       }
@@ -957,6 +963,7 @@ class Forum
       if ( !is_numeric($user_id) )
          error('invalid_user', "Forum.build_query_forum_list($user_id)");
 
+      $mindate = ForumRead::get_min_date();
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
          'Forums.*',
@@ -965,13 +972,15 @@ class Forum
          'LP.User_ID AS LP_User_ID',
          'P.Name AS LP_Name',
          'P.Handle AS LP_Handle',
-         'FR.NewCount AS FR_NewCount' );
+         'FR.NewCount AS FR_NewCount',
+         "IF(ISNULL(FR.User_ID),(Forums.Updated > FROM_UNIXTIME($mindate)),"
+            . "(FR.NewCount<0 OR Forums.Updated > FR.Time)) AS FR_NeedUpdate" );
       $qsql->add_part( SQLP_FROM,
          'Forums',
          'LEFT JOIN Posts AS LP ON Forums.LastPost=LP.ID',
          'LEFT JOIN Players AS P ON P.ID=LP.User_ID',
          "LEFT JOIN ForumRead AS FR ON FR.User_ID='$user_id' "
-            . 'AND FR.Forum_ID=Forums.ID AND FR.Thread_ID=0' );
+            . 'AND FR.Forum_ID=Forums.ID AND FR.Thread_ID=0 AND FR.Post_ID='.THPID_NEWCOUNT );
       $qsql->add_part( SQLP_ORDER, 'SortOrder' );
 
       $query = $qsql->get_select();
@@ -986,7 +995,7 @@ class Forum
                new ForumUser( $row['LP_User_ID'], $row['LP_Name'], $row['LP_Handle'] ) );
          $post->created = $row['LP_Time'];
          $forum->last_post = $post;
-         $forum->count_new = @$row['FR_NewCount'] + 0;
+         $forum->count_new = ($row['FR_NeedUpdate']) ? -1 : @$row['FR_NewCount'] + 0;
 
          $flist[] = $forum;
       }
@@ -1022,7 +1031,7 @@ class ForumThread
 
    /*! \brief ForumRead-object to be used to mark posts as read. */
    var $forum_read;
-   /*! \brief Number of unread posts. */
+   /*! \brief Number of unread posts; -1=forum-read needs update. */
    var $count_new;
 
    function ForumThread( $forum_read=null )
@@ -1250,6 +1259,8 @@ class ForumPost
    var $last_changed;
    /*! \brief Posts.Lastedited */
    var $last_edited;
+   /*! \brief Posts.Updated (change-date for thread-forum-read) */
+   var $updated;
 
    /*! \brief Posts.crc32 */
    var $crc32;
@@ -1286,7 +1297,7 @@ class ForumPost
    function ForumPost( $id=0, $forum_id=0, $thread_id=0, $author=null, $last_post_id=0,
          $count_posts=0, $count_hits=0, $subject='', $text='', $parent_id=0, $answer_num=0,
          $depth=0, $posindex='', $approved='Y', $pending_approval='N',
-         $created=0, $last_changed=0, $last_edited=0, $crc32=0, $old_id=0 )
+         $created=0, $last_changed=0, $last_edited=0, $updated=0, $crc32=0, $old_id=0 )
    {
       $this->id = (int) $id;
       $this->forum_id = (int) $forum_id;
@@ -1306,6 +1317,7 @@ class ForumPost
       $this->created = (int) $created;
       $this->last_changed = (int) $last_changed;
       $this->last_edited = (int) $last_edited;
+      $this->updated = (int) $updated;
       $this->crc32 = (int) $crc32;
       $this->old_id = (int) $old_id;
       // non-db
@@ -1390,6 +1402,7 @@ class ForumPost
          . "created=[{$this->created}], "
          . "last_changed=[{$this->last_changed}], "
          . "last_edited=[{$this->last_edited}], "
+         . "updated=[{$this->updated}], "
          . "crc32=[{$this->crc32}], "
          . "old_id=[{$this->old_id}], "
          . "last_updated=[{$this->last_updated}], "
@@ -1403,7 +1416,7 @@ class ForumPost
    /*! \brief Builds basic QuerySQL to load post(s). */
    function build_query_sql()
    {
-      // Posts: ID,Forum_ID,Time,Lastchanged,Lastedited,Subject,Text,User_ID,Parent_ID,Thread_ID,
+      // Posts: ID,Forum_ID,Time,Lastchanged,Lastedited,Updated,Subject,Text,User_ID,Parent_ID,Thread_ID,
       //        AnswerNr,Depth,crc32,PosIndex,old_ID,Approved,PostsInThread,LastPost,PendingApproval
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
@@ -1411,6 +1424,7 @@ class ForumPost
          'UNIX_TIMESTAMP(P.Time) AS X_Time',
          'UNIX_TIMESTAMP(P.Lastchanged) AS X_Lastchanged',
          'UNIX_TIMESTAMP(P.Lastedited) AS X_Lastedited',
+         'UNIX_TIMESTAMP(P.Updated) AS X_Updated',
          'PAuthor.Name AS Author_Name', 'PAuthor.Handle AS Author_Handle' );
       $qsql->add_part( SQLP_FROM,
          'Posts AS P',
@@ -1441,6 +1455,7 @@ class ForumPost
             @$row['X_Time'],
             @$row['X_Lastchanged'],
             @$row['X_Lastedited'],
+            @$row['X_Updated'],
             @$row['crc32'],
             @$row['old_ID']
          );
@@ -1518,7 +1533,7 @@ class ForumRead
    var $fid;
    var $tid;
    var $reads; // key=fid,tid,pid => [ unix-time, count ]
-   var $min_date; // older posts than min_date are considered as read
+   var $min_date; // posts older (or equal) than min_date are considered as read
 
    /*! \brief Constructs a ForumUser with specified args. */
    function ForumRead( $user_id, $forum_id=0, $thread_id=0 )
@@ -1603,8 +1618,8 @@ class ForumRead
       return false; // unread = new
    }
 
-   /*! \brief Replaces ForumRead-db-entry with time for specified fid/tid/pid-key. */
-   function replace_row_forumread( $dbgmsg, $fid, $tid, $pid, $time )
+   /*! \brief Replaces ForumRead-db-entry with time and newcount for specified fid/tid/pid-key. */
+   function replace_row_forumread( $dbgmsg, $fid, $tid, $pid, $time, $newcount )
    {
       //TODO use 'INSERT .. ON DUPLICATE UPDATE', need 4.1.x and 5.0.38 for replication-bugfix
       // NOTE:
@@ -1613,14 +1628,19 @@ class ForumRead
       //   => use insert-IGNORE-option
       $argstr = "{$this->uid},$fid,$tid,$pid";
       db_query( "{$dbgmsg}($argstr)",
-         "UPDATE ForumRead SET Time=FROM_UNIXTIME($time) "
+         "UPDATE ForumRead SET NewCount=$newcount, Time=FROM_UNIXTIME($time) "
             . "WHERE User_ID='{$this->uid}' AND Forum_ID='$fid' AND "
             . "Thread_ID='$tid' AND Post_ID='$pid' LIMIT 1" );
       if ( mysql_affected_rows() <= 0 ) // insert if not existing
       {
-         db_query( "{$dbgmsg}2($argstr)",
-            "INSERT INTO IGNORE ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,Time) "
-               . "VALUES ('{$this->uid}','$fid','$tid','$pid',FROM_UNIXTIME($time))" );
+         //TODO: get rid of the 'if' with mysql >= 4.1 (simply using IGNORE option to INSERT)
+         if( mysql_single_fetch( "{$dbgmsg}3($argstr)", "SELECT 1 FROM ForumRead WHERE User_ID='{$this->uid}' AND Forum_ID='$fid' AND Thread_ID='$tid' AND Post_ID='$pid' LIMIT 1" ) === false )
+         {
+            $opt_insert = (version_compare(MYSQL_VERSION, '4.1', '>=')) ? 'IGNORE' : ''; //TODO use direct
+            db_query( "{$dbgmsg}2($argstr)",
+               "INSERT INTO $opt_insert ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time) "
+                  . "VALUES ('{$this->uid}','$fid','$tid','$pid','$newcount',FROM_UNIXTIME($time))" );
+         }
       }
    }
 
@@ -1658,7 +1678,7 @@ class ForumRead
    function mark_post_read( $post_id, $time )
    {
       $this->replace_row_forumread( "ForumRead.mark_post_read",
-         $this->fid, $this->tid, $post_id, $time );
+         $this->fid, $this->tid, $post_id, $time, -1 );
       $this->trigger_recalc_thread( $this->tid, $time );
       $this->trigger_recalc_forum( $this->fid, $time );
    }
@@ -1670,7 +1690,7 @@ class ForumRead
    function mark_thread_read( $thread_id, $time )
    {
       $this->replace_row_forumread( "ForumRead.mark_thread_read",
-         $this->fid, $thread_id, THPID_READDATE, $time );
+         $this->fid, $thread_id, THPID_READDATE, $time, -1 );
       $this->trigger_recalc_thread( $thread_id, $time );
       $this->trigger_recalc_forum( $this->fid, $time );
    }
@@ -1691,6 +1711,114 @@ class ForumRead
             . "WHERE ID='$forum_id' LIMIT 1" );
    }
 
+
+   /*! \brief Recalculates new-count of forums. */
+   function recalc_forum_reads( &$forums )
+   {
+      // recalc forum reads
+      global $NOW;
+      $queryfmt = 'SELECT SUM(NewCount) AS X_NewCount '
+         . 'FROM ForumRead '
+         . "WHERE User_ID={$this->uid} AND Forum_ID=%s " // fill in $fid
+            . 'AND Thread_ID>0 AND Post_ID=0 AND NewCount>0';
+
+      // NOTE: foreach does NOT work with array-reference (need PHP5)
+      for( $i=0; $i < count($forums); $i++)
+      {
+         // Calculate fields for single thread if update needed
+         $forum =& $forums[$i];
+         if( $forum->count_new >= 0 )
+            continue;
+         $fid = $forum->id;
+
+         // recalc forum threads
+         $empty = array();
+         $this->recalc_thread_reads( $empty, $fid );
+
+         $dbgmsgfmt = "Forum.recalc_forum_reads.recalc_forum%s({$this->uid},$fid)";
+         $row =
+            mysql_single_fetch( sprintf($dbgmsgfmt,'1'), sprintf( $queryfmt, $fid ) )
+               or error('mysql_query_failed', sprintf($dbgmsgfmt,'2') );
+
+         // update
+         $forum->count_new = @$row['X_NewCount'] + 0;
+         $this->replace_row_forumread( 'Forum.recalc_forum_reads.update_forumread',
+            $fid, 0, THPID_NEWCOUNT, $NOW, $forum->count_new );
+      }
+   }
+
+   /*! \brief Recalculates new-count of threads. */
+   function recalc_thread_reads( &$threads, $forum_id=0 )
+   {
+      // get threads, that needs to be updated (all or for specific forum)
+      if( !is_array($threads) || count($threads) == 0 )
+      {
+         $qsql = new QuerySQL();
+         $qsql->add_part( SQLP_FIELDS,
+            'P.ID', 'P.Forum_ID',
+            "IF(ISNULL(FR.User_ID),(P.Updated > FROM_UNIXTIME({$this->min_date})),"
+               . "(FR.NewCount<0 OR P.Updated > FR.Time)) AS FR_NeedUpdate" );
+         $qsql->add_part( SQLP_FROM,
+            'Posts AS P',
+            "LEFT JOIN ForumRead AS FR ON FR.User_ID='{$this->uid}' AND FR.Forum_ID=P.Forum_ID "
+               . 'AND FR.Thread_ID=P.ID AND FR.Post_ID='.THPID_NEWCOUNT );
+         $qsql->add_part( SQLP_WHERE,
+            'P.Parent_ID=0',
+            'P.PostsInThread>0',
+            "P.Lastchanged > FROM_UNIXTIME({$this->min_date})" );
+         if( $forum_id > 0 )
+            $qsql->add_part( SQLP_WHERE, 'P.Forum_ID='.$forum_id );
+         $qsql->add_part( SQLP_HAVING,
+            'FR_NeedUpdate>0' );
+
+         $query = $qsql->get_select();
+         $result = db_query( "ForumRead.recalc_thread_reads.read_threads({$this->uid},$forum_id)", $query );
+
+         $threads = array();
+         while( $row = mysql_fetch_array( $result ) )
+         {
+            $threads[] = new ForumPost( $row['ID'], $row['Forum_ID'], $row['ID'] );
+         }
+         mysql_free_result($result);
+      }
+
+      // recalc thread reads
+      global $NOW;
+      $queryfmt = 'SELECT SUM(ISNULL(FRT.Thread_ID) & ISNULL(FRP.Post_ID)) AS X_NewCount '
+         . 'FROM Posts AS P '
+         . 'LEFT JOIN ForumRead AS FRT ON '  // thread read-date
+            . "FRT.User_ID={$this->uid} AND FRT.Forum_ID=P.Forum_ID "
+            . "AND FRT.Thread_ID=P.Thread_ID AND FRT.Post_ID=-1 AND FRT.Time >= P.Time "
+         . 'LEFT JOIN ForumRead AS FRP ON '  // post read
+            . "FRP.User_ID={$this->uid} AND FRP.Forum_ID=P.Forum_ID "
+            . "AND FRP.Thread_ID=P.Thread_ID AND FRP.Post_ID=P.ID AND FRP.Time >= P.Time "
+         . "WHERE P.Forum_ID=%s AND P.Thread_ID=%s " // fill in $fid, $tid
+            . "AND P.Approved='Y' "
+            . "AND P.Time > FROM_UNIXTIME({$this->min_date}) "
+            . "AND P.User_ID<>{$this->uid}";
+
+      // NOTE: foreach does NOT work with array-reference (need PHP5)
+      for( $i=0; $i < count($threads); $i++)
+      {
+         // Calculate fields for single thread if update needed
+         $thread =& $threads[$i];
+         if( $thread->count_new >= 0 )
+            continue;
+         $fid = $thread->forum_id;
+         $tid = $thread->thread_id;
+
+         $dbgmsgfmt = "Forum.recalc_thread_reads.recalc_thread%s({$this->uid},$fid,$tid)";
+         $row =
+            mysql_single_fetch( sprintf($dbgmsgfmt,'1'), sprintf( $queryfmt, $fid, $tid ) )
+               or error('mysql_query_failed', sprintf($dbgmsgfmt,'2') );
+
+         // update
+         $thread->count_new = @$row['X_NewCount'] + 0;
+         $this->replace_row_forumread( 'Forum.recalc_thread_reads.update_forumread',
+            $fid, $tid, THPID_NEWCOUNT, $NOW, $thread->count_new );
+      }
+   }
+
    /*! \brief Returns string-representation of this object (for debugging purposes). */
    function to_string()
    {
@@ -1707,7 +1835,7 @@ class ForumRead
    function get_min_date()
    {
       global $NOW;
-      return $NOW - SECS_NEW_END;
+      return $NOW - FORUM_SECS_NEW_END;
    }
 
 } // end of 'ForumRead'
