@@ -383,8 +383,8 @@ function recalc_thread_lastpost( $tid )
          . "AND PosIndex>'' " // ''=inactivated (edited)
          . "ORDER BY Time DESC LIMIT 1" )
       or error('unknown_post', "recalc_thread_lastpost.find_lastpost($tid)");
-   $lastpost = $row['ID'];
-   $lastchanged = $row['X_Time'];
+   $lastpost = @$row['ID'] + 0;
+   $lastchanged = @$row['X_Time'] + 0;
 
    db_query( "recalc_thread_lastpost.update_lastpost($tid)",
       'UPDATE Posts SET '
@@ -401,21 +401,22 @@ function recalc_forum_lastpost( $fid )
          . "AND PosIndex>'' " // ''=inactivated (edited)
          . "ORDER BY Time DESC LIMIT 1" )
       or error('unknown_post', "recalc_forum_lastpost.find_lastpost($tid)");
-   $lastpost = $row['ID'];
+   $lastpost = @$row['ID'] + 0;
 
    db_query( "recalc_forum_lastpost.update_lastpost($fid)",
       "UPDATE Forums SET LastPost=$lastpost WHERE ID='$tid' LIMIT 1" );
 }
 
-// recalculate Thread.PostsInThread for all threads in specific forum
-function recalc_thread_counts( $fid )
+// recalculate Thread.PostsInThread and Forums.ThreadsInForum/PostsInForum
+// for all threads in specific forum
+function recalc_forum_counts( $fid, $update_thread_counts=true )
 {
    $result =
-      db_query( "recalc_thread_counts.find_counts($fid)",
+      db_query( "recalc_forum_counts.find_counts($fid)",
          "SELECT Thread_ID, COUNT(*) AS X_CountPosts FROM Posts "
          . "WHERE Thread_ID>0 AND Approved='Y' "
          . "AND PosIndex>'' " // ''=inactivated (edited)
-         . ( ($fid > 0) ? "Forum_ID='$fid' " : '' )
+         . "AND Forum_ID='$fid' "
          . "GROUP BY Thread_ID" );
 
    $cnt_threads = 0;
@@ -428,28 +429,15 @@ function recalc_thread_counts( $fid )
       $sum_posts += $cnt;
 
       // update thread-count
-      db_query( "recalc_thread_counts.update_thread_counts($tid)",
-         "UPDATE Posts SET PostsInThread=$cnt WHERE ID='$tid' LIMIT 1" );
+      if ( $update_thread_counts )
+         db_query( "recalc_forum_counts.update_thread_counts($tid)",
+            "UPDATE Posts SET PostsInThread=$cnt WHERE ID='$tid' LIMIT 1" );
    }
 
    // update forum-counts
-   db_query( "recalc_thread_counts.update_forum_counts($fid)",
+   db_query( "recalc_forum_counts.update_forum_counts($fid)",
       "UPDATE Forums SET ThreadsInForum=$cnt_threads, PostsInForum=$sum_posts "
       . "WHERE ID='$fid' LIMIT 1" );
-}
-
-// use-case A11 (cleanup)
-function cleanup_forum_read()
-{
-   $min_date = ForumRead::get_min_date();
-
-   db_query( 'cleanup_forum_read.delete_post_reads',
-      'DELETE FROM ForumRead WHERE Thread_ID>0 AND Post_ID<>0 AND '
-      . "Time < FROM_UNIXTIME($min_date)" );
-
-   db_query( 'cleanup_forum_read.delete_old_thread_newcnt',
-      'DELETE FROM ForumRead WHERE Thread_ID>0 AND Post_ID=0 AND NewCount=0 AND '
-      . "Time < FROM_UNIXTIME($min_date)" );
 }
 
 ?>
