@@ -44,9 +44,11 @@ $ThePage = new Page('ForumsList');
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
    $is_moderator = ($switch_moderator == 1);
 
-   //TODO: recalc NEWs
+   $forums = Forum::load_forum_list( $my_id );
 
-   $forum_list = Forum::load_forum_list( $my_id );
+   // recalc NEWs
+   $FR = new ForumRead( $my_id );
+   $FR->recalc_forum_reads( $forums );
    // end of DB-stuff
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator );
@@ -75,7 +77,7 @@ $ThePage = new Page('ForumsList');
    $disp_forum->print_moderation_note('98%');
    $disp_forum->forum_start_table('Index');
 
-   foreach( $forum_list as $forum )
+   foreach( $forums as $forum )
    {
       $lpost = $forum->last_post;
       $lpost_date   = $lpost->build_link_postdate( $lpost->created, 'class=LastPost' );

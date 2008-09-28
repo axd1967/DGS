@@ -55,10 +55,12 @@ require_once( 'include/form_functions.php' );
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
 
-   //TODO: recalc NEWs
-
    $forum = Forum::load_forum( $forum_id );
    $show_rows = $forum->load_threads( $my_id, $is_moderator, $maxrows, $offset );
+
+   // recalc NEWs
+   $FR = new ForumRead( $my_id );
+   $FR->recalc_thread_reads( $forum->threads );
    // end of DB-stuff
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id );
