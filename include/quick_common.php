@@ -77,7 +77,7 @@ define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')");
 //used in quick_status.php and associated (wap, rss ...)
 define('FOLDER_NEW', 2);
 
-//used in daily_cron.php & others (to build forum oldest unread entry)
+//used in daily_cron.php & others (to "mark" forum oldest unread entry)
 define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * 86400); // [secs]
 
 
