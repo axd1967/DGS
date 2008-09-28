@@ -117,5 +117,7 @@ define('ACCKEYP_GAME_COMMENT',   '');
 // Global Config for Features on DGS
 define('ALLOW_QUOTING', 0);
 
+// Forum: number of weeks ending NEW-scope (older entries are considered READ)
+define('FORUM_WEEKS_NEW_END', 12);
 
 ?>
