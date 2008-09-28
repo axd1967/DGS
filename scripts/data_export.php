@@ -482,10 +482,11 @@ function definitions_fix( $table, $keys)
          switch((string)$name)
          {
          case('KEY'): //can't have this option with older versions
-            if( $row[1] == 'PendingApproval' )
-            {
-               $str= eregi_replace('Time DESC','Time',$str);
-            }
+            //TODO PendingApproval replaced with 'P'-enum in Approved-field
+            //if( $row[1] == 'PendingApproval' )
+            //{
+               //$str= eregi_replace('Time DESC','Time',$str);
+            //}
             break;
          }
          break;

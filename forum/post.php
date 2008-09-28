@@ -163,8 +163,7 @@ function post_message($player_row, $moderated_forum, &$thread)
          "Parent_ID=$parent, " .
          "AnswerNr=" . ($answer_nr+1) . ", " .
          "Depth=$Depth, " .
-         "Approved=" . ($moderated ? "'N'" : "'Y'")  . ", " .
-         "PendingApproval=" . ($moderated ? "'Y'" : "'N'")  . ", " .
+         "Approved=" . ($moderated ? "'P'" : "'Y'")  . ", " .
          "crc32=" . crc32($Text) . ", " .
          "PosIndex='$PosIndex'";
 
@@ -248,7 +247,7 @@ function approve_post( $fid, $tid, $pid )
 
    // approve post
    db_query( "approve_post.update_post($pid)",
-      "UPDATE Posts SET PendingApproval='N', Approved='Y' WHERE ID=$pid LIMIT 1" );
+      "UPDATE Posts SET Approved='Y' WHERE ID=$pid LIMIT 1" );
 
    // thread-trigger
    db_query( "approve_post.trigger_thread($tid,$pid)",
@@ -277,7 +276,7 @@ function approve_post( $fid, $tid, $pid )
 function reject_post( $fid, $tid, $pid )
 {
    db_query( "reject_post.update_post($pid)",
-      "UPDATE Posts SET PendingApproval='N', Approved='N' WHERE ID=$pid LIMIT 1" );
+      "UPDATE Posts SET Approved='N' WHERE ID=$pid LIMIT 1" );
 }
 
 // use-case A06 (hide shown post)

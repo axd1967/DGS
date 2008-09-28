@@ -234,7 +234,7 @@ function revision_history( $display_forum, $post_id )
       $is_my_post = ($uid == $my_id);
       if ( !$is_my_post ) $all_my_posts = false;
 
-      $hidden = !$post->approved;
+      $hidden = !$post->is_approved();
       if( $hidden && !$disp_forum->is_moderator && !$is_my_post )
          continue;
 

@@ -231,7 +231,7 @@ define('MODERATOR_SEARCH', 0);
       foreach( $findposts as $post )
       {
          $is_my_post = ( $post->author->id == $my_id );
-         $hidden = !$post->approved;
+         $hidden = !$post->is_approved();
          if( $hidden && !$disp_forum->is_moderator && !$is_my_post )
             continue;
 

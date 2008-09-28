@@ -76,7 +76,7 @@ function display_posts_pending_approval()
          . 'FROM Posts '
             . 'INNER JOIN Players AS PAuthor ON PAuthor.ID=Posts.User_ID '
             . 'INNER JOIN Forums ON Forums.ID=Posts.Forum_ID '
-         . "WHERE PendingApproval='Y' ORDER BY Time" );
+         . "WHERE Approved='P' ORDER BY Time" );
 
    $cnt = 0;
    if( mysql_num_rows($result) > 0 )
@@ -591,7 +591,7 @@ class DisplayForum
             if( $hdrcols != $cols )
             {
                echo "</td>\n <td rowspan=$hdrrows class=PostStatus>";
-               echo ( $post->pending_approval ? T_('Awaiting<br>approval') : T_('Hidden') );
+               echo ( $post->is_pending_approval() ? T_('Awaiting<br>approval') : T_('Hidden') );
             }
             echo "</td></tr>";
          }
@@ -679,7 +679,7 @@ class DisplayForum
 
          if( $this->is_moderator ) // hide/show link
          {
-            if( !$post->pending_approval )
+            if( !$post->is_pending_approval() )
                echo '<a class=Highlight href="'.$thread_url
                   .URI_AMP . ($hidden ? 'show' : 'hide') . "=$pid#$pid\">"
                   ."[ " . ($hidden ? T_('show') : T_('hide')) . " ]</a>";
@@ -717,7 +717,7 @@ class DisplayForum
          $subj_part = substr( $post->subject, 0, 40 )
             . ( (strlen($post->subject) > 40) ? ' ...' : '' );
          $sbj = make_html_safe( $subj_part, SUBJECT_HTML, $this->rx_term );
-         $newstr = ($post->approved)
+         $newstr = ($post->is_approved())
             ? $this->get_new_string( NEWMODE_OVERVIEW, $post->count_new, $post->created ) : '';
 
          $mypostclass = ( $post->author->id == $player_row['ID'] ) ? ' class=MyPost' : '';
@@ -1248,10 +1248,8 @@ class ForumPost
    /*! \brief Posts.PosIndex : string */
    var $posindex;
 
-   /*! \brief Posts.Approved : bool (DB=Y|N) */
+   /*! \brief Posts.Approved : string (DB=Y|N|P); use is_approved/is_pending_approval-funcs. */
    var $approved;
-   /*! \brief Posts.PendingApproval : bool (DB=Y|N) */
-   var $pending_approval;
 
    /*! \brief Posts.Time */
    var $created;
@@ -1296,7 +1294,7 @@ class ForumPost
    /*! \brief Constructs ForumPost-object with specified arguments: dates are in UNIX-time. */
    function ForumPost( $id=0, $forum_id=0, $thread_id=0, $author=null, $last_post_id=0,
          $count_posts=0, $count_hits=0, $subject='', $text='', $parent_id=0, $answer_num=0,
-         $depth=0, $posindex='', $approved='Y', $pending_approval='N',
+         $depth=0, $posindex='', $approved='Y',
          $created=0, $last_changed=0, $last_edited=0, $updated=0, $crc32=0, $old_id=0 )
    {
       $this->id = (int) $id;
@@ -1312,8 +1310,7 @@ class ForumPost
       $this->answer_num = (int) $answer_num;
       $this->depth = (int) $depth;
       $this->posindex = $posindex;
-      $this->set_approved( $approved );
-      $this->set_pending_approval( $pending_approval );
+      $this->approved = $approved;
       $this->created = (int) $created;
       $this->last_changed = (int) $last_changed;
       $this->last_edited = (int) $last_edited;
@@ -1329,16 +1326,16 @@ class ForumPost
    }
 
 
-   /*! \brief Correctly sets approved-field to boolean-value (input=enum(Y|N) from db). */
-   function set_approved( $val )
+   /*! Returns true, if post is approved (Approved=Y). */
+   function is_approved()
    {
-      $this->approved = ( is_string($val) ? ( (string)$val === 'Y' ) : (bool)$val );
+      return ( $this->approved === 'Y' );
    }
 
-   /*! \brief Correctly sets pending_approval-field to boolean-value (input=enum(Y|N) from db). */
-   function set_pending_approval( $val )
+   /*! Returns true, if post is pending-approval (Approved=P). */
+   function is_pending_approval()
    {
-      $this->pending_approval = ( is_string($val) ? ( (string)$val === 'Y' ) : (bool)$val );
+      return ( $this->approved === 'P' );
    }
 
    /*! \brief Sets tree-navigation vars for this post (NULL=not-set). */
@@ -1398,7 +1395,6 @@ class ForumPost
          . "depth=[{$this->depth}], "
          . "posidx=[{$this->posindex}], "
          . "approved=[{$this->approved}], "
-         . "pendapprov=[{$this->pending_approval}], "
          . "created=[{$this->created}], "
          . "last_changed=[{$this->last_changed}], "
          . "last_edited=[{$this->last_edited}], "
@@ -1417,7 +1413,7 @@ class ForumPost
    function build_query_sql()
    {
       // Posts: ID,Forum_ID,Time,Lastchanged,Lastedited,Updated,Subject,Text,User_ID,Parent_ID,Thread_ID,
-      //        AnswerNr,Depth,crc32,PosIndex,old_ID,Approved,PostsInThread,LastPost,PendingApproval
+      //        AnswerNr,Depth,crc32,PosIndex,old_ID,Approved,PostsInThread,LastPost
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
          'P.*',
@@ -1451,7 +1447,6 @@ class ForumPost
             @$row['Depth'],
             @$row['PosIndex'],
             @$row['Approved'],
-            @$row['PendingApproval'],
             @$row['X_Time'],
             @$row['X_Lastchanged'],
             @$row['X_Lastedited'],
