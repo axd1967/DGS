@@ -71,6 +71,17 @@ function revision_history( $display_forum, $post_id )
    $markread = get_request_arg('markread', ''); // syntax of ForumRead::mark_read
    $rx_term = get_request_arg('xterm', '');
 
+   // toggle forumflag
+   $toggleflag = @$_REQUEST['toggleflag'] + 0;
+   $toggle_baseurl = "read.php?forum=$forum_id"
+      . URI_AMP."thread=$thread"
+      . ( $rx_term != '' ? URI_AMP."xterm=$rx_term" : '');
+   if( toggle_forum_flags($my_id, $toggleflag) )
+   {
+      jump_to( 'forum/'.$toggle_baseurl );
+   }
+   $show_overview = ( $player_row['ForumFlags'] & FORUMFLAG_POSTVIEW_OVERVIEW );
+
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
 
@@ -109,12 +120,6 @@ function revision_history( $display_forum, $post_id )
    $disp_forum->cols = 2;
    $disp_forum->links = LINKPAGE_READ;
    $disp_forum->links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
-   $headline1 = array(
-      T_('Reading thread (overview)') => "colspan={$disp_forum->cols}"
-   );
-   $headline2 = array(
-      T_('Reading thread (posts)') => "colspan={$disp_forum->cols}"
-   );
 
    //toggle moderator and preview does not work together.
    //(else add $_POST in the moderator link build)
@@ -132,6 +137,32 @@ function revision_history( $display_forum, $post_id )
       else if( (int)@$_GET['reject'] > 0 )
          reject_post( $forum_id, $thread, (int)@$_GET['reject'] );
    }
+
+
+   if( $show_overview )
+   {
+      $headtitle1 = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
+         T_('Reading thread overview'),
+         $toggle_baseurl .URI_AMP.'toggleflag='.FORUMFLAG_POSTVIEW_OVERVIEW,
+         T_('Hide#threadoverview') );
+      $headline1 = array(
+         $headtitle1 => "colspan={$disp_forum->cols}"
+      );
+
+      $headtitle2 = T_('Reading thread posts');
+   }
+   else
+   {
+      $headline1 = null;
+
+      $headtitle2 = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
+         T_('Reading thread posts'),
+         $toggle_baseurl .URI_AMP.'toggleflag='.FORUMFLAG_POSTVIEW_OVERVIEW,
+         T_('Show overview#threadoverview') );
+   }
+   $headline2 = array(
+      $headtitle2 => "colspan={$disp_forum->cols}"
+   );
 
    $title = sprintf( '%s - %s', T_('Forum'), $forum->name );
    start_page($title, true, $logged_in, $player_row);
@@ -157,6 +188,8 @@ function revision_history( $display_forum, $post_id )
       "P.Forum_ID=$forum_id",
       "P.Thread_ID=$thread",
       "P.PosIndex>''" ); // '' == inactivated (edited)
+   if( !$is_moderator )
+      $qsql->add_part( SQLP_WHERE, "P.Approved='Y'" );
    $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
    $fthread = new ForumThread( $FR );
    $fthread->load_posts( $qsql );
@@ -165,7 +198,7 @@ function revision_history( $display_forum, $post_id )
 
    $post0 = $fthread->thread_post(); // initial post of the thread
    $is_empty_thread = is_null($post0);
-   if( $is_empty_thread )
+   if( !$show_overview || $is_empty_thread )
    {
       $thread_Subject = '';
       $Lastchangedthread = 0 ;
@@ -184,7 +217,7 @@ function revision_history( $display_forum, $post_id )
       $disp_forum->links |= LINK_MARK_READ;
    $disp_forum->forum_start_table('Read');
 
-   if( !$is_empty_thread )
+   if( $show_overview && !$is_empty_thread )
    {
       // draw tree-overview
       $disp_forum->draw_overview( $fthread );
