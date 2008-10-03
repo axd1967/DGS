@@ -23,6 +23,16 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-10-03 juga
+
+   * include/connect2mysql.php, INSTALL:
+   - use separate local config 'include/config-local.php' copied
+     and adjusted from config-template 'include/config.php';
+     Easier to avoid CVS-conflicts and SourceForge website updates
+
+   * include/.cvsignore:
+   - hide local config file from CVS
+
 2008-09-28 juga
 
    * forum/forum_functions.php (get_new_string), forum/list.php:
@@ -161,6 +171,13 @@ CREATE TABLE ForumRead (
    UNIQUE KEY FR_Uniq (Thread_ID,Post_ID,Forum_ID,User_ID),
    KEY Time (Time)
 ) TYPE=MyISAM;
+
+// migrate Forumreads- to ForumRead-table
+INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time)
+   SELECT User_ID,Forum_ID,Thread_ID,-1,-1,Time FROM Forumreads;
+
+// later can drop old forum-reads-table (or keep it)
+DROP TABLE Forumreads
 
 // added images for thread-post-list navigation
 copy images/f_bottom.png
