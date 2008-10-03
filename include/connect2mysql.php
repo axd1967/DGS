@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( "include/config.php" );
+require_once( "include/config-local.php" );
 //@set_time_limit(0); //does not work with safe_mode
 
 //because we will use MySQL, this will help to

@@ -97,14 +97,19 @@ Then, this user will be able to manage the other admins.
 
 4) Adjust config of software and adjust file permissions:
 
-* Edit permissions for include/config.php and directory translations/:
+* Copy config-template and adjust for local configuration and
+  adjust 'include/config-local.php' to your environment.
 
-Find which group your webserver is using (e.g. www-data).
-> su -c 'chgrp www-data include/config.php translations'
-> chmod 640 include/config.php
+> cp include/config.php include/config-local.php
+
+* Edit permissions for include/config-local.php and directory translations/:
+
+Find out which group your webserver is using (e.g. www-data).
+> su -c 'chgrp www-data include/config-local.php translations'
+> chmod 640 include/config-local.php
 > chmod 775 translations/
 
-* If wanted, create a CACHE_FOLDER (from include/config.php) with
+* If wanted, create a CACHE_FOLDER (from include/config-local.php) with
   the proper user/groups and rights, so that your web-server
   can read and write that directory.
 
@@ -119,9 +124,6 @@ Find which group your webserver is using (e.g. www-data).
 
 * If you want to adjust the source-code, please have a look to the
   notes in scripts/README.developers
-
-
-* Adjust include/config.php to your environment.
 
 
 * PHP config:
