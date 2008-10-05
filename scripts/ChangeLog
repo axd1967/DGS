@@ -23,6 +23,17 @@ quick TODO:
 Changelog
 ------------------------------------------------------------------
 
+2008-10-05 juga
+
+   * docs.php:
+   - added link to statistics page
+
+   * include/config.php:
+   - added note about unused keys for access-keys
+
+   * include/std_functions.php (start_page):
+   - added site-map page into main menu
+
 2008-10-03 juga
 
    * include/connect2mysql.php, INSTALL:
