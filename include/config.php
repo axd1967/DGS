@@ -84,6 +84,7 @@ define('CACHE_FOLDER', 'temp/');
 // Define access keys
 // - keep empty with value '' to define no access key
 // - keys 0..9 are reserved for bottom page-links
+// - unused keys: ahjklny
 
 // access keys always visible in menus
 define('ACCKEY_MENU_STATUS',     's');
