@@ -11,17 +11,25 @@ Release [2007-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
 quick INFO:
 
 2007-12-23 rodival
-   New features for release 1.0.14
+   Code Cleanup, New Features
 
-2008-01-01 juga
-   Code cleanup, new features
+2008-10-06 juga
+   Forum, New-Game/Waiting-Room, Code Cleanup
 
 -----
 quick TODO:
 
 ------------------------------------------------------------------
-Changelog
+ChangeLog
 ------------------------------------------------------------------
+
+2008-10-12 juga
+
+   * NEWS:
+   - added new and changed features so far (since DGS release 1.0.13)
+
+   * forum/read.php:
+   - changed text: Hide -> Hide overview
 
 2008-10-05 juga
 
@@ -39,7 +47,7 @@ Changelog
    * include/connect2mysql.php, INSTALL:
    - use separate local config 'include/config-local.php' copied
      and adjusted from config-template 'include/config.php';
-     Easier to avoid CVS-conflicts and SourceForge website updates
+     easier for SourceForge website updates and to avoid CVS-conflicts
 
    * include/.cvsignore:
    - hide local config file from CVS
@@ -936,7 +944,7 @@ copy /images/favicon.ico into the root folder
 
    * include/filter.php (get_url_parts),
      scripts/message_consistency.php, message.php:
-   - filtering empty url parts
+   - filtering out empty url parts
    - minor adjustements and comments
 
    * change_profile.php:
