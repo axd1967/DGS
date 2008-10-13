@@ -144,7 +144,7 @@ function revision_history( $display_forum, $post_id )
       $headtitle1 = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
          T_('Reading thread overview'),
          $toggle_baseurl .URI_AMP.'toggleflag='.FORUMFLAG_POSTVIEW_OVERVIEW,
-         T_('Hide#threadoverview') );
+         T_('Hide overview#threadoverview') );
       $headline1 = array(
          $headtitle1 => "colspan={$disp_forum->cols}"
       );
