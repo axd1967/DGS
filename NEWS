@@ -3,27 +3,149 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_14 [2008-??-??] - DGS 1.0.14  (??)
+#release DGS_1_0_14 [2008-??-??] - DGS 1.0.14  (Games, Forum)
 
    New features and Major changes:
 
-   *
+   * Games:
+      * Delete game on opponents turn (within first 10 moves)
+      * Resign game on opponents turn
+      * Preview game message
+      * Added access key [x]='Next Game', [v]=Preview
+
+   * Game settings:
+      * Changed default for Standard Handicap Placement: ON
+      * Changed default for Time settings: Fischer time with 30d + 1d
+
+   * User info: Show a users timezone, local time and night start
+
+   * Status page:
+      * Reduced user info on status page, but show vacation if on vacation
+
+   * Forum pages reworked:
+      * Show number of NEW posts
+      * Changed time range for outdated forum posts from 4 to 12 weeks
+      * Changed time range for old NEW posts from 2 to 4 weeks
+
+      * Forum list:
+         * Indication for NEW posts in forum list
+         * Added thread count column
+         * Added link on date to view last post
+         * Added author of last post (with show/hide toggle in header line)
+
+      * Thread list:
+         * Added hits column showing activity in a thread
+         * Added link on date to view last post
+         * Added author of last post (with show/hide toggle in header line)
+         * Added max rows selectbox to control number of shown threads
+         * Removed link on subject and NEW-text to first new thread
+
+      * Thread posts view:
+         * Force reply: User has to choose which post to reply on
+         * Added tree-like overview of all posts with
+            * subjects (truncated if too long), author and last changed date
+            * own posts in dark-blue and bold font
+            * linked NEW markers
+            * show/hide toggle in header lines
+         * Added navigation links on every post to page top and bottom,
+           previous and next post, previous parent and next parent post,
+           and to first answer of post
+         * Viewing thread posts doesn't mark thread as read
+            * This fixed "missing" new posts while replying and own new posts
+            * User can mark single posts as read: 'mark read'-link on new post
+            * User can mark all posts as read: 'mark all read'-link
+
+   * Voting on feature
+
 
    Code improvements:
 
-   *
+   * Improvements of database queries
+   * Introduction of a cache management for some pages and graphics
+
+   * Optimized translations
+   * Code cleanup
+   * Hide some sensible server infos
+
 
    Minor changes:
 
-   *
+   * Games:
+      * Game info: show OnVacation in red
+      * Game: "move" selectbox contains only move-subset,
+        fixing possible bug on large boards
+      * Game: Modified URI '&toggleobserve=' behaviour to avoid toggling on page refresh
+        (Former value '1' -> y&n: needs FAQ-adjustment for observing own-games-trick)
+      * Replaced "Show my observed games" -> "Show games I'm observing"
+      * Games list: Modified columns; (keep entry up to release)
+        needs migration of bitmasks in DB; changed table-field-numbers of
+        - Games.Weekendclock: #12 -> #24
+        - Players.LastAccess: #15 -> #25
+      * Status & own Games list: Added "Notes" column
+      * Game markup: Changed char used for the moves number in game reference
+
+   * Users:
+      * Faster Activity handling, added third active-level (<image star3.gif><image star3.gif><image star3.gif>)
+      * Introducing JavaScript management in profile setting
+      * Initial Rating: removed converting of NNGS-rank/rating
+
+   * Filters:
+      * Changed access keys for filter-search: [x]=Search, [z]=Reset
+      * Added warning-message for stopwords-warning of mysql-match-search
+        (mainly for forum-search)
+      * Added tooltips for submit buttons
+
+   * Table Lists:
+      * Used clearer header for column ID
+      * Used top vertical alignment for multiline table cells
+      * Changed default sort-direction for ID
+
+   * Docs:
+      * Added site-map page into main menu
+      * Added statistics-page on site-map
+      * Added link to statistics page on docs page
+      * News: added table of contents
+
+   * More use of CSS
+
 
    Administrative changes:
 
-   *
+   * Statistics page:
+      * Restrict the 'loadavg'-stats to admins view
+      * Added 'Activity' curve in the graph (activated in the URL)
+
+   * Changed handling of some URL-arguments to reduce risc of SQL-injections
+
+   * Changes for FAQ-editors:
+
+   * Changes for Translators:
+      * Added comments to clarify the translation process
+      * Added the 'N'=Native pseudo-language to browser settings section
+      * Displaying the group-names
+
+   * Changes for Admins:
+      * Removed translations from the admin pages
+
+
+   Server config:
+
+   * Changed local configuration using template config file
+   * Changed all config in server config using constants
+
+   * Moved configuration into server config:
+      * ALLOW_QUOTING
+      * Definition of all access keys
+      * Forum NEW config
+      * Default password encryption (SHA1 now)
+
 
    Bug fixes:
 
-   *
+   * fixed activation toggle for filters: Contacts countries, Games score
+   * fixed problems with favicon picture
+   * fixed duplicated row problem for Add-Time feature
+   * fixed default bug on selectbox filters
 
 
 #release DGS_1_0_13 [2007-10-07] - DGS 1.0.13  (CSS, Searching, Contacts, Add time)
@@ -96,9 +218,6 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Better error handling
 
    * Improved consistency checks
-
-   * Prepared future walking of message chain
-   * Prepared future mass messages
 
 
    Minor changes:
