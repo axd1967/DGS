@@ -105,9 +105,9 @@ $info_box = '<ul>
 
    // read/write move-distance for entries using cookie
    $movedist = (int)@$_REQUEST['movedist'];
-   if ( $movedist < 1 )
+   if( $movedist < 1 )
       $movedist = max( 1, (int)safe_getcookie('admin_faq_movedist'));
-   if ( @$_REQUEST['setmovedist'] ) // write into cookie
+   if( @$_REQUEST['setmovedist'] ) // write into cookie
       safe_setcookie( 'admin_faq_movedist', $movedist, 3600 ); // save for 1h
 
    $show_list = true;

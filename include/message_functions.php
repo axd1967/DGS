@@ -982,7 +982,7 @@ function echo_folder_box( $folders, $folder_nr, $bgcolor=null, $attbs='', $layou
      list($foldername, $folderbgcolor, $folderfgcolor) = @$folders[$folder_nr];
 
    if( empty($foldername) )
-     if ( $folder_nr < USER_FOLDERS )
+     if( $folder_nr < USER_FOLDERS )
        list($foldername, $folderbgcolor, $folderfgcolor) = $STANDARD_FOLDERS[$folder_nr];
      else
        $foldername = T_('Folder name');
@@ -1070,7 +1070,7 @@ function message_list_head( &$mtable, $current_folder
    $mtable->add_tablehead( 1, T_('Folder#header'), 'Folder',
       ($current_folder>FOLDER_ALL_RECEIVED ? TABLE_NO_SORT : 0), 'folder-');
 
-   if ( $full_details )
+   if( $full_details )
    {
       // additional fields for search-messages
       $mtable->add_tablehead( 6, T_('Type#header'), '', TABLE_NO_HIDE, 'M.Type+');
@@ -1164,7 +1164,7 @@ function message_list_body( &$mtable, $result, $show_rows
          $user_str = $row['other_name']; // server-msg or unknown
 
       $str = $user_str;
-      if ( !$full_details )
+      if( !$full_details )
          if( $row['Sender'] === 'Y' )
             $str = T_('To') . ': ' . $str;
       $mrow_strings[ 2] = $str;
@@ -1180,7 +1180,7 @@ function message_list_body( &$mtable, $result, $show_rows
       $mrow_strings[ 4] = date(DATE_FMT, $row["Time"]);
 
       // additional fields for search-messages
-      if ( $full_details )
+      if( $full_details )
       {
          global $MSG_TYPES;
          $mrow_strings[ 6] = $MSG_TYPES[$row['Type']];

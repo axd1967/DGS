@@ -60,10 +60,10 @@ define('PFLAG_EXCL_END',   0x00000004); // if set, indicates that parsed end-val
  */
 function extract_range( $arr )
 {
-   if ( count($arr) == 3 )
+   if( count($arr) == 3 )
       return array( $arr[0]->get_token(), $arr[2]->get_token() );
 
-   if ($arr[0]->get_type() == TOK_SEPARATOR)
+   if($arr[0]->get_type() == TOK_SEPARATOR)
       return array( '', $arr[1]->get_token() );
    else
       return array( $arr[0]->get_token(), '' );
@@ -154,7 +154,7 @@ class TokenizerConfig
   *    Parser is constructed with configuration needed for parsing.
   *    $parser = new XYZParser( value, TokenizerConfig, int flags);
   *    $success = parse( input_string, parser_flags );
-  *    if ( !$success )
+  *    if( !$success )
   *       handle_errors( $parser->errormsg() );
   */
 class BasicParser
@@ -229,7 +229,7 @@ class BasicParser
     * signature: bool|null = is_parsed_flags_set()
     */
    function is_parsed_flags_set( $flag ) {
-      if ( $this->errormsg != '' )
+      if( $this->errormsg != '' )
          return null;
       return (bool)( $this->p_flags & $flag );
    }
@@ -256,9 +256,9 @@ class BasicParser
     */
    function handle_reverse_range( $force = false ) {
       $swapped = false;
-      if ( !$this->is_flags_set(PARSER_NOSWAP_REVERSE) || $force )
+      if( !$this->is_flags_set(PARSER_NOSWAP_REVERSE) || $force )
       {
-         if ( $this->is_reverse_range() )
+         if( $this->is_reverse_range() )
          {
             $this->swap_range_start_end();
             $swapped = true;
@@ -272,7 +272,7 @@ class BasicParser
     * signature: bool is_reverse_range()
     */
    function is_reverse_range() {
-      if ( (string)$this->p_start != '' && (string)$this->p_end != '' )
+      if( (string)$this->p_start != '' && (string)$this->p_end != '' )
          return ( $this->p_start > $this->p_end );
       else
          return false;
@@ -315,12 +315,12 @@ class NumericParser extends BasicParser
     */
    function parse($value, $flags) {
       $this->init_parse($value, $flags);
-      if ( $this->value == '' )
+      if( $this->value == '' )
          return true; // empty (no-error)
 
       // tokenize
       $tokenizer = create_StringTokenizer( $this->tokconf, '', $this->flags);
-      if ( !$tokenizer->parse($value) )
+      if( !$tokenizer->parse($value) )
       {
          $this->errormsg = implode('; ', $tokenizer->errors());
          return false;
@@ -329,19 +329,19 @@ class NumericParser extends BasicParser
       $cnt = count($arr);
       // expected: 0 entries (''), 1 entry (val), 2 entries (sep val | val sep), 3 entries (start sep end)
 
-      if ( $cnt == 0 )
+      if( $cnt == 0 )
          return true;
 
-      if ( $cnt > 3 )
+      if( $cnt > 3 )
       {
          $this->errormsg = "[$value] " . T_('too many separators#filter') . " [{$this->tokconf->sep}]";
          return false;
       }
 
-      if ( $cnt == 1 )
+      if( $cnt == 1 )
       { // exact syntax
          $v = $arr[0]->get_token();
-         if ( empty($v) || is_numeric($v) )
+         if( empty($v) || is_numeric($v) )
             $this->p_value = $v;
          else
          {
@@ -352,12 +352,12 @@ class NumericParser extends BasicParser
       else
       { // range syntax
          list( $v1, $v2 ) = extract_range( $arr );
-         if ( !empty($v1) && !is_numeric($v1) )
+         if( !empty($v1) && !is_numeric($v1) )
          {
             $this->errormsg = "[$v1] " . T_('not numeric');
             return false;
          }
-         elseif ( !empty($v2) && !is_numeric($v2) )
+         elseif( !empty($v2) && !is_numeric($v2) )
          {
             $this->errormsg = "[$v2] " . T_('not numeric');
             return false;
@@ -410,7 +410,7 @@ class TextParser extends BasicParser
 {
    /*! \brief Constructs TextParser( string value, TokenizerConfig tok_config, int flags ). */
    function TextParser( $value, $tok_config, $flags = 0 ) {
-      if ( $flags & TEXTPARSER_IMPLICIT_WILD )
+      if( $flags & TEXTPARSER_IMPLICIT_WILD )
          $flags |= TEXTPARSER_FORBID_RANGE | TEXTPARSER_ALLOW_START_WILD;
       parent::BasicParser( $value, $tok_config, $flags );
       $this->parse($value, $this->flags);
@@ -422,21 +422,21 @@ class TextParser extends BasicParser
     */
    function parse($value, $flags) {
       $this->init_parse($value, $flags);
-      if ( $this->value == '' )
+      if( $this->value == '' )
          return true; // empty (no-error)
 
       // init tokenizer
       $forbid_wild = $this->is_flags_set(TEXTPARSER_FORBID_WILD);
       $wild_char = $this->tokconf->wild;
-      if ( $forbid_wild )
+      if( $forbid_wild )
          $wild_char = '';
       $tokenizer = create_StringTokenizer( $this->tokconf, $wild_char, $this->flags);
       $rx_no_sep = $this->tokconf->get_config( TEXTPARSER_CONF_RX_NO_SEP );
-      if ( $rx_no_sep != '' )
+      if( $rx_no_sep != '' )
          $tokenizer->add_config( STRTOK_CONF_RX_NO_SEP, $rx_no_sep );
 
       // tokenize
-      if ( !$tokenizer->parse($value) )
+      if( !$tokenizer->parse($value) )
       {
          $this->errormsg = implode('; ', $tokenizer->errors());
          return false;
@@ -445,10 +445,10 @@ class TextParser extends BasicParser
       $cnt = count($arr);
       // expected: 0 entries (''), 1 entry (val), 2 entries (sep val | val sep), 3 entries (start sep end)
 
-      if ( $cnt == 0 )
+      if( $cnt == 0 )
          return true;
 
-      if ( $cnt > 3 )
+      if( $cnt > 3 )
       {
          $this->errormsg = "[$value] " . T_('too many separators#filter') . " [{$this->tokconf->sep}]";
          return false;
@@ -456,12 +456,12 @@ class TextParser extends BasicParser
 
       // assure higher precedence of wildcard (over separator)
       $arr_wild_replace = array( $this->tokconf->wild => '%' );
-      if ( $cnt != 1 && !$forbid_wild && !$this->is_flags_set(TEXTPARSER_CONF_PRECEDENCE_SEP) )
+      if( $cnt != 1 && !$forbid_wild && !$this->is_flags_set(TEXTPARSER_CONF_PRECEDENCE_SEP) )
       {
          list( $v1, $v2 ) = extract_range( $arr );
          list( $sql, $cnt_wild1 ) = sql_replace_wildcards( $v1, $arr_wild_replace );
          list( $sql, $cnt_wild2 ) = sql_replace_wildcards( $v2, $arr_wild_replace );
-         if ( $cnt_wild1 + $cnt_wild2 > 0 )
+         if( $cnt_wild1 + $cnt_wild2 > 0 )
          {
             $merged_token = new Token(TOK_TEXT, 0, $v1 . $arr[1]->get_token() . $v2 );
             $arr = array( $merged_token );
@@ -469,13 +469,13 @@ class TextParser extends BasicParser
          }
       }
 
-      if ( $cnt == 1 )
+      if( $cnt == 1 )
       { // exact syntax or wildcard
          $v = $arr[0]->get_token();
-         if ($v == '')
+         if($v == '')
             return true;
 
-         if ( $forbid_wild )
+         if( $forbid_wild )
          {
             // wild can be treated as normal char, same goes for special-chars
             $this->p_value = $v;
@@ -485,26 +485,26 @@ class TextParser extends BasicParser
          else // allow-wild
          {
             // add wild as prefix and suffix to build substring-search
-            if ( $this->is_flags_set(TEXTPARSER_IMPLICIT_WILD) )
+            if( $this->is_flags_set(TEXTPARSER_IMPLICIT_WILD) )
             {
-               if ( $v[0] != $wild_char )
+               if( $v[0] != $wild_char )
                   $v = $wild_char . $v;
-               if ( substr($v, -1) != $wild_char )
+               if( substr($v, -1) != $wild_char )
                   $v .= $wild_char;
             }
 
-            if ( (string)$wild_char != '' )
-               if (substr_count($v, $wild_char) == strlen($v)) // wildcards only (multi-char '*')
+            if( (string)$wild_char != '' )
+               if(substr_count($v, $wild_char) == strlen($v)) // wildcards only (multi-char '*')
                   return true; // matching all (return '')
 
             // started with wildcard?
-            if ( $v[0] == $wild_char )
+            if( $v[0] == $wild_char )
             {
-               if ( $this->is_flags_set(TEXTPARSER_ALLOW_START_WILD) ) // check min-chars
+               if( $this->is_flags_set(TEXTPARSER_ALLOW_START_WILD) ) // check min-chars
                {
                   $minchars = $this->tokconf->get_config(TEXTPARSER_CONF_STARTWILD_MINCHARS, STARTWILD_OPTMINCHARS);
                   $quote_wild = preg_quote( $wild_char, '/' );
-                  if ( $minchars > 1 && !(preg_match("/^[{$quote_wild}]+([^{$quote_wild}]{".$minchars.",})/", $v)) )
+                  if( $minchars > 1 && !(preg_match("/^[{$quote_wild}]+([^{$quote_wild}]{".$minchars.",})/", $v)) )
                   {
                      $this->errormsg =
                         sprintf( T_('need at least %1$s characters when using text with starting wildcard [%2$s]'),
@@ -523,10 +523,10 @@ class TextParser extends BasicParser
             list( $valsql, $cnt_wild ) = sql_replace_wildcards( $v, $arr_wild_replace );
 
             $this->p_value = $valsql;
-            if ( $cnt_wild > 0 )
+            if( $cnt_wild > 0 )
                $this->p_flags |= PFLAG_WILDCARD;
             $arr_terms = sql_extract_terms( $valsql );
-            if ( count($arr_terms) > 0 )
+            if( count($arr_terms) > 0 )
                $this->p_terms = array_merge( $this->p_terms, $arr_terms );
          }
       }
@@ -537,7 +537,7 @@ class TextParser extends BasicParser
          $this->p_end   = $v2;
          $this->handle_reverse_range();
 
-         if ( (string)$this->p_end != '' && !$this->is_flags_set(TEXTPARSER_END_INCL) )
+         if( (string)$this->p_end != '' && !$this->is_flags_set(TEXTPARSER_END_INCL) )
             $this->p_end = make_text_end_exclusive( $this->p_end );
       }
 
@@ -602,7 +602,7 @@ class DateParser
    function DateParser( $datestr, $rangetype )
    {
       // check args
-      if ( $rangetype != RANGE_START && $rangetype != RANGE_END )
+      if( $rangetype != RANGE_START && $rangetype != RANGE_END )
          error('invalid_filter', "filter_parser.DateParser.invalid_arg.rangetype($rangetype)");
 
       $this->origdate = $datestr;
@@ -611,7 +611,7 @@ class DateParser
       global $NOW;
       $this->now = getdate($NOW);
 
-      if ( $this->parse($this->origdate) )
+      if( $this->parse($this->origdate) )
          $this->complete_date();
    }
 
@@ -660,13 +660,13 @@ class DateParser
    function check_datepart($typepart, $dpart, $start, $end)
    {
       $error = 0;
-      if ( $dpart == '' )
+      if( $dpart == '' )
          return false; // ok, if empty
-      if ( $dpart < $start )
+      if( $dpart < $start )
          $error++;
-      if ( $dpart > $end )
+      if( $dpart > $end )
          $error++;
-      if ( $error )
+      if( $error )
          $this->checkarr[]= $typepart;
       return (boolean)$error;
    }
@@ -689,7 +689,7 @@ class DateParser
 
       // parse into date-parts: YMD hms
       $out = array();
-      if ( preg_match($rxdate, $this->datestr, $out) == 0)
+      if( preg_match($rxdate, $this->datestr, $out) == 0)
       {
          $this->errormsg = "[$date] " . T_('invalid date-format#filter');
          return false;
@@ -703,7 +703,7 @@ class DateParser
       $this->check_datepart('h', $this->hour,  0, 23);
       $this->check_datepart('m', $this->min,   0, 59);
       $this->check_datepart('s', $this->sec,   0, 59);
-      if ( count($this->checkarr) > 0)
+      if( count($this->checkarr) > 0)
       {
          $err_datepart = implode( '', $this->checkarr);
          $this->errormsg = "[$date] " . T_('has invalid date-part#filter') . " [".$err_datepart."]";
@@ -713,7 +713,7 @@ class DateParser
       // check year/month/day-combination
       $chk_day   = ( (string)$this->day   != '' ) ? $this->day   : 1; // maybe empty
       $chk_month = ( (string)$this->month != '' ) ? $this->month : 1; // maybe empty
-      if ( !checkdate( $chk_month, $chk_day, $this->year ) )
+      if( !checkdate( $chk_month, $chk_day, $this->year ) )
       {
          $this->errormsg = "[$date] " . T_('invalid day#filter');
          return false;
@@ -730,50 +730,50 @@ class DateParser
    function complete_date()
    {
       // missing year + remaining ('YMDhms') -> use current year
-      if ( $this->year == '' )
+      if( $this->year == '' )
          $this->year = $this->now['year'];
 
       // missing month + remaining ('MDhms')
-      if ( $this->month == '' )
+      if( $this->month == '' )
       {
          $this->month = 1;
          $this->day = 1;
          $this->hour = $this->min = $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if ( $this->rangetype == RANGE_END)
+         if( $this->rangetype == RANGE_END)
             $this->year++;
       }
       // missing day + remaining ('Dhms')
-      elseif ( $this->day == '' )
+      elseif( $this->day == '' )
       {
          $this->day = 1;
          $this->hour = $this->min = $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if ( $this->rangetype == RANGE_END)
+         if( $this->rangetype == RANGE_END)
             $this->month++;
       }
       // missing hour + remaining ('hms')
-      elseif ( $this->hour == '' )
+      elseif( $this->hour == '' )
       {
          $this->hour = $this->min = $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if ( $this->rangetype == RANGE_END)
+         if( $this->rangetype == RANGE_END)
             $this->day++;
       }
       // missing minute + remaining ('ms')
-      elseif ( $this->min == '' )
+      elseif( $this->min == '' )
       {
          $this->min = $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if ( $this->rangetype == RANGE_END)
+         if( $this->rangetype == RANGE_END)
             $this->hour++;
       }
       // missing sec + remaining ('s')
-      elseif ( $this->sec == '' )
+      elseif( $this->sec == '' )
       {
          $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if ( $this->rangetype == RANGE_END)
+         if( $this->rangetype == RANGE_END)
             $this->min++;
       }
 

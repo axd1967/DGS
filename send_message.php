@@ -263,7 +263,7 @@ disable_cache();
    // Update database
 
    $msg_gid = 0;
-   if ( $type == 'INVITATION' )
+   if( $type == 'INVITATION' )
       $msg_gid = $gid;
 
    send_message( 'send_message', $message, $subject

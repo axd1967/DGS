@@ -157,7 +157,7 @@ function get_alt_arg( $n1, $n2)
       error('not_your_turn');
 
    // allow validation
-   if ( $just_looking && ( $action == 'add_time' || $action == 'delete' || $action == 'resign' ) )
+   if( $just_looking && ( $action == 'add_time' || $action == 'delete' || $action == 'resign' ) )
       $just_looking = false;
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
@@ -316,7 +316,7 @@ function get_alt_arg( $n1, $n2)
 
       case 'resign': //for validation
       {
-         if ( !$may_resign_game )
+         if( !$may_resign_game )
             error('invalid_action',"game.resign($Status,$my_id)");
 
          $validation_step = true;
@@ -326,7 +326,7 @@ function get_alt_arg( $n1, $n2)
 
       case 'add_time': //add-time for opponent
       {
-         if ( !$may_add_time )
+         if( !$may_add_time )
             error('invalid_action', "game.add_time");
 
          $validation_step = true;
@@ -346,7 +346,7 @@ function get_alt_arg( $n1, $n2)
 
       case 'delete': //for validation
       {
-         if ( !$may_add_time )
+         if( !$may_add_time )
             error('invalid_action',"game.delete($Status,$my_id)");
 
          $validation_step = true;
@@ -433,7 +433,7 @@ function get_alt_arg( $n1, $n2)
          $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
       }
 
-      if ($Size >= $player_row["NotesCutoff"])
+      if( $Size >= $player_row["NotesCutoff"] )
       {
         $notesheight = $player_row["NotesLargeHeight"];
         $noteswidth = $player_row["NotesLargeWidth"];
@@ -579,13 +579,13 @@ function get_alt_arg( $n1, $n2)
          $show_notes = false;
       }
 
-      if ( $action == 'add_time' )
+      if( $action == 'add_time' )
          draw_add_time( $game_row );
       else
       {
          draw_message_box( $message);
 
-         if ( $preview )
+         if( $preview )
          {
             $prevmsg = make_html_safe( $message, 'gameh' );
             $TheBoard->draw_move_message( $prevmsg );
@@ -678,13 +678,13 @@ function get_alt_arg( $n1, $n2)
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$opponent_ID" ;
       }
 
-      if ( $may_resign_game )
+      if( $may_resign_game )
          $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=resign";
 
-      if ( $may_del_game )
+      if( $may_del_game )
          $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
 
-      if ( $action != 'add_time' && $may_add_time )
+      if( $action != 'add_time' && $may_add_time )
          $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";
 
       $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid" );
@@ -862,7 +862,7 @@ function draw_add_time( $game_row )
           </TD>
         </TR>';
 
-   if ( $game_row['Byotype'] != 'FIS'
+   if( $game_row['Byotype'] != 'FIS'
       && $game_row['Byotime'] > 0 && $game_row['Byoperiods'] > 0 ) // no byoyomi-reset if no byoyomi
    {
       echo '<TR>

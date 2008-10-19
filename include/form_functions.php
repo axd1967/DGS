@@ -476,7 +476,7 @@ class Form
       $groups = array();
       $grcnt = 0;
       $L = "($layout)";
-      while (true)
+      while( true )
       {
          $epos = strpos( $L, ')' );
          if( $epos === false )
@@ -534,7 +534,7 @@ class Form
          error('internal_error', "Form.parse_layout_global.bad_syntax.2($layout)"); // with one of '|,'
 
       $result = $groups[$grcnt-1];
-      while ( is_array($result) && count($result) == 1 )
+      while( is_array($result) && count($result) == 1 )
          $result = array_shift($result);
       $this->layout[FLAYOUT_GLOBAL] = $result;
    }
@@ -835,7 +835,7 @@ class Form
          $cnt = 0;
          if( $L[0] == 'H' )
          { // horizontal grouping
-            for ($i=1; $i < count($L); $i++)
+            for( $i=1; $i < count($L); $i++ )
             {
                $area = $L[$i];
                $str = $this->build_areas( $area, $AR, false);
@@ -1548,7 +1548,7 @@ class Form
          $hiddens = array_merge( $hiddens, $this->hiddens);
       else
          $hiddens = $this->hiddens;
-      foreach ($this->attached as $attach)
+      foreach( $this->attached as $attach )
       {
          $attach->get_hiddens( $hiddens);
       }
@@ -1558,7 +1558,7 @@ class Form
    function get_hiddens_string()
    {
       $hiddens = $this->hiddens;
-      foreach ($this->attached as $attach)
+      foreach( $this->attached as $attach )
       {
          $attach->get_hiddens( $hiddens);
       }

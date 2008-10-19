@@ -66,7 +66,7 @@ class Contact
     */
    function Contact( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
    {
-      if ( !is_numeric($uid) || !is_numeric($cid)
+      if( !is_numeric($uid) || !is_numeric($cid)
             || $uid <= 0 || $cid < 0
             || $uid == $cid )
          error('invalid_user', "contacts.Contact($uid,$cid)");
@@ -133,7 +133,7 @@ class Contact
     */
    function load_contact( $uid, $cid )
    {
-      if ( !is_numeric($uid) || !is_numeric($cid) )
+      if( !is_numeric($uid) || !is_numeric($cid) )
          error('invalid_user', "contact.load_contact($uid,$cid)");
 
       $row = mysql_single_fetch("contact.load_contact2($uid,$cid)",
@@ -156,7 +156,7 @@ class Contact
     */
    function set_note( $note )
    {
-      if ( is_null($note) )
+      if( is_null($note) )
          $this->note = '';
       else
          $this->note = preg_replace( "/(\r\n|\n|\r)+/s", "\n", trim($note) );
@@ -184,7 +184,7 @@ class Contact
 
       $this->sysflags = 0;
       foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr )
-         if ( @$_REQUEST[$arr[0]] )
+         if( @$_REQUEST[$arr[0]] )
             $this->sysflags |= $sysflag;
    }
 
@@ -198,7 +198,7 @@ class Contact
 
       $this->userflags = 0;
       foreach( $ARR_CONTACT_USERFLAGS as $userflag => $arr )
-         if ( @$_REQUEST[$arr[0]] )
+         if( @$_REQUEST[$arr[0]] )
             $this->userflags |= $userflag;
    }
 
@@ -208,7 +208,7 @@ class Contact
     */
    function update_contact()
    {
-      if ( !is_numeric($this->uid) || !is_numeric($this->cid)
+      if( !is_numeric($this->uid) || !is_numeric($this->cid)
             || $this->uid <= 0 || $this->cid <= 0
             || $this->uid == $this->cid )
          error('invalid_user', "contact.update_contact({$this->uid},{$this->cid})");
@@ -238,7 +238,7 @@ class Contact
    /*! \brief Deletes current Contact from database. */
    function delete_contact()
    {
-      if ( !is_numeric($this->uid) || !is_numeric($this->cid)
+      if( !is_numeric($this->uid) || !is_numeric($this->cid)
             || $this->uid <= 0 || $this->cid <= 0
             || $this->uid == $this->cid )
          error('invalid_user', "contact.delete_contact({$this->uid},{$this->cid})");
@@ -268,7 +268,7 @@ class Contact
     */
    function has_contact( $uid, $cid )
    {
-      if ( $uid == $cid || $cid <= GUESTS_ID_MAX || $uid <= GUESTS_ID_MAX ) //exclude guest
+      if( $uid == $cid || $cid <= GUESTS_ID_MAX || $uid <= GUESTS_ID_MAX ) //exclude guest
          return -1;
       $result = db_query( 'contact.has_contact',
          "SELECT cid FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
@@ -308,7 +308,7 @@ class Contact
    {
       $out = array();
       foreach( $flags_array as $flag => $arr )
-         if ( $flagmask & $flag )
+         if( $flagmask & $flag )
             $out[]= $arr[1];
       return implode($sep, $out);
    }

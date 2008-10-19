@@ -62,7 +62,7 @@ function ff( $col, $msg ) {
 }
 
 $layout = get_request_arg('layout');
-if ( !isset($arr_layouts[$layout]) )
+if( !isset($arr_layouts[$layout]) )
    $layout = 1;
 $align = (int)@$_REQUEST['align'];
 $center = (bool)@$_REQUEST['center'];
@@ -177,7 +177,7 @@ $actform->echo_string();
 $the_form = new Form( "myname", "form_example2.php", FORM_POST );
 
 // set layout
-if ( $layout )
+if( $layout )
    $the_form->set_layout( FLAYOUT_GLOBAL, $arr_layouts[$layout]['layout'] );
 
 // set config for layout
@@ -205,7 +205,7 @@ $the_form->set_layout( FLAYOUT_AREACONF, 1,
       'title' => 'Title 1',
    ) );
 
-if ( $layout ) $the_form->set_area( 2 );
+if( $layout ) $the_form->set_area( 2 );
 $the_form->add_row( array( 'TEXT', ff($col2, 'Area 2 - Row 1') ) );
 $the_form->add_row( array( 'TEXT', ff($col2, 'Area 2 - Row 2') ) );
 $the_form->add_row( array( 'TEXT', ff($col2, 'Area 2 - Row 3') ) );
@@ -216,7 +216,7 @@ $the_form->set_layout( FLAYOUT_AREACONF, 2,
       FAC_TABLE => 'id=tblWarn1',
    ) );
 
-if ( $layout ) $the_form->set_area( 3 );
+if( $layout ) $the_form->set_area( 3 );
 $the_form->add_row( array( 'TEXT', ff($col3, 'Area 3 - Row 1') ) );
 $the_form->add_row( array( 'TEXT', ff($col3, 'Area 3 - Row 2') ) );
 $the_form->add_row( array( 'TEXT', ff($col3, 'Area 3 - Row 3') ) );
@@ -226,7 +226,7 @@ $the_form->set_layout( FLAYOUT_AREACONF, 3,
       FAC_TABLE => 'class=TblWarn2',
    ) );
 
-if ( $layout ) $the_form->set_area( 4 );
+if( $layout ) $the_form->set_area( 4 );
 $the_form->add_row( array( 'TEXT', ff($col4, 'Area 4 - Row 1') ) );
 $the_form->add_row( array( 'TEXT', ff($col4, 'Area 4 - Row 2') ) );
 $the_form->set_layout( FLAYOUT_AREACONF, 4,
@@ -235,7 +235,7 @@ $the_form->set_layout( FLAYOUT_AREACONF, 4,
       FAC_TABLE => 'bgcolor="#ffc0c0"',
    ) );
 
-if ( $layout ) $the_form->set_area( 5 );
+if( $layout ) $the_form->set_area( 5 );
 $the_form->add_row( array( 'TEXT', ff($col5, 'Area 5 - Row 1') ) );
 $the_form->add_row( array( 'TEXT', ff($col5, 'Area 5 - Row 2') ) );
 $the_form->add_row( array( 'TEXT', ff($col5, 'Area 5 - Row 3') ) );
@@ -249,7 +249,7 @@ $the_form->echo_string();
 
 
 // present some internal vars from Form
-if ( isset($the_form->layout[FLAYOUT_GLOBAL]) )
+if( isset($the_form->layout[FLAYOUT_GLOBAL]) )
 {
    echo "<br><br>\nvar_export:\n<font size=+2><pre>"
       . "global-layout: " . var_export( $the_form->orig_layout, true ) ."\n\n"

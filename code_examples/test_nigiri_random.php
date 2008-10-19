@@ -37,15 +37,15 @@ chdir("code_examples/");
         "\n\n\n";
 
    $loop = get_request_arg('l');
-   if ( empty($loop) || $loop <= 0 )
+   if( empty($loop) || $loop <= 0 )
       $loop = 10;
-   if ( $loop > 100 )
+   if( $loop > 100 )
       $loop = 100;
 
    $bcnt = get_request_arg('b');
-   if ( empty($bcnt) || $bcnt <= 0 )
+   if( empty($bcnt) || $bcnt <= 0 )
       $bcnt = 20;
-   if ( $bcnt > 100 )
+   if( $bcnt > 100 )
       $bcnt = 100;
 
    for( $j=1; $j <= $loop; $j++)

@@ -31,7 +31,7 @@ function build_TOC( $text )
          "<li><a href=\"#\\1\">\\2</a>",
          $header);
    }
-   if ( count($toc_entries) > 0 )
+   if( count($toc_entries) > 0 )
       return '<div class="ReleaseTOC"><h2>' . T_('Table of contents') . '</h2>'
          . "<ul>\n" . implode("\n", $toc_entries) . "</ul></div>\n"
          . '<hr noshade="1" size="1">';

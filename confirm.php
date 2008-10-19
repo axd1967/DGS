@@ -113,12 +113,12 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    $may_del_game  = $my_game && $too_few_moves && $is_running_game;
 
    $may_resign_game = $my_game && $is_running_game;
-   if ( $action == 'resign' )
+   if( $action == 'resign' )
    {
-      if ( !$may_resign_game )
+      if( !$may_resign_game )
          error('invalid_action', "confirm.resign($gid,$Status,$my_id)");
 
-      if ( $my_id != $ToMove_ID )
+      if( $my_id != $ToMove_ID )
          $to_move = WHITE+BLACK-$to_move;
    }
 
@@ -581,7 +581,7 @@ This is why:
                . "</center>" ;
       }
 
-      if ( $message_raw )
+      if( $message_raw )
       {
          if( $message_from_server_way )
          {
@@ -650,7 +650,7 @@ function do_add_time( $game_row, $my_id)
 
    $add_hours = add_time_opponent( $game_row, $my_id,
                   time_convert_to_hours( $add_days, 'days'), $reset_byo );
-   if ( !is_numeric($add_hours) )
+   if( !is_numeric($add_hours) )
       error('confirm_add_time',
          "do_add_time($gid,$my_id,$add_days,$reset_byo): $add_hours");
 

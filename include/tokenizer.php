@@ -136,7 +136,7 @@ class Token
    /*! \brief Returns int end-position where token was found in orig-text. */
    function get_endpos()
    {
-      if ( $this->epos < 0 )
+      if( $this->epos < 0 )
          return $this->spos + strlen($this->token) - 1;
       else
          return $this->epos;
@@ -145,7 +145,7 @@ class Token
    /*! \brief Returns int the length of token as found in orig-text. */
    function get_length()
    {
-      if ( $this->epos < 0 )
+      if( $this->epos < 0 )
          return strlen($this->token);
       else
          return $this->epos - $this->spos + 1;
@@ -195,7 +195,7 @@ class Token
   * Example:
   *   $tokenizer = new XYZTokenizer(tok-config, other args);
   *   $success = $tokenizer->parse( value );
-  *   if ( !$success )
+  *   if( !$success )
   *      handle_errors( $tokenizer->errors );
   *   $token_arr = $tokenizer->tokens(); // array of Token-objects
   *
@@ -395,7 +395,7 @@ class StringTokenizer extends BasicTokenizer
       $this->quote_chars  = $quote_chars;
       $this->rxsep        = '';
 
-      if ( $this->flags & TOKENIZE_WORD_RX )
+      if( $this->flags & TOKENIZE_WORD_RX )
       {
          $this->rxsep = ($split_chars) ? "/[^{$split_chars}]/i" : '';
          $this->split_chars = '';
@@ -411,11 +411,11 @@ class StringTokenizer extends BasicTokenizer
       $this->init_parse($value);
 
       $success = false;
-      if ( $this->quote_type == QUOTETYPE_DOUBLE )
+      if( $this->quote_type == QUOTETYPE_DOUBLE )
          $success = $this->parse_quote_double();
-      elseif ( $this->quote_type == QUOTETYPE_QUOTE )
+      elseif( $this->quote_type == QUOTETYPE_QUOTE )
          $success = $this->parse_quote_quote();
-      elseif ( $this->quote_type == QUOTETYPE_ESCAPE )
+      elseif( $this->quote_type == QUOTETYPE_ESCAPE )
          $success = $this->parse_quote_escape();
       else
          error('invalid_filter', "tokenizer.parse.unknown_quote_type({$this->quote_type})");
@@ -439,7 +439,7 @@ class StringTokenizer extends BasicTokenizer
     */
    function is_split_char( $char, $substr )
    {
-      if ( (string)$this->rxsep != '')
+      if( (string)$this->rxsep != '')
          $is_splitter = preg_match($this->rxsep, $char);
       else
          $is_splitter = !(strpos($this->split_chars, $char) === false);
@@ -478,16 +478,16 @@ class StringTokenizer extends BasicTokenizer
          $char = substr( $this->value, $pos, 1 );
 
          // check for separator
-         if ( $this->is_split_char( $char, substr( $this->value, $pos ) ) ) // separator found
+         if( $this->is_split_char( $char, substr( $this->value, $pos ) ) ) // separator found
          {
-            if ( ($pos + 1 < $len) && (substr($this->value,$pos+1,1) == $char) ) // need escape
+            if( ($pos + 1 < $len) && (substr($this->value,$pos+1,1) == $char) ) // need escape
             {
                $tok .= $char;
                $pos++;
                continue;
             }
 
-            if ( (string)$tok != '' )
+            if( (string)$tok != '' )
                $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
             $spos = $pos;
             $tok = '';
@@ -496,9 +496,9 @@ class StringTokenizer extends BasicTokenizer
          }
 
          // check for double special-char
-         if ( !(strpos($this->spec_chars, $char) === false) )
+         if( !(strpos($this->spec_chars, $char) === false) )
          {
-            if ( ($pos + 1 < $len) && (substr($this->value,$pos+1,1) == $char) ) // need escape
+            if( ($pos + 1 < $len) && (substr($this->value,$pos+1,1) == $char) ) // need escape
             {
                $tok .= $this->escape_chars[1] . $char;
                $pos++;
@@ -509,7 +509,7 @@ class StringTokenizer extends BasicTokenizer
          $tok .= $char;
       }
 
-      if ( (string)$tok != '' )
+      if( (string)$tok != '' )
          $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
       return true;
    }
@@ -539,42 +539,42 @@ class StringTokenizer extends BasicTokenizer
          // note: $this->value{pos} works only with const-pos
          $char = substr( $this->value, $pos, 1 );
 
-         if ( $char == $quote_start && ($pos+1 < $len) && substr($this->value,$pos+1,1) == $quote_start ) // double-quote
+         if( $char == $quote_start && ($pos+1 < $len) && substr($this->value,$pos+1,1) == $quote_start ) // double-quote
          {
             $tok .= $quote_start;
             $pos++;
             continue;
          }
 
-         if ( $quote_begin == 0 && $char == $quote_start )
+         if( $quote_begin == 0 && $char == $quote_start )
          {
             $quote_begin++;
             $tokflags = TOKFLAG_QUOTED;
             continue;
          }
-         elseif ($quote_begin == 1 && $char == $quote_end )
+         elseif($quote_begin == 1 && $char == $quote_end )
          {
             $quote_begin--;
             continue;
          }
 
-         if ( strpos($this->spec_chars, $char) !== false ) // special-char found
+         if( strpos($this->spec_chars, $char) !== false ) // special-char found
          {
-            if ( $quote_begin > 0 ) // quoted
+            if( $quote_begin > 0 ) // quoted
                $tok .= $this->escape_chars[1];
             $tok .= $char;
             continue;
          }
 
-         if ( $this->is_split_char( $char, substr( $this->value, $pos ) ) ) // separator found
+         if( $this->is_split_char( $char, substr( $this->value, $pos ) ) ) // separator found
          {
-            if ( $quote_begin > 0 )
+            if( $quote_begin > 0 )
             { // quoted
                $tok .= $char;
             }
             else
             { // unquoted
-               if ( (string)$tok != '' )
+               if( (string)$tok != '' )
                   $this->tokens[]= new Token(TOK_TEXT, $spos, $tok, $tokflags);
                $tokflags = 0;
                $spos = $pos;
@@ -585,10 +585,10 @@ class StringTokenizer extends BasicTokenizer
             $tok .= $char;
          }
       }
-      if ( (string)$tok != '' )
+      if( (string)$tok != '' )
          $this->tokens[]= new Token(TOK_TEXT, $spos, $tok, $tokflags);
 
-      if ($quote_begin != 0)
+      if($quote_begin != 0)
       {
          $this->errors[]= "[{$this->value}] " . T_('using bad quoting#filter');
          return false;
@@ -617,12 +617,12 @@ class StringTokenizer extends BasicTokenizer
          // note: $this->value{pos} works only with const-pos
          $char = substr( $this->value, $pos, 1 );
 
-         if ( $char == $esc_char ) // found escape-char
+         if( $char == $esc_char ) // found escape-char
          {
-            if ( $pos + 1 < $len ) // need escape
+            if( $pos + 1 < $len ) // need escape
             {
                $next_char = substr($this->value, $pos+1, 1);
-               if ( $next_char == $esc_char || ( strpos($this->spec_chars, $next_char) !== false ) )
+               if( $next_char == $esc_char || ( strpos($this->spec_chars, $next_char) !== false ) )
                   $tok .= $this->escape_chars[1]; // special-char
                $tok .= $next_char;
                $pos++;
@@ -630,9 +630,9 @@ class StringTokenizer extends BasicTokenizer
             }
          }
 
-         if ( $this->is_split_char( $char, substr( $this->value, $pos ) ) ) // separator found
+         if( $this->is_split_char( $char, substr( $this->value, $pos ) ) ) // separator found
          {
-            if ( (string)$tok != '' )
+            if( (string)$tok != '' )
                $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
             $spos = $pos;
             $tok = '';
@@ -642,7 +642,7 @@ class StringTokenizer extends BasicTokenizer
             $tok .= $char;
       }
 
-      if ( (string)$tok != '' )
+      if( (string)$tok != '' )
          $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
       return true;
    }
@@ -708,7 +708,7 @@ class XmlTag
   * <pre>
   *    $tokenizer = new XmlTokenizer();
   *    $success = $tokenizer->parse( "some <xml> ..." );
-  *    if ($sucess)
+  *    if($sucess)
   *       echo $tokenizer->to_string();
   *    else
   *       echo implode( "\n", $tokenizer->errors() );
@@ -760,20 +760,20 @@ class XmlTokenizer extends BasicTokenizer
       $this->len = strlen($this->value);
       $this->tok = '';
 
-      while ( $this->pos < $this->len )
+      while( $this->pos < $this->len )
       {
          // note: $this->value{pos} works only with const-pos
          $char = substr( $this->value, $this->pos, 1);
 
-         if ( $char == '<' ) // xml-tag
+         if( $char == '<' ) // xml-tag
          {
             $oldpos = $this->pos;
             $token_xml_tag = $this->eat_tag();
-            if ( $token_xml_tag->has_error() )
+            if( $token_xml_tag->has_error() )
                $this->pos = $oldpos; // if parse-error eat as normal-char
             else
             {
-               if ( (string)$this->tok != '' )
+               if( (string)$this->tok != '' )
                   $this->tokens[]= new Token(TOK_TEXT, $this->spos, $this->tok);
                $this->spos = $this->pos;
                $this->tok = '';
@@ -782,15 +782,15 @@ class XmlTokenizer extends BasicTokenizer
             }
          }
 
-         if ( $char == '&' ) // entity
+         if( $char == '&' ) // entity
          {
             $oldpos = $this->pos;
             $token_xml_ent = $this->eat_entity();
-            if ( $token_xml_ent->has_error() )
+            if( $token_xml_ent->has_error() )
                $this->pos = $oldpos; // if parse-error eat as normal-char
             else
             {
-               if ( (string)$this->tok != '' )
+               if( (string)$this->tok != '' )
                   $this->tokens[]= new Token(TOK_TEXT, $this->spos, $this->tok);
                $this->spos = $this->pos;
                $this->tok = '';
@@ -803,11 +803,11 @@ class XmlTokenizer extends BasicTokenizer
          $this->tok .= $char;
          $this->pos++;
       }
-      if ( (string)$this->tok != '' )
+      if( (string)$this->tok != '' )
          $this->tokens[]= new Token(TOK_TEXT, $this->spos, $this->tok);
 
       // encountered errors
-      if ( count($this->errors) > 0 )
+      if( count($this->errors) > 0 )
          return false;
 
       return true;
@@ -823,7 +823,7 @@ class XmlTokenizer extends BasicTokenizer
 
       // parse entity
       $out = array();
-      if ( preg_match($rx_entity, $val, $out) == 0)
+      if( preg_match($rx_entity, $val, $out) == 0)
       {
          $token->set_error("[" . substr($val, 0, 10) . "]: " .
             T_('invalid XML-entity at position #') . ($this->pos+1) );
@@ -852,7 +852,7 @@ class XmlTokenizer extends BasicTokenizer
       $xmltag->is_start = 1;
       $xmltag->is_end   = 0;
       $this->pos++; // skip '<'
-      if ( $this->pos >= $this->len )
+      if( $this->pos >= $this->len )
       {
          $token->set_error( "[<]: " . T_('invalid XML-tag at position #') . ($spos+1) );
          $this->errors[]= $token->get_error();
@@ -863,10 +863,10 @@ class XmlTokenizer extends BasicTokenizer
       /*
       // non-XML(!): check for special-tag <http://..>
       //   parsing XML-http-tag: <http://www/abc>
-      if ( substr($this->value, $this->pos, 7) === "http://" )
+      if( substr($this->value, $this->pos, 7) === "http://" )
       {
          $epos = strpos( $this->value, '>', $this->pos );
-         if ( $epos === false )
+         if( $epos === false )
          {
             $token->set_error( "[" . substr($this->value, $spos, $this->pos - $spos + 15) . "]: "
                . T_('invalid http-XML-tag at position #') . ($spos+1) );
@@ -886,12 +886,12 @@ class XmlTokenizer extends BasicTokenizer
       */
 
       // check for: </endtag>
-      if ( substr($this->value,$this->pos,1) == '/' )
+      if( substr($this->value,$this->pos,1) == '/' )
       {
          $xmltag->is_end   = 1;
          $xmltag->is_start = 0;
          $this->pos++; // skip '/'
-         if ( $this->pos >= $this->len )
+         if( $this->pos >= $this->len )
          {
             $token->set_error( "[</]: " . T_('invalid XML-tag at position #') . ($spos+1) );
             $this->errors[]= $token->get_error();
@@ -908,16 +908,16 @@ class XmlTokenizer extends BasicTokenizer
 
       // check for: / > attr
       $valid = false;
-      while ( $this->pos < $this->len )
+      while( $this->pos < $this->len )
       {
-         if ( ctype_space(substr($this->value,$this->pos,1)) ) // skip spaces
+         if( ctype_space(substr($this->value,$this->pos,1)) ) // skip spaces
          {
             $this->pos++;
             continue;
          }
 
          // check for: > (tag ended)
-         if ( substr($this->value,$this->pos,1) == '>' )
+         if( substr($this->value,$this->pos,1) == '>' )
          {
             $this->pos++;
             $valid = true;
@@ -925,9 +925,9 @@ class XmlTokenizer extends BasicTokenizer
          }
 
          // check for: /
-         if ( substr($this->value,$this->pos,1) == '/' )
+         if( substr($this->value,$this->pos,1) == '/' )
          {
-            if ($xmltag->is_end)
+            if($xmltag->is_end)
             {
                $token->set_error(
                   "[" . substr($this->value, $spos, $this->pos - $spos + 10) . "]: " .
@@ -943,14 +943,14 @@ class XmlTokenizer extends BasicTokenizer
          }
 
          // parse attribute
-         if ( !$this->eat_attribute( $token, $xmltag, $spos) )
+         if( !$this->eat_attribute( $token, $xmltag, $spos) )
          {
             $token->set_token($xmltag);
             return $token;
          }
       }
 
-      if ( !$valid )
+      if( !$valid )
       {
          $token->set_error(
             "[" . substr($this->value, $spos, $this->pos - $spos + 10) . "]: " .
@@ -970,13 +970,13 @@ class XmlTokenizer extends BasicTokenizer
    function eat_attribute( &$token, &$xmltag, $spos )
    {
       $out = array();
-      if ( preg_match( '/^([^\s=\/>]*)?="([^"]*)"/', substr($this->value, $this->pos), $out ) != 0 ) // 1. key = "val"
+      if( preg_match( '/^([^\s=\/>]*)?="([^"]*)"/', substr($this->value, $this->pos), $out ) != 0 ) // 1. key = "val"
          $xmltag->add_attribute( $out[1], $out[2] );
-      elseif ( preg_match( '/^([^\s=\/>]*)?=\'([^\']*)\'/', substr($this->value, $this->pos), $out ) != 0 ) // 2. key = 'val'
+      elseif( preg_match( '/^([^\s=\/>]*)?=\'([^\']*)\'/', substr($this->value, $this->pos), $out ) != 0 ) // 2. key = 'val'
          $xmltag->add_attribute( $out[1], $out[2] );
-      elseif ( preg_match( '/^([^\s=\/>]*)?=([^\s\/>]*)/', substr($this->value, $this->pos), $out ) != 0 ) // 3. key = val
+      elseif( preg_match( '/^([^\s=\/>]*)?=([^\s\/>]*)/', substr($this->value, $this->pos), $out ) != 0 ) // 3. key = val
          $xmltag->add_attribute( $out[1], $out[2] );
-      elseif ( preg_match( '/^([^\s=\/>]+)?/', substr($this->value, $this->pos), $out ) != 0 ) // 4. key
+      elseif( preg_match( '/^([^\s=\/>]+)?/', substr($this->value, $this->pos), $out ) != 0 ) // 4. key
          $xmltag->add_attribute( $out[1], 1 );
       else
       {

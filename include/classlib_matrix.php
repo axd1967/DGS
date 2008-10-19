@@ -65,19 +65,19 @@ class Matrix
     */
    function add( $x, $y, $obj )
    {
-      if ( is_null($this->get_entry($x,$y)) )
+      if( is_null($this->get_entry($x,$y)) )
          $this->infos[MATRIX_NUM_ENTRIES]++;
 
       $this->entries_x[$x][$y] = $obj;
       $this->entries_y[$y][$x] = 1;
 
-      if ( !isset($this->infos[MATRIX_MIN_X]) || $x < @$this->infos[MATRIX_MIN_X] )
+      if( !isset($this->infos[MATRIX_MIN_X]) || $x < @$this->infos[MATRIX_MIN_X] )
          $this->infos[MATRIX_MIN_X] = $x;
-      if ( !isset($this->infos[MATRIX_MAX_X]) || $x > @$this->infos[MATRIX_MAX_X] )
+      if( !isset($this->infos[MATRIX_MAX_X]) || $x > @$this->infos[MATRIX_MAX_X] )
          $this->infos[MATRIX_MAX_X] = $x;
-      if ( !isset($this->infos[MATRIX_MIN_Y]) || $y < @$this->infos[MATRIX_MIN_Y] )
+      if( !isset($this->infos[MATRIX_MIN_Y]) || $y < @$this->infos[MATRIX_MIN_Y] )
          $this->infos[MATRIX_MIN_Y] = $y;
-      if ( !isset($this->infos[MATRIX_MAX_Y]) || $y > @$this->infos[MATRIX_MAX_Y] )
+      if( !isset($this->infos[MATRIX_MAX_Y]) || $y > @$this->infos[MATRIX_MAX_Y] )
          $this->infos[MATRIX_MAX_Y] = $y;
    }
 
@@ -106,10 +106,10 @@ class Matrix
     */
    function get_y_entries( $x, $sortflag=0 )
    {
-      if ( !isset($this->entries_x[$x]) )
+      if( !isset($this->entries_x[$x]) )
          return array();
       $result = $this->entries_x[$x];
-      if ( $sortflag )
+      if( $sortflag )
          sort($result, $sortflag);
       return $result;
    }
@@ -121,10 +121,10 @@ class Matrix
     */
    function get_x_entries( $y, $sortflag=0 )
    {
-      if ( !isset($this->entries_y[$y]) )
+      if( !isset($this->entries_y[$y]) )
          return array();
       $result = $this->entries_y[$y];
-      if ( $sortflag )
+      if( $sortflag )
          sort($result, $sortflag);
       return $result;
    }

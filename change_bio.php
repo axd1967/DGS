@@ -50,7 +50,7 @@ require_once( "include/std_functions.php" );
       $bid= $row['ID'];
 
       // delete entry
-      if ( $change_it )
+      if( $change_it )
       {
          $EnteredText = trim(get_request_arg("text$bid"));
          if( $EnteredText == "" )
@@ -69,14 +69,14 @@ require_once( "include/std_functions.php" );
    $max_pos = $idx;
 
    // compute the new SortOrder
-   if ( !$change_it )
+   if( !$change_it )
    foreach( $bios as $idx => $row )
    {
       $bid= $row['ID'];
 
       // check for bios movements
       $pos = (int)@$_REQUEST['move'.$bid];
-      if ( !$pos )
+      if( !$pos )
          continue;
 
       $pos+= $idx;
@@ -96,7 +96,7 @@ require_once( "include/std_functions.php" );
    foreach( $bios as $idx => $row ) {
       $bid= $row['ID'];
 
-      if ( $change_it )
+      if( $change_it )
       {
          $EnteredText = trim(get_request_arg("text$bid"));
          $EnteredCategory = trim(get_request_arg("category$bid"));
@@ -133,7 +133,7 @@ require_once( "include/std_functions.php" );
 
    // add new entries
    $idx = get_request_arg("newcnt");
-   if ( $change_it )
+   if( $change_it )
    for( $bid=1; $bid <= $idx; $bid++ )
    {
       $EnteredText = trim(get_request_arg("newtext$bid"));
@@ -155,7 +155,7 @@ require_once( "include/std_functions.php" );
    }
 
 
-   if ( !$change_it )
+   if( !$change_it )
    {
       // was up/down-move
       jump_to("edit_bio.php?editorder=1");

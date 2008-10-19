@@ -118,9 +118,9 @@ class Board
 
          extract($row); //$MoveNr, $Stone, $PosX, $PosY, $Hours
 
-         if ( $PosX <= POSX_ADDTIME ) //configuration actions
+         if( $PosX <= POSX_ADDTIME ) //configuration actions
          {
-            if ( $PosX == POSX_ADDTIME )
+            if( $PosX == POSX_ADDTIME )
             {
          //POSX_ADDTIME Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=hours added
                $this->infos[] = array(POSX_ADDTIME, $MoveNr, $Stone, $Hours, $PosY);
@@ -441,7 +441,7 @@ class Board
          $coord_start_letter = "<td class=brdl><img class=brdl src=\"$stone_size/c";
 
          $s = ($this->coord_borders & COORD_LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
-         if ( $s )
+         if( $s )
             $coord_left = "<td colspan=$s><img src=\"images/blank.gif\" width=" .
              ( ( $this->coord_borders & COORD_LEFT ? $coord_width : 0 )
              + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
@@ -450,7 +450,7 @@ class Board
             $coord_left = '';
 
          $s = ($this->coord_borders & COORD_RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
-         if ( $s )
+         if( $s )
             $coord_right = "<td colspan=$s><img src=\"images/blank.gif\" width=" .
              ( ( $this->coord_borders & COORD_RIGHT ? $coord_width : 0 )
              + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
@@ -1069,7 +1069,7 @@ class Board
                {
                   foreach( $sub as $y => $val )
                   {
-                     if ($c == @$this->array[$x][$y]) {
+                     if( $c == @$this->array[$x][$y] ) {
                         $marked[]= array($x,$y);
                         @$this->array[$x][$y] ^= OFFSET_MARKED;
                      }

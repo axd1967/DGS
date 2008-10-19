@@ -57,11 +57,11 @@ $ARR_DBFIELDKEYS = array(
    $my_id = $player_row['ID'];
    $uid = (int)@$_REQUEST['uid'];
    $opp = (int)@$_REQUEST['opp'];
-   if ( empty($uid) )
+   if( empty($uid) )
       $uid = $my_id;
-   if ( $uid <= 0 )
+   if( $uid <= 0 )
       error('invalid_user', "opponents.bad_user($uid)");
-   if ( $opp < 0 || $opp == $uid )
+   if( $opp < 0 || $opp == $uid )
       $opp = 0;
       //error('invalid_opponent', "opponents.bad_opponent($opp)");
 
@@ -146,7 +146,7 @@ $ARR_DBFIELDKEYS = array(
    // page-vars
    $page_vars = new RequestParameters();
    $page_vars->add_entry( 'uid', $uid );
-   if ( $opp )
+   if( $opp )
       $page_vars->add_entry( 'opp', $opp );
    $usform->attach_table( $page_vars ); // for page-vars as hiddens in form
 
@@ -202,7 +202,7 @@ $ARR_DBFIELDKEYS = array(
          'DESCRIPTION', T_('Last changed'),
          'FILTER',      $usfilter, 3,
          'FILTERERROR', $usfilter, 3, '<br>'.$FERR1, $FERR2, true ));
-   if ( $opp )
+   if( $opp )
    {
       $usform->add_row( array(
             'TAB',
@@ -219,7 +219,7 @@ $ARR_DBFIELDKEYS = array(
    $uqsql = new QuerySQL( // base-query is to show only opponents
       SQLP_OPTS, 'DISTINCT',
       SQLP_FROM, 'Games AS G' );
-   if ( ALLOW_SQL_UNION )
+   if( ALLOW_SQL_UNION )
    {
       $uqsql->add_part( SQLP_UNION_WHERE,
          "G.White_ID=$uid AND P.ID=G.Black_ID",
@@ -256,7 +256,7 @@ $ARR_DBFIELDKEYS = array(
    $qsql->add_part( SQLP_FROM, 'Games AS G' );
    $qsql->merge ( $query_usfilter ); // clause-parts for filter
 
-   if ( $opp )
+   if( $opp )
    {
       // uid is black
       $qsql_black = new QuerySQL( SQLP_WHERE, "G.Black_ID=$uid", "G.White_ID=$opp" );
@@ -307,7 +307,7 @@ $ARR_DBFIELDKEYS = array(
 
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
 
-   if ( $opp )
+   if( $opp )
    {
       //players infos
       $usform->set_area( 2 );
@@ -330,14 +330,14 @@ $ARR_DBFIELDKEYS = array(
 
    start_page( $title1, true, $logged_in, $player_row,
                $utable->button_style($player_row['Button']) );
-   if ( $DEBUG_SQL && isset($query_black) ) echo "QUERY-BLACK: " . make_html_safe($query_black) . "<br>\n";
-   if ( $DEBUG_SQL && isset($query_white) ) echo "QUERY-WHITE: " . make_html_safe($query_white) . "<br>\n";
-   if ( $DEBUG_SQL && !$opp) echo "QUERY: " . make_html_safe($query) . "<br>\n";
+   if( $DEBUG_SQL && isset($query_black) ) echo "QUERY-BLACK: " . make_html_safe($query_black) . "<br>\n";
+   if( $DEBUG_SQL && isset($query_white) ) echo "QUERY-WHITE: " . make_html_safe($query_white) . "<br>\n";
+   if( $DEBUG_SQL && !$opp) echo "QUERY: " . make_html_safe($query) . "<br>\n";
 
    // static filter-values
    $arrtmp = array();
    $filterURL = $usfilter->get_url_parts( $arrtmp );
-   if ( $filterURL )
+   if( $filterURL )
       $filterURL .= URI_AMP;
 
    // build user-table
@@ -409,7 +409,7 @@ $ARR_DBFIELDKEYS = array(
    mysql_free_result($result);
 
    // print form with user-table
-   if ( $opp ) // has opp
+   if( $opp ) // has opp
    {
       // print static-filter, player-info, stats-table
       echo "<h3 class=Header>$title2</h3>\n"
@@ -432,20 +432,20 @@ $ARR_DBFIELDKEYS = array(
    // end of table
 
    $menu_array = array();
-   if ( $opp )
+   if( $opp )
       $menu_array[ T_('Show opponents') ] = "{$page}{$filterURL}uid=$uid";
 
-   if ( $uid != $my_id ) // others opponents
+   if( $uid != $my_id ) // others opponents
    {
       $menu_array[ T_('Show my opponents') ]   = "{$page}{$filterURL}uid=$my_id";
-      if ( $opp != $my_id )
+      if( $opp != $my_id )
       {
          $menu_array[ T_('Show me as opponent') ] = "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$my_id";
          $menu_array[ T_('Show as my opponent') ] = "{$page}{$filterURL}uid=$my_id".URI_AMP."opp=$uid";
       }
    }
 
-   if ( $opp )
+   if( $opp )
       $menu_array[ T_('Switch opponent role') ] = "{$page}{$filterURL}uid=$opp".URI_AMP."opp=$uid";
 
    end_page(@$menu_array);
@@ -460,12 +460,12 @@ function extract_user_stats( $color, $query = null )
    global $ARR_DBFIELDKEYS;
 
    $arr = array();
-   if ( !is_null($query) )
+   if( !is_null($query) )
    {
       $result = mysql_query( $query )
          or error('mysql_query_failed', "opponents.extract_user_stats($color)");
 
-      if ( $row = mysql_fetch_assoc( $result ) )
+      if( $row = mysql_fetch_assoc( $result ) )
       {
          foreach( $ARR_DBFIELDKEYS as $key )
             $arr[$key] = $row[$key];
@@ -475,7 +475,7 @@ function extract_user_stats( $color, $query = null )
 
    foreach( $ARR_DBFIELDKEYS as $key )
    {
-      if ( @$arr[$key] == '' )
+      if( @$arr[$key] == '' )
          $arr[$key] = 0;
    }
 
@@ -586,7 +586,7 @@ function print_stats_table( $p, $B, $W, $fin )
    $won_games  = $B['cntWon'] + $W['cntWon'];
    $jigo_games = $B['cntJigo'] + $W['cntJigo'];
 
-   if ( $fin )
+   if( $fin )
    {
       // stats: win/lost-ratio
       $ratio = ( $cnt_games == 0) ? 0 : round( 100 * ( $won_games + $jigo_games/2 ) / $cnt_games );
@@ -601,7 +601,7 @@ function print_stats_table( $p, $B, $W, $fin )
       $W['cntGames'],
       $cnt_games );
 
-   if ( $fin )
+   if( $fin )
    {
       // stats: won + lost games
       $r .= sprintf( $rowpatt2, T_('#Games won : lost'),

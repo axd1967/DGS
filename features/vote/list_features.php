@@ -59,7 +59,7 @@ require_once( "features/vote/lib_votes.php" );
    $filter_subject =&
       $ffilter->add_filter( 3, 'Text', 'FL.Subject', true,
          array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ) );
-   if ( $is_admin )
+   if( $is_admin )
       $ffilter->add_filter( 4, 'Numeric', 'FL.Editor_ID', true, array( FC_SIZE => 8 ) );
    $ffilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_subject->get_rx_terms() );
@@ -73,7 +73,7 @@ require_once( "features/vote/lib_votes.php" );
    $ftable->add_tablehead( 1, T_('ID#header'),          'ID', 0, 'FL.ID+');
    $ftable->add_tablehead( 2, T_('Status#header'),      'Enum', 0, 'FL.Status+');
    $ftable->add_tablehead( 3, T_('Subject#header'),     '', 0, 'FL.Subject+');
-   if ( $is_admin )
+   if( $is_admin )
       $ftable->add_tablehead( 4, T_('Editor#header'),   'User', 0, 'FL.Editor_ID+');
    $ftable->add_tablehead( 5, T_('Created#header'),     'Date', 0, 'FL.Created+');
    $ftable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
@@ -95,8 +95,8 @@ require_once( "features/vote/lib_votes.php" );
 
    $title = T_('Feature list');
    start_page( $title, true, $logged_in, $player_row );
-   if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_ffilter->get_select()) ."<br>";
-   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
+   if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_ffilter->get_select()) ."<br>";
+   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    echo "<h3 class=Header>$title</h3>\n";
 
@@ -114,7 +114,7 @@ require_once( "features/vote/lib_votes.php" );
          $allow_edit = $feature->allow_edit( $my_id );
 
          // vote
-         if ( $feature->allow_vote( $my_id ) )
+         if( $feature->allow_vote( $my_id ) )
          {
             $links .= anchor( "vote_feature.php?fid=$ID",
                   image( "{$base_path}17/wx.gif", 'V'),
@@ -125,7 +125,7 @@ require_once( "features/vote/lib_votes.php" );
 
          // edit
          $links .= '&nbsp;';
-         if ( $allow_edit )
+         if( $allow_edit )
          {
             $links .= anchor( "edit_feature.php?fid=$ID",
                   image( "{$base_path}images/edit.gif", 'E'),
@@ -136,7 +136,7 @@ require_once( "features/vote/lib_votes.php" );
 
          // delete
          $links .= '&nbsp;';
-         if ( $allow_edit )
+         if( $allow_edit )
          {
             $links .= anchor( "edit_feature.php?fid=$ID".URI_AMP.'feature_delete=1',
                   image( "{$base_path}images/trashcan.gif", 'X'),
@@ -179,7 +179,7 @@ require_once( "features/vote/lib_votes.php" );
    // end of table
 
    $menu_array = array();
-   if ( Feature::allow_user_edit( $my_id ) )
+   if( Feature::allow_user_edit( $my_id ) )
       $menu_array[ T_('Add new feature') ] = "features/vote/edit_feature.php";
    $menu_array[ T_('Show votes') ] = "features/vote/list_votes.php";
 

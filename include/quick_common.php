@@ -81,7 +81,7 @@ define('FOLDER_NEW', 2);
 define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * 86400); // [secs]
 
 
-if ( get_magic_quotes_gpc() )
+if( get_magic_quotes_gpc() )
 {
    function arg_stripslashes( $arg)
    {
@@ -120,9 +120,9 @@ function get_request_arg( $name, $def='', $list=NULL)
    $val = (isset($_REQUEST[$name]) ? arg_stripslashes($_REQUEST[$name]) :
          //$HTTP_REQUEST_VARS does not exist
          $def) ;
-   if (is_array($list) && !is_array($val))
+   if( is_array($list) && !is_array($val) )
    {
-      if (!array_key_exists( (string) $val, $list) )
+      if( !array_key_exists( (string) $val, $list) )
          $val = $def;
    }
    return $val;

@@ -34,7 +34,6 @@ define('DATEFMT_FEATLIST', 'Y-m-d');
 define('DATEFMT_VOTELIST', 'Y-m-d');
 define('DATEFMT_FEATURE',  'Y-m-d&\n\b\s\p;H:i');
 
-
  /*!
   * \class Feature
   *
@@ -66,7 +65,7 @@ class Feature
     */
    function Feature( $id=0, $status=FEATSTAT_NEW, $subject='', $description='', $editor=0, $created=0, $lastchanged=0 )
    {
-      if ( !is_numeric($editor) || !is_numeric($editor) || $editor < 0 )
+      if( !is_numeric($editor) || !is_numeric($editor) || $editor < 0 )
          error('invalid_user', "feature.Feature($id,$editor)");
       $this->id = (int) $id;
       $this->set_status( $status );
@@ -80,7 +79,7 @@ class Feature
    /*! \brief Sets valid status */
    function set_status( $status )
    {
-      if ( !preg_match( "/^(NEW|NACK|ACK|WORK|DONE)$/", $status ) )
+      if( !preg_match( "/^(NEW|NACK|ACK|WORK|DONE)$/", $status ) )
          error('invalid_status', "feature.set_status($status)");
 
       $this->status = $status;
@@ -89,7 +88,7 @@ class Feature
    /*! \brief Sets description */
    function set_description( $description )
    {
-      if ( is_null($description) )
+      if( is_null($description) )
          $this->description = '';
       else
          $this->description = preg_replace( "/(\r\n|\n|\r)+/s", "\n", trim($description) );
@@ -101,7 +100,7 @@ class Feature
     */
    function set_subject( $subject )
    {
-      if ( is_null($subject) )
+      if( is_null($subject) )
          $this->subject = '';
       else
          $this->subject = preg_replace( "/(\r\n|\n|\r)+/s", "\n", trim($subject) );
@@ -113,13 +112,13 @@ class Feature
     */
    function allow_vote( $uid )
    {
-      if ( !Feature::allow_voting() )
+      if( !Feature::allow_voting() )
          return false;
 
       // not allowed for invalid user, guest or not current user
       global $player_row;
       $my_id = (int)@$player_row['ID'];
-      if ( !is_numeric($uid) || $uid != $my_id || $uid <= GUESTS_ID_MAX )
+      if( !is_numeric($uid) || $uid != $my_id || $uid <= GUESTS_ID_MAX )
          return false;
 
       return (bool) ( $this->status == FEATSTAT_ACK || $this->status == FEATSTAT_WORK );
@@ -132,12 +131,12 @@ class Feature
     */
    function allow_edit( $uid )
    {
-      if ( !Feature::allow_voting() ) // not even for admin
+      if( !Feature::allow_voting() ) // not even for admin
          return false;
 
-      if ( Feature::is_admin() )
+      if( Feature::is_admin() )
          return true;
-      if ( !Feature::allow_user_edit( $uid ) )
+      if( !Feature::allow_user_edit( $uid ) )
          return false;
 
       $allow_edit_status = (bool) ( $this->status != FEATSTAT_WORK && $this->status != FEATSTAT_DONE );
@@ -156,7 +155,7 @@ class Feature
 
       $result = mysql_query("SELECT ID FROM Players WHERE ID={$this->editor} LIMIT 1")
          or error('mysql_query_failed', "feature.find_user({$this->editor})");
-      if ( !$result || mysql_num_rows($result) != 1 )
+      if( !$result || mysql_num_rows($result) != 1 )
          error('unknown_user', "feature.find_user2({$this->editor})");
       mysql_free_result($result);
 
@@ -201,7 +200,7 @@ class Feature
     */
    function update_vote( $voter, $points )
    {
-      if ( is_null($this->featurevote) )
+      if( is_null($this->featurevote) )
          $this->featurevote = FeatureVote::new_featurevote( $this->id, $voter, $points );
       else
          $this->featurevote->set_points( $points );
@@ -250,15 +249,15 @@ class Feature
     */
    function allow_user_edit( $uid )
    {
-      if ( !Feature::allow_voting() )
+      if( !Feature::allow_voting() )
          return false;
 
       // not allowed for invalid user or guest
-      if ( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
          return false;
 
       global $player_row;
-      if ( $uid != (int)@$player_row['ID'] && !Feature::is_admin() )
+      if( $uid != (int)@$player_row['ID'] && !Feature::is_admin() )
          return false;
       else
          return true;
@@ -271,8 +270,8 @@ class Feature
     */
    function build_query_feature_list( $ftable, $user_id )
    {
-      if ( !is_numeric($user_id) )
-         error('invalid_user', "Feature.build_queryfeature_list($user_id)");
+      if( !is_numeric($user_id) )
+         error('invalid_user', "Feature.build_query_feature_list($user_id)");
 
       // build SQL-query
       $qsql = new QuerySQL();
@@ -326,7 +325,7 @@ class Feature
     */
    function load_feature( $id )
    {
-      if ( !is_numeric($id) )
+      if( !is_numeric($id) )
          error('invalid_feature', "feature.load_feature($id)");
 
       $fields = implode(',', Feature::get_query_fields());
@@ -366,7 +365,7 @@ class FeatureVote
     */
    function FeatureVote( $fid=0, $voter=0, $points=0, $lastchanged=0 )
    {
-      if ( !is_numeric($voter) || !is_numeric($voter) || $voter < 0 )
+      if( !is_numeric($voter) || !is_numeric($voter) || $voter < 0 )
          error('invalid_user', "featurevote.FeatureVote($id,$voter)");
       $this->fid = (int) $fid;
       $this->voter = (int) $voter;
@@ -377,7 +376,7 @@ class FeatureVote
    /*! \brief Sets valid points (<0,0,>0). */
    function set_points( $points )
    {
-      if ( !is_numeric($points) || $points < -FEATVOTE_MAXPOINTS || $points > FEATVOTE_MAXPOINTS )
+      if( !is_numeric($points) || $points < -FEATVOTE_MAXPOINTS || $points > FEATVOTE_MAXPOINTS )
          error('invalid_status', "featurevote.set_points($points)");
 
       $this->points = $points;
@@ -425,9 +424,9 @@ class FeatureVote
    /*! \brief Returns error-message if points are invalid; otherwise return null (=points ok). */
    function check_points( $points )
    {
-      if ( !is_numeric($points) )
+      if( !is_numeric($points) )
          return sprintf( T_('points [%s] must be numeric'), $points );
-      if ( $points < -FEATVOTE_MAXPOINTS || $points > FEATVOTE_MAXPOINTS )
+      if( $points < -FEATVOTE_MAXPOINTS || $points > FEATVOTE_MAXPOINTS )
          return sprintf( T_('points [%s] must be in range [%s,%s]'), $points, -FEATVOTE_MAXPOINTS, FEATVOTE_MAXPOINTS );
       return null;
    }
@@ -484,7 +483,7 @@ class FeatureVote
     */
    function new_from_row( $row )
    {
-      if ( $row['fid'] != 0 )
+      if( $row['fid'] != 0 )
       {
          $fvote = new FeatureVote(
                $row['fid'], $row['Voter_ID'], $row['Points'], $row['FVLastchangedU'] );
@@ -500,7 +499,7 @@ class FeatureVote
     */
    function load_featurevote( $fid, $voter )
    {
-      if ( !is_numeric($fid) )
+      if( !is_numeric($fid) )
          error('invalid_feature', "featurevote.load_feature($fid,$voter)");
 
       $fields = implode(',', FeatureVote::get_query_fields());

@@ -249,7 +249,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
          , $datelabel, $black
          , $dategrid, $red);
 
-      if (SHOW_NRGAMES )
+      if( SHOW_NRGAMES )
       {
          $y = $gr->boxbottom+3 +2*$gr->labelMetrics['LINEH'];
          $x = $gr->label($gr->border, $y

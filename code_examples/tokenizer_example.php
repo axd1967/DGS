@@ -44,7 +44,7 @@ END_DATA;
 
    // parse args
    $type = 'xml';
-   if ( $argc > 2 )
+   if( $argc > 2 )
    {
       $type = $argv[1];
       $value = $argv[2];
@@ -52,18 +52,18 @@ END_DATA;
    $sep = ( $argc > 3 ) ? $argv[3] : '-';
 
    // choose Tokenizer
-   if ($type == 'xml') {
+   if( $type == 'xml' ) {
       $t = new XmlTokenizer();
 
-   } elseif ($type == 'D') {
+   } elseif( $type == 'D' ) {
       // using split_chars/spec_chars/escape_char, ignore quote_chars
       $t = new StringTokenizer(QUOTETYPE_DOUBLE, $sep, '*?');
 
-   } elseif ($type == 'Q') {
+   } elseif( $type == 'Q' ) {
       // using split_chars/spec_chars/quote_chars/escape_char
       $t = new StringTokenizer(QUOTETYPE_QUOTE,  $sep, '*?', "''");
 
-   } elseif ($type == 'E') {
+   } elseif( $type == 'E' ) {
       // using split_chars/spec_chars/quote_chars/escape_char
       $t = new StringTokenizer(QUOTETYPE_ESCAPE, $sep, '*?', '.');
 

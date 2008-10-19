@@ -181,7 +181,7 @@ require_once( "include/contacts.php" );
 //   $subject = mysql_addslashes('<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game");
    $subject = 'Your waiting room game has been joined.';
    $reply = trim(get_request_arg('reply'));
-   if ($reply)
+   if( $reply )
    {
       $reply = user_reference( REF_LINK, 1, '', $player_row). " wrote:\n" . $reply;
    }

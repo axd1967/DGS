@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 chdir( '../' );
 require_once( "include/std_functions.php" );
 
-if (!function_exists('glob')) {
+if( !function_exists('glob') ) {
 //glob exists by default since PHP version 4.3.9 (The PHP Group)
 /* Valid flags:
 Note : GLOB_ONLYDIR is not available on Windows.
@@ -46,22 +46,23 @@ function glob($pat, $flg=0)
    //echo "glob: dir='$dir' rexp=$rexp<br>";
 
    $res= array();
-   if (is_dir($dir)) {
-     if ($dh = opendir($dir)) {
-       while (($file = readdir($dh)) !== false) {
-         if (preg_match($rexp,$file)) {
-           if (!($flg & GLOB_ONLYDIR) || is_dir($dir.$file))
+   if( is_dir($dir) ) {
+     if( $dh = opendir($dir) ) {
+       while( ($file = readdir($dh)) !== false ) {
+         if( preg_match($rexp,$file) ) {
+           if( !($flg & GLOB_ONLYDIR) || is_dir($dir.$file) )
              $res[]=$dir.$file.(($flg & GLOB_MARK)?'/':'');
          }
        }
        closedir($dh);
      }
    }
-   if (count($res)) {
-     if (!($flg & GLOB_NOSORT)) sort($res);
-   } else {
-     if ( ($flg & GLOB_NOCHECK)) $res=$rexp;
-     else $res=false;
+   if( count($res) ) {
+     if( !($flg & GLOB_NOSORT) ) sort($res);
+   }
+   else
+   {
+     $res = ( ($flg & GLOB_NOCHECK) ) ? $rexp : false;
    }
    return $res;
 }//glob
@@ -112,7 +113,7 @@ function find_php_files( )
 
    foreach( $directories as $dir )
    {
-      foreach (glob("$dir*.php") as $filename)
+      foreach( glob("$dir*.php") as $filename )
       {
          //echo "filename=$filename<br>";
          $array[] = $filename;

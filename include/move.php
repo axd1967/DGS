@@ -185,7 +185,7 @@ function check_remove( &$board, $coord=false )
          error("illegal_position",'move5');
 
       $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
-      if ( MAX_SEKI_MARK<=0 || ($stone!=NONE && $stone!=MARKED_DAME) )
+      if( MAX_SEKI_MARK<=0 || ($stone!=NONE && $stone!=MARKED_DAME) )
       {
          if( $stone!=BLACK && $stone!=WHITE && $stone!=BLACK_DEAD && $stone!=WHITE_DEAD )
             error("illegal_position",'move6');

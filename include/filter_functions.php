@@ -54,7 +54,7 @@ function filter_id2mask( $id )
  */
 function createTokenizerConfig( $quotetype = null )
 {
-   if ( is_null($quotetype) )
+   if( is_null($quotetype) )
       $quotetype = QUOTETYPE_QUOTE;
    return new TokenizerConfig( $quotetype, '-', TEXT_WILD_M, "''", '\\\\' );
 }
@@ -64,7 +64,7 @@ function createTokenizerConfig( $quotetype = null )
  * signature: string make_text_end_exclusive(string v)
  */
 function make_text_end_exclusive( $v ) {
-   if ( $v == '' )
+   if( $v == '' )
       return '';
    $lastch = substr($v, -1, 1);
    return substr($v, 0, strlen($v) - 1) . chr( ord($lastch) + 1);
@@ -91,43 +91,43 @@ function sql_replace_wildcards( $valsql, $arr_repl, $arr_allow = array() )
       $char = $valsql{$pos};
       $repl = $char;
 
-      if ( $esc )
+      if( $esc )
       {
          $esc = 0;
          // non-DGS-wildcard needs no escaping, so escape previous '\', e.g. \a -> \\a
          // note: DGS-wildcard don't need '\' (so omit it to insert)
-         if ( !isset($arr_repl[$char]) )
+         if( !isset($arr_repl[$char]) )
             $sql .= '\\\\';
 
          // SQL-escape with '\' only needed if SQL-wildcard (if DGS-wild or not), e.g. \' -> \\\'
-         if ( !(strpos($sql_spec, $char) === false) )
+         if( !(strpos($sql_spec, $char) === false) )
             $sql .= '\\';
       }
-      elseif ( $char == '\\' )
+      elseif( $char == '\\' )
       {
          $esc = 1; // next char may needs escaping (but no '\')
          continue;
       }
       else // no char to escape
       {
-         if ( isset($arr_repl[$char]) )
+         if( isset($arr_repl[$char]) )
          {
             $repl = $arr_repl[$char];
-            if ($repl == '%' || $repl == '_')
+            if($repl == '%' || $repl == '_')
                $cnt_wild++;
 
             // SQL-injection-error: dest_char must never be one of: ' " \ -> so catch it by escaping
-            if ( !isset($arr_allow[$char]) ) // allow forbidden (BUT use with caution)
-               if ( $repl == "'" || $repl == '"' || $repl == '\\' )
+            if( !isset($arr_allow[$char]) ) // allow forbidden (BUT use with caution)
+               if( $repl == "'" || $repl == '"' || $repl == '\\' )
                   $sql .= '\\';
          }
-         elseif ( !(strpos($sql_spec, $char) === false) ) // SQL-special -> escape
+         elseif( !(strpos($sql_spec, $char) === false) ) // SQL-special -> escape
             $sql .= '\\';
       }
 
       $sql .= $repl;
    }
-   if ( $esc )
+   if( $esc )
       $sql .= '\\\\'; // ending with '\' (is SQL-special, so needs escaping)
 
    return array( $sql, $cnt_wild );
@@ -151,21 +151,21 @@ function sql_extract_terms( $sql, $rx_delimiter='/' )
    $rx_term = '';
    for( $pos = 0; $pos < $len; $pos++)
    {
-      if ( $sql{$pos} == '\\' )
+      if( $sql{$pos} == '\\' )
       {
          $pos++;
-         if ( $pos < $len )
+         if( $pos < $len )
             $rx_term .= preg_quote($sql{$pos}, $rx_delimiter);
       }
-      elseif ( $sql{$pos} == '%' )
+      elseif( $sql{$pos} == '%' )
       {
-         if ( $pos >= $endpos ) // skip trailing '%'
+         if( $pos >= $endpos ) // skip trailing '%'
             break;
-         while ( $pos <= $len && substr($sql, $pos+1, 1) == '%' ) // skip double '%'
+         while( $pos <= $len && substr($sql, $pos+1, 1) == '%' ) // skip double '%'
             $pos++;
          $rx_term .= '.*?';
       }
-      elseif ( $sql{$pos} == '_' )
+      elseif( $sql{$pos} == '_' )
          $rx_term .= '.';
       else
          $rx_term .= preg_quote($sql{$pos}, $rx_delimiter);

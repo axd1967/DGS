@@ -181,7 +181,7 @@ class DisplayForum
       // highlight terms (skipping XML-elements like tags & entities)
       if( is_array($rx_term) && count($rx_term) > 0 )
          $this->rx_term = implode('|', $rx_term);
-      else if( !is_string($rx_term) )
+      elseif( !is_string($rx_term) )
          $this->rx_term = '';
       else
          $this->rx_term = $rx_term;
@@ -214,7 +214,7 @@ class DisplayForum
 
    function print_headline( $headline=NULL )
    {
-      if ( is_null($headline) )
+      if( is_null($headline) )
          $headline = $this->headline;
 
       echo "<tr class=Caption>";
@@ -269,9 +269,9 @@ class DisplayForum
          $get['moderator'] = ( empty($this->is_moderator) ? 'y' : 'n' );
          if( $links & LINKPAGE_READ )
             $url = make_url( 'read.php', $get );
-         else if ( $links & LINKPAGE_LIST )
+         elseif( $links & LINKPAGE_LIST )
             $url = make_url( 'list.php', $get );
-         else if ( $links & LINKPAGE_SEARCH )
+         elseif( $links & LINKPAGE_SEARCH )
             $url = make_url( 'search.php', $get );
          else
             $url = make_url( 'index.php', $get );
@@ -279,7 +279,7 @@ class DisplayForum
       }
 
       $navi = array( 'maxrows' => $this->max_rows );
-      if ( !is_null($ReqParam) && ($links & (LINKPAGE_SEARCH|LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
+      if( !is_null($ReqParam) && ($links & (LINKPAGE_SEARCH|LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
          $navi = array_merge( $navi, $ReqParam->get_entries() );
 
       if( $links & LINK_PREV_PAGE )
@@ -358,21 +358,21 @@ class DisplayForum
    {
       $new = '';
       $anchor_prefix = 'new';
-      if ( $mode & NEWMODE_BOTTOM )
+      if( $mode & NEWMODE_BOTTOM )
       {
          $link = ($mode & NEWMODE_NO_LINK) ? '' : ' href="#new1"';
          if( $this->new_count > 0 )
             $new = sprintf( $this->fmt_new, 'NewFlag', $anchor_prefix,
                $this->new_count + 1, $link, T_('first new') );
       }
-      else if ( $cnt_new > 0 )
+      elseif( $cnt_new > 0 )
       {
          global $NOW;
          $newclass = ( $newdate == 0 || $newdate + NEW_LEVEL1 > $NOW )
             ? 'NewFlag'       // recent 'new'
             : 'OlderNewFlag'; // older 'new'
 
-         if ( $mode & NEWMODE_OVERVIEW )
+         if( $mode & NEWMODE_OVERVIEW )
          {
             $anchor_prefix = 'treenew';
             $addnew = 0;
@@ -486,7 +486,7 @@ class DisplayForum
    /*! \brief Inits and returns navigational images for draw_post if not initialized yet. */
    function init_navi_images()
    {
-      if ( !is_array($this->navi_img) )
+      if( !is_array($this->navi_img) )
       {
          global $base_path;
          $this->navi_img = array(
@@ -667,7 +667,7 @@ class DisplayForum
                .URI_AMP."edit=$pid#$pid\">"
                ."[ " . T_('edit') . " ]</a>&nbsp;&nbsp;";
          }
-         if ( $post->count_new > 0 && !$this->is_moderator ) // mark read link
+         if( $post->count_new > 0 && !$this->is_moderator ) // mark read link
          {
             $readmark = ( $post->read_mark != '' ) ? $post->read_mark : "p$pid.$NOW";
             echo '<a href="', $thread_url, URI_AMP, "markread=$readmark#$pid\">", // mark post
@@ -844,13 +844,13 @@ class Forum
     */
    function load_threads( $user_id, $is_moderator, $show_rows, $offset=0 )
    {
-      if ( !is_numeric($user_id) )
+      if( !is_numeric($user_id) )
          error('invalid_user', "Forum.load_threads($user_id)");
-      if ( !is_numeric($show_rows) || !is_numeric($offset) )
+      if( !is_numeric($show_rows) || !is_numeric($offset) )
          error('invalid_args', "Forum.load_threads(show_rows=$show_rows,offset=$offset)");
 
       $forum_id = $this->id;
-      if ( !is_numeric($forum_id) )
+      if( !is_numeric($forum_id) )
          error('unknown_forum', "Forum.load_threads(forum_id={$forum_id})");
 
       $mindate = ForumRead::get_min_date();
@@ -870,7 +870,7 @@ class Forum
       $qsql->add_part( SQLP_WHERE,
          "P.Forum_ID=$forum_id",
          'P.Parent_ID=0' );
-      if ( !$is_moderator )
+      if( !$is_moderator )
          $qsql->add_part( SQLP_WHERE, 'P.PostsInThread>0' );
       $qsql->add_part( SQLP_ORDER, 'P.LastChanged DESC' );
       $qsql->add_part( SQLP_LIMIT, sprintf( '%d,%d', $offset, $show_rows + 1) );
@@ -893,7 +893,7 @@ class Forum
       }
       mysql_free_result($result);
 
-      if ( $rows > $show_rows )
+      if( $rows > $show_rows )
       {
          array_pop( $thlist ); // remove last entry
          $this->navi_more_threads = true;
@@ -944,7 +944,7 @@ class Forum
     */
    function load_forum( $id )
    {
-      if ( !is_numeric($id) || $id <= 0 )
+      if( !is_numeric($id) || $id <= 0 )
          error('unknown_forum', "load_forum($id)");
 
       $qsql = Forum::build_query_sql();
@@ -965,7 +965,7 @@ class Forum
     */
    function load_forum_list( $user_id )
    {
-      if ( !is_numeric($user_id) )
+      if( !is_numeric($user_id) )
          error('invalid_user', "Forum.build_query_forum_list($user_id)");
 
       $mindate = ForumRead::get_min_date();
@@ -1066,11 +1066,11 @@ class ForumThread
       while( $row = mysql_fetch_array( $result ) )
       {
          $post = ForumPost::new_from_row( $row );
-         if ( $post->parent_id == 0 )
+         if( $post->parent_id == 0 )
             $this->thread_post = $post;
 
          $post->count_new = ( $this->forum_read->is_read_post($post) ) ? 0 : 1;
-         if ( $post->count_new > 0 )
+         if( $post->count_new > 0 )
          {
             $this->count_new++;
             $post->read_mark = "p{$post->id}.$NOW";
@@ -1163,13 +1163,13 @@ class ForumThread
          $navmap['child'] = 0;
 
          $last_post_id = @$last_parent_posts[$parent_id];
-         if ( $last_post_id )
+         if( $last_post_id )
          {
             $navmap['prevA'] = $last_post_id;
             $navtree[$last_post_id]['nextA'] = $post_id;
          }
 
-         if ( $parent_id )
+         if( $parent_id )
          {
             $last_parent_posts[$parent_id] = $post_id;
             $parent_children[$parent_id][] = $post_id;
@@ -1187,7 +1187,7 @@ class ForumThread
          }
       }
 
-      if ( $set_in_posts )
+      if( $set_in_posts )
       {
          foreach( $navtree as $post_id => $navmap )
          {
@@ -1359,9 +1359,9 @@ class ForumPost
     */
    function build_url_post( $anchor=null, $url_suffix='' )
    {
-      if ( is_null($anchor) )
+      if( is_null($anchor) )
          $anchor = '#' . ((int)$this->id);
-      else if ( (string)$anchor != '' )
+      elseif( (string)$anchor != '' )
          $anchor = '#' . ((string)$anchor);
       // else: anchor=''
 
@@ -1376,7 +1376,7 @@ class ForumPost
    /*! \brief Builds link to this post for specified date using given anchor-attribs. */
    function build_link_postdate( $date, $attbs='' )
    {
-     if ( empty($date) )
+     if( empty($date) )
          return NO_VALUE;
 
      $datestr = date( DATE_FMT, $date );
@@ -1599,20 +1599,20 @@ class ForumRead
    function is_read_post( $post )
    {
       // own posts are always read
-      if ( $post->author->id == $this->uid )
+      if( $post->author->id == $this->uid )
          return true;
 
       $chkdate = $post->created; // check against post creation-date
       // read, if date passed global read-date
-      if ( $this->min_date >= $chkdate )
+      if( $this->min_date >= $chkdate )
          return true;
 
       // read, if date passed thread read-date
-      if ( $this->has_newer_read_date( $chkdate, $this->fid, $this->tid, THPID_READDATE ) )
+      if( $this->has_newer_read_date( $chkdate, $this->fid, $this->tid, THPID_READDATE ) )
          return true;
 
       // read, if date passed post read-date
-      if ( $this->has_newer_read_date( $chkdate, $this->fid, $this->tid, $post->id ) )
+      if( $this->has_newer_read_date( $chkdate, $this->fid, $this->tid, $post->id ) )
          return true;
 
       return false; // unread = new
@@ -1631,7 +1631,7 @@ class ForumRead
          "UPDATE ForumRead SET NewCount=$newcount, Time=FROM_UNIXTIME($time) "
             . "WHERE User_ID='{$this->uid}' AND Forum_ID='$fid' AND "
             . "Thread_ID='$tid' AND Post_ID='$pid' LIMIT 1" );
-      if ( mysql_affected_rows() <= 0 ) // insert if not existing
+      if( mysql_affected_rows() <= 0 ) // insert if not existing
       {
          //TODO: get rid of the 'if' with mysql >= 4.1 (simply using IGNORE option to INSERT)
          if( mysql_single_fetch( "{$dbgmsg}3($argstr)", "SELECT 1 FROM ForumRead WHERE User_ID='{$this->uid}' AND Forum_ID='$fid' AND Thread_ID='$tid' AND Post_ID='$pid' LIMIT 1" ) === false )
@@ -1653,16 +1653,16 @@ class ForumRead
    function mark_read( $mark )
    {
       $out = array();
-      if ( !preg_match( "/^(p)(all|\d+)\.(\d+)$/", $mark, $out ) )
+      if( !preg_match( "/^(p)(all|\d+)\.(\d+)$/", $mark, $out ) )
          error( 'invalid_args', "ForumRead.mark_read($mark)" );
       $type = $out[1];
       $id = $out[2];
       $time = $out[3];
 
       $result = false;
-      if ( $type === 'p' )
+      if( $type === 'p' )
       {
-         if ( $id === 'all' )
+         if( $id === 'all' )
             $result = $this->mark_thread_read( $this->tid, $time );
          else
             $result = $this->mark_post_read( $id, $time );

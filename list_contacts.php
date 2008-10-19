@@ -172,8 +172,8 @@ require_once( "include/contacts.php" );
    $title = T_('Contact list');
 
    start_page( $title, true, $logged_in, $player_row );
-   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) . "<br>\n";
-   if ( $DEBUG_SQL ) echo "TERMS: " . $rx_term . "<br>\n";
+   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) . "<br>\n";
+   if( $DEBUG_SQL ) echo "TERMS: " . $rx_term . "<br>\n";
 
    echo "<h3 class=Header>$title</h3>\n";
 

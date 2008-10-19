@@ -300,7 +300,7 @@ function check_consistency( $gid)
 
       if( !($Stone == WHITE || $Stone == BLACK ) || $PosX<0 )
       {
-         if ( $PosX == POSX_ADDTIME )
+         if( $PosX == POSX_ADDTIME )
          {
             //TODO: Stone=time-adder, PosY=0|1 (1=byo-yomi-reset), Hours = hours added
             continue;

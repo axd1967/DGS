@@ -24,7 +24,7 @@ $TranslateGroups[] = "Common";
 require_once( "include/quick_common.php" );
 
 require_once( "include/time_functions.php" );
-if (!isset($page_microtime))
+if( !isset($page_microtime) )
 {
    $page_microtime = getmicrotime();
    //std_functions.php must be called from the main dir
@@ -343,7 +343,7 @@ function array_value_to_key_and_value( $array )
 // returns string-representation of flat map: "key=[val], ..."
 function map_to_string( $map, $sep = ', ' )
 {
-   if ( !is_array($map) )
+   if( !is_array($map) )
       return '';
 
    $arr = array();
@@ -529,7 +529,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       echo "\n<table id='pageLayout'>" //layout table
          . "\n <tr class=LayoutHorizontal>";
    }
-   else if( $player_row['MenuDirection'] == 'HORIZONTAL' )
+   elseif( $player_row['MenuDirection'] == 'HORIZONTAL' )
    {
       //echo "\n  <td class=Menu>\n";
       make_menu_horizontal($menu); //outside layout table
@@ -705,7 +705,7 @@ function make_menu($menu_array)
       $width = round($cumw - $cumwidth);
 
       echo "\n  <td width=\"$width%\">";
-      if ( is_a($link, 'Form') )
+      if( is_a($link, 'Form') )
          echo $link->echo_string();
       else
          echo anchor( "$base_path$link"
@@ -747,13 +747,13 @@ function make_menu_horizontal($menu)
       "\n  <td width=\"%d%%\" class=\"%s\" rowspan=\"%d\"><img src=\"{$base_path}images/%s\" alt=\"Dragon\"></td>";
    echo sprintf( $logo_line, $b, 'Logo1', $rows, 'dragonlogo_bl.jpg');
 
-   for ($row=1; $row <= $rows; $row++)
+   for( $row=1; $row <= $rows; $row++ )
    {
-      for ($col=1; $col <= $cols; $col++)
+      for( $col=1; $col <= $cols; $col++ )
       {
          // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
          $menuitem = $menu->get_entry( $col, $row );
-         if ( !is_null($menuitem) )
+         if( !is_null($menuitem) )
          {
             @list( $text, $link, $attbs ) = $menuitem;
             $content = anchor( $base_path.$link, $text, '', $attbs);
@@ -764,9 +764,9 @@ function make_menu_horizontal($menu)
       }
 
       // right logo
-      if ( $row == 1 )
+      if( $row == 1 )
          echo sprintf( $logo_line, $w, 'Logo2', $rows, 'dragonlogo_br.jpg');
-      if ( $row < $rows )
+      if( $row < $rows )
          echo "\n </tr><tr>";
    }
 
@@ -801,7 +801,7 @@ function make_menu_vertical($menu)
       . "\n  <td align=left nowrap>";
 
    $cntX = $menu->get_info(MATRIX_MAX_X);
-   for ($x=1; $x <= $cntX; $x++)
+   for( $x=1; $x <= $cntX; $x++ )
    {
       if( $x > 1 )
           echo '</td>'
@@ -913,7 +913,7 @@ function random_letter()
    $c = mt_rand(0,61);
    if( $c < 10 )
       return chr( $c + ord('0'));
-   else if( $c < 36 )
+   elseif( $c < 36 )
       return chr( $c - 10 + ord('a'));
    else
       return chr( $c - 36 + ord('A'));
@@ -1084,7 +1084,7 @@ function send_message( $debugmsg, $text='', $subject=''
          $uid= $row['ID'];
          if( $from_id > 0 && $uid == $from_id )
             $to_myself= true;
-         else if( $uid > GUESTS_ID_MAX ) //exclude guest
+         elseif( $uid > GUESTS_ID_MAX ) //exclude guest
             $receivers[$uid]= $row;
       }
       mysql_free_result($result);
@@ -1254,7 +1254,7 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
    else
       $n= 0;
 
-   while ($n>1) {
+   while( $n>1 ) {
       setcookie( $name, '', $NOW-3600, SUB_PATH);
       $n--;
    }
@@ -1422,24 +1422,24 @@ function parse_atbs_safe( &$trail, &$bad)
          "'"   => "'",
       );
 
-   while ( !$bad )
+   while( !$bad )
    {
       $i = strcspn($trail, $seps[$quote]);
       $c = substr($trail,$i,1);
-      if ( $c=='' || $c=='<' )
+      if( $c=='' || $c=='<' )
       {
          $head.= substr($trail,0,$i);
          $trail = substr($trail,$i);
          $bad = 1;
          break;
       }
-      else if ( $c=='>' )
+      elseif( $c=='>' )
       {
          $head.= substr($trail,0,$i);
          $trail = substr($trail,$i+1);
          break;
       }
-      else if( $quote )
+      elseif( $quote )
       {
          $quote.= substr($trail,0,$i+1);
          $quote = str_replace('"', ALLOWED_QUOT, $quote);
@@ -1455,12 +1455,12 @@ function parse_atbs_safe( &$trail, &$bad)
          $quote = $c;
       }
    }
-   if ( $quote )
+   if( $quote )
    {
       $head.= $quote;
       $bad = 1;
    }
-   if ( !$bad && $head )
+   if( !$bad && $head )
    {
 /*
 This part fix a security hole. One was able to execute a javascript code
@@ -1475,12 +1475,12 @@ This part fix a security hole. One was able to execute a javascript code
          .'|\\beval\\s*\\('      //eval() can split most of the keywords
          .'|\\bstyle\\s*='       //disabling style= is not bad too
          ;
-      if ( /*$quote &&*/  preg_match( "%($quote)%i",
+      if( /*$quote &&*/  preg_match( "%($quote)%i",
             preg_replace( "/[\\x01-\\x1f]+/", '', $head)) ) {
          $bad = 2;
       }
    }
-   if ( $bad )
+   if( $bad )
    {
       $head = str_replace(ALLOWED_QUOT, '"', $head);
       $head = str_replace(ALLOWED_APOS, "'", $head);
@@ -1517,7 +1517,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    //enclosed by '%' because $html_code may contain '/'
    $reg = "%^(.*?)<($reg)\\b(.*)$%is";
 
-   while ( preg_match($reg, $trail, $matches) )
+   while( preg_match($reg, $trail, $matches) )
    {
       $marks = $matches[1] ;
       if( $parse_mark_regex && PARSE_MARK_TERM && $marks )
@@ -1550,7 +1550,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       { //remove all the following newlines (to avoid inserted <br>)
          $trail= preg_replace( "/^[\\r\\n]+/", '', $trail);
       }
-      else if( in_array($tag, array(
+      elseif( in_array($tag, array(
             //as a first set/choice of </ul>-like tags
             '/quote','/code','/pre','/center',
             '/dl','/ul','/ol','/note','/div',
@@ -1580,7 +1580,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
             '\\1&\\2&\\3',
             $inside);
       }
-      else if( $tag == 'tt' )
+      elseif( $tag == 'tt' )
       {
          // TT is mainly designed to be used when $some_html=='cell'
          // does not allow inside HTML and remove line breaks
@@ -1594,7 +1594,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          //TODO: fix possible corrupted marks... to be reviewed
          $inside = preg_replace('/&nbsp;class=Mark/', ' class=Mark', $inside);
       }
-      else if( $to_be_closed )
+      elseif( $to_be_closed )
       {
          $inside = parse_tags_safe( $trail, $bad, $html_code, $html_code_closed, '/'.$tag);
          if( $bad)
@@ -1816,7 +1816,7 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
       $msg= preg_replace( array_keys($html_safe_preg), $html_safe_preg, $msg);
 
    }
-   else if( $mark_terms )
+   elseif( $mark_terms )
    {
       $msg = parse_html_safe( $msg, '', $mark_terms) ;
    }
@@ -1900,7 +1900,7 @@ function score2text($score, $verbose, $keep_english=false)
    {
       return ( $verbose ? sprintf( $T_("%s wins on time"), $color) : $color . "+Time" );
    }
-   else if( abs($score) == SCORE_RESIGN )
+   elseif( abs($score) == SCORE_RESIGN )
    {
       return ( $verbose ? sprintf( $T_("%s wins by resign"), $color) : $color . "+Resign" );
    }
@@ -1924,7 +1924,7 @@ function build_maxrows_array( $maxrows, $rows_limit = MAXROWS_PER_PAGE )
    $arr_maxrows = array();
    foreach( array( 5, 10, 15, 20, 25, 30, 40, 50, 75, 100 ) as $k)
    {
-      if ( $k <= $rows_limit )
+      if( $k <= $rows_limit )
          $arr_maxrows[$k] = $k;
    }
    $arr_maxrows[$maxrows] = $maxrows; // add manually added value
@@ -2081,7 +2081,7 @@ function get_request_url( $absolute=false)
 //if there is a redirection, _URI==requested, while _SELF==reached (running one)
    $url = str_replace('\\','/',@$_SERVER['REQUEST_URI']); //contains URI_AMP_IN and still urlencoded
    $len = strlen(SUB_PATH);
-   if (!strcasecmp( SUB_PATH, substr($url,0,$len) ))
+   if(!strcasecmp( SUB_PATH, substr($url,0,$len) ))
       $url = substr($url,$len);
    $url = str_replace( URI_AMP_IN, URI_AMP, $url);
    if( $absolute )
@@ -2277,13 +2277,13 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
          else
             $vaultcnt= 0; //stay in fever vault...
       }
-      else if( $vaultcnt > 1 ) //measuring fever
+      elseif( $vaultcnt > 1 ) //measuring fever
       {
          $vaultcnt--;
          $query.= ",VaultCnt=$vaultcnt";
       }
       //TODO: maybe exclude the multi-users accounts
-      else if( $NOW < $vaulttime ) //fever too high
+      elseif( $NOW < $vaulttime ) //fever too high
       //to exclude guest, add: && $uid > GUESTS_ID_MAX
       {
          $vaultcnt= 0; //enter fever vault...
@@ -2570,7 +2570,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
       $blackname = "$blackname (B)" ;
    if( !$whitename && !$blackname )
       $whitename = "Game#$gid" ;
-   else if( $whitename && $blackname )
+   elseif( $whitename && $blackname )
       $whitename = "$whitename vs. $blackname" ;
    else
       $whitename = "$whitename$blackname" ;
@@ -2691,7 +2691,7 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
          $link = 0;
          $class = 'Ref'.$class;
       }
-      else if( $link<0 ) //send_reference
+      elseif( $link<0 ) //send_reference
       {
          $url = "message.php?mode=NewMessage".URI_AMP;
          $link = -$link;
@@ -2812,7 +2812,7 @@ function not_in_clause( $arr_enum )
 
 function RGBA($r, $g, $b, $a=NULL)
 {
-   if ( $a === NULL )
+   if( $a === NULL )
       return sprintf("%02x%02x%02x", $r, $g, $b);
    else
       return sprintf("%02x%02x%02x%02x", $r, $g, $b, $a);
@@ -2841,7 +2841,7 @@ function split_RGBA($color, $alpha=NULL)
 // param bgcolor: if null, use default
 function blend_alpha_hex($color, $bgcolor=null)
 {
-   if ( is_null($bgcolor) )
+   if( is_null($bgcolor) )
       $bgcolor = "f7f5e3"; //$bg_color value (#f7f5e3)
    list($r,$g,$b,$a)= split_RGBA($color, 0);
    list($br,$bg,$bb,$ba)= split_RGBA($bgcolor);
@@ -2851,7 +2851,8 @@ function blend_alpha_hex($color, $bgcolor=null)
 function blend_warning_cell_attb( $title='', $bgcolor='f7f5e3', $col='ff000033')
 {
    $str= ' bgcolor="#' . blend_alpha_hex( $col, $bgcolor) . '"';
-   if ($title) $str.= ' title="' . $title . '"';
+   if( $title )
+      $str.= ' title="' . $title . '"';
    return $str;
 }
 
@@ -2874,9 +2875,9 @@ function limit($val, $minimum, $maximum, $default)
 
    if( !is_numeric($val) )
       return (isset($default) ? $default : $val );
-   else if( is_numeric($minimum) && $val < $minimum )
+   elseif( is_numeric($minimum) && $val < $minimum )
       return $minimum;
-   else if( is_numeric($maximum) && $val > $maximum )
+   elseif( is_numeric($maximum) && $val > $maximum )
       return $maximum;
 
    return $val;

@@ -163,8 +163,8 @@ require_once( "include/filterlib_mysqlmatch.php" );
 
    $title = T_('Message search');
    start_page($title, true, $logged_in, $player_row);
-   if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe($rx_term) . "<br>\n";
-   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($rqsql->get_select()) . "<br>\n";
+   if( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe($rx_term) . "<br>\n";
+   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($rqsql->get_select()) . "<br>\n";
 
    echo "<h3 class=Header>$title</h3>\n";
 

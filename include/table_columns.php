@@ -193,7 +193,7 @@ class Table
       // prepare for appending URL-parts (ends with either '?' or URI_AMP)
       if( !is_numeric( strpos( $_page, '?')) )
          $this->Page = $_page . '?'; //end_sep
-      else if( substr( $_page, -1 ) == '?'
+      elseif( substr( $_page, -1 ) == '?'
             || substr( $_page, -strlen(URI_AMP) ) == URI_AMP )
          $this->Page = $_page; //end_sep
       else
@@ -296,7 +296,7 @@ class Table
       $sort_xtend= trim($sort_xtend);
       if( !$sort_xtend )
          $mode|= TABLE_NO_SORT;
-      else if( !is_numeric(strpos('+-',substr($sort_xtend,-1))) )
+      elseif( !is_numeric(strpos('+-',substr($sort_xtend,-1))) )
          $sort_xtend.= '+';
       $this->Tableheads[$nr] =
          array( 'Nr' => $nr,
@@ -306,7 +306,7 @@ class Table
                 'attbs' => $attbs );
 
       $visible = $this->Is_Column_Displayed[$nr] = $this->is_column_displayed( $nr);
-      if ( $this->UseFilters ) // fix filter-visibility (especially for static cols)
+      if( $this->UseFilters ) // fix filter-visibility (especially for static cols)
          $this->Filters->set_visible($nr, $visible);
    } //add_tablehead
 
@@ -404,7 +404,7 @@ class Table
       $string = "\n<table id='{$this->Id}Table' class=Table>";
       $string .= $this->make_next_prev_links('T');
       $string .= $head_row;
-      if ( $this->ConfigFilters[FCONF_FILTER_TABLEHEAD] )
+      if( $this->ConfigFilters[FCONF_FILTER_TABLEHEAD] )
       { // filter at table-header
          $string .= $filter_row; // maybe empty
          $string .= $table_rows;
@@ -424,7 +424,7 @@ class Table
 
       if( isset($this->ExternalForm) )
          $table_form = $this->ExternalForm; // read-only
-      else if( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // need form for filter or add-column
+      elseif( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // need form for filter or add-column
       {
          $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
             clean_url( $this->Page),
@@ -442,7 +442,7 @@ class Table
       }
 
       // build form for Filter + AddColumn
-      if ( isset($table_form) && is_null($this->ExternalForm) )
+      if( isset($table_form) && is_null($this->ExternalForm) )
       {
          $string = $table_form->print_start_default()
             . $string // embed table
@@ -470,7 +470,7 @@ class Table
       $need_form  = false;
       $filter_rows = '';
 
-      if ( $this->UseFilters )
+      if( $this->UseFilters )
       {
          // make filters
          $row_cells['Filter'] = '';
@@ -478,12 +478,12 @@ class Table
             $row_cells['Filter'] .= $this->make_table_filter( $thead );
 
          // add error-messages for filters
-         if ( $this->Shown_Filters > 0 )
+         if( $this->Shown_Filters > 0 )
          {
             // build error-messages
             $arr = $this->Filters->get_filter_keys(GETFILTER_ERROR);
             $arr_err = array();
-            foreach ($arr as $id) {
+            foreach( $arr as $id ) {
                $filter = $this->Filters->get_filter($id);
                $syntax = $filter->get_syntax_description();
                $arr_err[]=
@@ -492,21 +492,21 @@ class Table
                   . ( ($syntax != '') ? "; $syntax" : '');
             }
             $errormessages = implode( '<br>', $arr_err );
-            if ( $errormessages != '' )
+            if( $errormessages != '' )
                $row_cells['Error'] =
                   "\n  <td class=ErrMsg colspan={$this->Shown_Columns}>$errormessages</td>";
 
             // build warn-messages
             $arr = $this->Filters->get_filter_keys(GETFILTER_WARNING);
             $arr_warn = array();
-            foreach ($arr as $id) {
+            foreach( $arr as $id ) {
                $filter = $this->Filters->get_filter($id);
                $arr_warn[]=
                   "<strong>{$this->Tableheads[$id]['Description']}:</strong> "
                   . '<em>' . T_('Warning#filter') . ': ' . $filter->warnmsg() . '</em>';
             }
             $warnmessages = implode( '<br>', $arr_warn );
-            if ( $warnmessages != '' )
+            if( $warnmessages != '' )
                $row_cells['Warning'] =
                   "\n  <td class=WarnMsg colspan={$this->Shown_Columns}>$warnmessages</td>";
 
@@ -514,7 +514,7 @@ class Table
          }
 
          // include row only, if there are filters
-         if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] || $this->Shown_Filters > 0 )
+         if( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] || $this->Shown_Filters > 0 )
          {
             $tr_attbs = " id=\"{$this->Prefix}TableFilter\""; // only for 1st entry
             foreach( $row_cells as $class => $cells )
@@ -557,7 +557,7 @@ class Table
    {
       global $button_max, $buttoncolors, $buttonfiles;
 
-      if ( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
+      if( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
          $button_nr = 0;
 
       return
@@ -624,12 +624,12 @@ class Table
       $adds = $this->get_arg('add');
       if( empty($adds) )
          $adds = array();
-      else if( !is_array($adds) )
+      elseif( !is_array($adds) )
          $adds = array($adds);
       $dels = $this->get_arg('del');
       if( empty($dels) )
          $dels = array();
-      else if( !is_array($dels) )
+      elseif( !is_array($dels) )
          $dels = array($dels);
 
       $newset = $this->Column_set;
@@ -642,7 +642,7 @@ class Table
             $this->Filters->reset_filter($add);
             $this->Filters->set_active($add, true);
          }
-         else if( $add < 0 ) // add all cols
+         elseif( $add < 0 ) // add all cols
          {
             $newset = ALL_COLUMNS;
             $this->Filters->reset_filters( GETFILTER_ALL );
@@ -658,7 +658,7 @@ class Table
             $this->Filters->reset_filter($del);
             $this->Filters->set_active($del, false);
          }
-         else if( $del < 0 ) // del all cols
+         elseif( $del < 0 ) // del all cols
          {
             $newset = 0;
             $this->Filters->reset_filters( GETFILTER_ALL );
@@ -694,11 +694,11 @@ class Table
    /*! \brief Sets Rows_Per_Page (according to changed Show-Rows-form-element or else cookie or players-row). */
    function handle_show_rows()
    {
-      if ( !$this->Use_Show_Rows )
+      if( !$this->Use_Show_Rows )
          return;
 
       $rows = (int)$this->get_arg(TFORM_VAL_SHOWROWS); // nr of rows
-      if ( $rows > 0 )
+      if( $rows > 0 )
          $this->Rows_Per_Page =
             get_maxrows( $rows, MAXROWS_PER_PAGE, MAXROWS_PER_PAGE_DEFAULT );
    }
@@ -772,7 +772,7 @@ class Table
    /*! \brief Retrieve mySQL LIMIT part from table. */
    function current_limit_string()
    {
-      if ( $this->Rows_Per_Page <= 0 )
+      if( $this->Rows_Per_Page <= 0 )
          return '';
       return ' LIMIT ' . $this->From_Row . ',' . ($this->Rows_Per_Page+1) ;
    }
@@ -836,16 +836,16 @@ class Table
 
       // include from_row (if unchanged search), otherwise remove from_row !?
       //   => reset from_row somehow (checking using hashcode on filter-values)
-      if ( $this->Rows_Per_Page > 0 && $this->From_Row > 0 )
+      if( $this->Rows_Per_Page > 0 && $this->From_Row > 0 )
          $hiddens[$this->Prefix . 'from_row'] = $this->From_Row;
 
       // NOTE: no active-fields needed, because they have form-values and
       //       inactive need not to be saved; but need general filter-attribs
-      if ( $this->UseFilters )
+      if( $this->UseFilters )
          $this->Filters->get_filter_hiddens( $hiddens, GETFILTER_NONE );
 
       // include hiddens from external RequestParameters
-      if ( $this->ext_req_params_use_hidden )
+      if( $this->ext_req_params_use_hidden )
       {
          foreach( $this->ext_req_params as $rp )
             $rp->get_hiddens( $hiddens );
@@ -1006,16 +1006,16 @@ class Table
       // check, if column displayed
       $nr = $thead['Nr']; // keep as sep var
       $col_displayed = $this->Is_Column_Displayed[$nr];
-      if ( !$col_displayed )
+      if( !$col_displayed )
          return '';
-      if ( !$filter )
+      if( !$filter )
          return "\n  <td></td>";
       // now: $filter valid
 
       // prepare strings for toggle-filter (if filter existing for field)
       $togglestr_show = '';
       $togglestr_hide = '';
-      if ( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] )
+      if( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] )
       {
          $fprefix = $this->Filters->Prefix;
          $query =
@@ -1030,7 +1030,7 @@ class Table
 
          // add from_row, if filter-value is empty, or else has a value but has an error
          //    (then removing of filter or column doesn't change the page)
-         if ( $filter->is_empty() ^ $filter->has_error() )
+         if( $filter->is_empty() ^ $filter->has_error() )
             $query .= $this->current_from_string(true); //end_sep
 
          $query = clean_url( $query);
@@ -1055,9 +1055,9 @@ class Table
       $this->Shown_Filters++;
 
       // filter input-element
-      if ( $filter->has_error() )
+      if( $filter->has_error() )
          $subclass = ' Error';
-      else if ( $filter->has_warn() )
+      elseif( $filter->has_warn() )
          $subclass = ' Warning';
       else
          $subclass = '';
@@ -1155,7 +1155,7 @@ class Table
    */
    function make_next_prev_links($id)
    {
-      if ( $this->Rows_Per_Page <= 0 || $this->Shown_Columns <= 0
+      if( $this->Rows_Per_Page <= 0 || $this->Shown_Columns <= 0
             || !( $this->From_Row > 0 || !$this->Last_Page ) )
          return '';
 
@@ -1278,12 +1278,12 @@ class Table
       $r_string = $this->make_show_rows( $ac_form );
 
       $string = false;
-      if ( $ac_string || $f_string || $r_string )
+      if( $ac_string || $f_string || $r_string )
       {
          $arr = array();
-         if ( $f_string )  $arr[]= $f_string;
-         if ( $r_string )  $arr[]= $r_string;
-         if ( $ac_string ) $arr[]= $ac_string;
+         if( $f_string )  $arr[]= $f_string;
+         if( $r_string )  $arr[]= $r_string;
+         if( $ac_string ) $arr[]= $ac_string;
 
          $string = "<div id='{$this->Prefix}tableFAC'>";
          $string .= implode( '&nbsp;&nbsp;&nbsp;', $arr );
@@ -1296,7 +1296,7 @@ class Table
    /*! \brief Builds select-box and submit-button to be able to change 'show-max-rows' */
    function make_show_rows( &$form )
    {
-      if ( !$this->Use_Show_Rows )
+      if( !$this->Use_Show_Rows )
          return '';
 
       $rows = $this->Rows_Per_Page;
@@ -1330,14 +1330,14 @@ class Table
    {
       $this->Filters = $searchfilter;
       $this->UseFilters = true;
-      if ( is_array($config) )
+      if( is_array($config) )
       {
          foreach( $config as $key => $value )
             $this->ConfigFilters[$key] = $value;
       }
 
       // reset from-row if filters have changed
-      if ( $this->UseFilters && ($this->Filters->HashCode != $this->Filters->hashcode()) )
+      if( $this->UseFilters && ($this->Filters->HashCode != $this->Filters->hashcode()) )
          $this->From_Row = 0;
    }
 
@@ -1378,7 +1378,7 @@ class Table
          foreach( $this->ext_req_params as $rp )
          {
             $url_str .= $rp->get_url_parts();
-            if ( $url_str != '' && $end_sep )
+            if( $url_str != '' && $end_sep )
                $url_str.= URI_AMP;
          }
          $this->cache_curr_extparam[$end_sep] = $url_str;

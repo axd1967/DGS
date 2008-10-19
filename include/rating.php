@@ -48,7 +48,7 @@ $CON_TABLE = array(
 
 function table_interpolate($value, $table, $extrapolate=false)
 {
-   foreach ( $table as $x )
+   foreach( $table as $x )
    {
       if( !empty($tmpprev) )
          $prev=$tmpprev;

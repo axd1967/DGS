@@ -61,7 +61,7 @@ $arr_filter_demos = array(
 );
 
 $fdemo = get_request_arg('fdemo');
-if ( !isset($arr_filter_demos[$fdemo]) )
+if( !isset($arr_filter_demos[$fdemo]) )
    $fdemo = 1;
 
 /* control-form to select filter-demo */
@@ -110,14 +110,14 @@ $title = ''; # string filter-title | array( filter-title, filter-info-lines, ...
  */
 function def_array( $with_def, $arr )
 {
-   if ( !$with_def )
+   if( !$with_def )
       unset( $arr[FC_DEFAULT] );
    return $arr;
 }
 
 
 /* -------------------- (1) Numeric ----------------------------------------------  */
-if ( $fdemo == 1 )
+if( $fdemo == 1 )
 {
    $title = array(
       'Numeric Filter',
@@ -186,7 +186,7 @@ if ( $fdemo == 1 )
 }
 
 /* -------------------- (2) Text -------------------------------------------------  */
-elseif ( $fdemo == 2 )
+elseif( $fdemo == 2 )
 {
    $title = array(
       'Text Filter',
@@ -229,7 +229,7 @@ elseif ( $fdemo == 2 )
 }
 
 /* -------------------- (3) Rating -----------------------------------------------  */
-elseif ( $fdemo == 3 )
+elseif( $fdemo == 3 )
 {
    $title = array(
       'Rating Filter',
@@ -256,7 +256,7 @@ elseif ( $fdemo == 3 )
 }
 
 /* -------------------- (4) Country ----------------------------------------------  */
-elseif ( $fdemo == 4 )
+elseif( $fdemo == 4 )
 {
    $title = array(
       'Country Filter',
@@ -270,7 +270,7 @@ elseif ( $fdemo == 4 )
 }
 
 /* -------------------- (5) Date -------------------------------------------------  */
-elseif ( $fdemo == 5 )
+elseif( $fdemo == 5 )
 {
    $title = array(
       'Date Filter (absolute dates)',
@@ -293,7 +293,7 @@ elseif ( $fdemo == 5 )
 }
 
 /* -------------------- (6) RelativeDate -----------------------------------------  */
-elseif ( $fdemo == 6 )
+elseif( $fdemo == 6 )
 {
    $title = array(
       'RelativeDate Filter (relative with optional absolute date)',
@@ -333,7 +333,7 @@ elseif ( $fdemo == 6 )
 }
 
 /* -------------------- (7) Selection --------------------------------------------  */
-elseif ( $fdemo == 7 )
+elseif( $fdemo == 7 )
 {
    $title = array(
       'Selection Filter',
@@ -402,7 +402,7 @@ elseif ( $fdemo == 7 )
 }
 
 /* -------------------- (8) BoolSelect -------------------------------------------  */
-elseif ( $fdemo == 8 )
+elseif( $fdemo == 8 )
 {
    $title = array(
       'BoolSelect Filter',
@@ -417,7 +417,7 @@ elseif ( $fdemo == 8 )
 }
 
 /* -------------------- (9) RatedSelect ------------------------------------------  */
-elseif ( $fdemo == 9 )
+elseif( $fdemo == 9 )
 {
    $title = array(
       'RatedSelect Filter',
@@ -432,7 +432,7 @@ elseif ( $fdemo == 9 )
 }
 
 /* -------------------- (10) Boolean ---------------------------------------------  */
-elseif ( $fdemo == 10 )
+elseif( $fdemo == 10 )
 {
    $title = array(
       'Boolean Filter',
@@ -475,7 +475,7 @@ elseif ( $fdemo == 10 )
 }
 
 /* -------------------- (11) MysqlMatch ------------------------------------------  */
-elseif ( $fdemo == 11 )
+elseif( $fdemo == 11 )
 {
    $title = array(
       'MysqlMatch Filter',
@@ -514,7 +514,7 @@ elseif ( $fdemo == 11 )
 }
 
 /* -------------------- (12) Score -----------------------------------------------  */
-elseif ( $fdemo == 12 )
+elseif( $fdemo == 12 )
 {
    $title = array(
       'Score Filter',
@@ -535,7 +535,7 @@ elseif ( $fdemo == 12 )
 }
 
 /* -------------------- (13) RatingDiff ------------------------------------------  */
-elseif ( $fdemo == 13 )
+elseif( $fdemo == 13 )
 {
    $title = array(
       'RatingDiff Filter',
@@ -551,7 +551,7 @@ elseif ( $fdemo == 13 )
 }
 
 /* -------------------- (14) CheckboxArray ---------------------------------------  */
-elseif ( $fdemo == 14 )
+elseif( $fdemo == 14 )
 {
    $title = array(
       'CheckboxArray Filter',
@@ -590,7 +590,7 @@ elseif ( $fdemo == 14 )
 }
 
 /* -------------------- (15) Defaults / (19) Without Defaults --------------------  */
-elseif ( $fdemo == 15 || $fdemo == 19 )
+elseif( $fdemo == 15 || $fdemo == 19 )
 {
    $with_def = ( $fdemo == 15 ); # show defaults
    $title = array(
@@ -699,7 +699,7 @@ elseif ( $fdemo == 15 || $fdemo == 19 )
 }
 
 /* -------------------- (16) Conditionals ----------------------------------------  */
-elseif ( $fdemo == 16 )
+elseif( $fdemo == 16 )
 {
    $title = array(
       'Conditional Filters',
@@ -749,7 +749,7 @@ elseif ( $fdemo == 16 )
 }
 
 /* -------------------- (17) Quoting / Escaping ----------------------------------  */
-elseif ( $fdemo == 17 )
+elseif( $fdemo == 17 )
 {
    $tc = createTokenizerConfig();
    $s = $tc->sep;
@@ -784,7 +784,7 @@ elseif ( $fdemo == 17 )
 }
 
 /* -------------------- (18) Miscellaneous----------------------------------------  */
-elseif ( $fdemo == 18 )
+elseif( $fdemo == 18 )
 {
    $title = array(
       'Miscellaneous Filter-Config',
@@ -809,7 +809,7 @@ $rq->add_entry( 'fdemo', $fdemo );
 $form->attach_table( $rq );
 
 # form-area-layout
-if ( $area_layout )
+if( $area_layout )
 {
    $form->set_layout( FLAYOUT_GLOBAL, $area_layout );
    $form->set_layout( FLAYOUT_AREACONF, FAREA_ALL,
@@ -826,11 +826,11 @@ foreach( $arr_layout as $fid => $felem )
    array_push( $arr, 'TD', 'TEXT', "&nbsp;<font size=-1>" . $felem['descr'] . "</font>" );
 
    $area = @$felem['area'];
-   if ( $area )
+   if( $area )
       $form->set_area( $area );
 
    $form->add_row( $arr );
-   if ( !isset($felem['noerr']) )
+   if( !isset($felem['noerr']) )
    {
       $arr = array(
          'TAB', 'CELL', 2, 'align=left',
@@ -852,14 +852,14 @@ $qstr = $query->get_select();
 
 
 /* ---------- demo-type specifics on query - START ---------- */
-if ( $fdemo == 16 ) // Conditionals
+if( $fdemo == 16 ) // Conditionals
 {
    $cquery = new QuerySQL( SQLP_FIELDS, '*', SQLP_FROM, 'TableXYZ', SQLP_WHERE, 'conditionXYZ' );
    $f6 = $filter->get_filter(6);
-   if ( $f6->get_value() )
+   if( $f6->get_value() )
    {
       $qf6 = $f6->get_query();
-      if ( !is_null($qf6) )
+      if( !is_null($qf6) )
       {
          $cquery->merge( $qf6 );
          $qstr = '(' . $cquery->get_select() . ") UNION ($qstr)";
@@ -870,12 +870,12 @@ if ( $fdemo == 16 ) // Conditionals
 
 
 echo "<hr>\n";
-if ( $DEBUG_SQL ) echo "<br>QUERY: " . make_html_safe($qstr) . "<br>\n";
+if( $DEBUG_SQL ) echo "<br>QUERY: " . make_html_safe($qstr) . "<br>\n";
 
 
 /* ---------- demo-type specifics extras - START ---------- */
 # some extra info
-if ( $fdemo == 11 ) // mysql-match
+if( $fdemo == 11 ) // mysql-match
 {
    echo "<font size=-1>\n";
    foreach( $filter->get_filter_keys(GETFILTER_ALL) as $fid )
@@ -891,11 +891,11 @@ if ( $fdemo == 11 ) // mysql-match
 
 # print filter-info + form
 echo "<hr>\n";
-if ( is_array($title) )
+if( is_array($title) )
 {
    $title0 = array_shift( $title );
    echo "<h4>$title0</h4>\n";
-   if ( count($title) > 0 )
+   if( count($title) > 0 )
    {
       echo "<ul>\n";
       foreach( $title as $item )
@@ -903,7 +903,7 @@ if ( is_array($title) )
       echo "</ul>\n";
    }
 }
-elseif ( $title != '' )
+elseif( $title != '' )
    echo "<h4>$title</h4>\n";
 $form->echo_string();
 

@@ -101,7 +101,7 @@ function revision_history( $display_forum, $post_id )
 
    // prepare users forum-reads
    $FR = new ForumRead( $my_id, $forum_id, $thread );
-   if ( $markread != '' )
+   if( $markread != '' )
       $FR->mark_read( $markread );
 
    $preview = isset($_POST['preview']);
@@ -213,7 +213,7 @@ function revision_history( $display_forum, $post_id )
       $disp_forum->headline = $headline1;
    }
 
-   if ( $fthread->count_new > 0 )
+   if( $fthread->count_new > 0 )
       $disp_forum->links |= LINK_MARK_READ;
    $disp_forum->forum_start_table('Read');
 
@@ -232,7 +232,7 @@ function revision_history( $display_forum, $post_id )
       $pid = $post->id;
       $uid = $post->author->id;
       $is_my_post = ($uid == $my_id);
-      if ( !$is_my_post ) $all_my_posts = false;
+      if( !$is_my_post ) $all_my_posts = false;
 
       $hidden = !$post->is_approved();
       if( $hidden && !$disp_forum->is_moderator && !$is_my_post )
@@ -318,7 +318,7 @@ function revision_history( $display_forum, $post_id )
 
 
    // use-cases U03: increase thread-hits show thread-"activity"
-   if ( !($reply > 0) && !$preview && !($edit > 0) && !$all_my_posts )
+   if( !($reply > 0) && !$preview && !($edit > 0) && !$all_my_posts )
       hit_thread( $thread );
 
    end_page();

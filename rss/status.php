@@ -80,11 +80,11 @@ Basis:
 
 /*
 $xmltrans = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES); //ENT_COMPAT
-foreach ($xmltrans as $key => $value)
+foreach( $xmltrans as $key => $value )
    $xmltrans[$key] = '&#'.ord($key).';';
 */
 $xmltrans = array();
-for ( $i=1; $i<0x20 ; $i++ )
+for( $i=1; $i<0x20; $i++ )
    $xmltrans[chr($i)] = ''; //"&#$i;";
 unset( $xmltrans["\t"]);
 unset( $xmltrans["\n"]);
@@ -113,7 +113,7 @@ switch( (string)CHARSET_MODE )
    {
       $encoding_used = 'iso-8859-1';
 
-      for ( $i=0x80; $i<0x100 ; $i++ )
+      for( $i=0x80; $i<0x100 ; $i++ )
          $xmltrans[chr($i)] = "&#$i;";
    }
    break;
@@ -121,7 +121,7 @@ switch( (string)CHARSET_MODE )
    {
       $encoding_used = 'utf-8';
 
-      for ( $i=0x80; $i<0x100 ; $i++ )
+      for( $i=0x80; $i<0x100 ; $i++ )
          $xmltrans[chr($i)] = "&#$i;";
    }
    break;

@@ -71,7 +71,7 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
          || $add_hours > time_convert_to_hours( MAX_ADD_DAYS, 'days'))
       return sprintf( 'Invalid value for add_hours [%s]', $add_hours);
 
-   if ( !$reset_byo && $add_hours == 0 )
+   if( !$reset_byo && $add_hours == 0 )
       return 0; // nothing to do (0 hours added, no error)
 
    if( is_numeric($game_row) )

@@ -82,8 +82,8 @@ require_once( "features/vote/lib_votes.php" );
 
    $title = T_('Feature vote list');
    start_page( $title, true, $logged_in, $player_row );
-   if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_vfilter->get_select()) ."<br>";
-   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
+   if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_vfilter->get_select()) ."<br>";
+   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    echo "<h3 class=Header>$title</h3>\n";
 
@@ -97,7 +97,7 @@ require_once( "features/vote/lib_votes.php" );
       if( $vtable->Is_Column_Displayed[1] )
       {
          $url = "{$base_path}features/vote/vote_feature.php?fid=$ID";
-         if ( !$feature->allow_vote( $my_id ) )
+         if( !$feature->allow_vote( $my_id ) )
             $url .= URI_AMP.'view=1';
          $frow_strings[1] = "<A HREF=\"$url\">$ID</A>";
       }

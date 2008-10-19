@@ -41,7 +41,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
 
 $xmltrans = array();
-for ( $i=1; $i<0x20 ; $i++ )
+for( $i=1; $i<0x20 ; $i++ )
    $xmltrans[chr($i)] = ''; //"&#$i;";
 unset( $xmltrans["\t"]);
 unset( $xmltrans["\n"]);
@@ -54,7 +54,7 @@ $xmltrans['<'] = '&lt;';
 $xmltrans['>'] = '&gt;';
 $xmltrans['"'] = '&quot;';
 
-for ( $i=0x80; $i<0x100 ; $i++ )
+for( $i=0x80; $i<0x100 ; $i++ )
    $xmltrans[chr($i)] = "&#$i;";
 
 

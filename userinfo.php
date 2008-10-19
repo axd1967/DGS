@@ -198,7 +198,7 @@ $ThePage = new Page('UserInfo');
                'sname' => T_('Percent'),
                'sinfo' => $percent,
                ) );
-      if ( $is_admin )
+      if( $is_admin )
       { // show player clock
          $itable->add_row( array(
                   'rattb' => 'class=DebugInfo',

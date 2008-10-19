@@ -196,11 +196,11 @@ require_once( "include/filterlib_country.php" );
 
 
    $arr_suitable = array();
-   if ( $f_handi->get_value() == 1 )
+   if( $f_handi->get_value() == 1 )
       $arr_suitable[]= T_('Handicap');
-   if ( $f_range->get_value() )
+   if( $f_range->get_value() )
       $arr_suitable[]= T_('Rating range');
-   if ( count($arr_suitable) > 0 )
+   if( count($arr_suitable) > 0 )
       $title = T_("Suitable waiting games") . ' (' . implode(', ', $arr_suitable) . ')';
    else
       $title = T_("All waiting games");
@@ -208,7 +208,7 @@ require_once( "include/filterlib_country.php" );
    start_page($title, true, $logged_in, $player_row,
                $wrtable->button_style($player_row['Button']) );
 
-   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
+   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
    echo "<h3 class=Header>". $title . "</h3>\n";
 
 

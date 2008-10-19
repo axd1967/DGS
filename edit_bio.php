@@ -72,7 +72,7 @@ function find_category_box_text($cat)
    $page = "edit_bio.php";
    $title = T_("Edit biographical info");
    $othertitle = T_("Edit biographical order");
-   if ( $editorder ) {
+   if( $editorder ) {
       $str = $title;
       $title = $othertitle;
       $othertitle = $str;
@@ -88,7 +88,7 @@ function find_category_box_text($cat)
       $text_height = 4;
 
       $moveurl = 'change_bio.php';
-      if ( !$editorder )
+      if( !$editorder )
       {
          $bio_form = new Form( 'bioform', $moveurl, FORM_POST );
       }
@@ -112,7 +112,7 @@ function find_category_box_text($cat)
             $other = make_html_safe($other, INFO_HTML);
          }
 
-         if ( !$editorder )
+         if( !$editorder )
          { //edit bio fields
             $bio_row = array(
                'CELL', 0, 'class=Header',
@@ -150,7 +150,7 @@ function find_category_box_text($cat)
       } //while($row)
       mysql_free_result($result);
 
-      if ( !$editorder )
+      if( !$editorder )
       {
          // And now some empty ones:
          for($i=1; $i <= USER_BIO_ADDENTRIES; $i++)
@@ -183,14 +183,14 @@ function find_category_box_text($cat)
 
    $menu_array[T_('Show/edit userinfo')] = "userinfo.php?uid=$my_id";
 
-   if ( !$editorder )
+   if( !$editorder )
    {
-      if ( $row_cnt > 1 )
+      if( $row_cnt > 1 )
          $page = make_url($page, array( 'editorder' => '1') );
       else
          $page = '';
    }
-   if ( $page )
+   if( $page )
       $menu_array[$othertitle] = $page;
 
    end_page(@$menu_array);

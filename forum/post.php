@@ -25,7 +25,7 @@ require_once( 'forum/forum_functions.php' );
 // to increase thread-hits to show thread-"activity"
 function hit_thread( $thread )
 {
-   if ( is_numeric($thread) && $thread > 0 )
+   if( is_numeric($thread) && $thread > 0 )
    {
       db_query( 'forum.hit_thread',
          "UPDATE Posts SET Hits=Hits+1 WHERE ID='$thread' LIMIT 1" );
@@ -428,7 +428,7 @@ function recalc_forum_counts( $fid, $update_thread_counts=true )
       $sum_posts += $cnt;
 
       // update thread-count
-      if ( $update_thread_counts )
+      if( $update_thread_counts )
          db_query( "recalc_forum_counts.update_thread_counts($tid)",
             "UPDATE Posts SET PostsInThread=$cnt WHERE ID='$tid' LIMIT 1" );
    }

@@ -35,7 +35,7 @@ require_once( "include/rating.php" );
    $v = 'B';
    for($i=1; $i <= $lim; $i++) {
       test($v, $i, false);
-      if ($i % 100 == 0) {
+      if( $i % 100 == 0 ) {
          echo "$i/$lim ...\n";
          echo "Needed[$v], Sum: " . (time() - $start) . "s\n";
       }
@@ -47,7 +47,7 @@ function test( $qver, $nr, $print=true )
 {
    global $NOW;
    $begin = gettimeofday();
-   if ($qver == 'A')
+   if( $qver == 'A' )
    {
       $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
                'black.Handle as blackhandle, white.Handle as whitehandle, ' .
@@ -99,7 +99,7 @@ function test( $qver, $nr, $print=true )
    $end = gettimeofday();
    mysql_free_result($result);
 
-   if ($print)
+   if( $print )
       echo "Needed[$qver], #$nr: " . timediff($begin,$end) . "\n";
 
 }
@@ -114,7 +114,7 @@ function timediff( $start, $end )
 
    $sec_diff   = $sec2 - $sec1;
    $msdiff = $ms2 - $ms1;
-   if ($msdiff < 0)
+   if( $msdiff < 0 )
    {
       $msdiff += 1000000;
       $sec_diff++;

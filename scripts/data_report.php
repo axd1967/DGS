@@ -315,7 +315,7 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
          $table[] = $row;
          $numrows++;
 
-         if ( $rowtime > $qrytout )
+         if( $rowtime > $qrytout )
          {
             // this is taking too long
             mysql_query("KILL $dbthread", $dbcnxctl);
@@ -395,10 +395,10 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
             case 'Password':
             case 'Sessioncode':
             case 'Email':
-               if ($val) $val= '***';
+               if( $val ) $val= '***';
                break;
             case 'Debug':
-               if ($val) if( !@$GLOBALS['Super_admin'] )
+               if( $val && !@$GLOBALS['Super_admin'] )
                   $val= preg_replace("%(passwd=)[^&]*%is", "\\1***", $val);
                break;
          }

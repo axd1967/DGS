@@ -166,13 +166,13 @@ define('MODERATOR_SEARCH', 0);
    echo $fform->get_form_string();
 
    $query_filter = $ffilter->get_query(); // clause-parts for filter
-   if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_filter->get_select()) . "<br>\n";
-   if ( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe( implode('|', $filter2->get_rx_terms()) ) . "<br>\n";
+   if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_filter->get_select()) . "<br>\n";
+   if( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe( implode('|', $filter2->get_rx_terms()) ) . "<br>\n";
 
    if( $ffilter->has_query() )  // Display results
    {
       // get clause-part for mysql-match as select-col
-      if ( is_null($filter2->get_query()) )
+      if( is_null($filter2->get_query()) )
          $query_match = '1';
       else
          $query_match = $filter2->get_match_query_part();
@@ -184,12 +184,12 @@ define('MODERATOR_SEARCH', 0);
       $qsql->add_part( SQLP_WHERE, "P.PosIndex>''" ); // '' == inactivated (edited)
       $qsql->merge($query_filter);
 
-      if ( $sql_order)
+      if( $sql_order)
          $qsql->add_part( SQLP_ORDER, $sql_order );
       $qsql->add_part( SQLP_LIMIT, "$offset," . ($maxrows+1) ); // +1 for next-page detection
       $query = $qsql->get_select();
 
-      if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) . "<br>\n";
+      if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) . "<br>\n";
 
       $result = db_query( 'forum_search.find', $query );
       $nr_rows = mysql_num_rows($result);

@@ -86,19 +86,19 @@ class WhereClause
     */
    function add( $clause, $operator = null)
    {
-      if ( is_a( $clause, "WhereClause" ))
+      if( is_a( $clause, "WhereClause" ))
       { // append other WhereClause
          $merge_clause = $clause->get_where_clause( false );
-         if ( $merge_clause )
+         if( $merge_clause )
          {
             $this->embrace();
             $this->add( "({$merge_clause})", $operator );
          }
       }
-      elseif ( $clause )
+      elseif( $clause )
       { // append clause-part
          $op = ( is_null($operator) ) ? $this->operator : $this->make_operator( $operator );
-         if ( $this->has_clause() )
+         if( $this->has_clause() )
             $this->parts[]= $op;
          $this->parts[]= $clause;
       }
@@ -110,7 +110,7 @@ class WhereClause
     */
    function get_where_clause( $inc_where = true )
    {
-      if ( $this->has_clause() )
+      if( $this->has_clause() )
          return ($inc_where ? 'WHERE ' : '') . implode(' ', $this->parts);
       else
          return '';
@@ -148,7 +148,7 @@ class RequestParameters
    function RequestParameters( $arr_src = null )
    {
       $this->values = array();
-      if ( is_array($arr_src) )
+      if( is_array($arr_src) )
       {
          foreach( $arr_src as $key => $val )
             $this->values[$key] = $val;
@@ -281,13 +281,13 @@ class QuerySQL
       for( $i=0; $i < func_num_args(); $i++)
       {
          $arg = trim(func_get_arg($i));
-         if ( isset($this->parts[$arg]) )
+         if( isset($this->parts[$arg]) )
             $type = $arg;
          else
          {
-            if ( $type == '')
+            if( $type == '')
                error('assert', "QuerySQL.miss_type($arg)"); // missing part-type for part
-            if ( $arg != '' )
+            if( $arg != '' )
                $this->parts[$type][] = $arg;
          }
       }
@@ -318,13 +318,13 @@ class QuerySQL
    function add_part( $type ) // var-args for parts
    {
       // check
-      if ( !isset($this->parts[$type]) )
+      if( !isset($this->parts[$type]) )
          error('assert', "QuerySQL.add_part.unknown_type($type)");
-      if ( ($type === SQLP_GROUP || $type === SQLP_LIMIT) && $this->has_part($type) )
+      if( ($type === SQLP_GROUP || $type === SQLP_LIMIT) && $this->has_part($type) )
       {
          // allow only once, except same part-value
          $arg = ( func_num_args() > 1 ) ? func_get_arg(1) : null;
-         if ( !is_null($arg) && !empty($arg) && $this->get_part($type) != $arg )
+         if( !is_null($arg) && !empty($arg) && $this->get_part($type) != $arg )
          {
             // type can only be set once (except the same value), part1=$arg
             error('assert', "QuerySQL.add_part.set_type_once($type,$arg)");
@@ -337,7 +337,7 @@ class QuerySQL
       for( $i=1; $i < func_num_args(); $i++)
       {
          $part = trim(func_get_arg($i));
-         if ( (string)$part != '' )
+         if( (string)$part != '' )
             $this->parts[$type][] = $part;
       }
    }
@@ -354,7 +354,7 @@ class QuerySQL
       foreach( $part_arr as $part )
       {
          $part = trim($part);
-         if ( $part != '' )
+         if( $part != '' )
             $this->parts[SQLP_FIELDS][] = $part;
       }
    }
@@ -368,9 +368,9 @@ class QuerySQL
       $args = func_get_args();
       foreach( $args as $type )
       {
-         if ( !isset($this->parts[$type]) )
+         if( !isset($this->parts[$type]) )
             error('assert', "QuerySQL.clear_parts.unknown_type($type)");
-         if ( isset($this->parts[$type]) )
+         if( isset($this->parts[$type]) )
             $this->parts[$type] = array();
       }
    }
@@ -378,7 +378,7 @@ class QuerySQL
    /*! \brief Returns true, if sql-part existing */
    function has_part( $type )
    {
-      if ( !isset($this->parts[$type]) )
+      if( !isset($this->parts[$type]) )
          error('assert', "QuerySQL.has_part.unknown_type($type)");
       return ( count($this->parts[$type]) > 0 );
    }
@@ -386,7 +386,7 @@ class QuerySQL
    /*! \brief Returns parts-array for specified part_type */
    function get_parts( $type )
    {
-      if ( !isset($this->parts[$type]) )
+      if( !isset($this->parts[$type]) )
          error('assert', "QuerySQL.get_parts.unknown_type($type)");
       return $this->parts[$type];
    }
@@ -397,24 +397,24 @@ class QuerySQL
     */
    function get_part( $type, $incl_prefix = false )
    {
-      if ( !$this->has_part($type) )
+      if( !$this->has_part($type) )
          return '';
 
       // make unique: SQLP_FIELDS|OPTS|FROM|WHERE|HAVING|ORDER
       $arr = array_unique( $this->parts[$type] );
-      if ( $type === SQLP_FIELDS || $type === SQLP_ORDER || $type === SQLP_GROUP )
+      if( $type === SQLP_FIELDS || $type === SQLP_ORDER || $type === SQLP_GROUP )
          $part = implode(', ', $arr);
-      elseif ( $type === SQLP_WHERE || $type === SQLP_HAVING || $type === SQLP_WHERETMPL )
+      elseif( $type === SQLP_WHERE || $type === SQLP_HAVING || $type === SQLP_WHERETMPL )
          $part = implode(' AND ', $arr);
-      elseif ( $type === SQLP_FROM )
+      elseif( $type === SQLP_FROM )
          $part = $this->merge_from_parts( $arr );
-      elseif ( $type === SQLP_LIMIT )
+      elseif( $type === SQLP_LIMIT )
          $part = (count($arr) > 0) ? $arr[0] : '';
-      elseif ( $type === SQLP_FNAMES )
+      elseif( $type === SQLP_FNAMES )
          $part = implode(',', $arr);
-      elseif ( $type === SQLP_OPTS )
+      elseif( $type === SQLP_OPTS )
          $part = implode(' ', $arr);
-      elseif ( $type === SQLP_UNION_WHERE )
+      elseif( $type === SQLP_UNION_WHERE )
          $part = implode(' OR ', $arr);
 
       global $ARR_SQL_STATEMENTS;
@@ -428,7 +428,7 @@ class QuerySQL
     */
    function merge_from_parts( $arr )
    {
-      if ( count($arr) == 0 )
+      if( count($arr) == 0 )
          return '';
 
       $result = array_shift($arr);
@@ -443,7 +443,7 @@ class QuerySQL
          // - fix: -> replace ','-join with 'INNER JOIN' (could also use CROSS JOIN),
          //   because join has higher precedence than ','-join
          //   see referenced URL above(!)
-         if ( !preg_match( "/^(STRAIGHT_JOIN|((INNER|CROSS)\s+)?JOIN|(NATURAL\s+)?(LEFT|RIGHT)\s+(OUTER\s+)?JOIN)\s/i", $part ) )
+         if( !preg_match( "/^(STRAIGHT_JOIN|((INNER|CROSS)\s+)?JOIN|(NATURAL\s+)?(LEFT|RIGHT)\s+(OUTER\s+)?JOIN)\s/i", $part ) )
             $result .= ' INNER JOIN';
          $result .= " $part";
       }
@@ -458,7 +458,7 @@ class QuerySQL
     */
    function get_select()
    {
-      if ( !$this->has_part(SQLP_UNION_WHERE) )
+      if( !$this->has_part(SQLP_UNION_WHERE) )
          return $this->get_select_normal();
 
       // handle UNION-syntax
@@ -472,9 +472,9 @@ class QuerySQL
       $arrsql = array();
       $arrsql[]= '(' . implode(') UNION (', $arr_union) . ')';
 
-      if ( $this->has_part(SQLP_ORDER) )
+      if( $this->has_part(SQLP_ORDER) )
          $arrsql[]= $this->get_part(SQLP_ORDER, true);
-      if ( $this->has_part(SQLP_LIMIT) )
+      if( $this->has_part(SQLP_LIMIT) )
          $arrsql[]= $this->get_part(SQLP_LIMIT, true);
 
       $sql = implode(' ', $arrsql);
@@ -492,17 +492,17 @@ class QuerySQL
    {
       $arrsql = array();
       $has_opts = $this->has_part(SQLP_OPTS);
-      if ( $this->has_part(SQLP_FIELDS) || $has_opts )
+      if( $this->has_part(SQLP_FIELDS) || $has_opts )
          $arrsql[]= 'SELECT';
-      if ( $has_opts )
+      if( $has_opts )
          $arrsql[]= $this->get_part(SQLP_OPTS);
       $arrsql[]= $this->get_part(SQLP_FIELDS);
       $arrsql[]= $this->get_part(SQLP_FROM, true);
 
       // handle UNION-WHERE and WHERE
-      if ( $union_part < 0 )
+      if( $union_part < 0 )
       {
-         if ( $this->has_part(SQLP_WHERE) )
+         if( $this->has_part(SQLP_WHERE) )
             $arrsql[]= $this->get_part(SQLP_WHERE, true);
       }
       else
@@ -510,21 +510,21 @@ class QuerySQL
          $union_parts = $this->get_parts(SQLP_UNION_WHERE); // non-empty
          $arrsql[]= 'WHERE ' . $union_parts[$union_part];
 
-         if ( $this->has_part(SQLP_WHERE) )
+         if( $this->has_part(SQLP_WHERE) )
             $arrsql[]= 'AND ' . $this->get_part(SQLP_WHERE);
       }
 
-      if ( $this->has_part(SQLP_GROUP) )
+      if( $this->has_part(SQLP_GROUP) )
          $arrsql[]= $this->get_part(SQLP_GROUP, true);
-      if ( $this->has_part(SQLP_HAVING) )
+      if( $this->has_part(SQLP_HAVING) )
          $arrsql[]= $this->get_part(SQLP_HAVING, true);
 
       // ORDER and LIMIT only for non-union-select
-      if ( $union_part < 0 )
+      if( $union_part < 0 )
       {
-         if ( $this->has_part(SQLP_ORDER) )
+         if( $this->has_part(SQLP_ORDER) )
             $arrsql[]= $this->get_part(SQLP_ORDER, true);
-         if ( $this->has_part(SQLP_LIMIT) )
+         if( $this->has_part(SQLP_LIMIT) )
             $arrsql[]= $this->get_part(SQLP_LIMIT, true);
       }
 
@@ -542,10 +542,10 @@ class QuerySQL
    function merge( $qsql )
    {
       // checks
-      if ( is_null($qsql) || empty($qsql) )
+      if( is_null($qsql) || empty($qsql) )
          return true;
 
-      if ( !is_a($qsql, 'QuerySQL') )
+      if( !is_a($qsql, 'QuerySQL') )
       {
          error('assert', "QuerySQL.merge.expect_obj.QuerySQL" );
          return false; // error may be func that go-on
@@ -557,8 +557,8 @@ class QuerySQL
 
       foreach( array_keys( $this->parts ) as $type )
       {
-         if ( $qsql->has_part($type) )
-            if ( $type != SQLP_GROUP && $type != SQLP_LIMIT )
+         if( $qsql->has_part($type) )
+            if( $type != SQLP_GROUP && $type != SQLP_LIMIT )
                $this->parts[$type] = array_merge( $this->parts[$type], $qsql->get_parts($type) );
       }
 
@@ -575,7 +575,7 @@ class QuerySQL
    {
       // normal merge into new one
       $query = $this->duplicate();
-      if ( !$query->merge($qsql) )
+      if( !$query->merge($qsql) )
          return NULL;
 
       // manual merge of WHERE and HAVING
@@ -583,11 +583,11 @@ class QuerySQL
       foreach( array( SQLP_WHERE, SQLP_HAVING ) as $type )
       {
          $arr = array();
-         if ( $this->has_part($type) )
+         if( $this->has_part($type) )
             $arr[]= $this->get_part($type);
-         if ( $qsql->has_part($type) )
+         if( $qsql->has_part($type) )
             $arr[]= $qsql->get_part($type);
-         if ( count($arr) > 0 )
+         if( count($arr) > 0 )
             $query->add_part( $type, '(' . implode(') OR (', $arr) . ')' );
       }
 
@@ -608,7 +608,7 @@ class QuerySQL
       $arr = array();
       foreach( array_keys($this->parts) as $type )
       {
-         if ( $this->has_part($type) )
+         if( $this->has_part($type) )
             $arr[]= "$type={[" . implode( '], [', $this->parts[$type] ) . "]}";
       }
       return "QuerySQL: " . implode(', ', $arr);

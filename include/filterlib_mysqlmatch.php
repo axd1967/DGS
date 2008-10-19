@@ -105,7 +105,7 @@ class FilterMysqlMatch extends Filter
       $arr_syntax = array();
       $arr_syntax[]= 'word word';
       $match_mode = $this->get_config(FC_MATCH_MODE);
-      if ( empty($match_mode) || $match_mode === MATCH_BOOLMODE_SET )
+      if( empty($match_mode) || $match_mode === MATCH_BOOLMODE_SET )
          $arr_syntax[]= '+w -w <w >w ~w (wgroup) w* "literals"';
       $this->syntax_descr = implode(', ', $arr_syntax);
 
@@ -127,15 +127,15 @@ class FilterMysqlMatch extends Filter
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val, $name); // if elem, value for elem_boolmode saved
 
-      if ( $name === $this->name )
+      if( $name === $this->name )
       { // parse terms
          list( $arr_terms, $arr_stopwords ) =
             $this->extract_match_terms( $this->value );
-         if ( is_null($arr_terms) )
+         if( is_null($arr_terms) )
             return false; // no terms or error
 
          // check for stopwords (but continue without error)
-         if ( count($arr_stopwords) > 0 )
+         if( count($arr_stopwords) > 0 )
          {
             $this->warnmsg =
                sprintf( T_('Can\'t search for stopwords [%s]!'),
@@ -145,7 +145,7 @@ class FilterMysqlMatch extends Filter
          $this->match_terms = $arr_terms;
          $this->p_value = $this->value;
       }
-      elseif ( $name === $this->elem_boolmode )
+      elseif( $name === $this->elem_boolmode )
          ; // only var set in values[elem_boolmode]
       else
          error('invalid_filter', "ERROR: MysqlMatch-Filter parse_value($name,$val) called with unknown key");
@@ -161,7 +161,7 @@ class FilterMysqlMatch extends Filter
    function build_query()
    {
       // check
-      if ( $this->p_value == '' )
+      if( $this->p_value == '' )
          return;
 
       // build SQL
@@ -189,7 +189,7 @@ class FilterMysqlMatch extends Filter
 
       // check-box for boolean-mode (only if no match-mode set (=default))
       $match_mode = $this->get_config(FC_MATCH_MODE);
-      if ( empty($match_mode) )
+      if( empty($match_mode) )
       {
          $r .= "<BR>";
          $r .= $this->build_generic_checkbox_elem(
@@ -209,13 +209,13 @@ class FilterMysqlMatch extends Filter
    {
       // handle boolean-mode
       $match_mode = $this->get_config(FC_MATCH_MODE);
-      if ( empty($match_mode) )
+      if( empty($match_mode) )
          $sql_option = ((bool)$this->values[$this->elem_boolmode]) ? 'IN BOOLEAN MODE' : '';
-      elseif ( $match_mode === MATCH_BOOLMODE_SET )
+      elseif( $match_mode === MATCH_BOOLMODE_SET )
          $sql_option = 'IN BOOLEAN MODE';
-      elseif ( $match_mode === MATCH_BOOLMODE_OFF )
+      elseif( $match_mode === MATCH_BOOLMODE_OFF )
          $sql_option = '';
-      elseif ( $match_mode === MATCH_QUERY_EXPANSION )
+      elseif( $match_mode === MATCH_QUERY_EXPANSION )
          $sql_option = 'WITH QUERY EXPANSION';
       else
          error('invalid_filter', "ERROR: FilterMysqlMatch.build_query(): unknown FC_MATCH_MODE [$match_mode] for filter [{$this->id}]");
@@ -238,7 +238,7 @@ class FilterMysqlMatch extends Filter
       $tokenizer = new StringTokenizer( QUOTETYPE_QUOTE | TOKENIZE_WORD_RX,
             '\\w\'\\*', '', '\\\\', '""');
 
-      if ( !$tokenizer->parse($terms) )
+      if( !$tokenizer->parse($terms) )
       {
          $this->errormsg = implode(", ", $tokenizer->errors());
          return null;
@@ -252,9 +252,9 @@ class FilterMysqlMatch extends Filter
       $n = 0;
       foreach( $tokenizer->tokens() as $token )
       {
-         if ( $token->get_type() == TOK_TEXT )
+         if( $token->get_type() == TOK_TEXT )
          {
-            if ( $token->get_flags() & TOKFLAG_QUOTED ) // quoted-text "text"
+            if( $token->get_flags() & TOKFLAG_QUOTED ) // quoted-text "text"
             {
                $val = preg_quote( $token->get_token(), '/' ); //regex delimiter
                $val = preg_replace( "/\\s+/", "\\s+", $val );
@@ -268,11 +268,11 @@ class FilterMysqlMatch extends Filter
             }
 
             $val = trim( $val );
-            if ( (string)$val != '' ) // need ''<>0, so don't use empty(val)
+            if( (string)$val != '' ) // need ''<>0, so don't use empty(val)
                $arr[]= $val;
 
             // check for stopwords
-            if ( preg_match( "/\\b(".MYSQL_MATCH_STOPWORDS.")\\b/i", $val, $out ) )
+            if( preg_match( "/\\b(".MYSQL_MATCH_STOPWORDS.")\\b/i", $val, $out ) )
                $stopwords[] = $out[1];
          }
       }

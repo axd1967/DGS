@@ -45,7 +45,7 @@ require_once( "include/contacts.php" );
      contact_cancel        : cancel remove-confirmation
 */
 
-   if ( @$_REQUEST['contact_cancel'] ) // cancel delete
+   if( @$_REQUEST['contact_cancel'] ) // cancel delete
       jump_to("list_contacts.php");
 
    //TODO: init in Contact-class
@@ -55,10 +55,10 @@ require_once( "include/contacts.php" );
    $cid = (int) @$_REQUEST['cid'];
    $cuser = get_request_arg('cuser'); //Handle
 
-   if ( $cid < 0 )
+   if( $cid < 0 )
       $cid = 0;
 
-   if ( @$_REQUEST['contact_new'] ) // reset
+   if( @$_REQUEST['contact_new'] ) // reset
    {
       $cid = 0;
       $cuser = '';
@@ -66,30 +66,30 @@ require_once( "include/contacts.php" );
 
    // identify cid from cid and cuser
    $other_row = null; // other-player (=contact to add/edit)
-   if ( $cid )
+   if( $cid )
    { // have cid to edit new or existing
       $result = mysql_query("SELECT ID, Name, Handle FROM Players WHERE ID=$cid")
          or error('mysql_query_failed', 'edit_contact.find_user.id');
-      if ( mysql_affected_rows() == 1 )
+      if( mysql_affected_rows() == 1 )
          $other_row = mysql_fetch_assoc( $result );
       mysql_free_result($result);
    }
-   if ( !$other_row && $cuser != '' ) // not identified yet
+   if( !$other_row && $cuser != '' ) // not identified yet
    { // load cid for userid
       $qhandle = mysql_addslashes($cuser);
       $result = mysql_query("SELECT ID, Name, Handle FROM Players WHERE Handle='$qhandle'")
          or error('mysql_query_failed', 'edit_contact.find_user.handle');
-      if ( mysql_affected_rows() == 1 )
+      if( mysql_affected_rows() == 1 )
          $other_row = mysql_fetch_assoc( $result );
       mysql_free_result($result);
    }
 
    $errormsg = null;
-   if ( $other_row ) // valid contact
+   if( $other_row ) // valid contact
    {
       $cid = $other_row['ID'];
       $cuser = $other_row['Handle'];
-      if ( $my_id == $cid )
+      if( $my_id == $cid )
       {
          $other_row = null;
          $cid = 0;
@@ -100,19 +100,19 @@ require_once( "include/contacts.php" );
       $errormsg = '('.T_('unknown user').')';
 
    $contact = null;
-   if ( !$errormsg && $cid )
+   if( !$errormsg && $cid )
       $contact = Contact::load_contact( $my_id, $cid ); // existing contact ?
-   if ( is_null($contact) )
+   if( is_null($contact) )
       $contact = Contact::new_contact( $my_id, $cid ); // new contact
 
-   if ( $cid && @$_REQUEST['contact_delete'] && @$_REQUEST['confirm'] )
+   if( $cid && @$_REQUEST['contact_delete'] && @$_REQUEST['confirm'] )
    {
       $contact->delete_contact();
       jump_to("list_contacts.php?sysmsg=". urlencode(T_('Contact removed!')) );
    }
 
    // update contact-object with values from edit-form
-   if ( $cid && @$_REQUEST['contact_save'] )
+   if( $cid && @$_REQUEST['contact_save'] )
    {
       $contact->parse_system_flags(); // read sfl_...
       $contact->parse_user_flags(); // read ufl_...
@@ -125,7 +125,7 @@ require_once( "include/contacts.php" );
 
 
    $page = "edit_contact.php";
-   if ( @$_REQUEST['contact_delete'] )
+   if( @$_REQUEST['contact_delete'] )
       $title = T_('Contact removal');
    else
       $title = T_('Contact edit');
@@ -135,13 +135,13 @@ require_once( "include/contacts.php" );
    $cform->set_layout( FLAYOUT_GLOBAL, ( $cid ? '1,2|3,4' : '1' ) );
 
    $cform->set_area(1);
-   if ( $cid <= 0 ) // ask for contact to add/edit
+   if( $cid <= 0 ) // ask for contact to add/edit
    {
       $cform->add_row( array(
          'DESCRIPTION',  T_('Userid'),
          'TEXTINPUT',    'cuser', 16, 16, textarea_safe($cuser),
          'SUBMITBUTTON', 'contact_check', T_('Check contact') ));
-      if ( !is_null($errormsg) )
+      if( !is_null($errormsg) )
          $cform->add_row( array(
             'TAB', 'TEXT', $errormsg ));
    }
@@ -156,7 +156,7 @@ require_once( "include/contacts.php" );
 
       if( $other_row )
       {
-         if ( @$_REQUEST['contact_delete'] )
+         if( @$_REQUEST['contact_delete'] )
          {
             $cform->add_hidden( 'confirm', 1 );
             $cform->add_row( array(

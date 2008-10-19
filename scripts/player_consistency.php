@@ -75,10 +75,10 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
             case 'Password':
             case 'Sessioncode':
             case 'Email':
-               if ($val) $val= '***';
+               if( $val ) $val= '***';
                break;
             case 'Debug':
-               if ($val)
+               if( $val )
                   $val= preg_replace( "%(passwd=)[^&]*%is", "\\1***", $val);
                break;
          }
@@ -87,7 +87,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
          {
             if( $colwrap==='wrap' )
                $val= wordwrap( $val, $colsize, '<br>', 1);
-            else if( $colwrap==='cut' )
+            elseif( $colwrap==='cut' )
                $val= substr( $val, 0, $colsize);
          }
          echo "<td title='$key#$i' nowrap>$val</td>";
@@ -120,7 +120,7 @@ function uid_clause( $fld, $oper)
    {
       return " $oper ($fld>=$uid1 AND $fld<=$uid2)";
    }
-   else if( $uid1>'' )
+   elseif( $uid1>'' )
    {
       return " $oper ($fld=$uid1)";
    }

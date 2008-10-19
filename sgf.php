@@ -95,7 +95,7 @@ function sgf_simpletext( $str )
 
 function sgf_echo_comment( $com )
 {
-   if ( !$com )
+   if( !$com )
       return false;
    echo "\nC[" . str_replace("]","\\]", str_replace("\\","\\\\",
          reverse_htmlentities( ltrim($com,"\r\n")
@@ -110,7 +110,7 @@ function sgf_echo_comment( $com )
  */
 function sgf_echo_point( $points, $overwrite_prop=false )
 {
-   if (count($points) <= 0)
+   if( count($points) <= 0 )
       return false;
 
    if( $overwrite_prop )
@@ -356,7 +356,7 @@ $array=array();
       error('unknown_game');
 
    $owned_comments = @$_GET['owned_comments'];
-   if ( $owned_comments )
+   if( $owned_comments )
       $field_owned =
          'black.Sessioncode AS Blackscode, ' .
          'white.Sessioncode AS Whitescode, ' .
@@ -386,7 +386,7 @@ $array=array();
    $row = mysql_fetch_array($result);
    extract($row);
 
-   if ( $owned_comments )
+   if( $owned_comments )
    {
       $owned_comments = DAME;
       if( $Blackhandle == safe_getcookie('handle') )
@@ -437,7 +437,7 @@ $array=array();
            "\nWR[" . ( isset($Whiterating) ? echo_rating($Whiterating, 0,0,1) : '?' ) . "]";
    }
 
-   if ($sgf_version >= 4)
+   if( $sgf_version >= 4 )
    {
       echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, 1)) . "]";
    }
@@ -453,7 +453,7 @@ $array=array();
 
 
    $sgf_trim_nr = @mysql_num_rows($result) - 1 ;
-   if ( $Status == 'FINISHED' && isset($Score) )
+   if( $Status == 'FINISHED' && isset($Score) )
    {
       echo "\nRE[" . sgf_simpletext(
          $Score==0 ? '0' : score2text($Score, false, true)
@@ -461,18 +461,18 @@ $array=array();
 
       //skip the ending moves where PosX <= $sgf_trim_level
       //-1= skip ending pass, -2= keep them ... -999= keep everything
-      if ( abs($Score) < SCORE_RESIGN )
+      if( abs($Score) < SCORE_RESIGN )
          $sgf_trim_level = POSX_PASS;
-      else if ( abs($Score) == SCORE_TIME )
+      else if( abs($Score) == SCORE_TIME )
          $sgf_trim_level = POSX_RESIGN;
       else
          $sgf_trim_level = POSX_SCORE;
 
-      while ( $sgf_trim_nr >=0 )
+      while( $sgf_trim_nr >=0 )
       {
-         if (!mysql_data_seek($result, $sgf_trim_nr))
+         if( !mysql_data_seek($result, $sgf_trim_nr) )
             break;
-         if (!$row = mysql_fetch_array($result))
+         if( !$row = mysql_fetch_array($result) )
             break;
          if( $row["PosX"] > $sgf_trim_level
             && ($row["Stone"] == WHITE || $row["Stone"] == BLACK) )
@@ -498,14 +498,14 @@ $array=array();
          case MARKED_BY_BLACK:
          { // toggle marks
             //record last skipped SCORE/SCORE2 marked points
-            if ($sgf_trim_nr < 0)
+            if( $sgf_trim_nr < 0 )
                @$array[$PosX][$PosY] ^= OFFSET_MARKED;
 
-            if (isset($points[$coord]))
+            if( isset($points[$coord]) )
             {
                unset($points[$coord]);
             }
-            else if ($sgf_trim_nr < 0)
+            elseif( $sgf_trim_nr < 0 )
             {
                if( @$array[$PosX][$PosY] == MARKED_DAME )
                   $points[$coord]=$marked_dame_prop;
@@ -532,7 +532,7 @@ $array=array();
          case WHITE:
          case BLACK:
          {
-            if ( $PosX <= POSX_ADDTIME ) //configuration actions
+            if( $PosX <= POSX_ADDTIME ) //configuration actions
             {
                //TODO: POSX_ADDTIME Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=hours added
                break;
@@ -583,9 +583,9 @@ $array=array();
                sgf_echo_comment( $node_com );
                $node_com= "";
             }
-            else if ($sgf_trim_nr >= 0)
+            elseif( $sgf_trim_nr >= 0 )
             {
-               if ( $Stone == WHITE )
+               if( $Stone == WHITE )
                   $color='W' ;
                else
                   $color='B' ;
@@ -597,7 +597,7 @@ $array=array();
                }
 
 
-               if ( $Stone == WHITE )
+               if( $Stone == WHITE )
                   $next_color='B' ;
                else
                   $next_color='W' ;
@@ -617,7 +617,7 @@ $array=array();
                   }
                }
 
-               if ($PosX < POSX_PASS )
+               if( $PosX < POSX_PASS )
                { //score steps, others filtered by $sgf_trim_level
 
                   $next_color= "";
@@ -625,7 +625,7 @@ $array=array();
                   if( $sgf_score_highlight & 1 )
                      echo "N[$color SCORE]";
 
-                  if ( $sgf_score_highlight & 2 )
+                  if( $sgf_score_highlight & 2 )
                      $node_com .= "\n$color SCORE";
 
                   sgf_echo_point( $points);
@@ -641,7 +641,7 @@ $array=array();
                      if( $sgf_pass_highlight & 1 )
                         echo "N[$color PASS]";
 
-                     if ( $sgf_pass_highlight & 2 )
+                     if( $sgf_pass_highlight & 2 )
                         $node_com .= "\n$color PASS";
                   }
                   else //move or non AB handicap
@@ -664,7 +664,7 @@ $array=array();
    }
    mysql_free_result($result);
 
-   if ( $Status == 'FINISHED')
+   if( $Status == 'FINISHED')
    {
       echo( "\n;N[RESULT]" ); //Node start
       $prop_type ='';
@@ -674,7 +674,7 @@ $array=array();
       {
          $node_com.= "\n";
 
-         if ( abs($Score) < SCORE_RESIGN ) // scor-able
+         if( abs($Score) < SCORE_RESIGN ) // scor-able
          {
 
             $black_territory = array();
@@ -686,7 +686,7 @@ $array=array();
                $black_prisoner, $white_prisoner);
 
             //Last dead stones mark
-            if ($dead_stone_prop)
+            if( $dead_stone_prop )
                sgf_echo_point(
                   array_merge( $black_prisoner, $white_prisoner)
                   , $dead_stone_prop);

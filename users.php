@@ -82,7 +82,7 @@ require_once( "include/filterlib_country.php" );
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
-   if ( $observe_gid )
+   if( $observe_gid )
    {
       $rp = new RequestParameters();
       $rp->add_entry( 'observe', $observe_gid );
@@ -125,7 +125,7 @@ require_once( "include/filterlib_country.php" );
       'IFNULL(UNIX_TIMESTAMP(P.LastMove),0) AS LastMoveU' );
    $qsql->add_part( SQLP_FROM, 'Players AS P' );
 
-   if ( $observe_gid )
+   if( $observe_gid )
       $qsql->add_part( SQLP_FROM, "INNER JOIN Observers AS OB ON P.ID=OB.uid AND OB.gid=$observe_gid" );
 
    $query_ufilter = $utable->get_query(); // clause-parts for filter
@@ -138,11 +138,11 @@ require_once( "include/filterlib_country.php" );
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
 
 
-   if ( $f_active->get_value() )
+   if( $f_active->get_value() )
       $title = T_('Active users');
    else
       $title = T_('Users');
-   if ( $observe_gid )
+   if( $observe_gid )
    {
       $title .= ' - '
          . sprintf( T_('Observers of game %s'),
@@ -151,8 +151,8 @@ require_once( "include/filterlib_country.php" );
 
 
    start_page( $title, true, $logged_in, $player_row );
-   if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_ufilter->get_select()) ."<br>";
-   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
+   if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_ufilter->get_select()) ."<br>";
+   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    echo "<h3 class=Header>$title</h3>\n";
 
