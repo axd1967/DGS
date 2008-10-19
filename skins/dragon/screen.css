@@ -413,6 +413,7 @@ table#pageHead th,
 table#pageHead td {
    border: 0px solid red;
    padding: 4px;
+   vertical-align: middle;
 }
 
 table#pageFoot a,
