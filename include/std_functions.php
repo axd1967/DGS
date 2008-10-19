@@ -607,40 +607,36 @@ function end_page( $menu_array=NULL )
 
    echo "</td>";
 
- if( !$printable )
- {
+   if( !$printable )
+   {
+      echo "\n  <td class=LoginBox>";
 
-   echo "\n  <td class=LoginBox>";
+      if( (@$player_row['admin_level'] & ~ADMIN_TIME) && !$printable )
+         echo "<a href=\"{$base_path}admin.php\">",
+            T_('Admin'), "</a>&nbsp;&nbsp;&nbsp;";
 
-   if( (@$player_row['admin_level'] & ~ADMIN_TIME) && !$printable )
-      echo "<a href=\"{$base_path}admin.php\">"
-        . T_('Admin') . "</a>&nbsp;&nbsp;&nbsp;";
+      if( @$player_row['Translator'] && !$printable )
+         echo anchor( $base_path.'translate.php',
+                      T_('Translate'), '', array( 'accesskey' => ACCKEY_MENU_TRANSLATE ))
+            . "&nbsp;&nbsp;&nbsp;";
 
-   if( @$player_row['Translator'] && !$printable )
-      echo anchor( $base_path.'translate.php',
-                   T_('Translate'), '', array( 'accesskey' => ACCKEY_MENU_TRANSLATE ))
-         . "&nbsp;&nbsp;&nbsp;";
+      echo anchor( $base_path."index.php?logout=t", T_("Logout"), '',
+                   array( 'accesskey' => ACCKEY_MENU_LOGOUT ));
 
-   echo anchor( $base_path."index.php?logout=t"
-              , T_("Logout")
-              , ''
-              , array( 'accesskey' => ACCKEY_MENU_LOGOUT )
-              );
+      echo "</td>",
+           "\n </tr>",
+           "\n</table>";
 
-   echo "</td>"
-      . "\n </tr>"
-      . "\n</table>";
-
-   // Start of a new host line
-   echo "\n<table class=HostedBy>"
-      . "\n <tr>";
- }
+      // Start of a new host line
+      echo "\n<table class=HostedBy>",
+           "\n <tr>";
+   }
 
    //continuation of host line
    echo "\n  <td id='hostedBy'>Hosted by&nbsp;&nbsp;$hostlink</td>";
 
-   echo "\n </tr>"
-      . "\n</table>";
+   echo "\n </tr>",
+        "\n</table>";
 
    end_html();
 } //end_page
