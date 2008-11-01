@@ -23,6 +23,51 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2008-11-01 juga
+
+   * forum/post.php:
+   - fix SQL-bug for use-case U06 (new thread)
+
+   * include/game_functions.php (allow_add_time_opponent):
+   - fix potential bug allowing max of 360 days to add time
+
+   * include/std_functions.php, include/config.php:
+   - changed bottom-bar: Logout -> Login, if user is logged out
+   - changed menu: FAQ -> Help - FAQ,
+     changed access-key 'q' -> 'h'
+
+2008-10-19 juga
+
+   * admin_faq.php, change_bio.php, confirm.php, edit_bio.php, edit_contact.php,
+     edit_profile.php, game.php, join_waitingroom_game.php, list_contacts.php,
+     news.php, opponents.php, ratingpng.php, search_messages.php, send_message.php,
+     sgf.php, snapshot.php, userinfo.php, users.php, waiting_room.php,
+     code_examples/filter_example.php, code_examples/filter_example2.php,
+     code_examples/form_example2.php, code_examples/test_clock_tick.php,
+     code_examples/test_nigiri_random.php, code_examples/tokenizer_example.php,
+     features/vote/edit_feature.php, features/vote/lib_votes.php,
+     features/vote/list_features.php, features/vote/list_votes.php,
+     features/vote/vote_feature.php, forum/forum_functions.php, forum/post.php,
+     forum/read.php, forum/search.php, include/board.php, include/contacts.php,
+     include/classlib_matrix.php, include/filter.php, include/filter_functions.php,
+     include/filter_parser.php, include/filterlib_mysqlmatch.php,
+     include/form_functions.php, include/game_functions.php, include/move.php,
+     include/message_functions.php, include/quick_common.php, include/rating.php,
+     include/std_classes.php, include/std_functions.php, include/table_columns.php,
+     include/tokenizer.php, rss/status.php, wap/status.php,
+     scripts/data_report.php, scripts/game_consistency.php,
+     scripts/player_consistency.php, scripts/update_translation_pages.php:
+   - fixed layout:
+     'if/for/foreach/while ('-> 'cmd('; some 'else if' -> elseif
+
+   * include/contacts.php:
+   - text-change: Admin Crew -> Site Crew,
+     item was also meant for translators, FAQ-editors or people
+     "contributing" to the server
+
+   * skins/dragon/screen.css:
+   - fix v-alignment of page-related tables (bottom)
+
 2008-10-12 juga
 
    * NEWS:
