@@ -180,7 +180,7 @@ function post_message($player_row, $moderated_forum, &$thread)
          db_query( 'forum_post.new_thread',
             'UPDATE Posts SET Thread_ID=ID, LastPost=ID, '
             . 'PostsInThread=' . ($moderated ? '0' : '1')
-            . "WHERE ID=$New_ID LIMIT 1" );
+            . " WHERE ID=$New_ID LIMIT 1" );
 
          if( mysql_affected_rows() != 1)
             error("mysql_insert_post", 'forum_post.new_thread');
