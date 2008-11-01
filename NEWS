@@ -12,12 +12,16 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Resign game on opponents turn
       * Preview game message
       * Added access key [x]='Next Game', [v]=Preview
+      * Added "Notes" column on pages Status & My-Games list
+      * "move"-selectbox contains only subset of moves,
+        fixing possible bug on large boards
 
    * Game settings:
       * Changed default for Standard Handicap Placement: ON
       * Changed default for Time settings: Fischer time with 30d + 1d
 
-   * User info: Show a users timezone, local time and night start
+   * User info:
+      * Show a users timezone, local time and night start
 
    * Status page:
       * Reduced user info on status page, but show vacation if on vacation
@@ -71,18 +75,9 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    Minor changes:
 
    * Games:
-      * Game info: show OnVacation in red
-      * Game: "move" selectbox contains only move-subset,
-        fixing possible bug on large boards
-      * Game: Modified URI '&toggleobserve=' behaviour to avoid toggling on page refresh
-        (Former value '1' -> y&n: needs FAQ-adjustment for observing own-games-trick)
       * Replaced "Show my observed games" -> "Show games I'm observing"
-      * Games list: Modified columns; (keep entry up to release)
-        needs migration of bitmasks in DB; changed table-field-numbers of
-        - Games.Weekendclock: #12 -> #24
-        - Players.LastAccess: #15 -> #25
-      * Status & own Games list: Added "Notes" column
-      * Game markup: Changed char used for the moves number in game reference
+      * Game info: show OnVacation in red
+      * &lt;game&gt; markup: Changed char used for move-number in game reference
 
    * Users:
       * Faster Activity handling, added third active-level (<image star3.gif><image star3.gif><image star3.gif>)
@@ -105,6 +100,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Added statistics-page on site-map
       * Added link to statistics page on docs page
       * News: added table of contents
+      * Main-Menu: changed menu FAQ to Help-FAQ, changed access key [q] -> [h]
 
    * More use of CSS
 
@@ -116,6 +112,12 @@ Copyright (C) 2001-2007  Erik Ouchterlony
       * Added 'Activity' curve in the graph (activated in the URL)
 
    * Changed handling of some URL-arguments to reduce risc of SQL-injections
+   * On game-page modified URI '&toggleobserve=' behaviour to avoid toggling on page refresh
+     (Former value '1' -> y&n: needs FAQ-adjustment for observing own-games-trick)
+   * Games list: Modified columns; (keep entry up to release)
+     needs migration of bitmasks in DB; changed table-field-numbers of
+     - Games.Weekendclock: #12 -> #24
+     - Players.LastAccess: #15 -> #25
 
    * Changes for FAQ-editors:
 
