@@ -47,7 +47,7 @@ function allow_add_time_opponent( $game_row, $uid )
       $oppcolor = 'Black';
    // don't exceed 365 days maintime
    if( $game_row["{$oppcolor}_Maintime"]
-         + time_convert_to_hours(MAX_ADD_DAYS,'days') > time_convert_to_hours(365,'days') )
+         + time_convert_to_hours(MAX_ADD_DAYS,'days') > time_convert_to_hours(360,'days') )
       return false;
 
    // TODO: might be denied, if declared as forbidden in waiting-room (by option)
