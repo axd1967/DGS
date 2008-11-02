@@ -33,8 +33,6 @@ ChangeLog
 
    * include/std_functions.php, include/config.php:
    - changed bottom-bar: Logout -> Login, if user is logged out
-   - changed menu: FAQ -> Help - FAQ,
-     changed access-key 'q' -> 'h'
 
 2008-10-19 juga
 
