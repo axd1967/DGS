@@ -101,7 +101,7 @@ class Contact
          CUSERFLAG_TEACHER => array( 'ufl_teacher', T_('Teacher') ),
          CUSERFLAG_FAN     => array( 'ufl_fan',     T_('Fan') ),
          CUSERFLAG_TROLL   => array( 'ufl_troll',   T_('Troll') ),
-         CUSERFLAG_ADMIN   => array( 'ufl_admin',   T_('Server people') ),
+         CUSERFLAG_ADMIN   => array( 'ufl_admin',   T_('Site Crew') ),
          CUSERFLAG_MISC    => array( 'ufl_misc',    T_('Miscellaneous') ),
          );
 
