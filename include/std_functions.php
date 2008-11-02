@@ -501,10 +501,10 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
       $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )));
 
-      $menu->add( 4,1, array( T_('Forums'),     'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )));
-      $menu->add( 4,2, array( T_('Help - FAQ'), 'faq.php',         array( 'accesskey' => ACCKEY_MENU_HELP )));
-      $menu->add( 4,3, array( T_('Site map'),   'site_map.php',    array()));
-      $menu->add( 4,4, array( T_('Docs'),       'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
+      $menu->add( 4,1, array( T_('Forums'),   'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )));
+      $menu->add( 4,2, array( T_('FAQ'),      'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
+      $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
+      $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
       $menu->add( 5,1, array( T_('Vote'), 'features/vote/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
 
@@ -1576,6 +1576,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
             return $before .'<'. $head .'>'. $inside ;
          $inside = str_replace('&', '&amp;', $inside);
          //TODO: fix possible corrupted marks... to be reviewed
+         //TODO: can't use nested <code>-tags
          $inside = preg_replace(
             '%(class=Mark[^`]*'.ALLOWED_GT.')&amp;(lt;[^&]*)&amp;(gt;)%',
             '\\1&\\2&\\3',
