@@ -66,9 +66,7 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
 
          $tmp = make_html_safe( $Atext, 'faq', $rx_term );
          if( $tmp )
-         {
             $itm.= "<br>\n<div class=Answer>$tmp</div>";
-         }
 
          if( $prevlevel < 1 )
             $str.= "\n<div class=FAQlevel1>";
@@ -81,6 +79,20 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
    return $str;
 }
 
+// returns true, if passed question and answer-text matches regex-terms
+function search_faq_match_terms( $Qtext, $Atext, $rx_term )
+{
+   if( (string)$rx_term == '')
+      return false;
+   $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
+   if( contains_mark_terms( $tmp ) )
+      return true;
+   $tmp = make_html_safe( $Atext, 'faq', $rx_term );
+   if( contains_mark_terms( $tmp ) )
+      return true;
+   return false;
+}
+
 function TD_button( $title, $href, $isrc, $ialt)
 {
    //image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
@@ -89,6 +101,32 @@ function TD_button( $title, $href, $isrc, $ialt)
    $str = anchor( $href, $str);
    $str = "<td class=Button>$str</td>\n";
    return $str;
+}
+
+// returns error-message, or '' if query-terms are ok to be searched for
+function check_faq_search_terms( $query_terms )
+{
+   $qterms = trim( preg_replace( "/\s+/", ' ', $query_terms ) );
+   if( (string)$qterms != '' )
+   {
+      $arr_words = explode(' ', $qterms );
+      foreach( $arr_words as $term )
+      {
+         if( strlen($term) < 2 )
+            return sprintf( T_('Search term [%s] too short#FAQ'), $term );
+      }
+   }
+   return '';
+}
+
+// build regex from query-term:
+// - spaces = separate alternatives
+// - otherwise no special characters
+function build_regex_term( $query_term )
+{
+   $regex = preg_quote( $query_term );
+   $regex = preg_replace( "/\s+/", '|', $regex );
+   return ( (string)$regex != '' ) ? "($regex)" : '';
 }
 
 ?>
