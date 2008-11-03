@@ -23,6 +23,16 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2008-11-03 juga
+
+   * faq.php, skins/dragon/screen.css,
+     include/faq_functions.php (search_faq_match_terms, check_faq_search_terms,
+       build_regex_term),
+     include/std_functions.php (contains_mark_terms):
+   - added search on FAQ:
+     matching words-regex on texts exported in translations-dir
+     for user-specific language or FAQ-original-english
+
 2008-11-01 juga
 
    * forum/post.php:

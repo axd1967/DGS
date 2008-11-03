@@ -2519,6 +2519,12 @@ table.FAQ td.FAQread div.Answer {
 */
 }
 
+table.FAQ td.FAQsearch div.Answer {
+   border: 0px solid red;
+   padding-top: 1em;
+   padding-bottom: 2em;
+}
+
 
 table.ForumAdmin,
 table.FAQAdmin {
@@ -2717,7 +2723,7 @@ td.FormClassC {border-style: solid; border-width: 1px;
 
 
 /* forum debug begin * /
-table.Forum td {
+table.FAQ td {
    border: 2px dotted red;
 }
 /* forum debug end */
