@@ -1614,6 +1614,13 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    return $before ;
 }
 
+// returns true, if given text contains some marked-terms
+// (originated from regex-matching added in parse_tags_safe)
+function contains_mark_terms( $text )
+{
+   return preg_match( "/class=Mark(Tag)?Term/", $text );
+}
+
 /**
  * Simple check of elements' attributes and inner text.
  * If an element is allowed and correctly closed,
@@ -1629,7 +1636,6 @@ function parse_html_safe( $msg, $some_html, $mark_terms='')
 
    //set the regexp (escaped for the '/' delimiter) to the first match level (parenthesis)
    $parse_mark_regex = !$mark_terms ? '' : "/($mark_terms)/is";
-         //: '%('.str_replace('%','\%',$mark_terms).')%is';
    $bad = 0;
    if( !$some_html )
       $str = '';
