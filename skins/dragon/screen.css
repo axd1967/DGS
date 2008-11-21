@@ -2739,8 +2739,40 @@ body#dDGS table#pageFoot,
 body#dDGS table#pageHead {
    background: #C9410C;
 }
-
 body#dDGS table#pageMenu {
    border-color: #C9410C;
 }
+
+/* JUG local devel servers:
+ * ldDGS = local devel  on CVS-HEAD
+ * lsDGS = local stable branch
+ */
+body#lsDGS table#pageFoot,
+body#lsDGS table#pageHead,
+body#ldDGS table#pageFoot,
+body#ldDGS table#pageHead {
+   background: #683888;
+}
+body#lsDGS table#pageMenu,
+body#ldDGS table#pageMenu {
+   border-color: #683888;
+}
+
+/* JUG remote devel servers:
+ * rdDGS = remote devel  on CVS-HEAD
+ * rsDGS = remote stable branch
+ */
+body#rsDGS table#pageFoot,
+body#rsDGS table#pageHead,
+body#rdDGS table#pageFoot,
+body#rdDGS table#pageHead {
+   background: #5838C8;
+}
+body#rsDGS table#pageMenu,
+body#rdDGS table#pageMenu {
+   border-color: #5838C8;
+}
+
+
+/* ------------------------- */
 
