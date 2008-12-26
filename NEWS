@@ -3,7 +3,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_14 [2008-??-??] - DGS 1.0.14  (Games, Forum)
+#release DGS_1_0_15 [2009-???-??] - DGS 1.0.15  (Games, Forum)
 
    New features and Major changes:
 
@@ -153,7 +153,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * fixed default bug on selectbox filters
 
 
-#release DGS_1_0_13 [2007-10-07] - DGS 1.0.13  (CSS, Searching, Contacts, Add time)
+#release DGS_1_0_13 [2007-Oct-07] - DGS 1.0.13  (CSS, Searching, Contacts, Add time)
 
    New features and Major changes:
 
@@ -298,7 +298,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * various other bugfixes
 
 
-#release DGS_1_0_12 [2006-08-07] - DGS 1.0.12  (New forum, Invitations, Game notes, Markup)
+#release DGS_1_0_12 [2006-Aug-07] - DGS 1.0.12  (New forum, Invitations, Game notes, Markup)
 
    New features and Major changes:
 
@@ -428,7 +428,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
      times. If you hit it a second time, the post has been sent a second time.
 
 
-#release DGS_1_0_11 [2003-07-15] - DGS 1.0.11  (Messaging system, vacation, country)
+#release DGS_1_0_11 [2003-Jul-15] - DGS 1.0.11  (Messaging system, vacation, country)
 
    * New messaging system, using folders to let you have better control over your messages.
 
@@ -441,7 +441,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Slightly changed ratings: lower rating limit at 30 kyu.
 
 
-#release DGS_1_0_10 [2002-10-26] - DGS 1.0.10  (FAQ, improved ratings)
+#release DGS_1_0_10 [2002-Oct-26] - DGS 1.0.10  (FAQ, improved ratings)
 
    * Rating graph: Click on the rating to see it.
 
@@ -455,7 +455,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
      where you can help Bjørn with filling the FAQ with content.
 
 
-#release DGS_1_0_9 [2002-06-10] - DGS 1.0.9  (Layout, finished games, waiting room)
+#release DGS_1_0_9 [2002-Jun-10] - DGS 1.0.9  (Layout, finished games, waiting room)
 
    * Menu layout: vertical and horizontal menu, editable in user profile
 
@@ -466,12 +466,12 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Improved Waiting room (look & feel)
 
 
-#release DGS_1_0_8 [2002-05-10] - DGS 1.0.8  (Waiting Room)
+#release DGS_1_0_8 [2002-May-10] - DGS 1.0.8  (Waiting Room)
 
    * Added waiting room to simplify finding suitable opponents.
 
 
-#release DGS_1_0_7 [2002-04-28] - DGS 1.0.7  (Translations, Invitation)
+#release DGS_1_0_7 [2002-Apr-28] - DGS 1.0.7  (Translations, Invitation)
 
    * Translations: Experimental support for translations.
      If you want to help translating, please write a message to the new 'Translations' forum.
@@ -484,7 +484,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * New message lists looking more like the game lists and the user list
 
 
-#release DGS_1_0_6 [2002-02-18] - DGS 1.0.6  (Tables)
+#release DGS_1_0_6 [2002-Feb-18] - DGS 1.0.6  (Tables)
 
    * New table looks
 
@@ -493,7 +493,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Game list button graphics can be selected user profile
 
 
-#release DGS_1_0_5 [2002-01-12] - DGS 1.0.5  (Email notification, game comments)
+#release DGS_1_0_5 [2002-Jan-12] - DGS 1.0.5  (Email notification, game comments)
 
    * Extended email notification:
      You can let dragon send messages and the game move or the full board instead of just notify.
@@ -505,7 +505,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
         This can be useful when reviewing your game, without helping your opponent.
 
 
-#release DGS_1_0_4 [2001-12-08] - DGS 1.0.4  (Board graphics)
+#release DGS_1_0_4 [2001-Dec-08] - DGS 1.0.4  (Board graphics)
 
    * Changed board graphics for faster load to get rid of a problem with strange looking boards on some browsers.
      Drawback: coordinates are drawn as images, so the first time may take a bit longer if you look at a board.
@@ -513,7 +513,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Edit profile page: change of wood color and coordinate placement
 
 
-#release DGS_1_0_3 [2001-12-01] - DGS 1.0.3  (Biographical info, HTML-like code)
+#release DGS_1_0_3 [2001-Dec-01] - DGS 1.0.3  (Biographical info, HTML-like code)
 
    * Biographical info: enter more info about yourself, see 'status->show/edit userinfo'
 
@@ -524,13 +524,13 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * Docs->todo list is added so you can see my plans for the future.
 
 
-#release DGS_1_0_2 [2001-11-11] - DGS 1.0.2  (Rating system)
+#release DGS_1_0_2 [2001-Nov-11] - DGS 1.0.2  (Rating system)
 
    * Own rating system: Algorithm borrowed from the european rating system <http://www.european-go.org/rating/gor.html>,
      and it's relative strength is also the same as the european, so that, e.g. the IYT go guild rank is one stone stronger.
 
 
-#release DGS_1_0_1 [2001-10-14] - DGS 1.0.1  (Fischer time)
+#release DGS_1_0_1 [2001-Oct-14] - DGS 1.0.1  (Fischer time)
 
    * You can now delete a game the first couple of moves.
 
@@ -538,7 +538,7 @@ Copyright (C) 2001-2007  Erik Ouchterlony
      This can be very useful in tournaments where you want to ensure the average playing tempo is fast enough.
 
 
-#release DGS_1_0_0 [2001-06-26] - DGS 1.0.0  (Initial version)
+#release DGS_1_0_0 [2001-Jun-26] - DGS 1.0.0  (Initial version)
 
    * First official release!
 
