@@ -23,6 +23,11 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2008-12-28 juga
+
+   * change_password.php:
+   - bugfix of last fix for guest-id (':'-typo -> ';')
+
 2008-11-03 juga
 
    * faq.php, NEWS, skins/dragon/screen.css,
