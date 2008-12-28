@@ -1638,7 +1638,7 @@ class ForumRead
          {
             $opt_insert = (version_compare(MYSQL_VERSION, '4.1', '>=')) ? 'IGNORE' : ''; //TODO use direct
             db_query( "{$dbgmsg}2($argstr)",
-               "INSERT INTO $opt_insert ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time) "
+               "INSERT $opt_insert INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time) "
                   . "VALUES ('{$this->uid}','$fid','$tid','$pid','$newcount',FROM_UNIXTIME($time))" );
          }
       }
