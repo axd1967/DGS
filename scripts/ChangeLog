@@ -251,7 +251,8 @@ CREATE TABLE ForumRead (
 
 // migrate Forumreads- to ForumRead-table
 INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time)
-   SELECT User_ID,Forum_ID,Thread_ID,-1,-1,Time FROM Forumreads;
+   SELECT FR.User_ID,P.Forum_ID,FR.Thread_ID,-1,-1,FR.Time
+      FROM Forumreads as FR INNER JOIN Posts as P ON P.ID=FR.Thread_ID;
 
 // later can drop old forum-reads-table (or keep it)
 DROP TABLE Forumreads
