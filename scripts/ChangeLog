@@ -782,7 +782,7 @@ ALTER TABLE `Posts`
 -----------
 CREATE TABLE FeatureList (
    ID int(11) NOT NULL auto_increment,
-   Status enum('NEW','NACK','ACK','WORK','DONE') NOT NULL default 'NEW',
+   Status enum('NEW','NACK','ACK','WORK','DONE','LIVE','ARCH') NOT NULL default 'NEW',
    Subject varchar(120) NOT NULL,
    Description text NOT NULL,
    Editor_ID int(11) NOT NULL default '0',
