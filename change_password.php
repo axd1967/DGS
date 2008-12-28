@@ -35,7 +35,7 @@ require_once( "include/std_functions.php" );
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
-   $guest_id= (int)@$_REQUEST['guestpass']:
+   $guest_id= (int)@$_REQUEST['guestpass'];
    if( $guest_id > 0 && $guest_id <= GUESTS_ID_MAX )
    {
       if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
