@@ -195,7 +195,7 @@ ALTER TABLE `Posts`
      - bugfix loading threads with wrong LastPost
 -----------
 ALTER TABLE `Players`
- ADD `ForumFlags` tinyint unsigned NOT NULL default '8' AFTER `MayPostOnForum`;
+ ADD `ForumFlags` tinyint unsigned NOT NULL default '8' AFTER `MayPostOnForum` ;
 -----------
 
    * scripts/convert_from_old_forum.php:
@@ -229,13 +229,14 @@ ALTER TABLE `Players`
 -----------
 // add Posts.Updated for NEW-handling
 ALTER TABLE `Posts`
-   ADD `Updated` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `Lastedited`;
-UPDATE Posts SET Updated=Lastchanged WHERE Parent_ID=0;
+   ADD `Updated` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `Lastedited` ;
+UPDATE Posts SET Updated=Lastchanged WHERE Parent_ID=0 ;
 
 // add Forums.Updated for NEW-handling
 ALTER TABLE `Forums`
-   ADD `Updated` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `LastPost`;
-UPDATE Forums, Posts SET Forums.Updated=Posts.Time WHERE Forums.LastPost>0 AND Posts.ID=Forums.LastPost;
+   ADD `Updated` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `LastPost` ;
+UPDATE Forums, Posts
+   SET Forums.Updated=Posts.Time WHERE Forums.LastPost>0 AND Posts.ID=Forums.LastPost ;
 
 // add Table ForumRead for NEW-handling (replacing Forumreads-table)
 CREATE TABLE ForumRead (
@@ -247,12 +248,12 @@ CREATE TABLE ForumRead (
    Time datetime NOT NULL default '0000-00-00 00:00:00',
    UNIQUE KEY FR_Uniq (Thread_ID,Post_ID,Forum_ID,User_ID),
    KEY Time (Time)
-) TYPE=MyISAM;
+) TYPE=MyISAM ;
 
 // migrate Forumreads- to ForumRead-table
 INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time)
    SELECT FR.User_ID,P.Forum_ID,FR.Thread_ID,-1,-1,FR.Time
-      FROM Forumreads as FR INNER JOIN Posts as P ON P.ID=FR.Thread_ID;
+      FROM Forumreads as FR INNER JOIN Posts as P ON P.ID=FR.Thread_ID ;
 
 // later can drop old forum-reads-table (or keep it)
 DROP TABLE Forumreads
@@ -471,6 +472,18 @@ copy images/f_top.png
    * forum/read.php (revision_history, change_depth):
    - increased thread-hits representing thread-"activity"
    - moved loading of revision history data of a post from forum/read.php
+-----------
+ALTER TABLE `Forums`
+   ADD `ThreadsInForum` int(11) NOT NULL default '0' AFTER `LastPost` ;
+UPDATE Forums,
+   (SELECT Forum_ID, COUNT(*) AS X_Count
+       FROM Posts WHERE Approved='Y' AND Thread_ID>0 AND Parent_ID=0
+       GROUP BY Forum_ID) as TMPF
+   SET Forums.ThreadsInForum=TMPF.X_Count WHERE Forums.ID=TMPF.Forum_ID ;
+
+ALTER TABLE `Posts`
+   ADD `Hits` int(11) NOT NULL default '0' AFTER `PostsInThread` ;
+-----------
 
    * forum/search.php:
    - bugfix: setting page-offset and page-rows in DisplayForum-container for navigating
@@ -726,12 +739,12 @@ copy images/f_top.png
    - fix cast, layouting of 'or error()', correct typos
 
    * scripts/README.developers:
-     - added texts about:
-       - translation-texts
-       - using and/or/xor <-> &&/||, logical expression vs. and/or-command
-       - usage of list(), don't reuse varnames
-       - DGS-conventions for SQL-aliases
-       - string constants
+   - added texts about:
+     - translation-texts
+     - using and/or/xor <-> &&/||, logical expression vs. and/or-command
+     - usage of list(), don't reuse varnames
+     - DGS-conventions for SQL-aliases
+     - string constants
 
 2008-08-01 juga
 
@@ -848,8 +861,10 @@ UPDATE Players SET Boardcoords=Boardcoords|0x100;
      the robots (overheated activity)
 -----------
 copy /images/star3.gif
+
 UPDATE Players SET Activity=FLOOR(1000*Activity) WHERE Activity>0;
-ALTER TABLE Players CHANGE Activity Activity INT(11) NOT NULL DEFAULT '15000';
+ALTER TABLE Players
+   CHANGE Activity Activity INT(11) NOT NULL DEFAULT '15000';
 -----------
 
    * include/time_functions.php, include/quick_common.php,
@@ -3343,7 +3358,6 @@ ALTER TABLE `Players`
    * images/sort1a.gif, images/sort1d.gif,
      images/sort2a.gif, images/sort2d.gif, images/remove.gif:
    - new images added used for table-sort-indicator
------------
 
 2007-07-07 rodival
 
