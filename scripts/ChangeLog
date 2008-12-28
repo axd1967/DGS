@@ -25,6 +25,12 @@ ChangeLog
 
 2008-12-28 juga
 
+   * features/vote/lib_votes.php:
+   - fixed double used varname: voter -> points
+
+   * forum/forum_functions.php (replace_row_forumread):
+   - fixed SQL-syntax for INSERT IGNORE
+
    * change_password.php:
    - bugfix of last fix for guest-id (':'-typo -> ';')
 
