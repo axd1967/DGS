@@ -354,7 +354,7 @@ class FeatureVote
    /*! \brief user-id of feature-voter. */
    var $voter;
    /*! \brief vote points on feature: 0=neutral, 1=low, 9=high points, -1=not-wanted. */
-   var $voter;
+   var $points;
    /*! \brief Date when feature has been last updated (unix-time). */
    var $lastchanged;
 
