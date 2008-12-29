@@ -1,5 +1,5 @@
 DragonGoServer NEWS -- Release Notes. History of user-visible changes.
-Copyright (C) 2001-2007  Erik Ouchterlony
+Copyright (C) 2001-2008  Erik Ouchterlony
 
 %TOC%
 
@@ -151,6 +151,60 @@ Copyright (C) 2001-2007  Erik Ouchterlony
    * fixed problems with favicon picture
    * fixed duplicated row problem for Add-Time feature
    * fixed default bug on selectbox filters
+
+
+#release DGS_1_0_14 [2008-12-14] - DGS 1.0.14
+
+   Policy changes:
+
+   * Added <home policy.php>Dragon Go Server policy</home>
+
+
+   Code improvements:
+
+   * Optimized some database queries and added indexes:
+      * Speed up full game list by default restriction on Last move
+
+
+   Minor changes:
+
+   * Forum pages:
+      * Moderate edited posts if moderation normally needed
+      * Show note for guest-user on reply-textbox about writing posts
+
+   * Increased size of bio and message text boxes
+
+   * People page:
+      * Changed main FAQ editor
+      * Added list of forum moderators
+
+
+   Administrative changes:
+
+   * Changes for FAQ-editors and Translators:
+      * Show last update date for FAQ-editor on people page
+
+   * Added blocking features:
+      * Deny bio-edit, hide bio, deny login and more
+      * Added config and validation script to block IPs
+      * Throw error on blocked IP on registration and login as guest
+      * Show message in user-info if bio is hidden or login denied
+
+   * Changes for Admins:
+      * Added admin page to edit user attributes and admin options
+      * Added admin page with list of administrated users
+      * Added forum log
+      * Added hidden forums
+      * Added forum groups and corresponding user admin options
+      * Added admin pages to show FAQ-, forum-, error- and admin-log
+      * Added Adminlog entries for admin user changes, login and login-denied
+      * Added Forumlog entry for changes in forums and posts
+      * Restricted access to Forum management
+
+
+   Bug fixes:
+
+   * fixed score-filter in finished games list
 
 
 #release DGS_1_0_13 [2007-Oct-07] - DGS 1.0.13  (CSS, Searching, Contacts, Add time)

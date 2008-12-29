@@ -4,8 +4,15 @@ General infos
 changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
+last server update start: 2006-10-06
+2007-10-06: bug fix update
+2007-11-07: bug fix update
+2007-12-19: bug fix update
+2008-01-10: bug fix update
+2008-12-14: release 1.0.14, mostly to add blocking functions
+
 previous server update:
-Release [2007-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
+Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 
 -----
 quick INFO:
@@ -13,7 +20,8 @@ quick INFO:
 2007-12-23 rodival
    Code Cleanup, New Features
 
-2008-10-06 juga
+2008-11-18 juga
+   Blocking and more admin features, Debugging for release 1.0.14
    Forum, New-Game/Waiting-Room, Code Cleanup
 
 -----
@@ -22,6 +30,21 @@ quick TODO:
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2008-12-29 juga
+
+   * scripts/ChangeLog, NEWS:
+   - start of merge from all changes for release DGS 1.0.14 from the stable
+     branch [DGS-stable-200712] tagged with [DGS-stable-200812]
+
+
+# All changes between releases DGS 1.0.13 (CVS-tag dev-start-20081116)
+# and DGS 1.0.14 (CVS-tag DGS-stable-200812) are now merged into
+# the MAIN-branch.
+# DDL-changes for release 1.0.14 are NOT repeated here within the merge.
+#
+# The code up to here is marked with CVS-tag [pre-merge-1_0_14-20081228].
+
 
 2008-12-28 juga
 
@@ -1500,6 +1523,424 @@ copy /images/favicon.ico into the root folder
    - remove a T_() detection while commented
 
 
+# from here on up development continued on MAIN-branch as continuation
+# after release DGS 1.0.13 on 19-Dec-2007 till 03-Nov-2008,
+# then development on branch DGS-stable-200712 is included below,
+# ending in release DGS 1.0.14
+#
+# All changes between releases DGS 1.0.13 (CVS-tag dev-start-20081116)
+# and DGS 1.0.14 (CVS-tag DGS-stable-200812) are merged into the MAIN-branch,
+# which is included in this ChangeLog starting at 29-Dec-2008 above.
+#
+# DDL-changes for release 1.0.14 are NOT repeated within the merge,
+# because those changes are already performed on the live-server
+# and they are not conflicting with development on the MAIN-branch.
+
+
+==================================================================
+Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
+# (Release in branch DGS-stable-200712)
+
+2008-12-14 juga
+
+   * snapshot.php:
+   - added release snapshot for 1.0.14 (DGS-stable-200812)
+
+   * site_map.php:
+   - added policy link
+
+   * NEWS:
+   - prep for new release 1.0.14 (in stable-branch)
+
+   * scripts/database_changes_1_0_13_to_1_0_14.mysql,
+     scripts/roadmap_1_0_12_to_1_0_13.txt:
+   - added information containing a collection of changes
+     for updating from v1.0.13 to v1.0.14
+
+2008-12-14 ejlo
+
+   * scripts/apc_cache_info.php,
+     scripts/apc_clear_cache.php:
+   - Scripts to get info about and control APC-cache
+
+   * do_registration.php, do_registration_blocked.php, error.php, register.php:
+   - added checkbox to Accept policy for registration
+
+2008-12-14 juga
+
+   * NEWS:
+   - added policy section about policy added
+
+   * do_registration_blocked.php:
+   - fixed bug: needed to update LastChanged for insert of post
+
+   * NEWS, admin_show_users.php, admin_users.php, forum/admin.php,
+     forum/forum_functions.php (ForumOptions), forum/index.php,
+     include/config.php, include/quick_common.php:
+   - removed user-restriction to initial forums predestinated for server newbies
+
+   * admin_show_users.php:
+   - don't show BlockReason for list of admin-users
+
+   * do_registration.php, do_registration_blocked.php, register.php,
+     include/quick_common.php (error_on_blocked_ip):
+   - add admin-log entry on IP-block for registration or guest-login
+
+   * error.php:
+   - add steps how to register a new account if IP-blocked -> send (automated) forum-request to admin
+   - error on IP-block for registration or guest-login
+   - added admin-log on edit-bio denied
+
+   * login.php:
+   - add check for IP-block on guest-user
+
+   * userinfo.php:
+   - fix hiding of bio-message if user is denied of showing-bio
+
+   * forum/forum_functions.php (add_forum_log):
+   - add_forum_log: use default user-id
+
+2008-12-14 ejlo
+
+   * policy.php:
+   - added link to FAQ
+
+2008-12-07 juga
+
+   * policy.php, docs.php, skins/dragon/screen.css:
+   - added DGS-policy
+   - policy-text provided by site-owner Erik Ouchterlony and Jens-Uwe Gaspar
+
+   * admin_show_users.php, admin_users.php, error.php, forgot.php, index.php,
+     login.php, quick_play.php, quick_status.php,
+     include/quick_common.php (error_on_blocked_ip),
+     include/std_functions.php (who_is_logged),
+     rss/status.php, wap/status.php:
+   - changed blocking-feature:
+     - users with existing account can always login (need login-denied)
+     - new account registration may get blocked by IP
+     - show blocking reason on deny-login set on user
+   - deactived admin-option bypass-IP-block
+
+   * admin_users.php, forum/admin.php, forum/index.php,
+     forum/forum_functions.php (ForumOptions):
+   - INIT: don't show to users and admin if deactivated
+
+   * include/connect2mysql.php (mysql_addslashes):
+   - since PHP4.3.0 mysql_escape_string shows deprecated warning,
+     use mysql_real_escape_string if existing db-connection
+
+   * admin_show_users.php, admin_users.php:
+   - added BlockReason
+-----------
+ALTER TABLE `Players`
+   ADD `BlockReason` text NOT NULL default '' AFTER `TableMaxRows` ;
+-----------
+
+2008-11-23 juga
+
+   * forum/forum_functions.php (display_posts_pending_approval):
+   - added safety-check on users admin-level
+
+   * forum/post.php, forum/forum_functions.php:
+   - moderate editing posts if moderation needed
+
+   * forum/admin_show_forumlog.php:
+   - added search for pending-edit-post
+   - added note about log-content
+
+   * admin.php, admin_show_adminlog.php, admin_show_errorlog.php,
+     admin_show_faqlog.php:
+   - added admin-pages to show: FAQlog, Forumlog, Errorlog and Adminlog
+
+   * admin_users.php, login.php, forum/post.php, forum/forum_functions.php:
+   - write Adminlog-entry for user-changes by admin, user-login and login-denied
+   - write Forumlog-entry for forum edit-post as edit_pend_post
+
+   * forum/forum_functions.php (display_posts_pending_approval),
+     skins/dragon/screen.css:
+   - added link to show forumlog for pending-approval posts on status page
+
+   * admin_users.php:
+   - added link to Block-IP check-script with proper admin-level
+
+   * admin_show_users.php, include/std_functions.php, forum/index.php:
+   - use constant for executive admins ADMINGROUP_EXECUTIVE
+   - properly format date
+
+2008-11-20 juga
+
+   * scripts/data_export.php:
+   - added table Forumlog
+
+   * NEWS:
+   - added blocking features and corresponding admin functionality
+   - added optimizations (queries, GUI) and bugfixes
+   - added more info for people page, forum note for guest
+
+   * admin.php, admin_show_users.php, scripts/check_block_ip.php:
+   - bugfix bit-operator precedence
+
+   * error.php, forum/index.php, forum/list.php, forum/post.php (post_message),
+     forum/read.php, forum/search.php:
+   - allow viewing, searching and posting only for visible forums configured
+     by users admin-options and forum-groups
+   - added error if user views non-visible forum
+
+   * admin_users.php, admin_show_users.php, include/quick_common.php:
+   - added admin-options for forum-groups INIT/ADMIN/DEV:
+     - INIT  = Restrict user to marked INIT-forums
+     - ADMIN = User can view marked ADMIN-forums
+     - DEV   = User can view marked DEV-forums
+
+   * forum/admin.php (build_forum_options, build_forum_options_text,
+       add_form_forum_options),
+     forum/forum_functions.php (class ForumOptions, forum_name),
+     forum/index.php,
+     include/config.php (NEWUSER_FGROUP_INIT_DAYS),
+     include/std_functions.php (is_logged_in):
+   - added forum-group options INIT/ADMIN/DEV and forum administration:
+     - INIT-forum  = user can be restricted to only view marked INIT-forums
+     - ADMIN-forum = user can view ADMIN-forum if corresponding admin-option set
+     - DEV-forum   = user can view DEV-forum if corresponding admin-option set
+   - for admins show forum-options in forum-list (hidden forum, INIT-forum)
+   - added ForumOptions-class to handle Forums.Options and forum-visibility
+   - added NEWUSER_FGROUP_INIT_DAYS to config number of days a user
+     is only allowed to view INIT-forums after registration:
+     - can be deactivated in config (val=-1)
+     - -1 = deactivated (all non-hidden forums can be viewed by new users),
+            except if admin-option overwrites this state
+     - 0..n=days after which only INIT-forums can be viewed
+
+   * forum/admin.php, forum/index.php, scripts/convert_from_old_forum.php,
+     forum/forum_functions.php (forum_name):
+   - replaced Forums.Moderated (char) to Options (int-bitmask)
+   - defined forum options: moderated, groups (init/admin/developer)
+-----------
+ALTER TABLE `Forums`
+   ADD `Options` int(11) unsigned NOT NULL default '0' AFTER `Moderated` ;
+
+-- take over Moderated-flag
+UPDATE Forums SET Options=IF(Moderated='Y',1,0) ;
+
+-- remove Moderated-column (replaced by Options)
+ALTER TABLE `Forums`
+   DROP COLUMN `Moderated` ;
+-----------
+
+   * do_registration.php:
+   - throw error on blocked ip
+
+   * forgot.php, index.php, login.php, quick_status.php, register.php:
+   - throw error on blocked ip except bypassed
+
+   * include/quick_common.php (error_on_blocked_ip):
+   - added method error_on_blocked_ip to throw error on blocked-ip
+     except if bypassed with admin-option
+
+   * login.php, quick_status.php, quick_play.php:
+   - added check on deny-login admin-option
+   - optimized query (select only used fields from table Players)
+
+   * change_bio.php, edit_bio.php, userinfo.php, include/std_functions.php,
+     quick_play.php, rss/status.php, wap/status.php:
+   - replaced calced db-field admin_options -> AdminOptions
+
+   * include/error_functions.php:
+   - bugfix: added missing PHP-end-marker
+
+2008-11-19 juga
+
+   * include/quick_common.php (is_blocked_ip, check_subnet_ip),
+     include/config.php, error.php,
+     scripts/check_block_ip.php:
+   - added IP-blocklist in include/config.php ARR_BLOCK_IPLIST
+   - added script to test syntax of IP-blocklist in include/config.php
+   - added methods to check for blocked-IP
+   - added errors: ip_blocked_login, ip_blocked_register
+
+   * admin_show_users.php, admin_users.php, include/quick_common.php:
+   - renamed ADMOPT_BYPASS_IP_BAN -> ADMOPT_BYPASS_IP_BLOCK
+
+   * admin.php, admin_show_users.php, skins/dragon/screen.css:
+   - added new admin page to show current admin and administrated users,
+     can be viewed by most admins
+
+   * admin_users.php:
+   - added read/write-field AdminNote
+   - added admin-option ADMIN_HIDE_BIO (bio of user is hidden)
+   - added refresh to reload user-data
+   - added syntax to define width and maxlength for text-input-fields
+   - added link to page showing administrated users
+   - forbid to change admin-option DENY_LOGIN for oneself
+-----------
+ALTER TABLE `Players`
+   ADD `AdminNote` varchar(100) NOT NULL default '' AFTER `AdminOptions` ;
+-----------
+
+   * userinfo.php, include/quick_common.php:
+   - don't show bio if admin-option ADMIN_HIDE_BIO is active,
+     show message if bio is hidden
+   - show message 'Login denied' if admin-option ADMIN_DENY_LOGIN is active
+
+   * forum/forum_functions.php (forum_message_box):
+   - for guest show note on reply-textbox about forum-moderation
+
+2008-11-18 juga
+
+   * admin_users.php, error.php, change_bio.php, edit_bio.php,
+     include/quick_common.php, include/std_functions.php (is_logged_in),
+     quick_play.php, quick_status.php, rss/status.php, wap/status.php:
+   - added and defined Players.AdminOptions:
+     defined AdminOptions: BYPASS_IP_BAN, DENY_LOGIN, DENY_EDIT_BIO, SHOW_TIME
+     - handle ADMOPT_DENY_EDIT_BIO denying edit bio
+     - handle ADMOPT_DENY_LOGIN denying login
+     - handle ADMOPT_SHOW_TIME showing time in bottom bar
+   - added write-controls for edit-user in admin_users.php
+   - added errors: login_denied, edit_bio_denied
+-----------
+ALTER TABLE `Players`
+   ADD `AdminOptions` int(11) unsigned NOT NULL default '0' AFTER `Adminlevel` ;
+ALTER TABLE `Players`
+   ADD INDEX `AdminOptions` (`AdminOptions`) ;
+-----------
+
+   * include/filter.php (add_or_del_filter):
+   - added prefix to the "toggle filter" actions (bugfix from CVS-Head)
+     Bugfix [http://www.dragongoserver.net/forum/read.php?forum=4&thread=18318]
+     for fixing Score-filter in finished games list
+
+   * people.php:
+   - FAQ-section:
+     - changed main-editor: jug -> Ingmar
+     - changed title, show last-update for all FAQ-editors
+   - added forum moderators section
+   - optimized query on admin-users (using index)
+-----------
+ALTER TABLE `Players`
+   ADD INDEX `Adminlevel` (`Adminlevel`) ;
+-----------
+
+   * include/config.php, show_games.php:
+   - added constant RESTRICT_SHOW_GAMES_ALL to restrict initial view
+     in show_games.php when showing ALL games with default value,
+     show explaining-note if config is active
+   - fix: replace all and/or -> &&/||
+
+   * edit_bio.php, message.php, waiting_room.php:
+   - adapt height of bio text-area on line-count
+   - increase size of message text-areas: width 50 > 60, height 8 > 12
+
+   * forum/admin_show_forumlog.php,
+     forum/forum_functions.php (add_forum_log, load_forum_id, approve_message),
+     forum/index.php, forum/post.php (post_message), forum/read.php:
+   - added forum log for forum-post changes (new/edit/moderate-post)
+     - viewable only to moderators
+     - show Forumlog.IP only to admin DEVELOPER-role
+
+   * include/table_columns.php (button_style, make_next_prev_links):
+   - added base_path to images (needed for forum log)
+-----------
+CREATE TABLE Forumlog (
+   ID int(11) NOT NULL auto_increment,
+   User_ID int(11) NOT NULL default '0',
+   Thread_ID int(11) NOT NULL default '0',
+   Post_ID int(11) NOT NULL default '0',
+   Time datetime NOT NULL default '0000-00-00 00:00:00',
+   Action varchar(40) NOT NULL default '',
+   IP varchar(16) NOT NULL default '',
+   PRIMARY KEY (ID),
+   KEY User_ID (User_ID),
+   KEY Time (Time)
+) TYPE=MyISAM ;
+
+-- add NEW-POST events from all users
+INSERT INTO Forumlog (User_ID,Thread_ID,Post_ID,Time,Action)
+   SELECT User_ID,Thread_ID,ID AS Post_ID,Time,
+          CONCAT(IF(PendingApproval='Y','new_pend_post:','new_post:'),IF(ID=Thread_ID,'new_thread','reply')) AS Action
+   FROM Posts WHERE Thread_ID>0 AND PosIndex>='' ORDER BY Time ;
+
+-- add EDIT-POST events from all users
+INSERT INTO Forumlog (User_ID,Thread_ID,Post_ID,Time,Action)
+   SELECT User_ID,-1 AS Thread_ID,Parent_ID AS Post_ID,Time,'edit_post' AS Action
+   FROM Posts WHERE PosIndex='' ORDER BY Time ;
+UPDATE Forumlog, Posts AS P
+   SET Forumlog.Thread_ID=P.Thread_ID
+   WHERE P.ID=Forumlog.Post_ID and Forumlog.Thread_ID=-1 ;
+-----------
+
+   * admin_users.php, admin.php:
+   - added admin-page for ADMIN_DEVELOPER to edit and show some
+     user attributes:
+     - edit: Handle, Name, VaultCnt, VaultTime, VacationDays, OnVacation,
+             MayPostOnForum
+     - show: Registerdate, Lastaccess, LastMove, Activity, Lang,
+             Email, IP, Browser, Sessionexpire, SendEmail, Notify
+
+   * forum/admin.php:
+   - changed access-right to manage forums from ADMIN_FORUM to ADMIN_DEVELOPER
+
+   * forum/list.php:
+   - show full user-reference in forum thread-list
+
+   * skins/dragon/screen.css:
+   - changed valign-style using CSS for multiline-table-cells: middle -> top
+
+
+# development continued on MAIN-branch from 17-Mar-2008 up to 03-Nov-2008
+# (see changes up in ChangeLog from release DGS 1.0.14),
+# development continued in branch DGS-stable-200712 (from here on up to add blocking features)
+
+
+2008-03-17 rodival
+
+   * include/form_functions.php (create_form_string,
+     print_insert_text_input, print_insert_textarea):
+   - fixed the textarea_safe() problem in the forms
+     (because of the new PHP5) (fix located in create_form_string())
+   - changed the not obvious $safe_text var-name to $make_texts_safe
+
+   * translate.php:
+   - added comments to clarify the translation process
+   - modified the various encodings management - both with OWNHTML now
+
+   * quick_status.php:
+   - substitued opponent.Handle to opponent.Name in the returned infos
+     to avoid charsets mismatches (the names are independently recorded
+     within the opponent charset, handles are all ascii compatible)
+
+==================================================================
+Update Release [2008-01-10] - DGS 1.0.13.b - CVS-tag [DGS-stable-200712]
+
+2008-01-09 rodival
+
+   * include/connect2mysql.php (check_password):
+   - revert the bad PASSWORD() stored (because of the new MySQL version)
+     to their OLD_PASWORD() value.
+     Today, there are 448 users with a corrupted password and no Email address
+     and this number grow. So, the previous "define the encryption function"
+     fix should be useful too.
+
+2008-01-06 rodival
+
+   * skins/dragon/screen.css:
+   - add a red OnVacation in game infos table
+
+2008-01-05 rodival
+
+   * include/config.php, include/connect2mysql.php (check_password),
+     do_registration.php, change_password.php, send_new_password.php,
+     scripts/data_export.php (after_table):
+   - define the encryption function used for passwords in config.php
+
+   * scripts/browser_stats.php:
+   - add of new browser types
+
+2007-12-22 rodival
+
+   * clock_tick.php:
+   - delayed the Players join from timeout games query
+
 ==================================================================
 Release [2007-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
 
@@ -1507,6 +1948,7 @@ History:
 2007-10-06: first big update of DGS 1.0.13
 2007-11-07: bug fix update
 2007-12-19: bug fix update + release
+2008-01-10: bug fix update (see above DGS 1.0.13.b)
 
 
 2007-12-27 juga
