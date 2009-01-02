@@ -277,7 +277,7 @@ CREATE TABLE ForumRead (
    Time datetime NOT NULL default '0000-00-00 00:00:00',
    UNIQUE KEY FR_Uniq (Thread_ID,Post_ID,Forum_ID,User_ID),
    KEY Time (Time)
-) TYPE=MyISAM ;
+) ENGINE=MyISAM ;
 
 // migrate Forumreads- to ForumRead-table
 INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time)
@@ -814,7 +814,7 @@ CREATE TABLE FeatureList (
    PRIMARY KEY (ID),
    KEY Status (Status),
    KEY Editor_ID (Editor_ID)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 CREATE TABLE FeatureVote (
    fid int(11) NOT NULL,
@@ -823,7 +823,7 @@ CREATE TABLE FeatureVote (
    Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
    PRIMARY KEY (fid,Voter_ID),
    KEY Voter_ID (Voter_ID)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 -----------
 
    * include/std_classes.php (add_part, add_part_fields):
@@ -1523,7 +1523,7 @@ copy /images/favicon.ico into the root folder
    - remove a T_() detection while commented
 
 
-# from here on up development continued on MAIN-branch as continuation
+# From here on up development continued on MAIN-branch as continuation
 # after release DGS 1.0.13 on 19-Dec-2007 till 03-Nov-2008,
 # then development on branch DGS-stable-200712 is included below,
 # ending in release DGS 1.0.14
@@ -1852,13 +1852,16 @@ CREATE TABLE Forumlog (
    PRIMARY KEY (ID),
    KEY User_ID (User_ID),
    KEY Time (Time)
-) TYPE=MyISAM ;
+) ENGINE=MyISAM ;
 
 -- add NEW-POST events from all users
 INSERT INTO Forumlog (User_ID,Thread_ID,Post_ID,Time,Action)
    SELECT User_ID,Thread_ID,ID AS Post_ID,Time,
           CONCAT(IF(PendingApproval='Y','new_pend_post:','new_post:'),IF(ID=Thread_ID,'new_thread','reply')) AS Action
    FROM Posts WHERE Thread_ID>0 AND PosIndex>='' ORDER BY Time ;
+-- if column PendingApproval already dropped (from HEAD-development),
+-- then replace CONCAT-statement in above SQL-command:
+   CONCAT(IF(Approved='P','new_pend_post:','new_post:'),IF(ID=Thread_ID,'new_thread','reply')) AS Action
 
 -- add EDIT-POST events from all users
 INSERT INTO Forumlog (User_ID,Thread_ID,Post_ID,Time,Action)
@@ -1887,8 +1890,12 @@ UPDATE Forumlog, Posts AS P
    - changed valign-style using CSS for multiline-table-cells: middle -> top
 
 
-# development continued on MAIN-branch from 17-Mar-2008 up to 03-Nov-2008
+# development continued on MAIN-branch from 17-Mar-2008 up to 03-Nov-2008.
+# Normally ChangeLog-entries from branches are not included, but the changes
+# for release 1.0.14 had been released on the live server and therefore had been
+# included in the MAIN-branch ChangeLog.
 # (see changes up in ChangeLog from release DGS 1.0.14),
+#
 # development continued in branch DGS-stable-200712 (from here on up to add blocking features)
 
 
