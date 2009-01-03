@@ -70,10 +70,11 @@ function disable_cache($stamp=NULL, $expire=NULL)
 
 
 //Because of mysql_real_escape_string(), mysql_addslashes()
-// can't be used without a valide connection to mysql
+// can't be used without a valid connection to mysql
 if( function_exists('mysql_real_escape_string') ) //PHP >= 4.3.0
 {
-   function mysql_addslashes($str) {
+   function mysql_addslashes($str)
+   {
       //If no connection is found, an E_WARNING level warning is generated.
       //Warning: Can't connect to MySQL server on '...' in ... on line ...
       //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
@@ -81,14 +82,13 @@ if( function_exists('mysql_real_escape_string') ) //PHP >= 4.3.0
       if( $res === false )
       {
          //error('mysql_query_failed','mysql_addslashes');
-         $res= mysql_escape_string($str);
+         $res= mysql_escape_string($str); // deprecated-warning since PHP 4.3.0
       }
       //error_reporting($e);
       return $res;
    }
 }
-else
-if( function_exists('mysql_escape_string') ) //PHP >= 4.0.3
+elseif( function_exists('mysql_escape_string') ) //PHP >= 4.0.3
 {
    function mysql_addslashes($str)
    {
