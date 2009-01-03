@@ -1,0 +1,44 @@
+
+# NOTE: To clear cache use:  ./scripts/apc_clear_cache.php
+
+
+(1) Take Server offline. Clear cache!
+
+(2) Backup database.
+
+(3) Backup samurajdata.
+
+   (.) Adjust snapshot page to include new version release
+   (.) Create snapshot and upload it to /snapshot directory
+
+(4) Update code from cvs.
+
+(5) Transfer changes to samurajdata. Clear cache!
+
+(6) Update database with /scripts/database_changes_1_0_13_to_1_0_14.mysql
+
+   (.) Export database DDL and save as init.mysql in CVS
+
+(7) Run consistency tests.
+
+   * Run translation scripts from ./scripts/README.translations
+
+   * Run the consistency tests:
+
+      ./scripts/player_consistency.php
+      ./scripts/translation_consistency.php
+
+
+(8) Do tests:
+
+     (a) Forum functions
+     (b) Registration
+     (c) Blocking and admin functions
+
+
+(9) Start server. Clear cache!
+
+(10) Adjust FAQ and post in News-forum.
+
+-- misc:
+

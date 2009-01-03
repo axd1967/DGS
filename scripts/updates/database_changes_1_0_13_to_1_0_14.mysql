@@ -1,0 +1,56 @@
+# Release at 14-Dec-2008 in branch: DGS-stable-200712
+# Changes from CVS-tag dev-start-20081116 up to DGS-stable-20081214
+
+CREATE TABLE Forumlog (
+   ID int(11) NOT NULL auto_increment,
+   User_ID int(11) NOT NULL default '0',
+   Thread_ID int(11) NOT NULL default '0',
+   Post_ID int(11) NOT NULL default '0',
+   Time datetime NOT NULL default '0000-00-00 00:00:00',
+   Action varchar(40) NOT NULL default '',
+   IP varchar(16) NOT NULL default '',
+   PRIMARY KEY (ID),
+   KEY User_ID (User_ID),
+   KEY Time (Time)
+) TYPE=MyISAM ;
+
+-- add NEW-POST events from all users
+INSERT INTO Forumlog (User_ID,Thread_ID,Post_ID,Time,Action)
+   SELECT User_ID,Thread_ID,ID AS Post_ID,Time,
+          CONCAT(IF(PendingApproval='Y','new_pend_post:','new_post:'),IF(ID=Thread_ID,'new_thread','reply')) AS Action
+   FROM Posts WHERE Thread_ID>0 AND PosIndex>='' ORDER BY Time ;
+
+-- add EDIT-POST events from all users
+INSERT INTO Forumlog (User_ID,Thread_ID,Post_ID,Time,Action)
+   SELECT User_ID,-1 AS Thread_ID,Parent_ID AS Post_ID,Time,'edit_post' AS Action
+   FROM Posts WHERE PosIndex='' ORDER BY Time ;
+UPDATE Forumlog, Posts AS P
+   SET Forumlog.Thread_ID=P.Thread_ID
+   WHERE P.ID=Forumlog.Post_ID and Forumlog.Thread_ID=-1 ;
+
+
+ALTER TABLE `Players`
+ ADD INDEX `Adminlevel` (`Adminlevel`) ;
+
+ALTER TABLE `Players`
+ ADD `AdminOptions` int(11) unsigned NOT NULL default '0' AFTER `Adminlevel` ;
+ALTER TABLE `Players`
+ ADD INDEX `AdminOptions` (`AdminOptions`) ;
+
+ALTER TABLE `Players`
+ ADD `AdminNote` varchar(100) NOT NULL default '' AFTER `AdminOptions` ;
+
+ALTER TABLE `Players`
+ ADD `BlockReason` text NOT NULL default '' AFTER `TableMaxRows` ;
+
+
+ALTER TABLE `Forums`
+ ADD `Options` int(11) unsigned NOT NULL default '0' AFTER `Moderated` ;
+
+-- take over Moderated-flag
+UPDATE Forums SET Options=IF(Moderated='Y',1,0) ;
+
+-- remove Moderated-column (replaced by Options)
+ALTER TABLE `Forums`
+ DROP COLUMN `Moderated` ;
+
