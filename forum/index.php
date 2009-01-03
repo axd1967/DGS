@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -41,6 +41,9 @@ $ThePage = new Page('ForumsList');
    }
    $show_lp_author = ( $player_row['ForumFlags'] & FORUMFLAG_FORUM_SHOWAUTHOR );
 
+   $f_opts = new ForumOptions( $player_row );
+   $show_fopts = (@$player_row['admin_level'] & ADMINGROUP_EXECUTIVE);
+
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
    $is_moderator = ($switch_moderator == 1);
 
@@ -79,6 +82,9 @@ $ThePage = new Page('ForumsList');
 
    foreach( $forums as $forum )
    {
+      if( !$f_opts->is_visible_forum( $row['Options'] ) )
+         continue;
+
       $lpost = $forum->last_post;
       $lpost_date   = $lpost->build_link_postdate( $lpost->created, 'class=LastPost' );
       $lpost_author = ( $show_lp_author && $lpost->author->is_set() )
@@ -88,12 +94,17 @@ $ThePage = new Page('ForumsList');
          ? $new_str = sprintf( '<span class="NewFlag">%s (%s)</span>', T_('new'), $forum->count_new )
          : '';
 
+      $opt_prefix = ' &nbsp;&nbsp;[';
+      $fopts_str = '';
+      if( $Options & FORUMOPT_MODERATED )
+         $fopts_str .= $opt_prefix . T_('Moderated') . ']';
+      if( $show_fopts && ($Options & FORUMOPTS_GROUPS_HIDDEN) )
+         $fopts_str .= $opt_prefix . T_('Hidden#forum') . ']';
+
       //incompatible with: $c=($c % LIST_ROWS_MODULO)+1;
       echo '<tr class=Row1><td class=Name>'
          . '<a href="list.php?forum=' . $forum->id . '">' . make_html_safe( $forum->name, 'cell') . '</a>'
-         . ( $forum->is_moderated()
-            ? ' &nbsp;&nbsp;<span class=Moderated>[' . T_('Moderated') . ']</span>'
-            : '')
+         . ( $fopts_str ? '<span class=Moderated>' . $fopts_str . '</span>' : '')
          . $new_str
          . '</td>'
          . '<td class=ThreadCnt>' . $forum->count_threads . '</td>'
@@ -108,6 +119,10 @@ $ThePage = new Page('ForumsList');
 
    $disp_forum->forum_end_table();
 
-   end_page();
+   $menu_array = array();
+   if( (@$player_row['admin_level'] & ADMIN_FORUM) )
+      $menu_array[T_('Show forum log')] = 'forum/admin_show_forumlog.php';
+
+   end_page(@$menu_array);
 }
 ?>
