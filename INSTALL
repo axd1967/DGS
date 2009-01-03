@@ -6,15 +6,15 @@ Requirements:
 
 *) A webserver which can use php, e.g., apache <http://httpd.apache.org>
 *) PHP >= 4.1.0 <http://www.php.net>
-*) MySQL >= 4.0.1 <http://www.mysql.com>
+*) MySQL >= 5.0.1 <http://www.mysql.com>
 *) cvs client <http://www.cvshome.org>
 
 *) GD to draw rating graph <http://www.boutell.com/gd/>
 *) FreeType for optional fonts in rating graph <http://www.freetype.org>
 
-Last versions used by Dragon:
- Apache Version Apache/1.3.29 (Unix) PHP/4.3.4
- MySQL 4.0.15
+Last versions used by Dragon Live Server:
+ Apache Version Apache/2.2.3 (Unix) PHP/5.1.6
+ MySQL 5.0.45
 
 
 
@@ -53,7 +53,8 @@ Those files have to be unzipped in the dragon root directory to obtain a tree li
          ...
 
 Copy /images/favicon.ico into the root folder (or place your own favicon.ico
-in the root folder).
+in the root folder). Some older browser ignore the shortcut-icon directive
+and expects it to be in the document-root.
 
 
 
@@ -121,10 +122,8 @@ Find out which group your webserver is using (e.g. www-data).
 * To create translations take a sidestep and read
   scripts/README.translations
 
-
 * If you want to adjust the source-code, please have a look to the
   notes in scripts/README.developers
-
 
 * PHP config:
 
