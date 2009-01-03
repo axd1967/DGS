@@ -36,16 +36,16 @@ require_once( "include/table_columns.php" );
     error('adminlevel_too_low');
 
   $admin_tasks = array(
-                        'AddAdm' => array( ADMIN_ADD_ADMIN, /*T_*/('New admin#header')),
-                        'ADMIN'  => array( ADMIN_SUPERADMIN, /*T_*/('Admins#header')),
-                        'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password#header')),
-                        'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators#header')),
-                        'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum#header')),
-                        'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ#header')),
-                        'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin#header')),
-                        'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer#header')),
-                        'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database#header')),
-                        'TIME'   => array( ADMIN_TIME, /*T_*/('Time#header')),
+                        'AddAdm' => array( ADMIN_ADD_ADMIN, /*T_*/('New admin')),
+                        'ADMIN'  => array( ADMIN_SUPERADMIN, /*T_*/('Admins')),
+                        'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password')),
+                        'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators')),
+                        'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum')),
+                        'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ')),
+                        'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin')),
+                        'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
+                        'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
+                        'TIME'   => array( ADMIN_TIME, /*T_*/('Time')),
                       );
 
 // Make sure all previous admins gets into the Admin array
@@ -128,7 +128,7 @@ require_once( "include/table_columns.php" );
      or error('mysql_query_failed','admin_admins.find_admins2');
 
 
-   $atable = new Table( 'admin', '');
+   $atable = new Table( 'admin', '', '', '', TABLE_NO_SIZE );
 
 
    start_page(/*T_*/("Admin").' - './*T_*/('Edit admin staff'), true, $logged_in, $player_row );
@@ -141,9 +141,9 @@ require_once( "include/table_columns.php" );
    $marked_form->set_tabindex(1);
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $atable->add_tablehead(1, /*T_*/('ID#header'), 'ID');
-   $atable->add_tablehead(2, /*T_*/('Userid#header'), 'User');
-   $atable->add_tablehead(3, /*T_*/('Name#header'), 'User');
+   $atable->add_tablehead(1, /*T_*/('ID'), 'ID');
+   $atable->add_tablehead(2, /*T_*/('Userid'), 'User');
+   $atable->add_tablehead(3, /*T_*/('Name'), 'User');
 
    $col = 4;
    foreach( $admin_tasks as $aid => $tmp )
