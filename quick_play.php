@@ -43,8 +43,8 @@ else
    // logged in?
 
    $uhandle= safe_getcookie('handle');
-   $result = @mysql_query( "SELECT ID, Timezone, " .
-                           "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
+   $result = @mysql_query( 'SELECT ID, Timezone, AdminOptions, ' .
+                           'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
                            "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" )
       or error('mysql_query_failed', 'quick_play.find_player');
 
@@ -54,6 +54,9 @@ else
    }
 
    $player_row = mysql_fetch_assoc($result);
+
+   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+      error('login_denied');
 
    if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
        || $player_row['Expire'] < $NOW )

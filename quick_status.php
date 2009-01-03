@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -94,9 +94,9 @@ else
 
 
    $player_row = mysql_single_fetch( 'quick_status.find_player',
-                  "SELECT ID, Timezone, " .
-                  "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode " .
-                  "FROM Players WHERE " .
+                  "SELECT ID, Timezone, AdminOptions, " .
+                  'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
+                  'FROM Players WHERE ' .
                   ( $idmode=='uid'
                         ? "ID=".((int)$uid)
                         : "Handle='".mysql_addslashes($uhandle)."'"
@@ -132,6 +132,9 @@ else
 
    if( $logged_in )
    {
+      if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+         error('login_denied');
+
       // New messages?
 
       $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
