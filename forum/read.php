@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -85,11 +85,19 @@ function revision_history( $display_forum, $post_id )
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
 
+   // assure independence from forum_id
+   if( $forum_id == 0 && $thread > 0 )
+      $forum_id = load_forum_id( $thread );
+
    $forum = Forum::load_forum( $forum_id );
+
+   $f_opts = new ForumOptions( $player_row );
+   if( !$f_opts->is_visible_forum( $forum_opts ) )
+      error('forbidden_forum');
 
    if( isset($_POST['post']) )
    {
-      $msg = post_message($player_row, $forum->is_moderated(), $thread);
+      $msg = post_message($player_row, $forum_opts, $thread);
       if( is_numeric( $msg) && $msg>0 )
          jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
             . "#$msg");
