@@ -37,7 +37,9 @@ require_once("forum_functions.php");
 
    start_html('convert_from_old_forum', 0);
 
-echo ">>>> Should not be used now. Do not run it before a check. Caution: no 'do_it' option"; end_html(); exit;
+echo '>>>> Should not be used now. Do not run it before a check ' .
+   '(Forums.Moderated column has been replaced with Options column). ' .
+   "Caution: no 'do_it' option"; end_html(); exit;
 
 
    $res0 = mysql_query( "SELECT * from forums" ) or die(mysql_error());
