@@ -58,8 +58,8 @@ require_once( "features/vote/lib_votes.php" );
 
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $vtable->add_tablehead( 1, T_('ID#header'),          'ID', 0, 'FL.ID+');
-   $vtable->add_tablehead( 2, T_('Status#header'),      '', 0, 'FL.Status+');
+   $vtable->add_tablehead( 1, T_('ID#header'),          'ID', 0, 'FL.ID-');
+   $vtable->add_tablehead( 2, T_('Status#header'),      'Enum', 0, 'FL.Status+');
    $vtable->add_tablehead( 3, T_('Subject#header'),     '', 0, 'FL.Subject+');
    $vtable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
    $vtable->add_tablehead( 9, T_('Points#header'),      'Number', 0, 'sumPoints-');

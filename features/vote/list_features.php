@@ -70,7 +70,7 @@ require_once( "features/vote/lib_votes.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ftable->add_tablehead(33, T_('Actions#header'),     'Image', TABLE_NO_HIDE, ''); // static
-   $ftable->add_tablehead( 1, T_('ID#header'),          'ID', 0, 'FL.ID+');
+   $ftable->add_tablehead( 1, T_('ID#header'),          'ID', 0, 'FL.ID-');
    $ftable->add_tablehead( 2, T_('Status#header'),      'Enum', 0, 'FL.Status+');
    $ftable->add_tablehead( 3, T_('Subject#header'),     '', 0, 'FL.Subject+');
    if( $is_admin )
