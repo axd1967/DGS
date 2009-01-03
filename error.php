@@ -25,12 +25,20 @@ require_once( "include/std_functions.php" );
 
 {
    connect2mysql(true);
+
+   $BlockReason = '';
+   $userid = '???';
    if( $dbcnx )
    {
       $tmp= $TheErrors->set_mode(ERROR_MODE_COLLECT);
       //may call error() again:
       $logged_in = who_is_logged( $player_row);
       $TheErrors->set_mode($tmp);
+      if( !is_null($player_row) )
+      {
+         $userid = @$player_row['Handle'];
+         $BlockReason = @$player_row['BlockReason'];
+      }
    }
    else
    {
@@ -292,6 +300,58 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
 
+      case('ip_blocked_guest_login'):
+      {
+        echo T_('Sorry, you are not allowed to login as guest to this server. The IP address you are using has been blocked by the admins.'),
+            "<br><br>\n",
+            sprintf( T_('If you think the IP block is not intended for you, please register your account with our <a href="%s">alternative registration page</a>.'),
+               "{$HOSTBASE}register.php" );
+      }
+      break;
+
+      case('ip_blocked_register'):
+      {
+        echo T_('Sorry, you are not allowed to register a new account. The IP address you are using has been blocked by the admins.'),
+            "<br><br>\n",
+            '<form action="do_registration_blocked.php" method="post">',
+            T_('To register a new account despite the IP-block, a user account can be created by an admin.'),
+            "<br>\n",
+            T_('Please enter a user-id for the DragonGoServer and your email to send you the login details.'),
+            "<br><br>\n",
+            T_('An IP-block is only used to keep misbehaving users away.'),
+            "<br>\n",
+            T_('So please add why you want to bypass the IP-block in the Comments-field.'),
+            "<br>\n",
+            T_('There you can also add questions you might have.'),
+            "<br>\n",
+            T_('All fields must be provided in order to fulfill the request.'),
+            "<br><br>\n",
+            '<table>',
+              '<tr>',
+                '<td>', T_('Userid'), ':</td>',
+                '<td><input type="text" name="userid" value="" size="16"></td>',
+              '</tr>', "\n",
+              '<tr>',
+                '<td>', T_('Email'), ':</td>',
+                '<td><input type="text" name="email" value="" size="50"></td>',
+              '</tr>', "\n",
+              '<tr>',
+                '<td>&nbsp;</td>',
+                '<td><input type="checkbox" name="policy" value="1">&nbsp;'
+                     . sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'), "{$HOSTBASE}policy.php" ) . '</td>',
+              '</tr>', "\n",
+              '<tr><td colspan="2">&nbsp;</td></tr>', "\n",
+              '<tr>',
+                '<td>', T_('Comments'), ':</td>',
+                '<td><textarea name="comment" cols="60" rows="10"></textarea></td>',
+              '</tr>', "\n",
+            '</table>', "\n",
+            sprintf( '<input type="submit" name="send_request" value="%s">', T_('Send registration request') ),
+            '</form>',
+            "\n";
+      }
+      break;
+
       case("not_logged_in"):
       {
         printf( T_("Sorry, you have to be logged in to do that.\n" .
@@ -304,6 +364,33 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
                    "<li> You haven't enabled cookies in your browser.\n" .
                    "</ul>"),
                 HOSTBASE );
+      }
+      break;
+
+      case('login_denied'):
+      {
+         if( (string)$userid != '' )
+            admin_log( 0, $userid, 'login_denied');
+
+         if( (string)$BlockReason != '' )
+         {
+            echo T_('Sorry, you are not allowed to login to this server. Your account has been blocked by admins out of the following reason:'),
+               "<br><br>\n",
+               '<table><tr><td>',
+                  make_html_safe($BlockReason, 'msg'),
+               "</td></tr></table><br>\n";
+         }
+         else
+            echo T_('Sorry, you are not allowed to login to this server. Your account has been blocked by admins.');
+      }
+      break;
+
+      case('edit_bio_denied'):
+      {
+         if( (string)$userid != '' )
+            admin_log( 0, $userid, 'edit_bio_denied');
+
+         echo T_('Sorry, you are not allowed to edit your bio. This feature has been blocked by admins.');
       }
       break;
 
@@ -375,6 +462,12 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
 
+      case("registration_policy_not_checked"):
+      {
+         echo T_("Please read the Rules of Conduct page and check the box if you accept it.");
+      }
+      break;
+
       case("suicide"):
       {
          echo T_("Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset.");
@@ -391,6 +484,12 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       case("unknown_forum"):
       {
          echo T_("Sorry, I couldn't find that forum you wanted to show.");
+      }
+      break;
+
+      case('forbidden_forum'):
+      {
+         echo T_("Sorry, you are not allowed to view or post in this forum.");
       }
       break;
 
