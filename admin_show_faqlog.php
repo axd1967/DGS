@@ -46,13 +46,14 @@ require_once( "include/table_columns.php" );
    section( 'faqlog', T_('FAQ log') );
 
    $atable = new Table( 'faqlog', $page, '' );
+   $atable->add_or_del_column();
    $limit = $atable->current_limit_string();
 
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $atable->add_tablehead( 1, T_('ID#header'));
-   $atable->add_tablehead( 2, T_('User#header'));
-   $atable->add_tablehead( 3, T_('Time#header'));
-   $atable->add_tablehead( 4, T_('FAQ ID#header'));
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $atable->add_tablehead( 1, T_('ID#header'), 'ID');
+   $atable->add_tablehead( 2, T_('User#header'), 'User');
+   $atable->add_tablehead( 3, T_('Time#header'), 'User');
+   $atable->add_tablehead( 4, T_('FAQ ID#header'), 'ID');
    $atable->add_tablehead( 5, T_('Question#header'));
    $atable->add_tablehead( 6, T_('Answer#header'));
 
@@ -72,27 +73,21 @@ require_once( "include/table_columns.php" );
    {
       $arow_str = array();
       if( $atable->Is_Column_Displayed[1] )
-         $arow_str[1] = '<td>' . @$row['ID'] . '</td>';
+         $arow_str[1] = @$row['ID'];
       if( $atable->Is_Column_Displayed[2] )
-      {
-         $userstr = ((string)@$row['PUser_Handle'] != '') ? $row['PUser_Handle'] : '';
-         $arow_str[2] = '<td>' . $userstr . '</td>';
-      }
+         $arow_str[2] = ((string)@$row['PUser_Handle'] != '') ? $row['PUser_Handle'] : '';
       if( $atable->Is_Column_Displayed[3] )
-      {
-         $datestr = ($row['X_Date'] > 0 ? date($date_fmt2, $row['X_Date']) : NULL );
-         $arow_str[3] = '<td>' . $datestr . '&nbsp;</td>';
-      }
+         $arow_str[3] = ($row['X_Date'] > 0 ? date(DATE_FMT2, $row['X_Date']) : NULL );
       if( $atable->Is_Column_Displayed[4] )
       {
          $typechar = (@$row['Level'] == 1) ? 'c' : 'e';
          $edit_link = 'admin_faq.php?edit=1'.URI_AMP.'type='.$typechar.URI_AMP.'id='.@$row['FAQID'];
-         $arow_str[4] = '<td><a href="' . $edit_link . '">' . sprintf( T_('Edit(%s)#faq'), @$row['FAQID']) . '</a></td>';
+         $arow_str[4] = '<a href="' . $edit_link . '">' . sprintf( T_('Edit(%s)#faq'), @$row['FAQID']) . '</a>';
       }
       if( $atable->Is_Column_Displayed[5] )
-         $arow_str[5] = '<td>' . make_html_safe( @$row['Question'], 'cell' ) . '&nbsp;</td>';
+         $arow_str[5] = make_html_safe( @$row['Question'], 'cell' );
       if( $atable->Is_Column_Displayed[6] )
-         $arow_str[6] = '<td>' . make_html_safe( wordwrap(@$row['Answer'], 60, "<br>\n", false), 'faq' ) . '&nbsp;</td>';
+         $arow_str[6] = make_html_safe( wordwrap(@$row['Answer'], 60, "\n", false), 'faq' );
       $atable->add_row( $arow_str );
    }
    mysql_free_result($result);
