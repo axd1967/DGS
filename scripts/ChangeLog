@@ -33,6 +33,12 @@ ChangeLog
 
 2009-01-03 juga
 
+   * include/message_functions.php (message_info_table),
+     include/std_functions.php:
+   - from wishlist:
+     - to send new message use "(no subject)"-text for empty subject (was '???')
+     - for preview show warning on empty subject
+
    * include/table_columns.php (make_table, add_tablehead):
    - bugfix for new Table-mode TABLE_NO_SIZE: need-form for show-max-rows elements
    - added comment: known classes (CSS) for add_tablehead()
