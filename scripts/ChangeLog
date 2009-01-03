@@ -33,17 +33,47 @@ ChangeLog
 
 2009-01-03 juga
 
+   * include/table_columns.php (make_table, add_tablehead):
+   - bugfix for new Table-mode TABLE_NO_SIZE: need-form for show-max-rows elements
+   - added comment: known classes (CSS) for add_tablehead()
+
+   * admin_admins.php:
+   - fix translated-text for removal of translations: /*T_*/('...#header'),
+     removed '#header' from now normal texts without "T_(..)"
+   - bugfix for Table-use-rows: deactivate show-max-rows with TABLE_NO_SIZE
+
+   * game_comments.php, list_messages.php:
+   - bugfix for Table-use-rows: deactivate show-max-rows with TABLE_NO_SIZE
+
+   * features/vote/list_features.php, features/vote/list_votes.php,
+     code_examples/filter_example.php:
+   - fix adjustment for add_tablehead()-signature and table-rows cell-values
+   - reverted default-sort-order for ID, fixed class
+
+   * forum/admin_show_forumlog.php:
+   - cleanup table-IDs (removed #3-gap)
+
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      scripts/updates/other_changes_1_0_14_to_1_0_15.txt:
    - started with needed changes for next DGS-release 1.0.15,
      easier to upgrade existing devel-servers
 
-2009-01-03 juga
-
 # All changes between releases DGS 1.0.13 (CVS-tag dev-start-20081116)
 # and DGS 1.0.14 (CVS-tag DGS-stable-200812) are now merged into
 # the MAIN-branch.
 # DDL-changes for release 1.0.14 are NOT repeated here within the merge.
+
+   * admin.php, admin_show_adminlog.php, admin_show_errorlog.php,
+     admin_show_faqlog.php, admin_show_users.php, forum/admin_show_forumlog.php,
+     forum/index.php, forum/list.php, forum/read.php,
+     include/quick_common.php, people.php:
+   - more merge-fixes:
+     - forum-management restriction ADMIN_FORUM -> ADMIN_DEVELOPER
+     - overlooked some changes for forum-options
+     - adjustment for new add_tablehead()-signature and table-rows cell-values,
+       used DATE_FMT2-const, fixed wordwrapping
+   - added Table-show-max-rows form-elements
+   - added date-format DATE_FMT3 with seconds for admin-log
 
    * INSTALL, admin.php, admin_show_adminlog.php, admin_show_errorlog.php,
      admin_show_faqlog.php, admin_show_users.php, admin_users.php,
