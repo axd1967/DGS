@@ -1049,8 +1049,8 @@ function send_message( $debugmsg, $text='', $subject=''
 
    $text = mysql_addslashes(trim($text));
    $subject = mysql_addslashes(trim($subject));
-   if( $subject == '' )
-      $subject = UNKNOWN_VALUE; //like in forum posts
+   if( (string)$subject == '' )
+      $subject = T_('(no subject)');
 
    if( !isset($type) || !is_string($type) || !$type )
       $type = 'NORMAL';
