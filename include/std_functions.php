@@ -231,6 +231,8 @@ define('JSCRIPT_ENA',0x100);
 
 
 //-----
+// admin-roles
+// NOTE: also adjust admin_show_users.php on adding new roles
 define("ADMIN_TRANSLATORS",0x01);
 define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
@@ -241,6 +243,8 @@ define("ADMIN_PASSWORD",0x40);
 define('ADMIN_DATABASE',0x80);
 define('ADMIN_DEVELOPER',0x100);
 define('ADMIN_SKINNER',0x200);
+// admin groups
+define('ADMINGROUP_EXECUTIVE', (ADMIN_DEVELOPER|ADMIN_PASSWORD|ADMIN_FORUM|ADMIN_FAQ) );
 //-----
 
 
@@ -406,8 +410,6 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    echo "\n <TITLE>".basic_safe(FRIENDLY_SHORT_NAME." - $title")."</TITLE>";
 
    //because of old browsers favicon.ico should always stay in the root folder
-   //echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"{$base_path}favicon.ico\">";
-   //echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"/favicon.ico\">";
    echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"".HOSTBASE."favicon.ico\">";
 
    global $main_path;
@@ -599,7 +601,8 @@ function end_page( $menu_array=NULL )
         . T_("Page time") . ' <span id="pageTime">' . date(DATE_FMT, $NOW)
         . "</span>";
 
-   if( (@$player_row['admin_level'] & ADMIN_TIME) && !$printable )
+   if( !$printable && ((@$player_row['admin_level'] & ADMIN_TIME)
+                       || (@$player_row['AdminOptions'] & ADMOPT_SHOW_TIME)) )
       echo "<br><span class=PageLapse>"
         . T_('Page created in') . ' <span id="pageLapse">'
         . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
@@ -2238,6 +2241,9 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
       return 0;
    }
    include_all_translate_groups($player_row); //must be called from main dir
+
+   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+      error('login_denied');
 
    $session_expired= ( $player_row['Sessioncode'] != $scode
                      || $player_row['Expire'] < $NOW );
