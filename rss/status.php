@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -372,19 +372,21 @@ else
    {
       // temp password?
 
-      $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+      $result = @mysql_query( "SELECT *, " .
+                "UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                 "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {
          $player_row = mysql_fetch_array($result);
 
-         if( check_password( $uhandle, $player_row["Password"],
-                              $player_row["Newpassword"], $passwd ) )
-         {
+         if( check_password( $uhandle, $player_row["Password"], $player_row["Newpassword"], $passwd ) )
             $logged_in = true;
-         }
-         else error("wrong_password");
+         else
+            error("wrong_password");
+
+         if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+            error('login_denied');
       }
       //else error("wrong_userid");
    }
@@ -393,7 +395,8 @@ else
    {
       // logged in?
 
-      $result = @mysql_query( "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+      $result = @mysql_query( "SELECT *, " .
+                          "UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                           "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
@@ -405,6 +408,9 @@ else
          {
             $logged_in = true;
          }
+
+         if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+            error('login_denied');
       }
    }
 
