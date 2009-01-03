@@ -82,7 +82,7 @@ $ThePage = new Page('ForumsList');
 
    foreach( $forums as $forum )
    {
-      if( !$f_opts->is_visible_forum( $row['Options'] ) )
+      if( !$f_opts->is_visible_forum( $forum->options ) )
          continue;
 
       $lpost = $forum->last_post;
@@ -96,9 +96,9 @@ $ThePage = new Page('ForumsList');
 
       $opt_prefix = ' &nbsp;&nbsp;[';
       $fopts_str = '';
-      if( $Options & FORUMOPT_MODERATED )
+      if( $forum->options & FORUMOPT_MODERATED )
          $fopts_str .= $opt_prefix . T_('Moderated') . ']';
-      if( $show_fopts && ($Options & FORUMOPTS_GROUPS_HIDDEN) )
+      if( $show_fopts && ($forum->options & FORUMOPTS_GROUPS_HIDDEN) )
          $fopts_str .= $opt_prefix . T_('Hidden#forum') . ']';
 
       //incompatible with: $c=($c % LIST_ROWS_MODULO)+1;

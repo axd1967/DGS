@@ -92,12 +92,12 @@ function revision_history( $display_forum, $post_id )
    $forum = Forum::load_forum( $forum_id );
 
    $f_opts = new ForumOptions( $player_row );
-   if( !$f_opts->is_visible_forum( $forum_opts ) )
+   if( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum');
 
    if( isset($_POST['post']) )
    {
-      $msg = post_message($player_row, $forum_opts, $thread);
+      $msg = post_message($player_row, $forum->options, $thread);
       if( is_numeric( $msg) && $msg>0 )
          jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
             . "#$msg");

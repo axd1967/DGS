@@ -51,14 +51,14 @@ require_once( 'include/form_functions.php' );
    }
    $show_lp_author = ( $player_row['ForumFlags'] & FORUMFLAG_THREAD_SHOWAUTHOR );
 
+   $forum = Forum::load_forum( $forum_id );
    $f_opts = new ForumOptions( $player_row );
-   if( !$f_opts->is_visible_forum( $forum_opts ) )
+   if( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum');
 
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
 
-   $forum = Forum::load_forum( $forum_id );
    $show_rows = $forum->load_threads( $my_id, $is_moderator, $maxrows, $offset );
 
    // recalc NEWs
