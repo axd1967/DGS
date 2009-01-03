@@ -439,9 +439,14 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
    $text = make_html_safe( $text, true, $rx_term);
 
+   // warn on empty subject
+   $subj_fmt = $subject;
+   if( (string)$subject == '' )
+      $subj_fmt = '<span class=InlineWarning>' . T_('(no subject)') . '</span>';
+
    echo "<tr class=Subject>" .
       "<td class=Rubric>" . T_('Subject') . ":</td>" .
-      "<td colspan=$cols>" . $subject . "</td></tr>\n" .
+      "<td colspan=$cols>" . $subj_fmt . "</td></tr>\n" .
       "<tr class=Message>" .
       "<td class=Rubric>" . T_('Message') . ":" ;
    $str = '';
