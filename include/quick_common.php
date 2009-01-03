@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -24,6 +24,19 @@ $is_down = false;
 $is_down_message = "Sorry, dragon is down for maintenance at the moment,"
                  . " please return in an hour or so."
                  . " Don't worry: the clocks are frozen until the server restarts";
+
+// options settable by admins (user-capabilities)
+// NOTE: also adjust admin_users.php and admin_show_users.php on adding new options
+//define('ADMOPT_BYPASS_IP_BLOCK', 0x001); // by-passes blocked IP for user
+define('ADMOPT_DENY_LOGIN',      0x002); // deny: server usage, login
+define('ADMOPT_DENY_EDIT_BIO',   0x004);
+//define('ADMOPT_DENY_START_GAME', 0x008); // deny: new/join game in waitroom, invite; being invited allowed
+//define('ADMOPT_DENY_SEND_MSG',   0x010);
+//define('ADMOPT_DENY_UPD_FORUM',  0x020); // deny: new/edits in forums
+define('ADMOPT_SHOW_TIME',       0x040); // shows time in page bottom bar
+define('ADMOPT_HIDE_BIO',        0x080); // hide user bio
+define('ADMOPT_FGROUP_ADMIN',    0x100); // user can see ADMIN-forums
+define('ADMOPT_FGROUP_DEV',      0x200); // user can see DEV-forums
 
 
 function setTZ( $tz='GMT')
@@ -127,7 +140,6 @@ function get_request_arg( $name, $def='', $list=NULL)
    }
    return $val;
 }
-
 
 // languages and encodings...
 
@@ -267,6 +279,104 @@ function recover_language( $player_row=null) //must be called from main dir
    $language_used = $language;
 
    return $language_used;
+}
+
+// Throws error() with errorcode if current-IP is blocked and no user-ip-block-bypass is active
+// param row: expect field AdminOptions, if null only check for IP
+function error_on_blocked_ip( $errorcode, $row=null )
+{
+   //if( is_array($row) && (@$row['AdminOptions'] & ADMOPT_BYPASS_IP_BLOCK) )
+      //return;
+
+   if( is_blocked_ip() )
+   {
+      $userid = (is_array($row)) ? @$row['Handle'] : '???';
+      admin_log( 0, $userid, $errorcode );
+      error($errorcode);
+   }
+}
+
+// Returns current IP, if used IP is blocked (listed in IP-blocklist set in config.php)
+//   return '' if IP is ok
+function is_blocked_ip( $ip=null, $arr_check=null )
+{
+   global $ARR_BLOCK_IPLIST;
+   if( is_null($ip) )
+      $ip = (string)@$_SERVER['REMOTE_ADDR'];
+   if( is_null($arr_check) || !is_array($arr_check) )
+      $arr_check = $ARR_BLOCK_IPLIST;
+
+   // check simple IP-syntax in config-array: 1.2.3.4 (=ip)
+   if( in_array( $ip, $arr_check ) )
+      return $ip;
+
+   // check IP-Syntax in config-array: 1.2.3.4/8 (=subnet), /.../ (=regex)
+   foreach( $arr_check as $checkip )
+   {
+      if( $checkip[0] == '/' ) // regex
+      {
+         if( preg_match( $checkip, $ip ) )
+            return $ip;
+      }
+      elseif( strpos( $checkip, '/' ) !== false ) // subnet
+      {
+         if ( check_subnet_ip( $checkip, $ip ) == 1 )
+            return $ip;
+      }
+   }
+
+   return '';
+}
+
+// Checks, if subnet matches IP, syntax: 1.2.3.4/8 or 1.2.3.4/32
+// Return values: 1=ip-matches, 0=ip-not-matching, -1=subnet-syntax-error, -2=ip-syntax-error
+function check_subnet_ip( $subnet, $ip )
+{
+   // NOTE: PHP-ints are always signed, so split IP and check on 24+8-bit-parts
+
+   // split subnet
+   $arrnet = array();
+   if( !preg_match( "/^((\d+\.\d+\.\d+)\.(\d+))\/(\d+)$/", $subnet, $arrnet ) )
+      return -1;
+   $netbits = $arrnet[4];
+   if( $netbits == 32 && strcmp($arrnet[1], $ip) == 0 )
+      return 1; // ip matching subnet [ip/32]
+   if( $netbits <= 0 || $netbits > 32 )
+      return -1;
+
+   // split ip
+   $arrip  = array();
+   if( !preg_match( "/^(\d+\.\d+\.\d+)\.(\d+)$/", $ip, $arrip ) )
+      return -2;
+
+   // match high 24-bit
+   $ip_high  = ip2long("0.{$arrip[1]}");
+   $net_high = ip2long("0.{$arrnet[2]}");
+   if( $netbits < 24 )
+   {
+      $matchmask = 0xffffff ^ ((1 << (24 - $netbits)) - 1);
+      if( ($ip_high & $matchmask) == ($net_high & $matchmask) )
+         return 1;
+   }
+   elseif( ($ip_high & 0xffffff) != ($net_high & 0xffffff) )
+   {// high 24-bits don't match
+      return 0;
+   }
+   elseif( $netbits == 24 )
+   {// high 24-bits match exactly
+      return 1;
+   }
+   else
+   {// match low 8-bit (netbits != 32, already checked above)
+      $lowbits = $netbits - 24;
+      $ip_low  = ip2long("0.0.0.{$arrip[2]}");
+      $net_low = ip2long("0.0.0.{$arrnet[3]}");
+      $matchmask = 0xff ^ ((1 << (8 - $lowbits)) - 1);
+      if( ($ip_low & $matchmask) == ($net_low & $matchmask) )
+         return 1;
+   }
+
+   return 0; // no match
 }
 
 ?>
