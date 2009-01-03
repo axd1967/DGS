@@ -130,7 +130,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
    {
       $row = $FAQ_list[$FAQmainID];
       add_contributor( T_("FAQ editor"), $row['ID'], $row['Name'], $row['Handle'],
-         ( ($extra_info && $row['LastUpdate']) ? date($date_fmt2, $row['LastUpdate']) : '') );
+         ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );
       $FAQexclude[] = $FAQmain;
    }
    else
@@ -142,7 +142,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       if( in_array( $row['Handle'], $FAQexclude) )
          continue;
       add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'],
-         ( ($extra_info && $row['LastUpdate']) ? date($date_fmt2, $row['LastUpdate']) : '') );
+         ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );
       $first = '';
    }
 
@@ -228,7 +228,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       foreach( $translators as $row )
       {
          add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'],
-            ( ($extra_info && $row['LastUpdate']) ? date($date_fmt2, $row['LastUpdate']) : '') );
+            ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );
          $first = '';
       }
    }
