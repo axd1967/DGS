@@ -47,10 +47,10 @@ define('DB_NAME', 'dragongoserver');
 
 // Dependent of your mysql version:
 
-define('MYSQL_VERSION', '3.23.49');
+define('MYSQL_VERSION', '5.0.45');
 // may be found with SELECT VERSION(),PASSWORD('foo'),OLD_PASSWORD('foo');
-// devel-server is '4.1.20-log' (client '3.23.49') old_exist but new_==old_
-// live-server is '5.0.22-log' (client '5.0.22') and new_<>old_
+// devel-server is '5.0.51a-log' (client '???') old_exist but new_==old_
+// live-server is '5.0.45-log' (client '???') and new_<>old_
 // Note: use version-number, that is supported by PHPs version_compare()-function
 //       see http://de2.php.net/manual/en/function.version-compare.php
 
@@ -69,6 +69,14 @@ define('ALLOW_SQL_UNION', 1); // 1 = UNION supported (needs min. mysql 4.0.X)
 
 
 // Dependent of the configuration of your server:
+
+// OPTIMIZATION:
+// restrict initial view in show_games.php when showing ALL games:
+// NOTE: used to avoid slow-queries on live-server
+//   value is number of relative days for LastMove
+//     0 = deactivate restriction
+//     e.g. 1 = only select games younger than one day
+define('RESTRICT_SHOW_GAMES_ALL', 1);
 
 define('URI_AMP_IN','&'); //see ini_get('arg_separator.input')
 //URI_AMP at '&amp;' work even if arg_separator.output is set to '&'
@@ -120,5 +128,11 @@ define('ALLOW_QUOTING', 0);
 
 // Forum: number of weeks ending NEW-scope (older entries are considered READ)
 define('FORUM_WEEKS_NEW_END', 12);
+
+// IP-blocklist: user with these IPs are blocked
+// Syntax: '127.0.0.1' (=ip), '127.0.0.1/32' (=subnet), '/^127\.0\.0\.1$/' (=regex)
+// Check Config with: scripts/check_block_ip.php
+$ARR_BLOCK_IPLIST = array(
+);
 
 ?>
