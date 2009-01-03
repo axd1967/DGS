@@ -49,9 +49,24 @@ $ThePage = new Page('Admin');
                      '', $admin_level & ADMIN_FAQ);
    add_link_page_link('forum/admin.php', /*T_*/('Admin forums'),
                      '', $admin_level & ADMIN_FORUM);
-   add_link_page_link('admin_admins.php', /*T_*/('Edit admin staff'),
+   add_link_page_link('admin_users.php', T_('Edit user attributes'),
+                     '', $admin_level & ADMIN_DEVELOPER);
+   add_link_page_link('admin_admins.php', T_('Edit admin staff'),
                      '', $admin_level & ADMIN_SUPERADMIN);
    //add_link_page_link('admin_requests.php', /*T_*///('Handle user requests'), '', false);
+
+   echo "<br><br>\n";
+
+   add_link_page_link('admin_show_faqlog.php', T_('Show FAQ log'),
+                     '', $admin_level & ADMIN_FAQ);
+   add_link_page_link('forum/admin_show_forumlog.php', T_('Show forum log'),
+                     '', $admin_level & ADMIN_FORUM);
+   add_link_page_link('admin_show_users.php', T_('Show administrated users'),
+                     '', $admin_level & ADMINGROUP_EXECUTIVE);
+   add_link_page_link('admin_show_errorlog.php', T_('Show error log'),
+                     '', $admin_level & ADMIN_DEVELOPER);
+   add_link_page_link('admin_show_adminlog.php', T_('Show admin log'),
+                     '', $admin_level & ADMIN_DEVELOPER);
 
    add_link_page_link();
 
