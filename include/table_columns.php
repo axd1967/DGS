@@ -266,13 +266,15 @@ class Table
 
    /*!@brief Add a tablehead.
     * @param $nr must be >0 but if higher than 32, the column will be static
-    * @param $attbs must be an array of attributs or a class-name for the column
-    *  default: no attributs or class (i.e. class "Text" left-aligned)
+    * @param $attbs must be an array of attributs or a class-name for the column (td-element)
+    *    default: no attributs or class (i.e. class "Text" left-aligned)
+    *    Other known classes defined in CSS, most used are:
+    *      ID, User, Date, Enum, Number, Image, Button, Mark, MsgDir, Folder, Rating, Sgf, '' (=default)
     * @param $mode is a combination of TABLE_NO_HIDE and TABLE_NO_SORT
-    *  default: TABLE_NO_HIDE|TABLE_NO_SORT
+    *    default: TABLE_NO_HIDE|TABLE_NO_SORT
     * @param $sort_xtend is the alias used as default to sort the column
-    *  ended by a '+' to sort it in the asc order or a '-' to sort it in the desc order
-    *  default: no sort
+    *    ended by a '+' to sort it in the asc order or a '-' to sort it in the desc order
+    *    default: no sort
     */
    function add_tablehead( $nr,
                            $description,
@@ -399,6 +401,9 @@ class Table
          }
       }
 
+      if( $this->Use_Show_Rows && !($this->Mode & TABLE_NO_SIZE) )
+         $need_form = true;
+
       /* Build the table */
 
       $string = "\n<table id='{$this->Id}Table' class=Table>";
@@ -424,7 +429,7 @@ class Table
 
       if( isset($this->ExternalForm) )
          $table_form = $this->ExternalForm; // read-only
-      elseif( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // need form for filter or add-column
+      elseif( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // need form for filter, show-rows or add-column
       {
          $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
             clean_url( $this->Page),
@@ -435,7 +440,7 @@ class Table
          unset( $table_form);
 
 
-      if( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // add-col & filter-submits
+      if( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // add-col & filter-submits & show-rows
       {
          $addcol_str = $this->make_add_column_form( $table_form);
          $string .= $addcol_str;
