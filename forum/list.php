@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -51,6 +51,9 @@ require_once( 'include/form_functions.php' );
    }
    $show_lp_author = ( $player_row['ForumFlags'] & FORUMFLAG_THREAD_SHOWAUTHOR );
 
+   $f_opts = new ForumOptions( $player_row );
+   if( !$f_opts->is_visible_forum( $forum_opts ) )
+      error('forbidden_forum');
 
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
