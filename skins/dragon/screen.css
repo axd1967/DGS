@@ -1610,6 +1610,11 @@ body.News table#pageLayout td#pageBody div.ReleaseTOC a:hover {
    text-decoration: underline;
 }
 
+body.Policy table#pageLayout td#pageBody div.Section {
+   width: 85%;
+   text-align: left;
+}
+
 body.News table#pageLayout td#pageBody span.ReleaseTitle {
    text-align: left;
    font-size: larger;
@@ -2125,6 +2130,17 @@ table.Forum table {
    width: 100%;
 }
 
+/* in status page */
+table#forumPending {
+   margin: 0px auto;
+   width: auto;
+}
+
+table#forumPending tr.Caption td a {
+   color: white;
+}
+
+/* forum lists */
 table.Forum tr.Row3,
 table.Forum tr.Row1 {
    background: #e0e8ed;
@@ -2526,6 +2542,10 @@ table.FAQ td.FAQsearch div.Answer {
 }
 
 
+/* ------------------------- */
+/* Admin pages */
+/* ------------------------- */
+
 table.ForumAdmin,
 table.FAQAdmin {
    border: 0px solid red;
@@ -2586,6 +2606,20 @@ table.FAQAdmin td.Entry {
    border-width: 0px 0px 0px 1px;
 /*   margin-left: 2px; /* */
 }
+
+form#adminuserForm td span.LegendItem {
+   font-style: italic;
+   font-size: 80%;
+}
+
+form#adminuserForm td span.LegendDescr {
+   font-size: 80%;
+}
+
+table#adminsTable td span.Flags {
+   font-size: 80%;
+}
+
 
 /* ------------------------- */
 /* edit profile page */
@@ -2744,7 +2778,7 @@ body#dDGS table#pageMenu {
 }
 
 /* JUG local devel servers:
- * ldDGS = local devel  on CVS-HEAD
+ * ldDGS = local devel on CVS-HEAD
  * lsDGS = local stable branch
  */
 body#lsDGS table#pageFoot,
@@ -2759,7 +2793,7 @@ body#ldDGS table#pageMenu {
 }
 
 /* JUG remote devel servers:
- * rdDGS = remote devel  on CVS-HEAD
+ * rdDGS = remote devel on CVS-HEAD
  * rsDGS = remote stable branch
  */
 body#rsDGS table#pageFoot,
@@ -2772,7 +2806,6 @@ body#rsDGS table#pageMenu,
 body#rdDGS table#pageMenu {
    border-color: #5838C8;
 }
-
 
 /* ------------------------- */
 
