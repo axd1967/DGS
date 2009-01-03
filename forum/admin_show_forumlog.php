@@ -45,10 +45,10 @@ require_once( "forum/forum_functions.php" );
    $flfilter = new SearchFilter();
    $flfilter->add_filter( 1, 'Numeric', 'FL.ID', true);
    $flfilter->add_filter( 2, 'Text',    'P.Handle', true);
-   $flfilter->add_filter( 4, 'RelativeDate', 'FL.Time', true,
+   $flfilter->add_filter( 3, 'RelativeDate', 'FL.Time', true,
       array( FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL,
              FC_SIZE => 10 ));
-   $flfilter->add_filter( 5, 'Selection',
+   $flfilter->add_filter( 4, 'Selection',
       array( T_('All#filter')           => '',
              T_('New post#filter')      => "Action LIKE 'new_%'",
              T_('Edit post#filter')     => "Action LIKE 'edit_%'",
@@ -60,7 +60,7 @@ require_once( "forum/forum_functions.php" );
                   . "')",
       ), true );
    if( $show_ip )
-      $flfilter->add_filter( 6, 'Text', 'FL.IP', true,
+      $flfilter->add_filter( 5, 'Text', 'FL.IP', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 1 ));
    $flfilter->init(); // parse current value from _GET
    $flfilter->set_accesskeys('x', 'e');
@@ -72,11 +72,11 @@ require_once( "forum/forum_functions.php" );
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $fltable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'FL.ID+');
    $fltable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'P.Handle+');
-   $fltable->add_tablehead( 4, T_('Time#header'), 'Date', 0, 'FL.Time-');
-   $fltable->add_tablehead( 5, T_('Action#header'));
+   $fltable->add_tablehead( 3, T_('Time#header'), 'Date', 0, 'FL.Time-');
+   $fltable->add_tablehead( 4, T_('Action#header'));
    if( $show_ip )
-      $fltable->add_tablehead( 6, T_('IP#header'));
-   $fltable->add_tablehead( 7, T_('Show Thread/Post#header') );
+      $fltable->add_tablehead( 5, T_('IP#header'));
+   $fltable->add_tablehead( 6, T_('Show Thread/Post#header') );
 
    $fltable->set_default_sort( 1 ); // on ID
    $order = $fltable->current_order_string();
@@ -114,14 +114,14 @@ require_once( "forum/forum_functions.php" );
          $flrow_str[1] = @$row['ID'];
       if( $fltable->Is_Column_Displayed[2] )
          $flrow_str[2] = user_reference( REF_LINK, 1, '', @$row['User_ID'], @$row['P_Name'], @$row['P_Handle'] );
+      if( $fltable->Is_Column_Displayed[3] )
+         $flrow_str[3] = (@$row['X_Time'] > 0) ? date(DATE_FMT2, @$row['X_Time']) : NULL;
       if( $fltable->Is_Column_Displayed[4] )
-         $flrow_str[4] = (@$row['X_Time'] > 0) ? date(DATE_FMT2, @$row['X_Time']) : NULL;
-      if( $fltable->Is_Column_Displayed[5] )
-         $flrow_str[5] = @$row['Action'];
-      if( $show_ip && $fltable->Is_Column_Displayed[6] )
-         $flrow_str[6] = @$row['IP'];
-      if( $fltable->Is_Column_Displayed[7] )
-         $flrow_str[7] = "<A HREF=\"read.php?thread=".@$row['Thread_ID'].URI_AMP."moderator=y#".@$row['Post_ID']."\">"
+         $flrow_str[4] = @$row['Action'];
+      if( $show_ip && $fltable->Is_Column_Displayed[5] )
+         $flrow_str[5] = @$row['IP'];
+      if( $fltable->Is_Column_Displayed[6] )
+         $flrow_str[6] = "<A HREF=\"read.php?thread=".@$row['Thread_ID'].URI_AMP."moderator=y#".@$row['Post_ID']."\">"
             . sprintf( T_('Show T%s/P%s'), @$row['Thread_ID'], @$row['Post_ID'] ) . "</A>";
 
       $fltable->add_row( $flrow_str );
