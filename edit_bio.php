@@ -44,6 +44,9 @@ function find_category_box_text($cat)
    if( !$logged_in )
       error('not_logged_in');
 
+   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
+      error('edit_bio_denied');
+
    $my_id = $player_row['ID'];
    $editorder = isset($_REQUEST['editorder']);
 
@@ -114,13 +117,17 @@ function find_category_box_text($cat)
 
          if( !$editorder )
          { //edit bio fields
+            // adapt text-height
+            $linecount = substr_count( $row['Text'], "\n" );
+            $txth_adapted = max( $text_height, min( 12, (int)($linecount / 2) ));
+
             $bio_row = array(
                'CELL', 0, 'class=Header',
                'SELECTBOX', "category$bid", 1, $categories, $cat, false,
                'BR',
                'TEXTINPUT', "other$bid", $cat_width, $cat_max, $other,
                'CELL', 0, 'class=Info',
-               'TEXTAREA', "text$bid", $text_width, $text_height, $row['Text']
+               'TEXTAREA', "text$bid", $text_width, $txth_adapted, $row['Text'],
             );
 
             $bio_form->add_row( $bio_row );
