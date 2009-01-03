@@ -31,22 +31,78 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-01-03 juga
+
+# All changes between releases DGS 1.0.13 (CVS-tag dev-start-20081116)
+# and DGS 1.0.14 (CVS-tag DGS-stable-200812) are now merged into
+# the MAIN-branch.
+# DDL-changes for release 1.0.14 are NOT repeated here within the merge.
+
+   * INSTALL, admin.php, admin_show_adminlog.php, admin_show_errorlog.php,
+     admin_show_faqlog.php, admin_show_users.php, admin_users.php,
+     change_bio.php, do_registration.php, do_registration_blocked.php,
+     docs.php, edit_bio.php, error.php,
+     forum/admin.php, forum/admin_show_forumlog.php, forum/index.php, forum/list.php,
+     forum/forum_functions.php (ForumOptions; add_forum_log, load_forum_id;
+       Forum, load_forum_names),
+     forum/post.php (post_message, approve_post, reject_post, hide_post, show_post),
+     forum/read.php, forum/search.php,
+     include/config.php,
+     include/connect2mysql.php (mysql_addslashes),
+     include/error_functions.php,
+     include/quick_common.php (error_on_blocked_ip, is_blocked_ip,
+       check_subnet_ip),
+     include/std_functions.php (end_page, is_logged_in),
+     include/table_columns.php (button_style, make_next_prev_links),
+     login.php, message.php, people.php, policy.php, quick_play.php, quick_status.php,
+     register.php, rss/status.php, wap/status.php,
+     scripts/apc_cache_info.php, scripts/apc_clear_cache.php, scripts/data_export.php,
+     scripts/check_block_ip.php, scripts/convert_from_old_forum.php,
+     scripts/updates/database_changes_1_0_13_to_1_0_14.mysql,
+     scripts/updates/roadmap_1_0_13_to_1_0_14.txt,
+     show_games.php, site_map.php, snapshot.php, userinfo.php, waiting_room.php,
+     skins/dragon/screen.css:
+   - merged all changes for release DGS 1.0.14 from branch [DGS-stable-200712],
+     also see NEWS-file and ChangeLog for release 1.0.14:
+     - added Dragon-Go-Server policy,
+       added mandatory check to register account (need to accept policy)
+     - added IP-blocking feature and alternative registration for blocked users
+     - added admin-options on user and edit of certain user-attributes:
+       - admin-options: deny login with block-reason, hide-bio, deny-edit-bio
+       - edit: vacation-days, fever-values, hidden forums (admin/dev), show-time
+       - view: IP, browser, some mail-based user attributes
+       - added view-page with list of admins and administrated users
+       - forum: only present visible forums to user (list, read, searching)
+     - added viewing of various logs: Adminlog, Errorlog, FAQlog, added Forumlog
+     - writing more logs for user and admin actions
+
+     - dynamical adaption of height of text-areas to edit bio or messages
+     - people-page: changed FAQ-main-editor, show list of forum-moderators
+     - added optimization (RESTRICT_SHOW_GAMES_ALL-config) to reduce
+       slow-queries for ALL-finished games
+     - restricted forum-management: ADMIN_FORUM -> ADMIN_DEVELOPER
+     - made forum-readings independent from forum-id;
+       to prepare for move-thread-to-other-forum,
+     - adjusted mysql-version in documentation: DGS needs MySQL5.0.X now
+     - some minor bugfixes
+
+     - added scripts to control APC (cache on live-server)
+     - added snapshots and instructions for DGS-release 1.0.14
+
+2009-01-02 juga
+
+   * scripts/ChangeLog:
+   - removed (msql5)-warning for "CREATE TABLE (..) TYPE=": replaced TYPE= with ENGINE=
+
 2008-12-29 juga
 
    * scripts/ChangeLog, NEWS:
    - start of merge from all changes for release DGS 1.0.14 from the stable
      branch [DGS-stable-200712] tagged with [DGS-stable-200812]
 
-
-# All changes between releases DGS 1.0.13 (CVS-tag dev-start-20081116)
-# and DGS 1.0.14 (CVS-tag DGS-stable-200812) are now merged into
-# the MAIN-branch.
-# DDL-changes for release 1.0.14 are NOT repeated here within the merge.
-#
-# The code up to here is marked with CVS-tag [pre-merge-1_0_14-20081228].
-
-
 2008-12-28 juga
+
+# The code up to here is marked with CVS-tag [pre-merge-1_0_14-20081228].
 
    * features/vote/lib_votes.php:
    - fixed double used varname: voter -> points
