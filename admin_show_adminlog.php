@@ -47,13 +47,14 @@ require_once( "include/table_columns.php" );
    section( 'adminlog', T_('Admin log') );
 
    $atable = new Table( 'adminlog', $page, '' );
+   $atable->add_or_del_column();
    $limit = $atable->current_limit_string();
 
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $atable->add_tablehead( 1, T_('ID#header'));
-   $atable->add_tablehead( 2, T_('Admin#header'));
-   $atable->add_tablehead( 3, T_('User#header'));
-   $atable->add_tablehead( 4, T_('Time#header'));
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $atable->add_tablehead( 1, T_('ID#header'), 'ID');
+   $atable->add_tablehead( 2, T_('Admin#header'), 'User');
+   $atable->add_tablehead( 3, T_('User#header'), 'User');
+   $atable->add_tablehead( 4, T_('Time#header'), 'Date');
    $atable->add_tablehead( 5, T_('Message#header'));
    if( $show_ip )
       $atable->add_tablehead( 6, T_('IP#header'));
@@ -75,24 +76,17 @@ require_once( "include/table_columns.php" );
    {
       $arow_str = array();
       if( $atable->Is_Column_Displayed[1] )
-         $arow_str[1] = '<td>' . @$row['ID'] . '</td>';
+         $arow_str[1] = @$row['ID'];
       if( $atable->Is_Column_Displayed[2] )
-      {
-         $userstr = ((string)@$row['PAdm_Handle'] != '') ? @$row['PAdm_Handle'] : '';
-         $arow_str[2] = '<td>' . $userstr . '</td>';
-      }
+         $arow_str[2] = ((string)@$row['PAdm_Handle'] != '') ? @$row['PAdm_Handle'] : '';
       if( $atable->Is_Column_Displayed[3] )
-         $arow_str[3] = '<td>' . user_reference( REF_LINK, 1, '',
-            $row['PUser_ID'], $row['PUser_Name'], $row['PUser_Handle'] ) . '</td>';
+         $arow_str[3] = user_reference( REF_LINK, 1, '', $row['PUser_ID'], $row['PUser_Name'], $row['PUser_Handle'] );
       if( $atable->Is_Column_Displayed[4] )
-      {
-         $datestr = ($row['X_Date'] > 0 ? date($date_fmt2, $row['X_Date']) : NULL );
-         $arow_str[4] = '<td>' . $datestr . '&nbsp;</td>';
-      }
+         $arow_str[4] = ($row['X_Date'] > 0 ? date(DATE_FMT2, $row['X_Date']) : NULL );
       if( $atable->Is_Column_Displayed[5] )
-         $arow_str[5] = '<td>' . wordwrap(@$row['Message'], 60, "<br>\n", false) . '&nbsp;</td>';
+         $arow_str[5] = wordwrap(@$row['Message'], 60, "<br>\n", false);
       if( $show_ip && $atable->Is_Column_Displayed[6] )
-         $arow_str[6] = '<td>' . @$row['IP'] . '&nbsp;</td>';
+         $arow_str[6] = @$row['IP'];
       $atable->add_row( $arow_str );
    }
    mysql_free_result($result);
