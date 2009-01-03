@@ -271,11 +271,11 @@ require_once( "include/form_functions.php" );
                ) );
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Subject'),
-                  'TEXTINPUT', 'subject', 50, 80, $default_subject,
+                  'TEXTINPUT', 'subject', 60, 80, $default_subject,
                ) );
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 50, 8, $default_message,
+                  'TEXTAREA', 'message', 60, 12, $default_message,
                ) );
             $message_form->add_row( array(
                   'HIDDEN', 'to', $other_handle,
@@ -300,11 +300,11 @@ require_once( "include/form_functions.php" );
                ) );
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Subject'),
-                  'TEXTINPUT', 'subject', 50, 80, $default_subject,
+                  'TEXTINPUT', 'subject', 60, 80, $default_subject,
                ) );
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 50, 8, $default_message,
+                  'TEXTAREA', 'message', 60, 12, $default_message,
                ) );
             $message_form->add_row( array(
                   'SUBMITBUTTONX', 'send_message', T_('Send Message'),
@@ -338,7 +338,7 @@ require_once( "include/form_functions.php" );
                ) );
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 50, 8, $default_message,
+                  'TEXTAREA', 'message', 60, 12, $default_message,
                ) );
             $message_form->add_row( array(
                   'HIDDEN', 'to', $other_handle,
@@ -373,7 +373,7 @@ require_once( "include/form_functions.php" );
                ) );
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 50, 8, $default_message,
+                  'TEXTAREA', 'message', 60, 12, $default_message,
                ) );
 
             $message_form->add_row( array(
@@ -406,7 +406,7 @@ require_once( "include/form_functions.php" );
                ) );
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 50, 8, $default_message,
+                  'TEXTAREA', 'message', 60, 12, $default_message,
                ) );
 
             $message_form->add_row( array(

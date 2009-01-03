@@ -393,7 +393,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
    {
       $game_form->add_row( array(
             'DESCRIPTION', T_('Reply'),
-            'TEXTAREA', 'reply', 50, 4, '',
+            'TEXTAREA', 'reply', 60, 8, '',
          ) );
       $game_form->add_row( array(
             'SUBMITBUTTONX', 'join', T_('Join'),
