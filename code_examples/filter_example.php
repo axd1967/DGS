@@ -165,8 +165,8 @@ if( $fdemo == 2 )
    $form->attach_table( $rq ); // add fdemo-var
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $table->add_tablehead( 1, 'ID', TABLE_NO_HIDE, 'ID+');
-   $table->add_tablehead( 2, 'Animal', 0, 'Animal+');
+   $table->add_tablehead( 1, 'ID', 'ID', TABLE_NO_HIDE, 'ID+');
+   $table->add_tablehead( 2, 'Animal', '', 0, 'Animal+');
 
    // form for static filters
    $form->add_row( array(
@@ -235,8 +235,8 @@ if( $fdemo == 3 )
    $table->add_external_parameters( $rq, true ); // add fdemo-var
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $table->add_tablehead( 1, 'ID', TABLE_NO_HIDE, 'ID+');
-   $table->add_tablehead( 2, 'Animal', 0, 'Animal+');
+   $table->add_tablehead( 1, 'ID', 'ID', TABLE_NO_HIDE, 'ID+');
+   $table->add_tablehead( 2, 'Animal', '', 0, 'Animal+');
 
    // build SQL-query (for user-table)
    $q3 = $qsql->duplicate();
