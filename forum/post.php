@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -36,12 +36,16 @@ function hit_thread( $thread )
  * \brief Saves post-message for use-cases U06/U07/U08/U09
  * \see specs/forums.txt
  */
-function post_message($player_row, $moderated_forum, &$thread)
+function post_message($player_row, $forum_opts, &$thread)
 {
    global $NOW, $order_str;
 
    if( $player_row['MayPostOnForum'] == 'N' )
       return T_('Sorry, you are not allowed to post on the forum');
+
+   $f_opts = new ForumOptions( $player_row );
+   if( !$f_opts->is_visible_forum( $forum_opts ) )
+      error('forbidden_forum');
 
    $forum = @$_POST['forum']+0;
    $parent = @$_POST['parent']+0;
@@ -58,7 +62,7 @@ function post_message($player_row, $moderated_forum, &$thread)
    $Subject = mysql_addslashes( $Subject);
    $Text = mysql_addslashes( $Text);
 
-   $moderated = ($moderated_forum || $player_row['MayPostOnForum'] == 'M');
+   $moderated = (($forum_opts & FORUMOPT_MODERATED) || ($player_row['MayPostOnForum'] == 'M'));
 
    // -------   Edit old post  ---------- (use-case U07)
 
@@ -80,6 +84,7 @@ function post_message($player_row, $moderated_forum, &$thread)
                      "Lastedited=FROM_UNIXTIME($NOW), " .
                      "Subject='$Subject', " .
                      "Text='$Text' " .
+                     ( ($moderated) ? ", Approved='N', PendingApproval='Y' " : '' ) .
                      "WHERE ID=$edit LIMIT 1")
             or error('mysql_query_failed','forum_post.post_message.edit.update');
 
@@ -93,9 +98,13 @@ function post_message($player_row, $moderated_forum, &$thread)
                      "Subject='$oldSubject', " .
                      "Text='$oldText'" )
             or error('mysql_query_failed','forum_post.post_message.edit.insert');
+
+         add_forum_log( @$row['Thread_ID'], $edit,
+            ($moderated) ? FORUMLOGACT_EDIT_PEND_POST : FORUMLOGACT_EDIT_POST );
       }
 
       hit_thread( $thread );
+
       return $edit;
    }
    else
@@ -194,8 +203,10 @@ function post_message($player_row, $moderated_forum, &$thread)
 
 //   save_diagrams($GoDiagrams);
 
+      $flog_actsuffix = ( $Thread_ID == $New_ID ) ? ':new_thread' : ':reply';
       if( $moderated )
       {
+         add_forum_log( $Thread_ID, $New_ID, FORUMLOGACT_NEW_PEND_POST . $flog_actsuffix );
          return T_('This post is subject to moderation. It will be shown once the moderators have approved it.');
       }
       else
@@ -221,6 +232,8 @@ function post_message($player_row, $moderated_forum, &$thread)
                : "LastPost=GREATEST(LastPost,$New_ID), " )
             . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
             . "WHERE ID='$forum' LIMIT 1" );
+
+         add_forum_log( $Thread_ID, $New_ID, FORUMLOGACT_NEW_POST . $flog_actsuffix );
 
          return T_('Message sent!');
       }
@@ -248,6 +261,8 @@ function approve_post( $fid, $tid, $pid )
    // approve post
    db_query( "approve_post.update_post($pid)",
       "UPDATE Posts SET Approved='Y' WHERE ID=$pid LIMIT 1" );
+
+   add_forum_log( $tid, $pid, FORUMLOGACT_APPROVE_POST );
 
    // thread-trigger
    db_query( "approve_post.trigger_thread($tid,$pid)",
@@ -277,6 +292,8 @@ function reject_post( $fid, $tid, $pid )
 {
    db_query( "reject_post.update_post($pid)",
       "UPDATE Posts SET Approved='N' WHERE ID=$pid LIMIT 1" );
+
+   add_forum_log( $tid, $pid, FORUMLOGACT_REJECT_POST );
 }
 
 // use-case A06 (hide shown post)
@@ -300,6 +317,8 @@ function hide_post( $fid, $tid, $pid )
    // hide post
    db_query( "hide_post.update_post($pid)",
       "UPDATE Posts SET Approved='N' WHERE ID=$pid LIMIT 1" );
+
+   add_forum_log( $tid, $pid, FORUMLOGACT_HIDE_POST );
 
    // thread-trigger
    db_query( "approve_post.trigger_thread($tid,$pid)",
@@ -346,6 +365,8 @@ function show_post( $fid, $tid, $pid )
    // show post
    db_query( "show_post.update_post($pid)",
       "UPDATE Posts SET Approved='Y' WHERE ID=$pid LIMIT 1" );
+
+   add_forum_log( $tid, $pid, FORUMLOGACT_SHOW_POST );
 
    // thread-trigger
    db_query( "show_post.trigger_thread($tid,$pid)",
