@@ -126,7 +126,7 @@ require_once( "include/filter.php" );
 
    $rx_term = get_request_arg('xterm');
 
-   $mtable = new Table( 'message', 'list_messages.php'.$page, '', '', TABLE_NO_HIDE );
+   $mtable = new Table( 'message', 'list_messages.php'.$page, '', '', TABLE_NO_HIDE|TABLE_NO_SIZE );
    //$mtable->add_or_del_column();
 
    $marked_form = new Form('messageMove','list_messages.php#action', FORM_GET, true, 'FormTable');

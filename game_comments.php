@@ -80,7 +80,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    echo "<h3 class=Header>$str</h3>";
 
 
-   $ctable = new Table( 'comment', '');
+   $ctable = new Table( 'comment', '', '', '', TABLE_NO_SIZE );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ctable->add_tablehead(1, T_('Moves'), 'Move');
