@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -17,6 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once( 'include/quick_common.php' );
 require_once( "include/std_functions.php" );
 
 define('USE_REGEXP_REGISTRATION',1); //loose account name reject
@@ -24,6 +25,8 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
 
 {
    connect2mysql();
+
+   error_on_blocked_ip( 'ip_blocked_register' );
 
    $uhandle = get_request_arg('userid');
    if( strlen( $uhandle ) < 3 )
@@ -43,6 +46,10 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
    $name = get_request_arg('name');
    if( strlen( $name ) < 1 )
       error("name_not_given");
+
+   $policy = get_request_arg('policy');
+   if( !$policy )
+     error("registration_policy_not_checked");
 
    if( !USE_REGEXP_REGISTRATION )
    {
