@@ -96,6 +96,10 @@ $ThePage = new Page('GamesList');
    $show_notes= (LIST_GAMENOTE_LEN>0
          && !$observe && !$all && $uid==$my_id); //FU+RU subset
 
+   $def_arr_lastmove = array();
+   if( RESTRICT_SHOW_GAMES_ALL && $all )
+      $def_arr_lastmove[FC_DEFAULT] = RESTRICT_SHOW_GAMES_ALL;
+
    // table filters
    $gfilter = new SearchFilter( $fprefix );
    //Filter & add_filter(int id, string type, string dbfield, [bool active=false], [array config])
@@ -108,7 +112,7 @@ $ThePage = new Page('GamesList');
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true,
          array( FC_SIZE => 4 ));
-   $gfilter->add_filter(13, 'RelativeDate', 'Lastchanged', true); // Games
+   $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true, $def_arr_lastmove ); // Games
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
    if( !$observe && !$all ) //FU+RU
@@ -249,20 +253,21 @@ $ThePage = new Page('GamesList');
  *   - (RU+RA) => RunningGamesColumns
  *
  * no: description of displayed info
- *  1: ID
- *  2: sgf
+ *  1:    ID
+ *  2:    sgf
  *  3: >  FU+RU (Opponent-Name)
  *  4: >  FU+RU (Opponent-Handle)
  *  5: >  FU (User-Color-Graphic), RU (2-Colors-Graphic, who-to-move)
- *  6: Size
- *  7: Handicap
- *  8: Komi
- *  9: Moves
+ *  6:    Size
+ *  7:    Handicap
+ *  8:    Komi
+ *  9:    Moves
  * 10: >  FU+FA [Score] (Score)
  * 11: >  FU [User-Score AS X_Score] (Win-graphic) -> fname=won
+ * 12:    --- unused ---
  * 13:    FU+FA [Lastchanged] (End date), OB+RU+RA [Lastchanged] (Last move)
  * 14:    [Rated AS X_Rated] (Rated) -> fname=rated
- * 32: >  FU+RU [Notes AS X_Note] (Notes)
+ * 15:    --- unused ---
  * 16: >  FU+RU [Rating AS X_Rating] (User-Rating)
  * 17: >  OB+FA+RA (Black-Name)
  * 18: >  OB+FA+RA (Black-Handle)
@@ -279,6 +284,7 @@ $ThePage = new Page('GamesList');
  * 29: >  OB+FA+RA (White-StartRating)
  * 30: >  FA (White-EndRating)
  * 31: >  FA (White-RatingDiff)
+ * 32: >  FU+RU [Notes AS X_Note] (Notes)
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -490,7 +496,6 @@ $ThePage = new Page('GamesList');
             "(White_ID=$uid OR Black_ID=$uid)",
             "Players.ID=White_ID+Black_ID-$uid" );
       }
-
    }
 
    $qsql->merge( $gtable->get_query() );
@@ -518,6 +523,13 @@ $ThePage = new Page('GamesList');
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title2</h3>\n";
 
+   if( RESTRICT_SHOW_GAMES_ALL && $all && !$gfilter->is_init() )
+      echo sprintf(
+            T_('NOTE: The full games list is per default restricted to show only recent games within %s day(s). '
+               . 'This can be changed in the filter for [%s].'),
+               RESTRICT_SHOW_GAMES_ALL, T_('Last move#header') ),
+         "<br><br>\n";
+
    // hover-texts for colors-column
    // (don't add 'w' and 'b', or else need to show in status.php too)
    $arr_titles_colors = array(
@@ -529,7 +541,7 @@ $ThePage = new Page('GamesList');
 
    $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
 
-   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+   while( ($show_rows-- > 0) && ($row = mysql_fetch_assoc( $result )) )
    {
       $X_Rating = $blackRating = $whiteRating = NULL;
       $startRating = $blackStartRating = $whiteStartRating = NULL;
@@ -594,8 +606,7 @@ $ThePage = new Page('GamesList');
             $grow_strings[3] = "<A href=\"userinfo.php?uid=$pid\">" .
                make_html_safe($Name) . "</a>";
          if( $gtable->Is_Column_Displayed[4] )
-            $grow_strings[4] = "<A href=\"userinfo.php?uid=$pid\">" .
-               $Handle . "</a>";
+            $grow_strings[4] = "<A href=\"userinfo.php?uid=$pid\">" . $Handle . "</a>";
          if( $gtable->Is_Column_Displayed[5] )
          {
             if( $X_Color & 0x2 ) //my color
@@ -669,7 +680,8 @@ $ThePage = new Page('GamesList');
 
       $gtable->add_row( $grow_strings );
    }
-   mysql_free_result($result);
+   if ( $result )
+      mysql_free_result($result);
    $gtable->echo_table();
 
    $menu_array = array();
