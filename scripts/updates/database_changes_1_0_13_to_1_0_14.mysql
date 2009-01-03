@@ -19,6 +19,9 @@ INSERT INTO Forumlog (User_ID,Thread_ID,Post_ID,Time,Action)
    SELECT User_ID,Thread_ID,ID AS Post_ID,Time,
           CONCAT(IF(PendingApproval='Y','new_pend_post:','new_post:'),IF(ID=Thread_ID,'new_thread','reply')) AS Action
    FROM Posts WHERE Thread_ID>0 AND PosIndex>='' ORDER BY Time ;
+-- if column PendingApproval already dropped (from HEAD-development),
+-- then replace CONCAT-statement in above SQL-command with:
+   CONCAT(IF(Approved='P','new_pend_post:','new_post:'),IF(ID=Thread_ID,'new_thread','reply')) AS Action
 
 -- add EDIT-POST events from all users
 INSERT INTO Forumlog (User_ID,Thread_ID,Post_ID,Time,Action)
