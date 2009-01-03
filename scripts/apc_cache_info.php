@@ -1,0 +1,1 @@
+<?php var_dump(apc_cache_info()) ?>
