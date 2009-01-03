@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -47,19 +47,26 @@ if( $quick_mode )
    }
 
    $row = mysql_single_fetch( 'login.find_player',
-                  "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+                  "SELECT Handle, AdminOptions,Password,Newpassword,Sessioncode, " .
+                        "UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                   "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
    if( !$row )
       error('wrong_userid');
 
-
    $code = @$row['Sessioncode'];
+   $userid = @$row['Handle'];
+
+   if( $userid == 'guest' )
+      error_on_blocked_ip( 'ip_blocked_guest_login', $row );
 
    if( !@$_REQUEST['cookie_check'] )
    {
       if( !check_password( $uhandle, $row['Password'],
                            $row['Newpassword'], $passwd ) )
-         error('wrong_password');
+      {
+         admin_log( 0, $userid, 'wrong_password');
+         error("wrong_password");
+      }
 
       if( !$code || @$row['Expire'] < $NOW )
       {
@@ -84,6 +91,11 @@ if( $quick_mode )
    {
       error('cookies_disabled');
    }
+
+   if( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+      error('login_denied');
+
+   admin_log( 0, $userid, 'logged_in');
 
    if( $quick_mode )
    {
