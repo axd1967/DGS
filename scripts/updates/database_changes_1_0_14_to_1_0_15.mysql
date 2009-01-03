@@ -1,0 +1,111 @@
+# Release DGS 1.0.15 at ??-???-2008 from MAIN-branch:
+
+-- change Players table-columns-handling
+ALTER TABLE Players
+ CHANGE UsersColumns UsersColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE GamesColumns GamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE RunningGamesColumns RunningGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE FinishedGamesColumns FinishedGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE ObservedGamesColumns ObservedGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE WaitingroomColumns WaitingroomColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE TournamentsColumns TournamentsColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+ CHANGE ContactColumns ContactColumns INT( 11 ) DEFAULT '-1' NOT NULL ;
+
+
+-- change Players.Activity: float -> integer
+UPDATE Players SET Activity=FLOOR(1000*Activity) WHERE Activity>0;
+ALTER TABLE Players
+   CHANGE Activity Activity INT(11) NOT NULL DEFAULT '15000';
+
+
+-- enable JavaScript usage for old players (as actually):
+-- perform this only, if your DGS-server wants to support JavaScript
+UPDATE Players SET Boardcoords=Boardcoords|0x100;
+
+
+-- add feature-voting
+CREATE TABLE FeatureList (
+   ID int(11) NOT NULL auto_increment,
+   Status enum('NEW','NACK','ACK','WORK','DONE','LIVE','ARCH') NOT NULL default 'NEW',
+   Subject varchar(120) NOT NULL,
+   Description text NOT NULL,
+   Editor_ID int(11) NOT NULL default '0',
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (ID),
+   KEY Status (Status),
+   KEY Editor_ID (Editor_ID)
+) ENGINE=MyISAM;
+
+CREATE TABLE FeatureVote (
+   fid int(11) NOT NULL,
+   Voter_ID int(11) NOT NULL default '0',
+   Points int(11) NOT NULL default '0',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (fid,Voter_ID),
+   KEY Voter_ID (Voter_ID)
+) ENGINE=MyISAM;
+
+
+-- add Forums.ThreadsInForum & seed it
+ALTER TABLE `Forums`
+   ADD `ThreadsInForum` int(11) NOT NULL default '0' AFTER `LastPost` ;
+UPDATE Forums,
+   (SELECT Forum_ID, COUNT(*) AS X_Count
+       FROM Posts WHERE Approved='Y' AND Thread_ID>0 AND Parent_ID=0
+       GROUP BY Forum_ID) as TMPF
+   SET Forums.ThreadsInForum=TMPF.X_Count WHERE Forums.ID=TMPF.Forum_ID ;
+
+-- add Posts.Hits
+ALTER TABLE `Posts`
+   ADD `Hits` int(11) NOT NULL default '0' AFTER `PostsInThread` ;
+
+
+-- add Posts.Updated for NEW-handling
+ALTER TABLE `Posts`
+   ADD `Updated` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `Lastedited` ;
+UPDATE Posts SET Updated=Lastchanged WHERE Parent_ID=0 ;
+
+-- add Forums.Updated for NEW-handling
+ALTER TABLE `Forums`
+   ADD `Updated` datetime NOT NULL default '0000-00-00 00:00:00' AFTER `LastPost` ;
+UPDATE Forums, Posts
+   SET Forums.Updated=Posts.Time WHERE Forums.LastPost>0 AND Posts.ID=Forums.LastPost ;
+
+-- add Table ForumRead for NEW-handling (replacing Forumreads-table)
+CREATE TABLE ForumRead (
+   User_ID int(11) NOT NULL default '0',
+   Forum_ID int(11) NOT NULL default '0',
+   Thread_ID int(11) NOT NULL default '0',
+   Post_ID int(11) NOT NULL default '0',
+   NewCount int(11) NOT NULL default '-1',
+   Time datetime NOT NULL default '0000-00-00 00:00:00',
+   UNIQUE KEY FR_Uniq (Thread_ID,Post_ID,Forum_ID,User_ID),
+   KEY Time (Time)
+) ENGINE=MyISAM ;
+
+-- migrate Forumreads- to ForumRead-table
+INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time)
+   SELECT FR.User_ID,P.Forum_ID,FR.Thread_ID,-1,-1,FR.Time
+      FROM Forumreads as FR INNER JOIN Posts as P ON P.ID=FR.Thread_ID ;
+
+-- later can drop old forum-reads-table (or keep it)
+DROP TABLE Forumreads ;
+
+
+-- configure forum-GUI for user, manage hidden forum-config for user
+ALTER TABLE `Players`
+   ADD `ForumFlags` tinyint unsigned NOT NULL default '8' AFTER `MayPostOnForum` ;
+
+
+-- replace Posts.PendingApproval -> Approved (enum 'P')
+ALTER TABLE `Posts`
+   CHANGE COLUMN Approved Approved enum('Y','N','P') NOT NULL DEFAULT 'Y';
+UPDATE Posts SET Approved='P' WHERE PendingApproval='Y';
+
+-- after update above, the "old" column can be dropped
+ALTER TABLE `Posts`
+   DROP COLUMN PendingApproval;
+
+
+

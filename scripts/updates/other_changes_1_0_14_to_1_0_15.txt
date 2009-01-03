@@ -1,0 +1,27 @@
+# copy/merge include/config.php to include/config-local.php and adjust to server-needs
+
+-----------
+// see also CACHE_FOLDER in config.php
+// The Sourceforge devel server needs a soft link: (where temp is CACHE_FOLDER)
+// This is an example for the devel-server only
+ mkdir /tmp/persistent/dragongoserver/temp/
+ chmod 775 /tmp/persistent/dragongoserver/temp/
+ ln -s -d /tmp/persistent/dragongoserver/temp /home/groups/d/dr/dragongoserver/htdocs/temp
+-----------
+
+-----------
+copy /images/favicon.ico into the root folder
+-----------
+
+copy /images/star3.gif
+
+// added images for thread-post-list navigation
+copy images/f_bottom.png
+copy images/f_firstanswer.png
+copy images/f_nextanswer.png
+copy images/f_nextparent.png
+copy images/f_prevanswer.png
+copy images/f_prevparent.png
+copy images/f_top.png
+
+
