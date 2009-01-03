@@ -121,12 +121,12 @@ require_once( "include/table_columns.php" );
 /* \brief Creates table for specified query containing admin/administrated users. */
 function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $query )
 {
-   global $ARR_ADMLEVELS, $ARR_ADMOPTS, $date_fmt2;
+   global $ARR_ADMLEVELS, $ARR_ADMOPTS;
 
-   $atable = new Table( 'admins', $page, '' );
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $atable->add_tablehead( 1, T_('User#header'));
-   $atable->add_tablehead( 2, T_('Last access#header'));
+   $atable = new Table( 'admins', $page, '', '', TABLE_NO_SIZE );
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $atable->add_tablehead( 1, T_('User#header'), 'User');
+   $atable->add_tablehead( 2, T_('Last access#header'), 'Date');
    if( $with_adminlevel )
       $atable->add_tablehead( 3, T_('Admin level#header'));
    $atable->add_tablehead( 4, T_('Admin options#header'));
@@ -144,21 +144,18 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
             $edit_link = anchor( 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode(@$row['Handle']),
                image( 'images/edit.gif', 'E'),
                T_('Edit user attributes'), 'class=ButIcon') . '&nbsp;';
-         $arow_str[1] = '<td>' . $edit_link . user_reference( REF_LINK, 1, '', $row ) . '</td>';
+         $arow_str[1] = $edit_link . user_reference( REF_LINK, 1, '', $row );
       }
       if( $atable->Is_Column_Displayed[2] )
-      {
-         $lastaccess = ($row['X_Lastaccess'] > 0 ? date($date_fmt2, $row['X_Lastaccess']) : NULL );
-         $arow_str[2] = '<td>' . $lastaccess . '&nbsp;</td>';
-      }
+         $arow_str[2] = ($row['X_Lastaccess'] > 0 ? date(DATE_FMT2, $row['X_Lastaccess']) : NULL );
       if( $with_adminlevel && $atable->Is_Column_Displayed[3] )
-         $arow_str[3] = '<td><span class="Flags">'
-            . build_admin_flags( $ARR_ADMLEVELS, @$row['Adminlevel']+0 ) . '</span></td>';
+         $arow_str[3] = '<span class="Flags">'
+            . build_admin_flags( $ARR_ADMLEVELS, @$row['Adminlevel']+0 ) . '</span>';
       if( $atable->Is_Column_Displayed[4] )
-         $arow_str[4] = '<td><span class="Flags">'
-            . build_admin_flags( $ARR_ADMOPTS, @$row['AdminOptions']+0 ) . '</span></td>';
+         $arow_str[4] = '<span class="Flags">'
+            . build_admin_flags( $ARR_ADMOPTS, @$row['AdminOptions']+0 ) . '</span>';
       if( $atable->Is_Column_Displayed[5] )
-         $arow_str[5] = '<td>' . @$row['AdminNote'] . '&nbsp;</td>';
+         $arow_str[5] = @$row['AdminNote'];
       $atable->add_row( $arow_str );
    }
    mysql_free_result($result);

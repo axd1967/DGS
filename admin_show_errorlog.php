@@ -47,12 +47,13 @@ require_once( "include/table_columns.php" );
    section( 'errorlog', T_('Error log') );
 
    $atable = new Table( 'errorlog', $page, '' );
+   $atable->add_or_del_column();
    $limit = $atable->current_limit_string();
 
-   // add_tablehead($nr, $descr, $sort=NULL, $desc_def=false, $undeletable=false, $attbs=NULL)
-   $atable->add_tablehead( 1, T_('ID#header'));
-   $atable->add_tablehead( 2, T_('User#header'));
-   $atable->add_tablehead( 3, T_('Time#header'));
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $atable->add_tablehead( 1, T_('ID#header'), 'ID');
+   $atable->add_tablehead( 2, T_('User#header'), 'User');
+   $atable->add_tablehead( 3, T_('Time#header'), 'Date');
    $atable->add_tablehead( 4, T_('Message#header'));
    $atable->add_tablehead( 5, T_('DB error#header'));
    $atable->add_tablehead( 6, T_('Debug info#header'));
@@ -74,28 +75,24 @@ require_once( "include/table_columns.php" );
    {
       $arow_str = array();
       if( $atable->Is_Column_Displayed[1] )
-         $arow_str[1] = '<td>' . @$row['ID'] . '</td>';
+         $arow_str[1] = @$row['ID'];
       if( $atable->Is_Column_Displayed[2] )
       {
-         $userstr = ((string)@$row['Handle'] != '')
+         $arow_str[2] = ((string)@$row['Handle'] != '')
             ? user_reference( REF_LINK, 1, '',
                   $row['PUser_ID'], $row['PUser_Name'], $row['PUser_Handle'] )
             : '';
-         $arow_str[2] = '<td>' . $userstr . '</td>';
       }
       if( $atable->Is_Column_Displayed[3] )
-      {
-         $datestr = ($row['X_Date'] > 0 ? date($date_fmt2, $row['X_Date']) : NULL );
-         $arow_str[3] = '<td>' . $datestr . '&nbsp;</td>';
-      }
+         $arow_str[3] = ($row['X_Date'] > 0 ? date(DATE_FMT3, $row['X_Date']) : NULL );
       if( $atable->Is_Column_Displayed[4] )
-         $arow_str[4] = '<td>' . @$row['Message'] . '</td>';
+         $arow_str[4] = @$row['Message'];
       if( $atable->Is_Column_Displayed[5] )
-         $arow_str[5] = '<td>' . wordwrap(@$row['MysqlError'], 30, "<br>\n", true) . '&nbsp;</td>';
+         $arow_str[5] = wordwrap(@$row['MysqlError'], 40, "<br>\n", true);
       if( $atable->Is_Column_Displayed[6] )
-         $arow_str[6] = '<td>' . wordwrap(@$row['Debug'], 50, "<br>\n", true) . '&nbsp;</td>';
+         $arow_str[6] = wordwrap(@$row['Debug'], 40, "<br>\n", true);
       if( $show_ip && $atable->Is_Column_Displayed[7] )
-         $arow_str[7] = '<td>' . @$row['IP'] . '&nbsp;</td>';
+         $arow_str[7] = @$row['IP'];
       $atable->add_row( $arow_str );
    }
    mysql_free_result($result);
