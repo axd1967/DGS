@@ -35,7 +35,7 @@ $ThePage = new Page('ForumAdmin');
    if( !$logged_in )
       error('not_logged_in');
 
-   if( !(@$player_row['admin_level'] & ADMIN_FORUM) )
+   if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER ) )
       error('adminlevel_too_low');
 
    $fid = max(0,@$_REQUEST['id']);
@@ -44,6 +44,11 @@ $ThePage = new Page('ForumAdmin');
    $page = 'admin.php';
    $abspage = 'forum/'.$page;
 
+   $ARR_FORUMOPTS = array( // maskval => [ argname, bit-text, label, descr ]
+      FORUMOPT_MODERATED   => array( 'moderated', 'MODERATED', T_('Moderated'), T_('all posts need moderation') ),
+      FORUMOPT_GROUP_ADMIN => array( 'fgr_admin', 'FGR_ADMIN', '', T_('ADMIN - mark as admin-forum') ),
+      FORUMOPT_GROUP_DEV   => array( 'fgr_dev',   'FGR_DEV',   '', T_('DEV - mark as development-forum') ),
+   );
 
    // ***********        Move entry       ****************
 
@@ -109,8 +114,7 @@ $ThePage = new Page('ForumAdmin');
                                   'TEXTINPUT', 'name', 50, 80, $row['Name'] ) );
       $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Description'),
                                   'TEXTAREA', 'description', 50, 4, $row['Description'] ) );
-      $edit_form->add_row( array( 'DESCRIPTION' , /*T_*/('Moderated'),
-                                  'CHECKBOX', 'moderated', 1, '', $row['Moderated'] == 'Y'));
+      add_form_forum_options( $edit_form, $row['Options'] );
       $edit_form->add_row( array(
                            'SUBMITBUTTONX', 'do_edit', /*T_*/('Save entry'),
                               array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
@@ -160,7 +164,7 @@ $ThePage = new Page('ForumAdmin');
          mysql_query("UPDATE Forums SET"
                   . " Name='".mysql_addslashes($name)."'"
                   . ",Description='".mysql_addslashes($description)."'"
-                  . ",Moderated=" . (@$_REQUEST['moderated'] ? "'Y'" : "'N'")
+                  . ',Options='. build_forum_options( @$_REQUEST )
                   . " WHERE ID=" . $row['ID'] . " LIMIT 1")
             or error('mysql_query_failed','forum_admin.do_edit.update_forums');
       }
@@ -188,8 +192,7 @@ $ThePage = new Page('ForumAdmin');
                                   'TEXTINPUT', 'name', 50, 80, '' ) );
       $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Description'),
                                   'TEXTAREA', 'description', 50, 4, '' ) );
-      $edit_form->add_row( array( 'DESCRIPTION' , /*T_*/('Moderated'),
-                                  'CHECKBOX', 'moderated', 1, '', false));
+      add_form_forum_options( $edit_form, 0 );
       $edit_form->add_row( array(
                            'SUBMITBUTTONX', 'do_new', /*T_*/('Add entry'),
                               array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
@@ -199,7 +202,7 @@ $ThePage = new Page('ForumAdmin');
    } //new
 
 
-    // ***********        Save new entry       ****************
+   // ***********        Save new entry       ****************
 
    // args: id, do_new=t (insert after entry #id, 0=first)
    // keep it tested after 'new'
@@ -227,7 +230,7 @@ $ThePage = new Page('ForumAdmin');
       mysql_query("INSERT INTO Forums SET"
                . " Name='".mysql_addslashes($name)."'"
                . ",Description='".mysql_addslashes($description)."'"
-               . ",Moderated=" . (@$_REQUEST['moderated'] ? "'Y'" : "'N'")
+               . ",Options=" . build_forum_options( @$_REQUEST )
                . ",SortOrder=" . ($SortOrder+1))
          or error('mysql_query_failed','forum_admin.insert');
 
@@ -243,20 +246,14 @@ $ThePage = new Page('ForumAdmin');
       $title = /*T_*/('Forum Admin');
       start_page($title, true, $logged_in, $player_row );
 
-      $query =
-         "SELECT Forums.ID,Description,Name"
-         . " FROM (Forums)"
-         //. " LEFT JOIN Posts ON Posts.Forum_ID=Forums.ID"
-         . " GROUP BY Forums.ID"
-         . " ORDER BY SortOrder";
-
+      $query = 'SELECT * FROM Forums ORDER BY SortOrder';
       #echo "<br>QUERY: $query<br>\n"; // debug
       $result = mysql_query($query)
          or error('mysql_query_failed','forum_admin.list');
 
       echo "<h3 class=Header>$title</h3>\n";
 
-      $nbcol = 5;
+      $nbcol = 6;
       echo "<a name=\"general\"></a><table class=ForumAdmin>\n";
 
       // table-columns:
@@ -286,6 +283,8 @@ $ThePage = new Page('ForumAdmin');
          echo TD_button( /*T_*/('Add new forum'),
                "$page?new=1".URI_AMP."id=" . $row['ID'],
                '../images/new.png', 'N');
+
+         echo '<td>' . build_forum_options_text( $row['Options'] ) . '</td>';
          echo '</tr>';
       }
       mysql_free_result($result);
@@ -295,4 +294,52 @@ $ThePage = new Page('ForumAdmin');
 
    end_page();
 }
+
+// Returns bitmask for Forums.Options
+// param urlargs array with URL-args from admin-form
+function build_forum_options( $urlargs )
+{
+   global $ARR_FORUMOPTS;
+   $fopts = 0;
+   foreach( $ARR_FORUMOPTS as $maskval => $arr )
+   {
+      $fopts |= (@$_REQUEST[$arr[0]] ? $maskval : 0);
+   }
+   return $fopts;
+}
+
+// Returns string from forum-options
+function build_forum_options_text( $opts )
+{
+   global $ARR_FORUMOPTS;
+   $arrout = array();
+   foreach( $ARR_FORUMOPTS as $maskval => $arr )
+   {
+      if( $opts & $maskval )
+         $arrout[] = $arr[1];
+   }
+   return '['.implode(', ', $arrout).']';
+}
+
+// Adds checkboxes for forum-options to form
+function add_form_forum_options( &$form, $fopts )
+{
+   global $ARR_FORUMOPTS;
+   foreach( $ARR_FORUMOPTS as $maskval => $arr )
+   {
+      $rowarr = array();
+
+      if( (string)$arr[2] != '' )
+         array_push( $rowarr,
+            'DESCRIPTION', $arr[2] );
+      else
+         $rowarr[] = 'TAB';
+
+      array_push( $rowarr,
+         'CHECKBOX', $arr[0], 1, $arr[3], ($fopts & $maskval) );
+
+      $form->add_row( $rowarr );
+   }
+}
+
 ?>
