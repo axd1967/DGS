@@ -321,6 +321,7 @@ function get_tables( $database)
          'TournamentParticipants',
          'Errorlog',
          'Adminlog',
+         'Forumlog',
          'Translationlog',
          'TranslationTexts',
          'Translations',
@@ -376,6 +377,7 @@ foreach( array(
    'Adminlog',
    'Errorlog',
    'Translationlog',
+   'Forumlog',
 ) as $table ) {
  $defs_rep[$table]['Date']
    ['%\s+default\s+CURRENT_TIMESTAMP\s+on\s+update\s+CURRENT_TIMESTAMP\b%is'] = '';
