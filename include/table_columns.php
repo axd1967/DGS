@@ -555,7 +555,7 @@ class Table
    /*! \brief Return the global style part of a table with buttons. */
    function button_style( $button_nr=0)
    {
-      global $button_max, $buttoncolors, $buttonfiles;
+      global $base_path, $button_max, $buttoncolors, $buttonfiles;
 
       if( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
          $button_nr = 0;
@@ -565,7 +565,7 @@ class Table
           " color: {$buttoncolors[$button_nr]};" .
         "}\n" .
         "table.Table td.Button {" .
-          " background-image: url(images/{$buttonfiles[$button_nr]});" .
+          " background-image: url({$base_path}images/{$buttonfiles[$button_nr]});" .
         "}";
    }
 
@@ -1155,6 +1155,8 @@ class Table
    */
    function make_next_prev_links($id)
    {
+      global $base_path;
+
       if( $this->Rows_Per_Page <= 0 || $this->Shown_Columns <= 0
             || !( $this->From_Row > 0 || !$this->Last_Page ) )
          return '';
@@ -1170,24 +1172,28 @@ class Table
          ; //end_sep
 
       if( $this->From_Row > 0 )
+      {
          $button.= anchor(
               $qstr //end_sep
               . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
-            , image( 'images/prev.gif', '<=', '', $string)
+            , image( $base_path.'images/prev.gif', '<=', '', $string)
             , T_("prev page")
             , array( 'accesskey' => ACCKEY_ACT_PREV )
             );
+      }
 
       $button.= '&nbsp;'.round($this->From_Row/$this->Rows_Per_Page+1).'&nbsp;';
 
       if( !$this->Last_Page )
+      {
          $button.= anchor(
               $qstr //end_sep
               . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
-            , image( 'images/next.gif', '=>', '', $string)
+            , image( $base_path.'images/next.gif', '=>', '', $string)
             , T_("next page")
             , array( 'accesskey' => ACCKEY_ACT_NEXT )
             );
+      }
 
 
       $string = '';
@@ -1195,13 +1201,11 @@ class Table
       $span = floor($this->Shown_Columns/2);
       if( $span < 2 ) $span = $this->Shown_Columns;
       if( $span > 0 )
-         $string.= "\n  <td class=PagingL"
-           . ($span>1 ? " colspan=$span" : '') . ">$button</td>";
+         $string.= "\n  <td class=PagingL" . ($span>1 ? " colspan=$span" : '') . ">$button</td>";
 
       $span = $this->Shown_Columns - $span;
       if( $span > 0 )
-         $string.= "\n  <td class=PagingR"
-           . ($span>1 ? " colspan=$span" : '') . ">$button</td>";
+         $string.= "\n  <td class=PagingR" . ($span>1 ? " colspan=$span" : '') . ">$button</td>";
 
       if( $string )
          $string = "\n <tr class=Links$id>\n$string\n </tr>";
