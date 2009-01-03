@@ -178,6 +178,7 @@ function item($text, $link='', $working=true, $last=false)
       item(T_('Documentation'), "docs.php", true, true);
       { $item_level++;
          item(T_('Introduction'), "introduction.php", true);
+         item(T_('Terms of Service - Rules of Conduct and Privacy Policy'), "policy.php", true);
          item(T_('News, Release notes'), "news.php", true);
          item(T_('Site map'), "site_map.php", true);
          item(T_('FAQ'), "faq.php", true);
