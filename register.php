@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,10 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Start";
 
+require_once( 'include/quick_common.php' );
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
 connect2mysql();
+
+error_on_blocked_ip( 'ip_blocked_register' );
 
 $logged_in = who_is_logged( $player_row);
 
@@ -40,10 +43,17 @@ $reg_form->add_row( array( 'DESCRIPTION', T_('Password'),
                            'PASSWORD', 'passwd', 16, 16, '' ) );
 $reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
                            'PASSWORD', 'passwd2', 16, 16, '' ) );
+
+$reg_form->add_row( array( 'TAB',
+                           'CHECKBOX', 'policy', '1', '', false,
+                           'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
+                                            "{$HOSTBASE}policy.php" ) ) );
+
 $reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Register') ) );
 $reg_form->echo_string(1);
 
-  echo T_("Note for beginners: read the FAQ especially for your initial rank setting in your profile page.");
+echo "<br>\n",
+   T_("Note for beginners: read the FAQ especially for your initial rank setting in your profile page.");
 
 echo "</center>\n";
 
