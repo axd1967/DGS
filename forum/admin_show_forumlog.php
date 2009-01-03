@@ -70,15 +70,15 @@ require_once( "forum/forum_functions.php" );
    $fltable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $fltable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'FL.ID+');
+   $fltable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'FL.ID-');
    $fltable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'P.Handle+');
    $fltable->add_tablehead( 3, T_('Time#header'), 'Date', 0, 'FL.Time-');
    $fltable->add_tablehead( 4, T_('Action#header'));
    if( $show_ip )
       $fltable->add_tablehead( 5, T_('IP#header'));
-   $fltable->add_tablehead( 6, T_('Show Thread/Post#header') );
+   $fltable->add_tablehead( 6, T_('Show Thread/Post#header'), '', TABLE_NO_HIDE);
 
-   $fltable->set_default_sort( 1 ); // on ID
+   $fltable->set_default_sort( 1); // on ID
    $order = $fltable->current_order_string();
    $limit = $fltable->current_limit_string();
 
@@ -132,7 +132,10 @@ require_once( "forum/forum_functions.php" );
    // end of table
 
    echo "<br>\n",
-      "NOTE: Log shows all user forum post events and all moderating actions by forum moderators.<br>\n";
+      /*T_*/'NOTE: Log shows all user forum post events and all moderating actions by forum moderators.',
+      "<br>\n",
+      /*T_*/'Index available on database-fields: ID, Userid, Time.',
+      "<br>\n";
 
    end_page();
 }
