@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -52,6 +52,99 @@ define("LINK_MASKS", ~(LINKPAGE_READ | LINKPAGE_LIST | LINKPAGE_INDEX
           | LINKPAGE_SEARCH | LINKPAGE_STATUS) );
 
 
+// Forumlog.Action
+// NOTE: when adding new also adjust forum/admin_show_forumlog.php
+// * for all users (incl. guest); new_..:(new_thread|reply)
+define('FORUMLOGACT_NEW_POST',      'new_post');
+define('FORUMLOGACT_NEW_PEND_POST', 'new_pend_post');
+define('FORUMLOGACT_EDIT_POST',     'edit_post');
+define('FORUMLOGACT_EDIT_PEND_POST', 'edit_pend_post');
+// * for moderators
+define('FORUMLOGACT_APPROVE_POST',  'approve_post');
+define('FORUMLOGACT_REJECT_POST',   'reject_post');
+define('FORUMLOGACT_SHOW_POST',     'show_post');
+define('FORUMLOGACT_HIDE_POST',     'hide_post');
+
+// Forums.Options
+define('FORUMOPT_MODERATED',     0x0001);
+define('FORUMOPT_GROUP_ADMIN',   0x0002); // forum is of admin group
+define('FORUMOPT_GROUP_DEV',     0x0004); // forum is of develop/advisor group
+// mask for normally hidden forums
+define('FORUMOPTS_GROUPS_HIDDEN', FORUMOPT_GROUP_ADMIN|FORUMOPT_GROUP_DEV);
+
+
+ /*!
+  * \class ForumOptions
+  * \brief Class to handle Forums.Options and user allowed to view hidden forums.
+  */
+class ForumOptions
+{
+   /*! \brief true if admin-option ADMOPT_FGROUP_ADMIN for user set [bool] */
+   var $view_admin;
+   /*! \brief true if admin-option ADMOPT_FGROUP_DEV for user set [bool] */
+   var $view_dev;
+
+   /*! \brief Constructs ForumOptions from specified player_row. */
+   function ForumOptions( $player_row )
+   {
+      $this->view_admin = (@$player_row['AdminOptions'] & ADMOPT_FGROUP_ADMIN);
+      $this->view_dev = (@$player_row['AdminOptions'] & ADMOPT_FGROUP_DEV);
+   }
+
+   /*! \brief returns true if forum with given Options can be seen by user. */
+   function is_visible_forum( $fopts )
+   {
+      $show = true;
+
+      // hidden forums has precedence (overwriting other forum-visibility)
+      if( $fopts & FORUMOPTS_GROUPS_HIDDEN )
+      {// is hidden forum
+         if( ($fopts & FORUMOPT_GROUP_DEV) && $this->view_dev )
+            $show = true;
+         elseif( ($fopts & FORUMOPT_GROUP_ADMIN) && $this->view_admin )
+            $show = true;
+         else
+            $show = false;
+      }
+
+      return $show;
+   }
+
+} // end of 'ForumOptions'
+
+
+/* \brief Adds entry into Forumlog */
+function add_forum_log( $tid, $pid, $action )
+{
+   global $player_row, $NOW;
+   $uid = @$player_row['ID'];
+   if( $uid <= 0 )
+      $uid = 1; // use guest-user as default-user
+   $ip = (string) @$_SERVER['REMOTE_ADDR'];
+
+   mysql_query("INSERT INTO Forumlog SET " .
+               "User_ID='$uid', " .
+               "Thread_ID='$tid', " .
+               "Post_ID='$pid', " .
+               "Time=FROM_UNIXTIME($NOW), " .
+               "Action='$action', " .
+               "IP='$ip' " )
+      or error( 'mysql_query_failed', 'forum.add_forum_log.insert' );
+}
+
+/* \brief Returns Forum_ID for specified thread. */
+function load_forum_id( $thread )
+{
+   $result = mysql_query("SELECT Forum_ID FROM Posts WHERE ID='$thread' LIMIT 1")
+      or error('mysql_query_failed','load_forum_id');
+
+   if( @mysql_num_rows($result) != 1 )
+      return 0;
+
+   $row = mysql_fetch_array($result);
+   return @$row['Forum_ID'];
+}
+
 // returns 1 if toggle was needed; 0 otherwise
 function toggle_forum_flags( $uid, $flag )
 {
@@ -83,7 +176,10 @@ function display_posts_pending_approval()
    {
       $disp_forum = new DisplayForum( 0, false );
       $disp_forum->cols = $cols = 4;
-      $disp_forum->headline = array( T_('Posts pending approval') => "colspan=$cols" );
+      $disp_forum->headline = array(
+         T_('Posts pending approval') => "colspan=".($cols-1),
+         anchor( 'forum/admin_show_forumlog.php', T_('Show forum log') ) => '',
+      );
       $disp_forum->links = LINKPAGE_STATUS;
       $disp_forum->forum_start_table('Pending');
 
@@ -393,12 +489,22 @@ class DisplayForum
 
    function forum_message_box( $postClass, $post_id, $GoDiagrams=null, $Subject='', $Text='')
    {
+      global $player_row;
+
       // reply-prefix
       if( $postClass != 'Edit' && $postClass != 'Preview'
          && strlen($Subject) > 0 && strcasecmp(substr($Subject,0,3), "re:") != 0 )
             $Subject = "RE: " . $Subject;
 
       $form = new Form( 'messageform', "read.php#preview", FORM_POST );
+      if( @$player_row['ID'] <= GUESTS_ID_MAX )
+      {
+         $form->add_row( array(
+               'DESCRIPTION', sprintf('<font color="darkred"><b>%s</b></font>', T_('NOTE#guest')),
+               'TEXT', T_('Forum posts by the guest-user needs to be approved or rejected by the server admins. '
+                        . 'If you want a private (non-public) answer, add your email and ask for private contact.') ));
+      }
+
 
       $form->add_row( array(
             'DESCRIPTION', T_('Subject'),
@@ -770,22 +876,22 @@ class DisplayForum
   */
 class Forum
 {
-   /*! \brief Forum.ID : id */
+   /*! \brief Forums.ID : id */
    var $id;
-   /*! \brief Forum.Name : str */
+   /*! \brief Forums.Name : str */
    var $name;
-   /*! \brief Forum.Description : str */
+   /*! \brief Forums.Description : str */
    var $description;
-   /*! \brief Forum.LastPost : id (=Posts.ID) */
+   /*! \brief Forums.LastPost : id (=Posts.ID) */
    var $last_post_id;
-   /*! \brief Forum.ThreadsInForum : int */
+   /*! \brief Forums.ThreadsInForum : int */
    var $count_threads;
-   /*! \brief Forum.PostsInForum : int */
+   /*! \brief Forums.PostsInForum : int */
    var $count_posts;
-   /*! \brief Forum.SortOrder : int */
+   /*! \brief Forums.SortOrder : int */
    var $sort_order;
-   /*! \brief Forum.Moderated : char (Y|N) */ //TODO: should be enum in db
-   var $moderated;
+   /*! \brief Forums.Options : int, bit-values see FORUMOPT_MODERATED, etc. */
+   var $options;
 
    /*! \brief partly filled ForumPost-object for last_post_id [default=null] */
    var $last_post;
@@ -802,7 +908,7 @@ class Forum
 
    /*! \brief Constructs Forum with specified args. */
    function Forum( $id=0, $name='', $description='', $last_post_id=0,
-         $count_threads=0, $count_posts=0, $sort_order=0, $moderated='N' )
+         $count_threads=0, $count_posts=0, $sort_order=0, $options=0 )
    {
       $this->id = $id;
       $this->name = $name;
@@ -811,7 +917,7 @@ class Forum
       $this->count_threads = $count_threads;
       $this->count_posts = $count_posts;
       $this->sort_order = $sort_order;
-      $this->moderated = $moderated;
+      $this->options = $options;
       // non-db
       $this->last_post = null;
       $this->threads = null;
@@ -821,7 +927,7 @@ class Forum
    /*! \brief Returns true, if forum is moderated. */
    function is_moderated()
    {
-      return ( $this->moderated === 'Y' );
+      return ( $this->options & FORUMOPT_MODERATED );
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
@@ -834,7 +940,7 @@ class Forum
          . "#threads=[{$this->count_threads}], "
          . "#posts=[{$this->count_posts}], "
          . "sort_order=[{$this->sort_order}], "
-         . "moderated=[{$this->moderated}], "
+         . "options=[{$this->options}], "
          . 'last_post={' . ( is_null($this->last_post) ? '' : $this->last_post->to_string() ) . '}';
    }
 
@@ -915,7 +1021,7 @@ class Forum
    /*! \brief Returns db-fields to be used for query of Forum-object. */
    function build_query_sql()
    {
-      // Forums: ID,Name,Description,LastPost,ThreadsInForum,PostsInForum,SortOrder,Moderated
+      // Forums: ID,Name,Description,LastPost,ThreadsInForum,PostsInForum,SortOrder,Options
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS, 'Forums.*' );
       $qsql->add_part( SQLP_FROM, 'Forums' );
@@ -933,7 +1039,7 @@ class Forum
             @$row['ThreadsInForum'],
             @$row['PostsInForum'],
             @$row['SortOrder'],
-            @$row['Moderated']
+            @$row['Options']
          );
       return $forum;
    }
@@ -1009,12 +1115,26 @@ class Forum
       return $flist;
    }
 
-   /*! \brief Returns array of partial Forum-objects with id and name set. */
-   function load_forum_names()
+   /*!
+    * \brief Returns array of partial Forum-objects with id and name set.
+    * param forum_opts is object ForumOptions($player_row), load all forum names if omitted
+    */
+   function load_forum_names( $forum_opts )
    {
       // build forum-array for filter: ( Name => Forum_ID )
-      $fnames = mysql_single_col( 'Forum.load_forum_names()',
-         'SELECT ID, Name FROM Forums ORDER BY SortOrder', true );
+      $result = db_query( 'Forum.load_forum_names()',
+            'SELECT ID, Name, Options FROM Forums ORDER BY SortOrder' );
+
+      $fnames = array();
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         // can user view forum?
+         if( $forum_opts && !$forum_opts->is_visible_forum( $row['Options'] ) )
+            continue;
+
+         $fnames[$row['Name']] = $row['ID'];
+      }
+      mysql_free_result($result);
       return $fnames;
    }
 
