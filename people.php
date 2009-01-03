@@ -69,7 +69,6 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
 
    start_page(T_('People'), true, $logged_in, $player_row );
 
-
    //---------
    section( 'Contributors', T_('Contributors to Dragon'));
 
@@ -91,21 +90,18 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
    add_contributor();
 
    //---------
-   section( 'FAQ', T_('FAQ'));
+   section( 'FAQ', T_('FAQ editors'));
 
-   $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_SUPERADMIN);
-   if( $extra_info )
-      $FAQexclude = array();
-   else
-      $FAQexclude = array( 'ejlo', 'rodival');
-   //$FAQmain = 'Ingmar';
-   $FAQmain = 'jug';
+   $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_FAQ);
+   $FAQexclude = array( 'ejlo', 'rodival', 'jug' );
+   $FAQmain = 'Ingmar';
+   //$FAQmain = 'jug';
    $FAQmainID = 0;
 
    $result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
             ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
             " FROM Players" .
-            " WHERE (Adminlevel & " . ADMIN_FAQ . ") > 0" .
+            " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FAQ . ") > 0" .
             " ORDER BY ID" )
       or error('mysql_query_failed', 'people.faq_admins');
 
@@ -133,31 +129,52 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
    if( $FAQmainID > 0 )
    {
       $row = $FAQ_list[$FAQmainID];
-      add_contributor( T_("FAQ editor"),
-                     $row['ID'], $row['Name'], $row['Handle'],
-         ( $extra_info && $row['LastUpdate']
-            ? date(DATE_FMT2, $row['LastUpdate']) : '')
-                     );
+      add_contributor( T_("FAQ editor"), $row['ID'], $row['Name'], $row['Handle'],
+         ( ($extra_info && $row['LastUpdate']) ? date($date_fmt2, $row['LastUpdate']) : '') );
       $FAQexclude[] = $FAQmain;
-   } else $FAQmain='';
+   }
+   else
+      $FAQmain='';
 
    $first = T_("FAQ co-editor");
    foreach( $FAQ_list as $uid => $row )
    {
       if( in_array( $row['Handle'], $FAQexclude) )
          continue;
-      add_contributor( $first,
-                     $row['ID'], $row['Name'], $row['Handle'],
-         ( $extra_info && $row['LastUpdate']
-            ? date(DATE_FMT2, $row['LastUpdate']) : '')
-                     );
+      add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'],
+         ( ($extra_info && $row['LastUpdate']) ? date($date_fmt2, $row['LastUpdate']) : '') );
       $first = '';
    }
 
    add_contributor();
 
    //---------
-   section( 'Translators', T_('Current translators'));
+   section( 'Moderators', T_('Forum moderators'));
+
+   $MODexclude = array( 'ejlo', 'rodival' );
+
+   $result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
+            ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+            " FROM Players" .
+            " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FORUM . ") > 0" .
+            " ORDER BY ID" )
+      or error('mysql_query_failed', 'people.forum_moderators');
+
+   $first = T_('Forum moderator');
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      if( in_array( $row['Handle'], $MODexclude) )
+         continue;
+
+      add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'], '' );
+      $first = '';
+   }
+   mysql_free_result($result);
+
+   add_contributor();
+
+   //---------
+   section( 'Translators', T_('Translators'));
 
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
@@ -210,11 +227,8 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
       $first = $langname;
       foreach( $translators as $row )
       {
-         add_contributor( $first,
-                        $row['ID'], $row['Name'], $row['Handle'],
-            ( $extra_info && $row['LastUpdate']
-               ? date(DATE_FMT2, $row['LastUpdate']) : '')
-                        );
+         add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'],
+            ( ($extra_info && $row['LastUpdate']) ? date($date_fmt2, $row['LastUpdate']) : '') );
          $first = '';
       }
    }
