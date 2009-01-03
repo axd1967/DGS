@@ -38,6 +38,7 @@ require_once( "include/std_functions.php" );
    $guest_id= (int)@$_REQUEST['guestpass'];
    if( $guest_id > 0 && $guest_id <= GUESTS_ID_MAX )
    {
+      // admin can change guest-password(?)
       if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
          error('adminlevel_too_low');
 
