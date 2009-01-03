@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -43,7 +43,9 @@ define('MODERATOR_SEARCH', 0);
    $is_moderator = ($switch_moderator == 1);
 
    // build forum-array for filter: ( Name => Forum_ID )
-   $arr_fnames = Forum::load_forum_names(); // id => name
+   $f_opts = new ForumOptions( $player_row );
+   $arr_fnames = Forum::load_forum_names( $f_opts ); // id => name
+   $farr_vis = array_values($arr_fnames); // IDs of visible forums
    $arr_forum = array( T_('All#forum') => '' );
    foreach( $arr_fnames as $id => $name )
       $arr_forum[$name] = 'Posts.Forum_ID=' . $id;
@@ -52,6 +54,7 @@ define('MODERATOR_SEARCH', 0);
    $disp_forum->links = LINKPAGE_SEARCH;
 
    $page = "search.php";
+   $f_opts = new ForumOptions( $player_row );
 
    if( !MODERATOR_SEARCH || $switch_moderator < 0 )
       $disp_forum->is_moderator = 0;
@@ -182,6 +185,10 @@ define('MODERATOR_SEARCH', 0);
       if( !MODERATOR_SEARCH )
          $qsql->add_part( SQLP_WHERE, "P.Approved='Y'" );
       $qsql->add_part( SQLP_WHERE, "P.PosIndex>''" ); // '' == inactivated (edited)
+      // restrict query on visible forums
+      $qsql->add_part( SQLP_WHERE,
+         'Forums.ID IN ('.implode(',', $farr_vis).')' );
+
       $qsql->merge($query_filter);
 
       if( $sql_order)
