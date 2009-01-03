@@ -58,14 +58,20 @@ $ThePage = new Page('UserInfo');
    if( !$row )
       error('unknown_user');
    $uid = (int)$row['ID'];
+   $hide_bio = (@$row['AdminOptions'] & ADMOPT_HIDE_BIO);
 
+   // load bio
    $bio_result = db_query( 'userinfo.bio',
       "SELECT * FROM Bio WHERE uid=$uid order by SortOrder, ID");
+   $count_bio = @mysql_num_rows($bio_result);
 
-   $has_contact= Contact::has_contact($my_id, $uid);
+   if( $hide_bio )
+   {
+      mysql_free_result($bio_result);
+      $bio_result = NULL; // hide bio
+   }
 
-   //db_close(); //not yet: the bio may contain <user>-like tags
-
+   $has_contact = Contact::has_contact($my_id, $uid);
 
    $my_info = ( $my_id == $uid );
    $name_safe = make_html_safe($row['Name']);
@@ -76,6 +82,10 @@ $ThePage = new Page('UserInfo');
 
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
+
+   if( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+      echo sprintf( "<p><font color=\"red\"><b>( %s )</b></font><br>\n",
+         T_('Account blocked - Login denied') );
 
    $run_link = "show_games.php?uid=$uid";
    $fin_link = $run_link.URI_AMP.'finished=1';
@@ -212,7 +222,12 @@ $ThePage = new Page('UserInfo');
    } //User infos
 
 
-   if( @mysql_num_rows($bio_result) > 0 )
+   if( is_null($bio_result) )
+   {//Bio infos hidden by admin
+      if( $count_bio > 0 )
+         echo '<p></p><h3 class=Header>' . T_('Biographical info (hidden)') . "</h3>\n";
+   }
+   elseif( $count_bio > 0 )
    {//Bio infos
       echo '<p></p><h3 class=Header>' . T_('Biographical info') . "</h3>\n";
 
@@ -239,9 +254,9 @@ $ThePage = new Page('UserInfo');
 
       $itable->echo_table();
       unset($itable);
+      mysql_free_result($bio_result);
    }//Bio infos
    db_close();
-   mysql_free_result($bio_result);
 
 
    if( $my_info )
