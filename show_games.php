@@ -96,9 +96,9 @@ $ThePage = new Page('GamesList');
    $show_notes= (LIST_GAMENOTE_LEN>0
          && !$observe && !$all && $uid==$my_id); //FU+RU subset
 
-   $def_arr_lastmove = array();
+   $restrict_games = '';
    if( RESTRICT_SHOW_GAMES_ALL && $all )
-      $def_arr_lastmove[FC_DEFAULT] = RESTRICT_SHOW_GAMES_ALL;
+      $restrict_games = ($finished) ? min(30, 5*RESTRICT_SHOW_GAMES_ALL) : RESTRICT_SHOW_GAMES_ALL;
 
    // table filters
    $gfilter = new SearchFilter( $fprefix );
@@ -112,7 +112,8 @@ $ThePage = new Page('GamesList');
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true,
          array( FC_SIZE => 4 ));
-   $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true, $def_arr_lastmove ); // Games
+   $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true, // Games
+         array( FC_DEFAULT => $restrict_games ));
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
    if( !$observe && !$all ) //FU+RU
@@ -376,13 +377,20 @@ $ThePage = new Page('GamesList');
 
    $gtable->add_tablehead(14, T_('Rated#header'), '', TABLE_NO_HIDE, 'X_Rated-');
 
+   // col 13 must be static for RESTRICT_SHOW_GAMES_ALL
+   $table_mode13 = ($restrict_games) ? TABLE_NO_HIDE : 0;
+   $restrict_gametext = '';
    if( $observe ) //OB
       $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged-');
    else if( $finished ) //FU+FA ?UNION
-      $gtable->add_tablehead(13, T_('End date#header'), 'Date', 0, 'Lastchanged-');
+   {
+      $restrict_gametext = T_('End date#header');
+      $gtable->add_tablehead(13, T_('End date#header'), 'Date', $table_mode13, 'Lastchanged-');
+   }
    else if( $running ) //RU+RA ?UNION
    {
-      $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged-');
+      $restrict_gametext = T_('Last move#header');
+      $gtable->add_tablehead(13, T_('Last move#header'), 'Date', $table_mode13, 'Lastchanged-');
       if( !$all ) //RU ?UNION
       {
          $gtable->add_tablehead(25, T_('Opponents Last Access#header'), 'Date', 0, 'Lastaccess-');
@@ -523,11 +531,11 @@ $ThePage = new Page('GamesList');
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title2</h3>\n";
 
-   if( RESTRICT_SHOW_GAMES_ALL && $all && !$gfilter->is_init() )
+   if( $restrict_games != '' && !$gfilter->is_init() )
       echo sprintf(
             T_('NOTE: The full games list is per default restricted to show only recent games within %s day(s). '
                . 'This can be changed in the filter for [%s].'),
-               RESTRICT_SHOW_GAMES_ALL, T_('Last move#header') ),
+               $restrict_games, $restrict_gametext ),
          "<br><br>\n";
 
    // hover-texts for colors-column
