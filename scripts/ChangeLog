@@ -10,6 +10,7 @@ last server update start: 2006-10-06
 2007-12-19: bug fix update
 2008-01-10: bug fix update
 2008-12-14: release 1.0.14, mostly to add blocking functions
+2009-01-04: bug fix update (by JUG)
 
 previous server update:
 Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
@@ -32,6 +33,29 @@ ChangeLog
 ------------------------------------------------------------------
 
 2009-01-04 juga
+
+   * edit_bio.php:
+   - fixed adapted text-height for bio (more effect), increased width (60->70)
+
+   * message.php:
+   - changed text-width for userid (50,maxl80->25,40), subject & message-body (60->70)
+
+   * show_games.php:
+   - bugfix for RESTRICT_SHOW_GAMES_ALL:
+     - use different day-restriction for full finished games list,
+       adjusted restrict-note
+     - use more elegant FC_DEFAULT-setting to restrict games-list Lastchanged
+     - make end-date/last-move column (#13) static
+
+   * include/message_functions.php (message_list_body), status.php:
+   - fixed PHP-warning on freeing mysql-result after message_list_body()
+
+   * forum/forum_functions.php (make_link_array, draw_post), forum/read.php:
+   - bugfix: prevented moderate-action to be re-done on moderator-toggle,
+     replaced show/hide/approve/reject-URL-arg by modact/modpid-URL-arg
+
+   * skins/dragon/screen.css:
+   - bugfix (reported): table-cell vertical-alignment only on forms
 
    * NEWS, policy.php:
    - merge-fix:
