@@ -87,7 +87,7 @@ function find_category_box_text($cat)
    {
       $cat_max = 40;
       $cat_width = 20;
-      $text_width = 60;
+      $text_width = 70;
       $text_height = 4;
 
       $moveurl = 'change_bio.php';
@@ -119,7 +119,7 @@ function find_category_box_text($cat)
          { //edit bio fields
             // adapt text-height
             $linecount = substr_count( $row['Text'], "\n" );
-            $txth_adapted = max( $text_height, min( 12, (int)($linecount / 2) ));
+            $txth_adapted = max( $text_height, min( 12, (int)($linecount / 1.3) ));
 
             $bio_row = array(
                'CELL', 0, 'class=Header',
