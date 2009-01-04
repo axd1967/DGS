@@ -22,11 +22,12 @@ $TranslateGroups[] = "Start";
 require_once( "include/std_functions.php" );
 
 {
+   $ThePage = new Page('Policy');
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
 
-   $ThePage['class']= 'Policy';
    start_page(T_('Policy'), true, $logged_in, $player_row );
 
    section( 'Policy', T_('DragonGoServer Policy'));
