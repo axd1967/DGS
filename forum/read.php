@@ -82,7 +82,8 @@ function revision_history( $display_forum, $post_id )
    }
    $show_overview = ( $player_row['ForumFlags'] & FORUMFLAG_POSTVIEW_OVERVIEW );
 
-   $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
+   $arg_moderator = get_request_arg('moderator');
+   $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, $arg_moderator );
    $is_moderator = ($switch_moderator == 1);
 
    // assure independence from forum_id
@@ -136,14 +137,19 @@ function revision_history( $display_forum, $post_id )
    else
    {
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
-      if( (int)@$_GET['show'] > 0 )
-         show_post( $forum_id, $thread, (int)@$_GET['show'] );
-      else if( (int)@$_GET['hide'] > 0 )
-         hide_post( $forum_id, $thread, (int)@$_GET['hide'] );
-      else if( (int)@$_GET['approve'] > 0 )
-         approve_post( $forum_id, $thread, (int)@$_GET['approve'] );
-      else if( (int)@$_GET['reject'] > 0 )
-         reject_post( $forum_id, $thread, (int)@$_GET['reject'] );
+      $modact = get_request_arg('modact'); // moderate-action
+      $modpid = get_request_arg('modpid', 0); // post-id
+      if( $arg_moderator == '' && $modpid > 0 )
+      {
+         if( $modact == 'show' )
+            show_post( $forum_id, $thread, $modpid );
+         else if( $modact == 'hide' )
+            hide_post( $forum_id, $thread, $modpid );
+         else if( $modact == 'approve' )
+            approve_post( $forum_id, $thread, $modpid );
+         else if( $modact == 'reject' )
+            reject_post( $forum_id, $thread, $modpid );
+      }
    }
 
 

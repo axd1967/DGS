@@ -362,6 +362,8 @@ class DisplayForum
       {
          // preserve all page-args on moderator switch
          $get = array_merge( $_GET, $_POST);
+         unset($get['modact']);
+         unset($get['modpid']);
          $get['moderator'] = ( empty($this->is_moderator) ? 'y' : 'n' );
          if( $links & LINKPAGE_READ )
             $url = make_url( 'read.php', $get );
@@ -788,19 +790,23 @@ class DisplayForum
             $first_answer,
             '&nbsp;';
 
-         if( $this->is_moderator ) // hide/show link
+         if( $this->is_moderator ) // hide/show/approve/reject-link
          {
-            if( !$post->is_pending_approval() )
-               echo '<a class=Highlight href="'.$thread_url
-                  .URI_AMP . ($hidden ? 'show' : 'hide') . "=$pid#$pid\">"
-                  ."[ " . ($hidden ? T_('show') : T_('hide')) . " ]</a>";
+            $modurl_fmt = '<a class=Highlight href="'.$thread_url
+               . URI_AMP."modpid=$ID".URI_AMP."modact=%s#$ID\">[ %s ]</a>";
+            if( $post->is_pending_approval() )
+            {
+               echo sprintf( $modurl_fmt, 'approve',  T_('Approve') ),
+                  "&nbsp;&nbsp;",
+                  sprintf( $modurl_fmt, 'reject',  T_('Reject') );
+            }
             else
-               echo '<a class=Highlight href="'.$thread_url
-                  .URI_AMP."approve=$pid#$pid\">"
-                  ."[ " . T_('Approve') . " ]</a>&nbsp;&nbsp;"
-                  .'<a class=Highlight href="'.$thread_url
-                  .URI_AMP."reject=$pid#$pid\">"
-                  ."[ " . T_('Reject') . " ]</a>";
+            {
+               if( $hidden )
+                  echo sprintf( $modurl_fmt, 'show',  T_('show') );
+               else
+                  echo sprintf( $modurl_fmt, 'hide',  T_('hide') );
+            }
          }
          echo "</td></tr>\n";
       }
