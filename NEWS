@@ -103,7 +103,6 @@ Copyright (C) 2001-2008  Erik Ouchterlony
       * Added statistics-page on site-map
       * Added link to statistics page on docs page
       * News: added table of contents
-      * Main-Menu: changed menu FAQ to Help-FAQ, changed access key [q] -> [h]
 
    * Messages:
       * Changed default for empty subject: ??? -> (no subject)
