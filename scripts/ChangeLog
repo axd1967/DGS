@@ -31,6 +31,13 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-01-04 juga
+
+   * NEWS, policy.php:
+   - merge-fix:
+     - adjusted to new date-format and added release-info for 1.0.14
+     - adjusted using new Page-class for CSS
+
 2009-01-03 juga
 
    * include/message_functions.php (message_info_table),
