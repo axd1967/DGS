@@ -59,15 +59,7 @@ define('MODERATOR_SEARCH', 0);
    if( !MODERATOR_SEARCH || $switch_moderator < 0 )
       $disp_forum->is_moderator = 0;
    else
-   {
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
-/*
-      if( @$_REQUEST['show'] > 0 )
-         approve_message( (int)@$_REQUEST['show'], $thread, $forum, true );
-      else if( @$_REQUEST['hide'] > 0 )
-         approve_message( (int)@$_REQUEST['hide'], $thread, $forum, false );
-*/
-   }
 
    $title = T_('Forum search');
    start_page($title, true, $logged_in, $player_row);

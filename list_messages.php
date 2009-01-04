@@ -161,7 +161,6 @@ require_once( "include/filter.php" );
    $can_move_messages =
       message_list_body( $mtable, $result, $show_rows, $my_folders
              , $toggle_marks, $rx_term);
-   //mysql_free_result($result); //already free
 
    $mtable->echo_table();
    //echo "<br>\n";
