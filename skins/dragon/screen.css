@@ -64,7 +64,6 @@ td {
    padding: 2px 4px;
    width: auto;
    text-align: left;
-   vertical-align: top;
 }
 
 hr {
@@ -1203,6 +1202,10 @@ table.InfoBox td {
 /* ------------------------- */
 /* form and area tables */
 /* ------------------------- */
+
+table.FormClass td {
+   vertical-align: top;
+}
 
 td.FormClassV,
 td.FormClassH,
