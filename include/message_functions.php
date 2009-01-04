@@ -1097,6 +1097,7 @@ function message_list_head( &$mtable, $current_folder
 
 // param result: typically coming from message_list_query()
 // param rx_terms: rx with terms to be marked within text
+// NOTE: frees given mysql $result
 function message_list_body( &$mtable, $result, $show_rows
              , $my_folders, $toggle_marks=false, $rx_term=''
              )
@@ -1142,9 +1143,7 @@ function message_list_body( &$mtable, $result, $show_rows
          'owntd' => echo_folder_box($my_folders, $folder_nr, $bgcolor) );
 
       if( $row['Sender'] === 'M' ) //Message to myself
-      {
          $row["other_name"] = '(' . T_('Myself') . ')';
-      }
       else if( $row["other_ID"] <= 0 )
          $row["other_name"] = '[' . T_('Server message') . ']';
       if( empty($row["other_name"]) )
@@ -1212,7 +1211,7 @@ function message_list_body( &$mtable, $result, $show_rows
       }
       $mtable->add_row( $mrow_strings );
    }
-   //mysql_free_result($result);
+   mysql_free_result($result);
 
    //insertion of the marks in the URL of sort, page move and add/del column.
    //it's useless to add marks to the URLs while they are only used with actions

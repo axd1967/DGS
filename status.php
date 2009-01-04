@@ -106,11 +106,12 @@ $ThePage = new Page('Status');
 
       section( 'Message', T_('New messages'));
 
-      message_list_body( $mtable, $result, 20, $my_folders) ;
+      message_list_body( $mtable, $result, 20, $my_folders) ; // also frees $result
 
       $mtable->echo_table();
    }
-   mysql_free_result($result);
+   else
+      mysql_free_result($result);
    //unset($mtable);
 } // show messages
 
