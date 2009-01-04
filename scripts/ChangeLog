@@ -34,7 +34,7 @@ ChangeLog
 2009-01-03 juga
 
    * include/message_functions.php (message_info_table),
-     include/std_functions.php:
+     include/std_functions.php, NEWS:
    - from wishlist:
      - to send new message use "(no subject)"-text for empty subject (was '???')
      - for preview show warning on empty subject
