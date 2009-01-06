@@ -155,7 +155,7 @@ require_once( "include/form_functions.php" );
    }
 
    $menu_array =
-      array( T_('Show finished games') => "show_games.php?uid=$uid".URI_AMP."finished=1" );
+      array( T_('Show my finished games') => "show_games.php?uid=$uid".URI_AMP."finished=1" );
 
    end_page(@$menu_array);
 
