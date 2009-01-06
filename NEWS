@@ -151,7 +151,7 @@ Copyright (C) 2001-2008  Erik Ouchterlony
    * Changed all config in server config using constants
 
    * Moved configuration into server config:
-      * ALLOW_QUOTING
+      * ALLOW_QUOTING, ALLOW_JAVASCRIPT
       * Definition of all access keys
       * Forum NEW config
       * Default password encryption (SHA1 now)

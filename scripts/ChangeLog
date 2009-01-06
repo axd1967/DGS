@@ -25,10 +25,17 @@ ChangeLog
 
 2009-01-06 juga
 
+   * include/config.php,
+     change_profile.php, edit_profile.php, game.php, include/std_functions.php,
+     include/table_columns.php, include/table_infos.php, scripts/data_report.php:
+   - renamed ALLOW_JSCRIPT and moved into config as ALLOW_JAVASCRIPT
+   - added comment for ALLOW_QUOTING
+
    * change_profile.php, edit_profile.php, game.php, ratinggraph.php, ratingpng.php,
      include/std_functions.php, include/table_columns.php, scripts/data_report.php:
-   - renamed consts with suffix _ENA -> _ENABLED:
-     JSCRIPT_ENA, GRAPH_RATING_BY_NUM_ENA
+   - renamed consts
+     - JSCRIPT_ENA -> JAVASCRIPT_ENABLED (clearer, JScript != JavaScript)
+     - GRAPH_RATING_BY_NUM_ENA -> GRAPH_RATING_BY_NUM_ENABLED
 
    * sgf.php (switch_move_color), NEWS:
    - use 3rd PASS-move as node for scoring for better RESUME-handling
