@@ -25,6 +25,14 @@ ChangeLog
 
 2009-01-06 juga
 
+   * game.php, skins/dragon/screen.css, NEWS:
+   - always show some start- and end-moves in view-moves-list
+   - show SGF-move-number before view-moves-list, added CSS
+   - mark setup-moves in view-moves-list with prefix: (H) =handicap-setup
+
+   * change_bio.php:
+   - fixed PHP-warning on missing mysql_free_result()
+
    * quick_status.php:
    - minor sql-change in ORDER: date -> Lastchanged
 
@@ -53,7 +61,7 @@ ChangeLog
      - make end-date/last-move column (#13) static
 
    * include/message_functions.php (message_list_body), status.php:
-   - fixed PHP-warning on freeing mysql-result after message_list_body()
+   - fixed PHP-warning on missing mysql_free_result() after message_list_body()
 
    * forum/forum_functions.php (make_link_array, draw_post), forum/read.php:
    - bugfix: prevented moderate-action to be re-done on moderator-toggle,
