@@ -25,6 +25,13 @@ ChangeLog
 
 2009-01-06 juga
 
+   * sgf.php (switch_move_color), NEWS:
+   - use 3rd PASS-move as node for scoring for better RESUME-handling
+   - switched off inclusion of node-names, added switch $include_games_notes
+
+   * game.php (draw_moves, get_final_score_move):
+   - fix SGF-move-number for final score-step or exceeding max-moves
+
    * game.php, skins/dragon/screen.css, NEWS:
    - always show some start- and end-moves in view-moves-list
    - show SGF-move-number before view-moves-list, added CSS

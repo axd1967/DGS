@@ -83,6 +83,7 @@ Copyright (C) 2001-2008  Erik Ouchterlony
    * SGF Download:
       * Included private game notes
       * Included PASS-moves
+      * Used 3rd PASS-move as node for scoring for better RESUME-handling
       * Removed node-text for pass/scoring-steps (viewer-problems)
       * Added URL-arg 'no_cache' to disable cache
 
