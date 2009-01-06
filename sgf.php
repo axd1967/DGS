@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -36,8 +36,9 @@ function reverse_htmlentities( $str )
 }
 
 
-/* SGf specs:
+/* SGF specs:
    Setup properties must not be mixed with move properties within a node.
+   Docs: http://www.red-bean.com/sgf/
    FF[4] move & setup properties:
 ID   Description     property type    property value
 ---- --------------- ---------------  --------------------------------------
@@ -297,6 +298,11 @@ function sgf_count_string( $color, $territory, $prisoner, $komi=false )
    return $str;
 }
 
+function switch_move_color( $color )
+{
+   return ($color == 'B') ? 'W' : 'B';
+}
+
 
 $array=array();
 
@@ -334,6 +340,7 @@ $array=array();
    $use_AB_for_handicap = true;
 
    $include_games_notes = true; // && owned_comments set
+   $include_node_name = false;
 
    //0=no highlight, 1=with Name property, 2=in comments, 3=both
    $sgf_pass_highlight = 0;
@@ -347,6 +354,8 @@ $array=array();
    // ''= no mark, 'MA'/'CR'/'TR'/'SQ'= mark them
    $marked_dame_prop = '';
 
+
+   // parse args
    $gid = (int)@$_GET['gid'];
    if( $gid <= 0 )
    {
@@ -358,6 +367,7 @@ $array=array();
       error('unknown_game');
 
    $use_cache = @$_GET['no_cache'];
+   #$use_cache = false;
 
    $owned_comments = @$_GET['owned_comments'];
    if( $owned_comments )
@@ -390,6 +400,7 @@ $array=array();
    $row = mysql_fetch_array($result);
    extract($row);
 
+   // owned_comments: BLACK|WHITE=viewed by B/W-player, DAME=viewed by other user
    if( $owned_comments )
    {
       $owned_comments = DAME;
@@ -450,13 +461,13 @@ $array=array();
       . "\nPW[" . sgf_simpletext("$Whitename ($Whitehandle)") . "]";
 
    if( isset($Blackrating) || isset($Whiterating) )
-   {
+   {// ratings
       echo "\nBR[" . ( isset($Blackrating) ? echo_rating($Blackrating, 0,0,1) : '?' ) . "]" .
            "\nWR[" . ( isset($Whiterating) ? echo_rating($Whiterating, 0,0,1) : '?' ) . "]";
    }
 
    if( $sgf_version >= 4 )
-   {
+   {// overtime
       echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, 1)) . "]";
    }
 
@@ -470,6 +481,7 @@ $array=array();
       echo "\nHA[$Handicap]";
 
 
+   // possibly skip some moves
    $sgf_trim_nr = @mysql_num_rows($result) - 1 ;
    if( $Status == 'FINISHED' && isset($Score) )
    {
@@ -478,10 +490,9 @@ $array=array();
          ) . "]";
 
       //skip the ending moves where PosX <= $sgf_trim_level
-      //-1= skip ending pass, -2= keep them ... -999= keep everything
+      //-1=POSX_PASS= skip ending pass, -2=POSX_SCORE= keep them ... -999= keep everything
       if( abs($Score) < SCORE_RESIGN ) // real-score
          $sgf_trim_level = POSX_SCORE; // keep PASSes for better SGF=DGS-move-numbering
-         //$sgf_trim_level = POSX_PASS;
       else if( abs($Score) == SCORE_TIME )
          $sgf_trim_level = POSX_RESIGN;
       else
@@ -502,13 +513,15 @@ $array=array();
    }
 
 
+   // loop over Moves
+
    $movenum= 0; $movesync= 0;
    $points= array();
    $next_color= "B";
    while( $row = mysql_fetch_assoc($result) )
    {
       $Text="";
-      extract($row);
+      extract($row); // fields: ID,gid,MoveNr,Stone,PosX,PosY,Hours
       $coord = chr($PosX + ord('a')) . chr($PosY + ord('a'));
 
       switch( $Stone )
@@ -589,7 +602,7 @@ $array=array();
             $Text="";
 
             if( $MoveNr <= $Handicap && $use_AB_for_handicap )
-            {
+            {// handicap
                $points[$coord]='AB'; //setup property
                if( $MoveNr < $Handicap)
                   break;
@@ -601,7 +614,7 @@ $array=array();
                $node_com= "";
             }
             elseif( $sgf_trim_nr >= 0 )
-            {
+            {// move
                if( $Stone == WHITE )
                   $color='W' ;
                else
@@ -622,6 +635,7 @@ $array=array();
                echo( "\n;" ); //Node start
                $prop_type ='';
 
+               // sync move-number
                if( $MoveNr > $Handicap && $PosX >= POSX_PASS )
                {
                   $movenum++;
@@ -636,8 +650,9 @@ $array=array();
 
                if( $PosX < POSX_PASS )
                { //score steps, others filtered by $sgf_trim_level
-
-                  $next_color= "";
+                  sgf_echo_prop($color);
+                  echo "[]"; // add 3rd pass
+                  $next_color = switch_move_color( $color );
 
                   if( $sgf_score_highlight & 1 )
                      echo "N[$color SCORE]";
@@ -683,7 +698,12 @@ $array=array();
 
    if( $Status == 'FINISHED')
    {
-      echo( "\n;N[RESULT]" ); //Node start
+      echo "\n;"; // Node start
+      sgf_echo_prop($next_color);
+      echo "[]"; // add 3rd pass
+
+      if( $include_node_name )
+         echo "N[RESULT]"; //Node start
       $prop_type ='';
 
       // highlighting result in last comments:
@@ -693,7 +713,6 @@ $array=array();
 
          if( abs($Score) < SCORE_RESIGN ) // scor-able
          {
-
             $black_territory = array();
             $white_territory = array();
             $black_prisoner = array();
