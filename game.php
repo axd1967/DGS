@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -594,7 +594,7 @@ function get_alt_arg( $n1, $n2)
    }
    else if( $Moves > 1 )
    {
-      draw_moves( $gid, $move);
+      draw_moves( $gid, $move, $game_row['Handicap'] );
       if( $show_notes )
       {
          draw_notes('Y');
@@ -709,7 +709,7 @@ function get_alt_arg( $n1, $n2)
    end_page(@$menu_array);
 }
 
-function draw_moves( $gid, $move)
+function draw_moves( $gid, $move, $handicap )
 {
    global $TheBoard, $player_row;
 
@@ -721,31 +721,41 @@ function draw_moves( $gid, $move)
    $trpas = basic_safe(T_('Pass'));
    $trsco = basic_safe(T_('Scoring'));
    $trres = basic_safe(T_('Resign'));
+   $trsetup_handi = basic_safe(T_('(H)#viewmove'));
 
    $ctab = '&nbsp;';
    $wtab = str_repeat($ctab, 8);
    // args: movenr, 'selected'; 'Move'-text (translated), movenr, move
-   $ofmt = "<OPTION value=\"%d\"%s>%s$ctab%s:$ctab$ctab%s</OPTION>\n";
+   $ofmt = "<OPTION value=\"%d\"%s>%s%s$ctab%s:$ctab$ctab%s</OPTION>\n";
 
-   $str= '';
-
-/**
-  make the <OPTION> list smaller:
-  e.g.: 100 moves, move #50 selected, step=sqrt(100)=10
-   => option lines provided, relative to the move selected:
-  +50 ... +40 ... +30 ... +20 ... +10 +9 +8 +7 +6 +5 +4 +3 +2 +1
-  selected -1 -2 -3 -4 -5 -6 -7 -8 -9 -10 ... -20 ... -30 ... -40 ... -50
-  Near (2*step+1) + (step-2) option lines => 2*step < nb_lines < 3*step
- **/
+   /**
+     make the <OPTION> list smaller:
+     - e.g.: 100 moves, move #50 selected, step=sqrt(100)=10
+       => option lines provided, relative to the move selected:
+       +50 ... +40 ... +30 ... +20 ... +10 +9 +8 +7 +6 +5 +4 +3 +2 +1
+       selected -1 -2 -3 -4 -5 -6 -7 -8 -9 -10 ... -20 ... -30 ... -40 ... -50
+     - Near (2*step+1) + (step-2) option lines => 2*step < num-lines < 3*step,
+       and always show some start- and end-moves
+    **/
    $step= 5 * max( 1, round(sqrt($Moves)/5) );
-   if( $move <= $step )
+
+   $mvs_start = 5; // num of first moves showed, 0 = ignore start
+   $mvs_end = 8; // num of last moves showed, at least 4 end-moves (+ 2x pass + 2x score)
+   $firstskip = 0;
+
+   if( ($mvs_start > 0) || ($move <= $step) )
+   {
       $i= 0;
+      $firstskip = (($move - 1) % $step) + 2;
+   }
    else
       $i= ($move-1) % $step;
+   $str= '';
+
    while( $i++ < $Moves )
    {
       $dlt= abs($move-$i);
-      if( $i == $Moves || $dlt < $step || ($dlt % $step) == 0 )
+      if( ($i <= $mvs_start || $i >= $Moves - $mvs_end) || ($dlt < $step) || ($dlt % $step) == 0 )
       {
          list( $Stone, $PosX, $PosY)= @$TheBoard->moves[$i];
          if( $Stone != BLACK && $Stone != WHITE )
@@ -771,30 +781,45 @@ function draw_moves( $gid, $move)
 
          $c= str_repeat($ctab, strlen($Moves)-strlen($i)).$c;
          if( $Stone == WHITE ) $c= $wtab.$c;
+         $setup = ( $handicap > 0 && $i <= $handicap )
+            ? $trsetup_handi .' '
+            : '';
+
          $c= sprintf( $ofmt
                     , $i, ( ($i == $move) ? ' selected' : '' )
+                    , $setup
                     , $trmov // keep to prevent mixup, if $trmov contains '%'-sprintf-fmttext
-                    , $i, $c);
+                    , $i, $c );
       }
       else
       {
          //$c= "<OPTION value=\"$move\">---</OPTION>\n";
          //$c= "<OPTION>---</OPTION>\n";
          $c= "<OPTION value=\"$move\" disabled>---</OPTION>\n";
-         //here $step is >1 because of $dlt%$step==0
-         $i+= $step-2;
-         if( $i >= $Moves ) $i= $Moves-1;
+
+         //here $step is >1 because of ($dlt % $step)==0
+         if( $firstskip > 0 && $i - $firstskip < $step )
+         {
+            $i -= ($i - $firstskip);
+            $firstskip = 0;
+         }
+         $i += $step - 2;
+         if( $i >= $Moves - $mvs_end ) $i = $Moves - $mvs_end - 1;
       }
+
       //first move at bottom:
       $str= $c.$str;
    }
 
+   // show SGF-move-num
+   echo "\n";
+   $sgf_move = ( $move > $handicap ) ? $move - $handicap : 0;
+   echo '<span class="SgfMove">', sprintf( T_('(SGF-Move %s)'), $sgf_move ), '</span>&nbsp;';
+
    // add selectbox to show specific move
-   echo "\n<SELECT name=\"gotomove\" size=\"1\"";
+   echo "<SELECT name=\"gotomove\" size=\"1\"";
    if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JSCRIPT_ENA) )
    {
-      //echo " onchange=\"javascript:alert('Index: ' + this.selectedIndex + ' Valeur: ' + this.options[this.selectedIndex].value );\"";
-      //echo " onchange=\"javascript:this.form.submit();\"";
       echo " onchange=\"javascript:this.form['movechange'].click();\"";
    }
    echo ">\n$str</SELECT>";
