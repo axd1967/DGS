@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -813,7 +813,13 @@ function draw_moves( $gid, $move, $handicap )
 
    // show SGF-move-num
    echo "\n";
-   $sgf_move = ( $move > $handicap ) ? $move - $handicap : 0;
+   if( $move <= $handicap )
+      $sgf_move = 0;
+   else {
+      $sgf_move = get_final_score_move( $move );
+      if( $handicap > 0 )
+         $sgf_move -= $handicap;
+   }
    echo '<span class="SgfMove">', sprintf( T_('(SGF-Move %s)'), $sgf_move ), '</span>&nbsp;';
 
    // add selectbox to show specific move
@@ -826,6 +832,22 @@ function draw_moves( $gid, $move, $handicap )
    echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">";
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">";
 } //draw_moves
+
+// returns true, if given move is the final score-move (predecessor = POSX_SCORE too)
+function get_final_score_move( $move )
+{
+   if( $move < 2 )
+      return $move;
+
+   global $TheBoard;
+   if( $move > $TheBoard->max_moves ) $move = $TheBoard->max_moves;
+
+   list( $temp, $PosX ) = @$TheBoard->moves[$move];
+   if( $PosX != POSX_SCORE )
+      return $move;
+   list( $temp, $PosX ) = @$TheBoard->moves[$move-1]; // predecessor-move
+   return ( $PosX == POSX_SCORE ) ? $move - 1 : $move;
+}
 
 function draw_message_box(&$message)
 {
