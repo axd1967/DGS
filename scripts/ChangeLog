@@ -25,6 +25,9 @@ ChangeLog
 
 2009-01-06 juga
 
+   * game_comments.php:
+   - fixed PHP-warning on missing mysql_free_result()
+
    * include/config.php,
      change_profile.php, edit_profile.php, game.php, include/std_functions.php,
      include/table_columns.php, include/table_infos.php, scripts/data_report.php:
