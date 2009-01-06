@@ -665,7 +665,7 @@ $ThePage = new Page('GamesList');
             if( $gtable->Is_Column_Displayed[25] )
                $grow_strings[25] = date(DATE_FMT, $X_Lastaccess);
          }
-      }
+      } //else //OB
 
       if( $gtable->Is_Column_Displayed[6] )
          $grow_strings[6] = $Size;
