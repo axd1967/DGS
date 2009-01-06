@@ -162,7 +162,7 @@ define('MAX_SEKI_MARK', 2);
 
 //-----
 //Board array
-define("NONE", 0); //i.e. DAME
+define("NONE", 0); //i.e. DAME, Moves(Stone=NONE,PosX/PosY=coord,Hours=0)
 define("BLACK", 1);
 define("WHITE", 2);
 
@@ -183,18 +183,18 @@ define("FLAG_NOCLICK", 0x10); //keep it a power of 2
 
 //Moves table: particular Stone values
 //normal moves are BLACK or WHITE, prisoners are NONE
-define("MARKED_BY_WHITE", 7);
+define("MARKED_BY_WHITE", 7); // for scoring: Moves(Stone=MARKED_BY_BLACK|WHITE, PosX/PosY=coord, Hours=0)
 define("MARKED_BY_BLACK", 8);
 
 //Moves table: particular PosX values
 //regular PosX and PosY are from 0 to size-1
 // game steps
-define('POSX_PASS', -1);
-define('POSX_SCORE', -2); //scoring step by Stone, PosY=0
-define('POSX_RESIGN', -3);
-define('POSX_TIME', -4); //timeout for Stone, PosY=0
+define('POSX_PASS', -1);   // Pass-move: Stone=BLACK|WHITE, PosY=0, Hours=passed-time
+define('POSX_SCORE', -2);  // scoring step by Stone=BLACK|WHITE, PosY=0, Hours=passed-time
+define('POSX_RESIGN', -3); // resigned by Stone=BLACK|WHITE: PosY=0, Hours=passed-time
+define('POSX_TIME', -4);   // timeout for Stone=BLACK|WHITE: PosY=0, Hours=passed-time
 // game commands
-define('POSX_ADDTIME', -50); //Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=add_hours
+define('POSX_ADDTIME', -50); // Add-Hours: Stone=BLACK|WHITE (time-adder), PosY=0|1 (1=byoyomi-reset), Hours=add_hours
 
 //Games table: particular Score values
 define('SCORE_RESIGN', 1000);
@@ -2553,7 +2553,7 @@ function nsq_addslashes( $str )
 
 function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=false, $blackname=false)
 {
- global $base_path;
+   global $base_path;
 
    $gid = (int)$gid;
    $legal = ( $gid<=0 ? 0 : 1 );
