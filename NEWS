@@ -115,6 +115,7 @@ Copyright (C) 2001-2008  Erik Ouchterlony
       * News: added table of contents
 
    * Messages:
+      * Added option to stay in folder after moving messages
       * Changed default for empty subject: ??? -> (no subject)
 
    * More use of CSS

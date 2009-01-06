@@ -25,6 +25,15 @@ ChangeLog
 
 2009-01-06 juga
 
+   * list_messages.php, NEWS:
+   - added $follow option to stay in folder after message-move
+   - changed move-elements in natural order from left to right,
+     toggle-marks to the right (near the toggles)
+
+   * include/message_functions.php (change_folders_for_marked_messages),
+     list_messages.php:
+   - secured parsing of args
+
    * game_comments.php:
    - fixed PHP-warning on missing mysql_free_result()
 
