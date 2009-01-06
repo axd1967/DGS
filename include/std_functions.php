@@ -121,7 +121,7 @@ define('MIN_RATING', -900); //30 kyu
 define('OUT_OF_RATING', 9999); //ominous rating bounds: [-OUT_OF_RATING,OUT_OF_RATING]
 
 //Allow the "by number of games" graphic (as well as "by date of games").
-define('GRAPH_RATING_BY_NUM_ENA', true);
+define('GRAPH_RATING_BY_NUM_ENABLED', true);
 define('GRAPH_RATING_MIN_INTERVAL', 2*31*24*3600);
 // see also CACHE_FOLDER in config.php
 define('CACHE_EXPIRE_GRAPH', 24*3600); //1 day
@@ -226,7 +226,7 @@ define('SMOOTH_EDGE',0x010);
 define('COORD_OVER',0x020);
 define('COORD_SGFOVER',0x040);
 define('NUMBER_OVER',0x080);
-define('JSCRIPT_ENA',0x100);
+define('JSCRIPT_ENABLED',0x100);
 //-----
 
 
@@ -435,7 +435,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       echo "\n <STYLE TYPE=\"text/css\">\n",$style_string,"\n </STYLE>";
 
    global $player_row;
-   if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JSCRIPT_ENA) )
+   if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JSCRIPT_ENABLED) )
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
 
    if( is_a($ThePage, 'HTMLPage') )
