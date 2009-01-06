@@ -173,12 +173,12 @@ else
    // Games to play?
 
    $query = "SELECT Black_ID,White_ID,Games.ID, (White_ID=$my_id)+0 AS Color, " .
-       "UNIX_TIMESTAMP(LastChanged) as date, " .
+       "UNIX_TIMESTAMP(Lastchanged) as date, " .
        "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId " .
        "FROM Games,Players AS opponent " .
        "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME .
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
-       "ORDER BY date DESC, Games.ID";
+       "ORDER BY LastChanged DESC, Games.ID";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed','quick_status.find_games');
