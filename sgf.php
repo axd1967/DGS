@@ -302,7 +302,7 @@ $array=array();
 
 
 {
-   // see the Expires header below
+   // see the Expires header below and 'no_cache'-URL-arg
    //disable_cache( $NOW, $NOW+5*60);
 
    connect2mysql();
@@ -333,9 +333,11 @@ $array=array();
    $use_HA = true;
    $use_AB_for_handicap = true;
 
+   $include_games_notes = true; // && owned_comments set
+
    //0=no highlight, 1=with Name property, 2=in comments, 3=both
-   $sgf_pass_highlight = 1;
-   $sgf_score_highlight = 1;
+   $sgf_pass_highlight = 0;
+   $sgf_score_highlight = 0;
 
    //Last dead stones property: (uppercase only)
    // ''= keep them, 'AE'= remove, 'MA'/'CR'/'TR'/'SQ'= mark them
@@ -354,6 +356,8 @@ $array=array();
    $gid = (int)$gid;
    if( $gid <= 0 )
       error('unknown_game');
+
+   $use_cache = @$_GET['no_cache'];
 
    $owned_comments = @$_GET['owned_comments'];
    if( $owned_comments )
@@ -403,6 +407,17 @@ $array=array();
    else
       $owned_comments = DAME;
 
+   // load GamesNotes for player
+   $player_notes = '';
+   if( $include_games_notes && ($owned_comments != DAME) )
+   {
+      $enum_player = ( $owned_comments == BLACK ) ? 'B' : 'W';
+      $gn_row = mysql_single_fetch( "sgf.notes($gid,$owned_comments)",
+         "SELECT Notes FROM GamesNotes WHERE gid=$gid AND player='$enum_player' LIMIT 1" );
+      if( is_array($gn_row) )
+         $player_notes = @$gn_row['Notes'];
+   }
+
    $node_com = "";
 
    $result = db_query( "sgf.moves($gid)",
@@ -419,8 +434,11 @@ $array=array();
    header( "Content-Description: PHP Generated Data" );
 
    //to allow some mime applications to find it in the cache
-   header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
-   header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
+   if( $use_cache )
+   {
+      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
+      header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
+   }
 
 
    echo "(\n;FF[$sgf_version]GM[1]" . ( $charset ? "CA[$charset]" : '' )
@@ -461,8 +479,9 @@ $array=array();
 
       //skip the ending moves where PosX <= $sgf_trim_level
       //-1= skip ending pass, -2= keep them ... -999= keep everything
-      if( abs($Score) < SCORE_RESIGN )
-         $sgf_trim_level = POSX_PASS;
+      if( abs($Score) < SCORE_RESIGN ) // real-score
+         $sgf_trim_level = POSX_SCORE; // keep PASSes for better SGF=DGS-move-numbering
+         //$sgf_trim_level = POSX_PASS;
       else if( abs($Score) == SCORE_TIME )
          $sgf_trim_level = POSX_RESIGN;
       else
@@ -546,9 +565,8 @@ $array=array();
                if( $Status != 'FINISHED' && $owned_comments != $Stone )
                   $Text = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text));
 
-                  if(  $Text )
-                     $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
-                           . ": " . $Text ;
+               if( $Text )
+                  $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname ) . ': ' . $Text;
             }
             else //SGF query from an observer
             {
@@ -565,8 +583,7 @@ $array=array();
                   if( !$Text )
                      $Text = trim($matches[7][$i]);
                   if(  $Text )
-                     $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname )
-                           . ": " . $Text ;
+                     $node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname ) . ': ' . $Text;
                }
             }
             $Text="";
@@ -723,10 +740,8 @@ $array=array();
       }
    }
 
-   if( $owned_comments == BLACK )
-     $notes = rtrim($Black_Notes);
-   elseif( $owned_comments == WHITE )
-     $notes = rtrim($White_Notes);
+   if( $owned_comments == BLACK || $owned_comments == WHITE )
+     $notes = rtrim($player_notes);
    else
      $notes = '';
 
