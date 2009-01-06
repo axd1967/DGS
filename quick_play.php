@@ -209,7 +209,7 @@ else
 /* **********************
 *** HOT_SECTION ***
 >>> See also confirm.php, quick_play.php and clock_tick.php
-Various dirty things (like duplicated moves) could append
+Various dirty things (like duplicated moves) could appear
 in case of multiple calls with the same move number. This could
 happen in case of multi-players account with simultaneous logins
 or if one player hit twice the validation button during a net lag
