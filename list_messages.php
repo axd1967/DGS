@@ -58,18 +58,25 @@ require_once( "include/filter.php" );
    - $folder: destination folder for move queries,
        effective on a *move_marked* click
        kept if != $current_folder
+
+   *follow* : true to switch into target folder after move
 */
-   $folder = @$_GET['folder'];
-   if( !isset($folder) || $folder < FOLDER_ALL_RECEIVED )
+   $folder = (int)@$_GET['folder']; // 0 if unset
+   if( $folder < FOLDER_ALL_RECEIVED )
       $folder = FOLDER_ALL_RECEIVED; //ineffective for move
+
    $current_folder = @$_GET['current_folder'];
    if( !isset($current_folder) )
    {
       $current_folder = $folder;
       $folder = FOLDER_ALL_RECEIVED; //ineffective for move
    }
+   else
+      $current_folder = (int)$current_folder;
    if( !isset($my_folders[$current_folder]) )
       $current_folder = FOLDER_ALL_RECEIVED;
+
+   $follow = (bool)@$_GET['follow']; // follow into target folder?
 
    if( isset($_GET['toggle_marks']) )
       $toggle_marks= true;
@@ -77,7 +84,8 @@ require_once( "include/filter.php" );
    {
       $toggle_marks= false;
       if( change_folders_for_marked_messages($my_id, $my_folders) > 0 )
-         if( isset($my_folders[$folder]) && $current_folder != FOLDER_DELETED )
+      {
+         if( isset($my_folders[$folder]) && $current_folder != FOLDER_DELETED && $follow )
          {
             //follow the move if one
             $current_folder= $folder;
@@ -86,6 +94,7 @@ require_once( "include/filter.php" );
             // WARNING: it should be better to follow the message but
             // we don't know its page in the new folder+sorting.
          }
+      }
    }
 
    $page = '';
@@ -180,13 +189,16 @@ require_once( "include/filter.php" );
       else if( $current_folder >= FOLDER_ALL_RECEIVED )
          $marked_form->add_hidden( 'current_folder', $current_folder);
 
-      echo $marked_form->print_insert_submit_buttonx( 'toggle_marks',
-               T_('Marks toggle'), array( 'accesskey' => ACCKEY_ACT_PREVIEW ));
+      $elem_toggle_marks =
+           $marked_form->print_insert_submit_buttonx( 'toggle_marks',
+               T_('Toggle marks'), array( 'accesskey' => ACCKEY_ACT_PREVIEW ));
 
       if( $current_folder == FOLDER_DELETED )
       {
          echo $marked_form->print_insert_submit_button( 'destroy_marked',
-                  T_('Destroy marked messages'));
+                  T_('Destroy marked messages')),
+              "&nbsp;&nbsp;",
+              $elem_toggle_marks;
       }
       else
       {
@@ -198,11 +210,21 @@ require_once( "include/filter.php" );
                $fld[$key] = $val[0];
          }
 
-         echo $marked_form->print_insert_submit_buttonx( 'move_marked',
-                  T_('Move marked messages to folder'),
-                  array('id'=>'action', 'accesskey' => ACCKEY_ACT_EXECUTE ));
-         echo $marked_form->print_insert_select_box( 'folder',
-                  '1', $fld, $folder, '');
+         // control-elements: target-folder-selectbox + follow-check, move, toggle
+         echo "\n<table class=FormClass><tr>\n",
+              '<td>',
+                T_('Target folder:'),
+              "</td>\n<td>",
+                 $marked_form->print_insert_select_box( 'folder', '1', $fld, $folder, '') .
+                 $marked_form->print_insert_submit_buttonx( 'move_marked',
+                     T_('Move marked messages'),
+                     array('id'=>'action', 'accesskey' => ACCKEY_ACT_EXECUTE )) .
+                 "<br>\n" .
+                 $marked_form->print_insert_checkbox( 'follow', '1', T_('Follow move'), $follow ),
+              "</td>\n<td>",
+                 $elem_toggle_marks,
+              "</td>\n",
+              "</tr></table>\n";
       }
    }
    echo $marked_form->print_end();
