@@ -12,9 +12,6 @@ Copyright (C) 2001-2008  Erik Ouchterlony
       * Resign game on opponents turn
       * Preview game message
       * Added access key [x]='Next Game', [v]=Preview
-      * Added "Notes" column on pages Status & My-Games list
-      * "move"-selectbox contains only subset of moves,
-        fixing possible bug on large boards
 
    * Game settings:
       * Changed default for Standard Handicap Placement: ON
@@ -78,9 +75,22 @@ Copyright (C) 2001-2008  Erik Ouchterlony
    Minor changes:
 
    * Games:
-      * Replaced "Show my observed games" -> "Show games I'm observing"
+      * Added "Notes" column on pages Status & My-Games list
       * Game info: show OnVacation in red
+      * Replaced "Show my observed games" -> "Show games I'm observing"
       * &lt;game&gt; markup: Changed char used for move-number in game reference
+
+   * SGF Download:
+      * Included private game notes
+      * Included PASS-moves
+      * Removed node-text for pass/scoring-steps (viewer-problems)
+      * Added URL-arg 'no_cache' to disable cache
+
+   * Game page:
+      * Show SGF-move-number near view-moves list
+      * "move"-selectbox (view-moves list) contains only subset of moves
+        fixing possible bug on large boards
+      * Mark handicap-setup in view-moves list
 
    * Users:
       * Faster Activity handling, added third active-level (<image star3.gif><image star3.gif><image star3.gif>)
