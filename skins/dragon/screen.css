@@ -1791,6 +1791,10 @@ table.Goban img {
 */
 }
 
+span.SgfMove {
+   font-size: 70%;
+}
+
 /* infos on action, just below the board */
 dl.ExtraInfos {
    margin: 0px;
