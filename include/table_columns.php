@@ -227,7 +227,7 @@ class Table
       $this->Use_Show_Rows = true;
       $this->Rows_Per_Page = $player_row['TableMaxRows'];
       $this->Jscript =
-         ( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JAVASCRIPT_ENABLED) );
+         ( ALLOW_JAVASCRIPT && (@$player_row['Boardcoords'] & JAVASCRIPT_ENABLED) );
 
       // filter-stuff
       $this->ext_req_params = array();

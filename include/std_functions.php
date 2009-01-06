@@ -63,8 +63,6 @@ else
    $GUESTPASS = 'guest';
 define('GUESTS_ID_MAX', 1); //minimum 1 because hard-coded in init.mysql
 
-define('ALLOW_JSCRIPT', 1);
-
 $DEBUG_SQL = false; // for debugging filter showing where-clause on page
 
 define('LAYOUT_FILTER_IN_TABLEHEAD', true); // default is to show filters within tablehead (not below rows)
@@ -435,7 +433,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       echo "\n <STYLE TYPE=\"text/css\">\n",$style_string,"\n </STYLE>";
 
    global $player_row;
-   if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JAVASCRIPT_ENABLED) )
+   if( ALLOW_JAVASCRIPT && (@$player_row['Boardcoords'] & JAVASCRIPT_ENABLED) )
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
 
    if( is_a($ThePage, 'HTMLPage') )

@@ -65,7 +65,7 @@ require_once( "include/rating.php" );
                 + ( @$_GET['coordssgfover'] ? COORD_SGFOVER : 0 )
                 + ( @$_GET['numbersover'] ? NUMBER_OVER : 0 )
                 + ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
-   if( ALLOW_JSCRIPT )
+   if( ALLOW_JAVASCRIPT )
    $boardcoords+= ( @$_GET['jsenable'] ? JAVASCRIPT_ENABLED : 0 );
 
    $movenumbers = (int)@$_GET['movenumbers'];

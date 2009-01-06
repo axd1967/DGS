@@ -125,6 +125,9 @@ define('ACCKEYP_GAME_COMMENT',   '');
 
 // Global Config for Features on DGS
 
+// Allow JavaScript for some convenience-functionality
+define('ALLOW_JAVASCRIPT', true);
+
 // Forum: 'Quote' works as 'Reply', but inits textbox with previous post in <quote>-tags
 define('ALLOW_QUOTING', false);
 

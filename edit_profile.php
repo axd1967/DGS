@@ -257,7 +257,7 @@ require_once( "include/form_functions.php" );
                                   'TEXT', sptext(T_('choosing a lower value helps the server (see also FAQ)')),
                                  ) );
 
-   if( ALLOW_JSCRIPT )
+   if( ALLOW_JAVASCRIPT )
    $profile_form->add_row( array( 'DESCRIPTION', T_('Allow JScript'),
                                   'CHECKBOX', 'jsenable', 1, '', ($boardcoords & JAVASCRIPT_ENABLED) ) );
 
