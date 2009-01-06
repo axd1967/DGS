@@ -70,6 +70,7 @@ require_once( "include/std_functions.php" );
       $row['newpos'] = $idx;
       $bios[$idx] = $row;
    }
+   mysql_free_result($result);
    $max_pos = $idx;
 
    // compute the new SortOrder
