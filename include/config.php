@@ -124,7 +124,9 @@ define('ACCKEYP_GAME_COMMENT',   '');
 
 
 // Global Config for Features on DGS
-define('ALLOW_QUOTING', 0);
+
+// Forum: 'Quote' works as 'Reply', but inits textbox with previous post in <quote>-tags
+define('ALLOW_QUOTING', false);
 
 // Forum: number of weeks ending NEW-scope (older entries are considered READ)
 define('FORUM_WEEKS_NEW_END', 12);
