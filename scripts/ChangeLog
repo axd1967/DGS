@@ -25,6 +25,11 @@ ChangeLog
 
 2009-01-06 juga
 
+   * change_profile.php, edit_profile.php, game.php, ratinggraph.php, ratingpng.php,
+     include/std_functions.php, include/table_columns.php, scripts/data_report.php:
+   - renamed consts with suffix _ENA -> _ENABLED:
+     JSCRIPT_ENA, GRAPH_RATING_BY_NUM_ENA
+
    * sgf.php (switch_move_color), NEWS:
    - use 3rd PASS-move as node for scoring for better RESUME-handling
    - switched off inclusion of node-names, added switch $include_games_notes
