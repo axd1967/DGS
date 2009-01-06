@@ -4,14 +4,6 @@ General infos
 changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
-last server update start: 2006-10-06
-2007-10-06: bug fix update
-2007-11-07: bug fix update
-2007-12-19: bug fix update
-2008-01-10: bug fix update
-2008-12-14: release 1.0.14, mostly to add blocking functions
-2009-01-04: bug fix update (by JUG)
-
 previous server update:
 Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812] on branch [DGS-stable-200712]
 
@@ -21,9 +13,8 @@ quick INFO:
 2007-12-23 rodival
    Code Cleanup, New Features
 
-2008-11-18 juga
-   Blocking and more admin features, Debugging for release 1.0.14
-   Forum, New-Game/Waiting-Room, Code Cleanup
+2009-01-01 juga
+   Forum, New-Game/Waiting-Room, Wishlist-items, Code Cleanup
 
 -----
 quick TODO:
@@ -1692,6 +1683,10 @@ copy /images/favicon.ico into the root folder
 Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 # (Release in branch DGS-stable-200712)
 
+# History:
+2008-12-14: release of DGS 1.0.14
+2009-01-04: bug fix update (by JUG) as DGS 1.0.14.b
+
 2008-12-14 juga
 
    * snapshot.php:
@@ -2102,7 +2097,7 @@ Update Release [2008-01-10] - DGS 1.0.13.b - CVS-tag [DGS-stable-200712]
 ==================================================================
 Release [2007-12-19] - DGS 1.0.13 - CVS-tag [DGS-stable-200712]
 
-History:
+# History:
 2007-10-06: first big update of DGS 1.0.13
 2007-11-07: bug fix update
 2007-12-19: bug fix update + release
