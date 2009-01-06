@@ -109,6 +109,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
       $ctable->add_row( $crow_strings );
    }
+   mysql_free_result($result);
 
    $ctable->echo_table();
 
