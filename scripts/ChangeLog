@@ -13,7 +13,7 @@ last server update start: 2006-10-06
 2009-01-04: bug fix update (by JUG)
 
 previous server update:
-Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
+Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812] on branch [DGS-stable-200712]
 
 -----
 quick INFO:
@@ -31,6 +31,20 @@ quick TODO:
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2009-01-06 juga
+
+   * quick_status.php:
+   - minor sql-change in ORDER: date -> Lastchanged
+
+   * ratinggraph.php:
+   - corrected bottom-link: Show finished games -> Show my finished games
+
+   * sgf.php:
+   - bugfix to include game-notes
+   - included PASS-moves
+   - removed node-name for PASS/SCORE-moves (strange effects with cgoban)
+   - added no_cache-URL-arg to disable caching
 
 2009-01-04 juga
 
