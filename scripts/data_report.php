@@ -381,7 +381,7 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
          }
          echo "\n</tr>";
       }
-      if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JSCRIPT_ENABLED) )
+      if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JAVASCRIPT_ENABLED) )
          echo "<tr class=Row$c ondblclick=\"toggle_class(this,'Row$c','HilRow$c')\">\n";
       else
          echo "<tr class=Row$c>\n";

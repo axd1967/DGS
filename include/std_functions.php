@@ -226,7 +226,7 @@ define('SMOOTH_EDGE',0x010);
 define('COORD_OVER',0x020);
 define('COORD_SGFOVER',0x040);
 define('NUMBER_OVER',0x080);
-define('JSCRIPT_ENABLED',0x100);
+define('JAVASCRIPT_ENABLED',0x100);
 //-----
 
 
@@ -435,7 +435,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       echo "\n <STYLE TYPE=\"text/css\">\n",$style_string,"\n </STYLE>";
 
    global $player_row;
-   if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JSCRIPT_ENABLED) )
+   if( ALLOW_JSCRIPT && (@$player_row['Boardcoords'] & JAVASCRIPT_ENABLED) )
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
 
    if( is_a($ThePage, 'HTMLPage') )
