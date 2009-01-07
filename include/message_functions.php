@@ -55,7 +55,10 @@ function init_standard_folders()
 
 
 // Prints game setting form used by message.php and waiting_room.php
-function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $gid=NULL)
+// param arr_ratings:
+//    if set, contain map with keys (rating1, rating2) ->
+//    then add probable game-settings for conventional/proper-handicap-type
+function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $gid=NULL, $map_ratings=NULL)
 {
 
    if( $formstyle != 'dispute' &&  $formstyle != 'waitingroom' )
@@ -283,11 +286,26 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $trp = T_('Proper handicap (komi adjusted by system)');
    if( $iamrated )
    {
-      $mform->add_row( array( 'DESCRIPTION', $trc,
-                              'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype ) );
+      $sugg_conv = '';
+      $sugg_prop = '';
+      if( is_array($map_ratings) )
+      {
+         $r1 = $map_ratings['rating1'];
+         $r2 = $map_ratings['rating2'];
+         $arr_conv_sugg = suggest_conventional( $r1, $r2, $Size );
+         $arr_prop_sugg = suggest_proper( $r1, $r2, $Size );
+         $sugg_conv = '<span class="Suggestion">' .
+            sptext( build_suggestion_shortinfo($arr_conv_sugg) ) . '</span>';
+         $sugg_prop = '<span class="Suggestion">' .
+            sptext( build_suggestion_shortinfo($arr_prop_sugg) ) . '</span>';
+      }
 
+      $mform->add_row( array( 'DESCRIPTION', $trc,
+                              'RADIOBUTTONS', 'handicap_type', array('conv'=>''), $Handitype,
+                              'TEXT', $sugg_conv ));
       $mform->add_row( array( 'DESCRIPTION', $trp,
-                              'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype ) );
+                              'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype,
+                              'TEXT', $sugg_prop ));
    }
    else if( $formstyle=='dispute' && $Handitype=='conv' )
    {
@@ -741,14 +759,18 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
        || $tablestyle != 'waitingroom'
        ) )
    {
-         // compute the 'Probable settings'
+         // compute the probable game settings
 
          if( $Handitype == 'proper' )
+         {
             list($infoHandicap,$infoKomi,$info_i_am_black) =
                suggest_proper($player_row['Rating2'], $other_rating, $Size);
-         else if( $Handitype == 'conv' )
+         }
+         elseif( $Handitype == 'conv' )
+         {
             list($infoHandicap,$infoKomi,$info_i_am_black) =
                suggest_conventional($player_row['Rating2'], $other_rating, $Size);
+         }
          else
          {
             $infoHandicap = $Handicap; $infoKomi = $Komi; $info_i_am_black = 0;
@@ -758,29 +780,22 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          if( $Handitype == 'double' )
          {
             $colortxt = image( '17/w.gif', T_('White'), '', $colortxt)
-                      . '&nbsp;+&nbsp;'
-                      . image( '17/b.gif', T_('Black'), '', $colortxt);
+                     . '&nbsp;+&nbsp;'
+                     . image( '17/b.gif', T_('Black'), '', $colortxt);
          }
-         else if( $Handitype == 'nigiri'
-                  || ($Handitype == 'conv'
-                        && $infoHandicap == 0 && $infoKomi == 6.5) )
+         elseif( $Handitype == 'nigiri'
+               || ($Handitype == 'conv' && $infoHandicap == 0 && $infoKomi == 6.5) )
          {
             $colortxt = image( '17/y.gif', T_('Nigiri'), T_('Nigiri'), $colortxt);
          }
-         else if( $info_i_am_black )
-         {
-            $colortxt = image( '17/b.gif', T_('Black'), '', $colortxt);
-         }
          else
          {
-            $colortxt = image( '17/w.gif', T_('White'), '', $colortxt);
+            $colortxt = get_colortext_probable( $info_i_am_black );
          }
 
-         /** TODO; remove the "probable" vocable in case of
-          *  double games or nigiri games (i.e. keep it only for
-          *  computed games).
-          **/
-         $itable->add_scaption(T_('Probable settings'));
+         $itable->add_scaption( ( $Handitype == 'proper' || $Handitype == 'conv' )
+            ? T_('Probable game settings')
+            : T_('Game settings') );
 
          $itable->add_row( array(
                   'sname' => T_('Color'),
@@ -797,6 +812,22 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    } //Probable settings
 
    $itable->echo_table();
+}
+
+function build_suggestion_shortinfo( $suggest_result )
+{
+   list( $handi, $komi, $iamblack ) = $suggest_result;
+   $info = sprintf( T_('... would probably be Color %s for you with Handicap %s, Komi %.1f'),
+      get_colortext_probable( $iamblack ), $handi, $komi );
+   return $info;
+}
+
+function get_colortext_probable( $iamblack )
+{
+   $colortxt = 'class=InTextStone';
+   return ( $iamblack )
+      ? image( '17/b.gif', T_('Black'), '', $colortxt)
+      : image( '17/w.gif', T_('White'), '', $colortxt);
 }
 
 
