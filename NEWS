@@ -10,17 +10,19 @@ Copyright (C) 2001-2008  Erik Ouchterlony
    * Games:
       * Delete game on opponents turn (within first 10 moves)
       * Resign game on opponents turn
-      * Preview game message
-      * Added access key [x]='Next Game', [v]=Preview
+      * Preview game message (access-key [v]=Preview)
+      * Added "Notes" column on pages Status & My-Games list
 
    * Game settings:
+      * Invitation: added indication of color, handicap & komi
+        for conventional & proper handicap-type
       * Changed default for Standard Handicap Placement: ON
       * Changed default for Time settings: Fischer time with 30d + 1d
 
    * User info:
       * Show a users timezone, local time and night start
 
-   * Searching capabilities
+   * Searching capabilities:
       * Added search on FAQ
 
    * Status page:
@@ -65,6 +67,8 @@ Copyright (C) 2001-2008  Erik Ouchterlony
    Code improvements:
 
    * Improvements of database queries
+      * Users: faster Activity handling
+
    * Introduction of a cache management for some pages and graphics
 
    * Optimized translations
@@ -75,7 +79,6 @@ Copyright (C) 2001-2008  Erik Ouchterlony
    Minor changes:
 
    * Games:
-      * Added "Notes" column on pages Status & My-Games list
       * Game info: show OnVacation in red
       * Replaced "Show my observed games" -> "Show games I'm observing"
       * &lt;game&gt; markup: Changed char used for move-number in game reference
@@ -92,14 +95,19 @@ Copyright (C) 2001-2008  Erik Ouchterlony
       * "move"-selectbox (view-moves list) contains only subset of moves
         fixing possible bug on large boards
       * Mark handicap-setup in view-moves list
+      * Added access key [x]='Next Game', [v]=Preview
+
+   * Messages:
+      * Added option to stay in folder after moving messages
+      * Changed default for empty subject: ??? -> (no subject)
 
    * Users:
-      * Faster Activity handling, added third active-level (<image star3.gif><image star3.gif><image star3.gif>)
+      * Added third activity-level (<image star3.gif><image star3.gif><image star3.gif>)
       * Introducing JavaScript management in profile setting
       * Initial Rating: removed converting of NNGS-rank/rating
 
    * Filters:
-      * Changed access keys for filter-search: [x]=Search, [z]=Reset
+      * Changed access keys for filter-search: [e]=Search, [z]=Reset
       * Added warning-message for stopwords-warning of mysql-match-search
         (mainly for forum-search)
       * Added tooltips for submit buttons
@@ -113,10 +121,6 @@ Copyright (C) 2001-2008  Erik Ouchterlony
       * Added site-map page into main menu
       * Added link to statistics page on docs and site-map page
       * News: added table of contents
-
-   * Messages:
-      * Added option to stay in folder after moving messages
-      * Changed default for empty subject: ??? -> (no subject)
 
    * More use of CSS
 
