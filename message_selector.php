@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
    $preview = @$_REQUEST['preview'];
 
-   if( !$send_message or $preview )
+   if( !$send_message || $preview )
       include_once( 'message.php');
    else
       include_once( 'send_message.php');
