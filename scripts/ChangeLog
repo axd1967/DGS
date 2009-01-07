@@ -23,10 +23,23 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-01-07 juga
+
+   * message.php, NEWS, skins/dragon/screen.css,
+     include/message_functions.php (game_settings_form,
+       build_probable_game_setting_shortinfo, get_colortext_probable):
+   - from wishlist for invites:
+     added color/handicap/komi-suggestion for conventional & proper type
+   - fixed text-TODO using "probable" only for conv/proper-type
+
+   * message_selector.php:
+   - fixed expression: or -> ||
+
 2009-01-06 juga
 
    * list_messages.php, NEWS:
-   - added $follow option to stay in folder after message-move
+   - from wishlist: added $follow option to stay in folder after message-move
+   - changed default to stay in current-folder
    - changed move-elements in natural order from left to right,
      toggle-marks to the right (near the toggles)
 
@@ -52,14 +65,12 @@ ChangeLog
    * sgf.php (switch_move_color), NEWS:
    - use 3rd PASS-move as node for scoring for better RESUME-handling
    - switched off inclusion of node-names, added switch $include_games_notes
-
    * game.php (draw_moves, get_final_score_move):
    - fix SGF-move-number for final score-step or exceeding max-moves
-
    * game.php, skins/dragon/screen.css, NEWS:
-   - always show some start- and end-moves in view-moves-list
-   - show SGF-move-number before view-moves-list, added CSS
+   - from wishlist: show SGF-move-number before view-moves-list, added CSS
    - mark setup-moves in view-moves-list with prefix: (H) =handicap-setup
+   - always show some start- and end-moves in view-moves-list
 
    * change_bio.php:
    - fixed PHP-warning on missing mysql_free_result()
