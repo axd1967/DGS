@@ -1270,6 +1270,10 @@ td.FormClassC span.Rubric {
 /* messages and folders features */
 /* ------------------------- */
 
+span.Suggestion {
+   font-size: 80%;
+}
+
 table.MessageInfos {
    table-layout: auto;
    border: 0px solid red;

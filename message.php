@@ -32,6 +32,8 @@ require_once( "include/form_functions.php" );
    if( !$logged_in )
       error("not_logged_in");
 
+   $show_suggestions = true;
+
 /* Actual GET calls used (to identify the ways to handle them):
    if(message.php?mode=...) //with mode
       NewMessage           : from menu
@@ -291,27 +293,27 @@ require_once( "include/form_functions.php" );
 
       case 'NewMessage':
       {
-            $message_form->add_row( array(
-                  'HEADER', T_('New message'),
-               ) );
-            $message_form->add_row( array(
-                  'DESCRIPTION', T_('To (userid)'),
-                  'TEXTINPUT', 'to', 25, 40, $default_uhandle,
-               ) );
-            $message_form->add_row( array(
-                  'DESCRIPTION', T_('Subject'),
-                  'TEXTINPUT', 'subject', 70, 80, $default_subject,
-               ) );
-            $message_form->add_row( array(
-                  'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 70, 12, $default_message,
-               ) );
-            $message_form->add_row( array(
-                  'SUBMITBUTTONX', 'send_message', T_('Send Message'),
-                              array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
-                  'SUBMITBUTTONX', 'preview', T_('Preview'),
-                              array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-               ) );
+         $message_form->add_row( array(
+               'HEADER', T_('New message'),
+            ) );
+         $message_form->add_row( array(
+               'DESCRIPTION', T_('To (userid)'),
+               'TEXTINPUT', 'to', 25, 40, $default_uhandle,
+            ) );
+         $message_form->add_row( array(
+               'DESCRIPTION', T_('Subject'),
+               'TEXTINPUT', 'subject', 70, 80, $default_subject,
+            ) );
+         $message_form->add_row( array(
+               'DESCRIPTION', T_('Message'),
+               'TEXTAREA', 'message', 70, 12, $default_message,
+            ) );
+         $message_form->add_row( array(
+               'SUBMITBUTTONX', 'send_message', T_('Send Message'),
+                           array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+               'SUBMITBUTTONX', 'preview', T_('Preview'),
+                           array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
+            ) );
       }
       break;
 
@@ -368,55 +370,72 @@ require_once( "include/form_functions.php" );
          else
             game_settings_form($message_form, 'dispute', $iamrated, $my_id, $Game_ID);
 
-            $message_form->add_row( array(
-                  'HEADER', T_('Dispute settings'),
-               ) );
-            $message_form->add_row( array(
-                  'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 70, 12, $default_message,
-               ) );
+         $message_form->add_row( array(
+               'HEADER', T_('Dispute settings'),
+            ) );
+         $message_form->add_row( array(
+               'DESCRIPTION', T_('Message'),
+               'TEXTAREA', 'message', 70, 12, $default_message,
+            ) );
 
-            $message_form->add_row( array(
-                  'HIDDEN', 'to', $other_handle,
-                  'HIDDEN', 'reply', $mid,
-                  'HIDDEN', 'subject', 'Game invitation dispute',
-                  'HIDDEN', 'type', 'INVITATION',
-                  'HIDDEN', 'disputegid', $Game_ID,
-                  'SUBMITBUTTONX', 'send_message', T_('Send Reply'),
-                              array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
-                  'SUBMITBUTTONX', 'preview', T_('Preview'),
-                              array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-               ) );
+         $message_form->add_row( array(
+               'HIDDEN', 'to', $other_handle,
+               'HIDDEN', 'reply', $mid,
+               'HIDDEN', 'subject', 'Game invitation dispute',
+               'HIDDEN', 'type', 'INVITATION',
+               'HIDDEN', 'disputegid', $Game_ID,
+               'SUBMITBUTTONX', 'send_message', T_('Send Reply'),
+                           array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+               'SUBMITBUTTONX', 'preview', T_('Preview'),
+                           array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
+            ) );
       }
       break;
 
       case 'Invite':
       {
+         // prepare to show conv/proper-handitype-suggestions
+         $map_ratings = NULL;
+         if( $show_suggestions && $iamrated && $default_uhandle != $player_row['Handle'] )
+         {
+            $other_row = mysql_single_fetch( 'message.invite_suggest',
+               'SELECT Rating2, RatingStatus FROM Players ' .
+               'WHERE Handle="' . mysql_addslashes($default_uhandle) . '"' );
+            if( $other_row )
+            {
+               $other_rating = (int)@$other_row['Rating2'];
+               if( @$other_row['RatingStatus'] && is_numeric($other_rating) && $other_rating >= MIN_RATING )
+               {// other is rated
+                  $map_ratings = array( 'rating1' => $my_rating, 'rating2' => $other_rating );
+               }
+            }
+         }
+
          if( $preview )
-            game_settings_form($message_form, 'invite', $iamrated, 'redraw', @$_POST);
+            game_settings_form($message_form, 'invite', $iamrated, 'redraw', @$_POST, $map_ratings);
          else
-            game_settings_form($message_form, 'invite', $iamrated);
+            game_settings_form($message_form, 'invite', $iamrated, null, null, $map_ratings);
 
-            $message_form->add_row( array(
-                  'HEADER', T_('Invitation message'),
-               ) );
-            $message_form->add_row( array(
-                  'DESCRIPTION', T_('To (userid)'),
-                  'TEXTINPUT', 'to', 25, 40, $default_uhandle,
-               ) );
-            $message_form->add_row( array(
-                  'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 70, 12, $default_message,
-               ) );
+         $message_form->add_row( array(
+               'HEADER', T_('Invitation message'),
+            ) );
+         $message_form->add_row( array(
+               'DESCRIPTION', T_('To (userid)'),
+               'TEXTINPUT', 'to', 25, 40, $default_uhandle,
+            ) );
+         $message_form->add_row( array(
+               'DESCRIPTION', T_('Message'),
+               'TEXTAREA', 'message', 70, 12, $default_message,
+            ) );
 
-            $message_form->add_row( array(
-                  'HIDDEN', 'subject', 'Game invitation',
-                  'HIDDEN', 'type', 'INVITATION',
-                  'SUBMITBUTTONX', 'send_message', T_('Send Invitation'),
-                              array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
-                  'SUBMITBUTTONX', 'preview', T_('Preview'),
-                              array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-               ) );
+         $message_form->add_row( array(
+               'HIDDEN', 'subject', 'Game invitation',
+               'HIDDEN', 'type', 'INVITATION',
+               'SUBMITBUTTONX', 'send_message', T_('Send Invitation'),
+                           array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+               'SUBMITBUTTONX', 'preview', T_('Preview'),
+                           array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
+            ) );
       }
       break;
    }
