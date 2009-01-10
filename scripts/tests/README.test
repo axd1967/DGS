@@ -1,0 +1,36 @@
+
+# run test
+# - use -d option to set PHP-ini 'include_path' or
+# - change "include_path" in php.ini for php-CLI (command-line, not for Apache)
+#   could be: /etc/php5/apache2/php.ini
+#   add DGS-basepath, so that phpunit find relative includes
+# - use --verbose option to print more test-"debug"
+cd <testdir>
+phpunit testclass.php
+
+# create phpunit test-skeleton from existing class
+cd <DGS-basepath>
+phpunit --skeleton BitSet include/classlib_bitset.php
+mv BitSetTest.php to scripts/test/
+# adjust to DGS-layout (3 space indent)
+
+# run test-class generated with phpunit --skeleton:
+php testclass.php
+
+# -------------------------------------------
+# run all tests of DGS-test-suite with (a), (b) or (c):
+# - also see http://www.phpunit.de/manual/3.0/en/organizing-test-suites.html
+# - assumes preceeding   'cd <DGS-basepath>/scripts/tests'
+#
+# (a): using PHP-cli
+php run_tests.php
+
+# (b): using PHPUnit
+phpunit AllTests.php
+
+# (c): using Makefile
+make
+  or
+make test
+
+
