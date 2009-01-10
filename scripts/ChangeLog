@@ -23,6 +23,21 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-01-10 juga
+
+   * include/classlib_bitset.php,
+     scripts/tests/BitSetTest.php:
+   - added class BitSet for bit-operations of arbitrary length,
+     added phpunit-test
+
+   * scripts/tests,
+     scripts/tests/README.test,
+     scripts/tests/Makefile,
+     scripts/tests/AllTests.php,
+     scripts/tests/run_tests.php:
+   - introducing unit-tests for DGS-code based on phpunit,
+     see README.test
+
 2009-01-07 juga
 
    * message.php, NEWS, skins/dragon/screen.css,
