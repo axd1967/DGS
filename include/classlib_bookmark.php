@@ -23,19 +23,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Common";
 
 // bookmark.Type
-define('BMTYPE_USERS', 1);
-define('BMTYPE_WAITINGROOM', 2);
-define('BMTYPE_MSG_SEARCH', 3);
-define('BMTYPE_CONTACTS', 4);
-define('BMTYPE_FEATURES', 5);
-define('BMTYPE_VOTES', 6);
-define('BMTYPE_FORUM_SEARCH', 7);
-define('BMTYPE_GAMES_STATUS', 8);
-define('BMTYPE_GAMES_OBSERVED', 9);
-define('BMTYPE_GAMES_RUNNING_MY', 10);
-define('BMTYPE_GAMES_RUNNING_ALL', 11);
-define('BMTYPE_GAMES_FINISHED_MY', 12);
-define('BMTYPE_GAMES_FINISHED_ALL', 13);
+define('BMTYPE_FILTER_USERS', 1);
+define('BMTYPE_FILTER_WAITINGROOM', 2);
+define('BMTYPE_FILTER_MSG_SEARCH', 3);
+define('BMTYPE_FILTER_CONTACTS', 4);
+define('BMTYPE_FILTER_FEATURES', 5);
+define('BMTYPE_FILTER_VOTES', 6);
+define('BMTYPE_FILTER_FORUM_SEARCH', 7);
+define('BMTYPE_FILTER_GAMES_STATUS', 8);
+define('BMTYPE_FILTER_GAMES_OBSERVED', 9);
+define('BMTYPE_FILTER_GAMES_RUNNING_MY', 10);
+define('BMTYPE_FILTER_GAMES_RUNNING_ALL', 11);
+define('BMTYPE_FILTER_GAMES_FINISHED_MY', 12);
+define('BMTYPE_FILTER_GAMES_FINISHED_ALL', 13);
 define('MAX_BMTYPE', 13);
 
 
