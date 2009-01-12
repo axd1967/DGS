@@ -197,7 +197,7 @@ require_once( "include/filterlib_country.php" );
 
    $arr_suitable = array();
    if( $f_handi->get_value() == 1 )
-      $arr_suitable[]= T_('Handicap');
+      $arr_suitable[]= T_('Handicap-Type');
    if( $f_range->get_value() )
       $arr_suitable[]= T_('Rating range');
    if( count($arr_suitable) > 0 )
