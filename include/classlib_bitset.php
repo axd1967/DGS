@@ -46,7 +46,7 @@ define('BITSET_MAXSIZE', (2 * BITSET_EXPORT_INTBITS));
   *    $b = BitSet::read_from_db_set(prefix,'b1,b7');
   *    $b->set_bit(1 [,false]);
   *    $b->clear_bit(1);
-  *    $b->clear(1);
+  *    $b->reset(1);
   *    $b->toggle_bit(1);
   *    $b->get_bit(1);
   *    $b->get_size();
@@ -64,7 +64,6 @@ define('BITSET_MAXSIZE', (2 * BITSET_EXPORT_INTBITS));
   */
 class BitSet
 {
-
    /*!
     * \brief int-array storing BitSet with 24-bit integers (see const BITSET_INTBITS);
     *        first int are lowest 24-bit, next int are next 24-bits, etc.
@@ -77,12 +76,21 @@ class BitSet
       $this->store = array_fill( 0, BitSet::_arrpos(BITSET_MAXSIZE) + 1, 0 );
    }
 
-   /*! \brief Clears all bits in this BitSet. */
-   function clear()
+   /*! \brief Clears (or sets) all bits in this BitSet; clear is default. */
+   function reset( $bitval=0 )
    {
-      for( $i=0; $i < count($this->store); $i++)
+      $bitval = ($bitval) ? 1 : 0;
+      if( $bitval )
       {
-         $this->store[$i] = 0;
+         $arrpos = BitSet::_arrpos(BITSET_MAXSIZE);
+         $this->store[$arrpos] = (1 << ( ((BITSET_MAXSIZE-1) % BITSET_STORE_BITS) + 1 )) - 1;
+         while( $arrpos-- > 0 )
+            $this->store[$arrpos] = (1 << BITSET_STORE_BITS) - 1;
+      }
+      else
+      {
+         for( $i=0; $i < count($this->store); $i++)
+            $this->store[$i] = 0;
       }
    }
 

@@ -67,11 +67,17 @@ class BitSetTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( $this->store_clear, $bitset->_get_store() );
    }
 
-   /** Test clear(). */
-   public function test_clear() {
+   /** Test reset(). */
+   public function test_reset() {
       $this->assertNotEquals( '0', $this->bitset->get_bin_format() );
-      $this->bitset->clear();
+
+      $this->bitset->reset();
       $this->assertEquals( '0', $this->bitset->get_bin_format() );
+      $this->assertEquals( $this->store_clear, $this->bitset->_get_store() );
+
+      $this->bitset->reset(1);
+      $this->assertEquals( str_repeat('1',BITSET_MAXSIZE), $this->bitset->get_bin_format() );
+      $this->assertEquals( $this->store_allset, $this->bitset->_get_store() );
    }
 
    /** Test set_bit(). */
