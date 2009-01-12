@@ -25,9 +25,18 @@ ChangeLog
 
 2009-01-12 juga
 
+   * include/classlib_profile.php (get_text, set_text),
+     scripts/tests/ProfileTest.php, scripts/tests/AllTests.php,
+     include/std_functions.php (build_url, split_url):
+   - fixed text-conversion for get/set_text()
+   - added phpunit-test for Profile-class
+   - build_url (added separator-arg),
+     split_url (handle '0'-value (<> unset or false))
+
    * include/classlib_profile.php:
    - added class Profile and DB-table Profiles to handle filter-search
      and form-element profiles
+   - added phpunit-test
 -----------
 CREATE TABLE Profiles (
    ID int(11) NOT NULL auto_increment,
@@ -54,8 +63,7 @@ CREATE TABLE Profiles (
 
 2009-01-10 juga
 
-   * include/classlib_bitset.php,
-     scripts/tests/BitSetTest.php:
+   * include/classlib_bitset.php, scripts/tests/BitSetTest.php:
    - added class BitSet for bit-operations of arbitrary length,
      added phpunit-test
 
