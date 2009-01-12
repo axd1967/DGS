@@ -211,7 +211,7 @@ require_once( "include/form_functions.php" );
 
 
 
-   $profile_form->add_row( array( 'HEADER', T_('Appearences') ) );
+   $profile_form->add_row( array( 'HEADER', T_('Appearence') ) );
 
    if( (@$player_row['admin_level'] & ADMIN_SKINNER) )
    $profile_form->add_row( array( 'DESCRIPTION', T_('Skin'),
