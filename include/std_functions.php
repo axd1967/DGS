@@ -1966,7 +1966,7 @@ function make_url( $url, $args, $end_sep=false)
    return $url;
 } //make_url
 
-function build_url( $args, $end_sep=false)
+function build_url( $args, $end_sep=false, $sep=URI_AMP )
 {
    if( !is_array( $args) )
       return '';
@@ -1990,7 +1990,7 @@ function build_url( $args, $end_sep=false)
       }
    }
    if( count($arr_str) )
-      return implode( URI_AMP, $arr_str) . ( $end_sep ? URI_AMP : '' );
+      return implode( $sep, $arr_str) . ( $end_sep ? $sep : '' );
    return '';
 } //build_url
 
@@ -2036,18 +2036,20 @@ function split_url($url, &$page, &$args, $sep='')
       if( !empty( $query ) )
       {
          @list( $var, $value ) = explode( '=', $query );
-         if( @$value )
+         if( (string)@$value != '' ) // can be '0' (which is <> unset/false)
          {
             $var = urldecode($var);
             if( substr($var,-2) != '[]' ) //'%5B%5D'
             {
                $args[$var] = urldecode($value);
-               continue;
             }
-            $var = substr($var,0,-2);
-            $tmp = @$args[$var];
-            $tmp[] = urldecode($value);
-            $args[$var] = $tmp;
+            else
+            {
+               $var = substr($var,0,-2);
+               $tmp = @$args[$var]; // append to array (if existing)
+               $tmp[] = urldecode($value);
+               $args[$var] = $tmp;
+            }
          }
       }
    }
