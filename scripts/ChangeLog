@@ -23,24 +23,34 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
-2009-01-11 juga
+2009-01-12 juga
 
-   * include/classlib_bookmark.php:
-   - added bookmarks to save filter-search profiles
+   * include/classlib_profile.php:
+   - added class Profile and DB-table Profiles to handle filter-search
+     and form-element profiles
 -----------
-CREATE TABLE Bookmarks (
+CREATE TABLE Profiles (
    ID int(11) NOT NULL auto_increment,
    User_ID int(11) NOT NULL default '0',
    Type smallint(5) NOT NULL default '0',
    SortOrder tinyint(3) NOT NULL default '1',
    Active enum('Y','N') NOT NULL default 'N',
    Name varchar(40) NOT NULL default '',
-   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
    Text blob NOT NULL,
    PRIMARY KEY (ID),
    UNIQUE KEY UserType (User_ID,Type)
 ) ENGINE=MyISAM ;
 -----------
+
+   * edit_profile.php:
+   - fixed typo: Appearances -> Appearance
+
+   * waiting_room.php:
+   - fixed to clearer title: Handicap -> Handicap-Type
+
+   * include/classlib_bitset.php (reset), scripts/tests/BitSetTest.php:
+   - renamed and enhanced clear() -> reset() allowing to set all bits, adjusted test
 
 2009-01-10 juga
 
