@@ -41,6 +41,8 @@ define('PROFTYPE_FILTER_GAMES_FINISHED_MY', 12);
 define('PROFTYPE_FILTER_GAMES_FINISHED_ALL', 13);
 define('MAX_PROFTYPE', 13);
 
+define('SEP_PROFVAL', '&'); // separator of fields (text stored in DB)
+
 // form-profile actions for selection + submit (selectbox values)
 define('FPROF_CURRENT_VALUES', 0);
 define('FPROF_CLEAR_VALUES', 1);
@@ -79,6 +81,7 @@ class Profile
    /*!
     * \brief Constructs Profile-object with specified arguments: lastchanged are in UNIX-time.
     *        $id may be 0 to add a new profile
+    * \param $type must be non-0
     */
    function Profile( $id=0, $user_id=0, $type=0, $sortorder=1, $active=false, $name='', $lastchanged=0, $text='' )
    {
@@ -111,7 +114,7 @@ class Profile
       if( is_null($arr) )
          $this->text = '0'; // representation of NULL
       elseif( is_array($arr) )
-         $this->text = build_url( $arr, false );
+         $this->text = build_url( $arr, false, SEP_PROFVAL );
       else
          $this->text = (string)$arr; // raw-format
    }
@@ -129,7 +132,7 @@ class Profile
             return null;
          else
          {
-            split_url( $this->text, $prefix, $arr_out );
+            split_url( '?'.$this->text, $prefix, $arr_out, SEP_PROFVAL );
             return $arr_out;
          }
       }
