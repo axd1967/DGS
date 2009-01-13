@@ -47,8 +47,7 @@ CREATE TABLE Profiles (
    Name varchar(40) NOT NULL default '',
    Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
    Text blob NOT NULL,
-   PRIMARY KEY (ID),
-   UNIQUE KEY UserType (User_ID,Type)
+   PRIMARY KEY (ID)
 ) ENGINE=MyISAM ;
 -----------
 
