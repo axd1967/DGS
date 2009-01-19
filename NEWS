@@ -114,7 +114,6 @@ Copyright (C) 2001-2008  Erik Ouchterlony
 
    * Table Lists:
       * Used clearer header for column ID
-      * Used top vertical alignment for multiline table cells
       * Changed default sort-direction for ID
 
    * Docs:
@@ -131,10 +130,10 @@ Copyright (C) 2001-2008  Erik Ouchterlony
       * Restrict the 'loadavg'-stats to admins view
       * Added 'Activity' curve in the graph (activated in the URL)
 
-   * Changed handling of some URL-arguments to reduce risc of SQL-injections
+   * Changed handling of some URL-arguments to reduce risk of SQL-injections
    * On game-page modified URI '&toggleobserve=' behaviour to avoid toggling on page refresh
      (Former value '1' -> y&n: needs FAQ-adjustment for observing own-games-trick)
-   * Games list: Modified columns; (keep entry up to release)
+   * Games list: Modified columns; (keep entry up to release)   #TODO
      needs migration of bitmasks in DB; changed table-field-numbers of
      - Games.Weekendclock: #12 -> #24
      - Players.LastAccess: #15 -> #25
