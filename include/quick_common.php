@@ -95,6 +95,9 @@ define('FOLDER_NEW', 2);
 define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * 86400); // [secs]
 
 
+//FIXME: get_magic_quotes_gpc-func is deprecated and will be removed (soon)
+// NOTE: also calling arg_stripslashes recursively can be exploited:
+//       see http://talks.php.net/show/php-best-practices/26
 if( get_magic_quotes_gpc() )
 {
    function arg_stripslashes( $arg)
