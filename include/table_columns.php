@@ -153,6 +153,9 @@ class Table
    /*! \brief cache for current_extparams_string() storing: add_sep => string */
    var $cache_curr_extparam;
 
+   /*! \brief Profile-handler */
+   var $ProfileHandler;
+
    // filter-stuff
 
    /*! \brief non-null SearchFilter-instance containing attached filters */
@@ -220,7 +223,10 @@ class Table
       $this->Row_Colors = array( $table_row_color1, $table_row_color2 );
       //}
 
-      $this->From_Row = (int)$this->get_arg('from_row');
+      // Profile-handler
+      $this->set_profile_handler( null );
+
+      $this->From_Row = (int)$this->get_arg('from_row'); // not in search-profile
       if( !is_numeric($this->From_Row) || $this->From_Row < 0 )
          $this->From_Row = 0;
       $this->Last_Page = true;
@@ -339,7 +345,7 @@ class Table
          //get the sort parameters from URL
          for( $i=TABLE_MAX_SORT; $i>0; $i--)
          {
-            if( $sd = (int)$this->get_arg("sort$i") )
+            if( $sd = (int)$this->get_saved_arg("sort$i") )
                $s = array( abs($sd) => $sd ) + $s; // put new key first in array
          }
       }
@@ -702,7 +708,7 @@ class Table
       if( !$this->Use_Show_Rows )
          return;
 
-      $rows = (int)$this->get_arg(TFORM_VAL_SHOWROWS); // nr of rows
+      $rows = (int)$this->get_saved_arg(TFORM_VAL_SHOWROWS); // nr of rows
       if( $rows > 0 )
          $this->Rows_Per_Page =
             get_maxrows( $rows, MAXROWS_PER_PAGE, MAXROWS_PER_PAGE_DEFAULT );
@@ -1281,7 +1287,7 @@ class Table
       // add filter-submits in add-column-row if not in table-head and need form for filter
       $f_string = '';
       if( $this->UseFilters && !$this->ConfigFilters[FCONF_EXTERNAL_SUBMITS] )
-         $f_string = implode( '', $this->Filters->get_submit_elements() );
+         $f_string = implode( '', $this->Filters->get_submit_elements( $ac_form ) );
 
       // add show-rows elements in add-column-row
       $r_string = $this->make_show_rows( $ac_form );
@@ -1316,19 +1322,49 @@ class Table
       return $elems;
    }
 
-   function get_arg( $name, $def='')
+   /*! \brief Returns (potentially profile-saved) arg or from _REQUEST-var with optional default-value. */
+   function get_saved_arg( $name, $def='' )
    {
-      return get_request_arg( $this->Prefix.$name, $def);
-      //return arg_stripslashes(@$_GET[ $this->Prefix.$name ]);
+      $fname = $this->Prefix . $name;
+      if( $this->ProfileHandler )
+      {
+         if( $this->ProfileHandler->need_reset || $this->ProfileHandler->need_clear )
+            $value = ''; // reset = clear
+         else
+            $value = $this->ProfileHandler->get_arg( $fname ); // get from saved profile
+      }
+      else
+         $value = NULL; // no profile-handler
+      return (is_null($value)) ? get_request_arg( $fname, $def) : $value;
    }
 
-/* Must do a reverse arg_stripslashes()
-   function set_arg( $name, $value)
+   /*! \brief Returns arg from _REQUEST-var with optional default-value. */
+   function get_arg( $name, $def='')
    {
-      //$_REQUEST[ $this->Prefix.$name ] = $value;
-      $_GET[ $this->Prefix.$name ] = $value;
+      return get_request_arg( $this->Prefix . $name, $def);
    }
-*/
+
+   /*! \brief Sets ProfileHandler managing search-profiles; use NULL to clear it. */
+   function set_profile_handler( $prof_handler )
+   {
+      $this->ProfileHandler = $prof_handler;
+
+      // register standard arg-names for Table
+      if( $this->ProfileHandler )
+      {
+         $args = array();
+         $args[] = $this->Prefix . TFORM_VAL_SHOWROWS;  // max-rows
+         for( $i=1; $i <= TABLE_MAX_SORT; $i++ )
+            $args[] = "sort$i";   // see set_default_sort-func
+
+         $this->ProfileHandler->register_argnames( $args );
+         $this->ProfileHandler->register_regex_save_args(
+            sprintf( "sort\d+|%s", $args[0] ));
+
+         // add link-vars
+         $this->add_external_parameters( $this->ProfileHandler->get_request_params() );
+      }
+   }
 
    /*!
     * \brief Attaches SearchFilter to this table.

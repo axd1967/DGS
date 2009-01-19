@@ -21,6 +21,7 @@ $TranslateGroups[] = "Common";
 
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
+require_once( "include/form_functions.php" );
 require_once( "include/filter_functions.php" );
 require_once( "include/filter_parser.php" );
 
@@ -242,6 +243,8 @@ class SearchFilter
    var $Filters;
    /*! \brief Prefix used to build vars for URL/form-names (without PFX_FILTER). */
    var $Prefix;
+   /*! \brief Profile-handler */
+   var $ProfileHandler;
 
    /*! \brief previous hash-code to check if filter-values have changed. */
    var $HashCode;
@@ -257,24 +260,66 @@ class SearchFilter
     * \brief Constructs SearchFilter with optional prefix to be able to use more than one.
     *        Sets default accesskeys.
     */
-   function SearchFilter( $prefix = '')
+   function SearchFilter( $prefix = '', $prof_handler=null )
    {
       $this->Filters  = array();
       $this->Prefix   = $prefix;
       $this->is_init  = false;
       $this->is_reset = false;
       $this->set_accesskeys( ACCKEY_ACT_FILT_SEARCH, ACCKEY_ACT_FILT_RESET );
+
+      $this->set_profile_handler( $prof_handler );
+   }
+
+   /*! \brief Sets ProfileHandler managing search-profiles; use NULL to clear it. */
+   function set_profile_handler( $prof_handler )
+   {
+      $this->ProfileHandler = $prof_handler;
+
+      // register standard arg-names for filters
+      if( $this->ProfileHandler )
+      {
+         $pfx = $this->Prefix;
+         $this->ProfileHandler->register_argnames( array(
+               // see init-method
+               $pfx.FNAME_INIT, $pfx.FNAME_ACTIVE_SET, $pfx.FNAME_HASHCODE,
+               FNAME_INIT,
+            ));
+
+         $this->ProfileHandler->register_regex_save_args(
+            sprintf( "%s(%s|%s|%s|%s)|%s",
+               $pfx, PFX_FILTER."\d+", FNAME_INIT, FNAME_ACTIVE_SET, FNAME_HASHCODE,
+               FNAME_INIT ));
+      }
+   }
+
+   /*!
+    * \brief Returns string- or array-value read from potentially saved profile or
+    *        parsed from _REQUEST-array stripped of slashes.
+    * signature: string|array get_saved_arg( string name, [bool use_prefix=1])
+    * \internal
+    * \see get_arg()
+    */
+   function get_saved_arg( $name, $use_prefix = true )
+   {
+      $fname = ( $use_prefix ) ? $this->Prefix . $name : $name;
+      // clear & reset handled in init-func
+      $value = ( $this->ProfileHandler )
+         ? $this->ProfileHandler->get_arg( $fname )
+         : NULL;
+      return (is_null($value)) ? get_request_arg($fname) : $value;
    }
 
    /*!
     * \brief Returns string- or array-value parsed from _REQUEST-array stripped of slashes.
-    * \internal
     * signature: string|array get_arg( string name, [bool use_prefix=1])
+    * \internal
+    * \see get_saved_arg()
     */
    function get_arg( $name, $use_prefix = true )
    {
       $fname = ( $use_prefix ) ? $this->Prefix . $name : $name;
-      return get_request_arg( $fname);
+      return get_request_arg($fname);
    }
 
    /*!
@@ -309,6 +354,16 @@ class SearchFilter
 
       // init filter
       $filter->set_active($active);
+
+      // register arg-names to profile-handler (regex-parts set in set_profile_handler)
+      if( $this->ProfileHandler )
+      {
+         $pfx = ($filter->get_config(FC_FNAME)) ? '' : $this->Prefix;
+         $elems = $filter->get_element_names();
+         foreach( $elems as $fname )
+            $this->ProfileHandler->register_argnames( $pfx . $fname );
+      }
+
       return $filter;
    }
 
@@ -316,15 +371,25 @@ class SearchFilter
    function init()
    {
       $arr_keys = $this->get_filter_keys(GETFILTER_ALL);
-      $is_init  = (bool)( $this->get_arg(FNAME_INIT) );
+      $is_init  = (bool)( $this->get_saved_arg(FNAME_INIT) );
       $is_reset = (bool)( $this->get_arg(FFORM_RESET_ACTION) != '' );
-      $act_set  = (int) $this->get_arg(FNAME_ACTIVE_SET);
+      $act_set  = (int) $this->get_saved_arg(FNAME_ACTIVE_SET);
+
+      // handle reset or clear induced by profile-handler
+      $need_clear = false;
+      if( $this->ProfileHandler )
+      {
+         if( $this->ProfileHandler->need_reset )
+            $is_reset = true;
+         elseif( $this->ProfileHandler->need_clear )
+            $is_init = $need_clear = true;
+      }
 
       // prefix-independent init & reset
-      $this->is_init  = (bool)( $is_init  || $this->get_arg(FNAME_INIT, false) );
-      $this->is_reset = (bool)( $is_reset || $this->get_arg(FFORM_RESET_ACTION, false) != '' );
+      $this->is_init  = (bool)( $is_init  || $this->get_saved_arg(FNAME_INIT, false) );
+      $this->is_reset = (bool)( $is_reset || ($this->get_arg(FFORM_RESET_ACTION, false) != '') );
 
-      $this->HashCode = ($this->is_init) ? $this->get_arg(FNAME_HASHCODE) : $this->hashcode();
+      $this->HashCode = ($this->is_init) ? $this->get_saved_arg(FNAME_HASHCODE) : $this->hashcode();
 
       // 1. parse active-set if initialized
       // 2. parse values from args-array into filters
@@ -353,10 +418,10 @@ class SearchFilter
                   if( $this->is_reset )
                      $qvalue = null; // reset value, independent from is_init(!)
                   else
-                     $qvalue = $this->get_arg( $fname, $use_prefix ); // string | array
+                     $qvalue = $this->get_saved_arg( $fname, $use_prefix ); // string | array
 
                   // reset to default, if no value and in init-state
-                  if( $qvalue == '' && !$this->is_init )
+                  if( $qvalue == '' && !$this->is_init && !$need_clear )
                      $qvalue = null;
 
                   if( is_array($qvalue) && !$filter->get_config(FC_MULTIPLE) )
@@ -894,42 +959,34 @@ class SearchFilter
    }
 
    /*!
-    * \brief Returns two form-elements with start-filter and reset-filter submits
+    * \brief Returns two form-elements with start-filter submit and
+    *        profile-filter form-element (reset-submit at minimum)
     *        to be used with Table or External-Form.
-    * \param $acckey_search accesskey for search-button (normal would be 'x'),
-    *        if not set use key configured for SearchFilter
-    * \param $acckey_reset accesskey for reset-button (normal would be 'e'),
-    *        if not set use key configured for SearchFilter
+    * \param $form instance of Form-class
     * \see set_accesskeys()
     */
-   function get_submit_elements( $acckey_search=null, $acckey_reset=null )
+   function get_submit_elements( $form )
    {
-      if( is_null($acckey_search) )
-         $acckey_search = $this->accesskeys[0];
-      if( is_null($acckey_reset) )
-         $acckey_reset = $this->accesskeys[1];
+      $search_elem = $form->print_insert_submit_buttonx(
+         $this->Prefix . FFORM_SEARCH_ACTION,
+         T_('Search#filter'), array( 'accesskey' => $this->accesskeys[0] ));
 
-      $xkey = trim($acckey_search);
-      if( (string)$xkey != '' ) // can be '0'
+      if( is_null($this->ProfileHandler) )
       {
-         $xkey = $xkey[0];
-         $xkey = ' accesskey='.attb_quote($xkey)
-               . ' title='.attb_quote("[&amp;$xkey]");
+         // normal reset-element
+         $reset_elem = $form->print_insert_submit_buttonx(
+            $this->Prefix . FFORM_RESET_ACTION,
+            T_('Reset search#filter'), array( 'accesskey' => $this->accesskeys[1] ));
+
+         $form_elems = array( $search_elem, $reset_elem );
       }
-      $start_search = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_SEARCH_ACTION."\" value=\"" . T_('Search#filter')
-         . "\"$xkey>";
-      $xkey = trim($acckey_reset);
-      if( (string)$xkey != '' ) // can be '0'
+      else
       {
-         $xkey = $xkey[0];
-         $xkey = ' accesskey='.attb_quote($xkey)
-               . ' title='.attb_quote("[&amp;$xkey]");
+         // use profile-handler to get according form-elements
+         $profile_elems = $this->ProfileHandler->get_form_elements( $form );
+         $form_elems = array( $profile_elems, $search_elem );
       }
-      $reset_search = "<input type=\"submit\" name=\"{$this->Prefix}"
-         . FFORM_RESET_ACTION."\" value=\"" . T_('Reset search#filter')
-         . "\"$xkey>";
-      return array( $start_search, $reset_search );
+      return $form_elems;
    }
 
    /*! \brief Wrapper for get_filter(id)->get_input_element(prefix,attr); returns '' if filter not existing. */
