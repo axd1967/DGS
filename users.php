@@ -27,6 +27,7 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
 require_once( "include/filterlib_country.php" );
+require_once( "include/classlib_profile.php" );
 
 {
    #$DEBUG_SQL = true;
@@ -45,8 +46,16 @@ require_once( "include/filterlib_country.php" );
    // observers of game
    $observe_gid = (int)get_request_arg('observe');
 
+   // init search profile
+   $profile_type = ($observe_gid) ? PROFTYPE_FILTER_OBSERVERS : PROFTYPE_FILTER_USERS;
+   $search_profile = new SearchProfile( $uid, $profile_type );
+   $ufilter = new SearchFilter( '', $search_profile );
+   $search_profile->register_regex_save_args( 'name|user|active' ); // named-filters FC_FNAME
+   $utable = new Table( 'user', $page, 'UsersColumns' );
+   $utable->set_profile_handler( $search_profile );
+   $search_profile->handle_action();
+
    // table filters
-   $ufilter = new SearchFilter();
    $ufilter->add_filter( 1, 'Numeric', 'P.ID', true);
    $ufilter->add_filter( 2, 'Text',    'P.Name', true,
          array( FC_FNAME => 'name', FC_SIZE => 12, FC_STATIC => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ));
@@ -75,10 +84,10 @@ require_once( "include/filterlib_country.php" );
          array( FC_HIDE => 1 ));
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,
          array( FC_SIZE => 4 ));
-   $ufilter->init(); // parse current value from _GET
    $f_active =& $ufilter->get_filter(13);
 
-   $utable = new Table( 'user', $page, 'UsersColumns' );
+   $ufilter->init(); // parse current value from _GET
+
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
