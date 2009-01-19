@@ -23,6 +23,36 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-01-19 juga
+
+   * include/classlib_profile.php (Profile, get_text, update_profile, delete_profile,
+       delete_all_profiles, new_from_row, load_profile; class SearchProfile),
+     include/filter.php (SearchProfile, set_profile_handler, get_arg, get_saved_arg,
+       init, get_submit_elements),
+     include/table_columns.php (Table, set_profile_handler, get_saved_arg,
+       set_default_sort, handle_show_rows),
+     users.php:
+   - users: added prototype of (default) search-profile for Filters & Table
+     to save form-entries as replacement for simple filter-reset-submit,
+     needs restructuring of object-inits: SearchProfile, SearchFilter, Table
+   - added class SearchProfile to handle single (default) search-profile
+     saving args for Filters & Table
+   - added profile-handler SearchProfile to clear/reset/load/save profiles
+   - disallowed writing of search-profile for guest-user
+   - fixed SQL on Profiles-table, added safety-checks
+
+   * include/filter.php (get_submit_elements),
+     include/table_columns.php (make_add_column_form),
+     code_examples/filter_example.php, code_examples/filter_example2.php,
+     forum/search.php, opponents.php:
+   - changed signature of filter->get_submit_elements(): added Form-object to use form-funcs
+
+   * include/quick_common.php:
+   - added notes/FIXME for arg_stripslashes/get_magic_quotes_gpc-funcs
+
+   * NEWS:
+   - undoed CSS-change, fixed typo, added TODO
+
 2009-01-12 juga
 
    * include/classlib_profile.php (get_text, set_text),
@@ -47,7 +77,8 @@ CREATE TABLE Profiles (
    Name varchar(40) NOT NULL default '',
    Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
    Text blob NOT NULL,
-   PRIMARY KEY (ID)
+   PRIMARY KEY (ID),
+   KEY UserType (User_ID,Type)
 ) ENGINE=MyISAM ;
 -----------
 
