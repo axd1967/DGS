@@ -114,7 +114,7 @@ if( $fdemo == 1 )
    $form->add_row( array(
          'TAB',
          'CELL',        1, 'align=left',
-         'OWNHTML',     implode( '', $filter->get_submit_elements() ) ));
+         'OWNHTML',     implode( '', $filter->get_submit_elements( $form ) ) ));
 
    $maxrows = get_request_arg( 'maxrows' );
    $form->add_row( array(
@@ -184,7 +184,7 @@ if( $fdemo == 2 )
    $form->add_row( array(
          'TAB',
          'CELL',        1, 'align=left',
-         'OWNHTML',     implode( '', $filter->get_submit_elements() ) ));
+         'OWNHTML',     implode( '', $filter->get_submit_elements( $form ) ) ));
 
    // build SQL-query (for user-table)
    $q2 = $qsql->duplicate();

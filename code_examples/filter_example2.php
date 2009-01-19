@@ -844,7 +844,7 @@ foreach( $arr_layout as $fid => $felem )
 $form->add_row( array(
       'TAB',
       'CELL',    2, 'align=left',
-      'OWNHTML', implode( '', $filter->get_submit_elements() ) ));
+      'OWNHTML', implode( '', $filter->get_submit_elements( $form ) ) ));
 
 # build (integrate filters) and print query
 $query->merge( $filter->get_query() );

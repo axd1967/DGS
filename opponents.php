@@ -207,7 +207,7 @@ $ARR_DBFIELDKEYS = array(
       $usform->add_row( array(
             'TAB',
             'CELL',     1, 'align=left',
-            'OWNHTML',  implode( '', $ufilter->get_submit_elements() ), ));
+            'OWNHTML',  implode( '', $ufilter->get_submit_elements( $usform ) ), ));
    }
 
 
