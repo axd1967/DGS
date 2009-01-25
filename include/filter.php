@@ -286,9 +286,10 @@ class SearchFilter
                FNAME_INIT,
             ));
 
+         // NOTE: \d+\w* capture most of the additional-element-names, e.g. for Score/RelativeDate/CheckboxArray/MysqlMatch-Filter
          $this->ProfileHandler->register_regex_save_args(
             sprintf( "%s(%s|%s|%s|%s)|%s",
-               $pfx, PFX_FILTER."\d+", FNAME_INIT, FNAME_ACTIVE_SET, FNAME_HASHCODE,
+               $pfx, PFX_FILTER."\d+\w*", FNAME_INIT, FNAME_ACTIVE_SET, FNAME_HASHCODE,
                FNAME_INIT ));
       }
    }
