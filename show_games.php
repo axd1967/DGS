@@ -23,6 +23,8 @@ require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/rating.php" );
+require_once( "include/filter.php" );
+require_once( "include/classlib_profile.php" );
 $ThePage = new Page('GamesList');
 
 {
@@ -65,13 +67,14 @@ $ThePage = new Page('GamesList');
                error('no_uid');
 
             $user_row = mysql_single_fetch('show_games.find_player',
-                  "SELECT ID, Name, Handle FROM Players WHERE $where" )
+                  "SELECT ID, Name, Handle, Rating2 FROM Players WHERE $where" )
                or error('unknown_user', 'show_games.find_player');
 
             $uid = $user_row['ID'];
          }
       }
    }
+   $is_mine = ($my_id == $uid); // my games-list
    $running = !$observe && !$finished;
 
    $page = 'show_games.php?';
@@ -80,28 +83,48 @@ $ThePage = new Page('GamesList');
       $tableid = 'observed';
       $column_set_name = "ObservedGamesColumns";
       $fprefix = 'o';
+      $profile_type = PROFTYPE_FILTER_GAMES_OBSERVED;
    }
    else if( $finished )
    {
       $tableid = 'finished';
       $column_set_name = "FinishedGamesColumns";
       $fprefix = 'f';
+      if( $all )
+         $profile_type = PROFTYPE_FILTER_GAMES_FINISHED_ALL;
+      elseif( $is_mine )
+         $profile_type = PROFTYPE_FILTER_GAMES_FINISHED_MY;
+      else
+         $profile_type = PROFTYPE_FILTER_GAMES_FINISHED_OTHER;
    }
    else if( $running )
    {
       $tableid = 'running';
       $column_set_name = "RunningGamesColumns";
       $fprefix = 'r';
+      if( $all )
+         $profile_type = PROFTYPE_FILTER_GAMES_RUNNING_ALL;
+      elseif( $is_mine )
+         $profile_type = PROFTYPE_FILTER_GAMES_RUNNING_MY;
+      else
+         $profile_type = PROFTYPE_FILTER_GAMES_RUNNING_OTHER;
    }
    $show_notes= (LIST_GAMENOTE_LEN>0
-         && !$observe && !$all && $uid==$my_id); //FU+RU subset
+         && !$observe && !$all && $is_mine); //FU+RU subset
 
    $restrict_games = '';
    if( RESTRICT_SHOW_GAMES_ALL && $all )
       $restrict_games = ($finished) ? min(30, 5*RESTRICT_SHOW_GAMES_ALL) : RESTRICT_SHOW_GAMES_ALL;
 
+   // init search profile
+   $search_profile = new SearchProfile( $my_id, $profile_type );
+   $gfilter = new SearchFilter( $fprefix, $search_profile );
+   $search_profile->register_regex_save_args( 'rated|won' ); // named-filters FC_FNAME
+   $gtable = new Table( $tableid, $page, $column_set_name );
+   $gtable->set_profile_handler( $search_profile );
+   $search_profile->handle_action();
+
    // table filters
-   $gfilter = new SearchFilter( $fprefix );
    //Filter & add_filter(int id, string type, string dbfield, [bool active=false], [array config])
    $gfilter->add_filter( 1, 'Numeric', 'Games.ID', true, array( FC_SIZE => 8 ) );
    $gfilter->add_filter( 6, 'Numeric', 'Size', true,
@@ -181,7 +204,7 @@ $ThePage = new Page('GamesList');
    }
    $gfilter->init(); // parse current value from _GET
 
-   $gtable = new Table( $tableid, $page, $column_set_name );
+   // init table
    $gtable->register_filter( $gfilter );
    $gtable->add_or_del_column();
 
@@ -521,7 +544,11 @@ $ThePage = new Page('GamesList');
    {
       $games_for = ( $finished ? T_('Finished games for %s') : T_('Running games for %s') );
       $title1 = sprintf( $games_for, make_html_safe($user_row["Name"]) );
-      $title2 = sprintf( $games_for, user_reference( REF_LINK, 1, '', $user_row) );
+
+      $games_for = ( $finished ? T_('Finished games for %1$s: %2$s') : T_('Running games for %1$s: %2$s') );
+      $title2 = sprintf( $games_for,
+         user_reference( REF_LINK, 1, '', $user_row),
+         echo_rating( @$user_row['Rating2'], true, $uid ));
    }
 
 
@@ -532,11 +559,13 @@ $ThePage = new Page('GamesList');
    echo "<h3 class=Header>$title2</h3>\n";
 
    if( $restrict_games != '' && !$gfilter->is_init() )
+   {
       echo sprintf(
             T_('NOTE: The full games list is per default restricted to show only recent games within %s day(s). '
                . 'This can be changed in the filter for [%s].'),
                $restrict_games, $restrict_gametext ),
          "<br><br>\n";
+   }
 
    // hover-texts for colors-column
    // (don't add 'w' and 'b', or else need to show in status.php too)
