@@ -27,6 +27,7 @@ require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
 require_once( "include/filterlib_country.php" );
+require_once( "include/classlib_profile.php" );
 
 
 $ARR_DBFIELDKEYS = array(
@@ -62,8 +63,10 @@ $ARR_DBFIELDKEYS = array(
    if( $uid <= 0 )
       error('invalid_user', "opponents.bad_user($uid)");
    if( $opp < 0 || $opp == $uid )
+   {
       $opp = 0;
       //error('invalid_opponent', "opponents.bad_opponent($opp)");
+   }
 
 
    // who are player (uid) and opponent (opp) ?
@@ -87,8 +90,20 @@ $ARR_DBFIELDKEYS = array(
 
    $page = "opponents.php?";
 
+   // init search profile
+   if( $uid == $my_id )
+      $profile_type = PROFTYPE_FILTER_OPPONENTS_MY;
+   else
+      $profile_type = PROFTYPE_FILTER_OPPONENTS_OTHER;
+   $search_profile = new SearchProfile( $my_id, $profile_type );
+   $usfilter = new SearchFilter( 's', $search_profile );
+   $ufilter = new SearchFilter( '', $search_profile );
+   $search_profile->register_regex_save_args( 'active' ); // named-filters FC_FNAME
+   $utable = new Table( 'user', $page, 'UsersColumns' );
+   $utable->set_profile_handler( $search_profile );
+   $search_profile->handle_action();
+
    // static filters
-   $usfilter = new SearchFilter('s');
    $usfilter->add_filter( 1, 'Numeric',      'G.Size', true );
    $usfilter->add_filter( 2, 'RatedSelect',  'G.Rated', true );
    $usfilter->add_filter( 3, 'Date',         'G.Lastchanged', true );
@@ -102,7 +117,6 @@ $ARR_DBFIELDKEYS = array(
    $f_status =& $usfilter->get_filter(4);
 
    // table filters: use same table-IDs as in users.php(!)
-   $ufilter = new SearchFilter();
    $ufilter->add_filter( 1, 'Numeric', 'P.ID', true);
    $ufilter->add_filter( 2, 'Text',    'P.Name', true,
          array( FC_SIZE => 12 ));
@@ -132,7 +146,7 @@ $ARR_DBFIELDKEYS = array(
          array( FC_SIZE => 4 ));
    $ufilter->init(); // parse current value from _GET
 
-   $utable = new Table( 'user', $page, 'UsersColumns' );
+   // init table
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
@@ -322,17 +336,20 @@ $ARR_DBFIELDKEYS = array(
 
 
    $stats_for = T_('Game statistics for player %s');
-   $opp_for   = T_('Opponents of player %s');
+   $opp_for   = T_('Opponents of player %1$s: %2$s');
    $title1 = sprintf( $stats_for, make_html_safe( $players[$uid]['Name']) );
    $tmp = user_reference( REF_LINK, 1, '', $players[$uid]);
    $title2 = sprintf( $stats_for, $tmp );
-   $title3 = sprintf( $opp_for,   $tmp );
+   $title3 = sprintf( $opp_for,   $tmp, echo_rating( @$players[$uid]['Rating2'], true, $uid ) );
 
    start_page( $title1, true, $logged_in, $player_row,
                $utable->button_style($player_row['Button']) );
-   if( $DEBUG_SQL && isset($query_black) ) echo "QUERY-BLACK: " . make_html_safe($query_black) . "<br>\n";
-   if( $DEBUG_SQL && isset($query_white) ) echo "QUERY-WHITE: " . make_html_safe($query_white) . "<br>\n";
-   if( $DEBUG_SQL && !$opp) echo "QUERY: " . make_html_safe($query) . "<br>\n";
+   if( $DEBUG_SQL )
+   {
+      if( isset($query_black) ) echo "QUERY-BLACK: " . make_html_safe($query_black) . "<br>\n";
+      if( isset($query_white) ) echo "QUERY-WHITE: " . make_html_safe($query_white) . "<br>\n";
+      if( !$opp) echo "QUERY: " . make_html_safe($query) . "<br>\n";
+   }
 
    // static filter-values
    $arrtmp = array();
