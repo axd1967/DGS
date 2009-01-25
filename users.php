@@ -88,6 +88,7 @@ require_once( "include/classlib_profile.php" );
 
    $ufilter->init(); // parse current value from _GET
 
+   // init table
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
