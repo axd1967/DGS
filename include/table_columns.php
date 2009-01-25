@@ -148,8 +148,6 @@ class Table
     * \see RequestParameters
     */
    var $ext_req_params;
-   /*! \brief if false, don't use for get_hiddens-func */
-   var $ext_req_params_use_hidden;
    /*! \brief cache for current_extparams_string() storing: add_sep => string */
    var $cache_curr_extparam;
 
@@ -237,7 +235,6 @@ class Table
 
       // filter-stuff
       $this->ext_req_params = array();
-      $this->ext_req_params_use_hidden = false;
       $this->cache_curr_extparam = array();
 
       $this->Filters = new SearchFilter();
@@ -855,12 +852,9 @@ class Table
       if( $this->UseFilters )
          $this->Filters->get_filter_hiddens( $hiddens, GETFILTER_NONE );
 
-      // include hiddens from external RequestParameters
-      if( $this->ext_req_params_use_hidden )
-      {
-         foreach( $this->ext_req_params as $rp )
-            $rp->get_hiddens( $hiddens );
-      }
+      // include hiddens from external RequestParameters (only on set use_hidden)
+      foreach( $this->ext_req_params as $rp )
+         $rp->get_hiddens( $hiddens );
    }
 
    /*!
@@ -1355,14 +1349,14 @@ class Table
          $args = array();
          $args[] = $this->Prefix . TFORM_VAL_SHOWROWS;  // max-rows
          for( $i=1; $i <= TABLE_MAX_SORT; $i++ )
-            $args[] = "sort$i";   // see set_default_sort-func
+            $args[] = $this->Prefix . "sort$i";   // see set_default_sort-func
 
          $this->ProfileHandler->register_argnames( $args );
          $this->ProfileHandler->register_regex_save_args(
-            sprintf( "sort\d+|%s", $args[0] ));
+            sprintf( "%ssort\d+|%s", $this->Prefix, $args[0] ));
 
          // add link-vars
-         $this->add_external_parameters( $this->ProfileHandler->get_request_params() );
+         $this->add_external_parameters( $this->ProfileHandler->get_request_params(), false );
       }
    }
 
@@ -1397,20 +1391,23 @@ class Table
 
    /*!
     * \brief Adds external-parameters included into URL
-    *        (expecting to have 2 interface-methods 'get_hiddens' and 'get_url_parts').
+    *        (expecting to have 3 interface-methods 'get_hiddens', 'get_url_parts' and 'use_hidden').
     * \param rp \see RequestParameters
     * \param use_hidden true, if parameters should be included into table-hiddens; default is false
+    *        state is stored in $rp-structure
     */
    function add_external_parameters( $rp, $use_hidden = false )
    {
       if( is_object($rp) && method_exists($rp, 'get_hiddens') && method_exists($rp, 'get_url_parts') )
+      {
+         $rp->use_hidden( $use_hidden );
          $this->ext_req_params[]= $rp;
+      }
       else
       {
          // expecting object-argument with interfaces get_hiddens() and get_url_parts()
          error('internal_error', 'Table.add_external_parameters.bad_object');
       }
-      $this->ext_req_params_use_hidden = $use_hidden;
       $this->cache_curr_extparam = array();
    }
 

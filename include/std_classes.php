@@ -133,6 +133,7 @@ class WhereClause
   * This class provides two interface-methods:
   *    \see get_hiddens()
   *    \see get_url_parts()
+  *    \see use_hidden()
   *
   * see also SearchFilters->get_req_params(..)
   */
@@ -140,12 +141,14 @@ class RequestParameters
 {
    /*! \brief array holding pairs of data: ( key => val ), val can be an array too representing multi-values. */
    var $values;
+   /*! \brief false, if hidden-vars should not be exported (default: true). */
+   var $use_hidden;
 
    /*!
     * \brief Constructs RequestParameters( [array( key => val)] )
-    * \param #arr_src Copies values from optional passed source-arry.
+    * \param $arr_src Copies values from optional passed source-arry.
     */
-   function RequestParameters( $arr_src = null )
+   function RequestParameters( $arr_src = null, $use_hidden=true )
    {
       $this->values = array();
       if( is_array($arr_src) )
@@ -153,6 +156,13 @@ class RequestParameters
          foreach( $arr_src as $key => $val )
             $this->values[$key] = $val;
       }
+      $this->use_hidden = $use_hidden;
+   }
+
+   /*! \brief Sets var to determine if hiddens should be exported or not (default: true). */
+   function use_hidden( $use_hidden=true )
+   {
+      $this->use_hidden = (bool)$use_hidden;
    }
 
    /*!
@@ -173,6 +183,9 @@ class RequestParameters
     */
    function get_hiddens( &$hiddens )
    {
+      if( !$this->use_hidden)
+         return ''; // don't export hiddens
+
       if( is_array($hiddens) )
          $hiddens = array_merge( $hiddens, $this->values);
       else
