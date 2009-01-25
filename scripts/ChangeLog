@@ -23,18 +23,45 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-01-25 juga
+
+   * include/classlib_profile.php (SearchProfile.handle_action),
+     include/filter.php (set_profile_handler),
+     include/std_classes.php (RequestParameters.use_hidden, ~.RequestParameters,
+       ~.get_hiddens),
+     include/table_columns.php (Table.add_external_parameters, ~.Table,
+       ~.get_hiddens, ~.set_profile_handler),
+     features/vote/list_features.php, features/vote/list_votes.php,
+     list_contacts.php, opponents.php, search_messages.php, show_games.php,
+     waiting_room.php, NEWS:
+   - bugfixes for search-profiles:
+     - reload profile after handling delete-profile
+     - correct regex_save_args for search-profile including all
+       additional-element-names for Score/RelativeDate/CheckboxArray/MysqlMatch-Filter
+     - handling of hiddens of search-profiles replacing Table-global use_hidden-var
+       by moving it into RequestParameters for multiple occurences
+     - use prefix for sort-args
+   - added search-profile for all pages with table-filters except forum-search and status-page:
+     - users, opponents, waiting room, search messages, contacts, features, votes
+     - observers of a game (users.php), observed games
+     - different search-profile ones for all/my/other finished and running games
+
+   * opponents.php, show_games.php:
+   - show player-rating in title
+
 2009-01-19 juga
 
-   * include/classlib_profile.php (Profile, get_text, update_profile, delete_profile,
-       delete_all_profiles, new_from_row, load_profile; class SearchProfile),
-     include/filter.php (SearchProfile, set_profile_handler, get_arg, get_saved_arg,
-       init, get_submit_elements),
-     include/table_columns.php (Table, set_profile_handler, get_saved_arg,
-       set_default_sort, handle_show_rows),
-     users.php:
-   - users: added prototype of (default) search-profile for Filters & Table
+   * users.php:
+   - added prototype of (default) search-profile for Filters & Table
      to save form-entries as replacement for simple filter-reset-submit,
      needs restructuring of object-inits: SearchProfile, SearchFilter, Table
+
+   * include/classlib_profile.php (Profile.get_text, ~.update_profile, ~.delete_profile,
+       ~.delete_all_profiles, ~.new_from_row, ~.load_profile; class SearchProfile),
+     include/filter.php (SearchProfile.set_profile_handler, ~.get_arg, ~.get_saved_arg,
+       ~.init, ~.get_submit_elements),
+     include/table_columns.php (Table.set_profile_handler, ~.get_saved_arg,
+       ~.set_default_sort, ~.handle_show_rows):
    - added class SearchProfile to handle single (default) search-profile
      saving args for Filters & Table
    - added profile-handler SearchProfile to clear/reset/load/save profiles
@@ -49,9 +76,6 @@ ChangeLog
 
    * include/quick_common.php:
    - added notes/FIXME for arg_stripslashes/get_magic_quotes_gpc-funcs
-
-   * NEWS:
-   - undoed CSS-change, fixed typo, added TODO
 
 2009-01-12 juga
 
