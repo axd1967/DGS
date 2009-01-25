@@ -26,21 +26,27 @@ require_once( "include/std_functions.php" );
 
 
 // profile.Type
+// NOTE: once released, id MUST NOT be changed (db-key)
 define('PROFTYPE_FILTER_USERS', 1);
 define('PROFTYPE_FILTER_WAITINGROOM', 2);
 define('PROFTYPE_FILTER_MSG_SEARCH', 3);
 define('PROFTYPE_FILTER_CONTACTS', 4);
-define('PROFTYPE_FILTER_FORUM_SEARCH', 5);
-define('PROFTYPE_FILTER_GAMES_STATUS', 6);
+define('PROFTYPE_FILTER_FORUM_SEARCH', 5); // unused
+define('PROFTYPE_FILTER_GAMES_STATUS', 6); // unused (not configurable)
 define('PROFTYPE_FILTER_GAMES_OBSERVED', 7);
-define('PROFTYPE_FILTER_GAMES_RUNNING_MY', 8);
-define('PROFTYPE_FILTER_GAMES_RUNNING_ALL', 9);
-define('PROFTYPE_FILTER_GAMES_FINISHED_MY', 10);
+define('PROFTYPE_FILTER_GAMES_RUNNING_ALL', 8);
+define('PROFTYPE_FILTER_GAMES_RUNNING_MY', 9);
+define('PROFTYPE_FILTER_GAMES_RUNNING_OTHER', 10);
 define('PROFTYPE_FILTER_GAMES_FINISHED_ALL', 11);
-define('PROFTYPE_FILTER_OBSERVERS', 12);
-define('PROFTYPE_FILTER_FEATURES', 13);
-define('PROFTYPE_FILTER_VOTES', 14);
-define('MAX_PROFTYPE', 14);
+define('PROFTYPE_FILTER_GAMES_FINISHED_MY', 12);
+define('PROFTYPE_FILTER_GAMES_FINISHED_OTHER', 13);
+define('PROFTYPE_FILTER_OBSERVERS', 14);
+define('PROFTYPE_FILTER_OPPONENTS_MY', 15);
+define('PROFTYPE_FILTER_OPPONENTS_OTHER', 16);
+define('PROFTYPE_FILTER_FEATURES', 17);
+define('PROFTYPE_FILTER_VOTES', 18);
+// adjust if adding one
+define('MAX_PROFTYPE', 18);
 
 define('SEP_PROFVAL', '&'); // separator of fields (text stored in DB)
 
@@ -474,6 +480,7 @@ class SearchProfile
 
          case SPROF_DEL_PROFILE:    // delete profile(s) for user
             $this->profile->delete_all_profiles( $this->user_id, $this->profile_type );
+            $this->load_profile();
             break;
 
          case SPROF_LOAD_PROFILE:   // load profile
