@@ -23,6 +23,7 @@ chdir("../../");
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
+require_once( "include/classlib_profile.php" );
 require_once( "features/vote/lib_votes.php" );
 
 
@@ -39,8 +40,15 @@ require_once( "features/vote/lib_votes.php" );
 
    $page = 'list_votes.php?';
 
+   // init search profile
+   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_VOTES );
+   $vfilter = new SearchFilter( '', $search_profile );
+   //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
+   $vtable = new Table( 'votes', $page );
+   $vtable->set_profile_handler( $search_profile );
+   $search_profile->handle_action();
+
    // table filters
-   $vfilter = new SearchFilter();
    $vfilter->add_filter( 1, 'Numeric',   'FL.ID', true );
    $vfilter->add_filter( 2, 'Selection',     # filter on status
             array( T_('Todo#filtervote')  => "FL.Status IN ('".FEATSTAT_ACK."','".FEATSTAT_WORK."')", // default
@@ -52,7 +60,7 @@ require_once( "features/vote/lib_votes.php" );
       array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ) );
    $vfilter->init(); // parse current value from _GET
 
-   $vtable = new Table( 'votes', $page );
+   // init table
    $vtable->register_filter( $vfilter );
    $vtable->add_or_del_column();
 

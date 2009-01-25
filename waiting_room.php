@@ -29,6 +29,7 @@ require_once( "include/message_functions.php" );
 require_once( "include/contacts.php" );
 require_once( "include/filter.php" );
 require_once( "include/filterlib_country.php" );
+require_once( "include/classlib_profile.php" );
 
 {
    #$DEBUG_SQL = true;
@@ -64,8 +65,15 @@ require_once( "include/filterlib_country.php" );
    if( $idinfo )
       $page.= 'info='.$idinfo . URI_AMP;
 
+   // init search profile
+   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_WAITINGROOM );
+   $wrfilter = new SearchFilter( '', $search_profile );
+   $search_profile->register_regex_save_args( 'handi|good' ); // named-filters FC_FNAME
+   $wrtable = new Table( 'waitingroom', $page, "WaitingroomColumns" );
+   $wrtable->set_profile_handler( $search_profile );
+   $search_profile->handle_action();
+
    // table filters
-   $wrfilter = new SearchFilter();
    $wrfilter->add_filter( 1, 'Text',      'Players.Name', true);
    $wrfilter->add_filter( 2, 'Text',      'Players.Handle', true);
    $wrfilter->add_filter( 3, 'Rating',    'Players.Rating2', true);
@@ -94,7 +102,7 @@ require_once( "include/filterlib_country.php" );
    $f_range =& $wrfilter->get_filter(8);
 
 
-   $wrtable = new Table( 'waitingroom', $page, "WaitingroomColumns" );
+   // init table
    $wrtable->register_filter( $wrfilter );
    $wrtable->add_or_del_column();
 

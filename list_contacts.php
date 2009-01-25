@@ -28,6 +28,7 @@ require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
 require_once( "include/filterlib_country.php" );
 require_once( "include/contacts.php" );
+require_once( "include/classlib_profile.php" );
 
 {
    #$DEBUG_SQL = true;
@@ -62,8 +63,16 @@ require_once( "include/contacts.php" );
       $arr_chk_userflags[$td_flagtext] = $userflag;
    }
 
+   // init search profile
+   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_CONTACTS );
+   $scfilter = new SearchFilter( 's', $search_profile );
+   $cfilter = new SearchFilter( '', $search_profile );
+   //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
+   $ctable = new Table( 'contact', $page, 'ContactColumns', 'contact' );
+   $ctable->set_profile_handler( $search_profile );
+   $search_profile->handle_action();
+
    // static filters on flags
-   $scfilter = new SearchFilter('s');
    $scfilter->add_filter( 1, 'CheckboxArray', 'SystemFlags', true,
          array( FC_SIZE => 1, FC_BITMASK => 1, FC_MULTIPLE => $arr_chk_sysflags ) );
    $scfilter->add_filter( 2, 'CheckboxArray', 'UserFlags', true,
@@ -71,7 +80,6 @@ require_once( "include/contacts.php" );
    $scfilter->init(); // parse current value from _GET
 
    // table filters
-   $cfilter = new SearchFilter();
    $cfilter->add_filter( 1, 'Text', 'P.Name', true,
          array( FC_SIZE => 12 ));
    $cfilter->add_filter( 2, 'Text', 'P.Handle', true);
@@ -91,7 +99,7 @@ require_once( "include/contacts.php" );
    $cfilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_note->get_rx_terms() );
 
-   $ctable = new Table( 'contact', $page, 'ContactColumns', 'contact' );
+   // init table
    $ctable->register_filter( $cfilter );
    $ctable->add_or_del_column();
 

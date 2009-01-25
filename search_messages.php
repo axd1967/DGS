@@ -26,6 +26,7 @@ require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/filter.php" );
 require_once( "include/filterlib_mysqlmatch.php" );
+require_once( "include/classlib_profile.php" );
 
 {
    #$DEBUG_SQL = true;
@@ -66,8 +67,16 @@ require_once( "include/filterlib_mysqlmatch.php" );
          otherP:  other_name, other_handle, other_ID
     */
 
+   // init search profile
+   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_MSG_SEARCH );
+   $smfilter = new SearchFilter( 's', $search_profile );
+   $mfilter = new SearchFilter( '', $search_profile );
+   //#$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
+   $mtable = new Table( 'message', $page, '', 'msgSearch', TABLE_NO_HIDE);
+   $mtable->set_profile_handler( $search_profile );
+   $search_profile->handle_action();
+
    // static filters
-   $smfilter = new SearchFilter('s');
    $smfilter->add_filter( 1, 'CheckboxArray', 'me.Folder_nr', true,
          array( FC_SIZE => FOLDER_COLS_MODULO, FC_MULTIPLE => $arr_chkfolders ) );
    $smfilter->add_filter( 2, 'Boolean',       'M.ReplyTo=0', true,
@@ -86,7 +95,6 @@ require_once( "include/filterlib_mysqlmatch.php" );
    $smfilter->init(); // parse current value from _GET
 
    // table-filters
-   $mfilter = new SearchFilter();
    $mfilter->add_filter( 2, 'Text', // can't search for myself with this filter, because otherP maybe null and therefore removing rows from SQL-result(!)
          'other_Handle',
          // TODO: could use filter on both, but would need dynamic UNION to avoid 'OR':
@@ -111,7 +119,7 @@ require_once( "include/filterlib_mysqlmatch.php" );
    $mfilter->init(); // parse current value from _GET
    $sf3 =& $mfilter->get_filter(3);
 
-   $mtable = new Table( 'message', $page, '', 'msgSearch', TABLE_NO_HIDE);
+   // init table
    $mtable->register_filter( $mfilter );
    $mtable->add_or_del_column();
 
