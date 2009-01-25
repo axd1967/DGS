@@ -46,6 +46,9 @@ ChangeLog
      - observers of a game (users.php), observed games
      - different search-profile ones for all/my/other finished and running games
 
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - synchronized: added Profiles-table
+
    * opponents.php, show_games.php:
    - show player-rating in title
 
