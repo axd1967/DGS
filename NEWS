@@ -24,6 +24,10 @@ Copyright (C) 2001-2008  Erik Ouchterlony
 
    * Searching capabilities:
       * Added search on FAQ
+      * Added customizable search-profile for most pages with table-filters:
+         * users, opponents, waiting room, search messages, contacts, features, votes
+         * observers of a game, observed games
+         * all/my/other finished and running games
 
    * Status page:
       * Reduced user info on status page, but show vacation if on vacation
