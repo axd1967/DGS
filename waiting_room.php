@@ -112,7 +112,7 @@ require_once( "include/classlib_profile.php" );
    $wrtable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'other_handle+');
    $wrtable->add_tablehead(15, T_('Country#header'), 'Image', 0, 'other_country+');
    $wrtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'other_rating-');
-   $wrtable->add_tablehead( 4, T_('Comment#header'));
+   $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
    /**
     * keep the Type#headerwr and Handicap#headerwr to allow the
@@ -120,7 +120,9 @@ require_once( "include/classlib_profile.php" );
     **/
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', TABLE_NO_HIDE, 'Handicaptype+');
    $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
-   /** TODO: the handicap stones info could be merged in the Komi column
+   /** TODO: the handicap stones info could be merged in the Komi column,
+    * [ BUT better to keep them separate to be able to filter on them
+    *   AND being more flexible for later handicap-enhancements !! ]
     * with the standard placement... something like: "%d H + %d K (S)"
     * where:
     *   H=Tr$['Handicap stones#short']
@@ -129,7 +131,7 @@ require_once( "include/classlib_profile.php" );
     **/
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
    $wrtable->add_tablehead( 8, T_('Rating range#header'), '', TABLE_NO_HIDE, 'Ratingmin-Ratingmax-');
-   $wrtable->add_tablehead( 9, T_('Time limit#header'));
+   $wrtable->add_tablehead( 9, T_('Time limit#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead(10, T_('#Games#header'), 'Number', 0, 'nrGames+');
    $wrtable->add_tablehead(11, T_('Rated#header'), '', 0, 'Rated-');
    $wrtable->add_tablehead(12, T_('Weekend Clock#header'), '', 0, 'WeekendClock-');
