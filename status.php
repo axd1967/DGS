@@ -124,7 +124,7 @@ $ThePage = new Page('Status');
    $gtable->add_or_del_column();
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf');
+   $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
    if( $show_notes )
       $gtable->add_tablehead(32, T_('Notes#header'), '', 0, 'X_Note-');
    $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
@@ -137,7 +137,7 @@ $ThePage = new Page('Status');
    $gtable->add_tablehead( 9, T_('Moves#header'), 'Number', 0, 'Moves-');
    $gtable->add_tablehead(14, T_('Rated#header'), '', 0, 'X_Rated-');
    $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged-');
-   $gtable->add_tablehead(10, T_('Time remaining#header'), '', TABLE_NO_SORT);
+   $gtable->add_tablehead(10, T_('Time remaining#header'), null, TABLE_NO_SORT);
 
    $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
    $order = $gtable->current_order_string('ID-');
